@@ -1,0 +1,35 @@
+{
+  "doctype": "DocType",
+  "name": "Accommodation Checkout",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "is_submittable": 1,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "fields": [
+    {"doctype": "DocField", "fieldname": "naming_series", "label": "Series", "fieldtype": "Select", "options": "ACC-CHKOUT-.YYYY.-.####", "default": "ACC-CHKOUT-.YYYY.-.####", "reqd": 1, "idx": 1},
+    {"doctype": "DocField", "fieldname": "assignment", "label": "Accommodation Assignment", "fieldtype": "Link", "options": "Accommodation Assignment", "reqd": 1, "in_list_view": 1, "idx": 2},
+    {"doctype": "DocField", "fieldname": "employee", "label": "Employee", "fieldtype": "Link", "options": "Employee", "fetch_from": "assignment.employee", "read_only": 1, "in_list_view": 1, "idx": 3},
+    {"doctype": "DocField", "fieldname": "bed", "label": "Bed", "fieldtype": "Link", "options": "Accommodation Bed", "fetch_from": "assignment.bed", "read_only": 1, "idx": 4},
+    {"doctype": "DocField", "fieldname": "cost_center", "label": "Cost Center", "fieldtype": "Link", "options": "Cost Center", "fetch_from": "assignment.cost_center", "read_only": 1, "idx": 5},
+    {"doctype": "DocField", "fieldname": "checkout_date", "label": "Checkout Date", "fieldtype": "Date", "reqd": 1, "in_list_view": 1, "idx": 6},
+    {"doctype": "DocField", "fieldname": "checkout_reason", "label": "Checkout Reason", "fieldtype": "Select", "options": "Final Exit\nInternal Transfer\nProject Transfer\nAbsconding\nEnd of Contract", "reqd": 1, "idx": 7},
+    {"doctype": "DocField", "fieldname": "section_custody", "label": "Custody Clearance", "fieldtype": "Section Break", "idx": 8},
+    {"doctype": "DocField", "fieldname": "custody_return_items", "label": "Custody Return Items", "fieldtype": "Table", "options": "Accommodation Custody Return Item", "idx": 9},
+    {"doctype": "DocField", "fieldname": "custody_cleared", "label": "All Custody Cleared", "fieldtype": "Check", "idx": 10},
+    {"doctype": "DocField", "fieldname": "damage_deduction_amount", "label": "Damage Deduction Amount (SAR)", "fieldtype": "Currency", "idx": 11},
+    {"doctype": "DocField", "fieldname": "damage_notes", "label": "Damage Description", "fieldtype": "Small Text", "idx": 12},
+    {"doctype": "DocField", "fieldname": "linked_additional_salary", "label": "Additional Salary Deduction", "fieldtype": "Link", "options": "Additional Salary", "read_only": 1, "idx": 13},
+    {"doctype": "DocField", "fieldname": "cancellation_reason", "label": "Cancellation Reason", "fieldtype": "Small Text", "idx": 14},
+    {"doctype": "DocField", "fieldname": "amended_from", "label": "Amended From", "fieldtype": "Link", "options": "Accommodation Checkout", "read_only": 1, "no_copy": 1, "print_hide": 1, "idx": 15}
+  ],
+  "permissions": [
+    {"doctype": "DocPerm", "role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 1, "cancel": 1, "amend": 1, "report": 1, "export": 1, "print": 1, "email": 1, "share": 1, "idx": 1},
+    {"doctype": "DocPerm", "role": "Accommodation Manager", "read": 1, "write": 1, "create": 1, "submit": 1, "cancel": 1, "amend": 1, "idx": 2}
+  ]
+}

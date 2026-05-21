@@ -1,0 +1,151 @@
+{
+  "doctype": "DocType",
+  "name": "Accommodation Lease",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "is_submittable": 1,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "description": "Formal lease contract holder for one building. Carries the rent payment schedule. Landlord identity fields stay on Accommodation Building.",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "ACC-LEASE-.YYYY.-.####",
+      "default": "ACC-LEASE-.YYYY.-.####",
+      "reqd": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "lease_reference",
+      "fieldtype": "Data",
+      "label": "Lease / Contract Reference",
+      "description": "Landlord-issued contract number or file reference.",
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "lease_start_date",
+      "fieldtype": "Date",
+      "label": "Lease Start Date",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "lease_end_date",
+      "fieldtype": "Date",
+      "label": "Lease End Date",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "monthly_rent_sar",
+      "fieldtype": "Currency",
+      "label": "Monthly Rent (SAR)",
+      "reqd": 1,
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "rent_due_day",
+      "fieldtype": "Int",
+      "label": "Rent Due Day of Month",
+      "default": 1,
+      "description": "Day of month on which rent is due (1-28).",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "supplier",
+      "fieldtype": "Link",
+      "label": "Landlord Supplier",
+      "options": "Supplier",
+      "description": "Optional ERPNext Supplier FK. When set, monthly_rent_due_alert creates a Draft Payment Entry automatically.",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "section_schedule",
+      "fieldtype": "Section Break",
+      "label": "Payment Schedule",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "payment_schedule",
+      "fieldtype": "Table",
+      "label": "Rent Payment Schedule",
+      "options": "Rent Payment Schedule",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "total_scheduled_sar",
+      "fieldtype": "Currency",
+      "label": "Total Scheduled Amount (SAR)",
+      "read_only": 1,
+      "description": "Auto-computed sum of all payment schedule rows.",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Active\nExpired\nTerminated",
+      "default": "Active",
+      "in_list_view": 1,
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "notes",
+      "fieldtype": "Small Text",
+      "label": "Notes",
+      "idx": 13
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1, "write": 1, "create": 1, "delete": 1,
+      "submit": 1, "cancel": 1, "print": 1, "email": 1, "share": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Accommodation Manager",
+      "read": 1, "write": 1, "create": 1, "submit": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Finance Manager",
+      "read": 1, "write": 1, "create": 1, "submit": 1, "cancel": 1,
+      "idx": 3
+    }
+  ]
+}

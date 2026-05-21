@@ -1,0 +1,57 @@
+{
+  "doctype": "DocType",
+  "name": "Depreciation Snapshot Item",
+  "module": "Habitat",
+  "custom": 0,
+  "issingle": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "description": "Child: one asset line in a Non-Financial Depreciation Snapshot.",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "article",
+      "fieldtype": "Link",
+      "label": "Article",
+      "options": "Custody Article",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "original_cost_sar",
+      "fieldtype": "Currency",
+      "label": "Original Cost (SAR)",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "age_years",
+      "fieldtype": "Float",
+      "label": "Age (Years)",
+      "in_list_view": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "book_value_sar",
+      "fieldtype": "Currency",
+      "label": "Book Value (SAR)",
+      "read_only": 1,
+      "in_list_view": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "policy",
+      "fieldtype": "Link",
+      "label": "Depreciation Policy",
+      "options": "Operational Depreciation Policy",
+      "idx": 5
+    }
+  ],
+  "permissions": []
+}

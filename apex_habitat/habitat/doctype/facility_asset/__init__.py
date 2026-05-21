@@ -1,0 +1,1 @@
+"""Facility Asset DocType."""

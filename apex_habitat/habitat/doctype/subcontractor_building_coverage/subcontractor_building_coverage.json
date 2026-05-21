@@ -1,0 +1,28 @@
+{
+  "doctype": "DocType",
+  "name": "Subcontractor Building Coverage",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "specific_rate_sar",
+      "fieldtype": "Currency",
+      "label": "Specific Rate for this Building (SAR)",
+      "description": "If different from contract default",
+      "idx": 2
+    }
+  ],
+  "permissions": []
+}

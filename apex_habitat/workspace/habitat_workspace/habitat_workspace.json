@@ -1,0 +1,285 @@
+{
+  "doctype": "Workspace",
+  "name": "Habitat",
+  "module": "Habitat",
+  "label": "Habitat",
+  "title": "Habitat",
+  "icon": "home",
+  "is_default": 0,
+  "public": 1,
+  "content": "[]",
+  "shortcuts": [
+    {
+      "doctype": "Workspace Shortcut",
+      "label": "Accommodation Assignment",
+      "link_to": "Accommodation Assignment",
+      "type": "DocType",
+      "idx": 1
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "label": "Maintenance Request",
+      "link_to": "Maintenance Request",
+      "type": "DocType",
+      "idx": 2
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "label": "Safety Inspection Report",
+      "link_to": "Safety Inspection Report",
+      "type": "DocType",
+      "idx": 3
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "label": "Client Audit Remediation Plan",
+      "link_to": "Client Audit Remediation Plan",
+      "type": "DocType",
+      "idx": 4
+    }
+  ],
+  "links": [
+    {
+      "doctype": "Workspace Link",
+      "label": "Master Data",
+      "type": "Card Break",
+      "idx": 1
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Accommodation Building",
+      "link_to": "Accommodation Building",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 2
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Accommodation Room",
+      "link_to": "Accommodation Room",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 3
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Accommodation Bed",
+      "link_to": "Accommodation Bed",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 4
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Facility Asset",
+      "link_to": "Facility Asset",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 5
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Building License",
+      "link_to": "Building License",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 6
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Subcontractor Service Contract",
+      "link_to": "Subcontractor Service Contract",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 7
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Utility Account",
+      "link_to": "Utility Account",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 8
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Safety Task Catalog",
+      "link_to": "Safety Task Catalog",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 9
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Custody Article",
+      "link_to": "Custody Article",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 10
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Operations",
+      "type": "Card Break",
+      "idx": 11
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Accommodation Assignment",
+      "link_to": "Accommodation Assignment",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 12
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Accommodation Checkout",
+      "link_to": "Accommodation Checkout",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 13
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Room Bed Transfer",
+      "link_to": "Room Bed Transfer",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 14
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Cleaning Log",
+      "link_to": "Cleaning Log",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 15
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Safety Inspection Report",
+      "link_to": "Safety Inspection Report",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 16
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Safety Task Execution",
+      "link_to": "Safety Task Execution",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 17
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Maintenance Request",
+      "link_to": "Maintenance Request",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 18
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Maintenance Work Order",
+      "link_to": "Maintenance Work Order",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 19
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Utility Bill Entry",
+      "link_to": "Utility Bill Entry",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 20
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Facility Asset Custody Assignment",
+      "link_to": "Facility Asset Custody Assignment",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 21
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Camera Access Grant",
+      "link_to": "Camera Access Grant",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 22
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Client Audit Remediation Plan",
+      "link_to": "Client Audit Remediation Plan",
+      "link_type": "DocType",
+      "type": "Link",
+      "idx": 23
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Reports",
+      "type": "Card Break",
+      "idx": 24
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Accommodation Occupancy Summary",
+      "link_to": "Accommodation Occupancy Summary",
+      "link_type": "Report",
+      "type": "Link",
+      "idx": 25
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Accommodation Cost Distribution",
+      "link_to": "Accommodation Cost Distribution",
+      "link_type": "Report",
+      "type": "Link",
+      "idx": 26
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Lease Expiry Watchlist",
+      "link_to": "Lease Expiry Watchlist",
+      "link_type": "Report",
+      "type": "Link",
+      "idx": 27
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Utility Variance Report",
+      "link_to": "Utility Variance Report",
+      "link_type": "Report",
+      "type": "Link",
+      "idx": 28
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Custody Damage Register",
+      "link_to": "Custody Damage Register",
+      "link_type": "Report",
+      "type": "Link",
+      "idx": 29
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Scheduled Task Compliance",
+      "link_to": "Scheduled Task Compliance",
+      "link_type": "Report",
+      "type": "Link",
+      "idx": 30
+    },
+    {
+      "doctype": "Workspace Link",
+      "label": "Maintenance Backlog",
+      "link_to": "Maintenance Backlog",
+      "link_type": "Report",
+      "type": "Link",
+      "idx": 31
+    }
+  ]
+}

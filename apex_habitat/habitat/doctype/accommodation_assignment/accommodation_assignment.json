@@ -1,0 +1,40 @@
+{
+  "doctype": "DocType",
+  "name": "Accommodation Assignment",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "is_submittable": 1,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "fields": [
+    {"doctype": "DocField", "fieldname": "naming_series", "label": "Series", "fieldtype": "Select", "options": "ACC-ASGN-.YYYY.-.####", "default": "ACC-ASGN-.YYYY.-.####", "reqd": 1, "idx": 1},
+    {"doctype": "DocField", "fieldname": "employee", "label": "Employee", "fieldtype": "Link", "options": "Employee", "reqd": 1, "in_list_view": 1, "idx": 2},
+    {"doctype": "DocField", "fieldname": "employee_name", "label": "Employee Name", "fieldtype": "Data", "fetch_from": "employee.employee_name", "read_only": 1, "in_list_view": 1, "idx": 3},
+    {"doctype": "DocField", "fieldname": "project", "label": "Project", "fieldtype": "Link", "options": "Project", "reqd": 1, "idx": 4},
+    {"doctype": "DocField", "fieldname": "cost_center", "label": "Cost Center", "fieldtype": "Link", "options": "Cost Center", "idx": 5},
+    {"doctype": "DocField", "fieldname": "column_break_spatial", "fieldtype": "Column Break", "idx": 6},
+    {"doctype": "DocField", "fieldname": "building", "label": "Building", "fieldtype": "Link", "options": "Accommodation Building", "reqd": 1, "in_list_view": 1, "idx": 7},
+    {"doctype": "DocField", "fieldname": "room", "label": "Room", "fieldtype": "Link", "options": "Accommodation Room", "reqd": 1, "idx": 8},
+    {"doctype": "DocField", "fieldname": "bed", "label": "Bed", "fieldtype": "Link", "options": "Accommodation Bed", "reqd": 1, "idx": 9},
+    {"doctype": "DocField", "fieldname": "section_lifecycle", "label": "Lifecycle", "fieldtype": "Section Break", "idx": 10},
+    {"doctype": "DocField", "fieldname": "check_in_date", "label": "Check-in Date", "fieldtype": "Date", "reqd": 1, "idx": 11},
+    {"doctype": "DocField", "fieldname": "check_out_date", "label": "Check-out Date", "fieldtype": "Date", "read_only": 1, "idx": 12},
+    {"doctype": "DocField", "fieldname": "assignment_type", "label": "Assignment Type", "fieldtype": "Select", "options": "New Assignment\nTransfer\nReturn from Leave", "default": "New Assignment", "reqd": 1, "idx": 13},
+    {"doctype": "DocField", "fieldname": "previous_building", "label": "Previous Building", "fieldtype": "Link", "options": "Accommodation Building", "depends_on": "eval:doc.assignment_type=='Transfer'", "idx": 14},
+    {"doctype": "DocField", "fieldname": "housing_allowance_suspended", "label": "Housing Allowance Suspended", "fieldtype": "Check", "read_only": 1, "idx": 15},
+    {"doctype": "DocField", "fieldname": "section_custody", "label": "Custody", "fieldtype": "Section Break", "idx": 16},
+    {"doctype": "DocField", "fieldname": "custody_items", "label": "Issued Custody Items", "fieldtype": "Table", "options": "Accommodation Custody Item", "idx": 17},
+    {"doctype": "DocField", "fieldname": "notes", "label": "Notes", "fieldtype": "Small Text", "idx": 18},
+    {"doctype": "DocField", "fieldname": "amended_from", "label": "Amended From", "fieldtype": "Link", "options": "Accommodation Assignment", "read_only": 1, "no_copy": 1, "print_hide": 1, "idx": 19}
+  ],
+  "permissions": [
+    {"doctype": "DocPerm", "role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 1, "cancel": 1, "amend": 1, "report": 1, "export": 1, "print": 1, "email": 1, "share": 1, "idx": 1},
+    {"doctype": "DocPerm", "role": "Accommodation Manager", "read": 1, "write": 1, "create": 1, "submit": 1, "cancel": 1, "amend": 1, "idx": 2},
+    {"doctype": "DocPerm", "role": "Resident Supervisor", "read": 1, "create": 1, "idx": 3}
+  ]
+}

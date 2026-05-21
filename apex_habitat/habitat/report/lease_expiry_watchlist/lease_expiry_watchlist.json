@@ -1,0 +1,9 @@
+{
+  "doctype": "Report",
+  "name": "Lease Expiry Watchlist",
+  "report_name": "Lease Expiry Watchlist",
+  "ref_doctype": "Accommodation Lease",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Habitat"
+}

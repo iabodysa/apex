@@ -1,0 +1,149 @@
+{
+  "doctype": "DocType",
+  "name": "Maintenance Work Order",
+  "module": "Habitat",
+  "custom": 0,
+  "issingle": 0,
+  "istable": 0,
+  "is_submittable": 1,
+  "engine": "InnoDB",
+  "description": "Submittable: formal work order derived from a Maintenance Request.",
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "MWO-.YYYY.-.####",
+      "default": "MWO-.YYYY.-.####",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_request",
+      "fieldtype": "Link",
+      "label": "Maintenance Request",
+      "options": "Maintenance Request",
+      "reqd": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "fetch_from": "maintenance_request.building",
+      "read_only": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "work_description",
+      "fieldtype": "Text Editor",
+      "label": "Work Description",
+      "reqd": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "assigned_to",
+      "fieldtype": "Link",
+      "label": "Assigned To (Employee)",
+      "options": "Employee",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order",
+      "fieldtype": "Link",
+      "label": "Subcontractor Service Order",
+      "options": "Subcontractor Service Order",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "planned_start_date",
+      "fieldtype": "Date",
+      "label": "Planned Start Date",
+      "reqd": 1,
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "planned_end_date",
+      "fieldtype": "Date",
+      "label": "Planned End Date",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "actual_start_date",
+      "fieldtype": "Date",
+      "label": "Actual Start Date",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "actual_end_date",
+      "fieldtype": "Date",
+      "label": "Actual End Date",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "procurement_items",
+      "fieldtype": "Table",
+      "label": "Procurement Items",
+      "options": "Maintenance Procurement Item",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "total_procurement_cost_sar",
+      "fieldtype": "Currency",
+      "label": "Total Procurement Cost (SAR)",
+      "read_only": 1,
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Draft\nPlanned\nIn Progress\nCompleted\nCancelled",
+      "default": "Draft",
+      "read_only": 1,
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "completion_notes",
+      "fieldtype": "Small Text",
+      "label": "Completion Notes",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "cancellation_reason",
+      "fieldtype": "Small Text",
+      "label": "Cancellation Reason",
+      "read_only": 1,
+      "idx": 15
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1
+    }
+  ]
+}

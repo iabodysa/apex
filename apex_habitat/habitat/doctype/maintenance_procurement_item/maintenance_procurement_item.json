@@ -1,0 +1,56 @@
+{
+  "doctype": "DocType",
+  "name": "Maintenance Procurement Item",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "description": "Materials required for the repair.",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "item",
+      "fieldtype": "Link",
+      "label": "Item",
+      "options": "Item",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "item_description",
+      "fieldtype": "Data",
+      "label": "Item Description",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "quantity",
+      "fieldtype": "Int",
+      "label": "Quantity",
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "unit",
+      "fieldtype": "Data",
+      "label": "Unit",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "is_fixed_asset",
+      "fieldtype": "Check",
+      "label": "Fixed Asset (Capex)",
+      "description": "Beds, ACs, washing machines = 1; consumables = 0",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "estimated_cost",
+      "fieldtype": "Currency",
+      "label": "Estimated Cost (SAR)",
+      "idx": 6
+    }
+  ]
+}

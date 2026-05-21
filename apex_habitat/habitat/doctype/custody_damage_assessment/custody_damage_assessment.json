@@ -1,0 +1,101 @@
+{
+  "doctype": "DocType",
+  "name": "Custody Damage Assessment",
+  "module": "Habitat",
+  "custom": 0,
+  "issingle": 0,
+  "istable": 0,
+  "is_submittable": 1,
+  "engine": "InnoDB",
+  "description": "Submittable: records damage on returned custody articles. Financial deduction only if enable_damage_deduction = 1.",
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "CUST-DMG-.YYYY.-.####",
+      "default": "CUST-DMG-.YYYY.-.####",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "assessment_date",
+      "fieldtype": "Date",
+      "label": "Assessment Date",
+      "reqd": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_return",
+      "fieldtype": "Link",
+      "label": "Custody Return",
+      "options": "Custody Return",
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "employee",
+      "fieldtype": "Link",
+      "label": "Employee Responsible",
+      "options": "Employee",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "items",
+      "fieldtype": "Table",
+      "label": "Damaged Items",
+      "options": "Custody Damage Item",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "total_estimated_replacement_cost_sar",
+      "fieldtype": "Currency",
+      "label": "Total Estimated Replacement Cost (SAR)",
+      "read_only": 1,
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "deduction_entry",
+      "fieldtype": "Link",
+      "label": "Additional Salary Deduction Entry",
+      "options": "Additional Salary",
+      "read_only": 1,
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks",
+      "idx": 9
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1
+    }
+  ]
+}

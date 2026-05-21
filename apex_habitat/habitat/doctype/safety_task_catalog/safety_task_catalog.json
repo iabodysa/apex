@@ -1,0 +1,148 @@
+{
+  "doctype": "DocType",
+  "name": "Safety Task Catalog",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "description": "Reference master of 60 standardized safety tasks loaded as fixture from real-world catalog. Each task defines department, frequency, priority, instructions.",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "STC-.####",
+      "default": "STC-.####",
+      "reqd": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "task_code",
+      "fieldtype": "Data",
+      "label": "Task Code",
+      "unique": 1,
+      "reqd": 1,
+      "description": "e.g., SAF-001, SEC-005",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "task_title",
+      "fieldtype": "Data",
+      "label": "Task Title (Arabic)",
+      "reqd": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "task_title_en",
+      "fieldtype": "Data",
+      "label": "Task Title (English)",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "department",
+      "fieldtype": "Select",
+      "label": "Department",
+      "options": "Fire Safety\nHealth & Hygiene\nSecurity\nMaintenance\nDocumentation\nAwareness & Training\nCompliance & Licensing\nEmergency & Crisis",
+      "reqd": 1,
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "frequency",
+      "fieldtype": "Select",
+      "label": "Frequency",
+      "options": "Daily\nWeekly\nMonthly\nQuarterly\nAnnual\nAs Needed\nOn Entry",
+      "reqd": 1,
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "priority",
+      "fieldtype": "Select",
+      "label": "Priority",
+      "options": "High\nMedium\nLow",
+      "default": "High",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "instructions",
+      "fieldtype": "Small Text",
+      "label": "Execution Instructions",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "evidence_required",
+      "fieldtype": "Check",
+      "label": "Photo Evidence Required",
+      "default": 0,
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "applicable_to_all_buildings",
+      "fieldtype": "Check",
+      "label": "Applies to All Buildings",
+      "default": 1,
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "applicable_buildings",
+      "fieldtype": "Table",
+      "label": "Specific Buildings",
+      "options": "Safety Task Building Scope",
+      "depends_on": "eval:doc.applicable_to_all_buildings==0",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Active",
+      "default": 1,
+      "idx": 12
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1,
+      "email": 1,
+      "share": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Accommodation Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Resident Supervisor",
+      "read": 1,
+      "idx": 3
+    }
+  ]
+}

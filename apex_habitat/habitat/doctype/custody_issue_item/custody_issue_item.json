@@ -1,0 +1,59 @@
+{
+  "doctype": "DocType",
+  "name": "Custody Issue Item",
+  "module": "Habitat",
+  "custom": 0,
+  "issingle": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "description": "Child: one article line on a Custody Issue.",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "article",
+      "fieldtype": "Link",
+      "label": "Article",
+      "options": "Custody Article",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "article_name",
+      "fieldtype": "Data",
+      "label": "Article Name",
+      "fetch_from": "article.article_name",
+      "read_only": 1,
+      "in_list_view": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "qty",
+      "fieldtype": "Int",
+      "label": "Qty",
+      "reqd": 1,
+      "default": "1",
+      "in_list_view": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "serial_no",
+      "fieldtype": "Data",
+      "label": "Serial No",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "condition_on_issue",
+      "fieldtype": "Select",
+      "label": "Condition on Issue",
+      "options": "New\nGood\nFair\nPoor",
+      "default": "Good",
+      "idx": 5
+    }
+  ],
+  "permissions": []
+}

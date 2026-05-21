@@ -1,0 +1,127 @@
+{
+  "doctype": "DocType",
+  "name": "Facility Asset Movement",
+  "module": "Habitat",
+  "custom": 0,
+  "issingle": 0,
+  "istable": 0,
+  "is_submittable": 1,
+  "engine": "InnoDB",
+  "description": "Submittable immutable log of physical Facility Asset movements. Habitat-owned (v3 decision).",
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "FAM-.YYYY.-.####",
+      "default": "FAM-.YYYY.-.####",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "movement_date",
+      "fieldtype": "Date",
+      "label": "Movement Date",
+      "reqd": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset",
+      "fieldtype": "Link",
+      "label": "Facility Asset",
+      "options": "Facility Asset",
+      "reqd": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "from_building",
+      "fieldtype": "Link",
+      "label": "From Building",
+      "options": "Accommodation Building",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "from_room",
+      "fieldtype": "Link",
+      "label": "From Room",
+      "options": "Accommodation Room",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "to_building",
+      "fieldtype": "Link",
+      "label": "To Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "to_room",
+      "fieldtype": "Link",
+      "label": "To Room",
+      "options": "Accommodation Room",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "moved_by",
+      "fieldtype": "Link",
+      "label": "Moved By (Employee)",
+      "options": "Employee",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "movement_reason",
+      "fieldtype": "Select",
+      "label": "Movement Reason",
+      "options": "Reallocation\nMaintenance\nCondemnation\nOther",
+      "default": "Reallocation",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "native_asset_movement",
+      "fieldtype": "Link",
+      "label": "Native Asset Movement",
+      "options": "Asset Movement",
+      "read_only": 1,
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "cancellation_reason",
+      "fieldtype": "Small Text",
+      "label": "Cancellation Reason",
+      "read_only": 1,
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks",
+      "idx": 12
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1
+    }
+  ]
+}

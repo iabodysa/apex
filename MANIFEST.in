@@ -1,0 +1,10 @@
+include README.md
+include license.txt
+recursive-include apex_habitat *.py
+recursive-include apex_habitat *.json
+recursive-include apex_habitat *.js
+recursive-include apex_habitat *.css
+recursive-include apex_habitat *.html
+recursive-include apex_habitat *.md
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

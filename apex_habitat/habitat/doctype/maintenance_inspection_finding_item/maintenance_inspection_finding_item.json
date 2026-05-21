@@ -1,0 +1,64 @@
+{
+  "doctype": "DocType",
+  "name": "Maintenance Inspection Finding Item",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "editable_grid": 1,
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "room",
+      "fieldtype": "Link",
+      "label": "Room",
+      "options": "Accommodation Room",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "bed",
+      "fieldtype": "Link",
+      "label": "Bed (if specific)",
+      "options": "Accommodation Bed",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "issue_type",
+      "fieldtype": "Select",
+      "label": "Issue Type",
+      "options": "Plumbing\nElectrical\nFurniture\nAir Conditioning\nPest Control\nStructural\nOther",
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "description",
+      "fieldtype": "Small Text",
+      "label": "Issue Description",
+      "reqd": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "priority",
+      "fieldtype": "Select",
+      "label": "Priority",
+      "options": "Low\nMedium\nHigh\nCritical",
+      "default": "Medium",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "generated_maint_request",
+      "fieldtype": "Link",
+      "label": "Generated Maintenance Request",
+      "options": "Maintenance Request",
+      "read_only": 1,
+      "idx": 6
+    }
+  ],
+  "permissions": []
+}

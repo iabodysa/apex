@@ -1,0 +1,53 @@
+{
+  "doctype": "DocType",
+  "name": "Facility Custody Item",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset",
+      "fieldtype": "Link",
+      "label": "Facility Asset",
+      "options": "Facility Asset",
+      "reqd": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "asset_category",
+      "fieldtype": "Data",
+      "label": "Category",
+      "fetch_from": "facility_asset.asset_category",
+      "read_only": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "serial_number",
+      "fieldtype": "Data",
+      "label": "Serial Number",
+      "fetch_from": "facility_asset.serial_number",
+      "read_only": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "physical_condition",
+      "fieldtype": "Select",
+      "label": "Condition at Handover",
+      "options": "Good\nFair\nFaulty\nNot Found",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "condition_notes",
+      "fieldtype": "Small Text",
+      "label": "Notes",
+      "idx": 5
+    }
+  ],
+  "permissions": []
+}

@@ -1,0 +1,87 @@
+{
+  "doctype": "DocType",
+  "name": "Custody Article",
+  "module": "Habitat",
+  "custom": 0,
+  "issingle": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "description": "Catalog master for individual issuable articles.",
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "CUST-ART-.####",
+      "default": "CUST-ART-.####",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "article_name",
+      "fieldtype": "Data",
+      "label": "Article Name",
+      "reqd": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "category",
+      "fieldtype": "Link",
+      "label": "Category",
+      "options": "Custody Asset Category",
+      "reqd": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "unit_of_measure",
+      "fieldtype": "Data",
+      "label": "Unit of Measure",
+      "default": "Each",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "standard_unit_cost_sar",
+      "fieldtype": "Currency",
+      "label": "Standard Unit Cost (SAR)",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "depreciation_policy",
+      "fieldtype": "Link",
+      "label": "Depreciation Policy",
+      "options": "Operational Depreciation Policy",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "is_serialized",
+      "fieldtype": "Check",
+      "label": "Is Serialized",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "notes",
+      "fieldtype": "Small Text",
+      "label": "Notes",
+      "idx": 8
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    }
+  ]
+}

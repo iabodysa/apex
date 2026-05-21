@@ -1,0 +1,27 @@
+{
+  "doctype": "DocType",
+  "name": "Accommodation Bed",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "fields": [
+    {"doctype": "DocField", "fieldname": "naming_series", "label": "Series", "fieldtype": "Select", "options": "BED-.####", "default": "BED-.####", "reqd": 1, "idx": 1},
+    {"doctype": "DocField", "fieldname": "room", "label": "Room", "fieldtype": "Link", "options": "Accommodation Room", "reqd": 1, "in_list_view": 1, "idx": 2},
+    {"doctype": "DocField", "fieldname": "building", "label": "Building", "fieldtype": "Link", "options": "Accommodation Building", "fetch_from": "room.building", "read_only": 1, "in_list_view": 1, "idx": 3},
+    {"doctype": "DocField", "fieldname": "bed_code", "label": "Bed Code", "fieldtype": "Data", "reqd": 1, "in_list_view": 1, "idx": 4},
+    {"doctype": "DocField", "fieldname": "status", "label": "Status", "fieldtype": "Select", "options": "Available\nOccupied\nOut of Service", "default": "Available", "in_list_view": 1, "idx": 5},
+    {"doctype": "DocField", "fieldname": "condition", "label": "Condition", "fieldtype": "Select", "options": "Good\nNeeds Repair\nScrapped", "default": "Good", "idx": 6},
+    {"doctype": "DocField", "fieldname": "last_inspected", "label": "Last Inspected", "fieldtype": "Date", "idx": 7}
+  ],
+  "permissions": [
+    {"doctype": "DocPerm", "role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "report": 1, "export": 1, "print": 1, "email": 1, "share": 1, "idx": 1},
+    {"doctype": "DocPerm", "role": "Accommodation Manager", "read": 1, "write": 1, "create": 1, "idx": 2},
+    {"doctype": "DocPerm", "role": "Resident Supervisor", "read": 1, "idx": 3}
+  ]
+}

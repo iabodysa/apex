@@ -1,0 +1,56 @@
+{
+  "doctype": "DocType",
+  "name": "Custody Asset Category",
+  "module": "Habitat",
+  "custom": 0,
+  "issingle": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "description": "Master categories for issuable custody articles.",
+  "autoname": "field:category_name",
+  "naming_rule": "By fieldname",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "category_name",
+      "fieldtype": "Data",
+      "label": "Category Name",
+      "reqd": 1,
+      "unique": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "description",
+      "fieldtype": "Small Text",
+      "label": "Description",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "default_depreciation_policy",
+      "fieldtype": "Link",
+      "label": "Default Depreciation Policy",
+      "options": "Operational Depreciation Policy",
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Is Active",
+      "default": "1",
+      "idx": 4
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    }
+  ]
+}
