@@ -7,33 +7,33 @@ import frappe
 def execute(filters=None):
     columns = [
         {
-                "label": "Assessment Date",
+                "label": frappe._("Assessment Date"),
                 "fieldname": "assessment_date",
                 "fieldtype": "Date",
                 "width": 100
         },
         {
-                "label": "Custodian",
+                "label": frappe._("Custodian"),
                 "fieldname": "employee",
                 "fieldtype": "Link",
                 "options": "Employee",
                 "width": 150
         },
         {
-                "label": "Asset Category",
+                "label": frappe._("Asset Category"),
                 "fieldname": "category",
                 "fieldtype": "Link",
                 "options": "Custody Asset Category",
                 "width": 120
         },
         {
-                "label": "Damage Details",
+                "label": frappe._("Damage Details"),
                 "fieldname": "details",
                 "fieldtype": "Small Text",
                 "width": 200
         },
         {
-                "label": "Repair Cost (SAR)",
+                "label": frappe._("Repair Cost (SAR)"),
                 "fieldname": "repair_cost",
                 "fieldtype": "Currency",
                 "width": 100
