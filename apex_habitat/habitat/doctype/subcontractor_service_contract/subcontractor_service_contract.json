@@ -1,0 +1,178 @@
+{
+  "doctype": "DocType",
+  "name": "Subcontractor Service Contract",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "is_submittable": 1,
+  "track_changes": 1,
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "description": "Master agreement with an external subcontractor (pest control, sewage suction, deep cleaning, generator service, fire equipment service).",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "supplier",
+      "fieldtype": "Link",
+      "label": "Supplier",
+      "options": "Supplier",
+      "reqd": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "service_type",
+      "fieldtype": "Select",
+      "label": "Service Type",
+      "options": "Pest Control\nSewage Tank Suction\nDeep Cleaning\nGenerator Service\nFire Equipment Service\nAC Maintenance\nWater Tank Cleaning\nOther",
+      "reqd": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "visit_frequency",
+      "fieldtype": "Select",
+      "label": "Scheduled Visit Frequency",
+      "options": "Weekly\nBi-weekly\nMonthly\nQuarterly\nOn-call Only",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "response_sla_hours",
+      "fieldtype": "Int",
+      "label": "Response SLA (Hours)",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Draft\nActive\nExpired\nTerminated",
+      "default": "Draft",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "contract_start_date",
+      "fieldtype": "Date",
+      "label": "Contract Start",
+      "reqd": 1,
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_overview_col",
+      "fieldtype": "Column Break",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "contract_end_date",
+      "fieldtype": "Date",
+      "label": "Contract End",
+      "reqd": 1,
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "SUB-CON-.YYYY.-.####",
+      "default": "SUB-CON-.YYYY.-.####",
+      "reqd": 1,
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "rate_per_visit_sar",
+      "fieldtype": "Currency",
+      "label": "Standard Rate Per Visit (SAR)",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "monthly_retainer_sar",
+      "fieldtype": "Currency",
+      "label": "Monthly Retainer (SAR)",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "attached_contract",
+      "fieldtype": "Attach",
+      "label": "Contract Document",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_sec_table_covered_buildings",
+      "fieldtype": "Section Break",
+      "label": "Covered Buildings",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "covered_buildings",
+      "fieldtype": "Table",
+      "label": "Covered Buildings",
+      "options": "Subcontractor Building Coverage",
+      "idx": 17
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1,
+      "email": 1,
+      "share": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Accommodation Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1,
+      "idx": 2
+    }
+  ]
+}

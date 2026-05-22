@@ -1,0 +1,119 @@
+{
+  "doctype": "DocType",
+  "name": "Scheduled Task Template",
+  "module": "Habitat",
+  "custom": 0,
+  "issingle": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "description": "Master: recurring task template that drives automatic Scheduled Task Instance generation.",
+  "autoname": "field:template_name",
+  "naming_rule": "By fieldname",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "scheduled_task_template_tab_details",
+      "fieldtype": "Tab Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "scheduled_task_template_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "template_name",
+      "fieldtype": "Data",
+      "label": "Template Name",
+      "reqd": 1,
+      "unique": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "task_type",
+      "fieldtype": "Select",
+      "label": "Task Type",
+      "options": "Safety\nMaintenance\nInspection\nCleaning\nOther",
+      "default": "Maintenance",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "scheduled_task_template_details_col",
+      "fieldtype": "Column Break",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "frequency",
+      "fieldtype": "Select",
+      "label": "Frequency",
+      "options": "Daily\nWeekly\nMonthly\nQuarterly\nAnnually",
+      "default": "Monthly",
+      "reqd": 1,
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "assigned_to",
+      "fieldtype": "Link",
+      "label": "Default Assignee (Employee)",
+      "options": "Employee",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Is Active",
+      "default": "1",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "scheduled_task_template_sec_large_text",
+      "fieldtype": "Section Break",
+      "label": "Additional Information",
+      "collapsible": 1,
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_catalog",
+      "fieldtype": "Link",
+      "label": "Safety Task (from Catalog)",
+      "options": "Safety Task Catalog",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "description",
+      "fieldtype": "Text Editor",
+      "label": "Description",
+      "idx": 12
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    }
+  ]
+}

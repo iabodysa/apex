@@ -1,0 +1,466 @@
+Absconding,,بلاغ تغيب عن العمل
+AC Maintenance,,صيانة المكيفات
+Access Level,,مستوى الصلاحية
+Accommodation Assignment,,تخصيص السكن
+Accommodation Bed,,سرير السكن
+Accommodation Building,,مبنى السكن
+Accommodation Checkout,,تسجيل الخروج من السكن
+Accommodation Custody Item,,عهد السكن المستلمة
+Accommodation Custody Return Item,,إرجاع عهد السكن
+Accommodation Lease,,عقد إيجار السكن
+Accommodation Ledger,,سجل حركات السكن
+Accommodation Manager,,مدير السكن
+Accommodation Room,,غرفة السكن
+Accommodation Site,,موقع السكن
+Account Number,,رقم الحساب
+Active CCTV Cameras,,كاميرات المراقبة النشطة
+Actual End Date,,تاريخ النهاية الفعلي
+Actual Start Date,,تاريخ البداية الفعلي
+Actual Visit Date,,تاريخ الزيارة الفعلي
+Additional Salary Deduction,,استقطاع إضافي من الراتب
+Additional Salary Deduction Entry,,قيد استقطاع راتب إضافي
+AFMCO Owner,,مالك شركة (AFMCO)
+Age (Years),,العمر (بالسنوات)
+Air Conditioning,,تكييف الهواء
+All Assets Physically Verified,,تم الجرد الفعلي لجميع الأصول
+All Custody Cleared,,تم إخلاء طرف جميع العهد
+All custody items must be marked Returned before submission.,,يجب تحديد جميع بنود العهد كـ "معادة" قبل التقديم.
+Allow Over-Capacity,,السماح بتجاوز الطاقة الاستيعابية
+Amount (SAR),,المبلغ (بالريال السعودي)
+Annual Cleaning Staff Cost (SAR),,التكلفة السنوية لعمالة النظافة (بالريال السعودي)
+Annual Cost Breakdown,,تفصيل التكلفة السنوية
+Annual Cost per Bed Capacity (SAR),,التكلفة السنوية لكل سرير سعة استيعابية (بالريال السعودي)
+Annual Electricity (SAR),,تكلفة الكهرباء السنوية (بالريال السعودي)
+Annual Other Expenses (SAR),,المصاريف السنوية الأخرى (بالريال السعودي)
+Annual Rent (SAR),,الإيجار السنوي (بالريال السعودي)
+Annual Supervision Cost (SAR),,تكلفة الإشراف السنوية (بالريال السعودي)
+Annual Total Cost (SAR),,إجمالي التكلفة السنوية (بالريال السعودي)
+Annual Water (SAR),,تكلفة المياه السنوية (بالريال السعودي)
+Applies to All Buildings,,ينطبق على جميع المباني
+Approved By,,معتمد من
+Approved by Supervisor,,معتمد من قبل المشرف
+Article Name,,اسم الصنف
+As Needed,,عند الحاجة
+Assessment Date,,تاريخ التقييم
+Asset Category,,فئة الأصل
+Asset Identification,,تعريف الأصل
+Asset Lines,,بنود الأصل
+Asset Location,,موقع الأصل
+Asset Logging,,تسجيل الأصول
+Asset Name,,اسم الأصل
+Assets in Custody,,الأصول التي في العهدة
+Assigned Building,,المبنى المخصص
+Assigned To,,مخصص لـ
+Assigned To (Employee),,مخصص للموظف
+Assignment Type,,نوع التخصيص
+At least one asset line is required.,,يجب إدخال بند أصول واحد على الأقل.
+At least one damaged item is required.,,يجب إدخال بند تالف واحد على الأقل.
+At least one finding is required on a Maintenance Inspection Report.,,يجب تسجيل ملاحظة واحدة على الأقل في تقرير فحص الصيانة.
+At least one item is required on a Custody Issue.,,يجب إدخال صنف واحد على الأقل لصرف العهدة.
+At least one item is required on a Custody Return.,,يجب إدخال صنف واحد على الأقل لإرجاع العهدة.
+Audit Finding,,ملاحظة التدقيق
+Audit Findings Received,,تم استلام نتائج التدقيق
+Audit Remediation Building Scope,,نطاق معالجة تدقيق المباني
+Audit Remediation Item,,بند معالجة التدقيق
+Authorization Document,,مستند التفويض
+Authorized By,,مفوض من قبل
+Average Monthly Bill (SAR),,متوسط الفاتورة الشهرية (بالريال السعودي)
+Awareness & Training,,التوعية والتدريب
+Balady Certificate,,شهادة بلدي
+Bed (if bed-specific),,السرير (إذا كان مخصصاً لسرير محدد)
+Bed (if specific),,السرير (إذا كان محدداً)
+Bed Capacity,,السعة الاستيعابية للأسرة
+Bed Code,,رمز السرير
+Bi-weekly,,كل أسبوعين
+Bill Amount (SAR),,قيمة الفاتورة (بالريال السعودي)
+Bill PDF,,الفاتورة بصيغة PDF
+Billing Period,,فترة الفوترة
+Billing Period From,,فترة الفوترة من
+Billing Period To,,فترة الفوترة إلى
+Billing Period To must be on or after Billing Period From.,,يجب أن يكون تاريخ نهاية فترة الفوترة مساوياً لتاريخ البداية أو بعده.
+Billing Recipient Email,,البريد الإلكتروني لمستلم الفاتورة
+Book Value (SAR),,القيمة الدفترية (بالريال السعودي)
+Building is at full capacity ({0} of {1}). Over-capacity not allowed.,,المبنى بكامل طاقته الاستيعابية ({0} من {1}). لا يسمح بتجاوز الطاقة الاستيعابية.
+Building License,,رخصة المبنى
+Building Name,,اسم المبنى
+Buildings Granted,,المباني المرخصة
+Buildings In Scope,,المباني المشمولة في النطاق
+Camera Access Building Scope,,نطاق الوصول لكاميرات المبنى
+Camera Access Grant,,منح صلاحية الوصول للكاميرات
+Cameras in Building,,الكاميرات في المبنى
+Cancellation Reason,,سبب الإلغاء
+Cancellation Reason is mandatory.,,سبب الإلغاء إلزامي.
+Cancellation Reason is required before cancelling a Depreciation Snapshot.,,يلزم تحديد سبب الإلغاء قبل إلغاء لقطة الاستهلاك.
+Cancellation Reason is required before cancelling a Facility Asset Movement.,,يلزم تحديد سبب الإلغاء قبل إلغاء نقل أصول المنشأة.
+Cancellation Reason is required before cancelling a Maintenance Inspection Report.,,يلزم تحديد سبب الإلغاء قبل إلغاء تقرير فحص الصيانة.
+Cancellation Reason is required before cancelling a Maintenance Work Order.,,يلزم تحديد سبب الإلغاء قبل إلغاء أمر عمل الصيانة.
+Cancellation Reason is required before cancelling a Scheduled Task Instance.,,يلزم تحديد سبب الإلغاء قبل إلغاء نموذج المهمة المجدولة.
+Cannot cancel Custody Damage Assessment {0} because Additional Salary Deduction Entry {1} is already linked.,,لا يمكن إلغاء تقييم تلف العهدة {0} لوجود قيد استقطاع راتب إضافي مرتبط {1}.
+Cannot cancel Custody Issue {0} because it is referenced by active Custody Return {1}.,,لا يمكن إلغاء صرف العهدة {0} لوجود إرجاع عهدة نشط مرتبط {1}.
+Cannot cancel Custody Return {0} because it is referenced by active Custody Damage Assessment {1}.,,لا يمكن إلغاء إرجاع العهدة {0} لوجود تقييم تلف عهدة نشط مرتبط {1}.
+Capacity Denominator,,مقام السعة (معيار السعة)
+Category Name,,اسم الفئة
+CCTV Camera,,كاميرا مراقبة
+Certificate File,,ملف الشهادة
+Check-in Date,,تاريخ الدخول / تاريخ التسكين
+Check-out Date,,تاريخ الخروج / تاريخ إخلاء السكن
+Checkout Date,,تاريخ تسجيل الخروج
+Checkout Reason,,سبب مغادرة السكن
+Civil Defence Certificate,,شهادة الدفاع المدني
+Cleaned,,تم التنظيف
+Cleaned By (Name),,تم التنظيف بواسطة (الاسم)
+Cleaning,,تنظيف / خدمات التنظيف
+Cleaning Date,,تاريخ التنظيف
+Cleaning Log,,سجل التنظيف
+Cleaning Log Room Detail,,تفاصيل غرف سجل التنظيف
+Cleaning Staff Salary,,رواتب عمالة النظافة
+Client Audit Reference / Ticket,,رقم مرجع/تذكرة تدقيق العميل
+Client Audit Remediation Plan,,خطة معالجة تدقيق العميل
+Client Point of Contact,,مسؤول التواصل لدى العميل
+Client Project,,مشروع العميل
+Closed by Client,,أُغلق من قِبل العميل
+Completed Date,,تاريخ الإنجاز
+Completion Date,,تاريخ الاكتمال
+Completion Notes,,ملاحظات الإنجاز / التقرير الختامي
+Completion Photo Evidence,,صورة إثبات الإنجاز
+Compliance & Licensing,,الامتثال والتراخيص
+Condemnation,,الإخلاء الجبري / الإزالة
+Condition at Check-in,,الحالة عند الدخول
+Condition at Handover,,الحالة عند التسليم
+Condition on Issue,,الحالة عند صرف العهدة
+Condition on Return,,الحالة عند إرجاع العهدة
+Consumption (kWh / m³),,الاستهلاك (كيلوواط ساعي / متر مكعب)
+Contract Document,,وثيقة العقد
+Contract End,,نهاية العقد
+Contract Start,,بداية العقد
+Corrective Action,,الإجراء التصحيحي
+Cost of Repair (SAR),,تكلفة الإصلاح (بالريال السعودي)
+Covered Buildings,,المباني المشمولة
+Credentials Delivered By,,مُسلم بيانات الاعتماد
+Current Occupancy,,النسبة الحالية لإشغال السكن
+Current Occupants,,المقيمون الحاليون / الشاغلون الحاليون
+Custodian Supervisor,,مشرف العهدة
+Custody Article,,بند العهدة / صنف العهدة
+Custody Asset Category,,فئة أصول العهدة
+Custody Clearance,,إخلاء طرف من العهدة
+Custody Damage Assessment,,تقييم أضرار العهدة
+Custody Damage Item,,بند تلفيات العهدة
+Custody Integration Mode,,نمط ربط العهدة
+Custody Issue,,صرف عهدة
+Custody Issue Item,,بند صرف العهدة
+Custody Return,,إرجاع عهدة
+Custody Return Item,,بند إرجاع العهدة
+Custody Return Items,,بنود إرجاع العهدة
+Damage Deduction Amount (SAR),,مبلغ استقطاع التلفيات (بالريال السعودي)
+Damage deduction {0} exceeds the per-checkout cap {1}.,,استقطاع التلفيات {0} يتجاوز الحد الأقصى المسموح به لكل خروج {1}.
+Damage Description,,وصف الضرر / التلف
+Damaged Items,,الأصناف التالفة
+Declining Balance,,الرصيد المتناقص
+Deduction Activation Date,,تاريخ تفعيل الاستقطاع
+Deduction Amount (SAR),,مبلغ الاستقطاع (بالريال السعودي)
+Deep Cleaning,,تنظيف عميق
+Default Assignee (Employee),,المستلم الافتراضي (الموظف)
+Default Depreciation Policy,,سياسة الاستهلاك الافتراضية
+Depreciation Policy,,سياسة الاستهلاك
+Depreciation Snapshot Item,,بند لقطة الاستهلاك
+Direct Allocation,,تخصيص مباشر
+Disputed,,متنازع عليه / معترض عليه
+Documents and Links,,المستندات والروابط
+Due Date is required.,,تاريخ الاستحقاق مطلوب.
+DVR/NVR,,جهاز التسجيل DVR/NVR
+DVR/NVR Status,,حالة جهاز التسجيل DVR/NVR
+Electrical,,كهرباء / كهربائي
+Electrical Hazard,,خطر كهربائي
+Emergency,,حالة طارئة
+Emergency & Crisis,,الطوارئ والأزمات
+Employee Daily Share (SAR),,الحصة اليومية للموظف (بالريال السعودي)
+Employee Responsible,,الموظف المسؤول
+Employee {0} already has an active Accommodation Assignment: {1},,الموظف {0} لديه تخصيص سكن نشط بالفعل: {1}
+Enable Damage Deduction Posting,,تفعيل ترحيل استقطاع التلفيات
+Enable ERPNext Asset Link,,تفعيل الربط مع أصول ERPNext
+Enable GL Entry Posting,,تفعيل ترحيل قيود دفتر الأستاذ العام
+Enable Housing Allowance Deduction,,تفعيل استقطاع بدل السكن
+Enable Stock Entry Posting,,تفعيل ترحيل سندات المخزن
+End of Contract,,نهاية العقد
+ERPNext Asset Record,,سجل أصول ERPNext
+Estimated Cost (SAR),,التكلفة التقديرية (بالريال السعودي)
+Estimated Replacement Cost (SAR),,تكلفة الاستبدال التقديرية (بالريال السعودي)
+Evidence (Photo/Document),,الإثبات (صورة/مستند)
+Evidence Photo,,صورة الإثبات
+Evidence Submitted,,تم تقديم الإثبات
+Executed By,,جهة التنفيذ
+Execution Date,,تاريخ التنفيذ
+Execution Instructions,,تعليمات التنفيذ
+Execution Status,,حالة التنفيذ
+Execution Time,,وقت التنفيذ
+Exit Blocked,,مخرج الطوارئ مغلق
+Expiring Soon,,ينتهي قريباً
+Expiry Date,,تاريخ الانتهاء
+Facility Asset,,أصل المنشأة
+Facility Asset Custody Assignment,,تخصيص عهدة أصل المنشأة
+Facility Asset Movement,,حركة أصول المنشأة
+Facility Custody Item,,عهد المرافق المستلمة
+Faulty,,عطلان / به عيب
+Final Exit,,خروج نهائي
+Finance Manager,,المدير المالي
+Financial Posting,,الترحيل المالي
+Finding Type,,نوع الملاحظة
+Fire Alarm Panel,,لوحة إنذار الحريق
+Fire Equipment Service,,صيانة معدات الحريق
+Fire Extinguisher,,طفاية حريق
+Fire Panel Fault,,عطل في لوحة الحريق
+Fire Safety,,السلامة من الحريق
+First Aid Kit,,صندوق الإسعافات الأولية
+Fixed Asset (Capex),,أصل ثابت (مصروفات رأس مالية)
+Frequency,,التكرار / الدورية
+From and To location must differ for a Facility Asset Movement.,,يجب أن يختلف موقع البداية والنهاية في حركة أصول المنشأة.
+From Bed,,من سرير
+From Building,,من مبنى
+From Room,,من غرفة
+Full Admin,,مسؤول كامل الصلاحيات
+Furniture,,أثاث
+Generated Maintenance Request,,طلب الصيانة المنشأ
+Generated Maintenance Requests,,طلبات الصيانة المنشأة
+Generator,,مولد كهربائي
+Generator Service,,صيانة المولد الكهربائي
+GL Entry Reference,,مرجع قيد دفتر الأستاذ العام
+GL Posted,,تم ترحيل قيد الأستاذ العام
+Google Maps Link,,رابط خرائط جوجل
+Group Housing Permit,,تصريح السكن الجماعي
+Habitat Settings,,إعدادات السكن (Habitat)
+Handover Date,,تاريخ التسليم
+Hard Disk,,القرص الصلب
+Health & Hygiene,,الصحة والنظافة العامة
+Housing Allowance Suspended,,إيقاف صرف بدل السكن
+In Storage,,في المستودع
+Inspection Date,,تاريخ الفحص
+Inspection Finding,,ملاحظة الفحص
+Inspection Type,,نوع الفحص
+Inspector (Employee),,الفاحص (الموظف)
+Installation Date,,تاريخ التركيب
+Insurance Policy,,بوليصة التأمين
+Internal Auditor,,المدقق الداخلي
+Internal Billing Model,,نموذج الفوترة الداخلية
+Internal Billing Notes,,ملاحظات الفوترة الداخلية
+Internal Transfer,,نقل داخلي
+Is Active,,نشط
+Is Serialized,,مرمز / ذو رقم تسلسلي
+Isolation,,عزل
+Issue Date,,تاريخ الإصدار / تاريخ الصرف
+Issue Description,,وصف المشكلة / وصف الصرف
+Issue Type,,نوع المشكلة / نوع الصرف
+Issued Custody Items,,بنود العهدة المصروفة
+Issued To (Employee),,صُرفت للموظف
+Issued To (Free Text),,صُرفت لـ (نص حر)
+Issuing Authority,,جهة الإصدار
+Item Description,,وصف الصنف / البند
+Landlord Information,,بيانات المؤجر
+Landlord Mobile,,رقم جوال المؤجر
+Landlord Name,,اسم المؤجر
+Landlord Office / Real Estate Agency,,مكتب المؤجر / المكتب العقاري
+Landlord Supplier,,المؤجر (مورد)
+Last Inspected,,آخر فحص
+Last Inspected Date,,تاريخ آخر فحص
+Last Modified By Role,,آخر تعديل بواسطة صلاحية
+Last Movement Date,,تاريخ آخر حركة
+Last Renewed On,,تاريخ آخر تجديد
+Lease / Contract Reference,,مرجع عقد الإيجار
+Lease Contract,,عقد الإيجار
+Lease End Date,,تاريخ نهاية عقد الإيجار
+Lease End Date must be after Lease Start Date.,,يجب أن يكون تاريخ نهاية عقد الإيجار بعد تاريخ بداية العقد.
+Lease Start Date,,تاريخ بداية عقد الإيجار
+Lease Status,,حالة عقد الإيجار
+Ledger Type,,نوع دفتر الأستاذ
+License Type,,نوع الرخصة
+License/Certificate Number,,رقم الرخصة/الشهادة
+Linked Maintenance Request,,طلب الصيانة المرتبط
+Linked Maintenance Request Item,,بند طلب الصيانة المرتبط
+Linked Safety Inspection Report,,تقرير فحص السلامة المرتبط
+Live View + Playback,,بث مباشر + إعادة تشغيل
+Live View Only,,بث مباشر فقط
+Location in Building,,الموقع داخل المبنى
+Maintenance Findings,,نتائج وملاحظات الصيانة
+Maintenance Inspection Finding Item,,بند ملاحظات فحص الصيانة
+Maintenance Inspection Report,,تقرير فحص الصيانة
+Maintenance Procurement Item,,بند مشتريات الصيانة
+Maintenance Request,,طلب صيانة
+Maintenance Work Order,,أمر عمل صيانة
+Max Damage Deduction per Checkout (SAR),,الحد الأقصى لاستقطاع التلفيات عند الخروج (بالريال السعودي)
+MOL Worker Housing Approval,,موافقة سكن العمالة من وزارة الموارد البشرية
+Monthly Cost per Bed Capacity (SAR),,التكلفة الشهرية لكل سرير سعة استيعابية (بالريال السعودي)
+Monthly Rent (SAR),,الإيجار الشهري (بالريال السعودي)
+Monthly Retainer (SAR),,المبلغ الشهري الثابت (بالريال السعودي)
+Moved By (Employee),,نُقل بواسطة (الموظف)
+Movement Date,,تاريخ الحركة
+Movement Reason,,سبب الحركة
+Needs Repair,,بحاجة لإصلاح
+Network Switch,,مقسم الشبكة (السويتش)
+New Assignment,,تخصيص جديد
+No Emergency Signage,,لا توجد لوحات إرشادية للطوارئ
+No First Aid Kit,,لا يوجد صندوق إسعافات أولية
+Non-Financial Depreciation Snapshot,,لقطة استهلاك غير مالي
+Not Done,,غير منجز
+Not Found,,غير موجود
+Not Installed,,غير مثبت
+Not Recording,,لا يسجل
+Occupancy %,,نسبة الإشغال (%)
+Occupancy Management,,إدارة إشغال السكن
+Occupied,,مشغول
+On Entry,,عند الدخول
+On-call Only,,عند الطلب فقط
+Operational Depreciation Policy,,سياسة الاستهلاك التشغيلية
+Operational Memo,,مذكرة تشغيلية
+Original Cost (SAR),,التكلفة الأصلية (بالريال السعودي)
+Out of Service,,خارج الخدمة
+Over-Capacity Alert Threshold (%),,حد تنبيه تجاوز الطاقة الاستيعابية (%)
+Overall Result,,النتيجة الإجمالية
+Overall Status,,الحالة العامة
+Overhead Absorption,,تحميل المصاريف غير المباشرة
+Owner Role,,صلاحية المالك
+Owner User,,المستخدم المالك
+Paid On,,دُفع في تاريخ
+Partially Occupied,,مشغول جزئياً
+Pass with Observations,,اجتياز مع وجود ملاحظات
+Payment Schedule,,جدول الدفعات
+Payroll Integration,,التكامل مع مسيرات الرواتب
+Pending Approval,,بانتظار الاعتماد
+Pest Control,,مكافحة الحشرات والآفات
+Photo Evidence,,إثبات بالصورة
+Photo Evidence Required,,يلزم إثبات بالصورة
+Planned End Date,,تاريخ النهاية المخطط له
+Planned End Date must be on or after Planned Start Date.,,يجب أن يكون تاريخ النهاية المخطط له بعد تاريخ البداية أو مساوياً له.
+Planned Start Date,,تاريخ البداية المخطط له
+Policy Name,,اسم السياسة
+Post-Work,,بعد العمل
+Posting Mode,,طريقة الترحيل
+Pre-Work,,قبل العمل
+Previous Building,,المبنى السابق
+Previous Location,,الموقع السابق
+Previous Repair Confirmation Details,,تفاصيل تأكيد الإصلاحات السابقة
+Previous Repairs Confirmed,,تم تأكيد الإصلاحات السابقة
+Procurement Items,,بنود المشتريات
+Procurement Items Required,,يلزم بنود مشتريات
+Project is required.,,المشروع مطلوب.
+Project Transfer,,تحويل المشروع
+Purchase Invoice,,فاتورة المشتريات
+Qty Issued,,الكمية المصروفة
+Qty Returned,,الكمية المعادة
+Quantity Issued,,الكمية المصروفة
+Quarterly,,ربع سنوي
+Reallocation,,إعادة تخصيص
+Rejected by Client,,مرفوض من قِبل العميل
+Related Facility Asset,,أصل المنشأة المرتبط
+Remediation Action Required,,الإجراء العلاجي المطلوب
+Remediation Actions,,الإجراءات العلاجية
+Remediation Deadline,,الموعد النهائي للمعالجة
+Renewal Cost Estimate (SAR),,التكلفة التقديرية للتجديد (بالريال السعودي)
+Renewal Lead Days,,مهلة التجديد بالأيام
+Rent Due Day must be between 1 and 28.,,يجب أن يكون يوم استحقاق الإيجار بين 1 و 28.
+Rent Due Day of Month,,يوم استحقاق الإيجار من الشهر
+Rent Payment Schedule,,جدول سداد الإيجارات
+Reported By,,مُبلغ من قبل
+Requires Procurement,,يتطلب شراء
+Resident Supervisor,,المشرف المقيم
+Residual Value (%),,القيمة المتبقية (%)
+Resolution Notes,,ملاحظات المعالجة
+Response SLA (Hours),,اتفاقية مستوى خدمة الاستجابة (بالساعات)
+Responsible Facility Supervisor,,مشرف المنشأة المسؤول
+Responsible Role,,الصلاحية المسؤولة
+Return Date,,تاريخ الإرجاع
+Return from Leave,,العودة من الإجازة
+Return Status,,حالة الإرجاع
+Returned By (Employee),,أُعيد بواسطة (الموظف)
+Returned Items,,الأصناف المعادة
+Room Bed Transfer,,نقل سرير الغرفة
+Room Cleaning Details,,تفاصيل تنظيف الغرفة
+Room Number,,رقم الغرفة
+Room Type,,نوع الغرفة
+Row {0}: Qty must be greater than zero.,,السطر {0}: يجب أن تكون الكمية أكبر من الصفر.
+Safety Findings,,ملاحظات السلامة
+Safety Inspection Finding Item,,بند ملاحظات فحص السلامة
+Safety Inspection Report,,تقرير فحص السلامة
+Safety Section — No Issues,,قسم السلامة — لا توجد ملاحظات
+Safety Task (from Catalog),,مهمة السلامة (من الدليل)
+Safety Task Building Scope,,نطاق مبنى مهمة السلامة
+Safety Task Catalog,,دليل مهام السلامة
+Safety Task Execution,,تنفيذ مهمة السلامة
+Salary Deduction,,استقطاع من الراتب
+Same-Day Escalation Required,,يلزم التصعيد في نفس اليوم
+Scheduled Date,,التاريخ المجدول
+Scheduled Task Instance,,نموذج المهمة المجدولة
+Scheduled Task Template,,قالب المهمة المجدولة
+Scheduled Visit Frequency,,دورية الزيارات المجدولة
+Selected Bed {0} does not belong to Room {1},,السرير المختار {0} لا ينتمي للغرفة {1}
+Selected Bed {0} is already occupied by Assignment {1},,السرير المختار {0} مشغول بالفعل بالتخصيص {1}
+Selected Bed {0} is Out of Service,,السرير المختار {0} خارج الخدمة
+Selected Room {0} does not belong to Building {1},,الغرفة المختارة {0} لا تنتمي للمبنى {1}
+Serial No.,,الرقم التسلسلي
+Service Contract,,عقد الخدمة
+Service Cost (SAR),,تكلفة الخدمة (بالريال السعودي)
+Service Type,,نوع الخدمة
+Sewage Tank Suction,,شفط خزان الصرف الصحي
+Site Name,,اسم الموقع
+Smoke Detector,,كاشف الدخان
+Smoke Detector Fault,,عطل في كاشف الدخان
+Snapshot Date,,تاريخ اللقطة
+Source Inspection Report,,تقرير الفحص المصدر
+Specific Buildings,,مباني محددة
+Specific Rate for this Building (SAR),,تسعيرة محددة لهذا المبنى (بالريال السعودي)
+Standard Rate Per Visit (SAR),,التسعيرة القياسية لكل زيارة (بالريال السعودي)
+Standard Unit Cost (SAR),,تكلفة الوحدة القياسية (بالريال السعودي)
+Straight Line,,القسط الثابت
+Structural Risk,,خطر إنشائي
+Subcontractor Building Coverage,,تغطية مباني مقاول الباطن
+Subcontractor Dispatched,,تم تكليف مقاول الباطن
+Subcontractor Service Contract,,عقد خدمة مقاول الباطن
+Subcontractor Service Order,,أمر خدمة مقاول الباطن
+Submitted To (Recipients),,مقدم إلى (المستلمون)
+Supervisor Confirmed Completion,,أكد المشرف اكتمال العمل
+Supervisor E-Signature,,التوقيع الإلكتروني للمشرف
+Supervisor Salary,,راتب المشرف
+Target bed is already occupied.,,السرير المستهدف مشغول بالفعل.
+Target Bed {0} does not belong to Room {1},,السرير المستهدف {0} لا ينتمي للغرفة {1}
+Target Bed {0} is Out of Service.,,السرير المستهدف {0} خارج الخدمة.
+Target Completion Date,,تاريخ الاكتمال المستهدف
+Target ERPNext Asset,,أصل ERPNext المستهدف
+Target Room {0} is not associated with any Building.,,الغرفة المستهدفة {0} غير مرتبطة بأي مبنى.
+Task Code,,رمز المهمة
+Task Title (Arabic),,عنوان المهمة (بالعربية)
+Task Title (English),,عنوان المهمة (بالإنجليزية)
+Task Type,,نوع المهمة
+Technician Notes,,ملاحظات الفني
+Template Name,,اسم القالب
+To Bed,,إلى سرير
+To Building,,إلى مبنى
+To Room,,إلى غرفة
+Total Bed Capacity,,إجمالي السعة الاستيعابية للأسرة
+Total Book Value (SAR),,إجمالي القيمة الدفترية (بالريال السعودي)
+Total Estimated Replacement Cost (SAR),,إجمالي تكلفة الاستبدال التقديرية (بالريال السعودي)
+Total Floors,,إجمالي الطوابق
+Total Movements Recorded,,إجمالي الحركات المسجلة
+Total Procurement Cost (SAR),,إجمالي تكلفة المشتريات (بالريال السعودي)
+Total Rooms,,إجمالي الغرف
+Total Scheduled Amount (SAR),,إجمالي المبلغ المجدول (بالريال السعودي)
+Total Site Cost for Period (SAR),,إجمالي تكلفة الموقع للفترة (بالريال السعودي)
+Transfer Date,,تاريخ النقل
+Under Maintenance,,تحت الصيانة
+Under Renewal,,تحت التجديد
+Under Renovation,,تحت الترميم
+Under Repair,,تحت الإصلاح
+Under Review,,تحت المراجعة
+Unit Economics,,اقتصاديات الوحدة
+Unit of Measure,,وحدة القياس
+Useful Life (Years),,العمر الإنتاجي (بالسنوات)
+User Requesting Access,,المستخدم طالب الصلاحية
+Utility Account,,حساب الخدمات العامة
+Utility Bill Entry,,تسجيل فاتورة الخدمات العامة
+Utility Type,,نوع الخدمة العامة
+Variance Alert Sent,,تم إرسال تنبيه الانحراف
+Variance Alert Threshold (%),,حد تنبيه الانحراف (%)
+Variance from Average (%),,الانحراف عن المتوسط (%)
+Verified by Client,,تم التحقق من قِبل العميل
+Warning: building occupancy will reach {0:.0f}%.,,تنبيه: ستصل نسبة إشغال المبنى إلى {0:.0f}%.
+Water Tank,,خزان المياه
+Water Tank Cleaning,,تنظيف خزان المياه
+Witness Role,,دور الشاهد
+Work Description,,وصف العمل

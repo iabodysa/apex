@@ -1,0 +1,173 @@
+{
+  "doctype": "DocType",
+  "name": "Facility Asset Custody Assignment",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "is_submittable": 1,
+  "track_changes": 1,
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "description": "Transfers responsibility of one or more Facility Assets to a supervisor.",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "supervisor",
+      "fieldtype": "Link",
+      "label": "Custodian Supervisor",
+      "options": "User",
+      "reqd": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "handover_date",
+      "fieldtype": "Date",
+      "label": "Handover Date",
+      "reqd": 1,
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "all_assets_verified",
+      "fieldtype": "Check",
+      "label": "All Assets Physically Verified",
+      "reqd": 1,
+      "description": "Must be checked before the assignment can be submitted.",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_overview_col",
+      "fieldtype": "Column Break",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "supervisor_signature",
+      "fieldtype": "Signature",
+      "label": "Supervisor E-Signature",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "witness_role",
+      "fieldtype": "Link",
+      "label": "Witness Role",
+      "options": "User",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "FAC-CUST-.YYYY.-.#####",
+      "default": "FAC-CUST-.YYYY.-.#####",
+      "reqd": 1,
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_sec_large_text",
+      "fieldtype": "Section Break",
+      "label": "Additional Information",
+      "collapsible": 1,
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "handover_notes",
+      "fieldtype": "Small Text",
+      "label": "Notes",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_sec_table_assets_in_custody",
+      "fieldtype": "Section Break",
+      "label": "Assets in Custody",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "assets_in_custody",
+      "fieldtype": "Table",
+      "label": "Assets in Custody",
+      "options": "Facility Custody Item",
+      "idx": 15
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1,
+      "email": 1,
+      "share": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Accommodation Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Resident Supervisor",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "submit": 1,
+      "idx": 3
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "doctype": "Report",
+  "name": "Scheduled Task Compliance",
+  "report_name": "Scheduled Task Compliance",
+  "ref_doctype": "Safety Task Execution",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Habitat"
+}

@@ -1,0 +1,147 @@
+{
+  "doctype": "DocType",
+  "name": "Utility Account",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "is_submittable": 0,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "description": "Utility account number per building (electricity, water, telecom). Links incoming bills to a building cost center.",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_account_tab_details",
+      "fieldtype": "Tab Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_account_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_type",
+      "fieldtype": "Select",
+      "label": "Utility Type",
+      "options": "Electricity\nWater\nGas\nInternet\nTelecom",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "account_number",
+      "fieldtype": "Data",
+      "label": "Account Number",
+      "reqd": 1,
+      "unique": 1,
+      "in_list_view": 1,
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "provider",
+      "fieldtype": "Data",
+      "label": "Provider",
+      "description": "e.g., Saudi Electricity Co., NWC, Mobily",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Active\nClosed",
+      "default": "Active",
+      "in_list_view": 1,
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_account_details_col",
+      "fieldtype": "Column Break",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "UTIL-ACC-.####",
+      "default": "UTIL-ACC-.####",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "average_monthly_bill_sar",
+      "fieldtype": "Currency",
+      "label": "Average Monthly Bill (SAR)",
+      "description": "Used for variance alerts. Updated monthly by the variance scan job.",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "billing_email",
+      "fieldtype": "Data",
+      "label": "Billing Recipient Email",
+      "description": "Email address where the e-bill arrives.",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "variance_threshold_pct",
+      "fieldtype": "Percent",
+      "label": "Variance Alert Threshold (%)",
+      "default": "25",
+      "description": "Trigger alert if monthly bill deviates from average by more than this percentage.",
+      "idx": 12
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "print": 1,
+      "email": 1,
+      "share": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Accommodation Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Finance Manager",
+      "read": 1,
+      "idx": 3
+    }
+  ]
+}

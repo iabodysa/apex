@@ -1,0 +1,159 @@
+{
+  "doctype": "DocType",
+  "name": "Habitat Settings",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "issingle": 1,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "habitat_settings_tab_details",
+      "fieldtype": "Tab Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "habitat_settings_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_integration_mode",
+      "label": "Custody Integration Mode",
+      "fieldtype": "Select",
+      "options": "Habitat Internal / No Financial Posting\nERPNext Asset Integration\nERPNext Stock Integration",
+      "default": "Habitat Internal / No Financial Posting",
+      "reqd": 1,
+      "description": "Default mode keeps all custody and depreciation inside Habitat with no financial posting.",
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "enable_housing_allowance_deduction",
+      "label": "Enable Housing Allowance Deduction",
+      "fieldtype": "Check",
+      "default": 0,
+      "description": "When OFF (default), accommodation assignment does not touch Salary Structure Assignment.",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "deduction_activation_date",
+      "label": "Deduction Activation Date",
+      "fieldtype": "Date",
+      "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "authorized_by",
+      "label": "Authorized By",
+      "fieldtype": "Link",
+      "options": "User",
+      "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "authorization_document",
+      "label": "Authorization Document",
+      "fieldtype": "Attach",
+      "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "enable_damage_deduction",
+      "label": "Enable Damage Deduction Posting",
+      "fieldtype": "Check",
+      "default": 0,
+      "description": "When ON, checkout damage amounts post to Additional Salary. Default OFF.",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "habitat_settings_details_col",
+      "fieldtype": "Column Break",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "enable_gl_posting",
+      "label": "Enable GL Entry Posting",
+      "fieldtype": "Check",
+      "default": 0,
+      "description": "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "enable_native_asset_link",
+      "label": "Enable ERPNext Asset Link",
+      "fieldtype": "Check",
+      "default": 0,
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "enable_stock_posting",
+      "label": "Enable Stock Entry Posting",
+      "fieldtype": "Check",
+      "default": 0,
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "auto_create_asset_movement_on_transfer",
+      "label": "Auto-create Facility Asset Movement on Transfer",
+      "fieldtype": "Check",
+      "default": 1,
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "max_damage_deduction_per_checkout_sar",
+      "label": "Max Damage Deduction per Checkout (SAR)",
+      "fieldtype": "Currency",
+      "default": 500,
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "habitat_settings_sec_system",
+      "fieldtype": "Section Break",
+      "label": "System Details",
+      "collapsible": 1,
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "last_modified_by_role",
+      "label": "Last Modified By Role",
+      "fieldtype": "Data",
+      "read_only": 1,
+      "idx": 16
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "print": 1,
+      "email": 1,
+      "share": 1,
+      "idx": 1
+    }
+  ]
+}
