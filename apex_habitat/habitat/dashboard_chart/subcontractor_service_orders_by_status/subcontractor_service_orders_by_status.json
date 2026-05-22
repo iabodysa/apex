@@ -1,0 +1,15 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Subcontractor Service Orders by Status",
+ "chart_name": "Subcontractor Service Orders by Status",
+ "chart_type": "Group By",
+ "document_type": "Subcontractor Service Order",
+ "group_by_type": "Count",
+ "group_by_based_on": "status",
+ "type": "Bar",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "module": "Habitat",
+ "timeseries": 0,
+ "filters_json": "[]"
+}

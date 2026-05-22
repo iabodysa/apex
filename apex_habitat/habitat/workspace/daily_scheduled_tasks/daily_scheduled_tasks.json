@@ -1,0 +1,126 @@
+{
+ "doctype": "Workspace",
+ "name": "Daily & Scheduled Tasks",
+ "label": "Daily & Scheduled Tasks",
+ "title": "Daily & Scheduled Tasks",
+ "module": "Habitat",
+ "icon": "calendar",
+ "public": 1,
+ "is_default": 0,
+ "sequence_id": 3.0,
+ "parent_page": "Operations Command Center",
+ "content": "[{\"id\": \"R7FGaVIgn6\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"7MTfTkFmk7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Scheduled Tasks Open\", \"col\": 3}}, {\"id\": \"GVVIkIVU00\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"FxlShVAncW\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cleaning Logs Recorded\", \"col\": 3}}, {\"id\": \"4ky6LBjKKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"UaqoyPCKaG\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Scheduled Task Instances by Status\", \"col\": 6}}, {\"id\": \"wD2HukNbfT\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"TBkneb7MTE\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Scheduled Task Instance\", \"col\": 4}}, {\"id\": \"s1YUKEWRqY\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"2Xi0qwW8h6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Instance\", \"col\": 3}}, {\"id\": \"yUlMbvEzyi\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Cleaning Log\", \"col\": 3}}, {\"id\": \"n5OeYnnXVe\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily & Scheduled Tasks</b></span>\", \"col\": 12}}, {\"id\": \"sdvDL3WVru\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Work\", \"col\": 4}}, {\"id\": \"RvqpVPUk4S\", \"type\": \"card\", \"data\": {\"card_name\": \"Task Setup\", \"col\": 4}}, {\"id\": \"DZYDlPmf3W\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Scheduled Task Instance",
+   "link_to": "Scheduled Task Instance",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Cleaning Log",
+   "link_to": "Cleaning Log",
+   "idx": 2
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Daily Work",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Scheduled Task Instance",
+   "link_type": "DocType",
+   "link_to": "Scheduled Task Instance",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Cleaning Log",
+   "link_type": "DocType",
+   "link_to": "Cleaning Log",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Task Setup",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Scheduled Task Template",
+   "link_type": "DocType",
+   "link_to": "Scheduled Task Template",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Task Catalog",
+   "link_type": "DocType",
+   "link_to": "Safety Task Catalog",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Views",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Scheduled Task Compliance",
+   "link_type": "Report",
+   "link_to": "Scheduled Task Compliance",
+   "idx": 8
+  }
+ ],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Scheduled Task Instances by Status",
+   "label": "Scheduled Task Instances by Status",
+   "idx": 1
+  }
+ ],
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Scheduled Tasks Open",
+   "label": "Scheduled Tasks Open",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Overdue Scheduled Tasks",
+   "label": "Overdue Scheduled Tasks",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Cleaning Logs Recorded",
+   "label": "Cleaning Logs Recorded",
+   "idx": 3
+  }
+ ],
+ "quick_lists": [
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "Scheduled Task Instance",
+   "label": "Scheduled Task Instance",
+   "quick_list_filter": "{\"status\": [\"in\", [\"Open\", \"In Progress\"]]}",
+   "idx": 1
+  }
+ ]
+}

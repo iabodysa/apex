@@ -42,10 +42,21 @@ def before_cancel(doc, method=None):
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
     
-    # Reverse ledger entry
+    # Reverse the ledger entry, linked explicitly to the original row so the
+    # reversal is auditable and excluded from cost reports by reconciliation.
     building = frappe.get_doc("Accommodation Building", doc.building)
     from frappe.utils import today
-    
+
+    original_row = frappe.db.get_value(
+        "Accommodation Ledger",
+        {
+            "source_doctype": "Utility Bill Entry",
+            "source_name": doc.name,
+            "reversal_of": ["is", "not set"],
+        },
+        "name",
+    )
+
     frappe.get_doc({
         "doctype": "Accommodation Ledger",
         "posting_date": today(),
@@ -55,6 +66,10 @@ def before_cancel(doc, method=None):
         "capacity_denominator": building.total_capacity or 0,
         "employee_daily_share": 0,
         "posting_mode": "Operational Memo",
+        "source_doctype": "Utility Bill Entry",
+        "source_name": doc.name,
+        "allocation_basis": "Direct",
+        "reversal_of": original_row,
     }).insert(ignore_permissions=True)
 
 
@@ -89,4 +104,9 @@ def _post_ledger_row(doc) -> None:
         "capacity_denominator": building.total_capacity or 0,
         "employee_daily_share": 0,
         "posting_mode": "Operational Memo",
+        "source_doctype": "Utility Bill Entry",
+        "source_name": doc.name,
+        "allocation_basis": "Direct",
+        "allocation_period_start": doc.billing_period_from,
+        "allocation_period_end": doc.billing_period_to,
     }).insert(ignore_permissions=True)

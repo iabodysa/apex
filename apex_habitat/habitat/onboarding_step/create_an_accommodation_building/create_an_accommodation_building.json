@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Create an Accommodation Building",
+ "title": "Create an Accommodation Building",
+ "action": "Create Entry",
+ "reference_document": "Accommodation Building",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Add a building under the site, with its cost center.",
+ "action_label": "Create a Accommodation Building"
+}

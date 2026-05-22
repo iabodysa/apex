@@ -72,6 +72,7 @@ doc_events = {
     "Maintenance Work Order": {
         "validate": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.validate",
         "on_submit": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.on_submit",
+        "on_update": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.on_update",
         "before_cancel": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.before_cancel",
     },
     # Phase 7 gaps

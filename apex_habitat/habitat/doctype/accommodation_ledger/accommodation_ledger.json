@@ -110,7 +110,8 @@
       "doctype": "DocField",
       "fieldname": "cost_center",
       "label": "Cost Center",
-      "fieldtype": "Data",
+      "fieldtype": "Link",
+      "options": "Cost Center",
       "idx": 13
     },
     {
@@ -136,6 +137,57 @@
       "options": "GL Entry",
       "read_only": 1,
       "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "source_doctype",
+      "label": "Source DocType",
+      "fieldtype": "Data",
+      "read_only": 1,
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "source_name",
+      "label": "Source Document",
+      "fieldtype": "Data",
+      "read_only": 1,
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "reversal_of",
+      "label": "Reversal Of",
+      "fieldtype": "Link",
+      "options": "Accommodation Ledger",
+      "read_only": 1,
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "allocation_basis",
+      "label": "Allocation Basis",
+      "fieldtype": "Select",
+      "options": "Capacity\nActual Occupancy\nManual\nDirect",
+      "default": "Capacity",
+      "read_only": 1,
+      "idx": 20
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "allocation_period_start",
+      "label": "Allocation Period Start",
+      "fieldtype": "Date",
+      "read_only": 1,
+      "idx": 21
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "allocation_period_end",
+      "label": "Allocation Period End",
+      "fieldtype": "Date",
+      "read_only": 1,
+      "idx": 22
     }
   ],
   "permissions": [

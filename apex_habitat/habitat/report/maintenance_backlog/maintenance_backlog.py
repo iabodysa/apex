@@ -6,38 +6,29 @@ import frappe
 
 def execute(filters=None):
     columns = [
-        {
-                "label": frappe._("Request ID"),
-                "fieldname": "name",
-                "fieldtype": "Link",
-                "options": "Maintenance Request",
-                "width": 100
-        },
-        {
-                "label": frappe._("Building"),
-                "fieldname": "building",
-                "fieldtype": "Link",
-                "options": "Accommodation Building",
-                "width": 120
-        },
-        {
-                "label": frappe._("Description"),
-                "fieldname": "description",
-                "fieldtype": "Small Text",
-                "width": 200
-        },
-        {
-                "label": frappe._("Priority"),
-                "fieldname": "priority",
-                "fieldtype": "Select",
-                "width": 100
-        },
-        {
-                "label": frappe._("Status"),
-                "fieldname": "status",
-                "fieldtype": "Select",
-                "width": 100
-        }
-]
-    data = []
+        {"label": frappe._("Request ID"), "fieldname": "name", "fieldtype": "Link", "options": "Maintenance Request", "width": 140},
+        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 150},
+        {"label": frappe._("Issue Type"), "fieldname": "issue_type", "fieldtype": "Data", "width": 120},
+        {"label": frappe._("Description"), "fieldname": "description", "fieldtype": "Small Text", "width": 240},
+        {"label": frappe._("Priority"), "fieldname": "priority", "fieldtype": "Data", "width": 90},
+        {"label": frappe._("Status"), "fieldname": "status", "fieldtype": "Data", "width": 110},
+    ]
+
+    query_filters = {"status": ["in", ["Open", "Assigned", "In Progress", "Reopened"]]}
+    if filters and filters.get("building"):
+        query_filters["building"] = filters["building"]
+
+    data = frappe.get_all(
+        "Maintenance Request",
+        filters=query_filters,
+        fields=[
+            "name",
+            "building",
+            "issue_type",
+            "issue_description as description",
+            "priority",
+            "status",
+        ],
+        order_by="creation asc",
+    )
     return columns, data

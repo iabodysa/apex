@@ -20,7 +20,10 @@ records, ledgers, inspections, and scheduled task execution.
 - Safety task catalogs, scheduled task execution, inspection findings, camera
   access grants, and remediation plans.
 - Query reports for occupancy, cost allocation, utility variance, maintenance
-  backlog, lease expiry, scheduled task compliance, and custody damage.
+  backlog, lease expiry, scheduled task compliance, custody damage, and audit
+  remediation status.
+- Operations-first Workspace: a process-based command centre with number
+  cards, dashboard charts, quick lists, and guided onboarding.
 
 ## Requirements
 
@@ -33,7 +36,7 @@ records, ledgers, inspections, and scheduled task execution.
 Use an existing Frappe bench and always specify the target site:
 
 ```bash
-bench get-app https://github.com/iabodysa/apex_habitat.git
+bench get-app https://github.com/iabodysa/apex.git
 bench --site "$FRAPPE_SITE" install-app apex_habitat
 bench --site "$FRAPPE_SITE" migrate
 ```

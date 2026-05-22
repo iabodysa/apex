@@ -37,3 +37,40 @@ def on_submit(doc, method=None):
 def before_cancel(doc, method=None):
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Maintenance Work Order."))
+
+
+def on_update(doc, method=None):
+    """Post a one-time operational maintenance cost row to the Accommodation
+    Ledger when the work order is marked Completed.
+
+    Operational Memo only — no GL impact. Idempotent: a second ledger row is
+    never created for the same work order.
+    """
+    if doc.status != "Completed" or not doc.building:
+        return
+    cost = flt(doc.total_procurement_cost_sar)
+    if cost <= 0:
+        return
+    if frappe.db.exists(
+        "Accommodation Ledger",
+        {"source_doctype": "Maintenance Work Order", "source_name": doc.name},
+    ):
+        return
+
+    from frappe.utils import today
+
+    frappe.get_doc({
+        "doctype": "Accommodation Ledger",
+        "posting_date": doc.actual_end_date or today(),
+        "building": doc.building,
+        "ledger_type": "Maintenance",
+        "total_site_cost": cost,
+        "capacity_denominator": 0,
+        "employee_daily_share": 0,
+        "posting_mode": "Operational Memo",
+        "source_doctype": "Maintenance Work Order",
+        "source_name": doc.name,
+        "allocation_basis": "Direct",
+        "allocation_period_start": doc.actual_start_date,
+        "allocation_period_end": doc.actual_end_date,
+    }).insert(ignore_permissions=True)

@@ -30,36 +30,18 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
+    # Close the assignment by recording the check-out date. The assignment is
+    # kept as a submitted historical record (not cancelled): the daily cost
+    # allocation job stops future rows because it filters on an unset
+    # check_out_date, and the stay history is preserved for audit and reports.
     assignment = frappe.get_doc("Accommodation Assignment", doc.assignment)
     assignment.db_set("check_out_date", doc.checkout_date)
-    if assignment.docstatus == 1:
-        assignment.cancel()
 
     frappe.db.set_value("Accommodation Bed", doc.bed, "status", "Available")
 
-    settings = frappe.get_single("Habitat Settings")
-    if (
-        settings.enable_damage_deduction
-        and (doc.damage_deduction_amount or 0) > 0
-    ):
-        cap = settings.max_damage_deduction_per_checkout_sar or 0
-        if cap and doc.damage_deduction_amount > cap:
-            frappe.throw(
-                _("Damage deduction {0} exceeds the per-checkout cap {1}.").format(
-                    doc.damage_deduction_amount, cap
-                )
-            )
-        additional_salary = frappe.get_doc(
-            {
-                "doctype": "Additional Salary",
-                "employee": doc.employee,
-                "salary_component": "Accommodation Damage Recovery",
-                "amount": doc.damage_deduction_amount,
-                "payroll_date": doc.checkout_date,
-            }
-        )
-        additional_salary.insert(ignore_permissions=True)
-        doc.db_set("linked_additional_salary", additional_salary.name)
+    # Damage recovery is intentionally NOT posted here. Custody Damage
+    # Assessment is the single authority for damage deductions, so a checkout
+    # can never double-charge an employee already charged via that flow.
 
 
 def before_cancel(doc, method=None):

@@ -1,0 +1,15 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Beds by Status",
+ "chart_name": "Beds by Status",
+ "chart_type": "Group By",
+ "document_type": "Accommodation Bed",
+ "group_by_type": "Count",
+ "group_by_based_on": "status",
+ "type": "Donut",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "module": "Habitat",
+ "timeseries": 0,
+ "filters_json": "[]"
+}
