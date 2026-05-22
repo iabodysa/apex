@@ -1,0 +1,71 @@
+{
+  "doctype": "DocType",
+  "name": "Rent Payment Schedule",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "description": "One row per scheduled rent payment on an Accommodation Lease. Linked to a Payment Entry once processed.",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "rent_payment_schedule_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "due_date",
+      "fieldtype": "Date",
+      "label": "Due Date",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "amount_sar",
+      "fieldtype": "Currency",
+      "label": "Amount (SAR)",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Unpaid\nPaid\nOverdue",
+      "default": "Unpaid",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "rent_payment_schedule_details_col",
+      "fieldtype": "Column Break",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "payment_entry",
+      "fieldtype": "Link",
+      "label": "Payment Entry",
+      "options": "Payment Entry",
+      "read_only": 1,
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "paid_on",
+      "fieldtype": "Date",
+      "label": "Paid On",
+      "read_only": 1,
+      "idx": 7
+    }
+  ],
+  "permissions": []
+}

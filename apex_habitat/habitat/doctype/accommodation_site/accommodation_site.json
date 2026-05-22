@@ -1,0 +1,110 @@
+{
+  "doctype": "DocType",
+  "name": "Accommodation Site",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "allow_rename": 1,
+  "autoname": "field:site_name",
+  "naming_rule": "By fieldname",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_site_tab_details",
+      "fieldtype": "Tab Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_site_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "site_name",
+      "label": "Site Name",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "unique": 1,
+      "in_list_view": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "label": "Status",
+      "fieldtype": "Select",
+      "options": "Active\nInactive",
+      "default": "Active",
+      "in_list_view": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_site_details_col",
+      "fieldtype": "Column Break",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "city",
+      "label": "City",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "district",
+      "label": "District",
+      "fieldtype": "Data",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_site_sec_large_text",
+      "fieldtype": "Section Break",
+      "label": "Additional Information",
+      "collapsible": 1,
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "notes",
+      "label": "Notes",
+      "fieldtype": "Small Text",
+      "idx": 9
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1,
+      "email": 1,
+      "share": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Accommodation Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "idx": 2
+    }
+  ]
+}

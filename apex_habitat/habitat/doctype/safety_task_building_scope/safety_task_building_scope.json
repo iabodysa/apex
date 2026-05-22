@@ -1,0 +1,27 @@
+{
+  "doctype": "DocType",
+  "name": "Safety Task Building Scope",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_building_scope_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 2
+    }
+  ],
+  "permissions": []
+}

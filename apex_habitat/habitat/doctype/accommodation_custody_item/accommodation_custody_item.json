@@ -1,0 +1,73 @@
+{
+  "doctype": "DocType",
+  "name": "Accommodation Custody Item",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "editable_grid": 1,
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_custody_item_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "article",
+      "label": "Custody Article",
+      "fieldtype": "Link",
+      "options": "Custody Article",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "quantity",
+      "label": "Quantity Issued",
+      "fieldtype": "Int",
+      "reqd": 1,
+      "default": 1,
+      "in_list_view": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "condition_at_checkin",
+      "label": "Condition at Check-in",
+      "fieldtype": "Select",
+      "options": "Good\nFair\nDamaged",
+      "default": "Good",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_custody_item_details_col",
+      "fieldtype": "Column Break",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "serial_no",
+      "label": "Serial No.",
+      "fieldtype": "Data",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "label": "Status",
+      "fieldtype": "Select",
+      "options": "Issued\nReturned\nLost\nDamaged",
+      "default": "Issued",
+      "in_list_view": 1,
+      "idx": 7
+    }
+  ],
+  "permissions": []
+}

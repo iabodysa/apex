@@ -1,0 +1,87 @@
+{
+  "doctype": "DocType",
+  "name": "Audit Remediation Item",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "audit_remediation_item_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "finding_description",
+      "fieldtype": "Small Text",
+      "label": "Audit Finding",
+      "reqd": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "remediation_action",
+      "fieldtype": "Small Text",
+      "label": "Remediation Action Required",
+      "reqd": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "owner_role",
+      "fieldtype": "Link",
+      "label": "Owner Role",
+      "options": "Role",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "owner_user",
+      "fieldtype": "Link",
+      "label": "Owner User",
+      "options": "User",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "audit_remediation_item_details_col",
+      "fieldtype": "Column Break",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "due_date",
+      "fieldtype": "Date",
+      "label": "Due Date",
+      "reqd": 1,
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "completion_date",
+      "fieldtype": "Date",
+      "label": "Completion Date",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "evidence_attached",
+      "fieldtype": "Attach",
+      "label": "Evidence (Photo/Document)",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Open\nIn Progress\nEvidence Submitted\nVerified by Client\nRejected by Client",
+      "default": "Open",
+      "idx": 10
+    }
+  ],
+  "permissions": []
+}

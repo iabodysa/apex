@@ -1,0 +1,189 @@
+{
+  "doctype": "DocType",
+  "name": "Building License",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "is_submittable": 1,
+  "track_changes": 1,
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "description": "Compliance document attached to a building (Balady, Civil Defence Certificate, Group Housing Permit, Lease Contract).",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_tab_details",
+      "fieldtype": "Tab Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "license_type",
+      "fieldtype": "Select",
+      "label": "License Type",
+      "options": "Balady Certificate\nCivil Defence Certificate\nGroup Housing Permit\nLease Contract\nMOL Worker Housing Approval\nInsurance Policy\nOther",
+      "reqd": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "license_number",
+      "fieldtype": "Data",
+      "label": "License/Certificate Number",
+      "reqd": 1,
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "issuing_authority",
+      "fieldtype": "Data",
+      "label": "Issuing Authority",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "issue_date",
+      "fieldtype": "Date",
+      "label": "Issue Date",
+      "reqd": 1,
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "expiry_date",
+      "fieldtype": "Date",
+      "label": "Expiry Date",
+      "reqd": 1,
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_details_col",
+      "fieldtype": "Column Break",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "renewal_lead_days",
+      "fieldtype": "Int",
+      "label": "Renewal Lead Days",
+      "default": 60,
+      "description": "Days before expiry to trigger renewal alert",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "attached_document",
+      "fieldtype": "Attach",
+      "label": "Certificate File",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "responsible_role",
+      "fieldtype": "Link",
+      "label": "Responsible Role",
+      "options": "Role",
+      "default": "Admin Manager",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Active\nExpiring Soon\nExpired\nUnder Renewal\nRevoked",
+      "default": "Active",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "BLDG-LIC-.YYYY.-.####",
+      "default": "BLDG-LIC-.YYYY.-.####",
+      "reqd": 1,
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "renewal_cost_estimate_sar",
+      "fieldtype": "Currency",
+      "label": "Renewal Cost Estimate (SAR)",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_sec_system",
+      "fieldtype": "Section Break",
+      "label": "System Details",
+      "collapsible": 1,
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "last_renewal_date",
+      "fieldtype": "Date",
+      "label": "Last Renewed On",
+      "read_only": 1,
+      "idx": 17
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1,
+      "email": 1,
+      "share": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Accommodation Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Resident Supervisor",
+      "read": 1,
+      "idx": 3
+    }
+  ]
+}

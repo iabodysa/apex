@@ -1,0 +1,72 @@
+{
+  "doctype": "DocType",
+  "name": "Accommodation Custody Return Item",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "editable_grid": 1,
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_custody_return_item_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "article",
+      "label": "Custody Article",
+      "fieldtype": "Link",
+      "options": "Custody Article",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "quantity_issued",
+      "label": "Qty Issued",
+      "fieldtype": "Int",
+      "read_only": 1,
+      "in_list_view": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "quantity_returned",
+      "label": "Qty Returned",
+      "fieldtype": "Int",
+      "in_list_view": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_custody_return_item_details_col",
+      "fieldtype": "Column Break",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "return_status",
+      "label": "Return Status",
+      "fieldtype": "Select",
+      "options": "Returned\nLost\nDamaged",
+      "reqd": 1,
+      "default": "Returned",
+      "in_list_view": 1,
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "deduction_amount",
+      "label": "Deduction Amount (SAR)",
+      "fieldtype": "Currency",
+      "idx": 7
+    }
+  ],
+  "permissions": []
+}

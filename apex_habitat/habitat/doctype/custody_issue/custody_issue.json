@@ -1,0 +1,149 @@
+{
+  "doctype": "DocType",
+  "name": "Custody Issue",
+  "module": "Habitat",
+  "custom": 0,
+  "issingle": 0,
+  "istable": 0,
+  "is_submittable": 1,
+  "engine": "InnoDB",
+  "description": "Submittable: records facility/operational custody articles issued to a responsible party.",
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "issue_date",
+      "fieldtype": "Date",
+      "label": "Issue Date",
+      "reqd": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "issued_to_employee",
+      "fieldtype": "Link",
+      "label": "Issued To (Employee)",
+      "options": "Employee",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_overview_col",
+      "fieldtype": "Column Break",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "issued_to_name",
+      "fieldtype": "Data",
+      "label": "Issued To (Free Text)",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "CUST-ISS-.YYYY.-.####",
+      "default": "CUST-ISS-.YYYY.-.####",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_sec_large_text",
+      "fieldtype": "Section Break",
+      "label": "Additional Information",
+      "collapsible": 1,
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_sec_table_items",
+      "fieldtype": "Section Break",
+      "label": "Items",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "items",
+      "fieldtype": "Table",
+      "label": "Items",
+      "options": "Custody Issue Item",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Draft\nIssued\nReturned\nCancelled",
+      "default": "Draft",
+      "read_only": 1,
+      "idx": 16
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "doctype": "DocType",
+  "name": "Safety Inspection Finding Item",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_finding_item_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "finding_type",
+      "fieldtype": "Select",
+      "label": "Finding Type",
+      "options": "Fire Panel Fault\nSmoke Detector Fault\nNo Emergency Signage\nNo First Aid Kit\nExit Blocked\nElectrical Hazard\nStructural Risk\nOther",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "location_description",
+      "fieldtype": "Data",
+      "label": "Location in Building",
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "severity",
+      "fieldtype": "Select",
+      "label": "Severity",
+      "options": "Low\nMedium\nHigh\nCritical",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_finding_item_details_col",
+      "fieldtype": "Column Break",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "photo",
+      "fieldtype": "Attach Image",
+      "label": "Photo Evidence",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "escalate_same_day",
+      "fieldtype": "Check",
+      "label": "Same-Day Escalation Required",
+      "description": "Auto-checked if severity = Critical or High",
+      "idx": 7
+    }
+  ],
+  "permissions": []
+}

@@ -1,0 +1,161 @@
+{
+  "doctype": "DocType",
+  "name": "Accommodation Ledger",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "hide_toolbar": 0,
+  "in_create": 1,
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "description": "Internal cost-allocation ledger. Maintained automatically by the system and not edited manually.",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_tab_details",
+      "fieldtype": "Tab Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "posting_date",
+      "label": "Posting Date",
+      "fieldtype": "Date",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "employee",
+      "label": "Employee",
+      "fieldtype": "Link",
+      "options": "Employee",
+      "in_list_view": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "assignment",
+      "label": "Accommodation Assignment",
+      "fieldtype": "Link",
+      "options": "Accommodation Assignment",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "label": "Building",
+      "fieldtype": "Link",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "project",
+      "label": "Project",
+      "fieldtype": "Link",
+      "options": "Project",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "ledger_type",
+      "label": "Ledger Type",
+      "fieldtype": "Select",
+      "options": "Rent\nElectricity\nWater\nCleaning Staff Salary\nSupervisor Salary\nMaintenance\nOther",
+      "reqd": 1,
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_details_col",
+      "fieldtype": "Column Break",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "capacity_denominator",
+      "label": "Capacity Denominator",
+      "fieldtype": "Int",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "employee_daily_share",
+      "label": "Employee Daily Share (SAR)",
+      "fieldtype": "Currency",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "posting_mode",
+      "label": "Posting Mode",
+      "fieldtype": "Select",
+      "options": "Operational Memo\nGL Posted",
+      "default": "Operational Memo",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "cost_center",
+      "label": "Cost Center",
+      "fieldtype": "Data",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "total_site_cost",
+      "label": "Total Site Cost for Period (SAR)",
+      "fieldtype": "Currency",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_sec_system",
+      "fieldtype": "Section Break",
+      "label": "System Details",
+      "collapsible": 1,
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "gl_entry",
+      "label": "GL Entry Reference",
+      "fieldtype": "Link",
+      "options": "GL Entry",
+      "read_only": 1,
+      "idx": 16
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Finance Manager",
+      "read": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Internal Auditor",
+      "read": 1,
+      "idx": 3
+    }
+  ]
+}

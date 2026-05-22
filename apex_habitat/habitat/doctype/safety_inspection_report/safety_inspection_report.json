@@ -1,0 +1,217 @@
+{
+  "doctype": "DocType",
+  "name": "Safety Inspection Report",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "engine": "InnoDB",
+  "is_submittable": 1,
+  "track_changes": 1,
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "description": "Weekly on-site safety field inspection. Generates maintenance requests on submit.",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "inspection_date",
+      "fieldtype": "Date",
+      "label": "Inspection Date",
+      "reqd": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "inspector",
+      "fieldtype": "Link",
+      "label": "Inspector",
+      "options": "User",
+      "reqd": 1,
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_overview_col",
+      "fieldtype": "Column Break",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_section_clear",
+      "fieldtype": "Check",
+      "label": "Safety Section — No Issues",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "previous_repairs_confirmed",
+      "fieldtype": "Check",
+      "label": "Previous Repairs Confirmed",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "FSI-.YYYY.-.#####",
+      "default": "FSI-.YYYY.-.#####",
+      "reqd": 1,
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_sec_large_text",
+      "fieldtype": "Section Break",
+      "label": "Additional Information",
+      "collapsible": 1,
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "previous_repair_notes",
+      "fieldtype": "Small Text",
+      "label": "Previous Repair Confirmation Details",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_sec_table_safety_findings",
+      "fieldtype": "Section Break",
+      "label": "Safety Findings",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_findings",
+      "fieldtype": "Table",
+      "label": "Safety Findings",
+      "options": "Safety Inspection Finding Item",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_sec_table_maintenance_findings",
+      "fieldtype": "Section Break",
+      "label": "Maintenance Findings",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_findings",
+      "fieldtype": "Table",
+      "label": "Maintenance Findings",
+      "options": "Maintenance Inspection Finding Item",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_sec_table_linked_maintenance_requests",
+      "fieldtype": "Section Break",
+      "label": "Generated Maintenance Requests",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "linked_maintenance_requests",
+      "fieldtype": "Table",
+      "label": "Generated Maintenance Requests",
+      "options": "Linked Maintenance Request Item",
+      "read_only": 1,
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 20
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "submitted_to",
+      "fieldtype": "Small Text",
+      "label": "Submitted To (Recipients)",
+      "read_only": 1,
+      "description": "Admin Manager, Operations Director, General Manager",
+      "idx": 21
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1,
+      "email": 1,
+      "share": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Accommodation Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "submit": 1,
+      "cancel": 1,
+      "amend": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Resident Supervisor",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "submit": 1,
+      "idx": 3
+    }
+  ]
+}

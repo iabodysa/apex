@@ -1,0 +1,167 @@
+{
+  "doctype": "DocType",
+  "name": "Maintenance Inspection Report",
+  "module": "Habitat",
+  "custom": 0,
+  "issingle": 0,
+  "istable": 0,
+  "is_submittable": 1,
+  "engine": "InnoDB",
+  "description": "Submittable: official on-site maintenance inspection record.",
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_inspection_report_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_inspection_report_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "inspection_date",
+      "fieldtype": "Date",
+      "label": "Inspection Date",
+      "reqd": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "inspector",
+      "fieldtype": "Link",
+      "label": "Inspector (Employee)",
+      "options": "Employee",
+      "reqd": 1,
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_work_order",
+      "fieldtype": "Link",
+      "label": "Maintenance Work Order",
+      "options": "Maintenance Work Order",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_inspection_report_overview_col",
+      "fieldtype": "Column Break",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "inspection_type",
+      "fieldtype": "Select",
+      "label": "Inspection Type",
+      "options": "Pre-Work\nPost-Work\nPeriodic\nEmergency",
+      "default": "Post-Work",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "overall_result",
+      "fieldtype": "Select",
+      "label": "Overall Result",
+      "options": "Pass\nPass with Observations\nFail",
+      "default": "Pass",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "MIR-.YYYY.-.####",
+      "default": "MIR-.YYYY.-.####",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_inspection_report_sec_large_text",
+      "fieldtype": "Section Break",
+      "label": "Additional Information",
+      "collapsible": 1,
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_inspection_report_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_inspection_report_sec_table_findings",
+      "fieldtype": "Section Break",
+      "label": "Findings",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "findings",
+      "fieldtype": "Table",
+      "label": "Findings",
+      "options": "Inspection Finding",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_inspection_report_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_inspection_report_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "cancellation_reason",
+      "fieldtype": "Small Text",
+      "label": "Cancellation Reason",
+      "read_only": 1,
+      "idx": 18
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1
+    }
+  ]
+}

@@ -1,0 +1,210 @@
+{
+  "doctype": "DocType",
+  "name": "Subcontractor Service Order",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 0,
+  "is_submittable": 1,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "description": "Single service visit, such as one pest control visit or one sewage tank suction.",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "scheduled_date",
+      "fieldtype": "Date",
+      "label": "Scheduled Date",
+      "reqd": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "actual_visit_date",
+      "fieldtype": "Date",
+      "label": "Actual Visit Date",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "completion_photo",
+      "fieldtype": "Attach Image",
+      "label": "Completion Photo Evidence",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "linked_purchase_invoice",
+      "fieldtype": "Link",
+      "label": "Purchase Invoice",
+      "options": "Purchase Invoice",
+      "description": "Auto-created on Submit",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "supervisor_confirmed",
+      "fieldtype": "Check",
+      "label": "Supervisor Confirmed Completion",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_overview_col",
+      "fieldtype": "Column Break",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Scheduled\nIn Progress\nCompleted\nMissed\nCancelled",
+      "default": "Scheduled",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "contract",
+      "fieldtype": "Link",
+      "label": "Service Contract",
+      "options": "Subcontractor Service Contract",
+      "reqd": 1,
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "SSO-.YYYY.-.#####",
+      "default": "SSO-.YYYY.-.#####",
+      "reqd": 1,
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "service_cost_sar",
+      "fieldtype": "Currency",
+      "label": "Service Cost (SAR)",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "cost_center",
+      "fieldtype": "Link",
+      "label": "Cost Center",
+      "options": "Cost Center",
+      "fetch_from": "building.linked_cost_center",
+      "read_only": 1,
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_sec_large_text",
+      "fieldtype": "Section Break",
+      "label": "Additional Information",
+      "collapsible": 1,
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "visit_notes",
+      "fieldtype": "Small Text",
+      "label": "Technician Notes",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "supplier",
+      "fieldtype": "Link",
+      "label": "Supplier",
+      "options": "Supplier",
+      "fetch_from": "contract.supplier",
+      "read_only": 1,
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_system_col",
+      "fieldtype": "Column Break",
+      "idx": 20
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "service_type",
+      "fieldtype": "Data",
+      "label": "Service Type",
+      "fetch_from": "contract.service_type",
+      "read_only": 1,
+      "idx": 21
+    }
+  ],
+  "permissions": [
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "submit": 1,
+      "cancel": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1,
+      "email": 1,
+      "share": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Accommodation Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "submit": 1,
+      "idx": 2
+    }
+  ]
+}
