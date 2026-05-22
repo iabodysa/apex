@@ -44,6 +44,9 @@ Stop revenue leakage. Apex Habitat natively integrates a robust financial layer 
 ### 🛡️ Proactive Safety & Maintenance
 Move from reactive repairs to proactive asset protection. Automate daily, weekly, and monthly safety inspections. Issue maintenance work orders, log facility movements, and track damages before they become costly failures.
 
+### 🎨 Enterprise Visual Identity
+Out-of-the-box support for the official **AFMCO Zenith Theme**, delivering a premium Navy Blue and Gold interface that ensures a highly professional user experience across the system.
+
 ---
 
 ## ⚙️ Core Capabilities
