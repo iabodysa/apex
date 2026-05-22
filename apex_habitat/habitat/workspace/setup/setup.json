@@ -1,15 +1,15 @@
 {
  "doctype": "Workspace",
- "name": "Setup",
- "label": "Setup",
- "title": "Setup",
+ "name": "Launchpad",
+ "label": "Launchpad",
+ "title": "Launchpad",
  "module": "Habitat",
- "icon": "setting",
+ "icon": "getting-started",
  "public": 1,
  "is_default": 0,
  "sequence_id": 9.0,
- "parent_page": "Operations Command Center",
- "content": "[{\"id\": \"uilz3c82ix\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"9VcW43It6n\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Habitat Operations Setup\", \"col\": 12}}, {\"id\": \"aqdfFdkzZB\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"rcZBNpa6qq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"pHtxNmsJbc\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup</b></span>\", \"col\": 12}}, {\"id\": \"ubq5yZuVm5\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"id\": \"OKSGAw588f\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"HKO59auXtq\", \"type\": \"card\", \"data\": {\"card_name\": \"Task Master\", \"col\": 4}}, {\"id\": \"tsoFCAKxe3\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"kyZDzLurvT\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility & Utility Master\", \"col\": 4}}]",
+ "parent_page": "Habitat Hub",
+ "content": "[{\"id\": \"uilz3c82ix\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"9VcW43It6n\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Habitat Operations Setup\", \"col\": 12}}, {\"id\": \"aqdfFdkzZB\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"rcZBNpa6qq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"pHtxNmsJbc\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Launchpad</b></span>\", \"col\": 12}}, {\"id\": \"ubq5yZuVm5\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"id\": \"OKSGAw588f\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"HKO59auXtq\", \"type\": \"card\", \"data\": {\"card_name\": \"Task Master\", \"col\": 4}}, {\"id\": \"tsoFCAKxe3\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"kyZDzLurvT\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility & Utility Master\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
