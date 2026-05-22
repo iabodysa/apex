@@ -7,38 +7,38 @@ import frappe
 def execute(filters=None):
     columns = [
         {
-                "label": "Building",
+                "label": frappe._("Building"),
                 "fieldname": "building",
                 "fieldtype": "Link",
                 "options": "Accommodation Building",
                 "width": 120
         },
         {
-                "label": "Utility Type",
+                "label": frappe._("Utility Type"),
                 "fieldname": "utility_type",
                 "fieldtype": "Select",
                 "width": 120
         },
         {
-                "label": "Billing Period",
+                "label": frappe._("Billing Period"),
                 "fieldname": "billing_period",
                 "fieldtype": "Data",
                 "width": 100
         },
         {
-                "label": "Amount (SAR)",
+                "label": frappe._("Amount (SAR)"),
                 "fieldname": "amount",
                 "fieldtype": "Currency",
                 "width": 100
         },
         {
-                "label": "Consumption",
+                "label": frappe._("Consumption"),
                 "fieldname": "consumption",
                 "fieldtype": "Float",
                 "width": 100
         },
         {
-                "label": "Variance",
+                "label": frappe._("Variance"),
                 "fieldname": "variance",
                 "fieldtype": "Percent",
                 "width": 100

@@ -7,33 +7,33 @@ import frappe
 def execute(filters=None):
     columns = [
         {
-                "label": "Request ID",
+                "label": frappe._("Request ID"),
                 "fieldname": "name",
                 "fieldtype": "Link",
                 "options": "Maintenance Request",
                 "width": 100
         },
         {
-                "label": "Building",
+                "label": frappe._("Building"),
                 "fieldname": "building",
                 "fieldtype": "Link",
                 "options": "Accommodation Building",
                 "width": 120
         },
         {
-                "label": "Description",
+                "label": frappe._("Description"),
                 "fieldname": "description",
                 "fieldtype": "Small Text",
                 "width": 200
         },
         {
-                "label": "Priority",
+                "label": frappe._("Priority"),
                 "fieldname": "priority",
                 "fieldtype": "Select",
                 "width": 100
         },
         {
-                "label": "Status",
+                "label": frappe._("Status"),
                 "fieldname": "status",
                 "fieldtype": "Select",
                 "width": 100
