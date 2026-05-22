@@ -6,11 +6,13 @@ Accommodation Assignment,تسكين الموظفين
 Accommodation Bed,سرير السكن
 Accommodation Building,مبنى السكن
 Accommodation Checkout,تسجيل الخروج من السكن
+Accommodation Cost Distribution,توزيع تكاليف السكن
 Accommodation Custody Item,عهدة السكن
 Accommodation Custody Return Item,إرجاع عهدة السكن
 Accommodation Lease,عقد إيجار السكن
 Accommodation Ledger,سجل حركات تسكين الموظفين
 Accommodation Manager,مدير السكن
+Accommodation Occupancy Summary,ملخص إشغال السكن
 Accommodation Room,غرفة السكن
 Accommodation Site,موقع السكن
 Account Number,رقم الحساب
@@ -149,6 +151,7 @@ Custody Asset Category,تصنيف أصول العهدة
 Custody Clearance,إخلاء طرف من العهد
 Custody Damage Assessment,تقييم تلفيات العهدة
 Custody Damage Item,صنف العهدة التالف
+Custody Damage Register,سجل تلفيات العهد
 Custody Integration Mode,نمط ربط العهدة
 Custody Issue,صرف العهدة
 Custody Issue Item,بند صرف العهدة
@@ -277,6 +280,7 @@ Lease / Contract Reference,مرجع عقد الإيجار
 Lease Contract,عقد الإيجار
 Lease End Date,تاريخ نهاية عقد الإيجار
 Lease End Date must be after Lease Start Date.,يجب أن يكون تاريخ نهاية عقد الإيجار بعد تاريخ بداية العقد.
+Lease Expiry Watchlist,قائمة مراقبة انتهاء عقود الإيجار
 Lease Number,رقم عقد الإيجار
 Lease Start Date,تاريخ بداية عقد الإيجار
 Lease Status,حالة عقد الإيجار
@@ -290,6 +294,7 @@ Live View + Playback,بث مباشر + إعادة تشغيل
 Live View Only,بث مباشر فقط
 Location in Building,الموقع داخل المبنى
 MOL Worker Housing Approval,ترخيص سكن العمالة (قوى/الموارد البشرية)
+Maintenance Backlog,متراكمات أعمال الصيانة
 Maintenance Findings,ملاحظات الصيانة
 Maintenance Inspection Finding Item,بند ملاحظات فحص الصيانة
 Maintenance Inspection Report,تقرير فحص الصيانة
@@ -403,6 +408,7 @@ Safety Task Execution,تنفيذ مهمة السلامة
 Salary Deduction,حسم من الراتب
 Same-Day Escalation Required,يتطلب تصعيداً فورياً في نفس اليوم
 Scheduled Date,التاريخ المجدول
+Scheduled Task Compliance,الالتزام بالمهام المجدولة
 Scheduled Task Instance,نموذج المهمة المجدولة
 Scheduled Task Template,قالب المهمة المجدولة
 Scheduled Visit Frequency,دورية الزيارات المجدولة
@@ -474,6 +480,7 @@ User Requesting Access,المستخدم طالب الصلاحية
 Utility Account,حساب الخدمات العامة
 Utility Bill Entry,تسجيل فاتورة الخدمات العامة
 Utility Type,نوع الخدمة
+Utility Variance Report,تقرير انحراف استهلاك الخدمات
 Variance,الانحراف
 Variance Alert Sent,تم إرسال تنبيه انحراف الخدمة
 Variance Alert Threshold (%),حد تنبيه انحراف الخدمة
