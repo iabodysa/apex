@@ -11,6 +11,9 @@ required_apps = ["frappe", "erpnext", "hrms"]
 # Frappe v15: export type annotations in DocType controllers when supported
 export_python_type_annotations = True
 
+# Theme inclusions
+app_include_css = "/assets/apex_habitat/css/afmco_theme.css"
+
 # Single functional module: Habitat
 
 # Document lifecycle hooks

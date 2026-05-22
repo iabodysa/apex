@@ -1,0 +1,80 @@
+/* AFMCO Zenith - Professional Brand Theme */
+:root {
+    --afmco-primary-color: #0B2447; /* Deep Navy Blue */
+    --afmco-secondary-color: #19376D; /* Lighter Navy */
+    --afmco-accent-color: #D4AF37; /* Zenith Gold */
+    --afmco-background: #F3F4F6;
+    
+    /* Frappe Overrides */
+    --primary-color: var(--afmco-primary-color);
+    --btn-primary-bg: var(--afmco-primary-color);
+    --btn-primary-hover-bg: var(--afmco-secondary-color);
+    --text-on-primary: #ffffff;
+    --navbar-bg: var(--afmco-primary-color);
+    --navbar-text-color: #ffffff;
+}
+
+/* Desk Navbar Customization */
+.navbar {
+    background-color: var(--afmco-primary-color) !important;
+    border-bottom: 2px solid var(--afmco-accent-color) !important;
+}
+
+.navbar .nav-link, 
+.navbar .navbar-brand {
+    color: var(--text-on-primary) !important;
+    font-weight: 500;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--afmco-primary-color) !important;
+    border-color: var(--afmco-primary-color) !important;
+    color: var(--text-on-primary) !important;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--afmco-accent-color) !important;
+    border-color: var(--afmco-accent-color) !important;
+    color: var(--afmco-primary-color) !important;
+}
+
+/* Cards & Layout */
+.layout-side-section {
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0;
+}
+
+.frappe-card {
+    border-top: 3px solid var(--afmco-primary-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
+}
+
+/* Form Headings */
+.form-header {
+    background: linear-gradient(90deg, var(--afmco-primary-color) 0%, var(--afmco-secondary-color) 100%);
+    color: white !important;
+    padding: 15px;
+    border-radius: 8px 8px 0 0;
+}
+
+.form-header .title-text {
+    color: white !important;
+}
+
+/* Badges / Status */
+.indicator-green {
+    background-color: var(--afmco-accent-color) !important;
+}
+
+/* Data Table Headers */
+.grid-heading-row {
+    background-color: var(--afmco-secondary-color) !important;
+    color: white !important;
+}
+
+.grid-heading-row .grid-static-col {
+    color: white !important;
+}
