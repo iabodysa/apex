@@ -1,98 +1,58 @@
-<h1 align="center">
-  <br>
-  Apex Habitat
-  <br>
-</h1>
+# Apex Habitat
 
-<h3 align="center">Next-Generation Accommodation & Facilities Management</h3>
+Apex Habitat is a Frappe application for operational accommodation and
+facilities management.
 
-<p align="center">
-  <strong>Streamline Operations • Automate Workflows • Maximize Asset Value</strong>
-</p>
+It provides structured input paths for housing operations rather than copying
+spreadsheet tabs into DocTypes. Operational reports are derived from submitted
+records, ledgers, inspections, and scheduled task execution.
 
-<p align="center">
-  <a href="#-the-ultimate-facility-management-solution">Overview</a> •
-  <a href="#-why-choose-apex-habitat">Why Apex Habitat?</a> •
-  <a href="#-core-capabilities">Capabilities</a> •
-  <a href="#-enterprise-ready">Enterprise Ready</a> •
-  <a href="#%EF%B8%8F-quick-deployment">Deployment</a>
-</p>
+## Capabilities
 
----
+- Spatial hierarchy for sites, buildings, rooms, and beds.
+- Accommodation assignment, checkout, and room or bed transfer.
+- Lease, rent schedule, utility account, and utility bill records.
+- Capacity-based operational cost allocation.
+- Custody article issue, return, damage assessment, and non-financial
+  depreciation snapshots.
+- Facility assets, maintenance requests, work orders, inspections, and
+  subcontractor service records.
+- Safety task catalogs, scheduled task execution, inspection findings, camera
+  access grants, and remediation plans.
+- Query reports for occupancy, cost allocation, utility variance, maintenance
+  backlog, lease expiry, scheduled task compliance, and custody damage.
 
-## 🌟 The Ultimate Facility Management Solution
+## Requirements
 
-Managing accommodations, facilities, and physical assets at scale shouldn't rely on fragmented spreadsheets, isolated chat groups, and manual tracking. 
+- Frappe Framework v15 or later.
+- ERPNext for native master and transaction references.
+- HRMS when payroll deduction integration is enabled.
 
-**Apex Habitat**, proudly developed by **Abdullah Fahad Al-Mutairi Co. (AFMCO)**, is an enterprise-grade extension for the Frappe Framework. It transforms chaotic facility operations into a centralized, automated, and highly visible digital ecosystem.
+## Installation
 
-Whether you are managing large-scale worker accommodations, corporate residential compounds, or specialized facility sites, Apex Habitat gives you absolute control over your spaces, assets, and tenants.
-
----
-
-## 🚀 Why Choose Apex Habitat?
-
-### 🏢 Total Spatial Control
-Gain complete visibility over your real estate footprint. From high-level sites and buildings down to individual rooms and bed allocations, know exactly where your capacity stands in real-time.
-
-### 👥 Frictionless Occupancy
-Eliminate booking conflicts and lost records. Automate the entire tenant lifecycle: rapid assignments, seamless room transfers, precise custody handovers, and clean checkouts.
-
-### 💰 Ironclad Financials
-Stop revenue leakage. Apex Habitat natively integrates a robust financial layer that handles utility accounts, recurring bill entries, complex lease agreements, and automated rent scheduling.
-
-### 🛡️ Proactive Safety & Maintenance
-Move from reactive repairs to proactive asset protection. Automate daily, weekly, and monthly safety inspections. Issue maintenance work orders, log facility movements, and track damages before they become costly failures.
-
-### 🎨 Enterprise Visual Identity
-Out-of-the-box support for the official **AFMCO Zenith Theme**, delivering a premium Navy Blue and Gold interface that ensures a highly professional user experience across the system.
-
----
-
-## ⚙️ Core Capabilities
-
-Apex Habitat is architected into 7 powerful operational modules:
-
-1. **Spatial Master Data**: Flexibly define your Sites, Buildings, Rooms, and Beds.
-2. **Occupancy & Allocation**: Master Assignments, Checkouts, and Room Transfers.
-3. **Financial Layer**: Integrate Ledgers, Utility Bills, Leases, and Rent Schedules.
-4. **Asset Custody**: Issue items reliably, process Returns, and penalize Damages.
-5. **Depreciation Management**: Automated life-cycle tracking for capital assets.
-6. **Maintenance Control**: Track Facility Assets and dispatch Maintenance Work Orders.
-7. **Automated Inspections**: Template-driven scheduled tasks and automated Safety Findings.
-
----
-
-## 🔌 Enterprise Ready (API First)
-
-Built on the modern **Frappe v15 Framework**, Apex Habitat doesn't just work in isolation. It features a fully equipped REST API, making it effortlessly connectable to your existing ERP, HR software, or custom employee portals.
-
----
-
-## 🌐 Seamless Localization
-
-Business happens in your language. Apex Habitat is natively designed with a robust English core and offers **flawless Arabic (AR) localization** out of the box—delivering an intuitive, native-feeling interface for regional teams without compromising global technical standards.
-
----
-
-## 🛠️ Quick Deployment
-
-Ready to modernize your facilities? Apex Habitat installs seamlessly into any standard Frappe v15 Bench environment.
+Use an existing Frappe bench and always specify the target site:
 
 ```bash
-# 1. Fetch the application
-bench get-app https://github.com/iabodysa/apex.git
-
-# 2. Install on your target site
-bench --site [your.site.name] install-app apex_habitat
-
-# 3. Apply schema migrations
-bench --site [your.site.name] migrate
+bench get-app https://github.com/iabodysa/apex_habitat.git
+bench --site "$FRAPPE_SITE" install-app apex_habitat
+bench --site "$FRAPPE_SITE" migrate
 ```
 
----
+Do not run bare `bench migrate` without `--site`.
 
-<div align="center">
-  <p><strong>Developed & Maintained by AFMCO</strong></p>
-  <p><em>Redefining the standard for enterprise accommodation software.</em></p>
-</div>
+## Localization
+
+The source code, DocType labels, comments, fixtures, and public documentation
+are written in English. Arabic text should be added through the Frappe
+translation layer.
+
+## Publication Safety
+
+This repository should contain application source only. Do not publish local
+planning files, source spreadsheets, private prompts, staging reports,
+credentials, local bench paths, generated caches, or machine-specific
+configuration.
+
+## License
+
+MIT
