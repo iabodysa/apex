@@ -22,8 +22,58 @@ records, ledgers, inspections, and scheduled task execution.
 - Query reports for occupancy, cost allocation, utility variance, maintenance
   backlog, lease expiry, scheduled task compliance, custody damage, and audit
   remediation status.
-- Operations-first Workspace: a process-based command centre with number
-  cards, dashboard charts, quick lists, and guided onboarding.
+
+## Relationship Map
+
+```mermaid
+flowchart TD
+    Settings["Habitat Settings"] --> Gates["Operational Posting Gates"]
+
+    Site["Accommodation Site"] --> Building["Accommodation Building"]
+    Building --> Room["Accommodation Room"]
+    Room --> Bed["Accommodation Bed"]
+
+    Employee["Employee"] --> Assignment["Accommodation Assignment"]
+    Project["Project"] --> Assignment
+    CostCenter["Cost Center"] --> Assignment
+    Building --> Assignment
+    Room --> Assignment
+    Bed --> Assignment
+
+    Assignment --> Checkout["Accommodation Checkout"]
+    Assignment --> Transfer["Room Bed Transfer"]
+
+    Assignment --> CustodyIssue["Custody Issue"]
+    CustodyArticle["Custody Article"] --> CustodyIssue
+    CustodyIssue --> CustodyReturn["Custody Return"]
+    CustodyReturn --> Damage["Custody Damage Assessment"]
+
+    Supplier["Supplier"] --> Lease["Accommodation Lease"]
+    Building --> Lease
+    Lease --> RentSchedule["Rent Payment Schedule"]
+
+    Building --> UtilityAccount["Utility Account"]
+    UtilityAccount --> UtilityBill["Utility Bill Entry"]
+
+    Building --> FacilityAsset["Facility Asset"]
+    FacilityAsset --> AssetMovement["Facility Asset Movement"]
+
+    Building --> SafetyInspection["Safety Inspection Report"]
+    Building --> MaintenanceInspection["Maintenance Inspection Report"]
+    SafetyInspection --> MaintenanceRequest["Maintenance Request"]
+    MaintenanceInspection --> MaintenanceRequest
+    MaintenanceRequest --> WorkOrder["Maintenance Work Order"]
+
+    Building --> ScheduledTemplate["Scheduled Task Template"]
+    ScheduledTemplate --> ScheduledInstance["Scheduled Task Instance"]
+    ScheduledInstance --> SafetyExecution["Safety Task Execution"]
+
+    Building --> License["Building License"]
+    Assignment --> Ledger["Accommodation Ledger"]
+    UtilityBill --> Ledger
+    RentSchedule --> Ledger
+    Ledger --> Reports["Reports & Workspace Dashboards"]
+```
 
 ## Requirements
 
@@ -40,21 +90,6 @@ bench get-app https://github.com/iabodysa/apex.git
 bench --site "$FRAPPE_SITE" install-app apex_habitat
 bench --site "$FRAPPE_SITE" migrate
 ```
-
-Do not run bare `bench migrate` without `--site`.
-
-## Localization
-
-The source code, DocType labels, comments, fixtures, and public documentation
-are written in English. Arabic text should be added through the Frappe
-translation layer.
-
-## Publication Safety
-
-This repository should contain application source only. Do not publish local
-planning files, source spreadsheets, private prompts, staging reports,
-credentials, local bench paths, generated caches, or machine-specific
-configuration.
 
 ## License
 
