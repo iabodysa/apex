@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Configure Habitat Settings",
+ "title": "Configure Habitat Settings",
+ "action": "Update Settings",
+ "reference_document": "Habitat Settings",
+ "is_single": 1,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Set custody, allowance, and GL posting modes for the Habitat module.",
+ "action_label": "Update Habitat Settings"
+}

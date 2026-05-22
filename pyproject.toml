@@ -1,6 +1,6 @@
 [project]
 name = "apex_habitat"
-version = "0.0.1"
+version = "0.2.0"
 description = "Apex Habitat custom application for Frappe Framework v15."
 authors = [
     { name = "Abdullah Fahad Al-Mutairi Co. (AFMCO)", email = "afm@afmcoltd.com" }
@@ -12,7 +12,7 @@ license = { text = "MIT" }
 dependencies = []
 
 [project.urls]
-Repository = "https://github.com/iabodysa/apex_habitat"
+Repository = "https://github.com/iabodysa/apex"
 
 [project.optional-dependencies]
 dev = [

@@ -1,0 +1,15 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Facility Assets by Category",
+ "chart_name": "Facility Assets by Category",
+ "chart_type": "Group By",
+ "document_type": "Facility Asset",
+ "group_by_type": "Count",
+ "group_by_based_on": "asset_category",
+ "type": "Bar",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "module": "Habitat",
+ "timeseries": 0,
+ "filters_json": "[]"
+}

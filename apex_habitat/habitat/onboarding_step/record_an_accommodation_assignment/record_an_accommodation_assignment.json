@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Record an Accommodation Assignment",
+ "title": "Record an Accommodation Assignment",
+ "action": "Create Entry",
+ "reference_document": "Accommodation Assignment",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Assign an employee to a bed to start the accommodation lifecycle.",
+ "action_label": "Create a Accommodation Assignment"
+}

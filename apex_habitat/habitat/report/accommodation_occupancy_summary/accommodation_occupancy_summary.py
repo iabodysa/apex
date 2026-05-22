@@ -6,46 +6,19 @@ import frappe
 
 def execute(filters=None):
     columns = [
-        {
-                "label": frappe._("Building"),
-                "fieldname": "building",
-                "fieldtype": "Link",
-                "options": "Accommodation Building",
-                "width": 120
-        },
-        {
-                "label": frappe._("Room"),
-                "fieldname": "room",
-                "fieldtype": "Link",
-                "options": "Accommodation Room",
-                "width": 100
-        },
-        {
-                "label": frappe._("Bed"),
-                "fieldname": "bed",
-                "fieldtype": "Link",
-                "options": "Accommodation Bed",
-                "width": 100
-        },
-        {
-                "label": frappe._("Occupant"),
-                "fieldname": "employee",
-                "fieldtype": "Link",
-                "options": "Employee",
-                "width": 150
-        },
-        {
-                "label": frappe._("Check-in Date"),
-                "fieldname": "check_in_date",
-                "fieldtype": "Date",
-                "width": 100
-        },
-        {
-                "label": frappe._("Status"),
-                "fieldname": "status",
-                "fieldtype": "Select",
-                "width": 100
-        }
-]
-    data = []
+        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 220},
+        {"label": frappe._("Active Residents"), "fieldname": "active_residents", "fieldtype": "Int", "width": 150},
+    ]
+
+    query_filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
+    if filters and filters.get("building"):
+        query_filters["building"] = filters["building"]
+
+    data = frappe.get_all(
+        "Accommodation Assignment",
+        filters=query_filters,
+        fields=["building", "count(name) as active_residents"],
+        group_by="building",
+        order_by="active_residents desc",
+    )
     return columns, data

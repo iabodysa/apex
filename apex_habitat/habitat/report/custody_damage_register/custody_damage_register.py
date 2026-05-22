@@ -6,38 +6,29 @@ import frappe
 
 def execute(filters=None):
     columns = [
-        {
-                "label": frappe._("Assessment Date"),
-                "fieldname": "assessment_date",
-                "fieldtype": "Date",
-                "width": 100
-        },
-        {
-                "label": frappe._("Custodian"),
-                "fieldname": "employee",
-                "fieldtype": "Link",
-                "options": "Employee",
-                "width": 150
-        },
-        {
-                "label": frappe._("Asset Category"),
-                "fieldname": "category",
-                "fieldtype": "Link",
-                "options": "Custody Asset Category",
-                "width": 120
-        },
-        {
-                "label": frappe._("Damage Details"),
-                "fieldname": "details",
-                "fieldtype": "Small Text",
-                "width": 200
-        },
-        {
-                "label": frappe._("Repair Cost (SAR)"),
-                "fieldname": "repair_cost",
-                "fieldtype": "Currency",
-                "width": 100
-        }
-]
-    data = []
+        {"label": frappe._("Assessment"), "fieldname": "name", "fieldtype": "Link", "options": "Custody Damage Assessment", "width": 150},
+        {"label": frappe._("Assessment Date"), "fieldname": "assessment_date", "fieldtype": "Date", "width": 120},
+        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 150},
+        {"label": frappe._("Custodian"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 160},
+        {"label": frappe._("Estimated Cost (SAR)"), "fieldname": "total_estimated_replacement_cost_sar", "fieldtype": "Currency", "width": 150},
+        {"label": frappe._("Deduction Entry"), "fieldname": "deduction_entry", "fieldtype": "Link", "options": "Additional Salary", "width": 150},
+    ]
+
+    query_filters = {"docstatus": 1}
+    if filters and filters.get("building"):
+        query_filters["building"] = filters["building"]
+
+    data = frappe.get_all(
+        "Custody Damage Assessment",
+        filters=query_filters,
+        fields=[
+            "name",
+            "assessment_date",
+            "building",
+            "employee",
+            "total_estimated_replacement_cost_sar",
+            "deduction_entry",
+        ],
+        order_by="assessment_date desc",
+    )
     return columns, data

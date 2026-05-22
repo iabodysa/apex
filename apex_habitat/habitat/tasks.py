@@ -101,7 +101,12 @@ def daily_accommodation_cost_allocation() -> None:
                     "total_site_cost": annual_cost,
                     "capacity_denominator": int(capacity),
                     "employee_daily_share": daily_share,
-                    "posting_mode": "Operational Memo"
+                    "posting_mode": "Operational Memo",
+                    "source_doctype": "Accommodation Assignment",
+                    "source_name": asgn.name,
+                    "allocation_basis": "Capacity",
+                    "allocation_period_start": posting_date,
+                    "allocation_period_end": posting_date,
                 })
                 ledger_entry.insert(ignore_permissions=True)
             except Exception as e:
@@ -357,9 +362,11 @@ def daily_scheduled_task_instance_generator() -> None:
 def monthly_rent_due_alert() -> None:
     """Alert on Rent Payment Schedule rows due this month.
 
-    For leases with a Supplier linked: creates a Draft Payment Entry and
-    updates the schedule row. For leases without a Supplier: logs a warning
-    so Finance can process manually.
+    Manual-reminder only: logs every unpaid row due this month so Finance can
+    process payment. Automatic Payment Entry creation was removed because it
+    was a dead branch — paid_from / paid_to accounts were never configured, so
+    the guard always skipped. Re-introduce automation only with explicit,
+    configured accounts and an idempotency/reversal policy.
     """
     from frappe.utils import getdate, get_first_day, get_last_day, today
 
@@ -387,70 +394,20 @@ def monthly_rent_due_alert() -> None:
         )
 
         for row in schedule_rows:
-            # Idempotency check: skip if payment_entry is already set
+            # Idempotency: skip rows already linked to a Payment Entry.
             if row.get("payment_entry"):
                 continue
 
-            if lease.supplier:
-                building = frappe.get_doc("Accommodation Building", lease.building)
-                company = None
-                if building.default_cost_center:
-                    company = frappe.db.get_value("Cost Center", building.default_cost_center, "company")
-
-                # paid_from and paid_to are not defined in the schema or settings
-                paid_from = None
-                paid_to = None
-
-                # Safe checks for required fields before creating Payment Entry
-                if not company or not paid_from or not paid_to:
-                    logger.warning(
-                        f"monthly_rent_due_alert: Lease {lease.name} (building {lease.building}) "
-                        f"row {row.name} cannot auto-generate Payment Entry: "
-                        f"required accounting fields (company: {company}, paid_from: {paid_from}, paid_to: {paid_to}) "
-                        f"cannot be determined. Row remains pending/manual."
-                    )
-                    continue
-
-                try:
-                    pe = frappe.get_doc({
-                        "doctype": "Payment Entry",
-                        "payment_type": "Pay",
-                        "party_type": "Supplier",
-                        "party": lease.supplier,
-                        "paid_amount": row.amount_sar,
-                        "received_amount": row.amount_sar,
-                        "cost_center": building.default_cost_center,
-                        "reference_date": row.due_date,
-                        "company": company,
-                        "paid_from": paid_from,
-                        "paid_to": paid_to,
-                        "remarks": f"Rent for {building.building_name} — Lease {lease.name}",
-                    })
-                    pe.insert(ignore_permissions=True)
-                    frappe.db.set_value(
-                        "Rent Payment Schedule",
-                        row.name,
-                        {"payment_entry": pe.name},
-                    )
-                    logger.info(
-                        "monthly_rent_due_alert: Draft Payment Entry %s created for lease %s row %s.",
-                        pe.name,
-                        lease.name,
-                        row.name,
-                    )
-                except Exception as e:
-                    logger.error(
-                        f"monthly_rent_due_alert: Failed to create Payment Entry for lease {lease.name} row {row.name}: {e}"
-                    )
-            else:
-                logger.warning(
-                    "monthly_rent_due_alert: Lease %s (building %s) has no Supplier linked. "
-                    "SAR %.2f due %s requires manual payment.",
-                    lease.name,
-                    lease.building,
-                    row.amount_sar,
-                    row.due_date,
-                )
+            # Manual-reminder only. Finance settles rent manually; this job
+            # only surfaces what is due. No Payment Entry is created here.
+            logger.warning(
+                "monthly_rent_due_alert: Lease %s (building %s) — SAR %.2f due %s "
+                "requires manual payment by Finance.",
+                lease.name,
+                lease.building,
+                row.amount_sar,
+                row.due_date,
+            )
 
 
 

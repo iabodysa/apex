@@ -1,0 +1,13 @@
+{
+ "doctype": "Number Card",
+ "name": "Open Custody Issues",
+ "label": "Open Custody Issues",
+ "document_type": "Custody Issue",
+ "function": "Count",
+ "is_public": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Habitat",
+ "filters_json": "[[\"Custody Issue\", \"status\", \"=\", \"Issued\"]]"
+}

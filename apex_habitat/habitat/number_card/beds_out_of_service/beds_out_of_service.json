@@ -1,0 +1,13 @@
+{
+ "doctype": "Number Card",
+ "name": "Beds Out of Service",
+ "label": "Beds Out of Service",
+ "document_type": "Accommodation Bed",
+ "function": "Count",
+ "is_public": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Habitat",
+ "filters_json": "[[\"Accommodation Bed\", \"status\", \"=\", \"Out of Service\"]]"
+}

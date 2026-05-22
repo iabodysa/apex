@@ -1,0 +1,153 @@
+{
+ "doctype": "Workspace",
+ "name": "Setup",
+ "label": "Setup",
+ "title": "Setup",
+ "module": "Habitat",
+ "icon": "setting",
+ "public": 1,
+ "is_default": 0,
+ "sequence_id": 9.0,
+ "parent_page": "Operations Command Center",
+ "content": "[{\"id\": \"uilz3c82ix\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"9VcW43It6n\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Habitat Operations Setup\", \"col\": 12}}, {\"id\": \"aqdfFdkzZB\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"rcZBNpa6qq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"pHtxNmsJbc\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup</b></span>\", \"col\": 12}}, {\"id\": \"ubq5yZuVm5\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"id\": \"OKSGAw588f\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"HKO59auXtq\", \"type\": \"card\", \"data\": {\"card_name\": \"Task Master\", \"col\": 4}}, {\"id\": \"tsoFCAKxe3\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"kyZDzLurvT\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility & Utility Master\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Habitat Settings",
+   "link_to": "Habitat Settings",
+   "idx": 1
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Settings",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Habitat Settings",
+   "link_type": "DocType",
+   "link_to": "Habitat Settings",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Accommodation Master",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Site",
+   "link_type": "DocType",
+   "link_to": "Accommodation Site",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Building",
+   "link_type": "DocType",
+   "link_to": "Accommodation Building",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Room",
+   "link_type": "DocType",
+   "link_to": "Accommodation Room",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Bed",
+   "link_type": "DocType",
+   "link_to": "Accommodation Bed",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Task Master",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Task Catalog",
+   "link_type": "DocType",
+   "link_to": "Safety Task Catalog",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Scheduled Task Template",
+   "link_type": "DocType",
+   "link_to": "Scheduled Task Template",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Custody Master",
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Custody Article",
+   "link_type": "DocType",
+   "link_to": "Custody Article",
+   "idx": 12
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Custody Asset Category",
+   "link_type": "DocType",
+   "link_to": "Custody Asset Category",
+   "idx": 13
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Operational Depreciation Policy",
+   "link_type": "DocType",
+   "link_to": "Operational Depreciation Policy",
+   "idx": 14
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Facility & Utility Master",
+   "idx": 15
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Facility Asset",
+   "link_type": "DocType",
+   "link_to": "Facility Asset",
+   "idx": 16
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Utility Account",
+   "link_type": "DocType",
+   "link_to": "Utility Account",
+   "idx": 17
+  }
+ ],
+ "charts": [],
+ "number_cards": [],
+ "quick_lists": []
+}

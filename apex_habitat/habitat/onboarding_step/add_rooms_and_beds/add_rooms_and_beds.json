@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Add Rooms and Beds",
+ "title": "Add Rooms and Beds",
+ "action": "Create Entry",
+ "reference_document": "Accommodation Room",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Define rooms, then beds, so assignments can be made.",
+ "action_label": "Create a Accommodation Room"
+}

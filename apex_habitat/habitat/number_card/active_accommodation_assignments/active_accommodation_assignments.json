@@ -1,0 +1,13 @@
+{
+ "doctype": "Number Card",
+ "name": "Active Accommodation Assignments",
+ "label": "Active Accommodation Assignments",
+ "document_type": "Accommodation Assignment",
+ "function": "Count",
+ "is_public": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Habitat",
+ "filters_json": "[[\"Accommodation Assignment\", \"docstatus\", \"=\", 1]]"
+}

@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Review the Safety Task Catalog",
+ "title": "Review the Safety Task Catalog",
+ "action": "View List",
+ "reference_document": "Safety Task Catalog",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Confirm the standardized safety tasks that drive scheduled work.",
+ "action_label": "View Safety Task Catalog list"
+}

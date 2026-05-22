@@ -1,0 +1,13 @@
+{
+ "doctype": "Number Card",
+ "name": "Maintenance Work Orders In Progress",
+ "label": "Maintenance Work Orders In Progress",
+ "document_type": "Maintenance Work Order",
+ "function": "Count",
+ "is_public": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Habitat",
+ "filters_json": "[[\"Maintenance Work Order\", \"status\", \"=\", \"In Progress\"]]"
+}

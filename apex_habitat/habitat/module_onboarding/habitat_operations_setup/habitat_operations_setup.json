@@ -1,0 +1,35 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Habitat Operations Setup",
+ "title": "Habitat Operations Setup",
+ "module": "Habitat",
+ "subtitle": "Accommodation, safety, maintenance and cost operations",
+ "success_message": "Habitat is ready. Your operations workspaces are now active.",
+ "is_complete": 0,
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Configure Habitat Settings"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Create an Accommodation Site"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Create an Accommodation Building"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Add Rooms and Beds"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Review the Safety Task Catalog"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Record an Accommodation Assignment"
+  }
+ ]
+}

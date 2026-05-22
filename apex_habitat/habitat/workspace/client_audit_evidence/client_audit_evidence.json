@@ -1,0 +1,105 @@
+{
+ "doctype": "Workspace",
+ "name": "Client Audit & Evidence",
+ "label": "Client Audit & Evidence",
+ "title": "Client Audit & Evidence",
+ "module": "Habitat",
+ "icon": "check-square",
+ "public": 1,
+ "is_default": 0,
+ "sequence_id": 8.0,
+ "parent_page": "Operations Command Center",
+ "content": "[{\"id\": \"1H44a94pbx\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"pcIOLnGec0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Audit Remediation Plans\", \"col\": 3}}, {\"id\": \"WN5USCw8St\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Audit Remediation Plans\", \"col\": 3}}, {\"id\": \"fwmziN7fu2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"2ljemvuaK4\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Audit Remediation Plans by Status\", \"col\": 6}}, {\"id\": \"YlHooilFJh\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"DwNQ0RrFuD\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Client Audit Remediation Plan\", \"col\": 4}}, {\"id\": \"2Phtb8AI0d\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"BuVPv3h7w1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Client Audit Remediation Plan\", \"col\": 3}}, {\"id\": \"Cg1pPHD3Qp\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Client Audit & Evidence</b></span>\", \"col\": 12}}, {\"id\": \"y3H8WefBBs\", \"type\": \"card\", \"data\": {\"card_name\": \"Audit\", \"col\": 4}}, {\"id\": \"qa2MCqxY6b\", \"type\": \"card\", \"data\": {\"card_name\": \"Evidence\", \"col\": 4}}, {\"id\": \"viewsCard01\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Client Audit Remediation Plan",
+   "link_to": "Client Audit Remediation Plan",
+   "idx": 1
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Audit",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Client Audit Remediation Plan",
+   "link_type": "DocType",
+   "link_to": "Client Audit Remediation Plan",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Evidence",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Inspection Report",
+   "link_type": "DocType",
+   "link_to": "Safety Inspection Report",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Inspection Report",
+   "link_type": "DocType",
+   "link_to": "Maintenance Inspection Report",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Views",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Audit Remediation Status",
+   "link_type": "Report",
+   "link_to": "Audit Remediation Status",
+   "idx": 7
+  }
+ ],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Audit Remediation Plans by Status",
+   "label": "Audit Remediation Plans by Status",
+   "idx": 1
+  }
+ ],
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Open Audit Remediation Plans",
+   "label": "Open Audit Remediation Plans",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Overdue Audit Remediation Plans",
+   "label": "Overdue Audit Remediation Plans",
+   "idx": 2
+  }
+ ],
+ "quick_lists": [
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "Client Audit Remediation Plan",
+   "label": "Client Audit Remediation Plan",
+   "quick_list_filter": "{\"overall_status\": [\"in\", [\"Open\", \"In Progress\", \"Overdue\"]]}",
+   "idx": 1
+  }
+ ]
+}

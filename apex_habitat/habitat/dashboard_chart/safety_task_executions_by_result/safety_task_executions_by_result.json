@@ -1,0 +1,15 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Safety Task Executions by Result",
+ "chart_name": "Safety Task Executions by Result",
+ "chart_type": "Group By",
+ "document_type": "Safety Task Execution",
+ "group_by_type": "Count",
+ "group_by_based_on": "execution_status",
+ "type": "Bar",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "module": "Habitat",
+ "timeseries": 0,
+ "filters_json": "[]"
+}
