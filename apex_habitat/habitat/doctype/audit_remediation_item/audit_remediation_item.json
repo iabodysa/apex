@@ -8,11 +8,18 @@
   "fields": [
     {
       "doctype": "DocField",
+      "fieldname": "audit_remediation_item_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "finding_description",
       "fieldtype": "Small Text",
       "label": "Audit Finding",
       "reqd": 1,
-      "idx": 1
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -20,7 +27,7 @@
       "fieldtype": "Small Text",
       "label": "Remediation Action Required",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -28,7 +35,7 @@
       "fieldtype": "Link",
       "label": "Owner Role",
       "options": "Role",
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -36,7 +43,13 @@
       "fieldtype": "Link",
       "label": "Owner User",
       "options": "User",
-      "idx": 4
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "audit_remediation_item_col_details",
+      "fieldtype": "Column Break",
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -44,21 +57,21 @@
       "fieldtype": "Date",
       "label": "Due Date",
       "reqd": 1,
-      "idx": 5
+      "idx": 7
     },
     {
       "doctype": "DocField",
       "fieldname": "completion_date",
       "fieldtype": "Date",
       "label": "Completion Date",
-      "idx": 6
+      "idx": 8
     },
     {
       "doctype": "DocField",
       "fieldname": "evidence_attached",
       "fieldtype": "Attach",
       "label": "Evidence (Photo/Document)",
-      "idx": 7
+      "idx": 9
     },
     {
       "doctype": "DocField",
@@ -67,7 +80,7 @@
       "label": "Status",
       "options": "Open\nIn Progress\nEvidence Submitted\nVerified by Client\nRejected by Client",
       "default": "Open",
-      "idx": 8
+      "idx": 10
     }
   ],
   "permissions": []

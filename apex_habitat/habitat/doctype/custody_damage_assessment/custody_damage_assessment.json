@@ -13,12 +13,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "CUST-DMG-.YYYY.-.####",
-      "default": "CUST-DMG-.YYYY.-.####",
+      "fieldname": "custody_damage_assessment_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_damage_assessment_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -26,7 +31,7 @@
       "fieldtype": "Date",
       "label": "Assessment Date",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -34,7 +39,7 @@
       "fieldtype": "Link",
       "label": "Custody Return",
       "options": "Custody Return",
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -43,7 +48,13 @@
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 4
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_damage_assessment_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -51,15 +62,28 @@
       "fieldtype": "Link",
       "label": "Employee Responsible",
       "options": "Employee",
-      "idx": 5
+      "idx": 7
     },
     {
       "doctype": "DocField",
-      "fieldname": "items",
-      "fieldtype": "Table",
-      "label": "Damaged Items",
-      "options": "Custody Damage Item",
-      "idx": 6
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_damage_assessment_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_damage_assessment_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
+      "idx": 10
     },
     {
       "doctype": "DocField",
@@ -67,7 +91,64 @@
       "fieldtype": "Currency",
       "label": "Total Estimated Replacement Cost (SAR)",
       "read_only": 1,
-      "idx": 7
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_damage_assessment_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_damage_assessment_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_damage_assessment_sec_table_items",
+      "fieldtype": "Section Break",
+      "label": "Damaged Items",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "items",
+      "fieldtype": "Table",
+      "label": "Damaged Items",
+      "options": "Custody Damage Item",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_damage_assessment_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_damage_assessment_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "CUST-DMG-.YYYY.-.####",
+      "default": "CUST-DMG-.YYYY.-.####",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_damage_assessment_col_system",
+      "fieldtype": "Column Break",
+      "idx": 19
     },
     {
       "doctype": "DocField",
@@ -76,14 +157,7 @@
       "label": "Additional Salary Deduction Entry",
       "options": "Additional Salary",
       "read_only": 1,
-      "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "remarks",
-      "fieldtype": "Small Text",
-      "label": "Remarks",
-      "idx": 9
+      "idx": 20
     }
   ],
   "permissions": [

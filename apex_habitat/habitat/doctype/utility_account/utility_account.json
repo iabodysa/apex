@@ -15,12 +15,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "UTIL-ACC-.####",
-      "default": "UTIL-ACC-.####",
+      "fieldname": "utility_account_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_account_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,7 +35,7 @@
       "options": "Accommodation Building",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -40,7 +45,7 @@
       "options": "Electricity\nWater\nGas\nInternet\nTelecom",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -50,7 +55,13 @@
       "reqd": 1,
       "unique": 1,
       "in_list_view": 1,
-      "idx": 4
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_account_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -58,15 +69,7 @@
       "fieldtype": "Data",
       "label": "Provider",
       "description": "e.g., Saudi Electricity Co., NWC, Mobily",
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "average_monthly_bill_sar",
-      "fieldtype": "Currency",
-      "label": "Average Monthly Bill (SAR)",
-      "description": "Used for variance alerts. Updated monthly by the variance scan job.",
-      "idx": 6
+      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -75,14 +78,6 @@
       "label": "Variance Alert Threshold (%)",
       "default": "25",
       "description": "Trigger alert if monthly bill deviates from average by more than this percentage.",
-      "idx": 7
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "billing_email",
-      "fieldtype": "Data",
-      "label": "Billing Recipient Email",
-      "description": "Email address where the e-bill arrives.",
       "idx": 8
     },
     {
@@ -94,6 +89,71 @@
       "default": "Active",
       "in_list_view": 1,
       "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_account_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_account_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "average_monthly_bill_sar",
+      "fieldtype": "Currency",
+      "label": "Average Monthly Bill (SAR)",
+      "description": "Used for variance alerts. Updated monthly by the variance scan job.",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_account_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "billing_email",
+      "fieldtype": "Data",
+      "label": "Billing Recipient Email",
+      "description": "Email address where the e-bill arrives.",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_account_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_account_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "UTIL-ACC-.####",
+      "default": "UTIL-ACC-.####",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_account_col_system",
+      "fieldtype": "Column Break",
+      "idx": 18
     }
   ],
   "permissions": [

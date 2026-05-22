@@ -12,12 +12,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "CUST-ART-.####",
-      "default": "CUST-ART-.####",
+      "fieldname": "custody_article_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_article_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -25,7 +30,7 @@
       "fieldtype": "Data",
       "label": "Article Name",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -34,7 +39,7 @@
       "label": "Category",
       "options": "Custody Asset Category",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -42,14 +47,13 @@
       "fieldtype": "Data",
       "label": "Unit of Measure",
       "default": "Each",
-      "idx": 4
+      "idx": 5
     },
     {
       "doctype": "DocField",
-      "fieldname": "standard_unit_cost_sar",
-      "fieldtype": "Currency",
-      "label": "Standard Unit Cost (SAR)",
-      "idx": 5
+      "fieldname": "custody_article_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -57,21 +61,77 @@
       "fieldtype": "Link",
       "label": "Depreciation Policy",
       "options": "Operational Depreciation Policy",
-      "idx": 6
+      "idx": 7
     },
     {
       "doctype": "DocField",
       "fieldname": "is_serialized",
       "fieldtype": "Check",
       "label": "Is Serialized",
-      "idx": 7
+      "idx": 8
     },
     {
       "doctype": "DocField",
       "fieldname": "notes",
       "fieldtype": "Small Text",
       "label": "Notes",
-      "idx": 8
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_article_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_article_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "standard_unit_cost_sar",
+      "fieldtype": "Currency",
+      "label": "Standard Unit Cost (SAR)",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_article_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_article_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_article_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "CUST-ART-.####",
+      "default": "CUST-ART-.####",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_article_col_system",
+      "fieldtype": "Column Break",
+      "idx": 17
     }
   ],
   "permissions": [

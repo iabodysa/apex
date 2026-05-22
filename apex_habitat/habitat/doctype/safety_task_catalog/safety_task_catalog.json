@@ -14,13 +14,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "STC-.####",
-      "default": "STC-.####",
-      "reqd": 1,
+      "fieldname": "safety_task_catalog_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_catalog_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,7 +34,7 @@
       "unique": 1,
       "reqd": 1,
       "description": "e.g., SAF-001, SEC-005",
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -38,14 +42,14 @@
       "fieldtype": "Data",
       "label": "Task Title (Arabic)",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
       "fieldname": "task_title_en",
       "fieldtype": "Data",
       "label": "Task Title (English)",
-      "idx": 4
+      "idx": 5
     },
     {
       "doctype": "DocField",
@@ -54,7 +58,7 @@
       "label": "Department",
       "options": "Fire Safety\nHealth & Hygiene\nSecurity\nMaintenance\nDocumentation\nAwareness & Training\nCompliance & Licensing\nEmergency & Crisis",
       "reqd": 1,
-      "idx": 5
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -63,7 +67,13 @@
       "label": "Frequency",
       "options": "Daily\nWeekly\nMonthly\nQuarterly\nAnnual\nAs Needed\nOn Entry",
       "reqd": 1,
-      "idx": 6
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_catalog_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 8
     },
     {
       "doctype": "DocField",
@@ -72,14 +82,14 @@
       "label": "Priority",
       "options": "High\nMedium\nLow",
       "default": "High",
-      "idx": 7
+      "idx": 9
     },
     {
       "doctype": "DocField",
       "fieldname": "instructions",
       "fieldtype": "Small Text",
       "label": "Execution Instructions",
-      "idx": 8
+      "idx": 10
     },
     {
       "doctype": "DocField",
@@ -87,7 +97,7 @@
       "fieldtype": "Check",
       "label": "Photo Evidence Required",
       "default": 0,
-      "idx": 9
+      "idx": 11
     },
     {
       "doctype": "DocField",
@@ -95,7 +105,29 @@
       "fieldtype": "Check",
       "label": "Applies to All Buildings",
       "default": 1,
-      "idx": 10
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Active",
+      "default": 1,
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_catalog_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_catalog_sec_table_applicable_buildings",
+      "fieldtype": "Section Break",
+      "label": "Specific Buildings",
+      "idx": 15
     },
     {
       "doctype": "DocField",
@@ -104,15 +136,37 @@
       "label": "Specific Buildings",
       "options": "Safety Task Building Scope",
       "depends_on": "eval:doc.applicable_to_all_buildings==0",
-      "idx": 11
+      "idx": 16
     },
     {
       "doctype": "DocField",
-      "fieldname": "is_active",
-      "fieldtype": "Check",
-      "label": "Active",
-      "default": 1,
-      "idx": 12
+      "fieldname": "safety_task_catalog_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_catalog_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "STC-.####",
+      "default": "STC-.####",
+      "reqd": 1,
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_catalog_col_system",
+      "fieldtype": "Column Break",
+      "idx": 20
     }
   ],
   "permissions": [

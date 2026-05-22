@@ -11,12 +11,19 @@
   "fields": [
     {
       "doctype": "DocField",
+      "fieldname": "linked_maintenance_request_item_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "maintenance_request",
       "fieldtype": "Link",
       "label": "Maintenance Request",
       "options": "Maintenance Request",
       "read_only": 1,
-      "idx": 1
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -25,7 +32,13 @@
       "label": "Room",
       "options": "Accommodation Room",
       "read_only": 1,
-      "idx": 2
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "linked_maintenance_request_item_col_details",
+      "fieldtype": "Column Break",
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -33,7 +46,7 @@
       "fieldtype": "Data",
       "label": "Issue Type",
       "read_only": 1,
-      "idx": 3
+      "idx": 5
     },
     {
       "doctype": "DocField",
@@ -41,7 +54,7 @@
       "fieldtype": "Data",
       "label": "Status",
       "read_only": 1,
-      "idx": 4
+      "idx": 6
     }
   ],
   "permissions": []

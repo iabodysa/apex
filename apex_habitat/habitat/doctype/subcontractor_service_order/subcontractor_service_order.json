@@ -15,13 +15,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "SSO-.YYYY.-.#####",
-      "default": "SSO-.YYYY.-.#####",
-      "reqd": 1,
+      "fieldname": "subcontractor_service_order_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,26 +34,7 @@
       "label": "Service Contract",
       "options": "Subcontractor Service Contract",
       "reqd": 1,
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "supplier",
-      "fieldtype": "Link",
-      "label": "Supplier",
-      "options": "Supplier",
-      "fetch_from": "contract.supplier",
-      "read_only": 1,
       "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "service_type",
-      "fieldtype": "Data",
-      "label": "Service Type",
-      "fetch_from": "contract.service_type",
-      "read_only": 1,
-      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -58,7 +43,7 @@
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 5
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -66,20 +51,26 @@
       "fieldtype": "Date",
       "label": "Scheduled Date",
       "reqd": 1,
-      "idx": 6
+      "idx": 5
     },
     {
       "doctype": "DocField",
       "fieldname": "actual_visit_date",
       "fieldtype": "Date",
       "label": "Actual Visit Date",
-      "idx": 7
+      "idx": 6
     },
     {
       "doctype": "DocField",
       "fieldname": "visit_notes",
       "fieldtype": "Small Text",
       "label": "Technician Notes",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_col_overview",
+      "fieldtype": "Column Break",
       "idx": 8
     },
     {
@@ -91,10 +82,55 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "linked_purchase_invoice",
+      "fieldtype": "Link",
+      "label": "Purchase Invoice",
+      "options": "Purchase Invoice",
+      "description": "Auto-created on Submit",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "supervisor_confirmed",
+      "fieldtype": "Check",
+      "label": "Supervisor Confirmed Completion",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Scheduled\nIn Progress\nCompleted\nMissed\nCancelled",
+      "default": "Scheduled",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "service_cost_sar",
       "fieldtype": "Currency",
       "label": "Service Cost (SAR)",
-      "idx": 10
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 16
     },
     {
       "doctype": "DocField",
@@ -104,32 +140,56 @@
       "options": "Cost Center",
       "fetch_from": "building.linked_cost_center",
       "read_only": 1,
-      "idx": 11
+      "idx": 17
     },
     {
       "doctype": "DocField",
-      "fieldname": "linked_purchase_invoice",
-      "fieldtype": "Link",
-      "label": "Purchase Invoice",
-      "options": "Purchase Invoice",
-      "description": "Auto-created on Submit",
-      "idx": 12
+      "fieldname": "subcontractor_service_order_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 18
     },
     {
       "doctype": "DocField",
-      "fieldname": "supervisor_confirmed",
-      "fieldtype": "Check",
-      "label": "Supervisor Confirmed Completion",
-      "idx": 13
+      "fieldname": "subcontractor_service_order_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 19
     },
     {
       "doctype": "DocField",
-      "fieldname": "status",
+      "fieldname": "naming_series",
       "fieldtype": "Select",
-      "label": "Status",
-      "options": "Scheduled\nIn Progress\nCompleted\nMissed\nCancelled",
-      "default": "Scheduled",
-      "idx": 14
+      "label": "Series",
+      "options": "SSO-.YYYY.-.#####",
+      "default": "SSO-.YYYY.-.#####",
+      "reqd": 1,
+      "idx": 20
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "supplier",
+      "fieldtype": "Link",
+      "label": "Supplier",
+      "options": "Supplier",
+      "fetch_from": "contract.supplier",
+      "read_only": 1,
+      "idx": 21
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_order_col_system",
+      "fieldtype": "Column Break",
+      "idx": 22
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "service_type",
+      "fieldtype": "Data",
+      "label": "Service Type",
+      "fetch_from": "contract.service_type",
+      "read_only": 1,
+      "idx": 23
     }
   ],
   "permissions": [

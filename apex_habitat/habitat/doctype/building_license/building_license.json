@@ -15,13 +15,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "BLDG-LIC-.YYYY.-.####",
-      "default": "BLDG-LIC-.YYYY.-.####",
-      "reqd": 1,
+      "fieldname": "building_license_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,7 +34,7 @@
       "label": "License Type",
       "options": "Balady Certificate\nCivil Defence Certificate\nGroup Housing Permit\nLease Contract\nMOL Worker Housing Approval\nInsurance Policy\nOther",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -39,7 +43,7 @@
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -47,14 +51,14 @@
       "fieldtype": "Data",
       "label": "License/Certificate Number",
       "reqd": 1,
-      "idx": 4
+      "idx": 5
     },
     {
       "doctype": "DocField",
       "fieldname": "issuing_authority",
       "fieldtype": "Data",
       "label": "Issuing Authority",
-      "idx": 5
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -62,7 +66,13 @@
       "fieldtype": "Date",
       "label": "Issue Date",
       "reqd": 1,
-      "idx": 6
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 8
     },
     {
       "doctype": "DocField",
@@ -70,7 +80,7 @@
       "fieldtype": "Date",
       "label": "Expiry Date",
       "reqd": 1,
-      "idx": 7
+      "idx": 9
     },
     {
       "doctype": "DocField",
@@ -79,21 +89,14 @@
       "label": "Renewal Lead Days",
       "default": 60,
       "description": "Days before expiry to trigger renewal alert",
-      "idx": 8
+      "idx": 10
     },
     {
       "doctype": "DocField",
       "fieldname": "attached_document",
       "fieldtype": "Attach",
       "label": "Certificate File",
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "renewal_cost_estimate_sar",
-      "fieldtype": "Currency",
-      "label": "Renewal Cost Estimate (SAR)",
-      "idx": 10
+      "idx": 11
     },
     {
       "doctype": "DocField",
@@ -102,7 +105,7 @@
       "label": "Responsible Role",
       "options": "Role",
       "default": "Admin Manager",
-      "idx": 11
+      "idx": 12
     },
     {
       "doctype": "DocField",
@@ -111,7 +114,64 @@
       "label": "Status",
       "options": "Active\nExpiring Soon\nExpired\nUnder Renewal\nRevoked",
       "default": "Active",
-      "idx": 12
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "renewal_cost_estimate_sar",
+      "fieldtype": "Currency",
+      "label": "Renewal Cost Estimate (SAR)",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "BLDG-LIC-.YYYY.-.####",
+      "default": "BLDG-LIC-.YYYY.-.####",
+      "reqd": 1,
+      "idx": 20
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building_license_col_system",
+      "fieldtype": "Column Break",
+      "idx": 21
     },
     {
       "doctype": "DocField",
@@ -119,7 +179,7 @@
       "fieldtype": "Date",
       "label": "Last Renewed On",
       "read_only": 1,
-      "idx": 13
+      "idx": 22
     }
   ],
   "permissions": [

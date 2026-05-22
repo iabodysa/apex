@@ -11,22 +11,183 @@
   "sort_order": "DESC",
   "description": "Hidden cost allocation ledger. Written only by scheduled jobs and hooks, never by humans.",
   "fields": [
-    {"doctype": "DocField", "fieldname": "posting_date", "label": "Posting Date", "fieldtype": "Date", "reqd": 1, "in_list_view": 1, "idx": 1},
-    {"doctype": "DocField", "fieldname": "employee", "label": "Employee", "fieldtype": "Link", "options": "Employee", "in_list_view": 1, "idx": 2},
-    {"doctype": "DocField", "fieldname": "assignment", "label": "Accommodation Assignment", "fieldtype": "Link", "options": "Accommodation Assignment", "idx": 3},
-    {"doctype": "DocField", "fieldname": "building", "label": "Building", "fieldtype": "Link", "options": "Accommodation Building", "reqd": 1, "idx": 4},
-    {"doctype": "DocField", "fieldname": "project", "label": "Project", "fieldtype": "Link", "options": "Project", "idx": 5},
-    {"doctype": "DocField", "fieldname": "cost_center", "label": "Cost Center", "fieldtype": "Data", "idx": 6},
-    {"doctype": "DocField", "fieldname": "ledger_type", "label": "Ledger Type", "fieldtype": "Select", "options": "Rent\nElectricity\nWater\nCleaning Staff Salary\nSupervisor Salary\nMaintenance\nOther", "reqd": 1, "idx": 7},
-    {"doctype": "DocField", "fieldname": "total_site_cost", "label": "Total Site Cost for Period (SAR)", "fieldtype": "Currency", "idx": 8},
-    {"doctype": "DocField", "fieldname": "capacity_denominator", "label": "Capacity Denominator", "fieldtype": "Int", "idx": 9},
-    {"doctype": "DocField", "fieldname": "employee_daily_share", "label": "Employee Daily Share (SAR)", "fieldtype": "Currency", "idx": 10},
-    {"doctype": "DocField", "fieldname": "posting_mode", "label": "Posting Mode", "fieldtype": "Select", "options": "Operational Memo\nGL Posted", "default": "Operational Memo", "idx": 11},
-    {"doctype": "DocField", "fieldname": "gl_entry", "label": "GL Entry Reference", "fieldtype": "Link", "options": "GL Entry", "read_only": 1, "idx": 12}
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "posting_date",
+      "label": "Posting Date",
+      "fieldtype": "Date",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "employee",
+      "label": "Employee",
+      "fieldtype": "Link",
+      "options": "Employee",
+      "in_list_view": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "assignment",
+      "label": "Accommodation Assignment",
+      "fieldtype": "Link",
+      "options": "Accommodation Assignment",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "label": "Building",
+      "fieldtype": "Link",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "project",
+      "label": "Project",
+      "fieldtype": "Link",
+      "options": "Project",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "ledger_type",
+      "label": "Ledger Type",
+      "fieldtype": "Select",
+      "options": "Rent\nElectricity\nWater\nCleaning Staff Salary\nSupervisor Salary\nMaintenance\nOther",
+      "reqd": 1,
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "capacity_denominator",
+      "label": "Capacity Denominator",
+      "fieldtype": "Int",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "employee_daily_share",
+      "label": "Employee Daily Share (SAR)",
+      "fieldtype": "Currency",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "posting_mode",
+      "label": "Posting Mode",
+      "fieldtype": "Select",
+      "options": "Operational Memo\nGL Posted",
+      "default": "Operational Memo",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "cost_center",
+      "label": "Cost Center",
+      "fieldtype": "Data",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "total_site_cost",
+      "label": "Total Site Cost for Period (SAR)",
+      "fieldtype": "Currency",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "gl_entry",
+      "label": "GL Entry Reference",
+      "fieldtype": "Link",
+      "options": "GL Entry",
+      "read_only": 1,
+      "idx": 20
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_ledger_col_system",
+      "fieldtype": "Column Break",
+      "idx": 21
+    }
   ],
   "permissions": [
-    {"doctype": "DocPerm", "role": "System Manager", "read": 1, "idx": 1},
-    {"doctype": "DocPerm", "role": "Finance Manager", "read": 1, "idx": 2},
-    {"doctype": "DocPerm", "role": "Internal Auditor", "read": 1, "idx": 3}
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Finance Manager",
+      "read": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Internal Auditor",
+      "read": 1,
+      "idx": 3
+    }
   ]
 }

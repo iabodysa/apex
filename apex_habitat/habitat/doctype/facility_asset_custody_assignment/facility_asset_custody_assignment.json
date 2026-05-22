@@ -15,13 +15,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "FAC-CUST-.YYYY.-.#####",
-      "default": "FAC-CUST-.YYYY.-.#####",
-      "reqd": 1,
+      "fieldname": "facility_asset_custody_assignment_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,7 +34,7 @@
       "label": "Custodian Supervisor",
       "options": "User",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -39,7 +43,7 @@
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -47,14 +51,6 @@
       "fieldtype": "Date",
       "label": "Handover Date",
       "reqd": 1,
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "assets_in_custody",
-      "fieldtype": "Table",
-      "label": "Assets in Custody",
-      "options": "Facility Custody Item",
       "idx": 5
     },
     {
@@ -68,10 +64,16 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "supervisor_signature",
       "fieldtype": "Signature",
       "label": "Supervisor E-Signature",
-      "idx": 7
+      "idx": 8
     },
     {
       "doctype": "DocField",
@@ -79,14 +81,66 @@
       "fieldtype": "Link",
       "label": "Witness Role",
       "options": "User",
-      "idx": 8
+      "idx": 9
     },
     {
       "doctype": "DocField",
       "fieldname": "handover_notes",
       "fieldtype": "Small Text",
       "label": "Notes",
-      "idx": 9
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_sec_table_assets_in_custody",
+      "fieldtype": "Section Break",
+      "label": "Assets in Custody",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "assets_in_custody",
+      "fieldtype": "Table",
+      "label": "Assets in Custody",
+      "options": "Facility Custody Item",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "FAC-CUST-.YYYY.-.#####",
+      "default": "FAC-CUST-.YYYY.-.#####",
+      "reqd": 1,
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_custody_assignment_col_system",
+      "fieldtype": "Column Break",
+      "idx": 17
     }
   ],
   "permissions": [

@@ -13,12 +13,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "MWO-.YYYY.-.####",
-      "default": "MWO-.YYYY.-.####",
+      "fieldname": "maintenance_work_order_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_work_order_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -27,16 +32,6 @@
       "label": "Maintenance Request",
       "options": "Maintenance Request",
       "reqd": 1,
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "building",
-      "fieldtype": "Link",
-      "label": "Building",
-      "options": "Accommodation Building",
-      "fetch_from": "maintenance_request.building",
-      "read_only": 1,
       "idx": 3
     },
     {
@@ -73,32 +68,51 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "maintenance_work_order_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "planned_end_date",
       "fieldtype": "Date",
       "label": "Planned End Date",
-      "idx": 8
+      "idx": 9
     },
     {
       "doctype": "DocField",
       "fieldname": "actual_start_date",
       "fieldtype": "Date",
       "label": "Actual Start Date",
-      "idx": 9
+      "idx": 10
     },
     {
       "doctype": "DocField",
       "fieldname": "actual_end_date",
       "fieldtype": "Date",
       "label": "Actual End Date",
-      "idx": 10
+      "idx": 11
     },
     {
       "doctype": "DocField",
-      "fieldname": "procurement_items",
-      "fieldtype": "Table",
-      "label": "Procurement Items",
-      "options": "Maintenance Procurement Item",
-      "idx": 11
+      "fieldname": "completion_notes",
+      "fieldtype": "Small Text",
+      "label": "Completion Notes",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_work_order_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_work_order_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
+      "idx": 14
     },
     {
       "doctype": "DocField",
@@ -106,7 +120,74 @@
       "fieldtype": "Currency",
       "label": "Total Procurement Cost (SAR)",
       "read_only": 1,
-      "idx": 12
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_work_order_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_work_order_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_work_order_sec_table_procurement_items",
+      "fieldtype": "Section Break",
+      "label": "Procurement Items",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "procurement_items",
+      "fieldtype": "Table",
+      "label": "Procurement Items",
+      "options": "Maintenance Procurement Item",
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_work_order_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 20
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_work_order_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 21
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "MWO-.YYYY.-.####",
+      "default": "MWO-.YYYY.-.####",
+      "idx": 22
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building",
+      "fetch_from": "maintenance_request.building",
+      "read_only": 1,
+      "idx": 23
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_work_order_col_system",
+      "fieldtype": "Column Break",
+      "idx": 24
     },
     {
       "doctype": "DocField",
@@ -116,14 +197,7 @@
       "options": "Draft\nPlanned\nIn Progress\nCompleted\nCancelled",
       "default": "Draft",
       "read_only": 1,
-      "idx": 13
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "completion_notes",
-      "fieldtype": "Small Text",
-      "label": "Completion Notes",
-      "idx": 14
+      "idx": 25
     },
     {
       "doctype": "DocField",
@@ -131,7 +205,7 @@
       "fieldtype": "Small Text",
       "label": "Cancellation Reason",
       "read_only": 1,
-      "idx": 15
+      "idx": 26
     }
   ],
   "permissions": [

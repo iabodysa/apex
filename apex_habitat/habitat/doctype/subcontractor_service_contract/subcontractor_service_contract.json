@@ -15,13 +15,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "SUB-CON-.YYYY.-.####",
-      "default": "SUB-CON-.YYYY.-.####",
-      "reqd": 1,
+      "fieldname": "subcontractor_service_contract_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,7 +34,7 @@
       "label": "Supplier",
       "options": "Supplier",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -39,14 +43,6 @@
       "label": "Service Type",
       "options": "Pest Control\nSewage Tank Suction\nDeep Cleaning\nGenerator Service\nFire Equipment Service\nAC Maintenance\nWater Tank Cleaning\nOther",
       "reqd": 1,
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "covered_buildings",
-      "fieldtype": "Table",
-      "label": "Covered Buildings",
-      "options": "Subcontractor Building Coverage",
       "idx": 4
     },
     {
@@ -67,39 +63,31 @@
     },
     {
       "doctype": "DocField",
-      "fieldname": "visit_frequency",
-      "fieldtype": "Select",
-      "label": "Scheduled Visit Frequency",
-      "options": "Weekly\nBi-weekly\nMonthly\nQuarterly\nOn-call Only",
+      "fieldname": "subcontractor_service_contract_col_overview",
+      "fieldtype": "Column Break",
       "idx": 7
     },
     {
       "doctype": "DocField",
-      "fieldname": "rate_per_visit_sar",
-      "fieldtype": "Currency",
-      "label": "Standard Rate Per Visit (SAR)",
+      "fieldname": "visit_frequency",
+      "fieldtype": "Select",
+      "label": "Scheduled Visit Frequency",
+      "options": "Weekly\nBi-weekly\nMonthly\nQuarterly\nOn-call Only",
       "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "monthly_retainer_sar",
-      "fieldtype": "Currency",
-      "label": "Monthly Retainer (SAR)",
-      "idx": 9
     },
     {
       "doctype": "DocField",
       "fieldname": "response_sla_hours",
       "fieldtype": "Int",
       "label": "Response SLA (Hours)",
-      "idx": 10
+      "idx": 9
     },
     {
       "doctype": "DocField",
       "fieldname": "attached_contract",
       "fieldtype": "Attach",
       "label": "Contract Document",
-      "idx": 11
+      "idx": 10
     },
     {
       "doctype": "DocField",
@@ -108,7 +96,93 @@
       "label": "Status",
       "options": "Draft\nActive\nExpired\nTerminated",
       "default": "Draft",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
       "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "rate_per_visit_sar",
+      "fieldtype": "Currency",
+      "label": "Standard Rate Per Visit (SAR)",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "monthly_retainer_sar",
+      "fieldtype": "Currency",
+      "label": "Monthly Retainer (SAR)",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_sec_table_covered_buildings",
+      "fieldtype": "Section Break",
+      "label": "Covered Buildings",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "covered_buildings",
+      "fieldtype": "Table",
+      "label": "Covered Buildings",
+      "options": "Subcontractor Building Coverage",
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 20
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 21
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "SUB-CON-.YYYY.-.####",
+      "default": "SUB-CON-.YYYY.-.####",
+      "reqd": 1,
+      "idx": 22
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "subcontractor_service_contract_col_system",
+      "fieldtype": "Column Break",
+      "idx": 23
     }
   ],
   "permissions": [

@@ -13,12 +13,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "FAM-.YYYY.-.####",
-      "default": "FAM-.YYYY.-.####",
+      "fieldname": "facility_asset_movement_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_movement_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -26,7 +31,7 @@
       "fieldtype": "Date",
       "label": "Movement Date",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -35,7 +40,7 @@
       "label": "Facility Asset",
       "options": "Facility Asset",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -43,7 +48,7 @@
       "fieldtype": "Link",
       "label": "From Building",
       "options": "Accommodation Building",
-      "idx": 4
+      "idx": 5
     },
     {
       "doctype": "DocField",
@@ -51,7 +56,7 @@
       "fieldtype": "Link",
       "label": "From Room",
       "options": "Accommodation Room",
-      "idx": 5
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -60,7 +65,13 @@
       "label": "To Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 6
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_movement_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 8
     },
     {
       "doctype": "DocField",
@@ -68,7 +79,7 @@
       "fieldtype": "Link",
       "label": "To Room",
       "options": "Accommodation Room",
-      "idx": 7
+      "idx": 9
     },
     {
       "doctype": "DocField",
@@ -76,7 +87,7 @@
       "fieldtype": "Link",
       "label": "Moved By (Employee)",
       "options": "Employee",
-      "idx": 8
+      "idx": 10
     },
     {
       "doctype": "DocField",
@@ -85,23 +96,6 @@
       "label": "Movement Reason",
       "options": "Reallocation\nMaintenance\nCondemnation\nOther",
       "default": "Reallocation",
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "native_asset_movement",
-      "fieldtype": "Link",
-      "label": "Native Asset Movement",
-      "options": "Asset Movement",
-      "read_only": 1,
-      "idx": 10
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "cancellation_reason",
-      "fieldtype": "Small Text",
-      "label": "Cancellation Reason",
-      "read_only": 1,
       "idx": 11
     },
     {
@@ -110,6 +104,52 @@
       "fieldtype": "Small Text",
       "label": "Remarks",
       "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_movement_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_movement_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "FAM-.YYYY.-.####",
+      "default": "FAM-.YYYY.-.####",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "native_asset_movement",
+      "fieldtype": "Link",
+      "label": "Native Asset Movement",
+      "options": "Asset Movement",
+      "read_only": 1,
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_movement_col_system",
+      "fieldtype": "Column Break",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "cancellation_reason",
+      "fieldtype": "Small Text",
+      "label": "Cancellation Reason",
+      "read_only": 1,
+      "idx": 18
     }
   ],
   "permissions": [

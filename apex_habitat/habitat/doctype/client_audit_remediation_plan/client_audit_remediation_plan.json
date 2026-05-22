@@ -15,13 +15,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "CARP-.YYYY.-.####",
-      "default": "CARP-.YYYY.-.####",
-      "reqd": 1,
+      "fieldname": "client_audit_remediation_plan_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "client_audit_remediation_plan_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,14 +34,14 @@
       "label": "Client Project",
       "options": "Project",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
       "fieldname": "client_audit_reference",
       "fieldtype": "Data",
       "label": "Client Audit Reference / Ticket",
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -45,7 +49,7 @@
       "fieldtype": "Date",
       "label": "Audit Findings Received",
       "reqd": 1,
-      "idx": 4
+      "idx": 5
     },
     {
       "doctype": "DocField",
@@ -53,22 +57,12 @@
       "fieldtype": "Date",
       "label": "Remediation Deadline",
       "reqd": 1,
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "buildings_in_scope",
-      "fieldtype": "Table",
-      "label": "Buildings In Scope",
-      "options": "Audit Remediation Building Scope",
       "idx": 6
     },
     {
       "doctype": "DocField",
-      "fieldname": "remediation_items",
-      "fieldtype": "Table",
-      "label": "Remediation Actions",
-      "options": "Audit Remediation Item",
+      "fieldname": "client_audit_remediation_plan_col_overview",
+      "fieldtype": "Column Break",
       "idx": 7
     },
     {
@@ -95,6 +89,73 @@
       "options": "User",
       "description": "Operations Director by default",
       "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "client_audit_remediation_plan_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "client_audit_remediation_plan_sec_table_buildings_in_scope",
+      "fieldtype": "Section Break",
+      "label": "Buildings In Scope",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "buildings_in_scope",
+      "fieldtype": "Table",
+      "label": "Buildings In Scope",
+      "options": "Audit Remediation Building Scope",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "client_audit_remediation_plan_sec_table_remediation_items",
+      "fieldtype": "Section Break",
+      "label": "Remediation Actions",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "remediation_items",
+      "fieldtype": "Table",
+      "label": "Remediation Actions",
+      "options": "Audit Remediation Item",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "client_audit_remediation_plan_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "client_audit_remediation_plan_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "CARP-.YYYY.-.####",
+      "default": "CARP-.YYYY.-.####",
+      "reqd": 1,
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "client_audit_remediation_plan_col_system",
+      "fieldtype": "Column Break",
+      "idx": 19
     }
   ],
   "permissions": [

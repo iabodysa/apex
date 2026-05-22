@@ -13,12 +13,19 @@
   "fields": [
     {
       "doctype": "DocField",
+      "fieldname": "custody_return_sec_main",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "naming_series",
       "fieldtype": "Select",
       "label": "Series",
       "options": "CUST-RET-.YYYY.-.####",
       "default": "CUST-RET-.YYYY.-.####",
-      "idx": 1
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -26,7 +33,7 @@
       "fieldtype": "Date",
       "label": "Return Date",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -35,7 +42,7 @@
       "label": "Custody Issue",
       "options": "Custody Issue",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -45,7 +52,13 @@
       "options": "Accommodation Building",
       "fetch_from": "custody_issue.building",
       "read_only": 1,
-      "idx": 4
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_return_col_main",
+      "fieldtype": "Column Break",
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -53,7 +66,7 @@
       "fieldtype": "Link",
       "label": "Returned By (Employee)",
       "options": "Employee",
-      "idx": 5
+      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -61,14 +74,14 @@
       "fieldtype": "Table",
       "label": "Returned Items",
       "options": "Custody Return Item",
-      "idx": 6
+      "idx": 8
     },
     {
       "doctype": "DocField",
       "fieldname": "remarks",
       "fieldtype": "Small Text",
       "label": "Remarks",
-      "idx": 7
+      "idx": 9
     }
   ],
   "permissions": [

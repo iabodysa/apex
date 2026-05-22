@@ -8,26 +8,39 @@
   "fields": [
     {
       "doctype": "DocField",
+      "fieldname": "cleaning_log_room_detail_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "room",
       "fieldtype": "Link",
       "label": "Room",
       "options": "Accommodation Room",
       "reqd": 1,
-      "idx": 1
+      "idx": 2
     },
     {
       "doctype": "DocField",
       "fieldname": "cleaned",
       "fieldtype": "Check",
       "label": "Cleaned",
-      "idx": 2
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "cleaning_log_room_detail_col_details",
+      "fieldtype": "Column Break",
+      "idx": 4
     },
     {
       "doctype": "DocField",
       "fieldname": "notes",
       "fieldtype": "Small Text",
       "label": "Notes",
-      "idx": 3
+      "idx": 5
     }
   ],
   "permissions": []

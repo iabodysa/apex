@@ -10,13 +10,20 @@
   "fields": [
     {
       "doctype": "DocField",
+      "fieldname": "custody_issue_item_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "article",
       "fieldtype": "Link",
       "label": "Article",
       "options": "Custody Article",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 1
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -26,7 +33,7 @@
       "fetch_from": "article.article_name",
       "read_only": 1,
       "in_list_view": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -36,14 +43,20 @@
       "reqd": 1,
       "default": "1",
       "in_list_view": 1,
-      "idx": 3
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_item_col_details",
+      "fieldtype": "Column Break",
+      "idx": 5
     },
     {
       "doctype": "DocField",
       "fieldname": "serial_no",
       "fieldtype": "Data",
       "label": "Serial No",
-      "idx": 4
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -52,7 +65,7 @@
       "label": "Condition on Issue",
       "options": "New\nGood\nFair\nPoor",
       "default": "Good",
-      "idx": 5
+      "idx": 7
     }
   ],
   "permissions": []

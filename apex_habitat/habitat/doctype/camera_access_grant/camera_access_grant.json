@@ -15,13 +15,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "CAM-ACC-.YYYY.-.####",
-      "default": "CAM-ACC-.YYYY.-.####",
-      "reqd": 1,
+      "fieldname": "camera_access_grant_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "camera_access_grant_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,14 +34,6 @@
       "label": "User Requesting Access",
       "options": "User",
       "reqd": 1,
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "buildings_scope",
-      "fieldtype": "Table",
-      "label": "Buildings Granted",
-      "options": "Camera Access Building Scope",
       "idx": 3
     },
     {
@@ -51,28 +47,18 @@
     },
     {
       "doctype": "DocField",
-      "fieldname": "valid_from",
-      "fieldtype": "Date",
-      "label": "Valid From",
-      "reqd": 1,
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "valid_until",
-      "fieldtype": "Date",
-      "label": "Valid Until",
-      "description": "Leave blank for permanent",
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
       "fieldname": "approved_by",
       "fieldtype": "Link",
       "label": "Approved By",
       "options": "User",
       "description": "Must be Admin Manager",
-      "idx": 7
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "camera_access_grant_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -81,7 +67,7 @@
       "label": "Credentials Delivered By",
       "options": "User",
       "description": "Typically IT Specialist",
-      "idx": 8
+      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -90,7 +76,95 @@
       "label": "Status",
       "options": "Pending Approval\nApproved\nActive\nExpired\nRevoked",
       "default": "Pending Approval",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "camera_access_grant_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
       "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "camera_access_grant_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "valid_from",
+      "fieldtype": "Date",
+      "label": "Valid From",
+      "reqd": 1,
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "camera_access_grant_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "valid_until",
+      "fieldtype": "Date",
+      "label": "Valid Until",
+      "description": "Leave blank for permanent",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "camera_access_grant_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "camera_access_grant_sec_table_buildings_scope",
+      "fieldtype": "Section Break",
+      "label": "Buildings Granted",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "buildings_scope",
+      "fieldtype": "Table",
+      "label": "Buildings Granted",
+      "options": "Camera Access Building Scope",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "camera_access_grant_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "camera_access_grant_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "CAM-ACC-.YYYY.-.####",
+      "default": "CAM-ACC-.YYYY.-.####",
+      "reqd": 1,
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "camera_access_grant_col_system",
+      "fieldtype": "Column Break",
+      "idx": 20
     }
   ],
   "permissions": [

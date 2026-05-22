@@ -15,13 +15,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "MAINT-.YYYY.-.#####",
-      "default": "MAINT-.YYYY.-.#####",
-      "reqd": 1,
+      "fieldname": "maintenance_request_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_request_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,7 +34,7 @@
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -39,7 +43,7 @@
       "label": "Room",
       "options": "Accommodation Room",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -47,7 +51,7 @@
       "fieldtype": "Link",
       "label": "Bed (if bed-specific)",
       "options": "Accommodation Bed",
-      "idx": 4
+      "idx": 5
     },
     {
       "doctype": "DocField",
@@ -56,7 +60,7 @@
       "label": "Source Inspection Report",
       "options": "Safety Inspection Report",
       "description": "Populated when auto-generated from FSI",
-      "idx": 5
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -65,7 +69,7 @@
       "label": "Reported By",
       "options": "User",
       "reqd": 1,
-      "idx": 6
+      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -74,7 +78,7 @@
       "label": "Issue Type",
       "options": "Electrical\nPlumbing\nFurniture\nAir Conditioning\nFire Safety\nPest Control\nStructural\nOther",
       "reqd": 1,
-      "idx": 7
+      "idx": 8
     },
     {
       "doctype": "DocField",
@@ -82,7 +86,7 @@
       "fieldtype": "Small Text",
       "label": "Issue Description",
       "reqd": 1,
-      "idx": 8
+      "idx": 9
     },
     {
       "doctype": "DocField",
@@ -91,7 +95,13 @@
       "label": "Priority",
       "options": "Low\nMedium\nHigh\nCritical",
       "default": "Medium",
-      "idx": 9
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_request_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 11
     },
     {
       "doctype": "DocField",
@@ -99,29 +109,13 @@
       "fieldtype": "Link",
       "label": "Assigned To",
       "options": "User",
-      "idx": 10
+      "idx": 12
     },
     {
       "doctype": "DocField",
       "fieldname": "resolution_notes",
       "fieldtype": "Small Text",
       "label": "Resolution Notes",
-      "idx": 11
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "cost_of_repair",
-      "fieldtype": "Currency",
-      "label": "Cost of Repair (SAR)",
-      "idx": 12
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "cost_center",
-      "fieldtype": "Link",
-      "label": "Cost Center",
-      "options": "Cost Center",
-      "description": "Auto-fetched from Building",
       "idx": 13
     },
     {
@@ -133,21 +127,12 @@
     },
     {
       "doctype": "DocField",
-      "fieldname": "procurement_items",
-      "fieldtype": "Table",
-      "label": "Procurement Items Required",
-      "options": "Maintenance Procurement Item",
-      "depends_on": "eval:doc.requires_procurement==1",
-      "idx": 15
-    },
-    {
-      "doctype": "DocField",
       "fieldname": "status",
       "fieldtype": "Select",
       "label": "Status",
       "options": "Open\nAssigned\nIn Progress\nResolved\nClosed\nReopened",
       "default": "Open",
-      "idx": 16
+      "idx": 15
     },
     {
       "doctype": "DocField",
@@ -156,7 +141,7 @@
       "label": "Related Facility Asset",
       "options": "Facility Asset",
       "description": "Use when the issue concerns a specific facility asset (e.g., CCTV camera, fire alarm panel)",
-      "idx": 17
+      "idx": 16
     },
     {
       "doctype": "DocField",
@@ -165,14 +150,7 @@
       "label": "Subcontractor Dispatched",
       "options": "Subcontractor Service Order",
       "description": "Set when a subcontractor visit is created from this request",
-      "idx": 18
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "section_asset_link",
-      "fieldtype": "Section Break",
-      "label": "Asset Identification",
-      "idx": 19
+      "idx": 17
     },
     {
       "doctype": "DocField",
@@ -181,7 +159,90 @@
       "label": "Target ERPNext Asset",
       "options": "Asset",
       "description": "Specific Fixed Asset this request concerns (e.g., AC-001, BED-014). Enables full maintenance history per asset.",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_request_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_request_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
       "idx": 20
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "cost_of_repair",
+      "fieldtype": "Currency",
+      "label": "Cost of Repair (SAR)",
+      "idx": 21
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_request_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 22
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "cost_center",
+      "fieldtype": "Link",
+      "label": "Cost Center",
+      "options": "Cost Center",
+      "description": "Auto-fetched from Building",
+      "idx": 23
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_request_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 24
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_request_sec_table_procurement_items",
+      "fieldtype": "Section Break",
+      "label": "Procurement Items Required",
+      "idx": 25
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "procurement_items",
+      "fieldtype": "Table",
+      "label": "Procurement Items Required",
+      "options": "Maintenance Procurement Item",
+      "depends_on": "eval:doc.requires_procurement==1",
+      "idx": 26
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_request_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 27
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_request_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 28
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "MAINT-.YYYY.-.#####",
+      "default": "MAINT-.YYYY.-.#####",
+      "reqd": 1,
+      "idx": 29
     },
     {
       "doctype": "DocField",
@@ -190,7 +251,7 @@
       "label": "Asset Name",
       "fetch_from": "target_asset.asset_name",
       "read_only": 1,
-      "idx": 21
+      "idx": 30
     },
     {
       "doctype": "DocField",
@@ -199,7 +260,13 @@
       "label": "Asset Category",
       "fetch_from": "target_asset.asset_category",
       "read_only": 1,
-      "idx": 22
+      "idx": 31
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_request_col_system",
+      "fieldtype": "Column Break",
+      "idx": 32
     },
     {
       "doctype": "DocField",
@@ -208,7 +275,7 @@
       "label": "Asset Location",
       "fetch_from": "target_asset.location",
       "read_only": 1,
-      "idx": 23
+      "idx": 33
     },
     {
       "doctype": "DocField",
@@ -216,8 +283,8 @@
       "fieldtype": "Check",
       "label": "Logged to Asset Maintenance History",
       "read_only": 1,
-      "description": "Set to 1 by on_update hook when status becomes \u0027Resolved\u0027 and target_asset is set",
-      "idx": 24
+      "description": "Set to 1 by on_update hook when status becomes 'Resolved' and target_asset is set",
+      "idx": 34
     }
   ],
   "permissions": [

@@ -10,12 +10,19 @@
   "fields": [
     {
       "doctype": "DocField",
+      "fieldname": "inspection_finding_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "finding_description",
       "fieldtype": "Data",
       "label": "Finding",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 1
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -25,7 +32,7 @@
       "options": "Low\nMedium\nHigh\nCritical",
       "default": "Low",
       "in_list_view": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -35,21 +42,27 @@
       "options": "Pass\nFail\nObservation",
       "default": "Pass",
       "in_list_view": 1,
-      "idx": 3
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "inspection_finding_col_details",
+      "fieldtype": "Column Break",
+      "idx": 5
     },
     {
       "doctype": "DocField",
       "fieldname": "corrective_action",
       "fieldtype": "Small Text",
       "label": "Corrective Action",
-      "idx": 4
+      "idx": 6
     },
     {
       "doctype": "DocField",
       "fieldname": "target_completion_date",
       "fieldtype": "Date",
       "label": "Target Completion Date",
-      "idx": 5
+      "idx": 7
     }
   ],
   "permissions": []

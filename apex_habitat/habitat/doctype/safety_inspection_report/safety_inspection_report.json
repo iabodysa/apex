@@ -15,13 +15,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "FSI-.YYYY.-.#####",
-      "default": "FSI-.YYYY.-.#####",
-      "reqd": 1,
+      "fieldname": "safety_inspection_report_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,7 +34,7 @@
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -38,7 +42,7 @@
       "fieldtype": "Date",
       "label": "Inspection Date",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -47,29 +51,19 @@
       "label": "Inspector",
       "options": "User",
       "reqd": 1,
-      "idx": 4
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 6
     },
     {
       "doctype": "DocField",
       "fieldname": "safety_section_clear",
       "fieldtype": "Check",
-      "label": "Safety Section \u2014 No Issues",
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "safety_findings",
-      "fieldtype": "Table",
-      "label": "Safety Findings",
-      "options": "Safety Inspection Finding Item",
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "maintenance_findings",
-      "fieldtype": "Table",
-      "label": "Maintenance Findings",
-      "options": "Maintenance Inspection Finding Item",
+      "label": "Safety Section — No Issues",
       "idx": 7
     },
     {
@@ -88,12 +82,86 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "safety_inspection_report_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_sec_table_safety_findings",
+      "fieldtype": "Section Break",
+      "label": "Safety Findings",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_findings",
+      "fieldtype": "Table",
+      "label": "Safety Findings",
+      "options": "Safety Inspection Finding Item",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_sec_table_maintenance_findings",
+      "fieldtype": "Section Break",
+      "label": "Maintenance Findings",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "maintenance_findings",
+      "fieldtype": "Table",
+      "label": "Maintenance Findings",
+      "options": "Maintenance Inspection Finding Item",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_sec_table_linked_maintenance_requests",
+      "fieldtype": "Section Break",
+      "label": "Generated Maintenance Requests",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "linked_maintenance_requests",
       "fieldtype": "Table",
       "label": "Generated Maintenance Requests",
       "options": "Linked Maintenance Request Item",
       "read_only": 1,
-      "idx": 10
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "FSI-.YYYY.-.#####",
+      "default": "FSI-.YYYY.-.#####",
+      "reqd": 1,
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_inspection_report_col_system",
+      "fieldtype": "Column Break",
+      "idx": 20
     },
     {
       "doctype": "DocField",
@@ -102,7 +170,7 @@
       "label": "Submitted To (Recipients)",
       "read_only": 1,
       "description": "Admin Manager, Operations Director, General Manager",
-      "idx": 11
+      "idx": 21
     }
   ],
   "permissions": [

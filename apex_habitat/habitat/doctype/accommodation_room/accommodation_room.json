@@ -11,18 +11,166 @@
   "sort_field": "modified",
   "sort_order": "DESC",
   "fields": [
-    {"doctype": "DocField", "fieldname": "naming_series", "label": "Series", "fieldtype": "Select", "options": "ROOM-.####", "default": "ROOM-.####", "reqd": 1, "idx": 1},
-    {"doctype": "DocField", "fieldname": "building", "label": "Building", "fieldtype": "Link", "options": "Accommodation Building", "reqd": 1, "in_list_view": 1, "idx": 2},
-    {"doctype": "DocField", "fieldname": "room_number", "label": "Room Number", "fieldtype": "Data", "reqd": 1, "in_list_view": 1, "idx": 3},
-    {"doctype": "DocField", "fieldname": "floor", "label": "Floor", "fieldtype": "Int", "idx": 4},
-    {"doctype": "DocField", "fieldname": "room_type", "label": "Room Type", "fieldtype": "Select", "options": "Standard\nSupervisor\nIsolation\nStorage", "default": "Standard", "idx": 5},
-    {"doctype": "DocField", "fieldname": "bed_capacity", "label": "Bed Capacity", "fieldtype": "Int", "reqd": 1, "idx": 6},
-    {"doctype": "DocField", "fieldname": "current_occupancy", "label": "Current Occupancy", "fieldtype": "Int", "read_only": 1, "idx": 7},
-    {"doctype": "DocField", "fieldname": "status", "label": "Status", "fieldtype": "Select", "options": "Available\nPartially Occupied\nFull\nUnder Maintenance", "default": "Available", "in_list_view": 1, "idx": 8}
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_room_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_room_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "building",
+      "label": "Building",
+      "fieldtype": "Link",
+      "options": "Accommodation Building",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "room_number",
+      "label": "Room Number",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "floor",
+      "label": "Floor",
+      "fieldtype": "Int",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_room_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "room_type",
+      "label": "Room Type",
+      "fieldtype": "Select",
+      "options": "Standard\nSupervisor\nIsolation\nStorage",
+      "default": "Standard",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "bed_capacity",
+      "label": "Bed Capacity",
+      "fieldtype": "Int",
+      "reqd": 1,
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "label": "Status",
+      "fieldtype": "Select",
+      "options": "Available\nPartially Occupied\nFull\nUnder Maintenance",
+      "default": "Available",
+      "in_list_view": 1,
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_room_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_room_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "current_occupancy",
+      "label": "Current Occupancy",
+      "fieldtype": "Int",
+      "read_only": 1,
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_room_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_room_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_room_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "label": "Series",
+      "fieldtype": "Select",
+      "options": "ROOM-.####",
+      "default": "ROOM-.####",
+      "reqd": 1,
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_room_col_system",
+      "fieldtype": "Column Break",
+      "idx": 17
+    }
   ],
   "permissions": [
-    {"doctype": "DocPerm", "role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "report": 1, "export": 1, "print": 1, "email": 1, "share": 1, "idx": 1},
-    {"doctype": "DocPerm", "role": "Accommodation Manager", "read": 1, "write": 1, "create": 1, "idx": 2},
-    {"doctype": "DocPerm", "role": "Resident Supervisor", "read": 1, "idx": 3}
+    {
+      "doctype": "DocPerm",
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1,
+      "email": 1,
+      "share": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Accommodation Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocPerm",
+      "role": "Resident Supervisor",
+      "read": 1,
+      "idx": 3
+    }
   ]
 }

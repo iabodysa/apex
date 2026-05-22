@@ -13,12 +13,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "CUST-ISS-.YYYY.-.####",
-      "default": "CUST-ISS-.YYYY.-.####",
+      "fieldname": "custody_issue_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -26,7 +31,7 @@
       "fieldtype": "Date",
       "label": "Issue Date",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -35,7 +40,7 @@
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -43,14 +48,41 @@
       "fieldtype": "Link",
       "label": "Issued To (Employee)",
       "options": "Employee",
-      "idx": 4
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 6
     },
     {
       "doctype": "DocField",
       "fieldname": "issued_to_name",
       "fieldtype": "Data",
       "label": "Issued To (Free Text)",
-      "idx": 5
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks",
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_tab_tables",
+      "fieldtype": "Tab Break",
+      "label": "Related Tables",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_sec_table_items",
+      "fieldtype": "Section Break",
+      "label": "Items",
+      "idx": 10
     },
     {
       "doctype": "DocField",
@@ -58,14 +90,36 @@
       "fieldtype": "Table",
       "label": "Items",
       "options": "Custody Issue Item",
-      "idx": 6
+      "idx": 11
     },
     {
       "doctype": "DocField",
-      "fieldname": "remarks",
-      "fieldtype": "Small Text",
-      "label": "Remarks",
-      "idx": 7
+      "fieldname": "custody_issue_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "CUST-ISS-.YYYY.-.####",
+      "default": "CUST-ISS-.YYYY.-.####",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_issue_col_system",
+      "fieldtype": "Column Break",
+      "idx": 15
     },
     {
       "doctype": "DocField",
@@ -75,7 +129,7 @@
       "options": "Draft\nIssued\nReturned\nCancelled",
       "default": "Draft",
       "read_only": 1,
-      "idx": 8
+      "idx": 16
     }
   ],
   "permissions": [

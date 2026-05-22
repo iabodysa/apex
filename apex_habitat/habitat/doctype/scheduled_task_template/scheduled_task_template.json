@@ -12,12 +12,19 @@
   "fields": [
     {
       "doctype": "DocField",
+      "fieldname": "scheduled_task_template_sec_main",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "template_name",
       "fieldtype": "Data",
       "label": "Template Name",
       "reqd": 1,
       "unique": 1,
-      "idx": 1
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -26,7 +33,7 @@
       "label": "Task Type",
       "options": "Safety\nMaintenance\nInspection\nCleaning\nOther",
       "default": "Maintenance",
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -34,7 +41,7 @@
       "fieldtype": "Link",
       "label": "Building",
       "options": "Accommodation Building",
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -44,7 +51,13 @@
       "options": "Daily\nWeekly\nMonthly\nQuarterly\nAnnually",
       "default": "Monthly",
       "reqd": 1,
-      "idx": 4
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "scheduled_task_template_col_main",
+      "fieldtype": "Column Break",
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -52,7 +65,7 @@
       "fieldtype": "Link",
       "label": "Default Assignee (Employee)",
       "options": "Employee",
-      "idx": 5
+      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -60,14 +73,14 @@
       "fieldtype": "Link",
       "label": "Safety Task (from Catalog)",
       "options": "Safety Task Catalog",
-      "idx": 6
+      "idx": 8
     },
     {
       "doctype": "DocField",
       "fieldname": "description",
       "fieldtype": "Text Editor",
       "label": "Description",
-      "idx": 7
+      "idx": 9
     },
     {
       "doctype": "DocField",
@@ -75,7 +88,7 @@
       "fieldtype": "Check",
       "label": "Is Active",
       "default": "1",
-      "idx": 8
+      "idx": 10
     }
   ],
   "permissions": [

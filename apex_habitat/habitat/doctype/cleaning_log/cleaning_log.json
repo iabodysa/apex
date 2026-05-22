@@ -11,8 +11,15 @@
   "naming_rule": "By \"Naming Series\" field",
   "sort_field": "modified",
   "sort_order": "DESC",
-  "description": "Daily cleaning record per building. Not submittable \u2014 operational log only.",
+  "description": "Daily cleaning record per building. Not submittable — operational log only.",
   "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "cleaning_log_sec_main",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 1
+    },
     {
       "doctype": "DocField",
       "fieldname": "naming_series",
@@ -21,7 +28,7 @@
       "options": "CLEAN-.YYYY.-.####",
       "default": "CLEAN-.YYYY.-.####",
       "reqd": 1,
-      "idx": 1
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,7 +37,7 @@
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -38,14 +45,20 @@
       "fieldtype": "Date",
       "label": "Cleaning Date",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
       "fieldname": "cleaned_by",
       "fieldtype": "Data",
       "label": "Cleaned By (Name)",
-      "idx": 4
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "cleaning_log_col_main",
+      "fieldtype": "Column Break",
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -53,14 +66,14 @@
       "fieldtype": "Table",
       "label": "Room Cleaning Details",
       "options": "Cleaning Log Room Detail",
-      "idx": 5
+      "idx": 7
     },
     {
       "doctype": "DocField",
       "fieldname": "supervisor_approved",
       "fieldtype": "Check",
       "label": "Approved by Supervisor",
-      "idx": 6
+      "idx": 8
     },
     {
       "doctype": "DocField",
@@ -69,7 +82,7 @@
       "label": "Approved By",
       "options": "User",
       "depends_on": "eval:doc.supervisor_approved==1",
-      "idx": 7
+      "idx": 9
     }
   ],
   "permissions": [

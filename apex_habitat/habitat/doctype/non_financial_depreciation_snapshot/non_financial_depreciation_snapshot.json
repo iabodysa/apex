@@ -13,12 +13,19 @@
   "fields": [
     {
       "doctype": "DocField",
+      "fieldname": "non-financial_depreciation_snapshot_sec_main",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "naming_series",
       "fieldtype": "Select",
       "label": "Series",
       "options": "DEP-SNAP-.YYYY.-.####",
       "default": "DEP-SNAP-.YYYY.-.####",
-      "idx": 1
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -26,7 +33,7 @@
       "fieldtype": "Date",
       "label": "Snapshot Date",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -35,7 +42,13 @@
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "non-financial_depreciation_snapshot_col_main",
+      "fieldtype": "Column Break",
+      "idx": 5
     },
     {
       "doctype": "DocField",
@@ -43,7 +56,7 @@
       "fieldtype": "Table",
       "label": "Asset Lines",
       "options": "Depreciation Snapshot Item",
-      "idx": 4
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -51,7 +64,7 @@
       "fieldtype": "Currency",
       "label": "Total Book Value (SAR)",
       "read_only": 1,
-      "idx": 5
+      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -59,7 +72,7 @@
       "fieldtype": "Small Text",
       "label": "Cancellation Reason",
       "read_only": 1,
-      "idx": 6
+      "idx": 8
     }
   ],
   "permissions": [

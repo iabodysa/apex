@@ -10,13 +10,20 @@
   "fields": [
     {
       "doctype": "DocField",
+      "fieldname": "custody_damage_item_sec_details",
+      "fieldtype": "Section Break",
+      "label": "Details",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "article",
       "fieldtype": "Link",
       "label": "Article",
       "options": "Custody Article",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 1
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -25,7 +32,13 @@
       "label": "Damage Description",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 2
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "custody_damage_item_col_details",
+      "fieldtype": "Column Break",
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -34,14 +47,14 @@
       "label": "Estimated Replacement Cost (SAR)",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 3
+      "idx": 5
     },
     {
       "doctype": "DocField",
       "fieldname": "serial_no",
       "fieldtype": "Data",
       "label": "Serial No",
-      "idx": 4
+      "idx": 6
     }
   ],
   "permissions": []

@@ -15,13 +15,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "STE-.YYYY.-.#####",
-      "default": "STE-.YYYY.-.#####",
-      "reqd": 1,
+      "fieldname": "safety_task_execution_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_execution_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,7 +34,7 @@
       "label": "Execution Date",
       "reqd": 1,
       "default": "Today",
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -39,7 +43,7 @@
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -48,34 +52,7 @@
       "label": "Task",
       "options": "Safety Task Catalog",
       "reqd": 1,
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "department",
-      "fieldtype": "Data",
-      "label": "Department",
-      "fetch_from": "task.department",
-      "read_only": 1,
       "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "frequency",
-      "fieldtype": "Data",
-      "label": "Frequency",
-      "fetch_from": "task.frequency",
-      "read_only": 1,
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "priority",
-      "fieldtype": "Data",
-      "label": "Priority",
-      "fetch_from": "task.priority",
-      "read_only": 1,
-      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -85,7 +62,7 @@
       "options": "Excellent\nGood\nAverage\nPoor\nNot Done",
       "reqd": 1,
       "default": "Excellent",
-      "idx": 8
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -94,28 +71,34 @@
       "label": "Executed By",
       "options": "User",
       "default": "user",
-      "idx": 9
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_execution_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 8
     },
     {
       "doctype": "DocField",
       "fieldname": "execution_time",
       "fieldtype": "Time",
       "label": "Execution Time",
-      "idx": 10
+      "idx": 9
     },
     {
       "doctype": "DocField",
       "fieldname": "notes",
       "fieldtype": "Small Text",
       "label": "Notes",
-      "idx": 11
+      "idx": 10
     },
     {
       "doctype": "DocField",
       "fieldname": "evidence_photo",
       "fieldtype": "Attach Image",
       "label": "Evidence Photo",
-      "idx": 12
+      "idx": 11
     },
     {
       "doctype": "DocField",
@@ -124,7 +107,7 @@
       "label": "Linked Safety Inspection Report",
       "options": "Safety Inspection Report",
       "description": "If execution discovered an issue requiring formal inspection",
-      "idx": 13
+      "idx": 12
     },
     {
       "doctype": "DocField",
@@ -133,7 +116,64 @@
       "label": "Linked Maintenance Request",
       "options": "Maintenance Request",
       "description": "Auto-created when execution_status in ('Poor', 'Not Done') and notes warrant repair",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_execution_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
       "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_execution_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "STE-.YYYY.-.#####",
+      "default": "STE-.YYYY.-.#####",
+      "reqd": 1,
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "department",
+      "fieldtype": "Data",
+      "label": "Department",
+      "fetch_from": "task.department",
+      "read_only": 1,
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "safety_task_execution_col_system",
+      "fieldtype": "Column Break",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "frequency",
+      "fieldtype": "Data",
+      "label": "Frequency",
+      "fetch_from": "task.frequency",
+      "read_only": 1,
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "priority",
+      "fieldtype": "Data",
+      "label": "Priority",
+      "fetch_from": "task.priority",
+      "read_only": 1,
+      "idx": 20
     }
   ],
   "permissions": [

@@ -15,12 +15,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "UTIL-BILL-.YYYY.-.#####",
-      "default": "UTIL-BILL-.YYYY.-.#####",
+      "fieldname": "utility_bill_entry_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_bill_entry_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -30,7 +35,123 @@
       "options": "Utility Account",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 2
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "consumption_units",
+      "fieldtype": "Float",
+      "label": "Consumption (kWh / m³)",
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "due_date",
+      "fieldtype": "Date",
+      "label": "Due Date",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_bill_entry_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "attached_bill",
+      "fieldtype": "Attach",
+      "label": "Bill PDF",
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "Draft\nReceived\nUnder Review\nPaid\nDisputed",
+      "default": "Received",
+      "in_list_view": 1,
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_bill_entry_tab_financials",
+      "fieldtype": "Tab Break",
+      "label": "Financials",
+      "idx": 9
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_bill_entry_sec_financials",
+      "fieldtype": "Section Break",
+      "label": "Financial Information",
+      "idx": 10
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "billing_period_from",
+      "fieldtype": "Date",
+      "label": "Billing Period From",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "billing_period_to",
+      "fieldtype": "Date",
+      "label": "Billing Period To",
+      "reqd": 1,
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_bill_entry_col_financials",
+      "fieldtype": "Column Break",
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "bill_amount_sar",
+      "fieldtype": "Currency",
+      "label": "Bill Amount (SAR)",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "linked_payment_entry",
+      "fieldtype": "Link",
+      "label": "Payment Entry",
+      "options": "Payment Entry",
+      "read_only": 1,
+      "description": "Draft Payment Entry created on submit.",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_bill_entry_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "utility_bill_entry_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "UTIL-BILL-.YYYY.-.#####",
+      "default": "UTIL-BILL-.YYYY.-.#####",
+      "idx": 18
     },
     {
       "doctype": "DocField",
@@ -41,7 +162,7 @@
       "fetch_from": "utility_account.building",
       "read_only": 1,
       "in_list_view": 1,
-      "idx": 3
+      "idx": 19
     },
     {
       "doctype": "DocField",
@@ -51,61 +172,13 @@
       "fetch_from": "utility_account.utility_type",
       "read_only": 1,
       "in_list_view": 1,
-      "idx": 4
+      "idx": 20
     },
     {
       "doctype": "DocField",
-      "fieldname": "section_billing",
-      "fieldtype": "Section Break",
-      "label": "Billing Period",
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "billing_period_from",
-      "fieldtype": "Date",
-      "label": "Billing Period From",
-      "reqd": 1,
-      "in_list_view": 1,
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "billing_period_to",
-      "fieldtype": "Date",
-      "label": "Billing Period To",
-      "reqd": 1,
-      "idx": 7
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "bill_amount_sar",
-      "fieldtype": "Currency",
-      "label": "Bill Amount (SAR)",
-      "reqd": 1,
-      "in_list_view": 1,
-      "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "consumption_units",
-      "fieldtype": "Float",
-      "label": "Consumption (kWh / m³)",
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "due_date",
-      "fieldtype": "Date",
-      "label": "Due Date",
-      "idx": 10
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "section_variance",
-      "fieldtype": "Section Break",
-      "label": "Variance",
-      "idx": 11
+      "fieldname": "utility_bill_entry_col_system",
+      "fieldtype": "Column Break",
+      "idx": 21
     },
     {
       "doctype": "DocField",
@@ -114,7 +187,7 @@
       "label": "Variance from Average (%)",
       "read_only": 1,
       "description": "Auto-calculated on validate. Positive = above average; negative = below average.",
-      "idx": 12
+      "idx": 22
     },
     {
       "doctype": "DocField",
@@ -122,41 +195,7 @@
       "fieldtype": "Check",
       "label": "Variance Alert Sent",
       "read_only": 1,
-      "idx": 13
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "section_docs",
-      "fieldtype": "Section Break",
-      "label": "Documents and Links",
-      "idx": 14
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "attached_bill",
-      "fieldtype": "Attach",
-      "label": "Bill PDF",
-      "idx": 15
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "linked_payment_entry",
-      "fieldtype": "Link",
-      "label": "Payment Entry",
-      "options": "Payment Entry",
-      "read_only": 1,
-      "description": "Draft Payment Entry created on submit.",
-      "idx": 16
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "status",
-      "fieldtype": "Select",
-      "label": "Status",
-      "options": "Draft\nReceived\nUnder Review\nPaid\nDisputed",
-      "default": "Received",
-      "in_list_view": 1,
-      "idx": 17
+      "idx": 23
     }
   ],
   "permissions": [

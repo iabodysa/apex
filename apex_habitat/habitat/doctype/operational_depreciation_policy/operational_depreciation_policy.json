@@ -12,12 +12,19 @@
   "fields": [
     {
       "doctype": "DocField",
+      "fieldname": "operational_depreciation_policy_sec_main",
+      "fieldtype": "Section Break",
+      "label": "Information",
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "policy_name",
       "fieldtype": "Data",
       "label": "Policy Name",
       "reqd": 1,
       "unique": 1,
-      "idx": 1
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -25,7 +32,7 @@
       "fieldtype": "Link",
       "label": "Asset Category",
       "options": "Custody Asset Category",
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -33,7 +40,13 @@
       "fieldtype": "Int",
       "label": "Useful Life (Years)",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "operational_depreciation_policy_col_main",
+      "fieldtype": "Column Break",
+      "idx": 5
     },
     {
       "doctype": "DocField",
@@ -42,7 +55,7 @@
       "label": "Method",
       "options": "Straight Line\nDeclining Balance",
       "default": "Straight Line",
-      "idx": 4
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -50,14 +63,14 @@
       "fieldtype": "Percent",
       "label": "Residual Value (%)",
       "default": "0",
-      "idx": 5
+      "idx": 7
     },
     {
       "doctype": "DocField",
       "fieldname": "notes",
       "fieldtype": "Small Text",
       "label": "Notes",
-      "idx": 6
+      "idx": 8
     }
   ],
   "permissions": [

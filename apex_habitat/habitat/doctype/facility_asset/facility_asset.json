@@ -14,13 +14,17 @@
   "fields": [
     {
       "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "FAC-AST-.YYYY.-.####",
-      "default": "FAC-AST-.YYYY.-.####",
-      "reqd": 1,
+      "fieldname": "facility_asset_tab_overview",
+      "fieldtype": "Tab Break",
+      "label": "Overview",
       "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_sec_overview",
+      "fieldtype": "Section Break",
+      "label": "General Details",
+      "idx": 2
     },
     {
       "doctype": "DocField",
@@ -28,7 +32,7 @@
       "fieldtype": "Data",
       "label": "Asset Name (e.g., Camera-Laundry-Room)",
       "reqd": 1,
-      "idx": 2
+      "idx": 3
     },
     {
       "doctype": "DocField",
@@ -37,7 +41,7 @@
       "label": "Category",
       "options": "CCTV Camera\nDVR/NVR\nHard Disk\nRouter\nNetwork Switch\nFire Alarm Panel\nSmoke Detector\nFirst Aid Kit\nFire Extinguisher\nGenerator\nWater Tank\nOther",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -46,21 +50,21 @@
       "label": "Assigned Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 4
+      "idx": 5
     },
     {
       "doctype": "DocField",
       "fieldname": "location_in_building",
       "fieldtype": "Data",
       "label": "Physical Location (e.g., Laundry Room, Floor 2 Hallway)",
-      "idx": 5
+      "idx": 6
     },
     {
       "doctype": "DocField",
       "fieldname": "serial_number",
       "fieldtype": "Data",
       "label": "Serial Number",
-      "idx": 6
+      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -69,7 +73,13 @@
       "label": "ERPNext Asset Record",
       "options": "Asset",
       "description": "FK to native Asset for depreciation",
-      "idx": 7
+      "idx": 8
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_col_overview",
+      "fieldtype": "Column Break",
+      "idx": 9
     },
     {
       "doctype": "DocField",
@@ -79,21 +89,21 @@
       "options": "User",
       "reqd": 1,
       "description": "Supervisor accountable for this asset; appears on facility custody report",
-      "idx": 8
+      "idx": 10
     },
     {
       "doctype": "DocField",
       "fieldname": "installation_date",
       "fieldtype": "Date",
       "label": "Installation Date",
-      "idx": 9
+      "idx": 11
     },
     {
       "doctype": "DocField",
       "fieldname": "warranty_expiry",
       "fieldtype": "Date",
       "label": "Warranty Expiry",
-      "idx": 10
+      "idx": 12
     },
     {
       "doctype": "DocField",
@@ -102,7 +112,38 @@
       "label": "Status",
       "options": "Operational\nFaulty\nUnder Repair\nReplaced\nScrapped\nIn Storage",
       "default": "Operational",
-      "idx": 11
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "notes",
+      "fieldtype": "Small Text",
+      "label": "Notes",
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_tab_system",
+      "fieldtype": "Tab Break",
+      "label": "System Info",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_sec_system",
+      "fieldtype": "Section Break",
+      "label": "Administrative Details",
+      "idx": 16
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "FAC-AST-.YYYY.-.####",
+      "default": "FAC-AST-.YYYY.-.####",
+      "reqd": 1,
+      "idx": 17
     },
     {
       "doctype": "DocField",
@@ -110,14 +151,7 @@
       "fieldtype": "Date",
       "label": "Last Inspected Date",
       "read_only": 1,
-      "idx": 12
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "notes",
-      "fieldtype": "Small Text",
-      "label": "Notes",
-      "idx": 13
+      "idx": 18
     },
     {
       "doctype": "DocField",
@@ -127,7 +161,13 @@
       "options": "Accommodation Building",
       "read_only": 1,
       "description": "Tracks last building before current; updated by on_update hook",
-      "idx": 14
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "facility_asset_col_system",
+      "fieldtype": "Column Break",
+      "idx": 20
     },
     {
       "doctype": "DocField",
@@ -135,7 +175,7 @@
       "fieldtype": "Data",
       "label": "Previous Location",
       "read_only": 1,
-      "idx": 15
+      "idx": 21
     },
     {
       "doctype": "DocField",
@@ -145,7 +185,7 @@
       "read_only": 1,
       "default": 0,
       "description": "Counter incremented each time an Asset Movement is created for this facility asset",
-      "idx": 16
+      "idx": 22
     },
     {
       "doctype": "DocField",
@@ -153,7 +193,7 @@
       "fieldtype": "Date",
       "label": "Last Movement Date",
       "read_only": 1,
-      "idx": 17
+      "idx": 23
     }
   ],
   "permissions": [
