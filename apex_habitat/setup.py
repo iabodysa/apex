@@ -1,4 +1,5 @@
 import frappe
+from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_material_template_seed import seed_templates
 
 
 def after_install():
@@ -8,6 +9,7 @@ def after_install():
     create_custody_articles()
     create_operational_depreciation_policies()
     create_safety_task_catalogs()
+    seed_templates()
     # Force translation cache reload so Arabic strings appear on first login
     frappe.clear_cache()
 
