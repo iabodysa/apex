@@ -14,7 +14,7 @@
  "doc_type": "Accommodation Resident Request",
  "docstatus": 0,
  "doctype": "Web Form",
- "fields": [
+ "web_form_fields": [
   {
    "allow_read_on_all_link_options": 0,
    "doctype": "Web Form Field",

@@ -4,6 +4,7 @@
   "module": "Habitat",
   "custom": 0,
   "istable": 0,
+  "quick_entry": 0,
   "engine": "InnoDB",
   "track_changes": 1,
   "allow_rename": 1,
