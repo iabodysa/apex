@@ -39,18 +39,18 @@ def validate(doc, method=None):
     if not doc.payment_schedule:
         _build_schedule(doc)
 
-    doc.total_scheduled_sar = sum(
-        flt(row.amount_sar) for row in (doc.payment_schedule or [])
+    doc.total_scheduled = sum(
+        flt(row.amount) for row in (doc.payment_schedule or [])
     )
 
 
 def _build_schedule(doc):
     """Populate payment_schedule rows from first_payment_date + billing_cycle."""
-    if not (doc.first_payment_date and doc.lease_end_date and flt(doc.rent_amount_sar) > 0):
+    if not (doc.first_payment_date and doc.lease_end_date and flt(doc.rent_amount) > 0):
         return
 
     step = _CYCLE_MONTHS.get(doc.billing_cycle or "Monthly", 1)
-    amount = flt(doc.rent_amount_sar) * step
+    amount = flt(doc.rent_amount) * step
 
     doc.payment_schedule = []
     due = getdate(doc.first_payment_date)
@@ -59,7 +59,7 @@ def _build_schedule(doc):
     while due <= end:
         doc.append("payment_schedule", {
             "due_date": due,
-            "amount_sar": amount,
+            "amount": amount,
             "status": "Unpaid",
         })
         due = getdate(add_months(due, step))
@@ -73,6 +73,6 @@ def regenerate_schedule(name):
         frappe.throw(_("Payment schedule can only be regenerated on a Draft lease."))
     doc.payment_schedule = []
     _build_schedule(doc)
-    doc.total_scheduled_sar = sum(flt(r.amount_sar) for r in doc.payment_schedule)
+    doc.total_scheduled = sum(flt(r.amount) for r in doc.payment_schedule)
     doc.save(ignore_permissions=True)
     return len(doc.payment_schedule)

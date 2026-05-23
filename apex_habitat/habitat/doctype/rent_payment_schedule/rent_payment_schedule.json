@@ -25,7 +25,7 @@
     },
     {
       "doctype": "DocField",
-      "fieldname": "amount_sar",
+      "fieldname": "amount",
       "fieldtype": "Currency",
       "label": "Amount (SAR)",
       "reqd": 1,
