@@ -25,7 +25,20 @@ def validate(doc, method=None):
 def on_submit(doc, method=None):
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
     if issue.docstatus == 1:
-        issue.db_set("status", "Returned")
+        # Check if fully returned
+        issued_qty = sum([item.qty for item in issue.items])
+        
+        # Calculate total returned so far across all returns for this issue
+        returns = frappe.get_all("Custody Return", filters={"custody_issue": issue.name, "docstatus": 1})
+        total_returned_qty = 0
+        for ret in returns:
+            ret_doc = frappe.get_doc("Custody Return", ret.name)
+            total_returned_qty += sum([item.qty for item in ret_doc.items])
+            
+        if total_returned_qty >= issued_qty:
+            issue.db_set("status", "Returned")
+        elif total_returned_qty > 0:
+            issue.db_set("status", "Partially Returned")
 
 
 def before_cancel(doc, method=None):

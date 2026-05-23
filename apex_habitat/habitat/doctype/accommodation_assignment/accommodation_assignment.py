@@ -97,10 +97,18 @@ def validate(doc, method=None):
         frappe.throw(_("Selected Bed {0} does not belong to Room {1}").format(doc.bed, doc.room))
 
     # Validate room belongs to building
-    room_building = frappe.db.get_value("Accommodation Room", doc.room, "building")
-    if room_building != doc.building:
+    room_doc = frappe.get_doc("Accommodation Room", doc.room)
+    if room_doc.building != doc.building:
         frappe.throw(
             _("Selected Room {0} does not belong to Building {1}").format(doc.room, doc.building)
+        )
+        
+    # Validate room readiness
+    if room_doc.readiness_status in ["Needs Repair", "Needs Cleaning", "Out of Service"]:
+        frappe.throw(
+            _("Room {0} is currently '{1}' and cannot be assigned to an employee.").format(
+                doc.room, room_doc.readiness_status
+            )
         )
 
     # Validate bed is available
