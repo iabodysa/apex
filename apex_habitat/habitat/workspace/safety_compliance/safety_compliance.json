@@ -86,17 +86,9 @@
     },
     {
       "doctype": "Workspace Link",
-      "type": "Link",
-      "label": "Safety Task Catalog",
-      "link_type": "DocType",
-      "link_to": "Safety Task Catalog",
-      "idx": 6
-    },
-    {
-      "doctype": "Workspace Link",
       "type": "Card Break",
       "label": "Views",
-      "idx": 7
+      "idx": 6
     },
     {
       "doctype": "Workspace Link",
@@ -104,7 +96,7 @@
       "label": "Scheduled Task Compliance",
       "link_type": "Report",
       "link_to": "Scheduled Task Compliance",
-      "idx": 8
+      "idx": 7
     }
   ],
   "charts": [
