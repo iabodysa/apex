@@ -40,15 +40,24 @@ body,
 .layout-main-section,
 .layout-side-section {
     background: var(--afmco-sand) !important;
-    color: var(--afmco-forest) !important;
+    /* no color !important — allows status indicator colors to render correctly */
+    color: var(--afmco-forest);
     font-family: var(--afmco-font);
     letter-spacing: -0.006em;
 }
 
+/* B-001: desk-page must be a positioned container so absolute children stay inside */
+.desk-page {
+    position: relative;
+    overflow: hidden;
+}
+
+/* B-001: decorative circles — absolute (not fixed) so they don't escape the page */
 .desk-page:before,
 .desk-page:after {
     content: "";
-    position: fixed;
+    position: absolute;
+    z-index: -1;
     border-left-style: solid;
     border-right-style: solid;
     border-radius: 999px;
@@ -56,8 +65,8 @@ body,
 }
 
 .desk-page:before {
-    right: -180px;
-    top: 84px;
+    inset-inline-end: -180px;
+    inset-block-start: 84px;
     width: 450px;
     height: 450px;
     border-left-width: 58px;
@@ -68,8 +77,8 @@ body,
 }
 
 .desk-page:after {
-    left: -170px;
-    bottom: -190px;
+    inset-inline-start: -170px;
+    inset-block-end: -190px;
     width: 410px;
     height: 410px;
     border-left-width: 50px;
@@ -96,6 +105,7 @@ body,
     letter-spacing: -0.01em;
 }
 
+/* Shared decorative pill shape for brand, page-head corner, section heads, card corners */
 .navbar .navbar-brand:before,
 .page-head:after,
 .form-section .section-head:before,
@@ -108,19 +118,22 @@ body,
     border-left: 6px solid var(--afmco-green);
     border-right: 6px solid var(--afmco-green);
     border-radius: 999px;
+    pointer-events: none; /* B-023: decorative — must not intercept clicks */
 }
 
+/* B-004: logical margin for RTL */
 .navbar .navbar-brand:before {
     width: 28px;
     height: 16px;
-    margin-right: 10px;
+    margin-inline-end: 10px;
     vertical-align: -2px;
 }
 
+/* B-007: logical border for RTL */
 .page-head {
     background: var(--afmco-paper) !important;
     border: 1px solid var(--afmco-line) !important;
-    border-left: 18px solid var(--afmco-green) !important;
+    border-inline-start: 18px solid var(--afmco-green) !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     margin-bottom: 18px;
@@ -138,29 +151,36 @@ body,
     font-weight: 950;
     letter-spacing: 0.18em;
     margin-bottom: 6px;
+    pointer-events: none; /* B-023 */
 }
 
+/* B-002 / B-022: logical position, contained, non-interactive */
 .page-head:after {
     position: absolute;
-    top: -54px;
-    right: 30px;
+    inset-block-start: -54px;
+    inset-inline-end: 30px;
     width: 142px;
     height: 142px;
     border-left-width: 18px;
     border-right-width: 18px;
     opacity: 0.16;
+    pointer-events: none; /* B-023 */
 }
 
+/* #14: prevent tagline from wrapping and pushing action buttons off-screen */
 .page-head .page-title:after {
     content: "UNLOCKING OPPORTUNITIES, DRIVING GROWTH.";
     color: var(--afmco-green);
     display: block;
     font-family: var(--afmco-serif);
-    font-size: 0.82rem;
+    font-size: clamp(0.65rem, 1vw, 0.82rem);
     font-style: italic;
     font-weight: 700;
     letter-spacing: 0.02em;
     margin-top: 7px;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .page-title .title-text,
@@ -184,27 +204,31 @@ h6 {
     line-height: 1.05;
 }
 
+/* B-005: logical border and padding for RTL */
 .page-actions {
     align-items: center;
-    border-left: 1px solid var(--afmco-line);
+    border-inline-start: 1px solid var(--afmco-line);
     display: flex;
+    flex-wrap: nowrap; /* #14: keep action buttons on one line */
     gap: 8px;
     min-height: 48px;
-    padding-left: 16px;
+    padding-inline-start: 16px;
 }
 
+/* B-006: logical margin for RTL */
 .page-actions:before {
     content: "ACTION";
     color: var(--afmco-green);
     font-size: 0.62rem;
     font-weight: 950;
     letter-spacing: 0.16em;
-    margin-right: 4px;
+    margin-inline-end: 4px;
 }
 
-.btn,
+/* B-024: narrow scope — plain .btn includes datepicker/calendar controls */
 .standard-actions .btn,
-.custom-actions .btn {
+.custom-actions .btn,
+.page-actions .btn {
     border-radius: 0 !important;
     box-shadow: none !important;
     font-family: var(--afmco-font);
@@ -226,6 +250,7 @@ h6 {
     border-color: var(--afmco-forest) !important;
 }
 
+/* B-008: logical margin for RTL */
 .btn-primary:before {
     content: "";
     display: inline-block;
@@ -234,7 +259,7 @@ h6 {
     border-left: 4px solid currentColor;
     border-right: 4px solid currentColor;
     border-radius: 999px;
-    margin-right: 8px;
+    margin-inline-end: 8px;
 }
 
 .btn-default,
@@ -277,16 +302,18 @@ h6 {
     position: relative;
 }
 
+/* B-003: logical position for RTL; B-023: non-interactive */
 .workspace-card:after,
 .number-widget-box:after,
 .dashboard-widget-box:after,
 .widget:after {
     position: absolute;
-    right: 14px;
-    top: 16px;
+    inset-inline-end: 14px;
+    inset-block-start: 16px;
     width: 34px;
     height: 18px;
     opacity: 0.32;
+    pointer-events: none; /* B-023 */
 }
 
 .number-widget-box .widget-body .number,
@@ -319,6 +346,7 @@ h6 {
     border-top: 10px solid var(--afmco-forest) !important;
 }
 
+/* B-023: decorative accent — must not block clicks or tab focus */
 .form-layout:before,
 .workspace-body:before {
     content: "";
@@ -330,6 +358,7 @@ h6 {
     border-radius: 999px;
     margin: 22px 22px 8px 22px;
     opacity: 0.25;
+    pointer-events: none; /* B-023 */
 }
 
 .form-section {
@@ -340,11 +369,12 @@ h6 {
     padding: 20px 22px 16px 22px;
 }
 
+/* B-010: logical border for RTL */
 .form-section .section-head {
     align-items: center;
     background: var(--afmco-sand-80);
     border: 1px solid var(--afmco-line);
-    border-left: 12px solid var(--afmco-green);
+    border-inline-start: 12px solid var(--afmco-green);
     color: var(--afmco-forest) !important;
     display: flex;
     font-size: 0.74rem;
@@ -373,6 +403,7 @@ h6 {
     text-transform: uppercase;
 }
 
+/* B-011: logical margin for RTL */
 .frappe-control.reqd .control-label:after,
 .frappe-control .reqd:after,
 .control-label.reqd:after {
@@ -381,7 +412,7 @@ h6 {
     font-size: 0.58rem;
     font-weight: 950;
     letter-spacing: 0.12em;
-    margin-left: 7px;
+    margin-inline-start: 7px;
 }
 
 .control-input,
@@ -408,13 +439,15 @@ select.input-with-feedback:focus {
     outline: 3px solid var(--afmco-focus) !important;
 }
 
+/* B-012: logical padding for RTL */
 .form-tabs-list,
 .nav-tabs {
     background: var(--afmco-paper) !important;
     border-bottom: 2px solid var(--afmco-line) !important;
-    padding-left: 10px;
+    padding-inline-start: 10px;
 }
 
+/* B-013: logical margin for RTL */
 .form-tabs-list .nav-link,
 .nav-tabs .nav-link {
     border: 0 !important;
@@ -422,7 +455,7 @@ select.input-with-feedback:focus {
     color: rgba(7, 43, 26, 0.72) !important;
     font-weight: 900;
     letter-spacing: 0.025em;
-    margin-right: 4px;
+    margin-inline-end: 4px;
     padding: 12px 18px;
 }
 
@@ -433,13 +466,14 @@ select.input-with-feedback:focus {
     color: var(--afmco-white) !important;
 }
 
+/* B-009: logical border for RTL */
 .page-form,
 .filter-section,
 .list-filters,
 .report-filter-area {
     background: var(--afmco-paper) !important;
     border: 1px solid var(--afmco-line) !important;
-    border-left: 10px solid var(--afmco-green) !important;
+    border-inline-start: 10px solid var(--afmco-green) !important;
     border-radius: 0 !important;
 }
 
@@ -478,9 +512,10 @@ select.input-with-feedback:focus {
     background: var(--afmco-sand-80) !important;
 }
 
+/* B-014: logical border for RTL */
 .grid-row-open {
     background: var(--afmco-sand-80) !important;
-    border-left: 12px solid var(--afmco-green) !important;
+    border-inline-start: 12px solid var(--afmco-green) !important;
 }
 
 .grid-footer {
@@ -488,9 +523,10 @@ select.input-with-feedback:focus {
     border-top: 3px solid var(--afmco-green) !important;
 }
 
+/* B-015: logical border for RTL */
 .modal .grid-form .form-section {
     border: 1px solid var(--afmco-line) !important;
-    border-left: 10px solid var(--afmco-green) !important;
+    border-inline-start: 10px solid var(--afmco-green) !important;
     margin-bottom: 14px;
 }
 
@@ -499,6 +535,7 @@ select.input-with-feedback:focus {
     color: var(--afmco-white) !important;
 }
 
+/* B-025: status indicator colors — rely on explicit per-state rules below */
 .indicator,
 .indicator-pill,
 .badge,
@@ -536,13 +573,14 @@ select.input-with-feedback:focus {
     color: var(--afmco-white) !important;
 }
 
+/* B-016: logical border for RTL */
 .workspace-sidebar,
 .standard-sidebar,
 .desk-sidebar,
 .list-sidebar,
 .layout-side-section {
     background: var(--afmco-paper) !important;
-    border-right: 1px solid var(--afmco-line) !important;
+    border-inline-end: 1px solid var(--afmco-line) !important;
     border-top: 8px solid var(--afmco-green) !important;
 }
 
@@ -580,6 +618,7 @@ select.input-with-feedback:focus {
     display: block;
     height: 8px;
     background: var(--afmco-green);
+    pointer-events: none; /* B-023 */
 }
 
 .dropdown-item:hover,
@@ -589,13 +628,14 @@ select.input-with-feedback:focus {
     color: var(--afmco-forest) !important;
 }
 
+/* B-017: logical border for RTL */
 .timeline-item,
 .communication,
 .comment-box,
 .activity-row {
     background: var(--afmco-paper) !important;
     border: 1px solid var(--afmco-line) !important;
-    border-left: 8px solid var(--afmco-mint) !important;
+    border-inline-start: 8px solid var(--afmco-mint) !important;
     border-radius: 0 !important;
 }
 
@@ -609,12 +649,13 @@ select.input-with-feedback:focus {
     font-weight: 900;
 }
 
+/* B-018: logical border for RTL */
 .no-result,
 .msg-box,
 .empty-state {
     background: var(--afmco-paper) !important;
     border: 2px solid var(--afmco-line) !important;
-    border-left: 18px solid var(--afmco-green) !important;
+    border-inline-start: 18px solid var(--afmco-green) !important;
     color: var(--afmco-forest) !important;
     padding: 24px !important;
 }
@@ -630,6 +671,7 @@ select.input-with-feedback:focus {
     border-radius: 999px;
     margin-bottom: 14px;
     opacity: 0.42;
+    pointer-events: none; /* B-023 */
 }
 
 .kanban-column {
@@ -639,10 +681,11 @@ select.input-with-feedback:focus {
     border-radius: 0 !important;
 }
 
+/* B-019: logical border for RTL */
 .kanban-card {
     background: var(--afmco-sand-80) !important;
     border: 1px solid var(--afmco-line) !important;
-    border-left: 8px solid var(--afmco-green) !important;
+    border-inline-start: 8px solid var(--afmco-green) !important;
     border-radius: 0 !important;
     box-shadow: none !important;
 }
@@ -667,27 +710,29 @@ select.input-with-feedback:focus {
     box-shadow: none !important;
 }
 
+/* B-020: logical border for RTL */
 .alert {
     border: 2px solid var(--afmco-line-strong) !important;
-    border-left: 12px solid var(--afmco-green) !important;
+    border-inline-start: 12px solid var(--afmco-green) !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     font-weight: 750;
 }
 
+/* B-028/B-029: smaller scrollbar; logical border */
 ::-webkit-scrollbar {
-    width: 14px;
-    height: 14px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
     background: var(--afmco-sand);
-    border-left: 1px solid var(--afmco-line);
+    border-inline-start: 1px solid var(--afmco-line);
 }
 
 ::-webkit-scrollbar-thumb {
     background: var(--afmco-green);
-    border: 3px solid var(--afmco-sand);
+    border: 2px solid var(--afmco-sand);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -700,14 +745,15 @@ select.input-with-feedback:focus {
         display: none;
     }
 
+    /* B-007 / B-022: logical property in responsive override */
     .page-head {
-        border-left-width: 8px !important;
+        border-inline-start-width: 8px !important;
         min-height: 78px;
     }
 
     .page-head:after {
-        right: -34px;
-        top: -52px;
+        inset-inline-end: -34px;
+        inset-block-start: -52px;
     }
 
     .page-actions:before,
