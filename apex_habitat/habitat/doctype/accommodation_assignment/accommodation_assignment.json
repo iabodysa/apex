@@ -34,7 +34,8 @@
    "options": "Employee",
    "reqd": 1,
    "in_list_view": 1,
-   "idx": 3
+   "idx": 3,
+   "search_index": 1
   },
   {
    "doctype": "DocField",
@@ -53,7 +54,8 @@
    "options": "Accommodation Building",
    "reqd": 1,
    "in_list_view": 1,
-   "idx": 5
+   "idx": 5,
+   "search_index": 1
   },
   {
    "doctype": "DocField",
@@ -62,7 +64,8 @@
    "fieldtype": "Link",
    "options": "Accommodation Room",
    "reqd": 1,
-   "idx": 6
+   "idx": 6,
+   "search_index": 1
   },
   {
    "doctype": "DocField",
@@ -71,7 +74,8 @@
    "fieldtype": "Link",
    "options": "Accommodation Bed",
    "reqd": 1,
-   "idx": 7
+   "idx": 7,
+   "search_index": 1
   },
   {
    "doctype": "DocField",

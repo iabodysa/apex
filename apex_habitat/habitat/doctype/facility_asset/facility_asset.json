@@ -50,7 +50,8 @@
    "label": "Assigned Building",
    "options": "Accommodation Building",
    "reqd": 1,
-   "idx": 5
+   "idx": 5,
+   "search_index": 1
   },
   {
    "doctype": "DocField",

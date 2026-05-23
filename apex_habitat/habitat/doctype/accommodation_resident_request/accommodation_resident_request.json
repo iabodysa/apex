@@ -44,19 +44,22 @@
    "fieldname": "building",
    "fieldtype": "Link",
    "label": "Building",
-   "options": "Accommodation Building"
+   "options": "Accommodation Building",
+   "search_index": 1
   },
   {
    "fieldname": "room",
    "fieldtype": "Link",
    "label": "Room",
-   "options": "Accommodation Room"
+   "options": "Accommodation Room",
+   "search_index": 1
   },
   {
    "fieldname": "bed",
    "fieldtype": "Link",
    "label": "Bed",
-   "options": "Accommodation Bed"
+   "options": "Accommodation Bed",
+   "search_index": 1
   },
   {
    "fieldname": "col1",
@@ -72,7 +75,8 @@
    "fieldname": "employee",
    "fieldtype": "Link",
    "label": "Employee",
-   "options": "Employee"
+   "options": "Employee",
+   "search_index": 1
   },
   {
    "fieldname": "worker_name",

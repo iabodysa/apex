@@ -212,7 +212,8 @@
    "fetch_from": "utility_account.building",
    "read_only": 1,
    "in_list_view": 1,
-   "idx": 25
+   "idx": 25,
+   "search_index": 1
   },
   {
    "doctype": "DocField",

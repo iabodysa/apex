@@ -191,7 +191,8 @@
    "fetch_from": "assignment.employee",
    "read_only": 1,
    "in_list_view": 1,
-   "idx": 23
+   "idx": 23,
+   "search_index": 1
   },
   {
    "doctype": "DocField",
@@ -201,7 +202,8 @@
    "options": "Accommodation Bed",
    "fetch_from": "assignment.bed",
    "read_only": 1,
-   "idx": 24
+   "idx": 24,
+   "search_index": 1
   },
   {
    "doctype": "DocField",

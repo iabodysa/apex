@@ -31,6 +31,9 @@ def before_cancel(doc, method=None):
 @frappe.whitelist()
 def start_task(task_instance):
     """Transition Scheduled Task Instance from Open to In Progress."""
+    if not frappe.has_permission("Scheduled Task Instance", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+        
     doc = frappe.get_doc("Scheduled Task Instance", task_instance)
 
     if doc.docstatus != 1:

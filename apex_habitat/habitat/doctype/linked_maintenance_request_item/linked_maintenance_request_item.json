@@ -36,7 +36,8 @@
    "read_only": 1,
    "idx": 3,
    "in_list_view": 1,
-   "columns": 3
+   "columns": 3,
+   "search_index": 1
   },
   {
    "doctype": "DocField",
