@@ -74,27 +74,12 @@ frappe.ui.form.on("Accommodation Building", {
 					frm.refresh_field("floor_plan");
 					
 					frappe.msgprint({
-						title: __('Wizard Generating...'),
-						message: __('Floor plan table populated. Saving building and generating rooms...'),
-						indicator: 'green'
+						title: __('Table Populated'),
+						message: __('The floor plan table has been filled. <br><br><b>Please review and adjust the room count for each floor if necessary</b>, then click <b>Generate from Table</b> to build the rooms.'),
+						indicator: 'blue'
 					});
 
-					frm.save().then(() => {
-						frappe.call({
-							method: "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.generate_rooms_and_beds",
-							args: { building_name: frm.doc.name },
-							freeze: true,
-							freeze_message: __("Building all Rooms & Beds..."),
-							callback: function(r) {
-								if (!r.exc) {
-									frappe.show_alert({message: __('Successfully generated all rooms and beds!'), indicator: 'green'});
-									frm.reload_doc();
-								}
-							}
-						});
-					});
-
-				}, 'Quick Setup Wizard', 'Build Now!');
+				}, 'Quick Setup Wizard', 'Populate Table');
 			});
 
 			wrapper.find(".btn-generate-rooms").on("click", () => {
