@@ -8,6 +8,8 @@ def after_install():
     create_custody_articles()
     create_operational_depreciation_policies()
     create_safety_task_catalogs()
+    # Force translation cache reload so Arabic strings appear on first login
+    frappe.clear_cache()
 
 
 def create_roles():

@@ -1,22 +1,22 @@
-"""Accommodation Lease controller.
-
-Thin DocType: lease contract period + rent payment schedule.
-Landlord identity (name, mobile, office) stays on Accommodation Building.
-"""
+"""Accommodation Lease controller."""
 
 from __future__ import annotations
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import add_months, flt, getdate
+
+_CYCLE_MONTHS = {
+    "Monthly": 1,
+    "Quarterly": 3,
+    "Semi-Annual": 6,
+    "Annual": 12,
+}
 
 
 class AccommodationLease(Document):
-    def before_save(self):
-        # Validate document properties
-        if self.doctype != "Accommodation Lease":
-            frappe.throw("DocType mismatch")
+    pass
 
 
 def validate(doc, method=None):
@@ -25,13 +25,50 @@ def validate(doc, method=None):
         doc.company = get_default_company()
 
     if doc.lease_end_date and doc.lease_start_date:
-        if doc.lease_end_date <= doc.lease_start_date:
+        if getdate(doc.lease_end_date) <= getdate(doc.lease_start_date):
             frappe.throw(_("Lease End Date must be after Lease Start Date."))
 
-    due_day = doc.rent_due_day or 1
-    if not (1 <= due_day <= 28):
-        frappe.throw(_("Rent Due Day must be between 1 and 28."))
+    if doc.first_payment_date and doc.lease_start_date:
+        if getdate(doc.first_payment_date) < getdate(doc.lease_start_date):
+            frappe.throw(_("First Payment Date cannot be before Lease Start Date."))
+
+    if not doc.payment_schedule:
+        _build_schedule(doc)
 
     doc.total_scheduled_sar = sum(
         flt(row.amount_sar) for row in (doc.payment_schedule or [])
     )
+
+
+def _build_schedule(doc):
+    """Populate payment_schedule rows from first_payment_date + billing_cycle."""
+    if not (doc.first_payment_date and doc.lease_end_date and flt(doc.monthly_rent_sar) > 0):
+        return
+
+    step = _CYCLE_MONTHS.get(doc.billing_cycle or "Monthly", 1)
+    amount = flt(doc.monthly_rent_sar) * step
+
+    doc.payment_schedule = []
+    due = getdate(doc.first_payment_date)
+    end = getdate(doc.lease_end_date)
+
+    while due <= end:
+        doc.append("payment_schedule", {
+            "due_date": due,
+            "amount_sar": amount,
+            "status": "Unpaid",
+        })
+        due = getdate(add_months(due, step))
+
+
+@frappe.whitelist()
+def regenerate_schedule(name):
+    """Force-rebuild the payment schedule (clears existing rows)."""
+    doc = frappe.get_doc("Accommodation Lease", name)
+    if doc.docstatus != 0:
+        frappe.throw(_("Payment schedule can only be regenerated on a Draft lease."))
+    doc.payment_schedule = []
+    _build_schedule(doc)
+    doc.total_scheduled_sar = sum(flt(r.amount_sar) for r in doc.payment_schedule)
+    doc.save(ignore_permissions=True)
+    return len(doc.payment_schedule)

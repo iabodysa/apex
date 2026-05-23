@@ -147,6 +147,7 @@ Billing Period,فترة الفوترة
 Billing Period From,فترة الفوترة من
 Billing Period To,فترة الفوترة إلى
 Billing Period To must be on or after Billing Period From.,يجب أن يكون تاريخ نهاية فترة الفوترة مساوياً لتاريخ البداية أو بعده.
+Billing Cycle,دورة الفوترة
 Billing Recipient Email,البريد الإلكتروني لمستلم الفاتورة
 Book Value (SAR),القيمة الدفترية (ريال)
 Building,المبنى
@@ -398,6 +399,9 @@ Fire Extinguisher,طفاية حريق
 Fire Panel Fault,عطل في لوحة الحريق
 Fire Safety,السلامة من الحريق
 First Aid Kit,صندوق الإسعافات الأولية
+First Payment Date,تاريخ أول دفعة
+First Payment Date cannot be before Lease Start Date.,لا يمكن أن يكون تاريخ أول دفعة قبل تاريخ بداية عقد الإيجار.
+Payment schedule can only be regenerated on a Draft lease.,لا يمكن إعادة توليد جدول الدفع إلا على عقد إيجار في مرحلة المسودة.
 Fixed Asset (Capex),أصل ثابت (مصروفات رأس مالية)
 Floor,الطابق
 Floor Number,رقم الطابق
@@ -719,9 +723,12 @@ Remediation Plan,خطة المعالجة
 Renewal Cost Estimate (SAR),تكلفة التجديد التقديرية (ريال)
 Renewal Lead Days,مهلة التجديد بالأيام
 Rent,الإيجار
+Rent (SAR),الإيجار (ريال)
 Rent Due Day must be between 1 and 28.,يجب أن يكون يوم استحقاق الإيجار بين 1 و 28.
 Rent Due Day of Month,يوم استحقاق الإيجار من الشهر
 Rent Payment Schedule,جدول سداد الإيجارات
+Regenerate Payment Schedule,إعادة توليد جدول السداد
+{0} payment rows generated.,تم توليد {0} صف دفع.
 Reopened,أُعيد فتحه
 Repair Cost (SAR),تكلفة الإصلاح (ريال)
 Report acknowledged by {0}.,اعتمد التقرير بواسطة {0}.
@@ -816,6 +823,7 @@ Set when a subcontractor visit is created from this request,يُضبط عند إ
 Settings,الإعدادات
 Setup,الإعداد
 Setup Status,حالة الإعداد
+Semi-Annual,نصف سنوي
 Severity,الخطورة
 Sewage Tank Suction,نزح خزان الصرف الصحي
 Single monthly utility bill linked to a Utility Account. Posts to Accommodation Ledger on submit.,فاتورة مرافق شهرية واحدة مرتبطة بحساب مرافق. تُرحَّل إلى سجل السكن عند الاعتماد.

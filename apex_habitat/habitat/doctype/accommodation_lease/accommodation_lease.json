@@ -93,9 +93,29 @@
    "doctype": "DocField",
    "fieldname": "monthly_rent_sar",
    "fieldtype": "Currency",
-   "label": "Monthly Rent (SAR)",
+   "label": "Rent (SAR)",
    "reqd": 1,
    "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "billing_cycle",
+   "fieldtype": "Select",
+   "label": "Billing Cycle",
+   "options": "Monthly\nQuarterly\nSemi-Annual\nAnnual",
+   "default": "Monthly",
+   "reqd": 1,
+   "description": "How often rent payments are scheduled. Amount per installment is calculated automatically.",
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "first_payment_date",
+   "fieldtype": "Date",
+   "label": "First Payment Date",
+   "reqd": 1,
+   "description": "Date of the first payment. Subsequent payments are calculated from this date based on Billing Cycle.",
+   "idx": 12
   },
   {
    "doctype": "DocField",
@@ -105,16 +125,7 @@
    "options": "ACC-LEASE-.YYYY.-.####",
    "default": "ACC-LEASE-.YYYY.-.####",
    "reqd": 1,
-   "idx": 11
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "rent_due_day",
-   "fieldtype": "Int",
-   "label": "Rent Due Day of Month",
-   "default": 1,
-   "description": "Day of month on which rent is due (1-28).",
-   "idx": 12
+   "idx": 13
   },
   {
    "doctype": "DocField",
@@ -123,7 +134,7 @@
    "label": "Total Scheduled Amount (SAR)",
    "read_only": 1,
    "description": "Auto-computed sum of all payment schedule rows.",
-   "idx": 13
+   "idx": 14
   },
   {
    "doctype": "DocField",
@@ -131,15 +142,6 @@
    "fieldtype": "Data",
    "label": "Lease / Contract Reference",
    "description": "Landlord-issued contract number or file reference.",
-   "idx": 14
-  },
-  {
-   "fieldname": "billing_cycle",
-   "fieldtype": "Select",
-   "label": "Billing Cycle",
-   "options": "Monthly\nQuarterly\nSemi-Annual\nAnnual",
-   "default": "Monthly",
-   "description": "How often rent payments are scheduled",
    "idx": 15
   },
   {
