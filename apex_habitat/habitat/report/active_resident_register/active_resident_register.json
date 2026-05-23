@@ -1,0 +1,9 @@
+{
+  "doctype": "Report",
+  "name": "Active Resident Register",
+  "report_name": "Active Resident Register",
+  "ref_doctype": "Accommodation Assignment",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Habitat"
+}

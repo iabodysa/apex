@@ -1,8 +1,8 @@
 {
  "doctype": "Workspace",
- "name": "Habitat Hub",
- "label": "Habitat Hub",
- "title": "Habitat Hub",
+ "name": "Operations Command Center",
+ "label": "Operations Command Center",
+ "title": "Operations Command Center",
  "module": "Habitat",
  "icon": "organization",
  "public": 1,

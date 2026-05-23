@@ -29,13 +29,22 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "company",
+      "label": "Company",
+      "fieldtype": "Link",
+      "options": "Company",
+      "read_only": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "building",
       "fieldtype": "Link",
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -44,7 +53,7 @@
       "label": "Landlord Supplier",
       "options": "Supplier",
       "description": "Optional ERPNext Supplier FK. When set, monthly_rent_due_alert creates a Draft Payment Entry automatically.",
-      "idx": 4
+      "idx": 5
     },
     {
       "doctype": "DocField",
@@ -54,7 +63,7 @@
       "options": "Active\nExpired\nTerminated",
       "default": "Active",
       "in_list_view": 1,
-      "idx": 5
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -63,7 +72,7 @@
       "label": "Lease Start Date",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 6
+      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -72,13 +81,13 @@
       "label": "Lease End Date",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 7
+      "idx": 8
     },
     {
       "doctype": "DocField",
       "fieldname": "accommodation_lease_overview_col",
       "fieldtype": "Column Break",
-      "idx": 8
+      "idx": 9
     },
     {
       "doctype": "DocField",
@@ -86,7 +95,7 @@
       "fieldtype": "Currency",
       "label": "Monthly Rent (SAR)",
       "reqd": 1,
-      "idx": 9
+      "idx": 10
     },
     {
       "doctype": "DocField",
@@ -96,7 +105,7 @@
       "options": "ACC-LEASE-.YYYY.-.####",
       "default": "ACC-LEASE-.YYYY.-.####",
       "reqd": 1,
-      "idx": 10
+      "idx": 11
     },
     {
       "doctype": "DocField",
@@ -105,7 +114,7 @@
       "label": "Rent Due Day of Month",
       "default": 1,
       "description": "Day of month on which rent is due (1-28).",
-      "idx": 11
+      "idx": 12
     },
     {
       "doctype": "DocField",
@@ -114,7 +123,7 @@
       "label": "Total Scheduled Amount (SAR)",
       "read_only": 1,
       "description": "Auto-computed sum of all payment schedule rows.",
-      "idx": 12
+      "idx": 13
     },
     {
       "doctype": "DocField",
@@ -122,7 +131,7 @@
       "fieldtype": "Data",
       "label": "Lease / Contract Reference",
       "description": "Landlord-issued contract number or file reference.",
-      "idx": 13
+      "idx": 14
     },
     {
       "doctype": "DocField",
@@ -130,28 +139,28 @@
       "fieldtype": "Section Break",
       "label": "Additional Information",
       "collapsible": 1,
-      "idx": 14
+      "idx": 15
     },
     {
       "doctype": "DocField",
       "fieldname": "notes",
       "fieldtype": "Small Text",
       "label": "Notes",
-      "idx": 15
+      "idx": 16
     },
     {
       "doctype": "DocField",
       "fieldname": "accommodation_lease_tab_tables",
       "fieldtype": "Tab Break",
       "label": "Related Tables",
-      "idx": 16
+      "idx": 17
     },
     {
       "doctype": "DocField",
       "fieldname": "accommodation_lease_sec_table_payment_schedule",
       "fieldtype": "Section Break",
       "label": "Rent Payment Schedule",
-      "idx": 17
+      "idx": 18
     },
     {
       "doctype": "DocField",
@@ -159,7 +168,7 @@
       "fieldtype": "Table",
       "label": "Rent Payment Schedule",
       "options": "Rent Payment Schedule",
-      "idx": 18
+      "idx": 19
     }
   ],
   "permissions": [

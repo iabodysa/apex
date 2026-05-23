@@ -17,6 +17,10 @@ class AccommodationBuilding(Document):
 
 
 def before_save(doc, method=None):
+    if not doc.company:
+        from apex_habitat.habitat.doctype.habitat_settings.habitat_settings import get_default_company
+        doc.company = get_default_company()
+
     doc.annual_total_cost_sar = (
         (doc.annual_rent_sar or 0)
         + (doc.annual_electricity_sar or 0)

@@ -1,0 +1,9 @@
+{
+  "doctype": "Report",
+  "name": "Safety Open Findings",
+  "report_name": "Safety Open Findings",
+  "ref_doctype": "Maintenance Inspection Report",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Habitat"
+}
