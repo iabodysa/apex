@@ -26,3 +26,18 @@ def on_submit(doc, method=None):
 def before_cancel(doc, method=None):
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Scheduled Task Instance."))
+
+
+@frappe.whitelist()
+def start_task(task_instance):
+    """Transition Scheduled Task Instance from Open to In Progress."""
+    doc = frappe.get_doc("Scheduled Task Instance", task_instance)
+
+    if doc.docstatus != 1:
+        frappe.throw(_("Only submitted Task Instances can be started."))
+    if doc.status != "Open":
+        frappe.throw(_("Only Task Instances with status Open can be marked In Progress."))
+
+    doc.db_set("status", "In Progress")
+    doc.add_comment("Comment", _("Task started — status set to In Progress."))
+    return {"status": "In Progress"}
