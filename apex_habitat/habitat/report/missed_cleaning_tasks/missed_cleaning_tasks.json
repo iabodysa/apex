@@ -1,0 +1,9 @@
+{
+  "doctype": "Report",
+  "name": "Missed Cleaning Tasks",
+  "report_name": "Missed Cleaning Tasks",
+  "ref_doctype": "Cleaning Log",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Habitat"
+}
