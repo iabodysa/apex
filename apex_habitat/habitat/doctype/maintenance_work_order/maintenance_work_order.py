@@ -88,6 +88,11 @@ def mark_completed(work_order, completion_notes=None):
     doc.db_set("status", "Completed")
     if completion_notes and not doc.completion_notes:
         doc.db_set("completion_notes", completion_notes)
+        
+    if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
+        mr_status_field = {f.fieldname for f in frappe.get_meta("Maintenance Request").fields}
+        if "status" in mr_status_field:
+            frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "Closed")
 
     ledger_posted = False
     cost = flt(doc.total_procurement_cost_sar)

@@ -63,20 +63,56 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    # Close the assignment by recording the check-out date. The assignment is
-    # kept as a submitted historical record (not cancelled): the daily cost
-    # allocation job stops future rows because it filters on an unset
-    # check_out_date, and the stay history is preserved for audit and reports.
+    # Close the assignment
     assignment = frappe.get_doc("Accommodation Assignment", doc.assignment)
     assignment.db_set("check_out_date", doc.checkout_date)
     assignment.add_comment("Comment", _("Check-out processed via {0} on {1}").format(doc.name, doc.checkout_date))
 
     frappe.db.set_value("Accommodation Bed", doc.bed, "status", "Available")
+    frappe.db.set_value("Accommodation Room", assignment.room, "readiness_status", "Needs Cleaning")
     recalculate_spatial(assignment.room, assignment.building)
 
-    # Damage recovery is intentionally NOT posted here. Custody Damage
-    # Assessment is the single authority for damage deductions, so a checkout
-    # can never double-charge an employee already charged via that flow.
+    # Automate Custody Return Document
+    if doc.custody_return_items:
+        return_doc = frappe.get_doc({
+            "doctype": "Custody Return",
+            "employee": doc.employee,
+            "return_date": doc.checkout_date,
+            "status": "Returned",
+            "linked_checkout": doc.name,
+            "notes": "Auto-generated from Accommodation Checkout"
+        })
+        has_damage = False
+        for item in doc.custody_return_items:
+            if item.return_status in ["Damaged", "Lost"]:
+                has_damage = True
+            return_doc.append("return_items", {
+                "article": item.article,
+                "quantity_returned": 1,
+                "return_status": item.return_status
+            })
+        return_doc.insert(ignore_permissions=True)
+        return_doc.submit()
+        doc.add_comment("Comment", _("Auto-generated Custody Return: {0}").format(return_doc.name))
+
+        if has_damage:
+            damage_doc = frappe.get_doc({
+                "doctype": "Custody Damage Assessment",
+                "employee": doc.employee,
+                "assessment_date": doc.checkout_date,
+                "source_reference": doc.name,
+                "status": "Draft"
+            })
+            for item in doc.custody_return_items:
+                if item.return_status in ["Damaged", "Lost"]:
+                    damage_doc.append("damaged_items", {
+                        "article": item.article,
+                        "quantity": 1,
+                        "damage_type": item.return_status,
+                        "description": "Reported during checkout"
+                    })
+            damage_doc.insert(ignore_permissions=True)
+            doc.add_comment("Comment", _("Draft Damage Assessment created: {0}. Please review and submit.").format(damage_doc.name))
 
 
 def before_cancel(doc, method=None):
