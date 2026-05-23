@@ -8,7 +8,7 @@
  "anonymous": 1,
  "apply_document_permissions": 0,
  "button_label": "Submit Request",
- "client_script": "frappe.web_form.after_load = function () {\n    var params = new URLSearchParams(window.location.search);\n    var token = params.get('token');\n    if (token) {\n        frappe.web_form.set_value('location_token', token);\n    }\n};\n\nfrappe.web_form.after_save = function (doc) {\n    var code = doc && doc.anonymous_tracking_code;\n    if (code) {\n        var msg = document.createElement('div');\n        msg.style.cssText = 'margin-top:16px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;font-size:15px;';\n        msg.innerHTML = '<strong>Your request has been received.</strong><br>Track it with code: <code style=\"font-size:16px;letter-spacing:2px;\">' + code + '</code>';\n        var btn = document.querySelector('.web-form-footer');\n        if (btn) btn.parentNode.insertBefore(msg, btn.nextSibling);\n    }\n};",
+ "client_script": "",
  "condition_json": "[]",
  "creation": "2026-05-23 00:00:00.000000",
  "doc_type": "Accommodation Resident Request",
