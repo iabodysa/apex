@@ -1,153 +1,167 @@
 {
- "doctype": "Workspace",
- "name": "Maintenance & Remediation",
- "label": "Maintenance & Remediation",
- "title": "Maintenance & Remediation",
- "module": "Habitat",
- "icon": "tool",
- "public": 1,
- "is_default": 0,
- "sequence_id": 4.0,
- "parent_page": "Operations Command Center",
- "content": "[{\"id\": \"51W9LDgfgD\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"FHrGhdq7XI\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"cCQHXuWwXA\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Escalated Maintenance Requests\", \"col\": 3}}, {\"id\": \"pNpIo3CuID\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders In Progress\", \"col\": 3}}, {\"id\": \"bE9LO6rnCN\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders Completed\", \"col\": 3}}, {\"id\": \"C75YgqaKoO\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"96D9JJHM66\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Requests by Status\", \"col\": 6}}, {\"id\": \"brTdTic9SK\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Requests by Priority\", \"col\": 6}}, {\"id\": \"BvE0D8ffFE\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"cC64lMNzCW\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Maintenance Request\", \"col\": 4}}, {\"id\": \"3G1STlBkEA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"TQv1Ji03WN\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"EEA6pMXoQd\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Work Order\", \"col\": 3}}, {\"id\": \"LyGwEKw9lS\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Inspection Report\", \"col\": 3}}, {\"id\": \"Krg11Y6er7\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Maintenance & Remediation</b></span>\", \"col\": 12}}, {\"id\": \"751uBjYG8u\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Flow\", \"col\": 4}}, {\"id\": \"WH9Bbq2FMW\", \"type\": \"card\", \"data\": {\"card_name\": \"Linked Records\", \"col\": 4}}, {\"id\": \"VaO2lQzXus\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
- "shortcuts": [
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Maintenance Request",
-   "link_to": "Maintenance Request",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Maintenance Work Order",
-   "link_to": "Maintenance Work Order",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Maintenance Inspection Report",
-   "link_to": "Maintenance Inspection Report",
-   "idx": 3
-  }
- ],
- "links": [
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Maintenance Flow",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Maintenance Request",
-   "link_type": "DocType",
-   "link_to": "Maintenance Request",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Maintenance Work Order",
-   "link_type": "DocType",
-   "link_to": "Maintenance Work Order",
-   "idx": 3
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Maintenance Inspection Report",
-   "link_type": "DocType",
-   "link_to": "Maintenance Inspection Report",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Linked Records",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Facility Asset",
-   "link_type": "DocType",
-   "link_to": "Facility Asset",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Subcontractor Service Order",
-   "link_type": "DocType",
-   "link_to": "Subcontractor Service Order",
-   "idx": 7
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Views",
-   "idx": 8
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Maintenance Backlog",
-   "link_type": "Report",
-   "link_to": "Maintenance Backlog",
-   "idx": 9
-  }
- ],
- "charts": [
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Maintenance Requests by Status",
-   "label": "Maintenance Requests by Status",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Maintenance Requests by Priority",
-   "label": "Maintenance Requests by Priority",
-   "idx": 2
-  }
- ],
- "number_cards": [
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Open Maintenance Requests",
-   "label": "Open Maintenance Requests",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Escalated Maintenance Requests",
-   "label": "Escalated Maintenance Requests",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Maintenance Work Orders In Progress",
-   "label": "Maintenance Work Orders In Progress",
-   "idx": 3
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Maintenance Work Orders Completed",
-   "label": "Maintenance Work Orders Completed",
-   "idx": 4
-  }
- ],
- "quick_lists": [
-  {
-   "doctype": "Workspace Quick List",
-   "document_type": "Maintenance Request",
-   "label": "Maintenance Request",
-   "quick_list_filter": "{\"status\": [\"in\", [\"Open\", \"Assigned\", \"In Progress\", \"Reopened\"]]}",
-   "idx": 1
-  }
- ]
+  "doctype": "Workspace",
+  "name": "Maintenance & Remediation",
+  "label": "Maintenance & Remediation",
+  "title": "Maintenance & Remediation",
+  "module": "Habitat",
+  "icon": "tool",
+  "public": 1,
+  "is_default": 0,
+  "sequence_id": 4.0,
+  "parent_page": "Operations Command Center",
+  "content": "[{\"id\": \"51W9LDgfgD\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"FHrGhdq7XI\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"cCQHXuWwXA\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Escalated Maintenance Requests\", \"col\": 3}}, {\"id\": \"pNpIo3CuID\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders In Progress\", \"col\": 3}}, {\"id\": \"bE9LO6rnCN\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders Completed\", \"col\": 3}}, {\"id\": \"C75YgqaKoO\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"96D9JJHM66\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Requests by Status\", \"col\": 6}}, {\"id\": \"brTdTic9SK\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Requests by Priority\", \"col\": 6}}, {\"id\": \"BvE0D8ffFE\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"cC64lMNzCW\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Maintenance Request\", \"col\": 4}}, {\"id\": \"3G1STlBkEA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"TQv1Ji03WN\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"EEA6pMXoQd\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Work Order\", \"col\": 3}}, {\"id\": \"LyGwEKw9lS\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Inspection Report\", \"col\": 3}}, {\"id\": \"Krg11Y6er7\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Maintenance & Remediation</b></span>\", \"col\": 12}}, {\"id\": \"751uBjYG8u\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Flow\", \"col\": 4}}, {\"id\": \"WH9Bbq2FMW\", \"type\": \"card\", \"data\": {\"card_name\": \"Linked Records\", \"col\": 4}}, {\"id\": \"VaO2lQzXus\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}, {\"id\": \"VS9zyc3Cli\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Backlog\", \"col\": 3}}, {\"id\": \"38fXKlIZE1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Aging\", \"col\": 3}}]",
+  "shortcuts": [
+    {
+      "doctype": "Workspace Shortcut",
+      "type": "DocType",
+      "label": "Maintenance Request",
+      "link_to": "Maintenance Request",
+      "idx": 1
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "type": "DocType",
+      "label": "Maintenance Work Order",
+      "link_to": "Maintenance Work Order",
+      "idx": 2
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "type": "DocType",
+      "label": "Maintenance Inspection Report",
+      "link_to": "Maintenance Inspection Report",
+      "idx": 3
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "type": "Report",
+      "label": "Maintenance Backlog",
+      "link_to": "Maintenance Backlog",
+      "idx": 4
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "type": "Report",
+      "label": "Maintenance Aging",
+      "link_to": "Maintenance Aging",
+      "idx": 5
+    }
+  ],
+  "links": [
+    {
+      "doctype": "Workspace Link",
+      "type": "Card Break",
+      "label": "Maintenance Flow",
+      "idx": 1
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Maintenance Request",
+      "link_type": "DocType",
+      "link_to": "Maintenance Request",
+      "idx": 2
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Maintenance Work Order",
+      "link_type": "DocType",
+      "link_to": "Maintenance Work Order",
+      "idx": 3
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Maintenance Inspection Report",
+      "link_type": "DocType",
+      "link_to": "Maintenance Inspection Report",
+      "idx": 4
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Card Break",
+      "label": "Linked Records",
+      "idx": 5
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Facility Asset",
+      "link_type": "DocType",
+      "link_to": "Facility Asset",
+      "idx": 6
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Subcontractor Service Order",
+      "link_type": "DocType",
+      "link_to": "Subcontractor Service Order",
+      "idx": 7
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Card Break",
+      "label": "Views",
+      "idx": 8
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Maintenance Backlog",
+      "link_type": "Report",
+      "link_to": "Maintenance Backlog",
+      "idx": 9
+    }
+  ],
+  "charts": [
+    {
+      "doctype": "Workspace Chart",
+      "chart_name": "Maintenance Requests by Status",
+      "label": "Maintenance Requests by Status",
+      "idx": 1
+    },
+    {
+      "doctype": "Workspace Chart",
+      "chart_name": "Maintenance Requests by Priority",
+      "label": "Maintenance Requests by Priority",
+      "idx": 2
+    }
+  ],
+  "number_cards": [
+    {
+      "doctype": "Workspace Number Card",
+      "number_card_name": "Open Maintenance Requests",
+      "label": "Open Maintenance Requests",
+      "idx": 1
+    },
+    {
+      "doctype": "Workspace Number Card",
+      "number_card_name": "Escalated Maintenance Requests",
+      "label": "Escalated Maintenance Requests",
+      "idx": 2
+    },
+    {
+      "doctype": "Workspace Number Card",
+      "number_card_name": "Maintenance Work Orders In Progress",
+      "label": "Maintenance Work Orders In Progress",
+      "idx": 3
+    },
+    {
+      "doctype": "Workspace Number Card",
+      "number_card_name": "Maintenance Work Orders Completed",
+      "label": "Maintenance Work Orders Completed",
+      "idx": 4
+    }
+  ],
+  "quick_lists": [
+    {
+      "doctype": "Workspace Quick List",
+      "document_type": "Maintenance Request",
+      "label": "Maintenance Request",
+      "quick_list_filter": "{\"status\": [\"in\", [\"Open\", \"Assigned\", \"In Progress\", \"Reopened\"]]}",
+      "idx": 1
+    }
+  ]
 }

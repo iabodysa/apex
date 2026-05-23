@@ -603,3 +603,59 @@ Create Accommodation Building,إنشاء مبنى
 Create Accommodation Site,إنشاء موقع
 Create Accommodation Assignment,إنشاء تسكين
 View Safety Task Catalog list,عرض قائمة دليل مهام السلامة
+Company,الشركة
+Default Currency,العملة الافتراضية
+Accommodation Ledger Summary,ملخص دفتر التكاليف التشغيلية
+Active Resident Register,سجل السكان النشطين
+Checkout Pending Clearance,إخلاءات بانتظار التسوية
+Safety Open Findings,نتائج السلامة المفتوحة
+Maintenance Aging,تقادم طلبات الصيانة
+Intercompany Movement Register,سجل الحركات بين الشركات
+Accommodation Ledger,دفتر التكاليف التشغيلية
+Ledger Type,نوع الدفتر
+Posting Mode,نمط الترحيل
+Allocation Basis,أساس التوزيع
+Period Start,بداية الفترة
+Period End,نهاية الفترة
+Total Site Cost (SAR),إجمالي تكلفة الموقع (ر.س)
+Employee Daily Share (SAR),حصة الموظف اليومية (ر.س)
+Source,المصدر
+Age (Days),العمر (أيام)
+SLA (Days),مستوى الخدمة (أيام)
+SLA Breached,تجاوز مستوى الخدمة
+Cost of Repair (SAR),تكلفة الإصلاح (ر.س)
+Days Open,أيام مفتوحة
+Linked Maintenance,طلب الصيانة المرتبط
+Cleaner Type,نوع العامل
+Internal Employee,موظف داخلي
+Subcontractor,مقاول من الباطن
+External Worker,عامل خارجي
+Cleaner (Employee),العامل (الموظف)
+Cleaner Name,اسم العامل
+Subcontractor Service Order,أمر خدمة المقاول
+Scheduled Task Instance,تنفيذ مهمة مجدولة
+Supervisor Rating,تقييم المشرف
+Satisfactory,مُرضٍ
+Needs Improvement,يحتاج تحسيناً
+Unsatisfactory,غير مُرضٍ
+Missed Cleaning,تنظيف مفقود
+Missed Reason,سبب التغيب
+Rework Required,يلزم إعادة العمل
+Evidence Photo,صورة الإثبات
+Evidence Notes,ملاحظات الإثبات
+Movement Category,تصنيف الحركة
+Same-Company Relocation,نقل داخل نفس الشركة
+Intercompany Temporary,نقل مؤقت بين الشركات
+Intercompany Permanent,نقل دائم بين الشركات
+Maintenance Dispatch,إرسال للصيانة
+Return from Repair,إعادة بعد الإصلاح
+Disposal/Scrap,إتلاف/خردة
+From Company,من الشركة
+To Company,إلى الشركة
+Is Intercompany Movement,حركة بين الشركات
+Release Approved By,اعتماد الإصدار من قِبَل
+Receiving Confirmed By,تأكيد الاستلام من قِبَل
+Accounting Acknowledged,اعتراف محاسبي
+Acknowledged By (Finance),اعتمد من قِبَل (مالية)
+Gate Pass Reference,رقم تصريح البوابة
+Intercompany Approval,موافقات حركة الشركات
