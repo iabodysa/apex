@@ -88,8 +88,7 @@
       "doctype": "DocField",
       "fieldname": "city",
       "label": "City",
-      "fieldtype": "Link",
-      "options": "City",
+      "fieldtype": "Data",
       "in_list_view": 1,
       "idx": 10
     },
