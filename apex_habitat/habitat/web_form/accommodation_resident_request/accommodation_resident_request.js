@@ -14,22 +14,16 @@ frappe.web_form.after_save = function (doc) {
 
 	var box = document.createElement("div");
 	box.id = "habitat-tracking-code";
-	box.style.cssText = [
-		"margin-top:16px",
-		"padding:14px 18px",
-		"background:#f0fdf4",
-		"border:1px solid #86efac",
-		"border-radius:6px",
-		"font-size:15px",
-		"line-height:1.6",
-	].join(";");
+	box.className = "alert alert-success mt-4";
+	box.style.fontSize = "15px";
+	
 	box.innerHTML =
-		"<strong>Request submitted.</strong><br>" +
-		"Your tracking code: " +
-		"<code style=\"font-size:17px;letter-spacing:3px;font-weight:bold;\">" +
+		"<strong>" + __("Request submitted successfully.") + "</strong><br>" +
+		__("Your tracking code:") + " " +
+		"<code style=\"font-size:17px;letter-spacing:3px;font-weight:bold;margin-top:5px;display:inline-block;\">" +
 		code +
 		"</code><br>" +
-		"<small style=\"color:#6b7280;\">Save this code to follow up with your supervisor.</small>";
+		"<small class=\"text-muted\">" + __("Save this code to follow up with your supervisor.") + "</small>";
 
 	var footer = document.querySelector(".web-form-footer");
 	if (footer) {
