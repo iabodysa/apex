@@ -10,6 +10,12 @@ class AccommodationResidentRequest(Document):
         if not self.anonymous_tracking_code:
             self.anonymous_tracking_code = frappe.generate_hash(length=8).upper()
 
+        if not self.source_channel:
+            self.source_channel = "QR Web Form"
+
+        if not self.status:
+            self.status = "New"
+
         self.populate_location_from_token()
         self.apply_priority_rules()
 

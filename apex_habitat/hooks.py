@@ -115,6 +115,7 @@ fixtures = [
     {"dt": "Safety Task Catalog"},
     {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
     {"dt": "Print Format", "filters": [["module", "=", "Habitat"]]},
+    {"dt": "Web Form", "filters": [["module", "=", "Habitat"]]},
 ]
 
 after_install = "apex_habitat.setup.after_install"
