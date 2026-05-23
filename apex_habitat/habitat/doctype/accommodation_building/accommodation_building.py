@@ -81,6 +81,9 @@ def generate_rooms_and_beds(building_name):
     for row in doc.floor_plan:
         floor = row.floor_number
         prefix = (row.room_prefix or "").strip()
+        if not prefix:
+            prefix = f"R-{building_name[:3].upper()}-"
+
         start = int(row.starting_room_number or 1)
         count = int(row.room_count or 0)
         capacity = int(row.bed_capacity_per_room or 0)
@@ -92,8 +95,7 @@ def generate_rooms_and_beds(building_name):
 
         for i in range(count):
             room_num_raw = start + i
-            # Pad to 2 digits within floor group so 1→01, floor prefix: floor*100+num pattern
-            room_number = f"{prefix}{floor}{str(room_num_raw).zfill(2)}"
+            room_number = f"{prefix}{floor}-{str(room_num_raw).zfill(2)}"
 
             if room_number in existing_rooms:
                 skipped_rooms += 1
