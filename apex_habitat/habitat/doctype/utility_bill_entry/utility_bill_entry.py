@@ -1,12 +1,15 @@
 """Utility Bill Entry controller.
 
 On submit: calculates variance from the Utility Account average, posts a
-summary row to the Accommodation Ledger (ledger_type = utility_type), and
-creates a draft Payment Entry when the provider is linked to a Supplier.
+summary row to the Accommodation Ledger (ledger_type = utility_type).
+
+Shared-meter support: when cost_bearing_pct < 100, bill_amount_sar is
+computed as total_bill_amount_sar × (cost_bearing_pct / 100). The full
+invoice total and the bearing percentage are preserved for audit trail.
+The ledger row carries the building's actual share only.
 
 Employee-level daily distribution is handled by the daily cost allocation
-scheduled job, not here. This submit hook records the building-level cost
-for the billing period.
+scheduled job, not here.
 """
 
 from __future__ import annotations
@@ -19,7 +22,6 @@ from frappe.utils import date_diff, flt
 
 class UtilityBillEntry(Document):
     def before_save(self):
-        # Validate document properties
         if self.doctype != "Utility Bill Entry":
             frappe.throw("DocType mismatch")
 
@@ -33,6 +35,8 @@ def validate(doc, method=None):
         if doc.billing_period_to < doc.billing_period_from:
             frappe.throw(_("Billing Period To must be on or after Billing Period From."))
 
+    _compute_meter_readings(doc)
+    _compute_sharing(doc)
     _compute_variance(doc)
 
 
@@ -45,9 +49,7 @@ def on_submit(doc, method=None):
 def before_cancel(doc, method=None):
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
-    
-    # Reverse the ledger entry, linked explicitly to the original row so the
-    # reversal is auditable and excluded from cost reports by reconciliation.
+
     building = frappe.get_doc("Accommodation Building", doc.building)
     from frappe.utils import today
 
@@ -77,6 +79,32 @@ def before_cancel(doc, method=None):
     }).insert(ignore_permissions=True)
 
 
+def _compute_meter_readings(doc) -> None:
+    prev = flt(doc.meter_reading_previous)
+    curr = flt(doc.meter_reading_current)
+    if curr and prev and curr >= prev:
+        doc.meter_units_consumed = round(curr - prev, 3)
+    elif curr and not prev:
+        doc.meter_units_consumed = round(curr, 3)
+
+
+def _compute_sharing(doc) -> None:
+    """Compute building share from total invoice when meter is shared."""
+    total = flt(doc.total_bill_amount_sar)
+    pct = flt(doc.cost_bearing_pct) or 100.0
+
+    if total > 0:
+        share = total * pct / 100.0
+        doc.bill_amount_sar = round(share, 2)
+
+        if pct < 100.0:
+            doc.bill_share_note = (
+                f"Shared meter — {pct:.1f}% of SAR {total:,.2f} "
+                f"= SAR {share:,.2f} (building share)"
+            )
+        else:
+            doc.bill_share_note = ""
+
 
 def _compute_variance(doc) -> None:
     utility_account = frappe.get_doc("Utility Account", doc.utility_account)
@@ -91,13 +119,12 @@ def _compute_variance(doc) -> None:
 def _post_ledger_row(doc) -> None:
     """Post one summary Accommodation Ledger row for the billing period.
 
-    This records the building-level utility cost. Per-employee daily shares
-    are computed by the daily_accommodation_cost_allocation scheduled job
-    using the capacity-denominator algorithm (v2.3 calibration).
+    Uses bill_amount_sar (the building's actual share after bearing calculation).
+    The bill_share_note provides the audit trail for shared-meter cases.
     """
-    days = date_diff(doc.billing_period_to, doc.billing_period_from) or 1
-
     building = frappe.get_doc("Accommodation Building", doc.building)
+
+    remarks = doc.bill_share_note or ""
 
     frappe.get_doc({
         "doctype": "Accommodation Ledger",
@@ -113,4 +140,5 @@ def _post_ledger_row(doc) -> None:
         "allocation_basis": "Direct",
         "allocation_period_start": doc.billing_period_from,
         "allocation_period_end": doc.billing_period_to,
+        **({"remarks": remarks} if remarks else {}),
     }).insert(ignore_permissions=True)
