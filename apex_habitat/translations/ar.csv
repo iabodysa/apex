@@ -585,11 +585,12 @@ Maintenance Backlog,متراكمات أعمال الصيانة
 Maintenance Dispatch,إرسال للصيانة
 Maintenance Findings,ملاحظات الصيانة
 Maintenance Flow,مسار الصيانة
-Maintenance Material Template,قالب مواد الصيانة
-Maintenance Material Template Item,عنصر قالب مواد الصيانة
 Maintenance Inspection Finding Item,بند ملاحظات فحص الصيانة
 Maintenance Inspection Report,تقرير فحص الصيانة
+Maintenance Master,إدارة مواد الصيانة
 Maintenance Material,مادة الصيانة
+Maintenance Material Template,قالب مواد الصيانة
+Maintenance Material Template Item,عنصر قالب مواد الصيانة
 Maintenance Procurement Item,بند مشتريات الصيانة
 Maintenance Request,طلب صيانة
 Maintenance Requests by Priority,طلبات الصيانة حسب الأولوية
@@ -611,6 +612,7 @@ Master: recurring task template that drives automatic Scheduled Task Instance ge
 Material Category,فئة المادة
 Material Name,اسم المادة
 Materials required for the repair.,المواد المطلوبة للإصلاح.
+Material Templates,قوالب المواد
 Max Damage Deduction per Checkout (SAR),حد حسم التلفيات الأقصى للمغادرة (ريال)
 Medium,متوسط
 Method,الطريقة

@@ -21,6 +21,13 @@ The Accommodation Lease DocType now supports structured billing:
 - **Auto-generated payment schedule**: saving a lease with a valid billing cycle and first payment date automatically populates the Rent Payment Schedule child table, eliminating manual row entry.
 - **Utility cost share %** field records the agreed proportion of utility bills that the landlord bears, enabling automated cost-split calculations in Utility Bill Entry.
 
+### Maintenance Material Catalog
+A lightweight Habitat-owned material master has been added to support procurement planning on Maintenance Work Orders:
+- **Maintenance Material** is a catalog DocType scoped to Habitat — it is not an ERPNext Item or a Stock record. An optional `erpnext_item` link field allows future mapping to ERPNext Item if inventory integration is required; leaving it blank uses the Habitat catalog only.
+- Materials are not SLA records, custody articles, or inventory positions. They exist solely to identify and describe materials needed for repair work.
+- **Maintenance Material Template** groups pre-defined sets of materials by issue type (Electrical, Plumbing, Civil, HVAC, etc.), enabling coordinators to load a standard kit in a single step.
+- A **Load Material Template** button on the Maintenance Work Order populates the procurement items child table from the selected template. No purchasing documents or stock transactions are created.
+
 ### Maintenance Work Order — Completion Photo Required
 Maintenance Work Orders now enforce a completion photo attachment before the record can be closed. The controller blocks closure if no file is attached, ensuring evidence is captured for every completed job before the record is finalised.
 
