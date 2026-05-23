@@ -52,6 +52,7 @@
    "fieldtype": "Link",
    "options": "Accommodation Bed",
    "reqd": 1,
+   "depends_on": "eval:doc.to_room",
    "idx": 5
   },
   {
