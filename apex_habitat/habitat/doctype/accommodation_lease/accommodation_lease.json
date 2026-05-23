@@ -44,7 +44,8 @@
    "options": "Accommodation Building",
    "reqd": 1,
    "in_list_view": 1,
-   "idx": 4
+   "idx": 4,
+   "search_index": 1
   },
   {
    "doctype": "DocField",

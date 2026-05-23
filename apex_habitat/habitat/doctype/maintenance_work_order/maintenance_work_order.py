@@ -44,6 +44,9 @@ def before_cancel(doc, method=None):
 @frappe.whitelist()
 def start_work(work_order):
     """Transition Maintenance Work Order from Planned to In Progress."""
+    if not frappe.has_permission("Maintenance Work Order", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+        
     doc = frappe.get_doc("Maintenance Work Order", work_order)
 
     if doc.docstatus != 1:
@@ -65,6 +68,9 @@ def mark_completed(work_order, completion_notes=None):
     No GL Entry, Payment Entry, Purchase Invoice, or salary document is created.
     """
     from frappe.utils import today
+
+    if not frappe.has_permission("Maintenance Work Order", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
 
     doc = frappe.get_doc("Maintenance Work Order", work_order)
 

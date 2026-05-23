@@ -58,6 +58,9 @@ def generate_rooms_and_beds(building_name):
     Never deletes or overwrites existing records.
     Blocks generation if any planned room would overwrite an occupied room.
     """
+    if not frappe.has_permission("Accommodation Building", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+        
     doc = frappe.get_doc("Accommodation Building", building_name)
 
     if not doc.floor_plan:
@@ -116,7 +119,7 @@ def generate_rooms_and_beds(building_name):
 
                 if gen_beds:
                     for b in range(1, capacity + 1):
-                        bed_code = f"{room_number}-{str(b).zfill(2)}"
+                        bed_code = f"{room_number}-{str(b).zfill(3)}"
                         bed = frappe.get_doc({
                             "doctype": "Accommodation Bed",
                             "room": room.name,

@@ -65,13 +65,15 @@
    "fieldname": "building",
    "fieldtype": "Link",
    "label": "Building",
-   "options": "Accommodation Building"
+   "options": "Accommodation Building",
+   "search_index": 1
   },
   {
    "fieldname": "room",
    "fieldtype": "Link",
    "label": "Room",
-   "options": "Accommodation Room"
+   "options": "Accommodation Room",
+   "search_index": 1
   },
   {
    "fieldname": "notes",

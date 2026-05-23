@@ -43,7 +43,8 @@
    "label": "Building",
    "options": "Accommodation Building",
    "reqd": 1,
-   "idx": 4
+   "idx": 4,
+   "search_index": 1
   },
   {
    "doctype": "DocField",

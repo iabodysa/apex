@@ -118,7 +118,8 @@
    "fetch_from": "assignment.employee",
    "read_only": 1,
    "in_list_view": 1,
-   "idx": 13
+   "idx": 13,
+   "search_index": 1
   },
   {
    "doctype": "DocField",

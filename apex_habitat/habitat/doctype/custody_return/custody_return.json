@@ -97,7 +97,8 @@
    "options": "Accommodation Building",
    "fetch_from": "custody_issue.building",
    "read_only": 1,
-   "idx": 11
+   "idx": 11,
+   "search_index": 1
   },
   {
    "doctype": "DocField",
@@ -124,7 +125,28 @@
    "create": 1,
    "delete": 1,
    "submit": 1,
-   "cancel": 1
+   "cancel": 1,
+   "idx": 1
+  },
+  {
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "doctype": "DocPerm",
+   "idx": 2
+  },
+  {
+   "role": "Resident Supervisor",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "doctype": "DocPerm",
+   "idx": 3
   }
  ]
 }
