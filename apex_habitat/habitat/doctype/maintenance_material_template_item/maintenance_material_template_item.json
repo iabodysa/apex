@@ -1,0 +1,46 @@
+{
+ "doctype": "DocType",
+ "name": "Maintenance Material Template Item",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "track_changes": 0,
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "material",
+   "fieldtype": "Link",
+   "label": "Material",
+   "options": "Maintenance Material",
+   "reqd": 1,
+   "in_list_view": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "quantity",
+   "fieldtype": "Int",
+   "label": "Quantity",
+   "default": "1",
+   "reqd": 1,
+   "in_list_view": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "label": "Unit",
+   "fetch_from": "material.default_uom",
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "idx": 4
+  }
+ ]
+}
