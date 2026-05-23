@@ -1,129 +1,130 @@
 {
-  "doctype": "DocType",
-  "name": "Custody Return",
-  "module": "Habitat",
-  "custom": 0,
-  "issingle": 0,
-  "istable": 0,
-  "is_submittable": 1,
-  "engine": "InnoDB",
-  "description": "Submittable: records the return of custody articles against a prior Custody Issue.",
-  "autoname": "naming_series:",
-  "naming_rule": "By \"Naming Series\" field",
-  "fields": [
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_return_tab_details",
-      "fieldtype": "Tab Break",
-      "label": "Details",
-      "idx": 1
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_return_sec_details",
-      "fieldtype": "Section Break",
-      "label": "Information",
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "return_date",
-      "fieldtype": "Date",
-      "label": "Return Date",
-      "reqd": 1,
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_issue",
-      "fieldtype": "Link",
-      "label": "Custody Issue",
-      "options": "Custody Issue",
-      "reqd": 1,
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_return_details_col",
-      "fieldtype": "Column Break",
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "returned_by_employee",
-      "fieldtype": "Link",
-      "label": "Returned By (Employee)",
-      "options": "Employee",
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "CUST-RET-.YYYY.-.####",
-      "default": "CUST-RET-.YYYY.-.####",
-      "idx": 7
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_return_sec_large_text",
-      "fieldtype": "Section Break",
-      "label": "Additional Information",
-      "collapsible": 1,
-      "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "remarks",
-      "fieldtype": "Small Text",
-      "label": "Remarks",
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_return_sec_system",
-      "fieldtype": "Section Break",
-      "label": "System Details",
-      "collapsible": 1,
-      "idx": 10
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "building",
-      "fieldtype": "Link",
-      "label": "Building",
-      "options": "Accommodation Building",
-      "fetch_from": "custody_issue.building",
-      "read_only": 1,
-      "idx": 11
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_return_sec_table_items",
-      "fieldtype": "Section Break",
-      "label": "Returned Items",
-      "idx": 12
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "items",
-      "fieldtype": "Table",
-      "label": "Returned Items",
-      "options": "Custody Return Item",
-      "idx": 13
-    }
-  ],
-  "permissions": [
-    {
-      "doctype": "DocPerm",
-      "role": "System Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "delete": 1,
-      "submit": 1,
-      "cancel": 1
-    }
-  ]
+ "doctype": "DocType",
+ "name": "Custody Return",
+ "module": "Habitat",
+ "custom": 0,
+ "issingle": 0,
+ "istable": 0,
+ "is_submittable": 1,
+ "engine": "InnoDB",
+ "description": "Submittable: records the return of custody articles against a prior Custody Issue.",
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_return_tab_details",
+   "fieldtype": "Tab Break",
+   "label": "Details",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_return_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Information",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "return_date",
+   "fieldtype": "Date",
+   "label": "Return Date",
+   "reqd": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_issue",
+   "fieldtype": "Link",
+   "label": "Custody Issue",
+   "options": "Custody Issue",
+   "reqd": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_return_details_col",
+   "fieldtype": "Column Break",
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "returned_by_employee",
+   "fieldtype": "Link",
+   "label": "Returned By (Employee)",
+   "options": "Employee",
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CUST-RET-.YYYY.-.####",
+   "default": "CUST-RET-.YYYY.-.####",
+   "idx": 7,
+   "hidden": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_return_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1,
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_return_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Details",
+   "collapsible": 1,
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Accommodation Building",
+   "fetch_from": "custody_issue.building",
+   "read_only": 1,
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_return_sec_table_items",
+   "fieldtype": "Section Break",
+   "label": "Returned Items",
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Returned Items",
+   "options": "Custody Return Item",
+   "idx": 13
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1
+  }
+ ]
 }

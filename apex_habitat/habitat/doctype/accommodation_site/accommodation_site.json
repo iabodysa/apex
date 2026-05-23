@@ -57,7 +57,8 @@
       "doctype": "DocField",
       "fieldname": "city",
       "label": "City",
-      "fieldtype": "Data",
+      "fieldtype": "Link",
+      "options": "Habitat City",
       "in_list_view": 1,
       "idx": 6
     },

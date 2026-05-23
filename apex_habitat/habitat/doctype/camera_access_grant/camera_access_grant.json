@@ -1,160 +1,161 @@
 {
-  "doctype": "DocType",
-  "name": "Camera Access Grant",
-  "module": "Habitat",
-  "custom": 0,
-  "istable": 0,
-  "engine": "InnoDB",
-  "is_submittable": 1,
-  "track_changes": 1,
-  "autoname": "naming_series:",
-  "naming_rule": "By \"Naming Series\" field",
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "description": "Grants viewing/admin credentials for CCTV systems to a specific user, scoped to one or more buildings.",
-  "fields": [
-    {
-      "doctype": "DocField",
-      "fieldname": "camera_access_grant_tab_overview",
-      "fieldtype": "Tab Break",
-      "label": "Overview",
-      "idx": 1
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "camera_access_grant_sec_overview",
-      "fieldtype": "Section Break",
-      "label": "General Details",
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "requested_for",
-      "fieldtype": "Link",
-      "label": "User Requesting Access",
-      "options": "User",
-      "reqd": 1,
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "access_level",
-      "fieldtype": "Select",
-      "label": "Access Level",
-      "options": "Live View Only\nLive View + Playback\nFull Admin",
-      "default": "Live View + Playback",
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "approved_by",
-      "fieldtype": "Link",
-      "label": "Approved By",
-      "options": "User",
-      "description": "Must be Admin Manager",
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "credentials_delivered_by",
-      "fieldtype": "Link",
-      "label": "Credentials Delivered By",
-      "options": "User",
-      "description": "Typically IT Specialist",
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "camera_access_grant_overview_col",
-      "fieldtype": "Column Break",
-      "idx": 7
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "status",
-      "fieldtype": "Select",
-      "label": "Status",
-      "options": "Pending Approval\nApproved\nActive\nExpired\nRevoked",
-      "default": "Pending Approval",
-      "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "valid_from",
-      "fieldtype": "Date",
-      "label": "Valid From",
-      "reqd": 1,
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "CAM-ACC-.YYYY.-.####",
-      "default": "CAM-ACC-.YYYY.-.####",
-      "reqd": 1,
-      "idx": 10
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "valid_until",
-      "fieldtype": "Date",
-      "label": "Valid Until",
-      "description": "Leave blank for permanent",
-      "idx": 11
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "camera_access_grant_tab_tables",
-      "fieldtype": "Tab Break",
-      "label": "Related Tables",
-      "idx": 12
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "camera_access_grant_sec_table_buildings_scope",
-      "fieldtype": "Section Break",
-      "label": "Buildings Granted",
-      "idx": 13
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "buildings_scope",
-      "fieldtype": "Table",
-      "label": "Buildings Granted",
-      "options": "Camera Access Building Scope",
-      "idx": 14
-    }
-  ],
-  "permissions": [
-    {
-      "doctype": "DocPerm",
-      "role": "System Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "delete": 1,
-      "submit": 1,
-      "cancel": 1,
-      "amend": 1,
-      "report": 1,
-      "export": 1,
-      "print": 1,
-      "email": 1,
-      "share": 1,
-      "idx": 1
-    },
-    {
-      "doctype": "DocPerm",
-      "role": "Accommodation Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "submit": 1,
-      "cancel": 1,
-      "amend": 1,
-      "idx": 2
-    }
-  ]
+ "doctype": "DocType",
+ "name": "Camera Access Grant",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 0,
+ "engine": "InnoDB",
+ "is_submittable": 1,
+ "track_changes": 1,
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "description": "Grants viewing/admin credentials for CCTV systems to a specific user, scoped to one or more buildings.",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "camera_access_grant_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "camera_access_grant_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "requested_for",
+   "fieldtype": "Link",
+   "label": "User Requesting Access",
+   "options": "User",
+   "reqd": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "access_level",
+   "fieldtype": "Select",
+   "label": "Access Level",
+   "options": "Live View Only\nLive View + Playback\nFull Admin",
+   "default": "Live View + Playback",
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "description": "Must be Admin Manager",
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "credentials_delivered_by",
+   "fieldtype": "Link",
+   "label": "Credentials Delivered By",
+   "options": "User",
+   "description": "Typically IT Specialist",
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "camera_access_grant_overview_col",
+   "fieldtype": "Column Break",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Pending Approval\nApproved\nActive\nExpired\nRevoked",
+   "default": "Pending Approval",
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "valid_from",
+   "fieldtype": "Date",
+   "label": "Valid From",
+   "reqd": 1,
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CAM-ACC-.YYYY.-.####",
+   "default": "CAM-ACC-.YYYY.-.####",
+   "reqd": 1,
+   "idx": 10,
+   "hidden": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "valid_until",
+   "fieldtype": "Date",
+   "label": "Valid Until",
+   "description": "Leave blank for permanent",
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "camera_access_grant_tab_tables",
+   "fieldtype": "Tab Break",
+   "label": "Related Tables",
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "camera_access_grant_sec_table_buildings_scope",
+   "fieldtype": "Section Break",
+   "label": "Buildings Granted",
+   "idx": 13
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "buildings_scope",
+   "fieldtype": "Table",
+   "label": "Buildings Granted",
+   "options": "Camera Access Building Scope",
+   "idx": 14
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "idx": 2
+  }
+ ]
 }

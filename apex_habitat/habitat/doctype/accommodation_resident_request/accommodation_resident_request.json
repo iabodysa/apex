@@ -1,207 +1,208 @@
 {
-  "doctype": "DocType",
-  "name": "Accommodation Resident Request",
-  "module": "Habitat",
-  "custom": 0,
-  "is_submittable": 0,
-  "engine": "InnoDB",
-  "track_changes": 1,
-  "fields": [
-    {
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "REQ-.YYYY.-.####",
-      "reqd": 1,
-      "default": "REQ-.YYYY.-.####"
-    },
-    {
-      "fieldname": "source_channel",
-      "fieldtype": "Select",
-      "label": "Source Channel",
-      "options": "QR Web Form\nManual Entry",
-      "default": "QR Web Form"
-    },
-    {
-      "fieldname": "location_token",
-      "fieldtype": "Data",
-      "label": "Location Token"
-    },
-    {
-      "fieldname": "anonymous_tracking_code",
-      "fieldtype": "Data",
-      "label": "Anonymous Tracking Code",
-      "read_only": 1
-    },
-    {
-      "fieldname": "accommodation_site",
-      "fieldtype": "Link",
-      "label": "Accommodation Site",
-      "options": "Accommodation Site"
-    },
-    {
-      "fieldname": "building",
-      "fieldtype": "Link",
-      "label": "Building",
-      "options": "Accommodation Building"
-    },
-    {
-      "fieldname": "room",
-      "fieldtype": "Link",
-      "label": "Room",
-      "options": "Accommodation Room"
-    },
-    {
-      "fieldname": "bed",
-      "fieldtype": "Link",
-      "label": "Bed",
-      "options": "Accommodation Bed"
-    },
-    {
-      "fieldname": "col1",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "requester_type",
-      "fieldtype": "Select",
-      "label": "Requester Type",
-      "options": "Worker\nSupervisor\nAnonymous"
-    },
-    {
-      "fieldname": "employee",
-      "fieldtype": "Link",
-      "label": "Employee",
-      "options": "Employee"
-    },
-    {
-      "fieldname": "worker_name",
-      "fieldtype": "Data",
-      "label": "Worker Name"
-    },
-    {
-      "fieldname": "mobile_number",
-      "fieldtype": "Data",
-      "label": "Mobile Number"
-    },
-    {
-      "fieldname": "preferred_language",
-      "fieldtype": "Select",
-      "label": "Preferred Language",
-      "options": "English\nArabic\nUrdu\nHindi\nBengali"
-    },
-    {
-      "fieldname": "sec2",
-      "fieldtype": "Section Break",
-      "label": "Request Details"
-    },
-    {
-      "fieldname": "request_category",
-      "fieldtype": "Select",
-      "label": "Category",
-      "options": "Maintenance\nSafety\nCleaning\nPest Control\nCustody\nFacility Item\nWater\nElectrical\nAC\nPlumbing\nReimbursement\nComplaint\nSuggestion\nOther",
-      "reqd": 1
-    },
-    {
-      "fieldname": "priority",
-      "fieldtype": "Select",
-      "label": "Priority",
-      "options": "Low\nMedium\nHigh\nCritical",
-      "default": "Low"
-    },
-    {
-      "fieldname": "issue_location",
-      "fieldtype": "Select",
-      "label": "Issue Location",
-      "options": "Room\nBathroom\nKitchen\nCommon Area\nEntrance\nStaircase\nExternal Area\nOther"
-    },
-    {
-      "fieldname": "description",
-      "fieldtype": "Small Text",
-      "label": "Description",
-      "reqd": 1
-    },
-    {
-      "fieldname": "attachment",
-      "fieldtype": "Attach",
-      "label": "Attachment"
-    },
-    {
-      "fieldname": "sec3",
-      "fieldtype": "Section Break",
-      "label": "Resolution"
-    },
-    {
-      "fieldname": "status",
-      "fieldtype": "Select",
-      "label": "Status",
-      "options": "New\nTriaged\nAssigned\nIn Progress\nWaiting Evidence\nResolved\nRejected\nClosed",
-      "default": "New"
-    },
-    {
-      "fieldname": "assigned_to",
-      "fieldtype": "Link",
-      "label": "Assigned To",
-      "options": "User"
-    },
-    {
-      "fieldname": "target_doctype",
-      "fieldtype": "Data",
-      "label": "Target DocType",
-      "read_only": 1
-    },
-    {
-      "fieldname": "target_document",
-      "fieldtype": "Data",
-      "label": "Target Document",
-      "read_only": 1
-    },
-    {
-      "fieldname": "triage_notes",
-      "fieldtype": "Small Text",
-      "label": "Triage Notes"
-    },
-    {
-      "fieldname": "resolution_notes",
-      "fieldtype": "Small Text",
-      "label": "Resolution Notes"
-    },
-    {
-      "fieldname": "closed_on",
-      "fieldtype": "Datetime",
-      "label": "Closed On",
-      "read_only": 1
-    },
-    {
-      "fieldname": "closed_by",
-      "fieldtype": "Link",
-      "label": "Closed By",
-      "options": "User",
-      "read_only": 1
-    }
-  ],
-  "permissions": [
-    {
-      "role": "System Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "delete": 1
-    },
-    {
-      "role": "Accommodation Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1
-    },
-    {
-      "role": "Resident Supervisor",
-      "read": 1,
-      "write": 1,
-      "create": 1
-    }
-  ],
-  "autoname": "naming_series:",
-  "naming_rule": "By \"Naming Series\" field",
-  "sort_field": "modified",
-  "sort_order": "DESC"
+ "doctype": "DocType",
+ "name": "Accommodation Resident Request",
+ "module": "Habitat",
+ "custom": 0,
+ "is_submittable": 0,
+ "engine": "InnoDB",
+ "track_changes": 1,
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "REQ-.YYYY.-.####",
+   "reqd": 1,
+   "default": "REQ-.YYYY.-.####",
+   "hidden": 1
+  },
+  {
+   "fieldname": "source_channel",
+   "fieldtype": "Select",
+   "label": "Source Channel",
+   "options": "QR Web Form\nManual Entry",
+   "default": "QR Web Form"
+  },
+  {
+   "fieldname": "location_token",
+   "fieldtype": "Data",
+   "label": "Location Token"
+  },
+  {
+   "fieldname": "anonymous_tracking_code",
+   "fieldtype": "Data",
+   "label": "Anonymous Tracking Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_site",
+   "fieldtype": "Link",
+   "label": "Accommodation Site",
+   "options": "Accommodation Site"
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Accommodation Building"
+  },
+  {
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "label": "Room",
+   "options": "Accommodation Room"
+  },
+  {
+   "fieldname": "bed",
+   "fieldtype": "Link",
+   "label": "Bed",
+   "options": "Accommodation Bed"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "requester_type",
+   "fieldtype": "Select",
+   "label": "Requester Type",
+   "options": "Worker\nSupervisor\nAnonymous"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "worker_name",
+   "fieldtype": "Data",
+   "label": "Worker Name"
+  },
+  {
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number"
+  },
+  {
+   "fieldname": "preferred_language",
+   "fieldtype": "Select",
+   "label": "Preferred Language",
+   "options": "English\nArabic\nUrdu\nHindi\nBengali"
+  },
+  {
+   "fieldname": "sec2",
+   "fieldtype": "Section Break",
+   "label": "Request Details"
+  },
+  {
+   "fieldname": "request_category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "Maintenance\nSafety\nCleaning\nPest Control\nCustody\nFacility Item\nWater\nElectrical\nAC\nPlumbing\nReimbursement\nComplaint\nSuggestion\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh\nCritical",
+   "default": "Low"
+  },
+  {
+   "fieldname": "issue_location",
+   "fieldtype": "Select",
+   "label": "Issue Location",
+   "options": "Room\nBathroom\nKitchen\nCommon Area\nEntrance\nStaircase\nExternal Area\nOther"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "reqd": 1
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment"
+  },
+  {
+   "fieldname": "sec3",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "New\nTriaged\nAssigned\nIn Progress\nWaiting Evidence\nResolved\nRejected\nClosed",
+   "default": "New"
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User"
+  },
+  {
+   "fieldname": "target_doctype",
+   "fieldtype": "Data",
+   "label": "Target DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "target_document",
+   "fieldtype": "Data",
+   "label": "Target Document",
+   "read_only": 1
+  },
+  {
+   "fieldname": "triage_notes",
+   "fieldtype": "Small Text",
+   "label": "Triage Notes"
+  },
+  {
+   "fieldname": "resolution_notes",
+   "fieldtype": "Small Text",
+   "label": "Resolution Notes"
+  },
+  {
+   "fieldname": "closed_on",
+   "fieldtype": "Datetime",
+   "label": "Closed On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "closed_by",
+   "fieldtype": "Link",
+   "label": "Closed By",
+   "options": "User",
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "Resident Supervisor",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  }
+ ],
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "sort_field": "modified",
+ "sort_order": "DESC"
 }

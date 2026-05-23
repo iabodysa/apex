@@ -1,279 +1,280 @@
 {
-  "doctype": "DocType",
-  "name": "Facility Asset Movement",
-  "module": "Habitat",
-  "custom": 0,
-  "issingle": 0,
-  "istable": 0,
-  "is_submittable": 1,
-  "engine": "InnoDB",
-  "description": "Physical facility asset movement with intercompany approval controls.",
-  "autoname": "naming_series:",
-  "naming_rule": "By \"Naming Series\" field",
-  "fields": [
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_movement_tab_overview",
-      "fieldtype": "Tab Break",
-      "label": "Overview",
-      "idx": 1
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_movement_sec_overview",
-      "fieldtype": "Section Break",
-      "label": "General Details",
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "movement_date",
-      "fieldtype": "Date",
-      "label": "Movement Date",
-      "reqd": 1,
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset",
-      "fieldtype": "Link",
-      "label": "Facility Asset",
-      "options": "Facility Asset",
-      "reqd": 1,
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "movement_category",
-      "fieldtype": "Select",
-      "label": "Movement Category",
-      "options": "Same-Company Relocation\nIntercompany Temporary\nIntercompany Permanent\nMaintenance Dispatch\nReturn from Repair\nDisposal/Scrap",
-      "default": "Same-Company Relocation",
-      "reqd": 1,
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "from_building",
-      "fieldtype": "Link",
-      "label": "From Building",
-      "options": "Accommodation Building",
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "from_room",
-      "fieldtype": "Link",
-      "label": "From Room",
-      "options": "Accommodation Room",
-      "idx": 7
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "from_company",
-      "fieldtype": "Link",
-      "label": "From Company",
-      "options": "Company",
-      "read_only": 1,
-      "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "to_building",
-      "fieldtype": "Link",
-      "label": "To Building",
-      "options": "Accommodation Building",
-      "reqd": 1,
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_movement_overview_col",
-      "fieldtype": "Column Break",
-      "idx": 10
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "to_room",
-      "fieldtype": "Link",
-      "label": "To Room",
-      "options": "Accommodation Room",
-      "idx": 11
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "to_company",
-      "fieldtype": "Link",
-      "label": "To Company",
-      "options": "Company",
-      "read_only": 1,
-      "idx": 12
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "is_intercompany",
-      "fieldtype": "Check",
-      "label": "Is Intercompany Movement",
-      "read_only": 1,
-      "idx": 13
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "moved_by",
-      "fieldtype": "Link",
-      "label": "Moved By (Employee)",
-      "options": "Employee",
-      "idx": 14
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "movement_reason",
-      "fieldtype": "Select",
-      "label": "Movement Reason",
-      "options": "Reallocation\nMaintenance\nCondemnation\nOther",
-      "default": "Reallocation",
-      "idx": 15
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "FAM-.YYYY.-.####",
-      "default": "FAM-.YYYY.-.####",
-      "idx": 16
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_movement_sec_intercompany",
-      "fieldtype": "Section Break",
-      "label": "Intercompany Approval",
-      "depends_on": "eval:doc.is_intercompany==1",
-      "collapsible": 1,
-      "idx": 17
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "release_approved_by",
-      "fieldtype": "Link",
-      "label": "Release Approved By",
-      "options": "User",
-      "depends_on": "eval:doc.is_intercompany==1",
-      "idx": 18
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "receiving_confirmed_by",
-      "fieldtype": "Link",
-      "label": "Receiving Confirmed By",
-      "options": "User",
-      "depends_on": "eval:doc.is_intercompany==1",
-      "idx": 19
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "accounting_acknowledged",
-      "fieldtype": "Check",
-      "label": "Accounting Acknowledged",
-      "depends_on": "eval:doc.is_intercompany==1",
-      "idx": 20
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "accounting_acknowledged_by",
-      "fieldtype": "Link",
-      "label": "Acknowledged By (Finance)",
-      "options": "User",
-      "depends_on": "eval:doc.accounting_acknowledged==1",
-      "idx": 21
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "gate_pass_reference",
-      "fieldtype": "Data",
-      "label": "Gate Pass Reference",
-      "depends_on": "eval:doc.is_intercompany==1",
-      "idx": 22
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_movement_sec_large_text",
-      "fieldtype": "Section Break",
-      "label": "Additional Information",
-      "collapsible": 1,
-      "idx": 23
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "remarks",
-      "fieldtype": "Small Text",
-      "label": "Remarks",
-      "idx": 24
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_movement_tab_system",
-      "fieldtype": "Tab Break",
-      "label": "System Info",
-      "idx": 25
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_movement_sec_system",
-      "fieldtype": "Section Break",
-      "label": "Administrative Details",
-      "idx": 26
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "native_asset_movement",
-      "fieldtype": "Link",
-      "label": "Native Asset Movement",
-      "options": "Asset Movement",
-      "read_only": 1,
-      "idx": 27
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_movement_system_col",
-      "fieldtype": "Column Break",
-      "idx": 28
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "cancellation_reason",
-      "fieldtype": "Small Text",
-      "label": "Cancellation Reason",
-      "read_only": 1,
-      "idx": 29
-    }
-  ],
-  "permissions": [
-    {
-      "doctype": "DocPerm",
-      "role": "System Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "delete": 1,
-      "submit": 1,
-      "cancel": 1
-    },
-    {
-      "doctype": "DocPerm",
-      "role": "Accommodation Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "submit": 1,
-      "cancel": 1
-    },
-    {
-      "doctype": "DocPerm",
-      "role": "Resident Supervisor",
-      "read": 1,
-      "write": 1,
-      "create": 1
-    }
-  ]
+ "doctype": "DocType",
+ "name": "Facility Asset Movement",
+ "module": "Habitat",
+ "custom": 0,
+ "issingle": 0,
+ "istable": 0,
+ "is_submittable": 1,
+ "engine": "InnoDB",
+ "description": "Physical facility asset movement with intercompany approval controls.",
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_movement_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_movement_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "movement_date",
+   "fieldtype": "Date",
+   "label": "Movement Date",
+   "reqd": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset",
+   "fieldtype": "Link",
+   "label": "Facility Asset",
+   "options": "Facility Asset",
+   "reqd": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "movement_category",
+   "fieldtype": "Select",
+   "label": "Movement Category",
+   "options": "Same-Company Relocation\nIntercompany Temporary\nIntercompany Permanent\nMaintenance Dispatch\nReturn from Repair\nDisposal/Scrap",
+   "default": "Same-Company Relocation",
+   "reqd": 1,
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "from_building",
+   "fieldtype": "Link",
+   "label": "From Building",
+   "options": "Accommodation Building",
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "from_room",
+   "fieldtype": "Link",
+   "label": "From Room",
+   "options": "Accommodation Room",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "from_company",
+   "fieldtype": "Link",
+   "label": "From Company",
+   "options": "Company",
+   "read_only": 1,
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "to_building",
+   "fieldtype": "Link",
+   "label": "To Building",
+   "options": "Accommodation Building",
+   "reqd": 1,
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_movement_overview_col",
+   "fieldtype": "Column Break",
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "to_room",
+   "fieldtype": "Link",
+   "label": "To Room",
+   "options": "Accommodation Room",
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "to_company",
+   "fieldtype": "Link",
+   "label": "To Company",
+   "options": "Company",
+   "read_only": 1,
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "is_intercompany",
+   "fieldtype": "Check",
+   "label": "Is Intercompany Movement",
+   "read_only": 1,
+   "idx": 13
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "moved_by",
+   "fieldtype": "Link",
+   "label": "Moved By (Employee)",
+   "options": "Employee",
+   "idx": 14
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "movement_reason",
+   "fieldtype": "Select",
+   "label": "Movement Reason",
+   "options": "Reallocation\nMaintenance\nCondemnation\nOther",
+   "default": "Reallocation",
+   "idx": 15
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "FAM-.YYYY.-.####",
+   "default": "FAM-.YYYY.-.####",
+   "idx": 16,
+   "hidden": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_movement_sec_intercompany",
+   "fieldtype": "Section Break",
+   "label": "Intercompany Approval",
+   "depends_on": "eval:doc.is_intercompany==1",
+   "collapsible": 1,
+   "idx": 17
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "release_approved_by",
+   "fieldtype": "Link",
+   "label": "Release Approved By",
+   "options": "User",
+   "depends_on": "eval:doc.is_intercompany==1",
+   "idx": 18
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "receiving_confirmed_by",
+   "fieldtype": "Link",
+   "label": "Receiving Confirmed By",
+   "options": "User",
+   "depends_on": "eval:doc.is_intercompany==1",
+   "idx": 19
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "accounting_acknowledged",
+   "fieldtype": "Check",
+   "label": "Accounting Acknowledged",
+   "depends_on": "eval:doc.is_intercompany==1",
+   "idx": 20
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "accounting_acknowledged_by",
+   "fieldtype": "Link",
+   "label": "Acknowledged By (Finance)",
+   "options": "User",
+   "depends_on": "eval:doc.accounting_acknowledged==1",
+   "idx": 21
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "gate_pass_reference",
+   "fieldtype": "Data",
+   "label": "Gate Pass Reference",
+   "depends_on": "eval:doc.is_intercompany==1",
+   "idx": 22
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_movement_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1,
+   "idx": 23
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "idx": 24
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_movement_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System Info",
+   "idx": 25
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_movement_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Administrative Details",
+   "idx": 26
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "native_asset_movement",
+   "fieldtype": "Link",
+   "label": "Native Asset Movement",
+   "options": "Asset Movement",
+   "read_only": 1,
+   "idx": 27
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_movement_system_col",
+   "fieldtype": "Column Break",
+   "idx": 28
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancellation Reason",
+   "read_only": 1,
+   "idx": 29
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Resident Supervisor",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  }
+ ]
 }

@@ -88,7 +88,8 @@
    "label": "Series",
    "options": "UTIL-ACC-.####",
    "default": "UTIL-ACC-.####",
-   "idx": 9
+   "idx": 9,
+   "hidden": 1
   },
   {
    "doctype": "DocField",

@@ -1,237 +1,238 @@
 {
-  "doctype": "DocType",
-  "name": "Facility Asset",
-  "module": "Habitat",
-  "custom": 0,
-  "istable": 0,
-  "engine": "InnoDB",
-  "track_changes": 1,
-  "autoname": "naming_series:",
-  "naming_rule": "By \"Naming Series\" field",
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "description": "Building-level fixed asset: CCTV camera, DVR/NVR, hard disk, router, switch, generator. Custody is on the supervisor, not on an employee.",
-  "fields": [
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_tab_overview",
-      "fieldtype": "Tab Break",
-      "label": "Overview",
-      "idx": 1
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_sec_overview",
-      "fieldtype": "Section Break",
-      "label": "General Details",
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "asset_name",
-      "fieldtype": "Data",
-      "label": "Asset Name (e.g., Camera-Laundry-Room)",
-      "reqd": 1,
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "asset_category",
-      "fieldtype": "Select",
-      "label": "Category",
-      "options": "CCTV Camera\nDVR/NVR\nHard Disk\nRouter\nNetwork Switch\nFire Alarm Panel\nSmoke Detector\nFirst Aid Kit\nFire Extinguisher\nGenerator\nWater Tank\nOther",
-      "reqd": 1,
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "building",
-      "fieldtype": "Link",
-      "label": "Assigned Building",
-      "options": "Accommodation Building",
-      "reqd": 1,
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "location_in_building",
-      "fieldtype": "Data",
-      "label": "Physical Location (e.g., Laundry Room, Floor 2 Hallway)",
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "serial_number",
-      "fieldtype": "Data",
-      "label": "Serial Number",
-      "idx": 7
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "linked_erpnext_asset",
-      "fieldtype": "Link",
-      "label": "ERPNext Asset Record",
-      "options": "Asset",
-      "description": "Links this asset to its ERPNext Asset record for depreciation tracking.",
-      "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_overview_col",
-      "fieldtype": "Column Break",
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "responsible_supervisor",
-      "fieldtype": "Link",
-      "label": "Custodian Supervisor",
-      "options": "User",
-      "reqd": 1,
-      "description": "Supervisor accountable for this asset; appears on facility custody report",
-      "idx": 10
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "installation_date",
-      "fieldtype": "Date",
-      "label": "Installation Date",
-      "idx": 11
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "warranty_expiry",
-      "fieldtype": "Date",
-      "label": "Warranty Expiry",
-      "idx": 12
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "status",
-      "fieldtype": "Select",
-      "label": "Status",
-      "options": "Operational\nFaulty\nUnder Repair\nReplaced\nScrapped\nIn Storage",
-      "default": "Operational",
-      "idx": 13
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "FAC-AST-.YYYY.-.####",
-      "default": "FAC-AST-.YYYY.-.####",
-      "reqd": 1,
-      "idx": 14
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_sec_large_text",
-      "fieldtype": "Section Break",
-      "label": "Additional Information",
-      "collapsible": 1,
-      "idx": 15
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "notes",
-      "fieldtype": "Small Text",
-      "label": "Notes",
-      "idx": 16
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_tab_system",
-      "fieldtype": "Tab Break",
-      "label": "System Info",
-      "idx": 17
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_sec_system",
-      "fieldtype": "Section Break",
-      "label": "Administrative Details",
-      "idx": 18
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "last_inspection_date",
-      "fieldtype": "Date",
-      "label": "Last Inspected Date",
-      "read_only": 1,
-      "idx": 19
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "previous_building",
-      "fieldtype": "Link",
-      "label": "Previous Building",
-      "options": "Accommodation Building",
-      "read_only": 1,
-      "description": "The building this asset was located in before its current location.",
-      "idx": 20
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "previous_location_in_building",
-      "fieldtype": "Data",
-      "label": "Previous Location",
-      "read_only": 1,
-      "idx": 21
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "facility_asset_system_col",
-      "fieldtype": "Column Break",
-      "idx": 22
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "movement_count",
-      "fieldtype": "Int",
-      "label": "Total Movements Recorded",
-      "read_only": 1,
-      "default": 0,
-      "description": "Number of times this asset has been moved between buildings.",
-      "idx": 23
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "last_movement_date",
-      "fieldtype": "Date",
-      "label": "Last Movement Date",
-      "read_only": 1,
-      "idx": 24
-    }
-  ],
-  "permissions": [
-    {
-      "doctype": "DocPerm",
-      "role": "System Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "delete": 1,
-      "report": 1,
-      "export": 1,
-      "print": 1,
-      "email": 1,
-      "share": 1,
-      "idx": 1
-    },
-    {
-      "doctype": "DocPerm",
-      "role": "Accommodation Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "idx": 2
-    },
-    {
-      "doctype": "DocPerm",
-      "role": "Resident Supervisor",
-      "read": 1,
-      "idx": 3
-    }
-  ]
+ "doctype": "DocType",
+ "name": "Facility Asset",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 0,
+ "engine": "InnoDB",
+ "track_changes": 1,
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "description": "Building-level fixed asset: CCTV camera, DVR/NVR, hard disk, router, switch, generator. Custody is on the supervisor, not on an employee.",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "asset_name",
+   "fieldtype": "Data",
+   "label": "Asset Name (e.g., Camera-Laundry-Room)",
+   "reqd": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "asset_category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "CCTV Camera\nDVR/NVR\nHard Disk\nRouter\nNetwork Switch\nFire Alarm Panel\nSmoke Detector\nFirst Aid Kit\nFire Extinguisher\nGenerator\nWater Tank\nOther",
+   "reqd": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Assigned Building",
+   "options": "Accommodation Building",
+   "reqd": 1,
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "location_in_building",
+   "fieldtype": "Data",
+   "label": "Physical Location (e.g., Laundry Room, Floor 2 Hallway)",
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "serial_number",
+   "fieldtype": "Data",
+   "label": "Serial Number",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "linked_erpnext_asset",
+   "fieldtype": "Link",
+   "label": "ERPNext Asset Record",
+   "options": "Asset",
+   "description": "Links this asset to its ERPNext Asset record for depreciation tracking.",
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_overview_col",
+   "fieldtype": "Column Break",
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "responsible_supervisor",
+   "fieldtype": "Link",
+   "label": "Custodian Supervisor",
+   "options": "User",
+   "reqd": 1,
+   "description": "Supervisor accountable for this asset; appears on facility custody report",
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "installation_date",
+   "fieldtype": "Date",
+   "label": "Installation Date",
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "warranty_expiry",
+   "fieldtype": "Date",
+   "label": "Warranty Expiry",
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Operational\nFaulty\nUnder Repair\nReplaced\nScrapped\nIn Storage",
+   "default": "Operational",
+   "idx": 13
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "FAC-AST-.YYYY.-.####",
+   "default": "FAC-AST-.YYYY.-.####",
+   "reqd": 1,
+   "idx": 14,
+   "hidden": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1,
+   "idx": 15
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "idx": 16
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System Info",
+   "idx": 17
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Administrative Details",
+   "idx": 18
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "last_inspection_date",
+   "fieldtype": "Date",
+   "label": "Last Inspected Date",
+   "read_only": 1,
+   "idx": 19
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "previous_building",
+   "fieldtype": "Link",
+   "label": "Previous Building",
+   "options": "Accommodation Building",
+   "read_only": 1,
+   "description": "The building this asset was located in before its current location.",
+   "idx": 20
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "previous_location_in_building",
+   "fieldtype": "Data",
+   "label": "Previous Location",
+   "read_only": 1,
+   "idx": 21
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_system_col",
+   "fieldtype": "Column Break",
+   "idx": 22
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "movement_count",
+   "fieldtype": "Int",
+   "label": "Total Movements Recorded",
+   "read_only": 1,
+   "default": 0,
+   "description": "Number of times this asset has been moved between buildings.",
+   "idx": 23
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "last_movement_date",
+   "fieldtype": "Date",
+   "label": "Last Movement Date",
+   "read_only": 1,
+   "idx": 24
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Resident Supervisor",
+   "read": 1,
+   "idx": 3
+  }
+ ]
 }

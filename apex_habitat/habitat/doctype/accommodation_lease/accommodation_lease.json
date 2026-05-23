@@ -134,7 +134,8 @@
    "options": "ACC-LEASE-.YYYY.-.####",
    "default": "ACC-LEASE-.YYYY.-.####",
    "reqd": 1,
-   "idx": 14
+   "idx": 14,
+   "hidden": 1
   },
   {
    "doctype": "DocField",
