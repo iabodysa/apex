@@ -8,39 +8,12 @@
     --afmco-mint: #60D297;
     --afmco-green-light: rgba(0, 132, 78, 0.1);
     
-    /* Core Frappe color variable overrides - applies theme colors cleanly without breaking dark/light mode switches */
+    /* Core Frappe color variable overrides */
     --primary: var(--afmco-green);
     --primary-color: var(--afmco-green);
     --btn-primary-bg: var(--afmco-green);
     --btn-primary-hover-bg: var(--afmco-forest);
     --btn-primary-border: var(--afmco-green);
-    
-    /* Subtle overrides for focus indicator rings */
-    --scrollbar-track-color: transparent;
-    --scrollbar-thumb-color: var(--afmco-green);
-}
-
-/* Scoped customization for custom app workspaces and DocTypes to avoid polluting the rest of ERPNext */
-[data-page-route^="Workspace/Accommodation"],
-[data-page-route^="Workspace/Daily"],
-[data-page-route^="Workspace/Maintenance"],
-[data-page-route^="Workspace/Custody"],
-[data-page-route^="Workspace/Lease"],
-[data-page-route^="Workspace/Safety"],
-[data-page-route^="Form/Accommodation"],
-[data-page-route^="Form/Custody"],
-[data-page-route^="Form/Safety"],
-[data-page-route^="Form/Maintenance"],
-[data-page-route^="Form/Cleaning"],
-[data-page-route^="Form/Facility"],
-[data-page-route^="Form/Subcontractor"],
-[data-page-route^="Form/Utility"] {
-    --primary-color: var(--afmco-green);
-}
-
-/* Page head accents (non-intrusive inline-start border, RTL-safe) */
-.page-head {
-    border-inline-start: 4px solid var(--afmco-green) !important;
 }
 
 /* Custom buttons styling matching branding colors */
@@ -55,42 +28,4 @@
 .btn-primary:active {
     background-color: var(--afmco-forest) !important;
     border-color: var(--afmco-forest) !important;
-}
-
-/* Input focus ring overrides using brand mint glow */
-.control-input:focus,
-.form-control:focus,
-.input-with-feedback:focus {
-    border-color: var(--afmco-green) !important;
-    box-shadow: 0 0 0 2px var(--afmco-mint) !important;
-}
-
-/* Tabs list active indicators */
-.form-tabs-list .nav-link.active,
-.nav-tabs .nav-link.active {
-    border-bottom: 2px solid var(--afmco-green) !important;
-    color: var(--afmco-green) !important;
-}
-
-/* Workspace card accent tops */
-.workspace-card,
-.widget,
-.number-widget-box,
-.dashboard-widget-box {
-    border-top: 3px solid var(--afmco-green) !important;
-}
-
-/* Selected list items, sidebar highlights and dropdown highlights */
-.sidebar-item.selected,
-.standard-sidebar-item.selected,
-.dropdown-item:hover,
-.dropdown-item:focus {
-    background-color: var(--afmco-green-light) !important;
-    color: var(--afmco-green) !important;
-}
-
-/* Grid highlights */
-.list-row-head,
-.grid-heading-row {
-    border-bottom: 2px solid var(--afmco-green) !important;
 }
