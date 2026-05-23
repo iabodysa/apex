@@ -1,113 +1,107 @@
 # Apex Habitat
 
-**Version 0.6.0**
+![Version](https://img.shields.io/badge/version-0.6.0-blue) ![Frappe](https://img.shields.io/badge/frappe-v15-green) ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-Apex Habitat is a custom application for the Frappe Framework. It provides operational accommodation, occupancy tracking, and facilities maintenance management. The application integrates with ERPNext and HRMS to process data workflows and track operational records.
+Apex Habitat manages worker accommodation operations for facilities in Saudi Arabia — from building and room allocation to maintenance coordination, utility cost tracking, and lease management. The application runs on Frappe Framework v15 and integrates with ERPNext and HRMS for payroll and cost workflows.
 
-> [!NOTE]
-> This application is built for Frappe v15. It handles accommodation workflows operationally, storing financial metrics in a dedicated memo ledger to isolate tracking from the core ERPNext General Ledger.
+> **Note:** Apex Habitat stores financial metrics in a dedicated memo ledger that is isolated from the ERPNext General Ledger. This keeps operational cost tracking clean and auditable without interfering with standard accounting.
 
 ---
 
-## What's New in v0.5.4
+## Key Features
 
-### Housing Supervisor Report
-A new per-building summary report gives Housing Supervisors a consolidated view of each accommodation building. The report surfaces occupancy counts, cleaning task completion status, open safety findings, pending maintenance work orders, and unresolved resident requests — all in a single screen without requiring cross-module navigation.
-
-### Accommodation Lease Enhancements
-The Accommodation Lease DocType now supports structured billing:
-- **Billing cycle** field (Monthly, Quarterly, Semi-Annual, Annual) controls rent schedule generation.
-- **First payment date** field anchors the schedule start for precise period alignment.
-- **Auto-generated payment schedule**: saving a lease with a valid billing cycle and first payment date automatically populates the Rent Payment Schedule child table, eliminating manual row entry.
-- **Utility cost share %** field records the agreed proportion of utility bills that the landlord bears, enabling automated cost-split calculations in Utility Bill Entry.
-
-### Maintenance Material Catalog
-A lightweight Habitat-owned material master has been added to support procurement planning on Maintenance Work Orders:
-- **Maintenance Material** is a catalog DocType scoped to Habitat — it is not an ERPNext Item or a Stock record. An optional `erpnext_item` link field allows future mapping to ERPNext Item if inventory integration is required; leaving it blank uses the Habitat catalog only.
-- Materials are not SLA records, custody articles, or inventory positions. They exist solely to identify and describe materials needed for repair work.
-- **Maintenance Material Template** groups pre-defined sets of materials by issue type (Electrical, Plumbing, Civil, HVAC, etc.), enabling coordinators to load a standard kit in a single step.
-- A **Load Material Template** button on the Maintenance Work Order populates the procurement items child table from the selected template. No purchasing documents or stock transactions are created.
-
-### Maintenance Work Order — Completion Photo Required
-Maintenance Work Orders now enforce a completion photo attachment before the record can be closed. The controller blocks closure if no file is attached, ensuring evidence is captured for every completed job before the record is finalised.
-
-### Habitat Settings — Damage Salary Component
-A new `damage_salary_component` field (Link to Salary Component) has been added to Habitat Settings. This field designates the HRMS salary component used for custody damage deductions, replacing the previous name-pattern lookup and removing the dependency on hardcoded component names.
-
-### CSS Theme — Scoped, Dark Mode Compatible, RTL Safe
-The custom stylesheet (`afmco_theme.css`) has been refined to scope all overrides to app workspace selectors. Changes include:
-- No global CSS selector overrides — only workspace-class-scoped rules.
-- Full compatibility with Frappe's built-in dark color scheme.
-- RTL layout correctness for Arabic-locale deployments.
+- **Spatial inventory** — hierarchical site → building → floor → room → bed structure with bulk generation from floor-plan templates
+- **Accommodation assignment** — check-in, check-out, and room-bed transfer workflows linked to ERPNext Employee, Project, and Cost Center
+- **Resident request intake** — QR-linked web form allowing residents to submit requests from any mobile device without a login
+- **Maintenance pipeline** — inspection reports route automatically to maintenance requests, which progress to work orders with completion-photo enforcement
+- **Subcontractor coordination** — service contracts, dispatch assignments, and work order closure tracking
+- **Lease management** — structured billing cycles with auto-generated payment schedules and landlord utility-share configuration
+- **Utility cost splitting** — shared-meter bill entry with configurable cost-share percentages across buildings
+- **Custody and asset tracking** — custody article issuance, returns, damage assessment, and HRMS salary deduction integration
+- **Safety inspection automation** — building safety templates generate daily task instances from a configurable catalog
+- **Building license tracking** — automated expiry checks with Expiring Soon and Expired status transitions
+- **Operational memo ledger** — cost allocations, utility charges, and work order expenses recorded in isolation from the ERPNext GL
+- **Maintenance material catalog** — issue-type templates preload material kits onto work orders in a single step
+- **9 role-based workspaces** — tailored desktops for managers, supervisors, finance, safety, custody, audit, and subcontractor users
+- **Full Arabic UI** — all user-facing labels, statuses, and messages delivered through the Frappe translation system
 
 ---
 
 ## Relationship Map
 
-This flowchart maps the relationships between master records, transactional documents, and ledgers within the application.
-
 ```mermaid
 flowchart TD
-    Settings["Habitat Settings"] --> Gates["Operational Posting Gates"]
+    Settings["Habitat Settings"] --> Gates["Operational Gates"]
 
-    Site["Accommodation Site"] --> Building["Accommodation Building"]
-    Building --> FloorPlan["Accommodation Floor Plan\n(child table)"]
-    FloorPlan -->|generate_rooms_and_beds| Room["Accommodation Room"]
-    Room --> Bed["Accommodation Bed"]
+    subgraph Spatial ["Spatial Inventory"]
+        Site["Accommodation Site"] --> Building["Accommodation Building"]
+        Building --> FloorPlan["Floor Plan (child table)"]
+        FloorPlan -->|"bulk generate"| Room["Accommodation Room"]
+        Room --> Bed["Accommodation Bed"]
+    end
 
-    Building -->|generate_safety_setup| STTemplate["Scheduled Task Template"]
-    STCatalog["Safety Task Catalog"] --> STTemplate
-    STTemplate --> STInstance["Scheduled Task Instance"]
-    STInstance --> SafetyExecution["Safety Task Execution"]
+    subgraph Safety ["Safety & Scheduling"]
+        TaskCatalog["Safety Task Catalog"] --> TaskTemplate["Safety Task Template"]
+        Building -->|"initialize safety"| TaskTemplate
+        TaskTemplate --> TaskInstance["Task Instance"]
+        TaskInstance --> SafetyExecution["Safety Task Execution"]
+    end
 
     Building --> License["Building License"]
-    Building --> QRLocation["Accommodation QR Location"]
-    QRLocation -->|token| ResidentRequest["Accommodation Resident Request"]
+    Building --> QRLocation["QR Location"]
+    QRLocation -->|token| ResidentRequest["Resident Request"]
     ResidentRequest --> MaintenanceRequest
 
-    Employee["Employee"] --> Assignment["Accommodation Assignment"]
-    Project["Project"] --> Assignment
-    CostCenter["Cost Center"] --> Assignment
-    Building --> Assignment
-    Room --> Assignment
-    Bed --> Assignment
+    subgraph Occupancy ["Occupancy Lifecycle"]
+        Employee["Employee"] --> Assignment["Accommodation Assignment"]
+        Project["Project"] --> Assignment
+        CostCenter["Cost Center"] --> Assignment
+        Building --> Assignment
+        Room --> Assignment
+        Bed --> Assignment
+        Assignment --> Checkout["Checkout"]
+        Assignment --> Transfer["Room Transfer"]
+    end
 
-    Assignment --> Checkout["Accommodation Checkout"]
-    Assignment --> Transfer["Room Bed Transfer"]
-    Assignment --> CustodyIssue["Custody Issue"]
-    CustodyArticle["Custody Article"] --> CustodyIssue
-    CustodyIssue --> CustodyReturn["Custody Return"]
-    CustodyReturn --> Damage["Custody Damage Assessment"]
+    subgraph Custody ["Custody & Assets"]
+        CustodyArticle["Custody Article"] --> CustodyIssue["Custody Issue"]
+        Assignment --> CustodyIssue
+        CustodyIssue --> CustodyReturn["Custody Return"]
+        CustodyReturn --> Damage["Damage Assessment"]
+    end
 
-    Supplier["Supplier"] --> Lease["Accommodation Lease"]
-    Building --> Lease
-    Lease --> RentSchedule["Rent Payment Schedule"]
+    subgraph LeaseUtility ["Lease & Utilities"]
+        Supplier["Supplier"] --> Lease["Accommodation Lease"]
+        Building --> Lease
+        Lease --> RentSchedule["Rent Payment Schedule"]
+        Building --> UtilityAccount["Utility Account"]
+        UtilityAccount --> UtilityBill["Utility Bill Entry"]
+    end
 
-    Building --> UtilityAccount["Utility Account"]
-    UtilityAccount --> UtilityBill["Utility Bill Entry"]
+    subgraph Assets ["Facility Assets"]
+        Building --> FacilityAsset["Facility Asset"]
+        FacilityAsset --> AssetMovement["Asset Movement"]
+    end
 
-    Building --> FacilityAsset["Facility Asset"]
-    FacilityAsset --> AssetMovement["Facility Asset Movement"]
-
-    Building --> SafetyInspection["Safety Inspection Report"]
-    Building --> MaintenanceInspection["Maintenance Inspection Report"]
-    SafetyInspection --> MaintenanceRequest["Maintenance Request"]
-    MaintenanceInspection --> MaintenanceRequest
-    MaintenanceRequest --> WorkOrder["Maintenance Work Order"]
+    subgraph Maintenance ["Maintenance"]
+        Building --> SafetyInspection["Safety Inspection Report"]
+        Building --> MaintenanceInspection["Maintenance Inspection Report"]
+        SafetyInspection --> MaintenanceRequest["Maintenance Request"]
+        MaintenanceInspection --> MaintenanceRequest
+        MaintenanceRequest --> WorkOrder["Maintenance Work Order"]
+    end
 
     Building --> CleaningLog["Cleaning Log"]
 
-    Assignment --> Ledger["Accommodation Ledger\n(operational memo)"]
+    Assignment --> Ledger["Accommodation Ledger"]
     UtilityBill --> Ledger
     RentSchedule --> Ledger
-    Ledger --> Reports["Reports & Workspace Dashboards"]
+    Ledger --> Reports["Reports & Dashboards"]
 ```
 
 ---
 
-## Workspace Map & Profiles
-
-The workspace hierarchy structures desktop accessibility based on operational roles.
+## Workspace Map
 
 ```mermaid
 flowchart TD
@@ -115,15 +109,15 @@ flowchart TD
         OCC["Operations Command Center"]
         Setup["Setup"]
         Lifecycle["Accommodation Lifecycle"]
-        Daily["Daily & Scheduled Tasks"]
-        Maintenance["Maintenance & Remediation"]
-        Safety["Safety & Compliance"]
-        Custody["Custody & Asset Control"]
-        Lease["Lease, Utilities & Cost Control"]
-        ClientAudit["Client Audit & Evidence"]
+        Daily["Daily and Scheduled Tasks"]
+        Maintenance["Maintenance and Remediation"]
+        Safety["Safety and Compliance"]
+        Custody["Custody and Asset Control"]
+        Lease["Lease, Utilities, and Cost Control"]
+        ClientAudit["Client Audit and Evidence"]
     end
 
-    subgraph Roles ["User Personas"]
+    subgraph Roles ["User Roles"]
         Admin["System Administrator"]
         Manager["Accommodation Manager"]
         Supervisor["Accommodation Supervisor"]
@@ -134,14 +128,15 @@ flowchart TD
         Compliance["Compliance Officer"]
         CustodySup["Custody Supervisor"]
         Auditor["Internal Auditor"]
-        Finance["Finance"]
+        Finance["Finance User"]
     end
 
+    Admin --> Setup
+    Admin --> OCC
     Manager --> OCC
     Manager --> Setup
     Manager --> Lifecycle
     Manager --> ClientAudit
-    Admin --> Setup
     Supervisor --> Lifecycle
     Supervisor --> Daily
     Cleaner --> Daily
@@ -155,20 +150,23 @@ flowchart TD
     Finance --> Lease
 ```
 
-### Workspace Specifications
-- **Operations Command Center**: Cross-module KPIs, open queues, and exception charts. Read-only overview.
-- **Setup**: Global settings, bootstrap templates, QR locations, and master data generation wizards.
-- **Accommodation Lifecycle**: Manages occupancy transactions (check-ins, check-outs, room transfers).
-- **Daily & Scheduled Tasks**: Operations queue for scheduled cleaning logs and daily tasks.
-- **Maintenance & Remediation**: Coordination hub for subcontractor assignments and maintenance work orders.
-- **Safety & Compliance**: Inspection reports, building safety monitoring, and license tracking.
-- **Custody & Asset Control**: Records asset movement, custody issue/returns, and damage recovery.
-- **Lease, Utilities & Cost Control**: Monitors lessor contracts, utility bills, and internal cost distributions.
-- **Client Audit & Evidence**: Houses audit remediation plans and evidence files.
+### Workspace Descriptions
+
+| Workspace | Purpose |
+| :--- | :--- |
+| **Operations Command Center** | Cross-module KPIs, open queues, and exception charts — read-only overview for managers |
+| **Setup** | Global settings, bootstrap templates, QR locations, and master data generation |
+| **Accommodation Lifecycle** | Check-in, check-out, and room-transfer transactions |
+| **Daily and Scheduled Tasks** | Operations queue for scheduled cleaning logs and daily inspection tasks |
+| **Maintenance and Remediation** | Subcontractor dispatch, work orders, and maintenance coordination |
+| **Safety and Compliance** | Inspection reports, safety task monitoring, and building license tracking |
+| **Custody and Asset Control** | Custody issuance, returns, damage assessment, and asset movement records |
+| **Lease, Utilities, and Cost Control** | Lessor contracts, utility bills, rent schedules, and cost distribution |
+| **Client Audit and Evidence** | Audit remediation plans and supporting evidence files |
 
 ---
 
-## Roles Map & responsibility Matrix
+## Roles and Responsibilities
 
 ```mermaid
 flowchart TD
@@ -182,11 +180,11 @@ flowchart TD
     end
 
     subgraph AccessWorkspaces ["Accessible Workspaces"]
-        WS_Setup["Setup Workspace"]
+        WS_Setup["Setup"]
         WS_OCC["Operations Command Center"]
-        WS_Ops["Operational Workspaces\n(Lifecycle, Daily Work, Safety)"]
-        WS_Finance["Lease & Cost Control"]
-        WS_Audit["Custody & Client Audit"]
+        WS_Ops["Operational Workspaces (Lifecycle, Daily, Safety)"]
+        WS_Finance["Lease and Cost Control"]
+        WS_Audit["Custody and Client Audit"]
     end
 
     UserAdmin --> WS_Setup
@@ -202,84 +200,91 @@ flowchart TD
 
 ### Responsibility Assignment Matrix (responsibility)
 
-Below is the lightweight responsibility structure mapping core application workflows to standard user roles.
+- **A** = Accountable
+- **R** = Responsible
+- **C** = Consulted
+- **I** = Informed
 
-- **A** = Accountable (من يعتمد)
-- **R** = Responsible (من ينفذ)
-- **C** = Consulted (من يستشار)
-- **I** = Informed (من يشعر)
-
-| Core Workflow Process | System Admin | Accommodation Manager | Resident Supervisor | Safety Supervisor | Custody Supervisor | Finance User | Internal Auditor |
+| Core Workflow | System Admin | Accommodation Manager | Resident Supervisor | Safety Supervisor | Custody Supervisor | Finance User | Internal Auditor |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Spatial Inventory Setup** | **R** | **A** | **C** | **I** | **I** | **I** | **I** |
 | **Accommodation Assignment** | **I** | **A** | **R** | **I** | **I** | **I** | **I** |
-| **Custody & Asset Control** | **I** | **A** | **C** | **I** | **R** | **I** | **C** |
+| **Custody and Asset Control** | **I** | **A** | **C** | **I** | **R** | **I** | **C** |
 | **Facility Maintenance** | **I** | **A** | **R** | **I** | **I** | **I** | **I** |
-| **Safety & Inspection Reports**| **I** | **A** | **I** | **R** | **I** | **I** | **I** |
-| **Lease & Utility Contracts** | **I** | **A** | **I** | **I** | **I** | **R** | **I** |
+| **Safety and Inspection Reports** | **I** | **A** | **I** | **R** | **I** | **I** | **I** |
+| **Lease and Utility Contracts** | **I** | **A** | **I** | **I** | **I** | **R** | **I** |
 | **Client Audit Remediation** | **A** | **R** | **I** | **I** | **I** | **I** | **R** |
 
 ---
 
-## Backend Engines & Automation
+## Backend Engines and Automation
 
-The application uses scheduler-driven tasks and event hooks to automate background processes.
+The application uses scheduler-driven tasks and controller hooks to automate background processes.
 
 ```mermaid
 flowchart TD
-    subgraph Schedulers ["Daily / Weekly Schedulers"]
-        CostAlloc["daily_accommodation_cost_allocation"]
-        LicenseCheck["daily_building_license_expiry_check"]
-        MaintEsc["open_maintenance_escalation"]
-        LeaseWatch["lease_expiry_watchlist"]
-        TaskGen["daily_scheduled_task_instance_generator"]
-        OccupancySync["weekly_occupancy_sync"]
-        ComplianceScan["weekly_safety_task_compliance_scan"]
-        RentAlert["monthly_rent_due_alert"]
+    subgraph Daily ["Daily Schedulers"]
+        CostAlloc["Cost Allocation"]
+        LicenseCheck["License Expiry Check"]
+        MaintEsc["Maintenance Escalation"]
+        LeaseWatch["Lease Expiry Watch"]
+        TaskGen["Safety Task Instance Generator"]
     end
 
-    subgraph Triggers ["On-Demand & Controller Hooks"]
-        RoomGen["generate_rooms_and_beds"]
-        SafetySetup["generate_safety_setup"]
-        CustodyHook["Custody Controller Hooks"]
-        AssetMoveHook["Facility Asset Movement Hook"]
-        ResidentRequestHook["Resident Request Hook"]
-        WorkOrderHook["Work Order Hook"]
+    subgraph Weekly ["Weekly Schedulers"]
+        OccupancySync["Occupancy Sync"]
+        ComplianceScan["Safety Compliance Scan"]
+    end
+
+    subgraph Monthly ["Monthly Schedulers"]
+        RentAlert["Rent Due Alert"]
+    end
+
+    subgraph Triggers ["On-Demand Hooks"]
+        RoomGen["Bulk Room and Bed Generation"]
+        SafetySetup["Safety Template Initialization"]
+        ResidentRequestHook["Resident Request Router"]
+        WorkOrderHook["Work Order Completion Hook"]
+        AssetMoveHook["Asset Movement Gate"]
     end
 
     CostAlloc -->|writes| Ledger["Accommodation Ledger"]
     WorkOrderHook -->|writes| Ledger
-    RoomGen -->|creates| RoomsBeds["Rooms & Beds"]
-    SafetySetup -->|creates| ScheduledTasks["Scheduled Tasks"]
+    RoomGen -->|creates| RoomsBeds["Rooms and Beds"]
+    SafetySetup -->|creates| ScheduledTasks["Safety Task Templates"]
     ResidentRequestHook -->|routes| MaintenanceRequest["Maintenance Request"]
     AssetMoveHook -->|gates| IntercompanyApproval["Intercompany Approval"]
 ```
 
-### Automation Specifications
-- **daily_accommodation_cost_allocation**: Distributes cost metrics to the memo ledger. Skips posting if gate controls in Settings are inactive or building capacity is zero.
-- **daily_building_license_expiry_check**: Updates license statuses (Expired, Expiring Soon) automatically using renewal lead day thresholds.
-- **open_maintenance_escalation**: Scans and logs overdue unresolved maintenance orders categorized by priority rules.
-- **lease_expiry_watchlist**: Flags buildings with expired lease dates.
-- **daily_scheduled_task_instance_generator**: Automatically spawns today's inspection instances from active safety templates.
-- **weekly_occupancy_sync**: Syncs live room occupancy metrics using real-time employee assignment counts.
-- **weekly_safety_task_compliance_scan**: Marks past-due unfinished safety tasks as Overdue.
-- **monthly_rent_due_alert**: Signals finance about unpaid rent periods.
-- **generate_rooms_and_beds**: Idempotent builder on Building master to bulk-generate rooms/beds based on floor plans.
-- **generate_safety_setup**: Generates building safety templates from the global catalog.
+### Scheduler Reference
+
+| Job | Frequency | Description |
+| :--- | :--- | :--- |
+| `daily_accommodation_cost_allocation` | Daily | Distributes cost metrics to the memo ledger. Skips posting when gate controls in Settings are inactive or building capacity is zero. |
+| `daily_building_license_expiry_check` | Daily | Updates license statuses (Expired, Expiring Soon) using configurable renewal lead-day thresholds. |
+| `open_maintenance_escalation` | Daily | Scans and logs overdue unresolved maintenance orders categorized by priority rules. |
+| `lease_expiry_watchlist` | Daily | Flags buildings with expired lease dates. |
+| `daily_scheduled_task_instance_generator` | Daily | Spawns today's inspection instances from active safety task templates. |
+| `weekly_occupancy_sync` | Weekly | Syncs live room occupancy metrics from current employee assignment counts. |
+| `weekly_safety_task_compliance_scan` | Weekly | Marks past-due unfinished safety tasks as Overdue. |
+| `monthly_rent_due_alert` | Monthly | Notifies finance of unpaid rent periods. |
 
 ---
 
-## Technical Design & Boundaries
+## Technical Design and Boundaries
 
 ### Operational Memo Ledger
-To separate operational transactions from standard accounting procedures, Apex Habitat does not write directly to the ERPNext financial General Ledger:
-- All cost-recoveries, allocations, and work order expenses populate the custom **Accommodation Ledger** (`Accommodation Ledger` DocType) for dashboard KPI analytics.
-- Integration triggers for standard ERPNext modules (such as payroll deduction records via `Additional Salary` in HRMS) are gated behind manual settings approvals.
 
-### UI Styling & Customization
+Apex Habitat does not write directly to the ERPNext financial General Ledger. Instead:
+
+- All cost recoveries, allocations, and work order expenses are recorded in the custom **Accommodation Ledger** DocType for dashboard KPI analytics.
+- Integration with standard ERPNext modules (such as HRMS payroll deductions via `Additional Salary`) is gated behind explicit settings approvals, preventing unintended financial postings.
+
+### UI Styling and Customization
+
 - Custom interface adjustments are scoped to workspace classes in `afmco_theme.css`.
-- Applies scoped CSS overrides to workspace elements without modifying global CSS selectors.
-- Retains native support for light and dark color schemes.
+- No global CSS selector overrides — only workspace-class-scoped rules.
+- Compatible with Frappe's built-in light and dark color schemes and RTL layout for Arabic-locale deployments.
 
 ---
 
@@ -293,7 +298,7 @@ apex_habitat/
 └── apex_habitat/
     ├── __init__.py
     ├── hooks.py                # Hook mappings, scheduler setup, and theme registration
-    ├── setup.py                # After-install role/permissions bootstrap logic
+    ├── setup.py                # After-install role and permissions bootstrap
     ├── translations/           # Arabic translation catalog (ar.csv)
     ├── public/
     │   └── css/
@@ -308,7 +313,7 @@ apex_habitat/
 
 ---
 
-## Installation & Deployment
+## Installation
 
 ```bash
 # Add the app to your bench directory
@@ -317,9 +322,11 @@ bench get-app https://github.com/iabodysa/apex.git
 # Install the app on your site
 bench --site [your-site-name] install-app apex_habitat
 
-# Run database migrations to register the custom DocTypes and schema
+# Run database migrations to register custom DocTypes and schema
 bench --site [your-site-name] migrate
 ```
+
+---
 
 ## License
 
