@@ -98,6 +98,15 @@
       "link_type": "Report",
       "link_to": "Accommodation Occupancy Summary",
       "idx": 6
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Housing Supervisor Report",
+      "link_type": "Report",
+      "link_to": "Housing Supervisor Report",
+      "onboard": 0,
+      "idx": 7
     }
   ],
   "charts": [
