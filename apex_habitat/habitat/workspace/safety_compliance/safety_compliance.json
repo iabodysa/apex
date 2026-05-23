@@ -9,7 +9,7 @@
   "is_default": 0,
   "sequence_id": 5.0,
   "parent_page": "Operations Command Center",
-  "content": "[{\"id\": \"LQD3uINKU8\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"TxkhqOIb24\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Safety Inspections Recorded\", \"col\": 3}}, {\"id\": \"bxpXMeyQRt\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Poor Safety Task Executions\", \"col\": 3}}, {\"id\": \"c3gbVDILDq\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"9zAGjJLu4j\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Expired Licenses\", \"col\": 3}}, {\"id\": \"7kbBvxsZ7m\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"GmxU3uaKS6\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Building Licenses by Status\", \"col\": 6}}, {\"id\": \"sljPSjGtx7\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Safety Task Executions by Result\", \"col\": 6}}, {\"id\": \"xeTLhXaMJb\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"TMjhIcAAbb\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Building License\", \"col\": 4}}, {\"id\": \"gLnzdBg8ZF\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"Mcojxx3zY6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Inspection Report\", \"col\": 3}}, {\"id\": \"c4qUqmrlbG\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Task Execution\", \"col\": 3}}, {\"id\": \"sYhkk6VO23\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building License\", \"col\": 3}}, {\"id\": \"vqiDGcntIU\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Safety & Compliance</b></span>\", \"col\": 12}}, {\"id\": \"5sjDbmKluh\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Operations\", \"col\": 4}}, {\"id\": \"CG2HJf8fHT\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"sZY4pSrnOf\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}, {\"id\": \"s8bq432xoc\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Open Findings\", \"col\": 3}}, {\"id\": \"zjFZ1idn0x\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Compliance\", \"col\": 3}}]",
+  "content": "[{\"id\": \"LQD3uINKU8\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"TxkhqOIb24\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Safety Inspections Recorded\", \"col\": 3}}, {\"id\": \"bxpXMeyQRt\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Poor Safety Task Executions\", \"col\": 3}}, {\"id\": \"c3gbVDILDq\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"9zAGjJLu4j\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Expired Licenses\", \"col\": 3}}, {\"id\": \"7kbBvxsZ7m\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"GmxU3uaKS6\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Building Licenses by Status\", \"col\": 6}}, {\"id\": \"sljPSjGtx7\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Safety Task Executions by Result\", \"col\": 6}}, {\"id\": \"xeTLhXaMJb\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"TMjhIcAAbb\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Building License\", \"col\": 4}}, {\"id\": \"gLnzdBg8ZF\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"Mcojxx3zY6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Inspection Report\", \"col\": 3}}, {\"id\": \"c4qUqmrlbG\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Task Execution\", \"col\": 3}}, {\"id\": \"sYhkk6VO23\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building License\", \"col\": 3}}, {\"id\": \"vqiDGcntIU\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Safety & Compliance</b></span>\", \"col\": 12}}, {\"id\": \"5sjDbmKluh\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Operations\", \"col\": 4}}, {\"id\": \"CG2HJf8fHT\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"sZY4pSrnOf\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}, {\"id\": \"s8bq432xoc\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Open Findings\", \"col\": 3}}, {\"id\": \"zjFZ1idn0x\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Compliance\", \"col\": 3}}, {\"id\": \"HsrSC001xx\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Supervisor Report\", \"col\": 3}}]",
   "shortcuts": [
     {
       "doctype": "Workspace Shortcut",
@@ -45,6 +45,13 @@
       "label": "Scheduled Task Compliance",
       "link_to": "Scheduled Task Compliance",
       "idx": 5
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "type": "Report",
+      "label": "Housing Supervisor Report",
+      "link_to": "Housing Supervisor Report",
+      "idx": 6
     }
   ],
   "links": [
@@ -97,6 +104,15 @@
       "link_type": "Report",
       "link_to": "Scheduled Task Compliance",
       "idx": 7
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Housing Supervisor Report",
+      "link_type": "Report",
+      "link_to": "Housing Supervisor Report",
+      "onboard": 0,
+      "idx": 8
     }
   ],
   "charts": [
