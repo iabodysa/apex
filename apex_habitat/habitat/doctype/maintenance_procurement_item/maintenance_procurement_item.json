@@ -30,6 +30,8 @@
       "label": "Maintenance Material",
       "options": "Maintenance Material",
       "description": "Select from the Habitat material catalog. Optional — use instead of or alongside ERPNext Item.",
+      "in_list_view": 1,
+      "columns": 4,
       "idx": 3
     },
     {
@@ -44,6 +46,8 @@
       "fieldname": "quantity",
       "fieldtype": "Int",
       "label": "Quantity",
+      "in_list_view": 1,
+      "columns": 2,
       "idx": 5
     },
     {
@@ -72,6 +76,8 @@
       "fieldname": "estimated_cost",
       "fieldtype": "Currency",
       "label": "Estimated Cost (SAR)",
+      "in_list_view": 1,
+      "columns": 3,
       "idx": 9
     }
   ]
