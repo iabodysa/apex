@@ -1,41 +1,45 @@
 {
-  "doctype": "DocType",
-  "name": "Subcontractor Building Coverage",
-  "module": "Habitat",
-  "custom": 0,
-  "istable": 1,
-  "engine": "InnoDB",
-  "fields": [
-    {
-      "doctype": "DocField",
-      "fieldname": "subcontractor_building_coverage_sec_details",
-      "fieldtype": "Section Break",
-      "label": "Details",
-      "idx": 1
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "building",
-      "fieldtype": "Link",
-      "label": "Building",
-      "options": "Accommodation Building",
-      "reqd": 1,
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "subcontractor_building_coverage_details_col",
-      "fieldtype": "Column Break",
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "specific_rate_sar",
-      "fieldtype": "Currency",
-      "label": "Specific Rate for this Building (SAR)",
-      "description": "If different from contract default",
-      "idx": 4
-    }
-  ],
-  "permissions": []
+ "doctype": "DocType",
+ "name": "Subcontractor Building Coverage",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "subcontractor_building_coverage_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Details",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Accommodation Building",
+   "reqd": 1,
+   "idx": 2,
+   "in_list_view": 1,
+   "columns": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "subcontractor_building_coverage_details_col",
+   "fieldtype": "Column Break",
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "specific_rate_sar",
+   "fieldtype": "Currency",
+   "label": "Specific Rate for this Building (SAR)",
+   "description": "If different from contract default",
+   "idx": 4,
+   "in_list_view": 1,
+   "columns": 3
+  }
+ ],
+ "permissions": []
 }
