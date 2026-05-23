@@ -1,9 +1,37 @@
 # Apex Habitat
 
+**Version 0.5.4**
+
 Apex Habitat is a custom application for the Frappe Framework. It provides operational accommodation, occupancy tracking, and facilities maintenance management. The application integrates with ERPNext and HRMS to process data workflows and track operational records.
 
 > [!NOTE]
 > This application is built for Frappe v15. It handles accommodation workflows operationally, storing financial metrics in a dedicated memo ledger to isolate tracking from the core ERPNext General Ledger.
+
+---
+
+## What's New in v0.5.4
+
+### Housing Supervisor Report
+A new per-building summary report gives Housing Supervisors a consolidated view of each accommodation building. The report surfaces occupancy counts, cleaning task completion status, open safety findings, pending maintenance work orders, and unresolved resident requests — all in a single screen without requiring cross-module navigation.
+
+### Accommodation Lease Enhancements
+The Accommodation Lease DocType now supports structured billing:
+- **Billing cycle** field (Monthly, Quarterly, Semi-Annual, Annual) controls rent schedule generation.
+- **First payment date** field anchors the schedule start for precise period alignment.
+- **Auto-generated payment schedule**: saving a lease with a valid billing cycle and first payment date automatically populates the Rent Payment Schedule child table, eliminating manual row entry.
+- **Utility cost share %** field records the agreed proportion of utility bills that the landlord bears, enabling automated cost-split calculations in Utility Bill Entry.
+
+### Maintenance Work Order — Completion Photo Required
+Maintenance Work Orders now enforce a completion photo attachment before the record can be closed. The controller blocks closure if no file is attached, ensuring evidence is captured for every completed job before the record is finalised.
+
+### Habitat Settings — Damage Salary Component
+A new `damage_salary_component` field (Link to Salary Component) has been added to Habitat Settings. This field designates the HRMS salary component used for custody damage deductions, replacing the previous name-pattern lookup and removing the dependency on hardcoded component names.
+
+### CSS Theme — Scoped, Dark Mode Compatible, RTL Safe
+The custom stylesheet (`afmco_theme.css`) has been refined to scope all overrides to app workspace selectors. Changes include:
+- No global CSS selector overrides — only workspace-class-scoped rules.
+- Full compatibility with Frappe's built-in dark color scheme.
+- RTL layout correctness for Arabic-locale deployments.
 
 ---
 
