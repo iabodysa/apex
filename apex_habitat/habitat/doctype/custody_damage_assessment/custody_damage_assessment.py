@@ -49,21 +49,11 @@ def on_submit(doc, method=None):
             )
             return
 
-        # Use ONLY an explicitly damage-named Deduction component. The previous
-        # fallback to "any Deduction component" was unsafe — it could deduct
-        # under an unrelated payroll component. If no damage component exists,
-        # skip creation rather than guessing.
-        salary_component = frappe.db.get_value(
-            "Salary Component",
-            {"type": "Deduction", "name": ["like", "%damage%"]},
-            "name"
-        )
-
+        salary_component = settings.damage_salary_component
         if not salary_component:
             logger.warning(
-                f"custody_damage_assessment.on_submit: No damage-specific Deduction Salary Component found. "
-                f"Cannot auto-generate Additional Salary deduction entry for assessment {doc.name}. "
-                f"Create a Deduction component whose name contains 'damage' first."
+                f"custody_damage_assessment.on_submit: Habitat Settings > Damage Deduction Component "
+                f"is not configured. Cannot auto-generate Additional Salary for assessment {doc.name}."
             )
             return
 

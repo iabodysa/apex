@@ -286,6 +286,8 @@ Daily & Scheduled Tasks,المهام اليومية والمجدولة
 Daily cleaning record per building. Not submittable — operational log only.,سجل تنظيف يومي لكل مبنى. غير قابل للاعتماد — سجل تشغيلي فقط.
 Daily Work,العمل اليومي
 Damage Deduction Amount (SAR),مبلغ حسم التلفيات (ريال)
+Damage Deduction Component,مكون حسم التلفيات
+Salary Component (Deduction type) used when posting custody damage as Additional Salary. Must exist in HRMS before enabling.,مكون الراتب (نوع خصم) المستخدم لترحيل تلفيات العهد كراتب إضافي. يجب أن يكون موجوداً في HRMS قبل التفعيل.
 Damage deduction {0} exceeds the per-checkout cap {1}.,حسم التلفيات {0} يتجاوز الحد الأقصى المسموح للمغادرة {1}.
 Damage Description,وصف التلفيات
 Damage Details,تفاصيل التلفيات
