@@ -101,9 +101,9 @@
    "doctype": "DocField",
    "fieldname": "company_share_pct",
    "fieldtype": "Percent",
-   "label": "Company Cost Share (%)",
+   "label": "Utility Cost Share (%)",
    "default": "100",
-   "description": "Percentage of rent borne by the company. Remainder is deducted from the resident's salary.",
+   "description": "Company's share (%) of utility bills for this building when meters are shared with other tenants. Agreed with the property management office. Does not affect the rent amount.",
    "idx": 11
   },
   {

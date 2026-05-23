@@ -34,7 +34,7 @@ def validate(doc, method=None):
 
     share = flt(doc.company_share_pct)
     if not (0 <= share <= 100):
-        frappe.throw(_("Company Cost Share must be between 0 and 100."))
+        frappe.throw(_("Utility Cost Share must be between 0 and 100."))
 
     if not doc.payment_schedule:
         _build_schedule(doc)
