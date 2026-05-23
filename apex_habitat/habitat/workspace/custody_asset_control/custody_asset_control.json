@@ -9,7 +9,7 @@
   "is_default": 0,
   "sequence_id": 6.0,
   "parent_page": "Operations Command Center",
-  "content": "[{\"id\": \"x8filuHNPQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"m12dcDNjVN\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"SX9ce41oqc\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"fndlaJ4Kqw\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Facility Assets Needing Attention\", \"col\": 3}}, {\"id\": \"FQtWNeYKp0\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"ib8BdQQtIC\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Custody Issues by Status\", \"col\": 6}}, {\"id\": \"DCvZ8pQvJF\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Facility Assets by Status\", \"col\": 6}}, {\"id\": \"TKxV1dJR5a\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"EfWXkLDUdq\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Custody Issue\", \"col\": 4}}, {\"id\": \"apoShDIlyA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"YWln3ptBaw\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"fqLqIG5wrE\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"bewuQW40x4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Damage Assessment\", \"col\": 3}}, {\"id\": \"xOC96L7gVF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Facility Asset Movement\", \"col\": 3}}, {\"id\": \"tgWVcqstng\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Custody & Asset Control</b></span>\", \"col\": 12}}, {\"id\": \"UavJYT7Hke\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"coQiGD3ZmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"3lQKvDmrhq\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"5E6IhvOOpt\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}, {\"id\": \"DQMkCY6m7g\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Intercompany Movement Register\", \"col\": 3}}]",
+  "content": "[{\"id\": \"x8filuHNPQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"m12dcDNjVN\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"SX9ce41oqc\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"fndlaJ4Kqw\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Facility Assets Needing Attention\", \"col\": 3}}, {\"id\": \"FQtWNeYKp0\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"ib8BdQQtIC\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Custody Issues by Status\", \"col\": 6}}, {\"id\": \"DCvZ8pQvJF\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Facility Assets by Status\", \"col\": 6}}, {\"id\": \"TKxV1dJR5a\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"EfWXkLDUdq\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Custody Issue\", \"col\": 4}}, {\"id\": \"apoShDIlyA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"YWln3ptBaw\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"fqLqIG5wrE\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"bewuQW40x4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Damage Assessment\", \"col\": 3}}, {\"id\": \"xOC96L7gVF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Facility Asset Movement\", \"col\": 3}}, {\"id\": \"tgWVcqstng\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Custody & Asset Control</b></span>\", \"col\": 12}}, {\"id\": \"UavJYT7Hke\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"coQiGD3ZmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"5E6IhvOOpt\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}, {\"id\": \"DQMkCY6m7g\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Intercompany Movement Register\", \"col\": 3}}]",
   "shortcuts": [
     {
       "doctype": "Workspace Shortcut",
@@ -127,38 +127,8 @@
     {
       "doctype": "Workspace Link",
       "type": "Card Break",
-      "label": "Custody Master",
-      "idx": 11
-    },
-    {
-      "doctype": "Workspace Link",
-      "type": "Link",
-      "label": "Custody Article",
-      "link_type": "DocType",
-      "link_to": "Custody Article",
-      "idx": 12
-    },
-    {
-      "doctype": "Workspace Link",
-      "type": "Link",
-      "label": "Custody Asset Category",
-      "link_type": "DocType",
-      "link_to": "Custody Asset Category",
-      "idx": 13
-    },
-    {
-      "doctype": "Workspace Link",
-      "type": "Link",
-      "label": "Operational Depreciation Policy",
-      "link_type": "DocType",
-      "link_to": "Operational Depreciation Policy",
-      "idx": 14
-    },
-    {
-      "doctype": "Workspace Link",
-      "type": "Card Break",
       "label": "Views",
-      "idx": 15
+      "idx": 11
     },
     {
       "doctype": "Workspace Link",
@@ -166,7 +136,7 @@
       "label": "Custody Damage Register",
       "link_type": "Report",
       "link_to": "Custody Damage Register",
-      "idx": 16
+      "idx": 12
     }
   ],
   "charts": [
