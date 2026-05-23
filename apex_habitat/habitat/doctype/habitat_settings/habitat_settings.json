@@ -100,9 +100,19 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "damage_salary_component",
+      "label": "Damage Deduction Component",
+      "fieldtype": "Link",
+      "options": "Salary Component",
+      "depends_on": "eval:doc.enable_damage_deduction==1",
+      "description": "Salary Component (Deduction type) used when posting custody damage as Additional Salary. Must exist in HRMS before enabling.",
+      "idx": 11
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "habitat_settings_details_col",
       "fieldtype": "Column Break",
-      "idx": 11
+      "idx": 12
     },
     {
       "doctype": "DocField",
@@ -111,7 +121,7 @@
       "fieldtype": "Check",
       "default": 0,
       "description": "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",
-      "idx": 12
+      "idx": 13
     },
     {
       "doctype": "DocField",
@@ -119,7 +129,7 @@
       "label": "Enable ERPNext Asset Link",
       "fieldtype": "Check",
       "default": 0,
-      "idx": 13
+      "idx": 14
     },
     {
       "doctype": "DocField",
@@ -127,7 +137,7 @@
       "label": "Enable Stock Entry Posting",
       "fieldtype": "Check",
       "default": 0,
-      "idx": 14
+      "idx": 15
     },
     {
       "doctype": "DocField",
@@ -135,7 +145,7 @@
       "label": "Auto-create Facility Asset Movement on Transfer",
       "fieldtype": "Check",
       "default": 1,
-      "idx": 15
+      "idx": 16
     },
     {
       "doctype": "DocField",
@@ -143,7 +153,7 @@
       "label": "Max Damage Deduction per Checkout (SAR)",
       "fieldtype": "Currency",
       "default": 500,
-      "idx": 16
+      "idx": 17
     },
     {
       "doctype": "DocField",
@@ -151,7 +161,7 @@
       "fieldtype": "Section Break",
       "label": "System Details",
       "collapsible": 1,
-      "idx": 17
+      "idx": 18
     },
     {
       "doctype": "DocField",
@@ -159,7 +169,7 @@
       "label": "Last Modified By Role",
       "fieldtype": "Data",
       "read_only": 1,
-      "idx": 18
+      "idx": 19
     }
   ],
   "permissions": [
