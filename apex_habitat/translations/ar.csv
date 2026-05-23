@@ -554,8 +554,11 @@ Maintenance Backlog,متراكمات أعمال الصيانة
 Maintenance Dispatch,إرسال للصيانة
 Maintenance Findings,ملاحظات الصيانة
 Maintenance Flow,مسار الصيانة
+Maintenance Master,إدارة مواد الصيانة
 Maintenance Inspection Finding Item,بند ملاحظات فحص الصيانة
 Maintenance Inspection Report,تقرير فحص الصيانة
+Maintenance Material,مادة الصيانة
+Maintenance Material Template,قالب مواد الصيانة
 Maintenance Procurement Item,بند مشتريات الصيانة
 Maintenance Request,طلب صيانة
 Maintenance Requests by Priority,طلبات الصيانة حسب الأولوية
@@ -575,6 +578,7 @@ Master categories for issuable custody articles,الفئات الرئيسية ل
 Master: recurring task template that drives automatic Scheduled Task Instance generation.,رئيسي: قالب مهمة متكرر يقود الإنشاء الآلي لسجلات تنفيذ المهام المجدولة.
 "Master: useful life and write-down schedule for custody article categories. Operational only, no GL.",رئيسي: العمر الإنتاجي وجدول التخفيض لفئات أصناف العهدة. تشغيلي فقط، دون دفتر أستاذ عام.
 Materials required for the repair.,المواد المطلوبة للإصلاح.
+Material Templates,قوالب المواد
 Max Damage Deduction per Checkout (SAR),حد حسم التلفيات الأقصى للمغادرة (ريال)
 Medium,متوسط
 Method,الطريقة
