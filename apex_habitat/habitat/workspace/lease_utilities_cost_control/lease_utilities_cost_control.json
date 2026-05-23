@@ -1,177 +1,191 @@
 {
- "doctype": "Workspace",
- "name": "Lease, Utilities & Cost Control",
- "label": "Lease, Utilities & Cost Control",
- "title": "Lease, Utilities & Cost Control",
- "module": "Habitat",
- "icon": "money-coins-1",
- "public": 1,
- "is_default": 0,
- "sequence_id": 7.0,
- "parent_page": "Operations Command Center",
- "content": "[{\"id\": \"Nx9ZvkfR7O\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"2R0iasqztL\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Leases\", \"col\": 3}}, {\"id\": \"5pQL7dlORC\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Utility Bills Under Review\", \"col\": 3}}, {\"id\": \"vBWnIaqKV0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Utility Bills\", \"col\": 3}}, {\"id\": \"kAJbP3yd3W\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Subcontractor Service Orders\", \"col\": 3}}, {\"id\": \"ihUib0LXGv\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"YB9BF4oyOx\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Utility Bills by Status\", \"col\": 6}}, {\"id\": \"BSUZsPWZO9\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Subcontractor Service Orders by Status\", \"col\": 6}}, {\"id\": \"3SXo796hmG\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"iLxjmUutvE\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Utility Bill Entry\", \"col\": 4}}, {\"id\": \"MxqvlVxTYl\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"JkvWpKMxfd\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Utility Bill Entry\", \"col\": 3}}, {\"id\": \"YzMI0ChRwO\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Lease\", \"col\": 3}}, {\"id\": \"qTPpfU8lha\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Subcontractor Service Order\", \"col\": 3}}, {\"id\": \"lkxS5brM85\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Lease, Utilities & Cost Control</b></span>\", \"col\": 12}}, {\"id\": \"Jywbpulqoo\", \"type\": \"card\", \"data\": {\"card_name\": \"Cost Transactions\", \"col\": 4}}, {\"id\": \"UX8RRGIRg6\", \"type\": \"card\", \"data\": {\"card_name\": \"Cost Master\", \"col\": 4}}, {\"id\": \"D7lmXItqYX\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
- "shortcuts": [
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Utility Bill Entry",
-   "link_to": "Utility Bill Entry",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Accommodation Lease",
-   "link_to": "Accommodation Lease",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Subcontractor Service Order",
-   "link_to": "Subcontractor Service Order",
-   "idx": 3
-  }
- ],
- "links": [
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Cost Transactions",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Accommodation Lease",
-   "link_type": "DocType",
-   "link_to": "Accommodation Lease",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Utility Bill Entry",
-   "link_type": "DocType",
-   "link_to": "Utility Bill Entry",
-   "idx": 3
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Subcontractor Service Order",
-   "link_type": "DocType",
-   "link_to": "Subcontractor Service Order",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Cost Master",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Utility Account",
-   "link_type": "DocType",
-   "link_to": "Utility Account",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Subcontractor Service Contract",
-   "link_type": "DocType",
-   "link_to": "Subcontractor Service Contract",
-   "idx": 7
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Views",
-   "idx": 8
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Lease Expiry Watchlist",
-   "link_type": "Report",
-   "link_to": "Lease Expiry Watchlist",
-   "idx": 9
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Utility Variance Report",
-   "link_type": "Report",
-   "link_to": "Utility Variance Report",
-   "idx": 10
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Accommodation Cost Distribution",
-   "link_type": "Report",
-   "link_to": "Accommodation Cost Distribution",
-   "idx": 11
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Accommodation Ledger",
-   "link_type": "DocType",
-   "link_to": "Accommodation Ledger",
-   "idx": 12
-  }
- ],
- "charts": [
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Utility Bills by Status",
-   "label": "Utility Bills by Status",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Subcontractor Service Orders by Status",
-   "label": "Subcontractor Service Orders by Status",
-   "idx": 2
-  }
- ],
- "number_cards": [
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Active Leases",
-   "label": "Active Leases",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Utility Bills Under Review",
-   "label": "Utility Bills Under Review",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Disputed Utility Bills",
-   "label": "Disputed Utility Bills",
-   "idx": 3
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Open Subcontractor Service Orders",
-   "label": "Open Subcontractor Service Orders",
-   "idx": 4
-  }
- ],
- "quick_lists": [
-  {
-   "doctype": "Workspace Quick List",
-   "document_type": "Utility Bill Entry",
-   "label": "Utility Bill Entry",
-   "quick_list_filter": "{\"status\": \"Disputed\"}",
-   "idx": 1
-  }
- ]
+  "doctype": "Workspace",
+  "name": "Lease, Utilities & Cost Control",
+  "label": "Lease, Utilities & Cost Control",
+  "title": "Lease, Utilities & Cost Control",
+  "module": "Habitat",
+  "icon": "money-coins-1",
+  "public": 1,
+  "is_default": 0,
+  "sequence_id": 7.0,
+  "parent_page": "Operations Command Center",
+  "content": "[{\"id\": \"Nx9ZvkfR7O\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"2R0iasqztL\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Leases\", \"col\": 3}}, {\"id\": \"5pQL7dlORC\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Utility Bills Under Review\", \"col\": 3}}, {\"id\": \"vBWnIaqKV0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Utility Bills\", \"col\": 3}}, {\"id\": \"kAJbP3yd3W\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Subcontractor Service Orders\", \"col\": 3}}, {\"id\": \"ihUib0LXGv\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"YB9BF4oyOx\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Utility Bills by Status\", \"col\": 6}}, {\"id\": \"BSUZsPWZO9\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Subcontractor Service Orders by Status\", \"col\": 6}}, {\"id\": \"3SXo796hmG\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"iLxjmUutvE\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Utility Bill Entry\", \"col\": 4}}, {\"id\": \"MxqvlVxTYl\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"JkvWpKMxfd\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Utility Bill Entry\", \"col\": 3}}, {\"id\": \"YzMI0ChRwO\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Lease\", \"col\": 3}}, {\"id\": \"qTPpfU8lha\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Subcontractor Service Order\", \"col\": 3}}, {\"id\": \"lkxS5brM85\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Lease, Utilities & Cost Control</b></span>\", \"col\": 12}}, {\"id\": \"Jywbpulqoo\", \"type\": \"card\", \"data\": {\"card_name\": \"Cost Transactions\", \"col\": 4}}, {\"id\": \"UX8RRGIRg6\", \"type\": \"card\", \"data\": {\"card_name\": \"Cost Master\", \"col\": 4}}, {\"id\": \"D7lmXItqYX\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}, {\"id\": \"B8p3uEyB2b\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Ledger Summary\", \"col\": 3}}, {\"id\": \"GbV4lFoIIZ\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Utility Variance Report\", \"col\": 3}}]",
+  "shortcuts": [
+    {
+      "doctype": "Workspace Shortcut",
+      "type": "DocType",
+      "label": "Utility Bill Entry",
+      "link_to": "Utility Bill Entry",
+      "idx": 1
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "type": "DocType",
+      "label": "Accommodation Lease",
+      "link_to": "Accommodation Lease",
+      "idx": 2
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "type": "DocType",
+      "label": "Subcontractor Service Order",
+      "link_to": "Subcontractor Service Order",
+      "idx": 3
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "type": "Report",
+      "label": "Accommodation Ledger Summary",
+      "link_to": "Accommodation Ledger Summary",
+      "idx": 4
+    },
+    {
+      "doctype": "Workspace Shortcut",
+      "type": "Report",
+      "label": "Utility Variance Report",
+      "link_to": "Utility Variance Report",
+      "idx": 5
+    }
+  ],
+  "links": [
+    {
+      "doctype": "Workspace Link",
+      "type": "Card Break",
+      "label": "Cost Transactions",
+      "idx": 1
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Accommodation Lease",
+      "link_type": "DocType",
+      "link_to": "Accommodation Lease",
+      "idx": 2
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Utility Bill Entry",
+      "link_type": "DocType",
+      "link_to": "Utility Bill Entry",
+      "idx": 3
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Subcontractor Service Order",
+      "link_type": "DocType",
+      "link_to": "Subcontractor Service Order",
+      "idx": 4
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Card Break",
+      "label": "Cost Master",
+      "idx": 5
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Utility Account",
+      "link_type": "DocType",
+      "link_to": "Utility Account",
+      "idx": 6
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Subcontractor Service Contract",
+      "link_type": "DocType",
+      "link_to": "Subcontractor Service Contract",
+      "idx": 7
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Card Break",
+      "label": "Views",
+      "idx": 8
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Lease Expiry Watchlist",
+      "link_type": "Report",
+      "link_to": "Lease Expiry Watchlist",
+      "idx": 9
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Utility Variance Report",
+      "link_type": "Report",
+      "link_to": "Utility Variance Report",
+      "idx": 10
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Accommodation Cost Distribution",
+      "link_type": "Report",
+      "link_to": "Accommodation Cost Distribution",
+      "idx": 11
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Accommodation Ledger",
+      "link_type": "DocType",
+      "link_to": "Accommodation Ledger",
+      "idx": 12
+    }
+  ],
+  "charts": [
+    {
+      "doctype": "Workspace Chart",
+      "chart_name": "Utility Bills by Status",
+      "label": "Utility Bills by Status",
+      "idx": 1
+    },
+    {
+      "doctype": "Workspace Chart",
+      "chart_name": "Subcontractor Service Orders by Status",
+      "label": "Subcontractor Service Orders by Status",
+      "idx": 2
+    }
+  ],
+  "number_cards": [
+    {
+      "doctype": "Workspace Number Card",
+      "number_card_name": "Active Leases",
+      "label": "Active Leases",
+      "idx": 1
+    },
+    {
+      "doctype": "Workspace Number Card",
+      "number_card_name": "Utility Bills Under Review",
+      "label": "Utility Bills Under Review",
+      "idx": 2
+    },
+    {
+      "doctype": "Workspace Number Card",
+      "number_card_name": "Disputed Utility Bills",
+      "label": "Disputed Utility Bills",
+      "idx": 3
+    },
+    {
+      "doctype": "Workspace Number Card",
+      "number_card_name": "Open Subcontractor Service Orders",
+      "label": "Open Subcontractor Service Orders",
+      "idx": 4
+    }
+  ],
+  "quick_lists": [
+    {
+      "doctype": "Workspace Quick List",
+      "document_type": "Utility Bill Entry",
+      "label": "Utility Bill Entry",
+      "quick_list_filter": "{\"status\": \"Disputed\"}",
+      "idx": 1
+    }
+  ]
 }
