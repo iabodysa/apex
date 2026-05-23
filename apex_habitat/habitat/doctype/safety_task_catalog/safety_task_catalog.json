@@ -40,7 +40,7 @@
       "doctype": "DocField",
       "fieldname": "task_title",
       "fieldtype": "Data",
-      "label": "Task Title (Arabic)",
+      "label": "Task Title",
       "reqd": 1,
       "idx": 4
     },

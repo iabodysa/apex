@@ -155,6 +155,105 @@ def generate_rooms_and_beds(building_name):
 
 
 @frappe.whitelist()
+def generate_safety_setup(building_name):
+    """
+    Idempotent safety setup generator.
+
+    For each active Safety Task Catalog entry:
+      1. If not applicable_to_all_buildings: add building to scope (Safety Task Building Scope child row).
+      2. Create a Scheduled Task Template linked to this building + catalog if none exists yet.
+
+    Updates building safety_setup_status, safety_setup_generated_on, safety_setup_generated_by.
+    Returns summary dict.
+
+    Building License records are NOT created — they require a real license_number.
+    The summary lists recommended license types for the operator to create manually.
+    """
+    doc = frappe.get_doc("Accommodation Building", building_name)
+
+    catalogs = frappe.get_all(
+        "Safety Task Catalog",
+        filters={"is_active": 1},
+        fields=["name", "task_code", "task_title_en", "task_title", "frequency", "applicable_to_all_buildings"],
+    )
+
+    if not catalogs:
+        frappe.throw(_("No active Safety Task Catalog entries found. Run the app setup first."))
+
+    created_scopes = 0
+    skipped_scopes = 0
+    created_templates = 0
+    skipped_templates = 0
+
+    for catalog in catalogs:
+        # 1. Add building scope for tasks that are NOT global
+        if not catalog.applicable_to_all_buildings:
+            scope_exists = frappe.db.exists(
+                "Safety Task Building Scope",
+                {"parent": catalog.name, "parenttype": "Safety Task Catalog", "building": building_name},
+            )
+            if not scope_exists:
+                scope = frappe.new_doc("Safety Task Building Scope")
+                scope.parent = catalog.name
+                scope.parenttype = "Safety Task Catalog"
+                scope.parentfield = "applicable_buildings"
+                scope.building = building_name
+                scope.insert(ignore_permissions=True)
+                created_scopes += 1
+            else:
+                skipped_scopes += 1
+
+        # 2. Create Scheduled Task Template if none exists for this building+catalog
+        template_exists = frappe.db.exists(
+            "Scheduled Task Template",
+            {"building": building_name, "safety_task_catalog": catalog.name},
+        )
+        if not template_exists:
+            _freq_map = {"Annual": "Annually", "As Needed": "Monthly", "On Entry": "Monthly"}
+            template_freq = _freq_map.get(catalog.frequency, catalog.frequency)
+            title = catalog.task_title_en or catalog.task_code or catalog.task_title or catalog.name
+            frappe.get_doc({
+                "doctype": "Scheduled Task Template",
+                "template_name": f"{title} — {building_name}"[:140],
+                "task_type": "Safety",
+                "building": building_name,
+                "safety_task_catalog": catalog.name,
+                "frequency": template_freq,
+                "is_active": 1,
+            }).insert(ignore_permissions=True)
+            created_templates += 1
+        else:
+            skipped_templates += 1
+
+    frappe.db.set_value("Accommodation Building", building_name, {
+        "safety_setup_status": "Completed",
+        "safety_setup_generated_on": today(),
+        "safety_setup_generated_by": frappe.session.user,
+    })
+    frappe.db.commit()
+
+    summary = {
+        "created_templates": created_templates,
+        "skipped_templates": skipped_templates,
+        "created_scopes": created_scopes,
+        "skipped_scopes": skipped_scopes,
+        "license_reminder": (
+            "Building License records must be created manually with real license numbers. "
+            "Recommended types: Civil Defense, Municipal Operating License, Accommodation Registration."
+        ),
+    }
+
+    frappe.msgprint(
+        _("Safety setup complete. Templates created: {0}, skipped (existing): {1}.").format(
+            created_templates, skipped_templates
+        ),
+        title=_("Safety Setup Generator"),
+        indicator="green",
+    )
+    return summary
+
+
+@frappe.whitelist()
 def update_room_inventory(room_name, readiness_status, inventory_notes=None):
     """Allow supervisor to record room readiness without opening full form."""
     allowed = ("Unknown", "Ready", "Needs Cleaning", "Needs Repair", "Out of Service")
