@@ -93,18 +93,23 @@ def create_operational_depreciation_policies():
 
 
 def create_safety_task_catalogs():
+    # task_code must be unique; used as deduplication key
+    # frequency must match DocType Select options: Daily/Weekly/Monthly/Quarterly/Annual/As Needed/On Entry
+    # priority must match: High/Medium/Low
     tasks = [
-        {"task_name": "Daily Cleanliness Assessment", "frequency": "Daily", "priority": "Medium", "instructions": "Check common areas, corridors, and bathrooms for cleanliness."},
-        {"task_name": "Daily Exit Obstruction Check", "frequency": "Daily", "priority": "High", "instructions": "Ensure all emergency exits and fire doors are clear of obstructions."},
-        {"task_name": "Weekly Fire Extinguisher Check", "frequency": "Weekly", "priority": "High", "instructions": "Check fire extinguishers for pressure, pin, and tag."},
-        {"task_name": "Weekly First Aid Kit Inspection", "frequency": "Weekly", "priority": "Medium", "instructions": "Check inventory and expiration dates of first aid kits."},
-        {"task_name": "Monthly Water Tank Inspection", "frequency": "Monthly", "priority": "High", "instructions": "Inspect water tanks for leaks, cleanliness, and structural integrity."},
-        {"task_name": "Monthly CCTV Recording Verification", "frequency": "Monthly", "priority": "Medium", "instructions": "Ensure all CCTV cameras are functional and recording properly."},
-        {"task_name": "Quarterly Pest Control", "frequency": "Quarterly", "priority": "High", "instructions": "Perform scheduled pest control spray across all rooms and facilities."},
-        {"task_name": "Annual License Renewal Follow-up", "frequency": "Annually", "priority": "Critical", "instructions": "Check civil defense and municipal licenses and initiate renewal if within 90 days."},
+        {"task_code": "SAF-001", "task_title": "Daily Cleanliness Assessment", "task_title_en": "Daily Cleanliness Assessment", "department": "Health & Hygiene", "frequency": "Daily", "priority": "Medium", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Check common areas, corridors, and bathrooms for cleanliness."},
+        {"task_code": "SAF-002", "task_title": "Daily Exit Obstruction Check", "task_title_en": "Daily Exit Obstruction Check", "department": "Fire Safety", "frequency": "Daily", "priority": "High", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Ensure all emergency exits and fire doors are clear of obstructions."},
+        {"task_code": "SAF-003", "task_title": "Weekly Fire Extinguisher Check", "task_title_en": "Weekly Fire Extinguisher Check", "department": "Fire Safety", "frequency": "Weekly", "priority": "High", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Check fire extinguishers for pressure, pin, and tag."},
+        {"task_code": "SAF-004", "task_title": "Weekly First Aid Kit Inspection", "task_title_en": "Weekly First Aid Kit Inspection", "department": "Health & Hygiene", "frequency": "Weekly", "priority": "Medium", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Check inventory and expiration dates of first aid kits."},
+        {"task_code": "SAF-005", "task_title": "Weekly Emergency Signage Check", "task_title_en": "Weekly Emergency Signage Check", "department": "Fire Safety", "frequency": "Weekly", "priority": "Medium", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Verify all emergency exit signs are illuminated and visible."},
+        {"task_code": "SAF-006", "task_title": "Monthly Water Tank Inspection", "task_title_en": "Monthly Water Tank Inspection", "department": "Health & Hygiene", "frequency": "Monthly", "priority": "High", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Inspect water tanks for leaks, cleanliness, and structural integrity."},
+        {"task_code": "SAF-007", "task_title": "Monthly CCTV Recording Verification", "task_title_en": "Monthly CCTV Recording Verification", "department": "Security", "frequency": "Monthly", "priority": "Medium", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Ensure all CCTV cameras are functional and recording properly."},
+        {"task_code": "SAF-008", "task_title": "Monthly Fire Alarm Panel Check", "task_title_en": "Monthly Fire Alarm Panel Check", "department": "Fire Safety", "frequency": "Monthly", "priority": "High", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Test fire alarm panel indicators and verify no fault conditions."},
+        {"task_code": "SAF-009", "task_title": "Quarterly Pest Control", "task_title_en": "Quarterly Pest Control", "department": "Health & Hygiene", "frequency": "Quarterly", "priority": "High", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Perform scheduled pest control spray across all rooms and facilities."},
+        {"task_code": "SAF-010", "task_title": "Annual License Renewal Follow-up", "task_title_en": "Annual License Renewal Follow-up", "department": "Compliance & Licensing", "frequency": "Annual", "priority": "High", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Check civil defense and municipal licenses and initiate renewal if within 90 days."},
     ]
     for task in tasks:
-        if not frappe.db.exists("Safety Task Catalog", task["task_name"]):
+        if not frappe.db.exists("Safety Task Catalog", {"task_code": task["task_code"]}):
             doc = frappe.new_doc("Safety Task Catalog")
             doc.update(task)
             doc.insert(ignore_permissions=True)

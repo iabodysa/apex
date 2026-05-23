@@ -118,3 +118,6 @@ fixtures = [
 ]
 
 after_install = "apex_habitat.setup.after_install"
+
+# Frappe What's New feed — appears in desk notification area, not as a popup
+get_changelog_feed = "apex_habitat.habitat.utils.changelog.get_changelog_feed"
