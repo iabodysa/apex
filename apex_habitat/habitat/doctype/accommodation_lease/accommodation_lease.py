@@ -32,6 +32,10 @@ def validate(doc, method=None):
         if getdate(doc.first_payment_date) < getdate(doc.lease_start_date):
             frappe.throw(_("First Payment Date cannot be before Lease Start Date."))
 
+    share = flt(doc.company_share_pct)
+    if not (0 <= share <= 100):
+        frappe.throw(_("Company Cost Share must be between 0 and 100."))
+
     if not doc.payment_schedule:
         _build_schedule(doc)
 
@@ -42,11 +46,11 @@ def validate(doc, method=None):
 
 def _build_schedule(doc):
     """Populate payment_schedule rows from first_payment_date + billing_cycle."""
-    if not (doc.first_payment_date and doc.lease_end_date and flt(doc.monthly_rent_sar) > 0):
+    if not (doc.first_payment_date and doc.lease_end_date and flt(doc.rent_amount_sar) > 0):
         return
 
     step = _CYCLE_MONTHS.get(doc.billing_cycle or "Monthly", 1)
-    amount = flt(doc.monthly_rent_sar) * step
+    amount = flt(doc.rent_amount_sar) * step
 
     doc.payment_schedule = []
     due = getdate(doc.first_payment_date)

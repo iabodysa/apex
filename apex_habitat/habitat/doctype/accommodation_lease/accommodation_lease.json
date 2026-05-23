@@ -91,11 +91,20 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "monthly_rent_sar",
+   "fieldname": "rent_amount_sar",
    "fieldtype": "Currency",
    "label": "Rent (SAR)",
    "reqd": 1,
    "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "company_share_pct",
+   "fieldtype": "Percent",
+   "label": "Company Cost Share (%)",
+   "default": "100",
+   "description": "Percentage of rent borne by the company. Remainder is deducted from the resident's salary.",
+   "idx": 11
   },
   {
    "doctype": "DocField",
@@ -106,7 +115,7 @@
    "default": "Monthly",
    "reqd": 1,
    "description": "How often rent payments are scheduled. Amount per installment is calculated automatically.",
-   "idx": 11
+   "idx": 12
   },
   {
    "doctype": "DocField",
@@ -115,7 +124,7 @@
    "label": "First Payment Date",
    "reqd": 1,
    "description": "Date of the first payment. Subsequent payments are calculated from this date based on Billing Cycle.",
-   "idx": 12
+   "idx": 13
   },
   {
    "doctype": "DocField",
@@ -125,7 +134,7 @@
    "options": "ACC-LEASE-.YYYY.-.####",
    "default": "ACC-LEASE-.YYYY.-.####",
    "reqd": 1,
-   "idx": 13
+   "idx": 14
   },
   {
    "doctype": "DocField",
@@ -134,7 +143,7 @@
    "label": "Total Scheduled Amount (SAR)",
    "read_only": 1,
    "description": "Auto-computed sum of all payment schedule rows.",
-   "idx": 14
+   "idx": 15
   },
   {
    "doctype": "DocField",
@@ -142,7 +151,7 @@
    "fieldtype": "Data",
    "label": "Lease / Contract Reference",
    "description": "Landlord-issued contract number or file reference.",
-   "idx": 15
+   "idx": 16
   },
   {
    "doctype": "DocField",

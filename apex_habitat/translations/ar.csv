@@ -219,6 +219,8 @@ Closed by Client,أُغلق من قِبل العميل
 Closed On,تاريخ الإغلاق
 Common Area,منطقة مشتركة
 Company,الشركة
+Company Cost Share (%),نسبة تحمل الشركة (%)
+Company Cost Share must be between 0 and 100.,يجب أن تكون نسبة تحمل الشركة بين 0 و 100.
 Complaint,شكوى
 Completed,مكتمل
 Completed Date,تاريخ الإنجاز
