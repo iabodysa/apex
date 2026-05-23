@@ -1,61 +1,67 @@
 {
-  "doctype": "DocType",
-  "name": "Linked Maintenance Request Item",
-  "module": "Habitat",
-  "custom": 0,
-  "istable": 1,
-  "engine": "InnoDB",
-  "editable_grid": 1,
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "fields": [
-    {
-      "doctype": "DocField",
-      "fieldname": "linked_maintenance_request_item_sec_details",
-      "fieldtype": "Section Break",
-      "label": "Details",
-      "idx": 1
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "maintenance_request",
-      "fieldtype": "Link",
-      "label": "Maintenance Request",
-      "options": "Maintenance Request",
-      "read_only": 1,
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "room",
-      "fieldtype": "Link",
-      "label": "Room",
-      "options": "Accommodation Room",
-      "read_only": 1,
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "linked_maintenance_request_item_details_col",
-      "fieldtype": "Column Break",
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "issue_type",
-      "fieldtype": "Data",
-      "label": "Issue Type",
-      "read_only": 1,
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "status",
-      "fieldtype": "Data",
-      "label": "Status",
-      "read_only": 1,
-      "idx": 6
-    }
-  ],
-  "permissions": []
+ "doctype": "DocType",
+ "name": "Linked Maintenance Request Item",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "linked_maintenance_request_item_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Details",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "maintenance_request",
+   "fieldtype": "Link",
+   "label": "Maintenance Request",
+   "options": "Maintenance Request",
+   "read_only": 1,
+   "idx": 2,
+   "in_list_view": 1,
+   "columns": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "label": "Room",
+   "options": "Accommodation Room",
+   "read_only": 1,
+   "idx": 3,
+   "in_list_view": 1,
+   "columns": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "linked_maintenance_request_item_details_col",
+   "fieldtype": "Column Break",
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "issue_type",
+   "fieldtype": "Data",
+   "label": "Issue Type",
+   "read_only": 1,
+   "idx": 5,
+   "in_list_view": 1,
+   "columns": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status",
+   "read_only": 1,
+   "idx": 6
+  }
+ ],
+ "permissions": []
 }
