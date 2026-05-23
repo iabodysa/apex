@@ -25,30 +25,39 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "material",
+      "fieldtype": "Link",
+      "label": "Maintenance Material",
+      "options": "Maintenance Material",
+      "description": "Select from the Habitat material catalog. Optional — use instead of or alongside ERPNext Item.",
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "item_description",
       "fieldtype": "Data",
       "label": "Item Description",
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
       "fieldname": "quantity",
       "fieldtype": "Int",
       "label": "Quantity",
-      "idx": 4
+      "idx": 5
     },
     {
       "doctype": "DocField",
       "fieldname": "maintenance_procurement_item_details_col",
       "fieldtype": "Column Break",
-      "idx": 5
+      "idx": 6
     },
     {
       "doctype": "DocField",
       "fieldname": "unit",
       "fieldtype": "Data",
       "label": "Unit",
-      "idx": 6
+      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -56,14 +65,14 @@
       "fieldtype": "Check",
       "label": "Fixed Asset (Capex)",
       "description": "Check for durable items such as beds, air conditioners, and washing machines; leave unchecked for consumables.",
-      "idx": 7
+      "idx": 8
     },
     {
       "doctype": "DocField",
       "fieldname": "estimated_cost",
       "fieldtype": "Currency",
       "label": "Estimated Cost (SAR)",
-      "idx": 8
+      "idx": 9
     }
   ]
 }
