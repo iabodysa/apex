@@ -28,6 +28,8 @@ docs/
 *.ods
 
 # Translation CSV files are publishable because Arabic text belongs there.
+!apex_habitat/apex_habitat/translations/
+!apex_habitat/apex_habitat/translations/*.csv
 !apex_habitat/translations/
 !apex_habitat/translations/*.csv
 
