@@ -1,0 +1,127 @@
+{
+ "doctype": "DocType",
+ "name": "Maintenance Material",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 0,
+ "is_submittable": 0,
+ "engine": "InnoDB",
+ "track_changes": 1,
+ "autoname": "field:material_name",
+ "naming_rule": "By fieldname",
+ "sort_field": "material_name",
+ "sort_order": "ASC",
+ "description": "Lightweight Habitat-owned catalog of maintenance materials. Not linked to ERPNext Stock/Item unless explicitly mapped.",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "maintenance_material_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Details",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "material_name",
+   "fieldtype": "Data",
+   "label": "Material Name",
+   "reqd": 1,
+   "in_list_view": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "material_category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "Electrical\nAir Conditioning\nPlumbing\nSanitary Fixtures\nFurniture\nGeneral",
+   "reqd": 1,
+   "in_list_view": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "default_uom",
+   "fieldtype": "Data",
+   "label": "Default UOM",
+   "default": "Piece",
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active",
+   "default": "1",
+   "in_list_view": 1,
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "maintenance_material_details_col",
+   "fieldtype": "Column Break",
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "estimated_unit_cost",
+   "fieldtype": "Currency",
+   "label": "Estimated Unit Cost",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "erpnext_item",
+   "fieldtype": "Link",
+   "label": "ERPNext Item (Optional)",
+   "options": "Item",
+   "description": "Optional future mapping to ERPNext Item/Stock. Leave blank to use Habitat catalog only.",
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "maintenance_material_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes",
+   "collapsible": 1,
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "idx": 10
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Maintenance Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "idx": 3
+  }
+ ]
+}
