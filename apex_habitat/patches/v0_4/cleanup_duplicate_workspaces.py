@@ -57,10 +57,10 @@ def _rename_rent_column():
 
 
 def _cleanup_duplicate_workspaces():
-    all_ws = frappe.get_all(
-        "Workspace",
-        fields=["name", "label", "is_standard"],
-        order_by="name",
+    # is_standard column may not exist in all Frappe v15 builds — use raw SQL
+    all_ws = frappe.db.sql(
+        "SELECT name, label FROM `tabWorkspace` ORDER BY name",
+        as_dict=True,
     )
 
     to_delete = []
@@ -76,7 +76,8 @@ def _cleanup_duplicate_workspaces():
         else:
             existing_name = label_seen[label]
             current_name = ws.name
-
+            # Keep the record whose name matches our canonical app workspace names;
+            # delete the other (browser-saved custom copy or old import).
             if current_name in APP_WORKSPACE_NAMES and existing_name not in APP_WORKSPACE_NAMES:
                 to_delete.append(existing_name)
                 label_seen[label] = current_name
