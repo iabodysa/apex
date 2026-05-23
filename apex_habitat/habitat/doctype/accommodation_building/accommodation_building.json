@@ -87,7 +87,8 @@
       "doctype": "DocField",
       "fieldname": "city",
       "label": "City",
-      "fieldtype": "Data",
+      "fieldtype": "Link",
+      "options": "City",
       "in_list_view": 1,
       "idx": 10
     },
@@ -412,8 +413,13 @@
       "fieldname": "accommodation_building_sec_floor_plan",
       "fieldtype": "Section Break",
       "label": "Floor Plan",
-      "description": "Define rooms per floor. Use 'Generate Rooms and Beds' button after saving.",
       "idx": 53
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "setup_instructions_html",
+      "fieldtype": "HTML",
+      "idx": 54
     },
     {
       "doctype": "DocField",
