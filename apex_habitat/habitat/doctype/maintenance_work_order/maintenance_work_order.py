@@ -40,6 +40,21 @@ def before_cancel(doc, method=None):
 
 
 @frappe.whitelist()
+def start_work(work_order):
+    """Transition Maintenance Work Order from Planned to In Progress."""
+    doc = frappe.get_doc("Maintenance Work Order", work_order)
+
+    if doc.docstatus != 1:
+        frappe.throw(_("Only submitted Work Orders can be started."))
+    if doc.status != "Planned":
+        frappe.throw(_("Only Work Orders with status Planned can be marked In Progress."))
+
+    doc.db_set("status", "In Progress")
+    doc.add_comment("Comment", _("Work started — status set to In Progress."))
+    return {"status": "In Progress"}
+
+
+@frappe.whitelist()
 def mark_completed(work_order, completion_notes=None):
     """Controlled transition to Completed.
 

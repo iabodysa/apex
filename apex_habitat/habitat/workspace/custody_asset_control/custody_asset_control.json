@@ -144,6 +144,14 @@
       "link_type": "Report",
       "link_to": "Custody Damage Register",
       "idx": 12
+    },
+    {
+      "doctype": "Workspace Link",
+      "type": "Link",
+      "label": "Operational Depreciation Aging",
+      "link_type": "Report",
+      "link_to": "Operational Depreciation Aging",
+      "idx": 13
     }
   ],
   "charts": [

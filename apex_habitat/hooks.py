@@ -114,8 +114,9 @@ override_doctype_dashboards = {
 fixtures = [
     {"dt": "Safety Task Catalog"},
     {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
-    {"dt": "Print Format", "filters": [["module", "=", "Habitat"]]},
-    {"dt": "Web Form", "filters": [["module", "=", "Habitat"]]},
+    # Print Format and Web Form are standard module files (is_standard=1)
+    # under habitat/print_format/ and habitat/web_form/ — loaded automatically
+    # by bench migrate via import_file, no fixture entry needed.
 ]
 
 after_install = "apex_habitat.setup.after_install"
