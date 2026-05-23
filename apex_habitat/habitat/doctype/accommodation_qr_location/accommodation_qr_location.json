@@ -1,0 +1,100 @@
+{
+  "doctype": "DocType",
+  "name": "Accommodation QR Location",
+  "module": "Habitat",
+  "custom": 0,
+  "is_submittable": 0,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "fields": [
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "QR-LOC-.####",
+      "reqd": 1,
+      "default": "QR-LOC-.####"
+    },
+    {
+      "fieldname": "location_token",
+      "fieldtype": "Data",
+      "label": "Location Token",
+      "unique": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Is Active",
+      "default": 1
+    },
+    {
+      "fieldname": "col1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "poster_title",
+      "fieldtype": "Data",
+      "label": "Poster Title",
+      "reqd": 1
+    },
+    {
+      "fieldname": "public_url",
+      "fieldtype": "Data",
+      "label": "Public URL",
+      "read_only": 1
+    },
+    {
+      "fieldname": "last_printed_on",
+      "fieldtype": "Datetime",
+      "label": "Last Printed On"
+    },
+    {
+      "fieldname": "sec2",
+      "fieldtype": "Section Break",
+      "label": "Scope"
+    },
+    {
+      "fieldname": "accommodation_site",
+      "fieldtype": "Link",
+      "label": "Accommodation Site",
+      "options": "Accommodation Site"
+    },
+    {
+      "fieldname": "building",
+      "fieldtype": "Link",
+      "label": "Building",
+      "options": "Accommodation Building"
+    },
+    {
+      "fieldname": "room",
+      "fieldtype": "Link",
+      "label": "Room",
+      "options": "Accommodation Room"
+    },
+    {
+      "fieldname": "notes",
+      "fieldtype": "Small Text",
+      "label": "Notes"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1
+    },
+    {
+      "role": "Accommodation Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1
+    }
+  ],
+  "autoname": "naming_series:",
+  "naming_rule": "By \"Naming Series\" field",
+  "sort_field": "modified",
+  "sort_order": "DESC"
+}

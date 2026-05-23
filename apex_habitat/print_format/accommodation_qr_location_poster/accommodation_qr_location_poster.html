@@ -1,0 +1,63 @@
+<style>
+    .qr-poster-container {
+        text-align: center;
+        padding: 40px;
+        border: 4px solid #1a202c;
+        border-radius: 12px;
+        margin: 20px auto;
+        max-width: 800px;
+        font-family: sans-serif;
+    }
+    .qr-poster-title {
+        font-size: 32px;
+        font-weight: bold;
+        color: #1a202c;
+        margin-bottom: 10px;
+    }
+    .qr-poster-subtitle {
+        font-size: 20px;
+        color: #4a5568;
+        margin-bottom: 40px;
+    }
+    .qr-code-image {
+        width: 300px;
+        height: 300px;
+    }
+    .qr-poster-footer {
+        font-size: 16px;
+        color: #718096;
+        margin-top: 30px;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 20px;
+    }
+    .location-details {
+        background: #f7fafc;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+        display: inline-block;
+        text-align: left;
+    }
+</style>
+
+<div class="qr-poster-container">
+    <div class="qr-poster-title">Need Help? Scan to Report</div>
+    <div class="qr-poster-subtitle">{{ doc.poster_title or "Resident Support Services" }}</div>
+
+    <div class="qr-code-wrapper">
+        <img src="/api/method/frappe.utils.print_format.report_print?type=qr&data={{ doc.public_url | urlencode }}" class="qr-code-image" />
+    </div>
+
+    <div class="location-details">
+        <strong>Location Reference:</strong><br>
+        Site: {{ doc.accommodation_site or "N/A" }}<br>
+        Building: {{ doc.building or "N/A" }}<br>
+        Room: {{ doc.room or "N/A" }}<br>
+        Ref: {{ doc.name }}
+    </div>
+
+    <div class="qr-poster-footer">
+        Point your phone camera at the QR code to open the request form.<br>
+        For life or safety emergencies, contact the accommodation supervisor directly.
+    </div>
+</div>

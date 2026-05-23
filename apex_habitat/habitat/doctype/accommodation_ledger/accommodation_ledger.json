@@ -156,12 +156,20 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "source_line_id",
+      "label": "Source Line ID",
+      "fieldtype": "Data",
+      "read_only": 1,
+      "idx": 19
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "reversal_of",
       "label": "Reversal Of",
       "fieldtype": "Link",
       "options": "Accommodation Ledger",
       "read_only": 1,
-      "idx": 19
+      "idx": 20
     },
     {
       "doctype": "DocField",
@@ -171,7 +179,7 @@
       "options": "Capacity\nActual Occupancy\nManual\nDirect",
       "default": "Capacity",
       "read_only": 1,
-      "idx": 20
+      "idx": 21
     },
     {
       "doctype": "DocField",
@@ -179,7 +187,7 @@
       "label": "Allocation Period Start",
       "fieldtype": "Date",
       "read_only": 1,
-      "idx": 21
+      "idx": 22
     },
     {
       "doctype": "DocField",
@@ -187,7 +195,7 @@
       "label": "Allocation Period End",
       "fieldtype": "Date",
       "read_only": 1,
-      "idx": 22
+      "idx": 23
     }
   ],
   "permissions": [

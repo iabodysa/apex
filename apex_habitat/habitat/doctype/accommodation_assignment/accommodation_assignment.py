@@ -20,20 +20,41 @@ class AccommodationAssignment(Document):
             frappe.throw("DocType mismatch")
 
 
-def _recalculate_room(room_name: str) -> None:
+def recalculate_room_occupancy(room_name: str) -> None:
+    if not room_name:
+        return
     room = frappe.get_doc("Accommodation Room", room_name)
+    if room.status == "Under Maintenance":
+        return
     active = frappe.db.count(
         "Accommodation Assignment",
         {"room": room_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
     )
-    room.current_occupancy = active
+    room.db_set("current_occupancy", active)
     if active <= 0:
-        room.status = "Available"
+        room.db_set("status", "Available")
     elif active >= (room.bed_capacity or 0):
-        room.status = "Full"
+        room.db_set("status", "Full")
     else:
-        room.status = "Partially Occupied"
-    room.save(ignore_permissions=True)
+        room.db_set("status", "Partially Occupied")
+
+
+def recalculate_building_occupancy(building_name: str) -> None:
+    if not building_name:
+        return
+    building = frappe.get_doc("Accommodation Building", building_name)
+    active = frappe.db.count(
+        "Accommodation Assignment",
+        {"building": building_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
+    )
+    building.db_set("current_occupants", active)
+    if building.total_capacity:
+        building.db_set("occupancy_percent", (active / building.total_capacity) * 100)
+
+
+def recalculate_spatial(room_name: str, building_name: str) -> None:
+    recalculate_room_occupancy(room_name)
+    recalculate_building_occupancy(building_name)
 
 
 def validate(doc, method=None):
@@ -132,7 +153,7 @@ def validate(doc, method=None):
 
 def on_submit(doc, method=None):
     frappe.db.set_value("Accommodation Bed", doc.bed, "status", "Occupied")
-    _recalculate_room(doc.room)
+    recalculate_spatial(doc.room, doc.building)
 
     settings = frappe.get_single("Habitat Settings")
     activation = settings.deduction_activation_date
@@ -153,5 +174,16 @@ def on_submit(doc, method=None):
 
 
 def on_cancel(doc, method=None):
-    frappe.db.set_value("Accommodation Bed", doc.bed, "status", "Available")
-    _recalculate_room(doc.room)
+    active_on_bed = frappe.db.count(
+        "Accommodation Assignment",
+        {
+            "bed": doc.bed,
+            "docstatus": 1,
+            "check_out_date": ["is", "not set"],
+            "name": ["!=", doc.name],
+        },
+    )
+    if active_on_bed == 0:
+        frappe.db.set_value("Accommodation Bed", doc.bed, "status", "Available")
+
+    recalculate_spatial(doc.room, doc.building)
