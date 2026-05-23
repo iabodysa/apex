@@ -1,7 +1,55 @@
 .DS_Store
+__pycache__/
 *.pyc
+**/.git/
 *.egg-info
 *.swp
 tags
 node_modules
-__pycache__
+
+# local working context.
+.claude/
+.agents/
+skills-lock.json
+local_drafts/
+scratch/
+
+# Internal project documents and source spreadsheets.
+docs/
+*.md
+!README.md
+
+# Local/private office source files.
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+*.numbers
+*.ods
+
+# Translation CSV files are publishable because Arabic text belongs there.
+!apex_habitat/translations/
+!apex_habitat/translations/*.csv
+
+# Environment, secrets, and local runtime files.
+.env
+.env.*
+*.local
+*.secret
+*secret*
+*.key
+*.pem
+
+# Build and packaging outputs.
+build/
+dist/
+*.egg-info/
+
+# Architecture design artifacts.
+afmco_accommodation_architecture_*.json
+
+# local lock files.
+*.skill
+
+# Dead code archive.
+archive/

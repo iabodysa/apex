@@ -11,6 +11,10 @@ def execute(filters=None):
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 150},
         {"label": frappe._("Ledger Type"), "fieldname": "ledger_type", "fieldtype": "Data", "width": 130},
         {"label": frappe._("Amount (SAR)"), "fieldname": "amount", "fieldtype": "Currency", "width": 130},
+        {"label": frappe._("Allocation Basis"), "fieldname": "allocation_basis", "fieldtype": "Data", "width": 120},
+        {"label": frappe._("Source DocType"), "fieldname": "source_doctype", "fieldtype": "Data", "width": 130},
+        {"label": frappe._("Source Document"), "fieldname": "source_name", "fieldtype": "Data", "width": 140},
+        {"label": frappe._("Source Line ID"), "fieldname": "source_line_id", "fieldtype": "Data", "width": 140},
     ]
 
     query_filters = {"posting_mode": "Operational Memo", "reversal_of": ["is", "not set"]}
@@ -26,6 +30,10 @@ def execute(filters=None):
             "building",
             "ledger_type",
             "employee_daily_share as amount",
+            "allocation_basis",
+            "source_doctype",
+            "source_name",
+            "source_line_id",
         ],
         order_by="posting_date desc",
         limit_page_length=1000,

@@ -31,6 +31,7 @@ doc_events = {
         "validate": "apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout.validate",
         "on_submit": "apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout.on_submit",
         "before_cancel": "apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout.before_cancel",
+        "on_cancel": "apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout.on_cancel",
     },
     "Accommodation Lease": {
         "validate": "apex_habitat.habitat.doctype.accommodation_lease.accommodation_lease.validate",
@@ -72,7 +73,6 @@ doc_events = {
     "Maintenance Work Order": {
         "validate": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.validate",
         "on_submit": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.on_submit",
-        "on_update": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.on_update",
         "before_cancel": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.before_cancel",
     },
     # Phase 7 gaps
@@ -108,4 +108,7 @@ scheduler_events = {
 # Fixtures shipped with the app
 fixtures = [
     {"dt": "Safety Task Catalog"},
+    {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]}
 ]
+
+after_install = "apex_habitat.setup.after_install"

@@ -39,38 +39,54 @@ def before_cancel(doc, method=None):
         frappe.throw(_("Cancellation Reason is required before cancelling a Maintenance Work Order."))
 
 
-def on_update(doc, method=None):
-    """Post a one-time operational maintenance cost row to the Accommodation
-    Ledger when the work order is marked Completed.
+@frappe.whitelist()
+def mark_completed(work_order, completion_notes=None):
+    """Controlled transition to Completed.
 
-    Operational Memo only — no GL impact. Idempotent: a second ledger row is
-    never created for the same work order.
+    The status field is not changed through a normal after-submit save. This
+    method performs the transition and posts a one-time operational memo row.
+    No GL Entry, Payment Entry, Purchase Invoice, or salary document is created.
     """
-    if doc.status != "Completed" or not doc.building:
-        return
-    cost = flt(doc.total_procurement_cost_sar)
-    if cost <= 0:
-        return
-    if frappe.db.exists(
-        "Accommodation Ledger",
-        {"source_doctype": "Maintenance Work Order", "source_name": doc.name},
-    ):
-        return
-
     from frappe.utils import today
 
-    frappe.get_doc({
-        "doctype": "Accommodation Ledger",
-        "posting_date": doc.actual_end_date or today(),
-        "building": doc.building,
-        "ledger_type": "Maintenance",
-        "total_site_cost": cost,
-        "capacity_denominator": 0,
-        "employee_daily_share": 0,
-        "posting_mode": "Operational Memo",
-        "source_doctype": "Maintenance Work Order",
-        "source_name": doc.name,
-        "allocation_basis": "Direct",
-        "allocation_period_start": doc.actual_start_date,
-        "allocation_period_end": doc.actual_end_date,
-    }).insert(ignore_permissions=True)
+    doc = frappe.get_doc("Maintenance Work Order", work_order)
+
+    if doc.docstatus != 1:
+        frappe.throw(_("Only submitted Maintenance Work Orders can be marked Completed."))
+    if doc.status == "Completed":
+        frappe.throw(_("This Maintenance Work Order is already Completed."))
+    if not doc.building:
+        frappe.throw(_("Building is required to mark Completed."))
+    if not doc.actual_start_date or not doc.actual_end_date:
+        frappe.throw(_("Actual Start Date and Actual End Date are required to mark Completed."))
+
+    doc.db_set("status", "Completed")
+    if completion_notes and not doc.completion_notes:
+        doc.db_set("completion_notes", completion_notes)
+
+    ledger_posted = False
+    cost = flt(doc.total_procurement_cost_sar)
+    already_posted = frappe.db.exists(
+        "Accommodation Ledger",
+        {"source_doctype": "Maintenance Work Order", "source_name": doc.name},
+    )
+    if cost > 0 and not already_posted:
+        frappe.get_doc({
+            "doctype": "Accommodation Ledger",
+            "posting_date": doc.actual_end_date or today(),
+            "building": doc.building,
+            "ledger_type": "Maintenance",
+            "total_site_cost": cost,
+            "capacity_denominator": 0,
+            "employee_daily_share": 0,
+            "posting_mode": "Operational Memo",
+            "source_doctype": "Maintenance Work Order",
+            "source_name": doc.name,
+            "allocation_basis": "Direct",
+            "allocation_period_start": doc.actual_start_date,
+            "allocation_period_end": doc.actual_end_date,
+        }).insert(ignore_permissions=True)
+        ledger_posted = True
+
+    doc.add_comment("Comment", _("Marked Completed via controlled method."))
+    return {"status": "Completed", "ledger_posted": ledger_posted, "cost": cost}
