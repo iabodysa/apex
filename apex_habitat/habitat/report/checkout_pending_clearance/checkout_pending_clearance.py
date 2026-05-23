@@ -35,15 +35,15 @@ def execute(filters=None):
         # Count open custody issues for this employee
         open_issues = frappe.db.count(
             "Custody Issue",
-            {"employee": co.employee, "docstatus": 1, "return_status": ["!=", "Fully Returned"]},
+            {"issued_to_employee": co.employee, "docstatus": 1},
         ) if co.employee else 0
 
         # Look for damage assessment linked to this checkout
         damage = frappe.db.get_value(
             "Custody Damage Assessment",
-            {"checkout": co.name, "docstatus": 1},
+            {"employee": co.employee, "docstatus": 1},
             "name",
-        ) or ""
+        ) or "" if co.employee else ""
 
         # Get building from bed
         building = frappe.db.get_value("Accommodation Bed", co.bed, "building") if co.bed else ""
