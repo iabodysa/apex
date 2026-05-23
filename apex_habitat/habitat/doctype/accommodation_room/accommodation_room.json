@@ -6,8 +6,7 @@
  "istable": 0,
  "engine": "InnoDB",
  "track_changes": 1,
- "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
+ "autoname": "field:room_number",
  "sort_field": "modified",
  "sort_order": "DESC",
  "fields": [
