@@ -84,6 +84,7 @@
       "options": "BED-.####",
       "default": "BED-.####",
       "reqd": 1,
+      "hidden": 1,
       "idx": 9
     },
     {

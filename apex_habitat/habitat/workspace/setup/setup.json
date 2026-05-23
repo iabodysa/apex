@@ -17,6 +17,20 @@
    "label": "Habitat Settings",
    "link_to": "Habitat Settings",
    "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Accommodation Building",
+   "link_to": "Accommodation Building",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Accommodation Room",
+   "link_to": "Accommodation Room",
+   "idx": 3
   }
  ],
  "links": [

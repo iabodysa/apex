@@ -92,6 +92,7 @@
       "options": "ROOM-.####",
       "default": "ROOM-.####",
       "reqd": 1,
+      "hidden": 1,
       "idx": 10
     },
     {
@@ -101,6 +102,45 @@
       "fieldtype": "Int",
       "read_only": 1,
       "idx": 11
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_room_sec_inventory",
+      "fieldtype": "Section Break",
+      "label": "Supervisor Inventory",
+      "collapsible": 1,
+      "idx": 12
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "readiness_status",
+      "label": "Readiness Status",
+      "fieldtype": "Select",
+      "options": "Unknown\nReady\nNeeds Cleaning\nNeeds Repair\nOut of Service",
+      "default": "Unknown",
+      "in_list_view": 0,
+      "idx": 13
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "last_inventory_date",
+      "label": "Last Inventory Date",
+      "fieldtype": "Date",
+      "read_only": 1,
+      "idx": 14
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "accommodation_room_inventory_col",
+      "fieldtype": "Column Break",
+      "idx": 15
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "inventory_notes",
+      "label": "Inventory Notes",
+      "fieldtype": "Small Text",
+      "idx": 16
     }
   ],
   "permissions": [

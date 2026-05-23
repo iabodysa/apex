@@ -1,0 +1,79 @@
+{
+  "doctype": "DocType",
+  "name": "Accommodation Floor Plan",
+  "module": "Habitat",
+  "custom": 0,
+  "istable": 1,
+  "engine": "InnoDB",
+  "fields": [
+    {
+      "doctype": "DocField",
+      "fieldname": "floor_number",
+      "label": "Floor Number",
+      "fieldtype": "Int",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 1
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "room_count",
+      "label": "Rooms on Floor",
+      "fieldtype": "Int",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 2
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "bed_capacity_per_room",
+      "label": "Beds per Room",
+      "fieldtype": "Int",
+      "reqd": 1,
+      "in_list_view": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "room_type",
+      "label": "Room Type",
+      "fieldtype": "Select",
+      "options": "Standard\nSupervisor\nIsolation\nStorage",
+      "default": "Standard",
+      "in_list_view": 1,
+      "idx": 4
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "room_prefix",
+      "label": "Room Number Prefix",
+      "fieldtype": "Data",
+      "description": "Prefix added before the room number (e.g. 'A' gives A101). Leave blank for numeric only.",
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "starting_room_number",
+      "label": "Starting Room Number",
+      "fieldtype": "Int",
+      "default": 1,
+      "idx": 6
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "generate_beds",
+      "label": "Auto-Generate Beds",
+      "fieldtype": "Check",
+      "default": 1,
+      "idx": 7
+    },
+    {
+      "doctype": "DocField",
+      "fieldname": "notes",
+      "label": "Notes",
+      "fieldtype": "Small Text",
+      "idx": 8
+    }
+  ],
+  "permissions": []
+}

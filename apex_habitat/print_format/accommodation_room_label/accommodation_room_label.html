@@ -1,0 +1,76 @@
+{% set building = frappe.get_doc("Accommodation Building", doc.building) %}
+<style>
+  .room-label {
+    width: 10cm;
+    height: 6cm;
+    border: 3px solid #1a1a2e;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    page-break-after: always;
+    box-sizing: border-box;
+  }
+  .room-label .building-name {
+    font-size: 11px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .room-label .room-number {
+    font-size: 52px;
+    font-weight: bold;
+    color: #1a1a2e;
+    line-height: 1.1;
+    margin: 4px 0;
+  }
+  .room-label .room-meta {
+    font-size: 11px;
+    color: #333;
+    margin-top: 4px;
+  }
+  .room-label .room-type-badge {
+    display: inline-block;
+    background: #eef;
+    border: 1px solid #99c;
+    border-radius: 4px;
+    padding: 1px 8px;
+    font-size: 10px;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .room-label .footer-note {
+    font-size: 9px;
+    color: #888;
+    margin-top: 8px;
+    border-top: 1px solid #eee;
+    padding-top: 4px;
+  }
+  {% if doc.readiness_status and doc.readiness_status != "Ready" %}
+  .room-label .readiness-warning {
+    font-size: 10px;
+    color: #c00;
+    font-weight: bold;
+    margin-top: 4px;
+  }
+  {% endif %}
+</style>
+
+<div class="room-label">
+  <div class="building-name">{{ building.building_name }}</div>
+  <div class="room-number">{{ doc.room_number }}</div>
+  <div class="room-meta">
+    {% if doc.floor %}Floor {{ doc.floor }} &nbsp;|&nbsp; {% endif %}
+    Capacity: {{ doc.bed_capacity }} bed{% if doc.bed_capacity != 1 %}s{% endif %}
+  </div>
+  <div class="room-type-badge">{{ doc.room_type }}</div>
+  {% if doc.readiness_status and doc.readiness_status != "Ready" and doc.readiness_status != "Unknown" %}
+  <div class="readiness-warning">&#9888; {{ doc.readiness_status }}</div>
+  {% endif %}
+  <div class="footer-note">
+    For emergencies contact your supervisor directly.
+    <br>Apex Habitat &bull; {{ frappe.utils.today() }}
+  </div>
+</div>

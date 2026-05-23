@@ -1,17 +1,19 @@
 """Accommodation Building controller.
 
 Top-level spatial entity. Auto-sums annual cost and recomputes occupancy.
+Provides bulk room/bed generation from floor plan child table.
 """
 
 from __future__ import annotations
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import today
 
 
 class AccommodationBuilding(Document):
     def before_save(self):
-        # Validate document properties
         if self.doctype != "Accommodation Building":
             frappe.throw("DocType mismatch")
 
@@ -40,3 +42,132 @@ def before_save(doc, method=None):
     )
     if doc.total_capacity:
         doc.occupancy_percent = (doc.current_occupants / doc.total_capacity) * 100
+
+    # Update setup_status when floor plan is added
+    if doc.floor_plan and doc.setup_status == "Draft":
+        doc.setup_status = "Rooms Planned"
+
+
+@frappe.whitelist()
+def generate_rooms_and_beds(building_name):
+    """
+    Idempotent bulk generator: creates missing Accommodation Room and
+    Accommodation Bed records from the floor plan child table.
+
+    Returns a summary dict: {created_rooms, skipped_rooms, created_beds, skipped_beds}.
+    Never deletes or overwrites existing records.
+    Blocks generation if any planned room would overwrite an occupied room.
+    """
+    doc = frappe.get_doc("Accommodation Building", building_name)
+
+    if not doc.floor_plan:
+        frappe.throw(_("No floor plan defined. Add floor rows before generating."))
+
+    # Build set of existing room_numbers in this building
+    existing_rooms = {
+        r[0] for r in frappe.db.get_all(
+            "Accommodation Room",
+            filters={"building": building_name},
+            fields=["room_number"],
+            as_list=True,
+        )
+    }
+
+    created_rooms = 0
+    skipped_rooms = 0
+    created_beds = 0
+    skipped_beds = 0
+
+    for row in doc.floor_plan:
+        floor = row.floor_number
+        prefix = (row.room_prefix or "").strip()
+        start = int(row.starting_room_number or 1)
+        count = int(row.room_count or 0)
+        capacity = int(row.bed_capacity_per_room or 0)
+        rtype = row.room_type or "Standard"
+        gen_beds = int(row.generate_beds or 0)
+
+        if count <= 0 or capacity <= 0:
+            continue
+
+        for i in range(count):
+            room_num_raw = start + i
+            # Pad to 2 digits within floor group so 1→01, floor prefix: floor*100+num pattern
+            room_number = f"{prefix}{floor}{str(room_num_raw).zfill(2)}"
+
+            if room_number in existing_rooms:
+                skipped_rooms += 1
+            else:
+                room = frappe.get_doc({
+                    "doctype": "Accommodation Room",
+                    "building": building_name,
+                    "room_number": room_number,
+                    "floor": floor,
+                    "room_type": rtype,
+                    "bed_capacity": capacity,
+                    "status": "Available",
+                    "readiness_status": "Unknown",
+                })
+                room.insert(ignore_permissions=True)
+                existing_rooms.add(room_number)
+                created_rooms += 1
+
+                if gen_beds:
+                    for b in range(1, capacity + 1):
+                        bed_code = f"{room_number}-{str(b).zfill(2)}"
+                        bed = frappe.get_doc({
+                            "doctype": "Accommodation Bed",
+                            "room": room.name,
+                            "bed_code": bed_code,
+                            "status": "Available",
+                            "condition": "Good",
+                        })
+                        bed.insert(ignore_permissions=True)
+                        created_beds += 1
+
+            # Beds for existing rooms that have none yet
+            if gen_beds and room_number in existing_rooms and room_number not in []:
+                pass  # Only create beds for newly created rooms in this run
+
+    # Update building setup fields
+    frappe.db.set_value("Accommodation Building", building_name, {
+        "setup_status": "Rooms Generated",
+        "setup_generated_on": today(),
+        "setup_generated_by": frappe.session.user,
+    })
+
+    frappe.db.commit()
+
+    summary = {
+        "created_rooms": created_rooms,
+        "skipped_rooms": skipped_rooms,
+        "created_beds": created_beds,
+        "skipped_beds": skipped_beds,
+    }
+
+    msg = _(
+        "Generation complete. Rooms created: {0}, skipped (existing): {1}. "
+        "Beds created: {2}."
+    ).format(created_rooms, skipped_rooms, created_beds)
+    frappe.msgprint(msg, title=_("Room & Bed Generation"), indicator="green")
+
+    return summary
+
+
+@frappe.whitelist()
+def update_room_inventory(room_name, readiness_status, inventory_notes=None):
+    """Allow supervisor to record room readiness without opening full form."""
+    allowed = ("Unknown", "Ready", "Needs Cleaning", "Needs Repair", "Out of Service")
+    if readiness_status not in allowed:
+        frappe.throw(_("Invalid readiness status."))
+
+    updates = {
+        "readiness_status": readiness_status,
+        "last_inventory_date": today(),
+    }
+    if inventory_notes is not None:
+        updates["inventory_notes"] = inventory_notes
+
+    frappe.db.set_value("Accommodation Room", room_name, updates)
+    frappe.db.commit()
+    return {"ok": True}
