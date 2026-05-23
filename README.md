@@ -1,6 +1,6 @@
 # Apex Habitat
 
-**Version 0.5.4**
+**Version 0.6.0**
 
 Apex Habitat is a custom application for the Frappe Framework. It provides operational accommodation, occupancy tracking, and facilities maintenance management. The application integrates with ERPNext and HRMS to process data workflows and track operational records.
 
