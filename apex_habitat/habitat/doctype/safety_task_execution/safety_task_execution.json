@@ -1,226 +1,227 @@
 {
-  "doctype": "DocType",
-  "name": "Safety Task Execution",
-  "module": "Habitat",
-  "custom": 0,
-  "istable": 0,
-  "engine": "InnoDB",
-  "is_submittable": 1,
-  "track_changes": 1,
-  "autoname": "naming_series:",
-  "naming_rule": "By \"Naming Series\" field",
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "description": "Records execution of a single safety task on a specific date for a specific building.",
-  "fields": [
-    {
-      "doctype": "DocField",
-      "fieldname": "safety_task_execution_tab_overview",
-      "fieldtype": "Tab Break",
-      "label": "Overview",
-      "idx": 1
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "safety_task_execution_sec_overview",
-      "fieldtype": "Section Break",
-      "label": "General Details",
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "execution_date",
-      "fieldtype": "Date",
-      "label": "Execution Date",
-      "reqd": 1,
-      "default": "Today",
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "building",
-      "fieldtype": "Link",
-      "label": "Building",
-      "options": "Accommodation Building",
-      "reqd": 1,
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "task",
-      "fieldtype": "Link",
-      "label": "Task",
-      "options": "Safety Task Catalog",
-      "reqd": 1,
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "execution_status",
-      "fieldtype": "Select",
-      "label": "Execution Status",
-      "options": "Excellent\nGood\nAverage\nPoor\nNot Done",
-      "reqd": 1,
-      "default": "Excellent",
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "executed_by",
-      "fieldtype": "Link",
-      "label": "Executed By",
-      "options": "User",
-      "default": "user",
-      "idx": 7
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "safety_task_execution_overview_col",
-      "fieldtype": "Column Break",
-      "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "execution_time",
-      "fieldtype": "Time",
-      "label": "Execution Time",
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "evidence_photo",
-      "fieldtype": "Attach Image",
-      "label": "Evidence Photo",
-      "idx": 10
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "linked_inspection",
-      "fieldtype": "Link",
-      "label": "Linked Safety Inspection Report",
-      "options": "Safety Inspection Report",
-      "description": "If execution discovered an issue requiring formal inspection",
-      "idx": 11
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "linked_maintenance_request",
-      "fieldtype": "Link",
-      "label": "Linked Maintenance Request",
-      "options": "Maintenance Request",
-      "description": "A maintenance request raised automatically when the task execution indicates a repair is needed.",
-      "idx": 12
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "STE-.YYYY.-.#####",
-      "default": "STE-.YYYY.-.#####",
-      "reqd": 1,
-      "idx": 13
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "safety_task_execution_sec_large_text",
-      "fieldtype": "Section Break",
-      "label": "Additional Information",
-      "collapsible": 1,
-      "idx": 14
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "notes",
-      "fieldtype": "Small Text",
-      "label": "Notes",
-      "idx": 15
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "safety_task_execution_tab_system",
-      "fieldtype": "Tab Break",
-      "label": "System Info",
-      "idx": 16
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "safety_task_execution_sec_system",
-      "fieldtype": "Section Break",
-      "label": "Administrative Details",
-      "idx": 17
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "department",
-      "fieldtype": "Data",
-      "label": "Department",
-      "fetch_from": "task.department",
-      "read_only": 1,
-      "idx": 18
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "frequency",
-      "fieldtype": "Data",
-      "label": "Frequency",
-      "fetch_from": "task.frequency",
-      "read_only": 1,
-      "idx": 19
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "safety_task_execution_system_col",
-      "fieldtype": "Column Break",
-      "idx": 20
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "priority",
-      "fieldtype": "Data",
-      "label": "Priority",
-      "fetch_from": "task.priority",
-      "read_only": 1,
-      "idx": 21
-    }
-  ],
-  "permissions": [
-    {
-      "doctype": "DocPerm",
-      "role": "System Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "delete": 1,
-      "submit": 1,
-      "cancel": 1,
-      "amend": 1,
-      "report": 1,
-      "export": 1,
-      "print": 1,
-      "email": 1,
-      "share": 1,
-      "idx": 1
-    },
-    {
-      "doctype": "DocPerm",
-      "role": "Accommodation Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "submit": 1,
-      "cancel": 1,
-      "amend": 1,
-      "idx": 2
-    },
-    {
-      "doctype": "DocPerm",
-      "role": "Resident Supervisor",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "submit": 1,
-      "idx": 3
-    }
-  ]
+ "doctype": "DocType",
+ "name": "Safety Task Execution",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 0,
+ "engine": "InnoDB",
+ "is_submittable": 1,
+ "track_changes": 1,
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "description": "Records execution of a single safety task on a specific date for a specific building.",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_task_execution_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_task_execution_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "execution_date",
+   "fieldtype": "Date",
+   "label": "Execution Date",
+   "reqd": 1,
+   "default": "Today",
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Accommodation Building",
+   "reqd": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "task",
+   "fieldtype": "Link",
+   "label": "Task",
+   "options": "Safety Task Catalog",
+   "reqd": 1,
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "execution_status",
+   "fieldtype": "Select",
+   "label": "Execution Status",
+   "options": "Excellent\nGood\nAverage\nPoor\nNot Done",
+   "reqd": 1,
+   "default": "Excellent",
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "executed_by",
+   "fieldtype": "Link",
+   "label": "Executed By",
+   "options": "User",
+   "default": "user",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_task_execution_overview_col",
+   "fieldtype": "Column Break",
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "execution_time",
+   "fieldtype": "Time",
+   "label": "Execution Time",
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "evidence_photo",
+   "fieldtype": "Attach Image",
+   "label": "Evidence Photo",
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "linked_inspection",
+   "fieldtype": "Link",
+   "label": "Linked Safety Inspection Report",
+   "options": "Safety Inspection Report",
+   "description": "If execution discovered an issue requiring formal inspection",
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "linked_maintenance_request",
+   "fieldtype": "Link",
+   "label": "Linked Maintenance Request",
+   "options": "Maintenance Request",
+   "description": "A maintenance request raised automatically when the task execution indicates a repair is needed.",
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "STE-.YYYY.-.#####",
+   "default": "STE-.YYYY.-.#####",
+   "reqd": 1,
+   "idx": 13,
+   "hidden": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_task_execution_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1,
+   "idx": 14
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "idx": 15
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_task_execution_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System Info",
+   "idx": 16
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_task_execution_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Administrative Details",
+   "idx": 17
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "label": "Department",
+   "fetch_from": "task.department",
+   "read_only": 1,
+   "idx": 18
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "frequency",
+   "fieldtype": "Data",
+   "label": "Frequency",
+   "fetch_from": "task.frequency",
+   "read_only": 1,
+   "idx": 19
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_task_execution_system_col",
+   "fieldtype": "Column Break",
+   "idx": 20
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "priority",
+   "fieldtype": "Data",
+   "label": "Priority",
+   "fetch_from": "task.priority",
+   "read_only": 1,
+   "idx": 21
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Resident Supervisor",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "idx": 3
+  }
+ ]
 }

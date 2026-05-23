@@ -1,157 +1,158 @@
 {
-  "doctype": "DocType",
-  "name": "Custody Damage Assessment",
-  "module": "Habitat",
-  "custom": 0,
-  "issingle": 0,
-  "istable": 0,
-  "is_submittable": 1,
-  "engine": "InnoDB",
-  "description": "Records damage on returned custody articles. A salary deduction is applied only when damage deduction is enabled in Habitat Settings.",
-  "autoname": "naming_series:",
-  "naming_rule": "By \"Naming Series\" field",
-  "fields": [
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_damage_assessment_tab_overview",
-      "fieldtype": "Tab Break",
-      "label": "Overview",
-      "idx": 1
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_damage_assessment_sec_overview",
-      "fieldtype": "Section Break",
-      "label": "General Details",
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "assessment_date",
-      "fieldtype": "Date",
-      "label": "Assessment Date",
-      "reqd": 1,
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_return",
-      "fieldtype": "Link",
-      "label": "Custody Return",
-      "options": "Custody Return",
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "building",
-      "fieldtype": "Link",
-      "label": "Building",
-      "options": "Accommodation Building",
-      "reqd": 1,
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_damage_assessment_overview_col",
-      "fieldtype": "Column Break",
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "employee",
-      "fieldtype": "Link",
-      "label": "Employee Responsible",
-      "options": "Employee",
-      "idx": 7
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "CUST-DMG-.YYYY.-.####",
-      "default": "CUST-DMG-.YYYY.-.####",
-      "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "total_estimated_replacement_cost_sar",
-      "fieldtype": "Currency",
-      "label": "Total Estimated Replacement Cost (SAR)",
-      "read_only": 1,
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_damage_assessment_sec_large_text",
-      "fieldtype": "Section Break",
-      "label": "Additional Information",
-      "collapsible": 1,
-      "idx": 10
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "remarks",
-      "fieldtype": "Small Text",
-      "label": "Remarks",
-      "idx": 11
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_damage_assessment_tab_tables",
-      "fieldtype": "Tab Break",
-      "label": "Related Tables",
-      "idx": 12
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_damage_assessment_sec_table_items",
-      "fieldtype": "Section Break",
-      "label": "Damaged Items",
-      "idx": 13
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "items",
-      "fieldtype": "Table",
-      "label": "Damaged Items",
-      "options": "Custody Damage Item",
-      "idx": 14
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_damage_assessment_tab_system",
-      "fieldtype": "Tab Break",
-      "label": "System Info",
-      "idx": 15
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_damage_assessment_sec_system",
-      "fieldtype": "Section Break",
-      "label": "Administrative Details",
-      "idx": 16
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "deduction_entry",
-      "fieldtype": "Link",
-      "label": "Additional Salary Deduction Entry",
-      "options": "Additional Salary",
-      "read_only": 1,
-      "idx": 17
-    }
-  ],
-  "permissions": [
-    {
-      "doctype": "DocPerm",
-      "role": "System Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "delete": 1,
-      "submit": 1,
-      "cancel": 1
-    }
-  ]
+ "doctype": "DocType",
+ "name": "Custody Damage Assessment",
+ "module": "Habitat",
+ "custom": 0,
+ "issingle": 0,
+ "istable": 0,
+ "is_submittable": 1,
+ "engine": "InnoDB",
+ "description": "Records damage on returned custody articles. A salary deduction is applied only when damage deduction is enabled in Habitat Settings.",
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_damage_assessment_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_damage_assessment_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "assessment_date",
+   "fieldtype": "Date",
+   "label": "Assessment Date",
+   "reqd": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_return",
+   "fieldtype": "Link",
+   "label": "Custody Return",
+   "options": "Custody Return",
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Accommodation Building",
+   "reqd": 1,
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_damage_assessment_overview_col",
+   "fieldtype": "Column Break",
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee Responsible",
+   "options": "Employee",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CUST-DMG-.YYYY.-.####",
+   "default": "CUST-DMG-.YYYY.-.####",
+   "idx": 8,
+   "hidden": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "total_estimated_replacement_cost_sar",
+   "fieldtype": "Currency",
+   "label": "Total Estimated Replacement Cost (SAR)",
+   "read_only": 1,
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_damage_assessment_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1,
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_damage_assessment_tab_tables",
+   "fieldtype": "Tab Break",
+   "label": "Related Tables",
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_damage_assessment_sec_table_items",
+   "fieldtype": "Section Break",
+   "label": "Damaged Items",
+   "idx": 13
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Damaged Items",
+   "options": "Custody Damage Item",
+   "idx": 14
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_damage_assessment_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System Info",
+   "idx": 15
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "custody_damage_assessment_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Administrative Details",
+   "idx": 16
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "deduction_entry",
+   "fieldtype": "Link",
+   "label": "Additional Salary Deduction Entry",
+   "options": "Additional Salary",
+   "read_only": 1,
+   "idx": 17
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1
+  }
+ ]
 }

@@ -1,179 +1,180 @@
 {
-  "doctype": "DocType",
-  "name": "Room Bed Transfer",
-  "module": "Habitat",
-  "custom": 0,
-  "istable": 0,
-  "is_submittable": 1,
-  "engine": "InnoDB",
-  "track_changes": 1,
-  "autoname": "naming_series:",
-  "naming_rule": "By \"Naming Series\" field",
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "fields": [
-    {
-      "doctype": "DocField",
-      "fieldname": "room_bed_transfer_tab_overview",
-      "fieldtype": "Tab Break",
-      "label": "Overview",
-      "idx": 1
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "room_bed_transfer_sec_overview",
-      "fieldtype": "Section Break",
-      "label": "General Details",
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "assignment",
-      "label": "Accommodation Assignment",
-      "fieldtype": "Link",
-      "options": "Accommodation Assignment",
-      "reqd": 1,
-      "in_list_view": 1,
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "to_room",
-      "label": "To Room",
-      "fieldtype": "Link",
-      "options": "Accommodation Room",
-      "reqd": 1,
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "to_bed",
-      "label": "To Bed",
-      "fieldtype": "Link",
-      "options": "Accommodation Bed",
-      "reqd": 1,
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "room_bed_transfer_overview_col",
-      "fieldtype": "Column Break",
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "transfer_date",
-      "label": "Transfer Date",
-      "fieldtype": "Date",
-      "reqd": 1,
-      "idx": 7
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "naming_series",
-      "label": "Series",
-      "fieldtype": "Select",
-      "options": "RBT-.YYYY.-.####",
-      "default": "RBT-.YYYY.-.####",
-      "reqd": 1,
-      "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "room_bed_transfer_sec_large_text",
-      "fieldtype": "Section Break",
-      "label": "Additional Information",
-      "collapsible": 1,
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "reason",
-      "label": "Reason",
-      "fieldtype": "Small Text",
-      "idx": 10
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "room_bed_transfer_tab_system",
-      "fieldtype": "Tab Break",
-      "label": "System Info",
-      "idx": 11
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "room_bed_transfer_sec_system",
-      "fieldtype": "Section Break",
-      "label": "Administrative Details",
-      "idx": 12
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "employee",
-      "label": "Employee",
-      "fieldtype": "Link",
-      "options": "Employee",
-      "fetch_from": "assignment.employee",
-      "read_only": 1,
-      "in_list_view": 1,
-      "idx": 13
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "from_bed",
-      "label": "From Bed",
-      "fieldtype": "Link",
-      "options": "Accommodation Bed",
-      "fetch_from": "assignment.bed",
-      "read_only": 1,
-      "idx": 14
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "room_bed_transfer_system_col",
-      "fieldtype": "Column Break",
-      "idx": 15
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "amended_from",
-      "label": "Amended From",
-      "fieldtype": "Link",
-      "options": "Room Bed Transfer",
-      "read_only": 1,
-      "no_copy": 1,
-      "print_hide": 1,
-      "idx": 16
-    }
-  ],
-  "permissions": [
-    {
-      "doctype": "DocPerm",
-      "role": "System Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "delete": 1,
-      "submit": 1,
-      "cancel": 1,
-      "amend": 1,
-      "report": 1,
-      "export": 1,
-      "print": 1,
-      "email": 1,
-      "share": 1,
-      "idx": 1
-    },
-    {
-      "doctype": "DocPerm",
-      "role": "Accommodation Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "submit": 1,
-      "cancel": 1,
-      "amend": 1,
-      "idx": 2
-    }
-  ]
+ "doctype": "DocType",
+ "name": "Room Bed Transfer",
+ "module": "Habitat",
+ "custom": 0,
+ "istable": 0,
+ "is_submittable": 1,
+ "engine": "InnoDB",
+ "track_changes": 1,
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "room_bed_transfer_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "room_bed_transfer_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "assignment",
+   "label": "Accommodation Assignment",
+   "fieldtype": "Link",
+   "options": "Accommodation Assignment",
+   "reqd": 1,
+   "in_list_view": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "to_room",
+   "label": "To Room",
+   "fieldtype": "Link",
+   "options": "Accommodation Room",
+   "reqd": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "to_bed",
+   "label": "To Bed",
+   "fieldtype": "Link",
+   "options": "Accommodation Bed",
+   "reqd": 1,
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "room_bed_transfer_overview_col",
+   "fieldtype": "Column Break",
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "transfer_date",
+   "label": "Transfer Date",
+   "fieldtype": "Date",
+   "reqd": 1,
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "label": "Series",
+   "fieldtype": "Select",
+   "options": "RBT-.YYYY.-.####",
+   "default": "RBT-.YYYY.-.####",
+   "reqd": 1,
+   "idx": 8,
+   "hidden": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "room_bed_transfer_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1,
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "reason",
+   "label": "Reason",
+   "fieldtype": "Small Text",
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "room_bed_transfer_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System Info",
+   "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "room_bed_transfer_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Administrative Details",
+   "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "employee",
+   "label": "Employee",
+   "fieldtype": "Link",
+   "options": "Employee",
+   "fetch_from": "assignment.employee",
+   "read_only": 1,
+   "in_list_view": 1,
+   "idx": 13
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "from_bed",
+   "label": "From Bed",
+   "fieldtype": "Link",
+   "options": "Accommodation Bed",
+   "fetch_from": "assignment.bed",
+   "read_only": 1,
+   "idx": 14
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "room_bed_transfer_system_col",
+   "fieldtype": "Column Break",
+   "idx": 15
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "amended_from",
+   "label": "Amended From",
+   "fieldtype": "Link",
+   "options": "Room Bed Transfer",
+   "read_only": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "idx": 16
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "idx": 2
+  }
+ ]
 }

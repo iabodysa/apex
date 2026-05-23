@@ -176,7 +176,8 @@
    "label": "Series",
    "options": "UTIL-BILL-.YYYY.-.#####",
    "default": "UTIL-BILL-.YYYY.-.#####",
-   "idx": 21
+   "idx": 21,
+   "hidden": 1
   },
   {
    "doctype": "DocField",

@@ -1,112 +1,113 @@
 {
-  "doctype": "DocType",
-  "name": "Non-Financial Depreciation Snapshot",
-  "module": "Habitat",
-  "custom": 0,
-  "issingle": 0,
-  "istable": 0,
-  "is_submittable": 1,
-  "engine": "InnoDB",
-  "description": "Submittable: periodic snapshot of operational asset book values. No GL impact.",
-  "autoname": "naming_series:",
-  "naming_rule": "By \"Naming Series\" field",
-  "fields": [
-    {
-      "doctype": "DocField",
-      "fieldname": "non-financial_depreciation_snapshot_tab_details",
-      "fieldtype": "Tab Break",
-      "label": "Details",
-      "idx": 1
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "non-financial_depreciation_snapshot_sec_details",
-      "fieldtype": "Section Break",
-      "label": "Information",
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "snapshot_date",
-      "fieldtype": "Date",
-      "label": "Snapshot Date",
-      "reqd": 1,
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "building",
-      "fieldtype": "Link",
-      "label": "Building",
-      "options": "Accommodation Building",
-      "reqd": 1,
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "non-financial_depreciation_snapshot_details_col",
-      "fieldtype": "Column Break",
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "label": "Series",
-      "options": "DEP-SNAP-.YYYY.-.####",
-      "default": "DEP-SNAP-.YYYY.-.####",
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "total_book_value_sar",
-      "fieldtype": "Currency",
-      "label": "Total Book Value (SAR)",
-      "read_only": 1,
-      "idx": 7
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "non-financial_depreciation_snapshot_sec_system",
-      "fieldtype": "Section Break",
-      "label": "System Details",
-      "collapsible": 1,
-      "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "cancellation_reason",
-      "fieldtype": "Small Text",
-      "label": "Cancellation Reason",
-      "read_only": 1,
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "non-financial_depreciation_snapshot_sec_table_items",
-      "fieldtype": "Section Break",
-      "label": "Asset Lines",
-      "idx": 10
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "items",
-      "fieldtype": "Table",
-      "label": "Asset Lines",
-      "options": "Depreciation Snapshot Item",
-      "idx": 11
-    }
-  ],
-  "permissions": [
-    {
-      "doctype": "DocPerm",
-      "role": "System Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "delete": 1,
-      "submit": 1,
-      "cancel": 1
-    }
-  ]
+ "doctype": "DocType",
+ "name": "Non-Financial Depreciation Snapshot",
+ "module": "Habitat",
+ "custom": 0,
+ "issingle": 0,
+ "istable": 0,
+ "is_submittable": 1,
+ "engine": "InnoDB",
+ "description": "Submittable: periodic snapshot of operational asset book values. No GL impact.",
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "non-financial_depreciation_snapshot_tab_details",
+   "fieldtype": "Tab Break",
+   "label": "Details",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "non-financial_depreciation_snapshot_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Information",
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "snapshot_date",
+   "fieldtype": "Date",
+   "label": "Snapshot Date",
+   "reqd": 1,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Accommodation Building",
+   "reqd": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "non-financial_depreciation_snapshot_details_col",
+   "fieldtype": "Column Break",
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "DEP-SNAP-.YYYY.-.####",
+   "default": "DEP-SNAP-.YYYY.-.####",
+   "idx": 6,
+   "hidden": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "total_book_value_sar",
+   "fieldtype": "Currency",
+   "label": "Total Book Value (SAR)",
+   "read_only": 1,
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "non-financial_depreciation_snapshot_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Details",
+   "collapsible": 1,
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancellation Reason",
+   "read_only": 1,
+   "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "non-financial_depreciation_snapshot_sec_table_items",
+   "fieldtype": "Section Break",
+   "label": "Asset Lines",
+   "idx": 10
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Asset Lines",
+   "options": "Depreciation Snapshot Item",
+   "idx": 11
+  }
+ ],
+ "permissions": [
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 1,
+   "cancel": 1
+  }
+ ]
 }
