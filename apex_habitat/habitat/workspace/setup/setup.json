@@ -9,7 +9,7 @@
  "is_default": 0,
  "sequence_id": 9.0,
  "parent_page": "Operations Command Center",
- "content": "[{\"id\": \"uilz3c82ix\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"9VcW43It6n\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Habitat Operations Setup\", \"col\": 12}}, {\"id\": \"aqdfFdkzZB\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"rcZBNpa6qq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"pHtxNmsJbc\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup</b></span>\", \"col\": 12}}, {\"id\": \"ubq5yZuVm5\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"id\": \"OKSGAw588f\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"HKO59auXtq\", \"type\": \"card\", \"data\": {\"card_name\": \"Task Master\", \"col\": 4}}, {\"id\": \"tsoFCAKxe3\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"kyZDzLurvT\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility & Utility Master\", \"col\": 4}}]",
+ "content": "[{\"id\": \"uilz3c82ix\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"9VcW43It6n\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Habitat Operations Setup\", \"col\": 12}}, {\"id\": \"aqdfFdkzZB\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"rcZBNpa6qq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"pHtxNmsJbc\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup</b></span>\", \"col\": 12}}, {\"id\": \"ubq5yZuVm5\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"id\": \"OKSGAw588f\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"HKO59auXtq\", \"type\": \"card\", \"data\": {\"card_name\": \"Task Master\", \"col\": 4}}, {\"id\": \"tsoFCAKxe3\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"kyZDzLurvT\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility & Utility Master\", \"col\": 4}}, {\"id\": \"maint_master_card\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Master\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -31,6 +31,20 @@
    "label": "Accommodation Room",
    "link_to": "Accommodation Room",
    "idx": 3
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Maintenance Material",
+   "link_to": "Maintenance Material",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Maintenance Material Template",
+   "link_to": "Maintenance Material Template",
+   "idx": 5
   }
  ],
  "links": [
@@ -175,6 +189,28 @@
    "link_type": "DocType",
    "link_to": "Subcontractor Service Contract",
    "idx": 19
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Maintenance Master",
+   "idx": 20
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Material",
+   "link_type": "DocType",
+   "link_to": "Maintenance Material",
+   "idx": 21
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Material Template",
+   "link_type": "DocType",
+   "link_to": "Maintenance Material Template",
+   "idx": 22
   }
  ],
  "charts": [],
