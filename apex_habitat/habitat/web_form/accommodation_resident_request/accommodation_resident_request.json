@@ -3,7 +3,7 @@
  "allow_delete": 0,
  "allow_edit": 0,
  "allow_incomplete": 0,
- "allow_multiple": 1,
+ "allow_multiple": 0,
  "allow_print": 0,
  "anonymous": 1,
  "apply_document_permissions": 0,
@@ -17,74 +17,97 @@
  "fields": [
   {
    "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
    "fieldname": "location_token",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Location Token"
+   "idx": 1,
+   "label": "Location Token",
+   "reqd": 0
   },
   {
    "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
    "fieldname": "requester_type",
    "fieldtype": "Select",
    "hidden": 0,
+   "idx": 2,
    "label": "I am a",
    "options": "Worker\nSupervisor\nAnonymous",
    "reqd": 1
   },
   {
    "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
    "fieldname": "worker_name",
    "fieldtype": "Data",
    "hidden": 0,
-   "label": "My Name (Optional)"
+   "idx": 3,
+   "label": "My Name (Optional)",
+   "reqd": 0
   },
   {
    "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
    "fieldname": "mobile_number",
    "fieldtype": "Data",
    "hidden": 0,
-   "label": "Mobile Number (Optional)"
+   "idx": 4,
+   "label": "Mobile Number (Optional)",
+   "reqd": 0
   },
   {
    "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
    "fieldname": "preferred_language",
    "fieldtype": "Select",
    "hidden": 0,
+   "idx": 5,
    "label": "Preferred Language",
-   "options": "English\nArabic\nUrdu\nHindi\nBengali"
+   "options": "English\nArabic\nUrdu\nHindi\nBengali",
+   "reqd": 0
   },
   {
    "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
    "fieldname": "request_category",
    "fieldtype": "Select",
    "hidden": 0,
+   "idx": 6,
    "label": "What do you need help with?",
    "options": "Maintenance\nSafety\nCleaning\nPest Control\nCustody\nFacility Item\nWater\nElectrical\nAC\nPlumbing\nReimbursement\nComplaint\nSuggestion\nOther",
    "reqd": 1
   },
   {
    "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
    "fieldname": "issue_location",
    "fieldtype": "Select",
    "hidden": 0,
+   "idx": 7,
    "label": "Where is the issue?",
    "options": "Room\nBathroom\nKitchen\nCommon Area\nEntrance\nStaircase\nExternal Area\nOther",
    "reqd": 1
   },
   {
    "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
    "fieldname": "description",
    "fieldtype": "Small Text",
    "hidden": 0,
+   "idx": 8,
    "label": "Describe the issue",
    "reqd": 1
   },
   {
    "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
    "fieldname": "attachment",
    "fieldtype": "Attach",
    "hidden": 0,
-   "label": "Upload Photo (Optional)"
+   "idx": 9,
+   "label": "Upload Photo (Optional)",
+   "reqd": 0
   }
  ],
  "idx": 0,
