@@ -134,17 +134,25 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "completion_photo",
+      "fieldtype": "Attach Image",
+      "label": "Completion Photo",
+      "description": "Photo evidence that maintenance work was completed. Required before closing.",
+      "idx": 17
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "maintenance_work_order_tab_tables",
       "fieldtype": "Tab Break",
       "label": "Related Tables",
-      "idx": 17
+      "idx": 18
     },
     {
       "doctype": "DocField",
       "fieldname": "maintenance_work_order_sec_table_procurement_items",
       "fieldtype": "Section Break",
       "label": "Procurement Items",
-      "idx": 18
+      "idx": 19
     },
     {
       "doctype": "DocField",
@@ -152,21 +160,21 @@
       "fieldtype": "Table",
       "label": "Procurement Items",
       "options": "Maintenance Procurement Item",
-      "idx": 19
+      "idx": 20
     },
     {
       "doctype": "DocField",
       "fieldname": "maintenance_work_order_tab_system",
       "fieldtype": "Tab Break",
       "label": "System Info",
-      "idx": 20
+      "idx": 21
     },
     {
       "doctype": "DocField",
       "fieldname": "maintenance_work_order_sec_system",
       "fieldtype": "Section Break",
       "label": "Administrative Details",
-      "idx": 21
+      "idx": 22
     },
     {
       "doctype": "DocField",
@@ -176,7 +184,7 @@
       "options": "Accommodation Building",
       "fetch_from": "maintenance_request.building",
       "read_only": 1,
-      "idx": 22
+      "idx": 23
     },
     {
       "doctype": "DocField",
@@ -186,13 +194,13 @@
       "options": "Draft\nPlanned\nIn Progress\nCompleted\nCancelled",
       "default": "Draft",
       "read_only": 1,
-      "idx": 23
+      "idx": 24
     },
     {
       "doctype": "DocField",
       "fieldname": "maintenance_work_order_system_col",
       "fieldtype": "Column Break",
-      "idx": 24
+      "idx": 25
     },
     {
       "doctype": "DocField",
@@ -200,7 +208,7 @@
       "fieldtype": "Small Text",
       "label": "Cancellation Reason",
       "read_only": 1,
-      "idx": 25
+      "idx": 26
     }
   ],
   "permissions": [
