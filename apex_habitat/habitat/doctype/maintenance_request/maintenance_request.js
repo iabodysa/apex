@@ -3,6 +3,15 @@ frappe.ui.form.on("Maintenance Request", {
 	refresh(frm) {
 		_update_priority_indicator(frm);
 
+		if (frm.doc.docstatus === 1 && frm.doc.status === "Open") {
+			frm.add_custom_button(__("Create Work Order"), function() {
+				frappe.model.open_mapped_doc({
+					method: "apex_habitat.habitat.doctype.maintenance_request.maintenance_request.make_work_order",
+					frm: frm
+				});
+			}, __("Actions"));
+		}
+
 		// Load material template button
 		if (frm.doc.docstatus === 0 && frm.doc.issue_type) {
 			frm.add_custom_button(__("Load Material Template"), function() {
@@ -32,7 +41,6 @@ frappe.ui.form.on("Maintenance Request", {
 });
 
 function _update_priority_indicator(frm) {
-	// Remove existing custom indicators
 	frm.page.clear_indicator();
 
 	if (frm.doc.priority === "Critical") {
@@ -41,7 +49,6 @@ function _update_priority_indicator(frm) {
 		frm.page.set_indicator(__("High Priority"), "orange");
 	}
 
-	// SLA breach warning — only when the field exists and is populated
 	if (
 		frm.doc.sla_breach_date &&
 		frappe.datetime.get_diff(frm.doc.sla_breach_date, frappe.datetime.now_datetime()) < 0 &&
