@@ -179,11 +179,11 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
             "supplier": supplier_name,
             "lease_start_date": "2026-05-01",
             "lease_end_date": "2026-12-31",
-            "monthly_rent_sar": 2000.0,
+            "rent_amount": 2000.0,
             "payment_schedule": [
                 {
                     "due_date": due_date,
-                    "amount_sar": 2000.0,
+                    "amount": 2000.0,
                     "status": "Unpaid"
                 }
             ]
@@ -302,11 +302,11 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
             "supplier": supplier_name,
             "lease_start_date": "2026-05-01",
             "lease_end_date": "2026-12-31",
-            "monthly_rent_sar": 2000.0,
+            "rent_amount": 2000.0,
             "payment_schedule": [
                 {
                     "due_date": due_date,
-                    "amount_sar": 2000.0,
+                    "amount": 2000.0,
                     "status": "Unpaid"
                 }
             ]

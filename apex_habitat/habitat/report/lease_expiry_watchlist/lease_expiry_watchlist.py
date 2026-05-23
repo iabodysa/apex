@@ -12,13 +12,13 @@ def execute(filters=None):
         {"label": frappe._("Status"), "fieldname": "status", "fieldtype": "Data", "width": 100},
         {"label": frappe._("Lease End Date"), "fieldname": "lease_end_date", "fieldtype": "Date", "width": 120},
         {"label": frappe._("Days to Expiry"), "fieldname": "days_to_expiry", "fieldtype": "Int", "width": 120},
-        {"label": frappe._("Monthly Rent (SAR)"), "fieldname": "monthly_rent_sar", "fieldtype": "Currency", "width": 140},
+        {"label": frappe._("Monthly Rent (SAR)"), "fieldname": "rent_amount", "fieldtype": "Currency", "width": 140},
     ]
 
     leases = frappe.get_all(
         "Accommodation Lease",
         filters={"docstatus": 1, "status": "Active"},
-        fields=["name", "building", "status", "lease_end_date", "monthly_rent_sar"],
+        fields=["name", "building", "status", "lease_end_date", "rent_amount"],
         order_by="lease_end_date asc",
     )
 

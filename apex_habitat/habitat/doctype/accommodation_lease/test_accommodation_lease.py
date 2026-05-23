@@ -14,10 +14,10 @@ class TestAccommodationLease(FrappeTestCase):
             "building": "QA-BLDG",
             "lease_start_date": "2026-01-01",
             "lease_end_date": "2026-12-31",
-            "monthly_rent_sar": 8000,
+            "rent_amount": 8000,
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
-        self.assertEqual(doc.monthly_rent_sar, 8000)
+        self.assertEqual(doc.rent_amount, 8000)
         frappe.delete_doc("Accommodation Lease", doc.name, force=True, ignore_permissions=True)
 
     def test_missing_building_raises(self):
@@ -26,7 +26,7 @@ class TestAccommodationLease(FrappeTestCase):
             "naming_series": "ACC-LEASE-.YYYY.-.####",
             "lease_start_date": "2026-01-01",
             "lease_end_date": "2026-12-31",
-            "monthly_rent_sar": 5000,
+            "rent_amount": 5000,
         })
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
@@ -38,7 +38,7 @@ class TestAccommodationLease(FrappeTestCase):
             "building": "QA-BLDG",
             "lease_start_date": "2026-06-01",
             "lease_end_date": "2026-05-01",
-            "monthly_rent_sar": 5000,
+            "rent_amount": 5000,
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)

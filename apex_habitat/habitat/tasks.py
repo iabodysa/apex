@@ -378,7 +378,7 @@ def monthly_rent_due_alert() -> None:
     leases = frappe.get_all(
         "Accommodation Lease",
         filters={"docstatus": 1, "status": "Active"},
-        fields=["name", "building", "supplier", "monthly_rent_sar"],
+        fields=["name", "building", "supplier", "rent_amount"],
     )
 
     for lease in leases:
@@ -390,7 +390,7 @@ def monthly_rent_due_alert() -> None:
                 "status": "Unpaid",
                 "due_date": ["between", [str(month_start), str(month_end)]],
             },
-            fields=["name", "due_date", "amount_sar", "payment_entry"],
+            fields=["name", "due_date", "amount", "payment_entry"],
         )
 
         for row in schedule_rows:
@@ -405,7 +405,7 @@ def monthly_rent_due_alert() -> None:
                 "requires manual payment by Finance.",
                 lease.name,
                 lease.building,
-                row.amount_sar,
+                row.amount,
                 row.due_date,
             )
 

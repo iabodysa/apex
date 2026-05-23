@@ -91,7 +91,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "rent_amount_sar",
+   "fieldname": "rent_amount",
    "fieldtype": "Currency",
    "label": "Rent (SAR)",
    "reqd": 1,
@@ -138,7 +138,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "total_scheduled_sar",
+   "fieldname": "total_scheduled",
    "fieldtype": "Currency",
    "label": "Total Scheduled Amount (SAR)",
    "read_only": 1,
