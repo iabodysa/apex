@@ -8,6 +8,42 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex Habitat v0.6.0 — Maintenance Materials & Database Cleanup",
+        "app_name": "apex_habitat",
+        "link": "/app/setup",
+        "creation": "2026-05-23 22:00:00",
+    },
+    {
+        "title": "v0.6.0: Added Maintenance Material catalog (38 items) and 4 templates",
+        "app_name": "apex_habitat",
+        "link": "/app/setup",
+        "creation": "2026-05-23 22:01:00",
+    },
+    {
+        "title": "v0.6.0: Added temporary database/workspace fresh-reload migration patch",
+        "app_name": "apex_habitat",
+        "link": "/app/setup",
+        "creation": "2026-05-23 22:02:00",
+    },
+    {
+        "title": "v0.6.0: Added Generate Rooms/Beds and Safety Setup buttons on Accommodation Building form",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-building",
+        "creation": "2026-05-23 22:03:00",
+    },
+    {
+        "title": "Apex Habitat v0.5.0 — Building Safety Setup Generator",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-building",
+        "creation": "2026-05-23 18:00:00",
+    },
+    {
+        "title": "v0.5.0: Added Safety Setup generator method and 12 tracking fields on Building form",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-building",
+        "creation": "2026-05-23 18:01:00",
+    },
+    {
         "title": "Apex Habitat v0.4.0 — Accommodation Setup & Bulk Generation",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-building",
