@@ -50,14 +50,16 @@ def validate(doc, method=None):
     if not doc.cost_center:
         doc.cost_center = assignment.cost_center
 
+    _VALID_TERMINAL = {"Returned", "Lost", "Damaged"}
     for row in doc.custody_return_items or []:
-        if row.return_status != "Returned":
+        if row.return_status not in _VALID_TERMINAL:
             doc.custody_cleared = 0
             frappe.throw(
-                _("All custody items must be marked Returned before submission.")
+                _("Each custody item must be marked Returned, Lost, or Damaged before submission.")
             )
     if doc.custody_return_items:
-        doc.custody_cleared = 1
+        all_returned = all(r.return_status == "Returned" for r in doc.custody_return_items)
+        doc.custody_cleared = 1 if all_returned else 0
 
 
 def on_submit(doc, method=None):

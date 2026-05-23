@@ -130,7 +130,7 @@
       "fieldtype": "Link",
       "label": "Cost Center",
       "options": "Cost Center",
-      "fetch_from": "building.linked_cost_center",
+      "fetch_from": "building.default_cost_center",
       "read_only": 1,
       "idx": 15
     },
