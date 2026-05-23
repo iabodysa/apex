@@ -7,6 +7,6 @@ from frappe.model.document import Document
 
 class SubcontractorServiceOrder(Document):
     def before_save(self):
-        # Validate document properties
-        if not self.doctype:
-            return
+        if not self.company:
+            from apex_habitat.habitat.doctype.habitat_settings.habitat_settings import get_default_company
+            self.company = get_default_company()

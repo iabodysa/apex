@@ -17,6 +17,24 @@ class AccommodationResidentRequest(Document):
         if self.location_token and not self.building:
             frappe.throw(_("Invalid or inactive location token."))
 
+        self._validate_status_transition()
+
+    def _validate_status_transition(self):
+        """Enforce role-based state transition rules without a full Frappe Workflow."""
+        status = self.status or "New"
+
+        if status == "Assigned" and not self.assigned_to:
+            frappe.throw(_("Assigned To is required when status is Assigned."))
+
+        if status in ("Resolved", "Closed") and not self.resolution_notes:
+            frappe.throw(_("Resolution Notes are required when closing or resolving a request."))
+
+        if status == "Closed" and not self.closed_on:
+            self.closed_on = frappe.utils.today()
+
+        if status == "Closed" and not self.closed_by:
+            self.closed_by = frappe.session.user
+
     def populate_location_from_token(self):
         if not self.location_token:
             return

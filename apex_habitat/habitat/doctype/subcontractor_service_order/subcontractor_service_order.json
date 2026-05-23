@@ -29,12 +29,21 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "company",
+      "label": "Company",
+      "fieldtype": "Link",
+      "options": "Company",
+      "read_only": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "building",
       "fieldtype": "Link",
       "label": "Building",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -42,21 +51,21 @@
       "fieldtype": "Date",
       "label": "Scheduled Date",
       "reqd": 1,
-      "idx": 4
+      "idx": 5
     },
     {
       "doctype": "DocField",
       "fieldname": "actual_visit_date",
       "fieldtype": "Date",
       "label": "Actual Visit Date",
-      "idx": 5
+      "idx": 6
     },
     {
       "doctype": "DocField",
       "fieldname": "completion_photo",
       "fieldtype": "Attach Image",
       "label": "Completion Photo Evidence",
-      "idx": 6
+      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -65,20 +74,20 @@
       "label": "Purchase Invoice",
       "options": "Purchase Invoice",
       "description": "Auto-created on Submit",
-      "idx": 7
+      "idx": 8
     },
     {
       "doctype": "DocField",
       "fieldname": "supervisor_confirmed",
       "fieldtype": "Check",
       "label": "Supervisor Confirmed Completion",
-      "idx": 8
+      "idx": 9
     },
     {
       "doctype": "DocField",
       "fieldname": "subcontractor_service_order_overview_col",
       "fieldtype": "Column Break",
-      "idx": 9
+      "idx": 10
     },
     {
       "doctype": "DocField",
@@ -87,7 +96,7 @@
       "label": "Status",
       "options": "Scheduled\nIn Progress\nCompleted\nMissed\nCancelled",
       "default": "Scheduled",
-      "idx": 10
+      "idx": 11
     },
     {
       "doctype": "DocField",
@@ -96,7 +105,7 @@
       "label": "Service Contract",
       "options": "Subcontractor Service Contract",
       "reqd": 1,
-      "idx": 11
+      "idx": 12
     },
     {
       "doctype": "DocField",
@@ -106,14 +115,14 @@
       "options": "SSO-.YYYY.-.#####",
       "default": "SSO-.YYYY.-.#####",
       "reqd": 1,
-      "idx": 12
+      "idx": 13
     },
     {
       "doctype": "DocField",
       "fieldname": "service_cost_sar",
       "fieldtype": "Currency",
       "label": "Service Cost (SAR)",
-      "idx": 13
+      "idx": 14
     },
     {
       "doctype": "DocField",
@@ -123,7 +132,7 @@
       "options": "Cost Center",
       "fetch_from": "building.linked_cost_center",
       "read_only": 1,
-      "idx": 14
+      "idx": 15
     },
     {
       "doctype": "DocField",
@@ -131,28 +140,28 @@
       "fieldtype": "Section Break",
       "label": "Additional Information",
       "collapsible": 1,
-      "idx": 15
+      "idx": 16
     },
     {
       "doctype": "DocField",
       "fieldname": "visit_notes",
       "fieldtype": "Small Text",
       "label": "Technician Notes",
-      "idx": 16
+      "idx": 17
     },
     {
       "doctype": "DocField",
       "fieldname": "subcontractor_service_order_tab_system",
       "fieldtype": "Tab Break",
       "label": "System Info",
-      "idx": 17
+      "idx": 18
     },
     {
       "doctype": "DocField",
       "fieldname": "subcontractor_service_order_sec_system",
       "fieldtype": "Section Break",
       "label": "Administrative Details",
-      "idx": 18
+      "idx": 19
     },
     {
       "doctype": "DocField",
@@ -162,13 +171,13 @@
       "options": "Supplier",
       "fetch_from": "contract.supplier",
       "read_only": 1,
-      "idx": 19
+      "idx": 20
     },
     {
       "doctype": "DocField",
       "fieldname": "subcontractor_service_order_system_col",
       "fieldtype": "Column Break",
-      "idx": 20
+      "idx": 21
     },
     {
       "doctype": "DocField",
@@ -177,7 +186,7 @@
       "label": "Service Type",
       "fetch_from": "contract.service_type",
       "read_only": 1,
-      "idx": 21
+      "idx": 22
     }
   ],
   "permissions": [

@@ -565,14 +565,15 @@ Utility Bills by Status,فواتير الخدمات حسب الحالة
 Vacant Beds,الأسرة الشاغرة
 Variance from Avg (%),الانحراف عن المتوسط (%)
 Views,العروض والتقارير
-Habitat Hub,مركز السكن
-Housing,السكن
-Routines,الدوريات
-Repairs,الإصلاحات
-Safety,السلامة
-Custody,العهد
-Costs,التكاليف
-Launchpad,التهيئة
+Operations Command Center,مركز عمليات السكن
+Accommodation Lifecycle,دورة حياة السكن
+Daily & Scheduled Tasks,المهام اليومية والمجدولة
+Maintenance & Remediation,الصيانة والمعالجة
+Safety & Compliance,السلامة والامتثال
+Custody & Asset Control,العهد ومراقبة الأصول
+"Lease, Utilities & Cost Control",الإيجارات والخدمات ومراقبة التكاليف
+Client Audit & Evidence,تدقيق العملاء والأدلة
+Setup,الإعداد
 Getting Started,ابدأ هنا
 Operational Metrics,مؤشرات التشغيل
 Trends,الاتجاهات

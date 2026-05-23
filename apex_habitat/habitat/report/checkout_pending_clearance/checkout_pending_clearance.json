@@ -1,0 +1,9 @@
+{
+  "doctype": "Report",
+  "name": "Checkout Pending Clearance",
+  "report_name": "Checkout Pending Clearance",
+  "ref_doctype": "Accommodation Checkout",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Habitat"
+}

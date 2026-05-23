@@ -27,12 +27,21 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "company",
+      "label": "Company",
+      "fieldtype": "Link",
+      "options": "Company",
+      "read_only": 1,
+      "idx": 3
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "posting_date",
       "label": "Posting Date",
       "fieldtype": "Date",
       "reqd": 1,
       "in_list_view": 1,
-      "idx": 3
+      "idx": 4
     },
     {
       "doctype": "DocField",
@@ -41,7 +50,7 @@
       "fieldtype": "Link",
       "options": "Employee",
       "in_list_view": 1,
-      "idx": 4
+      "idx": 5
     },
     {
       "doctype": "DocField",
@@ -49,7 +58,7 @@
       "label": "Accommodation Assignment",
       "fieldtype": "Link",
       "options": "Accommodation Assignment",
-      "idx": 5
+      "idx": 6
     },
     {
       "doctype": "DocField",
@@ -58,7 +67,7 @@
       "fieldtype": "Link",
       "options": "Accommodation Building",
       "reqd": 1,
-      "idx": 6
+      "idx": 7
     },
     {
       "doctype": "DocField",
@@ -66,7 +75,7 @@
       "label": "Project",
       "fieldtype": "Link",
       "options": "Project",
-      "idx": 7
+      "idx": 8
     },
     {
       "doctype": "DocField",
@@ -75,27 +84,27 @@
       "fieldtype": "Select",
       "options": "Rent\nElectricity\nWater\nCleaning Staff Salary\nSupervisor Salary\nMaintenance\nOther",
       "reqd": 1,
-      "idx": 8
+      "idx": 9
     },
     {
       "doctype": "DocField",
       "fieldname": "accommodation_ledger_details_col",
       "fieldtype": "Column Break",
-      "idx": 9
+      "idx": 10
     },
     {
       "doctype": "DocField",
       "fieldname": "capacity_denominator",
       "label": "Capacity Denominator",
       "fieldtype": "Int",
-      "idx": 10
+      "idx": 11
     },
     {
       "doctype": "DocField",
       "fieldname": "employee_daily_share",
       "label": "Employee Daily Share (SAR)",
       "fieldtype": "Currency",
-      "idx": 11
+      "idx": 12
     },
     {
       "doctype": "DocField",
@@ -104,7 +113,7 @@
       "fieldtype": "Select",
       "options": "Operational Memo\nGL Posted",
       "default": "Operational Memo",
-      "idx": 12
+      "idx": 13
     },
     {
       "doctype": "DocField",
@@ -112,14 +121,14 @@
       "label": "Cost Center",
       "fieldtype": "Link",
       "options": "Cost Center",
-      "idx": 13
+      "idx": 14
     },
     {
       "doctype": "DocField",
       "fieldname": "total_site_cost",
       "label": "Total Site Cost for Period (SAR)",
       "fieldtype": "Currency",
-      "idx": 14
+      "idx": 15
     },
     {
       "doctype": "DocField",
@@ -127,7 +136,7 @@
       "fieldtype": "Section Break",
       "label": "System Details",
       "collapsible": 1,
-      "idx": 15
+      "idx": 16
     },
     {
       "doctype": "DocField",
@@ -136,7 +145,7 @@
       "fieldtype": "Link",
       "options": "GL Entry",
       "read_only": 1,
-      "idx": 16
+      "idx": 17
     },
     {
       "doctype": "DocField",
@@ -144,7 +153,7 @@
       "label": "Source DocType",
       "fieldtype": "Data",
       "read_only": 1,
-      "idx": 17
+      "idx": 18
     },
     {
       "doctype": "DocField",
@@ -152,7 +161,7 @@
       "label": "Source Document",
       "fieldtype": "Data",
       "read_only": 1,
-      "idx": 18
+      "idx": 19
     },
     {
       "doctype": "DocField",
@@ -160,7 +169,7 @@
       "label": "Source Line ID",
       "fieldtype": "Data",
       "read_only": 1,
-      "idx": 19
+      "idx": 20
     },
     {
       "doctype": "DocField",
@@ -169,7 +178,7 @@
       "fieldtype": "Link",
       "options": "Accommodation Ledger",
       "read_only": 1,
-      "idx": 20
+      "idx": 21
     },
     {
       "doctype": "DocField",
@@ -179,7 +188,7 @@
       "options": "Capacity\nActual Occupancy\nManual\nDirect",
       "default": "Capacity",
       "read_only": 1,
-      "idx": 21
+      "idx": 22
     },
     {
       "doctype": "DocField",
@@ -187,7 +196,7 @@
       "label": "Allocation Period Start",
       "fieldtype": "Date",
       "read_only": 1,
-      "idx": 22
+      "idx": 23
     },
     {
       "doctype": "DocField",
@@ -195,7 +204,7 @@
       "label": "Allocation Period End",
       "fieldtype": "Date",
       "read_only": 1,
-      "idx": 23
+      "idx": 24
     }
   ],
   "permissions": [
