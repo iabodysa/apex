@@ -1,3 +1,4 @@
+A completion photo is required before closing a Maintenance Work Order.,يجب إرفاق صورة إنجاز قبل إغلاق أمر عمل الصيانة.
 A maintenance request raised automatically when the task execution indicates a repair is needed.,طلب صيانة يُنشأ آلياً عندما يشير تنفيذ المهمة إلى الحاجة لإصلاح.
 A submitted Accommodation Checkout already exists for this assignment: {0},توجد مغادرة سكن معتمدة بالفعل لهذا التسكين: {0}
 Absconding,بلاغ هروب عمالة
@@ -202,7 +203,7 @@ Cleaner Name,اسم العامل
 Cleaner Type,نوع العامل
 Cleaning,خدمات النظافة
 Cleaning Date,تاريخ التنظيف
-Cleaning Compliance %,نسبة الامتثال للتنظيف
+Cleaning Compliance %,نسبة الالتزام بالتنظيف
 Cleaning Log,سجل النظافة
 Cleaning Log Room Detail,تفاصيل غرف سجل التنظيف
 Cleaning Logs,سجلات التنظيف
@@ -216,17 +217,18 @@ Client Point of Contact,مسؤول التواصل لدى العميل
 Client Project,مشروع العميل
 Closed By,أُغلق بواسطة
 Closed by Client,أُغلق من قِبل العميل
+Closed Maintenance,صيانة مغلقة
 Closed On,تاريخ الإغلاق
 Common Area,منطقة مشتركة
 Company,الشركة
-Company Cost Share (%),نسبة تحمل الشركة (%)
-Company Cost Share must be between 0 and 100.,يجب أن تكون نسبة تحمل الشركة بين 0 و 100.
 Complaint,شكوى
 Completed,مكتمل
 Completed Date,تاريخ الإنجاز
 Completion Date,تاريخ الاكتمال
 Completion Notes,ملاحظات الإنجاز / التقرير الختامي
+Completion Photo,صورة الإنجاز
 Completion Photo Evidence,صورة إثبات الإنجاز
+Completion photo required to close this work order.,صورة الإنجاز مطلوبة لإغلاق أمر العمل.
 Compliance,الامتثال
 Compliance & Licensing,الامتثال والتراخيص
 "Compliance document attached to a building (Balady, Civil Defence Certificate, Group Housing Permit, Lease Contract).",مستند امتثال مرتبط بمبنى (بلدي، شهادة الدفاع المدني، تصريح سكن جماعي، عقد إيجار).
@@ -445,6 +447,7 @@ Handover Date,تاريخ التسليم
 Hard Disk,القرص الصلب
 Health & Hygiene,الصحة والنظافة العامة
 High,عالٍ
+High Priority,أولوية عالية
 Hindi,الهندية
 Housing Allowance Suspended,تعليق بدل السكن
 Housing Supervisor Escalation,تصعيد مشرف السكن
@@ -577,6 +580,7 @@ Medium,متوسط
 Method,الطريقة
 Missed,فائت
 Missed Cleaning,تنظيف مفقود
+Missed Cleaning Logs,سجلات التنظيف الفائتة
 Missed Reason,سبب التغيب
 Missed Subcontractor Visits,زيارات مقاول الباطن الفائتة
 Missing required fields: {0},حقول مطلوبة مفقودة: {0}
@@ -622,8 +626,9 @@ Only submitted Maintenance Work Orders can be marked Completed.,لا يمكن و
 Only submitted reports can be acknowledged.,لا يمكن اعتماد التقارير غير المعتمدة.
 Open Audit Remediation Plans,خطط معالجة التدقيق المفتوحة
 Open Custody Issues,طلبات صرف العهد المفتوحة
+Open Maintenance,صيانة مفتوحة
 Open Maintenance Requests,طلبات الصيانة المفتوحة
-Open Resident Requests,طلبات المقيمين المفتوحة
+Open Resident Requests,طلبات الساكنين المفتوحة
 Open Subcontractor Service Orders,أوامر خدمة مقاول الباطن المفتوحة
 Operational,تشغيلي
 Operational Depreciation Policy,سياسة الإهلاك التشغيلية
@@ -666,11 +671,13 @@ Permanent log of physical facility asset movements between buildings,سجل دا
 Pest Control,مكافحة الحشرات والآفات
 Photo Evidence,إثبات بالصورة
 Photo Evidence Required,يلزم إثبات بالصورة
+Photo evidence that maintenance work was completed. Required before closing.,دليل مصوّر على اكتمال أعمال الصيانة. مطلوب قبل الإغلاق.
 Physical Location,الموقع الفعلي
 Planned,مخطط
 Planned End Date,تاريخ النهاية المخطط له
 Planned End Date must be on or after Planned Start Date.,يجب أن يكون تاريخ النهاية المخطط له بعد تاريخ البداية أو مساوياً له.
 Planned Start Date,تاريخ البداية المخطط له
+Please attach a completion photo before marking as completed.,يرجى إرفاق صورة الإنجاز قبل وضع علامة مكتمل.
 Plumbing,سباكة
 Policy Name,اسم السياسة
 Poor,رديء
@@ -836,6 +843,7 @@ Site,الموقع
 Site Name,اسم الموقع
 SLA (Days),مستوى الخدمة (أيام)
 SLA Breached,تجاوز مستوى الخدمة
+SLA Breached — this request requires immediate attention.,انتهت مهلة SLA — هذا الطلب يحتاج اهتماماً فورياً.
 Smoke Detector,كاشف دخان
 Smoke Detector Fault,عطل في كاشف الدخان
 Snapshot Date,تاريخ اللقطة
@@ -953,6 +961,9 @@ Utility Account,حساب الخدمات العامة
 Utility Bill Entry,تسجيل فاتورة الخدمات العامة
 Utility Bills by Status,فواتير الخدمات حسب الحالة
 Utility Bills Under Review,فواتير الخدمات تحت المراجعة
+Utility Cost Share,نسبة تحمل تكاليف المرافق
+Utility Cost Share (%),نسبة تحمل تكاليف المرافق (%)
+Utility Cost Share must be between 0 and 100.,يجب أن تكون نسبة تحمل تكاليف المرافق بين 0 و 100.
 Utility Type,نوع المرفق الخدمي
 Utility Variance Report,تقرير انحراف استهلاك الخدمات
 Vacant Beds,الأسرة الشاغرة
