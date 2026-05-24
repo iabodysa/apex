@@ -16,6 +16,20 @@ def validate(doc, method=None):
     if doc.planned_end_date and doc.planned_start_date:
         if doc.planned_end_date < doc.planned_start_date:
             frappe.throw(_("Planned End Date must be on or after Planned Start Date."))
+    # One active Work Order per Maintenance Request: reject a duplicate.
+    if doc.maintenance_request:
+        dup = frappe.db.exists(
+            "Maintenance Work Order",
+            {
+                "maintenance_request": doc.maintenance_request,
+                "docstatus": ["!=", 2],
+                "name": ["!=", doc.name or ""],
+            },
+        )
+        if dup:
+            frappe.throw(
+                _("A Work Order already exists for this Maintenance Request: {0}").format(dup)
+            )
     doc.total_procurement_cost_sar = sum(
         flt(row.get("amount") or 0) for row in (doc.procurement_items or [])
     )

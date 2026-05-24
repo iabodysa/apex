@@ -359,10 +359,8 @@ class TestDuplicateOverlap(QABase):
             allowed = False
             err = str(e)
         print(f"\n[5b] overlapping lease same building allowed={allowed} err={err}")
-        if allowed:
-            print("[5b] BUG: two OVERLAPPING Accommodation Leases for the same building accepted. No overlap guard.")
-        # CONFIRMED BUG: asserting current (buggy) behavior to keep module green.
-        self.assertTrue(allowed, "CONFIRMED BUG: overlapping leases for same building accepted (should be rejected)")
+        # FIXED (accommodation_lease.validate): overlapping leases are rejected.
+        self.assertFalse(allowed, "overlapping leases for the same building must be rejected")
 
     # Scenario 5c: two Maintenance Work Orders for same Maintenance Request -> rejected?
     def test_5c_two_work_orders_same_request(self):
@@ -398,6 +396,5 @@ class TestDuplicateOverlap(QABase):
             allowed = False
             err = str(e)
         print(f"\n[5c] second work order same request allowed={allowed} err={err}")
-        if allowed:
-            print("[5c] BUG: two Maintenance Work Orders for the SAME Maintenance Request accepted. No duplicate guard.")
-        print("[5c] BEHAVIOR recorded.")
+        # FIXED (maintenance_work_order.validate): duplicate WO per request rejected.
+        self.assertFalse(allowed, "a second Work Order for the same Maintenance Request must be rejected")

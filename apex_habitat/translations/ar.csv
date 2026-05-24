@@ -1,4 +1,5 @@
 A Utility Bill Entry already exists for this account and billing period: {0},توجد فاتورة خدمات مسجّلة بالفعل لهذا الحساب وفترة الفوترة: {0}
+A Work Order already exists for this Maintenance Request: {0},يوجد أمر عمل بالفعل لطلب الصيانة هذا: {0}
 A completion photo is required before closing a Maintenance Work Order.,يجب إرفاق صورة إنجاز قبل إغلاق أمر عمل الصيانة.
 A maintenance request raised automatically when the task execution indicates a repair is needed.,طلب صيانة يُنشأ آلياً عندما يشير تنفيذ المهمة إلى الحاجة لإصلاح.
 A submitted Accommodation Checkout already exists for this assignment: {0},توجد مغادرة سكن معتمدة بالفعل لهذا التسكين: {0}
@@ -71,6 +72,7 @@ Allocation Period Start,بداية فترة التوزيع
 Allow Over-Capacity,السماح بتجاوز الطاقة الاستيعابية
 Amended From,مُعدّل من
 Amount (SAR),المبلغ (ريال)
+An overlapping lease already exists for this building: {0},يوجد عقد متداخل بالفعل لهذا المبنى: {0}
 Annual,سنوي
 Annual Cleaning Staff Cost (SAR),تكلفة عمالة النظافة السنوية (ريال)
 Annual Cost Breakdown,تفصيل التكلفة السنوية
