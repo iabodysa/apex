@@ -7,6 +7,43 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v0.8.0 ---------------------------------------------------------------
+    {
+        "title": "Apex Habitat v0.8.0 — Supplier Recovery, Native Notifications & Engine Insights",
+        "app_name": "apex_habitat",
+        "link": "/app/setup",
+        "creation": "2026-05-25 09:00:00",
+    },
+    {
+        "title": "v0.8.0: Supplier Cost Recovery report — monthly per-supplier cost with markup",
+        "app_name": "apex_habitat",
+        "link": "/app/supplier-cost-recovery/view/report",
+        "creation": "2026-05-25 09:01:00",
+    },
+    {
+        "title": "v0.8.0: Operational alerts moved to native timeline comments + Frappe Notifications",
+        "app_name": "apex_habitat",
+        "link": "/app/habitat-settings",
+        "creation": "2026-05-25 09:02:00",
+    },
+    {
+        "title": "v0.8.0: New occupancy-history engine + Occupancy Trend report",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-occupancy-snapshot",
+        "creation": "2026-05-25 09:03:00",
+    },
+    {
+        "title": "v0.8.0: Five bilingual hand-over print formats (custody, checkout, work order)",
+        "app_name": "apex_habitat",
+        "link": "/app/custody-issue",
+        "creation": "2026-05-25 09:04:00",
+    },
+    {
+        "title": "v0.8.0: System Administration workspace + new dashboard cards and charts",
+        "app_name": "apex_habitat",
+        "link": "/app/habitat-system-administration",
+        "creation": "2026-05-25 09:05:00",
+    },
     # v0.7.2 ---------------------------------------------------------------
     {
         "title": "Apex Habitat v0.7.2 — Reliability, Performance & Translation Hardening",

@@ -1,6 +1,12 @@
 {
- "charts": [],
- "content": "[{\"id\": \"5dda5c76e3\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Background Operations Health</b></span>\", \"col\": 12}}, {\"id\": \"bf038d80ac\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 4}}, {\"id\": \"a61bce88b8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 4}}, {\"id\": \"d2456e9355\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 4}}, {\"id\": \"b2affccb93\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Background Engines & Logs</b></span>\", \"col\": 12}}, {\"id\": \"3c81e13d24\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Ledger\", \"col\": 3}}, {\"id\": \"b38bf659a5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Facility Asset Movement\", \"col\": 3}}, {\"id\": \"f32afd70e3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Non-Financial Depreciation Snapshot\", \"col\": 3}}, {\"id\": \"0f3c656fbf\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Instance\", \"col\": 3}}, {\"id\": \"573381fc96\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"0359e1e10f\", \"type\": \"card\", \"data\": {\"card_name\": \"Background Engines & Logs\", \"col\": 12}}]",
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Available Capacity Trend",
+   "label": "Available Capacity Trend"
+  }
+ ],
+ "content": "[{\"id\": \"5dda5c76e3\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Background Operations Health</b></span>\", \"col\": 12}}, {\"id\": \"bf038d80ac\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 4}}, {\"id\": \"a61bce88b8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 4}}, {\"id\": \"d2456e9355\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 4}}, {\"id\": \"b2affccb93\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Background Engines & Logs</b></span>\", \"col\": 12}}, {\"id\": \"3c81e13d24\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Ledger\", \"col\": 3}}, {\"id\": \"b38bf659a5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Facility Asset Movement\", \"col\": 3}}, {\"id\": \"f32afd70e3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Non-Financial Depreciation Snapshot\", \"col\": 3}}, {\"id\": \"0f3c656fbf\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Instance\", \"col\": 3}}, {\"id\": \"573381fc96\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"0359e1e10f\", \"type\": \"card\", \"data\": {\"card_name\": \"Background Engines & Logs\", \"col\": 12}}, {\"id\": \"Box4GgOsfx\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Engine Insights</b></span>\", \"col\": 12}}, {\"id\": \"r1mpCZEByh\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Ledger Cost This Month\", \"col\": 4}}, {\"id\": \"QvKI43f4nB\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Available Capacity Trend\", \"col\": 12}}]",
  "creation": "2026-05-25 01:38:02.293790",
  "custom_blocks": [],
  "docstatus": 0,
@@ -108,6 +114,11 @@
   {
    "label": "Recent Error Logs",
    "number_card_name": "Recent Error Logs"
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Ledger Cost This Month",
+   "label": "Ledger Cost This Month"
   }
  ],
  "owner": "Administrator",

@@ -116,9 +116,11 @@ Asset Identification,تعريف الأصول
 Asset Lines,بنود الأصول
 Asset Location,موقع الأصول
 Asset Logging,سجل الأصول
+Asset Movements Over Time,حركة الأصول عبر الزمن
 Asset Name,اسم الأصل
 "Asset Name (e.g., Camera-Laundry-Room)",اسم الأصل (مثال: Camera-Laundry-Room)
 Assets & Custody,الأصول والعهد
+Assets Moved This Month,الأصول المنقولة هذا الشهر
 Assets in Custody,الأصول في العهدة
 Assign an employee to a bed to start the accommodation lifecycle.,اربط الموظف بسرير لبدء دورة السكن.
 Assigned,مُسنَد
@@ -156,6 +158,7 @@ Auto-generated from Accommodation Checkout {0}. Review replacement costs and sub
 Auto-generated summary of meter sharing calculation,ملخّص يُنشأ تلقائياً لحساب مشاركة العدّاد
 Available,متاح
 Available Capacity,السعة المتاحة
+Available Capacity Trend,اتجاه السعة المتاحة
 Available Rooms,الغرف المتاحة
 Average,متوسط
 Average Monthly Bill (SAR),متوسط الفاتورة الشهرية (ريال)
@@ -472,6 +475,7 @@ Enable Supplier Markup,تفعيل هامش المورد
 Enable if this meter covers multiple units,فعّل هذا الخيار إذا كان هذا العدّاد يغطّي عدة وحدات
 End Date,تاريخ الانتهاء
 End of Contract,نهاية العقد
+Engine Insights,رؤى المحرّكات
 English,الإنجليزية
 Entrance,المدخل
 Escalated Maintenance Requests,طلبات الصيانة المصعدة
@@ -629,6 +633,7 @@ Installation Date,تاريخ التركيب
 Insurance Policy,بوليصة التأمين
 Intercompany Approval,موافقات حركة الشركات
 Intercompany Movement Register,سجل الحركات بين الشركات
+Intercompany Moves Pending Acknowledgement,نقل بين الشركات بانتظار الإقرار
 Intercompany Permanent,نقل دائم بين الشركات
 Intercompany Temporary,نقل مؤقت بين الشركات
 Internal Auditor,المدقق الداخلي
@@ -696,6 +701,8 @@ Lease Status,حالة عقد الإيجار
 Lease payment reference: {0},مرجع دفعة الإيجار: {0}
 "Lease, Utilities & Cost Control",الإيجارات والخدمات ومراقبة التكاليف
 Leave blank for permanent,اتركه فارغاً للدائم
+Ledger Cost This Month,تكلفة الدفتر هذا الشهر
+Ledger Cost by Type,تكلفة الدفتر حسب النوع
 Ledger Type,نوع الدفتر
 License Expiry,انتهاء الرخصة
 License Expiry Lead Days,أيام التنبيه قبل انتهاء الرخصة
@@ -833,6 +840,7 @@ Occupancy & Operations,الإشغال والعمليات
 Occupancy & Residents,الإشغال والمقيمون
 Occupancy Limit,حد الإشغال
 Occupancy Management,إدارة تسكين الموظفين
+Occupancy Percent Trend,اتجاه نسبة الإشغال
 Occupant,الشاغل
 Occupied,مشغول
 Occupied Beds,الأسرة المشغولة
@@ -1207,6 +1215,7 @@ Supervisor accountable for this asset; appears on facility custody report,الم
 Supplier,المورّد
 Supplier Cost Recovery,استرداد تكلفة المورد
 Supplier Markup Percent,نسبة هامش المورد
+Supplier-Billed Cost This Month,التكلفة المحمَّلة على المورّد هذا الشهر
 System Details,تفاصيل النظام
 System Info,معلومات النظام
 Target Bed {0} does not belong to Room {1},السرير المستهدف {0} لا ينتمي للغرفة {1}
@@ -1219,6 +1228,7 @@ Target Room {0} is not associated with any Building.,الغرفة المستهد
 Target bed is already occupied.,السرير المستهدف مشغول بالفعل.
 Task,المهمة
 Task Code,رمز المهمة
+Task Completions Over Time,إنجاز المهام عبر الزمن
 Task Instance marked Completed.,تم تحديد المهمة كمكتملة.
 Task Instance marked In Progress.,تم تحديد حالة تنفيذ المهمة كـ 'قيد التنفيذ'.
 Task Master,بيانات المهام الأساسية
@@ -1230,6 +1240,8 @@ Task Title (English),عنوان المهمة (بالإنجليزية)
 Task Type,نوع المهمة
 Task completed.,اكتملت المهمة.
 Task started — status set to In Progress.,بدأت المهمة — تم ضبط الحالة إلى 'قيد التنفيذ'.
+Tasks Completed This Month,المهام المكتملة هذا الشهر
+Tasks Due Today,المهام المستحقة اليوم
 Technician Notes,ملاحظات الفني
 Telecom,اتصالات
 Template,القالب
@@ -1255,6 +1267,7 @@ To Date,إلى تاريخ
 To Room,إلى غرفة
 Toilets,أدوات صحية (مراحيض)
 Total,الإجمالي
+Total Asset Book Value,إجمالي القيمة الدفترية للأصول
 Total Bed Capacity,إجمالي الطاقة الاستيعابية (أسرة)
 Total Beds,إجمالي الأسرة
 Total Book Value (SAR),إجمالي القيمة الدفترية (ريال)
