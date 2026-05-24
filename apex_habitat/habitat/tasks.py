@@ -453,6 +453,60 @@ def weekly_occupancy_sync() -> None:
     frappe.logger().info("weekly_occupancy_sync: building occupancy counters refreshed.")
 
 
+def daily_occupancy_snapshot() -> None:
+    """Write a daily point-in-time occupancy row per building to the read-only
+    Accommodation Occupancy Snapshot engine, so occupancy history/trends survive
+    (the live occupancy_percent field is overwritten and keeps no history)."""
+    from frappe.utils import today
+
+    snapshot_date = today()
+    start = 0
+    batch_size = 500
+    while True:
+        building_names = frappe.get_all(
+            "Accommodation Building", pluck="name",
+            limit_start=start, limit_page_length=batch_size,
+        )
+        if not building_names:
+            break
+        for building_name in building_names:
+            try:
+                if frappe.db.exists(
+                    "Accommodation Occupancy Snapshot",
+                    {"building": building_name, "snapshot_date": snapshot_date},
+                ):
+                    continue
+                total_rooms = frappe.db.count("Accommodation Room", {"building": building_name})
+                if not total_rooms:
+                    continue
+                active = frappe.db.count(
+                    "Accommodation Assignment",
+                    {"building": building_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
+                )
+                total_capacity = frappe.db.get_value("Accommodation Building", building_name, "total_capacity") or 0
+                occ_pct = round(active / total_capacity * 100, 2) if total_capacity else 0.0
+                frappe.get_doc({
+                    "doctype": "Accommodation Occupancy Snapshot",
+                    "snapshot_date": snapshot_date,
+                    "building": building_name,
+                    "active_occupants": active,
+                    "total_capacity": total_capacity,
+                    "occupancy_percent": occ_pct,
+                    "available_capacity": max(total_capacity - active, 0),
+                    "full_rooms": frappe.db.count("Accommodation Room", {"building": building_name, "status": "Full"}),
+                    "partial_rooms": frappe.db.count("Accommodation Room", {"building": building_name, "status": "Partially Occupied"}),
+                    "available_rooms": frappe.db.count("Accommodation Room", {"building": building_name, "status": "Available"}),
+                }).insert(ignore_permissions=True)  # audit-ok
+            except Exception:
+                frappe.db.rollback()
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Occupancy snapshot failed for building {building_name}"[:140],
+                )
+        start += batch_size
+    frappe.logger().info("daily_occupancy_snapshot: snapshots written.")
+
+
 def weekly_safety_task_compliance_scan() -> None:
     """Scan for overdue Scheduled Task Instances and flag them as Overdue."""
     from frappe.utils import today, getdate

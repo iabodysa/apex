@@ -25,6 +25,7 @@ Accommodation Ledger Summary,ملخص دفتر التكاليف التشغيلي
 Accommodation Lifecycle,دورة حياة السكن
 Accommodation Manager,مدير السكن
 Accommodation Master,بيانات السكن الأساسية
+Accommodation Occupancy Snapshot,لقطة إشغال السكن
 Accommodation Occupancy Summary,ملخص الإشغال
 Accommodation QR Location,موقع QR للسكن
 Accommodation Resident Request,طلب مقيم
@@ -45,6 +46,7 @@ Active,نشط
 Active Accommodation Assignments,التسكينات النشطة
 Active CCTV Cameras,كاميرات المراقبة المفعّلة
 Active Leases,عقود الإيجار النشطة
+Active Occupants,الساكنون الحاليون
 Active Resident Register,سجل السكان النشطين
 Active Residents,المقيمون النشطون
 Actual End Date,تاريخ النهاية الفعلي
@@ -157,6 +159,8 @@ Available Capacity,السعة المتاحة
 Available Rooms,الغرف المتاحة
 Average,متوسط
 Average Monthly Bill (SAR),متوسط الفاتورة الشهرية (ريال)
+Avg Available Capacity,متوسط السعة المتاحة
+Avg Occupancy %,متوسط نسبة الإشغال
 Awareness & Training,التوعية والتدريب
 Background Engines & Logs,المحرّكات والسجلات الخلفية
 Background Operations Health,صحة العمليات الخلفية
@@ -387,6 +391,7 @@ Date of the first payment. Subsequent payments are calculated from this date bas
 Day of month on which rent is due (1-28).,يوم الشهر المستحق فيه الإيجار (1-28).
 Days Housed,أيام الإسكان
 Days Open,أيام مفتوحة
+Days Over Capacity,أيام تجاوز السعة
 Days Since,أيام منذ
 Days Since Checkout,أيام منذ المغادرة
 Days before a Building License expiry date to flag it Expiring Soon (per-license renewal_lead_days still overrides).,عدد الأيام قبل تاريخ انتهاء رخصة المبنى لتمييزها بأنها ستنتهي قريباً (تظل قيمة renewal_lead_days الخاصة بكل رخصة هي المُرجّحة).
@@ -545,6 +550,7 @@ Frequency,التكرار / الدورية
 From Bed,من سرير
 From Building,من مبنى
 From Company,من الشركة
+From Date,من تاريخ
 From Room,من غرفة
 From and To location must differ for a Facility Asset Movement.,يجب أن يختلف موقع البداية والنهاية في حركة أصول المنشأة.
 Full,ممتلئ
@@ -765,6 +771,7 @@ Material Name,اسم المادة
 Material Templates,قوالب المواد
 Materials required for the repair.,المواد المطلوبة للإصلاح.
 Max Damage Deduction per Checkout (SAR),حد حسم التلفيات الأقصى للمغادرة (ريال)
+Max Occupancy %,أعلى نسبة إشغال
 May,مايو
 Medium,متوسط
 Message,الرسالة
@@ -772,6 +779,7 @@ Meter & Sharing,العدّاد والمشاركة
 Meter Number,رقم العدّاد
 Meter Readings & Sharing,قراءات العدّاد والمشاركة
 Method,الطريقة
+Min Occupancy %,أدنى نسبة إشغال
 Missed,فائت
 Missed Cleaning,تنظيف مفقود
 Missed Cleaning Logs,سجلات التنظيف الفائتة
@@ -1044,6 +1052,7 @@ Room Generator — Step 3 of 3: Review,مولّد الغرف — الخطوة 3 
 Room Number,رقم الغرفة
 Room Number Prefix,بادئة رقم الغرفة
 Room Setup,إعداد الغرف
+Room Status Breakdown,تفصيل حالة الغرف
 Room Type,نوع الغرفة
 Room {0} is currently '{1}' and cannot be assigned to an employee.,الغرفة {0} حالتها الآن '{1}' ولا يمكن تخصيصها لموظف.
 Room {0}: {1},الغرفة {0}: {1}
@@ -1147,6 +1156,7 @@ Smoke Detector Fault,عطل في كاشف الدخان
 Smoke Detectors Present,كاشفات الدخان موجودة
 Snapshot,لقطة
 Snapshot Date,تاريخ اللقطة
+Snapshots,اللقطات
 Soap Dispenser,موزع صابون
 Source,المصدر
 Source Channel,قناة المصدر
@@ -1241,6 +1251,7 @@ This will clear and rebuild the entire payment schedule. Continue?,سيؤدي ه
 To Bed,إلى سرير
 To Building,إلى مبنى
 To Company,إلى الشركة
+To Date,إلى تاريخ
 To Room,إلى غرفة
 Toilets,أدوات صحية (مراحيض)
 Total,الإجمالي

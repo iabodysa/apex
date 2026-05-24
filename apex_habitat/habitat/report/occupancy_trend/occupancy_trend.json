@@ -1,0 +1,14 @@
+{
+  "doctype": "Report",
+  "name": "Occupancy Trend",
+  "report_name": "Occupancy Trend",
+  "ref_doctype": "Accommodation Occupancy Snapshot",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Habitat",
+  "roles": [
+    {"role": "Accommodation Manager"},
+    {"role": "System Manager"},
+    {"role": "Finance Manager"}
+  ]
+}
