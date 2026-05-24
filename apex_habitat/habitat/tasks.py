@@ -7,6 +7,25 @@ import calendar
 import frappe
 
 
+def _create_alert(
+    alert_type: str,
+    message: str,
+    severity: str = "Warning",
+    building: str | None = None,
+    source_doctype: str | None = None,
+    source_name: str | None = None,
+) -> None:
+    from apex_habitat.habitat.doctype.habitat_operations_alert.habitat_operations_alert import create_alert
+    create_alert(
+        alert_type=alert_type,
+        message=message,
+        severity=severity,
+        building=building,
+        source_doctype=source_doctype,
+        source_name=source_name,
+    )
+
+
 def daily_accommodation_cost_allocation() -> None:
     """Allocate daily accommodation costs to the Accommodation Ledger.
 
@@ -169,15 +188,15 @@ def daily_building_license_expiry_check() -> None:
             if days_to_expiry <= 0:
                 if lic.status != "Expired":
                     frappe.db.set_value("Building License", lic.name, "status", "Expired")
-                    logger.warning(
-                        f"Building License {lic.name} ({lic.license_type} {lic.license_number}) has expired on {expiry_date}."
-                    )
+                    msg = f"Building License {lic.name} ({lic.license_type} {lic.license_number}) has expired on {expiry_date}."
+                    logger.warning(msg)
+                    _create_alert("License Expiry", msg, severity="Critical", source_doctype="Building License", source_name=lic.name)
             elif days_to_expiry <= lead_days:
                 if lic.status != "Expiring Soon":
                     frappe.db.set_value("Building License", lic.name, "status", "Expiring Soon")
-                    logger.warning(
-                        f"Building License {lic.name} ({lic.license_type} {lic.license_number}) is expiring soon on {expiry_date} ({days_to_expiry} days remaining)."
-                    )
+                    msg = f"Building License {lic.name} ({lic.license_type} {lic.license_number}) is expiring soon on {expiry_date} ({days_to_expiry} days remaining)."
+                    logger.warning(msg)
+                    _create_alert("License Expiry", msg, severity="Warning", source_doctype="Building License", source_name=lic.name)
 
         start += batch_size
 
@@ -270,18 +289,13 @@ def lease_expiry_watchlist() -> None:
                 frappe.db.set_value(
                     "Accommodation Building", b.name, "lease_renewal_status", "Expired"
                 )
-                logger.warning(
-                    "lease_expiry_watchlist: %s lease expired %d days ago.",
-                    b.building_name,
-                    abs(days),
-                )
+                msg = f"lease_expiry_watchlist: {b.building_name} lease expired {abs(days)} days ago."
+                logger.warning(msg)
+                _create_alert("Lease Expiry", msg, severity="Critical", building=b.name, source_doctype="Accommodation Building", source_name=b.name)
             elif 0 <= days <= 90:
-                logger.warning(
-                    "lease_expiry_watchlist: %s lease expires in %d days (%s).",
-                    b.building_name,
-                    days,
-                    b.lease_end_date,
-                )
+                msg = f"lease_expiry_watchlist: {b.building_name} lease expires in {days} days ({b.lease_end_date})."
+                logger.warning(msg)
+                _create_alert("Lease Expiry", msg, severity="Warning", building=b.name, source_doctype="Accommodation Building", source_name=b.name)
 
         start += batch_size
 
@@ -363,10 +377,9 @@ def weekly_safety_task_compliance_scan() -> None:
         start += batch_size
 
     if total_overdue:
-        logger.warning(
-            "weekly_safety_task_compliance_scan: Marked %d Scheduled Task Instances as Overdue.",
-            total_overdue,
-        )
+        msg = f"weekly_safety_task_compliance_scan: Marked {total_overdue} Scheduled Task Instances as Overdue."
+        logger.warning(msg)
+        _create_alert("Task Overdue", msg, severity="Warning")
     else:
         logger.info("weekly_safety_task_compliance_scan: No overdue instances found.")
 
