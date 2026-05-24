@@ -8,25 +8,6 @@ from frappe.model.document import Document
 
 
 class CustodyIssue(Document):
-    # begin: auto-generated types
-    # This code is auto-generated. Do not modify anything in this block.
-
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        from apex_habitat.habitat.doctype.custody_issue_item.custody_issue_item import CustodyIssueItem
-        from frappe.types import DF
-
-        amended_from: DF.Link | None
-        building: DF.Link
-        issue_date: DF.Date
-        issued_to_employee: DF.Link | None
-        issued_to_name: DF.Data | None
-        items: DF.Table[CustodyIssueItem]
-        naming_series: DF.Literal["CUST-ISS-.YYYY.-.####"]
-        remarks: DF.SmallText | None
-        status: DF.Literal["Draft", "Issued", "Returned", "Partially Returned", "Cancelled"]
-    # end: auto-generated types
     pass
 
 

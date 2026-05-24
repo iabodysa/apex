@@ -8,24 +8,6 @@ from frappe.model.document import Document
 
 
 class CustodyReturn(Document):
-    # begin: auto-generated types
-    # This code is auto-generated. Do not modify anything in this block.
-
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        from apex_habitat.habitat.doctype.custody_return_item.custody_return_item import CustodyReturnItem
-        from frappe.types import DF
-
-        amended_from: DF.Link | None
-        building: DF.Link | None
-        custody_issue: DF.Link
-        items: DF.Table[CustodyReturnItem]
-        naming_series: DF.Literal["CUST-RET-.YYYY.-.####"]
-        remarks: DF.SmallText | None
-        return_date: DF.Date
-        returned_by_employee: DF.Link | None
-    # end: auto-generated types
     pass
 
 

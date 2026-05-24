@@ -8,25 +8,6 @@ from frappe.model.document import Document
 
 
 class ScheduledTaskInstance(Document):
-    # begin: auto-generated types
-    # This code is auto-generated. Do not modify anything in this block.
-
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        from frappe.types import DF
-
-        amended_from: DF.Link | None
-        assigned_to: DF.Link | None
-        building: DF.Link | None
-        cancellation_reason: DF.SmallText | None
-        completed_date: DF.Date | None
-        completion_notes: DF.SmallText | None
-        due_date: DF.Date
-        naming_series: DF.Literal["STI-.YYYY.-.####"]
-        status: DF.Literal["Open", "In Progress", "Completed", "Overdue", "Cancelled"]
-        template: DF.Link
-    # end: auto-generated types
     pass
 
 

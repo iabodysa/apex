@@ -21,37 +21,6 @@ from frappe.utils import flt
 
 
 class UtilityBillEntry(Document):
-    # begin: auto-generated types
-    # This code is auto-generated. Do not modify anything in this block.
-
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        from frappe.types import DF
-
-        amended_from: DF.Link | None
-        attached_bill: DF.Attach | None
-        bill_amount_sar: DF.Currency
-        bill_share_note: DF.SmallText | None
-        billing_period_from: DF.Date
-        billing_period_to: DF.Date
-        building: DF.Link | None
-        company: DF.Link | None
-        consumption_units: DF.Float
-        cost_bearing_pct: DF.Percent
-        due_date: DF.Date | None
-        linked_payment_entry: DF.Link | None
-        meter_reading_current: DF.Float
-        meter_reading_previous: DF.Float
-        meter_units_consumed: DF.Float
-        naming_series: DF.Literal["UTIL-BILL-.YYYY.-.#####"]
-        status: DF.Literal["Draft", "Received", "Under Review", "Paid", "Disputed"]
-        total_bill_amount_sar: DF.Currency
-        utility_account: DF.Link
-        utility_type: DF.Data | None
-        variance_alert_sent: DF.Check
-        variance_from_avg_pct: DF.Percent
-    # end: auto-generated types
     pass
 
 
