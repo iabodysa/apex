@@ -69,7 +69,7 @@ def on_submit(doc, method=None):
                 "company": company,
                 "remarks": f"Deduction for custody damage assessment {doc.name}"
             })
-            add_sal.insert(ignore_permissions=True)
+            add_sal.insert(ignore_permissions=False)
 
             # Link it back to this document
             frappe.db.set_value("Custody Damage Assessment", doc.name, "deduction_entry", add_sal.name)
@@ -79,9 +79,10 @@ def on_submit(doc, method=None):
                 f"created for assessment {doc.name}."
             )
         except Exception as e:
-            print(f"CUSTODY DAMAGE ON_SUBMIT EXCEPTION: {e}")
-            import traceback
-            traceback.print_exc()
+            frappe.log_error(
+                title="Custody Damage Assessment on_submit error",
+                message=frappe.get_traceback(),
+            )
             logger.error(
                 f"custody_damage_assessment.on_submit: Failed to create Additional Salary for assessment {doc.name}: {e}"
             )
