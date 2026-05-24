@@ -41,7 +41,11 @@ def validate(doc, method=None):
 def on_submit(doc, method=None):
     _compute_variance(doc)
     doc.db_set("variance_from_avg_pct", doc.variance_from_avg_pct)
-    _post_ledger_row(doc)
+    try:
+        _post_ledger_row(doc)
+    except Exception:
+        frappe.db.rollback()
+        frappe.throw(_("Could not post the utility cost to the ledger. The bill was not submitted."))
 
 
 def before_cancel(doc, method=None):
@@ -61,20 +65,24 @@ def before_cancel(doc, method=None):
         "name",
     )
 
-    frappe.get_doc({
-        "doctype": "Accommodation Ledger",
-        "posting_date": today(),
-        "building": doc.building,
-        "ledger_type": doc.utility_type,
-        "total_site_cost": -flt(doc.bill_amount_sar),
-        "capacity_denominator": building.total_capacity or 0,
-        "employee_daily_share": 0,
-        "posting_mode": "Operational Memo",
-        "source_doctype": "Utility Bill Entry",
-        "source_name": doc.name,
-        "allocation_basis": "Direct",
-        "reversal_of": original_row,
-    }).insert(ignore_permissions=True)
+    try:
+        frappe.get_doc({
+            "doctype": "Accommodation Ledger",
+            "posting_date": today(),
+            "building": doc.building,
+            "ledger_type": doc.utility_type,
+            "total_site_cost": -flt(doc.bill_amount_sar),
+            "capacity_denominator": building.total_capacity or 0,
+            "employee_daily_share": 0,
+            "posting_mode": "Operational Memo",
+            "source_doctype": "Utility Bill Entry",
+            "source_name": doc.name,
+            "allocation_basis": "Direct",
+            "reversal_of": original_row,
+        }).insert(ignore_permissions=True)
+    except Exception:
+        frappe.db.rollback()
+        frappe.throw(_("Could not post the reversal to the ledger. The cancellation was rejected."))
 
 
 def _compute_meter_readings(doc) -> None:

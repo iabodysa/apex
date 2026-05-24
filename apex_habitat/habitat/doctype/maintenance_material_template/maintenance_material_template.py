@@ -49,5 +49,9 @@ def load_template_into_doc(doctype, docname, issue_type):
 
     if rows_added:
         doc.requires_procurement = 1
-    doc.save(ignore_permissions=True)
+    try:
+        doc.save()
+    except Exception:
+        frappe.db.rollback()
+        frappe.throw(_("Could not save changes. Please try again or contact support."))
     return {"rows_added": rows_added, "template": template.name}

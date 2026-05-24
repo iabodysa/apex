@@ -16,14 +16,34 @@ frappe.web_form.after_save = function (doc) {
 	box.id = "habitat-tracking-code";
 	box.className = "alert alert-success mt-4";
 	box.style.fontSize = "15px";
-	
-	box.innerHTML =
-		"<strong>" + __("Request submitted successfully.") + "</strong><br>" +
-		__("Your tracking code:") + " " +
-		"<code style=\"font-size:17px;letter-spacing:3px;font-weight:bold;margin-top:5px;display:inline-block;\">" +
-		code +
-		"</code><br>" +
-		"<small class=\"text-muted\">" + __("Save this code to follow up with your supervisor.") + "</small>";
+
+	// Fix: build DOM nodes instead of injecting via innerHTML so that the
+	// server-generated tracking code cannot be interpreted as markup.
+	var heading = document.createElement("strong");
+	heading.textContent = __("Request submitted successfully.");
+
+	var br1 = document.createElement("br");
+
+	var codeLabel = document.createTextNode(__("Your tracking code:") + " ");
+
+	var codeEl = document.createElement("code");
+	codeEl.style.cssText = "font-size:17px;letter-spacing:3px;font-weight:bold;margin-top:5px;display:inline-block;";
+	// Fix 4: use textContent (equivalent to frappe.utils.escape_html) so the
+	// hash value is never parsed as HTML.
+	codeEl.textContent = frappe.utils.escape_html(code);
+
+	var br2 = document.createElement("br");
+
+	var hint = document.createElement("small");
+	hint.className = "text-muted";
+	hint.textContent = __("Save this code to follow up with your supervisor.");
+
+	box.appendChild(heading);
+	box.appendChild(br1);
+	box.appendChild(codeLabel);
+	box.appendChild(codeEl);
+	box.appendChild(br2);
+	box.appendChild(hint);
 
 	var footer = document.querySelector(".web-form-footer");
 	if (footer) {

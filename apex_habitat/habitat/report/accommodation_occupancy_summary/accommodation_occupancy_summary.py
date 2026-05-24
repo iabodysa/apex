@@ -23,7 +23,7 @@ def execute(filters=None):
     buildings = frappe.get_all(
         "Accommodation Building",
         filters=building_filters,
-        fields=["name", "current_occupants", "total_capacity", "occupancy_percent"],
+        fields=["name", "current_occupants", "total_capacity"],
         order_by="name asc",
     )
 
@@ -39,9 +39,11 @@ def execute(filters=None):
 
     room_map = {}
     for row in rooms:
-        room_map.setdefault(row.building, {"Full": 0, "Partially Occupied": 0, "Available": 0})
-        if row.status in room_map[row.building]:
+        room_map.setdefault(row.building, {"Full": 0, "Partially Occupied": 0, "Available": 0, "Other": 0})
+        if row.status in ("Full", "Partially Occupied", "Available"):
             room_map[row.building][row.status] += row.room_count
+        else:
+            room_map[row.building]["Other"] += row.room_count
 
     data = []
     for building in buildings:
@@ -51,12 +53,13 @@ def execute(filters=None):
         )
         active_residents = building.current_occupants or 0
         total_capacity = building.total_capacity or 0
+        occupancy_percent = round(active_residents / total_capacity * 100, 2) if total_capacity else 0
         data.append({
             "building": building.name,
             "active_residents": active_residents,
             "total_capacity": total_capacity,
             "available_capacity": max(total_capacity - active_residents, 0),
-            "occupancy_percent": building.occupancy_percent or 0,
+            "occupancy_percent": occupancy_percent,
             "full_rooms": room_counts["Full"],
             "partial_rooms": room_counts["Partially Occupied"],
             "available_rooms": room_counts["Available"],

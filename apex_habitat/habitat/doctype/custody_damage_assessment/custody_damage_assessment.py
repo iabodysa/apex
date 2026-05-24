@@ -80,6 +80,7 @@ def on_submit(doc, method=None):
                 f"created for assessment {doc.name}."
             )
         except Exception as e:
+            frappe.db.rollback()
             frappe.log_error(
                 title="Custody Damage Assessment on_submit error",
                 message=frappe.get_traceback(),
