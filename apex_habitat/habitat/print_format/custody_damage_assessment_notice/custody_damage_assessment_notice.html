@@ -1,0 +1,93 @@
+<style>
+  .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
+  .ah-doc h1 { font-size: 18px; margin: 0; }
+  .ah-doc .ah-sub { color: #666; font-size: 12px; margin-top: 2px; }
+  .ah-head { border-bottom: 3px solid #8a1a1a; padding-bottom: 8px; margin-bottom: 12px;
+             display: flex; justify-content: space-between; align-items: flex-start; }
+  .ah-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
+  .ah-meta .ah-lbl { background: #f8f4f4; font-weight: bold; width: 22%; }
+  .ah-items { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .ah-items th { background: #8a1a1a; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
+  .ah-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
+  .ah-items tr:nth-child(even) td { background: #faf6f6; }
+  .ah-total { text-align: right; font-size: 14px; font-weight: bold; margin-bottom: 16px; }
+  .ah-ar { color: #555; font-size: 10px; }
+  .ah-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
+  .ah-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
+  .ah-foot { margin-top: 20px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
+</style>
+
+<div class="ah-doc">
+  <div class="ah-head">
+    <div>
+      <h1>Custody Damage / Deduction Notice</h1>
+      <div class="ah-sub">إشعار تلف عهدة وخصم &bull; {{ doc.name }}</div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#666;">
+      {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}
+    </div>
+  </div>
+
+  <table class="ah-meta">
+    <tr>
+      <td class="ah-lbl">Date <span class="ah-ar">التاريخ</span></td>
+      <td>{{ frappe.format(doc.assessment_date, {"fieldtype": "Date"}) }}</td>
+      <td class="ah-lbl">Building <span class="ah-ar">المبنى</span></td>
+      <td>{{ doc.building or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ah-lbl">Employee <span class="ah-ar">الموظف</span></td>
+      <td>{{ doc.employee or "" }}</td>
+      <td class="ah-lbl">Against Return <span class="ah-ar">مقابل إرجاع</span></td>
+      <td>{{ doc.custody_return or "" }}</td>
+    </tr>
+  </table>
+
+  <table class="ah-items">
+    <thead>
+      <tr>
+        <th style="width:5%;">#</th>
+        <th>Article <span class="ah-ar">الصنف</span></th>
+        <th>Damage Description <span class="ah-ar">وصف التلف</span></th>
+        <th style="width:18%;">Serial No <span class="ah-ar">الرقم التسلسلي</span></th>
+        <th style="width:20%;">Replacement Cost (SAR) <span class="ah-ar">تكلفة الاستبدال</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in doc.items %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row.article or "" }}</td>
+        <td>{{ row.damage_description or "" }}</td>
+        <td>{{ row.serial_no or "—" }}</td>
+        <td>{{ frappe.format(row.estimated_replacement_cost_sar, {"fieldtype": "Currency"}) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="ah-total">
+    Total Estimated Replacement Cost <span class="ah-ar">إجمالي تكلفة الاستبدال المقدّرة</span>:
+    {{ frappe.format(doc.total_estimated_replacement_cost_sar, {"fieldtype": "Currency"}) }}
+  </div>
+
+  {% if doc.deduction_entry %}
+  <div style="margin-bottom:12px; font-size:11px;">
+    Linked salary deduction <span class="ah-ar">خصم الراتب المرتبط</span>: <b>{{ doc.deduction_entry }}</b>
+  </div>
+  {% endif %}
+
+  <table class="ah-sign">
+    <tr>
+      <td>Assessed by (Supervisor)<br><span class="ah-ar">قيّمها (المشرف)</span></td>
+      <td style="text-align:right;">Acknowledged by (Employee)<br><span class="ah-ar">أقرّ بها (الموظف)</span></td>
+    </tr>
+  </table>
+
+  <div class="ah-foot">
+    The employee acknowledges the assessed damage and the associated deduction, if any.
+    يقرّ الموظف بالتلف المقيَّم وبالخصم المرتبط إن وُجد.
+    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
+  </div>
+</div>

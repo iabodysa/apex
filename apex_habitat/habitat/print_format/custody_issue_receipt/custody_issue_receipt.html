@@ -1,0 +1,81 @@
+<style>
+  .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
+  .ah-doc h1 { font-size: 18px; margin: 0; }
+  .ah-doc .ah-sub { color: #666; font-size: 12px; margin-top: 2px; }
+  .ah-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
+             display: flex; justify-content: space-between; align-items: flex-start; }
+  .ah-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
+  .ah-meta .ah-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
+  .ah-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .ah-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
+  .ah-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
+  .ah-items tr:nth-child(even) td { background: #f8f8fb; }
+  .ah-ar { color: #555; font-size: 10px; }
+  .ah-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
+  .ah-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
+  .ah-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
+</style>
+
+<div class="ah-doc">
+  <div class="ah-head">
+    <div>
+      <h1>Custody Issue Receipt</h1>
+      <div class="ah-sub">إيصال صرف عهدة &bull; {{ doc.name }}</div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#666;">
+      {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}
+    </div>
+  </div>
+
+  <table class="ah-meta">
+    <tr>
+      <td class="ah-lbl">Date <span class="ah-ar">التاريخ</span></td>
+      <td>{{ frappe.format(doc.issue_date, {"fieldtype": "Date"}) }}</td>
+      <td class="ah-lbl">Building <span class="ah-ar">المبنى</span></td>
+      <td>{{ doc.building or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ah-lbl">Issued To <span class="ah-ar">صُرفت إلى</span></td>
+      <td colspan="3">{{ doc.issued_to_name or doc.issued_to_employee or "" }}</td>
+    </tr>
+  </table>
+
+  <table class="ah-items">
+    <thead>
+      <tr>
+        <th style="width:5%;">#</th>
+        <th>Article <span class="ah-ar">الصنف</span></th>
+        <th style="width:10%;">Qty <span class="ah-ar">الكمية</span></th>
+        <th style="width:22%;">Serial No <span class="ah-ar">الرقم التسلسلي</span></th>
+        <th style="width:18%;">Condition <span class="ah-ar">الحالة</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in doc.items %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row.article_name or row.article or "" }}</td>
+        <td>{{ row.qty }}</td>
+        <td>{{ row.serial_no or "—" }}</td>
+        <td>{{ row.condition_on_issue or "" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if doc.remarks %}<div style="margin-bottom:12px;"><b>Remarks <span class="ah-ar">ملاحظات</span>:</b> {{ doc.remarks }}</div>{% endif %}
+
+  <table class="ah-sign">
+    <tr>
+      <td>Issued by (Supervisor)<br><span class="ah-ar">صرفها (المشرف)</span></td>
+      <td style="text-align:right;">Received by (Employee)<br><span class="ah-ar">استلمها (الموظف)</span></td>
+    </tr>
+  </table>
+
+  <div class="ah-foot">
+    The recipient acknowledges receiving the listed items in the stated condition.
+    يقرّ المستلم باستلام الأصناف المذكورة بحالتها الموضّحة.
+    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
+  </div>
+</div>

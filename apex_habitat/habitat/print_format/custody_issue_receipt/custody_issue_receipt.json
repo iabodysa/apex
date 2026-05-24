@@ -1,0 +1,22 @@
+{
+ "absolute_value": 0,
+ "align_labels_right": 0,
+ "creation": "2026-05-25 00:00:00.000000",
+ "custom_format": 1,
+ "default_print_language": "en",
+ "disabled": 0,
+ "doc_type": "Custody Issue",
+ "docstatus": 0,
+ "doctype": "Print Format",
+ "font_size": 0,
+ "idx": 0,
+ "line_breaks": 0,
+ "module": "Habitat",
+ "name": "Custody Issue Receipt",
+ "print_format_builder": 0,
+ "print_format_builder_beta": 0,
+ "print_format_type": "Jinja",
+ "raw_printing": 0,
+ "show_empty_items": 0,
+ "standard": "Yes"
+}

@@ -1,0 +1,76 @@
+<style>
+  .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
+  .ah-doc h1 { font-size: 18px; margin: 0; }
+  .ah-doc .ah-sub { color: #666; font-size: 12px; margin-top: 2px; }
+  .ah-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
+             display: flex; justify-content: space-between; align-items: flex-start; }
+  .ah-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
+  .ah-meta .ah-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
+  .ah-clear { display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+  .ah-yes { background: #dcfce7; color: #166534; border: 1px solid #166534; }
+  .ah-no { background: #fee2e2; color: #991b1b; border: 1px solid #991b1b; }
+  .ah-ar { color: #555; font-size: 10px; }
+  .ah-sign { width: 100%; margin-top: 32px; border-collapse: collapse; }
+  .ah-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
+  .ah-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
+</style>
+
+<div class="ah-doc">
+  <div class="ah-head">
+    <div>
+      <h1>Accommodation Checkout Clearance</h1>
+      <div class="ah-sub">إخلاء طرف مغادرة السكن &bull; {{ doc.name }}</div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#666;">
+      {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}
+    </div>
+  </div>
+
+  <table class="ah-meta">
+    <tr>
+      <td class="ah-lbl">Employee <span class="ah-ar">الموظف</span></td>
+      <td>{{ doc.employee or "" }}</td>
+      <td class="ah-lbl">Bed <span class="ah-ar">السرير</span></td>
+      <td>{{ doc.bed or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ah-lbl">Checkout Date <span class="ah-ar">تاريخ المغادرة</span></td>
+      <td>{{ frappe.format(doc.checkout_date, {"fieldtype": "Date"}) }}</td>
+      <td class="ah-lbl">Reason <span class="ah-ar">السبب</span></td>
+      <td>{{ doc.checkout_reason or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ah-lbl">Assignment <span class="ah-ar">التسكين</span></td>
+      <td>{{ doc.assignment or "" }}</td>
+      <td class="ah-lbl">Custody Cleared <span class="ah-ar">إخلاء العهدة</span></td>
+      <td>
+        {% if doc.custody_cleared %}<span class="ah-clear ah-yes">CLEARED / مُخلاة</span>
+        {% else %}<span class="ah-clear ah-no">NOT CLEARED / غير مُخلاة</span>{% endif %}
+      </td>
+    </tr>
+    {% if doc.damage_deduction_amount %}
+    <tr>
+      <td class="ah-lbl">Damage Deduction <span class="ah-ar">خصم التلف</span></td>
+      <td>{{ frappe.format(doc.damage_deduction_amount, {"fieldtype": "Currency"}) }}</td>
+      <td class="ah-lbl">Salary Entry <span class="ah-ar">قيد الراتب</span></td>
+      <td>{{ doc.linked_additional_salary or "—" }}</td>
+    </tr>
+    {% endif %}
+  </table>
+
+  {% if doc.damage_notes %}<div style="margin-bottom:12px;"><b>Damage Notes <span class="ah-ar">ملاحظات التلف</span>:</b> {{ doc.damage_notes }}</div>{% endif %}
+
+  <table class="ah-sign">
+    <tr>
+      <td>Cleared by (Supervisor)<br><span class="ah-ar">أخلى طرفه (المشرف)</span></td>
+      <td style="text-align:right;">Employee<br><span class="ah-ar">الموظف</span></td>
+    </tr>
+  </table>
+
+  <div class="ah-foot">
+    This slip certifies the resident's checkout and custody clearance status on the date shown.
+    تشهد هذه الوثيقة بمغادرة الساكن وحالة إخلاء عهدته في التاريخ الموضّح.
+    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
+  </div>
+</div>
