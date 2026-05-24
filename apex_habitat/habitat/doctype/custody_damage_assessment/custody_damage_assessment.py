@@ -9,26 +9,6 @@ from frappe.utils import flt
 
 
 class CustodyDamageAssessment(Document):
-    # begin: auto-generated types
-    # This code is auto-generated. Do not modify anything in this block.
-
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        from apex_habitat.habitat.doctype.custody_damage_item.custody_damage_item import CustodyDamageItem
-        from frappe.types import DF
-
-        amended_from: DF.Link | None
-        assessment_date: DF.Date
-        building: DF.Link
-        custody_return: DF.Link | None
-        deduction_entry: DF.Link | None
-        employee: DF.Link | None
-        items: DF.Table[CustodyDamageItem]
-        naming_series: DF.Literal["CUST-DMG-.YYYY.-.####"]
-        remarks: DF.SmallText | None
-        total_estimated_replacement_cost_sar: DF.Currency
-    # end: auto-generated types
     pass
 
 

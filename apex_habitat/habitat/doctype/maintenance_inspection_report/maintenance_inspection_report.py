@@ -8,27 +8,6 @@ from frappe.model.document import Document
 
 
 class MaintenanceInspectionReport(Document):
-    # begin: auto-generated types
-    # This code is auto-generated. Do not modify anything in this block.
-
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        from apex_habitat.habitat.doctype.inspection_finding_item.inspection_finding_item import InspectionFindingItem
-        from frappe.types import DF
-
-        amended_from: DF.Link | None
-        building: DF.Link
-        cancellation_reason: DF.SmallText | None
-        findings: DF.Table[InspectionFindingItem]
-        inspection_date: DF.Date
-        inspection_type: DF.Literal["Pre-Work", "Post-Work", "Periodic", "Emergency"]
-        inspector: DF.Link
-        maintenance_work_order: DF.Link | None
-        naming_series: DF.Literal["MIR-.YYYY.-.####"]
-        overall_result: DF.Literal["Pass", "Pass with Observations", "Fail"]
-        remarks: DF.SmallText | None
-    # end: auto-generated types
     pass
 
 

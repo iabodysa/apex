@@ -9,31 +9,6 @@ from frappe.utils import nowdate
 
 
 class SubcontractorServiceOrder(Document):
-    # begin: auto-generated types
-    # This code is auto-generated. Do not modify anything in this block.
-
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        from frappe.types import DF
-
-        actual_visit_date: DF.Date | None
-        amended_from: DF.Link | None
-        building: DF.Link
-        company: DF.Link | None
-        completion_photo: DF.AttachImage | None
-        contract: DF.Link
-        cost_center: DF.Link | None
-        linked_purchase_invoice: DF.Link | None
-        naming_series: DF.Literal["SSO-.YYYY.-.#####"]
-        scheduled_date: DF.Date
-        service_cost_sar: DF.Currency
-        service_type: DF.Data | None
-        status: DF.Literal["Scheduled", "In Progress", "Completed", "Missed", "Cancelled"]
-        supervisor_confirmed: DF.Check
-        supplier: DF.Link | None
-        visit_notes: DF.SmallText | None
-    # end: auto-generated types
     pass
 
 
