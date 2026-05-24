@@ -30,6 +30,7 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
         self.employee = frappe.db.get_value("Employee", {}) or frappe.get_doc({
             "doctype": "Employee", "first_name": "Test Emp",
             "company": self.company, "gender": "Male",
+            "date_of_birth": "1990-01-01", "date_of_joining": "2020-01-01",
         }).insert(ignore_permissions=True).name
 
         self.site = frappe.get_doc({
