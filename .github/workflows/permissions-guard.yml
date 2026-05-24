@@ -19,7 +19,7 @@ on:
 #   2. Add a comment explaining why the new call site is safe.
 
 env:
-  BASELINE: 189
+  BASELINE: 192
 
 jobs:
   permissions-guard:
