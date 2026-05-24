@@ -71,6 +71,10 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
         # Run the wizard a SECOND time with the same floor plan
         second = generate_rooms_and_beds(building.name)
         rooms_after_second = frappe.db.count("Accommodation Room", {"building": building.name})
+        beds_after_second = frappe.db.count(
+            "Accommodation Bed", {"room": ["in", frappe.get_all(
+                "Accommodation Room", {"building": building.name}, pluck="name")]}
+        )
 
         self.assertEqual(first["created_rooms"], 3)
         self.assertEqual(
@@ -81,6 +85,10 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
         self.assertEqual(
             rooms_after_second, rooms_after_first,
             f"Room count changed on re-run ({rooms_after_first} -> {rooms_after_second}): duplicates created.",
+        )
+        self.assertEqual(
+            beds_after_second, beds_after_first,
+            f"Bed count changed on re-run ({beds_after_first} -> {beds_after_second}): duplicate beds created.",
         )
 
     # --- Bug 2: double checkout must be rejected ----------------------------
