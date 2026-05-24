@@ -12,7 +12,7 @@ class TestCameraAccessGrant(FrappeTestCase):
             "requested_for": "Administrator",
             "valid_from": "2026-06-01",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Camera Access Grant", doc.name, force=True, ignore_permissions=True)
 

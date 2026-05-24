@@ -25,5 +25,6 @@ requires = ["flit_core>=3.9"]
 build-backend = "flit_core.buildapi"
 
 [tool.pytest.ini_options]
-testpaths = ["apex_habitat/tests"]
+testpaths = ["apex_habitat/tests", "apex_habitat/habitat"]
 python_files = "test_*.py"
+addopts = "--tb=short"

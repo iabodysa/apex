@@ -12,7 +12,7 @@ class TestAccommodationLedger(FrappeTestCase):
             "building": "QA-BLDG",
             "ledger_type": "Rent",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.ledger_type, "Rent")
         frappe.delete_doc("Accommodation Ledger", doc.name, force=True, ignore_permissions=True)
 

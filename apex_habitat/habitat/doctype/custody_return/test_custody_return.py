@@ -13,7 +13,7 @@ class TestCustodyReturn(FrappeTestCase):
             "custody_issue": "CUST-ISS-QA",
             "items": [{"doctype": "Custody Return Item", "article": "QA-ART", "qty": 1}],
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Custody Return", doc.name, force=True, ignore_permissions=True)
 

@@ -14,7 +14,7 @@ class TestFacilityAssetMovement(FrappeTestCase):
             "from_building": "BLDG-A",
             "to_building": "BLDG-B",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Facility Asset Movement", doc.name, force=True, ignore_permissions=True)
 

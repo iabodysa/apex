@@ -12,7 +12,7 @@ class TestCleaningLog(FrappeTestCase):
             "building": "QA-BLDG",
             "cleaning_date": "2026-06-15",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.cleaning_date, "2026-06-15")
         frappe.delete_doc("Cleaning Log", doc.name, force=True, ignore_permissions=True)
 

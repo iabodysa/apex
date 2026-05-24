@@ -14,7 +14,7 @@ class TestUtilityBillEntry(FrappeTestCase):
             "billing_period_to": "2026-06-30",
             "bill_amount_sar": 1200,
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.bill_amount_sar, 1200)
         frappe.delete_doc("Utility Bill Entry", doc.name, force=True, ignore_permissions=True)
 

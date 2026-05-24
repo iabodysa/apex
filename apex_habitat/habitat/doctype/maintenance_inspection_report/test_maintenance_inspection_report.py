@@ -14,7 +14,7 @@ class TestMaintenanceInspectionReport(FrappeTestCase):
             "inspector": "EMP-QA-001",
             "findings": [{"doctype": "Inspection Finding", "finding_description": "crack in wall"}],
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Maintenance Inspection Report", doc.name, force=True, ignore_permissions=True)
 

@@ -13,7 +13,7 @@ class TestUtilityAccount(FrappeTestCase):
             "utility_type": "Electricity",
             "account_number": "ELEC-QA-00001",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.utility_type, "Electricity")
         frappe.delete_doc("Utility Account", doc.name, force=True, ignore_permissions=True)
 
