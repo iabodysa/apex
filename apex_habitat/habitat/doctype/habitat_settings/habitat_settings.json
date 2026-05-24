@@ -1,199 +1,231 @@
 {
-  "doctype": "DocType",
-  "name": "Habitat Settings",
-  "module": "Habitat",
-  "custom": 0,
-  "istable": 0,
-  "issingle": 1,
-  "engine": "InnoDB",
-  "track_changes": 1,
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "fields": [
-    {
-      "doctype": "DocField",
-      "fieldname": "habitat_settings_tab_details",
-      "fieldtype": "Tab Break",
-      "label": "Details",
-      "idx": 1
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "habitat_settings_sec_details",
-      "fieldtype": "Section Break",
-      "label": "Information",
-      "idx": 2
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "company",
-      "label": "Company",
-      "fieldtype": "Link",
-      "options": "Company",
-      "description": "Default company for Accommodation Ledger, Maintenance, Utility, and Lease documents. Required before enabling financial posting.",
-      "idx": 3
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "default_currency",
-      "label": "Default Currency",
-      "fieldtype": "Link",
-      "options": "Currency",
-      "description": "Operational currency for Habitat cost fields. Fetched from Company if left blank.",
-      "fetch_from": "company.default_currency",
-      "read_only": 1,
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "custody_integration_mode",
-      "label": "Custody Integration Mode",
-      "fieldtype": "Select",
-      "options": "Habitat Internal / No Financial Posting\nERPNext Asset Integration\nERPNext Stock Integration",
-      "default": "Habitat Internal / No Financial Posting",
-      "reqd": 1,
-      "description": "Default mode keeps all custody and depreciation inside Habitat with no financial posting.",
-      "idx": 5
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "enable_housing_allowance_deduction",
-      "label": "Enable Housing Allowance Deduction",
-      "fieldtype": "Check",
-      "default": 0,
-      "description": "When OFF (default), accommodation assignment does not touch Salary Structure Assignment.",
-      "idx": 6
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "deduction_activation_date",
-      "label": "Deduction Activation Date",
-      "fieldtype": "Date",
-      "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
-      "idx": 7
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "authorized_by",
-      "label": "Authorized By",
-      "fieldtype": "Link",
-      "options": "User",
-      "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
-      "idx": 8
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "authorization_document",
-      "label": "Authorization Document",
-      "fieldtype": "Attach",
-      "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
-      "idx": 9
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "enable_damage_deduction",
-      "label": "Enable Damage Deduction Posting",
-      "fieldtype": "Check",
-      "default": 0,
-      "description": "When ON, checkout damage amounts post to Additional Salary. Default OFF.",
-      "idx": 10
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "damage_salary_component",
-      "label": "Damage Deduction Component",
-      "fieldtype": "Link",
-      "options": "Salary Component",
-      "depends_on": "eval:doc.enable_damage_deduction==1",
-      "description": "Salary Component (Deduction type) used when posting custody damage as Additional Salary. Must exist in HRMS before enabling.",
-      "idx": 11
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "habitat_settings_details_col",
-      "fieldtype": "Column Break",
-      "idx": 12
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "enable_gl_posting",
-      "label": "Enable GL Entry Posting",
-      "fieldtype": "Check",
-      "default": 0,
-      "description": "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",
-      "idx": 13
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "enable_native_asset_link",
-      "label": "Enable ERPNext Asset Link",
-      "fieldtype": "Check",
-      "default": 0,
-      "idx": 14
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "enable_stock_posting",
-      "label": "Enable Stock Entry Posting",
-      "fieldtype": "Check",
-      "default": 0,
-      "idx": 15
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "auto_create_asset_movement_on_transfer",
-      "label": "Auto-create Facility Asset Movement on Transfer",
-      "fieldtype": "Check",
-      "default": 1,
-      "idx": 16
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "max_damage_deduction_per_checkout_sar",
-      "label": "Max Damage Deduction per Checkout (SAR)",
-      "fieldtype": "Currency",
-      "default": 500,
-      "idx": 17
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "default_payment_method",
-      "label": "Default Payment Method",
-      "fieldtype": "Select",
-      "options": "Payment Entry\nPayment Order\nExpense Request Afmco",
-      "default": "Payment Entry",
-      "description": "Document type to generate when creating rent payments from Accommodation Lease.",
-      "idx": 18
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "habitat_settings_sec_system",
-      "fieldtype": "Section Break",
-      "label": "System Details",
-      "collapsible": 1,
-      "idx": 19
-    },
-    {
-      "doctype": "DocField",
-      "fieldname": "last_modified_by_role",
-      "label": "Last Modified By Role",
-      "fieldtype": "Data",
-      "read_only": 1,
-      "idx": 20
-    }
-  ],
-  "permissions": [
-    {
-      "doctype": "DocPerm",
-      "role": "System Manager",
-      "read": 1,
-      "write": 1,
-      "create": 1,
-      "delete": 1,
-      "print": 1,
-      "email": 1,
-      "share": 1,
-      "idx": 1
-    }
-  ]
+ "actions": [],
+ "creation": "2026-05-24 18:13:22.917770",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "habitat_settings_tab_details",
+  "habitat_settings_sec_details",
+  "company",
+  "default_currency",
+  "custody_integration_mode",
+  "enable_housing_allowance_deduction",
+  "deduction_activation_date",
+  "authorized_by",
+  "authorization_document",
+  "enable_damage_deduction",
+  "damage_salary_component",
+  "habitat_settings_details_col",
+  "enable_gl_posting",
+  "enable_native_asset_link",
+  "enable_stock_posting",
+  "auto_create_asset_movement_on_transfer",
+  "max_damage_deduction_per_checkout_sar",
+  "default_payment_method",
+  "habitat_settings_sec_system",
+  "last_modified_by_role",
+  "operational_notifications_sec",
+  "enable_operational_notifications",
+  "notification_channel",
+  "operational_notifications_col",
+  "license_expiry_days_before",
+  "lease_expiry_days_before"
+ ],
+ "fields": [
+  {
+   "fieldname": "habitat_settings_tab_details",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "habitat_settings_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Information"
+  },
+  {
+   "description": "Default company for Accommodation Ledger, Maintenance, Utility, and Lease documents. Required before enabling financial posting.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "description": "Operational currency for Habitat cost fields. Fetched from Company if left blank.",
+   "fetch_from": "company.default_currency",
+   "fieldname": "default_currency",
+   "fieldtype": "Link",
+   "label": "Default Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "default": "Habitat Internal / No Financial Posting",
+   "description": "Default mode keeps all custody and depreciation inside Habitat with no financial posting.",
+   "fieldname": "custody_integration_mode",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Custody Integration Mode",
+   "options": "Habitat Internal / No Financial Posting\nERPNext Asset Integration\nERPNext Stock Integration",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "When OFF (default), accommodation assignment does not touch Salary Structure Assignment.",
+   "fieldname": "enable_housing_allowance_deduction",
+   "fieldtype": "Check",
+   "label": "Enable Housing Allowance Deduction"
+  },
+  {
+   "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
+   "fieldname": "deduction_activation_date",
+   "fieldtype": "Date",
+   "label": "Deduction Activation Date"
+  },
+  {
+   "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
+   "fieldname": "authorized_by",
+   "fieldtype": "Link",
+   "label": "Authorized By",
+   "options": "User"
+  },
+  {
+   "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
+   "fieldname": "authorization_document",
+   "fieldtype": "Attach",
+   "label": "Authorization Document"
+  },
+  {
+   "default": "0",
+   "description": "When ON, checkout damage amounts post to Additional Salary. Default OFF.",
+   "fieldname": "enable_damage_deduction",
+   "fieldtype": "Check",
+   "label": "Enable Damage Deduction Posting"
+  },
+  {
+   "depends_on": "eval:doc.enable_damage_deduction==1",
+   "description": "Salary Component (Deduction type) used when posting custody damage as Additional Salary. Must exist in HRMS before enabling.",
+   "fieldname": "damage_salary_component",
+   "fieldtype": "Link",
+   "label": "Damage Deduction Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "habitat_settings_details_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",
+   "fieldname": "enable_gl_posting",
+   "fieldtype": "Check",
+   "label": "Enable GL Entry Posting"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_native_asset_link",
+   "fieldtype": "Check",
+   "label": "Enable ERPNext Asset Link"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_stock_posting",
+   "fieldtype": "Check",
+   "label": "Enable Stock Entry Posting"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_create_asset_movement_on_transfer",
+   "fieldtype": "Check",
+   "label": "Auto-create Facility Asset Movement on Transfer"
+  },
+  {
+   "default": "500",
+   "fieldname": "max_damage_deduction_per_checkout_sar",
+   "fieldtype": "Currency",
+   "label": "Max Damage Deduction per Checkout (SAR)"
+  },
+  {
+   "default": "Payment Entry",
+   "description": "Document type to generate when creating rent payments from Accommodation Lease.",
+   "fieldname": "default_payment_method",
+   "fieldtype": "Select",
+   "label": "Default Payment Method",
+   "options": "Payment Entry\nPayment Order\nExpense Request Afmco"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "habitat_settings_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Details"
+  },
+  {
+   "fieldname": "last_modified_by_role",
+   "fieldtype": "Data",
+   "label": "Last Modified By Role",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "operational_notifications_sec",
+   "fieldtype": "Section Break",
+   "label": "Operational Notifications"
+  },
+  {
+   "default": "0",
+   "description": "When ON, expiry/overdue scheduler jobs post a timeline comment on the source document (and any configured Notification emails fire). When OFF, jobs run silently.",
+   "fieldname": "enable_operational_notifications",
+   "fieldtype": "Check",
+   "label": "Enable Operational Notifications"
+  },
+  {
+   "default": "In-App Only",
+   "depends_on": "eval:doc.enable_operational_notifications",
+   "fieldname": "notification_channel",
+   "fieldtype": "Select",
+   "label": "Notification Channel",
+   "options": "In-App Only\nEmail\nIn-App and Email"
+  },
+  {
+   "fieldname": "operational_notifications_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "60",
+   "description": "Days before a Building License expiry date to flag it Expiring Soon (per-license renewal_lead_days still overrides).",
+   "fieldname": "license_expiry_days_before",
+   "fieldtype": "Int",
+   "label": "License Expiry Lead Days"
+  },
+  {
+   "default": "90",
+   "description": "Days before a building lease end date to flag it on the watchlist.",
+   "fieldname": "lease_expiry_days_before",
+   "fieldtype": "Int",
+   "label": "Lease Expiry Lead Days"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-05-25 01:46:38.546665",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Habitat Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
 }

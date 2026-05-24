@@ -7,23 +7,27 @@ import calendar
 import frappe
 
 
-def _create_alert(
-    alert_type: str,
-    message: str,
-    severity: str = "Warning",
-    building: str | None = None,
-    source_doctype: str | None = None,
-    source_name: str | None = None,
-) -> None:
-    from apex_habitat.habitat.doctype.habitat_operations_alert.habitat_operations_alert import create_alert
-    create_alert(
-        alert_type=alert_type,
-        message=message,
-        severity=severity,
-        building=building,
-        source_doctype=source_doctype,
-        source_name=source_name,
-    )
+def _notify_operational(source_doctype: str, source_name: str, message: str) -> None:
+    """Post an operational notice to the source document's timeline, gated by the
+    Habitat Settings "Enable Operational Notifications" toggle.
+
+    This replaces the deprecated Habitat Operations Alert inserts: native Frappe
+    timeline Comments (plus the configured Notification emails) carry operational
+    notices. When the toggle is OFF the scheduler jobs run silently. Technical
+    exceptions go to the standard Error Log, not here.
+    """
+    if not frappe.db.get_single_value("Habitat Settings", "enable_operational_notifications"):
+        return
+    if not (source_doctype and source_name):
+        return
+    try:
+        frappe.get_doc(source_doctype, source_name).add_comment("Comment", message)
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Operational notification comment failed for {source_name}"[:140],
+        )
 
 
 def daily_accommodation_cost_allocation() -> None:
@@ -200,7 +204,8 @@ def daily_building_license_expiry_check() -> None:
                 continue
 
             try:
-                lead_days = lic.renewal_lead_days if lic.renewal_lead_days is not None else 60
+                default_lead = frappe.db.get_single_value("Habitat Settings", "license_expiry_days_before") or 60
+                lead_days = lic.renewal_lead_days if lic.renewal_lead_days is not None else default_lead
                 days_to_expiry = date_diff(expiry_date, today_str)
 
                 if days_to_expiry <= 0:
@@ -208,13 +213,13 @@ def daily_building_license_expiry_check() -> None:
                         frappe.db.set_value("Building License", lic.name, "status", "Expired")
                         msg = f"Building License {lic.name} ({lic.license_type} {lic.license_number}) has expired on {expiry_date}."
                         logger.warning(msg)
-                        _create_alert("License Expiry", msg, severity="Critical", source_doctype="Building License", source_name=lic.name)
+                        _notify_operational("Building License", lic.name, msg)
                 elif days_to_expiry <= lead_days:
                     if lic.status != "Expiring Soon":
                         frappe.db.set_value("Building License", lic.name, "status", "Expiring Soon")
                         msg = f"Building License {lic.name} ({lic.license_type} {lic.license_number}) is expiring soon on {expiry_date} ({days_to_expiry} days remaining)."
                         logger.warning(msg)
-                        _create_alert("License Expiry", msg, severity="Warning", source_doctype="Building License", source_name=lic.name)
+                        _notify_operational("Building License", lic.name, msg)
             except Exception:
                 frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
                 frappe.log_error(
@@ -317,6 +322,7 @@ def lease_expiry_watchlist() -> None:
 
         for b in buildings:
             try:
+                lease_lead = frappe.db.get_single_value("Habitat Settings", "lease_expiry_days_before") or 90
                 days = date_diff(b.lease_end_date, today_str)
                 if days < 0 and b.lease_renewal_status != "Expired":
                     frappe.db.set_value(
@@ -324,11 +330,11 @@ def lease_expiry_watchlist() -> None:
                     )
                     msg = f"lease_expiry_watchlist: {b.building_name} lease expired {abs(days)} days ago."
                     logger.warning(msg)
-                    _create_alert("Lease Expiry", msg, severity="Critical", building=b.name, source_doctype="Accommodation Building", source_name=b.name)
-                elif 0 <= days <= 90:
+                    _notify_operational("Accommodation Building", b.name, msg)
+                elif 0 <= days <= lease_lead:
                     msg = f"lease_expiry_watchlist: {b.building_name} lease expires in {days} days ({b.lease_end_date})."
                     logger.warning(msg)
-                    _create_alert("Lease Expiry", msg, severity="Warning", building=b.name, source_doctype="Accommodation Building", source_name=b.name)
+                    _notify_operational("Accommodation Building", b.name, msg)
             except Exception:
                 frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
                 frappe.log_error(
@@ -472,6 +478,10 @@ def weekly_safety_task_compliance_scan() -> None:
         for inst in overdue:
             try:
                 frappe.db.set_value("Scheduled Task Instance", inst.name, "status", "Overdue")
+                _notify_operational(
+                    "Scheduled Task Instance", inst.name,
+                    f"Scheduled task {inst.name} ({inst.template}) is overdue (was due {inst.due_date}).",
+                )
             except Exception:
                 frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
                 frappe.log_error(
@@ -483,9 +493,9 @@ def weekly_safety_task_compliance_scan() -> None:
         start += batch_size
 
     if total_overdue:
-        msg = f"weekly_safety_task_compliance_scan: Marked {total_overdue} Scheduled Task Instances as Overdue."
-        logger.warning(msg)
-        _create_alert("Task Overdue", msg, severity="Warning")
+        logger.warning(
+            f"weekly_safety_task_compliance_scan: Marked {total_overdue} Scheduled Task Instances as Overdue."
+        )
     else:
         logger.info("weekly_safety_task_compliance_scan: No overdue instances found.")
 
