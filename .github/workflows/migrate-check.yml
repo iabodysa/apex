@@ -22,6 +22,33 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
+      redis-queue:
+        image: redis:7
+        ports:
+          - 11000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-cache:
+        image: redis:7
+        ports:
+          - 13000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-socketio:
+        image: redis:7
+        ports:
+          - 12000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +63,13 @@ jobs:
 
       - name: Create bench
         run: bench init --skip-redis-config-generation --frappe-branch version-15 frappe-bench
+
+      - name: Configure bench Redis hosts
+        working-directory: frappe-bench
+        run: |
+          bench set-config -g redis_cache "redis://127.0.0.1:13000"
+          bench set-config -g redis_queue "redis://127.0.0.1:11000"
+          bench set-config -g redis_socketio "redis://127.0.0.1:12000"
 
       - name: Get required Frappe apps
         working-directory: frappe-bench
