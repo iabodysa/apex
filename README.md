@@ -245,16 +245,16 @@ flowchart LR
     end
 
     Ledger[("Accommodation Ledger")]:::sink
-    Alert[("Habitat Operations Alert")]:::sink
+    Notices["Timeline Comments + Notifications<br/>(if enabled)"]:::sink
     AddSal["Additional Salary · HRMS"]:::ext
-    Log["Logger reminders"]:::sink
+    Log["Logger reminders + Error Log"]:::sink
     Made["Rooms · Beds · Task Templates"]:::sink
 
     D1 == "utility / work order cost" ==> Ledger
     D1 -. "damage, if enabled" .-> AddSal
     S1 == "daily cost allocation" ==> Ledger
-    S1 --> Alert
-    S2 --> Alert
+    S1 -. "expiry, if notifications on" .-> Notices
+    S2 -. "overdue, if notifications on" .-> Notices
     S3 --> Log
     O1 --> Made
     O2 --> Made
@@ -291,17 +291,32 @@ errors (rollback + `log_error`) so one bad record never aborts the batch.
 | Job | Frequency | What it does |
 | :-- | :-- | :-- |
 | `daily_accommodation_cost_allocation` | Daily | Writes one Accommodation Ledger row per active assignment per cost type, using annual cost / days-in-year / building capacity (leap-year aware). Idempotent per day. |
-| `daily_building_license_expiry_check` | Daily | Sets Building License status to `Expired` or `Expiring Soon` (default 60-day lead) and raises a Habitat Operations Alert. |
+| `daily_building_license_expiry_check` | Daily | Sets Building License status to `Expired` or `Expiring Soon` (lead from `license_expiry_days_before`, default 60) and, if operational notifications are enabled, posts a timeline comment on the license. |
 | `open_maintenance_escalation` | Daily | Logs overdue open Maintenance Requests against priority thresholds (24h Critical / 72h High / 168h Medium / 336h Low). |
-| `lease_expiry_watchlist` | Daily | Sets `lease_renewal_status = Expired` on past-due building leases and alerts on leases due within 90 days. |
+| `lease_expiry_watchlist` | Daily | Sets `lease_renewal_status = Expired` on past-due building leases and flags leases due within `lease_expiry_days_before` days (default 90) via a timeline comment when notifications are enabled. |
 | `daily_scheduled_task_instance_generator` | Daily | Creates a Scheduled Task Instance for each active template whose current period (Daily/Weekly/Monthly/Quarterly/Annually) has none. |
 | `weekly_occupancy_sync` | Weekly | Recomputes room and building occupancy counters and status from live assignment counts to correct drift. |
-| `weekly_safety_task_compliance_scan` | Weekly | Marks past-due draft Scheduled Task Instances as `Overdue` and raises an alert. |
+| `weekly_safety_task_compliance_scan` | Weekly | Marks past-due draft Scheduled Task Instances as `Overdue` and posts a timeline comment on each when notifications are enabled. |
 | `monthly_rent_due_alert` | Monthly | Logs a reminder for each unpaid Rent Payment Schedule row due this month. No Payment Entry is created. |
 
-Jobs that detect problems (license expiry, lease expiry, overdue tasks) write
-to the `Habitat Operations Alert` DocType, which is the single feed surfaced on
-the operations dashboard.
+### Operational notifications (native, not a custom alert table)
+
+Operational notices use native Frappe features rather than a custom alert
+DocType. Controlled by **Habitat Settings → Enable Operational Notifications**
+(off by default):
+
+- When enabled, the expiry/overdue jobs post a **timeline Comment** on the source
+  document (Building License, Accommodation Building, Scheduled Task Instance).
+- Email reminders are configured declaratively through Frappe **Notification**
+  records (date-based on the license/lease date fields) with companion Email
+  Templates — no custom scheduler code sends mail.
+- **Technical exceptions go to the standard Frappe `Error Log`**, never to an
+  operational feed.
+
+The legacy `Habitat Operations Alert` DocType is **deprecated for new alerts**
+(retained for historical records); the schedulers no longer write to it. The
+status fields the jobs still set (`Expired` / `Expiring Soon` / `Overdue`) drive
+the number cards on the workspaces.
 
 ### On-demand actions
 
