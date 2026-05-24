@@ -518,6 +518,16 @@ def daily_scheduled_task_instance_generator() -> None:
             break
 
         for tmpl in templates:
+            # Skip templates pointing at a building that no longer exists, so the
+            # generator does not log a LinkValidationError on every run.
+            if tmpl.building and not frappe.db.exists("Accommodation Building", tmpl.building):
+                logger.warning(
+                    "daily_scheduled_task_instance_generator: skipping template %s — building %s not found.",
+                    tmpl.name,
+                    tmpl.building,
+                )
+                continue
+
             freq = tmpl.frequency or "Monthly"
             if freq == "Daily":
                 period_key = today_str
