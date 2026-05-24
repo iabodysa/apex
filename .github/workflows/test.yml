@@ -85,7 +85,7 @@ jobs:
       - name: Create test site
         working-directory: frappe-bench
         run: |
-          bench new-site test.localhost --db-root-password root --admin-password admin --no-mariadb-socket
+          bench new-site test.localhost --db-root-password ${{ secrets.DB_ROOT_PASSWORD }} --admin-password ${{ secrets.ADMIN_PASSWORD }} --no-mariadb-socket
           bench --site test.localhost install-app erpnext
           bench --site test.localhost install-app hrms
           bench --site test.localhost install-app apex_habitat
