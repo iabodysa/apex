@@ -4,9 +4,39 @@ function _toggleFloorFields(frm) {
 	frm.set_df_property("total_floors", "hidden", isApartment ? 1 : 0);
 }
 
+function _renderBuildingDashboard(frm) {
+	if (frm.is_new()) return;
+	frappe.call({
+		method: "apex_habitat.habitat.api.building_dashboard.get_building_metrics",
+		args: { building: frm.doc.name },
+		callback: function (r) {
+			if (r.exc || !r.message) return;
+			const m = r.message;
+			frm.dashboard.reset();
+			frm.dashboard.add_indicator(__("Active Occupants: {0}", [m.active_occupants]),
+				m.active_occupants ? "blue" : "gray");
+			frm.dashboard.add_indicator(__("Open Maintenance: {0}", [m.open_maintenance]),
+				m.open_maintenance ? "orange" : "green");
+			frm.dashboard.add_indicator(__("Open Custody Issues: {0}", [m.open_custody]),
+				m.open_custody ? "orange" : "green");
+			if (m.labels && m.labels.length) {
+				frm.dashboard.add_chart({
+					title: __("Occupancy % Trend"),
+					type: "line",
+					data: {
+						labels: m.labels,
+						datasets: [{ name: __("Occupancy %"), values: m.occupancy }],
+					},
+				});
+			}
+		},
+	});
+}
+
 frappe.ui.form.on("Accommodation Building", {
 	refresh(frm) {
 		_toggleFloorFields(frm);
+		_renderBuildingDashboard(frm);
 
 		// Status indicator
 		const colors = {

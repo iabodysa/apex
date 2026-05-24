@@ -10,7 +10,8 @@ def get_data():
             },
             {
                 "label": _("Occupancy & Residents"),
-                "items": ["Accommodation Assignment", "Accommodation Resident Request"]
+                "items": ["Accommodation Assignment", "Accommodation Resident Request",
+                          "Accommodation Occupancy Snapshot"]
             },
             {
                 "label": _("Operations & Maintenance"),

@@ -184,6 +184,7 @@ scheduler_events = {
 # Employee form dashboard: surface housing and custody records
 override_doctype_dashboards = {
     "Employee": "apex_habitat.habitat.api.employee_links.get_data",
+    "Supplier": "apex_habitat.habitat.api.supplier_links.get_data",
 }
 
 # Fixtures shipped with the app
