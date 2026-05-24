@@ -95,5 +95,6 @@ jobs:
         run: |
           bench --site test.localhost run-tests --module apex_habitat.tests.test_http_enforcement
           bench --site test.localhost run-tests --module apex_habitat.tests.test_workspace_visibility
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_change_log_popup
           bench --site test.localhost run-tests --module apex_habitat.tests.test_bed_booking_concurrency
           bench --site test.localhost run-tests --module apex_habitat.tests.test_task_schedulers
