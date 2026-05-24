@@ -1,6 +1,6 @@
 # Apex Habitat
 
-![Version](https://img.shields.io/badge/version-0.7.0-blue) ![Frappe](https://img.shields.io/badge/frappe-v15-green) ![License](https://img.shields.io/badge/license-MIT-lightgrey)
+![Version](https://img.shields.io/badge/version-0.7.1-blue) ![Frappe](https://img.shields.io/badge/frappe-v15-green) ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 Apex Habitat gives facilities operators in Saudi Arabia a single system to manage worker accommodation — allocating buildings and rooms, tracking occupancy across contract periods, recording maintenance tasks and inspections, monitoring utility costs per unit, and coordinating the lease and renewal lifecycle. It runs on Frappe Framework v15 and connects to ERPNext and HRMS for payroll deduction and cost recovery workflows.
 
@@ -380,6 +380,7 @@ bench build --app apex_habitat
 | **v0.5.4** | Housing Supervisor Report, lease billing cycles, maintenance photo requirement, web form intake fix |
 | **v0.6.0** | Maintenance Material catalog (38 items), Material Templates, currency fieldname normalization |
 | **v0.7.0** | Audit remediation sprint: 76 issues closed, controller migration, floor-code room numbering, 3-step Frappe wizard UX, Arabic translation fixes |
+| **v0.7.1** | Official Frappe update popup changelog for the v0.7 release |
 
 ## Release Procedure
 
