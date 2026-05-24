@@ -11,11 +11,11 @@ required_apps = ["frappe", "erpnext", "hrms"]
 # Frappe v15: export type annotations in DocType controllers when supported
 export_python_type_annotations = True
 
-app_version = "0.6.0"
+from apex_habitat import __version__ as app_version
 
-# Theme inclusions (Disabled to fix caching and layout issues)
-# app_include_css = "/assets/apex_habitat/css/afmco_theme.css"
-# web_include_css = "/assets/apex_habitat/css/afmco_theme.css"
+# Theme inclusions
+app_include_css = "/assets/apex_habitat/css/afmco_theme.css"
+web_include_css = "/assets/apex_habitat/css/afmco_theme.css"
 
 # Single functional module: Habitat
 
