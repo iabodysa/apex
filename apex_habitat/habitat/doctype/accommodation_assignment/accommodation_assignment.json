@@ -29,7 +29,9 @@
   "check_out_date",
   "accommodation_assignment_system_col",
   "housing_allowance_suspended",
-  "amended_from"
+  "amended_from",
+  "is_external_supplier",
+  "billed_to_supplier"
  ],
  "fields": [
   {
@@ -199,11 +201,24 @@
    "options": "Accommodation Assignment",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_external_supplier",
+   "fieldtype": "Check",
+   "label": "Is External Supplier Worker?"
+  },
+  {
+   "depends_on": "eval:doc.is_external_supplier",
+   "fieldname": "billed_to_supplier",
+   "fieldtype": "Link",
+   "label": "Billed To Supplier",
+   "options": "Supplier"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-25 01:05:28.395463",
+ "modified": "2026-05-25 02:00:45.440671",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Assignment",

@@ -101,3 +101,4 @@ jobs:
           bench --site test.localhost run-tests --module apex_habitat.tests.test_release_hygiene
           bench --site test.localhost run-tests --module apex_habitat.tests.test_idempotency_guards
           bench --site test.localhost run-tests --module apex_habitat.tests.test_material_template_coverage
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_supplier_cost_recovery
