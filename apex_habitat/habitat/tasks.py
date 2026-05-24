@@ -50,7 +50,13 @@ def daily_accommodation_cost_allocation() -> None:
         "Other": "annual_other_expenses_sar"
     }
 
+    # TODO(scale): enqueue per building via frappe.enqueue(per_building_cost_allocation,
+    #   queue="long", timeout=3600) so the scheduler thread is not blocked on large datasets.
+    #   Safe to do once building count grows beyond ~50; idempotency guard (frappe.db.exists)
+    #   already protects against duplicate inserts from overlapping runs.
+
     # Paginate active submitted Accommodation Assignments at 500/batch
+    building_cache: dict = {}  # T-01: cache building docs to avoid repeated get_doc per assignment
     start = 0
     batch_size = 500
     while True:
@@ -80,9 +86,15 @@ def daily_accommodation_cost_allocation() -> None:
                 )
                 continue
 
-            try:
-                building = frappe.get_doc("Accommodation Building", asgn.building)
-            except frappe.DoesNotExistError:
+            # T-01: fetch building from cache; only hit the DB on the first miss per building
+            if asgn.building not in building_cache:
+                try:
+                    building_cache[asgn.building] = frappe.get_doc("Accommodation Building", asgn.building)
+                except frappe.DoesNotExistError:
+                    building_cache[asgn.building] = None
+
+            building = building_cache[asgn.building]
+            if building is None:
                 logger.warning(
                     f"daily_accommodation_cost_allocation: Building {asgn.building} not found for assignment {asgn.name}. Skipping."
                 )
@@ -141,6 +153,7 @@ def daily_accommodation_cost_allocation() -> None:
                     })
                     ledger_entry.insert(ignore_permissions=True)
                 except Exception as e:
+                    frappe.db.rollback()  # T-02: rollback before log_error to avoid aborted-transaction errors
                     logger.error(
                         f"daily_accommodation_cost_allocation: Failed to insert ledger row for assignment {asgn.name}, cost {ledger_type}: {e}"
                     )
@@ -203,6 +216,7 @@ def daily_building_license_expiry_check() -> None:
                         logger.warning(msg)
                         _create_alert("License Expiry", msg, severity="Warning", source_doctype="Building License", source_name=lic.name)
             except Exception:
+                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"License expiry check failed for {lic.name}"[:140],
@@ -252,17 +266,25 @@ def open_maintenance_escalation() -> None:
             break
 
         for req in open_requests:
-            priority = req.priority or "Medium"
-            threshold_hours = thresholds.get(priority, 168)
+            try:  # T-03: isolate per-row errors so one bad row does not abort the whole batch
+                priority = req.priority or "Medium"
+                threshold_hours = thresholds.get(priority, 168)
 
-            creation_dt = get_datetime(req.creation)
-            elapsed_hours = (now - creation_dt).total_seconds() / 3600.0
+                creation_dt = get_datetime(req.creation)
+                elapsed_hours = (now - creation_dt).total_seconds() / 3600.0
 
-            if elapsed_hours > threshold_hours:
-                logger.warning(
-                    f"Maintenance Request {req.name} ({req.issue_type}, status: {req.status}) "
-                    f"is overdue! Priority: {priority}, hours open: {elapsed_hours:.1f} (threshold: {threshold_hours} hours)."
+                if elapsed_hours > threshold_hours:
+                    logger.warning(
+                        f"Maintenance Request {req.name} ({req.issue_type}, status: {req.status}) "
+                        f"is overdue! Priority: {priority}, hours open: {elapsed_hours:.1f} (threshold: {threshold_hours} hours)."
+                    )
+            except Exception:
+                frappe.db.rollback()
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Maintenance escalation failed for {req.name}"[:140],
                 )
+                continue
 
         start += batch_size
 
@@ -308,6 +330,7 @@ def lease_expiry_watchlist() -> None:
                     logger.warning(msg)
                     _create_alert("Lease Expiry", msg, severity="Warning", building=b.name, source_doctype="Accommodation Building", source_name=b.name)
             except Exception:
+                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Lease expiry watchlist failed for {b.name}"[:140],
@@ -360,6 +383,7 @@ def weekly_occupancy_sync() -> None:
                     update_modified=False,
                 )
             except Exception:
+                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Occupancy sync failed for room {room_name}"[:140],
@@ -411,6 +435,7 @@ def weekly_occupancy_sync() -> None:
                     update_modified=False,
                 )
             except Exception:
+                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Occupancy sync failed for building {building_name}"[:140],
@@ -448,6 +473,7 @@ def weekly_safety_task_compliance_scan() -> None:
             try:
                 frappe.db.set_value("Scheduled Task Instance", inst.name, "status", "Overdue")
             except Exception:
+                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Safety compliance scan failed for {inst.name}"[:140],
@@ -532,6 +558,7 @@ def daily_scheduled_task_instance_generator() -> None:
                     period_key,
                 )
             except Exception as e:  # noqa: BLE001
+                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
                 logger.error(
                     "daily_scheduled_task_instance_generator: Failed to create STI for template %s: %s",
                     tmpl.name,
@@ -576,31 +603,39 @@ def monthly_rent_due_alert() -> None:
             break
 
         for lease in leases:
-            schedule_rows = frappe.get_all(
-                "Rent Payment Schedule",
-                filters={
-                    "parent": lease.name,
-                    "parenttype": "Accommodation Lease",
-                    "status": "Unpaid",
-                    "due_date": ["between", [str(month_start), str(month_end)]],
-                },
-                fields=["name", "due_date", "amount", "payment_entry"],
-            )
-
-            for row in schedule_rows:
-                # Idempotency: skip rows already linked to a Payment Entry.
-                if row.get("payment_entry"):
-                    continue
-
-                # Manual-reminder only. Finance settles rent manually; this job
-                # only surfaces what is due. No Payment Entry is created here.
-                logger.warning(
-                    "monthly_rent_due_alert: Lease %s (building %s) — SAR %.2f due %s "
-                    "requires manual payment by Finance.",
-                    lease.name,
-                    lease.building,
-                    row.amount,
-                    row.due_date,
+            try:  # T-04: isolate per-lease errors so one bad row does not abort the whole batch
+                schedule_rows = frappe.get_all(
+                    "Rent Payment Schedule",
+                    filters={
+                        "parent": lease.name,
+                        "parenttype": "Accommodation Lease",
+                        "status": "Unpaid",
+                        "due_date": ["between", [str(month_start), str(month_end)]],
+                    },
+                    fields=["name", "due_date", "amount", "payment_entry"],
                 )
+
+                for row in schedule_rows:
+                    # Idempotency: skip rows already linked to a Payment Entry.
+                    if row.get("payment_entry"):
+                        continue
+
+                    # Manual-reminder only. Finance settles rent manually; this job
+                    # only surfaces what is due. No Payment Entry is created here.
+                    logger.warning(
+                        "monthly_rent_due_alert: Lease %s (building %s) — SAR %.2f due %s "
+                        "requires manual payment by Finance.",
+                        lease.name,
+                        lease.building,
+                        row.amount,
+                        row.due_date,
+                    )
+            except Exception:
+                frappe.db.rollback()  # T-04: rollback before log_error to avoid aborted-transaction errors
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Rent due alert failed for lease {lease.name}"[:140],
+                )
+                continue
 
         start += batch_size

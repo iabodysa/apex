@@ -90,8 +90,14 @@ def on_submit(doc, method=None):
                         "damage_description": _("Reported during checkout ({0})").format(item.return_status),
                         "estimated_replacement_cost_sar": 0,
                     })
-            damage_doc.insert(ignore_permissions=True)
-            doc.add_comment("Comment", _("Draft Damage Assessment created: {0}. Please review and submit.").format(damage_doc.name))
+            try:
+                damage_doc.insert(ignore_permissions=True)
+                doc.add_comment("Comment", _("Draft Damage Assessment created: {0}. Please review and submit.").format(damage_doc.name))
+            except Exception:
+                frappe.log_error(
+                    title="Accommodation Checkout: draft Damage Assessment creation failed",
+                    message=frappe.get_traceback(),
+                )
 
 
 def before_cancel(doc, method=None):

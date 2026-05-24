@@ -6,11 +6,15 @@
 
 import frappe
 
+# Canonical workspace names AND labels are identical in the shipped JSON, and both
+# include "&" and commas. Keep these two sets in sync with the workspace JSON `name`
+# fields under habitat/workspace/ — a mismatch here makes the dedup logic below fail
+# to protect the canonical record and risk deleting the wrong copy.
 APP_WORKSPACE_LABELS = {
     "Accommodation Lifecycle",
-    "Client Audit Evidence",
+    "Client Audit & Evidence",
     "Custody & Asset Control",
-    "Daily Scheduled Tasks",
+    "Daily & Scheduled Tasks",
     "Lease, Utilities & Cost Control",
     "Maintenance & Remediation",
     "Operations Command Center",
@@ -18,17 +22,7 @@ APP_WORKSPACE_LABELS = {
     "Setup",
 }
 
-APP_WORKSPACE_NAMES = {
-    "Accommodation Lifecycle",
-    "Client Audit Evidence",
-    "Custody Asset Control",
-    "Daily Scheduled Tasks",
-    "Lease Utilities Cost Control",
-    "Maintenance Remediation",
-    "Operations Command Center",
-    "Safety Compliance",
-    "Setup",
-}
+APP_WORKSPACE_NAMES = set(APP_WORKSPACE_LABELS)
 
 
 def execute():
@@ -85,8 +79,16 @@ def _cleanup_duplicate_workspaces():
                 to_delete.append(current_name)
 
     for name in to_delete:
-        frappe.db.delete("Workspace", {"name": name})
-        for child in ("Workspace Shortcut", "Workspace Link", "Workspace Chart",
-                      "Workspace Number Card", "Workspace Quick List"):
-            frappe.db.delete(child, {"parent": name})
-        frappe.logger().info(f"apex_habitat patch: deleted duplicate workspace '{name}'")
+        try:
+            frappe.db.delete("Workspace", {"name": name})
+            for child in ("Workspace Shortcut", "Workspace Link", "Workspace Chart",
+                          "Workspace Number Card", "Workspace Quick List"):
+                frappe.db.delete(child, {"parent": name})
+            frappe.logger().info(f"apex_habitat patch: deleted duplicate workspace '{name}'")
+        except Exception:
+            frappe.db.rollback()
+            frappe.log_error(
+                title="cleanup_duplicate_workspaces: failed to delete workspace",
+                message=f"workspace={name}\n{frappe.get_traceback()}",
+            )
+            continue

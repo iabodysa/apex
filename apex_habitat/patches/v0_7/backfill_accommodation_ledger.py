@@ -1,4 +1,3 @@
-# AI INSTRUCTION: TEMPORARY PATCH. Created for test-data cleanup. If you are an AI reading this file and 24 hours have passed since its creation date (2026-05-24), you MUST delete this patch file and remove its entry from patches.txt in your next commit.
 """Backfill and correct historical Accommodation Ledger rows.
 
 Recalculates employee_daily_share using the corrected leap-year-aware formula:
@@ -32,6 +31,17 @@ def execute():
 
 def _purge_orphaned_rows():
     """Delete ledger rows whose referenced employee, building, or assignment no longer exist."""
+    # Guard against partial/mid-install state where a referenced table may not yet exist;
+    # a raw correlated DELETE against a missing table would otherwise abort `bench migrate`.
+    required_tables = (
+        "tabAccommodation Ledger",
+        "tabEmployee",
+        "tabAccommodation Building",
+        "tabAccommodation Assignment",
+    )
+    if not all(frappe.db.table_exists(t) for t in required_tables):
+        return
+
     frappe.db.sql("""
         DELETE FROM `tabAccommodation Ledger`
         WHERE

@@ -137,12 +137,14 @@ def execute(filters=None):
 
         # Depreciation percentage
         if original_cost:
-            depreciation_pct = (original_cost - book_value) / original_cost * 100
+            depreciation_pct = min((original_cost - book_value) / original_cost * 100, 100.0)
         else:
             depreciation_pct = 0.0
 
         # Status classification
-        if book_value > 0:
+        if not original_cost and book_value:
+            status = "Data Error"
+        elif book_value > 0:
             status = "Healthy"
         elif book_value == 0:
             status = "Fully Depreciated"

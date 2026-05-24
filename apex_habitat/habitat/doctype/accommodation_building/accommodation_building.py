@@ -93,6 +93,8 @@ def generate_rooms_and_beds(building_name):
     created_beds = 0
     skipped_beds = 0
 
+    row_failures = []
+
     for row in doc.floor_plan:
         floor_num = int(row.floor_number or 0)
         floor_code = "G" if floor_num == 0 else str(floor_num)
@@ -122,20 +124,24 @@ def generate_rooms_and_beds(building_name):
                 skipped_rooms += 1
                 room_doc_name = existing_room_map[room_number]
             else:
-                room = frappe.get_doc({
-                    "doctype": "Accommodation Room",
-                    "building": building_name,
-                    "room_number": room_number,
-                    "floor": floor_num,
-                    "room_type": rtype,
-                    "bed_capacity": capacity,
-                    "status": "Available",
-                    "readiness_status": "Unknown",
-                })
-                room.insert(ignore_permissions=False)
-                existing_room_map[room_number] = room.name
-                room_doc_name = room.name
-                created_rooms += 1
+                try:
+                    room = frappe.get_doc({
+                        "doctype": "Accommodation Room",
+                        "building": building_name,
+                        "room_number": room_number,
+                        "floor": floor_num,
+                        "room_type": rtype,
+                        "bed_capacity": capacity,
+                        "status": "Available",
+                        "readiness_status": "Unknown",
+                    })
+                    room.insert(ignore_permissions=False)
+                    existing_room_map[room_number] = room.name
+                    room_doc_name = room.name
+                    created_rooms += 1
+                except Exception as exc:
+                    row_failures.append(_("Room {0}: {1}").format(room_number, str(exc)))
+                    continue
 
             if gen_beds and room_doc_name:
                 for b in range(1, capacity + 1):
@@ -143,16 +149,19 @@ def generate_rooms_and_beds(building_name):
                     if bed_code in existing_bed_codes:
                         skipped_beds += 1
                     else:
-                        bed = frappe.get_doc({
-                            "doctype": "Accommodation Bed",
-                            "room": room_doc_name,
-                            "bed_code": bed_code,
-                            "status": "Available",
-                            "condition": "Good",
-                        })
-                        bed.insert(ignore_permissions=False)
-                        existing_bed_codes.add(bed_code)
-                        created_beds += 1
+                        try:
+                            bed = frappe.get_doc({
+                                "doctype": "Accommodation Bed",
+                                "room": room_doc_name,
+                                "bed_code": bed_code,
+                                "status": "Available",
+                                "condition": "Good",
+                            })
+                            bed.insert(ignore_permissions=False)
+                            existing_bed_codes.add(bed_code)
+                            created_beds += 1
+                        except Exception as exc:
+                            row_failures.append(_("Bed {0}: {1}").format(bed_code, str(exc)))
 
     # Only update setup audit fields when new records were created
     if created_rooms > 0 or created_beds > 0:
@@ -162,20 +171,25 @@ def generate_rooms_and_beds(building_name):
             "setup_generated_by": frappe.session.user,
         })
 
-    frappe.db.commit()
+    # Frappe manages the request transaction; do not commit explicitly so that
+    # any unhandled error outside this block can still trigger a full rollback.
 
     summary = {
         "created_rooms": created_rooms,
         "skipped_rooms": skipped_rooms,
         "created_beds": created_beds,
         "skipped_beds": skipped_beds,
+        "failures": row_failures,
     }
 
     msg = _(
         "Generation complete. Rooms created: {0}, skipped (existing): {1}. "
         "Beds created: {2}."
     ).format(created_rooms, skipped_rooms, created_beds)
-    frappe.msgprint(msg, title=_("Room & Bed Generation"), indicator="green")
+    if row_failures:
+        failure_lines = "<br>".join(row_failures)
+        msg += "<br><br>" + _("Failures ({0}):").format(len(row_failures)) + "<br>" + failure_lines
+    frappe.msgprint(msg, title=_("Room & Bed Generation"), indicator="green" if not row_failures else "orange")
 
     return summary
 
@@ -212,6 +226,7 @@ def generate_safety_setup(building_name):
     skipped_scopes = 0
     created_templates = 0
     skipped_templates = 0
+    catalog_failures = []
 
     for catalog in catalogs:
         # 1. Add building scope for tasks that are NOT global
@@ -221,13 +236,24 @@ def generate_safety_setup(building_name):
                 {"parent": catalog.name, "parenttype": "Safety Task Catalog", "building": building_name},
             )
             if not scope_exists:
-                scope = frappe.new_doc("Safety Task Building Scope")
-                scope.parent = catalog.name
-                scope.parenttype = "Safety Task Catalog"
-                scope.parentfield = "applicable_buildings"
-                scope.building = building_name
-                scope.insert(ignore_permissions=True)
-                created_scopes += 1
+                try:
+                    scope = frappe.new_doc("Safety Task Building Scope")
+                    scope.parent = catalog.name
+                    scope.parenttype = "Safety Task Catalog"
+                    scope.parentfield = "applicable_buildings"
+                    scope.building = building_name
+                    # ignore_permissions=True: the calling user holds write permission on
+                    # Accommodation Building (checked above), but Safety Task Catalog is a
+                    # master-data DocType maintained by administrators. Allowing the role to
+                    # append scope rows here is an intentional cross-doctype operation that
+                    # the business setup flow requires; enforcing DocType-level write on
+                    # Safety Task Catalog would block legitimate supervisor-triggered setup.
+                    scope.insert(ignore_permissions=True)
+                    created_scopes += 1
+                except Exception as exc:
+                    catalog_failures.append(
+                        _("Scope for catalog {0}: {1}").format(catalog.name, str(exc))
+                    )
             else:
                 skipped_scopes += 1
 
@@ -249,16 +275,25 @@ def generate_safety_setup(building_name):
             }
             template_freq = _freq_map.get(catalog.frequency, catalog.frequency)
             title = catalog.task_title_en or catalog.task_code or catalog.task_title or catalog.name
-            frappe.get_doc({
-                "doctype": "Scheduled Task Template",
-                "template_name": f"{title} — {building_name}"[:140],
-                "task_type": "Safety",
-                "building": building_name,
-                "safety_task_catalog": catalog.name,
-                "frequency": template_freq,
-                "is_active": 1,
-            }).insert(ignore_permissions=True)
-            created_templates += 1
+            try:
+                frappe.get_doc({
+                    "doctype": "Scheduled Task Template",
+                    "template_name": f"{title} — {building_name}"[:140],
+                    "task_type": "Safety",
+                    "building": building_name,
+                    "safety_task_catalog": catalog.name,
+                    "frequency": template_freq,
+                    "is_active": 1,
+                # ignore_permissions=True: same rationale as above — the calling user is
+                # authorized on the building, but Scheduled Task Template is owned by the
+                # admin/safety-manager role. Creating templates on their behalf during
+                # building setup is the intended workflow.
+                }).insert(ignore_permissions=True)
+                created_templates += 1
+            except Exception as exc:
+                catalog_failures.append(
+                    _("Template for catalog {0}: {1}").format(catalog.name, str(exc))
+                )
         else:
             skipped_templates += 1
 
@@ -267,25 +302,31 @@ def generate_safety_setup(building_name):
         "safety_setup_generated_on": today(),
         "safety_setup_generated_by": frappe.session.user,
     })
-    frappe.db.commit()
+    # Frappe manages the request transaction; do not commit explicitly so that
+    # any unhandled error outside this block can still trigger a full rollback.
 
     summary = {
         "created_templates": created_templates,
         "skipped_templates": skipped_templates,
         "created_scopes": created_scopes,
         "skipped_scopes": skipped_scopes,
+        "failures": catalog_failures,
         "license_reminder": (
             "Building License records must be created manually with real license numbers. "
             "Recommended types: Civil Defense, Municipal Operating License, Accommodation Registration."
         ),
     }
 
+    msg = _("Safety setup complete. Templates created: {0}, skipped (existing): {1}.").format(
+        created_templates, skipped_templates
+    )
+    if catalog_failures:
+        failure_lines = "<br>".join(catalog_failures)
+        msg += "<br><br>" + _("Failures ({0}):").format(len(catalog_failures)) + "<br>" + failure_lines
     frappe.msgprint(
-        _("Safety setup complete. Templates created: {0}, skipped (existing): {1}.").format(
-            created_templates, skipped_templates
-        ),
+        msg,
         title=_("Safety Setup Generator"),
-        indicator="green",
+        indicator="green" if not catalog_failures else "orange",
     )
     return summary
 
@@ -293,7 +334,9 @@ def generate_safety_setup(building_name):
 @frappe.whitelist(methods=["POST"])
 def update_room_inventory(room_name, readiness_status, inventory_notes=None):
     """Allow supervisor to record room readiness without opening full form."""
-    if not frappe.has_permission("Accommodation Room", "write"):
+    # Per-document check: ensures the caller can write this specific room, not just
+    # any Accommodation Room record at the DocType level.
+    if not frappe.has_permission("Accommodation Room", "write", doc=room_name):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
 
     allowed = ("Unknown", "Ready", "Needs Cleaning", "Needs Repair", "Out of Service")
@@ -308,5 +351,5 @@ def update_room_inventory(room_name, readiness_status, inventory_notes=None):
         updates["inventory_notes"] = inventory_notes
 
     frappe.db.set_value("Accommodation Room", room_name, updates)
-    frappe.db.commit()
+    # Frappe manages the request transaction; do not commit explicitly.
     return {"ok": True}

@@ -1,4 +1,3 @@
-# AI INSTRUCTION: TEMPORARY PATCH. Created for test-data cleanup. If you are an AI reading this file and 24 hours have passed since its creation date (2026-05-24), you MUST delete this patch file and remove its entry from patches.txt in your next commit.
 """Remove stale afmco_theme CSS from Frappe's asset registry and cache.
 
 The CSS file (afmco_theme.css) was removed from the app but Frappe may have
@@ -17,7 +16,9 @@ def execute():
         pluck="name",
     )
     for name in stale:
-        frappe.delete_doc("File", name, ignore_permissions=True, force=True)
+        frappe.delete_doc(
+            "File", name, ignore_permissions=True, force=True, ignore_missing=True
+        )
 
     # Remove any DefaultValue entries caching the CSS path
     frappe.db.sql(
