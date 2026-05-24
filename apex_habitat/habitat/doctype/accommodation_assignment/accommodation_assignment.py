@@ -160,6 +160,30 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
+    # Acquire row-level lock to prevent concurrent double-booking
+    frappe.db.sql(
+        "SELECT `status` FROM `tabAccommodation Bed` WHERE `name` = %s FOR UPDATE",
+        doc.bed,
+    )
+    current_status = frappe.db.get_value("Accommodation Bed", doc.bed, "status")
+    if current_status == "Occupied":
+        occupying_asg = frappe.db.get_value(
+            "Accommodation Assignment",
+            {
+                "bed": doc.bed,
+                "docstatus": 1,
+                "check_out_date": ["is", "not set"],
+                "name": ["!=", doc.name],
+            },
+            "name",
+        )
+        if occupying_asg:
+            frappe.throw(
+                _("Bed {0} was just taken by another assignment ({1}). Please select a different bed.").format(
+                    doc.bed, occupying_asg
+                )
+            )
+
     frappe.db.set_value("Accommodation Bed", doc.bed, "status", "Occupied")
     recalculate_spatial(doc.room, doc.building)
 
