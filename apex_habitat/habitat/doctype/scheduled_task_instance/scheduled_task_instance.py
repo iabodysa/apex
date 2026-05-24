@@ -28,7 +28,7 @@ def before_cancel(doc, method=None):
         frappe.throw(_("Cancellation Reason is required before cancelling a Scheduled Task Instance."))
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def start_task(task_instance):
     """Transition Scheduled Task Instance from Open to In Progress."""
     if not frappe.has_permission("Scheduled Task Instance", "write"):

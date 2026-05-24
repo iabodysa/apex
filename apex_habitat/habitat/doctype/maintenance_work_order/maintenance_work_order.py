@@ -41,7 +41,7 @@ def before_cancel(doc, method=None):
         frappe.throw(_("Cancellation Reason is required before cancelling a Maintenance Work Order."))
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def start_work(work_order):
     """Transition Maintenance Work Order from Planned to In Progress."""
     if not frappe.has_permission("Maintenance Work Order", "write"):
@@ -59,7 +59,7 @@ def start_work(work_order):
     return {"status": "In Progress"}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def mark_completed(work_order, completion_notes=None):
     """Controlled transition to Completed.
 

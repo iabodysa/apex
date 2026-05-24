@@ -8,7 +8,7 @@ class MaintenanceMaterialTemplate(Document):
     pass
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def load_template_into_doc(doctype, docname, issue_type):
     """Load the first active template matching issue_type into the doc's procurement_items.
 

@@ -49,7 +49,7 @@ def before_save(doc, method=None):
         doc.setup_status = "Rooms Planned"
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def generate_rooms_and_beds(building_name):
     """
     Idempotent bulk generator: creates missing Accommodation Room and
@@ -175,7 +175,7 @@ def generate_rooms_and_beds(building_name):
     return summary
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def generate_safety_setup(building_name):
     """
     Idempotent safety setup generator.
@@ -287,7 +287,7 @@ def generate_safety_setup(building_name):
     return summary
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_room_inventory(room_name, readiness_status, inventory_notes=None):
     """Allow supervisor to record room readiness without opening full form."""
     if not frappe.has_permission("Accommodation Room", "write"):
