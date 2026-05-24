@@ -17,6 +17,58 @@ def validate(doc, method=None):
     for row in doc.items:
         if (row.qty or 0) <= 0:
             frappe.throw(_("Row {0}: Qty must be greater than zero.").format(row.idx))
+    _validate_return_quantities(doc)
+
+
+def _validate_return_quantities(doc):
+    """Reject returning more than was issued, per article, across all submitted
+    returns for the linked Custody Issue (prevents over-return and duplicate
+    full returns)."""
+    if not doc.custody_issue:
+        return
+    issue = frappe.get_doc("Custody Issue", doc.custody_issue)
+    if issue.docstatus != 1:
+        frappe.throw(_("The linked Custody Issue {0} must be submitted before returning.").format(issue.name))
+
+    issued = {}
+    for it in issue.items:
+        issued[it.article] = issued.get(it.article, 0) + (it.qty or 0)
+
+    # Quantities already returned on OTHER submitted returns for this issue.
+    prior_returns = frappe.get_all(
+        "Custody Return",
+        filters={"custody_issue": issue.name, "docstatus": 1, "name": ["!=", doc.name or ""]},
+        pluck="name",
+    )
+    prior = {}
+    if prior_returns:
+        for r in frappe.get_all(
+            "Custody Return Item",
+            filters={"parent": ["in", prior_returns]},
+            fields=["article", "qty"],
+        ):
+            prior[r.article] = prior.get(r.article, 0) + (r.qty or 0)
+
+    # This document's quantities, aggregated per article.
+    this_doc = {}
+    for row in doc.items:
+        this_doc[row.article] = this_doc.get(row.article, 0) + (row.qty or 0)
+
+    for article, qty in this_doc.items():
+        issued_qty = issued.get(article, 0)
+        if issued_qty == 0:
+            frappe.throw(
+                _("Article {0} was not issued on Custody Issue {1}, so it cannot be returned.").format(
+                    article, issue.name
+                )
+            )
+        already = prior.get(article, 0)
+        if already + qty > issued_qty:
+            frappe.throw(
+                _("Cannot return {0} unit(s) of {1}: {2} were issued and {3} already returned.").format(
+                    qty, article, issued_qty, already
+                )
+            )
 
 
 def on_submit(doc, method=None):
