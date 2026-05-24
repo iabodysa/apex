@@ -97,7 +97,7 @@
    "fieldname": "city",
    "label": "City",
    "fieldtype": "Link",
-   "options": "Habitat City",
+   "options": "City",
    "in_list_view": 1,
    "idx": 10
   },
