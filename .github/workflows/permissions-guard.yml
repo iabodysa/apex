@@ -6,8 +6,8 @@ on:
   pull_request:
     branches: [apex]
 
-# Baseline: number of ignore_permissions=True call sites that existed when
-# this guard was introduced (2026-05-24). Any call site without a
+# Baseline: number of unaudited ignore_permissions=True call sites in PRODUCTION
+# code (test files are excluded — see the grep below). Any call site without a
 # "# audit-ok" comment on the same line counts toward the total.
 #
 # To add a NEW ignore_permissions=True that is genuinely necessary:
@@ -19,7 +19,7 @@ on:
 #   2. Add a comment explaining why the new call site is safe.
 
 env:
-  BASELINE: 192
+  BASELINE: 23
 
 jobs:
   permissions-guard:
@@ -29,8 +29,12 @@ jobs:
 
       - name: Count unaudited ignore_permissions=True call sites
         run: |
+          # Production code only. Test files (tests/ and test_*.py) legitimately use
+          # ignore_permissions=True to build fixtures and are not a runtime security
+          # surface, so they are excluded from the guard.
           COUNT=$(grep -rn "ignore_permissions=True" apex_habitat/ --include="*.py" \
             | grep -v "# audit-ok" \
+            | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' \
             | wc -l \
             | tr -d ' ')
 
@@ -44,7 +48,8 @@ jobs:
             echo ""
             echo "New call sites (not present when baseline was set):"
             grep -rn "ignore_permissions=True" apex_habitat/ --include="*.py" \
-              | grep -v "# audit-ok" || true
+              | grep -v "# audit-ok" \
+              | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' || true
             echo ""
             echo "To fix:"
             echo "  - If the new call site is genuinely required, append '# audit-ok'"
