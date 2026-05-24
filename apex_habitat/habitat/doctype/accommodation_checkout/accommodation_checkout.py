@@ -72,44 +72,26 @@ def on_submit(doc, method=None):
     frappe.db.set_value("Accommodation Room", assignment.room, "readiness_status", "Needs Cleaning")
     recalculate_spatial(assignment.room, assignment.building)
 
-    # Automate Custody Return Document
+    # Custody Damage Assessment — auto-create a draft for damaged/lost items.
+    # Custody Return must be created manually against the specific Custody Issue.
     if doc.custody_return_items:
-        return_doc = frappe.get_doc({
-            "doctype": "Custody Return",
-            "employee": doc.employee,
-            "return_date": doc.checkout_date,
-            "status": "Returned",
-            "linked_checkout": doc.name,
-            "notes": "Auto-generated from Accommodation Checkout"
-        })
-        has_damage = False
-        for item in doc.custody_return_items:
-            if item.return_status in ["Damaged", "Lost"]:
-                has_damage = True
-            return_doc.append("return_items", {
-                "article": item.article,
-                "quantity_returned": 1,
-                "return_status": item.return_status
-            })
-        return_doc.insert(ignore_permissions=True)
-        return_doc.submit()
-        doc.add_comment("Comment", _("Auto-generated Custody Return: {0}").format(return_doc.name))
+        has_damage = any(item.return_status in ("Damaged", "Lost") for item in doc.custody_return_items)
 
         if has_damage:
+            building = frappe.db.get_value("Accommodation Bed", doc.bed, "building") or ""
             damage_doc = frappe.get_doc({
                 "doctype": "Custody Damage Assessment",
                 "employee": doc.employee,
                 "assessment_date": doc.checkout_date,
-                "source_reference": doc.name,
-                "status": "Draft"
+                "building": building,
+                "remarks": _("Auto-generated from Accommodation Checkout {0}. Review replacement costs and submit.").format(doc.name),
             })
             for item in doc.custody_return_items:
-                if item.return_status in ["Damaged", "Lost"]:
-                    damage_doc.append("damaged_items", {
+                if item.return_status in ("Damaged", "Lost"):
+                    damage_doc.append("items", {
                         "article": item.article,
-                        "quantity": 1,
-                        "damage_type": item.return_status,
-                        "description": "Reported during checkout"
+                        "damage_description": _("Reported during checkout ({0})").format(item.return_status),
+                        "estimated_replacement_cost_sar": 0,
                     })
             damage_doc.insert(ignore_permissions=True)
             doc.add_comment("Comment", _("Draft Damage Assessment created: {0}. Please review and submit.").format(damage_doc.name))

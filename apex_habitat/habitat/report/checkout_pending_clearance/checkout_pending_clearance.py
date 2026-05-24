@@ -20,8 +20,8 @@ def execute(filters=None):
     ]
 
     query_filters = {"docstatus": 1}
-    if filters.get("building"):
-        query_filters["building"] = filters["building"]
+    # Note: Accommodation Checkout has no "building" field — building is derived
+    # per row via the bed link. The building filter is applied in the loop below.
 
     checkouts = frappe.get_all(
         "Accommodation Checkout",

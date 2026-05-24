@@ -130,7 +130,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Draft\nIssued\nReturned\nCancelled",
+   "options": "Draft\nIssued\nReturned\nPartially Returned\nCancelled",
    "default": "Draft",
    "read_only": 1,
    "idx": 16
