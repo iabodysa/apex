@@ -7,6 +7,43 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v0.7.2 ---------------------------------------------------------------
+    {
+        "title": "Apex Habitat v0.7.2 — Reliability, Performance & Translation Hardening",
+        "app_name": "apex_habitat",
+        "link": "/app/setup",
+        "creation": "2026-05-24 21:00:00",
+    },
+    {
+        "title": "v0.7.2: Submit/cancel is now all-or-nothing — no half-saved bills, checkouts, or work orders",
+        "app_name": "apex_habitat",
+        "link": "/app/utility-bill-entry",
+        "creation": "2026-05-24 21:01:00",
+    },
+    {
+        "title": "v0.7.2: Checkout clearance and cleaning reports load faster (N+1 queries removed)",
+        "app_name": "apex_habitat",
+        "link": "/app/checkout-pending-clearance",
+        "creation": "2026-05-24 21:02:00",
+    },
+    {
+        "title": "v0.7.2: Occupancy % and depreciation figures now computed live and capped correctly",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-occupancy-summary",
+        "creation": "2026-05-24 21:03:00",
+    },
+    {
+        "title": "v0.7.2: Stronger per-record permissions on room updates, lease, and template loading",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-room",
+        "creation": "2026-05-24 21:04:00",
+    },
+    {
+        "title": "v0.7.2: Arabic interface fully translated; broken translation lines repaired",
+        "app_name": "apex_habitat",
+        "link": "/app/setup",
+        "creation": "2026-05-24 21:05:00",
+    },
     # v0.7.0 ---------------------------------------------------------------
     {
         "title": "Apex Habitat v0.7.0 — Security, Performance & Compliance Overhaul",

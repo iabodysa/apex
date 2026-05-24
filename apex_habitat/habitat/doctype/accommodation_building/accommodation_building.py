@@ -242,7 +242,7 @@ def generate_safety_setup(building_name):
                     scope.parenttype = "Safety Task Catalog"
                     scope.parentfield = "applicable_buildings"
                     scope.building = building_name
-                    # ignore_permissions=True: the calling user holds write permission on
+                    # Permission bypass is intentional: the calling user holds write permission on
                     # Accommodation Building (checked above), but Safety Task Catalog is a
                     # master-data DocType maintained by administrators. Allowing the role to
                     # append scope rows here is an intentional cross-doctype operation that
@@ -284,7 +284,7 @@ def generate_safety_setup(building_name):
                     "safety_task_catalog": catalog.name,
                     "frequency": template_freq,
                     "is_active": 1,
-                # ignore_permissions=True: same rationale as above — the calling user is
+                # Permission bypass intentional, same rationale as above — the calling user is
                 # authorized on the building, but Scheduled Task Template is owned by the
                 # admin/safety-manager role. Creating templates on their behalf during
                 # building setup is the intended workflow.
