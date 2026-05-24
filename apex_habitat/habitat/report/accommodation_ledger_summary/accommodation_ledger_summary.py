@@ -25,9 +25,11 @@ def execute(filters=None):
         query_filters["building"] = filters["building"]
     if filters.get("ledger_type"):
         query_filters["ledger_type"] = filters["ledger_type"]
-    if filters.get("from_date"):
+    if filters.get("from_date") and filters.get("to_date"):
+        query_filters["posting_date"] = ["between", [filters["from_date"], filters["to_date"]]]
+    elif filters.get("from_date"):
         query_filters["posting_date"] = [">=", filters["from_date"]]
-    if filters.get("to_date"):
+    elif filters.get("to_date"):
         query_filters["posting_date"] = ["<=", filters["to_date"]]
 
     rows = frappe.get_all(
