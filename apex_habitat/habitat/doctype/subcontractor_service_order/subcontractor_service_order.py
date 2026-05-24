@@ -18,6 +18,9 @@ class SubcontractorServiceOrder(Document):
 @frappe.whitelist()
 def start_work(service_order):
     """Transition Subcontractor Service Order from Scheduled to In Progress."""
+    if not frappe.has_permission("Subcontractor Service Order", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
     doc = frappe.get_doc("Subcontractor Service Order", service_order)
 
     if doc.docstatus != 1:
@@ -33,6 +36,9 @@ def start_work(service_order):
 @frappe.whitelist()
 def mark_missed(service_order):
     """Transition Subcontractor Service Order from In Progress to Missed."""
+    if not frappe.has_permission("Subcontractor Service Order", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
     doc = frappe.get_doc("Subcontractor Service Order", service_order)
 
     if doc.docstatus != 1:

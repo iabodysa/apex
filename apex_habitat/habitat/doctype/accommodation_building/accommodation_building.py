@@ -168,12 +168,16 @@ def generate_safety_setup(building_name):
       1. If not applicable_to_all_buildings: add building to scope (Safety Task Building Scope child row).
       2. Create a Scheduled Task Template linked to this building + catalog if none exists yet.
 
+
     Updates building safety_setup_status, safety_setup_generated_on, safety_setup_generated_by.
     Returns summary dict.
 
     Building License records are NOT created — they require a real license_number.
     The summary lists recommended license types for the operator to create manually.
     """
+    if not frappe.has_permission("Accommodation Building", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
     doc = frappe.get_doc("Accommodation Building", building_name)
 
     catalogs = frappe.get_all(
@@ -261,6 +265,9 @@ def generate_safety_setup(building_name):
 @frappe.whitelist()
 def update_room_inventory(room_name, readiness_status, inventory_notes=None):
     """Allow supervisor to record room readiness without opening full form."""
+    if not frappe.has_permission("Accommodation Room", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
     allowed = ("Unknown", "Ready", "Needs Cleaning", "Needs Repair", "Out of Service")
     if readiness_status not in allowed:
         frappe.throw(_("Invalid readiness status."))
