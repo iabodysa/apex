@@ -8,10 +8,7 @@ from frappe.model.document import Document
 
 
 class MaintenanceInspectionReport(Document):
-    def before_save(self):
-        # Validate document properties
-        if self.doctype != "Maintenance Inspection Report":
-            frappe.throw("DocType mismatch")
+    pass
 
 
 def validate(doc, method=None):

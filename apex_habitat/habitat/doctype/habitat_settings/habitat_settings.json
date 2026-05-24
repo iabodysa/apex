@@ -157,11 +157,21 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "default_payment_method",
+      "label": "Default Payment Method",
+      "fieldtype": "Select",
+      "options": "Payment Entry\nPayment Order\nExpense Request Afmco",
+      "default": "Payment Entry",
+      "description": "Document type to generate when creating rent payments from Accommodation Lease.",
+      "idx": 18
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "habitat_settings_sec_system",
       "fieldtype": "Section Break",
       "label": "System Details",
       "collapsible": 1,
-      "idx": 18
+      "idx": 19
     },
     {
       "doctype": "DocField",
@@ -169,7 +179,7 @@
       "label": "Last Modified By Role",
       "fieldtype": "Data",
       "read_only": 1,
-      "idx": 19
+      "idx": 20
     }
   ],
   "permissions": [
