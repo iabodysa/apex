@@ -9,10 +9,7 @@ from frappe.utils import flt
 
 
 class MaintenanceWorkOrder(Document):
-    def before_save(self):
-        # Validate document properties
-        if self.doctype != "Maintenance Work Order":
-            frappe.throw("DocType mismatch")
+    pass
 
 
 def validate(doc, method=None):

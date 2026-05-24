@@ -306,6 +306,7 @@ def weekly_occupancy_sync() -> None:
     Runs a full reconciliation pass to correct any counter drift caused by
     out-of-band data changes.
     """
+    # --- Room pass ---
     # Paginate rooms at 500/batch; use frappe.db.set_value to avoid per-row .save()
     start = 0
     batch_size = 500
@@ -345,6 +346,51 @@ def weekly_occupancy_sync() -> None:
         start += batch_size
 
     frappe.logger().info("weekly_occupancy_sync: room occupancy counters refreshed.")
+
+    # --- Building pass ---
+    # Guard: skip buildings with no rooms to avoid division by zero in
+    # occupancy_percent calculation.
+    start = 0
+    while True:
+        building_names = frappe.get_all(
+            "Accommodation Building",
+            pluck="name",
+            limit_start=start,
+            limit_page_length=batch_size,
+        )
+        if not building_names:
+            break
+
+        for building_name in building_names:
+            total_rooms = frappe.db.count(
+                "Accommodation Room",
+                {"building": building_name},
+            )
+            if not total_rooms:
+                # Building has no rooms — skip to avoid division by zero.
+                continue
+
+            active = frappe.db.count(
+                "Accommodation Assignment",
+                {"building": building_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
+            )
+            total_capacity = (
+                frappe.db.get_value("Accommodation Building", building_name, "total_capacity") or 0
+            )
+            occupancy_pct = (active / total_capacity * 100) if total_capacity else 0.0
+            frappe.db.set_value(
+                "Accommodation Building",
+                building_name,
+                {
+                    "current_occupants": active,
+                    "occupancy_percent": round(occupancy_pct, 2),
+                },
+                update_modified=False,
+            )
+
+        start += batch_size
+
+    frappe.logger().info("weekly_occupancy_sync: building occupancy counters refreshed.")
 
 
 def weekly_safety_task_compliance_scan() -> None:

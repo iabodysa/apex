@@ -84,7 +84,7 @@
    "fieldname": "ledger_type",
    "label": "Ledger Type",
    "fieldtype": "Select",
-   "options": "Rent\nElectricity\nWater\nCleaning Staff Salary\nSupervisor Salary\nMaintenance\nOther",
+   "options": "Rent\nElectricity\nWater\nGas\nInternet\nTelecom\nCleaning Staff Salary\nSupervisor Salary\nMaintenance\nOther",
    "reqd": 1,
    "idx": 9
   },
