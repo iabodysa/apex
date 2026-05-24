@@ -66,15 +66,23 @@ def generate_rooms_and_beds(building_name):
     if not doc.floor_plan:
         frappe.throw(_("No floor plan defined. Add floor rows before generating."))
 
-    # Build set of existing room_numbers in this building
-    existing_rooms = {
-        r[0] for r in frappe.db.get_all(
-            "Accommodation Room",
-            filters={"building": building_name},
-            fields=["room_number"],
-            as_list=True,
-        )
-    }
+    # Build existing room map: room_number → room.name
+    existing_room_rows = frappe.db.get_all(
+        "Accommodation Room",
+        filters={"building": building_name},
+        fields=["name", "room_number"],
+    )
+    existing_room_map = {r.room_number: r.name for r in existing_room_rows}
+
+    # Build existing bed codes (idempotency guard)
+    _bed_rows = frappe.db.sql(
+        "SELECT ab.bed_code FROM `tabAccommodation Bed` ab "
+        "JOIN `tabAccommodation Room` ar ON ab.room = ar.name "
+        "WHERE ar.building = %s",
+        building_name,
+        as_list=True,
+    )
+    existing_bed_codes = {r[0] for r in _bed_rows}
 
     created_rooms = 0
     skipped_rooms = 0
@@ -95,13 +103,16 @@ def generate_rooms_and_beds(building_name):
 
         if count <= 0 or capacity <= 0:
             continue
+        if capacity > 50:
+            frappe.throw(_("Bed capacity per room exceeds maximum of 50. Floor {0}: {1} beds configured.").format(floor, capacity))
 
         for i in range(count):
             room_num_raw = start + i
             room_number = f"{prefix}{floor}-{str(room_num_raw).zfill(2)}"
 
-            if room_number in existing_rooms:
+            if room_number in existing_room_map:
                 skipped_rooms += 1
+                room_doc_name = existing_room_map[room_number]
             else:
                 room = frappe.get_doc({
                     "doctype": "Accommodation Room",
@@ -114,32 +125,34 @@ def generate_rooms_and_beds(building_name):
                     "readiness_status": "Unknown",
                 })
                 room.insert(ignore_permissions=True)
-                existing_rooms.add(room_number)
+                existing_room_map[room_number] = room.name
+                room_doc_name = room.name
                 created_rooms += 1
 
-                if gen_beds:
-                    for b in range(1, capacity + 1):
-                        bed_code = f"{room_number}-{str(b).zfill(3)}"
+            if gen_beds and room_doc_name:
+                for b in range(1, capacity + 1):
+                    bed_code = f"{room_number}-{str(b).zfill(3)}"
+                    if bed_code in existing_bed_codes:
+                        skipped_beds += 1
+                    else:
                         bed = frappe.get_doc({
                             "doctype": "Accommodation Bed",
-                            "room": room.name,
+                            "room": room_doc_name,
                             "bed_code": bed_code,
                             "status": "Available",
                             "condition": "Good",
                         })
                         bed.insert(ignore_permissions=True)
+                        existing_bed_codes.add(bed_code)
                         created_beds += 1
 
-            # Beds for existing rooms that have none yet
-            if gen_beds and room_number in existing_rooms and room_number not in []:
-                pass  # Only create beds for newly created rooms in this run
-
-    # Update building setup fields
-    frappe.db.set_value("Accommodation Building", building_name, {
-        "setup_status": "Rooms Generated",
-        "setup_generated_on": today(),
-        "setup_generated_by": frappe.session.user,
-    })
+    # Only update setup audit fields when new records were created
+    if created_rooms > 0 or created_beds > 0:
+        frappe.db.set_value("Accommodation Building", building_name, {
+            "setup_status": "Rooms Generated",
+            "setup_generated_on": today(),
+            "setup_generated_by": frappe.session.user,
+        })
 
     frappe.db.commit()
 
@@ -218,7 +231,16 @@ def generate_safety_setup(building_name):
             {"building": building_name, "safety_task_catalog": catalog.name},
         )
         if not template_exists:
-            _freq_map = {"Annual": "Annually", "As Needed": "Monthly", "On Entry": "Monthly"}
+            _freq_map = {
+                "Annual": "Annually",
+                "Semi-Annual": "Every 6 Months",
+                "Quarterly": "Quarterly",
+                "Monthly": "Monthly",
+                "Weekly": "Weekly",
+                "Daily": "Daily",
+                "As Needed": "As Needed",
+                "On Entry": "On Entry",
+            }
             template_freq = _freq_map.get(catalog.frequency, catalog.frequency)
             title = catalog.task_title_en or catalog.task_code or catalog.task_title or catalog.name
             frappe.get_doc({
