@@ -31,5 +31,36 @@ frappe.ui.form.on("Scheduled Task Instance", {
 				);
 			}, __("Status"));
 		}
+
+		if (frm.doc.docstatus === 1 && ["Open", "In Progress"].includes(frm.doc.status)) {
+			frm.add_custom_button(__("Mark Completed"), function () {
+				frappe.confirm(
+					__("Mark this Task Instance as Completed?"),
+					function () {
+						frappe.call({
+							method: "apex_habitat.habitat.doctype.scheduled_task_instance.scheduled_task_instance.mark_completed",
+							args: { task_instance: frm.doc.name },
+							freeze: true,
+							freeze_message: __("Updating status..."),
+							callback: function (r) {
+								if (!r.exc) {
+									frappe.show_alert({
+										message: __("Task Instance marked Completed."),
+										indicator: "green",
+									});
+									frm.reload_doc();
+								}
+							},
+							error: function () {
+								frappe.show_alert({
+									message: __("Could not update the Task Instance. Please try again."),
+									indicator: "red",
+								});
+							},
+						});
+					}
+				);
+			}, __("Status"));
+		}
 	}
 });
