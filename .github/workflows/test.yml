@@ -1,0 +1,51 @@
+name: Tests
+
+on:
+  push:
+    branches: [apex]
+  pull_request:
+    branches: [apex]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install bench CLI
+        run: pip install frappe-bench
+
+      - name: Create bench
+        run: bench init --skip-redis-config-generation --frappe-branch version-15 frappe-bench
+
+      - name: Get apex_habitat app
+        working-directory: frappe-bench
+        run: bench get-app apex_habitat ${{ github.workspace }}
+
+      - name: Create test site
+        working-directory: frappe-bench
+        run: |
+          bench new-site test.localhost --db-root-password root --admin-password admin --no-mariadb-socket
+          bench --site test.localhost install-app apex_habitat
+
+      - name: Run tests
+        working-directory: frappe-bench
+        run: bench --site test.localhost run-tests --app apex_habitat
