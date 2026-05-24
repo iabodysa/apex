@@ -6,6 +6,10 @@
  "module": "Habitat",
  "icon": "review",
  "public": 1,
+ "roles": [
+  {"role": "Internal Auditor"},
+  {"role": "Accommodation Manager"}
+ ],
  "is_default": 0,
  "sequence_id": 8.0,
  "parent_page": "Operations Command Center",

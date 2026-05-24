@@ -6,6 +6,10 @@
   "module": "Habitat",
   "icon": "money-coins-1",
   "public": 1,
+  "roles": [
+    {"role": "Finance Manager"},
+    {"role": "Accommodation Manager"}
+  ],
   "is_default": 0,
   "sequence_id": 7.0,
   "parent_page": "Operations Command Center",
