@@ -10,7 +10,7 @@ class TestCustodyAssetCategory(FrappeTestCase):
             "doctype": "Custody Asset Category",
             "category_name": "QA Bedding",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.category_name, "QA Bedding")
         frappe.delete_doc("Custody Asset Category", doc.name, force=True, ignore_permissions=True)
 

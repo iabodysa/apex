@@ -14,7 +14,7 @@ class TestSafetyTaskExecution(FrappeTestCase):
             "task": "STC-QA-001",
             "execution_status": "Good",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.execution_status, "Good")
         frappe.delete_doc("Safety Task Execution", doc.name, force=True, ignore_permissions=True)
 

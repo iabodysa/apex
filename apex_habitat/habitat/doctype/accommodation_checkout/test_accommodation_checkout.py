@@ -13,7 +13,7 @@ class TestAccommodationCheckout(FrappeTestCase):
             "checkout_date": "2026-07-01",
             "checkout_reason": "End of Contract",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.checkout_reason, "End of Contract")
         frappe.delete_doc("Accommodation Checkout", doc.name, force=True, ignore_permissions=True)
 

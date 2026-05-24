@@ -14,7 +14,7 @@ class TestFacilityAssetCustodyAssignment(FrappeTestCase):
             "handover_date": "2026-06-01",
             "all_assets_verified": 1,
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Facility Asset Custody Assignment", doc.name, force=True, ignore_permissions=True)
 

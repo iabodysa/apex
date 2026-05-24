@@ -14,7 +14,7 @@ class TestSafetyTaskCatalog(FrappeTestCase):
             "department": "Fire Safety",
             "frequency": "Monthly",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.task_code, "STC-QA-001")
         frappe.delete_doc("Safety Task Catalog", doc.name, force=True, ignore_permissions=True)
 

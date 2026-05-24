@@ -12,7 +12,7 @@ class TestScheduledTaskInstance(FrappeTestCase):
             "template": "QA TEMPLATE",
             "due_date": "2026-06-25",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Scheduled Task Instance", doc.name, force=True, ignore_permissions=True)
 

@@ -13,7 +13,7 @@ class TestSubcontractorServiceOrder(FrappeTestCase):
             "building": "QA-BLDG",
             "scheduled_date": "2026-07-05",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Subcontractor Service Order", doc.name, force=True, ignore_permissions=True)
 

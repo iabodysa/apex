@@ -11,7 +11,7 @@ class TestAccommodationBuilding(FrappeTestCase):
             "building_name": "QA Test Building",
             "total_capacity": 20,
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.building_name, "QA Test Building")
         frappe.delete_doc("Accommodation Building", doc.name, force=True, ignore_permissions=True)
 

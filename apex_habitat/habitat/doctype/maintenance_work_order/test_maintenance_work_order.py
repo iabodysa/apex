@@ -14,7 +14,7 @@ class TestMaintenanceWorkOrder(FrappeTestCase):
             "planned_start_date": "2026-06-10",
             "planned_end_date": "2026-06-12",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Maintenance Work Order", doc.name, force=True, ignore_permissions=True)
 

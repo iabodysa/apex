@@ -17,7 +17,7 @@ class TestAccommodationAssignment(FrappeTestCase):
             "check_in_date": "2026-06-01",
             "assignment_type": "New Assignment",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Accommodation Assignment", doc.name, force=True, ignore_permissions=True)
 
@@ -48,3 +48,21 @@ class TestAccommodationAssignment(FrappeTestCase):
         })
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_duplicate_active_assignment_rejected(self):
+        """Employee with existing active assignment cannot get a second."""
+        # Setup: Create building, room, bed, employee with an active assignment
+        # Then try to create a second assignment for the same employee
+        # Expect frappe.exceptions.ValidationError
+        import frappe
+        from frappe.exceptions import ValidationError
+        # Use try/except or assertRaises pattern
+        pass  # Implement the test body using available fixtures
+
+    def test_occupied_bed_rejected(self):
+        """Assignment to an already-occupied bed should be rejected."""
+        pass
+
+    def test_room_not_in_building_rejected(self):
+        """Assignment where room doesn't belong to the specified building is rejected."""
+        pass

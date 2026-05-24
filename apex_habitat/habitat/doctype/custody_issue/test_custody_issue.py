@@ -13,7 +13,7 @@ class TestCustodyIssue(FrappeTestCase):
             "building": "QA-BLDG",
             "items": [{"doctype": "Custody Issue Item", "article": "QA-ART", "qty": 1}],
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Custody Issue", doc.name, force=True, ignore_permissions=True)
 

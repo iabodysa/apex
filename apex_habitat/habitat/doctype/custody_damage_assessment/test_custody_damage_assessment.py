@@ -14,7 +14,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
             "items": [{"doctype": "Custody Damage Item", "article": "QA-ART",
                         "damage_description": "cracked", "estimated_replacement_cost_sar": 150}],
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Custody Damage Assessment", doc.name, force=True, ignore_permissions=True)
 

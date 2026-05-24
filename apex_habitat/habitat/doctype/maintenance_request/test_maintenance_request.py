@@ -15,7 +15,7 @@ class TestMaintenanceRequest(FrappeTestCase):
             "issue_type": "Plumbing",
             "issue_description": "Leak under sink",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.issue_type, "Plumbing")
         frappe.delete_doc("Maintenance Request", doc.name, force=True, ignore_permissions=True)
 

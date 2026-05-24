@@ -15,7 +15,7 @@ class TestBuildingLicense(FrappeTestCase):
             "issue_date": "2026-01-01",
             "expiry_date": "2027-01-01",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.license_number, "LIC-QA-001")
         frappe.delete_doc("Building License", doc.name, force=True, ignore_permissions=True)
 

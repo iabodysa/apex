@@ -13,7 +13,7 @@ class TestSafetyInspectionReport(FrappeTestCase):
             "inspection_date": "2026-06-15",
             "inspector": "Administrator",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Safety Inspection Report", doc.name, force=True, ignore_permissions=True)
 

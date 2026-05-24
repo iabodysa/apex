@@ -11,7 +11,7 @@ class TestOperationalDepreciationPolicy(FrappeTestCase):
             "policy_name": "QA Straight Line Policy",
             "useful_life_years": 5,
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.useful_life_years, 5)
         frappe.delete_doc("Operational Depreciation Policy", doc.name, force=True, ignore_permissions=True)
 

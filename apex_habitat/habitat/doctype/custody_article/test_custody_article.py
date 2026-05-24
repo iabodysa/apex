@@ -11,7 +11,7 @@ class TestCustodyArticle(FrappeTestCase):
             "article_name": "QA Mattress",
             "category": "QA-CAT",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.article_name, "QA Mattress")
         frappe.delete_doc("Custody Article", doc.name, force=True, ignore_permissions=True)
 

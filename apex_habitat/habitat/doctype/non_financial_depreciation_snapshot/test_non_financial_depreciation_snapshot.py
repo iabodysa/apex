@@ -14,7 +14,7 @@ class TestNonFinancialDepreciationSnapshot(FrappeTestCase):
             "items": [{"doctype": "Depreciation Snapshot Item",
                         "article": "QA-ART", "original_cost_sar": 200}],
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Non-Financial Depreciation Snapshot", doc.name, force=True, ignore_permissions=True)
 

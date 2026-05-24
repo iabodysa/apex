@@ -16,7 +16,7 @@ class TestAccommodationLease(FrappeTestCase):
             "lease_end_date": "2026-12-31",
             "rent_amount": 8000,
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.rent_amount, 8000)
         frappe.delete_doc("Accommodation Lease", doc.name, force=True, ignore_permissions=True)
 

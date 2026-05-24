@@ -14,7 +14,7 @@ class TestFacilityAsset(FrappeTestCase):
             "building": "QA-BLDG",
             "responsible_supervisor": "Administrator",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.asset_name, "QA CCTV Camera 1")
         frappe.delete_doc("Facility Asset", doc.name, force=True, ignore_permissions=True)
 

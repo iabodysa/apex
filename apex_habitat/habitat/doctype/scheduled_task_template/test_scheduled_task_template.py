@@ -11,7 +11,7 @@ class TestScheduledTaskTemplate(FrappeTestCase):
             "template_name": "QA Weekly Safety Check",
             "frequency": "Weekly",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.frequency, "Weekly")
         frappe.delete_doc("Scheduled Task Template", doc.name, force=True, ignore_permissions=True)
 

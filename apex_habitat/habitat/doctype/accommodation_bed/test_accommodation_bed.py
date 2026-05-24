@@ -12,7 +12,7 @@ class TestAccommodationBed(FrappeTestCase):
             "room": "ROOM-0001",
             "bed_code": "B-A1",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertEqual(doc.bed_code, "B-A1")
         frappe.delete_doc("Accommodation Bed", doc.name, force=True, ignore_permissions=True)
 

@@ -14,7 +14,7 @@ class TestRoomBedTransfer(FrappeTestCase):
             "to_bed": "BED-QA",
             "transfer_date": "2026-06-01",
         })
-        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Room Bed Transfer", doc.name, force=True, ignore_permissions=True)
 
