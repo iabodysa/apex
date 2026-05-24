@@ -54,13 +54,17 @@ def on_submit(doc, method=None):
             )
             return
 
+        # Validate that the configured salary component is a Deduction type
+        component_type = frappe.db.get_value("Salary Component", salary_component, "type")
+        if component_type != "Deduction":
+            frappe.throw(_("Salary component {0} must be of type Deduction for damage assessments.").format(salary_component))
+
         try:
             # Create a Draft Additional Salary record
             add_sal = frappe.get_doc({
                 "doctype": "Additional Salary",
                 "employee": doc.employee,
                 "salary_component": salary_component,
-                "type": "Deduction",
                 "amount": amount,
                 "payroll_date": doc.assessment_date,
                 "company": company,

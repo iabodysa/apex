@@ -15,10 +15,7 @@ from apex_habitat.habitat.doctype.accommodation_assignment.accommodation_assignm
 
 
 class AccommodationCheckout(Document):
-    def before_save(self):
-        # Validate document properties
-        if self.doctype != "Accommodation Checkout":
-            frappe.throw("DocType mismatch")
+    pass
 
 
 def validate(doc, method=None):

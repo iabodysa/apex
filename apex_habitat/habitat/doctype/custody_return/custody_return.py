@@ -8,10 +8,7 @@ from frappe.model.document import Document
 
 
 class CustodyReturn(Document):
-    def before_save(self):
-        # Validate document properties
-        if self.doctype != "Custody Return":
-            frappe.throw("DocType mismatch")
+    pass
 
 
 def validate(doc, method=None):
