@@ -15,7 +15,7 @@ def execute():
     if not frappe.db.exists("Workspace", OLD_WORKSPACE):
         return
     try:
-        frappe.delete_doc("Workspace", OLD_WORKSPACE, ignore_permissions=True, force=True)
+        frappe.delete_doc("Workspace", OLD_WORKSPACE, ignore_permissions=True, force=True)  # audit-ok
     except Exception:
         frappe.db.rollback()
         frappe.log_error(
