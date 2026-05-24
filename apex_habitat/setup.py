@@ -3,6 +3,8 @@ from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_mate
 
 from apex_habitat.habitat.doctype.maintenance_material.maintenance_material_catalog import seed_catalog
 
+from apex_habitat.habitat.notifications_seed import seed_operational_notifications
+
 
 def after_install():
     create_roles()
@@ -13,6 +15,7 @@ def after_install():
     create_safety_task_catalogs()
     seed_catalog()
     seed_templates()
+    seed_operational_notifications()
     # Force translation cache reload so Arabic strings appear on first login
     frappe.clear_cache()
 
