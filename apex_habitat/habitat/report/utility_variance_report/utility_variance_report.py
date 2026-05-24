@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.utils import flt
 
 
 def execute(filters=None):
@@ -20,7 +21,7 @@ def execute(filters=None):
     if filters and filters.get("building"):
         query_filters["building"] = filters["building"]
 
-    data = frappe.get_all(
+    rows = frappe.get_all(
         "Utility Bill Entry",
         filters=query_filters,
         fields=[
@@ -36,4 +37,17 @@ def execute(filters=None):
         order_by="variance_from_avg_pct desc",
         limit_page_length=1000,
     )
+
+    data = []
+    for row in rows:
+        data.append({
+            "name": row.name,
+            "utility_account": row.utility_account,
+            "building": row.building,
+            "utility_type": row.utility_type,
+            "bill_amount_sar": flt(row.get("bill_amount_sar")),
+            "consumption_units": row.consumption_units,
+            "variance_from_avg_pct": flt(row.get("variance_from_avg_pct")),
+            "status": row.status,
+        })
     return columns, data

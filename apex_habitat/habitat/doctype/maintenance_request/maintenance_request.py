@@ -27,7 +27,7 @@ def _validate_status_rules(doc):
         frappe.throw(_("Resolution Notes are required to resolve or close a Maintenance Request."))
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_work_order(source_name, target_doc=None):
     from frappe.model.mapper import get_mapped_doc
 

@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.utils import flt
 
 
 def execute(filters=None):
@@ -21,7 +22,7 @@ def execute(filters=None):
     if filters and filters.get("building"):
         query_filters["building"] = filters["building"]
 
-    data = frappe.get_all(
+    rows = frappe.get_all(
         "Accommodation Ledger",
         filters=query_filters,
         fields=[
@@ -38,4 +39,18 @@ def execute(filters=None):
         order_by="posting_date desc",
         limit_page_length=1000,
     )
+
+    data = []
+    for row in rows:
+        data.append({
+            "posting_date": row.posting_date,
+            "employee": row.employee,
+            "building": row.building,
+            "ledger_type": row.ledger_type,
+            "amount": flt(row.get("amount")),
+            "allocation_basis": row.allocation_basis,
+            "source_doctype": row.source_doctype,
+            "source_name": row.source_name,
+            "source_line_id": row.source_line_id,
+        })
     return columns, data

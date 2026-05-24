@@ -77,5 +77,9 @@ def regenerate_schedule(name):
     doc.payment_schedule = []
     _build_schedule(doc)
     doc.total_scheduled = sum(flt(r.amount) for r in doc.payment_schedule)
-    doc.save(ignore_permissions=True)
+    try:
+        doc.save()
+    except Exception:
+        frappe.db.rollback()
+        frappe.throw(_("Could not save changes. Please try again or contact support."))
     return len(doc.payment_schedule)

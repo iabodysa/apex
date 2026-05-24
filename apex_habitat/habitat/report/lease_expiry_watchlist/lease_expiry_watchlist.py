@@ -2,10 +2,12 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import date_diff, today
+from frappe.utils import date_diff, today, flt
 
 
 def execute(filters=None):
+    filters = filters or {}
+
     columns = [
         {"label": frappe._("Lease"), "fieldname": "name", "fieldtype": "Link", "options": "Accommodation Lease", "width": 150},
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 160},
@@ -15,9 +17,19 @@ def execute(filters=None):
         {"label": frappe._("Monthly Rent (SAR)"), "fieldname": "rent_amount", "fieldtype": "Currency", "width": 140},
     ]
 
+    query_filters = {"docstatus": 1, "status": "Active"}
+    if filters.get("building"):
+        query_filters["building"] = filters["building"]
+    if filters.get("from_date") and filters.get("to_date"):
+        query_filters["lease_end_date"] = ["between", [filters["from_date"], filters["to_date"]]]
+    elif filters.get("from_date"):
+        query_filters["lease_end_date"] = [">=", filters["from_date"]]
+    elif filters.get("to_date"):
+        query_filters["lease_end_date"] = ["<=", filters["to_date"]]
+
     leases = frappe.get_all(
         "Accommodation Lease",
-        filters={"docstatus": 1, "status": "Active"},
+        filters=query_filters,
         fields=["name", "building", "status", "lease_end_date", "rent_amount"],
         order_by="lease_end_date asc",
     )
@@ -25,8 +37,14 @@ def execute(filters=None):
     today_str = today()
     data = []
     for lease in leases:
-        lease["days_to_expiry"] = (
-            date_diff(lease["lease_end_date"], today_str) if lease.get("lease_end_date") else None
-        )
-        data.append(lease)
+        data.append({
+            "name": lease["name"],
+            "building": lease["building"],
+            "status": lease["status"],
+            "lease_end_date": lease["lease_end_date"],
+            "days_to_expiry": (
+                date_diff(lease["lease_end_date"], today_str) if lease.get("lease_end_date") else None
+            ),
+            "rent_amount": flt(lease.get("rent_amount")),
+        })
     return columns, data
