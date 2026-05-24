@@ -6,8 +6,11 @@ from frappe.utils import get_url
 
 
 class AccommodationQRLocation(Document):
-    def before_save(self):
-        if not self.location_token:
-            self.location_token = frappe.generate_hash(length=10)
+    pass
 
-        self.public_url = get_url(f"/qr-request?token={self.location_token}")
+
+def before_save(doc, method=None):
+    if not doc.location_token:
+        doc.location_token = frappe.generate_hash(length=10)
+
+    doc.public_url = get_url(f"/qr-request?token={doc.location_token}")
