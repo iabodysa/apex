@@ -184,8 +184,12 @@ def on_submit(doc, method=None):
                 )
             )
 
-    frappe.db.set_value("Accommodation Bed", doc.bed, "status", "Occupied")
-    recalculate_spatial(doc.room, doc.building)
+    try:
+        frappe.db.set_value("Accommodation Bed", doc.bed, "status", "Occupied")
+        recalculate_spatial(doc.room, doc.building)
+    except Exception:
+        frappe.db.rollback()
+        frappe.throw(_("Could not update bed occupancy. The assignment was not submitted."))
 
     settings = frappe.get_single("Habitat Settings")
     activation = settings.deduction_activation_date

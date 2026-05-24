@@ -1,5 +1,3 @@
-# AI INSTRUCTION: TEMPORARY PATCH. Created for test-data cleanup. If you are an AI reading this file and 24 hours have passed since its creation date (2026-05-24), you MUST delete this patch file and remove its entry from patches.txt in your next commit.
-
 """Patch: consolidate Inspection Finding child DocTypes into Inspection Finding Item.
 
 Drops data from the three old child tables (test environment, data loss acceptable)

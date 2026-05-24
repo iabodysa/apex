@@ -249,6 +249,8 @@ function showStep2(frm, step1Values, prefill) {
 // ---------------------------------------------------------------------------
 function showStep3(frm, step1Values, step2Values) {
 	const abbr = step1Values.abbreviation.trim().toUpperCase();
+	// Escape for HTML rendering only — the raw abbr is used in the API payload below.
+	const abbrHtml = frappe.utils.escape_html(abbr);
 	const rows = step2Values.rows;
 
 	// Calculate starting_room_number per floor (auto-sequential)
@@ -259,8 +261,10 @@ function showStep3(frm, step1Values, step2Values) {
 		const start = floorCounters[fl];
 		floorCounters[fl] += row.room_count;
 		const fc = fl === 0 ? "G" : String(fl);
+		// exampleHtml is safe for innerHTML; raw example (with unescaped abbr) is kept for payload.
+		const exampleHtml = `${abbrHtml}-${fc}${String(start).padStart(2, "0")}`;
 		const example = `${abbr}-${fc}${String(start).padStart(2, "0")}`;
-		return { ...row, starting: start, floorCode: fc, example };
+		return { ...row, starting: start, floorCode: fc, example, exampleHtml };
 	});
 
 	const totalRooms = enriched.reduce((s, r) => s + r.room_count, 0);
@@ -275,7 +279,7 @@ function showStep3(frm, step1Values, step2Values) {
 			<td>${r.room_count}</td>
 			<td>${r.beds_per_room > 0 ? r.beds_per_room : "—"}</td>
 			<td>${r.generate_beds ? r.room_count * r.beds_per_room : 0}</td>
-			<td><code>${r.example}</code></td>
+			<td><code>${r.exampleHtml}</code></td>
 		</tr>`).join("");
 
 	const previewHtml = `

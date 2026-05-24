@@ -28,9 +28,6 @@ def execute(filters=None):
         "cleaning_date": ["between", [str(date_from), str(date_to)]],
         "missed_cleaning": ["in", [1, "Yes"]],
     }
-    if not query_filters.get("missed_cleaning"):
-        # also include rework rows if filter not set
-        pass
 
     if filters.get("building"):
         query_filters["building"] = filters["building"]
@@ -71,10 +68,22 @@ def execute(filters=None):
 
     today_date = getdate(today())
 
+    # Prefetch employee names for all cleaner_employee values in one query
+    all_logs = list(missed) + list(rework)
+    all_cleaner_employees = list({log.cleaner_employee for log in all_logs if log.cleaner_employee})
+    employee_name_map = {}
+    if all_cleaner_employees:
+        emp_rows = frappe.get_all(
+            "Employee",
+            filters={"name": ["in", all_cleaner_employees]},
+            fields=["name", "employee_name"],
+        )
+        employee_name_map = {e.name: e.employee_name for e in emp_rows}
+
     def build_row(log, issue_label):
         cleaner_label = log.cleaned_by or ""
         if log.cleaner_employee:
-            cleaner_label = frappe.db.get_value("Employee", log.cleaner_employee, "employee_name") or log.cleaner_employee
+            cleaner_label = employee_name_map.get(log.cleaner_employee) or log.cleaner_employee
         days = (today_date - getdate(log.cleaning_date)).days if log.cleaning_date else 0
         return {
             "name": log.name,

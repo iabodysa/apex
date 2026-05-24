@@ -66,6 +66,17 @@ def execute(filters=None):
         if rr.cleaned:
             room_cleaned[rr.parent] += 1
 
+    # Prefetch employee names for all cleaner_employee values in one query
+    all_cleaner_employees = list({log.cleaner_employee for log in logs if log.cleaner_employee})
+    employee_name_map = {}
+    if all_cleaner_employees:
+        emp_rows = frappe.get_all(
+            "Employee",
+            filters={"name": ["in", all_cleaner_employees]},
+            fields=["name", "employee_name"],
+        )
+        employee_name_map = {e.name: e.employee_name for e in emp_rows}
+
     data = []
     for log in logs:
         total = room_totals[log.name]
@@ -74,7 +85,7 @@ def execute(filters=None):
 
         cleaner_label = log.cleaned_by or ""
         if log.cleaner_employee:
-            cleaner_label = frappe.db.get_value("Employee", log.cleaner_employee, "employee_name") or log.cleaner_employee
+            cleaner_label = employee_name_map.get(log.cleaner_employee) or log.cleaner_employee
 
         data.append({
             "name": log.name,

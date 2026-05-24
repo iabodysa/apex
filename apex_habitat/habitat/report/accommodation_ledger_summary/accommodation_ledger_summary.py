@@ -41,6 +41,7 @@ def execute(filters=None):
             "total_site_cost", "employee_daily_share", "source_doctype", "source_name",
         ],
         order_by="building asc, ledger_type asc, allocation_period_start desc",
+        limit_page_length=5000,
     )
 
     data = []

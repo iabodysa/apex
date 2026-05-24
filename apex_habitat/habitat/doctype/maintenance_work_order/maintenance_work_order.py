@@ -82,38 +82,45 @@ def mark_completed(work_order, completion_notes=None):
     if not doc.completion_photo:
         frappe.throw(_("A completion photo is required before closing a Maintenance Work Order."))
 
-    doc.db_set("status", "Completed")
-    if completion_notes and not doc.completion_notes:
-        doc.db_set("completion_notes", completion_notes)
-        
-    if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
-        mr_status_field = {f.fieldname for f in frappe.get_meta("Maintenance Request").fields}
-        if "status" in mr_status_field:
-            frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "Closed")
-
     ledger_posted = False
     cost = flt(doc.total_procurement_cost_sar)
-    already_posted = frappe.db.exists(
-        "Accommodation Ledger",
-        {"source_doctype": "Maintenance Work Order", "source_name": doc.name},
-    )
-    if cost > 0 and not already_posted:
-        frappe.get_doc({
-            "doctype": "Accommodation Ledger",
-            "posting_date": doc.actual_end_date or today(),
-            "building": doc.building,
-            "ledger_type": "Maintenance",
-            "total_site_cost": cost,
-            "capacity_denominator": 0,
-            "employee_daily_share": 0,
-            "posting_mode": "Operational Memo",
-            "source_doctype": "Maintenance Work Order",
-            "source_name": doc.name,
-            "allocation_basis": "Direct",
-            "allocation_period_start": doc.actual_start_date,
-            "allocation_period_end": doc.actual_end_date,
-        }).insert(ignore_permissions=True)
-        ledger_posted = True
+
+    try:
+        doc.db_set("status", "Completed")
+        if completion_notes and not doc.completion_notes:
+            doc.db_set("completion_notes", completion_notes)
+
+        if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
+            mr_status_field = {f.fieldname for f in frappe.get_meta("Maintenance Request").fields}
+            if "status" in mr_status_field:
+                frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "Closed")
+
+        already_posted = frappe.db.exists(
+            "Accommodation Ledger",
+            {"source_doctype": "Maintenance Work Order", "source_name": doc.name},
+        )
+        if cost > 0 and not already_posted:
+            # ignore_permissions=True: Accommodation Ledger is an internal system/audit write
+            # that must succeed regardless of the calling user's ledger permissions.
+            frappe.get_doc({
+                "doctype": "Accommodation Ledger",
+                "posting_date": doc.actual_end_date or today(),
+                "building": doc.building,
+                "ledger_type": "Maintenance",
+                "total_site_cost": cost,
+                "capacity_denominator": 0,
+                "employee_daily_share": 0,
+                "posting_mode": "Operational Memo",
+                "source_doctype": "Maintenance Work Order",
+                "source_name": doc.name,
+                "allocation_basis": "Direct",
+                "allocation_period_start": doc.actual_start_date,
+                "allocation_period_end": doc.actual_end_date,
+            }).insert(ignore_permissions=True)
+            ledger_posted = True
+    except Exception:
+        frappe.db.rollback()
+        frappe.throw(_("Could not complete the Work Order. No changes were saved. Please try again or contact support."))
 
     doc.add_comment("Comment", _("Marked Completed via controlled method."))
     return {"status": "Completed", "ledger_posted": ledger_posted, "cost": cost}

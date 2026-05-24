@@ -20,8 +20,6 @@ def execute(filters=None):
     ]
 
     query_filters = {"docstatus": 1}
-    # Note: Accommodation Checkout has no "building" field — building is derived
-    # per row via the bed link. The building filter is applied in the loop below.
 
     checkouts = frappe.get_all(
         "Accommodation Checkout",
@@ -30,27 +28,65 @@ def execute(filters=None):
         order_by="checkout_date desc",
     )
 
+    if not checkouts:
+        return columns, []
+
+    # --- Prefetch bed -> building mapping in one query ---
+    all_beds = list({co.bed for co in checkouts if co.bed})
+    bed_building_map = {}
+    if all_beds:
+        bed_rows = frappe.get_all(
+            "Accommodation Bed",
+            filters={"name": ["in", all_beds]},
+            fields=["name", "building"],
+        )
+        bed_building_map = {b.name: b.building for b in bed_rows}
+
+    # Apply building filter: keep only checkouts whose bed maps to the requested building
+    building_filter = filters.get("building")
+    if building_filter:
+        checkouts = [
+            co for co in checkouts
+            if bed_building_map.get(co.bed) == building_filter
+        ]
+
+    if not checkouts:
+        return columns, []
+
+    all_employees = list({co.employee for co in checkouts if co.employee})
+
+    # --- Prefetch open custody issue counts grouped by employee in one query ---
+    issue_count_map = {}
+    if all_employees:
+        issue_rows = frappe.get_all(
+            "Custody Issue",
+            filters={"issued_to_employee": ["in", all_employees], "docstatus": 1},
+            fields=["issued_to_employee", "count(name) as issue_count"],
+            group_by="issued_to_employee",
+        )
+        issue_count_map = {r.issued_to_employee: r.issue_count for r in issue_rows}
+
+    # --- Prefetch damage assessments grouped by employee (one per employee) ---
+    damage_map = {}
+    if all_employees:
+        damage_rows = frappe.get_all(
+            "Custody Damage Assessment",
+            filters={"employee": ["in", all_employees], "docstatus": 1},
+            fields=["employee", "name"],
+            order_by="name asc",
+        )
+        # Keep first hit per employee (stable ordering)
+        for dr in damage_rows:
+            if dr.employee not in damage_map:
+                damage_map[dr.employee] = dr.name
+
+    today_date = getdate(today())
     data = []
     for co in checkouts:
-        # Count open custody issues for this employee
-        open_issues = frappe.db.count(
-            "Custody Issue",
-            {"issued_to_employee": co.employee, "docstatus": 1},
-        ) if co.employee else 0
-
-        # Look for damage assessment linked to this checkout
-        damage = frappe.db.get_value(
-            "Custody Damage Assessment",
-            {"employee": co.employee, "docstatus": 1},
-            "name",
-        ) or "" if co.employee else ""
-
-        # Get building from bed
-        building = frappe.db.get_value("Accommodation Bed", co.bed, "building") if co.bed else ""
-        if filters.get("building") and building != filters.get("building"):
-            continue
-
-        days_since = (getdate(today()) - getdate(co.checkout_date)).days if co.checkout_date else 0
+        building = bed_building_map.get(co.bed, "") if co.bed else ""
+        open_issues = issue_count_map.get(co.employee, 0) if co.employee else 0
+        damage = damage_map.get(co.employee, "") if co.employee else ""
+        days_since = (today_date - getdate(co.checkout_date)).days if co.checkout_date else 0
 
         # Show only if custody not cleared or damage exists or open issues
         if not co.custody_cleared or open_issues or damage:
