@@ -86,24 +86,24 @@ class TestRoomGenerator(QABase):
         self.assertEqual(after, before, "BUG: re-run created duplicate rooms")
         self.assertEqual(res["created_rooms"], 0)
 
-    # Scenario 1b: change room_type and re-run -> does existing room type update?
-    def test_1b_change_room_type_rerun(self):
+    # Scenario 1b (FIXED): changing room_type and re-running updates existing rooms.
+    def test_1b_change_room_type_updates_existing(self):
         b = self._make_building(room_count=3, room_type="Standard")
         generate_rooms_and_beds(b.name)
         room = frappe.get_all("Accommodation Room", {"building": b.name}, pluck="name")[0]
-        type_before = frappe.db.get_value("Accommodation Room", room, "room_type")
 
         b.reload()
         b.floor_plan[0].room_type = "Supervisor"
         b.save(ignore_permissions=True)
         res = generate_rooms_and_beds(b.name)
         type_after = frappe.db.get_value("Accommodation Room", room, "room_type")
-        print(f"\n[1b] room_type before={type_before} after={type_after} created={res['created_rooms']} skipped={res['skipped_rooms']}")
-        # Record behavior. The generator only inserts missing rooms; it never updates type.
-        print(f"[1b] BEHAVIOR: changing floor_plan room_type does NOT update existing rooms (still '{type_after}'); re-run silently skipped all {res['skipped_rooms']} rooms.")
+        print(f"\n[1b] room_type after={type_after} updated={res.get('updated_rooms')} created={res.get('created_rooms')}")
+        self.assertEqual(type_after, "Supervisor", "existing room type must update to match the plan")
+        self.assertGreaterEqual(res.get("updated_rooms", 0), 1)
+        self.assertEqual(res.get("created_rooms"), 0)
 
-    # Scenario 1c: increase room_count 3 -> 5 and re-run; does it silently add 2?
-    def test_1c_increase_room_count_rerun_adds_rooms(self):
+    # Scenario 1c (FIXED): raising room_count does NOT silently add rooms; it needs confirmation.
+    def test_1c_increase_room_count_requires_confirmation(self):
         b = self._make_building(room_count=3)
         generate_rooms_and_beds(b.name)
         before = frappe.db.count("Accommodation Room", {"building": b.name})
@@ -111,10 +111,22 @@ class TestRoomGenerator(QABase):
         b.reload()
         b.floor_plan[0].room_count = 5
         b.save(ignore_permissions=True)
+
+        # Re-run WITHOUT confirmation: must not create new rooms silently.
         res = generate_rooms_and_beds(b.name)
+        mid = frappe.db.count("Accommodation Room", {"building": b.name})
+        print(f"\n[1c] no-confirm before={before} after={mid} created={res.get('created_rooms')} pending={res.get('pending_new_rooms')} needs_confirmation={res.get('needs_confirmation')}")
+        self.assertTrue(res.get("needs_confirmation"), "new rooms must require confirmation")
+        self.assertEqual(res.get("created_rooms"), 0)
+        self.assertEqual(mid, before, "no rooms may be created without confirmation")
+        self.assertEqual(res.get("pending_new_rooms"), 2)
+
+        # Re-run WITH confirmation: the 2 new rooms are created.
+        res2 = generate_rooms_and_beds(b.name, confirm_new_rooms=1)
         after = frappe.db.count("Accommodation Room", {"building": b.name})
-        print(f"\n[1c] rooms before={before} after={after} created={res['created_rooms']} skipped={res['skipped_rooms']}")
-        print(f"[1c] BEHAVIOR: increasing room_count from 3 to 5 SILENTLY ADDED {res['created_rooms']} new rooms with no explicit settings gate. User expectation was that new rooms should require an explicit settings change.")
+        print(f"[1c] confirmed after={after} created={res2.get('created_rooms')}")
+        self.assertEqual(res2.get("created_rooms"), 2)
+        self.assertEqual(after, before + 2)
 
 
 class TestCheckout(QABase):

@@ -523,6 +523,7 @@ Generated Maintenance Requests,طلبات الصيانة المنشأة
 Generating Rooms & Beds…,جارٍ توليد الغرف والأسرة…
 Generating Safety Setup…,جارٍ توليد إعداد السلامة…
 "Generation complete. Rooms created: {0}, skipped (existing): {1}. ",اكتمل التوليد. الغرف المنشأة: {0}، المتخطاة (موجودة): {1}. 
+"Generation complete. Rooms created: {0}, updated: {1}, skipped (existing): {2}. Beds created: {3}.",اكتمل التوليد. الغرف المنشأة: {0}، المحدّثة: {1}، المتخطاة (موجودة): {2}. الأسرّة المنشأة: {3}.
 Generator,مولد كهربائي
 Generator Service,صيانة المولد الكهربائي
 Getting Started,ابدأ هنا
@@ -1110,6 +1111,8 @@ Template for catalog {0}: {1},القالب للدليل {0}: {1}
 Template loading is only supported for Maintenance Request and Maintenance Work Order.,تحميل القالب مدعوم فقط لـ 'طلب صيانة' و'أمر عمل صيانة'.
 Terminated,مُنهى
 The building asset was located in before current location,المبنى الذي كان فيه هذا الأصل قبل موقعه الحالي
+The floor plan adds {0} new room(s) and {1} new bed(s) beyond what already exists. Existing rooms were updated to match the plan. Create the new rooms and beds?,خطة الطابق تضيف {0} غرفة و{1} سرير جديدة زيادة على الموجود. حُدّثت الغرف الموجودة لتطابق الخطة. هل تريد إنشاء الغرف والأسرّة الجديدة؟
+The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.,خطة الطابق تضيف {0} غرفة و{1} سرير جديدة لم تُنشأ بعد. الغرف الموجودة المحدّثة: {2}. أكّد لإنشاء الغرف والأسرّة الجديدة.
 The linked Custody Issue {0} must be submitted before returning.,يجب اعتماد صرف العهدة المرتبط {0} قبل الإرجاع.
 Thermal Pipes,أنابيب حرارية
 This Maintenance Work Order is already Completed.,أمر عمل الصيانة هذا مكتمل بالفعل.

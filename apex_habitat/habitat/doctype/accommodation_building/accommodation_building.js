@@ -29,21 +29,7 @@ frappe.ui.form.on("Accommodation Building", {
 				frappe.confirm(
 					__("Are you sure you want to generate rooms and beds from the floor plan?"),
 					function () {
-						frappe.call({
-							method: "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.generate_rooms_and_beds",
-							args: { building_name: frm.doc.name },
-							freeze: true,
-							freeze_message: __("Generating Rooms & Beds…"),
-							callback: function (r) {
-								if (!r.exc) frm.reload_doc();
-							},
-							error: function () {
-								frappe.show_alert({
-									message: __("Could not complete the generation. Please try again."),
-									indicator: "red",
-								});
-							}
-						});
+						_generateRoomsAndBeds(frm, 0);
 					}
 				);
 			}, __("Setup"));
@@ -330,6 +316,36 @@ function showStep3(frm, step1Values, step2Values) {
 // ---------------------------------------------------------------------------
 // Apply wizard values — update floor_plan child table and trigger generation
 // ---------------------------------------------------------------------------
+function _generateRoomsAndBeds(frm, confirm_new_rooms) {
+	frappe.call({
+		method: "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.generate_rooms_and_beds",
+		args: { building_name: frm.doc.name, confirm_new_rooms: confirm_new_rooms ? 1 : 0 },
+		freeze: true,
+		freeze_message: __("Generating Rooms & Beds…"),
+		callback: function (r) {
+			if (r.exc) return;
+			const m = r.message || {};
+			// Re-run added new rooms/beds beyond what exists: confirm before creating
+			// so the building never grows silently from an edited floor plan.
+			if (m.needs_confirmation && !confirm_new_rooms) {
+				frappe.confirm(
+					__("The floor plan adds {0} new room(s) and {1} new bed(s) beyond what already exists. Existing rooms were updated to match the plan. Create the new rooms and beds?", [m.pending_new_rooms || 0, m.pending_new_beds || 0]),
+					function () { _generateRoomsAndBeds(frm, 1); },
+					function () { frm.reload_doc(); }
+				);
+			} else {
+				frm.reload_doc();
+			}
+		},
+		error: function () {
+			frappe.show_alert({
+				message: __("Could not complete the generation. Please try again."),
+				indicator: "red",
+			});
+		}
+	});
+}
+
 function _applyWizard(frm, v) {
 	// v = { abbreviation, rows: [{floor, room_type, room_count, beds_per_room, generate_beds, starting_room_number}] }
 	function _buildAndSave() {
