@@ -1,0 +1,56 @@
+name: Permissions Guard
+
+on:
+  push:
+    branches: [apex]
+  pull_request:
+    branches: [apex]
+
+# Baseline: number of ignore_permissions=True call sites that existed when
+# this guard was introduced (2026-05-24). Any call site without a
+# "# audit-ok" comment on the same line counts toward the total.
+#
+# To add a NEW ignore_permissions=True that is genuinely necessary:
+#   1. Add "# audit-ok" to the same line.
+#   2. The line will be excluded from the count automatically.
+#
+# To raise the baseline (rare — requires security review):
+#   1. Update BASELINE below.
+#   2. Add a comment explaining why the new call site is safe.
+
+env:
+  BASELINE: 189
+
+jobs:
+  permissions-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Count unaudited ignore_permissions=True call sites
+        run: |
+          COUNT=$(grep -rn "ignore_permissions=True" apex_habitat/ --include="*.py" \
+            | grep -v "# audit-ok" \
+            | wc -l \
+            | tr -d ' ')
+
+          echo "Unaudited ignore_permissions=True count: $COUNT"
+          echo "Baseline: $BASELINE"
+
+          if [ "$COUNT" -gt "$BASELINE" ]; then
+            echo ""
+            echo "ERROR: $COUNT unaudited ignore_permissions=True call sites found."
+            echo "Baseline is $BASELINE."
+            echo ""
+            echo "New call sites (not present when baseline was set):"
+            grep -rn "ignore_permissions=True" apex_habitat/ --include="*.py" \
+              | grep -v "# audit-ok" || true
+            echo ""
+            echo "To fix:"
+            echo "  - If the new call site is genuinely required, append '# audit-ok'"
+            echo "    to that line and update BASELINE in .github/workflows/permissions-guard.yml."
+            echo "  - If it was added by mistake, remove ignore_permissions=True."
+            exit 1
+          fi
+
+          echo "OK: count ($COUNT) is within baseline ($BASELINE)."
