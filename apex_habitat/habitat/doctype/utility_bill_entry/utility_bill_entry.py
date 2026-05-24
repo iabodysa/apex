@@ -21,9 +21,7 @@ from frappe.utils import date_diff, flt
 
 
 class UtilityBillEntry(Document):
-    def before_save(self):
-        if self.doctype != "Utility Bill Entry":
-            frappe.throw("DocType mismatch")
+    pass
 
 
 def validate(doc, method=None):

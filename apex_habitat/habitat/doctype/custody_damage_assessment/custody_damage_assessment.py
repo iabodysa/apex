@@ -9,10 +9,7 @@ from frappe.utils import flt
 
 
 class CustodyDamageAssessment(Document):
-    def before_save(self):
-        # Validate document properties
-        if self.doctype != "Custody Damage Assessment":
-            frappe.throw("DocType mismatch")
+    pass
 
 
 def validate(doc, method=None):

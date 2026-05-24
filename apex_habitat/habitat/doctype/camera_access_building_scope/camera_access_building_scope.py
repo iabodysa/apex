@@ -5,7 +5,4 @@ import frappe
 from frappe.model.document import Document
 
 class CameraAccessBuildingScope(Document):
-    def before_save(self):
-        # Validate document properties
-        if self.doctype != "Camera Access Building Scope":
-            frappe.throw("DocType mismatch")
+    pass

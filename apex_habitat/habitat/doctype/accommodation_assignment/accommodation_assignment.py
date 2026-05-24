@@ -14,10 +14,7 @@ from frappe.model.document import Document
 
 
 class AccommodationAssignment(Document):
-    def before_save(self):
-        # Validate document properties
-        if self.doctype != "Accommodation Assignment":
-            frappe.throw("DocType mismatch")
+    pass
 
 
 def recalculate_room_occupancy(room_name: str) -> None:
