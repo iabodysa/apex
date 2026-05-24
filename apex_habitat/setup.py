@@ -85,12 +85,15 @@ def create_custody_articles():
 
 
 def create_operational_depreciation_policies():
+    # Note: DocType field is `useful_life_years` (Int), so the durations below
+    # are expressed in whole years. Sub-year policies (e.g. linen at 12 months)
+    # are rounded up to 1 year to satisfy the mandatory Int field.
     policies = [
-        {"policy_name": "Linen - 12 Months", "useful_life_months": 12},
-        {"policy_name": "Keys and Cards - 24 Months", "useful_life_months": 24},
-        {"policy_name": "Remotes - 24 Months", "useful_life_months": 24},
-        {"policy_name": "Furniture - 36 Months", "useful_life_months": 36},
-        {"policy_name": "Electronics - 36 Months", "useful_life_months": 36},
+        {"policy_name": "Linen - 12 Months", "useful_life_years": 1},
+        {"policy_name": "Keys and Cards - 24 Months", "useful_life_years": 2},
+        {"policy_name": "Remotes - 24 Months", "useful_life_years": 2},
+        {"policy_name": "Furniture - 36 Months", "useful_life_years": 3},
+        {"policy_name": "Electronics - 36 Months", "useful_life_years": 3},
     ]
     for policy in policies:
         if not frappe.db.exists("Operational Depreciation Policy", policy["policy_name"]):
