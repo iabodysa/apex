@@ -9,10 +9,13 @@ from frappe.utils import nowdate
 
 
 class SubcontractorServiceOrder(Document):
-    def before_save(self):
-        if not self.company:
-            from apex_habitat.habitat.doctype.habitat_settings.habitat_settings import get_default_company
-            self.company = get_default_company()
+    pass
+
+
+def before_save(doc, method=None):
+    if not doc.company:
+        from apex_habitat.habitat.doctype.habitat_settings.habitat_settings import get_default_company
+        doc.company = get_default_company()
 
 
 @frappe.whitelist(methods=["POST"])

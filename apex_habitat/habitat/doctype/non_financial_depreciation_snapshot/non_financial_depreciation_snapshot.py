@@ -9,10 +9,7 @@ from frappe.utils import flt
 
 
 class NonFinancialDepreciationSnapshot(Document):
-    def before_save(self):
-        # Validate document properties
-        if self.doctype != "Non-Financial Depreciation Snapshot":
-            frappe.throw("DocType mismatch")
+    pass
 
 
 def validate(doc, method=None):

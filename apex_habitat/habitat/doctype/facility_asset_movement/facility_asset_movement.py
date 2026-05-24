@@ -8,9 +8,12 @@ from frappe.model.document import Document
 
 
 class FacilityAssetMovement(Document):
-    def before_save(self):
-        _populate_company_fields(self)
-        _detect_intercompany(self)
+    pass
+
+
+def before_save(doc, method=None):
+    _populate_company_fields(doc)
+    _detect_intercompany(doc)
 
 
 def validate(doc, method=None):
