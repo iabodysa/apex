@@ -104,10 +104,17 @@ def generate_rooms_and_beds(building_name):
         rtype = row.room_type or "Standard"
         gen_beds = int(row.generate_beds or 0)
 
-        if count <= 0 or capacity <= 0:
+        if count <= 0:
             continue
-        if capacity > 50:
-            frappe.throw(_("Bed capacity per room exceeds maximum of 50. Floor {0}: {1} beds configured.").format(floor_num, capacity))
+        # For sleeping rooms (generate_beds=1), capacity must be valid
+        if gen_beds and capacity <= 0:
+            frappe.throw(
+                _("Beds per Room must be greater than 0 when Auto-Generate Beds is enabled. Floor {0}, type {1}.").format(floor_num, rtype)
+            )
+        if gen_beds and capacity > 50:
+            frappe.throw(
+                _("Bed capacity per room exceeds maximum of 50. Floor {0}: {1} beds configured.").format(floor_num, capacity)
+            )
 
         for i in range(count):
             seq = start + i
