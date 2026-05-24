@@ -62,6 +62,7 @@ def generate_rooms_and_beds(building_name):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
         
     doc = frappe.get_doc("Accommodation Building", building_name)
+    abbreviation = (doc.abbreviation or "").strip() or doc.building_name[:4].upper().strip()
 
     if not doc.floor_plan:
         frappe.throw(_("No floor plan defined. Add floor rows before generating."))
@@ -90,11 +91,8 @@ def generate_rooms_and_beds(building_name):
     skipped_beds = 0
 
     for row in doc.floor_plan:
-        floor = row.floor_number
-        prefix = (row.room_prefix or "").strip()
-        if not prefix:
-            prefix = f"R-{building_name[:3].upper()}-"
-
+        floor_num = int(row.floor_number or 0)
+        floor_code = "G" if floor_num == 0 else str(floor_num)
         start = int(row.starting_room_number or 1)
         count = int(row.room_count or 0)
         capacity = int(row.bed_capacity_per_room or 0)
@@ -104,11 +102,11 @@ def generate_rooms_and_beds(building_name):
         if count <= 0 or capacity <= 0:
             continue
         if capacity > 50:
-            frappe.throw(_("Bed capacity per room exceeds maximum of 50. Floor {0}: {1} beds configured.").format(floor, capacity))
+            frappe.throw(_("Bed capacity per room exceeds maximum of 50. Floor {0}: {1} beds configured.").format(floor_num, capacity))
 
         for i in range(count):
-            room_num_raw = start + i
-            room_number = f"{prefix}{floor}-{str(room_num_raw).zfill(2)}"
+            seq = start + i
+            room_number = f"{abbreviation}-{floor_code}{seq:02d}"
 
             if room_number in existing_room_map:
                 skipped_rooms += 1
@@ -118,7 +116,7 @@ def generate_rooms_and_beds(building_name):
                     "doctype": "Accommodation Room",
                     "building": building_name,
                     "room_number": room_number,
-                    "floor": floor,
+                    "floor": floor_num,
                     "room_type": rtype,
                     "bed_capacity": capacity,
                     "status": "Available",
@@ -131,7 +129,7 @@ def generate_rooms_and_beds(building_name):
 
             if gen_beds and room_doc_name:
                 for b in range(1, capacity + 1):
-                    bed_code = f"{room_number}-{str(b).zfill(3)}"
+                    bed_code = f"{room_number}-B{b:02d}"
                     if bed_code in existing_bed_codes:
                         skipped_beds += 1
                     else:
