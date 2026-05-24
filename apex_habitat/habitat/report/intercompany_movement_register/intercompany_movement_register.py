@@ -28,9 +28,11 @@ def execute(filters=None):
         query_filters["from_company"] = filters["from_company"]
     if filters.get("to_company"):
         query_filters["to_company"] = filters["to_company"]
-    if filters.get("from_date"):
+    if filters.get("from_date") and filters.get("to_date"):
+        query_filters["movement_date"] = ["between", [filters["from_date"], filters["to_date"]]]
+    elif filters.get("from_date"):
         query_filters["movement_date"] = [">=", filters["from_date"]]
-    if filters.get("to_date"):
+    elif filters.get("to_date"):
         query_filters["movement_date"] = ["<=", filters["to_date"]]
     if filters.get("accounting_acknowledged") is not None:
         query_filters["accounting_acknowledged"] = filters["accounting_acknowledged"]
