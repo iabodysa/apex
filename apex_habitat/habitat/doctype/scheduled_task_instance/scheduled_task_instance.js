@@ -20,6 +20,12 @@ frappe.ui.form.on("Scheduled Task Instance", {
 									frm.reload_doc();
 								}
 							},
+							error: function () {
+								frappe.show_alert({
+									message: __("Could not update the Task Instance. Please try again."),
+									indicator: "red",
+								});
+							},
 						});
 					}
 				);

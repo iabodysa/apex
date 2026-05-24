@@ -36,6 +36,12 @@ frappe.ui.form.on("Accommodation Building", {
 							freeze_message: __("Generating Rooms & Beds…"),
 							callback: function (r) {
 								if (!r.exc) frm.reload_doc();
+							},
+							error: function () {
+								frappe.show_alert({
+									message: __("Could not complete the generation. Please try again."),
+									indicator: "red",
+								});
 							}
 						});
 					}
@@ -53,6 +59,12 @@ frappe.ui.form.on("Accommodation Building", {
 							freeze_message: __("Generating Safety Setup…"),
 							callback: function (r) {
 								if (!r.exc) frm.reload_doc();
+							},
+							error: function () {
+								frappe.show_alert({
+									message: __("Could not complete the generation. Please try again."),
+									indicator: "red",
+								});
 							}
 						});
 					}
@@ -334,7 +346,13 @@ function _applyWizard(frm, v) {
 				args: { building_name: frm.doc.name },
 				freeze: true,
 				freeze_message: __("Generating Rooms & Beds…"),
-				callback: function (r) { if (!r.exc) frm.reload_doc(); }
+				callback: function (r) { if (!r.exc) frm.reload_doc(); },
+				error: function () {
+					frappe.show_alert({
+						message: __("Could not generate rooms and beds. Please try again."),
+						indicator: "red",
+					});
+				}
 			});
 		});
 	}
@@ -343,6 +361,11 @@ function _applyWizard(frm, v) {
 		frappe.db.set_value("Accommodation Building", frm.doc.name, "abbreviation", v.abbreviation).then(() => {
 			frm.doc.abbreviation = v.abbreviation;
 			_buildAndSave();
+		}).catch(() => {
+			frappe.show_alert({
+				message: __("Could not save the building abbreviation. Please try again."),
+				indicator: "red",
+			});
 		});
 	} else {
 		_buildAndSave();
