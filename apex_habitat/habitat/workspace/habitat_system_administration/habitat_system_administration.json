@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\": \"4d2d4065e4\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Background Operations Health</b></span>\", \"col\": 12}}, {\"id\": \"409d0a1add\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 4}}, {\"id\": \"655ddfbcae\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 4}}, {\"id\": \"7e181f2082\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 4}}, {\"id\": \"a4f1151edd\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>App Background DocTypes</b></span>\", \"col\": 12}}, {\"id\": \"940303bbf6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Operations Alert\", \"col\": 4}}, {\"id\": \"030e1f98da\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Template\", \"col\": 4}}, {\"id\": \"c844adaed0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Instance\", \"col\": 4}}, {\"id\": \"1ea8f1072e\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Framework Logs & Jobs</b></span>\", \"col\": 12}}, {\"id\": \"80afc2d400\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs & Background Jobs\", \"col\": 12}}, {\"id\": \"605344fe5f\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Project Ledger & Engines</b></span>\", \"col\": 12}}, {\"id\": \"306243d276\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Ledger\", \"col\": 4}}, {\"id\": \"fc51490a14\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 4}}, {\"id\": \"eebfeadbe7\", \"type\": \"card\", \"data\": {\"card_name\": \"Project Ledger & Engines\", \"col\": 12}}]",
+ "content": "[{\"id\": \"4d2d4065e4\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Background Operations Health</b></span>\", \"col\": 12}}, {\"id\": \"409d0a1add\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 4}}, {\"id\": \"655ddfbcae\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 4}}, {\"id\": \"7e181f2082\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 4}}, {\"id\": \"a4f1151edd\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>App Background DocTypes</b></span>\", \"col\": 12}}, {\"id\": \"940303bbf6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Operations Alert\", \"col\": 4}}, {\"id\": \"030e1f98da\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Template\", \"col\": 4}}, {\"id\": \"c844adaed0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Instance\", \"col\": 4}}, {\"id\": \"1ea8f1072e\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Framework Logs & Jobs</b></span>\", \"col\": 12}}, {\"id\": \"80afc2d400\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs & Background Jobs\", \"col\": 12}}, {\"id\": \"605344fe5f\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Project Ledger & Engines</b></span>\", \"col\": 12}}, {\"id\": \"306243d276\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Ledger\", \"col\": 4}}, {\"id\": \"eebfeadbe7\", \"type\": \"card\", \"data\": {\"card_name\": \"Project Ledger & Engines\", \"col\": 12}}]",
  "creation": "2026-05-25 01:38:02.293790",
  "custom_blocks": [],
  "docstatus": 0,
@@ -89,39 +89,9 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Accommodation Lease",
-   "link_count": 0,
-   "link_to": "Accommodation Lease",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Utility Bill Entry",
-   "link_count": 0,
-   "link_to": "Utility Bill Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Habitat Settings",
-   "link_count": 0,
-   "link_to": "Habitat Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2026-05-25 02:11:02.687855",
+ "modified": "2026-05-25 02:15:12.607311",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Habitat System Administration",
@@ -178,12 +148,6 @@
    "doc_view": "",
    "label": "Accommodation Ledger",
    "link_to": "Accommodation Ledger",
-   "type": "DocType"
-  },
-  {
-   "doc_view": "",
-   "label": "Habitat Settings",
-   "link_to": "Habitat Settings",
    "type": "DocType"
   }
  ],
