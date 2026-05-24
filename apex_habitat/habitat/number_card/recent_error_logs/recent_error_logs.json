@@ -1,0 +1,23 @@
+{
+ "creation": "2026-05-25 01:38:02.133784",
+ "currency": "SAR",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Error Log",
+ "filters_json": "[[\"Error Log\", \"creation\", \">\", \"Today\"]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 0,
+ "label": "Recent Error Logs",
+ "modified": "2026-05-25 01:38:02.133784",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Recent Error Logs",
+ "owner": "Administrator",
+ "report_function": "Sum",
+ "show_full_number": 0,
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Daily",
+ "type": "Document Type"
+}
