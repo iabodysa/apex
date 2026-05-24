@@ -36,6 +36,24 @@ def validate(doc, method=None):
     if not (0 <= share <= 100):
         frappe.throw(_("Utility Cost Share must be between 0 and 100."))
 
+    # Reject a second lease whose term overlaps an existing (non-cancelled) lease
+    # for the same building.
+    if doc.building and doc.lease_start_date and doc.lease_end_date:
+        conflict = frappe.db.exists(
+            "Accommodation Lease",
+            {
+                "building": doc.building,
+                "docstatus": ["!=", 2],
+                "name": ["!=", doc.name or ""],
+                "lease_start_date": ["<=", doc.lease_end_date],
+                "lease_end_date": [">=", doc.lease_start_date],
+            },
+        )
+        if conflict:
+            frappe.throw(
+                _("An overlapping lease already exists for this building: {0}").format(conflict)
+            )
+
     if not doc.payment_schedule:
         _build_schedule(doc)
 
