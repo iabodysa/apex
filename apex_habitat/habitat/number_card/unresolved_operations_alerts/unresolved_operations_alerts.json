@@ -1,0 +1,20 @@
+{
+    "aggregate_function_based_on": "",
+    "color": "#ff5858",
+    "creation": "2026-05-24 00:00:00.000000",
+    "document_type": "Habitat Operations Alert",
+    "doctype": "Number Card",
+    "dynamic_filters_json": "[]",
+    "filters_json": "[{\"fieldname\": \"is_resolved\", \"filter_based_on\": \"Value\", \"label\": \"Resolved\", \"condition\": \"equals\", \"value\": \"0\"}]",
+    "function": "Count",
+    "is_public": 1,
+    "label": "Unresolved Alerts",
+    "method": "",
+    "modified": "2026-05-24 00:00:00.000000",
+    "modified_by": "Administrator",
+    "name": "Unresolved Alerts",
+    "owner": "Administrator",
+    "show_percentage_stats": 0,
+    "stats_time_interval": "Monthly",
+    "type": "Document Type"
+}
