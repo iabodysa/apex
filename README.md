@@ -69,7 +69,7 @@ flowchart TD
     end
 
     subgraph Maintenance ["Maintenance"]
-        MaintTemplate["Material Template"] -->|seeds| MaintMaterial["Maintenance Material"]
+        MaintTemplate["Maintenance Material Template"] -->|seeds| MaintMaterial["Maintenance Material"]
         Building -->|triggers| SafetyInspection["Safety Inspection"]
         Building -->|triggers| MaintInspection["Maintenance Inspection"]
         SafetyInspection -->|generates| MaintRequest["Maintenance Request"]

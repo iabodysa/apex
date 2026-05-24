@@ -1055,3 +1055,9 @@ Worker Name,اسم العامل
 apps/apex_habitat/apex_habitat/habitat/web_form/accommodation_resident_request/accommodation_resident_request.js,Request submitted successfully.,تم إرسال الطلب بنجاح.
 apps/apex_habitat/apex_habitat/habitat/web_form/accommodation_resident_request/accommodation_resident_request.js,Your tracking code:,رقم التتبع الخاص بك:
 apps/apex_habitat/apex_habitat/habitat/web_form/accommodation_resident_request/accommodation_resident_request.js,Save this code to follow up with your supervisor.,احتفظ بهذا الرقم للمتابعة مع مشرفك.
+Accommodation Floor Plan,مخطط طوابق المبنى
+Default UOM,وحدة القياس الافتراضية
+Details,التفاصيل
+Material,المادة
+Notes,ملاحظات
+Quantity,الكمية
