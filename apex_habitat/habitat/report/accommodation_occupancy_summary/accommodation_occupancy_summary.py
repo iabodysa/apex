@@ -27,6 +27,9 @@ def execute(filters=None):
         order_by="name asc",
     )
 
+    if not buildings:
+        return columns, []
+
     rooms = frappe.get_all(
         "Accommodation Room",
         filters={"building": ["in", [row.name for row in buildings]]} if buildings else {},
