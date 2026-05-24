@@ -98,3 +98,6 @@ jobs:
           bench --site test.localhost run-tests --module apex_habitat.tests.test_change_log_popup
           bench --site test.localhost run-tests --module apex_habitat.tests.test_bed_booking_concurrency
           bench --site test.localhost run-tests --module apex_habitat.tests.test_task_schedulers
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_release_hygiene
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_idempotency_guards
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_material_template_coverage
