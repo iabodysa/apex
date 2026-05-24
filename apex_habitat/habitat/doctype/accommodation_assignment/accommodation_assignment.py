@@ -55,6 +55,9 @@ def recalculate_spatial(room_name: str, building_name: str) -> None:
 
 
 def validate(doc, method=None):
+    if not doc.building or not frappe.db.exists("Accommodation Building", doc.building):
+        return  # Mandatory/link check will catch missing or invalid building
+
     building = frappe.get_doc("Accommodation Building", doc.building)
 
     # Project and Cost Center validation

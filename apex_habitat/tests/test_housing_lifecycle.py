@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.utils import getdate
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
 
 
@@ -111,7 +112,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
 
         # Reload assignment and assert docstatus is 1 (Submitted) and check_out_date is set
         assignment.reload()
-        self.assertEqual(assignment.check_out_date, "2026-05-21")
+        self.assertEqual(getdate(assignment.check_out_date), getdate("2026-05-21"))
         self.assertEqual(assignment.docstatus, 1, "Assignment should not be cancelled (docstatus 2) on checkout; history should be preserved.")
         
         # Verify bed is set back to available

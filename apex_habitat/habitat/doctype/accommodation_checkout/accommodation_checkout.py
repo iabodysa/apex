@@ -19,8 +19,8 @@ class AccommodationCheckout(Document):
 
 
 def validate(doc, method=None):
-    if not doc.assignment:
-        frappe.throw(_("Accommodation Assignment is required."))
+    if not doc.assignment or not frappe.db.exists("Accommodation Assignment", doc.assignment):
+        return  # Mandatory/link check will catch missing or invalid assignment
 
     assignment = frappe.get_doc("Accommodation Assignment", doc.assignment)
 
