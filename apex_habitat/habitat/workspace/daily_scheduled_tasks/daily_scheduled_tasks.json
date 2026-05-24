@@ -6,6 +6,10 @@
  "module": "Habitat",
  "icon": "milestone",
  "public": 1,
+ "roles": [
+  {"role": "Accommodation Manager"},
+  {"role": "Resident Supervisor"}
+ ],
  "is_default": 0,
  "sequence_id": 3.0,
  "parent_page": "Operations Command Center",
