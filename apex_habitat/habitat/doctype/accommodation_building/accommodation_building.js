@@ -68,14 +68,14 @@ function showStep1(frm, prefill) {
 				label: __("Building Abbreviation"),
 				reqd: 1,
 				default: (prefill && prefill.abbreviation) || frm.doc.abbreviation || "",
-				description: __("Short code for all room/bed IDs. Example: 'JED1' → rooms JED1-G01, JED1-101…"),
+				description: __("Used in room/bed codes, e.g. JED1-G01."),
 			},
 			{
 				fieldname: "has_ground_floor",
 				fieldtype: "Check",
 				label: __("Has Ground Floor (Floor 0)"),
 				default: (prefill && prefill.has_ground_floor !== undefined) ? prefill.has_ground_floor : 1,
-				description: __("Ground floor rooms use code G: JED1-G01, JED1-G02…"),
+				description: __("Ground floor uses G, e.g. JED1-G01."),
 			},
 			{
 				fieldname: "num_upper_floors",
@@ -100,151 +100,202 @@ function showStep1(frm, prefill) {
 }
 
 // ---------------------------------------------------------------------------
-// Step 2 — Floor Configuration
+// Step 2 — Dynamic Floor Plan Builder
 // ---------------------------------------------------------------------------
 function showStep2(frm, step1Values, prefill) {
+	const abbr = step1Values.abbreviation.trim().toUpperCase();
+	const hasGround = !!step1Values.has_ground_floor;
+	const numUpper = parseInt(step1Values.num_upper_floors) || 0;
+
+	const ROOM_TYPES = ["Standard", "Worker", "Driver", "Supervisor", "Office", "Storage", "Isolation", "Maintenance", "Other"];
+
+	function floorOptions(selectedFloor) {
+		let opts = "";
+		if (hasGround) opts += `<option value="0" ${selectedFloor === 0 ? "selected" : ""}>${__("Ground (G)")}</option>`;
+		for (let i = 1; i <= numUpper; i++) {
+			opts += `<option value="${i}" ${selectedFloor === i ? "selected" : ""}>${__("Floor")} ${i}</option>`;
+		}
+		return opts;
+	}
+
+	function typeOptions(selectedType) {
+		return ROOM_TYPES.map(t =>
+			`<option value="${t}" ${t === selectedType ? "selected" : ""}>${__(t)}</option>`
+		).join("");
+	}
+
+	function renderRow(row) {
+		return `<tr>
+			<td><select class="fp-floor form-control input-xs" style="min-width:90px">${floorOptions(row.floor)}</select></td>
+			<td><select class="fp-type form-control input-xs" style="min-width:110px">${typeOptions(row.room_type)}</select></td>
+			<td><input type="number" class="fp-rooms form-control input-xs" value="${row.room_count}" min="1" style="width:60px"></td>
+			<td><input type="number" class="fp-beds form-control input-xs" value="${row.beds_per_room}" min="0" style="width:60px"></td>
+			<td style="text-align:center;vertical-align:middle"><input type="checkbox" class="fp-gen-beds" ${row.generate_beds ? "checked" : ""}></td>
+			<td><button class="fp-remove btn btn-xs btn-danger">✕</button></td>
+		</tr>`;
+	}
+
+	// Build default rows if no prefill
+	let initialRows = (prefill && prefill.rows && prefill.rows.length) ? prefill.rows : [];
+	if (!initialRows.length) {
+		if (hasGround) initialRows.push({ floor: 0, room_type: "Worker", room_count: 10, beds_per_room: 4, generate_beds: 1 });
+		for (let i = 1; i <= numUpper; i++) {
+			initialRows.push({ floor: i, room_type: "Worker", room_count: 10, beds_per_room: 4, generate_beds: 1 });
+		}
+	}
+
+	const tableHtml = `
+		<div>
+			<table class="table table-bordered table-condensed fp-table" style="font-size:13px;margin-bottom:6px">
+				<thead>
+					<tr style="background:#f5f5f5">
+						<th>${__("Floor")}</th>
+						<th>${__("Room Type")}</th>
+						<th>${__("Rooms")}</th>
+						<th>${__("Beds/Room")}</th>
+						<th>${__("Gen.Beds")}</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody class="fp-tbody">
+					${initialRows.map(renderRow).join("")}
+				</tbody>
+			</table>
+			<button class="fp-add btn btn-xs btn-default">+ ${__("Add Row")}</button>
+			<p class="text-muted" style="margin-top:6px;font-size:12px">
+				${__("Set Beds/Room to 0 for non-sleeping rooms (office, storage).")}
+			</p>
+		</div>`;
+
 	const d2 = new frappe.ui.Dialog({
-		title: __("Room Generator — Step 2 of 3: Floor Details"),
-		fields: [
-			{
-				fieldname: "rooms_per_floor",
-				fieldtype: "Int",
-				label: __("Rooms per Floor"),
-				reqd: 1,
-				default: (prefill && prefill.rooms_per_floor) || 10,
-			},
-			{
-				fieldname: "beds_per_room",
-				fieldtype: "Int",
-				label: __("Beds per Room"),
-				reqd: 1,
-				default: (prefill && prefill.beds_per_room) || 4,
-			},
-			{
-				fieldname: "room_type",
-				fieldtype: "Select",
-				label: __("Room Type"),
-				options: "Standard\nSupervisor\nIsolation\nStorage",
-				default: (prefill && prefill.room_type) || "Standard",
-			},
-			{
-				fieldname: "generate_beds",
-				fieldtype: "Check",
-				label: __("Auto-Generate Beds"),
-				default: (prefill && prefill.generate_beds !== undefined) ? prefill.generate_beds : 1,
-			},
-		],
+		title: __("Room Generator — Step 2 of 3: Floor Plan"),
+		fields: [{ fieldname: "fp_html", fieldtype: "HTML", options: tableHtml }],
 		primary_action_label: __("Next →"),
-		primary_action(values) {
+		primary_action() {
+			const rows = [];
+			let valid = true;
+			d2.$body.find(".fp-tbody tr").each(function () {
+				const floor = parseInt($(this).find(".fp-floor").val()) || 0;
+				const rtype = $(this).find(".fp-type").val();
+				const rcount = parseInt($(this).find(".fp-rooms").val()) || 0;
+				const beds = parseInt($(this).find(".fp-beds").val()) || 0;
+				const genBeds = $(this).find(".fp-gen-beds").is(":checked") ? 1 : 0;
+				if (rcount <= 0) {
+					frappe.msgprint({ message: __("Each row must have at least 1 room."), indicator: "red" });
+					valid = false;
+					return false;
+				}
+				if (genBeds && beds <= 0) {
+					frappe.msgprint({ message: __("Beds per Room must be > 0 when Auto-Generate Beds is enabled."), indicator: "red" });
+					valid = false;
+					return false;
+				}
+				rows.push({ floor, room_type: rtype, room_count: rcount, beds_per_room: beds, generate_beds: genBeds });
+			});
+			if (!valid) return;
+			if (!rows.length) {
+				frappe.msgprint({ message: __("Add at least one floor plan row."), indicator: "red" });
+				return;
+			}
 			d2.hide();
-			showStep3(frm, step1Values, values);
+			showStep3(frm, step1Values, { rows });
 		},
 		secondary_action_label: __("← Back"),
-		secondary_action() {
-			d2.hide();
-			showStep1(frm, step1Values);
-		},
+		secondary_action() { d2.hide(); showStep1(frm, step1Values); },
 	});
 	d2.show();
+
+	d2.$body.on("click", ".fp-remove", function () { $(this).closest("tr").remove(); });
+	d2.$body.on("click", ".fp-add", function () {
+		const defaultFloor = hasGround ? 0 : 1;
+		d2.$body.find(".fp-tbody").append(renderRow({ floor: defaultFloor, room_type: "Worker", room_count: 10, beds_per_room: 4, generate_beds: 1 }));
+	});
+	d2.$body.on("change", ".fp-gen-beds", function () {
+		const row = $(this).closest("tr");
+		const bedsInput = row.find(".fp-beds");
+		if (!$(this).is(":checked")) {
+			bedsInput.val(0);
+		} else if (parseInt(bedsInput.val()) === 0) {
+			bedsInput.val(4);
+		}
+	});
 }
 
 // ---------------------------------------------------------------------------
-// Step 3 — Review & Generate
+// Step 3 — Review & Generate (per-row preview)
 // ---------------------------------------------------------------------------
 function showStep3(frm, step1Values, step2Values) {
 	const abbr = step1Values.abbreviation.trim().toUpperCase();
-	const hasGround = step1Values.has_ground_floor;
-	const numUpper = parseInt(step1Values.num_upper_floors) || 0;
-	const roomsPerFloor = parseInt(step2Values.rooms_per_floor) || 0;
-	const bedsPerRoom = parseInt(step2Values.beds_per_room) || 0;
-	const generateBeds = step2Values.generate_beds;
+	const rows = step2Values.rows;
 
-	// Build preview rows
-	const floors = [];
-	if (hasGround) {
-		const exampleRoom = abbr + "-G01";
-		floors.push({
-			floorNumber: 0,
-			floorCode: "G",
-			rooms: roomsPerFloor,
-			beds: generateBeds ? roomsPerFloor * bedsPerRoom : 0,
-			example: exampleRoom,
-		});
-	}
-	for (let i = 1; i <= numUpper; i++) {
-		const exampleRoom = abbr + "-" + String(i) + "01";
-		floors.push({
-			floorNumber: i,
-			floorCode: String(i),
-			rooms: roomsPerFloor,
-			beds: generateBeds ? roomsPerFloor * bedsPerRoom : 0,
-			example: exampleRoom,
-		});
-	}
+	// Calculate starting_room_number per floor (auto-sequential)
+	const floorCounters = {};
+	const enriched = rows.map(row => {
+		const fl = row.floor;
+		if (!floorCounters[fl]) floorCounters[fl] = 1;
+		const start = floorCounters[fl];
+		floorCounters[fl] += row.room_count;
+		const fc = fl === 0 ? "G" : String(fl);
+		const example = `${abbr}-${fc}${String(start).padStart(2, "0")}`;
+		return { ...row, starting: start, floorCode: fc, example };
+	});
 
-	const totalRooms = floors.reduce((s, f) => s + f.rooms, 0);
-	const totalBeds = floors.reduce((s, f) => s + f.beds, 0);
+	const totalRooms = enriched.reduce((s, r) => s + r.room_count, 0);
+	const totalBeds = enriched.reduce((s, r) => s + (r.generate_beds ? r.room_count * r.beds_per_room : 0), 0);
+	const sleepingRooms = enriched.filter(r => r.generate_beds && r.beds_per_room > 0).reduce((s, r) => s + r.room_count, 0);
+	const nonSleeping = totalRooms - sleepingRooms;
 
-	// Build HTML preview table
-	let tableRows = floors.map(f => `
+	const tableRows = enriched.map(r => `
 		<tr>
-			<td>${f.floorNumber === 0 ? __("Ground") : f.floorNumber}</td>
-			<td>${f.floorCode}</td>
-			<td>${f.rooms}</td>
-			<td>${f.beds}</td>
-			<td><code>${f.example}</code></td>
-		</tr>
-	`).join("");
+			<td>${r.floor === 0 ? __("Ground (G)") : __("Floor") + " " + r.floor}</td>
+			<td>${__(r.room_type)}</td>
+			<td>${r.room_count}</td>
+			<td>${r.beds_per_room > 0 ? r.beds_per_room : "—"}</td>
+			<td>${r.generate_beds ? r.room_count * r.beds_per_room : 0}</td>
+			<td><code>${r.example}</code></td>
+		</tr>`).join("");
 
 	const previewHtml = `
-		<div style="margin-bottom: 12px;">
-			<table class="table table-bordered table-condensed" style="font-size: 13px;">
+		<div style="margin-bottom:12px">
+			<table class="table table-bordered table-condensed" style="font-size:13px">
 				<thead>
-					<tr style="background: #f5f5f5;">
+					<tr style="background:#f5f5f5">
 						<th>${__("Floor")}</th>
-						<th>${__("Floor Code")}</th>
+						<th>${__("Room Type")}</th>
 						<th>${__("Rooms")}</th>
-						<th>${__("Bed Count")}</th>
-						<th>${__("Example Room")}</th>
+						<th>${__("Beds/Room")}</th>
+						<th>${__("Total Beds")}</th>
+						<th>${__("Example")}</th>
 					</tr>
 				</thead>
-				<tbody>
-					${tableRows}
-				</tbody>
+				<tbody>${tableRows}</tbody>
 			</table>
-			<p style="margin-top: 8px; font-weight: 600;">
-				${__("Total")}: ${totalRooms} ${__("rooms")}, ${totalBeds} ${__("beds")}
+			<p style="font-weight:600;margin-top:8px">
+				${__("Total")}: ${totalRooms} ${__("rooms")}, ${totalBeds} ${__("beds")}<br>
+				${__("Sleeping rooms")}: ${sleepingRooms} &nbsp;|&nbsp; ${__("Non-sleeping")}: ${nonSleeping}
 			</p>
-		</div>
-	`;
+		</div>`;
 
 	const d3 = new frappe.ui.Dialog({
 		title: __("Room Generator — Step 3 of 3: Review"),
-		fields: [
-			{
-				fieldname: "preview",
-				fieldtype: "HTML",
-				options: previewHtml,
-			},
-		],
+		fields: [{ fieldname: "preview", fieldtype: "HTML", options: previewHtml }],
 		primary_action_label: __("Generate Rooms & Beds ✓"),
 		primary_action() {
 			d3.hide();
 			_applyWizard(frm, {
 				abbreviation: step1Values.abbreviation.trim(),
-				has_ground_floor: hasGround,
-				num_upper_floors: numUpper,
-				rooms_per_floor: roomsPerFloor,
-				beds_per_room: bedsPerRoom,
-				room_type: step2Values.room_type,
-				generate_beds: generateBeds,
+				rows: enriched.map(r => ({
+					floor: r.floor,
+					room_type: r.room_type,
+					room_count: r.room_count,
+					beds_per_room: r.beds_per_room,
+					generate_beds: r.generate_beds,
+					starting_room_number: r.starting,
+				})),
 			});
 		},
 		secondary_action_label: __("← Back"),
-		secondary_action() {
-			d3.hide();
-			showStep2(frm, step1Values, step2Values);
-		},
+		secondary_action() { d3.hide(); showStep2(frm, step1Values, step2Values); },
 	});
 	d3.show();
 }
@@ -253,55 +304,32 @@ function showStep3(frm, step1Values, step2Values) {
 // Apply wizard values — update floor_plan child table and trigger generation
 // ---------------------------------------------------------------------------
 function _applyWizard(frm, v) {
+	// v = { abbreviation, rows: [{floor, room_type, room_count, beds_per_room, generate_beds, starting_room_number}] }
 	function _buildAndSave() {
-		// Clear existing floor plan rows
 		frm.doc.floor_plan = [];
-
-		// Ground floor
-		if (v.has_ground_floor) {
-			let row = frm.add_child("floor_plan");
-			row.floor_number = 0;
-			row.room_count = v.rooms_per_floor;
-			row.bed_capacity_per_room = v.beds_per_room;
-			row.room_type = v.room_type;
-			row.generate_beds = v.generate_beds ? 1 : 0;
-			row.starting_room_number = 1;
-		}
-
-		// Upper floors
-		for (let i = 1; i <= v.num_upper_floors; i++) {
-			let row = frm.add_child("floor_plan");
-			row.floor_number = i;
-			row.room_count = v.rooms_per_floor;
-			row.bed_capacity_per_room = v.beds_per_room;
-			row.room_type = v.room_type;
-			row.generate_beds = v.generate_beds ? 1 : 0;
-			row.starting_room_number = 1;
-		}
-
+		v.rows.forEach(row => {
+			let childRow = frm.add_child("floor_plan");
+			childRow.floor_number = row.floor;
+			childRow.room_count = row.room_count;
+			childRow.bed_capacity_per_room = row.beds_per_room;
+			childRow.room_type = row.room_type;
+			childRow.generate_beds = row.generate_beds ? 1 : 0;
+			childRow.starting_room_number = row.starting_room_number || 1;
+		});
 		frm.refresh_field("floor_plan");
-
 		frm.save("Update", function () {
 			frappe.call({
 				method: "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.generate_rooms_and_beds",
 				args: { building_name: frm.doc.name },
 				freeze: true,
 				freeze_message: __("Generating Rooms & Beds…"),
-				callback: function (r) {
-					if (!r.exc) frm.reload_doc();
-				}
+				callback: function (r) { if (!r.exc) frm.reload_doc(); }
 			});
 		});
 	}
 
-	// Update abbreviation on the server first if it changed
 	if (v.abbreviation && v.abbreviation !== frm.doc.abbreviation) {
-		frappe.db.set_value(
-			"Accommodation Building",
-			frm.doc.name,
-			"abbreviation",
-			v.abbreviation
-		).then(() => {
+		frappe.db.set_value("Accommodation Building", frm.doc.name, "abbreviation", v.abbreviation).then(() => {
 			frm.doc.abbreviation = v.abbreviation;
 			_buildAndSave();
 		});
