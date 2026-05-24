@@ -39,16 +39,10 @@ WRITE_CALLS = {
 # Allowlist: bare @frappe.whitelist() functions that are safe without
 # methods=["POST"] because they only return data (read-only mapping helpers).
 # Each entry is (module_relative_path, function_name, reason).
-SAFE_ALLOWLIST = [
-    (
-        "habitat/doctype/maintenance_request/maintenance_request.py",
-        "make_work_order",
-        # get_mapped_doc() returns an unsaved Document object. The frontend
-        # receives the prefilled doc dict and lets the user submit from the
-        # form. No data is written server-side; it is a pure read mapper.
-        "get_mapped_doc returns an unsaved doc; no server-side write occurs",
-    ),
-]
+# make_work_order was previously allowlisted here as a read-only get_mapped_doc
+# mapper. It is now declared methods=["POST"] explicitly (frappe.model.open_mapped_doc
+# issues a POST), so it no longer needs an exemption and was removed from this list.
+SAFE_ALLOWLIST = []
 
 
 def _python_files():
