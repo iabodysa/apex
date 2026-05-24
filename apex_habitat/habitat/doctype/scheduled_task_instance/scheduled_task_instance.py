@@ -17,7 +17,10 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    doc.db_set("status", "Completed")
+    # Submitting activates the task; it stays Open until a worker starts it.
+    # (Previously this forced "Completed", which made start_task unreachable.)
+    if doc.status not in ("In Progress", "Completed", "Cancelled"):
+        doc.db_set("status", "Open")
 
 
 def before_cancel(doc, method=None):
@@ -41,3 +44,21 @@ def start_task(task_instance):
     doc.db_set("status", "In Progress")
     doc.add_comment("Comment", _("Task started — status set to In Progress."))
     return {"status": "In Progress"}
+
+
+@frappe.whitelist(methods=["POST"])
+def mark_completed(task_instance):
+    """Transition Scheduled Task Instance from Open/In Progress to Completed."""
+    if not frappe.has_permission("Scheduled Task Instance", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+    doc = frappe.get_doc("Scheduled Task Instance", task_instance)
+
+    if doc.docstatus != 1:
+        frappe.throw(_("Only submitted Task Instances can be marked Completed."))
+    if doc.status not in ("Open", "In Progress"):
+        frappe.throw(_("Only Open or In Progress Task Instances can be marked Completed."))
+
+    doc.db_set("status", "Completed")
+    doc.add_comment("Comment", _("Task completed."))
+    return {"status": "Completed"}

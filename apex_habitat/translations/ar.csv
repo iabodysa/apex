@@ -679,10 +679,12 @@ Maintenance Work Orders In Progress,أوامر عمل الصيانة قيد ال
 Maintenance Work Orders by Status,أوامر عمل الصيانة حسب الحالة
 Manual,يدوي
 Manual Entry,إدخال يدوي
+Mark Completed,تحديد كمكتمل
 Mark Missed,تحديد كـ فائت
 Mark as Completed,وسم كمكتمل
 Mark this Service Order as In Progress?,هل تريد تحديد حالة أمر الخدمة هذا كـ 'قيد التنفيذ'؟
 Mark this Service Order as Missed? This indicates the scheduled work was not completed on time.,هل تريد تحديد حالة أمر الخدمة هذا كـ 'فائت'؟ يشير ذلك إلى عدم اكتمال العمل المجدول في الوقت المحدد.
+Mark this Task Instance as Completed?,تحديد هذه المهمة كمكتملة؟
 Mark this Task Instance as In Progress?,هل تريد تحديد حالة تنفيذ المهمة هذا كـ 'قيد التنفيذ'؟
 Mark this Work Order as Completed? This will post an operational ledger row.,وسم أمر العمل هذا كمكتمل؟ سيُرحّل ذلك سطراً في السجل التشغيلي.
 Mark this Work Order as In Progress?,هل تريد تحديد حالة أمر العمل هذا كـ 'قيد التنفيذ'؟
@@ -756,6 +758,7 @@ Offline,غير متصل
 On Entry,عند الدخول
 On-call Only,عند الطلب فقط
 One row per scheduled rent payment on an Accommodation Lease. Linked to a Payment Entry once processed.,سطر لكل دفعة إيجار مجدولة على عقد الإيجار. يُربط بقيد دفع بمجرد معالجته.
+Only Open or In Progress Task Instances can be marked Completed.,لا يمكن إكمال إلا المهام المفتوحة أو قيد التنفيذ.
 Only Service Orders with status In Progress can be marked Missed.,لا يمكن تحديد حالة 'فائت' إلا لأوامر الخدمة ذات الحالة 'قيد التنفيذ'.
 Only Service Orders with status Scheduled can be marked In Progress.,لا يمكن تحديد حالة 'قيد التنفيذ' إلا لأوامر الخدمة ذات الحالة 'مجدول'.
 Only Task Instances with status Open can be marked In Progress.,لا يمكن تحديد حالة 'قيد التنفيذ' إلا لتنفيذات المهام ذات الحالة 'مفتوح'.
@@ -763,6 +766,7 @@ Only Work Orders with status Planned can be marked In Progress.,لا يمكن ت
 Only submitted Maintenance Work Orders can be marked Completed.,لا يمكن وسم أوامر عمل الصيانة كمكتملة إلا بعد اعتمادها.
 Only submitted Service Orders can be marked Missed.,لا يمكن تحديد حالة 'فائت' إلا لأوامر الخدمة المعتمدة.
 Only submitted Service Orders can be started.,لا يمكن بدء تنفيذ أوامر الخدمة غير المعتمدة.
+Only submitted Task Instances can be marked Completed.,لا يمكن تحديد المهمة كمكتملة إلا بعد اعتمادها.
 Only submitted Task Instances can be started.,لا يمكن بدء تنفيذ المهام غير المعتمدة.
 Only submitted Work Orders can be started.,لا يمكن بدء تنفيذ أوامر العمل غير المعتمدة.
 Only submitted reports can be acknowledged.,لا يمكن اعتماد التقارير غير المعتمدة.
@@ -1096,12 +1100,14 @@ Target Room {0} is not associated with any Building.,الغرفة المستهد
 Target bed is already occupied.,السرير المستهدف مشغول بالفعل.
 Task,المهمة
 Task Code,رمز المهمة
+Task Instance marked Completed.,تم تحديد المهمة كمكتملة.
 Task Instance marked In Progress.,تم تحديد حالة تنفيذ المهمة كـ 'قيد التنفيذ'.
 Task Master,بيانات المهام الأساسية
 Task Setup,إعداد المهام
 Task Title (Arabic),عنوان المهمة (بالعربية)
 Task Title (English),عنوان المهمة (بالإنجليزية)
 Task Type,نوع المهمة
+Task completed.,اكتملت المهمة.
 Task started — status set to In Progress.,بدأت المهمة — تم ضبط الحالة إلى 'قيد التنفيذ'.
 Technician Notes,ملاحظات الفني
 Telecom,اتصالات
