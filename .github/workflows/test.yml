@@ -25,6 +25,8 @@ jobs:
           --health-retries=5
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -36,14 +38,22 @@ jobs:
       - name: Create bench
         run: bench init --skip-redis-config-generation --frappe-branch version-15 frappe-bench
 
+      - name: Get required Frappe apps
+        working-directory: frappe-bench
+        run: |
+          bench get-app --branch version-15 --skip-assets erpnext
+          bench get-app --branch version-15 --skip-assets hrms
+
       - name: Get apex_habitat app
         working-directory: frappe-bench
-        run: bench get-app apex_habitat ${{ github.workspace }}
+        run: bench get-app --skip-assets ${{ github.workspace }}
 
       - name: Create test site
         working-directory: frappe-bench
         run: |
           bench new-site test.localhost --db-root-password root --admin-password admin --no-mariadb-socket
+          bench --site test.localhost install-app erpnext
+          bench --site test.localhost install-app hrms
           bench --site test.localhost install-app apex_habitat
 
       - name: Run tests
