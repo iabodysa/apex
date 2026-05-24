@@ -9,6 +9,33 @@ from frappe.utils import flt
 
 
 class MaintenanceWorkOrder(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from apex_habitat.habitat.doctype.maintenance_procurement_item.maintenance_procurement_item import MaintenanceProcurementItem
+        from frappe.types import DF
+
+        actual_end_date: DF.Date | None
+        actual_start_date: DF.Date | None
+        amended_from: DF.Link | None
+        assigned_to: DF.Link | None
+        building: DF.Link | None
+        cancellation_reason: DF.SmallText | None
+        completion_notes: DF.SmallText | None
+        completion_photo: DF.AttachImage | None
+        maintenance_request: DF.Link
+        naming_series: DF.Literal["MWO-.YYYY.-.####"]
+        planned_end_date: DF.Date | None
+        planned_start_date: DF.Date
+        procurement_items: DF.Table[MaintenanceProcurementItem]
+        status: DF.Literal["Draft", "Planned", "In Progress", "Completed", "Cancelled"]
+        subcontractor_service_order: DF.Link | None
+        total_procurement_cost_sar: DF.Currency
+        work_description: DF.TextEditor
+    # end: auto-generated types
     pass
 
 

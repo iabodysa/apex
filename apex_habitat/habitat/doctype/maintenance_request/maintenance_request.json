@@ -1,334 +1,325 @@
 {
- "doctype": "DocType",
- "name": "Maintenance Request",
- "module": "Habitat",
- "custom": 0,
- "istable": 0,
- "is_submittable": 1,
- "engine": "InnoDB",
- "track_changes": 1,
+ "actions": [],
  "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "creation": "2026-05-23 23:31:44.837702",
  "description": "Room-level maintenance ticket. Can be generated automatically from a safety inspection report.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "maintenance_request_tab_overview",
+  "maintenance_request_sec_overview",
+  "company",
+  "building",
+  "room",
+  "bed",
+  "source_inspection",
+  "reported_by",
+  "issue_type",
+  "priority",
+  "assigned_to",
+  "maintenance_request_overview_col",
+  "requires_procurement",
+  "status",
+  "related_facility_asset",
+  "target_asset",
+  "naming_series",
+  "cost_of_repair",
+  "cost_center",
+  "subcontractor_dispatched",
+  "maintenance_request_sec_primary_large_text",
+  "issue_description",
+  "maintenance_request_sec_large_text",
+  "resolution_notes",
+  "maintenance_request_tab_tables",
+  "maintenance_request_sec_table_procurement_items",
+  "procurement_items",
+  "maintenance_request_tab_system",
+  "maintenance_request_sec_system",
+  "target_asset_name",
+  "target_asset_category",
+  "maintenance_request_system_col",
+  "target_asset_location",
+  "is_logged_to_asset_history",
+  "amended_from"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_request_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_request_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "General Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "company",
-   "label": "Company",
    "fieldtype": "Link",
+   "label": "Company",
    "options": "Company",
-   "read_only": 1,
-   "idx": 3
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "building",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Building",
    "options": "Accommodation Building",
    "reqd": 1,
-   "idx": 4,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "room",
    "fieldtype": "Link",
    "label": "Room",
    "options": "Accommodation Room",
    "reqd": 1,
-   "idx": 5,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "bed",
    "fieldtype": "Link",
    "label": "Bed (if bed-specific)",
    "options": "Accommodation Bed",
-   "idx": 6,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
+   "description": "Set automatically when this request is generated from a safety inspection report.",
    "fieldname": "source_inspection",
    "fieldtype": "Link",
    "label": "Source Inspection Report",
-   "options": "Safety Inspection Report",
-   "description": "Set automatically when this request is generated from a safety inspection report.",
-   "idx": 7
+   "options": "Safety Inspection Report"
   },
   {
-   "doctype": "DocField",
    "fieldname": "reported_by",
    "fieldtype": "Link",
    "label": "Reported By",
    "options": "User",
-   "reqd": 1,
-   "idx": 8
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "issue_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Issue Type",
    "options": "Electrical\nPlumbing\nFurniture\nAir Conditioning\nFire Safety\nPest Control\nStructural\nOther",
-   "reqd": 1,
-   "idx": 9
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
+   "default": "Medium",
    "fieldname": "priority",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Priority",
-   "options": "Low\nMedium\nHigh\nCritical",
-   "default": "Medium",
-   "idx": 10
+   "options": "Low\nMedium\nHigh\nCritical"
   },
   {
-   "doctype": "DocField",
    "fieldname": "assigned_to",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Assigned To",
-   "options": "User",
-   "idx": 11
+   "options": "User"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_request_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 12
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
+   "default": "0",
    "fieldname": "requires_procurement",
    "fieldtype": "Check",
-   "label": "Requires Procurement",
-   "idx": 13
+   "label": "Requires Procurement"
   },
   {
-   "doctype": "DocField",
+   "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nAssigned\nIn Progress\nResolved\nClosed\nReopened",
-   "default": "Open",
-   "idx": 14
+   "options": "Open\nAssigned\nIn Progress\nResolved\nClosed\nReopened"
   },
   {
-   "doctype": "DocField",
+   "description": "Use when the issue concerns a specific facility asset (e.g., CCTV camera, fire alarm panel)",
    "fieldname": "related_facility_asset",
    "fieldtype": "Link",
    "label": "Related Facility Asset",
-   "options": "Facility Asset",
-   "description": "Use when the issue concerns a specific facility asset (e.g., CCTV camera, fire alarm panel)",
-   "idx": 15
+   "options": "Facility Asset"
   },
   {
-   "doctype": "DocField",
+   "description": "Specific Fixed Asset this request concerns (e.g., AC-001, BED-014). Enables full maintenance history per asset.",
    "fieldname": "target_asset",
    "fieldtype": "Link",
    "label": "Target ERPNext Asset",
-   "options": "Asset",
-   "description": "Specific Fixed Asset this request concerns (e.g., AC-001, BED-014). Enables full maintenance history per asset.",
-   "idx": 16
+   "options": "Asset"
   },
   {
-   "doctype": "DocField",
+   "default": "MAINT-.YYYY.-.#####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "options": "MAINT-.YYYY.-.#####",
-   "default": "MAINT-.YYYY.-.#####",
-   "reqd": 1,
-   "idx": 17,
-   "hidden": 1
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "cost_of_repair",
    "fieldtype": "Currency",
-   "label": "Cost of Repair (SAR)",
-   "idx": 18
+   "label": "Cost of Repair (SAR)"
   },
   {
-   "doctype": "DocField",
+   "description": "Auto-fetched from Building",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
-   "options": "Cost Center",
-   "description": "Auto-fetched from Building",
-   "idx": 19
+   "options": "Cost Center"
   },
   {
-   "doctype": "DocField",
+   "description": "Set when a subcontractor visit is created from this request",
    "fieldname": "subcontractor_dispatched",
    "fieldtype": "Link",
    "label": "Subcontractor Dispatched",
-   "options": "Subcontractor Service Order",
-   "description": "Set when a subcontractor visit is created from this request",
-   "idx": 20
+   "options": "Subcontractor Service Order"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_request_sec_primary_large_text",
    "fieldtype": "Section Break",
-   "label": "Detailed Description",
-   "idx": 21
+   "label": "Detailed Description"
   },
   {
-   "doctype": "DocField",
    "fieldname": "issue_description",
    "fieldtype": "Small Text",
    "label": "Issue Description",
-   "reqd": 1,
-   "idx": 22
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "maintenance_request_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 23
+   "label": "Additional Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "resolution_notes",
    "fieldtype": "Small Text",
-   "label": "Resolution Notes",
-   "idx": 24
+   "label": "Resolution Notes"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_request_tab_tables",
    "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 25
+   "label": "Related Tables"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_request_sec_table_procurement_items",
    "fieldtype": "Section Break",
-   "label": "Procurement Items Required",
-   "idx": 26
+   "label": "Procurement Items Required"
   },
   {
-   "doctype": "DocField",
+   "depends_on": "eval:doc.requires_procurement==1",
    "fieldname": "procurement_items",
    "fieldtype": "Table",
    "label": "Procurement Items Required",
-   "options": "Maintenance Procurement Item",
-   "depends_on": "eval:doc.requires_procurement==1",
-   "idx": 27
+   "options": "Maintenance Procurement Item"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_request_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info",
-   "idx": 28
+   "label": "System Info"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_request_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
-   "idx": 29
+   "label": "Administrative Details"
   },
   {
-   "doctype": "DocField",
+   "fetch_from": "target_asset.asset_name",
    "fieldname": "target_asset_name",
    "fieldtype": "Data",
    "label": "Asset Name",
-   "fetch_from": "target_asset.asset_name",
-   "read_only": 1,
-   "idx": 30
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
+   "fetch_from": "target_asset.asset_category",
    "fieldname": "target_asset_category",
    "fieldtype": "Data",
    "label": "Asset Category",
-   "fetch_from": "target_asset.asset_category",
-   "read_only": 1,
-   "idx": 31
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_request_system_col",
-   "fieldtype": "Column Break",
-   "idx": 32
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
+   "fetch_from": "target_asset.location",
    "fieldname": "target_asset_location",
    "fieldtype": "Data",
    "label": "Asset Location",
-   "fetch_from": "target_asset.location",
-   "read_only": 1,
-   "idx": 33
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
+   "default": "0",
+   "description": "Indicates the resolved request has been recorded in the asset's maintenance history.",
    "fieldname": "is_logged_to_asset_history",
    "fieldtype": "Check",
    "label": "Logged to Asset Maintenance History",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Maintenance Request",
+   "print_hide": 1,
    "read_only": 1,
-   "description": "Indicates the resolved request has been recorded in the asset's maintenance history.",
-   "idx": 34
+   "search_index": 1
   }
  ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-25 01:05:29.717302",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Maintenance Request",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
-   "submit": 1,
-   "cancel": 1,
-   "report": 1,
+   "email": 1,
    "export": 1,
    "print": 1,
-   "email": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
    "share": 1,
-   "idx": 1
+   "submit": 1,
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
+   "create": 1,
+   "read": 1,
    "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
    "submit": 1,
-   "idx": 2
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Resident Supervisor",
-   "read": 1,
-   "write": 1,
    "create": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
    "submit": 1,
-   "idx": 3
+   "write": 1
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "issue_type",
+ "track_changes": 1
 }

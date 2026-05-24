@@ -1,231 +1,227 @@
 {
- "doctype": "DocType",
- "name": "Accommodation Lease",
- "module": "Habitat",
- "custom": 0,
- "istable": 0,
- "is_submittable": 1,
- "engine": "InnoDB",
- "track_changes": 1,
+ "actions": [],
  "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "creation": "2026-05-23 23:31:43.779074",
  "description": "Formal lease contract holder for one building. Carries the rent payment schedule. Landlord identity fields stay on Accommodation Building.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "accommodation_lease_tab_overview",
+  "accommodation_lease_sec_overview",
+  "company",
+  "building",
+  "supplier",
+  "status",
+  "lease_start_date",
+  "lease_end_date",
+  "accommodation_lease_overview_col",
+  "rent_amount",
+  "company_share_pct",
+  "billing_cycle",
+  "first_payment_date",
+  "naming_series",
+  "total_scheduled",
+  "accommodation_lease_sec_large_text",
+  "lease_reference",
+  "notes",
+  "accommodation_lease_tab_tables",
+  "accommodation_lease_sec_table_payment_schedule",
+  "payment_schedule",
+  "amended_from"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_lease_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_lease_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "General Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "company",
-   "label": "Company",
    "fieldtype": "Link",
+   "label": "Company",
    "options": "Company",
-   "read_only": 1,
-   "idx": 3
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "building",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Building",
    "options": "Accommodation Building",
    "reqd": 1,
-   "in_list_view": 1,
-   "idx": 4,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
+   "description": "Optional ERPNext Supplier FK. When set, monthly_rent_due_alert creates a Draft Payment Entry automatically.",
    "fieldname": "supplier",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Landlord Supplier",
-   "options": "Supplier",
-   "description": "Optional ERPNext Supplier FK. When set, monthly_rent_due_alert creates a Draft Payment Entry automatically.",
-   "idx": 5
+   "options": "Supplier"
   },
   {
-   "doctype": "DocField",
+   "default": "Active",
    "fieldname": "status",
    "fieldtype": "Select",
-   "label": "Status",
-   "options": "Active\nExpired\nTerminated",
-   "default": "Active",
    "in_list_view": 1,
-   "idx": 6
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nExpired\nTerminated"
   },
   {
-   "doctype": "DocField",
    "fieldname": "lease_start_date",
    "fieldtype": "Date",
-   "label": "Lease Start Date",
-   "reqd": 1,
    "in_list_view": 1,
-   "idx": 7
+   "label": "Lease Start Date",
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "lease_end_date",
    "fieldtype": "Date",
-   "label": "Lease End Date",
-   "reqd": 1,
    "in_list_view": 1,
-   "idx": 8
+   "label": "Lease End Date",
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_lease_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 9
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "rent_amount",
    "fieldtype": "Currency",
    "label": "Rent (SAR)",
-   "reqd": 1,
-   "idx": 10
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
-   "fieldname": "company_share_pct",
-   "fieldtype": "Percent",
-   "label": "Utility Cost Share (%)",
    "default": "100",
    "description": "Company's share (%) of utility bills for this building when meters are shared with other tenants. Agreed with the property management office. Does not affect the rent amount.",
-   "idx": 11
+   "fieldname": "company_share_pct",
+   "fieldtype": "Percent",
+   "label": "Utility Cost Share (%)"
   },
   {
-   "doctype": "DocField",
+   "default": "Monthly",
+   "description": "How often rent payments are scheduled. Amount per installment is calculated automatically.",
    "fieldname": "billing_cycle",
    "fieldtype": "Select",
    "label": "Billing Cycle",
    "options": "Monthly\nQuarterly\nSemi-Annual\nAnnual",
-   "default": "Monthly",
-   "reqd": 1,
-   "description": "How often rent payments are scheduled. Amount per installment is calculated automatically.",
-   "idx": 12
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
+   "description": "Date of the first payment. Subsequent payments are calculated from this date based on Billing Cycle.",
    "fieldname": "first_payment_date",
    "fieldtype": "Date",
    "label": "First Payment Date",
-   "reqd": 1,
-   "description": "Date of the first payment. Subsequent payments are calculated from this date based on Billing Cycle.",
-   "idx": 13
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
+   "default": "ACC-LEASE-.YYYY.-.####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "options": "ACC-LEASE-.YYYY.-.####",
-   "default": "ACC-LEASE-.YYYY.-.####",
-   "reqd": 1,
-   "idx": 14,
-   "hidden": 1
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
+   "description": "Auto-computed sum of all payment schedule rows.",
    "fieldname": "total_scheduled",
    "fieldtype": "Currency",
    "label": "Total Scheduled Amount (SAR)",
-   "read_only": 1,
-   "description": "Auto-computed sum of all payment schedule rows.",
-   "idx": 15
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
+   "description": "Landlord-issued contract number or file reference.",
    "fieldname": "lease_reference",
    "fieldtype": "Data",
-   "label": "Lease / Contract Reference",
-   "description": "Landlord-issued contract number or file reference.",
-   "idx": 16
+   "label": "Lease / Contract Reference"
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "accommodation_lease_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 16
+   "label": "Additional Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "notes",
    "fieldtype": "Small Text",
-   "label": "Notes",
-   "idx": 17
+   "label": "Notes"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_lease_tab_tables",
    "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 18
+   "label": "Related Tables"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_lease_sec_table_payment_schedule",
    "fieldtype": "Section Break",
-   "label": "Rent Payment Schedule",
-   "idx": 19
+   "label": "Rent Payment Schedule"
   },
   {
-   "doctype": "DocField",
    "fieldname": "payment_schedule",
    "fieldtype": "Table",
    "label": "Rent Payment Schedule",
-   "options": "Rent Payment Schedule",
-   "idx": 20
+   "options": "Rent Payment Schedule"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Accommodation Lease",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-25 01:05:30.804051",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Accommodation Lease",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
-   "submit": 1,
-   "cancel": 1,
-   "print": 1,
    "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
    "share": 1,
-   "idx": 1
+   "submit": 1,
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
+   "create": 1,
+   "read": 1,
    "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
    "submit": 1,
-   "idx": 2
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Finance Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "submit": 1,
    "cancel": 1,
-   "idx": 3
+   "create": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "submit": 1,
+   "write": 1
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "building",
+ "track_changes": 1
 }

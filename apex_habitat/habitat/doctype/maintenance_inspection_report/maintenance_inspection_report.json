@@ -1,169 +1,178 @@
 {
- "doctype": "DocType",
- "name": "Maintenance Inspection Report",
- "module": "Habitat",
- "custom": 0,
- "issingle": 0,
- "istable": 0,
- "is_submittable": 1,
- "engine": "InnoDB",
- "description": "Submittable: official on-site maintenance inspection record.",
+ "actions": [],
  "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
+ "creation": "2026-05-24 18:03:15.847320",
+ "description": "Submittable: official on-site maintenance inspection record.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "maintenance_inspection_report_tab_overview",
+  "maintenance_inspection_report_sec_overview",
+  "inspection_date",
+  "building",
+  "inspector",
+  "maintenance_work_order",
+  "maintenance_inspection_report_overview_col",
+  "inspection_type",
+  "overall_result",
+  "naming_series",
+  "maintenance_inspection_report_sec_large_text",
+  "remarks",
+  "maintenance_inspection_report_tab_tables",
+  "maintenance_inspection_report_sec_table_findings",
+  "findings",
+  "maintenance_inspection_report_tab_system",
+  "maintenance_inspection_report_sec_system",
+  "cancellation_reason",
+  "amended_from"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_inspection_report_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_inspection_report_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "General Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "inspection_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Inspection Date",
-   "reqd": 1,
-   "idx": 3
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "building",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Building",
    "options": "Accommodation Building",
    "reqd": 1,
-   "idx": 4,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "inspector",
    "fieldtype": "Link",
    "label": "Inspector (Employee)",
    "options": "Employee",
-   "reqd": 1,
-   "idx": 5
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_work_order",
    "fieldtype": "Link",
    "label": "Maintenance Work Order",
-   "options": "Maintenance Work Order",
-   "idx": 6
+   "options": "Maintenance Work Order"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_inspection_report_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 7
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
+   "default": "Post-Work",
    "fieldname": "inspection_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Inspection Type",
-   "options": "Pre-Work\nPost-Work\nPeriodic\nEmergency",
-   "default": "Post-Work",
-   "idx": 8
+   "options": "Pre-Work\nPost-Work\nPeriodic\nEmergency"
   },
   {
-   "doctype": "DocField",
+   "default": "Pass",
    "fieldname": "overall_result",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Overall Result",
-   "options": "Pass\nPass with Observations\nFail",
-   "default": "Pass",
-   "idx": 9
+   "options": "Pass\nPass with Observations\nFail"
   },
   {
-   "doctype": "DocField",
+   "default": "MIR-.YYYY.-.####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "MIR-.YYYY.-.####",
-   "default": "MIR-.YYYY.-.####",
-   "idx": 10,
-   "hidden": 1
+   "options": "MIR-.YYYY.-.####"
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "maintenance_inspection_report_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 11
+   "label": "Additional Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "remarks",
    "fieldtype": "Small Text",
-   "label": "Remarks",
-   "idx": 12
+   "label": "Remarks"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_inspection_report_tab_tables",
    "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 13
+   "label": "Related Tables"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_inspection_report_sec_table_findings",
    "fieldtype": "Section Break",
-   "label": "Findings",
-   "idx": 14
+   "label": "Findings"
   },
   {
-   "doctype": "DocField",
    "fieldname": "findings",
    "fieldtype": "Table",
    "label": "Findings",
-   "options": "Inspection Finding Item",
-   "idx": 15
+   "options": "Inspection Finding Item"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_inspection_report_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info",
-   "idx": 16
+   "label": "System Info"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_inspection_report_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
-   "idx": 17
+   "label": "Administrative Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "cancellation_reason",
    "fieldtype": "Small Text",
    "label": "Cancellation Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Maintenance Inspection Report",
+   "print_hide": 1,
    "read_only": 1,
-   "idx": 18
+   "search_index": 1
   }
  ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-25 01:05:31.522132",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Maintenance Inspection Report",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
+   "read": 1,
+   "role": "System Manager",
    "submit": 1,
-   "cancel": 1
+   "write": 1
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "building"
 }

@@ -14,6 +14,32 @@ from frappe.model.document import Document
 
 
 class AccommodationAssignment(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from apex_habitat.habitat.doctype.accommodation_custody_item.accommodation_custody_item import AccommodationCustodyItem
+        from frappe.types import DF
+
+        amended_from: DF.Link | None
+        assignment_type: DF.Literal["New Assignment", "Transfer", "Return from Leave"]
+        bed: DF.Link
+        building: DF.Link
+        check_in_date: DF.Date
+        check_out_date: DF.Date | None
+        cost_center: DF.Link | None
+        custody_items: DF.Table[AccommodationCustodyItem]
+        employee: DF.Link
+        employee_name: DF.Data | None
+        housing_allowance_suspended: DF.Check
+        naming_series: DF.Literal["ACC-ASGN-.YYYY.-.####"]
+        notes: DF.SmallText | None
+        previous_building: DF.Link | None
+        project: DF.Link
+        room: DF.Link
+    # end: auto-generated types
     pass
 
 

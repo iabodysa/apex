@@ -1,622 +1,553 @@
 {
- "doctype": "DocType",
- "name": "Accommodation Building",
- "module": "Habitat",
- "custom": 0,
- "istable": 0,
- "quick_entry": 0,
- "engine": "InnoDB",
- "track_changes": 1,
+ "actions": [],
  "allow_rename": 1,
  "autoname": "field:building_name",
- "naming_rule": "By fieldname",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "creation": "2026-05-24 17:56:21.084961",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "accommodation_building_tab_overview",
+  "accommodation_building_sec_overview",
+  "company",
+  "building_name",
+  "site",
+  "abbreviation",
+  "status",
+  "total_floors",
+  "total_rooms",
+  "accommodation_building_overview_col",
+  "city",
+  "district",
+  "google_maps_url",
+  "total_capacity",
+  "responsible_facility_supervisor",
+  "accommodation_building_sec_landlord",
+  "landlord_name",
+  "landlord_mobile",
+  "landlord_office",
+  "accommodation_building_landlord_col",
+  "lease_start_date",
+  "lease_end_date",
+  "lease_renewal_status",
+  "accommodation_building_sec_capacity",
+  "over_capacity_allowed",
+  "accommodation_building_capacity_col",
+  "over_capacity_threshold_percent",
+  "accommodation_building_sec_large_text",
+  "address",
+  "accommodation_building_tab_financials",
+  "accommodation_building_sec_financials",
+  "rent_due_day",
+  "annual_rent_sar",
+  "default_cost_center",
+  "annual_total_cost_sar",
+  "annual_cost_per_capacity_sar",
+  "monthly_cost_per_capacity_sar",
+  "current_occupants",
+  "accommodation_building_financials_col",
+  "annual_electricity_sar",
+  "annual_water_sar",
+  "annual_cleaning_staff_sar",
+  "annual_supervision_sar",
+  "annual_other_expenses_sar",
+  "internal_billing_model",
+  "internal_billing_notes",
+  "accommodation_building_tab_setup",
+  "accommodation_building_sec_setup_type",
+  "accommodation_type",
+  "accommodation_building_setup_col",
+  "setup_status",
+  "setup_generated_on",
+  "setup_generated_by",
+  "accommodation_building_sec_floor_plan",
+  "floor_plan",
+  "setup_instructions_html",
+  "accommodation_building_tab_safety",
+  "accommodation_building_sec_safety_profile",
+  "safety_setup_status",
+  "safety_setup_generated_on",
+  "safety_setup_generated_by",
+  "accommodation_building_safety_col",
+  "fire_alarm_panel_present",
+  "smoke_detectors_present",
+  "first_aid_kit_required",
+  "emergency_signage_required",
+  "water_tank_inspection_required",
+  "pest_control_required",
+  "accommodation_building_tab_system",
+  "accommodation_building_sec_system",
+  "occupancy_percent",
+  "accommodation_building_sec_security",
+  "cctv_camera_count",
+  "accommodation_building_security_col",
+  "dvr_status"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "General Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "company",
-   "label": "Company",
    "fieldtype": "Link",
+   "label": "Company",
    "options": "Company",
-   "read_only": 1,
-   "idx": 3
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "building_name",
-   "label": "Property / Unit Name",
    "fieldtype": "Data",
-   "reqd": 1,
-   "unique": 1,
    "in_list_view": 1,
-   "idx": 4
+   "label": "Property / Unit Name",
+   "reqd": 1,
+   "unique": 1
   },
   {
-   "doctype": "DocField",
+   "description": "Short code used to prefix generated room numbers.",
    "fieldname": "abbreviation",
    "fieldtype": "Data",
-   "label": "Abbreviation",
-   "description": "Short code used to prefix generated room numbers."
+   "label": "Abbreviation"
   },
   {
-   "doctype": "DocField",
    "fieldname": "site",
-   "label": "Site",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Site",
    "options": "Accommodation Site",
-   "idx": 5,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
-   "fieldname": "status",
-   "label": "Status",
-   "fieldtype": "Select",
-   "options": "Active\nInactive\nUnder Renovation",
    "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
    "in_list_view": 1,
-   "idx": 6
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nInactive\nUnder Renovation"
   },
   {
-   "doctype": "DocField",
    "fieldname": "total_floors",
-   "label": "Total Floors",
    "fieldtype": "Int",
-   "idx": 7
+   "label": "Total Floors"
   },
   {
-   "doctype": "DocField",
    "fieldname": "total_rooms",
-   "label": "Total Rooms",
    "fieldtype": "Int",
-   "idx": 8
+   "label": "Total Rooms"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 9
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "city",
-   "label": "City",
    "fieldtype": "Link",
-   "options": "City",
    "in_list_view": 1,
-   "idx": 10
+   "in_standard_filter": 1,
+   "label": "City",
+   "options": "City"
   },
   {
-   "doctype": "DocField",
    "fieldname": "district",
-   "label": "District",
    "fieldtype": "Data",
-   "idx": 11
+   "label": "District"
   },
   {
-   "doctype": "DocField",
    "fieldname": "google_maps_url",
-   "label": "Google Maps Link",
    "fieldtype": "Data",
-   "idx": 12
+   "label": "Google Maps Link"
   },
   {
-   "doctype": "DocField",
    "fieldname": "total_capacity",
-   "label": "Total Bed Capacity",
    "fieldtype": "Int",
-   "reqd": 1,
-   "idx": 13
+   "label": "Total Bed Capacity",
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "responsible_facility_supervisor",
-   "label": "Responsible Facility Supervisor",
    "fieldtype": "Link",
-   "options": "User",
-   "idx": 14
+   "label": "Responsible Facility Supervisor",
+   "options": "User"
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "accommodation_building_sec_landlord",
    "fieldtype": "Section Break",
-   "label": "Landlord & Lease Details",
-   "collapsible": 1,
-   "idx": 15
+   "label": "Landlord & Lease Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "landlord_name",
-   "label": "Landlord Name",
    "fieldtype": "Data",
-   "idx": 16
+   "label": "Landlord Name"
   },
   {
-   "doctype": "DocField",
    "fieldname": "landlord_mobile",
-   "label": "Landlord Mobile",
    "fieldtype": "Data",
-   "idx": 17
+   "label": "Landlord Mobile"
   },
   {
-   "doctype": "DocField",
    "fieldname": "landlord_office",
-   "label": "Landlord Office / Real Estate Agency",
    "fieldtype": "Data",
-   "idx": 18
+   "label": "Landlord Office / Real Estate Agency"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_landlord_col",
-   "fieldtype": "Column Break",
-   "idx": 19
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "lease_start_date",
-   "label": "Lease Start Date",
    "fieldtype": "Date",
-   "idx": 20
+   "label": "Lease Start Date"
   },
   {
-   "doctype": "DocField",
    "fieldname": "lease_end_date",
-   "label": "Lease End Date",
    "fieldtype": "Date",
-   "idx": 21
+   "label": "Lease End Date"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "lease_renewal_status",
-   "label": "Lease Status",
-   "fieldtype": "Select",
-   "options": "Active\nUnder Renewal\nExpired\nTerminated",
    "default": "Active",
-   "idx": 22
+   "fieldname": "lease_renewal_status",
+   "fieldtype": "Select",
+   "label": "Lease Status",
+   "options": "Active\nUnder Renewal\nExpired\nTerminated"
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "accommodation_building_sec_capacity",
    "fieldtype": "Section Break",
-   "label": "Capacity Policies",
-   "collapsible": 1,
-   "idx": 23
+   "label": "Capacity Policies"
   },
   {
-   "doctype": "DocField",
+   "default": "1",
    "fieldname": "over_capacity_allowed",
-   "label": "Allow Over-Capacity",
    "fieldtype": "Check",
-   "default": 1,
-   "idx": 24
+   "label": "Allow Over-Capacity"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_capacity_col",
-   "fieldtype": "Column Break",
-   "idx": 25
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
+   "default": "120",
    "fieldname": "over_capacity_threshold_percent",
-   "label": "Over-Capacity Alert Threshold (%)",
    "fieldtype": "Percent",
-   "default": 120,
-   "idx": 26
+   "label": "Over-Capacity Alert Threshold (%)"
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "accommodation_building_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 27
+   "label": "Additional Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "address",
-   "label": "Address",
    "fieldtype": "Small Text",
-   "idx": 28
+   "label": "Address"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_tab_financials",
    "fieldtype": "Tab Break",
-   "label": "Financials",
-   "idx": 29
+   "label": "Financials"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_sec_financials",
    "fieldtype": "Section Break",
-   "label": "Financial Information",
-   "idx": 30
+   "label": "Financial Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "rent_due_day",
-   "label": "Rent Due Day of Month",
    "fieldtype": "Int",
-   "idx": 31
+   "label": "Rent Due Day of Month"
   },
   {
-   "doctype": "DocField",
    "fieldname": "annual_rent_sar",
-   "label": "Annual Rent (SAR)",
    "fieldtype": "Currency",
-   "idx": 32
+   "label": "Annual Rent (SAR)"
   },
   {
-   "doctype": "DocField",
    "fieldname": "default_cost_center",
-   "label": "Default Cost Center",
    "fieldtype": "Link",
-   "options": "Cost Center",
-   "idx": 33
+   "label": "Default Cost Center",
+   "options": "Cost Center"
   },
   {
-   "doctype": "DocField",
    "fieldname": "annual_total_cost_sar",
+   "fieldtype": "Currency",
    "label": "Annual Total Cost (SAR)",
-   "fieldtype": "Currency",
-   "read_only": 1,
-   "idx": 34
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "annual_cost_per_capacity_sar",
+   "fieldtype": "Currency",
    "label": "Annual Cost per Bed Capacity (SAR)",
-   "fieldtype": "Currency",
-   "read_only": 1,
-   "idx": 35
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "monthly_cost_per_capacity_sar",
+   "fieldtype": "Currency",
    "label": "Monthly Cost per Bed Capacity (SAR)",
-   "fieldtype": "Currency",
-   "read_only": 1,
-   "idx": 36
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "current_occupants",
-   "label": "Current Occupants",
    "fieldtype": "Int",
-   "read_only": 1,
-   "idx": 37
+   "label": "Current Occupants",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_financials_col",
-   "fieldtype": "Column Break",
-   "idx": 38
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "annual_electricity_sar",
-   "label": "Annual Electricity (SAR)",
    "fieldtype": "Currency",
-   "idx": 39
+   "label": "Annual Electricity (SAR)"
   },
   {
-   "doctype": "DocField",
    "fieldname": "annual_water_sar",
-   "label": "Annual Water (SAR)",
    "fieldtype": "Currency",
-   "idx": 40
+   "label": "Annual Water (SAR)"
   },
   {
-   "doctype": "DocField",
    "fieldname": "annual_cleaning_staff_sar",
-   "label": "Annual Cleaning Staff Cost (SAR)",
    "fieldtype": "Currency",
-   "idx": 41
+   "label": "Annual Cleaning Staff Cost (SAR)"
   },
   {
-   "doctype": "DocField",
    "fieldname": "annual_supervision_sar",
-   "label": "Annual Supervision Cost (SAR)",
    "fieldtype": "Currency",
-   "idx": 42
+   "label": "Annual Supervision Cost (SAR)"
   },
   {
-   "doctype": "DocField",
    "fieldname": "annual_other_expenses_sar",
-   "label": "Annual Other Expenses (SAR)",
    "fieldtype": "Currency",
-   "idx": 43
+   "label": "Annual Other Expenses (SAR)"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "internal_billing_model",
-   "label": "Internal Billing Model",
-   "fieldtype": "Select",
-   "options": "Direct Allocation\nSalary Deduction\nOverhead Absorption",
    "default": "Direct Allocation",
-   "idx": 44
+   "fieldname": "internal_billing_model",
+   "fieldtype": "Select",
+   "label": "Internal Billing Model",
+   "options": "Direct Allocation\nSalary Deduction\nOverhead Absorption"
   },
   {
-   "doctype": "DocField",
    "fieldname": "internal_billing_notes",
-   "label": "Internal Billing Notes",
    "fieldtype": "Small Text",
-   "idx": 45
+   "label": "Internal Billing Notes"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_tab_setup",
    "fieldtype": "Tab Break",
-   "label": "Room Setup",
-   "idx": 46
+   "label": "Room Setup"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_sec_setup_type",
    "fieldtype": "Section Break",
-   "label": "Accommodation Type",
-   "idx": 47
+   "label": "Accommodation Type"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "accommodation_type",
-   "label": "Accommodation Type",
-   "fieldtype": "Select",
-   "options": "Apartment\nBuilding\nVilla\nCompound Block\nOther",
    "default": "Building",
    "description": "Select 'Building' if leasing an entire building, or 'Apartment' if leasing a single unit.",
-   "in_list_view": 0,
-   "idx": 48
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "accommodation_building_setup_col",
-   "fieldtype": "Column Break",
-   "idx": 49
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "setup_status",
-   "label": "Setup Status",
+   "fieldname": "accommodation_type",
    "fieldtype": "Select",
-   "options": "Draft\nRooms Planned\nRooms Generated\nInventory In Progress\nInventory Completed",
+   "in_standard_filter": 1,
+   "label": "Accommodation Type",
+   "options": "Apartment\nBuilding\nVilla\nCompound Block\nOther"
+  },
+  {
+   "fieldname": "accommodation_building_setup_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "Draft",
-   "read_only": 1,
-   "in_list_view": 0,
-   "idx": 50
+   "fieldname": "setup_status",
+   "fieldtype": "Select",
+   "label": "Setup Status",
+   "options": "Draft\nRooms Planned\nRooms Generated\nInventory In Progress\nInventory Completed",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "setup_generated_on",
-   "label": "Rooms Generated On",
    "fieldtype": "Date",
-   "read_only": 1,
-   "idx": 51
+   "label": "Rooms Generated On",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "setup_generated_by",
-   "label": "Generated By",
    "fieldtype": "Link",
+   "label": "Generated By",
    "options": "User",
-   "read_only": 1,
-   "idx": 52
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_sec_floor_plan",
    "fieldtype": "Section Break",
-   "label": "Floor Plan",
-   "idx": 53
+   "label": "Floor Plan"
   },
   {
-   "doctype": "DocField",
    "fieldname": "setup_instructions_html",
-   "fieldtype": "HTML",
-   "idx": 54
+   "fieldtype": "HTML"
   },
   {
-   "doctype": "DocField",
    "fieldname": "floor_plan",
-   "label": "Floor Plan",
    "fieldtype": "Table",
-   "options": "Accommodation Floor Plan",
-   "idx": 54
+   "label": "Floor Plan",
+   "options": "Accommodation Floor Plan"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_tab_safety",
    "fieldtype": "Tab Break",
-   "label": "Safety Setup",
-   "idx": 55
+   "label": "Safety Setup"
   },
   {
-   "doctype": "DocField",
+   "description": "Configure required safety controls. Use 'Generate Safety Setup' button to create task templates.",
    "fieldname": "accommodation_building_sec_safety_profile",
    "fieldtype": "Section Break",
-   "label": "Safety Profile",
-   "description": "Configure required safety controls. Use 'Generate Safety Setup' button to create task templates.",
-   "idx": 56
+   "label": "Safety Profile"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "safety_setup_status",
-   "label": "Safety Setup Status",
-   "fieldtype": "Select",
-   "options": "Draft\nIn Progress\nCompleted",
    "default": "Draft",
-   "read_only": 1,
-   "idx": 57
+   "fieldname": "safety_setup_status",
+   "fieldtype": "Select",
+   "label": "Safety Setup Status",
+   "options": "Draft\nIn Progress\nCompleted",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "safety_setup_generated_on",
-   "label": "Safety Setup Generated On",
    "fieldtype": "Date",
-   "read_only": 1,
-   "idx": 58
+   "label": "Safety Setup Generated On",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "safety_setup_generated_by",
-   "label": "Safety Setup Generated By",
    "fieldtype": "Link",
+   "label": "Safety Setup Generated By",
    "options": "User",
-   "read_only": 1,
-   "idx": 59
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_safety_col",
-   "fieldtype": "Column Break",
-   "idx": 60
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
+   "default": "0",
    "fieldname": "fire_alarm_panel_present",
-   "label": "Fire Alarm Panel Present",
    "fieldtype": "Check",
-   "default": 0,
-   "idx": 61
+   "label": "Fire Alarm Panel Present"
   },
   {
-   "doctype": "DocField",
+   "default": "0",
    "fieldname": "smoke_detectors_present",
-   "label": "Smoke Detectors Present",
    "fieldtype": "Check",
-   "default": 0,
-   "idx": 62
+   "label": "Smoke Detectors Present"
   },
   {
-   "doctype": "DocField",
+   "default": "1",
    "fieldname": "first_aid_kit_required",
-   "label": "First Aid Kit Required",
    "fieldtype": "Check",
-   "default": 1,
-   "idx": 63
+   "label": "First Aid Kit Required"
   },
   {
-   "doctype": "DocField",
+   "default": "1",
    "fieldname": "emergency_signage_required",
-   "label": "Emergency Signage Required",
    "fieldtype": "Check",
-   "default": 1,
-   "idx": 64
+   "label": "Emergency Signage Required"
   },
   {
-   "doctype": "DocField",
+   "default": "1",
    "fieldname": "water_tank_inspection_required",
-   "label": "Water Tank Inspection Required",
    "fieldtype": "Check",
-   "default": 1,
-   "idx": 65
+   "label": "Water Tank Inspection Required"
   },
   {
-   "doctype": "DocField",
+   "default": "1",
    "fieldname": "pest_control_required",
-   "label": "Pest Control Required",
    "fieldtype": "Check",
-   "default": 1,
-   "idx": 66
+   "label": "Pest Control Required"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info",
-   "idx": 67
+   "label": "System Info"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
-   "idx": 68
+   "label": "Administrative Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "occupancy_percent",
-   "label": "Occupancy %",
    "fieldtype": "Percent",
-   "read_only": 1,
-   "idx": 69
+   "label": "Occupancy %",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "accommodation_building_sec_security",
    "fieldtype": "Section Break",
-   "label": "Security & Systems",
-   "collapsible": 1,
-   "idx": 70
+   "label": "Security & Systems"
   },
   {
-   "doctype": "DocField",
    "fieldname": "cctv_camera_count",
-   "label": "Active CCTV Cameras",
    "fieldtype": "Int",
-   "read_only": 1,
-   "idx": 71
+   "label": "Active CCTV Cameras",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_building_security_col",
-   "fieldtype": "Column Break",
-   "idx": 72
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "dvr_status",
-   "label": "DVR/NVR Status",
-   "fieldtype": "Select",
-   "options": "Recording\nNot Recording\nOffline\nNot Installed",
    "default": "Not Installed",
-   "idx": 73
+   "fieldname": "dvr_status",
+   "fieldtype": "Select",
+   "label": "DVR/NVR Status",
+   "options": "Recording\nNot Recording\nOffline\nNot Installed"
   }
  ],
+ "links": [],
+ "modified": "2026-05-25 01:05:27.682446",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Accommodation Building",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
    "create": 1,
    "delete": 1,
-   "report": 1,
+   "email": 1,
    "export": 1,
    "print": 1,
-   "email": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
    "share": 1,
-   "idx": 1
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
    "create": 1,
-   "idx": 2
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Resident Supervisor",
    "read": 1,
-   "idx": 3
+   "role": "Resident Supervisor"
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "building_name",
+ "track_changes": 1
 }

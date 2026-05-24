@@ -1,256 +1,239 @@
 {
- "doctype": "DocType",
- "name": "Accommodation Checkout",
- "module": "Habitat",
- "custom": 0,
- "istable": 0,
- "is_submittable": 1,
- "engine": "InnoDB",
- "track_changes": 1,
+ "actions": [],
  "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "creation": "2026-05-23 23:31:44.551429",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "accommodation_checkout_tab_overview",
+  "accommodation_checkout_sec_overview",
+  "assignment",
+  "checkout_date",
+  "checkout_reason",
+  "accommodation_checkout_overview_col",
+  "custody_cleared",
+  "naming_series",
+  "accommodation_checkout_sec_large_text",
+  "damage_notes",
+  "cancellation_reason",
+  "accommodation_checkout_tab_financials",
+  "accommodation_checkout_sec_financials",
+  "cost_center",
+  "damage_deduction_amount",
+  "accommodation_checkout_financials_col",
+  "linked_additional_salary",
+  "accommodation_checkout_tab_tables",
+  "accommodation_checkout_sec_table_custody_return_items",
+  "custody_return_items",
+  "accommodation_checkout_tab_system",
+  "accommodation_checkout_sec_system",
+  "employee",
+  "bed",
+  "accommodation_checkout_system_col",
+  "amended_from"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_checkout_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_checkout_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "General Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "assignment",
-   "label": "Accommodation Assignment",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Accommodation Assignment",
    "options": "Accommodation Assignment",
-   "reqd": 1,
-   "in_list_view": 1,
-   "idx": 3
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "checkout_date",
-   "label": "Checkout Date",
    "fieldtype": "Date",
-   "reqd": 1,
    "in_list_view": 1,
-   "idx": 4
+   "label": "Checkout Date",
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "checkout_reason",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Checkout Reason",
-   "fieldtype": "Select",
    "options": "Final Exit\nInternal Transfer\nProject Transfer\nAbsconding\nEnd of Contract",
-   "reqd": 1,
-   "idx": 5
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_checkout_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 6
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
+   "default": "0",
    "fieldname": "custody_cleared",
-   "label": "All Custody Cleared",
    "fieldtype": "Check",
-   "idx": 7
+   "in_standard_filter": 1,
+   "label": "All Custody Cleared"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "naming_series",
-   "label": "Series",
-   "fieldtype": "Select",
-   "options": "ACC-CHKOUT-.YYYY.-.####",
    "default": "ACC-CHKOUT-.YYYY.-.####",
-   "reqd": 1,
-   "idx": 8,
-   "hidden": 1
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ACC-CHKOUT-.YYYY.-.####",
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "accommodation_checkout_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 9
+   "label": "Additional Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "damage_notes",
-   "label": "Damage Description",
    "fieldtype": "Small Text",
-   "idx": 10
+   "label": "Damage Description"
   },
   {
-   "doctype": "DocField",
    "fieldname": "cancellation_reason",
-   "label": "Cancellation Reason",
    "fieldtype": "Small Text",
-   "idx": 11
+   "label": "Cancellation Reason"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_checkout_tab_financials",
    "fieldtype": "Tab Break",
-   "label": "Financials",
-   "idx": 12
+   "label": "Financials"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_checkout_sec_financials",
    "fieldtype": "Section Break",
-   "label": "Financial Information",
-   "idx": 13
+   "label": "Financial Information"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "cost_center",
-   "label": "Cost Center",
-   "fieldtype": "Link",
-   "options": "Cost Center",
    "fetch_from": "assignment.cost_center",
-   "read_only": 1,
-   "idx": 14
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "damage_deduction_amount",
-   "label": "Damage Deduction Amount (SAR)",
-   "fieldtype": "Currency",
-   "idx": 15
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "accommodation_checkout_financials_col",
-   "fieldtype": "Column Break",
-   "idx": 16
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "linked_additional_salary",
-   "label": "Additional Salary Deduction",
+   "fieldname": "cost_center",
    "fieldtype": "Link",
-   "options": "Additional Salary",
-   "read_only": 1,
-   "idx": 17
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
+   "fieldname": "damage_deduction_amount",
+   "fieldtype": "Currency",
+   "label": "Damage Deduction Amount (SAR)"
+  },
+  {
+   "fieldname": "accommodation_checkout_financials_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "linked_additional_salary",
+   "fieldtype": "Link",
+   "label": "Additional Salary Deduction",
+   "options": "Additional Salary",
+   "read_only": 1
+  },
+  {
    "fieldname": "accommodation_checkout_tab_tables",
    "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 18
+   "label": "Related Tables"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_checkout_sec_table_custody_return_items",
    "fieldtype": "Section Break",
-   "label": "Custody Return Items",
-   "idx": 19
+   "label": "Custody Return Items"
   },
   {
-   "doctype": "DocField",
    "fieldname": "custody_return_items",
-   "label": "Custody Return Items",
    "fieldtype": "Table",
-   "options": "Accommodation Custody Return Item",
-   "idx": 20
+   "label": "Custody Return Items",
+   "options": "Accommodation Custody Return Item"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_checkout_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info",
-   "idx": 21
+   "label": "System Info"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_checkout_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
-   "idx": 22
+   "label": "Administrative Details"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "employee",
-   "label": "Employee",
-   "fieldtype": "Link",
-   "options": "Employee",
    "fetch_from": "assignment.employee",
-   "read_only": 1,
+   "fieldname": "employee",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "idx": 23,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
-   "fieldname": "bed",
-   "label": "Bed",
-   "fieldtype": "Link",
-   "options": "Accommodation Bed",
    "fetch_from": "assignment.bed",
+   "fieldname": "bed",
+   "fieldtype": "Link",
+   "label": "Bed",
+   "options": "Accommodation Bed",
    "read_only": 1,
-   "idx": 24,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_checkout_system_col",
-   "fieldtype": "Column Break",
-   "idx": 25
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "amended_from",
-   "label": "Amended From",
    "fieldtype": "Link",
-   "options": "Accommodation Checkout",
-   "read_only": 1,
+   "label": "Amended From",
    "no_copy": 1,
+   "options": "Accommodation Checkout",
    "print_hide": 1,
-   "idx": 26
+   "read_only": 1
   }
  ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-25 01:05:28.592895",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Accommodation Checkout",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
-   "submit": 1,
-   "cancel": 1,
-   "amend": 1,
-   "report": 1,
+   "email": 1,
    "export": 1,
    "print": 1,
-   "email": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
    "share": 1,
-   "idx": 1
+   "submit": 1,
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "submit": 1,
-   "cancel": 1,
    "amend": 1,
-   "idx": 2
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "assignment",
+ "track_changes": 1
 }

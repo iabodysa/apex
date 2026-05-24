@@ -1,141 +1,137 @@
 {
- "doctype": "DocType",
- "name": "Accommodation Bed",
- "module": "Habitat",
- "custom": 0,
- "istable": 0,
- "engine": "InnoDB",
- "track_changes": 1,
+ "actions": [],
  "autoname": "field:bed_code",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "creation": "2026-05-23 23:41:54.154621",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "accommodation_bed_tab_details",
+  "accommodation_bed_sec_details",
+  "room",
+  "bed_code",
+  "status",
+  "accommodation_bed_details_col",
+  "condition",
+  "last_inspected",
+  "naming_series",
+  "accommodation_bed_sec_system",
+  "building"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_bed_tab_details",
    "fieldtype": "Tab Break",
-   "label": "Details",
-   "idx": 1
+   "label": "Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_bed_sec_details",
    "fieldtype": "Section Break",
-   "label": "Information",
-   "idx": 2
+   "label": "Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "room",
-   "label": "Room",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Room",
    "options": "Accommodation Room",
    "reqd": 1,
-   "in_list_view": 1,
-   "idx": 3,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "bed_code",
-   "label": "Bed Code",
    "fieldtype": "Data",
-   "reqd": 1,
    "in_list_view": 1,
-   "idx": 4
+   "label": "Bed Code",
+   "reqd": 1,
+   "unique": 1
   },
   {
-   "doctype": "DocField",
-   "fieldname": "status",
-   "label": "Status",
-   "fieldtype": "Select",
-   "options": "Available\nOccupied\nOut of Service",
    "default": "Available",
+   "fieldname": "status",
+   "fieldtype": "Select",
    "in_list_view": 1,
-   "idx": 5
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Available\nOccupied\nOut of Service"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_bed_details_col",
-   "fieldtype": "Column Break",
-   "idx": 6
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "condition",
-   "label": "Condition",
-   "fieldtype": "Select",
-   "options": "Good\nNeeds Repair\nScrapped",
    "default": "Good",
-   "idx": 7
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "last_inspected",
-   "label": "Last Inspected",
-   "fieldtype": "Date",
-   "idx": 8
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "naming_series",
-   "label": "Series",
+   "fieldname": "condition",
    "fieldtype": "Select",
-   "options": "BED-.####",
-   "default": "BED-.####",
-   "reqd": 1,
-   "hidden": 1,
-   "idx": 9
+   "label": "Condition",
+   "options": "Good\nNeeds Repair\nScrapped"
   },
   {
-   "doctype": "DocField",
+   "fieldname": "last_inspected",
+   "fieldtype": "Date",
+   "label": "Last Inspected"
+  },
+  {
+   "default": "BED-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "BED-.####",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
    "fieldname": "accommodation_bed_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Details",
-   "collapsible": 1,
-   "idx": 10
+   "label": "System Details"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "building",
-   "label": "Building",
-   "fieldtype": "Link",
-   "options": "Accommodation Building",
    "fetch_from": "room.building",
-   "read_only": 1,
+   "fieldname": "building",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "idx": 11,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Accommodation Building",
+   "read_only": 1,
    "search_index": 1
   }
  ],
+ "links": [],
+ "modified": "2026-05-25 01:05:28.177528",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Accommodation Bed",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
    "create": 1,
    "delete": 1,
-   "report": 1,
+   "email": 1,
    "export": 1,
    "print": 1,
-   "email": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
    "share": 1,
-   "idx": 1
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
    "create": 1,
-   "idx": 2
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Resident Supervisor",
    "read": 1,
-   "idx": 3
+   "role": "Resident Supervisor"
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "bed_code",
+ "track_changes": 1
 }

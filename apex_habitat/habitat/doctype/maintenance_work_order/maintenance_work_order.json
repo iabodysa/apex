@@ -1,228 +1,229 @@
 {
- "doctype": "DocType",
- "name": "Maintenance Work Order",
- "module": "Habitat",
- "custom": 0,
- "issingle": 0,
- "istable": 0,
- "is_submittable": 1,
- "engine": "InnoDB",
- "description": "Submittable: formal work order derived from a Maintenance Request.",
+ "actions": [],
  "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
+ "creation": "2026-05-23 23:31:42.053506",
+ "description": "Submittable: formal work order derived from a Maintenance Request.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "maintenance_work_order_tab_overview",
+  "maintenance_work_order_sec_overview",
+  "maintenance_request",
+  "assigned_to",
+  "planned_start_date",
+  "planned_end_date",
+  "actual_start_date",
+  "maintenance_work_order_overview_col",
+  "actual_end_date",
+  "naming_series",
+  "total_procurement_cost_sar",
+  "subcontractor_service_order",
+  "maintenance_work_order_sec_primary_large_text",
+  "work_description",
+  "maintenance_work_order_sec_large_text",
+  "completion_notes",
+  "completion_photo",
+  "maintenance_work_order_tab_tables",
+  "maintenance_work_order_sec_table_procurement_items",
+  "procurement_items",
+  "maintenance_work_order_tab_system",
+  "maintenance_work_order_sec_system",
+  "building",
+  "status",
+  "maintenance_work_order_system_col",
+  "cancellation_reason",
+  "amended_from"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_work_order_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_work_order_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "General Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_request",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Maintenance Request",
    "options": "Maintenance Request",
-   "reqd": 1,
-   "idx": 3
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "assigned_to",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Assigned To (Employee)",
-   "options": "Employee",
-   "idx": 4
+   "options": "Employee"
   },
   {
-   "doctype": "DocField",
    "fieldname": "planned_start_date",
    "fieldtype": "Date",
    "label": "Planned Start Date",
-   "reqd": 1,
-   "idx": 5
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "planned_end_date",
    "fieldtype": "Date",
-   "label": "Planned End Date",
-   "idx": 6
+   "in_list_view": 1,
+   "label": "Planned End Date"
   },
   {
-   "doctype": "DocField",
    "fieldname": "actual_start_date",
    "fieldtype": "Date",
-   "label": "Actual Start Date",
-   "idx": 7
+   "label": "Actual Start Date"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_work_order_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 8
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "actual_end_date",
    "fieldtype": "Date",
-   "label": "Actual End Date",
-   "idx": 9
+   "label": "Actual End Date"
   },
   {
-   "doctype": "DocField",
+   "default": "MWO-.YYYY.-.####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "MWO-.YYYY.-.####",
-   "default": "MWO-.YYYY.-.####",
-   "idx": 10,
-   "hidden": 1
+   "options": "MWO-.YYYY.-.####"
   },
   {
-   "doctype": "DocField",
    "fieldname": "total_procurement_cost_sar",
    "fieldtype": "Currency",
    "label": "Total Procurement Cost (SAR)",
-   "read_only": 1,
-   "idx": 11
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "subcontractor_service_order",
    "fieldtype": "Link",
    "label": "Subcontractor Service Order",
-   "options": "Subcontractor Service Order",
-   "idx": 12
+   "options": "Subcontractor Service Order"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_work_order_sec_primary_large_text",
    "fieldtype": "Section Break",
-   "label": "Detailed Description",
-   "idx": 13
+   "label": "Detailed Description"
   },
   {
-   "doctype": "DocField",
    "fieldname": "work_description",
    "fieldtype": "Text Editor",
    "label": "Work Description",
-   "reqd": 1,
-   "idx": 14
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "maintenance_work_order_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 15
+   "label": "Additional Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "completion_notes",
    "fieldtype": "Small Text",
-   "label": "Completion Notes",
-   "idx": 16
+   "label": "Completion Notes"
   },
   {
-   "doctype": "DocField",
+   "description": "Photo evidence that maintenance work was completed. Required before closing.",
    "fieldname": "completion_photo",
    "fieldtype": "Attach Image",
-   "label": "Completion Photo",
-   "description": "Photo evidence that maintenance work was completed. Required before closing.",
-   "idx": 17
+   "label": "Completion Photo"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_work_order_tab_tables",
    "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 18
+   "label": "Related Tables"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_work_order_sec_table_procurement_items",
    "fieldtype": "Section Break",
-   "label": "Procurement Items",
-   "idx": 19
+   "label": "Procurement Items"
   },
   {
-   "doctype": "DocField",
    "fieldname": "procurement_items",
    "fieldtype": "Table",
    "label": "Procurement Items",
-   "options": "Maintenance Procurement Item",
-   "idx": 20
+   "options": "Maintenance Procurement Item"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_work_order_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info",
-   "idx": 21
+   "label": "System Info"
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_work_order_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
-   "idx": 22
+   "label": "Administrative Details"
   },
   {
-   "doctype": "DocField",
+   "fetch_from": "maintenance_request.building",
    "fieldname": "building",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Building",
    "options": "Accommodation Building",
-   "fetch_from": "maintenance_request.building",
    "read_only": 1,
-   "idx": 23,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
+   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nPlanned\nIn Progress\nCompleted\nCancelled",
-   "default": "Draft",
-   "read_only": 1,
-   "idx": 24
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_work_order_system_col",
-   "fieldtype": "Column Break",
-   "idx": 25
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "cancellation_reason",
    "fieldtype": "Small Text",
    "label": "Cancellation Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Maintenance Work Order",
+   "print_hide": 1,
    "read_only": 1,
-   "idx": 26
+   "search_index": 1
   }
  ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-25 01:05:30.129623",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Maintenance Work Order",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
+   "read": 1,
+   "role": "System Manager",
    "submit": 1,
-   "cancel": 1
+   "write": 1
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "maintenance_request"
 }

@@ -1,287 +1,284 @@
 {
- "doctype": "DocType",
- "name": "Utility Bill Entry",
- "module": "Habitat",
- "custom": 0,
- "istable": 0,
- "is_submittable": 1,
- "engine": "InnoDB",
- "track_changes": 1,
+ "actions": [],
  "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "creation": "2026-05-23 23:31:42.837470",
  "description": "Single monthly utility bill linked to a Utility Account. Posts to Accommodation Ledger on submit.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "utility_bill_entry_tab_overview",
+  "utility_bill_entry_sec_overview",
+  "company",
+  "utility_account",
+  "consumption_units",
+  "due_date",
+  "attached_bill",
+  "status",
+  "utility_bill_entry_overview_col",
+  "billing_period_from",
+  "billing_period_to",
+  "bill_amount_sar",
+  "utility_bill_meter_sec",
+  "total_bill_amount_sar",
+  "cost_bearing_pct",
+  "utility_bill_meter_col",
+  "meter_reading_previous",
+  "meter_reading_current",
+  "meter_units_consumed",
+  "bill_share_note",
+  "naming_series",
+  "linked_payment_entry",
+  "utility_bill_entry_tab_system",
+  "utility_bill_entry_sec_system",
+  "building",
+  "utility_type",
+  "utility_bill_entry_system_col",
+  "variance_from_avg_pct",
+  "variance_alert_sent",
+  "amended_from"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "utility_bill_entry_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
-   "doctype": "DocField",
    "fieldname": "utility_bill_entry_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "General Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "company",
-   "label": "Company",
    "fieldtype": "Link",
+   "label": "Company",
    "options": "Company",
-   "read_only": 1,
-   "idx": 3
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "utility_account",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Utility Account",
    "options": "Utility Account",
-   "reqd": 1,
-   "in_list_view": 1,
-   "idx": 4
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "consumption_units",
    "fieldtype": "Float",
-   "label": "Consumption (kWh / m³)",
-   "idx": 5
+   "label": "Consumption (kWh / m\u00b3)"
   },
   {
-   "doctype": "DocField",
    "fieldname": "due_date",
    "fieldtype": "Date",
-   "label": "Due Date",
-   "idx": 6
+   "label": "Due Date"
   },
   {
-   "doctype": "DocField",
    "fieldname": "attached_bill",
    "fieldtype": "Attach",
-   "label": "Bill PDF",
-   "idx": 7
+   "label": "Bill PDF"
   },
   {
-   "doctype": "DocField",
+   "default": "Received",
    "fieldname": "status",
    "fieldtype": "Select",
-   "label": "Status",
-   "options": "Draft\nReceived\nUnder Review\nPaid\nDisputed",
-   "default": "Received",
    "in_list_view": 1,
-   "idx": 8
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nReceived\nUnder Review\nPaid\nDisputed"
   },
   {
-   "doctype": "DocField",
    "fieldname": "utility_bill_entry_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 9
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "billing_period_from",
    "fieldtype": "Date",
-   "label": "Billing Period From",
-   "reqd": 1,
    "in_list_view": 1,
-   "idx": 10
+   "label": "Billing Period From",
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "billing_period_to",
    "fieldtype": "Date",
    "label": "Billing Period To",
-   "reqd": 1,
-   "idx": 11
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "bill_amount_sar",
    "fieldtype": "Currency",
-   "label": "Bill Amount (SAR)",
-   "reqd": 1,
    "in_list_view": 1,
-   "idx": 12
+   "label": "Bill Amount (SAR)",
+   "reqd": 1
   },
   {
    "fieldname": "utility_bill_meter_sec",
    "fieldtype": "Section Break",
-   "label": "Meter Readings & Sharing",
-   "idx": 13
+   "label": "Meter Readings & Sharing"
   },
   {
+   "description": "Full amount on the utility company's invoice (before sharing)",
    "fieldname": "total_bill_amount_sar",
    "fieldtype": "Currency",
-   "label": "Total Invoice Amount (SAR)",
-   "description": "Full amount on the utility company's invoice (before sharing)",
-   "idx": 14
+   "label": "Total Invoice Amount (SAR)"
   },
   {
-   "fieldname": "cost_bearing_pct",
-   "fieldtype": "Percent",
-   "label": "Cost Bearing (%)",
    "default": "100",
+   "description": "Auto-filled from Utility Account. Adjust if different for this bill.",
    "fetch_from": "utility_account.cost_bearing_pct",
    "fetch_if_empty": 1,
-   "read_only": 0,
-   "description": "Auto-filled from Utility Account. Adjust if different for this bill.",
-   "idx": 15
+   "fieldname": "cost_bearing_pct",
+   "fieldtype": "Percent",
+   "label": "Cost Bearing (%)"
   },
   {
    "fieldname": "utility_bill_meter_col",
-   "fieldtype": "Column Break",
-   "idx": 16
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "meter_reading_previous",
    "fieldtype": "Float",
    "label": "Previous Reading",
-   "precision": "3",
-   "idx": 17
+   "precision": "3"
   },
   {
    "fieldname": "meter_reading_current",
    "fieldtype": "Float",
    "label": "Current Reading",
-   "precision": "3",
-   "idx": 18
+   "precision": "3"
   },
   {
+   "description": "Computed: Current Reading \u2212 Previous Reading",
    "fieldname": "meter_units_consumed",
    "fieldtype": "Float",
    "label": "Units Consumed",
    "precision": "3",
-   "read_only": 1,
-   "description": "Computed: Current Reading − Previous Reading",
-   "idx": 19
+   "read_only": 1
   },
   {
+   "description": "Auto-generated summary of meter sharing calculation",
    "fieldname": "bill_share_note",
    "fieldtype": "Small Text",
    "label": "Sharing Note",
-   "read_only": 1,
-   "description": "Auto-generated summary of meter sharing calculation",
-   "idx": 20
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
+   "default": "UTIL-BILL-.YYYY.-.#####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "UTIL-BILL-.YYYY.-.#####",
-   "default": "UTIL-BILL-.YYYY.-.#####",
-   "idx": 21,
-   "hidden": 1
+   "options": "UTIL-BILL-.YYYY.-.#####"
   },
   {
-   "doctype": "DocField",
+   "description": "Draft Payment Entry created on submit.",
    "fieldname": "linked_payment_entry",
    "fieldtype": "Link",
    "label": "Payment Entry",
    "options": "Payment Entry",
-   "read_only": 1,
-   "description": "Draft Payment Entry created on submit.",
-   "idx": 22
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "utility_bill_entry_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info",
-   "idx": 23
+   "label": "System Info"
   },
   {
-   "doctype": "DocField",
    "fieldname": "utility_bill_entry_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
-   "idx": 24
+   "label": "Administrative Details"
   },
   {
-   "doctype": "DocField",
+   "fetch_from": "utility_account.building",
    "fieldname": "building",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Building",
    "options": "Accommodation Building",
-   "fetch_from": "utility_account.building",
    "read_only": 1,
-   "in_list_view": 1,
-   "idx": 25,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
+   "fetch_from": "utility_account.utility_type",
    "fieldname": "utility_type",
    "fieldtype": "Data",
-   "label": "Utility Type",
-   "fetch_from": "utility_account.utility_type",
-   "read_only": 1,
    "in_list_view": 1,
-   "idx": 26
+   "in_standard_filter": 1,
+   "label": "Utility Type",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "utility_bill_entry_system_col",
-   "fieldtype": "Column Break",
-   "idx": 27
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
+   "description": "Auto-calculated on validate. Positive = above average; negative = below average.",
    "fieldname": "variance_from_avg_pct",
    "fieldtype": "Percent",
    "label": "Variance from Average (%)",
-   "read_only": 1,
-   "description": "Auto-calculated on validate. Positive = above average; negative = below average.",
-   "idx": 28
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
+   "default": "0",
    "fieldname": "variance_alert_sent",
    "fieldtype": "Check",
    "label": "Variance Alert Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Utility Bill Entry",
+   "print_hide": 1,
    "read_only": 1,
-   "idx": 29
+   "search_index": 1
   }
  ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-25 01:05:30.445686",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Utility Bill Entry",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
-   "submit": 1,
-   "cancel": 1,
-   "print": 1,
    "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
    "share": 1,
-   "idx": 1
+   "submit": 1,
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
+   "create": 1,
+   "read": 1,
    "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
    "submit": 1,
-   "idx": 2
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Finance Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "submit": 1,
    "cancel": 1,
-   "idx": 3
+   "create": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "submit": 1,
+   "write": 1
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "utility_account",
+ "track_changes": 1
 }

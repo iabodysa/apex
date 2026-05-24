@@ -1,264 +1,249 @@
 {
- "doctype": "DocType",
- "name": "Accommodation Assignment",
- "module": "Habitat",
- "custom": 0,
- "istable": 0,
- "is_submittable": 1,
- "engine": "InnoDB",
- "track_changes": 1,
+ "actions": [],
  "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "creation": "2026-05-23 23:31:39.092122",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "accommodation_assignment_tab_overview",
+  "accommodation_assignment_sec_overview",
+  "employee",
+  "project",
+  "building",
+  "room",
+  "bed",
+  "accommodation_assignment_overview_col",
+  "check_in_date",
+  "assignment_type",
+  "previous_building",
+  "naming_series",
+  "cost_center",
+  "accommodation_assignment_sec_large_text",
+  "notes",
+  "accommodation_assignment_tab_tables",
+  "accommodation_assignment_sec_table_custody_items",
+  "custody_items",
+  "accommodation_assignment_tab_system",
+  "accommodation_assignment_sec_system",
+  "employee_name",
+  "check_out_date",
+  "accommodation_assignment_system_col",
+  "housing_allowance_suspended",
+  "amended_from"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_assignment_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_assignment_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "General Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "employee",
-   "label": "Employee",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
    "options": "Employee",
    "reqd": 1,
-   "in_list_view": 1,
-   "idx": 3,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "project",
-   "label": "Project",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
    "options": "Project",
-   "reqd": 1,
-   "idx": 4
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "building",
-   "label": "Building",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
    "options": "Accommodation Building",
    "reqd": 1,
-   "in_list_view": 1,
-   "idx": 5,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "room",
-   "label": "Room",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Room",
    "options": "Accommodation Room",
    "reqd": 1,
-   "idx": 6,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "bed",
-   "label": "Bed",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bed",
    "options": "Accommodation Bed",
    "reqd": 1,
-   "idx": 7,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_assignment_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 8
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "check_in_date",
-   "label": "Check-in Date",
    "fieldtype": "Date",
-   "reqd": 1,
-   "idx": 9
+   "in_list_view": 1,
+   "label": "Check-in Date",
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
-   "fieldname": "assignment_type",
-   "label": "Assignment Type",
-   "fieldtype": "Select",
-   "options": "New Assignment\nTransfer\nReturn from Leave",
    "default": "New Assignment",
-   "reqd": 1,
-   "idx": 10
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "previous_building",
-   "label": "Previous Building",
-   "fieldtype": "Link",
-   "options": "Accommodation Building",
-   "depends_on": "eval:doc.assignment_type=='Transfer'",
-   "idx": 11
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "naming_series",
-   "label": "Series",
+   "fieldname": "assignment_type",
    "fieldtype": "Select",
-   "options": "ACC-ASGN-.YYYY.-.####",
-   "default": "ACC-ASGN-.YYYY.-.####",
-   "reqd": 1,
-   "idx": 12,
-   "hidden": 1
+   "in_standard_filter": 1,
+   "label": "Assignment Type",
+   "options": "New Assignment\nTransfer\nReturn from Leave",
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
-   "fieldname": "cost_center",
-   "label": "Cost Center",
+   "depends_on": "eval:doc.assignment_type=='Transfer'",
+   "fieldname": "previous_building",
    "fieldtype": "Link",
-   "options": "Cost Center",
-   "idx": 13
+   "label": "Previous Building",
+   "options": "Accommodation Building"
   },
   {
-   "doctype": "DocField",
+   "default": "ACC-ASGN-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ACC-ASGN-.YYYY.-.####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "collapsible": 1,
    "fieldname": "accommodation_assignment_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 14
+   "label": "Additional Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "notes",
-   "label": "Notes",
    "fieldtype": "Small Text",
-   "idx": 15
+   "label": "Notes"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_assignment_tab_tables",
    "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 16
+   "label": "Related Tables"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_assignment_sec_table_custody_items",
    "fieldtype": "Section Break",
-   "label": "Issued Custody Items",
-   "idx": 17
+   "label": "Issued Custody Items"
   },
   {
-   "doctype": "DocField",
    "fieldname": "custody_items",
-   "label": "Issued Custody Items",
    "fieldtype": "Table",
-   "options": "Accommodation Custody Item",
-   "idx": 18
+   "label": "Issued Custody Items",
+   "options": "Accommodation Custody Item"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_assignment_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info",
-   "idx": 19
+   "label": "System Info"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_assignment_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
-   "idx": 20
+   "label": "Administrative Details"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "employee_name",
-   "label": "Employee Name",
-   "fieldtype": "Data",
    "fetch_from": "employee.employee_name",
-   "read_only": 1,
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "idx": 21
+   "label": "Employee Name",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "check_out_date",
-   "label": "Check-out Date",
    "fieldtype": "Date",
-   "read_only": 1,
-   "idx": 22
+   "label": "Check-out Date",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_assignment_system_col",
-   "fieldtype": "Column Break",
-   "idx": 23
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
+   "default": "0",
    "fieldname": "housing_allowance_suspended",
-   "label": "Housing Allowance Suspended",
    "fieldtype": "Check",
-   "read_only": 1,
-   "idx": 24
+   "label": "Housing Allowance Suspended",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "amended_from",
-   "label": "Amended From",
    "fieldtype": "Link",
-   "options": "Accommodation Assignment",
-   "read_only": 1,
+   "label": "Amended From",
    "no_copy": 1,
+   "options": "Accommodation Assignment",
    "print_hide": 1,
-   "idx": 25
+   "read_only": 1
   }
  ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-25 01:05:28.395463",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Accommodation Assignment",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
-   "submit": 1,
-   "cancel": 1,
-   "amend": 1,
-   "report": 1,
+   "email": 1,
    "export": 1,
    "print": 1,
-   "email": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
    "share": 1,
-   "idx": 1
-  },
-  {
-   "doctype": "DocPerm",
-   "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
    "submit": 1,
-   "cancel": 1,
-   "amend": 1,
-   "idx": 2
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Resident Supervisor",
-   "read": 1,
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
-   "idx": 3
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Resident Supervisor"
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name",
+ "track_changes": 1
 }

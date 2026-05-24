@@ -14,6 +14,68 @@ from frappe.utils import today
 
 
 class AccommodationBuilding(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from apex_habitat.habitat.doctype.accommodation_floor_plan.accommodation_floor_plan import AccommodationFloorPlan
+        from frappe.types import DF
+
+        abbreviation: DF.Data | None
+        accommodation_type: DF.Literal["Apartment", "Building", "Villa", "Compound Block", "Other"]
+        address: DF.SmallText | None
+        annual_cleaning_staff_sar: DF.Currency
+        annual_cost_per_capacity_sar: DF.Currency
+        annual_electricity_sar: DF.Currency
+        annual_other_expenses_sar: DF.Currency
+        annual_rent_sar: DF.Currency
+        annual_supervision_sar: DF.Currency
+        annual_total_cost_sar: DF.Currency
+        annual_water_sar: DF.Currency
+        building_name: DF.Data
+        cctv_camera_count: DF.Int
+        city: DF.Link | None
+        company: DF.Link | None
+        current_occupants: DF.Int
+        default_cost_center: DF.Link | None
+        district: DF.Data | None
+        dvr_status: DF.Literal["Recording", "Not Recording", "Offline", "Not Installed"]
+        emergency_signage_required: DF.Check
+        fire_alarm_panel_present: DF.Check
+        first_aid_kit_required: DF.Check
+        floor_plan: DF.Table[AccommodationFloorPlan]
+        google_maps_url: DF.Data | None
+        internal_billing_model: DF.Literal["Direct Allocation", "Salary Deduction", "Overhead Absorption"]
+        internal_billing_notes: DF.SmallText | None
+        landlord_mobile: DF.Data | None
+        landlord_name: DF.Data | None
+        landlord_office: DF.Data | None
+        lease_end_date: DF.Date | None
+        lease_renewal_status: DF.Literal["Active", "Under Renewal", "Expired", "Terminated"]
+        lease_start_date: DF.Date | None
+        monthly_cost_per_capacity_sar: DF.Currency
+        occupancy_percent: DF.Percent
+        over_capacity_allowed: DF.Check
+        over_capacity_threshold_percent: DF.Percent
+        pest_control_required: DF.Check
+        rent_due_day: DF.Int
+        responsible_facility_supervisor: DF.Link | None
+        safety_setup_generated_by: DF.Link | None
+        safety_setup_generated_on: DF.Date | None
+        safety_setup_status: DF.Literal["Draft", "In Progress", "Completed"]
+        setup_generated_by: DF.Link | None
+        setup_generated_on: DF.Date | None
+        setup_status: DF.Literal["Draft", "Rooms Planned", "Rooms Generated", "Inventory In Progress", "Inventory Completed"]
+        site: DF.Link | None
+        smoke_detectors_present: DF.Check
+        status: DF.Literal["Active", "Inactive", "Under Renovation"]
+        total_capacity: DF.Int
+        total_floors: DF.Int
+        total_rooms: DF.Int
+        water_tank_inspection_required: DF.Check
+    # end: auto-generated types
     pass
 
 

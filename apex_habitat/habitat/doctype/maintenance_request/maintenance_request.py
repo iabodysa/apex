@@ -8,6 +8,41 @@ from frappe.model.document import Document
 
 
 class MaintenanceRequest(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from apex_habitat.habitat.doctype.maintenance_procurement_item.maintenance_procurement_item import MaintenanceProcurementItem
+        from frappe.types import DF
+
+        amended_from: DF.Link | None
+        assigned_to: DF.Link | None
+        bed: DF.Link | None
+        building: DF.Link
+        company: DF.Link | None
+        cost_center: DF.Link | None
+        cost_of_repair: DF.Currency
+        is_logged_to_asset_history: DF.Check
+        issue_description: DF.SmallText
+        issue_type: DF.Literal["Electrical", "Plumbing", "Furniture", "Air Conditioning", "Fire Safety", "Pest Control", "Structural", "Other"]
+        naming_series: DF.Literal["MAINT-.YYYY.-.#####"]
+        priority: DF.Literal["Low", "Medium", "High", "Critical"]
+        procurement_items: DF.Table[MaintenanceProcurementItem]
+        related_facility_asset: DF.Link | None
+        reported_by: DF.Link
+        requires_procurement: DF.Check
+        resolution_notes: DF.SmallText | None
+        room: DF.Link
+        source_inspection: DF.Link | None
+        status: DF.Literal["Open", "Assigned", "In Progress", "Resolved", "Closed", "Reopened"]
+        subcontractor_dispatched: DF.Link | None
+        target_asset: DF.Link | None
+        target_asset_category: DF.Data | None
+        target_asset_location: DF.Data | None
+        target_asset_name: DF.Data | None
+    # end: auto-generated types
     pass
 
 
