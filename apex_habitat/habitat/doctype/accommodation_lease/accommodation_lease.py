@@ -65,7 +65,7 @@ def _build_schedule(doc):
         due = getdate(add_months(due, step))
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def regenerate_schedule(name):
     """Force-rebuild the payment schedule (clears existing rows)."""
     if not frappe.has_permission("Accommodation Lease", "write"):

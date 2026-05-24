@@ -15,7 +15,7 @@ class SubcontractorServiceOrder(Document):
             self.company = get_default_company()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def start_work(service_order):
     """Transition Subcontractor Service Order from Scheduled to In Progress."""
     if not frappe.has_permission("Subcontractor Service Order", "write"):
@@ -33,7 +33,7 @@ def start_work(service_order):
     return {"status": "In Progress"}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def mark_missed(service_order):
     """Transition Subcontractor Service Order from In Progress to Missed."""
     if not frappe.has_permission("Subcontractor Service Order", "write"):
