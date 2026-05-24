@@ -16,6 +16,32 @@ _CYCLE_MONTHS = {
 
 
 class AccommodationLease(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from apex_habitat.habitat.doctype.rent_payment_schedule.rent_payment_schedule import RentPaymentSchedule
+        from frappe.types import DF
+
+        amended_from: DF.Link | None
+        billing_cycle: DF.Literal["Monthly", "Quarterly", "Semi-Annual", "Annual"]
+        building: DF.Link
+        company: DF.Link | None
+        company_share_pct: DF.Percent
+        first_payment_date: DF.Date
+        lease_end_date: DF.Date
+        lease_reference: DF.Data | None
+        lease_start_date: DF.Date
+        naming_series: DF.Literal["ACC-LEASE-.YYYY.-.####"]
+        notes: DF.SmallText | None
+        payment_schedule: DF.Table[RentPaymentSchedule]
+        rent_amount: DF.Currency
+        status: DF.Literal["Active", "Expired", "Terminated"]
+        supplier: DF.Link | None
+        total_scheduled: DF.Currency
+    # end: auto-generated types
     pass
 
 

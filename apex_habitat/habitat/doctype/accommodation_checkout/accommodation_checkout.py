@@ -15,6 +15,30 @@ from apex_habitat.habitat.doctype.accommodation_assignment.accommodation_assignm
 
 
 class AccommodationCheckout(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from apex_habitat.habitat.doctype.accommodation_custody_return_item.accommodation_custody_return_item import AccommodationCustodyReturnItem
+        from frappe.types import DF
+
+        amended_from: DF.Link | None
+        assignment: DF.Link
+        bed: DF.Link | None
+        cancellation_reason: DF.SmallText | None
+        checkout_date: DF.Date
+        checkout_reason: DF.Literal["Final Exit", "Internal Transfer", "Project Transfer", "Absconding", "End of Contract"]
+        cost_center: DF.Link | None
+        custody_cleared: DF.Check
+        custody_return_items: DF.Table[AccommodationCustodyReturnItem]
+        damage_deduction_amount: DF.Currency
+        damage_notes: DF.SmallText | None
+        employee: DF.Link | None
+        linked_additional_salary: DF.Link | None
+        naming_series: DF.Literal["ACC-CHKOUT-.YYYY.-.####"]
+    # end: auto-generated types
     pass
 
 

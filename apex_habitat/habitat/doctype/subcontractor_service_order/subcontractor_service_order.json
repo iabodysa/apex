@@ -1,221 +1,225 @@
 {
- "doctype": "DocType",
- "name": "Subcontractor Service Order",
- "module": "Habitat",
- "custom": 0,
- "istable": 0,
- "is_submittable": 1,
- "engine": "InnoDB",
- "track_changes": 1,
+ "actions": [],
  "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "creation": "2026-05-23 23:31:39.261849",
  "description": "Single service visit, such as one pest control visit or one sewage tank suction.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "subcontractor_service_order_tab_overview",
+  "subcontractor_service_order_sec_overview",
+  "company",
+  "building",
+  "scheduled_date",
+  "actual_visit_date",
+  "completion_photo",
+  "linked_purchase_invoice",
+  "supervisor_confirmed",
+  "subcontractor_service_order_overview_col",
+  "status",
+  "contract",
+  "naming_series",
+  "service_cost_sar",
+  "cost_center",
+  "subcontractor_service_order_sec_large_text",
+  "visit_notes",
+  "subcontractor_service_order_tab_system",
+  "subcontractor_service_order_sec_system",
+  "supplier",
+  "subcontractor_service_order_system_col",
+  "service_type",
+  "amended_from"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "subcontractor_service_order_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
-   "doctype": "DocField",
    "fieldname": "subcontractor_service_order_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "General Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "company",
-   "label": "Company",
    "fieldtype": "Link",
+   "label": "Company",
    "options": "Company",
-   "read_only": 1,
-   "idx": 3
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "building",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Building",
    "options": "Accommodation Building",
    "reqd": 1,
-   "idx": 4,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "scheduled_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Scheduled Date",
-   "reqd": 1,
-   "idx": 5
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "actual_visit_date",
    "fieldtype": "Date",
-   "label": "Actual Visit Date",
-   "idx": 6
+   "label": "Actual Visit Date"
   },
   {
-   "doctype": "DocField",
    "fieldname": "completion_photo",
    "fieldtype": "Attach Image",
-   "label": "Completion Photo Evidence",
-   "idx": 7
+   "label": "Completion Photo Evidence"
   },
   {
-   "doctype": "DocField",
+   "description": "Auto-created on Submit",
    "fieldname": "linked_purchase_invoice",
    "fieldtype": "Link",
    "label": "Purchase Invoice",
-   "options": "Purchase Invoice",
-   "description": "Auto-created on Submit",
-   "idx": 8
+   "options": "Purchase Invoice"
   },
   {
-   "doctype": "DocField",
+   "default": "0",
    "fieldname": "supervisor_confirmed",
    "fieldtype": "Check",
-   "label": "Supervisor Confirmed Completion",
-   "idx": 9
+   "label": "Supervisor Confirmed Completion"
   },
   {
-   "doctype": "DocField",
    "fieldname": "subcontractor_service_order_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 10
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
+   "default": "Scheduled",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
-   "options": "Scheduled\nIn Progress\nCompleted\nMissed\nCancelled",
-   "default": "Scheduled",
-   "idx": 11
+   "options": "Scheduled\nIn Progress\nCompleted\nMissed\nCancelled"
   },
   {
-   "doctype": "DocField",
    "fieldname": "contract",
    "fieldtype": "Link",
    "label": "Service Contract",
    "options": "Subcontractor Service Contract",
-   "reqd": 1,
-   "idx": 12
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
+   "default": "SSO-.YYYY.-.#####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "options": "SSO-.YYYY.-.#####",
-   "default": "SSO-.YYYY.-.#####",
-   "reqd": 1,
-   "idx": 13,
-   "hidden": 1
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "service_cost_sar",
    "fieldtype": "Currency",
-   "label": "Service Cost (SAR)",
-   "idx": 14
+   "in_list_view": 1,
+   "label": "Service Cost (SAR)"
   },
   {
-   "doctype": "DocField",
+   "fetch_from": "building.default_cost_center",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center",
-   "fetch_from": "building.default_cost_center",
-   "read_only": 1,
-   "idx": 15
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "subcontractor_service_order_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 16
+   "label": "Additional Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "visit_notes",
    "fieldtype": "Small Text",
-   "label": "Technician Notes",
-   "idx": 17
+   "label": "Technician Notes"
   },
   {
-   "doctype": "DocField",
    "fieldname": "subcontractor_service_order_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info",
-   "idx": 18
+   "label": "System Info"
   },
   {
-   "doctype": "DocField",
    "fieldname": "subcontractor_service_order_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
-   "idx": 19
+   "label": "Administrative Details"
   },
   {
-   "doctype": "DocField",
+   "fetch_from": "contract.supplier",
    "fieldname": "supplier",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Supplier",
    "options": "Supplier",
-   "fetch_from": "contract.supplier",
-   "read_only": 1,
-   "idx": 20
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "subcontractor_service_order_system_col",
-   "fieldtype": "Column Break",
-   "idx": 21
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
+   "fetch_from": "contract.service_type",
    "fieldname": "service_type",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Service Type",
-   "fetch_from": "contract.service_type",
-   "read_only": 1,
-   "idx": 22
-  }
- ],
- "permissions": [
-  {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "delete": 1,
-   "submit": 1,
-   "cancel": 1,
-   "report": 1,
-   "export": 1,
-   "print": 1,
-   "email": 1,
-   "share": 1,
-   "idx": 1
+   "read_only": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "submit": 1,
-   "idx": 2
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Subcontractor Service Order",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
- ]
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-25 01:05:32.070295",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Subcontractor Service Order",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "supplier",
+ "track_changes": 1
 }

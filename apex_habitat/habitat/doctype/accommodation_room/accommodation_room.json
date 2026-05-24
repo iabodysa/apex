@@ -1,176 +1,166 @@
 {
- "doctype": "DocType",
- "name": "Accommodation Room",
- "module": "Habitat",
- "custom": 0,
- "istable": 0,
- "engine": "InnoDB",
- "track_changes": 1,
+ "actions": [],
  "autoname": "field:room_number",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "creation": "2026-05-24 17:14:06.774643",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "accommodation_room_tab_details",
+  "accommodation_room_sec_details",
+  "building",
+  "room_number",
+  "floor",
+  "room_type",
+  "accommodation_room_details_col",
+  "bed_capacity",
+  "status",
+  "naming_series",
+  "current_occupancy",
+  "accommodation_room_sec_inventory",
+  "readiness_status",
+  "last_inventory_date",
+  "accommodation_room_inventory_col",
+  "inventory_notes"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_room_tab_details",
    "fieldtype": "Tab Break",
-   "label": "Details",
-   "idx": 1
+   "label": "Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_room_sec_details",
    "fieldtype": "Section Break",
-   "label": "Information",
-   "idx": 2
+   "label": "Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "building",
-   "label": "Building",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
    "options": "Accommodation Building",
    "reqd": 1,
-   "in_list_view": 1,
-   "idx": 3,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "room_number",
-   "label": "Room Number",
    "fieldtype": "Data",
-   "reqd": 1,
    "in_list_view": 1,
-   "idx": 4
+   "label": "Room Number",
+   "reqd": 1,
+   "unique": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "floor",
-   "label": "Floor",
    "fieldtype": "Int",
-   "idx": 5
+   "label": "Floor"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "room_type",
-   "label": "Room Type",
-   "fieldtype": "Select",
-   "options": "Standard\nWorker\nDriver\nSupervisor\nOffice\nStorage\nIsolation\nMaintenance\nOther",
    "default": "Standard",
-   "idx": 6
+   "fieldname": "room_type",
+   "fieldtype": "Select",
+   "label": "Room Type",
+   "options": "Standard\nWorker\nDriver\nSupervisor\nOffice\nStorage\nIsolation\nMaintenance\nOther"
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_room_details_col",
-   "fieldtype": "Column Break",
-   "idx": 7
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "bed_capacity",
-   "label": "Bed Capacity",
    "fieldtype": "Int",
-   "reqd": 0,
-   "idx": 8
+   "label": "Bed Capacity"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "status",
-   "label": "Status",
-   "fieldtype": "Select",
-   "options": "Available\nPartially Occupied\nFull\nUnder Maintenance",
    "default": "Available",
-   "in_list_view": 1,
-   "idx": 9
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "naming_series",
-   "label": "Series",
+   "fieldname": "status",
    "fieldtype": "Select",
-   "options": "ROOM-.####",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Available\nPartially Occupied\nFull\nUnder Maintenance"
+  },
+  {
    "default": "ROOM-.####",
-   "reqd": 1,
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
    "hidden": 1,
-   "idx": 10
+   "label": "Series",
+   "options": "ROOM-.####",
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "current_occupancy",
-   "label": "Current Occupancy",
    "fieldtype": "Int",
-   "read_only": 1,
-   "idx": 11
+   "label": "Current Occupancy",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "accommodation_room_sec_inventory",
    "fieldtype": "Section Break",
-   "label": "Supervisor Inventory",
-   "collapsible": 1,
-   "idx": 12
+   "label": "Supervisor Inventory"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "readiness_status",
-   "label": "Readiness Status",
-   "fieldtype": "Select",
-   "options": "Unknown\nReady\nNeeds Cleaning\nNeeds Repair\nOut of Service",
    "default": "Unknown",
-   "in_list_view": 0,
-   "idx": 13
+   "fieldname": "readiness_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Readiness Status",
+   "options": "Unknown\nReady\nNeeds Cleaning\nNeeds Repair\nOut of Service"
   },
   {
-   "doctype": "DocField",
    "fieldname": "last_inventory_date",
-   "label": "Last Inventory Date",
    "fieldtype": "Date",
-   "read_only": 1,
-   "idx": 14
+   "label": "Last Inventory Date",
+   "read_only": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "accommodation_room_inventory_col",
-   "fieldtype": "Column Break",
-   "idx": 15
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "inventory_notes",
-   "label": "Inventory Notes",
    "fieldtype": "Small Text",
-   "idx": 16
+   "label": "Inventory Notes"
   }
  ],
+ "links": [],
+ "modified": "2026-05-25 01:05:27.957245",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Accommodation Room",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
    "create": 1,
    "delete": 1,
-   "report": 1,
+   "email": 1,
    "export": 1,
    "print": 1,
-   "email": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
    "share": 1,
-   "idx": 1
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
    "create": 1,
-   "idx": 2
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Resident Supervisor",
    "read": 1,
-   "idx": 3
+   "role": "Resident Supervisor"
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "room_number",
+ "track_changes": 1
 }

@@ -1,172 +1,178 @@
 {
- "doctype": "DocType",
- "name": "Custody Issue",
- "module": "Habitat",
- "custom": 0,
- "issingle": 0,
- "istable": 0,
- "is_submittable": 1,
- "engine": "InnoDB",
- "description": "Submittable: records facility/operational custody articles issued to a responsible party.",
+ "actions": [],
  "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
+ "creation": "2026-05-24 06:15:19.463672",
+ "description": "Submittable: records facility/operational custody articles issued to a responsible party.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "custody_issue_tab_overview",
+  "custody_issue_sec_overview",
+  "issue_date",
+  "building",
+  "issued_to_employee",
+  "custody_issue_overview_col",
+  "issued_to_name",
+  "naming_series",
+  "custody_issue_sec_large_text",
+  "remarks",
+  "custody_issue_tab_tables",
+  "custody_issue_sec_table_items",
+  "items",
+  "custody_issue_tab_system",
+  "custody_issue_sec_system",
+  "status",
+  "amended_from"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "custody_issue_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
-   "doctype": "DocField",
    "fieldname": "custody_issue_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "General Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "issue_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Issue Date",
-   "reqd": 1,
-   "idx": 3
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "building",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Building",
    "options": "Accommodation Building",
    "reqd": 1,
-   "idx": 4,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "issued_to_employee",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Issued To (Employee)",
-   "options": "Employee",
-   "idx": 5
+   "options": "Employee"
   },
   {
-   "doctype": "DocField",
    "fieldname": "custody_issue_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 6
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
    "fieldname": "issued_to_name",
    "fieldtype": "Data",
-   "label": "Issued To (Free Text)",
-   "idx": 7
+   "in_list_view": 1,
+   "label": "Issued To (Free Text)"
   },
   {
-   "doctype": "DocField",
+   "default": "CUST-ISS-.YYYY.-.####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "CUST-ISS-.YYYY.-.####",
-   "default": "CUST-ISS-.YYYY.-.####",
-   "idx": 8,
-   "hidden": 1
+   "options": "CUST-ISS-.YYYY.-.####"
   },
   {
-   "doctype": "DocField",
+   "collapsible": 1,
    "fieldname": "custody_issue_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 9
+   "label": "Additional Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "remarks",
    "fieldtype": "Small Text",
-   "label": "Remarks",
-   "idx": 10
+   "label": "Remarks"
   },
   {
-   "doctype": "DocField",
    "fieldname": "custody_issue_tab_tables",
    "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 11
+   "label": "Related Tables"
   },
   {
-   "doctype": "DocField",
    "fieldname": "custody_issue_sec_table_items",
    "fieldtype": "Section Break",
-   "label": "Items",
-   "idx": 12
+   "label": "Items"
   },
   {
-   "doctype": "DocField",
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Custody Issue Item",
-   "idx": 13
+   "options": "Custody Issue Item"
   },
   {
-   "doctype": "DocField",
    "fieldname": "custody_issue_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info",
-   "idx": 14
+   "label": "System Info"
   },
   {
-   "doctype": "DocField",
    "fieldname": "custody_issue_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
-   "idx": 15
+   "label": "Administrative Details"
   },
   {
-   "doctype": "DocField",
+   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nIssued\nReturned\nPartially Returned\nCancelled",
-   "default": "Draft",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Custody Issue",
+   "print_hide": 1,
    "read_only": 1,
-   "idx": 16
+   "search_index": 1
   }
  ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-25 01:05:28.834914",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Custody Issue",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
    "role": "System Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "delete": 1,
    "submit": 1,
-   "cancel": 1,
-   "idx": 1
+   "write": 1
   },
   {
-   "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "delete": 1,
-   "submit": 1,
-   "cancel": 1,
    "amend": 1,
-   "doctype": "DocPerm",
-   "idx": 2
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
   },
   {
-   "role": "Resident Supervisor",
-   "read": 1,
-   "write": 1,
    "create": 1,
-   "doctype": "DocPerm",
-   "idx": 3
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "issued_to_name"
 }

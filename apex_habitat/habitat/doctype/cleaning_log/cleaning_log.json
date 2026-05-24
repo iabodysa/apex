@@ -1,225 +1,215 @@
 {
- "doctype": "DocType",
- "name": "Cleaning Log",
- "module": "Habitat",
- "custom": 0,
- "istable": 0,
- "engine": "InnoDB",
- "is_submittable": 0,
- "track_changes": 0,
+ "actions": [],
  "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "creation": "2026-05-23 23:31:44.022864",
  "description": "Daily cleaning record per building with worker accountability and evidence controls.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "cleaning_log_tab_details",
+  "cleaning_log_sec_details",
+  "building",
+  "cleaning_date",
+  "cleaner_type",
+  "cleaner_employee",
+  "cleaned_by",
+  "subcontractor_service_order",
+  "scheduled_task_instance",
+  "cleaning_log_details_col",
+  "supervisor_approved",
+  "approver",
+  "supervisor_rating",
+  "missed_cleaning",
+  "missed_reason",
+  "rework_required",
+  "naming_series",
+  "cleaning_log_sec_evidence",
+  "evidence_photo",
+  "evidence_notes",
+  "cleaning_log_sec_table_room_details",
+  "room_details"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "cleaning_log_tab_details",
    "fieldtype": "Tab Break",
-   "label": "Details",
-   "idx": 1
+   "label": "Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "cleaning_log_sec_details",
    "fieldtype": "Section Break",
-   "label": "Information",
-   "idx": 2
+   "label": "Information"
   },
   {
-   "doctype": "DocField",
    "fieldname": "building",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Building",
    "options": "Accommodation Building",
    "reqd": 1,
-   "idx": 3,
    "search_index": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "cleaning_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Cleaning Date",
-   "reqd": 1,
-   "idx": 4
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
+   "default": "Internal Employee",
    "fieldname": "cleaner_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Cleaner Type",
-   "options": "Internal Employee\nSubcontractor\nExternal Worker",
-   "default": "Internal Employee",
-   "idx": 5
+   "options": "Internal Employee\nSubcontractor\nExternal Worker"
   },
   {
-   "doctype": "DocField",
+   "depends_on": "eval:doc.cleaner_type=='Internal Employee'",
    "fieldname": "cleaner_employee",
    "fieldtype": "Link",
    "label": "Cleaner (Employee)",
-   "options": "Employee",
-   "depends_on": "eval:doc.cleaner_type=='Internal Employee'",
-   "idx": 6
+   "options": "Employee"
   },
   {
-   "doctype": "DocField",
+   "depends_on": "eval:doc.cleaner_type!='Internal Employee'",
+   "description": "For Subcontractor or External Worker when Employee link is not available.",
    "fieldname": "cleaned_by",
    "fieldtype": "Data",
-   "label": "Cleaner Name",
-   "description": "For Subcontractor or External Worker when Employee link is not available.",
-   "depends_on": "eval:doc.cleaner_type!='Internal Employee'",
-   "idx": 7
+   "label": "Cleaner Name"
   },
   {
-   "doctype": "DocField",
+   "depends_on": "eval:doc.cleaner_type=='Subcontractor'",
    "fieldname": "subcontractor_service_order",
    "fieldtype": "Link",
    "label": "Subcontractor Service Order",
-   "options": "Subcontractor Service Order",
-   "depends_on": "eval:doc.cleaner_type=='Subcontractor'",
-   "idx": 8
+   "options": "Subcontractor Service Order"
   },
   {
-   "doctype": "DocField",
    "fieldname": "scheduled_task_instance",
    "fieldtype": "Link",
    "label": "Scheduled Task Instance",
-   "options": "Scheduled Task Instance",
-   "idx": 9
+   "options": "Scheduled Task Instance"
   },
   {
-   "doctype": "DocField",
    "fieldname": "cleaning_log_details_col",
-   "fieldtype": "Column Break",
-   "idx": 10
+   "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
+   "default": "0",
    "fieldname": "supervisor_approved",
    "fieldtype": "Check",
-   "label": "Approved by Supervisor",
-   "idx": 11
+   "in_list_view": 1,
+   "label": "Approved by Supervisor"
   },
   {
-   "doctype": "DocField",
+   "depends_on": "eval:doc.supervisor_approved==1",
    "fieldname": "approver",
    "fieldtype": "Link",
    "label": "Approved By",
-   "options": "User",
-   "depends_on": "eval:doc.supervisor_approved==1",
-   "idx": 12
+   "options": "User"
   },
   {
-   "doctype": "DocField",
+   "depends_on": "eval:doc.supervisor_approved==1",
    "fieldname": "supervisor_rating",
    "fieldtype": "Select",
    "label": "Supervisor Rating",
-   "options": "\nSatisfactory\nNeeds Improvement\nUnsatisfactory",
-   "depends_on": "eval:doc.supervisor_approved==1",
-   "idx": 13
+   "options": "\nSatisfactory\nNeeds Improvement\nUnsatisfactory"
   },
   {
-   "doctype": "DocField",
+   "default": "0",
    "fieldname": "missed_cleaning",
    "fieldtype": "Check",
-   "label": "Missed Cleaning",
-   "idx": 14
+   "in_standard_filter": 1,
+   "label": "Missed Cleaning"
   },
   {
-   "doctype": "DocField",
+   "depends_on": "eval:doc.missed_cleaning==1",
    "fieldname": "missed_reason",
    "fieldtype": "Data",
-   "label": "Missed Reason",
-   "depends_on": "eval:doc.missed_cleaning==1",
-   "idx": 15
+   "label": "Missed Reason"
   },
   {
-   "doctype": "DocField",
+   "default": "0",
    "fieldname": "rework_required",
    "fieldtype": "Check",
-   "label": "Rework Required",
-   "idx": 16
+   "label": "Rework Required"
   },
   {
-   "doctype": "DocField",
+   "default": "CLEAN-.YYYY.-.####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "options": "CLEAN-.YYYY.-.####",
-   "default": "CLEAN-.YYYY.-.####",
-   "reqd": 1,
-   "idx": 17,
-   "hidden": 1
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
    "fieldname": "cleaning_log_sec_evidence",
    "fieldtype": "Section Break",
-   "label": "Evidence",
-   "idx": 18
+   "label": "Evidence"
   },
   {
-   "doctype": "DocField",
    "fieldname": "evidence_photo",
    "fieldtype": "Attach Image",
-   "label": "Evidence Photo",
-   "idx": 19
+   "label": "Evidence Photo"
   },
   {
-   "doctype": "DocField",
    "fieldname": "evidence_notes",
    "fieldtype": "Small Text",
-   "label": "Evidence Notes",
-   "idx": 20
+   "label": "Evidence Notes"
   },
   {
-   "doctype": "DocField",
    "fieldname": "cleaning_log_sec_table_room_details",
    "fieldtype": "Section Break",
-   "label": "Room Cleaning Details",
-   "idx": 21
+   "label": "Room Cleaning Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "room_details",
    "fieldtype": "Table",
    "label": "Room Cleaning Details",
-   "options": "Cleaning Log Room Detail",
-   "idx": 22
+   "options": "Cleaning Log Room Detail"
   }
  ],
+ "links": [],
+ "modified": "2026-05-25 01:05:32.423482",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Cleaning Log",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
    "create": 1,
    "delete": 1,
-   "report": 1,
+   "email": 1,
    "export": 1,
    "print": 1,
-   "email": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
    "share": 1,
-   "idx": 1
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
+   "create": 1,
+   "read": 1,
    "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "idx": 2
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Resident Supervisor",
-   "read": 1,
-   "write": 1,
    "create": 1,
-   "idx": 3
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
   }
- ]
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "building"
 }
