@@ -1,5 +1,3 @@
 apex_habitat.patches.v0_4.cleanup_duplicate_workspaces
 apex_habitat.patches.v0_5.rename_sar_columns
-apex_habitat.patches.cleanup_stale_records
-apex_habitat.patches.v0_6.force_reset_onboarding
 apex_habitat.patches.v0_6.sync_web_form
