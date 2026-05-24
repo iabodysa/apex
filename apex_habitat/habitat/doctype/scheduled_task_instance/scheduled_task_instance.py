@@ -8,10 +8,7 @@ from frappe.model.document import Document
 
 
 class ScheduledTaskInstance(Document):
-    def before_save(self):
-        # Validate document properties
-        if self.doctype != "Scheduled Task Instance":
-            frappe.throw("DocType mismatch")
+    pass
 
 
 def validate(doc, method=None):
@@ -33,7 +30,7 @@ def start_task(task_instance):
     """Transition Scheduled Task Instance from Open to In Progress."""
     if not frappe.has_permission("Scheduled Task Instance", "write"):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
-        
+
     doc = frappe.get_doc("Scheduled Task Instance", task_instance)
 
     if doc.docstatus != 1:
