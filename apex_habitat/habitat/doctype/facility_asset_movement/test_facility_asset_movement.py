@@ -1,6 +1,26 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+# Prevent Frappe test runner from recursively resolving Link-field dependencies
+# on external DocTypes that require ERPNext (not installed in CI bench).
+test_ignore = [
+    "Additional Salary",
+    "Asset",
+    "Asset Movement",
+    "Company",
+    "Cost Center",
+    "Currency",
+    "Employee",
+    "Item",
+    "Payment Entry",
+    "Project",
+    "Purchase Invoice",
+    "Role",
+    "Salary Component",
+    "Supplier",
+    "User",
+]
+
 
 class TestFacilityAssetMovement(FrappeTestCase):
 
@@ -13,7 +33,7 @@ class TestFacilityAssetMovement(FrappeTestCase):
             "from_building": "BLDG-A",
             "to_building": "BLDG-B",
         })
-        doc.insert(ignore_permissions=True)
+        doc.insert(ignore_permissions=True, ignore_links=True)
         self.assertIsNotNone(doc.name)
         frappe.delete_doc("Facility Asset Movement", doc.name, force=True, ignore_permissions=True)
 
@@ -29,6 +49,7 @@ class TestFacilityAssetMovement(FrappeTestCase):
 
     def test_same_from_and_to_raises(self):
         from apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement import validate
+
         doc = frappe.get_doc({
             "doctype": "Facility Asset Movement",
             "movement_date": "2026-06-01",

@@ -7,6 +7,26 @@ Usage:
 from __future__ import annotations
 import frappe
 
+# Prevent Frappe test runner from recursively resolving Link-field dependencies
+# on external DocTypes that require ERPNext (not installed in CI bench).
+test_ignore = [
+    "Additional Salary",
+    "Asset",
+    "Asset Movement",
+    "Company",
+    "Cost Center",
+    "Currency",
+    "Employee",
+    "Item",
+    "Payment Entry",
+    "Project",
+    "Purchase Invoice",
+    "Role",
+    "Salary Component",
+    "Supplier",
+    "User",
+]
+
 
 def make_company(name="Test AFMCO", **kwargs):
     if frappe.db.exists("Company", name):

@@ -1,6 +1,26 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+# Prevent Frappe test runner from recursively resolving Link-field dependencies
+# on external DocTypes that require ERPNext (not installed in CI bench).
+test_ignore = [
+    "Additional Salary",
+    "Asset",
+    "Asset Movement",
+    "Company",
+    "Cost Center",
+    "Currency",
+    "Employee",
+    "Item",
+    "Payment Entry",
+    "Project",
+    "Purchase Invoice",
+    "Role",
+    "Salary Component",
+    "Supplier",
+    "User",
+]
+
 
 class TestUtilityAccount(FrappeTestCase):
 
@@ -12,7 +32,7 @@ class TestUtilityAccount(FrappeTestCase):
             "utility_type": "Electricity",
             "account_number": "ELEC-QA-00001",
         })
-        doc.insert(ignore_permissions=True)
+        doc.insert(ignore_permissions=True, ignore_links=True)
         self.assertEqual(doc.utility_type, "Electricity")
         frappe.delete_doc("Utility Account", doc.name, force=True, ignore_permissions=True)
 

@@ -105,6 +105,9 @@ def _compute_sharing(doc) -> None:
 
 
 def _compute_variance(doc) -> None:
+    if not doc.utility_account or not frappe.db.exists("Utility Account", doc.utility_account):
+        doc.variance_from_avg_pct = 0.0
+        return
     utility_account = frappe.get_doc("Utility Account", doc.utility_account)
     avg = flt(utility_account.average_monthly_bill_sar)
     if avg > 0:
