@@ -72,7 +72,23 @@ doc_events = {
         "on_submit": "apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry.on_submit",
         "before_cancel": "apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry.before_cancel",
     },
-    # Safety Inspection Report and Safety Task Execution doc_events registered in Phase 7.
+    "Room Bed Transfer": {
+        "validate": "apex_habitat.habitat.doctype.room_bed_transfer.room_bed_transfer.validate",
+        "on_submit": "apex_habitat.habitat.doctype.room_bed_transfer.room_bed_transfer.on_submit",
+        "on_cancel": "apex_habitat.habitat.doctype.room_bed_transfer.room_bed_transfer.on_cancel",
+    },
+    "Safety Inspection Report": {
+        "before_save": "apex_habitat.habitat.doctype.safety_inspection_report.safety_inspection_report.before_save",
+    },
+    "Maintenance Request": {
+        "before_save": "apex_habitat.habitat.doctype.maintenance_request.maintenance_request.before_save",
+    },
+    "Custody Article": {
+        "before_save": "apex_habitat.habitat.doctype.custody_article.custody_article.before_save",
+    },
+    "Custody Asset Category": {
+        "before_save": "apex_habitat.habitat.doctype.custody_asset_category.custody_asset_category.before_save",
+    },
     # Phase 5 — Custody and Operational Depreciation
     "Custody Issue": {
         "validate": "apex_habitat.habitat.doctype.custody_issue.custody_issue.validate",
@@ -96,10 +112,38 @@ doc_events = {
         "before_cancel": "apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financial_depreciation_snapshot.before_cancel",
     },
     # Phase 6 gaps
+    "Facility Asset": {
+        "before_save": "apex_habitat.habitat.doctype.facility_asset.facility_asset.before_save",
+    },
+    "Facility Asset Custody Assignment": {
+        "before_save": "apex_habitat.habitat.doctype.facility_asset_custody_assignment.facility_asset_custody_assignment.before_save",
+    },
     "Facility Asset Movement": {
+        "before_save": "apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement.before_save",
         "validate": "apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement.validate",
         "on_submit": "apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement.on_submit",
         "before_cancel": "apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement.before_cancel",
+    },
+    "Operational Depreciation Policy": {
+        "before_save": "apex_habitat.habitat.doctype.operational_depreciation_policy.operational_depreciation_policy.before_save",
+    },
+    "Subcontractor Service Order": {
+        "before_save": "apex_habitat.habitat.doctype.subcontractor_service_order.subcontractor_service_order.before_save",
+    },
+    "Subcontractor Service Contract": {
+        "before_save": "apex_habitat.habitat.doctype.subcontractor_service_contract.subcontractor_service_contract.before_save",
+    },
+    "Utility Account": {
+        "before_save": "apex_habitat.habitat.doctype.utility_account.utility_account.before_save",
+    },
+    "Habitat Settings": {
+        "before_save": "apex_habitat.habitat.doctype.habitat_settings.habitat_settings.before_save",
+    },
+    "Safety Task Catalog": {
+        "before_save": "apex_habitat.habitat.doctype.safety_task_catalog.safety_task_catalog.before_save",
+    },
+    "Safety Task Execution": {
+        "before_save": "apex_habitat.habitat.doctype.safety_task_execution.safety_task_execution.before_save",
     },
     "Maintenance Work Order": {
         "validate": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.validate",

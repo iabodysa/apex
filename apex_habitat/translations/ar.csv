@@ -1088,3 +1088,10 @@ Notes,ملاحظات
 Quantity,الكمية
 Property / Unit Name,اسم العقار / الوحدة
 Select 'Building' if leasing an entire building, or 'Apartment' if leasing a single unit.,اختر 'مبنى' إذا كان العقد لعمارة كاملة، أو 'شقة' إذا كان العقد لوحدة مستقلة.
+
+Default Payment Method,طريقة الدفع الافتراضية
+Payment Entry,قيد الدفع
+Payment Order,أمر الدفع
+Expense Request Afmco,طلب صرف
+Generate Payment,توليد الدفع
+Select a row from the Rent Payment Schedule to generate a payment.,اختر صفاً من جدول الدفعات لتوليد الدفع.

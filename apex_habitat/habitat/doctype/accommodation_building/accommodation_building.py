@@ -14,9 +14,7 @@ from frappe.utils import today
 
 
 class AccommodationBuilding(Document):
-    def before_save(self):
-        if self.doctype != "Accommodation Building":
-            frappe.throw("DocType mismatch")
+    pass
 
 
 def before_save(doc, method=None):
