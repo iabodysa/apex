@@ -48,14 +48,20 @@ def before_save(doc, method=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def generate_rooms_and_beds(building_name):
+def generate_rooms_and_beds(building_name, confirm_new_rooms=0):
     """
-    Idempotent bulk generator: creates missing Accommodation Room and
-    Accommodation Bed records from the floor plan child table.
+    Bulk generator for Accommodation Room/Bed records from the floor plan.
 
-    Returns a summary dict: {created_rooms, skipped_rooms, created_beds, skipped_beds}.
-    Never deletes or overwrites existing records.
-    Blocks generation if any planned room would overwrite an occupied room.
+    Behaviour:
+    - First generation (building has no rooms yet): creates everything in the plan.
+    - Re-run: brings EXISTING rooms' room_type / bed_capacity in line with the plan
+      (so changing a room type in the floor plan takes effect), but creating NEW
+      rooms/beds (e.g. the plan's room_count was increased) requires the caller to
+      pass confirm_new_rooms=1. Without it, new rooms are reported as "pending" and
+      NOT created, so the building cannot silently grow from an edited floor plan.
+
+    Returns a summary dict with created/updated/skipped/pending counts and a
+    needs_confirmation flag. Never deletes existing records.
     """
     if not frappe.has_permission("Accommodation Building", "write"):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
@@ -88,10 +94,19 @@ def generate_rooms_and_beds(building_name):
     )
     existing_bed_codes = {r[0] for r in _bed_rows}
 
+    confirm_new_rooms = int(confirm_new_rooms or 0)
+    # First generation = no rooms exist yet (new rooms expected). On a re-run,
+    # creating NEW rooms/beds requires explicit confirmation.
+    is_first_generation = len(existing_room_map) == 0
+    allow_create = is_first_generation or bool(confirm_new_rooms)
+
     created_rooms = 0
+    updated_rooms = 0
     skipped_rooms = 0
+    pending_new_rooms = 0
     created_beds = 0
     skipped_beds = 0
+    pending_new_beds = 0
 
     row_failures = []
 
@@ -121,9 +136,28 @@ def generate_rooms_and_beds(building_name):
             room_number = f"{abbreviation}-{floor_code}{seq:02d}"
 
             if room_number in existing_room_map:
-                skipped_rooms += 1
                 room_doc_name = existing_room_map[room_number]
+                # 1b: bring an existing room's type/capacity in line with the plan
+                # (changing a room type in the floor plan now takes effect on re-run).
+                current = frappe.db.get_value(
+                    "Accommodation Room", room_doc_name,
+                    ["room_type", "bed_capacity"], as_dict=True,
+                )
+                updates = {}
+                if current and current.room_type != rtype:
+                    updates["room_type"] = rtype
+                if current and (current.bed_capacity or 0) != capacity:
+                    updates["bed_capacity"] = capacity
+                if updates:
+                    frappe.db.set_value("Accommodation Room", room_doc_name, updates)
+                    updated_rooms += 1
+                else:
+                    skipped_rooms += 1
             else:
+                # 1c: a NEW room — only create on first generation or explicit confirm.
+                if not allow_create:
+                    pending_new_rooms += 1
+                    continue
                 try:
                     room = frappe.get_doc({
                         "doctype": "Accommodation Room",
@@ -148,6 +182,9 @@ def generate_rooms_and_beds(building_name):
                     bed_code = f"{room_number}-B{b:02d}"
                     if bed_code in existing_bed_codes:
                         skipped_beds += 1
+                    elif not allow_create:
+                        # New bed on a re-run without confirmation — defer, don't grow silently.
+                        pending_new_beds += 1
                     else:
                         try:
                             bed = frappe.get_doc({
@@ -163,8 +200,8 @@ def generate_rooms_and_beds(building_name):
                         except Exception as exc:
                             row_failures.append(_("Bed {0}: {1}").format(bed_code, str(exc)))
 
-    # Only update setup audit fields when new records were created
-    if created_rooms > 0 or created_beds > 0:
+    # Only update setup audit fields when records were created or updated.
+    if created_rooms > 0 or created_beds > 0 or updated_rooms > 0:
         frappe.db.set_value("Accommodation Building", building_name, {
             "setup_status": "Rooms Generated",
             "setup_generated_on": today(),
@@ -174,22 +211,31 @@ def generate_rooms_and_beds(building_name):
     # Frappe manages the request transaction; do not commit explicitly so that
     # any unhandled error outside this block can still trigger a full rollback.
 
+    needs_confirmation = (pending_new_rooms > 0 or pending_new_beds > 0)
     summary = {
         "created_rooms": created_rooms,
+        "updated_rooms": updated_rooms,
         "skipped_rooms": skipped_rooms,
+        "pending_new_rooms": pending_new_rooms,
         "created_beds": created_beds,
         "skipped_beds": skipped_beds,
+        "pending_new_beds": pending_new_beds,
         "failures": row_failures,
+        "needs_confirmation": needs_confirmation,
     }
 
-    msg = _(
-        "Generation complete. Rooms created: {0}, skipped (existing): {1}. "
-        "Beds created: {2}."
-    ).format(created_rooms, skipped_rooms, created_beds)
+    if needs_confirmation:
+        # Re-run with new rooms in the plan, but not confirmed: existing rooms were
+        # updated; new ones are held back pending an explicit confirmation.
+        msg = _("The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.").format(pending_new_rooms, pending_new_beds, updated_rooms)
+        indicator = "orange"
+    else:
+        msg = _("Generation complete. Rooms created: {0}, updated: {1}, skipped (existing): {2}. Beds created: {3}.").format(created_rooms, updated_rooms, skipped_rooms, created_beds)
+        indicator = "green" if not row_failures else "orange"
     if row_failures:
         failure_lines = "<br>".join(row_failures)
         msg += "<br><br>" + _("Failures ({0}):").format(len(row_failures)) + "<br>" + failure_lines
-    frappe.msgprint(msg, title=_("Room & Bed Generation"), indicator="green" if not row_failures else "orange")
+    frappe.msgprint(msg, title=_("Room & Bed Generation"), indicator=indicator)
 
     return summary
 
