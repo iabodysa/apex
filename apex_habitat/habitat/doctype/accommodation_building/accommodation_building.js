@@ -1,6 +1,13 @@
 // Client-side script for Accommodation Building
+function _toggleFloorFields(frm) {
+	const isApartment = frm.doc.accommodation_type === "Apartment";
+	frm.set_df_property("total_floors", "hidden", isApartment ? 1 : 0);
+}
+
 frappe.ui.form.on("Accommodation Building", {
 	refresh(frm) {
+		_toggleFloorFields(frm);
+
 		// Status indicator
 		const colors = {
 			"Active": "green",
@@ -52,6 +59,10 @@ frappe.ui.form.on("Accommodation Building", {
 				);
 			}, __("Setup"));
 		}
+	},
+
+	accommodation_type(frm) {
+		_toggleFloorFields(frm);
 	},
 });
 

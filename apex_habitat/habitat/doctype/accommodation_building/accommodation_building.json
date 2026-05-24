@@ -39,7 +39,7 @@
   {
    "doctype": "DocField",
    "fieldname": "building_name",
-   "label": "Building Name",
+   "label": "Property / Unit Name",
    "fieldtype": "Data",
    "reqd": 1,
    "unique": 1,
@@ -380,6 +380,7 @@
    "fieldtype": "Select",
    "options": "Apartment\nBuilding\nVilla\nCompound Block\nOther",
    "default": "Building",
+   "description": "Select 'Building' if leasing an entire building, or 'Apartment' if leasing a single unit.",
    "in_list_view": 0,
    "idx": 48
   },

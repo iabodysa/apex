@@ -1086,3 +1086,5 @@ Details,التفاصيل
 Material,المادة
 Notes,ملاحظات
 Quantity,الكمية
+Property / Unit Name,اسم العقار / الوحدة
+Select 'Building' if leasing an entire building, or 'Apartment' if leasing a single unit.,اختر 'مبنى' إذا كان العقد لعمارة كاملة، أو 'شقة' إذا كان العقد لوحدة مستقلة.
