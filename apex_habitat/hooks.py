@@ -11,7 +11,6 @@ required_apps = ["frappe", "erpnext", "hrms"]
 # Frappe v15: export type annotations in DocType controllers when supported
 export_python_type_annotations = True
 
-from apex_habitat import __version__ as app_version
 
 # Single functional module: Habitat
 

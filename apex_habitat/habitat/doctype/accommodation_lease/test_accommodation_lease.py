@@ -1,8 +1,6 @@
 import frappe
-import unittest
 from frappe.tests.utils import FrappeTestCase
 
-import datetime
 
 
 class TestAccommodationLease(FrappeTestCase):

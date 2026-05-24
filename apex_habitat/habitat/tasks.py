@@ -437,7 +437,7 @@ def daily_scheduled_task_instance_generator() -> None:
     Scheduled Task Instance already exists for the current period before creating.
     Phase 7 — requires Scheduled Task Template and Scheduled Task Instance DocTypes.
     """
-    from frappe.utils import today, get_first_day, get_last_day, getdate, add_days
+    from frappe.utils import today, get_first_day, getdate
 
     today_str = today()
     today_date = getdate(today_str)
