@@ -16,6 +16,40 @@ export_python_type_annotations = True
 
 # Document lifecycle hooks
 doc_events = {
+    "Accommodation Site": {
+        "before_save": "apex_habitat.habitat.doctype.accommodation_site.accommodation_site.before_save",
+    },
+    "Accommodation Bed": {
+        "before_save": "apex_habitat.habitat.doctype.accommodation_bed.accommodation_bed.before_save",
+    },
+    "Accommodation Room": {
+        "before_save": "apex_habitat.habitat.doctype.accommodation_room.accommodation_room.before_save",
+    },
+    "Accommodation QR Location": {
+        "before_save": "apex_habitat.habitat.doctype.accommodation_qr_location.accommodation_qr_location.before_save",
+    },
+    "Accommodation Ledger": {
+        "before_save": "apex_habitat.habitat.doctype.accommodation_ledger.accommodation_ledger.before_save",
+    },
+    "Accommodation Resident Request": {
+        "before_insert": "apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request.before_insert",
+        "validate": "apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request.validate",
+    },
+    "Building License": {
+        "before_save": "apex_habitat.habitat.doctype.building_license.building_license.before_save",
+    },
+    "Camera Access Grant": {
+        "before_save": "apex_habitat.habitat.doctype.camera_access_grant.camera_access_grant.before_save",
+    },
+    "Cleaning Log": {
+        "before_save": "apex_habitat.habitat.doctype.cleaning_log.cleaning_log.before_save",
+    },
+    "Client Audit Remediation Plan": {
+        "before_save": "apex_habitat.habitat.doctype.client_audit_remediation_plan.client_audit_remediation_plan.before_save",
+    },
+    "Scheduled Task Template": {
+        "before_save": "apex_habitat.habitat.doctype.scheduled_task_template.scheduled_task_template.before_save",
+    },
     "Accommodation Building": {
         "before_save": "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.before_save",
     },
