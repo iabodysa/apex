@@ -1,0 +1,92 @@
+{
+ "doctype": "DocType",
+ "name": "Inspection Finding Item",
+ "module": "Habitat",
+ "custom": 0,
+ "issingle": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "description": "Unified child table for inspection findings used by Safety Inspection Report and Maintenance Inspection Report.",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "inspection_finding_item_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Details",
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "finding_category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "Safety\nMaintenance\nHygiene\nGeneral",
+   "in_list_view": 1,
+   "columns": 2,
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 4,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "severity",
+   "fieldtype": "Select",
+   "label": "Severity",
+   "options": "Low\nMedium\nHigh\nCritical",
+   "in_list_view": 1,
+   "columns": 2,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "inspection_finding_item_details_col",
+   "fieldtype": "Column Break",
+   "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Open\nIn Progress\nResolved",
+   "default": "Open",
+   "in_list_view": 1,
+   "columns": 2,
+   "idx": 6
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "resolution_notes",
+   "fieldtype": "Small Text",
+   "label": "Resolution Notes",
+   "idx": 9
+  }
+ ],
+ "permissions": []
+}

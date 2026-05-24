@@ -119,7 +119,7 @@
    "fieldname": "safety_findings",
    "fieldtype": "Table",
    "label": "Safety Findings",
-   "options": "Safety Inspection Finding Item",
+   "options": "Inspection Finding Item",
    "idx": 14
   },
   {
@@ -134,7 +134,7 @@
    "fieldname": "maintenance_findings",
    "fieldtype": "Table",
    "label": "Maintenance Findings",
-   "options": "Maintenance Inspection Finding Item",
+   "options": "Inspection Finding Item",
    "idx": 16
   },
   {

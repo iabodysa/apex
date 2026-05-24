@@ -128,7 +128,7 @@
    "fieldname": "findings",
    "fieldtype": "Table",
    "label": "Findings",
-   "options": "Inspection Finding",
+   "options": "Inspection Finding Item",
    "idx": 15
   },
   {
