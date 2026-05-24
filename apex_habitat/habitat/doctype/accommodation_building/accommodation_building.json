@@ -48,6 +48,13 @@
   },
   {
    "doctype": "DocField",
+   "fieldname": "abbreviation",
+   "fieldtype": "Data",
+   "label": "Abbreviation",
+   "description": "Short code used to prefix generated room numbers."
+  },
+  {
+   "doctype": "DocField",
    "fieldname": "site",
    "label": "Site",
    "fieldtype": "Link",
