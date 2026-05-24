@@ -6,3 +6,5 @@ apex_habitat.patches.v0_7.rename_habitat_city_to_city
 apex_habitat.patches.v0_7.set_workspace_roles
 apex_habitat.patches.v0_7.add_bed_assignment_index
 apex_habitat.patches.v0_7.fix_unresolved_alerts_number_card_filter
+apex_habitat.patches.v0_7.remove_css_asset_cache
+apex_habitat.patches.v0_7.backfill_accommodation_ledger
