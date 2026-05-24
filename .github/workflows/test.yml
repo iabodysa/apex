@@ -103,3 +103,4 @@ jobs:
           bench --site test.localhost run-tests --module apex_habitat.tests.test_material_template_coverage
           bench --site test.localhost run-tests --module apex_habitat.tests.test_supplier_cost_recovery
           bench --site test.localhost run-tests --module apex_habitat.tests.test_occupancy_snapshot
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_form_dashboards
