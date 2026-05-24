@@ -68,6 +68,9 @@ def _build_schedule(doc):
 @frappe.whitelist()
 def regenerate_schedule(name):
     """Force-rebuild the payment schedule (clears existing rows)."""
+    if not frappe.has_permission("Accommodation Lease", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
     doc = frappe.get_doc("Accommodation Lease", name)
     if doc.docstatus != 0:
         frappe.throw(_("Payment schedule can only be regenerated on a Draft lease."))

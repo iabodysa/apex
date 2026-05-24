@@ -18,6 +18,9 @@ def load_template_into_doc(doctype, docname, issue_type):
     if doctype not in ("Maintenance Request", "Maintenance Work Order"):
         frappe.throw(_("Template loading is only supported for Maintenance Request and Maintenance Work Order."))
 
+    if not frappe.has_permission(doctype, "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
     templates = frappe.get_all(
         "Maintenance Material Template",
         filters={"issue_type": issue_type, "is_active": 1},
