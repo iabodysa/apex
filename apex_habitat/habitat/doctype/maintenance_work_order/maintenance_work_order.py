@@ -100,8 +100,8 @@ def mark_completed(work_order, completion_notes=None):
             {"source_doctype": "Maintenance Work Order", "source_name": doc.name},
         )
         if cost > 0 and not already_posted:
-            # ignore_permissions=True: Accommodation Ledger is an internal system/audit write
-            # that must succeed regardless of the calling user's ledger permissions.
+            # Permission bypass intentional: Accommodation Ledger is an internal system/audit
+            # write that must succeed regardless of the calling user's ledger permissions.
             frappe.get_doc({
                 "doctype": "Accommodation Ledger",
                 "posting_date": doc.actual_end_date or today(),
