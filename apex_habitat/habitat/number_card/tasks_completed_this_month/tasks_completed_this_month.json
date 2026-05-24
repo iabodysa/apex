@@ -1,0 +1,23 @@
+{
+ "creation": "2026-05-25 02:39:22.059003",
+ "currency": "SAR",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Scheduled Task Instance",
+ "filters_json": "[[\"Scheduled Task Instance\", \"completed_date\", \"Timespan\", \"this month\"], [\"Scheduled Task Instance\", \"status\", \"=\", \"Completed\"]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 0,
+ "label": "Tasks Completed This Month",
+ "modified": "2026-05-25 02:39:22.059003",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Tasks Completed This Month",
+ "owner": "Administrator",
+ "report_function": "Sum",
+ "show_full_number": 0,
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Daily",
+ "type": "Document Type"
+}

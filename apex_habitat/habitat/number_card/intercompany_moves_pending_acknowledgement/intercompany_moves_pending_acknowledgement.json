@@ -1,0 +1,23 @@
+{
+ "creation": "2026-05-25 02:39:22.054106",
+ "currency": "SAR",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Facility Asset Movement",
+ "filters_json": "[[\"Facility Asset Movement\", \"is_intercompany\", \"=\", 1], [\"Facility Asset Movement\", \"accounting_acknowledged\", \"=\", 0], [\"Facility Asset Movement\", \"docstatus\", \"=\", 1]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 0,
+ "label": "Intercompany Moves Pending Acknowledgement",
+ "modified": "2026-05-25 02:39:22.054106",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Intercompany Moves Pending Acknowledgement",
+ "owner": "Administrator",
+ "report_function": "Sum",
+ "show_full_number": 0,
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Daily",
+ "type": "Document Type"
+}
