@@ -14,3 +14,4 @@ apex_habitat.patches.v0_7.force_v0_7_1_change_log_popup
 # v0.8 — data completeness
 apex_habitat.patches.v0_8.seed_missing_material_templates
 apex_habitat.patches.v0_8.fix_safety_catalog_onboarding_action
+apex_habitat.patches.v0_8.merge_daily_tasks_into_safety
