@@ -201,8 +201,6 @@ def generate_safety_setup(building_name):
     if not frappe.has_permission("Accommodation Building", "write"):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
 
-    doc = frappe.get_doc("Accommodation Building", building_name)
-
     catalogs = frappe.get_all(
         "Safety Task Catalog",
         filters={"is_active": 1},

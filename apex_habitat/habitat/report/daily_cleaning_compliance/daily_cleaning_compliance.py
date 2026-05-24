@@ -49,7 +49,7 @@ def execute(filters=None):
     )
 
     # Fetch room detail counts in bulk
-    all_log_names = [l.name for l in logs]
+    all_log_names = [log.name for log in logs]
     room_rows = []
     if all_log_names:
         room_rows = frappe.get_all(

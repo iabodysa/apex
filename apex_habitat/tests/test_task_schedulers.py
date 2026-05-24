@@ -9,7 +9,6 @@ They verify correctness of logic without integration dependencies.
 from __future__ import annotations
 
 import unittest
-from unittest.mock import MagicMock, patch, call
 
 
 class TestWeeklyOccupancySyncEmptyBuilding(unittest.TestCase):

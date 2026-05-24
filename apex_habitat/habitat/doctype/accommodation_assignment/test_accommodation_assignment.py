@@ -1,5 +1,4 @@
 import frappe
-import unittest
 from frappe.tests.utils import FrappeTestCase
 
 
@@ -54,8 +53,6 @@ class TestAccommodationAssignment(FrappeTestCase):
         # Setup: Create building, room, bed, employee with an active assignment
         # Then try to create a second assignment for the same employee
         # Expect frappe.exceptions.ValidationError
-        import frappe
-        from frappe.exceptions import ValidationError
         # Use try/except or assertRaises pattern
         pass  # Implement the test body using available fixtures
 

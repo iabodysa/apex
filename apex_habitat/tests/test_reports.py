@@ -1,7 +1,6 @@
 # Copyright (c) 2026, AFMCO and contributors
 # For license information, please see license.txt
 
-import frappe
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
 from apex_habitat.habitat.report.accommodation_occupancy_summary.accommodation_occupancy_summary import execute as execute_occupancy
 from apex_habitat.habitat.report.accommodation_cost_distribution.accommodation_cost_distribution import execute as execute_cost
