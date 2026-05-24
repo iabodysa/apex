@@ -87,6 +87,7 @@ Annually,سنوياً
 Anonymous,مجهول الهوية
 Anonymous Tracking Code,رمز تتبع مجهول الهوية
 Apartment,شقة
+App Background DocTypes,مستندات التطبيق الخلفية
 Applies to All Buildings,يسري على جميع المباني
 Approved,معتمد
 Approved By,معتمد من
@@ -149,6 +150,7 @@ Available Rooms,الغرف المتاحة
 Average,متوسط
 Average Monthly Bill (SAR),متوسط الفاتورة الشهرية (ريال)
 Awareness & Training,التوعية والتدريب
+Background Operations Health,صحة العمليات الخلفية
 Balady Certificate,شهادة بلدي
 Base Accommodation Cost,تكلفة السكن الأساسية
 Basin Mixer,خلاط الحوض
@@ -505,6 +507,7 @@ Floor Drains,مصارف أرضية
 Floor Number,رقم الطابق
 Floor Plan,مخطط الطوابق
 Formal lease contract holder for one building. Carries the rent payment schedule. Landlord identity fields stay on Accommodation Building.,حامل عقد الإيجار الرسمي لمبنى واحد. يحمل جدول دفعات الإيجار. تبقى بيانات هوية المالك على سجل المبنى.
+Framework Logs & Jobs,سجلات ومهام الإطار
 Frequency,التكرار / الدورية
 From Bed,من سرير
 From Building,من مبنى
@@ -548,6 +551,7 @@ HSR,تقرير مشرف
 Habitat Internal / No Financial Posting,داخلي في Habitat / بدون ترحيل مالي
 Habitat Operations Setup,تهيئة عمليات السكن
 Habitat Settings,إعدادات السكن (Habitat)
+Habitat System Administration,إدارة نظام هابيتات
 Habitat is ready. Your operations workspaces are now active.,تم تجهيز نظام السكن. مساحات العمل التشغيلية جاهزة الآن.
 Hand Shower,دش يدوي
 Handover Date,تاريخ التسليم
@@ -669,6 +673,7 @@ Location Token,رمز الموقع
 Location in Building,الموقع داخل المبنى
 Log,سجل
 Logged to Asset Maintenance History,مُسجَّل في سجل صيانة الأصل
+Logs & Background Jobs,السجلات والمهام الخلفية
 Lost,مفقود
 Louvers,فتحات تهوية
 Low,منخفض
@@ -875,6 +880,7 @@ Priority,الأولوية
 Procurement Items,بنود المشتريات
 Procurement Items Required,يلزم بنود مشتريات
 Project,المشروع
+Project Ledger & Engines,سجل المشروع والمحرّكات
 Project Transfer,تحويل المشروع
 Project is required.,المشروع مطلوب.
 Property / Unit Name,اسم العقار / الوحدة
@@ -897,6 +903,7 @@ Received,مُستلَم
 Receiving Confirmed,تم تأكيد الاستلام
 Receiving Confirmed By,تأكيد الاستلام من قِبَل
 Receiving Confirmed By is required for intercompany asset movement.,حقل 'تأكيد الاستلام من قِبَل' مطلوب لحركة الأصول بين الشركات.
+Recent Error Logs,سجلات الأخطاء الأخيرة
 Record an Accommodation Assignment,تسجيل تسكين
 Recording,يُسجِّل
 Records damage on returned custody articles with salary deduction when enabled,يسجّل تلف أصناف العهدة المُعادة مع خصم راتب عند التفعيل
@@ -1192,6 +1199,7 @@ Unit Economics,اقتصاديات الوحدة
 Unit of Measure,وحدة القياس
 Unknown,غير محدد
 Unpaid,غير مدفوع
+Unresolved Alerts,التنبيهات غير المحلولة
 Unsatisfactory,غير مُرضٍ
 Update Habitat Settings,تحديث إعدادات السكن
 Update Settings,تحديث الإعدادات
