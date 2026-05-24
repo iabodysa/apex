@@ -30,6 +30,9 @@ frappe.ui.form.on("Maintenance Request", {
 								: __("No active template found for issue type: {0}", [frm.doc.issue_type]);
 							frappe.show_alert({message: msg, indicator: r.message.rows_added ? "green" : "orange"});
 						}
+					},
+					error: function() {
+						frappe.show_alert({message: __("Could not load the material template. Please try again."), indicator: "red"});
 					}
 				});
 			}, __("Actions"));

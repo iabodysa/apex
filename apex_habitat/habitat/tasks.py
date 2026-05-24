@@ -144,6 +144,10 @@ def daily_accommodation_cost_allocation() -> None:
                     logger.error(
                         f"daily_accommodation_cost_allocation: Failed to insert ledger row for assignment {asgn.name}, cost {ledger_type}: {e}"
                     )
+                    frappe.log_error(
+                        message=frappe.get_traceback(),
+                        title=f"Cost allocation: ledger insert failed ({asgn.name}/{ledger_type})"[:140],
+                    )
 
         start += batch_size
 
@@ -182,21 +186,27 @@ def daily_building_license_expiry_check() -> None:
             if not expiry_date:
                 continue
 
-            lead_days = lic.renewal_lead_days if lic.renewal_lead_days is not None else 60
-            days_to_expiry = date_diff(expiry_date, today_str)
+            try:
+                lead_days = lic.renewal_lead_days if lic.renewal_lead_days is not None else 60
+                days_to_expiry = date_diff(expiry_date, today_str)
 
-            if days_to_expiry <= 0:
-                if lic.status != "Expired":
-                    frappe.db.set_value("Building License", lic.name, "status", "Expired")
-                    msg = f"Building License {lic.name} ({lic.license_type} {lic.license_number}) has expired on {expiry_date}."
-                    logger.warning(msg)
-                    _create_alert("License Expiry", msg, severity="Critical", source_doctype="Building License", source_name=lic.name)
-            elif days_to_expiry <= lead_days:
-                if lic.status != "Expiring Soon":
-                    frappe.db.set_value("Building License", lic.name, "status", "Expiring Soon")
-                    msg = f"Building License {lic.name} ({lic.license_type} {lic.license_number}) is expiring soon on {expiry_date} ({days_to_expiry} days remaining)."
-                    logger.warning(msg)
-                    _create_alert("License Expiry", msg, severity="Warning", source_doctype="Building License", source_name=lic.name)
+                if days_to_expiry <= 0:
+                    if lic.status != "Expired":
+                        frappe.db.set_value("Building License", lic.name, "status", "Expired")
+                        msg = f"Building License {lic.name} ({lic.license_type} {lic.license_number}) has expired on {expiry_date}."
+                        logger.warning(msg)
+                        _create_alert("License Expiry", msg, severity="Critical", source_doctype="Building License", source_name=lic.name)
+                elif days_to_expiry <= lead_days:
+                    if lic.status != "Expiring Soon":
+                        frappe.db.set_value("Building License", lic.name, "status", "Expiring Soon")
+                        msg = f"Building License {lic.name} ({lic.license_type} {lic.license_number}) is expiring soon on {expiry_date} ({days_to_expiry} days remaining)."
+                        logger.warning(msg)
+                        _create_alert("License Expiry", msg, severity="Warning", source_doctype="Building License", source_name=lic.name)
+            except Exception:
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"License expiry check failed for {lic.name}"[:140],
+                )
 
         start += batch_size
 
@@ -284,18 +294,24 @@ def lease_expiry_watchlist() -> None:
             break
 
         for b in buildings:
-            days = date_diff(b.lease_end_date, today_str)
-            if days < 0 and b.lease_renewal_status != "Expired":
-                frappe.db.set_value(
-                    "Accommodation Building", b.name, "lease_renewal_status", "Expired"
+            try:
+                days = date_diff(b.lease_end_date, today_str)
+                if days < 0 and b.lease_renewal_status != "Expired":
+                    frappe.db.set_value(
+                        "Accommodation Building", b.name, "lease_renewal_status", "Expired"
+                    )
+                    msg = f"lease_expiry_watchlist: {b.building_name} lease expired {abs(days)} days ago."
+                    logger.warning(msg)
+                    _create_alert("Lease Expiry", msg, severity="Critical", building=b.name, source_doctype="Accommodation Building", source_name=b.name)
+                elif 0 <= days <= 90:
+                    msg = f"lease_expiry_watchlist: {b.building_name} lease expires in {days} days ({b.lease_end_date})."
+                    logger.warning(msg)
+                    _create_alert("Lease Expiry", msg, severity="Warning", building=b.name, source_doctype="Accommodation Building", source_name=b.name)
+            except Exception:
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Lease expiry watchlist failed for {b.name}"[:140],
                 )
-                msg = f"lease_expiry_watchlist: {b.building_name} lease expired {abs(days)} days ago."
-                logger.warning(msg)
-                _create_alert("Lease Expiry", msg, severity="Critical", building=b.name, source_doctype="Accommodation Building", source_name=b.name)
-            elif 0 <= days <= 90:
-                msg = f"lease_expiry_watchlist: {b.building_name} lease expires in {days} days ({b.lease_end_date})."
-                logger.warning(msg)
-                _create_alert("Lease Expiry", msg, severity="Warning", building=b.name, source_doctype="Accommodation Building", source_name=b.name)
 
         start += batch_size
 
@@ -321,27 +337,33 @@ def weekly_occupancy_sync() -> None:
             break
 
         for room_name in room_names:
-            active = frappe.db.count(
-                "Accommodation Assignment",
-                {"room": room_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
-            )
-            capacity = frappe.db.get_value("Accommodation Room", room_name, "bed_capacity") or 0
-            if active <= 0:
-                new_status = "Available"
-            elif capacity and active >= capacity:
-                new_status = "Full"
-            else:
-                new_status = "Partially Occupied"
+            try:
+                active = frappe.db.count(
+                    "Accommodation Assignment",
+                    {"room": room_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
+                )
+                capacity = frappe.db.get_value("Accommodation Room", room_name, "bed_capacity") or 0
+                if active <= 0:
+                    new_status = "Available"
+                elif capacity and active >= capacity:
+                    new_status = "Full"
+                else:
+                    new_status = "Partially Occupied"
 
-            frappe.db.set_value(
-                "Accommodation Room",
-                room_name,
-                {
-                    "current_occupancy": active,
-                    "status": new_status,
-                },
-                update_modified=False,
-            )
+                frappe.db.set_value(
+                    "Accommodation Room",
+                    room_name,
+                    {
+                        "current_occupancy": active,
+                        "status": new_status,
+                    },
+                    update_modified=False,
+                )
+            except Exception:
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Occupancy sync failed for room {room_name}"[:140],
+                )
 
         start += batch_size
 
@@ -362,31 +384,37 @@ def weekly_occupancy_sync() -> None:
             break
 
         for building_name in building_names:
-            total_rooms = frappe.db.count(
-                "Accommodation Room",
-                {"building": building_name},
-            )
-            if not total_rooms:
-                # Building has no rooms — skip to avoid division by zero.
-                continue
+            try:
+                total_rooms = frappe.db.count(
+                    "Accommodation Room",
+                    {"building": building_name},
+                )
+                if not total_rooms:
+                    # Building has no rooms — skip to avoid division by zero.
+                    continue
 
-            active = frappe.db.count(
-                "Accommodation Assignment",
-                {"building": building_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
-            )
-            total_capacity = (
-                frappe.db.get_value("Accommodation Building", building_name, "total_capacity") or 0
-            )
-            occupancy_pct = (active / total_capacity * 100) if total_capacity else 0.0
-            frappe.db.set_value(
-                "Accommodation Building",
-                building_name,
-                {
-                    "current_occupants": active,
-                    "occupancy_percent": round(occupancy_pct, 2),
-                },
-                update_modified=False,
-            )
+                active = frappe.db.count(
+                    "Accommodation Assignment",
+                    {"building": building_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
+                )
+                total_capacity = (
+                    frappe.db.get_value("Accommodation Building", building_name, "total_capacity") or 0
+                )
+                occupancy_pct = (active / total_capacity * 100) if total_capacity else 0.0
+                frappe.db.set_value(
+                    "Accommodation Building",
+                    building_name,
+                    {
+                        "current_occupants": active,
+                        "occupancy_percent": round(occupancy_pct, 2),
+                    },
+                    update_modified=False,
+                )
+            except Exception:
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Occupancy sync failed for building {building_name}"[:140],
+                )
 
         start += batch_size
 
@@ -417,7 +445,13 @@ def weekly_safety_task_compliance_scan() -> None:
             break
 
         for inst in overdue:
-            frappe.db.set_value("Scheduled Task Instance", inst.name, "status", "Overdue")
+            try:
+                frappe.db.set_value("Scheduled Task Instance", inst.name, "status", "Overdue")
+            except Exception:
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Safety compliance scan failed for {inst.name}"[:140],
+                )
 
         total_overdue += len(overdue)
         start += batch_size
@@ -502,6 +536,10 @@ def daily_scheduled_task_instance_generator() -> None:
                     "daily_scheduled_task_instance_generator: Failed to create STI for template %s: %s",
                     tmpl.name,
                     e,
+                )
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"STI generator failed for template {tmpl.name}"[:140],
                 )
 
         start += batch_size

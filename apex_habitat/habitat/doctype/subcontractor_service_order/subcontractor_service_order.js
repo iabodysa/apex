@@ -21,6 +21,12 @@ frappe.ui.form.on("Subcontractor Service Order", {
 										frm.reload_doc();
 									}
 								},
+								error: function () {
+									frappe.show_alert({
+										message: __("Could not update the Service Order. Please try again."),
+										indicator: "red",
+									});
+								},
 							});
 						}
 					);
@@ -45,6 +51,12 @@ frappe.ui.form.on("Subcontractor Service Order", {
 										});
 										frm.reload_doc();
 									}
+								},
+								error: function () {
+									frappe.show_alert({
+										message: __("Could not update the Service Order. Please try again."),
+										indicator: "red",
+									});
 								},
 							});
 						}

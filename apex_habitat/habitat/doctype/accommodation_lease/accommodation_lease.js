@@ -15,6 +15,12 @@ frappe.ui.form.on("Accommodation Lease", {
 								});
 								frm.reload_doc();
 							},
+							error() {
+								frappe.show_alert({
+									message: __("Could not regenerate the payment schedule. Please try again."),
+									indicator: "red",
+								});
+							},
 						});
 					}
 				);
@@ -54,6 +60,8 @@ frappe.ui.form.on("Accommodation Lease", {
 							doc.payment_type = "Rent";
 							doc.remark = __("Rent payment generated for building: {0} under lease {1}", [frm.doc.building, frm.doc.name]);
 							frappe.set_route("Form", "Expense Request Afmco", doc.name);
+						}).catch(() => {
+							frappe.msgprint({message: __("Could not verify the Expense Request Afmco DocType. Please try again."), indicator: "red"});
 						});
 					} else if (method === "Payment Order") {
 						const doc = frappe.model.get_new_doc("Payment Order");
@@ -78,6 +86,8 @@ frappe.ui.form.on("Accommodation Lease", {
 						doc.remarks = __("Lease payment reference: {0}", [frm.doc.name]);
 						frappe.set_route("Form", "Payment Entry", doc.name);
 					}
+				}).catch(() => {
+					frappe.msgprint({message: __("Could not read the payment settings. Please try again."), indicator: "red"});
 				});
 			}, __("Actions"));
 		}
