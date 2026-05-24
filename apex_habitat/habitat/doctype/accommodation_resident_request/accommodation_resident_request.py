@@ -7,6 +7,9 @@ from frappe.model.document import Document
 
 class AccommodationResidentRequest(Document):
     def before_insert(self):
+        if self.get("website_field"):
+            frappe.throw("Invalid submission.", frappe.PermissionError)
+
         if not self.anonymous_tracking_code:
             self.anonymous_tracking_code = frappe.generate_hash(length=8).upper()
 
