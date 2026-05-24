@@ -9,6 +9,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import DocType
 from frappe.utils import today
 
 
@@ -76,12 +77,16 @@ def generate_rooms_and_beds(building_name):
     existing_room_map = {r.room_number: r.name for r in existing_room_rows}
 
     # Build existing bed codes (idempotency guard)
-    _bed_rows = frappe.db.sql(
-        "SELECT ab.bed_code FROM `tabAccommodation Bed` ab "
-        "JOIN `tabAccommodation Room` ar ON ab.room = ar.name "
-        "WHERE ar.building = %s",
-        building_name,
-        as_list=True,
+    Bed = DocType("Accommodation Bed")
+    Room = DocType("Accommodation Room")
+
+    _bed_rows = (
+        frappe.qb.from_(Bed)
+        .join(Room)
+        .on(Bed.room == Room.name)
+        .where(Room.building == building_name)
+        .select(Bed.bed_code)
+        .run(as_list=True)
     )
     existing_bed_codes = {r[0] for r in _bed_rows}
 
@@ -122,7 +127,7 @@ def generate_rooms_and_beds(building_name):
                     "status": "Available",
                     "readiness_status": "Unknown",
                 })
-                room.insert(ignore_permissions=True)
+                room.insert(ignore_permissions=False)
                 existing_room_map[room_number] = room.name
                 room_doc_name = room.name
                 created_rooms += 1
@@ -140,7 +145,7 @@ def generate_rooms_and_beds(building_name):
                             "status": "Available",
                             "condition": "Good",
                         })
-                        bed.insert(ignore_permissions=True)
+                        bed.insert(ignore_permissions=False)
                         existing_bed_codes.add(bed_code)
                         created_beds += 1
 
