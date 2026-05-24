@@ -170,6 +170,7 @@ scheduler_events = {
         "apex_habitat.habitat.tasks.open_maintenance_escalation",
         "apex_habitat.habitat.tasks.lease_expiry_watchlist",
         "apex_habitat.habitat.tasks.daily_scheduled_task_instance_generator",
+        "apex_habitat.habitat.tasks.daily_occupancy_snapshot",
     ],
     "weekly": [
         "apex_habitat.habitat.tasks.weekly_occupancy_sync",

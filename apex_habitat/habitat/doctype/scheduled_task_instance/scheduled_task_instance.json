@@ -141,7 +141,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-25 01:05:31.807247",
+ "modified": "2026-05-25 02:26:27.399518",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Scheduled Task Instance",
@@ -150,7 +150,6 @@
  "permissions": [
   {
    "cancel": 1,
-   "create": 1,
    "delete": 1,
    "read": 1,
    "role": "System Manager",

@@ -13,14 +13,14 @@
  "fields": [
   {
    "doctype": "DocField",
-   "fieldname": "non-financial_depreciation_snapshot_tab_details",
+   "fieldname": "nfds_tab_details",
    "fieldtype": "Tab Break",
    "label": "Details",
    "idx": 1
   },
   {
    "doctype": "DocField",
-   "fieldname": "non-financial_depreciation_snapshot_sec_details",
+   "fieldname": "nfds_sec_details",
    "fieldtype": "Section Break",
    "label": "Information",
    "idx": 2
@@ -45,7 +45,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "non-financial_depreciation_snapshot_details_col",
+   "fieldname": "nfds_details_col",
    "fieldtype": "Column Break",
    "idx": 5
   },
@@ -69,7 +69,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "non-financial_depreciation_snapshot_sec_system",
+   "fieldname": "nfds_sec_system",
    "fieldtype": "Section Break",
    "label": "System Details",
    "collapsible": 1,
@@ -85,7 +85,7 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "non-financial_depreciation_snapshot_sec_table_items",
+   "fieldname": "nfds_sec_table_items",
    "fieldtype": "Section Break",
    "label": "Asset Lines",
    "idx": 10
@@ -105,7 +105,7 @@
    "role": "System Manager",
    "read": 1,
    "write": 1,
-   "create": 1,
+   "create": 0,
    "delete": 1,
    "submit": 1,
    "cancel": 1,
@@ -115,7 +115,7 @@
    "role": "Accommodation Manager",
    "read": 1,
    "write": 1,
-   "create": 1,
+   "create": 0,
    "delete": 1,
    "submit": 1,
    "cancel": 1,
@@ -127,7 +127,7 @@
    "role": "Resident Supervisor",
    "read": 1,
    "write": 1,
-   "create": 1,
+   "create": 0,
    "doctype": "DocPerm",
    "idx": 3
   }
