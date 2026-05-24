@@ -13,10 +13,6 @@ export_python_type_annotations = True
 
 from apex_habitat import __version__ as app_version
 
-# Theme inclusions
-app_include_css = "/assets/apex_habitat/css/afmco_theme.css"
-web_include_css = "/assets/apex_habitat/css/afmco_theme.css"
-
 # Single functional module: Habitat
 
 # Document lifecycle hooks
