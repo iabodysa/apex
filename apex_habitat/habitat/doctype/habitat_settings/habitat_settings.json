@@ -29,7 +29,10 @@
   "notification_channel",
   "operational_notifications_col",
   "license_expiry_days_before",
-  "lease_expiry_days_before"
+  "lease_expiry_days_before",
+  "supplier_cost_recovery_sec",
+  "enable_supplier_markup",
+  "supplier_markup_percent"
  ],
  "fields": [
   {
@@ -202,11 +205,31 @@
    "fieldname": "lease_expiry_days_before",
    "fieldtype": "Int",
    "label": "Lease Expiry Lead Days"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "supplier_cost_recovery_sec",
+   "fieldtype": "Section Break",
+   "label": "Supplier Cost Recovery"
+  },
+  {
+   "default": "0",
+   "description": "Apply an operational markup to external-supplier accommodation costs in the Supplier Cost Recovery report.",
+   "fieldname": "enable_supplier_markup",
+   "fieldtype": "Check",
+   "label": "Enable Supplier Markup"
+  },
+  {
+   "default": "5.0",
+   "depends_on": "eval:doc.enable_supplier_markup",
+   "fieldname": "supplier_markup_percent",
+   "fieldtype": "Percent",
+   "label": "Supplier Markup Percent"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-05-25 01:46:38.546665",
+ "modified": "2026-05-25 02:00:45.100577",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Habitat Settings",

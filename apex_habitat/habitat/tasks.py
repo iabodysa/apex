@@ -70,7 +70,7 @@ def daily_accommodation_cost_allocation() -> None:
                 "docstatus": 1,
                 "check_out_date": ["is", "not set"]
             },
-            fields=["name", "employee", "building", "project", "cost_center"],
+            fields=["name", "employee", "building", "project", "cost_center", "billed_to_supplier"],
             limit_start=start,
             limit_page_length=batch_size,
         )
@@ -144,6 +144,7 @@ def daily_accommodation_cost_allocation() -> None:
                         "building": asgn.building,
                         "project": asgn.project,
                         "cost_center": asgn.cost_center,
+                        "billed_to_supplier": asgn.billed_to_supplier,
                         "ledger_type": ledger_type,
                         "total_site_cost": annual_cost,
                         "capacity_denominator": int(capacity),
