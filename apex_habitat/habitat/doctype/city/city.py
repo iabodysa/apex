@@ -1,4 +1,4 @@
 from frappe.model.document import Document
 
-class HabitatCity(Document):
+class City(Document):
     pass

@@ -26,14 +26,14 @@ SAUDI_CITIES = [
 
 
 def execute():
-    if not frappe.db.exists("DocType", "Habitat City"):
+    if not frappe.db.exists("DocType", "City"):
         return
 
     for city in SAUDI_CITIES:
-        if frappe.db.exists("Habitat City", city):
+        if frappe.db.exists("City", city):
             continue
         doc = frappe.get_doc({
-            "doctype": "Habitat City",
+            "doctype": "City",
             "city_name": city,
             "country": "Saudi Arabia",
         })
