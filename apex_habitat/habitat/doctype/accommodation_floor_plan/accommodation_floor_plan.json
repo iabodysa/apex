@@ -29,7 +29,7 @@
       "fieldname": "bed_capacity_per_room",
       "label": "Beds per Room",
       "fieldtype": "Int",
-      "reqd": 1,
+      "reqd": 0,
       "in_list_view": 1,
       "idx": 3
     },
@@ -38,7 +38,7 @@
       "fieldname": "room_type",
       "label": "Room Type",
       "fieldtype": "Select",
-      "options": "Standard\nSupervisor\nIsolation\nStorage",
+      "options": "Standard\nWorker\nDriver\nSupervisor\nOffice\nStorage\nIsolation\nMaintenance\nOther",
       "default": "Standard",
       "in_list_view": 1,
       "idx": 4

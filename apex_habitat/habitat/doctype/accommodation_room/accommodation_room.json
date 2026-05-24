@@ -56,7 +56,7 @@
    "fieldname": "room_type",
    "label": "Room Type",
    "fieldtype": "Select",
-   "options": "Standard\nSupervisor\nIsolation\nStorage",
+   "options": "Standard\nWorker\nDriver\nSupervisor\nOffice\nStorage\nIsolation\nMaintenance\nOther",
    "default": "Standard",
    "idx": 6
   },
@@ -71,7 +71,7 @@
    "fieldname": "bed_capacity",
    "label": "Bed Capacity",
    "fieldtype": "Int",
-   "reqd": 1,
+   "reqd": 0,
    "idx": 8
   },
   {
