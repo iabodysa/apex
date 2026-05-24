@@ -12,9 +12,8 @@ import frappe
 # to protect the canonical record and risk deleting the wrong copy.
 APP_WORKSPACE_LABELS = {
     "Accommodation Lifecycle",
-    "Client Audit & Evidence",
     "Custody & Asset Control",
-    "Daily & Scheduled Tasks",
+    "Habitat System Administration",
     "Lease, Utilities & Cost Control",
     "Maintenance & Remediation",
     "Operations Command Center",
