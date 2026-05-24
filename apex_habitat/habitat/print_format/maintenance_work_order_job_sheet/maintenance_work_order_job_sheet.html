@@ -1,0 +1,97 @@
+<style>
+  .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
+  .ah-doc h1 { font-size: 18px; margin: 0; }
+  .ah-doc .ah-sub { color: #666; font-size: 12px; margin-top: 2px; }
+  .ah-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
+             display: flex; justify-content: space-between; align-items: flex-start; }
+  .ah-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
+  .ah-meta .ah-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
+  .ah-desc { border: 1px solid #e2e2ea; padding: 8px; margin-bottom: 14px; min-height: 40px; }
+  .ah-items { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .ah-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
+  .ah-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
+  .ah-items tr:nth-child(even) td { background: #f8f8fb; }
+  .ah-total { text-align: right; font-weight: bold; margin-bottom: 16px; }
+  .ah-ar { color: #555; font-size: 10px; }
+  .ah-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
+  .ah-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
+  .ah-foot { margin-top: 20px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
+</style>
+
+<div class="ah-doc">
+  <div class="ah-head">
+    <div>
+      <h1>Maintenance Work Order</h1>
+      <div class="ah-sub">أمر عمل صيانة &bull; {{ doc.name }}</div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#666;">
+      {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}
+    </div>
+  </div>
+
+  <table class="ah-meta">
+    <tr>
+      <td class="ah-lbl">Request <span class="ah-ar">الطلب</span></td>
+      <td>{{ doc.maintenance_request or "" }}</td>
+      <td class="ah-lbl">Building <span class="ah-ar">المبنى</span></td>
+      <td>{{ doc.building or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ah-lbl">Assigned To <span class="ah-ar">المكلَّف</span></td>
+      <td>{{ doc.assigned_to or "" }}</td>
+      <td class="ah-lbl">Status <span class="ah-ar">الحالة</span></td>
+      <td>{{ doc.status or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ah-lbl">Planned <span class="ah-ar">المخطّط</span></td>
+      <td>{{ frappe.format(doc.planned_start_date, {"fieldtype": "Date"}) }} → {{ frappe.format(doc.planned_end_date, {"fieldtype": "Date"}) }}</td>
+      <td class="ah-lbl">Actual <span class="ah-ar">الفعلي</span></td>
+      <td>{{ frappe.format(doc.actual_start_date, {"fieldtype": "Date"}) }} → {{ frappe.format(doc.actual_end_date, {"fieldtype": "Date"}) }}</td>
+    </tr>
+  </table>
+
+  <div><b>Work Description <span class="ah-ar">وصف العمل</span></b></div>
+  <div class="ah-desc">{{ doc.work_description or "" }}</div>
+
+  {% if doc.procurement_items %}
+  <table class="ah-items">
+    <thead>
+      <tr>
+        <th style="width:5%;">#</th>
+        <th>Material / Description <span class="ah-ar">المادة / الوصف</span></th>
+        <th style="width:12%;">Qty <span class="ah-ar">الكمية</span></th>
+        <th style="width:12%;">Unit <span class="ah-ar">الوحدة</span></th>
+        <th style="width:18%;">Est. Cost (SAR) <span class="ah-ar">التكلفة المقدّرة</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in doc.procurement_items %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row.material or row.item_description or "" }}</td>
+        <td>{{ row.quantity }}</td>
+        <td>{{ row.unit or "" }}</td>
+        <td>{{ frappe.format(row.estimated_cost, {"fieldtype": "Currency"}) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="ah-total">Total Estimated Cost <span class="ah-ar">إجمالي التكلفة المقدّرة</span>: {{ frappe.format(doc.total_procurement_cost_sar, {"fieldtype": "Currency"}) }}</div>
+  {% endif %}
+
+  {% if doc.completion_notes %}<div style="margin-bottom:12px;"><b>Completion Notes <span class="ah-ar">ملاحظات الإنجاز</span>:</b> {{ doc.completion_notes }}</div>{% endif %}
+
+  <table class="ah-sign">
+    <tr>
+      <td>Performed by (Technician)<br><span class="ah-ar">نفّذها (الفنّي)</span></td>
+      <td style="text-align:right;">Verified by (Supervisor)<br><span class="ah-ar">اعتمدها (المشرف)</span></td>
+    </tr>
+  </table>
+
+  <div class="ah-foot">
+    Job order for the assigned maintenance work; record actual dates and completion on finishing.
+    أمر عمل للصيانة المكلَّف بها؛ سجّل التواريخ الفعلية والإنجاز عند الانتهاء.
+    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
+  </div>
+</div>
