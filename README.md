@@ -306,7 +306,7 @@ apex_habitat/
     ├── patches/                # Database migration patches applied during bench migrate
     ├── public/
     │   └── css/
-    │       └── habitat_theme.css  # Scoped workspace overrides and dark-mode style fixes
+    │       └── afmco_theme.css  # Scoped workspace overrides and AFMCO brand styling
     └── habitat/                # All custom DocTypes, reports, and forms for the Habitat module
         ├── doctype/            # DocTypes (Assignment, Lease, Ledger, Custody, Inspection, etc.)
         ├── report/             # Script Reports: occupancy, variance, cost, and safety summaries
@@ -320,6 +320,14 @@ apex_habitat/
 ---
 
 ## Requirements
+
+| Component | Minimum Version | Tested Version |
+| :--- | :--- | :--- |
+| Frappe Framework | v15.0 | v15.x |
+| ERPNext | v15.0 | v15.x |
+| Frappe HRMS | v15.0 | v15.x |
+| Python | 3.10 | 3.11 |
+| MariaDB | 10.6 | 10.6 |
 
 Before installing Apex Habitat, ensure your Frappe bench environment meets the following requirements:
 
@@ -364,6 +372,21 @@ bench build --app apex_habitat
 | **v0.5.3** | README rewrite, relationship map |
 | **v0.5.4** | Housing Supervisor Report, lease billing cycles, maintenance photo requirement, web form intake fix |
 | **v0.6.0** | Maintenance Material catalog (38 items), Material Templates, currency fieldname normalization |
+
+## Release Procedure
+
+When bumping the version, update all three version files in sync:
+
+1. `apex_habitat/__init__.py` — `__version__ = "X.Y.Z"`
+2. `pyproject.toml` — `version = "X.Y.Z"`
+3. `setup.py` — `version="X.Y.Z"`
+
+Version rules:
+- **Patch** (`0.6.x`): translation updates, README fixes, icon fixes, non-breaking report polish
+- **Minor** (`0.x.0`): new DocTypes, new reports, new workspaces, new scheduler behavior
+- **Major** (`x.0.0`): breaking data compatibility changes — requires explicit human approval
+
+After bumping, create a commit: `chore: bump version to X.Y.Z`
 
 ---
 
