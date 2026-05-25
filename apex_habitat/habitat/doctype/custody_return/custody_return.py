@@ -24,7 +24,8 @@ def _validate_return_quantities(doc):
     """Reject returning more than was issued, per article, across all submitted
     returns for the linked Custody Issue (prevents over-return and duplicate
     full returns)."""
-    if not doc.custody_issue:
+    if not doc.custody_issue or not frappe.db.exists("Custody Issue", doc.custody_issue):
+        # Invalid/missing link is reported by Frappe's own link validation; don't crash here.
         return
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
     if issue.docstatus != 1:
@@ -107,6 +108,25 @@ def on_submit(doc, method=None):
         elif total_returned_qty > 0:
             issue.db_set("status", "Partially Returned")
 
+    _post_return_stock(doc)
+
+
+def _post_return_stock(doc):
+    """Move stock from the employee's custody back into the building store on the
+    Accommodation Stock Ledger."""
+    from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        post_stock_entry, has_stock_entries,
+    )
+    if not doc.returned_by_employee or has_stock_entries("Custody Return", doc.name):
+        return
+    for row in doc.items:
+        post_stock_entry(item_type="Custody Article", item=row.article, qty=-(row.qty or 0),
+                         building=doc.building, employee=doc.returned_by_employee, voucher_type="Custody Return",
+                         voucher_no=doc.name, voucher_detail_no=row.name, posting_date=doc.return_date)
+        post_stock_entry(item_type="Custody Article", item=row.article, qty=(row.qty or 0),
+                         building=doc.building, employee=None, voucher_type="Custody Return",
+                         voucher_no=doc.name, voucher_detail_no=row.name, posting_date=doc.return_date)
+
 
 def before_cancel(doc, method=None):
     damage = frappe.get_all(
@@ -126,4 +146,8 @@ def on_cancel(doc, method=None):
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
     if issue.status == "Returned":
         issue.db_set("status", "Issued")
+    from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        reverse_stock_entries,
+    )
+    reverse_stock_entries("Custody Return", doc.name)
 

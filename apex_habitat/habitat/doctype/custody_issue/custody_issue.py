@@ -21,6 +21,25 @@ def validate(doc, method=None):
 
 def on_submit(doc, method=None):
     doc.db_set("status", "Issued")
+    _post_custody_stock(doc)
+
+
+def _post_custody_stock(doc):
+    """Move stock from the building store into the employee's custody (same
+    building) on the Accommodation Stock Ledger. Skipped for free-text issues
+    with no linked employee."""
+    from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        post_stock_entry, has_stock_entries,
+    )
+    if not doc.issued_to_employee or has_stock_entries("Custody Issue", doc.name):
+        return
+    for row in doc.items:
+        post_stock_entry(item_type="Custody Article", item=row.article, qty=-(row.qty or 0),
+                         building=doc.building, employee=None, voucher_type="Custody Issue",
+                         voucher_no=doc.name, voucher_detail_no=row.name, posting_date=doc.issue_date)
+        post_stock_entry(item_type="Custody Article", item=row.article, qty=(row.qty or 0),
+                         building=doc.building, employee=doc.issued_to_employee, voucher_type="Custody Issue",
+                         voucher_no=doc.name, voucher_detail_no=row.name, posting_date=doc.issue_date)
 
 
 def before_cancel(doc, method=None):
@@ -39,4 +58,8 @@ def before_cancel(doc, method=None):
 
 def on_cancel(doc, method=None):
     doc.db_set("status", "Cancelled")
+    from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        reverse_stock_entries,
+    )
+    reverse_stock_entries("Custody Issue", doc.name)
 
