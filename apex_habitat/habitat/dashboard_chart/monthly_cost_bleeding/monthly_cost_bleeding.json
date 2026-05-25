@@ -1,0 +1,19 @@
+{
+ "based_on": "snapshot_date",
+ "chart_name": "Monthly Cost Bleeding",
+ "chart_type": "Sum",
+ "doctype": "Dashboard Chart",
+ "document_type": "Accommodation Occupancy Snapshot",
+ "group_by_type": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "module": "Habitat",
+ "name": "Monthly Cost Bleeding",
+ "number_of_groups": 0,
+ "time_interval": "Monthly",
+ "timeseries": 1,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "value_based_on": "cost_bleeding",
+ "filters_json": "[]"
+}

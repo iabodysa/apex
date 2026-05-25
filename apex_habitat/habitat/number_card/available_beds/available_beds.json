@@ -1,0 +1,14 @@
+{
+ "doctype": "Number Card",
+ "document_type": "Accommodation Bed",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Available Beds",
+ "module": "Habitat",
+ "name": "Available Beds",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "filters_json": "[[\"Accommodation Bed\", \"status\", \"=\", \"Available\"]]"
+}

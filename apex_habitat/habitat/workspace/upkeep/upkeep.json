@@ -125,6 +125,14 @@
    "link_to": "Maintenance Aging",
    "idx": 11,
    "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Resident Supervisor Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Resident Supervisor Dashboard",
+   "idx": 12
   }
  ],
  "charts": [],

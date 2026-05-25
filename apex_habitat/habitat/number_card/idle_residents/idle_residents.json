@@ -1,0 +1,14 @@
+{
+ "doctype": "Number Card",
+ "document_type": "Idle Resident Report",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Idle Residents",
+ "module": "Habitat",
+ "name": "Idle Residents",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "filters_json": "[[\"Idle Resident Report\", \"status\", \"!=\", \"Resolved\"]]"
+}

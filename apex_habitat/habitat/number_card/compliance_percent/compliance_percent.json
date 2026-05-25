@@ -1,0 +1,10 @@
+{
+ "doctype": "Number Card",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Compliance %",
+ "method": "apex_habitat.habitat.api.dashboard.get_compliance_percent",
+ "module": "Habitat",
+ "name": "Compliance Percent",
+ "type": "Custom"
+}

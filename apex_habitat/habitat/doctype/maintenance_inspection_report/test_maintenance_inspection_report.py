@@ -31,7 +31,7 @@ class TestMaintenanceInspectionReport(FrappeTestCase):
             "inspection_date": "2026-06-20",
             "building": "QA-BLDG",
             "inspector": "EMP-QA-001",
-            "findings": [{"doctype": "Inspection Finding", "finding_description": "crack in wall"}],
+            "findings": [{"doctype": "Inspection Finding Item", "description": "crack in wall"}],
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
         self.assertIsNotNone(doc.name)
@@ -43,6 +43,7 @@ class TestMaintenanceInspectionReport(FrappeTestCase):
             "naming_series": "MIR-.YYYY.-.####",
             "inspection_date": "2026-06-20",
             "building": "QA-BLDG",
+            "findings": [{"doctype": "Inspection Finding Item", "description": "crack in wall"}],
         })
         with self.assertRaises(frappe.exceptions.ValidationError):
             doc.insert(ignore_permissions=True, ignore_links=True)
