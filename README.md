@@ -339,6 +339,36 @@ record only. The single financial-posting exception is the HRMS Additional
 Salary draft for damage recovery, which is gated behind
 `enable_damage_deduction`.
 
+### Internal Store engine
+
+Custody and maintenance materials are tracked through a decentralized internal
+store — **each Accommodation Building is its own store** — without using ERPNext
+Stock. The engine mirrors the Accommodation Ledger pattern: a read-only,
+system-written, signed-quantity ledger with full reversal on cancel.
+
+- **Accommodation Stock Ledger** (read-only) — one signed-quantity row per stock
+  movement. A blank `employee` means the stock sits in the building's store; a
+  set `employee` means it is in that employee's custody. A Dynamic Link
+  (`item_type` → `Custody Article` or `Maintenance Material`) lets one ledger
+  serve both item families. Rows are posted only through helper functions
+  (`post_stock_entry`, `reverse_stock_entries`, `get_store_balance`), never
+  created by hand. Reversals post a negative mirror entry and mark both rows
+  cancelled, so `balance = sum(qty where is_cancelled = 0)`.
+- **Custody Issue / Return** post to the ledger on submit (issue moves stock
+  store → employee custody; return moves it back) and reverse on cancel. Both are
+  idempotent and skip free-text issues with no linked employee.
+- **Accommodation Material Transfer** (submittable) moves stock between two
+  building stores in two legs: `on_submit` ships stock out of the source store
+  (status **In Transit**); the whitelisted `mark_received` lands it in the
+  destination store (status **Received**); cancel reverses every posted leg.
+  Submit enforces source-store availability per item.
+- **Cross-cost-center memo** — when a received transfer crosses cost centers, an
+  opt-in setting (`notify_finance_on_liability_transfer`) emails Finance a
+  memo so the cross-charge can be recorded manually. **No GL Entry is posted** —
+  the Accommodation Ledger memo boundary above still holds.
+- **Accommodation Stock Balance** report aggregates the ledger into current
+  on-hand quantity and value per building store and per employee custody.
+
 ## Workspaces
 
 Nine workspaces are defined under `habitat/workspace/`:
