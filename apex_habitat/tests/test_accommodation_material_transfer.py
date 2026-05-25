@@ -14,6 +14,9 @@ from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock
 from apex_habitat.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer import (
     mark_received,
 )
+from apex_habitat.habitat.report.accommodation_stock_balance.accommodation_stock_balance import (
+    execute as stock_balance_report,
+)
 
 
 def _h(n=4):
@@ -113,6 +116,18 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
         with patch("apex_habitat.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.frappe.sendmail") as mock_send:
             mark_received(t.name, "2026-05-03")
         mock_send.assert_not_called()
+
+    def test_stock_balance_report_reflects_transfer(self):
+        # After receipt, the report should show 6 in b1's store and 4 in b2's store.
+        self._set_finance_toggle(False)
+        self._seed_store(self.b1, 10)
+        t = self._transfer(4)
+        mark_received(t.name, "2026-05-03")
+        _columns, data = stock_balance_report({"item_type": "Custody Article"})
+        by_building = {r["building"]: r for r in data
+                       if r["item"] == self.article and not r["employee"]}
+        self.assertEqual(by_building[self.b1]["balance_qty"], 6.0)
+        self.assertEqual(by_building[self.b2]["balance_qty"], 4.0)
 
     def test_no_finance_email_when_same_cost_center(self):
         # Force both buildings onto the same cost center -> no shift, no memo.
