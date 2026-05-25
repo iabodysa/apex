@@ -73,24 +73,8 @@
    "label": "Notes"
   }
  ],
- "links": [
-  {
-   "group": "Spatial",
-   "link_doctype": "Accommodation Building",
-   "link_fieldname": "site"
-  },
-  {
-   "group": "Residents",
-   "link_doctype": "Accommodation Resident Request",
-   "link_fieldname": "accommodation_site"
-  },
-  {
-   "group": "Operations",
-   "link_doctype": "Accommodation QR Location",
-   "link_fieldname": "accommodation_site"
-  }
- ],
- "modified": "2026-06-06 09:30:00.000000",
+ "links": [],
+ "modified": "2026-06-06 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Site",
