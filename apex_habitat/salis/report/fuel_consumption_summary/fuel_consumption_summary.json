@@ -1,0 +1,23 @@
+{
+  "doctype": "Report",
+  "name": "Fuel Consumption Summary",
+  "report_name": "Fuel Consumption Summary",
+  "ref_doctype": "Fuel Daily Log",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Salis",
+  "roles": [
+    {
+      "role": "Fleet Manager"
+    },
+    {
+      "role": "Fleet Supervisor"
+    },
+    {
+      "role": "Fleet Project Manager"
+    },
+    {
+      "role": "Finance Manager"
+    }
+  ]
+}

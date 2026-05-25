@@ -38,3 +38,7 @@ apex_habitat.patches.v0_8.rename_workspaces_to_short_names
 apex_habitat.patches.v0_8.fix_navbar_command_center_route
 apex_habitat.patches.v0_9.seed_habitat_dashboard
 apex_habitat.patches.v0_9.seed_role_dashboards
+
+# v1.0 — Salis fleet module (1.0.0-beta)
+apex_habitat.patches.v1_0.seed_salis_roles
+apex_habitat.patches.v1_0.seed_salis_settings

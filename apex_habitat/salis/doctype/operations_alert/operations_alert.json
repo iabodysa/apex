@@ -1,0 +1,147 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "OA-.######",
+ "creation": "2026-05-26 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "operations_alert_sec_overview",
+  "alert_type",
+  "severity",
+  "status",
+  "raised_on",
+  "operations_alert_overview_col",
+  "vehicle",
+  "driver",
+  "operations_alert_sec_message",
+  "message"
+ ],
+ "fields": [
+  {
+   "fieldname": "operations_alert_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "alert_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Alert Type",
+   "options": "No Fuel\nIdle Vehicle\nForgotten Request\nSupervisor Delay\nExcessive Topup\nIncomplete Handover\nLicense Expiry",
+   "reqd": 1
+  },
+  {
+   "default": "Warning",
+   "fieldname": "severity",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Severity",
+   "options": "Info\nWarning\nCritical",
+   "reqd": 1
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nAcknowledged\nResolved"
+  },
+  {
+   "fieldname": "raised_on",
+   "fieldtype": "Datetime",
+   "label": "Raised On"
+  },
+  {
+   "fieldname": "operations_alert_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "label": "Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "fieldname": "operations_alert_sec_message",
+   "fieldtype": "Section Break",
+   "label": "Message"
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Small Text",
+   "label": "Message",
+   "reqd": 1
+  }
+ ],
+ "icon": "fa fa-exclamation-triangle",
+ "is_submittable": 0,
+ "links": [],
+ "modified": "2026-05-26 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Operations Alert",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "alert_type",
+ "track_changes": 0
+}

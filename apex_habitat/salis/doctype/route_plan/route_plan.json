@@ -1,0 +1,171 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:45:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "route_name",
+  "transport_request",
+  "project",
+  "shift",
+  "vehicle",
+  "driver",
+  "stops_sec",
+  "stops",
+  "total_stops",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "RP-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "RP-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "route_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Route Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "transport_request",
+   "fieldtype": "Link",
+   "label": "Transport Request",
+   "options": "Transport Request",
+   "search_index": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Shift",
+   "options": "Morning\nEvening\nNight"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "label": "Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "fieldname": "stops_sec",
+   "fieldtype": "Section Break",
+   "label": "Stops"
+  },
+  {
+   "fieldname": "stops",
+   "fieldtype": "Table",
+   "label": "Stops",
+   "options": "Route Stop"
+  },
+  {
+   "fieldname": "total_stops",
+   "fieldtype": "Int",
+   "label": "Total Stops",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Route Plan",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Movement",
+   "link_doctype": "Dispatch Trip",
+   "link_fieldname": "route_plan"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Passenger Manifest",
+   "link_fieldname": "route_plan"
+  }
+ ],
+ "modified": "2026-05-26 02:45:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Route Plan",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

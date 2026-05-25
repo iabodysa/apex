@@ -1,0 +1,179 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:45:00.000000",
+ "description": "Driver stop record (violation, leave, termination, or transfer). May release the linked vehicle.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "driver_stop_sec_details",
+  "naming_series",
+  "driver",
+  "stop_reason",
+  "stop_date",
+  "driver_stop_details_col",
+  "release_vehicle",
+  "related_vehicle",
+  "driver_stop_sec_notes",
+  "notes",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "driver_stop_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Stop Details"
+  },
+  {
+   "default": "SD-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "SD-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "stop_reason",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Stop Reason",
+   "options": "Violation\nLeave\nTermination\nTransfer\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "stop_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Stop Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "driver_stop_details_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If set, the linked vehicle should be released from this driver.",
+   "fieldname": "release_vehicle",
+   "fieldtype": "Check",
+   "label": "Release Vehicle"
+  },
+  {
+   "depends_on": "eval:doc.release_vehicle==1",
+   "fieldname": "related_vehicle",
+   "fieldtype": "Link",
+   "label": "Related Vehicle",
+   "options": "Salis Vehicle"
+  },
+  {
+   "fieldname": "driver_stop_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Driver Stop",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 02:45:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Driver Stop",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "if_owner": 1,
+   "read": 1,
+   "role": "Driver"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

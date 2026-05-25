@@ -1,0 +1,185 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:45:00.000000",
+ "description": "Daily driver attendance record with check-in/out times and photographic evidence.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "driver_attendance_sec_details",
+  "naming_series",
+  "driver",
+  "attendance_date",
+  "status",
+  "driver_attendance_details_col",
+  "check_in",
+  "check_out",
+  "worked_hours",
+  "driver_attendance_sec_images",
+  "images",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "driver_attendance_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Attendance Details"
+  },
+  {
+   "default": "ATT-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ATT-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "attendance_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Attendance Date",
+   "reqd": 1
+  },
+  {
+   "default": "Present",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Present\nAbsent\nLate\nOn Leave"
+  },
+  {
+   "fieldname": "driver_attendance_details_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "check_in",
+   "fieldtype": "Time",
+   "label": "Check In"
+  },
+  {
+   "fieldname": "check_out",
+   "fieldtype": "Time",
+   "label": "Check Out"
+  },
+  {
+   "fieldname": "worked_hours",
+   "fieldtype": "Float",
+   "label": "Worked Hours",
+   "read_only": 1
+  },
+  {
+   "fieldname": "driver_attendance_sec_images",
+   "fieldtype": "Section Break",
+   "label": "Attendance Images"
+  },
+  {
+   "fieldname": "images",
+   "fieldtype": "Table",
+   "label": "Attendance Images",
+   "options": "Driver Attendance Image"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Driver Attendance",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 02:45:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Driver Attendance",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "if_owner": 1,
+   "read": 1,
+   "role": "Driver"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

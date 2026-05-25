@@ -1,0 +1,210 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 11:00:00.000000",
+ "description": "Monthly fuel quota allocated to a vehicle/driver on a project. Tracks allocated vs consumed litres.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fuel_quota_tab_overview",
+  "fuel_quota_sec_overview",
+  "vehicle",
+  "driver",
+  "project",
+  "fuel_quota_overview_col",
+  "period_month",
+  "status",
+  "naming_series",
+  "fuel_quota_sec_allocation",
+  "monthly_litres",
+  "monthly_amount",
+  "fuel_quota_allocation_col",
+  "consumed_litres",
+  "fuel_quota_sec_system",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "fuel_quota_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "fuel_quota_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "search_index": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "fuel_quota_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Quota period in YYYY-MM format (e.g. 2026-05).",
+   "fieldname": "period_month",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Period (Month)",
+   "reqd": 1
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nExhausted\nClosed"
+  },
+  {
+   "default": "FQ-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "FQ-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fuel_quota_sec_allocation",
+   "fieldtype": "Section Break",
+   "label": "Allocation"
+  },
+  {
+   "fieldname": "monthly_litres",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Monthly Litres",
+   "reqd": 1
+  },
+  {
+   "fieldname": "monthly_amount",
+   "fieldtype": "Currency",
+   "label": "Monthly Amount (SAR)"
+  },
+  {
+   "fieldname": "fuel_quota_allocation_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Total litres consumed against this quota.",
+   "fieldname": "consumed_litres",
+   "fieldtype": "Float",
+   "label": "Consumed Litres",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fuel_quota_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Info"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Fuel Quota",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Request",
+   "link_fieldname": "fuel_quota"
+  }
+ ],
+ "modified": "2026-05-26 11:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Fuel Quota",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "vehicle",
+ "track_changes": 1
+}

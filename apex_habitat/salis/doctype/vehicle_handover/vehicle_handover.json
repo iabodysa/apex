@@ -1,0 +1,185 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:43:00.000000",
+ "description": "Records the handover of a vehicle from one driver to another.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle_handover_tab_overview",
+  "vehicle_handover_sec_main",
+  "naming_series",
+  "vehicle",
+  "from_driver",
+  "to_driver",
+  "vehicle_handover_main_col",
+  "handover_date",
+  "odometer_reading",
+  "vehicle_handover_sec_condition",
+  "condition_notes",
+  "vehicle_handover_sec_checklist",
+  "handover_check_items",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle_handover_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "vehicle_handover_sec_main",
+   "fieldtype": "Section Break",
+   "label": "Handover Details"
+  },
+  {
+   "default": "GV-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "GV-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "from_driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "From Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "fieldname": "to_driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "To Driver",
+   "options": "Salis Driver",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle_handover_main_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "handover_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Handover Date",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "odometer_reading",
+   "fieldtype": "Int",
+   "label": "Odometer Reading"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vehicle_handover_sec_condition",
+   "fieldtype": "Section Break",
+   "label": "Condition"
+  },
+  {
+   "fieldname": "condition_notes",
+   "fieldtype": "Small Text",
+   "label": "Condition Notes"
+  },
+  {
+   "fieldname": "vehicle_handover_sec_checklist",
+   "fieldtype": "Section Break",
+   "label": "Handover Checklist"
+  },
+  {
+   "fieldname": "handover_check_items",
+   "fieldtype": "Table",
+   "label": "Handover Check Items",
+   "options": "Vehicle Handover Item"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Handover",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 02:43:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Vehicle Handover",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

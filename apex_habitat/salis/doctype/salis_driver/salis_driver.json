@@ -1,0 +1,227 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:45:00.000000",
+ "description": "Fleet driver master record: identity, project, supervisor, vehicle linkage, and compliance.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "driver_sec_identity",
+  "employee",
+  "full_name",
+  "national_id",
+  "phone",
+  "driver_identity_col",
+  "status",
+  "project",
+  "supervisor",
+  "current_vehicle",
+  "driver_sec_compliance",
+  "license_number",
+  "license_expiry"
+ ],
+ "fields": [
+  {
+   "default": "DRV-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "DRV-.######",
+   "print_hide": 1,
+   "report_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "driver_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Identity"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fetch_if_empty": 1,
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Full Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "national_id",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "National ID",
+   "search_index": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "driver_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nStopped\nOn Leave\nReleased"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project",
+   "search_index": 1
+  },
+  {
+   "fieldname": "supervisor",
+   "fieldtype": "Link",
+   "label": "Supervisor",
+   "options": "User"
+  },
+  {
+   "fieldname": "current_vehicle",
+   "fieldtype": "Link",
+   "label": "Current Vehicle",
+   "options": "Salis Vehicle"
+  },
+  {
+   "fieldname": "driver_sec_compliance",
+   "fieldtype": "Section Break",
+   "label": "Compliance"
+  },
+  {
+   "fieldname": "license_number",
+   "fieldtype": "Data",
+   "label": "License Number"
+  },
+  {
+   "fieldname": "license_expiry",
+   "fieldtype": "Date",
+   "label": "License Expiry"
+  }
+ ],
+ "links": [
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Assignment",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Driver Stop",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Driver Attendance",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Request",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Support",
+   "link_doctype": "Support Ticket",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Dispatch Trip",
+   "link_fieldname": "driver"
+  }
+ ],
+ "modified": "2026-05-26 02:45:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Salis Driver",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "if_owner": 1,
+   "read": 1,
+   "role": "Driver"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "full_name",
+ "track_changes": 1
+}

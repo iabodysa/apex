@@ -1,0 +1,169 @@
+{
+ "actions": [],
+ "creation": "2026-05-26 10:00:00.000000",
+ "description": "Single configuration record for the Salis Fleet Management module.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "salis_settings_tab_general",
+  "salis_settings_sec_defaults",
+  "default_company",
+  "default_cost_center",
+  "salis_settings_general_col",
+  "alert_lead_days",
+  "salis_settings_tab_approvals",
+  "salis_settings_sec_approvals",
+  "enable_approvals",
+  "cross_project_needs_approval",
+  "salis_settings_approvals_col",
+  "fuel_request_approval_threshold_litres",
+  "salis_settings_tab_portal",
+  "salis_settings_sec_portal",
+  "enable_driver_portal",
+  "salis_settings_sec_naming",
+  "naming_notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "salis_settings_tab_general",
+   "fieldtype": "Tab Break",
+   "label": "General"
+  },
+  {
+   "fieldname": "salis_settings_sec_defaults",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "description": "Default company applied to Salis transactions when not set explicitly.",
+   "fieldname": "default_company",
+   "fieldtype": "Link",
+   "label": "Default Company",
+   "options": "Company"
+  },
+  {
+   "description": "Default cost center used for fleet cost postings.",
+   "fieldname": "default_cost_center",
+   "fieldtype": "Link",
+   "label": "Default Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "salis_settings_general_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "7",
+   "description": "Number of days before an expiry or due date to start raising alerts.",
+   "fieldname": "alert_lead_days",
+   "fieldtype": "Int",
+   "label": "Alert Lead Days"
+  },
+  {
+   "fieldname": "salis_settings_tab_approvals",
+   "fieldtype": "Tab Break",
+   "label": "Approvals"
+  },
+  {
+   "fieldname": "salis_settings_sec_approvals",
+   "fieldtype": "Section Break",
+   "label": "Approval Controls"
+  },
+  {
+   "default": "1",
+   "description": "Master switch to enable approval routing across Salis transactions.",
+   "fieldname": "enable_approvals",
+   "fieldtype": "Check",
+   "label": "Enable Approvals"
+  },
+  {
+   "default": "1",
+   "description": "Require approval when an assignment or transfer crosses project boundaries.",
+   "fieldname": "cross_project_needs_approval",
+   "fieldtype": "Check",
+   "label": "Cross-Project Needs Approval"
+  },
+  {
+   "fieldname": "salis_settings_approvals_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "100",
+   "description": "Fuel requests above this litre amount require approval.",
+   "fieldname": "fuel_request_approval_threshold_litres",
+   "fieldtype": "Float",
+   "label": "Fuel Request Approval Threshold (Litres)"
+  },
+  {
+   "fieldname": "salis_settings_tab_portal",
+   "fieldtype": "Tab Break",
+   "label": "Portal & Naming"
+  },
+  {
+   "fieldname": "salis_settings_sec_portal",
+   "fieldtype": "Section Break",
+   "label": "Driver Portal"
+  },
+  {
+   "default": "0",
+   "description": "Allow drivers to access the self-service portal.",
+   "fieldname": "enable_driver_portal",
+   "fieldtype": "Check",
+   "label": "Enable Driver Portal"
+  },
+  {
+   "fieldname": "salis_settings_sec_naming",
+   "fieldtype": "Section Break",
+   "label": "Naming Notes"
+  },
+  {
+   "description": "Reference notes for operational naming series used across Salis transactions.",
+   "default": "Handover: GV-.######  |  Vehicle Stop: SV-.######  |  Driver Stop: SD-.######  |  Fuel: NF-.######  |  Ticket: TK-.######",
+   "fieldname": "naming_notes",
+   "fieldtype": "Small Text",
+   "label": "Naming Series Notes"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-05-26 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Salis Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

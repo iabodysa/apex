@@ -1,0 +1,200 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 11:00:00.000000",
+ "description": "Fuel top-up request. Temporary top-ups must be reverted by the revert due date.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fuel_topup_request_tab_overview",
+  "fuel_topup_request_sec_overview",
+  "vehicle",
+  "driver",
+  "project",
+  "topup_litres",
+  "fuel_topup_request_overview_col",
+  "status",
+  "naming_series",
+  "fuel_topup_request_sec_temporary",
+  "is_temporary",
+  "reverted",
+  "fuel_topup_request_temporary_col",
+  "revert_due_date",
+  "fuel_topup_request_sec_system",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "fuel_topup_request_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "fuel_topup_request_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "search_index": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "topup_litres",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Top-up Litres",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fuel_topup_request_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nApproved\nDone\nReverted\nCancelled"
+  },
+  {
+   "default": "FT-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "FT-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fuel_topup_request_sec_temporary",
+   "fieldtype": "Section Break",
+   "label": "Temporary Top-up"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_temporary",
+   "fieldtype": "Check",
+   "label": "Is Temporary"
+  },
+  {
+   "default": "0",
+   "fieldname": "reverted",
+   "fieldtype": "Check",
+   "label": "Reverted"
+  },
+  {
+   "fieldname": "fuel_topup_request_temporary_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.is_temporary==1",
+   "fieldname": "revert_due_date",
+   "fieldtype": "Date",
+   "label": "Revert Due Date"
+  },
+  {
+   "fieldname": "fuel_topup_request_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Info"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Fuel Topup Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 11:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Fuel Topup Request",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "vehicle",
+ "track_changes": 1
+}

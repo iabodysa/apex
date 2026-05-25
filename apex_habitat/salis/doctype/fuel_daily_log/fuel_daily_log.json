@@ -1,0 +1,149 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 11:00:00.000000",
+ "description": "Daily fuel consumption log for a vehicle: odometer, litres, amount, and platform.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fuel_daily_log_tab_overview",
+  "fuel_daily_log_sec_overview",
+  "naming_series",
+  "vehicle",
+  "driver",
+  "log_date",
+  "fuel_platform",
+  "fuel_daily_log_overview_col",
+  "odometer",
+  "litres",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "fuel_daily_log_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "fuel_daily_log_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "FDL-.######"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "search_index": 1
+  },
+  {
+   "fieldname": "log_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Log Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fuel_platform",
+   "fieldtype": "Link",
+   "label": "Fuel Platform",
+   "options": "Fuel Platform"
+  },
+  {
+   "fieldname": "fuel_daily_log_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "odometer",
+   "fieldtype": "Int",
+   "label": "Odometer"
+  },
+  {
+   "fieldname": "litres",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Litres"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount (SAR)"
+  }
+ ],
+ "links": [],
+ "modified": "2026-05-26 11:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Fuel Daily Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "vehicle",
+ "track_changes": 1
+}

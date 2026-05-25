@@ -1,0 +1,173 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:44:00.000000",
+ "description": "Records a vehicle stop event with reason and ownership context.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle_stop_tab_overview",
+  "vehicle_stop_sec_main",
+  "naming_series",
+  "vehicle",
+  "stop_reason",
+  "stop_date",
+  "vehicle_stop_main_col",
+  "ownership_at_stop",
+  "related_driver",
+  "vehicle_stop_sec_notes",
+  "notes",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle_stop_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "vehicle_stop_sec_main",
+   "fieldtype": "Section Break",
+   "label": "Stop Details"
+  },
+  {
+   "default": "SV-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "SV-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "stop_reason",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Stop Reason",
+   "options": "Accident\nMaintenance\nViolation\nRental Return\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "stop_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Stop Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle_stop_main_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.ownership",
+   "fieldname": "ownership_at_stop",
+   "fieldtype": "Data",
+   "label": "Ownership At Stop",
+   "read_only": 1
+  },
+  {
+   "fieldname": "related_driver",
+   "fieldtype": "Link",
+   "label": "Related Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vehicle_stop_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Stop",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 02:44:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Vehicle Stop",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

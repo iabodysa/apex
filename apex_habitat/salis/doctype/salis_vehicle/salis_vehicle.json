@@ -1,0 +1,249 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:40:00.000000",
+ "description": "Fleet vehicle master record. Stores plate, ownership, and operational status.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "vehicle_tab_overview",
+  "vehicle_sec_identity",
+  "plate_number",
+  "plate_normalized",
+  "vehicle_category",
+  "status",
+  "vehicle_identity_col",
+  "ownership",
+  "rental_office",
+  "odometer",
+  "vehicle_sec_assignment",
+  "company",
+  "project",
+  "vehicle_assignment_col",
+  "current_driver",
+  "vehicle_sec_notes",
+  "notes"
+ ],
+ "fields": [
+  {
+   "default": "VEH-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "VEH-.######",
+   "print_hide": 1,
+   "report_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "vehicle_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Identity"
+  },
+  {
+   "fieldname": "plate_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Plate Number",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Normalized plate (spaces removed, uppercased). Set automatically.",
+   "fieldname": "plate_normalized",
+   "fieldtype": "Data",
+   "label": "Plate (Normalized)",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "vehicle_category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle Category",
+   "options": "Vehicle Category"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nStopped\nUnder Maintenance\nReleased"
+  },
+  {
+   "fieldname": "vehicle_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Owned",
+   "fieldname": "ownership",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Ownership",
+   "options": "Owned\nRented"
+  },
+  {
+   "depends_on": "eval:doc.ownership=='Rented'",
+   "fieldname": "rental_office",
+   "fieldtype": "Link",
+   "label": "Rental Office",
+   "options": "Rental Office"
+  },
+  {
+   "default": "0",
+   "fieldname": "odometer",
+   "fieldtype": "Int",
+   "label": "Odometer"
+  },
+  {
+   "fieldname": "vehicle_sec_assignment",
+   "fieldtype": "Section Break",
+   "label": "Assignment"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "vehicle_assignment_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "current_driver",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Current Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vehicle_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Assignment",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Handover",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Stop",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Request",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Quota",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Dispatch Trip",
+   "link_fieldname": "vehicle"
+  },
+  {
+   "group": "Service",
+   "link_doctype": "Wash Request",
+   "link_fieldname": "vehicle"
+  }
+ ],
+ "modified": "2026-05-26 02:40:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Salis Vehicle",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "plate_number",
+ "track_changes": 1
+}

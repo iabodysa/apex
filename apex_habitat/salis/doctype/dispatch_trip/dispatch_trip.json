@@ -1,0 +1,156 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 02:45:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "route_plan",
+  "vehicle",
+  "driver",
+  "trip_date",
+  "depart_time",
+  "return_time",
+  "status",
+  "odometer_start",
+  "odometer_end",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "DT-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "DT-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "route_plan",
+   "fieldtype": "Link",
+   "label": "Route Plan",
+   "options": "Route Plan"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "fieldname": "trip_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Trip Date"
+  },
+  {
+   "fieldname": "depart_time",
+   "fieldtype": "Time",
+   "label": "Depart Time"
+  },
+  {
+   "fieldname": "return_time",
+   "fieldtype": "Time",
+   "label": "Return Time"
+  },
+  {
+   "default": "Planned",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Planned\nDispatched\nCompleted\nCancelled"
+  },
+  {
+   "fieldname": "odometer_start",
+   "fieldtype": "Int",
+   "label": "Odometer Start"
+  },
+  {
+   "fieldname": "odometer_end",
+   "fieldtype": "Int",
+   "label": "Odometer End"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Dispatch Trip",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 02:45:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Dispatch Trip",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

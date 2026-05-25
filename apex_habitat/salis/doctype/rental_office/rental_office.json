@@ -1,0 +1,140 @@
+{
+ "actions": [],
+ "autoname": "field:office_name",
+ "creation": "2026-05-26 10:00:00.000000",
+ "description": "External rental office that supplies rented vehicles to the fleet.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "rental_office_tab_overview",
+  "rental_office_sec_details",
+  "office_name",
+  "supplier",
+  "city",
+  "rental_office_overview_col",
+  "status",
+  "rental_office_sec_contact",
+  "contact_person",
+  "phone"
+ ],
+ "fields": [
+  {
+   "fieldname": "rental_office_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "rental_office_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Office Details"
+  },
+  {
+   "fieldname": "office_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Office Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Linked ERPNext Supplier for the rental office, where applicable.",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "City"
+  },
+  {
+   "fieldname": "rental_office_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nInactive"
+  },
+  {
+   "fieldname": "rental_office_sec_contact",
+   "fieldtype": "Section Break",
+   "label": "Contact"
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "options": "Phone"
+  }
+ ],
+ "links": [],
+ "modified": "2026-05-26 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Rental Office",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

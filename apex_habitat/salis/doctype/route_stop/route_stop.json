@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "creation": "2026-05-26 02:45:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sequence",
+  "stop_name",
+  "location",
+  "planned_time",
+  "passengers"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "sequence",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Sequence"
+  },
+  {
+   "columns": 3,
+   "fieldname": "stop_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Stop Name"
+  },
+  {
+   "columns": 3,
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Location"
+  },
+  {
+   "columns": 2,
+   "fieldname": "planned_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Planned Time"
+  },
+  {
+   "columns": 2,
+   "fieldname": "passengers",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Passengers"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-26 02:45:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Route Stop",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

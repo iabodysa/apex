@@ -1,0 +1,23 @@
+{
+  "doctype": "Report",
+  "name": "Salis Fleet Register",
+  "report_name": "Salis Fleet Register",
+  "ref_doctype": "Salis Vehicle",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Salis",
+  "roles": [
+    {
+      "role": "Fleet Manager"
+    },
+    {
+      "role": "Fleet Supervisor"
+    },
+    {
+      "role": "Fleet Project Manager"
+    },
+    {
+      "role": "Finance Manager"
+    }
+  ]
+}

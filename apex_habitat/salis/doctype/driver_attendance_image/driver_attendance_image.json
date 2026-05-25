@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "creation": "2026-05-26 02:45:00.000000",
+ "description": "Photographic evidence captured for a driver attendance record.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "image",
+  "caption",
+  "captured_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "in_list_view": 1,
+   "label": "Image"
+  },
+  {
+   "columns": 4,
+   "fieldname": "caption",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Caption"
+  },
+  {
+   "columns": 3,
+   "fieldname": "captured_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Captured At"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-26 02:45:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Driver Attendance Image",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
