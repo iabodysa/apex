@@ -9,7 +9,7 @@ and idempotent, never clobbering existing items.
 import frappe
 
 _LINKS = [
-    {"item_label": "Apex Habitat — Command Center", "item_type": "Route", "route": "/app/operations-command-center"},
+    {"item_label": "Apex Habitat — Command Center", "item_type": "Route", "route": "/app/habitat"},
     {"item_label": "Apex Habitat — Setup", "item_type": "Route", "route": "/app/setup"},
 ]
 
