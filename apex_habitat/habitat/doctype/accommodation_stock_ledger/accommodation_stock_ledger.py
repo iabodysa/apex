@@ -66,6 +66,17 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
     return doc.name
 
 
+def get_store_balance(item_type: str, item: str, building: str, employee=None) -> float:
+    """Live signed-quantity balance for one item in a building's store (employee
+    unset) or in an employee's custody (employee set). Sums non-cancelled rows."""
+    filters = {
+        "item_type": item_type, "item": item, "building": building, "is_cancelled": 0,
+        "employee": employee if employee else ["is", "not set"],
+    }
+    rows = frappe.get_all("Accommodation Stock Ledger", filters=filters, fields=["qty"])
+    return flt(sum(flt(r.qty) for r in rows))
+
+
 def has_stock_entries(voucher_type: str, voucher_no: str) -> bool:
     """Idempotency guard: True if this voucher already has live (non-cancelled) rows."""
     return bool(frappe.db.exists(
