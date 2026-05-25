@@ -40,7 +40,9 @@ class TestHousingLifecycle(ApexHabitatTestCase):
                 "doctype": "Employee",
                 "first_name": "Test Employee",
                 "company": self.company,
-                "gender": "Male"
+                "gender": "Male",
+                "date_of_birth": "1990-01-01",
+                "date_of_joining": "2020-01-01",
             })
             emp.insert(ignore_permissions=True)
             self.employee = emp.name
