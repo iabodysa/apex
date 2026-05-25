@@ -1,0 +1,16 @@
+{
+ "chart_name": "Findings by Severity",
+ "chart_type": "Group By",
+ "doctype": "Dashboard Chart",
+ "document_type": "Inspection Finding Item",
+ "group_by_based_on": "severity",
+ "group_by_type": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "module": "Habitat",
+ "name": "Findings by Severity",
+ "number_of_groups": 0,
+ "timeseries": 0,
+ "type": "Donut",
+ "filters_json": "[]"
+}
