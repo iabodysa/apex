@@ -80,7 +80,7 @@ def _post_ship_leg(doc):
         )
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def mark_received(transfer: str, received_date: str = None):
     """Post the receive leg into the destination store and mark the transfer
     Received. Only valid for a submitted, In-Transit transfer; idempotent on status."""
