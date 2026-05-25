@@ -1,8 +1,8 @@
 {
  "doctype": "Workspace",
  "name": "Lease, Utilities & Cost Control",
- "label": "Lease, Utilities & Cost Control",
- "title": "Lease, Utilities & Cost Control",
+ "label": "Costs",
+ "title": "Costs",
  "module": "Habitat",
  "icon": "money-coins-1",
  "public": 1,
@@ -224,5 +224,6 @@
    "quick_list_filter": "{\"status\": \"Disputed\"}",
    "idx": 1
   }
- ]
+ ],
+ "modified": "2026-05-26 09:00:00.000000"
 }
