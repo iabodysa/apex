@@ -32,7 +32,10 @@
   "lease_expiry_days_before",
   "supplier_cost_recovery_sec",
   "enable_supplier_markup",
-  "supplier_markup_percent"
+  "supplier_markup_percent",
+  "internal_store_sec",
+  "notify_finance_on_liability_transfer",
+  "finance_notification_email"
  ],
  "fields": [
   {
@@ -225,6 +228,26 @@
    "fieldname": "supplier_markup_percent",
    "fieldtype": "Percent",
    "label": "Supplier Markup Percent"
+  },
+  {
+   "fieldname": "internal_store_sec",
+   "fieldtype": "Section Break",
+   "label": "Internal Store"
+  },
+  {
+   "default": "0",
+   "description": "Send a memo-only notification to Finance when a Material Transfer moves stock between buildings on different cost centers. No GL Entry is posted.",
+   "fieldname": "notify_finance_on_liability_transfer",
+   "fieldtype": "Check",
+   "label": "Notify Finance on Cross-Cost-Center Transfer"
+  },
+  {
+   "depends_on": "eval:doc.notify_finance_on_liability_transfer",
+   "description": "Recipient address for the cross-cost-center transfer memo. Falls back to the Finance Manager role if left blank.",
+   "fieldname": "finance_notification_email",
+   "fieldtype": "Data",
+   "label": "Finance Notification Email",
+   "options": "Email"
   }
  ],
  "issingle": 1,
