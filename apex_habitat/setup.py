@@ -8,6 +8,7 @@ from apex_habitat.habitat.kanban_seed import seed_kanban_boards
 from apex_habitat.habitat.assignment_rules_seed import seed_assignment_rules
 from apex_habitat.habitat.auto_email_reports_seed import seed_auto_email_reports
 from apex_habitat.habitat.email_templates_seed import seed_email_templates
+from apex_habitat.habitat.dashboard_seed import seed_habitat_dashboard
 
 
 def after_install():
@@ -24,6 +25,7 @@ def after_install():
     seed_assignment_rules()
     seed_auto_email_reports()
     seed_email_templates()
+    seed_habitat_dashboard()
     # Force translation cache reload so Arabic strings appear on first login
     frappe.clear_cache()
 
