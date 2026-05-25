@@ -513,8 +513,45 @@
    "options": "Recording\nNot Recording\nOffline\nNot Installed"
   }
  ],
- "links": [],
- "modified": "2026-06-06 12:00:00.000000",
+ "links": [
+  {
+   "link_doctype": "Accommodation Room",
+   "link_fieldname": "building"
+  },
+  {
+   "link_doctype": "Accommodation Lease",
+   "link_fieldname": "building"
+  },
+  {
+   "link_doctype": "Building License",
+   "link_fieldname": "building"
+  },
+  {
+   "link_doctype": "Safety Inspection Report",
+   "link_fieldname": "building"
+  },
+  {
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "building"
+  },
+  {
+   "link_doctype": "Utility Account",
+   "link_fieldname": "building"
+  },
+  {
+   "link_doctype": "Utility Bill Entry",
+   "link_fieldname": "building"
+  },
+  {
+   "link_doctype": "Accommodation Ledger",
+   "link_fieldname": "building"
+  },
+  {
+   "link_doctype": "Accommodation Assignment",
+   "link_fieldname": "building"
+  }
+ ],
+ "modified": "2026-06-06 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Building",
