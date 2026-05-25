@@ -403,6 +403,66 @@ def temporary_stay_checkout_watchlist() -> None:
         start += batch_size
 
 
+def idle_resident_aging() -> None:
+    """Accrue days-idle and the estimated accommodation cost bleed for every open
+    Idle Resident Report.
+
+    days_idle = today - reported_on. Cost bleed = sum of the per-resident daily
+    share already posted to the Accommodation Ledger (Operational Memo) for the
+    linked assignment over the idle window — no GL, reuses existing memo data.
+    Paginated 500/batch with per-row error isolation; posts a timeline note every
+    7 idle days when operational notifications are enabled.
+    """
+    from frappe.utils import date_diff, flt, today
+
+    today_str = today()
+    start = 0
+    batch_size = 500
+    while True:
+        reports = frappe.get_all(
+            "Idle Resident Report",
+            filters={"status": ["in", ["Open", "Acknowledged"]]},
+            fields=["name", "reported_on", "assignment", "employee_name", "employee"],
+            limit_start=start,
+            limit_page_length=batch_size,
+        )
+        if not reports:
+            break
+
+        for r in reports:
+            try:
+                days = date_diff(today_str, r.reported_on) if r.reported_on else 0
+                cost = 0.0
+                if r.assignment and r.reported_on:
+                    rows = frappe.get_all(
+                        "Accommodation Ledger",
+                        filters={"assignment": r.assignment,
+                                 "posting_date": ["between", [r.reported_on, today_str]]},
+                        fields=["employee_daily_share"],
+                    )
+                    cost = flt(sum(flt(x.employee_daily_share) for x in rows))
+                frappe.db.set_value(
+                    "Idle Resident Report", r.name,
+                    {"days_idle": days, "estimated_accommodation_cost_bleed_sar": cost},
+                    update_modified=False,
+                )
+                if days and days % 7 == 0:
+                    worker = r.employee_name or r.employee
+                    _notify_operational(
+                        "Idle Resident Report", r.name,
+                        f"idle_resident_aging: {worker} has now been a cost bleed for {days} days "
+                        f"(estimated accommodation cost {cost} SAR).",
+                    )
+            except Exception:
+                frappe.db.rollback()
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Idle resident aging failed for {r.name}"[:140],
+                )
+
+        start += batch_size
+
+
 def weekly_occupancy_sync() -> None:
     """Recalculate occupancy counters on all Accommodation Rooms and Buildings.
 

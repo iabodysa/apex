@@ -7,6 +7,31 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v0.8.6 ---------------------------------------------------------------
+    {
+        "title": "Apex Habitat v0.8.6 — Visual Front Desk Check-In & Idle Resident Accountability",
+        "app_name": "apex_habitat",
+        "link": "/app/front-desk",
+        "creation": "2026-05-26 09:00:00",
+    },
+    {
+        "title": "v0.8.6: Front Desk board — colour-coded beds; click a green bed to check in, a red bed to check out",
+        "app_name": "apex_habitat",
+        "link": "/app/front-desk",
+        "creation": "2026-05-26 09:01:00",
+    },
+    {
+        "title": "v0.8.6: Resident Supervisors can now check residents in and out directly from the Front Desk board",
+        "app_name": "apex_habitat",
+        "link": "/app/front-desk",
+        "creation": "2026-05-26 09:02:00",
+    },
+    {
+        "title": "v0.8.6: Idle Resident Reports auto-route a follow-up task to HR/Operations/Legal and accrue days-idle + estimated cost bleed",
+        "app_name": "apex_habitat",
+        "link": "/app/idle-resident-report",
+        "creation": "2026-05-26 09:03:00",
+    },
     # v0.8.5 ---------------------------------------------------------------
     {
         "title": "Apex Habitat v0.8.5 — Temporary Stays & Idle Resident Tracking (schema)",

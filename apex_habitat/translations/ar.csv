@@ -1432,3 +1432,29 @@ Accommodation,السكن
 Costs,التكاليف
 Upkeep,الصيانة
 Console,وحدة التحكم
+Idle resident reported to {0}: employee {1} (building {2}). Please action.,تم الإبلاغ عن مقيم غير مشغّل إلى {0}: الموظف {1} (المبنى {2}). يرجى المعالجة.
+An idle resident has been reported and routed to the responsible department,تم الإبلاغ عن مقيم غير مشغّل وتوجيهه إلى الإدارة المسؤولة
+Front Desk,مكتب الاستقبال
+Quick Check-in,تسجيل دخول سريع
+Quick Check-out,تسجيل خروج سريع
+Check In,تسجيل الدخول
+Check Out,تسجيل الخروج
+Refresh Board,تحديث اللوحة
+Loading board…,جارٍ تحميل اللوحة…
+Select a building to load the board.,اختر مبنى لتحميل اللوحة.
+No beds found for this building.,لا توجد أسرّة لهذا المبنى.
+{0} of {1} beds available,{0} من {1} سرير متاح
+Room not ready,الغرفة غير جاهزة
+This bed is in a room that is not ready. Resolve room readiness before check-in.,هذا السرير في غرفة غير جاهزة. عالج جاهزية الغرفة قبل تسجيل الدخول.
+This bed is out of service and cannot be assigned.,هذا السرير خارج الخدمة ولا يمكن تخصيصه.
+This resident has custody items. Opening the full Checkout form to clear custody.,لدى هذا المقيم عُهد. يتم فتح نموذج تسجيل الخروج الكامل لتصفية العهدة.
+Open Checkout Form,فتح نموذج تسجيل الخروج
+Checked in: {0},تم تسجيل الدخول: {0}
+Checked out: {0},تم تسجيل الخروج: {0}
+Checking in…,جارٍ تسجيل الدخول…
+Checking out…,جارٍ تسجيل الخروج…
+Check-out Reason,سبب الخروج
+Bed {0} is not linked to a room and building.,السرير {0} غير مرتبط بغرفة ومبنى.
+No active assignment found for bed {0}.,لا يوجد تخصيص نشط للسرير {0}.
+Floor {0},الطابق {0}
+Unassigned Floor,طابق غير محدد

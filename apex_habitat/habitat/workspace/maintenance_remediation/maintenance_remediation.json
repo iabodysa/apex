@@ -16,7 +16,7 @@
   ],
   "is_default": 0,
   "sequence_id": 4.0,
-  "parent_page": "Operations Command Center",
+  "parent_page": "Habitat",
   "content": "[{\"id\": \"51W9LDgfgD\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"FHrGhdq7XI\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"cCQHXuWwXA\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Escalated Maintenance Requests\", \"col\": 3}}, {\"id\": \"pNpIo3CuID\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders In Progress\", \"col\": 3}}, {\"id\": \"bE9LO6rnCN\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders Completed\", \"col\": 3}}, {\"id\": \"C75YgqaKoO\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"96D9JJHM66\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Requests by Status\", \"col\": 6}}, {\"id\": \"brTdTic9SK\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Requests by Priority\", \"col\": 6}}, {\"id\": \"BvE0D8ffFE\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"cC64lMNzCW\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Maintenance Request\", \"col\": 4}}, {\"id\": \"3G1STlBkEA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"TQv1Ji03WN\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"EEA6pMXoQd\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Work Order\", \"col\": 3}}, {\"id\": \"LyGwEKw9lS\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Inspection Report\", \"col\": 3}}, {\"id\": \"SubSvcOrdSC01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Subcontractor Service Order\", \"col\": 3}}, {\"id\": \"Krg11Y6er7\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Maintenance & Remediation</b></span>\", \"col\": 12}}, {\"id\": \"751uBjYG8u\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Flow\", \"col\": 4}}, {\"id\": \"VaO2lQzXus\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}, {\"id\": \"VS9zyc3Cli\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Backlog\", \"col\": 3}}, {\"id\": \"38fXKlIZE1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Aging\", \"col\": 3}}, {\"id\": \"maint_master_card_mr\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Master\", \"col\": 4}}]",
   "shortcuts": [
     {
@@ -193,5 +193,5 @@
       "idx": 1
     }
   ],
-  "modified": "2026-05-26 09:00:00.000000"
+  "modified": "2026-06-01 09:00:00.000000"
 }

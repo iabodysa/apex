@@ -59,3 +59,24 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
         self._idle().insert(ignore_permissions=True)
         with self.assertRaises(frappe.ValidationError):
             self._idle().insert(ignore_permissions=True)
+
+    def test_idle_after_insert_routes_todo_to_department_role(self):
+        # Operations -> Accommodation Manager role; a role holder gets a ToDo.
+        email = f"mgr{_h()}@test.com".lower()
+        user = frappe.get_doc({"doctype": "User", "email": email, "first_name": "Mgr",
+                               "send_welcome_email": 0,
+                               "roles": [{"role": "Accommodation Manager"}]}).insert(ignore_permissions=True)
+        rep = self._idle(responsible_department="Operations").insert(ignore_permissions=True)
+        todos = frappe.get_all("ToDo", filters={
+            "reference_type": "Idle Resident Report", "reference_name": rep.name,
+            "allocated_to": user.name, "status": "Open"})
+        self.assertEqual(len(todos), 1, "an Operations role holder must get a routed ToDo")
+
+    def test_idle_aging_accrues_days_idle(self):
+        from apex_habitat.habitat.tasks import idle_resident_aging
+        from frappe.utils import add_days, today
+        rep = self._idle(reported_on=add_days(today(), -7)).insert(ignore_permissions=True)
+        idle_resident_aging()
+        rep.reload()
+        self.assertEqual(rep.days_idle, 7)
+        self.assertEqual(rep.estimated_accommodation_cost_bleed_sar, 0)  # no assignment linked

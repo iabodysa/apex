@@ -129,6 +129,15 @@ _NOTIFICATIONS = [
         "roles": ["Resident Supervisor", "Accommodation Manager"],
     },
     {
+        "name": "Habitat - Idle Resident Reported",
+        "subject": "Idle Resident Reported: {{ doc.name }}",
+        "document_type": "Idle Resident Report",
+        "event": "New",
+        "condition": "",
+        "message": '{{ _("An idle resident has been reported and routed to the responsible department") }}: {{ doc.name }} ({{ doc.responsible_department }}).',
+        "roles": ["Accommodation Manager", "HR Manager", "System Manager"],
+    },
+    {
         "name": "Habitat - Custody Damage Assessment Created",
         "subject": "Custody Damage Assessment Submitted: {{ doc.name }}",
         "document_type": "Custody Damage Assessment",

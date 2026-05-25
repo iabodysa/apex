@@ -93,6 +93,7 @@ doc_events = {
     # Phase 5 — Custody and Operational Depreciation
     "Idle Resident Report": {
         "validate": "apex_habitat.habitat.doctype.idle_resident_report.idle_resident_report.validate",
+        "after_insert": "apex_habitat.habitat.doctype.idle_resident_report.idle_resident_report.after_insert",
     },
     "Accommodation Material Transfer": {
         "validate": "apex_habitat.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.validate",
@@ -179,6 +180,7 @@ scheduler_events = {
         "apex_habitat.habitat.tasks.open_maintenance_escalation",
         "apex_habitat.habitat.tasks.lease_expiry_watchlist",
         "apex_habitat.habitat.tasks.temporary_stay_checkout_watchlist",
+        "apex_habitat.habitat.tasks.idle_resident_aging",
         "apex_habitat.habitat.tasks.daily_scheduled_task_instance_generator",
         "apex_habitat.habitat.tasks.daily_occupancy_snapshot",
     ],

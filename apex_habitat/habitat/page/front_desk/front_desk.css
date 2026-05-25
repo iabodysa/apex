@@ -1,0 +1,165 @@
+/* Front Desk — visual bed board (v0.8.6).
+ * Status color classes + responsive tablet grid. Color is never the only
+ * status signal: each bed card also carries a text badge for glare/a11y.
+ */
+
+.fd-board {
+	padding: 8px 4px 32px;
+}
+
+.fd-empty {
+	padding: 48px 16px;
+	text-align: center;
+	font-size: 15px;
+}
+
+.fd-summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 12px;
+	margin-bottom: 16px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--border-color, #d1d8dd);
+}
+
+.fd-summary-title {
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.fd-summary-counts {
+	color: var(--text-muted, #74808b);
+	font-size: 13px;
+}
+
+.fd-floor {
+	margin-bottom: 24px;
+}
+
+.fd-floor-header {
+	font-size: 14px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted, #74808b);
+	margin-bottom: 10px;
+}
+
+.fd-rooms {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+}
+
+.fd-room {
+	border: 1px solid var(--border-color, #d1d8dd);
+	border-radius: 8px;
+	padding: 12px;
+	min-width: 240px;
+	flex: 1 1 260px;
+	background: var(--card-bg, #fff);
+}
+
+.fd-room-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 10px;
+	gap: 8px;
+}
+
+.fd-room-number {
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.fd-room-meta {
+	font-size: 12px;
+	color: var(--text-muted, #74808b);
+}
+
+.fd-beds {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+	gap: 10px;
+}
+
+/* Bed card — large touch target for tablet use. */
+.fd-bed {
+	border-radius: 8px;
+	padding: 12px 10px;
+	min-height: 84px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	cursor: pointer;
+	border: 2px solid transparent;
+	user-select: none;
+	transition: transform 0.05s ease-in-out;
+}
+
+.fd-bed:focus {
+	outline: 3px solid var(--primary, #2490ef);
+	outline-offset: 2px;
+}
+
+.fd-bed:active {
+	transform: scale(0.98);
+}
+
+.fd-bed-code {
+	font-weight: 700;
+	font-size: 15px;
+}
+
+.fd-bed-badge {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.fd-bed-occupant {
+	font-size: 12px;
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Status colors — paired with the text badge so color is not the sole signal. */
+.fd-bed--green {
+	background: #e6f4ea;
+	border-color: #34a853;
+	color: #1e7e34;
+}
+
+.fd-bed--red {
+	background: #fde8e8;
+	border-color: #d93025;
+	color: #b71c1c;
+}
+
+.fd-bed--amber {
+	background: #fff6e0;
+	border-color: #f5a623;
+	color: #a96a00;
+	cursor: not-allowed;
+}
+
+.fd-bed--grey {
+	background: #f0f1f3;
+	border-color: #c2c8ce;
+	color: #74808b;
+	cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+	.fd-room {
+		min-width: 100%;
+		flex-basis: 100%;
+	}
+	.fd-bed {
+		min-height: 96px;
+	}
+}

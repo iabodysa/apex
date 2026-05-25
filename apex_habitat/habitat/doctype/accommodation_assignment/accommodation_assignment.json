@@ -272,7 +272,9 @@
   {
    "create": 1,
    "read": 1,
-   "role": "Resident Supervisor"
+   "role": "Resident Supervisor",
+   "submit": 1,
+   "write": 1
   }
  ],
  "row_format": "Dynamic",
