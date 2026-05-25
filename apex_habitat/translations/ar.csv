@@ -1403,3 +1403,6 @@ A new maintenance request awaits triage,يوجد طلب صيانة جديد با
 This resident request is waiting for supporting evidence,هذا الطلب السكني بانتظار إرفاق إثبات
 A new resident request has been received and awaits triage,تم استلام طلب سكني جديد بانتظار الفرز
 A custody damage assessment has been submitted and may create a salary deduction,تم اعتماد تقييم تلف عهدة وقد ينشأ عنه خصم من الراتب
+Resident request assigned for follow-up: {0},تم إسناد طلب سكني للمتابعة: {0}
+Apex Habitat — Command Center,أبيكس هابيتات — مركز القيادة
+Apex Habitat — Setup,أبيكس هابيتات — الإعداد

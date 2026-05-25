@@ -107,3 +107,4 @@ jobs:
           bench --site test.localhost run-tests --module apex_habitat.tests.test_accommodation_stock_ledger
           bench --site test.localhost run-tests --module apex_habitat.tests.test_custody_stock_integration
           bench --site test.localhost run-tests --module apex_habitat.tests.test_accommodation_material_transfer
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_resident_request_todo
