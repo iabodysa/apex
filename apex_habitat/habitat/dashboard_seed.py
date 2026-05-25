@@ -51,8 +51,9 @@ def seed_habitat_dashboard():
         "Habitat Dashboard",
         charts=[("Beds by Status", "Half"), ("Occupancy Percent Trend", "Half"),
                 ("Maintenance Requests by Status", "Half"), ("Scheduled Task Instances by Status", "Half"),
-                ("Task Completions Over Time", "Full")],
-        cards=["Open Maintenance Requests", "Overdue Scheduled Tasks", "Licenses Expiring Soon", "Vacant Beds"],
+                ("Facility Assets by Status", "Half"), ("Task Completions Over Time", "Full")],
+        cards=["Open Maintenance Requests", "Overdue Scheduled Tasks", "Licenses Expiring Soon",
+               "Vacant Beds", "Total Occupancy Percent"],
     )
     frappe.db.commit()
 
@@ -69,26 +70,38 @@ def seed_role_dashboards():
     and is reachable from that role's (role-restricted) Workspace."""
     _upsert_dashboard(
         "Accommodation Manager Dashboard",
-        charts=[("Beds by Status", "Half"), ("Occupancy Percent Trend", "Half"),
+        charts=[("Beds by Status", "Half"), ("Beds by Building", "Half"),
+                ("Occupancy Percent Trend", "Half"), ("Available Capacity Trend", "Half"),
                 ("Accommodation Leases by Status", "Full")],
-        cards=["Occupied Beds", "Vacant Beds", "Pending Accommodation Checkouts", "Active Accommodation Assignments"],
+        cards=["Occupied Beds", "Vacant Beds", "Available Beds", "Beds Out of Service",
+               "Pending Accommodation Checkouts", "Imminent Checkouts", "Idle Residents",
+               "Active Accommodation Assignments"],
     )
     _upsert_dashboard(
         "Resident Supervisor Dashboard",
         charts=[("Maintenance Requests by Status", "Half"), ("Maintenance Requests by Priority", "Half"),
+                ("Maintenance Work Orders by Status", "Half"), ("Custody Issues by Status", "Half"),
                 ("Scheduled Task Instances by Status", "Full")],
-        cards=["Open Maintenance Requests", "Overdue Scheduled Tasks", "Open Custody Issues", "Tasks Due Today"],
+        cards=["Open Maintenance Requests", "Escalated Maintenance Requests", "Maintenance Work Orders In Progress",
+               "Overdue Scheduled Tasks", "Overdue Safety Tasks", "Open Resident Requests",
+               "Custody Items Pending Return", "Tasks Due Today"],
     )
     _upsert_dashboard(
         "Finance Manager Dashboard",
-        charts=[("Ledger Cost by Type", "Half"), ("Utility Bills by Status", "Half"),
+        charts=[("Ledger Cost by Type", "Half"), ("Monthly Cost Bleeding", "Half"),
+                ("Utility Bills by Status", "Half"), ("Leases by Status", "Half"),
                 ("Subcontractor Service Orders by Status", "Full")],
-        cards=["Active Leases", "Utility Bills Under Review", "Ledger Cost This Month", "Supplier-Billed Cost This Month"],
+        cards=["Active Leases", "Utility Bills Under Review", "Pending Utility Bills", "Disputed Utility Bills",
+               "Ledger Cost This Month", "Supplier-Billed Cost This Month", "Missed Subcontractor Visits",
+               "Total Asset Book Value"],
     )
     _upsert_dashboard(
         "Internal Auditor Dashboard",
         charts=[("Building Licenses by Status", "Half"), ("Safety Task Executions by Result", "Half"),
+                ("Findings by Severity", "Half"), ("Safety Inspections Over Time", "Half"),
                 ("Audit Remediation Plans by Status", "Full")],
-        cards=["Open Audit Remediation Plans", "Overdue Audit Remediation Plans", "Licenses Expiring Soon", "Safety Inspections Recorded"],
+        cards=["Open Audit Remediation Plans", "Overdue Audit Remediation Plans", "Compliance Percent",
+               "Poor Safety Task Executions", "Expired Licenses", "Licenses Expiring Soon",
+               "Safety Inspections Recorded", "Recent Error Logs"],
     )
     frappe.db.commit()
