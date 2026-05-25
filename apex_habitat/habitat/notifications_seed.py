@@ -118,6 +118,17 @@ _NOTIFICATIONS = [
         "roles": ["Resident Supervisor", "Accommodation Manager"],
     },
     {
+        "name": "Habitat - Temporary Stay Ending",
+        "subject": "Temporary Stay Ending: {{ doc.name }}",
+        "document_type": "Accommodation Assignment",
+        "event": "Days Before",
+        "date_changed": "expected_checkout_date",
+        "days_in_advance": 2,
+        "condition": "doc.docstatus == 1 and doc.stay_type == 'Temporary' and not doc.check_out_date",
+        "message": '{{ _("This temporary stay is ending soon — please arrange check-out") }}: {{ doc.name }} ({{ doc.expected_checkout_date }}).',
+        "roles": ["Resident Supervisor", "Accommodation Manager"],
+    },
+    {
         "name": "Habitat - Custody Damage Assessment Created",
         "subject": "Custody Damage Assessment Submitted: {{ doc.name }}",
         "document_type": "Custody Damage Assessment",

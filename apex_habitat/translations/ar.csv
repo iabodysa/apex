@@ -1406,3 +1406,24 @@ A custody damage assessment has been submitted and may create a salary deduction
 Resident request assigned for follow-up: {0},تم إسناد طلب سكني للمتابعة: {0}
 Apex Habitat — Command Center,أبيكس هابيتات — مركز القيادة
 Apex Habitat — Setup,أبيكس هابيتات — الإعداد
+Stay Type,نوع الإقامة
+Expected Check-out Date,تاريخ المغادرة المتوقع
+Temporary Stay Lead Days,أيام التنبيه قبل المغادرة المؤقتة
+Expected check-out date is required for temporary stays.,تاريخ المغادرة المتوقع مطلوب للإقامات المؤقتة.
+Expected check-out date cannot be earlier than the check-in date.,لا يمكن أن يكون تاريخ المغادرة المتوقع قبل تاريخ الدخول.
+This temporary stay is ending soon — please arrange check-out,هذه الإقامة المؤقتة على وشك الانتهاء — يرجى ترتيب المغادرة
+Idle Resident Report,بلاغ مقيم غير مشغّل
+Reason Category,سبب عدم التشغيل
+New Hire,موظف جديد
+Returned from Leave,عائد من إجازة
+Legal Case,قضية قانونية
+HR Case,قضية موارد بشرية
+Responsible Department,الإدارة المسؤولة
+Legal,الشؤون القانونية
+Days Idle,أيام عدم التشغيل
+Estimated Accommodation Cost Bleed (SAR),تكلفة السكن المهدرة المقدرة (ريال)
+Resolution Category,نوع المعالجة
+Case Closed,تم إغلاق القضية
+Reported On,تاريخ الإبلاغ
+Resolution Notes are required when resolving an Idle Resident Report.,ملاحظات المعالجة مطلوبة عند إغلاق بلاغ المقيم غير المشغّل.
+An open Idle Resident Report already exists for employee {0}: {1}.,يوجد بلاغ مفتوح بالفعل للموظف {0}: {1}.

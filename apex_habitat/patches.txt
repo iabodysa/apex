@@ -28,3 +28,6 @@ apex_habitat.patches.v0_8.seed_assignment_rules
 apex_habitat.patches.v0_8.seed_auto_email_reports
 apex_habitat.patches.v0_8.seed_email_templates
 apex_habitat.patches.v0_8.add_navbar_help_links
+
+# v0.8.5 — temporary stays + idle resident schema
+apex_habitat.patches.v0_8.seed_temporary_stay_notification

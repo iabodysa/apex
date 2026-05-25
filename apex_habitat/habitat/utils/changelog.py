@@ -7,6 +7,31 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v0.8.5 ---------------------------------------------------------------
+    {
+        "title": "Apex Habitat v0.8.5 — Temporary Stays & Idle Resident Tracking (schema)",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-assignment",
+        "creation": "2026-05-25 21:00:00",
+    },
+    {
+        "title": "v0.8.5: Accommodation Assignment now has Stay Type and Expected Check-out Date for temporary stays",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-assignment",
+        "creation": "2026-05-25 21:01:00",
+    },
+    {
+        "title": "v0.8.5: Daily watchlist flags temporary stays approaching or past their expected check-out (+ disabled email reminder)",
+        "app_name": "apex_habitat",
+        "link": "/app/habitat-settings",
+        "creation": "2026-05-25 21:02:00",
+    },
+    {
+        "title": "v0.8.5: New Idle Resident Report to track non-deployed residents and force HR/Operations/Legal accountability",
+        "app_name": "apex_habitat",
+        "link": "/app/idle-resident-report",
+        "creation": "2026-05-25 21:03:00",
+    },
     # v0.8.4 ---------------------------------------------------------------
     {
         "title": "Apex Habitat v0.8.4 — Scheduled Report Emails, Email Templates, Follow-up Tasks & Navbar Links",

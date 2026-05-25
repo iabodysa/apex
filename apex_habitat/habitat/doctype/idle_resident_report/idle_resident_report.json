@@ -1,0 +1,233 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-25 00:00:00.000000",
+ "description": "Tracks idle/forgotten residents occupying accommodation without an active deployment, to surface accommodation cost bleed and assign responsibility for resolution.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "idle_resident_sec_overview",
+  "naming_series",
+  "employee",
+  "employee_name",
+  "assignment",
+  "building",
+  "idle_resident_overview_col",
+  "reason_category",
+  "responsible_department",
+  "reported_on",
+  "reported_by",
+  "idle_resident_sec_tracking",
+  "status",
+  "days_idle",
+  "estimated_accommodation_cost_bleed_sar",
+  "idle_resident_tracking_col",
+  "acknowledged_by",
+  "acknowledged_on",
+  "idle_resident_sec_resolution",
+  "resolution_category",
+  "resolution_notes",
+  "idle_resident_resolution_col",
+  "resolved_by",
+  "resolved_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "idle_resident_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Overview"
+  },
+  {
+   "default": "IDLE-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "IDLE-.YYYY.-.####",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "assignment",
+   "fieldtype": "Link",
+   "label": "Assignment",
+   "options": "Accommodation Assignment"
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Accommodation Building",
+   "reqd": 1
+  },
+  {
+   "fieldname": "idle_resident_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reason_category",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Reason Category",
+   "options": "New Hire\nReturned from Leave\nLegal Case\nHR Case\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "responsible_department",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Responsible Department",
+   "options": "HR\nOperations\nLegal",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "reported_on",
+   "fieldtype": "Date",
+   "label": "Reported On",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "__user",
+   "fieldname": "reported_by",
+   "fieldtype": "Link",
+   "label": "Reported By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "idle_resident_sec_tracking",
+   "fieldtype": "Section Break",
+   "label": "Tracking"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nAcknowledged\nResolved"
+  },
+  {
+   "description": "Number of days the resident has been idle. Accrued by the v0.8.6 aging job; not set manually.",
+   "fieldname": "days_idle",
+   "fieldtype": "Int",
+   "label": "Days Idle",
+   "read_only": 1
+  },
+  {
+   "description": "Estimate derived from the Accommodation Ledger memo only (not salary). Populated by the v0.8.6 aging job.",
+   "fieldname": "estimated_accommodation_cost_bleed_sar",
+   "fieldtype": "Currency",
+   "label": "Estimated Accommodation Cost Bleed (SAR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "idle_resident_tracking_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "acknowledged_by",
+   "fieldtype": "Link",
+   "label": "Acknowledged By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "acknowledged_on",
+   "fieldtype": "Date",
+   "label": "Acknowledged On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "idle_resident_sec_resolution",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
+  },
+  {
+   "depends_on": "eval:doc.status==\"Resolved\"",
+   "fieldname": "resolution_category",
+   "fieldtype": "Select",
+   "label": "Resolution Category",
+   "options": "Deployed\nChecked Out\nTransferred\nCase Closed\nOther"
+  },
+  {
+   "depends_on": "eval:doc.status==\"Resolved\"",
+   "fieldname": "resolution_notes",
+   "fieldtype": "Small Text",
+   "label": "Resolution Notes"
+  },
+  {
+   "fieldname": "idle_resident_resolution_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "resolved_by",
+   "fieldtype": "Link",
+   "label": "Resolved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "resolved_on",
+   "fieldtype": "Date",
+   "label": "Resolved On",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 0,
+ "links": [],
+ "modified": "2026-05-25 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Idle Resident Report",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

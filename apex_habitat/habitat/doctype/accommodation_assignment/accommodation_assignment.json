@@ -15,6 +15,8 @@
   "accommodation_assignment_overview_col",
   "check_in_date",
   "assignment_type",
+  "stay_type",
+  "expected_checkout_date",
   "previous_building",
   "naming_series",
   "cost_center",
@@ -108,6 +110,24 @@
    "label": "Assignment Type",
    "options": "New Assignment\nTransfer\nReturn from Leave",
    "reqd": 1
+  },
+  {
+   "default": "Permanent",
+   "fieldname": "stay_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Stay Type",
+   "options": "Permanent\nTemporary",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.stay_type=='Temporary'",
+   "description": "Planned departure date for a temporary stay. The supervisor is alerted as it approaches and if the worker is still checked in past it.",
+   "fieldname": "expected_checkout_date",
+   "fieldtype": "Date",
+   "label": "Expected Check-out Date",
+   "mandatory_depends_on": "eval:doc.stay_type=='Temporary'"
   },
   {
    "depends_on": "eval:doc.assignment_type=='Transfer'",

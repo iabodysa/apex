@@ -73,6 +73,13 @@ def validate(doc, method=None):
             )
         )
 
+    # Temporary stay: expected check-out must not precede check-in
+    if doc.stay_type == "Temporary":
+        if not doc.expected_checkout_date:
+            frappe.throw(_("Expected check-out date is required for temporary stays."))
+        if doc.check_in_date and doc.expected_checkout_date < doc.check_in_date:
+            frappe.throw(_("Expected check-out date cannot be earlier than the check-in date."))
+
     # Reject a second active submitted assignment for the same employee
     active_asg = frappe.db.get_value(
         "Accommodation Assignment",

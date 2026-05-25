@@ -346,6 +346,63 @@ def lease_expiry_watchlist() -> None:
         start += batch_size
 
 
+def temporary_stay_checkout_watchlist() -> None:
+    """Flag temporary stays whose expected check-out date has arrived or passed
+    while the worker is still checked in.
+
+    Active stay = submitted Accommodation Assignment with no check_out_date. For
+    each temporary one, compare today to expected_checkout_date; post a timeline
+    comment (gated by Enable Operational Notifications) on overdue stays, and on
+    those due within the Temporary Stay Lead Days. Mirrors lease_expiry_watchlist:
+    paginated 500/batch, per-row error isolation. Sets no state field.
+    """
+    from frappe.utils import date_diff, today
+
+    today_str = today()
+    logger = frappe.logger()
+    start = 0
+    batch_size = 500
+    while True:
+        stays = frappe.get_all(
+            "Accommodation Assignment",
+            filters={
+                "stay_type": "Temporary",
+                "docstatus": 1,
+                "check_out_date": ["is", "not set"],
+                "expected_checkout_date": ["is", "set"],
+            },
+            fields=["name", "employee", "employee_name", "expected_checkout_date"],
+            limit_start=start,
+            limit_page_length=batch_size,
+        )
+        if not stays:
+            break
+
+        for s in stays:
+            try:
+                lead = frappe.db.get_single_value("Habitat Settings", "temporary_stay_days_before") or 2
+                days = date_diff(s.expected_checkout_date, today_str)
+                worker = s.employee_name or s.employee
+                if days < 0:
+                    msg = (f"temporary_stay_checkout_watchlist: {worker} is overdue — expected check-out was "
+                           f"{s.expected_checkout_date} ({abs(days)} days ago) and the worker is still checked in.")
+                    logger.warning(msg)
+                    _notify_operational("Accommodation Assignment", s.name, msg)
+                elif 0 <= days <= lead:
+                    msg = (f"temporary_stay_checkout_watchlist: {worker}'s temporary stay ends on "
+                           f"{s.expected_checkout_date} (in {days} days). Please arrange check-out.")
+                    logger.warning(msg)
+                    _notify_operational("Accommodation Assignment", s.name, msg)
+            except Exception:
+                frappe.db.rollback()
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Temporary stay watchlist failed for {s.name}"[:140],
+                )
+
+        start += batch_size
+
+
 def weekly_occupancy_sync() -> None:
     """Recalculate occupancy counters on all Accommodation Rooms and Buildings.
 
