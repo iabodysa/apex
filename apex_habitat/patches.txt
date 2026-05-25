@@ -17,3 +17,4 @@ apex_habitat.patches.v0_8.fix_safety_catalog_onboarding_action
 apex_habitat.patches.v0_8.merge_daily_tasks_into_safety
 apex_habitat.patches.v0_8.merge_client_audit_into_safety
 apex_habitat.patches.v0_8.seed_operational_notifications
+apex_habitat.patches.v0_8.seed_kanban_boards

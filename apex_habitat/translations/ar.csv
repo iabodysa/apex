@@ -1376,3 +1376,5 @@ rooms,غرف
 {0} material(s) loaded from template {1},{0} مادة تم تحميلها من القالب {1}
 {0} payment rows generated.,تم توليد {0} صف دفع.
 ← Back,→ رجوع
+Resident Requests,طلبات السكن
+Maintenance Requests,طلبات الصيانة
