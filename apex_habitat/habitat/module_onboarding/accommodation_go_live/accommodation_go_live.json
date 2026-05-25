@@ -1,0 +1,23 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Accommodation Go-Live",
+ "title": "Accommodation Go-Live",
+ "module": "Habitat",
+ "subtitle": "Open the front desk and place your first resident.",
+ "success_message": "Accommodation is live. Use the Front Desk for daily check-in/out.",
+ "is_complete": 0,
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Open the Front Desk"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Record an Accommodation Assignment"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Review the Active Resident Register"
+  }
+ ]
+}

@@ -1,0 +1,23 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Safety Readiness",
+ "title": "Safety Readiness",
+ "module": "Habitat",
+ "subtitle": "Confirm your safety catalog and log your first inspection.",
+ "success_message": "Safety is set up. Scheduled tasks and inspections are active.",
+ "is_complete": 0,
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Review the Safety Task Catalog"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Record a Safety Inspection"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Open the Safety Map"
+  }
+ ]
+}

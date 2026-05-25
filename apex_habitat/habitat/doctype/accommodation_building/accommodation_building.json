@@ -513,8 +513,134 @@
    "options": "Recording\nNot Recording\nOffline\nNot Installed"
   }
  ],
- "links": [],
- "modified": "2026-05-25 01:05:27.682446",
+ "links": [
+  {
+   "group": "Spatial",
+   "link_doctype": "Accommodation Room",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Spatial",
+   "link_doctype": "Accommodation Bed",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Residents",
+   "link_doctype": "Accommodation Assignment",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Residents",
+   "link_doctype": "Accommodation Resident Request",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Residents",
+   "link_doctype": "Idle Resident Report",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Compliance",
+   "link_doctype": "Building License",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Compliance",
+   "link_doctype": "Safety Inspection Report",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Compliance",
+   "link_doctype": "Safety Task Execution",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Work Order",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Inspection Report",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Cleaning Log",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Custody & Assets",
+   "link_doctype": "Facility Asset",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Custody & Assets",
+   "link_doctype": "Facility Asset Custody Assignment",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Custody & Assets",
+   "link_doctype": "Custody Issue",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Custody & Assets",
+   "link_doctype": "Custody Return",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Custody & Assets",
+   "link_doctype": "Custody Damage Assessment",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Costs & Utilities",
+   "link_doctype": "Accommodation Lease",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Costs & Utilities",
+   "link_doctype": "Utility Account",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Costs & Utilities",
+   "link_doctype": "Utility Bill Entry",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Scheduling",
+   "link_doctype": "Scheduled Task Template",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Scheduling",
+   "link_doctype": "Scheduled Task Instance",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Subcontractor Service Order",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Habitat Operations Alert",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Accommodation QR Location",
+   "link_fieldname": "building"
+  }
+ ],
+ "modified": "2026-06-06 09:30:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Building",
