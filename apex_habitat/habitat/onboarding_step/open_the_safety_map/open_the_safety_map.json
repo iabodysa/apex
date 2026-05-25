@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Open the Safety Map",
+ "title": "Open the Safety Map",
+ "action": "Go to Page",
+ "path": "safety-map",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "View the interactive safety map; rooms with open maintenance pulse.",
+ "action_label": "Open Safety Map"
+}

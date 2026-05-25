@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v0.9.1 ---------------------------------------------------------------
+    {
+        "title": "Apex Habitat v0.9.1 — Onboarding restored + form Connections",
+        "app_name": "apex_habitat",
+        "link": "/app/setup",
+        "creation": "2026-06-06 09:30:00",
+    },
+    {
+        "title": "v0.9.1: Guided onboarding banners on Setup, Accommodation, and Safety workspaces",
+        "app_name": "apex_habitat",
+        "link": "/app/setup",
+        "creation": "2026-06-06 09:31:00",
+    },
+    {
+        "title": "v0.9.1: Accommodation Building (and Site/Room) now show linked Rooms, Beds, Assignments and more in the Connections tab",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-building",
+        "creation": "2026-06-06 09:32:00",
+    },
     # v0.9.0 ---------------------------------------------------------------
     {
         "title": "Apex Habitat v0.9.0 — Visual & Interactive UX Leap (Transfer Board, Safety Map, Custody Kiosk)",

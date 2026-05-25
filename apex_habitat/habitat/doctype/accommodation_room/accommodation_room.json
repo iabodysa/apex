@@ -127,8 +127,24 @@
    "label": "Inventory Notes"
   }
  ],
- "links": [],
- "modified": "2026-05-25 01:05:27.957245",
+ "links": [
+  {
+   "group": "Spatial",
+   "link_doctype": "Accommodation Bed",
+   "link_fieldname": "room"
+  },
+  {
+   "group": "Residents",
+   "link_doctype": "Accommodation Assignment",
+   "link_fieldname": "room"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "room"
+  }
+ ],
+ "modified": "2026-06-06 09:30:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Room",

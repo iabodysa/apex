@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Review the Active Resident Register",
+ "title": "Review the Active Resident Register",
+ "action": "View Report",
+ "reference_report": "Active Resident Register",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "See who is currently housed across your buildings.",
+ "action_label": "View Active Resident Register"
+}

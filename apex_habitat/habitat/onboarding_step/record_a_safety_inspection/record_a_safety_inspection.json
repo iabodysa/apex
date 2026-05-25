@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Record a Safety Inspection",
+ "title": "Record a Safety Inspection",
+ "action": "Create Entry",
+ "reference_document": "Safety Inspection Report",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Log your first building/floor safety inspection.",
+ "action_label": "Create Safety Inspection Report"
+}
