@@ -209,6 +209,8 @@ fixtures = [
 ]
 
 after_install = "apex_habitat.setup.after_install"
+# Dashboards seed after migrate (when their charts/number cards already exist).
+after_migrate = "apex_habitat.habitat.dashboard_seed.seed_all_dashboards"
 
 # Frappe What's New feed — appears in desk notification area, not as a popup
 get_changelog_feed = "apex_habitat.habitat.utils.changelog.get_changelog_feed"
