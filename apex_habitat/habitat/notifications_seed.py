@@ -172,7 +172,10 @@ def seed_operational_notifications():
             "module": "Habitat",
         })
         for role in cfg.get("roles", []):
-            doc.append("recipients", {"receiver_by_role": role})
+            # Skip roles that don't exist on this site (e.g. HR Manager when HRMS
+            # roles aren't present) so the seed never fails on recipient link validation.
+            if frappe.db.exists("Role", role):
+                doc.append("recipients", {"receiver_by_role": role})
         for fieldname in cfg.get("recipient_fields", []):
             doc.append("recipients", {"receiver_by_document_field": fieldname})
         doc.insert(ignore_permissions=True)  # audit-ok

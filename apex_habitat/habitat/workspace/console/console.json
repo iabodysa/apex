@@ -60,9 +60,17 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Internal Auditor Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Internal Auditor Dashboard",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Logs",
-   "idx": 7
+   "idx": 8
   },
   {
    "doctype": "Workspace Link",
@@ -70,7 +78,7 @@
    "label": "Error Log",
    "link_type": "DocType",
    "link_to": "Error Log",
-   "idx": 8
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -78,13 +86,13 @@
    "label": "Scheduled Job Log",
    "link_type": "DocType",
    "link_to": "Scheduled Job Log",
-   "idx": 9
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Settings",
-   "idx": 10
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -92,10 +100,10 @@
    "label": "Habitat Settings",
    "link_type": "DocType",
    "link_to": "Habitat Settings",
-   "idx": 11
+   "idx": 12
   }
  ],
- "modified": "2026-06-04 09:00:00.000000",
+ "modified": "2026-06-05 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Console",
