@@ -1397,3 +1397,9 @@ Holder,الجهة الحائزة
 Balance Qty,الكمية المتبقية
 As On Date,حتى تاريخ
 Show Zero Balances,عرض الأرصدة الصفرية
+Room Readiness,جاهزية الغرفة
+A maintenance request has been assigned to you,تم إسناد طلب صيانة إليك
+A new maintenance request awaits triage,يوجد طلب صيانة جديد بانتظار الفرز
+This resident request is waiting for supporting evidence,هذا الطلب السكني بانتظار إرفاق إثبات
+A new resident request has been received and awaits triage,تم استلام طلب سكني جديد بانتظار الفرز
+A custody damage assessment has been submitted and may create a salary deduction,تم اعتماد تقييم تلف عهدة وقد ينشأ عنه خصم من الراتب

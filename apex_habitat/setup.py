@@ -4,6 +4,8 @@ from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_mate
 from apex_habitat.habitat.doctype.maintenance_material.maintenance_material_catalog import seed_catalog
 
 from apex_habitat.habitat.notifications_seed import seed_operational_notifications
+from apex_habitat.habitat.kanban_seed import seed_kanban_boards
+from apex_habitat.habitat.assignment_rules_seed import seed_assignment_rules
 
 
 def after_install():
@@ -16,6 +18,8 @@ def after_install():
     seed_catalog()
     seed_templates()
     seed_operational_notifications()
+    seed_kanban_boards()
+    seed_assignment_rules()
     # Force translation cache reload so Arabic strings appear on first login
     frappe.clear_cache()
 

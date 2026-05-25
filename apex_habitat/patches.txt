@@ -18,3 +18,8 @@ apex_habitat.patches.v0_8.merge_daily_tasks_into_safety
 apex_habitat.patches.v0_8.merge_client_audit_into_safety
 apex_habitat.patches.v0_8.seed_operational_notifications
 apex_habitat.patches.v0_8.seed_kanban_boards
+
+# v0.8.3 — native paradigms (Tier 1)
+apex_habitat.patches.v0_8.seed_event_notifications
+apex_habitat.patches.v0_8.seed_room_readiness_kanban
+apex_habitat.patches.v0_8.seed_assignment_rules
