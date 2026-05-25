@@ -30,7 +30,8 @@
   "employee",
   "bed",
   "accommodation_checkout_system_col",
-  "amended_from"
+  "amended_from",
+  "room_condition_snapshot"
  ],
  "fields": [
   {
@@ -194,6 +195,13 @@
    "options": "Accommodation Checkout",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "room_condition_snapshot",
+   "fieldtype": "Attach Image",
+   "label": "Room Condition Snapshot",
+   "allow_on_submit": 1,
+   "description": "Optional photo of the bed/room condition at checkout (handover evidence)."
   }
  ],
  "is_submittable": 1,

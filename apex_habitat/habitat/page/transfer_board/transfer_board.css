@@ -1,0 +1,200 @@
+/* Transfer Board — split-screen drag-and-drop resident transfer (v0.9.0).
+ * Reuses the Front Desk bed-card visual language (color + text badge so color
+ * is never the only status signal) inside a two-column split layout, with
+ * drag/drop and tap-select affordances.
+ */
+
+.tb-board {
+	padding: 8px 4px 32px;
+}
+
+.tb-help {
+	font-size: 13px;
+	margin-bottom: 12px;
+}
+
+.tb-split {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	align-items: flex-start;
+}
+
+.tb-pane {
+	flex: 1 1 360px;
+	min-width: 320px;
+	border: 1px solid var(--border-color, #d1d8dd);
+	border-radius: 8px;
+	padding: 12px;
+	background: var(--card-bg, #fff);
+}
+
+.tb-pane-label {
+	font-size: 13px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted, #74808b);
+	margin-bottom: 10px;
+}
+
+.tb-empty {
+	padding: 40px 12px;
+	text-align: center;
+	font-size: 14px;
+}
+
+.tb-summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 10px;
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--border-color, #d1d8dd);
+}
+
+.tb-summary-title {
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.tb-summary-counts {
+	color: var(--text-muted, #74808b);
+	font-size: 12px;
+}
+
+.tb-floor {
+	margin-bottom: 18px;
+}
+
+.tb-floor-header {
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted, #74808b);
+	margin-bottom: 8px;
+}
+
+.tb-rooms {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.tb-room {
+	border: 1px solid var(--border-color, #d1d8dd);
+	border-radius: 8px;
+	padding: 10px;
+}
+
+.tb-room-header {
+	font-weight: 600;
+	font-size: 13px;
+	margin-bottom: 8px;
+}
+
+.tb-beds {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+	gap: 8px;
+}
+
+/* Bed card — large touch target. */
+.tb-bed {
+	border-radius: 8px;
+	padding: 10px 8px;
+	min-height: 78px;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	cursor: pointer;
+	border: 2px solid transparent;
+	user-select: none;
+	transition: transform 0.05s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+.tb-bed:focus {
+	outline: 3px solid var(--primary, #2490ef);
+	outline-offset: 2px;
+}
+
+.tb-bed:active {
+	transform: scale(0.98);
+}
+
+.tb-bed-code {
+	font-weight: 700;
+	font-size: 14px;
+}
+
+.tb-bed-badge {
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.tb-bed-occupant {
+	font-size: 11px;
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Status colors — paired with text badges. */
+.tb-bed--green {
+	background: #e6f4ea;
+	border-color: #34a853;
+	color: #1e7e34;
+}
+
+.tb-bed--red {
+	background: #fde8e8;
+	border-color: #d93025;
+	color: #b71c1c;
+}
+
+.tb-bed--amber {
+	background: #fff6e0;
+	border-color: #f5a623;
+	color: #a96a00;
+	cursor: not-allowed;
+}
+
+.tb-bed--grey {
+	background: #f0f1f3;
+	border-color: #c2c8ce;
+	color: #74808b;
+	cursor: not-allowed;
+}
+
+/* Drag-and-drop affordances. */
+.tb-bed--draggable {
+	cursor: grab;
+}
+
+.tb-bed--dragging {
+	opacity: 0.5;
+}
+
+.tb-bed--dropover {
+	box-shadow: 0 0 0 3px var(--primary, #2490ef);
+	transform: scale(1.02);
+}
+
+/* Tap-fallback source selection. */
+.tb-bed--selected {
+	box-shadow: 0 0 0 3px var(--primary, #2490ef);
+}
+
+@media (max-width: 768px) {
+	.tb-pane {
+		flex-basis: 100%;
+		min-width: 100%;
+	}
+	.tb-bed {
+		min-height: 92px;
+	}
+}

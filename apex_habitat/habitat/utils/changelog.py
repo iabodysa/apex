@@ -7,6 +7,37 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v0.9.0 ---------------------------------------------------------------
+    {
+        "title": "Apex Habitat v0.9.0 — Visual & Interactive UX Leap (Transfer Board, Safety Map, Custody Kiosk)",
+        "app_name": "apex_habitat",
+        "link": "/app/transfer-board",
+        "creation": "2026-06-04 09:00:00",
+    },
+    {
+        "title": "v0.9.0: Transfer Board — drag an occupied bed onto an empty bed to move a resident between buildings",
+        "app_name": "apex_habitat",
+        "link": "/app/transfer-board",
+        "creation": "2026-06-04 09:01:00",
+    },
+    {
+        "title": "v0.9.0: Interactive Safety Map — rooms with open maintenance pulse; click to log a Safety Inspection",
+        "app_name": "apex_habitat",
+        "link": "/app/safety-map",
+        "creation": "2026-06-04 09:02:00",
+    },
+    {
+        "title": "v0.9.0: Custody Kiosk — POS-style item issuance with large tappable article images",
+        "app_name": "apex_habitat",
+        "link": "/app/custody-kiosk",
+        "creation": "2026-06-04 09:03:00",
+    },
+    {
+        "title": "v0.9.0: Front Desk now shows the worker's photo for identity check and captures a room-condition snapshot at handover",
+        "app_name": "apex_habitat",
+        "link": "/app/front-desk",
+        "creation": "2026-06-04 09:04:00",
+    },
     # v0.8.6 ---------------------------------------------------------------
     {
         "title": "Apex Habitat v0.8.6 — Visual Front Desk Check-In & Idle Resident Accountability",

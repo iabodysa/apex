@@ -71,6 +71,38 @@
    "link_type": "DocType",
    "link_to": "Maintenance Request",
    "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Transfer Board",
+   "link_type": "Page",
+   "link_to": "transfer-board",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Map",
+   "link_type": "Page",
+   "link_to": "safety-map",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Custody Kiosk",
+   "link_type": "Page",
+   "link_to": "custody-kiosk",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Habitat Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Habitat Dashboard",
+   "idx": 8
   }
  ],
  "charts": [],
@@ -101,5 +133,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-03 09:00:00.000000"
+ "modified": "2026-06-04 09:00:00.000000"
 }

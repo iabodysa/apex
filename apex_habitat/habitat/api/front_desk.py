@@ -223,9 +223,19 @@ def get_building_grid(building: str) -> dict:
     }
 
 
+@frappe.whitelist()
+def get_employee_card(employee):
+    """Read-only HR identity card for the check-in dialog: name + profile photo.
+    Lets the supervisor visually verify the worker before assigning a bed."""
+    frappe.has_permission("Employee", "read", throw=True)
+    vals = frappe.db.get_value("Employee", employee, ["employee_name", "image"], as_dict=True) or {}
+    return {"employee_name": vals.get("employee_name"), "image": vals.get("image")}
+
+
 @frappe.whitelist(methods=["POST"])
 def quick_check_in(bed, employee, project, check_in_date,
-                   cost_center=None, assignment_type="New Assignment"):
+                   cost_center=None, assignment_type="New Assignment",
+                   room_condition_snapshot=None):
     """Create and submit an Accommodation Assignment from the Front Desk board.
 
     Room and building are derived SERVER-SIDE from the bed (never trusted from
@@ -269,6 +279,7 @@ def quick_check_in(bed, employee, project, check_in_date,
             "check_in_date": check_in_date,
             "cost_center": cost_center,
             "assignment_type": assignment_type or "New Assignment",
+            "room_condition_snapshot": room_condition_snapshot,
         }
     )
     doc.insert(ignore_permissions=False)
@@ -277,7 +288,7 @@ def quick_check_in(bed, employee, project, check_in_date,
 
 
 @frappe.whitelist(methods=["POST"])
-def quick_check_out(bed, checkout_date=None, checkout_reason=None):
+def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_condition_snapshot=None):
     """Build and submit an Accommodation Checkout for the active assignment on a bed.
 
     Resolves the single active assignment for the bed server-side
@@ -333,6 +344,7 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None):
             "assignment": assignment,
             "checkout_date": checkout_date or today(),
             "checkout_reason": checkout_reason,
+            "room_condition_snapshot": room_condition_snapshot,
         }
     )
     doc.insert(ignore_permissions=False)

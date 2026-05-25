@@ -35,9 +35,17 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Map",
+   "link_type": "Page",
+   "link_to": "safety-map",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Daily Work",
-   "idx": 4
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -45,7 +53,7 @@
    "label": "Scheduled Task Instance",
    "link_type": "DocType",
    "link_to": "Scheduled Task Instance",
-   "idx": 5
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
@@ -53,13 +61,13 @@
    "label": "Cleaning Log",
    "link_type": "DocType",
    "link_to": "Cleaning Log",
-   "idx": 6
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Compliance",
-   "idx": 7
+   "idx": 8
   },
   {
    "doctype": "Workspace Link",
@@ -67,7 +75,7 @@
    "label": "Building License",
    "link_type": "DocType",
    "link_to": "Building License",
-   "idx": 8
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -75,13 +83,13 @@
    "label": "Client Audit Remediation Plan",
    "link_type": "DocType",
    "link_to": "Client Audit Remediation Plan",
-   "idx": 9
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Views",
-   "idx": 10
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -89,7 +97,8 @@
    "label": "Safety Open Findings",
    "link_type": "Report",
    "link_to": "Safety Open Findings",
-   "idx": 11
+   "idx": 12,
+   "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
@@ -97,7 +106,8 @@
    "label": "Scheduled Task Compliance",
    "link_type": "Report",
    "link_to": "Scheduled Task Compliance",
-   "idx": 12
+   "idx": 13,
+   "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
@@ -105,10 +115,11 @@
    "label": "Audit Remediation Status",
    "link_type": "Report",
    "link_to": "Audit Remediation Status",
-   "idx": 13
+   "idx": 14,
+   "is_query_report": 1
   }
  ],
- "modified": "2026-06-03 09:00:00.000000",
+ "modified": "2026-06-04 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety",

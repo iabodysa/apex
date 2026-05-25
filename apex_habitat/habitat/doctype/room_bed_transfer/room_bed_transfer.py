@@ -37,6 +37,16 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
+    # Concurrency guard: lock the target bed row (SELECT ... FOR UPDATE) and
+    # re-check availability inside the transaction so two simultaneous transfers
+    # (e.g. rapid drag-drops on the Transfer Board) cannot both claim it. Mirrors
+    # the Accommodation Assignment bed lock.
+    locked_status = frappe.db.get_value("Accommodation Bed", doc.to_bed, "status", for_update=True)
+    if locked_status == "Out of Service":
+        frappe.throw(_("Target Bed {0} is Out of Service.").format(doc.to_bed))
+    if locked_status == "Occupied":
+        frappe.throw(_("Target bed is already occupied."))
+
     frappe.db.set_value("Accommodation Bed", doc.from_bed, "status", "Available")
     frappe.db.set_value("Accommodation Bed", doc.to_bed, "status", "Occupied")
     to_building = frappe.db.get_value("Accommodation Room", doc.to_room, "building")

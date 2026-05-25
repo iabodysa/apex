@@ -1458,3 +1458,43 @@ Bed {0} is not linked to a room and building.,السرير {0} غير مرتبط
 No active assignment found for bed {0}.,لا يوجد تخصيص نشط للسرير {0}.
 Floor {0},الطابق {0}
 Unassigned Floor,طابق غير محدد
+Transfer Board,لوحة النقل
+Safety Map,خريطة السلامة
+Custody Kiosk,كشك العهد
+Building A,المبنى أ
+Building B,المبنى ب
+Drag an occupied bed onto an empty bed to transfer the resident.,اسحب سريراً مشغولاً إلى سرير فارغ لنقل المقيم.
+Now tap an available bed to transfer the resident.,الآن انقر على سرير متاح لنقل المقيم.
+Drop target must be an available bed.,يجب أن يكون الهدف سريراً متاحاً.
+Confirm Transfer,تأكيد النقل
+Move {0} from {1} to {2}?,نقل {0} من {1} إلى {2}؟
+Transferred: {0},تم النقل: {0}
+Transferring…,جارٍ النقل…
+Source bed has no active resident to transfer.,السرير المصدر لا يحتوي على مقيم نشط للنقل.
+"{0} rooms — {1} red, {2} amber",{0} غرفة — {1} حمراء، {2} كهرمانية
+No open safety or maintenance signals for this building.,لا توجد إشارات سلامة أو صيانة مفتوحة لهذا المبنى.
+Recent damage assessments: {0},تقييمات تلف حديثة: {0}
+Log Inspection,تسجيل تفتيش
+Log Inspection — {0},تسجيل تفتيش — {0}
+Logging inspection…,جارٍ تسجيل التفتيش…
+Inspection logged: {0},تم تسجيل التفتيش: {0}
+Finding Description,وصف الملاحظة
+Refresh Map,تحديث الخريطة
+Loading map…,جارٍ تحميل الخريطة…
+Select a building to load the map.,اختر مبنى لتحميل الخريطة.
+Cart,السلة
+Cart is empty.,السلة فارغة.
+"Select an employee, then tap items to issue.",اختر موظفاً ثم انقر على الأصناف لصرفها.
+Issuing…,جارٍ الصرف…
+Issued to {0}: {1},تم الصرف إلى {0}: {1}
+In stock: {0},المتوفر: {0}
+No articles found.,لا توجد أصناف.
+Search articles…,ابحث عن صنف…
+Loading catalog…,جارٍ تحميل الكتالوج…
+Select a building to load the catalog.,اختر مبنى لتحميل الكتالوج.
+Select an employee before issuing.,اختر موظفاً قبل الصرف.
+Select a building before issuing.,اختر مبنى قبل الصرف.
+Add at least one item to the cart before issuing.,أضف صنفاً واحداً على الأقل قبل الصرف.
+Cross-building moves are not supported here. Use Check-out and a new Check-in.,النقل بين المباني غير مدعوم هنا. استخدم تسجيل الخروج ثم دخولاً جديداً.
+Room Condition Snapshot,صورة حالة الغرفة
+No photo on file,لا توجد صورة
