@@ -7,6 +7,37 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v0.8.3 ---------------------------------------------------------------
+    {
+        "title": "Apex Habitat v0.8.3 — Calendars, Room Readiness Kanban, Auto-Assignment & Event Notifications",
+        "app_name": "apex_habitat",
+        "link": "/app/setup",
+        "creation": "2026-05-25 15:00:00",
+    },
+    {
+        "title": "v0.8.3: Calendar views for Scheduled Tasks, Building Licences, Service Orders, and Leases",
+        "app_name": "apex_habitat",
+        "link": "/app/scheduled-task-instance/view/calendar",
+        "creation": "2026-05-25 15:01:00",
+    },
+    {
+        "title": "v0.8.3: Room Readiness Kanban board for housekeeping turnover",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-room/view/kanban",
+        "creation": "2026-05-25 15:02:00",
+    },
+    {
+        "title": "v0.8.3: Auto-assignment rules for Maintenance and Resident Requests (disabled by default — add your team and enable)",
+        "app_name": "apex_habitat",
+        "link": "/app/assignment-rule",
+        "creation": "2026-05-25 15:03:00",
+    },
+    {
+        "title": "v0.8.3: New event notifications — request assigned, new request, waiting evidence, damage assessment (disabled by default)",
+        "app_name": "apex_habitat",
+        "link": "/app/notification",
+        "creation": "2026-05-25 15:04:00",
+    },
     # v0.8.2 ---------------------------------------------------------------
     {
         "title": "Apex Habitat v0.8.2 — Decentralized Internal Store Engine & Kanban Boards",

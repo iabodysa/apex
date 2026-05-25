@@ -43,6 +43,20 @@ _BOARDS = [
             ("Reopened", "Red"),
         ],
     },
+    {
+        # Housekeeping turnover board — uses readiness_status, NOT the occupancy
+        # `status` (which is occupancy-derived and not a manual workflow).
+        "name": "Room Readiness",
+        "reference_doctype": "Accommodation Room",
+        "field_name": "readiness_status",
+        "columns": [
+            ("Unknown", "Gray"),
+            ("Needs Cleaning", "Yellow"),
+            ("Needs Repair", "Orange"),
+            ("Out of Service", "Red"),
+            ("Ready", "Green"),
+        ],
+    },
 ]
 
 

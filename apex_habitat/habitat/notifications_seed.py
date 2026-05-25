@@ -1,13 +1,22 @@
-"""Seed native Frappe Notification records for operational reminders.
+"""Seed native Frappe Notification records for operational reminders and events.
 
-These replace the custom Habitat Operations Alert for outbound email: date-based
-Notifications fire declaratively before/on license and lease expiry. Idempotent —
-created only if absent, so admins can freely edit or disable them afterwards.
+These replace the custom Habitat Operations Alert for outbound email/alerts:
+date-based Notifications fire before/on license and lease expiry; event-based
+Notifications fire on new/assigned/submitted documents. Idempotent — created
+only if absent, so admins can freely edit or disable them afterwards. All are
+created disabled so they only send once an admin enables them and email is
+configured.
+
+New (v0.8.3+) notifications keep their user-facing text English-first with
+``{{ _("...") }}`` so it is translated through ``translations/ar.csv`` rather
+than inlined; the four original expiry notifications keep their pre-existing
+inline bilingual bodies (acknowledged technical debt).
 """
 
 import frappe
 
 _NOTIFICATIONS = [
+    # --- Date-based expiry reminders (original, inline-bilingual) -------------
     {
         "name": "Habitat - Building License Expiring Soon",
         "subject": "Building License Expiring Soon: {{ doc.name }}",
@@ -67,6 +76,56 @@ _NOTIFICATIONS = [
         ),
         "roles": ["Accommodation Manager", "System Manager"],
     },
+    # --- Event-based operational notifications (v0.8.3, English + _()) --------
+    {
+        "name": "Habitat - Maintenance Request Assigned",
+        "subject": "Maintenance Request Assigned: {{ doc.name }}",
+        "document_type": "Maintenance Request",
+        "event": "Value Change",
+        "value_changed": "status",
+        "condition": "doc.status == 'Assigned' and doc.assigned_to",
+        "message": '{{ _("A maintenance request has been assigned to you") }}: {{ doc.name }}.',
+        "recipient_fields": ["assigned_to"],
+        "roles": [],
+    },
+    {
+        "name": "Habitat - New Maintenance Request",
+        "subject": "New Maintenance Request: {{ doc.name }}",
+        "document_type": "Maintenance Request",
+        "event": "New",
+        "condition": "",
+        "message": '{{ _("A new maintenance request awaits triage") }}: {{ doc.name }}.',
+        "roles": ["Accommodation Manager", "Resident Supervisor"],
+    },
+    {
+        "name": "Habitat - Resident Request Waiting Evidence",
+        "subject": "Resident Request Waiting for Evidence: {{ doc.name }}",
+        "document_type": "Accommodation Resident Request",
+        "event": "Value Change",
+        "value_changed": "status",
+        "condition": "doc.status == 'Waiting Evidence'",
+        "message": '{{ _("This resident request is waiting for supporting evidence") }}: {{ doc.name }}.',
+        "recipient_fields": ["assigned_to"],
+        "roles": ["Resident Supervisor"],
+    },
+    {
+        "name": "Habitat - New Resident Request",
+        "subject": "New Resident Request: {{ doc.name }}",
+        "document_type": "Accommodation Resident Request",
+        "event": "New",
+        "condition": "",
+        "message": '{{ _("A new resident request has been received and awaits triage") }}: {{ doc.name }}.',
+        "roles": ["Resident Supervisor", "Accommodation Manager"],
+    },
+    {
+        "name": "Habitat - Custody Damage Assessment Created",
+        "subject": "Custody Damage Assessment Submitted: {{ doc.name }}",
+        "document_type": "Custody Damage Assessment",
+        "event": "Submit",
+        "condition": "doc.docstatus == 1",
+        "message": '{{ _("A custody damage assessment has been submitted and may create a salary deduction") }}: {{ doc.name }}.',
+        "roles": ["Finance Manager", "Accommodation Manager"],
+    },
 ]
 
 
@@ -83,15 +142,18 @@ def seed_operational_notifications():
             "document_type": cfg["document_type"],
             "channel": "Email",
             "event": cfg["event"],
-            "date_changed": cfg["date_changed"],
-            "days_in_advance": cfg["days_in_advance"],
-            "condition": cfg["condition"],
+            "date_changed": cfg.get("date_changed"),
+            "days_in_advance": cfg.get("days_in_advance", 0),
+            "value_changed": cfg.get("value_changed"),
+            "condition": cfg.get("condition") or "",
             "message": cfg["message"],
             "enabled": 0,
             "is_standard": 0,
             "module": "Habitat",
         })
-        for role in cfg["roles"]:
+        for role in cfg.get("roles", []):
             doc.append("recipients", {"receiver_by_role": role})
+        for fieldname in cfg.get("recipient_fields", []):
+            doc.append("recipients", {"receiver_by_document_field": fieldname})
         doc.insert(ignore_permissions=True)  # audit-ok
     frappe.db.commit()
