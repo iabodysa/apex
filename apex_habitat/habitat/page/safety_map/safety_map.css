@@ -1,0 +1,208 @@
+/* Safety Map — interactive building floor plan (v0.9.0).
+ * Floor grid of room tiles + a per-floor common-zone tile. Rooms with open
+ * maintenance pulse red; amber for damage / lower-priority signals. Color is
+ * never the only status signal: each tile also carries a text badge.
+ */
+
+.sm-map {
+	padding: 8px 4px 32px;
+}
+
+.sm-empty {
+	padding: 48px 16px;
+	text-align: center;
+	font-size: 15px;
+}
+
+.sm-summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 12px;
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--border-color, #d1d8dd);
+}
+
+.sm-summary-title {
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.sm-summary-counts {
+	color: var(--text-muted, #74808b);
+	font-size: 13px;
+}
+
+.sm-damage-banner {
+	background: #fff6e0;
+	border: 1px solid #f5a623;
+	color: #a96a00;
+	border-radius: 6px;
+	padding: 8px 12px;
+	font-size: 13px;
+	font-weight: 500;
+	margin-bottom: 16px;
+}
+
+.sm-floor {
+	margin-bottom: 24px;
+}
+
+.sm-floor-header {
+	font-size: 14px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted, #74808b);
+	margin-bottom: 10px;
+}
+
+.sm-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	gap: 12px;
+}
+
+/* Room tile. */
+.sm-room {
+	border-radius: 8px;
+	padding: 14px 12px;
+	min-height: 86px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	justify-content: space-between;
+	cursor: pointer;
+	border: 2px solid transparent;
+	user-select: none;
+	transition: transform 0.05s ease-in-out;
+}
+
+.sm-room:focus {
+	outline: 3px solid var(--primary, #2490ef);
+	outline-offset: 2px;
+}
+
+.sm-room:active {
+	transform: scale(0.98);
+}
+
+.sm-room-number {
+	font-weight: 700;
+	font-size: 14px;
+}
+
+.sm-room-badge {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	font-weight: 600;
+}
+
+.sm-room-badge--ok {
+	opacity: 0.7;
+}
+
+/* Signal colors. */
+.sm-room--red {
+	background: #fde8e8;
+	border-color: #d93025;
+	color: #b71c1c;
+}
+
+.sm-room--amber {
+	background: #fff6e0;
+	border-color: #f5a623;
+	color: #a96a00;
+}
+
+.sm-room--green {
+	background: #e6f4ea;
+	border-color: #34a853;
+	color: #1e7e34;
+}
+
+/* Common-zone tile — distinct from bedrooms (building/floor safety layer). */
+.sm-zone {
+	border-radius: 8px;
+	padding: 14px 12px;
+	min-height: 86px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border: 2px dashed var(--text-muted, #74808b);
+	background: var(--control-bg, #f4f5f6);
+	color: var(--text-muted, #74808b);
+	user-select: none;
+	transition: transform 0.05s ease-in-out;
+}
+
+.sm-zone:focus {
+	outline: 3px solid var(--primary, #2490ef);
+	outline-offset: 2px;
+}
+
+.sm-zone:active {
+	transform: scale(0.98);
+}
+
+.sm-zone-icon {
+	font-size: 22px;
+	line-height: 1;
+}
+
+.sm-zone-label {
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+/* Pulse animation for active red / amber signals. */
+@keyframes sm-pulse-anim {
+	0% {
+		box-shadow: 0 0 0 0 rgba(217, 48, 37, 0.45);
+	}
+	70% {
+		box-shadow: 0 0 0 10px rgba(217, 48, 37, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(217, 48, 37, 0);
+	}
+}
+
+.sm-pulse {
+	animation: sm-pulse-anim 1.8s ease-out infinite;
+}
+
+.sm-room--amber.sm-pulse {
+	animation-name: sm-pulse-amber;
+}
+
+@keyframes sm-pulse-amber {
+	0% {
+		box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.45);
+	}
+	70% {
+		box-shadow: 0 0 0 10px rgba(245, 166, 35, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(245, 166, 35, 0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sm-pulse {
+		animation: none;
+	}
+}
+
+@media (max-width: 768px) {
+	.sm-grid {
+		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+	}
+}

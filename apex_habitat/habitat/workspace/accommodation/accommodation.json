@@ -58,9 +58,17 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Transfer Board",
+   "link_type": "Page",
+   "link_to": "transfer-board",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Lifecycle",
-   "idx": 3
+   "idx": 4
   },
   {
    "doctype": "Workspace Link",
@@ -68,7 +76,7 @@
    "label": "Accommodation Assignment",
    "link_type": "DocType",
    "link_to": "Accommodation Assignment",
-   "idx": 4
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -76,7 +84,7 @@
    "label": "Accommodation Checkout",
    "link_type": "DocType",
    "link_to": "Accommodation Checkout",
-   "idx": 5
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
@@ -84,13 +92,13 @@
    "label": "Room Bed Transfer",
    "link_type": "DocType",
    "link_to": "Room Bed Transfer",
-   "idx": 6
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Residents & Rooms",
-   "idx": 7
+   "idx": 8
   },
   {
    "doctype": "Workspace Link",
@@ -98,7 +106,7 @@
    "label": "Accommodation Room",
    "link_type": "DocType",
    "link_to": "Accommodation Room",
-   "idx": 8
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -106,7 +114,7 @@
    "label": "Idle Resident Report",
    "link_type": "DocType",
    "link_to": "Idle Resident Report",
-   "idx": 9
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
@@ -114,13 +122,14 @@
    "label": "Active Resident Register",
    "link_type": "Report",
    "link_to": "Active Resident Register",
-   "idx": 10
+   "idx": 11,
+   "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Views",
-   "idx": 11
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -128,7 +137,8 @@
    "label": "Accommodation Occupancy Summary",
    "link_type": "Report",
    "link_to": "Accommodation Occupancy Summary",
-   "idx": 12
+   "idx": 13,
+   "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
@@ -136,7 +146,8 @@
    "label": "Housing Supervisor Report",
    "link_type": "Report",
    "link_to": "Housing Supervisor Report",
-   "idx": 13
+   "idx": 14,
+   "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
@@ -144,7 +155,8 @@
    "label": "Checkout Pending Clearance",
    "link_type": "Report",
    "link_to": "Checkout Pending Clearance",
-   "idx": 14
+   "idx": 15,
+   "is_query_report": 1
   }
  ],
  "charts": [],
@@ -175,5 +187,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-03 09:00:00.000000"
+ "modified": "2026-06-04 09:00:00.000000"
 }

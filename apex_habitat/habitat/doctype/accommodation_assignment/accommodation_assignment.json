@@ -17,6 +17,7 @@
   "assignment_type",
   "stay_type",
   "expected_checkout_date",
+  "room_condition_snapshot",
   "previous_building",
   "naming_series",
   "cost_center",
@@ -234,6 +235,13 @@
    "fieldtype": "Link",
    "label": "Billed To Supplier",
    "options": "Supplier"
+  },
+  {
+   "fieldname": "room_condition_snapshot",
+   "fieldtype": "Attach Image",
+   "label": "Room Condition Snapshot",
+   "allow_on_submit": 1,
+   "description": "Optional photo of the bed/room condition at check-in (handover evidence)."
   }
  ],
  "is_submittable": 1,

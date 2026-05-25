@@ -114,7 +114,8 @@
    "label": "Maintenance Backlog",
    "link_type": "Report",
    "link_to": "Maintenance Backlog",
-   "idx": 10
+   "idx": 10,
+   "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
@@ -122,7 +123,8 @@
    "label": "Maintenance Aging",
    "link_type": "Report",
    "link_to": "Maintenance Aging",
-   "idx": 11
+   "idx": 11,
+   "is_query_report": 1
   }
  ],
  "charts": [],
@@ -153,5 +155,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-03 09:00:00.000000"
+ "modified": "2026-06-04 09:00:00.000000"
 }

@@ -101,6 +101,11 @@
    "fieldtype": "Small Text",
    "label": "Notes",
    "idx": 12
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Image"
   }
  ],
  "permissions": [

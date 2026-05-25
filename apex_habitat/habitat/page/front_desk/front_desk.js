@@ -184,7 +184,36 @@ class FrontDesk {
 					fieldtype: "HTML",
 					options: `<div class="text-muted" style="margin-bottom:8px">${frappe.utils.escape_html(context)}</div>`,
 				},
-				{ fieldname: "employee", label: __("Employee"), fieldtype: "Link", options: "Employee", reqd: 1 },
+				{
+					fieldname: "employee",
+					label: __("Employee"),
+					fieldtype: "Link",
+					options: "Employee",
+					reqd: 1,
+					onchange: function () {
+						const emp = this.get_value && this.get_value();
+						const photo = d.fields_dict.employee_photo;
+						if (!emp) {
+							photo.$wrapper.html("");
+							return;
+						}
+						// Security: show the worker's HR photo to verify identity before assigning.
+						frappe.call({
+							method: "apex_habitat.habitat.api.front_desk.get_employee_card",
+							args: { employee: emp },
+							callback: (r) => {
+								if (r.exc || !r.message) return;
+								const img = r.message.image
+									? `<img src="${frappe.utils.escape_html(r.message.image)}" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid var(--border-color)">`
+									: `<div class="text-muted">${__("No photo on file")}</div>`;
+								photo.$wrapper.html(
+									`<div style="margin:6px 0">${img}<div><b>${frappe.utils.escape_html(r.message.employee_name || emp)}</b></div></div>`
+								);
+							},
+						});
+					},
+				},
+				{ fieldname: "employee_photo", fieldtype: "HTML" },
 				{ fieldname: "project", label: __("Project"), fieldtype: "Link", options: "Project", reqd: 1 },
 				{
 					fieldname: "check_in_date",
@@ -201,6 +230,11 @@ class FrontDesk {
 					options: "New Assignment\nTransfer\nReturn from Leave",
 					default: "New Assignment",
 				},
+				{
+					fieldname: "room_condition_snapshot",
+					label: __("Room Condition Snapshot"),
+					fieldtype: "Attach Image",
+				},
 			],
 			primary_action_label: __("Check In"),
 			primary_action: (values) => {
@@ -213,6 +247,7 @@ class FrontDesk {
 						check_in_date: values.check_in_date,
 						cost_center: values.cost_center || null,
 						assignment_type: values.assignment_type || "New Assignment",
+						room_condition_snapshot: values.room_condition_snapshot || null,
 					},
 					freeze: true,
 					freeze_message: __("Checking in…"),
@@ -278,6 +313,11 @@ class FrontDesk {
 					reqd: 1,
 					options: "\nFinal Exit\nInternal Transfer\nProject Transfer\nAbsconding\nEnd of Contract",
 				},
+				{
+					fieldname: "room_condition_snapshot",
+					label: __("Room Condition Snapshot"),
+					fieldtype: "Attach Image",
+				},
 			],
 			primary_action_label: __("Check Out"),
 			primary_action: (values) => {
@@ -287,6 +327,7 @@ class FrontDesk {
 						bed: bed.bed,
 						checkout_date: values.checkout_date,
 						checkout_reason: values.checkout_reason,
+						room_condition_snapshot: values.room_condition_snapshot || null,
 					},
 					freeze: true,
 					freeze_message: __("Checking out…"),

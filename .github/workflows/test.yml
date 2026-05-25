@@ -110,3 +110,10 @@ jobs:
           bench --site test.localhost run-tests --module apex_habitat.tests.test_resident_request_todo
           bench --site test.localhost run-tests --module apex_habitat.tests.test_temporary_stay_and_idle
           bench --site test.localhost run-tests --module apex_habitat.tests.test_front_desk
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_v0_9_0_pages
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_financial_side_effects
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_housing_lifecycle
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_qa_probe_systems
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_qa_probe_transactions
+          bench --site test.localhost run-tests --module apex_habitat.tests.test_reports
+          bench --site test.localhost run-tests --module apex_habitat.habitat.doctype.accommodation_assignment.test_accommodation_assignment

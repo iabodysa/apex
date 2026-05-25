@@ -1,0 +1,27 @@
+{
+ "content": null,
+ "creation": "2026-05-25 06:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-05-25 06:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "custody-kiosk",
+ "owner": "Administrator",
+ "page_name": "custody-kiosk",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  }
+ ],
+ "standard": "Yes",
+ "system_page": 0,
+ "title": "Custody Kiosk"
+}

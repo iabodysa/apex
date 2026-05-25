@@ -106,7 +106,8 @@
    "label": "Lease Expiry Watchlist",
    "link_type": "Report",
    "link_to": "Lease Expiry Watchlist",
-   "idx": 9
+   "idx": 9,
+   "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
@@ -114,7 +115,8 @@
    "label": "Utility Variance Report",
    "link_type": "Report",
    "link_to": "Utility Variance Report",
-   "idx": 10
+   "idx": 10,
+   "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
@@ -122,7 +124,8 @@
    "label": "Accommodation Cost Distribution",
    "link_type": "Report",
    "link_to": "Accommodation Cost Distribution",
-   "idx": 11
+   "idx": 11,
+   "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
@@ -130,7 +133,8 @@
    "label": "Accommodation Ledger Summary",
    "link_type": "Report",
    "link_to": "Accommodation Ledger Summary",
-   "idx": 12
+   "idx": 12,
+   "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
@@ -169,5 +173,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-03 09:00:00.000000"
+ "modified": "2026-06-04 09:00:00.000000"
 }
