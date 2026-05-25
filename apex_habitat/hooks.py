@@ -34,6 +34,7 @@ doc_events = {
     "Accommodation Resident Request": {
         "before_insert": "apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request.before_insert",
         "validate": "apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request.validate",
+        "on_update": "apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request.on_update",
     },
     "Building License": {
         "before_save": "apex_habitat.habitat.doctype.building_license.building_license.before_save",

@@ -7,6 +7,37 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v0.8.4 ---------------------------------------------------------------
+    {
+        "title": "Apex Habitat v0.8.4 — Scheduled Report Emails, Email Templates, Follow-up Tasks & Navbar Links",
+        "app_name": "apex_habitat",
+        "link": "/app/setup",
+        "creation": "2026-05-25 18:00:00",
+    },
+    {
+        "title": "v0.8.4: Auto Email Reports for Supplier Cost Recovery, Occupancy Trend, Maintenance Backlog, Task Compliance (disabled by default)",
+        "app_name": "apex_habitat",
+        "link": "/app/auto-email-report",
+        "creation": "2026-05-25 18:01:00",
+    },
+    {
+        "title": "v0.8.4: Reusable Email Templates — license renewal, lease renewal, resident request acknowledgement",
+        "app_name": "apex_habitat",
+        "link": "/app/email-template",
+        "creation": "2026-05-25 18:02:00",
+    },
+    {
+        "title": "v0.8.4: Assigning a Resident Request now creates a follow-up ToDo for the assignee; closing the request closes the task",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-resident-request",
+        "creation": "2026-05-25 18:03:00",
+    },
+    {
+        "title": "v0.8.4: Navbar Help dropdown now links to the Command Center and Setup workspaces",
+        "app_name": "apex_habitat",
+        "link": "/app/operations-command-center",
+        "creation": "2026-05-25 18:04:00",
+    },
     # v0.8.3 ---------------------------------------------------------------
     {
         "title": "Apex Habitat v0.8.3 — Calendars, Room Readiness Kanban, Auto-Assignment & Event Notifications",

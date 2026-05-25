@@ -23,3 +23,8 @@ apex_habitat.patches.v0_8.seed_kanban_boards
 apex_habitat.patches.v0_8.seed_event_notifications
 apex_habitat.patches.v0_8.seed_room_readiness_kanban
 apex_habitat.patches.v0_8.seed_assignment_rules
+
+# v0.8.4 — automation & communication
+apex_habitat.patches.v0_8.seed_auto_email_reports
+apex_habitat.patches.v0_8.seed_email_templates
+apex_habitat.patches.v0_8.add_navbar_help_links

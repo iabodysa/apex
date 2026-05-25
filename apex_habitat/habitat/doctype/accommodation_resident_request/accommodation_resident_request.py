@@ -33,6 +33,55 @@ def validate(doc, method=None):
     _validate_status_transition(doc)
 
 
+def on_update(doc, method=None):
+    """Native ToDo follow-up: when a request is Assigned to a user, put it in that
+    user's desk queue; when it ends (Resolved/Rejected/Closed), close the open
+    ToDos. Idempotent — never creates a duplicate ToDo for the same assignee."""
+    _sync_assignment_todo(doc)
+
+
+def _sync_assignment_todo(doc):
+    """Create/close the follow-up ToDo directly (not via assign_to.add, which would
+    re-save this same document mid-on_update and raise a timestamp mismatch). The
+    parent's `_assign` is updated with update_modified=False so the desk badge still
+    shows without bumping this document's modified timestamp."""
+    if doc.status in ("Resolved", "Rejected", "Closed"):
+        open_todos = frappe.get_all(
+            "ToDo",
+            filters={"reference_type": doc.doctype, "reference_name": doc.name, "status": "Open"},
+            pluck="name",
+        )
+        for todo in open_todos:
+            frappe.db.set_value("ToDo", todo, "status", "Cancelled")
+        if open_todos:
+            frappe.db.set_value(doc.doctype, doc.name, "_assign", None, update_modified=False)
+        return
+
+    if doc.status != "Assigned" or not doc.assigned_to:
+        return
+
+    already = frappe.get_all(
+        "ToDo",
+        filters={"reference_type": doc.doctype, "reference_name": doc.name,
+                 "allocated_to": doc.assigned_to, "status": "Open"},
+        limit=1,
+    )
+    if already:
+        return
+    priority = doc.priority if doc.priority in ("Low", "Medium", "High") else "Medium"
+    frappe.get_doc({
+        "doctype": "ToDo",
+        "allocated_to": doc.assigned_to,
+        "reference_type": doc.doctype,
+        "reference_name": doc.name,
+        "description": _("Resident request assigned for follow-up: {0}").format(doc.name),
+        "priority": priority,
+        "assigned_by": frappe.session.user,
+    }).insert(ignore_permissions=True)  # audit-ok
+    frappe.db.set_value(doc.doctype, doc.name, "_assign",
+                        frappe.as_json([doc.assigned_to]), update_modified=False)
+
+
 def _validate_status_transition(doc):
     """Enforce role-based state transition rules without a full Frappe Workflow."""
     status = doc.status or "New"
