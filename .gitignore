@@ -18,6 +18,8 @@ scratch/
 docs/
 *.md
 !README.md
+# Frappe "Updated To A New Version" popup changelogs are shipped app files.
+!apex_habitat/change_log/v0/*.md
 
 # Local/private office source files.
 *.xlsx
