@@ -105,7 +105,54 @@ def mark_received(transfer: str, received_date: str = None):
         )
     doc.db_set("received_date", rcv_date)
     doc.db_set("status", "Received")
+    _notify_finance_on_cost_center_shift(doc)
     return doc.name
+
+
+def _notify_finance_on_cost_center_shift(doc):
+    """Memo-only: if the source and destination buildings sit on different cost
+    centers, the stock liability has shifted between them. We do NOT post any GL
+    Entry — we only email Finance so they can record the cross-charge manually,
+    and only when the admin has opted in via Habitat Settings."""
+    if not frappe.db.get_single_value("Habitat Settings", "notify_finance_on_liability_transfer"):
+        return
+    from_cc = frappe.db.get_value("Accommodation Building", doc.from_building, "default_cost_center")
+    to_cc = frappe.db.get_value("Accommodation Building", doc.to_building, "default_cost_center")
+    if not from_cc or not to_cc or from_cc == to_cc:
+        return
+
+    recipients = []
+    email = frappe.db.get_single_value("Habitat Settings", "finance_notification_email")
+    if email:
+        recipients = [email]
+    else:
+        recipients = _role_emails("Finance Manager")
+    if not recipients:
+        return
+
+    subject = _("Cross-cost-center material transfer: {0}").format(doc.name)
+    lines = "".join(
+        "<li>{0} &times; {1} ({2})</li>".format(flt(r.qty), frappe.utils.escape_html(r.item_name or r.item), r.uom or "")
+        for r in doc.items
+    )
+    message = _(
+        "Material Transfer {0} moved stock from {1} (cost center {2}) to {3} (cost center {4}). "
+        "This is a memo only — no GL Entry was posted. Please record the cross-charge if required."
+    ).format(doc.name, doc.from_building, from_cc, doc.to_building, to_cc) + "<ul>{0}</ul>".format(lines)
+
+    try:
+        frappe.sendmail(recipients=recipients, subject=subject, message=message, reference_doctype=VOUCHER_TYPE, reference_name=doc.name)
+    except Exception:
+        frappe.log_error(title="Material Transfer finance memo failed", message=frappe.get_traceback())
+
+
+def _role_emails(role):
+    users = frappe.get_all("Has Role", filters={"role": role, "parenttype": "User"}, pluck="parent")
+    if not users:
+        return []
+    return frappe.get_all(
+        "User", filters={"name": ["in", users], "enabled": 1, "email": ["is", "set"]}, pluck="email"
+    )
 
 
 def on_cancel(doc, method=None):

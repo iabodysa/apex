@@ -1378,3 +1378,15 @@ rooms,غرف
 ← Back,→ رجوع
 Resident Requests,طلبات السكن
 Maintenance Requests,طلبات الصيانة
+Accommodation Material Transfer,نقل مواد السكن
+Mark Received,تأكيد الاستلام
+Receive Transfer,استلام النقل
+Internal Store,المتجر الداخلي
+Notify Finance on Cross-Cost-Center Transfer,إشعار المالية عند النقل بين مراكز التكلفة
+Finance Notification Email,بريد إشعار المالية
+At least one item is required on a Material Transfer.,يجب إدخال صنف واحد على الأقل في نقل المواد.
+Source and destination buildings must be different.,يجب أن يكون مبنى المصدر والوجهة مختلفين.
+Only a submitted transfer can be received.,لا يمكن استلام إلا النقل المعتمد.
+Transfer {0} is not In Transit.,النقل {0} ليس قيد النقل.
+Cannot transfer {0} unit(s) of {1} from {2}: only {3} available in the store.,لا يمكن نقل {0} وحدة من {1} من {2}: المتوفر في المتجر {3} فقط.
+Cross-cost-center material transfer: {0},نقل مواد بين مراكز التكلفة: {0}
