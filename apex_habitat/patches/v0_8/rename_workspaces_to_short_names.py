@@ -27,7 +27,7 @@ def execute():
             continue
         if frappe.db.exists("Workspace", new):
             # Target already exists (re-run or sync created it) — drop the stale old one.
-            frappe.delete_doc("Workspace", old, force=True, ignore_permissions=True)
+            frappe.delete_doc("Workspace", old, force=True, ignore_permissions=True)  # audit-ok
             continue
         frappe.rename_doc("Workspace", old, new, force=True)
     # Children nest by parent title "Habitat" (unchanged) — ensure none still point
