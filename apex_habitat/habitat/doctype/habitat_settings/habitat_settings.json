@@ -30,6 +30,7 @@
   "operational_notifications_col",
   "license_expiry_days_before",
   "lease_expiry_days_before",
+  "temporary_stay_days_before",
   "supplier_cost_recovery_sec",
   "enable_supplier_markup",
   "supplier_markup_percent",
@@ -208,6 +209,13 @@
    "fieldname": "lease_expiry_days_before",
    "fieldtype": "Int",
    "label": "Lease Expiry Lead Days"
+  },
+  {
+   "default": "2",
+   "description": "Days before a temporary stay's expected check-out date to flag it on the supervisor's watchlist.",
+   "fieldname": "temporary_stay_days_before",
+   "fieldtype": "Int",
+   "label": "Temporary Stay Lead Days"
   },
   {
    "collapsible": 1,
