@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Habitat — 5-Day Operating & Training Manual | دليل التشغيل والتدريب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sand:#ECE6D6; --off-white:#F8F5EE; --green:#00844E; --forest:#072B1A; --mint:#60D297;
+    --forest-60:rgba(7,43,26,.60); --green-12:rgba(0,132,78,.12); --mint-30:rgba(96,210,151,.30);
+    --font-en:'Montserrat',system-ui,sans-serif; --font-ar:'Cairo','Montserrat',sans-serif;
+    --nav-h:60px; --maxw:1200px; --radius:14px; --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;scroll-padding-top:var(--nav-h);scroll-snap-type:y proximity;}
+  body{margin:0;font-family:var(--font-en);color:var(--forest);background:var(--sand);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  #progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--mint);z-index:1000;transition:width .08s linear;}
+  .nav{position:sticky;top:0;z-index:900;height:var(--nav-h);background:var(--off-white);border-bottom:2px solid var(--green);display:flex;align-items:center;gap:14px;padding:0 22px;}
+  .nav__brand{font-weight:800;letter-spacing:.5px;color:var(--green);font-size:1rem;white-space:nowrap;}
+  .nav__links{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin-inline-start:auto;}
+  .nav__links::-webkit-scrollbar{display:none;}
+  .nav__links a{text-decoration:none;color:var(--forest);font-size:.78rem;font-weight:600;padding:6px 11px;border-radius:999px;white-space:nowrap;transition:background .2s var(--ease),color .2s var(--ease);}
+  .nav__links a:hover,.nav__links a.active{background:var(--green);color:var(--off-white);}
+  .slide{scroll-snap-align:start;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:70px 24px;}
+  .slide--alt{background:var(--off-white);}
+  .inner{max-width:var(--maxw);margin:0 auto;width:100%;}
+  .eyebrow{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--green);border:2px solid var(--mint);border-radius:999px;padding:4px 14px;margin-bottom:14px;}
+  .sec-title{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin:0 0 6px;}
+  .sec-title h2{color:var(--green);font-size:clamp(1.5rem,3.2vw,2.2rem);font-weight:800;margin:0;line-height:1.2;}
+  .sec-title .ar{font-family:var(--font-ar);direction:rtl;color:var(--forest-60);font-size:1.25rem;font-weight:700;}
+  .lead{max-width:860px;color:var(--forest);margin:6px 0 0;}
+  .lead .ar{display:block;font-family:var(--font-ar);direction:rtl;color:var(--forest-60);margin-top:6px;}
+  .bi{display:grid;grid-template-columns:1fr 1fr;gap:38px;align-items:start;}
+  .bi__en{text-align:left;direction:ltr;border-left:4px solid var(--mint);padding-left:20px;}
+  .bi__ar{text-align:right;direction:rtl;font-family:var(--font-ar);border-right:4px solid var(--mint);padding-right:20px;}
+  .bi h2{color:var(--green);margin:0 0 12px;line-height:1.25;font-size:clamp(1.4rem,2.6vw,2rem);font-weight:800;}
+  .bi__ar h2{font-weight:700;} .bi p{margin:0 0 12px;}
+  [dir="rtl"] span[dir="ltr"]{font-family:var(--font-en);unicode-bidi:isolate;font-weight:600;}
+  code{background:var(--green-12);color:var(--green);padding:1px 6px;border-radius:5px;font-size:.85em;}
+  /* hero */
+  .hero{position:relative;color:var(--off-white);background:var(--forest);text-align:center;align-items:center;overflow:hidden;}
+  .hero__bg{position:absolute;inset:-12% 0;background:radial-gradient(circle at 18% 22%,var(--green-12) 0 2px,transparent 3px) 0 0/38px 38px,var(--forest);will-change:transform;z-index:0;}
+  .hero__accent{position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--mint);z-index:2;}
+  .hero__inner{position:relative;z-index:1;max-width:920px;margin:0 auto;}
+  .hero__t-en{font-size:clamp(2.2rem,6.5vw,4.4rem);font-weight:800;margin:0;letter-spacing:1px;}
+  .hero__t-ar{font-family:var(--font-ar);direction:rtl;font-size:clamp(1.6rem,4.5vw,2.8rem);font-weight:700;color:var(--mint);margin:8px 0 0;}
+  .hero__sub{margin-top:20px;font-size:clamp(1rem,1.9vw,1.2rem);color:rgba(248,245,238,.85);max-width:760px;margin-inline:auto;}
+  .hero__pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:26px;}
+  .hero__pills span{background:rgba(96,210,151,.16);border:1px solid var(--mint-30);color:var(--mint);border-radius:999px;padding:6px 14px;font-size:.8rem;font-weight:600;}
+  .cue{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:2;color:var(--mint);font-size:1.5rem;animation:bob 1.8s var(--ease) infinite;}
+  @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,9px)}}
+  /* grids & cards */
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));margin-top:22px;}
+  .card{background:var(--off-white);border:2px solid var(--green-12);border-top:5px solid var(--green);border-radius:var(--radius);padding:18px;}
+  .slide--alt .card{background:var(--sand);}
+  .card__icon{width:40px;height:40px;border-radius:10px;background:var(--mint);color:var(--forest);display:grid;place-items:center;font-size:1.15rem;font-weight:800;margin-bottom:12px;}
+  .card h3{margin:0 0 3px;color:var(--green);font-size:1rem;}
+  .card .ar{font-family:var(--font-ar);direction:rtl;color:var(--forest-60);font-size:.92rem;}
+  .card p{margin:9px 0 0;font-size:.84rem;}
+  .card .ar-body{font-family:var(--font-ar);direction:rtl;display:block;margin-top:7px;color:var(--forest-60);font-size:.82rem;}
+  .card .meta{display:block;margin-top:9px;font-size:.72rem;font-weight:700;color:var(--green);letter-spacing:.3px;text-transform:uppercase;}
+  /* tables */
+  .tablewrap{overflow:auto;margin-top:20px;border:2px solid var(--green-12);border-radius:var(--radius);max-height:64vh;}
+  table{border-collapse:collapse;width:100%;font-size:.8rem;background:var(--off-white);}
+  .slide--alt table{background:var(--sand);}
+  th,td{padding:8px 11px;text-align:left;border-bottom:1px solid var(--green-12);white-space:nowrap;}
+  thead th{position:sticky;top:0;background:var(--green);color:var(--off-white);font-weight:700;z-index:1;}
+  tbody tr:hover{background:var(--mint-30);}
+  td.perm{text-align:center;}
+  .pc{display:inline-block;min-width:46px;padding:2px 6px;border-radius:6px;font-size:.74rem;font-weight:700;}
+  .pc.full{background:var(--green);color:#fff;} .pc.rw{background:var(--mint);color:var(--forest);}
+  .pc.r{background:var(--sand);color:var(--forest);border:1px solid var(--green-12);} .pc.no{color:#bbb;}
+  .slide--alt .pc.r{background:#fff;}
+  td.ar,th.ar{font-family:var(--font-ar);direction:rtl;text-align:right;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:.78rem;color:var(--forest-60);}
+  .legend b{color:var(--green);}
+  /* ERD */
+  .erd-wrap{margin-top:18px;background:var(--off-white);border:2px solid var(--green-12);border-radius:var(--radius);padding:14px;}
+  .slide--alt .erd-wrap{background:var(--sand);}
+  svg.erd{width:100%;height:auto;display:block;}
+  .erd .node rect{fill:var(--off-white);stroke:var(--green);stroke-width:2;}
+  .slide--alt .erd .node rect{fill:#fff;}
+  .erd .node.hub rect{fill:var(--green);} .erd .node.hub text{fill:#fff;}
+  .erd .node.ext rect{fill:var(--sand);stroke:var(--forest-60);stroke-dasharray:5 3;}
+  .slide--alt .erd .node.ext rect{fill:var(--off-white);}
+  .erd .node.child rect{fill:var(--mint-30);stroke:var(--green);}
+  .erd text{font-family:var(--font-en);font-size:13px;font-weight:600;fill:var(--forest);}
+  .erd .edge{stroke:var(--green);stroke-width:2;fill:none;}
+  .erd .elabel{font-size:10px;font-weight:600;fill:var(--green);}
+  .erd-cap{margin-top:8px;font-size:.8rem;color:var(--forest-60);}
+  .erd-cap b{color:var(--green);}
+  /* curriculum */
+  .modules{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));margin-top:18px;}
+  .module{background:var(--off-white);border-left:5px solid var(--green);border-radius:10px;padding:14px;}
+  .slide--alt .module{background:var(--sand);}
+  .module .no{font-weight:800;color:var(--mint);background:var(--forest);border-radius:6px;padding:1px 8px;font-size:.78rem;margin-right:6px;}
+  .module h4{margin:8px 0 4px;color:var(--green);font-size:.95rem;display:inline;}
+  .module .arh{font-family:var(--font-ar);direction:rtl;color:var(--forest-60);font-size:.86rem;display:block;margin:6px 0;}
+  .module .lab{font-size:.8rem;margin:6px 0 0;} .module .lab b{color:var(--green);}
+  .module .roles{display:inline-block;margin-top:8px;font-size:.7rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.3px;}
+  .assess{margin-top:16px;background:var(--green-12);border:1px solid var(--mint);border-radius:10px;padding:12px 16px;font-size:.84rem;}
+  .assess b{color:var(--green);} .assess .ar{font-family:var(--font-ar);direction:rtl;display:block;margin-top:4px;color:var(--forest-60);}
+  .daybadge{display:inline-block;background:var(--green);color:var(--off-white);font-weight:800;border-radius:999px;padding:5px 16px;font-size:.82rem;letter-spacing:1px;margin-bottom:10px;}
+  /* status flow */
+  .flow{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center;}
+  .flow span{background:var(--off-white);border:2px solid var(--green);color:var(--green);border-radius:999px;padding:5px 13px;font-size:.78rem;font-weight:700;}
+  .slide--alt .flow span{background:var(--sand);}
+  .flow .arrow{border:0;color:var(--mint);font-size:1.1rem;padding:0;}
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+  .reveal.revealed{opacity:1;transform:none;}
+  .reveal .stagger{opacity:0;transform:translateY(20px);transition:opacity .55s var(--ease),transform .55s var(--ease);}
+  .reveal.revealed .stagger{opacity:1;transform:none;transition-delay:calc(var(--i,0)*70ms);}
+  @media (max-width:820px){
+    .bi{grid-template-columns:1fr;gap:20px;} .bi__en,.bi__ar{border:0;padding:0;}
+    .bi__ar{border-top:4px solid var(--mint);padding-top:16px;}
+    .slide{padding:54px 16px;min-height:auto;} .nav__brand{font-size:.85rem;}
+    html{scroll-snap-type:none;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;scroll-snap-type:none;}
+    .reveal,.reveal .stagger{transition:none;opacity:1;transform:none;} .cue{animation:none;}
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav class="nav">
+  <span class="nav__brand">Apex&nbsp;Habitat</span>
+  <div class="nav__links">
+    <a href="#welcome">Welcome</a><a href="#concept">Concept</a><a href="#workspaces">Workspaces</a>
+    <a href="#roles">Roles</a><a href="#permissions">Permissions</a><a href="#maps">Data Maps</a>
+    <a href="#features">Features</a><a href="#value">Value</a><a href="#reports">Reports</a><a href="#training">5-Day Plan</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="slide hero" id="welcome" data-section>
+  <div class="hero__bg"></div>
+  <div class="hero__inner reveal">
+    <h1 class="hero__t-en stagger">Apex Habitat</h1>
+    <p class="hero__t-ar stagger">دليل التشغيل والتدريب — 5 أيام</p>
+    <p class="hero__sub stagger">The complete operating &amp; onboarding manual for AFMCO worker-accommodation management — every workspace, role, data relationship, feature and report.
+      <span style="font-family:var(--font-ar);display:block;margin-top:8px" dir="rtl">الدليل الكامل لتشغيل وتأهيل إدارة سكن العمّال — كل مساحة عمل ودور وعلاقة بيانات وميزة وتقرير.</span></p>
+    <div class="hero__pills stagger">
+      <span>8 Workspaces</span><span>6 Roles</span><span>~70 DocTypes</span><span>4 Smart Pages</span><span>21 Reports</span><span>5-Day Track</span>
+    </div>
+  </div>
+  <div class="cue" aria-hidden="true">&#x2193;</div>
+  <div class="hero__accent"></div>
+</section>
+
+<!-- CONCEPT -->
+<section class="slide" id="concept" data-section>
+  <div class="inner">
+    <span class="eyebrow">The Core Idea · الفكرة الجوهرية</span>
+    <div class="bi reveal">
+      <div class="bi__en stagger">
+        <h2>One estate. One platform. Zero accidental accounting.</h2>
+        <p>Apex Habitat runs worker housing end-to-end — sites, buildings, rooms, beds, residents, maintenance, safety, custody and cost — on a single Frappe v15 platform.</p>
+        <p>Its signature: the <b>Accommodation Ledger</b> and <b>Stock Ledger</b> are machine-written, read-only <b>operational memos</b>. With GL posting off by default, you see the full cost story — including idle-resident "bleed" — without a single accounting entry. A real financial posting stays a deliberate human decision.</p>
+      </div>
+      <div class="bi__ar stagger">
+        <h2>منشأة واحدة. منصّة واحدة. بلا محاسبة عَرَضية.</h2>
+        <p>يُدير أبيكس هابيتات سكن العمّال من البداية للنهاية — المواقع والمباني والغرف والأسرّة والقاطنين والصيانة والسلامة والعُهَد والتكاليف — على منصّة <span dir="ltr">Frappe v15</span> واحدة.</p>
+        <p>وما يميّزه: أن <b>دفتر السكن</b> و<b>دفتر المخزون</b> مذكّرات تشغيلية للقراءة فقط تكتبها الأنظمة. ومع إيقاف الترحيل المحاسبي افتراضيًا، ترى صورة التكلفة كاملة — حتى «هدر» القاطن الخامل — دون أي قيد محاسبي <span dir="ltr">(no GL)</span>. ويبقى القيد المالي قرارًا بشريًا متعمّدًا.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKSPACES -->
+<section class="slide slide--alt" id="workspaces" data-section>
+  <div class="inner">
+    <span class="eyebrow">Navigation · التنقّل</span>
+    <div class="sec-title reveal"><h2 class="stagger">The 8 Workspaces</h2><span class="ar stagger">مساحات العمل الثماني</span></div>
+    <div class="grid reveal">
+      <article class="card stagger"><div class="card__icon">★</div><h3>Habitat</h3><div class="ar" dir="rtl">الموطن</div><p>Command hub — top shortcuts &amp; cross-domain KPIs.<span class="ar-body" dir="rtl">مركز القيادة — اختصارات ومؤشرات شاملة.</span></p></article>
+      <article class="card stagger"><div class="card__icon">🏠</div><h3>Accommodation</h3><div class="ar" dir="rtl">السكن</div><p>Sites, buildings, beds, assignments, checkouts.<span class="ar-body" dir="rtl">المواقع والمباني والأسرّة والتسكين والمغادرة.</span></p></article>
+      <article class="card stagger"><div class="card__icon">🔧</div><h3>Upkeep</h3><div class="ar" dir="rtl">الصيانة</div><p>Requests, work orders, inspections, materials.<span class="ar-body" dir="rtl">الطلبات وأوامر العمل والتفتيش والمواد.</span></p></article>
+      <article class="card stagger"><div class="card__icon">🛡️</div><h3>Safety</h3><div class="ar" dir="rtl">السلامة</div><p>Inspections, licenses, scheduled safety tasks.<span class="ar-body" dir="rtl">التفتيش والتراخيص ومهام السلامة المجدولة.</span></p></article>
+      <article class="card stagger"><div class="card__icon">📦</div><h3>Custody</h3><div class="ar" dir="rtl">العُهَد</div><p>Issue, return, damage, material transfers.<span class="ar-body" dir="rtl">الصرف والإرجاع والأضرار وتحويل المواد.</span></p></article>
+      <article class="card stagger"><div class="card__icon">💰</div><h3>Costs</h3><div class="ar" dir="rtl">التكاليف</div><p>Leases, utilities, subcontractors, the ledger.<span class="ar-body" dir="rtl">العقود والمرافق والمقاولون والسجل.</span></p></article>
+      <article class="card stagger"><div class="card__icon">⚙️</div><h3>Console</h3><div class="ar" dir="rtl">اللوحة</div><p>Operational controls, ledgers, alerts, jobs.<span class="ar-body" dir="rtl">أدوات التشغيل والسجلات والتنبيهات والمهام.</span></p></article>
+      <article class="card stagger"><div class="card__icon">🚀</div><h3>Setup</h3><div class="ar" dir="rtl">الإعداد</div><p>Guided onboarding tracks, catalogs, settings.<span class="ar-body" dir="rtl">مسارات تهيئة موجّهة وكتالوجات وإعدادات.</span></p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ROLES -->
+<section class="slide" id="roles" data-section>
+  <div class="inner">
+    <span class="eyebrow">Who does what · من يفعل ماذا</span>
+    <div class="sec-title reveal"><h2 class="stagger">The 6 Roles</h2><span class="ar stagger">الأدوار الستة</span></div>
+    <div class="grid reveal" style="grid-template-columns:repeat(auto-fill,minmax(330px,1fr))">
+      <article class="card stagger"><div class="card__icon">M</div><h3>Accommodation Manager</h3><div class="ar" dir="rtl">مدير الإسكان</div><p>Owns the full housing lifecycle — sites, buildings, rooms, beds; submits assignments, checkouts, leases, licenses; drives custody, transfers, inspections, utilities &amp; subcontractor orders.<span class="ar-body" dir="rtl">يتولّى دورة حياة السكن كاملةً — المواقع والمباني والغرف والأسرّة؛ ويعتمد التسكين والمغادرة والعقود والتراخيص؛ ويقود العُهَد والتحويلات والتفتيش والمرافق وأوامر المقاولين.</span></p></article>
+      <article class="card stagger"><div class="card__icon">S</div><h3>Resident Supervisor</h3><div class="ar" dir="rtl">مشرف القاطنين</div><p>The on-the-ground operator — reads masters, creates &amp; submits daily records: assignments, checkouts, maintenance &amp; resident requests, safety inspections, cleaning logs, custody. No delete, no finance.<span class="ar-body" dir="rtl">المشغّل الميداني — يطّلع على البيانات الأساسية وينشئ ويعتمد السجلات اليومية: التسكين والمغادرة وطلبات الصيانة والقاطنين وتفتيش السلامة وسجلات النظافة والعُهَد. دون حذف أو صلاحيات مالية.</span></p></article>
+      <article class="card stagger"><div class="card__icon">T</div><h3>Maintenance Manager</h3><div class="ar" dir="rtl">مدير الصيانة</div><p>Governs maintenance work orders &amp; inspection workflows. <em>Training note:</em> in this manual it is the maintenance-owner track — its DocType permissions are wired before go-live.<span class="ar-body" dir="rtl">يحكم أوامر عمل الصيانة وتقارير الفحص. <em>ملاحظة تدريبية:</em> في هذا الدليل هو مسار مالك الصيانة — تُربَط صلاحياته على الدوكتايبات قبل الإطلاق.</span></p></article>
+      <article class="card stagger"><div class="card__icon">F</div><h3>Finance Manager</h3><div class="ar" dir="rtl">المدير المالي</div><p>Controls the financial boundary — creates/submits/cancels leases &amp; utility bills; holds read-only oversight of the Accommodation &amp; Stock Ledgers to verify cost without altering operational stock.<span class="ar-body" dir="rtl">يتحكّم بالحدود المالية — ينشئ ويعتمد ويلغي العقود وفواتير المرافق؛ ويملك صلاحية اطّلاع فقط على دفتري السكن والمخزون للتحقق من التكلفة دون تعديل المخزون التشغيلي.</span></p></article>
+      <article class="card stagger"><div class="card__icon">A</div><h3>Internal Auditor</h3><div class="ar" dir="rtl">المدقّق الداخلي</div><p>Strictly read-only — examines the ledgers, licenses, inspections, findings &amp; remediation for independent verification, with no ability to create, modify or delete anything.<span class="ar-body" dir="rtl">صلاحية اطّلاع فقط بحتة — يفحص السجلات والتراخيص والتفتيش والملاحظات وخطط المعالجة للتحقق المستقل، دون أي إنشاء أو تعديل أو حذف.</span></p></article>
+      <article class="card stagger"><div class="card__icon">⚙</div><h3>System Manager</h3><div class="ar" dir="rtl">مدير النظام</div><p>Platform administrator — full CRUD+submit on every DocType, exclusive control of Habitat Settings and the maintenance workflows; configures the system and master data.<span class="ar-body" dir="rtl">مسؤول المنصّة — صلاحيات كاملة على كل الدوكتايبات، وتحكّم حصري في إعدادات النظام ومسارات الصيانة؛ يهيّئ النظام والبيانات الأساسية.</span></p></article>
+    </div>
+  </div>
+</section>
+
+<!-- PERMISSIONS MATRIX -->
+<section class="slide slide--alt" id="permissions" data-section>
+  <div class="inner">
+    <span class="eyebrow">Authority · الصلاحيات</span>
+    <div class="sec-title reveal"><h2 class="stagger">Permissions by Main DocType</h2><span class="ar stagger">الصلاحيات حسب الدوكتايب الرئيسية</span></div>
+    <div class="legend reveal"><span><b>C</b> create</span><span><b>R</b> read</span><span><b>U</b> update</span><span><b>D</b> delete</span><span><b>S</b> submit</span><span>— no access</span></div>
+    <div class="tablewrap reveal">
+      <table>
+        <thead><tr>
+          <th>DocType / الدوكتايب</th><th>Accom. Mgr</th><th>Resident Sup.</th><th>Maint. Mgr</th><th>Finance Mgr</th><th>Auditor</th><th>System Mgr</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Accommodation Site</td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUD</span></td></tr>
+          <tr><td>Accommodation Building</td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc r">R</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUD</span></td></tr>
+          <tr><td>Accommodation Room</td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc r">R</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUD</span></td></tr>
+          <tr><td>Accommodation Bed</td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc r">R</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUD</span></td></tr>
+          <tr><td>Accommodation Assignment</td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Accommodation Checkout</td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Accommodation Lease</td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Resident Request</td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUD</span></td></tr>
+          <tr><td>Maintenance Request</td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Maintenance Work Order</td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Maintenance Inspection Report</td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Safety Inspection Report</td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Building License</td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc r">R</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Custody Issue</td><td class="perm"><span class="pc full">CRUDS</span></td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Custody Return</td><td class="perm"><span class="pc full">CRUDS</span></td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Material Transfer</td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Accommodation Ledger</td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc r">R</span></td><td class="perm"><span class="pc r">R</span></td><td class="perm"><span class="pc r">R</span></td></tr>
+          <tr><td>Stock Ledger</td><td class="perm"><span class="pc r">R</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc r">R</span></td><td class="perm"><span class="pc r">R</span></td><td class="perm"><span class="pc rw">RD</span></td></tr>
+          <tr><td>Utility Bill Entry</td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Subcontractor Service Order</td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Idle Resident Report</td><td class="perm"><span class="pc full">CRUD</span></td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUD</span></td></tr>
+          <tr><td>Facility Asset</td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc r">R</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUD</span></td></tr>
+          <tr><td>Safety Task Execution</td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc full">CRUS</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUDS</span></td></tr>
+          <tr><td>Cleaning Log</td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc rw">CRU</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUD</span></td></tr>
+          <tr><td>Habitat Settings</td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc no">—</span></td><td class="perm"><span class="pc full">CRUD</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- DATA MAPS: SPATIAL -->
+<section class="slide" id="maps" data-section>
+  <div class="inner">
+    <span class="eyebrow">Data Relationships · علاقات البيانات</span>
+    <div class="sec-title reveal"><h2 class="stagger">How everything connects</h2><span class="ar stagger">كيف يرتبط كل شيء</span></div>
+    <p class="lead reveal stagger">Six maps trace the links between the main records. <b>Accommodation Building</b> is the central hub — almost every domain points back to it. Solid boxes are Habitat DocTypes, dashed are shared ERPNext entities, mint are child tables.
+      <span class="ar" dir="rtl">ستّ خرائط تتبع الروابط بين السجلات الرئيسية. <b>المبنى</b> هو المحور المركزي. الصناديق المصمتة دوكتايبات هابيتات، والمتقطّعة كيانات <span dir="ltr">ERPNext</span>، والخضراء جداول فرعية.</span></p>
+    <div class="erd-wrap reveal stagger">
+      <svg class="erd" viewBox="0 0 1120 250" role="img" aria-label="Spatial relationships">
+        <defs><marker id="a1" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#00844E"/></marker></defs>
+        <g class="node"><rect x="10" y="100" width="120" height="46" rx="9"/><text x="70" y="128" text-anchor="middle">Site</text></g>
+        <g class="node hub"><rect x="185" y="100" width="135" height="46" rx="9"/><text x="252" y="128" text-anchor="middle">Building</text></g>
+        <g class="node"><rect x="375" y="100" width="120" height="46" rx="9"/><text x="435" y="128" text-anchor="middle">Room</text></g>
+        <g class="node"><rect x="550" y="100" width="120" height="46" rx="9"/><text x="610" y="128" text-anchor="middle">Bed</text></g>
+        <g class="node"><rect x="725" y="100" width="150" height="46" rx="9"/><text x="800" y="128" text-anchor="middle">Assignment</text></g>
+        <g class="node"><rect x="930" y="100" width="130" height="46" rx="9"/><text x="995" y="128" text-anchor="middle">Checkout</text></g>
+        <g class="node child"><rect x="185" y="20" width="135" height="40" rx="9"/><text x="252" y="44" text-anchor="middle">Floor Plan</text></g>
+        <g class="node"><rect x="725" y="190" width="150" height="44" rx="9"/><text x="800" y="217" text-anchor="middle">Bed Transfer</text></g>
+        <path class="edge" d="M130 123 H183" marker-end="url(#a1)"/><text class="elabel" x="157" y="116" text-anchor="middle">site</text>
+        <path class="edge" d="M320 123 H373" marker-end="url(#a1)"/><text class="elabel" x="347" y="116" text-anchor="middle">building</text>
+        <path class="edge" d="M495 123 H548" marker-end="url(#a1)"/><text class="elabel" x="522" y="116" text-anchor="middle">room</text>
+        <path class="edge" d="M670 123 H723" marker-end="url(#a1)"/><text class="elabel" x="697" y="116" text-anchor="middle">bed</text>
+        <path class="edge" d="M875 123 H928" marker-end="url(#a1)"/><text class="elabel" x="902" y="116" text-anchor="middle">assignment</text>
+        <path class="edge" d="M252 60 V98" marker-end="url(#a1)"/>
+        <path class="edge" d="M800 146 V188" marker-end="url(#a1)"/>
+      </svg>
+      <p class="erd-cap"><b>Spatial / المكان:</b> Site → Building → Room → Bed → Assignment → Checkout; Building contains Floor Plan; Assignment branches to a Bed Transfer.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DATA MAPS: MAINTENANCE + SAFETY -->
+<section class="slide slide--alt" data-section>
+  <div class="inner">
+    <span class="eyebrow">Maps 2–3 · الصيانة والسلامة</span>
+    <div class="erd-wrap reveal">
+      <svg class="erd" viewBox="0 0 1120 230" role="img" aria-label="Maintenance relationships">
+        <defs><marker id="a2" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#00844E"/></marker></defs>
+        <g class="node"><rect x="20" y="90" width="170" height="46" rx="9"/><text x="105" y="118" text-anchor="middle">Maint. Request</text></g>
+        <g class="node"><rect x="270" y="90" width="160" height="46" rx="9"/><text x="350" y="118" text-anchor="middle">Work Order</text></g>
+        <g class="node"><rect x="510" y="90" width="210" height="46" rx="9"/><text x="615" y="118" text-anchor="middle">Inspection Report</text></g>
+        <g class="node ext"><rect x="20" y="10" width="190" height="40" rx="9"/><text x="115" y="34" text-anchor="middle">Safety Inspection</text></g>
+        <g class="node ext"><rect x="270" y="170" width="210" height="40" rx="9"/><text x="375" y="194" text-anchor="middle">Subcontractor Order</text></g>
+        <g class="node child"><rect x="800" y="90" width="200" height="46" rx="9"/><text x="900" y="118" text-anchor="middle">Procurement Items</text></g>
+        <path class="edge" d="M190 113 H268" marker-end="url(#a2)"/><text class="elabel" x="229" y="106" text-anchor="middle">request</text>
+        <path class="edge" d="M430 113 H508" marker-end="url(#a2)"/><text class="elabel" x="469" y="106" text-anchor="middle">work order</text>
+        <path class="edge" d="M115 50 V88" marker-end="url(#a2)"/><text class="elabel" x="150" y="74">source</text>
+        <path class="edge" d="M320 136 V168" marker-end="url(#a2)"/><text class="elabel" x="360" y="156">dispatch</text>
+        <path class="edge" d="M430 113 H798" marker-end="url(#a2)" opacity=".35"/>
+      </svg>
+      <p class="erd-cap"><b>Maintenance / الصيانة:</b> Request → Work Order → Inspection; sourced from a Safety Inspection &amp; can dispatch a Subcontractor Order; both carry Procurement Items.</p>
+    </div>
+    <div class="erd-wrap reveal" style="margin-top:14px">
+      <svg class="erd" viewBox="0 0 1120 220" role="img" aria-label="Safety relationships">
+        <defs><marker id="a3" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#00844E"/></marker></defs>
+        <g class="node"><rect x="20" y="90" width="180" height="46" rx="9"/><text x="110" y="118" text-anchor="middle">Task Catalog</text></g>
+        <g class="node"><rect x="270" y="90" width="190" height="46" rx="9"/><text x="365" y="118" text-anchor="middle">Sched. Template</text></g>
+        <g class="node"><rect x="530" y="90" width="190" height="46" rx="9"/><text x="625" y="118" text-anchor="middle">Sched. Instance</text></g>
+        <g class="node"><rect x="790" y="90" width="180" height="46" rx="9"/><text x="880" y="118" text-anchor="middle">Task Execution</text></g>
+        <g class="node hub"><rect x="270" y="10" width="190" height="40" rx="9"/><text x="365" y="34" text-anchor="middle">Building</text></g>
+        <g class="node ext"><rect x="790" y="170" width="180" height="40" rx="9"/><text x="880" y="194" text-anchor="middle">Building License</text></g>
+        <path class="edge" d="M200 113 H268" marker-end="url(#a3)"/><text class="elabel" x="234" y="106" text-anchor="middle">catalog</text>
+        <path class="edge" d="M460 113 H528" marker-end="url(#a3)"/><text class="elabel" x="494" y="106" text-anchor="middle">template</text>
+        <path class="edge" d="M720 113 H788" marker-end="url(#a3)"/><text class="elabel" x="754" y="106" text-anchor="middle">execution</text>
+        <path class="edge" d="M365 50 V88" marker-end="url(#a3)"/>
+        <path class="edge" d="M880 168 V138" marker-end="url(#a3)"/>
+      </svg>
+      <p class="erd-cap"><b>Safety / السلامة:</b> Task Catalog → Scheduled Template → Instance → Execution (all anchored to a Building); Building License tracks compliance.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DATA MAPS: CUSTODY + COSTS -->
+<section class="slide" data-section>
+  <div class="inner">
+    <span class="eyebrow">Maps 4–5 · العُهَد والتكاليف</span>
+    <div class="erd-wrap reveal">
+      <svg class="erd" viewBox="0 0 1120 220" role="img" aria-label="Custody relationships">
+        <defs><marker id="a4" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#00844E"/></marker></defs>
+        <g class="node"><rect x="20" y="90" width="150" height="46" rx="9"/><text x="95" y="118" text-anchor="middle">Custody Issue</text></g>
+        <g class="node"><rect x="240" y="90" width="150" height="46" rx="9"/><text x="315" y="118" text-anchor="middle">Custody Return</text></g>
+        <g class="node"><rect x="460" y="90" width="190" height="46" rx="9"/><text x="555" y="118" text-anchor="middle">Damage Assess.</text></g>
+        <g class="node ext"><rect x="720" y="90" width="180" height="46" rx="9"/><text x="810" y="118" text-anchor="middle">Additional Salary</text></g>
+        <g class="node child"><rect x="20" y="10" width="150" height="40" rx="9"/><text x="95" y="34" text-anchor="middle">Article</text></g>
+        <g class="node"><rect x="960" y="90" width="140" height="46" rx="9"/><text x="1030" y="118" text-anchor="middle">Stock Ledger</text></g>
+        <path class="edge" d="M170 113 H238" marker-end="url(#a4)"/><text class="elabel" x="204" y="106" text-anchor="middle">issue</text>
+        <path class="edge" d="M390 113 H458" marker-end="url(#a4)"/><text class="elabel" x="424" y="106" text-anchor="middle">return</text>
+        <path class="edge" d="M650 113 H718" marker-end="url(#a4)"/><text class="elabel" x="684" y="106" text-anchor="middle">deduction</text>
+        <path class="edge" d="M95 90 V52" marker-end="url(#a4)"/><text class="elabel" x="122" y="74">article</text>
+        <path class="edge" d="M170 100 C 880 50 920 60 985 90" marker-end="url(#a4)" opacity=".3"/>
+      </svg>
+      <p class="erd-cap"><b>Custody / العُهَد:</b> Issue → Return → Damage Assessment → Additional Salary (cost recovery). Issues post to the Stock Ledger; items link to the Article catalog.</p>
+    </div>
+    <div class="erd-wrap reveal" style="margin-top:14px">
+      <svg class="erd" viewBox="0 0 1120 240" role="img" aria-label="Costs relationships">
+        <defs><marker id="a5" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#00844E"/></marker></defs>
+        <g class="node"><rect x="20" y="20" width="170" height="44" rx="9"/><text x="105" y="47" text-anchor="middle">Lease</text></g>
+        <g class="node"><rect x="20" y="98" width="170" height="44" rx="9"/><text x="105" y="125" text-anchor="middle">Utility Bill</text></g>
+        <g class="node"><rect x="20" y="176" width="170" height="44" rx="9"/><text x="105" y="203" text-anchor="middle">Subcontractor</text></g>
+        <g class="node hub"><rect x="430" y="96" width="210" height="48" rx="9"/><text x="535" y="125" text-anchor="middle">Accom. Ledger</text></g>
+        <g class="node"><rect x="780" y="96" width="210" height="48" rx="9"/><text x="885" y="125" text-anchor="middle">Reports &amp; Recovery</text></g>
+        <path class="edge" d="M190 42 C 320 60 330 96 430 112" marker-end="url(#a5)"/>
+        <path class="edge" d="M190 120 H430" marker-end="url(#a5)"/>
+        <path class="edge" d="M190 198 C 320 178 330 144 430 130" marker-end="url(#a5)"/>
+        <path class="edge" d="M640 120 H778" marker-end="url(#a5)"/><text class="elabel" x="709" y="113" text-anchor="middle">memo lines</text>
+        <text class="elabel" x="300" y="86" text-anchor="middle">daily cost share (no GL)</text>
+      </svg>
+      <p class="erd-cap"><b>Costs / التكاليف:</b> Leases, Utility Bills &amp; Subcontractor orders feed daily memo lines into the Accommodation Ledger — which drives reports &amp; supplier cost recovery, with no GL posting.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES 1: SMART PAGES -->
+<section class="slide slide--alt" id="features" data-section>
+  <div class="inner">
+    <span class="eyebrow">Smart Pages · الصفحات الذكية</span>
+    <div class="sec-title reveal"><h2 class="stagger">Four purpose-built screens</h2><span class="ar stagger">أربع شاشات مصمّمة للغرض</span></div>
+    <div class="grid reveal" style="grid-template-columns:repeat(auto-fill,minmax(270px,1fr))">
+      <article class="card stagger"><div class="card__icon">🛏️</div><h3>Front Desk</h3><div class="ar" dir="rtl">مكتب الاستقبال</div><p>Color-coded bed grid (green free · red occupied · amber not-ready · grey out-of-service). Tap green → quick check-in with HR photo &amp; room snapshot; tap red → checkout (routes to full form if custody is held).<span class="ar-body" dir="rtl">شبكة أسرّة ملوّنة. اضغط الأخضر لدخول سريع مع صورة الموظف ولقطة الغرفة؛ والأحمر للخروج (يحوّل للنموذج الكامل إن وُجدت عُهَد).</span><span class="meta">/app/front-desk · Manager / Supervisor</span></p></article>
+      <article class="card stagger"><div class="card__icon">🔄</div><h3>Transfer Board</h3><div class="ar" dir="rtl">لوحة النقل</div><p>Split two-building view. Drag an occupied bed onto an empty one (or tap source→target on tablets); confirm date &amp; reason → a Room Bed Transfer is written and both panes refresh.<span class="ar-body" dir="rtl">شاشة مقسومة لمبنيين. اسحب سريرًا مشغولًا إلى فارغ، أكّد التاريخ والسبب ← يُسجَّل نقل السرير ويتحدّث الجانبان.</span><span class="meta">/app/transfer-board · Manager / Supervisor</span></p></article>
+      <article class="card stagger"><div class="card__icon">🗺️</div><h3>Safety Map</h3><div class="ar" dir="rtl">خريطة السلامة</div><p>Interactive floor plan; rooms pulse red/amber on open maintenance or damage. Tap any tile to log a building/floor Safety Inspection; the map repaints after a generated request.<span class="ar-body" dir="rtl">مخطط طوابق تفاعلي؛ تنبض الغرف بالأحمر/الكهرماني عند الأعطال. انقر مربعًا لتسجيل تفتيش سلامة، وتُعاد الرسم بعد إنشاء الطلب.</span><span class="meta">/app/safety-map · Safety / Supervisor / Auditor</span></p></article>
+      <article class="card stagger"><div class="card__icon">🧾</div><h3>Custody Kiosk</h3><div class="ar" dir="rtl">كشك العُهَد</div><p>POS-style issuing. Pick employee &amp; building, search articles (tiles show stock), add to cart with +/- steppers, then Issue → a submitted Custody Issue posts to the Stock Ledger.<span class="ar-body" dir="rtl">صرف بأسلوب نقاط البيع. اختر الموظف والمبنى، أضف الأصناف للسلّة، ثم اضغط صرف ← عُهدة معتمدة تُسجَّل في المخزون.</span><span class="meta">/app/custody-kiosk · Supervisor / Store</span></p></article>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES 2: WHERE THE WORKER REPORTS -->
+<section class="slide" data-section>
+  <div class="inner">
+    <span class="eyebrow">Resident Voice · صوت الساكن</span>
+    <div class="sec-title reveal"><h2 class="stagger">Where a worker reports a problem</h2><span class="ar stagger">أين يُبلّغ العامل عن مشكلته</span></div>
+    <div class="bi reveal">
+      <div class="bi__en stagger">
+        <h2>QR Resident Request — no login</h2>
+        <p>A worker scans the building/room <b>QR</b> code and opens a public web form (route <code>/qr-request</code>, titled "Housing Request") in his own language (EN / AR / Urdu / Hindi / Bengali).</p>
+        <p>He chooses a category (Maintenance, Safety, Cleaning, Plumbing, AC, Complaint…), location, description and optional photo. On submit he gets a tracking code. A hidden honeypot field and a 5-per-minute IP limit block bots. Each submission becomes an <b>Accommodation Resident Request</b>, triaged on a Kanban board.</p>
+      </div>
+      <div class="bi__ar stagger">
+        <h2>طلب الساكن عبر <span dir="ltr">QR</span> — بلا تسجيل دخول</h2>
+        <p>يمسح العامل رمز <span dir="ltr">QR</span> للمبنى/الغرفة فيفتح نموذج ويب عامًّا (المسار <code>/qr-request</code> بعنوان «طلب سكن») بلغته (عربي / إنجليزي / أردو / هندي / بنغالي).</p>
+        <p>يختار الفئة (صيانة، سلامة، نظافة، سباكة، تكييف، شكوى…) والموقع والوصف وصورة اختيارية. وعند الإرسال يحصل على رمز متابعة. ويمنع حقلٌ فخّ مخفي وحدُّ 5 طلبات/دقيقة الروبوتات. ويصبح كل طلب <b>طلب ساكن</b> يُفرَز على لوحة كانبان.</p>
+      </div>
+    </div>
+    <div class="flow reveal stagger">
+      <span>New</span><b class="arrow">→</b><span>Triaged</span><b class="arrow">→</b><span>Assigned</span><b class="arrow">→</b><span>In Progress</span><b class="arrow">→</b><span>Waiting Evidence</span><b class="arrow">→</b><span>Resolved</span><b class="arrow">→</b><span>Rejected</span><b class="arrow">→</b><span>Closed</span>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES 3: PLATFORM -->
+<section class="slide slide--alt" data-section>
+  <div class="inner">
+    <span class="eyebrow">Platform · المنصّة</span>
+    <div class="sec-title reveal"><h2 class="stagger">Dashboards, setup &amp; automation</h2><span class="ar stagger">اللوحات والإعداد والأتمتة</span></div>
+    <div class="grid reveal" style="grid-template-columns:repeat(auto-fill,minmax(270px,1fr))">
+      <article class="card stagger"><div class="card__icon">📊</div><h3>Role Dashboards</h3><div class="ar" dir="rtl">لوحات الأدوار</div><p>Each role opens tailored charts + number cards — Manager (beds, occupancy, checkouts, idle), Supervisor (maintenance, tasks, custody), Finance (cost bleeding, bills, leases), Auditor (licenses, findings, compliance %). Seeded automatically.<span class="ar-body" dir="rtl">لكل دور رسوم وبطاقات مخصّصة، وتُزرَع تلقائيًا عند التثبيت.</span></p></article>
+      <article class="card stagger"><div class="card__icon">🚀</div><h3>Setup &amp; Onboarding</h3><div class="ar" dir="rtl">الإعداد والتهيئة</div><p>On install everything bootstraps (roles, catalogs, policies, notifications, Kanban). The Setup workspace offers 3 guided tracks: Habitat Operations, Accommodation Go-Live, Safety Readiness — each step deep-links to the right page.<span class="ar-body" dir="rtl">عند التثبيت تُهيّأ كل البيانات؛ وتقدّم مساحة الإعداد 3 مسارات موجّهة تنقلك مباشرةً للصفحة المناسبة.</span></p></article>
+      <article class="card stagger"><div class="card__icon">⏱️</div><h3>Scheduled Jobs &amp; Alerts</h3><div class="ar" dir="rtl">المهام والتنبيهات</div><p>Daily: cost allocation, license expiry, maintenance escalation, lease &amp; temp-stay watch, idle aging, task generation, occupancy snapshot. Weekly: occupancy reconcile + overdue tasks. Monthly: rent reminders.<span class="ar-body" dir="rtl">يوميًا: التكاليف والتراخيص وتصعيد الصيانة والإقامات والخمول واللقطات. أسبوعيًا: مطابقة الإشغال. شهريًا: تذكير الإيجار.</span></p></article>
+      <article class="card stagger"><div class="card__icon">🔒</div><h3>Habitat Settings (no-GL)</h3><div class="ar" dir="rtl">إعدادات السكن</div><p>One control panel. Default is safe/internal: GL, stock posting, asset link &amp; deductions all OFF — ledger stays memo-only until explicitly enabled. Also sets damage cap (SAR 500), lead-days (license 60 / lease 90 / temp-stay 2), supplier markup.<span class="ar-body" dir="rtl">لوحة تحكم واحدة، وضعها الافتراضي آمن: الترحيل والمخزون والخصومات موقوفة حتى تُفعَّل صراحةً، مع ضبط الحدود والمُهَل والهامش.</span></p></article>
+    </div>
+  </div>
+</section>
+
+<!-- BUSINESS VALUE -->
+<section class="slide" id="value" data-section>
+  <div class="inner">
+    <span class="eyebrow">Why it matters · لماذا يهمّ</span>
+    <div class="sec-title reveal"><h2 class="stagger">Signature business logic</h2><span class="ar stagger">منطق الأعمال المميّز</span></div>
+    <div class="grid reveal" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))">
+      <article class="card stagger"><div class="card__icon">1</div><h3>No-GL Memo Ledger</h3><p>A machine-written, read-only ledger; rows are inserted only by jobs/hooks. With GL off, each row is a pure operational memo — full cost visibility, zero accounting impact.<span class="ar-body" dir="rtl">سجل تكتبه الأنظمة فقط للقراءة؛ ومع إيقاف الترحيل تصبح كل قيد مذكّرة تشغيلية — رؤية كاملة بلا أثر محاسبي.</span></p></article>
+      <article class="card stagger"><div class="card__icon">2</div><h3>Capacity-Based Allocation</h3><p>Daily share = annual cost ÷ days-in-year ÷ building capacity, posted per housed day (leap-year aware, idempotent). Check-ins/outs bill to the exact day.<span class="ar-body" dir="rtl">الحصة اليومية = التكلفة السنوية ÷ أيام السنة ÷ طاقة المبنى، قيدٌ لكل يوم سكن، فتُحتسب الدخول والخروج باليوم بدقّة.</span></p></article>
+      <article class="card stagger"><div class="card__icon">3</div><h3>Idle-Resident Bleed</h3><p>For every open idle report, the job recomputes idle days and sums posted daily shares — surfacing the exact wasted cost, alerting every 7th day, routing ToDos to the responsible dept.<span class="ar-body" dir="rtl">يحسب النظام أيام الخمول ويجمع الحصص المسجّلة، فيُظهر التكلفة المهدرة بدقّة، وينبّه كل 7 أيام ويوزّع المهام.</span></p></article>
+      <article class="card stagger"><div class="card__icon">4</div><h3>Supplier Cost Recovery</h3><p>Monthly per-supplier roll-up of ledger rows by supplier/employee/project, counting housed days; a markup % is applied dynamically at report time — never stored.<span class="ar-body" dir="rtl">تجميع شهري لكل مورّد بعدّ أيام السكن، مع تطبيق نسبة هامش ديناميكيًا وقت التقرير دون تخزينها.</span></p></article>
+      <article class="card stagger"><div class="card__icon">5</div><h3>Custody Damage Recovery</h3><p>On submit, a damage assessment totals replacement cost and (if enabled) auto-creates a capped Draft Additional Salary deduction; it can't be cancelled once linked.<span class="ar-body" dir="rtl">يجمع التقييم تكلفة الاستبدال ويُنشئ خصمًا محدودًا تلقائيًا (إن فُعِّل)، ولا يُلغى بعد ربطه.</span></p></article>
+      <article class="card stagger"><div class="card__icon">6</div><h3>Expiry Watchlists</h3><p>Jobs continuously scan leases &amp; building licenses for approaching expiry, turning silent contract dates into proactive alerts — no unlicensed occupancy, no rent surprises.<span class="ar-body" dir="rtl">تفحص المهام العقود والتراخيص باستمرار، فتحوّل التواريخ الصامتة إلى تنبيهات استباقية — لا إشغال غير مرخّص ولا مفاجآت إيجار.</span></p></article>
+    </div>
+  </div>
+</section>
+
+<!-- REPORTS -->
+<section class="slide slide--alt" id="reports" data-section>
+  <div class="inner">
+    <span class="eyebrow">Reporting · التقارير</span>
+    <div class="sec-title reveal"><h2 class="stagger">The 21 Reports</h2><span class="ar stagger">التقارير الواحد والعشرون</span></div>
+    <div class="tablewrap reveal">
+      <table>
+        <thead><tr><th>Report</th><th class="ar">التقرير</th><th>What it shows</th><th>Who uses it</th></tr></thead>
+        <tbody>
+          <tr><td>Accommodation Cost Distribution</td><td class="ar">توزيع تكاليف السكن</td><td>Per-employee daily cost by ledger type</td><td>Finance / Manager</td></tr>
+          <tr><td>Accommodation Ledger Summary</td><td class="ar">ملخص دفتر السكن</td><td>Aggregated cost &amp; daily share per building/type</td><td>Finance / Manager</td></tr>
+          <tr><td>Accommodation Occupancy Summary</td><td class="ar">ملخص الإشغال</td><td>Residents, capacity, occupancy % per building</td><td>Manager / Supervisor</td></tr>
+          <tr><td>Accommodation Stock Balance</td><td class="ar">رصيد المخزون</td><td>On-hand qty &amp; value per store/holder/item</td><td>Manager / Supervisor</td></tr>
+          <tr><td>Active Resident Register</td><td class="ar">سجل المقيمين النشطين</td><td>Current residents w/ room, bed, project, CC</td><td>Supervisor / Manager</td></tr>
+          <tr><td>Audit Remediation Status</td><td class="ar">حالة معالجة التدقيق</td><td>Remediation actions, owners, due, overdue</td><td>Compliance / SysMgr</td></tr>
+          <tr><td>Checkout Pending Clearance</td><td class="ar">إخلاء طرف معلّق</td><td>Checkouts awaiting custody/damage clearance</td><td>Supervisor / Manager</td></tr>
+          <tr><td>Custody Damage Register</td><td class="ar">سجل أضرار العهدة</td><td>Damage assessments, est. cost, deduction</td><td>Finance / Manager</td></tr>
+          <tr><td>Daily Cleaning Compliance</td><td class="ar">الالتزام بالنظافة</td><td>Daily cleaning logs, compliance %, rating</td><td>Supervisor</td></tr>
+          <tr><td>Housing Supervisor Report</td><td class="ar">تقرير مشرف السكن</td><td>Consolidated per-building operational view</td><td>Supervisor</td></tr>
+          <tr><td>Intercompany Movement Register</td><td class="ar">تنقّل الأصول بين الشركات</td><td>Asset moves across buildings/companies</td><td>Custody / Finance</td></tr>
+          <tr><td>Lease Expiry Watchlist</td><td class="ar">مراقبة انتهاء الإيجار</td><td>Leases near expiry w/ days &amp; rent</td><td>Manager / Finance</td></tr>
+          <tr><td>Maintenance Aging</td><td class="ar">تقادم الصيانة</td><td>Open requests by age, SLA breach, cost</td><td>Maint. / Manager</td></tr>
+          <tr><td>Maintenance Backlog</td><td class="ar">متأخرات الصيانة</td><td>Outstanding requests by priority/status</td><td>Maint. / Manager</td></tr>
+          <tr><td>Missed Cleaning Tasks</td><td class="ar">مهام النظافة الفائتة</td><td>Missed logs w/ reason &amp; days since</td><td>Supervisor</td></tr>
+          <tr><td>Occupancy Trend</td><td class="ar">اتجاه الإشغال</td><td>Historical min/avg/max, days over capacity</td><td>Manager / Finance</td></tr>
+          <tr><td>Operational Depreciation Aging</td><td class="ar">تقادم الإهلاك التشغيلي</td><td>Non-financial asset depreciation aging</td><td>Custody / Finance</td></tr>
+          <tr><td>Safety Open Findings</td><td class="ar">ملاحظات السلامة المفتوحة</td><td>Failed safety tasks w/ linked maintenance</td><td>Safety / Manager</td></tr>
+          <tr><td>Scheduled Task Compliance</td><td class="ar">التزام المهام المجدولة</td><td>Safety execution results vs schedule</td><td>Safety / Supervisor</td></tr>
+          <tr><td>Supplier Cost Recovery</td><td class="ar">استرداد التكلفة من المورد</td><td>Monthly per-supplier cost plus markup</td><td>Finance / Manager</td></tr>
+          <tr><td>Utility Variance Report</td><td class="ar">تباين المرافق</td><td>Bills, consumption, variance from average</td><td>Finance / Manager</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- TRAINING INTRO + ROLE MATRIX -->
+<section class="slide" id="training" data-section>
+  <div class="inner">
+    <span class="eyebrow">Curriculum · المنهج</span>
+    <div class="sec-title reveal"><h2 class="stagger">The 5-Day Training Plan</h2><span class="ar stagger">خطة التدريب لخمسة أيام</span></div>
+    <p class="lead reveal stagger">A cumulative program — each day's labs reuse the records built the day before. The matrix shows which days each role must attend.
+      <span class="ar" dir="rtl">برنامج تراكمي — تستخدم تمارين كل يوم سجلات اليوم السابق. تبيّن المصفوفة الأيام الإلزامية لكل دور.</span></p>
+    <div class="tablewrap reveal stagger" style="max-height:none">
+      <table>
+        <thead><tr><th>Role / الدور</th><th>Day 1</th><th>Day 2</th><th>Day 3</th><th>Day 4</th><th>Day 5</th></tr></thead>
+        <tbody>
+          <tr><td>Accommodation Manager / مدير الإسكان</td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc rw">Rec.</span></td><td class="perm"><span class="pc rw">Rec.</span></td><td class="perm"><span class="pc full">Core</span></td></tr>
+          <tr><td>Resident Supervisor / مشرف القاطنين</td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc r">Opt.</span></td></tr>
+          <tr><td>Maintenance Manager / مدير الصيانة</td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc rw">Rec.</span></td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc r">Opt.</span></td></tr>
+          <tr><td>Finance Manager / المدير المالي</td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc r">Opt.</span></td><td class="perm"><span class="pc r">Opt.</span></td><td class="perm"><span class="pc rw">Rec.</span></td><td class="perm"><span class="pc full">Core</span></td></tr>
+          <tr><td>Internal Auditor / المدقّق الداخلي</td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc rw">Rec.</span></td><td class="perm"><span class="pc rw">Rec.</span></td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc full">Core</span></td></tr>
+          <tr><td>System Manager / مدير النظام</td><td class="perm"><span class="pc full">Core</span></td><td class="perm"><span class="pc rw">Rec.</span></td><td class="perm"><span class="pc rw">Rec.</span></td><td class="perm"><span class="pc rw">Rec.</span></td><td class="perm"><span class="pc full">Core</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- DAY 1 -->
+<section class="slide slide--alt" data-section>
+  <div class="inner">
+    <span class="daybadge reveal">DAY 1 · اليوم الأول</span>
+    <div class="sec-title reveal"><h2 class="stagger">Foundations &amp; Navigation</h2><span class="ar stagger">الأساسيات والتنقّل</span></div>
+    <div class="modules reveal">
+      <div class="module stagger"><span class="no">1.1</span><h4>Platform Tour &amp; the 8 Workspaces</h4><span class="arh" dir="rtl">جولة النظام والمساحات الثماني</span><p class="lab"><b>Lab:</b> Open each workspace and bookmark 3 shortcuts on your home dashboard.</p><span class="roles">All roles</span></div>
+      <div class="module stagger"><span class="no">1.2</span><h4>Roles &amp; Permissions</h4><span class="arh" dir="rtl">الأدوار والصلاحيات</span><p class="lab"><b>Lab:</b> Log in as your role; attempt one allowed and one blocked action; record the message.</p><span class="roles">All roles</span></div>
+      <div class="module stagger"><span class="no">1.3</span><h4>The No-GL Philosophy &amp; Ledger</h4><span class="arh" dir="rtl">فلسفة عدم القيد والسجل</span><p class="lab"><b>Lab:</b> Open the Accommodation Ledger and trace one memo entry; confirm it doesn't post to GL.</p><span class="roles">Finance · Auditor</span></div>
+      <div class="module stagger"><span class="no">1.4</span><h4>Master Data &amp; Setup Concepts</h4><span class="arh" dir="rtl">البيانات الرئيسية ومفاهيم الإعداد</span><p class="lab"><b>Lab:</b> In Setup, review master lists (sites, task templates, license types) read-only.</p><span class="roles">SysMgr · Manager</span></div>
+      <div class="module stagger"><span class="no">1.5</span><h4>Dashboards &amp; Reports Catalog</h4><span class="arh" dir="rtl">اللوحات وكتالوج التقارير</span><p class="lab"><b>Lab:</b> Open your role dashboard; run any one report read-only.</p><span class="roles">All roles</span></div>
+    </div>
+    <div class="assess reveal stagger"><b>Checkpoint:</b> Open any workspace, identify your role's permissions, and explain why the ledger is a memo, not GL.<span class="ar" dir="rtl"><b>التقييم:</b> فتح أي مساحة، وتحديد الصلاحيات، وشرح أن السجل مذكّرة لا قيد محاسبي.</span></div>
+  </div>
+</section>
+
+<!-- DAY 2 -->
+<section class="slide" data-section>
+  <div class="inner">
+    <span class="daybadge reveal">DAY 2 · اليوم الثاني</span>
+    <div class="sec-title reveal"><h2 class="stagger">Resident Lifecycle</h2><span class="ar stagger">دورة حياة المقيم</span></div>
+    <div class="modules reveal">
+      <div class="module stagger"><span class="no">2.1</span><h4>Spatial Hierarchy: Site→Building→Room→Bed</h4><span class="arh" dir="rtl">التسلسل المكاني</span><p class="lab"><b>Lab:</b> Create 1 Site, 1 Building, 1 Room and 2 Beds correctly linked.</p><span class="roles">Manager</span></div>
+      <div class="module stagger"><span class="no">2.2</span><h4>Front Desk Check-In</h4><span class="arh" dir="rtl">تسجيل الدخول بالاستقبال</span><p class="lab"><b>Lab:</b> Check a resident into an open bed; confirm the bed turns occupied.</p><span class="roles">Supervisor</span></div>
+      <div class="module stagger"><span class="no">2.3</span><h4>Bed Transfers</h4><span class="arh" dir="rtl">نقل الأسرّة</span><p class="lab"><b>Lab:</b> Transfer one resident on the Transfer Board; verify a Room Bed Transfer record.</p><span class="roles">Supervisor · Manager</span></div>
+      <div class="module stagger"><span class="no">2.4</span><h4>Checkout &amp; Assignment Closure</h4><span class="arh" dir="rtl">المغادرة وإغلاق التخصيص</span><p class="lab"><b>Lab:</b> Check out the resident from 2.2; confirm the bed returns to available.</p><span class="roles">Supervisor</span></div>
+      <div class="module stagger"><span class="no">2.5</span><h4>QR Resident Request Intake</h4><span class="arh" dir="rtl">استقبال طلبات <span dir="ltr">QR</span></span><p class="lab"><b>Lab:</b> Submit a sample issue on the QR form, then find it in the Kanban queue.</p><span class="roles">Supervisor · Maint.</span></div>
+    </div>
+    <div class="assess reveal stagger"><b>Checkpoint:</b> Build a bed, check a resident in, transfer, check out, and locate a QR request.<span class="ar" dir="rtl"><b>التقييم:</b> إنشاء سرير، تسجيل دخول، نقل، خروج، وإيجاد طلب <span dir="ltr">QR</span>.</span></div>
+  </div>
+</section>
+
+<!-- DAY 3 -->
+<section class="slide slide--alt" data-section>
+  <div class="inner">
+    <span class="daybadge reveal">DAY 3 · اليوم الثالث</span>
+    <div class="sec-title reveal"><h2 class="stagger">Maintenance &amp; Safety</h2><span class="ar stagger">الصيانة والسلامة</span></div>
+    <div class="modules reveal">
+      <div class="module stagger"><span class="no">3.1</span><h4>Maintenance Request → Work Order</h4><span class="arh" dir="rtl">طلب صيانة ← أمر عمل</span><p class="lab"><b>Lab:</b> Create a Maintenance Request, then generate a Work Order from it.</p><span class="roles">Maint. Manager</span></div>
+      <div class="module stagger"><span class="no">3.2</span><h4>Work Order Materials &amp; Completion</h4><span class="arh" dir="rtl">مواد أمر العمل والإنجاز</span><p class="lab"><b>Lab:</b> Add materials to the Work Order and mark it complete; verify stock impact.</p><span class="roles">Maint. Manager</span></div>
+      <div class="module stagger"><span class="no">3.3</span><h4>Maintenance &amp; Safety Inspections</h4><span class="arh" dir="rtl">تفتيش الصيانة والسلامة</span><p class="lab"><b>Lab:</b> Record one Maintenance and one Safety inspection, each with a finding.</p><span class="roles">Maint. · Supervisor</span></div>
+      <div class="module stagger"><span class="no">3.4</span><h4>Building Licenses</h4><span class="arh" dir="rtl">تراخيص المباني</span><p class="lab"><b>Lab:</b> Add a Building License with an expiry date; confirm it surfaces in alerts/reports.</p><span class="roles">Manager · SysMgr</span></div>
+      <div class="module stagger"><span class="no">3.5</span><h4>Safety Tasks &amp; Safety Map</h4><span class="arh" dir="rtl">مهام السلامة وخريطتها</span><p class="lab"><b>Lab:</b> Generate a scheduled safety execution, then find the building on the Safety Map.</p><span class="roles">Supervisor · Maint.</span></div>
+    </div>
+    <div class="assess reveal stagger"><b>Checkpoint:</b> Take a request to a completed work order with materials, log an inspection, schedule a safety task.<span class="ar" dir="rtl"><b>التقييم:</b> تحويل طلب لأمر عمل مكتمل بمواد، تسجيل تفتيش، وجدولة مهمة سلامة.</span></div>
+  </div>
+</section>
+
+<!-- DAY 4 -->
+<section class="slide" data-section>
+  <div class="inner">
+    <span class="daybadge reveal">DAY 4 · اليوم الرابع</span>
+    <div class="sec-title reveal"><h2 class="stagger">Custody &amp; Assets</h2><span class="ar stagger">العُهَد والأصول</span></div>
+    <div class="modules reveal">
+      <div class="module stagger"><span class="no">4.1</span><h4>Custody Kiosk: Issue</h4><span class="arh" dir="rtl">كشك العُهَد — الصرف</span><p class="lab"><b>Lab:</b> Issue one item at the kiosk; confirm a Custody Issue record.</p><span class="roles">Supervisor</span></div>
+      <div class="module stagger"><span class="no">4.2</span><h4>Custody Return &amp; Damage Assessment</h4><span class="arh" dir="rtl">الإرجاع وتقييم الضرر</span><p class="lab"><b>Lab:</b> Return the item flagged "damaged"; record an assessment &amp; recovery amount.</p><span class="roles">Supervisor · Finance</span></div>
+      <div class="module stagger"><span class="no">4.3</span><h4>Facility Assets &amp; Movement</h4><span class="arh" dir="rtl">الأصول وحركتها</span><p class="lab"><b>Lab:</b> Register a Facility Asset, then move it to a different building.</p><span class="roles">Manager</span></div>
+      <div class="module stagger"><span class="no">4.4</span><h4>Material Transfer Between Stores</h4><span class="arh" dir="rtl">نقل المواد بين المخازن</span><p class="lab"><b>Lab:</b> Transfer stock between two stores; verify both sides in the Stock Ledger.</p><span class="roles">Maint. · SysMgr</span></div>
+      <div class="module stagger"><span class="no">4.5</span><h4>Custody &amp; Stock Reconciliation</h4><span class="arh" dir="rtl">مطابقة العُهَد والمخزون</span><p class="lab"><b>Lab:</b> Run the stock balance report and reconcile against your 4.1–4.4 entries.</p><span class="roles">Auditor · Finance</span></div>
+    </div>
+    <div class="assess reveal stagger"><b>Checkpoint:</b> Issue &amp; return custody with a damage charge, move an asset, complete a balanced material transfer.<span class="ar" dir="rtl"><b>التقييم:</b> صرف وإرجاع عُهدة مع رسم ضرر، نقل أصل، وإتمام نقل مواد متوازن.</span></div>
+  </div>
+</section>
+
+<!-- DAY 5 -->
+<section class="slide slide--alt" data-section>
+  <div class="inner">
+    <span class="daybadge reveal">DAY 5 · اليوم الخامس</span>
+    <div class="sec-title reveal"><h2 class="stagger">Costs, Ledger, Reports &amp; Admin</h2><span class="ar stagger">التكاليف والسجل والتقارير والإدارة</span></div>
+    <div class="modules reveal">
+      <div class="module stagger"><span class="no">5.1</span><h4>Leases &amp; Rent Schedules</h4><span class="arh" dir="rtl">العقود وجداول الإيجار</span><p class="lab"><b>Lab:</b> Add a Lease with start/end dates and verify the rent schedule rows.</p><span class="roles">Finance · Manager</span></div>
+      <div class="module stagger"><span class="no">5.2</span><h4>Utility Accounts &amp; Bills</h4><span class="arh" dir="rtl">حسابات وفواتير المرافق</span><p class="lab"><b>Lab:</b> Create a Utility Account and enter one bill against a building.</p><span class="roles">Finance</span></div>
+      <div class="module stagger"><span class="no">5.3</span><h4>Cost Allocation &amp; the Ledger</h4><span class="arh" dir="rtl">توزيع التكاليف والسجل</span><p class="lab"><b>Lab:</b> Trigger a cost allocation; confirm matching ledger memos (no GL).</p><span class="roles">Finance · Auditor</span></div>
+      <div class="module stagger"><span class="no">5.4</span><h4>The 21 Reports &amp; Dashboards</h4><span class="arh" dir="rtl">التقارير واللوحات</span><p class="lab"><b>Lab:</b> Run 3 reports across domains (occupancy, cost, custody) and export one.</p><span class="roles">All roles</span></div>
+      <div class="module stagger"><span class="no">5.5</span><h4>Setup, Onboarding &amp; Administration</h4><span class="arh" dir="rtl">الإعداد والتأهيل والإدارة</span><p class="lab"><b>Lab:</b> Add a master record, assign a role to a test user, review default records.</p><span class="roles">SysMgr</span></div>
+    </div>
+    <div class="assess reveal stagger"><b>Checkpoint:</b> Build a lease + rent schedule, post a utility bill, confirm a no-GL memo, run the right report, onboard a user.<span class="ar" dir="rtl"><b>التقييم:</b> عقد وجدول إيجار، فاتورة مرافق، مذكّرة بلا قيد، التقرير الصحيح، وتأهيل مستخدم.</span></div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="slide hero" data-section style="min-height:70vh">
+  <div class="hero__bg"></div>
+  <div class="hero__inner reveal">
+    <h1 class="hero__t-en stagger" style="font-size:clamp(1.8rem,5vw,3.2rem)">One platform. Every bed accounted for.</h1>
+    <p class="hero__t-ar stagger">منصّة واحدة. وكل سرير محسوب.</p>
+    <p class="hero__sub stagger">Start at the <span style="color:var(--mint);font-weight:700">Habitat</span> workspace — your daily command hub — and let the 5-day track build mastery one domain at a time.
+      <span style="font-family:var(--font-ar);display:block;margin-top:8px" dir="rtl">ابدأ من مساحة <span dir="ltr">Habitat</span> — مركز قيادتك اليومي — ودع خطة الأيام الخمسة تبني الإتقان مجالًا تلو الآخر.</span></p>
+  </div>
+  <div class="hero__accent"></div>
+</section>
+
+<script>
+(function(){'use strict';
+  var progress=document.getElementById('progress');
+  function up(){var h=document.documentElement;var s=h.scrollTop/(h.scrollHeight-h.clientHeight||1);if(progress)progress.style.width=(s*100)+'%';}
+  document.querySelectorAll('.reveal').forEach(function(b){b.querySelectorAll('.stagger').forEach(function(c,i){c.style.setProperty('--i',i);});});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('revealed');io.unobserve(e.target);}});},{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+  document.querySelectorAll('.nav__links a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){var t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});});
+  var links=[].slice.call(document.querySelectorAll('.nav__links a[href^="#"]')),lf={};links.forEach(function(a){lf[a.getAttribute('href').slice(1)]=a;});
+  var spy=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&lf[e.target.id]){links.forEach(function(l){l.classList.remove('active');});lf[e.target.id].classList.add('active');}});},{threshold:.4});
+  document.querySelectorAll('[data-section][id]').forEach(function(s){spy.observe(s);});
+  var bg=document.querySelectorAll('.hero__bg'),ticking=false;
+  function px(){var y=window.scrollY*.25;bg.forEach(function(b){b.style.transform='translateY('+y+'px)';});}
+  window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(function(){up();px();ticking=false;});ticking=true;}},{passive:true});
+  up();px();
+})();
+</script>
+</body>
+</html>
