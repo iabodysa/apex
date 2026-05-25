@@ -1,12 +1,6 @@
 {
- "charts": [
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Available Capacity Trend",
-   "label": "Available Capacity Trend"
-  }
- ],
- "content": "[{\"id\": \"5dda5c76e3\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Background Operations Health</b></span>\", \"col\": 12}}, {\"id\": \"bf038d80ac\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 4}}, {\"id\": \"a61bce88b8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 4}}, {\"id\": \"d2456e9355\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 4}}, {\"id\": \"b2affccb93\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Background Engines & Logs</b></span>\", \"col\": 12}}, {\"id\": \"3c81e13d24\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Ledger\", \"col\": 3}}, {\"id\": \"b38bf659a5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Facility Asset Movement\", \"col\": 3}}, {\"id\": \"f32afd70e3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Non-Financial Depreciation Snapshot\", \"col\": 3}}, {\"id\": \"0f3c656fbf\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Instance\", \"col\": 3}}, {\"id\": \"573381fc96\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"0359e1e10f\", \"type\": \"card\", \"data\": {\"card_name\": \"Background Engines & Logs\", \"col\": 12}}, {\"id\": \"Box4GgOsfx\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Engine Insights</b></span>\", \"col\": 12}}, {\"id\": \"r1mpCZEByh\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Ledger Cost This Month\", \"col\": 4}}, {\"id\": \"QvKI43f4nB\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Available Capacity Trend\", \"col\": 12}}]",
+ "charts": [],
+ "content": "[{\"id\": \"LuIQ7ypPYW\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"TpBi6op2QK\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"RuucwAgwy0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"sKD8yaenVP\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 3}}, {\"id\": \"CelUPtn95P\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Ledger Cost This Month\", \"col\": 3}}, {\"id\": \"ydKmgr0h74\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"r4qO3QSm7Z\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"QBIb8KdTuB\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Instance\", \"col\": 3}}, {\"id\": \"mUtkOV6OBs\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Ledger\", \"col\": 3}}, {\"id\": \"nlnnRNGl53\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"ff2hRCgGz9\", \"type\": \"card\", \"data\": {\"card_name\": \"Engines & Ledgers\", \"col\": 4}}, {\"id\": \"D5W1eD1LcK\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 4}}, {\"id\": \"GDOQdtClrw\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}]",
  "creation": "2026-05-25 01:38:02.293790",
  "custom_blocks": [],
  "docstatus": 0,
@@ -19,106 +13,116 @@
  "label": "Console",
  "links": [
   {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Background Engines & Logs",
-   "link_count": 0,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Engines & Ledgers",
+   "idx": 1
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Accommodation Ledger",
-   "link_count": 0,
+   "link_type": "DocType",
    "link_to": "Accommodation Ledger",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
+   "idx": 2
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Stock Ledger",
+   "link_type": "DocType",
+   "link_to": "Accommodation Stock Ledger",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Facility Asset Movement",
-   "link_count": 0,
+   "link_type": "DocType",
    "link_to": "Facility Asset Movement",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
+   "idx": 4
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Non-Financial Depreciation Snapshot",
-   "link_count": 0,
+   "link_type": "DocType",
    "link_to": "Non-Financial Depreciation Snapshot",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
+   "idx": 5
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Scheduled Task Instance",
-   "link_count": 0,
+   "link_type": "DocType",
    "link_to": "Scheduled Task Instance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
+   "idx": 6
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Logs",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Error Log",
-   "link_count": 0,
+   "link_type": "DocType",
    "link_to": "Error Log",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
+   "idx": 8
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Scheduled Job Log",
-   "link_count": 0,
-   "link_to": "Scheduled Job Log",
    "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
+   "link_to": "Scheduled Job Log",
+   "idx": 9
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Settings",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Habitat Settings",
-   "link_count": 0,
-   "link_to": "Habitat Settings",
    "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
+   "link_to": "Habitat Settings",
+   "idx": 11
   }
  ],
- "modified": "2026-06-02 09:00:00.000000",
+ "modified": "2026-06-03 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Console",
  "number_cards": [
   {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Unresolved Alerts",
    "label": "Unresolved Alerts",
-   "number_card_name": "Unresolved Alerts"
+   "idx": 1
   },
   {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Overdue Scheduled Tasks",
    "label": "Overdue Scheduled Tasks",
-   "number_card_name": "Overdue Scheduled Tasks"
+   "idx": 2
   },
   {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Recent Error Logs",
    "label": "Recent Error Logs",
-   "number_card_name": "Recent Error Logs"
+   "idx": 3
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Ledger Cost This Month",
-   "label": "Ledger Cost This Month"
+   "label": "Ledger Cost This Month",
+   "idx": 4
   }
  ],
  "owner": "Administrator",
@@ -136,34 +140,25 @@
  "sequence_id": 9.0,
  "shortcuts": [
   {
-   "doc_view": "",
-   "label": "Accommodation Ledger",
-   "link_to": "Accommodation Ledger",
-   "type": "DocType"
-  },
-  {
-   "doc_view": "",
-   "label": "Facility Asset Movement",
-   "link_to": "Facility Asset Movement",
-   "type": "DocType"
-  },
-  {
-   "doc_view": "",
-   "label": "Non-Financial Depreciation Snapshot",
-   "link_to": "Non-Financial Depreciation Snapshot",
-   "type": "DocType"
-  },
-  {
-   "doc_view": "",
-   "label": "Scheduled Task Instance",
-   "link_to": "Scheduled Task Instance",
-   "type": "DocType"
-  },
-  {
-   "doc_view": "",
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
    "label": "Habitat Settings",
-   "link_to": "Habitat Settings",
-   "type": "DocType"
+   "idx": 1,
+   "link_to": "Habitat Settings"
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Scheduled Task Instance",
+   "idx": 2,
+   "link_to": "Scheduled Task Instance"
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Accommodation Ledger",
+   "idx": 3,
+   "link_to": "Accommodation Ledger"
   }
  ],
  "title": "Console"

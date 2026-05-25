@@ -17,62 +17,63 @@
  "is_default": 0,
  "sequence_id": 1.0,
  "parent_page": "",
- "content": "[{\"id\": \"vJjoPB51XU\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"xGkjopKkuE\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Habitat Operations Setup\", \"col\": 12}}, {\"id\": \"ZcJPLxUL2j\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"8PhzYLSRoF\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"zbdMJ6qu4y\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"i7KV7SvLOE\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"PW9pp8gj7S\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Audit Remediation Plans\", \"col\": 3}}, {\"id\": \"YzqSVSs23R\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"aB7cDeFgHi\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"3We2akrtIo\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"J3yD9OGhZt\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Requests by Status\", \"col\": 6}}, {\"id\": \"KRw44XhqQM\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Scheduled Task Instances by Status\", \"col\": 6}}, {\"id\": \"rvObnXwhQU\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"Dtiph9A1Ce\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Maintenance Request\", \"col\": 4}}, {\"id\": \"kzzWmSWZSM\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Scheduled Task Instance\", \"col\": 4}}, {\"id\": \"esZSC3di2O\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"72gXSENcn6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"LgzRL16ylv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Inspection Report\", \"col\": 3}}, {\"id\": \"P2JLZcUNLB\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"iWoUaL1Au0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Instance\", \"col\": 3}}, {\"id\": \"WgcjDWys5t\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Engine Insights</b></span>\", \"col\": 12}}, {\"id\": \"4Tl8D3Bvpk\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Tasks Due Today\", \"col\": 4}}, {\"id\": \"xH_NToMeo1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Tasks Completed This Month\", \"col\": 4}}, {\"id\": \"9a6PUQCkH9\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Occupancy Percent Trend\", \"col\": 12}}, {\"id\": \"fxnHZy5cp8\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Task Completions Over Time\", \"col\": 12}}]",
+ "content": "[{\"id\": \"9ebnvqk9d2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"f2QamzRaps\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"VPduwKDGHu\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"VOqNTb937f\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"hA122RJZOj\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"n6KIBM1YLM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"fHYMpMaQKz\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"keUaPzYWC6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"zSMQrn6qnc\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"oYL1EfseQf\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"75GED7c9Vn\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Maintenance Request",
-   "link_to": "Maintenance Request",
-   "idx": 1
+   "type": "URL",
+   "label": "Front Desk",
+   "idx": 1,
+   "url": "/app/front-desk"
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
-   "label": "Safety Inspection Report",
-   "link_to": "Safety Inspection Report",
-   "idx": 2
+   "label": "Maintenance Request",
+   "idx": 2,
+   "link_to": "Maintenance Request"
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Accommodation Assignment",
+   "idx": 3,
+   "link_to": "Accommodation Assignment"
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Daily Operations",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Front Desk",
+   "link_type": "Page",
+   "link_to": "front-desk",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Assignment",
+   "link_type": "DocType",
    "link_to": "Accommodation Assignment",
    "idx": 3
   },
   {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Scheduled Task Instance",
-   "link_to": "Scheduled Task Instance",
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Request",
+   "link_type": "DocType",
+   "link_to": "Maintenance Request",
    "idx": 4
   }
  ],
- "links": [],
- "charts": [
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Maintenance Requests by Status",
-   "label": "Maintenance Requests by Status",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Scheduled Task Instances by Status",
-   "label": "Scheduled Task Instances by Status",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Occupancy Percent Trend",
-   "label": "Occupancy Percent Trend"
-  },
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Task Completions Over Time",
-   "label": "Task Completions Over Time"
-  }
- ],
+ "charts": [],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -94,48 +95,11 @@
   },
   {
    "doctype": "Workspace Number Card",
-   "number_card_name": "Open Audit Remediation Plans",
-   "label": "Open Audit Remediation Plans",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Number Card",
    "number_card_name": "Vacant Beds",
    "label": "Vacant Beds",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Unresolved Alerts",
-   "label": "Unresolved Alerts",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Tasks Due Today",
-   "label": "Tasks Due Today"
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Tasks Completed This Month",
-   "label": "Tasks Completed This Month"
+   "idx": 4
   }
  ],
- "quick_lists": [
-  {
-   "doctype": "Workspace Quick List",
-   "document_type": "Maintenance Request",
-   "label": "Maintenance Request",
-   "quick_list_filter": "{\"status\": [\"in\", [\"Open\", \"Assigned\", \"In Progress\", \"Reopened\"]]}",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Quick List",
-   "document_type": "Scheduled Task Instance",
-   "label": "Scheduled Task Instance",
-   "quick_list_filter": "{\"status\": [\"in\", [\"Open\", \"In Progress\"]]}",
-   "idx": 2
-  }
- ],
- "modified": "2026-06-02 09:00:00.000000"
+ "quick_lists": [],
+ "modified": "2026-06-03 09:00:00.000000"
 }
