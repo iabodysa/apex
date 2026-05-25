@@ -17,63 +17,28 @@
  "is_default": 0,
  "sequence_id": 6.0,
  "parent_page": "Habitat",
- "content": "[{\"id\": \"x8filuHNPQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"m12dcDNjVN\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"SX9ce41oqc\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"fndlaJ4Kqw\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Facility Assets Needing Attention\", \"col\": 3}}, {\"id\": \"FQtWNeYKp0\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"ib8BdQQtIC\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Custody Issues by Status\", \"col\": 6}}, {\"id\": \"DCvZ8pQvJF\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Facility Assets by Status\", \"col\": 6}}, {\"id\": \"TKxV1dJR5a\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"EfWXkLDUdq\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Custody Issue\", \"col\": 4}}, {\"id\": \"apoShDIlyA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"YWln3ptBaw\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"fqLqIG5wrE\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"bewuQW40x4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Damage Assessment\", \"col\": 3}}, {\"id\": \"xOC96L7gVF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Facility Asset Movement\", \"col\": 3}}, {\"id\": \"CustArtSC01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Article\", \"col\": 3}}, {\"id\": \"MatTrfSC01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Material Transfer\", \"col\": 3}}, {\"id\": \"StkBalSC01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Stock Balance\", \"col\": 3}}, {\"id\": \"tgWVcqstng\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Custody & Asset Control</b></span>\", \"col\": 12}}, {\"id\": \"UavJYT7Hke\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"coQiGD3ZmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"5E6IhvOOpt\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}, {\"id\": \"IntStrCD01\", \"type\": \"card\", \"data\": {\"card_name\": \"Internal Store\", \"col\": 4}},{\"id\": \"DQMkCY6m7g\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Intercompany Movement Register\", \"col\": 3}}, {\"id\": \"ECRkS3KD1e\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Engine Insights</b></span>\", \"col\": 12}}, {\"id\": \"GViP0HkJ0w\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Assets Moved This Month\", \"col\": 4}}, {\"id\": \"nvAOadMWeU\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Intercompany Moves Pending Acknowledgement\", \"col\": 4}}, {\"id\": \"nqO6nUpJSN\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Asset Book Value\", \"col\": 4}}, {\"id\": \"5AvCVzGOt7\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Asset Movements Over Time\", \"col\": 12}}]",
+ "content": "[{\"id\": \"pZyrZVh4yJ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"cxppVYIyNb\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"h6sOtahi1Z\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"jSgfql5ue2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Facility Assets Needing Attention\", \"col\": 3}}, {\"id\": \"O8NGPvPjvd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Asset Book Value\", \"col\": 3}}, {\"id\": \"GAJ58bRBht\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"h7rPQpwBDF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"Y3kWw6e9qD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"mfipSEPsEv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Material Transfer\", \"col\": 3}}, {\"id\": \"f1V9RqLhsK\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"IxeVMDBiPa\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"6UnKyDIcs2\", \"type\": \"card\", \"data\": {\"card_name\": \"Internal Store\", \"col\": 4}}, {\"id\": \"xKUtrzTnmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"rRLLPGC6jF\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Custody Issue",
-   "link_to": "Custody Issue",
-   "idx": 1
+   "idx": 1,
+   "link_to": "Custody Issue"
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Custody Return",
-   "link_to": "Custody Return",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Custody Damage Assessment",
-   "link_to": "Custody Damage Assessment",
-   "idx": 3
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Facility Asset Movement",
-   "link_to": "Facility Asset Movement",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Report",
-   "label": "Intercompany Movement Register",
-   "link_to": "Intercompany Movement Register",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Custody Article",
-   "link_to": "Custody Article",
-   "idx": 6
+   "idx": 2,
+   "link_to": "Custody Return"
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Accommodation Material Transfer",
-   "link_to": "Accommodation Material Transfer",
-   "idx": 7
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Report",
-   "label": "Accommodation Stock Balance",
-   "link_to": "Accommodation Stock Balance",
-   "idx": 8
+   "idx": 3,
+   "link_to": "Accommodation Material Transfer"
   }
  ],
  "links": [
@@ -110,76 +75,8 @@
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
-   "label": "Facility Assets",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Facility Asset",
-   "link_type": "DocType",
-   "link_to": "Facility Asset",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Facility Asset Custody Assignment",
-   "link_type": "DocType",
-   "link_to": "Facility Asset Custody Assignment",
-   "idx": 7
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Facility Asset Movement",
-   "link_type": "DocType",
-   "link_to": "Facility Asset Movement",
-   "idx": 8
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Non-Financial Depreciation Snapshot",
-   "link_type": "DocType",
-   "link_to": "Non-Financial Depreciation Snapshot",
-   "idx": 9
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Camera Access Grant",
-   "link_type": "DocType",
-   "link_to": "Camera Access Grant",
-   "idx": 10
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Views",
-   "idx": 11
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Custody Damage Register",
-   "link_type": "Report",
-   "link_to": "Custody Damage Register",
-   "idx": 12
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Operational Depreciation Aging",
-   "link_type": "Report",
-   "link_to": "Operational Depreciation Aging",
-   "idx": 13
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
    "label": "Internal Store",
-   "idx": 14
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -187,7 +84,7 @@
    "label": "Accommodation Material Transfer",
    "link_type": "DocType",
    "link_to": "Accommodation Material Transfer",
-   "idx": 15
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
@@ -195,7 +92,7 @@
    "label": "Accommodation Stock Ledger",
    "link_type": "DocType",
    "link_to": "Accommodation Stock Ledger",
-   "idx": 16
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -203,28 +100,86 @@
    "label": "Accommodation Stock Balance",
    "link_type": "Report",
    "link_to": "Accommodation Stock Balance",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Facility Assets",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Facility Asset",
+   "link_type": "DocType",
+   "link_to": "Facility Asset",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Facility Asset Custody Assignment",
+   "link_type": "DocType",
+   "link_to": "Facility Asset Custody Assignment",
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Facility Asset Movement",
+   "link_type": "DocType",
+   "link_to": "Facility Asset Movement",
+   "idx": 12
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Non-Financial Depreciation Snapshot",
+   "link_type": "DocType",
+   "link_to": "Non-Financial Depreciation Snapshot",
+   "idx": 13
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Camera Access Grant",
+   "link_type": "DocType",
+   "link_to": "Camera Access Grant",
+   "idx": 14
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Views",
+   "idx": 15
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Custody Damage Register",
+   "link_type": "Report",
+   "link_to": "Custody Damage Register",
+   "idx": 16
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Operational Depreciation Aging",
+   "link_type": "Report",
+   "link_to": "Operational Depreciation Aging",
    "idx": 17
-  }
- ],
- "charts": [
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Custody Issues by Status",
-   "label": "Custody Issues by Status",
-   "idx": 1
   },
   {
-   "doctype": "Workspace Chart",
-   "chart_name": "Facility Assets by Status",
-   "label": "Facility Assets by Status",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Asset Movements Over Time",
-   "label": "Asset Movements Over Time"
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Intercompany Movement Register",
+   "link_type": "Report",
+   "link_to": "Intercompany Movement Register",
+   "idx": 18
   }
  ],
+ "charts": [],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -246,28 +201,11 @@
   },
   {
    "doctype": "Workspace Number Card",
-   "number_card_name": "Assets Moved This Month",
-   "label": "Assets Moved This Month"
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Intercompany Moves Pending Acknowledgement",
-   "label": "Intercompany Moves Pending Acknowledgement"
-  },
-  {
-   "doctype": "Workspace Number Card",
    "number_card_name": "Total Asset Book Value",
-   "label": "Total Asset Book Value"
+   "label": "Total Asset Book Value",
+   "idx": 4
   }
  ],
- "quick_lists": [
-  {
-   "doctype": "Workspace Quick List",
-   "document_type": "Custody Issue",
-   "label": "Custody Issue",
-   "quick_list_filter": "{\"status\": \"Issued\"}",
-   "idx": 1
-  }
- ],
- "modified": "2026-06-02 09:00:00.000000"
+ "quick_lists": [],
+ "modified": "2026-06-03 09:00:00.000000"
 }

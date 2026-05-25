@@ -14,42 +14,28 @@
  "is_default": 0,
  "sequence_id": 9.0,
  "parent_page": "Habitat",
- "content": "[{\"id\": \"uilz3c82ix\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"9VcW43It6n\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Habitat Operations Setup\", \"col\": 12}}, {\"id\": \"aqdfFdkzZB\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"rcZBNpa6qq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"short_bldg\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Building\", \"col\": 3}}, {\"id\": \"short_room\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Room\", \"col\": 3}}, {\"id\": \"short_mat\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Material\", \"col\": 3}}, {\"id\": \"short_tpl\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Material Template\", \"col\": 3}}, {\"id\": \"pHtxNmsJbc\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup</b></span>\", \"col\": 12}}, {\"id\": \"ubq5yZuVm5\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"id\": \"OKSGAw588f\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"HKO59auXtq\", \"type\": \"card\", \"data\": {\"card_name\": \"Task Master\", \"col\": 4}}, {\"id\": \"tsoFCAKxe3\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"kyZDzLurvT\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility & Utility Master\", \"col\": 4}}, {\"id\": \"maint_master_card\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Master\", \"col\": 4}}]",
+ "content": "[{\"id\": \"FBRNnSUe7y\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"zSADrHqh99\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Building\", \"col\": 3}}, {\"id\": \"YJRcBTSyXy\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"6wA0rc71i4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Template\", \"col\": 3}}, {\"id\": \"49sLz0L1Uz\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"bN73ByWa9q\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}, {\"id\": \"y88VorUFK3\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"e3P1vm2anJ\", \"type\": \"card\", \"data\": {\"card_name\": \"Task Master\", \"col\": 4}}, {\"id\": \"sogylkvU0T\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"yYhIEPDNp2\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility & Utility Master\", \"col\": 4}}, {\"id\": \"J9x9o1yIDV\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Master\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
-   "label": "Habitat Settings",
-   "link_to": "Habitat Settings",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
    "label": "Accommodation Building",
-   "link_to": "Accommodation Building",
-   "idx": 2
+   "idx": 1,
+   "link_to": "Accommodation Building"
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
-   "label": "Accommodation Room",
-   "link_to": "Accommodation Room",
-   "idx": 3
+   "label": "Habitat Settings",
+   "idx": 2,
+   "link_to": "Habitat Settings"
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
-   "label": "Maintenance Material",
-   "link_to": "Maintenance Material",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Maintenance Material Template",
-   "link_to": "Maintenance Material Template",
-   "idx": 5
+   "label": "Scheduled Task Template",
+   "idx": 3,
+   "link_to": "Scheduled Task Template"
   }
  ],
  "links": [
@@ -221,5 +207,5 @@
  "charts": [],
  "number_cards": [],
  "quick_lists": [],
- "modified": "2026-06-01 09:00:00.000000"
+ "modified": "2026-06-03 09:00:00.000000"
 }

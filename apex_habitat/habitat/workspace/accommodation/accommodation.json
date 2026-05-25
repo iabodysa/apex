@@ -17,71 +17,50 @@
  "is_default": 0,
  "sequence_id": 2.0,
  "parent_page": "Habitat",
- "content": "[{\"id\": \"FzZ5YSqxZN\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational Metrics</b></span>\", \"col\": 12}}, {\"id\": \"oyruGqNDeE\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Accommodation Assignments\", \"col\": 3}}, {\"id\": \"wzblrF8elM\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Accommodation Checkouts\", \"col\": 3}}, {\"id\": \"V36vvYW00G\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"PNs4rTgObR\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Occupied Beds\", \"col\": 3}}, {\"id\": \"7M7adVud9h\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"DkiJqe2PXP\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Beds by Status\", \"col\": 6}}, {\"id\": \"46nU3DUDFg\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Action Queue</b></span>\", \"col\": 12}}, {\"id\": \"on2YuVfC94\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Accommodation Checkout\", \"col\": 4}}, {\"id\": \"gS8inC9XZ8\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Access</b></span>\", \"col\": 12}}, {\"id\": \"5byVSe0mLR\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"pZi0TEG2ES\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Checkout\", \"col\": 3}}, {\"id\": \"ZWk7JeBrvh\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Room Bed Transfer\", \"col\": 3}}, {\"id\": \"AccRoomSC01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Room\", \"col\": 3}}, {\"id\": \"FrntDsk0001\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"aC7YeEJ5Ts\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Accommodation Lifecycle</b></span>\", \"col\": 12}}, {\"id\": \"0JwVYP3MFO\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Transactions\", \"col\": 4}}, {\"id\": \"fOUfcspBGy\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}, {\"id\": \"7LNoGQJ1JB\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Active Resident Register\", \"col\": 3}}, {\"id\": \"sqQffyxqmZ\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Checkout Pending Clearance\", \"col\": 3}}, {\"id\": \"HsrAL001xx\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Supervisor Report\", \"col\": 3}}]",
+ "content": "[{\"id\": \"eaKnJiXIZ1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"v7Z9nmSLK7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Accommodation Assignments\", \"col\": 3}}, {\"id\": \"GF9KY19jUm\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Accommodation Checkouts\", \"col\": 3}}, {\"id\": \"KZRPgiv9hj\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"qFcbP395oC\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Occupied Beds\", \"col\": 3}}, {\"id\": \"tWodpekYHU\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"AU1DYOtzOC\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"JZ2mlB7OJD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"FSNXXOZrD2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Checkout\", \"col\": 3}}, {\"id\": \"Ieufvl4kMj\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"mp4HU2s3nG\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}, {\"id\": \"W81gManmPJ\", \"type\": \"card\", \"data\": {\"card_name\": \"Lifecycle\", \"col\": 4}}, {\"id\": \"zmHoma085p\", \"type\": \"card\", \"data\": {\"card_name\": \"Residents & Rooms\", \"col\": 4}}, {\"id\": \"i36f9v7sIW\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
  "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Front Desk",
+   "idx": 1,
+   "url": "/app/front-desk"
+  },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Accommodation Assignment",
-   "link_to": "Accommodation Assignment",
-   "idx": 1
+   "idx": 2,
+   "link_to": "Accommodation Assignment"
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Accommodation Checkout",
-   "link_to": "Accommodation Checkout",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Room Bed Transfer",
-   "link_to": "Room Bed Transfer",
-   "idx": 3
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Report",
-   "label": "Active Resident Register",
-   "link_to": "Active Resident Register",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Report",
-   "label": "Checkout Pending Clearance",
-   "link_to": "Checkout Pending Clearance",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Accommodation Room",
-   "link_to": "Accommodation Room",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Report",
-   "label": "Housing Supervisor Report",
-   "link_to": "Housing Supervisor Report",
-   "idx": 7
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "URL",
-   "label": "Front Desk",
-   "url": "/app/front-desk",
-   "idx": 8
+   "idx": 3,
+   "link_to": "Accommodation Checkout"
   }
  ],
  "links": [
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
-   "label": "Accommodation Transactions",
+   "label": "Daily Operations",
    "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Front Desk",
+   "link_type": "Page",
+   "link_to": "front-desk",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Lifecycle",
+   "idx": 3
   },
   {
    "doctype": "Workspace Link",
@@ -89,7 +68,7 @@
    "label": "Accommodation Assignment",
    "link_type": "DocType",
    "link_to": "Accommodation Assignment",
-   "idx": 2
+   "idx": 4
   },
   {
    "doctype": "Workspace Link",
@@ -97,7 +76,7 @@
    "label": "Accommodation Checkout",
    "link_type": "DocType",
    "link_to": "Accommodation Checkout",
-   "idx": 3
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -105,13 +84,43 @@
    "label": "Room Bed Transfer",
    "link_type": "DocType",
    "link_to": "Room Bed Transfer",
-   "idx": 4
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Residents & Rooms",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Room",
+   "link_type": "DocType",
+   "link_to": "Accommodation Room",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Idle Resident Report",
+   "link_type": "DocType",
+   "link_to": "Idle Resident Report",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Active Resident Register",
+   "link_type": "Report",
+   "link_to": "Active Resident Register",
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Views",
-   "idx": 5
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -119,7 +128,7 @@
    "label": "Accommodation Occupancy Summary",
    "link_type": "Report",
    "link_to": "Accommodation Occupancy Summary",
-   "idx": 6
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -127,18 +136,18 @@
    "label": "Housing Supervisor Report",
    "link_type": "Report",
    "link_to": "Housing Supervisor Report",
-   "onboard": 0,
-   "idx": 7
-  }
- ],
- "charts": [
+   "idx": 13
+  },
   {
-   "doctype": "Workspace Chart",
-   "chart_name": "Beds by Status",
-   "label": "Beds by Status",
-   "idx": 1
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Checkout Pending Clearance",
+   "link_type": "Report",
+   "link_to": "Checkout Pending Clearance",
+   "idx": 14
   }
  ],
+ "charts": [],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -165,14 +174,6 @@
    "idx": 4
   }
  ],
- "quick_lists": [
-  {
-   "doctype": "Workspace Quick List",
-   "document_type": "Accommodation Checkout",
-   "label": "Accommodation Checkout",
-   "quick_list_filter": "{\"docstatus\": 0}",
-   "idx": 1
-  }
- ],
- "modified": "2026-06-02 09:00:00.000000"
+ "quick_lists": [],
+ "modified": "2026-06-03 09:00:00.000000"
 }
