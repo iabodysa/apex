@@ -1,14 +1,18 @@
 {
   "doctype": "Workspace",
   "name": "Maintenance & Remediation",
-  "label": "Maintenance & Remediation",
-  "title": "Maintenance & Remediation",
+  "label": "Upkeep",
+  "title": "Upkeep",
   "module": "Habitat",
   "icon": "tool",
   "public": 1,
   "roles": [
-    {"role": "Accommodation Manager"},
-    {"role": "Resident Supervisor"}
+    {
+      "role": "Accommodation Manager"
+    },
+    {
+      "role": "Resident Supervisor"
+    }
   ],
   "is_default": 0,
   "sequence_id": 4.0,
@@ -188,5 +192,6 @@
       "quick_list_filter": "{\"status\": [\"in\", [\"Open\", \"Assigned\", \"In Progress\", \"Reopened\"]]}",
       "idx": 1
     }
-  ]
+  ],
+  "modified": "2026-05-26 09:00:00.000000"
 }
