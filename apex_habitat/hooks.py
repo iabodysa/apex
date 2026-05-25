@@ -90,6 +90,11 @@ doc_events = {
         "before_save": "apex_habitat.habitat.doctype.custody_asset_category.custody_asset_category.before_save",
     },
     # Phase 5 — Custody and Operational Depreciation
+    "Accommodation Material Transfer": {
+        "validate": "apex_habitat.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.validate",
+        "on_submit": "apex_habitat.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.on_submit",
+        "on_cancel": "apex_habitat.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.on_cancel",
+    },
     "Custody Issue": {
         "validate": "apex_habitat.habitat.doctype.custody_issue.custody_issue.validate",
         "on_submit": "apex_habitat.habitat.doctype.custody_issue.custody_issue.on_submit",
