@@ -11,13 +11,14 @@ import frappe
 # fields under habitat/workspace/ — a mismatch here makes the dedup logic below fail
 # to protect the canonical record and risk deleting the wrong copy.
 APP_WORKSPACE_LABELS = {
-    "Accommodation Lifecycle",
-    "Custody & Asset Control",
-    "Habitat System Administration",
-    "Lease, Utilities & Cost Control",
-    "Maintenance & Remediation",
-    "Operations Command Center",
-    "Safety & Compliance",
+    # Short, ERPNext-collision-free names (v0.8.6 rename; name == title == label).
+    "Habitat",
+    "Accommodation",
+    "Custody",
+    "Upkeep",
+    "Safety",
+    "Costs",
+    "Console",
     "Setup",
 }
 

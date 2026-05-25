@@ -34,3 +34,4 @@ apex_habitat.patches.v0_8.seed_temporary_stay_notification
 
 # v0.8.6 — front desk + idle resident automation
 apex_habitat.patches.v0_8.seed_idle_resident_notification
+apex_habitat.patches.v0_8.rename_workspaces_to_short_names

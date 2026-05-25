@@ -1,6 +1,6 @@
 {
  "doctype": "Workspace",
- "name": "Accommodation Lifecycle",
+ "name": "Accommodation",
  "label": "Accommodation",
  "title": "Accommodation",
  "module": "Habitat",
@@ -174,5 +174,5 @@
    "idx": 1
   }
  ],
- "modified": "2026-06-01 09:00:00.000000"
+ "modified": "2026-06-02 09:00:00.000000"
 }

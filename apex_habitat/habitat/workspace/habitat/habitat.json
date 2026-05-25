@@ -1,6 +1,6 @@
 {
  "doctype": "Workspace",
- "name": "Operations Command Center",
+ "name": "Habitat",
  "label": "Habitat",
  "title": "Habitat",
  "module": "Habitat",
@@ -137,5 +137,5 @@
    "idx": 2
   }
  ],
- "modified": "2026-05-26 09:00:00.000000"
+ "modified": "2026-06-02 09:00:00.000000"
 }
