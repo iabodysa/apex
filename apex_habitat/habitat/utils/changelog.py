@@ -7,6 +7,43 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v0.8.2 ---------------------------------------------------------------
+    {
+        "title": "Apex Habitat v0.8.2 — Decentralized Internal Store Engine & Kanban Boards",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-stock-ledger",
+        "creation": "2026-05-25 12:00:00",
+    },
+    {
+        "title": "v0.8.2: Each building is now its own store — custody issue/return moves stock on the new Accommodation Stock Ledger",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-stock-ledger",
+        "creation": "2026-05-25 12:01:00",
+    },
+    {
+        "title": "v0.8.2: New Accommodation Material Transfer — ship stock between buildings (In Transit → Received) with availability checks",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-material-transfer",
+        "creation": "2026-05-25 12:02:00",
+    },
+    {
+        "title": "v0.8.2: Memo-only finance notification on cross-cost-center transfers (no GL Entry posted)",
+        "app_name": "apex_habitat",
+        "link": "/app/habitat-settings",
+        "creation": "2026-05-25 12:03:00",
+    },
+    {
+        "title": "v0.8.2: New Accommodation Stock Balance report — on-hand quantity and value per store and per employee custody",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-stock-balance/view/report",
+        "creation": "2026-05-25 12:04:00",
+    },
+    {
+        "title": "v0.8.2: Kanban boards for Resident Requests and Maintenance Requests — drag cards across status columns",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-resident-request/view/kanban",
+        "creation": "2026-05-25 12:05:00",
+    },
     # v0.8.0 ---------------------------------------------------------------
     {
         "title": "Apex Habitat v0.8.0 — Supplier Recovery, Native Notifications & Engine Insights",
