@@ -29,22 +29,26 @@ def seed_role_dashboards():
         {
             "name": "Accommodation Manager Dashboard",
             "cards": ["Total Occupancy Percent", "Available Beds", "Imminent Checkouts"],
-            "charts": [{"chart": "Beds by Status", "width": "Half"}]
+            "charts": [{"chart": "Beds by Status", "width": "Half"}, {"chart": "Beds by Building", "width": "Half"}]
         },
         {
             "name": "Resident Supervisor Dashboard",
             "cards": ["Open Resident Requests", "Overdue Safety Tasks", "Custody Items Pending Return"],
-            "charts": [{"chart": "Requests by Status", "width": "Half"}]
+            "charts": [
+                {"chart": "Requests by Status", "width": "Half"},
+                {"chart": "Requests by Priority", "width": "Half"},
+                {"chart": "Work Orders by Status", "width": "Full"}
+            ]
         },
         {
             "name": "Finance Manager Dashboard",
             "cards": ["Active Lease Contracts", "Pending Utility Bills"],
-            "charts": [{"chart": "Monthly Cost Bleeding", "width": "Half"}]
+            "charts": [{"chart": "Monthly Cost Bleeding", "width": "Half"}, {"chart": "Leases by Status", "width": "Half"}]
         },
         {
             "name": "Internal Auditor Dashboard",
             "cards": ["Compliance Percent", "Expiring Licenses", "Idle Residents"],
-            "charts": [{"chart": "Safety Inspections Over Time", "width": "Half"}]
+            "charts": [{"chart": "Safety Inspections Over Time", "width": "Half"}, {"chart": "Findings by Severity", "width": "Half"}]
         }
     ]
     for d in dashboards:
@@ -59,7 +63,7 @@ def seed_role_dashboards():
                 doc.append("cards", c)
             for ch in charts_list:
                 doc.append("charts", ch)
-            doc.save(ignore_permissions=True)
+            doc.save(ignore_permissions=True)  # audit-ok
         else:
             doc = frappe.get_doc({
                 "doctype": "Dashboard",
@@ -70,5 +74,5 @@ def seed_role_dashboards():
                 "cards": cards_list,
                 "charts": charts_list
             })
-            doc.insert(ignore_permissions=True)
+            doc.insert(ignore_permissions=True)  # audit-ok
     frappe.db.commit()
