@@ -1,0 +1,27 @@
+{
+ "cards": [
+  {
+   "card": "Total Occupancy Percent"
+  },
+  {
+   "card": "Available Beds"
+  },
+  {
+   "card": "Imminent Checkouts"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Beds by Status",
+   "width": "Half"
+  }
+ ],
+ "creation": "2026-05-25 00:00:00.000000",
+ "dashboard_name": "Accommodation Manager Dashboard",
+ "doctype": "Dashboard",
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2026-05-25 00:00:00.000000",
+ "module": "Habitat",
+ "name": "Accommodation Manager Dashboard"
+}

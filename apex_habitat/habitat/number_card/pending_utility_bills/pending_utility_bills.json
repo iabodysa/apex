@@ -1,0 +1,14 @@
+{
+ "doctype": "Number Card",
+ "document_type": "Utility Bill Entry",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Pending Utility Bills",
+ "module": "Habitat",
+ "name": "Pending Utility Bills",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "filters_json": "[[\"Utility Bill Entry\", \"status\", \"!=\", \"Paid\"]]"
+}

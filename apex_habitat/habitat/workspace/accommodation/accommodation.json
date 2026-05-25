@@ -157,6 +157,14 @@
    "link_to": "Checkout Pending Clearance",
    "idx": 15,
    "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Manager Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Accommodation Manager Dashboard",
+   "idx": 16
   }
  ],
  "charts": [],

@@ -602,6 +602,13 @@ def daily_occupancy_snapshot() -> None:
                 )
                 total_capacity = frappe.db.get_value("Accommodation Building", building_name, "total_capacity") or 0
                 occ_pct = round(active / total_capacity * 100, 2) if total_capacity else 0.0
+                available_capacity = max(total_capacity - active, 0)
+                
+                annual_cost_per_capacity = frappe.db.get_value("Accommodation Building", building_name, "annual_cost_per_capacity_sar") or 0.0
+                year = int(snapshot_date[:4])
+                days_in_year = 366 if calendar.isleap(year) else 365
+                cost_bleeding = round(available_capacity * (annual_cost_per_capacity / days_in_year), 2)
+                
                 frappe.get_doc({
                     "doctype": "Accommodation Occupancy Snapshot",
                     "snapshot_date": snapshot_date,
@@ -609,7 +616,8 @@ def daily_occupancy_snapshot() -> None:
                     "active_occupants": active,
                     "total_capacity": total_capacity,
                     "occupancy_percent": occ_pct,
-                    "available_capacity": max(total_capacity - active, 0),
+                    "available_capacity": available_capacity,
+                    "cost_bleeding": cost_bleeding,
                     "full_rooms": frappe.db.count("Accommodation Room", {"building": building_name, "status": "Full"}),
                     "partial_rooms": frappe.db.count("Accommodation Room", {"building": building_name, "status": "Partially Occupied"}),
                     "available_rooms": frappe.db.count("Accommodation Room", {"building": building_name, "status": "Available"}),

@@ -15,6 +15,7 @@
   "total_capacity",
   "occupancy_percent",
   "available_capacity",
+  "cost_bleeding",
   "sec_rooms",
   "full_rooms",
   "partial_rooms",
@@ -73,6 +74,11 @@
    "fieldname": "available_capacity",
    "fieldtype": "Int",
    "label": "Available Capacity"
+  },
+  {
+   "fieldname": "cost_bleeding",
+   "fieldtype": "Currency",
+   "label": "Cost Bleeding (SAR)"
   },
   {
    "fieldname": "sec_rooms",

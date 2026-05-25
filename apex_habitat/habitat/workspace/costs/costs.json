@@ -143,6 +143,14 @@
    "link_type": "DocType",
    "link_to": "Accommodation Ledger",
    "idx": 13
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Finance Manager Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Finance Manager Dashboard",
+   "idx": 14
   }
  ],
  "charts": [],
