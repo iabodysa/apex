@@ -57,3 +57,7 @@ afmco_accommodation_architecture_*.json
 
 # Dead code archive.
 archive/
+
+# Local-only: AI brain, generated skills, training decks (never commit)
+.gemini/
+*.pptx
