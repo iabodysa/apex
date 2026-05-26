@@ -60,13 +60,15 @@
    "fieldtype": "Data",
    "in_standard_filter": 1,
    "label": "National ID",
+   "permlevel": 1,
    "search_index": 1
   },
   {
    "fieldname": "phone",
    "fieldtype": "Data",
    "label": "Phone",
-   "options": "Phone"
+   "options": "Phone",
+   "permlevel": 1
   },
   {
    "fieldname": "driver_identity_col",
@@ -110,7 +112,8 @@
   {
    "fieldname": "license_number",
    "fieldtype": "Data",
-   "label": "License Number"
+   "label": "License Number",
+   "permlevel": 1
   },
   {
    "fieldname": "license_expiry",
@@ -216,6 +219,23 @@
    "read": 1,
    "report": 1,
    "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager"
   }
  ],
  "row_format": "Dynamic",

@@ -7,6 +7,7 @@ events or controlled APIs, never trusted from the browser.
 from __future__ import annotations
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now_datetime
 
@@ -17,3 +18,6 @@ class SalisActivityLog(Document):
             self.logged_at = now_datetime()
         if not self.user:
             self.user = frappe.session.user
+
+    def on_trash(self):
+        frappe.throw(_("Salis Activity Log is append-only and cannot be deleted."))

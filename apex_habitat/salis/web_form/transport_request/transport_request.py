@@ -60,6 +60,6 @@ def submit_transport_request(
         "source_channel": "Web QR",
         "status": "New",
     })
-    doc.insert(ignore_permissions=True)
+    doc.insert(ignore_permissions=True)  # audit-ok
     frappe.db.commit()
     return {"name": doc.name, "tracking_code": doc.anonymous_tracking_code}

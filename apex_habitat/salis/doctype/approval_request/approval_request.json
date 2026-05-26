@@ -180,6 +180,13 @@
    "read": 1,
    "report": 1,
    "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
   }
  ],
  "row_format": "Dynamic",

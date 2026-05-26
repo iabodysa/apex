@@ -100,7 +100,7 @@ def _raise_alert(
                 "message": message[:2000],
             }
         )
-        alert.insert(ignore_permissions=True)
+        alert.insert(ignore_permissions=True)  # audit-ok
         alert_name = alert.name
     except Exception:
         frappe.db.rollback()
@@ -147,7 +147,7 @@ def driver_license_expiry_watch() -> None:
         drivers = frappe.get_all(
             "Salis Driver",
             filters={"status": "Active", "license_expiry": ["is", "set"]},
-            fields=["name", "full_name", "license_expiry"],
+            fields=["name", "license_expiry"],
             limit_start=start,
             limit_page_length=BATCH_SIZE,
         )
@@ -157,15 +157,17 @@ def driver_license_expiry_watch() -> None:
         for d in drivers:
             try:
                 days = date_diff(d.license_expiry, today_str)
-                who = d.full_name or d.name
+                # Reference the driver by docname only — never embed PII
+                # (full_name / national_id / phone) in alert text.
+                who = d.name
                 if days < 0:
-                    msg = (f"driver_license_expiry_watch: {who} licence expired "
+                    msg = (f"driver_license_expiry_watch: driver {who} licence expired "
                            f"{abs(days)} days ago ({d.license_expiry}).")
                     logger.warning(msg)
                     _raise_alert("License Expiry", "Critical", msg,
                                  "Salis Driver", d.name, driver=d.name)
                 elif days <= lead_days:
-                    msg = (f"driver_license_expiry_watch: {who} licence expires in "
+                    msg = (f"driver_license_expiry_watch: driver {who} licence expires in "
                            f"{days} days ({d.license_expiry}).")
                     logger.warning(msg)
                     _raise_alert("License Expiry", "Warning", msg,
@@ -239,13 +241,22 @@ def idle_vehicle_watch() -> None:
 
 
 def unreverted_topup_watch() -> None:
-    """Flag temporary fuel top-ups that are past their revert-due date.
+    """Auto-revert temporary fuel top-ups that are past their revert-due date,
+    then raise an alert for each (G42).
 
     Reads Fuel Topup Request ``{is_temporary: 1, reverted: 0,
-    status: not in [Reverted, Cancelled], revert_due_date: < today}`` and
-    raises a Critical "Excessive Topup" alert per overdue row.
+    status in [Approved, Done], revert_due_date: < today}``. For each overdue
+    row it loads the document, sets ``reverted = 1`` and ``status = Reverted``,
+    saves it, writes a Salis Activity Log entry, and still raises a Critical
+    "Excessive Topup" alert.
+
+    Each row is guarded in its own ``try/except`` (rollback + log) so one
+    failure never aborts the batch. No ``commit()`` inside the loop — the
+    scheduler commits the job transaction on success.
     """
     from frappe.utils import today
+
+    from apex_habitat.salis.salis_lib import log_activity
 
     today_str = today()
     logger = frappe.logger()
@@ -257,7 +268,7 @@ def unreverted_topup_watch() -> None:
             filters={
                 "is_temporary": 1,
                 "reverted": 0,
-                "status": ["not in", ["Reverted", "Cancelled"]],
+                "status": ["in", ["Approved", "Done"]],
                 "revert_due_date": ["<", today_str],
             },
             fields=["name", "vehicle", "driver", "revert_due_date", "topup_litres"],
@@ -269,9 +280,26 @@ def unreverted_topup_watch() -> None:
 
         for t in topups:
             try:
+                # --- Auto-revert the overdue temporary top-up ----------------
+                doc = frappe.get_doc("Fuel Topup Request", t.name)
+                doc.reverted = 1
+                doc.status = "Reverted"
+                doc.save(ignore_permissions=True)  # audit-ok
+                log_activity(
+                    "fuel_topup_auto_reverted",
+                    "Fuel Topup Request",
+                    t.name,
+                    {
+                        "reason": "overdue temporary top-up",
+                        "revert_due_date": str(t.revert_due_date),
+                        "topup_litres": t.topup_litres,
+                    },
+                )
+
+                # --- Still raise the alert -----------------------------------
                 msg = (f"unreverted_topup_watch: temporary top-up {t.name} "
                        f"({t.topup_litres} L) was due to be reverted on "
-                       f"{t.revert_due_date} and is still outstanding.")
+                       f"{t.revert_due_date}; it has now been auto-reverted.")
                 logger.warning(msg)
                 _raise_alert("Excessive Topup", "Critical", msg,
                              "Fuel Topup Request", t.name,
@@ -353,7 +381,7 @@ def missing_attendance_watch() -> None:
         drivers = frappe.get_all(
             "Salis Driver",
             filters={"status": "Active"},
-            fields=["name", "full_name"],
+            fields=["name"],
             limit_start=start,
             limit_page_length=BATCH_SIZE,
         )
@@ -368,7 +396,9 @@ def missing_attendance_watch() -> None:
                 )
                 if has_attendance:
                     continue
-                who = d.full_name or d.name
+                # Reference the driver by docname only — never embed PII
+                # (full_name / national_id / phone) in alert text.
+                who = d.name
                 msg = (f"missing_attendance_watch: no attendance recorded today for "
                        f"active driver {who}.")
                 logger.warning(msg)
@@ -453,7 +483,7 @@ def vehicle_utilization_summary() -> None:
                         "logged_at": now_datetime(),
                         "details": json.dumps(details),
                     }
-                ).insert(ignore_permissions=True)
+                ).insert(ignore_permissions=True)  # audit-ok
 
                 plate = v.plate_number or v.name
                 logger.info(

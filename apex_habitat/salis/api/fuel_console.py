@@ -53,7 +53,7 @@ def _log_activity(action: str, name: str, details: dict) -> None:
                 "logged_at": now(),
                 "details": json.dumps(details, default=str),
             }
-        ).insert(ignore_permissions=True)
+        ).insert(ignore_permissions=True)  # audit-ok
     except Exception:
         frappe.db.rollback()
         frappe.log_error(

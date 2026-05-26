@@ -133,8 +133,8 @@
    "label": "Naming Notes"
   },
   {
-   "description": "Reference notes for operational naming series used across Salis transactions.",
    "default": "Handover: GV-.######  |  Vehicle Stop: SV-.######  |  Driver Stop: SD-.######  |  Fuel: NF-.######  |  Ticket: TK-.######",
+   "description": "Reference notes for operational naming series used across Salis transactions.",
    "fieldname": "naming_notes",
    "fieldtype": "Small Text",
    "label": "Naming Series Notes"
@@ -175,6 +175,13 @@
   {
    "read": 1,
    "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
   }
  ],
  "row_format": "Dynamic",

@@ -45,7 +45,8 @@
   {
    "fieldname": "mobile_number",
    "fieldtype": "Data",
-   "label": "Mobile Number"
+   "label": "Mobile Number",
+   "permlevel": 1
   },
   {
    "fieldname": "project",
@@ -176,6 +177,23 @@
   {
    "read": 1,
    "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager"
   }
  ],
  "row_format": "Dynamic",
