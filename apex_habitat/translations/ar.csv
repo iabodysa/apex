@@ -1778,3 +1778,32 @@ Log Count,عدد السجلات
 Total Amount,المبلغ الإجمالي
 Total Litres,إجمالي اللترات
 OK,سليم
+Salis Vehicle Compliance,امتثال المركبة
+Compliance Type,نوع الوثيقة
+Registration (Istimara),الاستمارة
+Insurance,التأمين
+Periodic Inspection,الفحص الدوري
+Operating Card,بطاقة التشغيل
+Compliance Status,حالة الامتثال
+Next Expiry Date,تاريخ الانتهاء القادم
+Compliant,ملتزم
+Not Tracked,غير متتبَّع
+Vehicle Compliance Register,سجل امتثال المركبات
+Days To Expiry,الأيام حتى الانتهاء
+Document No,رقم الوثيقة
+Block Assignment On Expired Compliance,منع الإسناد عند انتهاء الامتثال
+Vehicle {0} has expired compliance documents. Assignment is blocked until compliance is renewed.,المركبة {0} لديها وثائق امتثال منتهية. تم منع الإسناد حتى يتم تجديد الامتثال.
+Warning: Vehicle {0} has expired compliance documents.,تحذير: المركبة {0} لديها وثائق امتثال منتهية.
+Fuel Exception Case,حالة استثناء وقود
+Fuel Exception Register,سجل استثناءات الوقود
+Exception Type,نوع الاستثناء
+Over-Consumption,استهلاك زائد
+GPS Mismatch,عدم تطابق GPS
+Duplicate Claim,مطالبة مكررة
+Suspected Fraud,اشتباه احتيال
+Quota Dispute,نزاع حصة
+Under Investigation,قيد التحقيق
+Evidence Required,إثبات مطلوب
+Amount Recovered,المبلغ المُسترد
+The closer must differ from the person who raised the case.,يجب أن يختلف من يُغلق الحالة عمّن رفعها.
+Evidence required before resolving,الإثبات مطلوب قبل الإغلاق

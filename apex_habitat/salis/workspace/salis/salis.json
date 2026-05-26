@@ -261,9 +261,17 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Exception Case",
+   "link_type": "DocType",
+   "link_to": "Fuel Exception Case",
+   "idx": 24
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Masters & Setup",
-   "idx": 24
+   "idx": 25
   },
   {
    "doctype": "Workspace Link",
@@ -271,7 +279,7 @@
    "label": "Salis Driver",
    "link_type": "DocType",
    "link_to": "Salis Driver",
-   "idx": 25
+   "idx": 26
   },
   {
    "doctype": "Workspace Link",
@@ -279,7 +287,7 @@
    "label": "Vehicle Category",
    "link_type": "DocType",
    "link_to": "Vehicle Category",
-   "idx": 26
+   "idx": 27
   },
   {
    "doctype": "Workspace Link",
@@ -287,7 +295,7 @@
    "label": "Rental Office",
    "link_type": "DocType",
    "link_to": "Rental Office",
-   "idx": 27
+   "idx": 28
   },
   {
    "doctype": "Workspace Link",
@@ -295,7 +303,7 @@
    "label": "Fuel Platform",
    "link_type": "DocType",
    "link_to": "Fuel Platform",
-   "idx": 28
+   "idx": 29
   },
   {
    "doctype": "Workspace Link",
@@ -303,7 +311,7 @@
    "label": "Wash Platform",
    "link_type": "DocType",
    "link_to": "Wash Platform",
-   "idx": 29
+   "idx": 30
   },
   {
    "doctype": "Workspace Link",
@@ -311,7 +319,7 @@
    "label": "Salis Settings",
    "link_type": "DocType",
    "link_to": "Salis Settings",
-   "idx": 30
+   "idx": 31
   }
  ],
  "charts": [],
