@@ -19,6 +19,9 @@
   "condition_notes",
   "vehicle_handover_sec_checklist",
   "handover_check_items",
+  "signed_evidence",
+  "discrepancy_status",
+  "discrepancy_notes",
   "amended_from"
  ],
  "fields": [
@@ -104,6 +107,24 @@
    "fieldtype": "Table",
    "label": "Handover Check Items",
    "options": "Vehicle Handover Item"
+  },
+  {
+   "fieldname": "signed_evidence",
+   "fieldtype": "Attach",
+   "label": "Signed Evidence"
+  },
+  {
+   "default": "Clean",
+   "fieldname": "discrepancy_status",
+   "fieldtype": "Select",
+   "label": "Discrepancy Status",
+   "options": "Clean\nDiscrepancy\nResolved"
+  },
+  {
+   "depends_on": "eval:doc.discrepancy_status!='Clean'",
+   "fieldname": "discrepancy_notes",
+   "fieldtype": "Small Text",
+   "label": "Discrepancy Notes"
   },
   {
    "fieldname": "amended_from",

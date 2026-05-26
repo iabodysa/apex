@@ -28,6 +28,13 @@ class VehicleHandover(Document):
                     )
                 )
 
+    def before_submit(self):
+        if not self.signed_evidence:
+            frappe.throw(_("Signed handover evidence is required before submitting."))
+
+        if self.discrepancy_status == "Discrepancy" and not self.discrepancy_notes:
+            frappe.throw(_("Discrepancy notes are required when the discrepancy status is Discrepancy."))
+
     def on_submit(self):
         lock_vehicle(self.vehicle)
 

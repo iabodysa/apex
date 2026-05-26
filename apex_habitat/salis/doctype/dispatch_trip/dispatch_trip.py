@@ -22,6 +22,31 @@ class DispatchTrip(Document):
         self._enforce_status_flow()
         self._validate_odometer()
         self._enforce_compliance()
+        self._require_completion_notes()
+
+    def before_submit(self):
+        self._enforce_dispatch_readiness()
+
+    def _enforce_dispatch_readiness(self):
+        """tiered authorityG50: a trip must be ready before it is submitted."""
+        required = {
+            "route_plan": _("Route Plan"),
+            "vehicle": _("Vehicle"),
+            "driver": _("Driver"),
+            "trip_date": _("Trip Date"),
+        }
+        for fieldname, label in required.items():
+            if not self.get(fieldname):
+                frappe.throw(
+                    _("Dispatch readiness: {0} is required before submitting.").format(label)
+                )
+
+    def _require_completion_notes(self):
+        """Completion Notes are mandatory once the trip is marked Completed."""
+        if self.status == "Completed" and not (self.completion_notes or "").strip():
+            frappe.throw(
+                _("Completion Notes are required when the trip status is Completed.")
+            )
 
     def _enforce_compliance(self):
         """Block (or warn) when the linked vehicle's compliance has expired.

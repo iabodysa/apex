@@ -15,6 +15,7 @@
   "status",
   "odometer_start",
   "odometer_end",
+  "completion_notes",
   "amended_from"
  ],
  "fields": [
@@ -81,6 +82,12 @@
    "fieldname": "odometer_end",
    "fieldtype": "Int",
    "label": "Odometer End"
+  },
+  {
+   "depends_on": "eval:doc.status=='Completed'",
+   "fieldname": "completion_notes",
+   "fieldtype": "Small Text",
+   "label": "Completion Notes"
   },
   {
    "fieldname": "amended_from",
