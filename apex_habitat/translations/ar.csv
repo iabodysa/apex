@@ -1833,3 +1833,148 @@ Fulfilled,مُنفّذ
 Trips This Month,الرحلات هذا الشهر
 Assigned Vehicle,المركبة المسندة
 Assigned Driver,السائق المسند
+Fuel Claim,مطالبة وقود
+Vehicle Damage Write-Off,شطب أضرار مركبة
+Movement Cost Recovery,استرداد تكلفة حركة
+Movement Cost Transfer,تحويل تكلفة حركة
+Driver Clearance,إخلاء طرف سائق
+Rental Vehicle Movement,حركة مركبة مستأجرة
+Rental Accrual Ledger,دفتر استحقاق الإيجار
+Rental Settlement,تسوية الإيجار
+Rental Settlement Item,بند تسوية الإيجار
+Fuel Consumption Ledger,دفتر استهلاك الوقود
+Trip Fulfilment Ledger,دفتر تنفيذ الرحلات
+Vehicle Utilisation Snapshot,لقطة استغلال المركبة
+Quota Increase Claim,مطالبة زيادة الحصة
+Claimed Litres,اللترات المطالب بها
+Claimed Amount (SAR),المبلغ المطالب به (ريال سعودي)
+Variance (L),الفرق (لتر)
+Source Handover,تسليم المصدر
+Recommended Action,الإجراء الموصى به
+Recovery Type,نوع الاسترداد
+Acknowledgement Received,تم استلام الإقرار
+Payment Request,طلب دفع
+Source Reference,مرجع المصدر
+Reference Document Type,نوع مستند المرجع
+Basis / Evidence,الأساس / الأدلة
+Transfer Type,نوع التحويل
+From Project,من المشروع
+From Cost Center,من مركز التكلفة
+To Project,إلى المشروع
+To Cost Center,إلى مركز التكلفة
+Clearance Reason,سبب إخلاء الطرف
+Returns And Outstanding Items,المرتجعات والبنود المعلّقة
+Vehicle Returned,تم إرجاع المركبة
+Fuel Chip Returned,تم إرجاع شريحة الوقود
+Custody Returned,تم إرجاع العهدة
+Outstanding Fuel Exceptions,حالات استثناء وقود معلّقة
+Outstanding Recoveries,عمليات استرداد معلّقة
+Movement Type,نوع الحركة
+Daily Rate,السعر اليومي
+Fuel Level,مستوى الوقود
+Signed Evidence,إثبات موقّع
+Accrual Date,تاريخ الاستحقاق
+Amount,المبلغ
+Settled,تمت التسوية
+Settlement,التسوية
+Period Month,شهر الفترة
+Vehicles,المركبات
+Totals,الإجماليات
+Accrued Total,إجمالي المستحق
+Claimed Total,إجمالي المطالب به
+Days,الأيام
+Source Type,نوع المصدر
+On Time,في الوقت المحدد
+Period (Days),الفترة (أيام)
+Trips Count,عدد الرحلات
+Idle Days,أيام التوقف
+Utilisation %,نسبة الاستغلال %
+Document Number,رقم المستند
+Case Details,تفاصيل الحالة
+Amount Recovered (SAR),المبلغ المسترد (ريال سعودي)
+Pickup Point,نقطة الالتقاط
+Escalation State,حالة التصعيد
+Discrepancy Status,حالة التباين
+Discrepancy Notes,ملاحظات التباين
+Requested By (Operations),طلب بواسطة (العمليات)
+Fulfilled By (Movement),نُفِّذ بواسطة (الحركة)
+Fulfilled On,تاريخ التنفيذ
+Inactivity Evidence,إثبات عدم النشاط
+Owner Acknowledged,إقرار المالك
+Escalated To Tier,تم التصعيد إلى المستوى
+Escalation Log,سجل التصعيد
+Compliance Documents,مستندات الامتثال
+Finance Decision,قرار المالية
+Is Cross Region,عابر للمناطق
+Estimated Monthly Saving,الوفر الشهري المقدّر
+Destination,الوجهة
+Submitted to Movement,مُرسل إلى الحركة
+Reconciled,تمت المطابقة
+Write-Off,شطب
+Recover from Driver,استرداد من السائق
+Insurance Claim,مطالبة تأمين
+Recovered,مُسترد
+Waived,مُعفى
+Posted (memo),مُرحّل (مذكرة)
+Cleared,تم إخلاء الطرف
+Blocked,محظور
+Receipt,استلام
+Return,إرجاع
+ThreeQuarter,ثلاثة أرباع
+Resignation,استقالة
+End of Assignment,انتهاء التكليف
+Vehicle Damage,أضرار مركبة
+Fuel Misuse,إساءة استخدام الوقود
+Custody Loss,فقدان عهدة
+Within Authority,ضمن الصلاحية
+Escalated,مُصعّد
+Clean,سليم
+Discrepancy,تباين
+Trip Cost,تكلفة الرحلة
+Quarter,ربع
+A handover discrepancy was recorded. Please raise a Vehicle Damage Write-Off for vehicle {0} to obtain tiered write-off approval.,تم تسجيل تباين في التسليم. يُرجى فتح شطب أضرار مركبة للمركبة {0} للحصول على موافقة الشطب وفق المستويات.
+Accommodation Building and Project are required for an Accommodation to Project Shuttle.,مبنى السكن والمشروع مطلوبان لرحلة النقل من السكن إلى المشروع.
+Amount must be greater than zero.,يجب أن يكون المبلغ أكبر من صفر.
+At least one worker is required for an Inter-City Relocation.,يلزم عامل واحد على الأقل لعملية النقل بين المدن.
+Basis / Evidence is required before a recovery can be Approved.,يجب توفير الأساس / الأدلة قبل اعتماد عملية الاسترداد.
+Cannot change Fuel Claim status from {0} to {1}.,لا يمكن تغيير حالة مطالبة الوقود من {0} إلى {1}.
+Cannot change Fuel Exception Case status from {0} to {1}.,لا يمكن تغيير حالة حالة استثناء الوقود من {0} إلى {1}.
+Cannot change Payment Request status from {0} to {1}.,لا يمكن تغيير حالة طلب الدفع من {0} إلى {1}.
+Claimed Litres must be greater than zero.,يجب أن تكون اللترات المطالب بها أكبر من صفر.
+Clearance is blocked. The following must be resolved first: {0}.,إخلاء الطرف محظور. يجب أولاً معالجة ما يلي: {0}.
+Completion Notes are required when the trip status is Completed.,ملاحظات الإنجاز مطلوبة عندما تكون حالة الرحلة مكتملة.
+Daily Rate cannot be negative.,لا يمكن أن يكون السعر اليومي سالباً.
+Daily Rate is required on a Receipt movement.,السعر اليومي مطلوب في حركة الاستلام.
+Destination is required for an Administrative Trip / Document Signing.,الوجهة مطلوبة للرحلة الإدارية / توقيع المستندات.
+Discrepancy notes are required when the discrepancy status is Discrepancy.,ملاحظات التباين مطلوبة عندما تكون حالة التباين «تباين».
+Dispatch readiness: {0} is required before submitting.,جاهزية الإرسال: {0} مطلوب قبل الاعتماد.
+Evidence is required before moving the write-off case beyond Open.,الأدلة مطلوبة قبل نقل حالة الشطب إلى ما بعد «مفتوح».
+Evidence is required to submit a stop with reason {0}.,الأدلة مطلوبة لاعتماد توقّف بسبب {0}.
+From Cost Center and To Cost Center must be different when both are set.,يجب أن يختلف مركز التكلفة المصدر عن مركز التكلفة الهدف عند تحديد كليهما.
+From Project and To Project must be different for a cost transfer.,يجب أن يختلف المشروع المصدر عن المشروع الهدف في تحويل التكلفة.
+Fuel consumption {0} L for vehicle {1} in period {2} exceeds the monthly quota of {3} L by {4} L (quota {5}).,استهلاك الوقود {0} لتر للمركبة {1} في الفترة {2} يتجاوز الحصة الشهرية البالغة {3} لتر بمقدار {4} لتر (الحصة {5}).
+Inactivity evidence is required to submit a fuel chip cancellation.,إثبات عدم النشاط مطلوب لاعتماد إلغاء شريحة الوقود.
+Owner acknowledgement is required to submit a fuel chip cancellation.,إقرار المالك مطلوب لاعتماد إلغاء شريحة الوقود.
+Rental settlement {0} for period {1}.,تسوية إيجار {0} للفترة {1}.
+Request Type {0} is not valid for the {1} service line.,نوع الطلب {0} غير صالح لخط الخدمة {1}.
+Signed handover evidence is required before submitting.,إثبات تسليم موقّع مطلوب قبل الاعتماد.
+Source not installed: {0},المصدر غير مُثبّت: {0}
+Submit the settlement before raising a payment request.,اعتمد التسوية قبل إنشاء طلب دفع.
+This request requires {0}-tier authority. The approver on Approval Request {1} does not hold the required tier.,يتطلب هذا الطلب صلاحية من المستوى {0}. المعتمِد في طلب الاعتماد {1} لا يملك المستوى المطلوب.
+Vehicle {0} has expired compliance and cannot be dispatched/assigned.,المركبة {0} لديها امتثال منتهي الصلاحية ولا يمكن إرسالها/تكليفها.
+Vehicle {0} is not a rented vehicle (ownership is {1}).,المركبة {0} ليست مركبة مستأجرة (نوع الملكية {1}).
+Warning: vehicle {0} has expired compliance.,تحذير: المركبة {0} لديها امتثال منتهي الصلاحية.
+"{0} — Escalated to {1} tier: approver {2} holds {3}, request requires {4}.",{0} — تم التصعيد إلى المستوى {1}: المعتمِد {2} يملك {3}، والطلب يتطلب {4}.
+Average Vehicle Utilisation %,متوسط نسبة استغلال المركبات %
+Completed Dispatch Trips,رحلات الإرسال المكتملة
+Fuel Consumption (Litres),استهلاك الوقود (لترات)
+Inter-City Transport Requests,طلبات النقل بين المدن
+Open Fuel Exception Cases,حالات استثناء وقود مفتوحة
+Open Movement Cost Recoveries,عمليات استرداد تكلفة حركة مفتوحة
+Pending Transport Requests,طلبات نقل معلّقة
+Quota Litres,لترات الحصة
+Rental Accrual (Amount),استحقاق الإيجار (المبلغ)
+Total Dispatch Trips,إجمالي رحلات الإرسال
+Trip Fulfilment Ledger Rows,صفوف دفتر تنفيذ الرحلات
+Trip Fulfilment Rate,معدل تنفيذ الرحلات
+Value,القيمة

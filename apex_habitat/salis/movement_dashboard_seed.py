@@ -223,6 +223,9 @@ _CHARTS = [
     {"name": "Vehicle Utilisation", "document_type": "Vehicle Utilisation Snapshot",
      "type": "Bar", "chart_type": "Group By", "group_by_based_on": "vehicle",
      "group_by_type": "Average", "aggregate_function_based_on": "utilisation_pct"},
+    # Cost Recovery by Type — Movement Cost Recovery grouped by recovery_type (NEW; guarded).
+    {"name": "Cost Recovery by Type", "document_type": "Movement Cost Recovery",
+     "type": "Donut", "chart_type": "Group By", "group_by_based_on": "recovery_type"},
 ]
 
 _CARDS = [
@@ -250,6 +253,21 @@ _CARDS = [
     {"name": "Inter-City Requests This Month", "document_type": "Transport Request",
      "filters": [["Transport Request", "request_type", "=", "Inter-City Relocation"],
                  ["Transport Request", "pickup_datetime", "Timespan", "this month"]]},
+    # Open Fuel Claims — Fuel Claim awaiting Movement reconciliation (NEW; guarded).
+    {"name": "Open Fuel Claims", "document_type": "Fuel Claim",
+     "filters": [["Fuel Claim", "status", "=", "Submitted to Movement"]]},
+    # Open Cost Recoveries — Movement Cost Recovery status "Open" (NEW; guarded).
+    {"name": "Open Cost Recoveries", "document_type": "Movement Cost Recovery",
+     "filters": [["Movement Cost Recovery", "status", "=", "Open"]]},
+    # Pending Vehicle Write-Offs — Vehicle Damage Write-Off under review (NEW; guarded).
+    {"name": "Pending Vehicle Write-Offs", "document_type": "Vehicle Damage Write-Off",
+     "filters": [["Vehicle Damage Write-Off", "status", "=", "Under Review"]]},
+    # Rental Settlements This Month — Rental Settlement created this month (NEW; guarded).
+    {"name": "Rental Settlements This Month", "document_type": "Rental Settlement",
+     "filters": [["Rental Settlement", "creation", "Timespan", "this month"]]},
+    # Blocked Driver Clearances — Driver Clearance status "Blocked" (NEW; guarded).
+    {"name": "Blocked Driver Clearances", "document_type": "Driver Clearance",
+     "filters": [["Driver Clearance", "status", "=", "Blocked"]]},
 ]
 
 
@@ -280,10 +298,14 @@ def seed_movement_dashboards(*args, **kwargs):
                 ("Trip Fulfilment Over Time", "Half"),
                 ("Fuel Consumption by Month", "Half"),
                 ("Rental Accrual by Office", "Half"),
-                ("Vehicle Utilisation", "Full")],
+                ("Vehicle Utilisation", "Full"),
+                ("Cost Recovery by Type", "Half")],
         cards=["Completed Trips Today", "Completed Trips This Month",
                "Pending Transport Requests", "Open Fuel Exception Cases",
                "Rental Accrual This Month", "Vehicles Tracked",
-               "Inter-City Requests This Month"],
+               "Inter-City Requests This Month",
+               "Open Fuel Claims", "Open Cost Recoveries",
+               "Pending Vehicle Write-Offs", "Rental Settlements This Month",
+               "Blocked Driver Clearances"],
     )
     frappe.db.commit()

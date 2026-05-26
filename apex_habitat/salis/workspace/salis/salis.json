@@ -23,7 +23,7 @@
  "is_default": 0,
  "sequence_id": 2.0,
  "parent_page": "",
- "content": "[{\"id\": \"salisHdrAct\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salisScTransport\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"salisScDispatch\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"salisScFuel\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"salisScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"salisScVehicle\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"salisScDriver\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"salisScTicket\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"salisScTransfer\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sponsorship Transfer Case\", \"col\": 3}}, {\"id\": \"salisHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"salisCardFleet\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet\", \"col\": 4}}, {\"id\": \"salisCardFuel\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"salisCardMove\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement\", \"col\": 4}}, {\"id\": \"salisCardGov\", \"type\": \"card\", \"data\": {\"card_name\": \"Governance & Support\", \"col\": 4}}, {\"id\": \"salisCardSetup\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters & Setup\", \"col\": 4}}]",
+ "content": "[{\"id\": \"salisHdrAct\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salisScTransport\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"salisScDispatch\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"salisScFuel\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"salisScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"salisScVehicle\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"salisScDriver\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"salisScTicket\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"salisScTransfer\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sponsorship Transfer Case\", \"col\": 3}}, {\"id\": \"salisScFuelClaim\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Claim\", \"col\": 3}}, {\"id\": \"salisScRentalSettle\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"salisScKpi\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Movement KPI Summary\", \"col\": 3}}, {\"id\": \"salisHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"salisCardFleet\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet\", \"col\": 4}}, {\"id\": \"salisCardFuel\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"salisCardMove\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement\", \"col\": 4}}, {\"id\": \"salisCardGov\", \"type\": \"card\", \"data\": {\"card_name\": \"Governance & Support\", \"col\": 4}}, {\"id\": \"salisCardSetup\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters & Setup\", \"col\": 4}}, {\"id\": \"salisCardMoveOps\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement Ops\", \"col\": 4}}, {\"id\": \"salisCardCosts\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs & Settlement\", \"col\": 4}}, {\"id\": \"salisCardLedgers\", \"type\": \"card\", \"data\": {\"card_name\": \"Engine Ledgers / Audit\", \"col\": 4}}, {\"id\": \"salisCardReports\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -80,6 +80,27 @@
    "label": "Sponsorship Transfer Case",
    "link_to": "Sponsorship Transfer Case",
    "idx": 8
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Fuel Claim",
+   "link_to": "Fuel Claim",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Rental Settlement",
+   "link_to": "Rental Settlement",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "Report",
+   "label": "Movement KPI Summary",
+   "link_to": "Movement KPI Summary",
+   "idx": 11
   }
  ],
  "links": [
@@ -328,6 +349,182 @@
    "link_type": "DocType",
    "link_to": "Salis Settings",
    "idx": 32
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Movement Ops",
+   "idx": 33
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Claim",
+   "link_type": "DocType",
+   "link_to": "Fuel Claim",
+   "idx": 34
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Driver Clearance",
+   "link_type": "DocType",
+   "link_to": "Driver Clearance",
+   "idx": 35
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Costs & Settlement",
+   "idx": 36
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Rental Vehicle Movement",
+   "link_type": "DocType",
+   "link_to": "Rental Vehicle Movement",
+   "idx": 37
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Rental Settlement",
+   "link_type": "DocType",
+   "link_to": "Rental Settlement",
+   "idx": 38
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Movement Cost Transfer",
+   "link_type": "DocType",
+   "link_to": "Movement Cost Transfer",
+   "idx": 39
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Movement Cost Recovery",
+   "link_type": "DocType",
+   "link_to": "Movement Cost Recovery",
+   "idx": 40
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Damage Write-Off",
+   "link_type": "DocType",
+   "link_to": "Vehicle Damage Write-Off",
+   "idx": 41
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Engine Ledgers / Audit",
+   "idx": 42
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Rental Accrual Ledger",
+   "link_type": "DocType",
+   "link_to": "Rental Accrual Ledger",
+   "idx": 43
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Consumption Ledger",
+   "link_type": "DocType",
+   "link_to": "Fuel Consumption Ledger",
+   "idx": 44
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Trip Fulfilment Ledger",
+   "link_type": "DocType",
+   "link_to": "Trip Fulfilment Ledger",
+   "idx": 45
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Utilisation Snapshot",
+   "link_type": "DocType",
+   "link_to": "Vehicle Utilisation Snapshot",
+   "idx": 46
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Reports",
+   "idx": 47
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Claim Register",
+   "link_type": "Report",
+   "link_to": "Fuel Claim Register",
+   "idx": 48
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Movement Cost Recovery Register",
+   "link_type": "Report",
+   "link_to": "Movement Cost Recovery Register",
+   "idx": 49
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Driver Clearance Register",
+   "link_type": "Report",
+   "link_to": "Driver Clearance Register",
+   "idx": 50
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Rental Settlement Register",
+   "link_type": "Report",
+   "link_to": "Rental Settlement Register",
+   "idx": 51
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Reconciliation",
+   "link_type": "Report",
+   "link_to": "Fuel Reconciliation",
+   "idx": 52
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Worker Transport Plan",
+   "link_type": "Report",
+   "link_to": "Worker Transport Plan",
+   "idx": 53
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Compliance Register",
+   "link_type": "Report",
+   "link_to": "Vehicle Compliance Register",
+   "idx": 54
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Movement KPI Summary",
+   "link_type": "Report",
+   "link_to": "Movement KPI Summary",
+   "idx": 55
   }
  ],
  "charts": [],
