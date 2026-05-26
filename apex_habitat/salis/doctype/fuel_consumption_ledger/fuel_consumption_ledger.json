@@ -17,7 +17,9 @@
   "logged_at",
   "fuel_consumption_ledger_sec_system",
   "source_type",
-  "source_name"
+  "source_doctype",
+  "source_name",
+  "reversal_of"
  ],
  "fields": [
   {
@@ -92,11 +94,24 @@
    "read_only": 1
   },
   {
+   "fieldname": "source_doctype",
+   "fieldtype": "Data",
+   "label": "Source DocType",
+   "read_only": 1
+  },
+  {
    "fieldname": "source_name",
    "fieldtype": "Data",
    "label": "Source Document",
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Fuel Consumption Ledger",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tint",

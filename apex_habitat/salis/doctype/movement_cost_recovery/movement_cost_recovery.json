@@ -1,0 +1,257 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 11:00:00.000000",
+ "description": "Movement-domain cost recovery record. Documents recovery of a loss (vehicle damage, fuel misuse, custody loss, fine) with tiered authority and audit. Any actual salary deduction stays in Finance/HR via a referenced Payment Request; Movement only documents the recovery.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "mcr_tab_overview",
+  "mcr_sec_overview",
+  "recovery_type",
+  "vehicle",
+  "driver",
+  "employee",
+  "mcr_overview_col",
+  "request_date",
+  "status",
+  "naming_series",
+  "mcr_sec_amounts",
+  "amount",
+  "acknowledgement_received",
+  "mcr_amounts_col",
+  "payment_request",
+  "mcr_sec_reference",
+  "reference_doctype",
+  "reference_name",
+  "mcr_reference_col",
+  "basis_evidence",
+  "mcr_sec_system",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "mcr_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "mcr_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details"
+  },
+  {
+   "fieldname": "recovery_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Recovery Type",
+   "options": "Vehicle Damage\nFuel Misuse\nCustody Loss\nFine / Violation\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "search_index": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "search_index": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "mcr_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "request_date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Request Date"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nAcknowledged\nApproved\nRecovered\nWaived\nRejected"
+  },
+  {
+   "default": "MCR-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "MCR-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mcr_sec_amounts",
+   "fieldtype": "Section Break",
+   "label": "Amounts"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount (SAR)",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Set when the driver/employee has acknowledged responsibility for the loss.",
+   "fieldname": "acknowledgement_received",
+   "fieldtype": "Check",
+   "label": "Acknowledgement Received"
+  },
+  {
+   "fieldname": "mcr_amounts_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Reference-only link to the Finance/HR Payment Request that handles the actual deduction. Movement does not post any payment.",
+   "fieldname": "payment_request",
+   "fieldtype": "Link",
+   "label": "Payment Request",
+   "options": "Salis Payment Request",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mcr_sec_reference",
+   "fieldtype": "Section Break",
+   "label": "Source Reference"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference Document Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "mcr_reference_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Supporting evidence for the loss and its valuation. Required before the recovery can be Approved.",
+   "fieldname": "basis_evidence",
+   "fieldtype": "Attach",
+   "label": "Basis / Evidence",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mcr_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Info"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Movement Cost Recovery",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 11:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Movement Cost Recovery",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Operations Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "recovery_type",
+ "track_changes": 1
+}

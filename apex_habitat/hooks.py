@@ -231,6 +231,7 @@ has_permission = {
     "Transport Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Route Plan": "apex_habitat.salis.permissions.scoped_has_permission",
     "Sponsorship Transfer Case": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Salis Payment Request": "apex_habitat.salis.permissions.payment_sod_has_permission",
 }
 
 # Fixtures shipped with the app

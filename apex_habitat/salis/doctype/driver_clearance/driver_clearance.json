@@ -1,0 +1,228 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 12:00:00.000000",
+ "description": "Movement-domain exit clearance for a driver (tiered authorityG60). Confirms vehicle, fuel chip, and custody return and blocks clearance while open fuel exception cases or cost recoveries remain. HR EOSB/visa clearance is out of scope.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "driver_clearance_tab_overview",
+  "driver_clearance_sec_overview",
+  "driver",
+  "clearance_reason",
+  "assigned_vehicle",
+  "driver_clearance_overview_col",
+  "status",
+  "naming_series",
+  "driver_clearance_sec_returns",
+  "vehicle_returned",
+  "fuel_chip_returned",
+  "custody_returned",
+  "driver_clearance_returns_col",
+  "outstanding_fuel_exceptions",
+  "outstanding_recoveries",
+  "driver_clearance_sec_notes",
+  "notes",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "driver_clearance_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "driver_clearance_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "clearance_reason",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Clearance Reason",
+   "options": "Resignation\nTransfer\nTermination\nEnd of Assignment"
+  },
+  {
+   "description": "The driver's current assigned vehicle, captured for reference.",
+   "fieldname": "assigned_vehicle",
+   "fieldtype": "Link",
+   "label": "Assigned Vehicle",
+   "options": "Salis Vehicle",
+   "read_only": 1
+  },
+  {
+   "fieldname": "driver_clearance_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nIn Progress\nCleared\nBlocked"
+  },
+  {
+   "default": "DCL-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "DCL-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "driver_clearance_sec_returns",
+   "fieldtype": "Section Break",
+   "label": "Returns And Outstanding Items"
+  },
+  {
+   "default": "0",
+   "fieldname": "vehicle_returned",
+   "fieldtype": "Check",
+   "label": "Vehicle Returned"
+  },
+  {
+   "default": "0",
+   "fieldname": "fuel_chip_returned",
+   "fieldtype": "Check",
+   "label": "Fuel Chip Returned"
+  },
+  {
+   "default": "0",
+   "fieldname": "custody_returned",
+   "fieldtype": "Check",
+   "label": "Custody Returned"
+  },
+  {
+   "fieldname": "driver_clearance_returns_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Count of open Fuel Exception Case records for this driver. Must be zero to clear.",
+   "fieldname": "outstanding_fuel_exceptions",
+   "fieldtype": "Int",
+   "label": "Outstanding Fuel Exceptions",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Count of open Movement Cost Recovery records for this driver. Must be zero to clear.",
+   "fieldname": "outstanding_recoveries",
+   "fieldtype": "Int",
+   "label": "Outstanding Recoveries",
+   "read_only": 1
+  },
+  {
+   "fieldname": "driver_clearance_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Driver Clearance",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Driver Clearance",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Operations Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "driver",
+ "track_changes": 1
+}

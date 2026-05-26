@@ -18,10 +18,13 @@ import frappe
 from frappe.utils import flt, today
 
 
-def _is_currently_received(vehicle: str, posting_date: str) -> tuple[bool, str | None, float]:
+def _is_currently_received(
+    vehicle: str, posting_date: str
+) -> tuple[bool, str | None, float, str | None]:
     """A rented vehicle is in-service when its latest submitted Rental Vehicle
     Movement on or before ``posting_date`` is a Receipt (i.e. there is an open
-    Receipt with no later Return). Returns (in_service, rental_office, daily_rate).
+    Receipt with no later Return). Returns
+    (in_service, rental_office, daily_rate, movement_name).
     """
     latest = frappe.get_all(
         "Rental Vehicle Movement",
@@ -30,16 +33,16 @@ def _is_currently_received(vehicle: str, posting_date: str) -> tuple[bool, str |
             "docstatus": 1,
             "movement_date": ["<=", posting_date],
         },
-        fields=["movement_type", "rental_office", "daily_rate"],
+        fields=["name", "movement_type", "rental_office", "daily_rate"],
         order_by="movement_date desc, creation desc",
         limit_page_length=1,
     )
     if not latest:
-        return False, None, 0.0
+        return False, None, 0.0, None
     row = latest[0]
     if row.movement_type != "Receipt":
-        return False, None, 0.0
-    return True, row.rental_office, flt(row.daily_rate)
+        return False, None, 0.0, None
+    return True, row.rental_office, flt(row.daily_rate), row.name
 
 
 def daily_rental_accrual() -> None:
@@ -75,11 +78,20 @@ def daily_rental_accrual() -> None:
                 ):
                     continue
 
-                in_service, rental_office, daily_rate = _is_currently_received(
-                    vehicle, posting_date
+                in_service, rental_office, daily_rate, movement_name = (
+                    _is_currently_received(vehicle, posting_date)
                 )
                 if not in_service:
                     continue
+
+                # Source traceability (G24): the originating record is the open
+                # Rental Vehicle Movement (Receipt) when known, else the vehicle.
+                if movement_name:
+                    source_doctype = "Rental Vehicle Movement"
+                    source_name = movement_name
+                else:
+                    source_doctype = "Salis Vehicle"
+                    source_name = vehicle
 
                 frappe.get_doc(
                     {
@@ -90,6 +102,8 @@ def daily_rental_accrual() -> None:
                         "daily_rate": daily_rate,
                         "amount": daily_rate,
                         "settled": 0,
+                        "source_doctype": source_doctype,
+                        "source_name": source_name,
                     }
                 ).insert(ignore_permissions=True)  # audit-ok
             except Exception:

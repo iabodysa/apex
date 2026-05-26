@@ -14,7 +14,10 @@
   "trip_date",
   "worker_count",
   "on_time",
-  "logged_at"
+  "logged_at",
+  "source_doctype",
+  "source_name",
+  "reversal_of"
  ],
  "fields": [
   {
@@ -80,6 +83,26 @@
    "fieldname": "logged_at",
    "fieldtype": "Datetime",
    "label": "Logged At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_doctype",
+   "fieldtype": "Data",
+   "label": "Source DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_name",
+   "fieldtype": "Data",
+   "label": "Source Document",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Trip Fulfilment Ledger",
    "read_only": 1
   }
  ],

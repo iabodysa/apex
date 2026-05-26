@@ -60,7 +60,12 @@ def _insert_ledger_row(
     source_name: str,
     logged_at,
 ) -> None:
-    """Insert one Fuel Consumption Ledger row (system-written, no GL)."""
+    """Insert one Fuel Consumption Ledger row (system-written, no GL).
+
+    Source traceability (G24): ``source_type`` is the originating DocType name
+    ("Fuel Daily Log" / "Fuel Request"), so ``source_doctype`` mirrors it and
+    ``source_name`` points to the originating record.
+    """
     frappe.get_doc(
         {
             "doctype": LEDGER_DOCTYPE,
@@ -70,6 +75,7 @@ def _insert_ledger_row(
             "litres": litres,
             "amount": amount,
             "source_type": source_type,
+            "source_doctype": source_type,
             "source_name": source_name,
             "logged_at": logged_at,
         }

@@ -18,6 +18,13 @@ class VehicleStop(Document):
         if self.vehicle and not self.ownership_at_stop:
             self.ownership_at_stop = frappe.db.get_value("Salis Vehicle", self.vehicle, "ownership")
 
+    def before_submit(self):
+        # Evidence-before-status gating: incident-type stops require evidence.
+        if self.stop_reason in ("Accident", "Violation") and not self.evidence:
+            frappe.throw(
+                _("Evidence is required to submit a stop with reason {0}.").format(_(self.stop_reason))
+            )
+
     def on_submit(self):
         lock_vehicle(self.vehicle)
 

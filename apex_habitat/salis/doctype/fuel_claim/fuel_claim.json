@@ -1,0 +1,251 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 12:00:00.000000",
+ "description": "Movement fuel claim and reconciliation against a quota. Compares claimed litres/amount with consumed litres derived from the Fuel Consumption Ledger and routes a Decentralized-of-Authority gate by variance / quota-increase (tiered authorityG22).",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fuel_claim_tab_overview",
+  "fuel_claim_sec_overview",
+  "project",
+  "vehicle",
+  "driver",
+  "fuel_quota",
+  "fuel_claim_overview_col",
+  "period_month",
+  "status",
+  "is_increase",
+  "naming_series",
+  "fuel_claim_sec_amounts",
+  "claimed_litres",
+  "claimed_amount",
+  "fuel_claim_amounts_col",
+  "consumed_litres",
+  "variance_litres",
+  "fuel_claim_sec_system",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "fuel_claim_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "fuel_claim_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "search_index": 1
+  },
+  {
+   "fieldname": "fuel_quota",
+   "fieldtype": "Link",
+   "label": "Fuel Quota",
+   "options": "Fuel Quota",
+   "search_index": 1
+  },
+  {
+   "fieldname": "fuel_claim_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Claim period in YYYY-MM format (e.g. 2026-05).",
+   "fieldname": "period_month",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Period (Month)",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nSubmitted to Movement\nReconciled\nApproved\nDisputed\nClosed"
+  },
+  {
+   "default": "0",
+   "description": "Set when this claim is a quota-increase claim. Quota-increase claims always require Operations-tier authority.",
+   "fieldname": "is_increase",
+   "fieldtype": "Check",
+   "label": "Quota Increase Claim"
+  },
+  {
+   "default": "FCM-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "FCM-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fuel_claim_sec_amounts",
+   "fieldtype": "Section Break",
+   "label": "Amounts"
+  },
+  {
+   "fieldname": "claimed_litres",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Claimed Litres",
+   "reqd": 1
+  },
+  {
+   "fieldname": "claimed_amount",
+   "fieldtype": "Currency",
+   "label": "Claimed Amount (SAR)"
+  },
+  {
+   "fieldname": "fuel_claim_amounts_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Sum of Fuel Consumption Ledger litres for this vehicle and period. Computed by the system.",
+   "fieldname": "consumed_litres",
+   "fieldtype": "Float",
+   "label": "Consumed Litres",
+   "read_only": 1
+  },
+  {
+   "description": "Claimed litres minus consumed litres. A positive variance means the claim exceeds recorded consumption.",
+   "fieldname": "variance_litres",
+   "fieldtype": "Float",
+   "label": "Variance (L)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fuel_claim_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Info"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Fuel Claim",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "icon": "fa fa-tint",
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Fuel Claim",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Project Manager",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Operations Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "vehicle",
+ "track_changes": 1
+}

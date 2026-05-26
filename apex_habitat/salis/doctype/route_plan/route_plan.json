@@ -8,6 +8,8 @@
   "naming_series",
   "route_name",
   "transport_request",
+  "requested_by_operations",
+  "fulfilled_by_movement",
   "project",
   "shift",
   "vehicle",
@@ -40,6 +42,22 @@
    "label": "Transport Request",
    "options": "Transport Request",
    "search_index": 1
+  },
+  {
+   "description": "Operations requester, carried from the linked Transport Request (responsibility: Operations Accountable).",
+   "fieldname": "requested_by_operations",
+   "fieldtype": "Link",
+   "label": "Requested By (Operations)",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "description": "Movement planner who fulfilled the request, set on submit (responsibility: Movement Responsible).",
+   "fieldname": "fulfilled_by_movement",
+   "fieldtype": "Link",
+   "label": "Fulfilled By (Movement)",
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "project",

@@ -11,6 +11,9 @@
   "requested_by",
   "approver",
   "required_tier",
+  "escalation_state",
+  "escalated_to_tier",
+  "escalation_log",
   "project",
   "approval_request_overview_col",
   "decision",
@@ -69,6 +72,30 @@
    "in_standard_filter": 1,
    "label": "Required Tier",
    "options": "\nSupervisor\nProject\nRegional\nOperations",
+   "read_only": 1
+  },
+  {
+   "description": "Whether the approver holds the required tier (Within Authority) or the request was routed to a higher tier (Escalated/Returned). Computed at validate.",
+   "fieldname": "escalation_state",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Escalation State",
+   "options": "\nWithin Authority\nEscalated\nReturned",
+   "read_only": 1
+  },
+  {
+   "description": "Tier the request was escalated to when the approver lacked the required authority.",
+   "fieldname": "escalated_to_tier",
+   "fieldtype": "Data",
+   "label": "Escalated To Tier",
+   "read_only": 1
+  },
+  {
+   "description": "Append-only audit trail of escalation decisions.",
+   "fieldname": "escalation_log",
+   "fieldtype": "Small Text",
+   "label": "Escalation Log",
    "read_only": 1
   },
   {

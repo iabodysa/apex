@@ -23,6 +23,13 @@ class DriverStop(Document):
             if not self.related_vehicle:
                 frappe.throw(_("Select the vehicle to release."))
 
+    def before_submit(self):
+        # Evidence-before-status gating: incident-type stops require evidence.
+        if self.stop_reason in ("Violation", "Termination") and not self.evidence:
+            frappe.throw(
+                _("Evidence is required to submit a stop with reason {0}.").format(_(self.stop_reason))
+            )
+
     def on_submit(self):
         lock_driver(self.driver)
 

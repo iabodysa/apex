@@ -14,6 +14,7 @@
   "driver_stop_details_col",
   "release_vehicle",
   "related_vehicle",
+  "evidence",
   "driver_stop_sec_notes",
   "notes",
   "previous_status",
@@ -77,6 +78,12 @@
    "fieldtype": "Link",
    "label": "Related Vehicle",
    "options": "Salis Vehicle"
+  },
+  {
+   "description": "Required for Violation or Termination stops.",
+   "fieldname": "evidence",
+   "fieldtype": "Attach",
+   "label": "Evidence"
   },
   {
    "fieldname": "driver_stop_sec_notes",

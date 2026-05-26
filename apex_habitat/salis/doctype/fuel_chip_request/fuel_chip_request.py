@@ -20,6 +20,17 @@ class FuelChipRequest(Document):
 				_("A chip number is required to {0} a fuel chip.").format(_(self.action))
 			)
 
+	def before_submit(self):
+		if self.action == "Cancel":
+			if not self.inactivity_evidence:
+				frappe.throw(
+					_("Inactivity evidence is required to submit a fuel chip cancellation.")
+				)
+			if not self.owner_acknowledged:
+				frappe.throw(
+					_("Owner acknowledgement is required to submit a fuel chip cancellation.")
+				)
+
 	def on_submit(self):
 		log_activity(
 			action="Fuel Chip {0}".format(self.action),

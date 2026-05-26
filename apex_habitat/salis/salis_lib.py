@@ -55,6 +55,31 @@ def user_max_tier(user):
 	return best
 
 
+def next_tier(tier):
+	"""Return the next higher authority tier above ``tier``, or None at the top.
+
+	None is also returned when ``tier`` is not a known tier."""
+	rank = tier_rank(tier)
+	if rank < 0 or rank + 1 >= len(TIERS):
+		return None
+	return TIERS[rank + 1]
+
+
+def escalation_target(required_tier, approver):
+	"""Return the tier a request must escalate to when the approver is below the
+	required tier, or None when the approver already holds sufficient authority.
+
+	The target is the required tier itself: a request needing ``required_tier``
+	must be routed to someone holding at least that tier. Returns None when no
+	tier is required or when the approver's standing already meets it
+	(tiered authority)."""
+	if not required_tier:
+		return None
+	if tier_rank(user_max_tier(approver)) >= tier_rank(required_tier):
+		return None
+	return required_tier
+
+
 def lock_vehicle(name):
 	"""Row-lock a Salis Vehicle to prevent concurrent assignment/handover races."""
 	if name:

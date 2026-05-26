@@ -170,6 +170,8 @@ class DispatchTrip(Document):
                 "worker_count": worker_count,
                 "on_time": on_time,
                 "logged_at": now_datetime(),
+                "source_doctype": "Dispatch Trip",
+                "source_name": self.name,
             }
         )
         ledger.insert(ignore_permissions=True)  # audit-ok

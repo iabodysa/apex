@@ -154,3 +154,54 @@ def scoped_has_permission(doc, ptype, user=None):
         return False
 
     return None
+
+
+# ---------------------------------------------------------------------------
+# Segregation of duties (tiered authority)
+# ---------------------------------------------------------------------------
+# A user who holds both an operational role and the finance role must not be
+# able to self-approve their own payment requests. This enforces
+# approver != requester at the permission layer, in addition to the
+# controller-level check, so a Finance-exclusive transition (Approved by
+# Finance / Paid) on a document the acting user requested or created is
+# blocked regardless of how the transition is attempted.
+
+# Statuses that represent a Finance-exclusive approval/payment outcome.
+FINANCE_EXCLUSIVE_STATES = {
+    "Approved by Finance",
+    "Paid",
+}
+
+
+def payment_sod_has_permission(doc, ptype, user=None):
+    """Block self-approval of payment requests into Finance-exclusive states.
+
+    For "Salis Payment Request", when the action is a submit/write that moves
+    the document into a Finance-exclusive state (Approved by Finance / Paid),
+    deny the action if the acting user is the requester or the original
+    creator of the document. Returns False to block; otherwise returns None to
+    defer to Frappe's default permission resolution.
+    """
+    if getattr(doc, "doctype", None) != "Salis Payment Request":
+        return None
+
+    if ptype not in ("submit", "write"):
+        return None
+
+    status = getattr(doc, "status", None)
+    if status not in FINANCE_EXCLUSIVE_STATES:
+        return None
+
+    user = _resolve_user(user)
+    if user in ("Administrator", "Guest"):
+        return None
+
+    requested_by = getattr(doc, "requested_by", None)
+    owner = getattr(doc, "owner", None)
+
+    if requested_by and requested_by == user:
+        return False
+    if owner and owner == user:
+        return False
+
+    return None

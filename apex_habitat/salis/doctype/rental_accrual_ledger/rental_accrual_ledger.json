@@ -13,7 +13,10 @@
   "daily_rate",
   "amount",
   "settled",
-  "rental_settlement"
+  "rental_settlement",
+  "source_doctype",
+  "source_name",
+  "reversal_of"
  ],
  "fields": [
   {
@@ -78,6 +81,26 @@
    "fieldtype": "Link",
    "label": "Rental Settlement",
    "options": "Rental Settlement",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_doctype",
+   "fieldtype": "Data",
+   "label": "Source DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_name",
+   "fieldtype": "Data",
+   "label": "Source Document",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Rental Accrual Ledger",
    "read_only": 1
   }
  ],

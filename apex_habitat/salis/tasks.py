@@ -140,7 +140,12 @@ def driver_license_expiry_watch() -> None:
 
     today_str = today()
     logger = frappe.logger()
-    lead_days = _settings_int("alert_lead_days", 7)
+    # G38: compliance documents (driver licences) need at least 30 days' lead
+    # notice. Prefer a dedicated ``license_alert_lead_days`` (default 30); else
+    # fall back to the generic ``alert_lead_days`` but never below 30 days.
+    LICENSE_MIN_LEAD_DAYS = 30
+    license_lead = _settings_int("license_alert_lead_days", LICENSE_MIN_LEAD_DAYS)
+    lead_days = max(license_lead, _settings_int("alert_lead_days", 7), LICENSE_MIN_LEAD_DAYS)
 
     start = 0
     while True:
@@ -202,7 +207,7 @@ def idle_vehicle_watch() -> None:
         vehicles = frappe.get_all(
             "Salis Vehicle",
             filters={"status": "Active"},
-            fields=["name", "plate_number"],
+            fields=["name"],
             limit_start=start,
             limit_page_length=BATCH_SIZE,
         )
@@ -224,8 +229,10 @@ def idle_vehicle_watch() -> None:
                 )
                 if recent:
                     continue
-                plate = v.plate_number or v.name
-                msg = (f"idle_vehicle_watch: vehicle {plate} has had no dispatch "
+                # Reference the vehicle by docname only — never embed
+                # plate_number (PII-adjacent) in alert text; the alert links
+                # the vehicle record.
+                msg = (f"idle_vehicle_watch: vehicle {v.name} has had no dispatch "
                        f"trip in the last {idle_days} days.")
                 logger.warning(msg)
                 _raise_alert("Idle Vehicle", "Info", msg,
@@ -489,7 +496,7 @@ def vehicle_utilization_summary() -> None:
         vehicles = frappe.get_all(
             "Salis Vehicle",
             filters={"status": "Active"},
-            fields=["name", "plate_number"],
+            fields=["name"],
             limit_start=start,
             limit_page_length=BATCH_SIZE,
         )
@@ -534,14 +541,15 @@ def vehicle_utilization_summary() -> None:
                     }
                 ).insert(ignore_permissions=True)  # audit-ok
 
-                plate = v.plate_number or v.name
+                # Reference the vehicle by docname only — never embed
+                # plate_number (PII-adjacent) in alert/log text.
                 logger.info(
-                    f"vehicle_utilization_summary: {plate} — {trip_count} trips, "
+                    f"vehicle_utilization_summary: {v.name} — {trip_count} trips, "
                     f"{distance} km over the last 7 days."
                 )
 
                 if trip_count == 0:
-                    msg = (f"vehicle_utilization_summary: vehicle {plate} logged no "
+                    msg = (f"vehicle_utilization_summary: vehicle {v.name} logged no "
                            f"dispatch trips in the last 7 days.")
                     _raise_alert("Idle Vehicle", "Info", msg,
                                  "Salis Vehicle", v.name, vehicle=v.name)

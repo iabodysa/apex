@@ -1,0 +1,222 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 12:00:00.000000",
+ "description": "Vehicle damage write-off case raised from a handover discrepancy. Tiered write-off authority gate on submit (tiered authority).",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "vwo_tab_overview",
+  "vwo_sec_overview",
+  "vehicle",
+  "source_handover",
+  "driver",
+  "vwo_overview_col",
+  "status",
+  "approved_by",
+  "naming_series",
+  "vwo_sec_damage",
+  "damage_description",
+  "recommended_action",
+  "vwo_damage_col",
+  "estimated_cost",
+  "evidence",
+  "vwo_sec_system",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "vwo_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "vwo_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "General Details"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "source_handover",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Source Handover",
+   "options": "Vehicle Handover",
+   "search_index": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "search_index": 1
+  },
+  {
+   "fieldname": "vwo_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nUnder Review\nApproved\nRejected\nClosed"
+  },
+  {
+   "description": "Set when the write-off case is approved.",
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "default": "VWO-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "VWO-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vwo_sec_damage",
+   "fieldtype": "Section Break",
+   "label": "Damage Details"
+  },
+  {
+   "fieldname": "damage_description",
+   "fieldtype": "Text",
+   "label": "Damage Description"
+  },
+  {
+   "fieldname": "recommended_action",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Recommended Action",
+   "options": "Repair\nWrite-Off\nRecover from Driver\nInsurance Claim"
+  },
+  {
+   "fieldname": "vwo_damage_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "estimated_cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Estimated Cost (SAR)"
+  },
+  {
+   "description": "Required before the case can move beyond Open.",
+   "fieldname": "evidence",
+   "fieldtype": "Attach",
+   "label": "Evidence",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vwo_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Info"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Damage Write-Off",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Vehicle Damage Write-Off",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Operations Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "vehicle",
+ "track_changes": 1
+}

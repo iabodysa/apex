@@ -16,6 +16,9 @@
   "action",
   "status",
   "naming_series",
+  "inactivity_evidence",
+  "estimated_monthly_saving",
+  "owner_acknowledged",
   "fuel_chip_request_sec_system",
   "amended_from"
  ],
@@ -93,6 +96,25 @@
    "label": "Series",
    "options": "FC-.######",
    "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.action=='Cancel'",
+   "fieldname": "inactivity_evidence",
+   "fieldtype": "Attach",
+   "label": "Inactivity Evidence"
+  },
+  {
+   "depends_on": "eval:doc.action=='Cancel'",
+   "fieldname": "estimated_monthly_saving",
+   "fieldtype": "Currency",
+   "label": "Estimated Monthly Saving"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.action=='Cancel'",
+   "fieldname": "owner_acknowledged",
+   "fieldtype": "Check",
+   "label": "Owner Acknowledged"
   },
   {
    "fieldname": "fuel_chip_request_sec_system",

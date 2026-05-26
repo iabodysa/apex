@@ -57,6 +57,18 @@ class VehicleHandover(Document):
             "Comment",
             _("Vehicle {0} handed over to driver {1}.").format(self.vehicle, self.to_driver),
         )
+
+        # Guide (do not auto-create): a discrepancy should be escalated through a
+        # Vehicle Damage Write-Off case for tiered write-off authority (tiered authority).
+        if self.discrepancy_status == "Discrepancy":
+            self.add_comment(
+                "Comment",
+                _(
+                    "A handover discrepancy was recorded. Please raise a Vehicle Damage "
+                    "Write-Off for vehicle {0} to obtain tiered write-off approval."
+                ).format(self.vehicle),
+            )
+
         log_activity(
             action="Vehicle Handover",
             entity_type="Salis Vehicle",
