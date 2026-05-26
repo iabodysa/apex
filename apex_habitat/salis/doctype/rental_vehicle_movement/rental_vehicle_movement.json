@@ -1,0 +1,213 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 13:00:00.000000",
+ "description": "Receipt/Return lifecycle for a rented vehicle. A Receipt with no later Return marks the vehicle as in-service; the Rental Accrual Ledger engine queries these to post daily rental memos. Posts NO GL.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "rental_vehicle_movement_tab_overview",
+  "rental_vehicle_movement_sec_overview",
+  "naming_series",
+  "movement_type",
+  "vehicle",
+  "rental_office",
+  "rental_vehicle_movement_overview_col",
+  "movement_date",
+  "daily_rate",
+  "rental_vehicle_movement_sec_condition",
+  "odometer",
+  "fuel_level",
+  "rental_vehicle_movement_condition_col",
+  "condition_notes",
+  "signed_evidence",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "rental_vehicle_movement_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "rental_vehicle_movement_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Movement"
+  },
+  {
+   "default": "RVM-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "RVM-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "movement_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Movement Type",
+   "options": "Receipt\nReturn",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "rental_office",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Rental Office",
+   "options": "Rental Office",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "rental_vehicle_movement_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "movement_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Movement Date",
+   "reqd": 1
+  },
+  {
+   "description": "Contracted daily rental rate. Carried into the Rental Accrual Ledger memo for each in-service day.",
+   "fieldname": "daily_rate",
+   "fieldtype": "Currency",
+   "label": "Daily Rate"
+  },
+  {
+   "fieldname": "rental_vehicle_movement_sec_condition",
+   "fieldtype": "Section Break",
+   "label": "Condition"
+  },
+  {
+   "fieldname": "odometer",
+   "fieldtype": "Int",
+   "label": "Odometer"
+  },
+  {
+   "fieldname": "fuel_level",
+   "fieldtype": "Select",
+   "label": "Fuel Level",
+   "options": "Empty\nQuarter\nHalf\nThreeQuarter\nFull"
+  },
+  {
+   "fieldname": "rental_vehicle_movement_condition_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "condition_notes",
+   "fieldtype": "Small Text",
+   "label": "Condition Notes"
+  },
+  {
+   "fieldname": "signed_evidence",
+   "fieldtype": "Attach",
+   "label": "Signed Evidence"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rental Vehicle Movement",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 13:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Rental Vehicle Movement",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Operations Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

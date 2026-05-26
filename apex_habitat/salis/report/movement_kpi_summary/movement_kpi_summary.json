@@ -1,0 +1,20 @@
+{
+  "doctype": "Report",
+  "name": "Movement KPI Summary",
+  "report_name": "Movement KPI Summary",
+  "ref_doctype": "Dispatch Trip",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Salis",
+  "roles": [
+    {
+      "role": "Fleet Manager"
+    },
+    {
+      "role": "Fleet Operations Manager"
+    },
+    {
+      "role": "Internal Auditor"
+    }
+  ]
+}

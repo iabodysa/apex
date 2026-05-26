@@ -1,0 +1,136 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 00:00:00.000000",
+ "description": "System-written, read-only periodic snapshot of vehicle utilisation over a trailing window. Never hand-entered; derived from completed Dispatch Trips.",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "snapshot_date",
+  "vehicle",
+  "col_break_util",
+  "period_days",
+  "trips_count",
+  "idle_days",
+  "utilisation_pct",
+  "sec_notes",
+  "notes"
+ ],
+ "fields": [
+  {
+   "default": "VUS-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "VUS-.######",
+   "print_hide": 1,
+   "report_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "snapshot_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Snapshot Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break_util",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "period_days",
+   "fieldtype": "Int",
+   "label": "Period (Days)"
+  },
+  {
+   "fieldname": "trips_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Trips Count"
+  },
+  {
+   "fieldname": "idle_days",
+   "fieldtype": "Int",
+   "label": "Idle Days"
+  },
+  {
+   "fieldname": "utilisation_pct",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Utilisation %"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-05-26 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Vehicle Utilisation Snapshot",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Operations Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "snapshot_date",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "vehicle"
+}

@@ -5,8 +5,12 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import now_datetime
 
 from apex_habitat.salis.salis_lib import lock_vehicle, log_activity
+
+# Transport Request statuses that are terminal and must not be reopened.
+_TR_TERMINAL = {"Fulfilled", "Cancelled"}
 
 # Allowed forward status transitions. Cancellation is allowed from any state.
 _ALLOWED_TRANSITIONS = {
@@ -19,10 +23,20 @@ _ALLOWED_TRANSITIONS = {
 
 class DispatchTrip(Document):
     def validate(self):
+        self._resolve_transport_request()
         self._enforce_status_flow()
         self._validate_odometer()
         self._enforce_compliance()
         self._require_completion_notes()
+
+    def _resolve_transport_request(self):
+        """Resolve the Transport Request from the Route Plan when not already set,
+        so the fulfilment chain is intact even if the fetch did not populate it."""
+        if self.transport_request or not self.route_plan:
+            return
+        self.transport_request = frappe.db.get_value(
+            "Route Plan", self.route_plan, "transport_request"
+        )
 
     def before_submit(self):
         self._enforce_dispatch_readiness()
@@ -109,3 +123,53 @@ class DispatchTrip(Document):
                 entity_name=self.vehicle,
                 details={"trip": self.name, "odometer_end": self.odometer_end},
             )
+
+        if self.status == "Completed" and self.transport_request:
+            self._fulfil_transport_request()
+            self._post_fulfilment_ledger()
+
+    def _fulfil_transport_request(self):
+        """Mark the linked Transport Request as Fulfilled and stamp the assignment
+        outcome back onto it. Terminal requests are left untouched."""
+        status = frappe.db.get_value(
+            "Transport Request", self.transport_request, "status"
+        )
+        if status in _TR_TERMINAL:
+            return
+        frappe.db.set_value(
+            "Transport Request",
+            self.transport_request,
+            {
+                "status": "Fulfilled",
+                "fulfilled_on": now_datetime(),
+                "assigned_vehicle": self.vehicle,
+                "assigned_driver": self.driver,
+                "dispatch_trip": self.name,
+            },
+        )
+
+    def _post_fulfilment_ledger(self):
+        """Insert a read-only Trip Fulfilment Ledger row capturing the completed
+        trip. System-written audit memo; humans never create these."""
+        worker_count = (
+            frappe.db.get_value(
+                "Transport Request", self.transport_request, "worker_count"
+            )
+            or 0
+        )
+        on_time = 1 if (self.return_time and self.depart_time) else 0
+        ledger = frappe.new_doc("Trip Fulfilment Ledger")
+        ledger.update(
+            {
+                "dispatch_trip": self.name,
+                "transport_request": self.transport_request,
+                "route_plan": self.route_plan,
+                "vehicle": self.vehicle,
+                "driver": self.driver,
+                "trip_date": self.trip_date,
+                "worker_count": worker_count,
+                "on_time": on_time,
+                "logged_at": now_datetime(),
+            }
+        )
+        ledger.insert(ignore_permissions=True)  # audit-ok

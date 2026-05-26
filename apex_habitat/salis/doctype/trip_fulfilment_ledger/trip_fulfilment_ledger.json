@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "autoname": "TFL-.######",
+ "creation": "2026-05-26 03:00:00.000000",
+ "description": "Trip fulfilment ledger. Maintained automatically by the system when a Dispatch Trip is completed and not edited manually.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "dispatch_trip",
+  "transport_request",
+  "route_plan",
+  "vehicle",
+  "driver",
+  "trip_date",
+  "worker_count",
+  "on_time",
+  "logged_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "dispatch_trip",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Dispatch Trip",
+   "options": "Dispatch Trip",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "transport_request",
+   "fieldtype": "Link",
+   "label": "Transport Request",
+   "options": "Transport Request",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "route_plan",
+   "fieldtype": "Link",
+   "label": "Route Plan",
+   "options": "Route Plan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "read_only": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "label": "Driver",
+   "options": "Salis Driver",
+   "read_only": 1
+  },
+  {
+   "fieldname": "trip_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Trip Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "worker_count",
+   "fieldtype": "Int",
+   "label": "Worker Count",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "on_time",
+   "fieldtype": "Check",
+   "label": "On Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "logged_at",
+   "fieldtype": "Datetime",
+   "label": "Logged At",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "links": [],
+ "modified": "2026-05-26 03:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Trip Fulfilment Ledger",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Operations Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -7,6 +7,7 @@
  "field_order": [
   "naming_series",
   "route_plan",
+  "transport_request",
   "vehicle",
   "driver",
   "trip_date",
@@ -33,6 +34,14 @@
    "fieldtype": "Link",
    "label": "Route Plan",
    "options": "Route Plan"
+  },
+  {
+   "fetch_from": "route_plan.transport_request",
+   "fieldname": "transport_request",
+   "fieldtype": "Link",
+   "label": "Transport Request",
+   "options": "Transport Request",
+   "read_only": 1
   },
   {
    "fieldname": "vehicle",
@@ -101,7 +110,13 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
+ "links": [
+  {
+   "group": "Movement",
+   "link_doctype": "Passenger Manifest",
+   "link_fieldname": "dispatch_trip"
+  }
+ ],
  "modified": "2026-05-26 02:45:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",

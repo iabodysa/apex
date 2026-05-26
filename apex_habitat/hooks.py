@@ -190,14 +190,18 @@ scheduler_events = {
         "apex_habitat.salis.tasks.overdue_fuel_request_watch",
         "apex_habitat.salis.tasks.missing_attendance_watch",
         "apex_habitat.salis.tasks.vehicle_compliance_expiry_watch",
+        "apex_habitat.salis.fuel_engine.accrue_fuel_consumption",
+        "apex_habitat.salis.rental_engine.daily_rental_accrual",
     ],
     "weekly": [
         "apex_habitat.habitat.tasks.weekly_occupancy_sync",
         "apex_habitat.habitat.tasks.weekly_safety_task_compliance_scan",
         "apex_habitat.salis.tasks.vehicle_utilization_summary",
+        "apex_habitat.salis.utilisation_engine.weekly_vehicle_utilisation_snapshot",
     ],
     "monthly": [
         "apex_habitat.habitat.tasks.monthly_rent_due_alert",
+        "apex_habitat.salis.fuel_engine.monthly_fuel_reconciliation",
     ],
 }
 
@@ -243,6 +247,7 @@ after_install = "apex_habitat.setup.after_install"
 after_migrate = [
     "apex_habitat.habitat.dashboard_seed.seed_all_dashboards",
     "apex_habitat.salis.dashboard_seed.seed_salis_dashboards",
+    "apex_habitat.salis.movement_dashboard_seed.seed_movement_dashboards",
 ]
 
 # Frappe What's New feed — appears in desk notification area, not as a popup

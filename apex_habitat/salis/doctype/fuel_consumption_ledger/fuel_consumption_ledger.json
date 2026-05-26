@@ -1,0 +1,150 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "FCL-.######",
+ "creation": "2026-05-26 12:00:00.000000",
+ "description": "Internal fuel consumption ledger. Maintained automatically by the system from Fuel Daily Log and Done Fuel Request records, and not edited manually.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fuel_consumption_ledger_sec_overview",
+  "vehicle",
+  "driver",
+  "period_month",
+  "fuel_consumption_ledger_overview_col",
+  "litres",
+  "amount",
+  "logged_at",
+  "fuel_consumption_ledger_sec_system",
+  "source_type",
+  "source_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "fuel_consumption_ledger_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Consumption period in YYYY-MM format (e.g. 2026-05).",
+   "fieldname": "period_month",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Period (Month)",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "fuel_consumption_ledger_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "litres",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Litres",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount (SAR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "logged_at",
+   "fieldtype": "Datetime",
+   "label": "Logged At",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "fuel_consumption_ledger_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Info"
+  },
+  {
+   "fieldname": "source_type",
+   "fieldtype": "Select",
+   "label": "Source Type",
+   "options": "Fuel Request\nFuel Daily Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_name",
+   "fieldtype": "Data",
+   "label": "Source Document",
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "icon": "fa fa-tint",
+ "in_create": 1,
+ "is_submittable": 0,
+ "links": [],
+ "modified": "2026-05-26 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Fuel Consumption Ledger",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Operations Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "vehicle",
+ "track_changes": 0
+}

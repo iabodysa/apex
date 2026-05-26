@@ -1,0 +1,20 @@
+{
+  "doctype": "Report",
+  "name": "Rental Settlement Register",
+  "report_name": "Rental Settlement Register",
+  "ref_doctype": "Rental Settlement",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Salis",
+  "roles": [
+    {
+      "role": "Fleet Manager"
+    },
+    {
+      "role": "Finance Manager"
+    },
+    {
+      "role": "Internal Auditor"
+    }
+  ]
+}

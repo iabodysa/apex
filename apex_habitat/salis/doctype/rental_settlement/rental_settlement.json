@@ -1,0 +1,211 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-26 13:00:00.000000",
+ "description": "Monthly reconciliation of a Rental Office claim against accrued rental days. Computes accrued_total from the vehicle lines and the variance against the claimed amount. On submit it may raise a finance-exclusive Salis Payment Request (expense_type Rental). Posts NO GL.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "rental_settlement_tab_overview",
+  "rental_settlement_sec_overview",
+  "naming_series",
+  "rental_office",
+  "period_month",
+  "rental_settlement_overview_col",
+  "status",
+  "payment_request",
+  "rental_settlement_sec_vehicles",
+  "vehicles",
+  "rental_settlement_sec_totals",
+  "accrued_total",
+  "claimed_total",
+  "rental_settlement_totals_col",
+  "variance",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "rental_settlement_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "rental_settlement_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Settlement"
+  },
+  {
+   "default": "RS-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "RS-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rental_office",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Rental Office",
+   "options": "Rental Office",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Settlement period, e.g. 2026-05.",
+   "fieldname": "period_month",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Period Month",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rental_settlement_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nReconciled\nApproved\nPaid\nDisputed"
+  },
+  {
+   "description": "Reference to the raised Salis Payment Request. Set automatically; this DocType never posts GL.",
+   "fieldname": "payment_request",
+   "fieldtype": "Link",
+   "label": "Payment Request",
+   "options": "Salis Payment Request",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rental_settlement_sec_vehicles",
+   "fieldtype": "Section Break",
+   "label": "Vehicles"
+  },
+  {
+   "fieldname": "vehicles",
+   "fieldtype": "Table",
+   "label": "Vehicles",
+   "options": "Rental Settlement Item"
+  },
+  {
+   "fieldname": "rental_settlement_sec_totals",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "description": "Sum of the vehicle line amounts (accrued).",
+   "fieldname": "accrued_total",
+   "fieldtype": "Currency",
+   "label": "Accrued Total",
+   "read_only": 1
+  },
+  {
+   "description": "Amount claimed by the rental office.",
+   "fieldname": "claimed_total",
+   "fieldtype": "Currency",
+   "label": "Claimed Total"
+  },
+  {
+   "fieldname": "rental_settlement_totals_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Claimed Total minus Accrued Total.",
+   "fieldname": "variance",
+   "fieldtype": "Currency",
+   "label": "Variance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rental Settlement",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-26 13:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Rental Settlement",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Operations Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
