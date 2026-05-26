@@ -12,7 +12,7 @@ Access Level,مستوى الصلاحية
 Accommodation Assignment,تسكين
 Accommodation Assignment is required.,التسكين مطلوب.
 Accommodation Bed,سرير
-Accommodation Building,مبنى
+Accommodation Building,مبنى السكن
 Accommodation Checkout,مغادرة السكن
 Accommodation Cost Distribution,توزيع تكلفة السكن
 Accommodation Custody Item,بند عهدة السكن
@@ -1818,3 +1818,18 @@ Linked Payment Entry,قيد الدفع المرتبط
 Fine / Violation,مخالفة
 Sponsorship Fee,رسوم كفالة
 Only Finance can approve or mark a payment as paid. This step cannot be bypassed.,المالية فقط تعتمد أو تؤكّد الدفع. لا يمكن تجاوز هذه الخطوة.
+Service Line,خط الخدمة
+Workers,العمال
+Representatives,المناديب
+Accommodation to Project Shuttle,نقل من السكن إلى المشروع
+Inter-City Relocation,ترحيل بين المدن
+Administrative Trip / Document Signing,رحلة إدارية / توقيع مستندات
+Worker Count,عدد العمال
+Cross Region,بين المناطق
+Transport Request Worker,عامل طلب النقل
+Worker Transport Plan,خطة نقل العمال
+Validated,مُدقّق
+Fulfilled,مُنفّذ
+Trips This Month,الرحلات هذا الشهر
+Assigned Vehicle,المركبة المسندة
+Assigned Driver,السائق المسند

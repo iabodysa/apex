@@ -1,0 +1,23 @@
+{
+  "doctype": "Report",
+  "name": "Worker Transport Plan",
+  "report_name": "Worker Transport Plan",
+  "ref_doctype": "Transport Request",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Salis",
+  "roles": [
+    {
+      "role": "Fleet Manager"
+    },
+    {
+      "role": "Fleet Operations Manager"
+    },
+    {
+      "role": "Project Manager"
+    },
+    {
+      "role": "Internal Auditor"
+    }
+  ]
+}

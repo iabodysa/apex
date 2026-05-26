@@ -19,6 +19,11 @@ ROLE_TIER = {
 	"Fleet Operations Manager": "Operations",
 	"Fleet Manager": "Operations",
 	"System Manager": "Operations",
+	# Operations approval roles (Movement is a service provider — Operations
+	# submits requests; these roles supply the DoA tier for those requests).
+	"Project Manager": "Project",
+	"Regional Operations Manager": "Regional",
+	"Operations Manager": "Operations",
 }
 
 
