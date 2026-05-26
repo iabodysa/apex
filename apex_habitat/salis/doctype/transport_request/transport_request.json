@@ -7,6 +7,8 @@
  "field_order": [
   "naming_series",
   "requested_by",
+  "requester_name",
+  "mobile_number",
   "project",
   "from_location",
   "to_location",
@@ -14,6 +16,9 @@
   "passenger_count",
   "purpose",
   "status",
+  "source_channel",
+  "site_token",
+  "anonymous_tracking_code",
   "amended_from"
  ],
  "fields": [
@@ -30,8 +35,17 @@
    "fieldname": "requested_by",
    "fieldtype": "Link",
    "label": "Requested By",
-   "options": "User",
-   "reqd": 1
+   "options": "User"
+  },
+  {
+   "fieldname": "requester_name",
+   "fieldtype": "Data",
+   "label": "Requester Name"
+  },
+  {
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number"
   },
   {
    "fieldname": "project",
@@ -76,6 +90,27 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "New\nApproved\nScheduled\nCompleted\nRejected\nCancelled"
+  },
+  {
+   "default": "Desk",
+   "fieldname": "source_channel",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Source Channel",
+   "options": "Desk\nWeb QR"
+  },
+  {
+   "fieldname": "site_token",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Site Token"
+  },
+  {
+   "fieldname": "anonymous_tracking_code",
+   "fieldtype": "Data",
+   "label": "Anonymous Tracking Code",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",

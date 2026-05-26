@@ -23,6 +23,7 @@
   "fuel_request_amounts_col",
   "amount",
   "fuel_request_sec_system",
+  "quota_applied",
   "amended_from"
  ],
  "fields": [
@@ -136,6 +137,16 @@
    "fieldname": "fuel_request_sec_system",
    "fieldtype": "Section Break",
    "label": "System Info"
+  },
+  {
+   "default": "0",
+   "description": "Set when this request's litres have been posted to the quota's consumed total. Guards against double-application on resubmit/amend.",
+   "fieldname": "quota_applied",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Quota Applied",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",

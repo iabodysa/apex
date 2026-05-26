@@ -11,6 +11,8 @@
   "default_cost_center",
   "salis_settings_general_col",
   "alert_lead_days",
+  "idle_vehicle_days",
+  "fuel_pending_max_days",
   "salis_settings_tab_approvals",
   "salis_settings_sec_approvals",
   "enable_approvals",
@@ -58,6 +60,20 @@
    "fieldname": "alert_lead_days",
    "fieldtype": "Int",
    "label": "Alert Lead Days"
+  },
+  {
+   "default": "7",
+   "description": "Number of days without a dispatch trip before an Active vehicle is flagged as idle.",
+   "fieldname": "idle_vehicle_days",
+   "fieldtype": "Int",
+   "label": "Idle Vehicle Days"
+  },
+  {
+   "default": "2",
+   "description": "Number of days a Fuel Request may stay Pending before it is flagged as overdue.",
+   "fieldname": "fuel_pending_max_days",
+   "fieldtype": "Int",
+   "label": "Fuel Request Pending Max Days"
   },
   {
    "fieldname": "salis_settings_tab_approvals",

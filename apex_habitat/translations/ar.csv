@@ -1498,3 +1498,283 @@ Add at least one item to the cart before issuing.,أضف صنفاً واحداً
 Cross-building moves are not supported here. Use Check-out and a new Check-in.,النقل بين المباني غير مدعوم هنا. استخدم تسجيل الخروج ثم دخولاً جديداً.
 Room Condition Snapshot,صورة حالة الغرفة
 No photo on file,لا توجد صورة
+Salis,ساليس
+Salis Vehicle,مركبة
+Salis Driver,سائق
+Salis Settings,إعدادات ساليس
+Salis Activity Log,سجل نشاط ساليس
+Vehicle,مركبة
+Vehicle Category,فئة المركبة
+Vehicle Assignment,إسناد مركبة
+Vehicle Handover,تسليم مركبة
+Vehicle Handover Item,بند تسليم المركبة
+Vehicle Stop,إيقاف مركبة
+Vehicle Transfer,نقل مركبة
+Vehicle Identity,هوية المركبة
+Dispatch Trip,رحلة تشغيل
+Driver Attendance,حضور السائق
+Driver Attendance Image,صورة حضور السائق
+Driver Stop,إيقاف سائق
+Driver Portal,بوابة السائق
+Fuel Request,طلب وقود
+Fuel Chip Request,طلب شريحة وقود
+Fuel Daily Log,السجل اليومي للوقود
+Fuel Platform,منصة الوقود
+Fuel Quota,حصة الوقود
+Fuel Topup Request,طلب تعبئة وقود
+Transport Request,طلب نقل
+Passenger Manifest,كشف الركاب
+Manifest Passenger,راكب الكشف
+Route Plan,خطة المسار
+Route Stop,محطة المسار
+Rental Office,مكتب التأجير
+Approval Request,طلب موافقة
+Operations Alert,تنبيه تشغيلي
+Sponsorship Transfer Case,حالة نقل كفالة
+Support Ticket,تذكرة دعم
+Ticket Message,رسالة التذكرة
+Wash Request,طلب غسيل
+Wash Platform,منصة الغسيل
+Wash Type,نوع الغسيل
+Pending,قيد الانتظار
+Done,منجز
+Stopped,متوقف
+Released,محرّر
+Submitted,مقدّم
+Acknowledged,مُستلم
+Dispatched,تم التشغيل
+Ended,منتهٍ
+Failed,فاشل
+Reverted,مُسترجَع
+Waiting,بالانتظار
+Not Started,لم يبدأ
+Boarded,على متن
+Cancel,إلغاء
+Replace,استبدال
+Owned,مملوكة
+Rented,مستأجرة
+Salary,راتب
+Termination,إنهاء خدمة
+Accident,حادث
+Violation,مخالفة
+Urgent,عاجل
+Present,حاضر
+Absent,غائب
+Late,متأخر
+Leave,إجازة
+On Leave,في إجازة
+Morning,صباحي
+Evening,مسائي
+Night,ليلي
+Pickup,نقطة الانطلاق
+Dropoff,نقطة الوصول
+Exterior,خارجي
+Interior,داخلي
+Petrol,بنزين
+Diesel,ديزل
+Electric,كهربائي
+No Fuel,بدون وقود
+Topup,تعبئة
+Allocation,تخصيص
+Cross-Project,بين المشاريع
+Rental Return,إرجاع مؤجَّر
+Sticker Requested,تم طلب الملصق
+Temporary Top-up,تعبئة مؤقتة
+Idle Vehicle,مركبة خاملة
+Excessive Topup,تعبئة مفرطة
+Exhausted,مستنفدة
+Quota Applied,تم تطبيق الحصة
+Forgotten Request,طلب منسي
+Supervisor Delay,تأخر المشرف
+Incomplete Handover,تسليم غير مكتمل
+License Expired,انتهاء صلاحية الرخصة
+Quota Exceeded,تجاوز الحصة
+Temporary Top-up Not Reverted,تعبئة مؤقتة لم تُسترجَع
+Clearance Done,تم إخلاء الطرف
+Plate Number,رقم اللوحة
+Plate,اللوحة
+Plate (Normalized),اللوحة (مُنسَّقة)
+License Number,رقم الرخصة
+National ID,رقم الهوية الوطنية
+Full Name,الاسم الكامل
+Phone,الهاتف
+Contact,جهة الاتصال
+Contact Person,الشخص المسؤول
+Current Driver,السائق الحالي
+Current Vehicle,المركبة الحالية
+Related Driver,السائق المرتبط
+Related Vehicle,المركبة المرتبطة
+From Driver,من السائق
+To Driver,إلى السائق
+From Location,من الموقع
+To Location,إلى الموقع
+From Sponsor,من الكفيل
+To Sponsor,إلى الكفيل
+Location,الموقع
+Ownership,الملكية
+Ownership At Stop,الملكية عند الإيقاف
+Odometer,عداد المسافة
+Odometer Start,عداد المسافة (البداية)
+Odometer End,عداد المسافة (النهاية)
+Odometer Reading,قراءة عداد المسافة
+Litres,اللترات
+Consumed Litres,اللترات المستهلكة
+Requested Litres,اللترات المطلوبة
+Top-up Litres,لترات التعبئة
+Monthly Litres,اللترات الشهرية
+Monthly Amount (SAR),المبلغ الشهري (ريال)
+Chip Number,رقم الشريحة
+Default Fuel Type,نوع الوقود الافتراضي
+Fuel,وقود
+Request Date,تاريخ الطلب
+Request Type,نوع الطلب
+Requested By,مقدَّم بواسطة
+Requester Name,اسم مقدّم الطلب
+Raised By,أُنشئ بواسطة
+Raised On,أُنشئ في
+Approver,المعتمِد
+Decision,القرار
+Decision Date,تاريخ القرار
+Revert Due Date,تاريخ الاسترجاع المستحق
+Reference DocType,نوع المستند المرجعي
+Reference Document,المستند المرجعي
+Reference Name,اسم المرجع
+Entity Name,اسم الكيان
+Entity Type,نوع الكيان
+Subject,الموضوع
+Purpose,الغرض
+Remark,ملاحظة
+Remarks,ملاحظات
+Condition Notes,ملاحظات الحالة
+Caption,التعليق
+Captured At,وقت الالتقاط
+Image,صورة
+Sender,المُرسِل
+Sent At,وقت الإرسال
+User,المستخدم
+Action,الإجراء
+Sequence,التسلسل
+Shift,الوردية
+Attendance Date,تاريخ الحضور
+Worked Hours,ساعات العمل
+Qiwa Status,حالة قِوى
+Dispatch Date,تاريخ التشغيل
+Trip Date,تاريخ الرحلة
+Depart Time,وقت المغادرة
+Return Time,وقت العودة
+Planned Time,الوقت المخطط
+Pickup Datetime,تاريخ ووقت الانطلاق
+Stop Date,تاريخ الإيقاف
+Stop Name,اسم المحطة
+Stop Reason,سبب الإيقاف
+Total Stops,إجمالي المحطات
+Route Name,اسم المسار
+Passenger Count,عدد الركاب
+Passenger Name,اسم الراكب
+Office Name,اسم المكتب
+Platform Name,اسم المنصة
+Log Date,تاريخ السجل
+Logged At,وقت التسجيل
+Wash Date,تاريخ الغسيل
+Period (Month),الفترة (الشهر)
+Previous Status,الحالة السابقة
+Site Token,رمز الموقع
+Web QR,رمز QR للويب
+Is Temporary,مؤقت
+Release Vehicle,تحرير المركبة
+Check Item,بند الفحص
+Default Company,الشركة الافتراضية
+Alert Lead Days,أيام التنبيه المسبق
+Idle Vehicle Days,أيام خمول المركبة
+Fuel Request Pending Max Days,الحد الأقصى لأيام انتظار طلب الوقود
+Fuel Request Approval Threshold (Litres),حد اعتماد طلب الوقود (لترات)
+Enable Approvals,تفعيل الموافقات
+Enable Driver Portal,تفعيل بوابة السائق
+Cross-Project Needs Approval,النقل بين المشاريع يتطلب موافقة
+Naming Series,سلسلة الترقيم
+Naming Series Notes,ملاحظات سلسلة الترقيم
+Naming Notes,ملاحظات الترقيم
+Identity,الهوية
+Defaults,الإعدادات الافتراضية
+Amounts,المبالغ
+Approvals,الموافقات
+Approval Controls,ضوابط الموافقة
+Attendance,الحضور
+Attendance Details,تفاصيل الحضور
+Attendance Images,صور الحضور
+Assignment Details,تفاصيل الإسناد
+Category Details,تفاصيل الفئة
+Handover Details,تفاصيل التسليم
+Handover Checklist,قائمة فحص التسليم
+Handover Check Items,بنود فحص التسليم
+Office Details,تفاصيل المكتب
+Platform Details,تفاصيل المنصة
+Stop Details,تفاصيل الإيقاف
+Stops,المحطات
+Passengers,الركاب
+Messages,الرسائل
+Portal & Naming,البوابة والترقيم
+Desk,سطح المكتب
+Allow drivers to access the self-service portal.,السماح للسائقين بالوصول إلى بوابة الخدمة الذاتية.
+Default company applied to Salis transactions when not set explicitly.,الشركة الافتراضية المطبَّقة على معاملات ساليس عند عدم تحديدها صراحةً.
+Default cost center used for fleet cost postings.,مركز التكلفة الافتراضي المستخدم لقيود تكاليف الأسطول.
+Fuel requests above this litre amount require approval.,طلبات الوقود التي تتجاوز هذا الحد باللترات تتطلب موافقة.
+"If set, the linked vehicle should be released from this driver.",عند التحديد، يجب تحرير المركبة المرتبطة من هذا السائق.
+JSON payload describing the audited change.,حمولة JSON تصف التغيير المُدقَّق.
+"Linked ERPNext Supplier for the rental office, where applicable.",المورّد المرتبط في ERPNext لمكتب التأجير، عند الانطباق.
+Master switch to enable approval routing across Salis transactions.,المفتاح الرئيسي لتفعيل توجيه الموافقات عبر معاملات ساليس.
+"Normalized plate (spaces removed, uppercased). Set automatically.",لوحة منسَّقة (دون مسافات وبأحرف كبيرة). تُضبط تلقائياً.
+Number of days a Fuel Request may stay Pending before it is flagged as overdue.,عدد الأيام التي يبقى فيها طلب الوقود قيد الانتظار قبل وسمه كمتأخر.
+Number of days before an expiry or due date to start raising alerts.,عدد الأيام قبل تاريخ الانتهاء أو الاستحقاق لبدء إطلاق التنبيهات.
+Number of days without a dispatch trip before an Active vehicle is flagged as idle.,عدد الأيام دون رحلة تشغيل قبل وسم المركبة النشطة بأنها خاملة.
+Quota period in YYYY-MM format (e.g. 2026-05).,فترة الحصة بصيغة YYYY-MM (مثال: 2026-05).
+Reference notes for operational naming series used across Salis transactions.,ملاحظات مرجعية لسلاسل الترقيم التشغيلية المستخدمة عبر معاملات ساليس.
+Require approval when an assignment or transfer crosses project boundaries.,اشتراط الموافقة عند تجاوز الإسناد أو النقل لحدود المشروع.
+Set when the request is approved.,يُضبط عند اعتماد الطلب.
+Set when this request's litres have been posted to the quota's consumed total. Guards against double-application on resubmit/amend.,يُضبط عند ترحيل لترات هذا الطلب إلى إجمالي المستهلك من الحصة. يمنع التطبيق المزدوج عند إعادة التقديم أو التعديل.
+Total litres consumed against this quota.,إجمالي اللترات المستهلكة من هذه الحصة.
+A chip number is required to {0} a fuel chip.,رقم الشريحة مطلوب لـ {0} شريحة وقود.
+A decision (Approved or Rejected) is required before submitting.,يلزم اتخاذ قرار (اعتماد أو رفض) قبل التقديم.
+A temporary top-up requires a revert due date.,تتطلب التعبئة المؤقتة تحديد تاريخ استحقاق للاسترجاع.
+Alert Lead Days cannot be negative.,لا يمكن أن تكون أيام التنبيه المسبق سالبة.
+An approved Approval Request is required before submitting {0} {1}.,يلزم وجود طلب موافقة معتمد قبل تقديم {0} {1}.
+Approver must be different from the requester.,يجب أن يكون المعتمِد مختلفاً عن مقدّم الطلب.
+Approver must differ from requester on Approval Request {0}.,يجب أن يختلف المعتمِد عن مقدّم الطلب في طلب الموافقة {0}.
+Cannot change Fuel Request status from {0} to {1}.,لا يمكن تغيير حالة طلب الوقود من {0} إلى {1}.
+Cannot change Fuel Topup Request status from {0} to {1}.,لا يمكن تغيير حالة طلب تعبئة الوقود من {0} إلى {1}.
+Cannot complete: Qiwa must be Approved and clearance done.,لا يمكن الإكمال: يجب أن تكون حالة قِوى معتمدة وأن يتم إخلاء الطرف.
+Category Name is required.,اسم الفئة مطلوب.
+Consumed litres ({0}) exceed the monthly quota ({1}).,اللترات المستهلكة ({0}) تتجاوز الحصة الشهرية ({1}).
+Driver license expired on {0}.,انتهت صلاحية رخصة السائق في {0}.
+Driver {0} already has an active assignment {1}.,السائق {0} لديه بالفعل إسناد نشط {1}.
+Driver {0} stopped: {1}.,تم إيقاف السائق {0}: {1}.
+Driver {0} was just assigned by {1}. Please review.,تم إسناد السائق {0} للتو بواسطة {1}. يرجى المراجعة.
+End Date cannot be earlier than Start Date.,لا يمكن أن يكون تاريخ الانتهاء أقدم من تاريخ البداية.
+Fuel Request Approval Threshold cannot be negative.,لا يمكن أن يكون حد اعتماد طلب الوقود سالباً.
+Fuel Request {0} is not pending (current status: {1}).,طلب الوقود {0} ليس قيد الانتظار (الحالة الحالية: {1}).
+Illegal status change from {0} to {1}.,تغيير حالة غير مسموح به من {0} إلى {1}.
+Invalid status: {0},حالة غير صالحة: {0}
+Invalid submission.,تقديم غير صالح.
+Litres cannot be negative.,لا يمكن أن تكون اللترات سالبة.
+Odometer cannot be negative.,لا يمكن أن تكون قراءة عداد المسافة سالبة.
+Odometer reading {0} cannot be lower than the vehicle's current {1}.,لا يمكن أن تكون قراءة عداد المسافة {0} أقل من القراءة الحالية للمركبة {1}.
+Office Name is required.,اسم المكتب مطلوب.
+Platform Name is required.,اسم المنصة مطلوب.
+Purpose is too long. Please keep it under 2000 characters.,الغرض طويل جداً. يرجى إبقاؤه أقل من 2000 حرف.
+Rejected: {0},مرفوض: {0}
+Requested Litres must be greater than zero.,يجب أن تكون اللترات المطلوبة أكبر من صفر.
+Select the vehicle to release.,اختر المركبة المراد تحريرها.
+This temporary top-up is past its revert due date ({0}) and has not been reverted.,تجاوزت هذه التعبئة المؤقتة تاريخ استحقاق استرجاعها ({0}) ولم تُسترجَع.
+To Driver must differ from From Driver.,يجب أن يختلف (إلى السائق) عن (من السائق).
+Top-up Litres must be greater than zero.,يجب أن تكون لترات التعبئة أكبر من صفر.
+Trip end odometer ({0}) cannot be less than start ({1}).,لا يمكن أن يكون عداد نهاية الرحلة ({0}) أقل من عداد البداية ({1}).
+Vehicle {0} already has an active assignment {1}.,المركبة {0} لديها بالفعل إسناد نشط {1}.
+Vehicle {0} assigned to driver {1}.,تم إسناد المركبة {0} إلى السائق {1}.
+Vehicle {0} handed over to driver {1}.,تم تسليم المركبة {0} إلى السائق {1}.
+Vehicle {0} stopped: {1}.,تم إيقاف المركبة {0}: {1}.
+Vehicle {0} was just assigned by {1}. Please review.,تم إسناد المركبة {0} للتو بواسطة {1}. يرجى المراجعة.
+Vehicle {0} was not re-linked on cancel; it is no longer free.,لم تُعَد المركبة {0} للربط عند الإلغاء؛ لم تعد متاحة.
+Log Count,عدد السجلات
+Total Amount,المبلغ الإجمالي
+Total Litres,إجمالي اللترات
+OK,سليم

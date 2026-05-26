@@ -16,6 +16,7 @@
   "related_vehicle",
   "driver_stop_sec_notes",
   "notes",
+  "previous_status",
   "amended_from"
  ],
  "fields": [
@@ -86,6 +87,14 @@
    "fieldname": "notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "fieldname": "previous_status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Previous Status",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",

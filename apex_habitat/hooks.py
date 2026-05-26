@@ -183,10 +183,17 @@ scheduler_events = {
         "apex_habitat.habitat.tasks.idle_resident_aging",
         "apex_habitat.habitat.tasks.daily_scheduled_task_instance_generator",
         "apex_habitat.habitat.tasks.daily_occupancy_snapshot",
+        # Salis fleet module
+        "apex_habitat.salis.tasks.driver_license_expiry_watch",
+        "apex_habitat.salis.tasks.idle_vehicle_watch",
+        "apex_habitat.salis.tasks.unreverted_topup_watch",
+        "apex_habitat.salis.tasks.overdue_fuel_request_watch",
+        "apex_habitat.salis.tasks.missing_attendance_watch",
     ],
     "weekly": [
         "apex_habitat.habitat.tasks.weekly_occupancy_sync",
         "apex_habitat.habitat.tasks.weekly_safety_task_compliance_scan",
+        "apex_habitat.salis.tasks.vehicle_utilization_summary",
     ],
     "monthly": [
         "apex_habitat.habitat.tasks.monthly_rent_due_alert",
@@ -210,7 +217,10 @@ fixtures = [
 
 after_install = "apex_habitat.setup.after_install"
 # Dashboards seed after migrate (when their charts/number cards already exist).
-after_migrate = "apex_habitat.habitat.dashboard_seed.seed_all_dashboards"
+after_migrate = [
+    "apex_habitat.habitat.dashboard_seed.seed_all_dashboards",
+    "apex_habitat.salis.dashboard_seed.seed_salis_dashboards",
+]
 
 # Frappe What's New feed — appears in desk notification area, not as a popup
 get_changelog_feed = "apex_habitat.habitat.utils.changelog.get_changelog_feed"
