@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "creation": "2026-05-26 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "compliance_type",
+  "document_number",
+  "issue_date",
+  "expiry_date",
+  "status",
+  "attachment"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "compliance_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Compliance Type",
+   "options": "Registration (Istimara)\nInsurance\nPeriodic Inspection\nOperating Card\nOther",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "document_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Document Number"
+  },
+  {
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "label": "Issue Date"
+  },
+  {
+   "columns": 2,
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Expiry Date",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Valid\nExpiring Soon\nExpired",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-26 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Salis Vehicle Compliance",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

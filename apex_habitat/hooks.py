@@ -189,6 +189,7 @@ scheduler_events = {
         "apex_habitat.salis.tasks.unreverted_topup_watch",
         "apex_habitat.salis.tasks.overdue_fuel_request_watch",
         "apex_habitat.salis.tasks.missing_attendance_watch",
+        "apex_habitat.salis.tasks.vehicle_compliance_expiry_watch",
     ],
     "weekly": [
         "apex_habitat.habitat.tasks.weekly_occupancy_sync",

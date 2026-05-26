@@ -23,6 +23,11 @@
   "project",
   "vehicle_assignment_col",
   "current_driver",
+  "vehicle_sec_compliance",
+  "compliance_documents",
+  "vehicle_compliance_col",
+  "compliance_status",
+  "next_expiry_date",
   "vehicle_sec_notes",
   "notes"
  ],
@@ -134,6 +139,35 @@
    "in_standard_filter": 1,
    "label": "Current Driver",
    "options": "Salis Driver"
+  },
+  {
+   "fieldname": "vehicle_sec_compliance",
+   "fieldtype": "Section Break",
+   "label": "Compliance"
+  },
+  {
+   "fieldname": "compliance_documents",
+   "fieldtype": "Table",
+   "label": "Compliance Documents",
+   "options": "Salis Vehicle Compliance"
+  },
+  {
+   "fieldname": "vehicle_compliance_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Not Tracked",
+   "fieldname": "compliance_status",
+   "fieldtype": "Select",
+   "label": "Compliance Status",
+   "options": "Compliant\nExpiring Soon\nExpired\nNot Tracked",
+   "read_only": 1
+  },
+  {
+   "fieldname": "next_expiry_date",
+   "fieldtype": "Date",
+   "label": "Next Expiry Date",
+   "read_only": 1
   },
   {
    "collapsible": 1,

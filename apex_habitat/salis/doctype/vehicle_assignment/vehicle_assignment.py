@@ -18,6 +18,33 @@ class VehicleAssignment(Document):
     def validate(self):
         self._validate_dates()
         self._validate_no_overlap()
+        self._enforce_compliance()
+
+    def _enforce_compliance(self):
+        """Block (or warn) when the linked vehicle's compliance has expired.
+
+        Reads Salis Vehicle.compliance_status; if Expired, honours the
+        Salis Settings.block_assignment_on_expired_compliance flag: block when
+        set, otherwise warn. Safe default = warn.
+        """
+        if not self.vehicle:
+            return
+        status = frappe.db.get_value("Salis Vehicle", self.vehicle, "compliance_status")
+        if status != "Expired":
+            return
+        if frappe.db.get_single_value(
+            "Salis Settings", "block_assignment_on_expired_compliance"
+        ):
+            frappe.throw(
+                _("Vehicle {0} has expired compliance and cannot be dispatched/assigned.").format(
+                    self.vehicle
+                )
+            )
+        else:
+            frappe.msgprint(
+                _("Warning: vehicle {0} has expired compliance.").format(self.vehicle),
+                indicator="orange",
+            )
 
     def _validate_dates(self):
         if self.start_date and self.end_date and self.end_date < self.start_date:

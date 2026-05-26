@@ -414,6 +414,55 @@ def missing_attendance_watch() -> None:
         start += BATCH_SIZE
 
 
+def vehicle_compliance_expiry_watch() -> None:
+    """Alert on vehicle compliance documents at or past their expiry window.
+
+    Reads Salis Vehicle Compliance child rows whose ``expiry_date`` is within
+    ``alert_lead_days`` (Salis Settings; default 30) of today. For each row
+    raises a "License Expiry" alert referencing the parent vehicle and
+    compliance type — Critical if already expired, otherwise Warning. Per-row
+    de-dup is handled by ``_raise_alert`` (one Open alert per vehicle+type+day).
+    """
+    from frappe.utils import add_days, getdate, today
+
+    today_str = today()
+    today_date = getdate(today_str)
+    logger = frappe.logger()
+    lead_days = _settings_int("alert_lead_days", 30)
+    horizon = add_days(today_str, lead_days)
+
+    start = 0
+    while True:
+        rows = frappe.get_all(
+            "Salis Vehicle Compliance",
+            filters={"expiry_date": ["<=", horizon]},
+            fields=["parent", "compliance_type", "expiry_date"],
+            limit_start=start,
+            limit_page_length=BATCH_SIZE,
+        )
+        if not rows:
+            break
+
+        for c in rows:
+            try:
+                expired = bool(c.expiry_date) and getdate(c.expiry_date) < today_date
+                severity = "Critical" if expired else "Warning"
+                state = "expired on" if expired else "expires on"
+                msg = (f"vehicle_compliance_expiry_watch: vehicle {c.parent} "
+                       f"{c.compliance_type} compliance {state} {c.expiry_date}.")
+                logger.warning(msg)
+                _raise_alert("License Expiry", severity, msg,
+                             "Salis Vehicle", c.parent, vehicle=c.parent)
+            except Exception:
+                frappe.db.rollback()
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Vehicle compliance watch failed for {c.parent}"[:140],
+                )
+
+        start += BATCH_SIZE
+
+
 # ---------------------------------------------------------------------------
 # Weekly job
 # ---------------------------------------------------------------------------

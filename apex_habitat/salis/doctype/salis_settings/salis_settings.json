@@ -17,6 +17,7 @@
   "salis_settings_sec_approvals",
   "enable_approvals",
   "cross_project_needs_approval",
+  "block_assignment_on_expired_compliance",
   "salis_settings_approvals_col",
   "fuel_request_approval_threshold_litres",
   "fuel_tier_regional_litres",
@@ -101,6 +102,13 @@
    "fieldname": "cross_project_needs_approval",
    "fieldtype": "Check",
    "label": "Cross-Project Needs Approval"
+  },
+  {
+   "default": "0",
+   "description": "Block vehicle assignment when the linked vehicle has expired compliance.",
+   "fieldname": "block_assignment_on_expired_compliance",
+   "fieldtype": "Check",
+   "label": "Block Assignment On Expired Compliance"
   },
   {
    "fieldname": "salis_settings_approvals_col",
