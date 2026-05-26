@@ -1807,3 +1807,14 @@ Evidence Required,إثبات مطلوب
 Amount Recovered,المبلغ المُسترد
 The closer must differ from the person who raised the case.,يجب أن يختلف من يُغلق الحالة عمّن رفعها.
 Evidence required before resolving,الإثبات مطلوب قبل الإغلاق
+Salis Payment Request,طلب دفع
+Salis Payment Register,سجل المدفوعات
+Expense Type,نوع المصروف
+Pending Finance,بانتظار المالية
+Approved by Finance,معتمد من المالية
+Finance Approved By,اعتمده من المالية
+Finance Approved On,تاريخ اعتماد المالية
+Linked Payment Entry,قيد الدفع المرتبط
+Fine / Violation,مخالفة
+Sponsorship Fee,رسوم كفالة
+Only Finance can approve or mark a payment as paid. This step cannot be bypassed.,المالية فقط تعتمد أو تؤكّد الدفع. لا يمكن تجاوز هذه الخطوة.

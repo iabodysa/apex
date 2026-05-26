@@ -1,0 +1,20 @@
+{
+  "doctype": "Report",
+  "name": "Salis Payment Register",
+  "report_name": "Salis Payment Register",
+  "ref_doctype": "Salis Payment Request",
+  "report_type": "Script Report",
+  "is_standard": "Yes",
+  "module": "Salis",
+  "roles": [
+    {
+      "role": "Fleet Manager"
+    },
+    {
+      "role": "Finance Manager"
+    },
+    {
+      "role": "Internal Auditor"
+    }
+  ]
+}
