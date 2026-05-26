@@ -42,7 +42,11 @@ class SponsorshipTransferCase(Document):
                 )
 
     def before_submit(self):
-        ensure_approval("Sponsorship Transfer Case", self.name)
+        # Sponsorship transfers are high-risk legal/government actions and must
+        # carry Operations-tier authority (tiered authorityG08).
+        ensure_approval(
+            "Sponsorship Transfer Case", self.name, required_tier="Operations"
+        )
 
     def on_submit(self):
         log_activity(

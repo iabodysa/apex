@@ -10,6 +10,7 @@
   "request_type",
   "requested_by",
   "approver",
+  "required_tier",
   "project",
   "approval_request_overview_col",
   "decision",
@@ -59,6 +60,16 @@
    "in_list_view": 1,
    "label": "Approver",
    "options": "User"
+  },
+  {
+   "description": "Minimum authority tier required to approve this request. Set by the originating controller; verified at submit of the reference document.",
+   "fieldname": "required_tier",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Required Tier",
+   "options": "\nSupervisor\nProject\nRegional\nOperations",
+   "read_only": 1
   },
   {
    "fieldname": "project",

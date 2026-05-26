@@ -4,6 +4,51 @@
 import frappe
 from frappe import _
 
+# Ordered authority-tier ladder (ascending). A higher index means a higher
+# authority. The Delegation-of-Authority gate routes each request to the tier
+# its amount/quantity/scope demands, then verifies the approver actually holds
+# at least that tier before allowing submit (tiered authorityG08).
+TIERS = ["Supervisor", "Project", "Regional", "Operations"]
+
+# Maps the Salis operational roles onto the tier ladder. A user's effective
+# authority is the highest tier among the roles they hold.
+ROLE_TIER = {
+	"Fleet Supervisor": "Supervisor",
+	"Fleet Project Manager": "Project",
+	"Fleet Regional Manager": "Regional",
+	"Fleet Operations Manager": "Operations",
+	"Fleet Manager": "Operations",
+	"System Manager": "Operations",
+}
+
+
+def tier_rank(tier):
+	"""Return the ladder index of a tier, or -1 if it is not a known tier."""
+	try:
+		return TIERS.index(tier)
+	except (ValueError, TypeError):
+		return -1
+
+
+def user_max_tier(user):
+	"""Return the highest authority tier among the user's roles, or None.
+
+	Used by the DoA gate to compare an approver's standing against the tier a
+	request requires. Returns None when the user holds no tier-bearing role."""
+	if not user:
+		return None
+	best = None
+	best_rank = -1
+	for role in frappe.get_roles(user):
+		tier = ROLE_TIER.get(role)
+		if tier is None:
+			continue
+		rank = tier_rank(tier)
+		if rank > best_rank:
+			best_rank = rank
+			best = tier
+	return best
+
 
 def lock_vehicle(name):
 	"""Row-lock a Salis Vehicle to prevent concurrent assignment/handover races."""
@@ -41,9 +86,14 @@ def log_activity(action, entity_type, entity_name, details=None):
 		frappe.log_error(frappe.get_traceback(), "Salis: activity log write failed")
 
 
-def ensure_approval(reference_doctype, reference_name):
+def ensure_approval(reference_doctype, reference_name, required_tier=None):
 	"""Block submit unless a submitted, Approved Approval Request exists for this document
-	with approver != requester. Call from a controller's before_submit when a DoA gate applies."""
+	with approver != requester. Call from a controller's before_submit when a DoA gate applies.
+
+	When ``required_tier`` is given, the gate additionally verifies that the
+	request's approver holds at least that authority tier (tiered authorityG08):
+	an approver below the required tier cannot authorize the request, even if an
+	Approved request row exists."""
 	rows = frappe.get_all(
 		"Approval Request",
 		filters={
@@ -64,4 +114,14 @@ def ensure_approval(reference_doctype, reference_name):
 	r = rows[0]
 	if r.approver and r.requested_by and r.approver == r.requested_by:
 		frappe.throw(_("Approver must differ from requester on Approval Request {0}.").format(r.name))
+
+	if required_tier:
+		approver_tier = user_max_tier(r.approver)
+		if tier_rank(approver_tier) < tier_rank(required_tier):
+			frappe.throw(
+				_(
+					"This request requires {0}-tier authority. The approver on Approval "
+					"Request {1} does not hold the required tier."
+				).format(required_tier, r.name)
+			)
 	return True

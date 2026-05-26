@@ -12,7 +12,13 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import ensure_approval, get_settings, lock_vehicle, log_activity
+from apex_habitat.salis.salis_lib import (
+	ensure_approval,
+	get_settings,
+	lock_vehicle,
+	log_activity,
+	tier_rank,
+)
 
 # Allowed forward status transitions. A status may always remain unchanged.
 _ALLOWED_TRANSITIONS = {
@@ -33,7 +39,7 @@ class FuelRequest(Document):
 
 	def before_submit(self):
 		if self._needs_approval():
-			ensure_approval("Fuel Request", self.name)
+			ensure_approval("Fuel Request", self.name, required_tier=self._required_tier())
 
 	def on_submit(self):
 		if self.status == "Done":
@@ -83,6 +89,35 @@ class FuelRequest(Document):
 				return True
 
 		return False
+
+	def _is_cross_project(self):
+		"""True when this request's project differs from the linked quota's project."""
+		if not (self.project and self.fuel_quota):
+			return False
+		quota_project = frappe.db.get_value("Fuel Quota", self.fuel_quota, "project")
+		return bool(quota_project and quota_project != self.project)
+
+	def _required_tier(self):
+		"""Compute the authority tier this fuel request demands (tiered authorityG08).
+
+		Base tier is Project. The volume bands and the cross-project rule escalate
+		it; the highest applicable tier wins. Thresholds are data-driven from
+		Salis Settings, not hardcoded."""
+		settings = get_settings()
+		litres = self.requested_litres or 0
+		ops_litres = settings.fuel_tier_operations_litres or 0
+		reg_litres = settings.fuel_tier_regional_litres or 0
+
+		tier = "Project"
+		if ops_litres and litres >= ops_litres:
+			tier = "Operations"
+		elif reg_litres and litres >= reg_litres:
+			tier = "Regional"
+
+		if self._is_cross_project() and tier_rank(tier) < tier_rank("Regional"):
+			tier = "Regional"
+
+		return tier
 
 	def _apply_quota_consumption(self):
 		"""Idempotently add requested_litres to the quota's consumed_litres."""

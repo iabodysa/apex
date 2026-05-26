@@ -19,6 +19,9 @@
   "cross_project_needs_approval",
   "salis_settings_approvals_col",
   "fuel_request_approval_threshold_litres",
+  "fuel_tier_regional_litres",
+  "fuel_tier_operations_litres",
+  "passenger_count_ops_threshold",
   "salis_settings_tab_portal",
   "salis_settings_sec_portal",
   "enable_driver_portal",
@@ -109,6 +112,27 @@
    "fieldname": "fuel_request_approval_threshold_litres",
    "fieldtype": "Float",
    "label": "Fuel Request Approval Threshold (Litres)"
+  },
+  {
+   "default": "200",
+   "description": "Fuel requests at or above this litre amount require Regional-tier authority.",
+   "fieldname": "fuel_tier_regional_litres",
+   "fieldtype": "Float",
+   "label": "Fuel Regional Tier Threshold (Litres)"
+  },
+  {
+   "default": "500",
+   "description": "Fuel requests at or above this litre amount require Operations-tier authority.",
+   "fieldname": "fuel_tier_operations_litres",
+   "fieldtype": "Float",
+   "label": "Fuel Operations Tier Threshold (Litres)"
+  },
+  {
+   "default": "20",
+   "description": "Passenger counts above this number require Operations-tier authority.",
+   "fieldname": "passenger_count_ops_threshold",
+   "fieldtype": "Int",
+   "label": "Passenger Count Operations Threshold"
   },
   {
    "fieldname": "salis_settings_tab_portal",

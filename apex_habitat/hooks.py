@@ -206,6 +206,28 @@ override_doctype_dashboards = {
     "Supplier": "apex_habitat.habitat.api.supplier_links.get_data",
 }
 
+# Salis: project-based row scoping (tiered authority) — supervisors/PMs see only
+# the projects they hold a User Permission for; oversight roles see all.
+permission_query_conditions = {
+    "Vehicle Assignment": "apex_habitat.salis.permissions.vehicle_assignment_query",
+    "Fuel Request": "apex_habitat.salis.permissions.fuel_request_query",
+    "Fuel Topup Request": "apex_habitat.salis.permissions.fuel_topup_request_query",
+    "Dispatch Trip": "apex_habitat.salis.permissions.dispatch_trip_query",
+    "Transport Request": "apex_habitat.salis.permissions.transport_request_query",
+    "Route Plan": "apex_habitat.salis.permissions.route_plan_query",
+    "Sponsorship Transfer Case": "apex_habitat.salis.permissions.sponsorship_transfer_case_query",
+}
+
+has_permission = {
+    "Vehicle Assignment": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Fuel Request": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Fuel Topup Request": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Dispatch Trip": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Transport Request": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Route Plan": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Sponsorship Transfer Case": "apex_habitat.salis.permissions.scoped_has_permission",
+}
+
 # Fixtures shipped with the app
 fixtures = [
     {"dt": "Safety Task Catalog"},
