@@ -106,6 +106,7 @@ def _upsert_chart(spec):
             doc.save(ignore_permissions=True)  # audit-ok
         else:
             frappe.get_doc(values).insert(ignore_permissions=True)  # audit-ok
+        frappe.db.commit()  # audit-ok — isolate each upsert so one failure can't wipe prior
     except Exception:
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(),
@@ -152,6 +153,7 @@ def _upsert_card(spec):
             doc.save(ignore_permissions=True)  # audit-ok
         else:
             frappe.get_doc(values).insert(ignore_permissions=True)  # audit-ok
+        frappe.db.commit()  # audit-ok — isolate each upsert
     except Exception:
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(),
@@ -190,6 +192,7 @@ def _upsert_dashboard(name, charts, cards):
             doc.insert(ignore_permissions=True)  # audit-ok
         else:
             doc.save(ignore_permissions=True)  # audit-ok
+        frappe.db.commit()  # audit-ok
     except Exception:
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(),
@@ -209,9 +212,8 @@ _CHARTS = [
      "based_on": "trip_date", "time_interval": "Daily", "timespan": "Last Month"},
     # Fuel Consumption by Month — engine ledger (NEW; guarded). Sum litres by period.
     {"name": "Fuel Consumption by Month", "document_type": "Fuel Consumption Ledger",
-     "type": "Bar", "chart_type": "Sum", "timeseries": True,
-     "based_on": "period_month", "time_interval": "Monthly",
-     "aggregate_function_based_on": "litres"},
+     "type": "Bar", "chart_type": "Group By", "group_by_based_on": "period_month",
+     "group_by_type": "Sum", "aggregate_function_based_on": "litres"},
     # Rental Accrual by Office — engine ledger (NEW; guarded). Sum amount by office.
     {"name": "Rental Accrual by Office", "document_type": "Rental Accrual Ledger",
      "type": "Pie", "chart_type": "Group By", "group_by_based_on": "rental_office",
@@ -219,8 +221,8 @@ _CHARTS = [
      "currency": "SAR"},
     # Vehicle Utilisation — engine snapshot (NEW; guarded). Average utilisation_pct.
     {"name": "Vehicle Utilisation", "document_type": "Vehicle Utilisation Snapshot",
-     "type": "Bar", "chart_type": "Average",
-     "aggregate_function_based_on": "utilisation_pct"},
+     "type": "Bar", "chart_type": "Group By", "group_by_based_on": "vehicle",
+     "group_by_type": "Average", "aggregate_function_based_on": "utilisation_pct"},
 ]
 
 _CARDS = [
