@@ -119,9 +119,11 @@
   },
   {
    "depends_on": "eval:doc.service_line=='Representatives'",
+   "description": "Server-derived: submitted Administrative Trips this month for the project (incl. this one).",
    "fieldname": "trips_this_month",
    "fieldtype": "Int",
-   "label": "Trips This Month"
+   "label": "Trips This Month",
+   "read_only": 1
   },
   {
    "fieldname": "from_location",

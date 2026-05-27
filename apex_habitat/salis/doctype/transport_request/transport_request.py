@@ -64,6 +64,10 @@ class TransportRequest(Document):
         # Worker count is always derived from the child rows.
         self.worker_count = len(self.workers or [])
 
+        # Trips-this-month is server-derived (not a trusted manual input), so the
+        # >5-trips/month DoA tier gate (tiered authority) cannot be under-stated.
+        self._derive_trips_this_month()
+
         if self.request_type == "Accommodation to Project Shuttle":
             if not self.accommodation_building or not self.project:
                 frappe.throw(
@@ -86,6 +90,33 @@ class TransportRequest(Document):
 
         if self.purpose and len(self.purpose) > 2000:
             frappe.throw(_("Purpose is too long. Please keep it under 2000 characters."))
+
+    def _derive_trips_this_month(self):
+        """Count submitted Administrative Trips this month for the same project (or
+        requester), including this one — server-derived so the DoA gate is reliable."""
+        if self.request_type != "Administrative Trip / Document Signing":
+            self.trips_this_month = 0
+            return
+        from frappe.utils import getdate, today, get_first_day, get_last_day, add_days
+
+        ref = getdate(self.pickup_datetime or today())
+        start = get_first_day(ref)
+        end = add_days(get_last_day(ref), 1)
+        filters = [
+            ["Transport Request", "request_type", "=", "Administrative Trip / Document Signing"],
+            ["Transport Request", "docstatus", "=", 1],
+            ["Transport Request", "pickup_datetime", ">=", str(start)],
+            ["Transport Request", "pickup_datetime", "<", str(end)],
+        ]
+        if self.project:
+            filters.append(["Transport Request", "project", "=", self.project])
+        elif self.requested_by:
+            filters.append(["Transport Request", "requested_by", "=", self.requested_by])
+        if self.name:
+            filters.append(["Transport Request", "name", "!=", self.name])
+        existing = frappe.get_all("Transport Request", filters=filters, limit=0)
+        # +1 to include the request currently being validated/submitted.
+        self.trips_this_month = len(existing) + 1
 
     def before_submit(self):
         from apex_habitat.salis.salis_lib import ensure_approval
