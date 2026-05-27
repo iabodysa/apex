@@ -1,3 +1,10 @@
+# Patch lifecycle policy (audit 2026-05-27):
+#   PERMANENT  = recurring/idempotent seeds; must stay so fresh installs replay them.
+#   ONE-TIME   = renames/cleanups/backfills; safe to PRUNE (remove module + this line)
+#               once every deployed site has run it (tracked in tabPatch Log).
+#   Backfills are no-ops on fresh installs — never rely on them to seed fresh DBs.
+#   Prune-eligible now: v0_4.cleanup_duplicate_workspaces (was "remove after v0.5").
+#   Date-gated: v0_7.rename_habitat_city_to_city (remove on/after 2026-06-24).
 apex_habitat.patches.v0_4.cleanup_duplicate_workspaces
 apex_habitat.patches.v0_5.rename_sar_columns
 apex_habitat.patches.v0_6.add_city_doctype

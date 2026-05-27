@@ -10,6 +10,8 @@
   "action",
   "entity_type",
   "entity_name",
+  "ref_doctype",
+  "ref_name",
   "activity_log_overview_col",
   "user",
   "logged_at",
@@ -43,6 +45,21 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Entity Name",
+   "read_only": 1
+  },
+  {
+   "description": "Native link to the source record (logs integration).",
+   "fieldname": "ref_doctype",
+   "fieldtype": "Link",
+   "label": "Reference DocType",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ref_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "ref_doctype",
    "read_only": 1
   },
   {

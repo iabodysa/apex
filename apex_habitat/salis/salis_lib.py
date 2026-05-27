@@ -100,17 +100,21 @@ def get_settings():
 def log_activity(action, entity_type, entity_name, details=None):
 	"""Append-only, server-written audit trail. Must never block the parent transaction."""
 	try:
-		doc = frappe.get_doc(
-			{
-				"doctype": "Salis Activity Log",
-				"action": action,
-				"entity_type": entity_type,
-				"entity_name": entity_name,
-				"user": frappe.session.user,
-				"logged_at": frappe.utils.now_datetime(),
-				"details": frappe.as_json(details) if details else None,
-			}
-		)
+		payload = {
+			"doctype": "Salis Activity Log",
+			"action": action,
+			"entity_type": entity_type,
+			"entity_name": entity_name,
+			"user": frappe.session.user,
+			"logged_at": frappe.utils.now_datetime(),
+			"details": frappe.as_json(details) if details else None,
+		}
+		# Logs integration: connect the event to its source record natively
+		# (clickable Dynamic Link) when entity_type is a real DocType.
+		if entity_type and entity_name and frappe.db.exists("DocType", entity_type):
+			payload["ref_doctype"] = entity_type
+			payload["ref_name"] = entity_name
+		doc = frappe.get_doc(payload)
 		doc.insert(ignore_permissions=True)  # audit-ok
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Salis: activity log write failed")
