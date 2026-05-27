@@ -14,10 +14,19 @@
    "role": "Fleet Project Manager"
   },
   {
+   "role": "Fleet Regional Manager"
+  },
+  {
+   "role": "Fleet Operations Manager"
+  },
+  {
    "role": "Fleet Supervisor"
   },
   {
    "role": "Finance Manager"
+  },
+  {
+   "role": "Internal Auditor"
   }
  ],
  "is_default": 0,
@@ -530,5 +539,5 @@
  "charts": [],
  "number_cards": [],
  "quick_lists": [],
- "modified": "2026-05-26 10:00:00.000000"
+ "modified": "2026-05-27 14:00:00.000000"
 }

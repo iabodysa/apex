@@ -238,12 +238,21 @@ has_permission = {
 fixtures = [
     {"dt": "Safety Task Catalog"},
     {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
+    # Salis (Movement) custom roles — only the uniquely-ours ones are fixtured;
+    # core/generic roles (Fleet Manager, Driver, Project Manager, Operations
+    # Manager, Regional Operations Manager) are existence-guarded in setup, never
+    # fixtured, to avoid clobbering ERPNext/HRMS-owned roles.
+    {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Regional Manager", "Fleet Supervisor", "Fleet Operations Manager", "Government Relations Officer", "Legal Officer"]]]},
     # Print Format and Web Form are standard module files (is_standard=1)
     # under habitat/print_format/ and habitat/web_form/ — loaded automatically
     # by bench migrate via import_file, no fixture entry needed.
 ]
 
-after_install = "apex_habitat.setup.after_install"
+# First-install bootstrap: Habitat + Salis (each existence-guarded/idempotent).
+after_install = [
+    "apex_habitat.setup.after_install",
+    "apex_habitat.salis.setup.after_install",
+]
 # Dashboards seed after migrate (when their charts/number cards already exist).
 after_migrate = [
     "apex_habitat.habitat.dashboard_seed.seed_all_dashboards",
