@@ -5,6 +5,10 @@
 #   Backfills are no-ops on fresh installs — never rely on them to seed fresh DBs.
 #   Prune-eligible now: v0_4.cleanup_duplicate_workspaces (was "remove after v0.5").
 #   Date-gated: v0_7.rename_habitat_city_to_city (remove on/after 2026-06-24).
+#   PERMANENT (keep, do NOT prune): all seed_* notifications (operational/event/
+#   temporary_stay/idle_resident), kanban (kanban_boards/room_readiness), dashboards,
+#   assignment_rules, email — each seeds DISTINCT records and fresh installs must replay
+#   them. They are idempotent (also called from after_install), not redundant.
 apex_habitat.patches.v0_4.cleanup_duplicate_workspaces
 apex_habitat.patches.v0_5.rename_sar_columns
 apex_habitat.patches.v0_6.add_city_doctype
