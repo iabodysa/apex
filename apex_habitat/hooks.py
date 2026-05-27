@@ -1,7 +1,10 @@
+# Package name (internal identifier) stays "apex_habitat" — renaming the package is a
+# breaking, major change. The user-facing title is decoupled from the Habitat module:
+# "Apex" hosts the Habitat (accommodation) and Salis (movement/fleet) modules.
 app_name = "apex_habitat"
-app_title = "Apex Habitat"
+app_title = "Apex"
 app_publisher = "Abdullah Fahad Al-Mutairi Co. (AFMCO)"
-app_description = "Accommodation and facilities management application."
+app_description = "Apex — workforce operations suite: Habitat (accommodation & facilities) and Salis (movement & fleet)."
 app_email = "afm@afmcoltd.com"
 app_license = "MIT"
 
