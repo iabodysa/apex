@@ -241,7 +241,24 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Green",
+   "title": "Active"
+  },
+  {
+   "color": "Orange",
+   "title": "Stopped"
+  },
+  {
+   "color": "Blue",
+   "title": "On Leave"
+  },
+  {
+   "color": "Gray",
+   "title": "Released"
+  }
+ ],
  "title_field": "full_name",
  "track_changes": 1
 }

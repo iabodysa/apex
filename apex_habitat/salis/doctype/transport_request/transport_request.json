@@ -333,6 +333,35 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Blue",
+   "title": "New"
+  },
+  {
+   "color": "Blue",
+   "title": "Validated"
+  },
+  {
+   "color": "Blue",
+   "title": "Approved"
+  },
+  {
+   "color": "Orange",
+   "title": "Scheduled"
+  },
+  {
+   "color": "Green",
+   "title": "Fulfilled"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
+  },
+  {
+   "color": "Red",
+   "title": "Cancelled"
+  }
+ ],
  "track_changes": 1
 }

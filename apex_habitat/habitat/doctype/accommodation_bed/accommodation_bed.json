@@ -136,7 +136,20 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Green",
+   "title": "Available"
+  },
+  {
+   "color": "Red",
+   "title": "Occupied"
+  },
+  {
+   "color": "Gray",
+   "title": "Out of Service"
+  }
+ ],
  "title_field": "bed_code",
  "track_changes": 1
 }

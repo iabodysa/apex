@@ -222,7 +222,24 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Blue",
+   "title": "Open"
+  },
+  {
+   "color": "Orange",
+   "title": "In Progress"
+  },
+  {
+   "color": "Green",
+   "title": "Cleared"
+  },
+  {
+   "color": "Red",
+   "title": "Blocked"
+  }
+ ],
  "title_field": "driver",
  "track_changes": 1
 }

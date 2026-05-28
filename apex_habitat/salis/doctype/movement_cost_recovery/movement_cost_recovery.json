@@ -251,7 +251,32 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Blue",
+   "title": "Open"
+  },
+  {
+   "color": "Orange",
+   "title": "Acknowledged"
+  },
+  {
+   "color": "Blue",
+   "title": "Approved"
+  },
+  {
+   "color": "Green",
+   "title": "Recovered"
+  },
+  {
+   "color": "Gray",
+   "title": "Waived"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
+  }
+ ],
  "title_field": "recovery_type",
  "track_changes": 1
 }

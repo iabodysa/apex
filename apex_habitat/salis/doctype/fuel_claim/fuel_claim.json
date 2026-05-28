@@ -245,7 +245,32 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Gray",
+   "title": "Draft"
+  },
+  {
+   "color": "Orange",
+   "title": "Submitted to Movement"
+  },
+  {
+   "color": "Blue",
+   "title": "Reconciled"
+  },
+  {
+   "color": "Green",
+   "title": "Approved"
+  },
+  {
+   "color": "Red",
+   "title": "Disputed"
+  },
+  {
+   "color": "Green",
+   "title": "Closed"
+  }
+ ],
  "title_field": "vehicle",
  "track_changes": 1
 }

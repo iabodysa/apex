@@ -284,7 +284,24 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Green",
+   "title": "Active"
+  },
+  {
+   "color": "Orange",
+   "title": "Stopped"
+  },
+  {
+   "color": "Red",
+   "title": "Under Maintenance"
+  },
+  {
+   "color": "Gray",
+   "title": "Released"
+  }
+ ],
  "title_field": "plate_number",
  "track_changes": 1
 }
