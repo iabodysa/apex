@@ -111,6 +111,11 @@ class SalisPaymentRequest(Document):
 				_("Only Finance can approve or mark a payment as paid. This step cannot be bypassed.")
 			)
 
+		if self.requested_by and frappe.session.user == self.requested_by:
+			frappe.throw(
+				_("You cannot approve or pay a Payment Request you raised; a different Finance approver is required.")
+			)
+
 		if new_status == "Approved by Finance":
 			if not self.finance_approved_by:
 				self.finance_approved_by = frappe.session.user

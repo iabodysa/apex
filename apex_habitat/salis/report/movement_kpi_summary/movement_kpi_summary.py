@@ -106,7 +106,7 @@ def execute(filters=None):
             _sum("Fuel Consumption Ledger", "litres", date_range("period_month")),
             "Fuel Consumption Ledger"),
         row(frappe._("Rental Accrual (Amount)"),
-            _sum("Rental Accrual Ledger", "amount", date_range("period_month")),
+            _sum("Rental Accrual Ledger", "amount", date_range("accrual_date")),
             "Rental Accrual Ledger"),
         row(frappe._("Average Vehicle Utilisation %"),
             _avg("Vehicle Utilisation Snapshot", "utilisation_pct", {}),

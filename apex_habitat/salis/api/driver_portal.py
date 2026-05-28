@@ -44,6 +44,7 @@ def get_driver_context():
 @frappe.whitelist()
 def my_trips_today():
 	"""Today's Dispatch Trips for the current driver (read)."""
+	_require_enabled()
 	driver = _resolve_driver()
 	return frappe.get_all(
 		"Dispatch Trip",
@@ -56,6 +57,7 @@ def my_trips_today():
 @frappe.whitelist()
 def my_support_tickets():
 	"""The current driver's support tickets (read)."""
+	_require_enabled()
 	driver = _resolve_driver()
 	return frappe.get_all(
 		"Support Ticket",

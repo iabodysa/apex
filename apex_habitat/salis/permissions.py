@@ -147,8 +147,10 @@ def scoped_has_permission(doc, ptype, user=None):
 
     project = _doc_project(doc)
     if not project:
-        # No project context to scope on; defer to default permissions.
-        return None
+        # Scoped user acting on a doc with no resolvable project: deny, to mirror
+        # the list-view query condition (which shows scoped users nothing when the
+        # project is absent). Without this, a project-less record bypasses scoping.
+        return False
 
     if project not in _allowed_projects(user):
         return False

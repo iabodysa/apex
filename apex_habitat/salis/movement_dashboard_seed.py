@@ -246,7 +246,7 @@ _CARDS = [
     # Rental Accrual This Month (Sum) — engine ledger (NEW; guarded).
     {"name": "Rental Accrual This Month", "document_type": "Rental Accrual Ledger",
      "function": "Sum", "aggregate_function_based_on": "amount", "currency": "SAR",
-     "filters": [["Rental Accrual Ledger", "period_month", "Timespan", "this month"]]},
+     "filters": [["Rental Accrual Ledger", "accrual_date", "Timespan", "this month"]]},
     # Vehicles Tracked — distinct vehicles in the utilisation snapshot (NEW; guarded).
     {"name": "Vehicles Tracked", "document_type": "Vehicle Utilisation Snapshot"},
     # Inter-City Requests This Month — Transport Request, inter-city relocation.

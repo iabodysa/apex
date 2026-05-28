@@ -151,6 +151,8 @@ class DispatchTrip(Document):
     def _post_fulfilment_ledger(self):
         """Insert a read-only Trip Fulfilment Ledger row capturing the completed
         trip. System-written audit memo; humans never create these."""
+        if frappe.db.exists("Trip Fulfilment Ledger", {"dispatch_trip": self.name}):
+            return
         worker_count = (
             frappe.db.get_value(
                 "Transport Request", self.transport_request, "worker_count"
@@ -175,3 +177,42 @@ class DispatchTrip(Document):
             }
         )
         ledger.insert(ignore_permissions=True)  # audit-ok
+
+    def on_cancel(self):
+        """Reverse the on_submit fulfilment effects so a cancelled trip does not
+        leave the Transport Request permanently Fulfilled or double-count the
+        Trip Fulfilment Ledger. Odometer is monotonic and is intentionally not
+        rolled back."""
+        if self.transport_request:
+            tr = frappe.db.get_value(
+                "Transport Request",
+                self.transport_request,
+                ["status", "dispatch_trip"],
+                as_dict=True,
+            )
+            if tr and tr.status == "Fulfilled" and tr.dispatch_trip == self.name:
+                frappe.db.set_value(
+                    "Transport Request",
+                    self.transport_request,
+                    {
+                        "status": "Scheduled",
+                        "fulfilled_on": None,
+                        "assigned_vehicle": None,
+                        "assigned_driver": None,
+                        "dispatch_trip": None,
+                    },
+                )
+        for row in frappe.get_all(
+            "Trip Fulfilment Ledger",
+            filters={"dispatch_trip": self.name},
+            pluck="name",
+        ):
+            frappe.delete_doc(
+                "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True
+            )
+        log_activity(
+            action="Trip Cancelled",
+            entity_type="Dispatch Trip",
+            entity_name=self.name,
+            details={"transport_request": self.transport_request},
+        )
