@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-4">
     <h2 class="font-semibold">Daily Attendance</h2>
-    <button class="w-full bg-green-600 text-white rounded-xl p-4 disabled:opacity-50"
+    <button class="w-full bg-ah-primary text-white rounded-xl p-4 disabled:opacity-50"
             :disabled="checkin.loading" @click="checkin.submit()">Check In</button>
-    <button class="w-full bg-gray-700 text-white rounded-xl p-4 disabled:opacity-50"
+    <button class="w-full bg-ah-forest text-white rounded-xl p-4 disabled:opacity-50"
             :disabled="checkout.loading" @click="checkout.submit()">Check Out</button>
-    <p v-if="msg" class="text-center text-sm text-green-700">{{ msg }}</p>
-    <p v-if="err" class="text-center text-sm text-red-600">{{ err }}</p>
+    <p v-if="msg" class="text-center text-sm text-ah-primary">{{ msg }}</p>
+    <p v-if="err" class="text-center text-sm text-ah-danger">{{ err }}</p>
   </div>
 </template>
 

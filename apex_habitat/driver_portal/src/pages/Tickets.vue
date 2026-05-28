@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <h2 class="font-semibold">Support</h2>
-    <div class="bg-white rounded-xl p-3 shadow-sm space-y-2">
+    <div class="bg-ah-surface rounded-xl p-3 shadow-sm space-y-2">
       <select v-model="form.category" class="w-full border rounded-lg p-2">
         <option>Vehicle</option><option>Fuel</option><option>Attendance</option><option>Salary</option><option>Other</option>
       </select>
@@ -10,13 +10,13 @@
       </select>
       <input v-model="form.subject" placeholder="Subject" class="w-full border rounded-lg p-2" />
       <textarea v-model="form.description" placeholder="Describe the issue" class="w-full border rounded-lg p-2"></textarea>
-      <button class="w-full bg-gray-700 text-white rounded-xl p-3 disabled:opacity-50"
+      <button class="w-full bg-ah-forest text-white rounded-xl p-3 disabled:opacity-50"
               :disabled="create.loading || !form.subject" @click="submit">Raise Ticket</button>
-      <p v-if="err" class="text-sm text-red-600">{{ err }}</p>
+      <p v-if="err" class="text-sm text-ah-danger">{{ err }}</p>
     </div>
-    <div v-for="t in list.data" :key="t.name" class="bg-white rounded-xl p-3 shadow-sm">
+    <div v-for="t in list.data" :key="t.name" class="bg-ah-surface rounded-xl p-3 shadow-sm">
       <div class="font-medium">{{ t.subject }}</div>
-      <div class="text-sm text-gray-500">{{ t.category }} · {{ t.priority }} · {{ t.status }}</div>
+      <div class="text-sm text-ah-forest/60">{{ t.category }} · {{ t.priority }} · {{ t.status }}</div>
     </div>
   </div>
 </template>
