@@ -4,7 +4,7 @@
     <div v-else-if="ctx.data && !ctx.data.enabled" class="p-8 text-center text-ah-forest/70">
       The driver portal is not enabled. Contact your supervisor.
     </div>
-    <div v-else-if="ctx.error" class="p-8 text-center text-ah-danger">
+    <div v-else-if="ctx.error || (ctx.data && !ctx.data.linked)" class="p-8 text-center text-ah-danger">
       Your account is not linked to a driver profile.
     </div>
     <template v-else-if="ctx.data && ctx.data.driver">

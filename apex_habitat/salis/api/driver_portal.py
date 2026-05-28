@@ -10,13 +10,25 @@ def _portal_enabled():
 	return bool(frappe.db.get_single_value("Salis Settings", "enable_driver_portal"))
 
 
-def _resolve_driver(user=None):
-	"""Return the Salis Driver name linked to the session user, else 403."""
+def _find_driver(user=None):
+	"""Return the Salis Driver name linked to the session user, or None.
+
+	Soft lookup with no exception — used by the portal bootstrap so an
+	unlinked user (e.g. an admin previewing the page) gets a friendly screen
+	instead of a 403 and an uncaught client error."""
 	user = user or frappe.session.user
-	driver = None
 	employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
-	if employee:
-		driver = frappe.db.get_value("Salis Driver", {"employee": employee}, "name")
+	if not employee:
+		return None
+	return frappe.db.get_value("Salis Driver", {"employee": employee}, "name")
+
+
+def _resolve_driver(user=None):
+	"""Return the Salis Driver name linked to the session user, else 403.
+
+	Used by every action endpoint so writes are always scoped to a real,
+	server-resolved driver."""
+	driver = _find_driver(user)
 	if not driver:
 		frappe.throw(_("No Salis Driver is linked to your account."), frappe.PermissionError)
 	return driver
@@ -29,16 +41,20 @@ def _require_enabled():
 
 @frappe.whitelist()
 def get_driver_context():
-	"""Driver profile + portal-enabled flag (read)."""
+	"""Portal bootstrap (read): enabled flag, whether the user is linked to a
+	driver, and the driver profile. Never raises for an unlinked user — the SPA
+	renders a friendly 'not linked' screen instead of surfacing a 403."""
 	if not _portal_enabled():
-		return {"enabled": False}
-	driver = _resolve_driver()
+		return {"enabled": False, "linked": False, "driver": None}
+	driver = _find_driver()
+	if not driver:
+		return {"enabled": True, "linked": False, "driver": None}
 	d = frappe.db.get_value(
 		"Salis Driver", driver,
 		["name", "full_name", "status", "current_vehicle", "license_expiry"],
 		as_dict=True,
 	)
-	return {"enabled": True, "driver": d}
+	return {"enabled": True, "linked": True, "driver": d}
 
 
 @frappe.whitelist()
