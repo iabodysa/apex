@@ -1,0 +1,9 @@
+{
+  "name": "Salis Driver",
+  "short_name": "Driver",
+  "start_url": "/driver",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#00844E",
+  "icons": []
+}
