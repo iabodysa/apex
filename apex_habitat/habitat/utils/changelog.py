@@ -45,7 +45,7 @@ _RELEASES = [
         "creation": "2026-06-08 09:05:00",
     },
     {
-        "title": "v1.0.0-beta: Employee and Supplier forms now surface Salis movement records (reference only, no GL postings)",
+        "title": "v1.0.0-beta: Employee and Supplier forms now surface related Salis movement records (reference links only)",
         "app_name": "apex_habitat",
         "link": "/app/salis",
         "creation": "2026-06-08 09:06:00",

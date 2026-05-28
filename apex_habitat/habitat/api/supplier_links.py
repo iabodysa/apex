@@ -28,7 +28,7 @@ def get_data(data=None):
         {"label": "Cost Recovery",
          "items": ["Accommodation Ledger"]},
         # Salis (Movement) — the rental office is an ERPNext Supplier; reference
-        # only, no GL postings (settlement -> Payment Request, never GL here).
+        # links only. Settlement routes through a Payment Request record; no GL Entry is posted here.
         {"label": "Fleet (Salis)",
          "items": ["Rental Office"]},
     ])

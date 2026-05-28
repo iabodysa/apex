@@ -30,7 +30,7 @@ def get_data(data=None):
          "items": ["Custody Issue", "Custody Return", "Custody Damage Assessment"]},
         {"label": "Tasks",
          "items": ["Scheduled Task Instance"]},
-        # Salis (Movement) — reference-only HRMS integration, no GL postings.
+        # Salis (Movement) — reference links to HRMS records; writes no accounting documents.
         {"label": "Movement (Salis)",
          "items": ["Salis Driver", "Movement Cost Recovery", "Sponsorship Transfer Case"]},
     ])

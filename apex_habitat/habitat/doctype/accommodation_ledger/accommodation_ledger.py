@@ -3,7 +3,7 @@
 Hidden, machine-written cost allocation ledger. No DocPerm grants write/create
 to any human role; rows are inserted by scheduled jobs and hooks using
 ignore_permissions. When GL posting is disabled in Habitat Settings, rows are
-operational memos with no GL postings.
+operational memos and no GL Entry is posted.
 """
 
 from __future__ import annotations

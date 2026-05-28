@@ -1,9 +1,9 @@
 """Driver Clearance controller.
 
-Movement-domain exit clearance for a driver (tiered authorityG60). Confirms the
-driver has returned the vehicle, fuel chip, and custody items, and blocks
-clearance while any open Fuel Exception Case or Movement Cost Recovery remains
-against the driver. HR EOSB/visa clearance is explicitly out of scope.
+Movement-domain exit clearance for a driver. Confirms the driver has returned
+the vehicle, fuel chip, and custody items, and blocks clearance while any open
+Fuel Exception Case or Movement Cost Recovery remains against the driver. HR
+end-of-service and visa clearance are handled outside this module.
 
 On submit of a Cleared clearance the linked Salis Driver is moved to Released
 and its current vehicle reference is cleared (guarded), so the released driver
