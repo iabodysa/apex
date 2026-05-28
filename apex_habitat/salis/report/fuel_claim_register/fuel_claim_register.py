@@ -4,8 +4,7 @@
 """Fuel Claim Register report.
 
 ORM listing of Fuel Claim records with their claimed vs consumed litres and the
-reconciliation variance, by project / vehicle / period / status (governance
-G10/G22).
+reconciliation variance, by project / vehicle / period / status.
 """
 
 import frappe

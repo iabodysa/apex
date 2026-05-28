@@ -84,7 +84,7 @@ def daily_rental_accrual() -> None:
                 if not in_service:
                     continue
 
-                # Source traceability (G24): the originating record is the open
+                # Source traceability: the originating record is the open
                 # Rental Vehicle Movement (Receipt) when known, else the vehicle.
                 if movement_name:
                     source_doctype = "Rental Vehicle Movement"

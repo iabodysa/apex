@@ -1,6 +1,6 @@
 """Movement Cost Transfer controller.
 
-Inter-project cost-transfer control for Movement costs (tiered authority).
+Inter-project cost-transfer control for Movement costs.
 Records the reallocation of a Movement-related cost (fuel, rental, trip cost,
 other) from one project / cost center to another. Because crossing a project
 boundary always demands Operations-tier authority, ``before_submit`` enforces a

@@ -7,7 +7,7 @@ amounts themselves) and the ``variance`` against the claimed total. On submit,
 (expense_type "Rental") referencing this settlement.
 
 This controller posts NO General Ledger / accounting entry. The Salis Payment
-Request it raises is a approval request record; Finance posts the actual
+Request it raises is a payment request record; Finance posts the actual
 payment externally.
 """
 
@@ -61,7 +61,7 @@ class RentalSettlement(Document):
     def create_payment_request(self):
         """Raise a finance-exclusive Salis Payment Request for this settlement.
 
-        Posts NO GL: the Salis Payment Request is a approval request record
+        Posts NO GL: the Salis Payment Request is a payment request record
         that routes through the Finance approval gate. Idempotent — returns the
         existing linked request if one is already attached.
         """

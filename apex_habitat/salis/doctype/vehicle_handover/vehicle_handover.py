@@ -59,7 +59,7 @@ class VehicleHandover(Document):
         )
 
         # Guide (do not auto-create): a discrepancy should be escalated through a
-        # Vehicle Damage Write-Off case for tiered write-off authority (tiered authority).
+        # Vehicle Damage Write-Off case for tiered write-off authority.
         if self.discrepancy_status == "Discrepancy":
             self.add_comment(
                 "Comment",

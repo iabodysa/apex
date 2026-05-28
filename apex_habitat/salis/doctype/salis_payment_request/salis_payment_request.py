@@ -1,10 +1,10 @@
 """Salis Payment Request controller.
 
-Enforces the finance boundary (tiered authority): every payable item routes
+Enforces the finance boundary: every payable item routes
 through a Finance-exclusive approval gate, and Finance cannot be bypassed.
 
 This DocType posts NO General Ledger / Journal / Payment Entry. It is a
-approval request record only. ``linked_payment_entry`` is a reference-only
+payment request record only. ``linked_payment_entry`` is a reference-only
 field set externally once Finance posts the actual payment in the accounting
 module; this controller must never write accounting.
 """
@@ -19,7 +19,7 @@ from frappe.utils import now
 from apex_habitat.salis.salis_lib import log_activity
 
 # Roles that exclusively hold the authority to approve a payment or mark it
-# paid. This is the core finance-boundary control (G32).
+# paid. This is the core finance-boundary control.
 _FINANCE_ROLES = {"Finance Manager", "System Manager"}
 
 # Statuses whose entry requires finance authority.
@@ -95,7 +95,7 @@ class SalisPaymentRequest(Document):
 			)
 
 	def _enforce_finance_gate(self):
-		"""Finance-exclusive gate (tiered authority).
+		"""Finance-exclusive gate.
 
 		Entering "Approved by Finance" or "Paid" is permitted ONLY when the
 		current user holds a finance authority role. This step cannot be

@@ -1,7 +1,7 @@
 """Route Plan controller.
 
-Route Plan is a Movement *fulfilment* record for an Operations request
-(responsibility: Operations Accountable, Movement Responsible). Operations requests a
+Route Plan is a Movement *fulfilment* record for an Operations request.
+Operations owns the request and Movement fulfils it: Operations requests a
 movement via the Transport Request; Movement plans and fulfils it here. Movement
 is consulted, not the approver.
 """
@@ -26,7 +26,7 @@ class RoutePlan(Document):
 
     def _default_operations_requester(self):
         """Carry the Operations requester from the linked Transport Request
-        (responsibility: Operations Accountable) when not already set."""
+        (Operations owns the request) when not already set."""
         if self.requested_by_operations or not self.transport_request:
             return
         requested_by = frappe.db.get_value(

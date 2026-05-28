@@ -98,7 +98,9 @@ class FuelRequest(Document):
 		return bool(quota_project and quota_project != self.project)
 
 	def _required_tier(self):
-		"""Compute the authority tier this fuel request demands (tiered authorityG08).
+		"""Compute the authority tier this fuel request demands.
+
+		A higher tier is required when scope crosses a threshold.
 
 		Base tier is Project. The volume bands and the cross-project rule escalate
 		it; the highest applicable tier wins. Thresholds are data-driven from

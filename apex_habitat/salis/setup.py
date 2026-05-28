@@ -2,7 +2,7 @@
 
 Wired into the app's ``after_install`` hook (as a list alongside the Habitat
 bootstrap). This is the canonical first-install path for Salis default records:
-roles, governance/operations approval roles, and Salis Settings defaults.
+roles, authority/operations approval roles, and Salis Settings defaults.
 
 The seed logic lives in the idempotent, existence-guarded ``patches/v1_0/seed_*``
 modules (single source of truth). after_install reuses them so a fresh install

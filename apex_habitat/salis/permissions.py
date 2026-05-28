@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Abdullah Fahad Al-Mutairi Co. (AFMCO)
 # Project-based row scoping for Salis transactional DocTypes.
 #
-# control requirement: every role currently acts across all projects.
+# By default every role acts across all projects.
 # Supervisors and project managers must be scoped to the projects they are
 # granted via a User Permission on "Project". A small set of oversight roles
 # remain unscoped (see UNSCOPED_ROLES) and continue to see every project.
@@ -159,7 +159,7 @@ def scoped_has_permission(doc, ptype, user=None):
 
 
 # ---------------------------------------------------------------------------
-# Segregation of duties (tiered authority)
+# Segregation of duties (requester cannot approve)
 # ---------------------------------------------------------------------------
 # A user who holds both an operational role and the finance role must not be
 # able to self-approve their own payment requests. This enforces

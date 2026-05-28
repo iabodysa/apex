@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-26 12:00:00.000000",
- "description": "Vehicle damage write-off case raised from a handover discrepancy. Tiered write-off authority gate on submit (tiered authority).",
+ "description": "Vehicle damage write-off case raised from a handover discrepancy. Tiered write-off authority gate on submit.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

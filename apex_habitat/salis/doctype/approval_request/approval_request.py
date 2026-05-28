@@ -21,7 +21,7 @@ class ApprovalRequest(Document):
         self._evaluate_escalation()
 
     def _evaluate_escalation(self):
-        # tiered authority: when the approver lacks the required tier, route and
+        # When the approver lacks the required tier, route and
         # record the escalation instead of relying solely on the submit-time
         # throw in ensure_approval.
         if not self.required_tier:

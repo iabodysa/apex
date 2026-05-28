@@ -140,7 +140,7 @@ def driver_license_expiry_watch() -> None:
 
     today_str = today()
     logger = frappe.logger()
-    # G38: compliance documents (driver licences) need at least 30 days' lead
+    # Compliance documents (driver licences) need at least 30 days' lead
     # notice. Prefer a dedicated ``license_alert_lead_days`` (default 30); else
     # fall back to the generic ``alert_lead_days`` but never below 30 days.
     LICENSE_MIN_LEAD_DAYS = 30
@@ -249,7 +249,7 @@ def idle_vehicle_watch() -> None:
 
 def unreverted_topup_watch() -> None:
     """Auto-revert temporary fuel top-ups that are past their revert-due date,
-    then raise an alert for each (G42).
+    then raise an alert for each.
 
     Reads Fuel Topup Request ``{is_temporary: 1, reverted: 0,
     status in [Approved, Done], revert_due_date: < today}``. For each overdue

@@ -1,8 +1,7 @@
 """Movement Cost Recovery controller.
 
 Movement-domain control to recover losses (vehicle damage, fuel misuse,
-custody loss, fines) with tiered authority and an audit trail
-(tiered authorityG16).
+custody loss, fines) with tiered authority and an audit trail.
 
 Scope boundary: this DocType is Movement-domain only. It documents the
 recovery and routes authorization through the Delegation-of-Authority gate.
@@ -20,7 +19,7 @@ from frappe.model.document import Document
 from apex_habitat.salis.salis_lib import ensure_approval, log_activity
 
 # Amount (SAR) at or above which the recovery escalates to Operations-tier
-# authority; below it, Regional tier suffices (tiered authorityG08).
+# authority; below it, Regional tier suffices.
 _OPERATIONS_TIER_THRESHOLD = 1000
 
 

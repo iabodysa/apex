@@ -16,7 +16,7 @@ VALID_STATUSES = (
     "Cancelled",
 )
 
-# Allowed request types per service line (two-division model).
+# Allowed request types per service line (two-division service model).
 SERVICE_LINE_REQUEST_TYPES = {
     "Workers": (
         "Accommodation to Project Shuttle",
@@ -65,7 +65,7 @@ class TransportRequest(Document):
         self.worker_count = len(self.workers or [])
 
         # Trips-this-month is server-derived (not a trusted manual input), so the
-        # >5-trips/month DoA tier gate (tiered authority) cannot be under-stated.
+        # >5-trips/month DoA tier gate cannot be under-stated.
         self._derive_trips_this_month()
 
         if self.request_type == "Accommodation to Project Shuttle":

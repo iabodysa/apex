@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-26 12:00:00.000000",
- "description": "Disputed or suspicious fuel-control case. Holds usage/GPS evidence and enforces non-raiser closure (tiered authorityG45).",
+ "description": "Disputed or suspicious fuel-control case. Holds usage/GPS evidence and enforces non-raiser closure (segregation of duties).",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -111,7 +111,7 @@
    "options": "Open\nUnder Investigation\nEvidence Required\nResolved\nRejected\nClosed"
   },
   {
-   "description": "The user who resolved or closed the case. Must differ from Reported By (G45 segregation).",
+   "description": "The user who resolved or closed the case. Must differ from Reported By (segregation of duties).",
    "fieldname": "closed_by",
    "fieldtype": "Link",
    "label": "Closed By",

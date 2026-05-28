@@ -42,7 +42,7 @@ class DispatchTrip(Document):
         self._enforce_dispatch_readiness()
 
     def _enforce_dispatch_readiness(self):
-        """tiered authorityG50: a trip must be ready before it is submitted."""
+        """A trip must be ready (route, vehicle, driver set) before it is submitted."""
         required = {
             "route_plan": _("Route Plan"),
             "vehicle": _("Vehicle"),

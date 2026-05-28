@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-26 12:00:00.000000",
- "description": "Movement fuel claim and reconciliation against a quota. Compares claimed litres/amount with consumed litres derived from the Fuel Consumption Ledger and routes a Decentralized-of-Authority gate by variance / quota-increase (tiered authorityG22).",
+ "description": "Movement fuel claim and reconciliation against a quota. Compares claimed litres/amount with consumed litres derived from the Fuel Consumption Ledger and routes a Delegation-of-Authority gate by variance / quota-increase.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

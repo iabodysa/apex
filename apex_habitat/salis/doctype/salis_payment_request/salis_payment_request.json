@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-26 12:00:00.000000",
- "description": "Finance-boundary payment request (tiered authority). Routes any payable item through a Finance-exclusive approval gate. Posts NO GL: linked_payment_entry is a reference set externally; the controller never writes accounting.",
+ "description": "Finance-boundary payment request. Routes any payable item through a Finance-exclusive approval gate. Posts NO GL: linked_payment_entry is a reference set externally; the controller never writes accounting.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

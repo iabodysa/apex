@@ -44,7 +44,7 @@
    "search_index": 1
   },
   {
-   "description": "Operations requester, carried from the linked Transport Request (responsibility: Operations Accountable).",
+   "description": "Operations requester, carried from the linked Transport Request (Operations owns the request).",
    "fieldname": "requested_by_operations",
    "fieldtype": "Link",
    "label": "Requested By (Operations)",
@@ -52,7 +52,7 @@
    "read_only": 1
   },
   {
-   "description": "Movement planner who fulfilled the request, set on submit (responsibility: Movement Responsible).",
+   "description": "Movement planner who fulfilled the request, set on submit (Movement fulfils the request).",
    "fieldname": "fulfilled_by_movement",
    "fieldtype": "Link",
    "label": "Fulfilled By (Movement)",

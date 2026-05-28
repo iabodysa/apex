@@ -9,16 +9,15 @@ install/migrate can never crash because of this seed.
 
 import frappe
 
-# name, authority_tier (documentation only — not a Role field)
 OPERATIONS_ROLES = [
-    ("Project Manager", "TIER_PROJECT"),
-    ("Regional Operations Manager", "TIER_REGIONAL_OPS"),
-    ("Operations Manager", "TIER_OPERATIONS"),
+    "Project Manager",
+    "Regional Operations Manager",
+    "Operations Manager",
 ]
 
 
 def execute():
-    for role_name, _authority_tier in OPERATIONS_ROLES:
+    for role_name in OPERATIONS_ROLES:
         # Existence-guard — never rely on ignore_if_duplicate.
         if frappe.db.exists("Role", role_name):
             continue

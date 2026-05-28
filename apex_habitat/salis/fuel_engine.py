@@ -62,7 +62,7 @@ def _insert_ledger_row(
 ) -> None:
     """Insert one Fuel Consumption Ledger row (system-written, no GL).
 
-    Source traceability (G24): ``source_type`` is the originating DocType name
+    Source traceability: ``source_type`` is the originating DocType name
     ("Fuel Daily Log" / "Fuel Request"), so ``source_doctype`` mirrors it and
     ``source_name`` points to the originating record.
     """

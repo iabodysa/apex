@@ -1,4 +1,4 @@
-"""Seed the Salis Movement (operational KPI) dashboard as data records.
+"""Seed the Salis Movement operations dashboard as data records.
 
 Standalone companion to ``salis/dashboard_seed.py``. It builds one
 **Movement Operations Dashboard** (charts + number cards) that surface the
@@ -10,9 +10,7 @@ operational KPIs for the Movement domain:
 - inter-city workforce transport plan fulfilment
 - vehicle utilisation
 
-Design reference:
-``internal design notes``
-(Part 3 — Background Engines). Several charts/cards reference the *new* engine
+Several charts/cards reference the background-engine
 DocTypes that may not be migrated yet on a given site:
 
 - Trip Fulfilment Ledger

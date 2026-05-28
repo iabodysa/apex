@@ -1,7 +1,7 @@
 """Fuel Exception Case controller.
 
-Submittable governance object for disputed or suspicious fuel-control cases
-(tiered authorityG45). Holds usage/GPS evidence, enforces a status state
+Submittable control record for disputed or suspicious fuel-control cases.
+Holds usage/GPS evidence, enforces a status state
 machine, requires evidence before a case may be resolved or closed, and
 enforces non-raiser closure (segregation of duties — the user who raised the
 case may not be the user who closes it). Submit is gated behind an
@@ -85,7 +85,7 @@ class FuelExceptionCase(Document):
 			)
 
 	def _enforce_closure_controls(self):
-		"""Require evidence before resolution/closure and enforce non-raiser closure (G45)."""
+		"""Require evidence before resolution/closure and enforce non-raiser closure (segregation of duties)."""
 		if self.status not in _CLOSING_STATUSES:
 			return
 

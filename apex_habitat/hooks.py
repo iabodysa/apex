@@ -214,7 +214,7 @@ override_doctype_dashboards = {
     "Supplier": "apex_habitat.habitat.api.supplier_links.get_data",
 }
 
-# Salis: project-based row scoping (tiered authority) — supervisors/PMs see only
+# Salis: project-based row scoping — supervisors/PMs see only
 # the projects they hold a User Permission for; oversight roles see all.
 permission_query_conditions = {
     "Vehicle Assignment": "apex_habitat.salis.permissions.vehicle_assignment_query",

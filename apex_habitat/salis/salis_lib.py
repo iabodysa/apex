@@ -7,7 +7,8 @@ from frappe import _
 # Ordered authority-tier ladder (ascending). A higher index means a higher
 # authority. The Delegation-of-Authority gate routes each request to the tier
 # its amount/quantity/scope demands, then verifies the approver actually holds
-# at least that tier before allowing submit (tiered authorityG08).
+# at least that tier before allowing submit (a higher tier is required when
+# scope crosses a threshold).
 TIERS = ["Supervisor", "Project", "Regional", "Operations"]
 
 # Maps the Salis operational roles onto the tier ladder. A user's effective
@@ -71,8 +72,7 @@ def escalation_target(required_tier, approver):
 
 	The target is the required tier itself: a request needing ``required_tier``
 	must be routed to someone holding at least that tier. Returns None when no
-	tier is required or when the approver's standing already meets it
-	(tiered authority)."""
+	tier is required or when the approver's standing already meets it."""
 	if not required_tier:
 		return None
 	if tier_rank(user_max_tier(approver)) >= tier_rank(required_tier):
@@ -125,7 +125,7 @@ def ensure_approval(reference_doctype, reference_name, required_tier=None):
 	with approver != requester. Call from a controller's before_submit when a DoA gate applies.
 
 	When ``required_tier`` is given, the gate additionally verifies that the
-	request's approver holds at least that authority tier (tiered authorityG08):
+	request's approver holds at least that authority tier:
 	an approver below the required tier cannot authorize the request, even if an
 	Approved request row exists."""
 	rows = frappe.get_all(

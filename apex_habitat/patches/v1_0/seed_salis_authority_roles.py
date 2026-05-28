@@ -1,4 +1,4 @@
-"""Seed the Salis governance authority-tier roles. Install-safe and idempotent.
+"""Seed the Salis authority-tier roles. Install-safe and idempotent.
 
 A failure on any single role is logged and skipped so that install/migrate
 can never crash because of this seed.
@@ -6,17 +6,16 @@ can never crash because of this seed.
 
 import frappe
 
-# name, authority_tier (documentation only — not a Role field)
-GOVERNANCE_ROLES = [
-    ("Fleet Operations Manager", "TIER_OPERATIONS"),
-    ("Fleet Regional Manager", "REG"),
-    ("Government Relations Officer", None),
-    ("Legal Officer", None),
+AUTHORITY_ROLES = [
+    "Fleet Operations Manager",
+    "Fleet Regional Manager",
+    "Government Relations Officer",
+    "Legal Officer",
 ]
 
 
 def execute():
-    for role_name, _authority_tier in GOVERNANCE_ROLES:
+    for role_name in AUTHORITY_ROLES:
         # Existence-guard — never rely on ignore_if_duplicate.
         if frappe.db.exists("Role", role_name):
             continue

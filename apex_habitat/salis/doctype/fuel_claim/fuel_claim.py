@@ -1,7 +1,7 @@
 """Fuel Claim controller.
 
-Submittable Movement fuel claim and reconciliation against a Fuel Quota
-(tiered authorityG22). Movement is a service provider: Operations submits the
+Submittable Movement fuel claim and reconciliation against a Fuel Quota.
+Movement is a service provider: Operations submits the
 claim, Movement reconciles it against the internal Fuel Consumption Ledger.
 
 The controller derives consumed litres from the ledger (sum of litres for the
@@ -106,16 +106,17 @@ class FuelClaim(Document):
 
 	def _is_large_variance(self):
 		"""True when the absolute variance exceeds the configured fraction of the
-		claimed litres (tiered authority reconciliation tolerance)."""
+		claimed litres (reconciliation tolerance)."""
 		claimed = self.claimed_litres or 0
 		if claimed <= 0:
 			return False
 		return abs(self.variance_litres or 0) > (LARGE_VARIANCE_RATIO * claimed)
 
 	def _required_tier(self):
-		"""Compute the authority tier this claim demands (tiered authorityG08).
+		"""Compute the authority tier this claim demands.
 
-		A quota-increase claim or a large variance needs the higher Operations
+		A higher tier is required when scope crosses a threshold:
+		a quota-increase claim or a large variance needs the higher Operations
 		tier (and a Finance consult); routine claims settle at the Regional
 		tier."""
 		if self.is_increase or self._is_large_variance():

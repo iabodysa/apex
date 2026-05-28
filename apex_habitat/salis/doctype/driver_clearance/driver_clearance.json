@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-26 12:00:00.000000",
- "description": "Movement-domain exit clearance for a driver (tiered authorityG60). Confirms vehicle, fuel chip, and custody return and blocks clearance while open fuel exception cases or cost recoveries remain. HR EOSB/visa clearance is out of scope.",
+ "description": "Movement-domain exit clearance for a driver. Confirms vehicle, fuel chip, and custody return and blocks clearance while open fuel exception cases or cost recoveries remain. HR EOSB/visa clearance is out of scope.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

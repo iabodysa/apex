@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-26 12:00:00.000000",
- "description": "Inter-project cost-transfer control for Movement costs (tiered authority). Records reallocation of a Movement cost from one project/cost center to another. The Posted (memo) status is an operational memo only - no GL or Journal Entry is written.",
+ "description": "Inter-project cost-transfer control for Movement costs. Records reallocation of a Movement cost from one project/cost center to another. The Posted (memo) status is an operational memo only - no GL or Journal Entry is written.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

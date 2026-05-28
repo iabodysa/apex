@@ -1,7 +1,7 @@
 """Vehicle Damage Write-Off controller.
 
 Submittable damage write-off case raised from a Vehicle Handover discrepancy.
-Enforces a SAR-tiered write-off authority gate on submit (tiered authority):
+Enforces a SAR-tiered write-off authority gate on submit:
 high-value cases (>= 2000 SAR) require Operations-tier approval; lower-value
 cases require at least Regional-tier approval.
 """
