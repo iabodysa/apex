@@ -7,12 +7,10 @@ __pycache__/
 tags
 node_modules
 
-# local working context.
+# Local working context (never commit).
 .claude/
 .agents/
 skills-lock.json
-local_drafts/
-scratch/
 
 # Internal project documents and source spreadsheets.
 docs/
@@ -50,20 +48,10 @@ build/
 dist/
 *.egg-info/
 
-# Architecture design artifacts.
-afmco_accommodation_architecture_*.json
-
-# local lock files.
-*.skill
-
 # Dead code archive.
 archive/
 
-# Local-only: working artifacts (never commit)
-.gemini/
-*.pptx
-
-# Local-only scratch scripts and reports (never commit)
+# Local-only scratch scripts and reports (never commit).
 *.command
 *.applescript
 flash_actions_report.json
