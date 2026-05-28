@@ -32,7 +32,7 @@
  "is_default": 0,
  "sequence_id": 2.0,
  "parent_page": "",
- "content": "[{\"id\": \"salisHdrAct\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salisScTransport\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"salisScDispatch\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"salisScFuel\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"salisScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"salisScVehicle\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"salisScDriver\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"salisScTicket\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"salisScTransfer\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sponsorship Transfer Case\", \"col\": 3}}, {\"id\": \"salisScFuelClaim\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Claim\", \"col\": 3}}, {\"id\": \"salisScRentalSettle\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"salisScKpi\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Movement KPI Summary\", \"col\": 3}}, {\"id\": \"salisHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"salisCardFleet\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet\", \"col\": 4}}, {\"id\": \"salisCardFuel\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"salisCardMove\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement\", \"col\": 4}}, {\"id\": \"salisCardGov\", \"type\": \"card\", \"data\": {\"card_name\": \"Governance & Support\", \"col\": 4}}, {\"id\": \"salisCardSetup\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters & Setup\", \"col\": 4}}, {\"id\": \"salisCardMoveOps\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement Ops\", \"col\": 4}}, {\"id\": \"salisCardCosts\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs & Settlement\", \"col\": 4}}, {\"id\": \"salisCardLedgers\", \"type\": \"card\", \"data\": {\"card_name\": \"Engine Ledgers / Audit\", \"col\": 4}}, {\"id\": \"salisCardReports\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "content": "[{\"id\": \"salisHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"salisKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Transport Requests\", \"col\": 4}}, {\"id\": \"salisKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Completed Trips Today\", \"col\": 4}}, {\"id\": \"salisKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Fuel Requests\", \"col\": 4}}, {\"id\": \"salisKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Exception Cases\", \"col\": 4}}, {\"id\": \"salisKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rental Accrual This Month\", \"col\": 4}}, {\"id\": \"salisKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Blocked Driver Clearances\", \"col\": 4}}, {\"id\": \"salisHdrAct\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salisScTransport\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"salisScDispatch\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"salisScFuel\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"salisScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"salisScVehicle\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"salisScDriver\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"salisScTicket\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"salisScTransfer\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sponsorship Transfer Case\", \"col\": 3}}, {\"id\": \"salisScFuelClaim\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Claim\", \"col\": 3}}, {\"id\": \"salisScRentalSettle\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"salisScKpi\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Movement KPI Summary\", \"col\": 3}}, {\"id\": \"salisHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"salisCardFleet\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet\", \"col\": 4}}, {\"id\": \"salisCardFuel\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"salisCardMove\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement\", \"col\": 4}}, {\"id\": \"salisCardGov\", \"type\": \"card\", \"data\": {\"card_name\": \"Governance & Support\", \"col\": 4}}, {\"id\": \"salisCardSetup\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters & Setup\", \"col\": 4}}, {\"id\": \"salisCardMoveOps\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement Ops\", \"col\": 4}}, {\"id\": \"salisCardCosts\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs & Settlement\", \"col\": 4}}, {\"id\": \"salisCardLedgers\", \"type\": \"card\", \"data\": {\"card_name\": \"Engine Ledgers / Audit\", \"col\": 4}}, {\"id\": \"salisCardReports\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -537,7 +537,44 @@
   }
  ],
  "charts": [],
- "number_cards": [],
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Pending Transport Requests",
+   "label": "Pending Transport Requests",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Completed Trips Today",
+   "label": "Completed Trips Today",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Pending Fuel Requests",
+   "label": "Pending Fuel Requests",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Open Fuel Exception Cases",
+   "label": "Open Fuel Exception Cases",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Rental Accrual This Month",
+   "label": "Rental Accrual This Month",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Blocked Driver Clearances",
+   "label": "Blocked Driver Clearances",
+   "idx": 6
+  }
+ ],
  "quick_lists": [],
- "modified": "2026-05-27 14:00:00.000000"
+ "modified": "2026-05-28 12:00:00.000000"
 }
