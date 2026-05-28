@@ -20,6 +20,7 @@ docs/
 !README.md
 # Frappe "Updated To A New Version" popup changelogs are shipped app files.
 !apex_habitat/change_log/v0/*.md
+!apex_habitat/change_log/v1/*.md
 
 # Local/private office source files.
 *.xlsx
