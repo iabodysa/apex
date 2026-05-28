@@ -7,45 +7,52 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
-    # v1.0.0-beta ----------------------------------------------------------
+    # v1.0.0 stable -------------------------------------------------------
     {
-        "title": "Apex v1.0.0-beta — Salis Movement module (fleet + workforce transport)",
+        "title": "Apex 1.0.0 — first stable release of the two-module workforce-operations suite (Habitat + Salis)",
+        "app_name": "apex_habitat",
+        "link": "/app/setup",
+        "creation": "2026-06-09 09:00:00",
+    },
+    # v1.0.0 ----------------------------------------------------------
+    {
+        "title": "Apex v1.0.0 — Salis Movement module (fleet + workforce transport)",
         "app_name": "apex_habitat",
         "link": "/app/salis",
         "creation": "2026-06-08 09:00:00",
     },
     {
-        "title": "v1.0.0-beta: Salis runs two divisions — Workers transport (accommodation→project shuttle, inter-city relocation) and Representatives (admin trips, cars, fuel)",
+        "title": "v1.0.0: Salis runs two divisions — Workers transport (accommodation→project shuttle, inter-city relocation) and Representatives (admin trips, cars, fuel)",
         "app_name": "apex_habitat",
         "link": "/app/transport-request",
         "creation": "2026-06-08 09:01:00",
     },
     {
-        "title": "v1.0.0-beta: Tiered Delegation-of-Authority approvals for fuel, transport and transfers (Supervisor → Project → Regional → Operations)",
+        "title": "v1.0.0: Tiered Delegation-of-Authority approvals for fuel, transport and transfers (Supervisor → Project → Regional → Operations)",
         "app_name": "apex_habitat",
         "link": "/app/approval-request",
         "creation": "2026-06-08 09:02:00",
     },
     {
-        "title": "v1.0.0-beta: Fuel Approval Console + Fuel Exception Case for disputed-fuel control",
+        "title": "v1.0.0: Fuel Approval Console + Fuel Exception Case for disputed-fuel control",
         "app_name": "apex_habitat",
         "link": "/app/fuel-approval-console",
         "creation": "2026-06-08 09:03:00",
     },
     {
-        "title": "v1.0.0-beta: Rental accrual ledger, monthly Rental Settlement and Payment Requests — operational memos, no GL posting",
+        "title": "v1.0.0: Rental accrual ledger, monthly Rental Settlement and Payment Requests — operational memos, no GL posting",
         "app_name": "apex_habitat",
         "link": "/app/rental-settlement",
         "creation": "2026-06-08 09:04:00",
     },
     {
-        "title": "v1.0.0-beta: Driver Portal — mobile self-service at /driver (attendance, today's trips, fuel requests, support tickets)",
+        "title": "v1.0.0: Driver Portal — mobile self-service at /driver (attendance, today's trips, fuel requests, support tickets)",
         "app_name": "apex_habitat",
         "link": "/driver",
         "creation": "2026-06-08 09:05:00",
     },
     {
-        "title": "v1.0.0-beta: Employee and Supplier forms now surface related Salis movement records (reference links only)",
+        "title": "v1.0.0: Employee and Supplier forms now surface related Salis movement records (reference links only)",
         "app_name": "apex_habitat",
         "link": "/app/salis",
         "creation": "2026-06-08 09:06:00",
