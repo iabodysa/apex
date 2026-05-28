@@ -193,9 +193,11 @@ def accrue_fuel_consumption() -> None:
 
 
 def _alert_already_raised(vehicle: str, period_month: str) -> bool:
-    """True if an Excessive Topup alert was already raised for this vehicle this
-    month, referencing the period in the message. Idempotency key =
-    ``(alert_type, vehicle, period_month within this month)``.
+    """True if an Excessive Topup alert was already raised for this vehicle in the
+    month of ``period_month``. Idempotency key = (alert_type, vehicle, raised_on
+    within that month). The previous implementation also matched the period inside
+    the (translated) message text, which was fragile; the raised-on month window
+    plus vehicle already identifies the alert uniquely for a given period.
     """
     from frappe.utils import get_first_day, get_last_day, getdate
 
@@ -212,7 +214,6 @@ def _alert_already_raised(vehicle: str, period_month: str) -> bool:
             {
                 "alert_type": "Excessive Topup",
                 "vehicle": vehicle,
-                "message": ["like", f"%{period_month}%"],
                 "raised_on": ["between", [start, end]],
             },
         )
