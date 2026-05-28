@@ -62,3 +62,8 @@ archive/
 # Local-only: working artifacts (never commit)
 .gemini/
 *.pptx
+
+# Local-only scratch scripts and reports (never commit)
+*.command
+*.applescript
+flash_actions_report.json
