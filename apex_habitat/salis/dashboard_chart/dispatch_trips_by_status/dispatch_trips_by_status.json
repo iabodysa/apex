@@ -1,0 +1,17 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Dispatch Trips by Status",
+ "chart_name": "Dispatch Trips by Status",
+ "chart_type": "Group By",
+ "document_type": "Dispatch Trip",
+ "group_by_type": "Count",
+ "group_by_based_on": "status",
+ "type": "Donut",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "is_standard": 0,
+ "module": "Salis",
+ "timeseries": 0,
+ "use_report_chart": 0,
+ "filters_json": "[]"
+}

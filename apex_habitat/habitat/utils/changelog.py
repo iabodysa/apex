@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.1.0 ----------------------------------------------------------------
+    {
+        "title": "Apex 1.1.0 — Salis Movement gets a metrics dashboard layer and two-division workspace",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-11 09:00:00",
+    },
+    {
+        "title": "v1.1.0: Salis workspace now opens to a Key Metrics row, with separate Workers Transport and Representatives Fleet dashboards",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-11 09:01:00",
+    },
+    {
+        "title": "v1.1.0: Status colours now render natively across vehicle, driver, trip, fuel, maintenance and accommodation lists (and Kanban, Calendar and Report views)",
+        "app_name": "apex_habitat",
+        "link": "/app/salis-vehicle",
+        "creation": "2026-06-11 09:02:00",
+    },
     # v1.0.1 ----------------------------------------------------------------
     {
         "title": "Apex 1.0.1 — Driver Portal no longer errors when opened by a user who is not linked to a driver",

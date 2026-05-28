@@ -1,0 +1,14 @@
+{
+ "doctype": "Number Card",
+ "name": "Open Fuel Exception Cases",
+ "label": "Open Fuel Exception Cases",
+ "document_type": "Fuel Exception Case",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 0,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Salis",
+ "filters_json": "[[\"Fuel Exception Case\", \"status\", \"=\", \"Open\"]]"
+}

@@ -1,0 +1,18 @@
+{
+ "doctype": "Number Card",
+ "name": "Fuel Spend This Month",
+ "label": "Fuel Spend This Month",
+ "document_type": "Fuel Request",
+ "function": "Sum",
+ "aggregate_function_based_on": "amount",
+ "report_function": "Sum",
+ "currency": "SAR",
+ "is_public": 1,
+ "is_standard": 0,
+ "show_full_number": 0,
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Salis",
+ "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"], [\"Fuel Request\", \"request_date\", \"Timespan\", \"this month\"]]"
+}

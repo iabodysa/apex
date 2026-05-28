@@ -197,7 +197,7 @@ _CHARTS = [
      "filters": [["Driver Attendance", "attendance_date", "Timespan", "today"]]},
     {"name": "Support Tickets by Status", "document_type": "Support Ticket", "type": "Donut",
      "chart_type": "Group By", "group_by_based_on": "status"},
-    {"name": "Dispatch Trips by Status", "document_type": "Dispatch Trip", "type": "Bar",
+    {"name": "Dispatch Trips by Status", "document_type": "Dispatch Trip", "type": "Donut",
      "chart_type": "Group By", "group_by_based_on": "status"},
 
     # --- Finance Manager ---
@@ -326,6 +326,38 @@ def seed_finance_manager_dashboard():
     )
 
 
+# --------------------------------------------------------------------------- #
+# Movement-department division dashboards (Workers Transport vs Representatives)
+# --------------------------------------------------------------------------- #
+# These two dashboards reflect the Movement Department's two divisions. Their
+# charts and number cards ship as committed JSON fixtures under
+# salis/dashboard_chart/ and salis/number_card/ (imported by bench migrate
+# before this after_migrate seed runs), so the seed only has to *link* them.
+# As with every dashboard here, _upsert_dashboard links only the charts/cards
+# that actually exist, so a partial install never raises LinkValidationError.
+def seed_workers_transport_dashboard():
+    _upsert_dashboard(
+        "Salis - Workers Transport",
+        charts=[("Workers Requests by Status", "Half"),
+                ("Workers Transport Over Time", "Half")],
+        cards=["Workers Requests Open", "Open Transport Requests",
+               "Inter-City Relocations This Month",
+               "Large Worker Moves Pending Escalation"],
+    )
+
+
+def seed_representatives_fleet_dashboard():
+    _upsert_dashboard(
+        "Salis - Representatives Fleet",
+        charts=[("Vehicles by Status", "Half"), ("Dispatch Trips by Status", "Half"),
+                ("Fuel Spend by Platform", "Half"), ("Fuel Spend Trend", "Full")],
+        cards=["Active Vehicles", "Vehicles Under Maintenance",
+               "Expiring Vehicle Compliance", "Pending Fuel Requests",
+               "Fuel Spend This Month", "Open Fuel Exception Cases",
+               "Rental Accrual This Month", "Blocked Driver Clearances"],
+    )
+
+
 def seed_salis_dashboards(*args, **kwargs):
     """after_migrate entrypoint: build Salis charts/cards, then the role dashboards.
 
@@ -338,4 +370,6 @@ def seed_salis_dashboards(*args, **kwargs):
     seed_fleet_manager_dashboard()
     seed_fleet_supervisor_dashboard()
     seed_finance_manager_dashboard()
+    seed_workers_transport_dashboard()
+    seed_representatives_fleet_dashboard()
     frappe.db.commit()

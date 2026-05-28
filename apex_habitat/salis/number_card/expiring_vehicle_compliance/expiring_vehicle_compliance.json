@@ -1,0 +1,14 @@
+{
+ "doctype": "Number Card",
+ "name": "Expiring Vehicle Compliance",
+ "label": "Expiring Vehicle Compliance",
+ "document_type": "Salis Vehicle",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 0,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Salis",
+ "filters_json": "[[\"Salis Vehicle\", \"compliance_status\", \"=\", \"Expiring Soon\"]]"
+}

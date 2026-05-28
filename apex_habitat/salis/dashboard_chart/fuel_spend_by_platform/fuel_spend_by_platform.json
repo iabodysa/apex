@@ -1,0 +1,19 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Fuel Spend by Platform",
+ "chart_name": "Fuel Spend by Platform",
+ "chart_type": "Group By",
+ "document_type": "Fuel Request",
+ "group_by_based_on": "fuel_platform",
+ "group_by_type": "Sum",
+ "aggregate_function_based_on": "amount",
+ "type": "Bar",
+ "number_of_groups": 0,
+ "currency": "SAR",
+ "is_public": 1,
+ "is_standard": 0,
+ "module": "Salis",
+ "timeseries": 0,
+ "use_report_chart": 0,
+ "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"]]"
+}

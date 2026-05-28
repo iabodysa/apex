@@ -1,0 +1,14 @@
+{
+ "doctype": "Number Card",
+ "name": "Pending Fuel Requests",
+ "label": "Pending Fuel Requests",
+ "document_type": "Fuel Request",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 0,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Salis",
+ "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Pending\"], [\"Fuel Request\", \"docstatus\", \"=\", 1]]"
+}

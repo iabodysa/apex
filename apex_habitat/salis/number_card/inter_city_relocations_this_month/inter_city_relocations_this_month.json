@@ -1,0 +1,14 @@
+{
+ "doctype": "Number Card",
+ "name": "Inter-City Relocations This Month",
+ "label": "Inter-City Relocations This Month",
+ "document_type": "Transport Request",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 0,
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Monthly",
+ "type": "Document Type",
+ "module": "Salis",
+ "filters_json": "[[\"Transport Request\", \"request_type\", \"=\", \"Inter-City Relocation\"], [\"Transport Request\", \"pickup_datetime\", \"Timespan\", \"this month\"]]"
+}

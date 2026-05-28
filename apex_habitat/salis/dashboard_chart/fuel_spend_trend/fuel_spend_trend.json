@@ -1,0 +1,21 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Fuel Spend Trend",
+ "chart_name": "Fuel Spend Trend",
+ "chart_type": "Sum",
+ "document_type": "Fuel Request",
+ "based_on": "request_date",
+ "value_based_on": "amount",
+ "group_by_type": "Count",
+ "time_interval": "Monthly",
+ "timespan": "Last Year",
+ "timeseries": 1,
+ "type": "Line",
+ "number_of_groups": 0,
+ "currency": "SAR",
+ "is_public": 1,
+ "is_standard": 0,
+ "module": "Salis",
+ "use_report_chart": 0,
+ "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"]]"
+}
