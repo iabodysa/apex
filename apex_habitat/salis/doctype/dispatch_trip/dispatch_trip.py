@@ -91,6 +91,12 @@ class DispatchTrip(Document):
     def _enforce_status_flow(self):
         before = self.get_doc_before_save()
         if not before or not before.status:
+            # A new trip may only be created in the initial state — closing the
+            # insert-bypass where a doc is inserted directly at a later/terminal status.
+            if self.status and self.status != "Planned":
+                frappe.throw(
+                    _("A new Dispatch Trip must start as Planned, not {0}.").format(_(self.status))
+                )
             return
         old, new = before.status, self.status
         if new == old:

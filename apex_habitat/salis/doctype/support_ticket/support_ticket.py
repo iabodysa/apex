@@ -27,6 +27,12 @@ class SupportTicket(Document):
     def _enforce_status_flow(self):
         before = self.get_doc_before_save()
         if not before or not before.status:
+            # A new ticket may only be created as New — closes the insert-bypass
+            # where a doc is inserted directly at a later/terminal status.
+            if self.status and self.status != "New":
+                frappe.throw(
+                    _("A new Support Ticket must start as New, not {0}.").format(_(self.status))
+                )
             return
         old, new = before.status, self.status
         if new == old:
