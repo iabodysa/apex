@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.1.1 ----------------------------------------------------------------
+    {
+        "title": "Apex 1.1.1 — continuous-integration and code-quality hardening",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-12 09:00:00",
+    },
     # v1.1.0 ----------------------------------------------------------------
     {
         "title": "Apex 1.1.0 — Salis Movement gets a metrics dashboard layer and two-division workspace",

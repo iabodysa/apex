@@ -214,7 +214,7 @@ class DispatchTrip(Document):
             pluck="name",
         ):
             frappe.delete_doc(
-                "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True
+                "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True  # audit-ok
             )
         log_activity(
             action="Trip Cancelled",

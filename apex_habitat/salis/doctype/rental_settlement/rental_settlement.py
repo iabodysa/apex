@@ -57,7 +57,7 @@ class RentalSettlement(Document):
             details={"rental_office": self.rental_office, "period_month": self.period_month},
         )
 
-    @frappe.whitelist()
+    @frappe.whitelist(methods=["POST"])
     def create_payment_request(self):
         """Raise a finance-exclusive Salis Payment Request for this settlement.
 
