@@ -5,6 +5,15 @@ the vehicle, fuel chip, and custody items, and blocks clearance while any open
 Fuel Exception Case or Movement Cost Recovery remains against the driver. HR
 end-of-service and visa clearance are handled outside this module.
 
+Status transitions are owned by the native **Driver Clearance Workflow** (see
+``salis/workflow/driver_clearance_workflow/``), not by this controller. The
+"Clear" transition (which submits the document) is gated by a workflow
+``condition`` mirroring the precondition guard below — it is only offered once
+the vehicle, fuel chip and custody are returned and no open Fuel Exception Case
+or Movement Cost Recovery remains. ``_guard_cleared_status`` stays as the hard
+server-side block (defence in depth: it fires on any save that lands the
+document in Cleared, including a path that bypasses the workflow action).
+
 On submit of a Cleared clearance the linked Salis Driver is moved to Released
 and its current vehicle reference is cleared (guarded), so the released driver
 no longer holds an assignment.
@@ -26,9 +35,15 @@ _CLOSED_FUEL_EXCEPTION_STATUSES = ("Resolved", "Rejected", "Closed")
 # guarded by an existence check so a missing doctype never breaks clearance.
 _CLOSED_RECOVERY_STATUSES = ("Recovered", "Closed", "Cancelled", "Written Off", "Resolved")
 
+# Known status values. The Select carries these for filtering/colour, but the
+# Driver Clearance Workflow owns the *transitions*.
+VALID_STATUSES = ("Open", "In Progress", "Cleared", "Blocked", "Cancelled")
+
 
 class DriverClearance(Document):
 	def validate(self):
+		if self.status and self.status not in VALID_STATUSES:
+			frappe.throw(_("Invalid status: {0}").format(self.status))
 		self._capture_assigned_vehicle()
 		self._compute_outstanding()
 		self._guard_cleared_status()

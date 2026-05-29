@@ -9,12 +9,16 @@ exactly like the other Salis seeds (notifications / kanban / assignment rules).
 
 This module is reused by the app's ``after_install`` / ``after_migrate`` hooks
 and by ``patches/v1_x/seed_salis_workflows.py`` so a fresh install gets the
-workflow immediately while already-installed sites pick it up on migrate. Every
-step is existence-guarded and skip-missing (the target DocType, every Workflow
-State and Workflow Action Master referenced), so running it twice — or on a
-partially installed module — is safe and never aborts the migrate.
+workflows immediately while already-installed sites pick them up on migrate.
+Every step is existence-guarded and skip-missing (the target DocType, every
+Workflow State and Workflow Action Master referenced), so running it twice — or
+on a partially installed module — is safe and never aborts the migrate.
 
-Colours for the workflow states mirror the DocType's own status indicator
+Seeds the Salis Workflow Spine: Transport Request, Rental Settlement and Driver
+Clearance. Each one is applied independently, so a missing target DocType only
+skips that one workflow.
+
+Colours for the workflow states mirror each DocType's own status indicator
 colours so the desk Workflow widget matches the list view.
 """
 
@@ -24,11 +28,17 @@ import os
 import frappe
 
 # Workflow definitions to seed: the folder name under salis/workflow/.
-_WORKFLOW_DIRS = ["transport_request_workflow"]
+_WORKFLOW_DIRS = [
+    "transport_request_workflow",
+    "rental_settlement_workflow",
+    "driver_clearance_workflow",
+]
 
-# State -> indicator style, mirroring the Transport Request status colours so the
-# Workflow widget matches the list/state colours.
+# State -> indicator style, mirroring each DocType's status indicator colours so
+# the Workflow widget matches the list/state colours. Shared across the seeded
+# workflows; a state name reused by more than one workflow keeps the same style.
 _STATE_STYLE = {
+    # Transport Request
     "New": "Primary",
     "Validated": "Primary",
     "Approved": "Primary",
@@ -36,6 +46,16 @@ _STATE_STYLE = {
     "Fulfilled": "Success",
     "Rejected": "Danger",
     "Cancelled": "Danger",
+    # Rental Settlement
+    "Draft": "Primary",
+    "Reconciled": "Warning",
+    "Disputed": "Danger",
+    "Paid": "Success",
+    # Driver Clearance
+    "Open": "Warning",
+    "In Progress": "Primary",
+    "Cleared": "Success",
+    "Blocked": "Danger",
 }
 
 

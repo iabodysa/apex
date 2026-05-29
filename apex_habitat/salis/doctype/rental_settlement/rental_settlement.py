@@ -6,6 +6,15 @@ amounts themselves) and the ``variance`` against the claimed total. On submit,
 ``create_payment_request`` may raise a finance-exclusive Salis Payment Request
 (expense_type "Rental") referencing this settlement.
 
+Status transitions are owned by the native **Rental Settlement Workflow** (see
+``salis/workflow/rental_settlement_workflow/``), not by this controller. In
+particular the "Mark Paid" transition is restricted to the **Finance Manager**
+role and carries the Segregation-of-Duties condition ``requested_by !=
+session.user`` so the finance approver can never be the (server-stamped)
+requester. This controller keeps only the *data* guards (totals, variance, the
+known-status check) and the server-side requester stamp that the SoD gate
+relies on.
+
 This controller posts NO General Ledger / accounting entry. The Salis Payment
 Request it raises is a payment request record; Finance posts the actual
 payment externally.
@@ -18,6 +27,15 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+VALID_STATUSES = (
+    "Draft",
+    "Reconciled",
+    "Approved",
+    "Paid",
+    "Disputed",
+    "Cancelled",
+)
+
 
 class RentalSettlement(Document):
     def before_insert(self):
@@ -27,6 +45,12 @@ class RentalSettlement(Document):
             self.requested_by = frappe.session.user
 
     def validate(self):
+        # The Select still carries the known states for filtering/colour, but the
+        # Rental Settlement Workflow owns *transitions* — this only rejects an
+        # unknown value.
+        if self.status and self.status not in VALID_STATUSES:
+            frappe.throw(_("Invalid status: {0}").format(self.status))
+
         if not self.requested_by:
             self.requested_by = frappe.session.user
         if not self.company:

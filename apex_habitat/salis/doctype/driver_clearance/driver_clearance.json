@@ -67,13 +67,16 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nIn Progress\nCleared\nBlocked"
+   "no_copy": 1,
+   "options": "Open\nIn Progress\nCleared\nBlocked\nCancelled",
+   "read_only": 1
   },
   {
    "default": "DCL-.######",
@@ -224,6 +227,10 @@
   {
    "color": "Red",
    "title": "Blocked"
+  },
+  {
+   "color": "Red",
+   "title": "Cancelled"
   }
  ],
  "title_field": "driver",
