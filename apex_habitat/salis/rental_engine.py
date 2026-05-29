@@ -57,7 +57,7 @@ def daily_rental_accrual() -> None:
     logger = frappe.logger()
 
     # Resolved once per run as the fallback when a vehicle has no company set.
-    from apex_habitat.salis.doctype.salis_settings.salis_settings import get_default_company
+    from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_default_company
 
     _default_company = get_default_company()
 

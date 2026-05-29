@@ -150,7 +150,7 @@ doc_events = {
         "before_save": "apex_habitat.habitat.doctype.utility_account.utility_account.before_save",
     },
     "Habitat Settings": {
-        "before_save": "apex_habitat.habitat.doctype.habitat_settings.habitat_settings.before_save",
+        "before_save": "apex_habitat.apex_core.doctype.habitat_settings.habitat_settings.before_save",
     },
     "Safety Task Catalog": {
         "before_save": "apex_habitat.habitat.doctype.safety_task_catalog.safety_task_catalog.before_save",

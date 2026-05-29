@@ -55,7 +55,7 @@ class FuelClaim(Document):
 	def _set_financial_defaults(self):
 		"""Default company and cost center from Salis Settings for reporting and
 		financial context. Reference fields only - no GL/Payment Entry is posted."""
-		from apex_habitat.salis.doctype.salis_settings.salis_settings import (
+		from apex_habitat.apex_core.doctype.salis_settings.salis_settings import (
 			get_default_company,
 			get_default_cost_center,
 		)

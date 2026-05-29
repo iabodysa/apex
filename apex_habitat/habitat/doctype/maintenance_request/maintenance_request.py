@@ -13,7 +13,7 @@ class MaintenanceRequest(Document):
 
 def before_save(doc, method=None):
     if not doc.company:
-        from apex_habitat.habitat.doctype.habitat_settings.habitat_settings import get_default_company
+        from apex_habitat.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()
 
     _validate_status_rules(doc)

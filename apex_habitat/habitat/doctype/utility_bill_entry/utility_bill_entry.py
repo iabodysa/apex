@@ -26,7 +26,7 @@ class UtilityBillEntry(Document):
 
 def validate(doc, method=None):
     if not doc.company:
-        from apex_habitat.habitat.doctype.habitat_settings.habitat_settings import get_default_company
+        from apex_habitat.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()
 
     if doc.billing_period_to and doc.billing_period_from:

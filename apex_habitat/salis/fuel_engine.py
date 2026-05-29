@@ -58,7 +58,7 @@ def _company_for_vehicle(vehicle: str | None) -> str | None:
     if vehicle:
         company = frappe.db.get_value("Salis Vehicle", vehicle, "company")
     if not company:
-        from apex_habitat.salis.doctype.salis_settings.salis_settings import (
+        from apex_habitat.apex_core.doctype.salis_settings.salis_settings import (
             get_default_company,
         )
 

@@ -23,7 +23,7 @@ class SalisVehicle(Document):
         """Default the owning company from Salis Settings (asset ownership /
         reporting context). Reference field only - no GL is posted."""
         if not self.company:
-            from apex_habitat.salis.doctype.salis_settings.salis_settings import (
+            from apex_habitat.apex_core.doctype.salis_settings.salis_settings import (
                 get_default_company,
             )
 

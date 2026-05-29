@@ -89,3 +89,10 @@ apex_habitat.patches.v1_x.seed_salis_communications
 # ONE-TIME (prune-eligible): deletes Salis-module Workspaces not in the shipped set
 # (Salis/Workers/Fleet/Fuel/Rentals/Compliance/Setup). No-op on fresh installs.
 apex_habitat.patches.v1_x.cleanup_renamed_salis_workspaces
+
+# v1.x — move the shared settings Singles into the new Apex Core module
+# ONE-TIME (prune-eligible once every deployed site has run it): re-homes
+# "Habitat Settings" and "Salis Settings" from the Habitat/Salis modules onto
+# "Apex Core" by updating the persisted DocType.module value. Names are unchanged,
+# so tables and stored Single values are preserved. No-op on fresh installs.
+apex_habitat.patches.v1_x.move_settings_to_apex_core
