@@ -13,10 +13,20 @@ mirroring the Habitat Front Desk pattern:
   behavior runs. They add NO posting or status logic of their own beyond the
   documented field updates, and they never touch the database with raw SQL.
 
-Every write is permission-gated on ``Fuel Request`` / ``write`` (defense in
-depth on top of the page role grant). The approve/reject mutations run through
-``doc.save()``, so the change is captured natively by Version (track_changes is
-enabled on Fuel Request) plus the automatic timeline comment.
+Project scoping is enforced SERVER-SIDE and reuses the canonical Salis row-scope
+helpers in :mod:`apex_habitat.salis.permissions` (``_is_unscoped`` /
+``_allowed_projects``), exactly like ``salis.api.dispatch_board``: a scoped
+supervisor only ever sees Fuel Requests in the projects they hold a User
+Permission for, and an out-of-scope ``project`` argument can never widen that
+view (it simply yields an empty queue). A scoped user with no permitted project
+sees an empty queue (mirroring the ``1=0`` fragment the list-view query
+condition applies). Approve/reject additionally run a per-document
+``frappe.has_permission("Fuel Request", "write", doc=...)`` so the same project
+boundary is enforced on the individual document, not just a blanket write grant.
+
+The approve/reject mutations run through ``doc.save()``, so the change is
+captured natively by Version (track_changes is enabled on Fuel Request) plus the
+automatic timeline comment.
 """
 
 from __future__ import annotations
@@ -24,6 +34,29 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.utils import date_diff, flt, today
+
+from apex_habitat.salis.permissions import _allowed_projects, _is_unscoped
+
+
+def _permitted_projects():
+    """Resolve the project scope for the current user.
+
+    Returns a tuple ``(unscoped, projects)`` with the same contract as
+    ``dispatch_board._permitted_projects``:
+
+      * ``unscoped`` is True for oversight roles that see every project, in which
+        case ``projects`` is ``None`` (no project filter applied);
+      * otherwise ``projects`` is the list of Project names the user holds a User
+        Permission for. An empty list means the user is scoped but granted no
+        project, so the queue must be empty.
+
+    This delegates to the same helpers the ``permission_query_conditions`` hooks
+    use, so the console scope and the list-view scope can never diverge.
+    """
+    user = frappe.session.user
+    if _is_unscoped(user):
+        return True, None
+    return False, _allowed_projects(user)
 
 
 def _approval_threshold() -> float:
@@ -47,17 +80,41 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
     (no per-row round trips). Each row carries an ``over_threshold`` flag
     computed against the Salis Settings approval threshold.
 
+    Project scoping is enforced server-side: a scoped supervisor only ever sees
+    Fuel Requests in their permitted projects. The ``project`` argument can only
+    NARROW that scope (it is intersected with the permitted set), never widen it.
+
     Args:
-        project: Optional Project docname to filter the queue.
+        project: Optional Project docname to narrow the queue to a single
+            project. Intersected with the caller's permitted scope — an
+            out-of-scope project yields an empty queue.
 
     Returns:
         list of dicts, newest request first.
     """
     frappe.has_permission("Fuel Request", "read", throw=True)
 
-    filters: dict = {"status": "Pending", "docstatus": 1}
+    unscoped, projects = _permitted_projects()
+
+    # Intersect an explicitly requested project with the permitted scope. A
+    # scoped user must never be able to widen their view via the argument.
     if project:
-        filters["project"] = project
+        if unscoped:
+            projects = [project]
+            unscoped = False
+        elif project in (projects or []):
+            projects = [project]
+        else:
+            # Requested project is outside the caller's scope: empty queue.
+            return []
+
+    # Scoped user with no permitted project => empty queue (mirrors `1=0`).
+    if not unscoped and not projects:
+        return []
+
+    filters: dict = {"status": "Pending", "docstatus": 1}
+    if not unscoped:
+        filters["project"] = ["in", projects]
 
     rows = frappe.get_all(
         "Fuel Request",
@@ -138,8 +195,10 @@ def approve_fuel_request(name: str) -> dict:
     ``approved_by = <current user>``, then ``doc.save()`` so native controller
     behavior runs. No raw SQL.
 
-    Permission: caller must have ``write`` on Fuel Request (checked explicitly
-    below, defense in depth on top of the page role grant).
+    Permission: caller must have ``write`` on this specific Fuel Request. The
+    per-document check (``doc=doc``) runs the project row-scope ``has_permission``
+    hook, so a scoped supervisor cannot approve a request outside their permitted
+    projects even though they hold a blanket Fuel Request write grant.
 
     Args:
         name: Fuel Request docname.
@@ -147,9 +206,9 @@ def approve_fuel_request(name: str) -> dict:
     Returns:
         dict: ``{"name": <docname>, "status": "Approved"}``.
     """
-    frappe.has_permission("Fuel Request", "write", throw=True)
-
     doc = frappe.get_doc("Fuel Request", name)
+    frappe.has_permission("Fuel Request", "write", doc=doc, throw=True)
+
     if doc.status != "Pending":
         frappe.throw(
             _("Fuel Request {0} is not pending (current status: {1}).").format(
@@ -173,8 +232,10 @@ def reject_fuel_request(name: str, reason: str | None = None) -> dict:
     ``approved_by = <current user>``, records the reason as a timeline comment,
     then ``doc.save()``. No raw SQL.
 
-    Permission: caller must have ``write`` on Fuel Request (checked explicitly
-    below).
+    Permission: caller must have ``write`` on this specific Fuel Request. The
+    per-document check (``doc=doc``) runs the project row-scope ``has_permission``
+    hook, so a scoped supervisor cannot reject a request outside their permitted
+    projects even though they hold a blanket Fuel Request write grant.
 
     Args:
         name: Fuel Request docname.
@@ -183,9 +244,9 @@ def reject_fuel_request(name: str, reason: str | None = None) -> dict:
     Returns:
         dict: ``{"name": <docname>, "status": "Failed"}``.
     """
-    frappe.has_permission("Fuel Request", "write", throw=True)
-
     doc = frappe.get_doc("Fuel Request", name)
+    frappe.has_permission("Fuel Request", "write", doc=doc, throw=True)
+
     if doc.status != "Pending":
         frappe.throw(
             _("Fuel Request {0} is not pending (current status: {1}).").format(

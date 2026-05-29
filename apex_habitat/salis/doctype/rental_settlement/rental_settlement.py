@@ -20,7 +20,15 @@ from frappe.utils import flt
 
 
 class RentalSettlement(Document):
+    def before_insert(self):
+        # Stamp the requester server-side (read-only field) so the
+        # segregation-of-duties / maker-checker gate cannot be spoofed.
+        if not self.requested_by:
+            self.requested_by = frappe.session.user
+
     def validate(self):
+        if not self.requested_by:
+            self.requested_by = frappe.session.user
         if not self.company:
             from apex_habitat.salis.doctype.salis_settings.salis_settings import (
                 get_default_company,

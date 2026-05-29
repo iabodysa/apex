@@ -1,9 +1,23 @@
 {
-  "doctype": "Report",
-  "name": "Intercompany Movement Register",
-  "report_name": "Intercompany Movement Register",
-  "ref_doctype": "Facility Asset Movement",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Habitat"
+ "doctype": "Report",
+ "name": "Intercompany Movement Register",
+ "report_name": "Intercompany Movement Register",
+ "ref_doctype": "Facility Asset Movement",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
 }

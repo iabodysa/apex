@@ -1,9 +1,20 @@
 {
-  "doctype": "Report",
-  "name": "Audit Remediation Status",
-  "report_name": "Audit Remediation Status",
-  "ref_doctype": "Client Audit Remediation Plan",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Habitat"
+ "doctype": "Report",
+ "name": "Audit Remediation Status",
+ "report_name": "Audit Remediation Status",
+ "ref_doctype": "Client Audit Remediation Plan",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
 }

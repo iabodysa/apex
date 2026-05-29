@@ -15,7 +15,15 @@ from apex_habitat.salis.salis_lib import (
 
 
 class ApprovalRequest(Document):
+    def before_insert(self):
+        # Stamp the requester server-side (read-only field) so the maker != checker
+        # (segregation-of-duties) gate cannot be spoofed at intake.
+        if not self.requested_by:
+            self.requested_by = frappe.session.user
+
     def validate(self):
+        if not self.requested_by:
+            self.requested_by = frappe.session.user
         self._enforce_segregation_of_duties()
         self._stamp_decision_date()
         self._evaluate_escalation()

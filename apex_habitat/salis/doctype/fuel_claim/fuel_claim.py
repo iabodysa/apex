@@ -37,7 +37,15 @@ _ALLOWED_TRANSITIONS = {
 
 
 class FuelClaim(Document):
+	def before_insert(self):
+		# Stamp the requester server-side (read-only field) so the
+		# segregation-of-duties / maker-checker gate cannot be spoofed.
+		if not self.requested_by:
+			self.requested_by = frappe.session.user
+
 	def validate(self):
+		if not self.requested_by:
+			self.requested_by = frappe.session.user
 		if (self.claimed_litres or 0) <= 0:
 			frappe.throw(_("Claimed Litres must be greater than zero."))
 		self._set_financial_defaults()

@@ -224,6 +224,11 @@ permission_query_conditions = {
     "Transport Request": "apex_habitat.salis.permissions.transport_request_query",
     "Route Plan": "apex_habitat.salis.permissions.route_plan_query",
     "Sponsorship Transfer Case": "apex_habitat.salis.permissions.sponsorship_transfer_case_query",
+    "Support Ticket": "apex_habitat.salis.permissions.support_ticket_query",
+    "Fuel Claim": "apex_habitat.salis.permissions.fuel_claim_query",
+    "Fuel Quota": "apex_habitat.salis.permissions.fuel_quota_query",
+    "Fuel Chip Request": "apex_habitat.salis.permissions.fuel_chip_request_query",
+    "Fuel Exception Case": "apex_habitat.salis.permissions.fuel_exception_case_query",
 }
 
 has_permission = {
@@ -234,7 +239,13 @@ has_permission = {
     "Transport Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Route Plan": "apex_habitat.salis.permissions.scoped_has_permission",
     "Sponsorship Transfer Case": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Support Ticket": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Fuel Claim": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Fuel Quota": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Fuel Chip Request": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Fuel Exception Case": "apex_habitat.salis.permissions.scoped_has_permission",
     "Salis Payment Request": "apex_habitat.salis.permissions.payment_sod_has_permission",
+    "Approval Request": "apex_habitat.salis.permissions.approval_sod_has_permission",
 }
 
 # Fixtures shipped with the app

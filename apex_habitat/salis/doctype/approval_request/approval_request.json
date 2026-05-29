@@ -50,11 +50,13 @@
    "reqd": 1
   },
   {
+   "description": "Set to the session user on creation; read-only so the maker != checker (segregation-of-duties) gate cannot be spoofed.",
    "fieldname": "requested_by",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Requested By",
    "options": "User",
+   "read_only": 1,
    "reqd": 1
   },
   {

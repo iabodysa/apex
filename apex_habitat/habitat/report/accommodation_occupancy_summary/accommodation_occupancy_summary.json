@@ -1,9 +1,23 @@
 {
-  "doctype": "Report",
-  "name": "Accommodation Occupancy Summary",
-  "report_name": "Accommodation Occupancy Summary",
-  "ref_doctype": "Accommodation Assignment",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Habitat"
+ "doctype": "Report",
+ "name": "Accommodation Occupancy Summary",
+ "report_name": "Accommodation Occupancy Summary",
+ "ref_doctype": "Accommodation Assignment",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "Internal Auditor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
 }

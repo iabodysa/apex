@@ -1,9 +1,23 @@
 {
-  "doctype": "Report",
-  "name": "Accommodation Cost Distribution",
-  "report_name": "Accommodation Cost Distribution",
-  "ref_doctype": "Accommodation Ledger",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Habitat"
+ "doctype": "Report",
+ "name": "Accommodation Cost Distribution",
+ "report_name": "Accommodation Cost Distribution",
+ "ref_doctype": "Accommodation Ledger",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
 }

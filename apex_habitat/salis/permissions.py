@@ -92,6 +92,26 @@ def sponsorship_transfer_case_query(user=None):
     return _project_condition(user)
 
 
+def support_ticket_query(user=None):
+    return _project_condition(user)
+
+
+def fuel_claim_query(user=None):
+    return _project_condition(user)
+
+
+def fuel_quota_query(user=None):
+    return _project_condition(user)
+
+
+def fuel_chip_request_query(user=None):
+    return _project_condition(user)
+
+
+def fuel_exception_case_query(user=None):
+    return _project_condition(user)
+
+
 def dispatch_trip_query(user=None):
     """Dispatch Trip has no own `project` field; it links to a Route Plan.
 
@@ -145,9 +165,16 @@ def scoped_has_permission(doc, ptype, user=None):
 
     project = _doc_project(doc)
     if not project:
-        # Scoped user acting on a doc with no resolvable project: deny, to mirror
-        # the list-view query condition (which shows scoped users nothing when the
-        # project is absent). Without this, a project-less record bypasses scoping.
+        # Project-less doc. Ownership is an independent, legitimate access basis
+        # (an if_owner permission row), so defer to Frappe's default resolution
+        # when the acting user owns the doc — e.g. a Driver reading the Support
+        # Ticket they raised, where the row carries no project. This does not
+        # widen project scope: every project-BEARING doc is still filtered below.
+        if getattr(doc, "owner", None) == user:
+            return None
+        # Otherwise deny, to mirror the list-view query condition (which shows
+        # scoped users nothing when the project is absent). Without this, a
+        # project-less record would bypass scoping.
         return False
 
     if project not in _allowed_projects(user):
@@ -190,6 +217,52 @@ def payment_sod_has_permission(doc, ptype, user=None):
 
     status = getattr(doc, "status", None)
     if status not in FINANCE_EXCLUSIVE_STATES:
+        return None
+
+    user = _resolve_user(user)
+    if user in ("Administrator", "Guest"):
+        return None
+
+    requested_by = getattr(doc, "requested_by", None)
+    owner = getattr(doc, "owner", None)
+
+    if requested_by and requested_by == user:
+        return False
+    if owner and owner == user:
+        return False
+
+    return None
+
+
+# Decisions that represent an authorization outcome on an Approval Request.
+APPROVAL_DECISION_STATES = {
+    "Approved",
+    "Rejected",
+}
+
+
+def approval_sod_has_permission(doc, ptype, user=None):
+    """Block self-authorization of an Approval Request at the permission layer.
+
+    For "Approval Request", when the action is a submit/write that records an
+    authorization decision (Approved / Rejected), deny it if the acting user is
+    the requester or the original creator of the request. This enforces
+    approver != requester at the permission layer (maker != checker), in
+    addition to the controller-level check in
+    :meth:`ApprovalRequest._enforce_segregation_of_duties`, so a requester can
+    never self-authorize regardless of how the transition is attempted.
+
+    Returns False to block; otherwise returns None to defer to Frappe's default
+    permission resolution.
+    """
+    if getattr(doc, "doctype", None) != "Approval Request":
+        return None
+
+    if ptype not in ("submit", "write"):
+        return None
+
+    decision = getattr(doc, "decision", None)
+    if decision not in APPROVAL_DECISION_STATES:
         return None
 
     user = _resolve_user(user)

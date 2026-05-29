@@ -1,9 +1,20 @@
 {
-  "doctype": "Report",
-  "name": "Maintenance Aging",
-  "report_name": "Maintenance Aging",
-  "ref_doctype": "Maintenance Request",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Habitat"
+ "doctype": "Report",
+ "name": "Maintenance Aging",
+ "report_name": "Maintenance Aging",
+ "ref_doctype": "Maintenance Request",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
 }

@@ -14,6 +14,7 @@
   "rental_settlement_overview_col",
   "status",
   "company",
+  "requested_by",
   "payment_request",
   "rental_settlement_sec_vehicles",
   "vehicles",
@@ -83,6 +84,14 @@
    "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
+   "read_only": 1
+  },
+  {
+   "description": "Set to the session user on creation; read-only so the segregation-of-duties gate cannot be spoofed.",
+   "fieldname": "requested_by",
+   "fieldtype": "Link",
+   "label": "Requested By",
+   "options": "User",
    "read_only": 1
   },
   {

@@ -1,31 +1,42 @@
 {
-  "doctype": "Report",
-  "name": "Housing Supervisor Report",
-  "report_name": "Housing Supervisor Report",
-  "ref_doctype": "Accommodation Building",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Habitat",
-  "filters": [
-    {
-      "fieldname": "period_from",
-      "fieldtype": "Date",
-      "label": "Period From",
-      "reqd": 1,
-      "default": "Today"
-    },
-    {
-      "fieldname": "period_to",
-      "fieldtype": "Date",
-      "label": "Period To",
-      "reqd": 1,
-      "default": "Today"
-    },
-    {
-      "fieldname": "building",
-      "fieldtype": "Link",
-      "label": "Building",
-      "options": "Accommodation Building"
-    }
-  ]
+ "doctype": "Report",
+ "name": "Housing Supervisor Report",
+ "report_name": "Housing Supervisor Report",
+ "ref_doctype": "Accommodation Building",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "filters": [
+  {
+   "fieldname": "period_from",
+   "fieldtype": "Date",
+   "label": "Period From",
+   "reqd": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "period_to",
+   "fieldtype": "Date",
+   "label": "Period To",
+   "reqd": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Accommodation Building"
+  }
+ ],
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
 }

@@ -1,9 +1,23 @@
 {
-  "doctype": "Report",
-  "name": "Accommodation Ledger Summary",
-  "report_name": "Accommodation Ledger Summary",
-  "ref_doctype": "Accommodation Ledger",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Habitat"
+ "doctype": "Report",
+ "name": "Accommodation Ledger Summary",
+ "report_name": "Accommodation Ledger Summary",
+ "ref_doctype": "Accommodation Ledger",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
 }

@@ -1,9 +1,23 @@
 {
-  "doctype": "Report",
-  "name": "Custody Damage Register",
-  "report_name": "Custody Damage Register",
-  "ref_doctype": "Custody Damage Assessment",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Habitat"
+ "doctype": "Report",
+ "name": "Custody Damage Register",
+ "report_name": "Custody Damage Register",
+ "ref_doctype": "Custody Damage Assessment",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
 }

@@ -126,6 +126,25 @@ def driver_check_out(photo=None):
 	return {"name": doc.name, "check_out": str(doc.check_out)}
 
 
+def _vehicle_bound_to_driver(driver, vehicle):
+	"""True when ``vehicle`` is genuinely bound to ``driver``.
+
+	A vehicle is bound when it is the driver's ``current_vehicle`` OR the driver
+	holds an Active Vehicle Assignment for it. This is the server-side guard that
+	stops a driver from charging fuel against a vehicle that is not theirs by
+	passing an arbitrary ``vehicle`` id to the portal."""
+	if not vehicle:
+		return False
+	if frappe.db.get_value("Salis Driver", driver, "current_vehicle") == vehicle:
+		return True
+	return bool(
+		frappe.db.exists(
+			"Vehicle Assignment",
+			{"driver": driver, "vehicle": vehicle, "status": "Active"},
+		)
+	)
+
+
 @frappe.whitelist(methods=["POST"])
 def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 	_require_enabled()
@@ -133,6 +152,13 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 	vehicle = vehicle or frappe.db.get_value("Salis Driver", driver, "current_vehicle")
 	if not vehicle:
 		frappe.throw(_("No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel."))
+	# Never trust a client-supplied vehicle: it must actually be bound to this
+	# driver (their current vehicle or an Active Vehicle Assignment).
+	if not _vehicle_bound_to_driver(driver, vehicle):
+		frappe.throw(
+			_("That vehicle is not assigned to you. You can only request fuel for your own vehicle."),
+			frappe.PermissionError,
+		)
 	doc = frappe.get_doc(
 		{"doctype": "Fuel Request", "driver": driver, "vehicle": vehicle,
 		 "fuel_platform": fuel_platform, "requested_litres": frappe.utils.flt(litres),

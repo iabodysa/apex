@@ -1,9 +1,20 @@
 {
-  "doctype": "Report",
-  "name": "Daily Cleaning Compliance",
-  "report_name": "Daily Cleaning Compliance",
-  "ref_doctype": "Cleaning Log",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Habitat"
+ "doctype": "Report",
+ "name": "Daily Cleaning Compliance",
+ "report_name": "Daily Cleaning Compliance",
+ "ref_doctype": "Cleaning Log",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
 }

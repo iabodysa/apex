@@ -64,6 +64,50 @@ class TestDriverPortalScope(unittest.TestCase):
         with self.assertRaises(frappe.ValidationError):
             driver_portal.submit_fuel_request(litres=10)
 
+    def test_fuel_request_rejects_vehicle_not_bound_to_driver(self):
+        """A driver passing an arbitrary vehicle id that is NOT theirs (not their
+        current_vehicle and no Active Vehicle Assignment) must be rejected — they
+        cannot charge fuel against someone else's vehicle."""
+        # driver_a has a bound current_vehicle; create a foreign vehicle that is
+        # NOT assigned to driver_a in any way.
+        frappe.set_user("Administrator")
+        foreign = frappe.get_doc(
+            {"doctype": "Salis Vehicle", "plate_number": "FOREIGN VEH 1", "status": "Active"}
+        ).insert(ignore_permissions=True).name
+        frappe.db.commit()
+        emp = frappe.db.get_value("Salis Driver", self.driver_a, "employee")
+        user_a = frappe.db.get_value("Employee", emp, "user_id")
+        frappe.set_user(user_a)
+        with self.assertRaises(frappe.PermissionError):
+            driver_portal.submit_fuel_request(litres=20, vehicle=foreign)
+        frappe.set_user("Administrator")
+        frappe.delete_doc("Salis Vehicle", foreign, ignore_permissions=True, force=True)
+        frappe.db.commit()
+
+    def test_fuel_request_accepts_vehicle_via_active_assignment(self):
+        """A vehicle bound through an Active Vehicle Assignment is accepted even
+        when it is not the driver's current_vehicle."""
+        frappe.set_user("Administrator")
+        assigned = frappe.get_doc(
+            {"doctype": "Salis Vehicle", "plate_number": "ASSIGNED VEH 1", "status": "Active"}
+        ).insert(ignore_permissions=True).name
+        va = frappe.get_doc(
+            {"doctype": "Vehicle Assignment", "driver": self.driver_a,
+             "vehicle": assigned, "status": "Active",
+             "start_date": frappe.utils.today()}
+        ).insert(ignore_permissions=True)
+        frappe.db.commit()
+        emp = frappe.db.get_value("Salis Driver", self.driver_a, "employee")
+        user_a = frappe.db.get_value("Employee", emp, "user_id")
+        frappe.set_user(user_a)
+        res = driver_portal.submit_fuel_request(litres=15, vehicle=assigned)
+        self.assertEqual(frappe.db.get_value("Fuel Request", res["name"], "vehicle"), assigned)
+        frappe.set_user("Administrator")
+        frappe.delete_doc("Fuel Request", res["name"], ignore_permissions=True, force=True)
+        va.delete(ignore_permissions=True)
+        frappe.delete_doc("Salis Vehicle", assigned, ignore_permissions=True, force=True)
+        frappe.db.commit()
+
     def test_trips_scoped_to_self(self):
         trip = frappe.get_doc({"doctype": "Dispatch Trip", "driver": self.driver_a,
                                "trip_date": frappe.utils.today(), "status": "Planned"}).insert(

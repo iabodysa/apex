@@ -87,6 +87,7 @@
    "label": "Request Date"
   },
   {
+   "allow_on_submit": 1,
    "default": "Pending",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -96,6 +97,7 @@
    "options": "Pending\nApproved\nDone\nFailed\nCancelled"
   },
   {
+   "allow_on_submit": 1,
    "description": "Set when the request is approved.",
    "fieldname": "approved_by",
    "fieldtype": "Link",

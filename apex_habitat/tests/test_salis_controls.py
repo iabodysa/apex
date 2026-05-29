@@ -114,3 +114,92 @@ class TestPaymentRequestSoD(unittest.TestCase):
         frappe.set_user("Administrator")
         frappe.delete_doc("Salis Payment Request", doc.name, ignore_permissions=True, force=True)
         frappe.db.commit()
+
+
+class TestRequestedByStamping(unittest.TestCase):
+    """``requested_by`` is stamped to the session user server-side and is a
+    read-only field on the SoD-bearing DocTypes, so the maker != checker gate
+    cannot be spoofed through the form path."""
+
+    @classmethod
+    def setUpClass(cls):
+        frappe.set_user("Administrator")
+        cls.user = cls._mgr("rb_user@example.com")
+        frappe.db.commit()
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    @staticmethod
+    def _mgr(email):
+        if not frappe.db.exists("User", email):
+            u = frappe.get_doc({"doctype": "User", "email": email,
+                                "first_name": email.split("@")[0], "send_welcome_email": 0})
+            u.insert(ignore_permissions=True)
+        else:
+            u = frappe.get_doc("User", email)
+        for role in ("Fleet Manager", "Fleet Project Manager"):
+            if role not in frappe.get_roles(email):
+                u.add_roles(role)
+        return email
+
+    def _vehicle(self, plate):
+        v = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
+        if not v:
+            v = frappe.get_doc({"doctype": "Salis Vehicle", "plate_number": plate,
+                                "status": "Active"}).insert(ignore_permissions=True).name
+        return v
+
+    def _project(self, name):
+        p = frappe.db.get_value("Project", {"project_name": name}, "name")
+        if not p:
+            p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(
+                ignore_permissions=True).name
+        return p
+
+    def test_field_is_read_only_in_schema(self):
+        for dt in ("Fuel Claim", "Rental Settlement", "Approval Request",
+                   "Salis Payment Request"):
+            meta = frappe.get_meta(dt)
+            field = meta.get_field("requested_by")
+            self.assertIsNotNone(field, f"{dt} must declare requested_by")
+            self.assertTrue(field.read_only, f"{dt}.requested_by must be read_only")
+
+    def test_fuel_claim_stamps_session_user(self):
+        frappe.set_user(self.user)
+        doc = frappe.get_doc({
+            "doctype": "Fuel Claim", "project": self._project("RB Claim P"),
+            "vehicle": self._vehicle("RB CLAIM 1"), "period_month": "2026-05",
+            "claimed_litres": 50, "status": "Draft",
+        }).insert(ignore_permissions=True)
+        self.assertEqual(doc.requested_by, self.user)
+        frappe.set_user("Administrator")
+        frappe.delete_doc("Fuel Claim", doc.name, ignore_permissions=True, force=True)
+        frappe.db.commit()
+
+    def test_rental_settlement_stamps_session_user(self):
+        frappe.set_user(self.user)
+        office = frappe.db.get_value("Rental Office", {}, "name")
+        if not office:
+            office = frappe.get_doc({"doctype": "Rental Office",
+                                     "office_name": "RB Office"}).insert(
+                ignore_permissions=True).name
+        doc = frappe.get_doc({
+            "doctype": "Rental Settlement", "rental_office": office,
+            "period_month": "2026-05", "status": "Draft", "claimed_total": 0,
+        }).insert(ignore_permissions=True)
+        self.assertEqual(doc.requested_by, self.user)
+        frappe.set_user("Administrator")
+        frappe.delete_doc("Rental Settlement", doc.name, ignore_permissions=True, force=True)
+        frappe.db.commit()
+
+    def test_approval_request_stamps_session_user(self):
+        frappe.set_user(self.user)
+        doc = frappe.get_doc({
+            "doctype": "Approval Request", "request_type": "Other",
+            "approver": "Administrator", "decision": "Pending",
+        }).insert(ignore_permissions=True)
+        self.assertEqual(doc.requested_by, self.user)
+        frappe.set_user("Administrator")
+        frappe.delete_doc("Approval Request", doc.name, ignore_permissions=True, force=True)
+        frappe.db.commit()

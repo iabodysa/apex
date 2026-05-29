@@ -86,7 +86,8 @@
   {
    "fieldname": "mobile_number",
    "fieldtype": "Data",
-   "label": "Mobile Number"
+   "label": "Mobile Number",
+   "permlevel": 1
   },
   {
    "fieldname": "preferred_language",
@@ -203,6 +204,24 @@
    "read": 1,
    "write": 1,
    "create": 1
+  },
+  {
+   "role": "System Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Accommodation Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Resident Supervisor",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
   }
  ],
  "autoname": "naming_series:",

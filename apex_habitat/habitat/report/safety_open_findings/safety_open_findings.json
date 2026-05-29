@@ -1,9 +1,20 @@
 {
-  "doctype": "Report",
-  "name": "Safety Open Findings",
-  "report_name": "Safety Open Findings",
-  "ref_doctype": "Safety Task Execution",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Habitat"
+ "doctype": "Report",
+ "name": "Safety Open Findings",
+ "report_name": "Safety Open Findings",
+ "ref_doctype": "Safety Task Execution",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
 }
