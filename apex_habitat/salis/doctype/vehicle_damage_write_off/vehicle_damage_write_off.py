@@ -14,8 +14,9 @@ from frappe.model.document import Document
 
 from apex_habitat.salis.salis_lib import ensure_approval, log_activity
 
-# Estimated cost (SAR) at or above which Operations-tier authority is required.
-_OPERATIONS_TIER_THRESHOLD = 2000
+# Fallback estimated cost (SAR) at or above which Operations-tier authority is
+# required, used only when Salis Settings has no configured threshold.
+_OPERATIONS_TIER_THRESHOLD_DEFAULT = 2000
 
 
 class VehicleDamageWriteOff(Document):
@@ -26,7 +27,14 @@ class VehicleDamageWriteOff(Document):
         self._stamp_approver()
 
     def before_submit(self):
-        required_tier = "Operations" if (self.estimated_cost or 0) >= _OPERATIONS_TIER_THRESHOLD else "Regional"
+        # Threshold is configurable via Salis Settings so the SAR write-off gate
+        # can be tuned without a code change; fall back to the default if unset.
+        threshold = frappe.db.get_single_value(
+            "Salis Settings", "writeoff_ops_threshold_sar"
+        )
+        if not threshold:
+            threshold = _OPERATIONS_TIER_THRESHOLD_DEFAULT
+        required_tier = "Operations" if (self.estimated_cost or 0) >= threshold else "Regional"
         ensure_approval("Vehicle Damage Write-Off", self.name, required_tier=required_tier)
 
     def on_submit(self):

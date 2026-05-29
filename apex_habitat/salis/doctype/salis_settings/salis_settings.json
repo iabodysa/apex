@@ -23,6 +23,12 @@
   "fuel_tier_regional_litres",
   "fuel_tier_operations_litres",
   "passenger_count_ops_threshold",
+  "salis_settings_sec_doa_thresholds",
+  "writeoff_ops_threshold_sar",
+  "salis_settings_doa_col",
+  "cost_recovery_ops_threshold_sar",
+  "salis_settings_sec_authority_ladder",
+  "authority_tier_map",
   "salis_settings_tab_portal",
   "salis_settings_sec_portal",
   "enable_driver_portal",
@@ -141,6 +147,41 @@
    "fieldname": "passenger_count_ops_threshold",
    "fieldtype": "Int",
    "label": "Passenger Count Operations Threshold"
+  },
+  {
+   "fieldname": "salis_settings_sec_doa_thresholds",
+   "fieldtype": "Section Break",
+   "label": "Delegation-of-Authority Thresholds (SAR)"
+  },
+  {
+   "default": "2000",
+   "description": "Vehicle Damage Write-Off cases at or above this estimated cost (SAR) require Operations-tier authority; lower-value cases require at least Regional-tier.",
+   "fieldname": "writeoff_ops_threshold_sar",
+   "fieldtype": "Currency",
+   "label": "Write-Off Operations Threshold (SAR)"
+  },
+  {
+   "fieldname": "salis_settings_doa_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1000",
+   "description": "Movement Cost Recovery amounts at or above this value (SAR) require Operations-tier authority; lower amounts require at least Regional-tier.",
+   "fieldname": "cost_recovery_ops_threshold_sar",
+   "fieldtype": "Currency",
+   "label": "Cost Recovery Operations Threshold (SAR)"
+  },
+  {
+   "fieldname": "salis_settings_sec_authority_ladder",
+   "fieldtype": "Section Break",
+   "label": "Authority Tier Mapping"
+  },
+  {
+   "description": "Configurable Delegation-of-Authority ladder: map each tier to a native Frappe Role. When populated, these rows extend the built-in tier-to-role mapping so the DoA ladder can be tuned without a code change.",
+   "fieldname": "authority_tier_map",
+   "fieldtype": "Table",
+   "label": "Authority Tier Map",
+   "options": "Salis Authority Tier"
   },
   {
    "fieldname": "salis_settings_tab_portal",

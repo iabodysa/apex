@@ -255,12 +255,25 @@ fixtures = [
 after_install = [
     "apex_habitat.setup.after_install",
     "apex_habitat.salis.setup.after_install",
+    # Salis native paradigms — Notifications, Kanban Boards, Assignment Rules.
+    # Idempotent + existence-guarded; mirrors Habitat (which seeds the equivalents
+    # from setup.after_install). The same functions also run on after_migrate and
+    # from the v1_1 patch (single source of truth), so replaying them is safe.
+    "apex_habitat.salis.notifications_seed.seed_salis_notifications",
+    "apex_habitat.salis.kanban_seed.seed_salis_kanban_boards",
+    "apex_habitat.salis.assignment_rules_seed.seed_salis_assignment_rules",
 ]
 # Dashboards seed after migrate (when their charts/number cards already exist).
 after_migrate = [
     "apex_habitat.habitat.dashboard_seed.seed_all_dashboards",
     "apex_habitat.salis.dashboard_seed.seed_salis_dashboards",
     "apex_habitat.salis.movement_dashboard_seed.seed_movement_dashboards",
+    # Salis native paradigms — keep already-installed sites in sync on migrate.
+    # Idempotent + existence-guarded (created only if absent), so re-running every
+    # migrate never duplicates and never aborts the migrate.
+    "apex_habitat.salis.notifications_seed.seed_salis_notifications",
+    "apex_habitat.salis.kanban_seed.seed_salis_kanban_boards",
+    "apex_habitat.salis.assignment_rules_seed.seed_salis_assignment_rules",
 ]
 
 # Frappe What's New feed — appears in desk notification area, not as a popup

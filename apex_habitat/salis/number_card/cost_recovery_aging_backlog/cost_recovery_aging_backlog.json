@@ -1,0 +1,14 @@
+{
+ "doctype": "Number Card",
+ "name": "Cost Recovery Aging Backlog",
+ "label": "Cost Recovery Aging Backlog",
+ "document_type": "Movement Cost Recovery",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 0,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Salis",
+ "filters_json": "[[\"Movement Cost Recovery\", \"status\", \"in\", [\"Open\", \"Acknowledged\", \"Approved\"]], [\"Movement Cost Recovery\", \"request_date\", \"Timespan\", \"last quarter\"]]"
+}

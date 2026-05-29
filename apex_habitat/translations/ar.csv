@@ -1884,7 +1884,6 @@ Accrued Total,إجمالي المستحق
 Claimed Total,إجمالي المطالب به
 Days,الأيام
 Source Type,نوع المصدر
-On Time,في الوقت المحدد
 Period (Days),الفترة (أيام)
 Trips Count,عدد الرحلات
 Idle Days,أيام التوقف
@@ -1978,3 +1977,52 @@ Total Dispatch Trips,إجمالي رحلات الإرسال
 Trip Fulfilment Ledger Rows,صفوف دفتر تنفيذ الرحلات
 Trip Fulfilment Rate,معدل تنفيذ الرحلات
 Value,القيمة
+Valid,ساري
+Active Vehicles,المركبات النشطة
+Blocked Driver Clearances,إخلاءات طرف السائقين المحظورة
+Expiring Vehicle Compliance,وثائق امتثال المركبات التي تنتهي قريباً
+Fuel Spend This Month,إنفاق الوقود لهذا الشهر
+Inter-City Relocations This Month,الترحيلات بين المدن لهذا الشهر
+Large Worker Moves Pending Escalation,تنقلات العمالة الكبيرة بانتظار التصعيد
+Open Transport Requests,طلبات النقل المفتوحة
+Pending Approvals,الموافقات المعلقة
+Pending Fuel Requests,طلبات الوقود المعلقة
+Rental Accrual This Month,استحقاق الإيجار لهذا الشهر
+Vehicles Under Maintenance,المركبات تحت الصيانة
+Workers Requests Open,طلبات العمالة المفتوحة
+Dispatch Trips by Status,رحلات التشغيل حسب الحالة
+Fuel Spend by Platform,إنفاق الوقود حسب المنصة
+Fuel Spend Trend,اتجاه إنفاق الوقود
+Vehicles by Status,المركبات حسب الحالة
+Workers Requests by Status,طلبات العمالة حسب الحالة
+Workers Transport Over Time,نقل العمالة عبر الزمن
+Driver Attendance Summary,ملخص حضور السائقين
+Driver Clearance Register,سجل إخلاء طرف السائقين
+Fuel Claim Register,سجل مطالبات الوقود
+Fuel Claim vs Consumption,مطالبات الوقود مقابل الاستهلاك
+Fuel Consumption Summary,ملخص استهلاك الوقود
+Fuel Reconciliation,مطابقة الوقود
+Movement Cost Recovery Register,سجل استرداد تكاليف الحركة
+Movement Cost Summary,ملخص تكاليف الحركة
+Movement KPI Summary,ملخص مؤشرات أداء الحركة
+Rental Settlement Register,سجل تسويات الإيجار
+Rental Variance Report,تقرير انحراف الإيجار
+Salis Fleet Register,سجل الأسطول
+Vehicle Utilisation,استغلال المركبات
+Driver Clearance Certificate,شهادة إخلاء طرف السائق
+Fuel Claim Voucher,سند مطالبة وقود
+Rental Settlement Statement,كشف تسوية الإيجار
+Vehicle Handover Receipt,إيصال تسليم المركبة
+Fuel Approval Console,وحدة اعتماد الوقود
+Key Metrics,المؤشرات الرئيسية
+Workers Transport,نقل العمالة
+Representatives Fleet,أسطول المناديب
+Navigate,التنقل
+Fleet,الأسطول
+Masters & Setup,البيانات الأساسية والإعداد
+Movement Ops,عمليات الحركة
+Costs & Settlement,التكاليف والتسوية
+Engine Ledgers / Audit,دفاتر المحركات / التدقيق
+Reports,التقارير
+Workers Transport Dashboard,لوحة نقل العمالة
+Representatives Fleet Dashboard,لوحة أسطول المناديب

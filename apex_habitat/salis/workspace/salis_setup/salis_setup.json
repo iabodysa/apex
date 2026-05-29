@@ -1,0 +1,90 @@
+{
+ "doctype": "Workspace",
+ "name": "Salis Setup",
+ "label": "Salis Setup",
+ "title": "Salis Setup",
+ "module": "Salis",
+ "icon": "setting",
+ "public": 1,
+ "roles": [
+  {
+   "role": "Fleet Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "is_default": 0,
+ "sequence_id": 8.0,
+ "parent_page": "Salis",
+ "content": "[{\"id\": \"sseHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Masters & Setup</b></span>\", \"col\": 12}}, {\"id\": \"sseCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters & Setup\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Salis Settings",
+   "link_to": "Salis Settings",
+   "idx": 1
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Masters & Setup",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Driver",
+   "link_type": "DocType",
+   "link_to": "Salis Driver",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Category",
+   "link_type": "DocType",
+   "link_to": "Vehicle Category",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Rental Office",
+   "link_type": "DocType",
+   "link_to": "Rental Office",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Platform",
+   "link_type": "DocType",
+   "link_to": "Fuel Platform",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Wash Platform",
+   "link_type": "DocType",
+   "link_to": "Wash Platform",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Settings",
+   "link_type": "DocType",
+   "link_to": "Salis Settings",
+   "idx": 7
+  }
+ ],
+ "charts": [],
+ "number_cards": [],
+ "quick_lists": [],
+ "modified": "2026-05-29 13:00:00.000000"
+}

@@ -1,0 +1,162 @@
+{
+ "doctype": "Workspace",
+ "name": "Salis Representatives Fleet",
+ "label": "Salis Representatives Fleet",
+ "title": "Salis Representatives Fleet",
+ "module": "Salis",
+ "icon": "tool",
+ "public": 1,
+ "roles": [
+  {
+   "role": "Fleet Manager"
+  },
+  {
+   "role": "Fleet Project Manager"
+  },
+  {
+   "role": "Fleet Regional Manager"
+  },
+  {
+   "role": "Fleet Operations Manager"
+  },
+  {
+   "role": "Fleet Supervisor"
+  }
+ ],
+ "is_default": 0,
+ "sequence_id": 4.0,
+ "parent_page": "Salis",
+ "content": "[{\"id\": \"srfHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srfKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"srfKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"srfKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Requests Open\", \"col\": 3}}, {\"id\": \"srfKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"srfHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srfQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"srfQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"srfQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Representatives Fleet Dashboard\", \"col\": 3}}, {\"id\": \"srfHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srfCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet\", \"col\": 4}}, {\"id\": \"srfCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Salis Vehicle",
+   "link_to": "Salis Vehicle",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Dispatch Trip",
+   "link_to": "Dispatch Trip",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "Dashboard",
+   "label": "Representatives Fleet Dashboard",
+   "link_to": "Salis - Representatives Fleet",
+   "idx": 3
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Fleet",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Vehicle",
+   "link_type": "DocType",
+   "link_to": "Salis Vehicle",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Assignment",
+   "link_type": "DocType",
+   "link_to": "Vehicle Assignment",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Handover",
+   "link_type": "DocType",
+   "link_to": "Vehicle Handover",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Dispatch Trip",
+   "link_type": "DocType",
+   "link_to": "Dispatch Trip",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Route Plan",
+   "link_type": "DocType",
+   "link_to": "Route Plan",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Views",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Fleet Register",
+   "link_type": "Report",
+   "link_to": "Salis Fleet Register",
+   "idx": 8,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Utilisation",
+   "link_type": "Report",
+   "link_to": "Vehicle Utilisation",
+   "idx": 9,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Representatives Fleet Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Salis - Representatives Fleet",
+   "idx": 10
+  }
+ ],
+ "charts": [],
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Active Vehicles",
+   "label": "Active Vehicles",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Vehicles Under Maintenance",
+   "label": "Vehicles Under Maintenance",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Representatives Transport Requests Open",
+   "label": "Representatives Transport Requests Open",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Representatives Transport Fulfilled This Month",
+   "label": "Representatives Transport Fulfilled This Month",
+   "idx": 4
+  }
+ ],
+ "quick_lists": [],
+ "modified": "2026-05-29 13:00:00.000000"
+}

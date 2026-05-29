@@ -1,0 +1,92 @@
+<style>
+  .sal-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
+  .sal-doc h1 { font-size: 18px; margin: 0; }
+  .sal-doc .sal-sub { color: #666; font-size: 12px; margin-top: 2px; }
+  .sal-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
+              display: flex; justify-content: space-between; align-items: flex-start; }
+  .sal-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .sal-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
+  .sal-meta .sal-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
+  .sal-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .sal-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
+  .sal-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
+  .sal-items tr:nth-child(even) td { background: #f8f8fb; }
+  .sal-ar { color: #555; font-size: 10px; }
+  .sal-pos { color: #b00020; font-weight: bold; }
+  .sal-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
+  .sal-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
+  .sal-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
+</style>
+
+<div class="sal-doc">
+  <div class="sal-head">
+    <div>
+      <h1>{{ _("Fuel Claim Voucher") }}</h1>
+      <div class="sal-sub">سند مطالبة وقود &bull; {{ doc.name }}</div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#666;">
+      {{ frappe.db.get_single_value("Salis Settings", "default_company") or "" }}
+    </div>
+  </div>
+
+  <table class="sal-meta">
+    <tr>
+      <td class="sal-lbl">Project <span class="sal-ar">المشروع</span></td>
+      <td>{{ doc.project or "" }}</td>
+      <td class="sal-lbl">Period <span class="sal-ar">الفترة</span></td>
+      <td>{{ doc.period_month or "" }}</td>
+    </tr>
+    <tr>
+      <td class="sal-lbl">Vehicle <span class="sal-ar">المركبة</span></td>
+      <td>{{ doc.vehicle or "" }}</td>
+      <td class="sal-lbl">Driver <span class="sal-ar">السائق</span></td>
+      <td>{{ doc.driver or "—" }}</td>
+    </tr>
+    <tr>
+      <td class="sal-lbl">Fuel Quota <span class="sal-ar">حصة الوقود</span></td>
+      <td>{{ doc.fuel_quota or "—" }}</td>
+      <td class="sal-lbl">Status <span class="sal-ar">الحالة</span></td>
+      <td>{{ doc.status or "" }}{% if doc.is_increase %} &bull; {{ _("Quota Increase") }}{% endif %}</td>
+    </tr>
+  </table>
+
+  <table class="sal-items">
+    <thead>
+      <tr>
+        <th>Measure <span class="sal-ar">البند</span></th>
+        <th style="width:30%;">Value <span class="sal-ar">القيمة</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Claimed Litres <span class="sal-ar">اللترات المُطالَب بها</span></td>
+        <td>{{ doc.claimed_litres or 0 }}</td>
+      </tr>
+      <tr>
+        <td>Consumed Litres (system) <span class="sal-ar">اللترات المُستهلَكة (النظام)</span></td>
+        <td>{{ doc.consumed_litres or 0 }}</td>
+      </tr>
+      <tr>
+        <td>Variance (L) <span class="sal-ar">الفرق (لتر)</span></td>
+        <td>{% if (doc.variance_litres or 0) > 0 %}<span class="sal-pos">{{ doc.variance_litres }}</span>{% else %}{{ doc.variance_litres or 0 }}{% endif %}</td>
+      </tr>
+      <tr>
+        <td>Claimed Amount <span class="sal-ar">المبلغ المُطالَب به</span></td>
+        <td>{{ frappe.format(doc.claimed_amount, {"fieldtype": "Currency"}) }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="sal-sign">
+    <tr>
+      <td>Prepared by (Supervisor)<br><span class="sal-ar">أعدّها (المشرف)</span></td>
+      <td style="text-align:right;">Approved by (Operations)<br><span class="sal-ar">اعتمدها (العمليات)</span></td>
+    </tr>
+  </table>
+
+  <div class="sal-foot">
+    {{ _("This voucher reconciles the claimed fuel against consumption recorded in the Fuel Consumption Ledger. It does not post to the general ledger.") }}
+    يُسوّي هذا السند الوقود المُطالَب به مقابل الاستهلاك المُسجّل في سجل استهلاك الوقود.
+    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
+  </div>
+</div>

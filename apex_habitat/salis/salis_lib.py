@@ -36,17 +36,58 @@ def tier_rank(tier):
 		return -1
 
 
+def role_tier_map():
+	"""Return the effective role -> tier mapping.
+
+	Starts from the built-in ``ROLE_TIER`` defaults and overlays any configurable
+	rows from ``Salis Settings.authority_tier_map`` (a Salis Authority Tier child
+	table), so the Delegation-of-Authority ladder can be extended as data without
+	a code change. Configured rows win over the defaults for the same role. Only
+	rows whose tier is a known ladder tier are honoured. Cached per request and
+	degrades gracefully to the defaults if Settings is unavailable."""
+	# Per-request memoisation: the mapping is read once per request.
+	try:
+		cached = frappe.local.cache.get("salis_role_tier_map")
+		if cached is not None:
+			return cached
+	except Exception:
+		cached = None
+
+	mapping = dict(ROLE_TIER)
+	try:
+		rows = frappe.get_all(
+			"Salis Authority Tier",
+			filters={"parenttype": "Salis Settings", "parentfield": "authority_tier_map"},
+			fields=["role", "tier"],
+		)
+		for row in rows:
+			if row.get("role") and row.get("tier") in TIERS:
+				mapping[row["role"]] = row["tier"]
+	except Exception:
+		# Settings/table not migrated yet — fall back to the built-in defaults.
+		pass
+
+	try:
+		frappe.local.cache["salis_role_tier_map"] = mapping
+	except Exception:
+		pass
+	return mapping
+
+
 def user_max_tier(user):
 	"""Return the highest authority tier among the user's roles, or None.
 
 	Used by the DoA gate to compare an approver's standing against the tier a
-	request requires. Returns None when the user holds no tier-bearing role."""
+	request requires. Considers both the built-in role mapping and any
+	configurable Salis Authority Tier rows. Returns None when the user holds no
+	tier-bearing role."""
 	if not user:
 		return None
+	mapping = role_tier_map()
 	best = None
 	best_rank = -1
 	for role in frappe.get_roles(user):
-		tier = ROLE_TIER.get(role)
+		tier = mapping.get(role)
 		if tier is None:
 			continue
 		rank = tier_rank(tier)

@@ -1,0 +1,14 @@
+{
+ "doctype": "Number Card",
+ "name": "Disputed Rental Settlements",
+ "label": "Disputed Rental Settlements",
+ "document_type": "Rental Settlement",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 0,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Salis",
+ "filters_json": "[[\"Rental Settlement\", \"status\", \"=\", \"Disputed\"]]"
+}

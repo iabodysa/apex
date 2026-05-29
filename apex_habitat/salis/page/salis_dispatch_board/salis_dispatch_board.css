@@ -1,0 +1,125 @@
+/* Salis Dispatch Board — read-only fleet glance board layout. */
+
+.sdb-board {
+	padding: 0 var(--padding-md, 15px) var(--padding-lg, 20px);
+}
+
+.sdb-help {
+	margin: 8px 0 16px;
+	font-size: var(--text-sm, 0.85rem);
+}
+
+.sdb-panes {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 16px;
+	align-items: start;
+}
+
+.sdb-pane {
+	background: var(--card-bg, var(--fg-color, #fff));
+	border: 1px solid var(--border-color, #e2e2e2);
+	border-radius: var(--border-radius-md, 8px);
+	overflow: hidden;
+}
+
+.sdb-pane-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 12px 14px;
+	border-bottom: 1px solid var(--border-color, #e2e2e2);
+	background: var(--subtle-fg, var(--control-bg, #f7f7f7));
+}
+
+.sdb-pane-title {
+	font-weight: 600;
+	font-size: var(--text-md, 1rem);
+}
+
+.sdb-pane-count {
+	font-size: var(--text-sm, 0.85rem);
+	color: var(--text-muted, #888);
+}
+
+.sdb-pane-body {
+	padding: 12px 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	max-height: 640px;
+	overflow-y: auto;
+}
+
+.sdb-group-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.sdb-group-count {
+	font-size: var(--text-sm, 0.85rem);
+	color: var(--text-muted, #888);
+}
+
+.sdb-cards {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.sdb-card {
+	border: 1px solid var(--border-color, #e2e2e2);
+	border-radius: var(--border-radius, 6px);
+	padding: 8px 10px;
+	background: var(--fg-color, #fff);
+}
+
+.sdb-card-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 4px;
+}
+
+.sdb-card-title {
+	font-weight: 600;
+	font-size: var(--text-sm, 0.9rem);
+}
+
+.sdb-kv {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	font-size: var(--text-sm, 0.82rem);
+	line-height: 1.5;
+}
+
+.sdb-kv-label {
+	color: var(--text-muted, #888);
+}
+
+.sdb-kv-value {
+	text-align: right;
+	color: var(--text-color, #333);
+}
+
+.sdb-driver-split {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 14px;
+}
+
+.sdb-empty {
+	padding: 8px 0;
+	font-size: var(--text-sm, 0.85rem);
+}
+
+@media (max-width: 575px) {
+	.sdb-driver-split {
+		grid-template-columns: 1fr;
+	}
+}

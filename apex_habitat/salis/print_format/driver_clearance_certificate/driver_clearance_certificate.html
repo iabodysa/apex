@@ -1,0 +1,110 @@
+<style>
+  .sal-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
+  .sal-doc h1 { font-size: 18px; margin: 0; }
+  .sal-doc .sal-sub { color: #666; font-size: 12px; margin-top: 2px; }
+  .sal-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
+              display: flex; justify-content: space-between; align-items: flex-start; }
+  .sal-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .sal-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
+  .sal-meta .sal-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
+  .sal-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .sal-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
+  .sal-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
+  .sal-items tr:nth-child(even) td { background: #f8f8fb; }
+  .sal-ar { color: #555; font-size: 10px; }
+  .sal-yes { color: #1b7f3b; font-weight: bold; }
+  .sal-no { color: #b00020; font-weight: bold; }
+  .sal-banner { padding: 8px 10px; margin-bottom: 14px; font-weight: bold; border-radius: 3px; }
+  .sal-banner-ok { background: #e7f5ec; color: #1b7f3b; border: 1px solid #b6e0c5; }
+  .sal-banner-warn { background: #fdecec; color: #b00020; border: 1px solid #f2c2c2; }
+  .sal-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
+  .sal-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
+  .sal-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
+</style>
+
+<div class="sal-doc">
+  <div class="sal-head">
+    <div>
+      <h1>{{ _("Driver Clearance Certificate") }}</h1>
+      <div class="sal-sub">شهادة إخلاء طرف سائق &bull; {{ doc.name }}</div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#666;">
+      {{ frappe.db.get_single_value("Salis Settings", "default_company") or "" }}
+    </div>
+  </div>
+
+  <table class="sal-meta">
+    <tr>
+      <td class="sal-lbl">Driver <span class="sal-ar">السائق</span></td>
+      <td>{{ doc.driver or "" }}</td>
+      <td class="sal-lbl">Reason <span class="sal-ar">السبب</span></td>
+      <td>{{ doc.clearance_reason or "" }}</td>
+    </tr>
+    <tr>
+      <td class="sal-lbl">Assigned Vehicle <span class="sal-ar">المركبة المُسندة</span></td>
+      <td>{{ doc.assigned_vehicle or "—" }}</td>
+      <td class="sal-lbl">Status <span class="sal-ar">الحالة</span></td>
+      <td>{{ doc.status or "" }}</td>
+    </tr>
+  </table>
+
+  {% if doc.status == "Cleared" %}
+  <div class="sal-banner sal-banner-ok">
+    {{ _("This driver has been cleared on all movement-domain items listed below.") }}
+    تمّ إخلاء طرف هذا السائق في جميع البنود الموضّحة أدناه.
+  </div>
+  {% elif doc.status == "Blocked" %}
+  <div class="sal-banner sal-banner-warn">
+    {{ _("Clearance is blocked. Outstanding movement-domain items remain open.") }}
+    إخلاء الطرف مُعلَّق. لا تزال هناك بنود قائمة لم تُغلَق.
+  </div>
+  {% endif %}
+
+  <table class="sal-items">
+    <thead>
+      <tr>
+        <th>Clearance Item <span class="sal-ar">بند الإخلاء</span></th>
+        <th style="width:30%;">Result <span class="sal-ar">النتيجة</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Vehicle Returned <span class="sal-ar">إرجاع المركبة</span></td>
+        <td>{% if doc.vehicle_returned %}<span class="sal-yes">{{ _("Yes") }}</span>{% else %}<span class="sal-no">{{ _("No") }}</span>{% endif %}</td>
+      </tr>
+      <tr>
+        <td>Fuel Chip Returned <span class="sal-ar">إرجاع شريحة الوقود</span></td>
+        <td>{% if doc.fuel_chip_returned %}<span class="sal-yes">{{ _("Yes") }}</span>{% else %}<span class="sal-no">{{ _("No") }}</span>{% endif %}</td>
+      </tr>
+      <tr>
+        <td>Custody Returned <span class="sal-ar">إرجاع العهدة</span></td>
+        <td>{% if doc.custody_returned %}<span class="sal-yes">{{ _("Yes") }}</span>{% else %}<span class="sal-no">{{ _("No") }}</span>{% endif %}</td>
+      </tr>
+      <tr>
+        <td>Outstanding Fuel Exceptions <span class="sal-ar">حالات استثناء وقود قائمة</span></td>
+        <td>{% if (doc.outstanding_fuel_exceptions or 0) > 0 %}<span class="sal-no">{{ doc.outstanding_fuel_exceptions }}</span>{% else %}<span class="sal-yes">0</span>{% endif %}</td>
+      </tr>
+      <tr>
+        <td>Outstanding Recoveries <span class="sal-ar">مبالغ استرداد قائمة</span></td>
+        <td>{% if (doc.outstanding_recoveries or 0) > 0 %}<span class="sal-no">{{ doc.outstanding_recoveries }}</span>{% else %}<span class="sal-yes">0</span>{% endif %}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  {% if doc.notes %}
+  <div style="margin-bottom:12px;"><b>Notes <span class="sal-ar">ملاحظات</span>:</b> {{ doc.notes }}</div>
+  {% endif %}
+
+  <table class="sal-sign">
+    <tr>
+      <td>Verified by (Fleet Supervisor)<br><span class="sal-ar">دقّقها (مشرف الأسطول)</span></td>
+      <td style="text-align:right;">Approved by (Operations)<br><span class="sal-ar">اعتمدها (العمليات)</span></td>
+    </tr>
+  </table>
+
+  <div class="sal-foot">
+    {{ _("This certificate covers movement-domain clearance only (vehicle, fuel chip, and custody). HR end-of-service and visa clearance are out of scope.") }}
+    تُغطّي هذه الشهادة إخلاء طرف نطاق الحركة فقط (المركبة وشريحة الوقود والعهدة).
+    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
+  </div>
+</div>

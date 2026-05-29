@@ -336,25 +336,49 @@ def seed_finance_manager_dashboard():
 # As with every dashboard here, _upsert_dashboard links only the charts/cards
 # that actually exist, so a partial install never raises LinkValidationError.
 def seed_workers_transport_dashboard():
+    # Charts/cards suffixed "(NEW)" are produced by the Salis cards-charts-depth
+    # fixtures (salis/dashboard_chart/, salis/number_card/) and referenced here by
+    # name only. _upsert_dashboard links solely the ones that actually exist, so a
+    # not-yet-synced fixture is skipped, never a LinkValidationError. The division
+    # reports (Worker Transport Plan, Transport Fulfilment SLA, Driver Attendance
+    # Summary) are surfaced as report links in the Salis Workers Transport
+    # workspace — Dashboards in this app hold only charts + number cards.
     _upsert_dashboard(
         "Salis - Workers Transport",
         charts=[("Workers Requests by Status", "Half"),
-                ("Workers Transport Over Time", "Half")],
+                ("Workers Transport Over Time", "Half"),
+                ("Transport Requests by Service Line", "Half")],  # NEW
         cards=["Workers Requests Open", "Open Transport Requests",
                "Inter-City Relocations This Month",
-               "Large Worker Moves Pending Escalation"],
+               "Large Worker Moves Pending Escalation",
+               "Workers Transport Fulfilled This Month",  # NEW
+               "Transport SLA Breaches Open"],             # NEW
     )
 
 
 def seed_representatives_fleet_dashboard():
+    # See seed_workers_transport_dashboard: "(NEW)" tiles are fixture-backed and
+    # referenced by name only; missing ones are skipped by the existence guard.
+    # Division reports (Salis Fleet Register, Vehicle Utilisation, Vehicle/Driver
+    # Clearance registers, rental reports) are surfaced as report links in the
+    # Salis Representatives Fleet / Rentals & Costs / Compliance & Drivers
+    # workspaces.
     _upsert_dashboard(
         "Salis - Representatives Fleet",
         charts=[("Vehicles by Status", "Half"), ("Dispatch Trips by Status", "Half"),
-                ("Fuel Spend by Platform", "Half"), ("Fuel Spend Trend", "Full")],
+                ("Fuel Spend by Platform", "Half"), ("Fuel Spend Trend", "Half"),
+                ("Active Vehicles by Category", "Half"),    # NEW
+                ("Fuel Claim Variance by Month", "Half"),   # NEW
+                ("Rental Accrual Trend", "Full")],          # NEW
         cards=["Active Vehicles", "Vehicles Under Maintenance",
                "Expiring Vehicle Compliance", "Pending Fuel Requests",
                "Fuel Spend This Month", "Open Fuel Exception Cases",
-               "Rental Accrual This Month", "Blocked Driver Clearances"],
+               "Rental Accrual This Month", "Blocked Driver Clearances",
+               "Representatives Transport Requests Open",        # NEW
+               "Representatives Transport Fulfilled This Month",  # NEW
+               "Disputed Rental Settlements",                    # NEW
+               "Overdue Rental Settlements",                     # NEW
+               "Cost Recovery Aging Backlog"],                   # NEW
     )
 
 

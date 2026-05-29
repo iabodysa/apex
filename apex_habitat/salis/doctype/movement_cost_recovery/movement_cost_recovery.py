@@ -18,9 +18,10 @@ from frappe.model.document import Document
 
 from apex_habitat.salis.salis_lib import ensure_approval, log_activity
 
-# Amount (SAR) at or above which the recovery escalates to Operations-tier
-# authority; below it, Regional tier suffices.
-_OPERATIONS_TIER_THRESHOLD = 1000
+# Fallback amount (SAR) at or above which the recovery escalates to Operations-
+# tier authority, used only when Salis Settings has no configured threshold;
+# below it, Regional tier suffices.
+_OPERATIONS_TIER_THRESHOLD_DEFAULT = 1000
 
 
 class MovementCostRecovery(Document):
@@ -31,7 +32,14 @@ class MovementCostRecovery(Document):
 			frappe.throw(_("Basis / Evidence is required before a recovery can be Approved."))
 
 	def before_submit(self):
-		required_tier = "Operations" if (self.amount or 0) >= _OPERATIONS_TIER_THRESHOLD else "Regional"
+		# Threshold is configurable via Salis Settings so the SAR recovery gate can
+		# be tuned without a code change; fall back to the default if unset.
+		threshold = frappe.db.get_single_value(
+			"Salis Settings", "cost_recovery_ops_threshold_sar"
+		)
+		if not threshold:
+			threshold = _OPERATIONS_TIER_THRESHOLD_DEFAULT
+		required_tier = "Operations" if (self.amount or 0) >= threshold else "Regional"
 		ensure_approval("Movement Cost Recovery", self.name, required_tier=required_tier)
 
 	def on_submit(self):

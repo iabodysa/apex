@@ -165,7 +165,11 @@ class DispatchTrip(Document):
             )
             or 0
         )
-        on_time = 1 if (self.return_time and self.depart_time) else 0
+        # Data-completeness flag only: records whether the trip captured both a
+        # depart and a return timestamp. This is NOT a punctuality measure — the
+        # schema carries no planned/scheduled return time to compare against, so
+        # an honest "on-time" KPI cannot be computed here.
+        has_timestamps = 1 if (self.return_time and self.depart_time) else 0
         ledger = frappe.new_doc("Trip Fulfilment Ledger")
         ledger.update(
             {
@@ -176,7 +180,7 @@ class DispatchTrip(Document):
                 "driver": self.driver,
                 "trip_date": self.trip_date,
                 "worker_count": worker_count,
-                "on_time": on_time,
+                "has_timestamps": has_timestamps,
                 "logged_at": now_datetime(),
                 "source_doctype": "Dispatch Trip",
                 "source_name": self.name,

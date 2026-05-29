@@ -1,0 +1,18 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Fuel Claim Variance by Month",
+ "chart_name": "Fuel Claim Variance by Month",
+ "chart_type": "Group By",
+ "document_type": "Fuel Claim",
+ "group_by_type": "Sum",
+ "group_by_based_on": "period_month",
+ "aggregate_function_based_on": "variance_litres",
+ "type": "Bar",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "is_standard": 0,
+ "module": "Salis",
+ "timeseries": 0,
+ "use_report_chart": 0,
+ "filters_json": "[[\"Fuel Claim\", \"status\", \"in\", [\"Submitted to Movement\", \"Reconciled\", \"Approved\", \"Closed\"]]]"
+}

@@ -13,7 +13,7 @@
   "driver",
   "trip_date",
   "worker_count",
-  "on_time",
+  "has_timestamps",
   "logged_at",
   "source_doctype",
   "source_name",
@@ -74,9 +74,10 @@
   },
   {
    "default": "0",
-   "fieldname": "on_time",
+   "description": "Whether the completed trip recorded both a depart and a return timestamp. This is a data-completeness flag, not a punctuality measure: the schema carries no planned/scheduled return time to judge on-time arrival against.",
+   "fieldname": "has_timestamps",
    "fieldtype": "Check",
-   "label": "On Time",
+   "label": "Has Timestamps",
    "read_only": 1
   },
   {

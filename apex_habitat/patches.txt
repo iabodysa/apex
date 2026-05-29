@@ -55,3 +55,8 @@ apex_habitat.patches.v1_0.seed_salis_roles
 apex_habitat.patches.v1_0.seed_salis_authority_roles
 apex_habitat.patches.v1_0.seed_salis_operations_roles
 apex_habitat.patches.v1_0.seed_salis_settings
+
+# v1.1 — Salis native paradigms (Notifications + Kanban + Assignment Rules)
+# PERMANENT (keep, do NOT prune): seeds DISTINCT records, idempotent, also called
+# from after_install/after_migrate. Not redundant.
+apex_habitat.patches.v1_1.seed_salis_operations_artifacts

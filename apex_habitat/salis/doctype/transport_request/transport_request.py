@@ -124,8 +124,16 @@ class TransportRequest(Document):
         worker_count = self.worker_count or 0
         trips = self.trips_this_month or 0
 
+        # Worker-count escalation threshold is configurable via Salis Settings so
+        # the DoA gate can be tuned without a code change. Default to 20 if unset.
+        ops_threshold = frappe.db.get_single_value(
+            "Salis Settings", "passenger_count_ops_threshold"
+        )
+        if not ops_threshold:
+            ops_threshold = 20
+
         needs_operations = (
-            (self.request_type == "Inter-City Relocation" and worker_count > 20)
+            (self.request_type == "Inter-City Relocation" and worker_count > ops_threshold)
             or (self.request_type == "Administrative Trip / Document Signing" and trips > 5)
             or (self.request_type == "Accommodation to Project Shuttle" and self.is_cross_region)
         )
