@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.11.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.11.0 — fuel requests now run on a clear, role-based approval workflow",
+        "app_name": "apex_habitat",
+        "link": "/app/fuel-request",
+        "creation": "2026-06-25 09:00:00",
+    },
+    {
+        "title": "v1.11.0: Every fuel request moves through request → approve → complete with a clear status, and the person who raises a request can no longer approve their own",
+        "app_name": "apex_habitat",
+        "link": "/app/fuel-request",
+        "creation": "2026-06-25 09:01:00",
+    },
+    {
+        "title": "v1.11.0: The Fuel Approval Console now drives the same workflow — approve or send back a request, and quotas apply on approval and reverse on cancellation",
+        "app_name": "apex_habitat",
+        "link": "/app/fuel-request",
+        "creation": "2026-06-25 09:02:00",
+    },
     # v1.10.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.10.0 — fuel requests, top-ups and chip actions are now one screen",

@@ -134,8 +134,15 @@ class TestFuelAccrualLateDone(unittest.TestCase):
         frappe.db.commit()
 
     def _make_done_request(self, request_date):
-        """Create a submitted Done Fuel Request whose request_date is in the past,
-        walking the legal Pending -> Approved -> Done flow while still a draft."""
+        """Create a Done Fuel Request whose request_date is in the past, walking
+        the legal Pending -> Approved -> Done flow. Transitions are owned by the
+        native Fuel Request Workflow (driven here as Administrator); the approval
+        carries a segregation-of-duties condition, so the requester is re-stamped
+        to a distinct user first (this test exercises the ledger engine, not the
+        SoD gate). Falls back to the direct save+submit path on a site without
+        the workflow seeded."""
+        from frappe.model.workflow import apply_workflow, get_workflow_name
+
         doc = frappe.get_doc({
             "doctype": "Fuel Request",
             "vehicle": self.vehicle,
@@ -145,11 +152,19 @@ class TestFuelAccrualLateDone(unittest.TestCase):
             "status": "Pending",
         })
         doc.insert(ignore_permissions=True)
-        doc.status = "Approved"
-        doc.save(ignore_permissions=True)
-        doc.status = "Done"
-        doc.save(ignore_permissions=True)
-        doc.submit()
+        if get_workflow_name("Fuel Request") == "Fuel Request Workflow":
+            if doc.requested_by == frappe.session.user:
+                doc.db_set("requested_by", "Guest")  # any user != the Administrator driver
+                doc.reload()
+            apply_workflow(doc, "Approve")  # Pending -> Approved (submits)
+            doc.reload()
+            apply_workflow(doc, "Complete")  # Approved -> Done (post-submit)
+        else:
+            doc.status = "Approved"
+            doc.save(ignore_permissions=True)
+            doc.status = "Done"
+            doc.save(ignore_permissions=True)
+            doc.submit()
         frappe.db.commit()
         return doc.name
 

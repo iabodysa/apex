@@ -15,9 +15,9 @@ Workflow State and Workflow Action Master referenced), so running it twice — o
 on a partially installed module — is safe and never aborts the migrate.
 
 Seeds the Salis Workflow Spine: Transport Request, Rental Settlement, Driver
-Clearance, Salis Payment Request, Support Ticket and Sponsorship Transfer Case.
-Each one is applied independently, so a missing target DocType only skips that
-one workflow.
+Clearance, Salis Payment Request, Support Ticket, Sponsorship Transfer Case and
+Fuel Request. Each one is applied independently, so a missing target DocType
+only skips that one workflow.
 
 Colours for the workflow states mirror each DocType's own status indicator
 colours so the desk Workflow widget matches the list view.
@@ -36,6 +36,7 @@ _WORKFLOW_DIRS = [
     "salis_payment_request_workflow",
     "support_ticket_workflow",
     "sponsorship_transfer_case_workflow",
+    "fuel_request_workflow",
 ]
 
 # State -> indicator style, mirroring each DocType's status indicator colours so
@@ -69,6 +70,11 @@ _STATE_STYLE = {
     "Closed": "Success",
     # Sponsorship Transfer Case (Open / In Progress / Cancelled reuse the above)
     "Completed": "Success",
+    # Fuel Request (Pending / Approved / Cancelled reuse the styles above;
+    # mirrors the Fuel Request list/indicator colours)
+    "Done": "Success",
+    "Failed": "Danger",
+    "Reverted": "Warning",
 }
 
 

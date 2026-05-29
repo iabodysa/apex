@@ -26,10 +26,38 @@ DocTypes are already gone (asserted in ``TestFuelMergeShape``).
 import unittest
 
 import frappe
+from frappe.model.workflow import apply_workflow, get_workflow_name
 from frappe.utils import add_days, today
 
 from apex_habitat.salis.fuel_engine import accrue_fuel_consumption
 from apex_habitat.salis.tasks import unreverted_topup_watch
+
+
+def _drive_to_done(doc):
+	"""Move a Pending Fuel Request to Done via the native workflow when one is
+	active, else fall back to the direct save+submit path (a site without the
+	workflow seeded).
+
+	Driven as Administrator, who may make any transition the workflow offers. The
+	approval transition carries a segregation-of-duties condition
+	(``requested_by != session.user``), so the requester is re-stamped to a
+	distinct sentinel user first — these legacy tests exercise the ledger /
+	auto-revert side-effects, not the SoD gate (that is covered in
+	test_fuel_request_workflow)."""
+	if get_workflow_name("Fuel Request") == "Fuel Request Workflow":
+		if doc.requested_by == frappe.session.user:
+			doc.db_set("requested_by", "Guest")  # any user != the Administrator driver
+			doc.reload()
+		apply_workflow(doc, "Approve")  # Pending -> Approved (submits)
+		doc.reload()
+		apply_workflow(doc, "Complete")  # Approved -> Done (post-submit)
+		doc.reload()
+	else:
+		doc.status = "Approved"
+		doc.save(ignore_permissions=True)
+		doc.status = "Done"
+		doc.save(ignore_permissions=True)
+		doc.submit()
 
 
 def _vehicle(plate):
@@ -103,11 +131,7 @@ class TestFuelRequestStandard(unittest.TestCase):
 			"status": "Pending",
 		})
 		doc.insert(ignore_permissions=True)
-		doc.status = "Approved"
-		doc.save(ignore_permissions=True)
-		doc.status = "Done"
-		doc.save(ignore_permissions=True)
-		doc.submit()
+		_drive_to_done(doc)
 		frappe.db.commit()
 		return doc.name
 
@@ -201,11 +225,7 @@ class TestFuelRequestTopup(unittest.TestCase):
 			"status": "Pending",
 		})
 		doc.insert(ignore_permissions=True)
-		doc.status = "Approved"
-		doc.save(ignore_permissions=True)
-		doc.status = "Done"
-		doc.save(ignore_permissions=True)
-		doc.submit()
+		_drive_to_done(doc)
 		frappe.db.commit()
 		name = doc.name
 		self.addCleanup(lambda: _purge(name))
@@ -230,11 +250,7 @@ class TestFuelRequestTopup(unittest.TestCase):
 			"status": "Pending",
 		})
 		doc.insert(ignore_permissions=True)
-		doc.status = "Approved"
-		doc.save(ignore_permissions=True)
-		doc.status = "Done"
-		doc.save(ignore_permissions=True)
-		doc.submit()
+		_drive_to_done(doc)
 		frappe.db.commit()
 		name = doc.name
 		self.addCleanup(lambda: _purge(name))
@@ -324,7 +340,11 @@ class TestFuelRequestTypeGuards(unittest.TestCase):
 		})
 		self.assertRaises(frappe.ValidationError, doc.insert, ignore_permissions=True)
 
-	def test_illegal_status_jump_rejected_standard(self):
+	def test_illegal_status_jump_rejected(self):
+		"""Transitions are now owned by the Fuel Request Workflow: a status jump
+		that is not an offered transition is rejected. Pending -> Done skips
+		Approved, so the workflow blocks it (the hand-rolled ``_TRANSITIONS`` map
+		was retired in the conversion). Administrator drives the workflow here."""
 		doc = frappe.get_doc({
 			"doctype": "Fuel Request",
 			"request_type": "Standard",
@@ -334,6 +354,13 @@ class TestFuelRequestTypeGuards(unittest.TestCase):
 		})
 		doc.insert(ignore_permissions=True)
 		self.addCleanup(lambda: _purge(doc.name))
-		# Pending -> Done is illegal (must pass through Approved).
-		doc.status = "Done"
-		self.assertRaises(frappe.ValidationError, doc.save, ignore_permissions=True)
+		# Pending -> Done is illegal (must pass through Approved). With the workflow
+		# active this is a non-offered transition; without it the validate guard on
+		# the Select still rejects an out-of-band jump on save.
+		if get_workflow_name("Fuel Request") == "Fuel Request Workflow":
+			from frappe.model.workflow import apply_workflow
+			with self.assertRaises(frappe.ValidationError):
+				apply_workflow(doc, "Complete")  # not offered from Pending
+		else:
+			doc.status = "Done"
+			self.assertRaises(frappe.ValidationError, doc.save, ignore_permissions=True)

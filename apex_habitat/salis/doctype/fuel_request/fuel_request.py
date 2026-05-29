@@ -15,8 +15,26 @@ behaviours, preserving the contract of the three former DocTypes verbatim:
   validation plus an audit entry on submit; a cancellation requires inactivity
   evidence and owner acknowledgement.
 
-No GL is written. The type-specific transition maps gate which statuses are
-reachable for each ``request_type``.
+No GL is written.
+
+Status transitions are owned by the native **Fuel Request Workflow** (see
+``salis/workflow/fuel_request_workflow/``), not by this controller. The workflow
+enforces the role per transition, the Segregation-of-Duties gate on the
+approval (``allow_self_approval=0`` + ``requested_by != session.user``), and the
+type-aware availability of the terminal transitions (``Mark Failed`` only for a
+Standard request, ``Revert`` only for a Top-up) via its transition
+``condition``s. The document is submitted (docstatus 0 -> 1) by the ``Approve``
+transition; ``Done`` / ``Failed`` / ``Reverted`` are then reachable post-submit
+(the state field is ``allow_on_submit``).
+
+This controller keeps only what the workflow cannot express: the per-type
+required-field validation, the Delegation-of-Authority approval gate
+(``ensure_approval`` against an Approval Request + tier), the Chip
+evidence/acknowledgement gate, the initial-status guard (a request must be
+created at Pending), and the idempotent quota side-effects — Standard quota
+consumption is applied when the request reaches Done (on submit if it submits
+straight into Done, or on the post-submit transition into Done) and reversed on
+cancel, guarded by the ``quota_applied`` flag.
 """
 
 from __future__ import annotations
@@ -36,43 +54,32 @@ from apex_habitat.salis.salis_lib import (
 
 REQUEST_TYPES = ("Standard", "Top-up", "Chip")
 
-# Allowed forward status transitions, per request type. A status may always
-# remain unchanged. These mirror the three former controllers exactly:
-#   Standard — Failed is a terminal-but-cancellable exit (was Fuel Request).
-#   Top-up   — Done can be Reverted (was Fuel Topup Request).
-#   Chip     — simple Pending/Approved/Done/Cancelled (was Fuel Chip Request).
-_TRANSITIONS = {
-	"Standard": {
-		"Pending": {"Approved", "Cancelled", "Failed"},
-		"Approved": {"Done", "Cancelled", "Failed"},
-		"Done": {"Cancelled"},
-		"Failed": {"Cancelled"},
-		"Cancelled": set(),
-	},
-	"Top-up": {
-		"Pending": {"Approved", "Cancelled"},
-		"Approved": {"Done", "Cancelled"},
-		"Done": {"Reverted", "Cancelled"},
-		"Reverted": {"Cancelled"},
-		"Cancelled": set(),
-	},
-	"Chip": {
-		"Pending": {"Approved", "Done", "Cancelled"},
-		"Approved": {"Done", "Cancelled"},
-		"Done": {"Cancelled"},
-		"Cancelled": set(),
-	},
-}
+# Known status values. The Select carries these for filtering / colour, but the
+# Fuel Request Workflow owns the *transitions* (which status is reachable from
+# which, by whom). This controller only rejects an unknown value and pins the
+# initial status to Pending.
+VALID_STATUSES = ("Pending", "Approved", "Done", "Failed", "Reverted", "Cancelled")
 
 
 class FuelRequest(Document):
 	# ------------------------------------------------------------------ lifecycle
+
+	def before_insert(self):
+		# Stamp the requester server-side (read-only field) so the workflow's
+		# segregation-of-duties gate on the approval transition cannot be spoofed.
+		if not self.requested_by:
+			self.requested_by = frappe.session.user
 
 	def validate(self):
 		if not self.request_type:
 			self.request_type = "Standard"
 		if self.request_type not in REQUEST_TYPES:
 			frappe.throw(_("Invalid Request Type: {0}").format(self.request_type))
+
+		if self.status and self.status not in VALID_STATUSES:
+			frappe.throw(_("Invalid status: {0}").format(self.status))
+		if not self.requested_by:
+			self.requested_by = frappe.session.user
 
 		if self.request_type == "Standard":
 			self._validate_standard()
@@ -81,7 +88,7 @@ class FuelRequest(Document):
 		elif self.request_type == "Chip":
 			self._validate_chip()
 
-		self._enforce_status_flow()
+		self._guard_initial_status()
 		self._stamp_approver()
 
 	def before_submit(self):
@@ -100,6 +107,9 @@ class FuelRequest(Document):
 
 	def on_submit(self):
 		if self.request_type == "Standard":
+			# The Approve transition submits the request at Approved; quota is
+			# applied once it reaches Done (here if it submits straight into Done,
+			# otherwise on the post-submit transition). Idempotent via quota_applied.
 			if self.status == "Done":
 				self._apply_quota_consumption()
 		elif self.request_type == "Top-up":
@@ -120,6 +130,17 @@ class FuelRequest(Document):
 					_(self.action), self.name, self.chip_number or _("n/a")
 				),
 			)
+
+	def on_update_after_submit(self):
+		"""Fire the Done side-effect for a post-submit workflow transition.
+
+		The Fuel Request Workflow submits at Approved (docstatus 0 -> 1) and then
+		moves Approved -> Done as a post-submit transition (the state field is
+		``allow_on_submit``). The Standard quota consumption must therefore post
+		when the request *reaches* Done, not only at submit time. Idempotent via
+		the ``quota_applied`` flag, so it is safe even if on_submit already ran."""
+		if self.request_type == "Standard" and self.status == "Done":
+			self._apply_quota_consumption()
 
 	def on_cancel(self):
 		if self.request_type == "Standard":
@@ -156,20 +177,15 @@ class FuelRequest(Document):
 
 	# ------------------------------------------------------------------ status flow
 
-	def _enforce_status_flow(self):
-		"""Reject illegal status jumps for this request type."""
-		new_status = self.status or "Pending"
-		previous = self.get_doc_before_save()
-		old_status = (previous.status if previous else None) or "Pending"
-
-		if new_status == old_status:
-			return
-
-		allowed = _TRANSITIONS.get(self.request_type, {}).get(old_status, set())
-		if new_status not in allowed:
+	def _guard_initial_status(self):
+		"""A new request must be created at the initial state (Pending). Later
+		states are reached only through the Fuel Request Workflow, which the desk
+		drives — this closes the insert-bypass the workflow itself cannot cover
+		(a brand-new document inserted directly at a later/terminal status)."""
+		if self.is_new() and self.status and self.status != "Pending":
 			frappe.throw(
-				_("Cannot change Fuel Request status from {0} to {1}.").format(
-					_(old_status), _(new_status)
+				_("A Fuel Request must be created with status Pending; {0} is reached through the workflow.").format(
+					_(self.status)
 				)
 			)
 

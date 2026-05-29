@@ -9,9 +9,12 @@ mirroring the Habitat Front Desk pattern:
   ``over_threshold`` flag computed against
   ``Salis Settings.fuel_request_approval_threshold_litres``.
 - ``approve_fuel_request`` / ``reject_fuel_request`` load the real Fuel Request
-  document and mutate it through ``doc.save()`` so all native controller
-  behavior runs. They add NO posting or status logic of their own beyond the
-  documented field updates, and they never touch the database with raw SQL.
+  document and drive the native **Fuel Request Workflow** (the ``Approve`` /
+  ``Reject`` transitions) via ``frappe.model.workflow.apply_workflow``, so the
+  workflow's role gate, Segregation-of-Duties condition
+  (``requested_by != session.user``) and docstatus transition all apply — the
+  console can never bypass them. They add NO posting or status logic of their
+  own, and never touch the database with raw SQL.
 
 Project scoping is enforced SERVER-SIDE and reuses the canonical Salis row-scope
 helpers in :mod:`apex_habitat.salis.permissions` (``_is_unscoped`` /
@@ -33,6 +36,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.model.workflow import apply_workflow
 from frappe.utils import date_diff, flt, today
 
 from apex_habitat.salis.permissions import _allowed_projects, _is_unscoped
@@ -72,7 +76,11 @@ def _approval_threshold() -> float:
 
 @frappe.whitelist()
 def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
-    """Return submitted Fuel Requests awaiting approval (status == Pending).
+    """Return Fuel Requests awaiting approval (the draft ``Pending`` queue).
+
+    Under the Fuel Request Workflow a request awaiting approval is a draft
+    (``Pending`` maps to docstatus 0); the ``Approve`` transition is what submits
+    it. The queue therefore lists ``status == Pending`` drafts (docstatus 0).
 
     Read-only. Permission-gated on ``Fuel Request`` / ``read``. Built from a
     single ORM query with the vehicle plate and driver name resolved via
@@ -112,7 +120,7 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
     if not unscoped and not projects:
         return []
 
-    filters: dict = {"status": "Pending", "docstatus": 1}
+    filters: dict = {"status": "Pending", "docstatus": 0}
     if not unscoped:
         filters["project"] = ["in", projects]
 
@@ -189,16 +197,19 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
 
 @frappe.whitelist(methods=["POST"])
 def approve_fuel_request(name: str) -> dict:
-    """Approve a Pending Fuel Request.
+    """Approve a Pending Fuel Request by driving the workflow ``Approve`` action.
 
-    Loads the real Fuel Request document, sets ``status = Approved`` and
-    ``approved_by = <current user>``, then ``doc.save()`` so native controller
-    behavior runs. No raw SQL.
+    Loads the real Fuel Request document and applies the native Fuel Request
+    Workflow ``Approve`` transition (Pending -> Approved, which submits the
+    request). The workflow enforces the role gate and the Segregation-of-Duties
+    condition (the approver cannot be the requester); the controller stamps
+    ``approved_by`` on entering Approved. No raw SQL.
 
     Permission: caller must have ``write`` on this specific Fuel Request. The
     per-document check (``doc=doc``) runs the project row-scope ``has_permission``
     hook, so a scoped supervisor cannot approve a request outside their permitted
-    projects even though they hold a blanket Fuel Request write grant.
+    projects even though they hold a blanket Fuel Request write grant. The
+    workflow transition then applies its own role + SoD gate on top.
 
     Args:
         name: Fuel Request docname.
@@ -216,26 +227,28 @@ def approve_fuel_request(name: str) -> dict:
             )
         )
 
-    doc.status = "Approved"
-    doc.approved_by = frappe.session.user
-    doc.save()
+    apply_workflow(doc, "Approve")
 
-    # The save above is captured natively by Version (track_changes) + auto-comment.
+    # The transition is captured natively by Version (track_changes) + the
+    # automatic Workflow comment; the controller stamps approved_by.
     return {"name": doc.name, "status": doc.status}
 
 
 @frappe.whitelist(methods=["POST"])
 def reject_fuel_request(name: str, reason: str | None = None) -> dict:
-    """Reject a Pending Fuel Request.
+    """Reject a Pending Fuel Request by driving the workflow ``Reject`` action.
 
-    Loads the real Fuel Request document, sets ``status = Failed`` and
-    ``approved_by = <current user>``, records the reason as a timeline comment,
-    then ``doc.save()``. No raw SQL.
+    Loads the real Fuel Request document and applies the native Fuel Request
+    Workflow ``Reject`` transition (Pending -> Failed). The workflow enforces the
+    role gate and the Segregation-of-Duties condition (the reviewer cannot be the
+    requester). The reason, if given, is recorded as a timeline comment. No raw
+    SQL.
 
     Permission: caller must have ``write`` on this specific Fuel Request. The
     per-document check (``doc=doc``) runs the project row-scope ``has_permission``
     hook, so a scoped supervisor cannot reject a request outside their permitted
-    projects even though they hold a blanket Fuel Request write grant.
+    projects even though they hold a blanket Fuel Request write grant. The
+    workflow transition then applies its own role + SoD gate on top.
 
     Args:
         name: Fuel Request docname.
@@ -254,12 +267,10 @@ def reject_fuel_request(name: str, reason: str | None = None) -> dict:
             )
         )
 
-    doc.status = "Failed"
-    doc.approved_by = frappe.session.user
-    doc.save()
+    apply_workflow(doc, "Reject")
 
     if reason:
         doc.add_comment("Comment", _("Rejected: {0}").format(reason))
 
-    # The save above is captured natively by Version (track_changes) + auto-comment.
+    # The transition is captured natively by Version (track_changes) + auto-comment.
     return {"name": doc.name, "status": doc.status}

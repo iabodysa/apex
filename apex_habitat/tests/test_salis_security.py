@@ -67,7 +67,11 @@ def _vehicle(plate, project=None):
 
 
 def _pending_fuel_request(project, vehicle):
-    """A submitted, Pending Fuel Request in the given project."""
+    """A Pending Fuel Request (a draft) in the given project.
+
+    Under the Fuel Request Workflow a request awaiting approval is a draft
+    (Pending maps to docstatus 0); the ``Approve`` transition is what submits it.
+    So the approval-queue fixture is a draft, not a submitted document."""
     doc = frappe.get_doc(
         {
             "doctype": "Fuel Request",
@@ -79,7 +83,6 @@ def _pending_fuel_request(project, vehicle):
         }
     )
     doc.insert(ignore_permissions=True)
-    doc.submit()
     frappe.db.commit()
     return doc
 
