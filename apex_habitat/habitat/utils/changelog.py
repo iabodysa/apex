@@ -7,6 +7,31 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.7.0 ----------------------------------------------------------------
+    {
+        "title": "Apex 1.7.0 — Transport Requests run on a real approval workflow, with sharper reports and sturdier engines",
+        "app_name": "apex_habitat",
+        "link": "/app/transport-request",
+        "creation": "2026-06-20 09:00:00",
+    },
+    {
+        "title": "v1.7.0: Transport Requests now move through a proper approval workflow — action buttons, the right approver at each step, and the post-approval steps actually work",
+        "app_name": "apex_habitat",
+        "link": "/app/transport-request",
+        "creation": "2026-06-20 09:01:00",
+    },
+    {
+        "title": "v1.7.0: Cost and fleet reports gain Project / Company / Cost Center filters and inline charts",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-20 09:02:00",
+    },
+    {
+        "title": "v1.7.0: More dependable fuel accrual, self-clearing operational alerts, and reliability improvements",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-20 09:03:00",
+    },
     # v1.6.1 ----------------------------------------------------------------
     {
         "title": "Apex 1.6.1 — a focused desk that opens to your Apex areas",
