@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.rate_limiter import rate_limit
 
 
 def get_context(context):
@@ -7,7 +8,7 @@ def get_context(context):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@frappe.rate_limit(key="frappe.request.remote_addr", limit=5, seconds=60)
+@rate_limit(key="frappe.request.remote_addr", limit=5, seconds=60)
 def submit_transport_request(
     from_location,
     to_location,
@@ -47,8 +48,15 @@ def submit_transport_request(
     elif count > 50:
         count = 50
 
+    # A guest QR submission is a lightweight ad-hoc request. Classify it as a
+    # Representatives "Administrative Trip" (destination = the stated drop-off) so
+    # it satisfies the service_line -> request_type guard; Operations re-classifies
+    # to a Workers shuttle (and fills Building/Project) during triage if needed.
     doc = frappe.get_doc({
         "doctype": "Transport Request",
+        "service_line": "Representatives",
+        "request_type": "Administrative Trip / Document Signing",
+        "destination": to_location,
         "requester_name": requester_name,
         "mobile_number": mobile_number,
         "site_token": site_token,

@@ -469,27 +469,42 @@ def weekly_occupancy_sync() -> None:
     Runs a full reconciliation pass to correct any counter drift caused by
     out-of-band data changes.
     """
-    # --- Room pass ---
-    # Paginate rooms at 500/batch; use frappe.db.set_value to avoid per-row .save()
-    start = 0
     batch_size = 500
+
+    # --- Room pass ---
+    # Pre-aggregate active occupants per room in one grouped query, then iterate
+    # rooms (carrying bed_capacity in the same read) instead of issuing one
+    # count + one get_value per room (N+1). Behaviour preserved.
+    active_by_room = {
+        r["room"]: int(r["n"] or 0)
+        for r in frappe.db.sql(
+            """
+            SELECT room, COUNT(*) AS n
+            FROM `tabAccommodation Assignment`
+            WHERE docstatus = 1
+              AND (check_out_date IS NULL OR check_out_date = '')
+              AND room IS NOT NULL
+            GROUP BY room
+            """,
+            as_dict=True,
+        )
+    }
+
+    start = 0
     while True:
-        room_names = frappe.get_all(
+        rooms = frappe.get_all(
             "Accommodation Room",
-            pluck="name",
+            fields=["name", "bed_capacity"],
             limit_start=start,
             limit_page_length=batch_size,
         )
-        if not room_names:
+        if not rooms:
             break
 
-        for room_name in room_names:
+        for room in rooms:
             try:
-                active = frappe.db.count(
-                    "Accommodation Assignment",
-                    {"room": room_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
-                )
-                capacity = frappe.db.get_value("Accommodation Room", room_name, "bed_capacity") or 0
+                active = active_by_room.get(room.name, 0)
+                capacity = room.bed_capacity or 0
                 if active <= 0:
                     new_status = "Available"
                 elif capacity and active >= capacity:
@@ -499,7 +514,7 @@ def weekly_occupancy_sync() -> None:
 
                 frappe.db.set_value(
                     "Accommodation Room",
-                    room_name,
+                    room.name,
                     {
                         "current_occupancy": active,
                         "status": new_status,
@@ -510,7 +525,7 @@ def weekly_occupancy_sync() -> None:
                 frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
                 frappe.log_error(
                     message=frappe.get_traceback(),
-                    title=f"Occupancy sync failed for room {room_name}"[:140],
+                    title=f"Occupancy sync failed for room {room.name}"[:140],
                 )
 
         start += batch_size
@@ -519,39 +534,61 @@ def weekly_occupancy_sync() -> None:
 
     # --- Building pass ---
     # Guard: skip buildings with no rooms to avoid division by zero in
-    # occupancy_percent calculation.
+    # occupancy_percent calculation. Room counts and active occupants are
+    # pre-aggregated per building in one grouped query each, and capacity is
+    # carried in the building read, instead of two counts + one get_value per
+    # building (N+1). Behaviour preserved.
+    rooms_per_building = {
+        r["building"]: int(r["n"] or 0)
+        for r in frappe.db.sql(
+            """
+            SELECT building, COUNT(*) AS n
+            FROM `tabAccommodation Room`
+            WHERE building IS NOT NULL
+            GROUP BY building
+            """,
+            as_dict=True,
+        )
+    }
+    active_by_building = {
+        r["building"]: int(r["n"] or 0)
+        for r in frappe.db.sql(
+            """
+            SELECT building, COUNT(*) AS n
+            FROM `tabAccommodation Assignment`
+            WHERE docstatus = 1
+              AND (check_out_date IS NULL OR check_out_date = '')
+              AND building IS NOT NULL
+            GROUP BY building
+            """,
+            as_dict=True,
+        )
+    }
+
     start = 0
     while True:
-        building_names = frappe.get_all(
+        buildings = frappe.get_all(
             "Accommodation Building",
-            pluck="name",
+            fields=["name", "total_capacity"],
             limit_start=start,
             limit_page_length=batch_size,
         )
-        if not building_names:
+        if not buildings:
             break
 
-        for building_name in building_names:
+        for building in buildings:
             try:
-                total_rooms = frappe.db.count(
-                    "Accommodation Room",
-                    {"building": building_name},
-                )
+                total_rooms = rooms_per_building.get(building.name, 0)
                 if not total_rooms:
                     # Building has no rooms — skip to avoid division by zero.
                     continue
 
-                active = frappe.db.count(
-                    "Accommodation Assignment",
-                    {"building": building_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
-                )
-                total_capacity = (
-                    frappe.db.get_value("Accommodation Building", building_name, "total_capacity") or 0
-                )
+                active = active_by_building.get(building.name, 0)
+                total_capacity = building.total_capacity or 0
                 occupancy_pct = (active / total_capacity * 100) if total_capacity else 0.0
                 frappe.db.set_value(
                     "Accommodation Building",
-                    building_name,
+                    building.name,
                     {
                         "current_occupants": active,
                         "occupancy_percent": round(occupancy_pct, 2),
@@ -562,7 +599,7 @@ def weekly_occupancy_sync() -> None:
                 frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
                 frappe.log_error(
                     message=frappe.get_traceback(),
-                    title=f"Occupancy sync failed for building {building_name}"[:140],
+                    title=f"Occupancy sync failed for building {building.name}"[:140],
                 )
 
         start += batch_size
@@ -573,10 +610,72 @@ def weekly_occupancy_sync() -> None:
 def daily_occupancy_snapshot() -> None:
     """Write a daily point-in-time occupancy row per building to the read-only
     Accommodation Occupancy Snapshot engine, so occupancy history/trends survive
-    (the live occupancy_percent field is overwritten and keeps no history)."""
+    (the live occupancy_percent field is overwritten and keeps no history).
+
+    The per-building inputs (already-snapshotted set, room counts by status,
+    active occupants, capacity, cost-per-capacity) are pre-aggregated once via a
+    few grouped queries and looked up in memory, instead of issuing ~7
+    ``count``/``exists``/``get_value`` calls per building (N+1). Behaviour and the
+    one-row-per-building-per-day idempotency guard are preserved."""
     from frappe.utils import today
 
     snapshot_date = today()
+    year = int(snapshot_date[:4])
+    days_in_year = 366 if calendar.isleap(year) else 365
+
+    # --- Pre-aggregate all per-building inputs in a handful of grouped reads ---
+    # Buildings already snapshotted today (idempotency set).
+    already = {
+        r["building"]
+        for r in frappe.get_all(
+            "Accommodation Occupancy Snapshot",
+            filters={"snapshot_date": snapshot_date},
+            fields=["building"],
+        )
+        if r["building"]
+    }
+
+    # Room counts per building, broken down by status, in one grouped query.
+    # rooms_by_building[building] = {"_total": n, "Full": n, "Partially Occupied": n, "Available": n}
+    rooms_by_building: dict = {}
+    for r in frappe.db.sql(
+        """
+        SELECT building, status, COUNT(*) AS n
+        FROM `tabAccommodation Room`
+        WHERE building IS NOT NULL
+        GROUP BY building, status
+        """,
+        as_dict=True,
+    ):
+        bucket = rooms_by_building.setdefault(r["building"], {"_total": 0})
+        bucket[r["status"]] = int(r["n"] or 0)
+        bucket["_total"] += int(r["n"] or 0)
+
+    # Active occupants per building (submitted assignments, not checked out).
+    active_by_building = {
+        r["building"]: int(r["n"] or 0)
+        for r in frappe.db.sql(
+            """
+            SELECT building, COUNT(*) AS n
+            FROM `tabAccommodation Assignment`
+            WHERE docstatus = 1
+              AND (check_out_date IS NULL OR check_out_date = '')
+              AND building IS NOT NULL
+            GROUP BY building
+            """,
+            as_dict=True,
+        )
+    }
+
+    # Building capacity + annual cost per capacity (one read instead of 2/building).
+    building_meta = {
+        b["name"]: b
+        for b in frappe.get_all(
+            "Accommodation Building",
+            fields=["name", "total_capacity", "annual_cost_per_capacity_sar"],
+        )
+    }
+
     start = 0
     batch_size = 500
     while True:
@@ -588,27 +687,21 @@ def daily_occupancy_snapshot() -> None:
             break
         for building_name in building_names:
             try:
-                if frappe.db.exists(
-                    "Accommodation Occupancy Snapshot",
-                    {"building": building_name, "snapshot_date": snapshot_date},
-                ):
+                if building_name in already:
                     continue
-                total_rooms = frappe.db.count("Accommodation Room", {"building": building_name})
+                room_bucket = rooms_by_building.get(building_name)
+                total_rooms = room_bucket["_total"] if room_bucket else 0
                 if not total_rooms:
                     continue
-                active = frappe.db.count(
-                    "Accommodation Assignment",
-                    {"building": building_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
-                )
-                total_capacity = frappe.db.get_value("Accommodation Building", building_name, "total_capacity") or 0
+                active = active_by_building.get(building_name, 0)
+                meta = building_meta.get(building_name) or {}
+                total_capacity = meta.get("total_capacity") or 0
                 occ_pct = round(active / total_capacity * 100, 2) if total_capacity else 0.0
                 available_capacity = max(total_capacity - active, 0)
-                
-                annual_cost_per_capacity = frappe.db.get_value("Accommodation Building", building_name, "annual_cost_per_capacity_sar") or 0.0
-                year = int(snapshot_date[:4])
-                days_in_year = 366 if calendar.isleap(year) else 365
+
+                annual_cost_per_capacity = meta.get("annual_cost_per_capacity_sar") or 0.0
                 cost_bleeding = round(available_capacity * (annual_cost_per_capacity / days_in_year), 2)
-                
+
                 frappe.get_doc({
                     "doctype": "Accommodation Occupancy Snapshot",
                     "snapshot_date": snapshot_date,
@@ -618,9 +711,9 @@ def daily_occupancy_snapshot() -> None:
                     "occupancy_percent": occ_pct,
                     "available_capacity": available_capacity,
                     "cost_bleeding": cost_bleeding,
-                    "full_rooms": frappe.db.count("Accommodation Room", {"building": building_name, "status": "Full"}),
-                    "partial_rooms": frappe.db.count("Accommodation Room", {"building": building_name, "status": "Partially Occupied"}),
-                    "available_rooms": frappe.db.count("Accommodation Room", {"building": building_name, "status": "Available"}),
+                    "full_rooms": room_bucket.get("Full", 0),
+                    "partial_rooms": room_bucket.get("Partially Occupied", 0),
+                    "available_rooms": room_bucket.get("Available", 0),
                 }).insert(ignore_permissions=True)  # audit-ok
             except Exception:
                 frappe.db.rollback()

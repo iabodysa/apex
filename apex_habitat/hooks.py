@@ -193,6 +193,7 @@ scheduler_events = {
         "apex_habitat.salis.tasks.overdue_fuel_request_watch",
         "apex_habitat.salis.tasks.missing_attendance_watch",
         "apex_habitat.salis.tasks.vehicle_compliance_expiry_watch",
+        "apex_habitat.salis.tasks.reconcile_operations_alerts",
         "apex_habitat.salis.fuel_engine.accrue_fuel_consumption",
         "apex_habitat.salis.rental_engine.daily_rental_accrual",
     ],
@@ -287,6 +288,11 @@ after_install = [
     # v1_x patch (single source of truth), so replaying them is safe.
     "apex_habitat.salis.email_templates_seed.seed_salis_email_templates",
     "apex_habitat.salis.auto_email_reports_seed.seed_salis_auto_email_reports",
+    # Salis native Workflow Spine — Transport Request (first-mover). Frappe does
+    # not auto-import a Workflow from a module folder, so the shipped JSON is
+    # applied by this idempotent, existence-guarded seed (also run on
+    # after_migrate and from the v1_x patch — single source of truth).
+    "apex_habitat.salis.workflow_seed.seed_salis_workflows",
 ]
 # Dashboards seed after migrate (when their charts/number cards already exist).
 after_migrate = [
@@ -306,6 +312,10 @@ after_migrate = [
     # migrate (idempotent + existence-guarded; created only if absent).
     "apex_habitat.salis.email_templates_seed.seed_salis_email_templates",
     "apex_habitat.salis.auto_email_reports_seed.seed_salis_auto_email_reports",
+    # Salis native Workflow Spine — keep already-installed sites in sync on
+    # migrate (idempotent + existence-guarded; created only if absent, never
+    # clobbers an on-site-tuned Workflow).
+    "apex_habitat.salis.workflow_seed.seed_salis_workflows",
 ]
 
 # Frappe What's New feed — appears in desk notification area, not as a popup

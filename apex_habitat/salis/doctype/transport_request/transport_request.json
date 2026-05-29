@@ -23,6 +23,7 @@
   "is_cross_region",
   "destination",
   "trips_this_month",
+  "needs_operations",
   "sec_schedule",
   "from_location",
   "to_location",
@@ -148,6 +149,14 @@
    "read_only": 1
   },
   {
+   "description": "Server-derived Delegation-of-Authority flag: when set, only an Operations-tier authorization is allowed. Read by the workflow transition condition; cannot be hand-set.",
+   "fieldname": "needs_operations",
+   "fieldtype": "Check",
+   "label": "Needs Operations Authorization",
+   "read_only": 1,
+   "allow_on_submit": 1
+  },
+  {
    "fieldname": "from_location",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -176,13 +185,16 @@
    "label": "Purpose"
   },
   {
+   "allow_on_submit": 1,
    "default": "New",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "New\nValidated\nApproved\nScheduled\nFulfilled\nRejected\nCancelled"
+   "options": "New\nValidated\nApproved\nScheduled\nFulfilled\nRejected\nCancelled",
+   "read_only": 1,
+   "no_copy": 1
   },
   {
    "fieldname": "route_plan",
@@ -292,6 +304,7 @@
    "create": 1,
    "read": 1,
    "role": "Fleet Supervisor",
+   "submit": 1,
    "write": 1
   },
   {

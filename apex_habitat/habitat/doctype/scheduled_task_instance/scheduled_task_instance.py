@@ -11,6 +11,30 @@ class ScheduledTaskInstance(Document):
     pass
 
 
+def on_doctype_update():
+    """Hard idempotency backstop: a composite UNIQUE index on ``(template,
+    due_date, docstatus)`` so ``habitat.tasks.daily_scheduled_task_instance_generator``
+    cannot create two instances for the same template+period even if its
+    check-then-insert is bypassed by a race.
+
+    Column choice: the generator's guard is
+    ``exists({template, due_date, docstatus != 2})`` — i.e. it treats Draft(0)
+    and Submitted(1) as the blocking set but lets a new instance be created after
+    the prior one is Cancelled(2). ``docstatus`` is therefore part of the key:
+    including it keeps a cancelled instance (and an amendment, which reuses the
+    template+due_date of its cancelled original) from colliding with a fresh
+    Open instance, while still blocking the duplicate Drafts the generator could
+    otherwise race-insert (it only ever inserts at docstatus 0). Guarded so
+    pre-existing duplicate data logs rather than aborting migrate."""
+    from apex_habitat.habitat.utils.ledger_index import add_unique_guarded
+
+    add_unique_guarded(
+        "Scheduled Task Instance",
+        ["template", "due_date", "docstatus"],
+        constraint_name="unique_sti_template_due_status",
+    )
+
+
 def validate(doc, method=None):
     if not doc.due_date:
         frappe.throw(_("Due Date is required."))

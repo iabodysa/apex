@@ -160,27 +160,56 @@ def accrue_fuel_consumption() -> None:
         start += BATCH_SIZE
 
     # --- Done Fuel Requests --------------------------------------------------
-    start = 0
+    # Accrual is driven off the COMPLETION event, not ``request_date``: a request
+    # created earlier that only flips to "Done" today (or any later day) would be
+    # missed by a ``request_date in [yesterday, today]`` window and its litres
+    # would silently vanish. Instead we select every submitted Done request that
+    # has not yet been ledgered (``ledgered = 0``), regardless of request_date,
+    # and stamp ``ledgered = 1`` once its row is posted. Idempotent on three
+    # levels: the ``ledgered`` flag, the ``(source_type, source_name)``
+    # check-then-insert guard, and the DB-level UNIQUE index on the ledger.
+    #
+    # Pagination note: every successfully-handled row leaves the ``ledgered = 0``
+    # set, so the set shrinks as we drain it. We therefore re-query from offset 0
+    # rather than advancing ``limit_start`` (which would skip un-handled rows once
+    # earlier rows are stamped). A row that cannot be advanced this run — a
+    # transient insert failure that rolls back and keeps ``ledgered = 0`` — would
+    # otherwise loop forever, so we stop once a batch makes zero forward progress;
+    # such rows are retried on the next scheduled run.
     while True:
         requests = frappe.get_all(
             "Fuel Request",
             filters={
                 "docstatus": 1,
                 "status": "Done",
-                "request_date": ["between", [yesterday_str, today_str]],
+                "ledgered": 0,
             },
             fields=["name", "vehicle", "driver", "request_date", "requested_litres", "amount"],
-            limit_start=start,
+            order_by="modified asc",
             limit_page_length=BATCH_SIZE,
         )
         if not requests:
             break
 
+        progressed = False
         for req in requests:
             try:
                 if not req.vehicle:
+                    # Terminally un-ledgerable (a ledger row requires a vehicle);
+                    # stamp it so it leaves the scan set instead of looping.
+                    frappe.db.set_value(
+                        "Fuel Request", req.name, "ledgered", 1, update_modified=False
+                    )
+                    progressed = True
                     continue
                 if _ledger_exists("Fuel Request", req.name):
+                    # Already ledgered by a prior run that did not get to stamp
+                    # the flag (e.g. crash between insert and set_value); reconcile
+                    # the flag so this row is not re-scanned every day.
+                    frappe.db.set_value(
+                        "Fuel Request", req.name, "ledgered", 1, update_modified=False
+                    )
+                    progressed = True
                     continue
                 _insert_ledger_row(
                     vehicle=req.vehicle,
@@ -192,6 +221,10 @@ def accrue_fuel_consumption() -> None:
                     source_name=req.name,
                     logged_at=now_datetime(),
                 )
+                frappe.db.set_value(
+                    "Fuel Request", req.name, "ledgered", 1, update_modified=False
+                )
+                progressed = True
             except Exception:
                 frappe.db.rollback()
                 frappe.log_error(
@@ -199,7 +232,10 @@ def accrue_fuel_consumption() -> None:
                     title=f"Fuel accrual failed for Request {req.name}"[:140],
                 )
 
-        start += BATCH_SIZE
+        if not progressed:
+            # No row in this batch could be drained (all transiently failing);
+            # avoid an infinite loop — the next scheduled run will retry them.
+            break
 
     logger.info("accrue_fuel_consumption: fuel consumption ledger updated.")
 

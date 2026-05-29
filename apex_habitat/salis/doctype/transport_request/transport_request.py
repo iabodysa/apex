@@ -1,4 +1,17 @@
-"""Transport Request controller."""
+"""Transport Request controller.
+
+Transitions are owned by the native **Transport Request Workflow** (see
+``salis/workflow/transport_request_workflow/``), not by this controller. The
+workflow enforces the role per transition, the Segregation-of-Duties gate
+(approver != requester) and the Delegation-of-Authority tier escalation via its
+transition ``condition``s.
+
+This controller keeps only the *data* guards: the service_line -> request_type
+pairing, the per-request-type required fields/evidence, and the **server-side
+DoA derivation** that sets ``needs_operations`` so the workflow's tier gate
+cannot be under-stated by a client. ``worker_count`` and ``trips_this_month``
+are likewise derived server-side, never trusted from the form.
+"""
 
 from __future__ import annotations
 
@@ -48,6 +61,8 @@ class TransportRequest(Document):
             self.status = "New"
 
     def validate(self):
+        # The Select still carries the known states for filtering/colour, but the
+        # workflow owns *transitions* — this only rejects an unknown value.
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
@@ -67,6 +82,10 @@ class TransportRequest(Document):
         # Trips-this-month is server-derived (not a trusted manual input), so the
         # >5-trips/month DoA tier gate cannot be under-stated.
         self._derive_trips_this_month()
+
+        # The DoA tier flag is derived from the (server-set) scope figures so the
+        # workflow's tier condition cannot be circumvented by a crafted payload.
+        self._derive_needs_operations()
 
         if self.request_type == "Accommodation to Project Shuttle":
             if not self.accommodation_building or not self.project:
@@ -118,9 +137,15 @@ class TransportRequest(Document):
         # +1 to include the request currently being validated/submitted.
         self.trips_this_month = len(existing) + 1
 
-    def before_submit(self):
-        from apex_habitat.salis.salis_lib import ensure_approval
+    def _derive_needs_operations(self):
+        """Server-side Delegation-of-Authority derivation.
 
+        Sets ``needs_operations`` when the request's scope crosses the tier
+        threshold so the workflow's "Authorize (Regional)" transition is gated
+        off (only "Authorize (Operations)", allowed for the Operations tier,
+        remains). Derived here — never trusted from the client — so the gate
+        cannot be under-stated. Mirrors the previous before_submit tier logic.
+        """
         worker_count = self.worker_count or 0
         trips = self.trips_this_month or 0
 
@@ -132,13 +157,12 @@ class TransportRequest(Document):
         if not ops_threshold:
             ops_threshold = 20
 
-        needs_operations = (
+        self.needs_operations = 1 if (
             (self.request_type == "Inter-City Relocation" and worker_count > ops_threshold)
             or (self.request_type == "Administrative Trip / Document Signing" and trips > 5)
             or (self.request_type == "Accommodation to Project Shuttle" and self.is_cross_region)
-        )
-        required_tier = "Operations" if needs_operations else "Regional"
+        ) else 0
 
-        ensure_approval("Transport Request", self.name, required_tier=required_tier)
-
-    # Submit/cancel are recorded natively (Version track_changes + auto-comment).
+    # Transitions, the SoD gate, and the DoA tier gate are enforced by the native
+    # Transport Request Workflow. Submit/cancel are recorded natively
+    # (Version track_changes + the automatic Workflow comment).

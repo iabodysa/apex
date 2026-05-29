@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.rate_limiter import rate_limit
 
 
 def get_context(context):
@@ -7,7 +8,7 @@ def get_context(context):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-@frappe.rate_limit(key="frappe.request.remote_addr", limit=5, seconds=60)
+@rate_limit(key="frappe.request.remote_addr", limit=5, seconds=60)
 def submit_resident_request(
     location_token,
     request_type,

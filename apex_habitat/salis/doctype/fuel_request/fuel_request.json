@@ -24,6 +24,7 @@
   "amount",
   "fuel_request_sec_system",
   "quota_applied",
+  "ledgered",
   "amended_from"
  ],
  "fields": [
@@ -147,6 +148,16 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Quota Applied",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Set by the fuel accrual engine once this request's litres have been posted to the Fuel Consumption Ledger. Decouples accrual from the request date so a request completed later is still ledgered, and guards against double-posting.",
+   "fieldname": "ledgered",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Ledgered",
    "no_copy": 1,
    "read_only": 1
   },

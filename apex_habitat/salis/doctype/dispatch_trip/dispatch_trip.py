@@ -7,10 +7,12 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now_datetime
 
-from apex_habitat.salis.salis_lib import add_timeline_note, lock_vehicle
-
-# Transport Request statuses that are terminal and must not be reopened.
-_TR_TERMINAL = {"Fulfilled", "Cancelled"}
+from apex_habitat.salis.salis_lib import (
+    add_timeline_note,
+    drive_transport_request,
+    lock_vehicle,
+    revert_transport_request,
+)
 
 # Allowed forward status transitions. Cancellation is allowed from any state.
 _ALLOWED_TRANSITIONS = {
@@ -136,18 +138,14 @@ class DispatchTrip(Document):
             self._post_fulfilment_ledger()
 
     def _fulfil_transport_request(self):
-        """Mark the linked Transport Request as Fulfilled and stamp the assignment
-        outcome back onto it. Terminal requests are left untouched."""
-        status = frappe.db.get_value(
-            "Transport Request", self.transport_request, "status"
-        )
-        if status in _TR_TERMINAL:
-            return
-        frappe.db.set_value(
-            "Transport Request",
+        """Drive the linked Transport Request to Fulfilled (via the native workflow
+        "Confirm Fulfilment" transition) and stamp the assignment outcome back onto
+        it. Terminal requests are left untouched by the drive helper."""
+        drive_transport_request(
             self.transport_request,
-            {
-                "status": "Fulfilled",
+            action="Confirm Fulfilment",
+            target_state="Fulfilled",
+            extra_fields={
                 "fulfilled_on": now_datetime(),
                 "assigned_vehicle": self.vehicle,
                 "assigned_driver": self.driver,
@@ -195,24 +193,21 @@ class DispatchTrip(Document):
         Trip Fulfilment Ledger. Odometer is monotonic and is intentionally not
         rolled back."""
         if self.transport_request:
-            tr = frappe.db.get_value(
-                "Transport Request",
+            # Workflows are forward-only; a cancelled fulfilment is reverted via a
+            # guarded system reversal (Fulfilled -> Scheduled), consistent with the
+            # workflow's state -> docstatus map.
+            revert_transport_request(
                 self.transport_request,
-                ["status", "dispatch_trip"],
-                as_dict=True,
+                from_state="Fulfilled",
+                to_state="Scheduled",
+                dispatch_trip=self.name,
+                clear_fields=[
+                    "fulfilled_on",
+                    "assigned_vehicle",
+                    "assigned_driver",
+                    "dispatch_trip",
+                ],
             )
-            if tr and tr.status == "Fulfilled" and tr.dispatch_trip == self.name:
-                frappe.db.set_value(
-                    "Transport Request",
-                    self.transport_request,
-                    {
-                        "status": "Scheduled",
-                        "fulfilled_on": None,
-                        "assigned_vehicle": None,
-                        "assigned_driver": None,
-                        "dispatch_trip": None,
-                    },
-                )
         for row in frappe.get_all(
             "Trip Fulfilment Ledger",
             filters={"dispatch_trip": self.name},

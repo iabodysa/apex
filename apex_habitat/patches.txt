@@ -105,3 +105,11 @@ apex_habitat.patches.v1_x.move_settings_to_apex_core
 # existence-guarded, skips already-hidden. Never edits erpnext/frappe core; migrate
 # preserves is_hidden (frappe import_file ignore_values), so it persists across upgrades.
 apex_habitat.patches.v1_x.hide_stock_erpnext_workspaces
+
+# v1.x — Salis native Workflow Spine (Transport Request, first-mover)
+# PERMANENT (keep, do NOT prune): seeds the Transport Request Workflow + its
+# Workflow State / Workflow Action Master masters via the idempotent,
+# existence-guarded salis/workflow_seed.py (single source of truth, also called
+# from after_install/after_migrate). Frappe does not auto-import a Workflow from a
+# module folder (not in IMPORTABLE_DOCTYPES), so this seed is the install path.
+apex_habitat.patches.v1_x.seed_salis_workflows
