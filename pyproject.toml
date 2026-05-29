@@ -3,7 +3,7 @@ name = "apex_habitat"
 version = "1.14.2"
 description = "Apex Habitat custom application for Frappe Framework v15."
 authors = [
-    { name = "AFMCO Support Services", email = "afm@afmcoltd.com" }
+    { name = "AFMCO Support Services Co. Ltd", email = "afm@afmcoltd.com" }
 ]
 requires-python = ">=3.10"
 readme = "README.md"

@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO Support Services
+# Copyright (c) 2026, AFMCO Support Services Co. Ltd
 # Project-based row scoping for Salis transactional DocTypes.
 #
 # By default every role acts across all projects.

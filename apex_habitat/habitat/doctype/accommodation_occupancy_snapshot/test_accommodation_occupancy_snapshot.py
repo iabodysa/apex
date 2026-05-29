@@ -1,4 +1,4 @@
-# Copyright (c) 2026, AFMCO Support Services and Contributors
+# Copyright (c) 2026, AFMCO Support Services Co. Ltd and Contributors
 # See license.txt
 
 # import frappe
