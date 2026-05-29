@@ -27,7 +27,7 @@ def execute():
             "Salis Activity Log",
             force=1,
             ignore_missing=True,
-            ignore_permissions=True,
+            ignore_permissions=True,  # audit-ok: system-managed schema cleanup patch
         )
         # Drop a stray table left behind if the DocType record was already gone.
         if "tabSalis Activity Log" in frappe.db.get_tables():

@@ -106,7 +106,7 @@ def execute():
                 "Role",
                 old_role,
                 ignore_missing=True,
-                ignore_permissions=True,
+                ignore_permissions=True,  # audit-ok: system-managed role migration patch
                 force=True,
             )
             frappe.db.commit()
