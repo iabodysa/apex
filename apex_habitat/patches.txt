@@ -96,3 +96,12 @@ apex_habitat.patches.v1_x.cleanup_renamed_salis_workspaces
 # "Apex Core" by updating the persisted DocType.module value. Names are unchanged,
 # so tables and stored Single values are preserved. No-op on fresh installs.
 apex_habitat.patches.v1_x.move_settings_to_apex_core
+
+# v1.x — foreground Apex workspaces by hiding the stock ERPNext/HRMS public ones
+# ONE-TIME (prune-eligible once every deployed site has run it): sets is_hidden=1
+# on the explicit, non-Apex stock workspaces (Accounting/Selling/Buying/Stock/
+# Assets/Manufacturing/Quality/CRM/Support/Projects/HR/Payroll areas) so the desk
+# sidebar foregrounds the Habitat/Salis/Core workspaces. Reversible (set is_hidden=0),
+# existence-guarded, skips already-hidden. Never edits erpnext/frappe core; migrate
+# preserves is_hidden (frappe import_file ignore_values), so it persists across upgrades.
+apex_habitat.patches.v1_x.hide_stock_erpnext_workspaces
