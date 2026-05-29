@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "creation": "2026-05-30 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "worker",
+  "worker_name",
+  "is_unregistered",
+  "contractor_id",
+  "stop_name",
+  "accommodation_building",
+  "boarded_at",
+  "method"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "description": "Registered worker (Employee) who boarded. Leave blank and tick 'Unregistered' for a contractor/temp hire not on the request manifest.",
+   "fieldname": "worker",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Worker",
+   "options": "Employee"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "worker.employee_name",
+   "fieldname": "worker_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Worker Name"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "description": "Tick for a contractor/temp hire not registered on the trip's worker manifest.",
+   "fieldname": "is_unregistered",
+   "fieldtype": "Check",
+   "label": "Unregistered"
+  },
+  {
+   "columns": 2,
+   "depends_on": "is_unregistered",
+   "description": "Identifier (e.g. Iqama/contractor id) for an unregistered worker.",
+   "fieldname": "contractor_id",
+   "fieldtype": "Data",
+   "label": "Contractor / Temp ID"
+  },
+  {
+   "columns": 2,
+   "description": "The route stop where this worker boarded (mirrors the Route Stop name on the trip's route).",
+   "fieldname": "stop_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Stop",
+   "options": ""
+  },
+  {
+   "columns": 2,
+   "description": "The housing pickup (Habitat) for this boarding, when the stop is a worker accommodation. The Habitat-Salis bridge.",
+   "fieldname": "accommodation_building",
+   "fieldtype": "Link",
+   "label": "Pickup Building",
+   "options": "Accommodation Building"
+  },
+  {
+   "columns": 2,
+   "fieldname": "boarded_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Boarded At"
+  },
+  {
+   "columns": 1,
+   "default": "Manual",
+   "fieldname": "method",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Method",
+   "options": "QR\nManual"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-30 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Trip Boarding Event",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

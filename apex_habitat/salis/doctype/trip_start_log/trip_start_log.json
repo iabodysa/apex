@@ -1,0 +1,243 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-30 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "sec_trip",
+  "dispatch_trip",
+  "transport_request",
+  "route_plan",
+  "col_trip",
+  "driver",
+  "vehicle",
+  "trip_date",
+  "sec_execution",
+  "status",
+  "start_datetime",
+  "end_datetime",
+  "col_execution",
+  "expected_count",
+  "boarded_count",
+  "sec_boarding",
+  "boarding_events",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "TSL-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "TSL-.######",
+   "reqd": 1
+  },
+  {"fieldname": "sec_trip", "fieldtype": "Section Break", "label": "Trip"},
+  {"fieldname": "col_trip", "fieldtype": "Column Break"},
+  {"fieldname": "sec_execution", "fieldtype": "Section Break", "label": "Execution"},
+  {"fieldname": "col_execution", "fieldtype": "Column Break"},
+  {"fieldname": "sec_boarding", "fieldtype": "Section Break", "label": "Boarding Events"},
+  {
+   "description": "The Dispatch Trip being executed. Its linked Transport Request carries the worker manifest this log records boarding against.",
+   "fieldname": "dispatch_trip",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Dispatch Trip",
+   "options": "Dispatch Trip",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "dispatch_trip.transport_request",
+   "fieldname": "transport_request",
+   "fieldtype": "Link",
+   "label": "Transport Request",
+   "options": "Transport Request",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "dispatch_trip.route_plan",
+   "fieldname": "route_plan",
+   "fieldtype": "Link",
+   "label": "Route Plan",
+   "options": "Route Plan",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "dispatch_trip.driver",
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "dispatch_trip.vehicle",
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "dispatch_trip.trip_date",
+   "fieldname": "trip_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Trip Date",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Started",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Started\nCompleted\nCancelled",
+   "no_copy": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "start_datetime",
+   "fieldtype": "Datetime",
+   "label": "Start Datetime"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "end_datetime",
+   "fieldtype": "Datetime",
+   "label": "End Datetime"
+  },
+  {
+   "description": "Expected boarding count, derived from the linked Transport Request's registered worker count.",
+   "fieldname": "expected_count",
+   "fieldtype": "Int",
+   "label": "Expected Count",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Boarded count, derived from the boarding events below (never hand-set).",
+   "fieldname": "boarded_count",
+   "fieldtype": "Int",
+   "label": "Boarded Count",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "boarding_events",
+   "fieldtype": "Table",
+   "label": "Boarding Events",
+   "options": "Trip Boarding Event"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Trip Start Log",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-30 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Trip Start Log",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Fleet Project Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Fleet Supervisor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "if_owner": 1,
+   "read": 1,
+   "role": "Driver",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Driver"
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Orange",
+   "title": "Started"
+  },
+  {
+   "color": "Green",
+   "title": "Completed"
+  },
+  {
+   "color": "Red",
+   "title": "Cancelled"
+  }
+ ],
+ "track_changes": 1
+}

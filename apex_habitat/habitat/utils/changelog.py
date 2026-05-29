@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.18.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.18.0 — worker-movement foundations: housing-linked pickups and trip boarding logs",
+        "app_name": "apex_habitat",
+        "link": "/app/trip-start-log",
+        "creation": "2026-07-04 09:00:00",
+    },
+    {
+        "title": "v1.18.0: A route stop can now be linked to a worker's housing building, and a new Trip Start Log records who boarded where - by QR or manual check-in, including unregistered contractors",
+        "app_name": "apex_habitat",
+        "link": "/app/trip-start-log",
+        "creation": "2026-07-04 09:01:00",
+    },
+    {
+        "title": "v1.18.0: A driver can fetch today's worker route, stops, housing pickups and manifest from one identity-scoped endpoint - the foundation for the worker-movement experience",
+        "app_name": "apex_habitat",
+        "link": "/app/trip-start-log",
+        "creation": "2026-07-04 09:02:00",
+    },
     # v1.17.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.17.0 — an integration kit so any frontend can use Apex as its backend",

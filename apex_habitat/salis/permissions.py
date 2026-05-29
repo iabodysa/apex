@@ -143,17 +143,43 @@ def dispatch_trip_query(user=None):
     )
 
 
+def trip_start_log_query(user=None):
+    """Trip Start Log has no own `project` field; it links to a Dispatch Trip,
+    which in turn links to a Route Plan carrying the project.
+
+    Scope it through that chain so the same project boundary applies as on every
+    other Salis transactional DocType. The fragment restricts the Trip Start Log
+    table's `route_plan` column (populated by fetch from the Dispatch Trip) to the
+    user's allowed projects via a subquery on `tabRoute Plan`.
+    """
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return ""
+
+    projects = _allowed_projects(user)
+    if not projects:
+        return "1=0"
+
+    escaped = ", ".join(frappe.db.escape(p) for p in projects)
+    return (
+        "`route_plan` in ("
+        "select `name` from `tabRoute Plan` where `project` in ({values})"
+        ")".format(values=escaped)
+    )
+
+
 # ---------------------------------------------------------------------------
 # Shared has_permission hook
 # ---------------------------------------------------------------------------
 
 def _doc_project(doc):
-    """Resolve the project a document belongs to, including Dispatch Trip."""
+    """Resolve the project a document belongs to, including the docs that reach
+    their project through a Route Plan (Dispatch Trip, Trip Start Log)."""
     project = getattr(doc, "project", None)
     if project:
         return project
 
-    if getattr(doc, "doctype", None) == "Dispatch Trip":
+    if getattr(doc, "doctype", None) in ("Dispatch Trip", "Trip Start Log"):
         route_plan = getattr(doc, "route_plan", None)
         if route_plan:
             return frappe.db.get_value("Route Plan", route_plan, "project")
