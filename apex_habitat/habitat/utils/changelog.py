@@ -7,6 +7,31 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.3.0 ----------------------------------------------------------------
+    {
+        "title": "Apex 1.3.0 — quicker Salis navigation, one-tap record creation and a leaner role setup",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-14 09:00:00",
+    },
+    {
+        "title": "v1.3.0: Jump straight to the area you work in — Workers Transport, Representatives Fleet, Fuel, Rentals, Compliance and Setup",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-14 09:01:00",
+    },
+    {
+        "title": "v1.3.0: Create as you go — new driver, vehicle, trip or fuel request right from each Salis area",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-14 09:02:00",
+    },
+    {
+        "title": "v1.3.0: A simpler set of roles that fits a focused team, plus security & reliability improvements",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-14 09:03:00",
+    },
     # v1.2.0 ----------------------------------------------------------------
     {
         "title": "Apex 1.2.0 — Salis gets a live dispatch board, deeper dashboards, printable documents and smarter alerts",
