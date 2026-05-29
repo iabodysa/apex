@@ -39,6 +39,19 @@ def _ensure_unlinked_user(email):
     return email
 
 
+def _ensure_staff_user(email, role):
+    """A logged-in Salis *staff* user (holds a desk role) with NO Salis Driver.
+    Opening /driver must give them a useful staff payload, never a dead-end."""
+    if not frappe.db.exists("User", email):
+        u = frappe.get_doc({"doctype": "User", "email": email, "first_name": "Staff",
+                            "send_welcome_email": 0})
+        u.insert(ignore_permissions=True)
+    user = frappe.get_doc("User", email)
+    if role not in {r.role for r in user.roles}:
+        user.add_roles(role)
+    return email
+
+
 class TestDriverPortalScope(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -57,7 +70,47 @@ class TestDriverPortalScope(unittest.TestCase):
         Salis Driver returns a friendly payload and does NOT raise."""
         frappe.set_user(self.unlinked_user)
         ctx = driver_portal.get_driver_context()
-        self.assertEqual(ctx, {"enabled": True, "linked": False, "driver": None})
+        self.assertTrue(ctx["enabled"])
+        self.assertFalse(ctx["linked"])
+        self.assertIsNone(ctx["driver"])
+
+    def test_context_for_unlinked_nonstaff_has_no_links(self):
+        """A plain logged-in user with no Salis role and no driver gets a friendly
+        non-staff payload: not staff, no desk links, and it never raises."""
+        frappe.set_user(self.unlinked_user)
+        ctx = driver_portal.get_driver_context()
+        self.assertFalse(ctx["is_staff"])
+        self.assertEqual(ctx["links"], [])
+        self.assertIn("full_name", ctx)
+
+    def test_context_for_unlinked_staff_returns_links(self):
+        """Expect-the-worst: a Fleet Supervisor with NO Salis Driver opens /driver.
+        The bootstrap must NOT raise and must return a useful staff payload —
+        is_staff:true plus permission-filtered desk links — so the screen is never
+        a dead-end."""
+        staff_user = _ensure_staff_user("drv_staff@example.com", "Fleet Supervisor")
+        frappe.set_user(staff_user)
+        ctx = driver_portal.get_driver_context()
+        self.assertTrue(ctx["enabled"])
+        self.assertFalse(ctx["linked"])
+        self.assertIsNone(ctx["driver"])
+        self.assertTrue(ctx["is_staff"])
+        labels = {link["label"] for link in ctx["links"]}
+        # A Fleet Supervisor sees the workspace and the Dispatch Board at minimum.
+        self.assertIn("Salis Workspace", labels)
+        self.assertIn("Dispatch Board", labels)
+        # Every link carries a label and an /app URL.
+        for link in ctx["links"]:
+            self.assertTrue(link["label"])
+            self.assertTrue(link["url"].startswith("/app/"))
+
+    def test_staff_links_exclude_unpermitted_destinations(self):
+        """A Fleet Supervisor is NOT a fuel approver, so the Fuel Approval Console
+        link must be withheld — links are permission-scoped, not a fixed list."""
+        staff_user = _ensure_staff_user("drv_staff@example.com", "Fleet Supervisor")
+        frappe.set_user(staff_user)
+        labels = {link["label"] for link in driver_portal.get_driver_context()["links"]}
+        self.assertNotIn("Fuel Approval Console", labels)
 
     def test_no_vehicle_blocks_fuel_request(self):
         frappe.set_user(self.user_b)

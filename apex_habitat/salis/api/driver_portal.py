@@ -5,6 +5,18 @@ only on that driver's records; the client never supplies the driver id."""
 import frappe
 from frappe import _
 
+# Salis "staff" roles — desk operators who manage the fleet rather than drive it.
+# An unlinked user holding any of these is greeted as staff (not an error) and is
+# offered the relevant desk links below. Kept in sync with the page/workspace role
+# lists; this is a *display* hint only — every action endpoint stays driver-scoped.
+STAFF_ROLES = (
+	"Fleet Manager",
+	"Fleet Project Manager",
+	"Fleet Supervisor",
+	"Finance Manager",
+	"System Manager",
+)
+
 
 def _portal_enabled():
 	return bool(frappe.db.get_single_value("Salis Settings", "enable_driver_portal"))
@@ -39,21 +51,93 @@ def _require_enabled():
 		frappe.throw(_("Driver portal is not enabled."), frappe.PermissionError)
 
 
+def _is_staff(user=None):
+	"""True when the user holds any Salis desk/oversight role (display hint)."""
+	user = user or frappe.session.user
+	if user == "Administrator":
+		return True
+	return bool(set(frappe.get_roles(user)) & set(STAFF_ROLES))
+
+
+def _staff_links(user=None):
+	"""Useful desk destinations for an unlinked staff user, filtered to what
+	they may actually open. Each entry carries an English label and an /app URL;
+	links are included only when the user holds a required role or has read
+	permission on the underlying DocType. The mobile portal action endpoints stay
+	driver-scoped — these are navigation hints to the full desk, nothing more."""
+	user = user or frappe.session.user
+	roles = set(frappe.get_roles(user))
+	links = []
+
+	# Salis workspace — any staff role.
+	if user == "Administrator" or roles & set(STAFF_ROLES):
+		links.append({"label": "Salis Workspace", "url": "/app/salis"})
+
+	# Dispatch Board — operations roles that run dispatch.
+	dispatch_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Fleet Supervisor"}
+	if user == "Administrator" or roles & dispatch_roles:
+		links.append({"label": "Dispatch Board", "url": "/app/salis-dispatch-board"})
+
+	# Transport Request list — gated by real DocType read permission.
+	if frappe.has_permission("Transport Request", "read", user=user):
+		links.append({"label": "Transport Requests", "url": "/app/transport-request"})
+
+	# Fuel Approval Console — finance/fleet approval roles.
+	fuel_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Finance Manager"}
+	if user == "Administrator" or roles & fuel_roles:
+		links.append({"label": "Fuel Approval Console", "url": "/app/fuel-approval-console"})
+
+	return links
+
+
+def _user_full_name(user=None):
+	user = user or frappe.session.user
+	return frappe.utils.get_fullname(user) or user
+
+
 @frappe.whitelist()
 def get_driver_context():
 	"""Portal bootstrap (read): enabled flag, whether the user is linked to a
-	driver, and the driver profile. Never raises for an unlinked user — the SPA
-	renders a friendly 'not linked' screen instead of surfacing a 403."""
+	driver, and the driver profile. Never raises for an unlinked user.
+
+	For an UNLINKED user the payload is still useful (not a dead-end): it carries
+	``is_staff`` (does the user hold a Salis desk role), the user's ``full_name``,
+	and ``links`` — a permission-filtered set of desk destinations. The SPA renders
+	a friendly staff panel or a generic explainer from these fields instead of a
+	bare error. Action endpoints remain strictly driver-scoped (unchanged)."""
+	user = frappe.session.user
 	if not _portal_enabled():
-		return {"enabled": False, "linked": False, "driver": None}
+		# Even disabled, tell a staff user how to reach the desk.
+		staff = _is_staff(user)
+		return {
+			"enabled": False,
+			"linked": False,
+			"driver": None,
+			"is_staff": staff,
+			"full_name": _user_full_name(user),
+			"links": _staff_links(user) if staff else [],
+		}
 	driver = _find_driver()
 	if not driver:
-		return {"enabled": True, "linked": False, "driver": None}
+		staff = _is_staff(user)
+		return {
+			"enabled": True,
+			"linked": False,
+			"driver": None,
+			"is_staff": staff,
+			"full_name": _user_full_name(user),
+			"links": _staff_links(user) if staff else [],
+		}
 	d = frappe.db.get_value(
 		"Salis Driver", driver,
 		["name", "full_name", "status", "current_vehicle", "license_expiry"],
 		as_dict=True,
 	)
+	# Stringify date fields so the HTTP JSON response always serializes. A raw
+	# date object can 500 the bootstrap call, which the SPA previously mis-rendered
+	# as "not linked to a driver profile".
+	if d and d.get("license_expiry"):
+		d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
 	return {"enabled": True, "linked": True, "driver": d}
 
 
