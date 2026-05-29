@@ -10,7 +10,7 @@ import frappe
 
 _LINKS = [
     {"item_label": "Apex Habitat — Command Center", "item_type": "Route", "route": "/app/habitat"},
-    {"item_label": "Apex Habitat — Setup", "item_type": "Route", "route": "/app/setup"},
+    {"item_label": "Apex Habitat — Setup", "item_type": "Route", "route": "/app/apex-core"},
 ]
 
 

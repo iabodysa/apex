@@ -139,3 +139,11 @@ apex_habitat.patches.v1_x.backfill_operations_alert_resolved_on
 # does not delete its DB record, so installed sites need this. Idempotent,
 # existence-guarded, a no-op on fresh installs (the records are never shipped).
 apex_habitat.patches.v1_x.consolidate_admin_workspaces_into_apex_core
+
+# v1.x — repoint stale navbar Help-dropdown routes to the consolidated workspace
+# ONE-TIME (prune-eligible once every deployed site has run it): rewrites only the
+# Navbar Settings help-dropdown rows whose route targets a deleted admin workspace
+# (/app/setup, /app/console, /app/salis-setup) to /app/apex-core. Never adds,
+# removes or touches any other navbar item. Idempotent; a no-op on fresh installs
+# (add_navbar_help_links now seeds /app/apex-core directly).
+apex_habitat.patches.v1_x.fix_navbar_routes_to_apex_core

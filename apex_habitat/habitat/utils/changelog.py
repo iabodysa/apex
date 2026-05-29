@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.17.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.17.0 — an integration kit so any frontend can use Apex as its backend",
+        "app_name": "apex_habitat",
+        "link": "/app/apex-core",
+        "creation": "2026-07-03 09:00:00",
+    },
+    {
+        "title": "v1.17.0: Apex now ships a public integration guide and an Apex Integration Settings page — install it as a backend and drive it over a clean, token-authenticated API",
+        "app_name": "apex_habitat",
+        "link": "/app/apex-core",
+        "creation": "2026-07-03 09:01:00",
+    },
+    {
+        "title": "v1.17.0: The Apex Core workspace is reorganized into clear sections (Settings, Integration, Habitat Setup, Salis Setup, Console), and What's-New links now point to the right place",
+        "app_name": "apex_habitat",
+        "link": "/app/apex-core",
+        "creation": "2026-07-03 09:02:00",
+    },
     # v1.16.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.16.0 — settings, console and Salis setup unified in one Apex Core workspace",
@@ -430,7 +449,7 @@ _RELEASES = [
     {
         "title": "Apex 1.0.0 — your workforce operations, end to end: where they live and how they move, now in one suite",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-06-09 09:00:00",
     },
     # v1.0.0 ----------------------------------------------------------
@@ -480,13 +499,13 @@ _RELEASES = [
     {
         "title": "Apex Habitat v0.9.1 — guided setup is back, and every record shows what it's connected to",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-06-06 09:30:00",
     },
     {
         "title": "v0.9.1: Never wonder where to start — step-by-step setup banners now guide you through Setup, Accommodation and Safety",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-06-06 09:31:00",
     },
     {
@@ -580,7 +599,7 @@ _RELEASES = [
     {
         "title": "Apex Habitat v0.8.4 — let the right reports, reminders and follow-ups send themselves",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-05-25 18:00:00",
     },
     {
@@ -611,7 +630,7 @@ _RELEASES = [
     {
         "title": "Apex Habitat v0.8.3 — see your work on a calendar, move it across a board, and let it route itself",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-05-25 15:00:00",
     },
     {
@@ -679,7 +698,7 @@ _RELEASES = [
     {
         "title": "Apex Habitat v0.8.0 — bill suppliers back, see occupancy trends, and print every handover",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-05-25 09:00:00",
     },
     {
@@ -716,7 +735,7 @@ _RELEASES = [
     {
         "title": "Apex Habitat v0.7.2 — faster reports, a fully translated interface, and security & reliability improvements",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-05-24 21:00:00",
     },
     {
@@ -746,7 +765,7 @@ _RELEASES = [
     {
         "title": "v0.7.2: Work in Arabic end to end — the full interface is now translated",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-05-24 21:05:00",
     },
     # v0.7.0 ---------------------------------------------------------------
@@ -759,7 +778,7 @@ _RELEASES = [
     {
         "title": "v0.7.0: Security & reliability improvements",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-05-24 10:01:00",
     },
     {
@@ -795,7 +814,7 @@ _RELEASES = [
     {
         "title": "v0.7.0: A sturdier foundation — every release now ships steadier and better tested",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-05-24 10:07:00",
     },
     {
@@ -831,26 +850,26 @@ _RELEASES = [
     {
         "title": "v0.7.0: A steadier core under the hood, so everything you build on it holds firm",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-05-24 10:13:00",
     },
     # v0.6.0 ---------------------------------------------------------------
     {
         "title": "Apex Habitat v0.6.0 — stock your maintenance catalog and set up a building from one screen",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-05-23 22:00:00",
     },
     {
         "title": "v0.6.0: Start maintenance with a ready-stocked shelf — 38 materials and 4 templates come built in",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-05-23 22:01:00",
     },
     {
         "title": "v0.6.0: Security & reliability improvements",
         "app_name": "apex_habitat",
-        "link": "/app/setup",
+        "link": "/app/apex-core",
         "creation": "2026-05-23 22:02:00",
     },
     {

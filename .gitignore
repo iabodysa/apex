@@ -19,6 +19,11 @@ docs/
 # Frappe "Updated To A New Version" popup changelogs are shipped app files.
 !apex_habitat/change_log/v0/*.md
 !apex_habitat/change_log/v1/*.md
+# Public developer integration guide — ONLY this one file under docs/ is published
+# (docs/superpowers and all other docs/ content stay ignored).
+!docs/
+docs/*
+!docs/INTEGRATION.md
 
 # Local/private office source files.
 *.xlsx

@@ -10,7 +10,7 @@
  "is_hidden": 0,
  "sequence_id": 90.0,
  "parent_page": "",
- "content": "[{\"id\": \"acHdrCfg\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Configuration</b></span>\", \"col\": 12}}, {\"id\": \"acSc0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"acSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Settings\", \"col\": 3}}, {\"id\": \"acSc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Instance\", \"col\": 3}}, {\"id\": \"acSc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Ledger\", \"col\": 3}}, {\"id\": \"acHdrHabSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat Setup</b></span>\", \"col\": 12}}, {\"id\": \"acScHab0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Building\", \"col\": 3}}, {\"id\": \"acScHab1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Template\", \"col\": 3}}, {\"id\": \"acCardAccMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"acCardTaskMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Task Master\", \"col\": 4}}, {\"id\": \"acCardCustodyMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"acCardFacilityMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility & Utility Master\", \"col\": 4}}, {\"id\": \"acCardMaintMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Master\", \"col\": 4}}, {\"id\": \"acHdrConsole\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat Console</b></span>\", \"col\": 12}}, {\"id\": \"acNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"acNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"acNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 3}}, {\"id\": \"acNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Ledger Cost This Month\", \"col\": 3}}, {\"id\": \"acCardEngines\", \"type\": \"card\", \"data\": {\"card_name\": \"Engines & Ledgers\", \"col\": 4}}, {\"id\": \"acCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 4}}, {\"id\": \"acHdrSalisSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Salis Setup</b></span>\", \"col\": 12}}, {\"id\": \"acScSalis0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Category\", \"col\": 3}}, {\"id\": \"acScSalis1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Office\", \"col\": 3}}, {\"id\": \"acScSalis2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Platform\", \"col\": 3}}, {\"id\": \"acCardSalisMasters\", \"type\": \"card\", \"data\": {\"card_name\": \"Salis Masters & Setup\", \"col\": 4}}, {\"id\": \"acHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Settings</b></span>\", \"col\": 12}}, {\"id\": \"acCard\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}]",
+ "content": "[{\"id\": \"acHdrSettings\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Settings</b></span>\", \"col\": 12}}, {\"id\": \"acScHabSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"acScSalisSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Settings\", \"col\": 3}}, {\"id\": \"acScIntSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Apex Integration Settings\", \"col\": 3}}, {\"id\": \"acCardSettings\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 6}}, {\"id\": \"acHdrIntegration\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Integration</b></span>\", \"col\": 12}}, {\"id\": \"acCardIntegration\", \"type\": \"card\", \"data\": {\"card_name\": \"Integration\", \"col\": 6}}, {\"id\": \"acHdrHabSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat Setup</b></span>\", \"col\": 12}}, {\"id\": \"acCardAccMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"acCardTaskMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Task Master\", \"col\": 4}}, {\"id\": \"acCardCustodyMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"acCardFacilityMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility & Utility Master\", \"col\": 4}}, {\"id\": \"acCardMaintMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Master\", \"col\": 4}}, {\"id\": \"acHdrSalisSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Salis Setup</b></span>\", \"col\": 12}}, {\"id\": \"acCardSalisMasters\", \"type\": \"card\", \"data\": {\"card_name\": \"Salis Masters & Setup\", \"col\": 6}}, {\"id\": \"acHdrConsole\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Console</b></span>\", \"col\": 12}}, {\"id\": \"acNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"acNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"acNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 3}}, {\"id\": \"acNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Ledger Cost This Month\", \"col\": 3}}, {\"id\": \"acScLedger\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Ledger\", \"col\": 3}}, {\"id\": \"acScTaskInstance\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Instance\", \"col\": 3}}, {\"id\": \"acCardEngines\", \"type\": \"card\", \"data\": {\"card_name\": \"Engines & Ledgers\", \"col\": 6}}, {\"id\": \"acCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 6}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -29,8 +29,8 @@
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
-   "label": "Scheduled Task Instance",
-   "link_to": "Scheduled Task Instance",
+   "label": "Apex Integration Settings",
+   "link_to": "Apex Integration Settings",
    "idx": 3
   },
   {
@@ -43,37 +43,9 @@
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
-   "label": "Accommodation Building",
-   "link_to": "Accommodation Building",
+   "label": "Scheduled Task Instance",
+   "link_to": "Scheduled Task Instance",
    "idx": 5
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Scheduled Task Template",
-   "link_to": "Scheduled Task Template",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Vehicle Category",
-   "link_to": "Vehicle Category",
-   "idx": 7
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Rental Office",
-   "link_to": "Rental Office",
-   "idx": 8
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Fuel Platform",
-   "link_to": "Fuel Platform",
-   "idx": 9
   }
  ],
  "links": [
@@ -102,16 +74,54 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
+   "label": "Apex Integration Settings",
+   "link_type": "DocType",
+   "link_to": "Apex Integration Settings",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Internal Auditor Dashboard",
    "link_type": "Dashboard",
    "link_to": "Internal Auditor Dashboard",
-   "idx": 4
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Integration",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Apex Integration Settings",
+   "link_type": "DocType",
+   "link_to": "Apex Integration Settings",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "OAuth Client",
+   "link_type": "DocType",
+   "link_to": "OAuth Client",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Webhook",
+   "link_type": "DocType",
+   "link_to": "Webhook",
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Accommodation Master",
-   "idx": 5
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
@@ -119,7 +129,7 @@
    "label": "Accommodation Site",
    "link_type": "DocType",
    "link_to": "Accommodation Site",
-   "idx": 6
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -127,7 +137,7 @@
    "label": "Accommodation Building",
    "link_type": "DocType",
    "link_to": "Accommodation Building",
-   "idx": 7
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -135,7 +145,7 @@
    "label": "Accommodation Room",
    "link_type": "DocType",
    "link_to": "Accommodation Room",
-   "idx": 8
+   "idx": 13
   },
   {
    "doctype": "Workspace Link",
@@ -143,7 +153,7 @@
    "label": "Accommodation Bed",
    "link_type": "DocType",
    "link_to": "Accommodation Bed",
-   "idx": 9
+   "idx": 14
   },
   {
    "doctype": "Workspace Link",
@@ -151,13 +161,13 @@
    "label": "Accommodation QR Location",
    "link_type": "DocType",
    "link_to": "Accommodation QR Location",
-   "idx": 10
+   "idx": 15
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Task Master",
-   "idx": 11
+   "idx": 16
   },
   {
    "doctype": "Workspace Link",
@@ -165,7 +175,7 @@
    "label": "Safety Task Catalog",
    "link_type": "DocType",
    "link_to": "Safety Task Catalog",
-   "idx": 12
+   "idx": 17
   },
   {
    "doctype": "Workspace Link",
@@ -173,13 +183,13 @@
    "label": "Scheduled Task Template",
    "link_type": "DocType",
    "link_to": "Scheduled Task Template",
-   "idx": 13
+   "idx": 18
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Custody Master",
-   "idx": 14
+   "idx": 19
   },
   {
    "doctype": "Workspace Link",
@@ -187,7 +197,7 @@
    "label": "Custody Article",
    "link_type": "DocType",
    "link_to": "Custody Article",
-   "idx": 15
+   "idx": 20
   },
   {
    "doctype": "Workspace Link",
@@ -195,7 +205,7 @@
    "label": "Custody Asset Category",
    "link_type": "DocType",
    "link_to": "Custody Asset Category",
-   "idx": 16
+   "idx": 21
   },
   {
    "doctype": "Workspace Link",
@@ -203,13 +213,13 @@
    "label": "Operational Depreciation Policy",
    "link_type": "DocType",
    "link_to": "Operational Depreciation Policy",
-   "idx": 17
+   "idx": 22
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Facility & Utility Master",
-   "idx": 18
+   "idx": 23
   },
   {
    "doctype": "Workspace Link",
@@ -217,7 +227,7 @@
    "label": "Facility Asset",
    "link_type": "DocType",
    "link_to": "Facility Asset",
-   "idx": 19
+   "idx": 24
   },
   {
    "doctype": "Workspace Link",
@@ -225,7 +235,7 @@
    "label": "Utility Account",
    "link_type": "DocType",
    "link_to": "Utility Account",
-   "idx": 20
+   "idx": 25
   },
   {
    "doctype": "Workspace Link",
@@ -233,13 +243,13 @@
    "label": "Subcontractor Service Contract",
    "link_type": "DocType",
    "link_to": "Subcontractor Service Contract",
-   "idx": 21
+   "idx": 26
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Maintenance Master",
-   "idx": 22
+   "idx": 27
   },
   {
    "doctype": "Workspace Link",
@@ -247,7 +257,7 @@
    "label": "Maintenance Material",
    "link_type": "DocType",
    "link_to": "Maintenance Material",
-   "idx": 23
+   "idx": 28
   },
   {
    "doctype": "Workspace Link",
@@ -255,81 +265,13 @@
    "label": "Maintenance Material Template",
    "link_type": "DocType",
    "link_to": "Maintenance Material Template",
-   "idx": 24
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Engines & Ledgers",
-   "idx": 25
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Accommodation Ledger",
-   "link_type": "DocType",
-   "link_to": "Accommodation Ledger",
-   "idx": 26
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Accommodation Stock Ledger",
-   "link_type": "DocType",
-   "link_to": "Accommodation Stock Ledger",
-   "idx": 27
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Facility Asset Movement",
-   "link_type": "DocType",
-   "link_to": "Facility Asset Movement",
-   "idx": 28
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Non-Financial Depreciation Snapshot",
-   "link_type": "DocType",
-   "link_to": "Non-Financial Depreciation Snapshot",
    "idx": 29
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Scheduled Task Instance",
-   "link_type": "DocType",
-   "link_to": "Scheduled Task Instance",
-   "idx": 30
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
-   "label": "Logs",
-   "idx": 31
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Error Log",
-   "link_type": "DocType",
-   "link_to": "Error Log",
-   "idx": 32
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Scheduled Job Log",
-   "link_type": "DocType",
-   "link_to": "Scheduled Job Log",
-   "idx": 33
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Salis Masters & Setup",
-   "idx": 34
+   "idx": 30
   },
   {
    "doctype": "Workspace Link",
@@ -337,7 +279,7 @@
    "label": "Salis Driver",
    "link_type": "DocType",
    "link_to": "Salis Driver",
-   "idx": 35
+   "idx": 31
   },
   {
    "doctype": "Workspace Link",
@@ -345,7 +287,7 @@
    "label": "Vehicle Category",
    "link_type": "DocType",
    "link_to": "Vehicle Category",
-   "idx": 36
+   "idx": 32
   },
   {
    "doctype": "Workspace Link",
@@ -353,7 +295,7 @@
    "label": "Rental Office",
    "link_type": "DocType",
    "link_to": "Rental Office",
-   "idx": 37
+   "idx": 33
   },
   {
    "doctype": "Workspace Link",
@@ -361,7 +303,7 @@
    "label": "Fuel Platform",
    "link_type": "DocType",
    "link_to": "Fuel Platform",
-   "idx": 38
+   "idx": 34
   },
   {
    "doctype": "Workspace Link",
@@ -369,7 +311,75 @@
    "label": "Wash Platform",
    "link_type": "DocType",
    "link_to": "Wash Platform",
+   "idx": 35
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Engines & Ledgers",
+   "idx": 36
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Ledger",
+   "link_type": "DocType",
+   "link_to": "Accommodation Ledger",
+   "idx": 37
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Stock Ledger",
+   "link_type": "DocType",
+   "link_to": "Accommodation Stock Ledger",
+   "idx": 38
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Facility Asset Movement",
+   "link_type": "DocType",
+   "link_to": "Facility Asset Movement",
    "idx": 39
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Non-Financial Depreciation Snapshot",
+   "link_type": "DocType",
+   "link_to": "Non-Financial Depreciation Snapshot",
+   "idx": 40
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Scheduled Task Instance",
+   "link_type": "DocType",
+   "link_to": "Scheduled Task Instance",
+   "idx": 41
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Logs",
+   "idx": 42
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Error Log",
+   "link_type": "DocType",
+   "link_to": "Error Log",
+   "idx": 43
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Scheduled Job Log",
+   "link_type": "DocType",
+   "link_to": "Scheduled Job Log",
+   "idx": 44
   }
  ],
  "number_cards": [
@@ -414,5 +424,5 @@
    "role": "Administrator"
   }
  ],
- "modified": "2026-05-30 12:00:00.000000"
+ "modified": "2026-05-30 14:00:00.000000"
 }

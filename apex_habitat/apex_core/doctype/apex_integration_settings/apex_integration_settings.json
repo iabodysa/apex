@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "creation": "2026-05-30 13:00:00.000000",
+ "description": "Single configuration record describing how an external frontend integrates with this Frappe backend over HTTP. This DocType documents and surfaces the integration; the real linking uses native Frappe tools (User API Access, OAuth Client, Webhook).",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "apex_integration_tab_general",
+  "apex_integration_sec_general",
+  "integration_enabled",
+  "frontend_base_url",
+  "api_contract_version",
+  "apex_integration_general_col",
+  "allowed_origins",
+  "apex_integration_sec_help",
+  "integration_help"
+ ],
+ "fields": [
+  {
+   "fieldname": "apex_integration_tab_general",
+   "fieldtype": "Tab Break",
+   "label": "General"
+  },
+  {
+   "fieldname": "apex_integration_sec_general",
+   "fieldtype": "Section Break",
+   "label": "Frontend Integration"
+  },
+  {
+   "default": "0",
+   "description": "Master switch indicating that an external frontend is integrated with this backend. This is a documentation/coordination flag; it does not start or stop the API.",
+   "fieldname": "integration_enabled",
+   "fieldtype": "Check",
+   "label": "Integration Enabled"
+  },
+  {
+   "description": "Public base URL of the external frontend that consumes this backend, for example https://salis-fleet.com.",
+   "fieldname": "frontend_base_url",
+   "fieldtype": "Data",
+   "label": "Frontend Base URL",
+   "options": "URL"
+  },
+  {
+   "default": "1",
+   "description": "Version of the documented API contract the frontend is built against. Additive changes are safe; breaking changes increment this value and require a notice to integrators.",
+   "fieldname": "api_contract_version",
+   "fieldtype": "Data",
+   "label": "API Contract Version"
+  },
+  {
+   "fieldname": "apex_integration_general_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "CORS origin(s) an administrator should add to allow_cors in site_config.json so the frontend can call this backend, for example https://salis-fleet.com. This field only records the intended origins; it does not modify server configuration.",
+   "fieldname": "allowed_origins",
+   "fieldtype": "Small Text",
+   "label": "Allowed Origins (for site_config allow_cors)"
+  },
+  {
+   "fieldname": "apex_integration_sec_help",
+   "fieldtype": "Section Break",
+   "label": "How To Integrate"
+  },
+  {
+   "default": "<h4>Integrating an external frontend</h4>\n<p>This app is the <b>backend</b> and source of truth. An external frontend (any stack: React, Vue, Flutter, native mobile, etc.) consumes it over HTTP. The full developer starter kit lives in <b>docs/INTEGRATION.md</b> in the application repository.</p>\n<p>The real linking uses <b>native Frappe tools</b> &mdash; do not reimplement them here:</p>\n<ul>\n<li><b>Token auth</b>: open a <b>User</b> record, generate an API Key + API Secret under <i>API Access</i>, and send the header <code>Authorization: token &lt;api_key&gt;:&lt;api_secret&gt;</code>. Token auth is stateless and CSRF-exempt, so it works reliably from an external origin.</li>\n<li><b>OAuth Client</b>: use the native <b>OAuth Client</b> DocType if you prefer an OAuth 2.0 authorization-code flow instead of API keys.</li>\n<li><b>Webhook</b>: use the native <b>Webhook</b> DocType to push outbound events to the frontend (or any service) when documents change.</li>\n</ul>\n<p>Remember to add the frontend origin to <code>allow_cors</code> in <code>site_config.json</code>.</p>",
+   "fieldname": "integration_help",
+   "fieldtype": "Text Editor",
+   "label": "Integration Help",
+   "read_only": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-05-30 13:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Apex Core",
+ "name": "Apex Integration Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Accommodation Manager"
+  },
+  {
+   "read": 1,
+   "role": "Fleet Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
