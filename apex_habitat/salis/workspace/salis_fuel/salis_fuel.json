@@ -72,26 +72,10 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Fuel Chip Request",
-   "link_type": "DocType",
-   "link_to": "Fuel Chip Request",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Fuel Topup Request",
-   "link_type": "DocType",
-   "link_to": "Fuel Topup Request",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Fuel Claim",
    "link_type": "DocType",
    "link_to": "Fuel Claim",
-   "idx": 7
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -99,13 +83,13 @@
    "label": "Fuel Exception Case",
    "link_type": "DocType",
    "link_to": "Fuel Exception Case",
-   "idx": 8
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Views",
-   "idx": 9
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -113,7 +97,7 @@
    "label": "Fuel Claim Register",
    "link_type": "Report",
    "link_to": "Fuel Claim Register",
-   "idx": 10,
+   "idx": 8,
    "is_query_report": 1
   },
   {
@@ -122,7 +106,7 @@
    "label": "Fuel Reconciliation",
    "link_type": "Report",
    "link_to": "Fuel Reconciliation",
-   "idx": 11,
+   "idx": 9,
    "is_query_report": 1
   },
   {
@@ -131,7 +115,7 @@
    "label": "Fuel Exception Register",
    "link_type": "Report",
    "link_to": "Fuel Exception Register",
-   "idx": 12,
+   "idx": 10,
    "is_query_report": 1
   },
   {
@@ -140,7 +124,7 @@
    "label": "Fuel Spend by Vehicle",
    "link_type": "Report",
    "link_to": "Fuel Spend by Vehicle",
-   "idx": 13,
+   "idx": 11,
    "is_query_report": 1
   },
   {
@@ -149,7 +133,7 @@
    "label": "Fuel Consumption Summary",
    "link_type": "Report",
    "link_to": "Fuel Consumption Summary",
-   "idx": 14,
+   "idx": 12,
    "is_query_report": 1
   },
   {
@@ -158,7 +142,7 @@
    "label": "Fuel Claim vs Consumption",
    "link_type": "Report",
    "link_to": "Fuel Claim vs Consumption",
-   "idx": 15,
+   "idx": 13,
    "is_query_report": 1
   },
   {
@@ -167,7 +151,7 @@
    "label": "Salis Finance Manager Dashboard",
    "link_type": "Dashboard",
    "link_to": "Salis Finance Manager Dashboard",
-   "idx": 16
+   "idx": 14
   }
  ],
  "charts": [],

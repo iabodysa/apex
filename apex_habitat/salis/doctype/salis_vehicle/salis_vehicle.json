@@ -240,16 +240,6 @@
   },
   {
    "group": "Fuel",
-   "link_doctype": "Fuel Chip Request",
-   "link_fieldname": "vehicle"
-  },
-  {
-   "group": "Fuel",
-   "link_doctype": "Fuel Topup Request",
-   "link_fieldname": "vehicle"
-  },
-  {
-   "group": "Fuel",
    "link_doctype": "Fuel Daily Log",
    "link_fieldname": "vehicle"
   },

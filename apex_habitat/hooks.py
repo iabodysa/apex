@@ -220,7 +220,6 @@ override_doctype_dashboards = {
 permission_query_conditions = {
     "Vehicle Assignment": "apex_habitat.salis.permissions.vehicle_assignment_query",
     "Fuel Request": "apex_habitat.salis.permissions.fuel_request_query",
-    "Fuel Topup Request": "apex_habitat.salis.permissions.fuel_topup_request_query",
     "Dispatch Trip": "apex_habitat.salis.permissions.dispatch_trip_query",
     "Transport Request": "apex_habitat.salis.permissions.transport_request_query",
     "Route Plan": "apex_habitat.salis.permissions.route_plan_query",
@@ -228,14 +227,12 @@ permission_query_conditions = {
     "Support Ticket": "apex_habitat.salis.permissions.support_ticket_query",
     "Fuel Claim": "apex_habitat.salis.permissions.fuel_claim_query",
     "Fuel Quota": "apex_habitat.salis.permissions.fuel_quota_query",
-    "Fuel Chip Request": "apex_habitat.salis.permissions.fuel_chip_request_query",
     "Fuel Exception Case": "apex_habitat.salis.permissions.fuel_exception_case_query",
 }
 
 has_permission = {
     "Vehicle Assignment": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Request": "apex_habitat.salis.permissions.scoped_has_permission",
-    "Fuel Topup Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Dispatch Trip": "apex_habitat.salis.permissions.scoped_has_permission",
     "Transport Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Route Plan": "apex_habitat.salis.permissions.scoped_has_permission",
@@ -243,7 +240,6 @@ has_permission = {
     "Support Ticket": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Claim": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Quota": "apex_habitat.salis.permissions.scoped_has_permission",
-    "Fuel Chip Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Exception Case": "apex_habitat.salis.permissions.scoped_has_permission",
     "Salis Payment Request": "apex_habitat.salis.permissions.payment_sod_has_permission",
     "Approval Request": "apex_habitat.salis.permissions.approval_sod_has_permission",

@@ -265,7 +265,7 @@ def unreverted_topup_watch() -> None:
     """Auto-revert temporary fuel top-ups that are past their revert-due date,
     then raise an alert for each.
 
-    Reads Fuel Topup Request ``{is_temporary: 1, reverted: 0,
+    Reads Fuel Request ``{request_type: Top-up, is_temporary: 1, reverted: 0,
     status in [Approved, Done], revert_due_date: < today}``. For each overdue
     row it loads the document, sets ``reverted = 1`` and ``status = Reverted``,
     saves it (the change is captured natively by Version / track_changes), and
@@ -283,8 +283,9 @@ def unreverted_topup_watch() -> None:
     start = 0
     while True:
         topups = frappe.get_all(
-            "Fuel Topup Request",
+            "Fuel Request",
             filters={
+                "request_type": "Top-up",
                 "is_temporary": 1,
                 "reverted": 0,
                 "status": ["in", ["Approved", "Done"]],
@@ -300,7 +301,7 @@ def unreverted_topup_watch() -> None:
         for t in topups:
             try:
                 # --- Auto-revert the overdue temporary top-up ----------------
-                doc = frappe.get_doc("Fuel Topup Request", t.name)
+                doc = frappe.get_doc("Fuel Request", t.name)
                 doc.reverted = 1
                 doc.status = "Reverted"
                 doc.save(ignore_permissions=True)  # audit-ok
@@ -317,7 +318,7 @@ def unreverted_topup_watch() -> None:
                        f"{t.revert_due_date}; it has now been auto-reverted.")
                 logger.warning(msg)
                 _raise_alert("Excessive Topup", "Critical", msg,
-                             "Fuel Topup Request", t.name,
+                             "Fuel Request", t.name,
                              vehicle=t.vehicle, driver=t.driver)
             except Exception:
                 frappe.db.rollback()

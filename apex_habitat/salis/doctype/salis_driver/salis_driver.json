@@ -169,16 +169,6 @@
   },
   {
    "group": "Fuel",
-   "link_doctype": "Fuel Chip Request",
-   "link_fieldname": "driver"
-  },
-  {
-   "group": "Fuel",
-   "link_doctype": "Fuel Topup Request",
-   "link_fieldname": "driver"
-  },
-  {
-   "group": "Fuel",
    "link_doctype": "Fuel Daily Log",
    "link_fieldname": "driver"
   },

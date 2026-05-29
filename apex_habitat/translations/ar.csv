@@ -1627,6 +1627,10 @@ Default Fuel Type,نوع الوقود الافتراضي
 Fuel,وقود
 Request Date,تاريخ الطلب
 Request Type,نوع الطلب
+Top-up,تعبئة
+Chip,شريحة
+Chip Action,إجراء الشريحة
+Chip Cancellation,إلغاء الشريحة
 Requested By,مقدَّم بواسطة
 Requester Name,اسم مقدّم الطلب
 Raised By,أُنشئ بواسطة
@@ -1733,6 +1737,7 @@ Set when the request is approved.,يُضبط عند اعتماد الطلب.
 Set when this request's litres have been posted to the quota's consumed total. Guards against double-application on resubmit/amend.,يُضبط عند ترحيل لترات هذا الطلب إلى إجمالي المستهلك من الحصة. يمنع التطبيق المزدوج عند إعادة التقديم أو التعديل.
 Total litres consumed against this quota.,إجمالي اللترات المستهلكة من هذه الحصة.
 A chip number is required to {0} a fuel chip.,رقم الشريحة مطلوب لـ {0} شريحة وقود.
+A chip action (Issue / Replace / Cancel) is required.,يلزم تحديد إجراء للشريحة (إصدار / استبدال / إلغاء).
 A decision (Approved or Rejected) is required before submitting.,يلزم اتخاذ قرار (اعتماد أو رفض) قبل التقديم.
 A temporary top-up requires a revert due date.,تتطلب التعبئة المؤقتة تحديد تاريخ استحقاق للاسترجاع.
 Alert Lead Days cannot be negative.,لا يمكن أن تكون أيام التنبيه المسبق سالبة.
@@ -1752,6 +1757,7 @@ End Date cannot be earlier than Start Date.,لا يمكن أن يكون تاري
 Fuel Request Approval Threshold cannot be negative.,لا يمكن أن يكون حد اعتماد طلب الوقود سالباً.
 Fuel Request {0} is not pending (current status: {1}).,طلب الوقود {0} ليس قيد الانتظار (الحالة الحالية: {1}).
 Illegal status change from {0} to {1}.,تغيير حالة غير مسموح به من {0} إلى {1}.
+Invalid Request Type: {0},نوع طلب غير صالح: {0}
 Invalid status: {0},حالة غير صالحة: {0}
 Invalid submission.,تقديم غير صالح.
 Litres cannot be negative.,لا يمكن أن تكون اللترات سالبة.

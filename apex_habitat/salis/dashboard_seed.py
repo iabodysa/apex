@@ -210,8 +210,9 @@ _CHARTS = [
      "group_by_type": "Sum", "aggregate_function_based_on": "amount", "currency": "SAR",
      "filters": [["Fuel Request", "status", "=", "Done"]]},
     # "Fuel Requests by Status" reused from Fleet Supervisor (same chart record)
-    {"name": "Topups by Status", "document_type": "Fuel Topup Request", "type": "Bar",
-     "chart_type": "Group By", "group_by_based_on": "status"},
+    {"name": "Topups by Status", "document_type": "Fuel Request", "type": "Bar",
+     "chart_type": "Group By", "group_by_based_on": "status",
+     "filters": [["Fuel Request", "request_type", "=", "Top-up"]]},
 ]
 
 _CARDS = [
@@ -263,15 +264,17 @@ _CARDS = [
     {"name": "Approved Fuel Awaiting Fulfilment", "document_type": "Fuel Request",
      "filters": [["Fuel Request", "status", "=", "Approved"],
                  ["Fuel Request", "docstatus", "=", 1]]},
-    {"name": "Unreverted Temporary Topups", "document_type": "Fuel Topup Request",
-     "filters": [["Fuel Topup Request", "is_temporary", "=", 1],
-                 ["Fuel Topup Request", "reverted", "=", 0],
-                 ["Fuel Topup Request", "status", "!=", "Cancelled"]]},
-    {"name": "Overdue Temporary Topups", "document_type": "Fuel Topup Request",
-     "filters": [["Fuel Topup Request", "is_temporary", "=", 1],
-                 ["Fuel Topup Request", "reverted", "=", 0]],
+    {"name": "Unreverted Temporary Topups", "document_type": "Fuel Request",
+     "filters": [["Fuel Request", "request_type", "=", "Top-up"],
+                 ["Fuel Request", "is_temporary", "=", 1],
+                 ["Fuel Request", "reverted", "=", 0],
+                 ["Fuel Request", "status", "!=", "Cancelled"]]},
+    {"name": "Overdue Temporary Topups", "document_type": "Fuel Request",
+     "filters": [["Fuel Request", "request_type", "=", "Top-up"],
+                 ["Fuel Request", "is_temporary", "=", 1],
+                 ["Fuel Request", "reverted", "=", 0]],
      # revert_due_date < today is dynamic — evaluated from dynamic_filters_json.
-     "dynamic_filters": [["Fuel Topup Request", "revert_due_date", "<",
+     "dynamic_filters": [["Fuel Request", "revert_due_date", "<",
                           "frappe.datetime.get_today()"]]},
     {"name": "Failed Fuel Requests", "document_type": "Fuel Request",
      "filters": [["Fuel Request", "status", "=", "Failed"]]},

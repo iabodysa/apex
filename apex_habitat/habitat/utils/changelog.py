@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.10.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.10.0 — fuel requests, top-ups and chip actions are now one screen",
+        "app_name": "apex_habitat",
+        "link": "/app/fuel-request",
+        "creation": "2026-06-24 09:00:00",
+    },
+    {
+        "title": "v1.10.0: Fuel requests, quota top-ups and fuel-chip actions are now a single Fuel Request — pick the type and only the fields you need appear",
+        "app_name": "apex_habitat",
+        "link": "/app/fuel-request",
+        "creation": "2026-06-24 09:01:00",
+    },
+    {
+        "title": "v1.10.0: Temporary fuel top-ups now reliably revert on their due date, so a vehicle's quota no longer quietly drifts upward",
+        "app_name": "apex_habitat",
+        "link": "/app/fuel-request",
+        "creation": "2026-06-24 09:02:00",
+    },
     # v1.9.1 ----------------------------------------------------------------
     {
         "title": "Apex 1.9.1 — the Driver Portal opens reliably for everyone",

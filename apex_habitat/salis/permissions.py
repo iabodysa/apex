@@ -76,10 +76,6 @@ def fuel_request_query(user=None):
     return _project_condition(user)
 
 
-def fuel_topup_request_query(user=None):
-    return _project_condition(user)
-
-
 def transport_request_query(user=None):
     return _project_condition(user)
 
@@ -101,10 +97,6 @@ def fuel_claim_query(user=None):
 
 
 def fuel_quota_query(user=None):
-    return _project_condition(user)
-
-
-def fuel_chip_request_query(user=None):
     return _project_condition(user)
 
 
