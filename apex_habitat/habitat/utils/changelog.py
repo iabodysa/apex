@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.9.1 ----------------------------------------------------------------
+    {
+        "title": "Apex 1.9.1 — the Driver Portal opens reliably for everyone",
+        "app_name": "apex_habitat",
+        "link": "/driver",
+        "creation": "2026-06-23 09:00:00",
+    },
+    {
+        "title": "v1.9.1: The Driver Portal now loads a driver's home screen reliably, and shows a clear message if it can't load instead of a misleading 'not linked'",
+        "app_name": "apex_habitat",
+        "link": "/driver",
+        "creation": "2026-06-23 09:01:00",
+    },
+    {
+        "title": "v1.9.1: Signed in as a manager? The portal shows a helpful screen with quick links to your Salis areas instead of a dead-end",
+        "app_name": "apex_habitat",
+        "link": "/driver",
+        "creation": "2026-06-23 09:02:00",
+    },
     # v1.9.0 ----------------------------------------------------------------
     {
         "title": "Apex 1.9.0 — payments, support tickets and sponsorship transfers move on a real workflow",
