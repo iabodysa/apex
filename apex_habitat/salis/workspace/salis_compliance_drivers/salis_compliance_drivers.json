@@ -1,8 +1,8 @@
 {
  "doctype": "Workspace",
- "name": "Salis Compliance Drivers",
- "label": "Salis Compliance & Drivers",
- "title": "Salis Compliance & Drivers",
+ "name": "Compliance",
+ "label": "Compliance",
+ "title": "Compliance",
  "module": "Salis",
  "icon": "quality",
  "public": 1,
@@ -177,5 +177,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 19:00:00.000000"
+ "modified": "2026-05-29 20:00:00.000000"
 }

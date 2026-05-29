@@ -1,8 +1,8 @@
 {
  "doctype": "Workspace",
- "name": "Salis Setup",
- "label": "Salis Setup",
- "title": "Salis Setup",
+ "name": "Setup",
+ "label": "Setup",
+ "title": "Setup",
  "module": "Salis",
  "icon": "setting-gear",
  "public": 1,
@@ -108,5 +108,5 @@
  "charts": [],
  "number_cards": [],
  "quick_lists": [],
- "modified": "2026-05-29 19:00:00.000000"
+ "modified": "2026-05-29 20:00:00.000000"
 }

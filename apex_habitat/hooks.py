@@ -264,6 +264,11 @@ after_install = [
     "apex_habitat.salis.notifications_seed.seed_salis_notifications",
     "apex_habitat.salis.kanban_seed.seed_salis_kanban_boards",
     "apex_habitat.salis.assignment_rules_seed.seed_salis_assignment_rules",
+    # Salis navbar Help-dropdown links — mirrors Habitat's add_navbar_help_links
+    # patch (Navbar Settings is a Single, never fixtured; additive + idempotent,
+    # never clobbers the customer's navbar). Surfaces the Salis workspace and the
+    # Dispatch Board page one click away from the desk Help menu.
+    "apex_habitat.salis.navbar_seed.seed_salis_navbar_help_links",
 ]
 # Dashboards seed after migrate (when their charts/number cards already exist).
 after_migrate = [
@@ -276,6 +281,9 @@ after_migrate = [
     "apex_habitat.salis.notifications_seed.seed_salis_notifications",
     "apex_habitat.salis.kanban_seed.seed_salis_kanban_boards",
     "apex_habitat.salis.assignment_rules_seed.seed_salis_assignment_rules",
+    # Salis navbar Help-dropdown links — keep already-installed sites in sync on
+    # migrate (idempotent; appends only the links that are missing).
+    "apex_habitat.salis.navbar_seed.seed_salis_navbar_help_links",
 ]
 
 # Frappe What's New feed — appears in desk notification area, not as a popup

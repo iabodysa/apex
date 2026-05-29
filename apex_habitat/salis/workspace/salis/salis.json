@@ -84,49 +84,49 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Salis Workers Transport",
+   "label": "Workers",
    "link_type": "Workspace",
-   "link_to": "Salis Workers Transport",
+   "link_to": "Workers",
    "idx": 2
   },
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Salis Representatives Fleet",
+   "label": "Fleet",
    "link_type": "Workspace",
-   "link_to": "Salis Representatives Fleet",
+   "link_to": "Fleet",
    "idx": 3
   },
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Salis Fuel",
+   "label": "Fuel",
    "link_type": "Workspace",
-   "link_to": "Salis Fuel",
+   "link_to": "Fuel",
    "idx": 4
   },
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Salis Rentals & Costs",
+   "label": "Rentals",
    "link_type": "Workspace",
-   "link_to": "Salis Rentals Costs",
+   "link_to": "Rentals",
    "idx": 5
   },
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Salis Compliance & Drivers",
+   "label": "Compliance",
    "link_type": "Workspace",
-   "link_to": "Salis Compliance Drivers",
+   "link_to": "Compliance",
    "idx": 6
   },
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Salis Setup",
+   "label": "Setup",
    "link_type": "Workspace",
-   "link_to": "Salis Setup",
+   "link_to": "Setup",
    "idx": 7
   },
   {
@@ -173,5 +173,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 19:00:00.000000"
+ "modified": "2026-05-29 20:00:00.000000"
 }

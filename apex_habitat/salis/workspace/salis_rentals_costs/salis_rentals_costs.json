@@ -1,8 +1,8 @@
 {
  "doctype": "Workspace",
- "name": "Salis Rentals Costs",
- "label": "Salis Rentals & Costs",
- "title": "Salis Rentals & Costs",
+ "name": "Rentals",
+ "label": "Rentals",
+ "title": "Rentals",
  "module": "Salis",
  "icon": "money-coins-1",
  "public": 1,
@@ -229,5 +229,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 19:00:00.000000"
+ "modified": "2026-05-29 20:00:00.000000"
 }

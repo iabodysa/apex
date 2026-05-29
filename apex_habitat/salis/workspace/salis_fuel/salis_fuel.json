@@ -1,8 +1,8 @@
 {
  "doctype": "Workspace",
- "name": "Salis Fuel",
- "label": "Salis Fuel",
- "title": "Salis Fuel",
+ "name": "Fuel",
+ "label": "Fuel",
+ "title": "Fuel",
  "module": "Salis",
  "icon": "assets",
  "public": 1,
@@ -184,5 +184,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 19:00:00.000000"
+ "modified": "2026-05-29 20:00:00.000000"
 }
