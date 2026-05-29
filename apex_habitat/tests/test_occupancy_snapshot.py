@@ -67,7 +67,7 @@ class TestOccupancySnapshot(ApexHabitatTestCase):
         self.assertFalse(any(p.create for p in meta.permissions), "snapshot must be read-only (no create)")
 
         # report aggregates the building
-        columns, data = execute({"from_date": today(), "to_date": today(), "building": self.building.name})
+        columns, data, *_ = execute({"from_date": today(), "to_date": today(), "building": self.building.name})
         mine = [d for d in data if d["building"] == self.building.name]
         self.assertEqual(len(mine), 1)
         self.assertEqual(mine[0]["avg_occ"], 25.0)
