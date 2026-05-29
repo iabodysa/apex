@@ -31,6 +31,10 @@ def execute(filters=None):
         query_filters["building"] = filters["building"]
     if filters.get("priority"):
         query_filters["priority"] = filters["priority"]
+    if filters.get("company"):
+        query_filters["company"] = filters["company"]
+    if filters.get("cost_center"):
+        query_filters["cost_center"] = filters["cost_center"]
 
     rows = frappe.get_all(
         "Maintenance Request",
@@ -65,4 +69,29 @@ def execute(filters=None):
     # Sort by SLA breached first, then by priority, then by age
     data.sort(key=lambda r: (-(r["sla_breached"]), _PRIORITY_ORDER.get(r["priority"], 99), -r["age_days"]))
 
-    return columns, data
+    return columns, data, None, _build_chart(data)
+
+
+def _build_chart(data):
+    """Stacked bar of within-SLA vs SLA-breached open requests, by priority."""
+    if not data:
+        return None
+    order = sorted(_PRIORITY_ORDER, key=lambda p: _PRIORITY_ORDER[p])
+    within = {p: 0 for p in order}
+    breached = {p: 0 for p in order}
+    for row in data:
+        priority = row.get("priority") if row.get("priority") in within else "Low"
+        if row.get("sla_breached"):
+            breached[priority] += 1
+        else:
+            within[priority] += 1
+    return {
+        "type": "bar",
+        "data": {
+            "labels": order,
+            "datasets": [
+                {"name": frappe._("Within SLA"), "values": [within[p] for p in order]},
+                {"name": frappe._("SLA Breached"), "values": [breached[p] for p in order]},
+            ],
+        },
+    }

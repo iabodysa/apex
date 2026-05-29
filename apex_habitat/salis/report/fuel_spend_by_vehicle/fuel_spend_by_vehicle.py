@@ -67,4 +67,20 @@ def execute(filters=None):
 
     data.sort(key=lambda r: r["total_amount"], reverse=True)
 
-    return columns, data
+    return columns, data, None, _build_chart(data)
+
+
+def _build_chart(data):
+    """Bar chart of total fuel spend for the highest-spend vehicles."""
+    if not data:
+        return None
+    top = data[:10]
+    labels = [r.get("vehicle") or _("Unspecified") for r in top]
+    values = [round(r.get("total_amount") or 0.0, 2) for r in top]
+    return {
+        "type": "bar",
+        "data": {
+            "labels": labels,
+            "datasets": [{"name": _("Total Amount"), "values": values}],
+        },
+    }

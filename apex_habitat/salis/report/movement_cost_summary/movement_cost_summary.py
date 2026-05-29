@@ -16,6 +16,10 @@ def execute(filters=None):
     if filters:
         if filters.get("status"):
             query_filters["status"] = filters["status"]
+        if filters.get("company"):
+            query_filters["company"] = filters["company"]
+        if filters.get("cost_center"):
+            query_filters["cost_center"] = filters["cost_center"]
         if filters.get("from_date") and filters.get("to_date"):
             query_filters["request_date"] = ["between", [filters["from_date"], filters["to_date"]]]
         elif filters.get("from_date"):

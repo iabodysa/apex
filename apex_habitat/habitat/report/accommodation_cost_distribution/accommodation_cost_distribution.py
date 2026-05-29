@@ -18,9 +18,16 @@ def execute(filters=None):
         {"label": frappe._("Source Line ID"), "fieldname": "source_line_id", "fieldtype": "Data", "width": 140},
     ]
 
+    filters = filters or {}
     query_filters = {"posting_mode": "Operational Memo", "reversal_of": ["is", "not set"]}
-    if filters and filters.get("building"):
+    if filters.get("building"):
         query_filters["building"] = filters["building"]
+    if filters.get("project"):
+        query_filters["project"] = filters["project"]
+    if filters.get("company"):
+        query_filters["company"] = filters["company"]
+    if filters.get("cost_center"):
+        query_filters["cost_center"] = filters["cost_center"]
 
     rows = frappe.get_all(
         "Accommodation Ledger",

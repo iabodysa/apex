@@ -74,4 +74,22 @@ def execute(filters=None):
 
     data = sorted(groups.values(), key=lambda r: (r["vehicle"], r["period_month"]))
 
-    return columns, data
+    return columns, data, None, _build_chart(data)
+
+
+def _build_chart(data):
+    """Bar chart of the largest fuel variance (quota - consumed) per vehicle/period."""
+    if not data:
+        return None
+    ranked = sorted(data, key=lambda r: abs(r.get("variance") or 0.0), reverse=True)[:10]
+    if not ranked:
+        return None
+    labels = [f"{r['vehicle']} {r['period_month']}".strip() for r in ranked]
+    values = [round(r.get("variance") or 0.0, 2) for r in ranked]
+    return {
+        "type": "bar",
+        "data": {
+            "labels": labels,
+            "datasets": [{"name": frappe._("Variance (L)"), "values": values}],
+        },
+    }

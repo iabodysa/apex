@@ -11,7 +11,9 @@ from frappe.utils import add_days, flt, getdate, today
 
 def execute(filters=None):
     filters = filters or {}
-    return get_columns(), get_data(filters)
+    rows = _fetch_rows(filters)
+    data = get_data(rows)
+    return get_columns(), data, None, _build_chart(rows)
 
 
 def get_columns():
@@ -26,20 +28,22 @@ def get_columns():
     ]
 
 
-def get_data(filters):
+def _fetch_rows(filters):
     to_date = filters.get("to_date") or today()
     from_date = filters.get("from_date") or add_days(getdate(to_date), -30)
     conditions = {"snapshot_date": ["between", [from_date, to_date]]}
     if filters.get("building"):
         conditions["building"] = filters["building"]
 
-    rows = frappe.get_all(
+    return frappe.get_all(
         "Accommodation Occupancy Snapshot",
         filters=conditions,
-        fields=["building", "occupancy_percent", "available_capacity"],
-        order_by="building asc",
+        fields=["building", "snapshot_date", "occupancy_percent", "available_capacity"],
+        order_by="snapshot_date asc, building asc",
     )
 
+
+def get_data(rows):
     agg = {}
     for r in rows:
         a = agg.setdefault(r.building, {"occ": [], "avail": [], "over": 0})
@@ -63,3 +67,26 @@ def get_data(filters):
             "avg_avail": flt(sum(avail) / len(avail), 2),
         })
     return sorted(data, key=lambda x: x["building"])
+
+
+def _build_chart(rows):
+    """Line chart of average occupancy % across all buildings, per snapshot date."""
+    if not rows:
+        return None
+    by_date = {}
+    for r in rows:
+        day = r.get("snapshot_date")
+        if not day:
+            continue
+        by_date.setdefault(str(day), []).append(flt(r.occupancy_percent))
+    if not by_date:
+        return None
+    labels = sorted(by_date)
+    values = [flt(sum(by_date[d]) / len(by_date[d]), 2) for d in labels]
+    return {
+        "type": "line",
+        "data": {
+            "labels": labels,
+            "datasets": [{"name": _("Avg Occupancy %"), "values": values}],
+        },
+    }

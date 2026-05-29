@@ -14,9 +14,14 @@ def execute(filters=None):
         {"label": frappe._("Status"), "fieldname": "status", "fieldtype": "Data", "width": 110},
     ]
 
+    filters = filters or {}
     query_filters = {"status": ["in", ["Open", "Assigned", "In Progress", "Reopened"]]}
-    if filters and filters.get("building"):
+    if filters.get("building"):
         query_filters["building"] = filters["building"]
+    if filters.get("company"):
+        query_filters["company"] = filters["company"]
+    if filters.get("cost_center"):
+        query_filters["cost_center"] = filters["cost_center"]
 
     data = frappe.get_all(
         "Maintenance Request",

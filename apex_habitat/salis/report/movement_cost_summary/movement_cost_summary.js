@@ -1,5 +1,5 @@
 // Copyright (c) 2026, AFMCO and contributors
-frappe.query_reports["Salis Payment Register"] = {
+frappe.query_reports["Movement Cost Summary"] = {
 	filters: [
 		{
 			fieldname: "company",
@@ -15,22 +15,10 @@ frappe.query_reports["Salis Payment Register"] = {
 			options: "Cost Center",
 		},
 		{
-			fieldname: "project",
-			label: __("Project"),
-			fieldtype: "Link",
-			options: "Project",
-		},
-		{
-			fieldname: "expense_type",
-			label: __("Expense Type"),
-			fieldtype: "Select",
-			options: ["", "Fuel", "Rental", "Fine / Violation", "Sponsorship Fee", "Maintenance", "Other"].join("\n"),
-		},
-		{
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "Select",
-			options: ["", "Draft", "Pending Finance", "Approved by Finance", "Paid", "Rejected", "Cancelled"].join("\n"),
+			options: ["", "Open", "Acknowledged", "Approved", "Recovered", "Waived", "Rejected"].join("\n"),
 		},
 		{
 			fieldname: "from_date",

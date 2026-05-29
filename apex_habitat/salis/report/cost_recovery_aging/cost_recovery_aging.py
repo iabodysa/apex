@@ -119,4 +119,21 @@ def execute(filters=None):
     if data:
         data.append(totals)
 
-    return columns, data
+    return columns, data, None, _build_chart(totals if data else None)
+
+
+def _build_chart(totals):
+    """Bar chart of open recovery exposure across the four aging buckets."""
+    if not totals:
+        return None
+    buckets = ["b_0_30", "b_31_60", "b_61_90", "b_90_plus"]
+    values = [round(totals.get(b) or 0.0, 2) for b in buckets]
+    if not any(values):
+        return None
+    return {
+        "type": "bar",
+        "data": {
+            "labels": [_("0-30"), _("31-60"), _("61-90"), _("90+")],
+            "datasets": [{"name": _("Open Exposure"), "values": values}],
+        },
+    }

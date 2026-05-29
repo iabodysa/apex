@@ -17,7 +17,7 @@ def execute(filters=None):
 
     query_filters = {}
     if filters:
-        for field in ("rental_office", "status", "period_month"):
+        for field in ("rental_office", "status", "period_month", "company"):
             if filters.get(field):
                 query_filters[field] = filters[field]
         if filters.get("from_date") and filters.get("to_date"):

@@ -17,9 +17,12 @@ def execute(filters=None):
         {"label": frappe._("Status"), "fieldname": "status", "fieldtype": "Data", "width": 110},
     ]
 
+    filters = filters or {}
     query_filters = {"docstatus": 1}
-    if filters and filters.get("building"):
+    if filters.get("building"):
         query_filters["building"] = filters["building"]
+    if filters.get("company"):
+        query_filters["company"] = filters["company"]
 
     rows = frappe.get_all(
         "Utility Bill Entry",
@@ -50,4 +53,22 @@ def execute(filters=None):
             "variance_from_avg_pct": flt(row.get("variance_from_avg_pct")),
             "status": row.status,
         })
-    return columns, data
+    return columns, data, None, _build_chart(data)
+
+
+def _build_chart(data):
+    """Bar chart of the highest absolute variance-from-average bills."""
+    if not data:
+        return None
+    ranked = sorted(data, key=lambda r: abs(flt(r.get("variance_from_avg_pct"))), reverse=True)[:10]
+    if not ranked:
+        return None
+    labels = [r.get("name") for r in ranked]
+    values = [flt(r.get("variance_from_avg_pct")) for r in ranked]
+    return {
+        "type": "bar",
+        "data": {
+            "labels": labels,
+            "datasets": [{"name": frappe._("Variance from Avg (%)"), "values": values}],
+        },
+    }

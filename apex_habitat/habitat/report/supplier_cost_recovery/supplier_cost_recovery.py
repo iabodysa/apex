@@ -45,6 +45,12 @@ def get_data(filters):
     }
     if filters.get("supplier"):
         conditions["billed_to_supplier"] = filters["supplier"]
+    if filters.get("project"):
+        conditions["project"] = filters["project"]
+    if filters.get("company"):
+        conditions["company"] = filters["company"]
+    if filters.get("cost_center"):
+        conditions["cost_center"] = filters["cost_center"]
 
     rows = frappe.get_all(
         "Accommodation Ledger",

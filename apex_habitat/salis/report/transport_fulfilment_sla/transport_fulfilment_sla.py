@@ -40,8 +40,8 @@ def execute(filters=None):
         {"label": _("Fulfilled Trips"), "fieldname": "fulfilled_trips", "fieldtype": "Int", "width": 130},
         {"label": _("Requests Served"), "fieldname": "requests_served", "fieldtype": "Int", "width": 140},
         {"label": _("Workers Moved"), "fieldname": "workers_moved", "fieldtype": "Int", "width": 130},
-        {"label": _("On Time"), "fieldname": "on_time_trips", "fieldtype": "Int", "width": 100},
-        {"label": _("On-Time %"), "fieldname": "on_time_pct", "fieldtype": "Percent", "width": 120},
+        {"label": _("Completed (timed)"), "fieldname": "on_time_trips", "fieldtype": "Int", "width": 140},
+        {"label": _("Timed %"), "fieldname": "on_time_pct", "fieldtype": "Percent", "width": 110},
     ]
 
     if not frappe.db.exists("DocType", "Trip Fulfilment Ledger"):
@@ -55,7 +55,7 @@ def execute(filters=None):
     rows = frappe.get_all(
         "Trip Fulfilment Ledger",
         filters=ledger_filters,
-        fields=["trip_date", "transport_request", "worker_count", "on_time"],
+        fields=["trip_date", "transport_request", "worker_count", "has_timestamps"],
     )
 
     summary = {}
@@ -77,7 +77,7 @@ def execute(filters=None):
         )
         bucket["fulfilled_trips"] += 1
         bucket["workers_moved"] += entry.get("worker_count") or 0
-        if entry.get("on_time"):
+        if entry.get("has_timestamps"):
             bucket["on_time_trips"] += 1
         if entry.get("transport_request"):
             bucket["_served"].add(entry["transport_request"])
@@ -125,4 +125,20 @@ def execute(filters=None):
 
     data.sort(key=lambda r: (r["trip_date"] is None, r["trip_date"] or getdate(nowdate())))
 
-    return columns, data
+    return columns, data, None, _build_chart(data)
+
+
+def _build_chart(data):
+    """Line chart of the daily on-time fulfilment rate."""
+    dated = [r for r in data if r.get("trip_date")]
+    if not dated:
+        return None
+    labels = [str(r["trip_date"]) for r in dated]
+    values = [round(r.get("on_time_pct") or 0.0, 1) for r in dated]
+    return {
+        "type": "line",
+        "data": {
+            "labels": labels,
+            "datasets": [{"name": _("On-Time %"), "values": values}],
+        },
+    }

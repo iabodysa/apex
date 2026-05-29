@@ -20,7 +20,7 @@ def execute(filters=None):
 
     query_filters = {}
     if filters:
-        for field in ("status", "expense_type", "company", "cost_center"):
+        for field in ("status", "expense_type", "company", "cost_center", "project"):
             if filters.get(field):
                 query_filters[field] = filters[field]
         if filters.get("from_date") and filters.get("to_date"):

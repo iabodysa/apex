@@ -25,6 +25,12 @@ def execute(filters=None):
         query_filters["building"] = filters["building"]
     if filters.get("ledger_type"):
         query_filters["ledger_type"] = filters["ledger_type"]
+    if filters.get("project"):
+        query_filters["project"] = filters["project"]
+    if filters.get("company"):
+        query_filters["company"] = filters["company"]
+    if filters.get("cost_center"):
+        query_filters["cost_center"] = filters["cost_center"]
     if filters.get("from_date") and filters.get("to_date"):
         query_filters["posting_date"] = ["between", [filters["from_date"], filters["to_date"]]]
     elif filters.get("from_date"):
