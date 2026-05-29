@@ -6,7 +6,7 @@ import frappe
 # duplicates. Remove any Salis-module Workspace whose name is not in the shipped
 # set. Idempotent and guarded; safe on fresh installs (nothing stale to remove).
 
-SHIPPED = {"Salis", "Workers", "Fleet", "Fuel", "Rentals", "Compliance", "Salis Setup"}
+SHIPPED = {"Salis", "Workers", "Fleet", "Fuel", "Rentals", "Compliance"}
 
 
 def execute():

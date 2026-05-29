@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.16.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.16.0 — settings, console and Salis setup unified in one Apex Core workspace",
+        "app_name": "apex_habitat",
+        "link": "/app/apex-core",
+        "creation": "2026-07-02 09:00:00",
+    },
+    {
+        "title": "v1.16.0: The Habitat Setup, Habitat Console and Salis Setup workspaces are merged into a single Apex Core workspace, so all configuration and admin tools share one home",
+        "app_name": "apex_habitat",
+        "link": "/app/apex-core",
+        "creation": "2026-07-02 09:01:00",
+    },
+    {
+        "title": "v1.16.0: Less sidebar clutter — three separate admin workspaces become one, with every link, shortcut and card carried over",
+        "app_name": "apex_habitat",
+        "link": "/app/apex-core",
+        "creation": "2026-07-02 09:02:00",
+    },
     # v1.15.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.15.0 — shared settings get a dedicated Apex Core workspace",

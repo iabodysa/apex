@@ -124,9 +124,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Setup",
+   "label": "Apex Core",
    "link_type": "Workspace",
-   "link_to": "Salis Setup",
+   "link_to": "Apex Core",
    "idx": 7
   },
   {
@@ -205,5 +205,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 21:30:00.000000"
+ "modified": "2026-05-30 12:00:00.000000"
 }
