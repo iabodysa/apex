@@ -1,11 +1,28 @@
 """Fuel Exception Case controller.
 
 Submittable control record for disputed or suspicious fuel-control cases.
-Holds usage/GPS evidence, enforces a status state
-machine, requires evidence before a case may be resolved or closed, and
-enforces non-raiser closure (segregation of duties — the user who raised the
-case may not be the user who closes it). Submit is gated behind an
+Holds usage/GPS evidence, requires evidence before a case may be resolved, and
+enforces non-raiser resolution (segregation of duties — the user who raised the
+case may not be the user who resolves it). Submit is gated behind an
 Operations-tier Approval Request.
+
+Status transitions are owned by the native **Fuel Exception Case Workflow** (see
+``salis/workflow/fuel_exception_case_workflow/``), not by this controller. The
+investigation states (Open -> Under Investigation -> Evidence Required) are
+pre-submit; the document is submitted (docstatus 0 -> 1) by the ``Resolve`` or
+``Reject`` transition (where the Operations-tier Delegation-of-Authority gate in
+``before_submit`` fires); ``Closed`` is the post-submit terminal, reached from
+``Resolved`` / ``Rejected`` as a docstatus-1 update (it finalizes, not voids, the
+case). The ``Resolve`` transition carries the Segregation-of-Duties gate
+(``allow_self_approval=0`` + ``reported_by != session.user``) so the raiser can
+never resolve their own case. The state field is ``allow_on_submit`` so a
+post-submit transition can move the status.
+
+This controller keeps only what the workflow cannot express: the reporter stamp
+the SoD gate relies on, the Operations-tier Delegation-of-Authority gate, the
+evidence-before-resolution requirement plus the non-raiser closer stamp/guard
+(defence in depth alongside the workflow condition), and the initial-status
+guard (a case must be created at Open).
 """
 
 from __future__ import annotations
@@ -16,19 +33,25 @@ from frappe.model.document import Document
 
 from apex_habitat.salis.salis_lib import ensure_approval
 
-# Allowed forward status transitions. A status may always remain unchanged.
-# Open -> Under Investigation -> Evidence Required -> Resolved/Rejected -> Closed.
-# Rejected and Closed are reachable from the investigation states as exits.
-_ALLOWED_TRANSITIONS = {
-	"Open": {"Under Investigation", "Rejected", "Closed"},
-	"Under Investigation": {"Evidence Required", "Resolved", "Rejected", "Closed"},
-	"Evidence Required": {"Under Investigation", "Resolved", "Rejected", "Closed"},
-	"Resolved": {"Closed", "Rejected"},
-	"Rejected": {"Closed"},
-	"Closed": set(),
-}
+# Known status values. The Select carries these for filtering / colour, but the
+# Fuel Exception Case Workflow owns the *transitions* (which status is reachable
+# from which, by whom). This controller only rejects an unknown value and pins
+# the initial status to Open.
+VALID_STATUSES = (
+	"Open",
+	"Under Investigation",
+	"Evidence Required",
+	"Resolved",
+	"Rejected",
+	"Closed",
+)
 
-# Terminal/closing states that require captured evidence and a distinct closer.
+# Closing states that require captured evidence and a distinct closer. The
+# evidence/non-raiser gate fires on validate (i.e. on the Resolve transition,
+# which submits the case). Closed is reached post-submit via the workflow's
+# cancel transition, where validate does not run, so the practical enforcement
+# point is Resolved; Closed is kept here as defence in depth for any non-cancel
+# path that lands the document in Closed.
 _CLOSING_STATUSES = {"Resolved", "Closed"}
 
 
@@ -38,7 +61,9 @@ class FuelExceptionCase(Document):
 
 	def validate(self):
 		self._default_reporter()
-		self._enforce_status_flow()
+		if self.status and self.status not in VALID_STATUSES:
+			frappe.throw(_("Invalid status: {0}").format(self.status))
+		self._guard_initial_status()
 		self._enforce_closure_controls()
 
 	def before_submit(self):
@@ -53,25 +78,20 @@ class FuelExceptionCase(Document):
 		if not self.reported_by:
 			self.reported_by = frappe.session.user
 
-	def _enforce_status_flow(self):
-		"""Reject illegal status jumps."""
-		new_status = self.status or "Open"
-		previous = self.get_doc_before_save()
-		old_status = (previous.status if previous else None) or "Open"
-
-		if new_status == old_status:
-			return
-
-		allowed = _ALLOWED_TRANSITIONS.get(old_status, set())
-		if new_status not in allowed:
+	def _guard_initial_status(self):
+		"""A new case must be created at the initial state (Open). Later states are
+		reached only through the Fuel Exception Case Workflow, which the desk
+		drives — this closes the insert-bypass the workflow itself cannot cover (a
+		brand-new document inserted directly at a later/terminal status)."""
+		if self.is_new() and self.status and self.status != "Open":
 			frappe.throw(
-				_("Cannot change Fuel Exception Case status from {0} to {1}.").format(
-					_(old_status), _(new_status)
+				_("A Fuel Exception Case must be created with status Open; {0} is reached through the workflow.").format(
+					_(self.status)
 				)
 			)
 
 	def _enforce_closure_controls(self):
-		"""Require evidence before resolution/closure and enforce non-raiser closure (segregation of duties)."""
+		"""Require evidence before resolution and enforce non-raiser resolution (segregation of duties)."""
 		if self.status not in _CLOSING_STATUSES:
 			return
 

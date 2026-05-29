@@ -1,0 +1,137 @@
+{
+ "doctype": "Workflow",
+ "name": "Fuel Claim Workflow",
+ "workflow_name": "Fuel Claim Workflow",
+ "document_type": "Fuel Claim",
+ "workflow_state_field": "status",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "states": [
+  {
+   "doctype": "Workflow Document State",
+   "state": "Draft",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Submitted to Movement",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Reconciled",
+   "doc_status": "0",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Disputed",
+   "doc_status": "0",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Approved",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Closed",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  }
+ ],
+ "transitions": [
+  {
+   "doctype": "Workflow Transition",
+   "state": "Draft",
+   "action": "Submit to Movement",
+   "next_state": "Submitted to Movement",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Draft",
+   "action": "Submit to Movement",
+   "next_state": "Submitted to Movement",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Draft",
+   "action": "Submit to Movement",
+   "next_state": "Submitted to Movement",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Submitted to Movement",
+   "action": "Reconcile",
+   "next_state": "Reconciled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Submitted to Movement",
+   "action": "Dispute",
+   "next_state": "Disputed",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Reconciled",
+   "action": "Dispute",
+   "next_state": "Disputed",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Disputed",
+   "action": "Re-submit",
+   "next_state": "Submitted to Movement",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Reconciled",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.requested_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Close",
+   "next_state": "Closed",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  }
+ ]
+}

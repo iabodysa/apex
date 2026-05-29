@@ -102,6 +102,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",

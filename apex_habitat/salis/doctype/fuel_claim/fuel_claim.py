@@ -5,12 +5,26 @@ Movement is a service provider: Operations submits the
 claim, Movement reconciles it against the internal Fuel Consumption Ledger.
 
 The controller derives consumed litres from the ledger (sum of litres for the
-claim's vehicle + period), computes the claimed-vs-consumed variance, enforces
-a Draft -> Submitted to Movement -> Reconciled -> Approved (with Disputed /
-Closed exits) status flow, and applies a Decentralized-of-Authority gate on
-submit. A quota-increase claim or a large variance (> 10% of claimed litres)
-demands the higher Operations tier and a Finance consult note; routine claims
-settle at the Regional tier.
+claim's vehicle + period), computes the claimed-vs-consumed variance, and
+applies a Delegation-of-Authority gate on submit. A quota-increase claim or a
+large variance (> 10% of claimed litres) demands the higher Operations tier and
+a Finance consult note; routine claims settle at the Regional tier.
+
+Status transitions are owned by the native **Fuel Claim Workflow** (see
+``salis/workflow/fuel_claim_workflow/``), not by this controller. The workflow
+enforces the role per transition and the Segregation-of-Duties gate on the
+approval (``allow_self_approval=0`` + ``requested_by != session.user``). The
+document is submitted (docstatus 0 -> 1) by the ``Approve`` transition (where the
+Delegation-of-Authority gate in ``before_submit`` fires); ``Closed`` is the
+post-submit terminal, reached from ``Approved`` as a docstatus-1 update (it
+finalizes, not voids, the claim — there is no cancel side-effect). The state
+field is ``allow_on_submit`` so a post-submit transition can move the status.
+
+This controller keeps only what the workflow cannot express: the required-field
+validation, the ledger-derived consumption/variance computation, the financial
+reference defaults, the Delegation-of-Authority approval gate (``ensure_approval``
+against an Approval Request + tier), the initial-status guard (a claim must be
+created at Draft), and the server-side requester stamp the SoD gate relies on.
 """
 
 from __future__ import annotations
@@ -25,15 +39,18 @@ from apex_habitat.salis.salis_lib import ensure_approval
 # escalated to the Operations tier (with a Finance consult note).
 LARGE_VARIANCE_RATIO = 0.1
 
-# Allowed forward status transitions. A status may always remain unchanged.
-_ALLOWED_TRANSITIONS = {
-	"Draft": {"Submitted to Movement", "Disputed", "Closed"},
-	"Submitted to Movement": {"Reconciled", "Disputed", "Closed"},
-	"Reconciled": {"Approved", "Disputed", "Closed"},
-	"Approved": {"Closed", "Disputed"},
-	"Disputed": {"Submitted to Movement", "Reconciled", "Closed"},
-	"Closed": set(),
-}
+# Known status values. The Select carries these for filtering / colour, but the
+# Fuel Claim Workflow owns the *transitions* (which status is reachable from
+# which, by whom). This controller only rejects an unknown value and pins the
+# initial status to Draft.
+VALID_STATUSES = (
+	"Draft",
+	"Submitted to Movement",
+	"Reconciled",
+	"Approved",
+	"Disputed",
+	"Closed",
+)
 
 
 class FuelClaim(Document):
@@ -46,11 +63,13 @@ class FuelClaim(Document):
 	def validate(self):
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
+		if self.status and self.status not in VALID_STATUSES:
+			frappe.throw(_("Invalid status: {0}").format(self.status))
 		if (self.claimed_litres or 0) <= 0:
 			frappe.throw(_("Claimed Litres must be greater than zero."))
 		self._set_financial_defaults()
 		self._compute_consumption()
-		self._enforce_status_flow()
+		self._guard_initial_status()
 
 	def _set_financial_defaults(self):
 		"""Default company and cost center from Salis Settings for reporting and
@@ -88,20 +107,15 @@ class FuelClaim(Document):
 		self.consumed_litres = consumed
 		self.variance_litres = (self.claimed_litres or 0) - consumed
 
-	def _enforce_status_flow(self):
-		"""Reject illegal status jumps (e.g. Draft -> Approved, Closed -> Draft)."""
-		new_status = self.status or "Draft"
-		previous = self.get_doc_before_save()
-		old_status = (previous.status if previous else None) or "Draft"
-
-		if new_status == old_status:
-			return
-
-		allowed = _ALLOWED_TRANSITIONS.get(old_status, set())
-		if new_status not in allowed:
+	def _guard_initial_status(self):
+		"""A new claim must be created at the initial state (Draft). Later states
+		are reached only through the Fuel Claim Workflow, which the desk drives —
+		this closes the insert-bypass the workflow itself cannot cover (a brand-new
+		document inserted directly at a later/terminal status)."""
+		if self.is_new() and self.status and self.status != "Draft":
 			frappe.throw(
-				_("Cannot change Fuel Claim status from {0} to {1}.").format(
-					_(old_status), _(new_status)
+				_("A Fuel Claim must be created with status Draft; {0} is reached through the workflow.").format(
+					_(self.status)
 				)
 			)
 

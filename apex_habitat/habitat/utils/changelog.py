@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.12.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.12.0 — fuel claims and exception cases now run on guided approval workflows",
+        "app_name": "apex_habitat",
+        "link": "/app/fuel-claim",
+        "creation": "2026-06-26 09:00:00",
+    },
+    {
+        "title": "v1.12.0: A fuel claim now follows a clear path — submit to Movement, reconcile, approve, close — and the person who raised it cannot approve their own",
+        "app_name": "apex_habitat",
+        "link": "/app/fuel-claim",
+        "creation": "2026-06-26 09:01:00",
+    },
+    {
+        "title": "v1.12.0: Fuel exception cases move through an investigation flow — open, investigate, request evidence, resolve or reject, close — with evidence required before resolution",
+        "app_name": "apex_habitat",
+        "link": "/app/fuel-exception-case",
+        "creation": "2026-06-26 09:02:00",
+    },
     # v1.11.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.11.0 — fuel requests now run on a clear, role-based approval workflow",
