@@ -245,7 +245,28 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
+"links": [
+  {
+   "group": "Accommodation",
+   "link_doctype": "Accommodation Checkout",
+   "link_fieldname": "assignment"
+  },
+  {
+   "group": "Accommodation",
+   "link_doctype": "Room Bed Transfer",
+   "link_fieldname": "assignment"
+  },
+  {
+   "group": "Reports",
+   "link_doctype": "Idle Resident Report",
+   "link_fieldname": "assignment"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Accommodation Ledger",
+   "link_fieldname": "assignment"
+  }
+ ],
  "modified": "2026-05-25 02:00:45.440671",
  "modified_by": "Administrator",
  "module": "Habitat",

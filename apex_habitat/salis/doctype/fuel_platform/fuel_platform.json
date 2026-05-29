@@ -65,7 +65,18 @@
    "label": "Notes"
   }
  ],
- "links": [],
+"links": [
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Request",
+   "link_fieldname": "fuel_platform"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Daily Log",
+   "link_fieldname": "fuel_platform"
+  }
+ ],
  "modified": "2026-05-26 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",

@@ -186,7 +186,23 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
+"links": [
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "subcontractor_dispatched"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Work Order",
+   "link_fieldname": "subcontractor_service_order"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Cleaning Log",
+   "link_fieldname": "subcontractor_service_order"
+  }
+ ],
  "modified": "2026-05-25 01:05:32.070295",
  "modified_by": "Administrator",
  "module": "Habitat",

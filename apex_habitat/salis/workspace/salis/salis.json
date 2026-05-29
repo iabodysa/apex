@@ -27,7 +27,7 @@
  "is_hidden": 0,
  "sequence_id": 2.0,
  "parent_page": "",
- "content": "[{\"id\": \"salisHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"salisKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"salisKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Transport Requests\", \"col\": 3}}, {\"id\": \"salisKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Approvals\", \"col\": 3}}, {\"id\": \"salisKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"salisHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salisQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"salisQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"salisQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"salisQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"salisHdrDash\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Division Views</b></span>\", \"col\": 12}}, {\"id\": \"salisDashWT\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Transport Plan\", \"col\": 3}}, {\"id\": \"salisDashRF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Fleet Register\", \"col\": 3}}, {\"id\": \"salisHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"salisCardNav\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement Areas\", \"col\": 4}}, {\"id\": \"salisCardOv\", \"type\": \"card\", \"data\": {\"card_name\": \"Overview\", \"col\": 4}}]",
+ "content": "[{\"id\": \"salisHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"salisOnb\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Salis Go-Live\", \"col\": 12}}, {\"id\": \"salisHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"salisKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"salisKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Transport Requests\", \"col\": 3}}, {\"id\": \"salisKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Approvals\", \"col\": 3}}, {\"id\": \"salisKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"salisHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"salisChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Vehicles by Status\", \"col\": 6}}, {\"id\": \"salisChart1\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Spend Trend\", \"col\": 6}}, {\"id\": \"salisChart2\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Rental Accrual Trend\", \"col\": 12}}, {\"id\": \"salisHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salisQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"salisQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"salisQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"salisQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"salisHdrDash\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Division Views</b></span>\", \"col\": 12}}, {\"id\": \"salisDashWT\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Transport Plan\", \"col\": 3}}, {\"id\": \"salisDashRF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Fleet Register\", \"col\": 3}}, {\"id\": \"salisHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"salisCardNav\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement Areas\", \"col\": 4}}, {\"id\": \"salisCardOv\", \"type\": \"card\", \"data\": {\"card_name\": \"Overview\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -126,7 +126,7 @@
    "type": "Link",
    "label": "Setup",
    "link_type": "Workspace",
-   "link_to": "Setup",
+   "link_to": "Salis Setup",
    "idx": 7
   },
   {
@@ -143,9 +143,41 @@
    "link_to": "Movement KPI Summary",
    "idx": 9,
    "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fleet Manager Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Fleet Manager Dashboard",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Movement Operations Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Movement Operations Dashboard",
+   "idx": 11
   }
  ],
- "charts": [],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Vehicles by Status",
+   "label": "Vehicles by Status"
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Fuel Spend Trend",
+   "label": "Fuel Spend Trend"
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Rental Accrual Trend",
+   "label": "Rental Accrual Trend"
+  }
+ ],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -173,5 +205,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 20:00:00.000000"
+ "modified": "2026-05-29 21:30:00.000000"
 }

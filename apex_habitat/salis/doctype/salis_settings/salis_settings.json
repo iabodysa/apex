@@ -31,9 +31,7 @@
   "authority_tier_map",
   "salis_settings_tab_portal",
   "salis_settings_sec_portal",
-  "enable_driver_portal",
-  "salis_settings_sec_naming",
-  "naming_notes"
+  "enable_driver_portal"
  ],
  "fields": [
   {
@@ -199,18 +197,6 @@
    "fieldname": "enable_driver_portal",
    "fieldtype": "Check",
    "label": "Enable Driver Portal"
-  },
-  {
-   "fieldname": "salis_settings_sec_naming",
-   "fieldtype": "Section Break",
-   "label": "Naming Notes"
-  },
-  {
-   "default": "Handover: GV-.######  |  Vehicle Stop: SV-.######  |  Driver Stop: SD-.######  |  Fuel: NF-.######  |  Ticket: TK-.######",
-   "description": "Reference notes for operational naming series used across Salis transactions.",
-   "fieldname": "naming_notes",
-   "fieldtype": "Small Text",
-   "label": "Naming Series Notes"
   }
  ],
  "issingle": 1,

@@ -280,6 +280,13 @@ after_install = [
     # never clobbers the customer's navbar). Surfaces the Salis workspace and the
     # Dispatch Board page one click away from the desk Help menu.
     "apex_habitat.salis.navbar_seed.seed_salis_navbar_help_links",
+    # Salis communication artifacts — Email Templates + Auto Email Reports.
+    # Mirrors Habitat's email_templates_seed / auto_email_reports_seed. Idempotent
+    # + existence-guarded (Auto Email Reports created disabled, addressed to
+    # Administrator as a placeholder). Also run on after_migrate and from the
+    # v1_x patch (single source of truth), so replaying them is safe.
+    "apex_habitat.salis.email_templates_seed.seed_salis_email_templates",
+    "apex_habitat.salis.auto_email_reports_seed.seed_salis_auto_email_reports",
 ]
 # Dashboards seed after migrate (when their charts/number cards already exist).
 after_migrate = [
@@ -295,6 +302,10 @@ after_migrate = [
     # Salis navbar Help-dropdown links — keep already-installed sites in sync on
     # migrate (idempotent; appends only the links that are missing).
     "apex_habitat.salis.navbar_seed.seed_salis_navbar_help_links",
+    # Salis communication artifacts — keep already-installed sites in sync on
+    # migrate (idempotent + existence-guarded; created only if absent).
+    "apex_habitat.salis.email_templates_seed.seed_salis_email_templates",
+    "apex_habitat.salis.auto_email_reports_seed.seed_salis_auto_email_reports",
 ]
 
 # Frappe What's New feed — appears in desk notification area, not as a popup

@@ -115,6 +115,22 @@
    "link_to": "Vehicle Utilisation",
    "idx": 9,
    "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Representatives Fleet Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Salis - Representatives Fleet",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fleet Supervisor Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Fleet Supervisor Dashboard",
+   "idx": 11
   }
  ],
  "charts": [],
@@ -145,5 +161,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 20:00:00.000000"
+ "modified": "2026-05-29 21:30:00.000000"
 }

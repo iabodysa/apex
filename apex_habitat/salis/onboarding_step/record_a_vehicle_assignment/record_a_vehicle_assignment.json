@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Record a Vehicle Assignment",
+ "title": "Record a Vehicle Assignment",
+ "action": "Create Entry",
+ "reference_document": "Vehicle Assignment",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Assign a vehicle to a driver or project to start the movement lifecycle.",
+ "action_label": "Create Vehicle Assignment"
+}

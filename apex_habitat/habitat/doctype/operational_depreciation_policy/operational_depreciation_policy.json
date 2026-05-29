@@ -88,6 +88,26 @@
       "idx": 10
     }
   ],
+"links": [
+    {
+      "group": "Custody",
+      "link_doctype": "Custody Article",
+      "link_fieldname": "depreciation_policy"
+    },
+    {
+      "group": "Custody",
+      "link_doctype": "Custody Asset Category",
+      "link_fieldname": "default_depreciation_policy"
+    },
+    {
+      "group": "Depreciation",
+      "is_child_table": 1,
+      "link_doctype": "Depreciation Snapshot Item",
+      "link_fieldname": "policy",
+      "parent_doctype": "Non-Financial Depreciation Snapshot",
+      "table_fieldname": "items"
+    }
+  ],
   "permissions": [
     {
       "doctype": "DocPerm",

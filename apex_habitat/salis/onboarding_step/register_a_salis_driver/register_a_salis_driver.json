@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Register a Salis Driver",
+ "title": "Register a Salis Driver",
+ "action": "Create Entry",
+ "reference_document": "Salis Driver",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Add the first driver, including license details used for clearance and dispatch.",
+ "action_label": "Register Salis Driver"
+}

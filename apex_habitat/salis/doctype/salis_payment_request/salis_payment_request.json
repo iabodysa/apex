@@ -221,7 +221,18 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
+"links": [
+  {
+   "group": "Rental",
+   "link_doctype": "Rental Settlement",
+   "link_fieldname": "payment_request"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Movement Cost Recovery",
+   "link_fieldname": "payment_request"
+  }
+ ],
  "modified": "2026-05-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",

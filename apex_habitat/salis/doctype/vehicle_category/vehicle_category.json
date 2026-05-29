@@ -52,7 +52,13 @@
    "label": "Description"
   }
  ],
- "links": [],
+"links": [
+  {
+   "group": "Fleet",
+   "link_doctype": "Salis Vehicle",
+   "link_fieldname": "vehicle_category"
+  }
+ ],
  "modified": "2026-05-26 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",

@@ -65,7 +65,13 @@
    "label": "Notes"
   }
  ],
- "links": [],
+"links": [
+  {
+   "group": "Service",
+   "link_doctype": "Wash Request",
+   "link_fieldname": "wash_platform"
+  }
+ ],
  "modified": "2026-05-26 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",

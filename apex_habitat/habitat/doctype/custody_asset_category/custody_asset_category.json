@@ -71,6 +71,18 @@
       "idx": 8
     }
   ],
+"links": [
+    {
+      "group": "Custody",
+      "link_doctype": "Custody Article",
+      "link_fieldname": "category"
+    },
+    {
+      "group": "Depreciation",
+      "link_doctype": "Operational Depreciation Policy",
+      "link_fieldname": "asset_category"
+    }
+  ],
   "permissions": [
     {
       "doctype": "DocPerm",

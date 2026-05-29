@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Register a Salis Vehicle",
+ "title": "Register a Salis Vehicle",
+ "action": "Create Entry",
+ "reference_document": "Salis Vehicle",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Add the first vehicle to the fleet so it can be assigned, fuelled, and dispatched.",
+ "action_label": "Register Salis Vehicle"
+}

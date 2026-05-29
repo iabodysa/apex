@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Create a Vehicle Category",
+ "title": "Create a Vehicle Category",
+ "action": "Create Entry",
+ "reference_document": "Vehicle Category",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Define the first vehicle class (e.g. Sedan, Bus, Pickup) used to group fleet vehicles.",
+ "action_label": "Create Vehicle Category"
+}

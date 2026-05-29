@@ -1,0 +1,39 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Salis Go-Live",
+ "title": "Salis Go-Live",
+ "module": "Salis",
+ "subtitle": "Set up your fleet and dispatch your first movement.",
+ "success_message": "Salis is live. Use the Dispatch Board to plan trips and assign vehicles.",
+ "is_complete": 0,
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Create a Vehicle Category"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Register a Salis Vehicle"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Register a Salis Driver"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Record a Vehicle Assignment"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Open the Dispatch Board"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Raise a Transport Request"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Raise a Fuel Request"
+  }
+ ]
+}

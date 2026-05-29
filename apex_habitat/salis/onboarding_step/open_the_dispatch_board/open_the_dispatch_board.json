@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Open the Dispatch Board",
+ "title": "Open the Dispatch Board",
+ "action": "Go to Page",
+ "path": "salis-dispatch-board",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Open the visual Dispatch Board to plan trips and assign vehicles to requests.",
+ "action_label": "Open Dispatch Board"
+}

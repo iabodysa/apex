@@ -121,15 +121,10 @@
    "label": "License Expiry"
   }
  ],
- "links": [
+"links": [
   {
    "group": "Fleet",
    "link_doctype": "Vehicle Assignment",
-   "link_fieldname": "driver"
-  },
-  {
-   "group": "Fleet",
-   "link_doctype": "Driver Stop",
    "link_fieldname": "driver"
   },
   {
@@ -138,8 +133,68 @@
    "link_fieldname": "driver"
   },
   {
+   "group": "Fleet",
+   "link_doctype": "Driver Clearance",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Driver Stop",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Dispatch Trip",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Route Plan",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Passenger Manifest",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Transport Request",
+   "link_fieldname": "assigned_driver"
+  },
+  {
    "group": "Fuel",
    "link_doctype": "Fuel Request",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Chip Request",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Topup Request",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Daily Log",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Exception Case",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Claim",
+   "link_fieldname": "driver"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Damage Write-Off",
    "link_fieldname": "driver"
   },
   {
@@ -148,8 +203,8 @@
    "link_fieldname": "driver"
   },
   {
-   "group": "Movement",
-   "link_doctype": "Dispatch Trip",
+   "group": "Costs",
+   "link_doctype": "Movement Cost Recovery",
    "link_fieldname": "driver"
   }
  ],

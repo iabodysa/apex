@@ -108,6 +108,56 @@
    "label": "Image"
   }
  ],
+"links": [
+  {
+   "group": "Custody",
+   "is_child_table": 1,
+   "link_doctype": "Custody Issue Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Custody Issue",
+   "table_fieldname": "items"
+  },
+  {
+   "group": "Custody",
+   "is_child_table": 1,
+   "link_doctype": "Custody Return Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Custody Return",
+   "table_fieldname": "items"
+  },
+  {
+   "group": "Custody",
+   "is_child_table": 1,
+   "link_doctype": "Custody Damage Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Custody Damage Assessment",
+   "table_fieldname": "items"
+  },
+  {
+   "group": "Accommodation",
+   "is_child_table": 1,
+   "link_doctype": "Accommodation Custody Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Accommodation Assignment",
+   "table_fieldname": "custody_items"
+  },
+  {
+   "group": "Accommodation",
+   "is_child_table": 1,
+   "link_doctype": "Accommodation Custody Return Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Accommodation Checkout",
+   "table_fieldname": "custody_return_items"
+  },
+  {
+   "group": "Depreciation",
+   "is_child_table": 1,
+   "link_doctype": "Depreciation Snapshot Item",
+   "link_fieldname": "article",
+   "parent_doctype": "Non-Financial Depreciation Snapshot",
+   "table_fieldname": "items"
+  }
+ ],
  "permissions": [
   {
    "doctype": "DocPerm",

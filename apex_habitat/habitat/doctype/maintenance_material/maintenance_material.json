@@ -94,6 +94,32 @@
    "idx": 10
   }
  ],
+"links": [
+  {
+   "group": "Templates",
+   "is_child_table": 1,
+   "link_doctype": "Maintenance Material Template Item",
+   "link_fieldname": "material",
+   "parent_doctype": "Maintenance Material Template",
+   "table_fieldname": "items"
+  },
+  {
+   "group": "Procurement",
+   "is_child_table": 1,
+   "link_doctype": "Maintenance Procurement Item",
+   "link_fieldname": "material",
+   "parent_doctype": "Maintenance Request",
+   "table_fieldname": "procurement_items"
+  },
+  {
+   "group": "Procurement",
+   "is_child_table": 1,
+   "link_doctype": "Maintenance Procurement Item",
+   "link_fieldname": "material",
+   "parent_doctype": "Maintenance Work Order",
+   "table_fieldname": "procurement_items"
+  }
+ ],
  "permissions": [
   {
    "doctype": "DocPerm",

@@ -206,6 +206,26 @@
    "idx": 24
   }
  ],
+"links": [
+  {
+   "group": "Custody",
+   "link_doctype": "Facility Asset Movement",
+   "link_fieldname": "facility_asset"
+  },
+  {
+   "group": "Custody",
+   "is_child_table": 1,
+   "link_doctype": "Facility Custody Item",
+   "link_fieldname": "facility_asset",
+   "parent_doctype": "Facility Asset Custody Assignment",
+   "table_fieldname": "assets_in_custody"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "related_facility_asset"
+  }
+ ],
  "permissions": [
   {
    "doctype": "DocPerm",

@@ -77,3 +77,15 @@ apex_habitat.patches.v1_x.drop_salis_activity_log
 #   Project Manager, Regional Operations Manager, Operations Manager
 #       -> Fleet Project Manager / Fleet Manager
 apex_habitat.patches.v1_x.consolidate_salis_roles
+
+# v1.x — Salis communication artifacts (Email Templates + Auto Email Reports)
+# PERMANENT (keep, do NOT prune): seeds DISTINCT records, idempotent, also called
+# from after_install/after_migrate. Not redundant. The matching Salis Go-Live
+# Module Onboarding + Onboarding Steps are standard module files (auto-imported by
+# migrate), so they need no patch step.
+apex_habitat.patches.v1_x.seed_salis_communications
+
+# v1.x — remove orphan Salis workspace records left after the short-name rename
+# ONE-TIME (prune-eligible): deletes Salis-module Workspaces not in the shipped set
+# (Salis/Workers/Fleet/Fuel/Rentals/Compliance/Setup). No-op on fresh installs.
+apex_habitat.patches.v1_x.cleanup_renamed_salis_workspaces

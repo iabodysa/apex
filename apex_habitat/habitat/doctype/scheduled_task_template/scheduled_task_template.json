@@ -107,6 +107,13 @@
    "idx": 12
   }
  ],
+"links": [
+  {
+   "group": "Scheduling",
+   "link_doctype": "Scheduled Task Instance",
+   "link_fieldname": "template"
+  }
+ ],
  "permissions": [
   {
    "doctype": "DocPerm",

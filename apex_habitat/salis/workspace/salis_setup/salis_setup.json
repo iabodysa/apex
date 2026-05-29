@@ -1,7 +1,7 @@
 {
  "doctype": "Workspace",
- "name": "Setup",
- "label": "Setup",
+ "name": "Salis Setup",
+ "label": "Salis Setup",
  "title": "Setup",
  "module": "Salis",
  "icon": "setting-gear",

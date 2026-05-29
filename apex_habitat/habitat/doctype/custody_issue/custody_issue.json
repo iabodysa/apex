@@ -136,7 +136,13 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
+"links": [
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Return",
+   "link_fieldname": "custody_issue"
+  }
+ ],
  "modified": "2026-05-25 01:05:28.834914",
  "modified_by": "Administrator",
  "module": "Habitat",

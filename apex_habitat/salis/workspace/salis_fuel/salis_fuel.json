@@ -160,6 +160,14 @@
    "link_to": "Fuel Claim vs Consumption",
    "idx": 15,
    "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Finance Manager Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Salis Finance Manager Dashboard",
+   "idx": 16
   }
  ],
  "charts": [],
@@ -184,5 +192,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 20:00:00.000000"
+ "modified": "2026-05-29 21:30:00.000000"
 }

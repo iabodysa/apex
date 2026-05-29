@@ -1,0 +1,13 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Raise a Transport Request",
+ "title": "Raise a Transport Request",
+ "action": "Create Entry",
+ "reference_document": "Transport Request",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Capture a movement need so it can be validated, scheduled, and dispatched.",
+ "action_label": "Raise Transport Request"
+}

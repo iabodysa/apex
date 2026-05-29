@@ -158,6 +158,18 @@
    "idx": 18
   }
  ],
+"links": [
+  {
+   "group": "Safety",
+   "link_doctype": "Safety Task Execution",
+   "link_fieldname": "task"
+  },
+  {
+   "group": "Scheduling",
+   "link_doctype": "Scheduled Task Template",
+   "link_fieldname": "safety_task_catalog"
+  }
+ ],
  "permissions": [
   {
    "doctype": "DocPerm",
