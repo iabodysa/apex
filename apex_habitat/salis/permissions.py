@@ -19,6 +19,14 @@ UNSCOPED_ROLES = {
     "System Manager",
     "Fleet Manager",
     "Internal Auditor",
+    # Finance Manager is a central finance-control role, not a project-bound
+    # operator: across the operational DocTypes it holds read/report oversight,
+    # and on the finance-boundary DocTypes (Salis Payment Request, Fuel Claim,
+    # Rental Settlement) it is THE cross-project approver/payer. Scoping it to a
+    # single project would make it unable to approve payments for other projects,
+    # so — like Internal Auditor — it sees every project. (Maker != checker is
+    # still enforced separately by the SoD hooks/workflow conditions.)
+    "Finance Manager",
 }
 
 
@@ -101,6 +109,14 @@ def fuel_quota_query(user=None):
 
 
 def fuel_exception_case_query(user=None):
+    return _project_condition(user)
+
+
+def salis_payment_request_query(user=None):
+    return _project_condition(user)
+
+
+def approval_request_query(user=None):
     return _project_condition(user)
 
 
@@ -193,17 +209,36 @@ FINANCE_EXCLUSIVE_STATES = {
 
 
 def payment_sod_has_permission(doc, ptype, user=None):
-    """Block self-approval of payment requests into Finance-exclusive states.
+    """Project-scope a payment request AND block self-approval of it.
 
-    For "Salis Payment Request", when the action is a submit/write that moves
-    the document into a Finance-exclusive state (Approved by Finance / Paid),
-    deny the action if the acting user is the requester or the original
-    creator of the document. Returns False to block; otherwise returns None to
-    defer to Frappe's default permission resolution.
+    This single hook composes two independent denials for "Salis Payment
+    Request" (it is the function wired in ``hooks.has_permission`` for the
+    DocType, so it must carry BOTH controls):
+
+      1. Project row-scoping (``scoped_has_permission``) — a scoped user
+         (Fleet Supervisor / Fleet Project Manager, i.e. not an oversight role
+         in ``UNSCOPED_ROLES``) may only act on documents in a project they
+         hold a User Permission for; a project-less document they do not own is
+         denied. This mirrors every other project-bearing Salis DocType and
+         closes the hole the native User-Permission link match leaves open for
+         NULL/blank ``project`` rows.
+      2. Segregation of duties — when the action is a submit/write that moves
+         the document into a Finance-exclusive state (Approved by Finance /
+         Paid), deny it if the acting user is the requester or the original
+         creator.
+
+    The document is denied if EITHER control denies. Returns False to block;
+    otherwise returns None to defer to Frappe's default permission resolution.
     """
     if getattr(doc, "doctype", None) != "Salis Payment Request":
         return None
 
+    # (1) Project scope first. A False here is an unconditional deny regardless
+    # of the action; None means scope does not object, so fall through to SoD.
+    if scoped_has_permission(doc, ptype, user=user) is False:
+        return False
+
+    # (2) Segregation of duties (maker != checker) for Finance-exclusive moves.
     if ptype not in ("submit", "write"):
         return None
 
@@ -234,22 +269,36 @@ APPROVAL_DECISION_STATES = {
 
 
 def approval_sod_has_permission(doc, ptype, user=None):
-    """Block self-authorization of an Approval Request at the permission layer.
+    """Project-scope an Approval Request AND block self-authorization of it.
 
-    For "Approval Request", when the action is a submit/write that records an
-    authorization decision (Approved / Rejected), deny it if the acting user is
-    the requester or the original creator of the request. This enforces
-    approver != requester at the permission layer (maker != checker), in
-    addition to the controller-level check in
-    :meth:`ApprovalRequest._enforce_segregation_of_duties`, so a requester can
-    never self-authorize regardless of how the transition is attempted.
+    This single hook composes two independent denials for "Approval Request"
+    (it is the function wired in ``hooks.has_permission`` for the DocType, so it
+    must carry BOTH controls):
 
-    Returns False to block; otherwise returns None to defer to Frappe's default
-    permission resolution.
+      1. Project row-scoping (``scoped_has_permission``) — a scoped user may
+         only act on documents in a project they hold a User Permission for; a
+         project-less document they do not own is denied. This mirrors every
+         other project-bearing Salis DocType and closes the hole the native
+         User-Permission link match leaves open for NULL/blank ``project`` rows.
+      2. Segregation of duties — when the action is a submit/write that records
+         an authorization decision (Approved / Rejected), deny it if the acting
+         user is the requester or the original creator. This enforces
+         approver != requester at the permission layer (maker != checker), in
+         addition to the controller-level check in
+         :meth:`ApprovalRequest._enforce_segregation_of_duties`, so a requester
+         can never self-authorize regardless of how the transition is attempted.
+
+    The document is denied if EITHER control denies. Returns False to block;
+    otherwise returns None to defer to Frappe's default permission resolution.
     """
     if getattr(doc, "doctype", None) != "Approval Request":
         return None
 
+    # (1) Project scope first; a False here denies unconditionally.
+    if scoped_has_permission(doc, ptype, user=user) is False:
+        return False
+
+    # (2) Segregation of duties (maker != checker) for authorization decisions.
     if ptype not in ("submit", "write"):
         return None
 

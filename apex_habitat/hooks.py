@@ -228,6 +228,8 @@ permission_query_conditions = {
     "Fuel Claim": "apex_habitat.salis.permissions.fuel_claim_query",
     "Fuel Quota": "apex_habitat.salis.permissions.fuel_quota_query",
     "Fuel Exception Case": "apex_habitat.salis.permissions.fuel_exception_case_query",
+    "Salis Payment Request": "apex_habitat.salis.permissions.salis_payment_request_query",
+    "Approval Request": "apex_habitat.salis.permissions.approval_request_query",
 }
 
 has_permission = {

@@ -22,8 +22,12 @@ Coverage (adversarial / cross-role, not only the happy path):
 
 The tests drive the real ``frappe.model.workflow.apply_workflow`` as concrete
 users, exercising the same path a desk action takes (role gate + condition +
-docstatus transition), not a mocked shortcut. Salis Payment Request is NOT
-project-scoped, so no Project User Permission is required.
+docstatus transition), not a mocked shortcut. Salis Payment Request IS
+project-scoped (a scoped operational maker may only act on requests in a project
+they hold a User Permission for), so the maker is granted a User Permission on
+the project these fixtures use and every request is stamped with that project.
+The Finance Manager approver is a cross-project finance-control role
+(UNSCOPED_ROLES) and needs no project grant.
 """
 
 import unittest
@@ -57,7 +61,37 @@ class TestSalisPaymentRequestWorkflow(unittest.TestCase):
         # SoD condition is what blocks self-approval, not a role gap.
         cls.finance_maker = _user("pr_finmaker@example.com", "Finance Manager")
         frappe.get_doc("User", cls.finance_maker).add_roles("Fleet Project Manager")
+        # Salis Payment Request is project-scoped: the scoped maker roles must
+        # hold a User Permission for the request's project, else row-scoping
+        # (correctly) denies them read/act on it. Grant the project to every
+        # maker-capable user; the Finance Manager approver is unscoped.
+        cls.project = cls._project("PR Workflow Project")
+        for u in (cls.maker, cls.finance_maker):
+            cls._grant_project(u, cls.project)
         frappe.db.commit()
+
+    @staticmethod
+    def _project(name):
+        p = frappe.db.get_value("Project", {"project_name": name}, "name")
+        if not p:
+            p = frappe.get_doc({"doctype": "Project", "project_name": name}).insert(
+                ignore_permissions=True
+            ).name
+        return p
+
+    @staticmethod
+    def _grant_project(user, project):
+        if not frappe.db.exists(
+            "User Permission", {"allow": "Project", "for_value": project, "user": user}
+        ):
+            frappe.get_doc(
+                {
+                    "doctype": "User Permission",
+                    "allow": "Project",
+                    "for_value": project,
+                    "user": user,
+                }
+            ).insert(ignore_permissions=True)
 
     def setUp(self):
         frappe.set_user("Administrator")
@@ -74,6 +108,7 @@ class TestSalisPaymentRequestWorkflow(unittest.TestCase):
             "expense_type": "Fuel",
             "amount": 250,
             "requested_by": requested_by or self.maker,
+            "project": self.project,
             "status": "Draft",
         }
         data.update(overrides)
