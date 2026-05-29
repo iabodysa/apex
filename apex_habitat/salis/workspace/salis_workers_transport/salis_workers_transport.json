@@ -14,19 +14,14 @@
    "role": "Fleet Project Manager"
   },
   {
-   "role": "Fleet Regional Manager"
-  },
-  {
-   "role": "Fleet Operations Manager"
-  },
-  {
    "role": "Fleet Supervisor"
   }
  ],
  "is_default": 0,
+ "is_hidden": 0,
  "sequence_id": 3.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"swtHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"swtKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Requests Open\", \"col\": 3}}, {\"id\": \"swtKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"swtKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Large Worker Moves Pending Escalation\", \"col\": 3}}, {\"id\": \"swtKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Inter-City Relocations This Month\", \"col\": 3}}, {\"id\": \"swtHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"swtQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"swtQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Workers Transport Dashboard\", \"col\": 3}}, {\"id\": \"swtHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"swtCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement\", \"col\": 4}}, {\"id\": \"swtCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "content": "[{\"id\": \"swtHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"swtKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Requests Open\", \"col\": 3}}, {\"id\": \"swtKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"swtKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Large Worker Moves Pending Escalation\", \"col\": 3}}, {\"id\": \"swtKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Inter-City Relocations This Month\", \"col\": 3}}, {\"id\": \"swtHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"swtQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"swtQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Attendance\", \"col\": 3}}, {\"id\": \"swtHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"swtCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement\", \"col\": 4}}, {\"id\": \"swtCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -37,9 +32,9 @@
   },
   {
    "doctype": "Workspace Shortcut",
-   "type": "Dashboard",
-   "label": "Workers Transport Dashboard",
-   "link_to": "Salis - Workers Transport",
+   "type": "DocType",
+   "label": "Driver Attendance",
+   "link_to": "Driver Attendance",
    "idx": 2
   }
  ],
@@ -114,14 +109,6 @@
    "link_to": "Transport Fulfilment SLA",
    "idx": 9,
    "is_query_report": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Workers Transport Dashboard",
-   "link_type": "Dashboard",
-   "link_to": "Salis - Workers Transport",
-   "idx": 10
   }
  ],
  "charts": [],
@@ -152,5 +139,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 13:00:00.000000"
+ "modified": "2026-05-29 19:00:00.000000"
 }

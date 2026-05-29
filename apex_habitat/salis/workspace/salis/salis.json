@@ -14,12 +14,6 @@
    "role": "Fleet Project Manager"
   },
   {
-   "role": "Fleet Regional Manager"
-  },
-  {
-   "role": "Fleet Operations Manager"
-  },
-  {
    "role": "Fleet Supervisor"
   },
   {
@@ -30,9 +24,10 @@
   }
  ],
  "is_default": 0,
+ "is_hidden": 0,
  "sequence_id": 2.0,
  "parent_page": "",
- "content": "[{\"id\": \"salisHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"salisKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"salisKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Transport Requests\", \"col\": 3}}, {\"id\": \"salisKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Approvals\", \"col\": 3}}, {\"id\": \"salisKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"salisHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salisQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"salisQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"salisQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"salisQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"salisHdrDash\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Division Dashboards</b></span>\", \"col\": 12}}, {\"id\": \"salisDashWT\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Workers Transport Dashboard\", \"col\": 3}}, {\"id\": \"salisDashRF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Representatives Fleet Dashboard\", \"col\": 3}}, {\"id\": \"salisHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"salisCardNav\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement Areas\", \"col\": 4}}, {\"id\": \"salisCardOv\", \"type\": \"card\", \"data\": {\"card_name\": \"Overview\", \"col\": 4}}]",
+ "content": "[{\"id\": \"salisHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"salisKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"salisKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Transport Requests\", \"col\": 3}}, {\"id\": \"salisKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Approvals\", \"col\": 3}}, {\"id\": \"salisKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"salisHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salisQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"salisQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"salisQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"salisQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"salisHdrDash\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Division Views</b></span>\", \"col\": 12}}, {\"id\": \"salisDashWT\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Transport Plan\", \"col\": 3}}, {\"id\": \"salisDashRF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Fleet Register\", \"col\": 3}}, {\"id\": \"salisHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"salisCardNav\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement Areas\", \"col\": 4}}, {\"id\": \"salisCardOv\", \"type\": \"card\", \"data\": {\"card_name\": \"Overview\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -64,16 +59,18 @@
   },
   {
    "doctype": "Workspace Shortcut",
-   "type": "Dashboard",
-   "label": "Workers Transport Dashboard",
-   "link_to": "Salis - Workers Transport",
+   "type": "Report",
+   "label": "Worker Transport Plan",
+   "link_to": "Worker Transport Plan",
+   "is_query_report": 1,
    "idx": 5
   },
   {
    "doctype": "Workspace Shortcut",
-   "type": "Dashboard",
-   "label": "Representatives Fleet Dashboard",
-   "link_to": "Salis - Representatives Fleet",
+   "type": "Report",
+   "label": "Salis Fleet Register",
+   "link_to": "Salis Fleet Register",
+   "is_query_report": 1,
    "idx": 6
   }
  ],
@@ -176,5 +173,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 13:00:00.000000"
+ "modified": "2026-05-29 19:00:00.000000"
 }

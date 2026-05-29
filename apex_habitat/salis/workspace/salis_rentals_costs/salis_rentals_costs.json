@@ -4,7 +4,7 @@
  "label": "Salis Rentals & Costs",
  "title": "Salis Rentals & Costs",
  "module": "Salis",
- "icon": "money",
+ "icon": "money-coins-1",
  "public": 1,
  "roles": [
   {
@@ -18,6 +18,7 @@
   }
  ],
  "is_default": 0,
+ "is_hidden": 0,
  "sequence_id": 6.0,
  "parent_page": "Salis",
  "content": "[{\"id\": \"srcHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srcKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rental Accrual This Month\", \"col\": 3}}, {\"id\": \"srcKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cost Recovery Aging Backlog\", \"col\": 3}}, {\"id\": \"srcHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srcQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"srcQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Payment Request\", \"col\": 3}}, {\"id\": \"srcHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srcCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs & Settlement\", \"col\": 4}}, {\"id\": \"srcCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Engine Ledgers / Audit\", \"col\": 4}}, {\"id\": \"srcCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
@@ -228,5 +229,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 13:00:00.000000"
+ "modified": "2026-05-29 19:00:00.000000"
 }

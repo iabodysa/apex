@@ -4,7 +4,7 @@
  "label": "Salis Compliance & Drivers",
  "title": "Salis Compliance & Drivers",
  "module": "Salis",
- "icon": "shield",
+ "icon": "quality",
  "public": 1,
  "roles": [
   {
@@ -17,37 +17,42 @@
    "role": "Government Relations Officer"
   },
   {
-   "role": "Legal Officer"
-  },
-  {
    "role": "Internal Auditor"
   }
  ],
  "is_default": 0,
+ "is_hidden": 0,
  "sequence_id": 7.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"scdHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"scdKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Expiring Vehicle Compliance\", \"col\": 3}}, {\"id\": \"scdKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Blocked Driver Clearances\", \"col\": 3}}, {\"id\": \"scdKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport SLA Breaches Open\", \"col\": 3}}, {\"id\": \"scdKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Approvals\", \"col\": 3}}, {\"id\": \"scdHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"scdQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Clearance\", \"col\": 3}}, {\"id\": \"scdQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"scdQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sponsorship Transfer Case\", \"col\": 3}}, {\"id\": \"scdHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"scdCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance & Support\", \"col\": 4}}, {\"id\": \"scdCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Driver Operations\", \"col\": 4}}, {\"id\": \"scdCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "content": "[{\"id\": \"scdHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"scdKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Expiring Vehicle Compliance\", \"col\": 3}}, {\"id\": \"scdKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Blocked Driver Clearances\", \"col\": 3}}, {\"id\": \"scdKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport SLA Breaches Open\", \"col\": 3}}, {\"id\": \"scdKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Approvals\", \"col\": 3}}, {\"id\": \"scdHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"scdQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"scdQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Clearance\", \"col\": 3}}, {\"id\": \"scdQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"scdQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sponsorship Transfer Case\", \"col\": 3}}, {\"id\": \"scdHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"scdCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance & Support\", \"col\": 4}}, {\"id\": \"scdCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Driver Operations\", \"col\": 4}}, {\"id\": \"scdCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
  "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Salis Driver",
+   "link_to": "Salis Driver",
+   "idx": 1
+  },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Driver Clearance",
    "link_to": "Driver Clearance",
-   "idx": 1
+   "idx": 2
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Support Ticket",
    "link_to": "Support Ticket",
-   "idx": 2
+   "idx": 3
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Sponsorship Transfer Case",
    "link_to": "Sponsorship Transfer Case",
-   "idx": 3
+   "idx": 4
   }
  ],
  "links": [
@@ -172,5 +177,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 18:00:00.000000"
+ "modified": "2026-05-29 19:00:00.000000"
 }

@@ -4,7 +4,7 @@
  "label": "Salis Fuel",
  "title": "Salis Fuel",
  "module": "Salis",
- "icon": "filter",
+ "icon": "assets",
  "public": 1,
  "roles": [
   {
@@ -18,6 +18,7 @@
   }
  ],
  "is_default": 0,
+ "is_hidden": 0,
  "sequence_id": 5.0,
  "parent_page": "Salis",
  "content": "[{\"id\": \"sfuHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"sfuKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Fuel Requests\", \"col\": 3}}, {\"id\": \"sfuKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Spend This Month\", \"col\": 3}}, {\"id\": \"sfuKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Exception Cases\", \"col\": 3}}, {\"id\": \"sfuHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"sfuQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"sfuQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Claim\", \"col\": 3}}, {\"id\": \"sfuHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"sfuCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"sfuCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
@@ -183,5 +184,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 13:00:00.000000"
+ "modified": "2026-05-29 19:00:00.000000"
 }
