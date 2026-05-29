@@ -23,7 +23,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import ensure_approval, log_activity
+from apex_habitat.salis.salis_lib import ensure_approval
 
 
 class MovementCostTransfer(Document):
@@ -37,18 +37,7 @@ class MovementCostTransfer(Document):
 			"Movement Cost Transfer", self.name, required_tier="Operations"
 		)
 
-	def on_submit(self):
-		log_activity(
-			action="Movement Cost Transfer Submitted",
-			entity_type="Movement Cost Transfer",
-			entity_name=self.name,
-			details={
-				"transfer_type": self.transfer_type,
-				"from_project": self.from_project,
-				"to_project": self.to_project,
-				"amount": self.amount,
-			},
-		)
+	# Submit is recorded natively (Version track_changes + auto-comment).
 
 	# ------------------------------------------------------------------ helpers
 

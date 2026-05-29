@@ -11,7 +11,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import lock_vehicle, lock_driver, log_activity
+from apex_habitat.salis.salis_lib import add_timeline_note, lock_vehicle, lock_driver
 
 
 class VehicleAssignment(Document):
@@ -117,11 +117,10 @@ class VehicleAssignment(Document):
         self.add_comment(
             "Comment", _("Vehicle {0} assigned to driver {1}.").format(self.vehicle, self.driver)
         )
-        log_activity(
-            action="Vehicle Assigned",
-            entity_type="Salis Vehicle",
-            entity_name=self.vehicle,
-            details={"assignment": self.name, "driver": self.driver},
+        add_timeline_note(
+            "Salis Vehicle",
+            self.vehicle,
+            _("Assigned to driver {0} via {1}.").format(self.driver, self.name),
         )
 
     def on_cancel(self):
@@ -132,9 +131,8 @@ class VehicleAssignment(Document):
         if frappe.db.get_value("Salis Driver", self.driver, "current_vehicle") == self.vehicle:
             frappe.db.set_value("Salis Driver", self.driver, "current_vehicle", None)
 
-        log_activity(
-            action="Vehicle Assignment Cancelled",
-            entity_type="Salis Vehicle",
-            entity_name=self.vehicle,
-            details={"assignment": self.name, "driver": self.driver},
+        add_timeline_note(
+            "Salis Vehicle",
+            self.vehicle,
+            _("Assignment {0} (driver {1}) cancelled.").format(self.name, self.driver),
         )

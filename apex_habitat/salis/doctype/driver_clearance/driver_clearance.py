@@ -16,7 +16,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import lock_driver, log_activity
+from apex_habitat.salis.salis_lib import add_timeline_note, lock_driver
 
 # Statuses that mean a Fuel Exception Case is no longer outstanding.
 _CLOSED_FUEL_EXCEPTION_STATUSES = ("Resolved", "Rejected", "Closed")
@@ -111,13 +111,12 @@ class DriverClearance(Document):
 			updates["current_vehicle"] = None
 		frappe.db.set_value("Salis Driver", self.driver, updates)
 
-		log_activity(
-			action="Driver Cleared",
-			entity_type="Salis Driver",
-			entity_name=self.driver,
-			details={
-				"driver_clearance": self.name,
-				"clearance_reason": self.clearance_reason,
-				"released_vehicle": current_vehicle,
-			},
+		add_timeline_note(
+			"Salis Driver",
+			self.driver,
+			_("Cleared and released via {0} (reason {1}; vehicle {2}).").format(
+				self.name,
+				_(self.clearance_reason) if self.clearance_reason else _("n/a"),
+				current_vehicle or _("none"),
+			),
 		)

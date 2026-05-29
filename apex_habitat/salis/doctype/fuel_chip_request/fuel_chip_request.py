@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import log_activity
+from apex_habitat.salis.salis_lib import add_timeline_note
 
 
 class FuelChipRequest(Document):
@@ -32,9 +32,10 @@ class FuelChipRequest(Document):
 				)
 
 	def on_submit(self):
-		log_activity(
-			action="Fuel Chip {0}".format(self.action),
-			entity_type="Salis Vehicle",
-			entity_name=self.vehicle,
-			details={"fuel_chip_request": self.name, "chip_number": self.chip_number},
+		add_timeline_note(
+			"Salis Vehicle",
+			self.vehicle,
+			_("Fuel chip {0} via request {1} (chip {2}).").format(
+				_(self.action), self.name, self.chip_number or _("n/a")
+			),
 		)

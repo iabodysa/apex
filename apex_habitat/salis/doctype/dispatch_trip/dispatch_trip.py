@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now_datetime
 
-from apex_habitat.salis.salis_lib import lock_vehicle, log_activity
+from apex_habitat.salis.salis_lib import add_timeline_note, lock_vehicle
 
 # Transport Request statuses that are terminal and must not be reopened.
 _TR_TERMINAL = {"Fulfilled", "Cancelled"}
@@ -123,11 +123,12 @@ class DispatchTrip(Document):
                 frappe.db.set_value(
                     "Salis Vehicle", self.vehicle, "odometer", self.odometer_end
                 )
-            log_activity(
-                action="Trip Completed",
-                entity_type="Salis Vehicle",
-                entity_name=self.vehicle,
-                details={"trip": self.name, "odometer_end": self.odometer_end},
+            add_timeline_note(
+                "Salis Vehicle",
+                self.vehicle,
+                _("Trip {0} completed; odometer {1}.").format(
+                    self.name, self.odometer_end
+                ),
             )
 
         if self.status == "Completed" and self.transport_request:
@@ -220,9 +221,4 @@ class DispatchTrip(Document):
             frappe.delete_doc(
                 "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True  # audit-ok
             )
-        log_activity(
-            action="Trip Cancelled",
-            entity_type="Dispatch Trip",
-            entity_name=self.name,
-            details={"transport_request": self.transport_request},
-        )
+        # Cancellation is recorded natively (Version track_changes + auto-comment).

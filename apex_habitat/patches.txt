@@ -60,3 +60,9 @@ apex_habitat.patches.v1_0.seed_salis_settings
 # PERMANENT (keep, do NOT prune): seeds DISTINCT records, idempotent, also called
 # from after_install/after_migrate. Not redundant.
 apex_habitat.patches.v1_1.seed_salis_operations_artifacts
+
+# v1.x — Salis audit-trail consolidation onto native Frappe
+# ONE-TIME (prune-eligible once every deployed site has run it): drops the
+# obsolete "Salis Activity Log" DocType (redundant with Version/track_changes +
+# timeline comments). Idempotent; a no-op on fresh installs.
+apex_habitat.patches.v1_x.drop_salis_activity_log

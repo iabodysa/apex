@@ -10,8 +10,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import log_activity
-
 
 class FuelQuota(Document):
 	def validate(self):
@@ -26,14 +24,4 @@ class FuelQuota(Document):
 				title=_("Quota Exceeded"),
 			)
 
-	def on_submit(self):
-		log_activity(
-			action="Fuel Quota Allocated",
-			entity_type="Fuel Quota",
-			entity_name=self.name,
-			details={
-				"vehicle": self.vehicle,
-				"period_month": self.period_month,
-				"monthly_litres": self.monthly_litres,
-			},
-		)
+	# Allocation on submit is recorded natively (Version track_changes + auto-comment).

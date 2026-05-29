@@ -16,7 +16,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import ensure_approval, log_activity
+from apex_habitat.salis.salis_lib import ensure_approval
 
 # Fallback amount (SAR) at or above which the recovery escalates to Operations-
 # tier authority, used only when Salis Settings has no configured threshold;
@@ -42,22 +42,4 @@ class MovementCostRecovery(Document):
 		required_tier = "Operations" if (self.amount or 0) >= threshold else "Regional"
 		ensure_approval("Movement Cost Recovery", self.name, required_tier=required_tier)
 
-	def on_submit(self):
-		log_activity(
-			action="Cost Recovery Submitted",
-			entity_type="Movement Cost Recovery",
-			entity_name=self.name,
-			details={
-				"recovery_type": self.recovery_type,
-				"amount": self.amount,
-				"status": self.status,
-			},
-		)
-
-	def on_cancel(self):
-		log_activity(
-			action="Cost Recovery Cancelled",
-			entity_type="Movement Cost Recovery",
-			entity_name=self.name,
-			details={"recovery_type": self.recovery_type, "amount": self.amount},
-		)
+	# Submit/cancel are recorded natively (Version track_changes + auto-comment).

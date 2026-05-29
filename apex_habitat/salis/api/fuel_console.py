@@ -14,16 +14,16 @@ mirroring the Habitat Front Desk pattern:
   documented field updates, and they never touch the database with raw SQL.
 
 Every write is permission-gated on ``Fuel Request`` / ``write`` (defense in
-depth on top of the page role grant) and audited to ``Salis Activity Log``.
+depth on top of the page role grant). The approve/reject mutations run through
+``doc.save()``, so the change is captured natively by Version (track_changes is
+enabled on Fuel Request) plus the automatic timeline comment.
 """
 
 from __future__ import annotations
 
-import json
-
 import frappe
 from frappe import _
-from frappe.utils import date_diff, flt, now, today
+from frappe.utils import date_diff, flt, today
 
 
 def _approval_threshold() -> float:
@@ -35,31 +35,6 @@ def _approval_threshold() -> float:
         "Salis Settings", "fuel_request_approval_threshold_litres"
     )
     return flt(value)
-
-
-def _log_activity(action: str, name: str, details: dict) -> None:
-    """Best-effort audit row in Salis Activity Log.
-
-    Wrapped so an audit failure never aborts the approval write itself.
-    """
-    try:
-        frappe.get_doc(
-            {
-                "doctype": "Salis Activity Log",
-                "action": action,
-                "entity_type": "Fuel Request",
-                "entity_name": name,
-                "user": frappe.session.user,
-                "logged_at": now(),
-                "details": json.dumps(details, default=str),
-            }
-        ).insert(ignore_permissions=True)  # audit-ok
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(
-            title="Salis fuel console activity log failed",
-            message=frappe.get_traceback(),
-        )
 
 
 @frappe.whitelist()
@@ -186,11 +161,7 @@ def approve_fuel_request(name: str) -> dict:
     doc.approved_by = frappe.session.user
     doc.save()
 
-    _log_activity(
-        "fuel_request_approved",
-        name,
-        {"status": "Approved", "approved_by": frappe.session.user},
-    )
+    # The save above is captured natively by Version (track_changes) + auto-comment.
     return {"name": doc.name, "status": doc.status}
 
 
@@ -229,9 +200,5 @@ def reject_fuel_request(name: str, reason: str | None = None) -> dict:
     if reason:
         doc.add_comment("Comment", _("Rejected: {0}").format(reason))
 
-    _log_activity(
-        "fuel_request_rejected",
-        name,
-        {"status": "Failed", "rejected_by": frappe.session.user, "reason": reason},
-    )
+    # The save above is captured natively by Version (track_changes) + auto-comment.
     return {"name": doc.name, "status": doc.status}

@@ -19,7 +19,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import ensure_approval, log_activity
+from apex_habitat.salis.salis_lib import ensure_approval
 
 # Fraction of claimed litres above which a variance is treated as "large" and
 # escalated to the Operations tier (with a Finance consult note).
@@ -46,28 +46,7 @@ class FuelClaim(Document):
 	def before_submit(self):
 		ensure_approval("Fuel Claim", self.name, required_tier=self._required_tier())
 
-	def on_submit(self):
-		log_activity(
-			action="Fuel Claim Submitted",
-			entity_type="Fuel Claim",
-			entity_name=self.name,
-			details={
-				"vehicle": self.vehicle,
-				"period_month": self.period_month,
-				"claimed_litres": self.claimed_litres,
-				"consumed_litres": self.consumed_litres,
-				"variance_litres": self.variance_litres,
-				"is_increase": self.is_increase,
-			},
-		)
-
-	def on_cancel(self):
-		log_activity(
-			action="Fuel Claim Cancelled",
-			entity_type="Fuel Claim",
-			entity_name=self.name,
-			details={"vehicle": self.vehicle, "period_month": self.period_month},
-		)
+	# Submit/cancel are recorded natively (Version track_changes + auto-comment).
 
 	# ------------------------------------------------------------------ helpers
 

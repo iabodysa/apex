@@ -15,7 +15,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import log_activity
+from apex_habitat.salis.salis_lib import add_timeline_note
 
 
 class RentalVehicleMovement(Document):
@@ -38,28 +38,19 @@ class RentalVehicleMovement(Document):
     def on_submit(self):
         # Receipt starts accrual eligibility; Return ends it. The engine reads
         # these submitted movements by date — no flag is written here.
-        action = (
-            "Rental Vehicle Received"
-            if self.movement_type == "Receipt"
-            else "Rental Vehicle Returned"
-        )
-        log_activity(
-            action=action,
-            entity_type="Salis Vehicle",
-            entity_name=self.vehicle,
-            details={
-                "movement": self.name,
-                "movement_type": self.movement_type,
-                "rental_office": self.rental_office,
-                "movement_date": str(self.movement_date) if self.movement_date else None,
-                "daily_rate": self.daily_rate,
-            },
+        add_timeline_note(
+            "Salis Vehicle",
+            self.vehicle,
+            _("Rental {0} via {1} (office {2}).").format(
+                _(self.movement_type), self.name, self.rental_office or _("n/a")
+            ),
         )
 
     def on_cancel(self):
-        log_activity(
-            action="Rental Vehicle Movement Cancelled",
-            entity_type="Salis Vehicle",
-            entity_name=self.vehicle,
-            details={"movement": self.name, "movement_type": self.movement_type},
+        add_timeline_note(
+            "Salis Vehicle",
+            self.vehicle,
+            _("Rental movement {0} ({1}) cancelled.").format(
+                self.name, _(self.movement_type)
+            ),
         )

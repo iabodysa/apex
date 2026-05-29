@@ -12,7 +12,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, nowdate
 
-from apex_habitat.salis.salis_lib import ensure_approval, get_settings, log_activity
+from apex_habitat.salis.salis_lib import add_timeline_note, ensure_approval, get_settings
 
 # Allowed forward status transitions. A status may always remain unchanged.
 _ALLOWED_TRANSITIONS = {
@@ -38,23 +38,21 @@ class FuelTopupRequest(Document):
 			ensure_approval("Fuel Topup Request", self.name)
 
 	def on_submit(self):
-		log_activity(
-			action="Fuel Topup",
-			entity_type="Salis Vehicle",
-			entity_name=self.vehicle,
-			details={
-				"fuel_topup_request": self.name,
-				"litres": self.topup_litres,
-				"is_temporary": bool(self.is_temporary),
-			},
+		add_timeline_note(
+			"Salis Vehicle",
+			self.vehicle,
+			_("Fuel top-up {0}: {1} L{2}.").format(
+				self.name,
+				self.topup_litres,
+				_(" (temporary)") if self.is_temporary else "",
+			),
 		)
 
 	def on_cancel(self):
-		log_activity(
-			action="Fuel Topup Cancelled",
-			entity_type="Salis Vehicle",
-			entity_name=self.vehicle,
-			details={"fuel_topup_request": self.name, "litres": self.topup_litres},
+		add_timeline_note(
+			"Salis Vehicle",
+			self.vehicle,
+			_("Fuel top-up {0} cancelled ({1} L).").format(self.name, self.topup_litres),
 		)
 
 	# ------------------------------------------------------------------ helpers

@@ -11,7 +11,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import log_activity
+from apex_habitat.salis.salis_lib import add_timeline_note
 
 
 class FuelDailyLog(Document):
@@ -22,9 +22,10 @@ class FuelDailyLog(Document):
 			frappe.throw(_("Odometer cannot be negative."))
 
 	def after_insert(self):
-		log_activity(
-			action="Fuel Daily Log Recorded",
-			entity_type="Salis Vehicle",
-			entity_name=self.vehicle,
-			details={"fuel_daily_log": self.name, "litres": self.litres, "amount": self.amount},
+		add_timeline_note(
+			"Salis Vehicle",
+			self.vehicle,
+			_("Fuel daily log {0}: {1} L, {2} SAR.").format(
+				self.name, self.litres, self.amount
+			),
 		)

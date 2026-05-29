@@ -18,8 +18,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from apex_habitat.salis.salis_lib import log_activity
-
 
 class RentalSettlement(Document):
     def validate(self):
@@ -34,28 +32,7 @@ class RentalSettlement(Document):
         self.accrued_total = flt(accrued)
         self.variance = flt(self.claimed_total) - flt(self.accrued_total)
 
-    def on_submit(self):
-        log_activity(
-            action="Rental Settlement Submitted",
-            entity_type="Rental Settlement",
-            entity_name=self.name,
-            details={
-                "rental_office": self.rental_office,
-                "period_month": self.period_month,
-                "accrued_total": self.accrued_total,
-                "claimed_total": self.claimed_total,
-                "variance": self.variance,
-                "status": self.status,
-            },
-        )
-
-    def on_cancel(self):
-        log_activity(
-            action="Rental Settlement Cancelled",
-            entity_type="Rental Settlement",
-            entity_name=self.name,
-            details={"rental_office": self.rental_office, "period_month": self.period_month},
-        )
+    # Submit/cancel are recorded natively (Version track_changes + auto-comment).
 
     @frappe.whitelist(methods=["POST"])
     def create_payment_request(self):
@@ -88,10 +65,8 @@ class RentalSettlement(Document):
         pr.insert()
 
         self.db_set("payment_request", pr.name)
-        log_activity(
-            action="Rental Settlement Payment Request Raised",
-            entity_type="Rental Settlement",
-            entity_name=self.name,
-            details={"payment_request": pr.name, "amount": pr.amount},
+        self.add_comment(
+            "Info",
+            _("Payment Request {0} raised for {1} SAR.").format(pr.name, pr.amount),
         )
         return pr.name

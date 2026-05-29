@@ -8,8 +8,8 @@ from frappe.model.document import Document
 from frappe.utils import now_datetime
 
 from apex_habitat.salis.salis_lib import (
+    add_timeline_note,
     escalation_target,
-    log_activity,
     user_max_tier,
 )
 
@@ -76,9 +76,11 @@ class ApprovalRequest(Document):
             )
 
     def on_submit(self):
-        log_activity(
-            action="Approval {0}".format(self.decision),
-            entity_type=self.reference_doctype or "Approval",
-            entity_name=self.reference_name or self.name,
-            details={"request_type": self.request_type, "remarks": self.remarks},
-        )
+        # Annotate the referenced source document's timeline with the decision.
+        # The Approval Request's own submit is captured natively by Version.
+        if self.reference_doctype and self.reference_name:
+            add_timeline_note(
+                self.reference_doctype,
+                self.reference_name,
+                _("Approval Request {0}: {1}.").format(self.name, _(self.decision)),
+            )

@@ -12,7 +12,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import ensure_approval, log_activity
+from apex_habitat.salis.salis_lib import add_timeline_note, ensure_approval
 
 # Fallback estimated cost (SAR) at or above which Operations-tier authority is
 # required, used only when Salis Settings has no configured threshold.
@@ -38,25 +38,19 @@ class VehicleDamageWriteOff(Document):
         ensure_approval("Vehicle Damage Write-Off", self.name, required_tier=required_tier)
 
     def on_submit(self):
-        log_activity(
-            action="Vehicle Damage Write-Off Submitted",
-            entity_type="Salis Vehicle",
-            entity_name=self.vehicle,
-            details={
-                "writeoff": self.name,
-                "source_handover": self.source_handover,
-                "driver": self.driver,
-                "estimated_cost": self.estimated_cost,
-                "recommended_action": self.recommended_action,
-            },
+        add_timeline_note(
+            "Salis Vehicle",
+            self.vehicle,
+            _("Damage write-off {0} submitted (estimated {1} SAR).").format(
+                self.name, self.estimated_cost
+            ),
         )
 
     def on_cancel(self):
-        log_activity(
-            action="Vehicle Damage Write-Off Cancelled",
-            entity_type="Salis Vehicle",
-            entity_name=self.vehicle,
-            details={"writeoff": self.name},
+        add_timeline_note(
+            "Salis Vehicle",
+            self.vehicle,
+            _("Damage write-off {0} cancelled.").format(self.name),
         )
 
     # ------------------------------------------------------------------ helpers

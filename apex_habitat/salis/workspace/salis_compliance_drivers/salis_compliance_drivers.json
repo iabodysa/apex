@@ -84,24 +84,16 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Salis Activity Log",
-   "link_type": "DocType",
-   "link_to": "Salis Activity Log",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Sponsorship Transfer Case",
    "link_type": "DocType",
    "link_to": "Sponsorship Transfer Case",
-   "idx": 6
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Driver Operations",
-   "idx": 7
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
@@ -109,7 +101,7 @@
    "label": "Salis Driver",
    "link_type": "DocType",
    "link_to": "Salis Driver",
-   "idx": 8
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -117,7 +109,7 @@
    "label": "Driver Clearance",
    "link_type": "DocType",
    "link_to": "Driver Clearance",
-   "idx": 9
+   "idx": 8
   },
   {
    "doctype": "Workspace Link",
@@ -125,13 +117,13 @@
    "label": "Salis Vehicle Compliance",
    "link_type": "DocType",
    "link_to": "Salis Vehicle Compliance",
-   "idx": 10
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Views",
-   "idx": 11
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
@@ -139,7 +131,7 @@
    "label": "Vehicle Compliance Register",
    "link_type": "Report",
    "link_to": "Vehicle Compliance Register",
-   "idx": 12,
+   "idx": 11,
    "is_query_report": 1
   },
   {
@@ -148,7 +140,7 @@
    "label": "Driver Clearance Register",
    "link_type": "Report",
    "link_to": "Driver Clearance Register",
-   "idx": 13,
+   "idx": 12,
    "is_query_report": 1
   }
  ],
@@ -180,5 +172,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 13:00:00.000000"
+ "modified": "2026-05-29 18:00:00.000000"
 }

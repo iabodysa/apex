@@ -138,27 +138,22 @@ def get_settings():
 	return frappe.get_single("Salis Settings")
 
 
-def log_activity(action, entity_type, entity_name, details=None):
-	"""Append-only, server-written audit trail. Must never block the parent transaction."""
+def add_timeline_note(doctype, name, message):
+	"""Record a human-readable note on a related document's timeline.
+
+	Thin, best-effort wrapper around the native ``add_comment`` so a cross-document
+	audit note (e.g. a Fuel Request annotating its Fuel Quota) lands on the target
+	doc's own timeline. The write must never abort the parent transaction, so any
+	failure is swallowed and logged. Create/submit/cancel/field changes on the
+	parent itself are already captured natively by Version (track_changes) and the
+	automatic comments, so this is only for notes about a *different* document.
+	"""
+	if not (doctype and name):
+		return
 	try:
-		payload = {
-			"doctype": "Salis Activity Log",
-			"action": action,
-			"entity_type": entity_type,
-			"entity_name": entity_name,
-			"user": frappe.session.user,
-			"logged_at": frappe.utils.now_datetime(),
-			"details": frappe.as_json(details) if details else None,
-		}
-		# Logs integration: connect the event to its source record natively
-		# (clickable Dynamic Link) when entity_type is a real DocType.
-		if entity_type and entity_name and frappe.db.exists("DocType", entity_type):
-			payload["ref_doctype"] = entity_type
-			payload["ref_name"] = entity_name
-		doc = frappe.get_doc(payload)
-		doc.insert(ignore_permissions=True)  # audit-ok
+		frappe.get_doc(doctype, name).add_comment("Info", message)
 	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Salis: activity log write failed")
+		frappe.log_error(frappe.get_traceback(), "Salis: timeline note failed")
 
 
 def ensure_approval(reference_doctype, reference_name, required_tier=None):

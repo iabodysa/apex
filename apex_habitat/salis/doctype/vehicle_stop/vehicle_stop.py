@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import lock_vehicle, log_activity
+from apex_habitat.salis.salis_lib import add_timeline_note, lock_vehicle
 
 
 class VehicleStop(Document):
@@ -34,11 +34,10 @@ class VehicleStop(Document):
         frappe.db.set_value("Salis Vehicle", self.vehicle, "status", "Stopped")
 
         self.add_comment("Comment", _("Vehicle {0} stopped: {1}.").format(self.vehicle, self.stop_reason))
-        log_activity(
-            action="Vehicle Stopped",
-            entity_type="Salis Vehicle",
-            entity_name=self.vehicle,
-            details={"stop": self.name, "reason": self.stop_reason},
+        add_timeline_note(
+            "Salis Vehicle",
+            self.vehicle,
+            _("Stopped via {0}: {1}.").format(self.name, _(self.stop_reason)),
         )
 
     def on_cancel(self):
@@ -50,9 +49,8 @@ class VehicleStop(Document):
             restore = self.previous_status or "Active"
             frappe.db.set_value("Salis Vehicle", self.vehicle, "status", restore)
 
-        log_activity(
-            action="Vehicle Stop Cancelled",
-            entity_type="Salis Vehicle",
-            entity_name=self.vehicle,
-            details={"stop": self.name},
+        add_timeline_note(
+            "Salis Vehicle",
+            self.vehicle,
+            _("Stop {0} cancelled.").format(self.name),
         )

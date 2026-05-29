@@ -141,12 +141,4 @@ class TransportRequest(Document):
 
         ensure_approval("Transport Request", self.name, required_tier=required_tier)
 
-    def on_submit(self):
-        from apex_habitat.salis.salis_lib import log_activity
-
-        log_activity("submit", "Transport Request", self.name)
-
-    def on_cancel(self):
-        from apex_habitat.salis.salis_lib import log_activity
-
-        log_activity("cancel", "Transport Request", self.name)
+    # Submit/cancel are recorded natively (Version track_changes + auto-comment).

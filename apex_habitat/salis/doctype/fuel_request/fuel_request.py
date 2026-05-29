@@ -13,10 +13,10 @@ from frappe import _
 from frappe.model.document import Document
 
 from apex_habitat.salis.salis_lib import (
+	add_timeline_note,
 	ensure_approval,
 	get_settings,
 	lock_vehicle,
-	log_activity,
 	tier_rank,
 )
 
@@ -145,11 +145,12 @@ class FuelRequest(Document):
 		frappe.db.set_value("Fuel Quota", self.fuel_quota, updates)
 
 		self.db_set("quota_applied", 1)
-		log_activity(
-			action="Fuel Consumed",
-			entity_type="Fuel Quota",
-			entity_name=self.fuel_quota,
-			details={"fuel_request": self.name, "litres": self.requested_litres},
+		add_timeline_note(
+			"Fuel Quota",
+			self.fuel_quota,
+			_("Consumed {0} L via Fuel Request {1}.").format(
+				self.requested_litres, self.name
+			),
 		)
 
 	def _reverse_quota_consumption(self):
@@ -174,9 +175,10 @@ class FuelRequest(Document):
 			frappe.db.set_value("Fuel Quota", self.fuel_quota, updates)
 
 		self.db_set("quota_applied", 0)
-		log_activity(
-			action="Fuel Consumption Reversed",
-			entity_type="Fuel Quota",
-			entity_name=self.fuel_quota,
-			details={"fuel_request": self.name, "litres": self.requested_litres},
+		add_timeline_note(
+			"Fuel Quota",
+			self.fuel_quota,
+			_("Reversed {0} L from Fuel Request {1}.").format(
+				self.requested_litres, self.name
+			),
 		)

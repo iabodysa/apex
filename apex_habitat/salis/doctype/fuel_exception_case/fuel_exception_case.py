@@ -14,7 +14,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import ensure_approval, log_activity
+from apex_habitat.salis.salis_lib import ensure_approval
 
 # Allowed forward status transitions. A status may always remain unchanged.
 # Open -> Under Investigation -> Evidence Required -> Resolved/Rejected -> Closed.
@@ -44,21 +44,7 @@ class FuelExceptionCase(Document):
 	def before_submit(self):
 		ensure_approval("Fuel Exception Case", self.name, required_tier="Operations")
 
-	def on_submit(self):
-		log_activity(
-			action="Fuel Exception Case Submitted",
-			entity_type="Fuel Exception Case",
-			entity_name=self.name,
-			details={"exception_type": self.exception_type, "status": self.status},
-		)
-
-	def on_cancel(self):
-		log_activity(
-			action="Fuel Exception Case Cancelled",
-			entity_type="Fuel Exception Case",
-			entity_name=self.name,
-			details={"exception_type": self.exception_type, "status": self.status},
-		)
+	# Submit/cancel are recorded natively (Version track_changes + auto-comment).
 
 	# ------------------------------------------------------------------ helpers
 

@@ -11,7 +11,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import lock_vehicle, log_activity
+from apex_habitat.salis.salis_lib import add_timeline_note, lock_vehicle
 
 
 class VehicleHandover(Document):
@@ -69,16 +69,15 @@ class VehicleHandover(Document):
                 ).format(self.vehicle),
             )
 
-        log_activity(
-            action="Vehicle Handover",
-            entity_type="Salis Vehicle",
-            entity_name=self.vehicle,
-            details={
-                "handover": self.name,
-                "from_driver": self.from_driver,
-                "to_driver": self.to_driver,
-                "odometer": self.odometer_reading,
-            },
+        add_timeline_note(
+            "Salis Vehicle",
+            self.vehicle,
+            _("Handed over from {0} to {1} via {2} (odometer {3}).").format(
+                self.from_driver or _("n/a"),
+                self.to_driver or _("n/a"),
+                self.name,
+                self.odometer_reading,
+            ),
         )
 
     def on_cancel(self):
@@ -97,9 +96,8 @@ class VehicleHandover(Document):
             if self.from_driver:
                 frappe.db.set_value("Salis Driver", self.from_driver, "current_vehicle", self.vehicle)
 
-        log_activity(
-            action="Vehicle Handover Cancelled",
-            entity_type="Salis Vehicle",
-            entity_name=self.vehicle,
-            details={"handover": self.name},
+        add_timeline_note(
+            "Salis Vehicle",
+            self.vehicle,
+            _("Handover {0} cancelled.").format(self.name),
         )

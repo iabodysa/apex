@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import ensure_approval, log_activity
+from apex_habitat.salis.salis_lib import add_timeline_note, ensure_approval
 
 # Allowed forward status transitions. Cancellation is allowed from any state.
 _ALLOWED_TRANSITIONS = {
@@ -49,17 +49,18 @@ class SponsorshipTransferCase(Document):
         )
 
     def on_submit(self):
-        log_activity(
-            action="Sponsorship Transfer Completed",
-            entity_type="Employee",
-            entity_name=self.employee,
-            details={"case": self.name, "status": self.status},
+        # The case's own submit is captured natively; annotate the Employee.
+        add_timeline_note(
+            "Employee",
+            self.employee,
+            _("Sponsorship Transfer Case {0} submitted (status {1}).").format(
+                self.name, _(self.status)
+            ),
         )
 
     def on_cancel(self):
-        log_activity(
-            action="Sponsorship Transfer Cancelled",
-            entity_type="Employee",
-            entity_name=self.employee,
-            details={"case": self.name},
+        add_timeline_note(
+            "Employee",
+            self.employee,
+            _("Sponsorship Transfer Case {0} cancelled.").format(self.name),
         )

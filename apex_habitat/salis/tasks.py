@@ -15,9 +15,8 @@ timeline Comment on the source document.
 
 from __future__ import annotations
 
-import json
-
 import frappe
+from frappe import _
 
 BATCH_SIZE = 500
 
@@ -254,16 +253,14 @@ def unreverted_topup_watch() -> None:
     Reads Fuel Topup Request ``{is_temporary: 1, reverted: 0,
     status in [Approved, Done], revert_due_date: < today}``. For each overdue
     row it loads the document, sets ``reverted = 1`` and ``status = Reverted``,
-    saves it, writes a Salis Activity Log entry, and still raises a Critical
-    "Excessive Topup" alert.
+    saves it (the change is captured natively by Version / track_changes), and
+    still raises a Critical "Excessive Topup" alert.
 
     Each row is guarded in its own ``try/except`` (rollback + log) so one
     failure never aborts the batch. No ``commit()`` inside the loop — the
     scheduler commits the job transaction on success.
     """
     from frappe.utils import today
-
-    from apex_habitat.salis.salis_lib import log_activity
 
     today_str = today()
     logger = frappe.logger()
@@ -292,15 +289,11 @@ def unreverted_topup_watch() -> None:
                 doc.reverted = 1
                 doc.status = "Reverted"
                 doc.save(ignore_permissions=True)  # audit-ok
-                log_activity(
-                    "fuel_topup_auto_reverted",
-                    "Fuel Topup Request",
-                    t.name,
-                    {
-                        "reason": "overdue temporary top-up",
-                        "revert_due_date": str(t.revert_due_date),
-                        "topup_litres": t.topup_litres,
-                    },
+                doc.add_comment(
+                    "Info",
+                    _("Auto-reverted: overdue temporary top-up (was due {0}).").format(
+                        t.revert_due_date
+                    ),
                 )
 
                 # --- Still raise the alert -----------------------------------
@@ -480,12 +473,11 @@ def vehicle_utilization_summary() -> None:
 
     For each Active vehicle, aggregates the count of Dispatch Trips and the
     distance (sum of ``odometer_end - odometer_start``) over the last 7 days and
-    writes a Salis Activity Log row (action ``vehicle_utilization_summary``,
-    details = JSON). Vehicles with zero trips additionally get an Info
-    "Idle Vehicle" alert as a weekly recap. Idempotent per day via the alert
-    dedupe; the Activity Log is append-only history.
+    logs the result. Vehicles with zero trips additionally get an Info
+    "Idle Vehicle" alert as a weekly recap (the actionable output, idempotent per
+    day via the alert dedupe).
     """
-    from frappe.utils import add_days, now_datetime, today
+    from frappe.utils import add_days, today
 
     today_str = today()
     window_start = add_days(today_str, -7)
@@ -522,24 +514,6 @@ def vehicle_utilization_summary() -> None:
                     e_odo = tr.odometer_end or 0
                     if e_odo > s_odo:
                         distance += e_odo - s_odo
-
-                details = {
-                    "window_start": window_start,
-                    "window_end": today_str,
-                    "trip_count": trip_count,
-                    "distance": distance,
-                }
-                frappe.get_doc(
-                    {
-                        "doctype": "Salis Activity Log",
-                        "action": "vehicle_utilization_summary",
-                        "entity_type": "Salis Vehicle",
-                        "entity_name": v.name,
-                        "user": "Administrator",
-                        "logged_at": now_datetime(),
-                        "details": json.dumps(details),
-                    }
-                ).insert(ignore_permissions=True)  # audit-ok
 
                 # Reference the vehicle by docname only — never embed
                 # plate_number (PII-adjacent) in alert/log text.

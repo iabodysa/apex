@@ -16,8 +16,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now
 
-from apex_habitat.salis.salis_lib import log_activity
-
 # Roles that exclusively hold the authority to approve a payment or mark it
 # paid. This is the core finance-boundary control.
 _FINANCE_ROLES = {"Finance Manager", "System Manager"}
@@ -51,25 +49,7 @@ class SalisPaymentRequest(Document):
 		self._enforce_status_flow()
 		self._enforce_finance_gate()
 
-	def on_submit(self):
-		log_activity(
-			action="Payment Request Submitted",
-			entity_type="Salis Payment Request",
-			entity_name=self.name,
-			details={
-				"expense_type": self.expense_type,
-				"amount": self.amount,
-				"status": self.status,
-			},
-		)
-
-	def on_cancel(self):
-		log_activity(
-			action="Payment Request Cancelled",
-			entity_type="Salis Payment Request",
-			entity_name=self.name,
-			details={"expense_type": self.expense_type, "amount": self.amount},
-		)
+	# Submit/cancel are recorded natively (Version track_changes + auto-comment).
 
 	# ------------------------------------------------------------------ helpers
 

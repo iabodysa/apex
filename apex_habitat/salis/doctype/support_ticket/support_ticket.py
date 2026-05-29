@@ -7,8 +7,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now_datetime
 
-from apex_habitat.salis.salis_lib import log_activity
-
 # Allowed status transitions. Closed is terminal except via amend.
 _ALLOWED_TRANSITIONS = {
     "New": {"New", "In Progress"},
@@ -50,10 +48,4 @@ class SupportTicket(Document):
             if not row.sent_at:
                 row.sent_at = now_datetime()
 
-    def on_submit(self):
-        log_activity(
-            action="Ticket Submitted",
-            entity_type="Support Ticket",
-            entity_name=self.name,
-            details={"status": self.status, "category": self.category},
-        )
+    # Submit is recorded natively (Version track_changes + auto-comment).
