@@ -1,21 +1,38 @@
-# Apex Habitat
+# Apex
 
-**Apex Habitat** is an enterprise accommodation and camp-management platform built on
-Frappe Framework v15, ERPNext, and HRMS. It runs the full estate-to-resident
-lifecycle for worker housing — spatial inventory (sites, buildings, rooms, beds),
-resident assignment, transfer and checkout, scheduled safety and cleaning work,
-maintenance inspection and work orders, custody of issued assets, a decentralized
-internal store, and lease/utility cost control.
+**Apex** is an enterprise workforce-operations suite built on Frappe Framework
+v15, ERPNext, and HRMS. It ships as a single Frappe package (`apex_habitat`)
+containing three modules: **Habitat** (accommodation & facilities), **Salis**
+(movement & fleet), and **Apex Core** (shared settings). Together they run the
+estate-to-resident housing lifecycle and the worker/representative movement
+lifecycle on one platform.
 
-Its defining architectural decision is a **governance-first cost model**: every
+Its defining architectural decision is a **memo-ledger cost model**: every
 operational cost and every stock movement is captured in purpose-built, read-only
 *memo* ledgers that are deliberately isolated from the ERPNext General Ledger.
 Accommodation analytics, cross-charge accountability, and on-hand inventory are
 fully traceable without ever touching a GL Entry, Payment Entry, or Stock Ledger
 Entry. Finance posting remains a human, opt-in decision.
 
-The entire app ships as a single Frappe module — `Habitat` — containing all
-DocTypes, reports, web forms, dashboards, and workspaces.
+---
+
+## Modules
+
+The app is **one Frappe package (`apex_habitat`) with three modules** — never a
+single module:
+
+- **Habitat** — accommodation and facilities. Spatial inventory (sites,
+  buildings, rooms, beds), resident assignment/transfer/checkout, scheduled
+  safety and cleaning work, maintenance inspection and work orders, custody of
+  issued assets, a decentralized internal store, and lease/utility cost control.
+- **Salis** — movement and fleet. A two-division service model on the
+  **Transport Request** (service line `Workers` vs `Representatives`), a shared
+  vehicle/driver/fuel/dispatch backbone, vehicle rentals and movement cost
+  recovery, and a native-Frappe **Workflow** approval spine across its
+  submittable documents.
+- **Apex Core** — shared configuration. Single DocTypes **Habitat Settings** and
+  **Salis Settings** that both functional modules read for thresholds, toggles,
+  and default company/cost-center.
 
 ---
 
@@ -49,10 +66,39 @@ DocTypes, reports, web forms, dashboards, and workspaces.
 
 ## Architecture
 
-### 1. Domain module map
+### 1. Package & module map
 
-A single `Habitat` module is organized into eight operational domains. The
-**Operations** workspace is the parent surface; the others hang beneath it.
+One package (`apex_habitat`) hosts three modules. The two functional modules —
+**Habitat** and **Salis** — own their own DocTypes, reports, workspaces, and
+backend logic; **Apex Core** holds the shared Single-DocType settings both read.
+
+```mermaid
+flowchart TB
+    PKG(["apex_habitat<br/>(single Frappe package)"]):::hub
+
+    subgraph Functional ["Functional modules"]
+        direction LR
+        HAB["Habitat<br/>accommodation & facilities<br/>housing · safety · maintenance<br/>custody · leasing · internal store"]:::dom
+        SAL["Salis<br/>movement & fleet<br/>Transport Request (Workers / Representatives)<br/>vehicles · drivers · fuel · dispatch<br/>rentals · cost recovery"]:::dom
+    end
+
+    CORE["Apex Core<br/>shared settings<br/>Habitat Settings · Salis Settings"]:::core
+
+    PKG --> HAB
+    PKG --> SAL
+    PKG --> CORE
+    HAB -. "reads" .-> CORE
+    SAL -. "reads" .-> CORE
+
+    classDef hub fill:#1e3a8a,stroke:#1e3a8a,color:#ffffff;
+    classDef dom fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
+    classDef core fill:#ede9fe,stroke:#5b21b6,color:#5b21b6;
+```
+
+### 2. Habitat domain map
+
+The `Habitat` module is organized into operational domains. The **Operations**
+workspace is the parent surface; the others hang beneath it.
 
 ```mermaid
 flowchart TB
@@ -76,13 +122,14 @@ flowchart TB
     classDef dom fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
 ```
 
-### 2. Three backend execution surfaces
+### 3. Habitat backend execution surfaces
 
-All business logic lives on the server, distributed across three surfaces:
-document-event controllers, scheduled jobs, and on-demand whitelisted actions.
-The diagram shows what triggers each surface and **where its output lands** —
-including the two memo boundaries (Accommodation Ledger and Stock Ledger) that
-never reach the GL.
+All Habitat business logic lives on the server, distributed across three
+surfaces: document-event controllers, scheduled jobs, and on-demand whitelisted
+actions. The diagram shows what triggers each surface and **where its output
+lands** — including the two memo boundaries (Accommodation Ledger and Stock
+Ledger) that never reach the GL. (Scheduler totals shown here are
+package-wide — see the Scheduled jobs table for the per-module split.)
 
 ```mermaid
 flowchart LR
@@ -93,9 +140,9 @@ flowchart LR
 
     subgraph Scheduler ["2 · Scheduled Jobs (tasks.py)"]
         direction TB
-        S1["7 daily"]:::engine
-        S2["2 weekly"]:::engine
-        S3["1 monthly"]:::engine
+        S1["17 daily"]:::engine
+        S2["4 weekly"]:::engine
+        S3["2 monthly"]:::engine
     end
 
     subgraph OnDemand ["3 · On-Demand (whitelisted form buttons)"]
@@ -129,7 +176,7 @@ flowchart LR
     classDef ext fill:#f1f5f9,stroke:#475569,color:#334155,stroke-dasharray:4 3;
 ```
 
-### 3. Decentralized internal store — stock flow
+### 4. Habitat decentralized internal store — stock flow
 
 Custody and maintenance materials move between **building stores** and
 **employee custody** through one read-only, signed-quantity ledger. Every
@@ -164,6 +211,97 @@ flowchart LR
     classDef sink fill:#ede9fe,stroke:#5b21b6,color:#5b21b6;
     classDef memo fill:#f1f5f9,stroke:#475569,color:#334155,stroke-dasharray:4 3;
 ```
+
+### 5. Salis — two-division movement on a shared fleet backbone
+
+Salis splits demand at the **Transport Request** by `service_line`. The
+**Workers** division moves housed labour from accommodation to project sites and
+between cities (built on route plans and passenger manifests); the
+**Representatives** division covers administrative trips and document signing.
+Both divisions resolve onto **one shared backbone** of vehicles, drivers, fuel,
+and dispatch. A server-derived `needs_operations` flag escalates a request to the
+Operations authorization tier when its scope crosses a configurable threshold.
+
+```mermaid
+flowchart TB
+    TR["Transport Request<br/>service_line = Workers | Representatives"]:::req
+
+    subgraph Workers ["Workers division"]
+        direction TB
+        W1["Accommodation to Project Shuttle"]:::line
+        W2["Inter-City Relocation"]:::line
+        WP["Route Plan + Route Stop<br/>Passenger Manifest"]:::line
+    end
+    subgraph Reps ["Representatives division"]
+        direction TB
+        R1["Administrative Trip / Document Signing"]:::line
+        R2["Trips-this-month tier check"]:::line
+    end
+
+    TR -- "Workers" --> Workers
+    TR -- "Representatives" --> Reps
+
+    subgraph Backbone ["Shared fleet backbone"]
+        direction LR
+        VEH["Salis Vehicle"]:::fleet
+        DRV["Salis Driver"]:::fleet
+        VA["Vehicle Assignment"]:::fleet
+        FR["Fuel Request"]:::fleet
+        DT["Dispatch Trip"]:::fleet
+        RENT["Rental Office · Rental Vehicle Movement · Rental Settlement"]:::fleet
+    end
+
+    Workers --> Backbone
+    Reps --> Backbone
+    VA --- VEH
+    VA --- DRV
+    DT --- VEH
+    DT --- DRV
+
+    classDef req fill:#1e3a8a,stroke:#1e3a8a,color:#ffffff;
+    classDef line fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
+    classDef fleet fill:#dcfce7,stroke:#166534,color:#166534;
+```
+
+### 6. Salis — native Workflow approval spine
+
+Salis submittable documents move through their states on **native Frappe
+Workflows** (defined in `salis/workflow/`), not custom controllers. Each
+Workflow enforces the role allowed per transition, a Segregation-of-Duties gate
+(approver must not be the requester), and a Delegation-of-Authority tier
+escalation via transition conditions. Ten documents are on the Workflow spine.
+
+```mermaid
+flowchart LR
+    subgraph Spine ["salis/workflow — native Frappe Workflows"]
+        direction TB
+        TR2["Transport Request<br/>New → Validated → Approved → Scheduled → Fulfilled"]:::wf
+        DT2["Dispatch Trip<br/>Planned → Dispatched → Completed"]:::wf
+        FRq["Fuel Request<br/>Pending → Approved → Done"]:::wf
+        FCl["Fuel Claim<br/>Draft → Submitted to Movement → Reconciled → Approved → Closed"]:::wf
+        FEx["Fuel Exception Case<br/>Open → Under Investigation → Resolved → Closed"]:::wf
+        RS["Rental Settlement<br/>Draft → Reconciled → Approved → Paid"]:::wf
+        PR["Salis Payment Request<br/>Draft → Pending Finance → Approved by Finance → Paid"]:::wf
+        DC["Driver Clearance<br/>Open → In Progress → Cleared"]:::wf
+        STC["Sponsorship Transfer Case<br/>Open → In Progress → Completed"]:::wf
+        ST["Support Ticket<br/>New → In Progress → Resolved → Closed"]:::wf
+    end
+
+    Gate{{"Per-transition role +<br/>Segregation-of-Duties gate (approver ≠ requester) +<br/>authorization-tier escalation"}}:::gate
+    Spine --> Gate
+
+    classDef wf fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
+    classDef gate fill:#fef9c3,stroke:#854d0e,color:#854d0e;
+```
+
+### 7. Apex Core — shared settings
+
+`Apex Core` owns no transactions; it holds two Single DocTypes that both
+functional modules read at runtime. **Habitat Settings** carries Habitat toggles
+(for example the opt-in custody-damage salary deduction and notification flags);
+**Salis Settings** carries Salis thresholds and toggles — alert lead days, idle
+and fuel limits, the fuel/passenger/write-off authorization tier thresholds, and
+the driver-portal and approvals switches read by Salis controllers and Workflows.
 
 ---
 
@@ -204,6 +342,11 @@ bad record never aborts the run.
 
 ### Scheduled jobs
 
+`scheduler_events` in `hooks.py` registers **17 daily, 4 weekly, and 2 monthly**
+jobs across the two functional modules.
+
+**Habitat** (8 daily / 2 weekly / 1 monthly):
+
 | Job | Frequency | What it does |
 | :-- | :-- | :-- |
 | `daily_accommodation_cost_allocation` | Daily | One Accommodation Ledger memo row per active assignment per cost type (annual cost ÷ days-in-year ÷ capacity, leap-year aware). Idempotent per day. |
@@ -211,11 +354,29 @@ bad record never aborts the run.
 | `open_maintenance_escalation` | Daily | Flags overdue open Maintenance Requests against priority thresholds. |
 | `lease_expiry_watchlist` | Daily | Marks past-due leases `Expired` and flags upcoming renewals. |
 | `temporary_stay_checkout_watchlist` | Daily | Flags temporary-stay assignments past their `expected_checkout_date` and fires a reminder Notification. |
+| `idle_resident_aging` | Daily | Ages open Idle Resident Reports for accountability follow-up. |
 | `daily_scheduled_task_instance_generator` | Daily | Creates a Scheduled Task Instance for each active template lacking one in the current period. |
 | `daily_occupancy_snapshot` | Daily | Captures an Accommodation Occupancy Snapshot for trend reporting. |
 | `weekly_occupancy_sync` | Weekly | Recomputes room/building occupancy counters from live assignments to correct drift. |
 | `weekly_safety_task_compliance_scan` | Weekly | Marks past-due task instances `Overdue`. |
 | `monthly_rent_due_alert` | Monthly | Logs a reminder per unpaid rent schedule row. No Payment Entry. |
+
+**Salis** (9 daily / 2 weekly / 1 monthly):
+
+| Job | Frequency | What it does |
+| :-- | :-- | :-- |
+| `driver_license_expiry_watch` | Daily | Flags drivers with licenses expired or nearing expiry. |
+| `idle_vehicle_watch` | Daily | Flags vehicles idle beyond the configured threshold. |
+| `unreverted_topup_watch` | Daily | Flags fuel top-ups left unreverted. |
+| `overdue_fuel_request_watch` | Daily | Flags fuel requests pending past the configured limit. |
+| `missing_attendance_watch` | Daily | Flags drivers missing expected attendance. |
+| `vehicle_compliance_expiry_watch` | Daily | Flags vehicle compliance documents expired or expiring. |
+| `reconcile_operations_alerts` | Daily | Reconciles Operations Alert records to live conditions. |
+| `accrue_fuel_consumption` | Daily | Accrues daily fuel consumption into the fuel ledger. |
+| `daily_rental_accrual` | Daily | Accrues daily rental cost for active rental vehicle movements. |
+| `vehicle_utilization_summary` | Weekly | Summarizes vehicle utilization for the week. |
+| `weekly_vehicle_utilisation_snapshot` | Weekly | Captures a vehicle utilisation snapshot for trend reporting. |
+| `monthly_fuel_reconciliation` | Monthly | Reconciles monthly fuel consumption against claims; idempotent per month. |
 
 ### On-demand actions
 
@@ -279,5 +440,5 @@ v15 (declared via `required_apps` in `hooks.py`), Python 3.10+, and MariaDB
 
 ## License
 
-MIT. Published by AFMCO Support Services.
+MIT. Published by AFMCO Support Services Co. Ltd.
 
