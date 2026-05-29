@@ -241,11 +241,13 @@ has_permission = {
 fixtures = [
     {"dt": "Safety Task Catalog"},
     {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
-    # Salis (Movement) custom roles — only the uniquely-ours ones are fixtured;
-    # core/generic roles (Fleet Manager, Driver, Project Manager, Operations
-    # Manager, Regional Operations Manager) are existence-guarded in setup, never
-    # fixtured, to avoid clobbering ERPNext/HRMS-owned roles.
-    {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Regional Manager", "Fleet Supervisor", "Fleet Operations Manager", "Government Relations Officer", "Legal Officer"]]]},
+    # Salis (Movement) custom roles — only the uniquely-ours, post-consolidation
+    # roles are fixtured. Core/generic roles (Fleet Manager, Driver) are
+    # existence-guarded in the seeds, never fixtured, to avoid clobbering
+    # ERPNext/HRMS-owned roles. The merged roles (Fleet Operations Manager,
+    # Fleet Regional Manager, Legal Officer) are intentionally NOT fixtured —
+    # see patches/v1_x/consolidate_salis_roles.py.
+    {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Supervisor", "Government Relations Officer"]]]},
     # Print Format and Web Form are standard module files (is_standard=1)
     # under habitat/print_format/ and habitat/web_form/ — loaded automatically
     # by bench migrate via import_file, no fixture entry needed.

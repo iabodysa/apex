@@ -16,15 +16,8 @@ TIERS = ["Supervisor", "Project", "Regional", "Operations"]
 ROLE_TIER = {
 	"Fleet Supervisor": "Supervisor",
 	"Fleet Project Manager": "Project",
-	"Fleet Regional Manager": "Regional",
-	"Fleet Operations Manager": "Operations",
 	"Fleet Manager": "Operations",
 	"System Manager": "Operations",
-	# Operations approval roles (Movement is a service provider — Operations
-	# submits requests; these roles supply the DoA tier for those requests).
-	"Project Manager": "Project",
-	"Regional Operations Manager": "Regional",
-	"Operations Manager": "Operations",
 }
 
 

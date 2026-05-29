@@ -18,8 +18,6 @@ import frappe
 UNSCOPED_ROLES = {
     "System Manager",
     "Fleet Manager",
-    "Fleet Operations Manager",
-    "Fleet Regional Manager",
     "Internal Auditor",
 }
 

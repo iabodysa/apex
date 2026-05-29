@@ -107,12 +107,6 @@
    "export": 1,
    "read": 1,
    "report": 1,
-   "role": "Fleet Operations Manager"
-  },
-  {
-   "export": 1,
-   "read": 1,
-   "report": 1,
    "role": "Finance Manager"
   },
   {

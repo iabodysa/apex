@@ -2,15 +2,17 @@
 
 A failure on any single role is logged and skipped so that install/migrate
 can never crash because of this seed.
+
+Consolidated (v1.x): "Fleet Operations Manager" and "Fleet Regional Manager"
+were merged into "Fleet Manager", and "Legal Officer" into
+"Government Relations Officer" (see patches/v1_x/consolidate_salis_roles.py).
+Those names are intentionally no longer seeded so they are not re-created.
 """
 
 import frappe
 
 AUTHORITY_ROLES = [
-    "Fleet Operations Manager",
-    "Fleet Regional Manager",
     "Government Relations Officer",
-    "Legal Officer",
 ]
 
 

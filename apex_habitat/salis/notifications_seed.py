@@ -73,7 +73,7 @@ _NOTIFICATIONS = [
         "value_changed": "status",
         "condition": "doc.worker_count and doc.worker_count >= 20 and doc.status in ('New', 'Validated')",
         "message": '{{ _("A large worker-transport request needs management escalation") }}: {{ doc.name }} ({{ doc.worker_count }} {{ _("workers") }}).',
-        "roles": ["Fleet Manager", "Fleet Operations Manager", "Fleet Regional Manager"],
+        "roles": ["Fleet Manager"],
     },
 ]
 

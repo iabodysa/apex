@@ -1,20 +1,17 @@
 {
-  "doctype": "Report",
-  "name": "Transport Fulfilment SLA",
-  "report_name": "Transport Fulfilment SLA",
-  "ref_doctype": "Trip Fulfilment Ledger",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Salis",
-  "roles": [
-    {
-      "role": "Fleet Manager"
-    },
-    {
-      "role": "Fleet Operations Manager"
-    },
-    {
-      "role": "Internal Auditor"
-    }
-  ]
+ "doctype": "Report",
+ "name": "Transport Fulfilment SLA",
+ "report_name": "Transport Fulfilment SLA",
+ "ref_doctype": "Trip Fulfilment Ledger",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Salis",
+ "roles": [
+  {
+   "role": "Fleet Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  }
+ ]
 }

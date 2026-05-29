@@ -66,3 +66,14 @@ apex_habitat.patches.v1_1.seed_salis_operations_artifacts
 # obsolete "Salis Activity Log" DocType (redundant with Version/track_changes +
 # timeline comments). Idempotent; a no-op on fresh installs.
 apex_habitat.patches.v1_x.drop_salis_activity_log
+
+# v1.x — Salis role consolidation (small-company, SoD-preserving merge)
+# ONE-TIME (prune-eligible once every deployed site has run it): re-points users
+# off the over-deep/generic roles onto the survivors, then deletes the unused
+# app-owned roles. Idempotent; a no-op on fresh installs (the removed roles are
+# no longer seeded). Never touches core/ERPNext roles.
+#   Fleet Operations Manager, Fleet Regional Manager -> Fleet Manager
+#   Legal Officer -> Government Relations Officer
+#   Project Manager, Regional Operations Manager, Operations Manager
+#       -> Fleet Project Manager / Fleet Manager
+apex_habitat.patches.v1_x.consolidate_salis_roles

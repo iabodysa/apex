@@ -39,7 +39,7 @@ class TestUserTier(unittest.TestCase):
     def setUpClass(cls):
         frappe.set_user("Administrator")
         cls.sup = _user("doa_sup@example.com", "Fleet Supervisor")
-        cls.ops = _user("doa_ops@example.com", "Fleet Operations Manager")
+        cls.ops = _user("doa_ops@example.com", "Fleet Manager")
         frappe.db.commit()
 
     def test_user_max_tier(self):
@@ -58,7 +58,7 @@ class TestApprovalRequestSoD(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         frappe.set_user("Administrator")
-        cls.a = _user("doa_a@example.com", "Fleet Operations Manager")
+        cls.a = _user("doa_a@example.com", "Fleet Manager")
         frappe.db.commit()
 
     def test_approver_equals_requester_blocked(self):
@@ -74,7 +74,7 @@ class TestEnsureApproval(unittest.TestCase):
     def setUpClass(cls):
         frappe.set_user("Administrator")
         cls.sup = _user("doa_sup2@example.com", "Fleet Supervisor")
-        cls.ops = _user("doa_ops2@example.com", "Fleet Operations Manager")
+        cls.ops = _user("doa_ops2@example.com", "Fleet Manager")
         cls.req = _user("doa_req2@example.com", "Fleet Project Manager")
         frappe.db.commit()
 

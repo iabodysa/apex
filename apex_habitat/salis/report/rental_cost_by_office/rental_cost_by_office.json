@@ -1,23 +1,20 @@
 {
-  "doctype": "Report",
-  "name": "Rental Cost by Office",
-  "report_name": "Rental Cost by Office",
-  "ref_doctype": "Rental Accrual Ledger",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Salis",
-  "roles": [
-    {
-      "role": "Fleet Manager"
-    },
-    {
-      "role": "Fleet Operations Manager"
-    },
-    {
-      "role": "Finance Manager"
-    },
-    {
-      "role": "Internal Auditor"
-    }
-  ]
+ "doctype": "Report",
+ "name": "Rental Cost by Office",
+ "report_name": "Rental Cost by Office",
+ "ref_doctype": "Rental Accrual Ledger",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Salis",
+ "roles": [
+  {
+   "role": "Fleet Manager"
+  },
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  }
+ ]
 }

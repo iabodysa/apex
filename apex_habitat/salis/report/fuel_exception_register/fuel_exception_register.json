@@ -1,23 +1,20 @@
 {
-  "doctype": "Report",
-  "name": "Fuel Exception Register",
-  "report_name": "Fuel Exception Register",
-  "ref_doctype": "Fuel Exception Case",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Salis",
-  "roles": [
-    {
-      "role": "Fleet Manager"
-    },
-    {
-      "role": "Fleet Operations Manager"
-    },
-    {
-      "role": "Finance Manager"
-    },
-    {
-      "role": "Internal Auditor"
-    }
-  ]
+ "doctype": "Report",
+ "name": "Fuel Exception Register",
+ "report_name": "Fuel Exception Register",
+ "ref_doctype": "Fuel Exception Case",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Salis",
+ "roles": [
+  {
+   "role": "Fleet Manager"
+  },
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  }
+ ]
 }

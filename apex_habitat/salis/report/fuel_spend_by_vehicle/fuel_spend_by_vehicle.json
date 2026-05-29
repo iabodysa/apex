@@ -1,23 +1,20 @@
 {
-  "doctype": "Report",
-  "name": "Fuel Spend by Vehicle",
-  "report_name": "Fuel Spend by Vehicle",
-  "ref_doctype": "Fuel Consumption Ledger",
-  "report_type": "Script Report",
-  "is_standard": "Yes",
-  "module": "Salis",
-  "roles": [
-    {
-      "role": "Fleet Manager"
-    },
-    {
-      "role": "Fleet Operations Manager"
-    },
-    {
-      "role": "Finance Manager"
-    },
-    {
-      "role": "Internal Auditor"
-    }
-  ]
+ "doctype": "Report",
+ "name": "Fuel Spend by Vehicle",
+ "report_name": "Fuel Spend by Vehicle",
+ "ref_doctype": "Fuel Consumption Ledger",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Salis",
+ "roles": [
+  {
+   "role": "Fleet Manager"
+  },
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  }
+ ]
 }

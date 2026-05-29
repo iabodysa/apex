@@ -132,11 +132,6 @@
    "write": 1
   },
   {
-   "read": 1,
-   "role": "Legal Officer",
-   "write": 1
-  },
-  {
    "cancel": 1,
    "create": 1,
    "delete": 1,
