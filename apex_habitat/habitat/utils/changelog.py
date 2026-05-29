@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.4.0 ----------------------------------------------------------------
+    {
+        "title": "Apex 1.4.0 — Movement costs now carry Company and Cost Center, with quicker navigation",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-15 09:00:00",
+    },
+    {
+        "title": "v1.4.0: Rentals, fuel claims, payments and cost recoveries now record their Company and Cost Center — so finance can filter and group Movement costs cleanly",
+        "app_name": "apex_habitat",
+        "link": "/app/rental-settlement",
+        "creation": "2026-06-15 09:01:00",
+    },
+    {
+        "title": "v1.4.0: Salis areas have short, clear names and a Help-menu shortcut, so you reach the Dispatch Board and your work area in one click",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-15 09:02:00",
+    },
     # v1.3.0 ----------------------------------------------------------------
     {
         "title": "Apex 1.3.0 — quicker Salis navigation, one-tap record creation and a leaner role setup",
