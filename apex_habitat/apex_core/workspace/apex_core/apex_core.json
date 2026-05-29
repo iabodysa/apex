@@ -1,0 +1,69 @@
+{
+ "doctype": "Workspace",
+ "name": "Apex Core",
+ "label": "Apex Core",
+ "title": "Apex Core",
+ "module": "Apex Core",
+ "icon": "setting",
+ "public": 1,
+ "is_default": 0,
+ "is_hidden": 0,
+ "sequence_id": 90.0,
+ "parent_page": "",
+ "content": "[{\"id\": \"acHdrCfg\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Configuration</b></span>\", \"col\": 12}}, {\"id\": \"acSc0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"acSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Settings\", \"col\": 3}}, {\"id\": \"acHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Settings</b></span>\", \"col\": 12}}, {\"id\": \"acCard\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Habitat Settings",
+   "link_to": "Habitat Settings",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Salis Settings",
+   "link_to": "Salis Settings",
+   "idx": 2
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Settings",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Habitat Settings",
+   "link_type": "DocType",
+   "link_to": "Habitat Settings",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Settings",
+   "link_type": "DocType",
+   "link_to": "Salis Settings",
+   "idx": 3
+  }
+ ],
+ "number_cards": [],
+ "charts": [],
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Fleet Manager"
+  }
+ ],
+ "modified": "2026-05-30 00:00:00.000000"
+}

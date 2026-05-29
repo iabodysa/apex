@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.15.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.15.0 — shared settings get a dedicated Apex Core workspace",
+        "app_name": "apex_habitat",
+        "link": "/app/apex-core",
+        "creation": "2026-07-01 09:00:00",
+    },
+    {
+        "title": "v1.15.0: Habitat Settings and Salis Settings now live in a dedicated Apex Core workspace, so configuration has a clear home in the desk",
+        "app_name": "apex_habitat",
+        "link": "/app/apex-core",
+        "creation": "2026-07-01 09:01:00",
+    },
+    {
+        "title": "v1.15.0: The Apex Core workspace is available to System Manager and the Accommodation and Fleet managers who own those settings",
+        "app_name": "apex_habitat",
+        "link": "/app/apex-core",
+        "creation": "2026-07-01 09:02:00",
+    },
     # v1.14.2 ---------------------------------------------------------------
     {
         "title": "Apex 1.14.2 — a refreshed, mobile-first driver portal and a cleaner fuel approval board",
