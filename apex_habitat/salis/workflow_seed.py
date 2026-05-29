@@ -14,9 +14,10 @@ Every step is existence-guarded and skip-missing (the target DocType, every
 Workflow State and Workflow Action Master referenced), so running it twice — or
 on a partially installed module — is safe and never aborts the migrate.
 
-Seeds the Salis Workflow Spine: Transport Request, Rental Settlement and Driver
-Clearance. Each one is applied independently, so a missing target DocType only
-skips that one workflow.
+Seeds the Salis Workflow Spine: Transport Request, Rental Settlement, Driver
+Clearance, Salis Payment Request, Support Ticket and Sponsorship Transfer Case.
+Each one is applied independently, so a missing target DocType only skips that
+one workflow.
 
 Colours for the workflow states mirror each DocType's own status indicator
 colours so the desk Workflow widget matches the list view.
@@ -32,6 +33,9 @@ _WORKFLOW_DIRS = [
     "transport_request_workflow",
     "rental_settlement_workflow",
     "driver_clearance_workflow",
+    "salis_payment_request_workflow",
+    "support_ticket_workflow",
+    "sponsorship_transfer_case_workflow",
 ]
 
 # State -> indicator style, mirroring each DocType's status indicator colours so
@@ -56,6 +60,15 @@ _STATE_STYLE = {
     "In Progress": "Primary",
     "Cleared": "Success",
     "Blocked": "Danger",
+    # Salis Payment Request (Draft / Paid / Rejected / Cancelled reuse the above)
+    "Pending Finance": "Warning",
+    "Approved by Finance": "Primary",
+    # Support Ticket (New / In Progress / Cancelled reuse the styles above)
+    "Waiting": "Warning",
+    "Resolved": "Primary",
+    "Closed": "Success",
+    # Sponsorship Transfer Case (Open / In Progress / Cancelled reuse the above)
+    "Completed": "Success",
 }
 
 

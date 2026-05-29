@@ -80,13 +80,16 @@
    "options": "Low\nMedium\nHigh\nUrgent"
   },
   {
+   "allow_on_submit": 1,
    "default": "New",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "New\nIn Progress\nWaiting\nResolved\nClosed"
+   "no_copy": 1,
+   "options": "New\nIn Progress\nWaiting\nResolved\nClosed\nCancelled",
+   "read_only": 1
   },
   {
    "fieldname": "support_ticket_sec_details",
@@ -162,6 +165,7 @@
    "read": 1,
    "report": 1,
    "role": "Fleet Supervisor",
+   "submit": 1,
    "write": 1
   },
   {
@@ -200,7 +204,32 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Blue",
+   "title": "New"
+  },
+  {
+   "color": "Blue",
+   "title": "In Progress"
+  },
+  {
+   "color": "Orange",
+   "title": "Waiting"
+  },
+  {
+   "color": "Blue",
+   "title": "Resolved"
+  },
+  {
+   "color": "Green",
+   "title": "Closed"
+  },
+  {
+   "color": "Red",
+   "title": "Cancelled"
+  }
+ ],
  "title_field": "subject",
  "track_changes": 1
 }

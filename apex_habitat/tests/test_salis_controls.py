@@ -5,6 +5,7 @@ later workflow refactor."""
 import unittest
 
 import frappe
+from frappe.model.workflow import apply_workflow, get_transitions
 
 from apex_habitat.salis.api import driver_portal
 from apex_habitat.tests.test_driver_portal import _ensure_test_driver
@@ -66,7 +67,13 @@ class TestDriverAttendanceDuplicate(unittest.TestCase):
 
 
 class TestPaymentRequestSoD(unittest.TestCase):
-    """A Finance approver may not approve a payment they themselves raised."""
+    """A Finance approver may not approve a payment they themselves raised.
+
+    Transitions are owned by the native Salis Payment Request Workflow, so the
+    request is driven Draft -> Pending Finance -> Approved by Finance through
+    ``apply_workflow``. The maker != checker rule is held both by the workflow
+    condition and by the controller's finance gate (defence in depth); this test
+    exercises the canonical workflow path."""
 
     @classmethod
     def setUpClass(cls):
@@ -83,35 +90,52 @@ class TestPaymentRequestSoD(unittest.TestCase):
             u.insert(ignore_permissions=True)
         else:
             u = frappe.get_doc("User", email)
-        if "Finance Manager" not in frappe.get_roles(email):
-            u.add_roles("Finance Manager")
+        # Finance Manager (to approve) plus an operational maker role (to raise /
+        # submit-to-finance), so the only thing standing between a requester and
+        # self-approval is the SoD condition, not a role gap.
+        for role in ("Finance Manager", "Fleet Project Manager"):
+            if role not in frappe.get_roles(email):
+                u.add_roles(role)
         return email
 
-    def _new_request_as(self, user):
-        frappe.set_user(user)
+    def _pending_request_by(self, user):
+        """A Pending Finance request whose requested_by is ``user``, reached via
+        the workflow (insert at Draft, then Submit to Finance)."""
+        frappe.set_user("Administrator")
         doc = frappe.get_doc(
             {"doctype": "Salis Payment Request", "expense_type": "Fuel",
-             "amount": 100, "status": "Pending Finance"}
+             "amount": 100, "requested_by": user, "status": "Draft"}
         ).insert(ignore_permissions=True)
+        frappe.set_user(user)
+        apply_workflow(doc, "Submit to Finance")
+        frappe.set_user("Administrator")
+        doc.reload()
         return doc
 
     def test_requester_cannot_self_approve(self):
-        doc = self._new_request_as(self.fin1)
+        doc = self._pending_request_by(self.fin1)
         self.assertEqual(doc.requested_by, self.fin1)
-        doc.status = "Approved by Finance"
+        frappe.set_user(self.fin1)
+        # The SoD condition removes the approve transition for the requester.
+        self.assertNotIn("Approve (Finance)", {t.action for t in get_transitions(doc)})
         with self.assertRaises(frappe.ValidationError):
-            doc.save(ignore_permissions=True)
+            apply_workflow(doc, "Approve (Finance)")
         frappe.set_user("Administrator")
         frappe.delete_doc("Salis Payment Request", doc.name, ignore_permissions=True, force=True)
         frappe.db.commit()
 
     def test_other_finance_user_can_approve(self):
-        doc = self._new_request_as(self.fin1)
+        doc = self._pending_request_by(self.fin1)
         frappe.set_user(self.fin2)
-        doc.status = "Approved by Finance"
-        doc.save(ignore_permissions=True)
+        apply_workflow(doc, "Approve (Finance)")
+        doc.reload()
+        self.assertEqual(doc.status, "Approved by Finance")
+        self.assertEqual(doc.docstatus, 1)
         self.assertEqual(doc.finance_approved_by, self.fin2)
+        # Approve (Finance) submits the document; cancel before deleting.
         frappe.set_user("Administrator")
+        doc.reload()
+        doc.cancel()
         frappe.delete_doc("Salis Payment Request", doc.name, ignore_permissions=True, force=True)
         frappe.db.commit()
 

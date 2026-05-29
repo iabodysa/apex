@@ -1,0 +1,119 @@
+{
+ "doctype": "Workflow",
+ "name": "Salis Payment Request Workflow",
+ "workflow_name": "Salis Payment Request Workflow",
+ "document_type": "Salis Payment Request",
+ "workflow_state_field": "status",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "states": [
+  {
+   "doctype": "Workflow Document State",
+   "state": "Draft",
+   "doc_status": "0",
+   "allow_edit": "Fleet Project Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Pending Finance",
+   "doc_status": "0",
+   "allow_edit": "Fleet Project Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Approved by Finance",
+   "doc_status": "1",
+   "allow_edit": "Finance Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Paid",
+   "doc_status": "1",
+   "allow_edit": "Finance Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Rejected",
+   "doc_status": "0",
+   "allow_edit": "Finance Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Cancelled",
+   "doc_status": "2",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  }
+ ],
+ "transitions": [
+  {
+   "doctype": "Workflow Transition",
+   "state": "Draft",
+   "action": "Submit to Finance",
+   "next_state": "Pending Finance",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Draft",
+   "action": "Submit to Finance",
+   "next_state": "Pending Finance",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Draft",
+   "action": "Submit to Finance",
+   "next_state": "Pending Finance",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending Finance",
+   "action": "Approve (Finance)",
+   "next_state": "Approved by Finance",
+   "allowed": "Finance Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.requested_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Pending Finance",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "Finance Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved by Finance",
+   "action": "Mark Paid",
+   "next_state": "Paid",
+   "allowed": "Finance Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.requested_by != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved by Finance",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  }
+ ]
+}

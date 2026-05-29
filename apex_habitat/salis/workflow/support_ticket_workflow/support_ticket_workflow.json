@@ -1,0 +1,209 @@
+{
+ "doctype": "Workflow",
+ "name": "Support Ticket Workflow",
+ "workflow_name": "Support Ticket Workflow",
+ "document_type": "Support Ticket",
+ "workflow_state_field": "status",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "states": [
+  {
+   "doctype": "Workflow Document State",
+   "state": "New",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "In Progress",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Waiting",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Resolved",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Closed",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Cancelled",
+   "doc_status": "2",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  }
+ ],
+ "transitions": [
+  {
+   "doctype": "Workflow Transition",
+   "state": "New",
+   "action": "Start Work",
+   "next_state": "In Progress",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "New",
+   "action": "Start Work",
+   "next_state": "In Progress",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "New",
+   "action": "Start Work",
+   "next_state": "In Progress",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "In Progress",
+   "action": "Mark Waiting",
+   "next_state": "Waiting",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "In Progress",
+   "action": "Mark Waiting",
+   "next_state": "Waiting",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Waiting",
+   "action": "Resume",
+   "next_state": "In Progress",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Waiting",
+   "action": "Resume",
+   "next_state": "In Progress",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "In Progress",
+   "action": "Resolve",
+   "next_state": "Resolved",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "In Progress",
+   "action": "Resolve",
+   "next_state": "Resolved",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Waiting",
+   "action": "Resolve",
+   "next_state": "Resolved",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Waiting",
+   "action": "Resolve",
+   "next_state": "Resolved",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Resolved",
+   "action": "Reopen",
+   "next_state": "In Progress",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Resolved",
+   "action": "Reopen",
+   "next_state": "In Progress",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Resolved",
+   "action": "Close",
+   "next_state": "Closed",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Resolved",
+   "action": "Close",
+   "next_state": "Closed",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Resolved",
+   "action": "Close",
+   "next_state": "Closed",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Closed",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  }
+ ]
+}

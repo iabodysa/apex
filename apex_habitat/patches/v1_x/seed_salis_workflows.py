@@ -1,5 +1,6 @@
 """Seed the Salis native Frappe Workflows (Transport Request, Rental Settlement,
-Driver Clearance — the Workflow Spine).
+Driver Clearance, Salis Payment Request, Support Ticket, Sponsorship Transfer
+Case — the Workflow Spine).
 
 Mirrors the other Salis seed patches: the seed logic lives in the idempotent,
 existence-guarded ``salis/workflow_seed.py`` module (single source of truth).

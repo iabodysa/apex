@@ -76,13 +76,16 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Draft\nPending Finance\nApproved by Finance\nPaid\nRejected\nCancelled"
+   "no_copy": 1,
+   "options": "Draft\nPending Finance\nApproved by Finance\nPaid\nRejected\nCancelled",
+   "read_only": 1
   },
   {
    "description": "Defaults to the session user on creation.",
@@ -300,7 +303,32 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
+ "states": [
+  {
+   "color": "Blue",
+   "title": "Draft"
+  },
+  {
+   "color": "Orange",
+   "title": "Pending Finance"
+  },
+  {
+   "color": "Blue",
+   "title": "Approved by Finance"
+  },
+  {
+   "color": "Green",
+   "title": "Paid"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
+  },
+  {
+   "color": "Red",
+   "title": "Cancelled"
+  }
+ ],
  "title_field": "expense_type",
  "track_changes": 1
 }

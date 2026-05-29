@@ -3,6 +3,18 @@
 Enforces the finance boundary: every payable item routes
 through a Finance-exclusive approval gate, and Finance cannot be bypassed.
 
+Status transitions are owned by the native **Salis Payment Request Workflow**
+(see ``salis/workflow/salis_payment_request_workflow/``), not by this
+controller. The finance approval/payment transitions ("Approve (Finance)" and
+"Mark Paid") are **Finance-Manager-only** and carry the Segregation-of-Duties
+condition ``requested_by != session.user`` so the (server-stamped) requester can
+never approve or pay their own request. The same maker != checker rule is also
+held at the permission layer by ``permissions.payment_sod_has_permission`` —
+both gates stand (defence in depth). This controller keeps the finance-gate
+*data* guard ``_enforce_finance_gate`` (the no-bypass finance boundary and the
+approver stamp) so any save that lands the document in a Finance-exclusive state
+— including a path that bypasses the workflow action — is still blocked.
+
 This DocType posts NO General Ledger / Journal / Payment Entry. It is a
 payment request record only. ``linked_payment_entry`` is a reference-only
 field set externally once Finance posts the actual payment in the accounting
@@ -23,19 +35,16 @@ _FINANCE_ROLES = {"Finance Manager", "System Manager"}
 # Statuses whose entry requires finance authority.
 _FINANCE_GATED_STATUSES = {"Approved by Finance", "Paid"}
 
-# Terminal statuses - no further transition is allowed out of them.
-_TERMINAL_STATUSES = {"Paid", "Rejected", "Cancelled"}
-
-# Allowed forward status transitions. A status may always remain unchanged.
-# Any non-terminal status may move to Rejected or Cancelled.
-_ALLOWED_TRANSITIONS = {
-	"Draft": {"Pending Finance", "Rejected", "Cancelled"},
-	"Pending Finance": {"Approved by Finance", "Rejected", "Cancelled"},
-	"Approved by Finance": {"Paid", "Rejected", "Cancelled"},
-	"Paid": set(),
-	"Rejected": set(),
-	"Cancelled": set(),
-}
+# Known status values. The Select carries these for filtering/colour, but the
+# Salis Payment Request Workflow owns the *transitions*.
+VALID_STATUSES = (
+	"Draft",
+	"Pending Finance",
+	"Approved by Finance",
+	"Paid",
+	"Rejected",
+	"Cancelled",
+)
 
 
 class SalisPaymentRequest(Document):
@@ -44,10 +53,15 @@ class SalisPaymentRequest(Document):
 			self.requested_by = frappe.session.user
 
 	def validate(self):
+		# The Select still carries the known states for filtering/colour, but the
+		# Salis Payment Request Workflow owns *transitions* — this only rejects an
+		# unknown value.
+		if self.status and self.status not in VALID_STATUSES:
+			frappe.throw(_("Invalid status: {0}").format(self.status))
+
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
 		self._set_financial_defaults()
-		self._enforce_status_flow()
 		self._enforce_finance_gate()
 
 	# Submit/cancel are recorded natively (Version track_changes + auto-comment).
@@ -72,28 +86,14 @@ class SalisPaymentRequest(Document):
 		# A brand-new document has no prior state; treat it as Draft.
 		return (previous.status if previous else None) or "Draft"
 
-	def _enforce_status_flow(self):
-		"""Reject illegal status jumps (e.g. Draft -> Approved by Finance / Paid)."""
-		new_status = self.status or "Draft"
-		old_status = self._old_status()
-
-		if new_status == old_status:
-			return
-
-		allowed = _ALLOWED_TRANSITIONS.get(old_status, set())
-		if new_status not in allowed:
-			frappe.throw(
-				_("Cannot change Payment Request status from {0} to {1}.").format(
-					_(old_status), _(new_status)
-				)
-			)
-
 	def _enforce_finance_gate(self):
-		"""Finance-exclusive gate.
+		"""Finance-exclusive gate (kept as a hard server-side block; defence in
+		depth alongside the workflow condition and the permission hook).
 
 		Entering "Approved by Finance" or "Paid" is permitted ONLY when the
-		current user holds a finance authority role. This step cannot be
-		bypassed. On entering "Approved by Finance", stamp the approver."""
+		current user holds a finance authority role and is not the requester.
+		This step cannot be bypassed, even on a save that does not go through the
+		workflow action. On entering "Approved by Finance", stamp the approver."""
 		new_status = self.status or "Draft"
 		old_status = self._old_status()
 

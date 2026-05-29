@@ -1,9 +1,16 @@
 """State-machine tests: a document may only be created in its initial status
-(closing the insert-bypass), and illegal status jumps are rejected."""
+(closing the insert-bypass), and illegal status jumps are rejected.
+
+Support Ticket transitions are now owned by the native Support Ticket Workflow
+(see test_support_ticket_workflow), so the only controller-level state guard
+remaining is the initial-status guard (a ticket must be created as New). The
+illegal-jump enforcement is proven on the workflow: a non-offered action is
+rejected by ``apply_workflow``."""
 
 import unittest
 
 import frappe
+from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 
 class TestSupportTicketStateFlow(unittest.TestCase):
@@ -18,16 +25,21 @@ class TestSupportTicketStateFlow(unittest.TestCase):
         frappe.set_user("Administrator")
 
     def test_insert_at_terminal_status_blocked(self):
+        # The initial-status guard stays in the controller (the workflow does not
+        # cover a direct insert at a later/terminal status).
         with self.assertRaises(frappe.ValidationError):
             self._new(status="Closed").insert(ignore_permissions=True)
 
-    def test_new_inserts_then_legal_and_illegal_transitions(self):
+    def test_illegal_jump_rejected_by_workflow(self):
+        # New -> Closed skips Resolved: that action is not offered from New, so
+        # the workflow rejects it. (Administrator drives the workflow here.)
+        if get_workflow_name("Support Ticket") != "Support Ticket Workflow":
+            self.skipTest("Support Ticket Workflow not seeded on this site")
         t = self._new(status="New").insert(ignore_permissions=True)
-        t.status = "In Progress"          # legal
-        t.save(ignore_permissions=True)
-        t.status = "Closed"               # illegal: must pass through Resolved
+        offered = {tr.action for tr in get_transitions(t)}
+        self.assertNotIn("Close", offered)
         with self.assertRaises(frappe.ValidationError):
-            t.save(ignore_permissions=True)
+            apply_workflow(t, "Close")
         frappe.delete_doc("Support Ticket", t.name, ignore_permissions=True, force=True)
         frappe.db.commit()
 
