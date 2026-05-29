@@ -11,11 +11,13 @@
   "severity",
   "status",
   "raised_on",
+  "resolved_on",
   "operations_alert_overview_col",
   "vehicle",
   "driver",
   "operations_alert_sec_message",
-  "message"
+  "message",
+  "resolution_note"
  ],
  "fields": [
   {
@@ -57,6 +59,13 @@
    "label": "Raised On"
   },
   {
+   "depends_on": "eval:doc.status==\"Resolved\"",
+   "fieldname": "resolved_on",
+   "fieldtype": "Datetime",
+   "label": "Resolved On",
+   "read_only": 1
+  },
+  {
    "fieldname": "operations_alert_overview_col",
    "fieldtype": "Column Break"
   },
@@ -83,6 +92,13 @@
    "fieldtype": "Small Text",
    "label": "Message",
    "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.status==\"Resolved\"",
+   "fieldname": "resolution_note",
+   "fieldtype": "Small Text",
+   "label": "Resolution Note",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-exclamation-triangle",

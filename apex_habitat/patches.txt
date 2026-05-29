@@ -121,3 +121,12 @@ apex_habitat.patches.v1_x.seed_salis_workflows
 # and their backing tables. Idempotent (skips a row whose name already exists) and
 # a no-op on a fresh install (the source tables do not exist).
 apex_habitat.patches.v1_x.merge_fuel_request_doctypes
+
+# v1.x — backfill Operations Alert resolution-audit fields
+# ONE-TIME (prune-eligible once every deployed site has run it): stamps the new
+# read-only resolved_on (and resolution_note) on Operations Alert rows that were
+# already Resolved before those fields existed, using COALESCE(modified,
+# raised_on). Idempotent (only NULL resolved_on on Resolved rows), existence-
+# guarded on table + column (no schema error during migrate), and a no-op on a
+# fresh install (no pre-existing Resolved rows).
+apex_habitat.patches.v1_x.backfill_operations_alert_resolved_on

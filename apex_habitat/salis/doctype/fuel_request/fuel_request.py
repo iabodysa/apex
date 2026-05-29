@@ -142,6 +142,24 @@ class FuelRequest(Document):
 		if self.request_type == "Standard" and self.status == "Done":
 			self._apply_quota_consumption()
 
+		# Resolve-on-source-clear: reverting a temporary top-up clears the
+		# condition behind any open "Excessive Topup" Operations Alert for this
+		# vehicle, so close it immediately rather than waiting for the daily
+		# reconciliation pass. has_value_changed keeps this to the revert event
+		# only; the resolver is a no-op when no such alert exists and never
+		# raises, so it cannot block this save.
+		if (
+			self.request_type == "Top-up"
+			and self.reverted
+			and self.has_value_changed("reverted")
+		):
+			from apex_habitat.salis.tasks import resolve_excessive_topup_alerts
+
+			resolve_excessive_topup_alerts(
+				self.vehicle,
+				_("temporary top-up {0} was reverted").format(self.name),
+			)
+
 	def on_cancel(self):
 		if self.request_type == "Standard":
 			self._reverse_quota_consumption()

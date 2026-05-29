@@ -506,11 +506,34 @@ def vehicle_compliance_expiry_watch() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _resolve_alert(alert_name: str, reason: str) -> None:
-    """Set an Operations Alert to Resolved and drop an audit comment. Idempotent:
-    a re-run that finds the alert already Resolved is a no-op. Per-alert error
-    isolation is the caller's responsibility."""
-    frappe.db.set_value(ALERT_DOCTYPE, alert_name, "status", "Resolved", update_modified=True)
+def _resolve_alert(alert_name: str, reason: str) -> bool:
+    """Resolve an Operations Alert: set ``status = Resolved`` and stamp
+    ``resolved_on`` + ``resolution_note``, then drop an audit comment.
+
+    Idempotent: an alert that is already ``Resolved`` is left untouched (no
+    status flip, no fresh ``resolved_on``, no duplicate comment) so a re-run
+    cannot flip-flop the row or rewrite its resolution timestamp. Returns
+    ``True`` only when this call performed the resolution. Per-alert error
+    isolation is the caller's responsibility.
+    """
+    from frappe.utils import now_datetime
+
+    current = frappe.db.get_value(ALERT_DOCTYPE, alert_name, "status")
+    if current == "Resolved":
+        return False
+
+    # Stamp status + audit fields in one write so the resolved row is always
+    # internally consistent (a Resolved alert always has resolved_on set).
+    frappe.db.set_value(
+        ALERT_DOCTYPE,
+        alert_name,
+        {
+            "status": "Resolved",
+            "resolved_on": now_datetime(),
+            "resolution_note": reason[:140],
+        },
+        update_modified=True,
+    )
     try:
         frappe.get_doc(ALERT_DOCTYPE, alert_name).add_comment(
             "Info", _("Auto-resolved: {0}").format(reason)
@@ -522,6 +545,44 @@ def _resolve_alert(alert_name: str, reason: str) -> None:
             message=frappe.get_traceback(),
             title=f"Alert resolve comment failed for {alert_name}"[:140],
         )
+    return True
+
+
+def resolve_excessive_topup_alerts(vehicle: str | None, reason: str) -> int:
+    """Resolve any open/acknowledged ``Excessive Topup`` alert for ``vehicle``.
+
+    Event-driven counterpart to the periodic resolver: callers fire this from a
+    clean source event (e.g. a temporary top-up is reverted) so the alert clears
+    immediately rather than waiting for the next daily reconciliation pass. Safe
+    to call even when no matching alert exists (returns 0) and idempotent
+    (already-Resolved rows are filtered out). Never raises: a failure is logged
+    and swallowed so it cannot abort the source-document save that triggered it.
+
+    Returns the number of alerts this call resolved.
+    """
+    if not vehicle:
+        return 0
+    resolved = 0
+    try:
+        open_alerts = frappe.get_all(
+            ALERT_DOCTYPE,
+            filters={
+                "alert_type": "Excessive Topup",
+                "vehicle": vehicle,
+                "status": ["in", ["Open", "Acknowledged"]],
+            },
+            pluck="name",
+        )
+        for name in open_alerts:
+            if _resolve_alert(name, reason):
+                resolved += 1
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Excessive-topup alert resolve-on-event failed ({vehicle})"[:140],
+        )
+    return resolved
 
 
 def reconcile_operations_alerts() -> None:
@@ -542,9 +603,11 @@ def reconcile_operations_alerts() -> None:
       ``fuel_pending_max_days`` for the alert's vehicle/driver.
     * **Supervisor Delay** — the driver has a submitted Driver Attendance for the
       day the alert was raised, or is no longer Active.
-
-    "Excessive Topup" is intentionally NOT auto-resolved: it flags a financial
-    overage / overdue temporary top-up that a human must acknowledge and clear.
+    * **Excessive Topup** — neither source still breaches for the vehicle: no
+      unreverted temporary top-up remains past its revert-due date AND current-
+      month ledgered consumption is back within the active quota (+ margin). The
+      overdue-top-up variant is also resolved immediately on the revert event
+      (``Fuel Request.on_update_after_submit``); this pass is the catch-up.
 
     Idempotent (already-Resolved rows are skipped by the status filter; a re-run
     resolves nothing new once conditions are stable) and never aborts: each alert
@@ -615,6 +678,52 @@ def reconcile_operations_alerts() -> None:
         if r["driver"]:
             overdue_request_drivers.add(r["driver"])
 
+    # Vehicles that STILL breach an "Excessive Topup" source. There are two
+    # raisers and an alert row cannot be attributed to one of them after the
+    # fact, so an Excessive Topup alert clears only when BOTH sources are clear
+    # for its vehicle:
+    #   (1) unreverted_topup_watch — an unreverted temporary top-up that is past
+    #       its revert-due date (the watcher reverts these on its pass, so a
+    #       cleared one is genuinely no longer breaching);
+    #   (2) monthly_fuel_reconciliation — current-month ledgered consumption
+    #       above the active quota by more than OVERAGE_MARGIN.
+    # This is deliberately conservative: it never closes an alert while either
+    # underlying breach for that vehicle still holds.
+    excessive_topup_vehicles = {
+        r["vehicle"]
+        for r in frappe.db.sql(
+            """
+            SELECT DISTINCT vehicle FROM `tabFuel Request`
+            WHERE request_type = 'Top-up' AND is_temporary = 1 AND reverted = 0
+              AND docstatus = 1 AND status IN ('Approved', 'Done')
+              AND revert_due_date < %(today)s AND vehicle IS NOT NULL
+            """,
+            {"today": today_str},
+            as_dict=True,
+        )
+    }
+    from apex_habitat.salis.fuel_engine import OVERAGE_MARGIN, _period_month
+
+    period_month = _period_month(today_str)
+    for r in frappe.db.sql(
+        """
+        SELECT q.vehicle AS vehicle, q.monthly_litres AS quota,
+               COALESCE(SUM(l.litres), 0) AS consumed
+        FROM `tabFuel Quota` q
+        LEFT JOIN `tabFuel Consumption Ledger` l
+          ON l.vehicle = q.vehicle AND l.period_month = q.period_month
+        WHERE q.docstatus = 1 AND q.status = 'Active'
+          AND q.period_month = %(period)s AND q.vehicle IS NOT NULL
+        GROUP BY q.name, q.vehicle, q.monthly_litres
+        """,
+        {"period": period_month},
+        as_dict=True,
+    ):
+        quota = float(r["quota"] or 0)
+        consumed = float(r["consumed"] or 0)
+        if quota > 0 and consumed > quota * (1 + OVERAGE_MARGIN):
+            excessive_topup_vehicles.add(r["vehicle"])
+
     def _vehicle_active(vehicle: str | None) -> bool:
         return bool(vehicle) and frappe.db.get_value("Salis Vehicle", vehicle, "status") == "Active"
 
@@ -677,8 +786,16 @@ def reconcile_operations_alerts() -> None:
                         ):
                             clear, reason = True, "attendance has since been recorded"
 
-                if clear:
-                    _resolve_alert(a.name, reason)
+                elif atype == "Excessive Topup":
+                    # Clears only when neither Excessive Topup source still
+                    # breaches for the vehicle (overdue unreverted temp top-up
+                    # AND current-month quota overage are both gone). A breach
+                    # with no vehicle reference cannot be re-evaluated and is
+                    # left for a human.
+                    if a.vehicle and a.vehicle not in excessive_topup_vehicles:
+                        clear, reason = True, "no fuel overage or unreverted top-up remains for the vehicle"
+
+                if clear and _resolve_alert(a.name, reason):
                     resolved_count += 1
             except Exception:
                 frappe.db.rollback()

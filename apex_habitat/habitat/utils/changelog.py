@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.14.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.14.0 — operations alerts clear themselves more completely and keep a resolution trail",
+        "app_name": "apex_habitat",
+        "link": "/app/operations-alert",
+        "creation": "2026-06-28 09:00:00",
+    },
+    {
+        "title": "v1.14.0: When the cause behind an alert is fixed it now closes on its own — including excessive fuel top-up alerts, which clear when the top-up is reverted or the quota is back in range",
+        "app_name": "apex_habitat",
+        "link": "/app/operations-alert",
+        "creation": "2026-06-28 09:01:00",
+    },
+    {
+        "title": "v1.14.0: Resolved alerts now record when they cleared and why, so your open-alerts view shows only what still needs attention",
+        "app_name": "apex_habitat",
+        "link": "/app/operations-alert",
+        "creation": "2026-06-28 09:02:00",
+    },
     # v1.13.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.13.0 — dispatch trips now run on a workflow, completing the Movement approval suite",
