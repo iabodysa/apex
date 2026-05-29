@@ -46,12 +46,26 @@ class SalisPaymentRequest(Document):
 	def validate(self):
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
+		self._set_financial_defaults()
 		self._enforce_status_flow()
 		self._enforce_finance_gate()
 
 	# Submit/cancel are recorded natively (Version track_changes + auto-comment).
 
 	# ------------------------------------------------------------------ helpers
+
+	def _set_financial_defaults(self):
+		"""Default company and cost center from Salis Settings for reporting and
+		financial context. Reference fields only - no GL/Payment Entry is posted."""
+		from apex_habitat.salis.doctype.salis_settings.salis_settings import (
+			get_default_company,
+			get_default_cost_center,
+		)
+
+		if not self.company:
+			self.company = get_default_company()
+		if not self.cost_center:
+			self.cost_center = get_default_cost_center()
 
 	def _old_status(self):
 		previous = self.get_doc_before_save()

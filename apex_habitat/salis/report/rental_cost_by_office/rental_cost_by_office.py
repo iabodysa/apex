@@ -23,6 +23,7 @@ def execute(filters=None):
 
     columns = [
         {"label": _("Rental Office"), "fieldname": "rental_office", "fieldtype": "Link", "options": "Rental Office", "width": 200},
+        {"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 160},
         {"label": _("Vehicles"), "fieldname": "vehicles", "fieldtype": "Int", "width": 100},
         {"label": _("Accrual Rows"), "fieldname": "row_count", "fieldtype": "Int", "width": 120},
         {"label": _("Total Accrued"), "fieldname": "total_accrued", "fieldtype": "Currency", "width": 150},
@@ -34,6 +35,8 @@ def execute(filters=None):
         return columns, []
 
     query_filters = {}
+    if filters.get("company"):
+        query_filters["company"] = filters["company"]
     if filters.get("rental_office"):
         query_filters["rental_office"] = filters["rental_office"]
     if filters.get("vehicle"):
@@ -48,7 +51,7 @@ def execute(filters=None):
     rows = frappe.get_all(
         "Rental Accrual Ledger",
         filters=query_filters,
-        fields=["rental_office", "vehicle", "amount", "settled"],
+        fields=["rental_office", "company", "vehicle", "amount", "settled"],
     )
 
     summary = {}
@@ -58,6 +61,7 @@ def execute(filters=None):
             office,
             {
                 "rental_office": office,
+                "company": entry.get("company") or "",
                 "vehicles": 0,
                 "row_count": 0,
                 "total_accrued": 0.0,
@@ -66,6 +70,8 @@ def execute(filters=None):
                 "_vehicles": set(),
             },
         )
+        if not bucket["company"] and entry.get("company"):
+            bucket["company"] = entry["company"]
         amount = entry.get("amount") or 0.0
         bucket["row_count"] += 1
         bucket["total_accrued"] += amount

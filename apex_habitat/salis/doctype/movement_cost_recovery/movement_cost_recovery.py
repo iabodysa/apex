@@ -26,10 +26,24 @@ _OPERATIONS_TIER_THRESHOLD_DEFAULT = 1000
 
 class MovementCostRecovery(Document):
 	def validate(self):
+		self._set_financial_defaults()
 		if (self.amount or 0) <= 0:
 			frappe.throw(_("Amount must be greater than zero."))
 		if self.status == "Approved" and not self.basis_evidence:
 			frappe.throw(_("Basis / Evidence is required before a recovery can be Approved."))
+
+	def _set_financial_defaults(self):
+		"""Default company and cost center from Salis Settings for reporting and
+		financial context. Reference fields only - no GL/Payment Entry is posted."""
+		from apex_habitat.salis.doctype.salis_settings.salis_settings import (
+			get_default_company,
+			get_default_cost_center,
+		)
+
+		if not self.company:
+			self.company = get_default_company()
+		if not self.cost_center:
+			self.cost_center = get_default_cost_center()
 
 	def before_submit(self):
 		# Threshold is configurable via Salis Settings so the SAR recovery gate can

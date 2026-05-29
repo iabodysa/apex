@@ -28,8 +28,19 @@ from apex_habitat.salis.salis_lib import ensure_approval
 
 class MovementCostTransfer(Document):
 	def validate(self):
+		self._set_company_default()
 		self._validate_distinct_targets()
 		self._stamp_approver()
+
+	def _set_company_default(self):
+		"""Default the owning company from Salis Settings for reporting and
+		financial context. Reference field only - this memo posts no GL."""
+		if not self.company:
+			from apex_habitat.salis.doctype.salis_settings.salis_settings import (
+				get_default_company,
+			)
+
+			self.company = get_default_company()
 
 	def before_submit(self):
 		# Crossing a project boundary always requires Operations-tier authority.

@@ -14,10 +14,12 @@
   "salis_payment_request_overview_col",
   "status",
   "requested_by",
+  "company",
   "salis_payment_request_sec_targets",
   "vehicle",
   "driver",
   "project",
+  "cost_center",
   "salis_payment_request_targets_col",
   "supplier",
   "rental_office",
@@ -91,6 +93,14 @@
    "read_only": 1
   },
   {
+   "description": "Owning company for reporting and financial context. Defaulted from Salis Settings; reference only, posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
    "fieldname": "salis_payment_request_sec_targets",
    "fieldtype": "Section Break",
    "label": "Subject"
@@ -117,6 +127,13 @@
    "in_standard_filter": 1,
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "description": "Cost center for grouping and financial context. Defaulted from Salis Settings; reference only, posts no GL.",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   },
   {
    "fieldname": "salis_payment_request_targets_col",

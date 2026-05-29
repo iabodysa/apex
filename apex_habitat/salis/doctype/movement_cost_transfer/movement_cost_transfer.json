@@ -14,6 +14,7 @@
   "mct_overview_col",
   "status",
   "approved_by",
+  "company",
   "naming_series",
   "mct_sec_allocation",
   "from_project",
@@ -78,6 +79,14 @@
    "label": "Approved By",
    "options": "User",
    "read_only": 1
+  },
+  {
+   "description": "Owning company for reporting and financial context. Defaulted from Salis Settings; reference only. A transfer reallocates cost between projects within one company and posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
   },
   {
    "default": "MCT-.######",

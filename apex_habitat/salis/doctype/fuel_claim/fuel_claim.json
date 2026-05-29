@@ -16,6 +16,8 @@
   "period_month",
   "status",
   "is_increase",
+  "company",
+  "cost_center",
   "naming_series",
   "fuel_claim_sec_amounts",
   "claimed_litres",
@@ -101,6 +103,21 @@
    "fieldname": "is_increase",
    "fieldtype": "Check",
    "label": "Quota Increase Claim"
+  },
+  {
+   "description": "Owning company for reporting and financial context. Defaulted from Salis Settings; reference only, posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "description": "Cost center for grouping and financial context. Defaulted from Salis Settings; reference only, posts no GL.",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   },
   {
    "default": "FCM-.######",

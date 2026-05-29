@@ -15,6 +15,8 @@
   "mcr_overview_col",
   "request_date",
   "status",
+  "company",
+  "cost_center",
   "naming_series",
   "mcr_sec_amounts",
   "amount",
@@ -91,6 +93,21 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Open\nAcknowledged\nApproved\nRecovered\nWaived\nRejected"
+  },
+  {
+   "description": "Owning company for reporting and financial context. Defaulted from Salis Settings; reference only, posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "description": "Cost center for grouping and financial context. Defaulted from Salis Settings; reference only, posts no GL.",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   },
   {
    "default": "MCR-.######",

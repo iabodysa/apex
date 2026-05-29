@@ -56,20 +56,26 @@ def daily_rental_accrual() -> None:
     posting_date = today()
     logger = frappe.logger()
 
+    # Resolved once per run as the fallback when a vehicle has no company set.
+    from apex_habitat.salis.doctype.salis_settings.salis_settings import get_default_company
+
+    _default_company = get_default_company()
+
     start = 0
     batch_size = 500
     while True:
         vehicles = frappe.get_all(
             "Salis Vehicle",
             filters={"ownership": "Rented"},
-            pluck="name",
+            fields=["name", "company"],
             limit_start=start,
             limit_page_length=batch_size,
         )
         if not vehicles:
             break
 
-        for vehicle in vehicles:
+        for vehicle_row in vehicles:
+            vehicle = vehicle_row.name
             try:
                 # Idempotence: one row per vehicle per day.
                 if frappe.db.exists(
@@ -93,11 +99,17 @@ def daily_rental_accrual() -> None:
                     source_doctype = "Salis Vehicle"
                     source_name = vehicle
 
+                # Carry the owning company for reporting grouping: the vehicle's
+                # own company, else the Salis Settings default. Reference only -
+                # this memo posts no GL.
+                company = vehicle_row.company or _default_company
+
                 frappe.get_doc(
                     {
                         "doctype": "Rental Accrual Ledger",
                         "vehicle": vehicle,
                         "rental_office": rental_office,
+                        "company": company,
                         "accrual_date": posting_date,
                         "daily_rate": daily_rate,
                         "amount": daily_rate,

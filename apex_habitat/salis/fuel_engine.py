@@ -50,6 +50,22 @@ def _ledger_exists(source_type: str, source_name: str) -> bool:
     )
 
 
+def _company_for_vehicle(vehicle: str | None) -> str | None:
+    """Resolve the owning company for a ledger row: the vehicle's own company,
+    else the Salis Settings default. Reference only - carried for reporting
+    grouping; the ledger posts no GL."""
+    company = None
+    if vehicle:
+        company = frappe.db.get_value("Salis Vehicle", vehicle, "company")
+    if not company:
+        from apex_habitat.salis.doctype.salis_settings.salis_settings import (
+            get_default_company,
+        )
+
+        company = get_default_company()
+    return company or None
+
+
 def _insert_ledger_row(
     vehicle: str,
     driver: str | None,
@@ -71,6 +87,7 @@ def _insert_ledger_row(
             "doctype": LEDGER_DOCTYPE,
             "vehicle": vehicle,
             "driver": driver,
+            "company": _company_for_vehicle(vehicle),
             "period_month": period_month,
             "litres": litres,
             "amount": amount,

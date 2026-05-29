@@ -10,6 +10,7 @@
   "fuel_consumption_ledger_sec_overview",
   "vehicle",
   "driver",
+  "company",
   "period_month",
   "fuel_consumption_ledger_overview_col",
   "litres",
@@ -44,6 +45,16 @@
    "in_standard_filter": 1,
    "label": "Driver",
    "options": "Salis Driver",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Owning company, carried for reporting grouping. System-written; reference only, posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
    "read_only": 1,
    "search_index": 1
   },

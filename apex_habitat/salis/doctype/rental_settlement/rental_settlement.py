@@ -21,6 +21,13 @@ from frappe.utils import flt
 
 class RentalSettlement(Document):
     def validate(self):
+        if not self.company:
+            from apex_habitat.salis.doctype.salis_settings.salis_settings import (
+                get_default_company,
+            )
+
+            self.company = get_default_company()
+
         accrued = 0.0
         for row in self.vehicles:
             # Derive the line amount from days * daily_rate when not supplied.

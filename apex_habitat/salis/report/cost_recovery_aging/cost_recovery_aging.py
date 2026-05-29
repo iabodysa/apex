@@ -38,6 +38,7 @@ def execute(filters=None):
     columns = [
         {"label": _("Recovery"), "fieldname": "name", "fieldtype": "Link", "options": "Movement Cost Recovery", "width": 160},
         {"label": _("Recovery Type"), "fieldname": "recovery_type", "fieldtype": "Data", "width": 140},
+        {"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 150},
         {"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Salis Vehicle", "width": 140},
         {"label": _("Driver"), "fieldname": "driver", "fieldtype": "Link", "options": "Salis Driver", "width": 140},
         {"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 120},
@@ -54,7 +55,7 @@ def execute(filters=None):
         return columns, []
 
     query_filters = {}
-    for field in ("recovery_type", "vehicle", "driver", "employee"):
+    for field in ("company", "recovery_type", "vehicle", "driver", "employee"):
         if filters.get(field):
             query_filters[field] = filters[field]
     if filters.get("status"):
@@ -65,7 +66,7 @@ def execute(filters=None):
     records = frappe.get_all(
         "Movement Cost Recovery",
         filters=query_filters,
-        fields=["name", "recovery_type", "vehicle", "driver", "status", "request_date", "amount"],
+        fields=["name", "recovery_type", "company", "vehicle", "driver", "status", "request_date", "amount"],
         order_by="request_date asc",
     )
 
@@ -75,6 +76,7 @@ def execute(filters=None):
     totals = {
         "name": _("Total"),
         "recovery_type": "",
+        "company": "",
         "vehicle": "",
         "driver": "",
         "status": "",
@@ -96,6 +98,7 @@ def execute(filters=None):
         row = {
             "name": rec.get("name"),
             "recovery_type": rec.get("recovery_type"),
+            "company": rec.get("company"),
             "vehicle": rec.get("vehicle"),
             "driver": rec.get("driver"),
             "status": rec.get("status"),

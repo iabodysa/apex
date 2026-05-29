@@ -9,6 +9,7 @@
   "naming_series",
   "vehicle",
   "rental_office",
+  "company",
   "accrual_date",
   "daily_rate",
   "amount",
@@ -45,6 +46,15 @@
    "in_list_view": 1,
    "label": "Rental Office",
    "options": "Rental Office",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Owning company, carried for reporting grouping. System-written; reference only, posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
    "read_only": 1,
    "search_index": 1
   },

@@ -40,8 +40,22 @@ class FuelClaim(Document):
 	def validate(self):
 		if (self.claimed_litres or 0) <= 0:
 			frappe.throw(_("Claimed Litres must be greater than zero."))
+		self._set_financial_defaults()
 		self._compute_consumption()
 		self._enforce_status_flow()
+
+	def _set_financial_defaults(self):
+		"""Default company and cost center from Salis Settings for reporting and
+		financial context. Reference fields only - no GL/Payment Entry is posted."""
+		from apex_habitat.salis.doctype.salis_settings.salis_settings import (
+			get_default_company,
+			get_default_cost_center,
+		)
+
+		if not self.company:
+			self.company = get_default_company()
+		if not self.cost_center:
+			self.cost_center = get_default_cost_center()
 
 	def before_submit(self):
 		ensure_approval("Fuel Claim", self.name, required_tier=self._required_tier())

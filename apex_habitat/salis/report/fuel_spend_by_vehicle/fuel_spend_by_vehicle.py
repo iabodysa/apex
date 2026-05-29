@@ -22,6 +22,7 @@ def execute(filters=None):
 
     columns = [
         {"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Salis Vehicle", "width": 200},
+        {"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 160},
         {"label": _("Total Litres"), "fieldname": "total_litres", "fieldtype": "Float", "width": 130},
         {"label": _("Total Amount"), "fieldname": "total_amount", "fieldtype": "Currency", "width": 150},
         {"label": _("Avg Cost / Litre"), "fieldname": "avg_cost_per_litre", "fieldtype": "Currency", "width": 150},
@@ -32,6 +33,8 @@ def execute(filters=None):
         return columns, []
 
     query_filters = {}
+    if filters.get("company"):
+        query_filters["company"] = filters["company"]
     if filters.get("vehicle"):
         query_filters["vehicle"] = filters["vehicle"]
     if filters.get("period_month"):
@@ -40,7 +43,7 @@ def execute(filters=None):
     rows = frappe.get_all(
         "Fuel Consumption Ledger",
         filters=query_filters,
-        fields=["vehicle", "litres", "amount"],
+        fields=["vehicle", "company", "litres", "amount"],
     )
 
     summary = {}
@@ -48,8 +51,10 @@ def execute(filters=None):
         vehicle = entry.get("vehicle") or ""
         bucket = summary.setdefault(
             vehicle,
-            {"vehicle": vehicle, "total_litres": 0.0, "total_amount": 0.0, "row_count": 0},
+            {"vehicle": vehicle, "company": entry.get("company") or "", "total_litres": 0.0, "total_amount": 0.0, "row_count": 0},
         )
+        if not bucket["company"] and entry.get("company"):
+            bucket["company"] = entry["company"]
         bucket["total_litres"] += entry.get("litres") or 0.0
         bucket["total_amount"] += entry.get("amount") or 0.0
         bucket["row_count"] += 1

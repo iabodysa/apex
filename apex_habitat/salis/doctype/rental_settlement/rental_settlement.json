@@ -13,6 +13,7 @@
   "period_month",
   "rental_settlement_overview_col",
   "status",
+  "company",
   "payment_request",
   "rental_settlement_sec_vehicles",
   "vehicles",
@@ -74,6 +75,15 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nReconciled\nApproved\nPaid\nDisputed"
+  },
+  {
+   "description": "Owning company for reporting and financial context. Defaulted from Salis Settings; reference only, posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
   },
   {
    "description": "Reference to the raised Salis Payment Request. Set automatically; this DocType never posts GL.",

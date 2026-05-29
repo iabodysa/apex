@@ -15,8 +15,19 @@ class SalisVehicle(Document):
     # NOTE: current_driver mirrors Driver.current_vehicle for quick reference only.
     # Vehicle Assignment is the authoritative source of the vehicle<->driver pairing.
     def validate(self):
+        self._set_company_default()
         self._set_plate_normalized()
         self._set_compliance_status()
+
+    def _set_company_default(self):
+        """Default the owning company from Salis Settings (asset ownership /
+        reporting context). Reference field only - no GL is posted."""
+        if not self.company:
+            from apex_habitat.salis.doctype.salis_settings.salis_settings import (
+                get_default_company,
+            )
+
+            self.company = get_default_company()
 
     def _set_plate_normalized(self):
         if self.plate_number:
