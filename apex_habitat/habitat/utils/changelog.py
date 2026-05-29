@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.8.0 ----------------------------------------------------------------
+    {
+        "title": "Apex 1.8.0 — more Movement documents move on a real approval workflow",
+        "app_name": "apex_habitat",
+        "link": "/app/rental-settlement",
+        "creation": "2026-06-21 09:00:00",
+    },
+    {
+        "title": "v1.8.0: Rental Settlements now follow a clear approval flow with a Finance-only 'Mark Paid' step",
+        "app_name": "apex_habitat",
+        "link": "/app/rental-settlement",
+        "creation": "2026-06-21 09:01:00",
+    },
+    {
+        "title": "v1.8.0: Driver Clearance is a workflow that only clears a driver once fuel, custody and vehicle returns are settled — and post-approval steps now work",
+        "app_name": "apex_habitat",
+        "link": "/app/driver-clearance",
+        "creation": "2026-06-21 09:02:00",
+    },
     # v1.7.0 ----------------------------------------------------------------
     {
         "title": "Apex 1.7.0 — Transport Requests run on a real approval workflow, with sharper reports and sturdier engines",
