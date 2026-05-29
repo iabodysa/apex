@@ -1,4 +1,4 @@
-# Copyright (c) 2026, Abdullah Fahad Al-Mutairi Co. (AFMCO) and Contributors
+# Copyright (c) 2026, AFMCO Support Services and Contributors
 # See license.txt
 
 # import frappe

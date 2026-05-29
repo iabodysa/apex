@@ -1,4 +1,4 @@
-# Copyright (c) 2026, Abdullah Fahad Al-Mutairi Co. (AFMCO) and contributors
+# Copyright (c) 2026, AFMCO Support Services and contributors
 # For license information, please see license.txt
 """Accommodation Stock Ledger — read-only, system-written quantity ledger for the
 decentralized internal-store engine. Each Accommodation Building is its own store.

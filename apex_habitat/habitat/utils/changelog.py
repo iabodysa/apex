@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.14.2 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.14.2 — a refreshed, mobile-first driver portal and a cleaner fuel approval board",
+        "app_name": "apex_habitat",
+        "link": "/driver",
+        "creation": "2026-06-30 09:00:00",
+    },
+    {
+        "title": "v1.14.2: The driver portal is redesigned for phones — a branded home with your status, vehicle and license at a glance, icon navigation, and large touch-friendly actions",
+        "app_name": "apex_habitat",
+        "link": "/driver",
+        "creation": "2026-06-30 09:01:00",
+    },
+    {
+        "title": "v1.14.2: The Fuel Approval Console is easier to scan — each request leads with the driver and vehicle, flags over-threshold requests first, and lays out as clean cards",
+        "app_name": "apex_habitat",
+        "link": "/app/fuel-approval-console",
+        "creation": "2026-06-30 09:02:00",
+    },
     # v1.14.1 ---------------------------------------------------------------
     {
         "title": "Apex 1.14.1 — the driver portal opens reliably for signed-in users",
