@@ -1,0 +1,96 @@
+{
+ "doctype": "Workflow",
+ "name": "Dispatch Trip Workflow",
+ "workflow_name": "Dispatch Trip Workflow",
+ "document_type": "Dispatch Trip",
+ "workflow_state_field": "status",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "states": [
+  {
+   "doctype": "Workflow Document State",
+   "state": "Planned",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Dispatched",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Completed",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Cancelled",
+   "doc_status": "2",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  }
+ ],
+ "transitions": [
+  {
+   "doctype": "Workflow Transition",
+   "state": "Planned",
+   "action": "Dispatch",
+   "next_state": "Dispatched",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Planned",
+   "action": "Dispatch",
+   "next_state": "Dispatched",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Planned",
+   "action": "Dispatch",
+   "next_state": "Dispatched",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Dispatched",
+   "action": "Complete",
+   "next_state": "Completed",
+   "allowed": "Fleet Project Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Dispatched",
+   "action": "Complete",
+   "next_state": "Completed",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Completed",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  }
+ ]
+}

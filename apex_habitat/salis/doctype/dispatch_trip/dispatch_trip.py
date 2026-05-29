@@ -1,4 +1,32 @@
-"""Dispatch Trip controller."""
+"""Dispatch Trip controller.
+
+The FINAL status DocType on the Salis Workflow Spine. Status transitions are
+owned by the native **Dispatch Trip Workflow** (see
+``salis/workflow/dispatch_trip_workflow/``), not by this controller. The
+workflow enforces the role per transition (operational, role-gated — a dispatch
+trip carries no maker/checker actor field, so there is no self-approval gate)
+and the legal order of states via its transitions:
+
+    Planned (0) --Dispatch--> Dispatched (0) --Complete--> Completed (1)
+                                                Completed (1) --Cancel--> Cancelled (2)
+
+``Complete`` is the submit transition (docstatus 0 -> 1): it is the only point
+at which the trip's side-effects fire — it locks the vehicle, advances the
+odometer, drives the linked Transport Request to Fulfilled through *its* native
+workflow, and posts the Trip Fulfilment Ledger. ``Cancel`` (only from the
+submitted ``Completed`` state, docstatus 1 -> 2) fires the ``on_cancel``
+reversal of those effects. A not-yet-completed (draft) trip that is called off
+is simply deleted — it never reached submit and has no downstream effects to
+reverse, so it never needs a ``Cancelled`` state (mirroring Fuel Request, which
+likewise reserves Cancel for its submitted states). A draft->Cancelled
+transition is in any case forbidden by Frappe (cannot cancel before submitting).
+
+This controller keeps only what the workflow cannot express: the dispatch
+readiness gate, the Completed completion-notes requirement, the odometer and
+compliance validation, the initial-status guard (a trip must be created at
+Planned), the idempotent cross-document fulfilment side-effects and their
+reversal on cancel.
+"""
 
 from __future__ import annotations
 
@@ -14,19 +42,11 @@ from apex_habitat.salis.salis_lib import (
     revert_transport_request,
 )
 
-# Allowed forward status transitions. Cancellation is allowed from any state.
-_ALLOWED_TRANSITIONS = {
-    "Planned": {"Planned", "Dispatched", "Cancelled"},
-    "Dispatched": {"Dispatched", "Completed", "Cancelled"},
-    "Completed": {"Completed", "Cancelled"},
-    "Cancelled": {"Cancelled"},
-}
-
 
 class DispatchTrip(Document):
     def validate(self):
         self._resolve_transport_request()
-        self._enforce_status_flow()
+        self._guard_initial_status()
         self._validate_odometer()
         self._enforce_compliance()
         self._require_completion_notes()
@@ -90,22 +110,16 @@ class DispatchTrip(Document):
                 indicator="orange",
             )
 
-    def _enforce_status_flow(self):
-        before = self.get_doc_before_save()
-        if not before or not before.status:
-            # A new trip may only be created in the initial state — closing the
-            # insert-bypass where a doc is inserted directly at a later/terminal status.
-            if self.status and self.status != "Planned":
-                frappe.throw(
-                    _("A new Dispatch Trip must start as Planned, not {0}.").format(_(self.status))
-                )
-            return
-        old, new = before.status, self.status
-        if new == old:
-            return
-        if new not in _ALLOWED_TRANSITIONS.get(old, set()):
+    def _guard_initial_status(self):
+        """A new trip may only be created in the initial state (Planned). Later
+        states are reached only through the Dispatch Trip Workflow, which the desk
+        drives — this closes the insert-bypass the workflow itself cannot cover
+        (a brand-new document inserted directly at a later/terminal status)."""
+        if self.is_new() and self.status and self.status != "Planned":
             frappe.throw(
-                _("Illegal status change from {0} to {1}.").format(_(old), _(new))
+                _("A new Dispatch Trip must start as Planned; {0} is reached through the workflow.").format(
+                    _(self.status)
+                )
             )
 
     def _validate_odometer(self):

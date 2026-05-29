@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.13.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.13.0 — dispatch trips now run on a workflow, completing the Movement approval suite",
+        "app_name": "apex_habitat",
+        "link": "/app/dispatch-trip",
+        "creation": "2026-06-27 09:00:00",
+    },
+    {
+        "title": "v1.13.0: A dispatch trip moves Planned → Dispatched → Completed, and completing it automatically marks the linked transport request fulfilled and advances the vehicle odometer",
+        "app_name": "apex_habitat",
+        "link": "/app/dispatch-trip",
+        "creation": "2026-06-27 09:01:00",
+    },
+    {
+        "title": "v1.13.0: Every Movement document — requests, settlements, clearances, payments, tickets, sponsorship transfers, fuel and now trips — runs on a guided, role-based workflow",
+        "app_name": "apex_habitat",
+        "link": "/app/dispatch-trip",
+        "creation": "2026-06-27 09:02:00",
+    },
     # v1.12.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.12.0 — fuel claims and exception cases now run on guided approval workflows",

@@ -306,14 +306,23 @@ class TestTransportRequestWorkflow(unittest.TestCase):
             "trip_date": frappe.utils.today(),
             "status": "Planned",
         }).insert(ignore_permissions=True)
-        dt.status = "Dispatched"
-        dt.save(ignore_permissions=True)
-        dt.status = "Completed"
+
+        # Status transitions are now owned by the native Dispatch Trip Workflow.
+        # Dispatch (draft -> draft), then stamp the completion fields while still a
+        # draft, then Complete (the submit transition, draft -> submitted) which
+        # fires on_submit: odometer + drive the TR to Fulfilled. Administrator
+        # drives the workflow here.
+        apply_workflow(dt, "Dispatch")
+        dt.reload()
+        self.assertEqual(dt.status, "Dispatched")
         dt.completion_notes = "Delivered."
         dt.odometer_start = 100
         dt.odometer_end = 180
         dt.save(ignore_permissions=True)
-        dt.submit()
+        apply_workflow(dt, "Complete")
+        dt.reload()
+        self.assertEqual(dt.status, "Completed")
+        self.assertEqual(dt.docstatus, 1)
         frappe.db.commit()
 
         tr.reload()
@@ -321,9 +330,13 @@ class TestTransportRequestWorkflow(unittest.TestCase):
         self.assertEqual(tr.dispatch_trip, dt.name)
         self.assertEqual(tr.assigned_vehicle, vehicle)
 
-        # Cancelling the trip reverts the request to Scheduled (system reversal;
-        # workflows are forward-only).
-        dt.cancel()
+        # Cancelling the completed trip reverts the request to Scheduled (system
+        # reversal; workflows are forward-only). Cancel is the submitted ->
+        # cancelled workflow transition.
+        apply_workflow(dt, "Cancel")
+        dt.reload()
+        self.assertEqual(dt.status, "Cancelled")
+        self.assertEqual(dt.docstatus, 2)
         frappe.db.commit()
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")

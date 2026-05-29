@@ -90,6 +90,7 @@
    "label": "Return Time"
   },
   {
+   "allow_on_submit": 1,
    "default": "Planned",
    "fieldname": "status",
    "fieldtype": "Select",
