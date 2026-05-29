@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.9.0 ----------------------------------------------------------------
+    {
+        "title": "Apex 1.9.0 — payments, support tickets and sponsorship transfers move on a real workflow",
+        "app_name": "apex_habitat",
+        "link": "/app/salis-payment-request",
+        "creation": "2026-06-22 09:00:00",
+    },
+    {
+        "title": "v1.9.0: Salis Payment Requests follow a finance approval flow — only Finance approves and marks paid, and no one approves their own request",
+        "app_name": "apex_habitat",
+        "link": "/app/salis-payment-request",
+        "creation": "2026-06-22 09:01:00",
+    },
+    {
+        "title": "v1.9.0: Support Tickets move through a clear status workflow, and sponsorship transfers complete only when Qiwa and clearance are done",
+        "app_name": "apex_habitat",
+        "link": "/app/support-ticket",
+        "creation": "2026-06-22 09:02:00",
+    },
     # v1.8.0 ----------------------------------------------------------------
     {
         "title": "Apex 1.8.0 — more Movement documents move on a real approval workflow",
