@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.19.1 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.19.1 — Arabic module names, a tidier settings hub, and a cleaner portal",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-10 09:00:00",
+    },
+    {
+        "title": "v1.19.1: Modules now read with proper Arabic names on the desk (Apex → أبيكس, Salis → سلس, Habitat → الإسكان), and the Apex Core settings hub is reorganised with the driver-portal theme surfaced",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-10 09:01:00",
+    },
+    {
+        "title": "v1.19.1: The driver portal's actions no longer force an early commit, so it no longer leaves stray records on a dev/test site and test runs stay isolated",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-10 09:02:00",
+    },
     # v1.19.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.19.0 — a themeable driver portal and a fully Arabic desk",
