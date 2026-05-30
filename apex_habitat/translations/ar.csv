@@ -1357,7 +1357,7 @@ Case Closed,تم إغلاق القضية
 Reported On,تاريخ الإبلاغ
 Resolution Notes are required when resolving an Idle Resident Report.,ملاحظات المعالجة مطلوبة عند إغلاق بلاغ المقيم غير المشغّل.
 An open Idle Resident Report already exists for employee {0}: {1}.,يوجد بلاغ مفتوح بالفعل للموظف {0}: {1}.
-Habitat,الرئيسية
+Habitat,هابيتات
 Accommodation,السكن
 Costs,التكاليف
 Upkeep,الصيانة
@@ -1969,3 +1969,305 @@ May,مايو
 Serial No.,الرقم التسلسلي
 Serial Number,الرقم التسلسلي
 Urdu,الأردية
+0-30,0-30
+31-60,31-60
+61-90,61-90
+90+,90+
+API Contract Version,إصدار عقد الواجهة البرمجية
+Accommodation Building (Pickup),مبنى السكن (نقطة الالتقاط)
+Accommodation Go-Live,تشغيل السكن
+Accommodation Manager Dashboard,لوحة معلومات مدير السكن
+Accommodation Material Transfer Item,بند نقل مواد السكن
+Accommodation Stock Ledger,دفتر مخزون السكن
+Accommodation is live. Use the Front Desk for daily check-in/out.,تم تشغيل السكن. استخدم مكتب الاستقبال للدخول والمغادرة اليومية.
+Accrual Rows,أسطر الاستحقاق
+Active Vehicles by Category,المركبات النشطة حسب الفئة
+"Add the first driver, including license details used for clearance and dispatch.",أضف أول سائق، متضمناً بيانات الرخصة المستخدمة لإخلاء الطرف والتشغيل.
+"Add the first vehicle to the fleet so it can be assigned, fuelled, and dispatched.",أضف أول مركبة إلى الأسطول ليتسنى إسنادها وتزويدها بالوقود وتشغيلها.
+Allowed Origins (for site_config allow_cors),المصادر المسموح بها (لإعداد allow_cors في site_config)
+Amount claimed by the rental office.,المبلغ المطالب به من مكتب التأجير.
+Apex Core,نواة أبيكس
+Apex Integration Settings,إعدادات تكامل أبيكس
+Append-only audit trail of escalation decisions.,سجل تدقيق لقرارات التصعيد قابل للإضافة فقط.
+Assign a vehicle to a driver or project to start the movement lifecycle.,أسنِد مركبة إلى سائق أو مشروع لبدء دورة حياة الحركة.
+Assigns a vehicle to a driver and project for a defined period.,يُسنِد مركبة إلى سائق ومشروع لفترة محددة.
+Authority Tier Map,خريطة مستويات الصلاحية
+Authority Tier Mapping,ربط مستويات الصلاحية
+Available Beds,الأسرّة المتاحة
+Avg Cost / Litre,متوسط التكلفة لكل لتر
+Avg Utilisation %,متوسط نسبة الاستخدام (%)
+Beds by Building,الأسرّة حسب المبنى
+Block vehicle assignment when the linked vehicle has expired compliance.,منع إسناد المركبة عند انتهاء صلاحية امتثال المركبة المرتبطة.
+Boarded At,وقت الصعود
+Boarded Count,عدد الصاعدين
+"Boarded count, derived from the boarding events below (never hand-set).",عدد الصاعدين، مشتق من أحداث الصعود أدناه (لا يُضبط يدوياً مطلقاً).
+Boarding Events,أحداث الصعود
+Building (Store),المبنى (المستودع)
+"Building-level fixed asset: CCTV camera, DVR/NVR, hard disk, router, switch, generator. Custody is on the supervisor, not on an employee.",أصل ثابت على مستوى المبنى: كاميرا مراقبة، مسجّل DVR/NVR، قرص صلب، موجّه، مبدّل، مولّد. العهدة على المشرف وليست على موظف.
+"CORS origin(s) an administrator should add to allow_cors in site_config.json so the frontend can call this backend, for example https://salis-fleet.com. This field only records the intended origins; it does not modify server configuration.",مصدر (مصادر) CORS التي ينبغي للمسؤول إضافتها إلى allow_cors في site_config.json ليتسنى للواجهة الأمامية استدعاء هذا الخادم الخلفي، مثل https://salis-fleet.com. لا يسجّل هذا الحقل سوى المصادر المقصودة؛ ولا يعدّل إعدادات الخادم.
+"Capture a movement need so it can be validated, scheduled, and dispatched.",سجّل حاجة حركة ليتسنى التحقق منها وجدولتها وتشغيلها.
+Catalog master for individual issuable articles.,بيانات فهرس أساسية للأصناف القابلة للصرف الفردية.
+Checked Out,تمت المغادرة
+Child: one article line on a Custody Issue.,تابع: سطر صنف واحد في صرف عهدة.
+Child: one article line on a Custody Return.,تابع: سطر صنف واحد في إرجاع عهدة.
+Child: one damaged article line on a Custody Damage Assessment.,تابع: سطر صنف تالف واحد في تقييم تلفيات العهدة.
+Claim,المطالبة
+Claim period in YYYY-MM format (e.g. 2026-05).,فترة المطالبة بصيغة YYYY-MM (مثال: 2026-05).
+Claimed Total minus Accrued Total.,إجمالي المطالب به ناقص إجمالي المستحق.
+Claimed litres minus consumed litres. A positive variance means the claim exceeds recorded consumption.,اللترات المطالب بها ناقص اللترات المستهلكة. الانحراف الموجب يعني أن المطالبة تتجاوز الاستهلاك المسجّل.
+"Classification of fleet vehicles (e.g., Sedan, Pickup, Bus).",تصنيف مركبات الأسطول (مثل سيدان أو بيك أب أو حافلة).
+Completed (timed),المكتملة (موقّتة)
+Compliance & Support,الامتثال والدعم
+Compliance Percent,نسبة الامتثال
+"Configurable Delegation-of-Authority ladder: map each tier to a native Frappe Role. When populated, these rows extend the built-in tier-to-role mapping so the DoA ladder can be tuned without a code change.",سلّم تفويض صلاحيات قابل للتهيئة: اربط كل مستوى بدور أصلي في فرابي. عند تعبئتها، توسّع هذه الأسطر الربط المدمج بين المستوى والدور بحيث يمكن ضبط سلّم تفويض الصلاحيات دون تعديل برمجي.
+Confirm your safety catalog and log your first inspection.,اعتمد فهرس السلامة وسجّل أول تفتيش.
+Consumption period in YYYY-MM format (e.g. 2026-05).,فترة الاستهلاك بصيغة YYYY-MM (مثال: 2026-05).
+Contracted daily rental rate. Carried into the Rental Accrual Ledger memo for each in-service day.,سعر الإيجار اليومي المتعاقد عليه. يُنقل إلى مذكرة دفتر استحقاق الإيجار عن كل يوم في الخدمة.
+Contractor / Temp ID,معرّف المتعاقد / المؤقت
+Cost Bleeding (SAR),نزيف التكلفة (ريال)
+Cost Recovery Aging,أعمار استرداد التكاليف
+Cost Recovery Aging Backlog,متأخرات استرداد التكاليف
+Cost Recovery Operations Threshold (SAR),حد عمليات استرداد التكاليف (ريال)
+"Cost center for grouping and financial context. Defaulted from Salis Settings; reference only, posts no GL.",مركز التكلفة للتجميع والسياق المالي. مُهيّأ افتراضياً من إعدادات ساليس؛ للمرجع فقط، ولا يرحّل أي قيد في دفتر الأستاذ العام.
+Count of open Fuel Exception Case records for this driver. Must be zero to clear.,عدد حالات استثناء الوقود المفتوحة لهذا السائق. يجب أن يكون صفراً لإخلاء الطرف.
+Count of open Movement Cost Recovery records for this driver. Must be zero to clear.,عدد سجلات استرداد تكلفة الحركة المفتوحة لهذا السائق. يجب أن يكون صفراً لإخلاء الطرف.
+Create Safety Inspection Report,إنشاء تقرير تفتيش سلامة
+Create Vehicle Assignment,إنشاء إسناد مركبة
+Create Vehicle Category,إنشاء فئة مركبات
+Create a Vehicle Category,أنشئ فئة مركبات
+Custody Items Pending Return,أصناف العهدة بانتظار الإرجاع
+Daily Cleaning Compliance,الالتزام بالنظافة اليومية
+Daily Operations,العمليات اليومية
+Daily cleaning record per building with worker accountability and evidence controls.,سجل نظافة يومي لكل مبنى مع مساءلة العامل وضوابط الأدلة.
+Daily driver attendance record with check-in/out times and photographic evidence.,سجل حضور يومي للسائق مع أوقات الدخول والمغادرة وأدلة مصوّرة.
+"Daily fuel consumption log for a vehicle: odometer, litres, amount, and platform.",سجل استهلاك وقود يومي لمركبة: عداد المسافة واللترات والمبلغ والمنصة.
+Days before a temporary stay's expected check-out date to flag it on the supervisor's watchlist.,عدد الأيام قبل تاريخ المغادرة المتوقع لإقامة مؤقتة لإدراجها في قائمة متابعة المشرف.
+Defaults to the session user on creation.,يُهيّأ افتراضياً إلى مستخدم الجلسة عند الإنشاء.
+Defaults to the session user on creation. The workflow's approval transition is segregation-of-duties gated on this field (the approver cannot be the requester).,يُهيّأ افتراضياً إلى مستخدم الجلسة عند الإنشاء. وتُقيَّد بوابة اعتماد سير العمل بالفصل بين المهام على هذا الحقل (لا يجوز أن يكون المعتمِد هو مقدّم الطلب).
+"Define the first vehicle class (e.g. Sedan, Bus, Pickup) used to group fleet vehicles.",عرّف أول فئة مركبات (مثل سيدان أو حافلة أو بيك أب) لتصنيف مركبات الأسطول.
+Delegation-of-Authority Thresholds (SAR),حدود تفويض الصلاحيات (ريال)
+Delegation-of-Authority tier this role grants.,مستوى تفويض الصلاحيات الذي يمنحه هذا الدور.
+Deployed,مشغّل
+Disputed Rental Settlements,تسويات الإيجار المتنازع عليها
+Disputed or suspicious fuel-control case. Holds usage/GPS evidence and enforces non-raiser closure (segregation of duties).,حالة رقابة وقود متنازع عليها أو مشبوهة. تحفظ أدلة الاستخدام/نظام تحديد المواقع وتفرض أن يُغلقها شخص غير منشئها (الفصل بين المهام).
+Division Views,عروض الأقسام
+Driver Operations,عمليات السائقين
+"Driver stop record (violation, leave, termination, or transfer). May release the linked vehicle.",سجل إيقاف سائق (مخالفة أو إجازة أو إنهاء خدمة أو نقل). قد يُحرّر المركبة المرتبطة.
+Employee (Custodian),الموظف (المؤتمن على العهدة)
+End Datetime,تاريخ ووقت الانتهاء
+Engines & Ledgers,المحركات والدفاتر
+Estimate derived from the Accommodation Ledger memo only (not salary). Populated by the v0.8.6 aging job.,تقدير مشتق من مذكرة دفتر السكن فقط (وليس من الراتب). تُعبّئه مهمة احتساب الأعمار في الإصدار v0.8.6.
+Expected Count,العدد المتوقع
+"Expected boarding count, derived from the linked Transport Request's registered worker count.",عدد الصعود المتوقع، مشتق من عدد العمالة المسجّلين في طلب النقل المرتبط.
+External rental office that supplies rented vehicles to the fleet.,مكتب تأجير خارجي يزوّد الأسطول بالمركبات المستأجرة.
+Finance Manager Dashboard,لوحة معلومات المدير المالي
+Finance-boundary payment request. Routes any payable item through a Finance-exclusive approval gate. Posts NO GL: linked_payment_entry is a reference set externally; the controller never writes accounting.,طلب دفع على حدود المالية. يوجّه أي بند مستحق الدفع عبر بوابة اعتماد حصرية للمالية. لا يرحّل أي قيد في دفتر الأستاذ العام: قيد الدفع المرتبط مرجع يُضبط خارجياً؛ ولا يكتب المتحكّم أي قيود محاسبية.
+Findings by Severity,الملاحظات حسب درجة الخطورة
+Fleet Manager Dashboard,لوحة معلومات مدير الأسطول
+Fleet Supervisor Dashboard,لوحة معلومات مشرف الأسطول
+"Fleet driver master record: identity, project, supervisor, vehicle linkage, and compliance.",سجل أساسي لسائق الأسطول: الهوية والمشروع والمشرف وربط المركبة والامتثال.
+"Fleet vehicle master record. Stores plate, ownership, and operational status.",سجل أساسي لمركبة الأسطول. يخزّن اللوحة والملكية والحالة التشغيلية.
+Frontend Base URL,العنوان الأساسي للواجهة الأمامية
+Frontend Integration,تكامل الواجهة الأمامية
+Fuel Claim Variance by Month,انحراف مطالبات الوقود حسب الشهر
+Fuel Operations Tier Threshold (Litres),حد مستوى عمليات الوقود (لترات)
+Fuel Regional Tier Threshold (Litres),حد المستوى الإقليمي للوقود (لترات)
+Fuel Spend by Vehicle,إنفاق الوقود حسب المركبة
+Fuel requests at or above this litre amount require Operations-tier authority.,طلبات الوقود التي تبلغ هذا الحد باللترات أو تتجاوزه تتطلب صلاحية مستوى العمليات.
+Fuel requests at or above this litre amount require Regional-tier authority.,طلبات الوقود التي تبلغ هذا الحد باللترات أو تتجاوزه تتطلب صلاحية المستوى الإقليمي.
+Fuel service platform or provider used for fueling fleet vehicles.,منصة أو مزوّد خدمة وقود يُستخدم لتزويد مركبات الأسطول بالوقود.
+Fulfilled Trips,الرحلات المنفّذة
+Habitat Dashboard,لوحة معلومات هابيتات
+Habitat Operations Alert,تنبيه عمليات هابيتات
+Habitat Setup,إعداد هابيتات
+Has Timestamps,يحتوي طوابع زمنية
+How To Integrate,كيفية التكامل
+Identifier (e.g. Iqama/contractor id) for an unregistered worker.,معرّف (مثل الإقامة/معرّف المتعاقد) لعامل غير مسجّل.
+Idle Residents,الساكنون غير المشغّلين
+Imminent Checkouts,مغادرات وشيكة
+Inspection Finding Item,بند ملاحظة التفتيش
+Integration,التكامل
+Integration Enabled,التكامل مُفعّل
+Integration Help,مساعدة التكامل
+Inter-project cost-transfer control for Movement costs. Records reallocation of a Movement cost from one project/cost center to another. The Posted (memo) status is an operational memo only - no GL or Journal Entry is written.,"ضبط تحويل تكلفة بين المشاريع لتكاليف الحركة. يسجّل إعادة توزيع تكلفة حركة من مشروع/مركز تكلفة إلى آخر. حالة ""مُرحّل (مذكرة)"" مذكرة تشغيلية فقط - دون كتابة قيد في دفتر الأستاذ العام أو قيد يومية."
+Internal Auditor Dashboard,لوحة معلومات المدقق الداخلي
+"Internal fuel consumption ledger. Maintained automatically by the system from Fuel Daily Log and Done Fuel Request records, and not edited manually.",دفتر استهلاك وقود داخلي. يُحدّثه النظام آلياً من سجلات سجل الوقود اليومي وطلبات الوقود المنجزة، ولا يُحرّر يدوياً.
+Leases by Status,عقود الإيجار حسب الحالة
+Ledger Rows,أسطر الدفتر
+Ledgered,تم ترحيله للدفتر
+Lightweight Habitat-owned catalog of maintenance materials. Not linked to ERPNext Stock/Item unless explicitly mapped.,فهرس مبسّط لمواد الصيانة تابع لهابيتات. غير مرتبط بمخزون/أصناف ERPNext ما لم يُربط صراحةً.
+Log your first building/floor safety inspection.,سجّل أول تفتيش سلامة لمبنى أو طابق.
+"Machine-written daily rental accrual memo, one row per in-service rented vehicle per day. Maintained automatically by the rental accrual engine; no human role may create, write, or delete rows. Posts NO GL.",مذكرة استحقاق إيجار يومية يكتبها النظام، سطر واحد لكل مركبة مستأجرة في الخدمة عن كل يوم. يُحدّثها محرّك استحقاق الإيجار آلياً؛ ولا يجوز لأي دور بشري إنشاء الأسطر أو تحريرها أو حذفها. لا تُرحّل أي قيد في دفتر الأستاذ العام.
+Maps a Delegation-of-Authority tier onto a native Frappe Role. Configurable rows let administrators extend the DoA ladder without a code change. Roles remain native Role records; this table only links a tier name to an existing Role.,يربط مستوى تفويض الصلاحيات بدور أصلي في فرابي. تتيح الأسطر القابلة للتهيئة للمسؤولين توسيع سلّم تفويض الصلاحيات دون تعديل برمجي. تبقى الأدوار سجلات أصلية؛ ولا يقوم هذا الجدول إلا بربط اسم المستوى بدور قائم.
+Master categories for issuable custody articles.,فئات أساسية لأصناف العهدة القابلة للصرف.
+Master switch indicating that an external frontend is integrated with this backend. This is a documentation/coordination flag; it does not start or stop the API.,مفتاح رئيسي يشير إلى تكامل واجهة أمامية خارجية مع هذا الخادم الخلفي. وهو مؤشر توثيقي/تنسيقي فقط؛ لا يشغّل الواجهة البرمجية ولا يوقفها.
+Masters & Contracts,البيانات الأساسية والعقود
+Migrated From,تم ترحيله من
+Minimum authority tier required to approve this request. Set by the originating controller; verified at submit of the reference document.,أدنى مستوى صلاحية مطلوب لاعتماد هذا الطلب. يُضبط من المتحكّم المنشئ؛ ويُتحقّق منه عند اعتماد المستند المرجعي.
+Missed Cleaning Tasks,مهام النظافة الفائتة
+Monthly Cost Bleeding,نزيف التكلفة الشهري
+Monthly fuel quota allocated to a vehicle/driver on a project. Tracks allocated vs consumed litres.,حصة وقود شهرية مخصّصة لمركبة/سائق في مشروع. تتتبّع اللترات المخصّصة مقابل المستهلكة.
+Monthly reconciliation of a Rental Office claim against accrued rental days. Computes accrued_total from the vehicle lines and the variance against the claimed amount. On submit it may raise a finance-exclusive Salis Payment Request (expense_type Rental). Posts NO GL.,تسوية شهرية لمطالبة مكتب تأجير مقابل أيام الإيجار المستحقة. تحسب إجمالي المستحق من أسطر المركبات والانحراف عن المبلغ المطالب به. وقد تُنشئ عند الاعتماد طلب دفع ساليس حصرياً للمالية (نوع المصروف: إيجار). لا تُرحّل أي قيد في دفتر الأستاذ العام.
+Movement Areas,مجالات الحركة
+Movement Context,سياق الحركة
+Movement Cost Recovery amounts at or above this value (SAR) require Operations-tier authority; lower amounts require at least Regional-tier.,مبالغ استرداد تكلفة الحركة التي تبلغ هذه القيمة (ريال) أو تتجاوزها تتطلب صلاحية مستوى العمليات؛ وما دونها يتطلب المستوى الإقليمي على الأقل.
+Movement Operations Dashboard,لوحة معلومات عمليات الحركة
+Movement fuel claim and reconciliation against a quota. Compares claimed litres/amount with consumed litres derived from the Fuel Consumption Ledger and routes a Delegation-of-Authority gate by variance / quota-increase.,مطالبة وتسوية وقود للحركة مقابل حصة. تقارن اللترات/المبلغ المطالب بها باللترات المستهلكة المستمدّة من دفتر استهلاك الوقود، وتوجّه بوابة تفويض صلاحيات بحسب الانحراف أو زيادة الحصة.
+"Movement planner who fulfilled the request, set on submit (Movement fulfils the request).",مخطّط الحركة الذي نفّذ الطلب، يُضبط عند الاعتماد (الحركة تنفّذ الطلب).
+"Movement-domain cost recovery record. Documents recovery of a loss (vehicle damage, fuel misuse, custody loss, fine) with tiered authority and audit. Any actual salary deduction stays in Finance/HR via a referenced Payment Request; Movement only documents the recovery.",سجل استرداد تكلفة في نطاق الحركة. يوثّق استرداد خسارة (تلف مركبة أو إساءة استخدام وقود أو فقدان عهدة أو غرامة) بصلاحيات متدرّجة وتدقيق. يبقى أي خصم فعلي من الراتب لدى المالية/الموارد البشرية عبر طلب دفع مرجعي؛ ولا توثّق الحركة سوى الاسترداد.
+"Movement-domain exit clearance for a driver. Confirms vehicle, fuel chip, and custody return and blocks clearance while open fuel exception cases or cost recoveries remain. HR EOSB/visa clearance is out of scope.",إخلاء طرف خروج للسائق في نطاق الحركة. يؤكّد إرجاع المركبة وشريحة الوقود والعهدة، ويمنع إخلاء الطرف مادامت هناك حالات استثناء وقود أو استردادات تكلفة مفتوحة. ولا يشمل إخلاء طرف نهاية الخدمة/التأشيرة لدى الموارد البشرية.
+Native Frappe Role that grants the selected tier.,الدور الأصلي في فرابي الذي يمنح المستوى المحدد.
+Needs Operations Authorization,يتطلب تفويض العمليات
+Number of days the resident has been idle. Accrued by the v0.8.6 aging job; not set manually.,عدد الأيام التي ظل فيها الساكن غير مشغّل. تتراكم عبر مهمة احتساب الأعمار في الإصدار v0.8.6؛ ولا تُضبط يدوياً.
+Occupancy Trend,اتجاه الإشغال
+Open Dispatch Board,فتح لوحة التشغيل
+Open Front Desk,فتح مكتب الاستقبال
+Open Safety Map,فتح خريطة السلامة
+Open the Dispatch Board,افتح لوحة التشغيل
+Open the Front Desk,افتح مكتب الاستقبال
+Open the Safety Map,افتح خريطة السلامة
+Open the front desk and place your first resident.,افتح مكتب الاستقبال وأسكِن أول مقيم.
+Open the visual Dispatch Board to plan trips and assign vehicles to requests.,افتح لوحة التشغيل المرئية لتخطيط الرحلات وإسناد المركبات للطلبات.
+Open the visual Front Desk board to check residents in and out.,افتح لوحة مكتب الاستقبال المرئية لتسجيل دخول الساكنين ومغادرتهم.
+Operational Depreciation Aging,أعمار الإهلاك التشغيلي
+"Operations requester, carried from the linked Transport Request (Operations owns the request).",مقدّم طلب العمليات، منقول من طلب النقل المرتبط (العمليات تملك الطلب).
+"Optional Habitat pickup: when set, this stop is a worker housing pickup location (the Habitat-Salis bridge). The stop's coordinates/address can derive from the building.",التقاط هابيتات اختياري: عند ضبطه، تكون هذه المحطة موقع التقاط سكن عمالة (جسر هابيتات-ساليس). ويمكن اشتقاق إحداثيات/عنوان المحطة من المبنى.
+Optional photo of the bed/room condition at check-in (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند الدخول (دليل تسليم).
+Optional photo of the bed/room condition at checkout (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند المغادرة (دليل تسليم).
+Overdue Rental Settlements,تسويات الإيجار المتأخرة
+Overdue Safety Tasks,مهام السلامة المتأخرة
+"Owning company for reporting and financial context. Defaulted from Salis Settings; reference only, posts no GL.",الشركة المالكة لأغراض التقارير والسياق المالي. مُهيّأة افتراضياً من إعدادات ساليس؛ للمرجع فقط، ولا تُرحّل أي قيد في دفتر الأستاذ العام.
+Owning company for reporting and financial context. Defaulted from Salis Settings; reference only. A transfer reallocates cost between projects within one company and posts no GL.,الشركة المالكة لأغراض التقارير والسياق المالي. مُهيّأة افتراضياً من إعدادات ساليس؛ للمرجع فقط. يعيد التحويل توزيع التكلفة بين المشاريع داخل شركة واحدة ولا يُرحّل أي قيد في دفتر الأستاذ العام.
+"Owning company, carried for reporting grouping. System-written; reference only, posts no GL.",الشركة المالكة، منقولة لأغراض تجميع التقارير. يكتبها النظام؛ للمرجع فقط، ولا تُرحّل أي قيد في دفتر الأستاذ العام.
+Passenger Count Operations Threshold,حد عمليات عدد الركاب
+Passenger counts above this number require Operations-tier authority.,أعداد الركاب التي تتجاوز هذا الرقم تتطلب صلاحية مستوى العمليات.
+Pending Utility Bills,فواتير الخدمات المعلّقة
+Period Days,أيام الفترة
+Photographic evidence captured for a driver attendance record.,دليل مصوّر يُلتقط لسجل حضور سائق.
+Physical facility asset movement with intercompany approval controls.,نقل مادي لأصل مرفق مع ضوابط اعتماد بين الشركات.
+Pickup Building,مبنى الالتقاط
+Planned departure date for a temporary stay. The supervisor is alerted as it approaches and if the worker is still checked in past it.,تاريخ المغادرة المخطّط لإقامة مؤقتة. يُنبّه المشرف عند اقترابه وإذا ظل العامل مسجّل الدخول بعده.
+Pre-defined material sets per issue type. Load into Maintenance Request or Work Order procurement items.,مجموعات مواد معرّفة مسبقاً لكل نوع عطل. تُحمّل ضمن بنود توريد طلب الصيانة أو أمر العمل.
+"Public base URL of the external frontend that consumes this backend, for example https://salis-fleet.com.",العنوان الأساسي العام للواجهة الأمامية الخارجية التي تستهلك هذا الخادم الخلفي، مثل https://salis-fleet.com.
+QR,رمز QR
+Qty (signed),الكمية (موجبة/سالبة)
+Quick Actions,إجراءات سريعة
+Raise Fuel Request,إنشاء طلب وقود
+Raise Transport Request,إنشاء طلب نقل
+Raise a Fuel Request,أنشئ طلب وقود
+Raise a Transport Request,أنشئ طلب نقل
+Readings & Completion,القراءات والإنجاز
+Receipt/Return lifecycle for a rented vehicle. A Receipt with no later Return marks the vehicle as in-service; the Rental Accrual Ledger engine queries these to post daily rental memos. Posts NO GL.,دورة استلام/إرجاع لمركبة مستأجرة. يُعدّ الاستلام دون إرجاع لاحق المركبة في الخدمة؛ ويستعلم محرّك دفتر استحقاق الإيجار عن هذه السجلات لترحيل مذكرات الإيجار اليومية. لا يُرحّل أي قيد في دفتر الأستاذ العام.
+Recipient address for the cross-cost-center transfer memo. Falls back to the Finance Manager role if left blank.,عنوان مستلم مذكرة التحويل بين مراكز التكلفة. يُستعاض عنه بدور المدير المالي إذا تُرك فارغاً.
+Record a Safety Inspection,سجّل تفتيش سلامة
+Record a Vehicle Assignment,سجّل إسناد مركبة
+Records a vehicle stop event with reason and ownership context.,يسجّل حدث إيقاف مركبة مع السبب وسياق الملكية.
+Records damage on returned custody articles. A salary deduction is applied only when damage deduction is enabled in Habitat Settings.,يسجّل التلف في أصناف العهدة المرتجعة. ولا يُطبّق خصم من الراتب إلا عند تفعيل خصم التلف في إعدادات هابيتات.
+Records the handover of a vehicle from one driver to another.,يسجّل تسليم مركبة من سائق إلى آخر.
+Recovery,الاسترداد
+Reference only. Set externally after Finance posts payment in the accounting module. This DocType never creates or posts a GL/Payment Entry.,للمرجع فقط. يُضبط خارجياً بعد ترحيل المالية للدفعة في وحدة المحاسبة. لا يُنشئ هذا المستند ولا يرحّل أي قيد في دفتر الأستاذ العام أو قيد دفع.
+Reference to the raised Salis Payment Request. Set automatically; this DocType never posts GL.,مرجع لطلب دفع ساليس المُنشأ. يُضبط آلياً؛ ولا يرحّل هذا المستند أي قيد في دفتر الأستاذ العام.
+Reference-only link to the Finance/HR Payment Request that handles the actual deduction. Movement does not post any payment.,رابط مرجعي فقط لطلب الدفع لدى المالية/الموارد البشرية الذي يتولى الخصم الفعلي. ولا تُرحّل الحركة أي دفعة.
+Register Salis Driver,تسجيل سائق ساليس
+Register Salis Vehicle,تسجيل مركبة ساليس
+Register a Salis Driver,سجّل سائق ساليس
+Register a Salis Vehicle,سجّل مركبة ساليس
+Registered worker (Employee) who boarded. Leave blank and tick 'Unregistered' for a contractor/temp hire not on the request manifest.,"العامل المسجّل (الموظف) الذي صعد. اتركه فارغاً وفعّل ""غير مسجّل"" لمتعاقد/موظف مؤقت غير مدرج في كشف الطلب."
+Rental,إيجار
+Rental Accrual Trend,اتجاه استحقاق الإيجار
+Rental Cost by Office,تكلفة الإيجار حسب المكتب
+Rentals,الإيجارات
+Repair,إصلاح
+Representatives Transport Fulfilled This Month,نقل المندوبين المنفّذ هذا الشهر
+Representatives Transport Requests Open,طلبات نقل المندوبين المفتوحة
+Request fuel for a vehicle to start the fuelling and reconciliation cycle.,اطلب وقوداً لمركبة لبدء دورة التزويد والتسوية.
+Requester,مقدّم الطلب
+Requests Raised,الطلبات المُنشأة
+Requests Served,الطلبات المخدومة
+Required Tier,المستوى المطلوب
+Required before the case can move beyond Open.,"مطلوب قبل أن تتجاوز الحالة وضع ""مفتوحة""."
+Required for Accident or Violation stops.,مطلوب لحالات الإيقاف بسبب حادث أو مخالفة.
+Required for Violation or Termination stops.,مطلوب لحالات الإيقاف بسبب مخالفة أو إنهاء خدمة.
+Resident Supervisor Dashboard,لوحة معلومات مشرف الساكنين
+Residents & Rooms,الساكنون والغرف
+Resolution Note,ملاحظة المعالجة
+Review the Active Resident Register,راجع سجل الساكنين النشطين
+Safety Inspections Over Time,تفتيشات السلامة عبر الزمن
+Safety Readiness,جاهزية السلامة
+Safety is set up. Scheduled tasks and inspections are active.,تم إعداد السلامة. المهام المجدولة والتفتيشات مفعّلة الآن.
+Salis Authority Tier,مستوى صلاحية ساليس
+Salis Finance Manager Dashboard,لوحة معلومات مدير ساليس المالي
+Salis Go-Live,تشغيل ساليس
+Salis Masters & Setup,بيانات ساليس الأساسية والإعداد
+Salis Setup,إعداد ساليس
+Salis is live. Use the Dispatch Board to plan trips and assign vehicles.,تم تشغيل ساليس. استخدم لوحة التشغيل لتخطيط الرحلات وإسناد المركبات.
+See who is currently housed across your buildings.,اطّلع على المقيمين حالياً في مبانيك.
+Send a memo-only notification to Finance when a Material Transfer moves stock between buildings on different cost centers. No GL Entry is posted.,إرسال إشعار مذكرة فقط إلى المالية عند نقل المواد للمخزون بين مبانٍ على مراكز تكلفة مختلفة. دون ترحيل أي قيد في دفتر الأستاذ العام.
+"Server-derived Delegation-of-Authority flag: when set, only an Operations-tier authorization is allowed. Read by the workflow transition condition; cannot be hand-set.",مؤشر تفويض صلاحيات مشتق من الخادم: عند ضبطه، لا يُسمح إلا بتفويض من مستوى العمليات. تقرؤه شروط انتقال سير العمل؛ ولا يمكن ضبطه يدوياً.
+Server-derived: submitted Administrative Trips this month for the project (incl. this one).,مشتق من الخادم: الرحلات الإدارية المعتمدة هذا الشهر للمشروع (متضمناً هذه الرحلة).
+"Set by the fuel accrual engine once this request's litres have been posted to the Fuel Consumption Ledger. Decouples accrual from the request date so a request completed later is still ledgered, and guards against double-posting.",يُضبط من محرّك استحقاق الوقود بمجرد ترحيل لترات هذا الطلب إلى دفتر استهلاك الوقود. يفصل الاستحقاق عن تاريخ الطلب بحيث يبقى الطلب المنجز لاحقاً مُرحّلاً للدفتر، ويحمي من الترحيل المزدوج.
+Set to the session user on creation; read-only so the maker != checker (segregation-of-duties) gate cannot be spoofed.,يُضبط إلى مستخدم الجلسة عند الإنشاء؛ وهو للقراءة فقط بحيث لا يمكن التحايل على بوابة فصل المهام (المُنشئ ≠ المراجع).
+Set to the session user on creation; read-only so the segregation-of-duties gate cannot be spoofed.,يُضبط إلى مستخدم الجلسة عند الإنشاء؛ وهو للقراءة فقط بحيث لا يمكن التحايل على بوابة الفصل بين المهام.
+Set up your fleet and dispatch your first movement.,جهّز أسطولك ونفّذ أول حركة.
+"Set when a temporary top-up has been reverted (by the daily auto-revert job once overdue, or manually). Allowed on submit so the scheduler can flip it on the submitted request.",يُضبط عند عكس تعبئة مؤقتة (عبر مهمة العكس التلقائي اليومية بمجرد تأخّرها، أو يدوياً). ويُسمح به عند الاعتماد ليتمكّن المجدوِل من تفعيله على الطلب المعتمد.
+Set when the driver/employee has acknowledged responsibility for the loss.,يُضبط عند إقرار السائق/الموظف بالمسؤولية عن الخسارة.
+Set when the transfer is approved.,يُضبط عند اعتماد التحويل.
+Set when the write-off case is approved.,يُضبط عند اعتماد حالة الشطب.
+Set when this claim is a quota-increase claim. Quota-increase claims always require Operations-tier authority.,يُضبط عندما تكون هذه المطالبة مطالبة زيادة حصة. وتتطلب مطالبات زيادة الحصة دائماً صلاحية مستوى العمليات.
+"Settlement period, e.g. 2026-05.",فترة التسوية، مثال: 2026-05.
+"Single configuration record describing how an external frontend integrates with this Frappe backend over HTTP. This DocType documents and surfaces the integration; the real linking uses native Frappe tools (User API Access, OAuth Client, Webhook).",سجل إعداد مفرد يصف كيفية تكامل واجهة أمامية خارجية مع هذا الخادم الخلفي لفرابي عبر HTTP. يوثّق هذا المستند التكامل ويُبرزه؛ أما الربط الفعلي فيتم عبر أدوات فرابي الأصلية (وصول واجهة المستخدم البرمجية، عميل OAuth، خطاف الويب).
+Single configuration record for the Salis Fleet Management module.,سجل إعداد مفرد لوحدة إدارة أسطول ساليس.
+Source & Tracking,المصدر والتتبّع
+Source DocType:name this row was migrated from when the Fuel Topup Request / Fuel Chip Request DocTypes were merged into Fuel Request. Blank for natively-created requests. Guards the merge patch against double-migration.,مستند:اسم المصدر الذي رُحّل منه هذا السطر عند دمج مستندي طلب تعبئة الوقود / طلب شريحة الوقود في طلب الوقود. فارغ للطلبات المُنشأة أصلاً. ويحمي ترقيع الدمج من الترحيل المزدوج.
+Stamped automatically when Finance approves. Read-only.,يُختم آلياً عند اعتماد المالية. للقراءة فقط.
+"Standard: quota consumption + ledger posting. Top-up: add litres, optionally temporary. Chip: issue / replace / cancel a fuel chip.",قياسي: استهلاك الحصة + الترحيل للدفتر. تعبئة: إضافة لترات، مؤقتة اختيارياً. شريحة: إصدار / استبدال / إلغاء شريحة وقود.
+Start Datetime,تاريخ ووقت البدء
+Status & Assignment,الحالة والإسناد
+Submittable: records facility/operational custody articles issued to a responsible party.,قابل للاعتماد: يسجّل أصناف عهدة المرافق/التشغيل المصروفة لجهة مسؤولة.
+Submittable: records the return of custody articles against a prior Custody Issue.,قابل للاعتماد: يسجّل إرجاع أصناف العهدة مقابل صرف عهدة سابق.
+Sum of Fuel Consumption Ledger litres for this vehicle and period. Computed by the system.,مجموع لترات دفتر استهلاك الوقود لهذه المركبة وهذه الفترة. يحتسبه النظام.
+Sum of the vehicle line amounts (accrued).,مجموع مبالغ أسطر المركبات (المستحقة).
+Supporting evidence for the loss and its valuation. Required before the recovery can be Approved.,أدلة داعمة للخسارة وتقييمها. مطلوبة قبل أن يتسنى اعتماد الاسترداد.
+"System-written, read-only periodic snapshot of vehicle utilisation over a trailing window. Never hand-entered; derived from completed Dispatch Trips.",لقطة دورية للقراءة فقط يكتبها النظام لاستخدام المركبات عبر نافذة زمنية متحركة. لا تُدخل يدوياً؛ وتُشتق من رحلات التشغيل المكتملة.
+The Dispatch Trip being executed. Its linked Transport Request carries the worker manifest this log records boarding against.,رحلة التشغيل الجاري تنفيذها. ويحمل طلب النقل المرتبط بها كشف العمالة الذي يسجّل هذا السجل الصعود مقابله.
+"The driver's current assigned vehicle, captured for reference.",المركبة المسندة حالياً للسائق، مسجّلة للمرجع.
+"The housing pickup (Habitat) for this boarding, when the stop is a worker accommodation. The Habitat-Salis bridge.",نقطة التقاط السكن (هابيتات) لهذا الصعود، عندما تكون المحطة سكن عمالة. وهي جسر هابيتات-ساليس.
+The route stop where this worker boarded (mirrors the Route Stop name on the trip's route).,محطة المسار التي صعد منها هذا العامل (تطابق اسم محطة المسار في مسار الرحلة).
+The user who raised this case. Set automatically.,المستخدم الذي أنشأ هذه الحالة. يُضبط آلياً.
+The user who resolved or closed the case. Must differ from Reported By (segregation of duties).,المستخدم الذي عالج الحالة أو أغلقها. يجب أن يختلف عن المُبلِّغ (الفصل بين المهام).
+Tick for a contractor/temp hire not registered on the trip's worker manifest.,فعّله لمتعاقد/موظف مؤقت غير مسجّل في كشف عمالة الرحلة.
+Tier,المستوى
+Tier the request was escalated to when the approver lacked the required authority.,المستوى الذي صُعّد إليه الطلب عند افتقار المعتمِد للصلاحية المطلوبة.
+Timed %,النسبة الموقّتة (%)
+Times,الأوقات
+Total Accrued,إجمالي المستحق
+Total Occupancy %,إجمالي نسبة الإشغال (%)
+Total Occupancy Percent,إجمالي نسبة الإشغال
+"Tracks idle/forgotten residents occupying accommodation without an active deployment, to surface accommodation cost bleed and assign responsibility for resolution.",يتتبّع الساكنين غير المشغّلين/المنسيّين الذين يشغلون السكن دون تشغيل فعّال، لإبراز نزيف تكلفة السكن وإسناد مسؤولية المعالجة.
+Transfers responsibility of one or more Facility Assets to a supervisor.,ينقل مسؤولية أصل مرفق واحد أو أكثر إلى مشرف.
+Transport Fulfilment SLA,اتفاقية مستوى خدمة تنفيذ النقل
+Transport Requests by Service Line,طلبات النقل حسب خط الخدمة
+Transport SLA Breaches Open,مخالفات اتفاقية مستوى خدمة النقل المفتوحة
+Trip,الرحلة
+Trip Boarding Event,حدث صعود الرحلة
+Trip Start Log,سجل بدء الرحلة
+Trip fulfilment ledger. Maintained automatically by the system when a Dispatch Trip is completed and not edited manually.,دفتر تنفيذ الرحلات. يُحدّثه النظام آلياً عند اكتمال رحلة تشغيل، ولا يُحرّر يدوياً.
+Trips,الرحلات
+Unified child table for inspection findings used by Safety Inspection Report and Maintenance Inspection Report.,جدول تابع موحّد لملاحظات التفتيش يستخدمه تقرير تفتيش السلامة وتقرير تفتيش الصيانة.
+"Unified fuel request. A request_type (Standard / Top-up / Chip) selects the behaviour: Standard consumes quota and posts to the Fuel Consumption Ledger; Top-up adds litres and may be temporary (auto-reverted when overdue); Chip issues, replaces, or cancels a vehicle fuel chip.",طلب وقود موحّد. يحدّد نوع الطلب (قياسي / تعبئة / شريحة) السلوك: القياسي يستهلك الحصة ويُرحّل إلى دفتر استهلاك الوقود؛ والتعبئة تضيف لترات وقد تكون مؤقتة (يُعكَس آلياً عند تأخّرها)؛ والشريحة تُصدر شريحة وقود للمركبة أو تستبدلها أو تلغيها.
+Unit Cost (SAR),تكلفة الوحدة (ريال)
+Value (SAR),القيمة (ريال)
+Vehicle & Driver,المركبة والسائق
+Vehicle Damage Write-Off cases at or above this estimated cost (SAR) require Operations-tier authority; lower-value cases require at least Regional-tier.,حالات شطب تلف المركبات التي تبلغ هذه التكلفة التقديرية (ريال) أو تتجاوزها تتطلب صلاحية مستوى العمليات؛ والحالات الأقل قيمة تتطلب المستوى الإقليمي على الأقل.
+Vehicle damage write-off case raised from a handover discrepancy. Tiered write-off authority gate on submit.,حالة شطب تلف مركبة تُنشأ من تباين في التسليم. بوابة صلاحية شطب متدرّجة عند الاعتماد.
+Vehicle wash service platform or provider used for cleaning fleet vehicles.,منصة أو مزوّد خدمة غسيل يُستخدم لتنظيف مركبات الأسطول.
+Version of the documented API contract the frontend is built against. Additive changes are safe; breaking changes increment this value and require a notice to integrators.,إصدار عقد الواجهة البرمجية الموثّق الذي بُنيت عليه الواجهة الأمامية. التغييرات الإضافية آمنة؛ أما التغييرات الكاسرة فترفع هذه القيمة وتستلزم إشعار المتكاملين.
+View Active Resident Register,عرض سجل الساكنين النشطين
+View the interactive safety map; rooms with open maintenance pulse.,اعرض خريطة السلامة التفاعلية؛ تنبض الغرف ذات الصيانة المفتوحة.
+Whether the approver holds the required tier (Within Authority) or the request was routed to a higher tier (Escalated/Returned). Computed at validate.,ما إذا كان المعتمِد يملك المستوى المطلوب (ضمن الصلاحية) أم وُجّه الطلب إلى مستوى أعلى (مُصعّد/مُعاد). يُحتسب عند التحقق.
+"Whether the completed trip recorded both a depart and a return timestamp. This is a data-completeness flag, not a punctuality measure: the schema carries no planned/scheduled return time to judge on-time arrival against.",ما إذا كانت الرحلة المكتملة قد سجّلت طابعاً زمنياً للمغادرة وآخر للعودة معاً. وهو مؤشر اكتمال بيانات وليس قياساً للالتزام بالمواعيد: إذ لا يحمل المخطط وقت عودة مخطّطاً/مجدولاً للحكم على الوصول في الوقت المحدد.
+Workers / Destination,العمالة / الوجهة
+Workers Moved,العمالة المنقولة
+Workers Transport Fulfilled This Month,نقل العمالة المنفّذ هذا الشهر
+Workers Transport Requests Open,طلبات نقل العمالة المفتوحة
+Write-Off Operations Threshold (SAR),حد عمليات الشطب (ريال)
