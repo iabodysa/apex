@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.21.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.21.0 — a clean settings hub, KPI tiles on every Salis workspace, and a training guide",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-12 09:00:00",
+    },
+    {
+        "title": "v1.21.0: The Apex Core workspace is now a focused settings hub (the four settings + the driver-portal theme up front, master-data clutter removed), and every Salis workspace shows at-a-glance KPI number cards",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-12 09:01:00",
+    },
+    {
+        "title": "v1.21.0: Added a per-DocType training guide, removed deprecated dead code (Habitat Operations Alert, the empty habitat_city), and added a 'my worker route today' page for workers",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-12 09:02:00",
+    },
     # v1.20.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.20.0 — driver portal: language toggle, profile and vehicle views",

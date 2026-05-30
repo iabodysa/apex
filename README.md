@@ -7,8 +7,8 @@ It ships as a single Frappe package (`apex_habitat`) with three modules — **Ha
 ## Modules
 
 - **Habitat** — accommodation and facilities: spatial inventory (sites, buildings, rooms, beds), resident assignment/transfer/checkout, scheduled safety and cleaning work, maintenance and work orders, custody of issued assets, a decentralized internal store, and lease/utility cost control.
-- **Salis** — movement and fleet: a two-division service model on **Transport Request** (`service_line` = Workers vs Representatives), a shared vehicle/driver/fuel/dispatch backbone, vehicle rentals and cost recovery, and a native-Frappe **Workflow** approval spine across its submittable documents.
-- **Apex Core** — shared configuration: the Single DocTypes **Habitat Settings**, **Salis Settings**, and **Apex Integration Settings** that both functional modules read for thresholds, toggles, and default company/cost-center.
+- **Salis** — movement and fleet: a two-division service model on **Transport Request** (`service_line` = Workers vs Representatives), a shared vehicle/driver/fuel/dispatch backbone, vehicle rentals and cost recovery, a native-Frappe **Workflow** approval spine across its submittable documents, and a mobile **driver portal** (`/driver`) with a theme driver, an English/Arabic language toggle, and driver-profile and assigned-vehicle views.
+- **Apex Core** — the settings hub: the Single DocTypes **Habitat Settings**, **Salis Settings**, **Apex Integration Settings**, and **Salis Portal Theme** that the functional modules and portal read for thresholds, toggles, default company/cost-center, and portal appearance.
 
 ## Architecture
 
@@ -34,7 +34,7 @@ flowchart TB
         end
     end
 
-    CORE["Apex Core — shared Single DocTypes<br/>Habitat · Salis · Integration Settings"]:::core
+    CORE["Apex Core — settings hub (Single DocTypes)<br/>Habitat · Salis · Integration · Portal Theme"]:::core
 
     PKG --> HABG
     PKG --> SALG
@@ -52,7 +52,7 @@ flowchart TB
 
 ### System context
 
-Black-box view of who and what Apex talks to. Desk users and operations consoles use the standard Frappe session; the `/driver` portal is a mobile web app that resolves the signed-in user to a driver server-side; two public QR web forms accept rate-limited guest submissions.
+Black-box view of who and what Apex talks to. Desk users and operations consoles use the standard Frappe session; the `/driver` portal is a themeable, mobile web app — English/Arabic toggle, driver-profile and assigned-vehicle views — that resolves the signed-in user to a driver server-side; two public QR web forms accept rate-limited guest submissions.
 
 ```mermaid
 flowchart TB
@@ -245,7 +245,7 @@ An idempotent `after_install` bootstrap (safe to re-run) seeds four custom roles
 
 ## Localization
 
-Arabic localization is available through Frappe translation files (`apex_habitat/translations/ar.csv`).
+The desk is delivered fully in Arabic through Frappe translation files (`apex_habitat/translations/ar.csv`). The driver portal stays English-first for a multinational workforce, with an in-portal English/Arabic toggle.
 
 ## Install
 
