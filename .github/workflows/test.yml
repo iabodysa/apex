@@ -89,6 +89,11 @@ jobs:
           bench --site test.localhost install-app erpnext
           bench --site test.localhost install-app hrms
           bench --site test.localhost install-app apex_habitat
+          # The full suite creates far more than Frappe's default cap of 60 new
+          # Users per 60s, which raises "Throttled" in many setUpClass blocks.
+          # Write the cap as an INT directly into site_config (bench set-config
+          # would store a string and break Frappe's `int > limit` comparison).
+          python3 -c "import json, pathlib; p = pathlib.Path('sites/test.localhost/site_config.json'); c = json.loads(p.read_text()); c['throttle_user_limit'] = 100000; p.write_text(json.dumps(c, indent=1))"
 
       - name: Migrate (apply seeds, workflows and patches)
         working-directory: frappe-bench
