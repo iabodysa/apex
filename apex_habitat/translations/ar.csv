@@ -2268,3 +2268,35 @@ Workers Moved,العمالة المنقولة
 Workers Transport Fulfilled This Month,نقل العمالة المنفّذ هذا الشهر
 Workers Transport Requests Open,طلبات نقل العمالة المفتوحة
 Write-Off Operations Threshold (SAR),حد عمليات الشطب (ريال)
+Accent Color,لون التمييز
+Active Drivers,السائقون النشطون
+Active Rentals,عقود الإيجار النشطة
+Active Trips,الرحلات النشطة
+Active Vehicle Assignments,إسنادات المركبات النشطة
+Admin Health,صحة النظام
+Appearance,المظهر
+Brand Logo,شعار العلامة التجارية
+Dark,داكن
+"Design theme applied to the driver portal. AFMCO is the flat, brand-aligned default; Frappe Standard is the neutral portal look; Dark is an AFMCO-flavoured dark mode.",سمة التصميم المطبَّقة على بوابة السائق. AFMCO هي السمة المسطّحة المتوافقة مع الهوية وهي الافتراضية؛ وFrappe القياسي هو المظهر المحايد للبوابة؛ والداكن هو وضع داكن بنكهة AFMCO.
+Driver Clearances Pending,تصاريح السائقين قيد الانتظار
+Driver Licenses Expiring Soon,رخص القيادة قاربت على الانتهاء
+Frappe Standard,Frappe القياسي
+Fuel Litres Dispensed This Month,لترات الوقود المصروفة هذا الشهر
+Fuel Requests Approved This Month,طلبات الوقود المعتمدة هذا الشهر
+Government Relations Cases Open,حالات العلاقات الحكومية المفتوحة
+Open Fuel Claim Disputes,نزاعات مطالبات الوقود المفتوحة
+Optional logo shown in the portal header in place of the built-in brand mark.,شعار اختياري يظهر في ترويسة البوابة بدلاً من علامة الهوية المدمجة.
+Optional override for the primary accent colour. Leave blank to use the colour defined by the selected theme.,تجاوز اختياري للون التمييز الأساسي. اتركه فارغاً لاستخدام اللون المحدَّد في السمة المختارة.
+Passenger Manifests Today,كشوف الركاب اليوم
+Rental Cost This Month,تكلفة الإيجار هذا الشهر
+Roles & Access,الأدوار والصلاحيات
+Salis Portal Theme,سمة بوابة سلس
+Scheduled Awaiting Dispatch,مجدولة بانتظار الإرسال
+Settlements Pending Approval,التسويات بانتظار الاعتماد
+Show Brand,إظهار العلامة التجارية
+"Show the AFMCO brand mark and wordmark in the portal header. Turn off for a minimal, unbranded header.",إظهار علامة AFMCO واسمها في ترويسة البوابة. أوقِف التفعيل للحصول على ترويسة بسيطة بدون علامة تجارية.
+Single configuration record controlling the look and feel of the Salis Driver Portal (the mobile web app at /driver).,سجل إعداد مفرد يتحكم في شكل ومظهر بوابة سائق سلس (تطبيق الويب للجوال على /driver).
+Theme,السمة
+Trips Dispatched Today,الرحلات المُرسَلة اليوم
+Vehicles In Service,المركبات في الخدمة
+Vehicles Stopped,المركبات الموقوفة
