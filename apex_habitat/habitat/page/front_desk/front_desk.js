@@ -42,6 +42,10 @@ class FrontDesk {
 				if (val && val !== this.building) {
 					this.building = val;
 					this.refresh();
+				} else if (!val && this.building) {
+					// Field cleared — reset the board instead of leaving stale data.
+					this.building = null;
+					this._render_empty(__("Select a building to load the board."));
 				}
 			},
 		});
@@ -60,14 +64,23 @@ class FrontDesk {
 
 	refresh() {
 		if (!this.building) return;
+		const requested = this.building;
+		this._render_loading();
 		frappe.call({
 			method: "apex_habitat.habitat.api.front_desk.get_building_grid",
 			args: { building: this.building },
-			freeze: true,
-			freeze_message: __("Loading board…"),
 			callback: (r) => {
-				if (r.exc || !r.message) return;
+				// Ignore a stale response if the user switched buildings mid-flight.
+				if (requested !== this.building) return;
+				if (r.exc || !r.message) {
+					this._render_error(__("Could not load the board for this building."));
+					return;
+				}
 				this._render_grid(r.message);
+			},
+			error: () => {
+				if (requested !== this.building) return;
+				this._render_error(__("Could not load the board. Check your connection and try again."));
 			},
 		});
 	}
@@ -77,6 +90,28 @@ class FrontDesk {
 		$(`<div class="fd-empty text-muted"></div>`)
 			.text(message)
 			.appendTo(this.$container);
+	}
+
+	_render_loading() {
+		this.$container.empty();
+		const $wrap = $('<div class="fd-loading" aria-busy="true"></div>').appendTo(this.$container);
+		$('<div class="fd-loading-label text-muted"></div>')
+			.text(__("Loading board…"))
+			.appendTo($wrap);
+		const $skeleton = $('<div class="fd-skeleton-rooms"></div>').appendTo($wrap);
+		for (let i = 0; i < 6; i++) {
+			$('<div class="fd-skeleton-room"></div>').appendTo($skeleton);
+		}
+	}
+
+	_render_error(message) {
+		this.$container.empty();
+		const $err = $('<div class="fd-error"></div>').appendTo(this.$container);
+		$('<div class="fd-error-msg"></div>').text(message).appendTo($err);
+		$('<button class="btn btn-default btn-sm"></button>')
+			.text(__("Retry"))
+			.on("click", () => this.refresh())
+			.appendTo($err);
 	}
 
 	_render_grid(data) {
@@ -202,7 +237,12 @@ class FrontDesk {
 							method: "apex_habitat.habitat.api.front_desk.get_employee_card",
 							args: { employee: emp },
 							callback: (r) => {
-								if (r.exc || !r.message) return;
+								if (r.exc || !r.message) {
+									photo.$wrapper.html(
+										`<div class="text-muted">${__("Could not load employee photo.")}</div>`
+									);
+									return;
+								}
 								const img = r.message.image
 									? `<img src="${frappe.utils.escape_html(r.message.image)}" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid var(--border-color)">`
 									: `<div class="text-muted">${__("No photo on file")}</div>`;

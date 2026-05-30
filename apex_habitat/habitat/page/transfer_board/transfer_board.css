@@ -189,6 +189,86 @@
 	box-shadow: 0 0 0 3px var(--primary, #2490ef);
 }
 
+/* Loading state — inline per-pane spinner + skeleton (replaces global freeze). */
+.tb-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	padding: 28px 12px;
+}
+
+.tb-spinner {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	border: 3px solid var(--border-color, #d1d8dd);
+	border-top-color: var(--primary, #2490ef);
+	animation: tb-spin 0.7s linear infinite;
+}
+
+@keyframes tb-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.tb-loading-text {
+	font-size: 13px;
+}
+
+.tb-skeleton {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 8px;
+}
+
+.tb-skeleton-row {
+	height: 56px;
+	border-radius: 8px;
+	background: linear-gradient(
+		90deg,
+		var(--control-bg, #f0f1f3) 25%,
+		var(--fg-color, #fff) 50%,
+		var(--control-bg, #f0f1f3) 75%
+	);
+	background-size: 200% 100%;
+	animation: tb-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes tb-shimmer {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.tb-spinner,
+	.tb-skeleton-row {
+		animation: none;
+	}
+}
+
+/* Error state — message + retry. */
+.tb-error {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	padding: 32px 12px;
+	text-align: center;
+}
+
+.tb-error-msg {
+	font-size: 14px;
+	color: var(--red-600, #b71c1c);
+}
+
 @media (max-width: 768px) {
 	.tb-pane {
 		flex-basis: 100%;

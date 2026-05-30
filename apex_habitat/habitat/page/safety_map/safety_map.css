@@ -201,8 +201,72 @@
 	}
 }
 
+/* Loading skeleton. */
+.sm-skeleton {
+	padding: 8px 0 4px;
+}
+
+.sm-skeleton-line {
+	height: 18px;
+	border-radius: 6px;
+	background: var(--control-bg, #f4f5f6);
+	margin-bottom: 16px;
+}
+
+.sm-skeleton-line--wide {
+	width: 40%;
+	max-width: 280px;
+}
+
+.sm-skeleton-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	gap: 12px;
+}
+
+.sm-skeleton-tile {
+	min-height: 86px;
+	border-radius: 8px;
+	background: var(--control-bg, #f4f5f6);
+}
+
+.sm-skeleton-line,
+.sm-skeleton-tile {
+	animation: sm-skeleton-pulse 1.3s ease-in-out infinite;
+}
+
+@keyframes sm-skeleton-pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}
+
+/* Error state with retry. */
+.sm-error {
+	padding: 40px 16px;
+	text-align: center;
+}
+
+.sm-error-msg {
+	color: var(--text-muted, #74808b);
+	font-size: 15px;
+	margin-bottom: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sm-skeleton-line,
+	.sm-skeleton-tile {
+		animation: none;
+	}
+}
+
 @media (max-width: 768px) {
-	.sm-grid {
+	.sm-grid,
+	.sm-skeleton-grid {
 		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
 	}
 }

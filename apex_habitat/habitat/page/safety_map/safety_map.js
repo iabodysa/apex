@@ -46,6 +46,10 @@ class SafetyMap {
 				if (val && val !== this.building) {
 					this.building = val;
 					this.refresh();
+				} else if (!val && this.building) {
+					this.building = null;
+					this.data = null;
+					this._render_empty(__("Select a building to load the map."));
 				}
 			},
 		});
@@ -68,15 +72,26 @@ class SafetyMap {
 
 	refresh() {
 		if (!this.building) return;
+		this._render_loading();
 		frappe.call({
 			method: "apex_habitat.habitat.api.safety_map.get_safety_map",
 			args: { building: this.building },
-			freeze: true,
-			freeze_message: __("Loading map…"),
 			callback: (r) => {
-				if (r.exc || !r.message) return;
+				if (r.exc || !r.message) {
+					this._render_error(
+						__("Could not load the safety map. Please try again."),
+						() => this.refresh()
+					);
+					return;
+				}
 				this.data = r.message;
 				this._render_map();
+			},
+			error: () => {
+				this._render_error(
+					__("Could not load the safety map. Please try again."),
+					() => this.refresh()
+				);
 			},
 		});
 	}
@@ -84,6 +99,31 @@ class SafetyMap {
 	_render_empty(message) {
 		this.$container.empty();
 		$('<div class="sm-empty text-muted"></div>').text(message).appendTo(this.$container);
+	}
+
+	_render_loading() {
+		this.$container.empty();
+		const $skel = $('<div class="sm-skeleton" aria-busy="true"></div>').appendTo(
+			this.$container
+		);
+		$('<div class="sm-skeleton-line sm-skeleton-line--wide"></div>').appendTo($skel);
+		const $grid = $('<div class="sm-skeleton-grid"></div>').appendTo($skel);
+		for (let i = 0; i < 8; i++) {
+			$('<div class="sm-skeleton-tile"></div>').appendTo($grid);
+		}
+		$('<div class="sm-empty text-muted"></div>')
+			.text(__("Loading map…"))
+			.appendTo(this.$container);
+	}
+
+	_render_error(message, retry) {
+		this.$container.empty();
+		const $err = $('<div class="sm-error"></div>').appendTo(this.$container);
+		$('<div class="sm-error-msg"></div>').text(message).appendTo($err);
+		$('<button class="btn btn-sm btn-default sm-error-retry"></button>')
+			.text(__("Retry"))
+			.on("click", () => retry && retry())
+			.appendTo($err);
 	}
 
 	_render_map() {
@@ -231,7 +271,13 @@ class SafetyMap {
 					freeze: true,
 					freeze_message: __("Logging inspection…"),
 					callback: (r) => {
-						if (r.exc || !r.message) return;
+						if (r.exc || !r.message) {
+							frappe.show_alert({
+								message: __("Could not log the inspection. Please try again."),
+								indicator: "red",
+							});
+							return;
+						}
 						d.hide();
 						frappe.show_alert({
 							message: __("Inspection logged: {0}", [r.message.report]),
@@ -239,6 +285,12 @@ class SafetyMap {
 						});
 						// Re-fetch — a generated maintenance request repaints signals.
 						this.refresh();
+					},
+					error: () => {
+						frappe.show_alert({
+							message: __("Could not log the inspection. Please try again."),
+							indicator: "red",
+						});
 					},
 				});
 			},

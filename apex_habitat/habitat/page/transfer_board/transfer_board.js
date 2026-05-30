@@ -101,15 +101,24 @@ class TransferBoard {
 	refresh(side) {
 		const pane = this.panes[side];
 		if (!pane.building) return;
+		// Keep a stable selection across a manual re-fetch of the side that does
+		// not hold the current source highlight; clear it if it belongs here.
+		this._render_loading(pane.$grid);
 		frappe.call({
 			method: "apex_habitat.habitat.api.front_desk.get_building_grid",
 			args: { building: pane.building },
-			freeze: true,
-			freeze_message: __("Loading board…"),
+			// Inline per-pane loading state instead of a global freeze, so the
+			// other pane and the page chrome stay interactive while one loads.
 			callback: (r) => {
-				if (r.exc || !r.message) return;
+				if (r.exc || !r.message) {
+					this._render_error(side);
+					return;
+				}
 				pane.data = r.message;
 				this._render_grid(side);
+			},
+			error: () => {
+				this._render_error(side);
 			},
 		});
 	}
@@ -117,6 +126,32 @@ class TransferBoard {
 	_render_empty($grid, message) {
 		$grid.empty();
 		$('<div class="tb-empty text-muted"></div>').text(message).appendTo($grid);
+	}
+
+	_render_loading($grid) {
+		$grid.empty();
+		const $wrap = $('<div class="tb-loading" aria-busy="true"></div>').appendTo($grid);
+		$('<div class="tb-spinner" role="status" aria-label="Loading"></div>').appendTo($wrap);
+		$('<div class="tb-loading-text text-muted"></div>').text(__("Loading board…")).appendTo($wrap);
+		// Lightweight skeleton rows so the pane has shape while data arrives.
+		const $sk = $('<div class="tb-skeleton"></div>').appendTo($wrap);
+		for (let i = 0; i < 3; i++) {
+			$('<div class="tb-skeleton-row"></div>').appendTo($sk);
+		}
+	}
+
+	_render_error(side) {
+		const pane = this.panes[side];
+		const $grid = pane.$grid;
+		$grid.empty();
+		const $err = $('<div class="tb-error"></div>').appendTo($grid);
+		$('<div class="tb-error-msg"></div>')
+			.text(__("Could not load this building. Please try again."))
+			.appendTo($err);
+		$('<button class="btn btn-default btn-sm tb-retry"></button>')
+			.text(__("Retry"))
+			.on("click", () => this.refresh(side))
+			.appendTo($err);
 	}
 
 	_render_grid(side) {
@@ -319,7 +354,11 @@ class TransferBoard {
 					freeze: true,
 					freeze_message: __("Transferring…"),
 					callback: (r) => {
-						if (r.exc || !r.message) return;
+						// On a server-side throw Frappe surfaces the message itself;
+						// keep the dialog open so the operator can correct and retry.
+						if (r.exc || !r.message || !r.message.transfer) {
+							return;
+						}
 						d.hide();
 						frappe.show_alert({
 							message: __("Transferred: {0}", [r.message.transfer]),
@@ -327,6 +366,13 @@ class TransferBoard {
 						});
 						// Re-fetch BOTH panes — server is the source of truth.
 						this.refresh_all();
+					},
+					error: () => {
+						// Network/unexpected failure: keep dialog open, tell the user.
+						frappe.show_alert({
+							message: __("Transfer failed. Please try again."),
+							indicator: "red",
+						});
 					},
 				});
 			},

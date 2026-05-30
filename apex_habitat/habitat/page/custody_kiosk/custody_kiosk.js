@@ -79,9 +79,14 @@ class CustodyKiosk {
 		this.$search = $(
 			`<input type="search" class="ck-search form-control" placeholder="${frappe.utils.escape_html(
 				__("Search articles…")
-			)}">`
+			)}" aria-label="${frappe.utils.escape_html(__("Search articles"))}">`
 		).appendTo($tools);
-		this.$search.on("input", () => this._render_tiles());
+		// Debounce client-side filtering so very large catalogs stay smooth.
+		let search_timer = null;
+		this.$search.on("input", () => {
+			clearTimeout(search_timer);
+			search_timer = setTimeout(() => this._render_tiles(), 120);
+		});
 		this.$tiles = $('<div class="ck-tiles"></div>').appendTo($catalog);
 
 		// Right — cart panel.
@@ -102,15 +107,26 @@ class CustodyKiosk {
 			this._render_empty(__("Select a building to load the catalog."));
 			return;
 		}
+		this._render_loading();
 		frappe.call({
 			method: "apex_habitat.habitat.api.custody_kiosk.get_kiosk_catalog",
 			args: { building: this.building },
-			freeze: true,
-			freeze_message: __("Loading catalog…"),
 			callback: (r) => {
-				if (r.exc || !r.message) return;
+				if (r.exc || !r.message) {
+					this._render_error(
+						__("Could not load the catalog."),
+						() => this.refresh()
+					);
+					return;
+				}
 				this.articles = r.message.articles || [];
 				this._render_tiles();
+			},
+			error: () => {
+				this._render_error(
+					__("Could not load the catalog."),
+					() => this.refresh()
+				);
 			},
 		});
 	}
@@ -118,6 +134,28 @@ class CustodyKiosk {
 	_render_empty(message) {
 		this.$tiles.empty();
 		$('<div class="ck-empty text-muted"></div>').text(message).appendTo(this.$tiles);
+	}
+
+	_render_loading() {
+		this.$tiles.empty();
+		// Lightweight skeleton: a handful of placeholder tiles while we fetch.
+		for (let i = 0; i < 6; i++) {
+			const $sk = $('<div class="ck-tile ck-tile-skeleton" aria-hidden="true"></div>');
+			$('<div class="ck-tile-thumb ck-skel"></div>').appendTo($sk);
+			$('<div class="ck-skel ck-skel-line"></div>').appendTo($sk);
+			$('<div class="ck-skel ck-skel-line ck-skel-line-sm"></div>').appendTo($sk);
+			$sk.appendTo(this.$tiles);
+		}
+	}
+
+	_render_error(message, retry) {
+		this.$tiles.empty();
+		const $box = $('<div class="ck-error"></div>').appendTo(this.$tiles);
+		$('<div class="ck-error-msg text-danger"></div>').text(message).appendTo($box);
+		$('<button class="btn btn-default btn-sm ck-retry"></button>')
+			.text(__("Retry"))
+			.appendTo($box)
+			.on("click", () => retry());
 	}
 
 	_render_tiles() {
@@ -263,6 +301,7 @@ class CustodyKiosk {
 
 		const items = lines.map((l) => ({ article: l.article, qty: l.qty }));
 
+		this.$issue_btn.prop("disabled", true);
 		frappe.call({
 			method: "apex_habitat.habitat.api.custody_kiosk.issue_cart",
 			args: {
@@ -273,7 +312,16 @@ class CustodyKiosk {
 			freeze: true,
 			freeze_message: __("Issuing…"),
 			callback: (r) => {
-				if (r.exc || !r.message) return;
+				if (r.exc || !r.message) {
+					// Server raised (e.g. qty gate, permission). Keep the cart so
+					// the user can correct and retry instead of silently losing it.
+					frappe.show_alert({
+						message: __("Could not issue the cart. Please review and try again."),
+						indicator: "red",
+					});
+					this._render_cart();
+					return;
+				}
 				frappe.show_alert({
 					message: __("Issued to {0}: {1}", [
 						this.employee,
@@ -284,6 +332,13 @@ class CustodyKiosk {
 				this.cart = {};
 				this._render_cart();
 				this.refresh();
+			},
+			error: () => {
+				frappe.show_alert({
+					message: __("Could not issue the cart. Please review and try again."),
+					indicator: "red",
+				});
+				this._render_cart();
 			},
 		});
 	}

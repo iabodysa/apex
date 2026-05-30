@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.22.1 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.22.1 — the desk pages are more robust, dynamic, and comfortable",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-14 09:00:00",
+    },
+    {
+        "title": "v1.22.1: The six operational desk pages (Front Desk, Custody Kiosk, Safety Map, Transfer Board, Fuel Approval Console, Dispatch Board) now show loading / empty / error-with-retry states instead of failing silently, and ~24 real bugs (silent failures, a stale-response race, double-submit gaps) were fixed",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-14 09:01:00",
+    },
+    {
+        "title": "v1.22.1: Loading skeletons, debounced search, double-submit guards, and accessibility touches make the desk pages feel livelier",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-14 09:02:00",
+    },
     # v1.22.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.22.0 — a new Gemini portal theme, a genuinely Frappe-styled theme, and a fixed worker-route page",

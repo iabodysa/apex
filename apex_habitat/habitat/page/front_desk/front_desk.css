@@ -13,6 +13,63 @@
 	font-size: 15px;
 }
 
+/* Error state — clear message plus a retry action instead of silent failure. */
+.fd-error {
+	padding: 48px 16px;
+	text-align: center;
+}
+
+.fd-error-msg {
+	font-size: 15px;
+	color: var(--text-color, #1f272e);
+	margin-bottom: 12px;
+}
+
+/* Loading skeleton shown while the board is fetched. */
+.fd-loading-label {
+	font-size: 13px;
+	margin-bottom: 12px;
+}
+
+.fd-skeleton-rooms {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+}
+
+.fd-skeleton-room {
+	height: 120px;
+	min-width: 240px;
+	flex: 1 1 260px;
+	border-radius: 8px;
+	background: linear-gradient(
+		90deg,
+		var(--control-bg, #f4f5f6) 25%,
+		var(--fg-hover-color, #e8eaec) 37%,
+		var(--control-bg, #f4f5f6) 63%
+	);
+	background-size: 400% 100%;
+	animation: fd-shimmer 1.4s ease infinite;
+}
+
+@keyframes fd-shimmer {
+	0% {
+		background-position: 100% 0;
+	}
+	100% {
+		background-position: -100% 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.fd-skeleton-room {
+		animation: none;
+	}
+	.fd-bed {
+		transition: none;
+	}
+}
+
 .fd-summary {
 	display: flex;
 	flex-wrap: wrap;

@@ -183,6 +183,57 @@
 	width: 100%;
 }
 
+/* Error + retry state. */
+.ck-error {
+	grid-column: 1 / -1;
+	padding: 40px 16px;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+}
+
+.ck-error-msg {
+	font-size: 15px;
+}
+
+/* Loading skeleton tiles. */
+.ck-tile-skeleton {
+	cursor: default;
+	pointer-events: none;
+}
+
+.ck-skel {
+	background: var(--control-bg, #f4f5f6);
+	border-radius: 6px;
+	animation: ck-skel-pulse 1.2s ease-in-out infinite;
+}
+
+.ck-skel-line {
+	height: 12px;
+	width: 80%;
+}
+
+.ck-skel-line-sm {
+	width: 50%;
+}
+
+@keyframes ck-skel-pulse {
+	0% { opacity: 1; }
+	50% { opacity: 0.45; }
+	100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ck-skel {
+		animation: none;
+	}
+	.ck-tile {
+		transition: none;
+	}
+}
+
 @media (max-width: 768px) {
 	.ck-layout {
 		flex-direction: column;

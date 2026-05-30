@@ -34,6 +34,19 @@ const FAC_STYLES = `
 .fac-empty { text-align: center; padding: 48px 16px; color: var(--text-muted);
 	border: 1px dashed var(--border-color); border-radius: var(--border-radius-lg, 10px);
 	background: var(--card-bg, var(--fg-color, #fff)); }
+.fac-empty-icon { font-size: 2rem; line-height: 1; margin-bottom: 8px; opacity: 0.6; }
+.fac-error { text-align: center; padding: 40px 16px; color: var(--text-muted);
+	border: 1px solid var(--red-300, #f5c2c2); border-radius: var(--border-radius-lg, 10px);
+	background: var(--red-50, #fdf3f3); }
+.fac-error-title { color: var(--red-600, #c0392b); font-weight: 600; margin-bottom: 6px; }
+.fac-error-detail { font-size: 0.85rem; margin-bottom: 14px; overflow-wrap: anywhere; }
+.fac-skeleton { background: linear-gradient(90deg,
+	var(--control-bg, #f0f1f3) 25%, var(--bg-color, #f8f9fa) 37%,
+	var(--control-bg, #f0f1f3) 63%); background-size: 400% 100%;
+	animation: fac-shimmer 1.4s ease infinite; border-radius: 6px; }
+.fac-skel-card { height: 184px; }
+@keyframes fac-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .fac-skeleton { animation: none; } }
 .fac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
 .fac-card { display: flex; flex-direction: column; gap: 12px;
 	background: var(--card-bg, var(--fg-color, #fff)); border: 1px solid var(--border-color);
@@ -108,16 +121,71 @@ class FuelApprovalConsole {
 	}
 
 	refresh() {
+		// Guard against overlapping fetches (rapid Refresh clicks / filter changes).
+		if (this._loading) return;
+		this._loading = true;
+		this._render_loading();
 		frappe.call({
 			method: "apex_habitat.salis.api.fuel_console.get_pending_fuel_requests",
 			args: { project: this.project || null },
-			freeze: true,
-			freeze_message: __("Loading pending fuel requests…"),
+			// No global freeze: the in-board skeleton communicates the load and
+			// keeps the page interactive (the Refresh button stays usable).
 			callback: (r) => {
-				if (r.exc) return;
+				this._loading = false;
+				if (r.exc) {
+					this._render_error(this._error_text(r));
+					return;
+				}
 				this._render_cards(r.message || []);
 			},
+			error: (r) => {
+				this._loading = false;
+				this._render_error(this._error_text(r));
+			},
 		});
+	}
+
+	_error_text(r) {
+		// Best-effort human-readable reason from a frappe.call failure.
+		let detail = "";
+		try {
+			if (r && r._server_messages) {
+				detail = JSON.parse(r._server_messages)
+					.map((m) => {
+						try {
+							return JSON.parse(m).message;
+						} catch (e) {
+							return m;
+						}
+					})
+					.join(" ");
+			}
+		} catch (e) {
+			detail = "";
+		}
+		if (!detail && r && Array.isArray(r.exc)) detail = r.exc.join(" ");
+		return frappe.utils.strip_html(detail || "") || __("Could not load pending fuel requests.");
+	}
+
+	_render_loading() {
+		this.$container.empty();
+		const $grid = $('<div class="fac-grid"></div>').appendTo(this.$container);
+		for (let i = 0; i < 6; i++) {
+			$('<div class="fac-card fac-skeleton fac-skel-card"></div>').appendTo($grid);
+		}
+	}
+
+	_render_error(detail) {
+		this.$container.empty();
+		const $box = $('<div class="fac-error" role="alert"></div>').appendTo(this.$container);
+		$('<div class="fac-error-title"></div>')
+			.text(__("Could not load the approval queue"))
+			.appendTo($box);
+		$('<div class="fac-error-detail"></div>').text(detail).appendTo($box);
+		$('<button class="btn btn-sm btn-default"></button>')
+			.text(__("Retry"))
+			.on("click", () => this.refresh())
+			.appendTo($box);
 	}
 
 	_render_cards(rows) {
@@ -145,9 +213,15 @@ class FuelApprovalConsole {
 		}
 
 		if (!sorted.length) {
-			$('<div class="fac-empty"></div>')
-				.text(__("No pending fuel requests."))
-				.appendTo(this.$container);
+			const $empty = $('<div class="fac-empty"></div>').appendTo(this.$container);
+			$('<div class="fac-empty-icon"></div>').text("✓").appendTo($empty);
+			$('<div></div>')
+				.text(
+					this.project
+						? __("No pending fuel requests for this project.")
+						: __("No pending fuel requests. The queue is clear.")
+				)
+				.appendTo($empty);
 			return;
 		}
 
@@ -236,12 +310,20 @@ class FuelApprovalConsole {
 					freeze: true,
 					freeze_message: __("Approving…"),
 					callback: (r) => {
+						// frappe.call surfaces server errors (exc) as a dialog
+						// automatically; only act on a clean success.
 						if (r.exc || !r.message) return;
 						frappe.show_alert({
 							message: __("Approved: {0}", [r.message.name]),
 							indicator: "green",
 						});
 						this.refresh();
+					},
+					error: () => {
+						frappe.show_alert({
+							message: __("Approval failed for {0}.", [row.name]),
+							indicator: "red",
+						});
 					},
 				});
 			}
@@ -268,19 +350,32 @@ class FuelApprovalConsole {
 			],
 			primary_action_label: __("Reject"),
 			primary_action: (values) => {
+				d.disable_primary_action();
 				frappe.call({
 					method: "apex_habitat.salis.api.fuel_console.reject_fuel_request",
 					args: { name: row.name, reason: values.reason },
 					freeze: true,
 					freeze_message: __("Rejecting…"),
 					callback: (r) => {
-						if (r.exc || !r.message) return;
+						// On failure (exc) frappe shows the server message; keep
+						// the dialog open so the reviewer can retry.
+						if (r.exc || !r.message) {
+							d.enable_primary_action();
+							return;
+						}
 						d.hide();
 						frappe.show_alert({
 							message: __("Rejected: {0}", [r.message.name]),
 							indicator: "orange",
 						});
 						this.refresh();
+					},
+					error: () => {
+						d.enable_primary_action();
+						frappe.show_alert({
+							message: __("Rejection failed for {0}.", [row.name]),
+							indicator: "red",
+						});
 					},
 				});
 			},

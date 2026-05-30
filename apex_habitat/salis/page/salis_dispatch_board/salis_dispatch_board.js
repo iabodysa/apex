@@ -75,16 +75,63 @@ class SalisDispatchBoard {
 	}
 
 	refresh() {
+		if (this._loading) return;
+		this._loading = true;
+		this._show_loading();
 		frappe.call({
 			method: "apex_habitat.salis.api.dispatch_board.get_dispatch_board",
 			args: { project: this.project || null },
-			freeze: true,
-			freeze_message: __("Loading dispatch board…"),
 			callback: (r) => {
-				if (r.exc || !r.message) return;
+				if (r.exc || !r.message) {
+					this._show_error();
+					return;
+				}
 				this._render(r.message);
 			},
+			error: () => {
+				this._show_error();
+			},
+			always: () => {
+				this._loading = false;
+			},
 		});
+	}
+
+	// Skeleton placeholder shown while the board is fetching. Replaces the freeze
+	// overlay so the page stays interactive and the user sees structured progress
+	// instead of a blank/stale board.
+	_show_loading() {
+		this.$panes.empty();
+		for (let i = 0; i < 4; i++) {
+			const $pane = $('<div class="sdb-pane sdb-skeleton-pane"></div>').appendTo(
+				this.$panes
+			);
+			$('<div class="sdb-skeleton sdb-skeleton-head"></div>').appendTo($pane);
+			const $body = $('<div class="sdb-pane-body"></div>').appendTo($pane);
+			for (let j = 0; j < 3; j++) {
+				$('<div class="sdb-skeleton sdb-skeleton-row"></div>').appendTo($body);
+			}
+		}
+	}
+
+	// Full-board error state with a retry control, shown when the reader fails or
+	// returns nothing. Replaces the previous silent `return` (blank board).
+	_show_error() {
+		this.$panes.empty();
+		const $err = $('<div class="sdb-error"></div>').appendTo(this.$panes);
+		$('<div class="sdb-error-msg"></div>')
+			.text(
+				__(
+					"Could not load the dispatch board. Please check your connection and try again."
+				)
+			)
+			.appendTo($err);
+		const $retry = $(
+			'<button class="btn btn-default btn-sm sdb-retry"></button>'
+		)
+			.text(__("Retry"))
+			.appendTo($err);
+		$retry.on("click", () => this.refresh());
 	}
 
 	_render(data) {

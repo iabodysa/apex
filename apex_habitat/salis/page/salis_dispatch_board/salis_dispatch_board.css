@@ -118,8 +118,86 @@
 	font-size: var(--text-sm, 0.85rem);
 }
 
+/* ---- loading skeleton ---- */
+
+.sdb-skeleton {
+	background: var(--skeleton-bg, #eee);
+	border-radius: var(--border-radius, 6px);
+	background-image: linear-gradient(
+		90deg,
+		rgba(0, 0, 0, 0) 0,
+		rgba(0, 0, 0, 0.06) 40px,
+		rgba(0, 0, 0, 0) 80px
+	);
+	background-size: 600px 100%;
+	background-repeat: no-repeat;
+	animation: sdb-shimmer 1.3s ease-in-out infinite;
+}
+
+.sdb-skeleton-head {
+	height: 42px;
+	border-radius: 0;
+}
+
+.sdb-skeleton-row {
+	height: 48px;
+}
+
+@keyframes sdb-shimmer {
+	0% {
+		background-position: -120px 0;
+	}
+	100% {
+		background-position: 480px 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sdb-skeleton {
+		animation: none;
+	}
+}
+
+/* ---- error state ---- */
+
+.sdb-error {
+	grid-column: 1 / -1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	padding: 32px 16px;
+	text-align: center;
+	border: 1px dashed var(--border-color, #e2e2e2);
+	border-radius: var(--border-radius-md, 8px);
+	background: var(--card-bg, var(--fg-color, #fff));
+}
+
+.sdb-error-msg {
+	color: var(--text-muted, #888);
+	font-size: var(--text-md, 1rem);
+	max-width: 480px;
+}
+
+.sdb-retry:focus-visible {
+	outline: 2px solid var(--primary, #2490ef);
+	outline-offset: 2px;
+}
+
 @media (max-width: 575px) {
 	.sdb-driver-split {
 		grid-template-columns: 1fr;
+	}
+
+	.sdb-panes {
+		grid-template-columns: 1fr;
+	}
+
+	.sdb-kv {
+		flex-wrap: wrap;
+	}
+
+	.sdb-kv-value {
+		text-align: left;
 	}
 }
