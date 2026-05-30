@@ -89,10 +89,6 @@ jobs:
           bench --site test.localhost install-app erpnext
           bench --site test.localhost install-app hrms
           bench --site test.localhost install-app apex_habitat
-          # The full suite creates well over Frappe's default 60-users-per-60s
-          # limit, which would otherwise raise "Throttled" in many setUpClass
-          # blocks. Raise the limit for the test site (Frappe reads this conf key).
-          bench --site test.localhost set-config throttle_user_limit 100000
 
       - name: Migrate (apply seeds, workflows and patches)
         working-directory: frappe-bench

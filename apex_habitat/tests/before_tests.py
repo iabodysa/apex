@@ -16,6 +16,13 @@ import frappe
 
 
 def before_tests():
+	# The full suite creates far more than Frappe's default cap of 60 new Users
+	# per 60 seconds, which raises "Throttled" in many setUpClass blocks. Raise
+	# the cap for the whole test run. It MUST be an int: a string (e.g. from
+	# `bench set-config`) breaks the `int > limit` comparison in Frappe's
+	# throttle_user_creation. before_tests runs before any user is created.
+	frappe.local.conf["throttle_user_limit"] = 100000
+
 	from erpnext.setup.utils import before_tests as erpnext_before_tests
 
 	erpnext_before_tests()
