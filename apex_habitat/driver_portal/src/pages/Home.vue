@@ -1,34 +1,34 @@
 <template>
-  <div class="space-y-4">
-    <!-- Driver header -->
-    <section class="bg-ah-surface rounded-ah p-4 shadow-sm">
+  <div class="space-y-5">
+    <!-- Driver summary -->
+    <section class="card card-pad">
       <div class="flex items-center gap-3">
         <span
-          class="grid place-items-center h-12 w-12 rounded-full bg-ah-primary text-white font-bold text-lg shrink-0"
+          class="avatar h-12 w-12 text-lg"
+          style="background: var(--c-primary); color: var(--c-primary-ink)"
         >
           {{ initial }}
         </span>
         <div class="min-w-0">
-          <div class="text-lg font-bold leading-tight truncate">{{ ctx.driver.full_name }}</div>
-          <span
-            class="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full"
-            :class="statusClass"
-          >
-            {{ ctx.driver.status || "—" }}
-          </span>
+          <div class="text-lg font-extrabold leading-tight truncate">
+            {{ ctx.driver.full_name }}
+          </div>
+          <span class="pill mt-1" :class="statusPill">{{ ctx.driver.status || "—" }}</span>
         </div>
       </div>
 
-      <div class="mt-4 space-y-2 text-sm">
+      <div class="divider my-4"></div>
+
+      <div class="space-y-3 text-sm">
         <div class="flex items-center gap-2">
-          <Icon name="truck" :size="18" class="text-ah-primary shrink-0" />
-          <span class="text-ah-forest/50">Vehicle</span>
-          <span class="ml-auto font-medium">{{ ctx.driver.current_vehicle || "Not assigned" }}</span>
+          <Icon name="truck" :size="18" class="text-primary shrink-0" />
+          <span class="text-muted">Vehicle</span>
+          <span class="ml-auto font-semibold">{{ ctx.driver.current_vehicle || "Not assigned" }}</span>
         </div>
         <div v-if="ctx.driver.license_expiry" class="flex items-center gap-2" :class="licenseColor">
           <Icon :name="licenseIcon" :size="18" class="shrink-0" />
-          <span class="text-ah-forest/50">License</span>
-          <span class="ml-auto font-medium">
+          <span class="text-muted">License</span>
+          <span class="ml-auto font-semibold">
             {{ ctx.driver.license_expiry }}
             <span v-if="licenseHint" class="opacity-90">· {{ licenseHint }}</span>
           </span>
@@ -37,17 +37,20 @@
     </section>
 
     <!-- Quick actions -->
-    <section class="grid grid-cols-2 gap-3">
-      <router-link
-        v-for="a in actions"
-        :key="a.to"
-        :to="a.to"
-        class="rounded-ah p-4 flex flex-col gap-3 shadow-sm active:scale-95 transition"
-        :class="a.cls"
-      >
-        <Icon :name="a.icon" :size="26" />
-        <span class="font-semibold">{{ a.label }}</span>
-      </router-link>
+    <section>
+      <h2 class="section-title mb-3">Quick actions</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <router-link
+          v-for="a in actions"
+          :key="a.to"
+          :to="a.to"
+          class="quick-action"
+          :style="a.style"
+        >
+          <Icon :name="a.icon" :size="26" />
+          <span class="font-bold">{{ a.label }}</span>
+        </router-link>
+      </div>
     </section>
   </div>
 </template>
@@ -62,12 +65,11 @@ const initial = computed(
   () => (props.ctx.driver.full_name || "?").trim().charAt(0).toUpperCase() || "?",
 );
 
-const statusClass = computed(() => {
+const statusPill = computed(() => {
   const s = (props.ctx.driver.status || "").toLowerCase();
-  if (s === "active") return "bg-ah-accent/30 text-ah-forest";
-  if (s === "suspended" || s === "blocked" || s === "inactive")
-    return "bg-ah-danger/15 text-ah-danger";
-  return "bg-ah-forest/10 text-ah-forest/70";
+  if (s === "active") return "pill-success";
+  if (s === "suspended" || s === "blocked" || s === "inactive") return "pill-danger";
+  return "pill-neutral";
 });
 
 // Days until the license expires (null when unknown) -> drives colour + hint.
@@ -81,10 +83,10 @@ const daysToExpiry = computed(() => {
 });
 const licenseColor = computed(() => {
   const d = daysToExpiry.value;
-  if (d === null) return "text-ah-forest/70";
-  if (d < 0) return "text-ah-danger";
-  if (d <= 30) return "text-ah-warning";
-  return "text-ah-forest/70";
+  if (d === null) return "";
+  if (d < 0) return "text-danger";
+  if (d <= 30) return "text-warning";
+  return "";
 });
 const licenseIcon = computed(() =>
   daysToExpiry.value !== null && daysToExpiry.value <= 30 ? "alert" : "badge",
@@ -97,10 +99,32 @@ const licenseHint = computed(() => {
   return "";
 });
 
+// Token-driven action tiles (flat fills, brand colours).
 const actions = [
-  { to: "/attendance", icon: "calendar", label: "Attendance", cls: "bg-ah-primary text-white" },
-  { to: "/trips", icon: "route", label: "My Trips", cls: "bg-ah-forest text-white" },
-  { to: "/fuel", icon: "fuel", label: "Request Fuel", cls: "bg-ah-warning text-white" },
-  { to: "/tickets", icon: "help", label: "Support", cls: "bg-ah-accent text-ah-forest" },
+  {
+    to: "/attendance",
+    icon: "calendar",
+    label: "Attendance",
+    style: "background: var(--c-primary); color: var(--c-primary-ink);",
+  },
+  {
+    to: "/trips",
+    icon: "route",
+    label: "My Trips",
+    style: "background: var(--c-ink); color: var(--c-surface);",
+  },
+  {
+    to: "/fuel",
+    icon: "fuel",
+    label: "Request Fuel",
+    style: "background: var(--c-mint); color: var(--c-ink);",
+  },
+  {
+    to: "/tickets",
+    icon: "help",
+    label: "Support",
+    style:
+      "background: var(--c-surface); color: var(--c-ink); border: var(--border-width) solid var(--c-border);",
+  },
 ];
 </script>

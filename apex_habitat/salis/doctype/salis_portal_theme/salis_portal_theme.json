@@ -1,0 +1,104 @@
+{
+ "actions": [],
+ "creation": "2026-05-30 06:00:00.000000",
+ "description": "Single configuration record controlling the look and feel of the Salis Driver Portal (the mobile web app at /driver).",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "portal_theme_sec_appearance",
+  "theme",
+  "show_brand",
+  "portal_theme_appearance_col",
+  "accent_color",
+  "brand_logo"
+ ],
+ "fields": [
+  {
+   "fieldname": "portal_theme_sec_appearance",
+   "fieldtype": "Section Break",
+   "label": "Appearance"
+  },
+  {
+   "default": "AFMCO",
+   "description": "Design theme applied to the driver portal. AFMCO is the flat, brand-aligned default; Frappe Standard is the neutral portal look; Dark is an AFMCO-flavoured dark mode.",
+   "fieldname": "theme",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Theme",
+   "options": "AFMCO\nFrappe Standard\nDark",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "description": "Show the AFMCO brand mark and wordmark in the portal header. Turn off for a minimal, unbranded header.",
+   "fieldname": "show_brand",
+   "fieldtype": "Check",
+   "label": "Show Brand"
+  },
+  {
+   "fieldname": "portal_theme_appearance_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Optional override for the primary accent colour. Leave blank to use the colour defined by the selected theme.",
+   "fieldname": "accent_color",
+   "fieldtype": "Color",
+   "label": "Accent Color"
+  },
+  {
+   "description": "Optional logo shown in the portal header in place of the built-in brand mark.",
+   "fieldname": "brand_logo",
+   "fieldtype": "Attach Image",
+   "label": "Brand Logo"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-05-30 06:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Salis Portal Theme",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Fleet Project Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

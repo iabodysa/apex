@@ -1,12 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="{{ portal_theme or 'afmco' }}">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#072B1A" />
     <link rel="manifest" href="/assets/apex_habitat/driver_portal/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+    />
     <link rel="stylesheet" href="/assets/apex_habitat/driver_portal/assets/index.css" />
+    {%- if portal_accent %}
+    <style>
+      /* Per-tenant accent override (Salis Portal Theme → Accent Color). Set on
+         the element so it wins over the theme's token defaults. */
+      html[data-theme] {
+        --c-accent: {{ portal_accent }};
+        --c-primary: {{ portal_accent }};
+      }
+    </style>
+    {%- endif %}
     <title>Salis Driver</title>
-    <script>window.csrf_token = "{{ csrf_token }}";</script>
+    <script>
+      window.csrf_token = "{{ csrf_token }}";
+      // Branding flags consumed by the SPA shell (App.vue / Unlinked.vue).
+      window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
+      window.portal_logo = "{{ portal_logo or '' }}";
+    </script>
   </head>
   <body>
     <div id="app"></div>

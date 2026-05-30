@@ -15,7 +15,6 @@ export default {
       },
       fontFamily: {
         sans: ["Montserrat", "system-ui", "sans-serif"],
-        ar: ["Cairo", "Montserrat", "sans-serif"],
       },
       borderRadius: { ah: "14px" },
     },

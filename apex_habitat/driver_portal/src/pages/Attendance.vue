@@ -1,18 +1,26 @@
 <template>
-  <div class="space-y-4">
-    <h2 class="font-semibold">Daily Attendance</h2>
-    <button class="w-full bg-ah-primary text-white rounded-xl p-4 disabled:opacity-50"
-            :disabled="checkin.loading" @click="checkin.submit()">Check In</button>
-    <button class="w-full bg-ah-forest text-white rounded-xl p-4 disabled:opacity-50"
-            :disabled="checkout.loading" @click="checkout.submit()">Check Out</button>
-    <p v-if="msg" class="text-center text-sm text-ah-primary">{{ msg }}</p>
-    <p v-if="err" class="text-center text-sm text-ah-danger">{{ err }}</p>
+  <div class="space-y-5">
+    <h2 class="section-title">Daily Attendance</h2>
+
+    <section class="card card-pad space-y-3">
+      <p class="text-sm text-soft">Record your shift below. We stamp the time for you.</p>
+      <button class="btn btn-primary" :disabled="checkin.loading" @click="checkin.submit()">
+        <Icon name="calendar" :size="20" /> Check In
+      </button>
+      <button class="btn btn-dark" :disabled="checkout.loading" @click="checkout.submit()">
+        <Icon name="calendar" :size="20" /> Check Out
+      </button>
+    </section>
+
+    <p v-if="msg" class="status-note status-ok">{{ msg }}</p>
+    <p v-if="err" class="status-note status-err">{{ err }}</p>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
 import { createResource } from "frappe-ui";
+import Icon from "../components/Icon.vue";
 
 const msg = ref("");
 const err = ref("");

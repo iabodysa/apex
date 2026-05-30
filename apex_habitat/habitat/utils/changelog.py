@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.19.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.19.0 — a themeable driver portal and a fully Arabic desk",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-09 09:00:00",
+    },
+    {
+        "title": "v1.19.0: The driver portal has a new mobile-first design with three selectable themes (AFMCO, Frappe Standard, Dark) chosen from Salis Portal Theme settings; it stays in English for a multilingual driver workforce",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-09 09:01:00",
+    },
+    {
+        "title": "v1.19.0: Over 300 desk strings (onboarding, reports, charts, number cards, dashboards, workspaces, Integration Settings) are now translated to Arabic, and the Habitat workspace label is corrected",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-09 09:02:00",
+    },
     # v1.18.4 ---------------------------------------------------------------
     {
         "title": "Apex 1.18.4 — driver portal check-ins now record attendance",

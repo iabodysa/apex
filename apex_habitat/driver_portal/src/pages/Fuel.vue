@@ -1,19 +1,34 @@
 <template>
-  <div class="space-y-4">
-    <h2 class="font-semibold">Request Fuel</h2>
-    <label class="block text-sm">Litres
-      <input v-model.number="litres" type="number" min="1" class="mt-1 w-full border rounded-lg p-2" />
-    </label>
-    <button class="w-full bg-ah-warning text-white rounded-xl p-4 disabled:opacity-50"
-            :disabled="req.loading || !litres" @click="submit">Submit Request</button>
-    <p v-if="msg" class="text-center text-sm text-ah-primary">{{ msg }}</p>
-    <p v-if="err" class="text-center text-sm text-ah-danger">{{ err }}</p>
+  <div class="space-y-5">
+    <h2 class="section-title">Request Fuel</h2>
+
+    <section class="card card-pad space-y-4">
+      <div>
+        <label class="field-label" for="fuel-litres">Litres</label>
+        <input
+          id="fuel-litres"
+          v-model.number="litres"
+          type="number"
+          min="1"
+          inputmode="numeric"
+          placeholder="e.g. 40"
+          class="input"
+        />
+      </div>
+      <button class="btn btn-primary" :disabled="req.loading || !litres" @click="submit">
+        <Icon name="fuel" :size="20" /> Submit Request
+      </button>
+    </section>
+
+    <p v-if="msg" class="status-note status-ok">{{ msg }}</p>
+    <p v-if="err" class="status-note status-err">{{ err }}</p>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
 import { createResource } from "frappe-ui";
+import Icon from "../components/Icon.vue";
 
 const litres = ref(null);
 const msg = ref("");
