@@ -21,7 +21,7 @@
  "is_hidden": 0,
  "sequence_id": 3.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"swtHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"swtKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Requests Open\", \"col\": 3}}, {\"id\": \"swtKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"swtKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Large Worker Moves Pending Escalation\", \"col\": 3}}, {\"id\": \"swtKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Inter-City Relocations This Month\", \"col\": 3}}, {\"id\": \"swtHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"swtQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"swtQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Attendance\", \"col\": 3}}, {\"id\": \"swtHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"swtCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement\", \"col\": 4}}, {\"id\": \"swtCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "content": "[{\"id\": \"swtHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"swtKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Requests Open\", \"col\": 3}}, {\"id\": \"swtKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"swtKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Large Worker Moves Pending Escalation\", \"col\": 3}}, {\"id\": \"swtKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Inter-City Relocations This Month\", \"col\": 3}}, {\"id\": \"swtKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_workers_transport Trips Dispatched Today\", \"col\": 3}}, {\"id\": \"swtKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_workers_transport Passenger Manifests Today\", \"col\": 3}}, {\"id\": \"swtKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_workers_transport Scheduled Awaiting Dispatch\", \"col\": 3}}, {\"id\": \"swtHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"swtQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"swtQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Attendance\", \"col\": 3}}, {\"id\": \"swtHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"swtCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement\", \"col\": 4}}, {\"id\": \"swtCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -144,6 +144,24 @@
    "number_card_name": "Inter-City Relocations This Month",
    "label": "Inter-City Relocations This Month",
    "idx": 4
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "salis_workers_transport Trips Dispatched Today",
+   "label": "Trips Dispatched Today",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "salis_workers_transport Passenger Manifests Today",
+   "label": "Passenger Manifests Today",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "salis_workers_transport Scheduled Awaiting Dispatch",
+   "label": "Scheduled Awaiting Dispatch",
+   "idx": 7
   }
  ],
  "quick_lists": [],

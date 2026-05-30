@@ -21,7 +21,7 @@
  "is_hidden": 0,
  "sequence_id": 4.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"srfHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srfKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"srfKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"srfKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Requests Open\", \"col\": 3}}, {\"id\": \"srfKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"srfHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srfQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"srfQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"srfQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"srfHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srfCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet\", \"col\": 4}}, {\"id\": \"srfCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "content": "[{\"id\": \"srfHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srfKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"srfKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"srfKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Requests Open\", \"col\": 3}}, {\"id\": \"srfKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"srfKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Active Assignments\", \"col\": 3}}, {\"id\": \"srfKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Gov Relations Open\", \"col\": 3}}, {\"id\": \"srfKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Vehicles Stopped\", \"col\": 3}}, {\"id\": \"srfHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srfQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"srfQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"srfQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"srfHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srfCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet\", \"col\": 4}}, {\"id\": \"srfCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -158,6 +158,24 @@
    "number_card_name": "Representatives Transport Fulfilled This Month",
    "label": "Representatives Transport Fulfilled This Month",
    "idx": 4
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Salis Representatives Fleet Active Assignments",
+   "label": "Active Vehicle Assignments",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Salis Representatives Fleet Gov Relations Open",
+   "label": "Government Relations Cases Open",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Salis Representatives Fleet Vehicles Stopped",
+   "label": "Vehicles Stopped",
+   "idx": 7
   }
  ],
  "quick_lists": [],

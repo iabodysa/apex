@@ -21,7 +21,7 @@
  "is_hidden": 0,
  "sequence_id": 5.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"sfuHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"sfuKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Fuel Requests\", \"col\": 3}}, {\"id\": \"sfuKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Spend This Month\", \"col\": 3}}, {\"id\": \"sfuKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Exception Cases\", \"col\": 3}}, {\"id\": \"sfuHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"sfuQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"sfuQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Claim\", \"col\": 3}}, {\"id\": \"sfuHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"sfuCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"sfuCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "content": "[{\"id\": \"sfuHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"sfuKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Fuel Requests\", \"col\": 3}}, {\"id\": \"sfuKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Spend This Month\", \"col\": 3}}, {\"id\": \"sfuKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Exception Cases\", \"col\": 3}}, {\"id\": \"sfuKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_fuel Approved This Month\", \"col\": 3}}, {\"id\": \"sfuKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_fuel Litres Dispensed This Month\", \"col\": 3}}, {\"id\": \"sfuKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_fuel Open Claim Disputes\", \"col\": 3}}, {\"id\": \"sfuHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"sfuQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"sfuQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Claim\", \"col\": 3}}, {\"id\": \"sfuHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"sfuCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"sfuCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -173,6 +173,24 @@
    "number_card_name": "Open Fuel Exception Cases",
    "label": "Open Fuel Exception Cases",
    "idx": 3
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "salis_fuel Approved This Month",
+   "label": "Fuel Requests Approved This Month",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "salis_fuel Litres Dispensed This Month",
+   "label": "Fuel Litres Dispensed This Month",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "salis_fuel Open Claim Disputes",
+   "label": "Open Fuel Claim Disputes",
+   "idx": 6
   }
  ],
  "quick_lists": [],

@@ -1,0 +1,19 @@
+{
+ "doctype": "Number Card",
+ "name": "Salis Rentals Costs Rental Cost This Month",
+ "label": "Rental Cost This Month",
+ "document_type": "Rental Accrual Ledger",
+ "function": "Sum",
+ "aggregate_function_based_on": "amount",
+ "report_function": "Sum",
+ "currency": "SAR",
+ "is_public": 1,
+ "is_standard": 1,
+ "color": "#449CF0",
+ "show_full_number": 0,
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Salis",
+ "filters_json": "[[\"Rental Accrual Ledger\", \"accrual_date\", \"Timespan\", \"this month\"]]"
+}

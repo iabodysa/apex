@@ -1,0 +1,15 @@
+{
+ "doctype": "Number Card",
+ "name": "salis_workers_transport Passenger Manifests Today",
+ "label": "Passenger Manifests Today",
+ "document_type": "Passenger Manifest",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "color": "#5e64ff",
+ "module": "Salis",
+ "filters_json": "[[\"Passenger Manifest\", \"dispatch_date\", \"Timespan\", \"today\"]]"
+}

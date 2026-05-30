@@ -1,0 +1,15 @@
+{
+ "doctype": "Number Card",
+ "name": "Salis Representatives Fleet Gov Relations Open",
+ "label": "Government Relations Cases Open",
+ "document_type": "Sponsorship Transfer Case",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Salis",
+ "color": "#ECAD4B",
+ "filters_json": "[[\"Sponsorship Transfer Case\", \"status\", \"in\", [\"Open\", \"In Progress\"]]]"
+}

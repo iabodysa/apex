@@ -1,0 +1,15 @@
+{
+ "doctype": "Number Card",
+ "name": "Salis Compliance Drivers Clearances Pending",
+ "label": "Driver Clearances Pending",
+ "document_type": "Driver Clearance",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Salis",
+ "color": "#FF5858",
+ "filters_json": "[[\"Driver Clearance\", \"status\", \"in\", [\"Open\", \"In Progress\"]]]"
+}

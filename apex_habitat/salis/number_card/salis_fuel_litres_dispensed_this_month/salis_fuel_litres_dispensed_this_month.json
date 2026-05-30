@@ -1,0 +1,18 @@
+{
+ "doctype": "Number Card",
+ "name": "salis_fuel Litres Dispensed This Month",
+ "label": "Fuel Litres Dispensed This Month",
+ "document_type": "Fuel Request",
+ "function": "Sum",
+ "aggregate_function_based_on": "topup_litres",
+ "report_function": "Sum",
+ "is_public": 1,
+ "is_standard": 1,
+ "show_full_number": 1,
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "color": "#29CD42",
+ "module": "Salis",
+ "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"], [\"Fuel Request\", \"request_date\", \"Timespan\", \"this month\"]]"
+}

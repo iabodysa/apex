@@ -1,0 +1,15 @@
+{
+ "doctype": "Number Card",
+ "name": "Salis Vehicles In Service",
+ "label": "Vehicles In Service",
+ "document_type": "Salis Vehicle",
+ "function": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "module": "Salis",
+ "color": "#761ACB",
+ "filters_json": "[[\"Salis Vehicle\", \"status\", \"=\", \"Active\"], [\"Salis Vehicle\", \"compliance_status\", \"in\", [\"Compliant\", \"Expiring Soon\"]]]"
+}

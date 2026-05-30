@@ -21,7 +21,7 @@
  "is_hidden": 0,
  "sequence_id": 6.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"srcHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srcKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rental Accrual This Month\", \"col\": 3}}, {\"id\": \"srcKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cost Recovery Aging Backlog\", \"col\": 3}}, {\"id\": \"srcHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srcQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"srcQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Payment Request\", \"col\": 3}}, {\"id\": \"srcHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srcCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs & Settlement\", \"col\": 4}}, {\"id\": \"srcCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Engine Ledgers / Audit\", \"col\": 4}}, {\"id\": \"srcCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "content": "[{\"id\": \"srcHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srcKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rental Accrual This Month\", \"col\": 3}}, {\"id\": \"srcKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cost Recovery Aging Backlog\", \"col\": 3}}, {\"id\": \"srcKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Active Rentals\", \"col\": 3}}, {\"id\": \"srcKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Settlements Pending Approval\", \"col\": 3}}, {\"id\": \"srcKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Rental Cost This Month\", \"col\": 3}}, {\"id\": \"srcHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srcQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"srcQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Payment Request\", \"col\": 3}}, {\"id\": \"srcHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srcCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs & Settlement\", \"col\": 4}}, {\"id\": \"srcCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Engine Ledgers / Audit\", \"col\": 4}}, {\"id\": \"srcCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -226,6 +226,24 @@
    "number_card_name": "Cost Recovery Aging Backlog",
    "label": "Cost Recovery Aging Backlog",
    "idx": 4
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Salis Rentals Costs Active Rentals",
+   "label": "Active Rentals",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Salis Rentals Costs Settlements Pending Approval",
+   "label": "Settlements Pending Approval",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Salis Rentals Costs Rental Cost This Month",
+   "label": "Rental Cost This Month",
+   "idx": 7
   }
  ],
  "quick_lists": [],
