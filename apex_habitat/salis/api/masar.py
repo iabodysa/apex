@@ -13,7 +13,6 @@ UI inside the existing /driver portal. No GL, no side-effects.
 """
 
 import frappe
-from frappe import _
 
 from apex_habitat.salis.api.driver_portal import _require_enabled, _resolve_driver
 
