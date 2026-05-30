@@ -90,30 +90,10 @@ jobs:
           bench --site test.localhost install-app hrms
           bench --site test.localhost install-app apex_habitat
 
-      - name: Run tests
+      - name: Migrate (apply seeds, workflows and patches)
         working-directory: frappe-bench
-        run: |
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_http_enforcement
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_workspace_visibility
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_change_log_popup
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_bed_booking_concurrency
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_task_schedulers
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_release_hygiene
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_idempotency_guards
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_material_template_coverage
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_supplier_cost_recovery
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_occupancy_snapshot
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_form_dashboards
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_accommodation_stock_ledger
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_custody_stock_integration
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_accommodation_material_transfer
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_resident_request_todo
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_temporary_stay_and_idle
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_front_desk
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_v0_9_0_pages
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_financial_side_effects
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_housing_lifecycle
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_qa_probe_systems
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_qa_probe_transactions
-          bench --site test.localhost run-tests --module apex_habitat.tests.test_reports
-          bench --site test.localhost run-tests --module apex_habitat.habitat.doctype.accommodation_assignment.test_accommodation_assignment
+        run: bench --site test.localhost migrate
+
+      - name: Run the full test suite
+        working-directory: frappe-bench
+        run: bench --site test.localhost run-tests --app apex_habitat
