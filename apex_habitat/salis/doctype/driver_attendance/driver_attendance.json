@@ -71,11 +71,13 @@
    "label": "Check In"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "check_out",
    "fieldtype": "Time",
    "label": "Check Out"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "worked_hours",
    "fieldtype": "Float",
    "label": "Worked Hours",
@@ -87,6 +89,7 @@
    "label": "Attendance Images"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "images",
    "fieldtype": "Table",
    "label": "Attendance Images",
@@ -167,7 +170,8 @@
    "create": 1,
    "if_owner": 1,
    "read": 1,
-   "role": "Driver"
+   "role": "Driver",
+   "submit": 1
   },
   {
    "export": 1,

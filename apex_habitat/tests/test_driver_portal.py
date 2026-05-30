@@ -72,7 +72,12 @@ class TestDriverPortal(unittest.TestCase):
 		att = frappe.get_doc("Driver Attendance", res["name"])
 		self.assertEqual(att.driver, drv)
 		self.assertEqual(str(att.attendance_date), frappe.utils.today())
+		# A portal check-in is an authoritative presence record: it is SUBMITTED,
+		# not left in draft, so the attendance watcher (which keys on docstatus=1)
+		# recognises it and raises no perpetual Supervisor Delay alert.
+		self.assertEqual(att.docstatus, 1, "Portal check-in must submit the attendance.")
 		frappe.set_user("Administrator")
+		att.cancel()
 		att.delete(ignore_permissions=True)
 		frappe.db.commit()
 
@@ -86,3 +91,119 @@ class TestDriverPortal(unittest.TestCase):
 		                                        subject="Brakes", description="Soft pedal")
 		self.assertEqual(frappe.db.get_value("Support Ticket", tk["name"], "driver"), drv)
 		frappe.set_user("Administrator")
+
+	def test_check_out_updates_submitted_record(self):
+		"""Check-out stamps the SUBMITTED record (check_out / worked_hours are
+		allow_on_submit), so a full in->out day stays one submitted attendance with
+		computed hours — no draft, no second row."""
+		drv, user = self._driver_user()
+		frappe.set_user(user)
+		ci = driver_portal.driver_check_in()
+		co = driver_portal.driver_check_out()
+		self.assertEqual(ci["name"], co["name"], "Check-out must reuse the check-in record.")
+		att = frappe.get_doc("Driver Attendance", co["name"])
+		self.assertEqual(att.docstatus, 1, "Record stays submitted after check-out.")
+		self.assertTrue(att.check_in and att.check_out, "Both times persisted on the submitted row.")
+		frappe.set_user("Administrator")
+		att.cancel()
+		att.delete(ignore_permissions=True)
+		frappe.db.commit()
+
+
+class TestPortalCheckInNoPerpetualAlert(unittest.TestCase):
+	"""F-02 regression: a driver who checks in through the mobile portal must NOT be
+	left with a perpetual, unresolvable "Supervisor Delay" Operations Alert.
+
+	Root cause: the portal saved Driver Attendance as a DRAFT (docstatus 0), but
+	``missing_attendance_watch`` and the Supervisor-Delay branch of
+	``reconcile_operations_alerts`` both require a SUBMITTED (docstatus 1) row. So a
+	compliant portal user tripped a fresh alert every day that never auto-resolved.
+	The fix submits the attendance on check-in. This test proves both halves:
+
+	  1) after a portal check-in, the watcher raises NO alert for that driver; and
+	  2) a Supervisor Delay alert already open for that driver auto-resolves once
+	     the driver has checked in (the reconcile pass sees the submitted record).
+	"""
+
+	@classmethod
+	def setUpClass(cls):
+		frappe.set_user("Administrator")
+		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
+		cls.drv = _ensure_test_driver()
+		# Driver must be Active for missing_attendance_watch to consider it.
+		frappe.db.set_value("Salis Driver", cls.drv, "status", "Active")
+		cls.user = frappe.db.get_value(
+			"Employee", frappe.db.get_value("Salis Driver", cls.drv, "employee"), "user_id"
+		)
+		cls._purge(cls)
+		frappe.db.commit()
+
+	@classmethod
+	def tearDownClass(cls):
+		cls._purge(cls)
+		frappe.db.commit()
+
+	def _purge(self):
+		frappe.set_user("Administrator")
+		for n in frappe.get_all("Operations Alert",
+		                        filters={"alert_type": "Supervisor Delay", "driver": self.drv},
+		                        pluck="name"):
+			frappe.delete_doc("Operations Alert", n, force=True, ignore_permissions=True)
+		for n in frappe.get_all("Driver Attendance",
+		                        filters={"driver": self.drv, "attendance_date": frappe.utils.today()},
+		                        pluck="name"):
+			doc = frappe.get_doc("Driver Attendance", n)
+			if doc.docstatus == 1:
+				doc.cancel()
+			frappe.delete_doc("Driver Attendance", n, force=True, ignore_permissions=True)
+
+	def _open_alerts(self):
+		return frappe.get_all("Operations Alert",
+		                      filters={"alert_type": "Supervisor Delay", "status": "Open",
+		                               "driver": self.drv}, pluck="name")
+
+	def test_portal_check_in_raises_no_alert_and_resolves_existing(self):
+		from apex_habitat.salis.tasks import (
+			missing_attendance_watch,
+			reconcile_operations_alerts,
+		)
+
+		# Baseline: genuine gap -> watcher raises exactly one Supervisor Delay alert.
+		self._purge()
+		frappe.db.commit()
+		missing_attendance_watch()
+		frappe.db.commit()
+		self.assertEqual(
+			len(self._open_alerts()), 1,
+			"A driver with no attendance must raise one Supervisor Delay alert.",
+		)
+
+		# Driver checks in through the portal (resolves to self server-side).
+		frappe.set_user(self.user)
+		res = driver_portal.driver_check_in()
+		frappe.set_user("Administrator")
+		self.assertEqual(
+			frappe.db.get_value("Driver Attendance", res["name"], "docstatus"), 1,
+			"Portal check-in must leave a SUBMITTED attendance for the watcher to see.",
+		)
+		frappe.db.commit()
+
+		# (1) The reconcile pass now sees a submitted attendance for the day the
+		#     alert was raised and resolves the previously-perpetual alert.
+		reconcile_operations_alerts()
+		frappe.db.commit()
+		self.assertEqual(
+			self._open_alerts(), [],
+			"An open Supervisor Delay alert must auto-resolve once the driver has "
+			"checked in via the portal.",
+		)
+
+		# (2) Re-running the watcher after the check-in raises NO new alert — the
+		#     compliant portal user no longer floods a fresh alert each day.
+		missing_attendance_watch()
+		frappe.db.commit()
+		self.assertEqual(
+			self._open_alerts(), [],
+			"A driver who has checked in via the portal must raise no Supervisor "
+			"Delay alert.",
+		)

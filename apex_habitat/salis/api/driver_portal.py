@@ -182,8 +182,50 @@ def _today_attendance(driver):
 	)
 
 
+def _persist_attendance(doc):
+	"""Persist a get-or-created Driver Attendance as a SUBMITTED presence record.
+
+	A portal check-in/out is authoritative, so the record must reach docstatus 1 —
+	that is what ``missing_attendance_watch`` and the Supervisor-Delay reconciler key
+	on (``docstatus = 1``). A draft would leave a compliant portal user tripping a
+	daily "Supervisor Delay" alert that never auto-resolves.
+
+	The write is server-authoritative (the driver was resolved from the session
+	identity, never client-supplied), so a single ``ignore_permissions`` flag is set
+	on the doc and the create/submit/update all run under it — one guarded operation,
+	matching the endpoint's prior single guarded write.
+
+	* A new (or still-draft) record is inserted then submitted.
+	* An already-submitted record (a second tap the same day — e.g. check-in then
+	  check-out) is updated in place; ``check_out`` / ``worked_hours`` / ``images``
+	  are ``allow_on_submit`` on the DocType, so ``save`` persists them with no
+	  amendment.
+	"""
+	doc.flags.ignore_permissions = True  # audit-ok — driver resolved from session identity
+	if doc.docstatus == 0:
+		doc.insert()
+		doc.submit()
+	else:
+		doc.save()
+
+
 @frappe.whitelist(methods=["POST"])
 def driver_check_in(photo=None):
+	"""Record the driver's presence for today and SUBMIT it.
+
+	A portal check-in is an authoritative record of presence, so the Driver
+	Attendance is submitted (docstatus 1) — not left in draft. This is what the
+	rest of the module treats as "attendance recorded": ``missing_attendance_watch``
+	and the Supervisor-Delay branch of ``reconcile_operations_alerts`` both key on
+	``docstatus = 1``. Leaving the record in draft meant a portal-using driver still
+	tripped a daily "Supervisor Delay" alert that never auto-resolved. Submitting on
+	check-in satisfies the watcher, so a compliant driver raises no alert (and any
+	already-open one auto-resolves on the next reconcile pass).
+
+	The Driver role holds a ``submit`` DocPerm on Driver Attendance (if_owner via the
+	identity-scoped resolution here); ``ignore_permissions`` keeps the write
+	server-authoritative regardless.
+	"""
 	_require_enabled()
 	driver = _resolve_driver()
 	doc = _today_attendance(driver)
@@ -192,20 +234,31 @@ def driver_check_in(photo=None):
 		doc.status = "Present"
 	if photo:
 		doc.append("images", {"image": photo, "captured_at": frappe.utils.now_datetime()})
-	doc.save(ignore_permissions=True)  # audit-ok — identity resolved server-side
+	_persist_attendance(doc)
 	frappe.db.commit()
 	return {"name": doc.name, "check_in": str(doc.check_in)}
 
 
 @frappe.whitelist(methods=["POST"])
 def driver_check_out(photo=None):
+	"""Stamp check-out on today's attendance.
+
+	Check-in already submitted the record, so check-out updates a submitted Driver
+	Attendance — ``check_out``, ``worked_hours`` and the ``images`` table are
+	``allow_on_submit`` on the DocType, so ``save`` persists them without an
+	amendment. If a driver checks out without ever checking in (no record yet), the
+	get-or-create returns a fresh draft, which is inserted and submitted here so the
+	day still counts as recorded presence.
+	"""
 	_require_enabled()
 	driver = _resolve_driver()
 	doc = _today_attendance(driver)
 	doc.check_out = frappe.utils.nowtime()
+	if not doc.status:
+		doc.status = "Present"
 	if photo:
 		doc.append("images", {"image": photo, "captured_at": frappe.utils.now_datetime()})
-	doc.save(ignore_permissions=True)  # audit-ok
+	_persist_attendance(doc)
 	frappe.db.commit()
 	return {"name": doc.name, "check_out": str(doc.check_out)}
 

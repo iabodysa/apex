@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.18.4 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.18.4 — driver portal check-ins now record attendance",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-08 09:00:00",
+    },
+    {
+        "title": "v1.18.4: A portal check-in now submits the attendance record, so the missing-attendance watcher recognises it and any open missing-attendance alert auto-resolves",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-08 09:01:00",
+    },
+    {
+        "title": "v1.18.4: Updating an existing site can no longer fail on the fuel-ledger unique index - a new patch removes any duplicate rows before the constraint is applied",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-08 09:02:00",
+    },
     # v1.18.3 ---------------------------------------------------------------
     {
         "title": "Apex 1.18.3 — leaner Arabic translations",

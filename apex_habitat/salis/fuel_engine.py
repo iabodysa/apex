@@ -167,7 +167,10 @@ def accrue_fuel_consumption() -> None:
     # has not yet been ledgered (``ledgered = 0``), regardless of request_date,
     # and stamp ``ledgered = 1`` once its row is posted. Idempotent on three
     # levels: the ``ledgered`` flag, the ``(source_type, source_name)``
-    # check-then-insert guard, and the DB-level UNIQUE index on the ledger.
+    # check-then-insert guard, and the DB-level UNIQUE index on the ledger
+    # (``unique_fcl_source`` on ``(source_type, source_name)`` — maintained by
+    # ``fuel_consumption_ledger.on_doctype_update`` and the migrate de-dup patch,
+    # so even two racing accrual runs cannot double-post the same source).
     #
     # Pagination note: every successfully-handled row leaves the ``ledgered = 0``
     # set, so the set shrinks as we drain it. We therefore re-query from offset 0

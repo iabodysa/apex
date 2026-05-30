@@ -202,6 +202,77 @@ class TestFuelAccrualLateDone(unittest.TestCase):
         frappe.db.commit()
 
 
+class TestFuelLedgerSourceUniqueIndex(unittest.TestCase):
+    """The fuel engine asserts a DB-level UNIQUE index on the ledger as its hard
+    idempotency backstop (``fuel_engine.accrue_fuel_consumption`` docstring). The
+    engine's application guard (``_ledger_exists`` check-then-insert) is not atomic,
+    so two overlapping accrual runs could both pass the check and double-post the
+    same source. This test proves the database itself rejects a duplicate
+    ``(source_type, source_name)`` row, making the claimed backstop real and
+    preventing silently-doubled ledgered consumption."""
+
+    SOURCE_NAME = "FCL DUP TEST 1"
+
+    @classmethod
+    def setUpClass(cls):
+        frappe.set_user("Administrator")
+        cls.vehicle = frappe.db.get_value("Salis Vehicle", {"plate_number": "FCL DUP 1"}, "name")
+        if not cls.vehicle:
+            cls.vehicle = frappe.get_doc({"doctype": "Salis Vehicle", "plate_number": "FCL DUP 1",
+                                          "status": "Active"}).insert(ignore_permissions=True).name
+        frappe.db.delete("Fuel Consumption Ledger",
+                         {"source_type": "Fuel Daily Log", "source_name": cls.SOURCE_NAME})
+        frappe.db.commit()
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+        frappe.db.delete("Fuel Consumption Ledger",
+                         {"source_type": "Fuel Daily Log", "source_name": self.SOURCE_NAME})
+        frappe.db.commit()
+
+    def _row(self):
+        return {"doctype": "Fuel Consumption Ledger", "vehicle": self.vehicle,
+                "period_month": frappe.utils.today()[:7], "litres": 10, "amount": 150,
+                "source_type": "Fuel Daily Log", "source_name": self.SOURCE_NAME}
+
+    def test_unique_constraint_exists_on_source_key(self):
+        # The composite UNIQUE index the engine's idempotency contract depends on
+        # must actually be present in the schema (created by on_doctype_update).
+        constraints = frappe.db.sql(
+            """SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS
+               WHERE table_schema = DATABASE() AND table_name = %s
+                 AND constraint_type = 'UNIQUE'""",
+            ("tabFuel Consumption Ledger",),
+            pluck=True,
+        )
+        self.assertIn(
+            "unique_fcl_source", constraints,
+            "Fuel Consumption Ledger must carry the unique_fcl_source UNIQUE index "
+            "on (source_type, source_name) — the engine's claimed DB backstop.",
+        )
+
+    def test_duplicate_source_row_rejected_by_db(self):
+        # First row inserts fine.
+        frappe.get_doc(self._row()).insert(ignore_permissions=True)
+        frappe.db.commit()
+
+        # A second row sharing the same (source_type, source_name) — the accrual
+        # idempotency key — must be rejected at the DB layer, even when the
+        # application-level guard is bypassed (raw insert below mirrors the race
+        # where two runs both pass _ledger_exists before either has committed).
+        from pymysql.err import IntegrityError as MySQLIntegrityError
+
+        with self.assertRaises((frappe.UniqueValidationError, MySQLIntegrityError)):
+            frappe.db.sql(
+                """INSERT INTO `tabFuel Consumption Ledger`
+                       (name, vehicle, period_month, litres, amount, source_type, source_name)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+                ("FCL-DUPRAW", self.vehicle, frappe.utils.today()[:7], 10, 150,
+                 "Fuel Daily Log", self.SOURCE_NAME),
+            )
+        frappe.db.rollback()
+
+
 class TestOperationsAlertAutoResolve(unittest.TestCase):
     """The alert resolver must close alerts whose source condition has cleared,
     leave still-valid alerts open, and be idempotent on re-run."""

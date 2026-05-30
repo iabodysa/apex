@@ -147,3 +147,15 @@ apex_habitat.patches.v1_x.consolidate_admin_workspaces_into_apex_core
 # removes or touches any other navbar item. Idempotent; a no-op on fresh installs
 # (add_navbar_help_links now seeds /app/apex-core directly).
 apex_habitat.patches.v1_x.fix_navbar_routes_to_apex_core
+
+# v1.x — make the Fuel Consumption Ledger unique source index installable on
+# existing sites that may already hold duplicate accrual rows
+# ONE-TIME (prune-eligible once every deployed site has run it): runs pre-model-
+# sync (this file has no section header, so every entry is pre_model_sync),
+# collapses any pre-existing duplicate (source_type, source_name) ledger rows to
+# the earliest one, then ensures the composite UNIQUE index (unique_fcl_source) the
+# fuel engine relies on as its hard idempotency backstop. Without this, the schema-
+# sync add_unique would fail on a site with legacy duplicates and break migrate.
+# Idempotent, existence-guarded on the table (no schema error during migrate), and
+# a no-op on a fresh install. Touches no GL.
+apex_habitat.patches.v1_x.dedupe_fuel_ledger_and_unique_index

@@ -144,14 +144,18 @@ def _ensure_attendance(driver):
 		{"driver": driver, "attendance_date": frappe.utils.today(), "docstatus": ["<", 2]},
 	):
 		return
-	frappe.get_doc(
+	doc = frappe.get_doc(
 		{
 			"doctype": "Driver Attendance",
 			"driver": driver,
 			"attendance_date": frappe.utils.today(),
 			"status": "Present",
 		}
-	).insert(ignore_permissions=True)  # audit-ok — admin-only demo seeding
+	)
+	doc.insert(ignore_permissions=True)  # audit-ok — admin-only demo seeding
+	# Submit so the demo row counts as recorded presence (mirrors the portal
+	# check-in path and the docstatus=1 attendance dashboards/watchers).
+	doc.submit()
 
 
 def _ensure_transport_request():
