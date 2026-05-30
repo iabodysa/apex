@@ -322,5 +322,11 @@ after_migrate = [
     "apex_habitat.salis.workflow_seed.seed_salis_workflows",
 ]
 
+# A fresh test site has no Company or ERPNext master data until the setup wizard
+# runs, so any test that inserts a Company would fail (Warehouse Type "Transit"
+# missing). This hook provisions the site once before the suite runs — see
+# apex_habitat/tests/before_tests.py.
+before_tests = "apex_habitat.tests.before_tests.before_tests"
+
 # Frappe What's New feed — appears in desk notification area, not as a popup
 get_changelog_feed = "apex_habitat.habitat.utils.changelog.get_changelog_feed"
