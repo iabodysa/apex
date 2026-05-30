@@ -10,11 +10,14 @@ from apex_habitat.tests.test_driver_portal import _ensure_test_driver
 
 def _driver_without_vehicle(email):
     if not frappe.db.exists("User", email):
-        u = frappe.get_doc(
-            {"doctype": "User", "email": email, "first_name": "NoVeh", "send_welcome_email": 0}
-        )
-        u.add_roles("Driver")
-        u.insert(ignore_permissions=True)
+        try:
+            u = frappe.get_doc(
+                {"doctype": "User", "email": email, "first_name": "NoVeh", "send_welcome_email": 0}
+            )
+            u.add_roles("Driver")
+            u.insert(ignore_permissions=True)
+        except frappe.DuplicateEntryError:
+            pass
     emp = frappe.db.get_value("Employee", {"user_id": email}, "name")
     if not emp:
         company = (frappe.defaults.get_global_default("company")
@@ -34,9 +37,12 @@ def _ensure_unlinked_user(email):
     """A logged-in user with NO Employee/Salis Driver chain — e.g. an admin
     previewing /driver. The portal must greet them, never 403."""
     if not frappe.db.exists("User", email):
-        frappe.get_doc(
-            {"doctype": "User", "email": email, "first_name": "Unlinked", "send_welcome_email": 0}
-        ).insert(ignore_permissions=True)
+        try:
+            frappe.get_doc(
+                {"doctype": "User", "email": email, "first_name": "Unlinked", "send_welcome_email": 0}
+            ).insert(ignore_permissions=True)
+        except frappe.DuplicateEntryError:
+            pass
     return email
 
 
@@ -44,9 +50,12 @@ def _ensure_staff_user(email, role):
     """A logged-in Salis *staff* user (holds a desk role) with NO Salis Driver.
     Opening /driver must give them a useful staff payload, never a dead-end."""
     if not frappe.db.exists("User", email):
-        frappe.get_doc(
-            {"doctype": "User", "email": email, "first_name": "Staff", "send_welcome_email": 0}
-        ).insert(ignore_permissions=True)
+        try:
+            frappe.get_doc(
+                {"doctype": "User", "email": email, "first_name": "Staff", "send_welcome_email": 0}
+            ).insert(ignore_permissions=True)
+        except frappe.DuplicateEntryError:
+            pass
     user = frappe.get_doc("User", email)
     if role not in {r.role for r in user.roles}:
         user.add_roles(role)

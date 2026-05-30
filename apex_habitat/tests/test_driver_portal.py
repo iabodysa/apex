@@ -13,11 +13,16 @@ def _ensure_test_driver():
 	pollution) and there is no cross-suite race that needs a DuplicateEntry guard."""
 	user = "drv_dp@example.com"
 	if not frappe.db.exists("User", user):
-		u = frappe.get_doc(
-			{"doctype": "User", "email": user, "first_name": "Test Driver", "send_welcome_email": 0}
-		)
-		u.add_roles("Driver")
-		u.insert(ignore_permissions=True)
+		try:
+			u = frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "Test Driver", "send_welcome_email": 0}
+			)
+			u.add_roles("Driver")
+			u.insert(ignore_permissions=True)
+		except frappe.DuplicateEntryError:
+			# Full-suite cache/DB skew: exists() above can report the user absent while
+			# a sibling class's row persists. Idempotent — the user exists either way.
+			pass
 	emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
 	if not emp:
 		company = (frappe.defaults.get_global_default("company")
