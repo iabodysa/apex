@@ -9,9 +9,12 @@ shared mixin, but every assertion here is a read):
      counts, expected total, and the earliest housing "next pickup", resolved
      for the session driver only; a different driver does not see it; a
      non-driver is rejected; the portal-disabled guard fires.
-  2. the standalone ``/masar`` www page context — guests redirect to login, an
-     unlinked user gets a friendly (no-403) context, and a linked driver's
-     context carries their own route payload.
+  2. the standalone ``/masar`` www page context — Masar is now the worker
+     self-service app shell: it is guest-accessible (identity is the personal
+     ``?w=<token>`` resolved server-side by the API, not a desk login), so the
+     page never redirects, forwards the token verbatim to the SPA, and exposes
+     the Salis Portal Theme appearance. (The old driver "my route today" view
+     moved into the driver portal; see ``test_driver_portal``.)
 
 The worker-trip fixture and the driver/employee chain are reused from
 ``test_masar_worker_movement`` so the two suites stay convention-aligned and
@@ -139,53 +142,46 @@ class TestMasarPageContext(_WorkerTripMixin, unittest.TestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    def test_guest_is_redirected_to_login(self):
+    def test_guest_gets_app_shell_context_no_redirect(self):
+        """Masar is now guest-accessible (identity is the personal token, resolved
+        server-side by the API), so the page must NOT redirect a guest to login —
+        it returns the populated SPA shell context instead."""
         frappe.set_user("Guest")
-        try:
-            with self.assertRaises(frappe.Redirect):
-                masar_page.get_context(frappe._dict())
-            self.assertEqual(
-                frappe.local.flags.redirect_location,
-                "/login?redirect-to=/masar",
-            )
-        finally:
-            frappe.local.flags.redirect_location = None
-            frappe.set_user("Administrator")
-
-    def test_unlinked_user_gets_friendly_context_no_route(self):
-        """A logged-in non-driver gets a context (no 403): a CSRF token, no driver
-        link, and no route payload."""
-        outsider = "masar_1b_page_outsider@example.com"
-        if not frappe.db.exists("User", outsider):
-            frappe.get_doc(
-                {
-                    "doctype": "User",
-                    "email": outsider,
-                    "first_name": "Masar 1b Page Outsider",
-                    "send_welcome_email": 0,
-                }
-            ).insert(ignore_permissions=True)
-            frappe.db.commit()
-        frappe.set_user(outsider)
+        frappe.local.form_dict = frappe._dict()
         try:
             ctx = masar_page.get_context(frappe._dict())
-            self.assertTrue(ctx.csrf_token)
-            self.assertIsNone(ctx.driver)
-            self.assertIsNone(ctx.route)
+            self.assertEqual(ctx.no_cache, 1)
+            self.assertTrue(ctx.portal_theme)
+            # csrf is a string (a real token in a browser request; "" in a
+            # session-less render — never a 500).
+            self.assertIsInstance(ctx.csrf_token, str)
+            # No token in the query → empty pass-through; never an employee id.
+            self.assertEqual(ctx.masar_token, "")
         finally:
+            frappe.local.form_dict = frappe._dict()
             frappe.set_user("Administrator")
 
-    def test_linked_driver_context_carries_own_route(self):
-        tr, rp, dt = self._worker_trip(
-            self.driver, self.project, self.building, [self.w1], "1b Page Route"
-        )
-        frappe.set_user(self.driver_user)
+    def test_personal_token_is_passed_through_to_shell(self):
+        """The ``?w=<token>`` value is forwarded verbatim to the SPA; the page
+        never resolves it to an employee (the whitelisted API does, server-side)."""
+        frappe.set_user("Guest")
+        frappe.local.form_dict = frappe._dict(w="opaque-personal-token")
         try:
             ctx = masar_page.get_context(frappe._dict())
-            self.assertEqual(ctx.driver, self.driver)
-            self.assertIsNotNone(ctx.route)
-            self.assertEqual(ctx.route["driver"], self.driver)
-            names = [t["dispatch_trip"] for t in ctx.route["trips"]]
-            self.assertIn(dt.name, names)
+            self.assertEqual(ctx.masar_token, "opaque-personal-token")
         finally:
+            frappe.local.form_dict = frappe._dict()
+            frappe.set_user("Administrator")
+
+    def test_theme_appearance_is_exposed(self):
+        """The shell carries the Salis Portal Theme appearance (theme slug + brand
+        flag) so the SPA renders with the right design tokens."""
+        frappe.set_user("Guest")
+        frappe.local.form_dict = frappe._dict()
+        try:
+            ctx = masar_page.get_context(frappe._dict())
+            self.assertIn(ctx.portal_theme, {"afmco", "frappe", "dark", "gemini"})
+            self.assertIsInstance(ctx.portal_show_brand, bool)
+        finally:
+            frappe.local.form_dict = frappe._dict()
             frappe.set_user("Administrator")
