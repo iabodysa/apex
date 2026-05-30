@@ -211,3 +211,66 @@ def get_my_worker_route_today():
             }
         )
     return {"driver": driver, "date": frappe.utils.today(), "trips": trips}
+
+
+@frappe.whitelist()
+def get_my_worker_route_summary() -> dict:
+    """Read-only, identity-scoped *summary* of the current driver's worker route
+    today — a compact roll-up for the standalone ``/masar`` page header.
+
+    Resolves the session user to a Salis Driver server-side (no client-supplied
+    id) and folds today's Workers-line trips into headline counts plus a single
+    "next pickup" pointer (the earliest housing-pickup stop on the earliest trip).
+    Read-only; writes nothing and posts no GL.
+
+    Shape::
+
+        {
+          "driver": "DRV-000001",
+          "date": "2026-05-30",
+          "trip_count": 2,
+          "stop_count": 5,
+          "expected_total": 7,
+          "next_pickup": {
+            "dispatch_trip": "DT-000007", "depart_time": "06:30:00",
+            "stop_name": "Housing Pickup", "sequence": 1,
+            "building_name": "...", "city": "...", "google_maps_url": "..."
+          }
+        }
+    """
+    _require_enabled()
+    driver = _resolve_driver()
+
+    worker_trips = _today_worker_trips(driver)
+    stop_count = 0
+    expected_total = 0
+    next_pickup = None
+    for t in worker_trips:
+        expected_total += len(_registered_workers(t.get("transport_request")))
+        stops = _ordered_stops(t.get("route_plan"))
+        stop_count += len(stops)
+        if next_pickup is None:
+            # Trips are already ordered by depart_time; the first housing-pickup
+            # stop on the earliest trip is the driver's next pickup.
+            for s in stops:
+                if s.get("accommodation_building") and s.get("pickup"):
+                    pickup = s["pickup"]
+                    next_pickup = {
+                        "dispatch_trip": t["name"],
+                        "depart_time": _fmt_time(t.get("depart_time")),
+                        "stop_name": s.get("stop_name"),
+                        "sequence": s.get("sequence"),
+                        "building_name": pickup.get("building_name"),
+                        "city": pickup.get("city"),
+                        "google_maps_url": pickup.get("google_maps_url"),
+                    }
+                    break
+
+    return {
+        "driver": driver,
+        "date": frappe.utils.today(),
+        "trip_count": len(worker_trips),
+        "stop_count": stop_count,
+        "expected_total": expected_total,
+        "next_pickup": next_pickup,
+    }

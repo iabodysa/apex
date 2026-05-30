@@ -1,0 +1,206 @@
+{%- comment -%}
+Masar — read-only "my worker route today" (server-rendered, self-contained).
+Plain semantic HTML; no build step, no Vue. Mirrors the route payload from
+salis/api/masar.get_my_worker_route_today.
+{%- endcomment -%}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#072B1A" />
+    <title>Masar — My Worker Route</title>
+    <script>
+      window.csrf_token = "{{ csrf_token }}";
+    </script>
+    <style>
+      :root {
+        --c-bg: #ece6d6;
+        --c-ink: #072b1a;
+        --c-primary: #00844e;
+        --c-card: #ffffff;
+        --c-muted: #5b6b62;
+        --c-line: #d8d2c2;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Montserrat", system-ui, -apple-system, Segoe UI, sans-serif;
+        background: var(--c-bg);
+        color: var(--c-ink);
+        line-height: 1.45;
+      }
+      .wrap {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      header.top {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      header.top h1 {
+        font-size: 20px;
+        margin: 0;
+        color: var(--c-primary);
+      }
+      .date {
+        color: var(--c-muted);
+        font-size: 13px;
+      }
+      .msg {
+        background: var(--c-card);
+        border: 1px solid var(--c-line);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        color: var(--c-muted);
+      }
+      .trip {
+        background: var(--c-card);
+        border: 1px solid var(--c-line);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+      }
+      .trip h2 {
+        font-size: 15px;
+        margin: 0 0 4px;
+      }
+      .trip .meta {
+        font-size: 13px;
+        color: var(--c-muted);
+        margin-bottom: 10px;
+      }
+      .section-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--c-muted);
+        margin: 12px 0 6px;
+      }
+      ol.stops {
+        margin: 0;
+        padding-left: 20px;
+      }
+      ol.stops li {
+        margin-bottom: 8px;
+      }
+      .stop-name {
+        font-weight: 600;
+      }
+      .stop-sub {
+        font-size: 13px;
+        color: var(--c-muted);
+      }
+      a.map {
+        color: var(--c-primary);
+        font-size: 13px;
+        text-decoration: none;
+      }
+      ul.workers {
+        margin: 0;
+        padding-left: 20px;
+      }
+      ul.workers li {
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+      .pill {
+        display: inline-block;
+        font-size: 11px;
+        background: var(--c-primary);
+        color: #fff;
+        border-radius: 999px;
+        padding: 2px 9px;
+        margin-left: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <h1>My Worker Route</h1>
+        <span class="date">{{ today }}</span>
+      </header>
+
+      {%- if not portal_enabled %}
+      <div class="msg">The worker movement portal is not enabled.</div>
+      {%- elif not driver %}
+      <div class="msg">
+        Your account is not linked to a driver profile. Please contact the fleet
+        team.
+      </div>
+      {%- elif not route or not route.trips %}
+      <div class="msg">No worker trips are scheduled for you today.</div>
+      {%- else %}
+      {%- for trip in route.trips %}
+      <section class="trip">
+        <h2>
+          Trip {{ trip.dispatch_trip }}
+          <span class="pill">{{ trip.expected_count }} expected</span>
+        </h2>
+        <div class="meta">
+          {%- if trip.depart_time %}Departs {{ trip.depart_time }}{% endif -%}
+          {%- if trip.status %} &middot; {{ trip.status }}{% endif -%}
+          {%- if trip.vehicle %} &middot; {{ trip.vehicle }}{% endif -%}
+        </div>
+
+        {%- if trip.stops %}
+        <div class="section-label">Stops</div>
+        <ol class="stops">
+          {%- for stop in trip.stops %}
+          <li>
+            <span class="stop-name">{{ stop.stop_name or "Stop" }}</span>
+            {%- if stop.planned_time %}
+            <span class="stop-sub"> &middot; {{ stop.planned_time }}</span>
+            {%- endif %}
+            {%- if stop.pickup %}
+            <div class="stop-sub">
+              Pickup: {{ stop.pickup.building_name or stop.accommodation_building }}
+              {%- if stop.pickup.city %}, {{ stop.pickup.city }}{% endif -%}
+            </div>
+            {%- if stop.pickup.google_maps_url %}
+            <a
+              class="map"
+              href="{{ stop.pickup.google_maps_url }}"
+              target="_blank"
+              rel="noopener"
+              >Open map</a
+            >
+            {%- endif %}
+            {%- elif stop.location %}
+            <div class="stop-sub">{{ stop.location }}</div>
+            {%- endif %}
+          </li>
+          {%- endfor %}
+        </ol>
+        {%- endif %}
+
+        {%- if trip.workers %}
+        <div class="section-label">Workers</div>
+        <ul class="workers">
+          {%- for w in trip.workers %}
+          <li>
+            {{ w.employee_name or w.employee }}
+            {%- if w.pickup_point %}
+            <span class="stop-sub"> &middot; {{ w.pickup_point }}</span>
+            {%- endif %}
+          </li>
+          {%- endfor %}
+        </ul>
+        {%- endif %}
+      </section>
+      {%- endfor %}
+      {%- endif %}
+    </div>
+  </body>
+</html>
