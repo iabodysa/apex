@@ -117,10 +117,17 @@ const actions = [
     style: "background: var(--c-ink); color: var(--c-surface);",
   },
   {
+    to: "/route",
+    icon: "route",
+    labelKey: "home.myRoute",
+    style: "background: var(--c-mint); color: var(--c-ink);",
+  },
+  {
     to: "/vehicle",
     icon: "truck",
     labelKey: "home.myVehicle",
-    style: "background: var(--c-mint); color: var(--c-ink);",
+    style:
+      "background: var(--c-surface); color: var(--c-ink); border: var(--border-width) solid var(--c-border);",
   },
   {
     to: "/fuel",

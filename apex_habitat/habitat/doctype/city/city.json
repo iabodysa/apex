@@ -19,7 +19,8 @@
   {
    "default": "Saudi Arabia",
    "fieldname": "country",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
+   "options": "Country",
    "label": "Country"
   }
  ],

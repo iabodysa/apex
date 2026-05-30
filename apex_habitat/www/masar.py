@@ -1,38 +1,52 @@
-"""Masar — standalone read-only "my worker route today" page (server-rendered).
+"""Masar — worker self-service app shell (Vue SPA served at /masar).
 
-A minimal self-contained surface, separate from the Vue driver portal: the
-session user is resolved to a Salis Driver server-side and today's Workers-line
-route (trips, ordered stops, registered manifest) is rendered as plain HTML.
+Masar is the worker's mobile self-service app: a transported and housed Employee
+opens their PERSONAL link (``/masar?w=<token>``) on a phone and manages their
+profile, accommodation, transport, and requests. Workers are NOT Frappe users —
+identity is the unguessable token, resolved server-side by the worker endpoints
+(``apex_habitat.salis.api.masar``), which scope every query to one Employee.
 
-Read-only — nothing here writes, posts GL, or commits. Guests are redirected to
-login; an unlinked (non-driver) user gets a friendly message instead of a 403.
-The CSRF token is exposed using the same pattern as the driver portal so any
-later client-side read POST works behind Frappe's CSRF guard."""
+This page is therefore Guest-accessible (no login redirect): it only serves the
+built SPA shell and passes the token through to the client. The CSRF token is
+exposed using ``frappe.sessions.get_csrf_token()`` (same pattern as the driver
+portal) so the SPA's whitelisted calls work behind Frappe's CSRF guard. The
+appearance (theme + optional brand overrides) reuses the Salis Portal Theme.
+
+The old read-only "my worker route today" view that previously lived here has
+moved into the driver portal (/driver → "My Route"); see
+``apex_habitat.salis.api.driver_portal.my_worker_route_today``.
+"""
 
 import frappe
 from frappe.sessions import get_csrf_token
 
-from apex_habitat.salis.api import masar
-from apex_habitat.salis.api.driver_portal import _find_driver, _portal_enabled
+from apex_habitat.salis.doctype.salis_portal_theme.salis_portal_theme import (
+	get_portal_appearance,
+)
 
 
 def get_context(context):
-	# Logged-in only; guests go to login and back.
-	if frappe.session.user == "Guest":
-		frappe.local.flags.redirect_location = "/login?redirect-to=/masar"
-		raise frappe.Redirect
-
+	# Guest-accessible by design: the worker is identified by their personal
+	# token, not a login. No redirect to /login.
 	context.no_cache = 1
-	context.csrf_token = get_csrf_token()
-	context.today = frappe.utils.today()
 
-	# Soft state for a friendly page (no 403): portal availability + driver link.
-	context.portal_enabled = bool(_portal_enabled())
-	driver = _find_driver()
-	context.driver = driver
-	context.route = None
-	if context.portal_enabled and driver:
-		# Reuse the whitelisted read endpoint's logic; it re-resolves the same
-		# session user, so the page only ever shows the current driver's route.
-		context.route = masar.get_my_worker_route_today()
+	# This page is guest-accessible, so it can be rendered in contexts where no
+	# session object is bound (e.g. some pre-warm / preview paths). A real browser
+	# request always has a Guest session, so get_csrf_token() returns a usable
+	# token there; we only fall back to an empty string to guarantee the worker app
+	# never 500s on load. (The SPA's whitelisted calls run with allow_guest.)
+	try:
+		context.csrf_token = get_csrf_token()
+	except Exception:
+		context.csrf_token = ""
+
+	# Pass the worker token through to the SPA. It is resolved server-side on every
+	# API call; the client never derives an employee id from it.
+	context.masar_token = frappe.form_dict.get("w") or ""
+
+	appearance = get_portal_appearance()
+	context.portal_theme = appearance["theme"]
+	context.portal_accent = appearance["accent"]
+	context.portal_logo = appearance["logo"]
+	context.portal_show_brand = appearance["show_brand"]
 	return context

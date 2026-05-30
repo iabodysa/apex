@@ -377,6 +377,19 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 	return {"name": doc.name}
 
 
+@frappe.whitelist()
+def my_worker_route_today():
+    """The current driver's worker-transport route today (read), surfaced in the
+    driver portal's "My Route" screen.
+
+    Thin identity-scoped wrapper over ``salis.api.masar.get_my_worker_route_today``
+    (which resolves the session user to a Salis Driver server-side). Lives here so
+    the driver SPA calls one cohesive driver-portal API namespace. Read-only."""
+    from apex_habitat.salis.api import masar
+
+    return masar.get_my_worker_route_today()
+
+
 @frappe.whitelist(methods=["POST"])
 def raise_support_ticket(category, priority, subject, description):
 	_require_enabled()

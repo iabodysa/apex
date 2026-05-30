@@ -1,0 +1,9 @@
+{
+  "name": "Masar Worker",
+  "short_name": "Masar",
+  "start_url": "/masar",
+  "display": "standalone",
+  "background_color": "#ece6d6",
+  "theme_color": "#00844E",
+  "icons": []
+}

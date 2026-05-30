@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.23.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.23.0 — Masar becomes a complete worker self-service app",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-15 09:00:00",
+    },
+    {
+        "title": "v1.23.0: Masar (/masar) is now a mobile worker app — a housed-and-transported employee opens a personal link and sees their profile and documents, their accommodation (building, room, in-charge contact), and their transport (pickup, route, vehicle, driver), and can raise requests. The old driver 'my route today' view moved into the driver portal where it belongs",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-15 09:01:00",
+    },
+    {
+        "title": "v1.23.0: A new 'Cost by Dimension' report breaks accommodation cost down by company, building and project; the Fuel Approval Console no longer shows stray markup on its metric tiles; and City now links to a real Country",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-15 09:02:00",
+    },
     # v1.22.1 ---------------------------------------------------------------
     {
         "title": "Apex 1.22.1 — the desk pages are more robust, dynamic, and comfortable",

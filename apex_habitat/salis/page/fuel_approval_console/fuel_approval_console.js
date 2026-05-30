@@ -253,15 +253,19 @@ class FuelApprovalConsole {
 
 		// The two numbers that drive the decision, shown prominently.
 		const $metrics = $('<div class="fac-card-metrics"></div>').appendTo($card);
+		// `inline: true` keeps the formatter from wrapping its output in a
+		// `<div style='text-align:right'>` (frappe.form.formatters._right). The
+		// metric value is set via .text(), so any markup would render as literal
+		// "<div ...>" text on the card. We want the bare formatted value.
 		this._add_metric(
 			$metrics,
 			__("Litres"),
-			frappe.format(row.requested_litres, { fieldtype: "Float" })
+			frappe.format(row.requested_litres, { fieldtype: "Float" }, { inline: true })
 		);
 		this._add_metric(
 			$metrics,
 			__("Amount"),
-			frappe.format(row.amount, { fieldtype: "Currency" })
+			frappe.format(row.amount, { fieldtype: "Currency" }, { inline: true })
 		);
 
 		// Secondary context.

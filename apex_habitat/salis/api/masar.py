@@ -13,6 +13,7 @@ UI inside the existing /driver portal. No GL, no side-effects.
 """
 
 import frappe
+from frappe import _
 
 from apex_habitat.salis.api.driver_portal import _require_enabled, _resolve_driver
 
@@ -274,3 +275,408 @@ def get_my_worker_route_summary() -> dict:
         "expected_total": expected_total,
         "next_pickup": next_pickup,
     }
+
+
+# ────────────────────────── Worker self-service (Masar app) ──────────────────────────
+#
+# These endpoints power the worker-facing Masar SPA (/masar). Workers are NOT
+# Frappe users: identity comes from a personal, unguessable ``token`` (Masar
+# Worker Token) that resolves server-side to exactly ONE Employee. The client
+# NEVER supplies an employee id; every query below is scoped to the resolved
+# employee, so a token can only ever surface its own worker's data — no
+# cross-worker leakage. All endpoints are guest-accessible and read-mostly; the
+# single writer (create_worker_request) reuses the native Accommodation Resident
+# Request channel and posts no GL.
+
+# Request categories the worker app exposes (a curated subset of the native
+# Accommodation Resident Request "Category" options). VALUES stay English — they
+# are sent straight to the DocType Select; the SPA translates only the labels.
+WORKER_REQUEST_CATEGORIES = (
+    "Maintenance",
+    "Cleaning",
+    "AC",
+    "Plumbing",
+    "Electrical",
+    "Water",
+    "Pest Control",
+    "Custody",
+    "Complaint",
+    "Suggestion",
+    "Other",
+)
+
+
+def _resolve_worker(token):
+    """Resolve a personal Masar token to its single Employee, or 403.
+
+    This is the ONE place a worker identity is established. Every worker endpoint
+    funnels through here, so data access is bound to the token's employee and can
+    never be widened by a client-supplied id. An unknown, blank, or disabled
+    token is rejected with a PermissionError (not a soft empty) so a bad link
+    fails closed."""
+    token = (token or "").strip()
+    if not token:
+        frappe.throw(_("A worker link token is required."), frappe.PermissionError)
+    row = frappe.db.get_value(
+        "Masar Worker Token",
+        {"token": token, "enabled": 1},
+        ["employee", "employee_name"],
+        as_dict=True,
+    )
+    if not row or not row.get("employee"):
+        frappe.throw(_("This worker link is invalid or has been disabled."), frappe.PermissionError)
+    return row["employee"]
+
+
+def _employee_doc(employee):
+    """The Employee document, read defensively (fields vary across HR setups)."""
+    return frappe.get_cached_doc("Employee", employee)
+
+
+def _fmt_date(value):
+    return frappe.utils.cstr(value) if value else None
+
+
+def _days_until(value):
+    """Whole days from today until ``value`` (a date), or None."""
+    if not value:
+        return None
+    try:
+        return frappe.utils.date_diff(value, frappe.utils.today())
+    except Exception:
+        return None
+
+
+@frappe.whitelist(allow_guest=True)
+def get_worker_context(token=None):
+    """The worker's own profile + document expiries (read, token-scoped).
+
+    Resolves the token to one Employee and returns the durable identity fields the
+    Masar profile screen shows. Employee field availability varies by HR setup, so
+    every field is read defensively via ``.get()``; missing fields surface as None
+    rather than erroring. Read-only, no commit, no GL."""
+    employee = _resolve_worker(token)
+    emp = _employee_doc(employee)
+
+    documents = []
+    # Iqama / residence permit. Field names vary across HR setups (a custom
+    # "iqama"/"iqama_no" + "iqama_expiry", or the standard HRMS "valid_upto" used
+    # for the residence document). Read defensively; surface only when present.
+    iqama_no = emp.get("iqama") or emp.get("iqama_no")
+    iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
+    if iqama_no or iqama_expiry:
+        documents.append(
+            {
+                "type": "iqama",
+                "number": iqama_no,
+                "expiry": _fmt_date(iqama_expiry),
+                "days_left": _days_until(iqama_expiry),
+            }
+        )
+    # Passport — standard HRMS fields passport_number + (custom) passport_expiry.
+    passport_no = emp.get("passport_number")
+    passport_expiry = emp.get("passport_expiry")
+    if passport_no:
+        documents.append(
+            {
+                "type": "passport",
+                "number": passport_no,
+                "expiry": _fmt_date(passport_expiry),
+                "days_left": _days_until(passport_expiry),
+            }
+        )
+
+    photo = emp.get("image")
+    return {
+        "employee": emp.name,
+        "employee_name": emp.get("employee_name"),
+        "employee_number": emp.get("employee_number") or emp.name,
+        "designation": emp.get("designation"),
+        "department": emp.get("department"),
+        "project": emp.get("project"),
+        "company": emp.get("company"),
+        "status": emp.get("status"),
+        "date_of_joining": _fmt_date(emp.get("date_of_joining")),
+        "cell_number": emp.get("cell_number") or emp.get("personal_email"),
+        "photo": photo,
+        "documents": documents,
+    }
+
+
+def _active_assignment(employee):
+    """The worker's current (submitted, not checked-out) Accommodation Assignment,
+    or None. Scoped strictly to the resolved employee."""
+    rows = frappe.get_all(
+        "Accommodation Assignment",
+        filters={
+            "employee": employee,
+            "docstatus": 1,
+            "check_out_date": ["is", "not set"],
+        },
+        fields=[
+            "name",
+            "building",
+            "room",
+            "bed",
+            "project",
+            "check_in_date",
+            "stay_type",
+            "expected_checkout_date",
+            "notes",
+        ],
+        order_by="check_in_date desc",
+        limit=1,
+    )
+    return rows[0] if rows else None
+
+
+@frappe.whitelist(allow_guest=True)
+def get_worker_accommodation(token=None):
+    """The worker's active accommodation (read, token-scoped).
+
+    Resolves the token to one Employee and returns their current housing —
+    building, room, bed, occupancy, the building in-charge contact, and any
+    building notices. Scoped to the resolved employee; a worker with no active
+    assignment gets a friendly ``{"assignment": None}`` empty state. Read-only."""
+    employee = _resolve_worker(token)
+    assignment = _active_assignment(employee)
+    if not assignment:
+        return {"assignment": None}
+
+    building = None
+    if assignment.get("building"):
+        b = frappe.db.get_value(
+            "Accommodation Building",
+            assignment["building"],
+            [
+                "name",
+                "building_name",
+                "city",
+                "district",
+                "address",
+                "google_maps_url",
+                "responsible_facility_supervisor",
+                "current_occupants",
+                "total_capacity",
+            ],
+            as_dict=True,
+        )
+        if b:
+            in_charge = None
+            user = b.get("responsible_facility_supervisor")
+            if user:
+                in_charge = {
+                    "name": frappe.utils.get_fullname(user) or user,
+                    "phone": frappe.db.get_value("User", user, "mobile_no"),
+                }
+            # City is autonamed by city_name, so the link value IS the city name.
+            building = {
+                "name": b.get("name"),
+                "building_name": b.get("building_name"),
+                "city": b.get("city"),
+                "district": b.get("district"),
+                "address": b.get("address"),
+                "google_maps_url": b.get("google_maps_url"),
+                "current_occupants": b.get("current_occupants"),
+                "total_capacity": b.get("total_capacity"),
+                "in_charge": in_charge,
+            }
+
+    room = None
+    if assignment.get("room"):
+        r = frappe.db.get_value(
+            "Accommodation Room",
+            assignment["room"],
+            ["name", "room_number", "floor", "room_type", "bed_capacity", "current_occupancy"],
+            as_dict=True,
+        )
+        room = r or None
+
+    bed = None
+    if assignment.get("bed"):
+        bd = frappe.db.get_value(
+            "Accommodation Bed", assignment["bed"], ["name", "bed_code", "status"], as_dict=True
+        )
+        bed = bd or None
+
+    return {
+        "assignment": {
+            "name": assignment["name"],
+            "check_in_date": _fmt_date(assignment.get("check_in_date")),
+            "stay_type": assignment.get("stay_type"),
+            "expected_checkout_date": _fmt_date(assignment.get("expected_checkout_date")),
+            "notes": assignment.get("notes"),
+        },
+        "building": building,
+        "room": room,
+        "bed": bed,
+    }
+
+
+def _worker_transport_requests(employee):
+    """Transport Requests whose worker manifest includes ``employee`` and that are
+    still live (not Rejected/Cancelled/Fulfilled). Scoped via the child table."""
+    parents = frappe.get_all(
+        "Transport Request Worker",
+        filters={"employee": employee, "parenttype": "Transport Request"},
+        fields=["parent", "pickup_point"],
+    )
+    by_request = {}
+    for p in parents:
+        by_request.setdefault(p["parent"], p.get("pickup_point"))
+    if not by_request:
+        return []
+    rows = frappe.get_all(
+        "Transport Request",
+        filters={
+            "name": ["in", list(by_request.keys())],
+            "status": ["not in", ["Rejected", "Cancelled"]],
+        },
+        fields=[
+            "name",
+            "service_line",
+            "request_type",
+            "project",
+            "accommodation_building",
+            "pickup_datetime",
+            "status",
+            "route_plan",
+            "assigned_vehicle",
+            "assigned_driver",
+            "dispatch_trip",
+        ],
+        order_by="pickup_datetime asc",
+    )
+    for r in rows:
+        r["pickup_point"] = by_request.get(r["name"])
+    return rows
+
+
+@frappe.whitelist(allow_guest=True)
+def get_worker_transport(token=None):
+    """The worker's upcoming shuttle(s) (read, token-scoped).
+
+    Resolves the token to one Employee and returns the transport requests that
+    carry them — pickup point + time, the ordered route stops, and (when
+    dispatched) the assigned vehicle/plate and driver name/contact. Scoped to the
+    resolved employee via the Transport Request worker manifest; a worker on no
+    live request gets ``{"trips": []}``. Read-only, no GL."""
+    employee = _resolve_worker(token)
+    requests = _worker_transport_requests(employee)
+    trips = []
+    for req in requests:
+        vehicle = None
+        if req.get("assigned_vehicle"):
+            v = frappe.db.get_value(
+                "Salis Vehicle",
+                req["assigned_vehicle"],
+                ["name", "plate_number", "vehicle_category"],
+                as_dict=True,
+            )
+            vehicle = v or None
+        driver = None
+        if req.get("assigned_driver"):
+            d = frappe.db.get_value(
+                "Salis Driver", req["assigned_driver"], ["full_name", "phone"], as_dict=True
+            )
+            driver = d or None
+        depart_time = None
+        if req.get("dispatch_trip"):
+            depart_time = _fmt_time(
+                frappe.db.get_value("Dispatch Trip", req["dispatch_trip"], "depart_time")
+            )
+        trips.append(
+            {
+                "transport_request": req["name"],
+                "request_type": req.get("request_type"),
+                "status": req.get("status"),
+                "pickup_point": req.get("pickup_point"),
+                "pickup_datetime": frappe.utils.cstr(req["pickup_datetime"])
+                if req.get("pickup_datetime")
+                else None,
+                "depart_time": depart_time,
+                "stops": _ordered_stops(req.get("route_plan")),
+                "vehicle": vehicle,
+                "driver": driver,
+            }
+        )
+    return {"date": frappe.utils.today(), "trips": trips}
+
+
+@frappe.whitelist(allow_guest=True)
+def list_worker_requests(token=None):
+    """The worker's own Accommodation Resident Requests (read, token-scoped).
+
+    Resolves the token to one Employee and returns the requests they raised —
+    reusing the native Accommodation Resident Request channel (no separate
+    ticketing engine). Scoped by ``employee``; cannot return another worker's
+    requests. Read-only."""
+    employee = _resolve_worker(token)
+    rows = frappe.get_all(
+        "Accommodation Resident Request",
+        filters={"employee": employee},
+        fields=[
+            "name",
+            "request_category",
+            "priority",
+            "issue_location",
+            "description",
+            "status",
+            "resolution_notes",
+            "creation",
+        ],
+        order_by="creation desc",
+        limit=50,
+    )
+    for r in rows:
+        r["creation"] = frappe.utils.cstr(r.get("creation"))
+    return rows
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+def create_worker_request(token=None, category=None, subject=None, body=None, priority=None):
+    """Raise an Accommodation Resident Request for the worker (write, token-scoped).
+
+    Reuses the native resident-request channel rather than inventing a ticketing
+    engine. The employee, building, room and bed are taken from the worker's
+    resolved identity + active assignment — NEVER from the client — so a request
+    can only ever be filed for the token's own worker, against their own housing.
+    Inserts a single ``source_channel = QR Web Form`` request as ``requester_type
+    = Worker``; posts no GL. ``subject`` is folded into the description (the native
+    DocType has no subject field)."""
+    employee = _resolve_worker(token)
+
+    category = (category or "Other").strip()
+    if category not in WORKER_REQUEST_CATEGORIES:
+        category = "Other"
+    priority = (priority or "Low").strip()
+    if priority not in ("Low", "Medium", "High", "Critical"):
+        priority = "Low"
+
+    subject = (subject or "").strip()
+    body = (body or "").strip()
+    if not body and not subject:
+        frappe.throw(_("Please describe your request."))
+    description = body if not subject else (f"{subject}\n\n{body}" if body else subject)
+
+    # Housing context comes from the worker's OWN active assignment, server-side.
+    assignment = _active_assignment(employee) or {}
+
+    doc = frappe.get_doc(
+        {
+            "doctype": "Accommodation Resident Request",
+            "source_channel": "QR Web Form",
+            "requester_type": "Worker",
+            "employee": employee,
+            "worker_name": frappe.db.get_value("Employee", employee, "employee_name"),
+            "building": assignment.get("building"),
+            "room": assignment.get("room"),
+            "bed": assignment.get("bed"),
+            "request_category": category,
+            "priority": priority,
+            "description": description,
+            "status": "New",
+        }
+    )
+    doc.insert(ignore_permissions=True)  # audit-ok — employee resolved from token server-side
+    return {"name": doc.name, "status": doc.status}
