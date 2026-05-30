@@ -10,10 +10,16 @@ def _ensure_test_driver():
 	"""Create a User+Employee+Salis Driver chain for portal tests; return driver name."""
 	user = "drv_dp@example.com"
 	if not frappe.db.exists("User", user):
-		u = frappe.get_doc({"doctype": "User", "email": user, "first_name": "Test Driver",
-		                    "send_welcome_email": 0})
-		u.add_roles("Driver")
-		u.insert(ignore_permissions=True)
+		# Idempotent + resilient to the full-suite isolation race where a sibling
+		# test class committed this user and left the exists() guard above stale.
+		try:
+			u = frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "Test Driver", "send_welcome_email": 0}
+			)
+			u.add_roles("Driver")
+			u.insert(ignore_permissions=True)
+		except frappe.DuplicateEntryError:
+			pass
 	emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
 	if not emp:
 		company = (frappe.defaults.get_global_default("company")
