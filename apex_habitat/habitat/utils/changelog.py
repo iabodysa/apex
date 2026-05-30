@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.18.3 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.18.3 — leaner Arabic translations",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-07 09:00:00",
+    },
+    {
+        "title": "v1.18.3: Standard Frappe terms (statuses, months, generic labels) now use Frappe's own Arabic translations; the app's file keeps only its domain-specific Salis and Habitat strings",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-07 09:01:00",
+    },
+    {
+        "title": "v1.18.3: Terms Frappe does not translate (such as Approved) are retained, so no label regresses to English",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-07 09:02:00",
+    },
     # v1.18.2 ---------------------------------------------------------------
     {
         "title": "Apex 1.18.2 — vehicle, driver and passenger-manifest lists are now project-scoped",
