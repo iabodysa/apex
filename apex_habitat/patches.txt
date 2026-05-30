@@ -160,3 +160,21 @@ apex_habitat.patches.v1_x.fix_navbar_routes_to_apex_core
 # Idempotent, existence-guarded on the table (no schema error during migrate), and
 # a no-op on a fresh install. Touches no GL.
 apex_habitat.patches.v1_x.dedupe_fuel_ledger_and_unique_index
+
+# v1.x — remove dead code: deprecated Habitat Operations Alert + dead options/city
+# ONE-TIME (prune-eligible once every deployed site has run them): each drops a
+# truly-dead artifact with no writer/reader/import left. All idempotent,
+# existence-guarded and no-ops on fresh installs.
+#   - drop_habitat_operations_alert: drops the deprecated "Habitat Operations
+#     Alert" DocType + table and its "Unresolved Alerts" Number Card (superseded
+#     by the Salis "Operations Alert" DocType + native Notifications). The card
+#     fixture is re-pointed at "Operations Alert"; the patch only removes the card
+#     if an installed site still has it bound to the dropped DocType.
+#   - drop_habitat_city: drops the empty, deprecated "Habitat City" DocType/table
+#     left after v0_7.rename_habitat_city_to_city; the source fixture is gone.
+#   - drop_dead_operations_alert_options: normalises any legacy "Operations Alert"
+#     row off the removed alert_type options ("No Fuel"/"Incomplete Handover",
+#     never written) to "General" so it stays selectable in the narrower set.
+apex_habitat.patches.v1_x.drop_habitat_operations_alert
+apex_habitat.patches.v1_x.drop_habitat_city
+apex_habitat.patches.v1_x.drop_dead_operations_alert_options

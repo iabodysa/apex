@@ -31,7 +31,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Alert Type",
-   "options": "No Fuel\nIdle Vehicle\nForgotten Request\nSupervisor Delay\nExcessive Topup\nIncomplete Handover\nLicense Expiry",
+   "options": "Idle Vehicle\nForgotten Request\nSupervisor Delay\nExcessive Topup\nLicense Expiry",
    "reqd": 1
   },
   {
