@@ -6,6 +6,8 @@ const routes = [
   { path: "/trips", name: "trips", component: () => import("./pages/Trips.vue") },
   { path: "/fuel", name: "fuel", component: () => import("./pages/Fuel.vue") },
   { path: "/tickets", name: "tickets", component: () => import("./pages/Tickets.vue") },
+  { path: "/profile", name: "profile", component: () => import("./pages/Profile.vue") },
+  { path: "/vehicle", name: "vehicle", component: () => import("./pages/Vehicle.vue") },
 ];
 
 export default createRouter({ history: createWebHashHistory(), routes });

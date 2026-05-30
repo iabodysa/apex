@@ -14,7 +14,8 @@
         </template>
       </template>
       <span v-else class="text-xl font-extrabold tracking-tight">Salis</span>
-      <span class="pill pill-accent">Driver Portal</span>
+      <span class="pill pill-accent">{{ t("common.driverPortal") }}</span>
+      <div class="ms-auto"><LangToggle /></div>
     </header>
 
     <!-- STAFF: signed-in desk operator with no driver profile. Not an error. -->
@@ -28,14 +29,11 @@
             <Icon name="user" :size="22" />
           </span>
           <div class="min-w-0">
-            <div class="text-base font-bold truncate">{{ ctx.full_name || "Signed in" }}</div>
-            <span class="pill pill-accent mt-0.5">Staff</span>
+            <div class="text-base font-bold truncate">{{ ctx.full_name || t("common.staff") }}</div>
+            <span class="pill pill-accent mt-0.5">{{ t("common.staff") }}</span>
           </div>
         </div>
-        <p class="mt-3 text-sm text-soft">
-          This mobile portal is for drivers. As staff, use your desk tools below to manage the
-          fleet.
-        </p>
+        <p class="mt-3 text-sm text-soft">{{ t("unlinked.staffHint") }}</p>
       </div>
 
       <div v-if="ctx.links && ctx.links.length" class="space-y-3">
@@ -68,15 +66,12 @@
           <Icon name="user" :size="26" />
         </span>
         <div class="mt-3 text-base font-bold">
-          Hello{{ ctx.full_name ? ", " + ctx.full_name : "" }}
+          {{ t("unlinked.hello") }}{{ ctx.full_name ? ", " + ctx.full_name : "" }}
         </div>
-        <p class="mt-2 text-sm text-soft">
-          Your account isn't linked to a driver profile yet. If you're a driver, ask your
-          supervisor to link your account.
-        </p>
+        <p class="mt-2 text-sm text-soft">{{ t("unlinked.notLinked") }}</p>
       </div>
       <a href="/app" class="btn btn-primary" style="text-decoration: none">
-        <Icon name="external" :size="18" /> Go to the main app
+        <Icon name="external" :size="18" /> {{ t("common.goToApp") }}
       </a>
     </section>
   </div>
@@ -85,6 +80,10 @@
 <script setup>
 import Icon from "./Icon.vue";
 import Brand from "./Brand.vue";
+import LangToggle from "./LangToggle.vue";
+import { useI18n } from "../i18n";
+
+const { t } = useI18n();
 
 defineProps({
   ctx: { type: Object, required: true },

@@ -142,6 +142,80 @@ def get_driver_context():
 
 
 @frappe.whitelist()
+def get_driver_profile():
+	"""The current driver's OWN profile (read).
+
+	Identity-scoped: the driver is resolved from the session, never client-supplied,
+	so this can only ever return the caller's own record — it cannot leak another
+	driver's data. Read-only, no commit. Returns the durable fields the portal
+	profile view shows (name, employee, status, license, contact, current vehicle).
+	Date fields are stringified so the JSON response always serializes."""
+	_require_enabled()
+	driver = _resolve_driver()
+	d = frappe.db.get_value(
+		"Salis Driver", driver,
+		["name", "full_name", "employee", "status", "phone", "project",
+		 "license_number", "license_expiry", "current_vehicle"],
+		as_dict=True,
+	) or {}
+	if d.get("license_expiry"):
+		d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
+	return d
+
+
+@frappe.whitelist()
+def get_my_vehicle():
+	"""The current driver's CURRENT vehicle (read).
+
+	Identity-scoped: resolves the driver from the session, then returns the vehicle
+	bound to them — their ``current_vehicle`` if set, otherwise the vehicle on an
+	Active Vehicle Assignment (the same binding rule ``_vehicle_bound_to_driver``
+	enforces for writes). Returns ``{"vehicle": None}`` (a friendly empty state) when
+	no vehicle is bound. Read-only, no commit."""
+	_require_enabled()
+	driver = _resolve_driver()
+
+	vehicle = frappe.db.get_value("Salis Driver", driver, "current_vehicle")
+	assignment = None
+	if not vehicle:
+		# Fall back to an Active Vehicle Assignment for this driver.
+		assignment = frappe.db.get_value(
+			"Vehicle Assignment",
+			{"driver": driver, "status": "Active"},
+			["name", "vehicle", "start_date"],
+			as_dict=True,
+		)
+		if assignment:
+			vehicle = assignment.get("vehicle")
+
+	if not vehicle:
+		return {"vehicle": None}
+
+	v = frappe.db.get_value(
+		"Salis Vehicle", vehicle,
+		["name", "plate_number", "vehicle_category", "status", "ownership", "project"],
+		as_dict=True,
+	) or {}
+
+	# Surface the active-assignment start date when available (either the matched
+	# fallback assignment, or — when the vehicle came from current_vehicle — the
+	# driver's Active Vehicle Assignment for that same vehicle, if one exists).
+	if assignment is None:
+		assignment = frappe.db.get_value(
+			"Vehicle Assignment",
+			{"driver": driver, "vehicle": vehicle, "status": "Active"},
+			["name", "start_date"],
+			as_dict=True,
+		)
+	v["assignment_start"] = (
+		frappe.utils.cstr(assignment["start_date"])
+		if assignment and assignment.get("start_date")
+		else None
+	)
+	return {"vehicle": v}
+
+
+@frappe.whitelist()
 def my_trips_today():
 	"""Today's Dispatch Trips for the current driver (read)."""
 	_require_enabled()

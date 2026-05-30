@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-4">
-    <h2 class="section-title">My Trips Today</h2>
+    <h2 class="section-title">{{ t("trips.title") }}</h2>
 
-    <div v-if="trips.loading" class="text-muted text-sm">Loading…</div>
+    <div v-if="trips.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
 
     <div v-else-if="!trips.data || !trips.data.length" class="card card-pad text-center">
       <div
@@ -11,8 +11,8 @@
       >
         <Icon name="route" :size="22" />
       </div>
-      <p class="font-semibold">No trips scheduled</p>
-      <p class="text-sm text-muted">You have nothing on the board today.</p>
+      <p class="font-semibold">{{ t("trips.empty") }}</p>
+      <p class="text-sm text-muted">{{ t("trips.emptyHint") }}</p>
     </div>
 
     <div v-for="t in trips.data" :key="t.name" class="card card-pad">
@@ -33,6 +33,9 @@
 <script setup>
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import { useI18n } from "../i18n";
+
+const { t } = useI18n();
 
 const trips = createResource({
   url: "apex_habitat.salis.api.driver_portal.my_trips_today",

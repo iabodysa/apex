@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.20.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.20.0 — driver portal: language toggle, profile and vehicle views",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-11 09:00:00",
+    },
+    {
+        "title": "v1.20.0: Each driver can switch the portal between English and Arabic (full right-to-left layout); English stays the default and the choice is remembered on the device",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-11 09:01:00",
+    },
+    {
+        "title": "v1.20.0: New driver profile and vehicle pages - a driver can view their own profile (license, status, project) and their assigned vehicle's details",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-11 09:02:00",
+    },
     # v1.19.1 ---------------------------------------------------------------
     {
         "title": "Apex 1.19.1 — Arabic module names, a tidier settings hub, and a cleaner portal",

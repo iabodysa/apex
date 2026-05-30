@@ -1,10 +1,10 @@
 <template>
-  <div class="app-shell">
+  <div class="app-shell" :dir="dir">
     <!-- Loading -->
     <div v-if="ctx.loading" class="flex-1 grid place-items-center p-8">
       <div class="text-center">
         <div class="spinner mx-auto"></div>
-        <p class="mt-3 text-sm text-muted">Loading…</p>
+        <p class="mt-3 text-sm text-muted">{{ t("common.loading") }}</p>
       </div>
     </div>
 
@@ -41,19 +41,22 @@
               Salis
             </span>
 
-            <!-- Driver avatar -->
-            <span
-              class="avatar h-9 w-9 text-sm"
-              style="background: var(--c-header-accent); color: var(--c-header-bg)"
-            >
-              {{ initial }}
-            </span>
+            <!-- Language selector + driver avatar -->
+            <div class="flex items-center gap-2 shrink-0">
+              <LangToggle variant="header" />
+              <span
+                class="avatar h-9 w-9 text-sm"
+                style="background: var(--c-header-accent); color: var(--c-header-bg)"
+              >
+                {{ initial }}
+              </span>
+            </div>
           </div>
 
           <!-- Greeting -->
           <div class="mt-3">
             <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--c-header-accent)">
-              Driver Portal
+              {{ t("common.driverPortal") }}
             </p>
             <h1 class="text-xl font-extrabold leading-tight truncate" style="color: var(--c-header-ink)">
               {{ greeting }}<span v-if="firstName">, {{ firstName }}</span>
@@ -66,10 +69,10 @@
         <router-view :ctx="ctx.data" />
       </main>
 
-      <nav class="tabbar">
-        <router-link v-for="t in tabs" :key="t.to" :to="t.to" class="tab">
-          <span class="tab-icon-wrap"><Icon :name="t.icon" :size="22" /></span>
-          <span>{{ t.label }}</span>
+      <nav class="tabbar" :style="{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }">
+        <router-link v-for="tab in tabs" :key="tab.to" :to="tab.to" class="tab">
+          <span class="tab-icon-wrap"><Icon :name="tab.icon" :size="22" /></span>
+          <span>{{ t(tab.labelKey) }}</span>
           <span class="tab-pip"></span>
         </router-link>
       </nav>
@@ -84,10 +87,10 @@
         >
           <Icon name="alert" :size="26" />
         </div>
-        <p class="font-bold mb-1">Couldn't load the portal</p>
+        <p class="font-bold mb-1">{{ t("errors.loadFailed") }}</p>
         <p class="text-sm text-muted">{{ ctx.error.message || ctx.error }}</p>
         <button class="btn btn-primary mt-4" style="width: auto; padding-inline: 24px" @click="ctx.reload()">
-          Retry
+          {{ t("common.retry") }}
         </button>
       </div>
     </div>
@@ -98,11 +101,27 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { createResource } from "frappe-ui";
 import Unlinked from "./components/Unlinked.vue";
 import Icon from "./components/Icon.vue";
 import Brand from "./components/Brand.vue";
+import LangToggle from "./components/LangToggle.vue";
+import { useI18n } from "./i18n";
+
+const { t, dir } = useI18n();
+
+// Keep the document direction (and lang attribute) in sync with the chosen
+// language so native RTL applies to the whole page, scrollbars and inputs
+// included — not just the app shell.
+watch(
+  dir,
+  (d) => {
+    document.documentElement.setAttribute("dir", d);
+    document.documentElement.setAttribute("lang", d === "rtl" ? "ar" : "en");
+  },
+  { immediate: true },
+);
 
 const ctx = createResource({
   url: "apex_habitat.salis.api.driver_portal.get_driver_context",
@@ -123,9 +142,9 @@ const initial = computed(
 // Time-of-day greeting (purely cosmetic).
 const greeting = computed(() => {
   const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
+  if (h < 12) return t("greeting.morning");
+  if (h < 18) return t("greeting.afternoon");
+  return t("greeting.evening");
 });
 
 // Branding flags projected by the page template (www/driver.html). Default to
@@ -134,11 +153,12 @@ const showBrand = computed(() => window.portal_show_brand !== false);
 const brandLogo = computed(() => window.portal_logo || "");
 
 const tabs = [
-  { to: "/", icon: "home", label: "Home" },
-  { to: "/attendance", icon: "calendar", label: "Attend" },
-  { to: "/trips", icon: "route", label: "Trips" },
-  { to: "/fuel", icon: "fuel", label: "Fuel" },
-  { to: "/tickets", icon: "help", label: "Support" },
+  { to: "/", icon: "home", labelKey: "nav.home" },
+  { to: "/attendance", icon: "calendar", labelKey: "nav.attendance" },
+  { to: "/trips", icon: "route", labelKey: "nav.trips" },
+  { to: "/fuel", icon: "fuel", labelKey: "nav.fuel" },
+  { to: "/tickets", icon: "help", labelKey: "nav.tickets" },
+  { to: "/profile", icon: "user", labelKey: "nav.profile" },
 ];
 
 // Normalise the payload for the Unlinked screen. On a bootstrap error (rare —

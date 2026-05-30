@@ -10,6 +10,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     Brand: typeof import('./src/components/Brand.vue')['default']
     Icon: typeof import('./src/components/Icon.vue')['default']
+    LangToggle: typeof import('./src/components/LangToggle.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Unlinked: typeof import('./src/components/Unlinked.vue')['default']

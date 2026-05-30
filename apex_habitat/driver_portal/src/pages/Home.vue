@@ -22,13 +22,13 @@
       <div class="space-y-3 text-sm">
         <div class="flex items-center gap-2">
           <Icon name="truck" :size="18" class="text-primary shrink-0" />
-          <span class="text-muted">Vehicle</span>
-          <span class="ml-auto font-semibold">{{ ctx.driver.current_vehicle || "Not assigned" }}</span>
+          <span class="text-muted">{{ t("home.vehicle") }}</span>
+          <span class="ms-auto font-semibold">{{ ctx.driver.current_vehicle || t("common.notAssigned") }}</span>
         </div>
         <div v-if="ctx.driver.license_expiry" class="flex items-center gap-2" :class="licenseColor">
           <Icon :name="licenseIcon" :size="18" class="shrink-0" />
-          <span class="text-muted">License</span>
-          <span class="ml-auto font-semibold">
+          <span class="text-muted">{{ t("home.license") }}</span>
+          <span class="ms-auto font-semibold">
             {{ ctx.driver.license_expiry }}
             <span v-if="licenseHint" class="opacity-90">· {{ licenseHint }}</span>
           </span>
@@ -38,7 +38,7 @@
 
     <!-- Quick actions -->
     <section>
-      <h2 class="section-title mb-3">Quick actions</h2>
+      <h2 class="section-title mb-3">{{ t("home.quickActions") }}</h2>
       <div class="grid grid-cols-2 gap-3">
         <router-link
           v-for="a in actions"
@@ -48,7 +48,7 @@
           :style="a.style"
         >
           <Icon :name="a.icon" :size="26" />
-          <span class="font-bold">{{ a.label }}</span>
+          <span class="font-bold">{{ t(a.labelKey) }}</span>
         </router-link>
       </div>
     </section>
@@ -58,6 +58,9 @@
 <script setup>
 import { computed } from "vue";
 import Icon from "../components/Icon.vue";
+import { useI18n } from "../i18n";
+
+const { t } = useI18n();
 
 const props = defineProps({ ctx: { type: Object, required: true } });
 
@@ -94,8 +97,8 @@ const licenseIcon = computed(() =>
 const licenseHint = computed(() => {
   const d = daysToExpiry.value;
   if (d === null) return "";
-  if (d < 0) return "expired";
-  if (d <= 30) return `${d} day(s) left`;
+  if (d < 0) return t("license.expired");
+  if (d <= 30) return t("license.daysLeft", { n: d });
   return "";
 });
 
@@ -104,25 +107,39 @@ const actions = [
   {
     to: "/attendance",
     icon: "calendar",
-    label: "Attendance",
+    labelKey: "home.attendance",
     style: "background: var(--c-primary); color: var(--c-primary-ink);",
   },
   {
     to: "/trips",
     icon: "route",
-    label: "My Trips",
+    labelKey: "home.myTrips",
     style: "background: var(--c-ink); color: var(--c-surface);",
+  },
+  {
+    to: "/vehicle",
+    icon: "truck",
+    labelKey: "home.myVehicle",
+    style: "background: var(--c-mint); color: var(--c-ink);",
   },
   {
     to: "/fuel",
     icon: "fuel",
-    label: "Request Fuel",
-    style: "background: var(--c-mint); color: var(--c-ink);",
+    labelKey: "home.requestFuel",
+    style:
+      "background: var(--c-surface); color: var(--c-ink); border: var(--border-width) solid var(--c-border);",
+  },
+  {
+    to: "/profile",
+    icon: "user",
+    labelKey: "home.profile",
+    style:
+      "background: var(--c-surface); color: var(--c-ink); border: var(--border-width) solid var(--c-border);",
   },
   {
     to: "/tickets",
     icon: "help",
-    label: "Support",
+    labelKey: "home.support",
     style:
       "background: var(--c-surface); color: var(--c-ink); border: var(--border-width) solid var(--c-border);",
   },
