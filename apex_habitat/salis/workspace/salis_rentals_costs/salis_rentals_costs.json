@@ -80,24 +80,16 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Vehicle Damage Write-Off",
-   "link_type": "DocType",
-   "link_to": "Vehicle Damage Write-Off",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Salis Payment Request",
    "link_type": "DocType",
    "link_to": "Salis Payment Request",
-   "idx": 7
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Engine Ledgers / Audit",
-   "idx": 8
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -105,7 +97,7 @@
    "label": "Rental Accrual Ledger",
    "link_type": "DocType",
    "link_to": "Rental Accrual Ledger",
-   "idx": 9
+   "idx": 8
   },
   {
    "doctype": "Workspace Link",
@@ -113,7 +105,7 @@
    "label": "Fuel Consumption Ledger",
    "link_type": "DocType",
    "link_to": "Fuel Consumption Ledger",
-   "idx": 10
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -121,21 +113,13 @@
    "label": "Trip Fulfilment Ledger",
    "link_type": "DocType",
    "link_to": "Trip Fulfilment Ledger",
-   "idx": 11
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Vehicle Utilisation Snapshot",
-   "link_type": "DocType",
-   "link_to": "Vehicle Utilisation Snapshot",
-   "idx": 12
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Views",
-   "idx": 13
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -143,7 +127,7 @@
    "label": "Rental Settlement Register",
    "link_type": "Report",
    "link_to": "Rental Settlement Register",
-   "idx": 14,
+   "idx": 12,
    "is_query_report": 1
   },
   {
@@ -152,7 +136,7 @@
    "label": "Rental Cost by Office",
    "link_type": "Report",
    "link_to": "Rental Cost by Office",
-   "idx": 15,
+   "idx": 13,
    "is_query_report": 1
   },
   {
@@ -161,7 +145,7 @@
    "label": "Rental Variance Report",
    "link_type": "Report",
    "link_to": "Rental Variance Report",
-   "idx": 16,
+   "idx": 14,
    "is_query_report": 1
   },
   {
@@ -170,7 +154,7 @@
    "label": "Movement Cost Recovery Register",
    "link_type": "Report",
    "link_to": "Movement Cost Recovery Register",
-   "idx": 17,
+   "idx": 15,
    "is_query_report": 1
   },
   {
@@ -179,7 +163,7 @@
    "label": "Cost Recovery Aging",
    "link_type": "Report",
    "link_to": "Cost Recovery Aging",
-   "idx": 18,
+   "idx": 16,
    "is_query_report": 1
   },
   {
@@ -188,7 +172,7 @@
    "label": "Movement Cost Summary",
    "link_type": "Report",
    "link_to": "Movement Cost Summary",
-   "idx": 19,
+   "idx": 17,
    "is_query_report": 1
   },
   {
@@ -197,7 +181,7 @@
    "label": "Salis Payment Register",
    "link_type": "Report",
    "link_to": "Salis Payment Register",
-   "idx": 20,
+   "idx": 18,
    "is_query_report": 1
   }
  ],
@@ -247,5 +231,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 20:00:00.000000"
+ "modified": "2026-05-30 19:00:00.000000"
 }

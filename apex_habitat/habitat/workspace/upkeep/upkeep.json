@@ -104,9 +104,25 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Material Transfer",
+   "link_type": "DocType",
+   "link_to": "Accommodation Material Transfer",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Stock Ledger",
+   "link_type": "DocType",
+   "link_to": "Accommodation Stock Ledger",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Views",
-   "idx": 9
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -114,7 +130,7 @@
    "label": "Maintenance Backlog",
    "link_type": "Report",
    "link_to": "Maintenance Backlog",
-   "idx": 10,
+   "idx": 12,
    "is_query_report": 1
   },
   {
@@ -123,7 +139,7 @@
    "label": "Maintenance Aging",
    "link_type": "Report",
    "link_to": "Maintenance Aging",
-   "idx": 11,
+   "idx": 13,
    "is_query_report": 1
   },
   {
@@ -132,7 +148,7 @@
    "label": "Resident Supervisor Dashboard",
    "link_type": "Dashboard",
    "link_to": "Resident Supervisor Dashboard",
-   "idx": 12
+   "idx": 14
   }
  ],
  "charts": [],
@@ -163,5 +179,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-04 09:00:00.000000"
+ "modified": "2026-05-30 19:00:00.000000"
 }

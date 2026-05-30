@@ -81,24 +81,16 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Operations Alert",
-   "link_type": "DocType",
-   "link_to": "Operations Alert",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Sponsorship Transfer Case",
    "link_type": "DocType",
    "link_to": "Sponsorship Transfer Case",
-   "idx": 5
+   "idx": 4
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Driver Operations",
-   "idx": 6
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -106,7 +98,7 @@
    "label": "Salis Driver",
    "link_type": "DocType",
    "link_to": "Salis Driver",
-   "idx": 7
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
@@ -114,6 +106,14 @@
    "label": "Driver Clearance",
    "link_type": "DocType",
    "link_to": "Driver Clearance",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Driver Stop",
+   "link_type": "DocType",
+   "link_to": "Driver Stop",
    "idx": 8
   },
   {
@@ -195,5 +195,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 20:00:00.000000"
+ "modified": "2026-05-30 19:00:00.000000"
 }

@@ -94,9 +94,49 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Trip Start Log",
+   "link_type": "DocType",
+   "link_to": "Trip Start Log",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Stop",
+   "link_type": "DocType",
+   "link_to": "Vehicle Stop",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Wash Request",
+   "link_type": "DocType",
+   "link_to": "Wash Request",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Damage Write-Off",
+   "link_type": "DocType",
+   "link_to": "Vehicle Damage Write-Off",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Utilisation Snapshot",
+   "link_type": "DocType",
+   "link_to": "Vehicle Utilisation Snapshot",
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Views",
-   "idx": 7
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -104,7 +144,7 @@
    "label": "Salis Fleet Register",
    "link_type": "Report",
    "link_to": "Salis Fleet Register",
-   "idx": 8,
+   "idx": 13,
    "is_query_report": 1
   },
   {
@@ -113,7 +153,7 @@
    "label": "Vehicle Utilisation",
    "link_type": "Report",
    "link_to": "Vehicle Utilisation",
-   "idx": 9,
+   "idx": 14,
    "is_query_report": 1
   },
   {
@@ -122,7 +162,7 @@
    "label": "Representatives Fleet Dashboard",
    "link_type": "Dashboard",
    "link_to": "Salis - Representatives Fleet",
-   "idx": 10
+   "idx": 15
   },
   {
    "doctype": "Workspace Link",
@@ -130,7 +170,7 @@
    "label": "Fleet Supervisor Dashboard",
    "link_type": "Dashboard",
    "link_to": "Fleet Supervisor Dashboard",
-   "idx": 11
+   "idx": 16
   }
  ],
  "charts": [],
@@ -179,5 +219,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 21:30:00.000000"
+ "modified": "2026-05-30 19:00:00.000000"
 }

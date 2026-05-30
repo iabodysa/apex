@@ -71,17 +71,9 @@
   },
   {
    "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Wash Request",
-   "link_type": "DocType",
-   "link_to": "Wash Request",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Views",
-   "idx": 6
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -89,7 +81,7 @@
    "label": "Worker Transport Plan",
    "link_type": "Report",
    "link_to": "Worker Transport Plan",
-   "idx": 7,
+   "idx": 6,
    "is_query_report": 1
   },
   {
@@ -98,7 +90,7 @@
    "label": "Driver Attendance Summary",
    "link_type": "Report",
    "link_to": "Driver Attendance Summary",
-   "idx": 8,
+   "idx": 7,
    "is_query_report": 1
   },
   {
@@ -107,7 +99,7 @@
    "label": "Transport Fulfilment SLA",
    "link_type": "Report",
    "link_to": "Transport Fulfilment SLA",
-   "idx": 9,
+   "idx": 8,
    "is_query_report": 1
   },
   {
@@ -116,7 +108,7 @@
    "label": "Workers Transport Dashboard",
    "link_type": "Dashboard",
    "link_to": "Salis - Workers Transport",
-   "idx": 10
+   "idx": 9
   }
  ],
  "charts": [],
@@ -165,5 +157,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-29 21:30:00.000000"
+ "modified": "2026-05-30 19:00:00.000000"
 }
