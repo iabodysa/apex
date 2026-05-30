@@ -235,7 +235,6 @@ def driver_check_in(photo=None):
 	if photo:
 		doc.append("images", {"image": photo, "captured_at": frappe.utils.now_datetime()})
 	_persist_attendance(doc)
-	frappe.db.commit()
 	return {"name": doc.name, "check_in": str(doc.check_in)}
 
 
@@ -259,7 +258,6 @@ def driver_check_out(photo=None):
 	if photo:
 		doc.append("images", {"image": photo, "captured_at": frappe.utils.now_datetime()})
 	_persist_attendance(doc)
-	frappe.db.commit()
 	return {"name": doc.name, "check_out": str(doc.check_out)}
 
 
@@ -302,7 +300,6 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 		 "request_date": frappe.utils.today(), "status": "Pending"}
 	)
 	doc.insert(ignore_permissions=True)  # audit-ok — driver resolved server-side
-	frappe.db.commit()
 	return {"name": doc.name}
 
 
@@ -316,5 +313,4 @@ def raise_support_ticket(category, priority, subject, description):
 		 "description": description, "status": "New"}
 	)
 	doc.insert(ignore_permissions=True)  # audit-ok
-	frappe.db.commit()
 	return {"name": doc.name}

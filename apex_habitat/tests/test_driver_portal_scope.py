@@ -1,9 +1,8 @@
 """Driver portal identity-scope tests: a driver only sees their own data, and a
 fuel request without an assigned vehicle is rejected."""
 
-import unittest
-
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api import driver_portal
 from apex_habitat.tests.test_driver_portal import _ensure_test_driver
@@ -11,16 +10,11 @@ from apex_habitat.tests.test_driver_portal import _ensure_test_driver
 
 def _driver_without_vehicle(email):
     if not frappe.db.exists("User", email):
-        # Idempotent + resilient to the full-suite isolation race (a sibling class
-        # committed this user, leaving the exists() guard above stale).
-        try:
-            u = frappe.get_doc(
-                {"doctype": "User", "email": email, "first_name": "NoVeh", "send_welcome_email": 0}
-            )
-            u.add_roles("Driver")
-            u.insert(ignore_permissions=True)
-        except frappe.DuplicateEntryError:
-            pass
+        u = frappe.get_doc(
+            {"doctype": "User", "email": email, "first_name": "NoVeh", "send_welcome_email": 0}
+        )
+        u.add_roles("Driver")
+        u.insert(ignore_permissions=True)
     emp = frappe.db.get_value("Employee", {"user_id": email}, "name")
     if not emp:
         company = (frappe.defaults.get_global_default("company")
@@ -40,12 +34,9 @@ def _ensure_unlinked_user(email):
     """A logged-in user with NO Employee/Salis Driver chain — e.g. an admin
     previewing /driver. The portal must greet them, never 403."""
     if not frappe.db.exists("User", email):
-        try:
-            frappe.get_doc(
-                {"doctype": "User", "email": email, "first_name": "Unlinked", "send_welcome_email": 0}
-            ).insert(ignore_permissions=True)
-        except frappe.DuplicateEntryError:
-            pass
+        frappe.get_doc(
+            {"doctype": "User", "email": email, "first_name": "Unlinked", "send_welcome_email": 0}
+        ).insert(ignore_permissions=True)
     return email
 
 
@@ -53,28 +44,24 @@ def _ensure_staff_user(email, role):
     """A logged-in Salis *staff* user (holds a desk role) with NO Salis Driver.
     Opening /driver must give them a useful staff payload, never a dead-end."""
     if not frappe.db.exists("User", email):
-        try:
-            u = frappe.get_doc(
-                {"doctype": "User", "email": email, "first_name": "Staff", "send_welcome_email": 0}
-            )
-            u.insert(ignore_permissions=True)
-        except frappe.DuplicateEntryError:
-            pass
+        frappe.get_doc(
+            {"doctype": "User", "email": email, "first_name": "Staff", "send_welcome_email": 0}
+        ).insert(ignore_permissions=True)
     user = frappe.get_doc("User", email)
     if role not in {r.role for r in user.roles}:
         user.add_roles(role)
     return email
 
 
-class TestDriverPortalScope(unittest.TestCase):
+class TestDriverPortalScope(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
         cls.driver_a = _ensure_test_driver()
         cls.driver_b, cls.user_b = _driver_without_vehicle("drv_noveh@example.com")
         cls.unlinked_user = _ensure_unlinked_user("drv_unlinked@example.com")
-        frappe.db.commit()
 
     def tearDown(self):
         frappe.set_user("Administrator")
@@ -141,15 +128,12 @@ class TestDriverPortalScope(unittest.TestCase):
         foreign = frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": "FOREIGN VEH 1", "status": "Active"}
         ).insert(ignore_permissions=True).name
-        frappe.db.commit()
         emp = frappe.db.get_value("Salis Driver", self.driver_a, "employee")
         user_a = frappe.db.get_value("Employee", emp, "user_id")
         frappe.set_user(user_a)
         with self.assertRaises(frappe.PermissionError):
             driver_portal.submit_fuel_request(litres=20, vehicle=foreign)
         frappe.set_user("Administrator")
-        frappe.delete_doc("Salis Vehicle", foreign, ignore_permissions=True, force=True)
-        frappe.db.commit()
 
     def test_fuel_request_accepts_vehicle_via_active_assignment(self):
         """A vehicle bound through an Active Vehicle Assignment is accepted even
@@ -158,31 +142,23 @@ class TestDriverPortalScope(unittest.TestCase):
         assigned = frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": "ASSIGNED VEH 1", "status": "Active"}
         ).insert(ignore_permissions=True).name
-        va = frappe.get_doc(
+        frappe.get_doc(
             {"doctype": "Vehicle Assignment", "driver": self.driver_a,
              "vehicle": assigned, "status": "Active",
              "start_date": frappe.utils.today()}
         ).insert(ignore_permissions=True)
-        frappe.db.commit()
         emp = frappe.db.get_value("Salis Driver", self.driver_a, "employee")
         user_a = frappe.db.get_value("Employee", emp, "user_id")
         frappe.set_user(user_a)
         res = driver_portal.submit_fuel_request(litres=15, vehicle=assigned)
         self.assertEqual(frappe.db.get_value("Fuel Request", res["name"], "vehicle"), assigned)
         frappe.set_user("Administrator")
-        frappe.delete_doc("Fuel Request", res["name"], ignore_permissions=True, force=True)
-        va.delete(ignore_permissions=True)
-        frappe.delete_doc("Salis Vehicle", assigned, ignore_permissions=True, force=True)
-        frappe.db.commit()
 
     def test_trips_scoped_to_self(self):
         trip = frappe.get_doc({"doctype": "Dispatch Trip", "driver": self.driver_a,
                                "trip_date": frappe.utils.today(), "status": "Planned"}).insert(
             ignore_permissions=True)
-        frappe.db.commit()
         frappe.set_user(self.user_b)
         names = [t["name"] for t in driver_portal.my_trips_today()]
         self.assertNotIn(trip.name, names)
         frappe.set_user("Administrator")
-        trip.delete(ignore_permissions=True)
-        frappe.db.commit()

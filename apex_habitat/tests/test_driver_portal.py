@@ -1,25 +1,23 @@
-import unittest
-
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api import driver_portal
 from apex_habitat.salis.api.driver_portal import _resolve_driver
 
 
 def _ensure_test_driver():
-	"""Create a User+Employee+Salis Driver chain for portal tests; return driver name."""
+	"""Create a User+Employee+Salis Driver chain for portal tests; return driver name.
+
+	Under FrappeTestCase every row created here lives inside the class transaction and
+	is rolled back at class teardown, so the chain stays test-local (no dev-site
+	pollution) and there is no cross-suite race that needs a DuplicateEntry guard."""
 	user = "drv_dp@example.com"
 	if not frappe.db.exists("User", user):
-		# Idempotent + resilient to the full-suite isolation race where a sibling
-		# test class committed this user and left the exists() guard above stale.
-		try:
-			u = frappe.get_doc(
-				{"doctype": "User", "email": user, "first_name": "Test Driver", "send_welcome_email": 0}
-			)
-			u.add_roles("Driver")
-			u.insert(ignore_permissions=True)
-		except frappe.DuplicateEntryError:
-			pass
+		u = frappe.get_doc(
+			{"doctype": "User", "email": user, "first_name": "Test Driver", "send_welcome_email": 0}
+		)
+		u.add_roles("Driver")
+		u.insert(ignore_permissions=True)
 	emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
 	if not emp:
 		company = (frappe.defaults.get_global_default("company")
@@ -37,25 +35,43 @@ def _ensure_test_driver():
 		veh = frappe.get_doc({"doctype": "Salis Vehicle", "plate_number": "DP TEST 1",
 		                      "status": "Active"}).insert(ignore_permissions=True).name
 		frappe.db.set_value("Salis Driver", drv, "current_vehicle", veh)
-	frappe.db.commit()
 	return drv
 
 
-class TestDriverPortal(unittest.TestCase):
+class TestDriverPortal(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		frappe.set_user("Administrator")
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
 		cls.outsider = "outsider_dp@example.com"
 		if not frappe.db.exists("User", cls.outsider):
 			frappe.get_doc({"doctype": "User", "email": cls.outsider, "first_name": "Outsider",
 			                "send_welcome_email": 0}).insert(ignore_permissions=True)
-		frappe.db.commit()
 
 	def _driver_user(self):
 		drv = _ensure_test_driver()
 		emp = frappe.db.get_value("Salis Driver", drv, "employee")
 		return drv, frappe.db.get_value("Employee", emp, "user_id")
+
+	def _clear_today_attendance(self, driver):
+		"""Drop any of today's Driver Attendance for ``driver`` so each attendance
+		test starts from a clean slate. FrappeTestCase rolls back only at class
+		teardown, not between methods, so a submitted check-in left by an earlier
+		method would otherwise be re-touched here (``check_in`` is not
+		allow_on_submit) and raise UpdateAfterSubmitError. This is the only
+		inter-method cleanup these tests rely on; the class rollback handles the
+		rest, so no commit is issued."""
+		frappe.set_user("Administrator")
+		for n in frappe.get_all(
+			"Driver Attendance",
+			filters={"driver": driver, "attendance_date": frappe.utils.today()},
+			pluck="name",
+		):
+			doc = frappe.get_doc("Driver Attendance", n)
+			if doc.docstatus == 1:
+				doc.cancel()
+			frappe.delete_doc("Driver Attendance", n, force=True, ignore_permissions=True)
 
 	def test_resolve_driver_rejects_non_driver(self):
 		frappe.set_user(self.outsider)
@@ -72,6 +88,7 @@ class TestDriverPortal(unittest.TestCase):
 
 	def test_check_in_creates_attendance_for_self(self):
 		drv, user = self._driver_user()
+		self._clear_today_attendance(drv)
 		frappe.set_user(user)
 		res = driver_portal.driver_check_in()
 		self.assertTrue(frappe.db.exists("Driver Attendance", res["name"]))
@@ -83,9 +100,6 @@ class TestDriverPortal(unittest.TestCase):
 		# recognises it and raises no perpetual Supervisor Delay alert.
 		self.assertEqual(att.docstatus, 1, "Portal check-in must submit the attendance.")
 		frappe.set_user("Administrator")
-		att.cancel()
-		att.delete(ignore_permissions=True)
-		frappe.db.commit()
 
 	def test_fuel_and_ticket_writes_scoped_to_self(self):
 		drv, user = self._driver_user()
@@ -103,6 +117,7 @@ class TestDriverPortal(unittest.TestCase):
 		allow_on_submit), so a full in->out day stays one submitted attendance with
 		computed hours — no draft, no second row."""
 		drv, user = self._driver_user()
+		self._clear_today_attendance(drv)
 		frappe.set_user(user)
 		ci = driver_portal.driver_check_in()
 		co = driver_portal.driver_check_out()
@@ -111,12 +126,9 @@ class TestDriverPortal(unittest.TestCase):
 		self.assertEqual(att.docstatus, 1, "Record stays submitted after check-out.")
 		self.assertTrue(att.check_in and att.check_out, "Both times persisted on the submitted row.")
 		frappe.set_user("Administrator")
-		att.cancel()
-		att.delete(ignore_permissions=True)
-		frappe.db.commit()
 
 
-class TestPortalCheckInNoPerpetualAlert(unittest.TestCase):
+class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 	"""F-02 regression: a driver who checks in through the mobile portal must NOT be
 	left with a perpetual, unresolvable "Supervisor Delay" Operations Alert.
 
@@ -133,6 +145,7 @@ class TestPortalCheckInNoPerpetualAlert(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		frappe.set_user("Administrator")
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
 		cls.drv = _ensure_test_driver()
@@ -142,12 +155,6 @@ class TestPortalCheckInNoPerpetualAlert(unittest.TestCase):
 			"Employee", frappe.db.get_value("Salis Driver", cls.drv, "employee"), "user_id"
 		)
 		cls._purge(cls)
-		frappe.db.commit()
-
-	@classmethod
-	def tearDownClass(cls):
-		cls._purge(cls)
-		frappe.db.commit()
 
 	def _purge(self):
 		frappe.set_user("Administrator")
@@ -176,9 +183,7 @@ class TestPortalCheckInNoPerpetualAlert(unittest.TestCase):
 
 		# Baseline: genuine gap -> watcher raises exactly one Supervisor Delay alert.
 		self._purge()
-		frappe.db.commit()
 		missing_attendance_watch()
-		frappe.db.commit()
 		self.assertEqual(
 			len(self._open_alerts()), 1,
 			"A driver with no attendance must raise one Supervisor Delay alert.",
@@ -192,12 +197,10 @@ class TestPortalCheckInNoPerpetualAlert(unittest.TestCase):
 			frappe.db.get_value("Driver Attendance", res["name"], "docstatus"), 1,
 			"Portal check-in must leave a SUBMITTED attendance for the watcher to see.",
 		)
-		frappe.db.commit()
 
 		# (1) The reconcile pass now sees a submitted attendance for the day the
 		#     alert was raised and resolves the previously-perpetual alert.
 		reconcile_operations_alerts()
-		frappe.db.commit()
 		self.assertEqual(
 			self._open_alerts(), [],
 			"An open Supervisor Delay alert must auto-resolve once the driver has "
@@ -207,7 +210,6 @@ class TestPortalCheckInNoPerpetualAlert(unittest.TestCase):
 		# (2) Re-running the watcher after the check-in raises NO new alert — the
 		#     compliant portal user no longer floods a fresh alert each day.
 		missing_attendance_watch()
-		frappe.db.commit()
 		self.assertEqual(
 			self._open_alerts(), [],
 			"A driver who has checked in via the portal must raise no Supervisor "
