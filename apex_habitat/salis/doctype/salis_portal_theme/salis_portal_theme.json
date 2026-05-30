@@ -25,7 +25,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Theme",
-   "options": "AFMCO\nFrappe Standard\nDark",
+   "options": "AFMCO\nFrappe Standard\nDark\nGemini",
    "reqd": 1
   },
   {

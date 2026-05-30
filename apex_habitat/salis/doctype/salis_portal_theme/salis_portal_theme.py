@@ -22,6 +22,7 @@ THEME_SLUGS = {
 	"AFMCO": "afmco",
 	"Frappe Standard": "frappe",
 	"Dark": "dark",
+	"Gemini": "gemini",
 }
 
 DEFAULT_THEME = "AFMCO"

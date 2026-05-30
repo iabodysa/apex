@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.22.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.22.0 — a new Gemini portal theme, a genuinely Frappe-styled theme, and a fixed worker-route page",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-13 09:00:00",
+    },
+    {
+        "title": "v1.22.0: The driver portal gains a premium dark 'Gemini' theme, and the 'Frappe Standard' theme was redesigned to genuinely look like Frappe (distinct layout, not just colours) — choose either in Salis Portal Theme settings",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-13 09:01:00",
+    },
+    {
+        "title": "v1.22.0: The worker-route page (/masar) no longer errors on load, the Apex Core workspace is restored to a complete organised hub, and newly-added desk strings are now in Arabic",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-13 09:02:00",
+    },
     # v1.21.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.21.0 — a clean settings hub, KPI tiles on every Salis workspace, and a training guide",

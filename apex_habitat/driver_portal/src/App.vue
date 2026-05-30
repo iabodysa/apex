@@ -16,8 +16,8 @@
           <Brand mode="arc" />
         </div>
 
-        <div class="relative z-[1] px-4 pt-4 pb-5">
-          <div class="flex items-center justify-between gap-3">
+        <div class="header-inner relative z-[1] px-4 pt-4 pb-5">
+          <div class="header-bar flex items-center justify-between gap-3">
             <!-- Brand lockup -->
             <div v-if="showBrand" class="flex items-center gap-2 min-w-0">
               <img
@@ -54,7 +54,7 @@
           </div>
 
           <!-- Greeting -->
-          <div class="mt-3">
+          <div class="greeting-block mt-3">
             <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--c-header-accent)">
               {{ t("common.driverPortal") }}
             </p>

@@ -88,13 +88,13 @@
   --c-primary: #2490ef;
   --c-primary-ink: #ffffff;
   --c-ink: #1f272e;
-  --c-ink-soft: #4c5a67;
+  --c-ink-soft: #525a62;
   --c-canvas: #f4f5f6;
   --c-surface: #ffffff;
   --c-surface-2: #f9fafb;
   --c-accent: #2490ef;
   --c-mint: #28a745;
-  --c-muted: #74808b;
+  --c-muted: #6b7682;
   --c-border: #e2e6e9;
   --c-border-strong: #d1d8dd;
   --c-success: #28a745;
@@ -157,6 +157,172 @@
   --border-width: 1px;
 
   --font: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* ───────────── Frappe Standard — structural layout overrides ─────────────
+ * The owner's requirement: the `frappe` theme must read like Frappe Desk /
+ * Frappe web — a genuinely DIFFERENT layout + density from AFMCO, not a colour
+ * swap. Everything here is scoped under `[data-theme="frappe"]` so the AFMCO
+ * (default) and Dark themes are byte-for-byte untouched.
+ *
+ * Key structural departures from AFMCO:
+ *   - Header: a thin, white, bordered top utility bar with a small title —
+ *     NOT AFMCO's tall Deep-Forest greeting hero.
+ *   - Brand supergraphic ("split-circle arc"): hidden (AFMCO-only element).
+ *   - Density: tighter page padding & gaps; cards become flatter, list-row /
+ *     panel-ish surfaces with a header rule rather than big rounded tiles.
+ *   - Quick actions: a compact list of rows (icon + label + chevron-feel)
+ *     instead of large two-up colour tiles.
+ *   - Buttons: shorter, utilitarian, 6px radius, smaller type.
+ * ─────────────────────────────────────────────────────────────────────── */
+
+/* Hide the AFMCO brand supergraphic entirely. */
+[data-theme="frappe"] .hero-arc {
+  display: none !important;
+}
+
+/* Header → thin white utility bar with a hairline rule. */
+[data-theme="frappe"] .app-header {
+  border-bottom: 1px solid var(--c-border);
+  box-shadow: var(--shadow);
+}
+[data-theme="frappe"] .app-header .header-inner {
+  padding: 10px 16px;
+}
+/* Collapse the tall greeting hero into a single compact line. */
+[data-theme="frappe"] .app-header .greeting-block {
+  margin-top: 2px;
+}
+[data-theme="frappe"] .app-header .greeting-block p {
+  display: none; /* drop the "DRIVER PORTAL" eyebrow — too brand-heavy for Frappe */
+}
+[data-theme="frappe"] .app-header .greeting-block h1 {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--c-muted);
+}
+/* Smaller avatar/title in the bar to match Frappe's denser navbar. */
+[data-theme="frappe"] .app-header .avatar {
+  height: 30px;
+  width: 30px;
+  font-size: var(--fs-xs);
+  border-radius: var(--radius-sm);
+}
+
+/* Tighten the page gutter and vertical rhythm (denser than AFMCO). */
+[data-theme="frappe"] main {
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 14px;
+}
+[data-theme="frappe"] main > .space-y-5 > * + * {
+  margin-top: 14px;
+}
+
+/* Cards → flat-topped panels: smaller radius, a soft real shadow, and a
+ * subtle internal header rule feel via tighter padding. */
+[data-theme="frappe"] .card {
+  border-radius: var(--radius);
+}
+[data-theme="frappe"] .card-pad {
+  padding: var(--sp-3) var(--sp-4);
+}
+
+/* Section titles → smaller, uppercase, muted — Frappe section-head style. */
+[data-theme="frappe"] .section-title {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--c-muted);
+}
+
+/* Quick actions → compact list rows instead of big two-up colour tiles.
+ * The grid that wraps them is forced to a single column; each tile becomes a
+ * horizontal row (icon left, label, chevron-feel right). Inline brand fills
+ * set in Home.vue are neutralised to Frappe's white-row look. */
+[data-theme="frappe"] .grid.grid-cols-2:has(> .quick-action) {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+[data-theme="frappe"] .quick-action {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--c-surface) !important;
+  color: var(--c-ink) !important;
+  border: 1px solid var(--c-border) !important;
+  box-shadow: var(--shadow);
+}
+[data-theme="frappe"] .quick-action:hover {
+  border-color: var(--c-border-strong) !important;
+  background: var(--c-surface-2) !important;
+}
+[data-theme="frappe"] .quick-action:active {
+  transform: none;
+}
+/* The action's icon sits in a small tinted chip, label fills the row. */
+[data-theme="frappe"] .quick-action svg {
+  color: var(--c-primary);
+  flex-shrink: 0;
+}
+[data-theme="frappe"] .quick-action span {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+}
+
+/* Buttons → utilitarian: shorter, 6px radius, smaller label. */
+[data-theme="frappe"] .btn {
+  min-height: 38px;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+}
+[data-theme="frappe"] .btn-primary {
+  box-shadow: var(--shadow);
+}
+/* Frappe's secondary button is a light grey, bordered "default" button. */
+[data-theme="frappe"] .btn-dark {
+  background: var(--c-surface-2);
+  color: var(--c-ink);
+  border-color: var(--c-border-strong);
+}
+
+/* Inputs → 6px radius, lighter border, soft inset focus ring (Frappe-style). */
+[data-theme="frappe"] .input,
+[data-theme="frappe"] .select,
+[data-theme="frappe"] .textarea {
+  border-radius: var(--radius-sm);
+  border-color: var(--c-border-strong);
+  padding: 9px 12px;
+}
+[data-theme="frappe"] .input:focus,
+[data-theme="frappe"] .select:focus,
+[data-theme="frappe"] .textarea:focus {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-primary) 22%, transparent);
+}
+
+/* Pills → squared-off Frappe "indicator" chips rather than full pills. */
+[data-theme="frappe"] .pill {
+  border-radius: var(--radius-sm);
+  letter-spacing: 0;
+}
+
+/* Stat blocks → flat panels with the subtle shadow. */
+[data-theme="frappe"] .stat {
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+}
+
+/* Tab bar → Frappe-flat: hairline top rule, no active pip, indented type. */
+[data-theme="frappe"] .tabbar {
+  box-shadow: var(--shadow-lg);
+}
+[data-theme="frappe"] .tab .tab-pip {
+  display: none;
 }
 
 /* ──────────────────────────── Base ──────────────────────────── */
@@ -499,4 +665,87 @@ body {
 .divider {
   height: var(--border-width);
   background: var(--c-border);
+}
+
+
+/* ===== Gemini (Premium Neon / glassmorphism) theme — added per owner; integrated into the data-theme system ===== */
+/* ──────────────────────────── Gemini Premium Theme ──────────────────────────── */
+/* Place this code inside driver_portal/src/index.css */
+
+[data-theme="gemini"] {
+  /* Deep Space Canvas */
+  --c-canvas: #04050b;
+  --c-surface: rgba(15, 17, 26, 0.65);
+  
+  /* Glowing / Neon Brand Colors (Gemini Inspired) */
+  --c-primary: #a855f7; /* Purple Glow */
+  --c-primary-ink: #ffffff;
+  --c-accent: #3b82f6; /* Blue Glow */
+  --c-mint: #06b6d4; /* Cyan Glow */
+  
+  /* Text & Ink */
+  --c-ink: #f8fafc;
+  --c-ink-soft: #cbd5e1;
+  --c-muted: #64748b;
+  
+  /* Borders with subtle glass glow */
+  --c-border: rgba(148, 163, 184, 0.12);
+  --c-border-strong: rgba(148, 163, 184, 0.25);
+  
+  /* Status Colors (Neon) */
+  --c-success: #10b981;
+  --c-success-bg: rgba(16, 185, 129, 0.15);
+  --c-warning: #f59e0b;
+  --c-warning-bg: rgba(245, 158, 11, 0.15);
+  --c-danger: #ef4444;
+  --c-danger-bg: rgba(239, 68, 68, 0.15);
+  
+  /* Headers & Supergraphics */
+  --c-header-bg: rgba(4, 5, 11, 0.85);
+  --c-header-ink: #ffffff;
+  --c-header-accent: #a855f7;
+  
+  /* Geometry & Glassmorphism */
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 48px rgba(168, 85, 247, 0.2);
+  --border-width: 1px;
+}
+
+/* ─────────────────── Gemini Special Overrides ─────────────────── */
+[data-theme="gemini"] .card,
+[data-theme="gemini"] .stat,
+[data-theme="gemini"] .quick-action,
+[data-theme="gemini"] .tabbar,
+[data-theme="gemini"] .app-header {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: var(--c-surface);
+  box-shadow: var(--shadow);
+}
+
+/* Vibrant Animated Button Gradients */
+[data-theme="gemini"] .btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #a855f7, #ec4899, #3b82f6);
+  background-size: 300% 300%;
+  animation: geminiGlow 4s ease infinite;
+  border: none;
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+  color: white;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes geminiGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Glowing active tab pip */
+[data-theme="gemini"] .tab.router-link-active .tab-pip {
+  background: linear-gradient(90deg, #3b82f6, #a855f7);
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
 }
