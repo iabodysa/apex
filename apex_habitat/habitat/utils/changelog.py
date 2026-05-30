@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.18.2 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.18.2 — vehicle, driver and passenger-manifest lists are now project-scoped",
+        "app_name": "apex_habitat",
+        "link": "/app/salis-vehicle",
+        "creation": "2026-07-06 09:00:00",
+    },
+    {
+        "title": "v1.18.2: A supervisor scoped to a project now sees only that project's vehicles, drivers and passenger manifests in the desk lists - closing a list-enumeration gap",
+        "app_name": "apex_habitat",
+        "link": "/app/salis-vehicle",
+        "creation": "2026-07-06 09:01:00",
+    },
+    {
+        "title": "v1.18.2: A driver still sees their own driver profile - the self-profile view is preserved",
+        "app_name": "apex_habitat",
+        "link": "/app/salis-driver",
+        "creation": "2026-07-06 09:02:00",
+    },
     # v1.18.1 ---------------------------------------------------------------
     {
         "title": "Apex 1.18.1 — a rental payment request can only be raised on an approved settlement",
