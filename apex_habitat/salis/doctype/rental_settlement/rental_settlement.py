@@ -84,6 +84,14 @@ class RentalSettlement(Document):
         if self.docstatus != 1:
             frappe.throw(_("Submit the settlement before raising a payment request."))
 
+        if self.status != "Approved":
+            frappe.throw(
+                _(
+                    "A payment request can only be raised on an Approved settlement "
+                    "(current status: {0})."
+                ).format(_(self.status))
+            )
+
         if self.payment_request and frappe.db.exists("Salis Payment Request", self.payment_request):
             return self.payment_request
 

@@ -105,6 +105,20 @@ class TestRentalSettlementWorkflow(unittest.TestCase):
         rs.reload()
         return rs
 
+    # --- F-04: a payment request may only be raised on an Approved settlement ---
+
+    def test_payment_request_only_on_approved_settlement(self):
+        # An Approved (submitted) settlement can raise a payment request.
+        rs = self._approved()
+        pr = rs.create_payment_request()
+        self.assertTrue(frappe.db.exists("Salis Payment Request", pr))
+        # A submitted-but-Disputed settlement is blocked by the F-04 guard.
+        rs2 = self._approved()
+        frappe.db.set_value("Rental Settlement", rs2.name, "status", "Disputed")
+        rs2.reload()
+        with self.assertRaises(frappe.ValidationError):
+            rs2.create_payment_request()
+
     # --- legal transition by the right role ------------------------------------
 
     def test_legal_reconcile_then_approve_submits(self):

@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.18.1 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.18.1 — a rental payment request can only be raised on an approved settlement",
+        "app_name": "apex_habitat",
+        "link": "/app/rental-settlement",
+        "creation": "2026-07-05 09:00:00",
+    },
+    {
+        "title": "v1.18.1: A payment request can no longer be raised on a disputed or not-yet-approved rental settlement - only on an Approved one",
+        "app_name": "apex_habitat",
+        "link": "/app/rental-settlement",
+        "creation": "2026-07-05 09:01:00",
+    },
+    {
+        "title": "v1.18.1: This protects the finance flow - a contested settlement cannot be paid until it is resolved and approved",
+        "app_name": "apex_habitat",
+        "link": "/app/rental-settlement",
+        "creation": "2026-07-05 09:02:00",
+    },
     # v1.18.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.18.0 — worker-movement foundations: housing-linked pickups and trip boarding logs",

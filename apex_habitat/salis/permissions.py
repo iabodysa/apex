@@ -168,19 +168,104 @@ def trip_start_log_query(user=None):
     )
 
 
+def salis_vehicle_query(user=None):
+    """Salis Vehicle carries a direct `project` Link, so it is scoped exactly like
+    the other project-bearing master/transactional DocTypes: a scoped user sees
+    only vehicles in their allowed projects; oversight roles see all. This closes
+    the desk-list leak where a scoped Fleet Supervisor could enumerate every
+    project's vehicles at /app/salis-vehicle (the Dispatch Board already filtered
+    by project, but the standard list view did not)."""
+    return _project_condition(user)
+
+
+def salis_driver_query(user=None):
+    """Salis Driver carries a direct `project` Link, scoped like Salis Vehicle —
+    with one addition: the Driver role reads its OWN profile via an ``if_owner``
+    DocPerm. Frappe ANDs this query fragment with the ``owner = me`` clause it adds
+    for an if_owner match, so a bare project restriction (``1=0`` for a Driver who
+    holds no Project User Permission) would make a Driver unable to see even their
+    own row. We therefore OR the project scope with ``owner = me`` so the self-
+    profile path survives while a scoped supervisor is still confined to the
+    drivers in their permitted projects.
+
+    Returns "" (no restriction) for unscoped oversight roles."""
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return ""
+
+    own = "`owner` = {0}".format(frappe.db.escape(user))
+
+    projects = _allowed_projects(user)
+    if not projects:
+        # No project grant: the only legitimate visibility is the user's own
+        # driver row (the if_owner self-profile). Everything else is hidden.
+        return own
+
+    escaped = ", ".join(frappe.db.escape(p) for p in projects)
+    return "(`project` in ({values}) or {own})".format(values=escaped, own=own)
+
+
+def passenger_manifest_query(user=None):
+    """Passenger Manifest has no own `project` field; it links to a Route Plan
+    (and a Dispatch Trip, which itself links to a Route Plan) that carries the
+    project. Scope it through either link so the same project boundary applies as
+    on every other Salis movement record. Without this a scoped Fleet Supervisor
+    could read passenger lists/counts for another project's transport at
+    /app/passenger-manifest.
+
+    A manifest can be keyed by ``route_plan`` directly OR only by ``dispatch_trip``
+    (neither field is mandatory and there is no fetch between them), so the
+    fragment admits a row whose Route Plan — reached by EITHER path — is in scope.
+    """
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return ""
+
+    projects = _allowed_projects(user)
+    if not projects:
+        return "1=0"
+
+    escaped = ", ".join(frappe.db.escape(p) for p in projects)
+    in_scope_route_plans = (
+        "select `name` from `tabRoute Plan` where `project` in ({values})".format(
+            values=escaped
+        )
+    )
+    return (
+        "(`route_plan` in ({rp}) or `dispatch_trip` in ("
+        "select `name` from `tabDispatch Trip` where `route_plan` in ({rp})"
+        "))".format(rp=in_scope_route_plans)
+    )
+
+
 # ---------------------------------------------------------------------------
 # Shared has_permission hook
 # ---------------------------------------------------------------------------
 
 def _doc_project(doc):
     """Resolve the project a document belongs to, including the docs that reach
-    their project through a Route Plan (Dispatch Trip, Trip Start Log)."""
+    their project through a Route Plan (Dispatch Trip, Trip Start Log, Passenger
+    Manifest)."""
     project = getattr(doc, "project", None)
     if project:
         return project
 
-    if getattr(doc, "doctype", None) in ("Dispatch Trip", "Trip Start Log"):
+    doctype = getattr(doc, "doctype", None)
+    if doctype in ("Dispatch Trip", "Trip Start Log"):
         route_plan = getattr(doc, "route_plan", None)
+        if route_plan:
+            return frappe.db.get_value("Route Plan", route_plan, "project")
+
+    if doctype == "Passenger Manifest":
+        # The manifest may carry route_plan directly, or only a dispatch_trip
+        # (which links to the Route Plan). Resolve via either path.
+        route_plan = getattr(doc, "route_plan", None)
+        if not route_plan:
+            dispatch_trip = getattr(doc, "dispatch_trip", None)
+            if dispatch_trip:
+                route_plan = frappe.db.get_value(
+                    "Dispatch Trip", dispatch_trip, "route_plan"
+                )
         if route_plan:
             return frappe.db.get_value("Route Plan", route_plan, "project")
 
