@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.26.3 ---------------------------------------------------------------
+    {
+        "title": "v1.26.3: Transport now clearly separates worker (bus/shuttle) trips from representative (مندوب) trips — a representative trip names the representative and can never carry labour-accommodation or a worker manifest, and only worker trips appear in the worker (Masar) view. Plus seed-reliability fixes and a clearer Employee 'Salis' connections label.",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-21 09:00:00",
+    },
     # v1.26.2 ---------------------------------------------------------------
     {
         "title": "v1.26.2: Retired the old custom approval authority-tier engine and its now-unused 'Approval Request' record. Approvals run entirely on native Frappe Workflow (since 1.26.0), so the parallel mechanism, its settings ladder and its dashboard card were removed. Segregation-of-duties (no self-approval) is unchanged.",

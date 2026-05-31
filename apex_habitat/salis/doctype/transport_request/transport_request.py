@@ -76,6 +76,22 @@ class TransportRequest(Document):
                     )
                 )
 
+        # Keep the two movement kinds strictly separated: a Representative trip
+        # is an administrative person-movement and must NEVER carry labour-housing
+        # context (accommodation building or a worker manifest), and a Worker trip
+        # must never name a Representative. This guards the data even if the
+        # depends_on / mandatory_depends_on form rules are bypassed (web/API).
+        if self.service_line == "Representatives":
+            if self.accommodation_building:
+                frappe.throw(_("A Representatives trip cannot be linked to labour accommodation."))
+            if self.workers or []:
+                frappe.throw(_("A Representatives trip cannot carry a worker manifest."))
+            if not self.representative:
+                frappe.throw(_("Representative is required for a Representatives trip."))
+        elif self.service_line == "Workers":
+            if self.representative:
+                frappe.throw(_("A Workers trip cannot name a Representative."))
+
         # Worker count is always derived from the child rows.
         self.worker_count = len(self.workers or [])
 

@@ -305,6 +305,15 @@ after_migrate = [
     # because after_migrate runs after every DocType sync, so a freshly-added
     # notification's document_type always exists by the time this runs.
     "apex_habitat.habitat.notifications_seed.seed_operational_notifications",
+    # Habitat native paradigms — these were install-only (after_install) so a
+    # newly-added kanban / assignment rule / email template / auto-email report
+    # never reached already-installed sites. They are idempotent + existence-
+    # guarded; running them on every migrate keeps existing sites in sync, matching
+    # the Salis equivalents below.
+    "apex_habitat.habitat.kanban_seed.seed_kanban_boards",
+    "apex_habitat.habitat.assignment_rules_seed.seed_assignment_rules",
+    "apex_habitat.habitat.email_templates_seed.seed_email_templates",
+    "apex_habitat.habitat.auto_email_reports_seed.seed_auto_email_reports",
     # Salis native paradigms — keep already-installed sites in sync on migrate.
     # Idempotent + existence-guarded (created only if absent), so re-running every
     # migrate never duplicates and never aborts the migrate.

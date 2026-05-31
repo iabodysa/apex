@@ -537,6 +537,7 @@ def _worker_transport_requests(employee):
         "Transport Request",
         filters={
             "name": ["in", list(by_request.keys())],
+            "service_line": WORKER_SERVICE_LINE,
             "status": ["not in", ["Rejected", "Cancelled"]],
         },
         fields=[

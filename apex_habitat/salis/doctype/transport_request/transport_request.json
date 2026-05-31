@@ -17,6 +17,7 @@
   "col_service",
   "project",
   "accommodation_building",
+  "representative",
   "sec_workers",
   "worker_count",
   "workers",
@@ -114,6 +115,14 @@
    "fieldtype": "Link",
    "label": "Accommodation Building",
    "options": "Accommodation Building"
+  },
+  {
+   "depends_on": "eval:doc.service_line=='Representatives'",
+   "mandatory_depends_on": "eval:doc.service_line=='Representatives'",
+   "fieldname": "representative",
+   "fieldtype": "Link",
+   "label": "Representative",
+   "options": "Employee"
   },
   {
    "fieldname": "worker_count",

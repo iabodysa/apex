@@ -521,6 +521,9 @@ class TestMasarReadEndpoint(_WorkerTripMixin, unittest.TestCase):
                 "service_line": "Representatives",
                 "request_type": "Administrative Trip / Document Signing",
                 "project": self.project,
+                # A Representatives trip now requires the representative (an Employee)
+                # and must not carry labour-accommodation/worker context.
+                "representative": _employee("EP Representative"),
                 "destination": "Ministry",
                 "from_location": "HQ",
                 "to_location": "Ministry",

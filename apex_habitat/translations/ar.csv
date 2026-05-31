@@ -2339,3 +2339,8 @@ Resolution Notes are required to close a Habitat Safety Incident.,ملاحظات
 A severe or critical safety incident has been reported and requires immediate management attention,تم الإبلاغ عن حادثة سلامة شديدة أو حرجة وتتطلّب انتباه الإدارة الفوري
 Open the incident record,افتح سجلّ الحادثة
 Severe Safety Incident Reported: {{ doc.name }},الإبلاغ عن حادثة سلامة شديدة: {{ doc.name }}
+Representative,المندوب
+A Representatives trip cannot be linked to labour accommodation.,رحلة المناديب لا تُربط بسكن العمالة.
+A Representatives trip cannot carry a worker manifest.,رحلة المناديب لا تحمل قائمة عمّال.
+Representative is required for a Representatives trip.,المندوب مطلوب لرحلة المناديب.
+A Workers trip cannot name a Representative.,رحلة العمّال لا تُسمّي مندوباً.
