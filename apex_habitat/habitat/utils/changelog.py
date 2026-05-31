@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.27.1 ---------------------------------------------------------------
+    {
+        "title": "v1.27.1: Restored the Safety onboarding (lost when Maintenance and Safety merged into Facilities), and surfaced two things that were built but not linked anywhere — the Cost by Dimension report (now in the Costs workspace) and the Arrivals Desk (now a shortcut in the Accommodation workspace).",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-23 12:00:00",
+    },
     # v1.27.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.27.0 — a one-screen Arrivals Desk for onboarding a worker",

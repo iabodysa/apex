@@ -17,7 +17,7 @@
  "is_default": 0,
  "sequence_id": 2.0,
  "parent_page": "Habitat",
- "content": "[{\"id\": \"WoNaZPIgru\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"338UshwXg9\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Accommodation Go-Live\", \"col\": 12}}, {\"id\": \"eaKnJiXIZ1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"v7Z9nmSLK7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Accommodation Assignments\", \"col\": 3}}, {\"id\": \"GF9KY19jUm\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Accommodation Checkouts\", \"col\": 3}}, {\"id\": \"KZRPgiv9hj\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"qFcbP395oC\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Occupied Beds\", \"col\": 3}}, {\"id\": \"tWodpekYHU\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"AU1DYOtzOC\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"JZ2mlB7OJD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"FSNXXOZrD2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Checkout\", \"col\": 3}}, {\"id\": \"Ieufvl4kMj\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"mp4HU2s3nG\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}, {\"id\": \"W81gManmPJ\", \"type\": \"card\", \"data\": {\"card_name\": \"Lifecycle\", \"col\": 4}}, {\"id\": \"zmHoma085p\", \"type\": \"card\", \"data\": {\"card_name\": \"Residents & Rooms\", \"col\": 4}}, {\"id\": \"i36f9v7sIW\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "content": "[{\"id\": \"WoNaZPIgru\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"338UshwXg9\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Accommodation Go-Live\", \"col\": 12}}, {\"id\": \"eaKnJiXIZ1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"v7Z9nmSLK7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Accommodation Assignments\", \"col\": 3}}, {\"id\": \"GF9KY19jUm\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Accommodation Checkouts\", \"col\": 3}}, {\"id\": \"KZRPgiv9hj\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"qFcbP395oC\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Occupied Beds\", \"col\": 3}}, {\"id\": \"tWodpekYHU\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"AU1DYOtzOC\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"ArrDeskSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Arrivals Desk\", \"col\": 3}}, {\"id\": \"JZ2mlB7OJD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"FSNXXOZrD2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Checkout\", \"col\": 3}}, {\"id\": \"Ieufvl4kMj\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"mp4HU2s3nG\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}, {\"id\": \"W81gManmPJ\", \"type\": \"card\", \"data\": {\"card_name\": \"Lifecycle\", \"col\": 4}}, {\"id\": \"zmHoma085p\", \"type\": \"card\", \"data\": {\"card_name\": \"Residents & Rooms\", \"col\": 4}}, {\"id\": \"i36f9v7sIW\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -28,16 +28,23 @@
   },
   {
    "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Arrivals Desk",
+   "idx": 2,
+   "url": "/app/arrivals-desk"
+  },
+  {
+   "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Accommodation Assignment",
-   "idx": 2,
+   "idx": 3,
    "link_to": "Accommodation Assignment"
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Accommodation Checkout",
-   "idx": 3,
+   "idx": 4,
    "link_to": "Accommodation Checkout"
   }
  ],
@@ -211,5 +218,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-30 19:00:00.000000"
+ "modified": "2026-05-31 16:00:00.000000"
 }
