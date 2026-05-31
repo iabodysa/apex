@@ -230,16 +230,29 @@ def my_trips_today():
 
 @frappe.whitelist()
 def my_support_tickets():
-	"""The current driver's support tickets (read)."""
+	"""The current driver's support tickets, now native ERPNext Issues (read).
+
+	Identity-scoped: the driver is resolved from the session, never client-supplied,
+	so this can only return the caller's own Issues. Returns the same shape the
+	portal Tickets view consumes — ``category`` (the Issue Type) and ``priority``
+	mapped from the native Issue fields so the SPA needs no change."""
 	_require_enabled()
 	driver = _resolve_driver()
-	return frappe.get_all(
-		"Support Ticket",
-		filters={"driver": driver},
-		fields=["name", "category", "priority", "subject", "status", "creation"],
+	rows = frappe.get_all(
+		"Issue",
+		filters={"custom_driver": driver},
+		fields=[
+			"name",
+			"issue_type as category",
+			"priority",
+			"subject",
+			"status",
+			"creation",
+		],
 		order_by="creation desc",
 		limit=50,
 	)
+	return rows
 
 
 def _today_attendance(driver):
@@ -392,12 +405,35 @@ def my_worker_route_today():
 
 @frappe.whitelist(methods=["POST"])
 def raise_support_ticket(category, priority, subject, description):
+	"""Raise a support ticket as a native ERPNext Issue (write).
+
+	Identity-scoped: the driver is resolved from the session, never client-supplied,
+	so the Issue is always stamped with the caller's own driver (``custom_driver``)
+	and email (``raised_by``). The client-supplied ``category`` maps to the Issue
+	Type and ``priority`` to the Issue Priority — both seeded by
+	``salis.issue_seed``. A linked Service Level Agreement (default for Issue) is
+	applied natively by ERPNext on insert, so the response/resolution clock starts
+	automatically. Returns ``{"name": ...}`` exactly as before so the portal SPA is
+	unchanged."""
 	_require_enabled()
 	driver = _resolve_driver()
-	doc = frappe.get_doc(
-		{"doctype": "Support Ticket", "driver": driver, "raised_by": frappe.session.user,
-		 "category": category, "priority": priority, "subject": subject,
-		 "description": description, "status": "New"}
-	)
-	doc.insert(ignore_permissions=True)  # audit-ok
+	project = frappe.db.get_value("Salis Driver", driver, "project")
+	data = {
+		"doctype": "Issue",
+		"custom_driver": driver,
+		"raised_by": frappe.session.user,
+		"subject": subject,
+		"description": description,
+		"status": "Open",
+	}
+	# Only set the masters when they exist as seeded records, so a partially
+	# seeded site never trips Link validation on insert.
+	if category and frappe.db.exists("Issue Type", category):
+		data["issue_type"] = category
+	if priority and frappe.db.exists("Issue Priority", priority):
+		data["priority"] = priority
+	if project:
+		data["project"] = project
+	doc = frappe.get_doc(data)
+	doc.insert(ignore_permissions=True)  # audit-ok — driver resolved server-side
 	return {"name": doc.name}

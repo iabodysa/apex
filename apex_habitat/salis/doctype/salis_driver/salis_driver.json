@@ -189,8 +189,8 @@
   },
   {
    "group": "Support",
-   "link_doctype": "Support Ticket",
-   "link_fieldname": "driver"
+   "link_doctype": "Issue",
+   "link_fieldname": "custom_driver"
   },
   {
    "group": "Costs",

@@ -114,7 +114,9 @@ class TestDriverPortal(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("Fuel Request", fr["name"], "status"), "Pending")
 		tk = driver_portal.raise_support_ticket(category="Vehicle", priority="High",
 		                                        subject="Brakes", description="Soft pedal")
-		self.assertEqual(frappe.db.get_value("Support Ticket", tk["name"], "driver"), drv)
+		# Support tickets are now native ERPNext Issues; the driver is stamped on
+		# the custom_driver Link, identity-resolved server-side.
+		self.assertEqual(frappe.db.get_value("Issue", tk["name"], "custom_driver"), drv)
 		frappe.set_user("Administrator")
 
 	def test_check_out_updates_submitted_record(self):

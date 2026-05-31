@@ -173,7 +173,9 @@ class TestFuelConsoleScoping(unittest.TestCase):
 
 
 class TestSupportTicketScoping(unittest.TestCase):
-    """Support Ticket: project row-scope for supervisors, if_owner for drivers."""
+    """Issue (support tickets): project row-scope for supervisors, if_owner for
+    drivers. Support tickets are now native ERPNext Issues; the same generic
+    project/owner scoping (scoped_has_permission, wired to Issue in hooks) applies."""
 
     @classmethod
     def setUpClass(cls):
@@ -187,7 +189,7 @@ class TestSupportTicketScoping(unittest.TestCase):
 
     def _ticket(self, project=None, owner=None):
         return frappe._dict(
-            {"doctype": "Support Ticket", "project": project, "owner": owner}
+            {"doctype": "Issue", "project": project, "owner": owner}
         )
 
     def test_scoped_sup_allowed_in_project(self):

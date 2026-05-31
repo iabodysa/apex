@@ -7,6 +7,19 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.28.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.28.0 — driver support tickets run on the native Issue desk with SLA",
+        "app_name": "apex_habitat",
+        "link": "/app/issue",
+        "creation": "2026-07-24 09:00:00",
+    },
+    {
+        "title": "v1.28.0: The custom Support Ticket was replaced by ERPNext's native Issue. A driver still raises and tracks tickets exactly as before in the portal, but they are now standard Issues with response/resolution SLA targets, a native communication timeline, and proper desk permissions (a driver sees only their own; fleet staff manage them). Don't-reinvent-the-wheel.",
+        "app_name": "apex_habitat",
+        "link": "/app/issue",
+        "creation": "2026-07-24 09:01:00",
+    },
     # v1.27.1 ---------------------------------------------------------------
     {
         "title": "v1.27.1: Restored the Safety onboarding (lost when Maintenance and Safety merged into Facilities), and surfaced two things that were built but not linked anywhere — the Cost by Dimension report (now in the Costs workspace) and the Arrivals Desk (now a shortcut in the Accommodation workspace).",

@@ -2,7 +2,8 @@
 (movement/fleet) work, routing it to the responsible division owner:
 
 - Transport Request (Round Robin) — give movement-division intake an owner.
-- Support Ticket (Load Balancing) — distribute support tickets across the team.
+- Issue (Load Balancing) — distribute support Issues across the team (the Salis
+  support flow now rides on native ERPNext Issue; Support Ticket was retired).
 
 These cannot ship with a real team list (the customer's division-owner users are
 unknown), so each rule is created **disabled** with Administrator as a single
@@ -31,9 +32,9 @@ _RULES = [
     },
     {
         "name": "Salis - Support Ticket Routing",
-        "document_type": "Support Ticket",
+        "document_type": "Issue",
         "rule": "Load Balancing",
-        "assign_condition": "status == 'New'",
+        "assign_condition": "status == 'Open'",
         "description": (
             "Auto-assign new support tickets across the division support team "
             "(load balancing). DISABLED by default: replace the placeholder user "

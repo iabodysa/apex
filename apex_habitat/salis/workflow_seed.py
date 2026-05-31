@@ -34,7 +34,6 @@ _WORKFLOW_DIRS = [
     "rental_settlement_workflow",
     "driver_clearance_workflow",
     "salis_payment_request_workflow",
-    "support_ticket_workflow",
     "fuel_request_workflow",
     "fuel_claim_workflow",
     "fuel_exception_case_workflow",

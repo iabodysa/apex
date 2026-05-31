@@ -3,7 +3,8 @@
 triage:
 
 - Transport Request (intake -> fulfilment): status-driven workflow.
-- Support Ticket (raised -> closed): status-driven workflow.
+- Issue (raised -> closed): native ERPNext Issue, status-driven (the Salis
+  support board now rides on Issue; the custom Support Ticket was retired).
 
 Kanban needs no DocType schema change — a board is a "Kanban Board" record bound
 to (reference_doctype, status field) with one column per status value. Boards are
@@ -13,7 +14,7 @@ module never aborts migrate.
 
 Status values + colours are verified against ``salis/doctype/*/*.json``:
 - Transport Request.status: New|Validated|Approved|Scheduled|Fulfilled|Rejected|Cancelled
-- Support Ticket.status: New|In Progress|Waiting|Resolved|Closed
+- Issue.status: Open|Replied|On Hold|Resolved|Closed
 """
 
 import json
@@ -38,12 +39,12 @@ _BOARDS = [
     },
     {
         "name": "Support Tickets",
-        "reference_doctype": "Support Ticket",
+        "reference_doctype": "Issue",
         "field_name": "status",
         "columns": [
-            ("New", "Gray"),
-            ("In Progress", "Orange"),
-            ("Waiting", "Yellow"),
+            ("Open", "Gray"),
+            ("Replied", "Orange"),
+            ("On Hold", "Yellow"),
             ("Resolved", "Green"),
             ("Closed", "Gray"),
         ],

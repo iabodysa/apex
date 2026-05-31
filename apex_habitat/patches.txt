@@ -221,3 +221,10 @@ apex_habitat.patches.v1_x.drop_approval_request
 # merged-away Workspace records (Upkeep/Safety/Workers/Fuel) and reloads the two
 # replacements (Facilities/Movement). Idempotent, existence-guarded, no-op on fresh installs.
 apex_habitat.patches.v1_x.merge_facilities_movement_workspaces
+
+# v1.x — retire the custom Salis "Support Ticket" onto native ERPNext Issue + SLA
+# ONE-TIME (prune-eligible once every deployed site has run it): migrates any
+# stored Support Ticket rows onto Issue (custom_driver linkage) and drops the
+# obsolete Support Ticket / Ticket Message DocTypes and their tables. Idempotent,
+# existence-guarded, a no-op on fresh installs (the source tables never ship).
+apex_habitat.patches.v1_x.drop_support_ticket

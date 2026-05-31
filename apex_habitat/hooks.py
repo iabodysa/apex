@@ -224,7 +224,8 @@ permission_query_conditions = {
     "Trip Start Log": "apex_habitat.salis.permissions.trip_start_log_query",
     "Transport Request": "apex_habitat.salis.permissions.transport_request_query",
     "Route Plan": "apex_habitat.salis.permissions.route_plan_query",
-    "Support Ticket": "apex_habitat.salis.permissions.support_ticket_query",
+    # Salis support now rides on native ERPNext Issue (Support Ticket retired).
+    "Issue": "apex_habitat.salis.permissions.support_ticket_query",
     "Fuel Claim": "apex_habitat.salis.permissions.fuel_claim_query",
     "Fuel Quota": "apex_habitat.salis.permissions.fuel_quota_query",
     "Fuel Exception Case": "apex_habitat.salis.permissions.fuel_exception_case_query",
@@ -241,7 +242,8 @@ has_permission = {
     "Trip Start Log": "apex_habitat.salis.permissions.scoped_has_permission",
     "Transport Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Route Plan": "apex_habitat.salis.permissions.scoped_has_permission",
-    "Support Ticket": "apex_habitat.salis.permissions.scoped_has_permission",
+    # Salis support now rides on native ERPNext Issue (Support Ticket retired).
+    "Issue": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Claim": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Quota": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Exception Case": "apex_habitat.salis.permissions.scoped_has_permission",
@@ -260,6 +262,9 @@ fixtures = [
     # Fleet Regional Manager, Legal Officer) are intentionally NOT fixtured —
     # see patches/v1_x/consolidate_salis_roles.py.
     {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Supervisor", "Government Relations Officer"]]]},
+    # Salis-on-Issue: the Issue.custom_driver Custom Field ships via the
+    # sync_customizations file salis/custom/issue.json (auto-applied on migrate),
+    # so no Custom Field fixture is needed here.
     # Print Format and Web Form are standard module files (is_standard=1)
     # under habitat/print_format/ and habitat/web_form/ — loaded automatically
     # by bench migrate via import_file, no fixture entry needed.
@@ -293,6 +298,10 @@ after_install = [
     # applied by this idempotent, existence-guarded seed (also run on
     # after_migrate and from the v1_x patch — single source of truth).
     "apex_habitat.salis.workflow_seed.seed_salis_workflows",
+    # Salis support-on-Issue masters — Issue Types / Priorities / default SLA +
+    # the core-Issue role DocPerms drivers and fleet staff need (Support Ticket
+    # retired). Idempotent + existence-guarded; also run on after_migrate.
+    "apex_habitat.salis.issue_seed.seed_salis_issue_masters",
 ]
 # Dashboards seed after migrate (when their charts/number cards already exist).
 after_migrate = [
@@ -331,6 +340,10 @@ after_migrate = [
     # migrate (idempotent + existence-guarded; created only if absent, never
     # clobbers an on-site-tuned Workflow).
     "apex_habitat.salis.workflow_seed.seed_salis_workflows",
+    # Salis support-on-Issue masters — keep already-installed sites in sync on
+    # migrate (idempotent + existence-guarded; seeds Issue Types/Priorities/SLA
+    # and grants the core-Issue role DocPerms via Custom DocPerm rows).
+    "apex_habitat.salis.issue_seed.seed_salis_issue_masters",
 ]
 
 # A fresh test site has no Company or ERPNext master data until the setup wizard
