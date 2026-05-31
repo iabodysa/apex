@@ -303,6 +303,12 @@ after_migrate = [
     "apex_habitat.habitat.dashboard_seed.seed_all_dashboards",
     "apex_habitat.salis.dashboard_seed.seed_salis_dashboards",
     "apex_habitat.salis.movement_dashboard_seed.seed_movement_dashboards",
+    # Habitat operational Notifications — keep already-installed sites in sync on
+    # migrate (idempotent, existence-guarded, created disabled). Single source of
+    # truth; also run from setup.after_install and the v1_x seed patch. Reliable
+    # because after_migrate runs after every DocType sync, so a freshly-added
+    # notification's document_type always exists by the time this runs.
+    "apex_habitat.habitat.notifications_seed.seed_operational_notifications",
     # Salis native paradigms — keep already-installed sites in sync on migrate.
     # Idempotent + existence-guarded (created only if absent), so re-running every
     # migrate never duplicates and never aborts the migrate.

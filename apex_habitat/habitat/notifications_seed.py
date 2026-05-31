@@ -138,6 +138,20 @@ _NOTIFICATIONS = [
         "roles": ["Accommodation Manager", "HR Manager", "System Manager"],
     },
     {
+        "name": "Habitat - Severe Safety Incident",
+        "subject": "Severe Safety Incident Reported: {{ doc.name }}",
+        "document_type": "Habitat Safety Incident",
+        "event": "Submit",
+        "condition": "doc.docstatus == 1 and doc.severity in ('Severe', 'Critical')",
+        "message": (
+            '{{ _("A severe or critical safety incident has been reported and requires '
+            'immediate management attention") }}: {{ doc.name }} '
+            "({{ doc.severity }} — {{ doc.incident_type }}, {{ doc.accommodation_building }}).<br><br>"
+            '<a href="/app/habitat-safety-incident/{{ doc.name }}">{{ _("Open the incident record") }}</a>'
+        ),
+        "roles": ["System Manager", "Accommodation Manager"],
+    },
+    {
         "name": "Habitat - Custody Damage Assessment Created",
         "subject": "Custody Damage Assessment Submitted: {{ doc.name }}",
         "document_type": "Custody Damage Assessment",

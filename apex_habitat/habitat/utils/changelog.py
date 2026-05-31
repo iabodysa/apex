@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.25.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.25.0 — a formal safety-incident record with management escalation, and hardened worker links",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-18 09:00:00",
+    },
+    {
+        "title": "v1.25.0: New Habitat Safety Incident record — log an accommodation safety incident with a severity, casualties and the immediate action taken; a severe or critical incident automatically notifies management. Severity must be chosen explicitly so nothing is silently filed as low.",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-18 09:01:00",
+    },
+    {
+        "title": "v1.25.0: The Masar worker links are hardened — the guest endpoints are rate-limited against abuse, and a link stops working once the worker is marked Left or Inactive even if it was never revoked.",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-18 09:02:00",
+    },
     # v1.24.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.24.0 — issuing a worker's Masar link is now easy, with a working QR and a WhatsApp share",

@@ -186,3 +186,11 @@ apex_habitat.patches.v1_x.dedupe_fuel_ledger_and_unique_index
 apex_habitat.patches.v1_x.drop_habitat_operations_alert
 apex_habitat.patches.v1_x.drop_habitat_city
 apex_habitat.patches.v1_x.drop_dead_operations_alert_options
+
+# v1.x — seed the "Habitat - Severe Safety Incident" management-escalation
+# Notification for the new Habitat Safety Incident DocType
+# PERMANENT (keep, do NOT prune): delegates to the idempotent, existence-guarded
+# seed_operational_notifications (single source of truth, also called from
+# setup.after_install). This is the migrate path that reaches already-installed
+# sites; fresh installs get it from after_install. Guarded + a no-op on re-run.
+apex_habitat.patches.v1_x.seed_severe_safety_incident_notification

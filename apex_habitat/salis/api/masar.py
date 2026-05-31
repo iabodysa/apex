@@ -14,6 +14,7 @@ UI inside the existing /driver portal. No GL, no side-effects.
 
 import frappe
 from frappe import _
+from frappe.rate_limiter import rate_limit
 
 from apex_habitat.salis.api.driver_portal import _require_enabled, _resolve_driver
 
@@ -325,6 +326,10 @@ def _resolve_worker(token):
     )
     if not row or not row.get("employee"):
         frappe.throw(_("This worker link is invalid or has been disabled."), frappe.PermissionError)
+    # Fail closed for an offboarded worker even if their token was never disabled:
+    # a Left/Inactive employee's link must stop resolving.
+    if frappe.db.get_value("Employee", row["employee"], "status") in ("Inactive", "Left"):
+        frappe.throw(_("This worker link is invalid or has been disabled."), frappe.PermissionError)
     return row["employee"]
 
 
@@ -348,6 +353,7 @@ def _days_until(value):
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=60)
 def get_worker_context(token=None):
     """The worker's own profile + document expiries (read, token-scoped).
 
@@ -431,6 +437,7 @@ def _active_assignment(employee):
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=60)
 def get_worker_accommodation(token=None):
     """The worker's active accommodation (read, token-scoped).
 
@@ -553,6 +560,7 @@ def _worker_transport_requests(employee):
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=60)
 def get_worker_transport(token=None):
     """The worker's upcoming shuttle(s) (read, token-scoped).
 
@@ -604,6 +612,7 @@ def get_worker_transport(token=None):
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=60)
 def list_worker_requests(token=None):
     """The worker's own Accommodation Resident Requests (read, token-scoped).
 
@@ -634,6 +643,7 @@ def list_worker_requests(token=None):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=10, seconds=60 * 60)
 def create_worker_request(token=None, category=None, subject=None, body=None, priority=None):
     """Raise an Accommodation Resident Request for the worker (write, token-scoped).
 

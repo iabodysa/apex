@@ -1,0 +1,227 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-31 00:00:00.000000",
+ "description": "Formal accommodation/housing safety-incident record with severity and automatic management escalation.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "habitat_safety_incident_tab_overview",
+  "habitat_safety_incident_sec_overview",
+  "incident_datetime",
+  "accommodation_building",
+  "specific_location",
+  "habitat_safety_incident_overview_col",
+  "incident_type",
+  "severity",
+  "status",
+  "naming_series",
+  "habitat_safety_incident_sec_details",
+  "description",
+  "immediate_action_taken",
+  "casualties",
+  "reported_by",
+  "habitat_safety_incident_tab_resolution",
+  "habitat_safety_incident_sec_resolution",
+  "resolution_notes",
+  "habitat_safety_incident_tab_system",
+  "habitat_safety_incident_sec_system",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "habitat_safety_incident_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "habitat_safety_incident_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Incident Details"
+  },
+  {
+   "fieldname": "incident_datetime",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Incident Date & Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accommodation_building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Accommodation Building",
+   "options": "Accommodation Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "specific_location",
+   "fieldtype": "Data",
+   "label": "Specific Location"
+  },
+  {
+   "fieldname": "habitat_safety_incident_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incident_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Incident Type",
+   "options": "Fire\nElectrical\nInjury\nStructural\nHealth & Hygiene\nSecurity\nOther"
+  },
+  {
+   "fieldname": "severity",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Severity",
+   "options": "\nLow\nMedium\nHigh\nSevere\nCritical",
+   "reqd": 1
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nUnder Investigation\nClosed"
+  },
+  {
+   "default": "HSI-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "HSI-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "habitat_safety_incident_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Report"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "reqd": 1
+  },
+  {
+   "fieldname": "immediate_action_taken",
+   "fieldtype": "Small Text",
+   "label": "Immediate Action Taken"
+  },
+  {
+   "default": "0",
+   "fieldname": "casualties",
+   "fieldtype": "Int",
+   "label": "Casualties"
+  },
+  {
+   "default": "__user",
+   "fieldname": "reported_by",
+   "fieldtype": "Link",
+   "label": "Reported By",
+   "options": "User"
+  },
+  {
+   "fieldname": "habitat_safety_incident_tab_resolution",
+   "fieldtype": "Tab Break",
+   "label": "Resolution"
+  },
+  {
+   "fieldname": "habitat_safety_incident_sec_resolution",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
+  },
+  {
+   "fieldname": "resolution_notes",
+   "fieldtype": "Small Text",
+   "label": "Resolution Notes"
+  },
+  {
+   "fieldname": "habitat_safety_incident_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System Info"
+  },
+  {
+   "fieldname": "habitat_safety_incident_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Administrative Details"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Habitat Safety Incident",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-31 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Habitat Safety Incident",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Resident Supervisor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "accommodation_building",
+ "track_changes": 1
+}
