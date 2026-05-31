@@ -14,6 +14,10 @@ required_apps = ["frappe", "erpnext", "hrms"]
 # Frappe v15: export type annotations in DocType controllers when supported
 export_python_type_annotations = True
 
+# Shared desk JS: the Masar worker-link dialog (QR + wa.me share + phone
+# normalisation) consolidated from 3 duplicated copies into one bundle.
+app_include_js = ["masar_worker_link.bundle.js"]
+
 
 # Single functional module: Habitat
 
@@ -204,7 +208,6 @@ scheduler_events = {
         "apex_habitat.salis.utilisation_engine.weekly_vehicle_utilisation_snapshot",
     ],
     "monthly": [
-        "apex_habitat.habitat.tasks.monthly_rent_due_alert",
         "apex_habitat.salis.fuel_engine.monthly_fuel_reconciliation",
     ],
 }

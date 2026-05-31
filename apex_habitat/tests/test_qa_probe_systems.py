@@ -151,7 +151,6 @@ class TestSchedulers(QASysBase):
         "daily_scheduled_task_instance_generator",
         "weekly_occupancy_sync",
         "weekly_safety_task_compliance_scan",
-        "monthly_rent_due_alert",
     ]
 
     def test_8_all_schedulers_run(self):

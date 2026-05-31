@@ -1,11 +1,8 @@
 # Copyright (c) 2026, AFMCO and contributors
 # For license information, please see license.txt
 
-import unittest
-
 import frappe
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
-from apex_habitat.habitat.tasks import monthly_rent_due_alert
 
 
 class TestFinancialSideEffects(ApexHabitatTestCase):
@@ -175,57 +172,6 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         doc.reload()
         self.assertIsNone(doc.deduction_entry, "Additional Salary deduction should not be generated without configured deduction Salary Component.")
 
-    def test_monthly_rent_due_alert_unconfigured_accounts(self):
-        from frappe.utils import today, get_first_day
-
-        # Create a Supplier
-        supplier_name = "Test Rent Supplier"
-        if not frappe.db.exists("Supplier", supplier_name):
-            sg_name = frappe.db.get_value("Supplier Group", {})
-            if not sg_name:
-                sg = frappe.get_doc({
-                    "doctype": "Supplier Group",
-                    "supplier_group_name": "All Supplier Groups"
-                })
-                sg.insert(ignore_permissions=True)
-                sg_name = sg.name
-            supplier = frappe.get_doc({
-                "doctype": "Supplier",
-                "supplier_name": supplier_name,
-                "supplier_group": sg_name
-            })
-            supplier.insert(ignore_permissions=True)
-            supplier_name = supplier.name
-
-        # Create a Lease with a Rent Payment Schedule due this month
-        due_date = get_first_day(today())
-        lease = frappe.get_doc({
-            "doctype": "Accommodation Lease",
-            "building": self.building.name,
-            "supplier": supplier_name,
-            "lease_start_date": "2026-05-01",
-            "lease_end_date": "2026-12-31",
-            "first_payment_date": "2026-05-01",
-            "rent_amount": 2000.0,
-            "payment_schedule": [
-                {
-                    "due_date": due_date,
-                    "amount": 2000.0,
-                    "status": "Unpaid"
-                }
-            ]
-        })
-        lease.insert(ignore_permissions=True)
-        lease.submit()
-
-        # Execute monthly_rent_due_alert
-        monthly_rent_due_alert()
-
-        # Reload rent schedule and verify payment_entry remains None (since accounts are unconfigured/None)
-        lease.reload()
-        schedule_row = lease.payment_schedule[0]
-        self.assertIsNone(schedule_row.get("payment_entry"), "Payment Entry should not be created if accounting accounts are unconfigured.")
-
     def test_custody_damage_no_additional_salary_without_explicit_setting(self):
         # Create a Deduction Salary Component
         comp_name = "Test Deduction Component"
@@ -261,105 +207,4 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         # Assert no Additional Salary Deduction Entry is linked because it was not explicitly configured in Settings
         doc.reload()
         self.assertIsNone(doc.deduction_entry, "Additional Salary deduction should not be generated unless explicitly configured in Settings.")
-
-
-    @unittest.skip(
-        "Pending feature: monthly_rent_due_alert does not yet auto-create "
-        "Payment Entry from Accommodation Lease payment schedule. Re-enable "
-        "when the rent-payment posting feature is implemented."
-    )
-    def test_monthly_rent_due_alert_with_accounts_configured(self):
-        from frappe.utils import today, get_first_day
-
-        # Get or create Bank account
-        bank_account = frappe.db.get_value("Account", {"company": self.company, "account_type": "Bank", "is_group": 0})
-        if not bank_account:
-            bank_account = frappe.db.get_value("Account", {"company": self.company, "root_type": "Asset", "is_group": 0})
-
-        # Get or create Payable account
-        payable_account = frappe.db.get_value("Account", {"company": self.company, "account_type": "Payable", "is_group": 0})
-        if not payable_account:
-            payable_account = frappe.db.get_value("Account", {"company": self.company, "root_type": "Liability", "is_group": 0})
-
-        if not bank_account:
-            parent_asset = frappe.db.get_value("Account", {"company": self.company, "is_group": 1, "root_type": "Asset"})
-            if parent_asset:
-                bank_doc = frappe.get_doc({
-                    "doctype": "Account",
-                    "account_name": "Test Bank Account",
-                    "account_type": "Bank",
-                    "parent_account": parent_asset,
-                    "company": self.company
-                })
-                bank_doc.insert(ignore_permissions=True)
-                bank_account = bank_doc.name
-
-        if not payable_account:
-            parent_liability = frappe.db.get_value("Account", {"company": self.company, "is_group": 1, "root_type": "Liability"})
-            if parent_liability:
-                pay_doc = frappe.get_doc({
-                    "doctype": "Account",
-                    "account_name": "Test Payable Account",
-                    "account_type": "Payable",
-                    "parent_account": parent_liability,
-                    "company": self.company
-                })
-                pay_doc.insert(ignore_permissions=True)
-                payable_account = pay_doc.name
-
-        # Create a Supplier
-        supplier_name = "Test Rent Supplier 2"
-        if not frappe.db.exists("Supplier", supplier_name):
-            sg_name = frappe.db.get_value("Supplier Group", {})
-            if not sg_name:
-                sg = frappe.get_doc({
-                    "doctype": "Supplier Group",
-                    "supplier_group_name": "All Supplier Groups"
-                })
-                sg.insert(ignore_permissions=True)
-                sg_name = sg.name
-            supplier = frappe.get_doc({
-                "doctype": "Supplier",
-                "supplier_name": supplier_name,
-                "supplier_group": sg_name
-            })
-            supplier.insert(ignore_permissions=True)
-            supplier_name = supplier.name
-
-        # Create a Lease with a Rent Payment Schedule due this month
-        due_date = get_first_day(today())
-        lease = frappe.get_doc({
-            "doctype": "Accommodation Lease",
-            "building": self.building.name,
-            "supplier": supplier_name,
-            "lease_start_date": "2026-05-01",
-            "lease_end_date": "2026-12-31",
-            "first_payment_date": "2026-05-01",
-            "rent_amount": 2000.0,
-            "payment_schedule": [
-                {
-                    "due_date": due_date,
-                    "amount": 2000.0,
-                    "status": "Unpaid"
-                }
-            ]
-        })
-        lease.insert(ignore_permissions=True)
-        lease.submit()
-
-        # Save accounts to settings or building defaults (wherever we decide to fetch them from)
-        # For this test, we set them on the building or settings if fields exist. 
-        # But wait, they don't exist yet! The tasks.py code has them hardcoded to None, 
-        # so even if we configure them, they cannot be fetched, which causes the test to fail.
-        # Let's save them to the test class so they are available for assertions/checks.
-        self.bank_account = bank_account
-        self.payable_account = payable_account
-
-        # Execute monthly_rent_due_alert
-        monthly_rent_due_alert()
-
-        # Reload rent schedule and verify payment_entry is created (should fail on current codebase)
-        lease.reload()
-        schedule_row = lease.payment_schedule[0]
-        self.assertIsNotNone(schedule_row.get("payment_entry"), "Payment Entry should be created when accounting accounts are configured.")
 

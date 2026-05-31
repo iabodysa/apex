@@ -58,7 +58,7 @@
    "search_index": 1
   },
   {
-   "description": "Optional ERPNext Supplier FK. When set, monthly_rent_due_alert creates a Draft Payment Entry automatically.",
+   "description": "Optional ERPNext Supplier FK for the landlord. Used to identify the payee for rent due reminders.",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "in_standard_filter": 1,

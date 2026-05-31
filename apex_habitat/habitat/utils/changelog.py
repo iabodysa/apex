@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.29.1 ---------------------------------------------------------------
+    {
+        "title": "v1.29.1: Native-first cleanups \u2014 the room-label print format now ships as a standard format (installs on new sites); the monthly rent-due reminder is now a native Frappe Notification on the unpaid schedule (replacing a custom scheduler); and the duplicated worker-link dialog (QR + WhatsApp) was consolidated from three desk scripts into one shared bundle.",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-27 12:00:00",
+    },
     # v1.29.0 ---------------------------------------------------------------
     {
         "title": "v1.29.0: Foundations for handling workers who arrive before they are registered \u2014 a new Temporary Worker record (keyed by passport, valid 30 days, extendable to 90) that will hold a new arrival's housing and custody until their Iqama is issued, then link to their permanent Employee. First step of the arrival redesign.",
