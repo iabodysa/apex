@@ -7,6 +7,19 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.27.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.27.0 — a one-screen Arrivals Desk for onboarding a worker",
+        "app_name": "apex_habitat",
+        "link": "/app/arrivals-desk",
+        "creation": "2026-07-23 09:00:00",
+    },
+    {
+        "title": "v1.27.0: New Arrivals Desk (/app/arrivals-desk) — pick an arriving worker and, from one screen, house them, issue their custody items, generate their personal Masar link + QR (and share it on WhatsApp), and request their transport. Each step reuses the existing flows; actions you lack permission for are disabled.",
+        "app_name": "apex_habitat",
+        "link": "/app/arrivals-desk",
+        "creation": "2026-07-23 09:01:00",
+    },
     # v1.26.4 ---------------------------------------------------------------
     {
         "title": "v1.26.4: Tidier desk navigation — Maintenance and Safety are merged into one 'Facilities' workspace, and Workers (transport) and Fuel are merged into one 'Movement' workspace. Fleet stays separate. Fewer, clearer areas to move between.",

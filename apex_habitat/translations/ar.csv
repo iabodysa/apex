@@ -2344,3 +2344,31 @@ A Representatives trip cannot be linked to labour accommodation.,رحلة الم
 A Representatives trip cannot carry a worker manifest.,رحلة المناديب لا تحمل قائمة عمّال.
 Representative is required for a Representatives trip.,المندوب مطلوب لرحلة المناديب.
 A Workers trip cannot name a Representative.,رحلة العمّال لا تُسمّي مندوباً.
+Arrivals Desk,مكتب الوصول
+Refresh,تحديث
+Select a worker to begin arrival.,اختر عاملاً لبدء الوصول.
+Loading arrival card…,جارٍ تحميل بطاقة الوصول…
+Could not load the arrival card for this worker.,تعذّر تحميل بطاقة وصول هذا العامل.
+Could not load the arrival card. Check your connection and try again.,تعذّر تحميل بطاقة الوصول. تحقّق من اتصالك وحاول مجدداً.
+Retry,إعادة المحاولة
+No photo,لا صورة
+No project assigned yet,لا مشروع مُسنَد بعد
+Current bed,السرير الحالي
+House,التسكين
+Not assigned,غير مُسكَّن
+{0} items,{0} عناصر
+None issued,لا صرف
+Masar Link,رابط مسار
+Not issued,لم يُصدَر
+You lack permission to issue links.,لا تملك صلاحية إصدار الروابط.
+Transport,النقل
+Request a ride,طلب توصيلة
+You lack permission to create transport requests.,لا تملك صلاحية إنشاء طلبات النقل.
+Unavailable,غير متاح
+Assign House,إسناد سكن
+Issue Custody,صرف عهدة
+Building (source store),المبنى (مخزن المصدر)
+Issuing custody…,جارٍ صرف العهدة…
+Custody issued: {0},صُرفت العهدة: {0}
+Copy link,نسخ الرابط
+Link copied.,نُسخ الرابط.
