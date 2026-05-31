@@ -10,6 +10,8 @@
   "custody_issue_sec_overview",
   "issue_date",
   "building",
+  "party_type",
+  "party",
   "issued_to_employee",
   "custody_issue_overview_col",
   "issued_to_name",
@@ -53,11 +55,28 @@
    "search_index": 1
   },
   {
+   "default": "Employee",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Worker Type",
+   "options": "Employee\nTemporary Worker"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Worker",
+   "options": "party_type",
+   "search_index": 1
+  },
+  {
    "fieldname": "issued_to_employee",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Issued To (Employee)",
-   "options": "Employee"
+   "options": "Employee",
+   "read_only": 1
   },
   {
    "fieldname": "custody_issue_overview_col",

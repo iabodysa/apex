@@ -1,4 +1,4 @@
-"""Pure-Python guards for Batch 2 of the arrival redesign (no live site required).
+"""Pure-Python guards for Batches 2-3 of the arrival redesign (no live site required).
 
 Two things are locked in so they cannot silently regress:
 
@@ -30,6 +30,15 @@ DOCTYPE_SPECS = {
     "Idle Resident Report": ("habitat/doctype/idle_resident_report/idle_resident_report.json", 1, 0, 0, "Resident Type", "Resident"),
     "Accommodation Ledger": ("habitat/doctype/accommodation_ledger/accommodation_ledger.json", 0, 1, 1, "Resident Type", "Resident"),
     "Masar Worker Token": ("apex_core/doctype/masar_worker_token/masar_worker_token.json", 1, 0, 0, "Worker Type", "Worker"),
+}
+
+# Batch 3 — TIER-2 custody. (relative json path, Employee link fieldname). These use
+# "Worker Type"/"Worker" labels, an optional (not-reqd) party_type, an editable party,
+# and a read-only Employee link under a doctype-specific name.
+CUSTODY_SPECS = {
+    "Custody Issue": ("habitat/doctype/custody_issue/custody_issue.json", "issued_to_employee"),
+    "Custody Return": ("habitat/doctype/custody_return/custody_return.json", "returned_by_employee"),
+    "Custody Damage Assessment": ("habitat/doctype/custody_damage_assessment/custody_damage_assessment.json", "employee"),
 }
 
 
@@ -72,6 +81,35 @@ class TestPartyFieldsInSchema(unittest.TestCase):
                     self.assertIn(fn, field_order, f"{dt}: {fn} missing from field_order")
                 self.assertLess(field_order.index("party_type"), field_order.index("employee"), f"{dt}: party_type after employee")
                 self.assertLess(field_order.index("party"), field_order.index("employee"), f"{dt}: party after employee")
+
+    def test_custody_party_fields_present_and_well_formed(self):
+        for dt, (path, emp_field) in CUSTODY_SPECS.items():
+            fields, field_order = _fields(path)
+            self.assertIn("party_type", fields, f"{dt}: party_type missing")
+            self.assertIn("party", fields, f"{dt}: party missing")
+            self.assertIn(emp_field, fields, f"{dt}: {emp_field} missing")
+
+            pt, party, emp = fields["party_type"], fields["party"], fields[emp_field]
+
+            self.assertEqual(pt["fieldtype"], "Select", f"{dt}: party_type not Select")
+            self.assertEqual(pt.get("options"), "Employee\nTemporary Worker", f"{dt}: party_type options")
+            self.assertEqual(pt.get("default"), "Employee", f"{dt}: party_type default")
+            self.assertEqual(pt.get("label"), "Worker Type", f"{dt}: party_type label")
+            self.assertFalse(pt.get("reqd"), f"{dt}: custody party_type must not be reqd")
+
+            self.assertEqual(party["fieldtype"], "Dynamic Link", f"{dt}: party not Dynamic Link")
+            self.assertEqual(party.get("options"), "party_type", f"{dt}: party options")
+            self.assertEqual(party.get("label"), "Worker", f"{dt}: party label")
+            self.assertFalse(party.get("read_only"), f"{dt}: custody party must stay editable")
+
+            # The Employee link is now a read-only mirror.
+            self.assertTrue(emp.get("read_only"), f"{dt}: {emp_field} must be read_only")
+            self.assertEqual(emp.get("options"), "Employee", f"{dt}: {emp_field}.options changed")
+
+            if field_order:
+                for fn in ("party_type", "party", emp_field):
+                    self.assertIn(fn, field_order, f"{dt}: {fn} missing from field_order")
+                self.assertLess(field_order.index("party"), field_order.index(emp_field), f"{dt}: party after {emp_field}")
 
 
 # --- helper logic ---------------------------------------------------------
@@ -142,6 +180,23 @@ class TestSyncPartyEmployee(unittest.TestCase):
         doc = _Doc(employee="HR-EMP-0003")
         sync_party_employee(doc, require_party=True)  # must not raise
         self.assertEqual(doc.party, "HR-EMP-0003")
+
+    def test_employee_field_param_mirrors_named_link(self):
+        # Batch 3: custody doctypes mirror party to a differently-named Employee link.
+        doc = _Doc(party_type=PARTY_EMPLOYEE, party="HR-EMP-1", issued_to_employee=None)
+        sync_party_employee(doc, employee_field="issued_to_employee")
+        self.assertEqual(doc.issued_to_employee, "HR-EMP-1")
+
+    def test_employee_field_param_backfills_party(self):
+        doc = _Doc(returned_by_employee="HR-EMP-2")
+        sync_party_employee(doc, employee_field="returned_by_employee")
+        self.assertEqual(doc.party_type, PARTY_EMPLOYEE)
+        self.assertEqual(doc.party, "HR-EMP-2")
+
+    def test_employee_field_param_clears_for_temporary_worker(self):
+        doc = _Doc(party_type=PARTY_TEMPORARY_WORKER, party="TEMP-1", issued_to_employee="STALE")
+        sync_party_employee(doc, employee_field="issued_to_employee")
+        self.assertIsNone(doc.issued_to_employee)
 
 
 if __name__ == "__main__":

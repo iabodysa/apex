@@ -7,12 +7,15 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from apex_habitat.apex_core.party_link import sync_party_employee
+
 
 class CustodyDamageAssessment(Document):
     pass
 
 
 def validate(doc, method=None):
+    sync_party_employee(doc)
     if not doc.items:
         frappe.throw(_("At least one damaged item is required."))
     doc.total_estimated_replacement_cost_sar = sum(

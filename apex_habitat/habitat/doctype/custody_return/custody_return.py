@@ -6,12 +6,15 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex_habitat.apex_core.party_link import sync_party_employee
+
 
 class CustodyReturn(Document):
     pass
 
 
 def validate(doc, method=None):
+    sync_party_employee(doc, employee_field="returned_by_employee")
     if not doc.items:
         frappe.throw(_("At least one item is required on a Custody Return."))
     for row in doc.items:

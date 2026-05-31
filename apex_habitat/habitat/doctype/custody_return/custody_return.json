@@ -11,6 +11,8 @@
   "return_date",
   "custody_issue",
   "custody_return_details_col",
+  "party_type",
+  "party",
   "returned_by_employee",
   "naming_series",
   "custody_return_sec_large_text",
@@ -53,11 +55,28 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "Employee",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Worker Type",
+   "options": "Employee\nTemporary Worker"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Worker",
+   "options": "party_type",
+   "search_index": 1
+  },
+  {
    "fieldname": "returned_by_employee",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Returned By (Employee)",
-   "options": "Employee"
+   "options": "Employee",
+   "read_only": 1
   },
   {
    "default": "CUST-RET-.YYYY.-.####",

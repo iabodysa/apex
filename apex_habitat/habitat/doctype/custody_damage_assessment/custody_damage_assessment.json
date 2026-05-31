@@ -12,6 +12,8 @@
   "custody_return",
   "building",
   "custody_damage_assessment_overview_col",
+  "party_type",
+  "party",
   "employee",
   "naming_series",
   "total_estimated_replacement_cost_sar",
@@ -64,12 +66,29 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "Employee",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Worker Type",
+   "options": "Employee\nTemporary Worker"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Worker",
+   "options": "party_type",
+   "search_index": 1
+  },
+  {
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Employee Responsible",
    "options": "Employee",
+   "read_only": 1,
    "search_index": 1
   },
   {

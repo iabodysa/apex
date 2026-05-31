@@ -226,3 +226,8 @@ apex_habitat.patches.v1_x.drop_support_ticket
 # party_type/party columns exist before the UPDATE. Idempotent (only rows with an
 # empty party), existence-guarded on table + columns, a no-op on fresh installs.
 apex_habitat.patches.v1_x.backfill_worker_party
+
+# v1.31.0 — arrival redesign Batch 3: back-fill party_type/party on the TIER-2
+# custody doctypes from their (differently-named) Employee links. Same ONE-TIME,
+# idempotent, existence-guarded, post-model-sync pattern as backfill_worker_party.
+apex_habitat.patches.v1_x.backfill_custody_party
