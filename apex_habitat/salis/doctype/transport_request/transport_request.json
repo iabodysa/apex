@@ -118,7 +118,6 @@
   },
   {
    "depends_on": "eval:doc.service_line=='Representatives'",
-   "mandatory_depends_on": "eval:doc.service_line=='Representatives'",
    "fieldname": "representative",
    "fieldtype": "Link",
    "label": "Representative",

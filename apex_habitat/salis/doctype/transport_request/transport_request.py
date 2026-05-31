@@ -86,8 +86,6 @@ class TransportRequest(Document):
                 frappe.throw(_("A Representatives trip cannot be linked to labour accommodation."))
             if self.workers or []:
                 frappe.throw(_("A Representatives trip cannot carry a worker manifest."))
-            if not self.representative:
-                frappe.throw(_("Representative is required for a Representatives trip."))
         elif self.service_line == "Workers":
             if self.representative:
                 frappe.throw(_("A Workers trip cannot name a Representative."))
