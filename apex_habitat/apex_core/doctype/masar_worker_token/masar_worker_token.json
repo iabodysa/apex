@@ -82,9 +82,9 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-05-31 00:00:00.000000",
+ "modified": "2026-05-31 03:30:00.000000",
  "modified_by": "Administrator",
- "module": "Salis",
+ "module": "Apex Core",
  "name": "Masar Worker Token",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
@@ -103,7 +103,6 @@
   },
   {
    "create": 1,
-   "delete": 1,
    "print": 1,
    "read": 1,
    "report": 1,
@@ -117,6 +116,22 @@
    "read": 1,
    "report": 1,
    "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
    "write": 1
   }
  ],

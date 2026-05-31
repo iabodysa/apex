@@ -98,6 +98,14 @@ apex_habitat.patches.v1_x.cleanup_renamed_salis_workspaces
 # so tables and stored Single values are preserved. No-op on fresh installs.
 apex_habitat.patches.v1_x.move_settings_to_apex_core
 
+# v1.x — move the "Masar Worker Token" DocType into the shared Apex Core module
+# ONE-TIME (prune-eligible once every deployed site has run it): re-homes
+# "Masar Worker Token" from the Salis module onto "Apex Core" by updating the
+# persisted DocType.module value. The name is unchanged, so the table and all
+# stored token rows are preserved and token-by-name lookups keep working. No-op
+# on fresh installs.
+apex_habitat.patches.v1_x.move_masar_token_to_apex_core
+
 # v1.x — foreground Apex workspaces by hiding the stock ERPNext/HRMS public ones
 # ONE-TIME (prune-eligible once every deployed site has run it): sets is_hidden=1
 # on the explicit, non-Apex stock workspaces (Accounting/Selling/Buying/Stock/

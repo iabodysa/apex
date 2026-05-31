@@ -1,63 +1,53 @@
-// Client-side script for Accommodation Assignment
-frappe.ui.form.on("Accommodation Assignment", {
-	setup: function(frm) {
-		frm.set_query("room", function() {
-			if (!frm.doc.building) {
-				return {};
-			}
-			return {
-				filters: {
-					"building": frm.doc.building
-				}
-			};
-		});
-
-		frm.set_query("bed", function() {
-			if (!frm.doc.room) {
-				return {};
-			}
-			return {
-				filters: {
-					"room": frm.doc.room,
-					"status": ["!=", "Occupied"]
-				}
-			};
-		});
-	},
-
+// Masar Worker Token — desk actions to issue / rotate a worker's personal
+// Masar link and show the shareable URL + QR (SVG) for printing or WhatsApp.
+frappe.ui.form.on("Masar Worker Token", {
 	refresh(frm) {
-		// Supervisor surface: issue the assigned worker's personal Masar link.
-		// Only meaningful on a saved Assignment that actually has an employee.
-		if (!frm.is_new() && frm.doc.employee) {
-			frm.add_custom_button(__("Issue Masar Link"), () => {
-				frappe.call({
-					method: "apex_habitat.apex_core.doctype.masar_worker_token.masar_worker_token.issue_worker_link",
-					args: { employee: frm.doc.employee, regenerate: 0 },
-					freeze: true,
-					freeze_message: __("Issuing worker link…"),
-					callback: (r) => {
-						if (r.message) {
-							masar_show_worker_link_dialog(r.message);
-						}
-					},
-				});
-			});
+		if (frm.is_new()) {
+			return;
+		}
+
+		frm.add_custom_button(__("Show Link & QR"), () => _show_link(frm, 0));
+		frm.add_custom_button(__("Regenerate Token"), () => {
+			frappe.confirm(
+				__(
+					"Regenerating invalidates the worker's current link and QR. Continue?"
+				),
+				() => _show_link(frm, 1)
+			);
+		});
+
+		if (!frm.doc.enabled) {
+			frm.dashboard.set_headline_alert(
+				__("This worker token is disabled — the personal link will not resolve."),
+				"orange"
+			);
 		}
 	},
-
-	building(frm) {
-		frm.set_value("room", "");
-		frm.set_value("bed", "");
-	},
-
-	room(frm) {
-		frm.set_value("bed", "");
-	}
 });
 
+function _show_link(frm, regenerate) {
+	frappe.call({
+		method: "apex_habitat.apex_core.doctype.masar_worker_token.masar_worker_token.issue_worker_link",
+		args: { employee: frm.doc.employee, regenerate: regenerate },
+		freeze: true,
+		freeze_message: __("Issuing worker link…"),
+		callback: (r) => {
+			if (!r.message) {
+				return;
+			}
+			frm.reload_doc();
+			masar_show_worker_link_dialog(r.message);
+		},
+	});
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// Shared Masar worker-link helpers (duplicated from the Masar Worker Token form;
-// no app-wide JS bundle is wired in hooks.py). Keep the two copies in sync.
+// Shared Masar worker-link helpers.
+//
+// These are intentionally self-contained (no app-wide JS bundle is wired in
+// hooks.py): the SAME two helpers are duplicated in the Accommodation Assignment
+// form so the supervisor surface shows an identical result dialog. Keep the two
+// copies in sync if you change either one.
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Normalise a raw phone string to E.164 *digits* (no "+") suitable for wa.me,

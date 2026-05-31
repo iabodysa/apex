@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.24.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.24.0 — issuing a worker's Masar link is now easy, with a working QR and a WhatsApp share",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-17 09:00:00",
+    },
+    {
+        "title": "v1.24.0: A supervisor can issue a worker's personal Masar link straight from the Accommodation Assignment form ('Issue Masar Link'), see a scannable QR code (now rendered reliably), and share the link to the worker's number over WhatsApp from the browser — no integration needed",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-17 09:01:00",
+    },
+    {
+        "title": "v1.24.0: Issuing a worker link is now allowed for accommodation supervisors, HR and fleet supervisors; the Masar Worker Token record moved into Apex Core as shared access infrastructure",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-17 09:02:00",
+    },
     # v1.23.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.23.0 — Masar becomes a complete worker self-service app",

@@ -2316,3 +2316,8 @@ Issuing worker link…,جارٍ إصدار رابط العامل…
 QR rendering is unavailable on this site; share the link below.,تعذّر إنشاء رمز QR على هذا الموقع؛ شارك الرابط أدناه.
 This worker token is disabled — the personal link will not resolve.,رمز هذا العامل معطّل — لن يعمل الرابط الشخصي.
 Anyone holding this link can view this worker's Masar app. Regenerate to revoke.,أي شخص يملك هذا الرابط يمكنه فتح تطبيق مسار لهذا العامل. أعد التوليد للإلغاء.
+Send via WhatsApp,إرسال عبر واتساب
+Issue Masar Link,إصدار رابط مسار
+Worker Access,وصول العامل
+Regenerating invalidates the worker's current link and QR. Continue?,إعادة التوليد تُبطل رابط العامل ورمزه الحاليين. متابعة؟
+Here is your personal Masar link: {0},هذا رابط مسار الشخصي الخاص بك: {0}

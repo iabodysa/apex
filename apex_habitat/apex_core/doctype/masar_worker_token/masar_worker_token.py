@@ -72,9 +72,9 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
     """Desk action: issue (or rotate) a worker's personal Masar link + QR.
 
     Permission-gated on write access to Masar Worker Token. Returns the link, the
-    token, and a data-URI QR image when the ``qrcode`` package is available
-    (Frappe ships it); otherwise ``qr`` is None and the caller renders the link
-    on its own. No financial impact."""
+    token, an SVG data-URI QR image (or None if QR rendering is unavailable), and
+    the worker's phone (Employee.cell_number) so the caller can offer a WhatsApp
+    share. No financial impact."""
     frappe.has_permission("Masar Worker Token", "write", throw=True)
     doc = get_or_create_for_employee(employee)
     if frappe.utils.cint(regenerate) and doc.token:
@@ -91,24 +91,28 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
         "token": doc.token,
         "link": link,
         "qr": _qr_data_uri(link),
+        # Worker phone for the optional WhatsApp share (browser-only wa.me link).
+        "phone": frappe.db.get_value("Employee", doc.employee, "cell_number"),
     }
 
 
 def _qr_data_uri(text: str):
-    """Render ``text`` as a base64 PNG data-URI QR, or None if unavailable.
+    """Render ``text`` as a base64 SVG data-URI QR, or None if unavailable.
 
-    Uses the ``qrcode`` package bundled with Frappe. Kept defensive so a missing
-    optional dependency degrades to a plain link rather than erroring the desk
-    action."""
+    Uses ``pyqrcode`` (bundled with Frappe — ``frappe.twofactor`` relies on it;
+    the ``qrcode`` package is NOT installed on the bench). pyqrcode emits a crisp,
+    tiny vector SVG that scales cleanly on screen and in print. Kept defensive so a
+    missing optional dependency degrades to a plain link rather than erroring the
+    desk action."""
     try:
         import io
         from base64 import b64encode
 
-        import qrcode  # bundled with frappe
+        import pyqrcode  # bundled with frappe (see frappe.twofactor)
 
-        img = qrcode.make(text)
+        q = pyqrcode.create(text)
         buf = io.BytesIO()
-        img.save(buf, format="PNG")
-        return "data:image/png;base64," + b64encode(buf.getvalue()).decode("ascii")
+        q.svg(buf, scale=4)
+        return "data:image/svg+xml;base64," + b64encode(buf.getvalue()).decode("ascii")
     except Exception:
         return None
