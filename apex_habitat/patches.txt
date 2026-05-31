@@ -59,58 +59,12 @@ apex_habitat.patches.v1_0.seed_salis_portal_theme
 # is_standard JSON under salis/notification/ and are imported by migrate.)
 apex_habitat.patches.v1_1.seed_salis_operations_artifacts
 
-# v1.x — Salis audit-trail consolidation onto native Frappe
-# ONE-TIME (prune-eligible once every deployed site has run it): drops the
-# obsolete "Salis Activity Log" DocType (redundant with Version/track_changes +
-# timeline comments). Idempotent; a no-op on fresh installs.
-apex_habitat.patches.v1_x.drop_salis_activity_log
-
-# v1.x — Salis role consolidation (small-company, SoD-preserving merge)
-# ONE-TIME (prune-eligible once every deployed site has run it): re-points users
-# off the over-deep/generic roles onto the survivors, then deletes the unused
-# app-owned roles. Idempotent; a no-op on fresh installs (the removed roles are
-# no longer seeded). Never touches core/ERPNext roles.
-#   Fleet Operations Manager, Fleet Regional Manager -> Fleet Manager
-#   Legal Officer -> Government Relations Officer
-#   Project Manager, Regional Operations Manager, Operations Manager
-#       -> Fleet Project Manager / Fleet Manager
-apex_habitat.patches.v1_x.consolidate_salis_roles
-
 # v1.x — Salis communication artifacts (Email Templates + Auto Email Reports)
 # PERMANENT (keep, do NOT prune): seeds DISTINCT records, idempotent, also called
 # from after_install/after_migrate. Not redundant. The matching Salis Go-Live
 # Module Onboarding + Onboarding Steps are standard module files (auto-imported by
 # migrate), so they need no patch step.
 apex_habitat.patches.v1_x.seed_salis_communications
-
-# v1.x — remove orphan Salis workspace records left after the short-name rename
-# ONE-TIME (prune-eligible): deletes Salis-module Workspaces not in the shipped set
-# (Salis/Workers/Fleet/Fuel/Rentals/Compliance/Setup). No-op on fresh installs.
-apex_habitat.patches.v1_x.cleanup_renamed_salis_workspaces
-
-# v1.x — move the shared settings Singles into the new Apex Core module
-# ONE-TIME (prune-eligible once every deployed site has run it): re-homes
-# "Habitat Settings" and "Salis Settings" from the Habitat/Salis modules onto
-# "Apex Core" by updating the persisted DocType.module value. Names are unchanged,
-# so tables and stored Single values are preserved. No-op on fresh installs.
-apex_habitat.patches.v1_x.move_settings_to_apex_core
-
-# v1.x — move the "Masar Worker Token" DocType into the shared Apex Core module
-# ONE-TIME (prune-eligible once every deployed site has run it): re-homes
-# "Masar Worker Token" from the Salis module onto "Apex Core" by updating the
-# persisted DocType.module value. The name is unchanged, so the table and all
-# stored token rows are preserved and token-by-name lookups keep working. No-op
-# on fresh installs.
-apex_habitat.patches.v1_x.move_masar_token_to_apex_core
-
-# v1.x — foreground Apex workspaces by hiding the stock ERPNext/HRMS public ones
-# ONE-TIME (prune-eligible once every deployed site has run it): sets is_hidden=1
-# on the explicit, non-Apex stock workspaces (Accounting/Selling/Buying/Stock/
-# Assets/Manufacturing/Quality/CRM/Support/Projects/HR/Payroll areas) so the desk
-# sidebar foregrounds the Habitat/Salis/Core workspaces. Reversible (set is_hidden=0),
-# existence-guarded, skips already-hidden. Never edits erpnext/frappe core; migrate
-# preserves is_hidden (frappe import_file ignore_values), so it persists across upgrades.
-apex_habitat.patches.v1_x.hide_stock_erpnext_workspaces
 
 # v1.x — Salis native Workflow Spine (Transport Request, first-mover)
 # PERMANENT (keep, do NOT prune): seeds the Transport Request Workflow + its
@@ -119,104 +73,6 @@ apex_habitat.patches.v1_x.hide_stock_erpnext_workspaces
 # from after_install/after_migrate). Frappe does not auto-import a Workflow from a
 # module folder (not in IMPORTABLE_DOCTYPES), so this seed is the install path.
 apex_habitat.patches.v1_x.seed_salis_workflows
-
-# v1.x — merge Fuel Topup Request + Fuel Chip Request into the unified Fuel Request
-# ONE-TIME (prune-eligible once every deployed site has run it): migrates each
-# stored FT-/FC- row into Fuel Request with request_type = Top-up / Chip (name,
-# owner, timestamps and docstatus preserved), then drops the two obsolete DocTypes
-# and their backing tables. Idempotent (skips a row whose name already exists) and
-# a no-op on a fresh install (the source tables do not exist).
-apex_habitat.patches.v1_x.merge_fuel_request_doctypes
-
-# v1.x — backfill Operations Alert resolution-audit fields
-# ONE-TIME (prune-eligible once every deployed site has run it): stamps the new
-# read-only resolved_on (and resolution_note) on Operations Alert rows that were
-# already Resolved before those fields existed, using COALESCE(modified,
-# raised_on). Idempotent (only NULL resolved_on on Resolved rows), existence-
-# guarded on table + column (no schema error during migrate), and a no-op on a
-# fresh install (no pre-existing Resolved rows).
-apex_habitat.patches.v1_x.backfill_operations_alert_resolved_on
-
-# v1.x — consolidate the three admin/settings workspaces into "Apex Core"
-# ONE-TIME (prune-eligible once every deployed site has run it): deletes the
-# Habitat "Setup", Habitat "Console" and Salis "Salis Setup" Workspace records
-# after their links/shortcuts/cards/roles were folded into the single "Apex Core"
-# config hub and their fixture dirs were removed. Deleting a workspace fixture
-# does not delete its DB record, so installed sites need this. Idempotent,
-# existence-guarded, a no-op on fresh installs (the records are never shipped).
-apex_habitat.patches.v1_x.consolidate_admin_workspaces_into_apex_core
-
-# v1.x — repoint stale navbar Help-dropdown routes to the consolidated workspace
-# ONE-TIME (prune-eligible once every deployed site has run it): rewrites only the
-# Navbar Settings help-dropdown rows whose route targets a deleted admin workspace
-# (/app/setup, /app/console, /app/salis-setup) to /app/apex-core. Never adds,
-# removes or touches any other navbar item. Idempotent; a no-op on fresh installs
-# (add_navbar_help_links now seeds /app/apex-core directly).
-apex_habitat.patches.v1_x.fix_navbar_routes_to_apex_core
-
-# v1.x — make the Fuel Consumption Ledger unique source index installable on
-# existing sites that may already hold duplicate accrual rows
-# ONE-TIME (prune-eligible once every deployed site has run it): runs pre-model-
-# sync (this file has no section header, so every entry is pre_model_sync),
-# collapses any pre-existing duplicate (source_type, source_name) ledger rows to
-# the earliest one, then ensures the composite UNIQUE index (unique_fcl_source) the
-# fuel engine relies on as its hard idempotency backstop. Without this, the schema-
-# sync add_unique would fail on a site with legacy duplicates and break migrate.
-# Idempotent, existence-guarded on the table (no schema error during migrate), and
-# a no-op on a fresh install. Touches no GL.
-apex_habitat.patches.v1_x.dedupe_fuel_ledger_and_unique_index
-
-# v1.x — remove dead code: deprecated Habitat Operations Alert + dead options/city
-# ONE-TIME (prune-eligible once every deployed site has run them): each drops a
-# truly-dead artifact with no writer/reader/import left. All idempotent,
-# existence-guarded and no-ops on fresh installs.
-#   - drop_habitat_operations_alert: drops the deprecated "Habitat Operations
-#     Alert" DocType + table and its "Unresolved Alerts" Number Card (superseded
-#     by the Salis "Operations Alert" DocType + native Notifications). The card
-#     fixture is re-pointed at "Operations Alert"; the patch only removes the card
-#     if an installed site still has it bound to the dropped DocType.
-#   - drop_habitat_city: drops the empty, deprecated "Habitat City" DocType/table
-#     left after v0_7.rename_habitat_city_to_city; the source fixture is gone.
-#   - drop_dead_operations_alert_options: normalises any legacy "Operations Alert"
-#     row off the removed alert_type options ("No Fuel"/"Incomplete Handover",
-#     never written) to "General" so it stays selectable in the narrower set.
-apex_habitat.patches.v1_x.drop_habitat_operations_alert
-apex_habitat.patches.v1_x.drop_habitat_city
-apex_habitat.patches.v1_x.drop_dead_operations_alert_options
-
-# v1.x — remove the out-of-scope "Sponsorship Transfer Case" feature
-# ONE-TIME (prune-eligible once every deployed site has run it): the kafala-
-# transfer / Qiwa-status governance case was out-of-scope HR creep and was
-# removed from source (DocType, Workflow, permission hooks, number card,
-# workspace links). This drops the lingering DocType + table (and its bound
-# Workflow) on pre-production sites that hold only test rows. Idempotent,
-# existence-guarded, a no-op on fresh installs.
-apex_habitat.patches.v1_x.drop_sponsorship_transfer_case
-
-# v1.x — retire the dead custom Salis approval tier-engine
-# ONE-TIME (prune-eligible once every deployed site has run it): the six approval
-# DocTypes were migrated to native Frappe Workflow, so the hand-rolled tier-engine
-# (salis_lib: TIERS / ROLE_TIER / ensure_approval / escalation) and the
-# "Approval Request" DocType it gated are now dead — nothing creates an Approval
-# Request and no controller calls ensure_approval (SoD lives on the workflow
-# transitions now). This drops the lingering "Approval Request" DocType + table
-# and the orphaned "Salis Authority Tier" child table (which only fed the deleted
-# role->tier map) on pre-production sites holding only test rows. Idempotent,
-# existence-guarded, a no-op on fresh installs.
-apex_habitat.patches.v1_x.drop_approval_request
-
-# v1.x — merge area workspaces: Upkeep+Safety -> Facilities, Workers+Fuel -> Movement
-# ONE-TIME (prune-eligible once every deployed site has run it): deletes the four
-# merged-away Workspace records (Upkeep/Safety/Workers/Fuel) and reloads the two
-# replacements (Facilities/Movement). Idempotent, existence-guarded, no-op on fresh installs.
-apex_habitat.patches.v1_x.merge_facilities_movement_workspaces
-
-# v1.x — retire the custom Salis "Support Ticket" onto native ERPNext Issue + SLA
-# ONE-TIME (prune-eligible once every deployed site has run it): migrates any
-# stored Support Ticket rows onto Issue (custom_driver linkage) and drops the
-# obsolete Support Ticket / Ticket Message DocTypes and their tables. Idempotent,
-# existence-guarded, a no-op on fresh installs (the source tables never ship).
-apex_habitat.patches.v1_x.drop_support_ticket
 
 [post_model_sync]
 # v1.30.0 — arrival redesign Batch 2: back-fill party_type/party on the seven
