@@ -51,7 +51,10 @@ def seed_salis_navbar_help_links():
             settings.save(ignore_permissions=True)  # audit-ok
             frappe.db.commit()
     except Exception:
-        frappe.db.rollback()
+        # Log FIRST so the error row is never discarded. This only ever does a
+        # single Single.save() (committed in the try), so on failure there is no
+        # partial work of ours to undo — a global rollback() would only discard
+        # unrelated pending writes from the surrounding seed run, so we don't.
         frappe.log_error(
             title="seed_salis_navbar_help_links failed",
             message=frappe.get_traceback(),

@@ -1,0 +1,349 @@
+{
+ "doctype": "Workspace",
+ "name": "Facilities",
+ "label": "Facilities",
+ "title": "Facilities",
+ "module": "Habitat",
+ "icon": "tool",
+ "public": 1,
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "Internal Auditor"
+  }
+ ],
+ "is_default": 0,
+ "is_hidden": 0,
+ "sequence_id": 4.0,
+ "parent_page": "Habitat",
+ "content": "[{\"id\": \"facHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"facKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"facKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders In Progress\", \"col\": 3}}, {\"id\": \"facKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"facKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"facKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Escalated Maintenance Requests\", \"col\": 3}}, {\"id\": \"facKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders Completed\", \"col\": 3}}, {\"id\": \"facKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Scheduled Tasks Open\", \"col\": 3}}, {\"id\": \"facKM7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Audit Remediation Plans\", \"col\": 3}}, {\"id\": \"facHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"facQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"facQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Work Order\", \"col\": 3}}, {\"id\": \"facQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Inspection Report\", \"col\": 3}}, {\"id\": \"facQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Safety Incident\", \"col\": 3}}, {\"id\": \"facQ4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building License\", \"col\": 3}}, {\"id\": \"facQ5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Scheduled Task Instance\", \"col\": 3}}, {\"id\": \"facHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"facCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Flow\", \"col\": 4}}, {\"id\": \"facCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Operations\", \"col\": 4}}, {\"id\": \"facCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Work\", \"col\": 4}}, {\"id\": \"facCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"facCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Materials\", \"col\": 4}}, {\"id\": \"facCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Maintenance Request",
+   "link_to": "Maintenance Request",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Maintenance Work Order",
+   "link_to": "Maintenance Work Order",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Safety Inspection Report",
+   "link_to": "Safety Inspection Report",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Habitat Safety Incident",
+   "link_to": "Habitat Safety Incident",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Building License",
+   "link_to": "Building License",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Scheduled Task Instance",
+   "link_to": "Scheduled Task Instance",
+   "idx": 6
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Maintenance Flow",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Request",
+   "link_type": "DocType",
+   "link_to": "Maintenance Request",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Work Order",
+   "link_type": "DocType",
+   "link_to": "Maintenance Work Order",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Inspection Report",
+   "link_type": "DocType",
+   "link_to": "Maintenance Inspection Report",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Safety Operations",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Inspection Report",
+   "link_type": "DocType",
+   "link_to": "Safety Inspection Report",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Habitat Safety Incident",
+   "link_type": "DocType",
+   "link_to": "Habitat Safety Incident",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Task Execution",
+   "link_type": "DocType",
+   "link_to": "Safety Task Execution",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Map",
+   "link_type": "Page",
+   "link_to": "safety-map",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Daily Work",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Scheduled Task Instance",
+   "link_type": "DocType",
+   "link_to": "Scheduled Task Instance",
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Cleaning Log",
+   "link_type": "DocType",
+   "link_to": "Cleaning Log",
+   "idx": 12
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Compliance",
+   "idx": 13
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Building License",
+   "link_type": "DocType",
+   "link_to": "Building License",
+   "idx": 14
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Client Audit Remediation Plan",
+   "link_type": "DocType",
+   "link_to": "Client Audit Remediation Plan",
+   "idx": 15
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Camera Access Grant",
+   "link_type": "DocType",
+   "link_to": "Camera Access Grant",
+   "idx": 16
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Materials",
+   "idx": 17
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Material",
+   "link_type": "DocType",
+   "link_to": "Maintenance Material",
+   "idx": 18
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Material Template",
+   "link_type": "DocType",
+   "link_to": "Maintenance Material Template",
+   "idx": 19
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Material Transfer",
+   "link_type": "DocType",
+   "link_to": "Accommodation Material Transfer",
+   "idx": 20
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Stock Ledger",
+   "link_type": "DocType",
+   "link_to": "Accommodation Stock Ledger",
+   "idx": 21
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Views",
+   "idx": 22
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Backlog",
+   "link_type": "Report",
+   "link_to": "Maintenance Backlog",
+   "idx": 23,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Aging",
+   "link_type": "Report",
+   "link_to": "Maintenance Aging",
+   "idx": 24,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Open Findings",
+   "link_type": "Report",
+   "link_to": "Safety Open Findings",
+   "idx": 25,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Scheduled Task Compliance",
+   "link_type": "Report",
+   "link_to": "Scheduled Task Compliance",
+   "idx": 26,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Audit Remediation Status",
+   "link_type": "Report",
+   "link_to": "Audit Remediation Status",
+   "idx": 27,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Resident Supervisor Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Resident Supervisor Dashboard",
+   "idx": 28
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Internal Auditor Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Internal Auditor Dashboard",
+   "idx": 29
+  }
+ ],
+ "charts": [],
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Open Maintenance Requests",
+   "label": "Open Maintenance Requests",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Maintenance Work Orders In Progress",
+   "label": "Maintenance Work Orders In Progress",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Overdue Scheduled Tasks",
+   "label": "Overdue Scheduled Tasks",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Licenses Expiring Soon",
+   "label": "Licenses Expiring Soon",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Escalated Maintenance Requests",
+   "label": "Escalated Maintenance Requests",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Maintenance Work Orders Completed",
+   "label": "Maintenance Work Orders Completed",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Scheduled Tasks Open",
+   "label": "Scheduled Tasks Open",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Open Audit Remediation Plans",
+   "label": "Open Audit Remediation Plans",
+   "idx": 8
+  }
+ ],
+ "quick_lists": [],
+ "modified": "2026-05-31 13:00:00.000000"
+}

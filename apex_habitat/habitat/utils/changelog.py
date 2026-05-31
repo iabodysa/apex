@@ -7,6 +7,19 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.26.4 ---------------------------------------------------------------
+    {
+        "title": "v1.26.4: Tidier desk navigation — Maintenance and Safety are merged into one 'Facilities' workspace, and Workers (transport) and Fuel are merged into one 'Movement' workspace. Fleet stays separate. Fewer, clearer areas to move between.",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-22 09:00:00",
+    },
+    {
+        "title": "v1.26.4: Reliability — the workflow, navbar and dashboard seeds now log before rolling back and roll back only their own item (a per-item savepoint), so one bad record can no longer silently discard the others seeded in the same run.",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-22 09:01:00",
+    },
     # v1.26.3 ---------------------------------------------------------------
     {
         "title": "v1.26.3: Transport now clearly separates worker (bus/shuttle) trips from representative (مندوب) trips — a representative trip names the representative and can never carry labour-accommodation or a worker manifest, and only worker trips appear in the worker (Masar) view. Plus seed-reliability fixes and a clearer Employee 'Salis' connections label.",

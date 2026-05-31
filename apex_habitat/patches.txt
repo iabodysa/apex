@@ -215,3 +215,9 @@ apex_habitat.patches.v1_x.drop_sponsorship_transfer_case
 # role->tier map) on pre-production sites holding only test rows. Idempotent,
 # existence-guarded, a no-op on fresh installs.
 apex_habitat.patches.v1_x.drop_approval_request
+
+# v1.x — merge area workspaces: Upkeep+Safety -> Facilities, Workers+Fuel -> Movement
+# ONE-TIME (prune-eligible once every deployed site has run it): deletes the four
+# merged-away Workspace records (Upkeep/Safety/Workers/Fuel) and reloads the two
+# replacements (Facilities/Movement). Idempotent, existence-guarded, no-op on fresh installs.
+apex_habitat.patches.v1_x.merge_facilities_movement_workspaces

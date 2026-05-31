@@ -100,9 +100,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Workers",
+   "label": "Movement",
    "link_type": "Workspace",
-   "link_to": "Workers",
+   "link_to": "Movement",
    "idx": 2
   },
   {
@@ -116,18 +116,10 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Fuel",
-   "link_type": "Workspace",
-   "link_to": "Fuel",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Rentals",
    "link_type": "Workspace",
    "link_to": "Rentals",
-   "idx": 5
+   "idx": 4
   },
   {
    "doctype": "Workspace Link",
@@ -135,7 +127,7 @@
    "label": "Compliance",
    "link_type": "Workspace",
    "link_to": "Compliance",
-   "idx": 6
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -143,13 +135,13 @@
    "label": "Apex Core",
    "link_type": "Workspace",
    "link_to": "Apex Core",
-   "idx": 7
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Overview",
-   "idx": 8
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -157,7 +149,7 @@
    "label": "Movement KPI Summary",
    "link_type": "Report",
    "link_to": "Movement KPI Summary",
-   "idx": 9,
+   "idx": 8,
    "is_query_report": 1
   },
   {
@@ -166,7 +158,7 @@
    "label": "Fleet Manager Dashboard",
    "link_type": "Dashboard",
    "link_to": "Fleet Manager Dashboard",
-   "idx": 10
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -174,13 +166,13 @@
    "label": "Movement Operations Dashboard",
    "link_type": "Dashboard",
    "link_to": "Movement Operations Dashboard",
-   "idx": 11
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Alerts",
-   "idx": 12
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -188,7 +180,7 @@
    "label": "Operations Alert",
    "link_type": "DocType",
    "link_to": "Operations Alert",
-   "idx": 13
+   "idx": 12
   }
  ],
  "charts": [
@@ -247,5 +239,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-31 12:00:00.000000"
+ "modified": "2026-05-31 14:30:00.000000"
 }

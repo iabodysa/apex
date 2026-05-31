@@ -200,14 +200,20 @@ def seed_salis_workflows():
     on the target DocType and every referenced state/action master — safe to
     re-run (install + every migrate)."""
     for dir_name in _WORKFLOW_DIRS:
+        # Per-item savepoint: a failing workflow rolls back only its own partial
+        # writes, never the workflows already seeded earlier in this same run.
+        sp = "wf_seed"
+        frappe.db.savepoint(sp)
         try:
             definition = _load_definition(dir_name)
             _seed_one(definition)
         except Exception:
-            # A seed must NEVER crash install/migrate — log and continue.
-            frappe.db.rollback()
+            # A seed must NEVER crash install/migrate — log FIRST (before any
+            # rollback, so the log row is never discarded), then undo just this
+            # item via the savepoint and continue.
             frappe.log_error(
                 title=f"seed_salis_workflows failed: {dir_name}",
                 message=frappe.get_traceback(),
             )
+            frappe.db.rollback(save_point=sp)
     frappe.db.commit()

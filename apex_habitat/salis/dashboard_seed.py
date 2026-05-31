@@ -14,9 +14,10 @@ Idempotency / safety contract (mirrors Habitat):
   LinkValidationError (which previously broke patches and opened GitHub issues —
   see memory `feedback_patches`).
 - Each upsert (charts, cards, every dashboard) is wrapped in its own try/except.
-  If the referenced DocType does not exist (module partially installed) the
-  failure is rolled back and logged via ``frappe.log_error`` — it never aborts
-  the migrate or the surrounding Habitat seed.
+  On failure it logs via ``frappe.log_error`` FIRST, then rolls back only its own
+  writes via a per-item savepoint (``frappe.db.rollback(save_point=sp)``) — so one
+  bad tile never aborts migrate, never erases tiles seeded earlier in the same
+  run, and never discards the log row.
 
 Real Salis DocTypes / fieldnames used here are verified against
 ``salis/doctype/*/*.json``. Notably the alert DocType is named **Operations
@@ -44,6 +45,8 @@ def _upsert_chart(spec):
     target document_type so a missing DocType is skipped, not fatal."""
     name = spec["name"]
     doctype = spec["document_type"]
+    sp = "salis_chart_seed"
+    frappe.db.savepoint(sp)
     try:
         if not frappe.db.exists("DocType", doctype):
             return  # source DocType not installed yet — skip silently
@@ -82,14 +85,18 @@ def _upsert_chart(spec):
         else:
             frappe.get_doc(values).insert(ignore_permissions=True)  # audit-ok
     except Exception:
-        frappe.db.rollback()
+        # Log FIRST (before rollback, so the log row survives), then undo only
+        # this chart via the savepoint — one bad chart can't discard the run.
         frappe.log_error(frappe.get_traceback(), f"Salis seed chart failed: {name}")
+        frappe.db.rollback(save_point=sp)
 
 
 def _upsert_card(spec):
     """Create/update one Number Card by name. Existence-guarded on document_type."""
     name = spec["name"]
     doctype = spec["document_type"]
+    sp = "salis_card_seed"
+    frappe.db.savepoint(sp)
     try:
         if not frappe.db.exists("DocType", doctype):
             return  # source DocType not installed yet — skip silently
@@ -128,8 +135,10 @@ def _upsert_card(spec):
         else:
             frappe.get_doc(values).insert(ignore_permissions=True)  # audit-ok
     except Exception:
-        frappe.db.rollback()
+        # Log FIRST (before rollback, so the log row survives), then undo only
+        # this card via the savepoint — one bad card can't discard the run.
         frappe.log_error(frappe.get_traceback(), f"Salis seed card failed: {name}")
+        frappe.db.rollback(save_point=sp)
 
 
 def _existing_charts(charts):
@@ -144,6 +153,8 @@ def _existing_cards(cards):
 
 def _upsert_dashboard(name, charts, cards):
     """Create/update one Dashboard, linking only charts/cards that exist."""
+    sp = "salis_dashboard_seed"
+    frappe.db.savepoint(sp)
     try:
         chart_rows = _existing_charts(charts)
         card_rows = _existing_cards(cards)
@@ -165,8 +176,10 @@ def _upsert_dashboard(name, charts, cards):
         else:
             doc.save(ignore_permissions=True)  # audit-ok
     except Exception:
-        frappe.db.rollback()
+        # Log FIRST (before rollback, so the log row survives), then undo only
+        # this dashboard via the savepoint — one bad dashboard can't discard the run.
         frappe.log_error(frappe.get_traceback(), f"Salis seed dashboard failed: {name}")
+        frappe.db.rollback(save_point=sp)
 
 
 # --------------------------------------------------------------------------- #

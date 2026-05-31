@@ -24,9 +24,10 @@ Idempotency / safety contract (mirrors ``salis/dashboard_seed.py``):
 - Each upsert is existence-guarded on its source DocType via
   ``frappe.db.exists("DocType", X)`` — a not-yet-migrated engine DocType is
   skipped silently, never fatal.
-- Each upsert is wrapped in its own try/except with ``frappe.db.rollback()``
-  + ``frappe.log_error`` so a partially installed module never aborts migrate
-  or the surrounding Salis/Habitat seeds.
+- Each upsert is wrapped in its own try/except that logs via ``frappe.log_error``
+  FIRST and then rolls back only its own writes via a per-item savepoint
+  (``frappe.db.rollback(save_point=sp)``), so one bad tile never aborts migrate,
+  never erases tiles seeded earlier in the run, and never discards the log row.
 - The dashboard links only charts/cards that actually got created, so it can
   never raise a LinkValidationError.
 
@@ -67,6 +68,8 @@ def _upsert_chart(spec):
     target document_type so a missing (engine) DocType is skipped, not fatal."""
     name = spec["name"]
     doctype = spec["document_type"]
+    sp = "salis_mv_chart_seed"
+    frappe.db.savepoint(sp)
     try:
         if not frappe.db.exists("DocType", doctype):
             return  # source/engine DocType not migrated yet — skip silently
@@ -104,17 +107,22 @@ def _upsert_chart(spec):
             doc.save(ignore_permissions=True)  # audit-ok
         else:
             frappe.get_doc(values).insert(ignore_permissions=True)  # audit-ok
-        frappe.db.commit()  # audit-ok — isolate each upsert so one failure can't wipe prior
     except Exception:
-        frappe.db.rollback()
+        # Log FIRST (before rollback, so the log row survives), then undo only
+        # this chart via the savepoint — one bad chart can't discard prior work.
+        # (No in-try commit: a COMMIT releases all savepoints, which would make
+        # the scoped rollback invalid; _seed_records commits once at the end.)
         frappe.log_error(frappe.get_traceback(),
                          f"Salis movement seed chart failed: {name}")
+        frappe.db.rollback(save_point=sp)
 
 
 def _upsert_card(spec):
     """Create/update one Number Card by name. Existence-guarded on document_type."""
     name = spec["name"]
     doctype = spec["document_type"]
+    sp = "salis_mv_card_seed"
+    frappe.db.savepoint(sp)
     try:
         if not frappe.db.exists("DocType", doctype):
             return  # source/engine DocType not migrated yet — skip silently
@@ -151,11 +159,14 @@ def _upsert_card(spec):
             doc.save(ignore_permissions=True)  # audit-ok
         else:
             frappe.get_doc(values).insert(ignore_permissions=True)  # audit-ok
-        frappe.db.commit()  # audit-ok — isolate each upsert
     except Exception:
-        frappe.db.rollback()
+        # Log FIRST (before rollback, so the log row survives), then undo only
+        # this card via the savepoint — one bad card can't discard prior work.
+        # (No in-try commit: a COMMIT releases all savepoints; _seed_records
+        # commits once at the end.)
         frappe.log_error(frappe.get_traceback(),
                          f"Salis movement seed card failed: {name}")
+        frappe.db.rollback(save_point=sp)
 
 
 def _existing_charts(charts):
@@ -170,6 +181,8 @@ def _existing_cards(cards):
 
 def _upsert_dashboard(name, charts, cards):
     """Create/update one Dashboard, linking only charts/cards that exist."""
+    sp = "salis_mv_dashboard_seed"
+    frappe.db.savepoint(sp)
     try:
         chart_rows = _existing_charts(charts)
         card_rows = _existing_cards(cards)
@@ -190,11 +203,14 @@ def _upsert_dashboard(name, charts, cards):
             doc.insert(ignore_permissions=True)  # audit-ok
         else:
             doc.save(ignore_permissions=True)  # audit-ok
-        frappe.db.commit()  # audit-ok
     except Exception:
-        frappe.db.rollback()
+        # Log FIRST (before rollback, so the log row survives), then undo only
+        # this dashboard via the savepoint — one bad dashboard can't discard
+        # prior work. (No in-try commit: a COMMIT releases all savepoints; the
+        # seed_movement_dashboards entrypoint commits once at the end.)
         frappe.log_error(frappe.get_traceback(),
                          f"Salis movement seed dashboard failed: {name}")
+        frappe.db.rollback(save_point=sp)
 
 
 # --------------------------------------------------------------------------- #
