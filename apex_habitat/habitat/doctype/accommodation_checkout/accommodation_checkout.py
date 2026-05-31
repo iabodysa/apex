@@ -12,6 +12,7 @@ from frappe.model.document import Document
 from frappe.utils import getdate
 
 from apex_habitat.habitat.doctype.accommodation_assignment.accommodation_assignment import recalculate_spatial
+from apex_habitat.apex_core.party_link import sync_party_employee
 
 
 class AccommodationCheckout(Document):
@@ -19,6 +20,7 @@ class AccommodationCheckout(Document):
 
 
 def validate(doc, method=None):
+    sync_party_employee(doc, derive_from="assignment")
     if not doc.assignment or not frappe.db.exists("Accommodation Assignment", doc.assignment):
         return  # Mandatory/link check will catch missing or invalid assignment
 

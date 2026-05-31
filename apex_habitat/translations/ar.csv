@@ -2399,3 +2399,7 @@ Active,نشط
 Linked,مرتبط
 Window Days must be at least 1 day.,يجب أن تكون أيام النافذة يوماً واحداً على الأقل.
 Window Days cannot exceed {0} days.,لا يمكن أن تتجاوز أيام النافذة {0} يوماً.
+Resident,المقيم
+Resident Type,نوع المقيم
+Worker Type,نوع العامل
+Resident / worker is required.,المقيم / العامل مطلوب.

@@ -3,6 +3,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from apex_habitat.apex_core.party_link import sync_party_employee
 
 
 class AccommodationResidentRequest(Document):
@@ -27,6 +28,7 @@ def before_insert(doc, method=None):
 
 
 def validate(doc, method=None):
+    sync_party_employee(doc)
     if doc.location_token and not doc.building:
         frappe.throw(_("Invalid or inactive location token."))
 

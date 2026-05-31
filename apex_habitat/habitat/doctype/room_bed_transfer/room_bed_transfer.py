@@ -10,12 +10,16 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex_habitat.apex_core.party_link import sync_party_employee
+
 
 class RoomBedTransfer(Document):
     pass
 
 
 def validate(doc, method=None):
+    sync_party_employee(doc, derive_from="assignment")
+
     if not doc.to_bed or not doc.to_room:
         return  # Mandatory check will catch missing fields
 

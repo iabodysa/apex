@@ -1,3 +1,4 @@
+[pre_model_sync]
 # Patch lifecycle policy (audit 2026-05-27):
 #   PERMANENT  = recurring/idempotent seeds; must stay so fresh installs replay them.
 #   ONE-TIME   = renames/cleanups/backfills; safe to PRUNE (remove module + this line)
@@ -216,3 +217,12 @@ apex_habitat.patches.v1_x.merge_facilities_movement_workspaces
 # obsolete Support Ticket / Ticket Message DocTypes and their tables. Idempotent,
 # existence-guarded, a no-op on fresh installs (the source tables never ship).
 apex_habitat.patches.v1_x.drop_support_ticket
+
+[post_model_sync]
+# v1.30.0 — arrival redesign Batch 2: back-fill party_type/party on the seven
+# worker-identity doctypes from the legacy `employee` link.
+# ONE-TIME (prune-eligible once every deployed site has run it): this is the
+# file's first [post_model_sync] entry, so it runs AFTER schema sync — the new
+# party_type/party columns exist before the UPDATE. Idempotent (only rows with an
+# empty party), existence-guarded on table + columns, a no-op on fresh installs.
+apex_habitat.patches.v1_x.backfill_worker_party

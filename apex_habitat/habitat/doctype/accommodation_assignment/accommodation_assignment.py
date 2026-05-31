@@ -11,6 +11,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from apex_habitat.apex_core.party_link import sync_party_employee
 
 
 class AccommodationAssignment(Document):
@@ -55,6 +56,8 @@ def recalculate_spatial(room_name: str, building_name: str) -> None:
 
 
 def validate(doc, method=None):
+    sync_party_employee(doc, require_party=True)
+
     if not doc.building or not frappe.db.exists("Accommodation Building", doc.building):
         return  # Mandatory/link check will catch missing or invalid building
 
@@ -80,23 +83,27 @@ def validate(doc, method=None):
         if doc.check_in_date and doc.expected_checkout_date < doc.check_in_date:
             frappe.throw(_("Expected check-out date cannot be earlier than the check-in date."))
 
-    # Reject a second active submitted assignment for the same employee
-    active_asg = frappe.db.get_value(
-        "Accommodation Assignment",
-        {
-            "employee": doc.employee,
-            "docstatus": 1,
-            "check_out_date": ["is", "not set"],
-            "name": ["!=", doc.name],
-        },
-        "name",
-    )
-    if active_asg:
-        frappe.throw(
-            _("Employee {0} already has an active Accommodation Assignment: {1}").format(
-                doc.employee, active_asg
-            )
+    # Reject a second active submitted assignment for the same employee. Skip when
+    # there is no employee (a Temporary Worker party): an `employee IS NULL` filter
+    # would otherwise match every other unlinked Temporary Worker as a false
+    # duplicate. (Mirrors the `if doc.employee` guard in idle_resident_report.)
+    if doc.employee:
+        active_asg = frappe.db.get_value(
+            "Accommodation Assignment",
+            {
+                "employee": doc.employee,
+                "docstatus": 1,
+                "check_out_date": ["is", "not set"],
+                "name": ["!=", doc.name],
+            },
+            "name",
         )
+        if active_asg:
+            frappe.throw(
+                _("Employee {0} already has an active Accommodation Assignment: {1}").format(
+                    doc.employee, active_asg
+                )
+            )
 
     # Validate bed belongs to room
     bed_room = frappe.db.get_value("Accommodation Bed", doc.bed, "room")

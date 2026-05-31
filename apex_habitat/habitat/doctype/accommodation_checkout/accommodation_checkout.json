@@ -27,6 +27,8 @@
   "custody_return_items",
   "accommodation_checkout_tab_system",
   "accommodation_checkout_sec_system",
+  "party_type",
+  "party",
   "employee",
   "bed",
   "accommodation_checkout_system_col",
@@ -163,6 +165,24 @@
    "fieldname": "accommodation_checkout_sec_system",
    "fieldtype": "Section Break",
    "label": "Administrative Details"
+  },
+  {
+   "default": "Employee",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Resident Type",
+   "options": "Employee\nTemporary Worker",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Resident",
+   "options": "party_type",
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "assignment.employee",

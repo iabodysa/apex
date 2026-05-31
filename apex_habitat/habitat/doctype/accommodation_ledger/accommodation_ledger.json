@@ -9,6 +9,8 @@
   "accommodation_ledger_sec_details",
   "company",
   "posting_date",
+  "party_type",
+  "party",
   "employee",
   "assignment",
   "building",
@@ -56,11 +58,30 @@
    "reqd": 1
   },
   {
+   "default": "Employee",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Resident Type",
+   "options": "Employee\nTemporary Worker",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Resident",
+   "options": "party_type",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Employee",
    "options": "Employee",
+   "read_only": 1,
    "search_index": 1
   },
   {

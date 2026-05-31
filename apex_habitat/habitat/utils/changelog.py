@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.30.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.30.0 — housing & worker records can now hold a passport-only Temporary Worker (pre-Iqama), with the Employee field kept in sync",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-28 09:00:00",
+    },
     # v1.29.1 ---------------------------------------------------------------
     {
         "title": "v1.29.1: Native-first cleanups \u2014 the room-label print format now ships as a standard format (installs on new sites); the monthly rent-due reminder is now a native Frappe Notification on the unpaid schedule (replacing a custom scheduler); and the duplicated worker-link dialog (QR + WhatsApp) was consolidated from three desk scripts into one shared bundle.",
@@ -1316,6 +1323,21 @@ _RELEASES = [
 ]
 
 
+# Frappe's "Changelog Feed" `title` is a Data field (max 140 chars), shown as a
+# one-line headline in the desk notification bell. Some blurbs here are longer (they
+# double as release notes), so clip them: an over-length title makes the insert in
+# Frappe's fetch_changelog_feed raise, which silently drops the WHOLE batch of new
+# items — the reason no What's-New item appeared for the long-titled 1.x releases.
+_FEED_TITLE_MAX = 140
+
+
+def _clip_title(title):
+    title = title.strip()
+    if len(title) <= _FEED_TITLE_MAX:
+        return title
+    return title[: _FEED_TITLE_MAX - 1].rstrip() + "…"
+
+
 def get_changelog_feed(since):
     """
     Returns Apex Habitat release items newer than `since`.
@@ -1323,4 +1345,8 @@ def get_changelog_feed(since):
     Frappe's fetch_changelog_feed() calls this and deduplicates by exact field match.
     """
     since_dt = get_datetime(since)
-    return [r for r in _RELEASES if get_datetime(r["creation"]) > since_dt]
+    return [
+        {**r, "title": _clip_title(r["title"])}
+        for r in _RELEASES
+        if get_datetime(r["creation"]) > since_dt
+    ]

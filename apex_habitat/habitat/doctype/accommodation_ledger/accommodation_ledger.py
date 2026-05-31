@@ -9,6 +9,7 @@ operational memos and no GL Entry is posted.
 from __future__ import annotations
 
 from frappe.model.document import Document
+from apex_habitat.apex_core.party_link import sync_party_employee
 
 
 class AccommodationLedger(Document):
@@ -16,6 +17,7 @@ class AccommodationLedger(Document):
 
 
 def before_save(doc, method=None):
+    sync_party_employee(doc)
     # Validate document properties
     if not doc.doctype:
         return

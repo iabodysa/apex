@@ -111,6 +111,28 @@
   },
   {
    "doctype": "DocField",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "label": "Resident Type",
+   "options": "Employee\nTemporary Worker",
+   "default": "Employee",
+   "read_only": 1,
+   "in_standard_filter": 1,
+   "idx": 13
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Resident",
+   "options": "party_type",
+   "read_only": 1,
+   "in_list_view": 1,
+   "search_index": 1,
+   "idx": 14
+  },
+  {
+   "doctype": "DocField",
    "fieldname": "employee",
    "label": "Employee",
    "fieldtype": "Link",
@@ -118,7 +140,7 @@
    "fetch_from": "assignment.employee",
    "read_only": 1,
    "in_list_view": 1,
-   "idx": 13,
+   "idx": 15,
    "search_index": 1
   },
   {
@@ -129,13 +151,13 @@
    "options": "Accommodation Bed",
    "fetch_from": "assignment.bed",
    "read_only": 1,
-   "idx": 14
+   "idx": 16
   },
   {
    "doctype": "DocField",
    "fieldname": "room_bed_transfer_system_col",
    "fieldtype": "Column Break",
-   "idx": 15
+   "idx": 17
   },
   {
    "doctype": "DocField",
@@ -146,7 +168,7 @@
    "read_only": 1,
    "no_copy": 1,
    "print_hide": 1,
-   "idx": 16
+   "idx": 18
   }
  ],
  "permissions": [

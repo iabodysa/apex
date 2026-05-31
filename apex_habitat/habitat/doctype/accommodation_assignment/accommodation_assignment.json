@@ -7,6 +7,8 @@
  "field_order": [
   "accommodation_assignment_tab_overview",
   "accommodation_assignment_sec_overview",
+  "party_type",
+  "party",
   "employee",
   "project",
   "building",
@@ -48,12 +50,29 @@
    "label": "General Details"
   },
   {
+   "default": "Employee",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Resident Type",
+   "options": "Employee\nTemporary Worker",
+   "reqd": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Resident",
+   "options": "party_type",
+   "search_index": 1
+  },
+  {
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Employee",
    "options": "Employee",
-   "reqd": 1,
+   "read_only": 1,
    "search_index": 1
   },
   {
