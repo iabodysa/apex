@@ -154,7 +154,7 @@ stateDiagram-v2
     end note
 ```
 
-The same role + SoD pattern governs the rest of the spine: Fuel Request, Fuel Claim, Fuel Exception Case, Rental Settlement, Salis Payment Request, Dispatch Trip, Driver Clearance, Sponsorship Transfer Case, and Support Ticket.
+The same role + SoD pattern governs the rest of the spine: Fuel Request, Fuel Claim, Fuel Exception Case, Rental Settlement, Salis Payment Request, Dispatch Trip, Driver Clearance, and Support Ticket.
 
 ### Request-to-fulfilment sequence
 

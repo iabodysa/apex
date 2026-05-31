@@ -92,10 +92,6 @@ def route_plan_query(user=None):
     return _project_condition(user)
 
 
-def sponsorship_transfer_case_query(user=None):
-    return _project_condition(user)
-
-
 def support_ticket_query(user=None):
     return _project_condition(user)
 

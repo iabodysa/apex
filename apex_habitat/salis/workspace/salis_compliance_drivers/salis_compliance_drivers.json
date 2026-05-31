@@ -24,7 +24,7 @@
  "is_hidden": 0,
  "sequence_id": 7.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"scdHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"scdKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Expiring Vehicle Compliance\", \"col\": 3}}, {\"id\": \"scdKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Blocked Driver Clearances\", \"col\": 3}}, {\"id\": \"scdKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport SLA Breaches Open\", \"col\": 3}}, {\"id\": \"scdKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Approvals\", \"col\": 3}}, {\"id\": \"scdKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Compliance Drivers Active Drivers\", \"col\": 3}}, {\"id\": \"scdKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Compliance Drivers Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"scdKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Compliance Drivers Clearances Pending\", \"col\": 3}}, {\"id\": \"scdHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"scdQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"scdQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Clearance\", \"col\": 3}}, {\"id\": \"scdQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"scdQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sponsorship Transfer Case\", \"col\": 3}}, {\"id\": \"scdHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"scdCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance & Support\", \"col\": 4}}, {\"id\": \"scdCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Driver Operations\", \"col\": 4}}, {\"id\": \"scdCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "content": "[{\"id\": \"scdHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"scdKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Expiring Vehicle Compliance\", \"col\": 3}}, {\"id\": \"scdKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Blocked Driver Clearances\", \"col\": 3}}, {\"id\": \"scdKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport SLA Breaches Open\", \"col\": 3}}, {\"id\": \"scdKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Approvals\", \"col\": 3}}, {\"id\": \"scdKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Compliance Drivers Active Drivers\", \"col\": 3}}, {\"id\": \"scdKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Compliance Drivers Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"scdKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Compliance Drivers Clearances Pending\", \"col\": 3}}, {\"id\": \"scdHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"scdQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"scdQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Clearance\", \"col\": 3}}, {\"id\": \"scdQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Support Ticket\", \"col\": 3}}, {\"id\": \"scdHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"scdCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance & Support\", \"col\": 4}}, {\"id\": \"scdCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Driver Operations\", \"col\": 4}}, {\"id\": \"scdCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -46,13 +46,6 @@
    "label": "Support Ticket",
    "link_to": "Support Ticket",
    "idx": 3
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Sponsorship Transfer Case",
-   "link_to": "Sponsorship Transfer Case",
-   "idx": 4
   }
  ],
  "links": [
@@ -80,17 +73,9 @@
   },
   {
    "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Sponsorship Transfer Case",
-   "link_type": "DocType",
-   "link_to": "Sponsorship Transfer Case",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Driver Operations",
-   "idx": 5
+   "idx": 4
   },
   {
    "doctype": "Workspace Link",
@@ -98,7 +83,7 @@
    "label": "Salis Driver",
    "link_type": "DocType",
    "link_to": "Salis Driver",
-   "idx": 6
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -106,7 +91,7 @@
    "label": "Driver Clearance",
    "link_type": "DocType",
    "link_to": "Driver Clearance",
-   "idx": 7
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
@@ -114,7 +99,7 @@
    "label": "Driver Stop",
    "link_type": "DocType",
    "link_to": "Driver Stop",
-   "idx": 8
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -122,13 +107,13 @@
    "label": "Salis Vehicle Compliance",
    "link_type": "DocType",
    "link_to": "Salis Vehicle Compliance",
-   "idx": 9
+   "idx": 8
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Views",
-   "idx": 10
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -136,7 +121,7 @@
    "label": "Vehicle Compliance Register",
    "link_type": "Report",
    "link_to": "Vehicle Compliance Register",
-   "idx": 11,
+   "idx": 10,
    "is_query_report": 1
   },
   {
@@ -145,7 +130,7 @@
    "label": "Driver Clearance Register",
    "link_type": "Report",
    "link_to": "Driver Clearance Register",
-   "idx": 12,
+   "idx": 11,
    "is_query_report": 1
   }
  ],
@@ -195,5 +180,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-05-30 19:00:00.000000"
+ "modified": "2026-05-31 10:00:00.000000"
 }

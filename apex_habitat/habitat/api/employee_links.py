@@ -32,6 +32,6 @@ def get_data(data=None):
          "items": ["Scheduled Task Instance"]},
         # Salis (Movement) — reference links to HRMS records; writes no accounting documents.
         {"label": "Movement (Salis)",
-         "items": ["Salis Driver", "Movement Cost Recovery", "Sponsorship Transfer Case"]},
+         "items": ["Salis Driver", "Movement Cost Recovery"]},
     ])
     return data

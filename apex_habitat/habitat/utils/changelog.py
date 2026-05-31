@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.26.1 ---------------------------------------------------------------
+    {
+        "title": "v1.26.1: Removed the out-of-scope 'Sponsorship Transfer Case' document (a kafala-transfer / Qiwa tracking record). It is a government-relations process that does not serve the accommodation-cost and fleet-operations core, so it and its workflow, report card and permissions were removed cleanly.",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-19 12:00:00",
+    },
     # v1.26.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.26.0 — Salis approvals run on native Frappe Workflow",

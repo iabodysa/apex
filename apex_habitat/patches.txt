@@ -194,3 +194,12 @@ apex_habitat.patches.v1_x.drop_dead_operations_alert_options
 # setup.after_install). This is the migrate path that reaches already-installed
 # sites; fresh installs get it from after_install. Guarded + a no-op on re-run.
 apex_habitat.patches.v1_x.seed_severe_safety_incident_notification
+
+# v1.x — remove the out-of-scope "Sponsorship Transfer Case" feature
+# ONE-TIME (prune-eligible once every deployed site has run it): the kafala-
+# transfer / Qiwa-status governance case was out-of-scope HR creep and was
+# removed from source (DocType, Workflow, permission hooks, number card,
+# workspace links). This drops the lingering DocType + table (and its bound
+# Workflow) on pre-production sites that hold only test rows. Idempotent,
+# existence-guarded, a no-op on fresh installs.
+apex_habitat.patches.v1_x.drop_sponsorship_transfer_case
