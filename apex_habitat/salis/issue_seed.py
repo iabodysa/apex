@@ -84,8 +84,8 @@ def _seed_issue_types():
         if frappe.db.exists("Issue Type", name):
             continue
         frappe.get_doc({"doctype": "Issue Type", "name": name}).insert(
-            ignore_permissions=True
-        )  # audit-ok — system master seed
+            ignore_permissions=True  # audit-ok — system master seed
+        )
 
 
 def _seed_issue_priorities():
@@ -95,8 +95,8 @@ def _seed_issue_priorities():
         if frappe.db.exists("Issue Priority", name):
             continue
         frappe.get_doc({"doctype": "Issue Priority", "name": name}).insert(
-            ignore_permissions=True
-        )  # audit-ok — system master seed
+            ignore_permissions=True  # audit-ok — system master seed
+        )
 
 
 def _pick_holiday_list():
