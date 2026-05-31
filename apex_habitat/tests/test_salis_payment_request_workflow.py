@@ -35,7 +35,7 @@ import unittest
 import frappe
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
-from apex_habitat.tests.test_salis_doa import _user
+from apex_habitat.tests._helpers import _user
 
 WORKFLOW = "Salis Payment Request Workflow"
 

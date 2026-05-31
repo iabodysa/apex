@@ -14,7 +14,6 @@ now owns plus the controls the controller still owns:
     case (the Resolve transition is ``allow_self_approval=0`` and carries
     ``reported_by != session.user``); a different resolver can. The controller's
     evidence-before-resolution + non-raiser-closer gate holds alongside it;
-  * the Operations-tier Delegation-of-Authority gate still fires on submit;
   * the Reject exit is reachable (docstatus 0 -> 1) and Rejected -> Closed
     (docstatus 1 update) finalizes it.
 
@@ -30,7 +29,7 @@ import unittest
 import frappe
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
-from apex_habitat.tests.test_salis_doa import _user
+from apex_habitat.tests._helpers import _user
 
 WORKFLOW = "Fuel Exception Case Workflow"
 
@@ -118,25 +117,6 @@ class TestFuelExceptionCaseWorkflow(unittest.TestCase):
 		self.addCleanup(lambda: self._purge(doc.name))
 		return doc
 
-	def _approve_request_for(self, doc, approver=None):
-		"""Mint an approved, submitted Approval Request for ``doc`` so the
-		controller's Operations-tier Delegation-of-Authority gate (before_submit)
-		is satisfied. The approver defaults to the Operations-tier Fleet Manager
-		and differs from the raiser."""
-		ar = frappe.get_doc({
-			"doctype": "Approval Request",
-			"request_type": "Other",
-			"requested_by": doc.reported_by,
-			"approver": approver or self.manager,
-			"reference_doctype": "Fuel Exception Case",
-			"reference_name": doc.name,
-			"decision": "Approved",
-		}).insert(ignore_permissions=True)
-		ar.submit()
-		self.addCleanup(lambda: self._purge_ar(ar.name))
-		frappe.db.commit()
-		return ar
-
 	def _investigating(self, **kwargs):
 		"""A case advanced to Under Investigation (still docstatus 0)."""
 		fec = self._new(**kwargs)
@@ -158,20 +138,6 @@ class TestFuelExceptionCaseWorkflow(unittest.TestCase):
 			except Exception:
 				pass
 		frappe.delete_doc("Fuel Exception Case", name, ignore_permissions=True, force=True)
-		frappe.db.commit()
-
-	@staticmethod
-	def _purge_ar(name):
-		frappe.set_user("Administrator")
-		if not frappe.db.exists("Approval Request", name):
-			return
-		doc = frappe.get_doc("Approval Request", name)
-		if doc.docstatus == 1:
-			try:
-				doc.cancel()
-			except Exception:
-				pass
-		frappe.delete_doc("Approval Request", name, ignore_permissions=True, force=True)
 		frappe.db.commit()
 
 	# ------------------------------------------------------------------ tests
@@ -206,8 +172,8 @@ class TestFuelExceptionCaseWorkflow(unittest.TestCase):
 		fec.reload()
 		self.assertEqual(fec.status, "Under Investigation")
 
-		# Resolve submits (docstatus 0 -> 1), gated by the DoA approval + evidence.
-		self._approve_request_for(fec)
+		# Resolve submits (docstatus 0 -> 1); the native Resolve transition (an
+		# authorized role + SoD) plus the controller's evidence gate are the gates now.
 		self.assertIn("Resolve", _actions(fec))
 		apply_workflow(fec, "Resolve")
 		fec.reload()
@@ -228,7 +194,6 @@ class TestFuelExceptionCaseWorkflow(unittest.TestCase):
 
 	def test_reject_then_close(self):
 		fec = self._investigating()
-		self._approve_request_for(fec)
 		frappe.set_user(self.manager)
 		self.assertIn("Reject", _actions(fec))
 		apply_workflow(fec, "Reject")
@@ -249,7 +214,6 @@ class TestFuelExceptionCaseWorkflow(unittest.TestCase):
 		# the SoD condition (reported_by != session.user) stands between them and
 		# self-resolution.
 		fec = self._investigating(reported_by=self.manager_maker)
-		self._approve_request_for(fec, approver=self.manager)
 
 		frappe.set_user(self.manager_maker)
 		self.assertNotIn("Resolve", _actions(fec))
@@ -282,7 +246,6 @@ class TestFuelExceptionCaseWorkflow(unittest.TestCase):
 
 	def test_resolve_blocked_without_evidence(self):
 		fec = self._investigating(with_evidence=False)
-		self._approve_request_for(fec)
 		frappe.set_user(self.manager)
 		with self.assertRaises(frappe.ValidationError):
 			apply_workflow(fec, "Resolve")

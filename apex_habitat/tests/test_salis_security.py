@@ -8,8 +8,6 @@ These lock in the audit hardening so it cannot silently regress:
     permitted projects even with a blanket write grant.
   * Support Ticket is row-scoped by project for supervisors, while a Driver only
     sees the tickets they raised (if_owner).
-  * An Approval Request requester cannot self-authorize at the permission layer
-    (maker != checker), independent of the controller-level check.
 
 The tests drive the permission layer directly (``frappe.set_user`` + the real
 endpoints / ``frappe.has_permission``) so they exercise the same code path a
@@ -22,11 +20,8 @@ import unittest
 import frappe
 
 from apex_habitat.salis.api import fuel_console
-from apex_habitat.salis.permissions import (
-    approval_sod_has_permission,
-    scoped_has_permission,
-)
-from apex_habitat.tests.test_salis_doa import _user
+from apex_habitat.salis.permissions import scoped_has_permission
+from apex_habitat.tests._helpers import _user
 
 
 def _project(name):
@@ -232,61 +227,6 @@ class TestSupportTicketScoping(unittest.TestCase):
         )
         self.assertIsNone(
             scoped_has_permission(self._ticket(project=None), "read", user=self.mgr)
-        )
-
-
-class TestApprovalRequestPermissionSoD(unittest.TestCase):
-    """maker != checker enforced at the permission layer (not just the controller)."""
-
-    @classmethod
-    def setUpClass(cls):
-        frappe.set_user("Administrator")
-        cls.requester = _user("ar_req@example.com", "Fleet Manager")
-        cls.other = _user("ar_other@example.com", "Fleet Manager")
-        frappe.db.commit()
-
-    def _req_doc(self, decision, requested_by=None, owner=None):
-        return frappe._dict(
-            {
-                "doctype": "Approval Request",
-                "decision": decision,
-                "requested_by": requested_by,
-                "owner": owner,
-            }
-        )
-
-    def test_requester_cannot_authorize_own_request(self):
-        doc = self._req_doc("Approved", requested_by=self.requester)
-        self.assertFalse(
-            approval_sod_has_permission(doc, "submit", user=self.requester)
-        )
-        self.assertFalse(
-            approval_sod_has_permission(doc, "write", user=self.requester)
-        )
-
-    def test_creator_cannot_authorize_own_request(self):
-        doc = self._req_doc("Rejected", owner=self.requester)
-        self.assertFalse(
-            approval_sod_has_permission(doc, "submit", user=self.requester)
-        )
-
-    def test_other_user_may_authorize(self):
-        doc = self._req_doc("Approved", requested_by=self.requester)
-        self.assertIsNone(
-            approval_sod_has_permission(doc, "submit", user=self.other)
-        )
-
-    def test_pending_decision_is_not_an_authorization(self):
-        # Saving a still-Pending request (no decision yet) is not self-approval.
-        doc = self._req_doc("Pending", requested_by=self.requester)
-        self.assertIsNone(
-            approval_sod_has_permission(doc, "write", user=self.requester)
-        )
-
-    def test_non_authorization_ptype_defers(self):
-        doc = self._req_doc("Approved", requested_by=self.requester)
-        self.assertIsNone(
-            approval_sod_has_permission(doc, "read", user=self.requester)
         )
 
 

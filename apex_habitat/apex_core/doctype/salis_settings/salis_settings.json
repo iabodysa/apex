@@ -20,15 +20,11 @@
   "block_assignment_on_expired_compliance",
   "salis_settings_approvals_col",
   "fuel_request_approval_threshold_litres",
-  "fuel_tier_regional_litres",
-  "fuel_tier_operations_litres",
   "passenger_count_ops_threshold",
   "salis_settings_sec_doa_thresholds",
   "writeoff_ops_threshold_sar",
   "salis_settings_doa_col",
   "cost_recovery_ops_threshold_sar",
-  "salis_settings_sec_authority_ladder",
-  "authority_tier_map",
   "salis_settings_tab_portal",
   "salis_settings_sec_portal",
   "enable_driver_portal"
@@ -126,20 +122,6 @@
    "label": "Fuel Request Approval Threshold (Litres)"
   },
   {
-   "default": "200",
-   "description": "Fuel requests at or above this litre amount require Regional-tier authority.",
-   "fieldname": "fuel_tier_regional_litres",
-   "fieldtype": "Float",
-   "label": "Fuel Regional Tier Threshold (Litres)"
-  },
-  {
-   "default": "500",
-   "description": "Fuel requests at or above this litre amount require Operations-tier authority.",
-   "fieldname": "fuel_tier_operations_litres",
-   "fieldtype": "Float",
-   "label": "Fuel Operations Tier Threshold (Litres)"
-  },
-  {
    "default": "20",
    "description": "Passenger counts above this number require Operations-tier authority.",
    "fieldname": "passenger_count_ops_threshold",
@@ -170,18 +152,6 @@
    "label": "Cost Recovery Operations Threshold (SAR)"
   },
   {
-   "fieldname": "salis_settings_sec_authority_ladder",
-   "fieldtype": "Section Break",
-   "label": "Authority Tier Mapping"
-  },
-  {
-   "description": "Configurable Delegation-of-Authority ladder: map each tier to a native Frappe Role. When populated, these rows extend the built-in tier-to-role mapping so the DoA ladder can be tuned without a code change.",
-   "fieldname": "authority_tier_map",
-   "fieldtype": "Table",
-   "label": "Authority Tier Map",
-   "options": "Salis Authority Tier"
-  },
-  {
    "fieldname": "salis_settings_tab_portal",
    "fieldtype": "Tab Break",
    "label": "Portal & Naming"
@@ -201,7 +171,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-05-26 10:00:00.000000",
+ "modified": "2026-05-31 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

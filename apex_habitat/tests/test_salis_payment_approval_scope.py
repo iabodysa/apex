@@ -1,10 +1,9 @@
-"""Project row-scoping regression tests for ``Salis Payment Request`` and
-``Approval Request``.
+"""Project row-scoping regression tests for ``Salis Payment Request``.
 
-Both DocTypes carry a ``project`` Link field and are readable by the scoped
+The DocType carries a ``project`` Link field and is readable by the scoped
 ``Fleet Supervisor`` / ``Fleet Project Manager`` roles (which are NOT in
-``UNSCOPED_ROLES``). Before this fix neither was registered in
-``permission_query_conditions``, and their ``has_permission`` slot held a
+``UNSCOPED_ROLES``). Before this fix it was not registered in
+``permission_query_conditions``, and its ``has_permission`` slot held a
 segregation-of-duties function that only enforced maker != checker — it did no
 project scoping.
 
@@ -16,10 +15,9 @@ empty: the generated SQL is ``(ifnull(`project`,'')='' OR `project` IN (...))``.
 The already-scoped DocTypes (Fuel Request, Support Ticket) add a strict
 ``AND project IN (...)`` via their ``*_query`` hook precisely to close that NULL
 hole, and their ``scoped_has_permission`` denies a project-less doc unless the
-caller owns it. ``Salis Payment Request`` / ``Approval Request`` had NEITHER
-half, so a scoped supervisor of project A could list and open EVERY
-project-less payment/approval request (and, via the same missing hook, any row
-the native match does not cover).
+caller owns it. ``Salis Payment Request`` had NEITHER half, so a scoped
+supervisor of project A could list and open EVERY project-less payment request
+(and, via the same missing hook, any row the native match does not cover).
 
 These tests lock the hole shut, the same way the other scoped DocTypes are
 protected:
@@ -48,11 +46,8 @@ import unittest
 
 import frappe
 
-from apex_habitat.salis.permissions import (
-    approval_sod_has_permission,
-    payment_sod_has_permission,
-)
-from apex_habitat.tests.test_salis_doa import _user
+from apex_habitat.salis.permissions import payment_sod_has_permission
+from apex_habitat.tests._helpers import _user
 
 
 def _project(name):
@@ -88,23 +83,6 @@ def _payment_request(project=None):
             "amount": 100,
             "project": project,
             "status": "Draft",
-        }
-    )
-    doc.insert(ignore_permissions=True)
-    frappe.db.commit()
-    return doc
-
-
-def _approval_request(project=None, requested_by=None):
-    """A draft Approval Request. ``project`` may be None to model the
-    project-less leak surface."""
-    doc = frappe.get_doc(
-        {
-            "doctype": "Approval Request",
-            "request_type": "Other",
-            "requested_by": requested_by or "Administrator",
-            "project": project,
-            "decision": "Pending",
         }
     )
     doc.insert(ignore_permissions=True)
@@ -223,104 +201,6 @@ class TestSalisPaymentRequestScoping(unittest.TestCase):
         )
 
 
-class TestApprovalRequestScoping(unittest.TestCase):
-    """A scoped supervisor sees only their project's approval requests."""
-
-    @classmethod
-    def setUpClass(cls):
-        frappe.set_user("Administrator")
-        cls.pa = _project("AppScope A")
-        cls.pb = _project("AppScope B")
-        cls.sup = _user("appscope_sup@example.com", "Fleet Supervisor")
-        _grant_project(cls.sup, cls.pa)
-        cls.mgr = _user("appscope_mgr@example.com", "Fleet Manager")
-        cls.ar_a = _approval_request(cls.pa)
-        cls.ar_b = _approval_request(cls.pb)
-        # The leak surface: a project-less approval request, owned by
-        # Administrator (not by our scoped supervisor).
-        cls.ar_null = _approval_request(None)
-        frappe.db.commit()
-
-    @classmethod
-    def tearDownClass(cls):
-        frappe.set_user("Administrator")
-        for ar in (cls.ar_a, cls.ar_b, cls.ar_null):
-            frappe.delete_doc(
-                "Approval Request", ar.name, ignore_permissions=True, force=True
-            )
-        frappe.db.commit()
-
-    def tearDown(self):
-        frappe.set_user("Administrator")
-
-    def test_list_excludes_projectless_for_scoped_user(self):
-        """The true leak: a project-less row must NOT appear for a scoped user."""
-        frappe.set_user(self.sup)
-        names = {r["name"] for r in frappe.get_list("Approval Request", fields=["name"])}
-        self.assertIn(self.ar_a.name, names)
-        self.assertNotIn(
-            self.ar_null.name,
-            names,
-            "scoped supervisor must NOT see a project-less approval request",
-        )
-        self.assertNotIn(self.ar_b.name, names)
-
-    def test_unscoped_manager_lists_all_projects(self):
-        frappe.set_user(self.mgr)
-        names = {r["name"] for r in frappe.get_list("Approval Request", fields=["name"])}
-        self.assertIn(self.ar_a.name, names)
-        self.assertIn(self.ar_b.name, names)
-        self.assertIn(self.ar_null.name, names)
-
-    def test_doc_read_allowed_in_scope(self):
-        frappe.set_user(self.sup)
-        doc = frappe.get_doc("Approval Request", self.ar_a.name)
-        self.assertTrue(doc.has_permission("read"))
-
-    def test_doc_read_denied_projectless(self):
-        frappe.set_user(self.sup)
-        self.assertFalse(
-            approval_sod_has_permission(
-                frappe.get_doc("Approval Request", self.ar_null.name),
-                "read",
-                user=self.sup,
-            )
-        )
-        frappe.set_user(self.sup)
-        self.assertFalse(
-            frappe.has_permission(
-                "Approval Request", "read", doc=self.ar_null.name, user=self.sup
-            ),
-            "scoped supervisor must NOT be able to read a project-less approval request",
-        )
-
-    def test_doc_read_denied_wrong_project(self):
-        frappe.set_user(self.sup)
-        self.assertFalse(
-            approval_sod_has_permission(
-                frappe.get_doc("Approval Request", self.ar_b.name),
-                "read",
-                user=self.sup,
-            )
-        )
-
-    def test_unscoped_manager_reads_any_project(self):
-        self.assertIsNone(
-            approval_sod_has_permission(
-                frappe.get_doc("Approval Request", self.ar_b.name),
-                "read",
-                user=self.mgr,
-            )
-        )
-        self.assertIsNone(
-            approval_sod_has_permission(
-                frappe.get_doc("Approval Request", self.ar_null.name),
-                "read",
-                user=self.mgr,
-            )
-        )
-
-
 class TestScopingDoesNotWeakenSoD(unittest.TestCase):
     """Composing project scope onto the SoD hook must NOT relax maker != checker.
 
@@ -356,17 +236,6 @@ class TestScopingDoesNotWeakenSoD(unittest.TestCase):
             }
         )
 
-    def _approval_doc(self, decision, requested_by=None, owner=None):
-        return frappe._dict(
-            {
-                "doctype": "Approval Request",
-                "decision": decision,
-                "project": self.pa,
-                "requested_by": requested_by,
-                "owner": owner,
-            }
-        )
-
     def test_payment_self_approval_still_blocked_in_scope(self):
         # In-scope project, but the requester tries to push it to a Finance state.
         doc = self._payment_doc("Approved by Finance", requested_by=self.requester)
@@ -384,23 +253,6 @@ class TestScopingDoesNotWeakenSoD(unittest.TestCase):
         self.assertIsNone(
             payment_sod_has_permission(doc, "submit", user=self.other),
             "a different in-scope user may authorize (not self-approval)",
-        )
-
-    def test_approval_self_authorization_still_blocked_in_scope(self):
-        doc = self._approval_doc("Approved", requested_by=self.requester)
-        self.assertFalse(
-            approval_sod_has_permission(doc, "submit", user=self.requester),
-            "requester must NOT self-authorize their own Approval Request",
-        )
-        doc2 = self._approval_doc("Rejected", owner=self.requester)
-        self.assertFalse(
-            approval_sod_has_permission(doc2, "write", user=self.requester)
-        )
-
-    def test_approval_other_in_scope_user_may_authorize(self):
-        doc = self._approval_doc("Approved", requested_by=self.requester)
-        self.assertIsNone(
-            approval_sod_has_permission(doc, "submit", user=self.other)
         )
 
 

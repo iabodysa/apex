@@ -13,9 +13,6 @@ controls the controller still owns:
   * Segregation of Duties — the (server-stamped) requester cannot approve their
     own claim (the approval transition is ``allow_self_approval=0`` and carries
     ``requested_by != session.user``); a different approver can;
-  * the Delegation-of-Authority gate still fires on submit (the Approve
-    transition requires an approved Approval Request whose approver holds the
-    required tier);
   * the no-GL boundary holds: Approve / Close post no GL / Payment Entry.
 
 The tests drive the real ``frappe.model.workflow.apply_workflow`` as concrete
@@ -30,7 +27,7 @@ import unittest
 import frappe
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
-from apex_habitat.tests.test_salis_doa import _user
+from apex_habitat.tests._helpers import _user
 
 WORKFLOW = "Fuel Claim Workflow"
 
@@ -114,26 +111,6 @@ class TestFuelClaimWorkflow(unittest.TestCase):
 		self.addCleanup(lambda: self._purge(doc.name))
 		return doc
 
-	def _approve_request_for(self, doc, approver=None):
-		"""Mint an approved, submitted Approval Request for ``doc`` so the
-		controller's Delegation-of-Authority gate (``ensure_approval`` in
-		before_submit) is satisfied. The approver defaults to the Operations-tier
-		Fleet Manager (>= both the Regional and Operations tiers a claim may
-		demand) and differs from the requester."""
-		ar = frappe.get_doc({
-			"doctype": "Approval Request",
-			"request_type": "Other",
-			"requested_by": doc.requested_by,
-			"approver": approver or self.manager,
-			"reference_doctype": "Fuel Claim",
-			"reference_name": doc.name,
-			"decision": "Approved",
-		}).insert(ignore_permissions=True)
-		ar.submit()
-		self.addCleanup(lambda: self._purge_ar(ar.name))
-		frappe.db.commit()
-		return ar
-
 	def _reconciled(self, **kwargs):
 		fc = self._new(**kwargs)
 		frappe.set_user(self.manager)
@@ -156,20 +133,6 @@ class TestFuelClaimWorkflow(unittest.TestCase):
 			except Exception:
 				pass
 		frappe.delete_doc("Fuel Claim", name, ignore_permissions=True, force=True)
-		frappe.db.commit()
-
-	@staticmethod
-	def _purge_ar(name):
-		frappe.set_user("Administrator")
-		if not frappe.db.exists("Approval Request", name):
-			return
-		doc = frappe.get_doc("Approval Request", name)
-		if doc.docstatus == 1:
-			try:
-				doc.cancel()
-			except Exception:
-				pass
-		frappe.delete_doc("Approval Request", name, ignore_permissions=True, force=True)
 		frappe.db.commit()
 
 	# ------------------------------------------------------------------ tests
@@ -200,8 +163,8 @@ class TestFuelClaimWorkflow(unittest.TestCase):
 		self.assertEqual(fc.status, "Reconciled")
 		self.assertEqual(fc.docstatus, 0)
 
-		# Approve submits (docstatus 0 -> 1) and is gated by the DoA approval.
-		self._approve_request_for(fc)
+		# Approve submits (docstatus 0 -> 1); the native Approve transition (an
+		# authorized role + SoD) is the gate now.
 		self.assertIn("Approve", _actions(fc))
 		apply_workflow(fc, "Approve")
 		fc.reload()
@@ -241,7 +204,6 @@ class TestFuelClaimWorkflow(unittest.TestCase):
 		# the SoD condition (requested_by != session.user) stands between them and
 		# self-approval.
 		fc = self._reconciled(requested_by=self.manager_maker)
-		self._approve_request_for(fc, approver=self.manager)
 
 		frappe.set_user(self.manager_maker)
 		self.assertNotIn("Approve", _actions(fc))
@@ -275,7 +237,6 @@ class TestFuelClaimWorkflow(unittest.TestCase):
 
 	def test_approve_and_close_post_no_gl(self):
 		fc = self._reconciled()
-		self._approve_request_for(fc)
 		frappe.set_user(self.manager)
 		apply_workflow(fc, "Approve")
 		fc.reload()

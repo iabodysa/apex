@@ -112,10 +112,6 @@ def salis_payment_request_query(user=None):
     return _project_condition(user)
 
 
-def approval_request_query(user=None):
-    return _project_condition(user)
-
-
 def dispatch_trip_query(user=None):
     """Dispatch Trip has no own `project` field; it links to a Route Plan.
 
@@ -351,66 +347,6 @@ def payment_sod_has_permission(doc, ptype, user=None):
 
     status = getattr(doc, "status", None)
     if status not in FINANCE_EXCLUSIVE_STATES:
-        return None
-
-    user = _resolve_user(user)
-    if user in ("Administrator", "Guest"):
-        return None
-
-    requested_by = getattr(doc, "requested_by", None)
-    owner = getattr(doc, "owner", None)
-
-    if requested_by and requested_by == user:
-        return False
-    if owner and owner == user:
-        return False
-
-    return None
-
-
-# Decisions that represent an authorization outcome on an Approval Request.
-APPROVAL_DECISION_STATES = {
-    "Approved",
-    "Rejected",
-}
-
-
-def approval_sod_has_permission(doc, ptype, user=None):
-    """Project-scope an Approval Request AND block self-authorization of it.
-
-    This single hook composes two independent denials for "Approval Request"
-    (it is the function wired in ``hooks.has_permission`` for the DocType, so it
-    must carry BOTH controls):
-
-      1. Project row-scoping (``scoped_has_permission``) — a scoped user may
-         only act on documents in a project they hold a User Permission for; a
-         project-less document they do not own is denied. This mirrors every
-         other project-bearing Salis DocType and closes the hole the native
-         User-Permission link match leaves open for NULL/blank ``project`` rows.
-      2. Segregation of duties — when the action is a submit/write that records
-         an authorization decision (Approved / Rejected), deny it if the acting
-         user is the requester or the original creator. This enforces
-         approver != requester at the permission layer (maker != checker), in
-         addition to the controller-level check in
-         :meth:`ApprovalRequest._enforce_segregation_of_duties`, so a requester
-         can never self-authorize regardless of how the transition is attempted.
-
-    The document is denied if EITHER control denies. Returns False to block;
-    otherwise returns None to defer to Frappe's default permission resolution.
-    """
-    if getattr(doc, "doctype", None) != "Approval Request":
-        return None
-
-    # (1) Project scope first; a False here denies unconditionally.
-    if scoped_has_permission(doc, ptype, user=user) is False:
-        return False
-
-    # (2) Segregation of duties (maker != checker) for authorization decisions.
-    if ptype not in ("submit", "write"):
-        return None
-
-    decision = getattr(doc, "decision", None)
-    if decision not in APPROVAL_DECISION_STATES:
         return None
 
     user = _resolve_user(user)

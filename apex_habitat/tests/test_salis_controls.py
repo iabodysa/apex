@@ -182,7 +182,7 @@ class TestRequestedByStamping(unittest.TestCase):
         return p
 
     def test_field_is_read_only_in_schema(self):
-        for dt in ("Fuel Claim", "Rental Settlement", "Approval Request",
+        for dt in ("Fuel Claim", "Rental Settlement",
                    "Salis Payment Request"):
             meta = frappe.get_meta(dt)
             field = meta.get_field("requested_by")
@@ -215,15 +215,4 @@ class TestRequestedByStamping(unittest.TestCase):
         self.assertEqual(doc.requested_by, self.user)
         frappe.set_user("Administrator")
         frappe.delete_doc("Rental Settlement", doc.name, ignore_permissions=True, force=True)
-        frappe.db.commit()
-
-    def test_approval_request_stamps_session_user(self):
-        frappe.set_user(self.user)
-        doc = frappe.get_doc({
-            "doctype": "Approval Request", "request_type": "Other",
-            "approver": "Administrator", "decision": "Pending",
-        }).insert(ignore_permissions=True)
-        self.assertEqual(doc.requested_by, self.user)
-        frappe.set_user("Administrator")
-        frappe.delete_doc("Approval Request", doc.name, ignore_permissions=True, force=True)
         frappe.db.commit()

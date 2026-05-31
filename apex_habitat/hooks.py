@@ -229,7 +229,6 @@ permission_query_conditions = {
     "Fuel Quota": "apex_habitat.salis.permissions.fuel_quota_query",
     "Fuel Exception Case": "apex_habitat.salis.permissions.fuel_exception_case_query",
     "Salis Payment Request": "apex_habitat.salis.permissions.salis_payment_request_query",
-    "Approval Request": "apex_habitat.salis.permissions.approval_request_query",
     "Salis Vehicle": "apex_habitat.salis.permissions.salis_vehicle_query",
     "Salis Driver": "apex_habitat.salis.permissions.salis_driver_query",
     "Passenger Manifest": "apex_habitat.salis.permissions.passenger_manifest_query",
@@ -247,7 +246,6 @@ has_permission = {
     "Fuel Quota": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Exception Case": "apex_habitat.salis.permissions.scoped_has_permission",
     "Salis Payment Request": "apex_habitat.salis.permissions.payment_sod_has_permission",
-    "Approval Request": "apex_habitat.salis.permissions.approval_sod_has_permission",
     "Salis Vehicle": "apex_habitat.salis.permissions.scoped_has_permission",
 }
 

@@ -203,3 +203,15 @@ apex_habitat.patches.v1_x.seed_severe_safety_incident_notification
 # Workflow) on pre-production sites that hold only test rows. Idempotent,
 # existence-guarded, a no-op on fresh installs.
 apex_habitat.patches.v1_x.drop_sponsorship_transfer_case
+
+# v1.x — retire the dead custom Salis approval tier-engine
+# ONE-TIME (prune-eligible once every deployed site has run it): the six approval
+# DocTypes were migrated to native Frappe Workflow, so the hand-rolled tier-engine
+# (salis_lib: TIERS / ROLE_TIER / ensure_approval / escalation) and the
+# "Approval Request" DocType it gated are now dead — nothing creates an Approval
+# Request and no controller calls ensure_approval (SoD lives on the workflow
+# transitions now). This drops the lingering "Approval Request" DocType + table
+# and the orphaned "Salis Authority Tier" child table (which only fed the deleted
+# role->tier map) on pre-production sites holding only test rows. Idempotent,
+# existence-guarded, a no-op on fresh installs.
+apex_habitat.patches.v1_x.drop_approval_request

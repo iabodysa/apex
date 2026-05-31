@@ -7,7 +7,7 @@ import unittest
 import frappe
 
 from apex_habitat.salis.permissions import scoped_has_permission
-from apex_habitat.tests.test_salis_doa import _user
+from apex_habitat.tests._helpers import _user
 
 
 class TestProjectScoping(unittest.TestCase):
