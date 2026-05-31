@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.28.3 ---------------------------------------------------------------
+    {
+        "title": "v1.28.3: Security \u2014 closed a project-boundary leak: a project-scoped fleet supervisor could open or API-fetch a Salis Driver or Passenger Manifest record from another project directly by name (the list view already hid them). Direct document access is now project-scoped too, and a driver can still read their own profile.",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-26 09:00:00",
+    },
     # v1.28.2 ---------------------------------------------------------------
     {
         "title": "v1.28.2: The 16 operational notifications now ship as native standard JSON (auto-installed by Frappe on migrate) instead of being created by Python seed code — the same notifications, the same disabled-by-default behaviour, but the framework-native deployment path. Removed two seed modules and five seed patches.",

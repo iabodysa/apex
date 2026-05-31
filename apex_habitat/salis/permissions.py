@@ -294,6 +294,45 @@ def scoped_has_permission(doc, ptype, user=None):
     return None
 
 
+def salis_driver_has_permission(doc, ptype, user=None):
+    """Project-scope direct Salis Driver document access, but never block a
+    Driver from reading their OWN profile.
+
+    Salis Driver carries a direct ``project`` Link AND grants the Driver role an
+    ``if_owner`` read DocPerm, while Fleet Supervisor / Fleet Project Manager get
+    an unconditional read across every row. ``salis_driver_query`` scopes the
+    list/report view (project OR owner), but without a matching ``has_permission``
+    hook the form view / REST resource / link reads were governed only by those
+    role DocPerms, letting a project-scoped supervisor open any other project's
+    driver record directly. This closes that direct-access leak.
+
+    It mirrors ``salis_driver_query`` exactly: ownership is an independent, valid
+    access basis (the if_owner self-profile), so the acting user's own row is
+    always allowed; everything else is confined to the user's allowed projects.
+    Using the shared ``scoped_has_permission`` here would be wrong — it denies a
+    project-BEARING doc outside scope, which would block a Driver (who holds no
+    Project User Permission) from reading their own project-tagged row.
+    """
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return None
+
+    # The Driver's own row is always readable, regardless of its project tag.
+    if getattr(doc, "owner", None) == user:
+        return None
+
+    project = _doc_project(doc)
+    if not project:
+        # Project-less, non-owned driver row: a scoped user sees nothing, mirroring
+        # the list query (which only admits project-in-scope OR owner == me).
+        return False
+
+    if project not in _allowed_projects(user):
+        return False
+
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Segregation of duties (requester cannot approve)
 # ---------------------------------------------------------------------------

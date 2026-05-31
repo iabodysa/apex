@@ -249,6 +249,14 @@ has_permission = {
     "Fuel Exception Case": "apex_habitat.salis.permissions.scoped_has_permission",
     "Salis Payment Request": "apex_habitat.salis.permissions.payment_sod_has_permission",
     "Salis Vehicle": "apex_habitat.salis.permissions.scoped_has_permission",
+    # Salis Driver carries an if_owner self-profile read alongside project-scoped
+    # supervisor reads, so it needs the owner-aware hook (the bare scoped one would
+    # deny a Driver their own project-tagged row). Passenger Manifest is purely
+    # project-scoped via its Route Plan / Dispatch Trip chain. Both were filtered
+    # in the list view (permission_query_conditions) but had no has_permission
+    # entry, leaving direct form/REST/link access to other projects' rows open.
+    "Salis Driver": "apex_habitat.salis.permissions.salis_driver_has_permission",
+    "Passenger Manifest": "apex_habitat.salis.permissions.scoped_has_permission",
 }
 
 # Fixtures shipped with the app
