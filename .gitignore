@@ -25,6 +25,9 @@ docs/
 docs/*
 !docs/INTEGRATION.md
 !docs/TRAINING.md
+# Public per-area training guide (index + one file per functional area)
+!docs/training/
+!docs/training/*.md
 
 # Local-only rich demo generator — Arabic sample data, bench-only, never published
 apex_habitat/salis/demo_rich.py

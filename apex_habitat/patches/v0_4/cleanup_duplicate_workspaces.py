@@ -17,6 +17,9 @@ APP_WORKSPACE_LABELS = {
     "Custody",
     "Upkeep",
     "Safety",
+    # v1.26.4 merge: Upkeep+Safety -> Facilities, Workers+Fuel -> Movement.
+    "Facilities",
+    "Movement",
     "Costs",
     "Console",
     "Setup",
