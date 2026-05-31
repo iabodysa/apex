@@ -170,6 +170,98 @@ def daily_accommodation_cost_allocation() -> None:
         start += batch_size
 
 
+def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
+    """Post the missed daily Operational-Memo accommodation-cost rows for ONE
+    assignment over [from_date, to_date] (default to_date = today).
+
+    Used when a Temporary Worker is linked to a real Employee (Batch 5): the days he
+    was housed on a passport were skipped by the daily allocator (it skips an
+    assignment with no employee), so they are back-dated to the now-linked Employee.
+    Mirrors daily_accommodation_cost_allocation's per-assignment-per-date algorithm;
+    idempotent (existence-guarded) and per-row error-isolated. Returns days processed.
+    """
+    from frappe.utils import today, getdate, add_days, flt
+
+    to_date = to_date or today()
+    asgn = frappe.db.get_value(
+        "Accommodation Assignment",
+        assignment_name,
+        ["name", "employee", "building", "project", "cost_center", "billed_to_supplier"],
+        as_dict=True,
+    )
+    if not asgn or not asgn.employee or not asgn.building:
+        return 0
+    try:
+        building = frappe.get_doc("Accommodation Building", asgn.building)
+    except frappe.DoesNotExistError:
+        return 0
+    capacity = flt(building.total_capacity)
+    if capacity <= 0:
+        return 0
+
+    cost_type_mapping = {
+        "Rent": "annual_rent_sar",
+        "Electricity": "annual_electricity_sar",
+        "Water": "annual_water_sar",
+        "Cleaning Staff Salary": "annual_cleaning_staff_sar",
+        "Supervisor Salary": "annual_supervision_sar",
+        "Other": "annual_other_expenses_sar",
+    }
+
+    d = getdate(from_date)
+    end = getdate(to_date)
+    days = 0
+    while d <= end:
+        posting_date = str(d)
+        days_in_year = 366 if calendar.isleap(d.year) else 365
+        for ledger_type, building_field in cost_type_mapping.items():
+            annual_cost = flt(building.get(building_field))
+            if annual_cost <= 0:
+                continue
+            daily_share = flt(flt(annual_cost / days_in_year, 5) / capacity, 5)
+            if frappe.db.exists(
+                "Accommodation Ledger",
+                {
+                    "employee": asgn.employee,
+                    "posting_date": posting_date,
+                    "assignment": asgn.name,
+                    "building": asgn.building,
+                    "ledger_type": ledger_type,
+                },
+            ):
+                continue
+            try:
+                frappe.get_doc({
+                    "doctype": "Accommodation Ledger",
+                    "posting_date": posting_date,
+                    "employee": asgn.employee,
+                    "assignment": asgn.name,
+                    "building": asgn.building,
+                    "project": asgn.project,
+                    "cost_center": asgn.cost_center,
+                    "billed_to_supplier": asgn.billed_to_supplier,
+                    "ledger_type": ledger_type,
+                    "total_site_cost": annual_cost,
+                    "capacity_denominator": int(capacity),
+                    "employee_daily_share": daily_share,
+                    "posting_mode": "Operational Memo",
+                    "source_doctype": "Accommodation Assignment",
+                    "source_name": asgn.name,
+                    "allocation_basis": "Capacity",
+                    "allocation_period_start": posting_date,
+                    "allocation_period_end": posting_date,
+                }).insert(ignore_permissions=True)  # audit-ok — back-dated cost memo
+            except Exception:
+                frappe.db.rollback()
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Backdate cost insert failed ({asgn.name}/{ledger_type})"[:140],
+                )
+        days += 1
+        d = getdate(add_days(d, 1))
+    return days
+
+
 def daily_building_license_expiry_check() -> None:
     """Warn when Building License documents are approaching or past expiry.
 

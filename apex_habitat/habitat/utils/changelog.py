@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.32.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.32.0 — a Temporary Worker auto-links to his Employee when HR registers the matching passport (housing/custody re-pointed, cost back-dated)",
+        "app_name": "apex_habitat",
+        "link": "/app/temporary-worker",
+        "creation": "2026-07-30 09:00:00",
+    },
     # v1.31.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.31.0 — custody records (issue, return, damage) can now name a Temporary Worker too, like the housing records",

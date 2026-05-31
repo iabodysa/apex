@@ -199,5 +199,40 @@ class TestSyncPartyEmployee(unittest.TestCase):
         self.assertIsNone(doc.issued_to_employee)
 
 
+class TestTemporaryWorkerLink(unittest.TestCase):
+    """Batch 5 — the daily Temporary-Worker -> Employee linker (pure-Python guards)."""
+
+    def test_repoint_map_matches_party_doctypes(self):
+        from apex_habitat.habitat.temporary_worker_link import PARTY_DOCTYPES
+        expected = {
+            "Accommodation Assignment": "employee",
+            "Accommodation Checkout": "employee",
+            "Room Bed Transfer": "employee",
+            "Accommodation Resident Request": "employee",
+            "Idle Resident Report": "employee",
+            "Accommodation Ledger": "employee",
+            "Masar Worker Token": "employee",
+            "Custody Issue": "issued_to_employee",
+            "Custody Return": "returned_by_employee",
+            "Custody Damage Assessment": "employee",
+        }
+        # The re-point map must cover exactly the party-bearing doctypes with the right
+        # Employee-mirror field, else linking would miss or mis-set a record.
+        self.assertEqual(PARTY_DOCTYPES, expected)
+        all_paths = {dt: v[0] for dt, v in {**DOCTYPE_SPECS, **CUSTODY_SPECS}.items()}
+        for dt, emp_field in PARTY_DOCTYPES.items():
+            fields, _fo = _fields(all_paths[dt])
+            self.assertIn("party", fields, f"{dt}: party field missing")
+            self.assertIn(emp_field, fields, f"{dt}: Employee mirror {emp_field} missing")
+
+    def test_linker_registered_in_daily_scheduler(self):
+        with open(os.path.join(APP_ROOT, "hooks.py"), encoding="utf-8") as fh:
+            hooks = fh.read()
+        self.assertIn(
+            "temporary_worker_link.link_temporary_workers", hooks,
+            "Batch 5 daily linker is not wired into scheduler_events",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

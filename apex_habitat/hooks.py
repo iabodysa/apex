@@ -190,6 +190,9 @@ scheduler_events = {
         "apex_habitat.habitat.tasks.idle_resident_aging",
         "apex_habitat.habitat.tasks.daily_scheduled_task_instance_generator",
         "apex_habitat.habitat.tasks.daily_occupancy_snapshot",
+        # Arrival redesign (Batch 5): link matured Temporary Workers to Employees by
+        # passport match (re-point party + back-date cost); expire lapsed windows + notify HR.
+        "apex_habitat.habitat.temporary_worker_link.link_temporary_workers",
         # Salis fleet module
         "apex_habitat.salis.tasks.driver_license_expiry_watch",
         "apex_habitat.salis.tasks.idle_vehicle_watch",
