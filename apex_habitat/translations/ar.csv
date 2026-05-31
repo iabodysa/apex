@@ -829,7 +829,7 @@ Operational currency for Habitat cost fields. Fetched from Company if left blank
 Operations & Maintenance,العمليات والصيانة
 Operations Command Center,مركز عمليات السكن
 Operations Director by default,مدير العمليات افتراضياً
-"Optional ERPNext Supplier FK. When set, monthly_rent_due_alert creates a Draft Payment Entry automatically.",مرجع مورّد ERPNext اختياري. عند تعيينه، يُنشئ تنبيه استحقاق الإيجار الشهري قيد دفع مسودة آلياً.
+"Optional ERPNext Supplier FK for the landlord. Used to identify the payee for rent due reminders.",مرجع مورّد ERPNext اختياري للمالك. يُستخدم لتحديد المستفيد في تذكيرات استحقاق الإيجار.
 Optional future mapping to ERPNext Item/Stock. Leave blank to use Habitat catalog only.,ربط اختياري مستقبلي بصنف/مخزون ERPNext. اتركه فارغاً لاستخدام كتالوج Habitat فقط.
 Original Cost (SAR),التكلفة الأصلية (ريال)
 Other,أخرى
@@ -2378,3 +2378,24 @@ The lease for,عقد الإيجار لـ
 ends on,ينتهي في
 Please review renewal or termination.,يُرجى مراجعة التجديد أو الإنهاء.
 has ended,انتهى
+A rent payment is due today and remains unpaid,يستحق سداد إيجار اليوم وما زال غير مدفوع
+Please process this payment.,يُرجى معالجة هذا الدفع.
+Temporary Worker,عامل مؤقت
+Worker Identity,هوية العامل
+Passport Number,رقم الجواز
+Nationality,الجنسية
+Iqama Number,رقم الإقامة
+Cell Number,رقم الجوال
+Arrival Date,تاريخ الوصول
+Arrival Context,سياق الوصول
+Labour Supplier,مورّد العمالة
+Arrival Batch Ref,مرجع دفعة الوصول
+Temporary Window,النافذة المؤقتة
+Window Days,أيام النافذة
+Lifecycle,دورة الحياة
+Linked Employee,الموظّف المرتبط
+Linked On,تاريخ الربط
+Active,نشط
+Linked,مرتبط
+Window Days must be at least 1 day.,يجب أن تكون أيام النافذة يوماً واحداً على الأقل.
+Window Days cannot exceed {0} days.,لا يمكن أن تتجاوز أيام النافذة {0} يوماً.

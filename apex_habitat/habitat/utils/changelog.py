@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.29.0 ---------------------------------------------------------------
+    {
+        "title": "v1.29.0: Foundations for handling workers who arrive before they are registered \u2014 a new Temporary Worker record (keyed by passport, valid 30 days, extendable to 90) that will hold a new arrival's housing and custody until their Iqama is issued, then link to their permanent Employee. First step of the arrival redesign.",
+        "app_name": "apex_habitat",
+        "link": "/app/temporary-worker",
+        "creation": "2026-07-27 09:00:00",
+    },
     # v1.28.3 ---------------------------------------------------------------
     {
         "title": "v1.28.3: Security \u2014 closed a project-boundary leak: a project-scoped fleet supervisor could open or API-fetch a Salis Driver or Passenger Manifest record from another project directly by name (the list view already hid them). Direct document access is now project-scoped too, and a driver can still read their own profile.",
