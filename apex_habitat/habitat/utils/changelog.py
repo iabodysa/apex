@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.28.1 ---------------------------------------------------------------
+    {
+        "title": "v1.28.1: The support-ticket SLA now uses the default Company's holiday list (the real business calendar) instead of whatever holiday list happened to exist, so SLA timers pause on the correct holidays.",
+        "app_name": "apex_habitat",
+        "link": "/app/issue",
+        "creation": "2026-07-24 12:00:00",
+    },
     # v1.28.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.28.0 — driver support tickets run on the native Issue desk with SLA",

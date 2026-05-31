@@ -103,8 +103,17 @@ def _pick_holiday_list():
     """A Service Level Agreement requires a Holiday List. Return one to use, or
     None if the site has none (in which case the SLA seed is skipped — it is not
     worth fabricating a holiday list here)."""
-    # The HR Settings default-holiday-list field name varies by HRMS version (it
-    # does not exist on some), so read it best-effort and fall back to any list.
+    # Prefer the default Company's holiday list — the real business calendar the
+    # SLA timers should pause on. Fall back to the HR Settings default (its field
+    # name varies by HRMS version, so read it best-effort), then to ANY Holiday
+    # List so a fresh ERPNext site still gets a usable SLA.
+    company = frappe.defaults.get_global_default("company") or frappe.db.get_value(
+        "Company", {}, "name"
+    )
+    if company:
+        hl = frappe.db.get_value("Company", company, "default_holiday_list")
+        if hl and frappe.db.exists("Holiday List", hl):
+            return hl
     try:
         default = frappe.db.get_single_value("HR Settings", "default_holiday_list")
         if default and frappe.db.exists("Holiday List", default):
