@@ -5,10 +5,11 @@
 #   Backfills are no-ops on fresh installs — never rely on them to seed fresh DBs.
 #   Prune-eligible now: v0_4.cleanup_duplicate_workspaces (was "remove after v0.5").
 #   Date-gated: v0_7.rename_habitat_city_to_city (remove on/after 2026-06-24).
-#   PERMANENT (keep, do NOT prune): all seed_* notifications (operational/event/
-#   temporary_stay/idle_resident), kanban (kanban_boards/room_readiness), dashboards,
+#   PERMANENT (keep, do NOT prune): kanban (kanban_boards/room_readiness), dashboards,
 #   assignment_rules, email — each seeds DISTINCT records and fresh installs must replay
 #   them. They are idempotent (also called from after_install), not redundant.
+#   (Notifications are no longer seeded via patches — they ship as is_standard JSON
+#   under */notification/ and are imported by migrate.)
 apex_habitat.patches.v0_4.cleanup_duplicate_workspaces
 apex_habitat.patches.v0_5.rename_sar_columns
 apex_habitat.patches.v0_6.add_city_doctype
@@ -27,11 +28,9 @@ apex_habitat.patches.v0_8.seed_missing_material_templates
 apex_habitat.patches.v0_8.fix_safety_catalog_onboarding_action
 apex_habitat.patches.v0_8.merge_daily_tasks_into_safety
 apex_habitat.patches.v0_8.merge_client_audit_into_safety
-apex_habitat.patches.v0_8.seed_operational_notifications
 apex_habitat.patches.v0_8.seed_kanban_boards
 
 # v0.8.3 — native paradigms (Tier 1)
-apex_habitat.patches.v0_8.seed_event_notifications
 apex_habitat.patches.v0_8.seed_room_readiness_kanban
 apex_habitat.patches.v0_8.seed_assignment_rules
 
@@ -40,11 +39,7 @@ apex_habitat.patches.v0_8.seed_auto_email_reports
 apex_habitat.patches.v0_8.seed_email_templates
 apex_habitat.patches.v0_8.add_navbar_help_links
 
-# v0.8.5 — temporary stays + idle resident schema
-apex_habitat.patches.v0_8.seed_temporary_stay_notification
-
 # v0.8.6 — front desk + idle resident automation
-apex_habitat.patches.v0_8.seed_idle_resident_notification
 apex_habitat.patches.v0_8.rename_workspaces_to_short_names
 apex_habitat.patches.v0_8.fix_navbar_command_center_route
 apex_habitat.patches.v0_9.seed_habitat_dashboard
@@ -57,9 +52,10 @@ apex_habitat.patches.v1_0.seed_salis_operations_roles
 apex_habitat.patches.v1_0.seed_salis_settings
 apex_habitat.patches.v1_0.seed_salis_portal_theme
 
-# v1.1 — Salis native paradigms (Notifications + Kanban + Assignment Rules)
+# v1.1 — Salis native paradigms (Kanban + Assignment Rules)
 # PERMANENT (keep, do NOT prune): seeds DISTINCT records, idempotent, also called
-# from after_install/after_migrate. Not redundant.
+# from after_install/after_migrate. Not redundant. (Notifications now ship as
+# is_standard JSON under salis/notification/ and are imported by migrate.)
 apex_habitat.patches.v1_1.seed_salis_operations_artifacts
 
 # v1.x — Salis audit-trail consolidation onto native Frappe
@@ -186,14 +182,6 @@ apex_habitat.patches.v1_x.dedupe_fuel_ledger_and_unique_index
 apex_habitat.patches.v1_x.drop_habitat_operations_alert
 apex_habitat.patches.v1_x.drop_habitat_city
 apex_habitat.patches.v1_x.drop_dead_operations_alert_options
-
-# v1.x — seed the "Habitat - Severe Safety Incident" management-escalation
-# Notification for the new Habitat Safety Incident DocType
-# PERMANENT (keep, do NOT prune): delegates to the idempotent, existence-guarded
-# seed_operational_notifications (single source of truth, also called from
-# setup.after_install). This is the migrate path that reaches already-installed
-# sites; fresh installs get it from after_install. Guarded + a no-op on re-run.
-apex_habitat.patches.v1_x.seed_severe_safety_incident_notification
 
 # v1.x — remove the out-of-scope "Sponsorship Transfer Case" feature
 # ONE-TIME (prune-eligible once every deployed site has run it): the kafala-

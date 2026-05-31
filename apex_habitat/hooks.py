@@ -274,11 +274,12 @@ fixtures = [
 after_install = [
     "apex_habitat.setup.after_install",
     "apex_habitat.salis.setup.after_install",
-    # Salis native paradigms — Notifications, Kanban Boards, Assignment Rules.
+    # Salis native paradigms — Kanban Boards, Assignment Rules.
     # Idempotent + existence-guarded; mirrors Habitat (which seeds the equivalents
     # from setup.after_install). The same functions also run on after_migrate and
     # from the v1_1 patch (single source of truth), so replaying them is safe.
-    "apex_habitat.salis.notifications_seed.seed_salis_notifications",
+    # (Notifications now ship as is_standard JSON under salis/notification/, so
+    # they are imported by migrate — no seed entry is needed.)
     "apex_habitat.salis.kanban_seed.seed_salis_kanban_boards",
     "apex_habitat.salis.assignment_rules_seed.seed_salis_assignment_rules",
     # Salis navbar Help-dropdown links — mirrors Habitat's add_navbar_help_links
@@ -308,12 +309,9 @@ after_migrate = [
     "apex_habitat.habitat.dashboard_seed.seed_all_dashboards",
     "apex_habitat.salis.dashboard_seed.seed_salis_dashboards",
     "apex_habitat.salis.movement_dashboard_seed.seed_movement_dashboards",
-    # Habitat operational Notifications — keep already-installed sites in sync on
-    # migrate (idempotent, existence-guarded, created disabled). Single source of
-    # truth; also run from setup.after_install and the v1_x seed patch. Reliable
-    # because after_migrate runs after every DocType sync, so a freshly-added
-    # notification's document_type always exists by the time this runs.
-    "apex_habitat.habitat.notifications_seed.seed_operational_notifications",
+    # Habitat operational Notifications now ship as is_standard JSON under
+    # habitat/notification/, so they are imported by migrate — no seed entry is
+    # needed here.
     # Habitat native paradigms — these were install-only (after_install) so a
     # newly-added kanban / assignment rule / email template / auto-email report
     # never reached already-installed sites. They are idempotent + existence-
@@ -326,7 +324,8 @@ after_migrate = [
     # Salis native paradigms — keep already-installed sites in sync on migrate.
     # Idempotent + existence-guarded (created only if absent), so re-running every
     # migrate never duplicates and never aborts the migrate.
-    "apex_habitat.salis.notifications_seed.seed_salis_notifications",
+    # (Notifications now ship as is_standard JSON under salis/notification/, so
+    # they are imported by migrate — no seed entry is needed.)
     "apex_habitat.salis.kanban_seed.seed_salis_kanban_boards",
     "apex_habitat.salis.assignment_rules_seed.seed_salis_assignment_rules",
     # Salis navbar Help-dropdown links — keep already-installed sites in sync on

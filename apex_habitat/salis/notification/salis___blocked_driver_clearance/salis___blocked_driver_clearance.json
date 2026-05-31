@@ -1,0 +1,29 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.status == 'Blocked'",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Driver Clearance",
+ "enabled": 0,
+ "event": "Value Change",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"A driver clearance is blocked and must be resolved before the driver is redeployed\") }}: {{ doc.name }} ({{ doc.driver }}).",
+ "message_type": "HTML",
+ "module": "Salis",
+ "name": "Salis - Blocked Driver Clearance",
+ "recipients": [
+  {
+   "receiver_by_role": "Fleet Manager"
+  },
+  {
+   "receiver_by_role": "Fleet Supervisor"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "subject": "Driver Clearance Blocked: {{ doc.name }}",
+ "value_changed": "status"
+}

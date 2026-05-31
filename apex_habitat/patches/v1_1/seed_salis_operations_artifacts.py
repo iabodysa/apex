@@ -1,5 +1,8 @@
-"""Seed the Salis operational native-paradigm artifacts: Notifications, Kanban
-Boards, and Assignment Rules.
+"""Seed the Salis operational native-paradigm artifacts: Kanban Boards and
+Assignment Rules.
+
+(Notifications now ship as is_standard JSON under ``salis/notification/`` and are
+imported by migrate, so they are no longer seeded here.)
 
 Mirrors the Habitat pattern (``patches/v0_8/seed_*`` -> module seeds): the seed
 logic lives in the idempotent, existence-guarded ``salis/*_seed.py`` modules
@@ -15,14 +18,12 @@ never aborts the migrate or the surrounding Habitat/Salis seeds.
 
 import frappe
 
-from apex_habitat.salis.notifications_seed import seed_salis_notifications
 from apex_habitat.salis.kanban_seed import seed_salis_kanban_boards
 from apex_habitat.salis.assignment_rules_seed import seed_salis_assignment_rules
 
 
 def execute():
     for step in (
-        seed_salis_notifications,
         seed_salis_kanban_boards,
         seed_salis_assignment_rules,
     ):

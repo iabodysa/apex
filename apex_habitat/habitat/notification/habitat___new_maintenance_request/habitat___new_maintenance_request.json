@@ -1,0 +1,28 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Maintenance Request",
+ "enabled": 0,
+ "event": "New",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"A new maintenance request awaits triage\") }}: {{ doc.name }}.",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - New Maintenance Request",
+ "recipients": [
+  {
+   "receiver_by_role": "Accommodation Manager"
+  },
+  {
+   "receiver_by_role": "Resident Supervisor"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "subject": "New Maintenance Request: {{ doc.name }}"
+}

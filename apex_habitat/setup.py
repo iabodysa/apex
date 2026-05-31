@@ -3,7 +3,6 @@ from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_mate
 
 from apex_habitat.habitat.doctype.maintenance_material.maintenance_material_catalog import seed_catalog
 
-from apex_habitat.habitat.notifications_seed import seed_operational_notifications
 from apex_habitat.habitat.kanban_seed import seed_kanban_boards
 from apex_habitat.habitat.assignment_rules_seed import seed_assignment_rules
 from apex_habitat.habitat.auto_email_reports_seed import seed_auto_email_reports
@@ -20,7 +19,6 @@ def after_install():
     create_safety_task_catalogs()
     seed_catalog()
     seed_templates()
-    seed_operational_notifications()
     seed_kanban_boards()
     seed_assignment_rules()
     seed_auto_email_reports()

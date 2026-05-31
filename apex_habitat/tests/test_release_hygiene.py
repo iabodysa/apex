@@ -11,8 +11,8 @@ silently regress:
   3. No patch file carries an embedded "AI INSTRUCTION" prompt-injection comment.
   4. The shipped app declares no test/placeholder role name anywhere in its
      tracked source (DocType permissions, hooks fixtures, seed lists, dashboard
-     and notification seeds) — so a Frappe-core test fixture such as
-     `_Test Role` can never be packaged and surfaced to operators.
+     seeds, and is_standard Notification JSON recipients) — so a Frappe-core test
+     fixture such as `_Test Role` can never be packaged and surfaced to operators.
 
 Run standalone:  python3 -m unittest tests.test_release_hygiene -v
 """
@@ -218,16 +218,44 @@ class TestNoTestRolesShipped(unittest.TestCase):
                 roles.update(quoted.findall(inner.group(0) if inner else m.group(1)))
         return roles
 
+    def _notification_json_roles(self):
+        """Recipient role names from the shipped is_standard Notification JSON.
+
+        The operational/event Notifications now ship as is_standard JSON under
+        `*/notification/<slug>/<slug>.json` (imported by migrate) instead of the
+        retired `notifications_seed.py` modules. Harvest every
+        `recipients[].receiver_by_role` so the hygiene check still covers
+        notification recipient roles.
+        """
+        roles = set()
+        for fp in glob.glob(
+            os.path.join(APP_ROOT, "**", "notification", "**", "*.json"),
+            recursive=True,
+        ):
+            if "node_modules" in fp:
+                continue
+            with open(fp, encoding="utf-8") as fh:
+                try:
+                    data = json.load(fh)
+                except json.JSONDecodeError:
+                    continue
+            if not isinstance(data, dict):
+                continue
+            for recipient in data.get("recipients", []) or []:
+                role = recipient.get("receiver_by_role")
+                if role:
+                    roles.add(role)
+        return roles
+
     def _all_declared_roles(self):
         roles = set()
         roles |= self._doctype_permission_roles()
         roles |= self._seed_list_roles()
+        roles |= self._notification_json_roles()
         roles |= self._literal_roles_in_files(
             "hooks.py",
             os.path.join("habitat", "dashboard_seed.py"),
             os.path.join("salis", "dashboard_seed.py"),
-            os.path.join("habitat", "notifications_seed.py"),
-            os.path.join("salis", "notifications_seed.py"),
         )
         return roles
 

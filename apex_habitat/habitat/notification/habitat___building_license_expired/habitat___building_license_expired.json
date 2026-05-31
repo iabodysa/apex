@@ -1,0 +1,29 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.docstatus == 1 and doc.status != 'Revoked'",
+ "date_changed": "expiry_date",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Building License",
+ "enabled": 0,
+ "event": "Days Before",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"Building License\") }} {{ doc.name }} {{ _(\"for building\") }} {{ doc.building }} {{ _(\"has expired\") }} ({{ doc.expiry_date }}).",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Building License Expired",
+ "recipients": [
+  {
+   "receiver_by_role": "Accommodation Manager"
+  },
+  {
+   "receiver_by_role": "System Manager"
+  }
+ ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
+ "subject": "Building License EXPIRED: {{ doc.name }}"
+}
