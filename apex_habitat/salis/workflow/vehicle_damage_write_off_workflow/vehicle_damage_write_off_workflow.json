@@ -1,0 +1,164 @@
+{
+ "doctype": "Workflow",
+ "name": "Vehicle Damage Write-Off Workflow",
+ "workflow_name": "Vehicle Damage Write-Off Workflow",
+ "document_type": "Vehicle Damage Write-Off",
+ "workflow_state_field": "status",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "states": [
+  {
+   "doctype": "Workflow Document State",
+   "state": "Open",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Under Review",
+   "doc_status": "0",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Approved",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Rejected",
+   "doc_status": "0",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Closed",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Cancelled",
+   "doc_status": "2",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  }
+ ],
+ "transitions": [
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Submit for Review",
+   "next_state": "Under Review",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Submit for Review",
+   "next_state": "Under Review",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Submit for Review",
+   "next_state": "Under Review",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Under Review",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.owner != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Under Review",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "System Manager",
+   "allow_self_approval": 0,
+   "condition": "doc.owner != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Under Review",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Under Review",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "System Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Close",
+   "next_state": "Closed",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Close",
+   "next_state": "Closed",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Rejected",
+   "action": "Reopen",
+   "next_state": "Open",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Rejected",
+   "action": "Reopen",
+   "next_state": "Open",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Rejected",
+   "action": "Reopen",
+   "next_state": "Open",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  }
+ ]
+}

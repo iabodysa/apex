@@ -40,6 +40,11 @@ _WORKFLOW_DIRS = [
     "fuel_claim_workflow",
     "fuel_exception_case_workflow",
     "dispatch_trip_workflow",
+    # Movement cost + write-off approvals: migrated off the custom tier engine
+    # onto native Frappe Workflow (the approve transition carries the authority).
+    "movement_cost_recovery_workflow",
+    "movement_cost_transfer_workflow",
+    "vehicle_damage_write_off_workflow",
 ]
 
 # State -> indicator style, mirroring each DocType's status indicator colours so

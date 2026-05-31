@@ -1,10 +1,11 @@
 """Movement Cost Recovery controller.
 
 Movement-domain control to recover losses (vehicle damage, fuel misuse,
-custody loss, fines) with tiered authority and an audit trail.
+custody loss, fines) with native-workflow authority and an audit trail.
 
 Scope boundary: this DocType is Movement-domain only. It documents the
-recovery and routes authorization through the Delegation-of-Authority gate.
+recovery and routes authorization through the native Movement Cost Recovery
+Workflow (Fleet Manager / System Manager, no self-approval).
 The actual salary deduction stays with Finance/HR and is handled via the
 referenced Salis Payment Request; this controller posts NO General Ledger /
 Journal / Payment Entry and never performs the deduction itself.
@@ -15,13 +16,6 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-
-from apex_habitat.salis.salis_lib import ensure_approval
-
-# Fallback amount (SAR) at or above which the recovery escalates to Operations-
-# tier authority, used only when Salis Settings has no configured threshold;
-# below it, Regional tier suffices.
-_OPERATIONS_TIER_THRESHOLD_DEFAULT = 1000
 
 
 class MovementCostRecovery(Document):
@@ -45,15 +39,7 @@ class MovementCostRecovery(Document):
 		if not self.cost_center:
 			self.cost_center = get_default_cost_center()
 
-	def before_submit(self):
-		# Threshold is configurable via Salis Settings so the SAR recovery gate can
-		# be tuned without a code change; fall back to the default if unset.
-		threshold = frappe.db.get_single_value(
-			"Salis Settings", "cost_recovery_ops_threshold_sar"
-		)
-		if not threshold:
-			threshold = _OPERATIONS_TIER_THRESHOLD_DEFAULT
-		required_tier = "Operations" if (self.amount or 0) >= threshold else "Regional"
-		ensure_approval("Movement Cost Recovery", self.name, required_tier=required_tier)
-
-	# Submit/cancel are recorded natively (Version track_changes + auto-comment).
+	# Authorization is routed through the native Movement Cost Recovery Workflow:
+	# only Fleet Manager / System Manager can drive Approve/Recover/Waive, and the
+	# Approve transition forbids self-approval (allow_self_approval=0). Submit/cancel
+	# are recorded natively (Version track_changes + auto-comment).

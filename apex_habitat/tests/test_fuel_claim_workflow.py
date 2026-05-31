@@ -256,20 +256,20 @@ class TestFuelClaimWorkflow(unittest.TestCase):
 		self.assertEqual(fc.status, "Approved")
 		self.assertEqual(fc.docstatus, 1)
 
-	# --- the Delegation-of-Authority gate still fires on submit -----------------
+	# --- approval authority now lives in the native workflow transition --------
 
-	def test_approve_blocked_without_doa_approval(self):
-		"""Without an approved Approval Request the Approve transition is offered
-		(role + SoD pass) but submit is blocked by the controller's DoA gate."""
+	def test_approve_succeeds_via_workflow_gate(self):
+		"""Approval authority now lives entirely in the native workflow's Approve
+		transition (authorized role + SoD); the old controller-side Delegation-of-
+		Authority gate (ensure_approval / Approval Request) was removed. An
+		authorized approver submits straight through the transition."""
 		fc = self._reconciled()
 		frappe.set_user(self.manager)
 		self.assertIn("Approve", _actions(fc))
-		with self.assertRaises(frappe.ValidationError):
-			apply_workflow(fc, "Approve")
+		apply_workflow(fc, "Approve")
 		fc.reload()
-		# Still pre-submit — the gate refused the transition.
-		self.assertEqual(fc.docstatus, 0)
-		self.assertEqual(fc.status, "Reconciled")
+		self.assertEqual(fc.docstatus, 1)
+		self.assertEqual(fc.status, "Approved")
 
 	# --- the no-GL boundary holds ----------------------------------------------
 

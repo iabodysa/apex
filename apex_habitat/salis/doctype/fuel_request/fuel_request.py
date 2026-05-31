@@ -4,10 +4,10 @@ A single submittable fuel request whose ``request_type`` selects one of three
 behaviours, preserving the contract of the three former DocTypes verbatim:
 
 * **Standard** — fuel-increase request against a Fuel Quota. Drives a
-  Pending -> Approved -> Done flow (Failed / Cancelled exits), enforces the
-  Delegation-of-Authority approval gate, and posts/reverses quota consumption
-  idempotently on submit/cancel. The Fuel accrual engine later ledgers the Done
-  request (``ledgered`` flag) into the Fuel Consumption Ledger.
+  Pending -> Approved -> Done flow (Failed / Cancelled exits) whose approval
+  authority is owned by the native Fuel Request Workflow, and posts/reverses
+  quota consumption idempotently on submit/cancel. The Fuel accrual engine later
+  ledgers the Done request (``ledgered`` flag) into the Fuel Consumption Ledger.
 * **Top-up** — fuel top-up. Temporary top-ups carry a revert-due date and are
   auto-reverted by the daily Salis scheduler once overdue; this controller only
   surfaces a warning for the overdue case and guards status transitions.
@@ -28,10 +28,9 @@ transition; ``Done`` / ``Failed`` / ``Reverted`` are then reachable post-submit
 (the state field is ``allow_on_submit``).
 
 This controller keeps only what the workflow cannot express: the per-type
-required-field validation, the Delegation-of-Authority approval gate
-(``ensure_approval`` against an Approval Request + tier), the Chip
-evidence/acknowledgement gate, the initial-status guard (a request must be
-created at Pending), and the idempotent quota side-effects — Standard quota
+required-field validation, the Chip evidence/acknowledgement gate, the
+initial-status guard (a request must be created at Pending), and the idempotent
+quota side-effects — Standard quota
 consumption is applied when the request reaches Done (on submit if it submits
 straight into Done, or on the post-submit transition into Done) and reversed on
 cancel, guarded by the ``quota_applied`` flag.
@@ -46,10 +45,7 @@ from frappe.utils import getdate, nowdate
 
 from apex_habitat.salis.salis_lib import (
 	add_timeline_note,
-	ensure_approval,
-	get_settings,
 	lock_vehicle,
-	tier_rank,
 )
 
 REQUEST_TYPES = ("Standard", "Top-up", "Chip")
@@ -92,17 +88,12 @@ class FuelRequest(Document):
 		self._stamp_approver()
 
 	def before_submit(self):
-		# Approval (DoA / SoD) gate applies to the litre-bearing types only; a
-		# chip request carries its own evidence/acknowledgement gate instead.
-		if self.request_type == "Standard":
-			if self._needs_approval():
-				ensure_approval(
-					"Fuel Request", self.name, required_tier=self._required_tier()
-				)
-		elif self.request_type == "Top-up":
-			if self._needs_approval():
-				ensure_approval("Fuel Request", self.name)
-		elif self.request_type == "Chip":
+		# Approval authority (legitimate approver role, segregation of duties, and
+		# the volume/cross-project escalation that the former tier engine enforced)
+		# is now owned by the native Fuel Request Workflow's Approve transition, not
+		# this controller. A Chip request carries no approval gate but keeps its own
+		# evidence/acknowledgement gate.
+		if self.request_type == "Chip":
 			self._guard_chip_cancellation()
 
 	def on_submit(self):
@@ -237,72 +228,6 @@ class FuelRequest(Document):
 				frappe.throw(
 					_("Owner acknowledgement is required to submit a fuel chip cancellation.")
 				)
-
-	# ------------------------------------------------------------------ approval gate
-
-	def _needs_approval(self):
-		"""Approval is required when the requested volume exceeds the configured
-		threshold, or when this is a cross-project request.
-
-		The litre figure compared is the type-relevant one (Standard ->
-		requested_litres, Top-up -> topup_litres). Cross-project escalation for a
-		Standard request uses the linked quota's project; a Top-up uses the
-		vehicle's project (it carries no quota), mirroring the two former
-		controllers verbatim."""
-		settings = get_settings()
-		if not getattr(settings, "enable_approvals", 0):
-			return False
-
-		threshold = settings.fuel_request_approval_threshold_litres or 0
-		if threshold and (self._litres() or 0) > threshold:
-			return True
-
-		if getattr(settings, "cross_project_needs_approval", 0) and self.project:
-			if self.request_type == "Standard" and self.fuel_quota:
-				quota_project = frappe.db.get_value("Fuel Quota", self.fuel_quota, "project")
-				if quota_project and quota_project != self.project:
-					return True
-			elif self.request_type == "Top-up" and self.vehicle:
-				vehicle_project = frappe.db.get_value("Salis Vehicle", self.vehicle, "project")
-				if vehicle_project and vehicle_project != self.project:
-					return True
-
-		return False
-
-	def _litres(self):
-		"""The type-relevant litre figure for the approval threshold check."""
-		if self.request_type == "Top-up":
-			return self.topup_litres or 0
-		return self.requested_litres or 0
-
-	def _is_cross_project(self):
-		"""True when a Standard request's project differs from its quota's project."""
-		if not (self.project and self.fuel_quota):
-			return False
-		quota_project = frappe.db.get_value("Fuel Quota", self.fuel_quota, "project")
-		return bool(quota_project and quota_project != self.project)
-
-	def _required_tier(self):
-		"""Compute the authority tier this (Standard) fuel request demands.
-
-		Base tier is Project. The volume bands and the cross-project rule escalate
-		it; the highest applicable tier wins. Thresholds are data-driven from
-		Salis Settings, not hardcoded."""
-		settings = get_settings()
-		litres = self.requested_litres or 0
-		ops_litres = settings.fuel_tier_operations_litres or 0
-		reg_litres = settings.fuel_tier_regional_litres or 0
-
-		tier = "Project"
-		if ops_litres and litres >= ops_litres:
-			tier = "Operations"
-		elif reg_litres and litres >= reg_litres:
-			tier = "Regional"
-
-		if self._is_cross_project() and tier_rank(tier) < tier_rank("Regional"):
-			tier = "Regional"
-
-		return tier
 
 	# ------------------------------------------------------------------ quota posting (Standard)
 

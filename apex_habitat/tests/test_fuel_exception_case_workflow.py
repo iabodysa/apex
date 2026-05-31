@@ -266,17 +266,17 @@ class TestFuelExceptionCaseWorkflow(unittest.TestCase):
 
 	# --- the Delegation-of-Authority gate still fires on submit -----------------
 
-	def test_resolve_blocked_without_doa_approval(self):
-		"""Without an approved Approval Request the Resolve transition is offered
-		(role + SoD pass) but submit is blocked by the controller's DoA gate."""
+	def test_resolve_succeeds_via_workflow_gate(self):
+		"""Approval authority now lives in the native workflow's Resolve transition
+		(authorized role + SoD); the old controller-side Delegation-of-Authority
+		gate (ensure_approval / Approval Request) was removed, so an authorized
+		approver resolves straight through it (the separate evidence gate stays)."""
 		fec = self._investigating()
 		frappe.set_user(self.manager)
 		self.assertIn("Resolve", _actions(fec))
-		with self.assertRaises(frappe.ValidationError):
-			apply_workflow(fec, "Resolve")
+		apply_workflow(fec, "Resolve")
 		fec.reload()
-		self.assertEqual(fec.docstatus, 0)
-		self.assertEqual(fec.status, "Under Investigation")
+		self.assertEqual(fec.docstatus, 1)
 
 	# --- evidence is required before resolution (controller gate) ---------------
 

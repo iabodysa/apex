@@ -7,6 +7,25 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.26.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.26.0 — Salis approvals run on native Frappe Workflow",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-19 09:00:00",
+    },
+    {
+        "title": "v1.26.0: Approval authority for the six Salis approval documents (Fuel Request, Fuel Claim, Fuel Exception Case, Movement Cost Recovery, Movement Cost Transfer, Vehicle Damage Write-Off) now lives entirely in native Frappe Workflows — one approval mechanism instead of two — with the same authorized approvers and maker-cannot-approve-their-own rule.",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-19 09:01:00",
+    },
+    {
+        "title": "v1.26.0: The movement-cost recovery / transfer and vehicle damage write-off documents gained their own native approval workflows, replacing the custom authority-tier engine.",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-19 09:02:00",
+    },
     # v1.25.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.25.0 — a formal safety-incident record with management escalation, and hardened worker links",

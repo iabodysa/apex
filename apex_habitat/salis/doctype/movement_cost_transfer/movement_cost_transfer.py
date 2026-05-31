@@ -3,8 +3,11 @@
 Inter-project cost-transfer control for Movement costs.
 Records the reallocation of a Movement-related cost (fuel, rental, trip cost,
 other) from one project / cost center to another. Because crossing a project
-boundary always demands Operations-tier authority, ``before_submit`` enforces a
-Decentralized-of-Authority approval gate at the Operations tier.
+boundary always demands Operations-tier authority, approval is governed by the
+native Frappe "Movement Cost Transfer Workflow": the Approve / Reject
+transitions out of "Pending Approval" are restricted to the Operations-tier
+roles (Fleet Manager, System Manager), reproducing the former
+required_tier="Operations" gate.
 
 NO-GL BOUNDARY
 --------------
@@ -23,8 +26,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import ensure_approval
-
 
 class MovementCostTransfer(Document):
 	def validate(self):
@@ -42,13 +43,11 @@ class MovementCostTransfer(Document):
 
 			self.company = get_default_company()
 
-	def before_submit(self):
-		# Crossing a project boundary always requires Operations-tier authority.
-		ensure_approval(
-			"Movement Cost Transfer", self.name, required_tier="Operations"
-		)
-
-	# Submit is recorded natively (Version track_changes + auto-comment).
+	# Crossing a project boundary requires Operations-tier authority; that gate
+	# is now enforced declaratively by the native "Movement Cost Transfer
+	# Workflow" (Approve / Reject restricted to Fleet Manager / System Manager),
+	# so no before_submit hook is needed here. Submit is recorded natively
+	# (Version track_changes + auto-comment).
 
 	# ------------------------------------------------------------------ helpers
 

@@ -5,26 +5,23 @@ Movement is a service provider: Operations submits the
 claim, Movement reconciles it against the internal Fuel Consumption Ledger.
 
 The controller derives consumed litres from the ledger (sum of litres for the
-claim's vehicle + period), computes the claimed-vs-consumed variance, and
-applies a Delegation-of-Authority gate on submit. A quota-increase claim or a
-large variance (> 10% of claimed litres) demands the higher Operations tier and
-a Finance consult note; routine claims settle at the Regional tier.
+claim's vehicle + period) and computes the claimed-vs-consumed variance.
 
-Status transitions are owned by the native **Fuel Claim Workflow** (see
-``salis/workflow/fuel_claim_workflow/``), not by this controller. The workflow
-enforces the role per transition and the Segregation-of-Duties gate on the
-approval (``allow_self_approval=0`` + ``requested_by != session.user``). The
-document is submitted (docstatus 0 -> 1) by the ``Approve`` transition (where the
-Delegation-of-Authority gate in ``before_submit`` fires); ``Closed`` is the
-post-submit terminal, reached from ``Approved`` as a docstatus-1 update (it
-finalizes, not voids, the claim — there is no cancel side-effect). The state
-field is ``allow_on_submit`` so a post-submit transition can move the status.
+Status transitions and the approval authority are owned by the native **Fuel
+Claim Workflow** (see ``salis/workflow/fuel_claim_workflow/``), not by this
+controller. The workflow enforces the role per transition and the
+Segregation-of-Duties gate on the approval (``allow_self_approval=0`` +
+``requested_by != session.user``). The document is submitted (docstatus 0 -> 1)
+by the ``Approve`` transition, whose ``allowed`` role (Fleet Manager) carries the
+governing approval authority; ``Closed`` is the post-submit terminal, reached
+from ``Approved`` as a docstatus-1 update (it finalizes, not voids, the claim —
+there is no cancel side-effect). The state field is ``allow_on_submit`` so a
+post-submit transition can move the status.
 
 This controller keeps only what the workflow cannot express: the required-field
 validation, the ledger-derived consumption/variance computation, the financial
-reference defaults, the Delegation-of-Authority approval gate (``ensure_approval``
-against an Approval Request + tier), the initial-status guard (a claim must be
-created at Draft), and the server-side requester stamp the SoD gate relies on.
+reference defaults, the initial-status guard (a claim must be created at Draft),
+and the server-side requester stamp the SoD gate relies on.
 """
 
 from __future__ import annotations
@@ -32,12 +29,6 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-
-from apex_habitat.salis.salis_lib import ensure_approval
-
-# Fraction of claimed litres above which a variance is treated as "large" and
-# escalated to the Operations tier (with a Finance consult note).
-LARGE_VARIANCE_RATIO = 0.1
 
 # Known status values. The Select carries these for filtering / colour, but the
 # Fuel Claim Workflow owns the *transitions* (which status is reachable from
@@ -84,9 +75,8 @@ class FuelClaim(Document):
 		if not self.cost_center:
 			self.cost_center = get_default_cost_center()
 
-	def before_submit(self):
-		ensure_approval("Fuel Claim", self.name, required_tier=self._required_tier())
-
+	# Approval authority on submit is enforced by the Fuel Claim Workflow's
+	# Approve transition (role-gated + SoD), not by this controller.
 	# Submit/cancel are recorded natively (Version track_changes + auto-comment).
 
 	# ------------------------------------------------------------------ helpers
@@ -118,22 +108,3 @@ class FuelClaim(Document):
 					_(self.status)
 				)
 			)
-
-	def _is_large_variance(self):
-		"""True when the absolute variance exceeds the configured fraction of the
-		claimed litres (reconciliation tolerance)."""
-		claimed = self.claimed_litres or 0
-		if claimed <= 0:
-			return False
-		return abs(self.variance_litres or 0) > (LARGE_VARIANCE_RATIO * claimed)
-
-	def _required_tier(self):
-		"""Compute the authority tier this claim demands.
-
-		A higher tier is required when scope crosses a threshold:
-		a quota-increase claim or a large variance needs the higher Operations
-		tier (and a Finance consult); routine claims settle at the Regional
-		tier."""
-		if self.is_increase or self._is_large_variance():
-			return "Operations"
-		return "Regional"

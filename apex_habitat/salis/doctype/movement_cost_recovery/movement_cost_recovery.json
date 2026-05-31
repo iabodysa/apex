@@ -92,7 +92,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nAcknowledged\nApproved\nRecovered\nWaived\nRejected"
+   "options": "Open\nAcknowledged\nApproved\nRecovered\nWaived\nRejected\nCancelled"
   },
   {
    "description": "Owning company for reporting and financial context. Defaulted from Salis Settings; reference only, posts no GL.",

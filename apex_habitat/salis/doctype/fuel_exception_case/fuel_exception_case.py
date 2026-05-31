@@ -3,26 +3,26 @@
 Submittable control record for disputed or suspicious fuel-control cases.
 Holds usage/GPS evidence, requires evidence before a case may be resolved, and
 enforces non-raiser resolution (segregation of duties — the user who raised the
-case may not be the user who resolves it). Submit is gated behind an
-Operations-tier Approval Request.
+case may not be the user who resolves it). Submit authority is owned by the
+native **Fuel Exception Case Workflow**.
 
 Status transitions are owned by the native **Fuel Exception Case Workflow** (see
 ``salis/workflow/fuel_exception_case_workflow/``), not by this controller. The
 investigation states (Open -> Under Investigation -> Evidence Required) are
 pre-submit; the document is submitted (docstatus 0 -> 1) by the ``Resolve`` or
-``Reject`` transition (where the Operations-tier Delegation-of-Authority gate in
-``before_submit`` fires); ``Closed`` is the post-submit terminal, reached from
-``Resolved`` / ``Rejected`` as a docstatus-1 update (it finalizes, not voids, the
-case). The ``Resolve`` transition carries the Segregation-of-Duties gate
-(``allow_self_approval=0`` + ``reported_by != session.user``) so the raiser can
-never resolve their own case. The state field is ``allow_on_submit`` so a
-post-submit transition can move the status.
+``Reject`` transition (restricted to ``Fleet Manager``, with the Resolve
+transition also carrying ``allow_self_approval=0``); ``Closed`` is the
+post-submit terminal, reached from ``Resolved`` / ``Rejected`` as a docstatus-1
+update (it finalizes, not voids, the case). The ``Resolve`` transition carries
+the Segregation-of-Duties gate (``allow_self_approval=0`` +
+``reported_by != session.user``) so the raiser can never resolve their own case.
+The state field is ``allow_on_submit`` so a post-submit transition can move the
+status.
 
 This controller keeps only what the workflow cannot express: the reporter stamp
-the SoD gate relies on, the Operations-tier Delegation-of-Authority gate, the
-evidence-before-resolution requirement plus the non-raiser closer stamp/guard
-(defence in depth alongside the workflow condition), and the initial-status
-guard (a case must be created at Open).
+the SoD gate relies on, the evidence-before-resolution requirement plus the
+non-raiser closer stamp/guard (defence in depth alongside the workflow
+condition), and the initial-status guard (a case must be created at Open).
 """
 
 from __future__ import annotations
@@ -30,8 +30,6 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-
-from apex_habitat.salis.salis_lib import ensure_approval
 
 # Known status values. The Select carries these for filtering / colour, but the
 # Fuel Exception Case Workflow owns the *transitions* (which status is reachable
@@ -66,10 +64,10 @@ class FuelExceptionCase(Document):
 		self._guard_initial_status()
 		self._enforce_closure_controls()
 
-	def before_submit(self):
-		ensure_approval("Fuel Exception Case", self.name, required_tier="Operations")
-
-	# Submit/cancel are recorded natively (Version track_changes + auto-comment).
+	# Submit/cancel are driven by the native Fuel Exception Case Workflow (the
+	# Resolve/Reject transitions perform docstatus 0 -> 1, restricted to Fleet
+	# Manager with allow_self_approval=0). Submit/cancel are recorded natively
+	# (Version track_changes + auto-comment).
 
 	# ------------------------------------------------------------------ helpers
 

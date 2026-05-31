@@ -1,0 +1,216 @@
+{
+ "doctype": "Workflow",
+ "name": "Movement Cost Recovery Workflow",
+ "workflow_name": "Movement Cost Recovery Workflow",
+ "document_type": "Movement Cost Recovery",
+ "workflow_state_field": "status",
+ "is_active": 1,
+ "override_status": 0,
+ "send_email_alert": 0,
+ "states": [
+  {
+   "doctype": "Workflow Document State",
+   "state": "Open",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Acknowledged",
+   "doc_status": "0",
+   "allow_edit": "Fleet Supervisor",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Approved",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Recovered",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Waived",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Rejected",
+   "doc_status": "1",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  },
+  {
+   "doctype": "Workflow Document State",
+   "state": "Cancelled",
+   "doc_status": "2",
+   "allow_edit": "Fleet Manager",
+   "is_optional_state": 0
+  }
+ ],
+ "transitions": [
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Acknowledge",
+   "next_state": "Acknowledged",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Acknowledge",
+   "next_state": "Acknowledged",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Acknowledge",
+   "next_state": "Acknowledged",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "System Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Acknowledged",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Acknowledged",
+   "action": "Approve",
+   "next_state": "Approved",
+   "allowed": "System Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Open",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "System Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Acknowledged",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Acknowledged",
+   "action": "Reject",
+   "next_state": "Rejected",
+   "allowed": "System Manager",
+   "allow_self_approval": 0,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Recover",
+   "next_state": "Recovered",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Recover",
+   "next_state": "Recovered",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Waive",
+   "next_state": "Waived",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Waive",
+   "next_state": "Waived",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "Fleet Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Approved",
+   "action": "Cancel",
+   "next_state": "Cancelled",
+   "allowed": "System Manager",
+   "allow_self_approval": 1,
+   "condition": ""
+  }
+ ]
+}
