@@ -94,6 +94,7 @@ def get_building_grid(building: str) -> dict:
             Bed.room,
             Bed.status.as_("bed_status"),
             Bed.condition,
+            Bed.is_temporary,
             Room.floor.as_("room_floor"),
             Room.room_type.as_("room_type"),
             Room.readiness_status.as_("readiness_status"),
@@ -164,6 +165,7 @@ def get_building_grid(building: str) -> dict:
             "bed_code": bed.bed_code,
             "bed_status": bed.bed_status,
             "condition": bed.condition,
+            "is_temporary": bed.is_temporary,
             "bed_color": color,
             "occupant": occupant,
         }

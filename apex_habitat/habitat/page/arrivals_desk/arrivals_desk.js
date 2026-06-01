@@ -44,8 +44,13 @@ class ArrivalsDesk {
 		// Body: floor-map (left) + worker rail (right).
 		this.$body = $('<div class="ax-body"></div>').appendTo(this.$root);
 		this.$floor = $('<div class="ax-floor"></div>').appendTo(this.$body);
-		// Delegated: a click on a FREE bed houses the active worker (Batch 3).
+		// Delegated: a click on a FREE bed houses the active worker (Batch 3); the
+		// per-room over-capacity button mints a temporary bed (Batch 3b).
 		this.$floor.on('click', '.ax-bed', (e) => this._on_bed_click(e));
+		this.$floor.on('click', '.ax-room-oc', (e) => {
+			e.stopPropagation();
+			this._house_over_capacity($(e.currentTarget).attr('data-room'));
+		});
 		this.$rail = $('<aside class="ax-rail"></aside>').appendTo(this.$body);
 		this._build_rail();
 	}
@@ -300,6 +305,49 @@ class ArrivalsDesk {
 		});
 	}
 
+	_house_over_capacity(room) {
+		if (!this.active) {
+			frappe.show_alert({ message: __('Pick a worker first.'), indicator: 'orange' });
+			return;
+		}
+		if (!this.project) {
+			frappe.show_alert({ message: __('Pick a project first.'), indicator: 'orange' });
+			return;
+		}
+		const worker = this.active;
+		// Over-capacity is consequential, so confirm first — a guardrail, not a data
+		// form, so the page still has exactly one data modal (the passport register).
+		frappe.confirm(__('Room is full. House {0} in a temporary over-capacity bed?', [worker.label]), () => {
+			frappe.call({
+				method: 'apex_habitat.habitat.api.arrivals_desk.house_over_capacity',
+				args: {
+					room,
+					party_type: worker.party_type,
+					party: worker.party,
+					project: this.project,
+					check_in_date: frappe.datetime.get_today(),
+				},
+				freeze: true,
+				freeze_message: __('Housing over capacity…'),
+				callback: (r) => {
+					if (r.exc || !r.message) return;
+					frappe.show_alert({
+						message: __('Housed {0} in a temporary bed', [worker.label]),
+						indicator: 'green',
+					});
+					const dupe = this.cart.some(
+						(c) => c.party === worker.party && c.party_type === worker.party_type
+					);
+					if (!dupe) this.cart.push({ ...worker, bed: r.message.bed_code || r.message.bed, temp: true });
+					this.active = null;
+					this.$active.empty();
+					this._render_cart();
+					this.refresh();
+				},
+			});
+		});
+	}
+
 	_render_cart() {
 		this.$cart.empty();
 		if (!this.cart.length) return;
@@ -379,16 +427,24 @@ class ArrivalsDesk {
 			room.readiness_status && room.readiness_status !== 'Ready'
 				? ` · ${frappe.utils.escape_html(room.readiness_status)}`
 				: '';
+		// No free bed → offer over-capacity housing (a temporary bed within the
+		// building's overload headroom; the assignment enforces the cap).
+		const has_free = (room.beds || []).some((b) => b.bed_color === 'green');
+		const oc = has_free
+			? ''
+			: `<button class="ax-room-oc" data-room="${frappe.utils.escape_html(room.room || '')}" ` +
+			  `title="${__('House over capacity in a temporary bed')}">+ ${__('Over-capacity')}</button>`;
 		return (
 			`<div class="ax-room"><div class="ax-room-header">` +
 			`<span class="ax-room-number">${frappe.utils.escape_html(room.room_number || room.room || '')}</span>` +
 			`<span class="ax-room-meta">${occ}${readiness}</span></div>` +
-			`<div class="ax-beds">${beds}</div></div>`
+			`<div class="ax-beds">${beds}</div>${oc}</div>`
 		);
 	}
 
 	_bed_html(bed) {
 		const color = bed.bed_color || 'grey';
+		const temp = bed.is_temporary ? ' ax-bed--temp' : ''; // virtual over-capacity bed
 		const occupant = bed.occupant
 			? `<span class="ax-bed-occupant">${frappe.utils.escape_html(
 					bed.occupant.employee_name || bed.occupant.employee || ''
@@ -399,7 +455,7 @@ class ArrivalsDesk {
 				? `<span class="ax-bed-badge" title="${__('Has custody')}">●</span>`
 				: '';
 		return (
-			`<div class="ax-bed ax-bed--${color}" data-bed="${frappe.utils.escape_html(bed.bed || '')}" ` +
+			`<div class="ax-bed ax-bed--${color}${temp}" data-bed="${frappe.utils.escape_html(bed.bed || '')}" ` +
 			`title="${frappe.utils.escape_html(bed.bed_code || '')}">` +
 			`<span class="ax-bed-code">${frappe.utils.escape_html(bed.bed_code || '')}</span>` +
 			`${occupant}${custody}</div>`

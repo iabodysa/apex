@@ -201,3 +201,45 @@ def register_temporary_worker(
         "label": doc.worker_name,
         "expiry_date": doc.expiry_date,
     }
+
+
+@frappe.whitelist(methods=["POST"])
+def house_over_capacity(room, party_type, party, project, check_in_date=None) -> dict:
+    """House a worker beyond a full room's physical capacity by minting a TEMPORARY
+    (virtual, ``is_temporary``) Accommodation Bed in the room and assigning to it.
+
+    The building's over-capacity headroom is enforced by Accommodation
+    Assignment.validate (building-level projected occupancy vs ``total_capacity``
+    and ``over_capacity_allowed``). quick_check_in performs no intermediate commit,
+    so when that gate rejects the assignment the whole request — including the
+    just-minted bed — rolls back. ``total_capacity`` is a stored building field and
+    is NOT inflated by the temporary bed, so the cap is measured against true
+    capacity. Each worker still gets his own bed, so the assignment bed-lock and
+    occupancy controllers are untouched.
+    """
+    from apex_habitat.habitat.api.front_desk import quick_check_in
+
+    frappe.has_permission("Accommodation Bed", "create", throw=True)
+    if not frappe.db.exists("Accommodation Room", room):
+        frappe.throw(_("Room {0} does not exist.").format(room))
+
+    n = frappe.db.count("Accommodation Bed", {"room": room, "is_temporary": 1}) + 1
+    bed = frappe.get_doc(
+        {
+            "doctype": "Accommodation Bed",
+            "room": room,
+            "bed_code": f"{room}-OC{n}",
+            "status": "Available",
+            "is_temporary": 1,
+        }
+    )
+    bed.insert()
+
+    result = quick_check_in(
+        bed=bed.name,
+        party_type=party_type,
+        party=party,
+        project=project,
+        check_in_date=check_in_date,
+    )
+    return {**result, "is_temporary": True, "bed_code": bed.bed_code}

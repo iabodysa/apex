@@ -357,6 +357,28 @@
 	font-size: 0.72rem;
 }
 
+/* ---- over-capacity: per-room button + the temporary (virtual) bed (Batch 3b) ---- */
+.arrivals-desk .ax-room-oc {
+	margin-top: 6px;
+	width: 100%;
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--ax-brand);
+	background: transparent;
+	border: 1px dashed var(--ax-brand);
+	border-radius: 6px;
+	padding: 3px 6px;
+	cursor: pointer;
+}
+.arrivals-desk .ax-room-oc:hover {
+	background: var(--ax-sand);
+}
+/* A temporary over-capacity bed is "not a real bed" — marked with a dashed outline. */
+.arrivals-desk .ax-bed--temp {
+	border: 2px dashed #fff;
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
 /* ---- responsive + reduced motion ---- */
 @media (max-width: 900px) {
 	.arrivals-desk .ax-body {

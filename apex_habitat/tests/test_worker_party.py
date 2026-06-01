@@ -290,6 +290,17 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn("party_type: worker.party_type", js)
         self.assertIn("this.cart", js)  # the session arrivals cart drives the later stages
 
+    def test_over_capacity_mints_temporary_bed(self):
+        with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
+            src = fh.read()
+        self.assertIn("def house_over_capacity(", src)
+        self.assertIn('"is_temporary": 1', src)  # the minted bed is flagged temporary
+        self.assertIn("quick_check_in", src)  # the cap is delegated to the assignment, not recomputed
+        # The grid must expose is_temporary so the floor-map can mark the virtual bed.
+        with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
+            grid = fh.read()
+        self.assertIn('"is_temporary": bed.is_temporary', grid)
+
 
 if __name__ == "__main__":
     unittest.main()
