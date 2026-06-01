@@ -42,5 +42,36 @@ class TestOrphanCleanup(unittest.TestCase):
             self.assertIn("workflow_utils.cleanup_orphaned_workflow_actions", fh.read())  # wired daily
 
 
+class TestActionInboxPage(unittest.TestCase):
+    PAGE = os.path.join(APP_ROOT, "apex_core", "page", "action_inbox")
+
+    def test_page_native_endpoints_no_modal(self):
+        with open(os.path.join(self.PAGE, "action_inbox.js"), encoding="utf-8") as fh:
+            js = fh.read()
+        self.assertIn("apex_habitat.apex_core.action_inbox.get_pending_actions", js)
+        self.assertIn("frappe.model.workflow.get_transitions", js)  # inline actions via native endpoints
+        self.assertIn("frappe.model.workflow.apply_workflow", js)
+        self.assertEqual(js.count("new frappe.ui.Dialog"), 0)  # inline, no modal
+
+    def test_page_no_orphan_dollar_refs(self):
+        import re
+
+        with open(os.path.join(self.PAGE, "action_inbox.js"), encoding="utf-8") as fh:
+            js = fh.read()
+        assigned = set(re.findall(r"this\.(\$[A-Za-z_]+)\s*=", js))
+        used = set(re.findall(r"this\.(\$[A-Za-z_]+)\b", js))
+        # $x appears only inside the rule's comment, not as a real container.
+        self.assertEqual((used - assigned) - {"$x"}, set(), "this.$ used but never created")
+
+    def test_page_json_standard_no_all_role(self):
+        import json
+
+        with open(os.path.join(self.PAGE, "action_inbox.json"), encoding="utf-8") as fh:
+            j = json.load(fh)
+        self.assertEqual(j["page_name"], "action-inbox")
+        self.assertEqual(j["standard"], "Yes")
+        self.assertNotIn("All", [r["role"] for r in j.get("roles", [])])
+
+
 if __name__ == "__main__":
     unittest.main()
