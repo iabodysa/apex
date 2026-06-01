@@ -335,6 +335,22 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn("def batch_issue_worker_links(", masar)
         self.assertIn("def masar_qr_data_uri(", masar)  # the QR helper is now public
 
+    def test_print_slips_terms_signature_and_qr(self):
+        with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
+            src = fh.read()
+        # Three signed print views (Jinja, no Print Format doctype) + embedded QR.
+        self.assertIn("def get_checkin_slip(", src)
+        self.assertIn("def get_custody_handover_slip(", src)
+        self.assertIn("masar_qr_data_uri(_worker_link", src)  # the worker QR is embedded in the slip
+        self.assertNotIn("#00844e", src)  # neutral print colours (de-branded)
+        with open(
+            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
+        ) as fh:
+            js = fh.read()
+        self.assertIn("_print_checkin", js)
+        self.assertIn("_print_custody", js)
+        self.assertIn("_print_all_cards", js)
+
     def test_transport_one_request_employees_only(self):
         with open(
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"

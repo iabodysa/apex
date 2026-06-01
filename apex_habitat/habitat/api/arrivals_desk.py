@@ -22,6 +22,11 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
+from apex_habitat.apex_core.doctype.masar_worker_token.masar_worker_token import (
+    _worker_link,
+    masar_qr_data_uri,
+)
+
 PARTY_EMPLOYEE = "Employee"
 PARTY_TEMPORARY_WORKER = "Temporary Worker"
 
@@ -56,7 +61,7 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         frappe.db.get_value(
             "Accommodation Assignment",
             {"party_type": party_type, "party": party, "docstatus": 1, "check_out_date": ["is", "not set"]},
-            ["name", "project", "building", "bed"],
+            ["name", "project", "building", "bed", "check_in_date"],
             as_dict=True,
         )
         or {}
@@ -97,6 +102,10 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         "current_building": assignment.get("building"),
         "current_bed": current_bed,
         "current_bed_code": current_bed_code,
+        # Formatted check-in date of the active assignment; null when not housed.
+        "check_in_date": (
+            frappe.utils.formatdate(assignment.get("check_in_date")) if assignment.get("check_in_date") else None
+        ),
         "has_housing": bool(current_bed),
         "custody_count": custody_count,
         "has_custody": bool(custody_count),
@@ -245,21 +254,45 @@ def house_over_capacity(room, party_type, party, project, check_in_date=None) ->
     return {**result, "is_temporary": True, "bed_code": bed.bed_code}
 
 
-# An on-demand welcome/arrival slip — a plain server-rendered card the desk opens in
-# a print window. NOT a Print Format doctype (the design asked for a print VIEW). Jinja
-# autoescapes every value, so the slip is safe with untrusted names.
+# ---------------------------------------------------------------------------
+# Printable slips — plain server-rendered HTML the desk opens in a print window.
+# These are deliberately NOT Print Format doctypes (the design asked for print
+# VIEWS the desk drives directly). Jinja autoescapes every value, so the slips
+# are safe with untrusted worker names. Neutral print colours throughout
+# (#1a1a2e heading, #555 muted, #ccc rules) — no brand colour, so they read
+# cleanly on a black-and-white office printer.
+# ---------------------------------------------------------------------------
+
+
+def _company_name() -> str:
+    """The operating company for slip headers: prefer the Habitat Settings single,
+    fall back to the global default company."""
+    return (
+        frappe.db.get_single_value("Habitat Settings", "company")
+        or frappe.defaults.get_global_default("company")
+        or ""
+    )
+
+
 ARRIVAL_SLIP_TEMPLATE = """
-<div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 24px auto;
-            border: 1px solid #ccc; border-radius: 8px; padding: 24px;">
-  <h2 style="color:#00844e; margin:0 0 4px;">Arrival Slip</h2>
-  <div style="color:#666; font-size:12px; margin-bottom:16px;">{{ company }} &middot; {{ today }}</div>
+<div class="ax-slip" style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 24px auto;
+            border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
+  <h2 style="color:#1a1a2e; margin:0 0 4px;">Arrival Slip</h2>
+  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company }} &middot; {{ today }}</div>
   <table style="width:100%; font-size:14px; border-collapse:collapse;">
-    <tr><td style="padding:4px 0; color:#666;">Worker</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
-    <tr><td style="padding:4px 0; color:#666;">Type</td><td style="padding:4px 0;">{{ party_type }}</td></tr>
-    <tr><td style="padding:4px 0; color:#666;">Building</td><td style="padding:4px 0;">{{ building }}</td></tr>
-    <tr><td style="padding:4px 0; color:#666;">Bed</td><td style="padding:4px 0; font-weight:bold;">{{ bed }}</td></tr>
-    <tr><td style="padding:4px 0; color:#666;">Project</td><td style="padding:4px 0;">{{ project }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">Worker</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">Type</td><td style="padding:4px 0;">{{ party_type }}</td></tr>
+    {% if designation %}<tr><td style="padding:4px 0; color:#555;">Designation</td><td style="padding:4px 0;">{{ designation }}</td></tr>{% endif %}
+    {% if passport_number %}<tr><td style="padding:4px 0; color:#555;">Passport</td><td style="padding:4px 0;">{{ passport_number }}</td></tr>{% endif %}
+    {% if iqama_number %}<tr><td style="padding:4px 0; color:#555;">Iqama</td><td style="padding:4px 0;">{{ iqama_number }}</td></tr>{% endif %}
+    {% if nationality %}<tr><td style="padding:4px 0; color:#555;">Nationality</td><td style="padding:4px 0;">{{ nationality }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">Building</td><td style="padding:4px 0;">{{ building }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">Bed</td><td style="padding:4px 0; font-weight:bold;">{{ bed }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">Project</td><td style="padding:4px 0;">{{ project }}</td></tr>
+    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">Check-in</td><td style="padding:4px 0;">{{ check_in_date }}</td></tr>{% endif %}
   </table>
+  {% if qr %}<div style="margin-top:16px;"><img src="{{ qr }}" style="width:120px;height:120px"></div>{% endif %}
+  <style>@media print { body { margin:0; } .ax-slip { border:none; margin:0; max-width:none; } }</style>
 </div>
 """
 
@@ -268,7 +301,11 @@ ARRIVAL_SLIP_TEMPLATE = """
 def get_arrival_slip(party_type, party) -> dict:
     """Render the on-demand arrival slip (HTML) for a housed worker. Reuses the
     party-aware get_arrival_card for identity + active housing, then renders the
-    slip template; the desk opens the HTML in a print window."""
+    slip template; the desk opens the HTML in a print window.
+
+    An Employee with an enabled Masar token gets his personal-link QR on the slip
+    plus his designation; a Temporary Worker gets his passport / Iqama / nationality
+    instead (and no QR — his Masar link issues only once he is registered)."""
     card = get_arrival_card(party_type=party_type, party=party)
     ctx = {
         "worker_name": card.get("worker_name") or card.get("party"),
@@ -276,7 +313,230 @@ def get_arrival_slip(party_type, party) -> dict:
         "building": card.get("current_building") or "",
         "bed": card.get("current_bed_code") or card.get("current_bed") or "",
         "project": card.get("project") or "",
-        "company": frappe.defaults.get_global_default("company") or "",
+        "check_in_date": card.get("check_in_date") or "",
+        "company": _company_name(),
         "today": frappe.utils.formatdate(frappe.utils.today()),
+        "designation": None,
+        "passport_number": None,
+        "iqama_number": None,
+        "nationality": None,
+        "qr": None,
     }
+
+    if party_type == PARTY_EMPLOYEE:
+        ctx["designation"] = frappe.db.get_value("Employee", party, "designation")
+        token = (
+            frappe.db.get_value("Masar Worker Token", {"employee": party}, ["token", "enabled"], as_dict=True)
+            or {}
+        )
+        if token.get("token") and token.get("enabled"):
+            ctx["qr"] = masar_qr_data_uri(_worker_link(token.get("token")))
+    elif party_type == PARTY_TEMPORARY_WORKER:
+        tw = (
+            frappe.db.get_value(
+                "Temporary Worker", party, ["passport_number", "iqama_number", "nationality"], as_dict=True
+            )
+            or {}
+        )
+        ctx["passport_number"] = tw.get("passport_number")
+        ctx["iqama_number"] = tw.get("iqama_number")
+        ctx["nationality"] = tw.get("nationality")
+
     return {"html": frappe.render_template(ARRIVAL_SLIP_TEMPLATE, ctx), "title": ctx["worker_name"]}
+
+
+# Standard housing terms acknowledged on check-in. English source strings only;
+# kept short and operational so the slip fits one page and reads at a glance.
+HOUSING_TERMS = [
+    "Keep the accommodation and shared areas clean and tidy.",
+    "No unauthorised guests or visitors are allowed in the accommodation.",
+    "Report any damage, fault, or maintenance issue to the supervisor immediately.",
+    "Comply with all fire, safety, and security rules and posted instructions.",
+    "Do not tamper with fire alarms, smoke detectors, or safety equipment.",
+    "Hand back all issued custody items in good condition on checkout.",
+]
+
+
+CHECKIN_SLIP_TEMPLATE = """
+<div class="ax-slip" style="font-family: Arial, Helvetica, sans-serif; max-width: 560px; margin: 24px auto;
+            border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
+  <h2 style="color:#1a1a2e; margin:0 0 4px;">Accommodation Check-in</h2>
+  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company }} &middot; {{ today }}</div>
+  <table style="width:100%; font-size:14px; border-collapse:collapse;">
+    <tr><td style="padding:4px 0; color:#555;">Worker</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">Type</td><td style="padding:4px 0;">{{ party_type }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">Building</td><td style="padding:4px 0;">{{ building }}</td></tr>
+    {% if address %}<tr><td style="padding:4px 0; color:#555;">Address</td><td style="padding:4px 0;">{{ address }}</td></tr>{% endif %}
+    {% if city %}<tr><td style="padding:4px 0; color:#555;">City</td><td style="padding:4px 0;">{{ city }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">Bed</td><td style="padding:4px 0; font-weight:bold;">{{ bed }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">Project</td><td style="padding:4px 0;">{{ project }}</td></tr>
+    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">Check-in</td><td style="padding:4px 0;">{{ check_in_date }}</td></tr>{% endif %}
+  </table>
+
+  <div style="margin-top:20px; border:1px solid #ccc; border-radius:6px; padding:14px 18px;">
+    <div style="font-weight:bold; margin-bottom:8px; color:#1a1a2e;">Housing Terms &amp; Conditions</div>
+    <ol style="margin:0; padding-left:18px; color:#1a1a2e; font-size:13px; line-height:1.6;">
+      {% for term in terms %}<li>{{ term }}</li>{% endfor %}
+    </ol>
+  </div>
+
+  <div style="margin-top:16px; font-size:13px; color:#1a1a2e;">
+    I have read and accept these terms and conditions.
+  </div>
+
+  <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
+    <tr>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Worker signature</td>
+      <td style="width:4%;"></td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Date</td>
+    </tr>
+  </table>
+  <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
+    <tr>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Supervisor signature</td>
+      <td style="width:4%;"></td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Date</td>
+    </tr>
+  </table>
+  <style>@media print { body { margin:0; } .ax-slip { border:none; margin:0; max-width:none; } }</style>
+</div>
+"""
+
+
+@frappe.whitelist()
+def get_checkin_slip(party_type, party) -> dict:
+    """Render the accommodation check-in acknowledgment slip (HTML) for a housed
+    worker: identity + bed + project + check-in date, the standard housing terms,
+    an acceptance line, and worker / supervisor signature lines. Reuses
+    get_arrival_card for identity and reads the building address/city for the
+    header. The desk opens the HTML in a print window."""
+    card = get_arrival_card(party_type=party_type, party=party)
+    building = card.get("current_building")
+    bldg = (
+        frappe.db.get_value("Accommodation Building", building, ["address", "city"], as_dict=True)
+        if building
+        else None
+    ) or {}
+    ctx = {
+        "worker_name": card.get("worker_name") or card.get("party"),
+        "party_type": party_type,
+        "building": building or "",
+        "address": bldg.get("address") or "",
+        "city": bldg.get("city") or "",
+        "bed": card.get("current_bed_code") or card.get("current_bed") or "",
+        "project": card.get("project") or "",
+        "check_in_date": card.get("check_in_date") or "",
+        "company": _company_name(),
+        "today": frappe.utils.formatdate(frappe.utils.today()),
+        "terms": HOUSING_TERMS,
+    }
+    return {"html": frappe.render_template(CHECKIN_SLIP_TEMPLATE, ctx), "title": ctx["worker_name"]}
+
+
+CUSTODY_HANDOVER_SLIP_TEMPLATE = """
+<div class="ax-slip" style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: 24px auto;
+            border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
+  <h2 style="color:#1a1a2e; margin:0 0 4px;">Custody Handover</h2>
+  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company }} &middot; {{ today }}</div>
+  <table style="width:100%; font-size:14px; border-collapse:collapse;">
+    <tr><td style="padding:4px 0; color:#555;">Issued to</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">Reference</td><td style="padding:4px 0;">{{ custody_issue }}</td></tr>
+    {% if building %}<tr><td style="padding:4px 0; color:#555;">Building</td><td style="padding:4px 0;">{{ building }}</td></tr>{% endif %}
+    {% if issue_date %}<tr><td style="padding:4px 0; color:#555;">Issue date</td><td style="padding:4px 0;">{{ issue_date }}</td></tr>{% endif %}
+  </table>
+
+  <table style="width:100%; margin-top:18px; font-size:13px; border-collapse:collapse;">
+    <thead>
+      <tr style="border-bottom:1px solid #555; text-align:left;">
+        <th style="padding:6px 4px; width:8%;">#</th>
+        <th style="padding:6px 4px;">Article</th>
+        <th style="padding:6px 4px; width:14%; text-align:right;">Qty</th>
+        {% if show_uom %}<th style="padding:6px 4px; width:18%;">UOM</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in items %}
+      <tr style="border-bottom:1px solid #ccc;">
+        <td style="padding:6px 4px;">{{ loop.index }}</td>
+        <td style="padding:6px 4px;">{{ row.article_name }}</td>
+        <td style="padding:6px 4px; text-align:right;">{{ row.qty }}</td>
+        {% if show_uom %}<td style="padding:6px 4px;">{{ row.uom }}</td>{% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div style="margin-top:16px; font-size:13px; color:#1a1a2e;">
+    I acknowledge that I have received the above items in good condition.
+  </div>
+
+  <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
+    <tr>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Worker signature</td>
+      <td style="width:4%;"></td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Date</td>
+    </tr>
+  </table>
+  <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
+    <tr>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Supervisor signature</td>
+      <td style="width:4%;"></td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Date</td>
+    </tr>
+  </table>
+  <style>@media print { body { margin:0; } .ax-slip { border:none; margin:0; max-width:none; } }</style>
+</div>
+"""
+
+
+@frappe.whitelist()
+def get_custody_handover_slip(custody_issue) -> dict:
+    """Render the custody-handover acknowledgment slip (HTML) for a Custody Issue:
+    a line-item table (article, qty, UOM), an acknowledgment line, and worker /
+    supervisor signature lines. Permission-gated on read of the specific Custody
+    Issue. The desk opens the HTML in a print window."""
+    frappe.has_permission("Custody Issue", "read", doc=custody_issue, throw=True)
+    doc = frappe.get_doc("Custody Issue", custody_issue)
+    if not doc.issued_to_employee:
+        frappe.throw(_("This Custody Issue has no issued-to Employee; nothing to hand over."))
+
+    worker_name = (
+        frappe.db.get_value("Employee", doc.issued_to_employee, "employee_name")
+        or doc.issued_to_name
+        or doc.issued_to_employee
+    )
+
+    # ONE bulk lookup of the article masters for name + unit of measure.
+    article_ids = list({row.article for row in doc.items if row.article})
+    masters = {}
+    if article_ids:
+        for a in frappe.get_all(
+            "Custody Article",
+            filters={"name": ["in", article_ids]},
+            fields=["name", "article_name", "unit_of_measure"],
+        ):
+            masters[a.name] = a
+
+    items = []
+    for row in doc.items:
+        m = masters.get(row.article, {})
+        items.append(
+            {
+                "article_name": row.article_name or m.get("article_name") or row.article,
+                "qty": row.qty,
+                "uom": m.get("unit_of_measure") or "",
+            }
+        )
+    show_uom = any(it["uom"] for it in items)
+
+    ctx = {
+        "worker_name": worker_name,
+        "custody_issue": doc.name,
+        "building": doc.building or "",
+        "issue_date": frappe.utils.formatdate(doc.issue_date) if doc.issue_date else "",
+        "company": _company_name(),
+        "today": frappe.utils.formatdate(frappe.utils.today()),
+        "items": items,
+        "show_uom": show_uom,
+    }
+    return {"html": frappe.render_template(CUSTODY_HANDOVER_SLIP_TEMPLATE, ctx), "title": worker_name}

@@ -410,12 +410,17 @@ class ArrivalsDesk {
 			.appendTo(this.$cart);
 		const $list = $('<div class="ax-cart-list"></div>').appendTo(this.$cart);
 		this.cart.forEach((c) => {
-			$('<div class="ax-cart-item"></div>')
+			const $item = $('<div class="ax-cart-item"></div>')
 				.html(
 					`<span class="ax-cart-name">${frappe.utils.escape_html(c.label || c.party)}</span>` +
 						`<span class="ax-cart-bed text-muted">${frappe.utils.escape_html(c.bed || '')}</span>`
 				)
 				.appendTo($list);
+			// Per-worker check-in acknowledgment slip (housing terms + signatures).
+			$('<button class="btn btn-xs btn-link ax-cart-checkin"></button>')
+				.text(__('Check-in slip'))
+				.on('click', () => this._print_checkin(c))
+				.appendTo($item);
 		});
 	}
 
@@ -443,6 +448,11 @@ class ArrivalsDesk {
 				.on('click', () => this._issue_group_qr())
 				.appendTo($card);
 		}
+		// ONE window with every cart member's arrival card (page-break between cards).
+		$('<button class="btn btn-sm btn-default ax-cards-all"></button>')
+			.text(__('Print arrival cards ({0})', [this.cart.length]))
+			.on('click', () => this._print_all_cards())
+			.appendTo($card);
 		this.$qrBlock = $('<div class="ax-qr-block"></div>').appendTo($card);
 		this._render_qr_block();
 		this._transport_section();
@@ -479,6 +489,11 @@ class ArrivalsDesk {
 		}
 		if (c._custody_issue) {
 			$('<span class="indicator-pill no-indicator-dot green"></span>').text(__('Issued')).appendTo($row);
+			// Print the signed custody-handover acknowledgment for this Custody Issue.
+			$('<button class="btn btn-xs btn-link ax-deck-handover"></button>')
+				.text(__('Print handover'))
+				.on('click', () => this._print_custody(c))
+				.appendTo($row);
 			return;
 		}
 		$('<button class="btn btn-sm btn-default ax-deck-btn"></button>')
@@ -639,24 +654,85 @@ class ArrivalsDesk {
 			});
 	}
 
+	// Open `html` in a fresh print window and trigger the browser print dialog.
+	// Shared by every printer (arrival slip, check-in slip, custody handover, the
+	// all-cards batch). Returns the window, or null if pop-ups were blocked.
+	_open_print(title, html) {
+		const w = window.open('', '_blank');
+		if (!w) {
+			frappe.show_alert({ message: __('Allow pop-ups to print the slip.'), indicator: 'orange' });
+			return null;
+		}
+		w.document.write(
+			`<html><head><title>${frappe.utils.escape_html(title || '')}</title></head>` +
+				`<body onload="window.print()">${html}</body></html>`
+		);
+		w.document.close();
+		return w;
+	}
+
 	_print_slip(c) {
 		frappe.call({
 			method: 'apex_habitat.habitat.api.arrivals_desk.get_arrival_slip',
 			args: { party_type: c.party_type, party: c.party },
 			callback: (r) => {
 				if (r.exc || !r.message) return;
-				const w = window.open('', '_blank');
-				if (!w) {
-					frappe.show_alert({ message: __('Allow pop-ups to print the slip.'), indicator: 'orange' });
-					return;
-				}
-				w.document.write(
-					`<html><head><title>${frappe.utils.escape_html(r.message.title || '')}</title></head>` +
-						`<body onload="window.print()">${r.message.html}</body></html>`
-				);
-				w.document.close();
+				this._open_print(r.message.title, r.message.html);
 			},
 		});
+	}
+
+	// Check-in acknowledgment slip (housing terms + worker/supervisor signatures).
+	_print_checkin(c) {
+		frappe.call({
+			method: 'apex_habitat.habitat.api.arrivals_desk.get_checkin_slip',
+			args: { party_type: c.party_type, party: c.party },
+			callback: (r) => {
+				if (r.exc || !r.message) return;
+				this._open_print(r.message.title, r.message.html);
+			},
+		});
+	}
+
+	// Custody handover slip for the Custody Issue posted this session for `c`.
+	_print_custody(c) {
+		if (!c._custody_issue) {
+			frappe.show_alert({ message: __('Issue custody first'), indicator: 'orange' });
+			return;
+		}
+		frappe.call({
+			method: 'apex_habitat.habitat.api.arrivals_desk.get_custody_handover_slip',
+			args: { custody_issue: c._custody_issue },
+			callback: (r) => {
+				if (r.exc || !r.message) return;
+				this._open_print(r.message.title, r.message.html);
+			},
+		});
+	}
+
+	// Print arrival cards for EVERY cart member in ONE window: fetch each slip,
+	// concatenate with a page-break between cards, then print once.
+	_print_all_cards() {
+		if (!this.cart.length) return;
+		const calls = this.cart.map((c) =>
+			frappe.call({
+				method: 'apex_habitat.habitat.api.arrivals_desk.get_arrival_slip',
+				args: { party_type: c.party_type, party: c.party },
+			})
+		);
+		frappe.dom.freeze(__('Building arrival cards…'));
+		// Promise.all returns a NATIVE promise (no jQuery .always) — unfreeze in a
+		// terminal .then so it runs on both success and failure.
+		Promise.all(calls)
+			.then((results) => {
+				const html = (results || [])
+					.filter((r) => r && r.message && r.message.html)
+					.map((r) => r.message.html)
+					.join('<div style="page-break-after:always"></div>');
+				if (html) this._open_print(__('Arrival Cards'), html);
+			})
+			.catch(() => {})
+			.then(() => frappe.dom.unfreeze());
 	}
 
 	_transport_section() {
