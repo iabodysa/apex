@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.35.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.35.0 — a Unified Action Inbox: one screen of only the documents awaiting your action (workflow approvals + your tasks), with inline Approve/Reject and a nightly cleanup of stale rows",
+        "app_name": "apex_habitat",
+        "link": "/app/action-inbox",
+        "creation": "2026-08-02 09:00:00",
+    },
     # v1.34.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.34.0 — the Arrivals Desk is reworked from desk feedback: native Frappe styling, a full-width three-column layout, a multi-item custody store, one group QR (no pop-up), and signed check-in / custody / arrival-card prints with an embedded QR",

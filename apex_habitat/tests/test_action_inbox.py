@@ -72,6 +72,16 @@ class TestActionInboxPage(unittest.TestCase):
         self.assertEqual(j["standard"], "Yes")
         self.assertNotIn("All", [r["role"] for r in j.get("roles", [])])
 
+    def test_page_wired_into_workspace(self):
+        import json
+
+        with open(
+            os.path.join(APP_ROOT, "apex_core", "workspace", "apex_core", "apex_core.json"), encoding="utf-8"
+        ) as fh:
+            ws = json.load(fh)
+        self.assertTrue(any(s.get("link_to") == "action-inbox" for s in ws.get("shortcuts", [])))
+        self.assertIn("acScActionInbox", ws.get("content", ""))  # also placed in the content layout
+
 
 if __name__ == "__main__":
     unittest.main()
