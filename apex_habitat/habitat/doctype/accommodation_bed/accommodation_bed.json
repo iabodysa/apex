@@ -10,6 +10,7 @@
   "room",
   "bed_code",
   "status",
+  "is_temporary",
   "accommodation_bed_details_col",
   "condition",
   "last_inspected",
@@ -54,6 +55,16 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Available\nOccupied\nOut of Service"
+  },
+  {
+   "default": "0",
+   "description": "A virtual over-capacity bed the Arrivals Desk creates when a room is full but the building's over-capacity headroom still allows another worker. Not a physical bed.",
+   "fieldname": "is_temporary",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Temporary (Over-Capacity) Bed",
+   "read_only": 1
   },
   {
    "fieldname": "accommodation_bed_details_col",

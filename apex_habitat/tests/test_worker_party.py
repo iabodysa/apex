@@ -234,5 +234,22 @@ class TestTemporaryWorkerLink(unittest.TestCase):
         )
 
 
+class TestArrivalsDeskGroundwork(unittest.TestCase):
+    """Batch 6 groundwork — party-aware housing endpoint + the over-capacity bed flag."""
+
+    def test_quick_check_in_is_party_aware(self):
+        with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
+            src = fh.read()
+        self.assertIn("party_type=None, party=None", src, "quick_check_in is not party-aware")
+        # The legacy `employee` alias must still be accepted (backward compatibility).
+        self.assertIn('party_type, party = "Employee", employee', src)
+
+    def test_bed_has_is_temporary_flag(self):
+        fields, _fo = _fields("habitat/doctype/accommodation_bed/accommodation_bed.json")
+        self.assertIn("is_temporary", fields, "Accommodation Bed missing is_temporary")
+        self.assertEqual(fields["is_temporary"]["fieldtype"], "Check")
+        self.assertTrue(fields["is_temporary"].get("read_only"), "is_temporary must be read-only")
+
+
 if __name__ == "__main__":
     unittest.main()

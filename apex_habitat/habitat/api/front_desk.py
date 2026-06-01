@@ -233,9 +233,9 @@ def get_employee_card(employee):
 
 
 @frappe.whitelist(methods=["POST"])
-def quick_check_in(bed, employee, project, check_in_date,
+def quick_check_in(bed, employee=None, project=None, check_in_date=None,
                    cost_center=None, assignment_type="New Assignment",
-                   room_condition_snapshot=None):
+                   room_condition_snapshot=None, party_type=None, party=None):
     """Create and submit an Accommodation Assignment from the Front Desk board.
 
     Room and building are derived SERVER-SIDE from the bed (never trusted from
@@ -264,6 +264,14 @@ def quick_check_in(bed, employee, project, check_in_date,
     frappe.has_permission("Accommodation Assignment", "create", throw=True)
     frappe.has_permission("Accommodation Assignment", "submit", throw=True)
 
+    # party_type/party (Employee | Temporary Worker) is the native identity; a bare
+    # `employee` stays a legacy alias for an Employee party. The Assignment's
+    # before_validate (sync_party_employee) mirrors `employee` from the party, so a
+    # Temporary Worker is housed with an empty employee (the cost engine skips him
+    # until he is linked).
+    if not party and employee:
+        party_type, party = "Employee", employee
+
     room, building = frappe.db.get_value("Accommodation Bed", bed, ["room", "building"])
     if not room or not building:
         frappe.throw(_("Bed {0} is not linked to a room and building.").format(bed))
@@ -274,7 +282,8 @@ def quick_check_in(bed, employee, project, check_in_date,
             "bed": bed,
             "room": room,
             "building": building,
-            "employee": employee,
+            "party_type": party_type,
+            "party": party,
             "project": project,
             "check_in_date": check_in_date,
             "cost_center": cost_center,
@@ -284,7 +293,13 @@ def quick_check_in(bed, employee, project, check_in_date,
     )
     doc.insert(ignore_permissions=False)
     doc.submit()
-    return {"assignment": doc.name, "bed": bed}
+    return {
+        "assignment": doc.name,
+        "bed": bed,
+        "party_type": doc.party_type,
+        "party": doc.party,
+        "employee": doc.employee,
+    }
 
 
 @frappe.whitelist(methods=["POST"])
