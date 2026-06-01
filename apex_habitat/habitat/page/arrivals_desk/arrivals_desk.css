@@ -89,6 +89,13 @@
 	color: var(--ad-bed-free-text);
 }
 
+.arrivals-desk .ax-stages {
+	flex: 1 1 100%;
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
 /* ---- floor-map ---- */
 .arrivals-desk .ax-floor {
 	flex: 1 1 auto;

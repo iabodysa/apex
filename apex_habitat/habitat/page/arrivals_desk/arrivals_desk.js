@@ -52,6 +52,7 @@ class ArrivalsDesk {
 		this.$floorZone = $('<section class="ax-zone ax-zone-floor"></section>').appendTo(this.$body);
 		this.$anchor = $('<div class="ax-anchor"></div>').appendTo(this.$floorZone);
 		this.$capacity = $('<div class="ax-capacity"></div>').appendTo(this.$anchor);
+		this.$stages = $('<div class="ax-stages"></div>').appendTo(this.$anchor); // 5-stage progress pills
 		this.$floor = $('<div class="ax-floor"></div>').appendTo(this.$floorZone);
 		// Delegated: a click on a FREE bed houses the active worker (Batch 3); the
 		// per-room over-capacity button mints a temporary bed (Batch 3b).
@@ -114,8 +115,14 @@ class ArrivalsDesk {
 		// Robust change wiring: an in-body Link control fires its value through both
 		// df.onchange AND the raw input events, so bind both to be sure a typed value
 		// or an autocomplete selection both take effect.
-		this.building_field.$input.on('change awesomplete-selectcomplete', () => this._on_building_change());
-		this.project_field.$input.on('change awesomplete-selectcomplete', () => this._on_project_change());
+		// df.onchange (above) is the primary path; also bind the raw input when present
+		// (typed value / autocomplete pick), guarded so a control lacking $input never throws.
+		if (this.building_field.$input) {
+			this.building_field.$input.on('change awesomplete-selectcomplete', () => this._on_building_change());
+		}
+		if (this.project_field.$input) {
+			this.project_field.$input.on('change awesomplete-selectcomplete', () => this._on_project_change());
+		}
 	}
 
 	_on_building_change() {

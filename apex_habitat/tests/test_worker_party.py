@@ -359,6 +359,20 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn("tw_names", src)  # resolved in one bulk Temporary Worker lookup
         self.assertIn("worker_name", src)
 
+    def test_arrivals_page_no_orphan_dollar_refs(self):
+        # Regression guard: every `this.$x` USED in the page must also be CREATED.
+        # (The v1.34.0 rebuild dropped the this.$stages creation → a load-time crash
+        # that node --check could not catch.)
+        import re
+
+        with open(
+            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
+        ) as fh:
+            js = fh.read()
+        assigned = set(re.findall(r"this\.(\$[A-Za-z_]+)\s*=", js))
+        used = set(re.findall(r"this\.(\$[A-Za-z_]+)\b", js))
+        self.assertEqual(used - assigned, set(), "this.$ refs used but never created")
+
     def test_transport_one_request_employees_only(self):
         with open(
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
