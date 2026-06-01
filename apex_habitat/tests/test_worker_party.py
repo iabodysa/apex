@@ -308,6 +308,11 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             js = fh.read()
         self.assertIn("apex_habitat.habitat.api.custody_kiosk.issue_cart", js)
         self.assertIn("Custody deferred", js)  # a Temporary Worker's custody is deferred, not posted
+        # Custody is a multi-item STORE cart (catalog + accumulate lines + issue once),
+        # not the old single-article get_list path.
+        self.assertIn("custody_kiosk.get_kiosk_catalog", js)
+        self.assertIn("_custody_lines", js)
+        self.assertNotIn("get_list('Custody Article'", js)
 
     def test_arrival_card_masar_link_and_print_slip(self):
         with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:

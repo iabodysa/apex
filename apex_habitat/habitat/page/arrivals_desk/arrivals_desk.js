@@ -122,11 +122,14 @@ class ArrivalsDesk {
 		const val = this.building_field.get_value();
 		if (val && val !== this.building) {
 			this.building = val;
+			this.catalog = null; // reload the custody catalog for the new building's store
 			this.refresh();
+			this._load_catalog();
 		} else if (!val && this.building) {
 			// Cleared: reset the building-scoped state back to the empty floor.
 			this.building = null;
 			this.grid = null;
+			this.catalog = null;
 			this._render_stages();
 			this._render_capacity(null);
 			this._render_empty(__('Pick a building to start the arrival.'));
@@ -421,7 +424,7 @@ class ArrivalsDesk {
 		this.$deck.empty();
 		this._render_stages();
 		if (!this.cart.length) return;
-		if (!this.articles) this._load_articles();
+		if (this.catalog == null) this._load_catalog();
 		const $cust = $('<section class="ax-deck-sec"></section>').appendTo(this.$deck);
 		$('<header class="ax-deck-head"></header>').text(__('Custody Handover')).appendTo($cust);
 		const $list = $('<div class="ax-deck-list"></div>').appendTo($cust);
@@ -434,15 +437,22 @@ class ArrivalsDesk {
 		this._transport_section();
 	}
 
-	_load_articles() {
-		this.articles = []; // mark as loading to avoid repeat fetches
-		frappe.db
-			.get_list('Custody Article', { fields: ['name'], limit: 200, order_by: 'name asc' })
-			.then((rows) => {
-				this.articles = rows.map((r) => r.name);
+	_load_catalog() {
+		// The building's custody catalog with live store balances (ONE bulk read,
+		// reused from the Custody Kiosk). null = not loaded; [] = loading/empty.
+		this.catalog = [];
+		if (!this.building) return;
+		frappe
+			.call({
+				method: 'apex_habitat.habitat.api.custody_kiosk.get_kiosk_catalog',
+				args: { building: this.building },
+			})
+			.then((r) => {
+				this.catalog = (r.message && r.message.articles) || [];
+				if (this.cart.length) this._render_deck(); // refill the selects now the catalog is in
 			})
 			.catch(() => {
-				this.articles = [];
+				this.catalog = [];
 			});
 	}
 
@@ -456,28 +466,60 @@ class ArrivalsDesk {
 				.appendTo($row);
 			return;
 		}
-		if (c._custody_done) {
+		if (c._custody_issue) {
 			$('<span class="indicator-pill no-indicator-dot green"></span>').text(__('Issued')).appendTo($row);
 			return;
 		}
 		$('<button class="btn btn-sm btn-default ax-deck-btn"></button>')
 			.text(__('Issue custody'))
-			.on('click', (e) => this._custody_inline($(e.currentTarget).closest('.ax-deck-row'), c))
+			.on('click', (e) => this._custody_cart($(e.currentTarget).closest('.ax-deck-row'), c))
 			.appendTo($row);
 	}
 
-	_custody_inline($row, c) {
-		if ($row.find('.ax-custody-form').length) return; // already open
+	// A per-Employee multi-item custody STORE cart: accumulate article+qty lines, then
+	// hand them over in ONE Custody Issue via custody_kiosk.issue_cart (feedback #4).
+	_custody_cart($row, c) {
+		if ($row.find('.ax-custody-cart').length) return; // already open
 		$row.find('.ax-deck-btn').remove();
-		const $form = $('<div class="ax-custody-form"></div>').appendTo($row);
-		const $sel = $('<select class="form-control form-control-sm ax-custody-article"></select>').appendTo($form);
+		c._custody_lines = c._custody_lines || [];
+		const $panel = $('<div class="ax-custody-cart"></div>').appendTo($row);
+		const $lines = $('<div class="ax-custody-lines"></div>').appendTo($panel);
+		const $add = $('<div class="ax-custody-add"></div>').appendTo($panel);
+		const $foot = $('<div class="ax-custody-foot"></div>').appendTo($panel);
+		const $issue = $('<button class="btn btn-sm btn-primary"></button>').appendTo($foot);
+
+		const $sel = $('<select class="form-control form-control-sm ax-custody-article"></select>').appendTo($add);
 		$('<option value=""></option>').text(__('Article…')).appendTo($sel);
-		(this.articles || []).forEach((a) => $('<option></option>').attr('value', a).text(a).appendTo($sel));
+		(this.catalog || []).forEach((a) => {
+			const bal = a.store_balance != null ? ` (${a.store_balance} ${a.uom || ''})` : '';
+			$('<option></option>')
+				.attr('value', a.article)
+				.text(`${a.article_name || a.article}${bal}`)
+				.appendTo($sel);
+		});
 		const $qty = $(
 			'<input type="number" class="form-control form-control-sm ax-custody-qty" min="1" value="1" />'
-		).appendTo($form);
-		$('<button class="btn btn-sm btn-primary"></button>')
-			.text(__('Issue'))
+		).appendTo($add);
+
+		const renderLines = () => {
+			$lines.empty();
+			c._custody_lines.forEach((l, i) => {
+				const $li = $('<div class="ax-custody-line"></div>').appendTo($lines);
+				$('<span></span>').text(`${l.qty} × ${l.label || l.article}`).appendTo($li);
+				$('<button class="btn btn-xs btn-link text-danger"></button>')
+					.text('×')
+					.attr('title', __('Remove'))
+					.on('click', () => {
+						c._custody_lines.splice(i, 1);
+						renderLines();
+					})
+					.appendTo($li);
+			});
+			$issue.text(__('Issue all ({0})', [c._custody_lines.length])).prop('disabled', !c._custody_lines.length);
+		};
+
+		$('<button class="btn btn-sm btn-default"></button>')
+			.text(__('Add'))
 			.on('click', () => {
 				const art = $sel.val();
 				const qty = parseInt($qty.val(), 10) || 1;
@@ -485,26 +527,38 @@ class ArrivalsDesk {
 					frappe.show_alert({ message: __('Pick an article.'), indicator: 'orange' });
 					return;
 				}
-				frappe.call({
-					method: 'apex_habitat.habitat.api.custody_kiosk.issue_cart',
-					args: {
-						employee: c.party, // an Employee party — issue_cart posts to his ledger
-						building: this.building,
-						items_json: JSON.stringify([{ article: art, qty }]),
-					},
-					freeze: true,
-					freeze_message: __('Issuing custody…'),
-					callback: (r) => {
-						if (r.exc || !r.message) return;
-						c._custody_done = true;
-						this.custodyIssued = true;
-						frappe.show_alert({ message: __('Custody issued to {0}', [c.label]), indicator: 'green' });
-						this._render_stages();
-						this._render_deck();
-					},
-				});
+				const label = $sel.find('option:selected').text();
+				const existing = c._custody_lines.find((l) => l.article === art);
+				if (existing) existing.qty += qty;
+				else c._custody_lines.push({ article: art, label, qty });
+				$sel.val('');
+				$qty.val(1);
+				renderLines();
 			})
-			.appendTo($form);
+			.appendTo($add);
+
+		$issue.on('click', () => {
+			if (!c._custody_lines.length) return;
+			frappe.call({
+				method: 'apex_habitat.habitat.api.custody_kiosk.issue_cart',
+				args: {
+					employee: c.party, // an Employee party — issue_cart posts to his ledger
+					building: this.building,
+					items_json: JSON.stringify(c._custody_lines.map((l) => ({ article: l.article, qty: l.qty }))),
+				},
+				freeze: true,
+				freeze_message: __('Issuing custody…'),
+				callback: (r) => {
+					if (r.exc || !r.message) return;
+					c._custody_issue = r.message.custody_issue; // kept for the handover print (later)
+					this.custodyIssued = true;
+					frappe.show_alert({ message: __('Custody issued to {0}', [c.label]), indicator: 'green' });
+					this._render_stages();
+					this._render_deck();
+				},
+			});
+		});
+		renderLines();
 	}
 
 	_card_row($list, c) {
