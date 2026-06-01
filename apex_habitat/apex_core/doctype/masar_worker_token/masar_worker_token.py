@@ -95,13 +95,39 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
         "enabled": bool(doc.enabled),
         "token": doc.token,
         "link": link,
-        "qr": _qr_data_uri(link),
+        "qr": masar_qr_data_uri(link),
         # Worker phone for the optional WhatsApp share (browser-only wa.me link).
         "phone": frappe.db.get_value("Employee", doc.employee, "cell_number"),
     }
 
 
-def _qr_data_uri(text: str):
+@frappe.whitelist(methods=["POST"])
+def batch_issue_worker_links(employees_json) -> list:
+    """Issue (or fetch) the Masar link + QR for several Employees in ONE call — the
+    Arrivals Desk group-QR action. Same per-worker behaviour as issue_worker_link
+    (mints a token when missing), permission-checked once. Returns one row per
+    Employee: ``{employee, employee_name, link, qr, phone}``."""
+    frappe.has_permission("Masar Worker Token", "write", throw=True)
+    employees = frappe.parse_json(employees_json) or []
+    out = []
+    for emp in employees:
+        doc = get_or_create_for_employee(emp)
+        if not doc.token:
+            doc.regenerate()
+        link = _worker_link(doc.token)
+        out.append(
+            {
+                "employee": doc.employee,
+                "employee_name": doc.employee_name,
+                "link": link,
+                "qr": masar_qr_data_uri(link),
+                "phone": frappe.db.get_value("Employee", doc.employee, "cell_number"),
+            }
+        )
+    return out
+
+
+def masar_qr_data_uri(text: str):
     """Render ``text`` as a base64 SVG data-URI QR, or None if unavailable.
 
     Uses ``pyqrcode`` (bundled with Frappe — ``frappe.twofactor`` relies on it;

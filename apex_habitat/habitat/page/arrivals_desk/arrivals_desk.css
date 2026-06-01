@@ -446,6 +446,40 @@
 	width: 100%;
 }
 
+/* ---- group QR (inline, no dialog) ---- */
+.arrivals-desk .ax-qr-all {
+	width: 100%;
+	margin-top: 6px;
+}
+.arrivals-desk .ax-qr-block {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 8px;
+}
+.arrivals-desk .ax-qr-item {
+	border: 1px solid var(--border-color, #d1d8dd);
+	border-radius: var(--border-radius, 6px);
+	padding: 8px;
+	text-align: center;
+	background: var(--card-bg, #fff);
+}
+.arrivals-desk .ax-qr-name {
+	font-weight: 600;
+	font-size: var(--text-sm);
+	margin-bottom: 4px;
+}
+.arrivals-desk .ax-qr-img {
+	width: 120px;
+	height: 120px;
+}
+.arrivals-desk .ax-qr-link {
+	display: block;
+	font-size: var(--text-xs);
+	word-break: break-all;
+	margin-top: 4px;
+}
+
 /* ---- transport + bed keyboard focus (Batch 5) ---- */
 .arrivals-desk .ax-tr-row {
 	cursor: pointer;

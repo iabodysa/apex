@@ -323,8 +323,17 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
         ) as fh:
             js = fh.read()
-        self.assertIn("issue_worker_link", js)  # the Masar QR is reused for Employees
+        # Group QR (one call for all housed Employees, no per-worker call, no popup).
+        self.assertIn("batch_issue_worker_links", js)
+        self.assertNotIn("show_worker_link_dialog", js)
         self.assertIn("get_arrival_slip", js)
+        with open(
+            os.path.join(APP_ROOT, "apex_core", "doctype", "masar_worker_token", "masar_worker_token.py"),
+            encoding="utf-8",
+        ) as fh:
+            masar = fh.read()
+        self.assertIn("def batch_issue_worker_links(", masar)
+        self.assertIn("def masar_qr_data_uri(", masar)  # the QR helper is now public
 
     def test_transport_one_request_employees_only(self):
         with open(

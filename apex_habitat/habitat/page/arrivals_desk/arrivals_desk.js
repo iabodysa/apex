@@ -429,11 +429,22 @@ class ArrivalsDesk {
 		$('<header class="ax-deck-head"></header>').text(__('Custody Handover')).appendTo($cust);
 		const $list = $('<div class="ax-deck-list"></div>').appendTo($cust);
 		this.cart.forEach((c) => this._custody_row($list, c));
-		// Arrival Card (Zone F): Masar link (Employee) + on-demand print slip (all).
+		// Arrival Card (Zone F): a no-popup GROUP QR + on-demand print slip.
 		const $card = $('<section class="ax-deck-sec"></section>').appendTo(this.$deck);
 		$('<header class="ax-deck-head"></header>').text(__('Arrival Card')).appendTo($card);
 		const $clist = $('<div class="ax-deck-list"></div>').appendTo($card);
 		this.cart.forEach((c) => this._card_row($clist, c));
+		// ONE group action issues the Masar QR for every not-yet-issued Employee at once
+		// and renders them inline — no per-worker button, no dialog (feedback #8,#9).
+		const pendingQr = this.cart.filter((c) => c.party_type === 'Employee' && !c._card_done);
+		if (pendingQr.length) {
+			$('<button class="btn btn-sm btn-default ax-qr-all"></button>')
+				.text(__('Create QR for all ({0})', [pendingQr.length]))
+				.on('click', () => this._issue_group_qr())
+				.appendTo($card);
+		}
+		this.$qrBlock = $('<div class="ax-qr-block"></div>').appendTo($card);
+		this._render_qr_block();
 		this._transport_section();
 	}
 
@@ -565,10 +576,9 @@ class ArrivalsDesk {
 		const $row = $('<div class="ax-deck-row"></div>').appendTo($list);
 		$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
 		if (c.party_type === 'Employee') {
-			$('<button class="btn btn-sm btn-default"></button>')
-				.text(c._card_done ? __('Link issued') : __('Masar link'))
-				.on('click', () => this._issue_masar(c))
-				.appendTo($row);
+			if (c._card_done) {
+				$('<span class="indicator-pill no-indicator-dot green"></span>').text(__('QR issued')).appendTo($row);
+			}
 		} else {
 			// A Temporary Worker's Masar link issues once he is registered as an Employee.
 			$('<span class="indicator-pill no-indicator-dot orange"></span>')
@@ -581,22 +591,52 @@ class ArrivalsDesk {
 			.appendTo($row);
 	}
 
-	_issue_masar(c) {
+	// Group QR (feedback #8,#9): issue every not-yet-issued Employee's Masar link in
+	// ONE call and render the codes inline — no per-worker button, no popup dialog.
+	_issue_group_qr() {
+		const employees = this.cart
+			.filter((c) => c.party_type === 'Employee' && !c._card_done)
+			.map((c) => c.party);
+		if (!employees.length) return;
 		frappe.call({
-			method: 'apex_habitat.apex_core.doctype.masar_worker_token.masar_worker_token.issue_worker_link',
-			args: { employee: c.party, regenerate: 0 },
+			method: 'apex_habitat.apex_core.doctype.masar_worker_token.masar_worker_token.batch_issue_worker_links',
+			args: { employees_json: JSON.stringify(employees) },
 			freeze: true,
-			freeze_message: __('Issuing worker link…'),
+			freeze_message: __('Creating QR codes…'),
 			callback: (r) => {
 				if (r.exc || !r.message) return;
-				c._card_done = true;
+				(r.message || []).forEach((m) => {
+					const c = this.cart.find((x) => x.party_type === 'Employee' && x.party === m.employee);
+					if (c) {
+						c._card_done = true;
+						c._card_qr = m; // {link, qr, phone} — rendered inline, never in a dialog
+					}
+				});
 				this.cardIssued = true;
-				// Shared helper from public/js/masar_worker_link.bundle.js (app_include_js).
-				apex_habitat.masar.show_worker_link_dialog(r.message, { copy_link: true });
+				frappe.show_alert({
+					message: __('QR created for {0} worker(s)', [r.message.length]),
+					indicator: 'green',
+				});
 				this._render_stages();
 				this._render_deck();
 			},
 		});
+	}
+
+	_render_qr_block() {
+		this.$qrBlock.empty();
+		this.cart
+			.filter((c) => c._card_qr)
+			.forEach((c) => {
+				const m = c._card_qr;
+				const $item = $('<div class="ax-qr-item"></div>').appendTo(this.$qrBlock);
+				$('<div class="ax-qr-name"></div>').text(c.label || c.party).appendTo($item);
+				if (m.qr) $('<img class="ax-qr-img" alt="QR" />').attr('src', m.qr).appendTo($item);
+				$('<a class="ax-qr-link" target="_blank" rel="noopener"></a>')
+					.attr('href', m.link)
+					.text(m.link)
+					.appendTo($item);
+			});
 	}
 
 	_print_slip(c) {
