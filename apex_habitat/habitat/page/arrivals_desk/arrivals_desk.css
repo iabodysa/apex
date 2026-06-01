@@ -314,6 +314,49 @@
 	font-weight: 600;
 }
 
+/* ---- assign interaction: free beds are the housing target (Batch 3) ---- */
+.arrivals-desk .ax-bed--green {
+	cursor: pointer;
+}
+.arrivals-desk .ax-bed--green:hover {
+	outline: 2px solid var(--ax-brand-dark);
+	outline-offset: -2px;
+}
+
+/* ---- arrivals cart (Zone E) ---- */
+.arrivals-desk .ax-cart {
+	margin-top: 16px;
+}
+.arrivals-desk .ax-cart-title {
+	font-weight: 700;
+	color: var(--ax-brand-dark);
+	font-size: 0.85rem;
+	border-bottom: 1px solid var(--ax-sand);
+	padding-bottom: 4px;
+	margin-bottom: 6px;
+}
+.arrivals-desk .ax-cart-list {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+.arrivals-desk .ax-cart-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px;
+	padding: 4px 8px;
+	border-radius: 6px;
+	background: var(--control-bg, #f4f5f6);
+}
+.arrivals-desk .ax-cart-name {
+	font-weight: 600;
+	font-size: 0.8rem;
+}
+.arrivals-desk .ax-cart-bed {
+	font-size: 0.72rem;
+}
+
 /* ---- responsive + reduced motion ---- */
 @media (max-width: 900px) {
 	.arrivals-desk .ax-body {

@@ -280,6 +280,16 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         # The design allows exactly ONE modal in the whole page — the passport register.
         self.assertEqual(js.count("new frappe.ui.Dialog"), 1, "Arrivals Desk must keep exactly one modal")
 
+    def test_arrivals_page_houses_via_quick_check_in(self):
+        with open(
+            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
+        ) as fh:
+            js = fh.read()
+        # Housing reuses the Front Desk writer with the active worker's native party.
+        self.assertIn("apex_habitat.habitat.api.front_desk.quick_check_in", js)
+        self.assertIn("party_type: worker.party_type", js)
+        self.assertIn("this.cart", js)  # the session arrivals cart drives the later stages
+
 
 if __name__ == "__main__":
     unittest.main()

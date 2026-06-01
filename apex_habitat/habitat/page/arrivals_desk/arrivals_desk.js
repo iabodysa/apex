@@ -1,11 +1,15 @@
 // Arrivals Desk — "Anchor / Floor / Cart" single-screen worker check-in.
 //
-// Batch 1 (this file): the page shell + building ANCHOR (Zone A) + stage progress
-// strip (Zone B) + a READ-ONLY rooms/beds floor-map (Zone C), reusing the Front
-// Desk get_building_grid reader verbatim. The right rail (worker search, the
-// arrivals cart, custody handover, arrival card and transport) plus every write
-// land in later batches. Frappe desk library only; the AFMCO brand lives in the
-// scoped arrivals_desk.css.
+// Building-first desk: pick a building (Zone A) → a read-only rooms/beds floor-map
+// (Zone C) appears beside a worker rail. Search or register an arrival (Zone D /
+// the one passport modal), pick a free bed to house him (party-aware), and the
+// arrivals cart (Zone E) remembers everyone housed this session for the later
+// custody / card / transport stages. Frappe desk library only; the AFMCO brand
+// lives in the scoped arrivals_desk.css.
+//
+// Server is the source of truth: the floor-map reuses front_desk.get_building_grid
+// (server-computed bed colour) and housing reuses front_desk.quick_check_in. After
+// every write we RE-FETCH the grid rather than mutating tiles optimistically.
 
 frappe.pages['arrivals-desk'].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -20,7 +24,10 @@ class ArrivalsDesk {
 	constructor(page) {
 		this.page = page;
 		this.building = null;
+		this.project = null;
 		this.grid = null;
+		this.active = null; // the worker currently being processed (party_type + party)
+		this.cart = []; // workers housed in this arrival session (Zone E)
 		this._build_skeleton();
 		this._setup_anchor();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
@@ -33,12 +40,13 @@ class ArrivalsDesk {
 		this.$head = $('<div class="ax-head"></div>').appendTo(this.$root);
 		this.$capacity = $('<div class="ax-capacity"></div>').appendTo(this.$head);
 		this.$stages = $('<div class="ax-stages"></div>').appendTo(this.$head);
-		this._render_stages(false);
-		// Body: floor-map (left) + reserved right rail (filled in later batches).
+		this._render_stages();
+		// Body: floor-map (left) + worker rail (right).
 		this.$body = $('<div class="ax-body"></div>').appendTo(this.$root);
 		this.$floor = $('<div class="ax-floor"></div>').appendTo(this.$body);
+		// Delegated: a click on a FREE bed houses the active worker (Batch 3).
+		this.$floor.on('click', '.ax-bed', (e) => this._on_bed_click(e));
 		this.$rail = $('<aside class="ax-rail"></aside>').appendTo(this.$body);
-		this.active = null; // the worker currently being processed (party_type + party)
 		this._build_rail();
 	}
 
@@ -56,10 +64,21 @@ class ArrivalsDesk {
 				} else if (!val && this.building) {
 					this.building = null;
 					this.grid = null;
-					this._render_stages(false);
+					this._render_stages();
 					this._render_capacity(null);
 					this._render_empty(__('Pick a building to start the arrival.'));
 				}
+			},
+		});
+		// Second anchor: the session project. House actions stamp this project, so
+		// the supervisor sets it once for the batch of arrivals (low friction).
+		this.project_field = this.page.add_field({
+			fieldname: 'project',
+			label: __('Project'),
+			fieldtype: 'Link',
+			options: 'Project',
+			change: () => {
+				this.project = this.project_field.get_value() || null;
 			},
 		});
 	}
@@ -95,8 +114,10 @@ class ArrivalsDesk {
 		).appendTo($search);
 		this.$results = $('<div class="ax-results"></div>').appendTo($search);
 		this.$active = $('<div class="ax-active"></div>').appendTo(this.$rail);
+		this.$cart = $('<div class="ax-cart"></div>').appendTo(this.$rail);
 		this.$search_input.on('input', frappe.utils.debounce(() => this._search(), 250));
 		this._render_results(null);
+		this._render_cart();
 	}
 
 	_search() {
@@ -204,7 +225,13 @@ class ArrivalsDesk {
 					options: 'Accommodation Building',
 					default: this.building,
 				},
-				{ fieldname: 'project', label: __('Project'), fieldtype: 'Link', options: 'Project' },
+				{
+					fieldname: 'project',
+					label: __('Project'),
+					fieldtype: 'Link',
+					options: 'Project',
+					default: this.project,
+				},
 				{ fieldname: 'cb2', fieldtype: 'Column Break' },
 				{ fieldname: 'cell_number', label: __('Cell Number'), fieldtype: 'Data' },
 				{ fieldname: 'iqama_number', label: __('Iqama Number (if any)'), fieldtype: 'Data' },
@@ -229,6 +256,67 @@ class ArrivalsDesk {
 		d.show();
 	}
 
+	// ---------- assign interaction + arrivals cart (Batch 3) ----------
+	_on_bed_click(e) {
+		const $bed = $(e.currentTarget);
+		if (!$bed.hasClass('ax-bed--green')) return; // only free beds house (over-capacity is a later step)
+		if (!this.active) {
+			frappe.show_alert({ message: __('Pick a worker first.'), indicator: 'orange' });
+			return;
+		}
+		if (!this.project) {
+			frappe.show_alert({ message: __('Pick a project first.'), indicator: 'orange' });
+			return;
+		}
+		this._house_in_bed($bed.attr('data-bed'));
+	}
+
+	_house_in_bed(bed) {
+		const worker = this.active;
+		frappe.call({
+			method: 'apex_habitat.habitat.api.front_desk.quick_check_in',
+			args: {
+				bed,
+				party_type: worker.party_type,
+				party: worker.party,
+				project: this.project,
+				check_in_date: frappe.datetime.get_today(),
+			},
+			freeze: true,
+			freeze_message: __('Housing…'),
+			callback: (r) => {
+				if (r.exc || !r.message) return;
+				frappe.show_alert({ message: __('Housed {0}', [worker.label]), indicator: 'green' });
+				// Remember in the session cart (dedupe by party) for the later stages.
+				const dupe = this.cart.some(
+					(c) => c.party === worker.party && c.party_type === worker.party_type
+				);
+				if (!dupe) this.cart.push({ ...worker, bed: r.message.bed || bed });
+				this.active = null;
+				this.$active.empty();
+				this._render_cart();
+				this.refresh(); // re-fetch the grid → the bed turns red, counts + stages update
+			},
+		});
+	}
+
+	_render_cart() {
+		this.$cart.empty();
+		if (!this.cart.length) return;
+		$('<div class="ax-cart-title"></div>')
+			.text(__('Arrived this session ({0})', [this.cart.length]))
+			.appendTo(this.$cart);
+		const $list = $('<div class="ax-cart-list"></div>').appendTo(this.$cart);
+		this.cart.forEach((c) => {
+			$('<div class="ax-cart-item"></div>')
+				.html(
+					`<span class="ax-cart-name">${frappe.utils.escape_html(c.label || c.party)}</span>` +
+						`<span class="ax-cart-bed text-muted">${frappe.utils.escape_html(c.bed || '')}</span>`
+				)
+				.appendTo($list);
+		});
+	}
+
 	// ---------- render ----------
 	_render_capacity(grid) {
 		if (!grid) {
@@ -243,10 +331,11 @@ class ArrivalsDesk {
 		);
 	}
 
-	_render_stages(building_done) {
+	_render_stages() {
+		const housed = this.cart.length > 0;
 		const chips = [
-			['building', __('Building'), building_done],
-			['housed', __('Housed'), false],
+			['building', __('Building'), !!this.building],
+			['housed', __('Housed'), housed],
 			['custody', __('Custody'), false],
 			['card', __('Card'), false],
 			['transport', __('Transport'), false],
@@ -264,7 +353,7 @@ class ArrivalsDesk {
 
 	_render_grid(grid) {
 		this._render_capacity(grid);
-		this._render_stages(true);
+		this._render_stages();
 		if (!grid || !(grid.floors || []).length) {
 			this._render_empty(__('This building has no rooms or beds yet.'));
 			return;
