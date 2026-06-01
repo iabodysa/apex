@@ -250,6 +250,16 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertEqual(fields["is_temporary"]["fieldtype"], "Check")
         self.assertTrue(fields["is_temporary"].get("read_only"), "is_temporary must be read-only")
 
+    def test_arrivals_endpoints_party_aware(self):
+        with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
+            src = fh.read()
+        self.assertIn("def get_arrival_card(party_type=None, party=None, employee=None)", src)
+        self.assertIn("def search_arrivals_workers(", src)
+        self.assertIn("def register_temporary_worker(", src)
+        # The supervisor may register ONLY a Temporary Worker — never an Employee.
+        self.assertIn('"doctype": "Temporary Worker"', src)
+        self.assertNotIn('"doctype": "Employee"', src)
+
 
 if __name__ == "__main__":
     unittest.main()
