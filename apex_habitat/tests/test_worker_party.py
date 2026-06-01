@@ -301,6 +301,14 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             grid = fh.read()
         self.assertIn('"is_temporary": bed.is_temporary', grid)
 
+    def test_arrivals_page_custody_defers_temporary_worker(self):
+        with open(
+            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
+        ) as fh:
+            js = fh.read()
+        self.assertIn("apex_habitat.habitat.api.custody_kiosk.issue_cart", js)
+        self.assertIn("Custody deferred", js)  # a Temporary Worker's custody is deferred, not posted
+
 
 if __name__ == "__main__":
     unittest.main()

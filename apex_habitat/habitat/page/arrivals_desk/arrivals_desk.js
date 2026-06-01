@@ -28,6 +28,7 @@ class ArrivalsDesk {
 		this.grid = null;
 		this.active = null; // the worker currently being processed (party_type + party)
 		this.cart = []; // workers housed in this arrival session (Zone E)
+		this.custodyIssued = false; // any custody handed over this session (Zone F)
 		this._build_skeleton();
 		this._setup_anchor();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
@@ -120,6 +121,7 @@ class ArrivalsDesk {
 		this.$results = $('<div class="ax-results"></div>').appendTo($search);
 		this.$active = $('<div class="ax-active"></div>').appendTo(this.$rail);
 		this.$cart = $('<div class="ax-cart"></div>').appendTo(this.$rail);
+		this.$deck = $('<div class="ax-deck"></div>').appendTo(this.$rail); // stage deck (Zone F)
 		this.$search_input.on('input', frappe.utils.debounce(() => this._search(), 250));
 		this._render_results(null);
 		this._render_cart();
@@ -349,6 +351,7 @@ class ArrivalsDesk {
 	}
 
 	_render_cart() {
+		this._render_deck(); // the stage deck depends on the cart; refresh it alongside
 		this.$cart.empty();
 		if (!this.cart.length) return;
 		$('<div class="ax-cart-title"></div>')
@@ -363,6 +366,88 @@ class ArrivalsDesk {
 				)
 				.appendTo($list);
 		});
+	}
+
+	// ---------- stage deck: custody handover (Batch 4) ----------
+	_render_deck() {
+		this.$deck.empty();
+		if (!this.cart.length) return;
+		if (!this.articles) this._load_articles();
+		const $cust = $('<section class="ax-deck-sec"></section>').appendTo(this.$deck);
+		$('<header class="ax-deck-head"></header>').text(__('Custody Handover')).appendTo($cust);
+		const $list = $('<div class="ax-deck-list"></div>').appendTo($cust);
+		this.cart.forEach((c) => this._custody_row($list, c));
+	}
+
+	_load_articles() {
+		this.articles = []; // mark as loading to avoid repeat fetches
+		frappe.db
+			.get_list('Custody Article', { fields: ['name'], limit: 200, order_by: 'name asc' })
+			.then((rows) => {
+				this.articles = rows.map((r) => r.name);
+			})
+			.catch(() => {
+				this.articles = [];
+			});
+	}
+
+	_custody_row($list, c) {
+		const $row = $('<div class="ax-deck-row"></div>').appendTo($list);
+		$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
+		if (c.party_type === 'Temporary Worker') {
+			// TW custody is deferred until the Iqama links the Employee (no stock posting now).
+			$('<span class="ax-deferred"></span>').text(__('Custody deferred')).appendTo($row);
+			return;
+		}
+		if (c._custody_done) {
+			$('<span class="ax-deck-ok"></span>').text(__('Issued')).appendTo($row);
+			return;
+		}
+		$('<button class="btn btn-xs btn-default ax-deck-btn"></button>')
+			.text(__('Issue custody'))
+			.on('click', (e) => this._custody_inline($(e.currentTarget).closest('.ax-deck-row'), c))
+			.appendTo($row);
+	}
+
+	_custody_inline($row, c) {
+		if ($row.find('.ax-custody-form').length) return; // already open
+		$row.find('.ax-deck-btn').remove();
+		const $form = $('<div class="ax-custody-form"></div>').appendTo($row);
+		const $sel = $('<select class="form-control input-xs ax-custody-article"></select>').appendTo($form);
+		$('<option value=""></option>').text(__('Article…')).appendTo($sel);
+		(this.articles || []).forEach((a) => $('<option></option>').attr('value', a).text(a).appendTo($sel));
+		const $qty = $('<input type="number" class="form-control input-xs ax-custody-qty" min="1" value="1" />').appendTo(
+			$form
+		);
+		$('<button class="btn btn-xs btn-primary"></button>')
+			.text(__('Issue'))
+			.on('click', () => {
+				const art = $sel.val();
+				const qty = parseInt($qty.val(), 10) || 1;
+				if (!art) {
+					frappe.show_alert({ message: __('Pick an article.'), indicator: 'orange' });
+					return;
+				}
+				frappe.call({
+					method: 'apex_habitat.habitat.api.custody_kiosk.issue_cart',
+					args: {
+						employee: c.party, // an Employee party — issue_cart posts to his ledger
+						building: this.building,
+						items_json: JSON.stringify([{ article: art, qty }]),
+					},
+					freeze: true,
+					freeze_message: __('Issuing custody…'),
+					callback: (r) => {
+						if (r.exc || !r.message) return;
+						c._custody_done = true;
+						this.custodyIssued = true;
+						frappe.show_alert({ message: __('Custody issued to {0}', [c.label]), indicator: 'green' });
+						this._render_stages();
+						this._render_deck();
+					},
+				});
+			})
+			.appendTo($form);
 	}
 
 	// ---------- render ----------
@@ -384,7 +469,7 @@ class ArrivalsDesk {
 		const chips = [
 			['building', __('Building'), !!this.building],
 			['housed', __('Housed'), housed],
-			['custody', __('Custody'), false],
+			['custody', __('Custody'), this.custodyIssued],
 			['card', __('Card'), false],
 			['transport', __('Transport'), false],
 		];
