@@ -309,6 +309,18 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn("apex_habitat.habitat.api.custody_kiosk.issue_cart", js)
         self.assertIn("Custody deferred", js)  # a Temporary Worker's custody is deferred, not posted
 
+    def test_arrival_card_masar_link_and_print_slip(self):
+        with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
+            src = fh.read()
+        self.assertIn("def get_arrival_slip(", src)
+        self.assertIn("frappe.render_template", src)  # a print VIEW, not a Print Format doctype
+        with open(
+            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
+        ) as fh:
+            js = fh.read()
+        self.assertIn("issue_worker_link", js)  # the Masar QR is reused for Employees
+        self.assertIn("get_arrival_slip", js)
+
 
 if __name__ == "__main__":
     unittest.main()

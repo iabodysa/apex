@@ -243,3 +243,40 @@ def house_over_capacity(room, party_type, party, project, check_in_date=None) ->
         check_in_date=check_in_date,
     )
     return {**result, "is_temporary": True, "bed_code": bed.bed_code}
+
+
+# An on-demand welcome/arrival slip — a plain server-rendered card the desk opens in
+# a print window. NOT a Print Format doctype (the design asked for a print VIEW). Jinja
+# autoescapes every value, so the slip is safe with untrusted names.
+ARRIVAL_SLIP_TEMPLATE = """
+<div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 24px auto;
+            border: 1px solid #ccc; border-radius: 8px; padding: 24px;">
+  <h2 style="color:#00844e; margin:0 0 4px;">Arrival Slip</h2>
+  <div style="color:#666; font-size:12px; margin-bottom:16px;">{{ company }} &middot; {{ today }}</div>
+  <table style="width:100%; font-size:14px; border-collapse:collapse;">
+    <tr><td style="padding:4px 0; color:#666;">Worker</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
+    <tr><td style="padding:4px 0; color:#666;">Type</td><td style="padding:4px 0;">{{ party_type }}</td></tr>
+    <tr><td style="padding:4px 0; color:#666;">Building</td><td style="padding:4px 0;">{{ building }}</td></tr>
+    <tr><td style="padding:4px 0; color:#666;">Bed</td><td style="padding:4px 0; font-weight:bold;">{{ bed }}</td></tr>
+    <tr><td style="padding:4px 0; color:#666;">Project</td><td style="padding:4px 0;">{{ project }}</td></tr>
+  </table>
+</div>
+"""
+
+
+@frappe.whitelist()
+def get_arrival_slip(party_type, party) -> dict:
+    """Render the on-demand arrival slip (HTML) for a housed worker. Reuses the
+    party-aware get_arrival_card for identity + active housing, then renders the
+    slip template; the desk opens the HTML in a print window."""
+    card = get_arrival_card(party_type=party_type, party=party)
+    ctx = {
+        "worker_name": card.get("worker_name") or card.get("party"),
+        "party_type": party_type,
+        "building": card.get("current_building") or "",
+        "bed": card.get("current_bed_code") or card.get("current_bed") or "",
+        "project": card.get("project") or "",
+        "company": frappe.defaults.get_global_default("company") or "",
+        "today": frappe.utils.formatdate(frappe.utils.today()),
+    }
+    return {"html": frappe.render_template(ARRIVAL_SLIP_TEMPLATE, ctx), "title": ctx["worker_name"]}

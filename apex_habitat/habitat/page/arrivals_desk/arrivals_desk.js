@@ -29,6 +29,7 @@ class ArrivalsDesk {
 		this.active = null; // the worker currently being processed (party_type + party)
 		this.cart = []; // workers housed in this arrival session (Zone E)
 		this.custodyIssued = false; // any custody handed over this session (Zone F)
+		this.cardIssued = false; // any Masar arrival link issued this session (Zone F)
 		this._build_skeleton();
 		this._setup_anchor();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
@@ -377,6 +378,11 @@ class ArrivalsDesk {
 		$('<header class="ax-deck-head"></header>').text(__('Custody Handover')).appendTo($cust);
 		const $list = $('<div class="ax-deck-list"></div>').appendTo($cust);
 		this.cart.forEach((c) => this._custody_row($list, c));
+		// Arrival Card (Zone F): Masar link (Employee) + on-demand print slip (all).
+		const $card = $('<section class="ax-deck-sec"></section>').appendTo(this.$deck);
+		$('<header class="ax-deck-head"></header>').text(__('Arrival Card')).appendTo($card);
+		const $clist = $('<div class="ax-deck-list"></div>').appendTo($card);
+		this.cart.forEach((c) => this._card_row($clist, c));
 	}
 
 	_load_articles() {
@@ -450,6 +456,62 @@ class ArrivalsDesk {
 			.appendTo($form);
 	}
 
+	_card_row($list, c) {
+		const $row = $('<div class="ax-deck-row"></div>').appendTo($list);
+		$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
+		if (c.party_type === 'Employee') {
+			$('<button class="btn btn-xs btn-default"></button>')
+				.text(c._card_done ? __('Link issued') : __('Masar link'))
+				.on('click', () => this._issue_masar(c))
+				.appendTo($row);
+		} else {
+			// A Temporary Worker's Masar link issues once he is registered as an Employee.
+			$('<span class="ax-deferred"></span>').text(__('Link after registration')).appendTo($row);
+		}
+		$('<button class="btn btn-xs btn-default"></button>')
+			.text(__('Print slip'))
+			.on('click', () => this._print_slip(c))
+			.appendTo($row);
+	}
+
+	_issue_masar(c) {
+		frappe.call({
+			method: 'apex_habitat.apex_core.doctype.masar_worker_token.masar_worker_token.issue_worker_link',
+			args: { employee: c.party, regenerate: 0 },
+			freeze: true,
+			freeze_message: __('Issuing worker link…'),
+			callback: (r) => {
+				if (r.exc || !r.message) return;
+				c._card_done = true;
+				this.cardIssued = true;
+				// Shared helper from public/js/masar_worker_link.bundle.js (app_include_js).
+				apex_habitat.masar.show_worker_link_dialog(r.message, { copy_link: true });
+				this._render_stages();
+				this._render_deck();
+			},
+		});
+	}
+
+	_print_slip(c) {
+		frappe.call({
+			method: 'apex_habitat.habitat.api.arrivals_desk.get_arrival_slip',
+			args: { party_type: c.party_type, party: c.party },
+			callback: (r) => {
+				if (r.exc || !r.message) return;
+				const w = window.open('', '_blank');
+				if (!w) {
+					frappe.show_alert({ message: __('Allow pop-ups to print the slip.'), indicator: 'orange' });
+					return;
+				}
+				w.document.write(
+					`<html><head><title>${frappe.utils.escape_html(r.message.title || '')}</title></head>` +
+						`<body onload="window.print()">${r.message.html}</body></html>`
+				);
+				w.document.close();
+			},
+		});
+	}
+
 	// ---------- render ----------
 	_render_capacity(grid) {
 		if (!grid) {
@@ -470,7 +532,7 @@ class ArrivalsDesk {
 			['building', __('Building'), !!this.building],
 			['housed', __('Housed'), housed],
 			['custody', __('Custody'), this.custodyIssued],
-			['card', __('Card'), false],
+			['card', __('Card'), this.cardIssued],
 			['transport', __('Transport'), false],
 		];
 		this.$stages.html(
