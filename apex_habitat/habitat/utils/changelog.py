@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.33.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.33.0 — the Arrivals Desk is rebuilt as one building-first screen: live floor-map, worker search, passport register, one-click housing (with over-capacity), custody, arrival card and multi-passenger transport",
+        "app_name": "apex_habitat",
+        "link": "/app/arrivals-desk",
+        "creation": "2026-07-31 09:00:00",
+    },
     # v1.32.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.32.0 — a Temporary Worker auto-links to his Employee when HR registers the matching passport (housing/custody re-pointed, cost back-dated)",
