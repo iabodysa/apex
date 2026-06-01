@@ -38,11 +38,8 @@ class ArrivalsDesk {
 		this.$body = $('<div class="ax-body"></div>').appendTo(this.$root);
 		this.$floor = $('<div class="ax-floor"></div>').appendTo(this.$body);
 		this.$rail = $('<aside class="ax-rail"></aside>').appendTo(this.$body);
-		this.$rail.html(
-			`<div class="ax-rail-placeholder text-muted">${frappe.utils.escape_html(
-				__('Worker search, the arrivals cart and custody come in the next steps.')
-			)}</div>`
-		);
+		this.active = null; // the worker currently being processed (party_type + party)
+		this._build_rail();
 	}
 
 	_setup_anchor() {
@@ -85,6 +82,151 @@ class ArrivalsDesk {
 				if (this.building !== requested) return;
 				this._render_error();
 			});
+	}
+
+	// ---------- rail: worker search + the one passport modal (Batch 2) ----------
+	_build_rail() {
+		this.$rail.empty();
+		const $search = $('<div class="ax-search"></div>').appendTo(this.$rail);
+		this.$search_input = $(
+			`<input type="search" class="ax-search-input form-control" placeholder="${__(
+				'Search worker name or passport…'
+			)}" />`
+		).appendTo($search);
+		this.$results = $('<div class="ax-results"></div>').appendTo($search);
+		this.$active = $('<div class="ax-active"></div>').appendTo(this.$rail);
+		this.$search_input.on('input', frappe.utils.debounce(() => this._search(), 250));
+		this._render_results(null);
+	}
+
+	_search() {
+		const txt = (this.$search_input.val() || '').trim();
+		frappe
+			.call({
+				method: 'apex_habitat.habitat.api.arrivals_desk.search_arrivals_workers',
+				args: { building: this.building, txt },
+			})
+			.then((r) => this._render_results(r.message || []))
+			.catch(() => this._render_results([]));
+	}
+
+	_render_results(rows) {
+		this.$results.empty();
+		if (rows && !rows.length) {
+			$('<div class="ax-results-empty text-muted"></div>')
+				.text(__('No registered workers match. Register a new arrival below.'))
+				.appendTo(this.$results);
+		} else if (rows) {
+			rows.forEach((row) => this._result_row(row));
+		}
+		// "Register by passport" is always pinned at the BOTTOM (the page's only modal).
+		$('<button class="btn btn-default btn-sm ax-register-row"></button>')
+			.html(`<span class="ax-register-plus">+</span> ${__('Register new arrival by passport')}`)
+			.on('click', () => this._open_register_modal())
+			.appendTo(this.$results);
+	}
+
+	_result_row(row) {
+		const is_tw = row.party_type === 'Temporary Worker';
+		const $row = $(
+			`<div class="ax-result" tabindex="0" role="button">` +
+				`<span class="ax-result-badge ax-result-badge--${is_tw ? 'tw' : 'emp'}">${
+					is_tw ? __('Temp') : __('Emp')
+				}</span>` +
+				`<span class="ax-result-label">${frappe.utils.escape_html(row.label || '')}</span>` +
+				`<span class="ax-result-sub text-muted">${frappe.utils.escape_html(row.sub || '')}</span></div>`
+		).appendTo(this.$results);
+		const pick = () => {
+			this.$results.find('.ax-result').removeClass('ax-result--active');
+			$row.addClass('ax-result--active');
+			this._select_worker(row);
+		};
+		$row.on('click', pick);
+		$row.on('keydown', (e) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				pick();
+			}
+		});
+	}
+
+	_select_worker(row) {
+		this.active = { party_type: row.party_type, party: row.party, label: row.label };
+		this.$active.html(`<div class="ax-active-card ax-active-card--load text-muted">${__('Loading…')}</div>`);
+		frappe
+			.call({
+				method: 'apex_habitat.habitat.api.arrivals_desk.get_arrival_card',
+				args: { party_type: row.party_type, party: row.party },
+			})
+			.then((r) => this._render_active_card(r.message))
+			.catch(() =>
+				this.$active.html(`<div class="ax-active-card text-muted">${__('Could not load the worker.')}</div>`)
+			);
+	}
+
+	_render_active_card(card) {
+		if (!card) {
+			this.$active.empty();
+			return;
+		}
+		const is_tw = card.party_type === 'Temporary Worker';
+		const bed = card.current_bed_code || card.current_bed || '';
+		const foot = card.has_housing
+			? `<span class="ax-active-bed">${__('Bed')}: ${frappe.utils.escape_html(bed)}</span>`
+			: `<span class="ax-active-hint">${__('Click a free bed to house him.')}</span>`;
+		this.$active.html(
+			`<div class="ax-active-card"><div class="ax-active-head">` +
+				`<span class="ax-active-name">${frappe.utils.escape_html(card.worker_name || card.party)}</span>` +
+				`<span class="ax-result-badge ax-result-badge--${is_tw ? 'tw' : 'emp'}">${
+					is_tw ? __('Temporary Worker') : __('Employee')
+				}</span></div>` +
+				`<div class="ax-active-sub text-muted">${
+					card.project ? frappe.utils.escape_html(card.project) : __('No project yet')
+				}</div>` +
+				`<div class="ax-active-foot">${foot}</div></div>`
+		);
+	}
+
+	_open_register_modal() {
+		const d = new frappe.ui.Dialog({
+			title: __('Register New Arrival (Passport)'),
+			fields: [
+				{ fieldname: 'worker_name', label: __('Worker Name'), fieldtype: 'Data', reqd: 1 },
+				{ fieldname: 'passport_number', label: __('Passport Number'), fieldtype: 'Data', reqd: 1 },
+				{ fieldname: 'cb1', fieldtype: 'Column Break' },
+				{ fieldname: 'nationality', label: __('Nationality'), fieldtype: 'Data' },
+				{ fieldname: 'labour_supplier', label: __('Labour Supplier'), fieldtype: 'Data' },
+				{ fieldname: 'sb1', fieldtype: 'Section Break' },
+				{
+					fieldname: 'building',
+					label: __('Building'),
+					fieldtype: 'Link',
+					options: 'Accommodation Building',
+					default: this.building,
+				},
+				{ fieldname: 'project', label: __('Project'), fieldtype: 'Link', options: 'Project' },
+				{ fieldname: 'cb2', fieldtype: 'Column Break' },
+				{ fieldname: 'cell_number', label: __('Cell Number'), fieldtype: 'Data' },
+				{ fieldname: 'iqama_number', label: __('Iqama Number (if any)'), fieldtype: 'Data' },
+			],
+			primary_action_label: __('Register'),
+			primary_action: (values) => {
+				frappe.call({
+					method: 'apex_habitat.habitat.api.arrivals_desk.register_temporary_worker',
+					args: values,
+					freeze: true,
+					freeze_message: __('Registering…'),
+					callback: (r) => {
+						if (r.exc || !r.message) return;
+						d.hide();
+						frappe.show_alert({ message: __('Registered: {0}', [r.message.label]), indicator: 'green' });
+						this._select_worker(r.message); // make the new arrival active
+						this._search(); // refresh the result list
+					},
+				});
+			},
+		});
+		d.show();
 	}
 
 	// ---------- render ----------

@@ -270,6 +270,16 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn("class ArrivalsDesk", js)
         self.assertIn("arrivals-desk", js)  # scoped brand root
 
+    def test_arrivals_page_search_register_one_modal(self):
+        with open(
+            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
+        ) as fh:
+            js = fh.read()
+        self.assertIn("search_arrivals_workers", js)
+        self.assertIn("register_temporary_worker", js)
+        # The design allows exactly ONE modal in the whole page — the passport register.
+        self.assertEqual(js.count("new frappe.ui.Dialog"), 1, "Arrivals Desk must keep exactly one modal")
+
 
 if __name__ == "__main__":
     unittest.main()

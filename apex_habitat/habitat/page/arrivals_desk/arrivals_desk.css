@@ -207,6 +207,113 @@
 	}
 }
 
+/* ---- rail: worker search + active card (Batch 2) ---- */
+.arrivals-desk .ax-search-input {
+	margin-bottom: 8px;
+}
+.arrivals-desk .ax-results {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.arrivals-desk .ax-result {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	border: 1px solid var(--border-color, #d1d8dd);
+	border-radius: 6px;
+	cursor: pointer;
+}
+.arrivals-desk .ax-result:hover,
+.arrivals-desk .ax-result:focus {
+	border-color: var(--ax-brand);
+	background: var(--ax-sand);
+	outline: none;
+}
+.arrivals-desk .ax-result--active {
+	border-color: var(--ax-brand);
+	background: var(--ax-mint);
+}
+.arrivals-desk .ax-result-badge {
+	font-size: 0.6rem;
+	font-weight: 700;
+	padding: 1px 6px;
+	border-radius: 8px;
+	text-transform: uppercase;
+	flex: 0 0 auto;
+}
+.arrivals-desk .ax-result-badge--emp {
+	background: #e6f4ea;
+	color: #1e7e34;
+}
+.arrivals-desk .ax-result-badge--tw {
+	background: #fff6e0;
+	color: #a96a00;
+}
+.arrivals-desk .ax-result-label {
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.arrivals-desk .ax-result-sub {
+	font-size: 0.72rem;
+	margin-left: auto;
+	flex: 0 0 auto;
+}
+.arrivals-desk .ax-results-empty {
+	font-size: 0.8rem;
+	padding: 8px 4px;
+}
+.arrivals-desk .ax-register-row {
+	margin-top: 8px;
+	width: 100%;
+	text-align: left;
+}
+.arrivals-desk .ax-register-plus {
+	font-weight: 700;
+	color: var(--ax-brand);
+}
+.arrivals-desk .ax-active {
+	margin-top: 14px;
+}
+.arrivals-desk .ax-active-card {
+	border: 1px solid var(--ax-brand);
+	border-radius: 8px;
+	padding: 10px;
+	background: var(--card-bg, #fff);
+}
+.arrivals-desk .ax-active-card--load {
+	border-style: dashed;
+	border-color: var(--border-color, #d1d8dd);
+}
+.arrivals-desk .ax-active-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+}
+.arrivals-desk .ax-active-name {
+	font-weight: 700;
+	color: var(--ax-brand-dark);
+}
+.arrivals-desk .ax-active-sub {
+	font-size: 0.78rem;
+	margin-top: 2px;
+}
+.arrivals-desk .ax-active-foot {
+	margin-top: 8px;
+	font-size: 0.8rem;
+}
+.arrivals-desk .ax-active-hint {
+	color: var(--ax-brand);
+	font-weight: 600;
+}
+.arrivals-desk .ax-active-bed {
+	font-weight: 600;
+}
+
 /* ---- responsive + reduced motion ---- */
 @media (max-width: 900px) {
 	.arrivals-desk .ax-body {
