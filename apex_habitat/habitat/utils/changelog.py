@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.34.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.34.0 — the Arrivals Desk is reworked from desk feedback: native Frappe styling, a full-width three-column layout, a multi-item custody store, one group QR (no pop-up), and signed check-in / custody / arrival-card prints with an embedded QR",
+        "app_name": "apex_habitat",
+        "link": "/app/arrivals-desk",
+        "creation": "2026-08-01 09:00:00",
+    },
     # v1.33.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.33.0 — the Arrivals Desk is rebuilt as one building-first screen: live floor-map, worker search, passport register, one-click housing (with over-capacity), custody, arrival card and multi-passenger transport",
