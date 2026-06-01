@@ -351,6 +351,14 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn("_print_custody", js)
         self.assertIn("_print_all_cards", js)
 
+    def test_grid_occupant_shows_party_name(self):
+        with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
+            src = fh.read()
+        # A housed Temporary Worker's occupant must show a name (its employee mirror is empty).
+        self.assertIn('"party_type", "party"', src)  # the grid fetches the party
+        self.assertIn("tw_names", src)  # resolved in one bulk Temporary Worker lookup
+        self.assertIn("worker_name", src)
+
     def test_transport_one_request_employees_only(self):
         with open(
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"

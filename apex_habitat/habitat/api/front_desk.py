@@ -111,9 +111,19 @@ def get_building_grid(building: str) -> dict:
             "docstatus": 1,
             "check_out_date": ["is", "not set"],
         },
-        fields=["name", "bed", "employee", "employee_name", "project", "check_in_date"],
+        fields=["name", "bed", "employee", "employee_name", "party_type", "party", "project", "check_in_date"],
     )
     assignments_by_bed = {a.bed: a for a in assignments}
+
+    # Resolve display names for Temporary Worker occupants (their `employee_name`
+    # mirror is empty by design) — ONE bulk query, no per-bed round trip.
+    tw_names: dict[str, str] = {}
+    tw_parties = {a.party for a in assignments if a.party_type == "Temporary Worker" and a.party}
+    if tw_parties:
+        for row in frappe.get_all(
+            "Temporary Worker", filters={"name": ["in", list(tw_parties)]}, fields=["name", "worker_name"]
+        ):
+            tw_names[row.name] = row.worker_name
 
     # Q4 — custody presence per active assignment (one bulk query, grouped by
     # parent — NOT one query per assignment).
@@ -151,10 +161,19 @@ def get_building_grid(building: str) -> dict:
         if color == "red":
             asg = assignments_by_bed.get(bed.bed)
             if asg:
+                # Occupant display name: the Employee name, or the Temporary Worker's
+                # worker_name (its employee mirror is empty by design).
+                occupant_name = (
+                    asg.employee_name
+                    or (tw_names.get(asg.party) if asg.party_type == "Temporary Worker" else None)
+                    or asg.party
+                )
                 occupant = {
                     "assignment": asg.name,
                     "employee": asg.employee,
-                    "employee_name": asg.employee_name,
+                    "employee_name": occupant_name,
+                    "party_type": asg.party_type,
+                    "party": asg.party,
                     "project": asg.project,
                     "check_in_date": str(asg.check_in_date) if asg.check_in_date else None,
                     "has_custody": asg.name in custody_parents,
