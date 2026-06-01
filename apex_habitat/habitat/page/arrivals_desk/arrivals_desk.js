@@ -1,11 +1,11 @@
-// Arrivals Desk — "Anchor / Floor / Cart" single-screen worker check-in.
+// Arrivals Desk — "Intake / Floor / Actions" single-screen worker check-in.
 //
-// Building-first desk: pick a building (Zone A) → a read-only rooms/beds floor-map
-// (Zone C) appears beside a worker rail. Search or register an arrival (Zone D /
-// the one passport modal), pick a free bed to house him (party-aware), and the
-// arrivals cart (Zone E) remembers everyone housed this session for the later
-// custody / card / transport stages. Frappe desk library only; the AFMCO brand
-// lives in the scoped arrivals_desk.css.
+// Three-zone desk: an in-body anchor row picks a building (and the session
+// project) → a read-only rooms/beds floor-map appears in the centre beside a
+// worker intake column (left). Search or register an arrival (the one passport
+// modal), pick a free bed to house him (party-aware), and the session roster
+// (right) remembers everyone housed this session for the later custody / card /
+// transport stages. Native Frappe desk styling only.
 //
 // Server is the source of truth: the floor-map reuses front_desk.get_building_grid
 // (server-computed bed colour) and housing reuses front_desk.quick_check_in. After
@@ -27,10 +27,13 @@ class ArrivalsDesk {
 		this.project = null;
 		this.grid = null;
 		this.active = null; // the worker currently being processed (party_type + party)
-		this.cart = []; // workers housed in this arrival session (Zone E)
-		this.custodyIssued = false; // any custody handed over this session (Zone F)
-		this.cardIssued = false; // any Masar arrival link issued this session (Zone F)
-		this.transportStarted = false; // a transport request was created this session (Zone F)
+		this.cart = []; // workers housed in this arrival session (right zone)
+		this.custodyIssued = false; // any custody handed over this session
+		this.cardIssued = false; // any Masar arrival link issued this session
+		this.transportStarted = false; // a transport request was created this session
+		// No in-toolbar form fields: the anchors live in the page body so the native
+		// sticky page-head can never cover their dropdowns (feedback #1).
+		this.page.hide_form();
 		this._build_skeleton();
 		this._setup_anchor();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
@@ -39,14 +42,17 @@ class ArrivalsDesk {
 
 	_build_skeleton() {
 		this.$root = $('<div class="arrivals-desk"></div>').appendTo(this.page.main);
-		// Frozen header: Zone A capacity readout + Zone B stage strip.
-		this.$head = $('<div class="ax-head"></div>').appendTo(this.$root);
-		this.$capacity = $('<div class="ax-capacity"></div>').appendTo(this.$head);
-		this.$stages = $('<div class="ax-stages"></div>').appendTo(this.$head);
-		this._render_stages();
-		// Body: floor-map (left) + worker rail (right).
+		// Full-width three-zone grid: intake (left) · floor (centre) · actions (right).
 		this.$body = $('<div class="ax-body"></div>').appendTo(this.$root);
-		this.$floor = $('<div class="ax-floor"></div>').appendTo(this.$body);
+
+		// ---- Zone: intake (left) — search + results + active worker card ----
+		this.$intake = $('<aside class="ax-zone ax-zone-intake"></aside>').appendTo(this.$body);
+
+		// ---- Zone: floor (centre) — anchor row (FIRST child) then the floor-map ----
+		this.$floorZone = $('<section class="ax-zone ax-zone-floor"></section>').appendTo(this.$body);
+		this.$anchor = $('<div class="ax-anchor"></div>').appendTo(this.$floorZone);
+		this.$capacity = $('<div class="ax-capacity"></div>').appendTo(this.$anchor);
+		this.$floor = $('<div class="ax-floor"></div>').appendTo(this.$floorZone);
 		// Delegated: a click on a FREE bed houses the active worker (Batch 3); the
 		// per-room over-capacity button mints a temporary bed (Batch 3b).
 		this.$floor.on('click', '.ax-bed', (e) => this._on_bed_click(e));
@@ -61,41 +67,74 @@ class ArrivalsDesk {
 				this._on_bed_click(e);
 			}
 		});
-		this.$rail = $('<aside class="ax-rail"></aside>').appendTo(this.$body);
-		this._build_rail();
+
+		// ---- Zone: actions (right) — session roster + the stage deck ----
+		this.$actions = $('<aside class="ax-zone ax-zone-actions"></aside>').appendTo(this.$body);
+
+		this._build_intake();
 	}
 
 	_setup_anchor() {
-		this.building_field = this.page.add_field({
-			fieldname: 'building',
-			label: __('Building'),
-			fieldtype: 'Link',
-			options: 'Accommodation Building',
-			change: () => {
-				const val = this.building_field.get_value();
-				if (val && val !== this.building) {
-					this.building = val;
-					this.refresh();
-				} else if (!val && this.building) {
-					this.building = null;
-					this.grid = null;
-					this._render_stages();
-					this._render_capacity(null);
-					this._render_empty(__('Pick a building to start the arrival.'));
-				}
+		// Anchors are make_control fields rendered INSIDE the page body (not the
+		// toolbar) so they share the body stacking context — the native page-head
+		// can never cover their dropdowns (root cause of feedback #1).
+		const $bWrap = $('<div class="ax-anchor-field"></div>').prependTo(this.$anchor);
+		const $pWrap = $('<div class="ax-anchor-field"></div>').insertAfter($bWrap);
+
+		this.building_field = frappe.ui.form.make_control({
+			df: {
+				fieldtype: 'Link',
+				fieldname: 'building',
+				options: 'Accommodation Building',
+				label: __('Building'),
+				placeholder: __('Pick a building…'),
+				onchange: () => this._on_building_change(),
 			},
+			parent: $bWrap.get(0),
+			render_input: true,
 		});
+		this.building_field.refresh();
+
 		// Second anchor: the session project. House actions stamp this project, so
 		// the supervisor sets it once for the batch of arrivals (low friction).
-		this.project_field = this.page.add_field({
-			fieldname: 'project',
-			label: __('Project'),
-			fieldtype: 'Link',
-			options: 'Project',
-			change: () => {
-				this.project = this.project_field.get_value() || null;
+		this.project_field = frappe.ui.form.make_control({
+			df: {
+				fieldtype: 'Link',
+				fieldname: 'project',
+				options: 'Project',
+				label: __('Project'),
+				placeholder: __('Pick a project…'),
+				onchange: () => this._on_project_change(),
 			},
+			parent: $pWrap.get(0),
+			render_input: true,
 		});
+		this.project_field.refresh();
+
+		// Robust change wiring: an in-body Link control fires its value through both
+		// df.onchange AND the raw input events, so bind both to be sure a typed value
+		// or an autocomplete selection both take effect.
+		this.building_field.$input.on('change awesomplete-selectcomplete', () => this._on_building_change());
+		this.project_field.$input.on('change awesomplete-selectcomplete', () => this._on_project_change());
+	}
+
+	_on_building_change() {
+		const val = this.building_field.get_value();
+		if (val && val !== this.building) {
+			this.building = val;
+			this.refresh();
+		} else if (!val && this.building) {
+			// Cleared: reset the building-scoped state back to the empty floor.
+			this.building = null;
+			this.grid = null;
+			this._render_stages();
+			this._render_capacity(null);
+			this._render_empty(__('Pick a building to start the arrival.'));
+		}
+	}
+
+	_on_project_change() {
+		this.project = this.project_field.get_value() || null;
 	}
 
 	refresh() {
@@ -118,19 +157,19 @@ class ArrivalsDesk {
 			});
 	}
 
-	// ---------- rail: worker search + the one passport modal (Batch 2) ----------
-	_build_rail() {
-		this.$rail.empty();
-		const $search = $('<div class="ax-search"></div>').appendTo(this.$rail);
+	// ---------- intake: worker search + the one passport modal (Batch 2) ----------
+	_build_intake() {
+		this.$intake.empty();
+		const $search = $('<div class="ax-search"></div>').appendTo(this.$intake);
 		this.$search_input = $(
-			`<input type="search" class="ax-search-input form-control" placeholder="${__(
+			`<input type="search" class="ax-search-input form-control form-control-sm" placeholder="${__(
 				'Search worker name or passport…'
 			)}" />`
 		).appendTo($search);
 		this.$results = $('<div class="ax-results"></div>').appendTo($search);
-		this.$active = $('<div class="ax-active"></div>').appendTo(this.$rail);
-		this.$cart = $('<div class="ax-cart"></div>').appendTo(this.$rail);
-		this.$deck = $('<div class="ax-deck"></div>').appendTo(this.$rail); // stage deck (Zone F)
+		this.$active = $('<div class="ax-active"></div>').appendTo(this.$intake);
+		this.$cart = $('<div class="ax-cart"></div>').appendTo(this.$actions);
+		this.$deck = $('<div class="ax-deck"></div>').appendTo(this.$actions); // stage deck
 		this.$search_input.on('input', frappe.utils.debounce(() => this._search(), 250));
 		this._render_results(null);
 		this._render_cart();
@@ -167,7 +206,7 @@ class ArrivalsDesk {
 		const is_tw = row.party_type === 'Temporary Worker';
 		const $row = $(
 			`<div class="ax-result" tabindex="0" role="button">` +
-				`<span class="ax-result-badge ax-result-badge--${is_tw ? 'tw' : 'emp'}">${
+				`<span class="indicator-pill no-indicator-dot ${is_tw ? 'orange' : 'green'}">${
 					is_tw ? __('Temp') : __('Emp')
 				}</span>` +
 				`<span class="ax-result-label">${frappe.utils.escape_html(row.label || '')}</span>` +
@@ -214,7 +253,7 @@ class ArrivalsDesk {
 		this.$active.html(
 			`<div class="ax-active-card"><div class="ax-active-head">` +
 				`<span class="ax-active-name">${frappe.utils.escape_html(card.worker_name || card.party)}</span>` +
-				`<span class="ax-result-badge ax-result-badge--${is_tw ? 'tw' : 'emp'}">${
+				`<span class="indicator-pill no-indicator-dot ${is_tw ? 'orange' : 'green'}">${
 					is_tw ? __('Temporary Worker') : __('Employee')
 				}</span></div>` +
 				`<div class="ax-active-sub text-muted">${
@@ -380,6 +419,7 @@ class ArrivalsDesk {
 	// ---------- stage deck: custody handover (Batch 4) ----------
 	_render_deck() {
 		this.$deck.empty();
+		this._render_stages();
 		if (!this.cart.length) return;
 		if (!this.articles) this._load_articles();
 		const $cust = $('<section class="ax-deck-sec"></section>').appendTo(this.$deck);
@@ -411,14 +451,16 @@ class ArrivalsDesk {
 		$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
 		if (c.party_type === 'Temporary Worker') {
 			// TW custody is deferred until the Iqama links the Employee (no stock posting now).
-			$('<span class="ax-deferred"></span>').text(__('Custody deferred')).appendTo($row);
+			$('<span class="indicator-pill no-indicator-dot orange"></span>')
+				.text(__('Custody deferred'))
+				.appendTo($row);
 			return;
 		}
 		if (c._custody_done) {
-			$('<span class="ax-deck-ok"></span>').text(__('Issued')).appendTo($row);
+			$('<span class="indicator-pill no-indicator-dot green"></span>').text(__('Issued')).appendTo($row);
 			return;
 		}
-		$('<button class="btn btn-xs btn-default ax-deck-btn"></button>')
+		$('<button class="btn btn-sm btn-default ax-deck-btn"></button>')
 			.text(__('Issue custody'))
 			.on('click', (e) => this._custody_inline($(e.currentTarget).closest('.ax-deck-row'), c))
 			.appendTo($row);
@@ -428,13 +470,13 @@ class ArrivalsDesk {
 		if ($row.find('.ax-custody-form').length) return; // already open
 		$row.find('.ax-deck-btn').remove();
 		const $form = $('<div class="ax-custody-form"></div>').appendTo($row);
-		const $sel = $('<select class="form-control input-xs ax-custody-article"></select>').appendTo($form);
+		const $sel = $('<select class="form-control form-control-sm ax-custody-article"></select>').appendTo($form);
 		$('<option value=""></option>').text(__('Article…')).appendTo($sel);
 		(this.articles || []).forEach((a) => $('<option></option>').attr('value', a).text(a).appendTo($sel));
-		const $qty = $('<input type="number" class="form-control input-xs ax-custody-qty" min="1" value="1" />').appendTo(
-			$form
-		);
-		$('<button class="btn btn-xs btn-primary"></button>')
+		const $qty = $(
+			'<input type="number" class="form-control form-control-sm ax-custody-qty" min="1" value="1" />'
+		).appendTo($form);
+		$('<button class="btn btn-sm btn-primary"></button>')
 			.text(__('Issue'))
 			.on('click', () => {
 				const art = $sel.val();
@@ -469,15 +511,17 @@ class ArrivalsDesk {
 		const $row = $('<div class="ax-deck-row"></div>').appendTo($list);
 		$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
 		if (c.party_type === 'Employee') {
-			$('<button class="btn btn-xs btn-default"></button>')
+			$('<button class="btn btn-sm btn-default"></button>')
 				.text(c._card_done ? __('Link issued') : __('Masar link'))
 				.on('click', () => this._issue_masar(c))
 				.appendTo($row);
 		} else {
 			// A Temporary Worker's Masar link issues once he is registered as an Employee.
-			$('<span class="ax-deferred"></span>').text(__('Link after registration')).appendTo($row);
+			$('<span class="indicator-pill no-indicator-dot orange"></span>')
+				.text(__('Link after registration'))
+				.appendTo($row);
 		}
-		$('<button class="btn btn-xs btn-default"></button>')
+		$('<button class="btn btn-sm btn-default"></button>')
 			.text(__('Print slip'))
 			.on('click', () => this._print_slip(c))
 			.appendTo($row);
@@ -536,10 +580,12 @@ class ArrivalsDesk {
 			const $row = $('<div class="ax-deck-row"></div>').appendTo($tlist);
 			$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
 			// A Temporary Worker boards via the trip's unregistered manifest, not the request.
-			$('<span class="ax-deferred"></span>').text(__('Unregistered manifest')).appendTo($row);
+			$('<span class="indicator-pill no-indicator-dot orange"></span>')
+				.text(__('Unregistered manifest'))
+				.appendTo($row);
 		});
 		if (employees.length) {
-			$('<button class="btn btn-xs btn-default ax-tr-go"></button>')
+			$('<button class="btn btn-sm btn-default ax-tr-go"></button>')
 				.text(__('Create one transport request'))
 				.on('click', () => this._create_transport($tlist))
 				.appendTo($tr);
@@ -589,6 +635,8 @@ class ArrivalsDesk {
 
 	_render_stages() {
 		const housed = this.cart.length > 0;
+		// Stage chips → native indicator pills: green when done, blue for the first
+		// incomplete (active) stage, gray for the rest still pending.
 		const chips = [
 			['building', __('Building'), !!this.building],
 			['housed', __('Housed'), housed],
@@ -596,13 +644,16 @@ class ArrivalsDesk {
 			['card', __('Card'), this.cardIssued],
 			['transport', __('Transport'), this.transportStarted],
 		];
+		const firstTodo = chips.findIndex(([, , done]) => !done);
 		this.$stages.html(
 			chips
-				.map(
-					([k, label, done]) =>
-						`<span class="ax-stage ax-stage--${done ? 'done' : 'todo'}" data-stage="${k}">` +
+				.map(([k, label, done], i) => {
+					const color = done ? 'green' : i === firstTodo ? 'blue' : 'gray';
+					return (
+						`<span class="indicator-pill no-indicator-dot ${color}" data-stage="${k}">` +
 						`${frappe.utils.escape_html(label)}</span>`
-				)
+					);
+				})
 				.join('')
 		);
 	}
@@ -654,9 +705,10 @@ class ArrivalsDesk {
 		const color = bed.bed_color || 'grey';
 		const temp = bed.is_temporary ? ' ax-bed--temp' : ''; // virtual over-capacity bed
 		const a11y = color === 'green' ? ' tabindex="0" role="button"' : ''; // free beds are keyboard-reachable
+		const name = bed.occupant ? bed.occupant.employee_name || bed.occupant.employee || '' : '';
 		const occupant = bed.occupant
-			? `<span class="ax-bed-occupant">${frappe.utils.escape_html(
-					bed.occupant.employee_name || bed.occupant.employee || ''
+			? `<span class="ax-bed-occupant" title="${frappe.utils.escape_html(name)}">${frappe.utils.escape_html(
+					name
 			  )}</span>`
 			: '';
 		const custody =

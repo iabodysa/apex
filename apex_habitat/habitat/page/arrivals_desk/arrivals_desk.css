@@ -1,111 +1,113 @@
-/* Arrivals Desk — "Anchor / Floor / Cart" frame (Batch 1: header + floor-map).
- * A Frappe desk page; the AFMCO brand layer is scoped under .arrivals-desk so no
- * other desk page is affected. NOTE: bed STATUS colours (green/red/amber/grey)
- * are deliberately distinct from the AFMCO brand green — status is never the sole
- * signal (each bed also carries its code, and occupied beds carry a name).
+/* Arrivals Desk — "Intake / Floor / Actions" frame. Native Frappe desk styling.
+ * A standard desk page: all colour comes from native Frappe theme tokens
+ * (--primary, --text-color, --border-color, …) so the page tracks the active
+ * theme. The ONLY brand-independent colours are the four bed-STATUS swatches
+ * below (light bg + dark text + 1px border, same legible pattern as front_desk);
+ * status is never the sole signal — each bed also carries its code, and occupied
+ * beds carry a name.
  */
 .arrivals-desk {
-	--ax-brand: #00844e;
-	--ax-brand-dark: #072b1a;
-	--ax-sand: #ece6d6;
-	--ax-mint: #60d297;
-	--ax-free: #2e7d32;
-	--ax-occupied: #c62828;
-	--ax-blocked: #f59e0b;
-	--ax-oos: #9e9e9e;
-	display: flex;
-	flex-direction: column;
-	height: calc(100vh - 130px);
+	/* Bed-status swatches (theme-safe, legible) — the only fixed colours. */
+	--ad-bed-free: #e6f4ea;
+	--ad-bed-free-text: #1e7e34;
+	--ad-bed-free-border: #34a853;
+	--ad-bed-occupied: #fde8e8;
+	--ad-bed-occupied-text: #b71c1c;
+	--ad-bed-occupied-border: #d93025;
+	--ad-bed-blocked: #fff6e0;
+	--ad-bed-blocked-text: #a96a00;
+	--ad-bed-blocked-border: #f5a623;
+	--ad-bed-oos: #f0f1f3;
+	--ad-bed-oos-text: #74808b;
+	--ad-bed-oos-border: #c2c8ce;
+	position: relative;
+	height: calc(100vh - var(--navbar-height) - var(--page-head-height) - 16px);
 	min-height: 420px;
 }
 
-/* ---- frozen header: Zone A capacity + Zone B stage strip ---- */
-.arrivals-desk .ax-head {
-	position: sticky;
-	top: 0;
-	z-index: 5;
-	background: var(--fg-color, #fff);
-	border-bottom: 2px solid var(--ax-brand);
-	padding: 8px 4px;
+/* ---- full-width three-zone grid: intake · floor · actions ---- */
+.arrivals-desk .ax-body {
+	display: grid;
+	grid-template-columns: minmax(300px, 26%) 1fr minmax(320px, 28%);
+	gap: 12px;
+	height: 100%;
+	overflow: hidden;
+}
+.arrivals-desk .ax-zone {
+	overflow-y: auto;
+	min-width: 0;
+}
+.arrivals-desk .ax-zone-intake {
+	border-right: 1px solid var(--border-color, #d1d8dd);
+	padding-right: 12px;
+}
+.arrivals-desk .ax-zone-floor {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden; /* the inner .ax-floor scrolls, the anchor row stays put */
+}
+.arrivals-desk .ax-zone-actions {
+	border-left: 1px solid var(--border-color, #d1d8dd);
+	padding-left: 12px;
+}
+
+/* ---- anchor row (centre zone, first child): building + project + capacity ---- */
+.arrivals-desk .ax-anchor {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 12px;
+	padding-bottom: 10px;
+	margin-bottom: 4px;
+	border-bottom: 1px solid var(--border-color, #d1d8dd);
+}
+.arrivals-desk .ax-anchor-field {
+	flex: 1 1 180px;
+	min-width: 160px;
+}
+.arrivals-desk .ax-anchor-field .frappe-control {
+	margin-bottom: 0;
 }
 .arrivals-desk .ax-capacity {
+	flex: 1 1 100%;
 	display: flex;
 	align-items: baseline;
+	flex-wrap: wrap;
 	gap: 12px;
 	min-height: 22px;
 }
 .arrivals-desk .ax-cap-title {
 	font-weight: 700;
-	color: var(--ax-brand-dark);
-	font-size: 1.05rem;
+	color: var(--heading-color, #1f272e);
+	font-size: var(--text-lg);
 }
 .arrivals-desk .ax-cap-counts {
 	color: var(--text-muted, #74808b);
-	font-size: 0.86rem;
+	font-size: var(--text-sm);
 }
 .arrivals-desk .ax-cap-counts b {
-	color: var(--ax-free);
-}
-.arrivals-desk .ax-stages {
-	display: flex;
-	gap: 6px;
-	margin-top: 6px;
-	flex-wrap: wrap;
-}
-.arrivals-desk .ax-stage {
-	font-size: 0.72rem;
-	font-weight: 600;
-	padding: 2px 10px;
-	border-radius: 10px;
-	border: 1px solid var(--border-color, #d1d8dd);
-	color: var(--text-muted, #74808b);
-	background: var(--control-bg, #f4f5f6);
-}
-.arrivals-desk .ax-stage--done {
-	color: #fff;
-	background: var(--ax-brand);
-	border-color: var(--ax-brand);
-}
-
-/* ---- body: floor-map (left) + rail (right) ---- */
-.arrivals-desk .ax-body {
-	display: flex;
-	gap: 12px;
-	flex: 1 1 auto;
-	overflow: hidden;
-	padding-top: 10px;
-}
-.arrivals-desk .ax-floor {
-	flex: 1 1 62%;
-	overflow-y: auto;
-	padding-right: 6px;
-}
-.arrivals-desk .ax-rail {
-	flex: 0 0 36%;
-	max-width: 380px;
-	border-left: 1px solid var(--border-color, #d1d8dd);
-	padding-left: 12px;
-	overflow-y: auto;
-}
-.arrivals-desk .ax-rail-placeholder {
-	padding: 24px 8px;
-	font-size: 0.85rem;
+	color: var(--ad-bed-free-text);
 }
 
 /* ---- floor-map ---- */
+.arrivals-desk .ax-floor {
+	flex: 1 1 auto;
+	overflow-y: auto;
+	padding-right: 6px;
+}
 .arrivals-desk .ax-floor-group {
 	margin-bottom: 16px;
 }
 .arrivals-desk .ax-floor-header {
 	font-weight: 700;
-	color: var(--ax-brand-dark);
-	border-bottom: 1px solid var(--ax-sand);
+	color: var(--heading-color, #1f272e);
+	border-bottom: 1px solid var(--border-color, #d1d8dd);
 	padding-bottom: 4px;
 	margin-bottom: 8px;
 }
 .arrivals-desk .ax-rooms {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 	gap: 10px;
 }
 .arrivals-desk .ax-room {
@@ -124,46 +126,52 @@
 	font-weight: 600;
 }
 .arrivals-desk .ax-room-meta {
-	font-size: 0.75rem;
+	font-size: var(--text-xs);
 	color: var(--text-muted, #74808b);
 }
 .arrivals-desk .ax-beds {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
 	gap: 6px;
 }
 .arrivals-desk .ax-bed {
 	position: relative;
 	border-radius: 6px;
 	padding: 6px 6px 5px;
-	min-height: 46px;
-	color: #fff;
-	font-size: 0.74rem;
+	min-height: 60px;
+	font-size: var(--text-sm);
+	border: 1px solid transparent;
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 }
 .arrivals-desk .ax-bed--green {
-	background: var(--ax-free);
+	background: var(--ad-bed-free);
+	color: var(--ad-bed-free-text);
+	border-color: var(--ad-bed-free-border);
 }
 .arrivals-desk .ax-bed--red {
-	background: var(--ax-occupied);
+	background: var(--ad-bed-occupied);
+	color: var(--ad-bed-occupied-text);
+	border-color: var(--ad-bed-occupied-border);
 }
 .arrivals-desk .ax-bed--amber {
-	background: var(--ax-blocked);
-	color: #3a2c00;
+	background: var(--ad-bed-blocked);
+	color: var(--ad-bed-blocked-text);
+	border-color: var(--ad-bed-blocked-border);
 }
 .arrivals-desk .ax-bed--grey {
-	background: var(--ax-oos);
+	background: var(--ad-bed-oos);
+	color: var(--ad-bed-oos-text);
+	border-color: var(--ad-bed-oos-border);
 }
 .arrivals-desk .ax-bed-code {
 	font-weight: 700;
 	letter-spacing: 0.2px;
 }
 .arrivals-desk .ax-bed-occupant {
-	font-size: 0.68rem;
-	opacity: 0.95;
+	font-size: var(--text-xs);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -172,7 +180,7 @@
 	position: absolute;
 	top: 3px;
 	right: 4px;
-	font-size: 0.6rem;
+	font-size: var(--text-xs);
 }
 
 /* ---- states ---- */
@@ -184,17 +192,17 @@
 }
 .arrivals-desk .ax-error-msg {
 	margin-bottom: 10px;
-	color: var(--ax-occupied);
+	color: var(--ad-bed-occupied-text);
 }
 .arrivals-desk .ax-skeleton {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 	gap: 10px;
 }
 .arrivals-desk .ax-skeleton-room {
 	height: 110px;
 	border-radius: 8px;
-	background: linear-gradient(90deg, #eef0f2 25%, #f6f7f8 37%, #eef0f2 63%);
+	background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 37%, var(--gray-200) 63%);
 	background-size: 400% 100%;
 	animation: ax-shimmer 1.4s ease infinite;
 }
@@ -207,7 +215,7 @@
 	}
 }
 
-/* ---- rail: worker search + active card (Batch 2) ---- */
+/* ---- intake: worker search + active card (Batch 2) ---- */
 .arrivals-desk .ax-search-input {
 	margin-bottom: 8px;
 }
@@ -225,31 +233,19 @@
 	border-radius: 6px;
 	cursor: pointer;
 }
-.arrivals-desk .ax-result:hover,
+.arrivals-desk .ax-result:hover {
+	border-color: var(--primary);
+	background: var(--fg-hover-color);
+}
 .arrivals-desk .ax-result:focus {
-	border-color: var(--ax-brand);
-	background: var(--ax-sand);
-	outline: none;
+	border-color: var(--primary);
+	background: var(--fg-hover-color);
+	outline: 1px solid var(--focus-default, var(--primary));
+	outline-offset: 1px;
 }
 .arrivals-desk .ax-result--active {
-	border-color: var(--ax-brand);
-	background: var(--ax-mint);
-}
-.arrivals-desk .ax-result-badge {
-	font-size: 0.6rem;
-	font-weight: 700;
-	padding: 1px 6px;
-	border-radius: 8px;
-	text-transform: uppercase;
-	flex: 0 0 auto;
-}
-.arrivals-desk .ax-result-badge--emp {
-	background: #e6f4ea;
-	color: #1e7e34;
-}
-.arrivals-desk .ax-result-badge--tw {
-	background: #fff6e0;
-	color: #a96a00;
+	border-color: var(--primary);
+	background: var(--bg-light-gray);
 }
 .arrivals-desk .ax-result-label {
 	font-weight: 600;
@@ -258,12 +254,12 @@
 	white-space: nowrap;
 }
 .arrivals-desk .ax-result-sub {
-	font-size: 0.72rem;
+	font-size: var(--text-xs);
 	margin-left: auto;
 	flex: 0 0 auto;
 }
 .arrivals-desk .ax-results-empty {
-	font-size: 0.8rem;
+	font-size: var(--text-sm);
 	padding: 8px 4px;
 }
 .arrivals-desk .ax-register-row {
@@ -273,13 +269,13 @@
 }
 .arrivals-desk .ax-register-plus {
 	font-weight: 700;
-	color: var(--ax-brand);
+	color: var(--primary);
 }
 .arrivals-desk .ax-active {
 	margin-top: 14px;
 }
 .arrivals-desk .ax-active-card {
-	border: 1px solid var(--ax-brand);
+	border: 1px solid var(--primary);
 	border-radius: 8px;
 	padding: 10px;
 	background: var(--card-bg, #fff);
@@ -296,18 +292,18 @@
 }
 .arrivals-desk .ax-active-name {
 	font-weight: 700;
-	color: var(--ax-brand-dark);
+	color: var(--heading-color, #1f272e);
 }
 .arrivals-desk .ax-active-sub {
-	font-size: 0.78rem;
+	font-size: var(--text-sm);
 	margin-top: 2px;
 }
 .arrivals-desk .ax-active-foot {
 	margin-top: 8px;
-	font-size: 0.8rem;
+	font-size: var(--text-sm);
 }
 .arrivals-desk .ax-active-hint {
-	color: var(--ax-brand);
+	color: var(--primary);
 	font-weight: 600;
 }
 .arrivals-desk .ax-active-bed {
@@ -319,19 +315,19 @@
 	cursor: pointer;
 }
 .arrivals-desk .ax-bed--green:hover {
-	outline: 2px solid var(--ax-brand-dark);
+	outline: 2px solid var(--primary);
 	outline-offset: -2px;
 }
 
-/* ---- arrivals cart (Zone E) ---- */
+/* ---- arrivals roster (right zone) ---- */
 .arrivals-desk .ax-cart {
-	margin-top: 16px;
+	margin-bottom: 16px;
 }
 .arrivals-desk .ax-cart-title {
 	font-weight: 700;
-	color: var(--ax-brand-dark);
-	font-size: 0.85rem;
-	border-bottom: 1px solid var(--ax-sand);
+	color: var(--heading-color, #1f272e);
+	font-size: var(--text-sm);
+	border-bottom: 1px solid var(--border-color, #d1d8dd);
 	padding-bottom: 4px;
 	margin-bottom: 6px;
 }
@@ -347,50 +343,47 @@
 	gap: 8px;
 	padding: 4px 8px;
 	border-radius: 6px;
-	background: var(--control-bg, #f4f5f6);
+	background: var(--bg-light-gray);
 }
 .arrivals-desk .ax-cart-name {
 	font-weight: 600;
-	font-size: 0.8rem;
+	font-size: var(--text-sm);
 }
 .arrivals-desk .ax-cart-bed {
-	font-size: 0.72rem;
+	font-size: var(--text-xs);
 }
 
 /* ---- over-capacity: per-room button + the temporary (virtual) bed (Batch 3b) ---- */
 .arrivals-desk .ax-room-oc {
 	margin-top: 6px;
 	width: 100%;
-	font-size: 0.72rem;
+	font-size: var(--text-xs);
 	font-weight: 600;
-	color: var(--ax-brand);
+	color: var(--primary);
 	background: transparent;
-	border: 1px dashed var(--ax-brand);
+	border: 1px dashed var(--primary);
 	border-radius: 6px;
-	padding: 3px 6px;
+	padding: 4px 6px;
 	cursor: pointer;
 }
 .arrivals-desk .ax-room-oc:hover {
-	background: var(--ax-sand);
+	background: var(--fg-hover-color);
 }
 /* A temporary over-capacity bed is "not a real bed" — marked with a dashed outline. */
 .arrivals-desk .ax-bed--temp {
-	border: 2px dashed #fff;
-	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+	border-style: dashed;
+	border-width: 2px;
 }
 
 /* ---- stage deck: custody handover (Batch 4) ---- */
-.arrivals-desk .ax-deck {
-	margin-top: 16px;
-}
 .arrivals-desk .ax-deck-sec {
 	margin-bottom: 12px;
 }
 .arrivals-desk .ax-deck-head {
 	font-weight: 700;
-	color: var(--ax-brand-dark);
-	font-size: 0.85rem;
-	border-bottom: 1px solid var(--ax-sand);
+	color: var(--heading-color, #1f272e);
+	font-size: var(--text-sm);
+	border-bottom: 1px solid var(--border-color, #d1d8dd);
 	padding-bottom: 4px;
 	margin-bottom: 6px;
 }
@@ -404,30 +397,13 @@
 	align-items: center;
 	gap: 8px;
 	flex-wrap: wrap;
+	min-height: 36px;
 	padding: 4px 0;
 }
 .arrivals-desk .ax-deck-name {
 	font-weight: 600;
-	font-size: 0.8rem;
+	font-size: var(--text-sm);
 	flex: 1 1 auto;
-}
-.arrivals-desk .ax-deferred {
-	font-size: 0.68rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	padding: 1px 6px;
-	border-radius: 8px;
-	background: #fff6e0;
-	color: #a96a00;
-}
-.arrivals-desk .ax-deck-ok {
-	font-size: 0.68rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	padding: 1px 6px;
-	border-radius: 8px;
-	background: #e6f4ea;
-	color: #1e7e34;
 }
 .arrivals-desk .ax-custody-form {
 	display: flex;
@@ -440,7 +416,7 @@
 	flex: 1 1 auto;
 }
 .arrivals-desk .ax-custody-qty {
-	width: 56px;
+	width: 64px;
 	flex: 0 0 auto;
 }
 
@@ -454,30 +430,41 @@
 	width: 100%;
 }
 .arrivals-desk .ax-tr-note {
-	font-size: 0.78rem;
+	font-size: var(--text-sm);
 	padding: 4px 0;
 }
 .arrivals-desk .ax-bed--green:focus {
-	outline: 3px solid var(--ax-brand-dark);
+	outline: 3px solid var(--focus-default, var(--primary));
 	outline-offset: -3px;
 }
 
-/* ---- responsive + reduced motion ---- */
-@media (max-width: 900px) {
-	.arrivals-desk .ax-body {
-		flex-direction: column;
-		overflow: visible;
-	}
-	.arrivals-desk .ax-rail {
-		flex: 1 1 auto;
-		max-width: none;
-		border-left: 0;
-		border-top: 1px solid var(--border-color, #d1d8dd);
-		padding-left: 0;
-		padding-top: 10px;
-	}
+/* ---- responsive: collapse to ONE column (intake → floor → actions) ---- */
+@media (max-width: 992px) {
 	.arrivals-desk {
 		height: auto;
+	}
+	.arrivals-desk .ax-body {
+		display: block;
+		overflow: visible;
+		height: auto;
+	}
+	.arrivals-desk .ax-zone {
+		overflow-y: visible;
+	}
+	.arrivals-desk .ax-zone-floor {
+		overflow: visible;
+	}
+	.arrivals-desk .ax-zone-intake {
+		border-right: 0;
+		padding-right: 0;
+		margin-bottom: 16px;
+	}
+	.arrivals-desk .ax-zone-actions {
+		border-left: 0;
+		padding-left: 0;
+		border-top: 1px solid var(--border-color, #d1d8dd);
+		padding-top: 12px;
+		margin-top: 16px;
 	}
 }
 @media (prefers-reduced-motion: reduce) {
