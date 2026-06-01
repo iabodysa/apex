@@ -321,6 +321,15 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn("issue_worker_link", js)  # the Masar QR is reused for Employees
         self.assertIn("get_arrival_slip", js)
 
+    def test_transport_one_request_employees_only(self):
+        with open(
+            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
+        ) as fh:
+            js = fh.read()
+        self.assertIn("frappe.new_doc('Transport Request'", js)  # ONE request, reuses the form
+        self.assertIn("Unregistered manifest", js)  # TWs board via the trip's unregistered path
+        self.assertIn("party_type === 'Employee'", js)  # request passengers are Employees only
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -444,6 +444,24 @@
 	flex: 0 0 auto;
 }
 
+/* ---- transport + bed keyboard focus (Batch 5) ---- */
+.arrivals-desk .ax-tr-row {
+	cursor: pointer;
+	margin: 0;
+}
+.arrivals-desk .ax-tr-go {
+	margin-top: 6px;
+	width: 100%;
+}
+.arrivals-desk .ax-tr-note {
+	font-size: 0.78rem;
+	padding: 4px 0;
+}
+.arrivals-desk .ax-bed--green:focus {
+	outline: 3px solid var(--ax-brand-dark);
+	outline-offset: -3px;
+}
+
 /* ---- responsive + reduced motion ---- */
 @media (max-width: 900px) {
 	.arrivals-desk .ax-body {

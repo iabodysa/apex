@@ -30,6 +30,7 @@ class ArrivalsDesk {
 		this.cart = []; // workers housed in this arrival session (Zone E)
 		this.custodyIssued = false; // any custody handed over this session (Zone F)
 		this.cardIssued = false; // any Masar arrival link issued this session (Zone F)
+		this.transportStarted = false; // a transport request was created this session (Zone F)
 		this._build_skeleton();
 		this._setup_anchor();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
@@ -52,6 +53,13 @@ class ArrivalsDesk {
 		this.$floor.on('click', '.ax-room-oc', (e) => {
 			e.stopPropagation();
 			this._house_over_capacity($(e.currentTarget).attr('data-room'));
+		});
+		// Keyboard: a focused free bed houses on Enter/Space (scanner + a11y).
+		this.$floor.on('keydown', '.ax-bed--green', (e) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				this._on_bed_click(e);
+			}
 		});
 		this.$rail = $('<aside class="ax-rail"></aside>').appendTo(this.$body);
 		this._build_rail();
@@ -383,6 +391,7 @@ class ArrivalsDesk {
 		$('<header class="ax-deck-head"></header>').text(__('Arrival Card')).appendTo($card);
 		const $clist = $('<div class="ax-deck-list"></div>').appendTo($card);
 		this.cart.forEach((c) => this._card_row($clist, c));
+		this._transport_section();
 	}
 
 	_load_articles() {
@@ -512,6 +521,58 @@ class ArrivalsDesk {
 		});
 	}
 
+	_transport_section() {
+		const $tr = $('<section class="ax-deck-sec"></section>').appendTo(this.$deck);
+		$('<header class="ax-deck-head"></header>').text(__('Transport')).appendTo($tr);
+		const $tlist = $('<div class="ax-deck-list"></div>').appendTo($tr);
+		const employees = this.cart.filter((c) => c.party_type === 'Employee');
+		const tws = this.cart.filter((c) => c.party_type === 'Temporary Worker');
+		employees.forEach((c) => {
+			const $row = $('<label class="ax-deck-row ax-tr-row"></label>').appendTo($tlist);
+			$('<input type="checkbox" checked />').attr('data-party', c.party).appendTo($row);
+			$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
+		});
+		tws.forEach((c) => {
+			const $row = $('<div class="ax-deck-row"></div>').appendTo($tlist);
+			$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
+			// A Temporary Worker boards via the trip's unregistered manifest, not the request.
+			$('<span class="ax-deferred"></span>').text(__('Unregistered manifest')).appendTo($row);
+		});
+		if (employees.length) {
+			$('<button class="btn btn-xs btn-default ax-tr-go"></button>')
+				.text(__('Create one transport request'))
+				.on('click', () => this._create_transport($tlist))
+				.appendTo($tr);
+		} else if (tws.length) {
+			$('<div class="ax-tr-note text-muted"></div>')
+				.text(__('Temporary workers board via the trip’s unregistered manifest.'))
+				.appendTo($tr);
+		}
+	}
+
+	_create_transport($tlist) {
+		const workers = [];
+		$tlist.find('input[type="checkbox"]:checked').each((i, el) => {
+			workers.push({ employee: $(el).attr('data-party') });
+		});
+		if (!workers.length) {
+			frappe.show_alert({ message: __('Select at least one passenger.'), indicator: 'orange' });
+			return;
+		}
+		this.transportStarted = true;
+		this._render_stages();
+		// ONE request, several Employee passengers — reuses the Transport Request form
+		// (the supervisor reviews and saves it). Temporary Workers board downstream via
+		// the trip's unregistered manifest (Trip Start Log), not the request.
+		frappe.new_doc('Transport Request', {
+			service_line: 'Workers',
+			request_type: 'Accommodation to Project Shuttle',
+			project: this.project || undefined,
+			accommodation_building: this.building || undefined,
+			workers,
+		});
+	}
+
 	// ---------- render ----------
 	_render_capacity(grid) {
 		if (!grid) {
@@ -533,7 +594,7 @@ class ArrivalsDesk {
 			['housed', __('Housed'), housed],
 			['custody', __('Custody'), this.custodyIssued],
 			['card', __('Card'), this.cardIssued],
-			['transport', __('Transport'), false],
+			['transport', __('Transport'), this.transportStarted],
 		];
 		this.$stages.html(
 			chips
@@ -592,6 +653,7 @@ class ArrivalsDesk {
 	_bed_html(bed) {
 		const color = bed.bed_color || 'grey';
 		const temp = bed.is_temporary ? ' ax-bed--temp' : ''; // virtual over-capacity bed
+		const a11y = color === 'green' ? ' tabindex="0" role="button"' : ''; // free beds are keyboard-reachable
 		const occupant = bed.occupant
 			? `<span class="ax-bed-occupant">${frappe.utils.escape_html(
 					bed.occupant.employee_name || bed.occupant.employee || ''
@@ -602,7 +664,7 @@ class ArrivalsDesk {
 				? `<span class="ax-bed-badge" title="${__('Has custody')}">●</span>`
 				: '';
 		return (
-			`<div class="ax-bed ax-bed--${color}${temp}" data-bed="${frappe.utils.escape_html(bed.bed || '')}" ` +
+			`<div class="ax-bed ax-bed--${color}${temp}" data-bed="${frappe.utils.escape_html(bed.bed || '')}"${a11y} ` +
 			`title="${frappe.utils.escape_html(bed.bed_code || '')}">` +
 			`<span class="ax-bed-code">${frappe.utils.escape_html(bed.bed_code || '')}</span>` +
 			`${occupant}${custody}</div>`
