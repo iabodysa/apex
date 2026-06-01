@@ -203,6 +203,10 @@ scheduler_events = {
         "apex_habitat.salis.tasks.reconcile_operations_alerts",
         "apex_habitat.salis.fuel_engine.accrue_fuel_consumption",
         "apex_habitat.salis.rental_engine.daily_rental_accrual",
+        # Action Inbox: prune orphaned Open Workflow Actions (the doc moved on or was
+        # deleted) so the inbox never shows stale items. Deletes only Open rows;
+        # Completed rows are the audit trail and are left untouched.
+        "apex_habitat.workflow_utils.cleanup_orphaned_workflow_actions",
     ],
     "weekly": [
         "apex_habitat.habitat.tasks.weekly_occupancy_sync",

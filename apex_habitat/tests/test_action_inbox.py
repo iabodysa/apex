@@ -30,5 +30,17 @@ class TestActionInboxAPI(unittest.TestCase):
         self.assertNotIn("frappe.new_doc(", src)
 
 
+class TestOrphanCleanup(unittest.TestCase):
+    def test_cleanup_only_open_and_wired(self):
+        with open(os.path.join(APP_ROOT, "workflow_utils.py"), encoding="utf-8") as fh:
+            src = fh.read()
+        self.assertIn("def cleanup_orphaned_workflow_actions(", src)
+        self.assertIn("status = 'Open'", src)  # acts only on Open rows
+        self.assertIn("DELETE", src)  # deletes orphans (not mark-Completed → cyclic re-open stays safe)
+        self.assertIn("table_exists", src)  # guarded against a since-dropped doctype
+        with open(os.path.join(APP_ROOT, "hooks.py"), encoding="utf-8") as fh:
+            self.assertIn("workflow_utils.cleanup_orphaned_workflow_actions", fh.read())  # wired daily
+
+
 if __name__ == "__main__":
     unittest.main()
