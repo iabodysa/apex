@@ -1,385 +1,194 @@
-// Arrivals Desk — unified "worker arrival" desk page (MVP).
+// Arrivals Desk — "Anchor / Floor / Cart" single-screen worker check-in.
 //
-// Standard Frappe page. No SPA / Vue / React / external libraries: built from
-// frappe.ui.Page primitives + native frappe.ui.Dialog, exactly like the Front
-// Desk board. The server is the source of truth: every tile calls an EXISTING
-// whitelisted endpoint (the page adds zero new write logic), and after every
-// write we RE-FETCH get_arrival_card rather than mutating chips optimistically.
-//
-// Endpoints reused (no new business logic):
-//   House     -> apex_habitat.habitat.api.front_desk.quick_check_in
-//   Custody   -> apex_habitat.habitat.api.custody_kiosk.issue_cart
-//   Masar     -> apex_habitat.apex_core.doctype.masar_worker_token.masar_worker_token.issue_worker_link
-//   Transport -> frappe.new_doc("Transport Request", {...prefilled})
-// Read-only card -> apex_habitat.habitat.api.arrivals_desk.get_arrival_card
+// Batch 1 (this file): the page shell + building ANCHOR (Zone A) + stage progress
+// strip (Zone B) + a READ-ONLY rooms/beds floor-map (Zone C), reusing the Front
+// Desk get_building_grid reader verbatim. The right rail (worker search, the
+// arrivals cart, custody handover, arrival card and transport) plus every write
+// land in later batches. Frappe desk library only; the AFMCO brand lives in the
+// scoped arrivals_desk.css.
 
-frappe.pages["arrivals-desk"].on_page_load = function (wrapper) {
+frappe.pages['arrivals-desk'].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: __("Arrivals Desk"),
+		title: __('Arrivals Desk'),
 		single_column: true,
 	});
-
-	const ad = new ArrivalsDesk(page);
-	ad.setup();
+	wrapper.arrivals_desk = new ArrivalsDesk(page);
 };
 
 class ArrivalsDesk {
 	constructor(page) {
 		this.page = page;
-		this.employee = null;
-		this.card = null;
+		this.building = null;
+		this.grid = null;
+		this._build_skeleton();
+		this._setup_anchor();
+		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
+		this._render_empty(__('Pick a building to start the arrival.'));
 	}
 
-	setup() {
-		this.$container = $('<div class="ad-board"></div>').appendTo(this.page.main);
-		this._render_empty(__("Select a worker to begin arrival."));
-		this._setup_controls();
+	_build_skeleton() {
+		this.$root = $('<div class="arrivals-desk"></div>').appendTo(this.page.main);
+		// Frozen header: Zone A capacity readout + Zone B stage strip.
+		this.$head = $('<div class="ax-head"></div>').appendTo(this.$root);
+		this.$capacity = $('<div class="ax-capacity"></div>').appendTo(this.$head);
+		this.$stages = $('<div class="ax-stages"></div>').appendTo(this.$head);
+		this._render_stages(false);
+		// Body: floor-map (left) + reserved right rail (filled in later batches).
+		this.$body = $('<div class="ax-body"></div>').appendTo(this.$root);
+		this.$floor = $('<div class="ax-floor"></div>').appendTo(this.$body);
+		this.$rail = $('<aside class="ax-rail"></aside>').appendTo(this.$body);
+		this.$rail.html(
+			`<div class="ax-rail-placeholder text-muted">${frappe.utils.escape_html(
+				__('Worker search, the arrivals cart and custody come in the next steps.')
+			)}</div>`
+		);
 	}
 
-	_setup_controls() {
-		// Worker selector in the page head.
-		this.employee_field = this.page.add_field({
-			fieldname: "employee",
-			label: __("Worker"),
-			fieldtype: "Link",
-			options: "Employee",
+	_setup_anchor() {
+		this.building_field = this.page.add_field({
+			fieldname: 'building',
+			label: __('Building'),
+			fieldtype: 'Link',
+			options: 'Accommodation Building',
 			change: () => {
-				const val = this.employee_field.get_value();
-				if (val && val !== this.employee) {
-					this.employee = val;
+				const val = this.building_field.get_value();
+				if (val && val !== this.building) {
+					this.building = val;
 					this.refresh();
-				} else if (!val && this.employee) {
-					this.employee = null;
-					this.card = null;
-					this._render_empty(__("Select a worker to begin arrival."));
+				} else if (!val && this.building) {
+					this.building = null;
+					this.grid = null;
+					this._render_stages(false);
+					this._render_capacity(null);
+					this._render_empty(__('Pick a building to start the arrival.'));
 				}
 			},
 		});
-
-		this.page.set_primary_action(__("Refresh"), () => {
-			if (this.employee) {
-				this.refresh();
-			} else {
-				frappe.show_alert({
-					message: __("Select a worker to begin arrival."),
-					indicator: "orange",
-				});
-			}
-		}, "refresh");
 	}
 
 	refresh() {
-		if (!this.employee) return;
-		const requested = this.employee;
+		if (!this.building) return;
+		const requested = this.building;
 		this._render_loading();
-		frappe.call({
-			method: "apex_habitat.habitat.api.arrivals_desk.get_arrival_card",
-			args: { employee: this.employee },
-			callback: (r) => {
-				// Ignore a stale response if the user switched workers mid-flight.
-				if (requested !== this.employee) return;
-				if (r.exc || !r.message) {
-					this._render_error(__("Could not load the arrival card for this worker."));
-					return;
-				}
-				this.card = r.message;
-				this._render_card(r.message);
-			},
-			error: () => {
-				if (requested !== this.employee) return;
-				this._render_error(__("Could not load the arrival card. Check your connection and try again."));
-			},
-		});
+		frappe
+			.call({
+				method: 'apex_habitat.habitat.api.front_desk.get_building_grid',
+				args: { building: this.building },
+			})
+			.then((r) => {
+				if (this.building !== requested) return; // stale: a newer building was picked
+				this.grid = r.message;
+				this._render_grid(this.grid);
+			})
+			.catch(() => {
+				if (this.building !== requested) return;
+				this._render_error();
+			});
 	}
 
-	_render_empty(message) {
-		this.$container.empty();
-		$('<div class="ad-empty text-muted"></div>').text(message).appendTo(this.$container);
+	// ---------- render ----------
+	_render_capacity(grid) {
+		if (!grid) {
+			this.$capacity.empty();
+			return;
+		}
+		const s = grid.summary || {};
+		this.$capacity.html(
+			`<span class="ax-cap-title">${frappe.utils.escape_html(grid.building_title || '')}</span>` +
+				`<span class="ax-cap-counts"><b>${s.available || 0}</b> ${__('free')} · ` +
+				`${s.occupied || 0} ${__('occupied')} · ${s.total_beds || 0} ${__('beds')}</span>`
+		);
+	}
+
+	_render_stages(building_done) {
+		const chips = [
+			['building', __('Building'), building_done],
+			['housed', __('Housed'), false],
+			['custody', __('Custody'), false],
+			['card', __('Card'), false],
+			['transport', __('Transport'), false],
+		];
+		this.$stages.html(
+			chips
+				.map(
+					([k, label, done]) =>
+						`<span class="ax-stage ax-stage--${done ? 'done' : 'todo'}" data-stage="${k}">` +
+						`${frappe.utils.escape_html(label)}</span>`
+				)
+				.join('')
+		);
+	}
+
+	_render_grid(grid) {
+		this._render_capacity(grid);
+		this._render_stages(true);
+		if (!grid || !(grid.floors || []).length) {
+			this._render_empty(__('This building has no rooms or beds yet.'));
+			return;
+		}
+		this.$floor.html(
+			grid.floors
+				.map((floor) => {
+					const rooms = (floor.rooms || []).map((room) => this._room_html(room)).join('');
+					return (
+						`<section class="ax-floor-group"><header class="ax-floor-header">` +
+						`${frappe.utils.escape_html(floor.floor_label || '')}</header>` +
+						`<div class="ax-rooms">${rooms}</div></section>`
+					);
+				})
+				.join('')
+		);
+	}
+
+	_room_html(room) {
+		const beds = (room.beds || []).map((bed) => this._bed_html(bed)).join('');
+		const occ = `${room.current_occupancy || 0}/${room.bed_capacity || 0}`;
+		const readiness =
+			room.readiness_status && room.readiness_status !== 'Ready'
+				? ` · ${frappe.utils.escape_html(room.readiness_status)}`
+				: '';
+		return (
+			`<div class="ax-room"><div class="ax-room-header">` +
+			`<span class="ax-room-number">${frappe.utils.escape_html(room.room_number || room.room || '')}</span>` +
+			`<span class="ax-room-meta">${occ}${readiness}</span></div>` +
+			`<div class="ax-beds">${beds}</div></div>`
+		);
+	}
+
+	_bed_html(bed) {
+		const color = bed.bed_color || 'grey';
+		const occupant = bed.occupant
+			? `<span class="ax-bed-occupant">${frappe.utils.escape_html(
+					bed.occupant.employee_name || bed.occupant.employee || ''
+			  )}</span>`
+			: '';
+		const custody =
+			bed.occupant && bed.occupant.has_custody
+				? `<span class="ax-bed-badge" title="${__('Has custody')}">●</span>`
+				: '';
+		return (
+			`<div class="ax-bed ax-bed--${color}" data-bed="${frappe.utils.escape_html(bed.bed || '')}" ` +
+			`title="${frappe.utils.escape_html(bed.bed_code || '')}">` +
+			`<span class="ax-bed-code">${frappe.utils.escape_html(bed.bed_code || '')}</span>` +
+			`${occupant}${custody}</div>`
+		);
+	}
+
+	_render_empty(msg) {
+		this.$floor.html(`<div class="ax-empty">${frappe.utils.escape_html(msg)}</div>`);
 	}
 
 	_render_loading() {
-		this.$container.empty();
-		const $wrap = $('<div class="ad-loading" aria-busy="true"></div>').appendTo(this.$container);
-		$('<div class="ad-loading-label text-muted"></div>')
-			.text(__("Loading arrival card…"))
-			.appendTo($wrap);
+		this.$floor.html(`<div class="ax-skeleton">${'<div class="ax-skeleton-room"></div>'.repeat(6)}</div>`);
 	}
 
-	_render_error(message) {
-		this.$container.empty();
-		const $err = $('<div class="ad-error"></div>').appendTo(this.$container);
-		$('<div class="ad-error-msg"></div>').text(message).appendTo($err);
-		$('<button class="btn btn-default btn-sm"></button>')
-			.text(__("Retry"))
-			.on("click", () => this.refresh())
-			.appendTo($err);
-	}
-
-	_render_card(card) {
-		this.$container.empty();
-
-		// Identity card — photo + name + project.
-		const $id = $('<div class="ad-identity"></div>').appendTo(this.$container);
-		const photo = card.image
-			? `<img class="ad-photo" src="${frappe.utils.escape_html(card.image)}" alt="" />`
-			: `<div class="ad-photo ad-photo--empty">${__("No photo")}</div>`;
-		$id.append(photo);
-		const $meta = $('<div class="ad-identity-meta"></div>').appendTo($id);
-		$('<div class="ad-identity-name"></div>')
-			.text(card.employee_name || card.employee)
-			.appendTo($meta);
-		$('<div class="ad-identity-sub text-muted"></div>')
-			.text(card.project ? `${__("Project")}: ${card.project}` : __("No project assigned yet"))
-			.appendTo($meta);
-		if (card.current_bed_code || card.current_building) {
-			$('<div class="ad-identity-sub text-muted"></div>')
-				.text(`${__("Current bed")}: ${card.current_bed_code || card.current_bed || "—"}`)
-				.appendTo($meta);
-		}
-
-		// Four action tiles.
-		const $tiles = $('<div class="ad-tiles"></div>').appendTo(this.$container);
-		this._render_tile($tiles, {
-			key: "house",
-			label: __("House"),
-			done: card.has_housing,
-			done_text: __("Assigned"),
-			pending_text: __("Not assigned"),
-			handler: () => this._open_house_dialog(),
-		});
-		this._render_tile($tiles, {
-			key: "custody",
-			label: __("Custody"),
-			done: card.has_custody,
-			done_text: __("{0} items", [card.custody_count || 0]),
-			pending_text: __("None issued"),
-			handler: () => this._open_custody_dialog(),
-		});
-		this._render_tile($tiles, {
-			key: "masar",
-			label: __("Masar Link"),
-			done: card.masar_enabled,
-			done_text: __("Issued"),
-			pending_text: __("Not issued"),
-			// Tile 3 needs WRITE on Masar Worker Token — disable (fail soft) if missing.
-			disabled: !frappe.perm.has_perm("Masar Worker Token", 0, "write"),
-			disabled_text: __("You lack permission to issue links."),
-			handler: () => this._open_masar_dialog(),
-		});
-		this._render_tile($tiles, {
-			key: "transport",
-			label: __("Transport"),
-			done: false,
-			done_text: "",
-			pending_text: __("Request a ride"),
-			// Tile 4 CREATEs a Transport Request — disable (fail soft) if missing.
-			disabled: !frappe.model.can_create("Transport Request"),
-			disabled_text: __("You lack permission to create transport requests."),
-			handler: () => this._open_transport(),
-		});
-	}
-
-	_render_tile($parent, opt) {
-		const $tile = $(`<div class="ad-tile" tabindex="0" role="button"></div>`).appendTo($parent);
-		$('<div class="ad-tile-label"></div>').text(opt.label).appendTo($tile);
-
-		const chip_class = opt.done ? "ad-chip--done" : "ad-chip--pending";
-		const chip_text = opt.done ? opt.done_text : opt.pending_text;
-		if (chip_text) {
-			$(`<div class="ad-chip ${chip_class}"></div>`).text(chip_text).appendTo($tile);
-		}
-
-		if (opt.disabled) {
-			$tile.addClass("ad-tile--disabled").attr("aria-disabled", "true");
-			$('<div class="ad-tile-note text-muted"></div>')
-				.text(opt.disabled_text || __("Unavailable"))
-				.appendTo($tile);
-			return;
-		}
-
-		const handler = () => opt.handler();
-		$tile.on("click", handler);
-		$tile.on("keydown", (e) => {
-			if (e.key === "Enter" || e.key === " ") {
-				e.preventDefault();
-				handler();
-			}
-		});
-	}
-
-	// ── Tile 1: House (reuses front_desk.quick_check_in) ─────────────────────
-	_open_house_dialog() {
-		const employee = this.employee;
-		const d = new frappe.ui.Dialog({
-			title: __("Assign House"),
-			fields: [
-				{
-					fieldname: "building",
-					label: __("Building"),
-					fieldtype: "Link",
-					options: "Accommodation Building",
-					reqd: 1,
-					onchange: function () {
-						const b = this.get_value && this.get_value();
-						d.set_value("room", "");
-						d.set_value("bed", "");
-						d.fields_dict.room.get_query = () => ({ filters: b ? { building: b } : {} });
-						d.fields_dict.bed.get_query = () => ({ filters: {} });
-					},
-				},
-				{
-					fieldname: "room",
-					label: __("Room"),
-					fieldtype: "Link",
-					options: "Accommodation Room",
-					reqd: 1,
-					get_query: () => ({ filters: {} }),
-					onchange: function () {
-						const room = this.get_value && this.get_value();
-						d.set_value("bed", "");
-						d.fields_dict.bed.get_query = () => ({
-							filters: room ? { room: room, status: ["!=", "Occupied"] } : {},
-						});
-					},
-				},
-				{
-					fieldname: "bed",
-					label: __("Bed"),
-					fieldtype: "Link",
-					options: "Accommodation Bed",
-					reqd: 1,
-					get_query: () => ({ filters: {} }),
-				},
-				{ fieldname: "project", label: __("Project"), fieldtype: "Link", options: "Project", reqd: 1 },
-				{
-					fieldname: "check_in_date",
-					label: __("Check-in Date"),
-					fieldtype: "Date",
-					reqd: 1,
-					default: frappe.datetime.get_today(),
-				},
-			],
-			primary_action_label: __("Check In"),
-			primary_action: (values) => {
-				frappe.call({
-					method: "apex_habitat.habitat.api.front_desk.quick_check_in",
-					args: {
-						bed: values.bed,
-						employee: employee,
-						project: values.project,
-						check_in_date: values.check_in_date,
-					},
-					freeze: true,
-					freeze_message: __("Checking in…"),
-					callback: (r) => {
-						if (r.exc || !r.message) return;
-						d.hide();
-						// Remember the building so Custody defaults to it (step 1 → step 2).
-						this._last_building = values.building;
-						frappe.show_alert({
-							message: __("Checked in: {0}", [r.message.assignment]),
-							indicator: "green",
-						});
-						this.refresh();
-					},
-				});
-			},
-		});
-		// Default project from the existing card when known.
-		if (this.card && this.card.project) d.set_value("project", this.card.project);
-		d.show();
-	}
-
-	// ── Tile 2: Custody (reuses custody_kiosk.issue_cart) ────────────────────
-	_open_custody_dialog() {
-		const employee = this.employee;
-		// Building defaults from step 1 (house assignment) or the worker's current bed.
-		const default_building =
-			this._last_building || (this.card && this.card.current_building) || null;
-		const d = new frappe.ui.Dialog({
-			title: __("Issue Custody"),
-			fields: [
-				{
-					fieldname: "building",
-					label: __("Building (source store)"),
-					fieldtype: "Link",
-					options: "Accommodation Building",
-					reqd: 1,
-					default: default_building,
-				},
-				{
-					fieldname: "article",
-					label: __("Article"),
-					fieldtype: "Link",
-					options: "Custody Article",
-					reqd: 1,
-				},
-				{
-					fieldname: "qty",
-					label: __("Quantity"),
-					fieldtype: "Int",
-					reqd: 1,
-					default: 1,
-				},
-			],
-			primary_action_label: __("Issue"),
-			primary_action: (values) => {
-				const items_json = JSON.stringify([{ article: values.article, qty: values.qty }]);
-				frappe.call({
-					method: "apex_habitat.habitat.api.custody_kiosk.issue_cart",
-					args: {
-						employee: employee,
-						building: values.building,
-						items_json: items_json,
-					},
-					freeze: true,
-					freeze_message: __("Issuing custody…"),
-					callback: (r) => {
-						if (r.exc || !r.message) return;
-						d.hide();
-						frappe.show_alert({
-							message: __("Custody issued: {0}", [r.message.custody_issue]),
-							indicator: "green",
-						});
-						this.refresh();
-					},
-				});
-			},
-		});
-		d.show();
-	}
-
-	// ── Tile 3: Masar link (reuses issue_worker_link) ────────────────────────
-	_open_masar_dialog() {
-		const employee = this.employee;
-		frappe.call({
-			method:
-				"apex_habitat.apex_core.doctype.masar_worker_token.masar_worker_token.issue_worker_link",
-			args: { employee: employee, regenerate: 0 },
-			freeze: true,
-			freeze_message: __("Issuing worker link…"),
-			callback: (r) => {
-				if (r.exc || !r.message) return;
-				// Shared helper from public/js/masar_worker_link.bundle.js
-				// (wired via hooks.py app_include_js). The Arrivals Desk shows
-				// the copy-link button (its historic superset behaviour).
-				apex_habitat.masar.show_worker_link_dialog(r.message, { copy_link: true });
-				this.refresh();
-			},
-		});
-	}
-
-	// ── Tile 4: Transport (prefilled new Transport Request) ──────────────────
-	_open_transport() {
-		const card = this.card || {};
-		const workers = [{ employee: this.employee }];
-		frappe.new_doc("Transport Request", {
-			service_line: "Workers",
-			project: card.project || undefined,
-			accommodation_building:
-				this._last_building || card.current_building || undefined,
-			workers: workers,
-		});
+	_render_error() {
+		this.$floor.html(
+			`<div class="ax-error"><div class="ax-error-msg">` +
+				`${__('Could not load the building. Please retry.')}</div>` +
+				`<button class="btn btn-default btn-sm ax-retry">${__('Retry')}</button></div>`
+		);
+		this.$floor.find('.ax-retry').on('click', () => this.refresh());
 	}
 }

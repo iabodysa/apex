@@ -260,6 +260,16 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn('"doctype": "Temporary Worker"', src)
         self.assertNotIn('"doctype": "Employee"', src)
 
+    def test_arrivals_page_floor_map_reuses_grid(self):
+        with open(
+            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
+        ) as fh:
+            js = fh.read()
+        # The read-only floor-map reuses the Front Desk reader, not a new endpoint.
+        self.assertIn("apex_habitat.habitat.api.front_desk.get_building_grid", js)
+        self.assertIn("class ArrivalsDesk", js)
+        self.assertIn("arrivals-desk", js)  # scoped brand root
+
 
 if __name__ == "__main__":
     unittest.main()

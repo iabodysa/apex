@@ -1,148 +1,232 @@
-/* Arrivals Desk — unified worker-arrival page (MVP).
- * Identity card + four action tiles. Status is shown as a done/pending chip on
- * each tile; color is never the sole signal (each chip also carries text).
+/* Arrivals Desk — "Anchor / Floor / Cart" frame (Batch 1: header + floor-map).
+ * A Frappe desk page; the AFMCO brand layer is scoped under .arrivals-desk so no
+ * other desk page is affected. NOTE: bed STATUS colours (green/red/amber/grey)
+ * are deliberately distinct from the AFMCO brand green — status is never the sole
+ * signal (each bed also carries its code, and occupied beds carry a name).
  */
-
-.ad-board {
-	padding: 8px 4px 32px;
-}
-
-.ad-empty {
-	padding: 48px 16px;
-	text-align: center;
-	font-size: 15px;
-}
-
-.ad-error {
-	padding: 48px 16px;
-	text-align: center;
-}
-
-.ad-error-msg {
-	font-size: 15px;
-	color: var(--text-color, #1f272e);
-	margin-bottom: 12px;
-}
-
-.ad-loading-label {
-	font-size: 13px;
-	padding: 32px 16px;
-	text-align: center;
-}
-
-/* Identity card — photo + name + project. */
-.ad-identity {
+.arrivals-desk {
+	--ax-brand: #00844e;
+	--ax-brand-dark: #072b1a;
+	--ax-sand: #ece6d6;
+	--ax-mint: #60d297;
+	--ax-free: #2e7d32;
+	--ax-occupied: #c62828;
+	--ax-blocked: #f59e0b;
+	--ax-oos: #9e9e9e;
 	display: flex;
-	align-items: center;
-	gap: 16px;
-	margin-bottom: 24px;
-	padding-bottom: 16px;
-	border-bottom: 1px solid var(--border-color, #d1d8dd);
+	flex-direction: column;
+	height: calc(100vh - 130px);
+	min-height: 420px;
 }
 
-.ad-photo {
-	width: 84px;
-	height: 84px;
-	object-fit: cover;
-	border-radius: 8px;
+/* ---- frozen header: Zone A capacity + Zone B stage strip ---- */
+.arrivals-desk .ax-head {
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	background: var(--fg-color, #fff);
+	border-bottom: 2px solid var(--ax-brand);
+	padding: 8px 4px;
+}
+.arrivals-desk .ax-capacity {
+	display: flex;
+	align-items: baseline;
+	gap: 12px;
+	min-height: 22px;
+}
+.arrivals-desk .ax-cap-title {
+	font-weight: 700;
+	color: var(--ax-brand-dark);
+	font-size: 1.05rem;
+}
+.arrivals-desk .ax-cap-counts {
+	color: var(--text-muted, #74808b);
+	font-size: 0.86rem;
+}
+.arrivals-desk .ax-cap-counts b {
+	color: var(--ax-free);
+}
+.arrivals-desk .ax-stages {
+	display: flex;
+	gap: 6px;
+	margin-top: 6px;
+	flex-wrap: wrap;
+}
+.arrivals-desk .ax-stage {
+	font-size: 0.72rem;
+	font-weight: 600;
+	padding: 2px 10px;
+	border-radius: 10px;
 	border: 1px solid var(--border-color, #d1d8dd);
-	flex: 0 0 auto;
-}
-
-.ad-photo--empty {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 11px;
 	color: var(--text-muted, #74808b);
 	background: var(--control-bg, #f4f5f6);
 }
+.arrivals-desk .ax-stage--done {
+	color: #fff;
+	background: var(--ax-brand);
+	border-color: var(--ax-brand);
+}
 
-.ad-identity-name {
-	font-size: 18px;
+/* ---- body: floor-map (left) + rail (right) ---- */
+.arrivals-desk .ax-body {
+	display: flex;
+	gap: 12px;
+	flex: 1 1 auto;
+	overflow: hidden;
+	padding-top: 10px;
+}
+.arrivals-desk .ax-floor {
+	flex: 1 1 62%;
+	overflow-y: auto;
+	padding-right: 6px;
+}
+.arrivals-desk .ax-rail {
+	flex: 0 0 36%;
+	max-width: 380px;
+	border-left: 1px solid var(--border-color, #d1d8dd);
+	padding-left: 12px;
+	overflow-y: auto;
+}
+.arrivals-desk .ax-rail-placeholder {
+	padding: 24px 8px;
+	font-size: 0.85rem;
+}
+
+/* ---- floor-map ---- */
+.arrivals-desk .ax-floor-group {
+	margin-bottom: 16px;
+}
+.arrivals-desk .ax-floor-header {
+	font-weight: 700;
+	color: var(--ax-brand-dark);
+	border-bottom: 1px solid var(--ax-sand);
+	padding-bottom: 4px;
+	margin-bottom: 8px;
+}
+.arrivals-desk .ax-rooms {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 10px;
+}
+.arrivals-desk .ax-room {
+	border: 1px solid var(--border-color, #d1d8dd);
+	border-radius: 8px;
+	padding: 8px;
+	background: var(--card-bg, #fff);
+}
+.arrivals-desk .ax-room-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 6px;
+}
+.arrivals-desk .ax-room-number {
 	font-weight: 600;
 }
-
-.ad-identity-sub {
-	font-size: 13px;
-	margin-top: 2px;
+.arrivals-desk .ax-room-meta {
+	font-size: 0.75rem;
+	color: var(--text-muted, #74808b);
 }
-
-/* Action tiles. */
-.ad-tiles {
+.arrivals-desk .ax-beds {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-	gap: 14px;
+	grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+	gap: 6px;
 }
-
-.ad-tile {
-	border: 2px solid var(--border-color, #d1d8dd);
-	border-radius: 8px;
-	padding: 16px;
-	min-height: 100px;
+.arrivals-desk .ax-bed {
+	position: relative;
+	border-radius: 6px;
+	padding: 6px 6px 5px;
+	min-height: 46px;
+	color: #fff;
+	font-size: 0.74rem;
+	overflow: hidden;
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
-	cursor: pointer;
-	background: var(--card-bg, #fff);
-	user-select: none;
-	transition: transform 0.05s ease-in-out;
+	justify-content: space-between;
 }
-
-.ad-tile:focus {
-	outline: 3px solid var(--primary, #2490ef);
-	outline-offset: 2px;
+.arrivals-desk .ax-bed--green {
+	background: var(--ax-free);
 }
-
-.ad-tile:active {
-	transform: scale(0.98);
+.arrivals-desk .ax-bed--red {
+	background: var(--ax-occupied);
 }
-
-.ad-tile--disabled {
-	cursor: not-allowed;
-	opacity: 0.55;
+.arrivals-desk .ax-bed--amber {
+	background: var(--ax-blocked);
+	color: #3a2c00;
 }
-
-.ad-tile-label {
+.arrivals-desk .ax-bed--grey {
+	background: var(--ax-oos);
+}
+.arrivals-desk .ax-bed-code {
 	font-weight: 700;
-	font-size: 16px;
+	letter-spacing: 0.2px;
+}
+.arrivals-desk .ax-bed-occupant {
+	font-size: 0.68rem;
+	opacity: 0.95;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.arrivals-desk .ax-bed-badge {
+	position: absolute;
+	top: 3px;
+	right: 4px;
+	font-size: 0.6rem;
 }
 
-.ad-tile-note {
-	font-size: 11px;
+/* ---- states ---- */
+.arrivals-desk .ax-empty,
+.arrivals-desk .ax-error {
+	text-align: center;
+	color: var(--text-muted, #74808b);
+	padding: 48px 16px;
 }
-
-/* Done / pending chip. */
-.ad-chip {
-	align-self: flex-start;
-	font-size: 11px;
-	font-weight: 600;
-	text-transform: uppercase;
-	letter-spacing: 0.03em;
-	padding: 2px 8px;
-	border-radius: 999px;
+.arrivals-desk .ax-error-msg {
+	margin-bottom: 10px;
+	color: var(--ax-occupied);
 }
-
-.ad-chip--done {
-	background: #e6f4ea;
-	color: #1e7e34;
-	border: 1px solid #34a853;
+.arrivals-desk .ax-skeleton {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 10px;
 }
-
-.ad-chip--pending {
-	background: #fff6e0;
-	color: #a96a00;
-	border: 1px solid #f5a623;
+.arrivals-desk .ax-skeleton-room {
+	height: 110px;
+	border-radius: 8px;
+	background: linear-gradient(90deg, #eef0f2 25%, #f6f7f8 37%, #eef0f2 63%);
+	background-size: 400% 100%;
+	animation: ax-shimmer 1.4s ease infinite;
 }
-
-@media (prefers-reduced-motion: reduce) {
-	.ad-tile {
-		transition: none;
+@keyframes ax-shimmer {
+	0% {
+		background-position: 100% 0;
+	}
+	100% {
+		background-position: 0 0;
 	}
 }
 
-@media (max-width: 768px) {
-	.ad-tiles {
-		grid-template-columns: 1fr;
+/* ---- responsive + reduced motion ---- */
+@media (max-width: 900px) {
+	.arrivals-desk .ax-body {
+		flex-direction: column;
+		overflow: visible;
+	}
+	.arrivals-desk .ax-rail {
+		flex: 1 1 auto;
+		max-width: none;
+		border-left: 0;
+		border-top: 1px solid var(--border-color, #d1d8dd);
+		padding-left: 0;
+		padding-top: 10px;
+	}
+	.arrivals-desk {
+		height: auto;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.arrivals-desk .ax-skeleton-room {
+		animation: none;
 	}
 }
