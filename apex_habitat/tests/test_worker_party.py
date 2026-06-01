@@ -373,6 +373,16 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         used = set(re.findall(r"this\.(\$[A-Za-z_]+)\b", js))
         self.assertEqual(used - assigned, set(), "this.$ refs used but never created")
 
+    def test_web_form_route_safeguard_patch(self):
+        with open(os.path.join(APP_ROOT, "patches", "v1_x", "ensure_web_form_route.py"), encoding="utf-8") as fh:
+            src = fh.read()
+        self.assertIn("def execute(", src)
+        self.assertIn('frappe.db.exists("Web Form"', src)  # guarded: a no-op when absent
+        self.assertIn("set_value", src)
+        self.assertNotIn("make_route_to_web_form(", src)  # must NOT call the v15-removed helper (prose mention is fine)
+        with open(os.path.join(APP_ROOT, "patches.txt"), encoding="utf-8") as fh:
+            self.assertIn("v1_x.ensure_web_form_route", fh.read())
+
     def test_transport_one_request_employees_only(self):
         with open(
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"

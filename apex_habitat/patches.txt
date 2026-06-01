@@ -87,3 +87,9 @@ apex_habitat.patches.v1_x.backfill_worker_party
 # custody doctypes from their (differently-named) Employee links. Same ONE-TIME,
 # idempotent, existence-guarded, post-model-sync pattern as backfill_worker_party.
 apex_habitat.patches.v1_x.backfill_custody_party
+
+# v1.x — TEMPORARY safeguard (GitHub #97): ensure the Web Form keeps its `route` on an
+# upgrade from an old version, so the v15-removed make_route_to_web_form helper is never
+# needed. Idempotent, only-if-missing (never clobbers a custom route), no-op on fresh
+# installs. PRUNE once every deployed site is confirmed v15-correct (tracked in tabPatch Log).
+apex_habitat.patches.v1_x.ensure_web_form_route
