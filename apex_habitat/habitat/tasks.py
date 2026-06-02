@@ -169,7 +169,7 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
                         "allocation_period_start": posting_date,
                         "allocation_period_end": posting_date,
                     })
-                    ledger_entry.insert(ignore_permissions=True)
+                    ledger_entry.insert(ignore_permissions=True)  # audit-ok — scheduler-run cost allocation, no user session
                 except Exception as e:
                     frappe.db.rollback()  # T-02: rollback before log_error to avoid aborted-transaction errors
                     logger.error(
@@ -948,7 +948,7 @@ def daily_scheduled_task_instance_generator() -> None:
                     "assigned_to": tmpl.assigned_to,
                     "status": "Open",
                 })
-                sti.insert(ignore_permissions=True)
+                sti.insert(ignore_permissions=True)  # audit-ok — scheduler-run task generation, no user session
                 logger.info(
                     "daily_scheduled_task_instance_generator: Created STI %s for template %s due %s.",
                     sti.name,

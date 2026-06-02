@@ -18,9 +18,6 @@ class AccommodationLedger(Document):
 
 def before_save(doc, method=None):
     sync_party_employee(doc)
-    # Validate document properties
-    if not doc.doctype:
-        return
 
 
 def on_doctype_update():

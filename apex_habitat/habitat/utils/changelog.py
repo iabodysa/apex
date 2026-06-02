@@ -132,7 +132,7 @@ _RELEASES = [
     },
     # v1.26.3 ---------------------------------------------------------------
     {
-        "title": "v1.26.3: Transport now clearly separates worker (bus/shuttle) trips from representative (مندوب) trips — a representative trip names the representative and can never carry labour-accommodation or a worker manifest, and only worker trips appear in the worker (Masar) view. Plus seed-reliability fixes and a clearer Employee 'Salis' connections label.",
+        "title": "v1.26.3: Transport now clearly separates worker (bus/shuttle) trips from representative trips — a representative trip names the representative and can never carry labour-accommodation or a worker manifest, and only worker trips appear in the worker (Masar) view. Plus seed-reliability fixes and a clearer Employee 'Salis' connections label.",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-07-21 09:00:00",
@@ -311,7 +311,7 @@ _RELEASES = [
         "creation": "2026-07-10 09:00:00",
     },
     {
-        "title": "v1.19.1: Modules now read with proper Arabic names on the desk (Apex → أبيكس, Salis → سلس, Habitat → الإسكان), and the Apex Core settings hub is reorganised with the driver-portal theme surfaced",
+        "title": "v1.19.1: Modules now read with proper Arabic names on the desk (Apex, Salis and Habitat), and the Apex Core settings hub is reorganised with the driver-portal theme surfaced",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-07-10 09:01:00",

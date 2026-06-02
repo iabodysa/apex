@@ -45,6 +45,6 @@ def submit_resident_request(
         "mobile_number": contact_number,    # was incorrectly keyed as contact_number
         "source_channel": "QR Web Form",
     })
-    doc.insert(ignore_permissions=True)
+    doc.insert(ignore_permissions=True)  # audit-ok — guest QR web-form intake, rate-limited + honeypot-guarded
     frappe.db.commit()
     return {"name": doc.name, "tracking_code": doc.anonymous_tracking_code}

@@ -52,7 +52,6 @@ def validate(doc, method=None):
     _VALID_TERMINAL = {"Returned", "Lost", "Damaged"}
     for row in doc.custody_return_items or []:
         if row.return_status not in _VALID_TERMINAL:
-            doc.custody_cleared = 0
             frappe.throw(
                 _("Each custody item must be marked Returned, Lost, or Damaged before submission.")
             )
