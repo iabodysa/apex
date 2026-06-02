@@ -61,3 +61,116 @@ class TestMaintenanceRequest(FrappeTestCase):
         })
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_reported_by_defaults_to_session_user(self):
+        # reported_by is reqd=1; omitting it must NOT raise because the
+        # controller defaults it server-side to the session user. This also
+        # lets a plain user POST via REST without supplying reported_by.
+        doc = frappe.get_doc({
+            "doctype": "Maintenance Request",
+            "naming_series": "MAINT-.YYYY.-.#####",
+            "building": "QA-BLDG",
+            "room": "ROOM-QA",
+            "issue_type": "Plumbing",
+            "issue_description": "Leak under sink",
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        # owner == reported_by == session user gives the owner-scoping hook a
+        # trustworthy creator that a non-privileged user cannot spoof.
+        self.assertEqual(doc.reported_by, frappe.session.user)
+        self.assertEqual(doc.owner, frappe.session.user)
+        self.assertEqual(doc.owner, doc.reported_by)
+        frappe.delete_doc("Maintenance Request", doc.name, force=True, ignore_permissions=True)
+
+    def test_reported_by_default_is_idempotent_on_update(self):
+        # The default only fires on a NEW record. A subsequent save must NOT
+        # re-stamp reported_by, so an explicit creator survives later edits.
+        doc = frappe.get_doc({
+            "doctype": "Maintenance Request",
+            "naming_series": "MAINT-.YYYY.-.#####",
+            "building": "QA-BLDG",
+            "room": "ROOM-QA",
+            "reported_by": "Administrator",
+            "issue_type": "Plumbing",
+            "issue_description": "Leak under sink",
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        self.assertEqual(doc.reported_by, "Administrator")
+        doc.priority = "High"
+        doc.save(ignore_permissions=True)
+        self.assertEqual(doc.reported_by, "Administrator")
+        frappe.delete_doc("Maintenance Request", doc.name, force=True, ignore_permissions=True)
+
+    # ------------------------------------------------------------------
+    # Permission-array structural tests
+    # These tests assert the DocType JSON has the correct permission rows
+    # without requiring a live bench migrate; they run in unit-test CI.
+    # ------------------------------------------------------------------
+
+    def _get_perms_by_role(self):
+        """Return a dict mapping role name -> permission dict for quick lookup."""
+        meta = frappe.get_meta("Maintenance Request")
+        return {p.role: p for p in meta.permissions}
+
+    def test_all_role_row_exists_with_create_and_if_owner(self):
+        """'All' role must grant create:1 and if_owner:1 (universal owner-scoped intake)."""
+        perms = self._get_perms_by_role()
+        self.assertIn("All", perms, "Expected an 'All' role permission row")
+        p = perms["All"]
+        self.assertEqual(p.read, 1, "'All' role must have read:1")
+        self.assertEqual(p.create, 1, "'All' role must have create:1")
+        self.assertEqual(p.if_owner, 1, "'All' role must have if_owner:1")
+        self.assertEqual(p.write, 0, "'All' role must NOT have write:1")
+        self.assertEqual(p.delete, 0, "'All' role must NOT have delete:1")
+        self.assertEqual(p.submit, 0, "'All' role must NOT have submit:1")
+        self.assertEqual(p.cancel, 0, "'All' role must NOT have cancel:1")
+
+    def test_maintenance_technician_row_is_read_only(self):
+        """'Maintenance Technician' role must be read-only on Maintenance Request."""
+        perms = self._get_perms_by_role()
+        self.assertIn("Maintenance Technician", perms,
+                      "Expected a 'Maintenance Technician' permission row")
+        p = perms["Maintenance Technician"]
+        self.assertEqual(p.read, 1, "'Maintenance Technician' must have read:1")
+        self.assertEqual(p.write, 0, "'Maintenance Technician' must NOT have write:1")
+        self.assertEqual(p.create, 0, "'Maintenance Technician' must NOT have create:1")
+        self.assertEqual(p.delete, 0, "'Maintenance Technician' must NOT have delete:1")
+        self.assertEqual(p.submit, 0, "'Maintenance Technician' must NOT have submit:1")
+
+    def test_resident_request_coordinator_row_has_create_write_submit(self):
+        """'Resident Request Coordinator' must have create/read/write/submit but no delete."""
+        perms = self._get_perms_by_role()
+        self.assertIn("Resident Request Coordinator", perms,
+                      "Expected a 'Resident Request Coordinator' permission row")
+        p = perms["Resident Request Coordinator"]
+        self.assertEqual(p.read, 1, "'Resident Request Coordinator' must have read:1")
+        self.assertEqual(p.create, 1, "'Resident Request Coordinator' must have create:1")
+        self.assertEqual(p.write, 1, "'Resident Request Coordinator' must have write:1")
+        self.assertEqual(p.submit, 1, "'Resident Request Coordinator' must have submit:1")
+        self.assertEqual(p.delete, 0, "'Resident Request Coordinator' must NOT have delete:1")
+
+    def test_existing_privileged_roles_untouched(self):
+        """System Manager, Accommodation Manager, Resident Supervisor rows must be unchanged."""
+        perms = self._get_perms_by_role()
+        # System Manager: full + submit + cancel + delete
+        sm = perms.get("System Manager")
+        self.assertIsNotNone(sm)
+        self.assertEqual(sm.cancel, 1)
+        self.assertEqual(sm.delete, 1)
+        self.assertEqual(sm.submit, 1)
+        # Accommodation Manager: create/read/write/submit (no delete)
+        am = perms.get("Accommodation Manager")
+        self.assertIsNotNone(am)
+        self.assertEqual(am.create, 1)
+        self.assertEqual(am.read, 1)
+        self.assertEqual(am.write, 1)
+        self.assertEqual(am.submit, 1)
+        self.assertEqual(am.delete, 0)
+        # Resident Supervisor: create/read/write/submit (no delete)
+        rs = perms.get("Resident Supervisor")
+        self.assertIsNotNone(rs)
+        self.assertEqual(rs.create, 1)
+        self.assertEqual(rs.read, 1)
+        self.assertEqual(rs.write, 1)
+        self.assertEqual(rs.submit, 1)
+        self.assertEqual(rs.delete, 0)

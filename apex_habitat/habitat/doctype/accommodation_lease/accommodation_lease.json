@@ -183,7 +183,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-25 01:05:30.804051",
+ "modified": "2026-06-02 09:00:00.000001",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Lease",
@@ -216,6 +216,11 @@
    "role": "Finance Manager",
    "submit": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
   }
  ],
  "row_format": "Dynamic",

@@ -12,8 +12,18 @@ class MaintenanceRequest(Document):
 
 
 def before_save(doc, method=None):
+    # Stamp the creator server-side on new tickets so a non-privileged 'All'
+    # creator cannot spoof ownership and the owner-scoping permission hook has a
+    # trustworthy reported_by. reported_by is reqd=1, so defaulting it here (runs
+    # before mandatory validation) also lets a plain user POST via REST without
+    # supplying it. Idempotent: only fires on a new record with reported_by unset.
+    if doc.is_new() and not doc.reported_by:
+        doc.reported_by = frappe.session.user
+
     if not doc.company:
-        from apex_habitat.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
+        from apex_habitat.apex_core.doctype.habitat_settings.habitat_settings import (
+            get_default_company,
+        )
         doc.company = get_default_company()
 
     _validate_status_rules(doc)

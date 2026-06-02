@@ -239,6 +239,18 @@
    "permlevel": 1,
    "read": 1,
    "write": 1
+  },
+  {
+   "role": "Resident Request Coordinator",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "Resident Request Coordinator",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
   }
  ],
  "autoname": "naming_series:",

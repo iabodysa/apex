@@ -236,7 +236,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-25 02:25:53.115029",
+ "modified": "2026-06-02 09:00:00.000007",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Facility Asset Movement",
@@ -262,6 +262,11 @@
    "read": 1,
    "role": "Resident Supervisor",
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
   }
  ],
  "row_format": "Dynamic",

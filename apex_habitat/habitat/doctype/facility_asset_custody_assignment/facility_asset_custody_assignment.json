@@ -170,6 +170,13 @@
    "create": 1,
    "submit": 1,
    "idx": 3
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Internal Auditor",
+   "read": 1,
+   "report": 1,
+   "idx": 4
   }
  ]
 }

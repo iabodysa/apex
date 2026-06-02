@@ -204,7 +204,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-05-25 02:00:45.652119",
+ "modified": "2026-06-02 09:00:00.000002",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Ledger",
@@ -220,6 +220,7 @@
   },
   {
    "read": 1,
+   "report": 1,
    "role": "Internal Auditor"
   }
  ],

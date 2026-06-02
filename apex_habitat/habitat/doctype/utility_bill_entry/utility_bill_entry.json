@@ -240,7 +240,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-25 01:05:30.445686",
+ "modified": "2026-06-02 09:00:00.000012",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Utility Bill Entry",
@@ -273,6 +273,11 @@
    "role": "Finance Manager",
    "submit": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
   }
  ],
  "row_format": "Dynamic",

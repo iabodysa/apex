@@ -175,7 +175,7 @@
   }
  ],
  "links": [],
- "modified": "2026-05-25 01:05:32.423482",
+ "modified": "2026-06-02 09:00:00.000003",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Cleaning Log",
@@ -205,6 +205,17 @@
    "read": 1,
    "role": "Resident Supervisor",
    "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Cleaning Supervisor",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
   }
  ],
  "row_format": "Dynamic",

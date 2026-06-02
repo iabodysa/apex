@@ -279,7 +279,7 @@
   }
  ],
  "is_submittable": 1,
-"links": [
+ "links": [
   {
    "group": "Maintenance",
    "link_doctype": "Maintenance Work Order",
@@ -299,7 +299,7 @@
    "table_fieldname": "linked_maintenance_requests"
   }
  ],
- "modified": "2026-05-25 01:05:29.717302",
+ "modified": "2026-06-02 09:00:00.000009",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",
@@ -331,6 +331,23 @@
    "create": 1,
    "read": 1,
    "role": "Resident Supervisor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "if_owner": 1,
+   "read": 1,
+   "role": "All"
+  },
+  {
+   "read": 1,
+   "role": "Maintenance Technician"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Resident Request Coordinator",
    "submit": 1,
    "write": 1
   }

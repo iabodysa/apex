@@ -24,6 +24,16 @@ test_ignore = [
 
 class TestCleaningLog(FrappeTestCase):
 
+    def test_docperm_cleaning_supervisor(self):
+        """Cleaning Supervisor must have read/write/create on Cleaning Log."""
+        meta = frappe.get_meta("Cleaning Log")
+        roles = {p.role: p for p in meta.permissions}
+        self.assertIn("Cleaning Supervisor", roles, "Cleaning Supervisor perm row is missing")
+        p = roles["Cleaning Supervisor"]
+        self.assertEqual(p.read, 1)
+        self.assertEqual(p.write, 1)
+        self.assertEqual(p.create, 1)
+
     def test_create_valid_cleaning_log(self):
         doc = frappe.get_doc({
             "doctype": "Cleaning Log",

@@ -1,13 +1,19 @@
 import frappe
-from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_material_template_seed import seed_templates
 
-from apex_habitat.habitat.doctype.maintenance_material.maintenance_material_catalog import seed_catalog
-
-from apex_habitat.habitat.kanban_seed import seed_kanban_boards
 from apex_habitat.habitat.assignment_rules_seed import seed_assignment_rules
 from apex_habitat.habitat.auto_email_reports_seed import seed_auto_email_reports
+from apex_habitat.habitat.dashboard_seed import (
+    seed_habitat_dashboard,
+    seed_role_dashboards,
+)
+from apex_habitat.habitat.doctype.maintenance_material.maintenance_material_catalog import (
+    seed_catalog,
+)
+from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_material_template_seed import (
+    seed_templates,
+)
 from apex_habitat.habitat.email_templates_seed import seed_email_templates
-from apex_habitat.habitat.dashboard_seed import seed_habitat_dashboard, seed_role_dashboards
+from apex_habitat.habitat.kanban_seed import seed_kanban_boards
 
 
 def after_install():
@@ -35,6 +41,10 @@ def create_roles():
         "Resident Supervisor",
         "Finance Manager",
         "Internal Auditor",
+        "Maintenance Technician",
+        "Cleaning Supervisor",
+        "Safety Officer",
+        "Resident Request Coordinator",
     ]
     for role_name in roles:
         if not frappe.db.exists("Role", role_name):
@@ -49,6 +59,10 @@ def create_role_profiles():
         "Habitat Accommodation Manager": ["Accommodation Manager", "System Manager"],
         "Habitat Resident Supervisor": ["Resident Supervisor"],
         "Habitat Finance Reviewer": ["Finance Manager", "Internal Auditor"],
+        "Habitat Maintenance Technician": ["Maintenance Technician"],
+        "Habitat Cleaning Supervisor": ["Cleaning Supervisor"],
+        "Habitat Safety Officer": ["Safety Officer"],
+        "Habitat Resident Request Coordinator": ["Resident Request Coordinator"],
     }
     for profile_name, roles in profiles.items():
         if not frappe.db.exists("Role Profile", profile_name):

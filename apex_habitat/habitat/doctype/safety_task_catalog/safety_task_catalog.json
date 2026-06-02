@@ -198,6 +198,12 @@
    "role": "Resident Supervisor",
    "read": 1,
    "idx": 3
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Safety Officer",
+   "read": 1,
+   "idx": 4
   }
  ]
 }

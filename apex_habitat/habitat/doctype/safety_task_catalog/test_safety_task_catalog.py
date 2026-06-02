@@ -26,6 +26,16 @@ test_ignore = [
 
 class TestSafetyTaskCatalog(FrappeTestCase):
 
+    def test_docperm_safety_officer_read_only(self):
+        """Safety Officer must have only read access on Safety Task Catalog (master data)."""
+        meta = frappe.get_meta("Safety Task Catalog")
+        roles = {p.role: p for p in meta.permissions}
+        self.assertIn("Safety Officer", roles, "Safety Officer perm row is missing")
+        p = roles["Safety Officer"]
+        self.assertEqual(p.read, 1)
+        self.assertFalse(getattr(p, "write", 0), "Safety Officer must NOT have write on STC master")
+        self.assertFalse(getattr(p, "create", 0), "Safety Officer must NOT have create on STC master")
+
     def test_create_valid_catalog_entry(self):
         doc = frappe.get_doc({
             "doctype": "Safety Task Catalog",

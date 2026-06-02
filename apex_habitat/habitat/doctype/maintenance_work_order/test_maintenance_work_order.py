@@ -24,6 +24,19 @@ test_ignore = [
 
 class TestMaintenanceWorkOrder(FrappeTestCase):
 
+    def test_docperm_maintenance_technician(self):
+        """Maintenance Technician must have read/write on MWO (no submit/cancel/create/delete)."""
+        meta = frappe.get_meta("Maintenance Work Order")
+        roles = {p.role: p for p in meta.permissions}
+        self.assertIn("Maintenance Technician", roles, "Maintenance Technician perm row is missing")
+        p = roles["Maintenance Technician"]
+        self.assertEqual(p.read, 1)
+        self.assertEqual(p.write, 1)
+        self.assertFalse(getattr(p, "submit", 0), "Maintenance Technician must NOT have submit")
+        self.assertFalse(getattr(p, "cancel", 0), "Maintenance Technician must NOT have cancel")
+        self.assertFalse(getattr(p, "create", 0), "Maintenance Technician must NOT have create")
+        self.assertFalse(getattr(p, "delete", 0), "Maintenance Technician must NOT have delete")
+
     def test_create_valid_work_order(self):
         doc = frappe.get_doc({
             "doctype": "Maintenance Work Order",

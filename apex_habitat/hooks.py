@@ -190,7 +190,11 @@ override_doctype_dashboards = {
 
 # Salis: project-based row scoping — supervisors/PMs see only
 # the projects they hold a User Permission for; oversight roles see all.
+# Habitat: Maintenance Request is universal-intake but owner-private — any user
+# may raise a ticket, yet a non-privileged raiser sees only their own + assigned
+# rows (privileged oversight roles see all). See habitat/permissions.py.
 permission_query_conditions = {
+    "Maintenance Request": "apex_habitat.habitat.permissions.maintenance_request_query",
     "Vehicle Assignment": "apex_habitat.salis.permissions.vehicle_assignment_query",
     "Fuel Request": "apex_habitat.salis.permissions.fuel_request_query",
     "Dispatch Trip": "apex_habitat.salis.permissions.dispatch_trip_query",
@@ -209,6 +213,10 @@ permission_query_conditions = {
 }
 
 has_permission = {
+    # Habitat: per-document owner-scope for Maintenance Request (mirrors the
+    # permission_query_conditions entry above) — confines form/REST/link reads to
+    # the ticket's owner/assignee, deferring to DocPerms for privileged roles.
+    "Maintenance Request": "apex_habitat.habitat.permissions.maintenance_request_has_permission",
     "Vehicle Assignment": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Dispatch Trip": "apex_habitat.salis.permissions.scoped_has_permission",
@@ -236,6 +244,12 @@ has_permission = {
 fixtures = [
     {"dt": "Safety Task Catalog"},
     {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
+    # Habitat operational roles (role-alignment pass) — the four new least-
+    # privilege roles ship as a complementary fixture entry (mirroring the Salis-
+    # roles line below) so they export cleanly without rewriting the long-standing
+    # Habitat-roles filter above or clobbering any ERPNext/HRMS-owned role. They
+    # also remain existence-guarded in the create_roles() seeder.
+    {"dt": "Role", "filters": [["name", "in", ["Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
     # Salis (Movement) custom roles — only the uniquely-ours, post-consolidation
     # roles are fixtured. Core/generic roles (Fleet Manager, Driver) are
     # existence-guarded in the seeds, never fixtured, to avoid clobbering
@@ -335,6 +349,12 @@ after_migrate = [
     # migrate (idempotent + existence-guarded; seeds Issue Types/Priorities/SLA
     # and grants the core-Issue role DocPerms via Custom DocPerm rows).
     "apex_habitat.salis.issue_seed.seed_salis_issue_masters",
+    # Habitat roles + Role Profiles — keep already-installed sites in sync on
+    # migrate (create-only/existence-guarded). after_install seeds them on a fresh
+    # install; this delivers newly-added roles/profiles to UPGRADING sites — Role
+    # Profiles are not fixtured, so without this they never reach migrate.
+    "apex_habitat.setup.create_roles",
+    "apex_habitat.setup.create_role_profiles",
 ]
 
 # A fresh test site has no Company or ERPNext master data until the setup wizard

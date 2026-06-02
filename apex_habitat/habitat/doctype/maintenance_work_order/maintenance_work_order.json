@@ -210,7 +210,7 @@
    "link_fieldname": "maintenance_work_order"
   }
  ],
- "modified": "2026-05-25 01:05:30.129623",
+ "modified": "2026-06-02 09:00:00.000010",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Work Order",
@@ -224,6 +224,11 @@
    "read": 1,
    "role": "System Manager",
    "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Maintenance Technician",
    "write": 1
   }
  ],

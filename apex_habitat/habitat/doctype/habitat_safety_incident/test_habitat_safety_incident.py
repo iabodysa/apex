@@ -12,6 +12,17 @@ test_ignore = [
 
 class TestHabitatSafetyIncident(FrappeTestCase):
 
+    def test_docperm_safety_officer(self):
+        """Safety Officer must have read/write/create on Habitat Safety Incident (no submit)."""
+        meta = frappe.get_meta("Habitat Safety Incident")
+        roles = {p.role: p for p in meta.permissions}
+        self.assertIn("Safety Officer", roles, "Safety Officer perm row is missing")
+        p = roles["Safety Officer"]
+        self.assertEqual(p.read, 1)
+        self.assertEqual(p.write, 1)
+        self.assertEqual(p.create, 1)
+        self.assertFalse(getattr(p, "submit", 0), "Safety Officer must NOT have submit on HSI")
+
     def _base(self, **overrides):
         doc = {
             "doctype": "Habitat Safety Incident",

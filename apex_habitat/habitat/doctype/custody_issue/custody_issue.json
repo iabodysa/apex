@@ -162,7 +162,7 @@
    "link_fieldname": "custody_issue"
   }
  ],
- "modified": "2026-05-25 01:05:28.834914",
+ "modified": "2026-06-02 09:00:00.000005",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Issue",
@@ -193,6 +193,11 @@
    "read": 1,
    "role": "Resident Supervisor",
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
   }
  ],
  "row_format": "Dynamic",
