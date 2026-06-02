@@ -24,7 +24,7 @@ def execute(filters=None):
     checkouts = frappe.get_all(
         "Accommodation Checkout",
         filters=query_filters,
-        fields=["name", "employee", "bed", "checkout_date", "custody_cleared", "assignment"],
+        fields=["name", "employee", "bed", "checkout_date", "custody_cleared"],
         order_by="checkout_date desc",
     )
 

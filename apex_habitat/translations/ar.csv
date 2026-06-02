@@ -2571,3 +2571,16 @@ Trip {0} completed; odometer {1}.,اكتملت الرحلة {0}؛ قراءة ا�
 A Fuel Claim must be created with status Draft; {0} is reached through the workflow.,يجب إنشاء مطالبة الوقود بحالة مسودة؛ ويُبلَغ {0} عبر سير العمل.
 Attendance for {0} on {1} already exists.,سجل الحضور لـ {0} بتاريخ {1} موجود بالفعل.
 Could not generate a unique worker token. Please try again.,تعذّر إنشاء رمز عامل فريد. يرجى المحاولة مجدداً.
+Unregistered,غير مسجّل
+Stop,محطة
+Service Details,تفاصيل الخدمة
+Temporary (Over-Capacity) Bed,سرير مؤقت (فوق الطاقة الاستيعابية)
+Permanent,دائم
+Temporary,مؤقت
+Manual,يدوي
+Received,مُستلَم
+Started,بدأ
+Transferred,مُحوَّل
+Warning,تحذير
+New,جديد
+Gemini,Gemini

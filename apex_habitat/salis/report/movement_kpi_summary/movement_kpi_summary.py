@@ -54,13 +54,20 @@ def execute(filters=None):
     to_date = filters.get("to_date")
 
     def date_range(field):
+        # period_month is a YYYY-MM Data field; comparing it against full YYYY-MM-DD
+        # bounds silently drops the whole partial month (e.g. a mid-month from_date
+        # excludes its own month). Truncate the bounds to YYYY-MM for that field.
+        lo, hi = from_date, to_date
+        if field == "period_month":
+            lo = lo[:7] if lo else lo
+            hi = hi[:7] if hi else hi
         f = {}
-        if from_date and to_date:
-            f[field] = ["between", [from_date, to_date]]
-        elif from_date:
-            f[field] = [">=", from_date]
-        elif to_date:
-            f[field] = ["<=", to_date]
+        if lo and hi:
+            f[field] = ["between", [lo, hi]]
+        elif lo:
+            f[field] = [">=", lo]
+        elif hi:
+            f[field] = ["<=", hi]
         return f
 
     columns = [
