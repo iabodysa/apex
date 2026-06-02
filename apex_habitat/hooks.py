@@ -182,6 +182,17 @@ scheduler_events = {
     ],
 }
 
+# Log Settings auto-clearing for the unbounded, scheduler-written DocTypes.
+# daily_maintenance (run_log_clean_up) calls each controller's clear_old_logs(days)
+# at the retention below. These are operational/time-series growth, NOT financial
+# ledgers: the financial ledgers (Accommodation/Fuel Consumption/Rental Accrual)
+# are deliberately NOT listed here — they carry audit significance and must persist.
+default_log_clearing_doctypes = {
+    "Operations Alert": 90,
+    "Accommodation Occupancy Snapshot": 365,
+    "Vehicle Utilisation Snapshot": 365,
+}
+
 # Employee form dashboard: surface housing and custody records
 override_doctype_dashboards = {
     "Employee": "apex_habitat.habitat.api.employee_links.get_data",
