@@ -62,35 +62,28 @@ def on_submit(doc, method=None):
         if component_type != "Deduction":
             frappe.throw(_("Salary component {0} must be of type Deduction for damage assessments.").format(salary_component))
 
-        try:
-            # Create a Draft Additional Salary record
-            add_sal = frappe.get_doc({
-                "doctype": "Additional Salary",
-                "employee": doc.employee,
-                "salary_component": salary_component,
-                "amount": amount,
-                "payroll_date": doc.assessment_date,
-                "company": company,
-                "remarks": f"Deduction for custody damage assessment {doc.name}"
-            })
-            add_sal.insert(ignore_permissions=False)
+        # Create the Draft Additional Salary. Do NOT swallow a failure here: an
+        # insert error must propagate so the submit aborts atomically, rather than
+        # leaving docstatus=1 with no deduction. (A rollback inside on_submit would
+        # also corrupt the in-flight submit transaction.)
+        add_sal = frappe.get_doc({
+            "doctype": "Additional Salary",
+            "employee": doc.employee,
+            "salary_component": salary_component,
+            "amount": amount,
+            "payroll_date": doc.assessment_date,
+            "company": company,
+            "remarks": f"Deduction for custody damage assessment {doc.name}"
+        })
+        add_sal.insert(ignore_permissions=False)
 
-            # Link it back to this document
-            frappe.db.set_value("Custody Damage Assessment", doc.name, "deduction_entry", add_sal.name)
+        # Link it back to this document
+        frappe.db.set_value("Custody Damage Assessment", doc.name, "deduction_entry", add_sal.name)
 
-            logger.info(
-                f"custody_damage_assessment.on_submit: Draft Additional Salary {add_sal.name} "
-                f"created for assessment {doc.name}."
-            )
-        except Exception as e:
-            frappe.db.rollback()
-            frappe.log_error(
-                title="Custody Damage Assessment on_submit error",
-                message=frappe.get_traceback(),
-            )
-            logger.error(
-                f"custody_damage_assessment.on_submit: Failed to create Additional Salary for assessment {doc.name}: {e}"
-            )
+        logger.info(
+            f"custody_damage_assessment.on_submit: Draft Additional Salary {add_sal.name} "
+            f"created for assessment {doc.name}."
+        )
 
 
 def before_cancel(doc, method=None):

@@ -131,7 +131,10 @@ def _link(tw, employee: str) -> None:
             ),
         )
     except Exception:
-        frappe.db.rollback()
+        # The comment is cosmetic. Log the failure but do NOT rollback — a rollback
+        # here would silently undo the substantive work above (party re-point,
+        # cost back-dating, status='Linked'), leaving the worker stuck Active.
+        frappe.log_error(frappe.get_traceback(), "Temporary Worker link: comment failed")
 
 
 def _expire(tw) -> None:

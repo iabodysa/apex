@@ -72,7 +72,7 @@ def _worker_link(token: str) -> str:
     return f"{frappe.utils.get_url()}/masar?w={token}"
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
     """Desk action: issue (or rotate) a worker's personal Masar link + QR.
 
