@@ -18,6 +18,14 @@ export_python_type_annotations = True
 # normalisation) consolidated from 3 duplicated copies into one bundle.
 app_include_js = ["masar_worker_link.bundle.js"]
 
+# First-install Setup Wizard: an extra "Apex Configuration" slide on the native
+# Frappe setup wizard (fresh site) where the operator chooses the payment method
+# and the salary-deduction / GL-posting toggles (all OFF by default). The choices
+# are applied to Habitat Settings server-side at completion. Change later anytime
+# in Habitat Settings; the wizard runs once.
+setup_wizard_requires = "assets/apex_habitat/js/apex_setup_wizard.js"
+setup_wizard_complete = "apex_habitat.apex_core.setup_wizard.setup_wizard_complete"
+
 
 # Single functional module: Habitat
 
