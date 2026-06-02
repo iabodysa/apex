@@ -25,6 +25,7 @@ is granted defensively as on Fuel Request.
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex_habitat.tests._helpers import _user
@@ -41,9 +42,10 @@ def _actions(doc):
 	get_workflow_name("Fuel Claim") == WORKFLOW,
 	"Fuel Claim Workflow not seeded on this site",
 )
-class TestFuelClaimWorkflow(unittest.TestCase):
+class TestFuelClaimWorkflow(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		frappe.set_user("Administrator")
 		# A requester (Project tier maker) and a separate approver (Operations
 		# tier). A user who is BOTH a maker role and Fleet Manager proves the SoD
@@ -64,7 +66,6 @@ class TestFuelClaimWorkflow(unittest.TestCase):
 					"allow": "Project",
 					"for_value": cls.project,
 				}).insert(ignore_permissions=True)
-		frappe.db.commit()
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -107,7 +108,6 @@ class TestFuelClaimWorkflow(unittest.TestCase):
 		}
 		data.update(overrides)
 		doc = frappe.get_doc(data).insert(ignore_permissions=True)
-		frappe.db.commit()
 		self.addCleanup(lambda: self._purge(doc.name))
 		return doc
 
@@ -133,7 +133,6 @@ class TestFuelClaimWorkflow(unittest.TestCase):
 			except Exception:
 				pass
 		frappe.delete_doc("Fuel Claim", name, ignore_permissions=True, force=True)
-		frappe.db.commit()
 
 	# ------------------------------------------------------------------ tests
 

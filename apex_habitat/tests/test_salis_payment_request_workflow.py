@@ -33,6 +33,7 @@ The Finance Manager approver is a cross-project finance-control role
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex_habitat.tests._helpers import _user
@@ -49,9 +50,10 @@ def _actions(doc):
     get_workflow_name("Salis Payment Request") == WORKFLOW,
     "Salis Payment Request Workflow not seeded on this site",
 )
-class TestSalisPaymentRequestWorkflow(unittest.TestCase):
+class TestSalisPaymentRequestWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         # An operational maker and the two finance approvers.
         cls.maker = _user("pr_maker@example.com", "Fleet Project Manager")
@@ -68,7 +70,6 @@ class TestSalisPaymentRequestWorkflow(unittest.TestCase):
         cls.project = cls._project("PR Workflow Project")
         for u in (cls.maker, cls.finance_maker):
             cls._grant_project(u, cls.project)
-        frappe.db.commit()
 
     @staticmethod
     def _project(name):

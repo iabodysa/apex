@@ -45,6 +45,7 @@ functions) rather than only the happy path.
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.permissions import payment_sod_has_permission
 from apex_habitat.tests._helpers import _user
@@ -86,15 +87,15 @@ def _payment_request(project=None):
         }
     )
     doc.insert(ignore_permissions=True)
-    frappe.db.commit()
     return doc
 
 
-class TestSalisPaymentRequestScoping(unittest.TestCase):
+class TestSalisPaymentRequestScoping(FrappeTestCase):
     """A scoped supervisor sees only their project's payment requests."""
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.pa = _project("PayScope A")
         cls.pb = _project("PayScope B")
@@ -110,16 +111,15 @@ class TestSalisPaymentRequestScoping(unittest.TestCase):
         # it. Owned by Administrator so the "owner defers" branch never applies to
         # our scoped supervisor.
         cls.pr_null = _payment_request(None)
-        frappe.db.commit()
 
     @classmethod
     def tearDownClass(cls):
+        super().tearDownClass()
         frappe.set_user("Administrator")
         for pr in (cls.pr_a, cls.pr_b, cls.pr_null):
             frappe.delete_doc(
                 "Salis Payment Request", pr.name, ignore_permissions=True, force=True
             )
-        frappe.db.commit()
 
     def tearDown(self):
         frappe.set_user("Administrator")
@@ -201,7 +201,7 @@ class TestSalisPaymentRequestScoping(unittest.TestCase):
         )
 
 
-class TestScopingDoesNotWeakenSoD(unittest.TestCase):
+class TestScopingDoesNotWeakenSoD(FrappeTestCase):
     """Composing project scope onto the SoD hook must NOT relax maker != checker.
 
     The requester/creator must still be blocked from authorizing their own
@@ -212,6 +212,7 @@ class TestScopingDoesNotWeakenSoD(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.pa = _project("SoDScope A")
         # Fleet Project Manager: scoped, can submit -> the realistic self-approver.
@@ -220,7 +221,6 @@ class TestScopingDoesNotWeakenSoD(unittest.TestCase):
         # A different in-scope user who legitimately may authorize.
         cls.other = _user("sod_pm_other@example.com", "Fleet Project Manager")
         _grant_project(cls.other, cls.pa)
-        frappe.db.commit()
 
     def tearDown(self):
         frappe.set_user("Administrator")

@@ -27,6 +27,7 @@ Permission, but one is granted defensively as on Fuel Request.
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex_habitat.tests._helpers import _user
@@ -43,9 +44,10 @@ def _actions(doc):
 	get_workflow_name("Fuel Exception Case") == WORKFLOW,
 	"Fuel Exception Case Workflow not seeded on this site",
 )
-class TestFuelExceptionCaseWorkflow(unittest.TestCase):
+class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		frappe.set_user("Administrator")
 		# A raiser (Project tier) and a separate resolver (Operations tier). A user
 		# who is BOTH a maker role and Fleet Manager proves the SoD condition is
@@ -66,7 +68,6 @@ class TestFuelExceptionCaseWorkflow(unittest.TestCase):
 					"allow": "Project",
 					"for_value": cls.project,
 				}).insert(ignore_permissions=True)
-		frappe.db.commit()
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -113,7 +114,6 @@ class TestFuelExceptionCaseWorkflow(unittest.TestCase):
 			data["evidence_notes"] = "GPS log attached."
 		data.update(overrides)
 		doc = frappe.get_doc(data).insert(ignore_permissions=True)
-		frappe.db.commit()
 		self.addCleanup(lambda: self._purge(doc.name))
 		return doc
 
@@ -138,7 +138,6 @@ class TestFuelExceptionCaseWorkflow(unittest.TestCase):
 			except Exception:
 				pass
 		frappe.delete_doc("Fuel Exception Case", name, ignore_permissions=True, force=True)
-		frappe.db.commit()
 
 	# ------------------------------------------------------------------ tests
 

@@ -28,6 +28,7 @@ project-scoped, so no Project User Permission is required.
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex_habitat.tests._helpers import _user
@@ -44,9 +45,10 @@ def _actions(doc):
     get_workflow_name("Rental Settlement") == WORKFLOW,
     "Rental Settlement Workflow not seeded on this site",
 )
-class TestRentalSettlementWorkflow(unittest.TestCase):
+class TestRentalSettlementWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         # A requester (operational maker) and the two approver tiers.
         cls.requester = _user("rs_req@example.com", "Fleet Project Manager")
@@ -57,7 +59,6 @@ class TestRentalSettlementWorkflow(unittest.TestCase):
         cls.finance_maker = _user("rs_finmaker@example.com", "Finance Manager")
         frappe.get_doc("User", cls.finance_maker).add_roles("Fleet Project Manager")
         cls.office = cls._office("RS Workflow Office")
-        frappe.db.commit()
 
     def setUp(self):
         frappe.set_user("Administrator")

@@ -1,9 +1,9 @@
 """Idempotency tests for the Salis background engines: re-running a daily/weekly
 job must never double-post its ledger/snapshot rows."""
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.fuel_engine import accrue_fuel_consumption, monthly_fuel_reconciliation
 from apex_habitat.salis.rental_engine import daily_rental_accrual
@@ -11,9 +11,10 @@ from apex_habitat.salis.tasks import reconcile_operations_alerts
 from apex_habitat.salis.utilisation_engine import weekly_vehicle_utilisation_snapshot
 
 
-class TestRentalAccrualIdempotency(unittest.TestCase):
+class TestRentalAccrualIdempotency(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.office = frappe.db.get_value("Rental Office", {"office_name": "Eng Test Office"}, "name")
         if not cls.office:
@@ -32,49 +33,43 @@ class TestRentalAccrualIdempotency(unittest.TestCase):
                                 "movement_date": frappe.utils.today(), "daily_rate": 100}).insert(
                 ignore_permissions=True)
             m.submit()
-        frappe.db.commit()
 
     def test_accrual_is_idempotent(self):
         today = frappe.utils.today()
         frappe.db.delete("Rental Accrual Ledger", {"vehicle": self.vehicle, "accrual_date": today})
-        frappe.db.commit()
         daily_rental_accrual()
-        frappe.db.commit()
         first = frappe.db.count("Rental Accrual Ledger", {"vehicle": self.vehicle, "accrual_date": today})
         daily_rental_accrual()
-        frappe.db.commit()
         second = frappe.db.count("Rental Accrual Ledger", {"vehicle": self.vehicle, "accrual_date": today})
         self.assertEqual(first, 1)
         self.assertEqual(second, 1)
 
 
-class TestUtilisationSnapshotIdempotency(unittest.TestCase):
+class TestUtilisationSnapshotIdempotency(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.vehicle = frappe.db.get_value("Salis Vehicle", {"plate_number": "UTIL ENG 1"}, "name")
         if not cls.vehicle:
             cls.vehicle = frappe.get_doc({"doctype": "Salis Vehicle", "plate_number": "UTIL ENG 1",
                                           "status": "Active"}).insert(ignore_permissions=True).name
-        frappe.db.commit()
 
     def test_snapshot_is_idempotent(self):
         today = frappe.utils.today()
         frappe.db.delete("Vehicle Utilisation Snapshot", {"vehicle": self.vehicle, "snapshot_date": today})
-        frappe.db.commit()
         weekly_vehicle_utilisation_snapshot()
-        frappe.db.commit()
         first = frappe.db.count("Vehicle Utilisation Snapshot", {"vehicle": self.vehicle, "snapshot_date": today})
         weekly_vehicle_utilisation_snapshot()
-        frappe.db.commit()
         second = frappe.db.count("Vehicle Utilisation Snapshot", {"vehicle": self.vehicle, "snapshot_date": today})
         self.assertEqual(first, 1)
         self.assertEqual(second, 1)
 
 
-class TestFuelReconciliationNoDuplicateAlert(unittest.TestCase):
+class TestFuelReconciliationNoDuplicateAlert(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.period = frappe.utils.today()[:7]
         cls.vehicle = frappe.db.get_value("Salis Vehicle", {"plate_number": "FUEL REC 1"}, "name")
@@ -91,7 +86,6 @@ class TestFuelReconciliationNoDuplicateAlert(unittest.TestCase):
                             "period_month": cls.period, "litres": 20, "amount": 300,
                             "source_type": "Fuel Daily Log", "source_name": "FUELRECTEST"}).insert(
                 ignore_permissions=True)
-        frappe.db.commit()
 
     def _window(self):
         from frappe.utils import get_first_day, get_last_day, getdate
@@ -105,18 +99,15 @@ class TestFuelReconciliationNoDuplicateAlert(unittest.TestCase):
     def test_reconciliation_raises_exactly_one_alert(self):
         frappe.db.delete("Operations Alert", {"alert_type": "Excessive Topup",
                          "vehicle": self.vehicle, "raised_on": ["between", self._window()]})
-        frappe.db.commit()
         monthly_fuel_reconciliation()
-        frappe.db.commit()
         first = self._count()
         monthly_fuel_reconciliation()
-        frappe.db.commit()
         second = self._count()
         self.assertEqual(first, 1)
         self.assertEqual(second, 1)
 
 
-class TestFuelAccrualLateDone(unittest.TestCase):
+class TestFuelAccrualLateDone(FrappeTestCase):
     """Regression: a Fuel Request created earlier that only flips to Done today
     (or any later day) must still be ledgered. The old window keyed accrual on
     ``request_date in [yesterday, today]`` AND status=Done, so a request with an
@@ -126,12 +117,12 @@ class TestFuelAccrualLateDone(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.vehicle = frappe.db.get_value("Salis Vehicle", {"plate_number": "FUEL LATE 1"}, "name")
         if not cls.vehicle:
             cls.vehicle = frappe.get_doc({"doctype": "Salis Vehicle", "plate_number": "FUEL LATE 1",
                                           "status": "Active"}).insert(ignore_permissions=True).name
-        frappe.db.commit()
 
     def _make_done_request(self, request_date):
         """Create a Done Fuel Request whose request_date is in the past, walking
@@ -165,7 +156,6 @@ class TestFuelAccrualLateDone(unittest.TestCase):
             doc.status = "Done"
             doc.save(ignore_permissions=True)
             doc.submit()
-        frappe.db.commit()
         return doc.name
 
     def test_late_done_request_is_ledgered(self):
@@ -178,10 +168,8 @@ class TestFuelAccrualLateDone(unittest.TestCase):
         # Pre-state: not yet ledgered, no ledger row.
         self.assertEqual(frappe.db.get_value("Fuel Request", name, "ledgered"), 0)
         frappe.db.delete("Fuel Consumption Ledger", {"source_type": "Fuel Request", "source_name": name})
-        frappe.db.commit()
 
         accrue_fuel_consumption()
-        frappe.db.commit()
 
         rows = frappe.db.count("Fuel Consumption Ledger",
                                {"source_type": "Fuel Request", "source_name": name})
@@ -191,7 +179,6 @@ class TestFuelAccrualLateDone(unittest.TestCase):
 
         # Idempotent: a second run must not double-post.
         accrue_fuel_consumption()
-        frappe.db.commit()
         rows_again = frappe.db.count("Fuel Consumption Ledger",
                                      {"source_type": "Fuel Request", "source_name": name})
         self.assertEqual(rows_again, 1, "Re-running accrual must not double-ledger.")
@@ -199,10 +186,9 @@ class TestFuelAccrualLateDone(unittest.TestCase):
     def _cleanup(self, name):
         frappe.set_user("Administrator")
         frappe.db.delete("Fuel Consumption Ledger", {"source_type": "Fuel Request", "source_name": name})
-        frappe.db.commit()
 
 
-class TestFuelLedgerSourceUniqueIndex(unittest.TestCase):
+class TestFuelLedgerSourceUniqueIndex(FrappeTestCase):
     """The fuel engine asserts a DB-level UNIQUE index on the ledger as its hard
     idempotency backstop (``fuel_engine.accrue_fuel_consumption`` docstring). The
     engine's application guard (``_ledger_exists`` check-then-insert) is not atomic,
@@ -215,6 +201,7 @@ class TestFuelLedgerSourceUniqueIndex(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.vehicle = frappe.db.get_value("Salis Vehicle", {"plate_number": "FCL DUP 1"}, "name")
         if not cls.vehicle:
@@ -222,13 +209,11 @@ class TestFuelLedgerSourceUniqueIndex(unittest.TestCase):
                                           "status": "Active"}).insert(ignore_permissions=True).name
         frappe.db.delete("Fuel Consumption Ledger",
                          {"source_type": "Fuel Daily Log", "source_name": cls.SOURCE_NAME})
-        frappe.db.commit()
 
     def tearDown(self):
         frappe.set_user("Administrator")
         frappe.db.delete("Fuel Consumption Ledger",
                          {"source_type": "Fuel Daily Log", "source_name": self.SOURCE_NAME})
-        frappe.db.commit()
 
     def _row(self):
         return {"doctype": "Fuel Consumption Ledger", "vehicle": self.vehicle,
@@ -254,7 +239,6 @@ class TestFuelLedgerSourceUniqueIndex(unittest.TestCase):
     def test_duplicate_source_row_rejected_by_db(self):
         # First row inserts fine.
         frappe.get_doc(self._row()).insert(ignore_permissions=True)
-        frappe.db.commit()
 
         # A second row sharing the same (source_type, source_name) — the accrual
         # idempotency key — must be rejected at the DB layer, even when the
@@ -273,12 +257,13 @@ class TestFuelLedgerSourceUniqueIndex(unittest.TestCase):
         frappe.db.rollback()
 
 
-class TestOperationsAlertAutoResolve(unittest.TestCase):
+class TestOperationsAlertAutoResolve(FrappeTestCase):
     """The alert resolver must close alerts whose source condition has cleared,
     leave still-valid alerts open, and be idempotent on re-run."""
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         # A driver WITH attendance today (Supervisor Delay should clear).
         cls.driver_ok = frappe.db.get_value("Salis Driver", {"full_name": "Resolve OK Driver"}, "name")
@@ -306,7 +291,6 @@ class TestOperationsAlertAutoResolve(unittest.TestCase):
                                   "attendance_date": frappe.utils.today(), "status": "Present"})
             att.insert(ignore_permissions=True)
             att.submit()
-        frappe.db.commit()
 
     def _open_alert(self, alert_type, severity, **subject):
         a = frappe.get_doc({
@@ -329,10 +313,8 @@ class TestOperationsAlertAutoResolve(unittest.TestCase):
         a_idle = self._open_alert("Idle Vehicle", "Info", vehicle=self.vehicle_inactive)
         for n in (a_ok, a_gap, a_idle):
             self.addCleanup(lambda n=n: self._cleanup(n))
-        frappe.db.commit()
 
         reconcile_operations_alerts()
-        frappe.db.commit()
 
         self.assertEqual(frappe.db.get_value("Operations Alert", a_ok, "status"), "Resolved",
                          "Attendance recorded -> Supervisor Delay must resolve.")
@@ -344,15 +326,12 @@ class TestOperationsAlertAutoResolve(unittest.TestCase):
     def test_resolution_is_idempotent(self):
         a_idle = self._open_alert("Idle Vehicle", "Info", vehicle=self.vehicle_inactive)
         self.addCleanup(lambda: self._cleanup(a_idle))
-        frappe.db.commit()
 
         reconcile_operations_alerts()
-        frappe.db.commit()
         first = frappe.db.get_value("Operations Alert", a_idle, "status")
 
         # Second run must not error and must leave the already-Resolved alert as-is.
         reconcile_operations_alerts()
-        frappe.db.commit()
         second = frappe.db.get_value("Operations Alert", a_idle, "status")
 
         self.assertEqual(first, "Resolved")
@@ -362,4 +341,3 @@ class TestOperationsAlertAutoResolve(unittest.TestCase):
         frappe.set_user("Administrator")
         if frappe.db.exists("Operations Alert", name):
             frappe.delete_doc("Operations Alert", name, force=True, ignore_permissions=True)
-        frappe.db.commit()

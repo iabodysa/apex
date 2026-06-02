@@ -26,6 +26,7 @@ condition + docstatus transition), not a mocked shortcut.
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex_habitat.tests._helpers import _user
@@ -42,9 +43,10 @@ def _actions(doc):
     get_workflow_name("Transport Request") == WORKFLOW,
     "Transport Request Workflow not seeded on this site",
 )
-class TestTransportRequestWorkflow(unittest.TestCase):
+class TestTransportRequestWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         # A requester (Operations-style) and two approvers at different tiers.
         cls.requester = _user("tr_req@example.com", "Fleet Project Manager")
@@ -64,7 +66,6 @@ class TestTransportRequestWorkflow(unittest.TestCase):
                     "allow": "Project",
                     "for_value": cls.project,
                 }).insert(ignore_permissions=True)
-        frappe.db.commit()
 
     def setUp(self):
         frappe.set_user("Administrator")
@@ -276,7 +277,6 @@ class TestTransportRequestWorkflow(unittest.TestCase):
             "project": self.project,
         }).insert(ignore_permissions=True)
         rp.submit()
-        frappe.db.commit()
 
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")
@@ -292,7 +292,6 @@ class TestTransportRequestWorkflow(unittest.TestCase):
             "project": self.project,
         }).insert(ignore_permissions=True)
         rp.submit()
-        frappe.db.commit()
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")
 
@@ -323,7 +322,6 @@ class TestTransportRequestWorkflow(unittest.TestCase):
         dt.reload()
         self.assertEqual(dt.status, "Completed")
         self.assertEqual(dt.docstatus, 1)
-        frappe.db.commit()
 
         tr.reload()
         self.assertEqual(tr.status, "Fulfilled")
@@ -337,7 +335,6 @@ class TestTransportRequestWorkflow(unittest.TestCase):
         dt.reload()
         self.assertEqual(dt.status, "Cancelled")
         self.assertEqual(dt.docstatus, 2)
-        frappe.db.commit()
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")
         self.assertIsNone(tr.dispatch_trip)

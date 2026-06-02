@@ -23,9 +23,9 @@ indirectly: every test runs against a freshly-migrated site where the two source
 DocTypes are already gone (asserted in ``TestFuelMergeShape``).
 """
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_workflow_name
 from frappe.utils import add_days, today
 
@@ -82,10 +82,9 @@ def _purge(name):
 		except Exception:
 			pass
 	frappe.delete_doc("Fuel Request", name, ignore_permissions=True, force=True)
-	frappe.db.commit()
 
 
-class TestFuelMergeShape(unittest.TestCase):
+class TestFuelMergeShape(FrappeTestCase):
 	"""The structural outcome of the merge: the two source DocTypes are gone and
 	Fuel Request carries the unified field set."""
 
@@ -113,12 +112,12 @@ class TestFuelMergeShape(unittest.TestCase):
 			self.assertTrue(meta.has_field(f), f"Unified Fuel Request must carry {f}.")
 
 
-class TestFuelRequestStandard(unittest.TestCase):
+class TestFuelRequestStandard(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		frappe.set_user("Administrator")
 		cls.vehicle = _vehicle("FR STD 1")
-		frappe.db.commit()
 
 	def _make_done_standard(self, request_date):
 		doc = frappe.get_doc({
@@ -132,7 +131,6 @@ class TestFuelRequestStandard(unittest.TestCase):
 		})
 		doc.insert(ignore_permissions=True)
 		_drive_to_done(doc)
-		frappe.db.commit()
 		return doc.name
 
 	def test_standard_default_request_type(self):
@@ -164,10 +162,8 @@ class TestFuelRequestStandard(unittest.TestCase):
 		frappe.db.delete("Fuel Consumption Ledger",
 						 {"source_type": "Fuel Request", "source_name": name})
 		frappe.db.set_value("Fuel Request", name, "ledgered", 0, update_modified=False)
-		frappe.db.commit()
 
 		accrue_fuel_consumption()
-		frappe.db.commit()
 
 		self.assertEqual(
 			frappe.db.count("Fuel Consumption Ledger",
@@ -179,16 +175,15 @@ class TestFuelRequestStandard(unittest.TestCase):
 		frappe.set_user("Administrator")
 		frappe.db.delete("Fuel Consumption Ledger",
 						 {"source_type": "Fuel Request", "source_name": name})
-		frappe.db.commit()
 		_purge(name)
 
 
-class TestFuelRequestTopup(unittest.TestCase):
+class TestFuelRequestTopup(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		frappe.set_user("Administrator")
 		cls.vehicle = _vehicle("FR TOPUP 1")
-		frappe.db.commit()
 
 	def test_temporary_requires_revert_due_date(self):
 		doc = frappe.get_doc({
@@ -226,14 +221,12 @@ class TestFuelRequestTopup(unittest.TestCase):
 		})
 		doc.insert(ignore_permissions=True)
 		_drive_to_done(doc)
-		frappe.db.commit()
 		name = doc.name
 		self.addCleanup(lambda: _purge(name))
 
 		self.assertEqual(frappe.db.get_value("Fuel Request", name, "reverted"), 0)
 
 		unreverted_topup_watch()
-		frappe.db.commit()
 
 		self.assertEqual(frappe.db.get_value("Fuel Request", name, "reverted"), 1,
 						 "Overdue temporary top-up must be auto-reverted.")
@@ -251,22 +244,20 @@ class TestFuelRequestTopup(unittest.TestCase):
 		})
 		doc.insert(ignore_permissions=True)
 		_drive_to_done(doc)
-		frappe.db.commit()
 		name = doc.name
 		self.addCleanup(lambda: _purge(name))
 
 		unreverted_topup_watch()
-		frappe.db.commit()
 		self.assertEqual(frappe.db.get_value("Fuel Request", name, "status"), "Done")
 		self.assertEqual(frappe.db.get_value("Fuel Request", name, "reverted"), 0)
 
 
-class TestFuelRequestChip(unittest.TestCase):
+class TestFuelRequestChip(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		frappe.set_user("Administrator")
 		cls.vehicle = _vehicle("FR CHIP 1")
-		frappe.db.commit()
 
 	def test_issue_chip_submits_without_evidence(self):
 		doc = frappe.get_doc({
@@ -324,12 +315,12 @@ class TestFuelRequestChip(unittest.TestCase):
 		self.assertEqual(doc.docstatus, 1)
 
 
-class TestFuelRequestTypeGuards(unittest.TestCase):
+class TestFuelRequestTypeGuards(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		frappe.set_user("Administrator")
 		cls.vehicle = _vehicle("FR GUARD 1")
-		frappe.db.commit()
 
 	def test_invalid_request_type_rejected(self):
 		doc = frappe.get_doc({

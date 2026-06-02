@@ -2,17 +2,18 @@
 act on documents in their granted projects (and not on project-less documents),
 while an oversight role sees everything."""
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.permissions import scoped_has_permission
 from apex_habitat.tests._helpers import _user
 
 
-class TestProjectScoping(unittest.TestCase):
+class TestProjectScoping(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.pa = cls._project("Scope A")
         cls.pb = cls._project("Scope B")
@@ -22,7 +23,6 @@ class TestProjectScoping(unittest.TestCase):
                                 {"allow": "Project", "for_value": cls.pa, "user": cls.sup}):
             frappe.get_doc({"doctype": "User Permission", "allow": "Project",
                             "for_value": cls.pa, "user": cls.sup}).insert(ignore_permissions=True)
-        frappe.db.commit()
 
     @staticmethod
     def _project(name):

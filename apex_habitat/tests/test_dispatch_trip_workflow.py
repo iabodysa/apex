@@ -36,6 +36,7 @@ none).
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex_habitat.tests._helpers import _user
@@ -52,9 +53,10 @@ def _actions(doc):
     get_workflow_name("Dispatch Trip") == WORKFLOW,
     "Dispatch Trip Workflow not seeded on this site",
 )
-class TestDispatchTripWorkflow(unittest.TestCase):
+class TestDispatchTripWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         # A scoped supervisor + project manager (dispatch operators) and an
         # unscoped Fleet Manager (completes / cancels).
@@ -76,7 +78,6 @@ class TestDispatchTripWorkflow(unittest.TestCase):
                     "allow": "Project",
                     "for_value": cls.project,
                 }).insert(ignore_permissions=True)
-        frappe.db.commit()
 
     def setUp(self):
         frappe.set_user("Administrator")
@@ -150,7 +151,6 @@ class TestDispatchTripWorkflow(unittest.TestCase):
             "project": self.project,
         }).insert(ignore_permissions=True)
         rp.submit()
-        frappe.db.commit()
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")
         self.addCleanup(lambda: self._purge_tr(tr.name, rp.name))
@@ -165,7 +165,6 @@ class TestDispatchTripWorkflow(unittest.TestCase):
             "trip_date": frappe.utils.today(),
             "status": "Planned",
         }).insert(ignore_permissions=True)
-        frappe.db.commit()
         self.addCleanup(lambda: self._purge_trip(dt.name))
         return dt
 
@@ -181,7 +180,6 @@ class TestDispatchTripWorkflow(unittest.TestCase):
             except Exception:
                 pass
         frappe.delete_doc("Dispatch Trip", name, ignore_permissions=True, force=True)
-        frappe.db.commit()
 
     @staticmethod
     def _purge_tr(tr_name, rp_name):
@@ -210,7 +208,6 @@ class TestDispatchTripWorkflow(unittest.TestCase):
             frappe.delete_doc(
                 "Transport Request", tr_name, ignore_permissions=True, force=True
             )
-        frappe.db.commit()
 
     # ------------------------------------------------------------------ seeded
 
@@ -264,7 +261,6 @@ class TestDispatchTripWorkflow(unittest.TestCase):
         dt.reload()
         self.assertEqual(dt.status, "Completed")
         self.assertEqual(dt.docstatus, 1)
-        frappe.db.commit()
 
         # Cross-doc drive: the linked Transport Request reached Fulfilled.
         tr.reload()
@@ -298,7 +294,6 @@ class TestDispatchTripWorkflow(unittest.TestCase):
         dt.odometer_end = 540
         dt.save(ignore_permissions=True)
         apply_workflow(dt, "Complete")
-        frappe.db.commit()
         tr.reload()
         self.assertEqual(tr.status, "Fulfilled")
         self.assertTrue(
@@ -313,7 +308,6 @@ class TestDispatchTripWorkflow(unittest.TestCase):
         dt.reload()
         self.assertEqual(dt.status, "Cancelled")
         self.assertEqual(dt.docstatus, 2)
-        frappe.db.commit()
 
         # Reversal: TR rolled back Fulfilled -> Scheduled, link cleared, ledger gone.
         tr.reload()

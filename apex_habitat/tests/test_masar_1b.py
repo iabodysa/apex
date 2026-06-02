@@ -21,9 +21,9 @@ The worker-trip fixture and the driver/employee chain are reused from
 re-runs on a non-fresh DB never duplicate.
 """
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api import masar
 from apex_habitat.tests.test_driver_portal import _ensure_test_driver
@@ -38,9 +38,10 @@ from apex_habitat.tests.test_masar_worker_movement import (
 from apex_habitat.www import masar as masar_page
 
 
-class TestMasarSummaryEndpoint(_WorkerTripMixin, unittest.TestCase):
+class TestMasarSummaryEndpoint(_WorkerTripMixin, FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
         cls.project = _project("Masar 1b Project")
@@ -52,7 +53,6 @@ class TestMasarSummaryEndpoint(_WorkerTripMixin, unittest.TestCase):
         cls.other_driver, cls.other_user = _ensure_driver_chain(
             "masar_1b_other_drv@example.com", "Masar 1b Other"
         )
-        frappe.db.commit()
 
     def setUp(self):
         frappe.set_user("Administrator")
@@ -107,7 +107,6 @@ class TestMasarSummaryEndpoint(_WorkerTripMixin, unittest.TestCase):
                     "send_welcome_email": 0,
                 }
             ).insert(ignore_permissions=True)
-            frappe.db.commit()
         frappe.set_user(outsider)
         with self.assertRaises(frappe.PermissionError):
             masar.get_my_worker_route_summary()
@@ -124,9 +123,10 @@ class TestMasarSummaryEndpoint(_WorkerTripMixin, unittest.TestCase):
             frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
 
 
-class TestMasarPageContext(_WorkerTripMixin, unittest.TestCase):
+class TestMasarPageContext(_WorkerTripMixin, FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
         cls.project = _project("Masar 1b Page Project")
@@ -134,7 +134,6 @@ class TestMasarPageContext(_WorkerTripMixin, unittest.TestCase):
         cls.driver = _ensure_test_driver()
         cls.driver_user = _driver_user_for(cls.driver)
         cls.w1 = _employee("Masar 1b Page Worker")
-        frappe.db.commit()
 
     def setUp(self):
         frappe.set_user("Administrator")

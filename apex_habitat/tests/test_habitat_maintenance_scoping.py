@@ -13,6 +13,7 @@ the exact code path the desk list view and the per-document access check hit.
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.habitat.permissions import (
     PRIVILEGED_ROLES,
@@ -44,12 +45,13 @@ def _ensure_role(name):
 NON_PRIVILEGED_ROLE = "Blogger"
 
 
-class TestMaintenanceRequestQuery(unittest.TestCase):
+class TestMaintenanceRequestQuery(FrappeTestCase):
     """permission_query_conditions fragment: '' for privileged, owner-scope
     otherwise, '1=0' for Guest."""
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         _ensure_role("Resident Request Coordinator")
         # A non-privileged user that can raise tickets but not oversee them.
@@ -59,7 +61,6 @@ class TestMaintenanceRequestQuery(unittest.TestCase):
             "mr_coordinator@example.com", "Resident Request Coordinator"
         )
         cls.manager = _user("mr_manager@example.com", "Accommodation Manager")
-        frappe.db.commit()
 
     def tearDown(self):
         frappe.set_user("Administrator")
@@ -106,12 +107,13 @@ class TestMaintenanceRequestQuery(unittest.TestCase):
         self.assertNotIn("= x' or '1'='1", frag)
 
 
-class TestMaintenanceRequestHasPermission(unittest.TestCase):
+class TestMaintenanceRequestHasPermission(FrappeTestCase):
     """has_permission contract: None (defer) for privileged, True only when the
     non-privileged user owns or is assigned the doc, else False."""
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         _ensure_role("Resident Request Coordinator")
         cls.owner = _user("mr_owner@example.com", NON_PRIVILEGED_ROLE)
@@ -120,7 +122,6 @@ class TestMaintenanceRequestHasPermission(unittest.TestCase):
         cls.coordinator = _user(
             "mr_perm_coordinator@example.com", "Resident Request Coordinator"
         )
-        frappe.db.commit()
 
     def _doc(self, owner=None, assigned_to=None):
         return frappe._dict(
@@ -181,7 +182,7 @@ class TestMaintenanceRequestHasPermission(unittest.TestCase):
         self.assertTrue(result)
 
 
-class TestPrivilegedRolesConstant(unittest.TestCase):
+class TestPrivilegedRolesConstant(FrappeTestCase):
     def test_expected_privileged_roles(self):
         self.assertEqual(
             PRIVILEGED_ROLES,

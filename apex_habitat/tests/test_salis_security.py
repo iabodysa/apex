@@ -18,6 +18,7 @@ happy path.
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api import fuel_console
 from apex_habitat.salis.permissions import scoped_has_permission
@@ -78,15 +79,15 @@ def _pending_fuel_request(project, vehicle):
         }
     )
     doc.insert(ignore_permissions=True)
-    frappe.db.commit()
     return doc
 
 
-class TestFuelConsoleScoping(unittest.TestCase):
+class TestFuelConsoleScoping(FrappeTestCase):
     """The fuel console queue and approve/reject are project-scoped server-side."""
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.pa = _project("FuelConsole A")
         cls.pb = _project("FuelConsole B")
@@ -105,17 +106,16 @@ class TestFuelConsoleScoping(unittest.TestCase):
         cls.veh_b = _vehicle("FC BBB 1", cls.pb)
         cls.fr_a = _pending_fuel_request(cls.pa, cls.veh_a)
         cls.fr_b = _pending_fuel_request(cls.pb, cls.veh_b)
-        frappe.db.commit()
 
     @classmethod
     def tearDownClass(cls):
+        super().tearDownClass()
         frappe.set_user("Administrator")
         for fr in (cls.fr_a, cls.fr_b):
             doc = frappe.get_doc("Fuel Request", fr.name)
             if doc.docstatus == 1:
                 doc.cancel()
             frappe.delete_doc("Fuel Request", fr.name, ignore_permissions=True, force=True)
-        frappe.db.commit()
 
     def tearDown(self):
         frappe.set_user("Administrator")
@@ -169,23 +169,22 @@ class TestFuelConsoleScoping(unittest.TestCase):
         own.reload()
         own.cancel()
         frappe.delete_doc("Fuel Request", own.name, ignore_permissions=True, force=True)
-        frappe.db.commit()
 
 
-class TestSupportTicketScoping(unittest.TestCase):
+class TestSupportTicketScoping(FrappeTestCase):
     """Issue (support tickets): project row-scope for supervisors, if_owner for
     drivers. Support tickets are now native ERPNext Issues; the same generic
     project/owner scoping (scoped_has_permission, wired to Issue in hooks) applies."""
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.pa = _project("Ticket A")
         cls.pb = _project("Ticket B")
         cls.sup = _user("tk_sup@example.com", "Fleet Supervisor")
         _grant_project(cls.sup, cls.pa)
         cls.mgr = _user("tk_mgr@example.com", "Fleet Manager")
-        frappe.db.commit()
 
     def _ticket(self, project=None, owner=None):
         return frappe._dict(

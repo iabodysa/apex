@@ -4,9 +4,9 @@ Closes the desk-list enumeration leak (a scoped Fleet Supervisor could list ever
 project's vehicles/drivers/manifests at /app/salis-vehicle etc.), while preserving
 the Driver `if_owner` self-profile (a Driver still sees their own row)."""
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.permissions import (
     passenger_manifest_query,
@@ -17,9 +17,10 @@ from apex_habitat.salis.permissions import (
 from apex_habitat.tests._helpers import _user
 
 
-class TestSalisFleetScoping(unittest.TestCase):
+class TestSalisFleetScoping(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.pa = cls._project("Fleet Scope A")
         cls.sup = _user("fleet_sup@example.com", "Fleet Supervisor")   # scoped to pa
@@ -31,7 +32,6 @@ class TestSalisFleetScoping(unittest.TestCase):
             frappe.get_doc(
                 {"doctype": "User Permission", "allow": "Project", "for_value": cls.pa, "user": cls.sup}
             ).insert(ignore_permissions=True)
-        frappe.db.commit()
 
     @staticmethod
     def _project(name):

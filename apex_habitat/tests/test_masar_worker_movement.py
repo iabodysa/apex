@@ -21,9 +21,9 @@ which has its own tests). The endpoint is then called as the driver's own user t
 prove server-side identity resolution.
 """
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api import masar
 from apex_habitat.tests.test_driver_portal import _ensure_test_driver
@@ -194,7 +194,6 @@ class _WorkerTripMixin:
                 "status": "Planned",
             }
         ).insert(ignore_permissions=True)
-        frappe.db.commit()
         self.addCleanup(lambda: self._purge(dt.name, rp.name, tr.name))
         return tr, rp, dt
 
@@ -214,10 +213,9 @@ class _WorkerTripMixin:
                     except Exception:
                         pass
                 frappe.delete_doc(*dtp, ignore_permissions=True, force=True)
-        frappe.db.commit()
 
 
-class TestMasarSchemaInstall(unittest.TestCase):
+class TestMasarSchemaInstall(FrappeTestCase):
     def test_doctypes_installed(self):
         self.assertTrue(frappe.db.exists("DocType", "Trip Start Log"))
         self.assertTrue(frappe.db.exists("DocType", "Trip Boarding Event"))
@@ -241,16 +239,16 @@ class TestMasarSchemaInstall(unittest.TestCase):
         self.assertFalse(field.reqd)
 
 
-class TestTripStartLogController(_WorkerTripMixin, unittest.TestCase):
+class TestTripStartLogController(_WorkerTripMixin, FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.project = _project("Masar TSL Project")
         cls.building = _building("Masar TSL Building")
         cls.driver = _ensure_test_driver()
         cls.w1 = _employee("Masar Worker One")
         cls.w2 = _employee("Masar Worker Two")
-        frappe.db.commit()
 
     def setUp(self):
         frappe.set_user("Administrator")
@@ -429,12 +427,12 @@ class TestTripStartLogController(_WorkerTripMixin, unittest.TestCase):
             except Exception:
                 pass
         frappe.delete_doc("Trip Start Log", name, ignore_permissions=True, force=True)
-        frappe.db.commit()
 
 
-class TestMasarReadEndpoint(_WorkerTripMixin, unittest.TestCase):
+class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
         cls.project = _project("Masar EP Project")
@@ -446,7 +444,6 @@ class TestMasarReadEndpoint(_WorkerTripMixin, unittest.TestCase):
         cls.other_driver, cls.other_user = _ensure_driver_chain(
             "masar_other_drv@example.com", "Masar Other"
         )
-        frappe.db.commit()
 
     def setUp(self):
         frappe.set_user("Administrator")
@@ -507,7 +504,6 @@ class TestMasarReadEndpoint(_WorkerTripMixin, unittest.TestCase):
                     "send_welcome_email": 0,
                 }
             ).insert(ignore_permissions=True)
-        frappe.db.commit()
         frappe.set_user(outsider)
         with self.assertRaises(frappe.PermissionError):
             masar.get_my_worker_route_today()
@@ -550,7 +546,6 @@ class TestMasarReadEndpoint(_WorkerTripMixin, unittest.TestCase):
                 "status": "Planned",
             }
         ).insert(ignore_permissions=True)
-        frappe.db.commit()
         self.addCleanup(lambda: self._purge(rep_dt.name, rep_rp.name, rep_tr.name))
 
         frappe.set_user(self.driver_user)

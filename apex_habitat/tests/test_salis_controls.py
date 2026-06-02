@@ -2,20 +2,21 @@
 attendance uniqueness). These cover behaviour that must hold regardless of any
 later workflow refactor."""
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions
 
 from apex_habitat.salis.api import driver_portal
 from apex_habitat.tests.test_driver_portal import _ensure_test_driver
 
 
-class TestDriverPortalGating(unittest.TestCase):
+class TestDriverPortalGating(FrappeTestCase):
     """Read and write endpoints must honour Salis Settings.enable_driver_portal."""
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.driver = _ensure_test_driver()
         cls.user = frappe.db.get_value(
@@ -25,11 +26,9 @@ class TestDriverPortalGating(unittest.TestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
-        frappe.db.commit()
 
     def test_reads_and_writes_blocked_when_portal_disabled(self):
         frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 0)
-        frappe.db.commit()
         frappe.set_user(self.user)
         for call in (
             driver_portal.my_trips_today,
@@ -41,18 +40,18 @@ class TestDriverPortalGating(unittest.TestCase):
                 call()
 
 
-class TestDriverAttendanceDuplicate(unittest.TestCase):
+class TestDriverAttendanceDuplicate(FrappeTestCase):
     """One attendance row per driver per day."""
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.driver = _ensure_test_driver()
 
     def test_second_attendance_same_day_is_rejected(self):
         today = frappe.utils.today()
         frappe.db.delete("Driver Attendance", {"driver": self.driver, "attendance_date": today})
-        frappe.db.commit()
         first = frappe.get_doc(
             {"doctype": "Driver Attendance", "driver": self.driver,
              "attendance_date": today, "status": "Present"}
@@ -63,10 +62,9 @@ class TestDriverAttendanceDuplicate(unittest.TestCase):
                  "attendance_date": today, "status": "Present"}
             ).insert(ignore_permissions=True)
         first.delete(ignore_permissions=True)
-        frappe.db.commit()
 
 
-class TestPaymentRequestSoD(unittest.TestCase):
+class TestPaymentRequestSoD(FrappeTestCase):
     """A Finance approver may not approve a payment they themselves raised.
 
     Transitions are owned by the native Salis Payment Request Workflow, so the
@@ -77,10 +75,10 @@ class TestPaymentRequestSoD(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.fin1 = cls._finance_user("fin1_sod@example.com")
         cls.fin2 = cls._finance_user("fin2_sod@example.com")
-        frappe.db.commit()
 
     @staticmethod
     def _finance_user(email):
@@ -122,7 +120,6 @@ class TestPaymentRequestSoD(unittest.TestCase):
             apply_workflow(doc, "Approve (Finance)")
         frappe.set_user("Administrator")
         frappe.delete_doc("Salis Payment Request", doc.name, ignore_permissions=True, force=True)
-        frappe.db.commit()
 
     def test_other_finance_user_can_approve(self):
         doc = self._pending_request_by(self.fin1)
@@ -137,19 +134,18 @@ class TestPaymentRequestSoD(unittest.TestCase):
         doc.reload()
         doc.cancel()
         frappe.delete_doc("Salis Payment Request", doc.name, ignore_permissions=True, force=True)
-        frappe.db.commit()
 
 
-class TestRequestedByStamping(unittest.TestCase):
+class TestRequestedByStamping(FrappeTestCase):
     """``requested_by`` is stamped to the session user server-side and is a
     read-only field on the SoD-bearing DocTypes, so the maker != checker gate
     cannot be spoofed through the form path."""
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.user = cls._mgr("rb_user@example.com")
-        frappe.db.commit()
 
     def tearDown(self):
         frappe.set_user("Administrator")
@@ -199,7 +195,6 @@ class TestRequestedByStamping(unittest.TestCase):
         self.assertEqual(doc.requested_by, self.user)
         frappe.set_user("Administrator")
         frappe.delete_doc("Fuel Claim", doc.name, ignore_permissions=True, force=True)
-        frappe.db.commit()
 
     def test_rental_settlement_stamps_session_user(self):
         frappe.set_user(self.user)
@@ -215,4 +210,3 @@ class TestRequestedByStamping(unittest.TestCase):
         self.assertEqual(doc.requested_by, self.user)
         frappe.set_user("Administrator")
         frappe.delete_doc("Rental Settlement", doc.name, ignore_permissions=True, force=True)
-        frappe.db.commit()

@@ -28,6 +28,7 @@ Transport Request).
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex_habitat.tests._helpers import _user
@@ -44,9 +45,10 @@ def _actions(doc):
 	get_workflow_name("Fuel Request") == WORKFLOW,
 	"Fuel Request Workflow not seeded on this site",
 )
-class TestFuelRequestWorkflow(unittest.TestCase):
+class TestFuelRequestWorkflow(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		frappe.set_user("Administrator")
 		# A requester (Project tier) and a separate approver (Operations tier).
 		cls.requester = _user("frwf_req@example.com", "Fleet Project Manager")
@@ -69,7 +71,6 @@ class TestFuelRequestWorkflow(unittest.TestCase):
 					"allow": "Project",
 					"for_value": cls.project,
 				}).insert(ignore_permissions=True)
-		frappe.db.commit()
 
 	def setUp(self):
 		frappe.set_user("Administrator")
@@ -125,7 +126,6 @@ class TestFuelRequestWorkflow(unittest.TestCase):
 		}
 		data.update(overrides)
 		doc = frappe.get_doc(data).insert(ignore_permissions=True)
-		frappe.db.commit()
 		self.addCleanup(lambda: self._purge(doc.name))
 		return doc
 
@@ -141,14 +141,12 @@ class TestFuelRequestWorkflow(unittest.TestCase):
 			except Exception:
 				pass
 		frappe.delete_doc("Fuel Request", name, ignore_permissions=True, force=True)
-		frappe.db.commit()
 
 	@staticmethod
 	def _purge_quota(name):
 		frappe.set_user("Administrator")
 		if frappe.db.exists("Fuel Quota", name):
 			frappe.delete_doc("Fuel Quota", name, ignore_permissions=True, force=True)
-			frappe.db.commit()
 
 	# ------------------------------------------------------------------ tests
 

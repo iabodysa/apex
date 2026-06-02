@@ -26,6 +26,7 @@ project-scoped, so no Project User Permission is required.
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
 from apex_habitat.tests._helpers import _user
@@ -42,13 +43,13 @@ def _actions(doc):
     get_workflow_name("Driver Clearance") == WORKFLOW,
     "Driver Clearance Workflow not seeded on this site",
 )
-class TestDriverClearanceWorkflow(unittest.TestCase):
+class TestDriverClearanceWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         frappe.set_user("Administrator")
         cls.supervisor = _user("dc_sup@example.com", "Fleet Supervisor")
         cls.manager = _user("dc_mgr@example.com", "Fleet Manager")
-        frappe.db.commit()
 
     def setUp(self):
         frappe.set_user("Administrator")
@@ -167,7 +168,6 @@ class TestDriverClearanceWorkflow(unittest.TestCase):
         # and re-validate the clearance so the counter refreshes.
         frappe.set_user("Administrator")
         frappe.db.set_value("Fuel Exception Case", fec.name, "status", "Resolved")
-        frappe.db.commit()
         dc.reload()
         dc.save(ignore_permissions=True)  # recompute outstanding counters
         dc.reload()
