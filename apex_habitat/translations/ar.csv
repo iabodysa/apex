@@ -2416,3 +2416,158 @@ Setup & Master Data,الإعداد والبيانات الرئيسية
 Tools & Consoles,الأدوات ولوحات التحكم
 My Tasks,المهام المُسندة لي
 My Maintenance Requests,طلبات الصيانة الخاصة بي
+Assigned Tasks,المهام المسندة
+Nothing awaiting your action.,لا يوجد ما ينتظر إجراءك.
+Loading…,جارٍ التحميل…
+Could not load your inbox. Please retry.,تعذّر تحميل صندوق الوارد. يرجى المحاولة مجدداً.
+State: {0},الحالة: {0}
+Loading actions…,جارٍ تحميل الإجراءات…
+No actions available.,لا توجد إجراءات متاحة.
+Applying…,جارٍ التطبيق…
+{0} applied,تم تطبيق {0}
+Could not apply {0},تعذّر تطبيق {0}
+Priority: {0},الأولوية: {0}
+Due: {0},الاستحقاق: {0}
+Open,فتح
+Close,إغلاق
+Closing…,جارٍ الإغلاق…
+Task closed,أُغلقت المهمة
+Could not close the task,تعذّر إغلاق المهمة
+Pick a building to start the arrival.,اختر مبنى لبدء الوصول.
+Pick a building…,اختر مبنى…
+Project,المشروع
+Pick a project…,اختر مشروعاً…
+Search worker name or passport…,ابحث باسم العامل أو رقم الجواز…
+No registered workers match. Register a new arrival below.,لا يوجد عمال مسجّلون مطابقون. سجّل وصولاً جديداً أدناه.
+Register new arrival by passport,تسجيل وصول جديد برقم الجواز
+Temp,مؤقت
+Emp,موظف
+Could not load the worker.,تعذّر تحميل بيانات العامل.
+Click a free bed to house him.,انقر على سرير شاغر لإسكانه.
+Employee,الموظف
+No project yet,لا يوجد مشروع بعد
+Register New Arrival (Passport),تسجيل وصول جديد (الجواز)
+Iqama Number (if any),رقم الإقامة (إن وُجد)
+Register,تسجيل
+Registering…,جارٍ التسجيل…
+Registered: {0},تم التسجيل: {0}
+Pick a worker first.,اختر عاملاً أولاً.
+Pick a project first.,اختر مشروعاً أولاً.
+Housing…,جارٍ الإسكان…
+Housed {0},تم إسكان {0}
+Room is full. House {0} in a temporary over-capacity bed?,الغرفة ممتلئة. هل تريد إسكان {0} في سرير مؤقت يتجاوز السعة؟
+Housing over capacity…,جارٍ الإسكان بتجاوز السعة…
+Housed {0} in a temporary bed,تم إسكان {0} في سرير مؤقت
+Arrived this session ({0}),وصلوا في هذه الجلسة ({0})
+Check-in slip,قسيمة التسكين
+Custody Handover,تسليم العهدة
+Arrival Card,بطاقة الوصول
+Create QR for all ({0}),إنشاء رمز QR للجميع ({0})
+Print arrival cards ({0}),طباعة بطاقات الوصول ({0})
+Custody deferred,تأجّلت العهدة
+Print handover,طباعة سند التسليم
+Issue custody,صرف العهدة
+Article…,الصنف…
+Remove,إزالة
+Issue all ({0}),صرف الكل ({0})
+Add,إضافة
+Pick an article.,اختر صنفاً.
+Custody issued to {0},صُرفت العهدة لـ {0}
+QR issued,صدر رمز QR
+Link after registration,الربط بعد التسجيل
+Print slip,طباعة القسيمة
+Creating QR codes…,جارٍ إنشاء رموز QR…
+QR created for {0} worker(s),أُنشئ رمز QR لـ {0} عامل
+Allow pop-ups to print the slip.,اسمح بالنوافذ المنبثقة لطباعة القسيمة.
+Issue custody first,اصرف العهدة أولاً
+Building arrival cards…,جارٍ تجهيز بطاقات الوصول…
+Arrival Cards,بطاقات الوصول
+Unregistered manifest,كشف غير مسجّل
+Create one transport request,إنشاء طلب نقل واحد
+Temporary workers board via the trip’s unregistered manifest.,يركب العمال المؤقتون عبر الكشف غير المسجّل للرحلة.
+Select at least one passenger.,اختر راكباً واحداً على الأقل.
+free,شاغر
+occupied,مشغول
+Housed,مُسكَن
+Card,بطاقة
+This building has no rooms or beds yet.,لا توجد غرف أو أسرّة في هذا المبنى بعد.
+House over capacity in a temporary bed,الإسكان بتجاوز السعة في سرير مؤقت
+Over-capacity,تجاوز السعة
+Has custody,لديه عهدة
+Could not load the building. Please retry.,تعذّر تحميل المبنى. يرجى المحاولة مجدداً.
+Could not load the board for this building.,تعذّر تحميل اللوحة لهذا المبنى.
+Could not load the board. Check your connection and try again.,تعذّر تحميل اللوحة. تحقق من اتصالك وحاول مجدداً.
+Could not load employee photo.,تعذّر تحميل صورة الموظف.
+Cost Center,مركز التكلفة
+Search articles,ابحث عن الأصناف
+Could not load the catalog.,تعذّر تحميل السجل.
+Could not issue the cart. Please review and try again.,تعذّر صرف السلة. يرجى المراجعة والمحاولة مجدداً.
+Could not load this building. Please try again.,تعذّر تحميل هذا المبنى. يرجى المحاولة مجدداً.
+Transfer failed. Please try again.,فشل النقل. يرجى المحاولة مجدداً.
+Could not load the safety map. Please try again.,تعذّر تحميل خريطة السلامة. يرجى المحاولة مجدداً.
+Clear,مسح
+Could not log the inspection. Please try again.,تعذّر تسجيل التفتيش. يرجى المحاولة مجدداً.
+Salis Dispatch Board,لوحة توجيه سلس
+Could not load the dispatch board. Please check your connection and try again.,تعذّر تحميل لوحة التوجيه. يرجى التحقق من اتصالك والمحاولة مجدداً.
+{0} total,{0} إجمالاً
+No vehicles in scope.,لا توجد مركبات ضمن النطاق.
+Category,الفئة
+No trips scheduled for today.,لا توجد رحلات مجدولة لليوم.
+Window,الفترة
+Driver Availability,توفّر السائقين
+{0} active,{0} نشط
+No available drivers.,لا يوجد سائقون متاحون.
+Assigned Today,المسندون اليوم
+No drivers assigned today.,لا يوجد سائقون مسندون اليوم.
+{0} open,{0} مفتوح
+No open transport requests.,لا توجد طلبات نقل مفتوحة.
+Type,النوع
+Route,المسار
+Could not load pending fuel requests.,تعذّر تحميل طلبات الوقود المعلّقة.
+Could not load the approval queue,تعذّر تحميل قائمة الاعتماد
+{0} awaiting approval,{0} بانتظار الاعتماد
+{0} over threshold,{0} تجاوز الحد
+No pending fuel requests for this project.,لا توجد طلبات وقود معلّقة لهذا المشروع.
+No pending fuel requests. The queue is clear.,لا توجد طلبات وقود معلّقة. القائمة خالية.
+Over Threshold,تجاوز الحد
+Amount,المبلغ
+Platform,المنصة
+Age,العمر
+{0} day(s),{0} يوم
+Approve,اعتماد
+Reject,رفض
+Approve fuel request {0}?,اعتماد طلب الوقود {0}؟
+Approving…,جارٍ الاعتماد…
+Approved: {0},تم الاعتماد: {0}
+Approval failed for {0}.,فشل اعتماد {0}.
+Reject Fuel Request,رفض طلب الوقود
+Rejecting…,جارٍ الرفض…
+Rejection failed for {0}.,فشل رفض {0}.
+"Live fleet glance: vehicles by status, today's trips, driver availability and open transport requests.",نظرة حية على الأسطول: المركبات حسب الحالة ورحلات اليوم وتوفّر السائقين وطلبات النقل المفتوحة.
+Today's Dispatch Trips,رحلات توجيه اليوم
+A building is required to log an inspection.,المبنى مطلوب لتسجيل التفتيش.
+Building safety inspection.,تفتيش سلامة المبنى.
+Each cart line must reference an article.,يجب أن يشير كل سطر في السلة إلى صنف.
+Each cart line must have a quantity greater than zero.,يجب أن تكون كمية كل سطر في السلة أكبر من صفر.
+Both a source bed and a target bed are required.,يلزم تحديد سرير المصدر وسرير الوجهة معاً.
+Source and target beds must be different.,يجب أن يختلف سرير المصدر عن سرير الوجهة.
+Target bed {0} is not linked to a room and building.,سرير الوجهة {0} غير مرتبط بغرفة ومبنى.
+party_type and party are required.,حقلا party_type و party مطلوبان.
+Employee {0} does not exist.,الموظف {0} غير موجود.
+Temporary Worker {0} does not exist.,العامل المؤقت {0} غير موجود.
+Unknown party type: {0},نوع طرف غير معروف: {0}
+Passport {0},الجواز {0}
+Room {0} does not exist.,الغرفة {0} غير موجودة.
+This Custody Issue has no issued-to Employee; nothing to hand over.,سند صرف العهدة هذا لا يحمل موظفاً مصروفاً له؛ لا يوجد ما يُسلَّم.
+No Salis Driver is linked to your account.,لا يوجد سائق سلس مرتبط بحسابك.
+Driver portal is not enabled.,بوابة السائق غير مفعّلة.
+No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel.,لا توجد مركبة مسندة إليك. اطلب من مشرفك إسناد مركبة قبل طلب الوقود.
+That vehicle is not assigned to you. You can only request fuel for your own vehicle.,تلك المركبة غير مسندة إليك. يمكنك طلب الوقود لمركبتك فقط.
+A worker link token is required.,رمز رابط العامل مطلوب.
+This worker link is invalid or has been disabled.,رابط العامل غير صالح أو تم تعطيله.
+Please describe your request.,يرجى وصف طلبك.
+A new Dispatch Trip must start as Planned; {0} is reached through the workflow.,يجب أن تبدأ رحلة التوجيه الجديدة بحالة مخطط؛ ويُبلَغ {0} عبر سير العمل.
+Trip {0} completed; odometer {1}.,اكتملت الرحلة {0}؛ قراءة العداد {1}.
+A Fuel Claim must be created with status Draft; {0} is reached through the workflow.,يجب إنشاء مطالبة الوقود بحالة مسودة؛ ويُبلَغ {0} عبر سير العمل.
+Attendance for {0} on {1} already exists.,سجل الحضور لـ {0} بتاريخ {1} موجود بالفعل.
+Could not generate a unique worker token. Please try again.,تعذّر إنشاء رمز عامل فريد. يرجى المحاولة مجدداً.
