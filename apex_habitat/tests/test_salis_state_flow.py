@@ -6,12 +6,11 @@ DocType was retired in favour of the native ERPNext Issue (Issue carries no
 initial-status guard and no custom workflow). Dispatch Trip still proves the
 controller-level initial-status guard."""
 
-import unittest
-
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestDispatchTripStateFlow(unittest.TestCase):
+class TestDispatchTripStateFlow(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
 

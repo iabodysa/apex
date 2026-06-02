@@ -110,9 +110,11 @@ class TestRoleProfileIdempotency(FrappeTestCase):
             p: frappe.db.count("Role Profile", {"name": p}) for p in NEW_PROFILES
         }
         # Re-running the seeders must be a no-op (mirrors a second bench migrate).
+        # No commit: the counts below read uncommitted writes within the same
+        # transaction, so idempotency is provable without landing data permanently
+        # (a mid-test commit would bypass the FrappeTestCase rollback safety net).
         create_roles()
         create_role_profiles()
-        frappe.db.commit()
         for role, count in before_roles.items():
             self.assertEqual(count, 1)
             self.assertEqual(frappe.db.count("Role", {"name": role}), 1)
