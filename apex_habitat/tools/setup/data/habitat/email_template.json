@@ -1,0 +1,25 @@
+{
+  "doctype": "Email Template",
+  "key": "name",
+  "create_only": true,
+  "records": [
+    {
+      "name": "Habitat - Building License Renewal Notice",
+      "subject": "Building License {{ doc.license_number }} renewal",
+      "use_html": 1,
+      "response_html": "<p>Dear Sir/Madam,</p><p>Building License <b>{{ doc.license_number }}</b> ({{ doc.license_type }}) for building {{ doc.building }} expires on <b>{{ doc.expiry_date }}</b>.</p><p>Please proceed with the renewal at your earliest convenience.</p><p>Regards,<br>Accommodation Management</p>"
+    },
+    {
+      "name": "Habitat - Building Lease Renewal Notice",
+      "subject": "Lease renewal for {{ doc.building_name }}",
+      "use_html": 1,
+      "response_html": "<p>Dear Sir/Madam,</p><p>The lease for <b>{{ doc.building_name }}</b> ends on <b>{{ doc.lease_end_date }}</b>.</p><p>Kindly advise whether the lease will be renewed or terminated.</p><p>Regards,<br>Accommodation Management</p>"
+    },
+    {
+      "name": "Habitat - Resident Request Acknowledgement",
+      "subject": "Your request {{ doc.name }} has been received",
+      "use_html": 1,
+      "response_html": "<p>Hello,</p><p>We have received your request <b>{{ doc.name }}</b> and it is now being reviewed.</p><p>We will follow up with you shortly.</p><p>Regards,<br>Accommodation Management</p>"
+    }
+  ]
+}

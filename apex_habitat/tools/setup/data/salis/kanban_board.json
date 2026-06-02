@@ -1,0 +1,39 @@
+{
+  "doctype": "Kanban Board",
+  "key": "kanban_board_name",
+  "create_only": true,
+  "records": [
+    {
+      "kanban_board_name": "Transport Requests",
+      "reference_doctype": "Transport Request",
+      "field_name": "status",
+      "private": 0,
+      "show_labels": 1,
+      "filters": "[]",
+      "columns": [
+        { "column_name": "New", "status": "Active", "indicator": "Gray", "order": "[]" },
+        { "column_name": "Validated", "status": "Active", "indicator": "Cyan", "order": "[]" },
+        { "column_name": "Approved", "status": "Active", "indicator": "Blue", "order": "[]" },
+        { "column_name": "Scheduled", "status": "Active", "indicator": "Orange", "order": "[]" },
+        { "column_name": "Fulfilled", "status": "Active", "indicator": "Green", "order": "[]" },
+        { "column_name": "Rejected", "status": "Active", "indicator": "Red", "order": "[]" },
+        { "column_name": "Cancelled", "status": "Active", "indicator": "Gray", "order": "[]" }
+      ]
+    },
+    {
+      "kanban_board_name": "Support Tickets",
+      "reference_doctype": "Issue",
+      "field_name": "status",
+      "private": 0,
+      "show_labels": 1,
+      "filters": "[]",
+      "columns": [
+        { "column_name": "Open", "status": "Active", "indicator": "Gray", "order": "[]" },
+        { "column_name": "Replied", "status": "Active", "indicator": "Orange", "order": "[]" },
+        { "column_name": "On Hold", "status": "Active", "indicator": "Yellow", "order": "[]" },
+        { "column_name": "Resolved", "status": "Active", "indicator": "Green", "order": "[]" },
+        { "column_name": "Closed", "status": "Active", "indicator": "Gray", "order": "[]" }
+      ]
+    }
+  ]
+}

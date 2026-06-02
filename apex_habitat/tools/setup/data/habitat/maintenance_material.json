@@ -1,0 +1,24 @@
+{
+  "doctype": "Maintenance Material",
+  "key": "material_name",
+  "create_only": true,
+  "records": [
+    {"material_name": "Fire Extinguisher", "material_category": "General", "is_active": 1},
+    {"material_name": "Smoke Detector", "material_category": "General", "is_active": 1},
+    {"material_name": "Fire Alarm Panel", "material_category": "General", "is_active": 1},
+    {"material_name": "Fire Hose Reel", "material_category": "General", "is_active": 1},
+    {"material_name": "Emergency Exit Light", "material_category": "General", "is_active": 1},
+    {"material_name": "Bed Frame", "material_category": "Furniture", "is_active": 1},
+    {"material_name": "Mattress", "material_category": "Furniture", "is_active": 1},
+    {"material_name": "Wardrobe", "material_category": "Furniture", "is_active": 1},
+    {"material_name": "Study Desk", "material_category": "Furniture", "is_active": 1},
+    {"material_name": "Chair", "material_category": "Furniture", "is_active": 1},
+    {"material_name": "Insecticide Spray", "material_category": "General", "is_active": 1},
+    {"material_name": "Rodent Trap", "material_category": "General", "is_active": 1},
+    {"material_name": "Cockroach Gel Bait", "material_category": "General", "is_active": 1},
+    {"material_name": "Cement Bag", "material_category": "General", "is_active": 1},
+    {"material_name": "Wall Paint", "material_category": "General", "is_active": 1},
+    {"material_name": "Gypsum Board", "material_category": "General", "is_active": 1},
+    {"material_name": "Door Lock", "material_category": "General", "is_active": 1}
+  ]
+}

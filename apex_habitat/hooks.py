@@ -292,6 +292,13 @@ fixtures = [
 after_install = [
     "apex_habitat.setup.after_install",
     "apex_habitat.salis.setup.after_install",
+    # Data-driven seed loader (tools/setup/data/<module>/*.json) — create-only:
+    # Email Templates, Assignment Rules, Kanban Boards (both modules) + Habitat
+    # maintenance materials/templates. Runs alongside the legacy *_seed.py (also
+    # create-only) until those are retired; parity-verified in
+    # tests/test_seed_parity_*. SLA + Issue Type/Priority JSON are apply:false
+    # (sourced by issue_seed); Auto Email Report stays a seeder (runtime fields).
+    "apex_habitat.tools.setup.seed.seed_all",
     # Salis native paradigms — Kanban Boards, Assignment Rules.
     # Idempotent + existence-guarded; mirrors Habitat (which seeds the equivalents
     # from setup.after_install). The same functions also run on after_migrate and
@@ -324,6 +331,10 @@ after_install = [
 ]
 # Dashboards seed after migrate (when their charts/number cards already exist).
 after_migrate = [
+    # Data-driven seed loader (tools/setup/data/<module>/*.json) — create-only;
+    # keeps installed sites in sync. Runs alongside the legacy *_seed.py until
+    # those are retired (parity-verified in tests/test_seed_parity_*).
+    "apex_habitat.tools.setup.seed.seed_all",
     "apex_habitat.habitat.dashboard_seed.seed_all_dashboards",
     "apex_habitat.salis.dashboard_seed.seed_salis_dashboards",
     "apex_habitat.salis.movement_dashboard_seed.seed_movement_dashboards",
