@@ -182,7 +182,7 @@
   }
  ],
  "index_web_pages_for_search": 1,
-"links": [
+ "links": [
   {
    "group": "Fleet",
    "link_doctype": "Vehicle Assignment",
@@ -269,10 +269,11 @@
    "link_fieldname": "vehicle"
   }
  ],
- "modified": "2026-05-26 02:40:00.000000",
+ "modified": "2026-06-03 02:50:34.264465",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Vehicle",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

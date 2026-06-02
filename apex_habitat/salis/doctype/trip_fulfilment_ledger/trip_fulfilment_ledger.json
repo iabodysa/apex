@@ -109,10 +109,11 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-05-26 03:00:00.000000",
+ "modified": "2026-06-03 02:50:34.264465",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Trip Fulfilment Ledger",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

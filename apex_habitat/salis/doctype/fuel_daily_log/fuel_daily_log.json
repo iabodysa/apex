@@ -90,10 +90,11 @@
   }
  ],
  "links": [],
- "modified": "2026-05-26 11:00:00.000000",
+ "modified": "2026-06-03 02:50:34.264465",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Daily Log",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

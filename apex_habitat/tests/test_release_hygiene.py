@@ -56,6 +56,24 @@ def _is_test_role(name):
     return name in KNOWN_FRAPPE_TEST_ROLES or bool(TEST_ROLE_RE.search(name))
 
 
+def _expected_naming_rule(autoname):
+    """The canonical Frappe `naming_rule` implied by an `autoname` string.
+
+    Returns None for naming styles we do not assert on (hash / autoincrement /
+    Prompt), so the consistency check stays narrow and non-brittle.
+    """
+    a = autoname or ""
+    if a.startswith("field:"):
+        return "By fieldname"
+    if a.startswith("naming_series:"):
+        return 'By "Naming Series" field'
+    if a.startswith("format:"):
+        return "Expression"
+    if re.search(r"\.#+", a):  # old-style series embedded in autoname, e.g. "TFL-.######"
+        return "Expression (old style)"
+    return None
+
+
 class TestTranslationFile(unittest.TestCase):
     def _rows(self):
         with open(AR_CSV, encoding="utf-8") as fh:
@@ -290,6 +308,49 @@ class TestNoTestRolesShipped(unittest.TestCase):
             [],
             f"shipped app declares test/placeholder role(s): {offenders}",
         )
+
+
+class TestNamingRuleConsistency(unittest.TestCase):
+    """Every DocType with an `autoname` must carry the matching `naming_rule`.
+
+    Frappe derives the Naming tab's `naming_rule` from `autoname`; when a
+    hand-authored DocType JSON sets `autoname` but leaves `naming_rule` empty,
+    the desk Naming UI shows blank and a UI save can silently rewrite the
+    naming. Seven shipped DocTypes had this gap (fixed 2026-06-03); this guard
+    stops it recurring.
+    """
+
+    def _doctypes(self):
+        out = []
+        for fp in glob.glob(os.path.join(APP_ROOT, "*", "doctype", "*", "*.json")):
+            with open(fp, encoding="utf-8") as fh:
+                try:
+                    data = json.load(fh)
+                except json.JSONDecodeError:
+                    continue
+            if not isinstance(data, dict) or data.get("doctype") != "DocType":
+                continue
+            out.append((data.get("name"), data.get("autoname"), data.get("naming_rule")))
+        return out
+
+    def test_scan_finds_doctypes(self):
+        # Guard the guard: a parser regression must not make this vacuously pass.
+        names = {n for n, _, _ in self._doctypes()}
+        self.assertIn("Accommodation Bed", names, "DocType scan found nothing — parser broke")
+
+    def test_autoname_implies_naming_rule(self):
+        offenders = sorted(name for name, an, nr in self._doctypes() if an and not nr)
+        self.assertEqual(
+            offenders, [], f"DocType sets autoname but leaves naming_rule empty: {offenders}"
+        )
+
+    def test_naming_rule_matches_autoname_style(self):
+        bad = []
+        for name, an, nr in self._doctypes():
+            expected = _expected_naming_rule(an)
+            if expected and nr != expected:
+                bad.append((name, an, nr, expected))
+        self.assertEqual(bad, [], f"naming_rule inconsistent with autoname style: {bad[:10]}")
 
 
 if __name__ == "__main__":

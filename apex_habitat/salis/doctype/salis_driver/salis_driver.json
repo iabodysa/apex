@@ -121,7 +121,7 @@
    "label": "License Expiry"
   }
  ],
-"links": [
+ "links": [
   {
    "group": "Fleet",
    "link_doctype": "Vehicle Assignment",
@@ -198,10 +198,11 @@
    "link_fieldname": "driver"
   }
  ],
- "modified": "2026-05-26 02:45:00.000000",
+ "modified": "2026-06-03 02:50:34.264465",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Driver",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
