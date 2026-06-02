@@ -31,15 +31,46 @@ def _notify_operational(source_doctype: str, source_name: str, message: str) -> 
 
 
 def daily_accommodation_cost_allocation() -> None:
-    """Allocate daily accommodation costs to the Accommodation Ledger.
+    """Scheduler entry — fan daily accommodation cost allocation out PER BUILDING
+    to the native ``long`` queue, so the scheduler worker is never blocked on a
+    large dataset and buildings allocate in parallel. Buildings are discovered
+    once; one idempotent job is enqueued per building (safe to retry).
+    """
+    from frappe.utils import today
 
-    Iterates active Accommodation Assignments, computes each employee's
-    daily cost share using the capacity-denominator algorithm, and writes
-    an Operational Memo row to Accommodation Ledger.
+    posting_date = today()
+    buildings = frappe.get_all(
+        "Accommodation Assignment",
+        filters={
+            "docstatus": 1,
+            "check_out_date": ["is", "not set"],
+            "building": ["is", "set"],
+        },
+        pluck="building",
+        distinct=True,
+    )
+    for building in buildings:
+        frappe.enqueue(
+            "apex_habitat.habitat.tasks.allocate_building_accommodation_cost",
+            queue="long",
+            timeout=3600,
+            job_name=f"acc-cost-alloc::{building}::{posting_date}",
+            enqueue_after_commit=True,
+            building=building,
+            posting_date=posting_date,
+        )
+
+
+def allocate_building_accommodation_cost(building, posting_date=None) -> None:
+    """Allocate ONE building's daily accommodation costs to the Accommodation
+    Ledger. Enqueued per building by ``daily_accommodation_cost_allocation`` (also
+    directly callable). Idempotent — an existing ledger row for the
+    (employee, posting_date, assignment, building, ledger_type) key is skipped, so
+    retries and overlapping runs never duplicate.
     """
     from frappe.utils import today, flt
 
-    posting_date = today()
+    posting_date = posting_date or today()
     logger = frappe.logger()
 
     year = int(posting_date[:4])
@@ -54,13 +85,20 @@ def daily_accommodation_cost_allocation() -> None:
         "Other": "annual_other_expenses_sar"
     }
 
-    # TODO(scale): enqueue per building via frappe.enqueue(per_building_cost_allocation,
-    #   queue="long", timeout=3600) so the scheduler thread is not blocked on large datasets.
-    #   Safe to do once building count grows beyond ~50; idempotency guard (frappe.db.exists)
-    #   already protects against duplicate inserts from overlapping runs.
+    # One building per job: fetch + validate it once, then paginate its assignments.
+    if not frappe.db.exists("Accommodation Building", building):
+        logger.warning(
+            f"allocate_building_accommodation_cost: Building {building} not found. Skipping."
+        )
+        return
+    building_doc = frappe.get_doc("Accommodation Building", building)
+    capacity = flt(building_doc.total_capacity)
+    if capacity <= 0:
+        logger.warning(
+            f"allocate_building_accommodation_cost: Building {building} has invalid capacity {capacity}. Skipping."
+        )
+        return
 
-    # Paginate active submitted Accommodation Assignments at 500/batch
-    building_cache: dict = {}  # T-01: cache building docs to avoid repeated get_doc per assignment
     start = 0
     batch_size = 500
     while True:
@@ -68,9 +106,10 @@ def daily_accommodation_cost_allocation() -> None:
             "Accommodation Assignment",
             filters={
                 "docstatus": 1,
-                "check_out_date": ["is", "not set"]
+                "check_out_date": ["is", "not set"],
+                "building": building,
             },
-            fields=["name", "employee", "building", "project", "cost_center", "billed_to_supplier"],
+            fields=["name", "employee", "project", "cost_center", "billed_to_supplier"],
             limit_start=start,
             limit_page_length=batch_size,
         )
@@ -78,41 +117,14 @@ def daily_accommodation_cost_allocation() -> None:
             break
 
         for asgn in active_assignments:
-            if not asgn.building:
-                logger.warning(
-                    f"daily_accommodation_cost_allocation: Assignment {asgn.name} has no building specified. Skipping."
-                )
-                continue
-
             if not asgn.employee:
                 logger.warning(
-                    f"daily_accommodation_cost_allocation: Assignment {asgn.name} has no employee specified. Skipping."
-                )
-                continue
-
-            # T-01: fetch building from cache; only hit the DB on the first miss per building
-            if asgn.building not in building_cache:
-                try:
-                    building_cache[asgn.building] = frappe.get_doc("Accommodation Building", asgn.building)
-                except frappe.DoesNotExistError:
-                    building_cache[asgn.building] = None
-
-            building = building_cache[asgn.building]
-            if building is None:
-                logger.warning(
-                    f"daily_accommodation_cost_allocation: Building {asgn.building} not found for assignment {asgn.name}. Skipping."
-                )
-                continue
-
-            capacity = flt(building.total_capacity)
-            if capacity <= 0:
-                logger.warning(
-                    f"daily_accommodation_cost_allocation: Building {building.name} has invalid capacity {capacity}. Skipping assignment {asgn.name}."
+                    f"allocate_building_accommodation_cost: Assignment {asgn.name} has no employee specified. Skipping."
                 )
                 continue
 
             for ledger_type, building_field in cost_type_mapping.items():
-                annual_cost = flt(building.get(building_field))
+                annual_cost = flt(building_doc.get(building_field))
                 if annual_cost <= 0:
                     continue
 
@@ -127,7 +139,7 @@ def daily_accommodation_cost_allocation() -> None:
                         "employee": asgn.employee,
                         "posting_date": posting_date,
                         "assignment": asgn.name,
-                        "building": asgn.building,
+                        "building": building,
                         "ledger_type": ledger_type
                     }
                 )
@@ -141,7 +153,7 @@ def daily_accommodation_cost_allocation() -> None:
                         "posting_date": posting_date,
                         "employee": asgn.employee,
                         "assignment": asgn.name,
-                        "building": asgn.building,
+                        "building": building,
                         "project": asgn.project,
                         "cost_center": asgn.cost_center,
                         "billed_to_supplier": asgn.billed_to_supplier,
@@ -160,7 +172,7 @@ def daily_accommodation_cost_allocation() -> None:
                 except Exception as e:
                     frappe.db.rollback()  # T-02: rollback before log_error to avoid aborted-transaction errors
                     logger.error(
-                        f"daily_accommodation_cost_allocation: Failed to insert ledger row for assignment {asgn.name}, cost {ledger_type}: {e}"
+                        f"allocate_building_accommodation_cost: Failed to insert ledger row for assignment {asgn.name}, cost {ledger_type}: {e}"
                     )
                     frappe.log_error(
                         message=frappe.get_traceback(),

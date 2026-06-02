@@ -6,7 +6,10 @@ Supplier Cost Recovery report aggregates the month with the markup applied."""
 import frappe
 from frappe.utils import flt, getdate
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
-from apex_habitat.habitat.tasks import daily_accommodation_cost_allocation
+from apex_habitat.habitat.tasks import (
+    daily_accommodation_cost_allocation,
+    allocate_building_accommodation_cost,
+)
 from apex_habitat.habitat.report.supplier_cost_recovery.supplier_cost_recovery import execute
 
 
@@ -65,7 +68,9 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         settings.supplier_markup_percent = 5.0
         settings.save(ignore_permissions=True)
 
-        daily_accommodation_cost_allocation()
+        # run the per-building worker directly (the scheduler entry now only
+        # fans these out to the long queue; see test_dispatcher_enqueues_per_building)
+        allocate_building_accommodation_cost(self.building.name)
 
         # ledger rows for this assignment must carry the supplier
         rows = frappe.get_all("Accommodation Ledger",
@@ -87,3 +92,32 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         self.assertAlmostEqual(row["base_cost"], base, places=2)
         self.assertAlmostEqual(row["markup"], flt(base * 0.05, 2), places=2)
         self.assertAlmostEqual(row["total_deduction"], flt(base + base * 0.05, 2), places=2)
+
+    def test_dispatcher_enqueues_per_building(self):
+        # The scheduler entry must fan out one enqueue per building that has an
+        # active submitted assignment, targeting the per-building worker on the
+        # long queue (not run the allocation synchronously itself).
+        from unittest.mock import patch
+
+        a = frappe.get_doc({
+            "doctype": "Accommodation Assignment", "employee": self.employee, "project": self.project,
+            "cost_center": self.cost_center, "building": self.building.name, "room": self.room,
+            "bed": self.bed, "check_in_date": getdate(), "assignment_type": "New Assignment",
+        })
+        a.insert(ignore_permissions=True)
+        a.submit()
+
+        with patch("apex_habitat.habitat.tasks.frappe.enqueue") as enq:
+            daily_accommodation_cost_allocation()
+
+        buildings = [c.kwargs.get("building") for c in enq.call_args_list]
+        self.assertIn(self.building.name, buildings, "dispatcher did not enqueue this building")
+        self.assertTrue(
+            all(c.kwargs.get("queue") == "long" for c in enq.call_args_list),
+            "per-building jobs must run on the long queue",
+        )
+        self.assertTrue(
+            all(c.args[0] == "apex_habitat.habitat.tasks.allocate_building_accommodation_cost"
+                for c in enq.call_args_list),
+            "dispatcher must enqueue the per-building worker",
+        )
