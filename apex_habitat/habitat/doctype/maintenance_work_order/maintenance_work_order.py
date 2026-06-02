@@ -128,7 +128,7 @@ def mark_completed(work_order, completion_notes=None):
                 "allocation_basis": "Direct",
                 "allocation_period_start": doc.actual_start_date,
                 "allocation_period_end": doc.actual_end_date,
-            }).insert(ignore_permissions=True)
+            }).insert(ignore_permissions=True)  # audit-ok — system ledger memo on completion, gated by Work Order write (above)
             ledger_posted = True
     except Exception:
         frappe.db.rollback()

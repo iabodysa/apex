@@ -297,7 +297,7 @@ def generate_safety_setup(building_name):
                     # append scope rows here is an intentional cross-doctype operation that
                     # the business setup flow requires; enforcing DocType-level write on
                     # Safety Task Catalog would block legitimate supervisor-triggered setup.
-                    scope.insert(ignore_permissions=True)
+                    scope.insert(ignore_permissions=True)  # audit-ok — gated by Accommodation Building write (above); generator-only cross-doctype op
                     created_scopes += 1
                 except Exception as exc:
                     catalog_failures.append(
@@ -337,7 +337,7 @@ def generate_safety_setup(building_name):
                 # authorized on the building, but Scheduled Task Template is owned by the
                 # admin/safety-manager role. Creating templates on their behalf during
                 # building setup is the intended workflow.
-                }).insert(ignore_permissions=True)
+                }).insert(ignore_permissions=True)  # audit-ok — same building-write gate (above); generator-only
                 created_templates += 1
             except Exception as exc:
                 catalog_failures.append(
