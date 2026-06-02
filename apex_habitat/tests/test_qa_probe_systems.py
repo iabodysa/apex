@@ -134,6 +134,16 @@ class TestReports(QASysBase):
                     print(f"\n[7] {r} ({label}): columns={len(columns) if columns else 0}, rows={len(result[1]) if result and len(result) > 1 else 0}")
                     if not columns:
                         failures.append(f"{r}/{label}: no columns returned")
+                except frappe.ValidationError as e:
+                    # A report that mandates a bounded date range (no silent
+                    # truncation) legitimately rejects the empty-filter case. That
+                    # is the intended guard, not a crash — only flag it for the
+                    # dated run, where the range is supplied.
+                    if label == "empty":
+                        print(f"\n[7] {r} (empty): requires date range (ok): {e}")
+                    else:
+                        failures.append(f"{r}/{label}: {type(e).__name__}: {e}")
+                        print(f"\n[7] BUG {r} ({label}) CRASHED: {type(e).__name__}: {e}")
                 except Exception as e:
                     failures.append(f"{r}/{label}: {type(e).__name__}: {e}")
                     print(f"\n[7] BUG {r} ({label}) CRASHED: {type(e).__name__}: {e}")

@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import getdate
+from frappe.utils import add_days, getdate
 
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
 from apex_habitat.habitat.report.accommodation_occupancy_summary.accommodation_occupancy_summary import execute as execute_occupancy
@@ -85,7 +85,14 @@ class TestReports(ApexHabitatTestCase):
         self._assert_report_shape(execute_occupancy())
 
     def test_accommodation_cost_distribution(self):
-        self._assert_report_shape(execute_cost())
+        # from_date/to_date are mandatory (no silent truncation).
+        self._assert_report_shape(
+            execute_cost({"from_date": "2026-01-01", "to_date": "2026-12-31"})
+        )
+
+    def test_accommodation_cost_distribution_requires_date_range(self):
+        with self.assertRaises(frappe.ValidationError):
+            execute_cost({})
 
     def test_lease_expiry_watchlist(self):
         self._assert_report_shape(execute_lease())
@@ -100,7 +107,14 @@ class TestReports(ApexHabitatTestCase):
         self._assert_report_shape(execute_maintenance())
 
     def test_accommodation_ledger_summary(self):
-        self._assert_report_shape(execute_ledger_summary())
+        # from_date/to_date are mandatory (no silent truncation).
+        self._assert_report_shape(
+            execute_ledger_summary({"from_date": "2026-01-01", "to_date": "2026-12-31"})
+        )
+
+    def test_accommodation_ledger_summary_requires_date_range(self):
+        with self.assertRaises(frappe.ValidationError):
+            execute_ledger_summary({})
 
     def test_supplier_cost_recovery_shape(self):
         self._assert_report_shape(execute_supplier())
@@ -194,9 +208,15 @@ class TestReports(ApexHabitatTestCase):
         # filter must narrow to exactly the one row under project_a. (The report's
         # output rows do not echo `project`, so narrowing is asserted by count of
         # the marker-tagged rows, which is what the server-side WHERE controls.)
-        _, all_rows = execute_cost({"building": building})[:2]
-        _, a_rows = execute_cost({"building": building, "project": project_a})[:2]
-        _, b_rows = execute_cost({"building": building, "project": project_b})[:2]
+        # The report requires a bounded date range; the seeded rows post today,
+        # so a window around today captures them.
+        window = {
+            "from_date": str(add_days(getdate(), -1)),
+            "to_date": str(add_days(getdate(), 1)),
+        }
+        _, all_rows = execute_cost({"building": building, **window})[:2]
+        _, a_rows = execute_cost({"building": building, "project": project_a, **window})[:2]
+        _, b_rows = execute_cost({"building": building, "project": project_b, **window})[:2]
 
         self.assertEqual(len(_mine(all_rows)), 2, "Both seeded ledger rows should be visible unfiltered.")
         self.assertEqual(len(_mine(a_rows)), 1, "Project filter must narrow to project_a's single row.")

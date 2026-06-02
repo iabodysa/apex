@@ -20,7 +20,15 @@ def execute(filters=None):
         {"label": frappe._("Source"), "fieldname": "source_name", "fieldtype": "Data", "width": 140},
     ]
 
-    query_filters = {}
+    # Mandatory date range. The Accommodation Ledger grows unboundedly, so an
+    # open-ended scan would silently truncate once it exceeds the result cap;
+    # require a bounded window instead.
+    from_date = filters.get("from_date")
+    to_date = filters.get("to_date")
+    if not (from_date and to_date):
+        frappe.throw(frappe._("From Date and To Date are required."))
+
+    query_filters = {"posting_date": ["between", [from_date, to_date]]}
     if filters.get("building"):
         query_filters["building"] = filters["building"]
     if filters.get("ledger_type"):
@@ -31,12 +39,6 @@ def execute(filters=None):
         query_filters["company"] = filters["company"]
     if filters.get("cost_center"):
         query_filters["cost_center"] = filters["cost_center"]
-    if filters.get("from_date") and filters.get("to_date"):
-        query_filters["posting_date"] = ["between", [filters["from_date"], filters["to_date"]]]
-    elif filters.get("from_date"):
-        query_filters["posting_date"] = [">=", filters["from_date"]]
-    elif filters.get("to_date"):
-        query_filters["posting_date"] = ["<=", filters["to_date"]]
 
     rows = frappe.get_all(
         "Accommodation Ledger",
@@ -47,7 +49,9 @@ def execute(filters=None):
             "total_site_cost", "employee_daily_share", "source_doctype", "source_name",
         ],
         order_by="building asc, ledger_type asc, allocation_period_start desc",
-        limit_page_length=5000,
+        # No limit_page_length: the mandatory date range above bounds the result
+        # set, so a hard cap would silently drop matching rows within the window.
+        limit_page_length=0,
     )
 
     data = []

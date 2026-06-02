@@ -19,7 +19,20 @@ def execute(filters=None):
     ]
 
     filters = filters or {}
-    query_filters = {"posting_mode": "Operational Memo", "reversal_of": ["is", "not set"]}
+
+    # Mandatory date range. One row per resident per day means this ledger grows
+    # by ~182,500 rows/yr for 500 employees, so an unbounded scan would silently
+    # truncate; require a bounded window instead.
+    from_date = filters.get("from_date")
+    to_date = filters.get("to_date")
+    if not (from_date and to_date):
+        frappe.throw(frappe._("From Date and To Date are required."))
+
+    query_filters = {
+        "posting_mode": "Operational Memo",
+        "reversal_of": ["is", "not set"],
+        "posting_date": ["between", [from_date, to_date]],
+    }
     if filters.get("building"):
         query_filters["building"] = filters["building"]
     if filters.get("project"):
@@ -44,7 +57,9 @@ def execute(filters=None):
             "source_line_id",
         ],
         order_by="posting_date desc",
-        limit_page_length=1000,
+        # No limit_page_length: the mandatory date range above bounds the result
+        # set, so a hard cap would silently drop matching rows within the window.
+        limit_page_length=0,
     )
 
     data = []

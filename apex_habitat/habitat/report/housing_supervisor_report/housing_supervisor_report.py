@@ -139,9 +139,12 @@ def _maintenance(building_names):
         fields=["building", "status"],
     )
     for r in rows:
-        if r.status in ("Open", "In Progress"):
+        # Maintenance Request states: Open/Assigned/In Progress/Resolved/Closed/Reopened.
+        # Assigned and Reopened are active work too — count them as open (they
+        # previously fell through both branches, undercounting open_maintenance).
+        if r.status in ("Open", "In Progress", "Assigned", "Reopened"):
             result[r.building]["open"] += 1
-        elif r.status == "Resolved":
+        elif r.status in ("Resolved", "Closed"):
             result[r.building]["closed"] += 1
     return result
 
