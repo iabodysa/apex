@@ -1,18 +1,13 @@
-"""Seed the operational Kanban Boards (Resident Requests, Maintenance Requests) on
-existing sites. Idempotent; boards are public and admins may edit them afterwards.
+"""Superseded — retired in the seed consolidation (M-10/M-11).
+
+Operational Kanban Boards are now provisioned by the data-driven loader
+``apex_habitat.tools.setup.seed.seed_all`` (create-only JSON under
+``tools/setup/data/habitat/kanban_board.json``), wired into after_install /
+after_migrate. This patch already ran on every existing site; it is kept in
+``patches.txt`` as a no-op so its Patch Log entry stays valid and lagging sites
+do not error on a removed import.
 """
-
-import frappe
-
-from apex_habitat.habitat.kanban_seed import seed_kanban_boards
 
 
 def execute():
-    try:
-        seed_kanban_boards()
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(
-            title="seed_kanban_boards failed",
-            message=frappe.get_traceback(),
-        )
+    pass

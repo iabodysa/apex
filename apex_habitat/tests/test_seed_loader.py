@@ -1,8 +1,9 @@
 """Guards for the data-driven seed loader (apex_habitat.tools.setup.seed).
 
 The structural tests are pure (no site needed): they exercise ``load_specs``,
-which has no ``frappe`` dependency. The parity test imports the legacy seeder to
-prove the externalised JSON did not drift from the records it replaces.
+which has no ``frappe`` dependency. (The legacy-seeder parity test was dropped in
+the seed consolidation (M-10/M-11) when the seeders it compared against were
+retired; the JSON shape is now guarded by tests/test_seed_parity_*.)
 """
 
 import json
@@ -48,21 +49,6 @@ class TestSeedLoaderStructure(unittest.TestCase):
                 json.dump({"doctype": "X", "key": "name", "records": {}}, fh)
             with self.assertRaises(SeedDataError):
                 load_specs("habitat", data_root=root)
-
-
-class TestSeedLoaderParity(unittest.TestCase):
-    """The externalised JSON must match the legacy seeder it replaces."""
-
-    def test_email_template_parity_with_legacy_seeder(self):
-        from apex_habitat.habitat.email_templates_seed import _TEMPLATES
-
-        spec = load_specs("habitat", only=["Email Template"])[0]
-        by_name = {r["name"]: r for r in spec["records"]}
-        self.assertEqual(set(by_name), {t["name"] for t in _TEMPLATES})
-        for t in _TEMPLATES:
-            self.assertEqual(by_name[t["name"]]["subject"], t["subject"])
-            self.assertEqual(by_name[t["name"]]["response_html"], t["response_html"])
-            self.assertEqual(by_name[t["name"]]["use_html"], 1)
 
 
 if __name__ == "__main__":

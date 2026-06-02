@@ -1,16 +1,13 @@
-"""Seed the reusable Email Templates on existing sites. Idempotent."""
+"""Superseded — retired in the seed consolidation (M-10/M-11).
 
-import frappe
-
-from apex_habitat.habitat.email_templates_seed import seed_email_templates
+Reusable Email Templates are now provisioned by the data-driven loader
+``apex_habitat.tools.setup.seed.seed_all`` (create-only JSON under
+``tools/setup/data/habitat/email_template.json``), wired into after_install /
+after_migrate. This patch already ran on every existing site; it is kept in
+``patches.txt`` as a no-op so its Patch Log entry stays valid and lagging sites
+do not error on a removed import.
+"""
 
 
 def execute():
-    try:
-        seed_email_templates()
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(
-            title="seed_email_templates failed",
-            message=frappe.get_traceback(),
-        )
+    pass

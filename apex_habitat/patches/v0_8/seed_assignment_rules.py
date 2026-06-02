@@ -1,18 +1,13 @@
-"""Seed the operational Assignment Rules (Maintenance/Resident intake) on existing
-sites, disabled with an Administrator placeholder. Idempotent.
+"""Superseded — retired in the seed consolidation (M-10/M-11).
+
+Operational Assignment Rules are now provisioned by the data-driven loader
+``apex_habitat.tools.setup.seed.seed_all`` (create-only JSON under
+``tools/setup/data/habitat/assignment_rule.json``), wired into after_install /
+after_migrate. This patch already ran on every existing site; it is kept in
+``patches.txt`` as a no-op so its Patch Log entry stays valid and lagging sites
+do not error on a removed import.
 """
-
-import frappe
-
-from apex_habitat.habitat.assignment_rules_seed import seed_assignment_rules
 
 
 def execute():
-    try:
-        seed_assignment_rules()
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(
-            title="seed_assignment_rules failed",
-            message=frappe.get_traceback(),
-        )
+    pass

@@ -152,7 +152,11 @@ def apply_spec(spec):
         frappe.db.savepoint(savepoint)
         try:
             doc = frappe.get_doc({"doctype": doctype, **record})
-            doc.insert(ignore_permissions=True)  # audit-ok
+            # ignore_if_duplicate mirrors Frappe core's own seeding idiom
+            # (frappe.desk.page.setup_wizard.setup_wizard.make_records); it is a
+            # belt-and-suspenders companion to the create_only existence guard
+            # above for DocTypes whose natural key is also their name.
+            doc.insert(ignore_permissions=True, ignore_if_duplicate=True)  # audit-ok
             created += 1
         except Exception:  # noqa: BLE001 — one bad record must not abort the batch
             frappe.db.rollback(save_point=savepoint)

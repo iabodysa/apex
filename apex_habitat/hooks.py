@@ -256,8 +256,13 @@ has_permission = {
 }
 
 # Fixtures shipped with the app
+#
+# NOTE: Safety Task Catalog is intentionally NOT fixtured. It is provisioned as a
+# create-only seed (setup.create_safety_task_catalogs, existence-guarded on
+# task_code), so the 10 standard tasks appear on install while any tasks the
+# customer adds or edits survive every migrate. A fixture would re-import and
+# OVERWRITE those edits on each migrate — the opposite of the intended semantics.
 fixtures = [
-    {"dt": "Safety Task Catalog"},
     {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
     # Habitat operational roles (role-alignment pass) — the four new least-
     # privilege roles ship as a complementary fixture entry (mirroring the Salis-
@@ -291,25 +296,19 @@ after_install = [
     # tests/test_seed_parity_*. SLA + Issue Type/Priority JSON are apply:false
     # (sourced by issue_seed); Auto Email Report stays a seeder (runtime fields).
     "apex_habitat.tools.setup.seed.seed_all",
-    # Salis native paradigms — Kanban Boards, Assignment Rules.
-    # Idempotent + existence-guarded; mirrors Habitat (which seeds the equivalents
-    # from setup.after_install). The same functions also run on after_migrate and
-    # from the v1_1 patch (single source of truth), so replaying them is safe.
-    # (Notifications now ship as is_standard JSON under salis/notification/, so
-    # they are imported by migrate — no seed entry is needed.)
-    "apex_habitat.salis.kanban_seed.seed_salis_kanban_boards",
-    "apex_habitat.salis.assignment_rules_seed.seed_salis_assignment_rules",
+    # Salis Kanban Boards, Assignment Rules and Email Templates are provisioned by
+    # the data-driven loader (seed_all, above) from create-only JSON under
+    # tools/setup/data/salis/ — the hand-written salis seeders were retired in the
+    # seed consolidation (M-10/M-11). (Notifications ship as is_standard JSON under
+    # salis/notification/, imported by migrate.)
     # Salis navbar Help-dropdown links — mirrors Habitat's add_navbar_help_links
     # patch (Navbar Settings is a Single, never fixtured; additive + idempotent,
     # never clobbers the customer's navbar). Surfaces the Salis workspace and the
     # Dispatch Board page one click away from the desk Help menu.
     "apex_habitat.salis.navbar_seed.seed_salis_navbar_help_links",
-    # Salis communication artifacts — Email Templates + Auto Email Reports.
-    # Mirrors Habitat's email_templates_seed / auto_email_reports_seed. Idempotent
-    # + existence-guarded (Auto Email Reports created disabled, addressed to
-    # Administrator as a placeholder). Also run on after_migrate and from the
-    # v1_x patch (single source of truth), so replaying them is safe.
-    "apex_habitat.salis.email_templates_seed.seed_salis_email_templates",
+    # Salis Auto Email Reports — created disabled, addressed to Administrator as a
+    # placeholder. Kept as a seeder (runtime recipient fields, not externalised to
+    # JSON). Idempotent + existence-guarded; also run on after_migrate / v1_x patch.
     "apex_habitat.salis.auto_email_reports_seed.seed_salis_auto_email_reports",
     # Salis native Workflow Spine — Transport Request (first-mover). Frappe does
     # not auto-import a Workflow from a module folder, so the shipped JSON is
@@ -333,28 +332,19 @@ after_migrate = [
     # Habitat operational Notifications now ship as is_standard JSON under
     # habitat/notification/, so they are imported by migrate — no seed entry is
     # needed here.
-    # Habitat native paradigms — these were install-only (after_install) so a
-    # newly-added kanban / assignment rule / email template / auto-email report
-    # never reached already-installed sites. They are idempotent + existence-
-    # guarded; running them on every migrate keeps existing sites in sync, matching
-    # the Salis equivalents below.
-    "apex_habitat.habitat.kanban_seed.seed_kanban_boards",
-    "apex_habitat.habitat.assignment_rules_seed.seed_assignment_rules",
-    "apex_habitat.habitat.email_templates_seed.seed_email_templates",
+    # Habitat Kanban Boards, Assignment Rules and Email Templates are provisioned by
+    # the data-driven loader (seed_all, above). Auto Email Reports stay a seeder
+    # (runtime recipient fields). Idempotent + existence-guarded; running on every
+    # migrate keeps existing sites in sync.
     "apex_habitat.habitat.auto_email_reports_seed.seed_auto_email_reports",
-    # Salis native paradigms — keep already-installed sites in sync on migrate.
-    # Idempotent + existence-guarded (created only if absent), so re-running every
-    # migrate never duplicates and never aborts the migrate.
-    # (Notifications now ship as is_standard JSON under salis/notification/, so
-    # they are imported by migrate — no seed entry is needed.)
-    "apex_habitat.salis.kanban_seed.seed_salis_kanban_boards",
-    "apex_habitat.salis.assignment_rules_seed.seed_salis_assignment_rules",
+    # Salis Kanban Boards + Assignment Rules are provisioned by the data-driven
+    # loader (seed_all, above). (Notifications ship as is_standard JSON under
+    # salis/notification/, imported by migrate.)
     # Salis navbar Help-dropdown links — keep already-installed sites in sync on
     # migrate (idempotent; appends only the links that are missing).
     "apex_habitat.salis.navbar_seed.seed_salis_navbar_help_links",
-    # Salis communication artifacts — keep already-installed sites in sync on
-    # migrate (idempotent + existence-guarded; created only if absent).
-    "apex_habitat.salis.email_templates_seed.seed_salis_email_templates",
+    # Salis Auto Email Reports — kept as a seeder (runtime recipient fields); the
+    # Email Templates moved to the data-driven loader (seed_all, above). Idempotent.
     "apex_habitat.salis.auto_email_reports_seed.seed_salis_auto_email_reports",
     # Salis native Workflow Spine — keep already-installed sites in sync on
     # migrate (idempotent + existence-guarded; created only if absent, never

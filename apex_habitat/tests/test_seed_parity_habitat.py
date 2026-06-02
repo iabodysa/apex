@@ -1,26 +1,20 @@
-"""Parity guards for the externalised Habitat record seeders.
+"""Shape guards for the externalised Habitat seed JSON files.
 
-These prove the data-driven JSON under ``tools/setup/data/habitat/`` did not
-drift from the records the legacy ``*_seed.py`` modules insert. They are pure
-(no site needed): they reconstruct each legacy seeder's *effective* record —
-exactly the dict passed to ``frappe.get_doc({...}).insert()`` including child
-rows appended in loops — from the seeder's own module-level data list, then
-assert byte-identical equality against the JSON loaded via ``load_specs``.
+The legacy ``habitat/*_seed.py`` modules that these files replaced were retired
+in the seed consolidation (M-10/M-11), so the byte-identical parity comparisons
+against the seeders' module constants are gone with them. What remains here are
+the still-meaningful guards on the externalised JSON itself — DocType, natural
+key, ``create_only`` flag, record count and per-record key presence — which the
+data-driven loader (``tools.setup.seed.seed_all``) relies on. These are pure
+(no site needed): they exercise only ``load_specs``.
 
-Two seeders are externalised here:
-
-- Assignment Rule  (assignment_rules_seed._RULES / _DAYS)
-- Kanban Board     (kanban_seed._BOARDS)
-
-The Auto Email Report seeder is deliberately NOT externalised: two of its
-fields are runtime database lookups, not constants —
-``email_to`` = the live ``Administrator`` user's email, and ``report_type`` =
-each Report's ``report_type`` resolved at install time. Static JSON cannot
-reproduce those without changing behaviour, so we assert the file is absent and
-pin the reason here so the gap is intentional and visible.
+The Auto Email Report seeder is deliberately NOT externalised: two of its fields
+are runtime database lookups, not constants — ``email_to`` = the live
+``Administrator`` user's email, and ``report_type`` = each Report's
+``report_type`` resolved at install time. Static JSON cannot reproduce those, so
+the seeder stays and we pin the reason here.
 """
 
-import json
 import unittest
 
 from apex_habitat.tools.setup.seed import load_specs
@@ -32,29 +26,7 @@ def _spec(doctype):
     return specs[0]
 
 
-class TestAssignmentRuleParity(unittest.TestCase):
-    """JSON must equal what assignment_rules_seed.seed_assignment_rules inserts."""
-
-    def _legacy_effective_records(self):
-        # Reconstruct the exact get_doc({...}) payload + appended child rows.
-        from apex_habitat.habitat.assignment_rules_seed import _DAYS, _RULES
-
-        records = []
-        for cfg in _RULES:
-            rec = {
-                "name": cfg["name"],
-                "document_type": cfg["document_type"],
-                "rule": cfg["rule"],
-                "disabled": 1,
-                "description": cfg["description"],
-                "assign_condition": cfg["assign_condition"],
-                "priority": 0,
-                "users": [{"user": "Administrator"}],
-                "assignment_days": [{"day": day} for day in _DAYS],
-            }
-            records.append(rec)
-        return records
-
+class TestAssignmentRuleSpec(unittest.TestCase):
     def test_spec_metadata(self):
         spec = _spec("Assignment Rule")
         self.assertEqual(spec["doctype"], "Assignment Rule")
@@ -62,16 +34,7 @@ class TestAssignmentRuleParity(unittest.TestCase):
         self.assertTrue(spec["create_only"])
 
     def test_record_count(self):
-        spec = _spec("Assignment Rule")
-        self.assertEqual(len(spec["records"]), 2)
-
-    def test_records_byte_identical_to_legacy(self):
-        spec = _spec("Assignment Rule")
-        expected = self._legacy_effective_records()
-        by_name = {r["name"]: r for r in spec["records"]}
-        self.assertEqual(set(by_name), {r["name"] for r in expected})
-        for exp in expected:
-            self.assertEqual(by_name[exp["name"]], exp)
+        self.assertEqual(len(_spec("Assignment Rule")["records"]), 2)
 
     def test_key_field_present_in_every_record(self):
         spec = _spec("Assignment Rule")
@@ -79,54 +42,17 @@ class TestAssignmentRuleParity(unittest.TestCase):
             self.assertIn(spec["key"], rec)
 
 
-class TestKanbanBoardParity(unittest.TestCase):
-    """JSON must equal what kanban_seed.seed_kanban_boards inserts."""
-
-    def _legacy_effective_records(self):
-        from apex_habitat.habitat.kanban_seed import _BOARDS
-
-        records = []
-        for cfg in _BOARDS:
-            rec = {
-                "kanban_board_name": cfg["name"],
-                "reference_doctype": cfg["reference_doctype"],
-                "field_name": cfg["field_name"],
-                "private": 0,
-                "show_labels": 1,
-                "filters": "[]",
-                "columns": [
-                    {
-                        "column_name": column_name,
-                        "status": "Active",
-                        "indicator": indicator,
-                        "order": json.dumps([]),
-                    }
-                    for column_name, indicator in cfg["columns"]
-                ],
-            }
-            records.append(rec)
-        return records
-
+class TestKanbanBoardSpec(unittest.TestCase):
     def test_spec_metadata(self):
         spec = _spec("Kanban Board")
         self.assertEqual(spec["doctype"], "Kanban Board")
-        # name == kanban_board_name (autoname: field:kanban_board_name); the
-        # legacy guard's positional name lookup is equivalent to matching on
-        # kanban_board_name, which is the field the record actually sets.
+        # Kanban Board auto-names from kanban_board_name, so the existence guard
+        # matches on that field rather than ``name``.
         self.assertEqual(spec["key"], "kanban_board_name")
         self.assertTrue(spec["create_only"])
 
     def test_record_count(self):
-        spec = _spec("Kanban Board")
-        self.assertEqual(len(spec["records"]), 3)
-
-    def test_records_byte_identical_to_legacy(self):
-        spec = _spec("Kanban Board")
-        expected = self._legacy_effective_records()
-        by_name = {r["kanban_board_name"]: r for r in spec["records"]}
-        self.assertEqual(set(by_name), {r["kanban_board_name"] for r in expected})
-        for exp in expected:
-            self.assertEqual(by_name[exp["kanban_board_name"]], exp)
+        self.assertEqual(len(_spec("Kanban Board")["records"]), 3)
 
     def test_key_field_present_in_every_record(self):
         spec = _spec("Kanban Board")

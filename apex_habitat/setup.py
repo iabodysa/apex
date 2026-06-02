@@ -1,6 +1,5 @@
 import frappe
 
-from apex_habitat.habitat.assignment_rules_seed import seed_assignment_rules
 from apex_habitat.habitat.auto_email_reports_seed import seed_auto_email_reports
 from apex_habitat.habitat.dashboard_seed import (
     seed_habitat_dashboard,
@@ -12,8 +11,11 @@ from apex_habitat.habitat.doctype.maintenance_material.maintenance_material_cata
 from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_material_template_seed import (
     seed_templates,
 )
-from apex_habitat.habitat.email_templates_seed import seed_email_templates
-from apex_habitat.habitat.kanban_seed import seed_kanban_boards
+
+# Assignment Rules, Email Templates and Kanban Boards are now provisioned by the
+# data-driven loader ``tools.setup.seed.seed_all`` (wired in hooks.py
+# after_install/after_migrate) — create-only JSON under tools/setup/data/. The
+# hand-written habitat seeders were retired in the seed consolidation (M-10/M-11).
 
 
 def after_install():
@@ -25,10 +27,7 @@ def after_install():
     create_safety_task_catalogs()
     seed_catalog()
     seed_templates()
-    seed_kanban_boards()
-    seed_assignment_rules()
     seed_auto_email_reports()
-    seed_email_templates()
     seed_habitat_dashboard()
     seed_role_dashboards()
     # Force translation cache reload so Arabic strings appear on first login
