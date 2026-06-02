@@ -7,9 +7,3 @@ from frappe.model.document import Document
 
 class CameraAccessGrant(Document):
     pass
-
-
-def before_save(doc, method=None):
-    # Validate document properties
-    if not doc.doctype:
-        return

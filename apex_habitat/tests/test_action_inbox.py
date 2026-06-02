@@ -32,7 +32,7 @@ class TestActionInboxAPI(unittest.TestCase):
 
 class TestOrphanCleanup(unittest.TestCase):
     def test_cleanup_only_open_and_wired(self):
-        with open(os.path.join(APP_ROOT, "workflow_utils.py"), encoding="utf-8") as fh:
+        with open(os.path.join(APP_ROOT, "apex_core", "workflow_utils.py"), encoding="utf-8") as fh:
             src = fh.read()
         self.assertIn("def cleanup_orphaned_workflow_actions(", src)
         self.assertIn("status = 'Open'", src)  # acts only on Open rows

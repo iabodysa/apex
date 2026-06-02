@@ -23,15 +23,9 @@ app_include_js = ["masar_worker_link.bundle.js"]
 
 # Document lifecycle hooks
 doc_events = {
-    "Accommodation Site": {
-        "before_save": "apex_habitat.habitat.doctype.accommodation_site.accommodation_site.before_save",
-    },
-    "Accommodation Bed": {
-        "before_save": "apex_habitat.habitat.doctype.accommodation_bed.accommodation_bed.before_save",
-    },
-    "Accommodation Room": {
-        "before_save": "apex_habitat.habitat.doctype.accommodation_room.accommodation_room.before_save",
-    },
+    "Accommodation Site": {},
+    "Accommodation Bed": {},
+    "Accommodation Room": {},
     "Accommodation QR Location": {
         "before_save": "apex_habitat.habitat.doctype.accommodation_qr_location.accommodation_qr_location.before_save",
     },
@@ -43,21 +37,11 @@ doc_events = {
         "validate": "apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request.validate",
         "on_update": "apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request.on_update",
     },
-    "Building License": {
-        "before_save": "apex_habitat.habitat.doctype.building_license.building_license.before_save",
-    },
-    "Camera Access Grant": {
-        "before_save": "apex_habitat.habitat.doctype.camera_access_grant.camera_access_grant.before_save",
-    },
-    "Cleaning Log": {
-        "before_save": "apex_habitat.habitat.doctype.cleaning_log.cleaning_log.before_save",
-    },
-    "Client Audit Remediation Plan": {
-        "before_save": "apex_habitat.habitat.doctype.client_audit_remediation_plan.client_audit_remediation_plan.before_save",
-    },
-    "Scheduled Task Template": {
-        "before_save": "apex_habitat.habitat.doctype.scheduled_task_template.scheduled_task_template.before_save",
-    },
+    "Building License": {},
+    "Camera Access Grant": {},
+    "Cleaning Log": {},
+    "Client Audit Remediation Plan": {},
+    "Scheduled Task Template": {},
     "Accommodation Building": {
         "before_save": "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.before_save",
     },
@@ -85,18 +69,12 @@ doc_events = {
         "on_submit": "apex_habitat.habitat.doctype.room_bed_transfer.room_bed_transfer.on_submit",
         "on_cancel": "apex_habitat.habitat.doctype.room_bed_transfer.room_bed_transfer.on_cancel",
     },
-    "Safety Inspection Report": {
-        "before_save": "apex_habitat.habitat.doctype.safety_inspection_report.safety_inspection_report.before_save",
-    },
+    "Safety Inspection Report": {},
     "Maintenance Request": {
         "before_save": "apex_habitat.habitat.doctype.maintenance_request.maintenance_request.before_save",
     },
-    "Custody Article": {
-        "before_save": "apex_habitat.habitat.doctype.custody_article.custody_article.before_save",
-    },
-    "Custody Asset Category": {
-        "before_save": "apex_habitat.habitat.doctype.custody_asset_category.custody_asset_category.before_save",
-    },
+    "Custody Article": {},
+    "Custody Asset Category": {},
     # Phase 5 — Custody and Operational Depreciation
     "Idle Resident Report": {
         "validate": "apex_habitat.habitat.doctype.idle_resident_report.idle_resident_report.validate",
@@ -129,38 +107,24 @@ doc_events = {
         "before_cancel": "apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financial_depreciation_snapshot.before_cancel",
     },
     # Phase 6 gaps
-    "Facility Asset": {
-        "before_save": "apex_habitat.habitat.doctype.facility_asset.facility_asset.before_save",
-    },
-    "Facility Asset Custody Assignment": {
-        "before_save": "apex_habitat.habitat.doctype.facility_asset_custody_assignment.facility_asset_custody_assignment.before_save",
-    },
+    "Facility Asset": {},
+    "Facility Asset Custody Assignment": {},
     "Facility Asset Movement": {
         "validate": "apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement.validate",
         "on_submit": "apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement.on_submit",
         "before_cancel": "apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement.before_cancel",
     },
-    "Operational Depreciation Policy": {
-        "before_save": "apex_habitat.habitat.doctype.operational_depreciation_policy.operational_depreciation_policy.before_save",
-    },
+    "Operational Depreciation Policy": {},
     "Subcontractor Service Order": {
         "before_save": "apex_habitat.habitat.doctype.subcontractor_service_order.subcontractor_service_order.before_save",
     },
-    "Subcontractor Service Contract": {
-        "before_save": "apex_habitat.habitat.doctype.subcontractor_service_contract.subcontractor_service_contract.before_save",
-    },
-    "Utility Account": {
-        "before_save": "apex_habitat.habitat.doctype.utility_account.utility_account.before_save",
-    },
+    "Subcontractor Service Contract": {},
+    "Utility Account": {},
     "Habitat Settings": {
         "before_save": "apex_habitat.apex_core.doctype.habitat_settings.habitat_settings.before_save",
     },
-    "Safety Task Catalog": {
-        "before_save": "apex_habitat.habitat.doctype.safety_task_catalog.safety_task_catalog.before_save",
-    },
-    "Safety Task Execution": {
-        "before_save": "apex_habitat.habitat.doctype.safety_task_execution.safety_task_execution.before_save",
-    },
+    "Safety Task Catalog": {},
+    "Safety Task Execution": {},
     "Maintenance Work Order": {
         "validate": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.validate",
         "on_submit": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.on_submit",
