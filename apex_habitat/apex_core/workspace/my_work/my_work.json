@@ -10,7 +10,7 @@
  "is_hidden": 0,
  "sequence_id": 5.0,
  "parent_page": "",
- "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 4}}]",
+ "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 4}}, {\"id\": \"mwScReq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Maintenance Requests\", \"col\": 4}}, {\"id\": \"mwHdrTasks\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Tasks</b></span>\", \"col\": 12}}, {\"id\": \"mwQlTasks\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Tasks\", \"col\": 12}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -19,6 +19,14 @@
    "link_to": "action-inbox",
    "color": "Blue",
    "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "My Maintenance Requests",
+   "link_to": "Maintenance Request",
+   "color": "Grey",
+   "idx": 2
   }
  ],
  "links": [],
@@ -31,7 +39,14 @@
   }
  ],
  "charts": [],
- "quick_lists": [],
+ "quick_lists": [
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "ToDo",
+   "label": "My Tasks",
+   "quick_list_filter": "[[\"status\", \"=\", \"Open\"]]"
+  }
+ ],
  "roles": [],
- "modified": "2026-06-02 12:00:00.000000"
+ "modified": "2026-06-02 13:00:00.000000"
 }
