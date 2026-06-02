@@ -2405,3 +2405,6 @@ Worker Type,نوع العامل
 Resident / worker is required.,المقيم / العامل مطلوب.
 Linked to Employee {0} (passport match); housing/custody re-pointed and cost back-dated.,تم الربط بالموظف {0} (مطابقة الجواز)؛ أُعيد توجيه السكن/العهدة واحتُسبت التكلفة بأثر رجعي.
 Temporary Worker {0} ({1}) expired without an Employee link — the temporary window lapsed.,انتهت صلاحية العامل المؤقت {0} ({1}) دون ربط بموظف — لانقضاء النافذة المؤقتة.
+Action Inbox,صندوق الإجراءات
+My Work,مهامي
+Pending My Action,بانتظار إجرائي

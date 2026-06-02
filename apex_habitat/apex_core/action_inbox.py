@@ -66,6 +66,16 @@ def get_pending_actions() -> dict:
     return {"workflow_actions": workflow_actions, "todos": todos}
 
 
+@frappe.whitelist()
+def get_pending_action_count(filters=None) -> dict:
+    """Number-card value: how many documents await the current user's action
+    (workflow approvals + assigned ToDos). Reuses :func:`get_pending_actions`, so
+    the same native scoping and staleness guard apply. ``filters`` is accepted and
+    ignored — the native Custom Number Card widget always passes it."""
+    pending = get_pending_actions()
+    return {"value": len(pending["workflow_actions"]) + len(pending["todos"])}
+
+
 def _drop_stale(rows: list) -> list:
     """Keep only Workflow Actions whose document still sits at the recorded state.
 
