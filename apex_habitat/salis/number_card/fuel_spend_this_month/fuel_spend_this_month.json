@@ -8,11 +8,12 @@
  "report_function": "Sum",
  "currency": "SAR",
  "is_public": 1,
- "is_standard": 0,
+ "is_standard": 1,
  "show_full_number": 0,
  "show_percentage_stats": 0,
  "stats_time_interval": "Daily",
  "type": "Document Type",
  "module": "Salis",
- "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"], [\"Fuel Request\", \"request_date\", \"Timespan\", \"this month\"]]"
+ "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"], [\"Fuel Request\", \"request_date\", \"Timespan\", \"this month\"]]",
+ "modified": "2026-06-02 13:30:00.000000"
 }

@@ -11,5 +11,6 @@
  "type": "Document Type",
  "color": "#29CD42",
  "module": "Salis",
- "filters_json": "[[\"Dispatch Trip\", \"status\", \"in\", [\"Dispatched\", \"Completed\"]], [\"Dispatch Trip\", \"trip_date\", \"Timespan\", \"today\"]]"
+ "filters_json": "[[\"Dispatch Trip\", \"status\", \"in\", [\"Dispatched\", \"Completed\"]], [\"Dispatch Trip\", \"trip_date\", \"Timespan\", \"today\"]]",
+ "modified": "2026-06-02 13:30:00.000000"
 }

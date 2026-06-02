@@ -13,5 +13,6 @@
  "time_interval": "Monthly",
  "timeseries": 1,
  "timespan": "Last Year",
- "type": "Bar"
+ "type": "Bar",
+ "modified": "2026-06-02 13:30:00.000000"
 }

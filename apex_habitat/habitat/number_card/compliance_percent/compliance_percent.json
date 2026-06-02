@@ -6,5 +6,6 @@
  "method": "apex_habitat.habitat.api.dashboard.get_compliance_percent",
  "module": "Habitat",
  "name": "Compliance Percent",
- "type": "Custom"
+ "type": "Custom",
+ "modified": "2026-06-02 13:30:00.000000"
 }

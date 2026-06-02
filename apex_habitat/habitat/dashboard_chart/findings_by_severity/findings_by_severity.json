@@ -12,5 +12,6 @@
  "number_of_groups": 0,
  "timeseries": 0,
  "type": "Donut",
- "filters_json": "[]"
+ "filters_json": "[]",
+ "modified": "2026-06-02 13:30:00.000000"
 }

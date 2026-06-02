@@ -11,5 +11,6 @@
  "type": "Document Type",
  "color": "#5e64ff",
  "module": "Salis",
- "filters_json": "[[\"Passenger Manifest\", \"dispatch_date\", \"Timespan\", \"today\"]]"
+ "filters_json": "[[\"Passenger Manifest\", \"dispatch_date\", \"Timespan\", \"today\"]]",
+ "modified": "2026-06-02 13:30:00.000000"
 }

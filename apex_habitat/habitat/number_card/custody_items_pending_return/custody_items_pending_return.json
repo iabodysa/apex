@@ -10,5 +10,6 @@
  "show_percentage_stats": 1,
  "stats_time_interval": "Daily",
  "type": "Document Type",
- "filters_json": "[[\"Custody Issue\", \"status\", \"in\", [\"Issued\", \"Partially Returned\"]], [\"Custody Issue\", \"docstatus\", \"=\", 1]]"
+ "filters_json": "[[\"Custody Issue\", \"status\", \"in\", [\"Issued\", \"Partially Returned\"]], [\"Custody Issue\", \"docstatus\", \"=\", 1]]",
+ "modified": "2026-06-02 13:30:00.000000"
 }

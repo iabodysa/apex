@@ -15,5 +15,6 @@
  "timespan": "Last Year",
  "type": "Bar",
  "value_based_on": "cost_bleeding",
- "filters_json": "[]"
+ "filters_json": "[]",
+ "modified": "2026-06-02 13:30:00.000000"
 }

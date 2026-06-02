@@ -9,5 +9,7 @@
  "stats_time_interval": "Daily",
  "type": "Document Type",
  "module": "Habitat",
- "filters_json": "[[\"Maintenance Request\", \"status\", \"in\", [\"Open\", \"Assigned\", \"In Progress\", \"Reopened\"]]]"
+ "filters_json": "[[\"Maintenance Request\", \"status\", \"in\", [\"Open\", \"Assigned\", \"In Progress\", \"Reopened\"]]]",
+ "is_standard": 1,
+ "modified": "2026-06-02 13:30:00.000000"
 }

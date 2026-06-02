@@ -14,5 +14,6 @@
  "type": "Document Type",
  "color": "#29CD42",
  "module": "Salis",
- "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"], [\"Fuel Request\", \"request_date\", \"Timespan\", \"this month\"]]"
+ "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"], [\"Fuel Request\", \"request_date\", \"Timespan\", \"this month\"]]",
+ "modified": "2026-06-02 13:30:00.000000"
 }
