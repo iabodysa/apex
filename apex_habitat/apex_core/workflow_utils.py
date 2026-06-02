@@ -56,5 +56,23 @@ def cleanup_orphaned_workflow_actions():
             frappe.db.rollback()
             frappe.log_error(title=f"cleanup_orphaned_workflow_actions: {dt}")
 
+    # Case C — the reference DocType itself no longer exists (retired/renamed) or has
+    # no table. Such a doctype has no active Workflow to drive Case A/B above, so its
+    # Open actions are permanently orphaned: they pollute every approver's Action Inbox
+    # AND crash it (get_transitions can't import the deleted controller). The per-
+    # workflow loop above can never reach them, so sweep them by reference_doctype here.
+    open_doctypes = frappe.get_all(
+        "Workflow Action", filters={"status": "Open"}, pluck="reference_doctype", distinct=True
+    )
+    for dt in open_doctypes:
+        if not dt or (frappe.db.exists("DocType", dt) and frappe.db.table_exists(dt)):
+            continue
+        try:
+            frappe.db.delete("Workflow Action", {"status": "Open", "reference_doctype": dt})
+            frappe.db.commit()
+        except Exception:
+            frappe.db.rollback()
+            frappe.log_error(title=f"cleanup_orphaned_workflow_actions (missing DocType): {dt}")
+
     # Refresh the notification badge (accepts a doctype name; a no-op if unconfigured).
     clear_doctype_notifications("Workflow Action")

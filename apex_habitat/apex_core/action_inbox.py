@@ -94,6 +94,17 @@ def _drop_stale(rows: list) -> list:
 
     kept: list = []
     for doctype, group in by_doctype.items():
+        # A retired/renamed reference DocType (its record is gone) leaves permanently
+        # orphaned Open actions whose controller can no longer be imported — returning
+        # them crashes the inbox the instant the desk fetches their transitions
+        # (frappe.model.workflow.get_transitions -> get_controller -> ImportError). Drop
+        # them here so the inbox can never crash on an orphan; the daily
+        # cleanup_orphaned_workflow_actions (Case C) purges the rows for good.
+        if not frappe.db.exists("DocType", doctype):
+            frappe.logger().info(
+                f"action_inbox: dropped {len(group)} Open action(s) for missing DocType {doctype!r}"
+            )
+            continue
         try:
             workflow = get_workflow_name(doctype)
             state_field = get_workflow_state_field(workflow) if workflow else None
