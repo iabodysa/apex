@@ -105,3 +105,101 @@ def maintenance_request_has_permission(doc, ptype, user=None):
     if getattr(doc, "assigned_to", None) == user:
         return True
     return False
+
+
+# ---------------------------------------------------------------------------
+# Building-scoped row security for the Housing Supervisor
+# ---------------------------------------------------------------------------
+# A Housing Supervisor (the "Resident Supervisor" role) is bound to the
+# building(s) he is responsible for via a User Permission on "Accommodation
+# Building" (one supervisor may cover MANY buildings). Within that scope he may
+# only: house residents (Accommodation Assignment), issue custody from the store
+# (Custody Issue), and oversee cleaning (Cleaning Log) for HIS buildings — and he
+# sees only his buildings. This mirrors the Salis fleet-supervisor project scope
+# (apex_habitat/salis/permissions.py), with "building" in place of "project".
+#
+# Oversight roles below see every building (no scoping); their access is bounded
+# only by their own DocPerms. NOTE: "Resident Supervisor" is intentionally NOT
+# here — he is the scoped role. (He remains owner-unscoped for Maintenance
+# Request via PRIVILEGED_ROLES above; that is an independent concern.)
+HOUSING_UNSCOPED_ROLES = {
+    "System Manager",
+    "Accommodation Manager",
+    "Internal Auditor",
+    "Finance Manager",
+}
+
+
+def _allowed_buildings(user):
+    """Accommodation Building names the user has an explicit User Permission for."""
+    return list(
+        frappe.get_all(
+            "User Permission",
+            filters={"allow": "Accommodation Building", "user": user},
+            pluck="for_value",
+        )
+    )
+
+
+def _building_is_unscoped(user):
+    """True when the user is the Administrator or holds a building-oversight role."""
+    if user in ("Administrator", "Guest"):
+        return user == "Administrator"
+    return bool(set(frappe.get_roles(user)) & HOUSING_UNSCOPED_ROLES)
+
+
+def _building_condition(user=None, column="`building`"):
+    """SQL WHERE fragment restricting ``column`` to the user's allowed buildings.
+
+    "" for unscoped users (no restriction); "1=0" when the user is scoped but has
+    no allowed buildings (so they see nothing).
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return ""
+    buildings = _allowed_buildings(user)
+    if not buildings:
+        return "1=0"
+    escaped = ", ".join(frappe.db.escape(b) for b in buildings)
+    return "{column} in ({values})".format(column=column, values=escaped)
+
+
+# permission_query_conditions — DocTypes with a direct `building` Link field.
+def accommodation_assignment_query(user=None):
+    return _building_condition(user)
+
+
+def custody_issue_query(user=None):
+    return _building_condition(user)
+
+
+def cleaning_log_query(user=None):
+    return _building_condition(user)
+
+
+def accommodation_building_query(user=None):
+    # The building IS the row, so scope on its own `name`.
+    return _building_condition(user, column="`name`")
+
+
+def building_scoped_has_permission(doc, ptype, user=None):
+    """Deny a building-scoped user acting on a doc outside their buildings.
+
+    Returns None to defer to Frappe's default resolution (unscoped users / in-scope
+    docs — keeps DocPerms intact), or False to block. The Accommodation Building doc
+    is scoped on its own name; the transactions are scoped on their `building` field.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return None
+
+    if getattr(doc, "doctype", None) == "Accommodation Building":
+        building = getattr(doc, "name", None)
+    else:
+        building = getattr(doc, "building", None)
+
+    if not building:
+        # Scoped user + a building-less record: deny, mirroring the list query
+        # (which shows scoped users nothing when the scope column is absent).
+        return False
+    return None if building in _allowed_buildings(user) else False

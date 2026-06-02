@@ -206,6 +206,11 @@ override_doctype_dashboards = {
 # rows (privileged oversight roles see all). See habitat/permissions.py.
 permission_query_conditions = {
     "Maintenance Request": "apex_habitat.habitat.permissions.maintenance_request_query",
+    # Housing Supervisor — building-scoped (Resident Supervisor sees only his buildings).
+    "Accommodation Assignment": "apex_habitat.habitat.permissions.accommodation_assignment_query",
+    "Custody Issue": "apex_habitat.habitat.permissions.custody_issue_query",
+    "Cleaning Log": "apex_habitat.habitat.permissions.cleaning_log_query",
+    "Accommodation Building": "apex_habitat.habitat.permissions.accommodation_building_query",
     "Vehicle Assignment": "apex_habitat.salis.permissions.vehicle_assignment_query",
     "Fuel Request": "apex_habitat.salis.permissions.fuel_request_query",
     "Dispatch Trip": "apex_habitat.salis.permissions.dispatch_trip_query",
@@ -228,6 +233,11 @@ has_permission = {
     # permission_query_conditions entry above) — confines form/REST/link reads to
     # the ticket's owner/assignee, deferring to DocPerms for privileged roles.
     "Maintenance Request": "apex_habitat.habitat.permissions.maintenance_request_has_permission",
+    # Housing Supervisor — per-document building scope (mirrors the query above).
+    "Accommodation Assignment": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Custody Issue": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Cleaning Log": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Accommodation Building": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Vehicle Assignment": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Dispatch Trip": "apex_habitat.salis.permissions.scoped_has_permission",
