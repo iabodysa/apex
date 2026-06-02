@@ -9,8 +9,10 @@ for a small company. The Salis Delegation-of-Authority ladder now uses the
 Fleet-prefixed roles instead:
     Project tier      -> Fleet Project Manager
     Regional/Ops tier -> Fleet Manager
-Existing users on the old names are migrated by
-patches/v1_x/consolidate_salis_roles.py.
+The consolidation is enforced purely by NOT seeding the old generic names (this
+module is now a guarded no-op). There is no consolidate_salis_roles patch — the
+earlier reference to one was stale; re-pointing any existing user off an old role
+name (on a legacy site that still has them) is an owner decision, not automated.
 
 This module is intentionally retained as a guarded no-op so the entry in
 patches.txt keeps resolving on already-installed sites; it seeds nothing.

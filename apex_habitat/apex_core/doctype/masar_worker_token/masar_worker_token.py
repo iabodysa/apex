@@ -37,6 +37,11 @@ def _new_token() -> str:
 
 
 class MasarWorkerToken(Document):
+    # NOTE on hook order: Frappe runs before_validate BEFORE before_insert on a
+    # new doc, i.e. the reverse of these methods' top-to-bottom (visual) order in
+    # this file. So when adding future employee-dependent insert logic, place it
+    # in before_insert (it can rely on before_validate's party sync having already
+    # run); do not assume before_insert runs first just because it is written first.
     def before_validate(self):
         sync_party_employee(self, require_party=True)
 

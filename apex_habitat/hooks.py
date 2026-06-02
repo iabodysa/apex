@@ -273,9 +273,15 @@ fixtures = [
     # Salis (Movement) custom roles — only the uniquely-ours, post-consolidation
     # roles are fixtured. Core/generic roles (Fleet Manager, Driver) are
     # existence-guarded in the seeds, never fixtured, to avoid clobbering
-    # ERPNext/HRMS-owned roles. The merged roles (Fleet Operations Manager,
-    # Fleet Regional Manager, Legal Officer) are intentionally NOT fixtured —
-    # see patches/v1_x/consolidate_salis_roles.py.
+    # ERPNext/HRMS-owned roles. The merged role names (Fleet Operations Manager,
+    # Fleet Regional Manager -> Fleet Manager; Legal Officer -> Government Relations
+    # Officer) are intentionally NOT fixtured and NOT seeded: the role-creation
+    # seeders (patches/v1_0/seed_salis_authority_roles.py +
+    # seed_salis_operations_roles.py) simply omit those names from their seed lists,
+    # so a fresh install never creates them. (There is no consolidate_salis_roles
+    # patch; the audit reference to one was stale. Re-pointing an EXISTING user from
+    # an old role name to the merged one — if any legacy site still has them — is an
+    # owner decision and is not automated here.)
     {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Supervisor", "Government Relations Officer"]]]},
     # Salis-on-Issue: the Issue.custom_driver Custom Field ships via the
     # sync_customizations file salis/custom/issue.json (auto-applied on migrate),
@@ -371,6 +377,11 @@ after_migrate = [
     # migrate (idempotent + existence-guarded; seeds Issue Types/Priorities/SLA
     # and grants the core-Issue role DocPerms via Custom DocPerm rows).
     "apex_habitat.salis.issue_seed.seed_salis_issue_masters",
+    # Salis Settings defaults — fill-blanks-only (never clobbers an admin's edits).
+    # after_install + a run-once patch seed this on fresh/legacy sites, but NOT on
+    # ordinary migrate, so a newly-added default key would never reach an already-
+    # upgraded site. Re-running the same idempotent seed here closes that gap.
+    "apex_habitat.patches.v1_0.seed_salis_settings.execute",
     # Habitat roles + Role Profiles — keep already-installed sites in sync on
     # migrate (create-only/existence-guarded). after_install seeds them on a fresh
     # install; this delivers newly-added roles/profiles to UPGRADING sites — Role
