@@ -319,16 +319,21 @@ after_install = [
     # the core-Issue role DocPerms drivers and fleet staff need (Support Ticket
     # retired). Idempotent + existence-guarded; also run on after_migrate.
     "apex_habitat.salis.issue_seed.seed_salis_issue_masters",
-    # Salis Dashboards + their Number Cards / Dashboard Charts. These are also run
-    # on after_migrate (below), but a bare `install-app` with no follow-up migrate
-    # never reaches after_migrate, so a fresh install would otherwise be missing the
-    # Salis dashboards and ~23 cards / ~16 charts until the first migrate. By install
-    # time sync_for has already created the Salis source DocTypes, so the seeders'
-    # existence guards are satisfied. Both are idempotent (upsert-by-name) and
-    # link-guarded, so running them in both phases never duplicates records. The
-    # Habitat dashboards are already provisioned on install via setup.after_install
-    # (seed_habitat_dashboard + seed_role_dashboards), so seed_all_dashboards is
-    # intentionally NOT wired here to avoid double-running the Habitat seed.
+]
+
+# Install-only hook that runs AFTER sync_dashboards (install order in
+# installer.py: after_install -> sync_jobs -> sync_fixtures -> sync_customizations
+# -> sync_dashboards -> after_sync). By this point the is_standard Dashboard Charts
+# and Number Cards have been imported, so the Salis role dashboards can link the
+# fixture-backed ("NEW") charts/cards they reference. They must seed here, not in
+# after_install: after_install runs before sync_dashboards, so those charts do not
+# exist yet and the existence-guarded seed leaves the Workers Transport /
+# Representatives Fleet dashboards unlinked on a bare `install-app` with no
+# follow-up migrate. Idempotent (upsert-by-name); also run on after_migrate (below)
+# to keep upgrading sites in sync. (Habitat dashboards are provisioned on install
+# via setup.after_install; seed_all_dashboards is intentionally not wired here to
+# avoid double-running the Habitat seed.)
+after_sync = [
     "apex_habitat.salis.dashboard_seed.seed_salis_dashboards",
     "apex_habitat.salis.movement_dashboard_seed.seed_movement_dashboards",
 ]
