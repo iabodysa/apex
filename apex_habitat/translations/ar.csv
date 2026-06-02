@@ -62,7 +62,7 @@ Additional Salary Deduction Entry,قيد حسم إضافي من الراتب
 "Admin Manager, Operations Director, General Manager",مدير الشؤون الإدارية، مدير العمليات، المدير العام
 Administrative Details,تفاصيل إدارية
 Age (Days),العمر (أيام)
-Age (Years),العمر (بالسنوات)
+Age (Years),العمر (سنوات)
 Air Conditioning,تكييف الهواء
 Air Filters,مرشحات الهواء
 Alert Type,نوع التنبيه
@@ -78,7 +78,7 @@ Amount (SAR),المبلغ (ريال)
 An overlapping lease already exists for this building: {0},يوجد عقد متداخل بالفعل لهذا المبنى: {0}
 Annual Cleaning Staff Cost (SAR),تكلفة عمالة النظافة السنوية (ريال)
 Annual Cost Breakdown,تفصيل التكلفة السنوية
-Annual Cost per Bed Capacity (SAR),التكلفة السنوية لكل سرير سعة استيعابية (بالريال السعودي)
+Annual Cost per Bed Capacity (SAR),التكلفة السنوية لكل سرير سعة استيعابية (ريال)
 Annual Electricity (SAR),تكلفة الكهرباء السنوية (ريال)
 Annual Other Expenses (SAR),المصاريف السنوية الأخرى (ريال)
 Annual Rent (SAR),الإيجار السنوي (ريال)
@@ -306,7 +306,7 @@ Cost Bearing (%),نسبة تحمّل التكلفة (٪)
 Cost Center is required. Please set it or configure a default Cost Center on Building {0}.,مركز التكلفة مطلوب. يُرجى تحديده أو ضبط مركز تكلفة افتراضي على المبنى {0}.
 Cost Master,بيانات التكلفة الأساسية
 Cost Transactions,حركات التكلفة
-Cost of Repair (SAR),تكلفة الإصلاح (ر.س)
+Cost of Repair (SAR),تكلفة الإصلاح (ريال)
 Could not complete the Work Order. No changes were saved. Please try again or contact support.,تعذّر إكمال أمر العمل. لم تُحفظ أي تغييرات. يرجى المحاولة مجدداً أو التواصل مع الدعم الفني.
 Could not complete the generation. Please try again.,تعذّر إتمام التوليد. يرجى المحاولة مجدداً.
 Could not generate rooms and beds. Please try again.,تعذّر توليد الغرف والأسرة. يرجى المحاولة مجدداً.
@@ -434,7 +434,7 @@ Email address where the e-bill arrives.,البريد الإلكتروني الذ
 Emergency,حالة طارئة
 Emergency & Crisis,الطوارئ والأزمات
 Emergency Signage Required,لافتات الطوارئ مطلوبة
-Employee Daily Share (SAR),حصة الموظف اليومية (ر.س)
+Employee Daily Share (SAR),حصة الموظف اليومية (ريال)
 Employee Name,اسم الموظف
 Employee Responsible,الموظف المسؤول
 Employee {0} already has an active Accommodation Assignment: {1},الموظف {0} مسكن بالفعل في: {1}
@@ -1212,12 +1212,12 @@ Total Capacity,إجمالي السعة
 Total Deduction Amount,إجمالي مبلغ الخصم
 Total Estimated Replacement Cost (SAR),إجمالي تكلفة الاستبدال التقديرية (ريال)
 Total Floors,إجمالي الطوابق
-Total Invoice Amount (SAR),إجمالي مبلغ الفاتورة (ريال سعودي)
+Total Invoice Amount (SAR),إجمالي مبلغ الفاتورة (ريال)
 Total Movements Recorded,إجمالي الحركات المسجلة
 Total Procurement Cost (SAR),إجمالي تكلفة المشتريات (ريال)
 Total Rooms,إجمالي الغرف
 Total Scheduled Amount (SAR),إجمالي المبلغ المجدول (ريال)
-Total Site Cost (SAR),إجمالي تكلفة الموقع (ر.س)
+Total Site Cost (SAR),إجمالي تكلفة الموقع (ريال)
 Total Site Cost for Period (SAR),إجمالي تكلفة الموقع للفترة (ريال)
 Towel Holders,حاملات المناشف
 "Tracks remediation actions imposed by a client audit. Each action has owner, deadline, evidence.",يتتبّع إجراءات المعالجة المفروضة من تدقيق العميل. لكل إجراء مسؤول وموعد نهائي وإثبات.
@@ -1250,7 +1250,7 @@ Upload Photo (Optional),رفع صورة (اختياري)
 "Use when the issue concerns a specific facility asset (e.g., CCTV camera, fire alarm panel)",استخدمه عندما تخص المشكلة أصل مرفق محدد (مثل كاميرا مراقبة، لوحة إنذار حريق)
 Used for variance alerts. Updated monthly by the variance scan job.,يُستخدم لتنبيهات الانحراف. يُحدَّث شهرياً بواسطة مهمة فحص الانحراف.
 "Used in room/bed codes, e.g. JED1-G01.",يُستخدم في رموز الغرف والأسرة، مثال: JED1-G01.
-Useful Life (Years),العمر الإنتاجي (بالسنوات)
+Useful Life (Years),العمر الإنتاجي (سنوات)
 User Requesting Access,المستخدم طالب الصلاحية
 Utility Account,حساب الخدمات العامة
 Utility Bill Entry,تسجيل فاتورة الخدمات العامة
@@ -1776,7 +1776,7 @@ Trip Fulfilment Ledger,دفتر تنفيذ الرحلات
 Vehicle Utilisation Snapshot,لقطة استغلال المركبة
 Quota Increase Claim,مطالبة زيادة الحصة
 Claimed Litres,اللترات المطالب بها
-Claimed Amount (SAR),المبلغ المطالب به (ريال سعودي)
+Claimed Amount (SAR),المبلغ المطالب به (ريال)
 Variance (L),الفرق (لتر)
 Source Handover,تسليم المصدر
 Recommended Action,الإجراء الموصى به
@@ -1818,7 +1818,7 @@ Idle Days,أيام التوقف
 Utilisation %,نسبة الاستغلال %
 Document Number,رقم المستند
 Case Details,تفاصيل الحالة
-Amount Recovered (SAR),المبلغ المسترد (ريال سعودي)
+Amount Recovered (SAR),المبلغ المسترد (ريال)
 Pickup Point,نقطة الالتقاط
 Escalation State,حالة التصعيد
 Discrepancy Status,حالة التباين
@@ -2412,3 +2412,5 @@ Facilities,المرافق
 Safety & Task Master,بيانات السلامة والمهام
 Salis Fleet Master,بيانات أسطول سلس
 Logs,السجلات
+Setup & Master Data,الإعداد والبيانات الرئيسية
+Tools & Consoles,الأدوات ولوحات التحكم
