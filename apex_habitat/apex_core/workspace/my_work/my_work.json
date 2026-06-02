@@ -4,7 +4,7 @@
  "label": "My Work",
  "title": "My Work",
  "module": "Apex Core",
- "icon": "todo",
+ "icon": "assign",
  "public": 1,
  "is_default": 0,
  "is_hidden": 0,
@@ -48,5 +48,5 @@
   }
  ],
  "roles": [],
- "modified": "2026-06-02 13:00:00.000000"
+ "modified": "2026-06-02 15:29:41.000000"
 }
