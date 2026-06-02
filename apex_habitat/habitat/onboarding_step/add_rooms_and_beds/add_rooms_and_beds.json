@@ -1,6 +1,7 @@
 {
  "doctype": "Onboarding Step",
  "name": "Add Rooms and Beds",
+ "intro_text": "Define the rooms in the building, then the beds in each room. A bed is the unit a resident is actually assigned to, so capacity and occupancy track accurately from day one.",
  "title": "Add Rooms and Beds",
  "action": "Create Entry",
  "reference_document": "Accommodation Room",

@@ -1,6 +1,7 @@
 {
  "doctype": "Onboarding Step",
  "name": "Raise a Fuel Request",
+ "intro_text": "Request fuel for a vehicle to begin the fuelling and reconciliation cycle, so consumption and spend are tracked against the vehicle.",
  "title": "Raise a Fuel Request",
  "action": "Create Entry",
  "reference_document": "Fuel Request",

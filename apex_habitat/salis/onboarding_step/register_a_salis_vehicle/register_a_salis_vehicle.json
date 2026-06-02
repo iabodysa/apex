@@ -1,6 +1,7 @@
 {
  "doctype": "Onboarding Step",
  "name": "Register a Salis Vehicle",
+ "intro_text": "Add your first fleet vehicle. Once registered it can be assigned to drivers and projects, fuelled, and tracked through its movement lifecycle.",
  "title": "Register a Salis Vehicle",
  "action": "Create Entry",
  "reference_document": "Salis Vehicle",

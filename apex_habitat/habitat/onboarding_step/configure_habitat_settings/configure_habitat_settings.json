@@ -1,6 +1,7 @@
 {
  "doctype": "Onboarding Step",
  "name": "Configure Habitat Settings",
+ "intro_text": "Set the module defaults — custody, allowance, and whether costs post to the General Ledger. These toggles gate financial behavior, so confirm them before live operations.",
  "title": "Configure Habitat Settings",
  "action": "Update Settings",
  "reference_document": "Habitat Settings",

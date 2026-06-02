@@ -1,6 +1,7 @@
 {
  "doctype": "Onboarding Step",
  "name": "Create an Accommodation Site",
+ "intro_text": "Start here. A site is the top of the housing hierarchy — every building, room, and bed lives under it. Create your first site so the rest of the accommodation setup has a home.",
  "title": "Create an Accommodation Site",
  "action": "Create Entry",
  "reference_document": "Accommodation Site",

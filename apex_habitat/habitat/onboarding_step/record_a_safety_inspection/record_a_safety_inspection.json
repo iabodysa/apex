@@ -1,6 +1,7 @@
 {
  "doctype": "Onboarding Step",
  "name": "Record a Safety Inspection",
+ "intro_text": "Log a building or floor safety inspection. Inspections feed the safety record and surface open findings that drive maintenance and compliance.",
  "title": "Record a Safety Inspection",
  "action": "Create Entry",
  "reference_document": "Safety Inspection Report",

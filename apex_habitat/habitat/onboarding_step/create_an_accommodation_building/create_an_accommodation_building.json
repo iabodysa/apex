@@ -1,6 +1,7 @@
 {
  "doctype": "Onboarding Step",
  "name": "Create an Accommodation Building",
+ "intro_text": "Add a building inside the site and give it a cost center — that cost center is what every accommodation cost (rent, utilities, custody) posts against, so set it before housing anyone.",
  "title": "Create an Accommodation Building",
  "action": "Create Entry",
  "reference_document": "Accommodation Building",

@@ -1,6 +1,7 @@
 {
  "doctype": "Onboarding Step",
  "name": "Review the Active Resident Register",
+ "intro_text": "See everyone currently housed across your buildings in one report — your quick answer to who is living where right now.",
  "title": "Review the Active Resident Register",
  "action": "View Report",
  "reference_report": "Active Resident Register",
