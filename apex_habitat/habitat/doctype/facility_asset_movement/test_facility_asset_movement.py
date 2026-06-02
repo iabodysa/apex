@@ -59,3 +59,25 @@ class TestFacilityAssetMovement(FrappeTestCase):
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
+
+    def test_intercompany_detected_in_validate_enforces_gate(self):
+        # Regression: detection moved from before_save into validate. validate runs
+        # BEFORE before_save, so deriving is_intercompany in before_save left this
+        # gate checking an unset value on the first save. With from/to companies
+        # differing, validate must derive is_intercompany=1 and then enforce the
+        # release-approval gate (here missing -> ValidationError).
+        from apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement import validate
+
+        doc = frappe.get_doc({
+            "doctype": "Facility Asset Movement",
+            "movement_date": "2026-06-01",
+            "facility_asset": "FAC-AST-QA",
+            "from_building": "BLDG-A",
+            "to_building": "BLDG-B",
+            "from_company": "Company X",
+            "to_company": "Company Y",
+            # is_intercompany intentionally NOT set — the fix must derive it.
+        })
+        with self.assertRaises(frappe.ValidationError):
+            validate(doc)
+        self.assertEqual(doc.is_intercompany, 1)

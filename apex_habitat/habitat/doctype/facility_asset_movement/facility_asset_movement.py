@@ -11,12 +11,13 @@ class FacilityAssetMovement(Document):
     pass
 
 
-def before_save(doc, method=None):
+def validate(doc, method=None):
+    # Populate company fields and detect intercompany HERE (not before_save):
+    # validate runs before before_save, so deriving is_intercompany in before_save
+    # left the gate below checking a stale/unset value on the first save.
     _populate_company_fields(doc)
     _detect_intercompany(doc)
 
-
-def validate(doc, method=None):
     if doc.from_building == doc.to_building and doc.from_room == doc.to_room:
         frappe.throw(_("From and To location must differ for a Facility Asset Movement."))
 
