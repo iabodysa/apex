@@ -143,21 +143,33 @@ def trip_start_log_query(user=None):
     other Salis transactional DocType. The fragment restricts the Trip Start Log
     table's `route_plan` column (populated by fetch from the Dispatch Trip) to the
     user's allowed projects via a subquery on `tabRoute Plan`.
+
+    Like Salis Driver, the Driver role reads its OWN logs via an ``if_owner``
+    DocPerm, so we OR the project scope with ``owner = me`` (mirroring
+    ``salis_driver_query``): a Driver who holds no Project User Permission still
+    sees the Trip Start Logs they created, while a scoped supervisor remains
+    confined to the logs in their permitted projects. Returns "" (no restriction)
+    for unscoped oversight roles.
     """
     user = _resolve_user(user)
     if _is_unscoped(user):
         return ""
 
+    own = "`owner` = {0}".format(frappe.db.escape(user))
+
     projects = _allowed_projects(user)
     if not projects:
-        return "1=0"
+        # No project grant: the only legitimate visibility is the user's own
+        # Trip Start Log rows (the if_owner self records). Everything else hidden.
+        return own
 
     escaped = ", ".join(frappe.db.escape(p) for p in projects)
-    return (
+    in_scope = (
         "`route_plan` in ("
         "select `name` from `tabRoute Plan` where `project` in ({values})"
         ")".format(values=escaped)
     )
+    return "({in_scope} or {own})".format(in_scope=in_scope, own=own)
 
 
 def salis_vehicle_query(user=None):
@@ -325,6 +337,45 @@ def salis_driver_has_permission(doc, ptype, user=None):
     if not project:
         # Project-less, non-owned driver row: a scoped user sees nothing, mirroring
         # the list query (which only admits project-in-scope OR owner == me).
+        return False
+
+    if project not in _allowed_projects(user):
+        return False
+
+    return None
+
+
+def trip_start_log_has_permission(doc, ptype, user=None):
+    """Project-scope direct Trip Start Log document access, but never block a
+    Driver from acting on their OWN log.
+
+    Trip Start Log reaches its project through the Dispatch Trip -> Route Plan
+    chain (resolved by ``_doc_project``) AND grants the Driver role an
+    ``if_owner`` DocPerm, while Fleet Supervisor / Fleet Project Manager get an
+    unconditional read across every row. ``trip_start_log_query`` scopes the
+    list/report view (project OR owner), so this hook mirrors it for the
+    form view / REST resource / link reads.
+
+    It mirrors ``salis_driver_has_permission`` exactly: ownership is an
+    independent, valid access basis (the if_owner self record), so the acting
+    user's own row is always allowed; everything else is confined to the user's
+    allowed projects. Using the shared ``scoped_has_permission`` here would be
+    wrong — it denies a project-BEARING doc outside scope, which would block a
+    Driver (who holds no Project User Permission) from opening their own
+    project-tagged log.
+    """
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return None
+
+    # The Driver's own log is always accessible, regardless of its project chain.
+    if getattr(doc, "owner", None) == user:
+        return None
+
+    project = _doc_project(doc)
+    if not project:
+        # Project-less, non-owned log: a scoped user sees nothing, mirroring the
+        # list query (which only admits project-in-scope OR owner == me).
         return False
 
     if project not in _allowed_projects(user):

@@ -63,10 +63,11 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0):
     Returns a summary dict with created/updated/skipped/pending counts and a
     needs_confirmation flag. Never deletes existing records.
     """
-    if not frappe.has_permission("Accommodation Building", "write"):
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
-        
     doc = frappe.get_doc("Accommodation Building", building_name)
+    # Document-level check (doc=) so if_owner / User Permissions / controller
+    # has_permission hooks apply, not just the blanket DocType-level write role.
+    frappe.has_permission("Accommodation Building", "write", doc=doc, throw=True)
+
     abbreviation = (doc.abbreviation or "").strip() or doc.building_name[:4].upper().strip()
 
     if not doc.floor_plan:
@@ -256,8 +257,10 @@ def generate_safety_setup(building_name):
     Building License records are NOT created — they require a real license_number.
     The summary lists recommended license types for the operator to create manually.
     """
-    if not frappe.has_permission("Accommodation Building", "write"):
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
+    # Document-level check (doc=) so if_owner / User Permissions / controller
+    # has_permission hooks apply, not just the blanket DocType-level write role.
+    # (This function operates on the building by name, mirroring update_room_inventory.)
+    frappe.has_permission("Accommodation Building", "write", doc=building_name, throw=True)
 
     catalogs = frappe.get_all(
         "Safety Task Catalog",

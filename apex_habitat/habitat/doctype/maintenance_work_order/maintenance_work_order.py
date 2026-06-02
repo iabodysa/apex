@@ -55,10 +55,10 @@ def before_cancel(doc, method=None):
 @frappe.whitelist(methods=["POST"])
 def start_work(work_order):
     """Transition Maintenance Work Order from Planned to In Progress."""
-    if not frappe.has_permission("Maintenance Work Order", "write"):
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
-        
     doc = frappe.get_doc("Maintenance Work Order", work_order)
+    # Document-level check (doc=) so if_owner / User Permissions / controller
+    # has_permission hooks apply, not just the blanket DocType-level write role.
+    frappe.has_permission("Maintenance Work Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
         frappe.throw(_("Only submitted Work Orders can be started."))
@@ -80,10 +80,8 @@ def mark_completed(work_order, completion_notes=None):
     """
     from frappe.utils import today
 
-    if not frappe.has_permission("Maintenance Work Order", "write"):
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
-
     doc = frappe.get_doc("Maintenance Work Order", work_order)
+    frappe.has_permission("Maintenance Work Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
         frappe.throw(_("Only submitted Maintenance Work Orders can be marked Completed."))

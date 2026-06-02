@@ -21,10 +21,10 @@ def before_save(doc, method=None):
 @frappe.whitelist(methods=["POST"])
 def start_work(service_order):
     """Transition Subcontractor Service Order from Scheduled to In Progress."""
-    if not frappe.has_permission("Subcontractor Service Order", "write"):
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
-
     doc = frappe.get_doc("Subcontractor Service Order", service_order)
+    # Document-level check (doc=) so if_owner / User Permissions / controller
+    # has_permission hooks apply, not just the blanket DocType-level write role.
+    frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
         frappe.throw(_("Only submitted Service Orders can be started."))
@@ -39,10 +39,8 @@ def start_work(service_order):
 @frappe.whitelist(methods=["POST"])
 def mark_missed(service_order):
     """Transition Subcontractor Service Order from In Progress to Missed."""
-    if not frappe.has_permission("Subcontractor Service Order", "write"):
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
-
     doc = frappe.get_doc("Subcontractor Service Order", service_order)
+    frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
         frappe.throw(_("Only submitted Service Orders can be marked Missed."))

@@ -149,7 +149,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-30 00:00:00.000000",
+ "modified": "2026-06-02 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Trip Start Log",
@@ -191,10 +191,6 @@
    "role": "Driver",
    "submit": 1,
    "write": 1
-  },
-  {
-   "read": 1,
-   "role": "Driver"
   },
   {
    "cancel": 1,

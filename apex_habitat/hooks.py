@@ -220,7 +220,11 @@ has_permission = {
     "Vehicle Assignment": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Dispatch Trip": "apex_habitat.salis.permissions.scoped_has_permission",
-    "Trip Start Log": "apex_habitat.salis.permissions.scoped_has_permission",
+    # Trip Start Log carries an if_owner self-record read for the Driver role (a
+    # Driver reads the logs they created) alongside project-scoped supervisor
+    # reads, so it needs the owner-aware hook — the bare scoped one would deny a
+    # Driver their own project-tagged log.
+    "Trip Start Log": "apex_habitat.salis.permissions.trip_start_log_has_permission",
     "Transport Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Route Plan": "apex_habitat.salis.permissions.scoped_has_permission",
     # Salis support now rides on native ERPNext Issue (Support Ticket retired).

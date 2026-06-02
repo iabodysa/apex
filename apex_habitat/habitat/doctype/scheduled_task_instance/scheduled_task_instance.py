@@ -55,10 +55,10 @@ def before_cancel(doc, method=None):
 @frappe.whitelist(methods=["POST"])
 def start_task(task_instance):
     """Transition Scheduled Task Instance from Open to In Progress."""
-    if not frappe.has_permission("Scheduled Task Instance", "write"):
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
-
     doc = frappe.get_doc("Scheduled Task Instance", task_instance)
+    # Document-level check (doc=) so if_owner / User Permissions / controller
+    # has_permission hooks apply, not just the blanket DocType-level write role.
+    frappe.has_permission("Scheduled Task Instance", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
         frappe.throw(_("Only submitted Task Instances can be started."))
@@ -73,10 +73,8 @@ def start_task(task_instance):
 @frappe.whitelist(methods=["POST"])
 def mark_completed(task_instance):
     """Transition Scheduled Task Instance from Open/In Progress to Completed."""
-    if not frappe.has_permission("Scheduled Task Instance", "write"):
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
-
     doc = frappe.get_doc("Scheduled Task Instance", task_instance)
+    frappe.has_permission("Scheduled Task Instance", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
         frappe.throw(_("Only submitted Task Instances can be marked Completed."))

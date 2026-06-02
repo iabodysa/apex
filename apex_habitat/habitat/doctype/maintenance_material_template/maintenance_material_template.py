@@ -18,8 +18,10 @@ def load_template_into_doc(doctype, docname, issue_type):
     if doctype not in ("Maintenance Request", "Maintenance Work Order"):
         frappe.throw(_("Template loading is only supported for Maintenance Request and Maintenance Work Order."))
 
-    if not frappe.has_permission(doctype, "write"):
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
+    doc = frappe.get_doc(doctype, docname)
+    # Document-level check (doc=) so if_owner / User Permissions / controller
+    # has_permission hooks apply, not just the blanket DocType-level write role.
+    frappe.has_permission(doctype, "write", doc=doc, throw=True)
 
     templates = frappe.get_all(
         "Maintenance Material Template",
@@ -31,7 +33,6 @@ def load_template_into_doc(doctype, docname, issue_type):
         return {"rows_added": 0, "message": f"No active template found for issue type: {issue_type}"}
 
     template = frappe.get_doc("Maintenance Material Template", templates[0].name)
-    doc = frappe.get_doc(doctype, docname)
 
     if doc.docstatus != 0:
         frappe.throw(_("Template can only be loaded into a Draft document."))
