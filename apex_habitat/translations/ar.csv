@@ -33,7 +33,6 @@ Accommodation Room,غرفة
 Accommodation Site,موقع
 Accommodation Transactions,حركات السكن
 Accommodation Type,نوع السكن
-"Accommodation, safety, maintenance and cost operations",عمليات السكن والسلامة والصيانة والتكاليف
 Account Number,رقم الحساب
 Accounting Acknowledged,الإقرار المحاسبي
 Accounting Acknowledged is required before submitting a permanent intercompany transfer.,الإقرار المحاسبي مطلوب قبل اعتماد نقل دائم بين الشركات.
@@ -53,7 +52,6 @@ Actual Occupancy,الإشغال الفعلي
 Actual Start Date,تاريخ البداية الفعلي
 Actual Start Date and Actual End Date are required to mark Completed.,تاريخ البدء الفعلي وتاريخ الانتهاء الفعلي مطلوبان للوسم كمكتمل.
 Actual Visit Date,تاريخ الزيارة الفعلي
-Add Rooms and Beds,إضافة الغرف والأسرة
 "Add a building under the site, with its cost center.",أضف مبنى ضمن الموقع مع مركز التكلفة الخاص به.
 Add at least one floor plan row.,أضف صفاً واحداً على الأقل في مخطط الطوابق.
 Additional Information,معلومات إضافية
@@ -291,7 +289,6 @@ Condition at Check-in,الحالة عند الدخول
 Condition at Handover,الحالة عند التسليم
 Condition on Issue,الحالة عند صرف العهدة
 Condition on Return,الحالة عند إرجاع العهدة
-Configure Habitat Settings,تهيئة إعدادات السكن
 Configure required safety controls. Use 'Generate Safety Setup' button to create task templates.,"اضبط ضوابط السلامة المطلوبة. استخدم زر ""توليد إعداد السلامة"" لإنشاء قوالب المهام."
 Confirm the standardized safety tasks that drive scheduled work.,راجع مهام السلامة القياسية التي تنشئ العمل المجدول.
 Consumption,الاستهلاك
@@ -330,8 +327,6 @@ Create Accommodation Room,إنشاء غرفة
 Create Accommodation Site,إنشاء موقع
 Create Entry,إنشاء سجل
 Create Work Order,إنشاء أمر عمل
-Create an Accommodation Building,إنشاء مبنى سكن
-Create an Accommodation Site,إنشاء موقع سكن
 Credentials Delivered By,مُسلم بيانات الاعتماد
 Critical,حرج
 Current Occupancy,الإشغال الحالي
@@ -561,7 +556,6 @@ Ground (G),الأرضي (G)
 Group Housing Permit,تصريح السكن الجماعي
 HSR,تقرير مشرف
 Habitat Internal / No Financial Posting,داخلي في Habitat / بدون ترحيل مالي
-Habitat Operations Setup,تهيئة عمليات السكن
 Habitat Settings,إعدادات السكن
 Habitat System Administration,إدارة نظام هابيتات
 Habitat is ready. Your operations workspaces are now active.,تم تجهيز نظام السكن. مساحات العمل التشغيلية جاهزة الآن.
