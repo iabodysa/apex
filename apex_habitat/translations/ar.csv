@@ -2608,3 +2608,11 @@ A Fuel Claim records what was actually fuelled and spent so it can be reconciled
 Process Fuel Claim,معالجة مطالبة وقود
 Submitted By Me,المُقدَّمة منّي
 Approved Last 48h,المُعتمَدة آخر 48 ساعة
+My Work Center,مركز عملي
+My Open Submissions,مُقدَّماتي المفتوحة
+Closed in the Last 48h,مُنجَزة آخر 48 ساعة
+Notifications,الإشعارات
+Nothing on your work center right now.,لا شيء في مركز عملك حاليًّا.
+Could not load your work center. Please retry.,تعذّر تحميل مركز عملك. أعد المحاولة.
+Status: {0},الحالة: {0}
+Notification,إشعار

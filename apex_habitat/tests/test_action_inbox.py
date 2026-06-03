@@ -64,7 +64,7 @@ class TestActionInboxPage(unittest.TestCase):
     def test_page_native_endpoints_no_modal(self):
         with open(os.path.join(self.PAGE, "action_inbox.js"), encoding="utf-8") as fh:
             js = fh.read()
-        self.assertIn("apex_habitat.apex_core.worklist.action_inbox.get_pending_actions", js)
+        self.assertIn("apex_habitat.apex_core.worklist.my_work_center.get_my_work", js)
         self.assertIn("frappe.model.workflow.get_transitions", js)  # inline actions via native endpoints
         self.assertIn("frappe.model.workflow.apply_workflow", js)
         self.assertEqual(js.count("new frappe.ui.Dialog"), 0)  # inline, no modal
