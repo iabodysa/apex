@@ -4,7 +4,7 @@
  "is_public": 1,
  "is_standard": 1,
  "label": "Approved Last 48h",
- "method": "apex_habitat.apex_core.my_work_center.get_approved_last_48h_count",
+ "method": "apex_habitat.apex_core.worklist.my_work_center.get_approved_last_48h_count",
  "module": "Apex Core",
  "name": "Approved Last 48h",
  "type": "Custom"

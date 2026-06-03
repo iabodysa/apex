@@ -1,7 +1,7 @@
 // Action Inbox — a single "pending my action" desk feed (Apex Core).
 //
 // Two sections render the aggregation read API
-// (apex_habitat.apex_core.action_inbox.get_pending_actions):
+// (apex_habitat.apex_core.worklist.action_inbox.get_pending_actions):
 //   • Pending Approvals — native Workflow Actions awaiting THIS user. Each card
 //     lazily fetches the document's allowed transitions and renders one button
 //     per transition; clicking it applies the workflow inline.
@@ -59,7 +59,7 @@ class ActionInbox {
 	refresh() {
 		this._render_loading();
 		frappe
-			.call('apex_habitat.apex_core.action_inbox.get_pending_actions')
+			.call('apex_habitat.apex_core.worklist.action_inbox.get_pending_actions')
 			.then((r) => this._render((r && r.message) || {}))
 			.catch(() => this._render_error());
 	}

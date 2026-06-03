@@ -4,7 +4,7 @@
  "is_public": 1,
  "is_standard": 1,
  "label": "Submitted By Me",
- "method": "apex_habitat.apex_core.my_work_center.get_submitted_by_me_count",
+ "method": "apex_habitat.apex_core.worklist.my_work_center.get_submitted_by_me_count",
  "module": "Apex Core",
  "name": "Submitted By Me",
  "type": "Custom"

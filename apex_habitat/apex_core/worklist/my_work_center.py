@@ -25,7 +25,7 @@ from __future__ import annotations
 import frappe
 from frappe.utils import add_to_date, now_datetime
 
-from apex_habitat.apex_core.action_inbox import get_pending_actions
+from apex_habitat.apex_core.worklist.action_inbox import get_pending_actions
 
 # Per-DocType worklist registry. state_field is "status" for every participating
 # DocType; "mine" is always ``owner == session user`` (the creator — universal and

@@ -15,7 +15,7 @@ APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
 
 def _src():
-    with open(os.path.join(APP_ROOT, "apex_core", "action_inbox.py"), encoding="utf-8") as fh:
+    with open(os.path.join(APP_ROOT, "apex_core", "worklist", "action_inbox.py"), encoding="utf-8") as fh:
         return fh.read()
 
 
@@ -64,7 +64,7 @@ class TestActionInboxPage(unittest.TestCase):
     def test_page_native_endpoints_no_modal(self):
         with open(os.path.join(self.PAGE, "action_inbox.js"), encoding="utf-8") as fh:
             js = fh.read()
-        self.assertIn("apex_habitat.apex_core.action_inbox.get_pending_actions", js)
+        self.assertIn("apex_habitat.apex_core.worklist.action_inbox.get_pending_actions", js)
         self.assertIn("frappe.model.workflow.get_transitions", js)  # inline actions via native endpoints
         self.assertIn("frappe.model.workflow.apply_workflow", js)
         self.assertEqual(js.count("new frappe.ui.Dialog"), 0)  # inline, no modal
@@ -105,7 +105,7 @@ class TestActionInboxOrphanHandling(FrappeTestCase):
     MISSING_DT = "Zz Retired DocType For Inbox Test"
 
     def test_drop_stale_drops_actions_for_missing_doctype(self):
-        from apex_habitat.apex_core.action_inbox import _drop_stale
+        from apex_habitat.apex_core.worklist.action_inbox import _drop_stale
 
         rows = [
             {
