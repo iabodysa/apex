@@ -377,7 +377,12 @@ class TestNoFutureDatedModified(unittest.TestCase):
     def test_no_modified_in_the_future(self):
         import datetime
 
-        now = datetime.datetime.now()
+        # `modified` strings are naive and are often stamped in LOCAL time, while
+        # CI runs in UTC — a naive compare to "now" would flag a stamp made a few
+        # hours ago in a UTC+N zone as "future". Tolerate 2 days of skew (well
+        # above any timezone offset) so the guard only fires on the real defect:
+        # hand-authored dates DAYS/years ahead (the migrate-skip-trap).
+        horizon = datetime.datetime.now() + datetime.timedelta(days=2)
         offenders = []
         for fp in glob.glob(os.path.join(APP_ROOT, "*", "**", "*.json"), recursive=True):
             if "node_modules" in fp:
@@ -390,7 +395,7 @@ class TestNoFutureDatedModified(unittest.TestCase):
             if not isinstance(data, dict):
                 continue
             ts = self._parse_modified(data.get("modified"))
-            if ts and ts > now:
+            if ts and ts > horizon:
                 offenders.append((os.path.relpath(fp, APP_ROOT), data.get("modified")))
         self.assertEqual(
             offenders, [], f"is_standard JSON carries a FUTURE `modified`: {offenders[:10]}"
