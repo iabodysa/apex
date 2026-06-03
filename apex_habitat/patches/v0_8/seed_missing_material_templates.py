@@ -7,7 +7,7 @@ function is idempotent (checks existence per material and per template).
 """
 
 import frappe
-from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_material_template_seed import (
+from apex_habitat.apex_core.setup.seeders.maintenance_material_template_seed import (
     seed_templates,
 )
 

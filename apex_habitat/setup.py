@@ -1,20 +1,20 @@
 import frappe
 
-from apex_habitat.habitat.auto_email_reports_seed import seed_auto_email_reports
-from apex_habitat.habitat.dashboard_seed import (
+from apex_habitat.apex_core.setup.seeders.habitat_auto_email_reports_seed import seed_auto_email_reports
+from apex_habitat.apex_core.setup.seeders.habitat_dashboard_seed import (
     seed_habitat_dashboard,
     seed_role_dashboards,
 )
 from apex_habitat.habitat.doctype.maintenance_material.maintenance_material_catalog import (
     seed_catalog,
 )
-from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_material_template_seed import (
+from apex_habitat.apex_core.setup.seeders.maintenance_material_template_seed import (
     seed_templates,
 )
 
 # Assignment Rules, Email Templates and Kanban Boards are now provisioned by the
-# data-driven loader ``tools.setup.seed.seed_all`` (wired in hooks.py
-# after_install/after_migrate) — create-only JSON under tools/setup/data/. The
+# data-driven loader ``apex_core.setup.seed.seed_all`` (wired in hooks.py
+# after_install/after_migrate) — create-only JSON under apex_core/setup/data/. The
 # hand-written habitat seeders were retired in the seed consolidation (M-10/M-11).
 
 

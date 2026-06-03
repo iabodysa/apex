@@ -5,7 +5,7 @@ in the seed consolidation (M-10/M-11), so the byte-identical parity comparisons
 against the seeders' module constants are gone with them. What remains here are
 the still-meaningful guards on the externalised JSON itself — DocType, natural
 key, ``create_only`` flag, record count and per-record key presence — which the
-data-driven loader (``tools.setup.seed.seed_all``) relies on. These are pure
+data-driven loader (``apex_core.setup.seed.seed_all``) relies on. These are pure
 (no site needed): they exercise only ``load_specs``.
 
 The Auto Email Report seeder is deliberately NOT externalised: two of its fields
@@ -17,7 +17,7 @@ the seeder stays and we pin the reason here.
 
 import unittest
 
-from apex_habitat.tools.setup.seed import load_specs
+from apex_habitat.apex_core.setup.seed import load_specs
 
 
 def _spec(doctype):
@@ -72,7 +72,7 @@ class TestAutoEmailReportNotExternalised(unittest.TestCase):
         # live database, so they are not static constants.
         import inspect
 
-        from apex_habitat.habitat import auto_email_reports_seed
+        from apex_habitat.apex_core.setup.seeders import habitat_auto_email_reports_seed as auto_email_reports_seed
 
         src = inspect.getsource(auto_email_reports_seed.seed_auto_email_reports)
         self.assertIn('frappe.db.get_value("User", "Administrator", "email")', src)

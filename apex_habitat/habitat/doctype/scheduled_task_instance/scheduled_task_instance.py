@@ -26,7 +26,7 @@ def on_doctype_update():
     Open instance, while still blocking the duplicate Drafts the generator could
     otherwise race-insert (it only ever inserts at docstatus 0). Guarded so
     pre-existing duplicate data logs rather than aborting migrate."""
-    from apex_habitat.habitat.utils.ledger_index import add_unique_guarded
+    from apex_habitat.apex_core.utils.ledger_index import add_unique_guarded
 
     add_unique_guarded(
         "Scheduled Task Instance",

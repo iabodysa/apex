@@ -9,7 +9,7 @@ Role, Auto Email Report, navbar links, Single defaults, and issue permissions.
 here: those DocTypes carry an ``is_standard`` field and ship as native module
 JSON imported by ``bench migrate``.)
 
-Records live as plain JSON data under ``tools/setup/data/<module>/<file>.json``,
+Records live as plain JSON data under ``apex_core/setup/data/<module>/<file>.json``,
 one DocType per file::
 
     {
@@ -170,7 +170,7 @@ def seed(module_dir, only=None):
     """Load and apply every seed spec for one module. Safe to re-run.
 
     Wire from ``hooks.py`` ``after_install`` / ``after_migrate`` as
-    ``apex_habitat.tools.setup.seed.seed("habitat")`` (and ``"salis"``).
+    ``apex_habitat.apex_core.setup.seed.seed("habitat")`` (and ``"salis"``).
     """
     import frappe
 
@@ -185,7 +185,7 @@ def seed(module_dir, only=None):
     return totals
 
 
-# Modules that ship JSON seed data under tools/setup/data/<module>/.
+# Modules that ship JSON seed data under apex_core/setup/data/<module>/.
 _MODULES = ("habitat", "salis")
 
 

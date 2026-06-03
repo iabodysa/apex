@@ -272,8 +272,12 @@ class TestNoTestRolesShipped(unittest.TestCase):
         roles |= self._notification_json_roles()
         roles |= self._literal_roles_in_files(
             "hooks.py",
-            os.path.join("habitat", "dashboard_seed.py"),
-            os.path.join("salis", "dashboard_seed.py"),
+            os.path.join(
+                "apex_core", "setup", "seeders", "habitat_dashboard_seed.py"
+            ),
+            os.path.join(
+                "apex_core", "setup", "seeders", "salis_dashboard_seed.py"
+            ),
         )
         return roles
 

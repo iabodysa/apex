@@ -2,7 +2,7 @@
 
 import frappe
 
-from apex_habitat.habitat.dashboard_seed import seed_habitat_dashboard
+from apex_habitat.apex_core.setup.seeders.habitat_dashboard_seed import seed_habitat_dashboard
 
 
 def execute():

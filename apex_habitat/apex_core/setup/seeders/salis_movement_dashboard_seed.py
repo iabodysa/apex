@@ -1,6 +1,6 @@
 """Seed the Salis Movement operations dashboard as data records.
 
-Standalone companion to ``salis/dashboard_seed.py``. It builds one
+Standalone companion to ``salis_dashboard_seed.py``. It builds one
 **Movement Operations Dashboard** (charts + number cards) that surface the
 operational KPIs for the Movement domain:
 
@@ -18,7 +18,7 @@ DocTypes that may not be migrated yet on a given site:
 - Rental Accrual Ledger
 - Vehicle Utilisation Snapshot
 
-Idempotency / safety contract (mirrors ``salis/dashboard_seed.py``):
+Idempotency / safety contract (mirrors ``salis_dashboard_seed.py``):
 - Every chart and card is upserted by name; a re-run updates in place, never
   duplicates.
 - Each upsert is existence-guarded on its source DocType via
@@ -31,9 +31,9 @@ Idempotency / safety contract (mirrors ``salis/dashboard_seed.py``):
 - The dashboard links only charts/cards that actually got created, so it can
   never raise a LinkValidationError.
 
-This module does NOT touch ``salis/dashboard_seed.py``. The orchestrator wires
-``apex_habitat.salis.movement_dashboard_seed.seed_movement_dashboards`` into
-``after_migrate`` separately.
+This module does NOT touch ``salis_dashboard_seed.py``. The orchestrator wires
+``apex_habitat.apex_core.setup.seeders.salis_movement_dashboard_seed.seed_movement_dashboards``
+into ``after_migrate`` separately.
 
 Fieldnames are verified against ``salis/doctype/*/*.json``:
 - Dispatch Trip.status options: Planned|Dispatched|Completed|Cancelled; date

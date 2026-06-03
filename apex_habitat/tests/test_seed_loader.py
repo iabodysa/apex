@@ -1,4 +1,4 @@
-"""Guards for the data-driven seed loader (apex_habitat.tools.setup.seed).
+"""Guards for the data-driven seed loader (apex_habitat.apex_core.setup.seed).
 
 The structural tests are pure (no site needed): they exercise ``load_specs``,
 which has no ``frappe`` dependency. (The legacy-seeder parity test was dropped in
@@ -11,7 +11,7 @@ import os
 import tempfile
 import unittest
 
-from apex_habitat.tools.setup.seed import DATA_ROOT, SeedDataError, load_specs
+from apex_habitat.apex_core.setup.seed import DATA_ROOT, SeedDataError, load_specs
 
 
 class TestSeedLoaderStructure(unittest.TestCase):

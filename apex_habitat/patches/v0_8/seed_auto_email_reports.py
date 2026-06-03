@@ -4,7 +4,7 @@ on existing sites. Idempotent.
 
 import frappe
 
-from apex_habitat.habitat.auto_email_reports_seed import seed_auto_email_reports
+from apex_habitat.apex_core.setup.seeders.habitat_auto_email_reports_seed import seed_auto_email_reports
 
 
 def execute():

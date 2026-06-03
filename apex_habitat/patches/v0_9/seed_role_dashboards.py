@@ -1,7 +1,7 @@
 """Seed the 4 new role-based dashboards. Idempotent."""
 
 import frappe
-from apex_habitat.habitat.dashboard_seed import seed_role_dashboards
+from apex_habitat.apex_core.setup.seeders.habitat_dashboard_seed import seed_role_dashboards
 
 
 def execute():

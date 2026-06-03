@@ -3,7 +3,8 @@ Driver Clearance, Salis Payment Request, Support Ticket, Sponsorship Transfer
 Case, Fuel Request — the Workflow Spine).
 
 Mirrors the other Salis seed patches: the seed logic lives in the idempotent,
-existence-guarded ``salis/workflow_seed.py`` module (single source of truth).
+existence-guarded ``apex_core/setup/seeders/salis_workflow_seed.py`` module
+(single source of truth).
 This patch — and the app's ``after_install`` / ``after_migrate`` hooks — reuse
 that same function, so a fresh install gets the workflows immediately while
 already-installed sites pick them up on migrate.
@@ -18,7 +19,7 @@ it. Idempotent (also called from the hooks), not redundant.
 
 import frappe
 
-from apex_habitat.salis.workflow_seed import seed_salis_workflows
+from apex_habitat.apex_core.setup.seeders.salis_workflow_seed import seed_salis_workflows
 
 
 def execute():

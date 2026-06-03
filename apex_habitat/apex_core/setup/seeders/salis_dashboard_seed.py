@@ -1,6 +1,6 @@
 """Seed the native Salis Dashboards (charts + number cards) as data records.
 
-Mirrors ``habitat/dashboard_seed.py``: Frappe does not reliably auto-sync
+Mirrors ``habitat_dashboard_seed.py``: Frappe does not reliably auto-sync
 standalone is_standard Dashboard / Dashboard Chart / Number Card fixtures on
 migrate, so they are created idempotently here. This module is the
 ``after_migrate`` entrypoint for the Salis fleet module and builds three
@@ -328,7 +328,7 @@ def seed_fleet_supervisor_dashboard():
 
 def seed_finance_manager_dashboard():
     # NOTE: Habitat already owns a Dashboard named "Finance Manager Dashboard"
-    # (habitat/dashboard_seed.py + costs.json link). Both seeds run on
+    # (habitat_dashboard_seed.py + costs.json link). Both seeds run on
     # after_migrate, so reusing that name would clobber Habitat's charts/cards.
     # Namespaced to "Salis Finance Manager Dashboard" to keep both intact.
     _upsert_dashboard(

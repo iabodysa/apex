@@ -36,7 +36,7 @@ def on_doctype_update():
     ``source_doctype``/``source_name`` app-level guards and run on user submit,
     not on a daily loop. Guarded so pre-existing duplicate data logs rather than
     aborting migrate."""
-    from apex_habitat.habitat.utils.ledger_index import add_unique_guarded
+    from apex_habitat.apex_core.utils.ledger_index import add_unique_guarded
 
     add_unique_guarded(
         "Accommodation Ledger",

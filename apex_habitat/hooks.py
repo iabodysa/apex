@@ -313,36 +313,36 @@ fixtures = [
 after_install = [
     "apex_habitat.setup.after_install",
     "apex_habitat.salis.setup.after_install",
-    # Data-driven seed loader (tools/setup/data/<module>/*.json) — create-only:
+    # Data-driven seed loader (apex_core/setup/data/<module>/*.json) — create-only:
     # Email Templates, Assignment Rules, Kanban Boards (both modules) + Habitat
     # maintenance materials/templates. Runs alongside the legacy *_seed.py (also
     # create-only) until those are retired; parity-verified in
     # tests/test_seed_parity_*. SLA + Issue Type/Priority JSON are apply:false
     # (sourced by issue_seed); Auto Email Report stays a seeder (runtime fields).
-    "apex_habitat.tools.setup.seed.seed_all",
+    "apex_habitat.apex_core.setup.seed.seed_all",
     # Salis Kanban Boards, Assignment Rules and Email Templates are provisioned by
     # the data-driven loader (seed_all, above) from create-only JSON under
-    # tools/setup/data/salis/ — the hand-written salis seeders were retired in the
+    # apex_core/setup/data/salis/ — the hand-written salis seeders were retired in the
     # seed consolidation (M-10/M-11). (Notifications ship as is_standard JSON under
     # salis/notification/, imported by migrate.)
     # Salis navbar Help-dropdown links — mirrors Habitat's add_navbar_help_links
     # patch (Navbar Settings is a Single, never fixtured; additive + idempotent,
     # never clobbers the customer's navbar). Surfaces the Salis workspace and the
     # Dispatch Board page one click away from the desk Help menu.
-    "apex_habitat.salis.navbar_seed.seed_salis_navbar_help_links",
+    "apex_habitat.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
     # Salis Auto Email Reports — created disabled, addressed to Administrator as a
     # placeholder. Kept as a seeder (runtime recipient fields, not externalised to
     # JSON). Idempotent + existence-guarded; also run on after_migrate / v1_x patch.
-    "apex_habitat.salis.auto_email_reports_seed.seed_salis_auto_email_reports",
+    "apex_habitat.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
     # Salis native Workflow Spine — Transport Request (first-mover). Frappe does
     # not auto-import a Workflow from a module folder, so the shipped JSON is
     # applied by this idempotent, existence-guarded seed (also run on
     # after_migrate and from the v1_x patch — single source of truth).
-    "apex_habitat.salis.workflow_seed.seed_salis_workflows",
+    "apex_habitat.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
     # Salis support-on-Issue masters — Issue Types / Priorities / default SLA +
     # the core-Issue role DocPerms drivers and fleet staff need (Support Ticket
     # retired). Idempotent + existence-guarded; also run on after_migrate.
-    "apex_habitat.salis.issue_seed.seed_salis_issue_masters",
+    "apex_habitat.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
 ]
 
 # Install-only hook that runs AFTER sync_dashboards (install order in
@@ -358,18 +358,18 @@ after_install = [
 # via setup.after_install; seed_all_dashboards is intentionally not wired here to
 # avoid double-running the Habitat seed.)
 after_sync = [
-    "apex_habitat.salis.dashboard_seed.seed_salis_dashboards",
-    "apex_habitat.salis.movement_dashboard_seed.seed_movement_dashboards",
+    "apex_habitat.apex_core.setup.seeders.salis_dashboard_seed.seed_salis_dashboards",
+    "apex_habitat.apex_core.setup.seeders.salis_movement_dashboard_seed.seed_movement_dashboards",
 ]
 # Dashboards seed after migrate (when their charts/number cards already exist).
 after_migrate = [
-    # Data-driven seed loader (tools/setup/data/<module>/*.json) — create-only;
+    # Data-driven seed loader (apex_core/setup/data/<module>/*.json) — create-only;
     # keeps installed sites in sync. Runs alongside the legacy *_seed.py until
     # those are retired (parity-verified in tests/test_seed_parity_*).
-    "apex_habitat.tools.setup.seed.seed_all",
-    "apex_habitat.habitat.dashboard_seed.seed_all_dashboards",
-    "apex_habitat.salis.dashboard_seed.seed_salis_dashboards",
-    "apex_habitat.salis.movement_dashboard_seed.seed_movement_dashboards",
+    "apex_habitat.apex_core.setup.seed.seed_all",
+    "apex_habitat.apex_core.setup.seeders.habitat_dashboard_seed.seed_all_dashboards",
+    "apex_habitat.apex_core.setup.seeders.salis_dashboard_seed.seed_salis_dashboards",
+    "apex_habitat.apex_core.setup.seeders.salis_movement_dashboard_seed.seed_movement_dashboards",
     # Habitat operational Notifications now ship as is_standard JSON under
     # habitat/notification/, so they are imported by migrate — no seed entry is
     # needed here.
@@ -377,24 +377,24 @@ after_migrate = [
     # the data-driven loader (seed_all, above). Auto Email Reports stay a seeder
     # (runtime recipient fields). Idempotent + existence-guarded; running on every
     # migrate keeps existing sites in sync.
-    "apex_habitat.habitat.auto_email_reports_seed.seed_auto_email_reports",
+    "apex_habitat.apex_core.setup.seeders.habitat_auto_email_reports_seed.seed_auto_email_reports",
     # Salis Kanban Boards + Assignment Rules are provisioned by the data-driven
     # loader (seed_all, above). (Notifications ship as is_standard JSON under
     # salis/notification/, imported by migrate.)
     # Salis navbar Help-dropdown links — keep already-installed sites in sync on
     # migrate (idempotent; appends only the links that are missing).
-    "apex_habitat.salis.navbar_seed.seed_salis_navbar_help_links",
+    "apex_habitat.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
     # Salis Auto Email Reports — kept as a seeder (runtime recipient fields); the
     # Email Templates moved to the data-driven loader (seed_all, above). Idempotent.
-    "apex_habitat.salis.auto_email_reports_seed.seed_salis_auto_email_reports",
+    "apex_habitat.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
     # Salis native Workflow Spine — keep already-installed sites in sync on
     # migrate (idempotent + existence-guarded; created only if absent, never
     # clobbers an on-site-tuned Workflow).
-    "apex_habitat.salis.workflow_seed.seed_salis_workflows",
+    "apex_habitat.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
     # Salis support-on-Issue masters — keep already-installed sites in sync on
     # migrate (idempotent + existence-guarded; seeds Issue Types/Priorities/SLA
     # and grants the core-Issue role DocPerms via Custom DocPerm rows).
-    "apex_habitat.salis.issue_seed.seed_salis_issue_masters",
+    "apex_habitat.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
     # Salis Settings defaults — fill-blanks-only (never clobbers an admin's edits).
     # after_install + a run-once patch seed this on fresh/legacy sites, but NOT on
     # ordinary migrate, so a newly-added default key would never reach an already-
@@ -415,4 +415,4 @@ after_migrate = [
 before_tests = "apex_habitat.tests.before_tests.before_tests"
 
 # Frappe What's New feed — appears in desk notification area, not as a popup
-get_changelog_feed = "apex_habitat.habitat.utils.changelog.get_changelog_feed"
+get_changelog_feed = "apex_habitat.apex_core.utils.changelog.get_changelog_feed"

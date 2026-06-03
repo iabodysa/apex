@@ -96,9 +96,18 @@ _STATE_STYLE = {
 
 
 def _load_definition(dir_name):
-    """Load a shipped Workflow JSON definition from salis/workflow/<dir>/."""
+    """Load a shipped Workflow JSON definition from salis/workflow/<dir>/.
+
+    The canonical definitions remain in the Salis module folder
+    ``salis/workflow/<dir>/<dir>.json`` (the design artifact / single source of
+    truth); this seeder lives under ``apex_core/setup/seeders/`` after the setup
+    consolidation, so the path is resolved against the app root rather than the
+    seeder's own location.
+    """
     path = os.path.join(
-        os.path.dirname(__file__), "workflow", dir_name, dir_name + ".json"
+        frappe.get_app_path("apex_habitat", "salis", "workflow"),
+        dir_name,
+        dir_name + ".json",
     )
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)

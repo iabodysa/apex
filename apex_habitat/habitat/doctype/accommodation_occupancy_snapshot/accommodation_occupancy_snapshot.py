@@ -27,7 +27,7 @@ def on_doctype_update():
 	check-then-insert is bypassed by a race. Mirrors that job's
 	``frappe.db.exists({building, snapshot_date})`` guard exactly. Guarded so
 	pre-existing duplicate data logs rather than aborting migrate."""
-	from apex_habitat.habitat.utils.ledger_index import add_unique_guarded
+	from apex_habitat.apex_core.utils.ledger_index import add_unique_guarded
 
 	add_unique_guarded(
 		"Accommodation Occupancy Snapshot",

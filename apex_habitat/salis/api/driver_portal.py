@@ -411,7 +411,8 @@ def raise_support_ticket(category, priority, subject, description):
 	so the Issue is always stamped with the caller's own driver (``custom_driver``)
 	and email (``raised_by``). The client-supplied ``category`` maps to the Issue
 	Type and ``priority`` to the Issue Priority — both seeded by
-	``salis.issue_seed``. A linked Service Level Agreement (default for Issue) is
+	``apex_core.setup.seeders.salis_issue_seed``. A linked Service Level
+	Agreement (default for Issue) is
 	applied natively by ERPNext on insert, so the response/resolution clock starts
 	automatically. Returns ``{"name": ...}`` exactly as before so the portal SPA is
 	unchanged."""

@@ -24,7 +24,7 @@ and documents the dynamic field as a known, deliberate gap.
 
 import unittest
 
-from apex_habitat.tools.setup.seed import load_specs
+from apex_habitat.apex_core.setup.seed import load_specs
 
 
 def _spec(module_dir, doctype):
@@ -35,7 +35,7 @@ def _spec(module_dir, doctype):
 
 class TestMaintenanceMaterialParity(unittest.TestCase):
     def test_maintenance_material_parity(self):
-        from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_material_template_seed import (
+        from apex_habitat.apex_core.setup.seeders.maintenance_material_template_seed import (
             MATERIAL_SEEDS,
         )
 
@@ -56,7 +56,7 @@ class TestMaintenanceMaterialParity(unittest.TestCase):
         self.assertEqual(len(spec["records"]), len(MATERIAL_SEEDS))
 
     def test_maintenance_material_template_parity(self):
-        from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_material_template_seed import (
+        from apex_habitat.apex_core.setup.seeders.maintenance_material_template_seed import (
             TEMPLATE_SEEDS,
         )
 
@@ -84,7 +84,7 @@ class TestMaintenanceMaterialParity(unittest.TestCase):
 
 class TestSalisIssueMasterParity(unittest.TestCase):
     def test_issue_type_parity(self):
-        from apex_habitat.salis.issue_seed import _ISSUE_TYPES
+        from apex_habitat.apex_core.setup.seeders.salis_issue_seed import _ISSUE_TYPES
 
         spec = _spec("salis", "Issue Type")
         self.assertEqual(spec["key"], "name")
@@ -92,7 +92,7 @@ class TestSalisIssueMasterParity(unittest.TestCase):
         self.assertEqual(spec["records"], [{"name": n} for n in _ISSUE_TYPES])
 
     def test_issue_priority_parity(self):
-        from apex_habitat.salis.issue_seed import _ISSUE_PRIORITIES
+        from apex_habitat.apex_core.setup.seeders.salis_issue_seed import _ISSUE_PRIORITIES
 
         spec = _spec("salis", "Issue Priority")
         self.assertEqual(spec["key"], "name")
@@ -100,7 +100,7 @@ class TestSalisIssueMasterParity(unittest.TestCase):
         self.assertEqual(spec["records"], [{"name": n} for n in _ISSUE_PRIORITIES])
 
     def test_service_level_agreement_static_parity(self):
-        from apex_habitat.salis import issue_seed
+        from apex_habitat.apex_core.setup.seeders import salis_issue_seed as issue_seed
 
         spec = _spec("salis", "Service Level Agreement")
         self.assertEqual(spec["key"], "service_level")
