@@ -1,7 +1,7 @@
 // Apex first-install Setup Wizard slide.
 // Registered via the `setup_wizard_requires` hook; renders on a fresh site's
 // native Frappe setup wizard. The operator's choices flow into the wizard args
-// and are applied server-side by apex_core.setup_wizard.setup_wizard_complete.
+// and are applied server-side by apex_core.setup.setup_wizard.setup_wizard_complete.
 frappe.provide("apex_habitat.setup");
 
 frappe.setup.on("before_load", function () {

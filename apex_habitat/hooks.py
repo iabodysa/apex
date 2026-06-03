@@ -24,7 +24,7 @@ app_include_js = ["masar_worker_link.bundle.js"]
 # are applied to Habitat Settings server-side at completion. Change later anytime
 # in Habitat Settings; the wizard runs once.
 setup_wizard_requires = "assets/apex_habitat/js/apex_setup_wizard.js"
-setup_wizard_complete = "apex_habitat.apex_core.setup_wizard.setup_wizard_complete"
+setup_wizard_complete = "apex_habitat.apex_core.setup.setup_wizard.setup_wizard_complete"
 
 
 # Single functional module: Habitat

@@ -12,7 +12,7 @@ import unittest
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex_habitat.apex_core.setup_wizard import setup_wizard_complete
+from apex_habitat.apex_core.setup.setup_wizard import setup_wizard_complete
 
 
 class TestApexSetupWizard(FrappeTestCase):
