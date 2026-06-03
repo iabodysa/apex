@@ -1,95 +1,54 @@
 [pre_model_sync]
-# Patch lifecycle policy (audit 2026-05-27):
-#   PERMANENT  = recurring/idempotent seeds; must stay so fresh installs replay them.
-#   ONE-TIME   = renames/cleanups/backfills; safe to PRUNE (remove module + this line)
-#               once every deployed site has run it (tracked in tabPatch Log).
+# Patch lifecycle policy (audit 2026-06-03):
+#   PERMANENT = recurring/idempotent seeds; must stay so fresh installs replay them.
+#   ONE-TIME  = renames/cleanups/backfills; PRUNE (remove module + this line) once
+#              every deployed site has run it (tracked in tabPatch Log).
 #   Backfills are no-ops on fresh installs — never rely on them to seed fresh DBs.
-#   Prune-eligible now: v0_4.cleanup_duplicate_workspaces (was "remove after v0.5").
-#   Date-gated: v0_7.rename_habitat_city_to_city (remove on/after 2026-06-24).
-#   PERMANENT (keep, do NOT prune): kanban (kanban_boards/room_readiness), dashboards,
-#   assignment_rules, email — each seeds DISTINCT records and fresh installs must replay
-#   them. They are idempotent (also called from after_install), not redundant.
-#   (Notifications are no longer seeded via patches — they ship as is_standard JSON
-#   under */notification/ and are imported by migrate.)
-apex_habitat.patches.v0_4.cleanup_duplicate_workspaces
-apex_habitat.patches.v0_5.rename_sar_columns
+#
+#   2026-06-03 prune (no prod sites yet → gate vacuously met): removed 20 spent
+#   one-time / no-op patches — renames, backfills, workspace merges, cache/filter
+#   fixes, and the M-10/M-11-superseded kanban/assignment/email/salis-artifact
+#   no-ops (those records are now provisioned by the data-driven loader
+#   apex_core/setup/seed.seed_all, wired into after_install + after_migrate).
+#   HELD on purpose: add_city_doctype (the ONLY City seed path — no data/ JSON,
+#   no other inserter), rename_habitat_city_to_city (date-gated, remove on/after
+#   2026-06-24), v1_x.ensure_web_form_route (recent GitHub #97 route safeguard),
+#   seed_salis_operations_roles (a guarded no-op but still imported by hooks +
+#   salis/setup, so its module must stay). PERMANENT seeders kept below.
 apex_habitat.patches.v0_6.add_city_doctype
-apex_habitat.patches.v0_6.sync_web_form
 apex_habitat.patches.v0_7.rename_habitat_city_to_city
-apex_habitat.patches.v0_7.set_workspace_roles
 apex_habitat.patches.v0_7.add_bed_assignment_index
-apex_habitat.patches.v0_7.fix_unresolved_alerts_number_card_filter
-apex_habitat.patches.v0_7.remove_css_asset_cache
-apex_habitat.patches.v0_7.backfill_accommodation_ledger
-apex_habitat.patches.v0_7.consolidate_inspection_findings
-apex_habitat.patches.v0_7.force_v0_7_1_change_log_popup
 
-# v0.8 — data completeness
+# v0.8 — data completeness (PERMANENT, idempotent seeder)
 apex_habitat.patches.v0_8.seed_missing_material_templates
-apex_habitat.patches.v0_8.fix_safety_catalog_onboarding_action
-apex_habitat.patches.v0_8.merge_daily_tasks_into_safety
-apex_habitat.patches.v0_8.merge_client_audit_into_safety
-apex_habitat.patches.v0_8.seed_kanban_boards
 
-# v0.8.3 — native paradigms (Tier 1)
-apex_habitat.patches.v0_8.seed_room_readiness_kanban
-apex_habitat.patches.v0_8.seed_assignment_rules
-
-# v0.8.4 — automation & communication
+# v0.8.4 — automation & communication (PERMANENT seeders + idempotent navbar)
 apex_habitat.patches.v0_8.seed_auto_email_reports
-apex_habitat.patches.v0_8.seed_email_templates
 apex_habitat.patches.v0_8.add_navbar_help_links
 
-# v0.8.6 — front desk + idle resident automation
-apex_habitat.patches.v0_8.rename_workspaces_to_short_names
+# v0.8.6 — navbar route fix (Single, idempotent) + dashboards (PERMANENT seeders)
 apex_habitat.patches.v0_8.fix_navbar_command_center_route
 apex_habitat.patches.v0_9.seed_habitat_dashboard
 apex_habitat.patches.v0_9.seed_role_dashboards
 
-# v1.0 — Salis fleet module (1.0.0-beta)
+# v1.0 — Salis fleet module (PERMANENT, idempotent, existence-guarded seeders).
+# seed_salis_operations_roles is a guarded no-op kept because hooks + salis/setup
+# import it; the others seed DISTINCT records and fresh installs must replay them.
 apex_habitat.patches.v1_0.seed_salis_roles
 apex_habitat.patches.v1_0.seed_salis_authority_roles
 apex_habitat.patches.v1_0.seed_salis_operations_roles
 apex_habitat.patches.v1_0.seed_salis_settings
 apex_habitat.patches.v1_0.seed_salis_portal_theme
 
-# v1.1 — Salis native paradigms (Kanban + Assignment Rules)
-# PERMANENT (keep, do NOT prune): seeds DISTINCT records, idempotent, also called
-# from after_install/after_migrate. Not redundant. (Notifications now ship as
-# is_standard JSON under salis/notification/ and are imported by migrate.)
-apex_habitat.patches.v1_1.seed_salis_operations_artifacts
-
-# v1.x — Salis communication artifacts (Email Templates + Auto Email Reports)
-# PERMANENT (keep, do NOT prune): seeds DISTINCT records, idempotent, also called
-# from after_install/after_migrate. Not redundant. The matching Salis Go-Live
-# Module Onboarding + Onboarding Steps are standard module files (auto-imported by
-# migrate), so they need no patch step.
+# v1.x — Salis communications + native Workflow spine (PERMANENT, idempotent).
+# Frappe does not auto-import a Workflow from a module folder, so seed_salis_workflows
+# is the install path; both also run from after_install/after_migrate.
 apex_habitat.patches.v1_x.seed_salis_communications
-
-# v1.x — Salis native Workflow Spine (Transport Request, first-mover)
-# PERMANENT (keep, do NOT prune): seeds the Transport Request Workflow + its
-# Workflow State / Workflow Action Master masters via the idempotent,
-# existence-guarded apex_core/setup/seeders/salis_workflow_seed.py (single source of truth, also called
-# from after_install/after_migrate). Frappe does not auto-import a Workflow from a
-# module folder (not in IMPORTABLE_DOCTYPES), so this seed is the install path.
 apex_habitat.patches.v1_x.seed_salis_workflows
 
 [post_model_sync]
-# v1.30.0 — arrival redesign Batch 2: back-fill party_type/party on the seven
-# worker-identity doctypes from the legacy `employee` link.
-# ONE-TIME (prune-eligible once every deployed site has run it): this is the
-# file's first [post_model_sync] entry, so it runs AFTER schema sync — the new
-# party_type/party columns exist before the UPDATE. Idempotent (only rows with an
-# empty party), existence-guarded on table + columns, a no-op on fresh installs.
-apex_habitat.patches.v1_x.backfill_worker_party
-
-# v1.31.0 — arrival redesign Batch 3: back-fill party_type/party on the TIER-2
-# custody doctypes from their (differently-named) Employee links. Same ONE-TIME,
-# idempotent, existence-guarded, post-model-sync pattern as backfill_worker_party.
-apex_habitat.patches.v1_x.backfill_custody_party
-
-# v1.x — TEMPORARY safeguard (GitHub #97): ensure the Web Form keeps its `route` on an
-# upgrade from an old version, so the v15-removed make_route_to_web_form helper is never
-# needed. Idempotent, only-if-missing (never clobbers a custom route), no-op on fresh
-# installs. PRUNE once every deployed site is confirmed v15-correct (tracked in tabPatch Log).
+# v1.x — TEMPORARY safeguard (GitHub #97): ensure the Web Form keeps its `route` on
+# an upgrade (the v15-removed make_route_to_web_form helper is never needed).
+# Idempotent, only-if-missing (never clobbers a custom route), no-op on fresh installs.
+# PRUNE once every deployed site is confirmed v15-correct (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.ensure_web_form_route
