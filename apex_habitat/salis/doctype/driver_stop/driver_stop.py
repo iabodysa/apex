@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import add_timeline_note, lock_vehicle, lock_driver
+from apex_habitat.salis.utils import add_timeline_note, lock_vehicle, lock_driver
 
 
 class DriverStop(Document):

@@ -15,7 +15,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import add_timeline_note
+from apex_habitat.salis.utils import add_timeline_note
 
 
 class RentalVehicleMovement(Document):

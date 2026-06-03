@@ -203,7 +203,7 @@ class TestTemporaryWorkerLink(unittest.TestCase):
     """Batch 5 — the daily Temporary-Worker -> Employee linker (pure-Python guards)."""
 
     def test_repoint_map_matches_party_doctypes(self):
-        from apex_habitat.habitat.temporary_worker_link import PARTY_DOCTYPES
+        from apex_habitat.habitat.temporary_worker_engine import PARTY_DOCTYPES
         expected = {
             "Accommodation Assignment": "employee",
             "Accommodation Checkout": "employee",
@@ -229,7 +229,7 @@ class TestTemporaryWorkerLink(unittest.TestCase):
         with open(os.path.join(APP_ROOT, "hooks.py"), encoding="utf-8") as fh:
             hooks = fh.read()
         self.assertIn(
-            "temporary_worker_link.link_temporary_workers", hooks,
+            "temporary_worker_engine.link_temporary_workers", hooks,
             "Batch 5 daily linker is not wired into scheduler_events",
         )
 

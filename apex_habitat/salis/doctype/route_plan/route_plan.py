@@ -11,7 +11,7 @@ from __future__ import annotations
 import frappe
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import drive_transport_request
+from apex_habitat.salis.utils import drive_transport_request
 
 
 class RoutePlan(Document):

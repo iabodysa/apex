@@ -25,7 +25,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.salis_lib import add_timeline_note, lock_driver
+from apex_habitat.salis.utils import add_timeline_note, lock_driver
 
 # Statuses that mean a Fuel Exception Case is no longer outstanding.
 _CLOSED_FUEL_EXCEPTION_STATUSES = ("Resolved", "Rejected", "Closed")

@@ -35,7 +35,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now_datetime
 
-from apex_habitat.salis.salis_lib import (
+from apex_habitat.salis.utils import (
     add_timeline_note,
     drive_transport_request,
     lock_vehicle,
