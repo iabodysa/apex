@@ -30,7 +30,7 @@ docs/*
 !docs/training/*.md
 
 # Local-only rich demo generator — Arabic sample data, bench-only, never published
-apex_habitat/salis/demo_rich.py
+apex_habitat/demo/
 
 # Local/private office source files.
 *.xlsx
