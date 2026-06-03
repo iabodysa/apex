@@ -16,7 +16,7 @@ from frappe.utils import add_days, today
 from apex_habitat.habitat.doctype.accommodation_occupancy_snapshot.accommodation_occupancy_snapshot import (
     AccommodationOccupancySnapshot,
 )
-from apex_habitat.salis.doctype.operations_alert.operations_alert import OperationsAlert
+from apex_habitat.apex_core.doctype.operations_alert.operations_alert import OperationsAlert
 from apex_habitat.salis.doctype.vehicle_utilisation_snapshot.vehicle_utilisation_snapshot import (
     VehicleUtilisationSnapshot,
 )
