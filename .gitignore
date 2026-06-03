@@ -67,3 +67,11 @@ archive/
 *.command
 *.applescript
 flash_actions_report.json
+
+# macOS junk (also stripped by: apex.sh clean)
+._*
+.AppleDouble
+.Spotlight-V100
+.Trashes
+__MACOSX
+.fseventsd
