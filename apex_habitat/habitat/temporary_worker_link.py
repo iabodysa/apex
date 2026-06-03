@@ -14,7 +14,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
-from apex_habitat.apex_core.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
+from apex_habitat.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
 
 # Every doctype carrying the party_type/party Dynamic Link, mapped to its legacy
 # Employee Link fieldname (kept as a read-only mirror).

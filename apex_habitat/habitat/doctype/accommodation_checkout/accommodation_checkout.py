@@ -12,7 +12,7 @@ from frappe.model.document import Document
 from frappe.utils import getdate
 
 from apex_habitat.habitat.doctype.accommodation_assignment.accommodation_assignment import recalculate_spatial
-from apex_habitat.apex_core.party_link import sync_party_employee
+from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
 
 class AccommodationCheckout(Document):

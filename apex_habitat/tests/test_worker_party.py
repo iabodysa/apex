@@ -136,7 +136,7 @@ if "frappe" not in sys.modules:
     sys.modules["frappe"] = _fake
 
 import frappe  # noqa: E402  (resolved to the real or stubbed module above)
-from apex_habitat.apex_core.party_link import (  # noqa: E402
+from apex_habitat.apex_core.utils.party_link import (  # noqa: E402
     PARTY_EMPLOYEE,
     PARTY_TEMPORARY_WORKER,
     sync_party_employee,

@@ -21,7 +21,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.apex_core.party_link import sync_party_employee
+from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
 TOKEN_BYTES = 24  # ~32 url-safe chars of entropy — unguessable.
 

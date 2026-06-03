@@ -40,7 +40,7 @@ class TestActionInboxAPI(unittest.TestCase):
 
 class TestOrphanCleanup(unittest.TestCase):
     def test_cleanup_only_open_and_wired(self):
-        with open(os.path.join(APP_ROOT, "apex_core", "workflow_utils.py"), encoding="utf-8") as fh:
+        with open(os.path.join(APP_ROOT, "apex_core", "utils", "workflow_utils.py"), encoding="utf-8") as fh:
             src = fh.read()
         self.assertIn("def cleanup_orphaned_workflow_actions(", src)
         self.assertIn("status = 'Open'", src)  # acts only on Open rows
@@ -130,7 +130,7 @@ class TestActionInboxOrphanHandling(FrappeTestCase):
         self.assertIn("ToDo", kept)
 
     def test_cleanup_purges_open_actions_for_missing_doctype(self):
-        from apex_habitat.apex_core.workflow_utils import cleanup_orphaned_workflow_actions
+        from apex_habitat.apex_core.utils.workflow_utils import cleanup_orphaned_workflow_actions
 
         wa = frappe.get_doc(
             {

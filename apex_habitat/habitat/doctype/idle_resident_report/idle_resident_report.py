@@ -3,7 +3,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from apex_habitat.apex_core.party_link import sync_party_employee
+from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
 
 class IdleResidentReport(Document):

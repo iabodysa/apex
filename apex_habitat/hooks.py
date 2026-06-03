@@ -177,7 +177,7 @@ scheduler_events = {
         # Action Inbox: prune orphaned Open Workflow Actions (the doc moved on or was
         # deleted) so the inbox never shows stale items. Deletes only Open rows;
         # Completed rows are the audit trail and are left untouched.
-        "apex_habitat.apex_core.workflow_utils.cleanup_orphaned_workflow_actions",
+        "apex_habitat.apex_core.utils.workflow_utils.cleanup_orphaned_workflow_actions",
     ],
     "weekly": [
         "apex_habitat.habitat.tasks.weekly_occupancy_sync",

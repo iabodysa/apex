@@ -9,7 +9,7 @@ operational memos and no GL Entry is posted.
 from __future__ import annotations
 
 from frappe.model.document import Document
-from apex_habitat.apex_core.party_link import sync_party_employee
+from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
 
 class AccommodationLedger(Document):
