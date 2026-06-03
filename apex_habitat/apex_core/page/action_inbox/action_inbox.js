@@ -31,8 +31,10 @@ class ActionInbox {
 		// this.$x (a TypeError node --check cannot catch).
 		this._build_skeleton();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
-		// Any notification (a new approval/assignment lands as one) nudges a debounced refresh.
-		frappe.realtime.on('notification', frappe.utils.debounce(() => this.refresh(), 1000));
+		// Auto-refresh is EVENT-DRIVEN, not a timer: it fires only when THIS user receives
+		// a notification (a new approval/assignment lands as one), and is debounced so a
+		// burst triggers at most ONE refresh per 5s. No polling, no per-second load.
+		frappe.realtime.on('notification', frappe.utils.debounce(() => this.refresh(), 5000));
 		this.refresh();
 	}
 
