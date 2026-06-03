@@ -1,7 +1,7 @@
 """Shared test fixture helpers for Habitat doctypes.
 
 Usage:
-    from apex_habitat.habitat.doctype.test_utils import make_building, make_room, make_bed, make_assignment
+    from apex_habitat.tests.factories import make_building, make_room, make_bed, make_assignment
 """
 
 from __future__ import annotations
