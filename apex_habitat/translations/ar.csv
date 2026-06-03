@@ -2606,3 +2606,5 @@ Process a Fuel Claim,معالجة مطالبة وقود
 A Fuel Claim records what was actually fuelled and spent so it can be reconciled against the quota and the request. Process one to close the fuel cycle and keep consumption and spend accurate per vehicle.,تسجل مطالبة الوقود ما تم تزويده وإنفاقه فعلياً ليتسنى مطابقته مع الحصة والطلب. عالج واحدة لإغلاق دورة الوقود والحفاظ على دقة الاستهلاك والإنفاق لكل مركبة.
 "Record actual fuelling and spend, then reconcile it against the quota and request.",سجّل التزويد والإنفاق الفعلي، ثم طابقه مع الحصة والطلب.
 Process Fuel Claim,معالجة مطالبة وقود
+Submitted By Me,المُقدَّمة منّي
+Approved Last 48h,المُعتمَدة آخر 48 ساعة

@@ -10,7 +10,7 @@
  "is_hidden": 0,
  "sequence_id": 5.0,
  "parent_page": "",
- "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 4}}, {\"id\": \"mwScReq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Maintenance Requests\", \"col\": 4}}, {\"id\": \"mwHdrTasks\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Tasks</b></span>\", \"col\": 12}}, {\"id\": \"mwQlTasks\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Tasks\", \"col\": 12}}]",
+ "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 4}}, {\"id\": \"mwScReq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Maintenance Requests\", \"col\": 4}}, {\"id\": \"mwHdrTasks\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Tasks</b></span>\", \"col\": 12}}, {\"id\": \"mwQlTasks\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Tasks\", \"col\": 12}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -36,6 +36,18 @@
    "number_card_name": "Pending My Action",
    "label": "Pending My Action",
    "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Submitted By Me",
+   "label": "Submitted By Me",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Approved Last 48h",
+   "label": "Approved Last 48h",
+   "idx": 3
   }
  ],
  "charts": [],
@@ -48,5 +60,5 @@
   }
  ],
  "roles": [],
- "modified": "2026-06-02 15:29:41.000000"
+ "modified": "2026-06-03 09:00:00.000000"
 }
