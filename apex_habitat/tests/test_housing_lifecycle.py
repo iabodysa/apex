@@ -50,16 +50,20 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         # Get any Cost Center
         self.cost_center = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0}) or frappe.db.get_value("Cost Center", {})
 
-        # Create Site, Building, Room, Bed
+        # Create Site, Building, Room, Bed with unique names so setUp is
+        # re-runnable across the class's tests: Accommodation Site/Building are
+        # named by field (site_name / building_name = primary key), so a fixed
+        # name collides on the second test's setUp once a submit commits the row.
+        suffix = frappe.generate_hash(length=6)
         self.site = frappe.get_doc({
             "doctype": "Accommodation Site",
-            "site_name": "Test Site"
+            "site_name": "Test Site " + suffix
         })
         self.site.insert(ignore_permissions=True)
 
         self.building = frappe.get_doc({
             "doctype": "Accommodation Building",
-            "building_name": "Test Building",
+            "building_name": "Test Building " + suffix,
             "site": self.site.name,
             "total_capacity": 10,
             "default_cost_center": self.cost_center
@@ -70,7 +74,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
             "doctype": "Accommodation Room",
             "naming_series": "ROOM-.####",
             "building": self.building.name,
-            "room_number": "101",
+            "room_number": "101-" + suffix,
             "bed_capacity": 2
         })
         self.room.insert(ignore_permissions=True)
@@ -79,7 +83,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
             "doctype": "Accommodation Bed",
             "naming_series": "BED-.####",
             "room": self.room.name,
-            "bed_code": "B1"
+            "bed_code": "B1-" + suffix
         })
         self.bed.insert(ignore_permissions=True)
 
@@ -119,3 +123,52 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         
         # Verify bed is set back to available
         self.assertEqual(frappe.db.get_value("Accommodation Bed", self.bed.name, "status"), "Available")
+
+    def test_checkout_pending_clearance_resolves_employee_name(self):
+        """Checkout Pending Clearance shows the employee's display name, not just
+        the raw Employee ID (Arrivals Batch 7). Reuses the setUp housing graph."""
+        from apex_habitat.habitat.report.checkout_pending_clearance.checkout_pending_clearance import (
+            execute as execute_checkout_clearance,
+        )
+
+        assignment = frappe.get_doc({
+            "doctype": "Accommodation Assignment",
+            "employee": self.employee,
+            "project": self.project,
+            "cost_center": self.cost_center,
+            "building": self.building.name,
+            "room": self.room.name,
+            "bed": self.bed.name,
+            "check_in_date": "2026-05-01",
+            "assignment_type": "New Assignment",
+        })
+        assignment.insert(ignore_permissions=True)
+        assignment.submit()
+
+        # custody_cleared defaults to 0, so this checkout is "pending clearance".
+        checkout = frappe.get_doc({
+            "doctype": "Accommodation Checkout",
+            "assignment": assignment.name,
+            "checkout_date": "2026-05-21",
+            "checkout_reason": "Internal Transfer",
+        })
+        checkout.insert(ignore_permissions=True)
+        checkout.submit()
+
+        emp_name = frappe.db.get_value("Employee", self.employee, "employee_name")
+        self.assertTrue(emp_name, "seeded employee must carry a display name for this test to be meaningful")
+
+        columns, rows = execute_checkout_clearance({})[:2]
+        self.assertIn(
+            "employee_name",
+            [c.get("fieldname") for c in columns],
+            "report must declare an Employee Name column",
+        )
+        mine = [r for r in rows if r.get("name") == checkout.name]
+        self.assertEqual(len(mine), 1, "the pending checkout should appear in the report exactly once")
+        self.assertEqual(mine[0].get("employee"), self.employee, "row must carry the fetched Employee ID")
+        self.assertEqual(
+            mine[0].get("employee_name"),
+            emp_name,
+            "report must resolve the employee's display name, not leave it blank",
+        )

@@ -10,6 +10,7 @@ from apex_habitat.habitat.report.accommodation_cost_distribution.accommodation_c
 from apex_habitat.habitat.report.lease_expiry_watchlist.lease_expiry_watchlist import execute as execute_lease
 from apex_habitat.habitat.report.utility_variance_report.utility_variance_report import execute as execute_utility
 from apex_habitat.habitat.report.custody_damage_register.custody_damage_register import execute as execute_custody
+from apex_habitat.habitat.report.checkout_pending_clearance.checkout_pending_clearance import execute as execute_checkout_clearance
 from apex_habitat.habitat.report.scheduled_task_compliance.scheduled_task_compliance import execute as execute_task
 from apex_habitat.habitat.report.maintenance_backlog.maintenance_backlog import execute as execute_maintenance
 from apex_habitat.habitat.report.maintenance_aging.maintenance_aging import execute as execute_maint_aging
@@ -99,6 +100,12 @@ class TestReports(ApexHabitatTestCase):
 
     def test_custody_damage_register(self):
         self._assert_report_shape(execute_custody())
+
+    def test_checkout_pending_clearance_shape(self):
+        result = execute_checkout_clearance()
+        self._assert_report_shape(result)
+        # Arrivals Batch 7: the Employee Name column must be declared.
+        self.assertIn("employee_name", [c.get("fieldname") for c in result[0]])
 
     def test_scheduled_task_compliance(self):
         self._assert_report_shape(execute_task())

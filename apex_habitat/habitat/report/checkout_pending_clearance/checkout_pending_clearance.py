@@ -11,6 +11,7 @@ def execute(filters=None):
     columns = [
         {"label": frappe._("Checkout"), "fieldname": "name", "fieldtype": "Link", "options": "Accommodation Checkout", "width": 150},
         {"label": frappe._("Employee"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 150},
+        {"label": frappe._("Employee Name"), "fieldname": "employee_name", "fieldtype": "Data", "width": 160},
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 150},
         {"label": frappe._("Checkout Date"), "fieldname": "checkout_date", "fieldtype": "Date", "width": 120},
         {"label": frappe._("Custody Cleared"), "fieldname": "custody_cleared", "fieldtype": "Check", "width": 110},
@@ -55,6 +56,18 @@ def execute(filters=None):
 
     all_employees = list({co.employee for co in checkouts if co.employee})
 
+    # --- Prefetch employee display names in one query (show names, not raw IDs) ---
+    emp_name_map = {}
+    if all_employees:
+        emp_name_map = {
+            e.name: e.employee_name
+            for e in frappe.get_all(
+                "Employee",
+                filters={"name": ["in", all_employees]},
+                fields=["name", "employee_name"],
+            )
+        }
+
     # --- Prefetch open custody issue counts grouped by employee in one query ---
     issue_count_map = {}
     if all_employees:
@@ -93,6 +106,7 @@ def execute(filters=None):
             data.append({
                 "name": co.name,
                 "employee": co.employee,
+                "employee_name": emp_name_map.get(co.employee, "") if co.employee else "",
                 "building": building,
                 "checkout_date": co.checkout_date,
                 "custody_cleared": co.custody_cleared,
