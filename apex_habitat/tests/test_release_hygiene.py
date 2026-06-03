@@ -353,5 +353,49 @@ class TestNamingRuleConsistency(unittest.TestCase):
         self.assertEqual(bad, [], f"naming_rule inconsistent with autoname style: {bad[:10]}")
 
 
+class TestNoFutureDatedModified(unittest.TestCase):
+    """No shipped is_standard JSON may carry a FUTURE `modified` timestamp.
+
+    A future `modified` is a migrate-skip-trap: once installed, the DB row holds
+    the future date, so a later real edit (stamped now) looks OLDER and Frappe's
+    import skips the file — edits silently fail to re-import in place. Three
+    Doc/Workspace JSONs had this (fixed 2026-06-03); this guard stops it.
+    """
+
+    def _parse_modified(self, value):
+        import datetime
+
+        if not value or not isinstance(value, str):
+            return None
+        for fmt, width in (("%Y-%m-%d %H:%M:%S.%f", 26), ("%Y-%m-%d %H:%M:%S", 19)):
+            try:
+                return datetime.datetime.strptime(value[:width], fmt)
+            except ValueError:
+                continue
+        return None
+
+    def test_no_modified_in_the_future(self):
+        import datetime
+
+        now = datetime.datetime.now()
+        offenders = []
+        for fp in glob.glob(os.path.join(APP_ROOT, "*", "**", "*.json"), recursive=True):
+            if "node_modules" in fp:
+                continue
+            try:
+                with open(fp, encoding="utf-8") as fh:
+                    data = json.load(fh)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                continue
+            if not isinstance(data, dict):
+                continue
+            ts = self._parse_modified(data.get("modified"))
+            if ts and ts > now:
+                offenders.append((os.path.relpath(fp, APP_ROOT), data.get("modified")))
+        self.assertEqual(
+            offenders, [], f"is_standard JSON carries a FUTURE `modified`: {offenders[:10]}"
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
