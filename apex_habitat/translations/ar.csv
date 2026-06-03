@@ -2578,3 +2578,31 @@ Transferred,مُحوَّل
 Warning,تحذير
 New,جديد
 Gemini,جيميني
+Apex Setup,إعداد أبيكس
+Confirm the shared Apex settings that the Habitat and Salis modules build on.,اعتمد إعدادات أبيكس المشتركة التي تبني عليها وحدتا هابيتات وسلس.
+Apex Core is configured. The accommodation and fleet modules now share these settings.,تم تهيئة نواة أبيكس. تشترك الآن وحدتا السكن والأسطول في هذه الإعدادات.
+Review Apex Integration Settings,مراجعة إعدادات تكامل أبيكس
+"Apex Integration Settings is the shared switchboard for the external frontend — whether the integration is enabled, the frontend base URL, the API contract version, and the allowed origins. Review it once so any client app can reach this backend.",إعدادات تكامل أبيكس هي لوحة التحكم المشتركة للواجهة الأمامية الخارجية — تفعيل التكامل، والرابط الأساسي للواجهة، وإصدار عقد الواجهة البرمجية، والمصادر المسموح بها. راجعها مرة واحدة ليتسنى لأي تطبيق عميل الوصول إلى هذا الخادم الخلفي.
+"Review the shared integration switchboard: frontend URL, API version, and allowed origins.",راجع لوحة التكامل المشتركة: رابط الواجهة، وإصدار الواجهة البرمجية، والمصادر المسموح بها.
+Review Integration Settings,مراجعة إعدادات التكامل
+Confirm Habitat Settings,اعتماد إعدادات هابيتات
+"The Setup Wizard captured your first-run payment and deduction choices. Open Habitat Settings to confirm the default payment method and the housing-allowance, damage, and GL-posting toggles now that prerequisites such as accounts and authorizers are in place.",التقط معالج الإعداد اختياراتك الأولية للدفع والاستقطاع. افتح إعدادات هابيتات لاعتماد طريقة الدفع الافتراضية ومفاتيح بدل السكن والأضرار والقيد المحاسبي بعد أن أصبحت المتطلبات المسبقة مثل الحسابات والمعتمدين متوفرة.
+Confirm the default payment method and the deduction and GL-posting toggles.,اعتمد طريقة الدفع الافتراضية ومفاتيح الاستقطاع والقيد المحاسبي.
+Confirm Salis Settings,اعتماد إعدادات سلس
+"Salis Settings holds the fleet defaults the movement module relies on — the default company and cost center for fleet postings, approval toggles, and the fuel-request approval threshold. Confirm these before drivers and vehicles start transacting.",تضم إعدادات سلس القيم الافتراضية للأسطول التي تعتمد عليها وحدة الحركة — الشركة الافتراضية ومركز التكلفة لقيود الأسطول، ومفاتيح الاعتماد، وحد اعتماد طلب الوقود. اعتمدها قبل أن يبدأ السائقون والمركبات بإجراء المعاملات.
+"Confirm the fleet defaults: company, cost center, approvals, and the fuel-request threshold.",اعتمد القيم الافتراضية للأسطول: الشركة، ومركز التكلفة، والاعتمادات، وحد طلب الوقود.
+Open the Action Inbox,افتح صندوق الإجراءات
+The Action Inbox is the shared Apex Core desk that gathers everything pending your action across accommodation and fleet into one list. Open it to see how approvals and tasks from both modules surface in a single place.,صندوق الإجراءات هو سطح المكتب المشترك لنواة أبيكس الذي يجمع كل ما ينتظر إجراءك عبر السكن والأسطول في قائمة واحدة. افتحه لترى كيف تظهر الاعتمادات والمهام من كلتا الوحدتين في مكان واحد.
+Open the unified inbox that gathers everything pending your action across modules.,افتح الصندوق الموحد الذي يجمع كل ما ينتظر إجراءك عبر الوحدات.
+Open Action Inbox,فتح صندوق الإجراءات
+Salis Fuel Setup,إعداد وقود سلس
+"Set a fuel quota, request fuel, and reconcile the claim.",حدد حصة وقود، واطلب الوقود، وطابق المطالبة.
+"Fuel is live. Quotas, requests, and claims now keep consumption and spend reconciled.",تم تشغيل الوقود. تحافظ الحصص والطلبات والمطالبات الآن على مطابقة الاستهلاك والإنفاق.
+Create a Fuel Quota,إنشاء حصة وقود
+A Fuel Quota sets the monthly litre allowance for a vehicle. Create one so fuel requests and claims have a ceiling to reconcile against and over-consumption is flagged automatically.,تحدد حصة الوقود البدل الشهري باللترات لمركبة. أنشئ واحدة ليكون لطلبات ومطالبات الوقود سقف يُطابق معه ويُوسم تجاوز الاستهلاك آلياً.
+Set the monthly litre allowance for a vehicle so consumption can be reconciled.,حدد البدل الشهري باللترات لمركبة ليتسنى مطابقة الاستهلاك.
+Create Fuel Quota,إنشاء حصة وقود
+Process a Fuel Claim,معالجة مطالبة وقود
+A Fuel Claim records what was actually fuelled and spent so it can be reconciled against the quota and the request. Process one to close the fuel cycle and keep consumption and spend accurate per vehicle.,تسجل مطالبة الوقود ما تم تزويده وإنفاقه فعلياً ليتسنى مطابقته مع الحصة والطلب. عالج واحدة لإغلاق دورة الوقود والحفاظ على دقة الاستهلاك والإنفاق لكل مركبة.
+"Record actual fuelling and spend, then reconcile it against the quota and request.",سجّل التزويد والإنفاق الفعلي، ثم طابقه مع الحصة والطلب.
+Process Fuel Claim,معالجة مطالبة وقود

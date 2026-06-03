@@ -1,0 +1,14 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Confirm Habitat Settings",
+ "intro_text": "The Setup Wizard captured your first-run payment and deduction choices. Open Habitat Settings to confirm the default payment method and the housing-allowance, damage, and GL-posting toggles now that prerequisites such as accounts and authorizers are in place.",
+ "title": "Confirm Habitat Settings",
+ "action": "Update Settings",
+ "reference_document": "Habitat Settings",
+ "is_single": 1,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Confirm the default payment method and the deduction and GL-posting toggles.",
+ "action_label": "Confirm Habitat Settings"
+}

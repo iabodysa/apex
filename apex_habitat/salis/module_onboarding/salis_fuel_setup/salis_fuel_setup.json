@@ -1,0 +1,23 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Salis Fuel Setup",
+ "title": "Salis Fuel Setup",
+ "module": "Salis",
+ "subtitle": "Set a fuel quota, request fuel, and reconcile the claim.",
+ "success_message": "Fuel is live. Quotas, requests, and claims now keep consumption and spend reconciled.",
+ "is_complete": 0,
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Create a Fuel Quota"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Raise a Fuel Request"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Process a Fuel Claim"
+  }
+ ]
+}

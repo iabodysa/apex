@@ -1,0 +1,27 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Apex Setup",
+ "title": "Apex Setup",
+ "module": "Apex Core",
+ "subtitle": "Confirm the shared Apex settings that the Habitat and Salis modules build on.",
+ "success_message": "Apex Core is configured. The accommodation and fleet modules now share these settings.",
+ "is_complete": 0,
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Review Apex Integration Settings"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Confirm Habitat Settings"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Confirm Salis Settings"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Open the Action Inbox"
+  }
+ ]
+}

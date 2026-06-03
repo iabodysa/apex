@@ -1,0 +1,14 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Create a Fuel Quota",
+ "intro_text": "A Fuel Quota sets the monthly litre allowance for a vehicle. Create one so fuel requests and claims have a ceiling to reconcile against and over-consumption is flagged automatically.",
+ "title": "Create a Fuel Quota",
+ "action": "Create Entry",
+ "reference_document": "Fuel Quota",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Set the monthly litre allowance for a vehicle so consumption can be reconciled.",
+ "action_label": "Create Fuel Quota"
+}
