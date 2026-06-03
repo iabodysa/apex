@@ -199,6 +199,10 @@ default_log_clearing_doctypes = {
     "Operations Alert": 90,
     "Accommodation Occupancy Snapshot": 365,
     "Vehicle Utilisation Snapshot": 365,
+    # Non-financial, submittable point-in-time snapshot (no GL impact). 2-year
+    # retention caps growth; clear_old_logs purges only submitted rows + their
+    # child items. Drafts and the financial ledgers above stay untouched.
+    "Non-Financial Depreciation Snapshot": 730,
 }
 
 # Employee form dashboard: surface housing and custody records

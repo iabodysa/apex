@@ -9,7 +9,35 @@ from frappe.utils import flt
 
 
 class NonFinancialDepreciationSnapshot(Document):
-    pass
+    @staticmethod
+    def clear_old_logs(days=730):
+        """Log Settings cleanup hook. A submittable, NON-financial snapshot of
+        operational asset book values (no GL impact) that managers archive at a point
+        in time for the Operational Depreciation Aging report. Registered in hooks
+        ``default_log_clearing_doctypes`` and invoked by ``daily_maintenance``
+        (run_log_clean_up). A two-year retention caps unbounded growth while keeping
+        enough aging history; only SUBMITTED (docstatus=1) snapshots older than
+        ``days`` are purged — drafts are preserved. The child ``Depreciation Snapshot
+        Item`` rows are deleted explicitly FIRST, because ``frappe.db.delete`` does
+        not cascade to a parent's children (unlike ``frappe.delete_doc``)."""
+        from frappe.query_builder import Interval
+        from frappe.query_builder.functions import Now
+
+        parent = frappe.qb.DocType("Non-Financial Depreciation Snapshot")
+        cutoff = Now() - Interval(days=days)
+        names = [
+            row[0]
+            for row in (
+                frappe.qb.from_(parent)
+                .select(parent.name)
+                .where((parent.modified < cutoff) & (parent.docstatus == 1))
+            ).run()
+        ]
+        if not names:
+            return
+        child = frappe.qb.DocType("Depreciation Snapshot Item")
+        frappe.db.delete(child, filters=(child.parent.isin(names)))
+        frappe.db.delete(parent, filters=(parent.name.isin(names)))
 
 
 def validate(doc, method=None):

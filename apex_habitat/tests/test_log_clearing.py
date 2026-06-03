@@ -20,6 +20,9 @@ from apex_habitat.apex_core.doctype.operations_alert.operations_alert import Ope
 from apex_habitat.salis.doctype.vehicle_utilisation_snapshot.vehicle_utilisation_snapshot import (
     VehicleUtilisationSnapshot,
 )
+from apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financial_depreciation_snapshot import (
+    NonFinancialDepreciationSnapshot,
+)
 
 
 class TestLogClearing(FrappeTestCase):
@@ -30,6 +33,7 @@ class TestLogClearing(FrappeTestCase):
             OperationsAlert,
             AccommodationOccupancySnapshot,
             VehicleUtilisationSnapshot,
+            NonFinancialDepreciationSnapshot,
         ):
             self.assertTrue(
                 callable(getattr(cls, "clear_old_logs", None)),
@@ -42,6 +46,7 @@ class TestLogClearing(FrappeTestCase):
             ("Operations Alert", 90),
             ("Accommodation Occupancy Snapshot", 365),
             ("Vehicle Utilisation Snapshot", 365),
+            ("Non-Financial Depreciation Snapshot", 730),
         ):
             self.assertIn(dt, hook, f"{dt} must be registered for log clearing.")
             self.assertEqual(int(hook[dt][-1]), retention)
@@ -88,4 +93,64 @@ class TestLogClearing(FrappeTestCase):
         self.assertTrue(
             frappe.db.exists("Operations Alert", fresh.name),
             "Fresh Operations Alert must survive clearing.",
+        )
+
+    def test_depreciation_snapshot_clears_submitted_with_children_keeps_drafts(self):
+        # The Depreciation Snapshot has a child table AND is submittable, so its
+        # clear_old_logs must (a) purge only SUBMITTED rows older than retention,
+        # (b) delete their child items (frappe.db.delete does not cascade), and
+        # (c) leave drafts alone.
+        marker = frappe.generate_hash(length=8)
+
+        def make(suffix):
+            doc = frappe.get_doc({
+                "doctype": "Non-Financial Depreciation Snapshot",
+                "naming_series": "DEP-SNAP-.YYYY.-.####",
+                "snapshot_date": today(),
+                "building": f"QA-{marker}-{suffix}",
+                "items": [{
+                    "doctype": "Depreciation Snapshot Item",
+                    "article": f"ART-{marker}-{suffix}",
+                    "original_cost_sar": 200,
+                }],
+            })
+            doc.insert(ignore_permissions=True, ignore_links=True)
+            return doc
+
+        old_sub = make("oldsub")
+        recent_sub = make("recentsub")
+        old_draft = make("olddraft")
+
+        # Mark the two "submitted" rows docstatus=1 (bypass submit's link checks),
+        # then backdate the two "old" rows well past the 730-day window.
+        for name in (old_sub.name, recent_sub.name):
+            frappe.db.set_value(
+                "Non-Financial Depreciation Snapshot", name, "docstatus", 1, update_modified=False
+            )
+        for name in (old_sub.name, old_draft.name):
+            frappe.db.sql(
+                "update `tabNon-Financial Depreciation Snapshot` set modified=%s where name=%s",
+                (add_days(today(), -800), name),
+            )
+
+        NonFinancialDepreciationSnapshot.clear_old_logs(days=730)
+
+        # Aged SUBMITTED snapshot and its child items are gone (no orphans).
+        self.assertFalse(
+            frappe.db.exists("Non-Financial Depreciation Snapshot", old_sub.name),
+            "Aged submitted snapshot should be cleared.",
+        )
+        self.assertEqual(
+            frappe.db.count("Depreciation Snapshot Item", {"parent": old_sub.name}),
+            0,
+            "Child rows of a cleared snapshot must be deleted (no orphans).",
+        )
+        # Recent submitted survives; aged DRAFT survives (only docstatus=1 is purged).
+        self.assertTrue(
+            frappe.db.exists("Non-Financial Depreciation Snapshot", recent_sub.name),
+            "Recent submitted snapshot must survive.",
+        )
+        self.assertTrue(
+            frappe.db.exists("Non-Financial Depreciation Snapshot", old_draft.name),
+            "Aged DRAFT snapshot must be preserved (not submitted).",
         )
