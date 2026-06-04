@@ -23,14 +23,16 @@ resolves it from the signed-in user's linked **Salis Driver** record.
 | **My route** | Read today's worker-route stops assigned to them |
 | **Check in / Check out** | Record and submit today's **Driver Attendance**, optionally with a photo |
 | **Submit fuel request** | Raise a **Fuel Request** for their bound vehicle |
-| **Raise support ticket** | File a **Support Ticket** (category, priority, subject, description) |
-| **My tickets** | Read their own support tickets |
+| **Raise support ticket** | File a native **Issue** (category, priority, subject, description) |
+| **My tickets** | Read their own **Issues** |
 
 ### Permissions
 Drivers hold only **Read** (and narrow **Create**) desk permissions — Driver
-Attendance (read/create/submit), Support Ticket (read/create), Salis
-Driver/Vehicle (read). They cannot browse other drivers' data. The portal is the
-intended surface; the desk is not.
+Attendance (read/create/submit), **Issue** (read/create, own only), Salis
+Driver/Vehicle (read). They cannot browse other drivers' data. Field support
+tickets are native ERPNext **Issue** records (the old "Support Ticket" DocType was
+retired); a driver-raised Issue is tagged with a `custom_driver` field and is
+visible only to its owner. The portal is the intended surface; the desk is not.
 
 ### Notes for trainers
 - The portal requires login; guests are redirected to the sign-in page.

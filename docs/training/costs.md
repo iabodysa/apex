@@ -9,12 +9,17 @@ depreciation.
 
 ## Permissions
 
-| DocType | Accommodation Manager | Finance Manager |
-|---------|----------------------|-----------------|
-| Utility Account (master) | Read, Write, Create | — |
-| **Utility Bill Entry** *(submittable)* | Read, Write, Create, Submit | Read, Write, Create, Submit, Cancel |
-| Operational Depreciation Policy (master) | Read, Write, Create | Read |
-| Accommodation Lease | Read, Write, Create | Read |
+| DocType | Accommodation Manager | Finance Manager | Internal Auditor |
+|---------|----------------------|-----------------|------------------|
+| Utility Account (master) | Read, Write, Create | Read | — |
+| **Utility Bill Entry** *(submittable)* | Read, Write, Create, Submit | Read, Write, Create, Submit, Cancel | Read |
+| Operational Depreciation Policy (master) | Read, Write, Create | Read | — |
+| **Accommodation Lease** *(submittable)* | Read, Write, Create, Submit | **Read, Write, Create, Submit, Cancel** | Read |
+
+> **Finance Manager is a full maker/checker on the Accommodation Lease and Utility
+> Bill Entry** — Read, Write, Create, Submit, and Cancel (not read-only). The
+> **Internal Auditor** holds read-only oversight across the Costs records (lease,
+> ledger, utility bill, occupancy/stock ledgers).
 
 ---
 

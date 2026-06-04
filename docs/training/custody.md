@@ -8,17 +8,23 @@ Tracks articles and assets issued to residents/staff and their return or damage.
 
 ## Permissions
 
-| DocType | Accommodation Manager | Resident Supervisor |
-|---------|----------------------|---------------------|
-| Custody Article / Asset Category (masters) | Read, Write, Create, Delete | Read, Write, Create |
-| **Custody Issue** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create |
-| **Custody Return** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create |
-| **Custody Damage Assessment** *(submittable)* | Read, Write, Create, Submit, Cancel | — |
-| Facility Asset Custody Assignment | Read, Write, Create | Read |
+| DocType | Accommodation Manager | Resident Supervisor | Cleaning Supervisor |
+|---------|----------------------|---------------------|---------------------|
+| Custody Article / Asset Category (masters) | Read, Write, Create, Delete | Read, Write, Create | — |
+| **Custody Issue** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — |
+| **Custody Return** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — |
+| **Custody Damage Assessment** *(submittable)* | Read, Write, Create, Submit, Cancel, Delete | Read, Write, Create | — |
+| Facility Asset Custody Assignment | Read, Write, Create | Read | — |
+| **Cleaning Log** | Read, Write, Create | Read, Write, Create | Read, Write, Create |
 
-> Supervisors can **prepare** custody issues and returns but cannot **submit**
-> them — the Accommodation Manager submits, keeping a single point of
-> accountability.
+> Supervisors can **prepare** custody issues, returns, and damage assessments but
+> cannot **submit** them — the Accommodation Manager submits, keeping a single
+> point of accountability.
+
+> **Cleaning Supervisor** is the housekeeping role: it holds Read/Write/Create on
+> the **Cleaning Log** (which is not a submittable record). The Resident Supervisor
+> is **building-scoped** on Cleaning Log — he only sees the log entries for the
+> building(s) he is responsible for.
 
 ---
 
@@ -40,7 +46,8 @@ Tracks articles and assets issued to residents/staff and their return or damage.
 
 ### Custody Damage Assessment *(submittable)*
 - **Purpose:** records damaged/lost items returned.
-- **Roles:** Manager only.
+- **Roles:** the Resident Supervisor prepares it (Read/Write/Create); the
+  Accommodation Manager submits it.
 - **Feeds:** non-financial (operational) depreciation snapshots.
 
 ### Facility Asset & related

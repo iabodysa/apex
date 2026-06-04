@@ -9,14 +9,29 @@ checkout, and resident-request records.
 
 ## Permissions
 
-| DocType | Accommodation Manager | Resident Supervisor | Finance Manager |
-|---------|----------------------|---------------------|-----------------|
-| Accommodation Site / Building | Read, Write, Create | Read | — |
-| Accommodation Room / Bed | Read, Write, Create | Read | — |
-| Facility Asset | Read, Write, Create | Read | — |
-| **Accommodation Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | — |
-| **Accommodation Checkout** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | — |
-| Accommodation Resident Request | Read, Write, Create | Read, Write, Create | — |
+| DocType | Accommodation Manager | Resident Supervisor | Resident Request Coordinator | Finance Manager |
+|---------|----------------------|---------------------|------------------------------|-----------------|
+| Accommodation Site / Building | Read, Write, Create | Read | — | — |
+| Accommodation Room / Bed | Read, Write, Create | Read | — | — |
+| Facility Asset | Read, Write, Create | Read | — | — |
+| **Accommodation Assignment** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | — | — |
+| **Accommodation Checkout** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | — | — |
+| Accommodation Resident Request | Read, Write, Create | Read, Write, Create | Read, Write, Create | — |
+
+> **Resident Request Coordinator** is the dedicated triage role for resident
+> requests: it holds Read/Write/Create on **Accommodation Resident Request**.
+
+> **Building scoping (Resident Supervisor):** a Resident Supervisor is bound to his
+> building(s) via a *User Permission* on **Accommodation Building**
+> (`habitat/permissions.py` → `building_scoped_has_permission`). He only sees and
+> acts on **Accommodation Assignment**, **Custody Issue**, **Cleaning Log**, and
+> **Accommodation Building** rows for those buildings. Oversight roles (System
+> Manager, Accommodation Manager, Internal Auditor, Finance Manager) are unscoped.
+
+> **Triage-field split:** Accommodation Resident Request uses a `permlevel 1`
+> permission split so the three housing roles (Accommodation Manager, Resident
+> Supervisor, Resident Request Coordinator) hold Read/Write on the protected triage
+> fields, separating resident-entered data from internal triage handling.
 
 ---
 

@@ -12,8 +12,11 @@ top of project scoping.
 | DocType | Fleet Manager | Fleet PM | Fleet Supervisor | Finance Manager |
 |---------|---------------|----------|------------------|-----------------|
 | **Salis Payment Request** *(workflow)* | Full | Read, Write, Create | Read, Write, Create | Read, Write, Submit, Cancel |
-| **Approval Request** *(workflow)* | Full | Read, Write, Create, Submit | Read, Write, Create | Read |
-| Movement Cost Recovery / Transfer | Full | Read, Write, Create | Read, Write, Create | Read, Write |
+| **Movement Cost Recovery** *(submittable)* | Full | — | Read, Write, Create | Read, Write |
+| **Movement Cost Transfer** *(submittable)* | Full | Read, Write, Create | — | Read, Write |
+
+> Note the **asymmetry**: Fleet PM holds **no** permission on Movement Cost
+> Recovery, and Fleet Supervisor holds **no** permission on Movement Cost Transfer.
 
 ---
 
@@ -23,15 +26,13 @@ top of project scoping.
 - **Purpose:** requests a payment to a vendor/office/driver.
 - **Segregation of duties:** the operator who *created* the request cannot also be
   the Finance Manager who *approves/pays* it. The `payment_sod_has_permission`
-  hook blocks the maker from approving their own request.
+  hook blocks the maker from approving their own request. **This is the only
+  code-enforced finance-boundary SoD in the app.**
 
-### Approval Request *(workflow)*
-- **Purpose:** a generic approval gate for operational decisions.
-- **Segregation of duties:** the *approver must differ from the requester*
-  (`approval_sod_has_permission`). Project scoping still applies on top of this.
-
-### Movement Cost Recovery / Movement Cost Transfer
+### Movement Cost Recovery / Movement Cost Transfer *(submittable)*
 - **Purpose:** reallocates movement cost between projects/cost owners.
+- **Access:** see the asymmetry note above — Fleet PM has no Recovery perm; Fleet
+  Supervisor has no Transfer perm.
 
 ---
 

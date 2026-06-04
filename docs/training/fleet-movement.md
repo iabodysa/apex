@@ -16,7 +16,7 @@ This page covers fleet masters, compliance, dispatch, and transport.
 
 | DocType | Fleet Manager | Fleet Project Manager | Fleet Supervisor | Driver | Finance / Auditor |
 |---------|---------------|-----------------------|------------------|--------|-------------------|
-| **Salis Vehicle** | Full | Read, Write, Create, Submit | Read, Write, Create | — | Read |
+| **Salis Vehicle** | Full | Read, Write, Create | Read, Write, Create | — | Read |
 | **Salis Driver** | Full | Read, Write, Create, Submit | Read, Write, Create | Read | Read |
 | Vehicle Category (master) | Read, Write, Create | Read | Read | — | Read |
 | **Salis Vehicle Compliance** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | — | Read |
@@ -51,7 +51,10 @@ _[screenshot: Salis Vehicle record with compliance tab]_
 | **Dispatch Trip** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | Read (own, via portal) |
 | **Route Plan** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | — |
 | **Passenger Manifest** *(submittable)* | Full | Read, Write, Create, Submit | Read, Write, Create | Read (own) |
-| **Support Ticket** *(workflow)* | Full | Read, Write, Create, Submit | Read, Write, Create, Submit | Read, Create |
+| **Issue** (field support) | Read, Write | — | Read, Write | Read, Create (own) |
+
+> **Salis Vehicle** is **not a submittable** DocType — there is no Submit action.
+> Create the record and save it.
 
 ### DocTypes
 - **Vehicle Assignment** — binds a vehicle to a driver/project for a period.
@@ -60,7 +63,10 @@ _[screenshot: Salis Vehicle record with compliance tab]_
 - **Dispatch Trip** — schedules the actual run; the driver sees it in the portal.
 - **Route Plan / Route Stop** — groups ordered stops for a trip.
 - **Passenger Manifest** — the people carried on a trip.
-- **Support Ticket** — field issues; runs the *Support Ticket Workflow*.
+- **Issue** — field support tickets ride the **native ERPNext Issue** DocType (the
+  old "Support Ticket" DocType was retired). A driver-raised Issue is tagged with a
+  `custom_driver` field; Apex seeds the Issue Types, Priorities, and a default SLA.
+  Drivers hold Read/Create on their **own** Issues; fleet roles read/write them.
 
 ### Workflow
 1. **Assign a vehicle.** Create a **Vehicle Assignment** binding a vehicle to a
@@ -69,8 +75,8 @@ _[screenshot: Salis Vehicle record with compliance tab]_
    workflow rather than a plain submit.
 3. **Dispatch.** A **Dispatch Trip** schedules the run; **Route Plan** groups
    stops. The driver sees today's trips in the portal.
-4. **Tickets.** Field issues are logged as **Support Tickets**, which follow the
-   Support Ticket Workflow to resolution.
+4. **Tickets.** Field issues are logged as native **Issue** records (drivers raise
+   them from the Driver Portal; fleet staff resolve them on the desk).
 
 _[screenshot: Dispatch Board page]_
 

@@ -35,14 +35,31 @@ day-to-day work:
 | Page | Module | Use |
 |------|--------|-----|
 | **Front Desk** | Habitat | Quick resident/accommodation overview and intake. |
+| **Arrivals Desk** | Habitat | Process incoming residents (System Manager, Accommodation Manager, Resident Supervisor). |
 | **Custody Kiosk** | Habitat | Fast custody issue/return at the front desk. |
 | **Safety Map** | Habitat | Visual building/task safety status. |
 | **Transfer Board** | Habitat | Manage room/bed transfers. |
 | **Salis Dispatch Board** | Salis | Plan and monitor dispatch trips. |
 | **Fuel Approval Console** | Salis | Review and action fuel claims/requests. |
+| **Action Inbox** | Apex Core | Personal cross-module worklist of items awaiting the signed-in user (available to any logged-in user). |
 
 _[screenshot: Front Desk page]_
 _[screenshot: Salis Dispatch Board]_
+
+---
+
+## My Work — personal worklist
+
+**My Work** is a top-level **public** workspace with **no role filter**, so it is
+available to **every logged-in user**. It is the desk home for the universal
+Maintenance Request intake and carries:
+
+- three Number Cards — **Pending My Action**, **Submitted By Me**, and
+  **Approved Last 48h**; and
+- shortcuts to the **Action Inbox** desk page and **My Maintenance Requests**.
+
+Use it as the daily starting point: it surfaces what *you* raised, what you
+submitted, and what needs your action across both modules.
 
 ---
 
