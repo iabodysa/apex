@@ -4,10 +4,12 @@ Feature = something new you can do; Fix = Apex got steadier or safer.
 
 ## Latest
 
-- **[1.50.4](v1/v1_50_4.md)** · Feature — You can now reach your own My Work page no matter your role.
+- **[1.50.6](v1/v1_50_6.md)** · Feature — You can now give rooms a wing or block prefix when you generate a building.
 
 ## 1.50.x
 
+- **[1.50.6](v1/v1_50_6.md)** · Feature — You can now give rooms a wing or block prefix when you generate a building.
+- **[1.50.5](v1/v1_50_5.md)** · Fix — Reliability fixes across custody returns, utility bills, and depreciation setup.
 - **[1.50.4](v1/v1_50_4.md)** · Feature — You can now reach your own My Work page no matter your role.
 - **[1.50.3](v1/v1_50_3.md)** · Fix — Operations alerts that still need attention are no longer cleared by age.
 - **[1.50.2](v1/v1_50_2.md)** · Fix — Reliability fixes in the resident check-out and custody-damage flow.

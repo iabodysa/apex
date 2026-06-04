@@ -49,6 +49,7 @@
       "label": "Room Number Prefix",
       "fieldtype": "Data",
       "description": "Prefix added before the room number (e.g. 'A' gives A101). Leave blank for numeric only.",
+      "in_list_view": 1,
       "idx": 5
     },
     {

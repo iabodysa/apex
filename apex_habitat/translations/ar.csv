@@ -191,6 +191,7 @@ Book Value (SAR),القيمة الدفترية (ريال)
 Building,المبنى
 Building Abbreviation,اختصار المبنى
 Building Abbreviation is required.,اختصار المبنى مطلوب.
+Building Code Locked,رمز المبنى مقفل
 Building License,رخصة المبنى
 Building Licenses by Status,رخص المباني حسب الحالة
 Building Name,اسم المبنى
@@ -1185,6 +1186,7 @@ Template for catalog {0}: {1},القالب للدليل {0}: {1}
 Template loading is only supported for Maintenance Request and Maintenance Work Order.,تحميل القالب مدعوم فقط لـ 'طلب صيانة' و'أمر عمل صيانة'.
 Terminated,مُنهى
 The building asset was located in before current location,المبنى الذي كان فيه هذا الأصل قبل موقعه الحالي
+"The building code is locked: {0} room(s) already use it in their room numbers, and renaming it would orphan them. Delete the generated rooms first if the code must change.",رمز المبنى مقفل: {0} غرفة تستخدمه في أرقامها، وتغييره سيجعلها يتيمة. احذف الغرف المولّدة أولاً إن لزم تغيير الرمز.
 The building this asset was located in before its current location.,المبنى الذي كان هذا الأصل موجوداً فيه قبل موقعه الحالي.
 The floor plan adds {0} new room(s) and {1} new bed(s) beyond what already exists. Existing rooms were updated to match the plan. Create the new rooms and beds?,خطة الطابق تضيف {0} غرفة و{1} سرير جديدة زيادة على الموجود. حُدّثت الغرف الموجودة لتطابق الخطة. هل تريد إنشاء الغرف والأسرّة الجديدة؟
 The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.,خطة الطابق تضيف {0} غرفة و{1} سرير جديدة لم تُنشأ بعد. الغرف الموجودة المحدّثة: {2}. أكّد لإنشاء الغرف والأسرّة الجديدة.

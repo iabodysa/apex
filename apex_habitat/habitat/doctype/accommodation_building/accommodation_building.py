@@ -17,7 +17,35 @@ class AccommodationBuilding(Document):
     pass
 
 
+def _room_number(abbreviation, floor_code, prefix, seq):
+    """Room number ``{abbr}-{floor_code}{prefix}{seq:02d}``. A blank prefix yields the
+    historical ``{abbr}-{floor_code}{seq:02d}`` byte-for-byte (no renumbering), so the
+    prefix only ever ADDS a wing/block segment (e.g. ``JED1-GA01``) for non-blank rows."""
+    prefix = (prefix or "").strip()
+    return f"{abbreviation}-{floor_code}{prefix}{seq:02d}"
+
+
+def _guard_abbreviation_lock(doc):
+    """Once rooms exist under a building its abbreviation is LOCKED: the generator keys
+    on the ``room_number`` string and never renames, so changing the code would mint a
+    fresh namespace and ORPHAN every existing room. Delete the rooms first to change it."""
+    if doc.is_new():
+        return
+    before = doc.get_doc_before_save()
+    if not before or (before.abbreviation or "") == (doc.abbreviation or ""):
+        return
+    room_count = frappe.db.count("Accommodation Room", {"building": doc.name})
+    if room_count:
+        frappe.throw(
+            _("The building code is locked: {0} room(s) already use it in their room "
+              "numbers, and renaming it would orphan them. Delete the generated rooms "
+              "first if the code must change.").format(room_count),
+            title=_("Building Code Locked"),
+        )
+
+
 def before_save(doc, method=None):
+    _guard_abbreviation_lock(doc)
     if not doc.company:
         from apex_habitat.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()
@@ -132,9 +160,10 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0):
                 _("Bed capacity per room exceeds maximum of 50. Floor {0}: {1} beds configured.").format(floor_num, capacity)
             )
 
+        prefix = (row.room_prefix or "").strip()
         for i in range(count):
             seq = start + i
-            room_number = f"{abbreviation}-{floor_code}{seq:02d}"
+            room_number = _room_number(abbreviation, floor_code, prefix, seq)
 
             if room_number in existing_room_map:
                 room_doc_name = existing_room_map[room_number]
