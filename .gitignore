@@ -10,6 +10,7 @@ node_modules
 # Local working context (never commit).
 .claude/
 .agents/
+.frappectl/
 skills-lock.json
 
 # Internal project documents and source spreadsheets.
