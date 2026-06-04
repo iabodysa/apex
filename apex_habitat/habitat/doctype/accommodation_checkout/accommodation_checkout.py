@@ -77,6 +77,16 @@ def resolve_damage_assessment_building(assignment, bed):
 
 
 def on_submit(doc, method=None):
+    # Close the concurrent-checkout race (#4). The validate dup-check is a TOCTOU pre-check with
+    # no DB enforcement, so two checkouts for the SAME assignment can both pass validate. Lock the
+    # assignment row here (for_update) so the submits serialize: the one that loses the race then
+    # sees the check-out already set and aborts (its submit transaction rolls back).
+    already = frappe.db.get_value(
+        "Accommodation Assignment", doc.assignment, "check_out_date", for_update=True
+    )
+    if already:
+        frappe.throw(_("This assignment was already checked out on {0}.").format(already))
+
     # Close the assignment
     assignment = frappe.get_doc("Accommodation Assignment", doc.assignment)
     assignment.db_set("check_out_date", doc.checkout_date)

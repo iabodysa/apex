@@ -4,10 +4,11 @@ Feature = something new you can do; Fix = Apex got steadier or safer.
 
 ## Latest
 
-- **[1.50.6](v1/v1_50_6.md)** · Feature — You can now give rooms a wing or block prefix when you generate a building.
+- **[1.50.7](v1/v1_50_7.md)** · Fix — A reliability fix in resident check-out.
 
 ## 1.50.x
 
+- **[1.50.7](v1/v1_50_7.md)** · Fix — A reliability fix in resident check-out.
 - **[1.50.6](v1/v1_50_6.md)** · Feature — You can now give rooms a wing or block prefix when you generate a building.
 - **[1.50.5](v1/v1_50_5.md)** · Fix — Reliability fixes across custody returns, utility bills, and depreciation setup.
 - **[1.50.4](v1/v1_50_4.md)** · Feature — You can now reach your own My Work page no matter your role.

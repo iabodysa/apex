@@ -1193,6 +1193,7 @@ The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created.
 The linked Custody Issue {0} must be submitted before returning.,يجب اعتماد صرف العهدة المرتبط {0} قبل الإرجاع.
 Thermal Pipes,أنابيب حرارية
 This Maintenance Work Order is already Completed.,أمر عمل الصيانة هذا مكتمل بالفعل.
+This assignment was already checked out on {0}.,تمّ تسجيل خروج هذا التسكين بالفعل بتاريخ {0}.
 This report has already been acknowledged.,تم اعتماد هذا التقرير مسبقاً.
 This will clear and rebuild the entire payment schedule. Continue?,سيؤدي هذا إلى حذف جدول الدفعات وإعادة بنائه بالكامل. هل تريد المتابعة؟
 To Bed,إلى سرير

@@ -88,3 +88,16 @@ class TestAccommodationCheckout(FrappeTestCase):
         result = resolve_damage_assessment_building(assignment, "NONEXISTENT-BED")
         self.assertIsNone(result)
         self.assertNotEqual(result, "")
+
+    def test_on_submit_locks_assignment_against_concurrent_checkout(self):
+        """Regression (#4): on_submit must take a row lock on the assignment
+        (for_update) and re-check check_out_date, so two concurrent checkouts for
+        the same assignment serialize and the loser aborts. True concurrency is not
+        reproducible single-threaded; this guards the mechanism from being removed."""
+        import inspect
+        from apex_habitat.habitat.doctype.accommodation_checkout import (
+            accommodation_checkout as mod,
+        )
+        src = inspect.getsource(mod.on_submit)
+        self.assertIn("for_update=True", src)
+        self.assertIn("check_out_date", src)
