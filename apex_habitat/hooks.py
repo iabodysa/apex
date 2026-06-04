@@ -290,7 +290,9 @@ fixtures = [
     # HR User, Maintenance User, Internal Auditor) are intentionally NOT listed
     # here — fixtured only the uniquely-ours roles to avoid clobbering framework
     # ownership.
-    {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor", "Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
+    {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
+    # Operational roles added in v1.50.9 — separate entry so existing fixture is not mutated.
+    {"dt": "Role", "filters": [["name", "in", ["Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
     # Habitat Role Profiles — shipped as fixtures so they export/import cleanly
     # on bench migrate.  The seeder (create_role_profiles) is idempotent and also
     # runs on after_migrate, so both paths stay in sync.
