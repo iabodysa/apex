@@ -62,37 +62,52 @@ class TestLogClearing(FrappeTestCase):
             )
 
     def test_clear_old_logs_deletes_only_aged_rows(self):
-        # Operations Alert has no mandatory Link, so it is the cleanest proof that
-        # clear_old_logs deletes rows older than the retention and keeps fresh ones.
+        # Operations Alert ages out ONLY Resolved rows past the retention window.
+        # An Open/Acknowledged alert is still actionable and is kept regardless of
+        # age (v1.50.3 — the old purge deleted by `modified` regardless of status).
         marker = frappe.generate_hash(length=8)
         old = frappe.get_doc({
             "doctype": "Operations Alert",
             "alert_type": "Idle Vehicle",
             "severity": "Info",
+            "status": "Resolved",
             "message": f"OLD-{marker}",
+        }).insert(ignore_permissions=True)
+        aged_open = frappe.get_doc({
+            "doctype": "Operations Alert",
+            "alert_type": "Idle Vehicle",
+            "severity": "Info",
+            "status": "Open",
+            "message": f"OLDOPEN-{marker}",
         }).insert(ignore_permissions=True)
         fresh = frappe.get_doc({
             "doctype": "Operations Alert",
             "alert_type": "Idle Vehicle",
             "severity": "Info",
+            "status": "Resolved",
             "message": f"NEW-{marker}",
         }).insert(ignore_permissions=True)
 
-        # Backdate the old row's modified well past the retention window.
-        frappe.db.sql(
-            "update `tabOperations Alert` set modified=%s where name=%s",
-            (add_days(today(), -200), old.name),
-        )
+        # Backdate both "old" rows' modified well past the retention window.
+        for name in (old.name, aged_open.name):
+            frappe.db.sql(
+                "update `tabOperations Alert` set modified=%s where name=%s",
+                (add_days(today(), -200), name),
+            )
 
         OperationsAlert.clear_old_logs(days=90)
 
         self.assertFalse(
             frappe.db.exists("Operations Alert", old.name),
-            "Aged Operations Alert should be cleared.",
+            "Aged Resolved Operations Alert should be cleared.",
+        )
+        self.assertTrue(
+            frappe.db.exists("Operations Alert", aged_open.name),
+            "Aged but still-Open Operations Alert must be kept (still actionable).",
         )
         self.assertTrue(
             frappe.db.exists("Operations Alert", fresh.name),
-            "Fresh Operations Alert must survive clearing.",
+            "Fresh Resolved Operations Alert must survive clearing.",
         )
 
     def test_depreciation_snapshot_clears_submitted_with_children_keeps_drafts(self):
