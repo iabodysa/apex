@@ -1,0 +1,10 @@
+# frappectl config for apex_habitat project
+[project]
+app = "apex_habitat"
+language = "ar"
+bench_path = "../frappe-bench"
+site = "test"
+
+[agent]
+allow_bench_write = true
+bench_command = "bench"
