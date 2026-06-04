@@ -62,3 +62,34 @@ class TestMyWorkCenter(ApexHabitatTestCase):
             doc.name, theirs,
             "a non-owner (even able to read all) must NOT see another user's submitted doc",
         )
+
+    def test_action_inbox_is_universal(self):
+        """A personal per-user inbox must be reachable by EVERY user. The Action
+        Inbox page carries no role restriction (empty roles ⇒ all users per
+        frappe page.py), and the backend already scopes each user to their own
+        work — so role-gating it would lock users out of their own inbox."""
+        import json
+        path = frappe.get_app_path(
+            "apex_habitat", "apex_core", "page", "action_inbox", "action_inbox.json"
+        )
+        with open(path) as f:
+            page = json.load(f)
+        self.assertEqual(
+            page.get("roles", []), [],
+            "Action Inbox is a personal surface — it must have NO role restriction (universal access).",
+        )
+
+    def test_my_work_has_no_unscoped_quick_list(self):
+        """The 'My Tasks' Quick List was removed: a Workspace Quick List filter is
+        a static string with no current-user token, so it surfaced EVERY user's
+        open ToDos. The per-user Action Inbox is the correct surface."""
+        import json
+        path = frappe.get_app_path(
+            "apex_habitat", "apex_core", "workspace", "my_work", "my_work.json"
+        )
+        with open(path) as f:
+            ws = json.load(f)
+        self.assertEqual(
+            ws.get("quick_lists", []), [],
+            "My Work must not ship an unscoped ToDo Quick List (it leaked every user's tasks).",
+        )
