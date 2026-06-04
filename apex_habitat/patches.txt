@@ -46,6 +46,11 @@ apex_habitat.patches.v1_0.seed_salis_portal_theme
 apex_habitat.patches.v1_x.seed_salis_communications
 apex_habitat.patches.v1_x.seed_salis_workflows
 
+# v1.50.8 — workspace canonical rename (ONE-TIME). Removes the four stale workspace
+# records left behind when Habitat/Accommodation/Facilities/Apex Core were renamed to
+# Habitat Hub/Housing/Safety/Launchpad. PRUNE once every deployed site has run it.
+apex_habitat.patches.v1_x.rename_habitat_workspaces
+
 [post_model_sync]
 # v1.x — TEMPORARY safeguard (GitHub #97): ensure the Web Form keeps its `route` on
 # an upgrade (the v15-removed make_route_to_web_form helper is never needed).

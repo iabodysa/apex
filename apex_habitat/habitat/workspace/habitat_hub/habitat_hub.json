@@ -1,8 +1,8 @@
 {
  "doctype": "Workspace",
- "name": "Habitat",
- "label": "Habitat",
- "title": "Habitat",
+ "name": "Habitat Hub",
+ "label": "Habitat Hub",
+ "title": "Habitat Hub",
  "module": "Habitat",
  "icon": "organization",
  "public": 1,
@@ -133,5 +133,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-03 04:18:49.587389"
+ "modified": "2026-06-04 00:00:00.000000"
 }

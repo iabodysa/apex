@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.50.8 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.50.8 — workspace names are now shorter and clearer: the main hub is Habitat Hub, daily housing work is under Housing, cleaning and fire safety under Safety, and app setup under Launchpad",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-06-04 12:00:00",
+    },
     # v1.35.0 ---------------------------------------------------------------
     {
         "title": "Apex 1.35.0 — a Unified Action Inbox: one screen of only the documents awaiting your action (workflow approvals + your tasks), with inline Approve/Reject and a nightly cleanup of stale rows",

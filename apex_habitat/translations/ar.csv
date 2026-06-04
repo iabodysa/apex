@@ -1356,8 +1356,11 @@ Reported On,تاريخ الإبلاغ
 Resolution Notes are required when resolving an Idle Resident Report.,ملاحظات المعالجة مطلوبة عند إغلاق بلاغ المقيم غير المشغّل.
 An open Idle Resident Report already exists for employee {0}: {1}.,يوجد بلاغ مفتوح بالفعل للموظف {0}: {1}.
 Habitat,الإسكان
+Habitat Hub,مركز الإسكان
+Housing,السكن
 Accommodation,السكن
 Costs,التكاليف
+Launchpad,لوحة الانطلاق
 Upkeep,الصيانة والعناية
 Console,وحدة التحكم
 Idle resident reported to {0}: employee {1} (building {2}). Please action.,تم الإبلاغ عن مقيم غير مشغّل إلى {0}: الموظف {1} (المبنى {2}). يرجى المعالجة.

@@ -101,3 +101,44 @@ class TestAccommodationCheckout(FrappeTestCase):
         src = inspect.getsource(mod.on_submit)
         self.assertIn("for_update=True", src)
         self.assertIn("check_out_date", src)
+
+    # --- P16 checkout → damage assessment fieldname verification ---------------
+
+    def test_on_submit_uses_correct_damage_assessment_fieldnames(self):
+        """on_submit() auto-creates a Custody Damage Assessment using the correct
+        child-table fieldnames from the Custody Damage Item schema:
+        'article', 'damage_description', 'estimated_replacement_cost_sar'.
+
+        Verifies the field mapping is correct by inspecting the source and the
+        Custody Damage Item meta — guards against future fieldname renames breaking
+        the draft assessment creation.
+        """
+        import inspect
+        from apex_habitat.habitat.doctype.accommodation_checkout import (
+            accommodation_checkout as mod,
+        )
+        src = inspect.getsource(mod.on_submit)
+        # Must use the correct schema fieldnames when building the damage item row
+        self.assertIn('"article"', src, "on_submit must map 'article' to Custody Damage Item")
+        self.assertIn('"damage_description"', src,
+                      "on_submit must set 'damage_description' on the damage item")
+        self.assertIn('"estimated_replacement_cost_sar"', src,
+                      "on_submit must set 'estimated_replacement_cost_sar' on the damage item")
+
+        # Also confirm these fieldnames are in the actual Custody Damage Item schema
+        meta = frappe.get_meta("Custody Damage Item")
+        fieldnames = {f.fieldname for f in meta.fields}
+        for expected in ("article", "damage_description", "estimated_replacement_cost_sar"):
+            self.assertIn(expected, fieldnames,
+                          f"'{expected}' must exist on Custody Damage Item")
+
+    def test_damage_assessment_doctype_has_correct_building_and_items_fields(self):
+        """Custody Damage Assessment must have 'building' (required Link) and
+        'items' (Table → Custody Damage Item) as expected by on_submit()."""
+        meta = frappe.get_meta("Custody Damage Assessment")
+        fieldnames = {f.fieldname: f for f in meta.fields}
+        self.assertIn("building", fieldnames,
+                      "'building' link field must exist on Custody Damage Assessment")
+        self.assertIn("items", fieldnames,
+                      "'items' table field must exist on Custody Damage Assessment")
+        self.assertEqual(fieldnames["items"].options, "Custody Damage Item")

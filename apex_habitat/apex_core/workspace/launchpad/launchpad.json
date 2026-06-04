@@ -1,8 +1,8 @@
 {
  "doctype": "Workspace",
- "name": "Apex Core",
- "label": "Apex Core",
- "title": "Apex Core",
+ "name": "Launchpad",
+ "label": "Launchpad",
+ "title": "Launchpad",
  "module": "Apex Core",
  "icon": "setting",
  "public": 1,
@@ -369,5 +369,5 @@
    "role": "Administrator"
   }
  ],
- "modified": "2026-06-03 01:45:38.000000"
+ "modified": "2026-06-04 00:00:00.000000"
 }

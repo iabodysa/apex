@@ -83,3 +83,86 @@ class TestAccommodationBuilding(FrappeTestCase):
             b.save(ignore_permissions=True)
         frappe.delete_doc("Accommodation Room", room.name, force=True, ignore_permissions=True)
         frappe.delete_doc("Accommodation Building", b.name, force=True, ignore_permissions=True)
+
+    # --- P16 security / idempotency tests ------------------------------------
+
+    def test_generate_rooms_and_beds_rejects_unauthorized_user(self):
+        """Unauthorized user (Guest) must receive PermissionError from
+        generate_rooms_and_beds, which guards with a doc-level write check."""
+        from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import (
+            generate_rooms_and_beds,
+        )
+        m = frappe.generate_hash(length=6)
+        b = frappe.get_doc({
+            "doctype": "Accommodation Building",
+            "building_name": "QA Perm Test " + m,
+            "abbreviation": "QP" + m[:2].upper(),
+            "total_capacity": 4,
+        })
+        b.insert(ignore_permissions=True, ignore_links=True)
+        try:
+            frappe.set_user("Guest")
+            with self.assertRaises((frappe.PermissionError, frappe.exceptions.PermissionError)):
+                generate_rooms_and_beds(b.name)
+        finally:
+            frappe.set_user("Administrator")
+            frappe.delete_doc("Accommodation Building", b.name, force=True, ignore_permissions=True)
+
+    def test_generate_rooms_and_beds_idempotent_no_duplicate_beds(self):
+        """Re-running generate_rooms_and_beds must NOT create duplicate beds for
+        existing rooms. The idempotency guard uses existing_bed_codes to skip any
+        bed whose code is already present."""
+        from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import (
+            generate_rooms_and_beds,
+        )
+        m = frappe.generate_hash(length=6)
+        b = frappe.get_doc({
+            "doctype": "Accommodation Building",
+            "building_name": "QA Idempotent " + m,
+            "abbreviation": "QI" + m[:2].upper(),
+            "total_capacity": 2,
+            "floor_plan": [
+                {
+                    "doctype": "Accommodation Floor Plan",
+                    "floor_number": 0,
+                    "room_count": 1,
+                    "bed_capacity_per_room": 2,
+                    "room_type": "Standard",
+                    "generate_beds": 1,
+                    "starting_room_number": 1,
+                }
+            ],
+        })
+        b.insert(ignore_permissions=True, ignore_links=True)
+        try:
+            # First run — creates rooms and beds
+            generate_rooms_and_beds(b.name)
+            beds_after_first = frappe.db.count(
+                "Accommodation Bed",
+                {"room": ["in", frappe.db.get_all(
+                    "Accommodation Room", {"building": b.name}, pluck="name"
+                )]},
+            )
+            # Second run with confirm — must NOT create duplicates
+            r2 = generate_rooms_and_beds(b.name, confirm_new_rooms=1)
+            beds_after_second = frappe.db.count(
+                "Accommodation Bed",
+                {"room": ["in", frappe.db.get_all(
+                    "Accommodation Room", {"building": b.name}, pluck="name"
+                )]},
+            )
+            self.assertEqual(
+                beds_after_first, beds_after_second,
+                "Re-running should not create duplicate beds"
+            )
+            self.assertEqual(r2.get("created_beds", 0), 0, "No new beds should be created on re-run")
+            self.assertGreater(r2.get("skipped_beds", 0), 0, "Existing beds must be counted as skipped")
+        finally:
+            frappe.set_user("Administrator")
+            rooms = frappe.db.get_all("Accommodation Room", {"building": b.name}, pluck="name")
+            for room in rooms:
+                beds = frappe.db.get_all("Accommodation Bed", {"room": room}, pluck="name")
+                for bed in beds:
+                    frappe.delete_doc("Accommodation Bed", bed, force=True, ignore_permissions=True)
+                frappe.delete_doc("Accommodation Room", room, force=True, ignore_permissions=True)
+            frappe.delete_doc("Accommodation Building", b.name, force=True, ignore_permissions=True)
