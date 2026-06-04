@@ -92,7 +92,7 @@ class TestActionInboxPage(unittest.TestCase):
         import json
 
         with open(
-            os.path.join(APP_ROOT, "apex_core", "workspace", "apex_core", "apex_core.json"), encoding="utf-8"
+            os.path.join(APP_ROOT, "apex_core", "workspace", "launchpad", "launchpad.json"), encoding="utf-8"
         ) as fh:
             ws = json.load(fh)
         self.assertTrue(any(s.get("link_to") == "action-inbox" for s in ws.get("shortcuts", [])))
