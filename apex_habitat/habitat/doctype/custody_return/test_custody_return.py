@@ -56,3 +56,24 @@ class TestCustodyReturn(FrappeTestCase):
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
+
+    # --- per-article return progress (bug #1) -------------------------------
+    # A Custody Issue is "Returned" only when EVERY issued article is fully
+    # accounted for — never from a cross-article quantity SUM.
+    def test_progress_partial_when_one_article_short(self):
+        from apex_habitat.habitat.doctype.custody_return.custody_return import _progress_from
+        self.assertEqual(_progress_from({"A": 5}, {"A": 3}), "Partially Returned")
+
+    def test_progress_multi_article_full_only_when_all_complete(self):
+        from apex_habitat.habitat.doctype.custody_return.custody_return import _progress_from
+        # A fully returned but B untouched: 5/10 by SUM, but per-article incomplete.
+        self.assertEqual(_progress_from({"A": 5, "B": 5}, {"A": 5}), "Partially Returned")
+        self.assertEqual(_progress_from({"A": 5, "B": 5}, {"A": 5, "B": 5}), "Returned")
+
+    def test_progress_returned_when_each_article_met(self):
+        from apex_habitat.habitat.doctype.custody_return.custody_return import _progress_from
+        self.assertEqual(_progress_from({"A": 5}, {"A": 5}), "Returned")
+
+    def test_progress_issued_when_nothing_returned(self):
+        from apex_habitat.habitat.doctype.custody_return.custody_return import _progress_from
+        self.assertEqual(_progress_from({"A": 5}, {}), "Issued")

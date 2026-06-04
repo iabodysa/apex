@@ -1245,6 +1245,7 @@ Upload Photo (Optional),رفع صورة (اختياري)
 Used for variance alerts. Updated monthly by the variance scan job.,يُستخدم لتنبيهات الانحراف. يُحدَّث شهرياً بواسطة مهمة فحص الانحراف.
 "Used in room/bed codes, e.g. JED1-G01.",يُستخدم في رموز الغرف والأسرة، مثال: JED1-G01.
 Useful Life (Years),العمر الإنتاجي (سنوات)
+Useful Life (Years) must be greater than zero.,العمر الإنتاجي (بالسنوات) يجب أن يكون أكبر من صفر.
 User Requesting Access,المستخدم طالب الصلاحية
 Utility Account,حساب الخدمات العامة
 Utility Bill Entry,تسجيل فاتورة الخدمات العامة

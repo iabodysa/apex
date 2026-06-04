@@ -49,3 +49,23 @@ class TestOperationalDepreciationPolicy(FrappeTestCase):
         })
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_zero_useful_life_raises(self):
+        # 0 passes the reqd check (it is a value, not empty) but is logically invalid —
+        # the controller must reject it so assets can't "never depreciate" (bug #8).
+        doc = frappe.get_doc({
+            "doctype": "Operational Depreciation Policy",
+            "policy_name": "QA Zero Life",
+            "useful_life_years": 0,
+        })
+        with self.assertRaises(frappe.exceptions.ValidationError):
+            doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_negative_useful_life_raises(self):
+        doc = frappe.get_doc({
+            "doctype": "Operational Depreciation Policy",
+            "policy_name": "QA Negative Life",
+            "useful_life_years": -3,
+        })
+        with self.assertRaises(frappe.exceptions.ValidationError):
+            doc.insert(ignore_permissions=True, ignore_links=True)

@@ -75,41 +75,54 @@ def _validate_return_quantities(doc):
             )
 
 
+def _progress_from(issued, returned):
+    """The status a Custody Issue should carry given its per-article issued vs
+    returned quantities. 'Returned' ONLY when every issued article is fully
+    accounted for — the same per-article model the validator enforces, never a
+    cross-article quantity SUM."""
+    fully = bool(issued) and all(returned.get(a, 0) >= q for a, q in issued.items())
+    any_returned = any(returned.get(a, 0) > 0 for a in issued)
+    return "Returned" if fully else "Partially Returned" if any_returned else "Issued"
+
+
+def _issue_return_progress(issue, exclude=None):
+    """Per-article return progress of a Custody Issue across its SUBMITTED returns
+    (optionally excluding one return being cancelled). Single source of truth shared
+    by on_submit and on_cancel."""
+    issued = {}
+    for it in issue.items:
+        issued[it.article] = issued.get(it.article, 0) + (it.qty or 0)
+    submitted = [
+        n for n in frappe.get_all(
+            "Custody Return",
+            filters={"custody_issue": issue.name, "docstatus": 1},
+            pluck="name",
+        ) if n != exclude
+    ]
+    returned = {}
+    if submitted:
+        for r in frappe.get_all(
+            "Custody Return Item",
+            filters={"parent": ["in", submitted]},
+            fields=["article", "qty"],
+        ):
+            returned[r.article] = returned.get(r.article, 0) + (r.qty or 0)
+    return _progress_from(issued, returned)
+
+
 def on_submit(doc, method=None):
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
     if issue.docstatus == 1:
-        # Check if fully returned
-        issued_qty = sum([item.qty for item in issue.items])
-
-        # Aggregate total returned qty across all submitted returns for this issue
         try:
-            result = frappe.db.get_value(
-                "Custody Return Item",
-                filters={
-                    "parenttype": "Custody Return",
-                    "parent": [
-                        "in",
-                        frappe.get_all(
-                            "Custody Return",
-                            filters={"custody_issue": issue.name, "docstatus": 1},
-                            pluck="name",
-                        ),
-                    ],
-                },
-                fieldname="sum(qty)",
-            )
-            total_returned_qty = result or 0
+            status = _issue_return_progress(issue)
         except Exception:
             frappe.log_error(
-                title="Custody Return on_submit: qty aggregation failed",
+                title="Custody Return on_submit: return-progress computation failed",
                 message=frappe.get_traceback(),
             )
-            total_returned_qty = 0
-
-        if total_returned_qty >= issued_qty:
-            issue.db_set("status", "Returned")
-        elif total_returned_qty > 0:
-            issue.db_set("status", "Partially Returned")
+            status = None
+        if status and issue.status != status:
+            issue.db_set("status", status)
 
     _post_return_stock(doc)
 
@@ -147,8 +160,17 @@ def before_cancel(doc, method=None):
 
 def on_cancel(doc, method=None):
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
-    if issue.status == "Returned":
-        issue.db_set("status", "Issued")
+    # Recompute per-article progress EXCLUDING this (now-cancelled) return rather than a
+    # blanket flip to "Issued" — a sibling return may still hold it Partially/fully Returned.
+    try:
+        status = _issue_return_progress(issue, exclude=doc.name)
+        if issue.status != status:
+            issue.db_set("status", status)
+    except Exception:
+        frappe.log_error(
+            title="Custody Return on_cancel: return-progress recompute failed",
+            message=frappe.get_traceback(),
+        )
     from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
         reverse_stock_entries,
     )

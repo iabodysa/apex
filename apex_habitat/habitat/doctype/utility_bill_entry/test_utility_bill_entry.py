@@ -60,3 +60,34 @@ class TestUtilityBillEntry(FrappeTestCase):
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
+
+    # --- duplicate scope: company + building + account + period (bug #7) ------
+    def _bill(self, **kw):
+        base = {
+            "doctype": "Utility Bill Entry", "naming_series": "UTIL-BILL-.YYYY.-.#####",
+            "billing_period_from": "2026-06-01", "billing_period_to": "2026-06-30",
+            "bill_amount_sar": 100,
+        }
+        base.update(kw)
+        return frappe.get_doc(base)
+
+    def test_duplicate_same_company_building_account_period_blocked(self):
+        from apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
+        m = frappe.generate_hash(length=6)
+        first = self._bill(company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m)
+        first.insert(ignore_permissions=True, ignore_links=True)
+        dup = self._bill(company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m)
+        with self.assertRaises(frappe.ValidationError):
+            validate(dup)
+        frappe.delete_doc("Utility Bill Entry", first.name, force=True, ignore_permissions=True)
+
+    def test_same_account_period_different_building_or_company_allowed(self):
+        from apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
+        m = frappe.generate_hash(length=6)
+        first = self._bill(company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m)
+        first.insert(ignore_permissions=True, ignore_links=True)
+        # same account + period, DIFFERENT building → not a duplicate (cost posts per building)
+        validate(self._bill(company="QA-CO-" + m, building="QA-BLD-2", utility_account="ACC-" + m))
+        # same account + period + building, DIFFERENT company → not a duplicate
+        validate(self._bill(company="QA-CO-OTHER-" + m, building="QA-BLD-1", utility_account="ACC-" + m))
+        frappe.delete_doc("Utility Bill Entry", first.name, force=True, ignore_permissions=True)

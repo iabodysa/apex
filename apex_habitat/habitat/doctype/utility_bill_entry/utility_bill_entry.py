@@ -39,6 +39,11 @@ def validate(doc, method=None):
         duplicate = frappe.db.exists(
             "Utility Bill Entry",
             {
+                # Scope the dup key to the cost-posting model: a bill is posted per
+                # company + building, so two companies (or two buildings) may share
+                # the same account + period without being duplicates of each other.
+                "company": doc.company,
+                "building": doc.building,
                 "utility_account": doc.utility_account,
                 "billing_period_from": doc.billing_period_from,
                 "billing_period_to": doc.billing_period_to,
