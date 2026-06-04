@@ -296,7 +296,7 @@ fixtures = [
     # Habitat Role Profiles — shipped as fixtures so they export/import cleanly
     # on bench migrate.  The seeder (create_role_profiles) is idempotent and also
     # runs on after_migrate, so both paths stay in sync.
-    {"dt": "Role Profile", "filters": [["name", "in", ["Habitat Accommodation Manager", "Habitat Resident Supervisor", "Habitat Finance Reviewer", "Habitat Maintenance Technician", "Habitat Cleaning Supervisor", "Habitat Safety Officer", "Habitat Resident Request Desk", "Habitat Procurement Inventory", "Habitat Internal Auditor"]]]},
+    {"dt": "Role Profile", "filters": [["name", "in", ["Habitat Accommodation Manager", "Habitat Resident Supervisor", "Habitat Finance Reviewer", "Habitat Maintenance Technician", "Habitat Cleaning Supervisor", "Habitat Safety Officer", "Habitat Resident Request Coordinator"]]]},
     # Salis (Movement) custom roles — only the uniquely-ours, post-consolidation
     # roles are fixtured. Core/generic roles (Fleet Manager, Driver) are
     # existence-guarded in the seeds, never fixtured, to avoid clobbering
