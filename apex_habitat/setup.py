@@ -55,12 +55,18 @@ def create_roles():
 
 def create_role_profiles():
     profiles = {
+        # Core Habitat management profiles
         "Habitat Accommodation Manager": ["Accommodation Manager", "System Manager"],
         "Habitat Resident Supervisor": ["Resident Supervisor"],
         "Habitat Finance Reviewer": ["Finance Manager", "Internal Auditor"],
-        "Habitat Maintenance Technician": ["Maintenance Technician"],
-        "Habitat Cleaning Supervisor": ["Cleaning Supervisor"],
+        # Operational staff profiles (Prompt 14 additions)
+        "Habitat Maintenance Technician": ["Maintenance Technician", "Maintenance User"],
+        "Habitat Cleaning Supervisor": ["Cleaning Supervisor", "HR User"],
         "Habitat Safety Officer": ["Safety Officer"],
+        "Habitat Resident Request Desk": ["Resident Request Coordinator"],
+        "Habitat Procurement Inventory": ["Purchase User", "Stock User"],
+        "Habitat Internal Auditor": ["Internal Auditor"],
+        # Legacy alias retained for backwards compatibility; do not remove.
         "Habitat Resident Request Coordinator": ["Resident Request Coordinator"],
     }
     for profile_name, roles in profiles.items():

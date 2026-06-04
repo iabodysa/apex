@@ -219,6 +219,7 @@
    "role": "Finance Manager"
   },
   {
+   "export": 1,
    "read": 1,
    "report": 1,
    "role": "Internal Auditor"

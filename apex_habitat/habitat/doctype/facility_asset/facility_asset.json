@@ -258,6 +258,7 @@
   {
    "doctype": "DocPerm",
    "role": "Internal Auditor",
+   "export": 1,
    "read": 1,
    "report": 1,
    "idx": 4

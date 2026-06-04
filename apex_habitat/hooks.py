@@ -285,13 +285,16 @@ has_permission = {
 # customer adds or edits survive every migrate. A fixture would re-import and
 # OVERWRITE those edits on each migrate — the opposite of the intended semantics.
 fixtures = [
-    {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
-    # Habitat operational roles (role-alignment pass) — the four new least-
-    # privilege roles ship as a complementary fixture entry (mirroring the Salis-
-    # roles line below) so they export cleanly without rewriting the long-standing
-    # Habitat-roles filter above or clobbering any ERPNext/HRMS-owned role. They
-    # also remain existence-guarded in the create_roles() seeder.
-    {"dt": "Role", "filters": [["name", "in", ["Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
+    # All Habitat custom roles in a single consolidated entry (Prompt 14
+    # role-alignment pass).  ERPNext/HRMS-owned roles (Purchase User, Stock User,
+    # HR User, Maintenance User, Internal Auditor) are intentionally NOT listed
+    # here — fixtured only the uniquely-ours roles to avoid clobbering framework
+    # ownership.
+    {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor", "Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
+    # Habitat Role Profiles — shipped as fixtures so they export/import cleanly
+    # on bench migrate.  The seeder (create_role_profiles) is idempotent and also
+    # runs on after_migrate, so both paths stay in sync.
+    {"dt": "Role Profile", "filters": [["name", "in", ["Habitat Accommodation Manager", "Habitat Resident Supervisor", "Habitat Finance Reviewer", "Habitat Maintenance Technician", "Habitat Cleaning Supervisor", "Habitat Safety Officer", "Habitat Resident Request Desk", "Habitat Procurement Inventory", "Habitat Internal Auditor"]]]},
     # Salis (Movement) custom roles — only the uniquely-ours, post-consolidation
     # roles are fixtured. Core/generic roles (Fleet Manager, Driver) are
     # existence-guarded in the seeds, never fixtured, to avoid clobbering

@@ -2623,3 +2623,13 @@ Nothing on your work center right now.,لا شيء في مركز عملك حال
 Could not load your work center. Please retry.,تعذّر تحميل مركز عملك. أعد المحاولة.
 Status: {0},الحالة: {0}
 Notification,إشعار
+Maintenance Technician,فني الصيانة
+Cleaning Supervisor,مشرف النظافة
+Safety Officer,مسؤول السلامة
+Resident Request Coordinator,منسق طلبات السكن
+Habitat Maintenance Technician,فني الصيانة - الإسكان
+Habitat Cleaning Supervisor,مشرف النظافة - الإسكان
+Habitat Safety Officer,مسؤول السلامة - الإسكان
+Habitat Resident Request Desk,مكتب طلبات السكن
+Habitat Procurement Inventory,المشتريات والمخزون - الإسكان
+Habitat Internal Auditor,المدقق الداخلي - الإسكان

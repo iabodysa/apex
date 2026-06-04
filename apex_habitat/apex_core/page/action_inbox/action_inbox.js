@@ -257,7 +257,7 @@ class ActionInbox {
 		$(`<span class="indicator-pill no-indicator-dot ${row.read ? 'gray' : 'blue'}"></span>`)
 			.text(row.type || __('Notification'))
 			.appendTo($head);
-		$('<span class="ai-card-subject"></span>').text(row.subject ? frappe.utils.strip_html(row.subject) : '').appendTo($head);
+		$('<span class="ai-card-subject"></span>').text(row.subject || '').appendTo($head);
 		if (row.document_type && row.document_name) {
 			$('<a class="ai-card-link" href="#"></a>')
 				.text(`${row.document_type}: ${row.document_name}`)

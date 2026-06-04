@@ -242,7 +242,46 @@ Two memo ledgers carry all operational truth. The **Accommodation Ledger** recor
 
 ## Roles and bootstrap
 
-An idempotent `after_install` bootstrap (safe to re-run) seeds four custom roles — **Accommodation Manager**, **Resident Supervisor**, **Finance Manager**, **Internal Auditor** — plus three role profiles, and the custody, maintenance-material, and safety-task catalogs.
+An idempotent `after_install` bootstrap (safe to re-run) creates all custom roles, role profiles, and the custody, maintenance-material, and safety-task catalogs. The same bootstrap functions run on every `bench migrate` so upgrading sites stay in sync.
+
+### Custom Habitat roles (7)
+
+| Role | Purpose |
+|---|---|
+| `Accommodation Manager` | Full operational and supervisory access across all Habitat DocTypes |
+| `Resident Supervisor` | Building-scoped oversight: assignments, cleaning logs, custody, safety |
+| `Finance Manager` | Financial review: utility bills, leases, accommodation costs |
+| `Internal Auditor` | Read-only access with report/export rights on custody, asset, ledger, and financial DocTypes — no write, submit, or cancel |
+| `Maintenance Technician` | Read and update Maintenance Work Orders |
+| `Cleaning Supervisor` | Create and submit Cleaning Logs for assigned buildings |
+| `Safety Officer` | Create, write, and submit Safety Task Executions, Safety Inspection Reports, and Building License records |
+| `Resident Request Coordinator` | Create and manage Accommodation Resident Requests |
+
+### Native ERPNext/HRMS roles reused
+
+`Purchase User`, `Stock User`, `HR User`, `Maintenance User` — these are standard ERPNext/HRMS roles assigned through Role Profiles and are never re-created or fixtured by this app.
+
+### Role Profiles (9)
+
+| Profile | Bundled Roles |
+|---|---|
+| `Habitat Accommodation Manager` | Accommodation Manager, System Manager |
+| `Habitat Resident Supervisor` | Resident Supervisor |
+| `Habitat Finance Reviewer` | Finance Manager, Internal Auditor |
+| `Habitat Maintenance Technician` | Maintenance Technician, Maintenance User |
+| `Habitat Cleaning Supervisor` | Cleaning Supervisor, HR User |
+| `Habitat Safety Officer` | Safety Officer |
+| `Habitat Resident Request Desk` | Resident Request Coordinator |
+| `Habitat Procurement Inventory` | Purchase User, Stock User |
+| `Habitat Internal Auditor` | Internal Auditor |
+
+### Maintenance ticket intake
+
+Any authenticated system user can raise a Maintenance Request (`role = All`, `if_owner = 1`). The submitter can create and edit their own tickets only. Privileged roles (`Accommodation Manager`, `Resident Supervisor`, `Resident Request Coordinator`) have unrestricted read/write/submit. `Maintenance Technician` has read-only access to assigned tickets. Owner-private access is enforced by both DocPerm (`if_owner`) and a `permission_query_conditions` hook that filters the list view.
+
+### Internal Auditor visibility
+
+`Internal Auditor` holds `read + report + export` on: Accommodation Ledger, Facility Asset, Facility Asset Movement, Facility Asset Custody Assignment, Custody Issue, Custody Return, Custody Damage Assessment, Cleaning Log, Utility Bill Entry, and Accommodation Lease. No write, submit, or cancel rights are granted to this role anywhere in the application.
 
 ## Localization
 
