@@ -57,3 +57,17 @@ class TestCustodyDamageAssessment(FrappeTestCase):
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
+
+    def test_additional_salary_insert_ignores_permissions(self):
+        """Regression (bug #3): the system-generated Additional Salary deduction
+        must insert with ignore_permissions=True so a non-HR submitter (e.g. a
+        Housing Supervisor) is not blocked by lacking Additional Salary create
+        rights — the whole submit would otherwise abort atomically. It stays
+        auditable: drafted, logged, and linked back via deduction_entry."""
+        import inspect
+        from apex_habitat.habitat.doctype.custody_damage_assessment import (
+            custody_damage_assessment as mod,
+        )
+        source = inspect.getsource(mod.on_submit)
+        self.assertIn("ignore_permissions=True", source)
+        self.assertNotIn("ignore_permissions=False", source)

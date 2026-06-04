@@ -55,3 +55,36 @@ class TestAccommodationCheckout(FrappeTestCase):
         })
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
+
+    # --- resolve_damage_assessment_building (bug #2) ---------------------------
+    # The auto-created Custody Damage Assessment has a MANDATORY Building link, so
+    # the building must come from the authoritative submitted assignment and must
+    # never collapse to "" (an empty Link fails the mandatory field and the draft
+    # assessment is then silently dropped by the best-effort try/except).
+
+    def test_resolve_building_prefers_assignment(self):
+        from apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout import (
+            resolve_damage_assessment_building,
+        )
+        assignment = frappe._dict({"building": "QA-BLDG-A"})
+        self.assertEqual(resolve_damage_assessment_building(assignment, None), "QA-BLDG-A")
+
+    def test_resolve_building_assignment_wins_over_bed(self):
+        # Assignment building present → the bed is never consulted (precedence).
+        from apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout import (
+            resolve_damage_assessment_building,
+        )
+        assignment = frappe._dict({"building": "QA-BLDG-A"})
+        self.assertEqual(
+            resolve_damage_assessment_building(assignment, "ANY-BED"), "QA-BLDG-A"
+        )
+
+    def test_resolve_building_never_empty_string(self):
+        # Regression: with no building anywhere, return None — NOT "".
+        from apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout import (
+            resolve_damage_assessment_building,
+        )
+        assignment = frappe._dict({"building": None})
+        result = resolve_damage_assessment_building(assignment, "NONEXISTENT-BED")
+        self.assertIsNone(result)
+        self.assertNotEqual(result, "")

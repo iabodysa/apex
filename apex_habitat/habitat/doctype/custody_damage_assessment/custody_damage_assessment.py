@@ -75,7 +75,11 @@ def on_submit(doc, method=None):
             "company": company,
             "remarks": f"Deduction for custody damage assessment {doc.name}"
         })
-        add_sal.insert(ignore_permissions=False)
+        # ignore_permissions=True: this is a system-generated deduction memo, not a
+        # user action. A non-HR submitter (e.g. a Housing Supervisor) lacks Additional
+        # Salary create rights and would otherwise have the whole submit blocked. It
+        # stays auditable — left as a draft, logged, and linked back via deduction_entry.
+        add_sal.insert(ignore_permissions=True)
 
         # Link it back to this document
         frappe.db.set_value("Custody Damage Assessment", doc.name, "deduction_entry", add_sal.name)

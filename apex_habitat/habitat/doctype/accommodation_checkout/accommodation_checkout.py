@@ -60,6 +60,22 @@ def validate(doc, method=None):
         doc.custody_cleared = 1 if all_returned else 0
 
 
+def resolve_damage_assessment_building(assignment, bed):
+    """Building for the auto-created Custody Damage Assessment.
+
+    The submitted Accommodation Assignment is the authoritative spatial record,
+    so it wins; fall back to the bed's building only when the assignment has
+    none. Returns None (never "") when neither is set — an empty string would
+    pass as a value yet fail the mandatory Building link, silently dropping the
+    assessment inside the best-effort try/except below.
+    """
+    return (
+        assignment.get("building")
+        or frappe.db.get_value("Accommodation Bed", bed, "building")
+        or None
+    )
+
+
 def on_submit(doc, method=None):
     # Close the assignment
     assignment = frappe.get_doc("Accommodation Assignment", doc.assignment)
@@ -76,7 +92,7 @@ def on_submit(doc, method=None):
         has_damage = any(item.return_status in ("Damaged", "Lost") for item in doc.custody_return_items)
 
         if has_damage:
-            building = frappe.db.get_value("Accommodation Bed", doc.bed, "building") or ""
+            building = resolve_damage_assessment_building(assignment, doc.bed)
             damage_doc = frappe.get_doc({
                 "doctype": "Custody Damage Assessment",
                 "employee": doc.employee,
