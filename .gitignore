@@ -11,6 +11,7 @@ node_modules
 .claude/
 .agents/
 .frappectl/
+.frappectl.toml
 skills-lock.json
 
 # Internal project documents and source spreadsheets.
