@@ -338,7 +338,7 @@ class TestMyWorkCenter(ApexHabitatTestCase):
         # tested separately (TestActionInboxOrphanHandling in test_action_inbox.py).
         cat = (frappe.get_meta("Accommodation Resident Request")
                .get_field("request_category").options.split("\n")[0].strip())
-        doc = frappe.get_doc({
+        frappe.get_doc({
             "doctype": "Accommodation Resident Request",
             "request_category": cat,
             "description": "worklist-test " + _h(),
