@@ -95,8 +95,47 @@ class TestActionInboxPage(unittest.TestCase):
             os.path.join(APP_ROOT, "apex_core", "workspace", "launchpad", "launchpad.json"), encoding="utf-8"
         ) as fh:
             ws = json.load(fh)
-        self.assertTrue(any(s.get("link_to") == "action-inbox" for s in ws.get("shortcuts", [])))
-        self.assertIn("acScActionInbox", ws.get("content", ""))  # also placed in the content layout
+        # Phase 3: Action Inbox page shortcut replaced by the My Work workspace shortcut.
+        # The page itself still exists; it is no longer a top-level launchpad shortcut.
+        self.assertTrue(any(s.get("link_to") == "My Work" for s in ws.get("shortcuts", [])))
+        self.assertIn("acScMyWork", ws.get("content", ""))  # My Work placed in the content layout
+
+
+    def test_launchpad_has_exactly_one_my_work_entry(self):
+        """Launchpad must have exactly one My Work shortcut (Workspace type)."""
+        import json
+
+        with open(
+            os.path.join(APP_ROOT, "apex_core", "workspace", "launchpad", "launchpad.json"), encoding="utf-8"
+        ) as fh:
+            ws = json.load(fh)
+        my_work_shortcuts = [
+            s for s in ws.get("shortcuts", [])
+            if s.get("label") == "My Work" or s.get("link_to") == "My Work"
+        ]
+        self.assertEqual(len(my_work_shortcuts), 1, "Expected exactly one My Work shortcut in Launchpad")
+        self.assertEqual(my_work_shortcuts[0].get("type"), "Workspace")
+
+    def test_no_duplicate_action_inbox_when_my_work_workspace_shortcut_present(self):
+        """When a My Work workspace shortcut exists, the action-inbox page shortcut must not also be present."""
+        import json
+
+        with open(
+            os.path.join(APP_ROOT, "apex_core", "workspace", "launchpad", "launchpad.json"), encoding="utf-8"
+        ) as fh:
+            ws = json.load(fh)
+        shortcuts = ws.get("shortcuts", [])
+        has_my_work_workspace = any(
+            s.get("type") == "Workspace" and s.get("link_to") == "My Work" for s in shortcuts
+        )
+        has_action_inbox_page = any(
+            s.get("type") == "Page" and s.get("link_to") == "action-inbox" for s in shortcuts
+        )
+        if has_my_work_workspace:
+            self.assertFalse(
+                has_action_inbox_page,
+                "action-inbox page shortcut must not coexist with a My Work workspace shortcut",
+            )
 
 
 class TestActionInboxOrphanHandling(FrappeTestCase):

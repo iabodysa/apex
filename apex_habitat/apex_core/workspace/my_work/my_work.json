@@ -10,25 +10,8 @@
  "is_hidden": 0,
  "sequence_id": 5.0,
  "parent_page": "",
- "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 4}}, {\"id\": \"mwScReq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Maintenance Requests\", \"col\": 4}}]",
- "shortcuts": [
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Page",
-   "label": "Action Inbox",
-   "link_to": "action-inbox",
-   "color": "Blue",
-   "idx": 1
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "My Maintenance Requests",
-   "link_to": "Maintenance Request",
-   "color": "Grey",
-   "idx": 2
-  }
- ],
+ "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwMyWorkBlock\", \"type\": \"custom_block\", \"data\": {\"custom_block_name\": \"Apex My Work Center\", \"col\": 12}}]",
+ "shortcuts": [],
  "links": [],
  "number_cards": [
   {
@@ -50,8 +33,16 @@
    "idx": 3
   }
  ],
+ "custom_blocks": [
+  {
+   "doctype": "Workspace Custom Block",
+   "custom_block_name": "Apex My Work Center",
+   "label": "My Work Center",
+   "idx": 1
+  }
+ ],
  "charts": [],
  "quick_lists": [],
  "roles": [],
- "modified": "2026-06-04 12:00:00.000000"
+ "modified": "2026-06-05 00:00:00.000000"
 }

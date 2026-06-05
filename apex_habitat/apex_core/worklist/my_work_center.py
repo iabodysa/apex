@@ -1,23 +1,33 @@
-"""My Work Center — a permission-safe, Oracle-style worklist aggregator (Path A).
+"""My Work Center — Universal My Work workspace aggregator (Phase 1).
 
-ONE read API that unions the four surfaces a user cares about, each scoped to the
+ONE read API that unions the surfaces a user cares about, each scoped to the
 *current user* and to that user's *real Frappe permissions*:
 
-  1. awaiting_action   — documents awaiting THIS user's workflow action / assignment
-                         (delegated to the native Action Inbox: open Workflow Action
-                         rows the framework scopes to the user + open ToDos).
-  2. my_open_submitted — documents the user CREATED (``owner == session user``) that
-                         are still in an active (non-terminal) state.
-  3. my_recent_closed  — the user's created documents that reached a terminal state
-                         within the last 48 hours.
-  4. my_notifications  — the user's own ``Notification Log`` rows.
+  needs_action   — documents awaiting THIS user's workflow action or assignment.
+                   Source 1: open ``Workflow Action`` rows — the framework's own
+                   ``get_permission_query_conditions`` hook in workflow_action.py
+                   automatically scopes these to the session user's permitted roles
+                   AND enforces ``status='Open'`` at the SQL level.  No additional
+                   manual role or user filter is needed here.
+                   Source 2: open ``ToDo`` rows allocated to this user that reference
+                   a real document (``reference_type`` set).
+  notifications  — the user's own ``Notification Log`` rows (all types), scoped by
+                   ``for_user = session user`` (search-indexed; ORM enforces it too).
+  mentions       — [] in Phase 1; deferred to Phase 2 (Notification Log type='Mention').
+  field_references — [] reserved; not populated in Phase 1.
+  summary        — integer counts for badge display:
+                     needs_action  = len(workflow_actions) + len(todos)
+                     assigned      = len(todos)  (sub-count of needs_action)
+                     mentions      = 0  (Phase 1 stub)
+                     notifications = len(notifications)
 
-This is the live aggregator (the source of truth) — NO new DocType, NO cache. Every
-row is read with ``frappe.get_list`` (NOT ``get_all``), so DocPerms +
-``permission_query_conditions`` apply; ``owner == session user`` is the "mine"
-filter. A document is never exposed because of a role name — only because the user
-owns it, is assigned it, or holds a native open Workflow Action on it. Workflow
-transitions stay with the native endpoints (handled by the Action Inbox page).
+This is the live aggregator — NO new DocType, NO cache. Every row is read with
+``frappe.get_list`` (NOT ``get_all``), so DocPerms + ``permission_query_conditions``
+apply. Workflow transitions are applied by the native endpoints; this module only
+reads. WORKLIST_REGISTRY (legacy per-DocType registry) is kept for
+``get_submitted_by_me_count`` / ``get_approved_last_48h_count`` Number Cards that
+still aggregate the user's own submitted documents — it is NOT used to source
+workflow actions (those come from Frappe's native Workflow Action DocType).
 """
 
 from __future__ import annotations
@@ -27,9 +37,10 @@ from frappe.utils import add_to_date, now_datetime
 
 from apex_habitat.apex_core.worklist.action_inbox import get_pending_actions
 
-# Per-DocType worklist registry. state_field is "status" for every participating
-# DocType; "mine" is always ``owner == session user`` (the creator — universal and
-# permission-safe). active = still needs something; terminal = done/closed/rejected.
+# Per-DocType worklist registry used ONLY for the "submitted by me" / "approved last
+# 48h" Number Cards. state_field is "status"; "mine" is always owner == session user.
+# This registry is NOT the source for needs_action / workflow_actions — those come
+# from Frappe's native Workflow Action DocType via get_pending_actions().
 WORKLIST_REGISTRY: dict[str, dict] = {
     "Maintenance Request": {
         "active": ["Open", "Assigned", "In Progress", "Reopened"],
@@ -99,7 +110,8 @@ def _mine(doctype: str, states: list[str], *, recent: bool = False) -> list[dict
 
 
 def _collect(kind: str) -> list[dict]:
-    """Union one surface ("active" or "terminal") across the whole registry."""
+    """Union one surface ("active" or "terminal") across the WORKLIST_REGISTRY.
+    Used ONLY for the Number Card helpers — NOT for workflow action sourcing."""
     out: list[dict] = []
     recent = kind == "terminal"
     for doctype, spec in WORKLIST_REGISTRY.items():
@@ -110,20 +122,53 @@ def _collect(kind: str) -> list[dict]:
 
 @frappe.whitelist()
 def get_my_work() -> dict:
-    """The full work center: the four user-scoped, permission-safe surfaces."""
-    awaiting = get_pending_actions()  # surface 1 — native, already scoped + stale-guarded
-    my_notifications = frappe.get_list(
+    """Universal My Work workspace — five surfaces, all user-scoped and permission-safe.
+
+    Response shape (Phase 1):
+      needs_action       dict  — {workflow_actions: [...], todos: [...]}
+      notifications      list  — Notification Log rows for this user (all types)
+      mentions           list  — [] in Phase 1 (deferred)
+      field_references   list  — [] reserved
+      summary            dict  — {needs_action: int, assigned: int, mentions: int,
+                                   notifications: int}
+    """
+    # Surface 1: needs_action — native Workflow Action (auto-scoped by framework hook)
+    # + open ToDos allocated to this user. get_pending_actions() uses frappe.get_list
+    # (NOT get_all) so the permission hook fires for Workflow Actions.
+    needs_action = get_pending_actions()  # returns {workflow_actions, todos}
+
+    # Surface 2: notifications — Notification Log scoped by for_user (search-indexed;
+    # ORM permission layer also enforces for_user = session user automatically).
+    notifications = frappe.get_list(
         "Notification Log",
         filters={"for_user": frappe.session.user},
         fields=["name", "subject", "type", "document_type", "document_name", "read", "creation"],
         order_by="creation desc",
-        limit_page_length=20,
+        limit_page_length=50,
     )
+
+    # Surface 3: mentions — [] in Phase 1 (Notification Log type='Mention' in Phase 2)
+    mentions: list = []
+
+    # Surface 4: field_references — [] reserved for Phase 2+
+    field_references: list = []
+
+    # Summary counts for badge/card display
+    workflow_actions = needs_action.get("workflow_actions", [])
+    todos = needs_action.get("todos", [])
+    summary = {
+        "needs_action": len(workflow_actions) + len(todos),
+        "assigned": len(todos),
+        "mentions": 0,
+        "notifications": len(notifications),
+    }
+
     return {
-        "awaiting_action": awaiting,
-        "my_open_submitted": _collect("active"),
-        "my_recent_closed": _collect("terminal"),
-        "my_notifications": my_notifications,
+        "needs_action": needs_action,
+        "notifications": notifications,
+        "mentions": mentions,
+        "field_references": field_references,
+        "summary": summary,
     }
 
 
