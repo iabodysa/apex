@@ -59,17 +59,9 @@ that right.
 > also let the assigned technician see a ticket, while hiding everyone else's. See
 > [Maintenance](maintenance.md).
 
-> **Project scoping (Salis):** Fleet Project Managers and Fleet Supervisors only
-> see records for the **Projects** they hold a *User Permission* for. Oversight
-> roles — System Manager, Fleet Manager, Internal Auditor, and Finance Manager —
-> see **all** projects. Grant a project to a supervisor by adding a *User
-> Permission* (allow **Project**) on their user.
+> **Project scoping (Salis):** Fleet Project Managers and Supervisors see only their permitted projects. Oversight roles (Fleet Manager, Finance Manager, Internal Auditor) see all. Grant access via a *User Permission* on **Project**.
 
-> **Building scoping (Habitat):** a **Resident Supervisor** is bound to his
-> building(s) via a *User Permission* on **Accommodation Building** — he only sees
-> and acts on Accommodation Assignment, Custody Issue, Cleaning Log, and
-> Accommodation Building rows for those buildings. Oversight roles (System Manager,
-> Accommodation Manager, Internal Auditor, Finance Manager) are unscoped.
+> **Building scoping (Habitat):** a **Resident Supervisor** is scoped to his building(s) via a *User Permission* on **Accommodation Building**, limiting his view to Assignment, Custody Issue, Cleaning Log, and Building records. Oversight roles are unscoped.
 
 ---
 
@@ -99,11 +91,7 @@ that right.
 11. [Settings & Desk Pages](settings.md) — Apex Core settings, operational desk consoles
 12. [Background Jobs](settings.md#background-jobs) — what runs automatically
 
-> **My Work** is a personal, cross-module worklist workspace available to **every
-> logged-in user** (no role filter). It carries three Number Cards — *Pending My
-> Action*, *Submitted By Me*, *Approved Last 48h* — and shortcuts to the
-> **Action Inbox** page and **My Maintenance Requests**. It is the desk home for
-> the universal Maintenance Request intake. See [Settings & Desk Pages](settings.md).
+> **My Work** is a personal worklist workspace (no role filter) with Number Cards for Pending My Action, Submitted By Me, and Approved Last 48h, plus shortcuts to the Action Inbox and My Maintenance Requests. See [Settings & Desk Pages](settings.md).
 
 ---
 

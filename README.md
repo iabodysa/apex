@@ -2,7 +2,7 @@
 
 Apex is a workforce-operations suite on Frappe v15, ERPNext, and HRMS. It runs two lifecycles on one platform: the estate-to-resident housing lifecycle and the worker/representative movement lifecycle.
 
-It ships as a single Frappe package (`apex_habitat`) with three modules — **Habitat**, **Salis**, and **Apex Core**. Its defining decision is a **memo-ledger cost model**: every operational cost and stock movement posts to purpose-built, read-only memo ledgers that are isolated from the ERPNext General Ledger. Cost, cross-charge, and on-hand inventory stay fully traceable; financial posting remains a deliberate, human decision.
+Single package, three modules — **Habitat**, **Salis**, **Apex Core** — on a **memo-ledger cost model**: every operational cost posts to purpose-built read-only ledgers isolated from the ERPNext General Ledger; financial posting is a deliberate, human decision.
 
 ## Modules
 
@@ -16,7 +16,7 @@ The architecture is documented from a few complementary perspectives; each diagr
 
 ### Modules and what each owns
 
-One package hosts three modules. Habitat and Salis own their DocTypes, reports, workspaces, and logic; Apex Core holds the shared settings both read. Every operational write lands in a module-owned memo ledger, never the General Ledger.
+One package, three modules. Habitat and Salis own their DocTypes, reports, and logic; Apex Core holds shared settings. All operational writes post to module-owned memo ledgers, never the GL.
 
 ```mermaid
 flowchart TB
@@ -52,7 +52,7 @@ flowchart TB
 
 ### System context
 
-Black-box view of who and what Apex talks to. Desk users and operations consoles use the standard Frappe session; the `/driver` portal is a themeable, mobile web app — English/Arabic toggle, driver-profile and assigned-vehicle views — that resolves the signed-in user to a driver server-side; two public QR web forms accept rate-limited guest submissions.
+Black-box view of who talks to Apex. Desk and console users use a standard Frappe session; the `/driver` portal is a mobile web app that resolves the signed-in user to their driver record server-side; two public QR web forms accept rate-limited guest submissions.
 
 ```mermaid
 flowchart TB
@@ -130,7 +130,7 @@ erDiagram
 
 ### Approval state machine (Salis)
 
-Dynamic state view. Salis submittable documents move on native Frappe Workflows (in `salis/workflow/`), not custom controllers — **ten documents** in all. Each transition is gated by an allowed role and a Segregation-of-Duties condition (approver ≠ requester); large-scope requests escalate to an Operations tier via the server-derived `needs_operations` flag. **Transport Request** is shown as the representative spine.
+Ten submittable documents run on native Frappe Workflows. Each transition is role-gated with a Segregation-of-Duties condition (approver ≠ requester); large-scope requests escalate via the server-derived `needs_operations` flag. **Transport Request** is shown as the representative spine; the same pattern governs Fuel Request, Fuel Claim, Fuel Exception Case, Rental Settlement, Salis Payment Request, Dispatch Trip, Driver Clearance, and Support Ticket.
 
 ```mermaid
 stateDiagram-v2
@@ -154,11 +154,9 @@ stateDiagram-v2
     end note
 ```
 
-The same role + SoD pattern governs the rest of the spine: Fuel Request, Fuel Claim, Fuel Exception Case, Rental Settlement, Salis Payment Request, Dispatch Trip, Driver Clearance, and Support Ticket.
-
 ### Request-to-fulfilment sequence
 
-Dynamic view across the wire: a fuel request from the driver portal to a manager approving on the desk console, showing where each guard fires. The portal resolves the driver from the session; the console call runs the per-document project row-scope check; the Workflow applies the role + SoD gate. No GL entry is written.
+Wire-level trace of a fuel request from the driver portal through manager approval, showing where each guard fires — session driver resolution, project row-scope check, role + SoD gate. No GL entry is written.
 
 ```mermaid
 sequenceDiagram
@@ -192,7 +190,7 @@ All business logic lives on the server across three surfaces:
 - **Document events** — `validate` / `on_submit` / `on_cancel` controllers wired in `hooks.py` (`doc_events`) on submittable transactions.
 - **Scheduled jobs** — `scheduler_events` registers **17 daily, 4 weekly, 2 monthly** jobs across Habitat and Salis (cost accrual, occupancy sync, compliance and expiry watches, fuel/rental accrual, monthly reconciliations). Each paginates its source in 500-row batches and isolates per-row failures so one bad record never aborts a run.
 - **On-demand actions** — whitelisted form buttons: `generate_rooms_and_beds`, `generate_safety_setup`, `mark_received`.
-- **Operator desk pages** — single-screen Frappe desk pages for high-volume work: the Front Desk bed board and the Arrivals Desk, a building-first three-column check-in screen in standard Frappe styling (live floor-map, worker search, passport register, one-click housing with over-capacity, a multi-item custody store, a group Masar QR, and signed check-in / custody / arrival-card prints) that orchestrates the existing party-aware writers and adds no posting logic of its own; and the **Action Inbox** (Apex Core), which unions each user's pending native Workflow Actions and assigned ToDos into one screen with inline Approve/Reject through the native workflow engine — plus a nightly job that prunes orphaned approval rows.
+- **Operator desk pages** — purpose-built single-screen consoles: **Front Desk** (bed board), **Arrivals Desk** (building-first check-in with floor-map, custody store, QR, and signed prints), and **Action Inbox** (Apex Core, unions Workflow Actions + ToDos with inline Approve/Reject).
 
 Operational alerting uses native Frappe primitives — Calendar views, Kanban boards, Assignment Rules, Notifications with Email Templates, Auto Email Reports, and ToDo follow-ups — all **disabled by default**, so automation is an explicit operator choice. Technical exceptions go to the standard Error Log and Scheduled Job Log.
 
@@ -238,11 +236,11 @@ flowchart LR
     classDef ext fill:#fff7ed,stroke:#9a3412,color:#7c2d12,stroke-dasharray:4 3;
 ```
 
-Two memo ledgers carry all operational truth. The **Accommodation Ledger** records every operational cost in `posting_mode = "Operational Memo"` (`on_submit` posts, `before_cancel` posts the reversal). The **Accommodation Stock Ledger** is a read-only, signed-quantity ledger for the internal store, written only through helper functions and reversed by a negative mirror row; on-hand balance is `sum(qty where is_cancelled = 0)`. The single financial-posting exception is a draft HRMS *Additional Salary* deduction for custody damage, which fires only when enabled in Habitat Settings.
+Two memo ledgers carry all operational truth. The **Accommodation Ledger** records cost posts on submit and reversal on cancel. The **Accommodation Stock Ledger** is a signed-quantity read-only ledger; on-hand = `sum(qty where is_cancelled = 0)`. The only financial-posting exception is a draft HRMS *Additional Salary* deduction for custody damage, gated by Habitat Settings.
 
 ## Roles and bootstrap
 
-An idempotent `after_install` bootstrap (safe to re-run) creates all custom roles, role profiles, and the custody, maintenance-material, and safety-task catalogs. The same bootstrap functions run on every `bench migrate` so upgrading sites stay in sync.
+An idempotent `after_install` bootstrap creates all custom roles, role profiles, and the custody, maintenance-material, and safety-task catalogs. It re-runs safely on `bench migrate`.
 
 ### Custom Habitat roles (7)
 
@@ -259,33 +257,31 @@ An idempotent `after_install` bootstrap (safe to re-run) creates all custom role
 
 ### Native ERPNext/HRMS roles reused
 
-`Purchase User`, `Stock User`, `HR User`, `Maintenance User` — these are standard ERPNext/HRMS roles assigned through Role Profiles and are never re-created or fixtured by this app.
+`Purchase User`, `Stock User`, `HR User`, `Maintenance User` — standard ERPNext/HRMS roles; never re-created by this app.
 
-### Role Profiles (9)
+### Role Profiles (7)
 
 | Profile | Bundled Roles |
 |---|---|
 | `Habitat Accommodation Manager` | Accommodation Manager, System Manager |
 | `Habitat Resident Supervisor` | Resident Supervisor |
 | `Habitat Finance Reviewer` | Finance Manager, Internal Auditor |
-| `Habitat Maintenance Technician` | Maintenance Technician, Maintenance User |
-| `Habitat Cleaning Supervisor` | Cleaning Supervisor, HR User |
+| `Habitat Maintenance Technician` | Maintenance Technician |
+| `Habitat Cleaning Supervisor` | Cleaning Supervisor |
 | `Habitat Safety Officer` | Safety Officer |
-| `Habitat Resident Request Desk` | Resident Request Coordinator |
-| `Habitat Procurement Inventory` | Purchase User, Stock User |
-| `Habitat Internal Auditor` | Internal Auditor |
+| `Habitat Resident Request Coordinator` | Resident Request Coordinator |
 
 ### Maintenance ticket intake
 
-Any authenticated system user can raise a Maintenance Request (`role = All`, `if_owner = 1`). The submitter can create and edit their own tickets only. Privileged roles (`Accommodation Manager`, `Resident Supervisor`, `Resident Request Coordinator`) have unrestricted read/write/submit. `Maintenance Technician` has read-only access to assigned tickets. Owner-private access is enforced by both DocPerm (`if_owner`) and a `permission_query_conditions` hook that filters the list view.
+Any logged-in user can raise a Maintenance Request and sees only their own tickets. The assigned `Maintenance Technician` also sees their ticket. Privileged roles (`Accommodation Manager`, `Resident Supervisor`, `Resident Request Coordinator`) see all. Owner-scoping is enforced by DocPerm `if_owner` + a `permission_query_conditions` hook.
 
 ### Internal Auditor visibility
 
-`Internal Auditor` holds `read + report + export` on: Accommodation Ledger, Facility Asset, Facility Asset Movement, Facility Asset Custody Assignment, Custody Issue, Custody Return, Custody Damage Assessment, Cleaning Log, Utility Bill Entry, and Accommodation Lease. No write, submit, or cancel rights are granted to this role anywhere in the application.
+`Internal Auditor` holds `read + report + export` (no write/submit/cancel) on: Accommodation Ledger, Facility Asset, Facility Asset Movement, Facility Asset Custody Assignment, Custody Issue, Custody Return, Custody Damage Assessment, Cleaning Log, Utility Bill Entry, and Accommodation Lease.
 
 ## Localization
 
-The desk is delivered fully in Arabic through Frappe translation files (`apex_habitat/translations/ar.csv`). The driver portal stays English-first for a multinational workforce, with an in-portal English/Arabic toggle.
+The desk is delivered in Arabic via `apex_habitat/translations/ar.csv`. The driver portal is English-first with an in-portal English/Arabic toggle.
 
 ## Install
 

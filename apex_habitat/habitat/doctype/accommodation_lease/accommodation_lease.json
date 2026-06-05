@@ -100,7 +100,7 @@
   },
   {
    "default": "100",
-   "description": "Company's share (%) of utility bills for this building when meters are shared with other tenants. Agreed with the property management office. Does not affect the rent amount.",
+   "description": "Company's share (%) of shared utility bills for this building. Agreed with the property management office. Does not affect rent.",
    "fieldname": "company_share_pct",
    "fieldtype": "Percent",
    "label": "Utility Cost Share (%)"

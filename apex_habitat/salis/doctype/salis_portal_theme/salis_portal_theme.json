@@ -20,7 +20,7 @@
   },
   {
    "default": "AFMCO",
-   "description": "Design theme applied to the driver portal. AFMCO is the flat, brand-aligned default; Frappe Standard is the neutral portal look; Dark is an AFMCO-flavoured dark mode.",
+   "description": "Portal design theme: AFMCO (flat brand default), Frappe Standard (neutral), or Dark (AFMCO dark mode).",
    "fieldname": "theme",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -30,7 +30,7 @@
   },
   {
    "default": "1",
-   "description": "Show the AFMCO brand mark and wordmark in the portal header. Turn off for a minimal, unbranded header.",
+   "description": "Show AFMCO brand mark and wordmark in the portal header.",
    "fieldname": "show_brand",
    "fieldtype": "Check",
    "label": "Show Brand"
@@ -40,7 +40,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Optional override for the primary accent colour. Leave blank to use the colour defined by the selected theme.",
+   "description": "Optional primary accent colour override. Leave blank to use the theme default.",
    "fieldname": "accent_color",
    "fieldtype": "Color",
    "label": "Accent Color"

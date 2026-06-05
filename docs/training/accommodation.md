@@ -21,17 +21,9 @@ checkout, and resident-request records.
 > **Resident Request Coordinator** is the dedicated triage role for resident
 > requests: it holds Read/Write/Create on **Accommodation Resident Request**.
 
-> **Building scoping (Resident Supervisor):** a Resident Supervisor is bound to his
-> building(s) via a *User Permission* on **Accommodation Building**
-> (`habitat/permissions.py` → `building_scoped_has_permission`). He only sees and
-> acts on **Accommodation Assignment**, **Custody Issue**, **Cleaning Log**, and
-> **Accommodation Building** rows for those buildings. Oversight roles (System
-> Manager, Accommodation Manager, Internal Auditor, Finance Manager) are unscoped.
+> **Building scoping:** a Resident Supervisor sees only his assigned buildings' records (Assignment, Custody Issue, Cleaning Log). Set scope via *User Permission* on **Accommodation Building**. Oversight roles are unscoped.
 
-> **Triage-field split:** Accommodation Resident Request uses a `permlevel 1`
-> permission split so the three housing roles (Accommodation Manager, Resident
-> Supervisor, Resident Request Coordinator) hold Read/Write on the protected triage
-> fields, separating resident-entered data from internal triage handling.
+> **Triage-field split:** the three housing roles hold Read/Write on the `permlevel 1` triage fields of Accommodation Resident Request, separating resident-entered data from internal triage handling.
 
 ---
 

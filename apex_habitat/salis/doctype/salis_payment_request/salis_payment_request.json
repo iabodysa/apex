@@ -96,7 +96,7 @@
    "read_only": 1
   },
   {
-   "description": "Owning company for reporting and financial context. Defaulted from Salis Settings; reference only, posts no GL.",
+   "description": "Owning company; defaulted from Salis Settings. Reference only — posts no GL.",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -132,7 +132,7 @@
    "options": "Project"
   },
   {
-   "description": "Cost center for grouping and financial context. Defaulted from Salis Settings; reference only, posts no GL.",
+   "description": "Cost center for grouping; defaults from Salis Settings. Reference only — no GL.",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -195,7 +195,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Reference only. Set externally after Finance posts payment in the accounting module. This DocType never creates or posts a GL/Payment Entry.",
+   "description": "Set externally after Finance posts payment. This DocType never creates a GL or Payment Entry.",
    "fieldname": "linked_payment_entry",
    "fieldtype": "Link",
    "label": "Linked Payment Entry",
@@ -224,7 +224,7 @@
   }
  ],
  "is_submittable": 1,
-"links": [
+ "links": [
   {
    "group": "Rental",
    "link_doctype": "Rental Settlement",

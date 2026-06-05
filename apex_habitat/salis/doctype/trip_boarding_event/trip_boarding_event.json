@@ -16,7 +16,7 @@
  "fields": [
   {
    "columns": 2,
-   "description": "Registered worker (Employee) who boarded. Leave blank and tick 'Unregistered' for a contractor/temp hire not on the request manifest.",
+   "description": "Registered worker (Employee) who boarded. Leave blank and tick 'Unregistered' for a contractor not on the manifest.",
    "fieldname": "worker",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -58,7 +58,7 @@
   },
   {
    "columns": 2,
-   "description": "The housing pickup (Habitat) for this boarding, when the stop is a worker accommodation. The Habitat-Salis bridge.",
+   "description": "Housing pickup for this boarding (Habitat-Salis bridge).",
    "fieldname": "accommodation_building",
    "fieldtype": "Link",
    "label": "Pickup Building",

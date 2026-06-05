@@ -95,7 +95,7 @@
    "options": "Open\nAcknowledged\nApproved\nRecovered\nWaived\nRejected\nCancelled"
   },
   {
-   "description": "Owning company for reporting and financial context. Defaulted from Salis Settings; reference only, posts no GL.",
+   "description": "Owning company; defaulted from Salis Settings. Reference only — posts no GL.",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -103,7 +103,7 @@
    "options": "Company"
   },
   {
-   "description": "Cost center for grouping and financial context. Defaulted from Salis Settings; reference only, posts no GL.",
+   "description": "Cost center for grouping; defaults from Salis Settings. Reference only — no GL.",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -142,7 +142,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Reference-only link to the Finance/HR Payment Request that handles the actual deduction. Movement does not post any payment.",
+   "description": "Reference-only link to the Finance/HR Payment Request handling the actual deduction. Movement posts no payment.",
    "fieldname": "payment_request",
    "fieldtype": "Link",
    "label": "Payment Request",

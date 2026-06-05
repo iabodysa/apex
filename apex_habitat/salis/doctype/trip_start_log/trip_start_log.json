@@ -35,13 +35,31 @@
    "options": "TSL-.######",
    "reqd": 1
   },
-  {"fieldname": "sec_trip", "fieldtype": "Section Break", "label": "Trip"},
-  {"fieldname": "col_trip", "fieldtype": "Column Break"},
-  {"fieldname": "sec_execution", "fieldtype": "Section Break", "label": "Execution"},
-  {"fieldname": "col_execution", "fieldtype": "Column Break"},
-  {"fieldname": "sec_boarding", "fieldtype": "Section Break", "label": "Boarding Events"},
   {
-   "description": "The Dispatch Trip being executed. Its linked Transport Request carries the worker manifest this log records boarding against.",
+   "fieldname": "sec_trip",
+   "fieldtype": "Section Break",
+   "label": "Trip"
+  },
+  {
+   "fieldname": "col_trip",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_execution",
+   "fieldtype": "Section Break",
+   "label": "Execution"
+  },
+  {
+   "fieldname": "col_execution",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_boarding",
+   "fieldtype": "Section Break",
+   "label": "Boarding Events"
+  },
+  {
+   "description": "The Dispatch Trip being executed; its linked Transport Request carries the worker manifest this log records boarding against.",
    "fieldname": "dispatch_trip",
    "fieldtype": "Link",
    "in_list_view": 1,

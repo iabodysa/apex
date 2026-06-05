@@ -74,7 +74,7 @@
   },
   {
    "default": "0",
-   "description": "Whether the completed trip recorded both a depart and a return timestamp. This is a data-completeness flag, not a punctuality measure: the schema carries no planned/scheduled return time to judge on-time arrival against.",
+   "description": "True when the trip recorded both a depart and return timestamp. Data-completeness flag — no planned return time is stored to judge punctuality against.",
    "fieldname": "has_timestamps",
    "fieldtype": "Check",
    "label": "Has Timestamps",

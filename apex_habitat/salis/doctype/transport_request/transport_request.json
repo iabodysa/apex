@@ -57,17 +57,58 @@
    "options": "TR-.######",
    "reqd": 1
   },
-  {"fieldname": "sec_requester", "fieldtype": "Section Break", "label": "Requester"},
-  {"fieldname": "col_requester", "fieldtype": "Column Break"},
-  {"fieldname": "sec_service", "fieldtype": "Section Break", "label": "Service Details"},
-  {"fieldname": "col_service", "fieldtype": "Column Break"},
-  {"fieldname": "sec_workers", "fieldtype": "Section Break", "label": "Workers / Destination"},
-  {"fieldname": "sec_schedule", "fieldtype": "Section Break", "label": "Schedule"},
-  {"fieldname": "col_schedule", "fieldtype": "Column Break"},
-  {"fieldname": "sec_assignment", "fieldtype": "Section Break", "label": "Status & Assignment", "collapsible": 1},
-  {"fieldname": "col_assignment", "fieldtype": "Column Break"},
-  {"fieldname": "sec_tracking", "fieldtype": "Section Break", "label": "Source & Tracking", "collapsible": 1},
-  {"fieldname": "col_tracking", "fieldtype": "Column Break"},
+  {
+   "fieldname": "sec_requester",
+   "fieldtype": "Section Break",
+   "label": "Requester"
+  },
+  {
+   "fieldname": "col_requester",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_service",
+   "fieldtype": "Section Break",
+   "label": "Service Details"
+  },
+  {
+   "fieldname": "col_service",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_workers",
+   "fieldtype": "Section Break",
+   "label": "Workers / Destination"
+  },
+  {
+   "fieldname": "sec_schedule",
+   "fieldtype": "Section Break",
+   "label": "Schedule"
+  },
+  {
+   "fieldname": "col_schedule",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_assignment",
+   "fieldtype": "Section Break",
+   "label": "Status & Assignment",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "col_assignment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_tracking",
+   "fieldtype": "Section Break",
+   "label": "Source & Tracking",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "col_tracking",
+   "fieldtype": "Column Break"
+  },
   {
    "fieldname": "requested_by",
    "fieldtype": "Link",
@@ -157,7 +198,7 @@
    "read_only": 1
   },
   {
-   "description": "Server-derived Delegation-of-Authority flag: when set, only an Operations-tier authorization is allowed. Read by the workflow transition condition; cannot be hand-set.",
+   "description": "Server-derived Delegation-of-Authority flag: when set, only Operations-tier authorization is allowed. Read by workflow; cannot be hand-set.",
    "fieldname": "needs_operations",
    "fieldtype": "Check",
    "label": "Needs Operations Authorization",

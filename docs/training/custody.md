@@ -21,10 +21,7 @@ Tracks articles and assets issued to residents/staff and their return or damage.
 > cannot **submit** them — the Accommodation Manager submits, keeping a single
 > point of accountability.
 
-> **Cleaning Supervisor** is the housekeeping role: it holds Read/Write/Create on
-> the **Cleaning Log** (which is not a submittable record). The Resident Supervisor
-> is **building-scoped** on Cleaning Log — he only sees the log entries for the
-> building(s) he is responsible for.
+> **Cleaning Supervisor** holds Read/Write/Create on **Cleaning Log** (not submittable). The Resident Supervisor is building-scoped on Cleaning Log.
 
 ---
 

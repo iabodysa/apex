@@ -28,7 +28,7 @@
   },
   {
    "columns": 2,
-   "description": "Optional Habitat pickup: when set, this stop is a worker housing pickup location (the Habitat-Salis bridge). The stop's coordinates/address can derive from the building.",
+   "description": "Optional Habitat pickup — when set, this stop is a worker housing location (Habitat-Salis bridge).",
    "fieldname": "accommodation_building",
    "fieldtype": "Link",
    "label": "Accommodation Building (Pickup)",

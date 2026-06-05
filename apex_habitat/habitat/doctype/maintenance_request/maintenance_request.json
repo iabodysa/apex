@@ -151,7 +151,7 @@
    "options": "Facility Asset"
   },
   {
-   "description": "Specific Fixed Asset this request concerns (e.g., AC-001, BED-014). Enables full maintenance history per asset.",
+   "description": "Specific fixed asset this request concerns (e.g. AC-001). Enables maintenance history per asset.",
    "fieldname": "target_asset",
    "fieldtype": "Link",
    "label": "Target ERPNext Asset",

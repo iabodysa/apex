@@ -17,12 +17,6 @@ licenses.
 | **Habitat Safety Incident** *(submittable)* | Read, Write, Create, Submit, Cancel | Read, Write, Create, Submit | Read, Write, Create |
 | **Building License** *(submittable)* | Read, Write, Create, Submit, Cancel | Read | — |
 
-> The **Safety Officer** is the day-to-day field safety operator: they read the
-> task catalog and **create** inspections, task executions, and incident records.
-> Submitting an inspection/execution/incident as the official record is done by a
-> **Resident Supervisor** or the **Accommodation Manager** (the Safety Officer holds
-> Read/Write/Create, not Submit).
-
 ---
 
 ## DocTypes in this area

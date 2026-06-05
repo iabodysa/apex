@@ -45,6 +45,4 @@ top of project scoping.
 
 _[screenshot: Salis Payment Request approval action]_
 
-> This is the most sensitive permission area. When onboarding a Finance Manager,
-> confirm they do **not** also hold a creator role on the same project, or the SoD
-> guard will (correctly) block them from approving their own work.
+> When onboarding a Finance Manager, confirm they do not also hold a creator role on the same project — the SoD guard will block self-approval.

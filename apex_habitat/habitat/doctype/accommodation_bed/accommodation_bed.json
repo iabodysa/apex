@@ -58,7 +58,7 @@
   },
   {
    "default": "0",
-   "description": "A virtual over-capacity bed the Arrivals Desk creates when a room is full but the building's over-capacity headroom still allows another worker. Not a physical bed.",
+   "description": "Virtual over-capacity bed created by the Arrivals Desk when a room is full but building headroom still allows another worker.",
    "fieldname": "is_temporary",
    "fieldtype": "Check",
    "in_list_view": 1,

@@ -17,14 +17,7 @@ coverage.
 | Maintenance Material / Material Template (masters) | Read, Write, Create | — | — | — | **Read, Write, Create** | — |
 | Subcontractor Service Contract / Order | Read, Write, Create | Read | — | — | — | — |
 
-> **Universal intake (most important behaviour):** any logged-in user can raise a
-> **Maintenance Request** via the built-in **All** role — they hold **Create**, and
-> **Read** only on the rows they own. A server hook
-> (`habitat/permissions.py` — `maintenance_request_has_permission` /
-> `maintenance_request_query`) widens that read so the **assigned technician** can
-> also see a ticket, while still hiding every other user's tickets. Oversight roles
-> (System Manager, Accommodation Manager, Resident Supervisor, Resident Request
-> Coordinator) see all requests.
+> **Universal intake:** any logged-in user can raise a **Maintenance Request** and sees only their own. The assigned technician also sees their ticket. Oversight roles see all.
 
 > **Maintenance Manager** is an ERPNext-supplied role (not created by Apex). When
 > present, it holds Read/Write/Create on the maintenance material masters only.
@@ -71,10 +64,5 @@ coverage.
 3. **Work order.** A **Maintenance Work Order** is issued against the request and
    worked by the **Maintenance Technician** (who holds Read/Write on it). A daily
    escalation job surfaces requests left open too long.
-
-> Trainees should know that **any logged-in user** can raise a Maintenance Request
-> and will see only their own; the assigned **Maintenance Technician** sees the
-> ticket they are working. The **My Work** workspace and **Action Inbox** desk page
-> are the personal home for these. See [Settings & Desk Pages](settings.md).
 
 _[screenshot: Maintenance Request lifecycle]_

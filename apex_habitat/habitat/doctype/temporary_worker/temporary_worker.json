@@ -71,7 +71,7 @@
    "options": "Country"
   },
   {
-   "description": "Usually blank on arrival. Populated when the Iqama is issued, just before the worker is linked to a permanent Employee.",
+   "description": "Usually blank on arrival; populated when the Iqama is issued before the worker is linked to a permanent Employee.",
    "fieldname": "iqama_number",
    "fieldtype": "Data",
    "label": "Iqama Number"

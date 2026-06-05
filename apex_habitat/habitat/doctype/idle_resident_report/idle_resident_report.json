@@ -155,7 +155,7 @@
    "read_only": 1
   },
   {
-   "description": "Estimate derived from the Accommodation Ledger memo only (not salary). Populated by the v0.8.6 aging job.",
+   "description": "Estimated accommodation cost from the memo ledger only (not salary). Populated by the aging job.",
    "fieldname": "estimated_accommodation_cost_bleed_sar",
    "fieldtype": "Currency",
    "label": "Estimated Accommodation Cost Bleed (SAR)",
