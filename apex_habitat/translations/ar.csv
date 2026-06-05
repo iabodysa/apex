@@ -87,6 +87,7 @@ Add at least one item to the cart before issuing.,أضف صنفاً واحداً
 Additional Information,معلومات إضافية
 Additional Salary Deduction,خصم إضافي من الراتب
 Additional Salary Deduction Entry,قيد خصم إضافي من الراتب
+Admin Health,صحة الإدارة
 "Admin Manager, Operations Director, General Manager",مدير الشؤون الإدارية، مدير العمليات، المدير العام
 Administrative Details,تفاصيل إدارية
 Administrative Trip / Document Signing,رحلة إدارية / توقيع مستندات
@@ -344,7 +345,6 @@ Claimed Litres,اللترات المطالب بها
 Claimed Litres must be greater than zero.,يجب أن تكون اللترات المطالب بها أكبر من صفر.
 Claimed Total,إجمالي المطالب به
 Claimed Total minus Accrued Total.,إجمالي المطالب به ناقص إجمالي المستحق.
-Claimed litres minus consumed litres. A positive variance means the claim exceeds recorded consumption.,اللترات المطالب بها ناقص اللترات المستهلكة. الانحراف الموجب يعني أن المطالبة تتجاوز الاستهلاك المسجّل.
 "Classification of fleet vehicles (e.g., Sedan, Pickup, Bus).",تصنيف مركبات الأسطول (مثل سيدان أو بيك أب أو حافلة).
 Clean,سليم
 Cleaned,تم التنظيف
@@ -378,7 +378,6 @@ Closed by Client,أُغلق من قِبل العميل
 Closed in the Last 48h,مُنجَزة آخر 48 ساعة
 Closingâ¦,جارٍ الإغلاق…
 Common Area,منطقة مشتركة
-Company's share (%) of utility bills for this building when meters are shared with other tenants. Agreed with the property management office. Does not affect the rent amount.,نسبة حصة الشركة (٪) من فواتير الخدمات لهذا المبنى عند مشاركة العدّادات مع مستأجرين آخرين. متفق عليها مع مكتب إدارة الأملاك. لا تؤثّر على قيمة الإيجار.
 Complaint,شكوى
 Complete Trip,إتمام الرحلة
 Completed,مكتمل
@@ -438,7 +437,6 @@ Cost Recovery Aging Backlog,متأخرات استرداد التكاليف
 Cost Recovery Operations Threshold (SAR),حد عمليات استرداد التكاليف (ريال)
 Cost Transactions,حركات التكلفة
 Cost by Dimension,التكلفة حسب البُعد
-"Cost center for grouping and financial context. Defaulted from Salis Settings; reference only, posts no GL.",مركز التكلفة للتجميع والسياق المالي. مُهيّأ افتراضياً من إعدادات سلس؛ للمرجع فقط، ولا يرحّل أي قيد في دفتر الأستاذ العام.
 Cost of Repair (SAR),تكلفة الإصلاح (ريال)
 Costs,التكاليف
 Costs and Settlement,التكاليف والتسوية
@@ -575,7 +573,6 @@ Default cost center used for fleet cost postings.,مركز التكلفة الا
 Default mode keeps all custody and depreciation inside Habitat with no financial posting.,الوضع الافتراضي يبقي كل العهد والإهلاك داخل Habitat دون أي ترحيل مالي.
 Defaults,الإعدادات الافتراضية
 Defaults to the session user on creation.,يُهيّأ افتراضياً إلى مستخدم الجلسة عند الإنشاء.
-Defaults to the session user on creation. The workflow's approval transition is segregation-of-duties gated on this field (the approver cannot be the requester).,يُهيّأ افتراضياً إلى مستخدم الجلسة عند الإنشاء. وتُقيَّد بوابة اعتماد سير العمل بالفصل بين المهام على هذا الحقل (لا يجوز أن يكون المعتمِد هو مقدّم الطلب).
 "Define the first vehicle class (e.g. Sedan, Bus, Pickup) used to group fleet vehicles.",عرّف أول فئة مركبات (مثل سيدان أو حافلة أو بيك أب) لتصنيف مركبات الأسطول.
 Delegation-of-Authority Thresholds (SAR),حدود تفويض الصلاحيات (ريال)
 Depart Time,وقت المغادرة
@@ -587,7 +584,6 @@ Depreciation Snapshot Item,بند لقطة الإهلاك
 Describe the issue,صف المشكلة
 Description,الوصف
 Description is too long. Please keep it under 2000 characters.,الوصف طويل جداً. يرجى الإبقاء عليه تحت 2000 حرف.
-"Design theme applied to the driver portal. AFMCO is the flat, brand-aligned default; Frappe Standard is the neutral portal look; Dark is an AFMCO-flavoured dark mode.",سمة التصميم المطبَّقة على بوابة السائق. AFMCO هي السمة المسطّحة المتوافقة مع الهوية وهي الافتراضية؛ وFrappe القياسي هو المظهر المحايد للبوابة؛ والداكن هو وضع داكن بنكهة AFMCO.
 Desk,سطح المكتب
 Destination,الوجهة
 Destination is required for an Administrative Trip / Document Signing.,الوجهة مطلوبة للرحلة الإدارية / توقيع المستندات.
@@ -610,6 +606,7 @@ Disputed Rental Settlements,تسويات الإيجار المتنازع علي�
 Disputed Utility Bills,فواتير الخدمات المعترض عليها
 Disputed or suspicious fuel-control case. Holds usage/GPS evidence and enforces non-raiser closure (segregation of duties).,حالة رقابة وقود متنازع عليها أو مشبوهة. تحفظ أدلة الاستخدام/نظام تحديد المواقع وتفرض أن يُغلقها شخص غير منشئها (الفصل بين المهام).
 District,الحي
+Division Views,عروض القسم
 DocType,نوع السجل
 Document No,رقم الوثيقة
 Document Number,رقم المستند
@@ -861,6 +858,7 @@ Generating Rooms & Bedsâ¦,جارٍ إنشاء الغرف والأسرّة…
 Generating Safety Setupâ¦,جارٍ إعداد منظومة السلامة…
 Generator,مولد كهربائي
 Generator Service,صيانة المولد الكهربائي
+Getting Started,البدء
 Good,جيد
 Google Maps Link,رابط خرائط جوجل
 Government Relations Cases Open,حالات العلاقات الحكومية المفتوحة
@@ -1002,6 +1000,7 @@ January,يناير
 July,يوليو
 June,يونيو
 KPI,مؤشر الأداء
+Key Metrics,المؤشرات الرئيسية
 Kitchen,المطبخ
 Labour Supplier,مورّد العمالة
 Landlord & Lease Details,تفاصيل المالك والإيجار
@@ -1154,6 +1153,7 @@ Missed Reason,سبب التغيب
 Missed Subcontractor Visits,زيارات مقاول الباطن الفائتة
 Mobile Number,رقم الجوال
 Mobile Number (Optional),رقم الجوال (اختياري)
+Mobile Portals,البوابات الجوالة
 Month,الشهر
 Monthly Amount (SAR),المبلغ الشهري (ريال)
 Monthly Cost Bleeding,هدر التكلفة الشهري
@@ -1190,6 +1190,7 @@ Naming Series,سلسلة الترقيم
 National ID,رقم الهوية الوطنية
 Nationality,الجنسية
 Native Asset Movement,حركة أصل داخلية
+Navigate,التنقل
 Needs Cleaning,يحتاج تنظيفاً
 Needs Improvement,يحتاج تحسيناً
 Needs Operations Authorization,يتطلب تفويض العمليات
@@ -1323,10 +1324,8 @@ Operations Alert,تنبيه تشغيلي
 Operations Director by default,مدير العمليات افتراضياً
 "Operations requester, carried from the linked Transport Request (Operations owns the request).",مقدّم طلب العمليات، منقول من طلب النقل المرتبط (العمليات تملك الطلب).
 Optional ERPNext Supplier FK for the landlord. Used to identify the payee for rent due reminders.,مرجع مورّد ERPNext اختياري للمالك. يُستخدم لتحديد المستفيد في تذكيرات استحقاق الإيجار.
-"Optional Habitat pickup: when set, this stop is a worker housing pickup location (the Habitat-Salis bridge). The stop's coordinates/address can derive from the building.",التقاط هابيتات اختياري: عند ضبطه، تكون هذه المحطة موقع التقاط سكن عمالة (جسر هابيتات-سلس). ويمكن اشتقاق إحداثيات/عنوان المحطة من المبنى.
 Optional future mapping to ERPNext Item/Stock. Leave blank to use Habitat catalog only.,ربط اختياري مستقبلي بصنف/مخزون ERPNext. اتركه فارغاً لاستخدام كتالوج Habitat فقط.
 Optional logo shown in the portal header in place of the built-in brand mark.,شعار اختياري يظهر في ترويسة البوابة بدلاً من علامة الهوية المدمجة.
-Optional override for the primary accent colour. Leave blank to use the colour defined by the selected theme.,تجاوز اختياري للون التمييز الأساسي. اتركه فارغاً لاستخدام اللون المحدَّد في السمة المختارة.
 Optional photo of the bed/room condition at check-in (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند الدخول (دليل تسليم).
 Optional photo of the bed/room condition at checkout (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند المغادرة (دليل تسليم).
 Original Cost (SAR),التكلفة الأصلية (ريال)
@@ -1355,8 +1354,6 @@ Owner User,المستخدم المالك
 Owner acknowledgement is required to submit a fuel chip cancellation.,إقرار المالك مطلوب لاعتماد إلغاء شريحة الوقود.
 Ownership,الملكية
 Ownership At Stop,الملكية عند الإيقاف
-"Owning company for reporting and financial context. Defaulted from Salis Settings; reference only, posts no GL.",الشركة المالكة لأغراض التقارير والسياق المالي. مُهيّأة افتراضياً من إعدادات سلس؛ للمرجع فقط، ولا تُرحّل أي قيد في دفتر الأستاذ العام.
-Owning company for reporting and financial context. Defaulted from Salis Settings; reference only. A transfer reallocates cost between projects within one company and posts no GL.,الشركة المالكة لأغراض التقارير والسياق المالي. مُهيّأة افتراضياً من إعدادات سلس؛ للمرجع فقط. يعيد التحويل توزيع التكلفة بين المشاريع داخل شركة واحدة ولا يُرحّل أي قيد في دفتر الأستاذ العام.
 "Owning company, carried for reporting grouping. System-written; reference only, posts no GL.",الشركة المالكة، منقولة لأغراض تجميع التقارير. يكتبها النظام؛ للمرجع فقط، ولا تُرحّل أي قيد في دفتر الأستاذ العام.
 Paid,مدفوع
 Paid On,دُفع في تاريخ
@@ -1488,6 +1485,7 @@ Quantity,الكمية
 Quantity Issued,الكمية المصروفة
 Quarter,ربع
 Quarterly,ربع سنوي
+Quick Actions,إجراءات سريعة
 Quick Check-in,تسجيل دخول سريع
 Quick Check-out,تسجيل خروج سريع
 Quick Room Setup,إعداد الغرف السريع
@@ -1539,9 +1537,7 @@ Recovery Type,نوع الاسترداد
 Reference Document Type,نوع مستند المرجع
 Reference Name,اسم المرجع
 "Reference catalog of standardized safety tasks. Each task defines its department, frequency, priority, and instructions.",سجل مرجعي لمهام السلامة المعيارية. تحدّد كل مهمة قسمها ودوريتها وأولويتها وتعليماتها.
-Reference only. Set externally after Finance posts payment in the accounting module. This DocType never creates or posts a GL/Payment Entry.,للمرجع فقط. يُضبط خارجياً بعد ترحيل المالية للدفعة في وحدة المحاسبة. لا يُنشئ هذا المستند ولا يرحّل أي قيد في دفتر الأستاذ العام أو قيد دفع.
 Reference to the raised Salis Payment Request. Set automatically; this DocType never posts GL.,مرجع لطلب دفع سلس المُنشأ. يُضبط آلياً؛ ولا يرحّل هذا المستند أي قيد في دفتر الأستاذ العام.
-Reference-only link to the Finance/HR Payment Request that handles the actual deduction. Movement does not post any payment.,رابط مرجعي فقط لطلب الدفع لدى المالية/الموارد البشرية الذي يتولى الخصم الفعلي. ولا تُرحّل الحركة أي دفعة.
 Refresh,تحديث
 Refresh Board,تحديث اللوحة
 Refresh Map,تحديث الخريطة
@@ -1555,7 +1551,6 @@ Register Salis Vehicle,تسجيل مركبة سلس
 Register a Salis Driver,سجّل سائق سلس
 Register a Salis Vehicle,سجّل مركبة سلس
 Register new arrival by passport,تسجيل وصول جديد برقم الجواز
-Registered worker (Employee) who boarded. Leave blank and tick 'Unregistered' for a contractor/temp hire not on the request manifest.,"العامل المسجّل (الموظف) الذي صعد. اتركه فارغاً وفعّل ""غير مسجّل"" لمتعاقد/موظف مؤقت غير مدرج في كشف الطلب."
 Registeringâ¦,جارٍ التسجيل…
 Registration (Istimara),الاستمارة
 Reimbursement,تعويض
@@ -1684,6 +1679,7 @@ Revoked,مُلغى
 Rework Required,يلزم إعادة العمل
 Role,الدور
 Role Profile,ملف الدور الوظيفي
+Roles and Access,الأدوار والصلاحيات
 Room,الغرفة
 Room & Bed Generation,توليد الغرف والأسرة
 Room Bed Transfer,نقل سرير الغرفة
@@ -1799,7 +1795,6 @@ Serial No,الرقم التسلسلي
 Serial No.,الرقم التسلسلي
 Serial Number,الرقم التسلسلي
 Series,التسلسل
-"Server-derived Delegation-of-Authority flag: when set, only an Operations-tier authorization is allowed. Read by the workflow transition condition; cannot be hand-set.",مؤشر تفويض صلاحيات مشتق من الخادم: عند ضبطه، لا يُسمح إلا بتفويض من مستوى العمليات. تقرؤه شروط انتقال سير العمل؛ ولا يمكن ضبطه يدوياً.
 Server-derived: submitted Administrative Trips this month for the project (incl. this one).,مشتق من الخادم: الرحلات الإدارية المعتمدة هذا الشهر للمشروع (متضمناً هذه الرحلة).
 Service Contract,عقد الخدمة
 Service Cost (SAR),تكلفة الخدمة (ريال)
@@ -1816,19 +1811,17 @@ Set the monthly litre allowance for a vehicle so consumption can be reconciled.,
 Set to the session user on creation; read-only so the segregation-of-duties gate cannot be spoofed.,يُضبط إلى مستخدم الجلسة عند الإنشاء؛ وهو للقراءة فقط بحيث لا يمكن التحايل على بوابة الفصل بين المهام.
 Set up your fleet and dispatch your first movement.,جهّز أسطولك ونفّذ أول حركة.
 Set when a subcontractor visit is created from this request,يُضبط عند إنشاء زيارة مقاول من هذا الطلب
-"Set when a temporary top-up has been reverted (by the daily auto-revert job once overdue, or manually). Allowed on submit so the scheduler can flip it on the submitted request.",يُضبط عند عكس تعبئة مؤقتة (عبر مهمة العكس التلقائي اليومية بمجرد تأخّرها، أو يدوياً). ويُسمح به عند الاعتماد ليتمكّن المجدوِل من تفعيله على الطلب المعتمد.
 Set when the driver/employee has acknowledged responsibility for the loss.,يُضبط عند إقرار السائق/الموظف بالمسؤولية عن الخسارة.
 Set when the request is approved.,يُضبط عند اعتماد الطلب.
 Set when the transfer is approved.,يُضبط عند اعتماد التحويل.
 Set when the write-off case is approved.,يُضبط عند اعتماد حالة الشطب.
-Set when this claim is a quota-increase claim. Quota-increase claims always require Operations-tier authority.,يُضبط عندما تكون هذه المطالبة مطالبة زيادة حصة. وتتطلب مطالبات زيادة الحصة دائماً صلاحية مستوى العمليات.
-Set when this request's litres have been posted to the quota's consumed total. Guards against double-application on resubmit/amend.,يُضبط عند ترحيل لترات هذا الطلب إلى إجمالي المستهلك من الحصة. يمنع التطبيق المزدوج عند إعادة التقديم أو التعديل.
 Settled,تمت التسوية
 Settlement,التسوية
 "Settlement period, e.g. 2026-05.",فترة التسوية، مثال: 2026-05.
 Settlements Pending Approval,التسويات بانتظار الاعتماد
 Setup,الإعداد
 Setup Status,حالة الإعداد
+Setup and Master Data,الإعداد والبيانات الأساسية
 Severe,شديدة
 Severity,الخطورة
 Sewage Tank Suction,نزح خزان الصرف الصحي
@@ -1839,7 +1832,6 @@ Short code used to prefix generated room numbers.,رمز مختصر يُستخد
 Show Brand,إظهار العلامة التجارية
 Show Link & QR,عرض الرابط ورمز QR
 Show Zero Balances,عرض الأرصدة الصفرية
-"Show the AFMCO brand mark and wordmark in the portal header. Turn off for a minimal, unbranded header.",إظهار علامة AFMCO واسمها في ترويسة البوابة. أوقِف التفعيل للحصول على ترويسة بسيطة بدون علامة تجارية.
 Signed Evidence,إثبات موقّع
 Signed handover evidence is required before submitting.,إثبات تسليم موقّع مطلوب قبل الاعتماد.
 Single configuration record controlling the look and feel of the Salis Driver Portal (the mobile web app at /driver).,سجل إعداد مفرد يتحكم في شكل ومظهر بوابة سائق سلس (تطبيق الويب للجوال على /driver).
@@ -1869,7 +1861,6 @@ Source and destination buildings must be different.,يجب أن يكون مبن�
 Source and target beds must be different.,يجب أن يختلف سرير المصدر عن سرير الوجهة.
 Source bed has no active resident to transfer.,السرير المصدر لا يحتوي على مقيم نشط للنقل.
 Specific Buildings,مباني محددة
-"Specific Fixed Asset this request concerns (e.g., AC-001, BED-014). Enables full maintenance history per asset.",الأصل الثابت المحدد الذي يخص هذا الطلب (مثل AC-001، BED-014). يتيح سجل صيانة كامل لكل أصل.
 Specific Location,الموقع المحدّد
 Specific Rate for this Building (SAR),تسعيرة المبنى الخاصة (ريال)
 Sponsorship Fee,رسوم كفالة
@@ -1878,7 +1869,6 @@ Stamped automatically when Finance approves. Read-only.,يُختم آلياً ع
 Standard,قياسي
 Standard Rate Per Visit (SAR),أجرة الزيارة القياسية (ريال)
 Standard Unit Cost (SAR),تكلفة الوحدة القياسية (ريال)
-"Standard: quota consumption + ledger posting. Top-up: add litres, optionally temporary. Chip: issue / replace / cancel a fuel chip.",قياسي: استهلاك الحصة + الترحيل للدفتر. تعبئة: إضافة لترات، مؤقتة اختيارياً. شريحة: إصدار / استبدال / إلغاء شريحة وقود.
 Start Date,تاريخ البدء
 Start Datetime,تاريخ ووقت البدء
 Start Task,بدء المهمة
@@ -1974,11 +1964,9 @@ Temporary workers board via the tripâs unregistered manifest.,لوحة ال
 Terminated,مُنهى
 Termination,إنهاء خدمة
 That vehicle is not assigned to you. You can only request fuel for your own vehicle.,تلك المركبة غير مسندة إليك. يمكنك طلب الوقود لمركبتك فقط.
-The Dispatch Trip being executed. Its linked Transport Request carries the worker manifest this log records boarding against.,رحلة التشغيل الجاري تنفيذها. ويحمل طلب النقل المرتبط بها كشف العمالة الذي يسجّل هذا السجل الصعود مقابله.
 The building this asset was located in before its current location.,المبنى الذي كان هذا الأصل موجوداً فيه قبل موقعه الحالي.
 The closer must differ from the person who raised the case.,يجب أن يختلف من يُغلق الحالة عمّن رفعها.
 "The driver's current assigned vehicle, captured for reference.",المركبة المسندة حالياً للسائق، مسجّلة للمرجع.
-"The housing pickup (Habitat) for this boarding, when the stop is a worker accommodation. The Habitat-Salis bridge.",نقطة التقاط السكن لهذا الصعود، عندما تكون المحطة سكن عمالة. وهي جسر هابيتات-سلس.
 The route stop where this worker boarded (mirrors the Route Stop name on the trip's route).,محطة المسار التي صعد منها هذا العامل (تطابق اسم محطة المسار في مسار الرحلة).
 The user who raised this case. Set automatically.,المستخدم الذي أنشأ هذه الحالة. يُضبط آلياً.
 The user who resolved or closed the case. Must differ from Reported By (segregation of duties).,المستخدم الذي عالج الحالة أو أغلقها. يجب أن يختلف عن المُبلِّغ (الفصل بين المهام).
@@ -2010,6 +1998,7 @@ To Project,إلى المشروع
 To Room,إلى غرفة
 Today's Dispatch Trips,رحلات توجيه اليوم
 Token,الرمز
+Tools and Consoles,الأدوات والوحدات
 Top-up,تعبئة
 Top-up Litres,لترات التعبئة
 Top-up Litres must be greater than zero.,يجب أن تكون لترات التعبئة أكبر من صفر.
@@ -2057,6 +2046,7 @@ Transport Request Worker,عامل طلب النقل
 Transport Requests by Service Line,طلبات النقل حسب خط الخدمة
 Transport SLA Breaches Open,مخالفات اتفاقية مستوى خدمة النقل المفتوحة
 Transport request submitted successfully.,تم تقديم طلب التنقل بنجاح.
+Trends,الاتجاهات
 Triage Notes,ملاحظات الفرز
 Triaged,تم الفرز
 Trigger alert if monthly bill deviates from average by more than this percentage.,أطلق تنبيهاً إذا انحرفت الفاتورة الشهرية عن المتوسط بأكثر من هذه النسبة.
