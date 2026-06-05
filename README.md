@@ -12,183 +12,200 @@ Single package, three modules — **Habitat**, **Salis**, **Apex Core** — on a
 
 ## Architecture
 
-The architecture is documented from a few complementary perspectives; each diagram carries a one-line caption.
+Four complementary diagrams document the system from module structure down to live data flow. Each carries a one-sentence caption.
 
-### Modules and what each owns
-
-One package, three modules. Habitat and Salis own their DocTypes, reports, and logic; Apex Core holds shared settings. All operational writes post to module-owned memo ledgers, never the GL.
+### Map 1 — Module architecture
 
 ```mermaid
-flowchart TB
-    PKG(["apex_habitat — single package, 3 modules"]):::hub
+graph TD
+    PKG(["apex_habitat · v1.50.10<br/>single package, 3 modules"]):::hub
 
-    subgraph Functional ["Functional modules (own DocTypes, reports, logic)"]
-        direction LR
-        subgraph HABG ["Habitat — accommodation & facilities"]
-            HAB["Housing · safety · maintenance<br/>custody · leasing · internal store"]:::dom
-            HLED[("Accommodation + Stock ledgers<br/>memo, no GL")]:::sink
-        end
-        subgraph SALG ["Salis — movement & fleet"]
-            SAL["Transport Request (Workers / Reps)<br/>vehicles · drivers · fuel · dispatch · rentals"]:::dom
-            SLED[("Movement cost / recovery<br/>memo, no GL")]:::sink
-        end
+    subgraph CORE_BOX ["Apex Core — shared kernel"]
+        CORE_SET["Habitat Settings<br/>Salis Settings<br/>Apex Integration Settings<br/>Salis Portal Theme"]:::core
+        CORE_WRK["My Work Center API<br/>Action Inbox aggregator<br/>Seed loader · Changelog feed"]:::core
     end
 
-    CORE["Apex Core — settings hub (Single DocTypes)<br/>Habitat · Salis · Integration · Portal Theme"]:::core
+    subgraph HAB_BOX ["Habitat — 66 DocTypes · accommodation & facilities"]
+        direction TB
+        HAB_SPACE["Spatial inventory<br/>Site · Building · Room · Bed"]:::hab
+        HAB_ASSIGN["Residency lifecycle<br/>Assignment · Room-Bed Transfer · Checkout"]:::hab
+        HAB_OPS["Scheduled operations<br/>Scheduled Task · Cleaning Log · Safety Inspection"]:::hab
+        HAB_MAINT["Maintenance<br/>Request · Work Order · Inspection Report"]:::hab
+        HAB_CUST["Custody & assets<br/>Custody Issue/Return · Facility Asset · Stock Ledger"]:::hab
+        HAB_COST["Cost control<br/>Utility Bill Entry · Accommodation Lease<br/>Subcontractor Service Order · Accommodation Ledger"]:::hab
+    end
 
-    PKG --> HABG
-    PKG --> SALG
-    PKG --> CORE
-    HAB --> HLED
-    SAL --> SLED
-    HAB -. reads .-> CORE
-    SAL -. reads .-> CORE
+    subgraph SAL_BOX ["Salis — 43 DocTypes · movement & fleet"]
+        direction TB
+        SAL_FLEET["Fleet masters<br/>Salis Vehicle · Salis Driver · Vehicle Assignment"]:::sal
+        SAL_MOVE["Movement operations<br/>Transport Request · Dispatch Trip · Route Plan"]:::sal
+        SAL_FUEL["Fuel lifecycle<br/>Fuel Request · Fuel Claim · Fuel Quota · Fuel Platform"]:::sal
+        SAL_RENT["Rentals & costs<br/>Rental Settlement · Movement Cost Recovery<br/>Salis Payment Request"]:::sal
+        SAL_COMPLY["Compliance<br/>Vehicle Compliance · Driver Clearance · Driver Attendance"]:::sal
+    end
 
-    classDef hub fill:#1e3a8a,stroke:#1e3a8a,color:#fff;
-    classDef dom fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
+    subgraph PLATFORM ["Platform (required_apps)"]
+        FRP["Frappe v15<br/>auth · ORM · Workflow · scheduler"]:::plat
+        ERP["ERPNext<br/>Company · Project · Cost Center"]:::plat
+        HRMS["HRMS<br/>Employee · Additional Salary"]:::plat
+    end
+
+    PKG --> CORE_BOX
+    PKG --> HAB_BOX
+    PKG --> SAL_BOX
+
+    HAB_BOX -. reads settings .-> CORE_BOX
+    SAL_BOX -. reads settings .-> CORE_BOX
+
+    HAB_BOX --> PLATFORM
+    SAL_BOX --> PLATFORM
+
+    classDef hub  fill:#1e3a8a,stroke:#1e3a8a,color:#fff;
     classDef core fill:#ede9fe,stroke:#5b21b6,color:#5b21b6;
-    classDef sink fill:#f1f5f9,stroke:#475569,color:#334155,stroke-dasharray:4 3;
+    classDef hab  fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
+    classDef sal  fill:#dcfce7,stroke:#166534,color:#166534;
+    classDef plat fill:#f1f5f9,stroke:#475569,color:#334155;
 ```
 
-### System context
+One package, three modules: Habitat owns the 66 accommodation and facilities DocTypes; Salis owns the 43 movement and fleet DocTypes; Apex Core is the shared kernel that both modules read for settings and that hosts the My Work aggregator.
 
-Black-box view of who talks to Apex. Desk and console users use a standard Frappe session; the `/driver` portal is a mobile web app that resolves the signed-in user to their driver record server-side; two public QR web forms accept rate-limited guest submissions.
-
-```mermaid
-flowchart TB
-    MGR(["Managers / Supervisors"]):::actor
-    FIN(["Finance / Auditor"]):::actor
-    DRV(["Drivers"]):::actor
-    WRK(["Residents / staff (guest)"]):::actor
-
-    subgraph Clients ["Client surfaces"]
-        direction LR
-        DESK["Frappe Desk<br/>workspaces · lists · reports"]:::dom
-        CONS["Ops consoles<br/>Dispatch · Fuel Approval"]:::dom
-        PORTAL["Driver portal /driver"]:::dom
-        QR["Public QR web forms"]:::dom
-    end
-
-    APEX(["Apex — Habitat · Salis · Apex Core"]):::hub
-
-    subgraph Platform ["Platform apps (required)"]
-        direction LR
-        FRP["Frappe v15<br/>auth · ORM · Workflow · scheduler"]:::core
-        ERP["ERPNext<br/>Company · Project · Cost Center"]:::core
-        HRMS["HRMS<br/>Employee · Additional Salary"]:::core
-    end
-
-    MGR --> DESK
-    MGR --> CONS
-    FIN --> DESK
-    DRV --> PORTAL
-    WRK --> QR
-
-    DESK --> APEX
-    CONS -- whitelisted API --> APEX
-    PORTAL -- session-scoped API --> APEX
-    QR -- guest, rate-limited --> APEX
-
-    APEX --> FRP
-    APEX -. Link masters .-> ERP
-    APEX -. draft deduction (gated) .-> HRMS
-
-    classDef actor fill:#fff7ed,stroke:#9a3412,color:#7c2d12;
-    classDef hub fill:#1e3a8a,stroke:#1e3a8a,color:#fff;
-    classDef dom fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
-    classDef core fill:#ede9fe,stroke:#5b21b6,color:#5b21b6;
-```
-
-### Residency data model
-
-Static view of the housing core. A site contains buildings; a building is planned into rooms and beds; an assignment places an employee in a bed and is the unit of occupancy. Every cost it incurs becomes an **Accommodation Ledger** memo row — analytics, never a GL entry.
-
-```mermaid
-erDiagram
-    ACCOMMODATION_SITE     ||--o{ ACCOMMODATION_BUILDING : contains
-    ACCOMMODATION_BUILDING ||--o{ ACCOMMODATION_ROOM : "planned into"
-    ACCOMMODATION_ROOM     ||--o{ ACCOMMODATION_BED : holds
-    ACCOMMODATION_BED      ||--o{ ACCOMMODATION_ASSIGNMENT : "occupied by"
-    EMPLOYEE               ||--o{ ACCOMMODATION_ASSIGNMENT : "housed by"
-    ACCOMMODATION_ASSIGNMENT ||--o{ ACCOMMODATION_CHECKOUT : "ends with"
-    ACCOMMODATION_ASSIGNMENT ||--o{ ROOM_BED_TRANSFER : "moved by"
-    ACCOMMODATION_ASSIGNMENT ||--o{ ACCOMMODATION_LEDGER : "accrues memo cost"
-
-    ACCOMMODATION_ASSIGNMENT {
-        Link employee
-        Link bed
-        Select stay_type "Permanent | Temporary"
-        Date expected_checkout_date
-    }
-    ACCOMMODATION_LEDGER {
-        Select ledger_type "Rent | Electricity | Cleaning"
-        Select posting_mode "Operational Memo (never GL)"
-        Currency employee_daily_share
-        Link reversal_of "cancellation mirror"
-    }
-```
-
-### Approval state machine (Salis)
-
-Ten submittable documents run on native Frappe Workflows. Each transition is role-gated with a Segregation-of-Duties condition (approver ≠ requester); large-scope requests escalate via the server-derived `needs_operations` flag. **Transport Request** is shown as the representative spine; the same pattern governs Fuel Request, Fuel Claim, Fuel Exception Case, Rental Settlement, Salis Payment Request, Dispatch Trip, Driver Clearance, and Support Ticket.
+### Map 2 — Accommodation lifecycle
 
 ```mermaid
 stateDiagram-v2
     direction LR
-    [*] --> New
-    New --> Validated: Validate (Supervisor)
-    New --> Rejected: Reject
-    Validated --> Approved: Authorize (Regional / Operations)
-    Validated --> Rejected: Reject
-    Approved --> Scheduled: Schedule (Supervisor)
-    Scheduled --> Fulfilled: Confirm
-    Approved --> Cancelled: Cancel (Manager)
-    Scheduled --> Cancelled: Cancel (Manager)
-    Fulfilled --> [*]
-    Rejected --> [*]
-    Cancelled --> [*]
 
-    note right of Approved
-        SoD gate: approver ≠ requester.
-        doc_status crosses 0 → 1 here.
+    state "Building Setup" as SETUP {
+        [*] --> SiteBuilding : Accommodation Site created
+        SiteBuilding --> RoomsGenerated : generate_rooms_and_beds()
+        RoomsGenerated --> SafetyReady : generate_safety_setup()
+    }
+
+    state "Active Stay" as ACTIVE {
+        Assigned --> Transferred : Room-Bed Transfer (submit)
+        Assigned --> CostAccruing : daily cost allocation (scheduler)
+    }
+
+    state "Checkout" as CHECKOUT {
+        CheckoutDraft --> CheckoutSubmitted : Accommodation Checkout (submit)
+        CheckoutSubmitted --> CustodyReturned : Custody Return (submit)
+    }
+
+    SETUP --> Assigned : Accommodation Assignment (submit)\nbed.status → Occupied
+    ACTIVE --> CheckoutDraft : checkout initiated
+    CHECKOUT --> Archived : bed.status → Vacant\nAccommodation Ledger closed
+
+    note right of CostAccruing
+        Accommodation Ledger row per day.
+        Memo only — never a GL Entry.
+    end note
+
+    note right of CustodyReturned
+        Custody Return · Custody Damage Assessment
+        may draft HRMS Additional Salary (gated).
     end note
 ```
 
-### Request-to-fulfilment sequence
+Traces the full resident journey from spatial setup through active occupancy and daily cost accrual to checkout and custody return, with the key DocType at each transition.
 
-Wire-level trace of a fuel request from the driver portal through manager approval, showing where each guard fires — session driver resolution, project row-scope check, role + SoD gate. No GL entry is written.
+### Map 3 — My Work Center data flow
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Driver
-    participant Portal as Driver portal (/driver)
-    actor Manager
-    participant API as Whitelisted API
-    participant WF as Workflow engine
-    participant Doc as Fuel Request
-    participant Ledger as Fuel ledger (memo)
+flowchart LR
+    USER(["Desk user\n(any role)"]):::actor
 
-    Driver->>Portal: tap "Request fuel"
-    Portal->>API: submit (session cookie)
-    API->>API: resolve driver + verify vehicle bound
-    API->>Doc: insert (status = Pending)
+    subgraph WS ["My Work workspace (Apex Core)"]
+        BLOCK["Apex My Work Center\ncustom HTML block"]:::ui
+        NC1["Pending My Action\nnumber card"]:::ui
+        NC2["Submitted By Me\nnumber card"]:::ui
+        NC3["Approved Last 48h\nnumber card"]:::ui
+    end
 
-    Manager->>API: approve (session cookie)
-    API->>API: has_permission — project row-scope
-    API->>WF: apply transition "Approve"
-    WF->>WF: role gate + SoD (approver ≠ requester)
-    WF->>Doc: Pending → Approved (submit)
-    Doc->>Doc: stamp approved_by
-    Note over Doc,Ledger: consumption accrues to the<br/>memo fuel ledger — never a GL Entry
+    API["get_my_work()\n@frappe.whitelist"]:::api
+
+    subgraph SOURCES ["Data sources — all scoped to session user"]
+        S1["Workflow Action\nstatus=Open\nrole-gated by framework\npermission_query_conditions"]:::src
+        S2["ToDo\nstatus=Open\nallocated_to=user\nreference_type set"]:::src
+        S3["Notification Log\nfor_user=user\nall types"]:::src
+        S4["Mentions\n(Phase 2 — deferred)"]:::stub
+    end
+
+    RESP["Response\n{needs_action, notifications,\nmentions, summary}"]:::data
+
+    USER --> WS
+    BLOCK -- "fetch on load" --> API
+    NC1 & NC2 & NC3 -- "custom number card" --> API
+    API --> S1
+    API --> S2
+    API --> S3
+    API --> S4
+    S1 & S2 --> RESP
+    S3 --> RESP
+    RESP --> BLOCK
+
+    classDef actor fill:#fff7ed,stroke:#9a3412,color:#7c2d12;
+    classDef ui    fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
+    classDef api   fill:#ede9fe,stroke:#5b21b6,color:#5b21b6;
+    classDef src   fill:#dcfce7,stroke:#166534,color:#166534;
+    classDef stub  fill:#f1f5f9,stroke:#94a3b8,color:#64748b,stroke-dasharray:4 3;
+    classDef data  fill:#fef9c3,stroke:#854d0e,color:#854d0e;
 ```
+
+Shows how the My Work workspace custom block calls a single whitelisted API that unions four permission-scoped sources and returns a structured payload the block renders as tabs.
+
+### Map 4 — Workspace navigation
+
+```mermaid
+graph LR
+    MW(["My Work\nApex Core · universal"]):::universal
+
+    subgraph HAB_NAV ["Habitat workspaces"]
+        HUB["Habitat Hub\noperations home\nKPIs · quick actions"]:::hub_ws
+        HOUSING["Housing\nassignment · transfer\ncheckout · bed board"]:::ws
+        SAFETY["Safety\nmaintenance · work orders\ninspections · scheduled tasks"]:::ws
+        CUSTODY["Custody\ncustody issue/return\nfacility assets · store"]:::ws
+        COSTS["Costs\nutility bills · leases\nsubcontractor orders"]:::ws
+    end
+
+    subgraph SAL_NAV ["Salis workspaces"]
+        SALIS["Salis\nfleet home\ntransport · dispatch · fuel"]:::sal_ws
+        MOVE["Movement\nroute plans · trip logs\npassenger manifests"]:::sal_ws
+        COMP["Compliance and Drivers\ndriver records · clearance\nvehicle compliance"]:::sal_ws
+        RENT["Rentals and Costs\nrental settlements\nmovement cost recovery"]:::sal_ws
+        REPS["Representatives Fleet\nrep transport · fleet register"]:::sal_ws
+    end
+
+    LP(["Launchpad\nApex Core · admin hub\nsettings · roles · logs"]):::launch
+
+    HUB --> HOUSING
+    HUB --> SAFETY
+    HUB --> CUSTODY
+    HUB --> COSTS
+
+    SALIS --> MOVE
+    SALIS --> COMP
+    SALIS --> RENT
+    SALIS --> REPS
+
+    LP -. links to all .-> HUB
+    LP -. links to all .-> SALIS
+    LP --> MW
+
+    classDef universal fill:#1e3a8a,stroke:#1e3a8a,color:#fff;
+    classDef launch    fill:#5b21b6,stroke:#5b21b6,color:#fff;
+    classDef hub_ws    fill:#1d4ed8,stroke:#1d4ed8,color:#fff;
+    classDef sal_ws    fill:#166534,stroke:#166534,color:#fff;
+    classDef ws        fill:#dbeafe,stroke:#1e3a8a,color:#1e3a8a;
+```
+
+Shows the 12 public workspaces grouped by module, the Habitat Hub and Salis parent-child hierarchy, and Launchpad as the cross-module admin entry point; My Work is the universal personal inbox independent of both modules.
 
 ### Backend surfaces
 
 All business logic lives on the server across three surfaces:
 
 - **Document events** — `validate` / `on_submit` / `on_cancel` controllers wired in `hooks.py` (`doc_events`) on submittable transactions.
-- **Scheduled jobs** — `scheduler_events` registers **17 daily, 4 weekly, 2 monthly** jobs across Habitat and Salis (cost accrual, occupancy sync, compliance and expiry watches, fuel/rental accrual, monthly reconciliations). Each paginates its source in 500-row batches and isolates per-row failures so one bad record never aborts a run.
+- **Scheduled jobs** — `scheduler_events` registers **17 daily, 4 weekly, 1 monthly** jobs across Habitat and Salis (cost accrual, occupancy sync, compliance and expiry watches, fuel/rental accrual, monthly reconciliations). Each paginates its source in 500-row batches and isolates per-row failures so one bad record never aborts a run.
 - **On-demand actions** — whitelisted form buttons: `generate_rooms_and_beds`, `generate_safety_setup`, `mark_received`.
 - **Operator desk pages** — purpose-built single-screen consoles: **Front Desk** (bed board), **Arrivals Desk** (building-first check-in with floor-map, custody store, QR, and signed prints), and **Action Inbox** (Apex Core, unions Workflow Actions + ToDos with inline Approve/Reject).
 
