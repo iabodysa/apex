@@ -1,9 +1,12 @@
 """Seed the 'Apex My Work Center' Custom HTML Block.
 
 Custom HTML Block is autonamed by user (naming_rule: Set by user), so it is NOT
-a standard fixture file — it must be seeded programmatically. This seeder is
-existence-guarded (skips if the block already exists) so admin edits to the HTML
-or script survive every migrate.
+a standard fixture file — it must be seeded programmatically.
+
+This seeder tracks a SHA-256 hash of html+script in the block's ``description``
+field. On every migrate it compares the current source hash to the stored hash
+and updates the block when they differ — so source code changes propagate
+automatically. The source file is the single source of truth for this block.
 
 The block is kept public (private=0) so all desk users can see it. The HTML
 scaffolding goes in the `html` field (no inline <script> tags — Frappe strips
@@ -16,7 +19,25 @@ Called from both after_install and after_migrate hooks in hooks.py.
 
 from __future__ import annotations
 
+import hashlib
+import re
+
 import frappe
+
+_HASH_TAG = "apex-src-hash"
+
+def _src_hash() -> str:
+    """Short SHA-256 of html+script used to detect source changes."""
+    return hashlib.sha256((_HTML + _SCRIPT).encode()).hexdigest()[:16]
+
+def _tagged_html(html: str, h: str) -> str:
+    """Prepend a hidden hash comment to html so future runs can detect changes."""
+    return f"<!-- {_HASH_TAG}:{h} -->\n{html}"
+
+def _stored_hash(html: str) -> str:
+    """Extract the stored hash from a tagged html string, or '' if absent."""
+    m = re.match(rf"<!-- {_HASH_TAG}:([0-9a-f]+) -->", html or "")
+    return m.group(1) if m else ""
 
 BLOCK_NAME = "Apex My Work Center"
 
@@ -367,29 +388,36 @@ _SCRIPT = r"""
 # ---------------------------------------------------------------------------
 
 def seed_my_work_center_block():
-    """Create 'Apex My Work Center' Custom HTML Block if absent.
+    """Create or update 'Apex My Work Center' Custom HTML Block.
 
-    Existence-guarded so admin edits to html/script survive every migrate.
-    The block is kept public (private=0) so all desk users can see it in
-    the My Work workspace.
+    Uses a short hash stored in ``description`` to detect source changes.
+    On every migrate: if the hash differs, html+script are updated so browser
+    always reflects the source file. Source code is the single source of truth.
     """
     try:
         if not frappe.db.exists("DocType", "Custom HTML Block"):
-            # Custom HTML Block ships with Frappe v15; if it is missing, skip
-            # rather than raise so the hook does not break older bench setups.
             frappe.logger().warning(
                 "my_work_center_block_seed: 'Custom HTML Block' DocType not found — skipping."
             )
             return
 
+        current_hash = _src_hash()
+
         if frappe.db.exists("Custom HTML Block", BLOCK_NAME):
-            # Already seeded — never overwrite (admin may have customised it).
+            doc = frappe.get_doc("Custom HTML Block", BLOCK_NAME)
+            if _stored_hash(doc.html) == current_hash:
+                return  # source unchanged — nothing to do
+            doc.html = _tagged_html(_HTML, current_hash)
+            doc.script = _SCRIPT
+            doc.save(ignore_permissions=True)
+            frappe.db.commit()
+            frappe.logger().info(f"my_work_center_block_seed: updated '{BLOCK_NAME}' (hash {current_hash}).")
             return
 
         doc = frappe.get_doc({
             "doctype": "Custom HTML Block",
             "name": BLOCK_NAME,
-            "html": _HTML,
+            "html": _tagged_html(_HTML, current_hash),
             "script": _SCRIPT,
         })
         doc.insert(ignore_permissions=True)
