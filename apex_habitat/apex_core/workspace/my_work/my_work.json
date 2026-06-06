@@ -10,8 +10,16 @@
  "is_hidden": 0,
  "sequence_id": 5.0,
  "parent_page": "",
- "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwMyWorkBlock\", \"type\": \"custom_block\", \"data\": {\"custom_block_name\": \"Apex My Work Center\", \"col\": 12}}]",
- "shortcuts": [],
+ "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 12}}, {\"id\": \"mwHdrInbox\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Inbox</b></span>\", \"col\": 12}}, {\"id\": \"mwQlApprovals\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Pending Approvals\", \"col\": 6}}, {\"id\": \"mwQlTasks\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Tasks\", \"col\": 6}}, {\"id\": \"mwQlMentions\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Mentions\", \"col\": 12}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Action Inbox",
+   "idx": 1,
+   "url": "/app/action-inbox"
+  }
+ ],
  "links": [],
  "number_cards": [
   {
@@ -33,16 +41,31 @@
    "idx": 3
   }
  ],
- "custom_blocks": [
+ "custom_blocks": [],
+ "charts": [],
+ "quick_lists": [
   {
-   "doctype": "Workspace Custom Block",
-   "custom_block_name": "Apex My Work Center",
-   "label": "My Work Center",
+   "doctype": "Workspace Quick List",
+   "document_type": "Workflow Action",
+   "label": "Pending Approvals",
+   "quick_list_filter": "[[\"status\", \"=\", \"Open\"]]",
    "idx": 1
+  },
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "ToDo",
+   "label": "My Tasks",
+   "quick_list_filter": "[[\"status\", \"=\", \"Open\"]]",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "Notification Log",
+   "label": "Mentions",
+   "quick_list_filter": "[[\"type\", \"=\", \"Mention\"]]",
+   "idx": 3
   }
  ],
- "charts": [],
- "quick_lists": [],
  "roles": [],
- "modified": "2026-06-05 00:00:00.000000"
+ "modified": "2026-06-06 12:00:00.000000"
 }

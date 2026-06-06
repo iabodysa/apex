@@ -352,9 +352,6 @@ after_install = [
     # the core-Issue role DocPerms drivers and fleet staff need (Support Ticket
     # retired). Idempotent + existence-guarded; also run on after_migrate.
     "apex_habitat.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
-    # My Work Center Custom HTML Block — existence-guarded; also wired in after_migrate
-    # so upgrading sites always get the block on next bench migrate.
-    "apex_habitat.apex_core.setup.seeders.my_work_center_block_seed.seed_my_work_center_block",
 ]
 
 # Install-only hook that runs AFTER sync_dashboards (install order in
@@ -418,10 +415,6 @@ after_migrate = [
     # Profiles are not fixtured, so without this they never reach migrate.
     "apex_habitat.setup.create_roles",
     "apex_habitat.setup.create_role_profiles",
-    # My Work Center Custom HTML Block — existence-guarded, never overwrites admin
-    # edits to the html/script fields. Keeps already-installed sites in sync on
-    # migrate. The block embeds the Universal My Work workspace tab UI.
-    "apex_habitat.apex_core.setup.seeders.my_work_center_block_seed.seed_my_work_center_block",
 ]
 
 # A fresh test site has no Company or ERPNext master data until the setup wizard
