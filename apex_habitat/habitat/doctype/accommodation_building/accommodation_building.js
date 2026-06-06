@@ -13,6 +13,9 @@ function _renderBuildingDashboard(frm) {
 			if (r.exc || !r.message) return;
 			const m = r.message;
 			frm.dashboard.reset();
+			// reset() hides the native Connections (links_area); re-render them so the
+			// linked-document groups (Rooms, Beds, Leases, Residents, ...) still appear.
+			frm.dashboard.render_links();
 			frm.dashboard.add_indicator(__("Active Occupants: {0}", [m.active_occupants]),
 				m.active_occupants ? "blue" : "gray");
 			frm.dashboard.add_indicator(__("Open Maintenance: {0}", [m.open_maintenance]),
