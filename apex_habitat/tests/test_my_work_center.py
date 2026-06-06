@@ -177,36 +177,24 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
             "'mwScReq' content item (My Maintenance Requests shortcut) must be removed.",
         )
 
-    # TEST 1f — the My Work workspace content must contain at least one custom_block
-    # item (the Universal My Work custom page block).
-    def test_my_work_has_custom_block_content_item(self):
+    # TEST 1f — My Work uses NATIVE widgets only (v1.50.16): the fragile shadow-DOM
+    # custom_block was retired because it did not render in the browser. Content must
+    # contain native number cards + an Action Inbox shortcut, and NO custom_block.
+    def test_my_work_is_native_widgets_no_custom_block(self):
         import json
         ws = self._ws()
         content_str = ws.get("content", "")
         content = json.loads(content_str) if isinstance(content_str, str) else content_str
         types = [item.get("type") for item in content]
-        self.assertIn(
+        self.assertNotIn(
             "custom_block",
             types,
-            "My Work workspace content must include at least one 'custom_block' type item "
-            "(the Universal My Work page block).",
+            "My Work must NOT embed a custom_block (the shadow-DOM work center was "
+            "retired; the native Action Inbox page is the interactive surface).",
         )
-
-    # TEST 1g — the custom_block item must reference 'Apex My Work Center'.
-    def test_my_work_custom_block_is_apex_my_work_center(self):
-        import json
-        ws = self._ws()
-        content_str = ws.get("content", "")
-        content = json.loads(content_str) if isinstance(content_str, str) else content_str
-        block_names = [
-            item.get("data", {}).get("custom_block_name")
-            for item in content
-            if item.get("type") == "custom_block"
-        ]
+        self.assertIn("number_card", types, "My Work must keep native number cards.")
         self.assertIn(
-            "Apex My Work Center",
-            block_names,
-            "My Work workspace must embed a custom_block named 'Apex My Work Center'.",
+            "shortcut", types, "My Work must include the native Action Inbox shortcut."
         )
 
     # TEST 1h — roles must be empty ([]) so the workspace is universal (all desk users).
@@ -219,38 +207,36 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
             "universal personal workspace visible to every desk user.",
         )
 
-    # TEST 1i — Action Inbox shortcut must NOT appear in My Work shortcuts or content.
-    # The action-inbox Page still exists; the duplicate workspace shortcut was removed
-    # to eliminate redundant navigation from the My Work workspace.
-    def test_my_work_has_no_action_inbox_shortcut(self):
+    # TEST 1i — Action Inbox shortcut MUST appear (v1.50.16): with the custom_block
+    # retired, the native Action Inbox page is the primary interactive surface, so the
+    # workspace links to it via a URL shortcut to /app/action-inbox.
+    def test_my_work_has_action_inbox_shortcut(self):
         import json
         ws = self._ws()
-        shortcut_links = [s.get("link_to", "") for s in ws.get("shortcuts", [])]
-        self.assertNotIn(
-            "action-inbox",
-            shortcut_links,
-            "My Work workspace must NOT have an Action Inbox shortcut — "
-            "the Custom HTML Block replaces the standalone page shortcut.",
+        shortcut_urls = [s.get("url", "") for s in ws.get("shortcuts", [])]
+        self.assertIn(
+            "/app/action-inbox",
+            shortcut_urls,
+            "My Work must have an Action Inbox shortcut (URL /app/action-inbox) — "
+            "it is the per-user scoped interactive surface.",
         )
         content_str = ws.get("content", "")
         content = json.loads(content_str) if isinstance(content_str, str) else content_str
         content_ids = [item.get("id", "") for item in content]
-        self.assertNotIn(
+        self.assertIn(
             "mwScInbox",
             content_ids,
-            "'mwScInbox' content item (Action Inbox shortcut) must be removed.",
+            "'mwScInbox' content item (Action Inbox shortcut) must be present.",
         )
 
-    # TEST 1j — custom_blocks child table must register 'Apex My Work Center'.
-    def test_my_work_custom_blocks_child_table_registered(self):
+    # TEST 1j — custom_blocks child table must be EMPTY (v1.50.16): the 'Apex My Work
+    # Center' block was retired, so no custom block is registered.
+    def test_my_work_custom_blocks_child_table_empty(self):
         ws = self._ws()
-        custom_block_names = [
-            cb.get("custom_block_name") for cb in ws.get("custom_blocks", [])
-        ]
-        self.assertIn(
-            "Apex My Work Center",
-            custom_block_names,
-            "My Work workspace custom_blocks child table must register 'Apex My Work Center'.",
+        self.assertEqual(
+            ws.get("custom_blocks", []),
+            [],
+            "My Work must register no custom_blocks (the shadow-DOM block was retired).",
         )
 
 
