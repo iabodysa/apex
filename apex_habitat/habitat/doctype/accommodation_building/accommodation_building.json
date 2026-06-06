@@ -373,7 +373,9 @@
    "fieldname": "floor_plan",
    "fieldtype": "Table",
    "label": "Floor Plan",
-   "options": "Accommodation Floor Plan"
+   "options": "Accommodation Floor Plan",
+   "read_only": 1,
+   "description": "Read-only — managed by the Room Generator wizard."
   },
   {
    "fieldname": "accommodation_building_tab_safety",
