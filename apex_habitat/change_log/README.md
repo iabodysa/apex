@@ -4,6 +4,9 @@ Feature = something new you can do; Fix = Apex got steadier or safer.
 
 ## Latest
 
+- [1.50.13](v1/v1_50_13.md)
+- [1.50.12](v1/v1_50_12.md)
+- [1.50.11](v1/v1_50_11.md)
 - **[1.50.7](v1/v1_50_7.md)** · Fix — A reliability fix in resident check-out.
 
 ## 1.50.x

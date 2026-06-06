@@ -76,7 +76,7 @@ def before_save(doc, method=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def generate_rooms_and_beds(building_name, confirm_new_rooms=0):
+def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity_reduction=0):
     """
     Bulk generator for Accommodation Room/Bed records from the floor plan.
 
@@ -138,6 +138,10 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0):
     pending_new_beds = 0
 
     row_failures = []
+    pending_capacity_reductions = 0
+    retired_beds = 0
+    blocked_reductions = []
+    confirm_capacity_reduction = int(confirm_capacity_reduction or 0)
 
     for row in doc.floor_plan:
         floor_num = int(row.floor_number or 0)
@@ -177,7 +181,39 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0):
                 if current and current.room_type != rtype:
                     updates["room_type"] = rtype
                 if current and (current.bed_capacity or 0) != capacity:
-                    updates["bed_capacity"] = capacity
+                    old_cap = int(current.bed_capacity or 0)
+                    if capacity >= old_cap:
+                        # Capacity increase or equal: always safe
+                        updates["bed_capacity"] = capacity
+                    else:
+                        # Capacity reduction: check for occupied surplus beds
+                        if not confirm_capacity_reduction:
+                            pending_capacity_reductions += 1
+                        else:
+                            _surplus_blocked = 0
+                            for _b_idx in range(capacity + 1, old_cap + 1):
+                                _surplus_code = f"{room_number}-B{_b_idx:02d}"
+                                if not frappe.db.exists("Accommodation Bed", _surplus_code):
+                                    continue
+                                _is_temp = frappe.db.get_value("Accommodation Bed", _surplus_code, "is_temporary")
+                                if _is_temp:
+                                    continue
+                                _occupied = frappe.db.exists(
+                                    "Accommodation Assignment",
+                                    {"bed": _surplus_code, "docstatus": 1, "check_out_date": ["is", "not set"]},
+                                )
+                                if _occupied:
+                                    _surplus_blocked += 1
+                                else:
+                                    frappe.db.set_value("Accommodation Bed", _surplus_code, "status", "Out of Service")
+                                    existing_bed_codes.discard(_surplus_code)
+                                    retired_beds += 1
+                            if _surplus_blocked:
+                                blocked_reductions.append(
+                                    _("{0}: {1} occupied bed(s) prevented capacity reduction.").format(room_number, _surplus_blocked)
+                                )
+                            else:
+                                updates["bed_capacity"] = capacity
                 if updates:
                     frappe.db.set_value("Accommodation Room", room_doc_name, updates)
                     updated_rooms += 1
@@ -241,7 +277,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0):
     # Frappe manages the request transaction; do not commit explicitly so that
     # any unhandled error outside this block can still trigger a full rollback.
 
-    needs_confirmation = (pending_new_rooms > 0 or pending_new_beds > 0)
+    needs_confirmation = (pending_new_rooms > 0 or pending_new_beds > 0 or pending_capacity_reductions > 0)
     summary = {
         "created_rooms": created_rooms,
         "updated_rooms": updated_rooms,
@@ -252,19 +288,28 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0):
         "pending_new_beds": pending_new_beds,
         "failures": row_failures,
         "needs_confirmation": needs_confirmation,
+        "pending_capacity_reductions": pending_capacity_reductions,
+        "retired_beds": retired_beds,
+        "blocked_reductions": blocked_reductions,
     }
 
     if needs_confirmation:
         # Re-run with new rooms in the plan, but not confirmed: existing rooms were
         # updated; new ones are held back pending an explicit confirmation.
         msg = _("The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.").format(pending_new_rooms, pending_new_beds, updated_rooms)
+        if pending_capacity_reductions:
+            msg += " " + _("{0} room(s) have a planned capacity reduction pending confirmation.").format(pending_capacity_reductions)
         indicator = "orange"
     else:
         msg = _("Generation complete. Rooms created: {0}, updated: {1}, skipped (existing): {2}. Beds created: {3}.").format(created_rooms, updated_rooms, skipped_rooms, created_beds)
+        if retired_beds > 0:
+            msg += " " + _("{0} surplus bed(s) retired (Out of Service).").format(retired_beds)
         indicator = "green" if not row_failures else "orange"
     if row_failures:
         failure_lines = "<br>".join(row_failures)
         msg += "<br><br>" + _("Failures ({0}):").format(len(row_failures)) + "<br>" + failure_lines
+    if blocked_reductions:
+        msg += "<br><br>" + _("Capacity reductions blocked ({0} room(s) have occupied surplus beds):").format(len(blocked_reductions)) + "<br>" + "<br>".join(blocked_reductions)
     frappe.msgprint(msg, title=_("Room & Bed Generation"), indicator=indicator)
 
     return summary

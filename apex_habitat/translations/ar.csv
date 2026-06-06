@@ -135,6 +135,7 @@ Apex Integration Settings,إعدادات تكامل أبيكس
 Apex Setup,إعداد أبيكس
 Appearance,المظهر
 Applies to All Buildings,يسري على جميع المباني
+Apply,تطبيق
 Apply an operational markup to external-supplier accommodation costs in the Supplier Cost Recovery report.,تطبيق هامش تشغيلي على تكاليف السكن الخاصة بالموردين الخارجيين في تقرير استرداد تكلفة المورّد.
 Applyingâ¦,جارٍ التطبيق…
 Approval Controls,ضوابط الموافقة
@@ -429,6 +430,7 @@ Contract End,نهاية العقد
 Contract Start,بداية العقد
 Contracted daily rental rate. Carried into the Rental Accrual Ledger memo for each in-service day.,سعر الإيجار اليومي المتعاقد عليه. يُنقل إلى مذكرة دفتر استحقاق الإيجار عن كل يوم في الخدمة.
 Contractor / Temp ID,معرّف المتعاقد / المؤقت
+Copy floor to next floor,نسخ الطابق إلى الطابق التالي
 Cost Bearing (%),نسبة تحمّل التكلفة (٪)
 Cost Bleeding (SAR),هدر التكلفة (ريال)
 Cost Center,مركز التكلفة
@@ -629,6 +631,7 @@ Driver Licenses Expiring Soon,رخص القيادة قاربت على الانت
 Driver Operations,عمليات السائقين
 Driver Portal,بوابة السائق
 Driver Stop,إيقاف سائق
+Driver floor,طابق السائقين
 Driver license has expired. Renew before assigning to trips.,انتهت صلاحية رخصة القيادة. يرجى التجديد قبل الإسناد للرحلات.
 Driver portal is not enabled.,بوابة السائق غير مفعّلة.
 "Driver stop record (violation, leave, termination, or transfer). May release the linked vehicle.",سجل إيقاف سائق (مخالفة أو إجازة أو إنهاء خدمة أو نقل). قد يُحرّر المركبة المرتبطة.
@@ -682,6 +685,7 @@ End of Contract,نهاية العقد
 Ended,منتهٍ
 Engine Ledgers / Audit,دفاتر المحركات / التدقيق
 English,الإنجليزية
+Enter the floor number to apply the preset to.,أدخل رقم الطابق لتطبيق القالب عليه.
 Entrance,المدخل
 Error Log,سجل الأخطاء
 Escalated Maintenance Requests,طلبات الصيانة المصعدة
@@ -775,6 +779,7 @@ Fleet Supervisor Dashboard,لوحة معلومات مشرف الأسطول
 Floor,الطابق
 Floor Number,رقم الطابق
 Floor Plan,مخطط الطوابق
+Floor Preset,قالب الطابق
 For Subcontractor or External Worker when Employee link is not available.,للمقاول من الباطن أو العامل الخارجي عند عدم توفّر ارتباط الموظف.
 Forgotten Request,طلب منسي
 Formal lease contract holder for one building. Carries the rent payment schedule. Landlord identity fields stay on Accommodation Building.,حامل عقد الإيجار الرسمي لمبنى واحد. يحمل جدول دفعات الإيجار. تبقى بيانات هوية المالك على سجل المبنى.
@@ -1448,6 +1453,7 @@ Posting Mode,نمط الترحيل
 Pre-Work,قبل العمل
 Pre-defined material sets per issue type. Load into Maintenance Request or Work Order procurement items.,مجموعات مواد معرّفة مسبقاً لكل نوع عطل. تُحمّل ضمن بنود توريد طلب الصيانة أو أمر العمل.
 Preferred Language,اللغة المفضّلة
+Prefix,البادئة
 Prefix added before the room number (e.g. 'A' gives A101). Leave blank for numeric only.,"بادئة تُضاف قبل رقم الغرفة (مثال: ""A"" ينتج A101). اتركها فارغة للأرقام فقط."
 Present,حاضر
 Previous Building,المبنى السابق
@@ -1781,6 +1787,7 @@ Select a building before issuing.,اختر مبنى قبل الصرف.
 Select a building to load the board.,اختر مبنى لتحميل اللوحة.
 Select a building to load the catalog.,اختر مبنى لتحميل الكتالوج.
 Select a building to load the map.,اختر مبنى لتحميل الخريطة.
+Select a preset first.,اختر قالباً أولاً.
 Select a row from the Rent Payment Schedule to generate a payment.,اختر صفاً من جدول الدفعات لتوليد الدفع.
 Select an employee before issuing.,اختر موظفاً قبل الصرف.
 "Select an employee, then tap items to issue.",اختر موظفاً ثم انقر على الأصناف لصرفها.
@@ -2189,6 +2196,8 @@ Work Order marked In Progress.,تم تحديد حالة أمر العمل كـ '
 Work started â status set to In Progress.,بدأ العمل — الحالة: قيد التنفيذ.
 Worked Hours,ساعات العمل
 Worker,عامل
+Worker + Office/Storage,عمال + مكتب/مخزن
+Worker + Supervisor,عمال + مشرف
 Worker Access,وصول العامل
 Worker Count,عدد العمال
 Worker Identity,هوية العامل
@@ -2235,4 +2244,17 @@ room_floor,طابق الغرفة
 room_type,نوع الغرفة
 rooms,غرف
 total_cost,التكلفة الإجمالية
+— apply preset to floor —,— طبّق قالباً على طابق —
+" It will also add {0} new room(s) and {1} new bed(s)."," كما سيضيف {0} غرفة/غرف جديدة و{1} سرير/أسرّة جديدة."
+All Worker (4-bed),جميع العمال (4 أسرّة)
+Capacity reductions blocked ({0} room(s) have occupied surplus beds):,تعليق تخفيضات السعة ({0} غرفة/غرف بها أسرّة زائدة مشغولة):
+Floor {0} is outside the configured upper floors ({1}). The rows were added anyway — adjust the floor selector if needed.,الطابق {0} خارج الطوابق العليا المُعدّة ({1}). أُضيفت الصفوف على أي حال — عدّل محدِّد الطابق إذا لزم.
+Locked — rooms already generated with this code.,مقفل — الغرف وُلِّدت بهذا الرمز بالفعل.
+Mixed (Worker + Isolation),مختلط (عمال + عزل)
+Reducing bed capacity will retire {0} empty bed(s) (set them Out of Service). This cannot be undone automatically. Existing rooms were updated to match the plan.{1} Confirm to proceed?,سيؤدي تخفيض سعة الأسرّة إلى إحالة {0} سرير/أسرّة فارغة (تعيينها «خارج الخدمة»). لا يمكن التراجع عن ذلك تلقائياً. حُدِّثت الغرف الحالية لتطابق الخطة.{1} هل تريد المتابعة؟
+Some rooms could not be reduced — they still have occupied beds: {0},تعذّر تخفيض بعض الغرف — لا تزال بها أسرّة مشغولة: {0}
+"Used in room/bed codes, e.g. JED1-G01.",يُستخدم في رموز الغرف/الأسرّة، مثل JED1-G01.
+{0} room(s) have a planned capacity reduction pending confirmation.,{0} غرفة/غرف بها تخفيض سعة مخطط في انتظار التأكيد.
+{0} surplus bed(s) retired (Out of Service).,أُحيلت {0} سرير/أسرّة زائدة إلى «خارج الخدمة».
+{0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
 â Back,← رجوع
