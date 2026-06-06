@@ -148,14 +148,6 @@
    "link_fieldname": "article",
    "parent_doctype": "Accommodation Checkout",
    "table_fieldname": "custody_return_items"
-  },
-  {
-   "group": "Depreciation",
-   "is_child_table": 1,
-   "link_doctype": "Depreciation Snapshot Item",
-   "link_fieldname": "article",
-   "parent_doctype": "Non-Financial Depreciation Snapshot",
-   "table_fieldname": "items"
   }
  ],
  "permissions": [

@@ -111,8 +111,34 @@
  ],
  "links": [
   {
+   "group": "Assignment",
    "link_doctype": "Accommodation Assignment",
    "link_fieldname": "bed"
+  },
+  {
+   "group": "Checkout",
+   "link_doctype": "Accommodation Checkout",
+   "link_fieldname": "bed"
+  },
+  {
+   "group": "Requests",
+   "link_doctype": "Accommodation Resident Request",
+   "link_fieldname": "bed"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "bed"
+  },
+  {
+   "group": "Bed Transfers",
+   "link_doctype": "Room Bed Transfer",
+   "link_fieldname": "from_bed"
+  },
+  {
+   "group": "Bed Transfers",
+   "link_doctype": "Room Bed Transfer",
+   "link_fieldname": "to_bed"
   }
  ],
  "modified": "2026-06-03 02:50:34.264465",

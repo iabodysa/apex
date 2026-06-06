@@ -491,39 +491,93 @@
  ],
  "links": [
   {
+   "group": "Rooms & Beds",
    "link_doctype": "Accommodation Room",
    "link_fieldname": "building"
   },
   {
+   "group": "Rooms & Beds",
+   "link_doctype": "Accommodation Bed",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Residents",
+   "link_doctype": "Accommodation Assignment",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Residents",
+   "link_doctype": "Temporary Worker",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Residents",
+   "link_doctype": "Accommodation Resident Request",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Contracts",
    "link_doctype": "Accommodation Lease",
    "link_fieldname": "building"
   },
   {
+   "group": "Contracts",
    "link_doctype": "Building License",
    "link_fieldname": "building"
   },
   {
-   "link_doctype": "Safety Inspection Report",
-   "link_fieldname": "building"
-  },
-  {
+   "group": "Maintenance & Facilities",
    "link_doctype": "Maintenance Request",
    "link_fieldname": "building"
   },
   {
+   "group": "Maintenance & Facilities",
+   "link_doctype": "Maintenance Work Order",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Maintenance & Facilities",
+   "link_doctype": "Facility Asset",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Maintenance & Facilities",
+   "link_doctype": "Subcontractor Service Order",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Safety",
+   "link_doctype": "Safety Inspection Report",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Safety",
+   "link_doctype": "Habitat Safety Incident",
+   "link_fieldname": "accommodation_building"
+  },
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Issue",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Custody",
+   "link_doctype": "Facility Asset Custody Assignment",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Cleaning",
+   "link_doctype": "Cleaning Log",
+   "link_fieldname": "building"
+  },
+  {
+   "group": "Utilities",
    "link_doctype": "Utility Account",
    "link_fieldname": "building"
   },
   {
+   "group": "Utilities",
    "link_doctype": "Utility Bill Entry",
-   "link_fieldname": "building"
-  },
-  {
-   "link_doctype": "Accommodation Ledger",
-   "link_fieldname": "building"
-  },
-  {
-   "link_doctype": "Accommodation Assignment",
    "link_fieldname": "building"
   }
  ],

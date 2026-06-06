@@ -119,12 +119,22 @@
  "links": [
   {
    "group": "Movement",
+   "link_doctype": "Transport Request",
+   "link_fieldname": "route_plan"
+  },
+  {
+   "group": "Movement",
    "link_doctype": "Dispatch Trip",
    "link_fieldname": "route_plan"
   },
   {
    "group": "Movement",
    "link_doctype": "Passenger Manifest",
+   "link_fieldname": "route_plan"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Trip Start Log",
    "link_fieldname": "route_plan"
   }
  ],

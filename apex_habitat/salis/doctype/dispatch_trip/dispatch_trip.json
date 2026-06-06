@@ -132,6 +132,16 @@
    "group": "Movement",
    "link_doctype": "Passenger Manifest",
    "link_fieldname": "dispatch_trip"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Transport Request",
+   "link_fieldname": "dispatch_trip"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Trip Start Log",
+   "link_fieldname": "dispatch_trip"
   }
  ],
  "modified": "2026-05-26 02:45:00.000000",

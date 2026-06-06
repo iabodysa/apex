@@ -75,8 +75,19 @@
  ],
  "links": [
   {
+   "group": "Buildings",
    "link_doctype": "Accommodation Building",
    "link_fieldname": "site"
+  },
+  {
+   "group": "Requests",
+   "link_doctype": "Accommodation Resident Request",
+   "link_fieldname": "accommodation_site"
+  },
+  {
+   "group": "QR",
+   "link_doctype": "Accommodation QR Location",
+   "link_fieldname": "accommodation_site"
   }
  ],
  "modified": "2026-06-03 04:17:02.756382",

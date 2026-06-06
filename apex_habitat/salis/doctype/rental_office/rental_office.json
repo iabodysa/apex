@@ -94,11 +94,6 @@
   },
   {
    "group": "Rental",
-   "link_doctype": "Rental Accrual Ledger",
-   "link_fieldname": "rental_office"
-  },
-  {
-   "group": "Rental",
    "link_doctype": "Rental Settlement",
    "link_fieldname": "rental_office"
   },

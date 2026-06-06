@@ -279,11 +279,6 @@
    "group": "Reports",
    "link_doctype": "Idle Resident Report",
    "link_fieldname": "assignment"
-  },
-  {
-   "group": "Costs",
-   "link_doctype": "Accommodation Ledger",
-   "link_fieldname": "assignment"
   }
  ],
  "modified": "2026-05-25 02:00:45.440671",

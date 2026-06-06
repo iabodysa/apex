@@ -319,6 +319,11 @@
    "group": "Movement",
    "link_doctype": "Dispatch Trip",
    "link_fieldname": "transport_request"
+  },
+  {
+   "group": "Operations",
+   "link_doctype": "Trip Start Log",
+   "link_fieldname": "transport_request"
   }
  ],
  "modified": "2026-05-26 02:45:00.000000",

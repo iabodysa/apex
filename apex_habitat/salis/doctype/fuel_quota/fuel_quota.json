@@ -142,6 +142,16 @@
    "group": "Fuel",
    "link_doctype": "Fuel Request",
    "link_fieldname": "fuel_quota"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Claim",
+   "link_fieldname": "fuel_quota"
+  },
+  {
+   "group": "Exceptions",
+   "link_doctype": "Fuel Exception Case",
+   "link_fieldname": "fuel_quota"
   }
  ],
  "modified": "2026-05-26 11:00:00.000000",

@@ -129,7 +129,36 @@
  ],
  "links": [
   {
+   "group": "Beds",
    "link_doctype": "Accommodation Bed",
+   "link_fieldname": "room"
+  },
+  {
+   "group": "Assignments",
+   "link_doctype": "Accommodation Assignment",
+   "link_fieldname": "room"
+  },
+  {
+   "group": "Requests",
+   "link_doctype": "Accommodation Resident Request",
+   "link_fieldname": "room"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "room"
+  },
+  {
+   "group": "Cleaning",
+   "is_child_table": 1,
+   "link_doctype": "Cleaning Log Room Detail",
+   "link_fieldname": "room",
+   "parent_doctype": "Cleaning Log",
+   "table_fieldname": "room_details"
+  },
+  {
+   "group": "QR",
+   "link_doctype": "Accommodation QR Location",
    "link_fieldname": "room"
   }
  ],
