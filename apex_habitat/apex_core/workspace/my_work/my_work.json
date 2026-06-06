@@ -10,7 +10,7 @@
  "is_hidden": 0,
  "sequence_id": 5.0,
  "parent_page": "",
- "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 12}}]",
+ "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwQlApprovals\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Pending Approvals\", \"col\": 4}}, {\"id\": \"mwQlTasks\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Tasks\", \"col\": 4}}, {\"id\": \"mwQlMentions\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Mentions\", \"col\": 4}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 12}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -43,7 +43,29 @@
  ],
  "custom_blocks": [],
  "charts": [],
- "quick_lists": [],
+ "quick_lists": [
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "Workflow Action",
+   "label": "Pending Approvals",
+   "quick_list_filter": "[[\"status\", \"=\", \"Open\"]]",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "ToDo",
+   "label": "My Tasks",
+   "quick_list_filter": "[[\"status\", \"=\", \"Open\"]]",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "Notification Log",
+   "label": "Mentions",
+   "quick_list_filter": "[[\"type\", \"=\", \"Mention\"]]",
+   "idx": 3
+  }
+ ],
  "roles": [],
- "modified": "2026-06-06 13:00:00.000000"
+ "modified": "2026-06-06 14:00:00.000000"
 }

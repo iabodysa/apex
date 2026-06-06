@@ -370,17 +370,20 @@ class TestMyWorkCenter(ApexHabitatTestCase):
             "Action Inbox is a personal surface — it must have NO role restriction (universal access).",
         )
 
-    def test_my_work_has_no_unscoped_quick_list(self):
-        """The 'My Tasks' Quick List was removed: a Workspace Quick List filter is
-        a static string with no current-user token, so it surfaced EVERY user's
-        open ToDos. The per-user Action Inbox is the correct surface."""
+    def test_my_work_quick_lists_are_scoped_doctypes(self):
+        """Owner-approved (v1.50.18): My Work shows native Quick Lists for Workflow
+        Action (role-scoped), ToDo and Notification Log — both ToDo and Notification
+        Log register get_permission_query_conditions, so a regular user sees only
+        their own rows (a System Manager sees all, which the owner accepts)."""
         import json
         path = frappe.get_app_path(
             "apex_habitat", "apex_core", "workspace", "my_work", "my_work.json"
         )
         with open(path) as f:
             ws = json.load(f)
+        dts = {q["document_type"] for q in ws.get("quick_lists", [])}
         self.assertEqual(
-            ws.get("quick_lists", []), [],
-            "My Work must not ship an unscoped ToDo Quick List (it leaked every user's tasks).",
+            dts,
+            {"Workflow Action", "ToDo", "Notification Log"},
+            "My Work must show the three scoped Quick Lists (Workflow Action, ToDo, Notification Log).",
         )
