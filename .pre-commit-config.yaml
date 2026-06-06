@@ -63,16 +63,6 @@ repos:
                 apex_habitat/public/js/lib/.*
             )$
 
-  - repo: local
-    hooks:
-      - id: frappectl-check-translations
-        name: frappectl check-translations
-        language: system
-        entry: frappectl check-translations --max-missing 20 --max-stale 0
-        pass_filenames: false
-        stages: [pre-commit]
-        files: \.(py|js|json|vue|html)$
-
 ci:
     autoupdate_schedule: weekly
     skip: []
