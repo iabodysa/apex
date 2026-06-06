@@ -1,17 +1,17 @@
 {
  "attach_print": 0,
  "channel": "Email",
- "condition": "doc.status == 'Active' and doc.lease_renewal_status != 'Terminated'",
+ "condition": "doc.status == 'Active'",
  "date_changed": "lease_end_date",
  "days_in_advance": 0,
  "docstatus": 0,
  "doctype": "Notification",
- "document_type": "Accommodation Building",
+ "document_type": "Accommodation Lease",
  "enabled": 0,
  "event": "Days Before",
  "idx": 0,
  "is_standard": 1,
- "message": "{{ _(\"The lease for\") }} {{ doc.building_name }} {{ _(\"has ended\") }} ({{ doc.lease_end_date }}).",
+ "message": "{{ _(\"The lease for\") }} {{ doc.building }} {{ _(\"has ended\") }} ({{ doc.lease_end_date }}).",
  "message_type": "HTML",
  "module": "Habitat",
  "name": "Habitat - Building Lease Expired",
@@ -25,6 +25,6 @@
  ],
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
- "subject": "Building Lease EXPIRED: {{ doc.building_name }}",
- "modified": "2026-06-02 13:30:00.000000"
+ "subject": "Building Lease EXPIRED: {{ doc.building }}",
+ "modified": "2026-06-06 00:00:00.000000"
 }

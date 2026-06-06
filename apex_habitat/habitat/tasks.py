@@ -401,51 +401,54 @@ def open_maintenance_escalation() -> None:
 
 
 def lease_expiry_watchlist() -> None:
-    """Alert on buildings with leases expiring within 90 days.
+    """Alert on leases expiring within the configured lead days.
 
-    Reads Accommodation Building.lease_end_date (v2.3 calibration field).
-    Sets lease_renewal_status = Expired for past-due leases.
-    Email notifications are handled by Phase 7 Notification DocType config.
+    Queries Accommodation Lease (submitted, status=Active) directly —
+    the authoritative source for lease dates.
+    Sets lease status = Expired when lease_end_date has passed.
     """
     from frappe.utils import date_diff, today
 
     today_str = today()
     logger = frappe.logger()
+    lease_lead = frappe.db.get_single_value("Habitat Settings", "lease_expiry_days_before") or 90
 
-    # Paginate active buildings with a lease_end_date at 500/batch
     start = 0
     batch_size = 500
     while True:
-        buildings = frappe.get_all(
-            "Accommodation Building",
-            filters={"status": "Active", "lease_end_date": ["is", "set"]},
-            fields=["name", "building_name", "lease_end_date", "lease_renewal_status"],
+        leases = frappe.get_all(
+            "Accommodation Lease",
+            filters={"docstatus": 1, "status": "Active", "lease_end_date": ["is", "set"]},
+            fields=["name", "building", "lease_end_date"],
             limit_start=start,
             limit_page_length=batch_size,
         )
-        if not buildings:
+        if not leases:
             break
 
-        for b in buildings:
+        for lease in leases:
             try:
-                lease_lead = frappe.db.get_single_value("Habitat Settings", "lease_expiry_days_before") or 90
-                days = date_diff(b.lease_end_date, today_str)
-                if days < 0 and b.lease_renewal_status != "Expired":
-                    frappe.db.set_value(
-                        "Accommodation Building", b.name, "lease_renewal_status", "Expired"
+                days = date_diff(lease.lease_end_date, today_str)
+                if days < 0:
+                    frappe.db.set_value("Accommodation Lease", lease.name, "status", "Expired")
+                    msg = (
+                        f"lease_expiry_watchlist: lease {lease.name} "
+                        f"(building {lease.building}) expired {abs(days)} days ago."
                     )
-                    msg = f"lease_expiry_watchlist: {b.building_name} lease expired {abs(days)} days ago."
                     logger.warning(msg)
-                    _notify_operational("Accommodation Building", b.name, msg)
+                    _notify_operational("Accommodation Lease", lease.name, msg)
                 elif 0 <= days <= lease_lead:
-                    msg = f"lease_expiry_watchlist: {b.building_name} lease expires in {days} days ({b.lease_end_date})."
+                    msg = (
+                        f"lease_expiry_watchlist: lease {lease.name} "
+                        f"(building {lease.building}) expires in {days} days ({lease.lease_end_date})."
+                    )
                     logger.warning(msg)
-                    _notify_operational("Accommodation Building", b.name, msg)
+                    _notify_operational("Accommodation Lease", lease.name, msg)
             except Exception:
-                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
+                frappe.db.rollback()
                 frappe.log_error(
                     message=frappe.get_traceback(),
-                    title=f"Lease expiry watchlist failed for {b.name}"[:140],
+                    title=f"Lease expiry watchlist failed for {lease.name}"[:140],
                 )
 
         start += batch_size

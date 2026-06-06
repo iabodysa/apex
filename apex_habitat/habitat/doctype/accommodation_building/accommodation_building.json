@@ -26,9 +26,6 @@
   "landlord_mobile",
   "landlord_office",
   "accommodation_building_landlord_col",
-  "lease_start_date",
-  "lease_end_date",
-  "lease_renewal_status",
   "accommodation_building_sec_capacity",
   "over_capacity_allowed",
   "accommodation_building_capacity_col",
@@ -37,7 +34,6 @@
   "address",
   "accommodation_building_tab_financials",
   "accommodation_building_sec_financials",
-  "rent_due_day",
   "annual_rent_sar",
   "default_cost_center",
   "annual_total_cost_sar",
@@ -202,23 +198,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "lease_start_date",
-   "fieldtype": "Date",
-   "label": "Lease Start Date"
-  },
-  {
-   "fieldname": "lease_end_date",
-   "fieldtype": "Date",
-   "label": "Lease End Date"
-  },
-  {
-   "default": "Active",
-   "fieldname": "lease_renewal_status",
-   "fieldtype": "Select",
-   "label": "Lease Status",
-   "options": "Active\nUnder Renewal\nExpired\nTerminated"
-  },
-  {
    "collapsible": 1,
    "fieldname": "accommodation_building_sec_capacity",
    "fieldtype": "Section Break",
@@ -260,11 +239,6 @@
    "fieldname": "accommodation_building_sec_financials",
    "fieldtype": "Section Break",
    "label": "Financial Information"
-  },
-  {
-   "fieldname": "rent_due_day",
-   "fieldtype": "Int",
-   "label": "Rent Due Day of Month"
   },
   {
    "fieldname": "annual_rent_sar",
