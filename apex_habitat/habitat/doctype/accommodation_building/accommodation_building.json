@@ -159,7 +159,8 @@
   {
    "fieldname": "google_maps_url",
    "fieldtype": "Data",
-   "label": "Google Maps Link"
+   "label": "Google Maps Link",
+   "options": "URL"
   },
   {
    "fieldname": "total_capacity",
