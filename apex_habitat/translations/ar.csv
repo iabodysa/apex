@@ -62,6 +62,13 @@ Acknowledgement Received,تم استلام الإقرار
 Action Inbox,صندوق الإجراءات الواردة
 Live Inbox,الوارد المباشر
 Mentions,الإشارات
+Floor Layout,مخطط الطوابق
+Available: {0},متاح: {0}
+Partial / Attention: {0},جزئي / انتباه: {0}
+Full: {0},ممتلئ: {0}
+Maintenance: {0},صيانة: {0}
+No rooms found for this building.,لا توجد غرف لهذا المبنى.
+Ground Floor,الطابق الأرضي
 Floor Type,نوع الطابق
 Room Types,أنواع الغرف
 Add Floor,إضافة طابق

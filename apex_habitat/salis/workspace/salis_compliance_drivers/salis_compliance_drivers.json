@@ -18,6 +18,9 @@
   },
   {
    "role": "Internal Auditor"
+  },
+  {
+   "role": "System Manager"
   }
  ],
  "is_default": 0,
@@ -166,5 +169,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-03 01:45:38.000000"
+ "modified": "2026-06-07 12:00:00.000000"
 }

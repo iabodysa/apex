@@ -32,17 +32,31 @@ def _upsert_dashboard(name, charts, cards):
     if not chart_rows and not card_rows:
         return  # nothing valid to show — don't create an empty dashboard
     if frappe.db.exists("Dashboard", name):
+        # CREATE-ONLY for existing dashboards: preserve admin-added/reordered tiles;
+        # only append spec charts/cards that are not already present (compare by name).
         doc = frappe.get_doc("Dashboard", name)
-        doc.set("charts", [])
-        doc.set("cards", [])
+        existing_chart_names = {row.chart for row in doc.charts}
+        existing_card_names = {row.card for row in doc.cards}
+        added = False
+        for ch in chart_rows:
+            if ch["chart"] not in existing_chart_names:
+                doc.append("charts", ch)
+                added = True
+        for cd in card_rows:
+            if cd["card"] not in existing_card_names:
+                doc.append("cards", cd)
+                added = True
+        if not added:
+            return  # nothing new to append — skip the save
+        doc.save(ignore_permissions=True)  # audit-ok
     else:
         doc = frappe.get_doc({"doctype": "Dashboard", "dashboard_name": name,
                               "module": "Habitat", "is_default": 0, "is_standard": 0})
-    for ch in chart_rows:
-        doc.append("charts", ch)
-    for cd in card_rows:
-        doc.append("cards", cd)
-    doc.save(ignore_permissions=True) if not doc.is_new() else doc.insert(ignore_permissions=True)  # audit-ok
+        for ch in chart_rows:
+            doc.append("charts", ch)
+        for cd in card_rows:
+            doc.append("cards", cd)
+        doc.insert(ignore_permissions=True)  # audit-ok
 
 
 def seed_habitat_dashboard():

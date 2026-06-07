@@ -59,6 +59,7 @@
   "accommodation_building_sec_floor_plan",
   "floor_plan",
   "setup_instructions_html",
+  "floor_layout_html",
   "accommodation_building_tab_safety",
   "accommodation_building_sec_safety_profile",
   "safety_setup_status",
@@ -137,7 +138,8 @@
   {
    "fieldname": "total_rooms",
    "fieldtype": "Int",
-   "label": "Total Rooms"
+   "label": "Total Rooms",
+   "read_only": 1
   },
   {
    "fieldname": "accommodation_building_overview_col",
@@ -183,17 +185,20 @@
   {
    "fieldname": "landlord_name",
    "fieldtype": "Data",
-   "label": "Landlord Name"
+   "label": "Landlord Name",
+   "read_only": 1
   },
   {
    "fieldname": "landlord_mobile",
    "fieldtype": "Data",
-   "label": "Landlord Mobile"
+   "label": "Landlord Mobile",
+   "read_only": 1
   },
   {
    "fieldname": "landlord_office",
    "fieldtype": "Data",
-   "label": "Landlord Office / Real Estate Agency"
+   "label": "Landlord Office / Real Estate Agency",
+   "read_only": 1
   },
   {
    "fieldname": "accommodation_building_landlord_col",
@@ -375,6 +380,11 @@
   {
    "fieldname": "setup_instructions_html",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "floor_layout_html",
+   "fieldtype": "HTML",
+   "label": "Floor Layout"
   },
   {
    "fieldname": "floor_plan",

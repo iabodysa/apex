@@ -1,4 +1,95 @@
 // Client-side script for Accommodation Building
+
+function _injectFloorLayoutStyles() {
+	if (document.getElementById("apex-floor-layout-style")) return;
+	var style = document.createElement("style");
+	style.id = "apex-floor-layout-style";
+	style.textContent = [
+		".apex-floor-section { margin-bottom: 18px; }",
+		".apex-floor-label { font-weight: 600; font-size: 13px; margin-bottom: 8px; color: #555; }",
+		".apex-room-grid { display: flex; flex-wrap: wrap; gap: 6px; }",
+		".apex-room-tile {",
+		"  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;",
+		"  width: 72px; min-height: 48px; border-radius: 5px; cursor: pointer;",
+		"  font-size: 11px; font-weight: 600; color: #fff; padding: 4px 3px; text-align: center;",
+		"  border: 1px solid rgba(0,0,0,0.10); box-shadow: 0 1px 2px rgba(0,0,0,0.08);",
+		"  transition: opacity 0.15s;",
+		"}",
+		".apex-room-tile:hover { opacity: 0.85; }",
+		".apex-room-tile.color-green  { background: #4caf50; }",
+		".apex-room-tile.color-orange { background: #ff9800; }",
+		".apex-room-tile.color-red    { background: #f44336; }",
+		".apex-room-tile.color-grey   { background: #9e9e9e; }",
+		".apex-room-occ { font-size: 10px; font-weight: 400; margin-top: 2px; opacity: 0.92; }",
+		".apex-layout-summary { display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }",
+		".apex-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #555; }",
+		".apex-legend-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }",
+	].join("\n");
+	document.head.appendChild(style);
+}
+
+function _renderFloorLayout(frm) {
+	if (frm.is_new()) return;
+	frappe.call({
+		method: "apex_habitat.habitat.api.building_dashboard.get_building_layout",
+		args: { building: frm.doc.name },
+		callback: function (r) {
+			if (r.exc || !r.message) return;
+			var data = r.message;
+
+			_injectFloorLayoutStyles();
+
+			var wrapper = frm.get_field("floor_layout_html").$wrapper;
+			wrapper.empty();
+
+			// Summary legend
+			var s = data.summary;
+			var legendHtml = [
+				'<div class="apex-layout-summary">',
+				'<div class="apex-legend-item"><span class="apex-legend-dot" style="background:#4caf50"></span>',
+				__("Available: {0}", [s.available]), '</div>',
+				'<div class="apex-legend-item"><span class="apex-legend-dot" style="background:#ff9800"></span>',
+				__("Partial / Attention: {0}", [s.partial]), '</div>',
+				'<div class="apex-legend-item"><span class="apex-legend-dot" style="background:#f44336"></span>',
+				__("Full: {0}", [s.full]), '</div>',
+				'<div class="apex-legend-item"><span class="apex-legend-dot" style="background:#9e9e9e"></span>',
+				__("Maintenance: {0}", [s.maintenance]), '</div>',
+				'</div>',
+			].join("");
+			wrapper.append($(legendHtml));
+
+			if (!data.floors || !data.floors.length) {
+				wrapper.append($('<p style="color:#999;font-size:13px;">' + __("No rooms found for this building.") + '</p>'));
+				return;
+			}
+
+			data.floors.forEach(function (floor) {
+				var section = $('<div class="apex-floor-section"></div>');
+				section.append($('<div class="apex-floor-label"></div>').text(__(floor.floor_label)));
+				var grid = $('<div class="apex-room-grid"></div>');
+
+				(floor.rooms || []).forEach(function (room) {
+					var occ = (room.current_occupancy != null ? room.current_occupancy : "—");
+					var cap = (room.bed_capacity != null ? room.bed_capacity : "—");
+					var tile = $(
+						'<div class="apex-room-tile color-' + (room.room_color || "grey") + '" title="' +
+						frappe.utils.escape_html(room.room_number || room.name) + '"></div>'
+					);
+					tile.append($('<div></div>').text(room.room_number || room.name));
+					tile.append($('<div class="apex-room-occ"></div>').text(occ + "/" + cap));
+					tile.on("click", function () {
+						frappe.set_route("Form", "Accommodation Room", room.name);
+					});
+					grid.append(tile);
+				});
+
+				section.append(grid);
+				wrapper.append(section);
+			});
+		},
+	});
+}
+
 function _toggleFloorFields(frm) {
 	const isApartment = frm.doc.accommodation_type === "Apartment";
 	frm.set_df_property("total_floors", "hidden", isApartment ? 1 : 0);
@@ -40,6 +131,11 @@ frappe.ui.form.on("Accommodation Building", {
 	refresh(frm) {
 		_toggleFloorFields(frm);
 		_renderBuildingDashboard(frm);
+
+		// Floor layout grid (saved docs only — lazy fetch)
+		if (!frm.is_new()) {
+			_renderFloorLayout(frm);
+		}
 
 		// Native Address (Address DocType via Dynamic Link): render the address list
 		// for saved buildings; the legacy free-text address field is hidden.

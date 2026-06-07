@@ -26,7 +26,6 @@
   "last_modified_by_role",
   "operational_notifications_sec",
   "enable_operational_notifications",
-  "notification_channel",
   "operational_notifications_col",
   "license_expiry_days_before",
   "lease_expiry_days_before",
@@ -179,18 +178,10 @@
   },
   {
    "default": "0",
-   "description": "When ON, expiry/overdue scheduler jobs post a timeline comment on the source document (and any configured Notification emails fire). When OFF, jobs run silently.",
+   "description": "When ON, expiry/overdue scheduler jobs post a timeline comment on the source document. Email is controlled by the Notification DocType. When OFF, jobs run silently.",
    "fieldname": "enable_operational_notifications",
    "fieldtype": "Check",
    "label": "Enable Operational Notifications"
-  },
-  {
-   "default": "In-App Only",
-   "depends_on": "eval:doc.enable_operational_notifications",
-   "fieldname": "notification_channel",
-   "fieldtype": "Select",
-   "label": "Notification Channel",
-   "options": "In-App Only\nEmail\nIn-App and Email"
   },
   {
    "fieldname": "operational_notifications_col",

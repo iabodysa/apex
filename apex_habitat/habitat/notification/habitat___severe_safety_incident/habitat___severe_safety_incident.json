@@ -16,9 +16,6 @@
  "name": "Habitat - Severe Safety Incident",
  "recipients": [
   {
-   "receiver_by_role": "System Manager"
-  },
-  {
    "receiver_by_role": "Accommodation Manager"
   }
  ],

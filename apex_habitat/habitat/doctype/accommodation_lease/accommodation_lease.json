@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-23 23:31:43.779074",
- "description": "Formal lease contract holder for one building. Carries the rent payment schedule. Landlord identity fields stay on Accommodation Building.",
+ "description": "Formal lease contract holder for one building. Carries the rent payment schedule. The landlord is identified by the Lease's supplier field.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

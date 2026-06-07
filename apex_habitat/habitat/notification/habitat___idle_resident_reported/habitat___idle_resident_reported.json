@@ -20,9 +20,6 @@
   },
   {
    "receiver_by_role": "HR Manager"
-  },
-  {
-   "receiver_by_role": "System Manager"
   }
  ],
  "send_system_notification": 0,

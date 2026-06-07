@@ -12,6 +12,97 @@ from frappe.utils import flt
 
 
 @frappe.whitelist()
+def get_building_layout(building: str) -> dict:
+    """Return a floor-grouped room layout for the building dashboard.
+
+    One query, grouped by floor (ascending). Each room carries a server-computed
+    ``room_color``:
+      - green  : status "Available"
+      - orange : status "Partially Occupied" OR readiness_status indicates
+                 needs cleaning / repair
+      - red    : status "Full"
+      - grey   : status "Under Maintenance" or "Out of Service"
+    """
+    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+
+    rooms = frappe.get_all(
+        "Accommodation Room",
+        filters={"building": building},
+        fields=[
+            "name",
+            "room_number",
+            "floor",
+            "room_type",
+            "status",
+            "readiness_status",
+            "bed_capacity",
+            "current_occupancy",
+        ],
+    )
+
+    _NEEDS_ATTENTION = {"Needs Cleaning", "Needs Repair"}
+
+    def _color(room):
+        s = (room.status or "").strip()
+        r = (room.readiness_status or "").strip()
+        if s in ("Under Maintenance", "Out of Service"):
+            return "grey"
+        if s == "Full":
+            return "red"
+        if s == "Partially Occupied" or r in _NEEDS_ATTENTION:
+            return "orange"
+        if s == "Available":
+            return "green"
+        return "grey"
+
+    for room in rooms:
+        room["room_color"] = _color(room)
+
+    # Group by floor, ascending
+    floors_map = {}
+    for room in rooms:
+        floor_num = room.floor if room.floor is not None else 0
+        if floor_num not in floors_map:
+            floors_map[floor_num] = []
+        floors_map[floor_num].append(room)
+
+    floors = []
+    for floor_num in sorted(floors_map.keys()):
+        floor_rooms = floors_map[floor_num]
+        if floor_num == 0:
+            floor_label = "Ground Floor"
+        elif floor_num < 0:
+            floor_label = f"Basement {abs(floor_num)}"
+        else:
+            floor_label = f"Floor {floor_num}"
+        floors.append({
+            "floor": floor_num,
+            "floor_label": floor_label,
+            "rooms": floor_rooms,
+        })
+
+    # Summary counts
+    summary = {"available": 0, "partial": 0, "full": 0, "maintenance": 0}
+    for room in rooms:
+        c = room["room_color"]
+        if c == "green":
+            summary["available"] += 1
+        elif c == "orange":
+            summary["partial"] += 1
+        elif c == "red":
+            summary["full"] += 1
+        else:
+            summary["maintenance"] += 1
+
+    return {
+        "building": building,
+        "total_rooms": len(rooms),
+        "floors": floors,
+        "summary": summary,
+    }
+
+
+@frappe.whitelist()
 def get_building_metrics(building: str) -> dict:
     frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
 

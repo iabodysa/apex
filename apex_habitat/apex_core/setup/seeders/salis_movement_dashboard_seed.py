@@ -180,7 +180,13 @@ def _existing_cards(cards):
 
 
 def _upsert_dashboard(name, charts, cards):
-    """Create/update one Dashboard, linking only charts/cards that exist."""
+    """Create/update one Dashboard, linking only charts/cards that exist.
+
+    CREATE-ONLY for existing dashboards: when the Dashboard already exists, only
+    append spec charts/cards that are missing (compared by name), preserving any
+    admin-added or reordered tiles.  When the Dashboard does not yet exist (first
+    install), it is built fully from the spec.
+    """
     sp = "salis_mv_dashboard_seed"
     frappe.db.savepoint(sp)
     try:
@@ -189,20 +195,31 @@ def _upsert_dashboard(name, charts, cards):
         if not chart_rows and not card_rows:
             return  # nothing valid to show — don't create an empty dashboard
         if frappe.db.exists("Dashboard", name):
+            # Existing dashboard — append only missing tiles; never clear+rebuild.
             doc = frappe.get_doc("Dashboard", name)
-            doc.set("charts", [])
-            doc.set("cards", [])
+            existing_chart_names = {row.chart for row in doc.charts}
+            existing_card_names = {row.card for row in doc.cards}
+            added = False
+            for ch in chart_rows:
+                if ch["chart"] not in existing_chart_names:
+                    doc.append("charts", ch)
+                    added = True
+            for cd in card_rows:
+                if cd["card"] not in existing_card_names:
+                    doc.append("cards", cd)
+                    added = True
+            if not added:
+                return  # nothing new to append — skip the save
+            doc.save(ignore_permissions=True)  # audit-ok
         else:
+            # First install — build the dashboard fully from the spec.
             doc = frappe.get_doc({"doctype": "Dashboard", "dashboard_name": name,
                                   "module": MODULE, "is_default": 0, "is_standard": 0})
-        for ch in chart_rows:
-            doc.append("charts", ch)
-        for cd in card_rows:
-            doc.append("cards", cd)
-        if doc.is_new():
+            for ch in chart_rows:
+                doc.append("charts", ch)
+            for cd in card_rows:
+                doc.append("cards", cd)
             doc.insert(ignore_permissions=True)  # audit-ok
-        else:
-            doc.save(ignore_permissions=True)  # audit-ok
     except Exception:
         # Log FIRST (before rollback, so the log row survives), then undo only
         # this dashboard via the savepoint — one bad dashboard can't discard

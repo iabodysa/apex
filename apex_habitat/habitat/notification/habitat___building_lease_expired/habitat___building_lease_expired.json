@@ -18,9 +18,6 @@
  "recipients": [
   {
    "receiver_by_role": "Accommodation Manager"
-  },
-  {
-   "receiver_by_role": "System Manager"
   }
  ],
  "send_system_notification": 0,
