@@ -196,8 +196,19 @@ def _grant_issue_role_perms():
     for role, flags in _ISSUE_ROLE_PERMS:
         if not frappe.db.exists("Role", role):
             continue  # role not seeded on this site — skip, never fatal
-        # Create the Custom DocPerm row at permlevel 0 if absent (no-op if present).
-        add_permission("Issue", role, ptype="read", permlevel=0)
+        # add_permission() only matches if_owner=0 rows internally, so once if_owner
+        # is flipped to 1 (below) a naive re-run created a DUPLICATE Custom DocPerm
+        # row on every migrate. Key on (parent, role, permlevel): self-heal any
+        # accumulated duplicates, create the row once, then converge the flags.
+        rows = frappe.get_all(
+            "Custom DocPerm",
+            filters={"parent": "Issue", "role": role, "permlevel": 0},
+            pluck="name",
+        )
+        for extra in rows[1:]:
+            frappe.delete_doc("Custom DocPerm", extra, ignore_permissions=True)
+        if not rows:
+            add_permission("Issue", role, ptype="read", permlevel=0)
         # Converge every flag explicitly (read/create/write/if_owner) so a re-run
         # is self-healing and matches the documented intent.
         for ptype, value in flags.items():
