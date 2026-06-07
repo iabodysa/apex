@@ -23,5 +23,5 @@
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
  "subject": "Building Lease EXPIRED: {{ doc.building }}",
- "modified": "2026-06-06 00:00:00.000000"
+ "modified": "2026-06-07 18:38:24.058196"
 }
