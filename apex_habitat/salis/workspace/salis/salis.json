@@ -132,9 +132,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Apex Core",
+   "label": "Launchpad",
    "link_type": "Workspace",
-   "link_to": "Apex Core",
+   "link_to": "Launchpad",
    "idx": 6
   },
   {
