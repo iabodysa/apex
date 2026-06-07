@@ -11,6 +11,7 @@
   "company",
   "building",
   "supplier",
+  "lease_reference",
   "status",
   "lease_start_date",
   "lease_end_date",
@@ -19,14 +20,15 @@
   "company_share_pct",
   "billing_cycle",
   "first_payment_date",
-  "naming_series",
   "total_scheduled",
+  "naming_series",
   "accommodation_lease_sec_large_text",
-  "lease_reference",
   "notes",
   "accommodation_lease_tab_tables",
   "accommodation_lease_sec_table_payment_schedule",
   "payment_schedule",
+  "accommodation_lease_tab_system",
+  "accommodation_lease_sec_amendment",
   "amended_from"
  ],
  "fields": [
@@ -64,6 +66,12 @@
    "in_standard_filter": 1,
    "label": "Landlord Supplier",
    "options": "Supplier"
+  },
+  {
+   "description": "Landlord-issued contract number or file reference.",
+   "fieldname": "lease_reference",
+   "fieldtype": "Data",
+   "label": "Lease / Contract Reference"
   },
   {
    "default": "Active",
@@ -122,15 +130,6 @@
    "reqd": 1
   },
   {
-   "default": "ACC-LEASE-.YYYY.-.####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "ACC-LEASE-.YYYY.-.####",
-   "reqd": 1
-  },
-  {
    "description": "Auto-computed sum of all payment schedule rows.",
    "fieldname": "total_scheduled",
    "fieldtype": "Currency",
@@ -138,10 +137,13 @@
    "read_only": 1
   },
   {
-   "description": "Landlord-issued contract number or file reference.",
-   "fieldname": "lease_reference",
-   "fieldtype": "Data",
-   "label": "Lease / Contract Reference"
+   "default": "ACC-LEASE-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ACC-LEASE-.YYYY.-.####",
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -171,6 +173,16 @@
    "options": "Rent Payment Schedule"
   },
   {
+   "fieldname": "accommodation_lease_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System Info"
+  },
+  {
+   "fieldname": "accommodation_lease_sec_amendment",
+   "fieldtype": "Section Break",
+   "label": "Amendment"
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -183,7 +195,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-02 09:00:00.000001",
+ "modified": "2026-06-07 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Lease",

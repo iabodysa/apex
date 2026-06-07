@@ -12,8 +12,9 @@
   "building",
   "party_type",
   "party",
-  "issued_to_employee",
   "custody_issue_overview_col",
+  "status",
+  "issued_to_employee",
   "issued_to_name",
   "naming_series",
   "custody_issue_sec_large_text",
@@ -23,7 +24,6 @@
   "items",
   "custody_issue_tab_system",
   "custody_issue_sec_system",
-  "status",
   "amended_from"
  ],
  "fields": [
@@ -83,6 +83,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.party_type!='Employee'",
    "fieldname": "issued_to_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -162,7 +163,7 @@
    "link_fieldname": "custody_issue"
   }
  ],
- "modified": "2026-06-02 09:00:00.000005",
+ "modified": "2026-06-07 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Issue",

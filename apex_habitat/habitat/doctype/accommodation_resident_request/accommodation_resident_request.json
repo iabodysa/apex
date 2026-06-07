@@ -6,15 +6,54 @@
  "is_submittable": 0,
  "engine": "InnoDB",
  "track_changes": 1,
+ "field_order": [
+  "arr_tab_overview",
+  "arr_sec_request_scope",
+  "source_channel",
+  "accommodation_site",
+  "building",
+  "room",
+  "bed",
+  "arr_col_resident",
+  "requester_type",
+  "party_type",
+  "party",
+  "employee",
+  "worker_name",
+  "mobile_number",
+  "preferred_language",
+  "arr_sec_request_details",
+  "request_category",
+  "priority",
+  "issue_location",
+  "description",
+  "attachment",
+  "arr_sec_resolution",
+  "status",
+  "assigned_to",
+  "triage_notes",
+  "resolution_notes",
+  "arr_tab_system",
+  "arr_sec_system",
+  "naming_series",
+  "anonymous_tracking_code",
+  "location_token",
+  "target_doctype",
+  "target_document",
+  "arr_col_system",
+  "closed_on",
+  "closed_by"
+ ],
  "fields": [
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "REQ-.YYYY.-.####",
-   "reqd": 1,
-   "default": "REQ-.YYYY.-.####",
-   "hidden": 1
+   "fieldname": "arr_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "arr_sec_request_scope",
+   "fieldtype": "Section Break",
+   "label": "Location & Resident"
   },
   {
    "fieldname": "source_channel",
@@ -22,17 +61,6 @@
    "label": "Source Channel",
    "options": "QR Web Form\nManual Entry",
    "default": "QR Web Form"
-  },
-  {
-   "fieldname": "location_token",
-   "fieldtype": "Data",
-   "label": "Location Token"
-  },
-  {
-   "fieldname": "anonymous_tracking_code",
-   "fieldtype": "Data",
-   "label": "Anonymous Tracking Code",
-   "read_only": 1
   },
   {
    "fieldname": "accommodation_site",
@@ -62,7 +90,7 @@
    "search_index": 1
   },
   {
-   "fieldname": "col1",
+   "fieldname": "arr_col_resident",
    "fieldtype": "Column Break"
   },
   {
@@ -113,7 +141,7 @@
    "options": "English\nArabic\nUrdu\nHindi\nBengali"
   },
   {
-   "fieldname": "sec2",
+   "fieldname": "arr_sec_request_details",
    "fieldtype": "Section Break",
    "label": "Request Details"
   },
@@ -149,7 +177,7 @@
    "label": "Attachment"
   },
   {
-   "fieldname": "sec3",
+   "fieldname": "arr_sec_resolution",
    "fieldtype": "Section Break",
    "label": "Resolution"
   },
@@ -167,6 +195,46 @@
    "options": "User"
   },
   {
+   "fieldname": "triage_notes",
+   "fieldtype": "Small Text",
+   "label": "Triage Notes"
+  },
+  {
+   "fieldname": "resolution_notes",
+   "fieldtype": "Small Text",
+   "label": "Resolution Notes"
+  },
+  {
+   "fieldname": "arr_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System Info"
+  },
+  {
+   "fieldname": "arr_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Administrative Details"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "REQ-.YYYY.-.####",
+   "reqd": 1,
+   "default": "REQ-.YYYY.-.####",
+   "hidden": 1
+  },
+  {
+   "fieldname": "anonymous_tracking_code",
+   "fieldtype": "Data",
+   "label": "Anonymous Tracking Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "location_token",
+   "fieldtype": "Data",
+   "label": "Location Token"
+  },
+  {
    "fieldname": "target_doctype",
    "fieldtype": "Data",
    "label": "Target DocType",
@@ -179,14 +247,8 @@
    "read_only": 1
   },
   {
-   "fieldname": "triage_notes",
-   "fieldtype": "Small Text",
-   "label": "Triage Notes"
-  },
-  {
-   "fieldname": "resolution_notes",
-   "fieldtype": "Small Text",
-   "label": "Resolution Notes"
+   "fieldname": "arr_col_system",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "closed_on",
@@ -256,5 +318,6 @@
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "modified": "2026-06-07 14:00:00.000000"
 }

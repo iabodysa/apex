@@ -5,21 +5,41 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
+  "route_plan_tab_overview",
+  "route_plan_sec_route_details",
   "route_name",
   "transport_request",
-  "requested_by_operations",
-  "fulfilled_by_movement",
   "project",
   "shift",
   "vehicle",
   "driver",
+  "route_plan_col_route_details",
+  "requested_by_operations",
+  "fulfilled_by_movement",
   "stops_sec",
   "stops",
+  "route_plan_col_stops",
   "total_stops",
+  "route_plan_tab_system",
+  "route_plan_sec_system",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
+  {
+   "fieldname": "route_plan_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "route_plan_sec_route_details",
+   "fieldtype": "Section Break",
+   "label": "Route Details"
+  },
+  {
+   "fieldname": "route_plan_col_route_details",
+   "fieldtype": "Column Break"
+  },
   {
    "default": "RP-.######",
    "fieldname": "naming_series",
@@ -99,10 +119,24 @@
    "options": "Route Stop"
   },
   {
+   "fieldname": "route_plan_col_stops",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "total_stops",
    "fieldtype": "Int",
    "label": "Total Stops",
    "read_only": 1
+  },
+  {
+   "fieldname": "route_plan_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System Info"
+  },
+  {
+   "fieldname": "route_plan_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Info"
   },
   {
    "fieldname": "amended_from",
@@ -138,7 +172,7 @@
    "link_fieldname": "route_plan"
   }
  ],
- "modified": "2026-05-26 02:45:00.000000",
+ "modified": "2026-06-07 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Plan",

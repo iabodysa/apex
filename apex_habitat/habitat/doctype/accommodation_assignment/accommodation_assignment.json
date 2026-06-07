@@ -16,13 +16,15 @@
   "bed",
   "accommodation_assignment_overview_col",
   "check_in_date",
+  "room_condition_snapshot",
   "assignment_type",
   "stay_type",
   "expected_checkout_date",
-  "room_condition_snapshot",
   "previous_building",
   "naming_series",
   "cost_center",
+  "is_external_supplier",
+  "billed_to_supplier",
   "accommodation_assignment_sec_large_text",
   "notes",
   "accommodation_assignment_tab_tables",
@@ -34,9 +36,7 @@
   "check_out_date",
   "accommodation_assignment_system_col",
   "housing_allowance_suspended",
-  "amended_from",
-  "is_external_supplier",
-  "billed_to_supplier"
+  "amended_from"
  ],
  "fields": [
   {
@@ -281,7 +281,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-05-25 02:00:45.440671",
+ "modified": "2026-06-07 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Assignment",

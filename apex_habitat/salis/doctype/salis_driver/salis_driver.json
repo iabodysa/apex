@@ -6,7 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
+  "driver_tab_overview",
   "driver_sec_identity",
   "employee",
   "full_name",
@@ -16,22 +16,19 @@
   "status",
   "project",
   "supervisor",
+  "driver_sec_assignment",
   "current_vehicle",
   "driver_sec_compliance",
   "license_number",
-  "license_expiry"
+  "license_expiry",
+  "driver_tab_system",
+  "naming_series"
  ],
  "fields": [
   {
-   "default": "DRV-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "DRV-.######",
-   "print_hide": 1,
-   "report_hide": 1,
-   "reqd": 1
+   "fieldname": "driver_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
   },
   {
    "fieldname": "driver_sec_identity",
@@ -99,6 +96,11 @@
    "options": "User"
   },
   {
+   "fieldname": "driver_sec_assignment",
+   "fieldtype": "Section Break",
+   "label": "Assignment"
+  },
+  {
    "fieldname": "current_vehicle",
    "fieldtype": "Link",
    "label": "Current Vehicle",
@@ -119,6 +121,22 @@
    "fieldname": "license_expiry",
    "fieldtype": "Date",
    "label": "License Expiry"
+  },
+  {
+   "fieldname": "driver_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System Info"
+  },
+  {
+   "default": "DRV-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "DRV-.######",
+   "print_hide": 1,
+   "report_hide": 1,
+   "reqd": 1
   }
  ],
  "links": [
@@ -198,7 +216,7 @@
    "link_fieldname": "driver"
   }
  ],
- "modified": "2026-06-03 02:50:34.264465",
+ "modified": "2026-06-07 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Driver",

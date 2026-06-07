@@ -12,7 +12,6 @@
   "building",
   "room",
   "bed",
-  "source_inspection",
   "reported_by",
   "issue_type",
   "priority",
@@ -20,12 +19,13 @@
   "maintenance_request_overview_col",
   "requires_procurement",
   "status",
+  "naming_series",
+  "maintenance_request_sec_asset_reference",
   "related_facility_asset",
   "target_asset",
-  "naming_series",
+  "maintenance_request_sec_financial",
   "cost_of_repair",
   "cost_center",
-  "subcontractor_dispatched",
   "maintenance_request_sec_primary_large_text",
   "issue_description",
   "maintenance_request_sec_large_text",
@@ -35,6 +35,8 @@
   "procurement_items",
   "maintenance_request_tab_system",
   "maintenance_request_sec_system",
+  "source_inspection",
+  "subcontractor_dispatched",
   "target_asset_name",
   "target_asset_category",
   "maintenance_request_system_col",
@@ -165,6 +167,18 @@
    "label": "Series",
    "options": "MAINT-.YYYY.-.#####",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "maintenance_request_sec_asset_reference",
+   "fieldtype": "Section Break",
+   "label": "Asset Reference"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "maintenance_request_sec_financial",
+   "fieldtype": "Section Break",
+   "label": "Financial"
   },
   {
    "fieldname": "cost_of_repair",
@@ -299,7 +313,7 @@
    "table_fieldname": "linked_maintenance_requests"
   }
  ],
- "modified": "2026-06-04 09:00:00.000000",
+ "modified": "2026-06-07 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",

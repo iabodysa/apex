@@ -2494,3 +2494,8 @@ total_cost,التكلفة الإجمالية
 {0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
 â Back,← رجوع
 — apply preset to floor —,— طبّق قالباً على طابق —
+Amendment,تعديل
+Asset Reference,مرجع الأصل
+Financial,المالية
+Readings,القراءات
+Route Details,تفاصيل المسار

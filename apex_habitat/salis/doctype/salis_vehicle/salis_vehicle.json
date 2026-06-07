@@ -7,8 +7,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
   "vehicle_tab_overview",
+  "naming_series",
   "vehicle_sec_identity",
   "plate_number",
   "plate_normalized",
@@ -23,15 +23,21 @@
   "project",
   "vehicle_assignment_col",
   "current_driver",
+  "vehicle_sec_notes",
+  "notes",
+  "vehicle_tab_compliance",
   "vehicle_sec_compliance",
   "compliance_documents",
   "vehicle_compliance_col",
   "compliance_status",
-  "next_expiry_date",
-  "vehicle_sec_notes",
-  "notes"
+  "next_expiry_date"
  ],
  "fields": [
+  {
+   "fieldname": "vehicle_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
   {
    "default": "VEH-.######",
    "fieldname": "naming_series",
@@ -42,11 +48,6 @@
    "print_hide": 1,
    "report_hide": 1,
    "reqd": 1
-  },
-  {
-   "fieldname": "vehicle_tab_overview",
-   "fieldtype": "Tab Break",
-   "label": "Overview"
   },
   {
    "fieldname": "vehicle_sec_identity",
@@ -141,9 +142,25 @@
    "options": "Salis Driver"
   },
   {
+   "collapsible": 1,
+   "fieldname": "vehicle_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "vehicle_tab_compliance",
+   "fieldtype": "Tab Break",
+   "label": "Compliance"
+  },
+  {
    "fieldname": "vehicle_sec_compliance",
    "fieldtype": "Section Break",
-   "label": "Compliance"
+   "label": "Compliance Documents"
   },
   {
    "fieldname": "compliance_documents",
@@ -168,17 +185,6 @@
    "fieldtype": "Date",
    "label": "Next Expiry Date",
    "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "vehicle_sec_notes",
-   "fieldtype": "Section Break",
-   "label": "Notes"
-  },
-  {
-   "fieldname": "notes",
-   "fieldtype": "Small Text",
-   "label": "Notes"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -269,7 +275,7 @@
    "link_fieldname": "vehicle"
   }
  ],
- "modified": "2026-06-03 02:50:34.264465",
+ "modified": "2026-06-07 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Vehicle",

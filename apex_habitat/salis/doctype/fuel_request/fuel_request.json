@@ -36,6 +36,7 @@
   "fuel_request_sec_chip",
   "inactivity_evidence",
   "owner_acknowledged",
+  "fuel_request_tab_system",
   "fuel_request_sec_system",
   "quota_applied",
   "ledgered",
@@ -256,6 +257,11 @@
    "label": "Owner Acknowledged"
   },
   {
+   "fieldname": "fuel_request_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System Info"
+  },
+  {
    "fieldname": "fuel_request_sec_system",
    "fieldtype": "Section Break",
    "label": "System Info"
@@ -310,7 +316,7 @@
    "link_fieldname": "fuel_request"
   }
  ],
- "modified": "2026-05-29 23:30:00.000000",
+ "modified": "2026-06-07 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Request",
