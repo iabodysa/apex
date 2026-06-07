@@ -24,6 +24,8 @@
   "default_payment_method",
   "habitat_settings_sec_system",
   "last_modified_by_role",
+  "email_notifications_sec",
+  "enable_email_notifications",
   "operational_notifications_sec",
   "enable_operational_notifications",
   "operational_notifications_col",
@@ -169,6 +171,18 @@
    "fieldtype": "Data",
    "label": "Last Modified By Role",
    "read_only": 1
+  },
+  {
+   "fieldname": "email_notifications_sec",
+   "fieldtype": "Section Break",
+   "label": "Email Notifications"
+  },
+  {
+   "default": "0",
+   "description": "Master kill-switch for all outgoing email from this app. When OFF (default), the app sends no email even if individual Notifications or Auto Email Reports are enabled. Turn ON only after the site's outgoing email (SMTP) is configured.",
+   "fieldname": "enable_email_notifications",
+   "fieldtype": "Check",
+   "label": "Enable Email Notifications"
   },
   {
    "collapsible": 1,

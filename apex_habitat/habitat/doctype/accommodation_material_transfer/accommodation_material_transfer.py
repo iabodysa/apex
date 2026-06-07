@@ -131,6 +131,15 @@ def _notify_finance_on_cost_center_shift(doc):
     if not recipients:
         return
 
+    # Master email kill-switch: stay silent unless an admin has turned email on
+    # in Habitat Settings, even when the per-feature opt-in above is set.
+    from apex_habitat.apex_core.utils.email_gate import email_enabled
+    if not email_enabled():
+        frappe.logger().info(
+            f"Email disabled (Habitat Settings): skipped finance memo for transfer {doc.name}"
+        )
+        return
+
     subject = _("Cross-cost-center material transfer: {0}").format(doc.name)
     lines = "".join(
         "<li>{0} &times; {1} ({2})</li>".format(flt(r.qty), frappe.utils.escape_html(r.item_name or r.item), r.uom or "")

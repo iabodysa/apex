@@ -293,10 +293,14 @@ fixtures = [
     {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
     # Operational roles added in v1.50.9 — separate entry so existing fixture is not mutated.
     {"dt": "Role", "filters": [["name", "in", ["Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
-    # Habitat Role Profiles — shipped as fixtures so they export/import cleanly
-    # on bench migrate.  The seeder (create_role_profiles) is idempotent and also
-    # runs on after_migrate, so both paths stay in sync.
-    {"dt": "Role Profile", "filters": [["name", "in", ["Habitat Accommodation Manager", "Habitat Resident Supervisor", "Habitat Finance Reviewer", "Habitat Maintenance Technician", "Habitat Cleaning Supervisor", "Habitat Safety Officer", "Habitat Resident Request Coordinator"]]]},
+    # Habitat Role Profiles are intentionally NOT fixtured. They are provisioned
+    # solely by the idempotent seeder (setup.create_role_profiles, existence-guarded
+    # on name), wired into both after_install and after_migrate. A fixture import
+    # runs Role Profile.on_update -> queue_action("update_all_users"), which takes a
+    # document file-lock BEFORE enqueuing the (worker-bound) job. On `bench migrate`
+    # there is no worker and no after_job cycle to drain the lock, so the lock file
+    # persists and every subsequent migrate re-imports the same fixture and aborts
+    # with DocumentLockedError. The seeder avoids this entirely (see create_role_profiles).
     # Salis (Movement) custom roles — only the uniquely-ours, post-consolidation
     # roles are fixtured. Core/generic roles (Fleet Manager, Driver) are
     # existence-guarded in the seeds, never fixtured, to avoid clobbering
@@ -411,9 +415,11 @@ after_migrate = [
     "apex_habitat.patches.v1_0.seed_salis_settings.execute",
     # Habitat roles + Role Profiles — keep already-installed sites in sync on
     # migrate (create-only/existence-guarded). after_install seeds them on a fresh
-    # install; this delivers newly-added roles/profiles to UPGRADING sites — Role
-    # Profiles ARE fixtured (see fixtures/ above), but the seeder also runs here
-    # so any profile added after the fixture export reaches sites on migrate.
+    # install; this delivers newly-added roles/profiles to UPGRADING sites. Role
+    # Profiles are NOT fixtured (see fixtures/ above — a fixture import triggers
+    # Role Profile.on_update's locking queue_action and breaks migrate); this
+    # idempotent seeder is the single source of truth, and its inserts release the
+    # controller's stale document lock so migrate stays lock-free.
     "apex_habitat.setup.create_roles",
     "apex_habitat.setup.create_role_profiles",
 ]

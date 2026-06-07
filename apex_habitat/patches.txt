@@ -51,6 +51,11 @@ apex_habitat.patches.v1_x.seed_salis_workflows
 # Habitat Hub/Housing/Safety/Launchpad. PRUNE once every deployed site has run it.
 apex_habitat.patches.v1_x.rename_habitat_workspaces
 
+# v1.52.2 — Accommodation Site native Address backfill (ONE-TIME). Creates a Frappe
+# Address record for each site that has city/district data and no linked Address yet.
+# Mirrors the building backfill pattern. PRUNE once every deployed site has run it.
+apex_habitat.patches.v1_x.backfill_accommodation_site_native_address
+
 [post_model_sync]
 # v1.x — TEMPORARY safeguard (GitHub #97): ensure the Web Form keeps its `route` on
 # an upgrade (the v15-removed make_route_to_web_form helper is never needed).

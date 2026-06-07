@@ -10,6 +10,12 @@ An Auto Email Report must name a real recipient; the customer's users/emails are
 unknown at install, so each is created **disabled** with Administrator as the
 placeholder user/recipient. An admin sets the real recipients and enables it.
 Idempotent — created only if absent.
+
+Email kill-switch: seeding these **disabled** is the gate for this declarative
+path — nothing is sent until an admin both enables the individual report AND
+turns on the master ``enable_email_notifications`` toggle in Habitat Settings
+(``apex_core.utils.email_gate.email_enabled``). We never seed them enabled, so
+the master toggle being OFF by default is upheld here without extra logic.
 """
 
 import frappe

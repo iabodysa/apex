@@ -14,7 +14,9 @@
   "city",
   "district",
   "accommodation_site_sec_large_text",
-  "notes"
+  "notes",
+  "accommodation_site_sec_address",
+  "address_html"
  ],
  "fields": [
   {
@@ -71,6 +73,16 @@
    "fieldname": "notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "fieldname": "accommodation_site_sec_address",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address"
   }
  ],
  "links": [
@@ -90,7 +102,7 @@
    "link_fieldname": "accommodation_site"
   }
  ],
- "modified": "2026-06-03 04:17:02.756382",
+ "modified": "2026-06-07 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Site",

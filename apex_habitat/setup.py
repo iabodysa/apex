@@ -73,6 +73,15 @@ def create_role_profiles():
             for role in roles:
                 doc.append("roles", {"role": role})
             doc.insert(ignore_permissions=True)
+            # T-059: Role Profile.on_update -> queue_action("update_all_users")
+            # always takes a document file-lock before enqueuing the user-sync job.
+            # On `bench migrate` (a CLI run) there is no worker to execute that job
+            # and no after_job hook to drain frappe.local.locked_documents, so the
+            # .lock file persists on disk and the NEXT migrate aborts with
+            # DocumentLockedError. A brand-new profile has no users assigned yet, so
+            # update_all_users is a no-op regardless; we just release the stale lock
+            # the controller created so migrate stays idempotent and lock-free.
+            doc.unlock()
 
 
 def create_custody_asset_categories():
