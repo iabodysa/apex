@@ -235,7 +235,7 @@
    "fieldname": "address",
    "fieldtype": "Small Text",
    "label": "Address (legacy)",
-   "hidden": 1
+   "read_only": 1
   },
   {
    "fieldname": "accommodation_building_tab_financials",
