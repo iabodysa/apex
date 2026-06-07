@@ -859,9 +859,12 @@ class ArrivalsDesk {
 	_room_html(room) {
 		const beds = (room.beds || []).map((bed) => this._bed_html(bed)).join('');
 		const occ = `${room.current_occupancy || 0}/${room.bed_capacity || 0}`;
+		// Show a readiness note only for a MEANINGFUL non-ready state (e.g. Under
+		// Maintenance). "Unknown" is the un-assessed default on freshly generated
+		// rooms — surfacing it reads as an error, so it is suppressed.
 		const readiness =
-			room.readiness_status && room.readiness_status !== 'Ready'
-				? ` · ${frappe.utils.escape_html(room.readiness_status)}`
+			room.readiness_status && room.readiness_status !== 'Ready' && room.readiness_status !== 'Unknown'
+				? ` · ${frappe.utils.escape_html(__(room.readiness_status))}`
 				: '';
 		// No free bed → offer over-capacity housing (a temporary bed within the
 		// building's overload headroom; the assignment enforces the cap).

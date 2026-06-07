@@ -87,6 +87,9 @@ Could not load the building.,تعذّر تحميل المبنى.
 Creating rooms and beds…,جارٍ إنشاء الغرف والأسرّة…
 "Define the floors: rooms per floor, floor type, and the default room type and bed count.",عرّف الطوابق: عدد الغرف لكل طابق، ونوع الطابق، ونوع الغرفة وعدد الأسرّة الافتراضي.
 Floor {0} — {1},الطابق {0} — {1}
+Floor {0},الطابق {0}
+Basement {0},القبو {0}
+Maintenance Overdue,صيانة متأخرة
 "Floor {0} ({1}): {2} room(s) × {3}, {4} bed(s) each",الطابق {0} ({1}): {2} غرفة × {3}، {4} سرير لكل غرفة
 Next: Approve,التالي: الاعتماد
 Next: Beds,التالي: الأسرّة

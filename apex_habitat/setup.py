@@ -20,6 +20,7 @@ from apex_habitat.apex_core.setup.seeders.maintenance_material_template_seed imp
 
 def after_install():
     create_roles()
+    frappe.db.commit()  # T-048: flush role rows before create_role_profiles() resolves Role links
     create_role_profiles()
     create_custody_asset_categories()
     create_custody_articles()

@@ -205,14 +205,20 @@ def get_building_grid(building: str) -> dict:
             }
         rooms_acc[room_name]["beds"].append(bed_payload)
 
-    # Group rooms by floor. Rooms with null/0 floor go to an "Unassigned" bucket.
+    # Group rooms by floor under the FUNCTIONAL floor_type scheme: floor 0 = Ground,
+    # negative = Basement, positive = upper floors. Only a genuinely NULL floor (never
+    # set) falls into the "Unassigned" bucket — 0 is Ground, not "unassigned".
     floors_acc: dict = {}
     for room in rooms_acc.values():
-        floor = room.pop("_floor")
-        key = floor if floor else None
-        if key not in floors_acc:
-            floors_acc[key] = []
-        floors_acc[key].append(room)
+        key = room.pop("_floor")  # int (0 = Ground, <0 = Basement) or None = unassigned
+        floors_acc.setdefault(key, []).append(room)
+
+    def _floor_label(n: int) -> str:
+        if n == 0:
+            return _("Ground Floor")
+        if n < 0:
+            return _("Basement {0}").format(abs(n))
+        return _("Floor {0}").format(n)
 
     floors = []
     numbered = sorted((k for k in floors_acc if k is not None))
@@ -221,7 +227,7 @@ def get_building_grid(building: str) -> dict:
         floors.append(
             {
                 "floor": floor,
-                "floor_label": _("Floor {0}").format(floor),
+                "floor_label": _floor_label(floor),
                 "rooms": rooms_list,
             }
         )

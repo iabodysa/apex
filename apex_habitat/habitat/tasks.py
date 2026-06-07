@@ -336,11 +336,91 @@ def daily_building_license_expiry_check() -> None:
         start += batch_size
 
 
+def _raise_maintenance_alert(
+    req_name: str,
+    priority: str,
+    elapsed_hours: float,
+    threshold_hours: int,
+    issue_type: str,
+    status: str,
+) -> None:
+    """Insert an Operations Alert for an overdue Maintenance Request (idempotent).
+
+    Mirrors the Salis ``_raise_alert`` pattern: existence-guarded so one Open
+    alert per (Maintenance Request, day) is never duplicated across runs. Both
+    the insert and the optional timeline comment are individually guarded so a
+    failure rolls back and logs but never aborts the calling loop.
+    """
+    from frappe.utils import now_datetime, today
+
+    alert_type = "Maintenance Overdue"  # dedicated Operations Alert type for an overdue ticket
+    severity = "Critical" if priority == "Critical" else "Warning"
+    message = (
+        f"open_maintenance_escalation: Maintenance Request {req_name} "
+        f"({issue_type}, status: {status}) is overdue. "
+        f"Priority: {priority}, hours open: {elapsed_hours:.1f} "
+        f"(threshold: {threshold_hours} hours)."
+    )[:2000]
+
+    # --- Idempotency guard: one Open alert per (Maintenance Request name, day) ---
+    try:
+        today_str = today()
+        if frappe.db.exists(
+            "Operations Alert",
+            {
+                "alert_type": alert_type,
+                "status": "Open",
+                "message": ["like", f"%{req_name}%"],
+                "raised_on": ["between", [f"{today_str} 00:00:00", f"{today_str} 23:59:59"]],
+            },
+        ):
+            return
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Maintenance alert dedupe check failed ({req_name})"[:140],
+        )
+        return
+
+    # --- Insert the alert record ---
+    try:
+        frappe.get_doc(
+            {
+                "doctype": "Operations Alert",
+                "alert_type": alert_type,
+                "severity": severity,
+                "status": "Open",
+                "raised_on": now_datetime(),
+                "message": message,
+            }
+        ).insert(ignore_permissions=True)  # audit-ok — scheduler-run escalation, no user session
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Maintenance alert insert failed ({req_name})"[:140],
+        )
+        return
+
+    # --- Drop a timeline comment on the Maintenance Request (best-effort) ---
+    try:
+        frappe.get_doc("Maintenance Request", req_name).add_comment("Comment", message)
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Maintenance alert comment failed for {req_name}"[:140],
+        )
+
+
 def open_maintenance_escalation() -> None:
     """Escalate overdue open Maintenance Requests.
 
     Checks open requests (docstatus != 2, status in ('Open', 'Assigned', 'In Progress', 'Reopened'))
     and logs escalations based on priority and elapsed time.
+    Also inserts an Operations Alert for each overdue ticket (idempotent — one
+    Open alert per request per day; see _raise_maintenance_alert).
     """
     from frappe.utils import now_datetime, get_datetime
 
@@ -388,6 +468,14 @@ def open_maintenance_escalation() -> None:
                     logger.warning(
                         f"Maintenance Request {req.name} ({req.issue_type}, status: {req.status}) "
                         f"is overdue! Priority: {priority}, hours open: {elapsed_hours:.1f} (threshold: {threshold_hours} hours)."
+                    )
+                    _raise_maintenance_alert(
+                        req_name=req.name,
+                        priority=priority,
+                        elapsed_hours=elapsed_hours,
+                        threshold_hours=threshold_hours,
+                        issue_type=req.issue_type or "",
+                        status=req.status or "",
                     )
             except Exception:
                 frappe.db.rollback()

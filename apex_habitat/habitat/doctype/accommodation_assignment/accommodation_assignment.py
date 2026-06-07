@@ -69,6 +69,10 @@ def validate(doc, method=None):
 
     if not doc.cost_center:
         doc.cost_center = building.default_cost_center
+    if not doc.cost_center and building.company:
+        # Fall back to the company's default cost center so a missing building-level
+        # cost center does not hard-block check-in when the company defines a default.
+        doc.cost_center = frappe.get_cached_value("Company", building.company, "cost_center")
     if not doc.cost_center:
         frappe.throw(
             _("Cost Center is required. Please set it or configure a default Cost Center on Building {0}.").format(

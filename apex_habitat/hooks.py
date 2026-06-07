@@ -412,7 +412,8 @@ after_migrate = [
     # Habitat roles + Role Profiles — keep already-installed sites in sync on
     # migrate (create-only/existence-guarded). after_install seeds them on a fresh
     # install; this delivers newly-added roles/profiles to UPGRADING sites — Role
-    # Profiles are not fixtured, so without this they never reach migrate.
+    # Profiles ARE fixtured (see fixtures/ above), but the seeder also runs here
+    # so any profile added after the fixture export reaches sites on migrate.
     "apex_habitat.setup.create_roles",
     "apex_habitat.setup.create_role_profiles",
 ]

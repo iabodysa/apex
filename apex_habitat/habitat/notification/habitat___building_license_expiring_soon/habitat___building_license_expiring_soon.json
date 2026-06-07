@@ -26,5 +26,6 @@
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
  "subject": "Building License Expiring Soon: {{ doc.name }}",
- "modified": "2026-06-02 13:30:00.000000"
+ "email_template": "Habitat - Building License Renewal Notice",
+ "modified": "2026-06-07 19:13:04.002116"
 }

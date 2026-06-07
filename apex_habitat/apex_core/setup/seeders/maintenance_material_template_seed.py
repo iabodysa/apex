@@ -1,33 +1,13 @@
-"""Seed default Maintenance Material Templates on fresh install."""
-import frappe
+"""Seed default Maintenance Material Templates on fresh install.
 
-# Catalog materials needed by the templates below that are not part of the
-# original Electrical/AC/Plumbing/Sanitary seed. Categories are limited to the
-# Maintenance Material select options (Furniture and General are the available
-# buckets for these issue types).
-MATERIAL_SEEDS = [
-    # Fire Safety
-    {"material_name": "Fire Extinguisher", "material_category": "General"},
-    {"material_name": "Smoke Detector", "material_category": "General"},
-    {"material_name": "Fire Alarm Panel", "material_category": "General"},
-    {"material_name": "Fire Hose Reel", "material_category": "General"},
-    {"material_name": "Emergency Exit Light", "material_category": "General"},
-    # Furniture
-    {"material_name": "Bed Frame", "material_category": "Furniture"},
-    {"material_name": "Mattress", "material_category": "Furniture"},
-    {"material_name": "Wardrobe", "material_category": "Furniture"},
-    {"material_name": "Study Desk", "material_category": "Furniture"},
-    {"material_name": "Chair", "material_category": "Furniture"},
-    # Pest Control
-    {"material_name": "Insecticide Spray", "material_category": "General"},
-    {"material_name": "Rodent Trap", "material_category": "General"},
-    {"material_name": "Cockroach Gel Bait", "material_category": "General"},
-    # Structural
-    {"material_name": "Cement Bag", "material_category": "General"},
-    {"material_name": "Wall Paint", "material_category": "General"},
-    {"material_name": "Gypsum Board", "material_category": "General"},
-    {"material_name": "Door Lock", "material_category": "General"},
-]
+T-050#3: Maintenance Material records are now the single source of truth via
+``apex_core/setup/data/habitat/maintenance_material.json`` (loaded by the
+data-driven loader ``seed_all`` on after_install/after_migrate).  The
+``MATERIAL_SEEDS`` list that used to live here was an exact duplicate of that
+JSON and has been removed.  ``seed_materials()`` is kept as a guarded no-op so
+any existing caller in setup.py continues to work without modification.
+"""
+import frappe
 
 TEMPLATE_SEEDS = [
     {
@@ -109,16 +89,13 @@ TEMPLATE_SEEDS = [
 
 
 def seed_materials():
-    """Insert catalog materials required by the templates. Idempotent."""
-    for mat in MATERIAL_SEEDS:
-        if frappe.db.exists("Maintenance Material", mat["material_name"]):
-            continue
-        frappe.get_doc({
-            "doctype": "Maintenance Material",
-            "material_name": mat["material_name"],
-            "material_category": mat["material_category"],
-            "is_active": 1,
-        }).insert(ignore_permissions=True)
+    """No-op stub kept for backward compatibility.
+
+    Maintenance Material records are seeded by the data-driven loader
+    (``seed_all``) from ``apex_core/setup/data/habitat/maintenance_material.json``
+    — that JSON is the single source of truth.  This function is intentionally
+    empty so callers (setup.py) continue to import and call it without error.
+    """
 
 
 def seed_templates():
