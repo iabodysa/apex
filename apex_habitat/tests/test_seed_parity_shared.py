@@ -8,7 +8,7 @@ we can reconstruct the *effective* inserted records and diff them against the
 JSON the loader will apply.
 
 Covered:
-- habitat/maintenance_material.json          <- maintenance_material_template_seed.MATERIAL_SEEDS
+- habitat/maintenance_material.json          <- single JSON source (MATERIAL_SEEDS retired, T-050#3)
 - habitat/maintenance_material_template.json <- maintenance_material_template_seed.TEMPLATE_SEEDS
 - salis/issue_type.json                      <- issue_seed._ISSUE_TYPES
 - salis/issue_priority.json                  <- issue_seed._ISSUE_PRIORITIES
@@ -34,26 +34,18 @@ def _spec(module_dir, doctype):
 
 
 class TestMaintenanceMaterialParity(unittest.TestCase):
-    def test_maintenance_material_parity(self):
-        from apex_habitat.apex_core.setup.seeders.maintenance_material_template_seed import (
-            MATERIAL_SEEDS,
-        )
-
+    def test_maintenance_material_spec_loads(self):
+        # MATERIAL_SEEDS was retired (T-050#3): habitat/maintenance_material.json is
+        # now the SINGLE source of truth, so there is no second source to diff. Assert
+        # the JSON still loads through the shared loader with the expected shape.
         spec = _spec("habitat", "Maintenance Material")
         self.assertEqual(spec["key"], "material_name")
         self.assertTrue(spec["create_only"])
-
-        # The seeder inserts material_name + material_category + is_active=1.
-        expected = [
-            {
-                "material_name": m["material_name"],
-                "material_category": m["material_category"],
-                "is_active": 1,
-            }
-            for m in MATERIAL_SEEDS
-        ]
-        self.assertEqual(spec["records"], expected)
-        self.assertEqual(len(spec["records"]), len(MATERIAL_SEEDS))
+        self.assertTrue(spec["records"], "maintenance_material.json must not be empty")
+        for rec in spec["records"]:
+            self.assertIn("material_name", rec)
+            self.assertIn("material_category", rec)
+            self.assertEqual(rec.get("is_active"), 1)
 
     def test_maintenance_material_template_parity(self):
         from apex_habitat.apex_core.setup.seeders.maintenance_material_template_seed import (
