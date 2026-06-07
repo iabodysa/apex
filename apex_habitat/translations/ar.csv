@@ -19,16 +19,8 @@ A temporary top-up requires a revert due date.,تتطلب التعبئة الم�
 A worker link token is required.,رمز رابط العامل مطلوب.
 AC,تكييف
 AC Maintenance,صيانة المكيفات
-ACC-ASGN-.YYYY.-.####,ACC-ASGN-.YYYY.-.####
-ACC-CHKOUT-.YYYY.-.####,ACC-CHKOUT-.YYYY.-.####
-ACC-LEASE-.YYYY.-.####,ACC-LEASE-.YYYY.-.####
-ACC-MTR-.YYYY.-.######,ACC-MTR-.YYYY.-.######
-ACC-OCC-.YYYY.-.#####,ACC-OCC-.YYYY.-.#####
-ACC-SLE-.YYYY.-.######,ACC-SLE-.YYYY.-.######
-AFMCO,AFMCO
 AFMCO Owner,مالك شركة (AFMCO)
 API Contract Version,إصدار عقد الواجهة البرمجية
-ATT-.######,ATT-.######
 Abbreviation,الاختصار
 Absconding,هروب من العمل
 Absent,غائب
@@ -273,8 +265,6 @@ Avg Occupancy %,متوسط نسبة الإشغال
 Avg Utilisation %,متوسط نسبة الاستخدام (%)
 Awareness & Training,التوعية والتدريب
 Awareness and Training,التوعية والتدريب
-BED-.####,BED-.####
-BLDG-LIC-.YYYY.-.####,BLDG-LIC-.YYYY.-.####
 Back,رجوع
 Balady Certificate,شهادة بلدي
 Balance Qty,الكمية المتبقية
@@ -342,14 +332,7 @@ Building safety inspection.,تفتيش سلامة المبنى.
 Buildings,المباني
 Buildings Granted,المباني المرخصة
 Buildings In Scope,المباني المشمولة بالعمل
-CAM-ACC-.YYYY.-.####,CAM-ACC-.YYYY.-.####
-CARP-.YYYY.-.####,CARP-.YYYY.-.####
 CCTV Camera,كاميرا مراقبة
-CLEAN-.YYYY.-.####,CLEAN-.YYYY.-.####
-CUST-ART-.####,CUST-ART-.####
-CUST-DMG-.YYYY.-.####,CUST-DMG-.YYYY.-.####
-CUST-ISS-.YYYY.-.####,CUST-ISS-.YYYY.-.####
-CUST-RET-.YYYY.-.####,CUST-RET-.YYYY.-.####
 Camera Access Building Scope,نطاق الوصول لكاميرات المبنى
 Camera Access Grant,منح صلاحية الوصول للكاميرات
 Cameras in Building,الكاميرات في المبنى
@@ -618,10 +601,6 @@ Custody Return Item,بند إرجاع العهدة
 Custody Return Items,بنود إرجاع العهدة
 Custody Returned,تم إرجاع العهدة
 Custody deferred,أُجِّلت العهدة
-DCL-.######,DCL-.######
-DEP-SNAP-.YYYY.-.####,DEP-SNAP-.YYYY.-.####
-DRV-.######,DRV-.######
-DT-.######,DT-.######
 DVR/NVR,جهاز التسجيل DVR/NVR
 DVR/NVR Status,حالة جهاز التسجيل DVR/NVR
 Daily,يومي
@@ -856,15 +835,6 @@ Exterior,خارجي
 External Area,منطقة خارجية
 External Worker,عامل خارجي
 External rental office that supplies rented vehicles to the fleet.,مكتب تأجير خارجي يزوّد الأسطول بالمركبات المستأجرة.
-FAC-AST-.YYYY.-.####,FAC-AST-.YYYY.-.####
-FAC-CUST-.YYYY.-.#####,FAC-CUST-.YYYY.-.#####
-FAM-.YYYY.-.####,FAM-.YYYY.-.####
-FCM-.######,FCM-.######
-FDL-.######,FDL-.######
-FEX-.######,FEX-.######
-FQ-.######,FQ-.######
-FR-.######,FR-.######
-FSI-.YYYY.-.#####,FSI-.YYYY.-.#####
 Facility Asset,أصل المنشأة
 Facility Asset Custody Assignment,تخصيص عهدة أصول المنشأة
 Facility Asset Movement,حركة أصول المرافق
@@ -991,7 +961,6 @@ Full: {0},ممتلئ: {0}
 Furniture,أثاث
 GL Posted,تم ترحيل قيد الأستاذ العام
 GPS Mismatch,عدم تطابق GPS
-GV-.######,GV-.######
 Gas,غاز
 Gate Pass,تصريح بوابة
 Gate Pass Reference,رقم تصريح البوابة
@@ -1021,7 +990,6 @@ Ground Floor,الطابق الأرضي
 Group Housing Permit,تصريح السكن الجماعي
 HR,الموارد البشرية
 HR Case,قضية موارد بشرية
-HSI-.YYYY.-.#####,HSI-.YYYY.-.#####
 Habitat Dashboard,لوحة معلومات هابيتات
 Habitat Hub,مركز الإسكان
 Habitat Internal / No Financial Posting,داخلي في Habitat / بدون ترحيل مالي
@@ -1055,7 +1023,6 @@ How To Integrate,كيفية التكامل
 How often rent payments are scheduled. Amount per installment is calculated automatically.,معدّل جدولة دفعات الإيجار. يُحسب مبلغ كل قسط تلقائياً.
 Hygiene,النظافة
 I am a,أنا
-IDLE-.YYYY.-.####,IDLE-.YYYY.-.####
 Identifier (e.g. Iqama/contractor id) for an unregistered worker.,معرّف (مثل الإقامة/معرّف المتعاقد) لعامل غير مسجّل.
 Identity,الهوية
 Idle Days,أيام التوقف
@@ -1251,12 +1218,7 @@ Logging inspectionâ¦,جارٍ تسجيل التفتيش…
 Logs,السجلات
 Lost,مفقود
 Low,منخفضة
-MAINT-.YYYY.-.#####,MAINT-.YYYY.-.#####
-MCR-.######,MCR-.######
-MCT-.######,MCT-.######
-MIR-.YYYY.-.####,MIR-.YYYY.-.####
 MOL Worker Housing Approval,اعتماد سكن العمالة من وزارة الموارد البشرية
-MWO-.YYYY.-.####,MWO-.YYYY.-.####
 Maintenance,صيانة
 Maintenance & Facilities,الصيانة والمرافق
 Maintenance Aging,تقادم طلبات الصيانة
@@ -1546,8 +1508,6 @@ Ownership,الملكية
 Ownership At Stop,الملكية عند الإيقاف
 "Owning company, carried for reporting grouping. System-written; reference only, posts no GL.",الشركة المالكة، منقولة لأغراض تجميع التقارير. يكتبها النظام؛ للمرجع فقط، ولا تُرحّل أي قيد في دفتر الأستاذ العام.
 Owning company; defaulted from Salis Settings. Reference only — posts no GL.,الشركة المالكة؛ تُؤخذ افتراضيًا من إعدادات ساليس. للمرجعية فقط — لا تُنشئ قيدًا محاسبيًا.
-PAY-.######,PAY-.######
-PM-.######,PM-.######
 Paid,مدفوع
 Paid On,دُفع في تاريخ
 Partial / Attention: {0},جزئي / انتباه: {0}
@@ -1678,7 +1638,6 @@ Purpose is too long. Please keep it under 2000 characters.,الغرض طويل �
 QR,رمز QR
 QR Web Form,نموذج ويب QR
 QR issued,صدر رمز QR
-QR-LOC-.####,QR-LOC-.####
 Qty,الكمية
 Qty (signed),الكمية (موجبة/سالبة)
 Qty Issued,الكمية المصروفة
@@ -1699,13 +1658,6 @@ Quota Increase Claim,مطالبة زيادة الحصة
 Quota Litres,لترات الحصة
 Quota period in YYYY-MM format (e.g. 2026-05).,فترة الحصة بصيغة YYYY-MM (مثال: 2026-05).
 Quota-increase claim - requires Operations-tier approval and a Finance consult note.,طلب زيادة حصة الوقود — يستلزم موافقة مستوى العمليات وملاحظة استشارة مالية.
-RAL-.######,RAL-.######
-RBT-.YYYY.-.####,RBT-.YYYY.-.####
-REQ-.YYYY.-.####,REQ-.YYYY.-.####
-ROOM-.####,ROOM-.####
-RP-.######,RP-.######
-RS-.######,RS-.######
-RVM-.######,RVM-.######
 Raise Fuel Request,إنشاء طلب وقود
 Raise Transport Request,إنشاء طلب نقل
 Raise a Fuel Request,أنشئ طلب وقود
@@ -1940,16 +1892,9 @@ Route Plan,خطة المسار
 Route Stop,محطة المسار
 Router,راوتر
 Row {0}: Qty must be greater than zero.,الصف {0}: يجب أن تكون الكمية أكبر من صفر.
-SD-.######,SD-.######
 SLA (Days),مستوى الخدمة (أيام)
 SLA Breached,تجاوز مستوى الخدمة
 SLA Breached â this request requires immediate attention.,تجاوز اتفاقية مستوى الخدمة — هذا الطلب يستلزم اهتماماً فورياً.
-SSO-.YYYY.-.#####,SSO-.YYYY.-.#####
-STC-.####,STC-.####
-STE-.YYYY.-.#####,STE-.YYYY.-.#####
-STI-.YYYY.-.####,STI-.YYYY.-.####
-SUB-CON-.YYYY.-.####,SUB-CON-.YYYY.-.####
-SV-.######,SV-.######
 Safety,السلامة
 Safety Findings,ملاحظات السلامة
 Safety Inspection Report,تقرير فحص السلامة
@@ -2199,9 +2144,6 @@ Suspected Fraud,اشتباه احتيال
 System Details,تفاصيل النظام
 System Info,معلومات النظام
 "System-written, read-only periodic snapshot of vehicle utilisation over a trailing window. Never hand-entered; derived from completed Dispatch Trips.",لقطة دورية للقراءة فقط يكتبها النظام لاستخدام المركبات عبر نافذة زمنية متحركة. لا تُدخل يدوياً؛ وتُشتق من رحلات التشغيل المكتملة.
-TEMP-.YYYY.-.#####,TEMP-.YYYY.-.#####
-TR-.######,TR-.######
-TSL-.######,TSL-.######
 Target Bed {0} does not belong to Room {1},السرير الهدف {0} لا ينتمي إلى الغرفة {1}
 Target Bed {0} is Out of Service.,السرير الهدف {0} خارج الخدمة.
 Target DocType,نوع المستند المستهدف
@@ -2356,8 +2298,6 @@ Type,النوع
 Typically IT Specialist,عادةً أخصائي تقنية المعلومات
 UOM,وحدة القياس
 URL,الرابط
-UTIL-ACC-.####,UTIL-ACC-.####
-UTIL-BILL-.YYYY.-.#####,UTIL-BILL-.YYYY.-.#####
 Unassigned Floor,طابق غير محدد
 Under Investigation,قيد التحقيق
 Under Maintenance,تحت الصيانة
@@ -2402,10 +2342,6 @@ Utility Cost Share must be between 0 and 100.,يجب أن تكون نسبة تح
 Utility Type,نوع المرفق الخدمي
 Utility Variance Report,تقرير انحراف استهلاك الخدمات
 "Utility account number per building (electricity, water, telecom). Links incoming bills to a building cost center.",رقم حساب المرافق لكل مبنى (كهرباء، ماء، اتصالات). يربط الفواتير الواردة بمركز تكلفة المبنى.
-VA-.######,VA-.######
-VEH-.######,VEH-.######
-VUS-.######,VUS-.######
-VWO-.######,VWO-.######
 Vacant Beds,الأسرة الشاغرة
 Valid,ساري
 Valid From,صالح من
@@ -2463,7 +2399,6 @@ Virtual over-capacity bed created by the Arrivals Desk when a room is full but b
 Voucher Detail No,رقم تفصيل القسيمة
 Voucher No,رقم القسيمة
 Voucher Type,نوع القسيمة
-WR-.######,WR-.######
 Waiting Evidence,بانتظار الإثباتات
 Waived,مُعفى
 Walk each floor and set the type of every room.,امشِ في كل طابق وحدد نوع كل غرفة.

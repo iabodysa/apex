@@ -95,6 +95,8 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
         settings = frappe.get_single("Habitat Settings")
         settings.notify_finance_on_liability_transfer = 1 if on else 0
         settings.finance_notification_email = email if on else None
+        # T-061: the master email kill-switch must also be ON for any email to send.
+        settings.enable_email_notifications = 1 if on else 0
         settings.save(ignore_permissions=True)
 
     def test_cross_cost_center_receipt_emails_finance_when_enabled(self):
