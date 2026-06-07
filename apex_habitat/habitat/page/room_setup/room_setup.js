@@ -24,7 +24,6 @@ class RoomSetup {
 		this.stage = 1;
 		this.floors = []; // [{number, type, rooms_per_floor, def_type, def_beds, rooms:[{type,beds}]}]
 		this.$body = $('<div class="room-setup"></div>').appendTo(this.page.main);
-		this._inject_styles();
 
 		if (!this.building) {
 			this._fatal(__("Open Room Setup from a building — no building was provided in the route."));
@@ -335,44 +334,5 @@ class RoomSetup {
 	_fatal(msg) {
 		this.$body.empty();
 		$('<div class="rs-fatal text-muted"></div>').text(msg).appendTo(this.$body);
-	}
-
-	_inject_styles() {
-		if (document.getElementById("rs-styles")) return;
-		const css = `
-.room-setup{max-width:900px;margin:0 auto;padding:8px 0 70px}
-.rs-steps{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.rs-step{flex:1;min-width:84px;padding:6px 8px;border-radius:6px;background:var(--control-bg,#f4f5f6);color:var(--text-muted);font-size:12px;text-align:center}
-.rs-step.active{background:var(--primary,#2490ef);color:#fff}
-.rs-step.done{background:var(--green-100,#e3f6e3);color:var(--green-700,#1f7a1f)}
-.rs-step-no{display:inline-block;width:18px;height:18px;line-height:18px;border-radius:50%;background:rgba(0,0,0,.12);text-align:center;margin-right:3px;font-weight:600}
-.rs-stage{margin-bottom:12px}
-.rs-floors{display:flex;flex-direction:column;gap:6px;margin:10px 0}
-.rs-frow{display:grid;grid-template-columns:34px 1.3fr .8fr 1.3fr .8fr 40px;gap:8px;align-items:center}
-.rs-fhead .rs-fcell{font-size:11px;color:var(--text-muted);text-transform:uppercase}
-.rs-fno{font-weight:600;color:var(--text-muted)}
-.rs-floor-block{margin:14px 0;padding:12px;border:1px solid var(--border-color,#e8e8e8);border-radius:8px}
-.rs-floor-title{font-weight:600;margin-bottom:10px}
-.rs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-.rs-room{border:1px solid var(--border-color,#e8e8e8);border-radius:8px;padding:8px;background:var(--card-bg,#fff)}
-.rs-room-no{font-size:11px;color:var(--text-muted);margin-bottom:4px}
-.rs-stepper{display:flex;align-items:center;gap:8px;justify-content:space-between}
-.rs-stepper .btn{width:36px;height:36px;font-size:18px;padding:0;line-height:1}
-.rs-bed-val{font-weight:600;font-size:16px}
-.rs-summary{display:flex;gap:10px;margin:10px 0}
-.rs-sum-card{flex:1;text-align:center;padding:14px;border-radius:8px;background:var(--control-bg,#f4f5f6)}
-.rs-sum-n{font-size:26px;font-weight:700}
-.rs-sum-l{font-size:12px;color:var(--text-muted)}
-.rs-review-row{padding:6px 0;border-bottom:1px solid var(--border-color,#eee);font-size:13px}
-.rs-note{margin-top:12px}
-.rs-footer{display:flex;justify-content:space-between;gap:10px;margin-top:18px;position:sticky;bottom:0;background:var(--fg-color,#fff);padding:10px 0}
-.rs-footer .btn{min-width:120px}
-.rs-add{margin-top:6px}
-@media(max-width:600px){.rs-frow{grid-template-columns:26px 1fr 1fr 40px}.rs-fhead{display:none}.rs-frow .rs-fcell:nth-child(4){grid-column:2}.rs-frow .rs-fcell:nth-child(5){grid-column:3}}
-`;
-		const style = document.createElement("style");
-		style.id = "rs-styles";
-		style.textContent = css;
-		document.head.appendChild(style);
 	}
 }
