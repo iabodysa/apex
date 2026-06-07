@@ -41,6 +41,15 @@ frappe.ui.form.on("Accommodation Building", {
 		_toggleFloorFields(frm);
 		_renderBuildingDashboard(frm);
 
+		// Native Address (Address DocType via Dynamic Link): render the address list
+		// for saved buildings; the legacy free-text address field is hidden.
+		frm.toggle_display("address_html", !frm.is_new());
+		if (!frm.is_new()) {
+			frappe.contacts.render_address_and_contact(frm);
+		} else {
+			frappe.contacts.clear_address_and_contact(frm);
+		}
+
 		// Status indicator
 		const colors = {
 			"Active": "green",

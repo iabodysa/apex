@@ -31,6 +31,7 @@
   "accommodation_building_capacity_col",
   "over_capacity_threshold_percent",
   "accommodation_building_sec_large_text",
+  "address_html",
   "address",
   "accommodation_building_tab_financials",
   "accommodation_building_sec_financials",
@@ -220,15 +221,20 @@
    "label": "Over-Capacity Alert Threshold (%)"
   },
   {
-   "collapsible": 1,
    "fieldname": "accommodation_building_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information"
+   "label": "Address"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address"
   },
   {
    "fieldname": "address",
    "fieldtype": "Small Text",
-   "label": "Address"
+   "label": "Address (legacy)",
+   "hidden": 1
   },
   {
    "fieldname": "accommodation_building_tab_financials",
