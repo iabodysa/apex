@@ -45,6 +45,15 @@
     },
     {
       "doctype": "DocField",
+      "fieldname": "floor_type",
+      "label": "Floor Type",
+      "fieldtype": "Select",
+      "options": "\nBasement\nGround\nMiddle\nRoof",
+      "in_list_view": 1,
+      "idx": 5
+    },
+    {
+      "doctype": "DocField",
       "fieldname": "room_prefix",
       "label": "Room Number Prefix",
       "fieldtype": "Data",

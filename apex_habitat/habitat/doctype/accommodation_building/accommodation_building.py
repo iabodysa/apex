@@ -76,6 +76,36 @@ def before_save(doc, method=None):
 
 
 @frappe.whitelist(methods=["POST"])
+def setup_building_rooms(building_name, floors):
+    """Persist the Room Setup wizard's plan onto the building, then generate
+    rooms + beds via the safe generator.
+
+    ``floors`` is a JSON list of floor_plan rows (floor_number, floor_type,
+    room_type, room_count, bed_capacity_per_room, starting_room_number,
+    generate_beds). One transaction: the building's floor_plan is replaced with
+    these rows, then generate_rooms_and_beds runs with confirmation granted.
+    """
+    rows = frappe.parse_json(floors) or []
+    doc = frappe.get_doc("Accommodation Building", building_name)
+    doc.check_permission("write")
+    doc.set("floor_plan", [])
+    for r in rows:
+        doc.append("floor_plan", {
+            "floor_number": r.get("floor_number"),
+            "floor_type": r.get("floor_type"),
+            "room_type": r.get("room_type") or "Standard",
+            "room_count": r.get("room_count") or 0,
+            "bed_capacity_per_room": r.get("bed_capacity_per_room") or 0,
+            "starting_room_number": r.get("starting_room_number") or 1,
+            "generate_beds": 1 if r.get("generate_beds", 1) else 0,
+        })
+    doc.save()
+    return generate_rooms_and_beds(
+        building_name, confirm_new_rooms=1, confirm_capacity_reduction=1
+    )
+
+
+@frappe.whitelist(methods=["POST"])
 def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity_reduction=0):
     """
     Bulk generator for Accommodation Room/Bed records from the floor plan.

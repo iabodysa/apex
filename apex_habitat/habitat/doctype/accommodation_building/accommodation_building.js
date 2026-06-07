@@ -54,6 +54,10 @@ frappe.ui.form.on("Accommodation Building", {
 
 		// Setup button group (only for saved documents)
 		if (!frm.is_new()) {
+			frm.add_custom_button(__("Setup Rooms"), function () {
+				frappe.set_route("room-setup", frm.doc.name);
+			}, __("Setup"));
+
 			frm.add_custom_button(__("Quick Room Setup"), function () {
 				showStep1(frm);
 			}, __("Setup"));

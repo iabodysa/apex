@@ -4,6 +4,7 @@ Feature = something new you can do; Fix = Apex got steadier or safer.
 
 ## Latest
 
+- [1.50.20](v1/v1_50_20.md)
 - [1.50.19](v1/v1_50_19.md)
 - [1.50.18](v1/v1_50_18.md)
 - [1.50.17](v1/v1_50_17.md)
