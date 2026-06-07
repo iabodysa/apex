@@ -115,7 +115,7 @@
   {
    "fieldname": "utility_bill_meter_sec",
    "fieldtype": "Section Break",
-   "label": "Meter Readings & Sharing"
+   "label": "Meter Readings and Sharing"
   },
   {
    "description": "Full amount on the utility company's invoice (before sharing)",

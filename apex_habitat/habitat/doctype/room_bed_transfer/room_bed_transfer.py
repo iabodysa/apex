@@ -41,6 +41,15 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
+    # The occupant being moved must be a CURRENT resident: the linked assignment must be
+    # submitted and not yet checked out. Guards against executing a transfer for a
+    # closed/cancelled stay. (Checked at submit — the point the move actually applies.)
+    asg = frappe.db.get_value(
+        "Accommodation Assignment", doc.assignment, ["docstatus", "check_out_date"], as_dict=True
+    )
+    if not asg or asg.docstatus != 1 or asg.check_out_date:
+        frappe.throw(_("This transfer needs an active (checked-in) assignment to move."))
+
     # Concurrency guard: lock the target bed row (SELECT ... FOR UPDATE) and
     # re-check availability inside the transaction so two simultaneous transfers
     # (e.g. rapid drag-drops on the Transfer Board) cannot both claim it. Mirrors

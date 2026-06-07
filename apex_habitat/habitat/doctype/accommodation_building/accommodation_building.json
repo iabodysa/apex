@@ -10,17 +10,21 @@
   "accommodation_building_sec_overview",
   "company",
   "building_name",
-  "site",
   "abbreviation",
+  "site",
   "status",
-  "total_floors",
-  "total_rooms",
   "accommodation_building_overview_col",
   "city",
   "district",
   "google_maps_url",
-  "total_capacity",
   "responsible_facility_supervisor",
+  "accommodation_building_sec_metrics",
+  "total_floors",
+  "total_rooms",
+  "total_capacity",
+  "accommodation_building_metrics_col",
+  "current_occupants",
+  "occupancy_percent",
   "accommodation_building_sec_landlord",
   "landlord",
   "accommodation_building_sec_capacity",
@@ -36,7 +40,6 @@
   "annual_total_cost_sar",
   "annual_cost_per_capacity_sar",
   "monthly_cost_per_capacity_sar",
-  "current_occupants",
   "accommodation_building_financials_col",
   "annual_electricity_sar",
   "annual_water_sar",
@@ -70,8 +73,6 @@
   "water_tank_inspection_required",
   "pest_control_required",
   "accommodation_building_tab_system",
-  "accommodation_building_sec_system",
-  "occupancy_percent",
   "accommodation_building_sec_security",
   "cctv_camera_count",
   "accommodation_building_security_col",
@@ -172,6 +173,15 @@
    "fieldtype": "Link",
    "label": "Responsible Facility Supervisor",
    "options": "User"
+  },
+  {
+   "fieldname": "accommodation_building_sec_metrics",
+   "fieldtype": "Section Break",
+   "label": "Capacity and Occupancy"
+  },
+  {
+   "fieldname": "accommodation_building_metrics_col",
+   "fieldtype": "Column Break"
   },
   {
    "collapsible": 1,
@@ -359,7 +369,7 @@
    "description": "Room and bed counts are managed by the Room Setup wizard. Click to add, change, or remove rooms / beds.",
    "fieldname": "edit_room_setup_btn",
    "fieldtype": "Button",
-   "label": "Edit Rooms & Beds"
+   "label": "Edit Rooms and Beds"
   },
   {
    "fieldname": "setup_instructions_html",
@@ -376,7 +386,8 @@
    "label": "Floor Plan",
    "options": "Accommodation Floor Plan",
    "read_only": 1,
-   "description": "Read-only — managed by the Room Generator wizard."
+   "hidden": 1,
+   "description": "Read-only — managed by the Room Setup wizard."
   },
   {
    "fieldname": "accommodation_building_tab_safety",
@@ -453,12 +464,7 @@
   {
    "fieldname": "accommodation_building_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info"
-  },
-  {
-   "fieldname": "accommodation_building_sec_system",
-   "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "label": "Security and Systems"
   },
   {
    "fieldname": "occupancy_percent",
@@ -470,7 +476,7 @@
    "collapsible": 1,
    "fieldname": "accommodation_building_sec_security",
    "fieldtype": "Section Break",
-   "label": "Security & Systems"
+   "label": "Surveillance"
   },
   {
    "fieldname": "cctv_camera_count",
@@ -492,12 +498,12 @@
  ],
  "links": [
   {
-   "group": "Rooms & Beds",
+   "group": "Rooms and Beds",
    "link_doctype": "Accommodation Room",
    "link_fieldname": "building"
   },
   {
-   "group": "Rooms & Beds",
+   "group": "Rooms and Beds",
    "link_doctype": "Accommodation Bed",
    "link_fieldname": "building"
   },
@@ -527,22 +533,22 @@
    "link_fieldname": "building"
   },
   {
-   "group": "Maintenance & Facilities",
+   "group": "Maintenance and Facilities",
    "link_doctype": "Maintenance Request",
    "link_fieldname": "building"
   },
   {
-   "group": "Maintenance & Facilities",
+   "group": "Maintenance and Facilities",
    "link_doctype": "Maintenance Work Order",
    "link_fieldname": "building"
   },
   {
-   "group": "Maintenance & Facilities",
+   "group": "Maintenance and Facilities",
    "link_doctype": "Facility Asset",
    "link_fieldname": "building"
   },
   {
-   "group": "Maintenance & Facilities",
+   "group": "Maintenance and Facilities",
    "link_doctype": "Subcontractor Service Order",
    "link_fieldname": "building"
   },
@@ -582,7 +588,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-06-07 12:00:00.000000",
+ "modified": "2026-06-07 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Building",

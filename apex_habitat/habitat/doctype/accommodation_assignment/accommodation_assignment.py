@@ -108,6 +108,27 @@ def validate(doc, method=None):
                     doc.employee, active_asg
                 )
             )
+    elif doc.party and doc.party_type:
+        # The employee guard above skips Temporary Worker parties (employee IS NULL);
+        # close that hole by rejecting a second active assignment for the same party
+        # (party_type + party) so a Temporary Worker cannot be double-housed either.
+        dup = frappe.db.get_value(
+            "Accommodation Assignment",
+            {
+                "party_type": doc.party_type,
+                "party": doc.party,
+                "docstatus": 1,
+                "check_out_date": ["is", "not set"],
+                "name": ["!=", doc.name],
+            },
+            "name",
+        )
+        if dup:
+            frappe.throw(
+                _("{0} {1} already has an active Accommodation Assignment: {2}").format(
+                    _(doc.party_type), doc.party, dup
+                )
+            )
 
     # Validate bed belongs to room
     bed_room = frappe.db.get_value("Accommodation Bed", doc.bed, "room")

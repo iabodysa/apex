@@ -44,7 +44,7 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Incident Date & Time",
+   "label": "Incident Date and Time",
    "reqd": 1
   },
   {
@@ -72,7 +72,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Incident Type",
-   "options": "Fire\nElectrical\nInjury\nStructural\nHealth & Hygiene\nSecurity\nOther"
+   "options": "Fire\nElectrical\nInjury\nStructural\nHealth and Hygiene\nSecurity\nOther"
   },
   {
    "fieldname": "severity",

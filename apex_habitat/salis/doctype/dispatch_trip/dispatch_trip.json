@@ -39,11 +39,11 @@
   },
   {"fieldname": "sec_trip", "fieldtype": "Section Break", "label": "Trip"},
   {"fieldname": "col_trip", "fieldtype": "Column Break"},
-  {"fieldname": "sec_assignment", "fieldtype": "Section Break", "label": "Vehicle & Driver"},
+  {"fieldname": "sec_assignment", "fieldtype": "Section Break", "label": "Vehicle and Driver"},
   {"fieldname": "col_assignment", "fieldtype": "Column Break"},
   {"fieldname": "sec_times", "fieldtype": "Section Break", "label": "Times"},
   {"fieldname": "col_times", "fieldtype": "Column Break"},
-  {"fieldname": "sec_readings", "fieldtype": "Section Break", "label": "Readings & Completion"},
+  {"fieldname": "sec_readings", "fieldtype": "Section Break", "label": "Readings and Completion"},
   {"fieldname": "col_readings", "fieldtype": "Column Break"},
   {
    "fieldname": "route_plan",

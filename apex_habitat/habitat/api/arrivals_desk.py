@@ -122,6 +122,17 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     txt = (txt or "").strip()
     results = []
 
+    # Parties already housed (an active, not-checked-out assignment) are excluded so the
+    # picker offers only assignable workers. The Accommodation Assignment validate is the
+    # backstop, but offering a housed worker only to fail on save is poor UX.
+    housed = frappe.get_all(
+        "Accommodation Assignment",
+        filters={"docstatus": 1, "check_out_date": ["is", "not set"]},
+        fields=["party_type", "party", "employee"],
+    )
+    housed_emp = {h.employee for h in housed if h.employee}
+    housed_tw = {h.party for h in housed if h.party_type == "Temporary Worker" and h.party}
+
     if frappe.has_permission("Employee", "read"):
         emps = frappe.get_all(
             "Employee",
@@ -141,6 +152,7 @@ def search_arrivals_workers(building=None, txt=None) -> list:
                 "sub": e.designation or e.name,
             }
             for e in emps
+            if e.name not in housed_emp
         ]
 
     if frappe.has_permission("Temporary Worker", "read"):
@@ -168,6 +180,7 @@ def search_arrivals_workers(building=None, txt=None) -> list:
                 "sub": _("Passport {0}").format(t.passport_number or "—"),
             }
             for t in tws
+            if t.name not in housed_tw
         ]
 
     return results

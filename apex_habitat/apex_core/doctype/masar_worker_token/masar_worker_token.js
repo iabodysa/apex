@@ -6,7 +6,7 @@ frappe.ui.form.on("Masar Worker Token", {
 			return;
 		}
 
-		frm.add_custom_button(__("Show Link & QR"), () => _show_link(frm, 0));
+		frm.add_custom_button(__("Show Link and QR"), () => _show_link(frm, 0));
 		frm.add_custom_button(__("Regenerate Token"), () => {
 			frappe.confirm(
 				__(

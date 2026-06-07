@@ -56,7 +56,7 @@
    "fieldname": "department",
    "fieldtype": "Select",
    "label": "Department",
-   "options": "Fire Safety\nHealth & Hygiene\nSecurity\nMaintenance\nDocumentation\nAwareness & Training\nCompliance & Licensing\nEmergency & Crisis",
+   "options": "Fire Safety\nHealth and Hygiene\nSecurity\nMaintenance\nDocumentation\nAwareness and Training\nCompliance and Licensing\nEmergency and Crisis",
    "reqd": 1,
    "idx": 6
   },

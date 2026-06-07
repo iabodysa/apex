@@ -92,7 +92,7 @@
   {
    "fieldname": "sec_assignment",
    "fieldtype": "Section Break",
-   "label": "Status & Assignment",
+   "label": "Status and Assignment",
    "collapsible": 1
   },
   {
@@ -102,7 +102,7 @@
   {
    "fieldname": "sec_tracking",
    "fieldtype": "Section Break",
-   "label": "Source & Tracking",
+   "label": "Source and Tracking",
    "collapsible": 1
   },
   {

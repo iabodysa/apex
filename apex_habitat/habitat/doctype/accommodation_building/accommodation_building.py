@@ -393,7 +393,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
         msg += "<br><br>" + _("Failures ({0}):").format(len(row_failures)) + "<br>" + failure_lines
     if blocked_reductions:
         msg += "<br><br>" + _("Capacity reductions blocked ({0} room(s) have occupied surplus beds):").format(len(blocked_reductions)) + "<br>" + "<br>".join(blocked_reductions)
-    frappe.msgprint(msg, title=_("Room & Bed Generation"), indicator=indicator)
+    frappe.msgprint(msg, title=_("Room and Bed Generation"), indicator=indicator)
 
     return summary
 

@@ -154,7 +154,7 @@
   {
    "fieldname": "salis_settings_tab_portal",
    "fieldtype": "Tab Break",
-   "label": "Portal & Naming"
+   "label": "Portal and Naming"
   },
   {
    "fieldname": "salis_settings_sec_portal",

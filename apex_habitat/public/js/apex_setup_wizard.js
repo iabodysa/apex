@@ -11,7 +11,7 @@ frappe.setup.on("before_load", function () {
 apex_habitat.setup.slides_settings = [
 	{
 		name: "apex_config",
-		title: __("Apex — Accommodation & Fleet Setup"),
+		title: __("Apex — Accommodation and Fleet Setup"),
 		icon: "fa fa-home",
 		help: __(
 			"Choose how Apex handles payments and salary deductions. You can change any of these later in Habitat Settings."

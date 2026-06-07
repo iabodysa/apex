@@ -241,7 +241,7 @@ class RoomSetup {
 
 		this._footer(
 			() => { this.stage = 3; this.render(); },
-			__("Approve & Generate"),
+			__("Approve and Generate"),
 			() => this._approve(),
 			"btn-primary"
 		);
