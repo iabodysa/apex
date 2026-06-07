@@ -162,7 +162,7 @@ class RoomSetup {
 		$('<p class="text-muted"></p>')
 			.text(__("Walk each floor and set the type of every room."))
 			.appendTo($wrap);
-		this.floors.forEach((f) =>
+		this._orderedFloors().forEach((f) =>
 			this._floor_block($wrap, f, (rm) => {
 				const $sel = $('<select class="form-control input-sm"></select>');
 				RS_ROOM_TYPES.forEach((t) => $("<option></option>").val(t).text(__(t)).appendTo($sel));
@@ -183,7 +183,7 @@ class RoomSetup {
 		$('<p class="text-muted"></p>')
 			.text(__("Set the number of beds in each room. Use − / + to adjust."))
 			.appendTo($wrap);
-		this.floors.forEach((f) =>
+		this._orderedFloors().forEach((f) =>
 			this._floor_block($wrap, f, (rm) => {
 				const $st = $('<div class="rs-stepper"></div>');
 				const $val = $('<span class="rs-bed-val"></span>').text(rm.beds);
@@ -207,7 +207,7 @@ class RoomSetup {
 	_floor_block($wrap, f, cellFn) {
 		const $b = $('<div class="rs-floor-block"></div>').appendTo($wrap);
 		$('<div class="rs-floor-title"></div>')
-			.text(__("Floor {0} — {1}", [f.number, __(f.type || "")]))
+			.text(__("Floor {0} — {1}", [f._code || f.number, __(f.type || "")]))
 			.appendTo($b);
 		const $grid = $('<div class="rs-grid"></div>').appendTo($b);
 		(f.rooms || []).forEach((rm, i) => {
@@ -248,9 +248,29 @@ class RoomSetup {
 		);
 	}
 
+	_orderedFloors() {
+		// Arrange floors bottom-to-top by classification (Basement -> Ground -> Middle
+		// -> Roof) and assign the functional floor number/code per type, so floor_type
+		// drives the numbering instead of being a cosmetic label.
+		const PRI = { Basement: 0, Ground: 1, Middle: 2, Roof: 3 };
+		const pri = (t) => (t in PRI ? PRI[t] : 2);
+		const sorted = this.floors.slice().sort(
+			(a, z) => pri(a.type) - pri(z.type) || this.floors.indexOf(a) - this.floors.indexOf(z)
+		);
+		let b = 0, m = 0, r = 0;
+		return sorted.map((f) => {
+			let num, code;
+			if (f.type === "Basement") { num = ++b; code = "B" + num; }
+			else if (f.type === "Ground") { num = 0; code = "G"; }
+			else if (f.type === "Roof") { r++; num = r; code = r > 1 ? "R" + r : "R"; }
+			else { num = ++m; code = String(num); }
+			return Object.assign({}, f, { _num: num, _code: code });
+		});
+	}
+
 	_grouped_floor_plan() {
 		const rows = [];
-		this.floors.forEach((f) => {
+		this._orderedFloors().forEach((f) => {
 			const groups = {};
 			const order = [];
 			(f.rooms || []).forEach((rm) => {
@@ -265,7 +285,7 @@ class RoomSetup {
 			order.forEach((key) => {
 				const g = groups[key];
 				rows.push({
-					floor_number: f.number,
+					floor_number: f._num,
 					floor_type: f.type || "",
 					room_type: g.room_type,
 					room_count: g.count,

@@ -25,6 +25,26 @@ def _room_number(abbreviation, floor_code, prefix, seq):
     return f"{abbreviation}-{floor_code}{prefix}{seq:02d}"
 
 
+def _floor_code(floor_type, floor_num):
+    """Floor code used in room numbers, driven by the floor's classification so the
+    type is FUNCTIONAL, not cosmetic: Basement -> B<n> (below ground), Ground -> G,
+    Roof -> R, Middle/unspecified -> the numeric floor."""
+    ft = (floor_type or "").strip()
+    if ft == "Basement":
+        return f"B{floor_num}" if floor_num else "B"
+    if ft == "Ground":
+        return "G"
+    if ft == "Roof":
+        return f"R{floor_num}" if floor_num and floor_num > 1 else "R"
+    return "G" if floor_num == 0 else str(floor_num)
+
+
+def _floor_sort_key(row):
+    """Order floors bottom-to-top by classification: Basement -> Ground -> Middle -> Roof."""
+    priority = {"Basement": 0, "Ground": 1, "Roof": 3}
+    return (priority.get((row.floor_type or "").strip(), 2), int(row.floor_number or 0))
+
+
 def _guard_abbreviation_lock(doc):
     """Once rooms exist under a building its abbreviation is LOCKED: the generator keys
     on the ``room_number`` string and never renames, so changing the code would mint a
@@ -173,9 +193,9 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
     blocked_reductions = []
     confirm_capacity_reduction = int(confirm_capacity_reduction or 0)
 
-    for row in doc.floor_plan:
+    for row in sorted(doc.floor_plan, key=_floor_sort_key):
         floor_num = int(row.floor_number or 0)
-        floor_code = "G" if floor_num == 0 else str(floor_num)
+        floor_code = _floor_code(row.floor_type, floor_num)
         start = int(row.starting_room_number or 1)
         count = int(row.room_count or 0)
         capacity = int(row.bed_capacity_per_room or 0)
