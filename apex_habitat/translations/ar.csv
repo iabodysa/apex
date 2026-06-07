@@ -62,6 +62,33 @@ Acknowledgement Received,تم استلام الإقرار
 Action Inbox,صندوق الإجراءات الواردة
 Live Inbox,الوارد المباشر
 Mentions,الإشارات
+Floor Type,نوع الطابق
+Room Types,أنواع الغرف
+Add Floor,إضافة طابق
+Setup Rooms,إعداد الغرف
+Ground,أرضي
+Middle,وسطي
+Roof,سطح
+Basement,قبو
+Default Beds,الأسرّة الافتراضية
+Default Room Type,نوع الغرفة الافتراضي
+Open Building,فتح المبنى
+Approve & Generate,اعتماد وتوليد
+Add at least one floor with rooms.,أضِف طابقاً واحداً على الأقل بغرف.
+Approving creates the rooms and beds and saves the floor plan on the building.,الاعتماد يُنشئ الغرف والأسرّة ويحفظ مخطط الطوابق في المبنى.
+Could not load the building.,تعذّر تحميل المبنى.
+Creating rooms and beds…,جارٍ إنشاء الغرف والأسرّة…
+"Define the floors: rooms per floor, floor type, and the default room type and bed count.",عرّف الطوابق: عدد الغرف لكل طابق، ونوع الطابق، ونوع الغرفة وعدد الأسرّة الافتراضي.
+Floor {0} — {1},الطابق {0} — {1}
+"Floor {0} ({1}): {2} room(s) × {3}, {4} bed(s) each",الطابق {0} ({1}): {2} غرفة × {3}، {4} سرير لكل غرفة
+Next: Approve,التالي: الاعتماد
+Next: Beds,التالي: الأسرّة
+Next: Room Types,التالي: أنواع الغرف
+Open Room Setup from a building — no building was provided in the route.,افتح إعداد الغرف من مبنى — لم يُحدَّد مبنى في المسار.
+Room Setup — {0},إعداد الغرف — {0}
+Rooms and beds created.,تم إنشاء الغرف والأسرّة.
+Set the number of beds in each room. Use − / + to adjust.,حدد عدد الأسرّة في كل غرفة. استخدم − / + للتعديل.
+Walk each floor and set the type of every room.,امشِ في كل طابق وحدد نوع كل غرفة.
 Accommodation,السكن
 Assignments,الإسنادات
 Bed Transfers,نقل الأسرّة
