@@ -45,14 +45,9 @@ class TestChangeLogPopup(unittest.TestCase):
             f"Changelog {change_log_file.name} must open with a heading naming version {version}.",
         )
 
-        # At least one "What changed ..." section describing user-visible updates.
-        self.assertRegex(
-            content,
-            re.compile(r"^#+\s+What changed", re.IGNORECASE | re.MULTILINE),
-            f"Changelog {change_log_file.name} must include a 'What changed' section.",
-        )
-
         # At least three bullet points — a real release note, not a stub.
+        # (The "What changed" heading was retired in v1.51.0; the bullets under the
+        # summary now carry the user-visible updates.)
         bullets = re.findall(r"^\s*[-*]\s+\S", content, re.MULTILINE)
         self.assertGreaterEqual(
             len(bullets),
