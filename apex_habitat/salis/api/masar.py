@@ -445,6 +445,8 @@ def get_worker_accommodation(token=None):
     building, room, bed, occupancy, the building in-charge contact, and any
     building notices. Scoped to the resolved employee; a worker with no active
     assignment gets a friendly ``{"assignment": None}`` empty state. Read-only."""
+    from apex_habitat.apex_core.utils.addresses import get_address_text
+
     employee = _resolve_worker(token)
     assignment = _active_assignment(employee)
     if not assignment:
@@ -460,7 +462,6 @@ def get_worker_accommodation(token=None):
                 "building_name",
                 "city",
                 "district",
-                "address",
                 "google_maps_url",
                 "responsible_facility_supervisor",
                 "current_occupants",
@@ -482,7 +483,7 @@ def get_worker_accommodation(token=None):
                 "building_name": b.get("building_name"),
                 "city": b.get("city"),
                 "district": b.get("district"),
-                "address": b.get("address"),
+                "address": get_address_text("Accommodation Building", assignment["building"]),
                 "google_maps_url": b.get("google_maps_url"),
                 "current_occupants": b.get("current_occupants"),
                 "total_capacity": b.get("total_capacity"),

@@ -1,3 +1,4 @@
+ It will also add {0} new room(s) and {1} new bed(s)., كما سيضيف {0} غرفة/غرف جديدة و{1} سرير/أسرّة جديدة.
 (temporary),مؤقت
 A Representatives trip cannot be linked to labour accommodation.,رحلة المناديب لا تُربط بسكن العمالة.
 A Representatives trip cannot carry a worker manifest.,رحلة المناديب لا تحمل قائمة عمّال.
@@ -18,6 +19,7 @@ Absent,غائب
 Accent Color,لون التمييز
 Access Level,مستوى الصلاحية
 Accident,حادث
+Accommodation,السكن
 Accommodation Assignment,إسناد السكن
 Accommodation Bed,سرير
 Accommodation Building,مبنى السكن
@@ -60,60 +62,8 @@ Acknowledged By (Finance),اعتمد من قِبَل (مالية)
 Acknowledged On,تاريخ الاعتماد
 Acknowledgement Received,تم استلام الإقرار
 Action Inbox,صندوق الإجراءات الواردة
-Live Inbox,الوارد المباشر
-Mentions,الإشارات
-Floor Layout,مخطط الطوابق
-Available: {0},متاح: {0}
-Partial / Attention: {0},جزئي / انتباه: {0}
-Full: {0},ممتلئ: {0}
-Maintenance: {0},صيانة: {0}
-No rooms found for this building.,لا توجد غرف لهذا المبنى.
-Ground Floor,الطابق الأرضي
-Floor Type,نوع الطابق
-Room Types,أنواع الغرف
-Add Floor,إضافة طابق
-Setup Rooms,إعداد الغرف
-Ground,أرضي
-Middle,وسطي
-Roof,سطح
-Basement,قبو
-Default Beds,الأسرّة الافتراضية
-Default Room Type,نوع الغرفة الافتراضي
-Open Building,فتح المبنى
-Approve & Generate,اعتماد وتوليد
-Add at least one floor with rooms.,أضِف طابقاً واحداً على الأقل بغرف.
-Approving creates the rooms and beds and saves the floor plan on the building.,الاعتماد يُنشئ الغرف والأسرّة ويحفظ مخطط الطوابق في المبنى.
-Could not load the building.,تعذّر تحميل المبنى.
-Creating rooms and beds…,جارٍ إنشاء الغرف والأسرّة…
-"Define the floors: rooms per floor, floor type, and the default room type and bed count.",عرّف الطوابق: عدد الغرف لكل طابق، ونوع الطابق، ونوع الغرفة وعدد الأسرّة الافتراضي.
-Floor {0} — {1},الطابق {0} — {1}
-Floor {0},الطابق {0}
-Basement {0},القبو {0}
-Maintenance Overdue,صيانة متأخرة
-"Floor {0} ({1}): {2} room(s) × {3}, {4} bed(s) each",الطابق {0} ({1}): {2} غرفة × {3}، {4} سرير لكل غرفة
-Next: Approve,التالي: الاعتماد
-Next: Beds,التالي: الأسرّة
-Next: Room Types,التالي: أنواع الغرف
-Open Room Setup from a building — no building was provided in the route.,افتح إعداد الغرف من مبنى — لم يُحدَّد مبنى في المسار.
-Room Setup — {0},إعداد الغرف — {0}
-Rooms and beds created.,تم إنشاء الغرف والأسرّة.
-Set the number of beds in each room. Use − / + to adjust.,حدد عدد الأسرّة في كل غرفة. استخدم − / + للتعديل.
-Walk each floor and set the type of every room.,امشِ في كل طابق وحدد نوع كل غرفة.
-Accommodation,السكن
-Assignments,الإسنادات
-Bed Transfers,نقل الأسرّة
-Beds,الأسرّة
-Buildings,المباني
-Contracts,العقود
-Exceptions,الاستثناءات
-Maintenance & Facilities,الصيانة والمرافق
-Reports,التقارير
-Requests,الطلبات
-Residents,الساكنون
-Rooms & Beds,الغرف والأسرّة
-Utilities,الخدمات العامة
-My Tasks,مهامي
-Read-only — managed by the Room Generator wizard.,للقراءة فقط — يُدار عبر معالج توليد الغرف.
+Activate Bed,تفعيل السرير
+Activate Room,تفعيل الغرفة
 Active,نشط
 Active Accommodation Assignments,التسكينات النشطة
 Active CCTV Cameras,كاميرات المراقبة المفعّلة
@@ -133,8 +83,10 @@ Actual Start Date,تاريخ البداية الفعلي
 Actual Start Date and Actual End Date are required to mark Completed.,تاريخ البدء الفعلي وتاريخ الانتهاء الفعلي مطلوبان للوسم كمكتمل.
 Actual Visit Date,تاريخ الزيارة الفعلي
 Add,إضافة
+Add Floor,إضافة طابق
 Add Row,إضافة صف
 Add at least one floor plan row.,أضف صفاً واحداً على الأقل في مخطط الطوابق.
+Add at least one floor with rooms.,أضِف طابقاً واحداً على الأقل بغرف.
 Add at least one item to the cart before issuing.,أضف صنفاً واحداً على الأقل قبل الصرف.
 "Add the first driver, including license details used for clearance and dispatch.",أضف أول سائق، متضمناً بيانات الرخصة المستخدمة لإخلاء الطرف والتشغيل.
 "Add the first vehicle to the fleet so it can be assigned, fuelled, and dispatched.",أضف أول مركبة إلى الأسطول ليتسنى إسنادها وتزويدها بالوقود وتشغيلها.
@@ -155,6 +107,7 @@ Alert Type,نوع التنبيه
 Alerts,تنبيهات
 All Assets Physically Verified,تم الجرد الفعلي لجميع الأصول
 All Custody Cleared,تم إخلاء طرف جميع العهد
+All Worker (4-bed),جميع العمال (4 أسرّة)
 Allocation,تخصيص
 Allocation Basis,أساس التوزيع
 Allocation Period End,نهاية فترة التوزيع
@@ -195,11 +148,13 @@ Applyingâ¦,جارٍ التطبيق…
 Approval Controls,ضوابط الموافقة
 Approvals,الموافقات
 Approve,اعتماد
+Approve & Generate,اعتماد وتوليد
 Approved,معتمد
 Approved By,معتمد من
 Approved Last 48h,المُعتمَدة آخر 48 ساعة
 Approved by Finance,معتمد من المالية
 Approved by Supervisor,معتمد من المشرف
+Approving creates the rooms and beds and saves the floor plan on the building.,الاعتماد يُنشئ الغرف والأسرّة ويحفظ مخطط الطوابق في المبنى.
 Approvingâ¦,جارٍ الموافقة…
 Arabic,العربية
 Are you sure you want to generate rooms and beds from the floor plan?,هل أنت متأكد أنك تريد توليد الغرف والأسرة من مخطط الطوابق؟
@@ -242,6 +197,7 @@ Assigned Vehicle,المركبة المسندة
 Assignment,الإسناد
 Assignment Details,تفاصيل الإسناد
 Assignment Type,نوع التسكين
+Assignments,الإسنادات
 Assigns a vehicle to a driver and project for a defined period.,يُسنِد مركبة إلى سائق ومشروع لفترة محددة.
 At least one asset line is required.,يجب إدخال بند أصول واحد على الأقل.
 At least one damaged item is required.,يجب إدخال بند تالف واحد على الأقل.
@@ -274,6 +230,7 @@ Available Beds,الأسرّة المتاحة
 Available Capacity,السعة المتاحة
 Available Capacity Trend,اتجاه السعة المتاحة
 Available Rooms,الغرف المتاحة
+Available: {0},متاح: {0}
 Average,متوسط
 Average Monthly Bill (SAR),متوسط الفاتورة الشهرية (ريال)
 Average Vehicle Utilisation %,متوسط نسبة استغلال المركبات %
@@ -285,6 +242,8 @@ Awareness & Training,التوعية والتدريب
 Balady Certificate,شهادة بلدي
 Balance Qty,الكمية المتبقية
 Base Accommodation Cost,تكلفة السكن الأساسية
+Basement,قبو
+Basement {0},القبو {0}
 Basis / Evidence,الأساس / الأدلة
 Basis / Evidence is required before a recovery can be Approved.,يجب توفير الأساس / الأدلة قبل اعتماد عملية الاسترداد.
 Bathroom,دورة المياه
@@ -292,6 +251,9 @@ Bed,سرير
 Bed (if bed-specific),السرير (إذا كان مخصصاً لسرير محدد)
 Bed Capacity,الطاقة الاستيعابية (أسرة)
 Bed Code,رمز السرير
+Bed Transfers,نقل الأسرّة
+Bed {0} is occupied. Check the resident out before deactivating it.,السرير {0} مشغول. أخرِج الساكن قبل تعطيله.
+Beds,الأسرّة
 Beds Out of Service,الأسرة خارج الخدمة
 Beds by Building,الأسرّة حسب المبنى
 Beds by Status,الأسرة حسب الحالة
@@ -334,6 +296,7 @@ Building arrival cardsâ¦,بطاقات وصول المبنى…
 Building is required to mark Completed.,المبنى مطلوب للوسم كمكتمل.
 Building safety inspection.,تفتيش سلامة المبنى.
 "Building-level fixed asset: CCTV camera, DVR/NVR, hard disk, router, switch, generator. Custody is on the supervisor, not on an employee.",أصل ثابت على مستوى المبنى: كاميرا مراقبة، مسجّل DVR/NVR، قرص صلب، موجّه، مبدّل، مولّد. العهدة على المشرف وليست على موظف.
+Buildings,المباني
 Buildings Granted,المباني المرخصة
 Buildings In Scope,المباني المشمولة بالعمل
 CCTV Camera,كاميرا مراقبة
@@ -350,6 +313,7 @@ Cancellation Reason is required before cancelling a Scheduled Task Instance.,ي�
 Capacity,السعة
 Capacity Denominator,مقام السعة المعتمد
 Capacity Policies,سياسات السعة
+Capacity reductions blocked ({0} room(s) have occupied surplus beds):,تعليق تخفيضات السعة ({0} غرفة/غرف بها أسرّة زائدة مشغولة):
 Caption,التعليق
 "Capture a movement need so it can be validated, scheduled, and dispatched.",سجّل حاجة حركة ليتسنى التحقق منها وجدولتها وتشغيلها.
 Captured At,وقت الالتقاط
@@ -484,6 +448,7 @@ Contract End,نهاية العقد
 Contract Start,بداية العقد
 Contracted daily rental rate. Carried into the Rental Accrual Ledger memo for each in-service day.,سعر الإيجار اليومي المتعاقد عليه. يُنقل إلى مذكرة دفتر استحقاق الإيجار عن كل يوم في الخدمة.
 Contractor / Temp ID,معرّف المتعاقد / المؤقت
+Contracts,العقود
 Copy floor to next floor,نسخ الطابق إلى الطابق التالي
 Cost Bearing (%),نسبة تحمّل التكلفة (٪)
 Cost Bleeding (SAR),هدر التكلفة (ريال)
@@ -507,6 +472,7 @@ Could not load pending fuel requests.,تعذّر تحميل طلبات الوق�
 Could not load the approval queue,تعذّر تحميل قائمة الاعتماد
 Could not load the board for this building.,تعذّر تحميل اللوحة لهذا المبنى.
 Could not load the board. Check your connection and try again.,تعذّر تحميل اللوحة. تحقق من اتصالك وحاول مجدداً.
+Could not load the building.,تعذّر تحميل المبنى.
 Could not load the building. Please retry.,تعذّر تحميل المبنى. يرجى المحاولة مجدداً.
 Could not load the catalog.,تعذّر تحميل السجل.
 Could not load the dispatch board. Please check your connection and try again.,تعذّر تحميل لوحة التوجيه. يرجى التحقق من اتصالك والمحاولة مجدداً.
@@ -541,6 +507,7 @@ Create a Fuel Quota,إنشاء حصة وقود
 Create a Vehicle Category,أنشئ فئة مركبات
 Create one transport request,إنشاء طلب نقل واحد
 Creating QR codesâ¦,جارٍ إنشاء رموز QR…
+Creating rooms and beds…,جارٍ إنشاء الغرف والأسرّة…
 Credentials Delivered By,مُسلم بيانات الاعتماد
 Critical,حرج
 Cross Region,بين المناطق
@@ -609,6 +576,8 @@ Days before a building lease end date to flag it on the watchlist.,عدد الأ
 Days before a temporary stay's expected check-out date to flag it on the supervisor's watchlist.,عدد الأيام قبل تاريخ المغادرة المتوقع لإقامة مؤقتة لإدراجها في قائمة متابعة المشرف.
 Days before expiry to trigger renewal alert,عدد الأيام قبل الانتهاء لإطلاق تنبيه التجديد
 Days to Expiry,الأيام المتبقية للانتهاء
+Deactivate Bed,تعطيل السرير
+Deactivate Room,تعطيل الغرفة
 December,ديسمبر
 Declining Balance,الرصيد المتناقص
 Deduction Activation Date,تاريخ تفعيل الخصم
@@ -616,12 +585,14 @@ Deduction Amount (SAR),مبلغ الحسم (ريال)
 Deduction Entry,قيد الحسم
 Deep Cleaning,نظافة عميقة
 Default Assignee (Employee),المكلف الافتراضي (الموظف)
+Default Beds,الأسرّة الافتراضية
 Default Company,الشركة الافتراضية
 Default Cost Center,مركز التكلفة الافتراضي
 Default Currency,العملة الافتراضية
 Default Depreciation Policy,سياسة الإهلاك الافتراضية
 Default Fuel Type,نوع الوقود الافتراضي
 Default Payment Method,طريقة الدفع الافتراضية
+Default Room Type,نوع الغرفة الافتراضي
 Default UOM,وحدة القياس الافتراضية
 Default company applied to Salis transactions when not set explicitly.,الشركة الافتراضية المطبَّقة على معاملات سلس عند عدم تحديدها صراحةً.
 "Default company for Accommodation Ledger, Maintenance, Utility, and Lease documents. Required before enabling financial posting.",الشركة الافتراضية لمستندات دفتر التكاليف التشغيلية والصيانة والخدمات وعقود الإيجار. مطلوبة قبل تفعيل الترحيل المالي.
@@ -630,6 +601,7 @@ Default mode keeps all custody and depreciation inside Habitat with no financial
 Defaults,الإعدادات الافتراضية
 Defaults to the session user on creation.,يُهيّأ افتراضياً إلى مستخدم الجلسة عند الإنشاء.
 "Define the first vehicle class (e.g. Sedan, Bus, Pickup) used to group fleet vehicles.",عرّف أول فئة مركبات (مثل سيدان أو حافلة أو بيك أب) لتصنيف مركبات الأسطول.
+"Define the floors: rooms per floor, floor type, and the default room type and bed count.",عرّف الطوابق: عدد الغرف لكل طابق، ونوع الطابق، ونوع الغرفة وعدد الأسرّة الافتراضي.
 Delegation-of-Authority Thresholds (SAR),حدود تفويض الصلاحيات (ريال)
 Depart Time,وقت المغادرة
 Department,القسم
@@ -637,6 +609,7 @@ Deployed,مشغّل
 Depreciation %,نسبة الإهلاك (%)
 Depreciation Policy,سياسة الإهلاك
 Depreciation Snapshot Item,بند لقطة الإهلاك
+Derived from the active Accommodation Lease (annualized). Read-only.,مشتق من عقد الإيجار الفعّال (محسوباً سنوياً). للقراءة فقط.
 Describe the issue,صف المشكلة
 Description,الوصف
 Description is too long. Please keep it under 2000 characters.,الوصف طويل جداً. يرجى الإبقاء عليه تحت 2000 حرف.
@@ -703,6 +676,7 @@ Each cart line must have a quantity greater than zero.,يجب أن تكون كم
 Each cart line must reference an article.,يجب أن يشير كل سطر في السلة إلى صنف.
 "Each custody item must be marked Returned, Lost, or Damaged before submission.",يجب تحديد كل بند عهدة كـ مُعاد أو مفقود أو تالف قبل التقديم.
 Each row must have at least 1 room.,يجب أن يحتوي كل صف على غرفة واحدة على الأقل.
+Edit Rooms & Beds,تعديل الغرف والأسرّة
 Electric,كهربائي
 Electrical,كهرباء / كهربائي
 Electricity,كهرباء
@@ -761,6 +735,7 @@ Evidence required before resolving,الإثبات مطلوب قبل الإغلا
 Example,مثال
 Excellent,ممتاز
 Exception Type,نوع الاستثناء
+Exceptions,الاستثناءات
 Excessive Topup,تعبئة مفرطة
 Executed By,جهة التنفيذ
 Execution,التنفيذ
@@ -831,9 +806,15 @@ Fleet Supervisor Dashboard,لوحة معلومات مشرف الأسطول
 "Fleet driver master record: identity, project, supervisor, vehicle linkage, and compliance.",سجل أساسي لسائق الأسطول: الهوية والمشروع والمشرف وربط المركبة والامتثال.
 "Fleet vehicle master record. Stores plate, ownership, and operational status.",سجل أساسي لمركبة الأسطول. يخزّن اللوحة والملكية والحالة التشغيلية.
 Floor,الطابق
+Floor Layout,مخطط الطوابق
 Floor Number,رقم الطابق
 Floor Plan,مخطط الطوابق
 Floor Preset,قالب الطابق
+Floor Type,نوع الطابق
+Floor {0},الطابق {0}
+"Floor {0} ({1}): {2} room(s) × {3}, {4} bed(s) each",الطابق {0} ({1}): {2} غرفة × {3}، {4} سرير لكل غرفة
+Floor {0} is outside the configured upper floors ({1}). The rows were added anyway — adjust the floor selector if needed.,الطابق {0} خارج الطوابق العليا المُعدّة ({1}). أُضيفت الصفوف على أي حال — عدّل محدِّد الطابق إذا لزم.
+Floor {0} — {1},الطابق {0} — {1}
 For Subcontractor or External Worker when Employee link is not available.,للمقاول من الباطن أو العامل الخارجي عند عدم توفّر ارتباط الموظف.
 Forgotten Request,طلب منسي
 Formal lease contract holder for one building. Carries the rent payment schedule. Landlord identity fields stay on Accommodation Building.,حامل عقد الإيجار الرسمي لمبنى واحد. يحمل جدول دفعات الإيجار. تبقى بيانات هوية المالك على سجل المبنى.
@@ -897,6 +878,7 @@ Full Admin,مسؤول كامل الصلاحيات
 Full Name,الاسم الكامل
 Full Rooms,الغرف الممتلئة
 Full amount on the utility company's invoice (before sharing),المبلغ الكامل في فاتورة شركة الخدمات (قبل المشاركة)
+Full: {0},ممتلئ: {0}
 Furniture,أثاث
 GL Posted,تم ترحيل قيد الأستاذ العام
 GPS Mismatch,عدم تطابق GPS
@@ -922,7 +904,9 @@ Good,جيد
 Google Maps Link,رابط خرائط جوجل
 Government Relations Cases Open,حالات العلاقات الحكومية المفتوحة
 "Grants viewing/admin credentials for CCTV systems to a specific user, scoped to one or more buildings.",يمنح صلاحيات المشاهدة/الإدارة لأنظمة المراقبة لمستخدم محدد، ضمن نطاق مبنى أو أكثر.
+Ground,أرضي
 Ground (G),الأرضي (G)
+Ground Floor,الطابق الأرضي
 "Ground floor uses G, e.g. JED1-G01.",الطابق الأرضي يستخدم الرمز G، مثال: JED1-G01.
 Group Housing Permit,تصريح السكن الجماعي
 HR,الموارد البشرية
@@ -1062,6 +1046,7 @@ KPI,مؤشر الأداء
 Key Metrics,المؤشرات الرئيسية
 Kitchen,المطبخ
 Labour Supplier,مورّد العمالة
+Landlord,المؤجّر
 Landlord & Lease Details,تفاصيل المالك والإيجار
 Landlord Mobile,رقم جوال المؤجر
 Landlord Name,اسم المؤجر
@@ -1124,6 +1109,7 @@ Links,الروابط
 Links this asset to its ERPNext Asset record for depreciation tracking.,يربط هذا الأصل بسجل الأصل في ERPNext لتتبّع الإهلاك.
 Litres,اللترات
 Litres cannot be negative.,لا يمكن أن تكون اللترات سالبة.
+Live Inbox,الوارد المباشر
 Live View + Playback,بث مباشر + إعادة تشغيل
 Live View Only,بث مباشر فقط
 "Live fleet glance: vehicles by status, today's trips, driver availability and open transport requests.",نظرة حية على الأسطول: المركبات حسب الحالة ورحلات اليوم وتوفّر السائقين وطلبات النقل المفتوحة.
@@ -1134,6 +1120,7 @@ Loading mapâ¦,جارٍ تحميل الخريطة…
 Loadingâ¦,جارٍ التحميل…
 Location,الموقع
 Location Token,رمز الموقع
+Locked — rooms already generated with this code.,مقفل — الغرف وُلِّدت بهذا الرمز بالفعل.
 Log,سجل
 Log Count,عدد السجلات
 Log Date,تاريخ السجل
@@ -1147,6 +1134,7 @@ Lost,مفقود
 Low,منخفضة
 MOL Worker Housing Approval,اعتماد سكن العمالة من وزارة الموارد البشرية
 Maintenance,صيانة
+Maintenance & Facilities,الصيانة والمرافق
 Maintenance Aging,تقادم طلبات الصيانة
 Maintenance Backlog,متراكمات أعمال الصيانة
 Maintenance Dispatch,إرسال للصيانة
@@ -1157,6 +1145,7 @@ Maintenance Master,إدارة مواد الصيانة
 Maintenance Material,مادة الصيانة
 Maintenance Material Template,قالب مواد الصيانة
 Maintenance Material Template Item,عنصر قالب مواد الصيانة
+Maintenance Overdue,صيانة متأخرة
 Maintenance Procurement Item,بند مشتريات الصيانة
 Maintenance Request,طلب صيانة
 Maintenance Requests by Priority,طلبات الصيانة حسب الأولوية
@@ -1165,6 +1154,7 @@ Maintenance Work Order,أمر عمل صيانة
 Maintenance Work Orders Completed,أوامر عمل الصيانة المكتملة
 Maintenance Work Orders In Progress,أوامر عمل الصيانة قيد التنفيذ
 Maintenance Work Orders by Status,أوامر عمل الصيانة حسب الحالة
+Maintenance: {0},صيانة: {0}
 Manifest Passenger,راكب الكشف
 Manual,يدوي
 Manual Entry,إدخال يدوي
@@ -1198,11 +1188,13 @@ Max Damage Deduction per Checkout (SAR),الحد الأقصى لخصم التل�
 Max Occupancy %,أعلى نسبة إشغال
 May,مايو
 Medium,متوسطة
+Mentions,الإشارات
 Message,الرسالة
 Meter & Sharing,العدّاد والمشاركة
 Meter Number,رقم العدّاد
 Meter Readings & Sharing,قراءات العدّاد والمشاركة
 Method,الطريقة
+Middle,وسطي
 Migrated From,تم ترحيله من
 Min Occupancy %,أدنى نسبة إشغال
 Missed,فائت
@@ -1210,6 +1202,7 @@ Missed Cleaning,تنظيف مفقود
 Missed Cleaning Logs,سجلات التنظيف الفائتة
 Missed Reason,سبب التغيب
 Missed Subcontractor Visits,زيارات مقاول الباطن الفائتة
+Mixed (Worker + Isolation),مختلط (عمال + عزل)
 Mobile Number,رقم الجوال
 Mobile Number (Optional),رقم الجوال (اختياري)
 Mobile Portals,البوابات الجوالة
@@ -1243,6 +1236,7 @@ Must be checked before the assignment can be submitted.,يجب تحديده قب
 My Maintenance Requests,طلبات الصيانة الخاصة بي
 My Name (Optional),اسمي (اختياري)
 My Open Submissions,مُقدَّماتي المفتوحة
+My Tasks,مهامي
 My Work,مهامي
 My Work Center,مركز عملي
 Naming Series,سلسلة الترقيم
@@ -1260,6 +1254,9 @@ New Assignment,تخصيص جديد
 New Hire,موظف جديد
 Next Expiry Date,تاريخ الانتهاء القادم
 Next â,التالي ←
+Next: Approve,التالي: الاعتماد
+Next: Beds,التالي: الأسرّة
+Next: Room Types,التالي: أنواع الغرف
 Night,ليلي
 No,لا
 No Salis Driver is linked to your account.,لا يوجد سائق سلس مرتبط بحسابك.
@@ -1277,6 +1274,7 @@ No pending fuel requests. The queue is clear.,لا توجد طلبات وقود 
 No photo on file,لا توجد صورة
 No project yet,لا يوجد مشروع بعد
 No registered workers match. Register a new arrival below.,لا يوجد عمال مسجّلون مطابقون. سجّل وصولاً جديداً أدناه.
+No rooms found for this building.,لا توجد غرف لهذا المبنى.
 No trips scheduled for today.,لا توجد رحلات مجدولة لليوم.
 No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel.,لا توجد مركبة مسندة إليك. اطلب من مشرفك إسناد مركبة قبل طلب الوقود.
 No vehicles in scope.,لا توجد مركبات ضمن النطاق.
@@ -1343,6 +1341,7 @@ Only submitted Work Orders can be started.,لا يمكن بدء تنفيذ أو�
 Open,فتح
 Open Action Inbox,فتح صندوق الإجراءات
 Open Audit Remediation Plans,خطط معالجة التدقيق المفتوحة
+Open Building,فتح المبنى
 Open Checkout Form,فتح نموذج تسجيل الخروج
 Open Current Driver,فتح السائق الحالي
 Open Current Vehicle,فتح المركبة الحالية
@@ -1358,6 +1357,7 @@ Open Maintenance,صيانة مفتوحة
 Open Maintenance Requests,طلبات الصيانة المفتوحة
 Open Movement Cost Recoveries,عمليات استرداد تكلفة حركة مفتوحة
 Open Resident Requests,طلبات الساكنين المفتوحة
+Open Room Setup from a building — no building was provided in the route.,افتح إعداد الغرف من مبنى — لم يُحدَّد مبنى في المسار.
 Open Safety Map,فتح خريطة السلامة
 Open Subcontractor Service Orders,أوامر خدمة مقاول الباطن المفتوحة
 Open Transport Requests,طلبات النقل المفتوحة
@@ -1416,6 +1416,7 @@ Ownership At Stop,الملكية عند الإيقاف
 "Owning company, carried for reporting grouping. System-written; reference only, posts no GL.",الشركة المالكة، منقولة لأغراض تجميع التقارير. يكتبها النظام؛ للمرجع فقط، ولا تُرحّل أي قيد في دفتر الأستاذ العام.
 Paid,مدفوع
 Paid On,دُفع في تاريخ
+Partial / Attention: {0},جزئي / انتباه: {0}
 Partially Occupied,مشغول جزئياً
 Partially Occupied Rooms,الغرف المشغولة جزئياً
 Partially Returned,مُرجَع جزئياً
@@ -1564,6 +1565,7 @@ Raise a Transport Request,أنشئ طلب نقل
 Raised By,أُنشئ بواسطة
 Raised On,أُنشئ في
 Rating,التقييم
+Read-only — managed by the Room Generator wizard.,للقراءة فقط — يُدار عبر معالج توليد الغرف.
 Readiness Status,حالة جاهزية الغرفة
 Readings & Completion,القراءات والإنجاز
 Ready,جاهز
@@ -1594,6 +1596,7 @@ Recover from Driver,استرداد من السائق
 Recovered,مُسترد
 Recovery,الاسترداد
 Recovery Type,نوع الاسترداد
+Reducing bed capacity will retire {0} empty bed(s) (set them Out of Service). This cannot be undone automatically. Existing rooms were updated to match the plan.{1} Confirm to proceed?,سيؤدي تخفيض سعة الأسرّة إلى إحالة {0} سرير/أسرّة فارغة (تعيينها «خارج الخدمة»). لا يمكن التراجع عن ذلك تلقائياً. حُدِّثت الغرف الحالية لتطابق الخطة.{1} هل تريد المتابعة؟
 Reference Document Type,نوع مستند المرجع
 Reference Name,اسم المرجع
 "Reference catalog of standardized safety tasks. Each task defines its department, frequency, priority, and instructions.",سجل مرجعي لمهام السلامة المعيارية. تحدّد كل مهمة قسمها ودوريتها وأولويتها وتعليماتها.
@@ -1666,6 +1669,7 @@ Replaced,مُستبدَل
 Report,تقرير
 Reported By,مُبلغ من قبل
 Reported On,تاريخ الإبلاغ
+Reports,التقارير
 Representative,المندوب
 Representatives,المناديب
 Representatives Fleet Dashboard,لوحة أسطول المناديب
@@ -1685,6 +1689,7 @@ Requested Litres must be greater than zero.,يجب أن تكون اللترات 
 Requester,مقدّم الطلب
 Requester Name,اسم مقدّم الطلب
 Requester Type,نوع مقدّم الطلب
+Requests,الطلبات
 Requests Raised,الطلبات المُنشأة
 Requests Served,الطلبات المخدومة
 Require approval when an assignment or transfer crosses project boundaries.,اشتراط الموافقة عند تجاوز الإسناد أو النقل لحدود المشروع.
@@ -1696,6 +1701,7 @@ Resident,المقيم
 Resident / worker is required.,المقيم / العامل مطلوب.
 Resident Supervisor Dashboard,لوحة معلومات مشرف الساكنين
 Resident Type,نوع المقيم
+Residents,الساكنون
 Residents and Rooms,الساكنون والغرف
 Residual Value (%),القيمة المتبقية (%)
 Resignation,استقالة
@@ -1740,6 +1746,7 @@ Rework Required,يلزم إعادة العمل
 Role,الدور
 Role Profile,ملف الدور الوظيفي
 Roles and Access,الأدوار والصلاحيات
+Roof,سطح
 Room,الغرفة
 Room & Bed Generation,توليد الغرف والأسرة
 Room Bed Transfer,نقل سرير الغرفة
@@ -1751,16 +1758,21 @@ Room Generator â Step 3 of 3: Review,منشئ الغرف — الخطوة 3
 Room Number,رقم الغرفة
 Room Number Prefix,بادئة رقم الغرفة
 Room Setup,إعداد الغرف
+Room Setup — {0},إعداد الغرف — {0}
 Room Status Breakdown,تفصيل حالة الغرف
 Room Type,نوع الغرفة
+Room Types,أنواع الغرف
+"Room and bed counts are managed by the Room Setup wizard. Click to add, change, or remove rooms / beds.",تُدار أعداد الغرف والأسرّة عبر معالج إعداد الغرف. اضغط لإضافة أو تغيير أو إزالة الغرف/الأسرّة.
 Room not ready,الغرفة غير جاهزة
 Room-level maintenance ticket. Can be generated automatically from a safety inspection report.,تذكرة صيانة على مستوى الغرفة. يمكن إنشاؤها آلياً من تقرير تفتيش السلامة.
 Rooms,الغرف
+Rooms & Beds,الغرف والأسرّة
 Rooms Cleaned,الغرف التي تم تنظيفها
 Rooms Generated,تم توليد الغرف
 Rooms Generated On,تاريخ توليد الغرف
 Rooms Planned,تم تخطيط الغرف
 Rooms Total,إجمالي الغرف
+Rooms and beds created.,تم إنشاء الغرف والأسرّة.
 Rooms on Floor,عدد الغرف في الطابق
 Route,المسار
 Route Name,اسم المسار
@@ -1869,6 +1881,7 @@ Service Type,نوع الخدمة
 Set automatically when this request is generated from a safety inspection report.,يُضبط آلياً عند إنشاء هذا الطلب من تقرير تفتيش سلامة.
 Set later by the Arrival Batch intake (built in a subsequent batch).,يُعبَّأ لاحقاً عند معالجة دفعة الوصول.
 Set the monthly litre allowance for a vehicle so consumption can be reconciled.,حدد البدل الشهري باللترات لمركبة ليتسنى مطابقة الاستهلاك.
+Set the number of beds in each room. Use − / + to adjust.,حدد عدد الأسرّة في كل غرفة. استخدم − / + للتعديل.
 Set to the session user on creation; read-only so the segregation-of-duties gate cannot be spoofed.,يُضبط إلى مستخدم الجلسة عند الإنشاء؛ وهو للقراءة فقط بحيث لا يمكن التحايل على بوابة الفصل بين المهام.
 Set up your fleet and dispatch your first movement.,جهّز أسطولك ونفّذ أول حركة.
 Set when a subcontractor visit is created from this request,يُضبط عند إنشاء زيارة مقاول من هذا الطلب
@@ -1881,6 +1894,7 @@ Settlement,التسوية
 "Settlement period, e.g. 2026-05.",فترة التسوية، مثال: 2026-05.
 Settlements Pending Approval,التسويات بانتظار الاعتماد
 Setup,الإعداد
+Setup Rooms,إعداد الغرف
 Setup Status,حالة الإعداد
 Setup and Master Data,الإعداد والبيانات الأساسية
 Severe,شديدة
@@ -1908,6 +1922,7 @@ Smoke Detectors Present,كاشفات الدخان موجودة
 Snapshot,لقطة
 Snapshot Date,تاريخ اللقطة
 Snapshots,اللقطات
+Some rooms could not be reduced — they still have occupied beds: {0},تعذّر تخفيض بعض الغرف — لا تزال بها أسرّة مشغولة: {0}
 Source,المصدر
 Source & Tracking,المصدر والتتبّع
 Source Channel,قناة المصدر
@@ -2028,6 +2043,7 @@ That vehicle is not assigned to you. You can only request fuel for your own vehi
 The building this asset was located in before its current location.,المبنى الذي كان هذا الأصل موجوداً فيه قبل موقعه الحالي.
 The closer must differ from the person who raised the case.,يجب أن يختلف من يُغلق الحالة عمّن رفعها.
 "The driver's current assigned vehicle, captured for reference.",المركبة المسندة حالياً للسائق، مسجّلة للمرجع.
+"The property's landlord, modeled as a Supplier. Auto-filled from the active lease when set there.",مالك/مؤجّر العقار، ممثَّلاً كمورّد. يُعبّأ تلقائياً من العقد الفعّال عند ضبطه هناك.
 The route stop where this worker boarded (mirrors the Route Stop name on the trip's route).,محطة المسار التي صعد منها هذا العامل (تطابق اسم محطة المسار في مسار الرحلة).
 The user who raised this case. Set automatically.,المستخدم الذي أنشأ هذه الحالة. يُضبط آلياً.
 The user who resolved or closed the case. Must differ from Reported By (segregation of duties).,المستخدم الذي عالج الحالة أو أغلقها. يجب أن يختلف عن المُبلِّغ (الفصل بين المهام).
@@ -2153,12 +2169,13 @@ Upload Photo (Optional),رفع صورة (اختياري)
 Urdu,الأردية
 "Use when the issue concerns a specific facility asset (e.g., CCTV camera, fire alarm panel)",استخدمه عندما تخص المشكلة أصل مرفق محدد (مثل كاميرا مراقبة، لوحة إنذار حريق)
 Used for variance alerts. Updated monthly by the variance scan job.,يُستخدم لتنبيهات الانحراف. يُحدَّث شهرياً بواسطة مهمة فحص الانحراف.
-"Used in room/bed codes, e.g. JED1-G01.",يُستخدم في رموز الغرف والأسرة، مثال: JED1-G01.
+"Used in room/bed codes, e.g. JED1-G01.",يُستخدم في رموز الغرف/الأسرّة، مثل JED1-G01.
 Useful Life (Years),العمر الإنتاجي (سنوات)
 Useful Life (Years) must be greater than zero.,العمر الإنتاجي (بالسنوات) يجب أن يكون أكبر من صفر.
 User,المستخدم
 User Requesting Access,المستخدم طالب الصلاحية
 Utilisation %,نسبة الاستغلال %
+Utilities,الخدمات العامة
 Utility Account,حساب الخدمات العامة
 Utility Bill Entry,تسجيل فاتورة الخدمات العامة
 Utility Bills Under Review,فواتير الخدمات تحت المراجعة
@@ -2218,6 +2235,7 @@ Voucher No,رقم القسيمة
 Voucher Type,نوع القسيمة
 Waiting Evidence,بانتظار الإثباتات
 Waived,مُعفى
+Walk each floor and set the type of every room.,امشِ في كل طابق وحدد نوع كل غرفة.
 Warning,تحذير
 Warranty Expiry,انتهاء الضمان
 Wash Date,تاريخ الغسيل
@@ -2298,17 +2316,8 @@ room_floor,طابق الغرفة
 room_type,نوع الغرفة
 rooms,غرف
 total_cost,التكلفة الإجمالية
-— apply preset to floor —,— طبّق قالباً على طابق —
-" It will also add {0} new room(s) and {1} new bed(s)."," كما سيضيف {0} غرفة/غرف جديدة و{1} سرير/أسرّة جديدة."
-All Worker (4-bed),جميع العمال (4 أسرّة)
-Capacity reductions blocked ({0} room(s) have occupied surplus beds):,تعليق تخفيضات السعة ({0} غرفة/غرف بها أسرّة زائدة مشغولة):
-Floor {0} is outside the configured upper floors ({1}). The rows were added anyway — adjust the floor selector if needed.,الطابق {0} خارج الطوابق العليا المُعدّة ({1}). أُضيفت الصفوف على أي حال — عدّل محدِّد الطابق إذا لزم.
-Locked — rooms already generated with this code.,مقفل — الغرف وُلِّدت بهذا الرمز بالفعل.
-Mixed (Worker + Isolation),مختلط (عمال + عزل)
-Reducing bed capacity will retire {0} empty bed(s) (set them Out of Service). This cannot be undone automatically. Existing rooms were updated to match the plan.{1} Confirm to proceed?,سيؤدي تخفيض سعة الأسرّة إلى إحالة {0} سرير/أسرّة فارغة (تعيينها «خارج الخدمة»). لا يمكن التراجع عن ذلك تلقائياً. حُدِّثت الغرف الحالية لتطابق الخطة.{1} هل تريد المتابعة؟
-Some rooms could not be reduced — they still have occupied beds: {0},تعذّر تخفيض بعض الغرف — لا تزال بها أسرّة مشغولة: {0}
-"Used in room/bed codes, e.g. JED1-G01.",يُستخدم في رموز الغرف/الأسرّة، مثل JED1-G01.
 {0} room(s) have a planned capacity reduction pending confirmation.,{0} غرفة/غرف بها تخفيض سعة مخطط في انتظار التأكيد.
 {0} surplus bed(s) retired (Out of Service).,أُحيلت {0} سرير/أسرّة زائدة إلى «خارج الخدمة».
 {0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
 â Back,← رجوع
+— apply preset to floor —,— طبّق قالباً على طابق —

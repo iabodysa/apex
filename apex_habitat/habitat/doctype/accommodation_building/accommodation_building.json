@@ -22,17 +22,13 @@
   "total_capacity",
   "responsible_facility_supervisor",
   "accommodation_building_sec_landlord",
-  "landlord_name",
-  "landlord_mobile",
-  "landlord_office",
-  "accommodation_building_landlord_col",
+  "landlord",
   "accommodation_building_sec_capacity",
   "over_capacity_allowed",
   "accommodation_building_capacity_col",
   "over_capacity_threshold_percent",
   "accommodation_building_sec_large_text",
   "address_html",
-  "address",
   "accommodation_building_tab_financials",
   "accommodation_building_sec_financials",
   "annual_rent_sar",
@@ -57,6 +53,7 @@
   "setup_generated_on",
   "setup_generated_by",
   "accommodation_building_sec_floor_plan",
+  "edit_room_setup_btn",
   "floor_plan",
   "setup_instructions_html",
   "floor_layout_html",
@@ -180,29 +177,14 @@
    "collapsible": 1,
    "fieldname": "accommodation_building_sec_landlord",
    "fieldtype": "Section Break",
-   "label": "Landlord & Lease Details"
+   "label": "Landlord"
   },
   {
-   "fieldname": "landlord_name",
-   "fieldtype": "Data",
-   "label": "Landlord Name",
-   "read_only": 1
-  },
-  {
-   "fieldname": "landlord_mobile",
-   "fieldtype": "Data",
-   "label": "Landlord Mobile",
-   "read_only": 1
-  },
-  {
-   "fieldname": "landlord_office",
-   "fieldtype": "Data",
-   "label": "Landlord Office / Real Estate Agency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "accommodation_building_landlord_col",
-   "fieldtype": "Column Break"
+   "description": "The property's landlord, modeled as a Supplier. Auto-filled from the active lease when set there.",
+   "fieldname": "landlord",
+   "fieldtype": "Link",
+   "label": "Landlord",
+   "options": "Supplier"
   },
   {
    "collapsible": 1,
@@ -237,12 +219,6 @@
    "label": "Address"
   },
   {
-   "fieldname": "address",
-   "fieldtype": "Small Text",
-   "label": "Address (legacy)",
-   "read_only": 1
-  },
-  {
    "fieldname": "accommodation_building_tab_financials",
    "fieldtype": "Tab Break",
    "label": "Financials"
@@ -253,9 +229,11 @@
    "label": "Financial Information"
   },
   {
+   "description": "Derived from the active Accommodation Lease (annualized). Read-only.",
    "fieldname": "annual_rent_sar",
    "fieldtype": "Currency",
-   "label": "Annual Rent (SAR)"
+   "label": "Annual Rent (SAR)",
+   "read_only": 1
   },
   {
    "fieldname": "default_cost_center",
@@ -376,6 +354,12 @@
    "fieldname": "accommodation_building_sec_floor_plan",
    "fieldtype": "Section Break",
    "label": "Floor Plan"
+  },
+  {
+   "description": "Room and bed counts are managed by the Room Setup wizard. Click to add, change, or remove rooms / beds.",
+   "fieldname": "edit_room_setup_btn",
+   "fieldtype": "Button",
+   "label": "Edit Rooms & Beds"
   },
   {
    "fieldname": "setup_instructions_html",
@@ -598,7 +582,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-06-03 04:17:02.755859",
+ "modified": "2026-06-07 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Building",

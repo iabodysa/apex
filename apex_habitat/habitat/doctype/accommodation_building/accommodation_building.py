@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import DocType
-from frappe.utils import today
+from frappe.utils import flt, today
 
 
 class AccommodationBuilding(Document):
@@ -69,11 +69,39 @@ def _guard_abbreviation_lock(doc):
         )
 
 
+_LEASE_CYCLE_FACTOR = {"Monthly": 12, "Quarterly": 4, "Semi-Annual": 2, "Annual": 1}
+
+
+def apply_active_lease(doc):
+    """The active Accommodation Lease is the single source of truth for rent and the
+    landlord, so the building never duplicates them by hand. Derive ``annual_rent_sar``
+    from the lease (annualized by billing cycle, then the company's share) and back-fill
+    ``landlord`` when it is unset. With no active lease there is no system-of-record
+    rent, so the existing value is left untouched rather than zeroed."""
+    lease = frappe.db.get_value(
+        "Accommodation Lease",
+        {"building": doc.name, "status": "Active", "docstatus": ["<", 2]},
+        ["rent_amount", "billing_cycle", "company_share_pct", "supplier"],
+        as_dict=True,
+        order_by="lease_start_date desc",
+    )
+    if not lease:
+        return
+    annual = flt(lease.rent_amount) * _LEASE_CYCLE_FACTOR.get(lease.billing_cycle, 1)
+    if flt(lease.company_share_pct):
+        annual = annual * flt(lease.company_share_pct) / 100.0
+    doc.annual_rent_sar = annual
+    if not doc.landlord and lease.supplier:
+        doc.landlord = lease.supplier
+
+
 def before_save(doc, method=None):
     _guard_abbreviation_lock(doc)
     if not doc.company:
         from apex_habitat.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()
+
+    apply_active_lease(doc)
 
     doc.annual_total_cost_sar = (
         (doc.annual_rent_sar or 0)

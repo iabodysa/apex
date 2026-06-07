@@ -191,4 +191,11 @@ frappe.ui.form.on("Accommodation Building", {
 	accommodation_type(frm) {
 		_toggleFloorFields(frm);
 	},
+
+	edit_room_setup_btn(frm) {
+		// Same destination as the toolbar "Setup Rooms" button, surfaced right by the
+		// read-only Floor Plan table so a supervisor who wants to change room/bed counts
+		// can reach the Room Setup wizard without hunting the toolbar.
+		frappe.set_route("room-setup", frm.doc.name);
+	},
 });

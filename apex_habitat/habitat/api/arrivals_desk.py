@@ -410,10 +410,12 @@ def get_checkin_slip(party_type, party) -> dict:
     an acceptance line, and worker / supervisor signature lines. Reuses
     get_arrival_card for identity and reads the building address/city for the
     header. The desk opens the HTML in a print window."""
+    from apex_habitat.apex_core.utils.addresses import get_address_text
+
     card = get_arrival_card(party_type=party_type, party=party)
     building = card.get("current_building")
     bldg = (
-        frappe.db.get_value("Accommodation Building", building, ["address", "city"], as_dict=True)
+        frappe.db.get_value("Accommodation Building", building, ["city"], as_dict=True)
         if building
         else None
     ) or {}
@@ -421,7 +423,7 @@ def get_checkin_slip(party_type, party) -> dict:
         "worker_name": card.get("worker_name") or card.get("party"),
         "party_type": party_type,
         "building": building or "",
-        "address": bldg.get("address") or "",
+        "address": get_address_text("Accommodation Building", building),
         "city": bldg.get("city") or "",
         "bed": card.get("current_bed_code") or card.get("current_bed") or "",
         "project": card.get("project") or "",

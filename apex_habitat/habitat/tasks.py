@@ -93,6 +93,11 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
         )
         return
     building_doc = frappe.get_doc("Accommodation Building", building)
+    # Keep rent fresh: the stored annual_rent_sar is a before_save cache that can lag a
+    # mid-period lease change, and this is the authoritative cost-recovery path, so
+    # re-derive it from the active lease in memory before reading the cost fields.
+    from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import apply_active_lease
+    apply_active_lease(building_doc)
     capacity = flt(building_doc.total_capacity)
     if capacity <= 0:
         logger.warning(
@@ -208,6 +213,8 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
         building = frappe.get_doc("Accommodation Building", asgn.building)
     except frappe.DoesNotExistError:
         return 0
+    from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import apply_active_lease
+    apply_active_lease(building)  # re-derive rent from the active lease (cache may lag)
     capacity = flt(building.total_capacity)
     if capacity <= 0:
         return 0
