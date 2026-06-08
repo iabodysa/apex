@@ -21,10 +21,8 @@
   "immediate_action_taken",
   "casualties",
   "reported_by",
-  "habitat_safety_incident_tab_resolution",
   "habitat_safety_incident_sec_resolution",
   "resolution_notes",
-  "habitat_safety_incident_tab_system",
   "habitat_safety_incident_sec_system",
   "amended_from"
  ],
@@ -131,11 +129,6 @@
    "options": "User"
   },
   {
-   "fieldname": "habitat_safety_incident_tab_resolution",
-   "fieldtype": "Tab Break",
-   "label": "Resolution"
-  },
-  {
    "fieldname": "habitat_safety_incident_sec_resolution",
    "fieldtype": "Section Break",
    "label": "Resolution"
@@ -146,14 +139,10 @@
    "label": "Resolution Notes"
   },
   {
-   "fieldname": "habitat_safety_incident_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
-  },
-  {
    "fieldname": "habitat_safety_incident_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "label": "Administrative Details",
+   "collapsible": 1
   },
   {
    "fieldname": "amended_from",
@@ -168,7 +157,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-02 09:00:00.000008",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Habitat Safety Incident",

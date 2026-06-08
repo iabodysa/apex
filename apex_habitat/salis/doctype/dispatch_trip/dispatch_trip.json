@@ -26,7 +26,6 @@
   "odometer_end",
   "dispatch_trip_sec_completion",
   "completion_notes",
-  "dispatch_trip_tab_system",
   "dispatch_trip_sec_system",
   "naming_series",
   "amended_from"
@@ -41,18 +40,59 @@
    "options": "DT-.######",
    "reqd": 1
   },
-  {"fieldname": "dispatch_trip_tab_overview", "fieldtype": "Tab Break", "label": "Overview"},
-  {"fieldname": "dispatch_trip_sec_trip", "fieldtype": "Section Break", "label": "Trip"},
-  {"fieldname": "dispatch_trip_col_trip", "fieldtype": "Column Break"},
-  {"fieldname": "dispatch_trip_sec_assignment", "fieldtype": "Section Break", "label": "Vehicle and Driver"},
-  {"fieldname": "dispatch_trip_col_assignment", "fieldtype": "Column Break"},
-  {"fieldname": "dispatch_trip_sec_times", "fieldtype": "Section Break", "label": "Times"},
-  {"fieldname": "dispatch_trip_col_times", "fieldtype": "Column Break"},
-  {"fieldname": "dispatch_trip_sec_readings", "fieldtype": "Section Break", "label": "Readings"},
-  {"fieldname": "dispatch_trip_col_readings", "fieldtype": "Column Break"},
-  {"fieldname": "dispatch_trip_sec_completion", "fieldtype": "Section Break", "label": "Completion Notes", "depends_on": "eval:doc.status=='Completed'"},
-  {"fieldname": "dispatch_trip_tab_system", "fieldtype": "Tab Break", "label": "System Info"},
-  {"fieldname": "dispatch_trip_sec_system", "fieldtype": "Section Break", "label": "System Info"},
+  {
+   "fieldname": "dispatch_trip_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_trip",
+   "fieldtype": "Section Break",
+   "label": "Trip"
+  },
+  {
+   "fieldname": "dispatch_trip_col_trip",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_assignment",
+   "fieldtype": "Section Break",
+   "label": "Vehicle and Driver"
+  },
+  {
+   "fieldname": "dispatch_trip_col_assignment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_times",
+   "fieldtype": "Section Break",
+   "label": "Times"
+  },
+  {
+   "fieldname": "dispatch_trip_col_times",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_readings",
+   "fieldtype": "Section Break",
+   "label": "Readings"
+  },
+  {
+   "fieldname": "dispatch_trip_col_readings",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_completion",
+   "fieldtype": "Section Break",
+   "label": "Completion Notes",
+   "depends_on": "eval:doc.status=='Completed'"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Info",
+   "collapsible": 1
+  },
   {
    "fieldname": "route_plan",
    "fieldtype": "Link",
@@ -152,7 +192,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

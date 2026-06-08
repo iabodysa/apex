@@ -128,7 +128,8 @@
   {
    "fieldname": "vwo_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Info"
+   "label": "System Info",
+   "collapsible": 1
   },
   {
    "fieldname": "amended_from",
@@ -143,7 +144,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-26 12:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Damage Write-Off",

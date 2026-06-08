@@ -16,15 +16,14 @@
   "accommodation_checkout_sec_large_text",
   "damage_notes",
   "cancellation_reason",
+  "accommodation_checkout_sec_table_custody_return_items",
+  "custody_return_items",
   "accommodation_checkout_tab_financials",
   "accommodation_checkout_sec_financials",
   "cost_center",
   "damage_deduction_amount",
   "accommodation_checkout_financials_col",
   "linked_additional_salary",
-  "accommodation_checkout_tab_tables",
-  "accommodation_checkout_sec_table_custody_return_items",
-  "custody_return_items",
   "accommodation_checkout_tab_system",
   "accommodation_checkout_sec_system",
   "party_type",
@@ -141,11 +140,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "accommodation_checkout_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables"
-  },
-  {
    "fieldname": "accommodation_checkout_sec_table_custody_return_items",
    "fieldtype": "Section Break",
    "label": "Custody Return Items"
@@ -226,7 +220,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-25 01:05:28.592895",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Checkout",

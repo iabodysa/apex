@@ -107,7 +107,7 @@
    "label": "Quota Increase Claim"
   },
   {
-   "description": "Owning company; defaulted from Salis Settings. Reference only — posts no GL.",
+   "description": "Owning company; defaulted from Salis Settings. Reference only \u2014 posts no GL.",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -115,7 +115,7 @@
    "options": "Company"
   },
   {
-   "description": "Cost center for grouping; defaults from Salis Settings. Reference only — no GL.",
+   "description": "Cost center for grouping; defaults from Salis Settings. Reference only \u2014 no GL.",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -176,7 +176,8 @@
   {
    "fieldname": "fuel_claim_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Info"
+   "label": "System Info",
+   "collapsible": 1
   },
   {
    "fieldname": "amended_from",
@@ -192,7 +193,7 @@
  "icon": "fa fa-tint",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-26 12:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Claim",

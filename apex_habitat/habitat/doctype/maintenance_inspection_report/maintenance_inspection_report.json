@@ -18,10 +18,8 @@
   "naming_series",
   "maintenance_inspection_report_sec_large_text",
   "remarks",
-  "maintenance_inspection_report_tab_tables",
   "maintenance_inspection_report_sec_table_findings",
   "findings",
-  "maintenance_inspection_report_tab_system",
   "maintenance_inspection_report_sec_system",
   "cancellation_reason",
   "amended_from"
@@ -109,11 +107,6 @@
    "label": "Remarks"
   },
   {
-   "fieldname": "maintenance_inspection_report_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables"
-  },
-  {
    "fieldname": "maintenance_inspection_report_sec_table_findings",
    "fieldtype": "Section Break",
    "label": "Findings"
@@ -125,14 +118,10 @@
    "options": "Inspection Finding Item"
   },
   {
-   "fieldname": "maintenance_inspection_report_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
-  },
-  {
    "fieldname": "maintenance_inspection_report_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "label": "Administrative Details",
+   "collapsible": 1
   },
   {
    "fieldname": "cancellation_reason",
@@ -153,7 +142,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-25 01:05:31.522132",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Inspection Report",

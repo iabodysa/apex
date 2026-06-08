@@ -24,10 +24,8 @@
   "naming_series",
   "accommodation_lease_sec_large_text",
   "notes",
-  "accommodation_lease_tab_tables",
   "accommodation_lease_sec_table_payment_schedule",
   "payment_schedule",
-  "accommodation_lease_tab_system",
   "accommodation_lease_sec_amendment",
   "amended_from"
  ],
@@ -157,11 +155,6 @@
    "label": "Notes"
   },
   {
-   "fieldname": "accommodation_lease_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables"
-  },
-  {
    "fieldname": "accommodation_lease_sec_table_payment_schedule",
    "fieldtype": "Section Break",
    "label": "Rent Payment Schedule"
@@ -173,14 +166,10 @@
    "options": "Rent Payment Schedule"
   },
   {
-   "fieldname": "accommodation_lease_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
-  },
-  {
    "fieldname": "accommodation_lease_sec_amendment",
    "fieldtype": "Section Break",
-   "label": "Amendment"
+   "label": "Amendment",
+   "collapsible": 1
   },
   {
    "fieldname": "amended_from",
@@ -195,7 +184,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Lease",

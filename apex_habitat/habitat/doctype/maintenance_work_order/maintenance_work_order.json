@@ -23,7 +23,6 @@
   "maintenance_work_order_sec_large_text",
   "completion_notes",
   "completion_photo",
-  "maintenance_work_order_tab_tables",
   "maintenance_work_order_sec_table_procurement_items",
   "procurement_items",
   "maintenance_work_order_tab_system",
@@ -136,11 +135,6 @@
    "label": "Completion Photo"
   },
   {
-   "fieldname": "maintenance_work_order_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables"
-  },
-  {
    "fieldname": "maintenance_work_order_sec_table_procurement_items",
    "fieldtype": "Section Break",
    "label": "Procurement Items"
@@ -203,14 +197,14 @@
   }
  ],
  "is_submittable": 1,
-"links": [
+ "links": [
   {
    "group": "Maintenance",
    "link_doctype": "Maintenance Inspection Report",
    "link_fieldname": "maintenance_work_order"
   }
  ],
- "modified": "2026-06-02 09:00:00.000010",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Work Order",

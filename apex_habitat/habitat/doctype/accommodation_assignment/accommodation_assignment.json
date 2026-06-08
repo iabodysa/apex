@@ -27,7 +27,6 @@
   "billed_to_supplier",
   "accommodation_assignment_sec_large_text",
   "notes",
-  "accommodation_assignment_tab_tables",
   "accommodation_assignment_sec_table_custody_items",
   "custody_items",
   "accommodation_assignment_tab_system",
@@ -183,11 +182,6 @@
    "label": "Notes"
   },
   {
-   "fieldname": "accommodation_assignment_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables"
-  },
-  {
    "fieldname": "accommodation_assignment_sec_table_custody_items",
    "fieldtype": "Section Break",
    "label": "Issued Custody Items"
@@ -281,7 +275,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Assignment",

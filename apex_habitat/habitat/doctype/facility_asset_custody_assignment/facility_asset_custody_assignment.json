@@ -112,13 +112,6 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "facility_asset_custody_assignment_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 13
-  },
-  {
-   "doctype": "DocField",
    "fieldname": "facility_asset_custody_assignment_sec_table_assets_in_custody",
    "fieldtype": "Section Break",
    "label": "Assets in Custody",
@@ -179,5 +172,22 @@
    "report": 1,
    "idx": 4
   }
- ]
+ ],
+ "field_order": [
+  "facility_asset_custody_assignment_tab_overview",
+  "facility_asset_custody_assignment_sec_overview",
+  "supervisor",
+  "building",
+  "handover_date",
+  "all_assets_verified",
+  "facility_asset_custody_assignment_overview_col",
+  "supervisor_signature",
+  "witness_role",
+  "naming_series",
+  "facility_asset_custody_assignment_sec_large_text",
+  "handover_notes",
+  "facility_asset_custody_assignment_sec_table_assets_in_custody",
+  "assets_in_custody"
+ ],
+ "modified": "2026-06-08 16:00:00.000000"
 }

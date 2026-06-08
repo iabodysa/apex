@@ -30,7 +30,6 @@
   "issue_description",
   "maintenance_request_sec_large_text",
   "resolution_notes",
-  "maintenance_request_tab_tables",
   "maintenance_request_sec_table_procurement_items",
   "procurement_items",
   "maintenance_request_tab_system",
@@ -222,11 +221,6 @@
    "label": "Resolution Notes"
   },
   {
-   "fieldname": "maintenance_request_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables"
-  },
-  {
    "fieldname": "maintenance_request_sec_table_procurement_items",
    "fieldtype": "Section Break",
    "label": "Procurement Items Required"
@@ -313,7 +307,7 @@
    "table_fieldname": "linked_maintenance_requests"
   }
  ],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",

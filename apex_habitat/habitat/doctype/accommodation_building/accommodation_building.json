@@ -72,7 +72,6 @@
   "emergency_signage_required",
   "water_tank_inspection_required",
   "pest_control_required",
-  "accommodation_building_tab_system",
   "accommodation_building_sec_security",
   "cctv_camera_count",
   "accommodation_building_security_col",
@@ -387,7 +386,7 @@
    "options": "Accommodation Floor Plan",
    "read_only": 1,
    "hidden": 1,
-   "description": "Read-only — managed by the Room Setup wizard."
+   "description": "Read-only \u2014 managed by the Room Setup wizard."
   },
   {
    "fieldname": "accommodation_building_tab_safety",
@@ -460,11 +459,6 @@
    "fieldname": "pest_control_required",
    "fieldtype": "Check",
    "label": "Pest Control Required"
-  },
-  {
-   "fieldname": "accommodation_building_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "Security and Systems"
   },
   {
    "fieldname": "occupancy_percent",
@@ -588,7 +582,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-06-07 13:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Building",

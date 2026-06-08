@@ -103,13 +103,6 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "client_audit_remediation_plan_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 12
-  },
-  {
-   "doctype": "DocField",
    "fieldname": "client_audit_remediation_plan_sec_table_buildings_in_scope",
    "fieldtype": "Section Break",
    "label": "Buildings In Scope",
@@ -168,5 +161,23 @@
    "amend": 1,
    "idx": 2
   }
- ]
+ ],
+ "field_order": [
+  "client_audit_remediation_plan_tab_overview",
+  "client_audit_remediation_plan_sec_overview",
+  "client_project",
+  "client_audit_reference",
+  "audit_received_date",
+  "remediation_deadline",
+  "client_audit_remediation_plan_overview_col",
+  "overall_status",
+  "client_poc_name",
+  "afmco_owner",
+  "naming_series",
+  "client_audit_remediation_plan_sec_table_buildings_in_scope",
+  "buildings_in_scope",
+  "client_audit_remediation_plan_sec_table_remediation_items",
+  "remediation_items"
+ ],
+ "modified": "2026-06-08 16:00:00.000000"
 }

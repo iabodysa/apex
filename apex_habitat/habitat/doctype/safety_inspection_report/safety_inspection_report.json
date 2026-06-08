@@ -17,14 +17,12 @@
   "naming_series",
   "safety_inspection_report_sec_large_text",
   "previous_repair_notes",
-  "safety_inspection_report_tab_tables",
   "safety_inspection_report_sec_table_safety_findings",
   "safety_findings",
   "safety_inspection_report_sec_table_maintenance_findings",
   "maintenance_findings",
   "safety_inspection_report_sec_table_linked_maintenance_requests",
   "linked_maintenance_requests",
-  "safety_inspection_report_tab_system",
   "safety_inspection_report_sec_system",
   "submitted_to",
   "amended_from"
@@ -76,7 +74,7 @@
    "fieldname": "safety_section_clear",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Safety Section — No Issues"
+   "label": "Safety Section \u2014 No Issues"
   },
   {
    "default": "0",
@@ -103,11 +101,6 @@
    "fieldname": "previous_repair_notes",
    "fieldtype": "Small Text",
    "label": "Previous Repair Confirmation Details"
-  },
-  {
-   "fieldname": "safety_inspection_report_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables"
   },
   {
    "fieldname": "safety_inspection_report_sec_table_safety_findings",
@@ -144,14 +137,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "safety_inspection_report_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
-  },
-  {
    "fieldname": "safety_inspection_report_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "label": "Administrative Details",
+   "collapsible": 1
   },
   {
    "description": "Admin Manager, Operations Director, General Manager",
@@ -184,7 +173,7 @@
    "link_fieldname": "linked_inspection"
   }
  ],
- "modified": "2026-06-04 09:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Inspection Report",

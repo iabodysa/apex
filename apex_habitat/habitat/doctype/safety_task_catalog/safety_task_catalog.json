@@ -136,13 +136,6 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "safety_task_catalog_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 16
-  },
-  {
-   "doctype": "DocField",
    "fieldname": "safety_task_catalog_sec_table_applicable_buildings",
    "fieldtype": "Section Break",
    "label": "Specific Buildings",
@@ -158,7 +151,7 @@
    "idx": 18
   }
  ],
-"links": [
+ "links": [
   {
    "group": "Safety",
    "link_doctype": "Safety Task Execution",
@@ -205,5 +198,25 @@
    "read": 1,
    "idx": 4
   }
- ]
+ ],
+ "field_order": [
+  "safety_task_catalog_tab_overview",
+  "safety_task_catalog_sec_overview",
+  "task_code",
+  "task_title",
+  "task_title_en",
+  "department",
+  "frequency",
+  "safety_task_catalog_overview_col",
+  "priority",
+  "evidence_required",
+  "applicable_to_all_buildings",
+  "is_active",
+  "naming_series",
+  "safety_task_catalog_sec_large_text",
+  "instructions",
+  "safety_task_catalog_sec_table_applicable_buildings",
+  "applicable_buildings"
+ ],
+ "modified": "2026-06-08 16:00:00.000000"
 }

@@ -21,7 +21,7 @@
   "driver_sec_compliance",
   "license_number",
   "license_expiry",
-  "driver_tab_system",
+  "driver_sec_system",
   "naming_series"
  ],
  "fields": [
@@ -123,11 +123,6 @@
    "label": "License Expiry"
   },
   {
-   "fieldname": "driver_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
-  },
-  {
    "default": "DRV-.######",
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -137,6 +132,12 @@
    "print_hide": 1,
    "report_hide": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "driver_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System Info",
+   "collapsible": 1
   }
  ],
  "links": [
@@ -216,7 +217,7 @@
    "link_fieldname": "driver"
   }
  ],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Driver",

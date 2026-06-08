@@ -19,10 +19,8 @@
   "naming_series",
   "custody_issue_sec_large_text",
   "remarks",
-  "custody_issue_tab_tables",
   "custody_issue_sec_table_items",
   "items",
-  "custody_issue_tab_system",
   "custody_issue_sec_system",
   "amended_from"
  ],
@@ -109,11 +107,6 @@
    "label": "Remarks"
   },
   {
-   "fieldname": "custody_issue_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables"
-  },
-  {
    "fieldname": "custody_issue_sec_table_items",
    "fieldtype": "Section Break",
    "label": "Items"
@@ -125,14 +118,10 @@
    "options": "Custody Issue Item"
   },
   {
-   "fieldname": "custody_issue_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
-  },
-  {
    "fieldname": "custody_issue_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "label": "Administrative Details",
+   "collapsible": 1
   },
   {
    "default": "Draft",
@@ -156,14 +145,14 @@
   }
  ],
  "is_submittable": 1,
-"links": [
+ "links": [
   {
    "group": "Custody",
    "link_doctype": "Custody Return",
    "link_fieldname": "custody_issue"
   }
  ],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Issue",

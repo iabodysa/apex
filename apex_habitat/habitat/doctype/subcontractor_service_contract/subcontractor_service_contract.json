@@ -125,13 +125,6 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "subcontractor_service_contract_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 15
-  },
-  {
-   "doctype": "DocField",
    "fieldname": "subcontractor_service_contract_sec_table_covered_buildings",
    "fieldtype": "Section Break",
    "label": "Covered Buildings",
@@ -146,7 +139,7 @@
    "idx": 17
   }
  ],
-"links": [
+ "links": [
   {
    "group": "Subcontracting",
    "link_doctype": "Subcontractor Service Order",
@@ -182,5 +175,24 @@
    "amend": 1,
    "idx": 2
   }
- ]
+ ],
+ "field_order": [
+  "subcontractor_service_contract_tab_overview",
+  "subcontractor_service_contract_sec_overview",
+  "supplier",
+  "service_type",
+  "visit_frequency",
+  "response_sla_hours",
+  "status",
+  "contract_start_date",
+  "subcontractor_service_contract_overview_col",
+  "contract_end_date",
+  "naming_series",
+  "rate_per_visit_sar",
+  "monthly_retainer_sar",
+  "attached_contract",
+  "subcontractor_service_contract_sec_table_covered_buildings",
+  "covered_buildings"
+ ],
+ "modified": "2026-06-08 16:00:00.000000"
 }

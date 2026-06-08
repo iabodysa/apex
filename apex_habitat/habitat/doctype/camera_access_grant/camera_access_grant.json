@@ -107,13 +107,6 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "camera_access_grant_tab_tables",
-   "fieldtype": "Tab Break",
-   "label": "Related Tables",
-   "idx": 12
-  },
-  {
-   "doctype": "DocField",
    "fieldname": "camera_access_grant_sec_table_buildings_scope",
    "fieldtype": "Section Break",
    "label": "Buildings Granted",
@@ -157,5 +150,21 @@
    "amend": 1,
    "idx": 2
   }
- ]
+ ],
+ "field_order": [
+  "camera_access_grant_tab_overview",
+  "camera_access_grant_sec_overview",
+  "requested_for",
+  "access_level",
+  "approved_by",
+  "credentials_delivered_by",
+  "camera_access_grant_overview_col",
+  "status",
+  "valid_from",
+  "naming_series",
+  "valid_until",
+  "camera_access_grant_sec_table_buildings_scope",
+  "buildings_scope"
+ ],
+ "modified": "2026-06-08 16:00:00.000000"
 }

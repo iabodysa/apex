@@ -20,7 +20,6 @@
   "stops",
   "route_plan_col_stops",
   "total_stops",
-  "route_plan_tab_system",
   "route_plan_sec_system",
   "naming_series",
   "amended_from"
@@ -129,14 +128,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "route_plan_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
-  },
-  {
    "fieldname": "route_plan_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Info"
+   "label": "System Info",
+   "collapsible": 1
   },
   {
    "fieldname": "amended_from",
@@ -172,7 +167,7 @@
    "link_fieldname": "route_plan"
   }
  ],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Plan",

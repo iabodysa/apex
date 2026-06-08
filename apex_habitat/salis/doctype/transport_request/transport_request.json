@@ -44,10 +44,8 @@
   "site_token",
   "transport_request_col_tracking",
   "anonymous_tracking_code",
-  "transport_request_tab_workers",
   "transport_request_sec_workers_list",
   "workers",
-  "transport_request_tab_system",
   "transport_request_sec_system",
   "naming_series",
   "amended_from"
@@ -120,24 +118,15 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "transport_request_tab_workers",
-   "fieldtype": "Tab Break",
-   "label": "Workers"
-  },
-  {
    "fieldname": "transport_request_sec_workers_list",
    "fieldtype": "Section Break",
    "label": "Workers"
   },
   {
-   "fieldname": "transport_request_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
-  },
-  {
    "fieldname": "transport_request_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Info"
+   "label": "System Info",
+   "collapsible": 1
   },
   {
    "fieldname": "requested_by",
@@ -356,7 +345,7 @@
    "link_fieldname": "transport_request"
   }
  ],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",

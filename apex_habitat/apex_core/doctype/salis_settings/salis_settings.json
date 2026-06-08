@@ -13,6 +13,8 @@
   "alert_lead_days",
   "idle_vehicle_days",
   "fuel_pending_max_days",
+  "salis_settings_sec_portal",
+  "enable_driver_portal",
   "salis_settings_tab_approvals",
   "salis_settings_sec_approvals",
   "enable_approvals",
@@ -24,10 +26,7 @@
   "salis_settings_sec_doa_thresholds",
   "writeoff_ops_threshold_sar",
   "salis_settings_doa_col",
-  "cost_recovery_ops_threshold_sar",
-  "salis_settings_tab_portal",
-  "salis_settings_sec_portal",
-  "enable_driver_portal"
+  "cost_recovery_ops_threshold_sar"
  ],
  "fields": [
   {
@@ -152,11 +151,6 @@
    "label": "Cost Recovery Operations Threshold (SAR)"
   },
   {
-   "fieldname": "salis_settings_tab_portal",
-   "fieldtype": "Tab Break",
-   "label": "Portal and Naming"
-  },
-  {
    "fieldname": "salis_settings_sec_portal",
    "fieldtype": "Section Break",
    "label": "Driver Portal"
@@ -171,7 +165,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-05-31 12:00:00.000000",
+ "modified": "2026-06-08 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",
