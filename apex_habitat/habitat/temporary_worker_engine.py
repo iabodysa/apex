@@ -11,10 +11,16 @@ notified.
 
 from __future__ import annotations
 
+import re
+
 import frappe
 from frappe import _
 
 from apex_habitat.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
+
+# SQL identifier guard — doctype names and field names interpolated into raw SQL must
+# match this pattern (mirrors apex_core/utils/workflow_utils.py).
+_IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_ ]*$")
 
 # Every doctype carrying the party_type/party Dynamic Link, mapped to its legacy
 # Employee Link fieldname (kept as a read-only mirror).
@@ -80,6 +86,10 @@ def _repoint_party(tw_name: str, employee: str) -> None:
     these include submitted documents, and this is a system identity correction, not a
     user edit. Existence-guarded on table + columns."""
     for doctype, emp_field in PARTY_DOCTYPES.items():
+        if not _IDENT.match(doctype):
+            frappe.throw(_("Invalid SQL identifier: doctype {0}").format(doctype))
+        if not _IDENT.match(emp_field):
+            frappe.throw(_("Invalid SQL identifier: field {0}").format(emp_field))
         if not frappe.db.table_exists(doctype):
             continue
         if not {"party_type", "party", emp_field} <= set(frappe.db.get_table_columns(doctype)):
@@ -165,12 +175,10 @@ def _notify_hr(message: str) -> None:
 
 def _hr_recipients() -> list:
     """Enabled users holding HR Manager (fallback: System Manager)."""
+    from frappe.utils.user import get_users_with_role
+
     for role in ("HR Manager", "System Manager"):
-        users = [
-            u
-            for u in set(frappe.get_all("Has Role", filters={"role": role, "parenttype": "User"}, pluck="parent"))
-            if u not in ("Administrator", "Guest") and frappe.db.get_value("User", u, "enabled")
-        ]
+        users = get_users_with_role(role)
         if users:
             return users
     return []

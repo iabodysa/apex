@@ -29,35 +29,34 @@ _DEPARTMENT_ROLE = {
 
 def after_insert(doc, method=None):
     """Force accountability: put the new report in the responsible department's
-    desk queue as ToDos (one per active role holder) and stamp _assign. Idempotent
-    — never duplicates an open ToDo for the same user."""
+    desk queue as ToDos (one per active role holder). Idempotent — assign_to.add
+    skips any user that already has an Open ToDo for this document, and ToDo's
+    on_update handler maintains _assign automatically."""
+    from frappe.desk.form import assign_to as _assign_to
+
     role = _DEPARTMENT_ROLE.get(doc.responsible_department)
     if not role:
         return
     holders = frappe.get_all("Has Role", filters={"role": role, "parenttype": "User"}, pluck="parent")
-    assignees = []
-    for user in holders:
-        if user in ("Administrator", "Guest"):
-            continue
-        if not frappe.db.get_value("User", user, "enabled"):
-            continue
-        if frappe.db.exists("ToDo", {"reference_type": doc.doctype, "reference_name": doc.name,
-                                     "allocated_to": user, "status": "Open"}):
-            continue
-        frappe.get_doc({
-            "doctype": "ToDo",
-            "allocated_to": user,
-            "reference_type": doc.doctype,
-            "reference_name": doc.name,
+    assignees = [
+        user for user in holders
+        if user not in ("Administrator", "Guest")
+        and frappe.db.get_value("User", user, "enabled")
+    ]
+    if not assignees:
+        return
+    _assign_to.add(
+        {
+            "doctype": doc.doctype,
+            "name": doc.name,
+            "assign_to": assignees,
             "description": _("Idle resident reported to {0}: employee {1} (building {2}). Please action.").format(
                 doc.responsible_department, doc.employee_name or doc.employee, doc.building),
             "priority": "High" if doc.reason_category == "Legal Case" else "Medium",
             "assigned_by": frappe.session.user,
-        }).insert(ignore_permissions=True)  # audit-ok
-        assignees.append(user)
-    if assignees:
-        frappe.db.set_value(doc.doctype, doc.name, "_assign", frappe.as_json(assignees),
-                            update_modified=False)
+        },
+        ignore_permissions=True,  # server-side after_insert; session may lack read on the new doc
+    )
 
 
 def _validate_status_transition(doc):

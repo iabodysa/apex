@@ -184,6 +184,24 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
     if not doc.floor_plan:
         frappe.throw(_("No floor plan defined. Add floor rows before generating."))
 
+    # Guard: detect two floor_plan rows that resolve to the same floor code — they
+    # would produce overlapping room numbers and the second floor's rooms would be
+    # silently dropped (or collide with existing records).
+    _seen_floor_codes: dict[str, int] = {}
+    for _row in doc.floor_plan:
+        _fc = _floor_code(_row.floor_type, int(_row.floor_number or 0))
+        _fn = int(_row.floor_number or 0)
+        if _fc in _seen_floor_codes:
+            frappe.throw(
+                _("Floor plan conflict: floor {0} and floor {1} both produce floor code \"{2}\". "
+                  "Two floors cannot share the same code — they would generate identical room numbers. "
+                  "Assign distinct floor numbers or floor types.").format(
+                    _seen_floor_codes[_fc], _fn, _fc
+                ),
+                title=_("Duplicate Floor Code"),
+            )
+        _seen_floor_codes[_fc] = _fn
+
     # Build existing room map: room_number → room.name
     existing_room_rows = frappe.db.get_all(
         "Accommodation Room",

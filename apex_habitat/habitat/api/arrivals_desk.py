@@ -338,6 +338,7 @@ def get_arrival_slip(party_type, party) -> dict:
 
     if party_type == PARTY_EMPLOYEE:
         ctx["designation"] = frappe.db.get_value("Employee", party, "designation")
+        frappe.has_permission("Masar Worker Token", "read", throw=True)
         token = (
             frappe.db.get_value("Masar Worker Token", {"employee": party}, ["token", "enabled"], as_dict=True)
             or {}
@@ -345,6 +346,7 @@ def get_arrival_slip(party_type, party) -> dict:
         if token.get("token") and token.get("enabled"):
             ctx["qr"] = masar_qr_data_uri(_worker_link(token.get("token")))
     elif party_type == PARTY_TEMPORARY_WORKER:
+        frappe.has_permission("Temporary Worker", "read", throw=True)
         tw = (
             frappe.db.get_value(
                 "Temporary Worker", party, ["passport_number", "iqama_number", "nationality"], as_dict=True

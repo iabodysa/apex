@@ -157,11 +157,13 @@ def _notify_finance_on_cost_center_shift(doc):
 
 
 def _role_emails(role):
-    users = frappe.get_all("Has Role", filters={"role": role, "parenttype": "User"}, pluck="parent")
+    from frappe.utils.user import get_users_with_role
+
+    users = get_users_with_role(role)
     if not users:
         return []
     return frappe.get_all(
-        "User", filters={"name": ["in", users], "enabled": 1, "email": ["is", "set"]}, pluck="email"
+        "User", filters={"name": ["in", users], "email": ["is", "set"]}, pluck="email"
     )
 
 

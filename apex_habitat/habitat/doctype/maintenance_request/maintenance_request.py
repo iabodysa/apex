@@ -39,6 +39,7 @@ def _validate_status_rules(doc):
 
 @frappe.whitelist(methods=["POST"])
 def make_work_order(source_name, target_doc=None):
+    frappe.has_permission("Maintenance Request", "read", doc=source_name, throw=True)
     from frappe.model.mapper import get_mapped_doc
 
     def set_missing_values(source, target):

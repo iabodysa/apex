@@ -44,6 +44,7 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
         ``{article, article_name, uom, image, store_balance}``. ``image`` may be
         ``None`` (the client falls back to initials/placeholder).
     """
+    frappe.has_permission("Custody Article", "read", throw=True)
     articles = frappe.get_all(
         "Custody Article",
         fields=[

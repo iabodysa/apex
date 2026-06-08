@@ -13,14 +13,14 @@ frappe.query_reports["Supplier Cost Recovery"] = {
 				{value: 9, label: __("September")}, {value: 10, label: __("October")},
 				{value: 11, label: __("November")}, {value: 12, label: __("December")},
 			],
-			default: (new Date()).getMonth() + 1,
+			default: frappe.datetime.str_to_obj(frappe.datetime.get_today()).getMonth() + 1,
 			reqd: 1,
 		},
 		{
 			fieldname: "year",
 			label: __("Year"),
 			fieldtype: "Int",
-			default: (new Date()).getFullYear(),
+			default: frappe.datetime.str_to_obj(frappe.datetime.get_today()).getFullYear(),
 			reqd: 1,
 		},
 		{
