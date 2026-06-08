@@ -142,6 +142,7 @@ Annual,سنوي
 Annual Cleaning Staff Cost (SAR),تكلفة عمالة النظافة السنوية (ريال)
 Annual Cost per Bed Capacity (SAR),التكلفة السنوية لكل سرير سعة استيعابية (ريال)
 Annual Electricity (SAR),تكلفة الكهرباء السنوية (ريال)
+Annual Expenses,المصروفات السنوية
 Annual Other Expenses (SAR),المصاريف السنوية الأخرى (ريال)
 Annual Rent (SAR),الإيجار السنوي (ريال)
 Annual Supervision Cost (SAR),تكلفة الإشراف السنوية (ريال)
@@ -478,6 +479,7 @@ Condition at Check-in,الحالة عند الدخول
 Condition at Handover,الحالة عند التسليم
 Condition on Issue,الحالة عند صرف العهدة
 Condition on Return,الحالة عند إرجاع العهدة
+Configuration,التهيئة
 Configure required safety controls. Use 'Generate Safety Setup' button to create task templates.,"اضبط ضوابط السلامة المطلوبة. استخدم زر ""توليد إعداد السلامة"" لإنشاء قوالب المهام."
 Configuring Apex,تهيئة Apex
 Confirm,تأكيد
@@ -510,6 +512,7 @@ Cost Center is required. Please set it or configure a default Cost Center on Bui
 Cost Recovery Aging,أعمار استرداد التكاليف
 Cost Recovery Aging Backlog,متأخرات استرداد التكاليف
 Cost Recovery Operations Threshold (SAR),حد عمليات استرداد التكاليف (ريال)
+Cost Summary,ملخص التكاليف
 Cost Transactions,حركات التكلفة
 Cost by Dimension,التكلفة حسب البُعد
 Cost center for grouping; defaults from Salis Settings. Reference only — no GL.,مركز التكلفة لأغراض التجميع؛ يُؤخذ افتراضيًا من إعدادات ساليس. للمرجعية فقط — بلا قيد محاسبي.

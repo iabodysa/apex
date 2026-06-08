@@ -37,17 +37,19 @@
   "accommodation_building_tab_financials",
   "accommodation_building_sec_financials",
   "annual_rent_sar",
-  "default_cost_center",
   "annual_total_cost_sar",
+  "default_cost_center",
+  "accommodation_building_financials_col",
   "annual_cost_per_capacity_sar",
   "monthly_cost_per_capacity_sar",
-  "accommodation_building_financials_col",
+  "internal_billing_model",
+  "accommodation_building_sec_financials_expenses",
   "annual_electricity_sar",
   "annual_water_sar",
   "annual_cleaning_staff_sar",
+  "accommodation_building_financials_expenses_col",
   "annual_supervision_sar",
   "annual_other_expenses_sar",
-  "internal_billing_model",
   "accommodation_building_sec_billing_notes",
   "internal_billing_notes",
   "accommodation_building_tab_setup",
@@ -61,9 +63,10 @@
   "accommodation_building_sec_safety_profile",
   "fire_alarm_panel_present",
   "smoke_detectors_present",
-  "first_aid_kit_required",
   "accommodation_building_safety_col",
+  "first_aid_kit_required",
   "emergency_signage_required",
+  "accommodation_building_safety_col2",
   "water_tank_inspection_required",
   "pest_control_required",
   "accommodation_building_sec_security",
@@ -255,7 +258,7 @@
   {
    "fieldname": "accommodation_building_sec_financials",
    "fieldtype": "Section Break",
-   "label": "Financial Information"
+   "label": "Cost Summary"
   },
   {
    "description": "Derived from the active Accommodation Lease (annualized). Read-only.",
@@ -265,16 +268,20 @@
    "read_only": 1
   },
   {
+   "fieldname": "annual_total_cost_sar",
+   "fieldtype": "Currency",
+   "label": "Annual Total Cost (SAR)",
+   "read_only": 1
+  },
+  {
    "fieldname": "default_cost_center",
    "fieldtype": "Link",
    "label": "Default Cost Center",
    "options": "Cost Center"
   },
   {
-   "fieldname": "annual_total_cost_sar",
-   "fieldtype": "Currency",
-   "label": "Annual Total Cost (SAR)",
-   "read_only": 1
+   "fieldname": "accommodation_building_financials_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "annual_cost_per_capacity_sar",
@@ -289,8 +296,16 @@
    "read_only": 1
   },
   {
-   "fieldname": "accommodation_building_financials_col",
-   "fieldtype": "Column Break"
+   "default": "Direct Allocation",
+   "fieldname": "internal_billing_model",
+   "fieldtype": "Select",
+   "label": "Internal Billing Model",
+   "options": "Direct Allocation\nSalary Deduction\nOverhead Absorption"
+  },
+  {
+   "fieldname": "accommodation_building_sec_financials_expenses",
+   "fieldtype": "Section Break",
+   "label": "Annual Expenses"
   },
   {
    "fieldname": "annual_electricity_sar",
@@ -308,6 +323,10 @@
    "label": "Annual Cleaning Staff Cost (SAR)"
   },
   {
+   "fieldname": "accommodation_building_financials_expenses_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "annual_supervision_sar",
    "fieldtype": "Currency",
    "label": "Annual Supervision Cost (SAR)"
@@ -316,13 +335,6 @@
    "fieldname": "annual_other_expenses_sar",
    "fieldtype": "Currency",
    "label": "Annual Other Expenses (SAR)"
-  },
-  {
-   "default": "Direct Allocation",
-   "fieldname": "internal_billing_model",
-   "fieldtype": "Select",
-   "label": "Internal Billing Model",
-   "options": "Direct Allocation\nSalary Deduction\nOverhead Absorption"
   },
   {
    "collapsible": 1,
@@ -342,7 +354,8 @@
   },
   {
    "fieldname": "accommodation_building_sec_setup_type",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Configuration"
   },
   {
    "default": "Building",
@@ -401,20 +414,24 @@
    "label": "Smoke Detectors Present"
   },
   {
+   "fieldname": "accommodation_building_safety_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "1",
    "fieldname": "first_aid_kit_required",
    "fieldtype": "Check",
    "label": "First Aid Kit Required"
   },
   {
-   "fieldname": "accommodation_building_safety_col",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "1",
    "fieldname": "emergency_signage_required",
    "fieldtype": "Check",
    "label": "Emergency Signage Required"
+  },
+  {
+   "fieldname": "accommodation_building_safety_col2",
+   "fieldtype": "Column Break"
   },
   {
    "default": "1",
@@ -601,7 +618,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-06-08 19:00:00.000000",
+ "modified": "2026-06-08 19:30:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Building",
