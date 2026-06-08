@@ -126,6 +126,14 @@ def before_save(doc, method=None):
     if doc.total_capacity:
         doc.occupancy_percent = (doc.current_occupants / doc.total_capacity) * 100
 
+    # Structural counts mirror the generated rooms (read-only on the form). They
+    # were previously never populated, so total_rooms/total_floors showed stale.
+    doc.total_rooms = frappe.db.count("Accommodation Room", {"building": doc.name})
+    _floor_values = frappe.db.get_all(
+        "Accommodation Room", filters={"building": doc.name}, pluck="floor", distinct=True
+    )
+    doc.total_floors = len([f for f in _floor_values if f is not None])
+
     # Update setup_status when floor plan is added
     if doc.floor_plan and doc.setup_status == "Draft":
         doc.setup_status = "Rooms Planned"
@@ -372,10 +380,15 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
 
     # Only update setup audit fields when records were created or updated.
     if created_rooms > 0 or created_beds > 0 or updated_rooms > 0:
+        _floor_values = frappe.db.get_all(
+            "Accommodation Room", filters={"building": building_name}, pluck="floor", distinct=True
+        )
         frappe.db.set_value("Accommodation Building", building_name, {
             "setup_status": "Rooms Generated",
             "setup_generated_on": today(),
             "setup_generated_by": frappe.session.user,
+            "total_rooms": frappe.db.count("Accommodation Room", {"building": building_name}),
+            "total_floors": len([f for f in _floor_values if f is not None]),
         })
 
     # Frappe manages the request transaction; do not commit explicitly so that

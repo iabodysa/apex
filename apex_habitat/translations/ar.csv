@@ -2149,6 +2149,7 @@ Supplier-Billed Cost This Month,التكلفة المحمَّلة على الم�
 Supporting evidence for the loss and its valuation. Required before the recovery can be Approved.,أدلة داعمة للخسارة وتقييمها. مطلوبة قبل أن يتسنى اعتماد الاسترداد.
 Surveillance,المراقبة
 Suspected Fraud,اشتباه احتيال
+System,النظام
 System Details,تفاصيل النظام
 System Info,معلومات النظام
 "System-written, read-only periodic snapshot of vehicle utilisation over a trailing window. Never hand-entered; derived from completed Dispatch Trips.",لقطة دورية للقراءة فقط يكتبها النظام لاستخدام المركبات عبر نافذة زمنية متحركة. لا تُدخل يدوياً؛ وتُشتق من رحلات التشغيل المكتملة.
