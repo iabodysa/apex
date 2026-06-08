@@ -12,12 +12,12 @@
   "assigned_to",
   "planned_start_date",
   "planned_end_date",
-  "actual_start_date",
   "maintenance_work_order_overview_col",
+  "subcontractor_service_order",
+  "total_procurement_cost_sar",
+  "actual_start_date",
   "actual_end_date",
   "naming_series",
-  "total_procurement_cost_sar",
-  "subcontractor_service_order",
   "maintenance_work_order_sec_primary_large_text",
   "work_description",
   "maintenance_work_order_sec_large_text",
@@ -28,8 +28,9 @@
   "maintenance_work_order_tab_system",
   "maintenance_work_order_sec_system",
   "building",
-  "status",
   "maintenance_work_order_system_col",
+  "status",
+  "maintenance_work_order_sec_cancellation",
   "cancellation_reason",
   "amended_from"
  ],
@@ -180,6 +181,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "maintenance_work_order_sec_cancellation",
+   "fieldtype": "Section Break"
+  },
+  {
    "fieldname": "cancellation_reason",
    "fieldtype": "Small Text",
    "label": "Cancellation Reason",
@@ -204,7 +209,7 @@
    "link_fieldname": "maintenance_work_order"
   }
  ],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Work Order",

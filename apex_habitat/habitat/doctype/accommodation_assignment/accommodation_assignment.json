@@ -16,15 +16,16 @@
   "bed",
   "accommodation_assignment_overview_col",
   "check_in_date",
-  "room_condition_snapshot",
   "assignment_type",
   "stay_type",
   "expected_checkout_date",
   "previous_building",
-  "naming_series",
   "cost_center",
   "is_external_supplier",
   "billed_to_supplier",
+  "naming_series",
+  "accommodation_assignment_sec_checkin_evidence",
+  "room_condition_snapshot",
   "accommodation_assignment_sec_large_text",
   "notes",
   "accommodation_assignment_sec_table_custody_items",
@@ -250,6 +251,12 @@
    "options": "Supplier"
   },
   {
+   "collapsible": 1,
+   "fieldname": "accommodation_assignment_sec_checkin_evidence",
+   "fieldtype": "Section Break",
+   "label": "Check-in Evidence"
+  },
+  {
    "fieldname": "room_condition_snapshot",
    "fieldtype": "Attach Image",
    "label": "Room Condition Snapshot",
@@ -275,7 +282,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Assignment",

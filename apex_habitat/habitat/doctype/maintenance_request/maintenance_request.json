@@ -13,10 +13,10 @@
   "room",
   "bed",
   "reported_by",
+  "maintenance_request_overview_col",
   "issue_type",
   "priority",
   "assigned_to",
-  "maintenance_request_overview_col",
   "requires_procurement",
   "status",
   "naming_series",
@@ -307,7 +307,7 @@
    "table_fieldname": "linked_maintenance_requests"
   }
  ],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",

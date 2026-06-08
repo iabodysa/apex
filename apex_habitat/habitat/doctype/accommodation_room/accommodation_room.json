@@ -17,8 +17,9 @@
   "current_occupancy",
   "accommodation_room_sec_inventory",
   "readiness_status",
-  "last_inventory_date",
   "accommodation_room_inventory_col",
+  "last_inventory_date",
+  "accommodation_room_sec_inventory_notes",
   "inventory_notes",
   "naming_series"
  ],
@@ -113,6 +114,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "accommodation_room_sec_inventory_notes",
+   "fieldtype": "Section Break"
+  },
+  {
    "fieldname": "inventory_notes",
    "fieldtype": "Small Text",
    "label": "Inventory Notes"
@@ -162,7 +167,7 @@
    "link_fieldname": "room"
   }
  ],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Room",

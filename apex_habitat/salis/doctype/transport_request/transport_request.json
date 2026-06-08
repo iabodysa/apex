@@ -30,6 +30,7 @@
   "pickup_datetime",
   "transport_request_col_schedule",
   "passenger_count",
+  "transport_request_sec_purpose",
   "purpose",
   "transport_request_sec_assignment",
   "status",
@@ -96,6 +97,11 @@
   {
    "fieldname": "transport_request_col_schedule",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transport_request_sec_purpose",
+   "fieldtype": "Section Break",
+   "label": "Purpose"
   },
   {
    "fieldname": "transport_request_sec_assignment",
@@ -345,7 +351,7 @@
    "link_fieldname": "transport_request"
   }
  ],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",

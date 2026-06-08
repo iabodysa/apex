@@ -26,11 +26,12 @@
   "vehicle_sec_notes",
   "notes",
   "vehicle_tab_compliance",
-  "vehicle_sec_compliance",
-  "compliance_documents",
-  "vehicle_compliance_col",
+  "vehicle_sec_compliance_status",
   "compliance_status",
-  "next_expiry_date"
+  "vehicle_compliance_col",
+  "next_expiry_date",
+  "vehicle_sec_compliance",
+  "compliance_documents"
  ],
  "fields": [
   {
@@ -158,19 +159,9 @@
    "label": "Compliance"
   },
   {
-   "fieldname": "vehicle_sec_compliance",
+   "fieldname": "vehicle_sec_compliance_status",
    "fieldtype": "Section Break",
-   "label": "Compliance Documents"
-  },
-  {
-   "fieldname": "compliance_documents",
-   "fieldtype": "Table",
-   "label": "Compliance Documents",
-   "options": "Salis Vehicle Compliance"
-  },
-  {
-   "fieldname": "vehicle_compliance_col",
-   "fieldtype": "Column Break"
+   "label": "Compliance Status"
   },
   {
    "default": "Not Tracked",
@@ -181,10 +172,25 @@
    "read_only": 1
   },
   {
+   "fieldname": "vehicle_compliance_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "next_expiry_date",
    "fieldtype": "Date",
    "label": "Next Expiry Date",
    "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_sec_compliance",
+   "fieldtype": "Section Break",
+   "label": "Compliance Documents"
+  },
+  {
+   "fieldname": "compliance_documents",
+   "fieldtype": "Table",
+   "label": "Compliance Documents",
+   "options": "Salis Vehicle Compliance"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -275,7 +281,7 @@
    "link_fieldname": "vehicle"
   }
  ],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Vehicle",

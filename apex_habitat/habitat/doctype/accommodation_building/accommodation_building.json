@@ -47,6 +47,7 @@
   "annual_supervision_sar",
   "annual_other_expenses_sar",
   "internal_billing_model",
+  "accommodation_building_sec_billing_notes",
   "internal_billing_notes",
   "accommodation_building_tab_setup",
   "accommodation_building_sec_setup_type",
@@ -309,6 +310,12 @@
    "fieldtype": "Select",
    "label": "Internal Billing Model",
    "options": "Direct Allocation\nSalary Deduction\nOverhead Absorption"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accommodation_building_sec_billing_notes",
+   "fieldtype": "Section Break",
+   "label": "Internal Billing Notes"
   },
   {
    "fieldname": "internal_billing_notes",
@@ -582,7 +589,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Building",
