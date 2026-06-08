@@ -118,7 +118,7 @@ def on_submit(doc, method=None):
                         "estimated_replacement_cost_sar": 0,
                     })
             try:
-                damage_doc.insert(ignore_permissions=True)
+                damage_doc.insert(ignore_permissions=True)  # audit-ok — post-submit side effect, no user session
                 doc.add_comment("Comment", _("Draft Damage Assessment created: {0}. Please review and submit.").format(damage_doc.name))
             except Exception:
                 frappe.log_error(

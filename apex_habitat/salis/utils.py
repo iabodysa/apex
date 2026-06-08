@@ -17,11 +17,6 @@ def lock_driver(name):
 		frappe.db.sql("SELECT name FROM `tabSalis Driver` WHERE name=%s FOR UPDATE", name)
 
 
-def get_settings():
-	"""Return the Salis Settings single doc."""
-	return frappe.get_single("Salis Settings")
-
-
 # Transport Request states keyed to their workflow docstatus, used by the
 # cross-doc drive fallback so a direct state set stays consistent with the
 # Transport Request Workflow.

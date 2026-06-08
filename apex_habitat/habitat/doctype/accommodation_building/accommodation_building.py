@@ -115,6 +115,9 @@ def before_save(doc, method=None):
     if doc.total_capacity:
         doc.annual_cost_per_capacity_sar = doc.annual_total_cost_sar / doc.total_capacity
         doc.monthly_cost_per_capacity_sar = doc.annual_cost_per_capacity_sar / 12
+    else:
+        doc.annual_cost_per_capacity_sar = 0
+        doc.monthly_cost_per_capacity_sar = 0
 
     doc.current_occupants = frappe.db.count(
         "Accommodation Assignment",

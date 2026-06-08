@@ -175,6 +175,8 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
                         "allocation_period_end": posting_date,
                     })
                     ledger_entry.insert(ignore_permissions=True)  # audit-ok — scheduler-run cost allocation, no user session
+                except frappe.exceptions.DuplicateEntryError:
+                    frappe.db.rollback()  # unique index is the backstop — treat as idempotent no-op
                 except Exception as e:
                     frappe.db.rollback()  # T-02: rollback before log_error to avoid aborted-transaction errors
                     logger.error(
@@ -311,13 +313,13 @@ def daily_building_license_expiry_check() -> None:
         if not licenses:
             break
 
+        default_lead = frappe.db.get_single_value("Habitat Settings", "license_expiry_days_before") or 60
         for lic in licenses:
             expiry_date = lic.expiry_date
             if not expiry_date:
                 continue
 
             try:
-                default_lead = frappe.db.get_single_value("Habitat Settings", "license_expiry_days_before") or 60
                 lead_days = lic.renewal_lead_days if lic.renewal_lead_days is not None else default_lead
                 days_to_expiry = date_diff(expiry_date, today_str)
 
@@ -581,9 +583,9 @@ def temporary_stay_checkout_watchlist() -> None:
         if not stays:
             break
 
+        lead = frappe.db.get_single_value("Habitat Settings", "temporary_stay_days_before") or 2
         for s in stays:
             try:
-                lead = frappe.db.get_single_value("Habitat Settings", "temporary_stay_days_before") or 2
                 days = date_diff(s.expected_checkout_date, today_str)
                 worker = s.employee_name or s.employee
                 if days < 0:
