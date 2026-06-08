@@ -20,7 +20,7 @@
  "is_default": 0,
  "sequence_id": 1.0,
  "parent_page": "",
- "content": "[{\"id\": \"9ebnvqk9d2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"f2QamzRaps\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"VPduwKDGHu\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"VOqNTb937f\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"hA122RJZOj\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"n6KIBM1YLM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"fHYMpMaQKz\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"keUaPzYWC6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"zSMQrn6qnc\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"oYL1EfseQf\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"75GED7c9Vn\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}]",
+ "content": "[{\"id\": \"9ebnvqk9d2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"f2QamzRaps\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"VPduwKDGHu\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"VOqNTb937f\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"hA122RJZOj\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"hubHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"hubChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Requests by Status\", \"col\": 12}}, {\"id\": \"hubHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"hubQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open Maintenance Requests\", \"col\": 4}}, {\"id\": \"n6KIBM1YLM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"fHYMpMaQKz\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"keUaPzYWC6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"zSMQrn6qnc\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"oYL1EfseQf\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"75GED7c9Vn\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -108,7 +108,13 @@
    "idx": 8
   }
  ],
- "charts": [],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Maintenance Requests by Status",
+   "label": "Maintenance Requests by Status"
+  }
+ ],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -135,6 +141,14 @@
    "idx": 4
   }
  ],
- "quick_lists": [],
- "modified": "2026-06-07 12:00:00.000000"
+ "quick_lists": [
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "Maintenance Request",
+   "label": "Open Maintenance Requests",
+   "quick_list_filter": "[[\"status\", \"in\", [\"Open\", \"Assigned\", \"In Progress\", \"Reopened\"]]]",
+   "idx": 1
+  }
+ ],
+ "modified": "2026-06-08 18:00:00.000000"
 }

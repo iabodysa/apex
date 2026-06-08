@@ -20,7 +20,7 @@
  "is_default": 0,
  "sequence_id": 6.0,
  "parent_page": "Habitat Hub",
- "content": "[{\"id\": \"pZyrZVh4yJ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"cxppVYIyNb\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"h6sOtahi1Z\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"jSgfql5ue2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Facility Assets Needing Attention\", \"col\": 3}}, {\"id\": \"O8NGPvPjvd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Asset Book Value\", \"col\": 3}}, {\"id\": \"GAJ58bRBht\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"h7rPQpwBDF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"Y3kWw6e9qD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"mfipSEPsEv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Material Transfer\", \"col\": 3}}, {\"id\": \"f1V9RqLhsK\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"IxeVMDBiPa\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"6UnKyDIcs2\", \"type\": \"card\", \"data\": {\"card_name\": \"Internal Store\", \"col\": 4}}, {\"id\": \"xKUtrzTnmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"rRLLPGC6jF\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "content": "[{\"id\": \"pZyrZVh4yJ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"cxppVYIyNb\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"h6sOtahi1Z\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"jSgfql5ue2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Facility Assets Needing Attention\", \"col\": 3}}, {\"id\": \"O8NGPvPjvd\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Asset Book Value\", \"col\": 3}}, {\"id\": \"cstHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"cstChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Custody Issues by Status\", \"col\": 12}}, {\"id\": \"cstHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"cstQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open Custody Issues\", \"col\": 4}}, {\"id\": \"GAJ58bRBht\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"h7rPQpwBDF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"Y3kWw6e9qD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"mfipSEPsEv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Material Transfer\", \"col\": 3}}, {\"id\": \"f1V9RqLhsK\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"IxeVMDBiPa\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"6UnKyDIcs2\", \"type\": \"card\", \"data\": {\"card_name\": \"Internal Store\", \"col\": 4}}, {\"id\": \"xKUtrzTnmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"rRLLPGC6jF\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -170,7 +170,13 @@
    "is_query_report": 1
   }
  ],
- "charts": [],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Custody Issues by Status",
+   "label": "Custody Issues by Status"
+  }
+ ],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -197,6 +203,14 @@
    "idx": 4
   }
  ],
- "quick_lists": [],
- "modified": "2026-06-07 12:00:00.000000"
+ "quick_lists": [
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "Custody Issue",
+   "label": "Open Custody Issues",
+   "quick_list_filter": "[[\"status\", \"=\", \"Issued\"]]",
+   "idx": 1
+  }
+ ],
+ "modified": "2026-06-08 18:00:00.000000"
 }

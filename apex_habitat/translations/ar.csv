@@ -75,6 +75,7 @@ Activate Bed,تفعيل السرير
 Activate Room,تفعيل الغرفة
 Active,نشط
 Active Accommodation Assignments,التسكينات النشطة
+Active Assignments,التسكينات النشطة
 Active CCTV Cameras,كاميرات المراقبة المفعّلة
 Active Drivers,السائقون النشطون
 Active Leases,عقود الإيجار النشطة
@@ -1197,6 +1198,7 @@ Links this asset to its ERPNext Asset record for depreciation tracking.,يربط
 Litres,اللترات
 Litres cannot be negative.,لا يمكن أن تكون اللترات سالبة.
 Live Inbox,الوارد المباشر
+Live Queue,الطابور الحيّ
 Live View + Playback,بث مباشر + إعادة تشغيل
 Live View Only,بث مباشر فقط
 "Live fleet glance: vehicles by status, today's trips, driver availability and open transport requests.",نظرة حية على الأسطول: المركبات حسب الحالة ورحلات اليوم وتوفّر السائقين وطلبات النقل المفتوحة.
@@ -1454,6 +1456,8 @@ Open Room Setup from a building — no building was provided in the route.,اف�
 Open Safety Map,فتح خريطة السلامة
 Open Subcontractor Service Orders,أوامر خدمة مقاول الباطن المفتوحة
 Open Transport Requests,طلبات النقل المفتوحة
+Open Transport Requests Live,طلبات النقل المفتوحة
+Open Transport Requests Queue,طلبات النقل المفتوحة
 Open Vehicle,فتح المركبة
 Open the Action Inbox,افتح صندوق الإجراءات
 Open the Dispatch Board,افتح لوحة التشغيل
@@ -1538,11 +1542,13 @@ Pending,قيد الانتظار
 Pending Accommodation Checkouts,مغادرات السكن المعلقة
 Pending Approval,بانتظار الاعتماد
 Pending Approvals,الموافقات المعلقة
+Pending Driver Clearances,إخلاءات طرف السائقين المعلّقة
 Pending Finance,بانتظار المالية
 Pending Fuel Requests,طلبات الوقود المعلقة
 Pending My Action,بانتظار اتخاذ إجرائي
 Pending Transport Requests,طلبات نقل معلّقة
 Pending Utility Bills,فواتير الخدمات المعلّقة
+Pending Wash Requests,طلبات الغسيل المعلّقة
 Percentage of the total invoice borne by this building/unit,النسبة المئوية من إجمالي الفاتورة التي يتحمّلها هذا المبنى/الوحدة
 Period,الفترة
 Period (Days),الفترة (أيام)
@@ -2021,6 +2027,7 @@ Settings,الإعدادات
 Settled,تمت التسوية
 Settlement,التسوية
 "Settlement period, e.g. 2026-05.",فترة التسوية، مثال: 2026-05.
+Settlements Awaiting Approval,تسويات الإيجار بانتظار الاعتماد
 Settlements Pending Approval,التسويات بانتظار الاعتماد
 Setup,الإعداد
 Setup Rooms,إعداد الغرف
