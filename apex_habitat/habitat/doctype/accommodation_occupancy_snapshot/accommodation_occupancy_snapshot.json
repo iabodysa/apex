@@ -7,22 +7,32 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "occ_sec_snapshot",
   "naming_series",
   "snapshot_date",
+  "occ_col_snapshot",
   "building",
   "col_break_occ",
   "active_occupants",
   "total_capacity",
-  "occupancy_percent",
+  "occ_col_occ2",
   "available_capacity",
+  "occupancy_percent",
+  "occ_col_occ3",
   "cost_bleeding",
   "sec_rooms",
   "full_rooms",
-  "partial_rooms",
   "col_break_rooms",
+  "partial_rooms",
+  "occ_col_rooms3",
   "available_rooms"
  ],
  "fields": [
+  {
+   "fieldname": "occ_sec_snapshot",
+   "fieldtype": "Section Break",
+   "label": "Snapshot"
+  },
   {
    "default": "ACC-OCC-.YYYY.-.#####",
    "fieldname": "naming_series",
@@ -41,6 +51,10 @@
    "reqd": 1
   },
   {
+   "fieldname": "occ_col_snapshot",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -51,7 +65,8 @@
   },
   {
    "fieldname": "col_break_occ",
-   "fieldtype": "Column Break"
+   "fieldtype": "Section Break",
+   "label": "Occupancy"
   },
   {
    "fieldname": "active_occupants",
@@ -65,15 +80,23 @@
    "label": "Total Capacity"
   },
   {
+   "fieldname": "occ_col_occ2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "available_capacity",
+   "fieldtype": "Int",
+   "label": "Available Capacity"
+  },
+  {
    "fieldname": "occupancy_percent",
    "fieldtype": "Percent",
    "in_list_view": 1,
    "label": "Occupancy %"
   },
   {
-   "fieldname": "available_capacity",
-   "fieldtype": "Int",
-   "label": "Available Capacity"
+   "fieldname": "occ_col_occ3",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "cost_bleeding",
@@ -91,12 +114,16 @@
    "label": "Full Rooms"
   },
   {
+   "fieldname": "col_break_rooms",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "partial_rooms",
    "fieldtype": "Int",
    "label": "Partially Occupied Rooms"
   },
   {
-   "fieldname": "col_break_rooms",
+   "fieldname": "occ_col_rooms3",
    "fieldtype": "Column Break"
   },
   {
@@ -108,7 +135,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-25 02:26:27.074933",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Occupancy Snapshot",

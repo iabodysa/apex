@@ -14,18 +14,14 @@
  "description": "Utility account number per building (electricity, water, telecom). Links incoming bills to a building cost center.",
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "utility_account_tab_details",
    "fieldtype": "Tab Break",
-   "label": "Details",
-   "idx": 1
+   "label": "Details"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "utility_account_sec_details",
+   "fieldname": "utility_account_sec_identity",
    "fieldtype": "Section Break",
-   "label": "Information",
-   "idx": 2
+   "label": "Account Identity"
   },
   {
    "doctype": "DocField",
@@ -35,7 +31,6 @@
    "options": "Accommodation Building",
    "reqd": 1,
    "in_list_view": 1,
-   "idx": 3,
    "search_index": 1
   },
   {
@@ -45,8 +40,7 @@
    "label": "Utility Type",
    "options": "Electricity\nWater\nGas\nInternet\nTelecom",
    "reqd": 1,
-   "in_list_view": 1,
-   "idx": 4
+   "in_list_view": 1
   },
   {
    "doctype": "DocField",
@@ -55,16 +49,18 @@
    "label": "Account Number",
    "reqd": 1,
    "unique": 1,
-   "in_list_view": 1,
-   "idx": 5
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "utility_account_identity_col",
+   "fieldtype": "Column Break"
   },
   {
    "doctype": "DocField",
    "fieldname": "provider",
    "fieldtype": "Data",
    "label": "Provider",
-   "description": "e.g., Saudi Electricity Co., NWC, Mobily",
-   "idx": 6
+   "description": "e.g., Saudi Electricity Co., NWC, Mobily"
   },
   {
    "doctype": "DocField",
@@ -73,14 +69,76 @@
    "label": "Status",
    "options": "Active\nClosed",
    "default": "Active",
-   "in_list_view": 1,
-   "idx": 7
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "utility_account_sec_billing",
+   "fieldtype": "Section Break",
+   "label": "Billing and Variance"
   },
   {
    "doctype": "DocField",
-   "fieldname": "utility_account_details_col",
-   "fieldtype": "Column Break",
-   "idx": 8
+   "fieldname": "billing_email",
+   "fieldtype": "Data",
+   "label": "Billing Recipient Email",
+   "description": "Email address where the e-bill arrives."
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "average_monthly_bill_sar",
+   "fieldtype": "Currency",
+   "label": "Average Monthly Bill (SAR)",
+   "description": "Used for variance alerts. Updated monthly by the variance scan job."
+  },
+  {
+   "fieldname": "utility_account_billing_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "variance_threshold_pct",
+   "fieldtype": "Percent",
+   "label": "Variance Alert Threshold (%)",
+   "default": "25",
+   "description": "Trigger alert if monthly bill deviates from average by more than this percentage."
+  },
+  {
+   "fieldname": "utility_account_meter_sec",
+   "fieldtype": "Section Break",
+   "label": "Meter and Sharing"
+  },
+  {
+   "fieldname": "meter_number",
+   "fieldtype": "Data",
+   "label": "Meter Number",
+   "description": "Physical meter ID as printed on the meter or invoice"
+  },
+  {
+   "fieldname": "utility_account_meter_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "is_shared_meter",
+   "fieldtype": "Check",
+   "label": "Shared Meter",
+   "description": "Enable if this meter covers multiple units"
+  },
+  {
+   "fieldname": "cost_bearing_pct",
+   "fieldtype": "Percent",
+   "label": "Cost Bearing (%)",
+   "default": "100",
+   "description": "Percentage of the total invoice borne by this building/unit"
+  },
+  {
+   "fieldname": "utility_account_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "utility_account_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
   },
   {
    "doctype": "DocField",
@@ -89,69 +147,10 @@
    "label": "Series",
    "options": "UTIL-ACC-.####",
    "default": "UTIL-ACC-.####",
-   "idx": 9,
    "hidden": 1
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "average_monthly_bill_sar",
-   "fieldtype": "Currency",
-   "label": "Average Monthly Bill (SAR)",
-   "description": "Used for variance alerts. Updated monthly by the variance scan job.",
-   "idx": 10
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "billing_email",
-   "fieldtype": "Data",
-   "label": "Billing Recipient Email",
-   "description": "Email address where the e-bill arrives.",
-   "idx": 11
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "variance_threshold_pct",
-   "fieldtype": "Percent",
-   "label": "Variance Alert Threshold (%)",
-   "default": "25",
-   "description": "Trigger alert if monthly bill deviates from average by more than this percentage.",
-   "idx": 12
-  },
-  {
-   "fieldname": "utility_account_meter_sec",
-   "fieldtype": "Section Break",
-   "label": "Meter and Sharing",
-   "idx": 13
-  },
-  {
-   "fieldname": "meter_number",
-   "fieldtype": "Data",
-   "label": "Meter Number",
-   "description": "Physical meter ID as printed on the meter or invoice",
-   "idx": 14
-  },
-  {
-   "fieldname": "utility_account_meter_col",
-   "fieldtype": "Column Break",
-   "idx": 15
-  },
-  {
-   "fieldname": "is_shared_meter",
-   "fieldtype": "Check",
-   "label": "Shared Meter",
-   "description": "Enable if this meter covers multiple units",
-   "idx": 16
-  },
-  {
-   "fieldname": "cost_bearing_pct",
-   "fieldtype": "Percent",
-   "label": "Cost Bearing (%)",
-   "default": "100",
-   "description": "Percentage of the total invoice borne by this building/unit",
-   "idx": 17
   }
  ],
-"links": [
+ "links": [
   {
    "group": "Costs",
    "link_doctype": "Utility Bill Entry",
@@ -185,5 +184,29 @@
    "read": 1,
    "idx": 3
   }
- ]
+ ],
+ "field_order": [
+  "utility_account_tab_details",
+  "utility_account_sec_identity",
+  "building",
+  "utility_type",
+  "account_number",
+  "utility_account_identity_col",
+  "provider",
+  "status",
+  "utility_account_sec_billing",
+  "billing_email",
+  "average_monthly_bill_sar",
+  "utility_account_billing_col",
+  "variance_threshold_pct",
+  "utility_account_meter_sec",
+  "meter_number",
+  "utility_account_meter_col",
+  "is_shared_meter",
+  "cost_bearing_pct",
+  "utility_account_tab_system",
+  "utility_account_sec_system",
+  "naming_series"
+ ],
+ "modified": "2026-06-08 21:00:00.000000"
 }

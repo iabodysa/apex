@@ -16,15 +16,13 @@
    "doctype": "DocField",
    "fieldname": "safety_task_catalog_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
    "doctype": "DocField",
    "fieldname": "safety_task_catalog_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "Task Identity"
   },
   {
    "doctype": "DocField",
@@ -46,10 +44,21 @@
   },
   {
    "doctype": "DocField",
+   "fieldname": "safety_task_catalog_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
    "fieldname": "task_title_en",
    "fieldtype": "Data",
    "label": "Task Title (English)",
    "idx": 5
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_task_catalog_sec_classification",
+   "fieldtype": "Section Break",
+   "label": "Classification"
   },
   {
    "doctype": "DocField",
@@ -71,9 +80,8 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "safety_task_catalog_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 8
+   "fieldname": "safety_task_catalog_classification_col",
+   "fieldtype": "Column Break"
   },
   {
    "doctype": "DocField",
@@ -83,6 +91,12 @@
    "options": "High\nMedium\nLow",
    "default": "High",
    "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_task_catalog_sec_options",
+   "fieldtype": "Section Break",
+   "label": "Options"
   },
   {
    "doctype": "DocField",
@@ -102,6 +116,11 @@
   },
   {
    "doctype": "DocField",
+   "fieldname": "safety_task_catalog_options_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
    "fieldname": "is_active",
    "fieldtype": "Check",
    "label": "Active",
@@ -110,22 +129,10 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "STC-.####",
-   "default": "STC-.####",
-   "reqd": 1,
-   "idx": 13,
-   "hidden": 1
-  },
-  {
-   "doctype": "DocField",
    "fieldname": "safety_task_catalog_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 14
+   "label": "Execution Instructions",
+   "collapsible": 1
   },
   {
    "doctype": "DocField",
@@ -138,8 +145,7 @@
    "doctype": "DocField",
    "fieldname": "safety_task_catalog_sec_table_applicable_buildings",
    "fieldtype": "Section Break",
-   "label": "Specific Buildings",
-   "idx": 17
+   "label": "Specific Buildings"
   },
   {
    "doctype": "DocField",
@@ -149,6 +155,24 @@
    "options": "Safety Task Building Scope",
    "depends_on": "eval:doc.applicable_to_all_buildings==0",
    "idx": 18
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_task_catalog_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "STC-.####",
+   "default": "STC-.####",
+   "reqd": 1,
+   "idx": 13,
+   "hidden": 1
   }
  ],
  "links": [
@@ -204,19 +228,24 @@
   "safety_task_catalog_sec_overview",
   "task_code",
   "task_title",
+  "safety_task_catalog_overview_col",
   "task_title_en",
+  "safety_task_catalog_sec_classification",
   "department",
   "frequency",
-  "safety_task_catalog_overview_col",
+  "safety_task_catalog_classification_col",
   "priority",
+  "safety_task_catalog_sec_options",
   "evidence_required",
   "applicable_to_all_buildings",
+  "safety_task_catalog_options_col",
   "is_active",
-  "naming_series",
   "safety_task_catalog_sec_large_text",
   "instructions",
   "safety_task_catalog_sec_table_applicable_buildings",
-  "applicable_buildings"
+  "applicable_buildings",
+  "safety_task_catalog_sec_system",
+  "naming_series"
  ],
- "modified": "2026-06-08 16:00:00.000000"
+ "modified": "2026-06-08 21:00:00.000000"
 }

@@ -5,50 +5,59 @@
  "engine": "InnoDB",
  "field_order": [
   "habitat_settings_tab_details",
-  "habitat_settings_sec_details",
+  "habitat_settings_sec_company",
   "company",
+  "habitat_settings_company_col",
   "default_currency",
+  "habitat_settings_sec_custody",
   "custody_integration_mode",
+  "enable_native_asset_link",
+  "habitat_settings_custody_col",
+  "enable_stock_posting",
+  "auto_create_asset_movement_on_transfer",
+  "habitat_settings_sec_financial",
+  "enable_gl_posting",
+  "default_payment_method",
+  "habitat_settings_financial_col",
+  "max_damage_deduction_per_checkout_sar",
+  "habitat_settings_sec_housing",
   "enable_housing_allowance_deduction",
   "deduction_activation_date",
   "authorized_by",
   "authorization_document",
+  "habitat_settings_sec_damage",
   "enable_damage_deduction",
   "damage_salary_component",
-  "habitat_settings_details_col",
-  "enable_gl_posting",
-  "enable_native_asset_link",
-  "enable_stock_posting",
-  "auto_create_asset_movement_on_transfer",
-  "max_damage_deduction_per_checkout_sar",
-  "default_payment_method",
-  "habitat_settings_sec_system",
-  "last_modified_by_role",
+  "habitat_settings_tab_notifications",
   "email_notifications_sec",
   "enable_email_notifications",
   "operational_notifications_sec",
   "enable_operational_notifications",
-  "operational_notifications_col",
   "license_expiry_days_before",
+  "operational_notifications_col",
   "lease_expiry_days_before",
   "temporary_stay_days_before",
   "supplier_cost_recovery_sec",
   "enable_supplier_markup",
+  "habitat_settings_supplier_col",
   "supplier_markup_percent",
   "internal_store_sec",
   "notify_finance_on_liability_transfer",
-  "finance_notification_email"
+  "habitat_settings_store_col",
+  "finance_notification_email",
+  "habitat_settings_sec_system",
+  "last_modified_by_role"
  ],
  "fields": [
   {
    "fieldname": "habitat_settings_tab_details",
    "fieldtype": "Tab Break",
-   "label": "Details"
+   "label": "Configuration"
   },
   {
-   "fieldname": "habitat_settings_sec_details",
+   "fieldname": "habitat_settings_sec_company",
    "fieldtype": "Section Break",
-   "label": "Information"
+   "label": "Company & Currency"
   },
   {
    "description": "Default company for Accommodation Ledger, Maintenance, Utility, and Lease documents. Required before enabling financial posting.",
@@ -56,6 +65,10 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fieldname": "habitat_settings_company_col",
+   "fieldtype": "Column Break"
   },
   {
    "description": "Operational currency for Habitat cost fields. Fetched from Company if left blank.",
@@ -67,6 +80,11 @@
    "read_only": 1
   },
   {
+   "fieldname": "habitat_settings_sec_custody",
+   "fieldtype": "Section Break",
+   "label": "Custody & Asset Integration"
+  },
+  {
    "default": "Habitat Internal / No Financial Posting",
    "description": "Default mode keeps all custody and depreciation inside Habitat with no financial posting.",
    "fieldname": "custody_integration_mode",
@@ -75,6 +93,63 @@
    "label": "Custody Integration Mode",
    "options": "Habitat Internal / No Financial Posting\nERPNext Asset Integration\nERPNext Stock Integration",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_native_asset_link",
+   "fieldtype": "Check",
+   "label": "Enable ERPNext Asset Link"
+  },
+  {
+   "fieldname": "habitat_settings_custody_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_stock_posting",
+   "fieldtype": "Check",
+   "label": "Enable Stock Entry Posting"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_create_asset_movement_on_transfer",
+   "fieldtype": "Check",
+   "label": "Auto-create Facility Asset Movement on Transfer"
+  },
+  {
+   "fieldname": "habitat_settings_sec_financial",
+   "fieldtype": "Section Break",
+   "label": "Financial Posting"
+  },
+  {
+   "default": "0",
+   "description": "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",
+   "fieldname": "enable_gl_posting",
+   "fieldtype": "Check",
+   "label": "Enable GL Entry Posting"
+  },
+  {
+   "default": "Payment Entry",
+   "description": "Document type to generate when creating rent payments from Accommodation Lease.",
+   "fieldname": "default_payment_method",
+   "fieldtype": "Select",
+   "label": "Default Payment Method",
+   "options": "Payment Entry\nPayment Order\nExpense Request Afmco"
+  },
+  {
+   "fieldname": "habitat_settings_financial_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "500",
+   "fieldname": "max_damage_deduction_per_checkout_sar",
+   "fieldtype": "Currency",
+   "label": "Max Damage Deduction per Checkout (SAR)"
+  },
+  {
+   "fieldname": "habitat_settings_sec_housing",
+   "fieldtype": "Section Break",
+   "label": "Housing Allowance Deduction"
   },
   {
    "default": "0",
@@ -103,6 +178,11 @@
    "label": "Authorization Document"
   },
   {
+   "fieldname": "habitat_settings_sec_damage",
+   "fieldtype": "Section Break",
+   "label": "Damage Deduction"
+  },
+  {
    "default": "0",
    "description": "When ON, checkout damage amounts post to Additional Salary. Default OFF.",
    "fieldname": "enable_damage_deduction",
@@ -118,64 +198,14 @@
    "options": "Salary Component"
   },
   {
-   "fieldname": "habitat_settings_details_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "description": "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",
-   "fieldname": "enable_gl_posting",
-   "fieldtype": "Check",
-   "label": "Enable GL Entry Posting"
-  },
-  {
-   "default": "0",
-   "fieldname": "enable_native_asset_link",
-   "fieldtype": "Check",
-   "label": "Enable ERPNext Asset Link"
-  },
-  {
-   "default": "0",
-   "fieldname": "enable_stock_posting",
-   "fieldtype": "Check",
-   "label": "Enable Stock Entry Posting"
-  },
-  {
-   "default": "1",
-   "fieldname": "auto_create_asset_movement_on_transfer",
-   "fieldtype": "Check",
-   "label": "Auto-create Facility Asset Movement on Transfer"
-  },
-  {
-   "default": "500",
-   "fieldname": "max_damage_deduction_per_checkout_sar",
-   "fieldtype": "Currency",
-   "label": "Max Damage Deduction per Checkout (SAR)"
-  },
-  {
-   "default": "Payment Entry",
-   "description": "Document type to generate when creating rent payments from Accommodation Lease.",
-   "fieldname": "default_payment_method",
-   "fieldtype": "Select",
-   "label": "Default Payment Method",
-   "options": "Payment Entry\nPayment Order\nExpense Request Afmco"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "habitat_settings_sec_system",
-   "fieldtype": "Section Break",
-   "label": "System Details"
-  },
-  {
-   "fieldname": "last_modified_by_role",
-   "fieldtype": "Data",
-   "label": "Last Modified By Role",
-   "read_only": 1
+   "fieldname": "habitat_settings_tab_notifications",
+   "fieldtype": "Tab Break",
+   "label": "Notifications"
   },
   {
    "fieldname": "email_notifications_sec",
    "fieldtype": "Section Break",
-   "label": "Email Notifications"
+   "label": "Email"
   },
   {
    "default": "0",
@@ -185,7 +215,6 @@
    "label": "Enable Email Notifications"
   },
   {
-   "collapsible": 1,
    "fieldname": "operational_notifications_sec",
    "fieldtype": "Section Break",
    "label": "Operational Notifications"
@@ -198,15 +227,15 @@
    "label": "Enable Operational Notifications"
   },
   {
-   "fieldname": "operational_notifications_col",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "60",
    "description": "Days before a Building License expiry date to flag it Expiring Soon (per-license renewal_lead_days still overrides).",
    "fieldname": "license_expiry_days_before",
    "fieldtype": "Int",
    "label": "License Expiry Lead Days"
+  },
+  {
+   "fieldname": "operational_notifications_col",
+   "fieldtype": "Column Break"
   },
   {
    "default": "90",
@@ -223,7 +252,6 @@
    "label": "Temporary Stay Lead Days"
   },
   {
-   "collapsible": 1,
    "fieldname": "supplier_cost_recovery_sec",
    "fieldtype": "Section Break",
    "label": "Supplier Cost Recovery"
@@ -234,6 +262,10 @@
    "fieldname": "enable_supplier_markup",
    "fieldtype": "Check",
    "label": "Enable Supplier Markup"
+  },
+  {
+   "fieldname": "habitat_settings_supplier_col",
+   "fieldtype": "Column Break"
   },
   {
    "default": "5.0",
@@ -255,17 +287,33 @@
    "label": "Notify Finance on Cross-Cost-Center Transfer"
   },
   {
+   "fieldname": "habitat_settings_store_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "depends_on": "eval:doc.notify_finance_on_liability_transfer",
    "description": "Recipient address for the cross-cost-center transfer memo. Falls back to the Finance Manager role if left blank.",
    "fieldname": "finance_notification_email",
    "fieldtype": "Data",
    "label": "Finance Notification Email",
    "options": "Email"
+  },
+  {
+   "fieldname": "habitat_settings_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "last_modified_by_role",
+   "fieldtype": "Data",
+   "label": "Last Modified By Role",
+   "read_only": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-05-25 02:00:45.100577",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Habitat Settings",

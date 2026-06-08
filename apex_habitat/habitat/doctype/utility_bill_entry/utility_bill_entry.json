@@ -8,33 +8,41 @@
  "field_order": [
   "utility_bill_entry_tab_overview",
   "utility_bill_entry_sec_overview",
-  "company",
   "utility_account",
-  "consumption_units",
-  "due_date",
-  "attached_bill",
   "status",
   "utility_bill_entry_overview_col",
+  "attached_bill",
+  "utility_bill_entry_sec_billing",
   "billing_period_from",
   "billing_period_to",
+  "due_date",
+  "utility_bill_entry_billing_col",
   "bill_amount_sar",
+  "consumption_units",
   "utility_bill_meter_sec",
-  "total_bill_amount_sar",
-  "cost_bearing_pct",
-  "utility_bill_meter_col",
   "meter_reading_previous",
   "meter_reading_current",
+  "utility_bill_meter_col",
   "meter_units_consumed",
+  "utility_bill_entry_sec_sharing",
+  "total_bill_amount_sar",
+  "utility_bill_entry_sharing_col",
+  "cost_bearing_pct",
+  "utility_bill_entry_sec_sharing_note",
   "bill_share_note",
-  "naming_series",
-  "linked_payment_entry",
   "utility_bill_entry_tab_system",
-  "utility_bill_entry_sec_system",
+  "utility_bill_entry_sec_fetched",
+  "company",
   "building",
+  "utility_bill_entry_fetched_col",
   "utility_type",
-  "utility_bill_entry_system_col",
+  "utility_bill_entry_sec_variance",
   "variance_from_avg_pct",
+  "utility_bill_entry_variance_col",
   "variance_alert_sent",
+  "utility_bill_entry_sec_system",
+  "linked_payment_entry",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
@@ -46,14 +54,7 @@
   {
    "fieldname": "utility_bill_entry_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
-   "read_only": 1
+   "label": "Bill Identity"
   },
   {
    "fieldname": "utility_account",
@@ -63,21 +64,6 @@
    "label": "Utility Account",
    "options": "Utility Account",
    "reqd": 1
-  },
-  {
-   "fieldname": "consumption_units",
-   "fieldtype": "Float",
-   "label": "Consumption (kWh / m\u00b3)"
-  },
-  {
-   "fieldname": "due_date",
-   "fieldtype": "Date",
-   "label": "Due Date"
-  },
-  {
-   "fieldname": "attached_bill",
-   "fieldtype": "Attach",
-   "label": "Bill PDF"
   },
   {
    "default": "Received",
@@ -93,6 +79,16 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "attached_bill",
+   "fieldtype": "Attach",
+   "label": "Bill PDF"
+  },
+  {
+   "fieldname": "utility_bill_entry_sec_billing",
+   "fieldtype": "Section Break",
+   "label": "Billing Period and Amount"
+  },
+  {
    "fieldname": "billing_period_from",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -106,6 +102,15 @@
    "reqd": 1
   },
   {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date"
+  },
+  {
+   "fieldname": "utility_bill_entry_billing_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "bill_amount_sar",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -113,28 +118,14 @@
    "reqd": 1
   },
   {
+   "fieldname": "consumption_units",
+   "fieldtype": "Float",
+   "label": "Consumption (kWh / m\u00b3)"
+  },
+  {
    "fieldname": "utility_bill_meter_sec",
    "fieldtype": "Section Break",
-   "label": "Meter Readings and Sharing"
-  },
-  {
-   "description": "Full amount on the utility company's invoice (before sharing)",
-   "fieldname": "total_bill_amount_sar",
-   "fieldtype": "Currency",
-   "label": "Total Invoice Amount (SAR)"
-  },
-  {
-   "default": "100",
-   "description": "Auto-filled from Utility Account. Adjust if different for this bill.",
-   "fetch_from": "utility_account.cost_bearing_pct",
-   "fetch_if_empty": 1,
-   "fieldname": "cost_bearing_pct",
-   "fieldtype": "Percent",
-   "label": "Cost Bearing (%)"
-  },
-  {
-   "fieldname": "utility_bill_meter_col",
-   "fieldtype": "Column Break"
+   "label": "Meter Readings"
   },
   {
    "fieldname": "meter_reading_previous",
@@ -149,12 +140,45 @@
    "precision": "3"
   },
   {
+   "fieldname": "utility_bill_meter_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "description": "Computed: Current Reading \u2212 Previous Reading",
    "fieldname": "meter_units_consumed",
    "fieldtype": "Float",
    "label": "Units Consumed",
    "precision": "3",
    "read_only": 1
+  },
+  {
+   "fieldname": "utility_bill_entry_sec_sharing",
+   "fieldtype": "Section Break",
+   "label": "Cost Sharing"
+  },
+  {
+   "description": "Full amount on the utility company's invoice (before sharing)",
+   "fieldname": "total_bill_amount_sar",
+   "fieldtype": "Currency",
+   "label": "Total Invoice Amount (SAR)"
+  },
+  {
+   "fieldname": "utility_bill_entry_sharing_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "100",
+   "description": "Auto-filled from Utility Account. Adjust if different for this bill.",
+   "fetch_from": "utility_account.cost_bearing_pct",
+   "fetch_if_empty": 1,
+   "fieldname": "cost_bearing_pct",
+   "fieldtype": "Percent",
+   "label": "Cost Bearing (%)"
+  },
+  {
+   "fieldname": "utility_bill_entry_sec_sharing_note",
+   "fieldtype": "Section Break",
+   "label": "Sharing Note"
   },
   {
    "description": "Auto-generated summary of meter sharing calculation",
@@ -164,30 +188,21 @@
    "read_only": 1
   },
   {
-   "default": "UTIL-BILL-.YYYY.-.#####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "UTIL-BILL-.YYYY.-.#####"
-  },
-  {
-   "description": "Draft Payment Entry created on submit.",
-   "fieldname": "linked_payment_entry",
-   "fieldtype": "Link",
-   "label": "Payment Entry",
-   "options": "Payment Entry",
-   "read_only": 1
-  },
-  {
    "fieldname": "utility_bill_entry_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info"
+   "label": "System"
   },
   {
-   "fieldname": "utility_bill_entry_sec_system",
+   "fieldname": "utility_bill_entry_sec_fetched",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "label": "Derived Fields"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
   },
   {
    "fetch_from": "utility_account.building",
@@ -201,6 +216,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "utility_bill_entry_fetched_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fetch_from": "utility_account.utility_type",
    "fieldname": "utility_type",
    "fieldtype": "Data",
@@ -210,8 +229,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "utility_bill_entry_system_col",
-   "fieldtype": "Column Break"
+   "fieldname": "utility_bill_entry_sec_variance",
+   "fieldtype": "Section Break",
+   "label": "Variance Monitoring"
   },
   {
    "description": "Auto-calculated on validate. Positive = above average; negative = below average.",
@@ -221,11 +241,37 @@
    "read_only": 1
   },
   {
+   "fieldname": "utility_bill_entry_variance_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "0",
    "fieldname": "variance_alert_sent",
    "fieldtype": "Check",
    "label": "Variance Alert Sent",
    "read_only": 1
+  },
+  {
+   "fieldname": "utility_bill_entry_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Bookkeeping",
+   "collapsible": 1
+  },
+  {
+   "description": "Draft Payment Entry created on submit.",
+   "fieldname": "linked_payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "read_only": 1
+  },
+  {
+   "default": "UTIL-BILL-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "UTIL-BILL-.YYYY.-.#####"
   },
   {
    "fieldname": "amended_from",
@@ -240,7 +286,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-02 09:00:00.000012",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Utility Bill Entry",

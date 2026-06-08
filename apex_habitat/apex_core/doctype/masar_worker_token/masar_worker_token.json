@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_worker",
   "party_type",
   "party",
   "employee",
@@ -16,9 +17,15 @@
   "token",
   "section_meta",
   "last_generated_on",
+  "col_meta",
   "last_generated_by"
  ],
  "fields": [
+  {
+   "fieldname": "section_worker",
+   "fieldtype": "Section Break",
+   "label": "Worker"
+  },
   {
    "fieldname": "party_type",
    "fieldtype": "Select",
@@ -83,13 +90,18 @@
   {
    "fieldname": "section_meta",
    "fieldtype": "Section Break",
-   "label": "Issuance"
+   "label": "System",
+   "collapsible": 1
   },
   {
    "fieldname": "last_generated_on",
    "fieldtype": "Datetime",
    "label": "Last Generated On",
    "read_only": 1
+  },
+  {
+   "fieldname": "col_meta",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "last_generated_by",
@@ -101,7 +113,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-05-31 03:30:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Masar Worker Token",

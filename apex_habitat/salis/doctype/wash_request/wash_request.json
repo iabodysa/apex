@@ -5,31 +5,31 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "wash_request_sec_overview",
-  "naming_series",
+  "wash_request_tab_details",
+  "wash_request_sec_request",
   "vehicle",
   "wash_platform",
+  "wash_request_request_col",
   "wash_type",
-  "wash_request_overview_col",
+  "sticker_requested",
+  "wash_request_sec_scheduling",
   "status",
   "wash_date",
-  "sticker_requested",
+  "wash_request_tab_system",
+  "wash_request_sec_system",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
   {
-   "fieldname": "wash_request_sec_overview",
-   "fieldtype": "Section Break",
-   "label": "Overview"
+   "fieldname": "wash_request_tab_details",
+   "fieldtype": "Tab Break",
+   "label": "Details"
   },
   {
-   "default": "WR-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "WR-.######",
-   "reqd": 1
+   "fieldname": "wash_request_sec_request",
+   "fieldtype": "Section Break",
+   "label": "Wash Request"
   },
   {
    "fieldname": "vehicle",
@@ -47,6 +47,10 @@
    "options": "Wash Platform"
   },
   {
+   "fieldname": "wash_request_request_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "wash_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -56,8 +60,15 @@
    "reqd": 1
   },
   {
-   "fieldname": "wash_request_overview_col",
-   "fieldtype": "Column Break"
+   "default": "0",
+   "fieldname": "sticker_requested",
+   "fieldtype": "Check",
+   "label": "Sticker Requested"
+  },
+  {
+   "fieldname": "wash_request_sec_scheduling",
+   "fieldtype": "Section Break",
+   "label": "Scheduling"
   },
   {
    "default": "Pending",
@@ -74,10 +85,23 @@
    "label": "Wash Date"
   },
   {
-   "default": "0",
-   "fieldname": "sticker_requested",
-   "fieldtype": "Check",
-   "label": "Sticker Requested"
+   "fieldname": "wash_request_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "wash_request_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "default": "WR-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "WR-.######",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -92,7 +116,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-26 10:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Wash Request",

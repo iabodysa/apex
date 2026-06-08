@@ -8,31 +8,34 @@
  "field_order": [
   "salis_payment_request_tab_overview",
   "salis_payment_request_sec_overview",
-  "naming_series",
   "expense_type",
   "amount",
-  "salis_payment_request_overview_col",
-  "status",
-  "requested_by",
   "company",
+  "salis_payment_request_overview_col",
+  "requested_by",
+  "naming_series",
   "salis_payment_request_sec_targets",
   "vehicle",
   "driver",
   "project",
-  "cost_center",
   "salis_payment_request_targets_col",
   "supplier",
   "rental_office",
+  "cost_center",
   "salis_payment_request_sec_reference",
   "reference_doctype",
+  "salis_payment_request_reference_col",
   "reference_name",
+  "salis_payment_request_sec_notes",
+  "remarks",
+  "salis_payment_request_tab_system",
   "salis_payment_request_sec_finance",
+  "status",
   "finance_approved_by",
   "finance_approved_on",
   "salis_payment_request_finance_col",
   "linked_payment_entry",
-  "salis_payment_request_sec_notes",
-  "remarks",
+  "salis_payment_request_sec_system",
   "amended_from"
  ],
  "fields": [
@@ -44,16 +47,7 @@
   {
    "fieldname": "salis_payment_request_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details"
-  },
-  {
-   "default": "PAY-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "PAY-.######",
-   "reqd": 1
+   "label": "Request"
   },
   {
    "fieldname": "expense_type",
@@ -72,20 +66,16 @@
    "reqd": 1
   },
   {
-   "fieldname": "salis_payment_request_overview_col",
-   "fieldtype": "Column Break"
+   "description": "Owning company; defaulted from Salis Settings. Reference only — posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
   },
   {
-   "allow_on_submit": 1,
-   "default": "Draft",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Status",
-   "no_copy": 1,
-   "options": "Draft\nPending Finance\nApproved by Finance\nPaid\nRejected\nCancelled",
-   "read_only": 1
+   "fieldname": "salis_payment_request_overview_col",
+   "fieldtype": "Column Break"
   },
   {
    "description": "Defaults to the session user on creation.",
@@ -96,12 +86,13 @@
    "read_only": 1
   },
   {
-   "description": "Owning company; defaulted from Salis Settings. Reference only — posts no GL.",
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Company",
-   "options": "Company"
+   "default": "PAY-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "PAY-.######",
+   "reqd": 1
   },
   {
    "fieldname": "salis_payment_request_sec_targets",
@@ -132,13 +123,6 @@
    "options": "Project"
   },
   {
-   "description": "Cost center for grouping; defaults from Salis Settings. Reference only — no GL.",
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
-  },
-  {
    "fieldname": "salis_payment_request_targets_col",
    "fieldtype": "Column Break"
   },
@@ -155,6 +139,13 @@
    "options": "Rental Office"
   },
   {
+   "description": "Cost center for grouping; defaults from Salis Settings. Reference only — no GL.",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
    "fieldname": "salis_payment_request_sec_reference",
    "fieldtype": "Section Break",
    "label": "Source Reference"
@@ -166,15 +157,46 @@
    "options": "DocType"
   },
   {
+   "fieldname": "salis_payment_request_reference_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "label": "Reference Name",
    "options": "reference_doctype"
   },
   {
+   "fieldname": "salis_payment_request_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "salis_payment_request_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
    "fieldname": "salis_payment_request_sec_finance",
    "fieldtype": "Section Break",
    "label": "Finance Decision"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nPending Finance\nApproved by Finance\nPaid\nRejected\nCancelled",
+   "read_only": 1
   },
   {
    "description": "Stamped automatically when Finance approves. Read-only.",
@@ -203,14 +225,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "salis_payment_request_sec_notes",
+   "fieldname": "salis_payment_request_sec_system",
    "fieldtype": "Section Break",
-   "label": "Notes"
-  },
-  {
-   "fieldname": "remarks",
-   "fieldtype": "Small Text",
-   "label": "Remarks"
+   "label": "System",
+   "collapsible": 1
   },
   {
    "fieldname": "amended_from",
@@ -236,7 +254,7 @@
    "link_fieldname": "payment_request"
   }
  ],
- "modified": "2026-05-26 12:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Payment Request",

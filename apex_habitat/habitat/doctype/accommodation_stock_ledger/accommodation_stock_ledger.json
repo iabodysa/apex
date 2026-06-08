@@ -7,18 +7,24 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "asl_tab_entry",
+  "asl_sec_posting",
   "naming_series",
   "posting_date",
   "company",
-  "item_type",
-  "item",
-  "item_name",
-  "uom",
-  "col_break_1",
+  "asl_col_posting",
   "qty",
   "unit_cost_sar",
+  "asl_sec_item",
+  "item_type",
+  "item",
+  "asl_col_item",
+  "item_name",
+  "uom",
+  "asl_sec_store",
   "building",
   "cost_center",
+  "asl_col_store",
   "employee",
   "sec_context",
   "from_building",
@@ -30,9 +36,20 @@
   "sec_status",
   "is_cancelled",
   "reversal_of",
+  "asl_col_status",
   "remarks"
  ],
  "fields": [
+  {
+   "fieldname": "asl_tab_entry",
+   "fieldtype": "Tab Break",
+   "label": "Stock Entry"
+  },
+  {
+   "fieldname": "asl_sec_posting",
+   "fieldtype": "Section Break",
+   "label": "Posting"
+  },
   {
    "default": "ACC-SLE-.YYYY.-.######",
    "fieldname": "naming_series",
@@ -57,6 +74,28 @@
    "read_only": 1
   },
   {
+   "fieldname": "asl_col_posting",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty (signed)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit_cost_sar",
+   "fieldtype": "Currency",
+   "label": "Unit Cost (SAR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "asl_sec_item",
+   "fieldtype": "Section Break",
+   "label": "Item"
+  },
+  {
    "fieldname": "item_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -75,6 +114,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "asl_col_item",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name",
@@ -87,21 +130,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "col_break_1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "qty",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Qty (signed)",
-   "reqd": 1
-  },
-  {
-   "fieldname": "unit_cost_sar",
-   "fieldtype": "Currency",
-   "label": "Unit Cost (SAR)",
-   "read_only": 1
+   "fieldname": "asl_sec_store",
+   "fieldtype": "Section Break",
+   "label": "Store & Custody"
   },
   {
    "fieldname": "building",
@@ -118,6 +149,10 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "read_only": 1
+  },
+  {
+   "fieldname": "asl_col_store",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "employee",
@@ -171,7 +206,9 @@
   },
   {
    "fieldname": "sec_status",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Reversal Status",
+   "collapsible": 1
   },
   {
    "default": "0",
@@ -188,6 +225,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "asl_col_status",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks"
@@ -197,7 +238,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-25 03:00:19.663962",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Stock Ledger",

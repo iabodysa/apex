@@ -8,26 +8,29 @@
  "field_order": [
   "subcontractor_service_order_tab_overview",
   "subcontractor_service_order_sec_overview",
-  "company",
   "building",
   "scheduled_date",
   "actual_visit_date",
-  "completion_photo",
-  "linked_purchase_invoice",
-  "supervisor_confirmed",
   "subcontractor_service_order_overview_col",
-  "status",
   "contract",
-  "naming_series",
+  "status",
+  "subcontractor_service_order_sec_completion",
+  "supervisor_confirmed",
+  "completion_photo",
+  "subcontractor_service_order_sec_cost",
   "service_cost_sar",
+  "subcontractor_service_order_cost_col",
   "cost_center",
+  "company",
   "subcontractor_service_order_sec_large_text",
   "visit_notes",
   "subcontractor_service_order_tab_system",
   "subcontractor_service_order_sec_system",
   "supplier",
-  "subcontractor_service_order_system_col",
   "service_type",
+  "subcontractor_service_order_system_col",
+  "linked_purchase_invoice",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
@@ -39,14 +42,7 @@
   {
    "fieldname": "subcontractor_service_order_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
-   "read_only": 1
+   "label": "Visit"
   },
   {
    "fieldname": "building",
@@ -71,26 +67,15 @@
    "label": "Actual Visit Date"
   },
   {
-   "fieldname": "completion_photo",
-   "fieldtype": "Attach Image",
-   "label": "Completion Photo Evidence"
-  },
-  {
-   "description": "Auto-created on Submit",
-   "fieldname": "linked_purchase_invoice",
-   "fieldtype": "Link",
-   "label": "Purchase Invoice",
-   "options": "Purchase Invoice"
-  },
-  {
-   "default": "0",
-   "fieldname": "supervisor_confirmed",
-   "fieldtype": "Check",
-   "label": "Supervisor Confirmed Completion"
-  },
-  {
    "fieldname": "subcontractor_service_order_overview_col",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contract",
+   "fieldtype": "Link",
+   "label": "Service Contract",
+   "options": "Subcontractor Service Contract",
+   "reqd": 1
   },
   {
    "default": "Scheduled",
@@ -102,26 +87,35 @@
    "options": "Scheduled\nIn Progress\nCompleted\nMissed\nCancelled"
   },
   {
-   "fieldname": "contract",
-   "fieldtype": "Link",
-   "label": "Service Contract",
-   "options": "Subcontractor Service Contract",
-   "reqd": 1
+   "fieldname": "subcontractor_service_order_sec_completion",
+   "fieldtype": "Section Break",
+   "label": "Completion"
   },
   {
-   "default": "SSO-.YYYY.-.#####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "SSO-.YYYY.-.#####",
-   "reqd": 1
+   "default": "0",
+   "fieldname": "supervisor_confirmed",
+   "fieldtype": "Check",
+   "label": "Supervisor Confirmed Completion"
+  },
+  {
+   "fieldname": "completion_photo",
+   "fieldtype": "Attach Image",
+   "label": "Completion Photo Evidence"
+  },
+  {
+   "fieldname": "subcontractor_service_order_sec_cost",
+   "fieldtype": "Section Break",
+   "label": "Cost"
   },
   {
    "fieldname": "service_cost_sar",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Service Cost (SAR)"
+  },
+  {
+   "fieldname": "subcontractor_service_order_cost_col",
+   "fieldtype": "Column Break"
   },
   {
    "fetch_from": "building.default_cost_center",
@@ -132,10 +126,17 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
    "fieldname": "subcontractor_service_order_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information"
+   "label": "Technician Notes",
+   "collapsible": 1
   },
   {
    "fieldname": "visit_notes",
@@ -145,12 +146,12 @@
   {
    "fieldname": "subcontractor_service_order_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info"
+   "label": "System"
   },
   {
    "fieldname": "subcontractor_service_order_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "label": "Contract-Derived References"
   },
   {
    "fetch_from": "contract.supplier",
@@ -163,16 +164,32 @@
    "read_only": 1
   },
   {
-   "fieldname": "subcontractor_service_order_system_col",
-   "fieldtype": "Column Break"
-  },
-  {
    "fetch_from": "contract.service_type",
    "fieldname": "service_type",
    "fieldtype": "Data",
    "in_standard_filter": 1,
    "label": "Service Type",
    "read_only": 1
+  },
+  {
+   "fieldname": "subcontractor_service_order_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Auto-created on Submit",
+   "fieldname": "linked_purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice",
+   "options": "Purchase Invoice"
+  },
+  {
+   "default": "SSO-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "SSO-.YYYY.-.#####",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -186,7 +203,7 @@
   }
  ],
  "is_submittable": 1,
-"links": [
+ "links": [
   {
    "group": "Maintenance",
    "link_doctype": "Maintenance Request",
@@ -203,7 +220,7 @@
    "link_fieldname": "subcontractor_service_order"
   }
  ],
- "modified": "2026-05-25 01:05:32.070295",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Subcontractor Service Order",

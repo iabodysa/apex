@@ -6,18 +6,19 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "fec_sec_overview",
-  "naming_series",
+  "fec_tab_overview",
+  "fec_sec_subject",
   "vehicle",
   "driver",
   "project",
+  "fec_subject_col",
+  "exception_type",
   "fuel_request",
   "fuel_quota",
-  "fec_overview_col",
-  "exception_type",
-  "reported_by",
+  "fec_sec_status",
   "status",
-  "closed_by",
+  "fec_status_col",
+  "reported_by",
   "fec_sec_details",
   "description",
   "evidence",
@@ -25,23 +26,22 @@
   "fec_sec_resolution",
   "resolution",
   "amount_recovered",
+  "closed_by",
   "fec_sec_system",
+  "naming_series",
+  "fec_system_col",
   "amended_from"
  ],
  "fields": [
   {
-   "fieldname": "fec_sec_overview",
-   "fieldtype": "Section Break",
+   "fieldname": "fec_tab_overview",
+   "fieldtype": "Tab Break",
    "label": "Overview"
   },
   {
-   "default": "FEX-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "FEX-.######",
-   "reqd": 1
+   "fieldname": "fec_sec_subject",
+   "fieldtype": "Section Break",
+   "label": "Subject"
   },
   {
    "fieldname": "vehicle",
@@ -68,6 +68,19 @@
    "options": "Project"
   },
   {
+   "fieldname": "fec_subject_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "exception_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Exception Type",
+   "options": "Over-Consumption\nGPS Mismatch\nDuplicate Claim\nSuspected Fraud\nQuota Dispute\nOther",
+   "reqd": 1
+  },
+  {
    "fieldname": "fuel_request",
    "fieldtype": "Link",
    "label": "Fuel Request",
@@ -81,25 +94,9 @@
    "options": "Fuel Quota"
   },
   {
-   "fieldname": "fec_overview_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "exception_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Exception Type",
-   "options": "Over-Consumption\nGPS Mismatch\nDuplicate Claim\nSuspected Fraud\nQuota Dispute\nOther",
-   "reqd": 1
-  },
-  {
-   "description": "The user who raised this case. Set automatically.",
-   "fieldname": "reported_by",
-   "fieldtype": "Link",
-   "label": "Reported By",
-   "options": "User",
-   "read_only": 1
+   "fieldname": "fec_sec_status",
+   "fieldtype": "Section Break",
+   "label": "Status"
   },
   {
    "allow_on_submit": 1,
@@ -112,10 +109,14 @@
    "options": "Open\nUnder Investigation\nEvidence Required\nResolved\nRejected\nClosed"
   },
   {
-   "description": "The user who resolved or closed the case. Must differ from Reported By (segregation of duties).",
-   "fieldname": "closed_by",
+   "fieldname": "fec_status_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The user who raised this case. Set automatically.",
+   "fieldname": "reported_by",
    "fieldtype": "Link",
-   "label": "Closed By",
+   "label": "Reported By",
    "options": "User",
    "read_only": 1
   },
@@ -156,10 +157,31 @@
    "label": "Amount Recovered (SAR)"
   },
   {
+   "description": "The user who resolved or closed the case. Must differ from Reported By (segregation of duties).",
+   "fieldname": "closed_by",
+   "fieldtype": "Link",
+   "label": "Closed By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
    "fieldname": "fec_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Info",
+   "label": "System",
    "collapsible": 1
+  },
+  {
+   "default": "FEX-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "FEX-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fec_system_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "amended_from",
@@ -174,7 +196,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Exception Case",

@@ -7,28 +7,31 @@
  "engine": "InnoDB",
  "field_order": [
   "mcr_tab_overview",
-  "mcr_sec_overview",
+  "mcr_sec_identity",
   "recovery_type",
   "vehicle",
   "driver",
   "employee",
-  "mcr_overview_col",
+  "mcr_identity_col",
   "request_date",
   "status",
-  "company",
-  "cost_center",
-  "naming_series",
   "mcr_sec_amounts",
   "amount",
   "acknowledgement_received",
   "mcr_amounts_col",
   "payment_request",
+  "mcr_sec_attribution",
+  "company",
+  "mcr_attribution_col",
+  "cost_center",
   "mcr_sec_reference",
   "reference_doctype",
-  "reference_name",
   "mcr_reference_col",
+  "reference_name",
+  "mcr_sec_evidence",
   "basis_evidence",
   "mcr_sec_system",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
@@ -38,9 +41,9 @@
    "label": "Overview"
   },
   {
-   "fieldname": "mcr_sec_overview",
+   "fieldname": "mcr_sec_identity",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Recovery Details"
   },
   {
    "fieldname": "recovery_type",
@@ -76,7 +79,7 @@
    "options": "Employee"
   },
   {
-   "fieldname": "mcr_overview_col",
+   "fieldname": "mcr_identity_col",
    "fieldtype": "Column Break"
   },
   {
@@ -95,33 +98,9 @@
    "options": "Open\nAcknowledged\nApproved\nRecovered\nWaived\nRejected\nCancelled"
   },
   {
-   "description": "Owning company; defaulted from Salis Settings. Reference only \u2014 posts no GL.",
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Company",
-   "options": "Company"
-  },
-  {
-   "description": "Cost center for grouping; defaults from Salis Settings. Reference only \u2014 no GL.",
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
-  },
-  {
-   "default": "MCR-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "MCR-.######",
-   "reqd": 1
-  },
-  {
    "fieldname": "mcr_sec_amounts",
    "fieldtype": "Section Break",
-   "label": "Amounts"
+   "label": "Recovery Amount"
   },
   {
    "fieldname": "amount",
@@ -150,6 +129,30 @@
    "read_only": 1
   },
   {
+   "fieldname": "mcr_sec_attribution",
+   "fieldtype": "Section Break",
+   "label": "Cost Attribution"
+  },
+  {
+   "description": "Owning company; defaulted from Salis Settings. Reference only \u2014 posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "mcr_attribution_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Cost center for grouping; defaults from Salis Settings. Reference only \u2014 no GL.",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
    "fieldname": "mcr_sec_reference",
    "fieldtype": "Section Break",
    "label": "Source Reference"
@@ -161,14 +164,19 @@
    "options": "DocType"
   },
   {
+   "fieldname": "mcr_reference_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "label": "Reference Name",
    "options": "reference_doctype"
   },
   {
-   "fieldname": "mcr_reference_col",
-   "fieldtype": "Column Break"
+   "fieldname": "mcr_sec_evidence",
+   "fieldtype": "Section Break",
+   "label": "Evidence"
   },
   {
    "description": "Supporting evidence for the loss and its valuation. Required before the recovery can be Approved.",
@@ -180,8 +188,17 @@
   {
    "fieldname": "mcr_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Info",
+   "label": "System",
    "collapsible": 1
+  },
+  {
+   "default": "MCR-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "MCR-.######",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -196,7 +213,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Movement Cost Recovery",

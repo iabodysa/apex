@@ -8,21 +8,24 @@
  "field_order": [
   "rental_settlement_tab_overview",
   "rental_settlement_sec_overview",
-  "naming_series",
   "rental_office",
   "period_month",
   "rental_settlement_overview_col",
   "status",
-  "company",
-  "requested_by",
-  "payment_request",
   "rental_settlement_sec_vehicles",
   "vehicles",
   "rental_settlement_sec_totals",
   "accrued_total",
+  "rental_settlement_totals_col1",
   "claimed_total",
-  "rental_settlement_totals_col",
+  "rental_settlement_totals_col2",
   "variance",
+  "rental_settlement_sec_system",
+  "naming_series",
+  "company",
+  "requested_by",
+  "rental_settlement_system_col",
+  "payment_request",
   "amended_from"
  ],
  "fields": [
@@ -35,15 +38,6 @@
    "fieldname": "rental_settlement_sec_overview",
    "fieldtype": "Section Break",
    "label": "Settlement"
-  },
-  {
-   "default": "RS-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "RS-.######",
-   "reqd": 1
   },
   {
    "fieldname": "rental_office",
@@ -81,31 +75,6 @@
    "read_only": 1
   },
   {
-   "description": "Owning company; defaulted from Salis Settings. Reference only — posts no GL.",
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Company",
-   "options": "Company",
-   "read_only": 1
-  },
-  {
-   "description": "Set to the session user on creation; read-only so the segregation-of-duties gate cannot be spoofed.",
-   "fieldname": "requested_by",
-   "fieldtype": "Link",
-   "label": "Requested By",
-   "options": "User",
-   "read_only": 1
-  },
-  {
-   "description": "Reference to the raised Salis Payment Request. Set automatically; this DocType never posts GL.",
-   "fieldname": "payment_request",
-   "fieldtype": "Link",
-   "label": "Payment Request",
-   "options": "Salis Payment Request",
-   "read_only": 1
-  },
-  {
    "fieldname": "rental_settlement_sec_vehicles",
    "fieldtype": "Section Break",
    "label": "Vehicles"
@@ -129,13 +98,17 @@
    "read_only": 1
   },
   {
+   "fieldname": "rental_settlement_totals_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "description": "Amount claimed by the rental office.",
    "fieldname": "claimed_total",
    "fieldtype": "Currency",
    "label": "Claimed Total"
   },
   {
-   "fieldname": "rental_settlement_totals_col",
+   "fieldname": "rental_settlement_totals_col2",
    "fieldtype": "Column Break"
   },
   {
@@ -143,6 +116,50 @@
    "fieldname": "variance",
    "fieldtype": "Currency",
    "label": "Variance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rental_settlement_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "RS-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "RS-.######",
+   "reqd": 1
+  },
+  {
+   "description": "Owning company; defaulted from Salis Settings. Reference only \u2014 posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "description": "Set to the session user on creation; read-only so the segregation-of-duties gate cannot be spoofed.",
+   "fieldname": "requested_by",
+   "fieldtype": "Link",
+   "label": "Requested By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rental_settlement_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Reference to the raised Salis Payment Request. Set automatically; this DocType never posts GL.",
+   "fieldname": "payment_request",
+   "fieldtype": "Link",
+   "label": "Payment Request",
+   "options": "Salis Payment Request",
    "read_only": 1
   },
   {
@@ -164,7 +181,7 @@
    "link_fieldname": "rental_settlement"
   }
  ],
- "modified": "2026-05-26 13:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Settlement",

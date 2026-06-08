@@ -10,15 +10,17 @@
   "fuel_consumption_ledger_sec_overview",
   "vehicle",
   "driver",
-  "company",
   "period_month",
   "fuel_consumption_ledger_overview_col",
   "litres",
   "amount",
   "logged_at",
+  "fuel_consumption_ledger_sec_financial",
+  "company",
   "fuel_consumption_ledger_sec_system",
   "source_type",
   "source_doctype",
+  "fuel_consumption_ledger_system_col",
   "source_name",
   "reversal_of"
  ],
@@ -26,7 +28,7 @@
   {
    "fieldname": "fuel_consumption_ledger_sec_overview",
    "fieldtype": "Section Break",
-   "label": "Overview"
+   "label": "Consumption"
   },
   {
    "fieldname": "vehicle",
@@ -45,16 +47,6 @@
    "in_standard_filter": 1,
    "label": "Driver",
    "options": "Salis Driver",
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "description": "Owning company, carried for reporting grouping. System-written; reference only, posts no GL.",
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Company",
-   "options": "Company",
    "read_only": 1,
    "search_index": 1
   },
@@ -92,10 +84,25 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
+   "fieldname": "fuel_consumption_ledger_sec_financial",
+   "fieldtype": "Section Break",
+   "label": "Financial Reference"
+  },
+  {
+   "description": "Owning company, carried for reporting grouping. System-written; reference only, posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
    "fieldname": "fuel_consumption_ledger_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Info"
+   "label": "System",
+   "collapsible": 1
   },
   {
    "fieldname": "source_type",
@@ -109,6 +116,10 @@
    "fieldtype": "Data",
    "label": "Source DocType",
    "read_only": 1
+  },
+  {
+   "fieldname": "fuel_consumption_ledger_system_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "source_name",
@@ -129,7 +140,7 @@
  "in_create": 1,
  "is_submittable": 0,
  "links": [],
- "modified": "2026-05-26 12:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Consumption Ledger",

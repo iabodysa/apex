@@ -6,20 +6,21 @@
  "engine": "InnoDB",
  "field_order": [
   "route_plan_tab_overview",
-  "route_plan_sec_route_details",
+  "rp_sec_request",
   "route_name",
   "transport_request",
-  "project",
-  "shift",
-  "vehicle",
-  "driver",
-  "route_plan_col_route_details",
+  "rp_request_col",
   "requested_by_operations",
   "fulfilled_by_movement",
-  "stops_sec",
-  "stops",
-  "route_plan_col_stops",
+  "rp_sec_assignment",
+  "project",
+  "shift",
+  "rp_assignment_col",
+  "vehicle",
+  "driver",
+  "rp_sec_stops",
   "total_stops",
+  "stops",
   "route_plan_sec_system",
   "naming_series",
   "amended_from"
@@ -31,22 +32,9 @@
    "label": "Overview"
   },
   {
-   "fieldname": "route_plan_sec_route_details",
+   "fieldname": "rp_sec_request",
    "fieldtype": "Section Break",
-   "label": "Route Details"
-  },
-  {
-   "fieldname": "route_plan_col_route_details",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "RP-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "RP-.######",
-   "reqd": 1
+   "label": "Request"
   },
   {
    "fieldname": "route_name",
@@ -61,6 +49,10 @@
    "label": "Transport Request",
    "options": "Transport Request",
    "search_index": 1
+  },
+  {
+   "fieldname": "rp_request_col",
+   "fieldtype": "Column Break"
   },
   {
    "description": "Operations requester, carried from the linked Transport Request (Operations owns the request).",
@@ -79,6 +71,11 @@
    "read_only": 1
   },
   {
+   "fieldname": "rp_sec_assignment",
+   "fieldtype": "Section Break",
+   "label": "Assignment"
+  },
+  {
    "fieldname": "project",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -94,6 +91,10 @@
    "options": "Morning\nEvening\nNight"
   },
   {
+   "fieldname": "rp_assignment_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "vehicle",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -107,19 +108,9 @@
    "options": "Salis Driver"
   },
   {
-   "fieldname": "stops_sec",
+   "fieldname": "rp_sec_stops",
    "fieldtype": "Section Break",
    "label": "Stops"
-  },
-  {
-   "fieldname": "stops",
-   "fieldtype": "Table",
-   "label": "Stops",
-   "options": "Route Stop"
-  },
-  {
-   "fieldname": "route_plan_col_stops",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "total_stops",
@@ -128,10 +119,25 @@
    "read_only": 1
   },
   {
+   "fieldname": "stops",
+   "fieldtype": "Table",
+   "label": "Stops",
+   "options": "Route Stop"
+  },
+  {
    "fieldname": "route_plan_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Info",
+   "label": "System",
    "collapsible": 1
+  },
+  {
+   "default": "RP-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "RP-.######",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -167,7 +173,7 @@
    "link_fieldname": "route_plan"
   }
  ],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Plan",

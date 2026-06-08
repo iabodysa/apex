@@ -5,26 +5,25 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
+  "pm_sec_dispatch",
   "route_plan",
   "dispatch_trip",
+  "pm_dispatch_col",
   "dispatch_date",
   "vehicle",
   "driver",
-  "passengers_sec",
-  "passengers",
+  "pm_sec_passengers",
   "passenger_count",
+  "passengers",
+  "pm_sec_system",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
   {
-   "default": "PM-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "PM-.######",
-   "reqd": 1
+   "fieldname": "pm_sec_dispatch",
+   "fieldtype": "Section Break",
+   "label": "Dispatch"
   },
   {
    "fieldname": "route_plan",
@@ -38,6 +37,10 @@
    "fieldtype": "Link",
    "label": "Dispatch Trip",
    "options": "Dispatch Trip"
+  },
+  {
+   "fieldname": "pm_dispatch_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "dispatch_date",
@@ -58,9 +61,15 @@
    "options": "Salis Driver"
   },
   {
-   "fieldname": "passengers_sec",
+   "fieldname": "pm_sec_passengers",
    "fieldtype": "Section Break",
    "label": "Passengers"
+  },
+  {
+   "fieldname": "passenger_count",
+   "fieldtype": "Int",
+   "label": "Passenger Count",
+   "read_only": 1
   },
   {
    "fieldname": "passengers",
@@ -69,10 +78,19 @@
    "options": "Manifest Passenger"
   },
   {
-   "fieldname": "passenger_count",
-   "fieldtype": "Int",
-   "label": "Passenger Count",
-   "read_only": 1
+   "fieldname": "pm_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "PM-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "PM-.######",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -87,7 +105,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-26 02:45:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Passenger Manifest",

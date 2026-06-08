@@ -161,7 +161,7 @@ frappe.ui.form.on("Accommodation Building", {
 		if (!frm.is_new()) {
 			frm.add_custom_button(__("Setup Rooms"), function () {
 				frappe.set_route("room-setup", frm.doc.name);
-			}, __("Setup"));
+			});
 
 			frm.add_custom_button(__("Generate Safety Setup"), function () {
 				frappe.confirm(
@@ -184,7 +184,7 @@ frappe.ui.form.on("Accommodation Building", {
 						});
 					}
 				);
-			}, __("Setup"));
+			});
 		}
 	},
 

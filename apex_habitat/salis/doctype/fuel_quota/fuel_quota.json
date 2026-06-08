@@ -7,20 +7,21 @@
  "engine": "InnoDB",
  "field_order": [
   "fuel_quota_tab_overview",
-  "fuel_quota_sec_overview",
+  "fuel_quota_sec_identity",
   "vehicle",
   "driver",
+  "fuel_quota_identity_col",
   "project",
-  "fuel_quota_overview_col",
   "period_month",
-  "status",
-  "naming_series",
   "fuel_quota_sec_allocation",
   "monthly_litres",
+  "fuel_quota_alloc_col2",
   "monthly_amount",
-  "fuel_quota_allocation_col",
+  "fuel_quota_alloc_col3",
   "consumed_litres",
   "fuel_quota_sec_system",
+  "status",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
@@ -30,9 +31,9 @@
    "label": "Overview"
   },
   {
-   "fieldname": "fuel_quota_sec_overview",
+   "fieldname": "fuel_quota_sec_identity",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Quota Identity"
   },
   {
    "fieldname": "vehicle",
@@ -54,15 +55,15 @@
    "search_index": 1
   },
   {
+   "fieldname": "fuel_quota_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "project",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Project",
    "options": "Project"
-  },
-  {
-   "fieldname": "fuel_quota_overview_col",
-   "fieldtype": "Column Break"
   },
   {
    "description": "Quota period in YYYY-MM format (e.g. 2026-05).",
@@ -72,6 +73,45 @@
    "in_standard_filter": 1,
    "label": "Period (Month)",
    "reqd": 1
+  },
+  {
+   "fieldname": "fuel_quota_sec_allocation",
+   "fieldtype": "Section Break",
+   "label": "Allocation"
+  },
+  {
+   "fieldname": "monthly_litres",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Monthly Litres",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fuel_quota_alloc_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "monthly_amount",
+   "fieldtype": "Currency",
+   "label": "Monthly Amount (SAR)"
+  },
+  {
+   "fieldname": "fuel_quota_alloc_col3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Total litres consumed against this quota.",
+   "fieldname": "consumed_litres",
+   "fieldtype": "Float",
+   "label": "Consumed Litres",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fuel_quota_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
   },
   {
    "default": "Active",
@@ -90,41 +130,6 @@
    "label": "Series",
    "options": "FQ-.######",
    "reqd": 1
-  },
-  {
-   "fieldname": "fuel_quota_sec_allocation",
-   "fieldtype": "Section Break",
-   "label": "Allocation"
-  },
-  {
-   "fieldname": "monthly_litres",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Monthly Litres",
-   "reqd": 1
-  },
-  {
-   "fieldname": "monthly_amount",
-   "fieldtype": "Currency",
-   "label": "Monthly Amount (SAR)"
-  },
-  {
-   "fieldname": "fuel_quota_allocation_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "description": "Total litres consumed against this quota.",
-   "fieldname": "consumed_litres",
-   "fieldtype": "Float",
-   "label": "Consumed Litres",
-   "read_only": 1
-  },
-  {
-   "fieldname": "fuel_quota_sec_system",
-   "fieldtype": "Section Break",
-   "label": "System Info",
-   "collapsible": 1
   },
   {
    "fieldname": "amended_from",
@@ -155,7 +160,7 @@
    "link_fieldname": "fuel_quota"
   }
  ],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Quota",

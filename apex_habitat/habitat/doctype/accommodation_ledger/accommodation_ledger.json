@@ -6,42 +6,50 @@
  "engine": "InnoDB",
  "field_order": [
   "accommodation_ledger_tab_details",
-  "accommodation_ledger_sec_details",
+  "accommodation_ledger_sec_posting",
   "company",
   "posting_date",
+  "ledger_type",
+  "posting_mode",
+  "accommodation_ledger_col_posting",
+  "cost_center",
+  "project",
+  "accommodation_ledger_sec_resident",
   "party_type",
   "party",
   "employee",
+  "accommodation_ledger_col_resident",
   "assignment",
   "building",
-  "project",
-  "ledger_type",
-  "accommodation_ledger_details_col",
+  "accommodation_ledger_sec_allocation",
   "capacity_denominator",
   "employee_daily_share",
-  "posting_mode",
-  "cost_center",
+  "accommodation_ledger_col_allocation",
   "total_site_cost",
-  "accommodation_ledger_sec_system",
+  "accommodation_ledger_tab_system",
+  "accommodation_ledger_sec_source",
   "source_doctype",
   "source_name",
   "source_line_id",
+  "accommodation_ledger_col_source",
   "reversal_of",
+  "accommodation_ledger_sec_system",
   "allocation_basis",
   "allocation_period_start",
   "allocation_period_end",
+  "accommodation_ledger_col_audit",
   "billed_to_supplier"
  ],
  "fields": [
   {
    "fieldname": "accommodation_ledger_tab_details",
    "fieldtype": "Tab Break",
-   "label": "Details"
+   "label": "Ledger Entry"
   },
   {
-   "fieldname": "accommodation_ledger_sec_details",
+   "fieldname": "accommodation_ledger_sec_posting",
    "fieldtype": "Section Break",
-   "label": "Information"
+   "label": "Posting"
   },
   {
    "fieldname": "company",
@@ -56,6 +64,41 @@
    "in_list_view": 1,
    "label": "Posting Date",
    "reqd": 1
+  },
+  {
+   "fieldname": "ledger_type",
+   "fieldtype": "Select",
+   "label": "Ledger Type",
+   "options": "Rent\nElectricity\nWater\nGas\nInternet\nTelecom\nCleaning Staff Salary\nSupervisor Salary\nMaintenance\nOther",
+   "reqd": 1
+  },
+  {
+   "default": "Operational Memo",
+   "fieldname": "posting_mode",
+   "fieldtype": "Select",
+   "label": "Posting Mode",
+   "options": "Operational Memo\nGL Posted"
+  },
+  {
+   "fieldname": "accommodation_ledger_col_posting",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "accommodation_ledger_sec_resident",
+   "fieldtype": "Section Break",
+   "label": "Resident & Building"
   },
   {
    "default": "Employee",
@@ -85,6 +128,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "accommodation_ledger_col_resident",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "assignment",
    "fieldtype": "Link",
    "label": "Accommodation Assignment",
@@ -99,21 +146,9 @@
    "search_index": 1
   },
   {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
-  },
-  {
-   "fieldname": "ledger_type",
-   "fieldtype": "Select",
-   "label": "Ledger Type",
-   "options": "Rent\nElectricity\nWater\nGas\nInternet\nTelecom\nCleaning Staff Salary\nSupervisor Salary\nMaintenance\nOther",
-   "reqd": 1
-  },
-  {
-   "fieldname": "accommodation_ledger_details_col",
-   "fieldtype": "Column Break"
+   "fieldname": "accommodation_ledger_sec_allocation",
+   "fieldtype": "Section Break",
+   "label": "Cost Allocation"
   },
   {
    "fieldname": "capacity_denominator",
@@ -126,17 +161,8 @@
    "label": "Employee Daily Share (SAR)"
   },
   {
-   "default": "Operational Memo",
-   "fieldname": "posting_mode",
-   "fieldtype": "Select",
-   "label": "Posting Mode",
-   "options": "Operational Memo\nGL Posted"
-  },
-  {
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
+   "fieldname": "accommodation_ledger_col_allocation",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "total_site_cost",
@@ -144,10 +170,14 @@
    "label": "Total Site Cost for Period (SAR)"
   },
   {
-   "collapsible": 1,
-   "fieldname": "accommodation_ledger_sec_system",
+   "fieldname": "accommodation_ledger_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "accommodation_ledger_sec_source",
    "fieldtype": "Section Break",
-   "label": "System Details"
+   "label": "Source Document"
   },
   {
    "fieldname": "source_doctype",
@@ -168,11 +198,21 @@
    "read_only": 1
   },
   {
+   "fieldname": "accommodation_ledger_col_source",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "reversal_of",
    "fieldtype": "Link",
    "label": "Reversal Of",
    "options": "Accommodation Ledger",
    "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_ledger_sec_system",
+   "fieldtype": "Section Break",
+   "label": "Allocation Audit",
+   "collapsible": 1
   },
   {
    "default": "Capacity",
@@ -195,6 +235,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "accommodation_ledger_col_audit",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "billed_to_supplier",
    "fieldtype": "Link",
    "label": "Billed To Supplier",
@@ -204,7 +248,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-06-02 09:00:00.000002",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Ledger",

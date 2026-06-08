@@ -10,12 +10,11 @@
   "mct_sec_overview",
   "transfer_type",
   "amount",
-  "reason",
   "mct_overview_col",
   "status",
   "approved_by",
-  "company",
-  "naming_series",
+  "mct_sec_reason",
+  "reason",
   "mct_sec_allocation",
   "from_project",
   "from_cost_center",
@@ -24,8 +23,12 @@
   "to_cost_center",
   "mct_sec_reference",
   "reference_doctype",
+  "mct_reference_col",
   "reference_name",
   "mct_sec_system",
+  "naming_series",
+  "company",
+  "mct_system_col",
   "amended_from"
  ],
  "fields": [
@@ -37,7 +40,7 @@
   {
    "fieldname": "mct_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Transfer Details"
   },
   {
    "fieldname": "transfer_type",
@@ -53,11 +56,6 @@
    "in_list_view": 1,
    "label": "Amount (SAR)",
    "reqd": 1
-  },
-  {
-   "fieldname": "reason",
-   "fieldtype": "Small Text",
-   "label": "Reason"
   },
   {
    "fieldname": "mct_overview_col",
@@ -81,21 +79,14 @@
    "read_only": 1
   },
   {
-   "description": "Owning company; defaulted from Salis Settings. Reference only \u2014 posts no GL.",
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Company",
-   "options": "Company"
+   "fieldname": "mct_sec_reason",
+   "fieldtype": "Section Break",
+   "label": "Reason"
   },
   {
-   "default": "MCT-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "MCT-.######",
-   "reqd": 1
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason"
   },
   {
    "fieldname": "mct_sec_allocation",
@@ -148,6 +139,10 @@
    "options": "DocType"
   },
   {
+   "fieldname": "mct_reference_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "label": "Reference Name",
@@ -156,8 +151,29 @@
   {
    "fieldname": "mct_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Info",
+   "label": "System",
    "collapsible": 1
+  },
+  {
+   "default": "MCT-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "MCT-.######",
+   "reqd": 1
+  },
+  {
+   "description": "Owning company; defaulted from Salis Settings. Reference only \u2014 posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "mct_system_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "amended_from",
@@ -172,7 +188,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Movement Cost Transfer",

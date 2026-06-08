@@ -6,29 +6,30 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
+  "ral_sec_accrual",
   "vehicle",
   "rental_office",
-  "company",
   "accrual_date",
+  "ral_accrual_col",
   "daily_rate",
   "amount",
+  "ral_sec_settlement",
   "settled",
+  "ral_settlement_col",
   "rental_settlement",
+  "ral_sec_system",
+  "naming_series",
+  "company",
   "source_doctype",
+  "ral_system_col",
   "source_name",
   "reversal_of"
  ],
  "fields": [
   {
-   "default": "RAL-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "RAL-.######",
-   "read_only": 1,
-   "reqd": 1
+   "fieldname": "ral_sec_accrual",
+   "fieldtype": "Section Break",
+   "label": "Accrual"
   },
   {
    "fieldname": "vehicle",
@@ -50,15 +51,6 @@
    "search_index": 1
   },
   {
-   "description": "Owning company, carried for reporting grouping. System-written; reference only, posts no GL.",
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "accrual_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -66,6 +58,10 @@
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "ral_accrual_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "daily_rate",
@@ -81,11 +77,20 @@
    "read_only": 1
   },
   {
+   "fieldname": "ral_sec_settlement",
+   "fieldtype": "Section Break",
+   "label": "Settlement"
+  },
+  {
    "default": "0",
    "fieldname": "settled",
    "fieldtype": "Check",
    "label": "Settled",
    "read_only": 1
+  },
+  {
+   "fieldname": "ral_settlement_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "rental_settlement",
@@ -95,10 +100,39 @@
    "read_only": 1
   },
   {
+   "fieldname": "ral_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "RAL-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "RAL-.######",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "description": "Owning company, carried for reporting grouping. System-written; reference only, posts no GL.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
    "fieldname": "source_doctype",
    "fieldtype": "Data",
    "label": "Source DocType",
    "read_only": 1
+  },
+  {
+   "fieldname": "ral_system_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "source_name",
@@ -117,7 +151,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-05-26 13:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Accrual Ledger",

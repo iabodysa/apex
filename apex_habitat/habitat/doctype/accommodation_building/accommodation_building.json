@@ -24,9 +24,10 @@
   "accommodation_building_sec_metrics",
   "total_floors",
   "total_rooms",
-  "total_capacity",
   "accommodation_building_metrics_col",
+  "total_capacity",
   "current_occupants",
+  "accommodation_building_metrics_col2",
   "occupancy_percent",
   "accommodation_building_sec_landlord",
   "landlord",
@@ -200,20 +201,24 @@
    "read_only": 1
   },
   {
+   "fieldname": "accommodation_building_metrics_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "total_capacity",
    "fieldtype": "Int",
    "label": "Total Bed Capacity",
    "reqd": 1
   },
   {
-   "fieldname": "accommodation_building_metrics_col",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "current_occupants",
    "fieldtype": "Int",
    "label": "Current Occupants",
    "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_building_metrics_col2",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "occupancy_percent",
@@ -640,7 +645,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-06-08 20:45:00.000000",
+ "modified": "2026-06-08 21:15:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Building",

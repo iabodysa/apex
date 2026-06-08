@@ -8,10 +8,13 @@
   "salis_settings_tab_general",
   "salis_settings_sec_defaults",
   "default_company",
-  "default_cost_center",
   "salis_settings_general_col",
+  "default_cost_center",
+  "salis_settings_sec_alerts",
   "alert_lead_days",
+  "salis_settings_alerts_col1",
   "idle_vehicle_days",
+  "salis_settings_alerts_col2",
   "fuel_pending_max_days",
   "salis_settings_sec_portal",
   "enable_driver_portal",
@@ -37,7 +40,7 @@
   {
    "fieldname": "salis_settings_sec_defaults",
    "fieldtype": "Section Break",
-   "label": "Defaults"
+   "label": "Default Posting"
   },
   {
    "description": "Default company applied to Salis transactions when not set explicitly.",
@@ -47,6 +50,10 @@
    "options": "Company"
   },
   {
+   "fieldname": "salis_settings_general_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "description": "Default cost center used for fleet cost postings.",
    "fieldname": "default_cost_center",
    "fieldtype": "Link",
@@ -54,8 +61,9 @@
    "options": "Cost Center"
   },
   {
-   "fieldname": "salis_settings_general_col",
-   "fieldtype": "Column Break"
+   "fieldname": "salis_settings_sec_alerts",
+   "fieldtype": "Section Break",
+   "label": "Operational Alert Windows"
   },
   {
    "default": "7",
@@ -65,6 +73,10 @@
    "label": "Alert Lead Days"
   },
   {
+   "fieldname": "salis_settings_alerts_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "7",
    "description": "Number of days without a dispatch trip before an Active vehicle is flagged as idle.",
    "fieldname": "idle_vehicle_days",
@@ -72,11 +84,27 @@
    "label": "Idle Vehicle Days"
   },
   {
+   "fieldname": "salis_settings_alerts_col2",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "2",
    "description": "Number of days a Fuel Request may stay Pending before it is flagged as overdue.",
    "fieldname": "fuel_pending_max_days",
    "fieldtype": "Int",
    "label": "Fuel Request Pending Max Days"
+  },
+  {
+   "fieldname": "salis_settings_sec_portal",
+   "fieldtype": "Section Break",
+   "label": "Driver Portal"
+  },
+  {
+   "default": "0",
+   "description": "Allow drivers to access the self-service portal.",
+   "fieldname": "enable_driver_portal",
+   "fieldtype": "Check",
+   "label": "Enable Driver Portal"
   },
   {
    "fieldname": "salis_settings_tab_approvals",
@@ -149,23 +177,11 @@
    "fieldname": "cost_recovery_ops_threshold_sar",
    "fieldtype": "Currency",
    "label": "Cost Recovery Operations Threshold (SAR)"
-  },
-  {
-   "fieldname": "salis_settings_sec_portal",
-   "fieldtype": "Section Break",
-   "label": "Driver Portal"
-  },
-  {
-   "default": "0",
-   "description": "Allow drivers to access the self-service portal.",
-   "fieldname": "enable_driver_portal",
-   "fieldtype": "Check",
-   "label": "Enable Driver Portal"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

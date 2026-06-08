@@ -10,12 +10,11 @@
   "worker_name",
   "passport_number",
   "nationality",
-  "iqama_number",
   "temporary_worker_identity_col",
+  "iqama_number",
   "cell_number",
-  "arrival_date",
-  "naming_series",
   "temporary_worker_sec_arrival_context",
+  "arrival_date",
   "project",
   "labour_supplier",
   "temporary_worker_arrival_context_col",
@@ -25,9 +24,9 @@
   "window_days",
   "temporary_worker_window_col",
   "expiry_date",
-  "temporary_worker_tab_system",
   "temporary_worker_sec_system",
   "status",
+  "naming_series",
   "temporary_worker_system_col",
   "linked_employee",
   "linked_on"
@@ -71,14 +70,14 @@
    "options": "Country"
   },
   {
+   "fieldname": "temporary_worker_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "description": "Usually blank on arrival; populated when the Iqama is issued before the worker is linked to a permanent Employee.",
    "fieldname": "iqama_number",
    "fieldtype": "Data",
    "label": "Iqama Number"
-  },
-  {
-   "fieldname": "temporary_worker_identity_col",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "cell_number",
@@ -87,26 +86,17 @@
    "options": "Phone"
   },
   {
+   "fieldname": "temporary_worker_sec_arrival_context",
+   "fieldtype": "Section Break",
+   "label": "Arrival Context"
+  },
+  {
    "default": "Today",
    "fieldname": "arrival_date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Arrival Date",
    "reqd": 1
-  },
-  {
-   "default": "TEMP-.YYYY.-.#####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "TEMP-.YYYY.-.#####",
-   "reqd": 1
-  },
-  {
-   "fieldname": "temporary_worker_sec_arrival_context",
-   "fieldtype": "Section Break",
-   "label": "Arrival Context"
   },
   {
    "fieldname": "project",
@@ -165,14 +155,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "temporary_worker_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
-  },
-  {
    "fieldname": "temporary_worker_sec_system",
    "fieldtype": "Section Break",
-   "label": "Lifecycle"
+   "label": "System",
+   "collapsible": 1
   },
   {
    "default": "Active",
@@ -182,6 +168,15 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nLinked\nExpired",
+   "reqd": 1
+  },
+  {
+   "default": "TEMP-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "TEMP-.YYYY.-.#####",
    "reqd": 1
   },
   {
@@ -205,7 +200,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-31 00:00:00.000000",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Temporary Worker",

@@ -7,16 +7,20 @@
  "engine": "InnoDB",
  "field_order": [
   "fuel_daily_log_tab_overview",
-  "fuel_daily_log_sec_overview",
-  "naming_series",
+  "fuel_daily_log_sec_trip",
   "vehicle",
-  "driver",
   "log_date",
+  "fuel_daily_log_trip_col",
+  "driver",
   "fuel_platform",
-  "fuel_daily_log_overview_col",
+  "fuel_daily_log_sec_consumption",
   "odometer",
+  "fuel_daily_log_consumption_col1",
   "litres",
-  "amount"
+  "fuel_daily_log_consumption_col2",
+  "amount",
+  "fuel_daily_log_sec_system",
+  "naming_series"
  ],
  "fields": [
   {
@@ -25,15 +29,9 @@
    "label": "Overview"
   },
   {
-   "fieldname": "fuel_daily_log_sec_overview",
+   "fieldname": "fuel_daily_log_sec_trip",
    "fieldtype": "Section Break",
-   "label": "General Details"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Naming Series",
-   "options": "FDL-.######"
+   "label": "Vehicle & Date"
   },
   {
    "fieldname": "vehicle",
@@ -46,6 +44,18 @@
    "search_index": 1
   },
   {
+   "fieldname": "log_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Log Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fuel_daily_log_trip_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -55,27 +65,24 @@
    "search_index": 1
   },
   {
-   "fieldname": "log_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Log Date",
-   "reqd": 1
-  },
-  {
    "fieldname": "fuel_platform",
    "fieldtype": "Link",
    "label": "Fuel Platform",
    "options": "Fuel Platform"
   },
   {
-   "fieldname": "fuel_daily_log_overview_col",
-   "fieldtype": "Column Break"
+   "fieldname": "fuel_daily_log_sec_consumption",
+   "fieldtype": "Section Break",
+   "label": "Consumption"
   },
   {
    "fieldname": "odometer",
    "fieldtype": "Int",
    "label": "Odometer"
+  },
+  {
+   "fieldname": "fuel_daily_log_consumption_col1",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "litres",
@@ -84,13 +91,29 @@
    "label": "Litres"
   },
   {
+   "fieldname": "fuel_daily_log_consumption_col2",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "amount",
    "fieldtype": "Currency",
    "label": "Amount (SAR)"
+  },
+  {
+   "fieldname": "fuel_daily_log_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "FDL-.######"
   }
  ],
  "links": [],
- "modified": "2026-06-03 02:50:34.264465",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Daily Log",
