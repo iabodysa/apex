@@ -1,0 +1,21 @@
+{
+ "cards": [
+  {
+   "card": "Pending Fuel Requests"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Dispatch Trips by Status",
+   "width": "Full"
+  }
+ ],
+ "dashboard_name": "Fleet Supervisor Dashboard",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "module": "Salis",
+ "name": "Fleet Supervisor Dashboard"
+}

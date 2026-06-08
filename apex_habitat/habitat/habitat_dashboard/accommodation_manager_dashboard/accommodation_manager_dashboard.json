@@ -1,0 +1,58 @@
+{
+ "cards": [
+  {
+   "card": "Occupied Beds"
+  },
+  {
+   "card": "Vacant Beds"
+  },
+  {
+   "card": "Available Beds"
+  },
+  {
+   "card": "Beds Out of Service"
+  },
+  {
+   "card": "Pending Accommodation Checkouts"
+  },
+  {
+   "card": "Imminent Checkouts"
+  },
+  {
+   "card": "Idle Residents"
+  },
+  {
+   "card": "Active Accommodation Assignments"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Beds by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Beds by Building",
+   "width": "Half"
+  },
+  {
+   "chart": "Occupancy Percent Trend",
+   "width": "Half"
+  },
+  {
+   "chart": "Available Capacity Trend",
+   "width": "Half"
+  },
+  {
+   "chart": "Accommodation Leases by Status",
+   "width": "Full"
+  }
+ ],
+ "dashboard_name": "Accommodation Manager Dashboard",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "module": "Habitat",
+ "name": "Accommodation Manager Dashboard"
+}

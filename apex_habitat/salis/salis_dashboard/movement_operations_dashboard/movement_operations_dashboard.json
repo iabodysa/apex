@@ -1,0 +1,74 @@
+{
+ "cards": [
+  {
+   "card": "Completed Trips Today"
+  },
+  {
+   "card": "Completed Trips This Month"
+  },
+  {
+   "card": "Pending Transport Requests"
+  },
+  {
+   "card": "Open Fuel Exception Cases"
+  },
+  {
+   "card": "Rental Accrual This Month"
+  },
+  {
+   "card": "Vehicles Tracked"
+  },
+  {
+   "card": "Inter-City Requests This Month"
+  },
+  {
+   "card": "Open Fuel Claims"
+  },
+  {
+   "card": "Open Cost Recoveries"
+  },
+  {
+   "card": "Pending Vehicle Write-Offs"
+  },
+  {
+   "card": "Rental Settlements This Month"
+  },
+  {
+   "card": "Blocked Driver Clearances"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Movement Trips by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Trip Fulfilment Over Time",
+   "width": "Half"
+  },
+  {
+   "chart": "Fuel Consumption by Month",
+   "width": "Half"
+  },
+  {
+   "chart": "Rental Accrual by Office",
+   "width": "Half"
+  },
+  {
+   "chart": "Vehicle Utilisation",
+   "width": "Full"
+  },
+  {
+   "chart": "Cost Recovery by Type",
+   "width": "Half"
+  }
+ ],
+ "dashboard_name": "Movement Operations Dashboard",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "module": "Salis",
+ "name": "Movement Operations Dashboard"
+}

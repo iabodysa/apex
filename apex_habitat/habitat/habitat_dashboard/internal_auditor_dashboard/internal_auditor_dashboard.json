@@ -1,0 +1,55 @@
+{
+ "cards": [
+  {
+   "card": "Open Audit Remediation Plans"
+  },
+  {
+   "card": "Overdue Audit Remediation Plans"
+  },
+  {
+   "card": "Poor Safety Task Executions"
+  },
+  {
+   "card": "Expired Licenses"
+  },
+  {
+   "card": "Licenses Expiring Soon"
+  },
+  {
+   "card": "Safety Inspections Recorded"
+  },
+  {
+   "card": "Recent Error Logs"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Building Licenses by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Safety Task Executions by Result",
+   "width": "Half"
+  },
+  {
+   "chart": "Findings by Severity",
+   "width": "Half"
+  },
+  {
+   "chart": "Safety Inspections Over Time",
+   "width": "Half"
+  },
+  {
+   "chart": "Audit Remediation Plans by Status",
+   "width": "Full"
+  }
+ ],
+ "dashboard_name": "Internal Auditor Dashboard",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "module": "Habitat",
+ "name": "Internal Auditor Dashboard"
+}

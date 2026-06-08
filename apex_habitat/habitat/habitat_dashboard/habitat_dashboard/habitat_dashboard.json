@@ -1,0 +1,50 @@
+{
+ "cards": [
+  {
+   "card": "Open Maintenance Requests"
+  },
+  {
+   "card": "Overdue Scheduled Tasks"
+  },
+  {
+   "card": "Licenses Expiring Soon"
+  },
+  {
+   "card": "Vacant Beds"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Beds by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Occupancy Percent Trend",
+   "width": "Half"
+  },
+  {
+   "chart": "Maintenance Requests by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Scheduled Task Instances by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Facility Assets by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Task Completions Over Time",
+   "width": "Full"
+  }
+ ],
+ "dashboard_name": "Habitat Dashboard",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "module": "Habitat",
+ "name": "Habitat Dashboard"
+}

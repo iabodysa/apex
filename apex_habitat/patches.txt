@@ -62,3 +62,12 @@ apex_habitat.patches.v1_x.backfill_accommodation_site_native_address
 # Idempotent, only-if-missing (never clobbers a custom route), no-op on fresh installs.
 # PRUNE once every deployed site is confirmed v15-correct (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.ensure_web_form_route
+
+# v1.x — NATIVE-FIRST dashboards (ONE-TIME). The Habitat + Salis Dashboard parents now
+# ship as is_standard=1 module JSON (habitat/habitat_dashboard/, salis/salis_dashboard/),
+# imported by sync_dashboards. This deletes the legacy is_standard=0 Dashboard rows the
+# retired runtime seeders created so the SAME-migrate sync_dashboards() step (runs AFTER
+# post_model_sync patches) re-imports them as is_standard=1. GUARD: deletes a Dashboard
+# only if its is_standard==0; idempotent; no-op on fresh installs. PRUNE once every
+# deployed site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v1_x.drop_legacy_is_standard0_dashboards

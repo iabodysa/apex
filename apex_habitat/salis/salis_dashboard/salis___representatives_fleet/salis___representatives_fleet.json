@@ -1,0 +1,81 @@
+{
+ "cards": [
+  {
+   "card": "Active Vehicles"
+  },
+  {
+   "card": "Vehicles Under Maintenance"
+  },
+  {
+   "card": "Expiring Vehicle Compliance"
+  },
+  {
+   "card": "Pending Fuel Requests"
+  },
+  {
+   "card": "Fuel Spend This Month"
+  },
+  {
+   "card": "Open Fuel Exception Cases"
+  },
+  {
+   "card": "Rental Accrual This Month"
+  },
+  {
+   "card": "Blocked Driver Clearances"
+  },
+  {
+   "card": "Representatives Transport Requests Open"
+  },
+  {
+   "card": "Representatives Transport Fulfilled This Month"
+  },
+  {
+   "card": "Disputed Rental Settlements"
+  },
+  {
+   "card": "Overdue Rental Settlements"
+  },
+  {
+   "card": "Cost Recovery Aging Backlog"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Vehicles by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Dispatch Trips by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Fuel Spend by Platform",
+   "width": "Half"
+  },
+  {
+   "chart": "Fuel Spend Trend",
+   "width": "Half"
+  },
+  {
+   "chart": "Active Vehicles by Category",
+   "width": "Half"
+  },
+  {
+   "chart": "Fuel Claim Variance by Month",
+   "width": "Half"
+  },
+  {
+   "chart": "Rental Accrual Trend",
+   "width": "Full"
+  }
+ ],
+ "dashboard_name": "Salis - Representatives Fleet",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "module": "Salis",
+ "name": "Salis - Representatives Fleet"
+}

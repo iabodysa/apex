@@ -1,0 +1,45 @@
+{
+ "cards": [
+  {
+   "card": "Fuel Cost This Month"
+  },
+  {
+   "card": "Approved Fuel Awaiting Fulfilment"
+  },
+  {
+   "card": "Unreverted Temporary Topups"
+  },
+  {
+   "card": "Overdue Temporary Topups"
+  },
+  {
+   "card": "Failed Fuel Requests"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Fuel Cost by Month",
+   "width": "Half"
+  },
+  {
+   "chart": "Fuel Cost by Platform",
+   "width": "Half"
+  },
+  {
+   "chart": "Fuel Requests by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Topups by Status",
+   "width": "Full"
+  }
+ ],
+ "dashboard_name": "Salis Finance Manager Dashboard",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "module": "Salis",
+ "name": "Salis Finance Manager Dashboard"
+}

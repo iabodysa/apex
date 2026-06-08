@@ -1,0 +1,58 @@
+{
+ "cards": [
+  {
+   "card": "Active Leases"
+  },
+  {
+   "card": "Utility Bills Under Review"
+  },
+  {
+   "card": "Pending Utility Bills"
+  },
+  {
+   "card": "Disputed Utility Bills"
+  },
+  {
+   "card": "Ledger Cost This Month"
+  },
+  {
+   "card": "Supplier-Billed Cost This Month"
+  },
+  {
+   "card": "Missed Subcontractor Visits"
+  },
+  {
+   "card": "Total Asset Book Value"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Ledger Cost by Type",
+   "width": "Half"
+  },
+  {
+   "chart": "Monthly Cost Bleeding",
+   "width": "Half"
+  },
+  {
+   "chart": "Utility Bills by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Leases by Status",
+   "width": "Half"
+  },
+  {
+   "chart": "Subcontractor Service Orders by Status",
+   "width": "Full"
+  }
+ ],
+ "dashboard_name": "Finance Manager Dashboard",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "module": "Habitat",
+ "name": "Finance Manager Dashboard"
+}

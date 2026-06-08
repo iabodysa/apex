@@ -358,31 +358,21 @@ after_install = [
     "apex_habitat.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
 ]
 
-# Install-only hook that runs AFTER sync_dashboards (install order in
-# installer.py: after_install -> sync_jobs -> sync_fixtures -> sync_customizations
-# -> sync_dashboards -> after_sync). By this point the is_standard Dashboard Charts
-# and Number Cards have been imported, so the Salis role dashboards can link the
-# fixture-backed ("NEW") charts/cards they reference. They must seed here, not in
-# after_install: after_install runs before sync_dashboards, so those charts do not
-# exist yet and the existence-guarded seed leaves the Workers Transport /
-# Representatives Fleet dashboards unlinked on a bare `install-app` with no
-# follow-up migrate. Idempotent (upsert-by-name); also run on after_migrate (below)
-# to keep upgrading sites in sync. (Habitat dashboards are provisioned on install
-# via setup.after_install; seed_all_dashboards is intentionally not wired here to
-# avoid double-running the Habitat seed.)
-after_sync = [
-    "apex_habitat.apex_core.setup.seeders.salis_dashboard_seed.seed_salis_dashboards",
-    "apex_habitat.apex_core.setup.seeders.salis_movement_dashboard_seed.seed_movement_dashboards",
-]
-# Dashboards seed after migrate (when their charts/number cards already exist).
+# after_sync runs right after sync_dashboards on install. The Salis/Movement
+# dashboards that used to be hand-seeded here are now shipped as native
+# is_standard=1 module JSON under salis/salis_dashboard/<slug>/<slug>.json (and
+# habitat/habitat_dashboard/... for Habitat), which sync_dashboards imports on
+# both install and migrate — exactly like ERPNext. The runtime seeders are retired
+# (no-op stubs) and their double-provisioning of charts/cards is removed, so there
+# is nothing left to wire here.
+after_sync = []
+# Dashboards now ship as is_standard JSON (imported by sync_dashboards), so the old
+# after_migrate dashboard seeds are gone. The seed loader keeps other records in sync.
 after_migrate = [
     # Data-driven seed loader (apex_core/setup/data/<module>/*.json) — create-only;
     # keeps installed sites in sync. Runs alongside the legacy *_seed.py until
     # those are retired (parity-verified in tests/test_seed_parity_*).
     "apex_habitat.apex_core.setup.seed.seed_all",
-    "apex_habitat.apex_core.setup.seeders.habitat_dashboard_seed.seed_all_dashboards",
-    "apex_habitat.apex_core.setup.seeders.salis_dashboard_seed.seed_salis_dashboards",
-    "apex_habitat.apex_core.setup.seeders.salis_movement_dashboard_seed.seed_movement_dashboards",
     # Habitat operational Notifications now ship as is_standard JSON under
     # habitat/notification/, so they are imported by migrate — no seed entry is
     # needed here.

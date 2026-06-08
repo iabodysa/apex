@@ -1,0 +1,20 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Fuel Cost by Platform",
+ "chart_name": "Fuel Cost by Platform",
+ "chart_type": "Group By",
+ "document_type": "Fuel Request",
+ "group_by_based_on": "fuel_platform",
+ "group_by_type": "Sum",
+ "aggregate_function_based_on": "amount",
+ "type": "Pie",
+ "number_of_groups": 0,
+ "currency": "SAR",
+ "is_public": 1,
+ "is_standard": 1,
+ "module": "Salis",
+ "timeseries": 0,
+ "use_report_chart": 0,
+ "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"]]",
+ "modified": "2026-06-02 13:30:00.000000"
+}

@@ -1,121 +1,38 @@
-"""Seed the native Habitat Dashboards as data records.
+"""RETIRED — Habitat Dashboards now ship as native is_standard=1 module JSON.
 
-Frappe does not reliably auto-sync a standalone is_standard Dashboard fixture on
-migrate, so we create them idempotently here. These dashboards re-home the charts
-and number cards that were stripped from the navigation-first Workspaces, and add
-per-role dashboards (visible via the role-restricted Workspace each is linked from).
+The Habitat operations dashboard and the four role dashboards (Accommodation
+Manager, Resident Supervisor, Finance Manager, Internal Auditor) are now shipped
+as standard Dashboard records under
 
-Every chart/card reference is existence-guarded: a missing record is skipped, never
-appended, so the seed can never raise a LinkValidationError (which previously broke
-the patch and opened GitHub issues).
+    habitat/habitat_dashboard/<slug>/<slug>.json   (is_standard=1, module=Habitat)
+
+which Frappe's ``sync_dashboards()`` imports automatically on install + migrate —
+exactly like ERPNext ships its module dashboards. The runtime seeders that used to
+hand-build these Dashboards as is_standard=0 records were the source of the deep-
+audit findings (native-first violation + double-provisioning) and are retired.
+
+The public entrypoints below are kept as NO-OP stubs because they are still
+imported by ``apex_habitat/setup.py`` (after_install) and by the legacy
+``patches/v0_9/seed_habitat_dashboard.py`` / ``seed_role_dashboards.py`` patches.
+Keeping the names importable avoids an ImportError on those call sites while the
+actual provisioning is owned entirely by the shipped JSON. A run-once patch
+(``patches/v1_x/drop_legacy_is_standard0_dashboards``) deletes the old
+is_standard=0 Dashboard rows on upgrading sites so migrate re-imports them from
+the new JSON as is_standard=1.
+
+Do not re-add record-building logic here: an is_standard Dashboard must be edited
+through its JSON, and Dashboard.validate forbids an is_standard Dashboard from
+referencing a non-standard chart/card.
 """
 
-import frappe
+
+def seed_habitat_dashboard(*args, **kwargs):
+    """No-op. Habitat Dashboard now ships as is_standard JSON (see module docstring)."""
 
 
-def _existing_charts(charts):
-    """[(chart_name, width)] -> child rows for charts that actually exist."""
-    rows = []
-    for name, width in charts:
-        if frappe.db.exists("Dashboard Chart", name):
-            rows.append({"chart": name, "width": width})
-    return rows
-
-
-def _existing_cards(cards):
-    return [{"card": c} for c in cards if frappe.db.exists("Number Card", c)]
-
-
-def _upsert_dashboard(name, charts, cards):
-    chart_rows = _existing_charts(charts)
-    card_rows = _existing_cards(cards)
-    if not chart_rows and not card_rows:
-        return  # nothing valid to show — don't create an empty dashboard
-    if frappe.db.exists("Dashboard", name):
-        # CREATE-ONLY for existing dashboards: preserve admin-added/reordered tiles;
-        # only append spec charts/cards that are not already present (compare by name).
-        doc = frappe.get_doc("Dashboard", name)
-        existing_chart_names = {row.chart for row in doc.charts}
-        existing_card_names = {row.card for row in doc.cards}
-        added = False
-        for ch in chart_rows:
-            if ch["chart"] not in existing_chart_names:
-                doc.append("charts", ch)
-                added = True
-        for cd in card_rows:
-            if cd["card"] not in existing_card_names:
-                doc.append("cards", cd)
-                added = True
-        if not added:
-            return  # nothing new to append — skip the save
-        doc.save(ignore_permissions=True)  # audit-ok
-    else:
-        doc = frappe.get_doc({"doctype": "Dashboard", "dashboard_name": name,
-                              "module": "Habitat", "is_default": 0, "is_standard": 0})
-        for ch in chart_rows:
-            doc.append("charts", ch)
-        for cd in card_rows:
-            doc.append("cards", cd)
-        doc.insert(ignore_permissions=True)  # audit-ok
-
-
-def seed_habitat_dashboard():
-    """Operations overview dashboard (linked from the Habitat workspace)."""
-    _upsert_dashboard(
-        "Habitat Dashboard",
-        charts=[("Beds by Status", "Half"), ("Occupancy Percent Trend", "Half"),
-                ("Maintenance Requests by Status", "Half"), ("Scheduled Task Instances by Status", "Half"),
-                ("Facility Assets by Status", "Half"), ("Task Completions Over Time", "Full")],
-        cards=["Open Maintenance Requests", "Overdue Scheduled Tasks", "Licenses Expiring Soon",
-               "Vacant Beds", "Total Occupancy Percent"],
-    )
-    frappe.db.commit()
+def seed_role_dashboards(*args, **kwargs):
+    """No-op. Role dashboards now ship as is_standard JSON (see module docstring)."""
 
 
 def seed_all_dashboards(*args, **kwargs):
-    """after_migrate entrypoint: runs once charts/cards are synced, so dashboards
-    populate reliably (after_install is too early — the charts don't exist yet)."""
-    seed_habitat_dashboard()
-    seed_role_dashboards()
-
-
-def seed_role_dashboards():
-    """Per-role dashboards. Each re-homes the workspace charts/cards for its audience
-    and is reachable from that role's (role-restricted) Workspace."""
-    _upsert_dashboard(
-        "Accommodation Manager Dashboard",
-        charts=[("Beds by Status", "Half"), ("Beds by Building", "Half"),
-                ("Occupancy Percent Trend", "Half"), ("Available Capacity Trend", "Half"),
-                ("Accommodation Leases by Status", "Full")],
-        cards=["Occupied Beds", "Vacant Beds", "Available Beds", "Beds Out of Service",
-               "Pending Accommodation Checkouts", "Imminent Checkouts", "Idle Residents",
-               "Active Accommodation Assignments"],
-    )
-    _upsert_dashboard(
-        "Resident Supervisor Dashboard",
-        charts=[("Maintenance Requests by Status", "Half"), ("Maintenance Requests by Priority", "Half"),
-                ("Maintenance Work Orders by Status", "Half"), ("Custody Issues by Status", "Half"),
-                ("Scheduled Task Instances by Status", "Full")],
-        cards=["Open Maintenance Requests", "Escalated Maintenance Requests", "Maintenance Work Orders In Progress",
-               "Overdue Scheduled Tasks", "Overdue Safety Tasks", "Open Resident Requests",
-               "Custody Items Pending Return", "Tasks Due Today"],
-    )
-    _upsert_dashboard(
-        "Finance Manager Dashboard",
-        charts=[("Ledger Cost by Type", "Half"), ("Monthly Cost Bleeding", "Half"),
-                ("Utility Bills by Status", "Half"), ("Leases by Status", "Half"),
-                ("Subcontractor Service Orders by Status", "Full")],
-        cards=["Active Leases", "Utility Bills Under Review", "Pending Utility Bills", "Disputed Utility Bills",
-               "Ledger Cost This Month", "Supplier-Billed Cost This Month", "Missed Subcontractor Visits",
-               "Total Asset Book Value"],
-    )
-    _upsert_dashboard(
-        "Internal Auditor Dashboard",
-        charts=[("Building Licenses by Status", "Half"), ("Safety Task Executions by Result", "Half"),
-                ("Findings by Severity", "Half"), ("Safety Inspections Over Time", "Half"),
-                ("Audit Remediation Plans by Status", "Full")],
-        cards=["Open Audit Remediation Plans", "Overdue Audit Remediation Plans", "Compliance Percent",
-               "Poor Safety Task Executions", "Expired Licenses", "Licenses Expiring Soon",
-               "Safety Inspections Recorded", "Recent Error Logs"],
-    )
-    frappe.db.commit()
+    """No-op after_migrate/after_install entrypoint (retired — see module docstring)."""
