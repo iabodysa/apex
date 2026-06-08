@@ -10,37 +10,48 @@
   "maintenance_request_sec_overview",
   "company",
   "building",
+  "maintenance_request_overview_col",
   "room",
   "bed",
-  "reported_by",
-  "maintenance_request_overview_col",
+  "maintenance_request_sec_ticket",
   "issue_type",
   "priority",
-  "assigned_to",
-  "requires_procurement",
+  "maintenance_request_ticket_col1",
   "status",
-  "naming_series",
+  "requires_procurement",
+  "maintenance_request_ticket_col2",
+  "reported_by",
+  "assigned_to",
+  "maintenance_request_sec_primary_large_text",
+  "issue_description",
   "maintenance_request_sec_asset_reference",
   "related_facility_asset",
+  "maintenance_request_asset_ref_col",
   "target_asset",
   "maintenance_request_sec_financial",
   "cost_of_repair",
+  "maintenance_request_financial_col",
   "cost_center",
-  "maintenance_request_sec_primary_large_text",
-  "issue_description",
-  "maintenance_request_sec_large_text",
-  "resolution_notes",
   "maintenance_request_sec_table_procurement_items",
   "procurement_items",
+  "maintenance_request_sec_large_text",
+  "resolution_notes",
   "maintenance_request_tab_system",
-  "maintenance_request_sec_system",
+  "maintenance_request_sec_automation",
   "source_inspection",
+  "maintenance_request_automation_col",
   "subcontractor_dispatched",
+  "maintenance_request_sec_asset_snapshot",
   "target_asset_name",
+  "maintenance_request_asset_snapshot_col1",
   "target_asset_category",
-  "maintenance_request_system_col",
+  "maintenance_request_asset_snapshot_col2",
   "target_asset_location",
+  "maintenance_request_sec_system",
   "is_logged_to_asset_history",
+  "maintenance_request_system_col1",
+  "naming_series",
+  "maintenance_request_system_col2",
   "amended_from"
  ],
  "fields": [
@@ -52,7 +63,7 @@
   {
    "fieldname": "maintenance_request_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Location"
   },
   {
    "fieldname": "company",
@@ -72,6 +83,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "maintenance_request_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "room",
    "fieldtype": "Link",
    "label": "Room",
@@ -87,18 +102,9 @@
    "search_index": 1
   },
   {
-   "description": "Set automatically when this request is generated from a safety inspection report.",
-   "fieldname": "source_inspection",
-   "fieldtype": "Link",
-   "label": "Source Inspection Report",
-   "options": "Safety Inspection Report"
-  },
-  {
-   "fieldname": "reported_by",
-   "fieldtype": "Link",
-   "label": "Reported By",
-   "options": "User",
-   "reqd": 1
+   "fieldname": "maintenance_request_sec_ticket",
+   "fieldtype": "Section Break",
+   "label": "Ticket"
   },
   {
    "fieldname": "issue_type",
@@ -119,21 +125,8 @@
    "options": "Low\nMedium\nHigh\nCritical"
   },
   {
-   "fieldname": "assigned_to",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Assigned To",
-   "options": "User"
-  },
-  {
-   "fieldname": "maintenance_request_overview_col",
+   "fieldname": "maintenance_request_ticket_col1",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "requires_procurement",
-   "fieldtype": "Check",
-   "label": "Requires Procurement"
   },
   {
    "default": "Open",
@@ -145,26 +138,38 @@
    "options": "Open\nAssigned\nIn Progress\nResolved\nClosed\nReopened"
   },
   {
-   "description": "Use when the issue concerns a specific facility asset (e.g., CCTV camera, fire alarm panel)",
-   "fieldname": "related_facility_asset",
-   "fieldtype": "Link",
-   "label": "Related Facility Asset",
-   "options": "Facility Asset"
+   "default": "0",
+   "fieldname": "requires_procurement",
+   "fieldtype": "Check",
+   "label": "Requires Procurement"
   },
   {
-   "description": "Specific fixed asset this request concerns (e.g. AC-001). Enables maintenance history per asset.",
-   "fieldname": "target_asset",
-   "fieldtype": "Link",
-   "label": "Target ERPNext Asset",
-   "options": "Asset"
+   "fieldname": "maintenance_request_ticket_col2",
+   "fieldtype": "Column Break"
   },
   {
-   "default": "MAINT-.YYYY.-.#####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "MAINT-.YYYY.-.#####",
+   "fieldname": "reported_by",
+   "fieldtype": "Link",
+   "label": "Reported By",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Assigned To",
+   "options": "User"
+  },
+  {
+   "fieldname": "maintenance_request_sec_primary_large_text",
+   "fieldtype": "Section Break",
+   "label": "Issue Description"
+  },
+  {
+   "fieldname": "issue_description",
+   "fieldtype": "Small Text",
+   "label": "Issue Description",
    "reqd": 1
   },
   {
@@ -172,6 +177,24 @@
    "fieldname": "maintenance_request_sec_asset_reference",
    "fieldtype": "Section Break",
    "label": "Asset Reference"
+  },
+  {
+   "description": "Use when the issue concerns a specific facility asset (e.g., CCTV camera, fire alarm panel)",
+   "fieldname": "related_facility_asset",
+   "fieldtype": "Link",
+   "label": "Related Facility Asset",
+   "options": "Facility Asset"
+  },
+  {
+   "fieldname": "maintenance_request_asset_ref_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Specific fixed asset this request concerns (e.g. AC-001). Enables maintenance history per asset.",
+   "fieldname": "target_asset",
+   "fieldtype": "Link",
+   "label": "Target ERPNext Asset",
+   "options": "Asset"
   },
   {
    "collapsible": 1,
@@ -185,40 +208,15 @@
    "label": "Cost of Repair (SAR)"
   },
   {
+   "fieldname": "maintenance_request_financial_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "description": "Auto-fetched from Building",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
-  },
-  {
-   "description": "Set when a subcontractor visit is created from this request",
-   "fieldname": "subcontractor_dispatched",
-   "fieldtype": "Link",
-   "label": "Subcontractor Dispatched",
-   "options": "Subcontractor Service Order"
-  },
-  {
-   "fieldname": "maintenance_request_sec_primary_large_text",
-   "fieldtype": "Section Break",
-   "label": "Detailed Description"
-  },
-  {
-   "fieldname": "issue_description",
-   "fieldtype": "Small Text",
-   "label": "Issue Description",
-   "reqd": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "maintenance_request_sec_large_text",
-   "fieldtype": "Section Break",
-   "label": "Additional Information"
-  },
-  {
-   "fieldname": "resolution_notes",
-   "fieldtype": "Small Text",
-   "label": "Resolution Notes"
   },
   {
    "fieldname": "maintenance_request_sec_table_procurement_items",
@@ -233,14 +231,47 @@
    "options": "Maintenance Procurement Item"
   },
   {
-   "fieldname": "maintenance_request_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
+   "fieldname": "maintenance_request_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
   },
   {
-   "fieldname": "maintenance_request_sec_system",
+   "fieldname": "resolution_notes",
+   "fieldtype": "Small Text",
+   "label": "Resolution Notes"
+  },
+  {
+   "fieldname": "maintenance_request_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "maintenance_request_sec_automation",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "label": "Automation Links"
+  },
+  {
+   "description": "Set automatically when this request is generated from a safety inspection report.",
+   "fieldname": "source_inspection",
+   "fieldtype": "Link",
+   "label": "Source Inspection Report",
+   "options": "Safety Inspection Report"
+  },
+  {
+   "fieldname": "maintenance_request_automation_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Set when a subcontractor visit is created from this request",
+   "fieldname": "subcontractor_dispatched",
+   "fieldtype": "Link",
+   "label": "Subcontractor Dispatched",
+   "options": "Subcontractor Service Order"
+  },
+  {
+   "fieldname": "maintenance_request_sec_asset_snapshot",
+   "fieldtype": "Section Break",
+   "label": "Asset Snapshot"
   },
   {
    "fetch_from": "target_asset.asset_name",
@@ -250,6 +281,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "maintenance_request_asset_snapshot_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fetch_from": "target_asset.asset_category",
    "fieldname": "target_asset_category",
    "fieldtype": "Data",
@@ -257,7 +292,7 @@
    "read_only": 1
   },
   {
-   "fieldname": "maintenance_request_system_col",
+   "fieldname": "maintenance_request_asset_snapshot_col2",
    "fieldtype": "Column Break"
   },
   {
@@ -268,12 +303,35 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
+   "fieldname": "maintenance_request_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
    "default": "0",
    "description": "Indicates the resolved request has been recorded in the asset's maintenance history.",
    "fieldname": "is_logged_to_asset_history",
    "fieldtype": "Check",
    "label": "Logged to Asset Maintenance History",
    "read_only": 1
+  },
+  {
+   "fieldname": "maintenance_request_system_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "MAINT-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "MAINT-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "maintenance_request_system_col2",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "amended_from",
@@ -307,7 +365,7 @@
    "table_fieldname": "linked_maintenance_requests"
   }
  ],
- "modified": "2026-06-08 17:00:00.000000",
+ "modified": "2026-06-08 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",

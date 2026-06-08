@@ -7,26 +7,29 @@
  "engine": "InnoDB",
  "field_order": [
   "accommodation_lease_tab_overview",
-  "accommodation_lease_sec_overview",
+  "accommodation_lease_sec_contract",
   "company",
   "building",
   "supplier",
   "lease_reference",
+  "accommodation_lease_contract_col",
   "status",
   "lease_start_date",
   "lease_end_date",
-  "accommodation_lease_overview_col",
+  "accommodation_lease_sec_rent",
   "rent_amount",
   "company_share_pct",
+  "total_scheduled",
+  "accommodation_lease_rent_col",
   "billing_cycle",
   "first_payment_date",
-  "total_scheduled",
-  "naming_series",
   "accommodation_lease_sec_large_text",
   "notes",
   "accommodation_lease_sec_table_payment_schedule",
   "payment_schedule",
-  "accommodation_lease_sec_amendment",
+  "accommodation_lease_sec_system",
+  "naming_series",
+  "accommodation_lease_system_col",
   "amended_from"
  ],
  "fields": [
@@ -36,9 +39,9 @@
    "label": "Overview"
   },
   {
-   "fieldname": "accommodation_lease_sec_overview",
+   "fieldname": "accommodation_lease_sec_contract",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Lease Contract"
   },
   {
    "fieldname": "company",
@@ -72,6 +75,10 @@
    "label": "Lease / Contract Reference"
   },
   {
+   "fieldname": "accommodation_lease_contract_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "Active",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -95,8 +102,9 @@
    "reqd": 1
   },
   {
-   "fieldname": "accommodation_lease_overview_col",
-   "fieldtype": "Column Break"
+   "fieldname": "accommodation_lease_sec_rent",
+   "fieldtype": "Section Break",
+   "label": "Rent & Billing"
   },
   {
    "fieldname": "rent_amount",
@@ -110,6 +118,17 @@
    "fieldname": "company_share_pct",
    "fieldtype": "Percent",
    "label": "Utility Cost Share (%)"
+  },
+  {
+   "description": "Auto-computed sum of all payment schedule rows.",
+   "fieldname": "total_scheduled",
+   "fieldtype": "Currency",
+   "label": "Total Scheduled Amount (SAR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_lease_rent_col",
+   "fieldtype": "Column Break"
   },
   {
    "default": "Monthly",
@@ -128,26 +147,10 @@
    "reqd": 1
   },
   {
-   "description": "Auto-computed sum of all payment schedule rows.",
-   "fieldname": "total_scheduled",
-   "fieldtype": "Currency",
-   "label": "Total Scheduled Amount (SAR)",
-   "read_only": 1
-  },
-  {
-   "default": "ACC-LEASE-.YYYY.-.####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "ACC-LEASE-.YYYY.-.####",
-   "reqd": 1
-  },
-  {
-   "collapsible": 1,
    "fieldname": "accommodation_lease_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information"
+   "label": "Additional Information",
+   "collapsible": 1
   },
   {
    "fieldname": "notes",
@@ -166,10 +169,23 @@
    "options": "Rent Payment Schedule"
   },
   {
-   "fieldname": "accommodation_lease_sec_amendment",
+   "fieldname": "accommodation_lease_sec_system",
    "fieldtype": "Section Break",
-   "label": "Amendment",
+   "label": "System",
    "collapsible": 1
+  },
+  {
+   "default": "ACC-LEASE-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ACC-LEASE-.YYYY.-.####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accommodation_lease_system_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "amended_from",
@@ -184,7 +200,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Lease",

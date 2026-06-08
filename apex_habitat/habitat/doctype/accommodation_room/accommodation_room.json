@@ -6,14 +6,17 @@
  "engine": "InnoDB",
  "field_order": [
   "accommodation_room_tab_details",
-  "accommodation_room_sec_details",
+  "accommodation_room_sec_location",
   "building",
   "room_number",
+  "accommodation_room_location_col",
   "floor",
   "room_type",
-  "accommodation_room_details_col",
+  "accommodation_room_sec_capacity",
   "bed_capacity",
+  "accommodation_room_capacity_col1",
   "status",
+  "accommodation_room_capacity_col2",
   "current_occupancy",
   "accommodation_room_sec_inventory",
   "readiness_status",
@@ -21,6 +24,7 @@
   "last_inventory_date",
   "accommodation_room_sec_inventory_notes",
   "inventory_notes",
+  "accommodation_room_sec_system",
   "naming_series"
  ],
  "fields": [
@@ -30,9 +34,9 @@
    "label": "Details"
   },
   {
-   "fieldname": "accommodation_room_sec_details",
+   "fieldname": "accommodation_room_sec_location",
    "fieldtype": "Section Break",
-   "label": "Information"
+   "label": "Location"
   },
   {
    "fieldname": "building",
@@ -53,6 +57,10 @@
    "unique": 1
   },
   {
+   "fieldname": "accommodation_room_location_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "floor",
    "fieldtype": "Int",
    "label": "Floor"
@@ -65,13 +73,18 @@
    "options": "Standard\nWorker\nDriver\nSupervisor\nOffice\nStorage\nIsolation\nMaintenance\nOther"
   },
   {
-   "fieldname": "accommodation_room_details_col",
-   "fieldtype": "Column Break"
+   "fieldname": "accommodation_room_sec_capacity",
+   "fieldtype": "Section Break",
+   "label": "Capacity & Status"
   },
   {
    "fieldname": "bed_capacity",
    "fieldtype": "Int",
    "label": "Bed Capacity"
+  },
+  {
+   "fieldname": "accommodation_room_capacity_col1",
+   "fieldtype": "Column Break"
   },
   {
    "default": "Available",
@@ -83,16 +96,20 @@
    "options": "Available\nPartially Occupied\nFull\nUnder Maintenance"
   },
   {
+   "fieldname": "accommodation_room_capacity_col2",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "current_occupancy",
    "fieldtype": "Int",
    "label": "Current Occupancy",
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "accommodation_room_sec_inventory",
    "fieldtype": "Section Break",
-   "label": "Supervisor Inventory"
+   "label": "Supervisor Inventory",
+   "collapsible": 1
   },
   {
    "default": "Unknown",
@@ -104,23 +121,30 @@
    "options": "Unknown\nReady\nNeeds Cleaning\nNeeds Repair\nOut of Service"
   },
   {
+   "fieldname": "accommodation_room_inventory_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "last_inventory_date",
    "fieldtype": "Date",
    "label": "Last Inventory Date",
    "read_only": 1
   },
   {
-   "fieldname": "accommodation_room_inventory_col",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "accommodation_room_sec_inventory_notes",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Inventory Notes"
   },
   {
    "fieldname": "inventory_notes",
    "fieldtype": "Small Text",
    "label": "Inventory Notes"
+  },
+  {
+   "fieldname": "accommodation_room_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
   },
   {
    "default": "ROOM-.####",
@@ -167,7 +191,7 @@
    "link_fieldname": "room"
   }
  ],
- "modified": "2026-06-08 17:00:00.000000",
+ "modified": "2026-06-08 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Room",

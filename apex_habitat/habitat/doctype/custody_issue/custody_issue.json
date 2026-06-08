@@ -9,19 +9,23 @@
   "custody_issue_tab_overview",
   "custody_issue_sec_overview",
   "issue_date",
+  "custody_issue_overview_col",
   "building",
+  "custody_issue_sec_worker",
   "party_type",
   "party",
-  "custody_issue_overview_col",
-  "status",
+  "custody_issue_worker_col",
   "issued_to_employee",
   "issued_to_name",
-  "naming_series",
-  "custody_issue_sec_large_text",
-  "remarks",
   "custody_issue_sec_table_items",
   "items",
+  "custody_issue_sec_large_text",
+  "remarks",
   "custody_issue_sec_system",
+  "status",
+  "custody_issue_system_col1",
+  "naming_series",
+  "custody_issue_system_col2",
   "amended_from"
  ],
  "fields": [
@@ -33,7 +37,7 @@
   {
    "fieldname": "custody_issue_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Issue"
   },
   {
    "fieldname": "issue_date",
@@ -41,6 +45,10 @@
    "in_list_view": 1,
    "label": "Issue Date",
    "reqd": 1
+  },
+  {
+   "fieldname": "custody_issue_overview_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "building",
@@ -51,6 +59,11 @@
    "options": "Accommodation Building",
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "custody_issue_sec_worker",
+   "fieldtype": "Section Break",
+   "label": "Worker"
   },
   {
    "default": "Employee",
@@ -69,6 +82,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "custody_issue_worker_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "issued_to_employee",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -77,34 +94,11 @@
    "read_only": 1
   },
   {
-   "fieldname": "custody_issue_overview_col",
-   "fieldtype": "Column Break"
-  },
-  {
    "depends_on": "eval:doc.party_type!='Employee'",
    "fieldname": "issued_to_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Issued To (Free Text)"
-  },
-  {
-   "default": "CUST-ISS-.YYYY.-.####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "CUST-ISS-.YYYY.-.####"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "custody_issue_sec_large_text",
-   "fieldtype": "Section Break",
-   "label": "Additional Information"
-  },
-  {
-   "fieldname": "remarks",
-   "fieldtype": "Small Text",
-   "label": "Remarks"
   },
   {
    "fieldname": "custody_issue_sec_table_items",
@@ -118,10 +112,20 @@
    "options": "Custody Issue Item"
   },
   {
+   "fieldname": "custody_issue_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "collapsible": 1,
    "fieldname": "custody_issue_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
-   "collapsible": 1
+   "label": "System"
   },
   {
    "default": "Draft",
@@ -132,6 +136,22 @@
    "label": "Status",
    "options": "Draft\nIssued\nReturned\nPartially Returned\nCancelled",
    "read_only": 1
+  },
+  {
+   "fieldname": "custody_issue_system_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "CUST-ISS-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "CUST-ISS-.YYYY.-.####"
+  },
+  {
+   "fieldname": "custody_issue_system_col2",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "amended_from",
@@ -152,7 +172,7 @@
    "link_fieldname": "custody_issue"
   }
  ],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Issue",

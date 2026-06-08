@@ -76,11 +76,15 @@
   "accommodation_building_tab_system",
   "accommodation_building_sec_system_room",
   "setup_status",
+  "accommodation_building_sys_room_col1",
   "setup_generated_on",
+  "accommodation_building_sys_room_col2",
   "setup_generated_by",
   "accommodation_building_sec_system_safety",
   "safety_setup_status",
+  "accommodation_building_sys_safety_col1",
   "safety_setup_generated_on",
+  "accommodation_building_sys_safety_col2",
   "safety_setup_generated_by"
  ],
  "fields": [
@@ -154,12 +158,14 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "City",
-   "options": "City"
+   "options": "City",
+   "fetch_from": "site.city"
   },
   {
    "fieldname": "district",
    "fieldtype": "Data",
-   "label": "District"
+   "label": "District",
+   "fetch_from": "site.district"
   },
   {
    "fieldname": "google_maps_url",
@@ -487,10 +493,18 @@
    "read_only": 1
   },
   {
+   "fieldname": "accommodation_building_sys_room_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "setup_generated_on",
    "fieldtype": "Date",
    "label": "Rooms Generated On",
    "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_building_sys_room_col2",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "setup_generated_by",
@@ -513,10 +527,18 @@
    "read_only": 1
   },
   {
+   "fieldname": "accommodation_building_sys_safety_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "safety_setup_generated_on",
    "fieldtype": "Date",
    "label": "Safety Setup Generated On",
    "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_building_sys_safety_col2",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "safety_setup_generated_by",
@@ -618,7 +640,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-06-08 19:30:00.000000",
+ "modified": "2026-06-08 20:45:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Building",

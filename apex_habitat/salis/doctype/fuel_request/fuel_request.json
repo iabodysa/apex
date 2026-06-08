@@ -6,53 +6,63 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "fuel_request_tab_overview",
-  "fuel_request_sec_overview",
+  "__tab_0",
+  "fuel_request_sec_request",
   "request_type",
+  "fuel_request_sec_request_col1",
+  "request_date",
+  "fuel_request_sec_request_col2",
+  "status",
+  "fuel_request_sec_subject",
   "vehicle",
   "driver",
+  "fuel_request_sec_subject_col1",
   "project",
+  "fuel_request_sec_fuel_account",
   "fuel_quota",
+  "fuel_request_sec_fuel_account_col1",
   "fuel_platform",
+  "fuel_request_sec_chip_details",
   "chip_number",
+  "fuel_request_sec_chip_details_col1",
   "action",
-  "fuel_request_overview_col",
-  "request_date",
-  "status",
-  "requested_by",
-  "approved_by",
-  "naming_series",
   "fuel_request_sec_amounts",
   "requested_litres",
   "topup_litres",
-  "fuel_request_amounts_col",
+  "fuel_request_sec_amounts_col1",
   "amount",
   "estimated_monthly_saving",
   "fuel_request_sec_temporary",
   "is_temporary",
   "reverted",
-  "fuel_request_temporary_col",
+  "fuel_request_sec_temporary_col1",
   "revert_due_date",
   "fuel_request_sec_chip",
   "inactivity_evidence",
   "owner_acknowledged",
-  "fuel_request_tab_system",
+  "__tab_1",
+  "fuel_request_sec_actors",
+  "requested_by",
+  "fuel_request_sec_actors_col1",
+  "approved_by",
   "fuel_request_sec_system",
   "quota_applied",
   "ledgered",
+  "fuel_request_sec_system_col1",
   "migrated_from",
-  "amended_from"
+  "amended_from",
+  "naming_series"
  ],
  "fields": [
   {
-   "fieldname": "fuel_request_tab_overview",
+   "fieldname": "__tab_0",
    "fieldtype": "Tab Break",
    "label": "Overview"
   },
   {
-   "fieldname": "fuel_request_sec_overview",
+   "fieldname": "fuel_request_sec_request",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Request"
   },
   {
    "default": "Standard",
@@ -65,6 +75,35 @@
    "options": "Standard\nTop-up\nChip",
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "fuel_request_sec_request_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "request_date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Request Date"
+  },
+  {
+   "fieldname": "fuel_request_sec_request_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nApproved\nDone\nFailed\nReverted\nCancelled"
+  },
+  {
+   "fieldname": "fuel_request_sec_subject",
+   "fieldtype": "Section Break",
+   "label": "Vehicle and Project"
   },
   {
    "fieldname": "vehicle",
@@ -86,11 +125,21 @@
    "search_index": 1
   },
   {
+   "fieldname": "fuel_request_sec_subject_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "project",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "fieldname": "fuel_request_sec_fuel_account",
+   "fieldtype": "Section Break",
+   "label": "Fuel Account",
+   "depends_on": "eval:doc.request_type=='Standard'"
   },
   {
    "depends_on": "eval:doc.request_type=='Standard'",
@@ -101,6 +150,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "fuel_request_sec_fuel_account_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "depends_on": "eval:doc.request_type=='Standard'",
    "fieldname": "fuel_platform",
    "fieldtype": "Link",
@@ -108,11 +161,21 @@
    "options": "Fuel Platform"
   },
   {
+   "fieldname": "fuel_request_sec_chip_details",
+   "fieldtype": "Section Break",
+   "label": "Chip",
+   "depends_on": "eval:doc.request_type=='Chip'"
+  },
+  {
    "depends_on": "eval:doc.request_type=='Chip'",
    "fieldname": "chip_number",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Chip Number"
+  },
+  {
+   "fieldname": "fuel_request_sec_chip_details_col1",
+   "fieldtype": "Column Break"
   },
   {
    "default": "Issue",
@@ -124,57 +187,10 @@
    "options": "\nIssue\nReplace\nCancel"
   },
   {
-   "fieldname": "fuel_request_overview_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "request_date",
-   "fieldtype": "Date",
-   "in_standard_filter": 1,
-   "label": "Request Date"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "Pending",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Status",
-   "options": "Pending\nApproved\nDone\nFailed\nReverted\nCancelled"
-  },
-  {
-   "description": "Defaults to the session user. The workflow approval transition is SoD-gated on this field (approver ≠ requester).",
-   "fieldname": "requested_by",
-   "fieldtype": "Link",
-   "label": "Requested By",
-   "no_copy": 1,
-   "options": "User",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "description": "Set when the request is approved.",
-   "fieldname": "approved_by",
-   "fieldtype": "Link",
-   "label": "Approved By",
-   "options": "User",
-   "read_only": 1
-  },
-  {
-   "default": "FR-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "FR-.######",
-   "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.request_type=='Standard' || doc.request_type=='Top-up'",
    "fieldname": "fuel_request_sec_amounts",
    "fieldtype": "Section Break",
-   "label": "Amounts"
+   "label": "Amounts",
+   "depends_on": "eval:doc.request_type=='Standard' || doc.request_type=='Top-up'"
   },
   {
    "depends_on": "eval:doc.request_type=='Standard'",
@@ -190,7 +206,7 @@
    "label": "Top-up Litres"
   },
   {
-   "fieldname": "fuel_request_amounts_col",
+   "fieldname": "fuel_request_sec_amounts_col1",
    "fieldtype": "Column Break"
   },
   {
@@ -206,10 +222,10 @@
    "label": "Estimated Monthly Saving"
   },
   {
-   "depends_on": "eval:doc.request_type=='Top-up'",
    "fieldname": "fuel_request_sec_temporary",
    "fieldtype": "Section Break",
-   "label": "Temporary Top-up"
+   "label": "Temporary Top-up",
+   "depends_on": "eval:doc.request_type=='Top-up'"
   },
   {
    "default": "0",
@@ -228,7 +244,7 @@
    "label": "Reverted"
   },
   {
-   "fieldname": "fuel_request_temporary_col",
+   "fieldname": "fuel_request_sec_temporary_col1",
    "fieldtype": "Column Break"
   },
   {
@@ -238,10 +254,10 @@
    "label": "Revert Due Date"
   },
   {
-   "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'",
    "fieldname": "fuel_request_sec_chip",
    "fieldtype": "Section Break",
-   "label": "Chip Cancellation"
+   "label": "Chip Cancellation",
+   "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'"
   },
   {
    "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'",
@@ -257,14 +273,41 @@
    "label": "Owner Acknowledged"
   },
   {
-   "fieldname": "fuel_request_tab_system",
+   "fieldname": "__tab_1",
    "fieldtype": "Tab Break",
    "label": "System Info"
   },
   {
+   "fieldname": "fuel_request_sec_actors",
+   "fieldtype": "Section Break",
+   "label": "Actors"
+  },
+  {
+   "description": "Defaults to the session user. The workflow approval transition is SoD-gated on this field (approver ≠ requester).",
+   "fieldname": "requested_by",
+   "fieldtype": "Link",
+   "label": "Requested By",
+   "no_copy": 1,
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fuel_request_sec_actors_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Set when the request is approved.",
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
    "fieldname": "fuel_request_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Info"
+   "label": "System"
   },
   {
    "default": "0",
@@ -289,6 +332,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "fuel_request_sec_system_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "description": "Source DocType:name this row was migrated from when Fuel Topup/Chip Request DocTypes merged into Fuel Request. Blank for native requests.",
    "fieldname": "migrated_from",
    "fieldtype": "Data",
@@ -306,6 +353,15 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "default": "FR-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "FR-.######",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
@@ -316,7 +372,7 @@
    "link_fieldname": "fuel_request"
   }
  ],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Request",

@@ -71,3 +71,8 @@ apex_habitat.patches.v1_x.ensure_web_form_route
 # only if its is_standard==0; idempotent; no-op on fresh installs. PRUNE once every
 # deployed site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.drop_legacy_is_standard0_dashboards
+
+# v1.52.x — backfill total_rooms / total_floors on existing buildings (ONE-TIME). The
+# controller now derives both from the generated rooms; rows saved earlier showed stale 0.
+# Idempotent, no-op on fresh installs. PRUNE once every deployed site has run it.
+apex_habitat.patches.v1_x.backfill_building_room_floor_counts

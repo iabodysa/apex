@@ -8,14 +8,19 @@
   "accommodation_bed_tab_details",
   "accommodation_bed_sec_details",
   "room",
-  "bed_code",
-  "status",
   "accommodation_bed_details_col",
+  "bed_code",
+  "accommodation_bed_sec_status",
+  "status",
+  "accommodation_bed_status_col1",
   "condition",
+  "accommodation_bed_status_col2",
   "last_inspected",
   "accommodation_bed_sec_system",
   "building",
+  "accommodation_bed_system_col1",
   "is_temporary",
+  "accommodation_bed_system_col2",
   "naming_series"
  ],
  "fields": [
@@ -27,7 +32,7 @@
   {
    "fieldname": "accommodation_bed_sec_details",
    "fieldtype": "Section Break",
-   "label": "Information"
+   "label": "Identity"
   },
   {
    "fieldname": "room",
@@ -40,12 +45,21 @@
    "search_index": 1
   },
   {
+   "fieldname": "accommodation_bed_details_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "bed_code",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Bed Code",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "accommodation_bed_sec_status",
+   "fieldtype": "Section Break",
+   "label": "Status"
   },
   {
    "default": "Available",
@@ -57,7 +71,7 @@
    "options": "Available\nOccupied\nOut of Service"
   },
   {
-   "fieldname": "accommodation_bed_details_col",
+   "fieldname": "accommodation_bed_status_col1",
    "fieldtype": "Column Break"
   },
   {
@@ -68,6 +82,10 @@
    "options": "Good\nNeeds Repair\nScrapped"
   },
   {
+   "fieldname": "accommodation_bed_status_col2",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "last_inspected",
    "fieldtype": "Date",
    "label": "Last Inspected"
@@ -76,7 +94,7 @@
    "collapsible": 1,
    "fieldname": "accommodation_bed_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Details"
+   "label": "System"
   },
   {
    "fetch_from": "room.building",
@@ -90,6 +108,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "accommodation_bed_system_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "0",
    "description": "Virtual over-capacity bed created by the Arrivals Desk when a room is full but building headroom still allows another worker.",
    "fieldname": "is_temporary",
@@ -98,6 +120,10 @@
    "in_standard_filter": 1,
    "label": "Temporary (Over-Capacity) Bed",
    "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_bed_system_col2",
+   "fieldtype": "Column Break"
   },
   {
    "default": "BED-.####",
@@ -141,7 +167,7 @@
    "link_fieldname": "to_bed"
   }
  ],
- "modified": "2026-06-07 14:00:00.000000",
+ "modified": "2026-06-08 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Bed",

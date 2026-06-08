@@ -8,30 +8,34 @@
  "engine": "InnoDB",
  "field_order": [
   "vehicle_tab_overview",
-  "naming_series",
   "vehicle_sec_identity",
   "plate_number",
   "plate_normalized",
-  "vehicle_category",
-  "status",
   "vehicle_identity_col",
+  "vehicle_category",
+  "vehicle_sec_status",
+  "status",
+  "vehicle_status_col1",
   "ownership",
   "rental_office",
+  "vehicle_status_col2",
   "odometer",
   "vehicle_sec_assignment",
   "company",
+  "vehicle_assignment_col1",
   "project",
-  "vehicle_assignment_col",
+  "vehicle_assignment_col2",
   "current_driver",
-  "vehicle_sec_notes",
-  "notes",
-  "vehicle_tab_compliance",
-  "vehicle_sec_compliance_status",
+  "vehicle_sec_compliance",
   "compliance_status",
   "vehicle_compliance_col",
   "next_expiry_date",
-  "vehicle_sec_compliance",
-  "compliance_documents"
+  "vehicle_sec_documents",
+  "compliance_documents",
+  "vehicle_sec_notes",
+  "notes",
+  "vehicle_sec_system",
+  "naming_series"
  ],
  "fields": [
   {
@@ -40,20 +44,9 @@
    "label": "Overview"
   },
   {
-   "default": "VEH-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "VEH-.######",
-   "print_hide": 1,
-   "report_hide": 1,
-   "reqd": 1
-  },
-  {
    "fieldname": "vehicle_sec_identity",
    "fieldtype": "Section Break",
-   "label": "Vehicle Identity"
+   "label": "Identity"
   },
   {
    "fieldname": "plate_number",
@@ -73,12 +66,21 @@
    "search_index": 1
   },
   {
+   "fieldname": "vehicle_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "vehicle_category",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Vehicle Category",
    "options": "Vehicle Category"
+  },
+  {
+   "fieldname": "vehicle_sec_status",
+   "fieldtype": "Section Break",
+   "label": "Operational Status"
   },
   {
    "default": "Active",
@@ -90,7 +92,7 @@
    "options": "Active\nStopped\nUnder Maintenance\nReleased"
   },
   {
-   "fieldname": "vehicle_identity_col",
+   "fieldname": "vehicle_status_col1",
    "fieldtype": "Column Break"
   },
   {
@@ -107,6 +109,10 @@
    "fieldtype": "Link",
    "label": "Rental Office",
    "options": "Rental Office"
+  },
+  {
+   "fieldname": "vehicle_status_col2",
+   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -126,13 +132,17 @@
    "options": "Company"
   },
   {
+   "fieldname": "vehicle_assignment_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
   },
   {
-   "fieldname": "vehicle_assignment_col",
+   "fieldname": "vehicle_assignment_col2",
    "fieldtype": "Column Break"
   },
   {
@@ -143,25 +153,9 @@
    "options": "Salis Driver"
   },
   {
-   "collapsible": 1,
-   "fieldname": "vehicle_sec_notes",
+   "fieldname": "vehicle_sec_compliance",
    "fieldtype": "Section Break",
-   "label": "Notes"
-  },
-  {
-   "fieldname": "notes",
-   "fieldtype": "Small Text",
-   "label": "Notes"
-  },
-  {
-   "fieldname": "vehicle_tab_compliance",
-   "fieldtype": "Tab Break",
-   "label": "Compliance"
-  },
-  {
-   "fieldname": "vehicle_sec_compliance_status",
-   "fieldtype": "Section Break",
-   "label": "Compliance Status"
+   "label": "Compliance & Expiry"
   },
   {
    "default": "Not Tracked",
@@ -182,7 +176,7 @@
    "read_only": 1
   },
   {
-   "fieldname": "vehicle_sec_compliance",
+   "fieldname": "vehicle_sec_documents",
    "fieldtype": "Section Break",
    "label": "Compliance Documents"
   },
@@ -191,6 +185,34 @@
    "fieldtype": "Table",
    "label": "Compliance Documents",
    "options": "Salis Vehicle Compliance"
+  },
+  {
+   "fieldname": "vehicle_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "vehicle_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "VEH-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "VEH-.######",
+   "print_hide": 1,
+   "report_hide": 1,
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -281,7 +303,7 @@
    "link_fieldname": "vehicle"
   }
  ],
- "modified": "2026-06-08 17:00:00.000000",
+ "modified": "2026-06-08 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Vehicle",

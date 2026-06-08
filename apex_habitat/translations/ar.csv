@@ -87,6 +87,7 @@ Active Trips,الرحلات النشطة
 Active Vehicle Assignments,إسنادات المركبات النشطة
 Active Vehicles,المركبات النشطة
 Active Vehicles by Category,المركبات النشطة حسب الفئة
+Actors,الأطراف
 Actual End Date,تاريخ النهاية الفعلي
 Actual Occupancy,الإشغال الفعلي
 Actual Start Date,تاريخ البداية الفعلي
@@ -201,6 +202,7 @@ Asset Movement,حركة الأصل
 Asset Movements Over Time,حركة الأصول عبر الزمن
 Asset Name,اسم الأصل
 "Asset Name (e.g., Camera-Laundry-Room)",اسم الأصل (مثال: Camera-Laundry-Room)
+Asset Snapshot,لقطة الأصل
 Assets Moved This Month,الأصول المنقولة هذا الشهر
 Assets in Custody,الأصول في العهدة
 Assign a vehicle to a driver or project to start the movement lifecycle.,أسنِد مركبة إلى سائق أو مشروع لبدء دورة حياة الحركة.
@@ -252,6 +254,7 @@ Auto-filled from Utility Account. Adjust if different for this bill.,يُعبّ�
 Auto-generated from Accommodation Checkout {0}. Review replacement costs and submit.,أُنشئ تلقائيًا من مغادرة السكن {0}. راجع تكاليف الاستبدال ثم قدّمه.
 Auto-generated summary of meter sharing calculation,ملخّص يُنشأ تلقائياً لحساب مشاركة العدّاد
 Auto-resolved: {0},تمت المعالجة تلقائيًا: {0}
+Automation Links,روابط الأتمتة
 Available,متاح
 Available Beds,الأسرّة المتاحة
 Available Capacity,السعة المتاحة
@@ -298,6 +301,7 @@ Bill,الفاتورة
 Bill Amount (SAR),قيمة الفاتورة (ريال)
 Bill PDF,الفاتورة بصيغة PDF
 Billed To Supplier,يُحاسَب على المورد
+Billing,الفوترة
 Billing Cycle,دورة الفوترة
 Billing Period From,فترة الفوترة من
 Billing Period To,فترة الفوترة إلى
@@ -339,6 +343,7 @@ Camera Access Building Scope,نطاق الوصول لكاميرات المبنى
 Camera Access Grant,منح صلاحية الوصول للكاميرات
 Cameras in Building,الكاميرات في المبنى
 Cancel,إلغاء
+Cancellation,الإلغاء
 Cancellation Reason,سبب الإلغاء
 Cancellation Reason is mandatory.,سبب الإلغاء إلزامي.
 Cancellation Reason is required before cancelling a Depreciation Snapshot.,يلزم تحديد سبب الإلغاء قبل إلغاء لقطة الاستهلاك.
@@ -351,6 +356,7 @@ Cannot cancel Custody Damage Assessment {0} because Additional Salary Deduction 
 Cannot cancel Custody Issue {0} because it is referenced by active Custody Return {1}.,لا يمكن إلغاء صرف العهدة {0} لأنه مرجوع إليه من إرجاع عهدة نشط {1}.
 Cannot cancel Custody Return {0} because it is referenced by active Custody Damage Assessment {1}.,لا يمكن إلغاء إرجاع العهدة {0} لأنه مرجوع إليه من تقييم تلفيات عهدة نشط {1}.
 Capacity,السعة
+Capacity & Status,السعة والحالة
 Capacity Denominator,مقام السعة المعتمد
 Capacity Policies,سياسات السعة
 Capacity and Occupancy,السعة والإشغال
@@ -454,6 +460,7 @@ Completed,مكتمل
 Completed (timed),المكتملة (موقّتة)
 Completed Date,تاريخ الإنجاز
 Completed Dispatch Trips,رحلات الإرسال المكتملة
+Completion,الإنجاز
 Completion Date,تاريخ الاكتمال
 Completion Notes,ملاحظات الإنجاز / التقرير الختامي
 Completion Notes are required when the trip status is Completed.,ملاحظات الإنجاز مطلوبة عندما تكون حالة الرحلة مكتملة.
@@ -462,6 +469,7 @@ Completion Photo Evidence,صورة إثبات الإنجاز
 Completion photo required to close this work order.,صورة الإنجاز مطلوبة لإغلاق أمر العمل.
 Compliance,الامتثال
 Compliance %,نسبة الامتثال (%)
+Compliance & Expiry,الامتثال والانتهاء
 Compliance & Licensing,الامتثال والتراخيص
 Compliance Documents,مستندات الامتثال
 Compliance Status,حالة الامتثال
@@ -672,6 +680,7 @@ Delegation-of-Authority Thresholds (SAR),حدود تفويض الصلاحيات 
 Depart Time,وقت المغادرة
 Department,القسم
 Deployed,مشغّل
+Deployment,التوزيع
 Depreciation %,نسبة الإهلاك (%)
 Depreciation Policy,سياسة الإهلاك
 Depreciation Snapshot Item,بند لقطة الإهلاك
@@ -920,6 +929,7 @@ Frontend Base URL,العنوان الأساسي للواجهة الأمامية
 Frontend Base URL must start with http:// or https:// (for example https://salis-fleet.com).,يجب أن يبدأ رابط الواجهة الأمامية بـ http:// أو https:// (مثال: https://salis-fleet.com).
 Frontend Integration,تكامل الواجهة الأمامية
 Fuel,وقود
+Fuel Account,حساب الوقود
 Fuel Approval Console,وحدة اعتماد الوقود
 Fuel Chip Returned,تم إرجاع شريحة الوقود
 Fuel Claim,مطالبة وقود
@@ -957,6 +967,7 @@ Fulfilled,مُنفّذ
 Fulfilled By (Movement),نُفِّذ بواسطة (الحركة)
 Fulfilled On,تاريخ التنفيذ
 Fulfilled Trips,الرحلات المنفّذة
+Fulfillment,التنفيذ
 Full,ممتلئ
 Full Admin,مسؤول كامل الصلاحيات
 Full Name,الاسم الكامل
@@ -1175,6 +1186,7 @@ Ledger Type,نوع الدفتر
 Ledgered,تم ترحيله للدفتر
 Legal,الشؤون القانونية
 Legal Case,قضية قانونية
+License & Compliance,الرخصة والامتثال
 License Expired,انتهاء صلاحية الرخصة
 License Expiry,انتهاء الرخصة
 License Expiry Lead Days,أيام التنبيه قبل انتهاء الرخصة
@@ -1477,6 +1489,7 @@ Operational Depreciation Policy,سياسة الإهلاك التشغيلية
 Operational Markup,هامش تشغيلي
 Operational Memo,مذكرة تشغيلية
 Operational Notifications,الإشعارات التشغيلية
+Operational Status,الحالة التشغيلية
 Operational currency for Habitat cost fields. Fetched from Company if left blank.,العملة التشغيلية لحقول التكلفة في Habitat. تُجلب من الشركة إذا تُرك الحقل فارغاً.
 Operations,العمليات
 Operations Alert,تنبيه تشغيلي
@@ -1587,6 +1600,7 @@ Pickup Building,مبنى الالتقاط
 Pickup Datetime,تاريخ ووقت الانطلاق
 Pickup From,نقطة الانطلاق
 Pickup Point,نقطة الالتقاط
+Placement,التسكين
 Planned,مخطط
 Planned End Date,تاريخ النهاية المخطط له
 Planned End Date must be on or after Planned Start Date.,يجب أن يكون تاريخ النهاية المخطط له بعد تاريخ البداية أو مساوياً له.
@@ -1632,6 +1646,7 @@ Print slip,طباعة القسيمة
 Priority,الأولوية
 Process Fuel Claim,معالجة مطالبة وقود
 Process a Fuel Claim,معالجة مطالبة وقود
+Procurement,المشتريات
 Procurement Items,بنود المشتريات
 Procurement Items Required,يلزم بنود مشتريات
 Project,المشروع
@@ -1756,6 +1771,7 @@ Remove,إزالة
 Renewal Cost Estimate (SAR),تكلفة التجديد التقديرية (ريال)
 Renewal Lead Days,مهلة التجديد بالأيام
 Rent,الإيجار
+Rent & Billing,الإيجار والفوترة
 Rent (SAR),الإيجار (ريال)
 Rent Due Day of Month,يوم استحقاق الإيجار من الشهر
 Rent Payment Schedule,جدول سداد الإيجارات
@@ -1965,6 +1981,7 @@ Scheduled Task Template,قالب جدولة المهام
 Scheduled Tasks Open,المهام المجدولة المفتوحة
 Scheduled Visit Frequency,دورية الزيارات المجدولة
 Scope,النطاق
+Scope and Authorization,النطاق والتفويض
 Scope for catalog {0}: {1},النطاق للكتالوج {0}: {1}
 Scrapped,مشطوب
 Search articles,ابحث عن الأصناف
@@ -2000,6 +2017,7 @@ Serial Number,الرقم التسلسلي
 Series,التسلسل
 "Server-derived Delegation-of-Authority flag: when set, only Operations-tier authorization is allowed. Read by workflow; cannot be hand-set.",مؤشر تفويض الصلاحية مشتق من الخادم: عند تعيينه، يُسمح فقط باعتماد على مستوى العمليات. يُقرأ بواسطة سير العمل؛ لا يمكن تعيينه يدويًا.
 Server-derived: submitted Administrative Trips this month for the project (incl. this one).,مشتق من الخادم: الرحلات الإدارية المعتمدة هذا الشهر للمشروع (متضمناً هذه الرحلة).
+Service,الخدمة
 Service Contract,عقد الخدمة
 Service Cost (SAR),تكلفة الخدمة (ريال)
 Service Details,تفاصيل الخدمة
@@ -2101,6 +2119,7 @@ Status & Assignment,الحالة والإسناد
 Status advanced to {0} by {1}.,تم تقديم الحالة إلى {0} بواسطة {1}.
 Status and Assignment,الحالة والإسناد
 Status reverted from {0} to {1}.,تم إرجاع الحالة من {0} إلى {1}.
+Stay Details,تفاصيل الإقامة
 Stay Type,نوع الإقامة
 Sticker Requested,تم طلب الملصق
 Stop,محطة
@@ -2224,6 +2243,7 @@ This worker link is invalid or has been disabled.,رابط العامل غير �
 This worker token is disabled â the personal link will not resolve.,رمز العامل معطّل — لن يعمل الرابط الشخصي.
 ThreeQuarter,ثلاثة أرباع
 Tick for a contractor/temp hire not registered on the trip's worker manifest.,فعّله لمتعاقد/موظف مؤقت غير مسجّل في كشف عمالة الرحلة.
+Ticket,التذكرة
 Timed %,النسبة الموقّتة (%)
 Times,الأوقات
 To Bed,إلى سرير
@@ -2295,10 +2315,12 @@ Trip,الرحلة
 Trip Boarding Event,حدث صعود الرحلة
 Trip Cost,تكلفة الرحلة
 Trip Date,تاريخ الرحلة
+Trip Execution,تنفيذ الرحلة
 Trip Fulfilment Ledger,دفتر تنفيذ الرحلات
 Trip Fulfilment Ledger Rows,صفوف دفتر تنفيذ الرحلات
 Trip Fulfilment Rate,معدل تنفيذ الرحلات
 Trip Start Log,سجل بدء الرحلة
+Trip Subject,موضوع الرحلة
 Trip fulfilment ledger. Maintained automatically by the system when a Dispatch Trip is completed and not edited manually.,دفتر تنفيذ الرحلات. يُحدّثه النظام آلياً عند اكتمال رحلة تشغيل، ولا يُحرّر يدوياً.
 Trip {0} completed; odometer {1}.,اكتملت الرحلة {0}؛ عداد المسافة {1}.
 Trips,الرحلات
@@ -2385,6 +2407,7 @@ Vehicle Stop,إيقاف مركبة
 Vehicle Utilisation,استغلال المركبات
 Vehicle Utilisation Snapshot,لقطة استغلال المركبة
 Vehicle and Driver,المركبة والسائق
+Vehicle and Project,المركبة والمشروع
 Vehicle damage write-off case raised from a handover discrepancy. Tiered write-off authority gate on submit.,حالة شطب تلف مركبة تُنشأ من تباين في التسليم. بوابة صلاحية شطب متدرّجة عند الاعتماد.
 Vehicle wash service platform or provider used for cleaning fleet vehicles.,منصة أو مزوّد خدمة غسيل يُستخدم لتنظيف مركبات الأسطول.
 Vehicle {0} already has an active assignment {1}.,المركبة {0} لديها بالفعل إسناد نشط {1}.
@@ -2456,6 +2479,7 @@ Worker + Supervisor,عمال + مشرف
 Worker Access,وصول العامل
 Worker Count,عدد العمال
 Worker Identity,هوية العامل
+Worker Manifest,كشف العمال
 Worker Name,اسم العامل
 Worker Route (Masar),مسار العامل (مسار)
 Worker Transport Plan,خطة نقل العمال

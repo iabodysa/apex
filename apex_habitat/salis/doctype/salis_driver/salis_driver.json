@@ -9,17 +9,19 @@
   "driver_tab_overview",
   "driver_sec_identity",
   "employee",
-  "full_name",
   "national_id",
-  "phone",
   "driver_identity_col",
+  "full_name",
+  "phone",
+  "driver_sec_deployment",
   "status",
   "project",
+  "driver_deployment_col",
   "supervisor",
-  "driver_sec_assignment",
   "current_vehicle",
   "driver_sec_compliance",
   "license_number",
+  "driver_compliance_col",
   "license_expiry",
   "driver_sec_system",
   "naming_series"
@@ -44,6 +46,18 @@
    "search_index": 1
   },
   {
+   "fieldname": "national_id",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "National ID",
+   "permlevel": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "driver_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fetch_from": "employee.employee_name",
    "fetch_if_empty": 1,
    "fieldname": "full_name",
@@ -53,14 +67,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "national_id",
-   "fieldtype": "Data",
-   "in_standard_filter": 1,
-   "label": "National ID",
-   "permlevel": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "phone",
    "fieldtype": "Data",
    "label": "Phone",
@@ -68,8 +74,9 @@
    "permlevel": 1
   },
   {
-   "fieldname": "driver_identity_col",
-   "fieldtype": "Column Break"
+   "fieldname": "driver_sec_deployment",
+   "fieldtype": "Section Break",
+   "label": "Deployment"
   },
   {
    "default": "Active",
@@ -90,15 +97,14 @@
    "search_index": 1
   },
   {
+   "fieldname": "driver_deployment_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "supervisor",
    "fieldtype": "Link",
    "label": "Supervisor",
    "options": "User"
-  },
-  {
-   "fieldname": "driver_sec_assignment",
-   "fieldtype": "Section Break",
-   "label": "Assignment"
   },
   {
    "fieldname": "current_vehicle",
@@ -109,7 +115,7 @@
   {
    "fieldname": "driver_sec_compliance",
    "fieldtype": "Section Break",
-   "label": "Compliance"
+   "label": "License & Compliance"
   },
   {
    "fieldname": "license_number",
@@ -118,9 +124,19 @@
    "permlevel": 1
   },
   {
+   "fieldname": "driver_compliance_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "license_expiry",
    "fieldtype": "Date",
    "label": "License Expiry"
+  },
+  {
+   "fieldname": "driver_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
   },
   {
    "default": "DRV-.######",
@@ -132,12 +148,6 @@
    "print_hide": 1,
    "report_hide": 1,
    "reqd": 1
-  },
-  {
-   "fieldname": "driver_sec_system",
-   "fieldtype": "Section Break",
-   "label": "System Info",
-   "collapsible": 1
   }
  ],
  "links": [
@@ -217,7 +227,7 @@
    "link_fieldname": "driver"
   }
  ],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Driver",

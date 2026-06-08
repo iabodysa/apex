@@ -5,24 +5,22 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "dispatch_trip_tab_overview",
+  "__tab_0",
   "dispatch_trip_sec_trip",
   "route_plan",
   "transport_request",
-  "dispatch_trip_col_trip",
+  "dispatch_trip_sec_trip_col1",
   "trip_date",
   "status",
   "dispatch_trip_sec_assignment",
   "vehicle",
-  "dispatch_trip_col_assignment",
+  "dispatch_trip_sec_assignment_col1",
   "driver",
-  "dispatch_trip_sec_times",
+  "dispatch_trip_sec_execution",
   "depart_time",
-  "dispatch_trip_col_times",
   "return_time",
-  "dispatch_trip_sec_readings",
+  "dispatch_trip_sec_execution_col1",
   "odometer_start",
-  "dispatch_trip_col_readings",
   "odometer_end",
   "dispatch_trip_sec_completion",
   "completion_notes",
@@ -32,16 +30,7 @@
  ],
  "fields": [
   {
-   "default": "DT-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "DT-.######",
-   "reqd": 1
-  },
-  {
-   "fieldname": "dispatch_trip_tab_overview",
+   "fieldname": "__tab_0",
    "fieldtype": "Tab Break",
    "label": "Overview"
   },
@@ -49,49 +38,6 @@
    "fieldname": "dispatch_trip_sec_trip",
    "fieldtype": "Section Break",
    "label": "Trip"
-  },
-  {
-   "fieldname": "dispatch_trip_col_trip",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "dispatch_trip_sec_assignment",
-   "fieldtype": "Section Break",
-   "label": "Vehicle and Driver"
-  },
-  {
-   "fieldname": "dispatch_trip_col_assignment",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "dispatch_trip_sec_times",
-   "fieldtype": "Section Break",
-   "label": "Times"
-  },
-  {
-   "fieldname": "dispatch_trip_col_times",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "dispatch_trip_sec_readings",
-   "fieldtype": "Section Break",
-   "label": "Readings"
-  },
-  {
-   "fieldname": "dispatch_trip_col_readings",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "dispatch_trip_sec_completion",
-   "fieldtype": "Section Break",
-   "label": "Completion Notes",
-   "depends_on": "eval:doc.status=='Completed'"
-  },
-  {
-   "fieldname": "dispatch_trip_sec_system",
-   "fieldtype": "Section Break",
-   "label": "System Info",
-   "collapsible": 1
   },
   {
    "fieldname": "route_plan",
@@ -108,34 +54,14 @@
    "read_only": 1
   },
   {
-   "fieldname": "vehicle",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Vehicle",
-   "options": "Salis Vehicle"
-  },
-  {
-   "fieldname": "driver",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Driver",
-   "options": "Salis Driver"
+   "fieldname": "dispatch_trip_sec_trip_col1",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "trip_date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Trip Date"
-  },
-  {
-   "fieldname": "depart_time",
-   "fieldtype": "Time",
-   "label": "Depart Time"
-  },
-  {
-   "fieldname": "return_time",
-   "fieldtype": "Time",
-   "label": "Return Time"
   },
   {
    "allow_on_submit": 1,
@@ -148,6 +74,48 @@
    "options": "Planned\nDispatched\nCompleted\nCancelled"
   },
   {
+   "fieldname": "dispatch_trip_sec_assignment",
+   "fieldtype": "Section Break",
+   "label": "Vehicle and Driver"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_assignment_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_execution",
+   "fieldtype": "Section Break",
+   "label": "Trip Execution"
+  },
+  {
+   "fieldname": "depart_time",
+   "fieldtype": "Time",
+   "label": "Depart Time"
+  },
+  {
+   "fieldname": "return_time",
+   "fieldtype": "Time",
+   "label": "Return Time"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_execution_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "odometer_start",
    "fieldtype": "Int",
    "label": "Odometer Start"
@@ -158,10 +126,31 @@
    "label": "Odometer End"
   },
   {
+   "fieldname": "dispatch_trip_sec_completion",
+   "fieldtype": "Section Break",
+   "label": "Completion Notes",
+   "depends_on": "eval:doc.status=='Completed'"
+  },
+  {
    "depends_on": "eval:doc.status=='Completed'",
    "fieldname": "completion_notes",
    "fieldtype": "Small Text",
    "label": "Completion Notes"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "DT-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "DT-.######",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -192,7 +181,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-08 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

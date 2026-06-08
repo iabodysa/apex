@@ -6,24 +6,30 @@
  "engine": "InnoDB",
  "field_order": [
   "accommodation_assignment_tab_overview",
-  "accommodation_assignment_sec_overview",
+  "accommodation_assignment_sec_resident",
   "party_type",
   "party",
+  "accommodation_assignment_resident_col",
   "employee",
-  "project",
+  "employee_name",
+  "accommodation_assignment_sec_placement",
   "building",
   "room",
+  "accommodation_assignment_placement_col",
   "bed",
-  "accommodation_assignment_overview_col",
-  "check_in_date",
+  "previous_building",
+  "accommodation_assignment_sec_stay",
   "assignment_type",
   "stay_type",
+  "accommodation_assignment_stay_col",
+  "check_in_date",
   "expected_checkout_date",
-  "previous_building",
+  "accommodation_assignment_sec_billing",
+  "project",
   "cost_center",
+  "accommodation_assignment_billing_col",
   "is_external_supplier",
   "billed_to_supplier",
-  "naming_series",
   "accommodation_assignment_sec_checkin_evidence",
   "room_condition_snapshot",
   "accommodation_assignment_sec_large_text",
@@ -32,10 +38,10 @@
   "custody_items",
   "accommodation_assignment_tab_system",
   "accommodation_assignment_sec_system",
-  "employee_name",
   "check_out_date",
-  "accommodation_assignment_system_col",
   "housing_allowance_suspended",
+  "accommodation_assignment_system_col",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
@@ -45,9 +51,9 @@
    "label": "Overview"
   },
   {
-   "fieldname": "accommodation_assignment_sec_overview",
+   "fieldname": "accommodation_assignment_sec_resident",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Resident"
   },
   {
    "default": "Employee",
@@ -67,6 +73,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "accommodation_assignment_resident_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -76,12 +86,17 @@
    "search_index": 1
   },
   {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Project",
-   "options": "Project",
-   "reqd": 1
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_placement",
+   "fieldtype": "Section Break",
+   "label": "Placement"
   },
   {
    "fieldname": "building",
@@ -103,6 +118,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "accommodation_assignment_placement_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "bed",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -112,15 +131,16 @@
    "search_index": 1
   },
   {
-   "fieldname": "accommodation_assignment_overview_col",
-   "fieldtype": "Column Break"
+   "depends_on": "eval:doc.assignment_type=='Transfer'",
+   "fieldname": "previous_building",
+   "fieldtype": "Link",
+   "label": "Previous Building",
+   "options": "Accommodation Building"
   },
   {
-   "fieldname": "check_in_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Check-in Date",
-   "reqd": 1
+   "fieldname": "accommodation_assignment_sec_stay",
+   "fieldtype": "Section Break",
+   "label": "Stay Details"
   },
   {
    "default": "New Assignment",
@@ -141,6 +161,17 @@
    "reqd": 1
   },
   {
+   "fieldname": "accommodation_assignment_stay_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "check_in_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Check-in Date",
+   "reqd": 1
+  },
+  {
    "allow_on_submit": 1,
    "depends_on": "eval:doc.stay_type=='Temporary'",
    "description": "Planned departure date for a temporary stay; supervisor is alerted as it approaches or if the worker is still checked in past it.",
@@ -150,19 +181,16 @@
    "mandatory_depends_on": "eval:doc.stay_type=='Temporary'"
   },
   {
-   "depends_on": "eval:doc.assignment_type=='Transfer'",
-   "fieldname": "previous_building",
-   "fieldtype": "Link",
-   "label": "Previous Building",
-   "options": "Accommodation Building"
+   "fieldname": "accommodation_assignment_sec_billing",
+   "fieldtype": "Section Break",
+   "label": "Billing"
   },
   {
-   "default": "ACC-ASGN-.YYYY.-.####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "ACC-ASGN-.YYYY.-.####",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project",
    "reqd": 1
   },
   {
@@ -172,10 +200,40 @@
    "options": "Cost Center"
   },
   {
-   "collapsible": 1,
+   "fieldname": "accommodation_assignment_billing_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_external_supplier",
+   "fieldtype": "Check",
+   "label": "Is External Supplier Worker?"
+  },
+  {
+   "depends_on": "eval:doc.is_external_supplier",
+   "fieldname": "billed_to_supplier",
+   "fieldtype": "Link",
+   "label": "Billed To Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "accommodation_assignment_sec_checkin_evidence",
+   "fieldtype": "Section Break",
+   "label": "Check-in Evidence",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "room_condition_snapshot",
+   "fieldtype": "Attach Image",
+   "label": "Room Condition Snapshot",
+   "allow_on_submit": 1,
+   "description": "Optional photo of the bed/room condition at check-in (handover evidence)."
+  },
+  {
    "fieldname": "accommodation_assignment_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information"
+   "label": "Additional Information",
+   "collapsible": 1
   },
   {
    "fieldname": "notes",
@@ -196,30 +254,19 @@
   {
    "fieldname": "accommodation_assignment_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info"
+   "label": "System"
   },
   {
    "fieldname": "accommodation_assignment_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
-  },
-  {
-   "fetch_from": "employee.employee_name",
-   "fieldname": "employee_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Employee Name",
-   "read_only": 1
+   "label": "System",
+   "collapsible": 1
   },
   {
    "fieldname": "check_out_date",
    "fieldtype": "Date",
    "label": "Check-out Date",
    "read_only": 1
-  },
-  {
-   "fieldname": "accommodation_assignment_system_col",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -229,6 +276,19 @@
    "read_only": 1
   },
   {
+   "fieldname": "accommodation_assignment_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "ACC-ASGN-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ACC-ASGN-.YYYY.-.####",
+   "reqd": 1
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -236,32 +296,6 @@
    "options": "Accommodation Assignment",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "is_external_supplier",
-   "fieldtype": "Check",
-   "label": "Is External Supplier Worker?"
-  },
-  {
-   "depends_on": "eval:doc.is_external_supplier",
-   "fieldname": "billed_to_supplier",
-   "fieldtype": "Link",
-   "label": "Billed To Supplier",
-   "options": "Supplier"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "accommodation_assignment_sec_checkin_evidence",
-   "fieldtype": "Section Break",
-   "label": "Check-in Evidence"
-  },
-  {
-   "fieldname": "room_condition_snapshot",
-   "fieldtype": "Attach Image",
-   "label": "Room Condition Snapshot",
-   "allow_on_submit": 1,
-   "description": "Optional photo of the bed/room condition at check-in (handover evidence)."
   }
  ],
  "is_submittable": 1,
@@ -282,7 +316,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-06-08 17:00:00.000000",
+ "modified": "2026-06-08 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Assignment",
