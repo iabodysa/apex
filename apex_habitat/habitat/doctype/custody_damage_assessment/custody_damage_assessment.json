@@ -10,18 +10,20 @@
   "custody_damage_assessment_sec_overview",
   "assessment_date",
   "custody_return",
-  "building",
   "custody_damage_assessment_overview_col",
+  "building",
+  "total_estimated_replacement_cost_sar",
+  "custody_damage_assessment_sec_worker",
   "party_type",
   "party",
+  "custody_damage_assessment_worker_col",
   "employee",
-  "naming_series",
-  "total_estimated_replacement_cost_sar",
-  "custody_damage_assessment_sec_large_text",
-  "remarks",
   "custody_damage_assessment_sec_table_items",
   "items",
+  "custody_damage_assessment_sec_large_text",
+  "remarks",
   "custody_damage_assessment_sec_system",
+  "naming_series",
   "deduction_entry",
   "amended_from"
  ],
@@ -34,7 +36,7 @@
   {
    "fieldname": "custody_damage_assessment_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Assessment"
   },
   {
    "fieldname": "assessment_date",
@@ -50,6 +52,10 @@
    "options": "Custody Return"
   },
   {
+   "fieldname": "custody_damage_assessment_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -60,8 +66,16 @@
    "search_index": 1
   },
   {
-   "fieldname": "custody_damage_assessment_overview_col",
-   "fieldtype": "Column Break"
+   "fieldname": "total_estimated_replacement_cost_sar",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Estimated Replacement Cost (SAR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "custody_damage_assessment_sec_worker",
+   "fieldtype": "Section Break",
+   "label": "Responsible Worker"
   },
   {
    "default": "Employee",
@@ -80,6 +94,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "custody_damage_assessment_worker_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -88,32 +106,6 @@
    "options": "Employee",
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "default": "CUST-DMG-.YYYY.-.####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "CUST-DMG-.YYYY.-.####"
-  },
-  {
-   "fieldname": "total_estimated_replacement_cost_sar",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Total Estimated Replacement Cost (SAR)",
-   "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "custody_damage_assessment_sec_large_text",
-   "fieldtype": "Section Break",
-   "label": "Additional Information"
-  },
-  {
-   "fieldname": "remarks",
-   "fieldtype": "Small Text",
-   "label": "Remarks"
   },
   {
    "fieldname": "custody_damage_assessment_sec_table_items",
@@ -127,10 +119,29 @@
    "options": "Custody Damage Item"
   },
   {
+   "fieldname": "custody_damage_assessment_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
    "fieldname": "custody_damage_assessment_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
+   "label": "System",
    "collapsible": 1
+  },
+  {
+   "default": "CUST-DMG-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "CUST-DMG-.YYYY.-.####"
   },
   {
    "fieldname": "deduction_entry",
@@ -152,7 +163,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-09 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Damage Assessment",

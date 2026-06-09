@@ -10,7 +10,7 @@
  "is_hidden": 0,
  "sequence_id": 90.0,
  "parent_page": "",
- "content": "[{\"id\": \"acHdrMyWork\",\"type\": \"header\",\"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\",\"col\": 12}},{\"id\": \"acScMyWork\",\"type\": \"shortcut\",\"data\": {\"shortcut_name\": \"My Work\",\"col\": 3}},{\"id\": \"acNcPendingMine\",\"type\": \"number_card\",\"data\": {\"number_card_name\": \"Pending My Action\",\"col\": 3}},{\"id\": \"acHdrSettings\",\"type\": \"header\",\"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Settings</b></span>\",\"col\": 12}},{\"id\": \"acScHabitatSettings\",\"type\": \"shortcut\",\"data\": {\"shortcut_name\": \"Habitat Settings\",\"col\": 3}},{\"id\": \"acScSalisSettings\",\"type\": \"shortcut\",\"data\": {\"shortcut_name\": \"Salis Settings\",\"col\": 3}},{\"id\": \"acScIntegrationSettings\",\"type\": \"shortcut\",\"data\": {\"shortcut_name\": \"Apex Integration Settings\",\"col\": 3}},{\"id\": \"acScPortalTheme\",\"type\": \"shortcut\",\"data\": {\"shortcut_name\": \"Salis Portal Theme\",\"col\": 3}},{\"id\": \"acHdrAccess\",\"type\": \"header\",\"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Roles and Access</b></span>\",\"col\": 12}},{\"id\": \"acScUser\",\"type\": \"shortcut\",\"data\": {\"shortcut_name\": \"User\",\"col\": 3}},{\"id\": \"acScRole\",\"type\": \"shortcut\",\"data\": {\"shortcut_name\": \"Role\",\"col\": 3}},{\"id\": \"acScRoleProfile\",\"type\": \"shortcut\",\"data\": {\"shortcut_name\": \"Role Profile\",\"col\": 3}},{\"id\": \"acHdrSetup\",\"type\": \"header\",\"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup and Master Data</b></span>\",\"col\": 12}},{\"id\": \"acCardAccMaster\",\"type\": \"card\",\"data\": {\"card_name\": \"Accommodation Master\",\"col\": 4}},{\"id\": \"acCardTaskMaster\",\"type\": \"card\",\"data\": {\"card_name\": \"Safety and Task Master\",\"col\": 4}},{\"id\": \"acCardCustodyMaster\",\"type\": \"card\",\"data\": {\"card_name\": \"Custody Master\",\"col\": 4}},{\"id\": \"acCardFacilityMaster\",\"type\": \"card\",\"data\": {\"card_name\": \"Facility and Utility Master\",\"col\": 4}},{\"id\": \"acCardMaintMaster\",\"type\": \"card\",\"data\": {\"card_name\": \"Maintenance Master\",\"col\": 4}},{\"id\": \"acCardSalisMaster\",\"type\": \"card\",\"data\": {\"card_name\": \"Salis Fleet Master\",\"col\": 4}},{\"id\": \"acHdrHealth\",\"type\": \"header\",\"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Admin Health</b></span>\",\"col\": 12}},{\"id\": \"acNcAlerts\",\"type\": \"number_card\",\"data\": {\"number_card_name\": \"Unresolved Alerts\",\"col\": 3}},{\"id\": \"acNcOverdue\",\"type\": \"number_card\",\"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\",\"col\": 3}},{\"id\": \"acNcErrors\",\"type\": \"number_card\",\"data\": {\"number_card_name\": \"Recent Error Logs\",\"col\": 3}},{\"id\": \"acCardLogs\",\"type\": \"card\",\"data\": {\"card_name\": \"Logs\",\"col\": 6}},{\"id\": \"acHdrTools\",\"type\": \"header\",\"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Tools and Consoles</b></span>\",\"col\": 12}},{\"id\": \"acScFuelConsole\",\"type\": \"shortcut\",\"data\": {\"shortcut_name\": \"Fuel Approval Console\",\"col\": 3}},{\"id\": \"acScDispatchBoard\",\"type\": \"shortcut\",\"data\": {\"shortcut_name\": \"Salis Dispatch Board\",\"col\": 3}},{\"id\": \"acCardWorkerAccess\",\"type\": \"card\",\"data\": {\"card_name\": \"Worker Access\",\"col\": 4}}]",
+ "content": "[{\"id\": \"acHdrMyWork\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"acScMyWork\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Work\", \"col\": 3}}, {\"id\": \"acNcPendingMine\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 3}}, {\"id\": \"acHdrSettings\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Settings</b></span>\", \"col\": 12}}, {\"id\": \"acScHabitatSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"acScSalisSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Settings\", \"col\": 3}}, {\"id\": \"acScIntegrationSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Apex Integration Settings\", \"col\": 3}}, {\"id\": \"acScPortalTheme\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Portal Theme\", \"col\": 3}}, {\"id\": \"acHdrAccess\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Roles and Access</b></span>\", \"col\": 12}}, {\"id\": \"acScUser\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"User\", \"col\": 3}}, {\"id\": \"acScRole\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Role\", \"col\": 3}}, {\"id\": \"acScRoleProfile\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Role Profile\", \"col\": 3}}, {\"id\": \"acHdrSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup and Master Data</b></span>\", \"col\": 12}}, {\"id\": \"acCardAccMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"acCardTaskMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety and Task Master\", \"col\": 4}}, {\"id\": \"acCardCustodyMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"acCardFacilityMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility and Utility Master\", \"col\": 4}}, {\"id\": \"acCardMaintMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Master\", \"col\": 4}}, {\"id\": \"acCardSalisMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Salis Fleet Master\", \"col\": 4}}, {\"id\": \"acHdrHealth\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Admin Health</b></span>\", \"col\": 12}}, {\"id\": \"acNcAlerts\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"acNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"acNcErrors\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 3}}, {\"id\": \"acCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 6}}, {\"id\": \"acHdrTools\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Tools and Consoles</b></span>\", \"col\": 12}}, {\"id\": \"acScFuelConsole\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Approval Console\", \"col\": 3}}, {\"id\": \"acScDispatchBoard\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Dispatch Board\", \"col\": 3}}, {\"id\": \"acCardWorkerAccess\", \"type\": \"card\", \"data\": {\"card_name\": \"Worker Access\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -142,9 +142,25 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "City",
+   "link_type": "DocType",
+   "link_to": "City",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Temporary Worker",
+   "link_type": "DocType",
+   "link_to": "Temporary Worker",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Safety and Task Master",
-   "idx": 7
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -152,7 +168,7 @@
    "label": "Safety Task Catalog",
    "link_type": "DocType",
    "link_to": "Safety Task Catalog",
-   "idx": 8
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
@@ -160,13 +176,13 @@
    "label": "Scheduled Task Template",
    "link_type": "DocType",
    "link_to": "Scheduled Task Template",
-   "idx": 9
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Custody Master",
-   "idx": 10
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -174,7 +190,7 @@
    "label": "Custody Article",
    "link_type": "DocType",
    "link_to": "Custody Article",
-   "idx": 11
+   "idx": 13
   },
   {
    "doctype": "Workspace Link",
@@ -182,7 +198,7 @@
    "label": "Custody Asset Category",
    "link_type": "DocType",
    "link_to": "Custody Asset Category",
-   "idx": 12
+   "idx": 14
   },
   {
    "doctype": "Workspace Link",
@@ -190,13 +206,13 @@
    "label": "Operational Depreciation Policy",
    "link_type": "DocType",
    "link_to": "Operational Depreciation Policy",
-   "idx": 13
+   "idx": 15
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Facility and Utility Master",
-   "idx": 14
+   "idx": 16
   },
   {
    "doctype": "Workspace Link",
@@ -204,7 +220,7 @@
    "label": "Facility Asset",
    "link_type": "DocType",
    "link_to": "Facility Asset",
-   "idx": 15
+   "idx": 17
   },
   {
    "doctype": "Workspace Link",
@@ -212,7 +228,7 @@
    "label": "Utility Account",
    "link_type": "DocType",
    "link_to": "Utility Account",
-   "idx": 16
+   "idx": 18
   },
   {
    "doctype": "Workspace Link",
@@ -220,13 +236,13 @@
    "label": "Subcontractor Service Contract",
    "link_type": "DocType",
    "link_to": "Subcontractor Service Contract",
-   "idx": 17
+   "idx": 19
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Maintenance Master",
-   "idx": 18
+   "idx": 20
   },
   {
    "doctype": "Workspace Link",
@@ -234,7 +250,7 @@
    "label": "Maintenance Material",
    "link_type": "DocType",
    "link_to": "Maintenance Material",
-   "idx": 19
+   "idx": 21
   },
   {
    "doctype": "Workspace Link",
@@ -242,13 +258,13 @@
    "label": "Maintenance Material Template",
    "link_type": "DocType",
    "link_to": "Maintenance Material Template",
-   "idx": 20
+   "idx": 22
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Salis Fleet Master",
-   "idx": 21
+   "idx": 23
   },
   {
    "doctype": "Workspace Link",
@@ -256,7 +272,7 @@
    "label": "Salis Driver",
    "link_type": "DocType",
    "link_to": "Salis Driver",
-   "idx": 22
+   "idx": 24
   },
   {
    "doctype": "Workspace Link",
@@ -264,7 +280,7 @@
    "label": "Vehicle Category",
    "link_type": "DocType",
    "link_to": "Vehicle Category",
-   "idx": 23
+   "idx": 25
   },
   {
    "doctype": "Workspace Link",
@@ -272,7 +288,7 @@
    "label": "Rental Office",
    "link_type": "DocType",
    "link_to": "Rental Office",
-   "idx": 24
+   "idx": 26
   },
   {
    "doctype": "Workspace Link",
@@ -280,7 +296,7 @@
    "label": "Fuel Platform",
    "link_type": "DocType",
    "link_to": "Fuel Platform",
-   "idx": 25
+   "idx": 27
   },
   {
    "doctype": "Workspace Link",
@@ -288,13 +304,13 @@
    "label": "Wash Platform",
    "link_type": "DocType",
    "link_to": "Wash Platform",
-   "idx": 26
+   "idx": 28
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Logs",
-   "idx": 27
+   "idx": 29
   },
   {
    "doctype": "Workspace Link",
@@ -302,7 +318,7 @@
    "label": "Error Log",
    "link_type": "DocType",
    "link_to": "Error Log",
-   "idx": 28
+   "idx": 30
   },
   {
    "doctype": "Workspace Link",
@@ -310,13 +326,13 @@
    "label": "Scheduled Job Log",
    "link_type": "DocType",
    "link_to": "Scheduled Job Log",
-   "idx": 29
+   "idx": 31
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Worker Access",
-   "idx": 30
+   "idx": 32
   },
   {
    "doctype": "Workspace Link",
@@ -324,7 +340,7 @@
    "label": "Masar Worker Token",
    "link_type": "DocType",
    "link_to": "Masar Worker Token",
-   "idx": 31
+   "idx": 33
   }
  ],
  "number_cards": [
@@ -369,5 +385,5 @@
    "role": "Administrator"
   }
  ],
- "modified": "2026-06-05 12:00:00.000000"
+ "modified": "2026-06-09 09:00:00.000000"
 }

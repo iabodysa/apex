@@ -11,12 +11,16 @@
   "naming_series",
   "vehicle",
   "driver",
+  "vehicle_assignment_main_col",
   "project",
   "supervisor",
-  "vehicle_assignment_main_col",
+  "va_sec_period",
   "start_date",
+  "va_period_col1",
   "end_date",
+  "va_period_col2",
   "status",
+  "va_sec_system",
   "amended_from"
  ],
  "fields": [
@@ -28,7 +32,7 @@
   {
    "fieldname": "vehicle_assignment_sec_main",
    "fieldtype": "Section Break",
-   "label": "Assignment Details"
+   "label": "Assignment"
   },
   {
    "default": "VA-.######",
@@ -60,6 +64,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "vehicle_assignment_main_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "project",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -73,8 +81,9 @@
    "options": "User"
   },
   {
-   "fieldname": "vehicle_assignment_main_col",
-   "fieldtype": "Column Break"
+   "fieldname": "va_sec_period",
+   "fieldtype": "Section Break",
+   "label": "Assignment Period"
   },
   {
    "fieldname": "start_date",
@@ -84,9 +93,17 @@
    "reqd": 1
   },
   {
+   "fieldname": "va_period_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "end_date",
    "fieldtype": "Date",
    "label": "End Date"
+  },
+  {
+   "fieldname": "va_period_col2",
+   "fieldtype": "Column Break"
   },
   {
    "default": "Active",
@@ -96,6 +113,12 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nEnded"
+  },
+  {
+   "fieldname": "va_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
   },
   {
    "fieldname": "amended_from",
@@ -110,7 +133,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-26 02:41:00.000000",
+ "modified": "2026-06-09 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Assignment",

@@ -8,20 +8,15 @@
  "track_changes": 1,
  "fields": [
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "QR-LOC-.####",
-   "reqd": 1,
-   "default": "QR-LOC-.####",
-   "hidden": 1
+   "fieldname": "qr_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Poster"
   },
   {
-   "fieldname": "location_token",
+   "fieldname": "poster_title",
    "fieldtype": "Data",
-   "label": "Location Token",
-   "unique": 1,
-   "read_only": 1
+   "label": "Poster Title",
+   "reqd": 1
   },
   {
    "fieldname": "is_active",
@@ -32,18 +27,6 @@
   {
    "fieldname": "col1",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "poster_title",
-   "fieldtype": "Data",
-   "label": "Poster Title",
-   "reqd": 1
-  },
-  {
-   "fieldname": "public_url",
-   "fieldtype": "Data",
-   "label": "Public URL",
-   "read_only": 1
   },
   {
    "fieldname": "last_printed_on",
@@ -79,6 +62,37 @@
    "fieldname": "notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "fieldname": "qr_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "QR-LOC-.####",
+   "reqd": 1,
+   "default": "QR-LOC-.####",
+   "hidden": 1
+  },
+  {
+   "fieldname": "location_token",
+   "fieldtype": "Data",
+   "label": "Location Token",
+   "unique": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "qr_col_system",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "public_url",
+   "fieldtype": "Data",
+   "label": "Public URL",
+   "read_only": 1
   }
  ],
  "permissions": [
@@ -99,5 +113,23 @@
  "autoname": "naming_series:",
  "naming_rule": "By \"Naming Series\" field",
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "field_order": [
+  "qr_sec_identity",
+  "poster_title",
+  "is_active",
+  "col1",
+  "last_printed_on",
+  "sec2",
+  "accommodation_site",
+  "building",
+  "room",
+  "notes",
+  "qr_sec_system",
+  "naming_series",
+  "location_token",
+  "qr_col_system",
+  "public_url"
+ ],
+ "modified": "2026-06-09 09:00:00.000000"
 }

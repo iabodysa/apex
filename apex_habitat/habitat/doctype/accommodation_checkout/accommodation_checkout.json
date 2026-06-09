@@ -12,38 +12,37 @@
   "checkout_reason",
   "accommodation_checkout_overview_col",
   "custody_cleared",
-  "naming_series",
-  "accommodation_checkout_sec_large_text",
-  "damage_notes",
-  "cancellation_reason",
+  "accommodation_checkout_sec_resident",
+  "party_type",
+  "party",
+  "accommodation_checkout_resident_col",
+  "employee",
+  "bed",
   "accommodation_checkout_sec_table_custody_return_items",
   "custody_return_items",
-  "accommodation_checkout_tab_financials",
   "accommodation_checkout_sec_financials",
   "cost_center",
   "damage_deduction_amount",
   "accommodation_checkout_financials_col",
   "linked_additional_salary",
-  "accommodation_checkout_tab_system",
+  "accommodation_checkout_sec_large_text",
+  "damage_notes",
+  "cancellation_reason",
+  "room_condition_snapshot",
   "accommodation_checkout_sec_system",
-  "party_type",
-  "party",
-  "employee",
-  "bed",
-  "accommodation_checkout_system_col",
-  "amended_from",
-  "room_condition_snapshot"
+  "naming_series",
+  "amended_from"
  ],
  "fields": [
   {
    "fieldname": "accommodation_checkout_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview"
+   "label": "Checkout"
   },
   {
    "fieldname": "accommodation_checkout_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Checkout Details"
   },
   {
    "fieldname": "assignment",
@@ -81,39 +80,66 @@
    "label": "All Custody Cleared"
   },
   {
-   "default": "ACC-CHKOUT-.YYYY.-.####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "ACC-CHKOUT-.YYYY.-.####",
-   "reqd": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "accommodation_checkout_sec_large_text",
+   "fieldname": "accommodation_checkout_sec_resident",
    "fieldtype": "Section Break",
-   "label": "Additional Information"
+   "label": "Resident"
   },
   {
-   "fieldname": "damage_notes",
-   "fieldtype": "Small Text",
-   "label": "Damage Description"
+   "default": "Employee",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Resident Type",
+   "options": "Employee\nTemporary Worker",
+   "read_only": 1
   },
   {
-   "fieldname": "cancellation_reason",
-   "fieldtype": "Small Text",
-   "label": "Cancellation Reason"
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Resident",
+   "options": "party_type",
+   "read_only": 1,
+   "search_index": 1
   },
   {
-   "fieldname": "accommodation_checkout_tab_financials",
-   "fieldtype": "Tab Break",
-   "label": "Financials"
+   "fieldname": "accommodation_checkout_resident_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "assignment.employee",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "assignment.bed",
+   "fieldname": "bed",
+   "fieldtype": "Link",
+   "label": "Bed",
+   "options": "Accommodation Bed",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "accommodation_checkout_sec_table_custody_return_items",
+   "fieldtype": "Section Break",
+   "label": "Custody Return"
+  },
+  {
+   "fieldname": "custody_return_items",
+   "fieldtype": "Table",
+   "label": "Custody Return Items",
+   "options": "Accommodation Custody Return Item"
   },
   {
    "fieldname": "accommodation_checkout_sec_financials",
    "fieldtype": "Section Break",
-   "label": "Financial Information"
+   "label": "Damage Deduction"
   },
   {
    "fetch_from": "assignment.cost_center",
@@ -140,66 +166,42 @@
    "read_only": 1
   },
   {
-   "fieldname": "accommodation_checkout_sec_table_custody_return_items",
+   "fieldname": "accommodation_checkout_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Custody Return Items"
+   "collapsible": 1,
+   "label": "Notes & Evidence"
   },
   {
-   "fieldname": "custody_return_items",
-   "fieldtype": "Table",
-   "label": "Custody Return Items",
-   "options": "Accommodation Custody Return Item"
+   "fieldname": "damage_notes",
+   "fieldtype": "Small Text",
+   "label": "Damage Description"
   },
   {
-   "fieldname": "accommodation_checkout_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancellation Reason"
+  },
+  {
+   "fieldname": "room_condition_snapshot",
+   "fieldtype": "Attach Image",
+   "label": "Room Condition Snapshot",
+   "allow_on_submit": 1,
+   "description": "Optional photo of the bed/room condition at checkout (handover evidence)."
   },
   {
    "fieldname": "accommodation_checkout_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "collapsible": 1,
+   "label": "System"
   },
   {
-   "default": "Employee",
-   "fieldname": "party_type",
+   "default": "ACC-CHKOUT-.YYYY.-.####",
+   "fieldname": "naming_series",
    "fieldtype": "Select",
-   "in_standard_filter": 1,
-   "label": "Resident Type",
-   "options": "Employee\nTemporary Worker",
-   "read_only": 1
-  },
-  {
-   "fieldname": "party",
-   "fieldtype": "Dynamic Link",
-   "in_list_view": 1,
-   "label": "Resident",
-   "options": "party_type",
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fetch_from": "assignment.employee",
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Employee",
-   "options": "Employee",
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fetch_from": "assignment.bed",
-   "fieldname": "bed",
-   "fieldtype": "Link",
-   "label": "Bed",
-   "options": "Accommodation Bed",
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "accommodation_checkout_system_col",
-   "fieldtype": "Column Break"
+   "hidden": 1,
+   "label": "Series",
+   "options": "ACC-CHKOUT-.YYYY.-.####",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -209,18 +211,11 @@
    "options": "Accommodation Checkout",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "room_condition_snapshot",
-   "fieldtype": "Attach Image",
-   "label": "Room Condition Snapshot",
-   "allow_on_submit": 1,
-   "description": "Optional photo of the bed/room condition at checkout (handover evidence)."
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-09 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Checkout",

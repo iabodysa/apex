@@ -14,11 +14,9 @@
  "description": "Lightweight Habitat-owned catalog of maintenance materials. Not linked to ERPNext Stock/Item unless explicitly mapped.",
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_material_sec_details",
    "fieldtype": "Section Break",
-   "label": "Details",
-   "idx": 1
+   "label": "Material Details"
   },
   {
    "doctype": "DocField",
@@ -40,6 +38,10 @@
    "idx": 3
   },
   {
+   "fieldname": "maintenance_material_details_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "doctype": "DocField",
    "fieldname": "default_uom",
    "fieldtype": "Data",
@@ -57,10 +59,9 @@
    "idx": 5
   },
   {
-   "doctype": "DocField",
-   "fieldname": "maintenance_material_details_col",
-   "fieldtype": "Column Break",
-   "idx": 6
+   "fieldname": "maintenance_material_sec_costing",
+   "fieldtype": "Section Break",
+   "label": "Costing & Mapping"
   },
   {
    "doctype": "DocField",
@@ -68,6 +69,10 @@
    "fieldtype": "Currency",
    "label": "Estimated Unit Cost",
    "idx": 7
+  },
+  {
+   "fieldname": "maintenance_material_costing_col",
+   "fieldtype": "Column Break"
   },
   {
    "doctype": "DocField",
@@ -79,12 +84,10 @@
    "idx": 8
   },
   {
-   "doctype": "DocField",
    "fieldname": "maintenance_material_sec_notes",
    "fieldtype": "Section Break",
    "label": "Notes",
-   "collapsible": 1,
-   "idx": 9
+   "collapsible": 1
   },
   {
    "doctype": "DocField",
@@ -94,7 +97,7 @@
    "idx": 10
   }
  ],
-"links": [
+ "links": [
   {
    "group": "Templates",
    "is_child_table": 1,
@@ -149,5 +152,20 @@
    "create": 1,
    "idx": 3
   }
- ]
+ ],
+ "field_order": [
+  "maintenance_material_sec_details",
+  "material_name",
+  "material_category",
+  "maintenance_material_details_col",
+  "default_uom",
+  "is_active",
+  "maintenance_material_sec_costing",
+  "estimated_unit_cost",
+  "maintenance_material_costing_col",
+  "erpnext_item",
+  "maintenance_material_sec_notes",
+  "notes"
+ ],
+ "modified": "2026-06-09 09:00:00.000000"
 }

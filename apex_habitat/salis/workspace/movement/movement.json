@@ -27,14 +27,17 @@
  "is_hidden": 0,
  "sequence_id": 3.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"movHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"movKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Requests Open\", \"col\": 3}}, {\"id\": \"movKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_workers_transport Trips Dispatched Today\", \"col\": 3}}, {\"id\": \"movKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"movKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Large Worker Moves Pending Escalation\", \"col\": 3}}, {\"id\": \"movKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Fuel Requests\", \"col\": 3}}, {\"id\": \"movKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Spend This Month\", \"col\": 3}}, {\"id\": \"movKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Exception Cases\", \"col\": 3}}, {\"id\": \"movKM7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_fuel Litres Dispensed This Month\", \"col\": 3}}, {\"id\": \"movHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"movChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Trip Fulfilment Over Time\", \"col\": 12}}, {\"id\": \"movHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"movQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open Transport Requests Queue\", \"col\": 4}}, {\"id\": \"movHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"movQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"movQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Attendance\", \"col\": 3}}, {\"id\": \"movQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"movQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Claim\", \"col\": 3}}, {\"id\": \"movHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"movCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Transport\", \"col\": 4}}, {\"id\": \"movCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"movCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "content": "[{\"id\": \"movHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"movKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Requests Open\", \"col\": 3}}, {\"id\": \"movKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_workers_transport Trips Dispatched Today\", \"col\": 3}}, {\"id\": \"movKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"movKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Large Worker Moves Pending Escalation\", \"col\": 3}}, {\"id\": \"movKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Fuel Requests\", \"col\": 3}}, {\"id\": \"movKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Spend This Month\", \"col\": 3}}, {\"id\": \"movKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Exception Cases\", \"col\": 3}}, {\"id\": \"movKM7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_fuel Litres Dispensed This Month\", \"col\": 3}}, {\"id\": \"movHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"movChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Trip Fulfilment Over Time\", \"col\": 12}}, {\"id\": \"movHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"movQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open Transport Requests\", \"col\": 4}}, {\"id\": \"movHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"movQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"movQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Attendance\", \"col\": 3}}, {\"id\": \"movQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"movQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Claim\", \"col\": 3}}, {\"id\": \"movHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"movCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Transport\", \"col\": 4}}, {\"id\": \"movCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"movCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"movCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Transport Request",
    "link_to": "Transport Request",
-   "idx": 1
+   "idx": 1,
+   "stats_filter": "{\"service_line\": \"Workers\", \"status\": [\"in\", [\"New\", \"Validated\", \"Approved\", \"Scheduled\"]]}",
+   "format": "{} Open",
+   "color": "Yellow"
   },
   {
    "doctype": "Workspace Shortcut",
@@ -138,7 +141,7 @@
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
-   "label": "Views",
+   "label": "Reports",
    "idx": 11
   },
   {
@@ -224,11 +227,17 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Dashboards",
+   "idx": 21
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Link",
    "label": "Workers Transport Dashboard",
    "link_type": "Dashboard",
    "link_to": "Salis - Workers Transport",
-   "idx": 21
+   "idx": 22
   },
   {
    "doctype": "Workspace Link",
@@ -236,7 +245,7 @@
    "label": "Salis Finance Manager Dashboard",
    "link_type": "Dashboard",
    "link_to": "Salis Finance Manager Dashboard",
-   "idx": 22
+   "idx": 23
   }
  ],
  "charts": [
@@ -300,10 +309,10 @@
   {
    "doctype": "Workspace Quick List",
    "document_type": "Transport Request",
-   "label": "Open Transport Requests Queue",
+   "label": "Open Transport Requests",
    "quick_list_filter": "[[\"status\",\"in\",[\"New\",\"Validated\",\"Approved\",\"Scheduled\"]]]",
    "idx": 1
   }
  ],
- "modified": "2026-06-08 18:00:00.000000"
+ "modified": "2026-06-09 09:00:00.000000"
 }

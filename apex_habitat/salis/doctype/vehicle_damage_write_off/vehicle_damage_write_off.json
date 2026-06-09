@@ -10,17 +10,21 @@
   "vwo_sec_overview",
   "vehicle",
   "source_handover",
-  "driver",
   "vwo_overview_col",
-  "status",
-  "approved_by",
+  "driver",
   "naming_series",
   "vwo_sec_damage",
   "damage_description",
+  "vwo_sec_assessment",
   "recommended_action",
-  "vwo_damage_col",
+  "vwo_assessment_col",
   "estimated_cost",
+  "vwo_sec_evidence",
   "evidence",
+  "vwo_sec_disposition",
+  "status",
+  "vwo_disposition_col",
+  "approved_by",
   "vwo_sec_system",
   "amended_from"
  ],
@@ -33,7 +37,7 @@
   {
    "fieldname": "vwo_sec_overview",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Case"
   },
   {
    "fieldname": "vehicle",
@@ -54,33 +58,16 @@
    "search_index": 1
   },
   {
+   "fieldname": "vwo_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Driver",
    "options": "Salis Driver",
    "search_index": 1
-  },
-  {
-   "fieldname": "vwo_overview_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "Open",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Status",
-   "options": "Open\nUnder Review\nApproved\nRejected\nClosed\nCancelled"
-  },
-  {
-   "description": "Set when the write-off case is approved.",
-   "fieldname": "approved_by",
-   "fieldtype": "Link",
-   "label": "Approved By",
-   "options": "User",
-   "read_only": 1
   },
   {
    "default": "VWO-.######",
@@ -94,12 +81,17 @@
   {
    "fieldname": "vwo_sec_damage",
    "fieldtype": "Section Break",
-   "label": "Damage Details"
+   "label": "Damage"
   },
   {
    "fieldname": "damage_description",
    "fieldtype": "Text",
    "label": "Damage Description"
+  },
+  {
+   "fieldname": "vwo_sec_assessment",
+   "fieldtype": "Section Break",
+   "label": "Assessment"
   },
   {
    "fieldname": "recommended_action",
@@ -109,7 +101,7 @@
    "options": "Repair\nWrite-Off\nRecover from Driver\nInsurance Claim"
   },
   {
-   "fieldname": "vwo_damage_col",
+   "fieldname": "vwo_assessment_col",
    "fieldtype": "Column Break"
   },
   {
@@ -119,6 +111,11 @@
    "label": "Estimated Cost (SAR)"
   },
   {
+   "fieldname": "vwo_sec_evidence",
+   "fieldtype": "Section Break",
+   "label": "Evidence"
+  },
+  {
    "description": "Required before the case can move beyond Open.",
    "fieldname": "evidence",
    "fieldtype": "Attach",
@@ -126,9 +123,35 @@
    "reqd": 1
   },
   {
+   "fieldname": "vwo_sec_disposition",
+   "fieldtype": "Section Break",
+   "label": "Disposition"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nUnder Review\nApproved\nRejected\nClosed\nCancelled"
+  },
+  {
+   "fieldname": "vwo_disposition_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Set when the write-off case is approved.",
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
    "fieldname": "vwo_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Info",
+   "label": "System",
    "collapsible": 1
   },
   {
@@ -144,7 +167,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-09 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Damage Write-Off",

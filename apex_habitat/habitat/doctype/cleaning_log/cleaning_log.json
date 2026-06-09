@@ -9,25 +9,32 @@
   "cleaning_log_tab_details",
   "cleaning_log_sec_details",
   "building",
+  "cleaning_log_details_col",
   "cleaning_date",
+  "cleaning_log_sec_performed_by",
   "cleaner_type",
   "cleaner_employee",
   "cleaned_by",
+  "cleaning_log_performed_by_col",
   "subcontractor_service_order",
   "scheduled_task_instance",
-  "cleaning_log_details_col",
+  "cleaning_log_sec_review",
   "supervisor_approved",
   "approver",
+  "cleaning_log_review_col",
   "supervisor_rating",
+  "cleaning_log_sec_exceptions",
   "missed_cleaning",
   "missed_reason",
+  "cleaning_log_exceptions_col",
   "rework_required",
-  "naming_series",
   "cleaning_log_sec_evidence",
   "evidence_photo",
   "evidence_notes",
   "cleaning_log_sec_table_room_details",
-  "room_details"
+  "room_details",
+  "cleaning_log_sec_system",
+  "naming_series"
  ],
  "fields": [
   {
@@ -38,7 +45,7 @@
   {
    "fieldname": "cleaning_log_sec_details",
    "fieldtype": "Section Break",
-   "label": "Information"
+   "label": "Cleaning Record"
   },
   {
    "fieldname": "building",
@@ -51,12 +58,21 @@
    "search_index": 1
   },
   {
+   "fieldname": "cleaning_log_details_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "cleaning_date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Cleaning Date",
    "reqd": 1
+  },
+  {
+   "fieldname": "cleaning_log_sec_performed_by",
+   "fieldtype": "Section Break",
+   "label": "Performed By"
   },
   {
    "default": "Internal Employee",
@@ -82,6 +98,10 @@
    "label": "Cleaner Name"
   },
   {
+   "fieldname": "cleaning_log_performed_by_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "depends_on": "eval:doc.cleaner_type=='Subcontractor'",
    "fieldname": "subcontractor_service_order",
    "fieldtype": "Link",
@@ -95,8 +115,9 @@
    "options": "Scheduled Task Instance"
   },
   {
-   "fieldname": "cleaning_log_details_col",
-   "fieldtype": "Column Break"
+   "fieldname": "cleaning_log_sec_review",
+   "fieldtype": "Section Break",
+   "label": "Supervisor Review"
   },
   {
    "default": "0",
@@ -113,11 +134,20 @@
    "options": "User"
   },
   {
+   "fieldname": "cleaning_log_review_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "depends_on": "eval:doc.supervisor_approved==1",
    "fieldname": "supervisor_rating",
    "fieldtype": "Select",
    "label": "Supervisor Rating",
    "options": "\nSatisfactory\nNeeds Improvement\nUnsatisfactory"
+  },
+  {
+   "fieldname": "cleaning_log_sec_exceptions",
+   "fieldtype": "Section Break",
+   "label": "Exceptions"
   },
   {
    "default": "0",
@@ -133,19 +163,14 @@
    "label": "Missed Reason"
   },
   {
+   "fieldname": "cleaning_log_exceptions_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "0",
    "fieldname": "rework_required",
    "fieldtype": "Check",
    "label": "Rework Required"
-  },
-  {
-   "default": "CLEAN-.YYYY.-.####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "CLEAN-.YYYY.-.####",
-   "reqd": 1
   },
   {
    "fieldname": "cleaning_log_sec_evidence",
@@ -172,10 +197,25 @@
    "fieldtype": "Table",
    "label": "Room Cleaning Details",
    "options": "Cleaning Log Room Detail"
+  },
+  {
+   "fieldname": "cleaning_log_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "CLEAN-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "CLEAN-.YYYY.-.####",
+   "reqd": 1
   }
  ],
  "links": [],
- "modified": "2026-06-04 09:00:00.000000",
+ "modified": "2026-06-09 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Cleaning Log",

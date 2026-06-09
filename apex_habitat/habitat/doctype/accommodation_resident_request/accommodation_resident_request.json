@@ -9,15 +9,17 @@
  "field_order": [
   "arr_tab_overview",
   "arr_sec_request_scope",
-  "source_channel",
   "accommodation_site",
   "building",
   "room",
   "bed",
-  "arr_col_resident",
+  "arr_col_location",
+  "source_channel",
+  "arr_sec_reporter",
   "requester_type",
   "party_type",
   "party",
+  "arr_col_resident",
   "employee",
   "worker_name",
   "mobile_number",
@@ -31,13 +33,14 @@
   "arr_sec_resolution",
   "status",
   "assigned_to",
+  "arr_col_resolution",
   "triage_notes",
   "resolution_notes",
   "arr_tab_system",
-  "arr_sec_system",
+  "arr_sec_routing",
   "naming_series",
-  "anonymous_tracking_code",
   "location_token",
+  "anonymous_tracking_code",
   "target_doctype",
   "target_document",
   "arr_col_system",
@@ -53,14 +56,7 @@
   {
    "fieldname": "arr_sec_request_scope",
    "fieldtype": "Section Break",
-   "label": "Location & Resident"
-  },
-  {
-   "fieldname": "source_channel",
-   "fieldtype": "Select",
-   "label": "Source Channel",
-   "options": "QR Web Form\nManual Entry",
-   "default": "QR Web Form"
+   "label": "Location"
   },
   {
    "fieldname": "accommodation_site",
@@ -90,8 +86,20 @@
    "search_index": 1
   },
   {
-   "fieldname": "arr_col_resident",
+   "fieldname": "arr_col_location",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "source_channel",
+   "fieldtype": "Select",
+   "label": "Source Channel",
+   "options": "QR Web Form\nManual Entry",
+   "default": "QR Web Form"
+  },
+  {
+   "fieldname": "arr_sec_reporter",
+   "fieldtype": "Section Break",
+   "label": "Reporter & Resident"
   },
   {
    "fieldname": "requester_type",
@@ -114,6 +122,10 @@
    "options": "party_type",
    "in_list_view": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "arr_col_resident",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "employee",
@@ -195,6 +207,10 @@
    "options": "User"
   },
   {
+   "fieldname": "arr_col_resolution",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "triage_notes",
    "fieldtype": "Small Text",
    "label": "Triage Notes"
@@ -207,12 +223,12 @@
   {
    "fieldname": "arr_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info"
+   "label": "System"
   },
   {
-   "fieldname": "arr_sec_system",
+   "fieldname": "arr_sec_routing",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "label": "Routing & Tracking"
   },
   {
    "fieldname": "naming_series",
@@ -224,15 +240,15 @@
    "hidden": 1
   },
   {
+   "fieldname": "location_token",
+   "fieldtype": "Data",
+   "label": "Location Token"
+  },
+  {
    "fieldname": "anonymous_tracking_code",
    "fieldtype": "Data",
    "label": "Anonymous Tracking Code",
    "read_only": 1
-  },
-  {
-   "fieldname": "location_token",
-   "fieldtype": "Data",
-   "label": "Location Token"
   },
   {
    "fieldname": "target_doctype",
@@ -319,5 +335,5 @@
  "naming_rule": "By \"Naming Series\" field",
  "sort_field": "modified",
  "sort_order": "DESC",
- "modified": "2026-06-07 14:00:00.000000"
+ "modified": "2026-06-09 09:00:00.000000"
 }

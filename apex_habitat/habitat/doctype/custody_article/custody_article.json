@@ -11,18 +11,14 @@
  "naming_rule": "By \"Naming Series\" field",
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "custody_article_tab_details",
    "fieldtype": "Tab Break",
-   "label": "Details",
-   "idx": 1
+   "label": "Details"
   },
   {
-   "doctype": "DocField",
    "fieldname": "custody_article_sec_details",
    "fieldtype": "Section Break",
-   "label": "Information",
-   "idx": 2
+   "label": "Article Details"
   },
   {
    "doctype": "DocField",
@@ -50,6 +46,10 @@
    "idx": 5
   },
   {
+   "fieldname": "custody_article_details_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "doctype": "DocField",
    "fieldname": "depreciation_policy",
    "fieldtype": "Link",
@@ -59,26 +59,15 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "custody_article_details_col",
-   "fieldtype": "Column Break",
-   "idx": 7
-  },
-  {
-   "doctype": "DocField",
    "fieldname": "is_serialized",
    "fieldtype": "Check",
    "label": "Is Serialized",
    "idx": 8
   },
   {
-   "doctype": "DocField",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "CUST-ART-.####",
-   "default": "CUST-ART-.####",
-   "idx": 9,
-   "hidden": 1
+   "fieldname": "custody_article_sec_costing",
+   "fieldtype": "Section Break",
+   "label": "Costing"
   },
   {
    "doctype": "DocField",
@@ -88,12 +77,10 @@
    "idx": 10
   },
   {
-   "doctype": "DocField",
    "fieldname": "custody_article_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 11
+   "label": "Notes & Image",
+   "collapsible": 1
   },
   {
    "doctype": "DocField",
@@ -106,9 +93,25 @@
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "label": "Image"
+  },
+  {
+   "fieldname": "custody_article_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CUST-ART-.####",
+   "default": "CUST-ART-.####",
+   "idx": 9,
+   "hidden": 1
   }
  ],
-"links": [
+ "links": [
   {
    "group": "Custody",
    "is_child_table": 1,
@@ -177,5 +180,23 @@
    "doctype": "DocPerm",
    "idx": 3
   }
- ]
+ ],
+ "field_order": [
+  "custody_article_tab_details",
+  "custody_article_sec_details",
+  "article_name",
+  "category",
+  "unit_of_measure",
+  "custody_article_details_col",
+  "depreciation_policy",
+  "is_serialized",
+  "custody_article_sec_costing",
+  "standard_unit_cost_sar",
+  "custody_article_sec_large_text",
+  "notes",
+  "image",
+  "custody_article_sec_system",
+  "naming_series"
+ ],
+ "modified": "2026-06-09 09:00:00.000000"
 }

@@ -7,34 +7,40 @@
  "engine": "InnoDB",
  "field_order": [
   "facility_asset_movement_tab_overview",
-  "facility_asset_movement_sec_overview",
+  "facility_asset_movement_sec_movement",
   "movement_date",
   "facility_asset",
   "movement_category",
+  "facility_asset_movement_movement_col",
+  "movement_reason",
+  "moved_by",
+  "naming_series",
+  "facility_asset_movement_sec_origin",
   "from_building",
+  "facility_asset_movement_origin_col",
   "from_room",
+  "facility_asset_movement_origin_col2",
   "from_company",
+  "facility_asset_movement_sec_destination",
   "to_building",
-  "facility_asset_movement_overview_col",
+  "facility_asset_movement_destination_col",
   "to_room",
+  "facility_asset_movement_destination_col2",
   "to_company",
   "is_intercompany",
-  "moved_by",
-  "movement_reason",
-  "naming_series",
   "facility_asset_movement_sec_intercompany",
   "release_approved_by",
   "receiving_confirmed_by",
+  "gate_pass_reference",
+  "facility_asset_movement_intercompany_col",
   "accounting_acknowledged",
   "accounting_acknowledged_by",
-  "gate_pass_reference",
   "facility_asset_movement_sec_large_text",
   "remarks",
-  "facility_asset_movement_tab_system",
   "facility_asset_movement_sec_system",
   "native_asset_movement",
-  "facility_asset_movement_system_col",
   "cancellation_reason",
+  "facility_asset_movement_system_col",
   "amended_from"
  ],
  "fields": [
@@ -44,9 +50,9 @@
    "label": "Overview"
   },
   {
-   "fieldname": "facility_asset_movement_sec_overview",
+   "fieldname": "facility_asset_movement_sec_movement",
    "fieldtype": "Section Break",
-   "label": "General Details"
+   "label": "Movement"
   },
   {
    "fieldname": "movement_date",
@@ -73,10 +79,44 @@
    "reqd": 1
   },
   {
+   "fieldname": "facility_asset_movement_movement_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Reallocation",
+   "fieldname": "movement_reason",
+   "fieldtype": "Select",
+   "label": "Movement Reason",
+   "options": "Reallocation\nMaintenance\nCondemnation\nOther"
+  },
+  {
+   "fieldname": "moved_by",
+   "fieldtype": "Link",
+   "label": "Moved By (Employee)",
+   "options": "Employee"
+  },
+  {
+   "default": "FAM-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "FAM-.YYYY.-.####"
+  },
+  {
+   "fieldname": "facility_asset_movement_sec_origin",
+   "fieldtype": "Section Break",
+   "label": "Origin"
+  },
+  {
    "fieldname": "from_building",
    "fieldtype": "Link",
    "label": "From Building",
    "options": "Accommodation Building"
+  },
+  {
+   "fieldname": "facility_asset_movement_origin_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "from_room",
@@ -85,11 +125,20 @@
    "options": "Accommodation Room"
   },
   {
+   "fieldname": "facility_asset_movement_origin_col2",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "from_company",
    "fieldtype": "Link",
    "label": "From Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "facility_asset_movement_sec_destination",
+   "fieldtype": "Section Break",
+   "label": "Destination"
   },
   {
    "fieldname": "to_building",
@@ -100,7 +149,7 @@
    "reqd": 1
   },
   {
-   "fieldname": "facility_asset_movement_overview_col",
+   "fieldname": "facility_asset_movement_destination_col",
    "fieldtype": "Column Break"
   },
   {
@@ -108,6 +157,10 @@
    "fieldtype": "Link",
    "label": "To Room",
    "options": "Accommodation Room"
+  },
+  {
+   "fieldname": "facility_asset_movement_destination_col2",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "to_company",
@@ -122,27 +175,6 @@
    "fieldtype": "Check",
    "label": "Is Intercompany Movement",
    "read_only": 1
-  },
-  {
-   "fieldname": "moved_by",
-   "fieldtype": "Link",
-   "label": "Moved By (Employee)",
-   "options": "Employee"
-  },
-  {
-   "default": "Reallocation",
-   "fieldname": "movement_reason",
-   "fieldtype": "Select",
-   "label": "Movement Reason",
-   "options": "Reallocation\nMaintenance\nCondemnation\nOther"
-  },
-  {
-   "default": "FAM-.YYYY.-.####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "FAM-.YYYY.-.####"
   },
   {
    "collapsible": 1,
@@ -166,6 +198,16 @@
    "options": "User"
   },
   {
+   "depends_on": "eval:doc.is_intercompany==1",
+   "fieldname": "gate_pass_reference",
+   "fieldtype": "Data",
+   "label": "Gate Pass Reference"
+  },
+  {
+   "fieldname": "facility_asset_movement_intercompany_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "0",
    "depends_on": "eval:doc.is_intercompany==1",
    "fieldname": "accounting_acknowledged",
@@ -180,16 +222,10 @@
    "options": "User"
   },
   {
-   "depends_on": "eval:doc.is_intercompany==1",
-   "fieldname": "gate_pass_reference",
-   "fieldtype": "Data",
-   "label": "Gate Pass Reference"
-  },
-  {
    "collapsible": 1,
    "fieldname": "facility_asset_movement_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information"
+   "label": "Remarks"
   },
   {
    "fieldname": "remarks",
@@ -197,14 +233,10 @@
    "label": "Remarks"
   },
   {
-   "fieldname": "facility_asset_movement_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System Info"
-  },
-  {
+   "collapsible": 1,
    "fieldname": "facility_asset_movement_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "label": "System"
   },
   {
    "fieldname": "native_asset_movement",
@@ -214,14 +246,14 @@
    "read_only": 1
   },
   {
-   "fieldname": "facility_asset_movement_system_col",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "cancellation_reason",
    "fieldtype": "Small Text",
    "label": "Cancellation Reason",
    "read_only": 1
+  },
+  {
+   "fieldname": "facility_asset_movement_system_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "amended_from",
@@ -236,7 +268,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-02 09:00:00.000007",
+ "modified": "2026-06-09 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Facility Asset Movement",

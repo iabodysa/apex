@@ -10,7 +10,7 @@
  "is_hidden": 0,
  "sequence_id": 5.0,
  "parent_page": "",
- "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwQlApprovals\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Pending Approvals\", \"col\": 4}}, {\"id\": \"mwQlTasks\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Tasks\", \"col\": 4}}, {\"id\": \"mwQlMentions\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Mentions\", \"col\": 4}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 12}}]",
+ "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwHdrNumbers\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Numbers</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwHdrQueues\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Queues</b></span>\", \"col\": 12}}, {\"id\": \"mwQlApprovals\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Pending Approvals\", \"col\": 4}}, {\"id\": \"mwQlTasks\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Tasks\", \"col\": 4}}, {\"id\": \"mwQlMentions\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Mentions\", \"col\": 4}}, {\"id\": \"mwHdrGoTo\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Go To</b></span>\", \"col\": 12}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 6}}, {\"id\": \"mwScAlerts\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Alert\", \"col\": 6}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -18,6 +18,16 @@
    "label": "Action Inbox",
    "idx": 1,
    "url": "/app/action-inbox"
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Operations Alert",
+   "link_to": "Operations Alert",
+   "stats_filter": "{\"status\": [\"!=\", \"Resolved\"]}",
+   "format": "{} Open",
+   "color": "Orange",
+   "idx": 2
   }
  ],
  "links": [],
@@ -67,5 +77,5 @@
   }
  ],
  "roles": [],
- "modified": "2026-06-06 14:00:00.000000"
+ "modified": "2026-06-09 09:00:00.000000"
 }

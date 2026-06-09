@@ -16,15 +16,13 @@
    "doctype": "DocField",
    "fieldname": "facility_asset_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview",
-   "idx": 1
+   "label": "Overview"
   },
   {
    "doctype": "DocField",
-   "fieldname": "facility_asset_sec_overview",
+   "fieldname": "facility_asset_sec_identification",
    "fieldtype": "Section Break",
-   "label": "General Details",
-   "idx": 2
+   "label": "Identification"
   },
   {
    "doctype": "DocField",
@@ -45,6 +43,44 @@
   },
   {
    "doctype": "DocField",
+   "fieldname": "serial_number",
+   "fieldtype": "Data",
+   "label": "Serial Number",
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_identification_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "linked_erpnext_asset",
+   "fieldtype": "Link",
+   "label": "ERPNext Asset Record",
+   "options": "Asset",
+   "description": "Links this asset to its ERPNext Asset record for depreciation tracking.",
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "FAC-AST-.YYYY.-.####",
+   "default": "FAC-AST-.YYYY.-.####",
+   "reqd": 1,
+   "idx": 14,
+   "hidden": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_sec_location",
+   "fieldtype": "Section Break",
+   "label": "Location & Custody"
+  },
+  {
+   "doctype": "DocField",
    "fieldname": "building",
    "fieldtype": "Link",
    "label": "Assigned Building",
@@ -62,25 +98,8 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "serial_number",
-   "fieldtype": "Data",
-   "label": "Serial Number",
-   "idx": 7
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "linked_erpnext_asset",
-   "fieldtype": "Link",
-   "label": "ERPNext Asset Record",
-   "options": "Asset",
-   "description": "Links this asset to its ERPNext Asset record for depreciation tracking.",
-   "idx": 8
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "facility_asset_overview_col",
-   "fieldtype": "Column Break",
-   "idx": 9
+   "fieldname": "facility_asset_location_col",
+   "fieldtype": "Column Break"
   },
   {
    "doctype": "DocField",
@@ -94,6 +113,12 @@
   },
   {
    "doctype": "DocField",
+   "fieldname": "facility_asset_sec_lifecycle",
+   "fieldtype": "Section Break",
+   "label": "Lifecycle"
+  },
+  {
+   "doctype": "DocField",
    "fieldname": "installation_date",
    "fieldtype": "Date",
    "label": "Installation Date",
@@ -101,10 +126,20 @@
   },
   {
    "doctype": "DocField",
+   "fieldname": "facility_asset_lifecycle_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
    "fieldname": "warranty_expiry",
    "fieldtype": "Date",
    "label": "Warranty Expiry",
    "idx": 12
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "facility_asset_lifecycle_col2",
+   "fieldtype": "Column Break"
   },
   {
    "doctype": "DocField",
@@ -117,22 +152,10 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "FAC-AST-.YYYY.-.####",
-   "default": "FAC-AST-.YYYY.-.####",
-   "reqd": 1,
-   "idx": 14,
-   "hidden": 1
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "facility_asset_sec_large_text",
+   "fieldname": "facility_asset_sec_notes",
    "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1,
-   "idx": 15
+   "label": "Notes",
+   "collapsible": 1
   },
   {
    "doctype": "DocField",
@@ -145,15 +168,15 @@
    "doctype": "DocField",
    "fieldname": "facility_asset_tab_system",
    "fieldtype": "Tab Break",
-   "label": "System Info",
-   "idx": 17
+   "label": "System"
   },
   {
    "doctype": "DocField",
-   "fieldname": "facility_asset_sec_system",
+   "fieldname": "facility_asset_sec_movement_audit",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
-   "idx": 18
+   "label": "Movement Audit",
+   "collapsible": 1,
+   "description": "Maintained by movement processing."
   },
   {
    "doctype": "DocField",
@@ -183,9 +206,8 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "facility_asset_system_col",
-   "fieldtype": "Column Break",
-   "idx": 22
+   "fieldname": "facility_asset_movement_audit_col",
+   "fieldtype": "Column Break"
   },
   {
    "doctype": "DocField",
@@ -206,7 +228,7 @@
    "idx": 24
   }
  ],
-"links": [
+ "links": [
   {
    "group": "Custody",
    "link_doctype": "Facility Asset Movement",
@@ -263,5 +285,37 @@
    "report": 1,
    "idx": 4
   }
- ]
+ ],
+ "field_order": [
+  "facility_asset_tab_overview",
+  "facility_asset_sec_identification",
+  "asset_name",
+  "asset_category",
+  "serial_number",
+  "facility_asset_identification_col",
+  "linked_erpnext_asset",
+  "naming_series",
+  "facility_asset_sec_location",
+  "building",
+  "location_in_building",
+  "facility_asset_location_col",
+  "responsible_supervisor",
+  "facility_asset_sec_lifecycle",
+  "installation_date",
+  "facility_asset_lifecycle_col",
+  "warranty_expiry",
+  "facility_asset_lifecycle_col2",
+  "status",
+  "facility_asset_sec_notes",
+  "notes",
+  "facility_asset_tab_system",
+  "facility_asset_sec_movement_audit",
+  "last_inspection_date",
+  "previous_building",
+  "previous_location_in_building",
+  "facility_asset_movement_audit_col",
+  "movement_count",
+  "last_movement_date"
+ ],
+ "modified": "2026-06-09 09:00:00.000000"
 }

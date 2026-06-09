@@ -24,14 +24,17 @@
  "is_hidden": 0,
  "sequence_id": 4.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"srfHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srfKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"srfKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"srfKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Requests Open\", \"col\": 3}}, {\"id\": \"srfKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"srfKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Active Assignments\", \"col\": 3}}, {\"id\": \"srfKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Gov Relations Open\", \"col\": 3}}, {\"id\": \"srfKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Vehicles Stopped\", \"col\": 3}}, {\"id\": \"fltHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"fltChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Vehicle Utilisation\", \"col\": 12}}, {\"id\": \"fltHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"fltQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Pending Wash Requests\", \"col\": 4}}, {\"id\": \"srfHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srfQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"srfQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"srfQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"srfHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srfCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Fleet\", \"col\": 4}}, {\"id\": \"srfCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Views\", \"col\": 4}}]",
+ "content": "[{\"id\": \"srfHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srfKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"srfKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"srfKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Requests Open\", \"col\": 3}}, {\"id\": \"srfKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Representatives Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"srfKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Active Assignments\", \"col\": 3}}, {\"id\": \"srfKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Gov Relations Open\", \"col\": 3}}, {\"id\": \"srfKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Vehicles Stopped\", \"col\": 3}}, {\"id\": \"fltHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"fltChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Vehicle Utilisation\", \"col\": 12}}, {\"id\": \"fltHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"fltQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Pending Wash Requests\", \"col\": 4}}, {\"id\": \"srfHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srfQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"srfQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"srfQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"srfHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srfCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"srfCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Operations\", \"col\": 4}}, {\"id\": \"srfCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Exceptions & Analytics\", \"col\": 4}}, {\"id\": \"srfCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"srfCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Salis Vehicle",
    "link_to": "Salis Vehicle",
-   "idx": 1
+   "idx": 1,
+   "stats_filter": "{\"status\": \"Active\"}",
+   "format": "{} Open",
+   "color": "Green"
   },
   {
    "doctype": "Workspace Shortcut",
@@ -52,7 +55,7 @@
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
-   "label": "Fleet",
+   "label": "Masters",
    "idx": 1
   },
   {
@@ -66,10 +69,24 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
+   "label": "Route Plan",
+   "link_type": "DocType",
+   "link_to": "Route Plan",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Operations",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Vehicle Assignment",
    "link_type": "DocType",
    "link_to": "Vehicle Assignment",
-   "idx": 3
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -77,7 +94,7 @@
    "label": "Vehicle Handover",
    "link_type": "DocType",
    "link_to": "Vehicle Handover",
-   "idx": 4
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
@@ -85,15 +102,7 @@
    "label": "Dispatch Trip",
    "link_type": "DocType",
    "link_to": "Dispatch Trip",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Route Plan",
-   "link_type": "DocType",
-   "link_to": "Route Plan",
-   "idx": 6
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -101,7 +110,7 @@
    "label": "Trip Start Log",
    "link_type": "DocType",
    "link_to": "Trip Start Log",
-   "idx": 7
+   "idx": 8
   },
   {
    "doctype": "Workspace Link",
@@ -109,7 +118,7 @@
    "label": "Vehicle Stop",
    "link_type": "DocType",
    "link_to": "Vehicle Stop",
-   "idx": 8
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -117,7 +126,13 @@
    "label": "Wash Request",
    "link_type": "DocType",
    "link_to": "Wash Request",
-   "idx": 9
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Exceptions & Analytics",
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -125,7 +140,7 @@
    "label": "Vehicle Damage Write-Off",
    "link_type": "DocType",
    "link_to": "Vehicle Damage Write-Off",
-   "idx": 10
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -133,13 +148,13 @@
    "label": "Vehicle Utilisation Snapshot",
    "link_type": "DocType",
    "link_to": "Vehicle Utilisation Snapshot",
-   "idx": 11
+   "idx": 13
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
-   "label": "Views",
-   "idx": 12
+   "label": "Reports",
+   "idx": 14
   },
   {
    "doctype": "Workspace Link",
@@ -147,7 +162,7 @@
    "label": "Salis Fleet Register",
    "link_type": "Report",
    "link_to": "Salis Fleet Register",
-   "idx": 13,
+   "idx": 15,
    "is_query_report": 1
   },
   {
@@ -156,8 +171,14 @@
    "label": "Vehicle Utilisation",
    "link_type": "Report",
    "link_to": "Vehicle Utilisation",
-   "idx": 14,
+   "idx": 16,
    "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Dashboards",
+   "idx": 17
   },
   {
    "doctype": "Workspace Link",
@@ -165,7 +186,7 @@
    "label": "Representatives Fleet Dashboard",
    "link_type": "Dashboard",
    "link_to": "Salis - Representatives Fleet",
-   "idx": 15
+   "idx": 18
   },
   {
    "doctype": "Workspace Link",
@@ -173,7 +194,7 @@
    "label": "Fleet Supervisor Dashboard",
    "link_type": "Dashboard",
    "link_to": "Fleet Supervisor Dashboard",
-   "idx": 16
+   "idx": 19
   }
  ],
  "charts": [
@@ -236,5 +257,5 @@
    "idx": 1
   }
  ],
- "modified": "2026-06-08 18:00:00.000000"
+ "modified": "2026-06-09 09:00:00.000000"
 }

@@ -11,33 +11,37 @@
   "party_type",
   "party",
   "employee",
+  "idle_resident_overview_col",
   "employee_name",
   "assignment",
   "building",
-  "idle_resident_overview_col",
+  "idle_resident_sec_classification",
   "reason_category",
+  "idle_resident_classification_col",
   "responsible_department",
-  "reported_on",
-  "reported_by",
   "idle_resident_sec_tracking",
   "status",
   "days_idle",
-  "estimated_accommodation_cost_bleed_sar",
   "idle_resident_tracking_col",
-  "acknowledged_by",
-  "acknowledged_on",
+  "estimated_accommodation_cost_bleed_sar",
   "idle_resident_sec_resolution",
   "resolution_category",
   "resolution_notes",
   "idle_resident_resolution_col",
   "resolved_by",
-  "resolved_on"
+  "resolved_on",
+  "idle_resident_sec_system",
+  "reported_on",
+  "reported_by",
+  "idle_resident_system_col",
+  "acknowledged_by",
+  "acknowledged_on"
  ],
  "fields": [
   {
    "fieldname": "idle_resident_sec_overview",
    "fieldtype": "Section Break",
-   "label": "Overview"
+   "label": "Resident"
   },
   {
    "default": "IDLE-.YYYY.-.####",
@@ -76,6 +80,10 @@
    "search_index": 1
   },
   {
+   "fieldname": "idle_resident_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
@@ -98,8 +106,9 @@
    "reqd": 1
   },
   {
-   "fieldname": "idle_resident_overview_col",
-   "fieldtype": "Column Break"
+   "fieldname": "idle_resident_sec_classification",
+   "fieldtype": "Section Break",
+   "label": "Classification"
   },
   {
    "fieldname": "reason_category",
@@ -110,28 +119,16 @@
    "reqd": 1
   },
   {
+   "fieldname": "idle_resident_classification_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "responsible_department",
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Responsible Department",
    "options": "HR\nOperations\nLegal",
    "reqd": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "reported_on",
-   "fieldtype": "Date",
-   "label": "Reported On",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "default": "__user",
-   "fieldname": "reported_by",
-   "fieldtype": "Link",
-   "label": "Reported By",
-   "options": "User",
-   "read_only": 1
   },
   {
    "fieldname": "idle_resident_sec_tracking",
@@ -155,6 +152,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "idle_resident_tracking_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "description": "Estimated accommodation cost from the memo ledger only (not salary). Populated by the aging job.",
    "fieldname": "estimated_accommodation_cost_bleed_sar",
    "fieldtype": "Currency",
@@ -162,26 +163,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "idle_resident_tracking_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "acknowledged_by",
-   "fieldtype": "Link",
-   "label": "Acknowledged By",
-   "options": "User",
-   "read_only": 1
-  },
-  {
-   "fieldname": "acknowledged_on",
-   "fieldtype": "Date",
-   "label": "Acknowledged On",
-   "read_only": 1
-  },
-  {
    "fieldname": "idle_resident_sec_resolution",
    "fieldtype": "Section Break",
-   "label": "Resolution"
+   "label": "Resolution",
+   "collapsible": 1
   },
   {
    "depends_on": "eval:doc.status==\"Resolved\"",
@@ -212,11 +197,50 @@
    "fieldtype": "Date",
    "label": "Resolved On",
    "read_only": 1
+  },
+  {
+   "fieldname": "idle_resident_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "reported_on",
+   "fieldtype": "Date",
+   "label": "Reported On",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "__user",
+   "fieldname": "reported_by",
+   "fieldtype": "Link",
+   "label": "Reported By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "idle_resident_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "acknowledged_by",
+   "fieldtype": "Link",
+   "label": "Acknowledged By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "acknowledged_on",
+   "fieldtype": "Date",
+   "label": "Acknowledged On",
+   "read_only": 1
   }
  ],
  "is_submittable": 0,
  "links": [],
- "modified": "2026-05-25 00:00:00.000000",
+ "modified": "2026-06-09 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Idle Resident Report",
