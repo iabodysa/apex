@@ -121,6 +121,7 @@ doc_events = {
         "validate": "apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement.validate",
         "on_submit": "apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement.on_submit",
         "before_cancel": "apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement.before_cancel",
+        "on_cancel": "apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement.on_cancel",
     },
     "Operational Depreciation Policy": {},
     "Subcontractor Service Order": {

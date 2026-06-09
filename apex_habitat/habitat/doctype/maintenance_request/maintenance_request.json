@@ -216,7 +216,9 @@
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "fetch_from": "building.default_cost_center",
+   "fetch_if_empty": 1
   },
   {
    "fieldname": "maintenance_request_sec_table_procurement_items",
@@ -365,7 +367,7 @@
    "table_fieldname": "linked_maintenance_requests"
   }
  ],
- "modified": "2026-06-08 20:00:00.000000",
+ "modified": "2026-06-09 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",

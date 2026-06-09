@@ -5,6 +5,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import today
 
 
 class FacilityAssetMovement(Document):
@@ -26,15 +27,41 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    if frappe.db.exists("DocType", "Facility Asset"):
-        asset_fields = {f.fieldname for f in frappe.get_meta("Facility Asset").fields}
-        updates = {}
-        if "current_building" in asset_fields:
-            updates["current_building"] = doc.to_building
-        if "current_room" in asset_fields:
-            updates["current_room"] = doc.to_room
-        if updates:
-            frappe.db.set_value("Facility Asset", doc.facility_asset, updates)
+    """Actually move the asset: snapshot its current location into previous_*, set the
+    new building/location from this movement, and bump the movement audit fields.
+
+    The previous code wrote ``current_building``/``current_room``, which do NOT exist
+    on Facility Asset (its fields are ``building``/``location_in_building``), so the
+    guarded ``updates`` dict stayed empty — every movement was a silent no-op and the
+    audit fields (previous_*/movement_count/last_movement_date) never populated."""
+    asset = frappe.db.get_value(
+        "Facility Asset",
+        doc.facility_asset,
+        ["building", "location_in_building", "movement_count"],
+        as_dict=True,
+    )
+    if not asset:
+        return
+    frappe.db.set_value("Facility Asset", doc.facility_asset, {
+        "previous_building": asset.building,
+        "previous_location_in_building": asset.location_in_building,
+        "building": doc.to_building,
+        "location_in_building": doc.to_room,
+        "movement_count": (asset.movement_count or 0) + 1,
+        "last_movement_date": today(),
+    })
+
+
+def on_cancel(doc, method=None):
+    """Revert the asset to where it came from when a submitted movement is cancelled."""
+    if not frappe.db.exists("Facility Asset", doc.facility_asset):
+        return
+    count = frappe.db.get_value("Facility Asset", doc.facility_asset, "movement_count") or 0
+    frappe.db.set_value("Facility Asset", doc.facility_asset, {
+        "building": doc.from_building,
+        "location_in_building": doc.from_room,
+        "movement_count": max(0, count - 1),
+    })
 
 
 def before_cancel(doc, method=None):

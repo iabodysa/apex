@@ -179,7 +179,9 @@
   {
    "fieldname": "cancellation_reason",
    "fieldtype": "Small Text",
-   "label": "Cancellation Reason"
+   "label": "Cancellation Reason",
+   "read_only": 0,
+   "allow_on_submit": 1
   },
   {
    "fieldname": "room_condition_snapshot",
@@ -215,7 +217,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-09 09:00:00.000000",
+ "modified": "2026-06-09 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Checkout",
