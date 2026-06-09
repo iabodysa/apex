@@ -15,7 +15,8 @@
    "options": "Maintenance Material",
    "reqd": 1,
    "in_list_view": 1,
-   "idx": 1
+   "idx": 1,
+   "columns": 4
   },
   {
    "doctype": "DocField",
@@ -25,7 +26,8 @@
    "default": "1",
    "reqd": 1,
    "in_list_view": 1,
-   "idx": 2
+   "idx": 2,
+   "columns": 2
   },
   {
    "doctype": "DocField",
@@ -33,7 +35,9 @@
    "fieldtype": "Data",
    "label": "Unit",
    "fetch_from": "material.default_uom",
-   "idx": 3
+   "idx": 3,
+   "in_list_view": 1,
+   "columns": 2
   },
   {
    "doctype": "DocField",
@@ -42,5 +46,6 @@
    "label": "Notes",
    "idx": 4
   }
- ]
+ ],
+ "modified": "2026-06-09 10:00:00.000000"
 }

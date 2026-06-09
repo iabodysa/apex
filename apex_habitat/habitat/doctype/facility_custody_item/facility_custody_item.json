@@ -8,19 +8,12 @@
  "fields": [
   {
    "doctype": "DocField",
-   "fieldname": "facility_custody_item_sec_details",
-   "fieldtype": "Section Break",
-   "label": "Details",
-   "idx": 1
-  },
-  {
-   "doctype": "DocField",
    "fieldname": "facility_asset",
    "fieldtype": "Link",
    "label": "Facility Asset",
    "options": "Facility Asset",
    "reqd": 1,
-   "idx": 2,
+   "idx": 1,
    "in_list_view": 1,
    "columns": 3
   },
@@ -31,7 +24,7 @@
    "label": "Category",
    "fetch_from": "facility_asset.asset_category",
    "read_only": 1,
-   "idx": 3,
+   "idx": 2,
    "in_list_view": 1,
    "columns": 3
   },
@@ -42,15 +35,9 @@
    "label": "Serial Number",
    "fetch_from": "facility_asset.serial_number",
    "read_only": 1,
-   "idx": 4,
+   "idx": 3,
    "in_list_view": 1,
    "columns": 3
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "facility_custody_item_details_col",
-   "fieldtype": "Column Break",
-   "idx": 5
   },
   {
    "doctype": "DocField",
@@ -58,15 +45,17 @@
    "fieldtype": "Select",
    "label": "Condition at Handover",
    "options": "Good\nFair\nFaulty\nNot Found",
-   "idx": 6
+   "idx": 4,
+   "in_list_view": 1
   },
   {
    "doctype": "DocField",
    "fieldname": "condition_notes",
    "fieldtype": "Small Text",
    "label": "Notes",
-   "idx": 7
+   "idx": 5
   }
  ],
- "permissions": []
+ "permissions": [],
+ "modified": "2026-06-09 10:00:00.000000"
 }
