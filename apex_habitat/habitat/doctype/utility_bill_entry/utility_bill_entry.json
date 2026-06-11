@@ -41,6 +41,7 @@
   "utility_bill_entry_variance_col",
   "variance_alert_sent",
   "utility_bill_entry_sec_system",
+  "cancellation_reason",
   "linked_payment_entry",
   "naming_series",
   "amended_from"
@@ -258,6 +259,14 @@
    "collapsible": 1
   },
   {
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancellation Reason",
+   "read_only": 0,
+   "allow_on_submit": 1,
+   "description": "Required to cancel a submitted bill; recorded on the reversal posted to the Accommodation Ledger."
+  },
+  {
    "description": "Draft Payment Entry created on submit.",
    "fieldname": "linked_payment_entry",
    "fieldtype": "Link",
@@ -286,7 +295,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-06-11 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Utility Bill Entry",

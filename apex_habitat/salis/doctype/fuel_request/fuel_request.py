@@ -163,6 +163,16 @@ class FuelRequest(Document):
 				),
 			)
 
+		# Reverse any Fuel Consumption Ledger row already accrued for this request.
+		# A Standard request only enters the ledger after it reaches Done and the
+		# fuel accrual engine ledgers it; cancelling it here must net that
+		# consumption back out, mirroring the quota reversal above. The engine
+		# helper is idempotent and a no-op when nothing was ledgered (other request
+		# types never accrue a ledger row), so this is safe to call unconditionally.
+		from apex_habitat.salis.fuel_engine import reverse_fuel_ledger
+
+		reverse_fuel_ledger("Fuel Request", self.name)
+
 	# ------------------------------------------------------------------ per-type validation
 
 	def _validate_standard(self):

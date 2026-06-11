@@ -31,7 +31,6 @@
   "topup_litres",
   "fuel_request_sec_amounts_col1",
   "amount",
-  "estimated_monthly_saving",
   "fuel_request_sec_temporary",
   "is_temporary",
   "reverted",
@@ -216,12 +215,6 @@
    "label": "Amount (SAR)"
   },
   {
-   "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'",
-   "fieldname": "estimated_monthly_saving",
-   "fieldtype": "Currency",
-   "label": "Estimated Monthly Saving"
-  },
-  {
    "fieldname": "fuel_request_sec_temporary",
    "fieldtype": "Section Break",
    "label": "Temporary Top-up",
@@ -372,7 +365,7 @@
    "link_fieldname": "fuel_request"
   }
  ],
- "modified": "2026-06-08 20:00:00.000000",
+ "modified": "2026-06-11 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Request",

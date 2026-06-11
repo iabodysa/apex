@@ -107,7 +107,7 @@ class TestFuelMergeShape(FrappeTestCase):
 		for f in (
 			"topup_litres", "is_temporary", "revert_due_date", "reverted",
 			"chip_number", "action", "inactivity_evidence",
-			"estimated_monthly_saving", "owner_acknowledged", "migrated_from",
+			"owner_acknowledged", "migrated_from",
 		):
 			self.assertTrue(meta.has_field(f), f"Unified Fuel Request must carry {f}.")
 

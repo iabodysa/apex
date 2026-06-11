@@ -10,6 +10,42 @@ class AccommodationResidentRequest(Document):
     pass
 
 
+# Category → target DocType routing for conversion. A resident request is a
+# triage funnel; once a supervisor decides what it really is, it is converted
+# into the operational record that actually does the work. Physical-issue
+# categories become a Maintenance Request (the dominant operational sink),
+# Safety becomes a Habitat Safety Incident, and custody/facility-item requests
+# become a Custody Issue. Categories with no operational target (Complaint,
+# Suggestion, Reimbursement, Other) are resolved on the request itself.
+_CATEGORY_TARGET = {
+    "Maintenance": "Maintenance Request",
+    "Water": "Maintenance Request",
+    "Electrical": "Maintenance Request",
+    "AC": "Maintenance Request",
+    "Plumbing": "Maintenance Request",
+    "Cleaning": "Maintenance Request",
+    "Pest Control": "Maintenance Request",
+    "Facility Item": "Maintenance Request",
+    "Safety": "Habitat Safety Incident",
+    "Custody": "Custody Issue",
+}
+
+# The resident-request Category vocabulary is broader than the Maintenance
+# Request Issue Type vocabulary; map each convertible category onto a valid
+# Issue Type option so the mapped ticket passes its own validation.
+_CATEGORY_TO_ISSUE_TYPE = {
+    "Maintenance": "Other",
+    "Water": "Plumbing",
+    "Plumbing": "Plumbing",
+    "Electrical": "Electrical",
+    "AC": "Air Conditioning",
+    "Cleaning": "Other",
+    "Pest Control": "Pest Control",
+    "Facility Item": "Furniture",
+    "Safety": "Fire Safety",
+}
+
+
 def before_insert(doc, method=None):
     if doc.get("website_field"):
         frappe.throw("Invalid submission.", frappe.PermissionError)
@@ -144,3 +180,116 @@ def _apply_priority_rules(doc):
         doc.priority = "Critical"
     elif any(term in text for term in high_terms) and doc.priority in (None, "", "Low", "Medium"):
         doc.priority = "High"
+
+
+# ---------------------------------------------------------------------------
+# Conversion: turn a triaged resident request into the operational record that
+# does the work, and stamp the back-link (target_doctype / target_document) so
+# the request keeps a permanent, read-only trace of what it became. Mirrors the
+# Maintenance Request -> Work Order pattern (frappe.model.mapper.get_mapped_doc),
+# but creates and saves the target server-side so the traceability fields always
+# populate — for desk users and programmatic callers alike — and so the request
+# can never be "converted" twice.
+# ---------------------------------------------------------------------------
+
+
+@frappe.whitelist(methods=["POST"])
+def convert_request(source_name):
+    """Create the category-appropriate operational document from a resident
+    request, link it back via target_doctype / target_document, and advance the
+    request to In Progress. Returns the new target's doctype + name so the
+    client can route to it.
+
+    Idempotent: if the request was already converted, the existing target is
+    returned instead of creating a duplicate."""
+    frappe.has_permission("Accommodation Resident Request", "write", doc=source_name, throw=True)
+
+    source = frappe.get_doc("Accommodation Resident Request", source_name)
+
+    # Already converted — return the existing link, do not create a second target.
+    if source.target_doctype and source.target_document:
+        if frappe.db.exists(source.target_doctype, source.target_document):
+            return {
+                "target_doctype": source.target_doctype,
+                "target_document": source.target_document,
+                "already_converted": True,
+            }
+
+    target_doctype = _CATEGORY_TARGET.get(source.request_category)
+    if not target_doctype:
+        frappe.throw(
+            _("Requests in category {0} are resolved directly and have no target document to create.")
+            .format(_(source.request_category or "Other"))
+        )
+
+    builders = {
+        "Maintenance Request": _build_maintenance_request,
+        "Habitat Safety Incident": _build_safety_incident,
+        "Custody Issue": _build_custody_issue,
+    }
+    target = builders[target_doctype](source)
+    target.insert(ignore_permissions=False)
+
+    _link_target_to_request(source, target.doctype, target.name)
+
+    return {
+        "target_doctype": target.doctype,
+        "target_document": target.name,
+        "already_converted": False,
+    }
+
+
+def _link_target_to_request(source, target_doctype, target_name):
+    """Stamp the read-only traceability fields and advance status. Uses
+    db.set_value (not a full save) so the read_only target_* fields are written
+    server-side without re-running the request's own validate/on_update mid-flow,
+    and without a timestamp-mismatch race."""
+    updates = {"target_doctype": target_doctype, "target_document": target_name}
+    # Move the request out of its intake states once work has a home, but never
+    # override a terminal state (Resolved/Rejected/Closed).
+    if source.status in (None, "", "New", "Triaged", "Assigned"):
+        updates["status"] = "In Progress"
+    frappe.db.set_value("Accommodation Resident Request", source.name, updates)
+
+
+def _common_location(source, target):
+    target.building = source.building
+    target.room = source.room
+    if source.bed:
+        target.bed = source.bed
+
+
+def _build_maintenance_request(source):
+    target = frappe.new_doc("Maintenance Request")
+    _common_location(source, target)
+    target.issue_type = _CATEGORY_TO_ISSUE_TYPE.get(source.request_category, "Other")
+    target.priority = source.priority or "Medium"
+    target.issue_description = source.description or _("Converted from resident request {0}").format(source.name)
+    target.reported_by = frappe.session.user
+    target.status = "Open"
+    return target
+
+
+def _build_safety_incident(source):
+    target = frappe.new_doc("Habitat Safety Incident")
+    target.incident_datetime = frappe.utils.now_datetime()
+    target.accommodation_building = source.building
+    target.specific_location = source.issue_location
+    # Map request priority onto the incident severity vocabulary
+    # (Low / Medium / High / Severe / Critical).
+    _severity_map = {"Critical": "Critical", "High": "High", "Medium": "Medium", "Low": "Low"}
+    target.severity = _severity_map.get(source.priority, "Medium")
+    target.description = source.description or _("Converted from resident request {0}").format(source.name)
+    target.reported_by = frappe.session.user
+    return target
+
+
+def _build_custody_issue(source):
+    target = frappe.new_doc("Custody Issue")
+    target.issue_date = frappe.utils.today()
+    target.building = source.building
+    if source.party_type and source.party:
+        target.party_type = source.party_type
+        target.party = source.party
+    target.remarks = source.description or _("Converted from resident request {0}").format(source.name)
+    return target

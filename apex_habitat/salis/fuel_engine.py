@@ -100,6 +100,87 @@ def _insert_ledger_row(
 
 
 # ---------------------------------------------------------------------------
+# Reversal
+# ---------------------------------------------------------------------------
+
+
+def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
+    """Reverse the ledgered consumption for a corrected/cancelled fuel source.
+
+    When a fuel source (a Fuel Request whose Done row was already ledgered, or a
+    Fuel Daily Log) is cancelled or deleted, its consumption must not stay in the
+    Fuel Consumption Ledger. This posts a negative mirror row for each original
+    ledger row of that source — negating ``litres`` and ``amount`` — and links it
+    back via ``reversal_of``, so the source nets to zero in every consumption sum
+    while the original row is preserved for audit.
+
+    This mirrors the Habitat ledger reversal idiom (``Accommodation Ledger`` via
+    ``utility_bill_entry.before_cancel``): a negated row with ``reversal_of`` set,
+    not a delete. The Fuel Consumption Ledger carries no ``is_cancelled`` flag, so
+    — exactly like the Accommodation Ledger — the guard against double-reversal is
+    that only an ORIGINAL row (``reversal_of`` unset) is ever mirrored, and a row
+    that already has a reversal pointing at it is skipped.
+
+    Idempotent: calling it twice for the same source posts at most one reversal
+    per original row. Returns the number of reversal rows posted (0 if the source
+    was never ledgered or is already fully reversed).
+    """
+    from frappe.utils import flt, now_datetime
+
+    # Only the originating rows are reversible; a reversal row (``reversal_of``
+    # set) is never itself reversed. This is the same selector the Habitat
+    # ledgers use to find the row to negate.
+    originals = frappe.get_all(
+        LEDGER_DOCTYPE,
+        filters={
+            "source_type": source_type,
+            "source_name": source_name,
+            "reversal_of": ["is", "not set"],
+        },
+        fields=[
+            "name",
+            "vehicle",
+            "driver",
+            "company",
+            "period_month",
+            "litres",
+            "amount",
+        ],
+    )
+
+    posted = 0
+    for row in originals:
+        # Double-reversal guard: skip if a reversal already points at this row.
+        # The reversal row is identified by reversal_of and deliberately leaves
+        # source_name unset (NULL). The composite UNIQUE index unique_fcl_source
+        # is on (source_type, source_name) with both columns nullable, and
+        # MariaDB treats NULL as distinct in a UNIQUE index — so the reversal can
+        # never collide with the original (whose source_name is always populated)
+        # nor with another reversal (all NULL source_name), regardless of the
+        # source_type value the Select field defaults to.
+        if frappe.db.exists(LEDGER_DOCTYPE, {"reversal_of": row.name}):
+            continue
+
+        frappe.get_doc(
+            {
+                "doctype": LEDGER_DOCTYPE,
+                "vehicle": row.vehicle,
+                "driver": row.driver,
+                "company": row.company,
+                "period_month": row.period_month,
+                "litres": -flt(row.litres),
+                "amount": -flt(row.amount),
+                "source_doctype": source_type,
+                "logged_at": now_datetime(),
+                "reversal_of": row.name,
+            }
+        ).insert(ignore_permissions=True)  # audit-ok
+        posted += 1
+
+    return posted
+
+
+# ---------------------------------------------------------------------------
 # Daily accrual
 # ---------------------------------------------------------------------------
 

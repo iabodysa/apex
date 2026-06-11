@@ -49,6 +49,8 @@ def validate(doc, method=None):
     if not doc.cost_center:
         doc.cost_center = assignment.cost_center
 
+    _populate_issued_quantities(doc)
+
     _VALID_TERMINAL = {"Returned", "Lost", "Damaged"}
     for row in doc.custody_return_items or []:
         if row.return_status not in _VALID_TERMINAL:
@@ -58,6 +60,50 @@ def validate(doc, method=None):
     if doc.custody_return_items:
         all_returned = all(r.return_status == "Returned" for r in doc.custody_return_items)
         doc.custody_cleared = 1 if all_returned else 0
+
+
+def _issued_quantities_for_employee(employee):
+    """Total quantity issued per Custody Article to an employee, summed across all
+    SUBMITTED Custody Issues. Returned as {article: qty}.
+
+    Accommodation Checkout is keyed to an Assignment/Employee (not to one Custody
+    Issue), and the Accommodation Custody Return Item child carries no parent
+    Custody Issue link — so the original issued quantity cannot be fetched via a
+    direct link and is instead aggregated here from the issuing Custody Issues."""
+    issued = {}
+    if not employee:
+        return issued
+    rows = frappe.get_all(
+        "Custody Issue Item",
+        filters={
+            "parenttype": "Custody Issue",
+            "parent": [
+                "in",
+                frappe.get_all(
+                    "Custody Issue",
+                    filters={"issued_to_employee": employee, "docstatus": 1},
+                    pluck="name",
+                ),
+            ],
+        },
+        fields=["article", "qty"],
+    )
+    for r in rows:
+        issued[r.article] = issued.get(r.article, 0) + (r.qty or 0)
+    return issued
+
+
+def _populate_issued_quantities(doc):
+    """Stamp each custody-return row's read-only quantity_issued with the total
+    quantity of that article issued to the resident employee (the original
+    issued quantity). Leaves rows untouched when the employee or article is
+    unknown."""
+    if not doc.custody_return_items:
+        return
+    issued = _issued_quantities_for_employee(doc.employee)
+    for row in doc.custody_return_items:
+        if row.article:
+            row.quantity_issued = issued.get(row.article, 0)
 
 
 def resolve_damage_assessment_building(assignment, bed):
