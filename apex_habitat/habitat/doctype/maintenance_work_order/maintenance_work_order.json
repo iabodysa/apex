@@ -9,6 +9,7 @@
   "maintenance_work_order_tab_overview",
   "maintenance_work_order_sec_overview",
   "maintenance_request",
+  "issue_type",
   "maintenance_work_order_overview_col",
   "assigned_to",
   "maintenance_work_order_sec_schedule",
@@ -234,6 +235,15 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "issue_type",
+   "fieldtype": "Select",
+   "label": "Issue Type",
+   "options": "Electrical\nPlumbing\nFurniture\nAir Conditioning\nFire Safety\nPest Control\nStructural\nOther",
+   "fetch_from": "maintenance_request.issue_type",
+   "fetch_if_empty": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
@@ -244,7 +254,7 @@
    "link_fieldname": "maintenance_work_order"
   }
  ],
- "modified": "2026-06-09 11:00:00.000000",
+ "modified": "2026-06-11 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Work Order",

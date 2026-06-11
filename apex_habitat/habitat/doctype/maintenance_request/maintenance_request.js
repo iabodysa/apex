@@ -52,15 +52,18 @@ function _update_priority_indicator(frm) {
 		frm.page.set_indicator(__("High Priority"), "orange");
 	}
 
-	if (
-		frm.doc.sla_breach_date &&
-		frappe.datetime.get_diff(frm.doc.sla_breach_date, frappe.datetime.now_datetime()) < 0 &&
-		frm.doc.status === "Open"
-	) {
-		frm.dashboard.add_comment(
-			__("SLA Breached — this request requires immediate attention."),
-			"red",
-			true
-		);
+	// SLA breach: compute from creation + priority (same SLA-days map as the
+	// Maintenance Aging report) — there is no stored sla_breach_date field.
+	const SLA_DAYS = { Critical: 1, High: 3, Medium: 7, Low: 14 };
+	if (frm.doc.creation && frm.doc.status === "Open") {
+		const sla = SLA_DAYS[frm.doc.priority] || 14;
+		const age = frappe.datetime.get_diff(frappe.datetime.now_datetime(), frm.doc.creation);
+		if (age > sla) {
+			frm.dashboard.add_comment(
+				__("SLA Breached — this request requires immediate attention."),
+				"red",
+				true
+			);
+		}
 	}
 }
