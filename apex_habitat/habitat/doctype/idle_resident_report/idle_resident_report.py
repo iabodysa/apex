@@ -45,18 +45,26 @@ def after_insert(doc, method=None):
     ]
     if not assignees:
         return
-    _assign_to.add(
-        {
-            "doctype": doc.doctype,
-            "name": doc.name,
-            "assign_to": assignees,
-            "description": _("Idle resident reported to {0}: employee {1} (building {2}). Please action.").format(
-                doc.responsible_department, doc.employee_name or doc.employee, doc.building),
-            "priority": "High" if doc.reason_category == "Legal Case" else "Medium",
-            "assigned_by": frappe.session.user,
-        },
-        ignore_permissions=True,  # server-side after_insert; session may lack read on the new doc
-    )
+    # Assign server-side. Bypass permissions via the version-agnostic flag rather
+    # than the assign_to.add(ignore_permissions=...) kwarg — that keyword-only arg
+    # is absent in older Frappe v15 builds (the CI Frappe rejected it with a
+    # TypeError) while frappe.flags.ignore_permissions works on every version.
+    _perm_flag = frappe.flags.ignore_permissions
+    frappe.flags.ignore_permissions = True
+    try:
+        _assign_to.add(
+            {
+                "doctype": doc.doctype,
+                "name": doc.name,
+                "assign_to": assignees,
+                "description": _("Idle resident reported to {0}: employee {1} (building {2}). Please action.").format(
+                    doc.responsible_department, doc.employee_name or doc.employee, doc.building),
+                "priority": "High" if doc.reason_category == "Legal Case" else "Medium",
+                "assigned_by": frappe.session.user,
+            }
+        )
+    finally:
+        frappe.flags.ignore_permissions = _perm_flag
 
 
 def _validate_status_transition(doc):
