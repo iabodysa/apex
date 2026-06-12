@@ -16,6 +16,7 @@
   "party",
   "custody_issue_worker_col",
   "issued_to_employee",
+  "custody_issue_worker_col2",
   "issued_to_name",
   "custody_issue_sec_table_items",
   "items",
@@ -32,7 +33,7 @@
   {
    "fieldname": "custody_issue_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview"
+   "label": "Details"
   },
   {
    "fieldname": "custody_issue_sec_overview",
@@ -63,7 +64,7 @@
   {
    "fieldname": "custody_issue_sec_worker",
    "fieldtype": "Section Break",
-   "label": "Worker"
+   "label": "Recipient"
   },
   {
    "default": "Employee",
@@ -92,6 +93,10 @@
    "label": "Issued To (Employee)",
    "options": "Employee",
    "read_only": 1
+  },
+  {
+   "fieldname": "custody_issue_worker_col2",
+   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:doc.party_type!='Employee'",

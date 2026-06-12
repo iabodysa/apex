@@ -15,8 +15,8 @@
   "accommodation_assignment_sec_placement",
   "building",
   "room",
-  "accommodation_assignment_placement_col",
   "bed",
+  "accommodation_assignment_placement_col",
   "previous_building",
   "accommodation_assignment_sec_stay",
   "assignment_type",
@@ -32,16 +32,18 @@
   "billed_to_supplier",
   "accommodation_assignment_sec_checkin_evidence",
   "room_condition_snapshot",
-  "accommodation_assignment_sec_large_text",
-  "notes",
   "accommodation_assignment_sec_table_custody_items",
   "custody_items",
+  "accommodation_assignment_sec_large_text",
+  "notes",
   "accommodation_assignment_tab_system",
-  "accommodation_assignment_sec_system",
+  "accommodation_assignment_sec_occupancy_status",
   "check_out_date",
+  "accommodation_assignment_occupancy_status_col",
   "housing_allowance_suspended",
-  "accommodation_assignment_system_col",
+  "accommodation_assignment_sec_system",
   "naming_series",
+  "accommodation_assignment_system_col",
   "amended_from"
  ],
  "fields": [
@@ -123,10 +125,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "accommodation_assignment_placement_col",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "bed",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -134,6 +132,10 @@
    "options": "Accommodation Bed",
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_placement_col",
+   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:doc.assignment_type=='Transfer'",
@@ -237,17 +239,6 @@
    "description": "Optional photo of the bed/room condition at check-in (handover evidence)."
   },
   {
-   "fieldname": "accommodation_assignment_sec_large_text",
-   "fieldtype": "Section Break",
-   "label": "Additional Information",
-   "collapsible": 1
-  },
-  {
-   "fieldname": "notes",
-   "fieldtype": "Small Text",
-   "label": "Notes"
-  },
-  {
    "fieldname": "accommodation_assignment_sec_table_custody_items",
    "fieldtype": "Section Break",
    "label": "Issued Custody Items"
@@ -259,14 +250,25 @@
    "options": "Accommodation Custody Item"
   },
   {
+   "fieldname": "accommodation_assignment_sec_large_text",
+   "fieldtype": "Section Break",
+   "label": "Additional Information",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
    "fieldname": "accommodation_assignment_tab_system",
    "fieldtype": "Tab Break",
    "label": "System"
   },
   {
-   "fieldname": "accommodation_assignment_sec_system",
+   "fieldname": "accommodation_assignment_sec_occupancy_status",
    "fieldtype": "Section Break",
-   "label": "System",
+   "label": "Occupancy Status",
    "collapsible": 1
   },
   {
@@ -276,6 +278,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "accommodation_assignment_occupancy_status_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "0",
    "fieldname": "housing_allowance_suspended",
    "fieldtype": "Check",
@@ -283,8 +289,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "accommodation_assignment_system_col",
-   "fieldtype": "Column Break"
+   "fieldname": "accommodation_assignment_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
   },
   {
    "default": "ACC-ASGN-.YYYY.-.####",
@@ -294,6 +302,10 @@
    "label": "Series",
    "options": "ACC-ASGN-.YYYY.-.####",
    "reqd": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_system_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "amended_from",

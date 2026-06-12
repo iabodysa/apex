@@ -11,26 +11,30 @@
   "company",
   "building",
   "supplier",
-  "lease_reference",
   "accommodation_lease_contract_col",
+  "lease_reference",
+  "accommodation_lease_sec_term",
   "status",
+  "accommodation_lease_term_col",
   "lease_start_date",
+  "accommodation_lease_term_col2",
   "lease_end_date",
   "accommodation_lease_sec_rent",
   "rent_amount",
-  "company_share_pct",
-  "total_scheduled",
-  "accommodation_lease_rent_col",
   "billing_cycle",
+  "accommodation_lease_rent_col",
   "first_payment_date",
+  "company_share_pct",
   "accommodation_lease_sec_large_text",
   "notes",
-  "accommodation_lease_sec_table_payment_schedule",
-  "payment_schedule",
   "accommodation_lease_sec_system",
   "naming_series",
   "accommodation_lease_system_col",
-  "amended_from"
+  "amended_from",
+  "accommodation_lease_tab_payment_schedule",
+  "accommodation_lease_sec_table_payment_schedule",
+  "total_scheduled",
+  "payment_schedule"
  ],
  "fields": [
   {
@@ -79,6 +83,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "accommodation_lease_sec_term",
+   "fieldtype": "Section Break",
+   "label": "Term & Status"
+  },
+  {
    "default": "Active",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -88,11 +97,19 @@
    "options": "Active\nExpired\nTerminated"
   },
   {
+   "fieldname": "accommodation_lease_term_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "lease_start_date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Lease Start Date",
    "reqd": 1
+  },
+  {
+   "fieldname": "accommodation_lease_term_col2",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "lease_end_date",
@@ -158,9 +175,14 @@
    "label": "Notes"
   },
   {
+   "fieldname": "accommodation_lease_tab_payment_schedule",
+   "fieldtype": "Tab Break",
+   "label": "Payment Schedule"
+  },
+  {
    "fieldname": "accommodation_lease_sec_table_payment_schedule",
    "fieldtype": "Section Break",
-   "label": "Rent Payment Schedule"
+   "label": "Schedule"
   },
   {
    "fieldname": "payment_schedule",

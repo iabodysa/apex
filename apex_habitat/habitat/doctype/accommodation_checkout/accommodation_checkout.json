@@ -8,11 +8,9 @@
   "accommodation_checkout_tab_overview",
   "accommodation_checkout_sec_overview",
   "assignment",
-  "accommodation_checkout_overview_col",
   "checkout_date",
+  "accommodation_checkout_overview_col",
   "checkout_reason",
-  "accommodation_checkout_overview_col2",
-  "custody_cleared",
   "accommodation_checkout_sec_resident",
   "party_type",
   "party",
@@ -21,18 +19,24 @@
   "bed",
   "accommodation_checkout_sec_table_custody_return_items",
   "custody_return_items",
+  "custody_cleared",
+  "accommodation_checkout_sec_notes_evidence",
+  "room_condition_snapshot",
+  "accommodation_checkout_tab_financials",
   "accommodation_checkout_sec_financials",
-  "cost_center",
-  "accommodation_checkout_financials_col",
   "damage_deduction_amount",
+  "accommodation_checkout_financials_col",
+  "cost_center",
   "accommodation_checkout_financials_col2",
   "linked_additional_salary",
-  "accommodation_checkout_sec_large_text",
+  "accommodation_checkout_sec_damage_notes",
   "damage_notes",
+  "accommodation_checkout_tab_system",
+  "accommodation_checkout_sec_cancellation",
   "cancellation_reason",
-  "room_condition_snapshot",
   "accommodation_checkout_sec_system",
   "naming_series",
+  "accommodation_checkout_overview_col2",
   "amended_from"
  ],
  "fields": [
@@ -143,6 +147,11 @@
    "options": "Accommodation Custody Return Item"
   },
   {
+   "fieldname": "accommodation_checkout_tab_financials",
+   "fieldtype": "Tab Break",
+   "label": "Financials"
+  },
+  {
    "fieldname": "accommodation_checkout_sec_financials",
    "fieldtype": "Section Break",
    "label": "Damage Deduction",
@@ -180,15 +189,32 @@
    "read_only": 1
   },
   {
-   "fieldname": "accommodation_checkout_sec_large_text",
+   "fieldname": "accommodation_checkout_sec_notes_evidence",
    "fieldtype": "Section Break",
    "collapsible": 1,
    "label": "Notes & Evidence"
   },
   {
+   "fieldname": "accommodation_checkout_sec_damage_notes",
+   "fieldtype": "Section Break",
+   "collapsible": 1,
+   "label": "Damage Notes"
+  },
+  {
    "fieldname": "damage_notes",
    "fieldtype": "Small Text",
    "label": "Damage Description"
+  },
+  {
+   "fieldname": "accommodation_checkout_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "accommodation_checkout_sec_cancellation",
+   "fieldtype": "Section Break",
+   "collapsible": 1,
+   "label": "Cancellation"
   },
   {
    "fieldname": "cancellation_reason",

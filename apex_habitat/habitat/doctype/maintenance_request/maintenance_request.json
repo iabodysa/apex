@@ -8,26 +8,31 @@
  "field_order": [
   "maintenance_request_tab_overview",
   "maintenance_request_sec_overview",
-  "company",
   "building",
   "maintenance_request_overview_col",
   "room",
+  "maintenance_request_overview_col2",
   "bed",
+  "maintenance_request_overview_col3",
+  "company",
   "maintenance_request_sec_ticket",
   "issue_type",
   "priority",
   "maintenance_request_ticket_col1",
   "status",
-  "requires_procurement",
+  "assigned_to",
   "maintenance_request_ticket_col2",
   "reported_by",
-  "assigned_to",
+  "requires_procurement",
   "maintenance_request_sec_primary_large_text",
   "issue_description",
   "maintenance_request_sec_asset_reference",
   "related_facility_asset",
-  "maintenance_request_asset_ref_col",
   "target_asset",
+  "maintenance_request_asset_ref_col",
+  "target_asset_name",
+  "target_asset_category",
+  "target_asset_location",
   "maintenance_request_sec_financial",
   "cost_of_repair",
   "maintenance_request_financial_col",
@@ -41,15 +46,9 @@
   "source_inspection",
   "maintenance_request_automation_col",
   "subcontractor_dispatched",
-  "maintenance_request_sec_asset_snapshot",
-  "target_asset_name",
-  "maintenance_request_asset_snapshot_col1",
-  "target_asset_category",
-  "maintenance_request_asset_snapshot_col2",
-  "target_asset_location",
-  "maintenance_request_sec_system",
-  "is_logged_to_asset_history",
   "maintenance_request_system_col1",
+  "is_logged_to_asset_history",
+  "maintenance_request_sec_system",
   "naming_series",
   "maintenance_request_system_col2",
   "amended_from"
@@ -58,7 +57,7 @@
   {
    "fieldname": "maintenance_request_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview"
+   "label": "Details"
   },
   {
    "fieldname": "maintenance_request_sec_overview",
@@ -86,6 +85,14 @@
   },
   {
    "fieldname": "maintenance_request_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "maintenance_request_overview_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "maintenance_request_overview_col3",
    "fieldtype": "Column Break"
   },
   {
@@ -254,6 +261,7 @@
    "label": "System"
   },
   {
+   "collapsible": 1,
    "fieldname": "maintenance_request_sec_automation",
    "fieldtype": "Section Break",
    "label": "Automation Links"
@@ -277,11 +285,6 @@
    "options": "Subcontractor Service Order"
   },
   {
-   "fieldname": "maintenance_request_sec_asset_snapshot",
-   "fieldtype": "Section Break",
-   "label": "Asset Snapshot"
-  },
-  {
    "fetch_from": "target_asset.asset_name",
    "fetch_if_empty": 1,
    "fieldname": "target_asset_name",
@@ -290,20 +293,12 @@
    "read_only": 1
   },
   {
-   "fieldname": "maintenance_request_asset_snapshot_col1",
-   "fieldtype": "Column Break"
-  },
-  {
    "fetch_from": "target_asset.asset_category",
    "fetch_if_empty": 1,
    "fieldname": "target_asset_category",
    "fieldtype": "Data",
    "label": "Asset Category",
    "read_only": 1
-  },
-  {
-   "fieldname": "maintenance_request_asset_snapshot_col2",
-   "fieldtype": "Column Break"
   },
   {
    "fetch_from": "target_asset.location",
