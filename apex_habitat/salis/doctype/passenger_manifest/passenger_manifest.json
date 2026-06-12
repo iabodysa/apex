@@ -27,6 +27,7 @@
   },
   {
    "fetch_from": "dispatch_trip.route_plan",
+   "fetch_if_empty": 1,
    "fieldname": "route_plan",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -51,6 +52,7 @@
   },
   {
    "fetch_from": "route_plan.vehicle",
+   "fetch_if_empty": 1,
    "fieldname": "vehicle",
    "fieldtype": "Link",
    "label": "Vehicle",
@@ -58,6 +60,7 @@
   },
   {
    "fetch_from": "route_plan.driver",
+   "fetch_if_empty": 1,
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",

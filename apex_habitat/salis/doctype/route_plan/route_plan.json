@@ -69,6 +69,7 @@
   },
   {
    "fetch_from": "transport_request.assigned_driver",
+   "fetch_if_empty": 1,
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",
@@ -92,6 +93,7 @@
   },
   {
    "fetch_from": "transport_request.assigned_vehicle",
+   "fetch_if_empty": 1,
    "fieldname": "vehicle",
    "fieldtype": "Link",
    "in_list_view": 1,

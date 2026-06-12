@@ -58,6 +58,7 @@
   },
   {
    "fetch_from": "custody_return.building",
+   "fetch_if_empty": 1,
    "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,

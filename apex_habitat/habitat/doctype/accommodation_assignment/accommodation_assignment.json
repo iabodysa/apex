@@ -87,6 +87,7 @@
   },
   {
    "fetch_from": "employee.employee_name",
+   "fetch_if_empty": 1,
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -100,6 +101,7 @@
   },
   {
    "fetch_from": "room.building",
+   "fetch_if_empty": 1,
    "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -111,6 +113,7 @@
   },
   {
    "fetch_from": "bed.room",
+   "fetch_if_empty": 1,
    "fieldname": "room",
    "fieldtype": "Link",
    "in_list_view": 1,

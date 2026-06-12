@@ -23,6 +23,7 @@
   {
    "doctype": "DocField",
    "fetch_from": "maintenance_request.room",
+   "fetch_if_empty": 1,
    "fieldname": "room",
    "fieldtype": "Link",
    "label": "Room",

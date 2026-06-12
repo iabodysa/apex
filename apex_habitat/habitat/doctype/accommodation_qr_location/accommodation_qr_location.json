@@ -40,6 +40,7 @@
   },
   {
    "fetch_from": "building.site",
+   "fetch_if_empty": 1,
    "fieldname": "accommodation_site",
    "fieldtype": "Link",
    "label": "Accommodation Site",
@@ -47,6 +48,7 @@
   },
   {
    "fetch_from": "room.building",
+   "fetch_if_empty": 1,
    "fieldname": "building",
    "fieldtype": "Link",
    "label": "Building",

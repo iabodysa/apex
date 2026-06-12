@@ -121,6 +121,7 @@
   },
   {
    "fetch_from": "maintenance_request.subcontractor_dispatched",
+   "fetch_if_empty": 1,
    "fieldname": "subcontractor_service_order",
    "fieldtype": "Link",
    "label": "Subcontractor Service Order",
@@ -176,6 +177,7 @@
   },
   {
    "fetch_from": "maintenance_request.building",
+   "fetch_if_empty": 1,
    "fieldname": "building",
    "fieldtype": "Link",
    "in_standard_filter": 1,

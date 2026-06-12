@@ -57,6 +57,7 @@
   {
    "description": "The driver's current assigned vehicle, captured for reference.",
    "fetch_from": "driver.current_vehicle",
+   "fetch_if_empty": 1,
    "fieldname": "assigned_vehicle",
    "fieldtype": "Link",
    "label": "Assigned Vehicle",

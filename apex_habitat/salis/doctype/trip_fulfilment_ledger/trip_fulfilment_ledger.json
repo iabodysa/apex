@@ -31,6 +31,7 @@
   },
   {
    "fetch_from": "dispatch_trip.transport_request",
+   "fetch_if_empty": 1,
    "fieldname": "transport_request",
    "fieldtype": "Link",
    "label": "Transport Request",
@@ -40,6 +41,7 @@
   },
   {
    "fetch_from": "dispatch_trip.route_plan",
+   "fetch_if_empty": 1,
    "fieldname": "route_plan",
    "fieldtype": "Link",
    "label": "Route Plan",
@@ -48,6 +50,7 @@
   },
   {
    "fetch_from": "dispatch_trip.vehicle",
+   "fetch_if_empty": 1,
    "fieldname": "vehicle",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -57,6 +60,7 @@
   },
   {
    "fetch_from": "dispatch_trip.driver",
+   "fetch_if_empty": 1,
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",

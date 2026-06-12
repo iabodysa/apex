@@ -53,6 +53,7 @@
   },
   {
    "fetch_from": "vehicle.current_driver",
+   "fetch_if_empty": 1,
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -89,6 +90,7 @@
   },
   {
    "fetch_from": "fuel_request.fuel_quota",
+   "fetch_if_empty": 1,
    "fieldname": "fuel_quota",
    "fieldtype": "Link",
    "label": "Fuel Quota",

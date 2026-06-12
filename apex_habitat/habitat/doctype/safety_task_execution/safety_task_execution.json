@@ -100,6 +100,7 @@
   {
    "doctype": "DocField",
    "fetch_from": "linked_maintenance_request.source_inspection",
+   "fetch_if_empty": 1,
    "fieldname": "linked_inspection",
    "fieldtype": "Link",
    "label": "Linked Safety Inspection Report",
@@ -143,6 +144,7 @@
    "fieldtype": "Data",
    "label": "Department",
    "fetch_from": "task.department",
+   "fetch_if_empty": 1,
    "read_only": 1,
    "idx": 18
   },
@@ -152,6 +154,7 @@
    "fieldtype": "Data",
    "label": "Frequency",
    "fetch_from": "task.frequency",
+   "fetch_if_empty": 1,
    "read_only": 1,
    "idx": 19
   },
@@ -166,6 +169,7 @@
    "fieldtype": "Data",
    "label": "Priority",
    "fetch_from": "task.priority",
+   "fetch_if_empty": 1,
    "read_only": 1,
    "idx": 21
   },

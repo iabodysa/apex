@@ -47,6 +47,7 @@
   },
   {
    "fetch_from": "route_plan.transport_request",
+   "fetch_if_empty": 1,
    "fieldname": "transport_request",
    "fieldtype": "Link",
    "label": "Transport Request",
@@ -80,6 +81,7 @@
   },
   {
    "fetch_from": "route_plan.vehicle",
+   "fetch_if_empty": 1,
    "fieldname": "vehicle",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -92,6 +94,7 @@
   },
   {
    "fetch_from": "route_plan.driver",
+   "fetch_if_empty": 1,
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_list_view": 1,

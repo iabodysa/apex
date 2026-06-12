@@ -57,6 +57,7 @@
   },
   {
    "fetch_from": "vehicle.current_driver",
+   "fetch_if_empty": 1,
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_list_view": 1,

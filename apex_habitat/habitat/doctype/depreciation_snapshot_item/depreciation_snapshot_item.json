@@ -51,6 +51,7 @@
    "label": "Depreciation Policy",
    "options": "Operational Depreciation Policy",
    "fetch_from": "article.depreciation_policy",
+   "fetch_if_empty": 1,
    "idx": 5
   }
  ],

@@ -75,6 +75,7 @@
   {
    "depends_on": "eval:doc.release_vehicle==1",
    "fetch_from": "driver.current_vehicle",
+   "fetch_if_empty": 1,
    "fieldname": "related_vehicle",
    "fieldtype": "Link",
    "label": "Related Vehicle",

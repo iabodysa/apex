@@ -43,6 +43,7 @@
   },
   {
    "fetch_from": "vehicle.rental_office",
+   "fetch_if_empty": 1,
    "fieldname": "rental_office",
    "fieldtype": "Link",
    "in_list_view": 1,

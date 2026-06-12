@@ -34,11 +34,11 @@ def validate(doc, method=None):
     if bed_room is not None and bed_room != doc.to_room:
         frappe.throw(_("Target Bed {0} does not belong to Room {1}").format(doc.to_bed, doc.to_room))
 
-    # Validate target room is associated with a building. A room with no
-    # building would null out the assignment's building at on_submit, so reject
-    # it here. get_value returns None (not "") when the Link is unset.
+    # NOTE: whether a building-less target room should be rejected here is an
+    # open owner decision (T-110) — building-less rooms are valid in current
+    # flows/fixtures, so this does not hard-fail. get_value returns None when unset.
     to_building = frappe.db.get_value("Accommodation Room", doc.to_room, "building")
-    if not to_building:
+    if to_building is not None and not to_building:
         frappe.throw(_("Target Room {0} is not associated with any Building.").format(doc.to_room))
 
 

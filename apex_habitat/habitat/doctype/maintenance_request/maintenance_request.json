@@ -74,6 +74,7 @@
   },
   {
    "fetch_from": "room.building",
+   "fetch_if_empty": 1,
    "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -89,6 +90,7 @@
   },
   {
    "fetch_from": "bed.room",
+   "fetch_if_empty": 1,
    "fieldname": "room",
    "fieldtype": "Link",
    "label": "Room",
@@ -194,6 +196,7 @@
   {
    "description": "Specific fixed asset this request concerns (e.g. AC-001). Enables maintenance history per asset.",
    "fetch_from": "related_facility_asset.linked_erpnext_asset",
+   "fetch_if_empty": 1,
    "fieldname": "target_asset",
    "fieldtype": "Link",
    "label": "Target ERPNext Asset",
@@ -280,6 +283,7 @@
   },
   {
    "fetch_from": "target_asset.asset_name",
+   "fetch_if_empty": 1,
    "fieldname": "target_asset_name",
    "fieldtype": "Data",
    "label": "Asset Name",
@@ -291,6 +295,7 @@
   },
   {
    "fetch_from": "target_asset.asset_category",
+   "fetch_if_empty": 1,
    "fieldname": "target_asset_category",
    "fieldtype": "Data",
    "label": "Asset Category",
@@ -302,6 +307,7 @@
   },
   {
    "fetch_from": "target_asset.location",
+   "fetch_if_empty": 1,
    "fieldname": "target_asset_location",
    "fieldtype": "Data",
    "label": "Asset Location",

@@ -109,6 +109,7 @@
   },
   {
    "fetch_from": "vehicle.current_driver",
+   "fetch_if_empty": 1,
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -135,6 +136,7 @@
   },
   {
    "fetch_from": "vehicle.rental_office",
+   "fetch_if_empty": 1,
    "fieldname": "rental_office",
    "fieldtype": "Link",
    "label": "Rental Office",

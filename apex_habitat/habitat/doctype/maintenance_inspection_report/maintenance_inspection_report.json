@@ -45,6 +45,7 @@
   },
   {
    "fetch_from": "maintenance_work_order.building",
+   "fetch_if_empty": 1,
    "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,
