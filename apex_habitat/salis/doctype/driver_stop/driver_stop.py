@@ -59,8 +59,19 @@ class DriverStop(Document):
     def on_cancel(self):
         lock_driver(self.driver)
 
-        # Restore driver status only if it is still in the state this stop set.
-        if frappe.db.get_value("Salis Driver", self.driver, "status") == "Stopped":
+        # Restore driver status only if it is still in the state this stop set
+        # (a later stop may have changed it) AND no other submitted Driver Stop
+        # is still in force for this driver. A second stop that also set the
+        # driver to Stopped must keep it stopped, so cancelling this (older)
+        # stop must not un-stop the driver on its behalf.
+        another_stop_in_force = frappe.db.exists(
+            "Driver Stop",
+            {"driver": self.driver, "docstatus": 1, "name": ["!=", self.name]},
+        )
+        if (
+            not another_stop_in_force
+            and frappe.db.get_value("Salis Driver", self.driver, "status") == "Stopped"
+        ):
             restore = self.previous_status or "Active"
             frappe.db.set_value("Salis Driver", self.driver, "status", restore)
 
