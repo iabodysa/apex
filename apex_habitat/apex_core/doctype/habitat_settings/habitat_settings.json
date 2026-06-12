@@ -16,8 +16,6 @@
   "enable_stock_posting",
   "auto_create_asset_movement_on_transfer",
   "habitat_settings_sec_financial",
-  "enable_gl_posting",
-  "default_payment_method",
   "habitat_settings_financial_col",
   "max_damage_deduction_per_checkout_sar",
   "habitat_settings_sec_housing",
@@ -120,21 +118,6 @@
    "fieldname": "habitat_settings_sec_financial",
    "fieldtype": "Section Break",
    "label": "Financial Posting"
-  },
-  {
-   "default": "0",
-   "description": "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",
-   "fieldname": "enable_gl_posting",
-   "fieldtype": "Check",
-   "label": "Enable GL Entry Posting"
-  },
-  {
-   "default": "Payment Entry",
-   "description": "Document type to generate when creating rent payments from Accommodation Lease.",
-   "fieldname": "default_payment_method",
-   "fieldtype": "Select",
-   "label": "Default Payment Method",
-   "options": "Payment Entry\nPayment Order\nExpense Request Afmco"
   },
   {
    "fieldname": "habitat_settings_financial_col",

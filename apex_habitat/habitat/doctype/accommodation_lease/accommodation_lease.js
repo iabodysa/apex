@@ -40,7 +40,7 @@ frappe.ui.form.on("Accommodation Lease", {
 					return;
 				}
 
-				frappe.db.get_single_value("Habitat Settings", "default_payment_method").then(method => {
+				frappe.db.get_single_value("Apex Settings", "default_payment_method").then(method => {
 					if (method === "Expense Request Afmco") {
 						frappe.db.exists("DocType", "Expense Request Afmco").then(exists => {
 							if (!exists) {

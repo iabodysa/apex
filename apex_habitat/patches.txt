@@ -76,3 +76,10 @@ apex_habitat.patches.v1_x.drop_legacy_is_standard0_dashboards
 # controller now derives both from the generated rooms; rows saved earlier showed stale 0.
 # Idempotent, no-op on fresh installs. PRUNE once every deployed site has run it.
 apex_habitat.patches.v1_x.backfill_building_room_floor_counts
+
+# v1.52.x — relocate app-wide finance settings (ONE-TIME). default_payment_method and
+# enable_gl_posting moved from Habitat Settings to the new app-wide Apex Settings single
+# (they serve both Habitat and Salis). Copies any value a site already set on Habitat
+# Settings into Apex Settings, then deletes the Habitat Settings orphan rows. Idempotent,
+# no-op on fresh installs. PRUNE once every deployed site has run it.
+apex_habitat.patches.v1_x.move_finance_settings_to_apex_settings

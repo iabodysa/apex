@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "creation": "2026-06-12 00:00:00.000000",
+ "description": "App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the finance integration defaults that govern how the app generates payment documents and whether it posts to the General Ledger.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "apex_settings_tab_finance",
+  "apex_settings_sec_financial",
+  "enable_gl_posting",
+  "default_payment_method"
+ ],
+ "fields": [
+  {
+   "fieldname": "apex_settings_tab_finance",
+   "fieldtype": "Tab Break",
+   "label": "Finance"
+  },
+  {
+   "fieldname": "apex_settings_sec_financial",
+   "fieldtype": "Section Break",
+   "label": "Financial Posting"
+  },
+  {
+   "default": "0",
+   "description": "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",
+   "fieldname": "enable_gl_posting",
+   "fieldtype": "Check",
+   "label": "Enable GL Entry Posting"
+  },
+  {
+   "default": "Payment Entry",
+   "description": "Document type to generate when creating rent payments from Accommodation Lease.",
+   "fieldname": "default_payment_method",
+   "fieldtype": "Select",
+   "label": "Default Payment Method",
+   "options": "Payment Entry\nPayment Order\nExpense Request Afmco"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-06-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Apex Core",
+ "name": "Apex Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

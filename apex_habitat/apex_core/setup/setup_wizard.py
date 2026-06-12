@@ -3,7 +3,9 @@
 On a fresh site, Frappe's setup wizard renders an extra "Apex Configuration" slide
 (registered by public/js/apex_setup_wizard.js via the `setup_wizard_requires` hook).
 The operator's choices flow into the wizard args and land here at completion
-(`setup_wizard_complete` hook), where they are applied — ONCE — to Habitat Settings.
+(`setup_wizard_complete` hook), where they are applied — ONCE. The app-wide finance
+defaults land on the Apex Settings single (shared by Habitat and Salis); the
+housing-scoped deduction toggles land on Habitat Settings.
 
 Safe-by-default: a toggle the operator did not tick stays OFF, so the app never
 deducts a housing allowance or posts to the GL unless the operator explicitly opts
@@ -40,40 +42,47 @@ def setup_wizard_complete(args=None):
 
 
 def apply_apex_setup(args=None):
-    """Write the operator's Setup-Wizard choices to Habitat Settings (create-only
-    semantics on the toggles: default OFF unless explicitly chosen). No commit —
-    Frappe commits after all setup stages succeed."""
+    """Write the operator's Setup-Wizard choices (create-only semantics on the
+    toggles: default OFF unless explicitly chosen). No commit — Frappe commits
+    after all setup stages succeed.
+
+    The app-wide finance defaults (``default_payment_method``, ``enable_gl_posting``)
+    live on the Apex Settings single because they serve both Habitat and Salis; the
+    housing-scoped deduction toggles stay on Habitat Settings."""
     args = frappe._dict(args or {})
 
     payment_method = args.get("apex_default_payment_method")
 
-    settings = frappe.get_single("Habitat Settings")
+    # App-wide finance defaults — Apex Settings (shared by Habitat + Salis).
+    apex = frappe.get_single("Apex Settings")
     if payment_method:
-        settings.default_payment_method = payment_method
+        apex.default_payment_method = payment_method
+    # GL posting defaults OFF; only ON when the operator ticked it in the slide.
+    apex.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
+    apex.save(ignore_permissions=True)
+
+    # Housing-scoped deduction toggles — Habitat Settings.
+    settings = frappe.get_single("Habitat Settings")
     # Toggles default OFF; only ON when the operator ticked them in the slide.
     settings.enable_housing_allowance_deduction = 1 if cint(args.get("apex_deduct_housing_allowance")) else 0
-    settings.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
     settings.enable_damage_deduction = 1 if cint(args.get("apex_deduct_damage")) else 0
     try:
         settings.save(ignore_permissions=True)
     except frappe.ValidationError:
-        # Enabling a deduction / GL toggle needs prerequisites (an authorizer,
-        # salary components, GL accounts) that usually do not exist at first
-        # install. Never let that fail the wizard: keep the safe defaults (all
-        # OFF) + the chosen payment method, and tell the operator to enable these
-        # later in Habitat Settings once they are configured.
+        # Enabling a deduction toggle needs prerequisites (an authorizer, salary
+        # components) that usually do not exist at first install. Never let that
+        # fail the wizard: keep the safe defaults (all OFF), and tell the operator
+        # to enable these later in Habitat Settings once they are configured.
         frappe.clear_last_message()
         settings.reload()
-        if payment_method:
-            settings.default_payment_method = payment_method
         settings.enable_housing_allowance_deduction = 0
-        settings.enable_gl_posting = 0
         settings.enable_damage_deduction = 0
         settings.save(ignore_permissions=True)
         frappe.msgprint(
             _(
-                "Payment method saved. To enable salary deductions or GL posting, set the "
-                "authorizer and accounts in Habitat Settings first, then turn them on there."
+                "Payment method saved. To enable salary deductions, set the "
+                "authorizer and salary components in Habitat Settings first, then "
+                "turn them on there."
             ),
             title=_("Apex Setup"),
             indicator="orange",

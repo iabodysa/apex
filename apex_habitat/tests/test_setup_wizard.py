@@ -28,17 +28,19 @@ class TestApexSetupWizard(FrappeTestCase):
             }
         )
         s = frappe.get_single("Habitat Settings")
-        self.assertEqual(s.default_payment_method, "Payment Order")
+        apex = frappe.get_single("Apex Settings")
+        self.assertEqual(apex.default_payment_method, "Payment Order")
         self.assertEqual(s.enable_housing_allowance_deduction, 0)  # safe fallback
-        self.assertEqual(s.enable_gl_posting, 0)
+        self.assertEqual(apex.enable_gl_posting, 0)
         self.assertEqual(s.enable_damage_deduction, 0)
 
     def test_toggles_off_when_not_chosen(self):
         setup_wizard_complete({"apex_default_payment_method": "Payment Entry"})
         s = frappe.get_single("Habitat Settings")
-        self.assertEqual(s.default_payment_method, "Payment Entry")
+        apex = frappe.get_single("Apex Settings")
+        self.assertEqual(apex.default_payment_method, "Payment Entry")
         self.assertEqual(s.enable_housing_allowance_deduction, 0)
-        self.assertEqual(s.enable_gl_posting, 0)
+        self.assertEqual(apex.enable_gl_posting, 0)
 
     def test_no_args_is_safe(self):
         setup_wizard_complete()  # must not raise; everything stays off

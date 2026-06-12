@@ -16,7 +16,7 @@ it uses native ``frappe.new_doc`` / ``insert`` / ``submit`` and the target's own
 meta ``is_submittable``; only the mapping schema is custom.
 
 Boundary: this layer only **routes** the payment record. General Ledger posting
-is governed separately by ``enable_gl_posting`` (Habitat Settings); the router
+is governed separately by ``enable_gl_posting`` (Apex Settings); the router
 writes no GL / Journal Entry here.
 """
 
