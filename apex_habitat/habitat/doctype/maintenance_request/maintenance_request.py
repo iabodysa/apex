@@ -50,12 +50,8 @@ def make_work_order(source_name, target_doc=None):
         "Maintenance Request": {
             "doctype": "Maintenance Work Order",
             "field_map": {
-                "name": "maintenance_request",
                 "building": "building",
-                "room": "room",
-                "bed": "bed",
-                "issue_type": "issue_type",
-                "priority": "priority"
+                "issue_type": "issue_type"
             }
         }
     }, target_doc, set_missing_values)

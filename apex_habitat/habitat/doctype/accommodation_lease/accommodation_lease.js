@@ -27,11 +27,11 @@ frappe.ui.form.on("Accommodation Lease", {
 			});
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.status !== "Expired") {
+		if (frm.doc.docstatus === 1 && frm.doc.status !== "Expired" && frm.doc.status !== "Terminated") {
 			frm.add_custom_button(__("Generate Payment"), function() {
 				// Get selected row or first unpaid row
 				const schedule = frm.doc.payment_schedule || [];
-				const selected = schedule.find(r => r.__checked) || schedule.find(r => !r.paid);
+				const selected = schedule.find(r => r.__checked) || schedule.find(r => r.status !== "Paid");
 				if (!selected) {
 					frappe.msgprint({
 						message: __("Select a row from the Rent Payment Schedule to generate a payment."),

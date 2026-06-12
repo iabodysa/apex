@@ -82,5 +82,7 @@ def mark_completed(task_instance):
         frappe.throw(_("Only Open or In Progress Task Instances can be marked Completed."))
 
     doc.db_set("status", "Completed")
+    if not doc.completed_date:
+        doc.db_set("completed_date", frappe.utils.today())
     doc.add_comment("Comment", _("Task completed."))
     return {"status": "Completed"}

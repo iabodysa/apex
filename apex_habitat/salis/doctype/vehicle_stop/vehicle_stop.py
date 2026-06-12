@@ -44,8 +44,18 @@ class VehicleStop(Document):
         lock_vehicle(self.vehicle)
 
         # Restore only if the vehicle is still in the state this stop set
-        # (a later stop may have changed it).
-        if frappe.db.get_value("Salis Vehicle", self.vehicle, "status") == "Stopped":
+        # (a later stop may have changed it) AND no other submitted Vehicle Stop
+        # is still in force for this vehicle. A second stop that also set the
+        # vehicle to Stopped must keep it stopped, so cancelling this (older)
+        # stop must not un-stop the vehicle on its behalf.
+        another_stop_in_force = frappe.db.exists(
+            "Vehicle Stop",
+            {"vehicle": self.vehicle, "docstatus": 1, "name": ["!=", self.name]},
+        )
+        if (
+            not another_stop_in_force
+            and frappe.db.get_value("Salis Vehicle", self.vehicle, "status") == "Stopped"
+        ):
             restore = self.previous_status or "Active"
             frappe.db.set_value("Salis Vehicle", self.vehicle, "status", restore)
 

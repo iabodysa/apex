@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -47,9 +49,11 @@ _CATEGORY_TO_ISSUE_TYPE = {
 
 
 def before_insert(doc, method=None):
-    if doc.get("website_field"):
-        frappe.throw("Invalid submission.", frappe.PermissionError)
-
+    # Note: the spam honeypot is enforced at the public web-form handler
+    # (submit_resident_request), which inspects the honeypot Web Form field and
+    # discards bot submissions before any document is built. There is no
+    # honeypot field on this DocType, so no inert controller-side check is kept
+    # here (it would always read None and never fire).
     if not doc.anonymous_tracking_code:
         doc.anonymous_tracking_code = frappe.generate_hash(length=8).upper()
 
@@ -176,9 +180,15 @@ def _apply_priority_rules(doc):
         "security",
     )
 
-    if any(term in text for term in critical_terms):
+    def _matches(term):
+        # Word/token-boundary match so a short token like "ac" only fires on the
+        # standalone word (e.g. "ac is broken"), not as a substring of unrelated
+        # words such as machine/jacket/replace/contact/back/space.
+        return re.search(r"\b" + re.escape(term) + r"\b", text) is not None
+
+    if any(_matches(term) for term in critical_terms):
         doc.priority = "Critical"
-    elif any(term in text for term in high_terms) and doc.priority in (None, "", "Low", "Medium"):
+    elif any(_matches(term) for term in high_terms) and doc.priority in (None, "", "Low", "Medium"):
         doc.priority = "High"
 
 
