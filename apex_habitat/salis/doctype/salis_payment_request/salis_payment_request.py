@@ -62,6 +62,10 @@ class SalisPaymentRequest(Document):
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
 		self._set_financial_defaults()
+		# A negative amount passes the reqd check; block it before the request can
+		# reach the Finance approval gate.
+		if (self.amount or 0) <= 0:
+			frappe.throw(_("Amount must be greater than zero."))
 		self._enforce_finance_gate()
 
 	# Submit/cancel are recorded natively (Version track_changes + auto-comment).

@@ -84,6 +84,12 @@ class RentalSettlement(Document):
             computed = flt(row.days) * flt(row.daily_rate)
             if not row.amount:
                 row.amount = computed
+            # Positivity guard: a negative day count, rate or amount must never
+            # flow into the accrued total or the downstream Payment Request.
+            if flt(row.days) < 0 or flt(row.daily_rate) < 0 or flt(row.amount) < 0:
+                frappe.throw(
+                    _("Row {0}: Days, Daily Rate and Amount cannot be negative.").format(row.idx)
+                )
             accrued += flt(row.amount)
 
         # Cross-check / derive against the LINKED Rental Accrual Ledger rows for
@@ -105,6 +111,17 @@ class RentalSettlement(Document):
 
         self.ledger_variance = flt(self.accrued_total) - flt(ledger_total)
         self.variance = flt(self.claimed_total) - flt(self.accrued_total)
+
+        # Totals sanity guard: neither the claimed amount nor the derived accrued
+        # total may be negative, so no negative value can flow into
+        # create_payment_request() and on to the Finance gate. A zero accrued
+        # total is a legitimate not-yet-accrued state (the settlement can still sit
+        # in the workflow); the actual zero-amount payable is blocked downstream by
+        # the Salis Payment Request's own "Amount must be greater than zero" guard.
+        if flt(self.claimed_total) < 0 or flt(self.accrued_total) < 0:
+            frappe.throw(
+                _("Claimed Total and Accrued Total cannot be negative.")
+            )
 
     # --- Settlement <-> Accrual Ledger stamping --------------------------------
     # Status transitions (incl. the submit at "Approved") are driven by the

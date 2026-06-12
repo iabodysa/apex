@@ -124,11 +124,10 @@
    "options": "Accommodation Building"
   },
   {
-   "description": "Set later by the Arrival Batch intake (built in a subsequent batch).",
+   "description": "Operator-entered reference grouping arrivals that landed together (e.g. a flight or batch code). No automated Arrival Batch intake exists yet; set manually if used.",
    "fieldname": "arrival_batch",
    "fieldtype": "Data",
-   "label": "Arrival Batch Ref",
-   "read_only": 1
+   "label": "Arrival Batch Ref"
   },
   {
    "fieldname": "temporary_worker_sec_window",
@@ -200,7 +199,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-06-12 09:30:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Temporary Worker",

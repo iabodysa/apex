@@ -429,6 +429,10 @@ def get_checkin_slip(party_type, party) -> dict:
 
     card = get_arrival_card(party_type=party_type, party=party)
     building = card.get("current_building")
+    if building:
+        # Defense-in-depth: explicitly gate the building read before exposing its
+        # address/city, matching front_desk.get_building_grid and safety_map.get_safety_map.
+        frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
     bldg = (
         frappe.db.get_value("Accommodation Building", building, ["city"], as_dict=True)
         if building

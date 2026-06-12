@@ -157,6 +157,7 @@
    "label": "Completion Notes"
   },
   {
+   "allow_on_submit": 1,
    "description": "Photo evidence that maintenance work was completed. Required before closing.",
    "fieldname": "completion_photo",
    "fieldtype": "Attach Image",
@@ -202,11 +203,11 @@
    "label": "Cancellation"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "cancellation_reason",
    "fieldtype": "Small Text",
    "label": "Cancellation Reason",
-   "read_only": 0,
-   "allow_on_submit": 1
+   "read_only": 0
   },
   {
    "collapsible": 1,
@@ -237,12 +238,12 @@
    "search_index": 1
   },
   {
+   "fetch_from": "maintenance_request.issue_type",
+   "fetch_if_empty": 1,
    "fieldname": "issue_type",
    "fieldtype": "Select",
    "label": "Issue Type",
    "options": "Electrical\nPlumbing\nFurniture\nAir Conditioning\nFire Safety\nPest Control\nStructural\nOther",
-   "fetch_from": "maintenance_request.issue_type",
-   "fetch_if_empty": 1,
    "read_only": 1
   }
  ],
@@ -254,7 +255,7 @@
    "link_fieldname": "maintenance_work_order"
   }
  ],
- "modified": "2026-06-11 10:00:00.000000",
+ "modified": "2026-06-12 09:30:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Work Order",

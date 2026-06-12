@@ -47,19 +47,25 @@ frappe.ui.form.on("Accommodation Lease", {
 								frappe.msgprint({message: __("Expense Request Afmco DocType is not installed."), indicator: "red"});
 								return;
 							}
-							const doc = frappe.model.get_new_doc("Expense Request Afmco");
-							doc.tax_invoice_number = frm.doc.name;
-							doc.beneficiary_name = frm.doc.supplier;
-							doc.amount = selected.amount || frm.doc.rent_amount;
-							doc.project = frm.doc.project || "";
-							doc.cost_center = frm.doc.cost_center || "";
-							doc.jv_status = "JV Not Created";
-							doc.naming_series = "PR-.YYYY.-";
-							doc.date = frappe.datetime.nowdate();
-							doc.bank_payment_date = frappe.datetime.nowdate();
-							doc.payment_type = "Rent";
-							doc.remark = __("Rent payment generated for building: {0} under lease {1}", [frm.doc.building, frm.doc.name]);
-							frappe.set_route("Form", "Expense Request Afmco", doc.name);
+							// Accommodation Lease has no project / cost_center fields of its own.
+							// Resolve the cost center from the linked building (matching the
+							// accommodation_assignment building.default_cost_center resolution);
+							// the lease carries no project, so it is left blank.
+							frappe.db.get_value("Accommodation Building", frm.doc.building, "default_cost_center").then(res => {
+								const doc = frappe.model.get_new_doc("Expense Request Afmco");
+								doc.tax_invoice_number = frm.doc.name;
+								doc.beneficiary_name = frm.doc.supplier;
+								doc.amount = selected.amount || frm.doc.rent_amount;
+								doc.project = "";
+								doc.cost_center = (res && res.message && res.message.default_cost_center) || "";
+								doc.jv_status = "JV Not Created";
+								doc.naming_series = "PR-.YYYY.-";
+								doc.date = frappe.datetime.nowdate();
+								doc.bank_payment_date = frappe.datetime.nowdate();
+								doc.payment_type = "Rent";
+								doc.remark = __("Rent payment generated for building: {0} under lease {1}", [frm.doc.building, frm.doc.name]);
+								frappe.set_route("Form", "Expense Request Afmco", doc.name);
+							});
 						}).catch(() => {
 							frappe.msgprint({message: __("Could not verify the Expense Request Afmco DocType. Please try again."), indicator: "red"});
 						});

@@ -256,7 +256,7 @@ Auto-Generate Beds,توليد الأسرة تلقائياً
 Auto-calculated on validate. Positive = above average; negative = below average.,يُحسب آلياً عند التحقق. الموجب = أعلى من المتوسط؛ السالب = أقل من المتوسط.
 Auto-computed sum of all payment schedule rows.,مجموع محسوب آلياً لكل أسطر جدول الدفعات.
 Auto-create Facility Asset Movement on Transfer,إنشاء حركة أصل مرفق آلياً عند النقل
-Auto-created on Submit,يُنشأ آلياً عند الاعتماد
+"Reference to a Purchase Invoice settling this visit, if any. Set externally; this DocType creates no Purchase Invoice.",إشارة إلى فاتورة شراء تُسوّي هذه الزيارة، إن وُجدت. تُضبط خارجياً؛ ولا يُنشئ هذا المستند أي فاتورة شراء.
 Auto-fetched from Building,يُجلب آلياً من المبنى
 Auto-filled from Utility Account. Adjust if different for this bill.,يُعبّأ تلقائياً من حساب الخدمة. عدّله إذا كان مختلفاً لهذه الفاتورة.
 Auto-generated from Accommodation Checkout {0}. Review replacement costs and submit.,أُنشئ تلقائيًا من مغادرة السكن {0}. راجع تكاليف الاستبدال ثم قدّمه.
@@ -1255,7 +1255,7 @@ Linked On,تاريخ الربط
 Linked Payment Entry,قيد الدفع المرتبط
 Linked Safety Inspection Report,تقرير فحص السلامة المرتبط
 Links,الروابط
-Links this asset to its ERPNext Asset record for depreciation tracking.,يربط هذا الأصل بسجل الأصل في ERPNext لتتبّع الإهلاك.
+Optional link to a native ERPNext Asset record. Informational cross-reference only; depreciation integration is configured separately.,رابط اختياري بسجل أصل في ERPNext. مرجع معلوماتي فقط؛ ويُهيّأ تكامل الإهلاك بشكل منفصل.
 Litres,اللترات
 Litres cannot be negative.,لا يمكن أن تكون اللترات سالبة.
 Live Inbox,الوارد المباشر
@@ -2542,7 +2542,7 @@ Water Tank Inspection Required,فحص خزان المياه مطلوب
 Web QR,رمز QR للويب
 Website,الموقع الإلكتروني
 Weekly,أسبوعي
-Weekly on-site safety field inspection. Generates maintenance requests on submit.,تفتيش سلامة ميداني أسبوعي. يُنشئ طلبات صيانة عند الاعتماد.
+Weekly on-site safety field inspection. Findings are recorded in the findings tables; no Maintenance Request is created automatically.,تفتيش سلامة ميداني أسبوعي. تُسجّل الملاحظات في جداول الملاحظات؛ ولا يُنشأ أي طلب صيانة آلياً.
 What do you need help with?,ما الذي تحتاج المساعدة فيه؟
 "When OFF (default), accommodation assignment does not touch Salary Structure Assignment.",عند الإيقاف (الافتراضي)، لا يمسّ تسكين السكن إسناد هيكل الراتب.
 "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",عند الإيقاف، تكون أسطر سجل السكن مذكرات تشغيلية دون أثر على دفتر الأستاذ العام.

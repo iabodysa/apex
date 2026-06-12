@@ -59,7 +59,7 @@
    "fieldtype": "Link",
    "label": "ERPNext Asset Record",
    "options": "Asset",
-   "description": "Links this asset to its ERPNext Asset record for depreciation tracking.",
+   "description": "Optional link to a native ERPNext Asset record. Informational cross-reference only; depreciation integration is configured separately.",
    "idx": 8
   },
   {
@@ -184,7 +184,8 @@
    "fieldtype": "Date",
    "label": "Last Inspected Date",
    "read_only": 1,
-   "idx": 19
+   "idx": 19,
+   "description": "Date of the most recent inspection of this asset. Set externally; no inspection flow stamps this automatically yet."
   },
   {
    "doctype": "DocField",
@@ -317,5 +318,5 @@
   "movement_count",
   "last_movement_date"
  ],
- "modified": "2026-06-09 09:00:00.000000"
+ "modified": "2026-06-12 09:59:52.443056"
 }

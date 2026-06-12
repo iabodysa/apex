@@ -58,6 +58,10 @@ class FuelClaim(Document):
 			frappe.throw(_("Invalid status: {0}").format(self.status))
 		if (self.claimed_litres or 0) <= 0:
 			frappe.throw(_("Claimed Litres must be greater than zero."))
+		# Guard the monetary side of the claim (the litres variance is already
+		# reconciled against the Fuel Consumption Ledger below).
+		if (self.claimed_amount or 0) < 0:
+			frappe.throw(_("Claimed Amount cannot be negative."))
 		self._set_financial_defaults()
 		self._compute_consumption()
 		self._guard_initial_status()

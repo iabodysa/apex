@@ -176,7 +176,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Auto-created on Submit",
+   "description": "Reference to a Purchase Invoice settling this visit, if any. Set externally; this DocType creates no Purchase Invoice.",
    "fieldname": "linked_purchase_invoice",
    "fieldtype": "Link",
    "label": "Purchase Invoice",
@@ -220,7 +220,7 @@
    "link_fieldname": "subcontractor_service_order"
   }
  ],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-06-12 09:59:52.443056",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Subcontractor Service Order",

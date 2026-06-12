@@ -30,6 +30,10 @@ from frappe.model.document import Document
 class MovementCostTransfer(Document):
 	def validate(self):
 		self._set_company_default()
+		# A negative amount passes the reqd check; a cost transfer must move a
+		# positive amount between projects.
+		if (self.amount or 0) <= 0:
+			frappe.throw(_("Amount must be greater than zero."))
 		self._validate_distinct_targets()
 		self._stamp_approver()
 

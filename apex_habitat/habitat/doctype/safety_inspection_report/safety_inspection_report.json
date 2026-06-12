@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-24 18:03:15.959201",
- "description": "Weekly on-site safety field inspection. Generates maintenance requests on submit.",
+ "description": "Weekly on-site safety field inspection. Findings are recorded in the findings tables; no Maintenance Request is created automatically.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -173,7 +173,7 @@
    "link_fieldname": "linked_inspection"
   }
  ],
- "modified": "2026-06-08 16:00:00.000000",
+ "modified": "2026-06-12 09:59:52.443056",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Inspection Report",
