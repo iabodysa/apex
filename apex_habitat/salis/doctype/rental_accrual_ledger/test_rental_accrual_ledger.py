@@ -275,8 +275,8 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
     # --- report Settled / Outstanding split reflects reality -----------------
 
     def test_report_split_reflects_stamping(self):
-        in1 = self._accrual_row(self.office, self.accrual_date, amount=100)
-        in2 = self._accrual_row(self.office, self.accrual_date, amount=150)
+        self._accrual_row(self.office, self.accrual_date, amount=100)
+        self._accrual_row(self.office, self.accrual_date, amount=150)
 
         # Before settlement: all outstanding.
         _, before = rental_cost_by_office(
