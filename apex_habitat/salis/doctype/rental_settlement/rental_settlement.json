@@ -15,19 +15,21 @@
   "rental_settlement_sec_vehicles",
   "vehicles",
   "rental_settlement_sec_totals",
-  "accrued_total",
-  "ledger_accrued_total",
   "rental_settlement_totals_col1",
   "claimed_total",
-  "ledger_variance",
   "rental_settlement_totals_col2",
+  "accrued_total",
+  "ledger_accrued_total",
+  "rental_settlement_totals_col3",
   "variance",
+  "ledger_variance",
+  "rental_settlement_sec_payment",
+  "payment_request",
   "rental_settlement_sec_system",
   "naming_series",
   "company",
   "requested_by",
   "rental_settlement_system_col",
-  "payment_request",
   "amended_from"
  ],
  "fields": [
@@ -90,7 +92,21 @@
   {
    "fieldname": "rental_settlement_sec_totals",
    "fieldtype": "Section Break",
-   "label": "Totals"
+   "label": "Reconciliation"
+  },
+  {
+   "fieldname": "rental_settlement_totals_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Amount claimed by the rental office.",
+   "fieldname": "claimed_total",
+   "fieldtype": "Currency",
+   "label": "Claimed Total"
+  },
+  {
+   "fieldname": "rental_settlement_totals_col2",
+   "fieldtype": "Column Break"
   },
   {
    "description": "Accrued total. Sum of the vehicle line amounts when lines are entered; otherwise derived from the linked Rental Accrual Ledger.",
@@ -107,14 +123,15 @@
    "read_only": 1
   },
   {
-   "fieldname": "rental_settlement_totals_col1",
+   "fieldname": "rental_settlement_totals_col3",
    "fieldtype": "Column Break"
   },
   {
-   "description": "Amount claimed by the rental office.",
-   "fieldname": "claimed_total",
+   "description": "Claimed Total minus Accrued Total.",
+   "fieldname": "variance",
    "fieldtype": "Currency",
-   "label": "Claimed Total"
+   "label": "Variance",
+   "read_only": 1
   },
   {
    "description": "Accrued Total minus Ledger Accrued Total — non-zero means the entered vehicle lines disagree with the accrual ledger.",
@@ -124,14 +141,17 @@
    "read_only": 1
   },
   {
-   "fieldname": "rental_settlement_totals_col2",
-   "fieldtype": "Column Break"
+   "fieldname": "rental_settlement_sec_payment",
+   "fieldtype": "Section Break",
+   "label": "Payment",
+   "collapsible": 1
   },
   {
-   "description": "Claimed Total minus Accrued Total.",
-   "fieldname": "variance",
-   "fieldtype": "Currency",
-   "label": "Variance",
+   "description": "Reference to the raised Salis Payment Request. Set automatically; this DocType never posts GL.",
+   "fieldname": "payment_request",
+   "fieldtype": "Link",
+   "label": "Payment Request",
+   "options": "Salis Payment Request",
    "read_only": 1
   },
   {
@@ -169,14 +189,6 @@
   {
    "fieldname": "rental_settlement_system_col",
    "fieldtype": "Column Break"
-  },
-  {
-   "description": "Reference to the raised Salis Payment Request. Set automatically; this DocType never posts GL.",
-   "fieldname": "payment_request",
-   "fieldtype": "Link",
-   "label": "Payment Request",
-   "options": "Salis Payment Request",
-   "read_only": 1
   },
   {
    "fieldname": "amended_from",

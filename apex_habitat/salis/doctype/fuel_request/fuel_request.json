@@ -15,27 +15,30 @@
   "status",
   "fuel_request_sec_subject",
   "vehicle",
-  "driver",
   "fuel_request_sec_subject_col1",
   "project",
+  "fuel_request_sec_subject_col2",
+  "driver",
   "fuel_request_sec_fuel_account",
   "fuel_quota",
   "fuel_request_sec_fuel_account_col1",
   "fuel_platform",
+  "fuel_request_sec_amounts",
+  "requested_litres",
+  "fuel_request_sec_amounts_col1",
+  "topup_litres",
+  "fuel_request_sec_amounts_col2",
+  "amount",
+  "fuel_request_sec_temporary",
+  "is_temporary",
+  "fuel_request_sec_temporary_col1",
+  "revert_due_date",
+  "fuel_request_sec_temporary_col2",
+  "reverted",
   "fuel_request_sec_chip_details",
   "chip_number",
   "fuel_request_sec_chip_details_col1",
   "action",
-  "fuel_request_sec_amounts",
-  "requested_litres",
-  "topup_litres",
-  "fuel_request_sec_amounts_col1",
-  "amount",
-  "fuel_request_sec_temporary",
-  "is_temporary",
-  "reverted",
-  "fuel_request_sec_temporary_col1",
-  "revert_due_date",
   "fuel_request_sec_chip",
   "inactivity_evidence",
   "owner_acknowledged",
@@ -45,18 +48,18 @@
   "fuel_request_sec_actors_col1",
   "approved_by",
   "fuel_request_sec_system",
-  "quota_applied",
-  "ledgered",
+  "naming_series",
+  "amended_from",
   "fuel_request_sec_system_col1",
   "migrated_from",
-  "amended_from",
-  "naming_series"
+  "quota_applied",
+  "ledgered"
  ],
  "fields": [
   {
    "fieldname": "__tab_0",
    "fieldtype": "Tab Break",
-   "label": "Overview"
+   "label": "Fuel Request"
   },
   {
    "fieldname": "fuel_request_sec_request",
@@ -115,17 +118,6 @@
    "search_index": 1
   },
   {
-   "fetch_from": "vehicle.current_driver",
-   "fetch_if_empty": 1,
-   "fieldname": "driver",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Driver",
-   "options": "Salis Driver",
-   "search_index": 1
-  },
-  {
    "fieldname": "fuel_request_sec_subject_col1",
    "fieldtype": "Column Break"
   },
@@ -135,6 +127,21 @@
    "in_standard_filter": 1,
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "fieldname": "fuel_request_sec_subject_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.current_driver",
+   "fetch_if_empty": 1,
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "search_index": 1
   },
   {
    "fieldname": "fuel_request_sec_fuel_account",
@@ -160,6 +167,75 @@
    "fieldtype": "Link",
    "label": "Fuel Platform",
    "options": "Fuel Platform"
+  },
+  {
+   "fieldname": "fuel_request_sec_amounts",
+   "fieldtype": "Section Break",
+   "label": "Amounts",
+   "depends_on": "eval:doc.request_type=='Standard' || doc.request_type=='Top-up'"
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Standard'",
+   "fieldname": "requested_litres",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Requested Litres"
+  },
+  {
+   "fieldname": "fuel_request_sec_amounts_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Top-up'",
+   "fieldname": "topup_litres",
+   "fieldtype": "Float",
+   "label": "Top-up Litres"
+  },
+  {
+   "fieldname": "fuel_request_sec_amounts_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Standard'",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount (SAR)"
+  },
+  {
+   "fieldname": "fuel_request_sec_temporary",
+   "fieldtype": "Section Break",
+   "label": "Temporary Top-up",
+   "depends_on": "eval:doc.request_type=='Top-up'"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.request_type=='Top-up'",
+   "fieldname": "is_temporary",
+   "fieldtype": "Check",
+   "label": "Is Temporary"
+  },
+  {
+   "fieldname": "fuel_request_sec_temporary_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.request_type=='Top-up' && doc.is_temporary==1",
+   "fieldname": "revert_due_date",
+   "fieldtype": "Date",
+   "label": "Revert Due Date"
+  },
+  {
+   "fieldname": "fuel_request_sec_temporary_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "depends_on": "eval:doc.request_type=='Top-up'",
+   "description": "Set when a temporary top-up has been reverted (by the daily auto-revert job or manually). Allowed on submit so the scheduler can flip it.",
+   "fieldname": "reverted",
+   "fieldtype": "Check",
+   "label": "Reverted"
   },
   {
    "fieldname": "fuel_request_sec_chip_details",
@@ -188,71 +264,11 @@
    "options": "\nIssue\nReplace\nCancel"
   },
   {
-   "fieldname": "fuel_request_sec_amounts",
-   "fieldtype": "Section Break",
-   "label": "Amounts",
-   "depends_on": "eval:doc.request_type=='Standard' || doc.request_type=='Top-up'"
-  },
-  {
-   "depends_on": "eval:doc.request_type=='Standard'",
-   "fieldname": "requested_litres",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Requested Litres"
-  },
-  {
-   "depends_on": "eval:doc.request_type=='Top-up'",
-   "fieldname": "topup_litres",
-   "fieldtype": "Float",
-   "label": "Top-up Litres"
-  },
-  {
-   "fieldname": "fuel_request_sec_amounts_col1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.request_type=='Standard'",
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "label": "Amount (SAR)"
-  },
-  {
-   "fieldname": "fuel_request_sec_temporary",
-   "fieldtype": "Section Break",
-   "label": "Temporary Top-up",
-   "depends_on": "eval:doc.request_type=='Top-up'"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.request_type=='Top-up'",
-   "fieldname": "is_temporary",
-   "fieldtype": "Check",
-   "label": "Is Temporary"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "depends_on": "eval:doc.request_type=='Top-up'",
-   "description": "Set when a temporary top-up has been reverted (by the daily auto-revert job or manually). Allowed on submit so the scheduler can flip it.",
-   "fieldname": "reverted",
-   "fieldtype": "Check",
-   "label": "Reverted"
-  },
-  {
-   "fieldname": "fuel_request_sec_temporary_col1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.request_type=='Top-up' && doc.is_temporary==1",
-   "fieldname": "revert_due_date",
-   "fieldtype": "Date",
-   "label": "Revert Due Date"
-  },
-  {
    "fieldname": "fuel_request_sec_chip",
    "fieldtype": "Section Break",
    "label": "Chip Cancellation",
-   "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'"
+   "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'",
+   "collapsible": 1
   },
   {
    "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'",
@@ -270,12 +286,13 @@
   {
    "fieldname": "__tab_1",
    "fieldtype": "Tab Break",
-   "label": "System Info"
+   "label": "System"
   },
   {
    "fieldname": "fuel_request_sec_actors",
    "fieldtype": "Section Break",
-   "label": "Actors"
+   "label": "Actors",
+   "collapsible": 1
   },
   {
    "description": "Defaults to the session user. The workflow approval transition is SoD-gated on this field (approver ≠ requester).",
@@ -302,7 +319,40 @@
   {
    "fieldname": "fuel_request_sec_system",
    "fieldtype": "Section Break",
-   "label": "System"
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "default": "FR-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "FR-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Fuel Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "fuel_request_sec_system_col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Source DocType:name this row was migrated from when Fuel Topup/Chip Request DocTypes merged into Fuel Request. Blank for native requests.",
+   "fieldname": "migrated_from",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Migrated From",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "default": "0",
@@ -325,38 +375,6 @@
    "label": "Ledgered",
    "no_copy": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "fuel_request_sec_system_col1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Source DocType:name this row was migrated from when Fuel Topup/Chip Request DocTypes merged into Fuel Request. Blank for native requests.",
-   "fieldname": "migrated_from",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Migrated From",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Fuel Request",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "default": "FR-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "FR-.######",
-   "reqd": 1
   }
  ],
  "is_submittable": 1,
