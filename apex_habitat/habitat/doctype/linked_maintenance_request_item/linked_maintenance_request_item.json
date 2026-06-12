@@ -22,6 +22,7 @@
   },
   {
    "doctype": "DocField",
+   "fetch_from": "maintenance_request.room",
    "fieldname": "room",
    "fieldtype": "Link",
    "label": "Room",

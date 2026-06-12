@@ -79,6 +79,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "vehicle.current_driver",
    "fieldname": "related_driver",
    "fieldtype": "Link",
    "label": "Related Driver",

@@ -79,6 +79,7 @@
    "label": "Vehicle and Driver"
   },
   {
+   "fetch_from": "route_plan.vehicle",
    "fieldname": "vehicle",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -90,6 +91,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "route_plan.driver",
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_list_view": 1,

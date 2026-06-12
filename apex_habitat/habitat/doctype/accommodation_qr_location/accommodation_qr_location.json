@@ -39,12 +39,14 @@
    "label": "Scope"
   },
   {
+   "fetch_from": "building.site",
    "fieldname": "accommodation_site",
    "fieldtype": "Link",
    "label": "Accommodation Site",
    "options": "Accommodation Site"
   },
   {
+   "fetch_from": "room.building",
    "fieldname": "building",
    "fieldtype": "Link",
    "label": "Building",

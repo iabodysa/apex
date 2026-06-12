@@ -54,6 +54,7 @@
    "search_index": 1
   },
   {
+   "fetch_from": "vehicle.current_driver",
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_list_view": 1,

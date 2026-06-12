@@ -56,6 +56,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "custody_return.building",
    "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,

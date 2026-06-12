@@ -62,6 +62,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "vehicle.current_driver",
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_standard_filter": 1,

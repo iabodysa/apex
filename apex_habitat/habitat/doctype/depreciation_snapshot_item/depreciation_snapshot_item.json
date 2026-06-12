@@ -50,6 +50,7 @@
    "fieldtype": "Link",
    "label": "Depreciation Policy",
    "options": "Operational Depreciation Policy",
+   "fetch_from": "article.depreciation_policy",
    "idx": 5
   }
  ],

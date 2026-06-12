@@ -108,6 +108,7 @@
    "search_index": 1
   },
   {
+   "fetch_from": "vehicle.current_driver",
    "fieldname": "driver",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -133,6 +134,7 @@
    "options": "Supplier"
   },
   {
+   "fetch_from": "vehicle.rental_office",
    "fieldname": "rental_office",
    "fieldtype": "Link",
    "label": "Rental Office",

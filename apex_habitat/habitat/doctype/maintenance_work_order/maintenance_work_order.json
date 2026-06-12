@@ -120,6 +120,7 @@
    "label": "Procurement"
   },
   {
+   "fetch_from": "maintenance_request.subcontractor_dispatched",
    "fieldname": "subcontractor_service_order",
    "fieldtype": "Link",
    "label": "Subcontractor Service Order",

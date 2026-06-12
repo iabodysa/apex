@@ -42,6 +42,7 @@
    "search_index": 1
   },
   {
+   "fetch_from": "vehicle.rental_office",
    "fieldname": "rental_office",
    "fieldtype": "Link",
    "in_list_view": 1,

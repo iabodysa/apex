@@ -95,6 +95,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "transport_request.assigned_vehicle",
    "fieldname": "vehicle",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -102,6 +103,7 @@
    "options": "Salis Vehicle"
   },
   {
+   "fetch_from": "transport_request.assigned_driver",
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",

@@ -99,6 +99,7 @@
    "label": "Placement"
   },
   {
+   "fetch_from": "room.building",
    "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -109,6 +110,7 @@
    "search_index": 1
   },
   {
+   "fetch_from": "bed.room",
    "fieldname": "room",
    "fieldtype": "Link",
    "in_list_view": 1,
