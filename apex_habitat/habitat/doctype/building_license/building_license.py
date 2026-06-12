@@ -45,7 +45,7 @@ class BuildingLicense(Document):
             self.last_renewal_date = today()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def renew(name: str, new_expiry_date: str | None = None, extend_days: int | None = None) -> dict:
     """Renew a Building License: roll ``expiry_date`` forward, stamp
     ``last_renewal_date`` = today, and reset ``status`` to ``Active``.
