@@ -40,12 +40,14 @@
   "purpose",
   "__tab_2",
   "transport_request_sec_assignment",
-  "status",
-  "route_plan",
   "assigned_vehicle",
-  "transport_request_sec_assignment_col1",
   "assigned_driver",
+  "transport_request_sec_assignment_col1",
+  "route_plan",
   "dispatch_trip",
+  "transport_request_sec_completion",
+  "status",
+  "transport_request_sec_completion_col1",
   "fulfilled_on",
   "__tab_3",
   "transport_request_sec_tracking",
@@ -256,8 +258,7 @@
   {
    "fieldname": "transport_request_sec_assignment",
    "fieldtype": "Section Break",
-   "label": "Status and Assignment",
-   "collapsible": 1
+   "label": "Assignment"
   },
   {
    "allow_on_submit": 1,
@@ -301,6 +302,15 @@
    "options": "Dispatch Trip"
   },
   {
+   "fieldname": "transport_request_sec_completion",
+   "fieldtype": "Section Break",
+   "label": "Completion"
+  },
+  {
+   "fieldname": "transport_request_sec_completion_col1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "fulfilled_on",
    "fieldtype": "Datetime",
    "label": "Fulfilled On",
@@ -314,7 +324,8 @@
   {
    "fieldname": "transport_request_sec_tracking",
    "fieldtype": "Section Break",
-   "label": "Source and Tracking"
+   "label": "Source and Tracking",
+   "collapsible": 1
   },
   {
    "default": "Desk",

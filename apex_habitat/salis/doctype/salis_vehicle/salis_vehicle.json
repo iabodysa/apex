@@ -10,7 +10,6 @@
   "vehicle_tab_overview",
   "vehicle_sec_identity",
   "plate_number",
-  "plate_normalized",
   "vehicle_identity_col",
   "vehicle_category",
   "vehicle_sec_status",
@@ -34,8 +33,11 @@
   "compliance_documents",
   "vehicle_sec_notes",
   "notes",
+  "vehicle_tab_system",
   "vehicle_sec_system",
-  "naming_series"
+  "naming_series",
+  "vehicle_sys_col",
+  "plate_normalized"
  ],
  "fields": [
   {
@@ -55,14 +57,6 @@
    "in_standard_filter": 1,
    "label": "Plate Number",
    "reqd": 1,
-   "search_index": 1
-  },
-  {
-   "description": "Normalized plate (spaces removed, uppercased). Set automatically.",
-   "fieldname": "plate_normalized",
-   "fieldtype": "Data",
-   "label": "Plate (Normalized)",
-   "read_only": 1,
    "search_index": 1
   },
   {
@@ -198,10 +192,14 @@
    "label": "Notes"
   },
   {
+   "fieldname": "vehicle_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
    "fieldname": "vehicle_sec_system",
    "fieldtype": "Section Break",
-   "label": "System",
-   "collapsible": 1
+   "label": "Identifiers"
   },
   {
    "default": "VEH-.######",
@@ -213,6 +211,18 @@
    "print_hide": 1,
    "report_hide": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "vehicle_sys_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Normalized plate (spaces removed, uppercased). Set automatically.",
+   "fieldname": "plate_normalized",
+   "fieldtype": "Data",
+   "label": "Plate (Normalized)",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,

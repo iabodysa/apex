@@ -120,6 +120,11 @@
   },
   {
    "doctype": "DocField",
+   "fieldname": "building_license_renewal_col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "doctype": "DocField",
    "fieldname": "attached_document",
    "fieldtype": "Attach",
    "label": "Certificate File"
@@ -234,6 +239,7 @@
   "renewal_cost_estimate_sar",
   "building_license_renewal_col",
   "responsible_role",
+  "building_license_renewal_col2",
   "attached_document",
   "building_license_sec_system",
   "status",

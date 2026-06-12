@@ -22,16 +22,18 @@
   "maintenance_findings",
   "safety_inspection_report_sec_table_linked_maintenance_requests",
   "linked_maintenance_requests",
+  "safety_inspection_report_tab_system",
   "safety_inspection_report_sec_system",
   "naming_series",
-  "submitted_to",
-  "amended_from"
+  "amended_from",
+  "safety_inspection_report_system_col",
+  "submitted_to"
  ],
  "fields": [
   {
    "fieldname": "safety_inspection_report_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Overview"
+   "label": "Inspection"
   },
   {
    "fieldname": "safety_inspection_report_sec_overview",
@@ -86,7 +88,7 @@
    "collapsible": 1,
    "fieldname": "safety_inspection_report_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Additional Information"
+   "label": "Previous Repairs"
   },
   {
    "fieldname": "previous_repair_notes",
@@ -116,6 +118,7 @@
    "options": "Inspection Finding Item"
   },
   {
+   "collapsible": 1,
    "fieldname": "safety_inspection_report_sec_table_linked_maintenance_requests",
    "fieldtype": "Section Break",
    "label": "Generated Maintenance Requests"
@@ -128,10 +131,14 @@
    "read_only": 1
   },
   {
+   "fieldname": "safety_inspection_report_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
    "fieldname": "safety_inspection_report_sec_system",
    "fieldtype": "Section Break",
-   "label": "System",
-   "collapsible": 1
+   "label": "System"
   },
   {
    "default": "FSI-.YYYY.-.#####",
@@ -143,13 +150,6 @@
    "reqd": 1
   },
   {
-   "description": "Admin Manager, Operations Director, General Manager",
-   "fieldname": "submitted_to",
-   "fieldtype": "Small Text",
-   "label": "Submitted To (Recipients)",
-   "read_only": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -158,6 +158,17 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "safety_inspection_report_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Admin Manager, Operations Director, General Manager",
+   "fieldname": "submitted_to",
+   "fieldtype": "Small Text",
+   "label": "Submitted To (Recipients)",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
