@@ -16,8 +16,10 @@
   "vehicles",
   "rental_settlement_sec_totals",
   "accrued_total",
+  "ledger_accrued_total",
   "rental_settlement_totals_col1",
   "claimed_total",
+  "ledger_variance",
   "rental_settlement_totals_col2",
   "variance",
   "rental_settlement_sec_system",
@@ -91,10 +93,17 @@
    "label": "Totals"
   },
   {
-   "description": "Sum of the vehicle line amounts (accrued).",
+   "description": "Accrued total. Sum of the vehicle line amounts when lines are entered; otherwise derived from the linked Rental Accrual Ledger.",
    "fieldname": "accrued_total",
    "fieldtype": "Currency",
    "label": "Accrued Total",
+   "read_only": 1
+  },
+  {
+   "description": "Sum of the linked Rental Accrual Ledger rows for this office and period — the machine-written source of truth. Reference cross-check.",
+   "fieldname": "ledger_accrued_total",
+   "fieldtype": "Currency",
+   "label": "Ledger Accrued Total",
    "read_only": 1
   },
   {
@@ -106,6 +115,13 @@
    "fieldname": "claimed_total",
    "fieldtype": "Currency",
    "label": "Claimed Total"
+  },
+  {
+   "description": "Accrued Total minus Ledger Accrued Total — non-zero means the entered vehicle lines disagree with the accrual ledger.",
+   "fieldname": "ledger_variance",
+   "fieldtype": "Currency",
+   "label": "Ledger Variance",
+   "read_only": 1
   },
   {
    "fieldname": "rental_settlement_totals_col2",
@@ -181,7 +197,7 @@
    "link_fieldname": "rental_settlement"
   }
  ],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-06-12 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Settlement",

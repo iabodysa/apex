@@ -188,6 +188,10 @@ scheduler_events = {
     ],
     "monthly": [
         "apex_habitat.salis.fuel_engine.monthly_fuel_reconciliation",
+        # Mirror of the fuel reconciliation: flag any Rental Office that still has
+        # unsettled Rental Accrual Ledger rows for the just-closed period (no
+        # submitted Rental Settlement claimed them) with an Operations Alert.
+        "apex_habitat.salis.rental_engine.monthly_rental_reconciliation",
     ],
 }
 

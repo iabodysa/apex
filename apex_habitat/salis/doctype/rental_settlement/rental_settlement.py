@@ -2,9 +2,22 @@
 
 Monthly reconciliation of a Rental Office's claim against accrued rental days.
 ``validate`` recomputes ``accrued_total`` from the vehicle lines (and the line
-amounts themselves) and the ``variance`` against the claimed total. On submit,
+amounts themselves), cross-checks it against the LINKED Rental Accrual Ledger
+total for the same office+period (``ledger_accrued_total`` /
+``ledger_variance``), and the ``variance`` against the claimed total. On submit,
 ``create_payment_request`` may raise a finance-exclusive Salis Payment Request
 (expense_type "Rental") referencing this settlement.
+
+Settlement <-> Accrual reconciliation (the second half of the documented
+rental-accrual loop): when this settlement reaches a settled state (it is
+submitted/Approved, or later marked Paid), the unsettled Rental Accrual Ledger
+rows for the same ``rental_office`` + ``period_month`` are stamped
+``rental_settlement = <this> / settled = 1`` (``rental_engine.stamp_settlement``;
+the ledger grants no human write role so the ``frappe.db.set_value`` bypass is
+the correct write path). Cancelling the settlement releases those rows again
+(``rental_engine.release_settlement``). The stamp is idempotent — a row already
+settled is never re-stamped, and a row owned by another settlement is never
+silently re-pointed.
 
 Status transitions are owned by the native **Rental Settlement Workflow** (see
 ``salis/workflow/rental_settlement_workflow/``), not by this controller. In
@@ -12,8 +25,8 @@ particular the "Mark Paid" transition is restricted to the **Finance Manager**
 role and carries the Segregation-of-Duties condition ``requested_by !=
 session.user`` so the finance approver can never be the (server-stamped)
 requester. This controller keeps only the *data* guards (totals, variance, the
-known-status check) and the server-side requester stamp that the SoD gate
-relies on.
+known-status check), the server-side requester stamp that the SoD gate relies
+on, and the accrual-ledger stamping described above.
 
 This controller posts NO General Ledger / accounting entry. The Salis Payment
 Request it raises is a payment request record; Finance posts the actual
@@ -35,6 +48,11 @@ VALID_STATUSES = (
     "Disputed",
     "Cancelled",
 )
+
+# The settled states: once the settlement is Approved (the Workflow submit point)
+# or Paid, its rental_office+period accrual rows are considered settled and are
+# stamped onto it. Both are docstatus=1 in the Rental Settlement Workflow.
+SETTLED_STATUSES = ("Approved", "Paid")
 
 
 class RentalSettlement(Document):
@@ -68,10 +86,62 @@ class RentalSettlement(Document):
                 row.amount = computed
             accrued += flt(row.amount)
 
-        self.accrued_total = flt(accrued)
+        # Cross-check / derive against the LINKED Rental Accrual Ledger rows for
+        # this office+period — the machine-written source of truth for what was
+        # actually accrued. When the office has no hand-entered vehicle lines, the
+        # ledger figure IS the accrued total (the controller no longer depends on
+        # someone re-keying the days). When lines ARE present, the ledger figure
+        # is still stored alongside so the variance against reality is visible and
+        # auditable rather than the settlement only checking its own arithmetic.
+        from apex_habitat.salis.rental_engine import linked_accrued_total
+
+        ledger_total = linked_accrued_total(self.rental_office, self.period_month)
+        self.ledger_accrued_total = flt(ledger_total)
+
+        if accrued:
+            self.accrued_total = flt(accrued)
+        else:
+            self.accrued_total = flt(ledger_total)
+
+        self.ledger_variance = flt(self.accrued_total) - flt(ledger_total)
         self.variance = flt(self.claimed_total) - flt(self.accrued_total)
 
-    # Submit/cancel are recorded natively (Version track_changes + auto-comment).
+    # --- Settlement <-> Accrual Ledger stamping --------------------------------
+    # Status transitions (incl. the submit at "Approved") are driven by the
+    # Rental Settlement Workflow, which saves the document. on_submit covers a
+    # direct submit; on_update_after_submit covers the post-submit workflow
+    # transitions (Approve -> Approved, Mark Paid -> Paid) that the controller
+    # would otherwise never see. Both funnel into one idempotent stamp.
+
+    def on_submit(self):
+        self._sync_accrual_stamp()
+
+    def on_update_after_submit(self):
+        self._sync_accrual_stamp()
+
+    def on_cancel(self):
+        # Release the rows so a cancelled settlement no longer counts as settled
+        # in the Rental Cost by Office report and a re-issued settlement can claim
+        # the same accrual days.
+        from apex_habitat.salis.rental_engine import release_settlement
+
+        release_settlement(self.name)
+
+    def _sync_accrual_stamp(self):
+        """Stamp this settlement's accrual rows once it is in a settled state.
+
+        Idempotent: ``stamp_settlement`` only touches rows that are still
+        ``settled = 0`` and unlinked (or already linked to THIS settlement), so
+        repeated post-submit saves (Approve, then Mark Paid) never double-stamp,
+        and a row already owned by another settlement is never re-pointed. A
+        not-yet-settled docstatus=1 state (none today, but future-proof) stamps
+        nothing.
+        """
+        if self.status not in SETTLED_STATUSES:
+            return
+        from apex_habitat.salis.rental_engine import stamp_settlement
+
+        stamp_settlement(self.name, self.rental_office, self.period_month)
 
     @frappe.whitelist(methods=["POST"])
     def create_payment_request(self):

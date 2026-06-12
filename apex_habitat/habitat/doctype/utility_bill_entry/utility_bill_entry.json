@@ -39,7 +39,6 @@
   "utility_bill_entry_sec_variance",
   "variance_from_avg_pct",
   "utility_bill_entry_variance_col",
-  "variance_alert_sent",
   "utility_bill_entry_sec_system",
   "cancellation_reason",
   "linked_payment_entry",
@@ -121,7 +120,7 @@
   {
    "fieldname": "consumption_units",
    "fieldtype": "Float",
-   "label": "Consumption (kWh / m\u00b3)"
+   "label": "Consumption (kWh / m³)"
   },
   {
    "fieldname": "utility_bill_meter_sec",
@@ -145,7 +144,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Computed: Current Reading \u2212 Previous Reading",
+   "description": "Computed: Current Reading − Previous Reading",
    "fieldname": "meter_units_consumed",
    "fieldtype": "Float",
    "label": "Units Consumed",
@@ -246,13 +245,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "variance_alert_sent",
-   "fieldtype": "Check",
-   "label": "Variance Alert Sent",
-   "read_only": 1
-  },
-  {
    "fieldname": "utility_bill_entry_sec_system",
    "fieldtype": "Section Break",
    "label": "Bookkeeping",
@@ -267,7 +259,7 @@
    "description": "Required to cancel a submitted bill; recorded on the reversal posted to the Accommodation Ledger."
   },
   {
-   "description": "Draft Payment Entry created on submit.",
+   "description": "Reference to a Payment Entry settling this bill, if any. Set externally; this controller posts no Payment Entry.",
    "fieldname": "linked_payment_entry",
    "fieldtype": "Link",
    "label": "Payment Entry",
@@ -295,7 +287,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-11 12:00:00.000000",
+ "modified": "2026-06-12 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Utility Bill Entry",
