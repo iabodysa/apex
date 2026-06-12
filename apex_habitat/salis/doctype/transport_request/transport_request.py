@@ -6,11 +6,19 @@ workflow enforces the role per transition, the Segregation-of-Duties gate
 (approver != requester) and the Delegation-of-Authority tier escalation via its
 transition ``condition``s.
 
-This controller keeps only the *data* guards: the service_line -> request_type
-pairing, the per-request-type required fields/evidence, and the **server-side
-DoA derivation** that sets ``needs_operations`` so the workflow's tier gate
-cannot be under-stated by a client. ``worker_count`` and ``trips_this_month``
+This controller keeps only the *data* guards: the transport-type (``service_line``)
+-> request_type consistency, the per-request-type required fields/evidence, and the
+**server-side DoA derivation** that sets ``needs_operations`` so the workflow's tier
+gate cannot be under-stated by a client. ``worker_count`` and ``trips_this_month``
 are likewise derived server-side, never trusted from the form.
+
+``service_line`` is the **transport type** (AFMCO Movement Department
+coordination): ``Site Transport`` (gov item 60 — accommodation->site workforce
+transport), ``Inter-City Relocation`` (gov item 61 — inter-city workforce
+relocation) and ``Administrative Trip`` (gov item 62 — document/administrative
+trips). The first two carry a worker manifest; an Administrative Trip is a simple
+trip and carries none. Rider-vehicle custody (gov item 63) is NOT a transport
+request — it is handled by Vehicle Assignment + Vehicle Handover.
 """
 
 from __future__ import annotations
@@ -29,15 +37,17 @@ VALID_STATUSES = (
     "Cancelled",
 )
 
-# Allowed request types per service line (two-division service model).
-SERVICE_LINE_REQUEST_TYPES = {
-    "Workers": (
-        "Accommodation to Project Shuttle",
-        "Inter-City Relocation",
-    ),
-    "Representatives": (
-        "Administrative Trip / Document Signing",
-    ),
+# Transport types that move the workforce and therefore carry a worker manifest
+# (workers table + accommodation building). An Administrative Trip carries none.
+WORKER_MANIFEST_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
+
+# Each transport type (``service_line``) implies exactly one finer ``request_type``.
+# This keeps the two trip-type fields consistent without re-introducing any
+# Workers/Representatives binary; the per-request_type rules below then apply.
+SERVICE_LINE_REQUEST_TYPE = {
+    "Site Transport": "Accommodation to Project Shuttle",
+    "Inter-City Relocation": "Inter-City Relocation",
+    "Administrative Trip": "Administrative Trip / Document Signing",
 }
 
 
@@ -66,29 +76,32 @@ class TransportRequest(Document):
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
-        # Enforce the service_line -> request_type pairing (two-division model).
-        if self.service_line and self.request_type:
-            allowed = SERVICE_LINE_REQUEST_TYPES.get(self.service_line, ())
-            if self.request_type not in allowed:
-                frappe.throw(
-                    _("Request Type {0} is not valid for the {1} service line.").format(
-                        self.request_type, self.service_line
+        # The transport type (service_line) implies its finer request_type. Default
+        # an unset request_type from it; reject a request_type that contradicts the
+        # transport type so the two trip-type fields can never diverge. This guards
+        # the data even if the depends_on form rules are bypassed (web/API).
+        if self.service_line:
+            implied = SERVICE_LINE_REQUEST_TYPE.get(self.service_line)
+            if implied:
+                if not self.request_type:
+                    self.request_type = implied
+                elif self.request_type != implied:
+                    frappe.throw(
+                        _("Request Type {0} is not valid for the {1} transport type.").format(
+                            self.request_type, self.service_line
+                        )
                     )
-                )
 
-        # Keep the two movement kinds strictly separated: a Representative trip
-        # is an administrative person-movement and must NEVER carry labour-housing
-        # context (accommodation building or a worker manifest), and a Worker trip
-        # must never name a Representative. This guards the data even if the
-        # depends_on / mandatory_depends_on form rules are bypassed (web/API).
-        if self.service_line == "Representatives":
+        # The worker manifest (worker rows table + accommodation building) belongs
+        # ONLY to a workforce move (Site Transport / Inter-City Relocation). A
+        # non-workforce transport type — an Administrative Trip — is a simple
+        # document/administrative trip and must carry none. Guards the data even if
+        # the depends_on form rules are bypassed (web/API).
+        if self.service_line and self.service_line not in WORKER_MANIFEST_SERVICE_LINES:
             if self.accommodation_building:
-                frappe.throw(_("A Representatives trip cannot be linked to labour accommodation."))
+                frappe.throw(_("An Administrative Trip cannot be linked to labour accommodation."))
             if self.workers or []:
-                frappe.throw(_("A Representatives trip cannot carry a worker manifest."))
-        elif self.service_line == "Workers":
-            if self.representative:
-                frappe.throw(_("A Workers trip cannot name a Representative."))
+                frappe.throw(_("An Administrative Trip cannot carry a worker manifest."))
 
         # Worker count is always derived from the child rows.
         self.worker_count = len(self.workers or [])

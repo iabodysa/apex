@@ -88,7 +88,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         and the SoD gate is exercised purely via ``requested_by``."""
         data = {
             "doctype": "Transport Request",
-            "service_line": "Representatives",
+            "service_line": "Administrative Trip",
             "request_type": "Administrative Trip / Document Signing",
             "destination": "Ministry Office",
             "from_location": "HQ",
@@ -110,7 +110,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         workers = [{"pickup_point": f"P{i}"} for i in range(25)]
         tr = frappe.get_doc({
             "doctype": "Transport Request",
-            "service_line": "Workers",
+            "service_line": "Inter-City Relocation",
             "request_type": "Inter-City Relocation",
             "from_location": "Camp A",
             "to_location": "Camp B",

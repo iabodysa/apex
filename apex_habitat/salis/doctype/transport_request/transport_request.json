@@ -95,12 +95,13 @@
    "label": "Service"
   },
   {
+   "description": "Transport type (Movement Department coordination): Site Transport moves the workforce from accommodation to the project site, Inter-City Relocation moves the workforce between cities, and Administrative Trip is a document/administrative trip.",
    "fieldname": "service_line",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Service Line",
-   "options": "Workers\nRepresentatives",
+   "label": "Transport Type",
+   "options": "Site Transport\nInter-City Relocation\nAdministrative Trip",
    "reqd": 1
   },
   {
@@ -128,7 +129,7 @@
    "label": "Trip Subject"
   },
   {
-   "depends_on": "eval:doc.service_line=='Workers'",
+   "depends_on": "eval:doc.service_line=='Site Transport' || doc.service_line=='Inter-City Relocation'",
    "fieldname": "accommodation_building",
    "fieldtype": "Link",
    "label": "Accommodation Building",
@@ -139,7 +140,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.service_line=='Representatives'",
+   "depends_on": "eval:doc.service_line=='Administrative Trip'",
    "fieldname": "representative",
    "fieldtype": "Link",
    "label": "Representative",
@@ -151,13 +152,13 @@
    "label": "Scope and Authorization"
   },
   {
-   "depends_on": "eval:doc.service_line=='Workers'",
+   "depends_on": "eval:doc.service_line=='Site Transport'",
    "fieldname": "is_cross_region",
    "fieldtype": "Check",
    "label": "Is Cross Region"
   },
   {
-   "depends_on": "eval:doc.service_line=='Representatives'",
+   "depends_on": "eval:doc.service_line=='Administrative Trip'",
    "fieldname": "destination",
    "fieldtype": "Data",
    "label": "Destination"
@@ -167,7 +168,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.service_line=='Representatives'",
+   "depends_on": "eval:doc.service_line=='Administrative Trip'",
    "description": "Server-derived: submitted Administrative Trips this month for the project (incl. this one).",
    "fieldname": "trips_this_month",
    "fieldtype": "Int",
@@ -231,7 +232,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.service_line=='Workers'",
+   "depends_on": "eval:doc.service_line=='Site Transport' || doc.service_line=='Inter-City Relocation'",
    "fieldname": "workers",
    "fieldtype": "Table",
    "label": "Workers",
@@ -384,7 +385,7 @@
    "link_fieldname": "transport_request"
   }
  ],
- "modified": "2026-06-08 20:00:00.000000",
+ "modified": "2026-06-12 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",

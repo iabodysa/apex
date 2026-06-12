@@ -8,7 +8,7 @@
       "document_type": "Transport Request",
       "rule": "Round Robin",
       "disabled": 1,
-      "description": "Auto-assign new transport requests to the responsible division owner (round robin). DISABLED by default: replace the placeholder user with your real Workers-Transport / Representatives-Fleet division owners, then enable.",
+      "description": "Auto-assign new transport requests to the responsible Movement coordinator (round robin). DISABLED by default: replace the placeholder user with your real transport coordinators (Site Transport / Inter-City Relocation / Administrative Trip), then enable.",
       "assign_condition": "status == 'New'",
       "priority": 0,
       "users": [

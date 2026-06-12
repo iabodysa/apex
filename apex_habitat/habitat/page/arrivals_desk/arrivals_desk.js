@@ -788,7 +788,7 @@ class ArrivalsDesk {
 		// (the supervisor reviews and saves it). Temporary Workers board downstream via
 		// the trip's unregistered manifest (Trip Start Log), not the request.
 		frappe.new_doc('Transport Request', {
-			service_line: 'Workers',
+			service_line: 'Site Transport',
 			request_type: 'Accommodation to Project Shuttle',
 			project: this.project || undefined,
 			accommodation_building: this.building || undefined,

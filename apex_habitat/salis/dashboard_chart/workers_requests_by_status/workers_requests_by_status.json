@@ -13,6 +13,6 @@
  "module": "Salis",
  "timeseries": 0,
  "use_report_chart": 0,
- "filters_json": "[[\"Transport Request\", \"service_line\", \"=\", \"Workers\"]]",
- "modified": "2026-06-02 13:30:00.000000"
+ "filters_json": "[[\"Transport Request\", \"service_line\", \"in\", [\"Site Transport\", \"Inter-City Relocation\"]]]",
+ "modified": "2026-06-12 12:00:00.000000"
 }

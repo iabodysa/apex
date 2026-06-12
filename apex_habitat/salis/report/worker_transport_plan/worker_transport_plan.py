@@ -20,7 +20,9 @@ def execute(filters=None):
         {"label": frappe._("Driver"), "fieldname": "assigned_driver", "fieldtype": "Link", "options": "Salis Driver", "width": 160},
     ]
 
-    query_filters = {"service_line": "Workers"}
+    # Worker transport plan covers the workforce-moving transport types (the worker
+    # manifest lines): Site Transport (accommodation -> site) and Inter-City Relocation.
+    query_filters = {"service_line": ["in", ["Site Transport", "Inter-City Relocation"]]}
 
     for field in ("request_type", "status"):
         if filters.get(field):

@@ -48,13 +48,13 @@ def submit_transport_request(
     elif count > 50:
         count = 50
 
-    # A guest QR submission is a lightweight ad-hoc request. Classify it as a
-    # Representatives "Administrative Trip" (destination = the stated drop-off) so
-    # it satisfies the service_line -> request_type guard; Operations re-classifies
-    # to a Workers shuttle (and fills Building/Project) during triage if needed.
+    # A guest QR submission is a lightweight ad-hoc request. Classify it as an
+    # Administrative Trip (destination = the stated drop-off) so it satisfies the
+    # transport-type -> request_type guard; Operations re-classifies it to a Site
+    # Transport shuttle (and fills Building/Project) during triage if needed.
     doc = frappe.get_doc({
         "doctype": "Transport Request",
-        "service_line": "Representatives",
+        "service_line": "Administrative Trip",
         "request_type": "Administrative Trip / Document Signing",
         "destination": to_location,
         "requester_name": requester_name,

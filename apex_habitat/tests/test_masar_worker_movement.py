@@ -142,7 +142,7 @@ class _WorkerTripMixin:
         tr = frappe.get_doc(
             {
                 "doctype": "Transport Request",
-                "service_line": "Workers",
+                "service_line": "Site Transport",
                 "request_type": "Accommodation to Project Shuttle",
                 "project": project,
                 "accommodation_building": building,
@@ -509,16 +509,17 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
             masar.get_my_worker_route_today()
 
     def test_representatives_trip_excluded(self):
-        """Only Workers-line trips are returned; a Representatives trip for the
-        same driver today is excluded from the worker route view."""
+        """Only worker-transport trips (Site Transport / Inter-City Relocation) are
+        returned; an Administrative Trip for the same driver today is excluded from
+        the worker route view."""
         rep_tr = frappe.get_doc(
             {
                 "doctype": "Transport Request",
-                "service_line": "Representatives",
+                "service_line": "Administrative Trip",
                 "request_type": "Administrative Trip / Document Signing",
                 "project": self.project,
-                # A Representatives trip now requires the representative (an Employee)
-                # and must not carry labour-accommodation/worker context.
+                # An Administrative Trip names a representative (an Employee) and must
+                # not carry labour-accommodation/worker context.
                 "representative": _employee("EP Representative"),
                 "destination": "Ministry",
                 "from_location": "HQ",

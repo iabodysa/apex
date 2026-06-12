@@ -10,6 +10,6 @@
  "stats_time_interval": "Daily",
  "type": "Document Type",
  "module": "Salis",
- "filters_json": "[[\"Transport Request\", \"service_line\", \"=\", \"Representatives\"], [\"Transport Request\", \"status\", \"in\", [\"New\", \"Validated\", \"Approved\", \"Scheduled\"]]]",
- "modified": "2026-06-02 13:30:00.000000"
+ "filters_json": "[[\"Transport Request\", \"service_line\", \"=\", \"Administrative Trip\"], [\"Transport Request\", \"status\", \"in\", [\"New\", \"Validated\", \"Approved\", \"Scheduled\"]]]",
+ "modified": "2026-06-12 12:00:00.000000"
 }

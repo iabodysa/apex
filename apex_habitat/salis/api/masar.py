@@ -18,8 +18,10 @@ from frappe.rate_limiter import rate_limit
 
 from apex_habitat.salis.api.driver_portal import _require_enabled, _resolve_driver
 
-# Worker-transport requests are the Workers service line.
-WORKER_SERVICE_LINE = "Workers"
+# Worker-transport requests are the workforce-moving transport types: Site Transport
+# (accommodation -> site) and Inter-City Relocation. These carry the worker manifest;
+# an Administrative Trip does not and is excluded from the worker route view.
+WORKER_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 
 
 def _fmt_time(value):
@@ -74,7 +76,7 @@ def _today_worker_trips(driver):
             service_line = frappe.db.get_value(
                 "Transport Request", t["transport_request"], "service_line"
             )
-        if service_line == WORKER_SERVICE_LINE:
+        if service_line in WORKER_SERVICE_LINES:
             worker_trips.append(t)
     return worker_trips
 
@@ -538,7 +540,7 @@ def _worker_transport_requests(employee):
         "Transport Request",
         filters={
             "name": ["in", list(by_request.keys())],
-            "service_line": WORKER_SERVICE_LINE,
+            "service_line": ["in", list(WORKER_SERVICE_LINES)],
             "status": ["not in", ["Rejected", "Cancelled"]],
         },
         fields=[

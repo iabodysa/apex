@@ -83,3 +83,12 @@ apex_habitat.patches.v1_x.backfill_building_room_floor_counts
 # Settings into Apex Settings, then deletes the Habitat Settings orphan rows. Idempotent,
 # no-op on fresh installs. PRUNE once every deployed site has run it.
 apex_habitat.patches.v1_x.move_finance_settings_to_apex_settings
+
+# v1.x — Salis transport-type service_line refactor (ONE-TIME). Transport Request
+# service_line is now the transport type (Site Transport / Inter-City Relocation /
+# Administrative Trip) instead of the Workers/Representatives division. Maps existing
+# rows: 'Workers' -> 'Inter-City Relocation' when its request_type is an inter-city
+# relocation, else 'Site Transport'; 'Representatives' -> 'Administrative Trip' (gov
+# item 62 — they were submitted as transport requests, so they stay مسار). Idempotent,
+# no-op on fresh installs / re-run. PRUNE once every deployed site has run it.
+apex_habitat.patches.v1_x.refactor_transport_request_service_line

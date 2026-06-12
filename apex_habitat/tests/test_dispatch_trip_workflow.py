@@ -125,7 +125,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         ``(tr_doc, route_plan_name)``."""
         tr = frappe.get_doc({
             "doctype": "Transport Request",
-            "service_line": "Representatives",
+            "service_line": "Administrative Trip",
             "request_type": "Administrative Trip / Document Signing",
             "destination": "Ministry Office",
             "from_location": "HQ",
