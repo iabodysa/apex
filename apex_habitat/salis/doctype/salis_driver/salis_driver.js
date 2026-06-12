@@ -6,7 +6,7 @@ frappe.ui.form.on("Salis Driver", {
 		if (!frm.is_new() && frm.doc.current_vehicle) {
 			frm.add_custom_button(__("Open Current Vehicle"), function() {
 				frappe.set_route("Form", "Salis Vehicle", frm.doc.current_vehicle);
-			}, __("Links"));
+			});
 		}
 
 		_check_license_expiry(frm);

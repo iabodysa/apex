@@ -29,7 +29,7 @@ frappe.ui.form.on("Scheduled Task Instance", {
 						});
 					}
 				);
-			}, __("Status"));
+			});
 		}
 
 		if (frm.doc.docstatus === 1 && ["Open", "In Progress"].includes(frm.doc.status)) {
@@ -60,7 +60,7 @@ frappe.ui.form.on("Scheduled Task Instance", {
 						});
 					}
 				);
-			}, __("Status"));
+			});
 		}
 	}
 });

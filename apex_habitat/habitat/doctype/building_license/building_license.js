@@ -32,7 +32,7 @@ frappe.ui.form.on("Building License", {
 					},
 				});
 				d.show();
-			}, __("Actions"));
+			});
 		}
 	}
 });

@@ -30,7 +30,7 @@ frappe.ui.form.on("Subcontractor Service Order", {
 							});
 						}
 					);
-				}, __("Status"));
+				});
 			}
 
 			if (frm.doc.status === "In Progress") {
@@ -61,7 +61,7 @@ frappe.ui.form.on("Subcontractor Service Order", {
 							});
 						}
 					);
-				}, __("Status"));
+				});
 			}
 		}
 	}

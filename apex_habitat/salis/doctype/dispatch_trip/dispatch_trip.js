@@ -6,7 +6,7 @@ frappe.ui.form.on("Dispatch Trip", {
 		if (!frm.is_new() && frm.doc.status === "Dispatched") {
 			frm.add_custom_button(__("Complete Trip"), function() {
 				_prompt_complete_trip(frm);
-			}, __("Actions"));
+			});
 		}
 	},
 	status(frm) {

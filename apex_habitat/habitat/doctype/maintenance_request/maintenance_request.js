@@ -9,7 +9,7 @@ frappe.ui.form.on("Maintenance Request", {
 					method: "apex_habitat.habitat.doctype.maintenance_request.maintenance_request.make_work_order",
 					frm: frm
 				});
-			}, __("Actions"));
+			});
 		}
 
 		// Load material template button
@@ -35,7 +35,7 @@ frappe.ui.form.on("Maintenance Request", {
 						frappe.show_alert({message: __("Could not load the material template. Please try again."), indicator: "red"});
 					}
 				});
-			}, __("Actions"));
+			});
 		}
 	},
 	priority(frm) {

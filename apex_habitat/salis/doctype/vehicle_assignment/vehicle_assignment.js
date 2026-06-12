@@ -6,13 +6,13 @@ frappe.ui.form.on("Vehicle Assignment", {
 		if (!frm.is_new() && frm.doc.vehicle) {
 			frm.add_custom_button(__("Open Vehicle"), function() {
 				frappe.set_route("Form", "Salis Vehicle", frm.doc.vehicle);
-			}, __("Links"));
+			});
 		}
 
 		if (!frm.is_new() && frm.doc.driver) {
 			frm.add_custom_button(__("Open Driver"), function() {
 				frappe.set_route("Form", "Salis Driver", frm.doc.driver);
-			}, __("Links"));
+			});
 		}
 
 		_show_context(frm);

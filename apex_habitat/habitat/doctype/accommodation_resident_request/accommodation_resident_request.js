@@ -37,14 +37,14 @@ frappe.ui.form.on("Accommodation Resident Request", {
 						}
 					},
 				});
-			}, __("Actions"));
+			});
 		}
 
 		// When already converted, offer a quick link to the target document.
 		if (open_target) {
 			frm.add_custom_button(__("Open Target Document"), function () {
 				frappe.set_route("Form", frm.doc.target_doctype, frm.doc.target_document);
-			}, __("Actions"));
+			});
 		}
 	},
 	priority(frm) {

@@ -24,7 +24,7 @@ frappe.ui.form.on("Accommodation Lease", {
 						});
 					}
 				);
-			}, __("Actions"));
+			});
 		}
 
 		if (frm.doc.docstatus === 1 && frm.doc.status !== "Expired") {
@@ -95,7 +95,7 @@ frappe.ui.form.on("Accommodation Lease", {
 				}).catch(() => {
 					frappe.msgprint({message: __("Could not read the payment settings. Please try again."), indicator: "red"});
 				});
-			}, __("Actions"));
+			});
 		}
 	},
 

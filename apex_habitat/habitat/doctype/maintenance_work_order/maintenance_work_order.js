@@ -24,7 +24,7 @@ frappe.ui.form.on("Maintenance Work Order", {
 						frappe.show_alert({message: __("Could not load the material template. Please try again."), indicator: "red"});
 					}
 				});
-			}, __("Actions"));
+			});
 		}
 
 		// Show orange banner if status is Completed/Closed but no photo attached
@@ -68,7 +68,7 @@ frappe.ui.form.on("Maintenance Work Order", {
 							});
 						}
 					);
-				}, __("Status"));
+				});
 			}
 
 			if (frm.doc.status !== "Completed" && frm.doc.status !== "Cancelled") {
@@ -103,7 +103,7 @@ frappe.ui.form.on("Maintenance Work Order", {
 							});
 						}
 					);
-				}, __("Status"));
+				});
 			}
 		}
 	}

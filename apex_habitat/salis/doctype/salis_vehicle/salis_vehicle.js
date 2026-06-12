@@ -6,7 +6,7 @@ frappe.ui.form.on("Salis Vehicle", {
 		if (!frm.is_new() && frm.doc.current_driver) {
 			frm.add_custom_button(__("Open Current Driver"), function() {
 				frappe.set_route("Form", "Salis Driver", frm.doc.current_driver);
-			}, __("Links"));
+			});
 		}
 
 		if (frm.doc.status === "Under Maintenance") {
