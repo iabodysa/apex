@@ -17,8 +17,6 @@
   "fuel_quota",
   "fec_sec_status",
   "status",
-  "fec_status_col",
-  "reported_by",
   "fec_sec_details",
   "description",
   "evidence",
@@ -26,10 +24,11 @@
   "fec_sec_resolution",
   "resolution",
   "amount_recovered",
-  "closed_by",
   "fec_sec_system",
-  "naming_series",
+  "reported_by",
+  "closed_by",
   "fec_system_col",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
@@ -111,18 +110,6 @@
    "options": "Open\nUnder Investigation\nEvidence Required\nResolved\nRejected\nClosed"
   },
   {
-   "fieldname": "fec_status_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "The user who raised this case. Set automatically.",
-   "fieldname": "reported_by",
-   "fieldtype": "Link",
-   "label": "Reported By",
-   "options": "User",
-   "read_only": 1
-  },
-  {
    "fieldname": "fec_sec_details",
    "fieldtype": "Section Break",
    "label": "Case Details"
@@ -159,6 +146,20 @@
    "label": "Amount Recovered (SAR)"
   },
   {
+   "fieldname": "fec_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System",
+   "collapsible": 1
+  },
+  {
+   "description": "The user who raised this case. Set automatically.",
+   "fieldname": "reported_by",
+   "fieldtype": "Link",
+   "label": "Reported By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
    "description": "The user who resolved or closed the case. Must differ from Reported By (segregation of duties).",
    "fieldname": "closed_by",
    "fieldtype": "Link",
@@ -167,10 +168,8 @@
    "read_only": 1
   },
   {
-   "fieldname": "fec_sec_system",
-   "fieldtype": "Section Break",
-   "label": "System",
-   "collapsible": 1
+   "fieldname": "fec_system_col",
+   "fieldtype": "Column Break"
   },
   {
    "default": "FEX-.######",
@@ -180,10 +179,6 @@
    "label": "Series",
    "options": "FEX-.######",
    "reqd": 1
-  },
-  {
-   "fieldname": "fec_system_col",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "amended_from",

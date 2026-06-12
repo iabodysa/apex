@@ -6,18 +6,19 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "cleaning_log_tab_details",
+  "cleaning_log_tab_overview",
   "cleaning_log_sec_details",
   "building",
   "cleaning_log_details_col",
   "cleaning_date",
+  "cleaning_log_details_col_2",
+  "scheduled_task_instance",
   "cleaning_log_sec_performed_by",
   "cleaner_type",
   "cleaner_employee",
   "cleaned_by",
   "cleaning_log_performed_by_col",
   "subcontractor_service_order",
-  "scheduled_task_instance",
   "cleaning_log_sec_review",
   "supervisor_approved",
   "approver",
@@ -38,9 +39,9 @@
  ],
  "fields": [
   {
-   "fieldname": "cleaning_log_tab_details",
+   "fieldname": "cleaning_log_tab_overview",
    "fieldtype": "Tab Break",
-   "label": "Details"
+   "label": "Overview"
   },
   {
    "fieldname": "cleaning_log_sec_details",
@@ -68,6 +69,17 @@
    "in_standard_filter": 1,
    "label": "Cleaning Date",
    "reqd": 1
+  },
+  {
+   "fieldname": "cleaning_log_details_col_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Provenance: the scheduled task instance this cleaning fulfils, if generated from the schedule.",
+   "fieldname": "scheduled_task_instance",
+   "fieldtype": "Link",
+   "label": "Scheduled Task Instance",
+   "options": "Scheduled Task Instance"
   },
   {
    "fieldname": "cleaning_log_sec_performed_by",
@@ -107,12 +119,6 @@
    "fieldtype": "Link",
    "label": "Subcontractor Service Order",
    "options": "Subcontractor Service Order"
-  },
-  {
-   "fieldname": "scheduled_task_instance",
-   "fieldtype": "Link",
-   "label": "Scheduled Task Instance",
-   "options": "Scheduled Task Instance"
   },
   {
    "fieldname": "cleaning_log_sec_review",
@@ -199,10 +205,10 @@
    "options": "Cleaning Log Room Detail"
   },
   {
+   "collapsible": 1,
    "fieldname": "cleaning_log_sec_system",
    "fieldtype": "Section Break",
-   "label": "System",
-   "collapsible": 1
+   "label": "System"
   },
   {
    "default": "CLEAN-.YYYY.-.####",

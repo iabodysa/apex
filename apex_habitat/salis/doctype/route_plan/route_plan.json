@@ -8,21 +8,22 @@
   "route_plan_tab_overview",
   "rp_sec_request",
   "route_name",
-  "transport_request",
   "rp_request_col",
-  "requested_by_operations",
-  "fulfilled_by_movement",
+  "transport_request",
   "rp_sec_assignment",
   "project",
-  "shift",
-  "rp_assignment_col",
-  "vehicle",
   "driver",
+  "rp_assignment_col_1",
+  "shift",
+  "rp_assignment_col_2",
+  "vehicle",
   "rp_sec_stops",
   "total_stops",
   "stops",
   "route_plan_sec_system",
   "naming_series",
+  "requested_by_operations",
+  "fulfilled_by_movement",
   "amended_from"
  ],
  "fields": [
@@ -44,31 +45,15 @@
    "reqd": 1
   },
   {
+   "fieldname": "rp_request_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "transport_request",
    "fieldtype": "Link",
    "label": "Transport Request",
    "options": "Transport Request",
    "search_index": 1
-  },
-  {
-   "fieldname": "rp_request_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Operations requester, carried from the linked Transport Request (Operations owns the request).",
-   "fieldname": "requested_by_operations",
-   "fieldtype": "Link",
-   "label": "Requested By (Operations)",
-   "options": "User",
-   "read_only": 1
-  },
-  {
-   "description": "Movement planner who fulfilled the request, set on submit (Movement fulfils the request).",
-   "fieldname": "fulfilled_by_movement",
-   "fieldtype": "Link",
-   "label": "Fulfilled By (Movement)",
-   "options": "User",
-   "read_only": 1
   },
   {
    "fieldname": "rp_sec_assignment",
@@ -83,6 +68,17 @@
    "options": "Project"
   },
   {
+   "fetch_from": "transport_request.assigned_driver",
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "label": "Driver",
+   "options": "Salis Driver"
+  },
+  {
+   "fieldname": "rp_assignment_col_1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "shift",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -91,7 +87,7 @@
    "options": "Morning\nEvening\nNight"
   },
   {
-   "fieldname": "rp_assignment_col",
+   "fieldname": "rp_assignment_col_2",
    "fieldtype": "Column Break"
   },
   {
@@ -101,13 +97,6 @@
    "in_list_view": 1,
    "label": "Vehicle",
    "options": "Salis Vehicle"
-  },
-  {
-   "fetch_from": "transport_request.assigned_driver",
-   "fieldname": "driver",
-   "fieldtype": "Link",
-   "label": "Driver",
-   "options": "Salis Driver"
   },
   {
    "fieldname": "rp_sec_stops",
@@ -140,6 +129,22 @@
    "label": "Series",
    "options": "RP-.######",
    "reqd": 1
+  },
+  {
+   "description": "Operations requester, carried from the linked Transport Request (Operations owns the request).",
+   "fieldname": "requested_by_operations",
+   "fieldtype": "Link",
+   "label": "Requested By (Operations)",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "description": "Movement planner who fulfilled the request, set on submit (Movement fulfils the request).",
+   "fieldname": "fulfilled_by_movement",
+   "fieldtype": "Link",
+   "label": "Fulfilled By (Movement)",
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",

@@ -14,7 +14,9 @@
   "facility_asset_movement_movement_col",
   "movement_reason",
   "moved_by",
-  "naming_series",
+  "facility_asset_movement_sec_large_text",
+  "remarks",
+  "facility_asset_movement_tab_locations",
   "facility_asset_movement_sec_origin",
   "from_building",
   "facility_asset_movement_origin_col",
@@ -28,6 +30,7 @@
   "facility_asset_movement_destination_col2",
   "to_company",
   "is_intercompany",
+  "facility_asset_movement_tab_approval",
   "facility_asset_movement_sec_intercompany",
   "release_approved_by",
   "receiving_confirmed_by",
@@ -35,19 +38,41 @@
   "facility_asset_movement_intercompany_col",
   "accounting_acknowledged",
   "accounting_acknowledged_by",
-  "facility_asset_movement_sec_large_text",
-  "remarks",
+  "facility_asset_movement_tab_system",
   "facility_asset_movement_sec_system",
   "native_asset_movement",
-  "cancellation_reason",
+  "naming_series",
   "facility_asset_movement_system_col",
-  "amended_from"
+  "amended_from",
+  "facility_asset_movement_sec_cancellation",
+  "cancellation_reason"
  ],
  "fields": [
   {
    "fieldname": "facility_asset_movement_tab_overview",
    "fieldtype": "Tab Break",
    "label": "Overview"
+  },
+  {
+   "fieldname": "facility_asset_movement_tab_locations",
+   "fieldtype": "Tab Break",
+   "label": "Locations"
+  },
+  {
+   "fieldname": "facility_asset_movement_tab_approval",
+   "fieldtype": "Tab Break",
+   "label": "Approval"
+  },
+  {
+   "fieldname": "facility_asset_movement_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "facility_asset_movement_sec_cancellation",
+   "fieldtype": "Section Break",
+   "label": "Cancellation",
+   "collapsible": 1
   },
   {
    "fieldname": "facility_asset_movement_sec_movement",
@@ -233,7 +258,6 @@
    "label": "Remarks"
   },
   {
-   "collapsible": 1,
    "fieldname": "facility_asset_movement_sec_system",
    "fieldtype": "Section Break",
    "label": "System"

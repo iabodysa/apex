@@ -9,12 +9,13 @@
   "mcr_tab_overview",
   "mcr_sec_identity",
   "recovery_type",
-  "vehicle",
-  "driver",
-  "employee",
-  "mcr_identity_col",
   "request_date",
   "status",
+  "mcr_identity_col",
+  "vehicle",
+  "driver",
+  "mcr_identity_col2",
+  "employee",
   "mcr_sec_amounts",
   "amount",
   "acknowledgement_received",
@@ -81,6 +82,10 @@
   },
   {
    "fieldname": "mcr_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mcr_identity_col2",
    "fieldtype": "Column Break"
   },
   {

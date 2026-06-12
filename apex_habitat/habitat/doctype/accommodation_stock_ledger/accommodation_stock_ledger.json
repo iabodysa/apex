@@ -26,6 +26,7 @@
   "cost_center",
   "asl_col_store",
   "employee",
+  "asl_tab_system",
   "sec_context",
   "from_building",
   "to_building",
@@ -35,8 +36,9 @@
   "voucher_detail_no",
   "sec_status",
   "is_cancelled",
-  "reversal_of",
   "asl_col_status",
+  "reversal_of",
+  "sec_remarks",
   "remarks"
  ],
  "fields": [
@@ -163,6 +165,11 @@
    "search_index": 1
   },
   {
+   "fieldname": "asl_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
    "fieldname": "sec_context",
    "fieldtype": "Section Break",
    "label": "Movement Context"
@@ -207,8 +214,7 @@
   {
    "fieldname": "sec_status",
    "fieldtype": "Section Break",
-   "label": "Reversal Status",
-   "collapsible": 1
+   "label": "Reversal Status"
   },
   {
    "default": "0",
@@ -218,6 +224,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "asl_col_status",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "reversal_of",
    "fieldtype": "Link",
    "label": "Reversal Of",
@@ -225,8 +235,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "asl_col_status",
-   "fieldtype": "Column Break"
+   "fieldname": "sec_remarks",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
   },
   {
    "fieldname": "remarks",

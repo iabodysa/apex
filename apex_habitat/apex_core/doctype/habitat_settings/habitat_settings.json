@@ -15,9 +15,6 @@
   "habitat_settings_custody_col",
   "enable_stock_posting",
   "auto_create_asset_movement_on_transfer",
-  "habitat_settings_sec_financial",
-  "habitat_settings_financial_col",
-  "max_damage_deduction_per_checkout_sar",
   "habitat_settings_sec_housing",
   "enable_housing_allowance_deduction",
   "deduction_activation_date",
@@ -26,13 +23,14 @@
   "habitat_settings_sec_damage",
   "enable_damage_deduction",
   "damage_salary_component",
+  "habitat_settings_damage_col",
+  "max_damage_deduction_per_checkout_sar",
   "habitat_settings_tab_notifications",
-  "email_notifications_sec",
-  "enable_email_notifications",
   "operational_notifications_sec",
+  "enable_email_notifications",
   "enable_operational_notifications",
-  "license_expiry_days_before",
   "operational_notifications_col",
+  "license_expiry_days_before",
   "lease_expiry_days_before",
   "temporary_stay_days_before",
   "supplier_cost_recovery_sec",
@@ -115,21 +113,6 @@
    "label": "Auto-create Facility Asset Movement on Transfer"
   },
   {
-   "fieldname": "habitat_settings_sec_financial",
-   "fieldtype": "Section Break",
-   "label": "Financial Posting"
-  },
-  {
-   "fieldname": "habitat_settings_financial_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "500",
-   "fieldname": "max_damage_deduction_per_checkout_sar",
-   "fieldtype": "Currency",
-   "label": "Max Damage Deduction per Checkout (SAR)"
-  },
-  {
    "fieldname": "habitat_settings_sec_housing",
    "fieldtype": "Section Break",
    "label": "Housing Allowance Deduction"
@@ -181,14 +164,25 @@
    "options": "Salary Component"
   },
   {
+   "fieldname": "habitat_settings_damage_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "500",
+   "description": "Hard cap on the damage amount posted to Additional Salary for a single checkout, regardless of assessed value.",
+   "fieldname": "max_damage_deduction_per_checkout_sar",
+   "fieldtype": "Currency",
+   "label": "Max Damage Deduction per Checkout (SAR)"
+  },
+  {
    "fieldname": "habitat_settings_tab_notifications",
    "fieldtype": "Tab Break",
    "label": "Notifications"
   },
   {
-   "fieldname": "email_notifications_sec",
+   "fieldname": "operational_notifications_sec",
    "fieldtype": "Section Break",
-   "label": "Email"
+   "label": "Operational Notifications"
   },
   {
    "default": "0",
@@ -198,11 +192,6 @@
    "label": "Enable Email Notifications"
   },
   {
-   "fieldname": "operational_notifications_sec",
-   "fieldtype": "Section Break",
-   "label": "Operational Notifications"
-  },
-  {
    "default": "0",
    "description": "When ON, expiry/overdue scheduler jobs post a timeline comment on the source document. Email is controlled by the Notification DocType. When OFF, jobs run silently.",
    "fieldname": "enable_operational_notifications",
@@ -210,15 +199,15 @@
    "label": "Enable Operational Notifications"
   },
   {
+   "fieldname": "operational_notifications_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "60",
    "description": "Days before a Building License expiry date to flag it Expiring Soon (per-license renewal_lead_days still overrides).",
    "fieldname": "license_expiry_days_before",
    "fieldtype": "Int",
    "label": "License Expiry Lead Days"
-  },
-  {
-   "fieldname": "operational_notifications_col",
-   "fieldtype": "Column Break"
   },
   {
    "default": "90",

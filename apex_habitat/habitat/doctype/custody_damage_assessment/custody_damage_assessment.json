@@ -12,7 +12,6 @@
   "custody_return",
   "custody_damage_assessment_overview_col",
   "building",
-  "total_estimated_replacement_cost_sar",
   "custody_damage_assessment_sec_worker",
   "party_type",
   "party",
@@ -20,6 +19,8 @@
   "employee",
   "custody_damage_assessment_sec_table_items",
   "items",
+  "custody_damage_assessment_sec_totals",
+  "total_estimated_replacement_cost_sar",
   "custody_damage_assessment_sec_large_text",
   "remarks",
   "custody_damage_assessment_sec_system",
@@ -67,13 +68,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "total_estimated_replacement_cost_sar",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Total Estimated Replacement Cost (SAR)",
-   "read_only": 1
-  },
-  {
    "fieldname": "custody_damage_assessment_sec_worker",
    "fieldtype": "Section Break",
    "label": "Responsible Worker"
@@ -118,6 +112,18 @@
    "fieldtype": "Table",
    "label": "Damaged Items",
    "options": "Custody Damage Item"
+  },
+  {
+   "fieldname": "custody_damage_assessment_sec_totals",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "fieldname": "total_estimated_replacement_cost_sar",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Estimated Replacement Cost (SAR)",
+   "read_only": 1
   },
   {
    "fieldname": "custody_damage_assessment_sec_large_text",

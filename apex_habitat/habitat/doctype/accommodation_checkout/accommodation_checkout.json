@@ -8,9 +8,10 @@
   "accommodation_checkout_tab_overview",
   "accommodation_checkout_sec_overview",
   "assignment",
+  "accommodation_checkout_overview_col",
   "checkout_date",
   "checkout_reason",
-  "accommodation_checkout_overview_col",
+  "accommodation_checkout_overview_col2",
   "custody_cleared",
   "accommodation_checkout_sec_resident",
   "party_type",
@@ -22,8 +23,9 @@
   "custody_return_items",
   "accommodation_checkout_sec_financials",
   "cost_center",
-  "damage_deduction_amount",
   "accommodation_checkout_financials_col",
+  "damage_deduction_amount",
+  "accommodation_checkout_financials_col2",
   "linked_additional_salary",
   "accommodation_checkout_sec_large_text",
   "damage_notes",
@@ -70,6 +72,10 @@
   },
   {
    "fieldname": "accommodation_checkout_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accommodation_checkout_overview_col2",
    "fieldtype": "Column Break"
   },
   {
@@ -139,7 +145,8 @@
   {
    "fieldname": "accommodation_checkout_sec_financials",
    "fieldtype": "Section Break",
-   "label": "Damage Deduction"
+   "label": "Damage Deduction",
+   "permlevel": 1
   },
   {
    "fetch_from": "assignment.cost_center",
@@ -147,15 +154,21 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center",
+   "permlevel": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_checkout_financials_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "damage_deduction_amount",
    "fieldtype": "Currency",
-   "label": "Damage Deduction Amount (SAR)"
+   "label": "Damage Deduction Amount (SAR)",
+   "permlevel": 1
   },
   {
-   "fieldname": "accommodation_checkout_financials_col",
+   "fieldname": "accommodation_checkout_financials_col2",
    "fieldtype": "Column Break"
   },
   {
@@ -163,6 +176,7 @@
    "fieldtype": "Link",
    "label": "Additional Salary Deduction",
    "options": "Additional Salary",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -253,6 +267,24 @@
    "read": 1,
    "role": "Resident Supervisor",
    "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
    "write": 1
   }
  ],

@@ -111,14 +111,10 @@
    "options": "Audit Remediation Item"
   },
   {
-   "fieldname": "client_audit_remediation_plan_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System"
-  },
-  {
    "fieldname": "client_audit_remediation_plan_sec_system",
    "fieldtype": "Section Break",
-   "label": "System"
+   "label": "System",
+   "collapsible": 1
   },
   {
    "doctype": "DocField",
@@ -178,7 +174,6 @@
   "buildings_in_scope",
   "client_audit_remediation_plan_sec_table_remediation_items",
   "remediation_items",
-  "client_audit_remediation_plan_tab_system",
   "client_audit_remediation_plan_sec_system",
   "naming_series"
  ],

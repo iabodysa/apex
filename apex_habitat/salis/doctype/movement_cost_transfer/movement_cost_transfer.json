@@ -9,10 +9,8 @@
   "mct_tab_overview",
   "mct_sec_overview",
   "transfer_type",
-  "amount",
   "mct_overview_col",
-  "status",
-  "approved_by",
+  "amount",
   "mct_sec_reason",
   "reason",
   "mct_sec_allocation",
@@ -26,9 +24,11 @@
   "mct_reference_col",
   "reference_name",
   "mct_sec_system",
+  "status",
   "naming_series",
   "company",
   "mct_system_col",
+  "approved_by",
   "amended_from"
  ],
  "fields": [

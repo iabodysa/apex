@@ -10,17 +10,18 @@
   "maintenance_inspection_report_sec_overview",
   "inspection_date",
   "building",
-  "inspector",
-  "maintenance_work_order",
   "maintenance_inspection_report_overview_col",
   "inspection_type",
   "overall_result",
-  "naming_series",
+  "maintenance_inspection_report_overview_col2",
+  "inspector",
+  "maintenance_work_order",
   "maintenance_inspection_report_sec_large_text",
   "remarks",
   "maintenance_inspection_report_sec_table_findings",
   "findings",
   "maintenance_inspection_report_sec_system",
+  "naming_series",
   "cancellation_reason",
   "amended_from"
  ],
@@ -71,6 +72,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "maintenance_inspection_report_overview_col2",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "Post-Work",
    "fieldname": "inspection_type",
    "fieldtype": "Select",
@@ -87,14 +92,6 @@
    "in_standard_filter": 1,
    "label": "Overall Result",
    "options": "Pass\nPass with Observations\nFail"
-  },
-  {
-   "default": "MIR-.YYYY.-.####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "MIR-.YYYY.-.####"
   },
   {
    "collapsible": 1,
@@ -122,7 +119,15 @@
    "collapsible": 1,
    "fieldname": "maintenance_inspection_report_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details"
+   "label": "System"
+  },
+  {
+   "default": "MIR-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "MIR-.YYYY.-.####"
   },
   {
    "allow_on_submit": 1,

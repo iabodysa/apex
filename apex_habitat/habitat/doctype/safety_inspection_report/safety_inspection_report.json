@@ -14,7 +14,6 @@
   "safety_inspection_report_overview_col",
   "safety_section_clear",
   "previous_repairs_confirmed",
-  "naming_series",
   "safety_inspection_report_sec_large_text",
   "previous_repair_notes",
   "safety_inspection_report_sec_table_safety_findings",
@@ -24,6 +23,7 @@
   "safety_inspection_report_sec_table_linked_maintenance_requests",
   "linked_maintenance_requests",
   "safety_inspection_report_sec_system",
+  "naming_series",
   "submitted_to",
   "amended_from"
  ],
@@ -83,15 +83,6 @@
    "label": "Previous Repairs Confirmed"
   },
   {
-   "default": "FSI-.YYYY.-.#####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "FSI-.YYYY.-.#####",
-   "reqd": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "safety_inspection_report_sec_large_text",
    "fieldtype": "Section Break",
@@ -139,8 +130,17 @@
   {
    "fieldname": "safety_inspection_report_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
+   "label": "System",
    "collapsible": 1
+  },
+  {
+   "default": "FSI-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "FSI-.YYYY.-.#####",
+   "reqd": 1
   },
   {
    "description": "Admin Manager, Operations Director, General Manager",

@@ -10,17 +10,17 @@
   "custody_return_sec_details",
   "return_date",
   "custody_issue",
+  "building",
   "custody_return_details_col",
   "party_type",
   "party",
   "returned_by_employee",
-  "naming_series",
+  "custody_return_sec_table_items",
+  "items",
   "custody_return_sec_large_text",
   "remarks",
   "custody_return_sec_system",
-  "building",
-  "custody_return_sec_table_items",
-  "items",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
@@ -51,6 +51,16 @@
    "reqd": 1
   },
   {
+   "fetch_from": "custody_issue.building",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Accommodation Building",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
    "fieldname": "custody_return_details_col",
    "fieldtype": "Column Break"
   },
@@ -79,12 +89,15 @@
    "read_only": 1
   },
   {
-   "default": "CUST-RET-.YYYY.-.####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "CUST-RET-.YYYY.-.####"
+   "fieldname": "custody_return_sec_table_items",
+   "fieldtype": "Section Break",
+   "label": "Returned Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Returned Items",
+   "options": "Custody Return Item"
   },
   {
    "collapsible": 1,
@@ -101,28 +114,15 @@
    "collapsible": 1,
    "fieldname": "custody_return_sec_system",
    "fieldtype": "Section Break",
-   "label": "System Details"
+   "label": "System"
   },
   {
-   "fetch_from": "custody_issue.building",
-   "fieldname": "building",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Building",
-   "options": "Accommodation Building",
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "custody_return_sec_table_items",
-   "fieldtype": "Section Break",
-   "label": "Returned Items"
-  },
-  {
-   "fieldname": "items",
-   "fieldtype": "Table",
-   "label": "Returned Items",
-   "options": "Custody Return Item"
+   "default": "CUST-RET-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "CUST-RET-.YYYY.-.####"
   },
   {
    "fieldname": "amended_from",

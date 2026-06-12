@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "driver_attendance_sec_details",
-  "naming_series",
   "driver",
   "attendance_date",
   "status",
@@ -17,6 +16,8 @@
   "worked_hours",
   "driver_attendance_sec_images",
   "images",
+  "driver_attendance_sec_system",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
@@ -24,15 +25,6 @@
    "fieldname": "driver_attendance_sec_details",
    "fieldtype": "Section Break",
    "label": "Attendance Details"
-  },
-  {
-   "default": "ATT-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "ATT-.######",
-   "reqd": 1
   },
   {
    "fieldname": "driver",
@@ -94,6 +86,21 @@
    "fieldtype": "Table",
    "label": "Attendance Images",
    "options": "Driver Attendance Image"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "driver_attendance_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "default": "ATT-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ATT-.######",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",

@@ -15,15 +15,16 @@
   "incident_type",
   "severity",
   "status",
-  "naming_series",
   "habitat_safety_incident_sec_details",
   "description",
   "immediate_action_taken",
+  "habitat_safety_incident_report_col",
   "casualties",
   "reported_by",
   "habitat_safety_incident_sec_resolution",
   "resolution_notes",
   "habitat_safety_incident_sec_system",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
@@ -116,6 +117,10 @@
    "label": "Immediate Action Taken"
   },
   {
+   "fieldname": "habitat_safety_incident_report_col",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "0",
    "fieldname": "casualties",
    "fieldtype": "Int",
@@ -141,7 +146,7 @@
   {
    "fieldname": "habitat_safety_incident_sec_system",
    "fieldtype": "Section Break",
-   "label": "Administrative Details",
+   "label": "System",
    "collapsible": 1
   },
   {

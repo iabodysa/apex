@@ -9,14 +9,16 @@
   "operations_alert_sec_overview",
   "alert_type",
   "severity",
-  "status",
-  "raised_on",
-  "resolved_on",
   "operations_alert_overview_col",
   "vehicle",
   "driver",
   "operations_alert_sec_message",
   "message",
+  "operations_alert_sec_system",
+  "status",
+  "raised_on",
+  "operations_alert_system_col",
+  "resolved_on",
   "resolution_note"
  ],
  "fields": [
@@ -93,6 +95,16 @@
    "fieldtype": "Small Text",
    "label": "Message",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "operations_alert_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "operations_alert_system_col",
+   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:doc.status==\"Resolved\"",

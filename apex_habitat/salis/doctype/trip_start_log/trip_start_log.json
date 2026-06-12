@@ -5,7 +5,6 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
   "sec_trip",
   "dispatch_trip",
   "transport_request",
@@ -23,6 +22,8 @@
   "boarded_count",
   "sec_boarding",
   "boarding_events",
+  "sec_system",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
@@ -57,6 +58,12 @@
    "fieldname": "sec_boarding",
    "fieldtype": "Section Break",
    "label": "Boarding Events"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
   },
   {
    "description": "The Dispatch Trip being executed; its linked Transport Request carries the worker manifest this log records boarding against.",

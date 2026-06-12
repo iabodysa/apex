@@ -128,17 +128,14 @@
    "fieldtype": "Percent",
    "label": "Cost Bearing (%)",
    "default": "100",
+   "depends_on": "is_shared_meter",
    "description": "Percentage of the total invoice borne by this building/unit"
-  },
-  {
-   "fieldname": "utility_account_tab_system",
-   "fieldtype": "Tab Break",
-   "label": "System"
   },
   {
    "fieldname": "utility_account_sec_system",
    "fieldtype": "Section Break",
-   "label": "System"
+   "label": "System",
+   "collapsible": 1
   },
   {
    "doctype": "DocField",
@@ -204,7 +201,6 @@
   "utility_account_meter_col",
   "is_shared_meter",
   "cost_bearing_pct",
-  "utility_account_tab_system",
   "utility_account_sec_system",
   "naming_series"
  ],

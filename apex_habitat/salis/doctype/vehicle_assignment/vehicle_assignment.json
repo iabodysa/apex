@@ -8,7 +8,6 @@
  "field_order": [
   "vehicle_assignment_tab_overview",
   "vehicle_assignment_sec_main",
-  "naming_series",
   "vehicle",
   "driver",
   "vehicle_assignment_main_col",
@@ -21,6 +20,7 @@
   "va_period_col2",
   "status",
   "va_sec_system",
+  "naming_series",
   "amended_from"
  ],
  "fields": [

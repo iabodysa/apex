@@ -8,7 +8,6 @@
  "field_order": [
   "vehicle_handover_tab_overview",
   "vehicle_handover_sec_main",
-  "naming_series",
   "vehicle",
   "from_driver",
   "to_driver",
@@ -20,8 +19,11 @@
   "vehicle_handover_sec_checklist",
   "handover_check_items",
   "signed_evidence",
+  "vehicle_handover_sec_discrepancy",
   "discrepancy_status",
   "discrepancy_notes",
+  "vehicle_handover_sec_system",
+  "naming_series",
   "amended_from"
  ],
  "fields": [
@@ -34,15 +36,6 @@
    "fieldname": "vehicle_handover_sec_main",
    "fieldtype": "Section Break",
    "label": "Handover Details"
-  },
-  {
-   "default": "GV-.######",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "GV-.######",
-   "reqd": 1
   },
   {
    "fieldname": "vehicle",
@@ -101,7 +94,7 @@
   {
    "fieldname": "vehicle_handover_sec_checklist",
    "fieldtype": "Section Break",
-   "label": "Handover Checklist"
+   "label": "Checklist & Evidence"
   },
   {
    "fieldname": "handover_check_items",
@@ -115,6 +108,11 @@
    "label": "Signed Evidence"
   },
   {
+   "fieldname": "vehicle_handover_sec_discrepancy",
+   "fieldtype": "Section Break",
+   "label": "Discrepancy"
+  },
+  {
    "default": "Clean",
    "fieldname": "discrepancy_status",
    "fieldtype": "Select",
@@ -126,6 +124,21 @@
    "fieldname": "discrepancy_notes",
    "fieldtype": "Small Text",
    "label": "Discrepancy Notes"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vehicle_handover_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "default": "GV-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "GV-.######",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
