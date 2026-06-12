@@ -30,8 +30,9 @@ class BuildingLicense(Document):
             return
 
         if self.is_new():
-            # Building License has no amended_from field today, so getattr keeps
-            # this safe; if the amendment chain is wired later it is picked up.
+            # On an amendment (cancel -> amend), ``amended_from`` points at the
+            # cancelled original; getattr stays defensive for plain new drafts
+            # where the field is simply empty.
             amended_from = getattr(self, "amended_from", None)
             previous_expiry = (
                 frappe.db.get_value("Building License", amended_from, "expiry_date")

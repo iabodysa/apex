@@ -85,6 +85,51 @@ class TestBuildingLicense(FrappeTestCase):
 
         frappe.delete_doc("Building License", doc.name, force=True, ignore_permissions=True)
 
+    def test_amendment_with_later_expiry_stamps_last_renewal_date(self):
+        """Amending (cancel -> amend) with a later expiry stamps last_renewal_date.
+
+        The amended copy reads the previous expiry from the ``amended_from``
+        original, so pushing the validity forward on the amendment is recorded
+        as a renewal. Proves the ``amended_from`` field is wired and consumed by
+        the controller, not just present.
+        """
+        from frappe.utils import today
+
+        original = frappe.get_doc({
+            "doctype": "Building License",
+            "naming_series": "BLDG-LIC-.YYYY.-.####",
+            "license_type": "Civil Defence Certificate",
+            "building": "QA-BLDG",
+            "license_number": "LIC-QA-AMEND",
+            "issue_date": "2026-01-01",
+            "expiry_date": "2027-01-01",
+        })
+        original.flags.ignore_links = True
+        original.insert(ignore_permissions=True, ignore_links=True)
+        # Walk the real lifecycle: submit then cancel, so the native
+        # validate_amended_from guard (original must be cancelled) is satisfied.
+        original.submit()
+        original.cancel()
+
+        # The amended copy: a brand-new doc pointing back at the cancelled
+        # original via amended_from, carrying a later expiry.
+        amended = frappe.get_doc({
+            "doctype": "Building License",
+            "naming_series": "BLDG-LIC-.YYYY.-.####",
+            "license_type": "Civil Defence Certificate",
+            "building": "QA-BLDG",
+            "license_number": "LIC-QA-AMEND-2",
+            "issue_date": "2026-01-01",
+            "expiry_date": "2028-06-01",
+            "amended_from": original.name,
+        })
+        amended.flags.ignore_links = True
+        amended.insert(ignore_permissions=True, ignore_links=True)
+        self.assertEqual(str(amended.last_renewal_date), today())
+
+        frappe.delete_doc("Building License", amended.name, force=True, ignore_permissions=True)
+        frappe.delete_doc("Building License", original.name, force=True, ignore_permissions=True)
+
     def test_renew_computes_forward_expiry_and_stamps_date(self):
         """renew() rolls expiry forward, stamps the date, and resets status to Active.
 

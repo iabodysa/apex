@@ -160,6 +160,17 @@
    "default": "BLDG-LIC-.YYYY.-.####",
    "reqd": 1,
    "hidden": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Building License",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "permissions": [
@@ -228,7 +239,8 @@
   "status",
   "last_renewal_date",
   "building_license_system_col",
-  "naming_series"
+  "naming_series",
+  "amended_from"
  ],
  "modified": "2026-06-09 09:00:00.000000"
 }
