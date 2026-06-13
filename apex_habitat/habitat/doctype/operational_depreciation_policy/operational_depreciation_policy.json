@@ -35,14 +35,6 @@
     },
     {
       "doctype": "DocField",
-      "fieldname": "asset_category",
-      "fieldtype": "Link",
-      "label": "Asset Category",
-      "options": "Custody Asset Category",
-      "idx": 4
-    },
-    {
-      "doctype": "DocField",
       "fieldname": "useful_life_years",
       "fieldtype": "Int",
       "label": "Useful Life (Years)",
