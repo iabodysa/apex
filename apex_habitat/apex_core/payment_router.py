@@ -199,5 +199,20 @@ def create_routed_payment(payment_request: str) -> str:
     POST-only: this performs a write (creates the payment, stamps the link), so a
     cacheable GET must never trigger it (CSRF / cache-poisoning guard enforced by
     ``tests/test_http_enforcement.py``). Delegates to :func:`route_payment`.
+
+    Authorization: ``route_payment`` builds the target with
+    ``ignore_permissions=True`` (the target payment DocType's roles may differ
+    from the source request's), so the source request's OWN permission gate is
+    enforced HERE, at the entry point, BEFORE any side effect. Being
+    finance-approved is a property of the request, not an authorization of the
+    caller; without this an authenticated user who merely knows an approved
+    request's name could trigger create+submit. The caller must hold ``write`` on
+    the specific source request (its ``has_permission`` hooks apply, not just the
+    blanket DocType-level role), and ``submit`` because the routed payment is
+    submitted on the GL-enabled path. ``throw=True`` raises ``PermissionError``
+    (HTTP 403) before ``route_payment`` runs.
     """
+    source = frappe.get_doc(SOURCE_DOCTYPE, payment_request)
+    frappe.has_permission(SOURCE_DOCTYPE, "write", doc=source, throw=True)
+    frappe.has_permission(SOURCE_DOCTYPE, "submit", doc=source, throw=True)
     return route_payment(payment_request)

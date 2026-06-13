@@ -7,6 +7,32 @@ on:
     branches: [apex]
 
 jobs:
+  gitleaks:
+    # Required secret-scanning gate. gitleaks exits non-zero when it finds a
+    # leak, which fails this job and therefore the whole workflow — no push or
+    # merge to apex can land a committed secret. Runs over full history
+    # (fetch-depth: 0) so a secret introduced in any commit on the branch/PR is
+    # caught, not just the tip.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          GITLEAKS_VERSION=8.18.4
+          curl -sSfL \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            -o /tmp/gitleaks.tar.gz
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          sudo install /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: Scan for committed secrets (required)
+        run: gitleaks detect --no-banner --redact --source .
+
   test:
     runs-on: ubuntu-latest
 
