@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.3 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.54.3 — worker-portal (Masar) fixes: the bottom Accommodation tab is now labeled and highlighted correctly (the landing tab no longer stays lit on every screen); a revoked, expired, or rate-limited session shows a clear error with retry instead of a misleading empty state; status, request-type, category and priority values render in Arabic in the Arabic interface; plus the Arabic web font, international WhatsApp links, a larger language-toggle tap target, and navigation polish",
+        "app_name": "apex_habitat",
+        "link": "/masar",
+        "creation": "2026-06-13 18:00:00",
+    },
     # v1.54.2 ---------------------------------------------------------------
     {
         "title": "Apex 1.54.2 — the routed-payment endpoint now rechecks source write and submit permission before any side effect (closing an authorization bypass), backed by new SQL-injection, write-permission, and secret-scan CI gates; the Accommodation Site is now the single source of a building's address (shown read-only, no more duplicate entry); building capacity derives from its rooms' beds; the Habitat Hub landing now carries onboarding; and an unused depreciation field was removed",
