@@ -117,13 +117,15 @@
   {
    "fieldname": "custody_damage_assessment_sec_totals",
    "fieldtype": "Section Break",
-   "label": "Totals"
+   "label": "Totals",
+   "permlevel": 1
   },
   {
    "fieldname": "total_estimated_replacement_cost_sar",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total Estimated Replacement Cost (SAR)",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -208,6 +210,24 @@
    "read": 1,
    "report": 1,
    "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Housing Manager",
+   "write": 1
   }
  ],
  "row_format": "Dynamic",

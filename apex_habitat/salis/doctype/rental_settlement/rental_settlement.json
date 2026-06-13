@@ -92,7 +92,8 @@
   {
    "fieldname": "rental_settlement_sec_totals",
    "fieldtype": "Section Break",
-   "label": "Reconciliation"
+   "label": "Reconciliation",
+   "permlevel": 1
   },
   {
    "fieldname": "rental_settlement_totals_col1",
@@ -102,7 +103,8 @@
    "description": "Amount claimed by the rental office.",
    "fieldname": "claimed_total",
    "fieldtype": "Currency",
-   "label": "Claimed Total"
+   "label": "Claimed Total",
+   "permlevel": 1
   },
   {
    "fieldname": "rental_settlement_totals_col2",
@@ -113,6 +115,7 @@
    "fieldname": "accrued_total",
    "fieldtype": "Currency",
    "label": "Accrued Total",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -120,6 +123,7 @@
    "fieldname": "ledger_accrued_total",
    "fieldtype": "Currency",
    "label": "Ledger Accrued Total",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -131,6 +135,7 @@
    "fieldname": "variance",
    "fieldtype": "Currency",
    "label": "Variance",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -138,13 +143,15 @@
    "fieldname": "ledger_variance",
    "fieldtype": "Currency",
    "label": "Ledger Variance",
+   "permlevel": 1,
    "read_only": 1
   },
   {
    "fieldname": "rental_settlement_sec_payment",
    "fieldtype": "Section Break",
    "label": "Payment",
-   "collapsible": 1
+   "collapsible": 1,
+   "permlevel": 1
   },
   {
    "description": "Reference to the raised Salis Payment Request. Set automatically; this DocType never posts GL.",
@@ -152,6 +159,7 @@
    "fieldtype": "Link",
    "label": "Payment Request",
    "options": "Salis Payment Request",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -260,6 +268,24 @@
    "role": "System Manager",
    "share": 1,
    "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Housing Manager",
    "write": 1
   }
  ],

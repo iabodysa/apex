@@ -304,13 +304,13 @@
   {
    "permlevel": 1,
    "read": 1,
-   "role": "Accommodation Manager",
+   "role": "Finance Manager",
    "write": 1
   },
   {
    "permlevel": 1,
    "read": 1,
-   "role": "Resident Supervisor",
+   "role": "Housing Manager",
    "write": 1
   }
  ],

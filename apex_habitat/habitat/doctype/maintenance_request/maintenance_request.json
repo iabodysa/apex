@@ -213,12 +213,14 @@
    "collapsible": 1,
    "fieldname": "maintenance_request_sec_financial",
    "fieldtype": "Section Break",
-   "label": "Financial"
+   "label": "Financial",
+   "permlevel": 1
   },
   {
    "fieldname": "cost_of_repair",
    "fieldtype": "Currency",
-   "label": "Cost of Repair (SAR)"
+   "label": "Cost of Repair (SAR)",
+   "permlevel": 1
   },
   {
    "fieldname": "maintenance_request_financial_col",
@@ -231,7 +233,8 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "fetch_from": "building.default_cost_center",
-   "fetch_if_empty": 1
+   "fetch_if_empty": 1,
+   "permlevel": 1
   },
   {
    "fieldname": "maintenance_request_sec_table_procurement_items",
@@ -421,6 +424,24 @@
    "read": 1,
    "role": "Resident Request Coordinator",
    "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Housing Manager",
    "write": 1
   }
  ],
