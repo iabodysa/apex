@@ -7,9 +7,12 @@
     <link rel="manifest" href="/assets/apex_habitat/worker_portal/manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Latin UI face (Montserrat) + Arabic UI face (Cairo). Masar defaults to
+         Arabic, so an Arabic-capable webfont must load or RTL text falls back to
+         the device default and reads inconsistently next to the Latin chrome. -->
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap"
     />
     <link rel="stylesheet" href="/assets/apex_habitat/worker_portal/assets/index.css" />
     {%- if portal_accent %}

@@ -681,7 +681,18 @@ def create_worker_request(token=None, category=None, subject=None, body=None, pr
     description = body if not subject else (f"{subject}\n\n{body}" if body else subject)
 
     # Housing context comes from the worker's OWN active assignment, server-side.
-    assignment = _active_assignment(employee) or {}
+    # A worker with no active assignment can still raise a request (e.g. a
+    # complaint or a custody item), but it must not look like a located housing
+    # issue: leave building/room/bed unset and flag the missing context in the
+    # description so a supervisor can triage it instead of it sitting orphaned.
+    assignment = _active_assignment(employee)
+    building = room = bed = None
+    if assignment:
+        building = assignment.get("building")
+        room = assignment.get("room")
+        bed = assignment.get("bed")
+    else:
+        description = f"{description}\n\n[{_('No active accommodation assignment on file.')}]"
 
     doc = frappe.get_doc(
         {
@@ -690,9 +701,9 @@ def create_worker_request(token=None, category=None, subject=None, body=None, pr
             "requester_type": "Worker",
             "employee": employee,
             "worker_name": frappe.db.get_value("Employee", employee, "employee_name"),
-            "building": assignment.get("building"),
-            "room": assignment.get("room"),
-            "bed": assignment.get("bed"),
+            "building": building,
+            "room": room,
+            "bed": bed,
             "request_category": category,
             "priority": priority,
             "description": description,

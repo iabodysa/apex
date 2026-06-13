@@ -46,8 +46,10 @@ defineProps({
   background: color-mix(in srgb, var(--c-ink) 8%, transparent);
 }
 .lang-opt {
-  min-width: 34px;
-  min-height: 28px;
+  /* >=44px hit target (WCAG 2.5.5 / iOS HIG) — the visible pill stays compact via
+     padding, but the tap area is comfortable for a thumb. */
+  min-width: 44px;
+  min-height: 44px;
   padding: 4px 10px;
   border-radius: var(--radius-pill);
   font-size: var(--fs-sm);

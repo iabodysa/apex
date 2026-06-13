@@ -56,17 +56,28 @@
       <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("requests.mine") }}</h3>
       <div v-for="r in list.data" :key="r.name" class="card card-pad">
         <div class="flex items-start justify-between gap-2">
-          <div class="font-bold leading-tight">{{ r.request_category }}</div>
-          <span class="pill shrink-0" :class="statusPill(r.status)">{{ r.status }}</span>
+          <div class="font-bold leading-tight">{{ tEnum("requestCategory", r.request_category) }}</div>
+          <span class="pill shrink-0" :class="statusPill(r.status)">{{ tEnum("requestStatus", r.status) }}</span>
         </div>
         <p class="mt-1 text-sm text-soft whitespace-pre-line line-clamp-3">{{ r.description }}</p>
-        <div class="mt-1 text-xs text-muted">{{ r.priority }} · {{ formatDate(r.creation) }}</div>
+        <div class="mt-1 text-xs text-muted">{{ tEnum("priority", r.priority) }} · {{ formatDate(r.creation) }}</div>
         <div v-if="r.resolution_notes" class="mt-2 text-sm">
           <span class="text-muted">{{ t("requests.resolution") }}:</span>
           <span class="font-semibold"> {{ r.resolution_notes }}</span>
         </div>
       </div>
     </section>
+
+    <!-- Error loading the worker's request list: a revoked/disabled token
+         (PermissionError) or server failure must surface, not read as "no
+         requests yet". The new-request form above stays usable. -->
+    <div v-else-if="list.error" class="card card-pad text-center">
+      <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
+      <p class="text-sm text-muted">{{ listErrorMessage }}</p>
+      <button class="btn btn-primary mt-3" style="width: auto; padding-inline: 24px" @click="list.reload()">
+        {{ t("common.retry") }}
+      </button>
+    </div>
 
     <div v-else-if="!list.loading" class="card card-pad text-center">
       <p class="text-sm text-muted">{{ t("requests.empty") }}</p>
@@ -78,10 +89,10 @@
 import { computed, reactive, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { TOKEN } from "../token";
 
-const { t } = useI18n();
+const { t, tEnum } = useI18n();
 
 const ok = ref(false);
 const err = ref("");
@@ -95,6 +106,8 @@ const list = createResource({
   auto: true,
 });
 
+const listErrorMessage = computed(() => resourceErrorMessage(list.error));
+
 const create = createResource({
   url: "apex_habitat.salis.api.masar.create_worker_request",
   onSuccess: () => {
@@ -107,7 +120,7 @@ const create = createResource({
   },
   onError: (e) => {
     ok.value = false;
-    err.value = e.messages?.[0] || t("common.error");
+    err.value = resourceErrorMessage(e, "common.error");
   },
 });
 

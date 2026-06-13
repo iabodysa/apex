@@ -4,6 +4,16 @@
 
     <div v-if="acc.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
 
+    <!-- Error: an invalid/disabled token (PermissionError) or a server failure
+         must NOT masquerade as a benign "no assignment" empty state. -->
+    <div v-else-if="acc.error" class="card card-pad text-center">
+      <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
+      <p class="text-sm text-muted">{{ errorMessage }}</p>
+      <button class="btn btn-primary mt-3" style="width: auto; padding-inline: 24px" @click="acc.reload()">
+        {{ t("common.retry") }}
+      </button>
+    </div>
+
     <template v-else-if="acc.data && acc.data.assignment">
       <!-- Building / room / bed -->
       <section class="card card-pad space-y-4">
@@ -36,7 +46,7 @@
 
         <dl class="space-y-3 text-sm">
           <Row icon="calendar" :label="t('accommodation.checkIn')" :value="acc.data.assignment.check_in_date" />
-          <Row v-if="acc.data.assignment.stay_type" icon="clock" :label="t('accommodation.stayType')" :value="acc.data.assignment.stay_type" />
+          <Row v-if="acc.data.assignment.stay_type" icon="clock" :label="t('accommodation.stayType')" :value="tEnum('stayType', acc.data.assignment.stay_type)" />
           <Row v-if="acc.data.assignment.expected_checkout_date" icon="clock" :label="t('accommodation.expectedCheckout')" :value="acc.data.assignment.expected_checkout_date" />
           <Row v-if="occupancy" icon="user" :label="t('accommodation.occupancy')" :value="occupancy" />
           <Row v-if="building?.address" icon="pin" :label="t('accommodation.address')" :value="building.address" />
@@ -92,16 +102,19 @@
 import { computed, h } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { TOKEN } from "../token";
+import { waLink } from "../phone";
 
-const { t } = useI18n();
+const { t, tEnum } = useI18n();
 
 const acc = createResource({
   url: "apex_habitat.salis.api.masar.get_worker_accommodation",
   params: { token: TOKEN },
   auto: true,
 });
+
+const errorMessage = computed(() => resourceErrorMessage(acc.error));
 
 const building = computed(() => acc.data?.building);
 const room = computed(() => acc.data?.room);
@@ -125,9 +138,4 @@ const Row = (rprops) =>
     h("dt", { class: "text-muted" }, rprops.label),
     h("dd", { class: "ms-auto font-semibold" }, rprops.value || t("common.none")),
   ]);
-
-function waLink(phone) {
-  const digits = (phone || "").replace(/[^\d]/g, "");
-  return "https://wa.me/" + digits;
-}
 </script>

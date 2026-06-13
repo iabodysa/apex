@@ -17,7 +17,7 @@
             <div class="text-lg font-extrabold leading-tight truncate">
               {{ p.employee_name || t("common.none") }}
             </div>
-            <span class="pill mt-1" :class="statusPill">{{ p.status || t("common.none") }}</span>
+            <span class="pill mt-1" :class="statusPill">{{ p.status ? tEnum("status", p.status) : t("common.none") }}</span>
           </div>
         </div>
 
@@ -83,7 +83,7 @@ import Icon from "../components/Icon.vue";
 import LangToggle from "../components/LangToggle.vue";
 import { useI18n } from "../i18n";
 
-const { t } = useI18n();
+const { t, tEnum } = useI18n();
 
 const props = defineProps({ ctx: { type: Object, required: true } });
 const p = computed(() => props.ctx);

@@ -43,6 +43,7 @@ const messages = {
     nav: {
       profile: "Profile",
       home: "Home",
+      accommodation: "Accommodation",
       transport: "Transport",
       requests: "Requests",
     },
@@ -130,10 +131,13 @@ const messages = {
     },
     errors: {
       loadFailed: "Couldn't load Masar",
+      loadError: "Couldn't load this section.",
       invalidLink:
         "This worker link is invalid or has been disabled. Please ask your supervisor for a new link.",
       noLink:
         "No worker link was provided. Open the personal link your supervisor shared with you.",
+      rateLimited: "Too many requests. Please wait a moment and try again.",
+      sessionExpired: "Your session expired. Please refresh the page.",
     },
   },
   ar: {
@@ -166,6 +170,7 @@ const messages = {
     nav: {
       profile: "ملفي",
       home: "الرئيسية",
+      accommodation: "السكن",
       transport: "النقل",
       requests: "الطلبات",
     },
@@ -253,13 +258,119 @@ const messages = {
     },
     errors: {
       loadFailed: "تعذّر تحميل مسار",
+      loadError: "تعذّر تحميل هذا القسم.",
       invalidLink:
         "رابط العامل غير صالح أو تم تعطيله. يرجى طلب رابط جديد من مشرفك.",
       noLink:
         "لم يتم تقديم رابط العامل. افتح الرابط الشخصي الذي شاركه معك مشرفك.",
+      rateLimited: "طلبات كثيرة جداً. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.",
+      sessionExpired: "انتهت صلاحية الجلسة. يرجى تحديث الصفحة.",
     },
   },
 };
+
+/* Server enum translations (rendered values that arrive from the API in English).
+ *
+ * Profile status, accommodation stay type, transport request type/status, and
+ * request category/status/priority are stored on the DocType in English and sent
+ * verbatim by the Masar API (the option VALUES must stay English — they round-trip
+ * to the server). Only the DISPLAY is localized: tEnum(namespace, value) maps a
+ * known English value to its Arabic label and otherwise returns the value
+ * unchanged, so an unmapped/new server value degrades gracefully to its English
+ * text rather than a missing-key marker. Keep these maps in lockstep with the
+ * DocType Select options. */
+const enums = {
+  ar: {
+    // Employee.status (ERPNext Employee)
+    status: {
+      Active: "نشط",
+      Inactive: "غير نشط",
+      Suspended: "موقوف",
+      Left: "منتهي الخدمة",
+    },
+    // Accommodation Assignment.stay_type
+    stayType: {
+      Permanent: "دائم",
+      Temporary: "مؤقت",
+    },
+    // Transport Request.request_type
+    requestType: {
+      "Accommodation to Project Shuttle": "نقل من السكن إلى المشروع",
+      "Inter-City Relocation": "نقل بين المدن",
+      "Administrative Trip / Document Signing": "مهمة إدارية / توقيع مستندات",
+    },
+    // Transport Request.status
+    transportStatus: {
+      New: "جديد",
+      Validated: "تم التحقق",
+      Approved: "معتمد",
+      Scheduled: "مجدول",
+      Fulfilled: "مُنفَّذ",
+      Rejected: "مرفوض",
+      Cancelled: "ملغى",
+    },
+    // Accommodation Resident Request.request_category
+    requestCategory: {
+      Maintenance: "صيانة",
+      Safety: "سلامة",
+      Cleaning: "نظافة",
+      "Pest Control": "مكافحة حشرات",
+      Custody: "عُهدة",
+      "Facility Item": "عنصر مرفق",
+      Water: "مياه",
+      Electrical: "كهرباء",
+      AC: "تكييف",
+      Plumbing: "سباكة",
+      Reimbursement: "تعويض",
+      Complaint: "شكوى",
+      Suggestion: "اقتراح",
+      Other: "أخرى",
+    },
+    // Accommodation Resident Request.status
+    requestStatus: {
+      New: "جديد",
+      Triaged: "تم الفرز",
+      Assigned: "مُسنَد",
+      "In Progress": "قيد التنفيذ",
+      "Waiting Evidence": "بانتظار إثبات",
+      Resolved: "تمت المعالجة",
+      Rejected: "مرفوض",
+      Closed: "مغلق",
+    },
+    // Accommodation Resident Request.priority
+    priority: {
+      Low: "منخفضة",
+      Medium: "متوسطة",
+      High: "عالية",
+      Critical: "حرجة",
+    },
+  },
+};
+
+export function translateEnum(namespace, value) {
+  if (value == null || value === "") return value;
+  const map = (enums[lang.value] || {})[namespace];
+  return (map && map[value]) || value;
+}
+
+/* Map a frappe-ui resource error to a worker-friendly, localized message.
+ *
+ * A transient transport failure (rate limit / stale CSRF) must NOT read as an
+ * invalid link or a benign empty state. ``invalidFallback`` is the copy used
+ * when the failure carries no explicit server message (App.vue uses the
+ * "invalid/disabled link" copy; the data pages use a neutral "couldn't load"). */
+export function resourceErrorMessage(e, invalidFallbackKey = "errors.loadError") {
+  if (!e) return translate(invalidFallbackKey);
+  const status = e.response?.status;
+  const excType = e.exc_type || "";
+  if (status === 429 || excType === "TooManyRequestsError") {
+    return translate("errors.rateLimited");
+  }
+  if (excType.includes("CSRFTokenError") || excType.includes("Authorization")) {
+    return translate("errors.sessionExpired");
+  }
+  return e.messages?.[0] || e.message || translate(invalidFallbackKey);
+}
 
 function detectInitial() {
   try {
@@ -304,6 +415,7 @@ const dir = computed(() => (lang.value === "ar" ? "rtl" : "ltr"));
 export function useI18n() {
   return {
     t: (key, params) => translate(key, params),
+    tEnum: (namespace, value) => translateEnum(namespace, value),
     lang,
     dir,
     setLang,

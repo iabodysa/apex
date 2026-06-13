@@ -4,19 +4,29 @@
 
     <div v-if="tr.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
 
+    <!-- Error: a revoked/disabled token (PermissionError) or a server failure
+         must surface, not show as a benign "no upcoming transport" empty state. -->
+    <div v-else-if="tr.error" class="card card-pad text-center">
+      <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
+      <p class="text-sm text-muted">{{ errorMessage }}</p>
+      <button class="btn btn-primary mt-3" style="width: auto; padding-inline: 24px" @click="tr.reload()">
+        {{ t("common.retry") }}
+      </button>
+    </div>
+
     <template v-else-if="tr.data && tr.data.trips && tr.data.trips.length">
       <section v-for="trip in tr.data.trips" :key="trip.transport_request" class="card card-pad space-y-3">
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0">
             <div class="font-extrabold leading-tight truncate">
-              {{ trip.request_type || trip.transport_request }}
+              {{ trip.request_type ? tEnum("requestType", trip.request_type) : trip.transport_request }}
             </div>
             <div v-if="trip.pickup_point || trip.pickup_datetime" class="mt-0.5 text-sm text-muted">
               <span v-if="trip.pickup_point">{{ trip.pickup_point }}</span>
               <span v-if="trip.depart_time || trip.pickup_datetime"> · {{ trip.depart_time || formatDt(trip.pickup_datetime) }}</span>
             </div>
           </div>
-          <span v-if="trip.status" class="pill pill-accent shrink-0">{{ trip.status }}</span>
+          <span v-if="trip.status" class="pill pill-accent shrink-0">{{ tEnum("transportStatus", trip.status) }}</span>
         </div>
 
         <!-- Vehicle + driver -->
@@ -82,12 +92,14 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
-import { useI18n } from "../i18n";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import { TOKEN } from "../token";
+import { waLink } from "../phone";
 
-const { t } = useI18n();
+const { t, tEnum } = useI18n();
 
 const tr = createResource({
   url: "apex_habitat.salis.api.masar.get_worker_transport",
@@ -95,13 +107,11 @@ const tr = createResource({
   auto: true,
 });
 
+const errorMessage = computed(() => resourceErrorMessage(tr.error));
+
 function formatDt(dt) {
   if (!dt) return "";
   // Server sends "YYYY-MM-DD HH:MM:SS"; show date + HH:MM.
   return dt.slice(0, 16).replace("T", " ");
-}
-function waLink(phone) {
-  const digits = (phone || "").replace(/[^\d]/g, "");
-  return "https://wa.me/" + digits;
 }
 </script>

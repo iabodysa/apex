@@ -94,7 +94,7 @@ import { createResource } from "frappe-ui";
 import Icon from "./components/Icon.vue";
 import Brand from "./components/Brand.vue";
 import LangToggle from "./components/LangToggle.vue";
-import { useI18n } from "./i18n";
+import { useI18n, resourceErrorMessage } from "./i18n";
 import { TOKEN, hasToken } from "./token";
 
 const { t, dir } = useI18n();
@@ -130,20 +130,18 @@ const greeting = computed(() => {
   return t("greeting.evening");
 });
 
-const errorMessage = computed(() => {
-  // A PermissionError from the resolver means the link is invalid/disabled.
-  const e = ctx.error;
-  if (!e) return t("errors.invalidLink");
-  const msg = e.messages?.[0] || e.message || "";
-  return msg || t("errors.invalidLink");
-});
+// A transient transport failure (rate limit / stale CSRF) is NOT a bad link —
+// mapping it to "invalid link" wrongly tells the worker to get a new link. Only
+// a real PermissionError (or an explicit server message) drives the
+// "invalid/disabled link" copy; transient failures get a retry-able message.
+const errorMessage = computed(() => resourceErrorMessage(ctx.error, "errors.invalidLink"));
 
 const showBrand = computed(() => window.portal_show_brand !== false);
 const brandLogo = computed(() => window.portal_logo || "");
 
 const tabs = [
   { to: "/", icon: "user", labelKey: "nav.profile" },
-  { to: "/accommodation", icon: "building", labelKey: "nav.home" },
+  { to: "/accommodation", icon: "building", labelKey: "nav.accommodation" },
   { to: "/transport", icon: "route", labelKey: "nav.transport" },
   { to: "/requests", icon: "message", labelKey: "nav.requests" },
 ];
