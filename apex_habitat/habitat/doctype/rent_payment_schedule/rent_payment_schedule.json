@@ -47,14 +47,6 @@
    "options": "Payment Entry",
    "read_only": 1,
    "idx": 4
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "paid_on",
-   "fieldtype": "Date",
-   "label": "Paid On",
-   "read_only": 1,
-   "idx": 5
   }
  ],
  "permissions": [],

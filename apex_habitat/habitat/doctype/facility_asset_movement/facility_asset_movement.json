@@ -40,7 +40,6 @@
   "accounting_acknowledged_by",
   "facility_asset_movement_tab_system",
   "facility_asset_movement_sec_system",
-  "native_asset_movement",
   "naming_series",
   "facility_asset_movement_system_col",
   "amended_from",
@@ -261,13 +260,6 @@
    "fieldname": "facility_asset_movement_sec_system",
    "fieldtype": "Section Break",
    "label": "System"
-  },
-  {
-   "fieldname": "native_asset_movement",
-   "fieldtype": "Link",
-   "label": "Native Asset Movement",
-   "options": "Asset Movement",
-   "read_only": 1
   },
   {
    "fieldname": "cancellation_reason",
