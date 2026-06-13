@@ -35,20 +35,20 @@ frappe.ui.form.on("Salis Payment Request", {
 								indicator: "green",
 							});
 							frm.reload_doc();
-							// Resolve the configured target DocType to route there.
+							// Resolve the configured target DocType to route there;
+							// fall back to native Payment Request (the router's
+							// default) when none is configured.
 							frappe.db
 								.get_single_value(
 									"Payment Routing Settings",
 									"target_payment_doctype"
 								)
 								.then(function (target_doctype) {
-									if (target_doctype) {
-										frappe.set_route(
-											"Form",
-											target_doctype,
-											payment_name
-										);
-									}
+									frappe.set_route(
+										"Form",
+										target_doctype || "Payment Request",
+										payment_name
+									);
 								});
 						},
 						error: function () {

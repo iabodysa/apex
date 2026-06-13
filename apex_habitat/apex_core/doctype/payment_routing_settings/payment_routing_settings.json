@@ -28,7 +28,7 @@
    "label": "About"
   },
   {
-   "default": "<h4>Payment Router</h4>\n<p>This single record is the configurable, mapping-driven payment-integration layer. When the <b>Create Payment</b> action runs on a finance-approved <b>Salis Payment Request</b>, the router reads this config, builds the target payment document by applying the field map below, and (optionally) submits it &mdash; with <b>no hard-coded per-DocType branches</b>. Set it once per deployment.</p>\n<p>It <b>replaces</b> the now-inert <code>default_payment_method</code> on Habitat Settings: instead of a fixed Select, the target payment DocType is a real <code>Link &rarr; DocType</code> and the source&rarr;target field mapping lives in config, so different companies/servers (ERPNext Payment Entry, Payment Order, or a client's own custom payment DocType) are supported without changing code.</p>\n<p>This layer only <b>routes</b> the payment record. General Ledger posting is governed separately by <code>enable_gl_posting</code> on Habitat Settings; the router writes no GL.</p>",
+   "default": "<h4>Payment Router</h4>\n<p>This single record is the configurable, mapping-driven payment-integration layer. When the <b>Create Payment</b> action runs on a finance-approved <b>Salis Payment Request</b>, the router reads this config, builds the target payment document by applying the field map below, and (optionally) submits it &mdash; with <b>no hard-coded per-DocType branches</b>. Set it once per deployment.</p>\n<p>It <b>replaces</b> the now-inert <code>default_payment_method</code> on Apex Settings: instead of a fixed Select, the target payment DocType is a real <code>Link &rarr; DocType</code> and the source&rarr;target field mapping lives in config, so different companies/servers (ERPNext Payment Entry, Payment Order, or a client's own custom payment DocType) are supported without changing code. <b>Left blank, the router builds the native <code>Payment Request</code></b> &mdash; Frappe's standard payment-intent document &mdash; so the flow works with no configuration.</p>\n<p>This layer only <b>routes</b> the payment record. General Ledger posting is governed separately by <code>enable_gl_posting</code> on Apex Settings; the router writes no GL and, while that flag is off, leaves the routed payment in Draft so nothing posts.</p>",
    "fieldname": "router_intro",
    "fieldtype": "Text Editor",
    "label": "About",
@@ -40,7 +40,7 @@
    "label": "Target Payment Document"
   },
   {
-   "description": "The payment DocType the Create Payment action builds (for example Payment Entry, Payment Order, or a client's custom payment DocType). Leave blank to disable routing; the Create Payment action then guides the admin to configure it.",
+   "description": "The payment DocType the Create Payment action builds (for example Payment Entry, Payment Order, or a client's custom payment DocType). Leave blank to use the native Payment Request, the default target.",
    "fieldname": "target_payment_doctype",
    "fieldtype": "Link",
    "in_list_view": 1,

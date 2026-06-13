@@ -6,23 +6,34 @@ Request:
   * the config-driven field map builds the target payment document - both
     mapped (copy from source) and static (constant) rows;
   * idempotency - a second route returns the same payment, creates nothing new;
-  * an unconfigured router (no target DocType) throws a clear message;
+  * an unconfigured router defaults to the native Payment Request (no throw) -
+    both the resolver default and a real default-build that creates an actual
+    Payment Request row from an approved request;
   * a not-yet-approved request throws and creates nothing;
-  * auto_submit_target submits a submittable target;
+  * auto_submit_target submits a submittable target only when GL posting is on;
   * the request is stamped with linked_payment_entry.
 
-Two targets are exercised: a real core DocType (Note) with no dependencies for
-the mapping/idempotency/auto-submit-off path, and a throwaway submittable stub
-DocType for the auto-submit path. The whitelisted POST endpoint's HTTP-method
-guard is locked by tests/test_http_enforcement.py.
+Targets exercised: native Payment Request (the unconfigured default), a real core
+DocType (Note) with no dependencies for the mapping/idempotency path, and a
+throwaway submittable stub DocType for the auto-submit + GL-gate paths. The
+whitelisted POST endpoint's HTTP-method guard is locked by
+tests/test_http_enforcement.py.
 """
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex_habitat.apex_core.payment_router import route_payment, create_routed_payment
+from apex_habitat.apex_core.payment_router import (
+    DEFAULT_TARGET_DOCTYPE,
+    SOURCE_DOCTYPE,
+    create_routed_payment,
+    get_target_doctype,
+    route_payment,
+)
 
 SETTINGS = "Payment Routing Settings"
 STUB_DOCTYPE = "Test Routed Payment Stub"
@@ -80,8 +91,16 @@ class TestPaymentRouter(FrappeTestCase):
         s.auto_submit_target = 0
         s.set("field_map", [])
         s.save(ignore_permissions=True)
+        # GL posting OFF by default (factory default); GL-gated tests opt in.
+        self._set_gl_posting(False)
 
     # ------------------------------------------------------------------ helpers
+
+    def _set_gl_posting(self, enabled):
+        """Flip the app-wide enable_gl_posting flag the router's GL gate reads."""
+        apex = frappe.get_single("Apex Settings")
+        apex.enable_gl_posting = 1 if enabled else 0
+        apex.save(ignore_permissions=True)
 
     def _approved_request(self, **overrides):
         """An approved (finance-stamped, submitted) Salis Payment Request.
@@ -116,17 +135,73 @@ class TestPaymentRouter(FrappeTestCase):
         s.save(ignore_permissions=True)
         return s
 
-    # ------------------------------------------------------- unconfigured guard
+    # --------------------------------------------------- native-first default
 
-    def test_unconfigured_target_throws(self):
-        pr = self._approved_request()
-        # No target_payment_doctype set (reset in setUp).
-        with self.assertRaises(frappe.ValidationError) as cm:
-            route_payment(pr.name)
-        self.assertIn("Payment Routing Settings", str(cm.exception))
-        # Nothing was stamped.
+    def test_default_target_is_native_payment_request(self):
+        # With no target configured (reset in setUp), the resolver returns the
+        # native primitive - never throws, never invents a custom DocType.
+        s = frappe.get_single(SETTINGS)
+        self.assertFalse(s.target_payment_doctype)
+        self.assertEqual(get_target_doctype(s), "Payment Request")
+        self.assertEqual(DEFAULT_TARGET_DOCTYPE, "Payment Request")
+
+    def test_routes_to_native_payment_request_by_default(self):
+        """An approved request, with the router unconfigured, builds a real native
+        Payment Request and links it back.
+
+        Payment Request is shipped by ERPNext; it is the standard payment-intent
+        DocType (the native-first default). The field map supplies the fields its
+        controller requires (``payment_request_type``, ``reference_doctype`` /
+        ``reference_name`` -> the source request itself, ``grand_total``). The
+        router defaults the target's ``currency`` (the source has none) so the
+        native build is valid. ERPNext's ``validate`` additionally treats the
+        reference as *invoice-shaped*, reading ``currency`` off it in two places -
+        ``get_amount`` and ``get_existing_payment_request_amount``; a Salis Payment
+        Request is not an invoice, so both couplings are patched (amount + the
+        existing-PR lookup). Everything else - ``frappe.new_doc``, the field map,
+        the currency default, the insert, the link stamp - is the real router path.
+        """
+        if not frappe.db.exists("DocType", "Payment Request"):
+            self.skipTest("ERPNext Payment Request not installed on this site")
+
+        pr = self._approved_request(amount=750.00, remarks="Default-route to native")
+        # No target configured -> the router must default to Payment Request.
+        self._configure(
+            None,
+            [
+                {"target_fieldname": "payment_request_type", "is_static": 1, "static_value": "Outward"},
+                {"target_fieldname": "reference_doctype", "is_static": 1, "static_value": SOURCE_DOCTYPE},
+                {"target_fieldname": "reference_name", "source_fieldname": "name"},
+                {"target_fieldname": "grand_total", "source_fieldname": "amount"},
+                {"target_fieldname": "subject", "source_fieldname": "remarks"},
+            ],
+        )
+
+        pr_mod = "erpnext.accounts.doctype.payment_request.payment_request"
+        # Both invoice-shaped couplings on the (non-invoice) reference are patched:
+        # get_amount -> the request amount; get_existing_payment_request_amount ->
+        # 0 (no prior Payment Requests exist against this brand-new approved source).
+        with (
+            patch(f"{pr_mod}.get_amount", return_value=750.00),
+            patch(f"{pr_mod}.get_existing_payment_request_amount", return_value=0),
+        ):
+            created = route_payment(pr.name)
+
+        # A genuine Payment Request row was created (the native default): the row
+        # exists in the Payment Request table itself.
+        self.assertTrue(frappe.db.exists("Payment Request", created))
+        built = frappe.get_doc("Payment Request", created)
+        self.assertEqual(built.doctype, "Payment Request")
+        self.assertEqual(built.reference_doctype, SOURCE_DOCTYPE)
+        self.assertEqual(built.reference_name, pr.name)
+        self.assertEqual(float(built.grand_total), 750.00)
+        # The router defaulted the target currency the Salis source lacks, so the
+        # native payment is currency-bearing (company default, else SAR baseline).
+        self.assertTrue(built.currency, "router must default the target currency")
+
+        # The request is stamped with the created native payment's name.
         pr.reload()
-        self.assertFalse(pr.linked_payment_entry)
+        self.assertEqual(pr.linked_payment_entry, created)
 
     # ------------------------------------------------------- approval guard
 
@@ -198,9 +273,11 @@ class TestPaymentRouter(FrappeTestCase):
         pr.reload()
         self.assertEqual(pr.linked_payment_entry, created)
 
-    # ------------------------------------------------------- auto-submit + meta
+    # ------------------------------------------------- auto-submit + GL gate
 
-    def test_auto_submit_submits_submittable_target(self):
+    def test_auto_submit_submits_submittable_target_when_gl_on(self):
+        # Submitting a payment doc fires its GL posting, so it requires the flag.
+        self._set_gl_posting(True)
         pr = self._approved_request(amount=555.00)
         self._configure(
             STUB_DOCTYPE,
@@ -216,7 +293,28 @@ class TestPaymentRouter(FrappeTestCase):
         self.assertEqual(float(target.paid_amount), 555.00)
         self.assertEqual(target.party, "AFMCO")
 
+    def test_auto_submit_blocked_when_gl_off_leaves_draft(self):
+        # GL gate: even with auto_submit on, GL posting OFF must NOT submit -
+        # the routed payment stays in Draft so nothing reaches the ledger (the
+        # operational-memo behaviour applied to routing). setUp left GL OFF.
+        pr = self._approved_request(amount=321.00)
+        self._configure(
+            STUB_DOCTYPE,
+            [{"target_fieldname": "paid_amount", "source_fieldname": "amount"}],
+            auto_submit=1,
+        )
+        created = route_payment(pr.name)
+        target = frappe.get_doc(STUB_DOCTYPE, created)
+        self.assertEqual(target.docstatus, 0)  # NOT submitted - GL gate held
+        # Still routed and linked (the record is created; only the GL-driving
+        # submit is withheld).
+        pr.reload()
+        self.assertEqual(pr.linked_payment_entry, created)
+
     def test_no_auto_submit_leaves_draft(self):
+        # Auto-submit off leaves Draft regardless of the GL flag; prove it even
+        # with GL on so this is isolated from the gate.
+        self._set_gl_posting(True)
         pr = self._approved_request()
         self._configure(
             STUB_DOCTYPE,
