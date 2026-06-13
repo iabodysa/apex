@@ -46,6 +46,8 @@ from frappe.utils import getdate, nowdate
 from apex_habitat.salis.utils import (
 	add_timeline_note,
 	lock_vehicle,
+	raise_rider_clearance_task,
+	rider_block_reason,
 )
 
 REQUEST_TYPES = ("Standard", "Top-up", "Chip")
@@ -84,8 +86,28 @@ class FuelRequest(Document):
 		elif self.request_type == "Chip":
 			self._validate_chip()
 
+		self._enforce_rider_active()
 		self._guard_initial_status()
 		self._stamp_approver()
+
+	def _enforce_rider_active(self):
+		"""T-119: block a new fuel request for a rider who is on leave / inactive.
+
+		Fuel is dispensed to the rider who holds the vehicle, so an offboarded /
+		on-leave rider must not draw new fuel. When such a rider still holds a
+		vehicle, also open a supervisor clearance task to recover it (idempotent;
+		best-effort so it never blocks the rejection)."""
+		if not self.driver:
+			return
+		reason = rider_block_reason(self.driver, self.request_date)
+		if reason:
+			raise_rider_clearance_task(
+				self.driver,
+				vehicle=self.vehicle,
+				source_doctype=self.doctype,
+				source_name=self.name,
+			)
+			frappe.throw(reason)
 
 	def before_submit(self):
 		# Approval authority (legitimate approver role, segregation of duties, and

@@ -11,7 +11,12 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.utils import add_timeline_note, lock_vehicle, lock_driver
+from apex_habitat.salis.utils import (
+    add_timeline_note,
+    lock_vehicle,
+    lock_driver,
+    rider_block_reason,
+)
 
 
 class VehicleAssignment(Document):
@@ -19,6 +24,21 @@ class VehicleAssignment(Document):
         self._validate_dates()
         self._validate_no_overlap()
         self._enforce_compliance()
+        self._enforce_rider_active()
+
+    def _enforce_rider_active(self):
+        """T-119: block assigning a vehicle to a rider who is on leave / inactive.
+
+        Source of truth is the rider's HRMS Employee status and any approved
+        Leave Application covering the assignment start date (falls back to the
+        local Salis Driver status). A new assignment puts a company vehicle in
+        the rider's custody, so an offboarded / on-leave rider must be rejected.
+        """
+        if not self.driver:
+            return
+        reason = rider_block_reason(self.driver, self.start_date)
+        if reason:
+            frappe.throw(reason)
 
     def _enforce_compliance(self):
         """Block (or warn) when the linked vehicle's compliance has expired.

@@ -11,13 +11,35 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.utils import add_timeline_note, lock_vehicle
+from apex_habitat.salis.utils import (
+    add_timeline_note,
+    lock_vehicle,
+    raise_rider_clearance_task,
+    rider_block_reason,
+)
 
 
 class VehicleHandover(Document):
     def validate(self):
         if self.from_driver and self.to_driver and self.from_driver == self.to_driver:
             frappe.throw(_("To Driver must differ from From Driver."))
+
+        # T-119: never hand a vehicle TO a rider who is on leave / inactive.
+        if self.to_driver:
+            reason = rider_block_reason(self.to_driver, self.handover_date)
+            if reason:
+                frappe.throw(reason)
+
+        # If the rider GIVING the vehicle back is on leave/inactive and the
+        # handover has not yet recovered it, open a supervisor clearance task so
+        # the vehicle + custody are recovered (idempotent).
+        if self.from_driver and rider_block_reason(self.from_driver, self.handover_date):
+            raise_rider_clearance_task(
+                self.from_driver,
+                vehicle=self.vehicle,
+                source_doctype=self.doctype,
+                source_name=self.name,
+            )
 
         if self.vehicle and self.odometer_reading is not None:
             current = frappe.db.get_value("Salis Vehicle", self.vehicle, "odometer") or 0
