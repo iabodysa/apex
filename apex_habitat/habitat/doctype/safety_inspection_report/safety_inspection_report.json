@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-24 18:03:15.959201",
- "description": "Weekly on-site safety field inspection. Findings are recorded in the findings tables; no Maintenance Request is created automatically.",
+ "description": "Weekly on-site safety field inspection. On submit, each actionable finding (one with an Issue Type and Room, not yet resolved) automatically spawns a Maintenance Request, surfaced in the Generated Maintenance Requests table.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

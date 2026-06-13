@@ -38,9 +38,19 @@
   },
   {
    "doctype": "DocField",
+   "fieldname": "issue_type",
+   "fieldtype": "Select",
+   "label": "Issue Type",
+   "options": "\nElectrical\nPlumbing\nFurniture\nAir Conditioning\nFire Safety\nPest Control\nStructural\nOther",
+   "description": "Set an Issue Type to make this finding actionable: on report submit it spawns a Maintenance Request of this type.",
+   "in_list_view": 1,
+   "idx": 4
+  },
+  {
+   "doctype": "DocField",
    "fieldname": "inspection_finding_item_finding_col",
    "fieldtype": "Column Break",
-   "idx": 4
+   "idx": 5
   },
   {
    "doctype": "DocField",
@@ -49,14 +59,33 @@
    "label": "Description",
    "reqd": 1,
    "in_list_view": 1,
-   "idx": 5
+   "idx": 6
   },
   {
    "doctype": "DocField",
    "fieldname": "inspection_finding_item_sec_resolution",
    "fieldtype": "Section Break",
    "label": "Resolution",
-   "idx": 6
+   "idx": 7
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "label": "Room",
+   "options": "Accommodation Room",
+   "description": "Room the Maintenance Request will target. Required for a finding to be actionable.",
+   "in_list_view": 1,
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh\nCritical",
+   "default": "Medium",
+   "idx": 9
   },
   {
    "doctype": "DocField",
@@ -66,7 +95,7 @@
    "options": "Open\nIn Progress\nResolved",
    "default": "Open",
    "in_list_view": 1,
-   "idx": 7
+   "idx": 10
   },
   {
    "doctype": "DocField",
@@ -74,27 +103,37 @@
    "fieldtype": "Link",
    "label": "Assigned To",
    "options": "User",
-   "idx": 8
+   "idx": 11
   },
   {
    "doctype": "DocField",
    "fieldname": "due_date",
    "fieldtype": "Date",
    "label": "Due Date",
-   "idx": 9
+   "idx": 12
   },
   {
    "doctype": "DocField",
    "fieldname": "inspection_finding_item_resolution_col",
    "fieldtype": "Column Break",
-   "idx": 10
+   "idx": 13
   },
   {
    "doctype": "DocField",
    "fieldname": "resolution_notes",
    "fieldtype": "Small Text",
    "label": "Resolution Notes",
-   "idx": 11
+   "idx": 14
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "generated_maintenance_request",
+   "fieldtype": "Link",
+   "label": "Generated Maintenance Request",
+   "options": "Maintenance Request",
+   "description": "Back-link to the Maintenance Request spawned from this finding. Presence makes the fan-out idempotent: a linked finding is never re-spawned. Intentionally copyable (no no_copy) so the link carries into an amended report and prevents duplicate tickets on amend.",
+   "read_only": 1,
+   "idx": 15
   }
  ],
  "permissions": [],
