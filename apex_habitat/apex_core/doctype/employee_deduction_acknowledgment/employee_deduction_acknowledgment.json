@@ -1,0 +1,297 @@
+{
+ "actions": [],
+ "autoname": "EDA-.#####",
+ "creation": "2026-06-13 09:00:00.000000",
+ "description": "Employee consent record (Mahdar Iqrar) for a single salary deduction. The worker acknowledges, and attaches written consent to, a specific damage / rent / fuel / custody deduction tied to a source document. Required by the Salary Deduction Policy before the deduction is posted. Submittable: a submitted, approved acknowledgment is the consent of record.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_deduction_ack_sec_party",
+  "party_type",
+  "party",
+  "employee",
+  "employee_deduction_ack_party_col",
+  "company",
+  "department",
+  "employee_deduction_ack_sec_deduction",
+  "deduction_type",
+  "salary_component",
+  "amount_sar",
+  "employee_deduction_ack_deduction_col",
+  "source_doctype",
+  "source_document",
+  "payroll_date",
+  "employee_deduction_ack_sec_consent",
+  "consent_given",
+  "consent_attachment",
+  "employee_deduction_ack_consent_col",
+  "consent_date",
+  "consent_method",
+  "employee_deduction_ack_sec_approval",
+  "approval_status",
+  "approved_by",
+  "employee_deduction_ack_approval_col",
+  "approved_on",
+  "employee_deduction_ack_sec_link",
+  "linked_additional_salary",
+  "employee_deduction_ack_sec_notes",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee_deduction_ack_sec_party",
+   "fieldtype": "Section Break",
+   "label": "Worker"
+  },
+  {
+   "default": "Employee",
+   "description": "Identity type of the consenting worker. Mirrors the native party_type / party Dynamic Link used across the housed-worker doctypes.",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "label": "Party Type",
+   "options": "Employee\nTemporary Worker",
+   "reqd": 1
+  },
+  {
+   "description": "The consenting worker.",
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_standard_filter": 1,
+   "label": "Party",
+   "options": "party_type",
+   "reqd": 1
+  },
+  {
+   "description": "Read-only Employee mirror of an Employee party (compatibility with payroll / Additional Salary, which is keyed on Employee).",
+   "fetch_if_empty": 1,
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee_deduction_ack_party_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.company",
+   "fetch_if_empty": 1,
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fetch_from": "employee.department",
+   "fetch_if_empty": 1,
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee_deduction_ack_sec_deduction",
+   "fieldtype": "Section Break",
+   "label": "Deduction"
+  },
+  {
+   "description": "Which policy deduction type this consent is for. Must match an enabled rule on the Salary Deduction Policy when the deduction is later posted.",
+   "fieldname": "deduction_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Deduction Type",
+   "options": "Damage\nRent\nFuel\nCustody",
+   "reqd": 1
+  },
+  {
+   "description": "HRMS Salary Component (Type = Deduction) the resulting Additional Salary will use. Defaults from the policy.",
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "description": "Amount the worker is acknowledging. Must respect the per-type cap and the 50% combined-wage ceiling on the Salary Deduction Policy.",
+   "fieldname": "amount_sar",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount (SAR)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee_deduction_ack_deduction_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Source DocType the deduction originates from (for example Custody Damage Assessment, Accommodation Checkout).",
+   "fieldname": "source_doctype",
+   "fieldtype": "Link",
+   "label": "Source DocType",
+   "options": "DocType"
+  },
+  {
+   "depends_on": "eval:doc.source_doctype",
+   "description": "The specific source record (damage assessment, checkout, fuel event, custody issue) this consent applies to.",
+   "fieldname": "source_document",
+   "fieldtype": "Dynamic Link",
+   "label": "Source Document",
+   "options": "source_doctype"
+  },
+  {
+   "description": "Pay period date the deduction is intended to post against.",
+   "fieldname": "payroll_date",
+   "fieldtype": "Date",
+   "label": "Payroll Date"
+  },
+  {
+   "fieldname": "employee_deduction_ack_sec_consent",
+   "fieldtype": "Section Break",
+   "label": "Consent (KSA Labor Law)"
+  },
+  {
+   "default": "0",
+   "description": "The worker has agreed to this deduction. KSA Labor Law requires the worker's consent for this kind of wage deduction; a submitted record must carry consent and the attachment below.",
+   "fieldname": "consent_given",
+   "fieldtype": "Check",
+   "label": "Consent Given",
+   "reqd": 1
+  },
+  {
+   "description": "Signed acknowledgment / consent document (Mahdar Iqrar) from the worker. Evidence of consent for audit and legal review.",
+   "fieldname": "consent_attachment",
+   "fieldtype": "Attach",
+   "label": "Consent Attachment"
+  },
+  {
+   "fieldname": "employee_deduction_ack_consent_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "consent_date",
+   "fieldtype": "Date",
+   "label": "Consent Date"
+  },
+  {
+   "default": "Signed Form",
+   "description": "How consent was captured.",
+   "fieldname": "consent_method",
+   "fieldtype": "Select",
+   "label": "Consent Method",
+   "options": "Signed Form\nDigital Signature\nEmail Confirmation\nOther"
+  },
+  {
+   "fieldname": "employee_deduction_ack_sec_approval",
+   "fieldtype": "Section Break",
+   "label": "Approval"
+  },
+  {
+   "default": "Pending",
+   "description": "Internal approval state, in addition to the worker's consent. The deduction posts only when approved.",
+   "fieldname": "approval_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Approval Status",
+   "options": "Pending\nApproved\nRejected"
+  },
+  {
+   "depends_on": "eval:doc.approval_status==\"Approved\"",
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee_deduction_ack_approval_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.approval_status==\"Approved\"",
+   "fieldname": "approved_on",
+   "fieldtype": "Datetime",
+   "label": "Approved On",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "employee_deduction_ack_sec_link",
+   "fieldtype": "Section Break",
+   "label": "Payroll Link"
+  },
+  {
+   "description": "The HRMS Additional Salary deduction generated from this acknowledgment. Populated by the controller wiring in a later increment; read-only here.",
+   "fieldname": "linked_additional_salary",
+   "fieldtype": "Link",
+   "label": "Additional Salary Deduction",
+   "options": "Additional Salary",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "employee_deduction_ack_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "icon": "fa fa-handshake-o",
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-06-13 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Apex Core",
+ "name": "Employee Deduction Acknowledgment",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1,
+   "cancel": 1,
+   "amend": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "party",
+ "track_changes": 1
+}
