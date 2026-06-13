@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.2 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.54.2 — the routed-payment endpoint now rechecks source write and submit permission before any side effect (closing an authorization bypass), backed by new SQL-injection, write-permission, and secret-scan CI gates; the Accommodation Site is now the single source of a building's address (shown read-only, no more duplicate entry); building capacity derives from its rooms' beds; the Habitat Hub landing now carries onboarding; and an unused depreciation field was removed",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-building",
+        "creation": "2026-06-13 17:30:00",
+    },
     # v1.54.1 ---------------------------------------------------------------
     {
         "title": "Apex 1.54.1 — reuse the existing Accommodation Manager role for cost-field privacy, sync the in-app changelog feed, harden the translation extractor so a Dynamic Link option (a fieldname) is no longer mis-translated and brand names stay in Latin, and correct the Salis worker-transport and fleet workspace routes (Masar, Fleet) and remove redundant workspace-to-workspace navigation links",
