@@ -31,6 +31,14 @@ HOOKS_PY = os.path.join(APP_ROOT, "hooks.py")
 ARABIC = re.compile(r"[؀-ۿ]")
 PLACEHOLDER = re.compile(r"\{\d+")
 
+# Brand / proper-noun source strings that legitimately stay in Latin script even
+# in the Arabic column — a brand mark is shown verbatim, not transliterated
+# (the Arabic translation keeps the Latin brand token verbatim inside the text).
+# Keep this set tiny and explicit; it is the ONLY exception to "every row has
+# Arabic". An entry here must be a genuine proper noun, not English left
+# untranslated.
+LATIN_BRAND_SOURCES = {"AFMCO"}
+
 # A role name is "test-shaped" if the substring "test" appears (case-insensitive)
 # as a standalone word, OR it is one of the known Frappe-core test fixtures.
 # Frappe ships these in frappe/core/doctype/role/test_records.json and only
@@ -82,7 +90,13 @@ class TestTranslationFile(unittest.TestCase):
         )
 
     def test_every_translation_contains_arabic(self):
-        missing = [r[0] for r in self._rows() if len(r) == 2 and not ARABIC.search(r[1])]
+        missing = [
+            r[0]
+            for r in self._rows()
+            if len(r) == 2
+            and r[0] not in LATIN_BRAND_SOURCES
+            and not ARABIC.search(r[1])
+        ]
         self.assertEqual(
             missing, [], f"ar.csv rows with no Arabic translation: {missing[:10]}"
         )

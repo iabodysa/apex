@@ -87,8 +87,8 @@ class TestCreateRolesList(unittest.TestCase):
         )
 
     def test_total_role_count(self):
-        # 4 existing + 4 new operational + "Housing Manager" (T-093) = 9.
-        self.assertEqual(len(self.roles), 9)
+        # 4 existing + 4 new operational = 8.
+        self.assertEqual(len(self.roles), 8)
 
 
 class TestCreateRoleProfilesDict(unittest.TestCase):

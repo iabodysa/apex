@@ -45,10 +45,6 @@ def create_roles():
         "Cleaning Supervisor",
         "Safety Officer",
         "Resident Request Coordinator",
-        # T-093: granted permlevel-1 read/write on the sensitive cost fields
-        # (Maintenance Request, Accommodation Checkout, Custody Damage Assessment,
-        # Rental Settlement) alongside System Manager and Finance Manager.
-        "Housing Manager",
     ]
     for role_name in roles:
         if not frappe.db.exists("Role", role_name):

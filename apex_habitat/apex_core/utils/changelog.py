@@ -7,6 +7,132 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.1 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.54.1 — reuse the existing Accommodation Manager role for cost-field privacy, sync the in-app changelog feed, harden the translation extractor so a Dynamic Link option (a fieldname) is no longer mis-translated and brand names stay in Latin, and correct the Salis worker-transport and fleet workspace routes (Masar, Fleet) and remove redundant workspace-to-workspace navigation links",
+        "app_name": "apex_habitat",
+        "link": "/app/salis",
+        "creation": "2026-06-13 09:00:00",
+    },
+    # v1.54.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.54.0 — finance-approved payment requests now post real payment documents (GL posting gated by a switch), a new policy-driven salary-deduction layer with Saudi labour-law caps and worker consent, cost figures hidden from non-finance roles, safety findings that auto-raise maintenance tickets, and a rider guard that blocks issuing a vehicle or fuel to a worker on leave",
+        "app_name": "apex_habitat",
+        "link": "/app/payment-request",
+        "creation": "2026-06-12 09:00:00",
+    },
+    # v1.53.3 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.53.3 — eight more core forms (Safety Inspection Report, Building License, Salis Vehicle, Salis Driver, Transport Request, Fuel Request, Rental Settlement) re-laid-out for clarity, completing the layout review of every core form; layout-only, no field or validation changed",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-06-11 12:00:00",
+    },
+    # v1.53.2 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.53.2 — five core forms (Accommodation Assignment, Checkout, Lease, Maintenance Request, Custody Issue) re-laid-out for clarity: fields grouped by purpose, audit fields tucked into collapsed System tabs, and long notes, tables and attachments given full-width rows; layout-only",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-assignment",
+        "creation": "2026-06-11 09:00:00",
+    },
+    # v1.53.1 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.53.1 — Salis now cleanly separates vehicle custody (handover, fuel, maintenance for a person given a company car) from worker transport (moving workers by bus or taxi): transport requests are classified by trip type, and the two Salis workspaces are re-split into Worker Transport and Fleet & Vehicle Custody",
+        "app_name": "apex_habitat",
+        "link": "/app/transport-request",
+        "creation": "2026-06-10 09:00:00",
+    },
+    # v1.53.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.53.0 — a configurable Payment Router turns a finance-approved request into the payment document of your choice, app-wide finance options move into a new Apex Settings, all twelve workspaces are re-ordered to one canonical layout, forty-seven link fields auto-fill from their source, and twelve correctness bugs are fixed",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-06-09 09:00:00",
+    },
+    # v1.52.9 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.52.9 — a deep correctness pass: facility asset movements now actually move the asset, rental accruals get reconciled and stamped by their settlement, blocked submittable documents can be cancelled again, negative payment and claim amounts are rejected, and resident requests convert into the right maintenance, safety or custody document",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-06-08 12:00:00",
+    },
+    # v1.52.8 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.52.8 — an app-wide form and workspace overhaul: every form is regrouped by concern, workspaces get wired-in charts, live quick-lists and shortcut tiles with live counts, building room and floor counts now compute correctly, and hundreds of Arabic section labels are added",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-06-08 09:00:00",
+    },
+    # v1.52.7 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.52.7 — form-layout polish across 27 DocTypes: 25 single-purpose tabs removed, child tables moved full-width into their Overview tab and system fields collapsed, so no tab holds fewer than three fields; nothing was changed, only repositioned",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-06-07 12:00:00",
+    },
+    # v1.52.6 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.52.6 — reliability and hygiene: scheduler jobs read their settings once per batch, the cost-allocation ledger ignores duplicate-key races quietly, and a building's per-capacity cost zeroes when its capacity is removed",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-06-07 09:00:00",
+    },
+    # v1.52.5 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.52.5 — the 11 app dashboards now provision the native Frappe way (is_standard module JSON, the same mechanism ERPNext uses) instead of Python seeders, auto-synced on install and migrate, with no dashboard, chart or number card lost",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-06-06 21:00:00",
+    },
+    # v1.52.4 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.52.4 — security hardening: a custody-kiosk catalog leak is closed and worker passport/iqama PII plus the Masar token are now gated behind permission checks; native-first cleanups wire the Assigned-To panel into the idle-resident report; and the room generator now rejects two floor rows that resolve to the same floor code",
+        "app_name": "apex_habitat",
+        "link": "/app/custody-kiosk",
+        "creation": "2026-06-06 18:00:00",
+    },
+    # v1.52.3 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.52.3 — one consistent form layout across 13 Habitat and Salis DocTypes (named Overview / Related / System Info tabs, editable inputs left and computed values right), and two fixes: the Accommodation Assignment check-in photo now renders, and Accommodation Resident Request gets a proper field order",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-06-06 15:00:00",
+    },
+    # v1.52.2 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.52.2 — a migrate-stability fix (Role Profiles no longer leave a stale lock on migrate), Accommodation Site now uses Frappe's native Address record with a one-time backfill, and a new Enable Email Notifications master switch in Habitat Settings (off by default) keeps the app from sending mail until the site is configured",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-site",
+        "creation": "2026-06-06 12:00:00",
+    },
+    # v1.52.1 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.52.1 — stability and clarity across accommodation: a worker can no longer be placed in two beds at once, the housing picker lists only workers who still need a bed, and the building screen is tidier with capacity and occupancy shown together",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-building",
+        "creation": "2026-06-06 09:30:00",
+    },
+    # v1.52.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.52.0 — Accommodation Building runs on its native sources: address reads from Frappe's Address record everywhere, the landlord is a Supplier auto-filled from the active lease, and annual rent is derived from the lease so figures can't drift; plus quick Activate / Deactivate for rooms and beds and an Edit Rooms & Beds button into the Room Setup wizard",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-building",
+        "creation": "2026-06-06 09:00:00",
+    },
+    # v1.51.1 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.51.1 — Arrivals Desk floor fixes (Ground floor rooms group under Ground Floor, basements label correctly, only truly floor-less rooms stay Unassigned) and the noisy Unknown readiness state is hidden; check-in now falls back to the company's default cost center, and an overdue maintenance ticket now raises a desk-visible Operations Alert",
+        "app_name": "apex_habitat",
+        "link": "/app/arrivals-desk",
+        "creation": "2026-06-05 21:00:00",
+    },
+    # v1.51.0 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.51.0 — a new staged Room Setup wizard (floors, room types, beds, approve) with functional floor numbering, My Work rebuilt on native widgets, and the Accommodation Building form gains a native Address widget, a Google Maps link, grouped Connections and a floor-layout dashboard, alongside a batch of production fixes",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-building",
+        "creation": "2026-06-05 12:00:00",
+    },
     # v1.50.10 ---------------------------------------------------------------
     {
         "title": "Apex 1.50.10 — My Work is now a universal work center: pending approvals from any workflow, assigned tasks, notifications, and mentions all in one place inside the workspace",

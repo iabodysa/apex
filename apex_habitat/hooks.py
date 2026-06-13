@@ -298,10 +298,6 @@ fixtures = [
     {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
     # Operational roles added in v1.50.9 — separate entry so existing fixture is not mutated.
     {"dt": "Role", "filters": [["name", "in", ["Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
-    # T-093 sensitive-cost field gate (permlevel 1). Housing Manager (مدير السكن)
-    # is granted permlevel-1 read/write on the gated cost fields alongside System
-    # Manager and Finance Manager. Separate entry so existing fixtures are untouched.
-    {"dt": "Role", "filters": [["name", "in", ["Housing Manager"]]]},
     # Habitat Role Profiles are intentionally NOT fixtured. They are provisioned
     # solely by the idempotent seeder (setup.create_role_profiles, existence-guarded
     # on name), wired into both after_install and after_migrate. A fixture import

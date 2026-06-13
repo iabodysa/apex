@@ -111,12 +111,16 @@ class TestMaintenanceRequest(FrappeTestCase):
         """Return a dict mapping role name -> document-level (permlevel 0) perm row.
 
         Only permlevel-0 rows are indexed. T-093 (owner-approved) added permlevel-1
-        DocPerm grants (System Manager, Finance Manager, Housing Manager) to gate the
+        DocPerm grants (System Manager, Finance Manager, Accommodation Manager) to gate the
         sensitive cost fields; those rows share a role name with the base rows, so a
         flat ``{p.role: p}`` map would let a permlevel-1 row clobber the permlevel-0
         one being asserted here. These tests assert document-level access, so the
         field-level grants are filtered out of this lookup (see
-        ``test_field_level_cost_grants`` for the permlevel-1 assertions)."""
+        ``test_field_level_cost_grants`` for the permlevel-1 assertions).
+
+        Accommodation Manager holds BOTH a permlevel-0 row (document access) and a
+        permlevel-1 row (T-093 cost-field grant); filtering to permlevel 0 here keeps
+        the document-level assertions reading the correct row."""
         meta = frappe.get_meta("Maintenance Request")
         return {p.role: p for p in meta.permissions if (p.permlevel or 0) == 0}
 
@@ -187,13 +191,13 @@ class TestMaintenanceRequest(FrappeTestCase):
         """T-093: the sensitive cost fields (Financial section: cost_of_repair,
         cost_center) are gated at permlevel 1, readable/writable only by the
         approved field-level roles — System Manager, Finance Manager, and
-        Housing Manager — and by no one else. These are the owner-approved
+        Accommodation Manager — and by no one else. These are the owner-approved
         permlevel-1 DocPerm grants; this test locks the exact grant set."""
         meta = frappe.get_meta("Maintenance Request")
         level1 = {p.role: p for p in meta.permissions if (p.permlevel or 0) == 1}
         self.assertEqual(
             set(level1),
-            {"System Manager", "Finance Manager", "Housing Manager"},
+            {"System Manager", "Finance Manager", "Accommodation Manager"},
             "permlevel-1 cost-field grant roles drifted from the approved set",
         )
         for role, p in level1.items():
