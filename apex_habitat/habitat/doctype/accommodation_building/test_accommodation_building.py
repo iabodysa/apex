@@ -86,6 +86,47 @@ class TestAccommodationBuilding(FrappeTestCase):
 
     # --- P16 security / idempotency tests ------------------------------------
 
+    def test_total_capacity_derives_from_beds(self):
+        """total_capacity is the TRUE physical capacity: once rooms exist it must equal
+        the sum of room bed_capacity (== physical bed count), overriding any manual
+        figure, so the occupancy / cost / over-capacity denominators cannot drift."""
+        from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import (
+            generate_rooms_and_beds,
+        )
+        m = frappe.generate_hash(length=6)
+        b = frappe.get_doc({
+            "doctype": "Accommodation Building",
+            "building_name": "QA Capacity " + m,
+            "abbreviation": "QC" + m[:2].upper(),
+            "total_capacity": 999,  # deliberately wrong; must be overridden by derivation
+            "floor_plan": [
+                {"doctype": "Accommodation Floor Plan", "floor_number": 0, "room_count": 3,
+                 "bed_capacity_per_room": 4, "room_type": "Standard", "generate_beds": 1,
+                 "starting_room_number": 1},
+                {"doctype": "Accommodation Floor Plan", "floor_number": 1, "room_count": 2,
+                 "bed_capacity_per_room": 2, "room_type": "Standard", "generate_beds": 1,
+                 "starting_room_number": 1},
+            ],
+        })
+        b.insert(ignore_permissions=True, ignore_links=True)
+        try:
+            generate_rooms_and_beds(b.name)  # 3*4 + 2*2 = 16
+            b.reload()
+            bed_count = frappe.db.count("Accommodation Bed", {"building": b.name})
+            self.assertEqual(b.total_capacity, 16, "total_capacity must derive to the bed-capacity sum")
+            self.assertEqual(b.total_capacity, bed_count, "total_capacity must equal the physical bed count")
+            # A subsequent save keeps it derived (before_save path), not the manual value.
+            b.total_capacity = 5
+            b.save(ignore_permissions=True)
+            b.reload()
+            self.assertEqual(b.total_capacity, 16, "before_save must re-derive total_capacity once rooms exist")
+        finally:
+            for room in frappe.db.get_all("Accommodation Room", {"building": b.name}, pluck="name"):
+                for bed in frappe.db.get_all("Accommodation Bed", {"room": room}, pluck="name"):
+                    frappe.delete_doc("Accommodation Bed", bed, force=True, ignore_permissions=True)
+                frappe.delete_doc("Accommodation Room", room, force=True, ignore_permissions=True)
+            frappe.delete_doc("Accommodation Building", b.name, force=True, ignore_permissions=True)
+
     def test_generate_rooms_and_beds_rejects_unauthorized_user(self):
         """Unauthorized user (Guest) must receive PermissionError from
         generate_rooms_and_beds, which guards with a doc-level write check."""

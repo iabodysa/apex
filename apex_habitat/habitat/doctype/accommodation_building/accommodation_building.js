@@ -95,6 +95,44 @@ function _toggleFloorFields(frm) {
 	frm.set_df_property("total_floors", "hidden", isApartment ? 1 : 0);
 }
 
+function _renderSiteAddress(frm) {
+	// The address belongs to the Accommodation Site. Render it here read-only so the
+	// operator can see where the building is without re-typing (and re-duplicating) it.
+	const wrapper = frm.get_field("address_html").$wrapper;
+	wrapper.empty();
+
+	if (!frm.doc.site) {
+		wrapper.append(
+			$('<p class="text-muted" style="font-size:13px;"></p>').text(
+				__("Select a Site to show its address. The address is managed on the Site.")
+			)
+		);
+		return;
+	}
+
+	frappe.call({
+		method: "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.get_site_address",
+		args: { building_name: frm.doc.name },
+		callback: function (r) {
+			wrapper.empty();
+			const text = r.message;
+			const hint = $('<p class="text-muted" style="font-size:12px;margin-top:6px;"></p>').text(
+				__("Managed on the Site.")
+			);
+			if (text) {
+				wrapper.append($("<div></div>").text(text));
+			} else {
+				wrapper.append(
+					$('<p class="text-muted" style="font-size:13px;"></p>').text(
+						__("No address recorded on the Site yet. Open the Site to add one.")
+					)
+				);
+			}
+			wrapper.append(hint);
+		},
+	});
+}
+
 function _renderBuildingDashboard(frm) {
 	if (frm.is_new()) return;
 	frappe.call({
@@ -137,13 +175,13 @@ frappe.ui.form.on("Accommodation Building", {
 			_renderFloorLayout(frm);
 		}
 
-		// Native Address (Address DocType via Dynamic Link): render the address list
-		// for saved buildings; the legacy free-text address field is hidden.
+		// Address is owned by the Accommodation Site (single source of truth). The
+		// building no longer carries its own editable Address widget — that caused the
+		// same address to be entered twice (once here, once on the site). Instead show
+		// the site's address read-only so it is never duplicated.
 		frm.toggle_display("address_html", !frm.is_new());
 		if (!frm.is_new()) {
-			frappe.contacts.render_address_and_contact(frm);
-		} else {
-			frappe.contacts.clear_address_and_contact(frm);
+			_renderSiteAddress(frm);
 		}
 
 		// Status indicator
@@ -190,6 +228,13 @@ frappe.ui.form.on("Accommodation Building", {
 
 	accommodation_type(frm) {
 		_toggleFloorFields(frm);
+	},
+
+	site(frm) {
+		// Re-render the (read-only) site address when the chosen site changes.
+		if (!frm.is_new()) {
+			_renderSiteAddress(frm);
+		}
 	},
 
 	edit_room_setup_btn(frm) {

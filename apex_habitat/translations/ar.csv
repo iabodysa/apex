@@ -1313,6 +1313,7 @@ Maintenance Work Order,أمر عمل صيانة
 Maintenance Work Orders Completed,أوامر عمل الصيانة المكتملة
 Maintenance Work Orders In Progress,أوامر عمل الصيانة قيد التنفيذ
 Maintenance Work Orders by Status,أوامر عمل الصيانة حسب الحالة
+Managed on the Site.,يُدار من خلال الموقع.
 Manifest Passenger,راكب الكشف
 Manual,يدوي
 Manual Entry,إدخال يدوي
@@ -1380,7 +1381,6 @@ Monthly fuel quota allocated to a vehicle/driver on a project. Tracks allocated 
 Morning,صباحي
 Moved By (Employee),نُقل بواسطة (الموظف)
 Movement,حركة
-Movement Areas,مجالات الحركة
 Movement Audit,تدقيق الحركة
 Movement Category,تصنيف الحركة
 Movement Context,سياق الحركة
@@ -1428,6 +1428,7 @@ No Salis Driver is linked to your account.,لا يوجد سائق سلس مرت�
 No actions available.,لا توجد إجراءات متاحة.
 No active Safety Task Catalog entries found. Run the app setup first.,لم يُعثر على إدخالات نشطة في دليل مهام السلامة. يرجى تشغيل إعداد التطبيق أولاً.
 No active assignment found for bed {0}.,لا يوجد إسناد نشط للسرير {0}.
+No address recorded on the Site yet. Open the Site to add one.,لا يوجد عنوان مسجّل على الموقع بعد. افتح الموقع لإضافة عنوان.
 No articles found.,لا توجد أصناف.
 No available drivers.,لا يوجد سائقون متاحون.
 No beds found for this building.,لا توجد أسرّة لهذا المبنى.
@@ -2087,6 +2088,7 @@ Search worker name or passport…,البحث باسم العامل أو جواز
 Security,أمن
 See who is currently housed across your buildings.,اطّلع على المقيمين حالياً في مبانيك.
 "Select 'Building' if leasing an entire building, or 'Apartment' if leasing a single unit.",اختر 'مبنى' إذا كان العقد لعمارة كاملة، أو 'شقة' إذا كان العقد لوحدة مستقلة.
+Select a Site to show its address. The address is managed on the Site.,اختر موقعًا لعرض عنوانه. يُدار العنوان من خلال الموقع.
 Select a building before issuing.,اختر مبنى قبل الصرف.
 Select a building to load the board.,اختر مبنى لتحميل اللوحة.
 Select a building to load the catalog.,اختر مبنى لتحميل الكتالوج.
@@ -2393,6 +2395,8 @@ Totals,الإجماليات
 Tracking,التتبع
 "Tracks idle/forgotten residents occupying accommodation without an active deployment, to surface accommodation cost bleed and assign responsibility for resolution.",يتتبّع الساكنين غير المشغّلين/المنسيّين الذين يشغلون السكن دون تشغيل فعّال، لإبراز نزيف تكلفة السكن وإسناد مسؤولية المعالجة.
 "Tracks remediation actions imposed by a client audit. Each action has owner, deadline, evidence.",يتتبّع إجراءات المعالجة المفروضة من تدقيق العميل. لكل إجراء مسؤول وموعد نهائي وإثبات.
+Tracks room setup progress. 'Draft' simply means rooms have not been set up yet — it advances automatically as you plan and generate rooms.,يتتبّع تقدّم إعداد الغرف. تعني حالة «مسودة» ببساطة أنّ الغرف لم تُجهّز بعد، وتتقدّم تلقائيًّا أثناء تخطيط الغرف وتوليدها.
+Tracks safety setup progress. 'Draft' simply means safety setup has not been generated yet — use 'Generate Safety Setup' to advance it.,يتتبّع تقدّم إعداد السلامة. تعني حالة «مسودة» ببساطة أنّ إعداد السلامة لم يُولّد بعد، استخدم «توليد إعداد السلامة» لتقدّمه.
 Transactions,المعاملات
 Transfer,نقل
 Transfer Board,لوحة النقل

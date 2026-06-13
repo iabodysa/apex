@@ -14,12 +14,22 @@ from frappe.utils import flt, today
 
 
 class AccommodationBuilding(Document):
-    def onload(self):
-        # Populate __onload.addr_list so the native Address widget (address_html)
-        # renders the linked Address records and the "New Address" button.
-        from frappe.contacts.address_and_contact import load_address_and_contact
+    pass
 
-        load_address_and_contact(self)
+
+@frappe.whitelist()
+def get_site_address(building_name):
+    """Return the plain-text address of the building's Accommodation Site.
+
+    The address is owned by the Site (single source of truth); the building displays
+    it read-only so the same address is never entered twice. Empty string when the
+    building has no site or the site has no linked Address yet.
+    """
+    frappe.has_permission("Accommodation Building", "read", doc=building_name, throw=True)
+    from apex_habitat.apex_core.utils.addresses import get_address_text
+
+    site = frappe.db.get_value("Accommodation Building", building_name, "site")
+    return get_address_text("Accommodation Site", site)
 
 
 def _room_number(abbreviation, floor_code, prefix, seq):
@@ -102,6 +112,18 @@ def before_save(doc, method=None):
         doc.company = get_default_company()
 
     apply_active_lease(doc)
+
+    # total_capacity is the building's TRUE physical bed capacity and the denominator
+    # for occupancy %, cost-per-capacity and the over-capacity gate. Once rooms exist
+    # it is DERIVED from the sum of each room's planned bed_capacity (physical beds,
+    # excluding virtual over-capacity beds) so it can no longer drift from the rooms.
+    # Before any room is generated there is nothing to sum, so the manually entered
+    # value (the field stays editable + reqd for that pre-generation path) is kept.
+    _capacity_sum = frappe.db.get_value(
+        "Accommodation Room", {"building": doc.name}, "sum(bed_capacity)"
+    )
+    if _capacity_sum is not None:
+        doc.total_capacity = int(_capacity_sum or 0)
 
     doc.annual_total_cost_sar = (
         (doc.annual_rent_sar or 0)
@@ -383,12 +405,20 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
         _floor_values = frappe.db.get_all(
             "Accommodation Room", filters={"building": building_name}, pluck="floor", distinct=True
         )
+        # Keep total_capacity in lock-step with the rooms the generator just wrote
+        # (sum of each room's planned bed_capacity) so the figure is correct
+        # immediately, not only after the next manual save. before_save derives it
+        # the same way for every other edit path.
+        _capacity_sum = frappe.db.get_value(
+            "Accommodation Room", {"building": building_name}, "sum(bed_capacity)"
+        )
         frappe.db.set_value("Accommodation Building", building_name, {
             "setup_status": "Rooms Generated",
             "setup_generated_on": today(),
             "setup_generated_by": frappe.session.user,
             "total_rooms": frappe.db.count("Accommodation Room", {"building": building_name}),
             "total_floors": len([f for f in _floor_values if f is not None]),
+            "total_capacity": int(_capacity_sum or 0),
         })
 
     # Frappe manages the request transaction; do not commit explicitly so that

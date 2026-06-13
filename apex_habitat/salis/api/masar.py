@@ -464,6 +464,7 @@ def get_worker_accommodation(token=None):
                 "building_name",
                 "city",
                 "district",
+                "site",
                 "google_maps_url",
                 "responsible_facility_supervisor",
                 "current_occupants",
@@ -479,13 +480,19 @@ def get_worker_accommodation(token=None):
                     "name": frappe.utils.get_fullname(user) or user,
                     "phone": frappe.db.get_value("User", user, "mobile_no"),
                 }
+            # Address is owned by the Accommodation Site (single source of truth).
+            # Fall back to any address still linked directly to the building so older
+            # records keep showing one during the transition.
+            _addr = get_address_text("Accommodation Site", b.get("site")) or get_address_text(
+                "Accommodation Building", assignment["building"]
+            )
             # City is autonamed by city_name, so the link value IS the city name.
             building = {
                 "name": b.get("name"),
                 "building_name": b.get("building_name"),
                 "city": b.get("city"),
                 "district": b.get("district"),
-                "address": get_address_text("Accommodation Building", assignment["building"]),
+                "address": _addr,
                 "google_maps_url": b.get("google_maps_url"),
                 "current_occupants": b.get("current_occupants"),
                 "total_capacity": b.get("total_capacity"),
