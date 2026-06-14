@@ -264,6 +264,30 @@ class TestPaymentRouter(FrappeTestCase):
         self.assertEqual(first, second)
         self.assertEqual(frappe.db.count("Note"), notes_after_first)
 
+    def test_chokepoint_rejects_caller_without_source_permission(self):
+        """A DIRECT route_payment call by a caller lacking write/submit on the source
+        request is rejected AT THE CHOKEPOINT (T-148) -- not only via the whitelisted
+        entry -- so a future direct caller can never reach the ignore_permissions
+        insert/submit unchecked. A runtime check, unlike the static presence assertion
+        in test_http_enforcement."""
+        pr = self._approved_request()
+        self._configure("Note", [{"target_fieldname": "title", "source_fieldname": "name"}])
+        notes_before = frappe.db.count("Note")
+        user = "no-router-perm@example.com"
+        if not frappe.db.exists("User", user):
+            frappe.get_doc({
+                "doctype": "User", "email": user, "first_name": "No Router Perm",
+                "send_welcome_email": 0,
+            }).insert(ignore_permissions=True)
+        frappe.set_user(user)
+        try:
+            with self.assertRaises(frappe.PermissionError):
+                route_payment(pr.name)
+        finally:
+            frappe.set_user("Administrator")
+        # The gate threw BEFORE any side effect: no payment was created.
+        self.assertEqual(frappe.db.count("Note"), notes_before)
+
     def test_whitelisted_endpoint_routes(self):
         # The POST endpoint delegates to route_payment.
         pr = self._approved_request()

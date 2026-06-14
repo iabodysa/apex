@@ -159,7 +159,20 @@ def route_payment(payment_request: str) -> str:
     settings = frappe.get_single("Payment Routing Settings")
     target_doctype = get_target_doctype(settings)
 
+    # Serialize concurrent routes for the same request (T-147): row-lock the source so
+    # the idempotency check + create + link-stamp form one critical section. A second
+    # concurrent call blocks here until the first commits, then sees the link and
+    # returns it instead of creating a duplicate payment.
+    frappe.db.get_value(SOURCE_DOCTYPE, payment_request, "name", for_update=True)
     source = frappe.get_doc(SOURCE_DOCTYPE, payment_request)
+
+    # Authorization at the chokepoint (T-148): this function performs the
+    # ignore_permissions insert/submit, so the caller's permission on the source
+    # request is enforced HERE -- every caller (the whitelisted entry and any future
+    # direct caller) is gated by construction. submit too, since the routed payment is
+    # submitted on the GL path. throw=True raises PermissionError (HTTP 403).
+    frappe.has_permission(SOURCE_DOCTYPE, "write", doc=source, throw=True)
+    frappe.has_permission(SOURCE_DOCTYPE, "submit", doc=source, throw=True)
 
     if not _is_finance_approved(source):
         frappe.throw(
@@ -194,25 +207,11 @@ def route_payment(payment_request: str) -> str:
 
 @frappe.whitelist(methods=["POST"])
 def create_routed_payment(payment_request: str) -> str:
-    """Whitelisted POST entry point for the Create Payment desk action.
+    """Whitelisted POST entry for the Create Payment desk action.
 
-    POST-only: this performs a write (creates the payment, stamps the link), so a
-    cacheable GET must never trigger it (CSRF / cache-poisoning guard enforced by
-    ``tests/test_http_enforcement.py``). Delegates to :func:`route_payment`.
-
-    Authorization: ``route_payment`` builds the target with
-    ``ignore_permissions=True`` (the target payment DocType's roles may differ
-    from the source request's), so the source request's OWN permission gate is
-    enforced HERE, at the entry point, BEFORE any side effect. Being
-    finance-approved is a property of the request, not an authorization of the
-    caller; without this an authenticated user who merely knows an approved
-    request's name could trigger create+submit. The caller must hold ``write`` on
-    the specific source request (its ``has_permission`` hooks apply, not just the
-    blanket DocType-level role), and ``submit`` because the routed payment is
-    submitted on the GL-enabled path. ``throw=True`` raises ``PermissionError``
-    (HTTP 403) before ``route_payment`` runs.
+    POST-only so a cacheable GET can never trigger this write (CSRF/cache guard in
+    ``tests/test_http_enforcement.py``). The caller's permission on the source
+    request is enforced at the chokepoint :func:`route_payment` (co-located with the
+    ``ignore_permissions`` side effects), so every caller is gated. Thin wrapper.
     """
-    source = frappe.get_doc(SOURCE_DOCTYPE, payment_request)
-    frappe.has_permission(SOURCE_DOCTYPE, "write", doc=source, throw=True)
-    frappe.has_permission(SOURCE_DOCTYPE, "submit", doc=source, throw=True)
     return route_payment(payment_request)
