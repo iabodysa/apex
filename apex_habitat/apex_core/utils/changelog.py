@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.4 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.54.4 — critical security and capacity fixes: routed-payment creation is now serialized with a row-lock, so two concurrent requests can no longer create a duplicate payment or a double ledger post; the routed-payment permission gate moved to the chokepoint, so every caller (including any future direct caller) is authorized before the payment is built; and a building's Total Bed Capacity now derives from its actual physical beds (excluding out-of-service and virtual over-capacity beds) and is read-only, so occupancy, cost-per-capacity and over-capacity figures can no longer drift",
+        "app_name": "apex_habitat",
+        "link": "/app/salis-payment-request",
+        "creation": "2026-06-14 06:00:00",
+    },
     # v1.54.3 ---------------------------------------------------------------
     {
         "title": "Apex 1.54.3 — worker-portal (Masar) fixes: the bottom Accommodation tab is now labeled and highlighted correctly (the landing tab no longer stays lit on every screen); a revoked, expired, or rate-limited session shows a clear error with retry instead of a misleading empty state; status, request-type, category and priority values render in Arabic in the Arabic interface; plus the Arabic web font, international WhatsApp links, a larger language-toggle tap target, and navigation polish",
