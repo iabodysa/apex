@@ -242,6 +242,10 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         pr.reload()
         self.assertEqual(pr.status, "Paid")
         self.assertEqual(pr.docstatus, 1)
+        # The approver stamp set at the Approve step persists into Paid: it is the
+        # immutable evidence the payment router gates on, so a paid request always
+        # carries it (the Approve→Paid transition never blanks it).
+        self.assertEqual(pr.finance_approved_by, self.finance)
 
     # --- the no-GL boundary holds ----------------------------------------------
 

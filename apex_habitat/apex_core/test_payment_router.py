@@ -103,12 +103,14 @@ class TestPaymentRouter(FrappeTestCase):
         apex.save(ignore_permissions=True)
 
     def _approved_request(self, **overrides):
-        """An approved (finance-stamped, submitted) Salis Payment Request.
+        """An approved (finance-STAMPED, submitted) Salis Payment Request.
 
-        Inserted and approved as Administrator (a System Manager, which is a
-        finance authority) directly via the status field; the controller's
-        finance gate stamps the approver. Bypasses the workflow UI - the router
-        only cares that the request is finance-approved, however it got there.
+        The router gates on the immutable ``finance_approved_by`` stamp the
+        controller's finance gate writes on a real approval (proven end to end in
+        test_salis_payment_request_workflow). Here that stamp is set directly as a
+        fixture so the router tests stay focused on routing: a request whose status
+        is finance-gated but that carries NO stamp does not route
+        (test_paid_status_without_finance_stamp_does_not_route).
         """
         data = {
             "doctype": "Salis Payment Request",
@@ -121,9 +123,12 @@ class TestPaymentRouter(FrappeTestCase):
         doc = frappe.get_doc(data)
         doc.insert(ignore_permissions=True)
         doc.submit()
-        # Enter the Finance-gated state; the controller stamps finance_approved_by.
+        # Enter the Finance-gated state (status is an allow_on_submit field), then
+        # stamp the finance approver the router reads. update_after_submit does not
+        # re-run validate, so the stamp is set directly (db_set) as the fixture.
         doc.status = "Approved by Finance"
         doc.save(ignore_permissions=True)
+        doc.db_set("finance_approved_by", "Administrator", update_modified=False)
         doc.reload()
         return doc
 
@@ -222,6 +227,74 @@ class TestPaymentRouter(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError) as cm:
             route_payment(pr.name)
         self.assertIn("not finance-approved", str(cm.exception))
+
+    def test_paid_status_without_finance_stamp_does_not_route(self):
+        """A request whose STATUS is finance-gated but that carries NO
+        ``finance_approved_by`` stamp must NOT route a payment (T-150).
+
+        The stamp is the controller's durable proof the finance gate (role + SoD)
+        actually ran. ``status`` is the mutable workflow_state field; a write that
+        bypasses the controller's ``validate`` -- modelled here by a direct
+        ``db.set_value`` -- can land "Paid" without ever clearing the gate. The
+        router must trust the immutable stamp, not the status, and fail closed.
+        """
+        pr = frappe.get_doc(
+            {
+                "doctype": "Salis Payment Request",
+                "expense_type": "Fuel",
+                "amount": 50,
+                "status": "Draft",
+            }
+        )
+        pr.insert(ignore_permissions=True)
+        # Bypass the controller's validate/finance gate (no stamp written), exactly
+        # as a direct status edit / db write would.
+        frappe.db.set_value("Salis Payment Request", pr.name, "status", "Paid", update_modified=False)
+        pr.reload()
+        self.assertEqual(pr.status, "Paid")
+        self.assertFalse(pr.finance_approved_by, "no finance stamp on the bypass path")
+
+        self._configure("Note", [{"target_fieldname": "title", "source_fieldname": "name"}])
+        notes_before = frappe.db.count("Note")
+        with self.assertRaises(frappe.ValidationError) as cm:
+            route_payment(pr.name)
+        self.assertIn("not finance-approved", str(cm.exception))
+        # Fail closed: no payment was created off the un-stamped status.
+        self.assertEqual(frappe.db.count("Note"), notes_before)
+
+    def test_forged_finance_stamp_is_stripped_and_does_not_route(self):
+        """A caller-supplied ``finance_approved_by`` must NOT survive and must NOT
+        route (the relocated-bypass guard).
+
+        The router gates on the stamp, so the stamp itself must be server-owned.
+        ``read_only`` is UI-only and the field is permlevel 0, so a role with
+        create/write could otherwise forge it at insert under a non-gated status -
+        where the finance gate early-returns and never inspects it. The controller
+        reverts any value the gate did not write, so the forgery is stripped and
+        the request never routes.
+        """
+        pr = frappe.get_doc(
+            {
+                "doctype": "Salis Payment Request",
+                "expense_type": "Fuel",
+                "amount": 100,
+                "status": "Draft",
+                "finance_approved_by": "Administrator",  # forged, under a non-gated status
+            }
+        )
+        pr.insert(ignore_permissions=True)
+        pr.reload()
+        self.assertFalse(
+            pr.finance_approved_by,
+            "server-owned stamp must be stripped when the finance gate did not write it",
+        )
+
+        self._configure("Note", [{"target_fieldname": "title", "source_fieldname": "name"}])
+        notes_before = frappe.db.count("Note")
+        with self.assertRaises(frappe.ValidationError) as cm:
+            route_payment(pr.name)
+        self.assertIn("not finance-approved", str(cm.exception))
+        self.assertEqual(frappe.db.count("Note"), notes_before)
 
     # ------------------------------------------------------- config-driven map
 

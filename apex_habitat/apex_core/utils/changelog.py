@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.5 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.54.5 — closes a finance-approval bypass in payment routing: a request is now treated as finance-approved only by the server-stamped approver recorded by the finance-approval step (after the finance-role and segregation-of-duties checks), never by the editable status field; and that approver stamp is server-owned, so it can no longer be forged when a request is created or edited. A real payment can no longer be routed for a request that did not actually clear finance",
+        "app_name": "apex_habitat",
+        "link": "/app/salis-payment-request",
+        "creation": "2026-06-14 12:00:00",
+    },
     # v1.54.4 ---------------------------------------------------------------
     {
         "title": "Apex 1.54.4 — critical security and capacity fixes: routed-payment creation is now serialized with a row-lock, so two concurrent requests can no longer create a duplicate payment or a double ledger post; the routed-payment permission gate moved to the chokepoint, so every caller (including any future direct caller) is authorized before the payment is built; and a building's Total Bed Capacity now derives from its actual physical beds (excluding out-of-service and virtual over-capacity beds) and is read-only, so occupancy, cost-per-capacity and over-capacity figures can no longer drift",

@@ -66,6 +66,9 @@ class SalisPaymentRequest(Document):
 		# reach the Finance approval gate.
 		if (self.amount or 0) <= 0:
 			frappe.throw(_("Amount must be greater than zero."))
+		# Server-own the approver stamp BEFORE the gate runs, so only the gate can
+		# write it (after the role + SoD checks).
+		self._guard_finance_stamp()
 		self._enforce_finance_gate()
 
 	# Submit/cancel are recorded natively (Version track_changes + auto-comment).
@@ -90,6 +93,20 @@ class SalisPaymentRequest(Document):
 		# A brand-new document has no prior state; treat it as Draft.
 		return (previous.status if previous else None) or "Draft"
 
+	def _guard_finance_stamp(self):
+		"""The approver stamp is SERVER-OWNED: only ``_enforce_finance_gate`` may
+		write ``finance_approved_by`` / ``finance_approved_on``, and only after the
+		finance-role and SoD checks. ``read_only`` is a UI-only attribute (it is NOT
+		enforced on save) and these fields sit at permlevel 0, so without this guard
+		any role with create/write could forge the stamp directly - e.g. insert with
+		a non-gated status, where the gate early-returns and never inspects it - and
+		the payment router would then route a real payment off the forged value.
+		Revert any caller-supplied value to the stored one so the stamp can never be
+		introduced or altered on a save except by the gate itself."""
+		before = self.get_doc_before_save()
+		self.finance_approved_by = before.finance_approved_by if before else None
+		self.finance_approved_on = before.finance_approved_on if before else None
+
 	def _enforce_finance_gate(self):
 		"""Finance-exclusive gate (kept as a hard server-side block; defence in
 		depth alongside the workflow condition and the permission hook).
@@ -97,7 +114,7 @@ class SalisPaymentRequest(Document):
 		Entering "Approved by Finance" or "Paid" is permitted ONLY when the
 		current user holds a finance authority role and is not the requester.
 		This step cannot be bypassed, even on a save that does not go through the
-		workflow action. On entering "Approved by Finance", stamp the approver."""
+		workflow action. On entering any finance-gated state, stamp the approver."""
 		new_status = self.status or "Draft"
 		old_status = self._old_status()
 
@@ -114,8 +131,13 @@ class SalisPaymentRequest(Document):
 				_("You cannot approve or pay a Payment Request you raised; a different Finance approver is required.")
 			)
 
-		if new_status == "Approved by Finance":
-			if not self.finance_approved_by:
-				self.finance_approved_by = frappe.session.user
-			if not self.finance_approved_on:
-				self.finance_approved_on = now()
+		# Stamp the approver on entry to ANY finance-gated state ("Approved by
+		# Finance" AND "Paid"): control only reaches here once the finance-role and
+		# SoD checks above have passed, so the stamp is the durable proof the gate
+		# was cleared. The payment router trusts this stamp (not the mutable status)
+		# as its sole approval evidence, so it must be present on every gated entry
+		# -- including a transition straight to "Paid".
+		if not self.finance_approved_by:
+			self.finance_approved_by = frappe.session.user
+		if not self.finance_approved_on:
+			self.finance_approved_on = now()

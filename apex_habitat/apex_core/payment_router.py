@@ -57,11 +57,6 @@ def get_target_doctype(settings=None) -> str:
     settings = settings or frappe.get_single("Payment Routing Settings")
     return settings.target_payment_doctype or DEFAULT_TARGET_DOCTYPE
 
-# A Salis Payment Request is finance-approved once it enters one of these
-# states. Mirrors ``salis_payment_request._FINANCE_GATED_STATUSES`` - entry into
-# either is the Finance-exclusive, SoD-guarded gate.
-_APPROVED_STATUSES = {"Approved by Finance", "Paid"}
-
 # Last-resort transaction currency when no company default can be resolved
 # (single-currency deployment baseline).
 _FALLBACK_CURRENCY = "SAR"
@@ -104,11 +99,17 @@ def _ensure_target_currency(target, source) -> None:
 def _is_finance_approved(source) -> bool:
     """True when the request has cleared the Finance approval gate.
 
-    Approved is proven by the stamped approver (``finance_approved_by``, set by
-    the controller's defence-in-depth gate) OR by an approved/paid status. Either
-    is sufficient; both are set together on the normal workflow path.
+    Approval is proven SOLELY by the stamped approver ``finance_approved_by``,
+    which the source controller's finance gate sets on entry to any
+    finance-gated state, after enforcing the finance-role and Segregation-of-
+    Duties checks. The mutable ``status`` field is deliberately NOT trusted: a
+    write that bypasses the controller's ``validate`` (e.g. a direct ``db_set``
+    or status edit) could land "Paid"/"Approved by Finance" without ever
+    clearing the gate, so routing a real payment off the status alone would be a
+    finance bypass. Gating on the immutable stamp is fail-closed - an un-stamped
+    request never routes.
     """
-    return bool(source.get("finance_approved_by")) or source.get("status") in _APPROVED_STATUSES
+    return bool(source.get("finance_approved_by"))
 
 
 def _apply_field_map(target, source, field_map) -> None:
