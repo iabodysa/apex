@@ -105,6 +105,30 @@ def apply_active_lease(doc):
         doc.landlord = lease.supplier
 
 
+def _derive_total_capacity(building_name):
+    """The building's TRUE physical bed capacity = the count of its real, available
+    physical beds. A bed counts when it is NOT Out of Service and NOT a virtual
+    over-capacity bed (``is_temporary``); those two exclusions are what keep
+    total_capacity from over-counting retired beds or being inflated by the very
+    over-capacity placements the gate exists to catch.
+
+    Returns the count, or ``None`` when the building has NO bed record at all — the
+    pre-generation path, where there is nothing physical to count and the manually
+    entered planned figure is kept. (A building whose beds are all excluded still has
+    bed rows, so it correctly derives to 0, not None.)
+    """
+    if not frappe.db.exists("Accommodation Bed", {"building": building_name}):
+        return None
+    return frappe.db.count(
+        "Accommodation Bed",
+        {
+            "building": building_name,
+            "status": ["!=", "Out of Service"],
+            "is_temporary": 0,
+        },
+    )
+
+
 def before_save(doc, method=None):
     _guard_abbreviation_lock(doc)
     if not doc.company:
@@ -114,16 +138,16 @@ def before_save(doc, method=None):
     apply_active_lease(doc)
 
     # total_capacity is the building's TRUE physical bed capacity and the denominator
-    # for occupancy %, cost-per-capacity and the over-capacity gate. Once rooms exist
-    # it is DERIVED from the sum of each room's planned bed_capacity (physical beds,
-    # excluding virtual over-capacity beds) so it can no longer drift from the rooms.
-    # Before any room is generated there is nothing to sum, so the manually entered
-    # value (the field stays editable + reqd for that pre-generation path) is kept.
-    _capacity_sum = frappe.db.get_value(
-        "Accommodation Room", {"building": doc.name}, "sum(bed_capacity)"
-    )
-    if _capacity_sum is not None:
-        doc.total_capacity = int(_capacity_sum or 0)
+    # for occupancy %, cost-per-capacity and the over-capacity gate. It is DERIVED from
+    # the ACTUAL physical beds — every Accommodation Bed for the building that is not
+    # Out of Service and is not a virtual over-capacity bed (is_temporary=1) — so a room
+    # with generate_beds=0 (no beds) or a retired/Out-of-Service bed can no longer make
+    # it OVERCOUNT, and a temporary over-capacity bed can never inflate the very
+    # denominator the over-capacity gate checks. Before any bed exists there is nothing
+    # to count (count is None), so the manually entered value is kept for that path.
+    _capacity_count = _derive_total_capacity(doc.name)
+    if _capacity_count is not None:
+        doc.total_capacity = _capacity_count
 
     doc.annual_total_cost_sar = (
         (doc.annual_rent_sar or 0)
@@ -405,20 +429,19 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
         _floor_values = frappe.db.get_all(
             "Accommodation Room", filters={"building": building_name}, pluck="floor", distinct=True
         )
-        # Keep total_capacity in lock-step with the rooms the generator just wrote
-        # (sum of each room's planned bed_capacity) so the figure is correct
-        # immediately, not only after the next manual save. before_save derives it
-        # the same way for every other edit path.
-        _capacity_sum = frappe.db.get_value(
-            "Accommodation Room", {"building": building_name}, "sum(bed_capacity)"
-        )
+        # Keep total_capacity in lock-step with the beds the generator just wrote so
+        # the figure is correct immediately, not only after the next manual save. It is
+        # derived from the ACTUAL physical beds (excluding Out-of-Service and virtual
+        # over-capacity beds), the same way before_save derives it for every other edit
+        # path — never the planned room bed_capacity, which over-counts no-bed rooms.
+        _capacity_count = _derive_total_capacity(building_name)
         frappe.db.set_value("Accommodation Building", building_name, {
             "setup_status": "Rooms Generated",
             "setup_generated_on": today(),
             "setup_generated_by": frappe.session.user,
             "total_rooms": frappe.db.count("Accommodation Room", {"building": building_name}),
             "total_floors": len([f for f in _floor_values if f is not None]),
-            "total_capacity": int(_capacity_sum or 0),
+            "total_capacity": int(_capacity_count or 0),
         })
 
     # Frappe manages the request transaction; do not commit explicitly so that

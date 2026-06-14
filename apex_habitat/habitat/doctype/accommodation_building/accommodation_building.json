@@ -205,11 +205,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Auto-calculated from the rooms once they are generated (sum of each room's bed capacity). Enter a planned figure before generating rooms.",
+   "default": "0",
+   "description": "Auto-derived from the building's physical beds.",
    "fieldname": "total_capacity",
    "fieldtype": "Int",
    "label": "Total Bed Capacity",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "current_occupants",

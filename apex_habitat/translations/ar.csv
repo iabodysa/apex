@@ -2639,3 +2639,4 @@ total_cost,التكلفة الإجمالية
 {0} surplus bed(s) retired (Out of Service).,أُحيلت {0} سرير/أسرّة زائدة إلى «خارج الخدمة».
 {0} {1} already has an active Accommodation Assignment: {2},{0} {1} لديه بالفعل إسناد سكن نشط: {2}
 {0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
+Auto-derived from the building's physical beds.,مشتق آلياً من الأسرّة الفعلية للمبنى.

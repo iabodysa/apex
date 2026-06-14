@@ -42,13 +42,23 @@ class TestAccommodationBuilding(FrappeTestCase):
         with self.assertRaises(frappe.exceptions.ValidationError):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
-    def test_missing_capacity_raises(self):
+    def test_new_building_saves_without_manual_capacity(self):
+        """total_capacity is system-derived (read-only, not reqd): a brand-new building
+        with NO rooms/beds yet must still save, defaulting the capacity to 0 rather than
+        raising MandatoryError (a read-only reqd Int could never be filled on a new doc)."""
         doc = frappe.get_doc({
             "doctype": "Accommodation Building",
-            "building_name": "QA Missing Capacity",
+            "building_name": "QA No Manual Capacity",
         })
-        with self.assertRaises(frappe.exceptions.MandatoryError):
-            doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        try:
+            self.assertEqual(doc.total_capacity, 0, "no beds yet -> capacity defaults to 0")
+            self.assertEqual(
+                frappe.get_meta("Accommodation Building").get_field("total_capacity").reqd, 0,
+                "total_capacity must no longer be reqd (it is system-derived)",
+            )
+        finally:
+            frappe.delete_doc("Accommodation Building", doc.name, force=True, ignore_permissions=True)
 
     # --- room-number prefix (Room Generator professionalization) -------------
     def test_room_number_blank_prefix_is_byte_identical(self):
@@ -87,11 +97,19 @@ class TestAccommodationBuilding(FrappeTestCase):
     # --- P16 security / idempotency tests ------------------------------------
 
     def test_total_capacity_derives_from_beds(self):
-        """total_capacity is the TRUE physical capacity: once rooms exist it must equal
-        the sum of room bed_capacity (== physical bed count), overriding any manual
-        figure, so the occupancy / cost / over-capacity denominators cannot drift."""
+        """total_capacity is the TRUE physical capacity: it must equal the count of the
+        building's ACTUAL beds that are not Out of Service (and not virtual over-capacity
+        beds), overriding any manual figure, so the occupancy / cost / over-capacity
+        denominators cannot drift. Setting one bed Out of Service drops capacity by 1.
+        The field is also read-only (system-derived)."""
         from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import (
             generate_rooms_and_beds,
+        )
+        # The derived field must be read-only so an operator cannot type a value that
+        # before_save would silently overwrite.
+        self.assertEqual(
+            frappe.get_meta("Accommodation Building").get_field("total_capacity").read_only, 1,
+            "total_capacity must be read_only (auto-derived)",
         )
         m = frappe.generate_hash(length=6)
         b = frappe.get_doc({
@@ -110,16 +128,68 @@ class TestAccommodationBuilding(FrappeTestCase):
         })
         b.insert(ignore_permissions=True, ignore_links=True)
         try:
-            generate_rooms_and_beds(b.name)  # 3*4 + 2*2 = 16
+            generate_rooms_and_beds(b.name)  # 3*4 + 2*2 = 16 physical beds
             b.reload()
-            bed_count = frappe.db.count("Accommodation Bed", {"building": b.name})
-            self.assertEqual(b.total_capacity, 16, "total_capacity must derive to the bed-capacity sum")
-            self.assertEqual(b.total_capacity, bed_count, "total_capacity must equal the physical bed count")
+            available_beds = frappe.db.count(
+                "Accommodation Bed",
+                {"building": b.name, "status": ["!=", "Out of Service"], "is_temporary": 0},
+            )
+            self.assertEqual(b.total_capacity, 16, "total_capacity must derive to the physical bed count")
+            self.assertEqual(available_beds, 16, "fixture sanity: 16 available physical beds")
+            self.assertEqual(b.total_capacity, available_beds,
+                             "total_capacity must equal the non-Out-of-Service physical bed count")
+            # Retire ONE physical bed -> re-derivation must DROP capacity by exactly 1.
+            one_bed = frappe.db.get_value("Accommodation Bed", {"building": b.name}, "name")
+            frappe.db.set_value("Accommodation Bed", one_bed, "status", "Out of Service")
+            b.save(ignore_permissions=True)
+            b.reload()
+            self.assertEqual(b.total_capacity, 15,
+                             "an Out-of-Service bed must be excluded -> capacity drops by 1")
             # A subsequent save keeps it derived (before_save path), not the manual value.
             b.total_capacity = 5
             b.save(ignore_permissions=True)
             b.reload()
-            self.assertEqual(b.total_capacity, 16, "before_save must re-derive total_capacity once rooms exist")
+            self.assertEqual(b.total_capacity, 15, "before_save must re-derive, ignoring the manual value")
+        finally:
+            for room in frappe.db.get_all("Accommodation Room", {"building": b.name}, pluck="name"):
+                for bed in frappe.db.get_all("Accommodation Bed", {"room": room}, pluck="name"):
+                    frappe.delete_doc("Accommodation Bed", bed, force=True, ignore_permissions=True)
+                frappe.delete_doc("Accommodation Room", room, force=True, ignore_permissions=True)
+            frappe.delete_doc("Accommodation Building", b.name, force=True, ignore_permissions=True)
+
+    def test_no_bed_room_does_not_inflate_capacity(self):
+        """The core T-136 fix: a room with generate_beds=0 has a planned bed_capacity but
+        NO physical beds. Deriving from sum(bed_capacity) over-counted it; deriving from
+        the actual beds must NOT — total_capacity counts only the beds that truly exist."""
+        from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import (
+            generate_rooms_and_beds,
+        )
+        m = frappe.generate_hash(length=6)
+        b = frappe.get_doc({
+            "doctype": "Accommodation Building",
+            "building_name": "QA NoBed " + m,
+            "abbreviation": "QN" + m[:2].upper(),
+            "total_capacity": 999,
+            "floor_plan": [
+                # Real beds: 2 rooms * 3 beds = 6 physical beds.
+                {"doctype": "Accommodation Floor Plan", "floor_number": 0, "room_count": 2,
+                 "bed_capacity_per_room": 3, "room_type": "Standard", "generate_beds": 1,
+                 "starting_room_number": 1},
+                # generate_beds=0: rooms carry a planned bed_capacity but mint NO beds.
+                # sum(bed_capacity) would have added 2*5=10 phantom capacity here.
+                {"doctype": "Accommodation Floor Plan", "floor_number": 1, "room_count": 2,
+                 "bed_capacity_per_room": 5, "room_type": "Office", "generate_beds": 0,
+                 "starting_room_number": 1},
+            ],
+        })
+        b.insert(ignore_permissions=True, ignore_links=True)
+        try:
+            generate_rooms_and_beds(b.name)
+            b.reload()
+            bed_count = frappe.db.count("Accommodation Bed", {"building": b.name})
+            self.assertEqual(bed_count, 6, "only the generate_beds=1 rooms mint physical beds")
+            self.assertEqual(b.total_capacity, 6,
+                             "no-bed rooms must NOT inflate capacity (old sum() would give 16)")
         finally:
             for room in frappe.db.get_all("Accommodation Room", {"building": b.name}, pluck="name"):
                 for bed in frappe.db.get_all("Accommodation Bed", {"room": room}, pluck="name"):

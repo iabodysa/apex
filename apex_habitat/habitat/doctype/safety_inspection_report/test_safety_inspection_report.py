@@ -80,8 +80,8 @@ class TestSafetyInspectionReport(FrappeTestCase):
             frappe.get_doc({
                 "doctype": "Accommodation Building",
                 "building_name": "T103-BLDG",
-                # total_capacity is reqd on Accommodation Building; supply it so
-                # the fixture inserts (status defaults to Active).
+                # total_capacity is auto-derived (read-only); a value supplied here is
+                # harmless and keeps the fixture explicit (status defaults to Active).
                 "total_capacity": 10,
             }).insert(ignore_permissions=True, ignore_links=True)
         if not frappe.db.exists("Accommodation Room", "T103-ROOM"):
