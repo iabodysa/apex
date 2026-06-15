@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.8 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.54.8 — a new Fleet Control desk page (under Fleet Operations) gives a live, filterable vehicle board: every vehicle as a status-coloured card or table, filters for status/office/project and a plate search, a per-vehicle detail drawer (driver, compliance, recent incidents and custody assignments), and a CSV export of the current view",
+        "app_name": "apex_habitat",
+        "link": "/app/operations-control",
+        "creation": "2026-06-15 12:00:00",
+    },
     # v1.54.7 ---------------------------------------------------------------
     {
         "title": "Apex 1.54.7 — a new Fleet Operations workspace brings the day-to-day fleet control surface together: live fleet metrics (now including open vehicle incidents and open theft reports), an Incidents-by-Type chart, an open-incident quick list, and grouped links for incidents, vehicle custody and office billing",

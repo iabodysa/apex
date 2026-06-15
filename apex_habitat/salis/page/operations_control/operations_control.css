@@ -1,0 +1,164 @@
+/* Fleet Control board styling. Uses Frappe CSS variables so it follows the
+   active desk theme (light/dark) and stays consistent with native pages. */
+
+.fc-root {
+	padding: 4px 2px 24px;
+}
+
+/* Summary chips */
+.fc-summary {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 14px;
+}
+.fc-chip {
+	flex: 1 1 120px;
+	min-width: 110px;
+	background: var(--card-bg, #fff);
+	border: 1px solid var(--border-color, #e2e2e2);
+	border-radius: var(--border-radius-md, 8px);
+	padding: 10px 14px;
+	border-top: 3px solid var(--gray-300, #ccc);
+}
+.fc-chip-val {
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1.1;
+}
+.fc-chip-lbl {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted, #888);
+}
+.fc-chip-total { border-top-color: var(--gray-600, #555); }
+.fc-chip-green { border-top-color: var(--green-500, #28a745); }
+.fc-chip-orange { border-top-color: var(--orange-500, #f0932b); }
+.fc-chip-red { border-top-color: var(--red-500, #e74c3c); }
+.fc-chip-gray { border-top-color: var(--gray-400, #aaa); }
+
+/* Controls */
+.fc-controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 10px;
+	margin-bottom: 14px;
+}
+.fc-filter {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.fc-filter label {
+	font-size: 11px;
+	color: var(--text-muted, #888);
+	margin: 0;
+}
+.fc-filter select { min-width: 150px; }
+.fc-search { min-width: 200px; }
+
+/* Body: grid + drawer side by side */
+.fc-body {
+	display: flex;
+	gap: 14px;
+	align-items: flex-start;
+}
+.fc-grid {
+	flex: 1 1 auto;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+	gap: 12px;
+}
+.fc-grid-table { display: block; }
+.fc-empty { padding: 40px; text-align: center; width: 100%; }
+
+/* Vehicle card */
+.fc-card {
+	background: var(--card-bg, #fff);
+	border: 1px solid var(--border-color, #e2e2e2);
+	border-left: 4px solid var(--gray-300, #ccc);
+	border-radius: var(--border-radius-md, 8px);
+	padding: 12px 14px;
+	cursor: pointer;
+	transition: box-shadow 0.12s ease, transform 0.12s ease;
+}
+.fc-card:hover {
+	box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+	transform: translateY(-1px);
+}
+.fc-accent-green { border-left-color: var(--green-500, #28a745); }
+.fc-accent-orange { border-left-color: var(--orange-500, #f0932b); }
+.fc-accent-red { border-left-color: var(--red-500, #e74c3c); }
+.fc-accent-gray { border-left-color: var(--gray-400, #aaa); }
+.fc-card-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+}
+.fc-plate {
+	font-size: 16px;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+}
+.fc-card-meta { margin: 6px 0; font-size: 13px; }
+.fc-card-foot {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	font-size: 12px;
+	margin-top: 8px;
+}
+
+/* Table view */
+.fc-table { width: 100%; font-size: 13px; }
+.fc-table tbody tr { cursor: pointer; }
+.fc-table tbody tr:hover { background: var(--bg-light-gray, #f7f7f7); }
+
+/* Detail drawer */
+.fc-drawer {
+	flex: 0 0 0;
+	width: 0;
+	overflow: hidden;
+	opacity: 0;
+	transition: width 0.15s ease, opacity 0.15s ease;
+	background: var(--card-bg, #fff);
+	border-radius: var(--border-radius-md, 8px);
+}
+.fc-drawer.fc-open {
+	flex: 0 0 320px;
+	width: 320px;
+	opacity: 1;
+	border: 1px solid var(--border-color, #e2e2e2);
+	padding: 14px;
+	position: sticky;
+	top: 10px;
+}
+.fc-drawer-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 10px;
+}
+.fc-drawer-title { font-size: 17px; font-weight: 700; flex: 1 1 auto; }
+.fc-form-link { white-space: nowrap; }
+.fc-drawer-sub {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted, #888);
+	margin: 14px 0 6px;
+}
+.fc-dl-row { display: flex; gap: 8px; padding: 3px 0; font-size: 13px; }
+.fc-dl-k { flex: 0 0 110px; color: var(--text-muted, #888); }
+.fc-dl-v { flex: 1 1 auto; font-weight: 500; }
+.fc-list { margin: 0; padding-left: 16px; font-size: 12.5px; }
+.fc-list li { margin: 2px 0; }
+
+@media (max-width: 768px) {
+	.fc-drawer.fc-open { flex-basis: 100%; width: 100%; }
+	.fc-body { flex-direction: column; }
+}
