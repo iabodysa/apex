@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.10 --------------------------------------------------------------
+    {
+        "title": "Apex 1.54.10 — Fleet Operations workspace fixes: the Fleet Control page now shows as a shortcut on the workspace (a stale timestamp had blocked it from syncing on migrate), and the workspace icons are de-duplicated so the Salis hub and Fleet Operations no longer share the Fleet wrench icon",
+        "app_name": "apex_habitat",
+        "link": "/app/fleet-operations",
+        "creation": "2026-06-15 16:30:00",
+    },
     # v1.54.9 ---------------------------------------------------------------
     {
         "title": "Apex 1.54.9 — the worker-transport workspace is now named Masar and opens at /app/masar (it was named Movement but labelled Masar, so navigating to Masar returned a page-not-found); a migration renames the workspace on existing sites and no content changes",

@@ -4,7 +4,7 @@
  "label": "Fleet Operations",
  "title": "Fleet Operations",
  "module": "Salis",
- "icon": "tool",
+ "icon": "assets",
  "public": 1,
  "roles": [
   {
@@ -217,5 +217,5 @@
    "idx": 1
   }
  ],
- "modified": "2026-06-15 12:00:00.000000"
+ "modified": "2026-06-15 16:00:00.000000"
 }
