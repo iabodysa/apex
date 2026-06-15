@@ -12,10 +12,14 @@
   "vehicle",
   "stop_reason",
   "stop_date",
+  "return_date",
   "vehicle_stop_main_col",
   "ownership_at_stop",
   "related_driver",
   "evidence",
+  "released_on",
+  "released_by",
+  "estimated_cost",
   "vehicle_stop_sec_notes",
   "notes",
   "previous_status",
@@ -68,6 +72,11 @@
    "reqd": 1
   },
   {
+   "fieldname": "return_date",
+   "fieldtype": "Date",
+   "label": "Return Date (Workshop Exit)"
+  },
+  {
    "fieldname": "vehicle_stop_main_col",
    "fieldtype": "Column Break"
   },
@@ -92,6 +101,22 @@
    "fieldname": "evidence",
    "fieldtype": "Attach",
    "label": "Evidence"
+  },
+  {
+   "fieldname": "released_on",
+   "fieldtype": "Date",
+   "label": "Released On"
+  },
+  {
+   "fieldname": "released_by",
+   "fieldtype": "Link",
+   "label": "Released By",
+   "options": "User"
+  },
+  {
+   "fieldname": "estimated_cost",
+   "fieldtype": "Currency",
+   "label": "Estimated Cost (SAR)"
   },
   {
    "collapsible": 1,
@@ -125,7 +150,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-26 02:44:00.000000",
+ "modified": "2026-06-15 16:30:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Stop",

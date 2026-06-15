@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.11 --------------------------------------------------------------
+    {
+        "title": "Apex 1.54.11 — more Fleet Operations: an Operating Days trend and a Vehicle Activations trend chart on the workspace, Vehicle Stop now records workshop-exit details (return date, released on/by, estimated cost) to close out a maintenance stop, and Salis Settings gains reference fuel prices (Petrol 91/95, Diesel) for budgeting",
+        "app_name": "apex_habitat",
+        "link": "/app/fleet-operations",
+        "creation": "2026-06-15 17:00:00",
+    },
     # v1.54.10 --------------------------------------------------------------
     {
         "title": "Apex 1.54.10 — Fleet Operations workspace fixes: the Fleet Control page now shows as a shortcut on the workspace (a stale timestamp had blocked it from syncing on migrate), and the workspace icons are de-duplicated so the Salis hub and Fleet Operations no longer share the Fleet wrench icon",

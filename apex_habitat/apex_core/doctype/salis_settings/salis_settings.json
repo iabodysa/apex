@@ -29,7 +29,12 @@
   "salis_settings_sec_doa_thresholds",
   "writeoff_ops_threshold_sar",
   "salis_settings_doa_col",
-  "cost_recovery_ops_threshold_sar"
+  "cost_recovery_ops_threshold_sar",
+  "salis_settings_sec_fuel_prices",
+  "fuel_price_petrol_91",
+  "salis_settings_fuel_col",
+  "fuel_price_petrol_95",
+  "fuel_price_diesel"
  ],
  "fields": [
   {
@@ -177,11 +182,35 @@
    "fieldname": "cost_recovery_ops_threshold_sar",
    "fieldtype": "Currency",
    "label": "Cost Recovery Operations Threshold (SAR)"
+  },
+  {
+   "fieldname": "salis_settings_sec_fuel_prices",
+   "fieldtype": "Section Break",
+   "label": "Fuel Reference Prices (SAR/Litre)"
+  },
+  {
+   "fieldname": "fuel_price_petrol_91",
+   "fieldtype": "Currency",
+   "label": "Petrol 91 (SAR/Litre)"
+  },
+  {
+   "fieldname": "salis_settings_fuel_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fuel_price_petrol_95",
+   "fieldtype": "Currency",
+   "label": "Petrol 95 (SAR/Litre)"
+  },
+  {
+   "fieldname": "fuel_price_diesel",
+   "fieldtype": "Currency",
+   "label": "Diesel (SAR/Litre)"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-06-15 16:30:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",
