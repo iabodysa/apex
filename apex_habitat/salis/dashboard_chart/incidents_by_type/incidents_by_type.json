@@ -1,0 +1,18 @@
+{
+ "doctype": "Dashboard Chart",
+ "name": "Incidents by Type",
+ "chart_name": "Incidents by Type",
+ "chart_type": "Group By",
+ "document_type": "Vehicle Incident",
+ "group_by_type": "Count",
+ "group_by_based_on": "incident_type",
+ "type": "Donut",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "module": "Salis",
+ "timeseries": 0,
+ "use_report_chart": 0,
+ "filters_json": "[]",
+ "modified": "2026-06-15 12:00:00.000000"
+}

@@ -2663,3 +2663,8 @@ Theft report {0} cancelled.,أُلغي بلاغ السرقة {0}.
 Vehicle Incident,بلاغ مركبة
 Vehicle {0} reported stolen.,أُبلغ عن سرقة المركبة {0}.
 Write-Off Case,حالة الشطب
+Fleet Operations,التشغيل
+Incidents by Type,البلاغات حسب النوع
+Office Billing,فوترة المكاتب
+Open Theft Reports,بلاغات السرقة المفتوحة
+Open Vehicle Incidents,بلاغات المركبات المفتوحة

@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.7 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.54.7 — a new Fleet Operations workspace brings the day-to-day fleet control surface together: live fleet metrics (now including open vehicle incidents and open theft reports), an Incidents-by-Type chart, an open-incident quick list, and grouped links for incidents, vehicle custody and office billing",
+        "app_name": "apex_habitat",
+        "link": "/app/fleet-operations",
+        "creation": "2026-06-15 09:00:00",
+    },
     # v1.54.6 ---------------------------------------------------------------
     {
         "title": "Apex 1.54.6 — foundations for Fleet Operations: a new Vehicle Incident record captures accident and theft events against a vehicle (location, police report number, fault, evidence), and submitting a theft takes the vehicle out of service and clears its driver (cancelling restores both); a damage write-off can now be linked back to the incident it was escalated from and carries the damaged parts and reporter; and vehicles gain an optional planned fuel grade and daily fuel budget while drivers carry a unique fleet identifier used as the data-import key",
