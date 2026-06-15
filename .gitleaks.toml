@@ -1,0 +1,16 @@
+# Apex gitleaks configuration.
+# Extends the default ruleset and allowlists known false positives so the
+# CI secret scan (which scans full history) does not block on non-secrets.
+title = "Apex gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known false positives (not secrets)"
+# 'OKEY = \"fleetOS_offices_v1\"' in www/fleet.html is a localStorage cache-key
+# name from the supervisor's dashboard design, not an API key. The default
+# generic-api-key rule matches the 'OKEY=' assignment shape.
+regexes = [
+  '''fleetOS_offices_v1''',
+]
