@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.12 --------------------------------------------------------------
+    {
+        "title": "Apex 1.54.12 — a new /fleet web dashboard serves the fleet supervisor's exact board design, but every vehicle, driver and custody record reads live from the Salis DocTypes, and its actions (reassign, stop, workshop in/out, recover, report theft) update the real records; it is open to logged-in fleet roles only, and the obsolete Save/Export buttons are gone now that the data lives in Apex",
+        "app_name": "apex_habitat",
+        "link": "/fleet",
+        "creation": "2026-06-15 19:30:00",
+    },
     # v1.54.11 --------------------------------------------------------------
     {
         "title": "Apex 1.54.11 — more Fleet Operations: an Operating Days trend and a Vehicle Activations trend chart on the workspace, Vehicle Stop now records workshop-exit details (return date, released on/by, estimated cost) to close out a maintenance stop, and Salis Settings gains reference fuel prices (Petrol 91/95, Diesel) for budgeting",
