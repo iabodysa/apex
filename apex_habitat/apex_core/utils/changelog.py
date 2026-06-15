@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.6 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.54.6 — foundations for Fleet Operations: a new Vehicle Incident record captures accident and theft events against a vehicle (location, police report number, fault, evidence), and submitting a theft takes the vehicle out of service and clears its driver (cancelling restores both); a damage write-off can now be linked back to the incident it was escalated from and carries the damaged parts and reporter; and vehicles gain an optional planned fuel grade and daily fuel budget while drivers carry a unique fleet identifier used as the data-import key",
+        "app_name": "apex_habitat",
+        "link": "/app/vehicle-incident",
+        "creation": "2026-06-15 06:00:00",
+    },
     # v1.54.5 ---------------------------------------------------------------
     {
         "title": "Apex 1.54.5 — closes a finance-approval bypass in payment routing: a request is now treated as finance-approved only by the server-stamped approver recorded by the finance-approval step (after the finance-role and segregation-of-duties checks), never by the editable status field; and that approver stamp is server-owned, so it can no longer be forged when a request is created or edited. A real payment can no longer be routed for a request that did not actually clear finance",

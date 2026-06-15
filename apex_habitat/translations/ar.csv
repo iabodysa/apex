@@ -2640,3 +2640,26 @@ total_cost,التكلفة الإجمالية
 {0} {1} already has an active Accommodation Assignment: {2},{0} {1} لديه بالفعل إسناد سكن نشط: {2}
 {0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
 Auto-derived from the building's physical beds.,مشتق آلياً من الأسرّة الفعلية للمبنى.
+Damaged Parts,الأجزاء المتضررة
+Driver ID,معرّف السائق
+Fault / Liable Party,الطرف المسؤول
+Fuel Plan,خطة الوقود
+Incident,البلاغ
+Incident Date,تاريخ البلاغ
+Incident date cannot be in the future.,لا يمكن أن يكون تاريخ البلاغ في المستقبل.
+Petrol 91,بنزين ٩١
+Petrol 95,بنزين ٩٥
+Planned Fuel Grade,درجة الوقود المخطّطة
+Police Report Number,رقم بلاغ الشرطة
+Police report PDF or a photo of the scene.,ملف بلاغ الشرطة أو صورة لموقع الحادث.
+Previous Driver,السائق السابق
+Previous Vehicle Status,حالة المركبة السابقة
+Reported stolen via {0}.,أُبلغ عن سرقتها عبر {0}.
+Set when the incident is escalated to a damage write-off.,يُضبط عند تصعيد البلاغ إلى شطب أضرار.
+Set when this write-off was escalated from a Vehicle Incident.,يُضبط عند تصعيد هذا الشطب من بلاغ مركبة.
+Source Incident,البلاغ المصدر
+Theft,سرقة
+Theft report {0} cancelled.,أُلغي بلاغ السرقة {0}.
+Vehicle Incident,بلاغ مركبة
+Vehicle {0} reported stolen.,أُبلغ عن سرقة المركبة {0}.
+Write-Off Case,حالة الشطب

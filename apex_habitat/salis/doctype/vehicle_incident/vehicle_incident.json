@@ -1,0 +1,280 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-06-15 12:00:00.000000",
+ "description": "A fleet incident event (accident or theft) captured against a vehicle, with location, report number and evidence. Distinct from a damage write-off (the disposition) and a vehicle stop (the state change).",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "vi_tab_overview",
+  "vi_sec_incident",
+  "incident_type",
+  "vehicle",
+  "incident_date",
+  "vi_incident_col",
+  "driver",
+  "location",
+  "report_number",
+  "vi_sec_details",
+  "description",
+  "fault",
+  "damaged_parts",
+  "vi_details_col",
+  "estimated_cost",
+  "reported_by",
+  "vi_sec_evidence",
+  "evidence",
+  "vi_sec_disposition",
+  "status",
+  "vi_disposition_col",
+  "write_off_case",
+  "vi_sec_system",
+  "naming_series",
+  "previous_vehicle_status",
+  "previous_driver",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "vi_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "vi_sec_incident",
+   "fieldtype": "Section Break",
+   "label": "Incident"
+  },
+  {
+   "fieldname": "incident_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Incident Type",
+   "options": "Accident\nTheft",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Salis Vehicle",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "incident_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Incident Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vi_incident_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.current_driver",
+   "fetch_if_empty": 1,
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Driver",
+   "options": "Salis Driver",
+   "search_index": 1
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location"
+  },
+  {
+   "fieldname": "report_number",
+   "fieldtype": "Data",
+   "label": "Police Report Number"
+  },
+  {
+   "fieldname": "vi_sec_details",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.incident_type=='Accident'",
+   "fieldname": "fault",
+   "fieldtype": "Data",
+   "label": "Fault / Liable Party"
+  },
+  {
+   "depends_on": "eval:doc.incident_type=='Accident'",
+   "fieldname": "damaged_parts",
+   "fieldtype": "Small Text",
+   "label": "Damaged Parts"
+  },
+  {
+   "fieldname": "vi_details_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "estimated_cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Estimated Cost (SAR)"
+  },
+  {
+   "fieldname": "reported_by",
+   "fieldtype": "Data",
+   "label": "Reported By"
+  },
+  {
+   "fieldname": "vi_sec_evidence",
+   "fieldtype": "Section Break",
+   "label": "Evidence"
+  },
+  {
+   "description": "Police report PDF or a photo of the scene.",
+   "fieldname": "evidence",
+   "fieldtype": "Attach",
+   "label": "Evidence"
+  },
+  {
+   "fieldname": "vi_sec_disposition",
+   "fieldtype": "Section Break",
+   "label": "Disposition"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nUnder Review\nClosed\nCancelled"
+  },
+  {
+   "fieldname": "vi_disposition_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Set when the incident is escalated to a damage write-off.",
+   "fieldname": "write_off_case",
+   "fieldtype": "Link",
+   "label": "Write-Off Case",
+   "options": "Vehicle Damage Write-Off",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vi_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "default": "VI-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "VI-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "previous_vehicle_status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Previous Vehicle Status",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "previous_driver",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Previous Driver",
+   "no_copy": 1,
+   "options": "Salis Driver",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Incident",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-06-15 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Vehicle Incident",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "vehicle",
+ "track_changes": 1
+}

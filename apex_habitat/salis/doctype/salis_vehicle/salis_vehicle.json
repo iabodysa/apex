@@ -31,6 +31,9 @@
   "next_expiry_date",
   "vehicle_sec_documents",
   "compliance_documents",
+  "vehicle_sec_fuel",
+  "planned_fuel_grade",
+  "planned_daily_fuel_sar",
   "vehicle_sec_notes",
   "notes",
   "vehicle_tab_system",
@@ -181,6 +184,23 @@
    "options": "Salis Vehicle Compliance"
   },
   {
+   "collapsible": 1,
+   "fieldname": "vehicle_sec_fuel",
+   "fieldtype": "Section Break",
+   "label": "Fuel Plan"
+  },
+  {
+   "fieldname": "planned_fuel_grade",
+   "fieldtype": "Select",
+   "label": "Planned Fuel Grade",
+   "options": "\nPetrol 91\nPetrol 95\nDiesel"
+  },
+  {
+   "fieldname": "planned_daily_fuel_sar",
+   "fieldtype": "Currency",
+   "label": "Planned Daily Fuel (SAR)"
+  },
+  {
    "fieldname": "vehicle_sec_notes",
    "fieldtype": "Section Break",
    "label": "Notes",
@@ -222,7 +242,8 @@
    "fieldtype": "Data",
    "label": "Plate (Normalized)",
    "read_only": 1,
-   "search_index": 1
+   "search_index": 1,
+   "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,

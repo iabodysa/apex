@@ -10,10 +10,13 @@
   "vwo_sec_overview",
   "vehicle",
   "source_handover",
+  "source_incident",
   "vwo_overview_col",
   "driver",
   "vwo_sec_damage",
   "damage_description",
+  "damaged_parts",
+  "reported_by",
   "vwo_sec_assessment",
   "recommended_action",
   "vwo_assessment_col",
@@ -72,6 +75,15 @@
    "search_index": 1
   },
   {
+   "description": "Set when this write-off was escalated from a Vehicle Incident.",
+   "fieldname": "source_incident",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Source Incident",
+   "options": "Vehicle Incident",
+   "search_index": 1
+  },
+  {
    "fieldname": "vwo_sec_damage",
    "fieldtype": "Section Break",
    "label": "Damage"
@@ -80,6 +92,16 @@
    "fieldname": "damage_description",
    "fieldtype": "Text",
    "label": "Damage Description"
+  },
+  {
+   "fieldname": "damaged_parts",
+   "fieldtype": "Small Text",
+   "label": "Damaged Parts"
+  },
+  {
+   "fieldname": "reported_by",
+   "fieldtype": "Data",
+   "label": "Reported By"
   },
   {
    "fieldname": "vwo_sec_assessment",

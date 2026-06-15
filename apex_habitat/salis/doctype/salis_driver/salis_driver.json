@@ -13,6 +13,7 @@
   "full_name",
   "driver_identity_col_2",
   "national_id",
+  "driver_id",
   "phone",
   "driver_sec_deployment",
   "status",
@@ -70,6 +71,15 @@
    "label": "National ID",
    "permlevel": 1,
    "search_index": 1
+  },
+  {
+   "description": "External fleet identifier used as the data-import key (unique).",
+   "fieldname": "driver_id",
+   "fieldtype": "Data",
+   "label": "Driver ID",
+   "permlevel": 1,
+   "search_index": 1,
+   "unique": 1
   },
   {
    "fieldname": "phone",
