@@ -92,3 +92,6 @@ apex_habitat.patches.v1_x.move_finance_settings_to_apex_settings
 # item 62 — they were submitted as transport requests, so they stay مسار). Idempotent,
 # no-op on fresh installs / re-run. PRUNE once every deployed site has run it.
 apex_habitat.patches.v1_x.refactor_transport_request_service_line
+# Rename the worker-transport Workspace 'Movement' -> 'Masar' so /app/masar
+# resolves (owner-reported 404). Idempotent; no-op on fresh installs / re-run.
+apex_habitat.patches.v1_x.rename_movement_workspace_to_masar

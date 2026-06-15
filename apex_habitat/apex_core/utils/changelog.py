@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.9 ---------------------------------------------------------------
+    {
+        "title": "Apex 1.54.9 — the worker-transport workspace is now named Masar and opens at /app/masar (it was named Movement but labelled Masar, so navigating to Masar returned a page-not-found); a migration renames the workspace on existing sites and no content changes",
+        "app_name": "apex_habitat",
+        "link": "/app/masar",
+        "creation": "2026-06-15 15:00:00",
+    },
     # v1.54.8 ---------------------------------------------------------------
     {
         "title": "Apex 1.54.8 — a new Fleet Control desk page (under Fleet Operations) gives a live, filterable vehicle board: every vehicle as a status-coloured card or table, filters for status/office/project and a plate search, a per-vehicle detail drawer (driver, compliance, recent incidents and custody assignments), and a CSV export of the current view",
