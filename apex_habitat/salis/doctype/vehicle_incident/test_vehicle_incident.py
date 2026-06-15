@@ -15,13 +15,17 @@ from frappe.utils import add_days, today
 class TestVehicleIncident(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
+        # A unique plate/driver per test: plate_normalized is unique, so reusing a
+        # fixed plate across setUp calls collides if the prior test's row is not
+        # rolled back first (observed on CI). Derive both from the test name.
+        tag = self._testMethodName
         self.driver = frappe.get_doc(
-            {"doctype": "Salis Driver", "full_name": "Incident Test Driver", "status": "Active"}
+            {"doctype": "Salis Driver", "full_name": f"Incident Driver {tag}", "status": "Active"}
         ).insert(ignore_permissions=True).name
         self.vehicle = frappe.get_doc(
             {
                 "doctype": "Salis Vehicle",
-                "plate_number": "INCIDENT TEST 1",
+                "plate_number": f"INC {tag}",
                 "status": "Active",
                 "current_driver": self.driver,
             }
