@@ -1,4 +1,4 @@
-// Client-side script for Fuel Request
+// [#jw1rmo]
 const FUEL_HIGH_LITRES_THRESHOLD = 200;
 
 frappe.ui.form.on("Fuel Request", {

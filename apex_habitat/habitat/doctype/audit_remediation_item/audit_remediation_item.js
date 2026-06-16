@@ -1,6 +1,6 @@
-// Client-side script for Audit Remediation Item
+// [#1syhf4]
 frappe.ui.form.on("Audit Remediation Item", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

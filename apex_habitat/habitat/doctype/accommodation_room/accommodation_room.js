@@ -1,4 +1,4 @@
-// Client-side script for Accommodation Room
+// [#oajw2e]
 frappe.ui.form.on("Accommodation Room", {
 	refresh(frm) {
 		const colors = {

@@ -1,8 +1,7 @@
-// Client-side script for Temporary Worker
+// [#85mm1b]
 frappe.ui.form.on("Temporary Worker", {
 	window_days(frm) {
-		// Mirror the server-side computation so the supervisor sees the expiry
-		// update immediately. The controller is still authoritative on save.
+		// [#tw9zet]
 		if (frm.doc.arrival_date && frm.doc.window_days) {
 			frm.set_value(
 				"expiry_date",

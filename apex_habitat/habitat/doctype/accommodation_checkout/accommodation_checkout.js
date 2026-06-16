@@ -1,6 +1,6 @@
-// Client-side script for Accommodation Checkout
+// [#n8kglt]
 frappe.ui.form.on("Accommodation Checkout", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

@@ -1,6 +1,6 @@
-// Client-side script for Camera Access Grant
+// [#mxivd5]
 frappe.ui.form.on("Camera Access Grant", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

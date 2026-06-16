@@ -1,15 +1,4 @@
-// Safety Map — interactive building floor plan (v0.9.0).
-//
-// Standard Frappe page built from frappe.ui.Page primitives + native
-// frappe.ui.Dialog. No SPA / Vue / React / external libraries. One bulk read
-// (get_safety_map) returns floors -> rooms with server-computed signals plus a
-// per-floor common-zone tile; rooms with open maintenance PULSE (CSS animation)
-// red, amber for damage / lower-priority signals. The pulse class is assigned by
-// the server signal — the client never recomputes business state.
-//
-// Clicking a room tile or a floor common-zone tile opens a Dialog that logs a
-// building/floor-scoped Safety Inspection Report via log_building_inspection.
-// After a successful write the map RE-FETCHES (server is the source of truth).
+// [#l7bpkl]
 
 frappe.pages["safety-map"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -167,7 +156,7 @@ class SafetyMap {
 				this._render_room_tile(floor, room).appendTo($grid);
 			});
 
-			// Per-floor common-zone tile (building/floor-level safety layer).
+			// [#fk2nxe]
 			if (floor.common_zone) {
 				this._render_zone_tile(floor).appendTo($grid);
 			}
@@ -179,7 +168,7 @@ class SafetyMap {
 			`<div class="sm-room sm-room--${room.signal}" tabindex="0" role="button"></div>`
 		);
 
-		// Pulse animation for red / amber signals.
+		// [#r0gsu1]
 		if (room.signal === "red" || room.signal === "amber") {
 			$tile.addClass("sm-pulse");
 		}
@@ -283,7 +272,7 @@ class SafetyMap {
 							message: __("Inspection logged: {0}", [r.message.report]),
 							indicator: "green",
 						});
-						// Re-fetch — a generated maintenance request repaints signals.
+						// [#1q9tno]
 						this.refresh();
 					},
 					error: () => {

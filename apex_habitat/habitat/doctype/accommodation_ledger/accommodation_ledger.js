@@ -1,6 +1,6 @@
-// Client-side script for Accommodation Ledger
+// [#ptidpq]
 frappe.ui.form.on("Accommodation Ledger", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

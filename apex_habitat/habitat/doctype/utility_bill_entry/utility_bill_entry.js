@@ -1,6 +1,6 @@
-// Client-side script for Utility Bill Entry
+// [#5vwurw]
 frappe.ui.form.on("Utility Bill Entry", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

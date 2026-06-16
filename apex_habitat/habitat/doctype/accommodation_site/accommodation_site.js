@@ -1,8 +1,7 @@
-// Client-side script for Accommodation Site
+// [#myqrhw]
 frappe.ui.form.on("Accommodation Site", {
 	refresh(frm) {
-		// Native Address (Address DocType via Dynamic Link): render the address list
-		// for saved sites; city and district remain visible as structured location fields.
+		// [#oe3or3]
 		frm.toggle_display("address_html", !frm.is_new());
 		if (!frm.is_new()) {
 			frappe.contacts.render_address_and_contact(frm);

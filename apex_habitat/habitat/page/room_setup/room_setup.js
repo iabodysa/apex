@@ -1,7 +1,4 @@
-// Room Setup — a staged, mobile-friendly wizard to define floors, room types and
-// bed counts for an Accommodation Building, then create the Room + Bed records via
-// the safe server generator (setup_building_rooms -> generate_rooms_and_beds).
-// Native Frappe page (make_app_page), normal DOM only — no shadow DOM, no presets.
+// [#gr1kmo]
 
 frappe.pages["room-setup"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -67,7 +64,7 @@ class RoomSetup {
 		});
 	}
 
-	// ----- Stage 1: floor definition -----
+	// [#aw8tj4]
 	_stage_floors() {
 		const $wrap = $('<div class="rs-stage"></div>').appendTo(this.$body);
 		$('<p class="text-muted"></p>')
@@ -143,8 +140,7 @@ class RoomSetup {
 	}
 
 	_materialize_rooms() {
-		// (Re)build each floor's rooms[] from counts/defaults, keeping prior overrides
-		// where the position still exists.
+		// [#mm9vce]
 		this.floors.forEach((f) => {
 			const n = Math.max(1, cint(f.rooms_per_floor) || 1);
 			const old = f.rooms || [];
@@ -155,7 +151,7 @@ class RoomSetup {
 		});
 	}
 
-	// ----- Stage 2: per-room type -----
+	// [#pax34c]
 	_stage_types() {
 		const $wrap = $('<div class="rs-stage"></div>').appendTo(this.$body);
 		$('<p class="text-muted"></p>')
@@ -176,7 +172,7 @@ class RoomSetup {
 		);
 	}
 
-	// ----- Stage 3: per-room beds -----
+	// [#gnqe4p]
 	_stage_beds() {
 		const $wrap = $('<div class="rs-stage"></div>').appendTo(this.$body);
 		$('<p class="text-muted"></p>')
@@ -216,7 +212,7 @@ class RoomSetup {
 		});
 	}
 
-	// ----- Stage 4: review + approve -----
+	// [#13u2dc]
 	_stage_review() {
 		const $wrap = $('<div class="rs-stage"></div>').appendTo(this.$body);
 		let rooms = 0, beds = 0;
@@ -248,9 +244,7 @@ class RoomSetup {
 	}
 
 	_orderedFloors() {
-		// Arrange floors bottom-to-top by classification (Basement -> Ground -> Middle
-		// -> Roof) and assign the functional floor number/code per type, so floor_type
-		// drives the numbering instead of being a cosmetic label.
+		// [#7me1f7]
 		const PRI = { Basement: 0, Ground: 1, Middle: 2, Roof: 3 };
 		const pri = (t) => (t in PRI ? PRI[t] : 2);
 		const sorted = this.floors.slice().sort(

@@ -1,4 +1,4 @@
-// Client-side script for Dispatch Trip
+// [#huha6w]
 frappe.ui.form.on("Dispatch Trip", {
 	refresh(frm) {
 		_update_trip_indicator(frm);

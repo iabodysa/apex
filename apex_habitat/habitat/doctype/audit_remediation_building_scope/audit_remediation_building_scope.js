@@ -1,6 +1,6 @@
-// Client-side script for Audit Remediation Building Scope
+// [#ilr8i3]
 frappe.ui.form.on("Audit Remediation Building Scope", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

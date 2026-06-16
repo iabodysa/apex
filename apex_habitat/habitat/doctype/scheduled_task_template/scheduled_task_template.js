@@ -1,6 +1,6 @@
-// Client-side script for Scheduled Task Template
+// [#ojds4e]
 frappe.ui.form.on("Scheduled Task Template", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

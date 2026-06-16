@@ -1,4 +1,4 @@
-// Client-side script for Scheduled Task Instance
+// [#f6nxz3]
 frappe.ui.form.on("Scheduled Task Instance", {
 	refresh(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.status === "Open") {

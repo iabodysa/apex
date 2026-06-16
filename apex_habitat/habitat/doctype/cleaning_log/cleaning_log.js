@@ -1,6 +1,6 @@
-// Client-side script for Cleaning Log
+// [#r66giq]
 frappe.ui.form.on("Cleaning Log", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

@@ -1,11 +1,4 @@
-// Front Desk — visual bed check-in board (v0.8.6).
-//
-// Standard Frappe page. No SPA / Vue / React / external libraries: built from
-// frappe.ui.Page primitives + native frappe.ui.Dialog. All reads come from the
-// single whitelisted reader get_building_grid (no N+1); all writes route through
-// the existing Accommodation Assignment / Accommodation Checkout controllers via
-// quick_check_in / quick_check_out. The server is the source of truth: after any
-// write we re-fetch the grid rather than mutating the DOM optimistically.
+// [#khaxgw]
 
 frappe.pages["front-desk"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -31,7 +24,7 @@ class FrontDesk {
 	}
 
 	_setup_controls() {
-		// Building selector in the page head.
+		// [#cvc2vf]
 		this.building_field = this.page.add_field({
 			fieldname: "building",
 			label: __("Building"),
@@ -43,7 +36,7 @@ class FrontDesk {
 					this.building = val;
 					this.refresh();
 				} else if (!val && this.building) {
-					// Field cleared — reset the board instead of leaving stale data.
+					// [#50f1po]
 					this.building = null;
 					this._render_empty(__("Select a building to load the board."));
 				}
@@ -70,7 +63,7 @@ class FrontDesk {
 			method: "apex_habitat.habitat.api.front_desk.get_building_grid",
 			args: { building: this.building },
 			callback: (r) => {
-				// Ignore a stale response if the user switched buildings mid-flight.
+				// [#ojympt]
 				if (requested !== this.building) return;
 				if (r.exc || !r.message) {
 					this._render_error(__("Could not load the board for this building."));
@@ -117,7 +110,7 @@ class FrontDesk {
 	_render_grid(data) {
 		this.$container.empty();
 
-		// Summary line.
+		// [#pmav3l]
 		const s = data.summary || {};
 		const $summary = $('<div class="fd-summary"></div>').appendTo(this.$container);
 		$summary.append(
@@ -232,7 +225,7 @@ class FrontDesk {
 							photo.$wrapper.html("");
 							return;
 						}
-						// Security: show the worker's HR photo to verify identity before assigning.
+						// [#rwp9u0]
 						frappe.call({
 							method: "apex_habitat.habitat.api.front_desk.get_employee_card",
 							args: { employee: emp },
@@ -309,8 +302,7 @@ class FrontDesk {
 	_open_check_out_dialog(bed, room, building) {
 		const occupant = bed.occupant || {};
 
-		// Custody items present → no one-click; route to the full Checkout form
-		// so the custody-clearance gate runs interactively.
+		// [#rukrv3]
 		if (occupant.has_custody) {
 			const d = new frappe.ui.Dialog({
 				title: __("Quick Check-out"),

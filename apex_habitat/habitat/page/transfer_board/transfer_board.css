@@ -1,8 +1,4 @@
-/* Transfer Board — split-screen drag-and-drop resident transfer (v0.9.0).
- * Reuses the Front Desk bed-card visual language (color + text badge so color
- * is never the only status signal) inside a two-column split layout, with
- * drag/drop and tap-select affordances.
- */
+/* [#cwpffa] */
 
 .tb-board {
 	padding: 8px 4px 32px;
@@ -101,7 +97,7 @@
 	gap: 8px;
 }
 
-/* Bed card — large touch target. */
+/* [#5f6not] */
 .tb-bed {
 	border-radius: 8px;
 	padding: 10px 8px;
@@ -143,7 +139,7 @@
 	white-space: nowrap;
 }
 
-/* Status colors — paired with text badges. */
+/* [#fxxhpv] */
 .tb-bed--green {
 	background: #e6f4ea;
 	border-color: #34a853;
@@ -170,7 +166,7 @@
 	cursor: not-allowed;
 }
 
-/* Drag-and-drop affordances. */
+/* [#bexr2c] */
 .tb-bed--draggable {
 	cursor: grab;
 }
@@ -184,12 +180,12 @@
 	transform: scale(1.02);
 }
 
-/* Tap-fallback source selection. */
+/* [#dxjm0q] */
 .tb-bed--selected {
 	box-shadow: 0 0 0 3px var(--primary, #2490ef);
 }
 
-/* Loading state — inline per-pane spinner + skeleton (replaces global freeze). */
+/* [#fprhwz] */
 .tb-loading {
 	display: flex;
 	flex-direction: column;
@@ -254,7 +250,7 @@
 	}
 }
 
-/* Error state — message + retry. */
+/* [#15yh1f] */
 .tb-error {
 	display: flex;
 	flex-direction: column;

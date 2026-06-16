@@ -2,9 +2,7 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import path from "path";
 
-// Builds the Fleet OS dashboard SPA into the app's public assets, served at
-// /fleet. Output names are stable (un-hashed) so www/fleet.html can reference
-// them directly. Mirrors the worker_portal / driver_portal conventions.
+// [#cynnk9]
 export default defineConfig({
   plugins: [vue()],
   base: "/assets/apex_habitat/fleet_portal/",

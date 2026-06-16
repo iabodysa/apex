@@ -1,6 +1,6 @@
-// Client-side script for Safety Inspection Report
+// [#phkaa5]
 frappe.ui.form.on("Safety Inspection Report", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

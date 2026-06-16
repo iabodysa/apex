@@ -1,6 +1,6 @@
-// Client-side script for Linked Maintenance Request Item
+// [#3zo7ig]
 frappe.ui.form.on("Linked Maintenance Request Item", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

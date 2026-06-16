@@ -1,6 +1,6 @@
-// Client-side script for Habitat Safety Incident
+// [#a46hqu]
 frappe.ui.form.on("Habitat Safety Incident", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

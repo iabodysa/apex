@@ -1,4 +1,4 @@
-// Client-side script for Fuel Claim
+// [#reao6e]
 
 frappe.ui.form.on("Fuel Claim", {
 	refresh(frm) {

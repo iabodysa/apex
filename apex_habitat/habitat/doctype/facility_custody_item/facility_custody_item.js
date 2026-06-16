@@ -1,6 +1,6 @@
-// Client-side script for Facility Custody Item
+// [#9fh5yd]
 frappe.ui.form.on("Facility Custody Item", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

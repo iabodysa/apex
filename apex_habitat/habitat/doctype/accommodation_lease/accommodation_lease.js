@@ -29,7 +29,7 @@ frappe.ui.form.on("Accommodation Lease", {
 
 		if (frm.doc.docstatus === 1 && frm.doc.status !== "Expired" && frm.doc.status !== "Terminated") {
 			frm.add_custom_button(__("Generate Payment"), function() {
-				// Get selected row or first unpaid row
+				// [#37puzh]
 				const schedule = frm.doc.payment_schedule || [];
 				const selected = schedule.find(r => r.__checked) || schedule.find(r => r.status !== "Paid");
 				if (!selected) {
@@ -47,10 +47,7 @@ frappe.ui.form.on("Accommodation Lease", {
 								frappe.msgprint({message: __("Expense Request Afmco DocType is not installed."), indicator: "red"});
 								return;
 							}
-							// Accommodation Lease has no project / cost_center fields of its own.
-							// Resolve the cost center from the linked building (matching the
-							// accommodation_assignment building.default_cost_center resolution);
-							// the lease carries no project, so it is left blank.
+							// [#ofbr6f]
 							frappe.db.get_value("Accommodation Building", frm.doc.building, "default_cost_center").then(res => {
 								const doc = frappe.model.get_new_doc("Expense Request Afmco");
 								doc.tax_invoice_number = frm.doc.name;
@@ -80,7 +77,7 @@ frappe.ui.form.on("Accommodation Lease", {
 						ref.supplier = frm.doc.supplier;
 						frappe.set_route("Form", "Payment Order", doc.name);
 					} else {
-						// Default: Payment Entry
+						// [#mrbtun]
 						const doc = frappe.model.get_new_doc("Payment Entry");
 						doc.payment_type = "Pay";
 						doc.party_type = "Supplier";

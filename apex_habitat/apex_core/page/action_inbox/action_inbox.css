@@ -1,16 +1,11 @@
-/* Action Inbox — a "pending my action" feed. Native Frappe desk styling only.
- * Every colour comes from native theme tokens (--border-color, --card-bg,
- * --text-muted, --heading-color, --bg-light-gray) so the page tracks the active
- * theme; pills use the native .indicator-pill, and buttons use native btn classes.
- * No brand colours. Every rule is scoped under the root .action-inbox.
- */
+/* [#sswf4x] */
 .action-inbox {
 	max-width: 860px;
 	margin: 0 auto;
 	padding: 4px 0 24px;
 }
 
-/* ---- sections ---- */
+/* [#dw8bvh] */
 .action-inbox .ai-section {
 	margin-bottom: 24px;
 }
@@ -28,7 +23,7 @@
 	gap: 10px;
 }
 
-/* ---- cards ---- */
+/* [#j7gugs] */
 .action-inbox .ai-card {
 	border: 1px solid var(--border-color, #d1d8dd);
 	border-radius: var(--border-radius, 8px);
@@ -66,7 +61,7 @@
 	font-size: var(--text-sm);
 }
 
-/* ---- action buttons (transitions / open-close) ---- */
+/* [#h17jb7] */
 .action-inbox .ai-card-actions {
 	display: flex;
 	flex-wrap: wrap;
@@ -80,7 +75,7 @@
 	font-size: var(--text-sm);
 }
 
-/* ---- empty / loading / error (the shared page-level slot) ---- */
+/* [#su3n62] */
 .action-inbox .ai-empty {
 	text-align: center;
 	color: var(--text-muted, #74808b);

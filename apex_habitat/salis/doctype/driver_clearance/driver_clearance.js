@@ -1,4 +1,4 @@
-// Client-side script for Driver Clearance
+// [#e2x1po]
 
 frappe.ui.form.on("Driver Clearance", {
 	refresh(frm) {

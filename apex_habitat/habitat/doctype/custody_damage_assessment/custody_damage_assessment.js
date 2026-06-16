@@ -1,6 +1,6 @@
-// Client-side script for Custody Damage Assessment
+// [#3h8kmi]
 frappe.ui.form.on("Custody Damage Assessment", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

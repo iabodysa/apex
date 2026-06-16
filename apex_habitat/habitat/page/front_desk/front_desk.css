@@ -1,7 +1,4 @@
-/* Front Desk — visual bed board (v0.8.6).
- * Status color classes + responsive tablet grid. Color is never the only
- * status signal: each bed card also carries a text badge for glare/a11y.
- */
+/* [#7jjeem] */
 
 .fd-board {
 	padding: 8px 4px 32px;
@@ -13,7 +10,7 @@
 	font-size: 15px;
 }
 
-/* Error state — clear message plus a retry action instead of silent failure. */
+/* [#iu6cwl] */
 .fd-error {
 	padding: 48px 16px;
 	text-align: center;
@@ -25,7 +22,7 @@
 	margin-bottom: 12px;
 }
 
-/* Loading skeleton shown while the board is fetched. */
+/* [#nt52v9] */
 .fd-loading-label {
 	font-size: 13px;
 	margin-bottom: 12px;
@@ -142,7 +139,7 @@
 	gap: 10px;
 }
 
-/* Bed card — large touch target for tablet use. */
+/* [#12ykxv] */
 .fd-bed {
 	border-radius: 8px;
 	padding: 12px 10px;
@@ -184,7 +181,7 @@
 	white-space: nowrap;
 }
 
-/* Status colors — paired with the text badge so color is not the sole signal. */
+/* [#8op24p] */
 .fd-bed--green {
 	background: #e6f4ea;
 	border-color: #34a853;

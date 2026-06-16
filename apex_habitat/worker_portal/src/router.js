@@ -5,15 +5,14 @@ const routes = [
   { path: "/accommodation", name: "accommodation", component: () => import("./pages/Accommodation.vue") },
   { path: "/transport", name: "transport", component: () => import("./pages/Transport.vue") },
   { path: "/requests", name: "requests", component: () => import("./pages/Requests.vue") },
-  // Unknown hash → land on the Profile tab rather than a blank <router-view>.
+  // [#a7w9tx]
   { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
 
 export default createRouter({
   history: createWebHashHistory(),
   routes,
-  // Each tab is a top-level screen; start it at the top on navigation, and
-  // restore the prior position on browser Back/Forward.
+  // [#dy6jiy]
   scrollBehavior(to, from, savedPosition) {
     return savedPosition || { top: 0 };
   },

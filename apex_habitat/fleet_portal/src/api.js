@@ -1,6 +1,4 @@
-// Minimal Frappe API helper: calls a whitelisted method and returns message.
-// CSRF token is exposed by the www shell as window.csrf_token; credentials
-// (the session cookie) ride along so the server enforces the fleet-role gate.
+// [#tn9tob]
 const CSRF = () => (typeof window !== "undefined" && window.csrf_token) || "";
 
 export async function call(method, { args = null, type = "GET" } = {}) {

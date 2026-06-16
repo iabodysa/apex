@@ -1,6 +1,6 @@
-// Client-side script for Safety Task Catalog
+// [#bt1tv6]
 frappe.ui.form.on("Safety Task Catalog", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

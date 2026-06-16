@@ -1,6 +1,6 @@
-// Client-side script for Maintenance Procurement Item
+// [#pvx5rq]
 frappe.ui.form.on("Maintenance Procurement Item", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

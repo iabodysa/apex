@@ -1,6 +1,6 @@
-// Client-side script for Custody Return Item
+// [#945fl8]
 frappe.ui.form.on("Custody Return Item", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

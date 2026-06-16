@@ -1,4 +1,4 @@
-// Client-side script for Subcontractor Service Order
+// [#jb13ri]
 frappe.ui.form.on("Subcontractor Service Order", {
 	refresh(frm) {
 		if (frm.doc.docstatus === 1) {

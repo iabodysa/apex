@@ -1,6 +1,6 @@
-// Client-side script for Operational Depreciation Policy
+// [#jeb8do]
 frappe.ui.form.on("Operational Depreciation Policy", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

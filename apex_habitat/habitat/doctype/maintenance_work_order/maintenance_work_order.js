@@ -1,7 +1,7 @@
-// Client-side script for Maintenance Work Order
+// [#l41jo9]
 frappe.ui.form.on("Maintenance Work Order", {
 	refresh(frm) {
-		// Load material template button
+		// [#j6atlg]
 		if (frm.doc.docstatus === 0 && frm.doc.issue_type) {
 			frm.add_custom_button(__("Load Material Template"), function() {
 				frappe.call({
@@ -27,7 +27,7 @@ frappe.ui.form.on("Maintenance Work Order", {
 			});
 		}
 
-		// Show orange banner if status is Completed/Closed but no photo attached
+		// [#hnxa95]
 		if (
 			(frm.doc.status === "Completed" || frm.doc.status === "Closed") &&
 			!frm.doc.completion_photo

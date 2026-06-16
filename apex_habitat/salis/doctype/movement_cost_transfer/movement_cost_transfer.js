@@ -1,4 +1,4 @@
-// Client-side script for Movement Cost Transfer
+// [#t6qih1]
 
 frappe.ui.form.on("Movement Cost Transfer", {
 	refresh(frm) {

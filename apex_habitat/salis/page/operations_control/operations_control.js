@@ -1,12 +1,4 @@
-// Fleet Control — professional fleet board for daily operations.
-//
-// Standard Frappe page (frappe.ui primitives only; no SPA / external libs). All
-// data comes from two bounded, permission-gated readers
-// (apex_habitat.salis.api.operations_control). Rendering is DOM-safe: data is
-// set via jQuery .text()/attr only, never innerHTML with unescaped values. Every
-// user-facing string goes through __() for translation. The board mirrors the
-// company's fleet worksheet: a filterable vehicle grid/table, a per-vehicle
-// detail drawer, and a CSV export of the current view.
+// [#odtona]
 
 frappe.pages["operations-control"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -185,9 +177,7 @@ class FleetControl {
 		$close.appendTo($head);
 		const $open = $('<a class="btn btn-xs btn-primary fc-form-link"></a>').text(__("Open Vehicle"));
 		$open.attr("href", "/app/salis-vehicle/" + encodeURIComponent(v.name)).appendTo($head);
-		// Quick actions: launch the native submittable forms prefilled with this
-		// vehicle (via route_options), so each write goes through the standard
-		// form's own validation, workflow and permissions — no duplicate write path.
+		// [#kv4vij]
 		["Vehicle Stop", "Vehicle Incident", "Vehicle Assignment"].forEach((doctype) => {
 			const $a = $('<button class="btn btn-xs btn-default fc-action"></button>').text("+ " + __(doctype));
 			$a.on("click", () => {

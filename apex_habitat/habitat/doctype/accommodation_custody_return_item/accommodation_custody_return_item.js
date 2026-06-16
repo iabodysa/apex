@@ -1,6 +1,6 @@
-// Client-side script for Accommodation Custody Return Item
+// [#kffygm]
 frappe.ui.form.on("Accommodation Custody Return Item", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

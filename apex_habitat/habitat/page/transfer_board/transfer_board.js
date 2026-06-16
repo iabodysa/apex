@@ -1,18 +1,4 @@
-// Transfer Board — split-screen drag-and-drop resident transfer (v0.9.0).
-//
-// Standard Frappe page built from frappe.ui.Page primitives + native HTML5
-// drag-and-drop + native frappe.ui.Dialog. No SPA / Vue / React / external
-// libraries. Each pane reuses the read-only front_desk.get_building_grid reader
-// (one bulk, N+1-free call per side). The single write routes through the
-// existing Room Bed Transfer controller via transfer_occupant. The server is the
-// source of truth: after a transfer we RE-FETCH both panes rather than mutating
-// the DOM optimistically.
-//
-// Gestures:
-//   * HTML5 drag-and-drop (mouse): drag an OCCUPIED bed card onto an AVAILABLE
-//     bed card → confirm dialog → transfer.
-//   * Tap/click fallback (tablets/keyboard): tap an occupied bed to select the
-//     source (it highlights), then tap an available bed to pick the target.
+// [#iupr5r]
 
 frappe.pages["transfer-board"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -28,12 +14,12 @@ frappe.pages["transfer-board"].on_page_load = function (wrapper) {
 class TransferBoard {
 	constructor(page) {
 		this.page = page;
-		// One pane descriptor per side.
+		// [#o6pgsl]
 		this.panes = {
 			left: { building: null, data: null, $grid: null, field: null },
 			right: { building: null, data: null, $grid: null, field: null },
 		};
-		// Tap-fallback selection: {side, bed, room, building} or null.
+		// [#nlmawh]
 		this.selected_source = null;
 	}
 
@@ -101,14 +87,12 @@ class TransferBoard {
 	refresh(side) {
 		const pane = this.panes[side];
 		if (!pane.building) return;
-		// Keep a stable selection across a manual re-fetch of the side that does
-		// not hold the current source highlight; clear it if it belongs here.
+		// [#m1brxr]
 		this._render_loading(pane.$grid);
 		frappe.call({
 			method: "apex_habitat.habitat.api.front_desk.get_building_grid",
 			args: { building: pane.building },
-			// Inline per-pane loading state instead of a global freeze, so the
-			// other pane and the page chrome stay interactive while one loads.
+			// [#i2n0q1]
 			callback: (r) => {
 				if (r.exc || !r.message) {
 					this._render_error(side);
@@ -133,7 +117,7 @@ class TransferBoard {
 		const $wrap = $('<div class="tb-loading" aria-busy="true"></div>').appendTo($grid);
 		$('<div class="tb-spinner" role="status" aria-label="Loading"></div>').appendTo($wrap);
 		$('<div class="tb-loading-text text-muted"></div>').text(__("Loading board…")).appendTo($wrap);
-		// Lightweight skeleton rows so the pane has shape while data arrives.
+		// [#aik87z]
 		const $sk = $('<div class="tb-skeleton"></div>').appendTo($wrap);
 		for (let i = 0; i < 3; i++) {
 			$('<div class="tb-skeleton-row"></div>').appendTo($sk);
@@ -216,7 +200,7 @@ class TransferBoard {
 				.appendTo($card);
 		}
 
-		// HTML5 drag source: only occupied beds are draggable.
+		// [#lenych]
 		if (is_occupied) {
 			$card.attr("draggable", "true");
 			$card.addClass("tb-bed--draggable");
@@ -229,7 +213,7 @@ class TransferBoard {
 			$card.on("dragend", () => $card.removeClass("tb-bed--dragging"));
 		}
 
-		// HTML5 drop target: only available beds accept a drop.
+		// [#fy14ez]
 		if (is_available) {
 			$card.on("dragover", (e) => {
 				e.preventDefault();
@@ -247,7 +231,7 @@ class TransferBoard {
 			});
 		}
 
-		// Tap/click fallback (tablet + keyboard).
+		// [#ok7fjp]
 		const handler = () => this._on_bed_tap(side, bed, room, building, $card);
 		$card.on("click", handler);
 		$card.on("keydown", (e) => {
@@ -264,7 +248,7 @@ class TransferBoard {
 		const is_occupied = bed.bed_color === "red" && bed.occupant;
 		const is_available = bed.bed_color === "green";
 
-		// Step 1 — pick an occupied source.
+		// [#3gx4tq]
 		if (!this.selected_source) {
 			if (!is_occupied) {
 				if (is_available) {
@@ -285,14 +269,14 @@ class TransferBoard {
 			return;
 		}
 
-		// Tapping the same source again deselects.
+		// [#dx0k8p]
 		if (this.selected_source.bed.bed === bed.bed) {
 			this.selected_source = null;
 			this._clear_selection_highlight();
 			return;
 		}
 
-		// Step 2 — pick an available target.
+		// [#ghi62y]
 		if (!is_available) {
 			frappe.show_alert({
 				message: __("Drop target must be an available bed."),
@@ -312,7 +296,7 @@ class TransferBoard {
 	}
 
 	_begin_transfer(source_bed, target_bed_card, target_building) {
-		// Look up the occupant label of the source for the confirm dialog.
+		// [#9ehbrc]
 		const source_ctx = this._find_bed(source_bed);
 		const occupant_label = source_ctx && source_ctx.bed.occupant
 			? source_ctx.bed.occupant.employee_name || source_ctx.bed.occupant.employee
@@ -354,8 +338,7 @@ class TransferBoard {
 					freeze: true,
 					freeze_message: __("Transferring…"),
 					callback: (r) => {
-						// On a server-side throw Frappe surfaces the message itself;
-						// keep the dialog open so the operator can correct and retry.
+						// [#amcl7a]
 						if (r.exc || !r.message || !r.message.transfer) {
 							return;
 						}
@@ -364,11 +347,11 @@ class TransferBoard {
 							message: __("Transferred: {0}", [r.message.transfer]),
 							indicator: "green",
 						});
-						// Re-fetch BOTH panes — server is the source of truth.
+						// [#o24v7l]
 						this.refresh_all();
 					},
 					error: () => {
-						// Network/unexpected failure: keep dialog open, tell the user.
+						// [#qx40uo]
 						frappe.show_alert({
 							message: __("Transfer failed. Please try again."),
 							indicator: "red",
@@ -380,7 +363,7 @@ class TransferBoard {
 		d.show();
 	}
 
-	// Find the rendered bed context (across both panes) by bed docname.
+	// [#hhva0k]
 	_find_bed(bed_name) {
 		let found = null;
 		this.$root.find(".tb-bed").each(function () {

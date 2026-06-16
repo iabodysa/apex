@@ -1,4 +1,4 @@
-/* Salis Dispatch Board — read-only fleet glance board layout. */
+/* [#e34z33] */
 
 .sdb-board {
 	padding: 0 var(--padding-md, 15px) var(--padding-lg, 20px);
@@ -118,7 +118,7 @@
 	font-size: var(--text-sm, 0.85rem);
 }
 
-/* ---- loading skeleton ---- */
+/* [#6dfkfk] */
 
 .sdb-skeleton {
 	background: var(--skeleton-bg, #eee);
@@ -158,7 +158,7 @@
 	}
 }
 
-/* ---- error state ---- */
+/* [#2um9gi] */
 
 .sdb-error {
 	grid-column: 1 / -1;

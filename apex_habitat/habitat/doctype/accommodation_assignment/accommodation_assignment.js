@@ -1,4 +1,4 @@
-// Client-side script for Accommodation Assignment
+// [#3nt923]
 frappe.ui.form.on("Accommodation Assignment", {
 	setup: function(frm) {
 		frm.set_query("room", function() {
@@ -26,8 +26,7 @@ frappe.ui.form.on("Accommodation Assignment", {
 	},
 
 	refresh(frm) {
-		// Supervisor surface: issue the assigned worker's personal Masar link.
-		// Only meaningful on a saved Assignment that actually has an employee.
+		// [#dsopww]
 		if (!frm.is_new() && frm.doc.employee) {
 			frm.add_custom_button(__("Issue Masar Link"), () => {
 				frappe.call({
@@ -37,11 +36,7 @@ frappe.ui.form.on("Accommodation Assignment", {
 					freeze_message: __("Issuing worker link…"),
 					callback: (r) => {
 						if (r.message) {
-							// Shared helper from
-							// public/js/masar_worker_link.bundle.js (wired via
-							// hooks.py app_include_js). No copy-link button on
-							// the supervisor surface — that's the Arrivals Desk
-							// superset.
+							// [#jt1dyc]
 							apex_habitat.masar.show_worker_link_dialog(r.message);
 						}
 					},

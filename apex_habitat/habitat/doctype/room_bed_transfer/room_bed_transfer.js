@@ -1,7 +1,7 @@
-// Client-side script for Room Bed Transfer
+// [#dcpq47]
 frappe.ui.form.on("Room Bed Transfer", {
 	setup: function(frm) {
-		// Restrict "To Bed" selection to the chosen "To Room" and only show beds that are not Occupied
+		// [#jhvhmd]
 		frm.set_query("to_bed", function() {
 			if (!frm.doc.to_room) {
 				return {}; // will return nothing or all if standard, but depends_on hides it anyway
@@ -16,11 +16,11 @@ frappe.ui.form.on("Room Bed Transfer", {
 	},
 	
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	},
 
 	to_room(frm) {
-		// clear bed if room changes
+		// [#qvjsr0]
 		frm.set_value("to_bed", "");
 	}
 });

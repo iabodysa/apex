@@ -1,4 +1,4 @@
-// Client-side script for Accommodation Building
+// [#co3q2w]
 
 function _injectFloorLayoutStyles() {
 	if (document.getElementById("apex-floor-layout-style")) return;
@@ -42,7 +42,7 @@ function _renderFloorLayout(frm) {
 			var wrapper = frm.get_field("floor_layout_html").$wrapper;
 			wrapper.empty();
 
-			// Summary legend
+			// [#i35f5h]
 			var s = data.summary;
 			var legendHtml = [
 				'<div class="apex-layout-summary">',
@@ -96,8 +96,7 @@ function _toggleFloorFields(frm) {
 }
 
 function _renderSiteAddress(frm) {
-	// The address belongs to the Accommodation Site. Render it here read-only so the
-	// operator can see where the building is without re-typing (and re-duplicating) it.
+	// [#5bdnvg]
 	const wrapper = frm.get_field("address_html").$wrapper;
 	wrapper.empty();
 
@@ -142,8 +141,7 @@ function _renderBuildingDashboard(frm) {
 			if (r.exc || !r.message) return;
 			const m = r.message;
 			frm.dashboard.reset();
-			// reset() hides the native Connections (links_area); re-render them so the
-			// linked-document groups (Rooms, Beds, Leases, Residents, ...) still appear.
+			// [#384474]
 			frm.dashboard.render_links();
 			frm.dashboard.add_indicator(__("Active Occupants: {0}", [m.active_occupants]),
 				m.active_occupants ? "blue" : "gray");
@@ -170,21 +168,18 @@ frappe.ui.form.on("Accommodation Building", {
 		_toggleFloorFields(frm);
 		_renderBuildingDashboard(frm);
 
-		// Floor layout grid (saved docs only — lazy fetch)
+		// [#qeq1h4]
 		if (!frm.is_new()) {
 			_renderFloorLayout(frm);
 		}
 
-		// Address is owned by the Accommodation Site (single source of truth). The
-		// building no longer carries its own editable Address widget — that caused the
-		// same address to be entered twice (once here, once on the site). Instead show
-		// the site's address read-only so it is never duplicated.
+		// [#hyf59p]
 		frm.toggle_display("address_html", !frm.is_new());
 		if (!frm.is_new()) {
 			_renderSiteAddress(frm);
 		}
 
-		// Status indicator
+		// [#msjhhk]
 		const colors = {
 			"Active": "green",
 			"Inactive": "grey",
@@ -195,7 +190,7 @@ frappe.ui.form.on("Accommodation Building", {
 			frm.page.set_indicator(__(status), colors[status] || "blue");
 		}
 
-		// Setup button group (only for saved documents)
+		// [#ob62bi]
 		if (!frm.is_new()) {
 			frm.add_custom_button(__("Setup Rooms"), function () {
 				frappe.set_route("room-setup", frm.doc.name);
@@ -231,16 +226,14 @@ frappe.ui.form.on("Accommodation Building", {
 	},
 
 	site(frm) {
-		// Re-render the (read-only) site address when the chosen site changes.
+		// [#t62uep]
 		if (!frm.is_new()) {
 			_renderSiteAddress(frm);
 		}
 	},
 
 	edit_room_setup_btn(frm) {
-		// Same destination as the toolbar "Setup Rooms" button, surfaced right by the
-		// read-only Floor Plan table so a supervisor who wants to change room/bed counts
-		// can reach the Room Setup wizard without hunting the toolbar.
+		// [#249zyk]
 		frappe.set_route("room-setup", frm.doc.name);
 	},
 });

@@ -1,6 +1,6 @@
-// Client-side script for Camera Access Building Scope
+// [#tqxic9]
 frappe.ui.form.on("Camera Access Building Scope", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

@@ -1,6 +1,6 @@
-// Client-side script for Safety Task Execution
+// [#jzwk5r]
 frappe.ui.form.on("Safety Task Execution", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

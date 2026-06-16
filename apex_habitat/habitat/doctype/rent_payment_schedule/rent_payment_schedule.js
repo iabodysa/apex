@@ -1,6 +1,6 @@
-// Client-side script for Rent Payment Schedule
+// [#mm4rm2]
 frappe.ui.form.on("Rent Payment Schedule", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

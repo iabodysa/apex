@@ -1,9 +1,4 @@
-// Client-side script for Salis Payment Request.
-//
-// Surfaces the Payment Router's "Create Payment" action. The button appears
-// only on a finance-approved request that has not yet been routed to a payment
-// document (linked_payment_entry empty). It calls the POST-only router endpoint,
-// reloads, and routes to the created payment document.
+// [#go2egg]
 frappe.ui.form.on("Salis Payment Request", {
 	refresh(frm) {
 		const finance_approved =
@@ -14,7 +9,7 @@ frappe.ui.form.on("Salis Payment Request", {
 			return;
 		}
 
-		// Only/primary toolbar action -> render directly, no dropdown group.
+		// [#7wcqvo]
 		frm.add_custom_button(__("Create Payment"), function () {
 			frappe.confirm(
 				__("Create the payment document for this approved request?"),
@@ -35,9 +30,7 @@ frappe.ui.form.on("Salis Payment Request", {
 								indicator: "green",
 							});
 							frm.reload_doc();
-							// Resolve the configured target DocType to route there;
-							// fall back to native Payment Request (the router's
-							// default) when none is configured.
+							// [#k0abyf]
 							frappe.db
 								.get_single_value(
 									"Payment Routing Settings",

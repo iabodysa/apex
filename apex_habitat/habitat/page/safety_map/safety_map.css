@@ -1,8 +1,4 @@
-/* Safety Map — interactive building floor plan (v0.9.0).
- * Floor grid of room tiles + a per-floor common-zone tile. Rooms with open
- * maintenance pulse red; amber for damage / lower-priority signals. Color is
- * never the only status signal: each tile also carries a text badge.
- */
+/* [#pt9jmh] */
 
 .sm-map {
 	padding: 8px 4px 32px;
@@ -64,7 +60,7 @@
 	gap: 12px;
 }
 
-/* Room tile. */
+/* [#i4lswp] */
 .sm-room {
 	border-radius: 8px;
 	padding: 14px 12px;
@@ -104,7 +100,7 @@
 	opacity: 0.7;
 }
 
-/* Signal colors. */
+/* [#t9fwi5] */
 .sm-room--red {
 	background: #fde8e8;
 	border-color: #d93025;
@@ -123,7 +119,7 @@
 	color: #1e7e34;
 }
 
-/* Common-zone tile — distinct from bedrooms (building/floor safety layer). */
+/* [#j7hu5w] */
 .sm-zone {
 	border-radius: 8px;
 	padding: 14px 12px;
@@ -162,7 +158,7 @@
 	letter-spacing: 0.03em;
 }
 
-/* Pulse animation for active red / amber signals. */
+/* [#9889xv] */
 @keyframes sm-pulse-anim {
 	0% {
 		box-shadow: 0 0 0 0 rgba(217, 48, 37, 0.45);
@@ -201,7 +197,7 @@
 	}
 }
 
-/* Loading skeleton. */
+/* [#q845gc] */
 .sm-skeleton {
 	padding: 8px 0 4px;
 }
@@ -245,7 +241,7 @@
 	}
 }
 
-/* Error state with retry. */
+/* [#15p7yx] */
 .sm-error {
 	padding: 40px 16px;
 	text-align: center;

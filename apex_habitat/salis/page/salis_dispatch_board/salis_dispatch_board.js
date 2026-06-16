@@ -1,14 +1,4 @@
-// Salis Dispatch Board — fleet/dispatch glance board (read-only).
-//
-// Standard Frappe page. No SPA / Vue / React / external libraries: built from
-// frappe.ui.Page primitives only. The whole board is loaded from a single
-// whitelisted reader (apex_habitat.salis.api.dispatch_board.get_dispatch_board)
-// that returns every pane in one N+1-free response. There are no writes: this
-// is a glance board, so it has a single "Refresh" primary action and an
-// optional Project filter that narrows the scope server-side.
-//
-// Rendering is DOM-safe: all data is set via jQuery .text() only. No innerHTML
-// with unescaped data. All user-facing strings go through __() for translation.
+// [#mxen9j]
 
 frappe.pages["salis-dispatch-board"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -21,7 +11,7 @@ frappe.pages["salis-dispatch-board"].on_page_load = function (wrapper) {
 	board.setup();
 };
 
-// Status -> Frappe indicator colour. Unknown statuses fall back to grey.
+// [#lgvk46]
 const VEHICLE_STATUS_COLOR = {
 	Active: "green",
 	Stopped: "orange",
@@ -97,9 +87,7 @@ class SalisDispatchBoard {
 		});
 	}
 
-	// Skeleton placeholder shown while the board is fetching. Replaces the freeze
-	// overlay so the page stays interactive and the user sees structured progress
-	// instead of a blank/stale board.
+	// [#oi0x2w]
 	_show_loading() {
 		this.$panes.empty();
 		for (let i = 0; i < 4; i++) {
@@ -114,8 +102,7 @@ class SalisDispatchBoard {
 		}
 	}
 
-	// Full-board error state with a retry control, shown when the reader fails or
-	// returns nothing. Replaces the previous silent `return` (blank board).
+	// [#nv07zv]
 	_show_error() {
 		this.$panes.empty();
 		const $err = $('<div class="sdb-error"></div>').appendTo(this.$panes);
@@ -142,7 +129,7 @@ class SalisDispatchBoard {
 		this._render_requests_pane(data.transport_requests || {});
 	}
 
-	// ---- pane scaffolding -------------------------------------------------
+	// [#byqetp]
 
 	_make_pane(title, count_text) {
 		const $pane = $('<div class="sdb-pane"></div>').appendTo(this.$panes);
@@ -160,8 +147,7 @@ class SalisDispatchBoard {
 	}
 
 	_indicator(label, color) {
-		// Frappe's standard inline status pill. The colour class carries no data,
-		// only the label is dynamic and it is set via .text().
+		// [#5l4ux5]
 		const $span = $(`<span class="indicator-pill ${color || "grey"}"></span>`);
 		$('<span></span>').text(label).appendTo($span);
 		return $span;
@@ -176,7 +162,7 @@ class SalisDispatchBoard {
 		return $r;
 	}
 
-	// ---- vehicles pane ----------------------------------------------------
+	// [#5uyhsp]
 
 	_render_vehicles_pane(pane) {
 		const $body = this._make_pane(
@@ -215,7 +201,7 @@ class SalisDispatchBoard {
 		});
 	}
 
-	// ---- today's trips pane ----------------------------------------------
+	// [#6oc75f]
 
 	_render_trips_pane(pane) {
 		const $body = this._make_pane(
@@ -256,7 +242,7 @@ class SalisDispatchBoard {
 		});
 	}
 
-	// ---- driver availability pane ----------------------------------------
+	// [#78g7r8]
 
 	_render_drivers_pane(pane) {
 		const active = pane.active_total || 0;
@@ -305,7 +291,7 @@ class SalisDispatchBoard {
 		});
 	}
 
-	// ---- open transport requests pane ------------------------------------
+	// [#npsjp4]
 
 	_render_requests_pane(pane) {
 		const $body = this._make_pane(

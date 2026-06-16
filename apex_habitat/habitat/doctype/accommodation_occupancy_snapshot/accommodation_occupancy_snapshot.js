@@ -1,8 +1,5 @@
-// Copyright (c) 2026, AFMCO Support Services Co. Ltd and contributors
-// For license information, please see license.txt
+// [#hezt05]
 
-// frappe.ui.form.on("Accommodation Occupancy Snapshot", {
-// 	refresh(frm) {
+// [#917dbt]
 
-// 	},
-// });
+// [#l49j7v]

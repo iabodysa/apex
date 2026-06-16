@@ -1,6 +1,6 @@
-// Client-side script for Facility Asset Custody Assignment
+// [#piuxig]
 frappe.ui.form.on("Facility Asset Custody Assignment", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

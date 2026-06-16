@@ -1,6 +1,6 @@
-// Client-side script for Habitat Settings
+// [#hfvzek]
 frappe.ui.form.on("Habitat Settings", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

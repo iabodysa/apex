@@ -1,16 +1,4 @@
-// Fuel Approval Console — pending fuel request review board (Salis).
-//
-// Standard Frappe page. No SPA / Vue / React / external libraries: built from
-// frappe.ui.Page primitives + native frappe.ui.Dialog. All reads come from the
-// single whitelisted reader get_pending_fuel_requests (no N+1); all writes route
-// through the whitelisted approve_fuel_request / reject_fuel_request methods,
-// which load the real Fuel Request doc and drive the native workflow. The server
-// is the source of truth: after any write we re-fetch the queue rather than
-// mutating the DOM optimistically.
-//
-// Rendering is DOM-safe: data is set via jQuery .text() / textContent only; no
-// innerHTML with unescaped data. The board's styles are injected once as a
-// stylesheet scoped under .fac-board (the page ships no separate CSS asset).
+// [#80d3f2]
 
 frappe.pages["fuel-approval-console"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -121,15 +109,14 @@ class FuelApprovalConsole {
 	}
 
 	refresh() {
-		// Guard against overlapping fetches (rapid Refresh clicks / filter changes).
+		// [#mqjs64]
 		if (this._loading) return;
 		this._loading = true;
 		this._render_loading();
 		frappe.call({
 			method: "apex_habitat.salis.api.fuel_console.get_pending_fuel_requests",
 			args: { project: this.project || null },
-			// No global freeze: the in-board skeleton communicates the load and
-			// keeps the page interactive (the Refresh button stays usable).
+			// [#5q0uer]
 			callback: (r) => {
 				this._loading = false;
 				if (r.exc) {
@@ -146,7 +133,7 @@ class FuelApprovalConsole {
 	}
 
 	_error_text(r) {
-		// Best-effort human-readable reason from a frappe.call failure.
+		// [#ajpm4h]
 		let detail = "";
 		try {
 			if (r && r._server_messages) {
@@ -191,7 +178,7 @@ class FuelApprovalConsole {
 	_render_cards(rows) {
 		this.$container.empty();
 
-		// Surface the requests needing scrutiny first: over-threshold, then newest.
+		// [#6xlkub]
 		const sorted = rows
 			.slice()
 			.sort((a, b) => (b.over_threshold ? 1 : 0) - (a.over_threshold ? 1 : 0));
@@ -235,8 +222,7 @@ class FuelApprovalConsole {
 		const cls = row.over_threshold ? "fac-card fac-card--over" : "fac-card";
 		const $card = $(`<div class="${cls}"></div>`);
 
-		// Headline is the human identity (driver · plate); the FR code is demoted
-		// to a small reference badge in the footer.
+		// [#9qgluq]
 		const $head = $('<div class="fac-card-head"></div>').appendTo($card);
 		const $identity = $('<div class="fac-card-identity"></div>').appendTo($head);
 		$('<div class="fac-card-name"></div>')
@@ -251,12 +237,9 @@ class FuelApprovalConsole {
 				.appendTo($head);
 		}
 
-		// The two numbers that drive the decision, shown prominently.
+		// [#bjmntt]
 		const $metrics = $('<div class="fac-card-metrics"></div>').appendTo($card);
-		// `inline: true` keeps the formatter from wrapping its output in a
-		// `<div style='text-align:right'>` (frappe.form.formatters._right). The
-		// metric value is set via .text(), so any markup would render as literal
-		// "<div ...>" text on the card. We want the bare formatted value.
+		// [#p2hugt]
 		this._add_metric(
 			$metrics,
 			__("Litres"),
@@ -268,7 +251,7 @@ class FuelApprovalConsole {
 			frappe.format(row.amount, { fieldtype: "Currency" }, { inline: true })
 		);
 
-		// Secondary context.
+		// [#omhdwu]
 		const $body = $('<div class="fac-card-body"></div>').appendTo($card);
 		this._add_row($body, __("Project"), row.project || "—");
 		this._add_row($body, __("Platform"), row.fuel_platform || "—");
@@ -314,8 +297,7 @@ class FuelApprovalConsole {
 					freeze: true,
 					freeze_message: __("Approving…"),
 					callback: (r) => {
-						// frappe.call surfaces server errors (exc) as a dialog
-						// automatically; only act on a clean success.
+						// [#jtyzu4]
 						if (r.exc || !r.message) return;
 						frappe.show_alert({
 							message: __("Approved: {0}", [r.message.name]),
@@ -361,8 +343,7 @@ class FuelApprovalConsole {
 					freeze: true,
 					freeze_message: __("Rejecting…"),
 					callback: (r) => {
-						// On failure (exc) frappe shows the server message; keep
-						// the dialog open so the reviewer can retry.
+						// [#s1fa9i]
 						if (r.exc || !r.message) {
 							d.enable_primary_action();
 							return;

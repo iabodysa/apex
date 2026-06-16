@@ -4,7 +4,7 @@ import router from "./router";
 import App from "./App.vue";
 import "./index.css";
 
-// frappe-ui resources call Frappe's API (credentials + CSRF handled by frappeRequest).
+// [#8jrnfo]
 setConfig("resourceFetcher", frappeRequest);
 
 const app = createApp(App);

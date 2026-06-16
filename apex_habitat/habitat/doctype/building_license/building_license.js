@@ -1,9 +1,7 @@
-// Client-side script for Building License
+// [#a5yn69]
 frappe.ui.form.on("Building License", {
 	refresh(frm) {
-		// On a draft license, offer an explicit Renew action that rolls the
-		// expiry date forward and stamps Last Renewed On. A submitted license is
-		// renewed by amending it with a later expiry (the controller stamps the date).
+		// [#cplw07]
 		if (frm.doc.docstatus === 0 && !frm.is_new()) {
 			frm.add_custom_button(__("Renew License"), () => {
 				const d = new frappe.ui.Dialog({

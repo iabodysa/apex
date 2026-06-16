@@ -1,6 +1,6 @@
-// Client-side script for Subcontractor Service Contract
+// [#swxitn]
 frappe.ui.form.on("Subcontractor Service Contract", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

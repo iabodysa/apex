@@ -1,4 +1,4 @@
-// Client-side script for Vehicle Assignment
+// [#53o1xx]
 frappe.ui.form.on("Vehicle Assignment", {
 	refresh(frm) {
 		_update_assignment_indicator(frm);

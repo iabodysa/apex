@@ -1,12 +1,4 @@
-/* Masar Worker Portal — client i18n (EN + AR).
- *
- * Self-contained worker-app dictionary (does NOT read Frappe's desk
- * translations / translations/ar.csv). Unlike the driver portal, Masar DEFAULTS
- * TO ARABIC — the worker is local field staff. The worker can switch in the
- * header; the choice persists in localStorage. On Arabic the root flips to
- * dir="rtl" (see App.vue). Source UI strings are authored here, English-first,
- * with the Arabic kept in lockstep.
- */
+// [#h991b9]
 import { computed, ref } from "vue";
 
 const STORAGE_KEY = "masar_portal_lang";
@@ -269,37 +261,28 @@ const messages = {
   },
 };
 
-/* Server enum translations (rendered values that arrive from the API in English).
- *
- * Profile status, accommodation stay type, transport request type/status, and
- * request category/status/priority are stored on the DocType in English and sent
- * verbatim by the Masar API (the option VALUES must stay English — they round-trip
- * to the server). Only the DISPLAY is localized: tEnum(namespace, value) maps a
- * known English value to its Arabic label and otherwise returns the value
- * unchanged, so an unmapped/new server value degrades gracefully to its English
- * text rather than a missing-key marker. Keep these maps in lockstep with the
- * DocType Select options. */
+// [#swa23s]
 const enums = {
   ar: {
-    // Employee.status (ERPNext Employee)
+    // [#qtypp3]
     status: {
       Active: "نشط",
       Inactive: "غير نشط",
       Suspended: "موقوف",
       Left: "منتهي الخدمة",
     },
-    // Accommodation Assignment.stay_type
+    // [#36b0x4]
     stayType: {
       Permanent: "دائم",
       Temporary: "مؤقت",
     },
-    // Transport Request.request_type
+    // [#ihaiue]
     requestType: {
       "Accommodation to Project Shuttle": "نقل من السكن إلى المشروع",
       "Inter-City Relocation": "نقل بين المدن",
       "Administrative Trip / Document Signing": "مهمة إدارية / توقيع مستندات",
     },
-    // Transport Request.status
+    // [#b5kbr2]
     transportStatus: {
       New: "جديد",
       Validated: "تم التحقق",
@@ -309,7 +292,7 @@ const enums = {
       Rejected: "مرفوض",
       Cancelled: "ملغى",
     },
-    // Accommodation Resident Request.request_category
+    // [#5mcbd5]
     requestCategory: {
       Maintenance: "صيانة",
       Safety: "سلامة",
@@ -326,7 +309,7 @@ const enums = {
       Suggestion: "اقتراح",
       Other: "أخرى",
     },
-    // Accommodation Resident Request.status
+    // [#lk929b]
     requestStatus: {
       New: "جديد",
       Triaged: "تم الفرز",
@@ -337,7 +320,7 @@ const enums = {
       Rejected: "مرفوض",
       Closed: "مغلق",
     },
-    // Accommodation Resident Request.priority
+    // [#asri7e]
     priority: {
       Low: "منخفضة",
       Medium: "متوسطة",
@@ -353,12 +336,7 @@ export function translateEnum(namespace, value) {
   return (map && map[value]) || value;
 }
 
-/* Map a frappe-ui resource error to a worker-friendly, localized message.
- *
- * A transient transport failure (rate limit / stale CSRF) must NOT read as an
- * invalid link or a benign empty state. ``invalidFallback`` is the copy used
- * when the failure carries no explicit server message (App.vue uses the
- * "invalid/disabled link" copy; the data pages use a neutral "couldn't load"). */
+// [#93umvm]
 export function resourceErrorMessage(e, invalidFallbackKey = "errors.loadError") {
   if (!e) return translate(invalidFallbackKey);
   const status = e.response?.status;
@@ -377,7 +355,7 @@ function detectInitial() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved && SUPPORTED.includes(saved)) return saved;
   } catch (e) {
-    /* localStorage may be unavailable (private mode); fall back to default */
+    // [#9qybx5]
   }
   return "ar"; // workers default to Arabic
 }
@@ -406,7 +384,7 @@ export function setLang(next) {
   try {
     localStorage.setItem(STORAGE_KEY, next);
   } catch (e) {
-    /* ignore persistence failure */
+    // [#l7a9zm]
   }
 }
 

@@ -1,6 +1,6 @@
-// Client-side script for Facility Asset
+// [#kc2azb]
 frappe.ui.form.on("Facility Asset", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

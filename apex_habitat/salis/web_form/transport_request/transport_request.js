@@ -17,8 +17,7 @@ frappe.web_form.after_save = function (doc) {
 	box.className = "alert alert-success mt-4";
 	box.style.fontSize = "15px";
 
-	// Build DOM nodes instead of injecting via innerHTML so the
-	// server-generated tracking code cannot be interpreted as markup.
+	// [#7yyomy]
 	var heading = document.createElement("strong");
 	heading.textContent = __("Transport request submitted successfully.");
 
@@ -28,8 +27,7 @@ frappe.web_form.after_save = function (doc) {
 
 	var codeEl = document.createElement("code");
 	codeEl.style.cssText = "font-size:17px;letter-spacing:3px;font-weight:bold;margin-top:5px;display:inline-block;";
-	// Use textContent (equivalent to frappe.utils.escape_html) so the
-	// code value is never parsed as HTML.
+	// [#oquyki]
 	codeEl.textContent = frappe.utils.escape_html(code);
 
 	var br2 = document.createElement("br");

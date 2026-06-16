@@ -3,10 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import frappeui from "frappe-ui/vite";
 import path from "path";
 
-// Builds the Masar Worker Portal SPA into the app's public assets, served at
-// /masar. frappeui() registers the ~icons (lucide) virtual modules frappe-ui
-// components use. Output names are stable (un-hashed) so www/masar.html can
-// reference them directly.
+// [#mgc049]
 export default defineConfig({
   plugins: [frappeui(), vue()],
   base: "/assets/apex_habitat/worker_portal/",

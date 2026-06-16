@@ -1,13 +1,6 @@
-/* Arrivals Desk — "Intake / Floor / Actions" frame. Native Frappe desk styling.
- * A standard desk page: all colour comes from native Frappe theme tokens
- * (--primary, --text-color, --border-color, …) so the page tracks the active
- * theme. The ONLY brand-independent colours are the four bed-STATUS swatches
- * below (light bg + dark text + 1px border, same legible pattern as front_desk);
- * status is never the sole signal — each bed also carries its code, and occupied
- * beds carry a name.
- */
+/* [#niitf7] */
 .arrivals-desk {
-	/* Bed-status swatches (theme-safe, legible) — the only fixed colours. */
+	/* [#qbeqtr] */
 	--ad-bed-free: #e6f4ea;
 	--ad-bed-free-text: #1e7e34;
 	--ad-bed-free-border: #34a853;
@@ -25,7 +18,7 @@
 	min-height: 420px;
 }
 
-/* ---- full-width three-zone grid: intake · floor · actions ---- */
+/* [#nz8rei] */
 .arrivals-desk .ax-body {
 	display: grid;
 	grid-template-columns: minmax(300px, 26%) 1fr minmax(320px, 28%);
@@ -51,7 +44,7 @@
 	padding-left: 12px;
 }
 
-/* ---- anchor row (centre zone, first child): building + project + capacity ---- */
+/* [#gcslyn] */
 .arrivals-desk .ax-anchor {
 	display: flex;
 	flex-wrap: wrap;
@@ -96,7 +89,7 @@
 	flex-wrap: wrap;
 }
 
-/* ---- floor-map ---- */
+/* [#o9nesv] */
 .arrivals-desk .ax-floor {
 	flex: 1 1 auto;
 	overflow-y: auto;
@@ -190,7 +183,7 @@
 	font-size: var(--text-xs);
 }
 
-/* ---- states ---- */
+/* [#77jza2] */
 .arrivals-desk .ax-empty,
 .arrivals-desk .ax-error {
 	text-align: center;
@@ -222,7 +215,7 @@
 	}
 }
 
-/* ---- intake: worker search + active card (Batch 2) ---- */
+/* [#dm2sgf] */
 .arrivals-desk .ax-search-input {
 	margin-bottom: 8px;
 }
@@ -317,7 +310,7 @@
 	font-weight: 600;
 }
 
-/* ---- assign interaction: free beds are the housing target (Batch 3) ---- */
+/* [#4j2b8l] */
 .arrivals-desk .ax-bed--green {
 	cursor: pointer;
 }
@@ -326,7 +319,7 @@
 	outline-offset: -2px;
 }
 
-/* ---- arrivals roster (right zone) ---- */
+/* [#tax91y] */
 .arrivals-desk .ax-cart {
 	margin-bottom: 16px;
 }
@@ -360,7 +353,7 @@
 	font-size: var(--text-xs);
 }
 
-/* ---- over-capacity: per-room button + the temporary (virtual) bed (Batch 3b) ---- */
+/* [#4xb0u3] */
 .arrivals-desk .ax-room-oc {
 	margin-top: 6px;
 	width: 100%;
@@ -376,13 +369,13 @@
 .arrivals-desk .ax-room-oc:hover {
 	background: var(--fg-hover-color);
 }
-/* A temporary over-capacity bed is "not a real bed" — marked with a dashed outline. */
+/* [#1vxr4a] */
 .arrivals-desk .ax-bed--temp {
 	border-style: dashed;
 	border-width: 2px;
 }
 
-/* ---- stage deck: custody handover (Batch 4) ---- */
+/* [#efyxlw] */
 .arrivals-desk .ax-deck-sec {
 	margin-bottom: 12px;
 }
@@ -412,7 +405,7 @@
 	font-size: var(--text-sm);
 	flex: 1 1 auto;
 }
-/* ---- multi-item custody store cart (redesign) ---- */
+/* [#qxj15m] */
 .arrivals-desk .ax-custody-cart {
 	width: 100%;
 	margin-top: 6px;
@@ -453,7 +446,7 @@
 	width: 100%;
 }
 
-/* ---- group QR (inline, no dialog) ---- */
+/* [#mab7ch] */
 .arrivals-desk .ax-qr-all {
 	width: 100%;
 	margin-top: 6px;
@@ -487,7 +480,7 @@
 	margin-top: 4px;
 }
 
-/* ---- transport + bed keyboard focus (Batch 5) ---- */
+/* [#j205wo] */
 .arrivals-desk .ax-tr-row {
 	cursor: pointer;
 	margin: 0;
@@ -505,7 +498,7 @@
 	outline-offset: -3px;
 }
 
-/* ---- responsive: collapse to ONE column (intake → floor → actions) ---- */
+/* [#8g6vlg] */
 @media (max-width: 992px) {
 	.arrivals-desk {
 		height: auto;

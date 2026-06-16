@@ -1,20 +1,10 @@
-/* The supervisor's original loaded these two families via a <head> link tag.
-   In the bundled SPA the equivalent is a CSS @import (must precede all rules),
-   so the typography stays identical regardless of which HTML shell serves the
-   bundle. This is the only line before the verbatim block. */
+/* [#lqy2ce] */
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
 
-/* ════════════════════════════════════════════════════════════════════════
-   Fleet OS dashboard styles.
-
-   The block below (down to the "END VERBATIM" marker) is copied VERBATIM from
-   the supervisor's original www/fleet.html <style> block — same rules, same
-   class names — so the ported Vue markup is styled identically. Do NOT restyle
-   it. Only the "POLISH ADDITIONS" block after the marker is new.
-   ════════════════════════════════════════════════════════════════════════ */
+/* [#30acrv] */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  /* Light theme */
+  /* [#87xbno] */
   --bg:#f4f6fa;--bg2:#ffffff;--bg3:#f0f2f8;--s1:#eef1f8;--s2:#e4e9f5;--s3:#d9e0f0;
   --b1:#dde3f0;--b2:#c8d2e8;--b3:#a8b8d8;
   --t1:#0f1c35;--t2:#3a5080;--t3:#7a92b8;--t4:#b0c0d8;
@@ -31,7 +21,7 @@
 html,body{height:100%;overflow:hidden}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-size:14px}
 
-/* TOPBAR */
+/* [#j5eda9] */
 .topbar{
   height:56px;background:#ffffff;border-bottom:1px solid var(--b1);box-shadow:0 1px 4px rgba(15,28,53,.06);
   display:flex;align-items:center;padding:0 18px;gap:12px;position:relative;z-index:100;
@@ -84,10 +74,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
 .btn-purple{background:var(--purple-d);color:var(--purple-l);border-color:rgba(139,92,246,.25)}
 .btn-purple:hover{background:rgba(139,92,246,.18)}
 
-/* LAYOUT */
+/* [#jsktbz] */
 .layout{display:flex;height:calc(100vh - 56px);overflow:hidden}
 
-/* SIDEBAR */
+/* [#sg86ga] */
 .sidebar{
   width:256px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--b1);
   display:flex;flex-direction:column;overflow:hidden;
@@ -122,7 +112,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
 .stat-mini-n{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
 .stat-mini-l{font-size:9px;color:var(--t3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
 
-/* MAIN */
+/* [#ilyxe7] */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .main-header{
   padding:10px 16px;border-bottom:1px solid var(--b1);background:var(--bg2);flex-shrink:0;
@@ -137,11 +127,11 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
 .sort-row{display:flex;align-items:center;gap:8px}
 .rcount{font-size:12px;color:var(--t3)}
 
-/* CARDS AREA */
+/* [#7dieqi] */
 .cards-wrap{flex:1;overflow-y:auto;padding:14px}
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
 
-/* ── VEHICLE CARD ── */
+/* [#h7zl00] */
 .vcard{
   background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);
   position:relative;overflow:hidden;cursor:pointer;
@@ -149,7 +139,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
   display:flex;flex-direction:column;
 }
 .vcard:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,99,235,.12)}
-/* Status accent line */
+/* [#ty9n76] */
 .vcard::before{
   content:'';position:absolute;top:0;right:0;width:3px;height:100%;border-radius:0 var(--r) var(--r) 0;z-index:1;
 }
@@ -157,7 +147,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
 .vcard.vs-available::before{background:var(--cyan)}
 .vcard.vs-workshop::before{background:var(--orange)}
 .vcard.vs-stopped::before{background:var(--t4)}
-/* Card sections */
+/* [#qpf1l7] */
 .vc-top{padding:13px 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .vc-plate{
   font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;letter-spacing:2px;
@@ -167,7 +157,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
 .vc-icon-area{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .vc-sheet-icon{font-size:24px;line-height:1}
 .vc-fuel-badge{font-size:9px;padding:1px 6px;border-radius:8px;background:var(--bg3);color:var(--t3);border:1px solid var(--b1);font-weight:500;font-family:'JetBrains Mono',monospace}
-/* ── FUEL RATE CARD (SAR) ── */
+/* [#jd5oxi] */
 .vc-fuel-row{
   padding:9px 14px;border-top:1px solid var(--b1);
   display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -187,7 +177,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
   color:var(--amber-l);cursor:pointer;font-size:10px;font-family:inherit;font-weight:600;transition:all .15s;
 }
 .fuel-rate-edit:hover{background:var(--amber);color:#fff}
-/* Fuel Tracker Modal */
+/* [#2r037d] */
 .fuel-modal{
   position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;
   display:flex;align-items:center;justify-content:center;
@@ -207,7 +197,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
 }
 .fuel-field input:focus,.fuel-field select:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(217,119,6,.1)}
 .fuel-field select option{background:var(--bg2)}
-/* SAR Summary Grid */
+/* [#thb234] */
 .fuel-sar-grid{
   display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
   margin-bottom:14px;
@@ -228,7 +218,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
 .fpr-item strong{display:block;font-size:12px;color:var(--t1);font-family:'JetBrains Mono',monospace;margin-bottom:2px}
 .fpr-item.active-grade{color:var(--amber-l)}
 .fpr-item.active-grade strong{color:var(--amber-l)}
-/* stolen status */
+/* [#gu7xts] */
 .vcard.vs-stolen::before{background:var(--purple)}
 .sb-stolen{background:var(--purple-d);color:var(--purple-l);border:1px solid rgba(124,58,237,.2)}
 .sb-stolen .dot{background:var(--purple)}
@@ -252,7 +242,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
 .sb-workshop .dot{background:var(--orange)}
 .sb-stopped{background:var(--s1);color:var(--t3);border:1px solid var(--b1)}
 .sb-stopped .dot{background:var(--t4)}
-/* Driver row */
+/* [#bf482k] */
 .vc-driver{
   padding:8px 14px;border-top:1px solid var(--b1);
   display:flex;align-items:center;gap:9px;
@@ -271,18 +261,18 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
   padding:8px 14px;border-top:1px solid var(--b1);
   font-size:11px;color:var(--t3);display:flex;align-items:center;gap:6px;
 }
-/* Workshop info stripe */
+/* [#1irt7s] */
 .vc-workshop-stripe{
   padding:5px 14px;background:var(--orange-d);
   font-size:10px;color:var(--orange-l);border-top:1px solid rgba(249,115,22,.15);
   display:flex;align-items:center;gap:5px;
 }
-/* Duration bar */
+/* [#azmcxc] */
 .vc-dur{padding:6px 14px;border-top:1px solid var(--b1)}
 .dur-bar{height:4px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:4px}
 .dur-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),var(--blue))}
 .dur-label{display:flex;justify-content:space-between;font-size:9px;color:var(--t3);font-family:'JetBrains Mono',monospace}
-/* ACTIONS ROW */
+/* [#gk24h8] */
 .vc-actions{
   padding:9px 12px;border-top:1px solid var(--b1);
   display:flex;gap:5px;background:var(--s1);
@@ -312,7 +302,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
   color:var(--purple-l);font-size:8px;font-weight:700;
 }
 
-/* ── TABLE ── */
+/* [#pi56yu] */
 .table-wrap{flex:1;overflow:auto}
 table{width:100%;border-collapse:collapse;white-space:nowrap}
 thead th{
@@ -326,7 +316,7 @@ tbody tr:hover{background:var(--s1)}
 tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflow:hidden;text-overflow:ellipsis}
 .mono{font-family:'JetBrains Mono',monospace}
 
-/* ── PANEL (right drawer) ── */
+/* [#i4lf08] */
 .panel-overlay{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;
   backdrop-filter:blur(6px);
@@ -365,7 +355,7 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .panel-body{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:18px}
 .pb{display:none}.pb.on{display:flex;flex-direction:column;gap:18px}
 
-/* Panel sections */
+/* [#kf4zq3] */
 .psect-title{
   font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;
   display:flex;align-items:center;gap:8px;
@@ -375,7 +365,7 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .kv{background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r3);padding:9px 11px}
 .kv-l{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
 .kv-v{font-size:13px;color:var(--t1);font-weight:500;word-break:break-all}
-/* Stats strip */
+/* [#cg9niz] */
 .pstats{display:flex;gap:8px}
 .pstat{
   flex:1;background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r3);
@@ -383,7 +373,7 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 }
 .pstat-n{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
 .pstat-l{font-size:9px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
-/* Status picker */
+/* [#deruo0] */
 .status-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .stpick{
   padding:11px 12px;border-radius:var(--r2);border:1px solid var(--b2);
@@ -400,7 +390,7 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .stpick.cur-available .sp-lbl{color:var(--cyan-l)}
 .stpick.cur-workshop .sp-lbl{color:var(--orange-l)}
 .stpick.cur-stopped .sp-lbl{color:var(--red-l)}
-/* Current driver card */
+/* [#pozonc] */
 .cur-driver-card{
   background:linear-gradient(135deg,var(--green-d),var(--blue-d));
   border:1px solid rgba(0,201,122,.2);border-radius:var(--r2);padding:14px;
@@ -425,7 +415,7 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
   color:var(--green-l);border:1px solid rgba(0,201,122,.2);
   font-size:10px;font-weight:600;flex-shrink:0;
 }
-/* Forms */
+/* [#iy3xwi] */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ff{display:flex;flex-direction:column;gap:5px}
 .fl{font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
@@ -438,14 +428,14 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .fsel option{background:var(--bg2)}
 .fta{resize:vertical;min-height:60px}
 .form-actions{display:flex;gap:8px;justify-content:flex-end}
-/* Alert box */
+/* [#ol2qds] */
 .alert{border-radius:var(--r3);padding:12px 14px;font-size:12px;line-height:1.5;border:1px solid}
 .alert-amber{background:var(--amber-d);border-color:rgba(245,158,11,.25);color:var(--amber-l)}
 .alert-red{background:var(--red-d);border-color:rgba(244,63,94,.25);color:var(--red-l)}
 .alert-green{background:var(--green-d);border-color:rgba(0,201,122,.25);color:var(--green-l)}
 .alert-orange{background:var(--orange-d);border-color:rgba(249,115,22,.25);color:var(--orange-l)}
 
-/* TIMELINE */
+/* [#ofrio2] */
 .tl{display:flex;flex-direction:column}
 .tl-item{display:flex;gap:12px;padding:12px 0;position:relative}
 .tl-item:not(:last-child)::after{
@@ -486,7 +476,7 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
   border-radius:0 4px 4px 0;font-size:11px;color:var(--blue-l);
 }
 
-/* TOAST */
+/* [#lj3ohg] */
 .toast{
   position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);
   background:#fff;border:1px solid var(--b2);border-radius:var(--r2);
@@ -498,17 +488,17 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .toast-green{color:var(--green-l);border-color:rgba(5,150,105,.25);background:#f0fdf4}
 .toast-amber{color:var(--amber-l);border-color:rgba(217,119,6,.25);background:#fffbeb}
 .toast-red{color:var(--red-l);border-color:rgba(220,38,38,.25);background:#fef2f2}
-/* Scroll */
+/* [#q287el] */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
-/* Empty */
+/* [#cvi67m] */
 .empty{text-align:center;padding:60px 20px;color:var(--t3)}
 .empty-ic{font-size:42px;margin-bottom:10px}
-/* Workshop form */
+/* [#qx66xy] */
 .ws-form{background:var(--orange-d);border:1px solid rgba(249,115,22,.2);border-radius:var(--r2);padding:14px;display:flex;flex-direction:column;gap:10px}
 
-/* OFFICE CARDS */
+/* [#rqayke] */
 .office-card{
   background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r2);
   display:flex;align-items:stretch;overflow:hidden;cursor:pointer;
@@ -531,19 +521,18 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
   background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r2);
   padding:16px;margin-top:12px;
 }
-/* Status badge fix for light */
-/* Table row fix */
+/* [#a7ga9g] */
 tbody tr:hover{background:var(--s1)}
-/* Input fix for light */
+/* [#hlqto2] */
 .fi,.fsel,.fta,.fs{background:#fff;color:var(--t1)}
 .fi:focus,.fsel:focus,.fta:focus,.fs:focus{background:#fff}
 
-/* ── STOLEN STATUS ── */
+/* [#mf81py] */
 .sb-stolen .dot{background:var(--purple);box-shadow:0 0 5px var(--purple)}
 .sp-stolen{background:var(--purple-d);color:var(--purple-l);border-color:rgba(124,58,237,.2)}
 .ti-stolen{background:var(--purple-d);border-color:rgba(124,58,237,.3)}
 
-/* ── DAMAGE / ACCIDENT RECORDS ── */
+/* [#arhpmx] */
 .incident-card{
   border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden;margin-bottom:8px;
 }
@@ -580,7 +569,7 @@ tbody tr:hover{background:var(--s1)}
   font-size:10px;color:var(--purple-l);border-top:1px solid rgba(124,58,237,.15);
   display:flex;align-items:center;gap:5px;
 }
-/* email config modal */
+/* [#chnj0n] */
 .email-cfg-modal{
   position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:600;
   display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);
@@ -590,7 +579,7 @@ tbody tr:hover{background:var(--s1)}
   box-shadow:0 20px 60px rgba(0,0,0,.3);
 }
 .email-cfg-title{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-/* Badge counters on tabs */
+/* [#fcaa62] */
 .folder-status{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600}
 .fs-ok{background:rgba(34,197,94,.12);color:var(--green-l);border:1px solid rgba(34,197,94,.25)}
 .fs-none{background:rgba(100,116,139,.12);color:var(--t3);border:1px solid rgba(100,116,139,.2)}
@@ -599,7 +588,7 @@ tbody tr:hover{background:var(--s1)}
   min-width:16px;height:16px;border-radius:50%;background:var(--red-l);color:#fff;
   font-size:9px;font-weight:700;margin-right:3px;
 }
-/* ── FILE / PHOTO UPLOAD ── */
+/* [#ifx1q6] */
 .upload-zone{
   border:2px dashed var(--b2);border-radius:var(--r2);padding:14px;
   text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);
@@ -633,13 +622,13 @@ tbody tr:hover{background:var(--s1)}
 .driver-photo-label{padding:5px 10px;background:var(--bg3);font-size:10px;font-weight:600;color:var(--t2);border-bottom:1px solid var(--b1)}
 .driver-photo-box img{width:100%;max-height:130px;object-fit:contain;display:block;cursor:pointer}
 .driver-photo-empty{height:90px;display:flex;align-items:center;justify-content:center;color:var(--t4);font-size:11px}
-/* Lightbox */
+/* [#phbgjn] */
 .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out}
 .lightbox img{max-width:92vw;max-height:88vh;border-radius:8px;box-shadow:0 8px 40px #000}
 .lightbox-close{position:fixed;top:16px;left:16px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:22px;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
 
-/* ── CUSTOM CONFIRM DIALOG ── */
+/* [#n97hqf] */
 .cf-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;
   display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);
@@ -658,29 +647,23 @@ tbody tr:hover{background:var(--s1)}
 .cf-msg{font-size:12px;color:var(--t3);line-height:1.75;margin-bottom:22px;white-space:pre-wrap}
 .cf-btns{display:flex;gap:10px;justify-content:center}
 .cf-btns .btn{min-width:120px;justify-content:center;font-size:13px;padding:9px 20px;border-radius:8px}
-/* WA preview */
+/* [#t0oedg] */
 .wa-preview{
   background:#e8fbe8;border:1px solid rgba(34,197,94,.3);border-radius:10px;
   padding:12px 14px;font-size:11.5px;line-height:2;direction:rtl;
   color:#166534;white-space:pre-wrap;margin-bottom:14px;max-height:200px;overflow-y:auto;
 }
-/* ════════════════ END VERBATIM (supervisor's original <style>) ════════════════ */
+/* [#6zc3ab] */
 
 
-/* ════════════════════════════════════════════════════════════════════════
-   POLISH ADDITIONS — new rules appended for the Vue port (the original had
-   none of these). Sticky sidebar/pill headers, the live-dot pulse, the panel
-   open/close transition, the loading skeleton, the error banner, and the
-   responsive sidebar-collapse breakpoints.
-   ════════════════════════════════════════════════════════════════════════ */
+/* [#756ms0] */
 
-/* Sticky sidebar filter header — stays visible while the filters scroll. */
+/* [#sytotv] */
 .sidebar-header{position:sticky;top:0;z-index:6;background:var(--bg2)}
-/* Top status pills stay visible while results scroll (the topbar is already
-   a flex header outside the scroll areas; this keeps it above the drawers). */
+/* [#ge75bc] */
 .topbar{position:sticky;top:0}
 
-/* Pulse animation on the live "assigned"/"available" status dots. */
+/* [#an5vjn] */
 @keyframes fpDotPulse{
   0%{box-shadow:0 0 0 0 currentColor;opacity:1}
   70%{box-shadow:0 0 0 5px rgba(0,0,0,0);opacity:.85}
@@ -688,15 +671,15 @@ tbody tr:hover{background:var(--s1)}
 }
 .sb-assigned .dot,.sb-available .dot,.sb-stolen .dot{animation:fpDotPulse 1.8s ease-out infinite}
 
-/* Smooth open/close transition for the detail panel (Vue <transition>). */
+/* [#7eolgy] */
 .fp-panel-enter-active,.fp-panel-leave-active{transition:transform .24s ease}
 .fp-panel-enter-from,.fp-panel-leave-to{transform:translateX(-100%)}
 .fp-overlay-enter-active,.fp-overlay-leave-active{transition:opacity .24s ease}
 .fp-overlay-enter-from,.fp-overlay-leave-to{opacity:0}
-/* The panel keyframe animation is redundant once Vue drives the transition. */
+/* [#jockh7] */
 .fp-panel-enter-active .panel,.fp-panel-leave-active .panel{animation:none}
 
-/* Loading skeleton (shimmer) — shown while get_fleet_os is in flight. */
+/* [#pp5zrn] */
 @keyframes fpShimmer{0%{background-position:-300px 0}100%{background-position:300px 0}}
 .fp-skel-card{
   background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r);
@@ -711,21 +694,21 @@ tbody tr:hover{background:var(--s1)}
   height:12px;border-radius:6px;background:var(--s2);margin:14px;
 }
 
-/* Persistent error banner with a retry button (NOT a transient toast). */
+/* [#l1utnt] */
 .fp-error-banner{
   margin:14px;padding:14px 16px;border-radius:var(--r2);
   background:var(--red-d);border:1px solid rgba(220,38,38,.25);color:var(--red-l);
   display:flex;align-items:center;gap:12px;font-size:13px;
 }
 .fp-error-banner .fp-err-msg{flex:1;line-height:1.5;word-break:break-word}
-/* Enriched empty-state active-filter context line. */
+/* [#mru11y] */
 .fp-empty-filters{font-size:11px;color:var(--t3);margin:10px 0 16px;line-height:1.7}
 .fp-empty-filters .fp-chip{
   display:inline-block;margin:2px;padding:2px 9px;border-radius:10px;
   background:var(--s2);color:var(--t2);border:1px solid var(--b2);font-size:10px;
 }
 
-/* Responsive: on phones/tablets the sidebar collapses and stacks above cards. */
+/* [#o432ip] */
 @media(max-width:860px){
   html,body{overflow:auto}
   .topbar{flex-wrap:wrap;height:auto;padding:10px 14px}
@@ -742,19 +725,16 @@ tbody tr:hover{background:var(--s1)}
   .panel{width:100%;max-width:100%}
 }
 
-/* ─── Extra polish (Vue adoption) — subtle, additive; static look unchanged ─── */
-/* Gentle entrance so the board eases in after load. Runs on appearance only:
-   the grid/table container persists while filters change, so it is NOT replayed
-   on every filter tweak (only on load and on card/table view switch). */
+/* [#t6dk0v] */
 @keyframes fpBoardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .cards-grid,.table-wrap{animation:fpBoardIn .3s ease both}
-/* Keyboard focus ring — his hover cues are mouse-only; this aids keyboard users. */
+/* [#5oklgt] */
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
   outline:2px solid var(--blue);outline-offset:2px;border-radius:6px;
 }
-/* Smooth momentum when the results column scrolls. */
+/* [#808a82] */
 .cards-wrap,.table-wrap{scroll-behavior:smooth}
-/* Respect prefers-reduced-motion: drop the pulse/entrance/slide for those users. */
+/* [#jo1ti9] */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 }

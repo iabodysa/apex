@@ -1,6 +1,6 @@
-// Client-side script for Custody Asset Category
+// [#kr2yxk]
 frappe.ui.form.on("Custody Asset Category", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

@@ -1,6 +1,6 @@
-// Client-side script for Subcontractor Building Coverage
+// [#6988v9]
 frappe.ui.form.on("Subcontractor Building Coverage", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

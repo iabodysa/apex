@@ -1,22 +1,10 @@
-/* Lightweight client i18n for the Salis Driver Portal.
- *
- * The portal carries its OWN translation dictionary here (EN + AR) — it does NOT
- * read Frappe's desk translations (translations/ar.csv). English is the default;
- * the driver picks a language in the header and the choice persists in
- * localStorage. On Arabic the app root flips to dir="rtl" (see App.vue); the
- * design tokens are unchanged — only direction + text differ.
- *
- * Usage (composable):
- *   import { useI18n } from "./i18n";
- *   const { t, lang, dir, setLang } = useI18n();
- *   t("home.title")
- */
+// [#7qn779]
 import { computed, ref } from "vue";
 
 const STORAGE_KEY = "salis_portal_lang";
 export const SUPPORTED = ["en", "ar"];
 
-// Flat, dotted-key dictionaries. Keep EN and AR in lockstep.
+// [#f0vfv7]
 const messages = {
   en: {
     common: {
@@ -293,12 +281,12 @@ function detectInitial() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved && SUPPORTED.includes(saved)) return saved;
   } catch (e) {
-    /* localStorage may be unavailable (private mode); fall back to default */
+    // [#9qybx5]
   }
   return "en";
 }
 
-// Module-level singleton so every component shares the same reactive language.
+// [#o7zbpi]
 const lang = ref(detectInitial());
 
 function lookup(locale, key) {
@@ -310,7 +298,7 @@ function interpolate(str, params) {
   return str.replace(/\{(\w+)\}/g, (m, k) => (params[k] != null ? params[k] : m));
 }
 
-/** Translate a dotted key for the active language, with EN fallback. */
+// [#90zqoh]
 export function translate(key, params) {
   const val = lookup(lang.value, key);
   if (val != null) return interpolate(val, params);
@@ -324,7 +312,7 @@ export function setLang(next) {
   try {
     localStorage.setItem(STORAGE_KEY, next);
   } catch (e) {
-    /* ignore persistence failure — in-memory choice still applies */
+    // [#p3xobl]
   }
 }
 

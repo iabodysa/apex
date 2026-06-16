@@ -1,6 +1,6 @@
-// Client-side script for Utility Account
+// [#i5t7pi]
 frappe.ui.form.on("Utility Account", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

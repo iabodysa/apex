@@ -1,6 +1,6 @@
-// Client-side script for Custody Issue
+// [#6p9113]
 frappe.ui.form.on("Custody Issue", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });

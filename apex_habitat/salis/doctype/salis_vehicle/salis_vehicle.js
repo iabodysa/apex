@@ -1,4 +1,4 @@
-// Client-side script for Salis Vehicle
+// [#947sr9]
 frappe.ui.form.on("Salis Vehicle", {
 	refresh(frm) {
 		_update_vehicle_indicator(frm);

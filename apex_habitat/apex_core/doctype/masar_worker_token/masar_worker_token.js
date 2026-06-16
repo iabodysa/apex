@@ -1,5 +1,4 @@
-// Masar Worker Token — desk actions to issue / rotate a worker's personal
-// Masar link and show the shareable URL + QR (SVG) for printing or WhatsApp.
+// [#o4a9j5]
 frappe.ui.form.on("Masar Worker Token", {
 	refresh(frm) {
 		if (frm.is_new()) {
@@ -36,9 +35,7 @@ function _show_link(frm, regenerate) {
 				return;
 			}
 			frm.reload_doc();
-			// Shared helper from public/js/masar_worker_link.bundle.js
-			// (wired via hooks.py app_include_js). No copy-link button on the
-			// token form — the copy button is the Arrivals Desk superset.
+			// [#f43ja4]
 			apex_habitat.masar.show_worker_link_dialog(r.message);
 		},
 	});

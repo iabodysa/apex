@@ -1,19 +1,4 @@
-// My Work Center — one permission-safe worklist desk page (Apex Core, Path A).
-//
-// Renders the four user-scoped surfaces of the live aggregator
-// (apex_habitat.apex_core.worklist.my_work_center.get_my_work):
-//   • Pending Approvals — native Workflow Actions awaiting THIS user; each card
-//     lazily fetches the document's allowed transitions and applies one inline.
-//   • Assigned Tasks — the user's open ToDos that point at a real document.
-//   • My Open Submissions — documents the user created that are still active.
-//   • Closed Last 48h — the user's documents that reached a final state recently.
-//   • Notifications — the user's own Notification Log rows.
-//
-// Native Frappe primitives ONLY (no Vue/external libs). The page never writes
-// through a custom endpoint: inline Approve/Reject goes through the canonical native
-// pair frappe.model.workflow.get_transitions / apply_workflow; a task closes via
-// frappe.client.set_value. The read API is permission-safe (get_list + owner==me);
-// the last three sections are read-only links. Every interpolated value is escaped.
+// [#ns38m9]
 
 frappe.pages['action-inbox'].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -27,13 +12,10 @@ frappe.pages['action-inbox'].on_page_load = function (wrapper) {
 class ActionInbox {
 	constructor(page) {
 		this.page = page;
-		// Build EVERY container first so no render method ever touches an undefined
-		// this.$x (a TypeError node --check cannot catch).
+		// [#9y9w2i]
 		this._build_skeleton();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
-		// Auto-refresh is EVENT-DRIVEN, not a timer: it fires only when THIS user receives
-		// a notification (a new approval/assignment lands as one), and is debounced so a
-		// burst triggers at most ONE refresh per 5s. No polling, no per-second load.
+		// [#4u0s03]
 		frappe.realtime.on('notification', frappe.utils.debounce(() => this.refresh(), 5000));
 		this.refresh();
 	}
@@ -52,7 +34,7 @@ class ActionInbox {
 		this.$notifsSection = this._section(__('Notifications'));
 		this.$notifs = this.$notifsSection.find('.ai-list');
 
-		// One page-level empty state shown only when ALL sections are empty.
+		// [#gqzws7]
 		this.$empty = $('<div class="ai-empty text-muted"></div>').appendTo(this.$root);
 		this._allSections = [
 			this.$approvalsSection, this.$tasksSection, this.$submittedSection,
@@ -75,7 +57,7 @@ class ActionInbox {
 			.catch(() => this._render_error());
 	}
 
-	// ---------- render ----------
+	// [#fltkjy]
 	_render(data) {
 		const awaiting = data.awaiting_action || {};
 		const workflow_actions = awaiting.workflow_actions || [];
@@ -121,7 +103,7 @@ class ActionInbox {
 			.appendTo(this.$empty);
 	}
 
-	// ---------- Pending Approvals (Workflow Action) ----------
+	// [#ml5epr]
 	_workflow_card(row) {
 		const $card = $('<div class="ai-card ai-card--workflow"></div>').appendTo(this.$approvals);
 		const $head = $('<div class="ai-card-head"></div>').appendTo($card);
@@ -185,7 +167,7 @@ class ActionInbox {
 			.finally(() => frappe.dom.unfreeze());
 	}
 
-	// ---------- Assigned Tasks (ToDo) ----------
+	// [#jwf4jo]
 	_todo_card(row) {
 		const $card = $('<div class="ai-card ai-card--todo"></div>').appendTo(this.$tasks);
 		const $head = $('<div class="ai-card-head"></div>').appendTo($card);
@@ -234,7 +216,7 @@ class ActionInbox {
 			.finally(() => frappe.dom.unfreeze());
 	}
 
-	// ---------- My Open Submissions / Closed Last 48h (read-only) ----------
+	// [#sexmnv]
 	_doc_card($list, row, color) {
 		const $card = $('<div class="ai-card ai-card--doc"></div>').appendTo($list);
 		const $head = $('<div class="ai-card-head"></div>').appendTo($card);
@@ -250,7 +232,7 @@ class ActionInbox {
 		$('<span class="ai-card-state"></span>').text(__('Status: {0}', [row.status || ''])).appendTo($meta);
 	}
 
-	// ---------- Notifications (read-only) ----------
+	// [#7e345x]
 	_notification_card(row) {
 		const $card = $('<div class="ai-card ai-card--notif"></div>').appendTo(this.$notifs);
 		const $head = $('<div class="ai-card-head"></div>').appendTo($card);

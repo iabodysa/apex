@@ -1,15 +1,4 @@
-// Arrivals Desk — "Intake / Floor / Actions" single-screen worker check-in.
-//
-// Three-zone desk: an in-body anchor row picks a building (and the session
-// project) → a read-only rooms/beds floor-map appears in the centre beside a
-// worker intake column (left). Search or register an arrival (the one passport
-// modal), pick a free bed to house him (party-aware), and the session roster
-// (right) remembers everyone housed this session for the later custody / card /
-// transport stages. Native Frappe desk styling only.
-//
-// Server is the source of truth: the floor-map reuses front_desk.get_building_grid
-// (server-computed bed colour) and housing reuses front_desk.quick_check_in. After
-// every write we RE-FETCH the grid rather than mutating tiles optimistically.
+// [#7ffkxk]
 
 frappe.pages['arrivals-desk'].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -31,8 +20,7 @@ class ArrivalsDesk {
 		this.custodyIssued = false; // any custody handed over this session
 		this.cardIssued = false; // any Masar arrival link issued this session
 		this.transportStarted = false; // a transport request was created this session
-		// No in-toolbar form fields: the anchors live in the page body so the native
-		// sticky page-head can never cover their dropdowns (feedback #1).
+		// [#frsjh3]
 		this.page.hide_form();
 		this._build_skeleton();
 		this._setup_anchor();
@@ -42,26 +30,25 @@ class ArrivalsDesk {
 
 	_build_skeleton() {
 		this.$root = $('<div class="arrivals-desk"></div>').appendTo(this.page.main);
-		// Full-width three-zone grid: intake (left) · floor (centre) · actions (right).
+		// [#b5ku2i]
 		this.$body = $('<div class="ax-body"></div>').appendTo(this.$root);
 
-		// ---- Zone: intake (left) — search + results + active worker card ----
+		// [#nzjhbw]
 		this.$intake = $('<aside class="ax-zone ax-zone-intake"></aside>').appendTo(this.$body);
 
-		// ---- Zone: floor (centre) — anchor row (FIRST child) then the floor-map ----
+		// [#awqamr]
 		this.$floorZone = $('<section class="ax-zone ax-zone-floor"></section>').appendTo(this.$body);
 		this.$anchor = $('<div class="ax-anchor"></div>').appendTo(this.$floorZone);
 		this.$capacity = $('<div class="ax-capacity"></div>').appendTo(this.$anchor);
 		this.$stages = $('<div class="ax-stages"></div>').appendTo(this.$anchor); // 5-stage progress pills
 		this.$floor = $('<div class="ax-floor"></div>').appendTo(this.$floorZone);
-		// Delegated: a click on a FREE bed houses the active worker (Batch 3); the
-		// per-room over-capacity button mints a temporary bed (Batch 3b).
+		// [#8gi0rj]
 		this.$floor.on('click', '.ax-bed', (e) => this._on_bed_click(e));
 		this.$floor.on('click', '.ax-room-oc', (e) => {
 			e.stopPropagation();
 			this._house_over_capacity($(e.currentTarget).attr('data-room'));
 		});
-		// Keyboard: a focused free bed houses on Enter/Space (scanner + a11y).
+		// [#r0hc0o]
 		this.$floor.on('keydown', '.ax-bed--green', (e) => {
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
@@ -69,16 +56,14 @@ class ArrivalsDesk {
 			}
 		});
 
-		// ---- Zone: actions (right) — session roster + the stage deck ----
+		// [#mo583e]
 		this.$actions = $('<aside class="ax-zone ax-zone-actions"></aside>').appendTo(this.$body);
 
 		this._build_intake();
 	}
 
 	_setup_anchor() {
-		// Anchors are make_control fields rendered INSIDE the page body (not the
-		// toolbar) so they share the body stacking context — the native page-head
-		// can never cover their dropdowns (root cause of feedback #1).
+		// [#r86sw8]
 		const $bWrap = $('<div class="ax-anchor-field"></div>').prependTo(this.$anchor);
 		const $pWrap = $('<div class="ax-anchor-field"></div>').insertAfter($bWrap);
 
@@ -96,8 +81,7 @@ class ArrivalsDesk {
 		});
 		this.building_field.refresh();
 
-		// Second anchor: the session project. House actions stamp this project, so
-		// the supervisor sets it once for the batch of arrivals (low friction).
+		// [#401r0k]
 		this.project_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'Link',
@@ -112,11 +96,7 @@ class ArrivalsDesk {
 		});
 		this.project_field.refresh();
 
-		// Robust change wiring: an in-body Link control fires its value through both
-		// df.onchange AND the raw input events, so bind both to be sure a typed value
-		// or an autocomplete selection both take effect.
-		// df.onchange (above) is the primary path; also bind the raw input when present
-		// (typed value / autocomplete pick), guarded so a control lacking $input never throws.
+		// [#omdu8q]
 		if (this.building_field.$input) {
 			this.building_field.$input.on('change awesomplete-selectcomplete', () => this._on_building_change());
 		}
@@ -133,7 +113,7 @@ class ArrivalsDesk {
 			this.refresh();
 			this._load_catalog();
 		} else if (!val && this.building) {
-			// Cleared: reset the building-scoped state back to the empty floor.
+			// [#df9hzt]
 			this.building = null;
 			this.grid = null;
 			this.catalog = null;
@@ -167,7 +147,7 @@ class ArrivalsDesk {
 			});
 	}
 
-	// ---------- intake: worker search + the one passport modal (Batch 2) ----------
+	// [#3005gs]
 	_build_intake() {
 		this.$intake.empty();
 		const $search = $('<div class="ax-search"></div>').appendTo(this.$intake);
@@ -205,7 +185,7 @@ class ArrivalsDesk {
 		} else if (rows) {
 			rows.forEach((row) => this._result_row(row));
 		}
-		// "Register by passport" is always pinned at the BOTTOM (the page's only modal).
+		// [#2tv16z]
 		$('<button class="btn btn-default btn-sm ax-register-row"></button>')
 			.html(`<span class="ax-register-plus">+</span> ${__('Register new arrival by passport')}`)
 			.on('click', () => this._open_register_modal())
@@ -321,7 +301,7 @@ class ArrivalsDesk {
 		d.show();
 	}
 
-	// ---------- assign interaction + arrivals cart (Batch 3) ----------
+	// [#2gxwhl]
 	_on_bed_click(e) {
 		const $bed = $(e.currentTarget);
 		if (!$bed.hasClass('ax-bed--green')) return; // only free beds house (over-capacity is a later step)
@@ -352,7 +332,7 @@ class ArrivalsDesk {
 			callback: (r) => {
 				if (r.exc || !r.message) return;
 				frappe.show_alert({ message: __('Housed {0}', [worker.label]), indicator: 'green' });
-				// Remember in the session cart (dedupe by party) for the later stages.
+				// [#dvlqkx]
 				const dupe = this.cart.some(
 					(c) => c.party === worker.party && c.party_type === worker.party_type
 				);
@@ -375,8 +355,7 @@ class ArrivalsDesk {
 			return;
 		}
 		const worker = this.active;
-		// Over-capacity is consequential, so confirm first — a guardrail, not a data
-		// form, so the page still has exactly one data modal (the passport register).
+		// [#jw9kx4]
 		frappe.confirm(__('Room is full. House {0} in a temporary over-capacity bed?', [worker.label]), () => {
 			frappe.call({
 				method: 'apex_habitat.habitat.api.arrivals_desk.house_over_capacity',
@@ -423,7 +402,7 @@ class ArrivalsDesk {
 						`<span class="ax-cart-bed text-muted">${frappe.utils.escape_html(c.bed || '')}</span>`
 				)
 				.appendTo($list);
-			// Per-worker check-in acknowledgment slip (housing terms + signatures).
+			// [#smadir]
 			$('<button class="btn btn-xs btn-link ax-cart-checkin"></button>')
 				.text(__('Check-in slip'))
 				.on('click', () => this._print_checkin(c))
@@ -431,7 +410,7 @@ class ArrivalsDesk {
 		});
 	}
 
-	// ---------- stage deck: custody handover (Batch 4) ----------
+	// [#33np9k]
 	_render_deck() {
 		this.$deck.empty();
 		this._render_stages();
@@ -441,13 +420,12 @@ class ArrivalsDesk {
 		$('<header class="ax-deck-head"></header>').text(__('Custody Handover')).appendTo($cust);
 		const $list = $('<div class="ax-deck-list"></div>').appendTo($cust);
 		this.cart.forEach((c) => this._custody_row($list, c));
-		// Arrival Card (Zone F): a no-popup GROUP QR + on-demand print slip.
+		// [#gk3q62]
 		const $card = $('<section class="ax-deck-sec"></section>').appendTo(this.$deck);
 		$('<header class="ax-deck-head"></header>').text(__('Arrival Card')).appendTo($card);
 		const $clist = $('<div class="ax-deck-list"></div>').appendTo($card);
 		this.cart.forEach((c) => this._card_row($clist, c));
-		// ONE group action issues the Masar QR for every not-yet-issued Employee at once
-		// and renders them inline — no per-worker button, no dialog (feedback #8,#9).
+		// [#co0grg]
 		const pendingQr = this.cart.filter((c) => c.party_type === 'Employee' && !c._card_done);
 		if (pendingQr.length) {
 			$('<button class="btn btn-sm btn-default ax-qr-all"></button>')
@@ -455,7 +433,7 @@ class ArrivalsDesk {
 				.on('click', () => this._issue_group_qr())
 				.appendTo($card);
 		}
-		// ONE window with every cart member's arrival card (page-break between cards).
+		// [#q1rgj9]
 		$('<button class="btn btn-sm btn-default ax-cards-all"></button>')
 			.text(__('Print arrival cards ({0})', [this.cart.length]))
 			.on('click', () => this._print_all_cards())
@@ -466,8 +444,7 @@ class ArrivalsDesk {
 	}
 
 	_load_catalog() {
-		// The building's custody catalog with live store balances (ONE bulk read,
-		// reused from the Custody Kiosk). null = not loaded; [] = loading/empty.
+		// [#ln7hst]
 		this.catalog = [];
 		if (!this.building) return;
 		frappe
@@ -488,7 +465,7 @@ class ArrivalsDesk {
 		const $row = $('<div class="ax-deck-row"></div>').appendTo($list);
 		$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
 		if (c.party_type === 'Temporary Worker') {
-			// TW custody is deferred until the Iqama links the Employee (no stock posting now).
+			// [#fkt5z4]
 			$('<span class="indicator-pill no-indicator-dot orange"></span>')
 				.text(__('Custody deferred'))
 				.appendTo($row);
@@ -496,7 +473,7 @@ class ArrivalsDesk {
 		}
 		if (c._custody_issue) {
 			$('<span class="indicator-pill no-indicator-dot green"></span>').text(__('Issued')).appendTo($row);
-			// Print the signed custody-handover acknowledgment for this Custody Issue.
+			// [#98wano]
 			$('<button class="btn btn-xs btn-link ax-deck-handover"></button>')
 				.text(__('Print handover'))
 				.on('click', () => this._print_custody(c))
@@ -509,8 +486,7 @@ class ArrivalsDesk {
 			.appendTo($row);
 	}
 
-	// A per-Employee multi-item custody STORE cart: accumulate article+qty lines, then
-	// hand them over in ONE Custody Issue via custody_kiosk.issue_cart (feedback #4).
+	// [#ta7hge]
 	_custody_cart($row, c) {
 		if ($row.find('.ax-custody-cart').length) return; // already open
 		$row.find('.ax-deck-btn').remove();
@@ -602,7 +578,7 @@ class ArrivalsDesk {
 				$('<span class="indicator-pill no-indicator-dot green"></span>').text(__('QR issued')).appendTo($row);
 			}
 		} else {
-			// A Temporary Worker's Masar link issues once he is registered as an Employee.
+			// [#1jl7r0]
 			$('<span class="indicator-pill no-indicator-dot orange"></span>')
 				.text(__('Link after registration'))
 				.appendTo($row);
@@ -613,8 +589,7 @@ class ArrivalsDesk {
 			.appendTo($row);
 	}
 
-	// Group QR (feedback #8,#9): issue every not-yet-issued Employee's Masar link in
-	// ONE call and render the codes inline — no per-worker button, no popup dialog.
+	// [#bw83vt]
 	_issue_group_qr() {
 		const employees = this.cart
 			.filter((c) => c.party_type === 'Employee' && !c._card_done)
@@ -661,9 +636,7 @@ class ArrivalsDesk {
 			});
 	}
 
-	// Open `html` in a fresh print window and trigger the browser print dialog.
-	// Shared by every printer (arrival slip, check-in slip, custody handover, the
-	// all-cards batch). Returns the window, or null if pop-ups were blocked.
+	// [#9szus4]
 	_open_print(title, html) {
 		const w = window.open('', '_blank');
 		if (!w) {
@@ -689,7 +662,7 @@ class ArrivalsDesk {
 		});
 	}
 
-	// Check-in acknowledgment slip (housing terms + worker/supervisor signatures).
+	// [#2f9r49]
 	_print_checkin(c) {
 		frappe.call({
 			method: 'apex_habitat.habitat.api.arrivals_desk.get_checkin_slip',
@@ -701,7 +674,7 @@ class ArrivalsDesk {
 		});
 	}
 
-	// Custody handover slip for the Custody Issue posted this session for `c`.
+	// [#1b6a7h]
 	_print_custody(c) {
 		if (!c._custody_issue) {
 			frappe.show_alert({ message: __('Issue custody first'), indicator: 'orange' });
@@ -717,8 +690,7 @@ class ArrivalsDesk {
 		});
 	}
 
-	// Print arrival cards for EVERY cart member in ONE window: fetch each slip,
-	// concatenate with a page-break between cards, then print once.
+	// [#6fkydb]
 	_print_all_cards() {
 		if (!this.cart.length) return;
 		const calls = this.cart.map((c) =>
@@ -728,8 +700,7 @@ class ArrivalsDesk {
 			})
 		);
 		frappe.dom.freeze(__('Building arrival cards…'));
-		// Promise.all returns a NATIVE promise (no jQuery .always) — unfreeze in a
-		// terminal .then so it runs on both success and failure.
+		// [#lkskns]
 		Promise.all(calls)
 			.then((results) => {
 				const html = (results || [])
@@ -756,7 +727,7 @@ class ArrivalsDesk {
 		tws.forEach((c) => {
 			const $row = $('<div class="ax-deck-row"></div>').appendTo($tlist);
 			$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
-			// A Temporary Worker boards via the trip's unregistered manifest, not the request.
+			// [#3b4x9r]
 			$('<span class="indicator-pill no-indicator-dot orange"></span>')
 				.text(__('Unregistered manifest'))
 				.appendTo($row);
@@ -784,9 +755,7 @@ class ArrivalsDesk {
 		}
 		this.transportStarted = true;
 		this._render_stages();
-		// ONE request, several Employee passengers — reuses the Transport Request form
-		// (the supervisor reviews and saves it). Temporary Workers board downstream via
-		// the trip's unregistered manifest (Trip Start Log), not the request.
+		// [#3z6pcn]
 		frappe.new_doc('Transport Request', {
 			service_line: 'Site Transport',
 			request_type: 'Accommodation to Project Shuttle',
@@ -796,7 +765,7 @@ class ArrivalsDesk {
 		});
 	}
 
-	// ---------- render ----------
+	// [#fltkjy]
 	_render_capacity(grid) {
 		if (!grid) {
 			this.$capacity.empty();
@@ -812,8 +781,7 @@ class ArrivalsDesk {
 
 	_render_stages() {
 		const housed = this.cart.length > 0;
-		// Stage chips → native indicator pills: green when done, blue for the first
-		// incomplete (active) stage, gray for the rest still pending.
+		// [#r6fpkn]
 		const chips = [
 			['building', __('Building'), !!this.building],
 			['housed', __('Housed'), housed],
@@ -859,15 +827,12 @@ class ArrivalsDesk {
 	_room_html(room) {
 		const beds = (room.beds || []).map((bed) => this._bed_html(bed)).join('');
 		const occ = `${room.current_occupancy || 0}/${room.bed_capacity || 0}`;
-		// Show a readiness note only for a MEANINGFUL non-ready state (e.g. Under
-		// Maintenance). "Unknown" is the un-assessed default on freshly generated
-		// rooms — surfacing it reads as an error, so it is suppressed.
+		// [#b9r9iq]
 		const readiness =
 			room.readiness_status && room.readiness_status !== 'Ready' && room.readiness_status !== 'Unknown'
 				? ` · ${frappe.utils.escape_html(__(room.readiness_status))}`
 				: '';
-		// No free bed → offer over-capacity housing (a temporary bed within the
-		// building's overload headroom; the assignment enforces the cap).
+		// [#ga6klw]
 		const has_free = (room.beds || []).some((b) => b.bed_color === 'green');
 		const oc = has_free
 			? ''

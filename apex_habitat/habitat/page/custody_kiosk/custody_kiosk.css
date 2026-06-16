@@ -1,7 +1,4 @@
-/* Custody Kiosk — POS-style tile grid + cart (v0.9.0).
- * Large touch targets, responsive two-column layout (catalog + cart) that
- * collapses to a single column on narrow screens.
- */
+/* [#s01s5i] */
 
 .ck-layout {
 	display: flex;
@@ -15,7 +12,7 @@
 	min-width: 0;
 }
 
-/* Search bar. */
+/* [#glvo5q] */
 .ck-tools {
 	margin-bottom: 14px;
 }
@@ -31,7 +28,7 @@
 	font-size: 15px;
 }
 
-/* Tile grid — large clickable POS tiles. */
+/* [#bnmgfm] */
 .ck-tiles {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -100,7 +97,7 @@
 	color: var(--text-muted, #74808b);
 }
 
-/* Cart panel. */
+/* [#qtak3m] */
 .ck-cart {
 	flex: 0 0 320px;
 	border: 1px solid var(--border-color, #d1d8dd);
@@ -183,7 +180,7 @@
 	width: 100%;
 }
 
-/* Error + retry state. */
+/* [#sf28nv] */
 .ck-error {
 	grid-column: 1 / -1;
 	padding: 40px 16px;
@@ -198,7 +195,7 @@
 	font-size: 15px;
 }
 
-/* Loading skeleton tiles. */
+/* [#d5tun5] */
 .ck-tile-skeleton {
 	cursor: default;
 	pointer-events: none;

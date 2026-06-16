@@ -1,12 +1,4 @@
-// Custody Kiosk — POS-style custody issuing (v0.9.0).
-//
-// Standard Frappe page. No SPA / Vue / React / external libraries: built from
-// frappe.ui.Page primitives + native DOM + jQuery (shipped with Frappe). The
-// catalog comes from the single whitelisted reader get_kiosk_catalog (no N+1);
-// the only write routes through the Custody Issue controller via issue_cart,
-// which submits a real Custody Issue whose on_submit posts to the Accommodation
-// Stock Ledger. The server is the source of truth: on success we clear the cart
-// and re-fetch the catalog rather than mutating ledger state on the client.
+// [#qt2p0p]
 
 frappe.pages["custody-kiosk"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
@@ -25,7 +17,7 @@ class CustodyKiosk {
 		this.employee = null;
 		this.building = null;
 		this.articles = [];
-		// article docname -> {article, article_name, uom, qty}
+		// [#kwkz4i]
 		this.cart = {};
 	}
 
@@ -73,7 +65,7 @@ class CustodyKiosk {
 	_build_layout() {
 		this.$layout = $('<div class="ck-layout"></div>').appendTo(this.page.main);
 
-		// Left — catalog (search + tile grid).
+		// [#20cz3t]
 		const $catalog = $('<div class="ck-catalog"></div>').appendTo(this.$layout);
 		const $tools = $('<div class="ck-tools"></div>').appendTo($catalog);
 		this.$search = $(
@@ -81,7 +73,7 @@ class CustodyKiosk {
 				__("Search articles…")
 			)}" aria-label="${frappe.utils.escape_html(__("Search articles"))}">`
 		).appendTo($tools);
-		// Debounce client-side filtering so very large catalogs stay smooth.
+		// [#guxhpt]
 		let search_timer = null;
 		this.$search.on("input", () => {
 			clearTimeout(search_timer);
@@ -89,7 +81,7 @@ class CustodyKiosk {
 		});
 		this.$tiles = $('<div class="ck-tiles"></div>').appendTo($catalog);
 
-		// Right — cart panel.
+		// [#4232vl]
 		const $cart = $('<div class="ck-cart"></div>').appendTo(this.$layout);
 		$('<div class="ck-cart-header"></div>').text(__("Cart")).appendTo($cart);
 		this.$cart_lines = $('<div class="ck-cart-lines"></div>').appendTo($cart);
@@ -138,7 +130,7 @@ class CustodyKiosk {
 
 	_render_loading() {
 		this.$tiles.empty();
-		// Lightweight skeleton: a handful of placeholder tiles while we fetch.
+		// [#3omcm3]
 		for (let i = 0; i < 6; i++) {
 			const $sk = $('<div class="ck-tile ck-tile-skeleton" aria-hidden="true"></div>');
 			$('<div class="ck-tile-thumb ck-skel"></div>').appendTo($sk);
@@ -313,8 +305,7 @@ class CustodyKiosk {
 			freeze_message: __("Issuing…"),
 			callback: (r) => {
 				if (r.exc || !r.message) {
-					// Server raised (e.g. qty gate, permission). Keep the cart so
-					// the user can correct and retry instead of silently losing it.
+					// [#c7lpcm]
 					frappe.show_alert({
 						message: __("Could not issue the cart. Please review and try again."),
 						indicator: "red",

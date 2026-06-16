@@ -1,11 +1,9 @@
-// Client-side script for Accommodation Resident Request
+// [#lhs0n9]
 frappe.ui.form.on("Accommodation Resident Request", {
 	refresh(frm) {
 		_update_priority_indicator(frm);
 
-		// Convert action: turn a triaged request into the operational document
-		// that does the work (Maintenance Request / Habitat Safety Incident /
-		// Custody Issue, by category) and stamp the back-link onto this request.
+		// [#csgsrv]
 		const convertible = [
 			"Maintenance", "Water", "Electrical", "AC", "Plumbing",
 			"Cleaning", "Pest Control", "Facility Item", "Safety", "Custody",
@@ -40,7 +38,7 @@ frappe.ui.form.on("Accommodation Resident Request", {
 			});
 		}
 
-		// When already converted, offer a quick link to the target document.
+		// [#hg0vmo]
 		if (open_target) {
 			frm.add_custom_button(__("Open Target Document"), function () {
 				frappe.set_route("Form", frm.doc.target_doctype, frm.doc.target_document);

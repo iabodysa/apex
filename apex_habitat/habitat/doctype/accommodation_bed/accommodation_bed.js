@@ -1,4 +1,4 @@
-// Client-side script for Accommodation Bed
+// [#3liu9f]
 frappe.ui.form.on("Accommodation Bed", {
 	refresh(frm) {
 		const colors = {

@@ -1,6 +1,6 @@
-// Client-side script for Safety Task Building Scope
+// [#fx0jtv]
 frappe.ui.form.on("Safety Task Building Scope", {
 	refresh(frm) {
-		// DocType client lifecycle hook
+		// [#g123bl]
 	}
 });
