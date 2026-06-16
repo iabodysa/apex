@@ -907,15 +907,16 @@ def vehicle_utilization_summary() -> None:
     logger.info("vehicle_utilization_summary: weekly summaries written.")
 
 
-def workshop_overstay_watch() -> None:
-    """Flag vehicles in the workshop longer than ``workshop_overstay_days``.
+def _overstay_stops() -> list:
+    """Submitted Maintenance Vehicle Stops still open past the overstay cutoff,
+    for vehicles still out of service.
 
-    A vehicle is overstaying if it is still out of service (Stopped or Under
-    Maintenance) and carries a submitted Vehicle Stop (reason Maintenance) with no
-    ``return_date`` whose ``stop_date`` is on or before the cutoff
-    (``workshop_overstay_days``; Salis Settings, default 14). Raises one
-    "Maintenance Overdue" Operations Alert per vehicle, deduped daily by
-    ``_raise_alert``.
+    A vehicle is overstaying if it is still Stopped / Under Maintenance and
+    carries a submitted Vehicle Stop (reason Maintenance) with no ``return_date``
+    whose ``stop_date`` is on or before the cutoff (``workshop_overstay_days``;
+    Salis Settings, default 14). Shared by ``workshop_overstay_watch`` (the alert)
+    and ``get_workshop_overstay_count`` (the number card) so the rule cannot drift
+    between them. Returns the Vehicle Stop rows (name, vehicle, stop_date).
     """
     from frappe.utils import add_days, today
 
@@ -931,14 +932,26 @@ def workshop_overstay_watch() -> None:
         },
         fields=["name", "vehicle", "stop_date"],
     )
-    for r in rows:
-        if not r.vehicle:
-            continue
-        # The maintenance Vehicle Stop set the vehicle out of service (a stop sets
-        # status Stopped; the /fleet workshop action sets Under Maintenance); skip
-        # if it has already been recovered to Active (the stop should be closed).
-        if frappe.db.get_value("Salis Vehicle", r.vehicle, "status") not in ("Stopped", "Under Maintenance"):
-            continue
+    # The maintenance Vehicle Stop set the vehicle out of service (a stop sets
+    # status Stopped; the /fleet workshop action sets Under Maintenance); drop any
+    # vehicle already recovered to Active (its stop should be closed).
+    return [
+        r
+        for r in rows
+        if r.vehicle
+        and frappe.db.get_value("Salis Vehicle", r.vehicle, "status")
+        in ("Stopped", "Under Maintenance")
+    ]
+
+
+def workshop_overstay_watch() -> None:
+    """Flag vehicles in the workshop longer than ``workshop_overstay_days``.
+
+    Raises one "Maintenance Overdue" Operations Alert per overstaying vehicle
+    (see ``_overstay_stops`` for the rule), deduped daily by ``_raise_alert``.
+    """
+    days = _settings_int("workshop_overstay_days", 14)
+    for r in _overstay_stops():
         msg = _("Vehicle {0} has been in the workshop since {1} (over {2} days).").format(
             r.vehicle, r.stop_date, days
         )
@@ -946,3 +959,26 @@ def workshop_overstay_watch() -> None:
             "Maintenance Overdue", "Warning", msg,
             source_doctype="Vehicle Stop", source_name=r.name, vehicle=r.vehicle,
         )
+
+
+@frappe.whitelist()
+def get_workshop_overstay_count(filters=None) -> dict:
+    """Custom Number Card: how many vehicles are overstaying in the workshop.
+
+    Same rule as the Maintenance Overdue alert, shared via ``_overstay_stops`` so
+    the card and the alert cannot disagree. Scoped to the viewer's permitted
+    projects to match the other fleet number cards. ``filters`` is accepted and
+    ignored (the Custom Number Card widget always passes it).
+    """
+    from apex_habitat.salis.api.dispatch_board import _permitted_projects
+
+    vehicles = {r.vehicle for r in _overstay_stops()}
+    if not vehicles:
+        return {"value": 0}
+    unscoped, projects = _permitted_projects()
+    v_filters = {"name": ["in", list(vehicles)]}
+    if not unscoped:
+        if not projects:
+            return {"value": 0}
+        v_filters["project"] = ["in", projects]
+    return {"value": frappe.db.count("Salis Vehicle", v_filters)}

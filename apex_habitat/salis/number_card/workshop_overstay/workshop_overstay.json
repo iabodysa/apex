@@ -1,0 +1,11 @@
+{
+ "doctype": "Number Card",
+ "document_type": "Salis Vehicle",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Workshop Overstay",
+ "method": "apex_habitat.salis.tasks.get_workshop_overstay_count",
+ "module": "Salis",
+ "name": "Workshop Overstay",
+ "type": "Custom"
+}

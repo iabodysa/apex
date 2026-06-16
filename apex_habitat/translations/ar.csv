@@ -2688,7 +2688,6 @@ Released On,تاريخ التحرير
 Vehicle Activations,تفعيلات المركبات
 Driver is required.,السائق مطلوب.
 Driver {0} not found.,السائق {0} غير موجود.
-Not permitted to view the fleet dashboard.,غير مصرَّح لك بعرض لوحة الأسطول.
 Plate is required.,اللوحة مطلوبة.
 Reported stolen from the Fleet OS dashboard.,أُبلغ عن السرقة من لوحة الأسطول.
 Vehicle {0} not found.,المركبة {0} غير موجودة.
@@ -2714,3 +2713,4 @@ This page is for the fleet team.,هذه الصفحة مخصّصة لفريق ا�
 Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.
 Contact your system administrator to request access.,تواصل مع مسؤول النظام لطلب الصلاحية.
 Back to the system,العودة إلى النظام
+Workshop Overstay,تأخّر في الورشة
