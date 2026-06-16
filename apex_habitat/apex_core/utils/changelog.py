@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.17 --------------------------------------------------------------
+    {
+        "title": "Apex 1.54.17 — a Fleet dashboard reassignment fix from a security audit: reassigning a driver now fully succeeds or makes no change. If a concurrent reassignment wins the race, the second is rejected cleanly instead of silently overwriting the vehicle's live driver and leaving an unsubmitted assignment behind",
+        "app_name": "apex_habitat",
+        "link": "/fleet",
+        "creation": "2026-06-16 13:00:00",
+    },
     # v1.54.16 --------------------------------------------------------------
     {
         "title": "Apex 1.54.16 — Fleet Operations gets a Workshop Overstay number card (counts vehicles still in the workshop past the overstay cutoff, the same rule as the Maintenance Overdue alert, scoped to your permitted projects), and the Operations Control page's vehicle drawer gains quick actions that open a new Vehicle Stop, Vehicle Incident or Vehicle Assignment prefilled for the selected vehicle",
