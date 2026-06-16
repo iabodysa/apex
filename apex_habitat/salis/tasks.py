@@ -30,7 +30,7 @@ def _settings_int(fieldname: str, default: int) -> int:
         value = frappe.db.get_single_value("Salis Settings", fieldname)
     except Exception:
         return default
-    if value in (None, ""):
+    if not value:
         return default
     try:
         return int(value)

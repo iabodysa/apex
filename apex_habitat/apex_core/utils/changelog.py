@@ -3,6 +3,12 @@ from frappe.utils import get_datetime
 # [#l4tfhr]
 
 _RELEASES = [
+    {
+        "title": "Apex 1.54.18 — Salis Settings gains two alert windows the code already read but the form was missing: Workshop Overstay Days (default 14) and License Alert Lead Days (default 30), so the Maintenance Overdue and licence-expiry alerts are configurable instead of stuck at their hard defaults",
+        "app_name": "apex_habitat",
+        "link": "/app/salis-settings",
+        "creation": "2026-06-16 14:30:00",
+    },
     # [#ma8w6v]
     {
         "title": "Apex 1.54.17 — a Fleet dashboard reassignment fix from a security audit: reassigning a driver now fully succeeds or makes no change. If a concurrent reassignment wins the race, the second is rejected cleanly instead of silently overwriting the vehicle's live driver and leaving an unsubmitted assignment behind",

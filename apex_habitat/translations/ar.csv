@@ -2714,3 +2714,7 @@ Your account does not have a role to access it.,لا يملك حسابك دور�
 Contact your system administrator to request access.,تواصل مع مسؤول النظام لطلب الصلاحية.
 Back to the system,العودة إلى النظام
 Workshop Overstay,تأخّر في الورشة
+License Alert Lead Days,أيام تنبيه انتهاء الرخصة
+Workshop Overstay Days,أيام تجاوز مدّة الورشة
+Lead days for driver licence-expiry alerts; the effective window is the larger of this and Alert Lead Days.,أيام التنبيه المسبق لانتهاء رخصة السائق؛ النافذةُ الفعليّة هي الأكبر بين هذه و«أيام التنبيه المسبق».
+Days a vehicle may remain in the workshop before a Maintenance Overdue alert is raised.,عددُ الأيام التي تبقى فيها المركبة في الورشة قبل إطلاق تنبيه «تأخّر الصيانة».

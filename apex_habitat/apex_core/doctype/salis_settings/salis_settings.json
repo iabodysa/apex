@@ -12,8 +12,10 @@
   "default_cost_center",
   "salis_settings_sec_alerts",
   "alert_lead_days",
+  "license_alert_lead_days",
   "salis_settings_alerts_col1",
   "idle_vehicle_days",
+  "workshop_overstay_days",
   "salis_settings_alerts_col2",
   "fuel_pending_max_days",
   "salis_settings_sec_portal",
@@ -78,6 +80,13 @@
    "label": "Alert Lead Days"
   },
   {
+   "default": "30",
+   "description": "Lead days for driver licence-expiry alerts; the effective window is the larger of this and Alert Lead Days.",
+   "fieldname": "license_alert_lead_days",
+   "fieldtype": "Int",
+   "label": "License Alert Lead Days"
+  },
+  {
    "fieldname": "salis_settings_alerts_col1",
    "fieldtype": "Column Break"
   },
@@ -87,6 +96,13 @@
    "fieldname": "idle_vehicle_days",
    "fieldtype": "Int",
    "label": "Idle Vehicle Days"
+  },
+  {
+   "default": "14",
+   "description": "Days a vehicle may remain in the workshop before a Maintenance Overdue alert is raised.",
+   "fieldname": "workshop_overstay_days",
+   "fieldtype": "Int",
+   "label": "Workshop Overstay Days"
   },
   {
    "fieldname": "salis_settings_alerts_col2",
@@ -210,7 +226,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-15 16:30:00.000000",
+ "modified": "2026-06-16 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",
