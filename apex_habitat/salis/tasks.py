@@ -972,6 +972,10 @@ def get_workshop_overstay_count(filters=None) -> dict:
     """
     from apex_habitat.salis.api.dispatch_board import _permitted_projects
 
+    # Chokepoint: require Salis Vehicle read (matches get_fleet_os). The project
+    # scope below already limits the count; this rejects a caller with no fleet
+    # visibility outright instead of returning a silent zero.
+    frappe.has_permission("Salis Vehicle", "read", throw=True)
     vehicles = {r.vehicle for r in _overstay_stops()}
     if not vehicles:
         return {"value": 0}
