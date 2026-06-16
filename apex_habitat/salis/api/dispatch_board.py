@@ -268,6 +268,9 @@ def _drivers_pane(unscoped, projects) -> dict:
     """
     driver_filters = _project_filter(unscoped, projects)
     driver_filters["status"] = "Active"
+    # phone is permlevel-1 PII on Salis Driver (Fleet Manager / System Manager only);
+    # get_all bypasses the permlevel strip, so gate it for lower roles.
+    show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
 
     drivers = frappe.get_all(
         "Salis Driver",
@@ -311,7 +314,7 @@ def _drivers_pane(unscoped, projects) -> dict:
                 "full_name": d.full_name or d.name,
                 "project": d.project,
                 "current_vehicle": d.current_vehicle,
-                "phone": d.phone,
+                "phone": (d.phone or "") if show_pii else "",
             }
         )
 

@@ -103,6 +103,10 @@ def get_fleet_os():
     fuel lookup).
     """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
+    # Driver phone + external id are permlevel-1 PII on Salis Driver, granted only
+    # to Fleet Manager / System Manager. frappe.get_all defaults to ignore_permissions
+    # (no permlevel strip), so gate them here: lower roles get the names, not the PII.
+    show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
     unscoped, projects = _permitted_projects()
     if not unscoped and not projects:
         return {"vehicles": []}
@@ -164,10 +168,10 @@ def get_fleet_os():
         # Submitted+Active assignment → "Active"; everything else → "Stopped".
         is_active = a.status == "Active" and a.docstatus == 1 and not a.end_date
         history_by_vehicle.setdefault(a.vehicle, []).append({
-            "driver_id": (d.get("driver_id") or a.driver or ""),
+            "driver_id": ((d.get("driver_id") or a.driver or "") if show_pii else ""),
             "name_en": (d.get("full_name") or ""),
             "name_ar": "",
-            "mobile": (d.get("phone") or ""),
+            "mobile": ((d.get("phone") or "") if show_pii else ""),
             "date_receive": str(a.start_date or ""),
             "date_deliver": str(a.end_date or ""),
             "status": "Active" if is_active else "Stopped",
@@ -195,9 +199,9 @@ def get_fleet_os():
             else:
                 d = drivers.get(v.current_driver) or {}
                 cd = {
-                    "driver_id": (d.get("driver_id") or v.current_driver or ""),
+                    "driver_id": ((d.get("driver_id") or v.current_driver or "") if show_pii else ""),
                     "name_en": (d.get("full_name") or ""), "name_ar": "",
-                    "mobile": (d.get("phone") or ""), "date_receive": "", "date_deliver": "",
+                    "mobile": ((d.get("phone") or "") if show_pii else ""), "date_receive": "", "date_deliver": "",
                     "status": "Active", "project": (v.project or ""), "area": "",
                     "reason": "", "notes": "", "branch_receive": "", "branch_deliver": "",
                 }
@@ -246,6 +250,10 @@ def reassign(plate, driver_id, date=None):
         driver = driver_id
     if not driver:
         frappe.throw(_("Driver {0} not found.").format(driver_id))
+    # Scope the DRIVER too (T-148): _resolve_plate gates the vehicle, but the driver
+    # comes straight from caller input; without this a scoped supervisor could pair an
+    # out-of-scope driver to an in-scope vehicle. Fires the salis_driver scope hook.
+    frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
 
     start = getdate(date) if date else getdate(today())
 
@@ -262,6 +270,7 @@ def reassign(plate, driver_id, date=None):
         "doctype": "Vehicle Assignment",
         "vehicle": vehicle,
         "driver": driver,
+        "project": frappe.db.get_value("Salis Vehicle", vehicle, "project"),
         "start_date": start,
         "status": "Active",
     })

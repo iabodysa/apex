@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.14 --------------------------------------------------------------
+    {
+        "title": "Apex 1.54.14 — security hardening for the Fleet dashboard from a skeptics audit: driver phone and external id (permlevel-1 fields) are now hidden from roles not granted them (Fleet Supervisor / Fleet Project Manager see names, not contact details) on both the Fleet dashboard and the Dispatch Board; reassigning a driver now permission-checks the driver as well as the vehicle and stamps the assignment's project, so a project-scoped supervisor cannot pair an out-of-scope driver to a vehicle",
+        "app_name": "apex_habitat",
+        "link": "/fleet",
+        "creation": "2026-06-16 10:00:00",
+    },
     # v1.54.13 --------------------------------------------------------------
     {
         "title": "Apex 1.54.13 — fix the Fleet dashboard cards failing to render: the /fleet board threw a script error and showed no vehicles because the API sent a vehicle's current driver as a partial record missing the project and date fields the card reads; the API now returns the current driver in the same full shape as a custody-history entry, so every card and detail panel renders",
