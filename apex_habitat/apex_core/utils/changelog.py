@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.54.20 — eight more Habitat desk strings now render in Arabic (the arrivals-desk action counters, the room-setup floor summary, and the maintenance template material-load message), and the Arabic-coverage guard test now spans the whole app's desk and www surfaces instead of only the fleet pages",
+        "app_name": "apex_habitat",
+        "link": "/app/arrivals-desk",
+        "creation": "2026-06-17 15:00:00",
+    },
+    {
         "title": "Apex 1.54.19 — the Fleet Control page and several fleet and housing surfaces no longer leak English into the Arabic interface: 55 status, alert and action strings (including the Fleet Control export-count and open-incident labels) are now translated, and a guard test fails the build if any fleet desk page or the /fleet portal adds a translate-call string without an Arabic entry",
         "app_name": "apex_habitat",
         "link": "/app/operations-control",
