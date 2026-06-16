@@ -86,3 +86,34 @@ class TestSchemaIntegrity(FrappeTestCase):
                 if target and "." not in src and frappe.db.exists("DocType", target) and not frappe.get_meta(target).get_field(src):
                     bad.append(f"{d['name']}.{f.get('fieldname')} ({ff})")
         self.assertEqual(bad, [], f"fetch_from sources that do not exist: {bad}")
+
+    def test_workspace_refs_resolve(self):
+        kind = {"DocType": "DocType", "Report": "Report", "Page": "Page"}
+        bad = []
+        for j in glob.glob(f"{APP}/**/workspace/*/*.json", recursive=True):
+            d = json.load(open(j, encoding="utf-8"))
+            for s in d.get("shortcuts", []):
+                m = kind.get(s.get("type"))
+                if m and s.get("link_to") and not frappe.db.exists(m, s["link_to"]):
+                    bad.append(f"{d['name']} shortcut -> {s['type']} {s['link_to']}")
+            for link in d.get("links", []):
+                if link.get("type") == "Link" and link.get("link_type") == "DocType" and link.get("link_to") and not frappe.db.exists("DocType", link["link_to"]):
+                    bad.append(f"{d['name']} link -> DocType {link['link_to']}")
+            for c in d.get("charts", []):
+                if c.get("chart_name") and not frappe.db.exists("Dashboard Chart", c["chart_name"]):
+                    bad.append(f"{d['name']} chart -> {c['chart_name']}")
+            for nc in d.get("number_cards", []):
+                if nc.get("number_card_name") and not frappe.db.exists("Number Card", nc["number_card_name"]):
+                    bad.append(f"{d['name']} number_card -> {nc['number_card_name']}")
+        self.assertEqual(bad, [], f"workspace references that do not resolve: {bad}")
+
+    def test_dashboard_chart_refs_resolve(self):
+        bad = []
+        for j in glob.glob(f"{APP}/**/dashboard_chart/*/*.json", recursive=True):
+            d = json.load(open(j, encoding="utf-8"))
+            dt = d.get("document_type")
+            if dt and not frappe.db.exists("DocType", dt):
+                bad.append(f"{d['name']} document_type {dt} missing")
+            elif dt and d.get("based_on") and "." not in d["based_on"] and not frappe.get_meta(dt).get_field(d["based_on"]):
+                bad.append(f"{d['name']} based_on {dt}.{d['based_on']} missing")
+        self.assertEqual(bad, [], f"dashboard chart references that do not resolve: {bad}")
