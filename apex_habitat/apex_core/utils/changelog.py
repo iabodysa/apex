@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.54.19 — the Fleet Control page and several fleet and housing surfaces no longer leak English into the Arabic interface: 55 status, alert and action strings (including the Fleet Control export-count and open-incident labels) are now translated, and a guard test fails the build if any fleet desk page or the /fleet portal adds a translate-call string without an Arabic entry",
+        "app_name": "apex_habitat",
+        "link": "/app/operations-control",
+        "creation": "2026-06-17 09:00:00",
+    },
+    {
         "title": "Apex 1.54.18 — Salis Settings gains two alert windows the code already read but the form was missing: Workshop Overstay Days (default 14) and License Alert Lead Days (default 30), so the Maintenance Overdue and licence-expiry alerts are configurable instead of stuck at their hard defaults",
         "app_name": "apex_habitat",
         "link": "/app/salis-settings",
