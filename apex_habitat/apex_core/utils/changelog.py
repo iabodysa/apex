@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.16 --------------------------------------------------------------
+    {
+        "title": "Apex 1.54.16 — Fleet Operations gets a Workshop Overstay number card (counts vehicles still in the workshop past the overstay cutoff, the same rule as the Maintenance Overdue alert, scoped to your permitted projects), and the Operations Control page's vehicle drawer gains quick actions that open a new Vehicle Stop, Vehicle Incident or Vehicle Assignment prefilled for the selected vehicle",
+        "app_name": "apex_habitat",
+        "link": "/app/fleet-operations",
+        "creation": "2026-06-16 12:30:00",
+    },
     # v1.54.15 --------------------------------------------------------------
     {
         "title": "Apex 1.54.15 — the /fleet dashboard is rebuilt as a Vue single-page app (the fleet_portal portal, like /driver and /masar) while keeping the supervisor's exact board design; it reads and writes the same live Salis DocTypes through the same permission-gated API, drops the obsolete version/date line and the dead save and export buttons, adds loading, empty and error states plus a keyboard focus ring and a reduced-motion option, and shows a signed-in user without a fleet role a friendly notice instead of a raw error",
