@@ -185,6 +185,17 @@ class FleetControl {
 		$close.appendTo($head);
 		const $open = $('<a class="btn btn-xs btn-primary fc-form-link"></a>').text(__("Open Vehicle"));
 		$open.attr("href", "/app/salis-vehicle/" + encodeURIComponent(v.name)).appendTo($head);
+		// Quick actions: launch the native submittable forms prefilled with this
+		// vehicle (via route_options), so each write goes through the standard
+		// form's own validation, workflow and permissions — no duplicate write path.
+		["Vehicle Stop", "Vehicle Incident", "Vehicle Assignment"].forEach((doctype) => {
+			const $a = $('<button class="btn btn-xs btn-default fc-action"></button>').text("+ " + __(doctype));
+			$a.on("click", () => {
+				frappe.route_options = { vehicle: v.name };
+				frappe.new_doc(doctype);
+			});
+			$a.appendTo($head);
+		});
 		const $body = $('<div class="fc-drawer-body text-muted"></div>').text(__("Loading…")).appendTo(this.$drawer);
 
 		frappe.call({
