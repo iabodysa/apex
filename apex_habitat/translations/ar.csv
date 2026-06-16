@@ -2709,3 +2709,8 @@ Take a vehicle out of service by recording a Vehicle Stop.,أخرِج مركبة
 Operating Days This Month,أيام التشغيل هذا الشهر
 Vehicle Incident Statement,بيان بلاغ مركبة
 Vehicle {0} has been in the workshop since {1} (over {2} days).,المركبة {0} في الورشة منذ {1} (أكثر من {2} يوماً).
+Fleet dashboard,لوحة الأسطول
+This page is for the fleet team.,هذه الصفحة مخصّصة لفريق الأسطول.
+Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.
+Contact your system administrator to request access.,تواصل مع مسؤول النظام لطلب الصلاحية.
+Back to the system,العودة إلى النظام
