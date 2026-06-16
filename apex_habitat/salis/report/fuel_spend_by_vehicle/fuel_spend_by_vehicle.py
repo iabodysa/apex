@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 """Fuel Spend by Vehicle - per-vehicle fuel litres and amount, derived from the
 system-written Fuel Consumption Ledger (which itself consolidates Fuel Daily Log

@@ -19,7 +19,7 @@ def validate(doc, method=None):
     _validate_status_transition(doc)
 
 
-# Responsible department -> the role that owns it. Used to route accountability.
+# [#7yszca]
 _DEPARTMENT_ROLE = {
     "HR": "HR Manager",
     "Operations": "Accommodation Manager",
@@ -45,10 +45,10 @@ def after_insert(doc, method=None):
     ]
     if not assignees:
         return
-    # Assign server-side. Bypass permissions via the version-agnostic flag rather
-    # than the assign_to.add(ignore_permissions=...) kwarg — that keyword-only arg
-    # is absent in older Frappe v15 builds (the CI Frappe rejected it with a
-    # TypeError) while frappe.flags.ignore_permissions works on every version.
+    # [#94y1w6]
+    # [#7iw13h]
+    # [#6h53zk]
+    # [#anejmw]
     _perm_flag = frappe.flags.ignore_permissions
     frappe.flags.ignore_permissions = True
     try:

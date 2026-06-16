@@ -12,11 +12,11 @@ class MaintenanceRequest(Document):
 
 
 def before_save(doc, method=None):
-    # Stamp the creator server-side on new tickets so a non-privileged 'All'
-    # creator cannot spoof ownership and the owner-scoping permission hook has a
-    # trustworthy reported_by. reported_by is reqd=1, so defaulting it here (runs
-    # before mandatory validation) also lets a plain user POST via REST without
-    # supplying it. Idempotent: only fires on a new record with reported_by unset.
+    # [#3s7d9g]
+    # [#20djfc]
+    # [#fmy19q]
+    # [#g1egz8]
+    # [#mlzvw8]
     if doc.is_new() and not doc.reported_by:
         doc.reported_by = frappe.session.user
 

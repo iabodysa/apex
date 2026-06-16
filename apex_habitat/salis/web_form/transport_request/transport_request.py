@@ -30,15 +30,15 @@ def submit_transport_request(
     The controller (``before_insert``) tags ``source_channel='Web QR'`` and
     generates the ``anonymous_tracking_code`` for guest submissions.
     """
-    # Honeypot — silently succeed but discard bot submissions.
+    # [#jykmh6]
     if website_field:
         return {"name": None, "tracking_code": None}
 
-    # Server-side length cap on free text.
+    # [#ml8ltv]
     if len(purpose or "") > 2000:
         frappe.throw(_("Purpose is too long. Please keep it under 2000 characters."))
 
-    # Server-side passenger clamp.
+    # [#in7thc]
     try:
         count = int(passenger_count)
     except (TypeError, ValueError):
@@ -48,10 +48,10 @@ def submit_transport_request(
     elif count > 50:
         count = 50
 
-    # A guest QR submission is a lightweight ad-hoc request. Classify it as an
-    # Administrative Trip (destination = the stated drop-off) so it satisfies the
-    # transport-type -> request_type guard; Operations re-classifies it to a Site
-    # Transport shuttle (and fills Building/Project) during triage if needed.
+    # [#8045nk]
+    # [#pcoadu]
+    # [#p5wm8x]
+    # [#qulkfo]
     doc = frappe.get_doc({
         "doctype": "Transport Request",
         "service_line": "Administrative Trip",

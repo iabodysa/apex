@@ -16,7 +16,7 @@ class TestWorkshopOverstay(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def _vehicle_with_maintenance_stop(self, stop_days_ago):
-        # Unique plate per test (plate_normalized is unique).
+        # [#5wbd96]
         plate = "WO " + self._testMethodName
         vehicle = frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
@@ -29,12 +29,12 @@ class TestWorkshopOverstay(FrappeTestCase):
                 "stop_date": add_days(today(), -stop_days_ago),
             }
         ).insert(ignore_permissions=True)
-        stop.submit()  # flips the vehicle to Stopped (out of service)
+        stop.submit()  # [#ij3jpf]
         frappe.db.delete("Operations Alert", {"vehicle": vehicle, "alert_type": "Maintenance Overdue"})
         return vehicle
 
     def test_overstay_raises_alert(self):
-        vehicle = self._vehicle_with_maintenance_stop(20)  # past the 14-day cutoff
+        vehicle = self._vehicle_with_maintenance_stop(20)  # [#385kmo]
         workshop_overstay_watch()
         self.assertTrue(
             frappe.db.exists("Operations Alert", {"vehicle": vehicle, **ALERT}),
@@ -42,7 +42,7 @@ class TestWorkshopOverstay(FrappeTestCase):
         )
 
     def test_recent_stop_no_alert(self):
-        vehicle = self._vehicle_with_maintenance_stop(2)  # within the cutoff
+        vehicle = self._vehicle_with_maintenance_stop(2)  # [#kgy7up]
         workshop_overstay_watch()
         self.assertFalse(
             frappe.db.exists("Operations Alert", {"vehicle": vehicle, **ALERT}),
@@ -51,7 +51,7 @@ class TestWorkshopOverstay(FrappeTestCase):
 
     def test_recovered_vehicle_no_alert(self):
         vehicle = self._vehicle_with_maintenance_stop(20)
-        # Recovered to Active (stop should be closed): no overstay alert.
+        # [#tdk54g]
         frappe.db.set_value("Salis Vehicle", vehicle, "status", "Active")
         workshop_overstay_watch()
         self.assertFalse(

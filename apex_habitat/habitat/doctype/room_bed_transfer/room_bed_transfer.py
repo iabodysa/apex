@@ -21,7 +21,7 @@ def validate(doc, method=None):
     sync_party_employee(doc, derive_from="assignment")
 
     if not doc.to_bed or not doc.to_room:
-        return  # Mandatory check will catch missing fields
+        return  # [#h7vrny]
 
     bed_status = frappe.db.get_value("Accommodation Bed", doc.to_bed, "status")
     if bed_status == "Out of Service":
@@ -29,33 +29,33 @@ def validate(doc, method=None):
     elif bed_status == "Occupied":
         frappe.throw(_("Target bed is already occupied."))
 
-    # Validate target bed belongs to target room
+    # [#aded21]
     bed_room = frappe.db.get_value("Accommodation Bed", doc.to_bed, "room")
     if bed_room is not None and bed_room != doc.to_room:
         frappe.throw(_("Target Bed {0} does not belong to Room {1}").format(doc.to_bed, doc.to_room))
 
-    # NOTE: whether a building-less target room should be rejected here is an
-    # open owner decision (T-110) — building-less rooms are valid in current
-    # flows/fixtures, so this does not hard-fail. get_value returns None when unset.
+    # [#ljls64]
+    # [#mh6t7o]
+    # [#o6882o]
     to_building = frappe.db.get_value("Accommodation Room", doc.to_room, "building")
     if to_building is not None and not to_building:
         frappe.throw(_("Target Room {0} is not associated with any Building.").format(doc.to_room))
 
 
 def on_submit(doc, method=None):
-    # The occupant being moved must be a CURRENT resident: the linked assignment must be
-    # submitted and not yet checked out. Guards against executing a transfer for a
-    # closed/cancelled stay. (Checked at submit — the point the move actually applies.)
+    # [#o6c8i6]
+    # [#m6sbrx]
+    # [#jte9tq]
     asg = frappe.db.get_value(
         "Accommodation Assignment", doc.assignment, ["docstatus", "check_out_date"], as_dict=True
     )
     if not asg or asg.docstatus != 1 or asg.check_out_date:
         frappe.throw(_("This transfer needs an active (checked-in) assignment to move."))
 
-    # Concurrency guard: lock the target bed row (SELECT ... FOR UPDATE) and
-    # re-check availability inside the transaction so two simultaneous transfers
-    # (e.g. rapid drag-drops on the Transfer Board) cannot both claim it. Mirrors
-    # the Accommodation Assignment bed lock.
+    # [#ciab8g]
+    # [#ghxtrn]
+    # [#mey7v8]
+    # [#qe742a]
     locked_status = frappe.db.get_value("Accommodation Bed", doc.to_bed, "status", for_update=True)
     if locked_status == "Out of Service":
         frappe.throw(_("Target Bed {0} is Out of Service.").format(doc.to_bed))

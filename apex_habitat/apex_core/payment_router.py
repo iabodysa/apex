@@ -40,10 +40,10 @@ from apex_habitat.apex_core.doctype.apex_settings.apex_settings import gl_postin
 
 SOURCE_DOCTYPE = "Salis Payment Request"
 
-# Native-first default. When Payment Routing Settings names no target DocType,
-# the router builds Frappe/ERPNext's standard, submittable "Payment Request"
-# (the payment-intent primitive). No custom DocType is fabricated for the
-# default; a deployment overrides this by configuring its own target.
+# [#fp9fyu]
+# [#t9qszv]
+# [#cufhur]
+# [#642vqq]
 DEFAULT_TARGET_DOCTYPE = "Payment Request"
 
 
@@ -57,8 +57,8 @@ def get_target_doctype(settings=None) -> str:
     settings = settings or frappe.get_single("Payment Routing Settings")
     return settings.target_payment_doctype or DEFAULT_TARGET_DOCTYPE
 
-# Last-resort transaction currency when no company default can be resolved
-# (single-currency deployment baseline).
+# [#rcwf7j]
+# [#dyphhj]
 _FALLBACK_CURRENCY = "SAR"
 
 
@@ -125,7 +125,7 @@ def _apply_field_map(target, source, field_map) -> None:
     for row in field_map:
         target_field = (row.target_fieldname or "").strip()
         if not target_field:
-            # Defensive: validate() blocks this, but never write a blank key.
+            # [#6v9bve]
             continue
         if row.is_static:
             value = row.static_value
@@ -160,18 +160,18 @@ def route_payment(payment_request: str) -> str:
     settings = frappe.get_single("Payment Routing Settings")
     target_doctype = get_target_doctype(settings)
 
-    # Serialize concurrent routes for the same request (T-147): row-lock the source so
-    # the idempotency check + create + link-stamp form one critical section. A second
-    # concurrent call blocks here until the first commits, then sees the link and
-    # returns it instead of creating a duplicate payment.
+    # [#58agmm]
+    # [#62d4rs]
+    # [#1ymyoq]
+    # [#93rjxu]
     frappe.db.get_value(SOURCE_DOCTYPE, payment_request, "name", for_update=True)
     source = frappe.get_doc(SOURCE_DOCTYPE, payment_request)
 
-    # Authorization at the chokepoint (T-148): this function performs the
-    # ignore_permissions insert/submit, so the caller's permission on the source
-    # request is enforced HERE -- every caller (the whitelisted entry and any future
-    # direct caller) is gated by construction. submit too, since the routed payment is
-    # submitted on the GL path. throw=True raises PermissionError (HTTP 403).
+    # [#dpzek9]
+    # [#th1tyi]
+    # [#kek961]
+    # [#p7p83c]
+    # [#an7p80]
     frappe.has_permission(SOURCE_DOCTYPE, "write", doc=source, throw=True)
     frappe.has_permission(SOURCE_DOCTYPE, "submit", doc=source, throw=True)
 
@@ -180,27 +180,27 @@ def route_payment(payment_request: str) -> str:
             _("This payment request is not finance-approved yet; it cannot be paid.")
         )
 
-    # Idempotency - a request routes to exactly one payment document.
+    # [#tksu31]
     if source.linked_payment_entry:
         return source.linked_payment_entry
 
     target = frappe.new_doc(target_doctype)
     _apply_field_map(target, source, settings.field_map or [])
-    # A currency-bearing target (e.g. the native Payment Request default) needs a
-    # transaction currency the Salis source can't supply; default it so the
-    # out-of-the-box integration builds a valid payment.
+    # [#4gxinh]
+    # [#tjvbch]
+    # [#2yxt5g]
     _ensure_target_currency(target, source)
     target.insert(ignore_permissions=True)
 
-    # GL gate: submitting a payment doc fires its own on_submit -> GL posting.
-    # Only submit when the admin asked for it AND GL posting is enabled; with the
-    # flag OFF the routed payment stays in Draft so nothing reaches the ledger
-    # (the housing ledger's operational-memo behaviour, applied to routing).
+    # [#ljvbql]
+    # [#450dmg]
+    # [#oy2d3o]
+    # [#2xccvh]
     if settings.auto_submit_target and target.meta.is_submittable and gl_posting_enabled():
         target.submit()
 
-    # Stamp the link back onto the request. db_set persists immediately without a
-    # full save, so it does not re-run the request's validate/finance gate.
+    # [#4fpafg]
+    # [#p48huq]
     source.db_set("linked_payment_entry", target.name)
 
     return target.name

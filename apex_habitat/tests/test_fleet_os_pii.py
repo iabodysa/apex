@@ -18,8 +18,8 @@ from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api.fleet_os import get_fleet_os
 
-# Synthetic, obviously-fake fixture: the field is framework-validated as a phone,
-# so it must be phone-shaped — these all-zeros are not a real number.
+# [#hdpjau]
+# [#b3us0i]
 PHONE = "0500000000"
 
 
@@ -33,7 +33,7 @@ class TestFleetOsPIIGate(FrappeTestCase):
     def _seed_vehicle(self):
         """A driver carrying PII, mirrored onto a vehicle as its current driver.
         Keyed off the test method so plate_normalized / driver_id stay unique."""
-        tag = self._testMethodName  # full method name → unique per test in the class
+        tag = self._testMethodName  # [#ryvrub]
         ext_id = "PIID-" + tag
         driver = frappe.get_doc(
             {
@@ -77,7 +77,7 @@ class TestFleetOsPIIGate(FrappeTestCase):
 
     def test_pii_shown_to_permlevel1_role(self):
         plate, ext_id = self._seed_vehicle()
-        frappe.set_user("Administrator")  # System Manager holds permlevel-1 read
+        frappe.set_user("Administrator")  # [#pg0epd]
         cd = self._current_driver(plate)
         self.assertIsNotNone(cd, "the seeded vehicle must surface for System Manager")
         self.assertEqual(cd["mobile"], PHONE, "permlevel-1 role must see the phone")
@@ -85,7 +85,7 @@ class TestFleetOsPIIGate(FrappeTestCase):
 
     def test_pii_hidden_from_non_permlevel1_role(self):
         plate, _ext_id = self._seed_vehicle()
-        frappe.set_user(self._auditor_user())  # no permlevel-1 read on Salis Driver
+        frappe.set_user(self._auditor_user())  # [#8yrk2t]
         cd = self._current_driver(plate)
         self.assertIsNotNone(cd, "the vehicle must STILL be visible (non-vacuous check)")
         self.assertEqual(cd["mobile"], "", "phone must be blanked without permlevel-1 read")

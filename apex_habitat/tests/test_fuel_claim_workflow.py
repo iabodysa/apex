@@ -47,9 +47,9 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		# A requester (Project tier maker) and a separate approver (Operations
-		# tier). A user who is BOTH a maker role and Fleet Manager proves the SoD
-		# condition is what blocks self-approval, not a role gap.
+		# [#2x6s2e]
+		# [#t6jx9e]
+		# [#m05xw9]
 		cls.requester = _user("fcw_req@example.com", "Fleet Project Manager")
 		cls.manager = _user("fcw_mgr@example.com", "Fleet Manager")
 		cls.manager_maker = _user("fcw_mgrmaker@example.com", "Fleet Manager")
@@ -73,7 +73,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	# ------------------------------------------------------------------ helpers
+	# [#4lslw6]
 
 	@staticmethod
 	def _project(name):
@@ -134,7 +134,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 				pass
 		frappe.delete_doc("Fuel Claim", name, ignore_permissions=True, force=True)
 
-	# ------------------------------------------------------------------ tests
+	# [#idl6yv]
 
 	def test_workflow_is_seeded_and_active(self):
 		self.assertEqual(get_workflow_name("Fuel Claim"), WORKFLOW)
@@ -143,7 +143,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 			frappe.db.get_value("Workflow", WORKFLOW, "workflow_state_field"), "status"
 		)
 
-	# --- happy path incl. the post-submit transition ---------------------------
+	# [#dws0r5]
 
 	def test_reconcile_approve_then_close(self):
 		fc = self._new()
@@ -162,24 +162,24 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		self.assertEqual(fc.status, "Reconciled")
 		self.assertEqual(fc.docstatus, 0)
 
-		# Approve submits (docstatus 0 -> 1); the native Approve transition (an
-		# authorized role + SoD) is the gate now.
+		# [#oa0bf8]
+		# [#qdwa7u]
 		self.assertIn("Approve", _actions(fc))
 		apply_workflow(fc, "Approve")
 		fc.reload()
 		self.assertEqual(fc.status, "Approved")
 		self.assertEqual(fc.docstatus, 1)
 
-		# The frozen-post-submit bug: Close must succeed on a docstatus=1 doc.
-		# Closed is a docstatus-1 finalize (not a cancel), so the document stays
-		# submitted.
+		# [#r59gdt]
+		# [#848vr4]
+		# [#e2ddcm]
 		self.assertIn("Close", _actions(fc))
 		apply_workflow(fc, "Close")
 		fc.reload()
 		self.assertEqual(fc.status, "Closed")
 		self.assertEqual(fc.docstatus, 1)
 
-	# --- dispute / re-submit loop ----------------------------------------------
+	# [#bpwy18]
 
 	def test_dispute_then_resubmit(self):
 		fc = self._reconciled()
@@ -196,12 +196,12 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		self.assertEqual(fc.status, "Submitted to Movement")
 		self.assertEqual(fc.docstatus, 0)
 
-	# --- Segregation of Duties: requester cannot approve their own claim --------
+	# [#7tbox3]
 
 	def test_sod_requester_cannot_approve(self):
-		# manager_maker holds BOTH Fleet Manager and Fleet Project Manager, so only
-		# the SoD condition (requested_by != session.user) stands between them and
-		# self-approval.
+		# [#f1afl3]
+		# [#zjk01p]
+		# [#286nf7]
 		fc = self._reconciled(requested_by=self.manager_maker)
 
 		frappe.set_user(self.manager_maker)
@@ -209,7 +209,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			apply_workflow(fc, "Approve")
 
-		# A different Fleet Manager CAN approve the same claim.
+		# [#9gg153]
 		frappe.set_user(self.manager)
 		self.assertIn("Approve", _actions(fc))
 		apply_workflow(fc, "Approve")
@@ -217,7 +217,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		self.assertEqual(fc.status, "Approved")
 		self.assertEqual(fc.docstatus, 1)
 
-	# --- approval authority now lives in the native workflow transition --------
+	# [#qmp2y3]
 
 	def test_approve_succeeds_via_workflow_gate(self):
 		"""Approval authority now lives entirely in the native workflow's Approve
@@ -232,7 +232,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		self.assertEqual(fc.docstatus, 1)
 		self.assertEqual(fc.status, "Approved")
 
-	# --- the no-GL boundary holds ----------------------------------------------
+	# [#dbvsmy]
 
 	def test_approve_and_close_post_no_gl(self):
 		fc = self._reconciled()

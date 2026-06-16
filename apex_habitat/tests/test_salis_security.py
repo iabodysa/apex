@@ -91,16 +91,16 @@ class TestFuelConsoleScoping(FrappeTestCase):
         frappe.set_user("Administrator")
         cls.pa = _project("FuelConsole A")
         cls.pb = _project("FuelConsole B")
-        # A scoped supervisor granted ONLY project A (read scope; no submit, so
-        # cannot mutate a submitted Fuel Request — used for the scoping/denial
-        # assertions which fire at the per-doc write check before save).
+        # [#cqmsve]
+        # [#gsvykl]
+        # [#r2ws6l]
         cls.sup = _user("fc_sup@example.com", "Fleet Supervisor")
         _grant_project(cls.sup, cls.pa)
-        # A scoped project manager granted ONLY project A — holds submit on Fuel
-        # Request, so used for the positive in-scope approval path.
+        # [#7t72wf]
+        # [#g2eyis]
         cls.pm = _user("fc_pm@example.com", "Fleet Project Manager")
         _grant_project(cls.pm, cls.pa)
-        # An unscoped oversight role (sees all projects).
+        # [#fmto24]
         cls.mgr = _user("fc_mgr@example.com", "Fleet Manager")
         cls.veh_a = _vehicle("FC AAA 1", cls.pa)
         cls.veh_b = _vehicle("FC BBB 1", cls.pb)
@@ -142,7 +142,7 @@ class TestFuelConsoleScoping(FrappeTestCase):
         frappe.set_user(self.sup)
         with self.assertRaises(frappe.PermissionError):
             fuel_console.approve_fuel_request(self.fr_b.name)
-        # The document must remain Pending — the write was blocked.
+        # [#4s6kiz]
         self.assertEqual(
             frappe.db.get_value("Fuel Request", self.fr_b.name, "status"), "Pending"
         )
@@ -156,8 +156,8 @@ class TestFuelConsoleScoping(FrappeTestCase):
         )
 
     def test_scoped_user_can_approve_in_scope(self):
-        # Dedicated in-scope request so this mutation does not disturb the shared
-        # fixtures relied on by the read-only queue tests.
+        # [#4djnnb]
+        # [#nkdtar]
         own = _pending_fuel_request(self.pa, self.veh_a)
         frappe.set_user(self.pm)
         res = fuel_console.approve_fuel_request(own.name)
@@ -205,7 +205,7 @@ class TestSupportTicketScoping(FrappeTestCase):
         """A Driver's own project-less ticket must defer to if_owner, not be
         blocked by project scoping."""
         drv_user = _user("tk_driver@example.com", "Driver")
-        # The Driver owns this project-less ticket -> scoping defers to default.
+        # [#qaflrt]
         self.assertIsNone(
             scoped_has_permission(
                 self._ticket(project=None, owner=drv_user), "read", user=drv_user

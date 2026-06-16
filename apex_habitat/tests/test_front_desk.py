@@ -54,7 +54,7 @@ class TestFrontDesk(ApexHabitatTestCase):
         b2 = _find_bed(grid2, self.bed)
         self.assertEqual(b2["bed_color"], "red", "bed is red after check-in")
         self.assertTrue(b2.get("occupant"), "occupied bed carries occupant info")
-        # the check-in created a submitted assignment through the real controller
+        # [#g9j6rp]
         self.assertTrue(frappe.db.exists("Accommodation Assignment",
                         {"bed": self.bed, "docstatus": 1, "check_out_date": ["is", "not set"]}))
 

@@ -155,7 +155,7 @@ class _WorkerTripMixin:
                 ],
             }
         ).insert(ignore_permissions=True)
-        # worker_count is server-derived on the Transport Request controller.
+        # [#sr4wvs]
         tr.reload()
 
         rp = frappe.get_doc(
@@ -260,7 +260,7 @@ class TestTripStartLogController(_WorkerTripMixin, FrappeTestCase):
         tr, rp, dt = self._worker_trip(
             self.driver, self.project, self.building, [self.w1, self.w2], "TSL Route A"
         )
-        # The TR manifest has two registered workers.
+        # [#5wi2do]
         self.assertEqual(tr.worker_count, 2)
 
         log = frappe.get_doc(
@@ -286,11 +286,11 @@ class TestTripStartLogController(_WorkerTripMixin, FrappeTestCase):
                 "Trip Start Log", log.name, ignore_permissions=True, force=True
             )
         )
-        # expected_count derived from the TR manifest (2); boarded_count from the
-        # single boarding row (1) — both read-only, server-derived.
+        # [#6ub6aa]
+        # [#nhzlou]
         self.assertEqual(log.expected_count, 2)
         self.assertEqual(log.boarded_count, 1)
-        # Fetched trip context resolved from the Dispatch Trip.
+        # [#4zb0oq]
         self.assertEqual(log.transport_request, tr.name)
         self.assertEqual(log.route_plan, rp.name)
 
@@ -440,7 +440,7 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
         cls.driver = _ensure_test_driver()
         cls.driver_user = _driver_user_for(cls.driver)
         cls.w1 = _employee("Masar EP Worker One")
-        # A second, unrelated driver — created once so re-runs never duplicate.
+        # [#kvd31w]
         cls.other_driver, cls.other_user = _ensure_driver_chain(
             "masar_other_drv@example.com", "Masar Other"
         )
@@ -455,7 +455,7 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
         tr, rp, dt = self._worker_trip(
             self.driver, self.project, self.building, [self.w1], "EP Route A"
         )
-        # Call the endpoint AS the driver's own user — identity resolved server-side.
+        # [#jvbbnq]
         frappe.set_user(self.driver_user)
         payload = masar.get_my_worker_route_today()
 
@@ -465,10 +465,10 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
         self.assertIn(dt.name, names)
 
         trip = next(t for t in payload["trips"] if t["dispatch_trip"] == dt.name)
-        # Registered manifest surfaced.
+        # [#xjsh8j]
         self.assertEqual(trip["expected_count"], 1)
         self.assertEqual(trip["workers"][0]["employee"], self.w1)
-        # Ordered stops, and the first stop is a housing pickup with the building.
+        # [#5z6fzr]
         self.assertEqual([s["sequence"] for s in trip["stops"]], [1, 2])
         pickup_stop = trip["stops"][0]
         self.assertEqual(pickup_stop["accommodation_building"], self.building)
@@ -482,11 +482,11 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
     def test_endpoint_is_identity_scoped_to_self(self):
         """A different driver does not see another driver's worker route — the
         endpoint resolves the SESSION user, never a supplied id."""
-        # driver A's worker trip
+        # [#5ncwnl]
         tr, rp, dt = self._worker_trip(
             self.driver, self.project, self.building, [self.w1], "EP Route B"
         )
-        # Call as the SECOND, unrelated driver (built once in setUpClass).
+        # [#htpwnj]
         frappe.set_user(self.other_user)
         payload = masar.get_my_worker_route_today()
         self.assertEqual(payload["driver"], self.other_driver)
@@ -518,8 +518,8 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
                 "service_line": "Administrative Trip",
                 "request_type": "Administrative Trip / Document Signing",
                 "project": self.project,
-                # An Administrative Trip names a representative (an Employee) and must
-                # not carry labour-accommodation/worker context.
+                # [#3z0g4o]
+                # [#cb1jyk]
                 "representative": _employee("EP Representative"),
                 "destination": "Ministry",
                 "from_location": "HQ",

@@ -28,7 +28,7 @@ def _validate_return_quantities(doc):
     returns for the linked Custody Issue (prevents over-return and duplicate
     full returns)."""
     if not doc.custody_issue or not frappe.db.exists("Custody Issue", doc.custody_issue):
-        # Invalid/missing link is reported by Frappe's own link validation; don't crash here.
+        # [#1bgxxw]
         return
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
     if issue.docstatus != 1:
@@ -38,7 +38,7 @@ def _validate_return_quantities(doc):
     for it in issue.items:
         issued[it.article] = issued.get(it.article, 0) + (it.qty or 0)
 
-    # Quantities already returned on OTHER submitted returns for this issue.
+    # [#nm9opi]
     prior_returns = frappe.get_all(
         "Custody Return",
         filters={"custody_issue": issue.name, "docstatus": 1, "name": ["!=", doc.name or ""]},
@@ -53,7 +53,7 @@ def _validate_return_quantities(doc):
         ):
             prior[r.article] = prior.get(r.article, 0) + (r.qty or 0)
 
-    # This document's quantities, aggregated per article.
+    # [#4f8bwp]
     this_doc = {}
     for row in doc.items:
         this_doc[row.article] = this_doc.get(row.article, 0) + (row.qty or 0)
@@ -160,8 +160,8 @@ def before_cancel(doc, method=None):
 
 def on_cancel(doc, method=None):
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
-    # Recompute per-article progress EXCLUDING this (now-cancelled) return rather than a
-    # blanket flip to "Issued" — a sibling return may still hold it Partially/fully Returned.
+    # [#cityzj]
+    # [#g7wi57]
     try:
         status = _issue_return_progress(issue, exclude=doc.name)
         if issue.status != status:

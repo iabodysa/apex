@@ -52,19 +52,19 @@ from apex_habitat.salis.utils import (
 
 REQUEST_TYPES = ("Standard", "Top-up", "Chip")
 
-# Known status values. The Select carries these for filtering / colour, but the
-# Fuel Request Workflow owns the *transitions* (which status is reachable from
-# which, by whom). This controller only rejects an unknown value and pins the
-# initial status to Pending.
+# [#ip8yq8]
+# [#gpwe2c]
+# [#ak590k]
+# [#8rwd5f]
 VALID_STATUSES = ("Pending", "Approved", "Done", "Failed", "Reverted", "Cancelled")
 
 
 class FuelRequest(Document):
-	# ------------------------------------------------------------------ lifecycle
+	# [#6yoecv]
 
 	def before_insert(self):
-		# Stamp the requester server-side (read-only field) so the workflow's
-		# segregation-of-duties gate on the approval transition cannot be spoofed.
+		# [#p176r1]
+		# [#cmsxtp]
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
 
@@ -110,19 +110,19 @@ class FuelRequest(Document):
 			frappe.throw(reason)
 
 	def before_submit(self):
-		# Approval authority (legitimate approver role, segregation of duties, and
-		# the volume/cross-project escalation that the former tier engine enforced)
-		# is now owned by the native Fuel Request Workflow's Approve transition, not
-		# this controller. A Chip request carries no approval gate but keeps its own
-		# evidence/acknowledgement gate.
+		# [#l2b6c9]
+		# [#tlw8h9]
+		# [#rrgh3g]
+		# [#gbaw4t]
+		# [#egkx12]
 		if self.request_type == "Chip":
 			self._guard_chip_cancellation()
 
 	def on_submit(self):
 		if self.request_type == "Standard":
-			# The Approve transition submits the request at Approved; quota is
-			# applied once it reaches Done (here if it submits straight into Done,
-			# otherwise on the post-submit transition). Idempotent via quota_applied.
+			# [#7ehveh]
+			# [#fv7irq]
+			# [#1bpaxx]
 			if self.status == "Done":
 				self._apply_quota_consumption()
 		elif self.request_type == "Top-up":
@@ -155,12 +155,12 @@ class FuelRequest(Document):
 		if self.request_type == "Standard" and self.status == "Done":
 			self._apply_quota_consumption()
 
-		# Resolve-on-source-clear: reverting a temporary top-up clears the
-		# condition behind any open "Excessive Topup" Operations Alert for this
-		# vehicle, so close it immediately rather than waiting for the daily
-		# reconciliation pass. has_value_changed keeps this to the revert event
-		# only; the resolver is a no-op when no such alert exists and never
-		# raises, so it cannot block this save.
+		# [#42r4yy]
+		# [#77jjcv]
+		# [#tnpsft]
+		# [#57eag0]
+		# [#f5r2ip]
+		# [#t5dwgu]
 		if (
 			self.request_type == "Top-up"
 			and self.reverted
@@ -185,17 +185,17 @@ class FuelRequest(Document):
 				),
 			)
 
-		# Reverse any Fuel Consumption Ledger row already accrued for this request.
-		# A Standard request only enters the ledger after it reaches Done and the
-		# fuel accrual engine ledgers it; cancelling it here must net that
-		# consumption back out, mirroring the quota reversal above. The engine
-		# helper is idempotent and a no-op when nothing was ledgered (other request
-		# types never accrue a ledger row), so this is safe to call unconditionally.
+		# [#bgxffd]
+		# [#qfkt79]
+		# [#m2nlyj]
+		# [#rwcftn]
+		# [#cp3r3k]
+		# [#os9hds]
 		from apex_habitat.salis.fuel_engine import reverse_fuel_ledger
 
 		reverse_fuel_ledger("Fuel Request", self.name)
 
-	# ------------------------------------------------------------------ per-type validation
+	# [#jlrxc6]
 
 	def _validate_standard(self):
 		if (self.requested_litres or 0) <= 0:
@@ -216,7 +216,7 @@ class FuelRequest(Document):
 				_("A chip number is required to {0} a fuel chip.").format(_(self.action))
 			)
 
-	# ------------------------------------------------------------------ status flow
+	# [#7v3fqw]
 
 	def _guard_initial_status(self):
 		"""A new request must be created at the initial state (Pending). Later
@@ -234,7 +234,7 @@ class FuelRequest(Document):
 		if self.status == "Approved" and not self.approved_by:
 			self.approved_by = frappe.session.user
 
-	# ------------------------------------------------------------------ Top-up helpers
+	# [#m928oh]
 
 	def _warn_overdue_temporary(self):
 		if not self.is_temporary or self.reverted:
@@ -248,7 +248,7 @@ class FuelRequest(Document):
 				title=_("Temporary Top-up Not Reverted"),
 			)
 
-	# ------------------------------------------------------------------ Chip helpers
+	# [#r9urke]
 
 	def _guard_chip_cancellation(self):
 		if self.action == "Cancel":
@@ -261,7 +261,7 @@ class FuelRequest(Document):
 					_("Owner acknowledgement is required to submit a fuel chip cancellation.")
 				)
 
-	# ------------------------------------------------------------------ quota posting (Standard)
+	# [#sp2u9x]
 
 	def _apply_quota_consumption(self):
 		"""Idempotently add requested_litres to the quota's consumed_litres."""

@@ -36,8 +36,8 @@ class RentalVehicleMovement(Document):
             frappe.throw(_("Daily Rate cannot be negative."))
 
     def on_submit(self):
-        # Receipt starts accrual eligibility; Return ends it. The engine reads
-        # these submitted movements by date — no flag is written here.
+        # [#czfkoc]
+        # [#8jahxk]
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,

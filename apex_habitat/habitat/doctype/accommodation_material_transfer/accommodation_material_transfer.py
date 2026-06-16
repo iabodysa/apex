@@ -131,8 +131,8 @@ def _notify_finance_on_cost_center_shift(doc):
     if not recipients:
         return
 
-    # Master email kill-switch: stay silent unless an admin has turned email on
-    # in Habitat Settings, even when the per-feature opt-in above is set.
+    # [#4dbfxf]
+    # [#eteb4m]
     from apex_habitat.apex_core.utils.email_gate import email_enabled
     if not email_enabled():
         frappe.logger().info(

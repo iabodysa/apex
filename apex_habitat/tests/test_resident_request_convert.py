@@ -8,7 +8,7 @@ import frappe
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
 from apex_habitat.tests import factories
 
-# External (ERPNext) link targets the test runner must not try to auto-create.
+# [#t6gatv]
 test_ignore = factories.test_ignore
 
 
@@ -48,15 +48,15 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
         self.assertTrue(res["target_document"])
         self.assertFalse(res["already_converted"])
 
-        # The read-only traceability fields are now stamped on the request.
+        # [#66h7g4]
         req.reload()
         self.assertEqual(req.target_doctype, "Maintenance Request")
         self.assertEqual(req.target_document, res["target_document"])
-        # Request advanced out of intake states once work has a home.
+        # [#fk6pic]
         self.assertEqual(req.status, "In Progress")
 
-        # The created ticket carries the mapped location, priority and a valid
-        # issue_type drawn from the category mapping.
+        # [#kvbm2g]
+        # [#a2w7ml]
         mr = frappe.get_doc("Maintenance Request", res["target_document"])
         self.assertEqual(mr.building, "RRC-BLDG")
         self.assertEqual(mr.room, "RRC-BLDG-R01")
@@ -73,7 +73,7 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
         self.assertTrue(second["already_converted"])
         self.assertEqual(first["target_document"], second["target_document"])
 
-        # Exactly one target exists for this request.
+        # [#8jjyla]
         count = frappe.db.count("Maintenance Request",
                                 {"name": first["target_document"]})
         self.assertEqual(count, 1)
@@ -97,14 +97,14 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
         with self.assertRaises(frappe.exceptions.ValidationError):
             self._convert(req.name)
 
-        # Nothing was stamped on the request.
+        # [#4c7qzj]
         req.reload()
         self.assertFalse(req.target_doctype)
         self.assertFalse(req.target_document)
 
     def test_terminal_status_is_not_overridden_on_convert(self):
-        # A request already Resolved keeps its terminal status; conversion still
-        # records the target for traceability but does not reopen it.
+        # [#24vj8a]
+        # [#99aqiq]
         req = self._new_request(category="Maintenance", status="Resolved",
                                 resolution_notes="Closed at source")
         res = self._convert(req.name)

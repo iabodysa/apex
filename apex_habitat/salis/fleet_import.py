@@ -43,7 +43,7 @@ def run(csv_dir=None):
     csv_dir = os.path.abspath(csv_dir)
     out = {"csv_dir": csv_dir}
 
-    # 1. Vehicle Category (name == category_name)
+    # [#a2zdu8]
     made = 0
     for r in _read(csv_dir, "vehicle_category.csv"):
         cn = (r.get("category_name") or "").strip()
@@ -57,7 +57,7 @@ def run(csv_dir=None):
                 pass
     out["categories_new"] = made
 
-    # 2. Rental Office (name == office_name)
+    # [#t0ys01]
     made = 0
     for r in _read(csv_dir, "rental_office.csv"):
         on = (r.get("office_name") or "").strip()
@@ -70,7 +70,7 @@ def run(csv_dir=None):
                 pass
     out["offices_new"] = made
 
-    # 3. Project (map project_name -> name)
+    # [#fdu5q4]
     proj = {}
     for r in _read(csv_dir, "project.csv"):
         pn = (r.get("project_name") or "").strip()
@@ -85,7 +85,7 @@ def run(csv_dir=None):
         proj[pn] = name
     out["projects"] = len(proj)
 
-    # 4. Salis Driver (dedupe by driver_id)
+    # [#bz8m4k]
     drv = {}
     for r in _read(csv_dir, "salis_driver.csv"):
         did = (r.get("driver_id") or "").strip()
@@ -106,7 +106,7 @@ def run(csv_dir=None):
         drv[did] = name
     out["drivers"] = len(drv)
 
-    # 5. Salis Vehicle (dedupe by plate_normalized)
+    # [#3wp485]
     veh = {}
     for r in _read(csv_dir, "salis_vehicle.csv"):
         plate = (r.get("plate_number") or "").strip()
@@ -129,7 +129,7 @@ def run(csv_dir=None):
         veh[plate] = name
     out["vehicles"] = len(veh)
 
-    # 6. current_driver / current_vehicle mirror
+    # [#bnwnyn]
     mirrored = 0
     for r in _read(csv_dir, "salis_vehicle_current_driver_patch.csv"):
         vn = veh.get((r.get("plate_number") or "").strip())
@@ -140,7 +140,7 @@ def run(csv_dir=None):
             mirrored += 1
     out["mirrored"] = mirrored
 
-    # 7. Vehicle Assignment (historical backfill, draft; gates bypassed)
+    # [#489xak]
     loaded = skipped = 0
     for r in _read(csv_dir, "vehicle_assignment_clean.csv"):
         vn = veh.get((r.get("vehicle") or "").strip())
@@ -156,7 +156,7 @@ def run(csv_dir=None):
                 "end_date": (r.get("end_date") or "").strip() or None,
                 "status": (r.get("status") or "Ended").strip(),
             })
-            a.flags.ignore_validate = True  # back-dated custody, not a live op
+            a.flags.ignore_validate = True  # [#fbx2ud]
             a.insert(ignore_permissions=True)  # audit-ok: admin bulk migration loader
             loaded += 1
         except Exception:

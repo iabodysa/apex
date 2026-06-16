@@ -1,8 +1,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Prevent Frappe test runner from recursively resolving Link-field dependencies
-# on external DocTypes that require ERPNext (not installed in CI bench).
+# [#hlfy1g]
+# [#rf8fpd]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -67,9 +67,9 @@ class TestSafetyInspectionReport(FrappeTestCase):
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
-    # ------------------------------------------------------------------
-    # T-103: on_submit fan-out — one Maintenance Request per actionable finding
-    # ------------------------------------------------------------------
+    # [#7usew1]
+    # [#3j4llj]
+    # [#7usew1]
 
     def _ensure_location(self):
         """Create real Accommodation Building + Room records so the Maintenance
@@ -80,17 +80,17 @@ class TestSafetyInspectionReport(FrappeTestCase):
             frappe.get_doc({
                 "doctype": "Accommodation Building",
                 "building_name": "T103-BLDG",
-                # total_capacity is auto-derived (read-only); a value supplied here is
-                # harmless and keeps the fixture explicit (status defaults to Active).
+                # [#83cvs4]
+                # [#20hga2]
                 "total_capacity": 10,
             }).insert(ignore_permissions=True, ignore_links=True)
         if not frappe.db.exists("Accommodation Room", "T103-ROOM"):
-            # Accommodation Room autonames from room_number (field:room_number),
-            # so naming the room "T103-ROOM" pins the docname directly - no
-            # post-insert rename. rename_doc(force=True) commits, which would
-            # leak this row past the per-test rollback and collide on the next
-            # test's insert; setting the name up front keeps the fixture
-            # rollback-clean and the existence guard above accurate.
+            # [#miqh4t]
+            # [#sztdd2]
+            # [#41p3kk]
+            # [#mrljlj]
+            # [#g4pkwt]
+            # [#dp2m1s]
             frappe.get_doc({
                 "doctype": "Accommodation Room",
                 "building": "T103-BLDG",
@@ -115,14 +115,14 @@ class TestSafetyInspectionReport(FrappeTestCase):
                 "status": "Open",
             })
         if with_noise:
-            # No issue_type -> not actionable.
+            # [#burphn]
             findings.append({
                 "finding_category": "General",
                 "description": "Observation only, no ticket",
                 "room": room,
                 "status": "Open",
             })
-            # Resolved -> not actionable even with an issue_type.
+            # [#ngnlfz]
             findings.append({
                 "finding_category": "Maintenance",
                 "description": "Already fixed on the spot",
@@ -144,9 +144,9 @@ class TestSafetyInspectionReport(FrappeTestCase):
                                  filters={"source_inspection": report_name}, pluck="name"):
             frappe.delete_doc("Maintenance Request", mr, force=True, ignore_permissions=True)
         if frappe.db.exists("Safety Inspection Report", report_name):
-            # The report is submitted (the fan-out runs on_submit). delete_doc's
-            # force flag only bypasses the link check, not the submitted guard, so
-            # a submitted doc must be cancelled before it can be deleted.
+            # [#38b52p]
+            # [#9ont8q]
+            # [#arhbzb]
             report = frappe.get_doc("Safety Inspection Report", report_name)
             if report.docstatus == 1:
                 report.cancel()
@@ -169,7 +169,7 @@ class TestSafetyInspectionReport(FrappeTestCase):
                 filters={"source_inspection": report.name},
                 fields=["name", "room", "building", "issue_type", "priority"],
             )
-            # N actionable -> N tickets (noise rows produced none).
+            # [#i947cd]
             self.assertEqual(len(mrs), n,
                              f"expected {n} Maintenance Requests, got {len(mrs)}")
             for mr in mrs:
@@ -178,20 +178,20 @@ class TestSafetyInspectionReport(FrappeTestCase):
                 self.assertEqual(mr.issue_type, "Plumbing")
                 self.assertEqual(mr.priority, "High")
 
-            # Surfaced in the linked table, one row per ticket.
+            # [#qg5czv]
             report.reload()
             self.assertEqual(len(report.linked_maintenance_requests), n)
             surfaced = {r.maintenance_request for r in report.linked_maintenance_requests}
             self.assertEqual(surfaced, {m.name for m in mrs})
 
-            # Back-link stamped on each actionable finding.
+            # [#fb4yhn]
             linked_findings = [f for f in report.safety_findings
                                if f.generated_maintenance_request]
             self.assertEqual(len(linked_findings), n)
 
-            # Idempotency: a second fan-out pass on the submitted doc must add no
-            # tickets and no surfacing rows (every actionable finding is already
-            # linked to a live MR).
+            # [#heq76w]
+            # [#aznyse]
+            # [#lytunr]
             report.generate_maintenance_requests()
             mrs_after = frappe.get_all("Maintenance Request",
                                        filters={"source_inspection": report.name}, pluck="name")

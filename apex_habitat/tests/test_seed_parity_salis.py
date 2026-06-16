@@ -50,7 +50,7 @@ class TestSalisAssignmentRuleSpec(unittest.TestCase):
 class TestSalisKanbanBoardSpec(unittest.TestCase):
     def test_spec_shape(self):
         spec = _spec("Kanban Board")
-        # Kanban Board auto-names from kanban_board_name.
+        # [#gthhuq]
         self.assertEqual(spec["key"], "kanban_board_name")
         self.assertTrue(spec["create_only"])
         self.assertEqual(len(spec["records"]), 2)
@@ -60,8 +60,8 @@ class TestSalisKanbanBoardSpec(unittest.TestCase):
 
 class TestSalisAutoEmailReportNotExternalised(unittest.TestCase):
     def test_auto_email_report_is_not_externalised(self):
-        # The seeder sets per-site runtime fields (email_to, report_type), so it
-        # is not statically reproducible and is deliberately left as a seeder.
+        # [#6ap3u4]
+        # [#rchip6]
         self.assertEqual(load_specs("salis", only=["Auto Email Report"]), [])
         self.assertFalse(
             os.path.exists(os.path.join(DATA_ROOT, "salis", "auto_email_report.json")),

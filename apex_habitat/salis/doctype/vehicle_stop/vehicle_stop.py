@@ -19,7 +19,7 @@ class VehicleStop(Document):
             self.ownership_at_stop = frappe.db.get_value("Salis Vehicle", self.vehicle, "ownership")
 
     def before_submit(self):
-        # Evidence-before-status gating: incident-type stops require evidence.
+        # [#ku7cqs]
         if self.stop_reason in ("Accident", "Violation") and not self.evidence:
             frappe.throw(
                 _("Evidence is required to submit a stop with reason {0}.").format(_(self.stop_reason))
@@ -28,7 +28,7 @@ class VehicleStop(Document):
     def on_submit(self):
         lock_vehicle(self.vehicle)
 
-        # Capture the prior status for a reliable revert on cancel.
+        # [#bp5wlg]
         self.db_set("previous_status", frappe.db.get_value("Salis Vehicle", self.vehicle, "status"))
 
         frappe.db.set_value("Salis Vehicle", self.vehicle, "status", "Stopped")
@@ -43,11 +43,11 @@ class VehicleStop(Document):
     def on_cancel(self):
         lock_vehicle(self.vehicle)
 
-        # Restore only if the vehicle is still in the state this stop set
-        # (a later stop may have changed it) AND no other submitted Vehicle Stop
-        # is still in force for this vehicle. A second stop that also set the
-        # vehicle to Stopped must keep it stopped, so cancelling this (older)
-        # stop must not un-stop the vehicle on its behalf.
+        # [#r0a24i]
+        # [#iodhu1]
+        # [#r47amw]
+        # [#cn2wtu]
+        # [#d0gbu0]
         another_stop_in_force = frappe.db.exists(
             "Vehicle Stop",
             {"vehicle": self.vehicle, "docstatus": 1, "name": ["!=", self.name]},

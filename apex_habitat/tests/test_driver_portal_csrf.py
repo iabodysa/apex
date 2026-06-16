@@ -19,8 +19,8 @@ class TestDriverPortalCsrf(unittest.TestCase):
     def test_context_carries_the_session_csrf_token(self):
         ctx = frappe._dict()
         driver_page.get_context(ctx)
-        # Non-empty, not the unrendered Jinja placeholder, and exactly the value
-        # auth.validate_csrf_token() compares incoming POST headers against.
+        # [#e7solg]
+        # [#rf28z1]
         self.assertTrue(ctx.csrf_token, "driver portal context must carry a CSRF token")
         self.assertNotEqual(ctx.csrf_token, "{{ csrf_token }}")
         self.assertEqual(ctx.csrf_token, frappe.session.data.csrf_token)

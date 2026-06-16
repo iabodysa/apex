@@ -12,8 +12,8 @@ _STATUS_RANK = {"Compliant": 0, "Expiring Soon": 1, "Expired": 2}
 
 
 class SalisVehicle(Document):
-    # NOTE: current_driver mirrors Driver.current_vehicle for quick reference only.
-    # Vehicle Assignment is the authoritative source of the vehicle<->driver pairing.
+    # [#eyb12w]
+    # [#1uyetq]
     def validate(self):
         self._set_company_default()
         self._set_plate_normalized()
@@ -46,7 +46,7 @@ class SalisVehicle(Document):
         lead_days = self._get_alert_lead_days()
         soon_cutoff = add_days(today_date, lead_days)
 
-        # Row status -> parent status mapping (row "Valid" rolls up to "Compliant").
+        # [#n9ggkr]
         row_to_parent = {
             "Expired": "Expired",
             "Expiring Soon": "Expiring Soon",
@@ -80,7 +80,7 @@ class SalisVehicle(Document):
                 worst_status = parent_status
 
         if worst_rank < 0:
-            # rows exist but none carry an expiry_date
+            # [#fjg9o7]
             self.compliance_status = "Not Tracked"
             self.next_expiry_date = None
             return

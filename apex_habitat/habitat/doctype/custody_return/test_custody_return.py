@@ -1,8 +1,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Prevent Frappe test runner from recursively resolving Link-field dependencies
-# on external DocTypes that require ERPNext (not installed in CI bench).
+# [#hlfy1g]
+# [#rf8fpd]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -57,16 +57,16 @@ class TestCustodyReturn(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
 
-    # --- per-article return progress (bug #1) -------------------------------
-    # A Custody Issue is "Returned" only when EVERY issued article is fully
-    # accounted for — never from a cross-article quantity SUM.
+    # [#bw1hb6]
+    # [#2or04y]
+    # [#cshlhd]
     def test_progress_partial_when_one_article_short(self):
         from apex_habitat.habitat.doctype.custody_return.custody_return import _progress_from
         self.assertEqual(_progress_from({"A": 5}, {"A": 3}), "Partially Returned")
 
     def test_progress_multi_article_full_only_when_all_complete(self):
         from apex_habitat.habitat.doctype.custody_return.custody_return import _progress_from
-        # A fully returned but B untouched: 5/10 by SUM, but per-article incomplete.
+        # [#hcw0mo]
         self.assertEqual(_progress_from({"A": 5, "B": 5}, {"A": 5}), "Partially Returned")
         self.assertEqual(_progress_from({"A": 5, "B": 5}, {"A": 5, "B": 5}), "Returned")
 
@@ -78,7 +78,7 @@ class TestCustodyReturn(FrappeTestCase):
         from apex_habitat.habitat.doctype.custody_return.custody_return import _progress_from
         self.assertEqual(_progress_from({"A": 5}, {}), "Issued")
 
-    # --- P16 partial-return status propagation --------------------------------
+    # [#j8c70d]
 
     def test_partially_returned_status_in_custody_issue_options(self):
         """Custody Issue status field must carry the 'Partially Returned' option
@@ -96,7 +96,7 @@ class TestCustodyReturn(FrappeTestCase):
         partially returned and at least one is not fully returned — verifies the
         logic that on_submit uses to update Custody Issue status."""
         from apex_habitat.habitat.doctype.custody_return.custody_return import _progress_from
-        # Two articles, one fully returned and one not returned yet.
+        # [#sul1dd]
         result = _progress_from({"CHAIR": 3, "TABLE": 2}, {"CHAIR": 3})
         self.assertEqual(result, "Partially Returned",
                          "A partial return should yield 'Partially Returned', not 'Returned'")
@@ -105,7 +105,7 @@ class TestCustodyReturn(FrappeTestCase):
         """Verify _issue_return_progress and _progress_from agree: per-article
         tracking never confuses a cross-article SUM as full return."""
         from apex_habitat.habitat.doctype.custody_return.custody_return import _progress_from
-        # 5+5 issued, 5+0 returned = 50% by sum but NOT fully returned
+        # [#8vj792]
         self.assertEqual(_progress_from({"A": 5, "B": 5}, {"A": 5}), "Partially Returned")
-        # 5+5 issued, 5+5 returned = fully returned
+        # [#m9ojkl]
         self.assertEqual(_progress_from({"A": 5, "B": 5}, {"A": 5, "B": 5}), "Returned")

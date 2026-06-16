@@ -23,7 +23,7 @@ class TestSeedLoaderStructure(unittest.TestCase):
         self.assertEqual(spec["key"], "name")
         self.assertTrue(spec["create_only"])
         self.assertEqual(len(spec["records"]), 3)
-        # data files are co-located with the loader so __file__ resolution works
+        # [#3avk34]
         self.assertTrue(os.path.isdir(os.path.join(DATA_ROOT, "habitat")))
 
     def test_only_filter_excludes_other_doctypes(self):
@@ -37,7 +37,7 @@ class TestSeedLoaderStructure(unittest.TestCase):
             mod = os.path.join(root, "habitat")
             os.makedirs(mod)
             with open(os.path.join(mod, "bad.json"), "w", encoding="utf-8") as fh:
-                json.dump({"doctype": "Email Template", "records": []}, fh)  # no 'key'
+                json.dump({"doctype": "Email Template", "records": []}, fh)  # [#5skuyx]
             with self.assertRaises(SeedDataError):
                 load_specs("habitat", data_root=root)
 

@@ -22,7 +22,7 @@ class AccommodationCheckout(Document):
 def validate(doc, method=None):
     sync_party_employee(doc, derive_from="assignment")
     if not doc.assignment or not frappe.db.exists("Accommodation Assignment", doc.assignment):
-        return  # Mandatory/link check will catch missing or invalid assignment
+        return  # [#ghdnph]
 
     assignment = frappe.get_doc("Accommodation Assignment", doc.assignment)
 
@@ -123,17 +123,17 @@ def resolve_damage_assessment_building(assignment, bed):
 
 
 def on_submit(doc, method=None):
-    # Close the concurrent-checkout race (#4). The validate dup-check is a TOCTOU pre-check with
-    # no DB enforcement, so two checkouts for the SAME assignment can both pass validate. Lock the
-    # assignment row here (for_update) so the submits serialize: the one that loses the race then
-    # sees the check-out already set and aborts (its submit transaction rolls back).
+    # [#3hehe7]
+    # [#nj5yjx]
+    # [#3dlx73]
+    # [#s2lw5t]
     already = frappe.db.get_value(
         "Accommodation Assignment", doc.assignment, "check_out_date", for_update=True
     )
     if already:
         frappe.throw(_("This assignment was already checked out on {0}.").format(already))
 
-    # Close the assignment
+    # [#9mhk9f]
     assignment = frappe.get_doc("Accommodation Assignment", doc.assignment)
     assignment.db_set("check_out_date", doc.checkout_date)
     assignment.add_comment("Comment", _("Check-out processed via {0} on {1}").format(doc.name, doc.checkout_date))
@@ -142,8 +142,8 @@ def on_submit(doc, method=None):
     frappe.db.set_value("Accommodation Room", assignment.room, "readiness_status", "Needs Cleaning")
     recalculate_spatial(assignment.room, assignment.building)
 
-    # Custody Damage Assessment — auto-create a draft for damaged/lost items.
-    # Custody Return must be created manually against the specific Custody Issue.
+    # [#7bdpt9]
+    # [#n0gcis]
     if doc.custody_return_items:
         has_damage = any(item.return_status in ("Damaged", "Lost") for item in doc.custody_return_items)
 

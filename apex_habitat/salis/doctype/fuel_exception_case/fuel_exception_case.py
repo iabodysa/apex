@@ -31,10 +31,10 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-# Known status values. The Select carries these for filtering / colour, but the
-# Fuel Exception Case Workflow owns the *transitions* (which status is reachable
-# from which, by whom). This controller only rejects an unknown value and pins
-# the initial status to Open.
+# [#ip8yq8]
+# [#puqmux]
+# [#rro23r]
+# [#xtxs2k]
 VALID_STATUSES = (
 	"Open",
 	"Under Investigation",
@@ -44,12 +44,12 @@ VALID_STATUSES = (
 	"Closed",
 )
 
-# Closing states that require captured evidence and a distinct closer. The
-# evidence/non-raiser gate fires on validate (i.e. on the Resolve transition,
-# which submits the case). Closed is reached post-submit via the workflow's
-# cancel transition, where validate does not run, so the practical enforcement
-# point is Resolved; Closed is kept here as defence in depth for any non-cancel
-# path that lands the document in Closed.
+# [#f63jiu]
+# [#pjdqn5]
+# [#94u6s5]
+# [#tk7kyc]
+# [#fw7ecx]
+# [#fy9jar]
 _CLOSING_STATUSES = {"Resolved", "Closed"}
 
 
@@ -64,12 +64,12 @@ class FuelExceptionCase(Document):
 		self._guard_initial_status()
 		self._enforce_closure_controls()
 
-	# Submit/cancel are driven by the native Fuel Exception Case Workflow (the
-	# Resolve/Reject transitions perform docstatus 0 -> 1, restricted to Fleet
-	# Manager with allow_self_approval=0). Submit/cancel are recorded natively
-	# (Version track_changes + auto-comment).
+	# [#m4vjrp]
+	# [#nt09ke]
+	# [#bnm6hu]
+	# [#1d3cvw]
 
-	# ------------------------------------------------------------------ helpers
+	# [#4lslw6]
 
 	def _default_reporter(self):
 		"""Default the raiser to the current session user when blank."""

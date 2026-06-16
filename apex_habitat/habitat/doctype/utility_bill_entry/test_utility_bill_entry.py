@@ -1,8 +1,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Prevent Frappe test runner from recursively resolving Link-field dependencies
-# on external DocTypes that require ERPNext (not installed in CI bench).
+# [#hlfy1g]
+# [#rf8fpd]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -61,7 +61,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
 
-    # --- duplicate scope: company + building + account + period (bug #7) ------
+    # [#is5nbc]
     def _bill(self, **kw):
         base = {
             "doctype": "Utility Bill Entry", "naming_series": "UTIL-BILL-.YYYY.-.#####",
@@ -86,8 +86,8 @@ class TestUtilityBillEntry(FrappeTestCase):
         m = frappe.generate_hash(length=6)
         first = self._bill(company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m)
         first.insert(ignore_permissions=True, ignore_links=True)
-        # same account + period, DIFFERENT building → not a duplicate (cost posts per building)
+        # [#ngobji]
         validate(self._bill(company="QA-CO-" + m, building="QA-BLD-2", utility_account="ACC-" + m))
-        # same account + period + building, DIFFERENT company → not a duplicate
+        # [#ph03g4]
         validate(self._bill(company="QA-CO-OTHER-" + m, building="QA-BLD-1", utility_account="ACC-" + m))
         frappe.delete_doc("Utility Bill Entry", first.name, force=True, ignore_permissions=True)

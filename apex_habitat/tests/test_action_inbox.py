@@ -25,15 +25,15 @@ class TestActionInboxAPI(unittest.TestCase):
         self.assertIn("def get_pending_actions(", src)
         self.assertIn('"Workflow Action"', src)
         self.assertIn('"ToDo"', src)
-        # Permission-scoped read for the user's pending actions: get_list, NOT get_all.
+        # [#dv6fdy]
         self.assertIn("frappe.get_list(", src)
 
     def test_pending_only_no_doa_no_timewindow(self):
         src = _src()
-        self.assertIn('"status": "Open"', src)  # only documents awaiting action
-        self.assertIn("get_workflow_state_field", src)  # staleness guard, no hard-coded state field
-        self.assertIn('"allocated_to": frappe.session.user', src)  # the user's own tasks only
-        # Read-only aggregation: no Delegation-of-Authority / governance record is created.
+        self.assertIn('"status": "Open"', src)  # [#8d5r0j]
+        self.assertIn("get_workflow_state_field", src)  # [#sxou0d]
+        self.assertIn('"allocated_to": frappe.session.user', src)  # [#k6ig3d]
+        # [#qc6pvo]
         self.assertNotIn(".insert(", src)
         self.assertNotIn("frappe.new_doc(", src)
 
@@ -43,18 +43,18 @@ class TestOrphanCleanup(unittest.TestCase):
         with open(os.path.join(APP_ROOT, "apex_core", "utils", "workflow_utils.py"), encoding="utf-8") as fh:
             src = fh.read()
         self.assertIn("def cleanup_orphaned_workflow_actions(", src)
-        self.assertIn("status = 'Open'", src)  # acts only on Open rows
-        self.assertIn("DELETE", src)  # deletes orphans (not mark-Completed → cyclic re-open stays safe)
-        self.assertIn("table_exists", src)  # guarded against a since-dropped doctype
-        # Case C — also purge Open actions whose reference DocType itself is gone
-        # (retired/renamed); it has no active Workflow to drive the Case A/B loop.
+        self.assertIn("status = 'Open'", src)  # [#egnqf8]
+        self.assertIn("DELETE", src)  # [#t4bne9]
+        self.assertIn("table_exists", src)  # [#j33fj5]
+        # [#41971m]
+        # [#n3mmxg]
         self.assertIn('frappe.db.exists("DocType"', src)
         with open(os.path.join(APP_ROOT, "hooks.py"), encoding="utf-8") as fh:
-            self.assertIn("workflow_utils.cleanup_orphaned_workflow_actions", fh.read())  # wired daily
+            self.assertIn("workflow_utils.cleanup_orphaned_workflow_actions", fh.read())  # [#qq4zux]
 
     def test_inbox_drops_actions_for_missing_doctype(self):
-        # The inbox render-time guard must skip a reference DocType that no longer
-        # exists, so the desk never calls get_transitions on a deleted controller.
+        # [#6rk5di]
+        # [#c87w2z]
         self.assertIn('frappe.db.exists("DocType"', _src())
 
 
@@ -65,9 +65,9 @@ class TestActionInboxPage(unittest.TestCase):
         with open(os.path.join(self.PAGE, "action_inbox.js"), encoding="utf-8") as fh:
             js = fh.read()
         self.assertIn("apex_habitat.apex_core.worklist.my_work_center.get_my_work", js)
-        self.assertIn("frappe.model.workflow.get_transitions", js)  # inline actions via native endpoints
+        self.assertIn("frappe.model.workflow.get_transitions", js)  # [#cfpssy]
         self.assertIn("frappe.model.workflow.apply_workflow", js)
-        self.assertEqual(js.count("new frappe.ui.Dialog"), 0)  # inline, no modal
+        self.assertEqual(js.count("new frappe.ui.Dialog"), 0)  # [#r063sb]
 
     def test_page_no_orphan_dollar_refs(self):
         import re
@@ -76,7 +76,7 @@ class TestActionInboxPage(unittest.TestCase):
             js = fh.read()
         assigned = set(re.findall(r"this\.(\$[A-Za-z_]+)\s*=", js))
         used = set(re.findall(r"this\.(\$[A-Za-z_]+)\b", js))
-        # $x appears only inside the rule's comment, not as a real container.
+        # [#pw755i]
         self.assertEqual((used - assigned) - {"$x"}, set(), "this.$ used but never created")
 
     def test_page_json_standard_no_all_role(self):
@@ -95,10 +95,10 @@ class TestActionInboxPage(unittest.TestCase):
             os.path.join(APP_ROOT, "apex_core", "workspace", "launchpad", "launchpad.json"), encoding="utf-8"
         ) as fh:
             ws = json.load(fh)
-        # Phase 3: Action Inbox page shortcut replaced by the My Work workspace shortcut.
-        # The page itself still exists; it is no longer a top-level launchpad shortcut.
+        # [#5jilk2]
+        # [#jwm9ol]
         self.assertTrue(any(s.get("link_to") == "My Work" for s in ws.get("shortcuts", [])))
-        self.assertIn("acScMyWork", ws.get("content", ""))  # My Work placed in the content layout
+        self.assertIn("acScMyWork", ws.get("content", ""))  # [#2bf67b]
 
 
     def test_launchpad_has_exactly_one_my_work_entry(self):
@@ -163,9 +163,9 @@ class TestActionInboxOrphanHandling(FrappeTestCase):
             },
         ]
         kept = {r["reference_doctype"] for r in _drop_stale(rows)}
-        # orphaned-doctype action dropped → the desk never imports a deleted controller
+        # [#auoj1n]
         self.assertNotIn(self.MISSING_DT, kept)
-        # a real doctype with no workflow is still kept (conservative behaviour preserved)
+        # [#4yk4mp]
         self.assertIn("ToDo", kept)
 
     def test_cleanup_purges_open_actions_for_missing_doctype(self):
@@ -181,7 +181,7 @@ class TestActionInboxOrphanHandling(FrappeTestCase):
             }
         ).insert(ignore_permissions=True, ignore_links=True)
         self.assertTrue(frappe.db.exists("Workflow Action", wa.name))
-        cleanup_orphaned_workflow_actions()  # Case C sweeps reference DocTypes that are gone
+        cleanup_orphaned_workflow_actions()  # [#hq6bc7]
         self.assertFalse(frappe.db.exists("Workflow Action", wa.name))
 
 

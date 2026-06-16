@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 import frappe
 from frappe.utils import getdate, today, date_diff
@@ -42,7 +42,7 @@ def execute(filters=None):
         order_by="expiry_date asc",
     )
 
-    # Bulk plate lookup to avoid N+1
+    # [#o6cm70]
     vehicle_names = list({r["parent"] for r in rows if r.get("parent")})
     plate_map = {}
     if vehicle_names:

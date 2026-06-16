@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 """M-6: Log Settings auto-clearing for the unbounded scheduler-written DocTypes.
 
@@ -27,8 +27,8 @@ from apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financ
 
 class TestLogClearing(FrappeTestCase):
     def test_clear_old_logs_methods_exist(self):
-        # Each controller exposes the LogType clear_old_logs interface so
-        # run_log_clean_up can invoke it.
+        # [#b3mz7n]
+        # [#2epaa1]
         for cls in (
             OperationsAlert,
             AccommodationOccupancySnapshot,
@@ -51,7 +51,7 @@ class TestLogClearing(FrappeTestCase):
             self.assertIn(dt, hook, f"{dt} must be registered for log clearing.")
             self.assertEqual(int(hook[dt][-1]), retention)
 
-        # The financial ledgers must NOT be auto-cleared (audit significance).
+        # [#tgm9az]
         for ledger in (
             "Accommodation Ledger",
             "Fuel Consumption Ledger",
@@ -62,9 +62,9 @@ class TestLogClearing(FrappeTestCase):
             )
 
     def test_clear_old_logs_deletes_only_aged_rows(self):
-        # Operations Alert ages out ONLY Resolved rows past the retention window.
-        # An Open/Acknowledged alert is still actionable and is kept regardless of
-        # age (v1.50.3 — the old purge deleted by `modified` regardless of status).
+        # [#idqwux]
+        # [#2e0wyu]
+        # [#6yp1jc]
         marker = frappe.generate_hash(length=8)
         old = frappe.get_doc({
             "doctype": "Operations Alert",
@@ -88,7 +88,7 @@ class TestLogClearing(FrappeTestCase):
             "message": f"NEW-{marker}",
         }).insert(ignore_permissions=True)
 
-        # Backdate both "old" rows' modified well past the retention window.
+        # [#jz555n]
         for name in (old.name, aged_open.name):
             frappe.db.sql(
                 "update `tabOperations Alert` set modified=%s where name=%s",
@@ -111,10 +111,10 @@ class TestLogClearing(FrappeTestCase):
         )
 
     def test_depreciation_snapshot_clears_submitted_with_children_keeps_drafts(self):
-        # The Depreciation Snapshot has a child table AND is submittable, so its
-        # clear_old_logs must (a) purge only SUBMITTED rows older than retention,
-        # (b) delete their child items (frappe.db.delete does not cascade), and
-        # (c) leave drafts alone.
+        # [#lq5mal]
+        # [#dfnplm]
+        # [#5wlrpi]
+        # [#bd3b3k]
         marker = frappe.generate_hash(length=8)
 
         def make(suffix):
@@ -136,8 +136,8 @@ class TestLogClearing(FrappeTestCase):
         recent_sub = make("recentsub")
         old_draft = make("olddraft")
 
-        # Mark the two "submitted" rows docstatus=1 (bypass submit's link checks),
-        # then backdate the two "old" rows well past the 730-day window.
+        # [#m19wkq]
+        # [#k7bpmy]
         for name in (old_sub.name, recent_sub.name):
             frappe.db.set_value(
                 "Non-Financial Depreciation Snapshot", name, "docstatus", 1, update_modified=False
@@ -150,7 +150,7 @@ class TestLogClearing(FrappeTestCase):
 
         NonFinancialDepreciationSnapshot.clear_old_logs(days=730)
 
-        # Aged SUBMITTED snapshot and its child items are gone (no orphans).
+        # [#tpm4bm]
         self.assertFalse(
             frappe.db.exists("Non-Financial Depreciation Snapshot", old_sub.name),
             "Aged submitted snapshot should be cleared.",
@@ -160,7 +160,7 @@ class TestLogClearing(FrappeTestCase):
             0,
             "Child rows of a cleared snapshot must be deleted (no orphans).",
         )
-        # Recent submitted survives; aged DRAFT survives (only docstatus=1 is purged).
+        # [#ljhg9n]
         self.assertTrue(
             frappe.db.exists("Non-Financial Depreciation Snapshot", recent_sub.name),
             "Recent submitted snapshot must survive.",

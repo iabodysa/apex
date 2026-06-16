@@ -39,7 +39,7 @@ class MovementCostRecovery(Document):
 		if not self.cost_center:
 			self.cost_center = get_default_cost_center()
 
-	# Authorization is routed through the native Movement Cost Recovery Workflow:
-	# only Fleet Manager / System Manager can drive Approve/Recover/Waive, and the
-	# Approve transition forbids self-approval (allow_self_approval=0). Submit/cancel
-	# are recorded natively (Version track_changes + auto-comment).
+	# [#sdm911]
+	# [#or2sf2]
+	# [#3bffhv]
+	# [#fxq3hf]

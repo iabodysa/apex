@@ -40,7 +40,7 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
         with self.assertRaises(frappe.ValidationError):
             self._assignment("Temporary", "2026-04-20").insert(ignore_permissions=True)
 
-    # --- Idle Resident Report ------------------------------------------------
+    # [#mgj01u]
     def _idle(self, **kw):
         doc = frappe.get_doc({
             "doctype": "Idle Resident Report", "naming_series": "IDLE-.YYYY.-.####",
@@ -61,7 +61,7 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
             self._idle().insert(ignore_permissions=True)
 
     def test_idle_after_insert_routes_todo_to_department_role(self):
-        # Operations -> Accommodation Manager role; a role holder gets a ToDo.
+        # [#lmpauc]
         email = f"mgr{_h()}@test.com".lower()
         user = frappe.get_doc({"doctype": "User", "email": email, "first_name": "Mgr",
                                "send_welcome_email": 0,
@@ -79,4 +79,4 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
         idle_resident_aging()
         rep.reload()
         self.assertEqual(rep.days_idle, 7)
-        self.assertEqual(rep.estimated_accommodation_cost_bleed_sar, 0)  # no assignment linked
+        self.assertEqual(rep.estimated_accommodation_cost_bleed_sar, 0)  # [#71g7ip]

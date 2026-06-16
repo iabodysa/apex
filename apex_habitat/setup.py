@@ -12,15 +12,15 @@ from apex_habitat.apex_core.setup.seeders.maintenance_material_template_seed imp
     seed_templates,
 )
 
-# Assignment Rules, Email Templates and Kanban Boards are now provisioned by the
-# data-driven loader ``apex_core.setup.seed.seed_all`` (wired in hooks.py
-# after_install/after_migrate) — create-only JSON under apex_core/setup/data/. The
-# hand-written habitat seeders were retired in the seed consolidation (M-10/M-11).
+# [#tdzfti]
+# [#73cp2g]
+# [#nzv30u]
+# [#hhmott]
 
 
 def after_install():
     create_roles()
-    frappe.db.commit()  # T-048: flush role rows before create_role_profiles() resolves Role links
+    frappe.db.commit()  # [#93zbw7]
     create_role_profiles()
     create_custody_asset_categories()
     create_custody_articles()
@@ -31,7 +31,7 @@ def after_install():
     seed_auto_email_reports()
     seed_habitat_dashboard()
     seed_role_dashboards()
-    # Force translation cache reload so Arabic strings appear on first login
+    # [#79zrk7]
     frappe.clear_cache()
 
 
@@ -56,11 +56,11 @@ def create_roles():
 
 def create_role_profiles():
     profiles = {
-        # Core Habitat management profiles (original 3)
+        # [#tw1apq]
         "Habitat Accommodation Manager": ["Accommodation Manager", "System Manager"],
         "Habitat Resident Supervisor": ["Resident Supervisor"],
         "Habitat Finance Reviewer": ["Finance Manager", "Internal Auditor"],
-        # Operational staff profiles (4 new, one role each)
+        # [#ld2kdg]
         "Habitat Maintenance Technician": ["Maintenance Technician"],
         "Habitat Cleaning Supervisor": ["Cleaning Supervisor"],
         "Habitat Safety Officer": ["Safety Officer"],
@@ -73,14 +73,14 @@ def create_role_profiles():
             for role in roles:
                 doc.append("roles", {"role": role})
             doc.insert(ignore_permissions=True)
-            # T-059: Role Profile.on_update -> queue_action("update_all_users")
-            # always takes a document file-lock before enqueuing the user-sync job.
-            # On `bench migrate` (a CLI run) there is no worker to execute that job
-            # and no after_job hook to drain frappe.local.locked_documents, so the
-            # .lock file persists on disk and the NEXT migrate aborts with
-            # DocumentLockedError. A brand-new profile has no users assigned yet, so
-            # update_all_users is a no-op regardless; we just release the stale lock
-            # the controller created so migrate stays idempotent and lock-free.
+            # [#ovf90l]
+            # [#lhb3wp]
+            # [#mu8pjm]
+            # [#fh4biw]
+            # [#mbs3ra]
+            # [#382o9s]
+            # [#or6xye]
+            # [#t6qrfu]
             doc.unlock()
 
 
@@ -122,9 +122,9 @@ def create_custody_articles():
 
 
 def create_operational_depreciation_policies():
-    # Note: DocType field is `useful_life_years` (Int), so the durations below
-    # are expressed in whole years. Sub-year policies (e.g. linen at 12 months)
-    # are rounded up to 1 year to satisfy the mandatory Int field.
+    # [#4daupz]
+    # [#nv6rzg]
+    # [#e8tpuj]
     policies = [
         {"policy_name": "Linen - 12 Months", "useful_life_years": 1},
         {"policy_name": "Keys and Cards - 24 Months", "useful_life_years": 2},
@@ -140,9 +140,9 @@ def create_operational_depreciation_policies():
 
 
 def create_safety_task_catalogs():
-    # task_code must be unique; used as deduplication key
-    # frequency must match DocType Select options: Daily/Weekly/Monthly/Quarterly/Annual/As Needed/On Entry
-    # priority must match: High/Medium/Low
+    # [#jl1qzc]
+    # [#fsripa]
+    # [#m92sax]
     tasks = [
         {"task_code": "SAF-001", "task_title": "Daily Cleanliness Assessment", "task_title_en": "Daily Cleanliness Assessment", "department": "Health and Hygiene", "frequency": "Daily", "priority": "Medium", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Check common areas, corridors, and bathrooms for cleanliness."},
         {"task_code": "SAF-002", "task_title": "Daily Exit Obstruction Check", "task_title_en": "Daily Exit Obstruction Check", "department": "Fire Safety", "frequency": "Daily", "priority": "High", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Ensure all emergency exits and fire doors are clear of obstructions."},

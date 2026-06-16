@@ -24,4 +24,4 @@ class FuelQuota(Document):
 				title=_("Quota Exceeded"),
 			)
 
-	# Allocation on submit is recorded natively (Version track_changes + auto-comment).
+	# [#o8fe5v]

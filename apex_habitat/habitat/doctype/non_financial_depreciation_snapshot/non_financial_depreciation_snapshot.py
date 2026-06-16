@@ -59,7 +59,7 @@ def _compute_book_values(doc):
         policy = None
         if row.policy:
             policy = frappe.get_doc("Operational Depreciation Policy", row.policy)
-        if policy and flt(policy.useful_life_years) > 0:  # explicit > 0 (a future refactor must keep 1/life guarded)
+        if policy and flt(policy.useful_life_years) > 0:  # [#dt9fyv]
             life = flt(policy.useful_life_years)
             residual_pct = flt(policy.residual_value_pct) / 100
             residual = original * residual_pct

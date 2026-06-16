@@ -53,26 +53,26 @@ def apply_apex_setup(args=None):
 
     payment_method = args.get("apex_default_payment_method")
 
-    # App-wide finance defaults — Apex Settings (shared by Habitat + Salis).
+    # [#knd5u7]
     apex = frappe.get_single("Apex Settings")
     if payment_method:
         apex.default_payment_method = payment_method
-    # GL posting defaults OFF; only ON when the operator ticked it in the slide.
+    # [#cyuc3q]
     apex.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
     apex.save(ignore_permissions=True)
 
-    # Housing-scoped deduction toggles — Habitat Settings.
+    # [#4e5jex]
     settings = frappe.get_single("Habitat Settings")
-    # Toggles default OFF; only ON when the operator ticked them in the slide.
+    # [#d1oej5]
     settings.enable_housing_allowance_deduction = 1 if cint(args.get("apex_deduct_housing_allowance")) else 0
     settings.enable_damage_deduction = 1 if cint(args.get("apex_deduct_damage")) else 0
     try:
         settings.save(ignore_permissions=True)
     except frappe.ValidationError:
-        # Enabling a deduction toggle needs prerequisites (an authorizer, salary
-        # components) that usually do not exist at first install. Never let that
-        # fail the wizard: keep the safe defaults (all OFF), and tell the operator
-        # to enable these later in Habitat Settings once they are configured.
+        # [#3jakkl]
+        # [#g1g2gb]
+        # [#p8nhid]
+        # [#qwowt8]
         frappe.clear_last_message()
         settings.reload()
         settings.enable_housing_allowance_deduction = 0

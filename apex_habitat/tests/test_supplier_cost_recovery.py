@@ -52,7 +52,7 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         }).insert(ignore_permissions=True).name
 
     def test_supplier_propagation_and_report_markup(self):
-        # tag an assignment as external-supplier
+        # [#nf2ofu]
         a = frappe.get_doc({
             "doctype": "Accommodation Assignment", "employee": self.employee, "project": self.project,
             "cost_center": self.cost_center, "building": self.building.name, "room": self.room,
@@ -62,17 +62,17 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         a.insert(ignore_permissions=True)
         a.submit()
 
-        # enable a 5% markup
+        # [#4gb2gz]
         settings = frappe.get_single("Habitat Settings")
         settings.enable_supplier_markup = 1
         settings.supplier_markup_percent = 5.0
         settings.save(ignore_permissions=True)
 
-        # run the per-building worker directly (the scheduler entry now only
-        # fans these out to the long queue; see test_dispatcher_enqueues_per_building)
+        # [#8dbl2q]
+        # [#s935ec]
         allocate_building_accommodation_cost(self.building.name)
 
-        # ledger rows for this assignment must carry the supplier
+        # [#jqzege]
         rows = frappe.get_all("Accommodation Ledger",
                               filters={"assignment": a.name},
                               fields=["billed_to_supplier", "employee_daily_share"])
@@ -82,7 +82,7 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         base = flt(sum(flt(r.employee_daily_share) for r in rows), 2)
         self.assertGreater(base, 0, "expected a non-zero daily share from annual_rent")
 
-        # report aggregates the month and applies the 5% markup
+        # [#5mu81k]
         today = getdate()
         columns, data = execute({"month": today.month, "year": today.year, "supplier": self.supplier})
         mine = [d for d in data if d["billed_to_supplier"] == self.supplier and d["employee"] == self.employee]
@@ -94,9 +94,9 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         self.assertAlmostEqual(row["total_deduction"], flt(base + base * 0.05, 2), places=2)
 
     def test_dispatcher_enqueues_per_building(self):
-        # The scheduler entry must fan out one enqueue per building that has an
-        # active submitted assignment, targeting the per-building worker on the
-        # long queue (not run the allocation synchronously itself).
+        # [#fmb537]
+        # [#bcaty6]
+        # [#7o0j17]
         from unittest.mock import patch
 
         a = frappe.get_doc({

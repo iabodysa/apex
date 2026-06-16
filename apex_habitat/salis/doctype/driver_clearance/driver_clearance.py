@@ -27,18 +27,18 @@ from frappe.model.document import Document
 
 from apex_habitat.salis.utils import add_timeline_note, lock_driver
 
-# Statuses that mean a Fuel Exception Case is no longer outstanding.
+# [#jfqw6e]
 _CLOSED_FUEL_EXCEPTION_STATUSES = ("Resolved", "Rejected", "Closed")
 
-# Statuses that mean a Movement Cost Recovery is no longer outstanding. These
-# must match Movement Cost Recovery's Select options
-# (Open/Acknowledged/Approved/Recovered/Waived/Rejected/Cancelled): the terminal,
-# non-outstanding states are Recovered, Waived, Rejected and Cancelled. The query
-# is guarded by an existence check so a missing doctype never breaks clearance.
+# [#9m6rz9]
+# [#gr1x2j]
+# [#rj5ydp]
+# [#nmfgdz]
+# [#e5zuni]
 _CLOSED_RECOVERY_STATUSES = ("Recovered", "Waived", "Rejected", "Cancelled")
 
-# Known status values. The Select carries these for filtering/colour, but the
-# Driver Clearance Workflow owns the *transitions*.
+# [#lhvvmn]
+# [#fh5s2n]
 VALID_STATUSES = ("Open", "In Progress", "Cleared", "Blocked", "Cancelled")
 
 
@@ -54,7 +54,7 @@ class DriverClearance(Document):
 		if self.status == "Cleared":
 			self._release_driver()
 
-	# ------------------------------------------------------------------ helpers
+	# [#4lslw6]
 
 	def _capture_assigned_vehicle(self):
 		"""Snapshot the driver's current vehicle for reference (read-only field)."""

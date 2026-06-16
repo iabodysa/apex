@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO Support Services Co. Ltd and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 """Accommodation Stock Ledger — read-only, system-written quantity ledger for the
 decentralized internal-store engine. Each Accommodation Building is its own store.
 Rows are posted only through the helpers below (never created manually); a blank
@@ -17,7 +17,7 @@ class AccommodationStockLedger(Document):
     pass
 
 
-# item_type -> (name_field, uom_field, unit_cost_field) on the master doctype
+# [#9tf33o]
 _MASTER_FIELDS = {
     "Custody Article": ("article_name", "unit_of_measure", "standard_unit_cost_sar"),
     "Maintenance Material": ("material_name", "default_uom", "estimated_unit_cost"),
@@ -101,7 +101,7 @@ def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
             from_building=r.from_building, to_building=r.to_building,
             reversal_of=r.name, remarks="Reversal",
         )
-        # Mark BOTH the original and its reversal cancelled so they net to zero in
-        # balance queries (which sum where is_cancelled = 0) while keeping the audit pair.
+        # [#473zyf]
+        # [#iipuv0]
         frappe.db.set_value("Accommodation Stock Ledger", r.name, "is_cancelled", 1)
         frappe.db.set_value("Accommodation Stock Ledger", rev, "is_cancelled", 1)

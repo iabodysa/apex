@@ -1,8 +1,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Prevent Frappe test runner from recursively resolving Link-field dependencies
-# on external DocTypes that require ERPNext (not installed in CI bench).
+# [#hlfy1g]
+# [#rf8fpd]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -60,10 +60,10 @@ class TestAccommodationBuilding(FrappeTestCase):
         finally:
             frappe.delete_doc("Accommodation Building", doc.name, force=True, ignore_permissions=True)
 
-    # --- room-number prefix (Room Generator professionalization) -------------
+    # [#hu6e8f]
     def test_room_number_blank_prefix_is_byte_identical(self):
         from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import _room_number
-        # A blank prefix must keep the historical format exactly (zero renumbering).
+        # [#2v1uri]
         self.assertEqual(_room_number("JED1", "G", "", 1), "JED1-G01")
         self.assertEqual(_room_number("JED1", "1", "", 5), "JED1-105")
 
@@ -71,11 +71,11 @@ class TestAccommodationBuilding(FrappeTestCase):
         from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import _room_number
         self.assertEqual(_room_number("JED1", "G", "A", 1), "JED1-GA01")
         self.assertEqual(_room_number("JED1", "1", "B", 5), "JED1-1B05")
-        self.assertEqual(_room_number("JED1", "G", " A ", 1), "JED1-GA01")  # whitespace stripped
+        self.assertEqual(_room_number("JED1", "G", " A ", 1), "JED1-GA01")  # [#h85o05]
 
     def test_abbreviation_locked_after_rooms_exist(self):
-        # Once a room uses the building code, changing the code is blocked (it would
-        # orphan every existing room). Delete the rooms first to change it.
+        # [#4zngiy]
+        # [#qrphai]
         m = frappe.generate_hash(length=6)
         b = frappe.get_doc({
             "doctype": "Accommodation Building", "building_name": "QA Lock " + m,
@@ -94,7 +94,7 @@ class TestAccommodationBuilding(FrappeTestCase):
         frappe.delete_doc("Accommodation Room", room.name, force=True, ignore_permissions=True)
         frappe.delete_doc("Accommodation Building", b.name, force=True, ignore_permissions=True)
 
-    # --- P16 security / idempotency tests ------------------------------------
+    # [#4sdjza]
 
     def test_total_capacity_derives_from_beds(self):
         """total_capacity is the TRUE physical capacity: it must equal the count of the
@@ -105,8 +105,8 @@ class TestAccommodationBuilding(FrappeTestCase):
         from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import (
             generate_rooms_and_beds,
         )
-        # The derived field must be read-only so an operator cannot type a value that
-        # before_save would silently overwrite.
+        # [#eeajug]
+        # [#c3adas]
         self.assertEqual(
             frappe.get_meta("Accommodation Building").get_field("total_capacity").read_only, 1,
             "total_capacity must be read_only (auto-derived)",
@@ -116,7 +116,7 @@ class TestAccommodationBuilding(FrappeTestCase):
             "doctype": "Accommodation Building",
             "building_name": "QA Capacity " + m,
             "abbreviation": "QC" + m[:2].upper(),
-            "total_capacity": 999,  # deliberately wrong; must be overridden by derivation
+            "total_capacity": 999,  # [#8yikf3]
             "floor_plan": [
                 {"doctype": "Accommodation Floor Plan", "floor_number": 0, "room_count": 3,
                  "bed_capacity_per_room": 4, "room_type": "Standard", "generate_beds": 1,
@@ -128,7 +128,7 @@ class TestAccommodationBuilding(FrappeTestCase):
         })
         b.insert(ignore_permissions=True, ignore_links=True)
         try:
-            generate_rooms_and_beds(b.name)  # 3*4 + 2*2 = 16 physical beds
+            generate_rooms_and_beds(b.name)  # [#y61kin]
             b.reload()
             available_beds = frappe.db.count(
                 "Accommodation Bed",
@@ -138,14 +138,14 @@ class TestAccommodationBuilding(FrappeTestCase):
             self.assertEqual(available_beds, 16, "fixture sanity: 16 available physical beds")
             self.assertEqual(b.total_capacity, available_beds,
                              "total_capacity must equal the non-Out-of-Service physical bed count")
-            # Retire ONE physical bed -> re-derivation must DROP capacity by exactly 1.
+            # [#amjr3s]
             one_bed = frappe.db.get_value("Accommodation Bed", {"building": b.name}, "name")
             frappe.db.set_value("Accommodation Bed", one_bed, "status", "Out of Service")
             b.save(ignore_permissions=True)
             b.reload()
             self.assertEqual(b.total_capacity, 15,
                              "an Out-of-Service bed must be excluded -> capacity drops by 1")
-            # A subsequent save keeps it derived (before_save path), not the manual value.
+            # [#73jw4q]
             b.total_capacity = 5
             b.save(ignore_permissions=True)
             b.reload()
@@ -171,12 +171,12 @@ class TestAccommodationBuilding(FrappeTestCase):
             "abbreviation": "QN" + m[:2].upper(),
             "total_capacity": 999,
             "floor_plan": [
-                # Real beds: 2 rooms * 3 beds = 6 physical beds.
+                # [#i1dwt4]
                 {"doctype": "Accommodation Floor Plan", "floor_number": 0, "room_count": 2,
                  "bed_capacity_per_room": 3, "room_type": "Standard", "generate_beds": 1,
                  "starting_room_number": 1},
-                # generate_beds=0: rooms carry a planned bed_capacity but mint NO beds.
-                # sum(bed_capacity) would have added 2*5=10 phantom capacity here.
+                # [#s1vpu9]
+                # [#3dlvcc]
                 {"doctype": "Accommodation Floor Plan", "floor_number": 1, "room_count": 2,
                  "bed_capacity_per_room": 5, "room_type": "Office", "generate_beds": 0,
                  "starting_room_number": 1},
@@ -246,7 +246,7 @@ class TestAccommodationBuilding(FrappeTestCase):
         })
         b.insert(ignore_permissions=True, ignore_links=True)
         try:
-            # First run — creates rooms and beds
+            # [#i5ufk3]
             generate_rooms_and_beds(b.name)
             beds_after_first = frappe.db.count(
                 "Accommodation Bed",
@@ -254,7 +254,7 @@ class TestAccommodationBuilding(FrappeTestCase):
                     "Accommodation Room", {"building": b.name}, pluck="name"
                 )]},
             )
-            # Second run with confirm — must NOT create duplicates
+            # [#jmvr3f]
             r2 = generate_rooms_and_beds(b.name, confirm_new_rooms=1)
             beds_after_second = frappe.db.count(
                 "Accommodation Bed",

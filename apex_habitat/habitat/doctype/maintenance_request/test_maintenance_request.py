@@ -1,8 +1,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Prevent Frappe test runner from recursively resolving Link-field dependencies
-# on external DocTypes that require ERPNext (not installed in CI bench).
+# [#hlfy1g]
+# [#rf8fpd]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -63,9 +63,9 @@ class TestMaintenanceRequest(FrappeTestCase):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
     def test_reported_by_defaults_to_session_user(self):
-        # reported_by is reqd=1; omitting it must NOT raise because the
-        # controller defaults it server-side to the session user. This also
-        # lets a plain user POST via REST without supplying reported_by.
+        # [#ck0xvh]
+        # [#sguq7g]
+        # [#j07wgw]
         doc = frappe.get_doc({
             "doctype": "Maintenance Request",
             "naming_series": "MAINT-.YYYY.-.#####",
@@ -75,16 +75,16 @@ class TestMaintenanceRequest(FrappeTestCase):
             "issue_description": "Leak under sink",
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
-        # owner == reported_by == session user gives the owner-scoping hook a
-        # trustworthy creator that a non-privileged user cannot spoof.
+        # [#he4xa2]
+        # [#3ioy8j]
         self.assertEqual(doc.reported_by, frappe.session.user)
         self.assertEqual(doc.owner, frappe.session.user)
         self.assertEqual(doc.owner, doc.reported_by)
         frappe.delete_doc("Maintenance Request", doc.name, force=True, ignore_permissions=True)
 
     def test_reported_by_default_is_idempotent_on_update(self):
-        # The default only fires on a NEW record. A subsequent save must NOT
-        # re-stamp reported_by, so an explicit creator survives later edits.
+        # [#7ke0kh]
+        # [#255kvo]
         doc = frappe.get_doc({
             "doctype": "Maintenance Request",
             "naming_series": "MAINT-.YYYY.-.#####",
@@ -101,11 +101,11 @@ class TestMaintenanceRequest(FrappeTestCase):
         self.assertEqual(doc.reported_by, "Administrator")
         frappe.delete_doc("Maintenance Request", doc.name, force=True, ignore_permissions=True)
 
-    # ------------------------------------------------------------------
-    # Permission-array structural tests
-    # These tests assert the DocType JSON has the correct permission rows
-    # without requiring a live bench migrate; they run in unit-test CI.
-    # ------------------------------------------------------------------
+    # [#7usew1]
+    # [#cg564t]
+    # [#kgsmqe]
+    # [#nppy85]
+    # [#7usew1]
 
     def _get_perms_by_role(self):
         """Return a dict mapping role name -> document-level (permlevel 0) perm row.
@@ -164,13 +164,13 @@ class TestMaintenanceRequest(FrappeTestCase):
     def test_existing_privileged_roles_untouched(self):
         """System Manager, Accommodation Manager, Resident Supervisor rows must be unchanged."""
         perms = self._get_perms_by_role()
-        # System Manager: full + submit + cancel + delete
+        # [#emtcn5]
         sm = perms.get("System Manager")
         self.assertIsNotNone(sm)
         self.assertEqual(sm.cancel, 1)
         self.assertEqual(sm.delete, 1)
         self.assertEqual(sm.submit, 1)
-        # Accommodation Manager: create/read/write/submit (no delete)
+        # [#mss9dq]
         am = perms.get("Accommodation Manager")
         self.assertIsNotNone(am)
         self.assertEqual(am.create, 1)
@@ -178,7 +178,7 @@ class TestMaintenanceRequest(FrappeTestCase):
         self.assertEqual(am.write, 1)
         self.assertEqual(am.submit, 1)
         self.assertEqual(am.delete, 0)
-        # Resident Supervisor: create/read/write/submit (no delete)
+        # [#pyof9b]
         rs = perms.get("Resident Supervisor")
         self.assertIsNotNone(rs)
         self.assertEqual(rs.create, 1)

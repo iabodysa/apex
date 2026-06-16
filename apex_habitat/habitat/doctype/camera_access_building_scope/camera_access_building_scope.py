@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# For license information, please see license.txt
+# [#m4uz3c]
 
 from frappe.model.document import Document
 

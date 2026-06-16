@@ -1,8 +1,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Prevent Frappe test runner from recursively resolving Link-field dependencies
-# on external DocTypes that require ERPNext (not installed in CI bench).
+# [#hlfy1g]
+# [#rf8fpd]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -61,11 +61,11 @@ class TestFacilityAssetMovement(FrappeTestCase):
             validate(doc)
 
     def test_intercompany_detected_in_validate_enforces_gate(self):
-        # Regression: detection moved from before_save into validate. validate runs
-        # BEFORE before_save, so deriving is_intercompany in before_save left this
-        # gate checking an unset value on the first save. With from/to companies
-        # differing, validate must derive is_intercompany=1 and then enforce the
-        # release-approval gate (here missing -> ValidationError).
+        # [#qsfebp]
+        # [#h7lbmj]
+        # [#ol3anl]
+        # [#p3oz76]
+        # [#9v2lzx]
         from apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement import validate
 
         doc = frappe.get_doc({
@@ -76,7 +76,7 @@ class TestFacilityAssetMovement(FrappeTestCase):
             "to_building": "BLDG-B",
             "from_company": "Company X",
             "to_company": "Company Y",
-            # is_intercompany intentionally NOT set — the fix must derive it.
+            # [#36d9d2]
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)

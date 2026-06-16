@@ -27,14 +27,14 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, now, today
 
-# Maintenance Request statuses considered "open" for the room signal. Must stay
-# in sync with the Maintenance Request.status Select options.
+# [#hks9dm]
+# [#knflry]
 _OPEN_MAINTENANCE_STATUSES = ["Open", "Assigned", "In Progress", "Reopened"]
 
-# Priorities that escalate a room to a red pulse.
+# [#7fqvpy]
 _RED_PRIORITIES = {"High", "Critical"}
 
-# Recency window (days) for the building-level damage signal.
+# [#trwgfo]
 _DAMAGE_RECENCY_DAYS = 14
 
 
@@ -78,14 +78,14 @@ def get_safety_map(building):
         frappe.db.get_value("Accommodation Building", building, "building_name") or building
     )
 
-    # Q1 — rooms in the building.
+    # [#pyw7i4]
     rooms = frappe.get_all(
         "Accommodation Room",
         filters={"building": building},
         fields=["name", "room_number", "floor", "room_type", "status", "readiness_status"],
     )
 
-    # Q2 — open maintenance requests in the building (bulk; grouped in Python).
+    # [#a6pjd1]
     maint_rows = frappe.get_all(
         "Maintenance Request",
         filters={
@@ -104,7 +104,7 @@ def get_safety_map(building):
         if m.priority in _RED_PRIORITIES:
             agg["has_red"] = True
 
-    # Q3 — recent damage assessments in the building (building-level signal).
+    # [#1h0fav]
     cutoff = add_days(today(), -_DAMAGE_RECENCY_DAYS)
     recent_damage_count = frappe.db.count(
         "Custody Damage Assessment",
@@ -116,7 +116,7 @@ def get_safety_map(building):
     )
     has_recent_damage = bool(recent_damage_count)
 
-    # Compute per-room signal and group rooms under floors.
+    # [#ef2vq8]
     summary = {"total_rooms": 0, "red": 0, "amber": 0, "green": 0}
     floors_acc: dict = {}
 
@@ -224,7 +224,7 @@ def log_building_inspection(building, floor=None, zone_label=None,
     if not building:
         frappe.throw(_("A building is required to log an inspection."))
 
-    # Build the scope-prefixed description carried in the seeded finding row.
+    # [#9m9v0f]
     scope_bits = []
     if floor:
         scope_bits.append(_("Floor {0}").format(floor))
@@ -236,7 +236,7 @@ def log_building_inspection(building, floor=None, zone_label=None,
     if scope_prefix:
         description = f"{scope_prefix}: {description}"
 
-    # Map the operator's overall result to a finding severity / clear flag.
+    # [#gp2754]
     severity = "Low"
     safety_clear = 0
     if overall_result == "Fail":

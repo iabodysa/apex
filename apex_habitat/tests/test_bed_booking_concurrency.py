@@ -49,7 +49,7 @@ ASSIGNMENT_CONTROLLER = os.path.normpath(
     )
 )
 
-# The exact SQL fragment that must appear in the on_submit path.
+# [#3qounl]
 FOR_UPDATE_FRAGMENT = "FOR UPDATE"
 
 
@@ -101,7 +101,7 @@ class TestBedBookingConcurrencyGuard(unittest.TestCase):
             "The submit hook has been renamed or removed.",
         )
 
-        # Extract source lines that belong to on_submit
+        # [#32mlh2]
         source_lines = source.splitlines()
         start = on_submit_node.lineno - 1
         end = on_submit_node.end_lineno

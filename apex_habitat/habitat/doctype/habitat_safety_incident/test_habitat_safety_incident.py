@@ -1,8 +1,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Prevent Frappe test runner from recursively resolving Link-field dependencies
-# on external DocTypes that require ERPNext (not installed in CI bench).
+# [#hlfy1g]
+# [#rf8fpd]
 test_ignore = [
     "Company",
     "Role",
@@ -39,7 +39,7 @@ class TestHabitatSafetyIncident(FrappeTestCase):
         doc = self._base()
         doc.insert(ignore_permissions=True, ignore_links=True)
         self.assertIsNotNone(doc.name)
-        self.assertTrue(doc.reported_by)  # defaulted to session user
+        self.assertTrue(doc.reported_by)  # [#30fqgf]
         frappe.delete_doc("Habitat Safety Incident", doc.name, force=True, ignore_permissions=True)
 
     def test_missing_building_raises(self):

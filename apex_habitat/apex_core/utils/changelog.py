@@ -1,342 +1,342 @@
 from frappe.utils import get_datetime
 
-# Static release feed for Apex Habitat.
-# Each entry has: title, app_name, link, creation (ISO datetime string).
-# creation must be a fixed past timestamp so deduplication is stable across repeated calls.
-# fetch_changelog_feed() checks frappe.db.exists("Changelog Feed", {title, app_name, link, posting_timestamp})
-# before inserting — fully idempotent.
+# [#19duxu]
+# [#62inzm]
+# [#oxb40r]
+# [#16xcjy]
+# [#318s97]
 
 _RELEASES = [
-    # v1.54.17 --------------------------------------------------------------
+    # [#68q5vu]
     {
         "title": "Apex 1.54.17 — a Fleet dashboard reassignment fix from a security audit: reassigning a driver now fully succeeds or makes no change. If a concurrent reassignment wins the race, the second is rejected cleanly instead of silently overwriting the vehicle's live driver and leaving an unsubmitted assignment behind",
         "app_name": "apex_habitat",
         "link": "/fleet",
         "creation": "2026-06-16 13:00:00",
     },
-    # v1.54.16 --------------------------------------------------------------
+    # [#nyw1p3]
     {
         "title": "Apex 1.54.16 — Fleet Operations gets a Workshop Overstay number card (counts vehicles still in the workshop past the overstay cutoff, the same rule as the Maintenance Overdue alert, scoped to your permitted projects), and the Operations Control page's vehicle drawer gains quick actions that open a new Vehicle Stop, Vehicle Incident or Vehicle Assignment prefilled for the selected vehicle",
         "app_name": "apex_habitat",
         "link": "/app/fleet-operations",
         "creation": "2026-06-16 12:30:00",
     },
-    # v1.54.15 --------------------------------------------------------------
+    # [#6palps]
     {
         "title": "Apex 1.54.15 — the /fleet dashboard is rebuilt as a Vue single-page app (the fleet_portal portal, like /driver and /masar) while keeping the supervisor's exact board design; it reads and writes the same live Salis DocTypes through the same permission-gated API, drops the obsolete version/date line and the dead save and export buttons, adds loading, empty and error states plus a keyboard focus ring and a reduced-motion option, and shows a signed-in user without a fleet role a friendly notice instead of a raw error",
         "app_name": "apex_habitat",
         "link": "/fleet",
         "creation": "2026-06-16 11:00:00",
     },
-    # v1.54.14 --------------------------------------------------------------
+    # [#le9o5y]
     {
         "title": "Apex 1.54.14 — security hardening for the Fleet dashboard from a skeptics audit: driver phone and external id (permlevel-1 fields) are now hidden from roles not granted them (Fleet Supervisor / Fleet Project Manager see names, not contact details) on both the Fleet dashboard and the Dispatch Board; reassigning a driver now permission-checks the driver as well as the vehicle and stamps the assignment's project, so a project-scoped supervisor cannot pair an out-of-scope driver to a vehicle",
         "app_name": "apex_habitat",
         "link": "/fleet",
         "creation": "2026-06-16 10:00:00",
     },
-    # v1.54.13 --------------------------------------------------------------
+    # [#7be8ac]
     {
         "title": "Apex 1.54.13 — fix the Fleet dashboard cards failing to render: the /fleet board threw a script error and showed no vehicles because the API sent a vehicle's current driver as a partial record missing the project and date fields the card reads; the API now returns the current driver in the same full shape as a custody-history entry, so every card and detail panel renders",
         "app_name": "apex_habitat",
         "link": "/fleet",
         "creation": "2026-06-16 09:30:00",
     },
-    # v1.54.12 --------------------------------------------------------------
+    # [#3msn4n]
     {
         "title": "Apex 1.54.12 — a new /fleet web dashboard serves the fleet supervisor's exact board design, but every vehicle, driver and custody record reads live from the Salis DocTypes, and its actions (reassign, stop, workshop in/out, recover, report theft) update the real records; it is open to logged-in fleet roles only, and the obsolete Save/Export buttons are gone now that the data lives in Apex",
         "app_name": "apex_habitat",
         "link": "/fleet",
         "creation": "2026-06-15 19:30:00",
     },
-    # v1.54.11 --------------------------------------------------------------
+    # [#4941kd]
     {
         "title": "Apex 1.54.11 — more Fleet Operations: an Operating Days trend and a Vehicle Activations trend chart on the workspace, Vehicle Stop now records workshop-exit details (return date, released on/by, estimated cost) to close out a maintenance stop, and Salis Settings gains reference fuel prices (Petrol 91/95, Diesel) for budgeting",
         "app_name": "apex_habitat",
         "link": "/app/fleet-operations",
         "creation": "2026-06-15 17:00:00",
     },
-    # v1.54.10 --------------------------------------------------------------
+    # [#koello]
     {
         "title": "Apex 1.54.10 — Fleet Operations workspace fixes: the Fleet Control page now shows as a shortcut on the workspace (a stale timestamp had blocked it from syncing on migrate), and the workspace icons are de-duplicated so the Salis hub and Fleet Operations no longer share the Fleet wrench icon",
         "app_name": "apex_habitat",
         "link": "/app/fleet-operations",
         "creation": "2026-06-15 16:30:00",
     },
-    # v1.54.9 ---------------------------------------------------------------
+    # [#cldc4u]
     {
         "title": "Apex 1.54.9 — the worker-transport workspace is now named Masar and opens at /app/masar (it was named Movement but labelled Masar, so navigating to Masar returned a page-not-found); a migration renames the workspace on existing sites and no content changes",
         "app_name": "apex_habitat",
         "link": "/app/masar",
         "creation": "2026-06-15 15:00:00",
     },
-    # v1.54.8 ---------------------------------------------------------------
+    # [#6gnmqv]
     {
         "title": "Apex 1.54.8 — a new Fleet Control desk page (under Fleet Operations) gives a live, filterable vehicle board: every vehicle as a status-coloured card or table, filters for status/office/project and a plate search, a per-vehicle detail drawer (driver, compliance, recent incidents and custody assignments), and a CSV export of the current view",
         "app_name": "apex_habitat",
         "link": "/app/operations-control",
         "creation": "2026-06-15 12:00:00",
     },
-    # v1.54.7 ---------------------------------------------------------------
+    # [#ezibof]
     {
         "title": "Apex 1.54.7 — a new Fleet Operations workspace brings the day-to-day fleet control surface together: live fleet metrics (now including open vehicle incidents and open theft reports), an Incidents-by-Type chart, an open-incident quick list, and grouped links for incidents, vehicle custody and office billing",
         "app_name": "apex_habitat",
         "link": "/app/fleet-operations",
         "creation": "2026-06-15 09:00:00",
     },
-    # v1.54.6 ---------------------------------------------------------------
+    # [#5q7jex]
     {
         "title": "Apex 1.54.6 — foundations for Fleet Operations: a new Vehicle Incident record captures accident and theft events against a vehicle (location, police report number, fault, evidence), and submitting a theft takes the vehicle out of service and clears its driver (cancelling restores both); a damage write-off can now be linked back to the incident it was escalated from and carries the damaged parts and reporter; and vehicles gain an optional planned fuel grade and daily fuel budget while drivers carry a unique fleet identifier used as the data-import key",
         "app_name": "apex_habitat",
         "link": "/app/vehicle-incident",
         "creation": "2026-06-15 06:00:00",
     },
-    # v1.54.5 ---------------------------------------------------------------
+    # [#m8l9u8]
     {
         "title": "Apex 1.54.5 — closes a finance-approval bypass in payment routing: a request is now treated as finance-approved only by the server-stamped approver recorded by the finance-approval step (after the finance-role and segregation-of-duties checks), never by the editable status field; and that approver stamp is server-owned, so it can no longer be forged when a request is created or edited. A real payment can no longer be routed for a request that did not actually clear finance",
         "app_name": "apex_habitat",
         "link": "/app/salis-payment-request",
         "creation": "2026-06-14 12:00:00",
     },
-    # v1.54.4 ---------------------------------------------------------------
+    # [#54m5k4]
     {
         "title": "Apex 1.54.4 — critical security and capacity fixes: routed-payment creation is now serialized with a row-lock, so two concurrent requests can no longer create a duplicate payment or a double ledger post; the routed-payment permission gate moved to the chokepoint, so every caller (including any future direct caller) is authorized before the payment is built; and a building's Total Bed Capacity now derives from its actual physical beds (excluding out-of-service and virtual over-capacity beds) and is read-only, so occupancy, cost-per-capacity and over-capacity figures can no longer drift",
         "app_name": "apex_habitat",
         "link": "/app/salis-payment-request",
         "creation": "2026-06-14 06:00:00",
     },
-    # v1.54.3 ---------------------------------------------------------------
+    # [#ql6wq8]
     {
         "title": "Apex 1.54.3 — worker-portal (Masar) fixes: the bottom Accommodation tab is now labeled and highlighted correctly (the landing tab no longer stays lit on every screen); a revoked, expired, or rate-limited session shows a clear error with retry instead of a misleading empty state; status, request-type, category and priority values render in Arabic in the Arabic interface; plus the Arabic web font, international WhatsApp links, a larger language-toggle tap target, and navigation polish",
         "app_name": "apex_habitat",
         "link": "/masar",
         "creation": "2026-06-13 18:00:00",
     },
-    # v1.54.2 ---------------------------------------------------------------
+    # [#adwjqe]
     {
         "title": "Apex 1.54.2 — the routed-payment endpoint now rechecks source write and submit permission before any side effect (closing an authorization bypass), backed by new SQL-injection, write-permission, and secret-scan CI gates; the Accommodation Site is now the single source of a building's address (shown read-only, no more duplicate entry); building capacity derives from its rooms' beds; the Habitat Hub landing now carries onboarding; and an unused depreciation field was removed",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-building",
         "creation": "2026-06-13 17:30:00",
     },
-    # v1.54.1 ---------------------------------------------------------------
+    # [#bphmvk]
     {
         "title": "Apex 1.54.1 — reuse the existing Accommodation Manager role for cost-field privacy, sync the in-app changelog feed, harden the translation extractor so a Dynamic Link option (a fieldname) is no longer mis-translated and brand names stay in Latin, and correct the Salis worker-transport and fleet workspace routes (Masar, Fleet) and remove redundant workspace-to-workspace navigation links",
         "app_name": "apex_habitat",
         "link": "/app/salis",
         "creation": "2026-06-13 09:00:00",
     },
-    # v1.54.0 ---------------------------------------------------------------
+    # [#1m9gcd]
     {
         "title": "Apex 1.54.0 — finance-approved payment requests now post real payment documents (GL posting gated by a switch), a new policy-driven salary-deduction layer with Saudi labour-law caps and worker consent, cost figures hidden from non-finance roles, safety findings that auto-raise maintenance tickets, and a rider guard that blocks issuing a vehicle or fuel to a worker on leave",
         "app_name": "apex_habitat",
         "link": "/app/payment-request",
         "creation": "2026-06-12 09:00:00",
     },
-    # v1.53.3 ---------------------------------------------------------------
+    # [#8vj3tq]
     {
         "title": "Apex 1.53.3 — eight more core forms (Safety Inspection Report, Building License, Salis Vehicle, Salis Driver, Transport Request, Fuel Request, Rental Settlement) re-laid-out for clarity, completing the layout review of every core form; layout-only, no field or validation changed",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-06-11 12:00:00",
     },
-    # v1.53.2 ---------------------------------------------------------------
+    # [#ndrifc]
     {
         "title": "Apex 1.53.2 — five core forms (Accommodation Assignment, Checkout, Lease, Maintenance Request, Custody Issue) re-laid-out for clarity: fields grouped by purpose, audit fields tucked into collapsed System tabs, and long notes, tables and attachments given full-width rows; layout-only",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-assignment",
         "creation": "2026-06-11 09:00:00",
     },
-    # v1.53.1 ---------------------------------------------------------------
+    # [#s5fkfc]
     {
         "title": "Apex 1.53.1 — Salis now cleanly separates vehicle custody (handover, fuel, maintenance for a person given a company car) from worker transport (moving workers by bus or taxi): transport requests are classified by trip type, and the two Salis workspaces are re-split into Worker Transport and Fleet & Vehicle Custody",
         "app_name": "apex_habitat",
         "link": "/app/transport-request",
         "creation": "2026-06-10 09:00:00",
     },
-    # v1.53.0 ---------------------------------------------------------------
+    # [#r8dd3v]
     {
         "title": "Apex 1.53.0 — a configurable Payment Router turns a finance-approved request into the payment document of your choice, app-wide finance options move into a new Apex Settings, all twelve workspaces are re-ordered to one canonical layout, forty-seven link fields auto-fill from their source, and twelve correctness bugs are fixed",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-06-09 09:00:00",
     },
-    # v1.52.9 ---------------------------------------------------------------
+    # [#42su1q]
     {
         "title": "Apex 1.52.9 — a deep correctness pass: facility asset movements now actually move the asset, rental accruals get reconciled and stamped by their settlement, blocked submittable documents can be cancelled again, negative payment and claim amounts are rejected, and resident requests convert into the right maintenance, safety or custody document",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-06-08 12:00:00",
     },
-    # v1.52.8 ---------------------------------------------------------------
+    # [#eztj7a]
     {
         "title": "Apex 1.52.8 — an app-wide form and workspace overhaul: every form is regrouped by concern, workspaces get wired-in charts, live quick-lists and shortcut tiles with live counts, building room and floor counts now compute correctly, and hundreds of Arabic section labels are added",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-06-08 09:00:00",
     },
-    # v1.52.7 ---------------------------------------------------------------
+    # [#fh2t0m]
     {
         "title": "Apex 1.52.7 — form-layout polish across 27 DocTypes: 25 single-purpose tabs removed, child tables moved full-width into their Overview tab and system fields collapsed, so no tab holds fewer than three fields; nothing was changed, only repositioned",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-06-07 12:00:00",
     },
-    # v1.52.6 ---------------------------------------------------------------
+    # [#6558t9]
     {
         "title": "Apex 1.52.6 — reliability and hygiene: scheduler jobs read their settings once per batch, the cost-allocation ledger ignores duplicate-key races quietly, and a building's per-capacity cost zeroes when its capacity is removed",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-06-07 09:00:00",
     },
-    # v1.52.5 ---------------------------------------------------------------
+    # [#m0cnau]
     {
         "title": "Apex 1.52.5 — the 11 app dashboards now provision the native Frappe way (is_standard module JSON, the same mechanism ERPNext uses) instead of Python seeders, auto-synced on install and migrate, with no dashboard, chart or number card lost",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-06-06 21:00:00",
     },
-    # v1.52.4 ---------------------------------------------------------------
+    # [#7fykbq]
     {
         "title": "Apex 1.52.4 — security hardening: a custody-kiosk catalog leak is closed and worker passport/iqama PII plus the Masar token are now gated behind permission checks; native-first cleanups wire the Assigned-To panel into the idle-resident report; and the room generator now rejects two floor rows that resolve to the same floor code",
         "app_name": "apex_habitat",
         "link": "/app/custody-kiosk",
         "creation": "2026-06-06 18:00:00",
     },
-    # v1.52.3 ---------------------------------------------------------------
+    # [#bvefku]
     {
         "title": "Apex 1.52.3 — one consistent form layout across 13 Habitat and Salis DocTypes (named Overview / Related / System Info tabs, editable inputs left and computed values right), and two fixes: the Accommodation Assignment check-in photo now renders, and Accommodation Resident Request gets a proper field order",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-06-06 15:00:00",
     },
-    # v1.52.2 ---------------------------------------------------------------
+    # [#bs8f1a]
     {
         "title": "Apex 1.52.2 — a migrate-stability fix (Role Profiles no longer leave a stale lock on migrate), Accommodation Site now uses Frappe's native Address record with a one-time backfill, and a new Enable Email Notifications master switch in Habitat Settings (off by default) keeps the app from sending mail until the site is configured",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-site",
         "creation": "2026-06-06 12:00:00",
     },
-    # v1.52.1 ---------------------------------------------------------------
+    # [#g45eay]
     {
         "title": "Apex 1.52.1 — stability and clarity across accommodation: a worker can no longer be placed in two beds at once, the housing picker lists only workers who still need a bed, and the building screen is tidier with capacity and occupancy shown together",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-building",
         "creation": "2026-06-06 09:30:00",
     },
-    # v1.52.0 ---------------------------------------------------------------
+    # [#jji14s]
     {
         "title": "Apex 1.52.0 — Accommodation Building runs on its native sources: address reads from Frappe's Address record everywhere, the landlord is a Supplier auto-filled from the active lease, and annual rent is derived from the lease so figures can't drift; plus quick Activate / Deactivate for rooms and beds and an Edit Rooms & Beds button into the Room Setup wizard",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-building",
         "creation": "2026-06-06 09:00:00",
     },
-    # v1.51.1 ---------------------------------------------------------------
+    # [#89b61i]
     {
         "title": "Apex 1.51.1 — Arrivals Desk floor fixes (Ground floor rooms group under Ground Floor, basements label correctly, only truly floor-less rooms stay Unassigned) and the noisy Unknown readiness state is hidden; check-in now falls back to the company's default cost center, and an overdue maintenance ticket now raises a desk-visible Operations Alert",
         "app_name": "apex_habitat",
         "link": "/app/arrivals-desk",
         "creation": "2026-06-05 21:00:00",
     },
-    # v1.51.0 ---------------------------------------------------------------
+    # [#cppdsq]
     {
         "title": "Apex 1.51.0 — a new staged Room Setup wizard (floors, room types, beds, approve) with functional floor numbering, My Work rebuilt on native widgets, and the Accommodation Building form gains a native Address widget, a Google Maps link, grouped Connections and a floor-layout dashboard, alongside a batch of production fixes",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-building",
         "creation": "2026-06-05 12:00:00",
     },
-    # v1.50.10 ---------------------------------------------------------------
+    # [#qgqwxb]
     {
         "title": "Apex 1.50.10 — My Work is now a universal work center: pending approvals from any workflow, assigned tasks, notifications, and mentions all in one place inside the workspace",
         "app_name": "apex_habitat",
         "link": "/app/my-work",
         "creation": "2026-06-05 09:00:00",
     },
-    # v1.50.8 ---------------------------------------------------------------
+    # [#npunbc]
     {
         "title": "Apex 1.50.8 — workspace names are now shorter and clearer: the main hub is Habitat Hub, daily housing work is under Housing, cleaning and fire safety under Safety, and app setup under Launchpad",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-06-04 12:00:00",
     },
-    # v1.35.0 ---------------------------------------------------------------
+    # [#3tg8hf]
     {
         "title": "Apex 1.35.0 — a Unified Action Inbox: one screen of only the documents awaiting your action (workflow approvals + your tasks), with inline Approve/Reject and a nightly cleanup of stale rows",
         "app_name": "apex_habitat",
         "link": "/app/action-inbox",
         "creation": "2026-05-28 09:00:00",
     },
-    # v1.34.0 ---------------------------------------------------------------
+    # [#22yl5s]
     {
         "title": "Apex 1.34.0 — the Arrivals Desk is reworked from desk feedback: native Frappe styling, a full-width three-column layout, a multi-item custody store, one group QR (no pop-up), and signed check-in / custody / arrival-card prints with an embedded QR",
         "app_name": "apex_habitat",
         "link": "/app/arrivals-desk",
         "creation": "2026-05-27 09:00:00",
     },
-    # v1.33.0 ---------------------------------------------------------------
+    # [#qvpjy8]
     {
         "title": "Apex 1.33.0 — the Arrivals Desk is rebuilt as one building-first screen: live floor-map, worker search, passport register, one-click housing (with over-capacity), custody, arrival card and multi-passenger transport",
         "app_name": "apex_habitat",
         "link": "/app/arrivals-desk",
         "creation": "2026-05-26 09:00:00",
     },
-    # v1.32.0 ---------------------------------------------------------------
+    # [#9uh6xm]
     {
         "title": "Apex 1.32.0 — a Temporary Worker auto-links to his Employee when HR registers the matching passport (housing/custody re-pointed, cost back-dated)",
         "app_name": "apex_habitat",
         "link": "/app/temporary-worker",
         "creation": "2026-05-25 09:00:00",
     },
-    # v1.31.0 ---------------------------------------------------------------
+    # [#i75qq6]
     {
         "title": "Apex 1.31.0 — custody records (issue, return, damage) can now name a Temporary Worker too, like the housing records",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-05-24 09:00:00",
     },
-    # v1.30.0 ---------------------------------------------------------------
+    # [#8ts5u9]
     {
         "title": "Apex 1.30.0 — housing & worker records can now hold a passport-only Temporary Worker (pre-Iqama), with the Employee field kept in sync",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-05-23 09:00:00",
     },
-    # v1.29.1 ---------------------------------------------------------------
+    # [#9p1nrn]
     {
         "title": "v1.29.1: Native-first cleanups \u2014 the room-label print format now ships as a standard format (installs on new sites); the monthly rent-due reminder is now a native Frappe Notification on the unpaid schedule (replacing a custom scheduler); and the duplicated worker-link dialog (QR + WhatsApp) was consolidated from three desk scripts into one shared bundle.",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-05-22 12:00:00",
     },
-    # v1.29.0 ---------------------------------------------------------------
+    # [#3onwse]
     {
         "title": "v1.29.0: Foundations for handling workers who arrive before they are registered \u2014 a new Temporary Worker record (keyed by passport, valid 30 days, extendable to 90) that will hold a new arrival's housing and custody until their Iqama is issued, then link to their permanent Employee. First step of the arrival redesign.",
         "app_name": "apex_habitat",
         "link": "/app/temporary-worker",
         "creation": "2026-05-22 09:00:00",
     },
-    # v1.28.3 ---------------------------------------------------------------
+    # [#gwz9gv]
     {
         "title": "v1.28.3: Security \u2014 closed a project-boundary leak: a project-scoped fleet supervisor could open or API-fetch a Salis Driver or Passenger Manifest record from another project directly by name (the list view already hid them). Direct document access is now project-scoped too, and a driver can still read their own profile.",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-05-21 09:00:00",
     },
-    # v1.28.2 ---------------------------------------------------------------
+    # [#82hcn0]
     {
         "title": "v1.28.2: The 16 operational notifications now ship as native standard JSON (auto-installed by Frappe on migrate) instead of being created by Python seed code — the same notifications, the same disabled-by-default behaviour, but the framework-native deployment path. Removed two seed modules and five seed patches.",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-05-20 09:00:00",
     },
-    # v1.28.1 ---------------------------------------------------------------
+    # [#mzy4n5]
     {
         "title": "v1.28.1: The support-ticket SLA now uses the default Company's holiday list (the real business calendar) instead of whatever holiday list happened to exist, so SLA timers pause on the correct holidays.",
         "app_name": "apex_habitat",
         "link": "/app/issue",
         "creation": "2026-05-19 12:00:00",
     },
-    # v1.28.0 ---------------------------------------------------------------
+    # [#8yr7ub]
     {
         "title": "Apex 1.28.0 — driver support tickets run on the native Issue desk with SLA",
         "app_name": "apex_habitat",
@@ -349,14 +349,14 @@ _RELEASES = [
         "link": "/app/issue",
         "creation": "2026-05-19 09:01:00",
     },
-    # v1.27.1 ---------------------------------------------------------------
+    # [#rn3zmy]
     {
         "title": "v1.27.1: Restored the Safety onboarding (lost when Maintenance and Safety merged into Facilities), and surfaced two things that were built but not linked anywhere — the Cost by Dimension report (now in the Costs workspace) and the Arrivals Desk (now a shortcut in the Accommodation workspace).",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-05-18 12:00:00",
     },
-    # v1.27.0 ---------------------------------------------------------------
+    # [#pjndy6]
     {
         "title": "Apex 1.27.0 — a one-screen Arrivals Desk for onboarding a worker",
         "app_name": "apex_habitat",
@@ -369,7 +369,7 @@ _RELEASES = [
         "link": "/app/arrivals-desk",
         "creation": "2026-05-18 09:01:00",
     },
-    # v1.26.4 ---------------------------------------------------------------
+    # [#ct5xtl]
     {
         "title": "v1.26.4: Tidier desk navigation — Maintenance and Safety are merged into one 'Facilities' workspace, and Workers (transport) and Fuel are merged into one 'Movement' workspace. Fleet stays separate. Fewer, clearer areas to move between.",
         "app_name": "apex_habitat",
@@ -382,28 +382,28 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-17 09:01:00",
     },
-    # v1.26.3 ---------------------------------------------------------------
+    # [#7lkluc]
     {
         "title": "v1.26.3: Transport now clearly separates worker (bus/shuttle) trips from representative trips — a representative trip names the representative and can never carry labour-accommodation or a worker manifest, and only worker trips appear in the worker (Masar) view. Plus seed-reliability fixes and a clearer Employee 'Salis' connections label.",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-05-16 09:00:00",
     },
-    # v1.26.2 ---------------------------------------------------------------
+    # [#9ywwvy]
     {
         "title": "v1.26.2: Retired the old custom approval authority-tier engine and its now-unused 'Approval Request' record. Approvals run entirely on native Frappe Workflow (since 1.26.0), so the parallel mechanism, its settings ladder and its dashboard card were removed. Segregation-of-duties (no self-approval) is unchanged.",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-05-15 09:00:00",
     },
-    # v1.26.1 ---------------------------------------------------------------
+    # [#axvm04]
     {
         "title": "v1.26.1: Removed the out-of-scope 'Sponsorship Transfer Case' document (a kafala-transfer / Qiwa tracking record). It is a government-relations process that does not serve the accommodation-cost and fleet-operations core, so it and its workflow, report card and permissions were removed cleanly.",
         "app_name": "apex_habitat",
         "link": "/app",
         "creation": "2026-05-14 12:00:00",
     },
-    # v1.26.0 ---------------------------------------------------------------
+    # [#4ggn9g]
     {
         "title": "Apex 1.26.0 — Salis approvals run on native Frappe Workflow",
         "app_name": "apex_habitat",
@@ -422,7 +422,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-14 09:02:00",
     },
-    # v1.25.0 ---------------------------------------------------------------
+    # [#eqoa79]
     {
         "title": "Apex 1.25.0 — a formal safety-incident record with management escalation, and hardened worker links",
         "app_name": "apex_habitat",
@@ -441,7 +441,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-13 09:02:00",
     },
-    # v1.24.0 ---------------------------------------------------------------
+    # [#d12vt1]
     {
         "title": "Apex 1.24.0 — issuing a worker's Masar link is now easy, with a working QR and a WhatsApp share",
         "app_name": "apex_habitat",
@@ -460,7 +460,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-12 09:02:00",
     },
-    # v1.23.0 ---------------------------------------------------------------
+    # [#f9jafb]
     {
         "title": "Apex 1.23.0 — Masar becomes a complete worker self-service app",
         "app_name": "apex_habitat",
@@ -479,7 +479,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-10 09:02:00",
     },
-    # v1.22.1 ---------------------------------------------------------------
+    # [#ttpyar]
     {
         "title": "Apex 1.22.1 — the desk pages are more robust, dynamic, and comfortable",
         "app_name": "apex_habitat",
@@ -498,7 +498,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-09 09:02:00",
     },
-    # v1.22.0 ---------------------------------------------------------------
+    # [#kmu8vk]
     {
         "title": "Apex 1.22.0 — a new Gemini portal theme, a genuinely Frappe-styled theme, and a fixed worker-route page",
         "app_name": "apex_habitat",
@@ -517,7 +517,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-08 09:02:00",
     },
-    # v1.21.0 ---------------------------------------------------------------
+    # [#nn9v6q]
     {
         "title": "Apex 1.21.0 — a clean settings hub, KPI tiles on every Salis workspace, and a training guide",
         "app_name": "apex_habitat",
@@ -536,7 +536,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-07 09:02:00",
     },
-    # v1.20.0 ---------------------------------------------------------------
+    # [#13ogel]
     {
         "title": "Apex 1.20.0 — driver portal: language toggle, profile and vehicle views",
         "app_name": "apex_habitat",
@@ -555,7 +555,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-06 09:02:00",
     },
-    # v1.19.1 ---------------------------------------------------------------
+    # [#awx9va]
     {
         "title": "Apex 1.19.1 — Arabic module names, a tidier settings hub, and a cleaner portal",
         "app_name": "apex_habitat",
@@ -574,7 +574,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-05 09:02:00",
     },
-    # v1.19.0 ---------------------------------------------------------------
+    # [#lxnx0z]
     {
         "title": "Apex 1.19.0 — a themeable driver portal and a fully Arabic desk",
         "app_name": "apex_habitat",
@@ -593,7 +593,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-04 09:02:00",
     },
-    # v1.18.4 ---------------------------------------------------------------
+    # [#3sz2cx]
     {
         "title": "Apex 1.18.4 — driver portal check-ins now record attendance",
         "app_name": "apex_habitat",
@@ -612,7 +612,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-03 09:02:00",
     },
-    # v1.18.3 ---------------------------------------------------------------
+    # [#fc598i]
     {
         "title": "Apex 1.18.3 — leaner Arabic translations",
         "app_name": "apex_habitat",
@@ -631,7 +631,7 @@ _RELEASES = [
         "link": "/app",
         "creation": "2026-05-02 09:02:00",
     },
-    # v1.18.2 ---------------------------------------------------------------
+    # [#syjm2r]
     {
         "title": "Apex 1.18.2 — vehicle, driver and passenger-manifest lists are now project-scoped",
         "app_name": "apex_habitat",
@@ -650,7 +650,7 @@ _RELEASES = [
         "link": "/app/salis-driver",
         "creation": "2026-05-01 09:02:00",
     },
-    # v1.18.1 ---------------------------------------------------------------
+    # [#cky6vu]
     {
         "title": "Apex 1.18.1 — a rental payment request can only be raised on an approved settlement",
         "app_name": "apex_habitat",
@@ -669,7 +669,7 @@ _RELEASES = [
         "link": "/app/rental-settlement",
         "creation": "2026-04-30 09:02:00",
     },
-    # v1.18.0 ---------------------------------------------------------------
+    # [#rmlsfa]
     {
         "title": "Apex 1.18.0 — worker-movement foundations: housing-linked pickups and trip boarding logs",
         "app_name": "apex_habitat",
@@ -688,7 +688,7 @@ _RELEASES = [
         "link": "/app/trip-start-log",
         "creation": "2026-04-29 09:02:00",
     },
-    # v1.17.0 ---------------------------------------------------------------
+    # [#m2nijx]
     {
         "title": "Apex 1.17.0 — an integration kit so any frontend can use Apex as its backend",
         "app_name": "apex_habitat",
@@ -707,7 +707,7 @@ _RELEASES = [
         "link": "/app/apex-core",
         "creation": "2026-04-28 09:02:00",
     },
-    # v1.16.0 ---------------------------------------------------------------
+    # [#j8ayy4]
     {
         "title": "Apex 1.16.0 — settings, console and Salis setup unified in one Apex Core workspace",
         "app_name": "apex_habitat",
@@ -726,7 +726,7 @@ _RELEASES = [
         "link": "/app/apex-core",
         "creation": "2026-04-27 09:02:00",
     },
-    # v1.15.0 ---------------------------------------------------------------
+    # [#11qxh1]
     {
         "title": "Apex 1.15.0 — shared settings get a dedicated Apex Core workspace",
         "app_name": "apex_habitat",
@@ -745,7 +745,7 @@ _RELEASES = [
         "link": "/app/apex-core",
         "creation": "2026-04-26 09:02:00",
     },
-    # v1.14.2 ---------------------------------------------------------------
+    # [#9iw1k5]
     {
         "title": "Apex 1.14.2 — a refreshed, mobile-first driver portal and a cleaner fuel approval board",
         "app_name": "apex_habitat",
@@ -764,7 +764,7 @@ _RELEASES = [
         "link": "/app/fuel-approval-console",
         "creation": "2026-04-25 09:02:00",
     },
-    # v1.14.1 ---------------------------------------------------------------
+    # [#4r50p7]
     {
         "title": "Apex 1.14.1 — the driver portal opens reliably for signed-in users",
         "app_name": "apex_habitat",
@@ -783,7 +783,7 @@ _RELEASES = [
         "link": "/driver",
         "creation": "2026-04-24 09:02:00",
     },
-    # v1.14.0 ---------------------------------------------------------------
+    # [#lxral4]
     {
         "title": "Apex 1.14.0 — operations alerts clear themselves more completely and keep a resolution trail",
         "app_name": "apex_habitat",
@@ -802,7 +802,7 @@ _RELEASES = [
         "link": "/app/operations-alert",
         "creation": "2026-04-23 09:02:00",
     },
-    # v1.13.0 ---------------------------------------------------------------
+    # [#tg1n8z]
     {
         "title": "Apex 1.13.0 — dispatch trips now run on a workflow, completing the Movement approval suite",
         "app_name": "apex_habitat",
@@ -821,7 +821,7 @@ _RELEASES = [
         "link": "/app/dispatch-trip",
         "creation": "2026-04-22 09:02:00",
     },
-    # v1.12.0 ---------------------------------------------------------------
+    # [#ax3au6]
     {
         "title": "Apex 1.12.0 — fuel claims and exception cases now run on guided approval workflows",
         "app_name": "apex_habitat",
@@ -840,7 +840,7 @@ _RELEASES = [
         "link": "/app/fuel-exception-case",
         "creation": "2026-04-21 09:02:00",
     },
-    # v1.11.0 ---------------------------------------------------------------
+    # [#mxhleh]
     {
         "title": "Apex 1.11.0 — fuel requests now run on a clear, role-based approval workflow",
         "app_name": "apex_habitat",
@@ -859,7 +859,7 @@ _RELEASES = [
         "link": "/app/fuel-request",
         "creation": "2026-04-20 09:02:00",
     },
-    # v1.10.0 ---------------------------------------------------------------
+    # [#nceiyt]
     {
         "title": "Apex 1.10.0 — fuel requests, top-ups and chip actions are now one screen",
         "app_name": "apex_habitat",
@@ -878,7 +878,7 @@ _RELEASES = [
         "link": "/app/fuel-request",
         "creation": "2026-04-19 09:02:00",
     },
-    # v1.9.1 ----------------------------------------------------------------
+    # [#8v6dzj]
     {
         "title": "Apex 1.9.1 — the Driver Portal opens reliably for everyone",
         "app_name": "apex_habitat",
@@ -897,7 +897,7 @@ _RELEASES = [
         "link": "/driver",
         "creation": "2026-04-18 09:02:00",
     },
-    # v1.9.0 ----------------------------------------------------------------
+    # [#gmpadc]
     {
         "title": "Apex 1.9.0 — payments, support tickets and sponsorship transfers move on a real workflow",
         "app_name": "apex_habitat",
@@ -916,7 +916,7 @@ _RELEASES = [
         "link": "/app/support-ticket",
         "creation": "2026-04-17 09:02:00",
     },
-    # v1.8.0 ----------------------------------------------------------------
+    # [#b2zl14]
     {
         "title": "Apex 1.8.0 — more Movement documents move on a real approval workflow",
         "app_name": "apex_habitat",
@@ -935,7 +935,7 @@ _RELEASES = [
         "link": "/app/driver-clearance",
         "creation": "2026-04-16 09:02:00",
     },
-    # v1.7.0 ----------------------------------------------------------------
+    # [#itf9zd]
     {
         "title": "Apex 1.7.0 — Transport Requests run on a real approval workflow, with sharper reports and sturdier engines",
         "app_name": "apex_habitat",
@@ -960,21 +960,21 @@ _RELEASES = [
         "link": "/app/salis",
         "creation": "2026-04-15 09:03:00",
     },
-    # v1.6.1 ----------------------------------------------------------------
+    # [#168foq]
     {
         "title": "Apex 1.6.1 — a focused desk that opens to your Apex areas",
         "app_name": "apex_habitat",
         "link": "/app/salis",
         "creation": "2026-04-14 09:00:00",
     },
-    # v1.6.0 ----------------------------------------------------------------
+    # [#o55yut]
     {
         "title": "Apex 1.6.0 — shared settings now live together in one Apex Core area",
         "app_name": "apex_habitat",
         "link": "/app/apex-core",
         "creation": "2026-04-13 09:00:00",
     },
-    # v1.5.0 ----------------------------------------------------------------
+    # [#liddxt]
     {
         "title": "Apex 1.5.0 — connected records everywhere, a Salis getting-started guide, and cleaner navigation",
         "app_name": "apex_habitat",
@@ -1005,14 +1005,14 @@ _RELEASES = [
         "link": "/app/salis",
         "creation": "2026-04-12 09:04:00",
     },
-    # v1.4.1 ----------------------------------------------------------------
+    # [#hbpi9x]
     {
         "title": "Apex 1.4.1 — security & reliability improvements",
         "app_name": "apex_habitat",
         "link": "/app/salis",
         "creation": "2026-04-11 09:00:00",
     },
-    # v1.4.0 ----------------------------------------------------------------
+    # [#dmal2d]
     {
         "title": "Apex 1.4.0 — Movement costs now carry Company and Cost Center, with quicker navigation",
         "app_name": "apex_habitat",
@@ -1031,7 +1031,7 @@ _RELEASES = [
         "link": "/app/salis",
         "creation": "2026-04-10 09:02:00",
     },
-    # v1.3.0 ----------------------------------------------------------------
+    # [#bunepz]
     {
         "title": "Apex 1.3.0 — quicker Salis navigation, one-tap record creation and a leaner role setup",
         "app_name": "apex_habitat",
@@ -1056,7 +1056,7 @@ _RELEASES = [
         "link": "/app/salis",
         "creation": "2026-04-09 09:03:00",
     },
-    # v1.2.0 ----------------------------------------------------------------
+    # [#bpgbfp]
     {
         "title": "Apex 1.2.0 — Salis gets a live dispatch board, deeper dashboards, printable documents and smarter alerts",
         "app_name": "apex_habitat",
@@ -1093,14 +1093,14 @@ _RELEASES = [
         "link": "/app/salis",
         "creation": "2026-04-08 09:05:00",
     },
-    # v1.1.1 ----------------------------------------------------------------
+    # [#27xaij]
     {
         "title": "Apex 1.1.1 — security & reliability improvements",
         "app_name": "apex_habitat",
         "link": "/app/salis",
         "creation": "2026-04-07 09:00:00",
     },
-    # v1.1.0 ----------------------------------------------------------------
+    # [#8qjvr5]
     {
         "title": "Apex 1.1.0 — Salis opens to the numbers that matter, on a cleaner two-division workspace",
         "app_name": "apex_habitat",
@@ -1119,21 +1119,21 @@ _RELEASES = [
         "link": "/app/salis-vehicle",
         "creation": "2026-04-06 09:02:00",
     },
-    # v1.0.1 ----------------------------------------------------------------
+    # [#qx85o6]
     {
         "title": "Apex 1.0.1 — security & reliability improvements",
         "app_name": "apex_habitat",
         "link": "/driver",
         "creation": "2026-04-05 09:00:00",
     },
-    # v1.0.0 stable -------------------------------------------------------
+    # [#7t0lxf]
     {
         "title": "Apex 1.0.0 — your workforce operations, end to end: where they live and how they move, now in one suite",
         "app_name": "apex_habitat",
         "link": "/app/apex-core",
         "creation": "2026-04-04 09:00:00",
     },
-    # v1.0.0 ----------------------------------------------------------
+    # [#em0gs3]
     {
         "title": "v1.0.0: Meet Salis — take command of every vehicle, driver, trip and litre of fuel from one Movement workspace",
         "app_name": "apex_habitat",
@@ -1176,7 +1176,7 @@ _RELEASES = [
         "link": "/app/salis",
         "creation": "2026-04-03 09:06:00",
     },
-    # v0.9.1 ---------------------------------------------------------------
+    # [#iy6ew2]
     {
         "title": "Apex Habitat v0.9.1 — guided setup is back, and every record shows what it's connected to",
         "app_name": "apex_habitat",
@@ -1195,7 +1195,7 @@ _RELEASES = [
         "link": "/app/accommodation-building",
         "creation": "2026-04-01 09:32:00",
     },
-    # v0.9.0 ---------------------------------------------------------------
+    # [#6n03vd]
     {
         "title": "v0.9.0: Stop typing, start tapping — move residents, inspect rooms and issue gear from fast, visual boards",
         "app_name": "apex_habitat",
@@ -1226,7 +1226,7 @@ _RELEASES = [
         "link": "/app/front-desk",
         "creation": "2026-03-30 09:04:00",
     },
-    # v0.8.6 ---------------------------------------------------------------
+    # [#pw8a4t]
     {
         "title": "Apex Habitat v0.8.6 — check residents in and out from a visual board, and never lose track of an idle worker",
         "app_name": "apex_habitat",
@@ -1251,7 +1251,7 @@ _RELEASES = [
         "link": "/app/idle-resident-report",
         "creation": "2026-03-21 09:03:00",
     },
-    # v0.8.5 ---------------------------------------------------------------
+    # [#pf5ch5]
     {
         "title": "Apex Habitat v0.8.5 — book short stays with a clear end date, and start holding idle workers to account",
         "app_name": "apex_habitat",
@@ -1276,7 +1276,7 @@ _RELEASES = [
         "link": "/app/idle-resident-report",
         "creation": "2026-03-20 21:03:00",
     },
-    # v0.8.4 ---------------------------------------------------------------
+    # [#1vezp4]
     {
         "title": "Apex Habitat v0.8.4 — let the right reports, reminders and follow-ups send themselves",
         "app_name": "apex_habitat",
@@ -1307,7 +1307,7 @@ _RELEASES = [
         "link": "/app/operations-command-center",
         "creation": "2026-03-20 18:04:00",
     },
-    # v0.8.3 ---------------------------------------------------------------
+    # [#97vu2r]
     {
         "title": "Apex Habitat v0.8.3 — see your work on a calendar, move it across a board, and let it route itself",
         "app_name": "apex_habitat",
@@ -1338,7 +1338,7 @@ _RELEASES = [
         "link": "/app/notification",
         "creation": "2026-03-20 15:04:00",
     },
-    # v0.8.2 ---------------------------------------------------------------
+    # [#bl45in]
     {
         "title": "Apex Habitat v0.8.2 — every building becomes its own store, with stock you can track and move",
         "app_name": "apex_habitat",
@@ -1375,7 +1375,7 @@ _RELEASES = [
         "link": "/app/accommodation-resident-request/view/kanban",
         "creation": "2026-03-20 12:05:00",
     },
-    # v0.8.0 ---------------------------------------------------------------
+    # [#poes18]
     {
         "title": "Apex Habitat v0.8.0 — bill suppliers back, see occupancy trends, and print every handover",
         "app_name": "apex_habitat",
@@ -1412,7 +1412,7 @@ _RELEASES = [
         "link": "/app/habitat-system-administration",
         "creation": "2026-03-20 09:05:00",
     },
-    # v0.7.2 ---------------------------------------------------------------
+    # [#drg8a8]
     {
         "title": "Apex Habitat v0.7.2 — faster reports, a fully translated interface, and security & reliability improvements",
         "app_name": "apex_habitat",
@@ -1449,7 +1449,7 @@ _RELEASES = [
         "link": "/app/apex-core",
         "creation": "2026-03-19 21:05:00",
     },
-    # v0.7.0 ---------------------------------------------------------------
+    # [#b9xyrg]
     {
         "title": "Apex Habitat v0.7.0 — a faster, sturdier build, plus a smarter building setup and lease payments",
         "app_name": "apex_habitat",
@@ -1534,7 +1534,7 @@ _RELEASES = [
         "link": "/app/apex-core",
         "creation": "2026-03-19 10:13:00",
     },
-    # v0.6.0 ---------------------------------------------------------------
+    # [#2g5o6o]
     {
         "title": "Apex Habitat v0.6.0 — stock your maintenance catalog and set up a building from one screen",
         "app_name": "apex_habitat",
@@ -1610,11 +1610,11 @@ _RELEASES = [
 ]
 
 
-# Frappe's "Changelog Feed" `title` is a Data field (max 140 chars), shown as a
-# one-line headline in the desk notification bell. Some blurbs here are longer (they
-# double as release notes), so clip them: an over-length title makes the insert in
-# Frappe's fetch_changelog_feed raise, which silently drops the WHOLE batch of new
-# items — the reason no What's-New item appeared for the long-titled 1.x releases.
+# [#bnwb36]
+# [#pa8k7r]
+# [#dlg3nt]
+# [#199ixg]
+# [#ezu99i]
 _FEED_TITLE_MAX = 140
 
 

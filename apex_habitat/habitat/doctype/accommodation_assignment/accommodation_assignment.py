@@ -59,19 +59,19 @@ def validate(doc, method=None):
     sync_party_employee(doc, require_party=True)
 
     if not doc.building or not frappe.db.exists("Accommodation Building", doc.building):
-        return  # Mandatory/link check will catch missing or invalid building
+        return  # [#61pl64]
 
     building = frappe.get_doc("Accommodation Building", doc.building)
 
-    # Project and Cost Center validation
+    # [#8fxncv]
     if not doc.project:
         frappe.throw(_("Project is required."))
 
     if not doc.cost_center:
         doc.cost_center = building.default_cost_center
     if not doc.cost_center and building.company:
-        # Fall back to the company's default cost center so a missing building-level
-        # cost center does not hard-block check-in when the company defines a default.
+        # [#g134i4]
+        # [#frln10]
         doc.cost_center = frappe.get_cached_value("Company", building.company, "cost_center")
     if not doc.cost_center:
         frappe.throw(
@@ -80,17 +80,17 @@ def validate(doc, method=None):
             )
         )
 
-    # Temporary stay: expected check-out must not precede check-in
+    # [#bdjrcz]
     if doc.stay_type == "Temporary":
         if not doc.expected_checkout_date:
             frappe.throw(_("Expected check-out date is required for temporary stays."))
         if doc.check_in_date and doc.expected_checkout_date < doc.check_in_date:
             frappe.throw(_("Expected check-out date cannot be earlier than the check-in date."))
 
-    # Reject a second active submitted assignment for the same employee. Skip when
-    # there is no employee (a Temporary Worker party): an `employee IS NULL` filter
-    # would otherwise match every other unlinked Temporary Worker as a false
-    # duplicate. (Mirrors the `if doc.employee` guard in idle_resident_report.)
+    # [#qbfqwj]
+    # [#n2avq3]
+    # [#o6z1si]
+    # [#13utv7]
     if doc.employee:
         active_asg = frappe.db.get_value(
             "Accommodation Assignment",
@@ -109,9 +109,9 @@ def validate(doc, method=None):
                 )
             )
     elif doc.party and doc.party_type:
-        # The employee guard above skips Temporary Worker parties (employee IS NULL);
-        # close that hole by rejecting a second active assignment for the same party
-        # (party_type + party) so a Temporary Worker cannot be double-housed either.
+        # [#klx6kc]
+        # [#f4gvob]
+        # [#tv5q3j]
         dup = frappe.db.get_value(
             "Accommodation Assignment",
             {
@@ -130,19 +130,19 @@ def validate(doc, method=None):
                 )
             )
 
-    # Validate bed belongs to room
+    # [#6nx3t9]
     bed_room = frappe.db.get_value("Accommodation Bed", doc.bed, "room")
     if bed_room != doc.room:
         frappe.throw(_("Selected Bed {0} does not belong to Room {1}").format(doc.bed, doc.room))
 
-    # Validate room belongs to building
+    # [#mizob0]
     room_doc = frappe.get_doc("Accommodation Room", doc.room)
     if room_doc.building != doc.building:
         frappe.throw(
             _("Selected Room {0} does not belong to Building {1}").format(doc.room, doc.building)
         )
         
-    # Validate room readiness
+    # [#3ce5id]
     if room_doc.readiness_status in ["Needs Repair", "Needs Cleaning", "Out of Service"]:
         frappe.throw(
             _("Room {0} is currently '{1}' and cannot be assigned to an employee.").format(
@@ -150,7 +150,7 @@ def validate(doc, method=None):
             )
         )
 
-    # Validate bed is available
+    # [#br20j8]
     bed_doc = frappe.get_doc("Accommodation Bed", doc.bed)
     if bed_doc.status == "Out of Service":
         frappe.throw(_("Selected Bed {0} is Out of Service").format(doc.bed))
@@ -199,7 +199,7 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    # Acquire row-level lock to prevent concurrent double-booking
+    # [#izebf3]
     frappe.db.sql(
         "SELECT `status` FROM `tabAccommodation Bed` WHERE `name` = %s FOR UPDATE",
         doc.bed,

@@ -24,15 +24,15 @@ class VehicleHandover(Document):
         if self.from_driver and self.to_driver and self.from_driver == self.to_driver:
             frappe.throw(_("To Driver must differ from From Driver."))
 
-        # T-119: never hand a vehicle TO a rider who is on leave / inactive.
+        # [#o0rvu8]
         if self.to_driver:
             reason = rider_block_reason(self.to_driver, self.handover_date)
             if reason:
                 frappe.throw(reason)
 
-        # If the rider GIVING the vehicle back is on leave/inactive and the
-        # handover has not yet recovered it, open a supervisor clearance task so
-        # the vehicle + custody are recovered (idempotent).
+        # [#bvq76e]
+        # [#skw0ub]
+        # [#nk1brb]
         if self.from_driver and rider_block_reason(self.from_driver, self.handover_date):
             raise_rider_clearance_task(
                 self.from_driver,
@@ -66,7 +66,7 @@ class VehicleHandover(Document):
             {"current_driver": self.to_driver, "odometer": self.odometer_reading},
         )
 
-        # Detach the old driver if its mirror still points at this vehicle.
+        # [#d74yu0]
         if self.from_driver and (
             frappe.db.get_value("Salis Driver", self.from_driver, "current_vehicle") == self.vehicle
         ):
@@ -80,8 +80,8 @@ class VehicleHandover(Document):
             _("Vehicle {0} handed over to driver {1}.").format(self.vehicle, self.to_driver),
         )
 
-        # Guide (do not auto-create): a discrepancy should be escalated through a
-        # Vehicle Damage Write-Off case for tiered write-off authority.
+        # [#ph347s]
+        # [#pstlcl]
         if self.discrepancy_status == "Discrepancy":
             self.add_comment(
                 "Comment",
@@ -105,12 +105,12 @@ class VehicleHandover(Document):
     def on_cancel(self):
         lock_vehicle(self.vehicle)
 
-        # Revert current_driver only if it still points at the to_driver this
-        # handover set (a later handover may have moved it again).
+        # [#1com2f]
+        # [#swwkt7]
         if frappe.db.get_value("Salis Vehicle", self.vehicle, "current_driver") == self.to_driver:
             frappe.db.set_value("Salis Vehicle", self.vehicle, "current_driver", self.from_driver)
 
-            # Restore the driver<->vehicle mirror to the from_driver.
+            # [#bz5szf]
             if self.to_driver and (
                 frappe.db.get_value("Salis Driver", self.to_driver, "current_vehicle") == self.vehicle
             ):

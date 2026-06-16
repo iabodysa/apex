@@ -13,9 +13,9 @@ class FacilityAssetMovement(Document):
 
 
 def validate(doc, method=None):
-    # Populate company fields and detect intercompany HERE (not before_save):
-    # validate runs before before_save, so deriving is_intercompany in before_save
-    # left the gate below checking a stale/unset value on the first save.
+    # [#pazy1g]
+    # [#8rs7p4]
+    # [#huovl7]
     _populate_company_fields(doc)
     _detect_intercompany(doc)
 

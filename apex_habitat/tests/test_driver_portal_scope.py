@@ -106,10 +106,10 @@ class TestDriverPortalScope(FrappeTestCase):
         self.assertIsNone(ctx["driver"])
         self.assertTrue(ctx["is_staff"])
         labels = {link["label"] for link in ctx["links"]}
-        # A Fleet Supervisor sees the workspace and the Dispatch Board at minimum.
+        # [#5tbwq9]
         self.assertIn("Salis Workspace", labels)
         self.assertIn("Dispatch Board", labels)
-        # Every link carries a label and an /app URL.
+        # [#icdh0u]
         for link in ctx["links"]:
             self.assertTrue(link["label"])
             self.assertTrue(link["url"].startswith("/app/"))
@@ -131,8 +131,8 @@ class TestDriverPortalScope(FrappeTestCase):
         """A driver passing an arbitrary vehicle id that is NOT theirs (not their
         current_vehicle and no Active Vehicle Assignment) must be rejected — they
         cannot charge fuel against someone else's vehicle."""
-        # driver_a has a bound current_vehicle; create a foreign vehicle that is
-        # NOT assigned to driver_a in any way.
+        # [#myqsou]
+        # [#gz9o8h]
         frappe.set_user("Administrator")
         foreign = frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": "FOREIGN VEH 1", "status": "Active"}

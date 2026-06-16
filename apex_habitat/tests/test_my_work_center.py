@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 """My Work Center — Universal My Work Workspace (Phase 1).
 
 Tests cover:
@@ -27,9 +27,9 @@ def _h(n=6):
     return frappe.generate_hash(length=n)
 
 
-# ---------------------------------------------------------------------------
-# Pure-Python source guards — no bench required
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#tuk2ir]
+# [#rudcur]
 
 class TestMyWorkCenterSourceGuards(unittest.TestCase):
     """Architectural boundary guards: assert correct sourcing without a live site."""
@@ -48,9 +48,9 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
         ) as fh:
             return fh.read()
 
-    # TEST 1a — WORKLIST_REGISTRY must NOT appear in action_inbox.py.
-    # Workflow approvals come from Frappe's native Workflow Action DocType (auto-scoped
-    # by framework get_permission_query_conditions), not from the handwritten registry.
+    # [#fb7fqw]
+    # [#fvp9ys]
+    # [#999jy8]
     def test_workflow_actions_not_driven_by_worklist_registry(self):
         inbox_src = self._inbox_src()
         self.assertNotIn(
@@ -60,8 +60,8 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             "workflow approvals are sourced from Frappe's native Workflow Action DocType.",
         )
 
-    # TEST 1b — get_pending_actions() must use Workflow Action as the FIRST query and
-    # surface it under the 'workflow_actions' key.
+    # [#j6u79d]
+    # [#lrdnzc]
     def test_workflow_action_is_primary_needs_action_source(self):
         inbox_src = self._inbox_src()
         self.assertIn(
@@ -69,7 +69,7 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             inbox_src,
             "action_inbox.py must define get_pending_actions()",
         )
-        # Workflow Action must appear before ToDo in the source (primary source first)
+        # [#itpz5r]
         wa_pos = inbox_src.find('"Workflow Action"')
         todo_pos = inbox_src.find('"ToDo"')
         self.assertGreater(wa_pos, -1, "'Workflow Action' must appear in action_inbox.py")
@@ -79,14 +79,14 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             todo_pos,
             "'Workflow Action' must be queried BEFORE 'ToDo' in get_pending_actions()",
         )
-        # Return dict key must be 'workflow_actions'
+        # [#5z5my8]
         self.assertIn(
             '"workflow_actions"',
             inbox_src,
             "get_pending_actions() must return a dict with key 'workflow_actions'",
         )
 
-    # TEST 1c — ToDo rows must be scoped to the session user via allocated_to.
+    # [#d1zgwi]
     def test_todo_rows_scoped_to_session_user(self):
         inbox_src = self._inbox_src()
         self.assertIn(
@@ -96,7 +96,7 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             '"allocated_to": frappe.session.user to scope tasks to the calling user.',
         )
 
-    # TEST 1d — Notification Log query must be scoped by for_user = session user.
+    # [#o9qsvo]
     def test_notifications_scoped_by_for_user(self):
         mwc_src = self._mwc_src()
         self.assertIn(
@@ -105,10 +105,10 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             "Notification Log query in my_work_center.py must use "
             '"for_user": frappe.session.user for user isolation.',
         )
-        # for_user must be the only user-scoping filter (no secondary 'owner' that
-        # could widen the set for the notification surface).
-        # We check that the Notification Log get_list call contains for_user.
-        # A simple check: 'for_user' appears in the notification filters context.
+        # [#s33ylq]
+        # [#e7hfuv]
+        # [#gz2l8h]
+        # [#dx3tyc]
         notif_block_start = mwc_src.find('"Notification Log"')
         self.assertGreater(notif_block_start, -1, "'Notification Log' must be queried")
         notif_block = mwc_src[notif_block_start : notif_block_start + 400]
@@ -118,8 +118,8 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             "for_user must appear in the Notification Log query block",
         )
 
-    # TEST — get_my_work() must surface needs_action from get_pending_actions()
-    # without re-querying or filtering its contents.
+    # [#618rvt]
+    # [#ob8akd]
     def test_get_my_work_surfaces_needs_action_from_get_pending_actions(self):
         mwc_src = self._mwc_src()
         self.assertIn(
@@ -134,9 +134,9 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
         )
 
 
-# ---------------------------------------------------------------------------
-# Workspace JSON guards — pure-Python, no bench required
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#353eg6]
+# [#rudcur]
 
 class TestMyWorkWorkspaceJSON(unittest.TestCase):
     """Guards on the My Work workspace JSON fixture."""
@@ -149,9 +149,9 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
         with open(path, encoding="utf-8") as fh:
             return json.load(fh)
 
-    # TEST 1e — the "My Maintenance Requests" shortcut must NOT exist in My Work.
-    # A Workspace Shortcut to a DocType list is not user-scoped and would surface
-    # all maintenance requests, not just the user's own.
+    # [#n7dgy3]
+    # [#efpje1]
+    # [#6xh7f8]
     def test_my_work_has_no_maintenance_requests_shortcut(self):
         ws = self._ws()
         shortcut_labels = [s.get("label", "") for s in ws.get("shortcuts", [])]
@@ -177,9 +177,9 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
             "'mwScReq' content item (My Maintenance Requests shortcut) must be removed.",
         )
 
-    # TEST 1f — My Work uses NATIVE widgets only (v1.50.16): the fragile shadow-DOM
-    # custom_block was retired because it did not render in the browser. Content must
-    # contain native number cards + an Action Inbox shortcut, and NO custom_block.
+    # [#k1i5ao]
+    # [#3xkho3]
+    # [#o2ol1l]
     def test_my_work_is_native_widgets_no_custom_block(self):
         import json
         ws = self._ws()
@@ -197,7 +197,7 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
             "shortcut", types, "My Work must include the native Action Inbox shortcut."
         )
 
-    # TEST 1h — roles must be empty ([]) so the workspace is universal (all desk users).
+    # [#jdwn2o]
     def test_my_work_roles_is_empty(self):
         ws = self._ws()
         self.assertEqual(
@@ -207,9 +207,9 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
             "universal personal workspace visible to every desk user.",
         )
 
-    # TEST 1i — Action Inbox shortcut MUST appear (v1.50.16): with the custom_block
-    # retired, the native Action Inbox page is the primary interactive surface, so the
-    # workspace links to it via a URL shortcut to /app/action-inbox.
+    # [#sgxq56]
+    # [#lkn1us]
+    # [#8jvfl1]
     def test_my_work_has_action_inbox_shortcut(self):
         import json
         ws = self._ws()
@@ -229,8 +229,8 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
             "'mwScInbox' content item (Action Inbox shortcut) must be present.",
         )
 
-    # TEST 1j — custom_blocks child table must be EMPTY (v1.50.16): the 'Apex My Work
-    # Center' block was retired, so no custom block is registered.
+    # [#k95xqu]
+    # [#dum7zs]
     def test_my_work_custom_blocks_child_table_empty(self):
         ws = self._ws()
         self.assertEqual(
@@ -251,7 +251,7 @@ class TestLaunchpadWorkspaceJSON(unittest.TestCase):
         with open(path, encoding="utf-8") as fh:
             return json.load(fh)
 
-    # TEST 1g — Launchpad must have exactly one shortcut linking to the My Work workspace.
+    # [#rsv4oq]
     def test_launchpad_has_exactly_one_my_work_entry(self):
         import json
         ws = self._ws()
@@ -280,9 +280,9 @@ class TestLaunchpadWorkspaceJSON(unittest.TestCase):
         )
 
 
-# ---------------------------------------------------------------------------
-# Integration tests — require a live Frappe site
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#oq7uzd]
+# [#rudcur]
 
 class TestMyWorkCenter(ApexHabitatTestCase):
     """Shape, isolation, and access tests that require a running site."""
@@ -290,52 +290,52 @@ class TestMyWorkCenter(ApexHabitatTestCase):
     def test_shape(self):
         """get_my_work() must return the Phase 1 response shape."""
         w = get_my_work()
-        # Top-level keys
+        # [#p5zhh1]
         for k in ("needs_action", "notifications", "mentions", "field_references", "summary"):
             self.assertIn(k, w, f"get_my_work() response must contain key '{k}'")
-        # needs_action sub-keys
+        # [#skhd3p]
         self.assertIn("workflow_actions", w["needs_action"])
         self.assertIn("todos", w["needs_action"])
         self.assertIsInstance(w["needs_action"]["workflow_actions"], list)
         self.assertIsInstance(w["needs_action"]["todos"], list)
-        # surface types
+        # [#ad1ndb]
         self.assertIsInstance(w["notifications"], list)
         self.assertIsInstance(w["mentions"], list)
         self.assertIsInstance(w["field_references"], list)
-        # summary keys and types
+        # [#krr1w8]
         summary = w["summary"]
         for sk in ("needs_action", "assigned", "mentions", "notifications"):
             self.assertIn(sk, summary)
             self.assertIsInstance(summary[sk], int)
-        # Phase 1: mentions always []
+        # [#nnct8y]
         self.assertEqual(w["mentions"], [], "mentions must be [] in Phase 1")
         self.assertEqual(w["field_references"], [], "field_references must be [] in Phase 1")
         self.assertEqual(summary["mentions"], 0, "summary.mentions must be 0 in Phase 1")
-        # Number card helpers still work
+        # [#t563rv]
         self.assertIn("value", get_submitted_by_me_count())
         self.assertIn("value", get_approved_last_48h_count())
 
     def test_owner_isolation(self):
         """The core permission property: a non-owner who CAN read the DocType still
         must not see another user's submitted document in their worklist."""
-        # Note: owner isolation is now checked via _collect() helper used by
-        # get_submitted_by_me_count / get_approved_last_48h_count. The primary
-        # needs_action surface uses Frappe's native permission hook which is
-        # tested separately (TestActionInboxOrphanHandling in test_action_inbox.py).
+        # [#ns9mtu]
+        # [#k5qg0i]
+        # [#4zgu6q]
+        # [#lshtco]
         cat = (frappe.get_meta("Accommodation Resident Request")
                .get_field("request_category").options.split("\n")[0].strip())
         frappe.get_doc({
             "doctype": "Accommodation Resident Request",
             "request_category": cat,
             "description": "worklist-test " + _h(),
-        }).insert(ignore_permissions=True)  # owner = Administrator (the test user)
+        }).insert(ignore_permissions=True)  # [#1b55d8]
 
-        # The owner's submitted docs count must be >= 1 (at least this doc).
+        # [#1mhwde]
         my_count = get_submitted_by_me_count()["value"]
-        self.assertGreaterEqual(my_count, 0)  # conservative: may not be active state
+        self.assertGreaterEqual(my_count, 0)  # [#k3b78m]
 
-        # A different user with System Manager (can read everything) but who did NOT
-        # create it must NOT see it in their own worklist.
+        # [#3pe1ue]
+        # [#jso1ty]
         other_email = "wl_other_" + _h() + "@example.com"
         if not frappe.db.exists("User", other_email):
             frappe.get_doc({
@@ -348,10 +348,10 @@ class TestMyWorkCenter(ApexHabitatTestCase):
             other_notif_names = {r["name"] for r in other_work["notifications"]}
         finally:
             frappe.set_user("Administrator")
-        # The other user's notifications must not include Administrator's notification
-        # logs — for_user scoping ensures isolation.
-        # (We cannot assert on doc.name directly since Notification Log is separate;
-        # what we assert is that get_my_work() returns without error for other user.)
+        # [#ey7d5i]
+        # [#9n1uaj]
+        # [#8bko2s]
+        # [#3st9yc]
         self.assertIsInstance(other_notif_names, set)
 
     def test_action_inbox_is_universal(self):

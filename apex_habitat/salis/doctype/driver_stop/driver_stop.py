@@ -24,7 +24,7 @@ class DriverStop(Document):
                 frappe.throw(_("Select the vehicle to release."))
 
     def before_submit(self):
-        # Evidence-before-status gating: incident-type stops require evidence.
+        # [#ku7cqs]
         if self.stop_reason in ("Violation", "Termination") and not self.evidence:
             frappe.throw(
                 _("Evidence is required to submit a stop with reason {0}.").format(_(self.stop_reason))
@@ -33,7 +33,7 @@ class DriverStop(Document):
     def on_submit(self):
         lock_driver(self.driver)
 
-        # Capture the prior status for a reliable revert on cancel.
+        # [#bp5wlg]
         self.db_set("previous_status", frappe.db.get_value("Salis Driver", self.driver, "status"))
 
         frappe.db.set_value("Salis Driver", self.driver, "status", "Stopped")
@@ -45,7 +45,7 @@ class DriverStop(Document):
                 self.related_vehicle,
                 {"status": "Released", "current_driver": None},
             )
-            # Clear the driver's mirror if it still points at this vehicle.
+            # [#8lr343]
             if frappe.db.get_value("Salis Driver", self.driver, "current_vehicle") == self.related_vehicle:
                 frappe.db.set_value("Salis Driver", self.driver, "current_vehicle", None)
 
@@ -59,11 +59,11 @@ class DriverStop(Document):
     def on_cancel(self):
         lock_driver(self.driver)
 
-        # Restore driver status only if it is still in the state this stop set
-        # (a later stop may have changed it) AND no other submitted Driver Stop
-        # is still in force for this driver. A second stop that also set the
-        # driver to Stopped must keep it stopped, so cancelling this (older)
-        # stop must not un-stop the driver on its behalf.
+        # [#r5w7ui]
+        # [#5rg79f]
+        # [#1mta1b]
+        # [#rklujf]
+        # [#c0lrq8]
         another_stop_in_force = frappe.db.exists(
             "Driver Stop",
             {"driver": self.driver, "docstatus": 1, "name": ["!=", self.name]},
@@ -75,8 +75,8 @@ class DriverStop(Document):
             restore = self.previous_status or "Active"
             frappe.db.set_value("Salis Driver", self.driver, "status", restore)
 
-        # Re-link the released vehicle only if it is still free (no newer
-        # assignment has taken it); otherwise leave it and record a comment.
+        # [#ekxt41]
+        # [#1k6eth]
         if self.release_vehicle and self.related_vehicle:
             lock_vehicle(self.related_vehicle)
             current_driver = frappe.db.get_value("Salis Vehicle", self.related_vehicle, "current_driver")

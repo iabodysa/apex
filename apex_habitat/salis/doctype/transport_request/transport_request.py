@@ -37,13 +37,13 @@ VALID_STATUSES = (
     "Cancelled",
 )
 
-# Transport types that move the workforce and therefore carry a worker manifest
-# (workers table + accommodation building). An Administrative Trip carries none.
+# [#fsea56]
+# [#vkbkvu]
 WORKER_MANIFEST_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 
-# Each transport type (``service_line``) implies exactly one finer ``request_type``.
-# This keeps the two trip-type fields consistent without re-introducing any
-# Workers/Representatives binary; the per-request_type rules below then apply.
+# [#awbsg5]
+# [#c8a1tx]
+# [#595rop]
 SERVICE_LINE_REQUEST_TYPE = {
     "Site Transport": "Accommodation to Project Shuttle",
     "Inter-City Relocation": "Inter-City Relocation",
@@ -53,11 +53,11 @@ SERVICE_LINE_REQUEST_TYPE = {
 
 class TransportRequest(Document):
     def before_insert(self):
-        # Honeypot guard for any controller-level path.
+        # [#kx98ad]
         if self.get("website_field"):
             frappe.throw(_("Invalid submission."), frappe.PermissionError)
 
-        # Web / anonymous (guest) submissions: tag the channel and mint a tracking code.
+        # [#m91309]
         if not self.requested_by or frappe.session.user == "Guest":
             self.source_channel = "Web QR"
 
@@ -71,15 +71,15 @@ class TransportRequest(Document):
             self.status = "New"
 
     def validate(self):
-        # The Select still carries the known states for filtering/colour, but the
-        # workflow owns *transitions* — this only rejects an unknown value.
+        # [#o9cdl2]
+        # [#mt92sl]
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
-        # The transport type (service_line) implies its finer request_type. Default
-        # an unset request_type from it; reject a request_type that contradicts the
-        # transport type so the two trip-type fields can never diverge. This guards
-        # the data even if the depends_on form rules are bypassed (web/API).
+        # [#7a819c]
+        # [#fqvudq]
+        # [#2h0wv2]
+        # [#395dq3]
         if self.service_line:
             implied = SERVICE_LINE_REQUEST_TYPE.get(self.service_line)
             if implied:
@@ -92,26 +92,26 @@ class TransportRequest(Document):
                         )
                     )
 
-        # The worker manifest (worker rows table + accommodation building) belongs
-        # ONLY to a workforce move (Site Transport / Inter-City Relocation). A
-        # non-workforce transport type — an Administrative Trip — is a simple
-        # document/administrative trip and must carry none. Guards the data even if
-        # the depends_on form rules are bypassed (web/API).
+        # [#lpjcu0]
+        # [#rjc2y9]
+        # [#30bznq]
+        # [#hbiz59]
+        # [#2sls6y]
         if self.service_line and self.service_line not in WORKER_MANIFEST_SERVICE_LINES:
             if self.accommodation_building:
                 frappe.throw(_("An Administrative Trip cannot be linked to labour accommodation."))
             if self.workers or []:
                 frappe.throw(_("An Administrative Trip cannot carry a worker manifest."))
 
-        # Worker count is always derived from the child rows.
+        # [#rcyzqw]
         self.worker_count = len(self.workers or [])
 
-        # Trips-this-month is server-derived (not a trusted manual input), so the
-        # >5-trips/month DoA tier gate cannot be under-stated.
+        # [#fin4b0]
+        # [#pi12o7]
         self._derive_trips_this_month()
 
-        # The DoA tier flag is derived from the (server-set) scope figures so the
-        # workflow's tier condition cannot be circumvented by a crafted payload.
+        # [#8skizc]
+        # [#bckjcj]
         self._derive_needs_operations()
 
         if self.request_type == "Accommodation to Project Shuttle":
@@ -161,7 +161,7 @@ class TransportRequest(Document):
         if self.name:
             filters.append(["Transport Request", "name", "!=", self.name])
         existing = frappe.get_all("Transport Request", filters=filters, limit=0)
-        # +1 to include the request currently being validated/submitted.
+        # [#2jtx7r]
         self.trips_this_month = len(existing) + 1
 
     def _derive_needs_operations(self):
@@ -176,8 +176,8 @@ class TransportRequest(Document):
         worker_count = self.worker_count or 0
         trips = self.trips_this_month or 0
 
-        # Worker-count escalation threshold is configurable via Salis Settings so
-        # the DoA gate can be tuned without a code change. Default to 20 if unset.
+        # [#2eii8p]
+        # [#ays0u5]
         ops_threshold = frappe.db.get_single_value(
             "Salis Settings", "passenger_count_ops_threshold"
         )
@@ -190,6 +190,6 @@ class TransportRequest(Document):
             or (self.request_type == "Accommodation to Project Shuttle" and self.is_cross_region)
         ) else 0
 
-    # Transitions, the SoD gate, and the DoA tier gate are enforced by the native
-    # Transport Request Workflow. Submit/cancel are recorded natively
-    # (Version track_changes + the automatic Workflow comment).
+    # [#2jyk6k]
+    # [#qc2isj]
+    # [#m1hlta]

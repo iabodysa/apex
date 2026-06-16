@@ -15,9 +15,9 @@ from frappe.utils import add_days, today
 class TestVehicleIncident(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # A unique plate/driver per test: plate_normalized is unique, so reusing a
-        # fixed plate across setUp calls collides if the prior test's row is not
-        # rolled back first (observed on CI). Derive both from the test name.
+        # [#6u8wvq]
+        # [#2ciqiy]
+        # [#1wxuaa]
         tag = self._testMethodName
         self.driver = frappe.get_doc(
             {"doctype": "Salis Driver", "full_name": f"Incident Driver {tag}", "status": "Active"}
@@ -52,7 +52,7 @@ class TestVehicleIncident(FrappeTestCase):
             frappe.db.get_value("Salis Driver", self.driver, "current_vehicle"),
             "theft must clear the driver's current vehicle",
         )
-        # The prior state is captured for reversal.
+        # [#t32yoo]
         inc.reload()
         self.assertEqual(inc.previous_vehicle_status, "Active")
         self.assertEqual(inc.previous_driver, self.driver)

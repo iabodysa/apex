@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 import frappe
 from frappe.utils import getdate, today, add_days
@@ -32,7 +32,7 @@ def execute(filters=None):
     if filters.get("building"):
         query_filters["building"] = filters["building"]
 
-    # Missed cleaning logs
+    # [#ps7hoi]
     missed = frappe.get_all(
         "Cleaning Log",
         filters=query_filters,
@@ -45,7 +45,7 @@ def execute(filters=None):
         order_by="cleaning_date desc",
     )
 
-    # Rework-only logs (not already captured as missed)
+    # [#9q7cp2]
     rework_filters = {
         "cleaning_date": ["between", [str(date_from), str(date_to)]],
         "rework_required": ["in", [1, "Yes"]],
@@ -68,7 +68,7 @@ def execute(filters=None):
 
     today_date = getdate(today())
 
-    # Prefetch employee names for all cleaner_employee values in one query
+    # [#m9aclk]
     all_logs = list(missed) + list(rework)
     all_cleaner_employees = list({log.cleaner_employee for log in all_logs if log.cleaner_employee})
     employee_name_map = {}

@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 """Transport Fulfilment SLA - requested-versus-fulfilled and on-time service
 levels, derived from the system-written Trip Fulfilment Ledger (one row per
@@ -82,8 +82,8 @@ def execute(filters=None):
         if entry.get("transport_request"):
             bucket["_served"].add(entry["transport_request"])
 
-    # Demand side: Transport Requests raised per day (guarded; pickup_datetime is
-    # the demand timestamp on Transport Request).
+    # [#dmj6ye]
+    # [#am0sca]
     demand = {}
     if frappe.db.exists("DocType", "Transport Request"):
         tr_filters = _date_range("pickup_datetime", filters)
@@ -99,7 +99,7 @@ def execute(filters=None):
             day = getdate(pickup)
             demand[day] = demand.get(day, 0) + 1
 
-    # Merge demand into days that may have no fulfilled trips yet.
+    # [#ewrnm5]
     for day, count in demand.items():
         bucket = summary.setdefault(
             day,

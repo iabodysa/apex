@@ -46,11 +46,11 @@ def _drive_to_done(doc):
 	test_fuel_request_workflow)."""
 	if get_workflow_name("Fuel Request") == "Fuel Request Workflow":
 		if doc.requested_by == frappe.session.user:
-			doc.db_set("requested_by", "Guest")  # any user != the Administrator driver
+			doc.db_set("requested_by", "Guest")  # [#gzmtd5]
 			doc.reload()
-		apply_workflow(doc, "Approve")  # Pending -> Approved (submits)
+		apply_workflow(doc, "Approve")  # [#ms0ltc]
 		doc.reload()
-		apply_workflow(doc, "Complete")  # Approved -> Done (post-submit)
+		apply_workflow(doc, "Complete")  # [#lpqooh]
 		doc.reload()
 	else:
 		doc.status = "Approved"
@@ -103,7 +103,7 @@ class TestFuelMergeShape(FrappeTestCase):
 		self.assertTrue(meta.has_field("request_type"))
 		options = (meta.get_field("request_type").options or "").split("\n")
 		self.assertEqual([o for o in options if o], ["Standard", "Top-up", "Chip"])
-		# Type-specific fields absorbed from the two former DocTypes.
+		# [#fv1og3]
 		for f in (
 			"topup_litres", "is_temporary", "revert_due_date", "reverted",
 			"chip_number", "action", "inactivity_evidence",
@@ -270,7 +270,7 @@ class TestFuelRequestChip(FrappeTestCase):
 		})
 		doc.insert(ignore_permissions=True)
 		self.addCleanup(lambda: _purge(doc.name))
-		doc.submit()  # must not raise
+		doc.submit()  # [#3vfaf1]
 		self.assertEqual(doc.docstatus, 1)
 
 	def test_replace_requires_chip_number(self):
@@ -296,17 +296,17 @@ class TestFuelRequestChip(FrappeTestCase):
 		name = doc.name
 		self.addCleanup(lambda: _purge(name))
 
-		# No evidence, no ack -> submit blocked.
+		# [#9e9k1v]
 		self.assertRaises(frappe.ValidationError, doc.submit)
 
-		# Evidence only, still no ack -> blocked. (Reload: a failed submit bumps
-		# the stored timestamp, so re-fetch to avoid a TimestampMismatchError.)
+		# [#q6q2mc]
+		# [#x9hdbu]
 		doc = frappe.get_doc("Fuel Request", name)
 		doc.inactivity_evidence = "/files/evidence.pdf"
 		doc.save(ignore_permissions=True)
 		self.assertRaises(frappe.ValidationError, doc.submit)
 
-		# Evidence + ack -> allowed.
+		# [#glbuyk]
 		doc = frappe.get_doc("Fuel Request", name)
 		doc.inactivity_evidence = "/files/evidence.pdf"
 		doc.owner_acknowledged = 1
@@ -345,13 +345,13 @@ class TestFuelRequestTypeGuards(FrappeTestCase):
 		})
 		doc.insert(ignore_permissions=True)
 		self.addCleanup(lambda: _purge(doc.name))
-		# Pending -> Done is illegal (must pass through Approved). With the workflow
-		# active this is a non-offered transition; without it the validate guard on
-		# the Select still rejects an out-of-band jump on save.
+		# [#d9dqdc]
+		# [#dkwyzf]
+		# [#f13rz1]
 		if get_workflow_name("Fuel Request") == "Fuel Request Workflow":
 			from frappe.model.workflow import apply_workflow
 			with self.assertRaises(frappe.ValidationError):
-				apply_workflow(doc, "Complete")  # not offered from Pending
+				apply_workflow(doc, "Complete")  # [#bfud4b]
 		else:
 			doc.status = "Done"
 			self.assertRaises(frappe.ValidationError, doc.save, ignore_permissions=True)

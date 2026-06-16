@@ -38,15 +38,15 @@ from frappe.utils import today
 
 from apex_habitat.salis.permissions import _allowed_projects, _is_unscoped
 
-# Canonical status ladders, kept in board order. These mirror the Select
-# options on the underlying DocTypes; any value seen on a record that is not in
-# the ladder is still surfaced under an "Other" bucket so the board never
-# silently drops a record.
+# [#janynu]
+# [#l0rctv]
+# [#k5l4f8]
+# [#grwt8u]
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 TRIP_STATUSES = ["Planned", "Dispatched", "Completed", "Cancelled"]
 
-# Transport Request statuses that are considered "closed" for intake purposes.
-# Anything outside this set is an open request still awaiting routing/dispatch.
+# [#a1qqki]
+# [#lwg4x9]
 CLOSED_REQUEST_STATUSES = {"Scheduled", "Fulfilled", "Rejected", "Cancelled"}
 
 
@@ -110,8 +110,8 @@ def get_dispatch_board(project: str | None = None) -> dict:
 
     unscoped, projects = _permitted_projects()
 
-    # Intersect an explicitly requested project with the permitted scope. A
-    # scoped user must never be able to widen their view via the argument.
+    # [#dexv1m]
+    # [#td1m9f]
     if project:
         if unscoped:
             projects = [project]
@@ -119,10 +119,10 @@ def get_dispatch_board(project: str | None = None) -> dict:
         elif project in (projects or []):
             projects = [project]
         else:
-            # Requested project is outside the caller's scope: empty board.
+            # [#po0f3x]
             projects = []
 
-    # Scoped user with no permitted project => empty board (mirrors `1=0`).
+    # [#67ww5h]
     if not unscoped and not projects:
         return _empty_board(unscoped, projects, project)
 
@@ -268,8 +268,8 @@ def _drivers_pane(unscoped, projects) -> dict:
     """
     driver_filters = _project_filter(unscoped, projects)
     driver_filters["status"] = "Active"
-    # phone is permlevel-1 PII on Salis Driver (Fleet Manager / System Manager only);
-    # get_all bypasses the permlevel strip, so gate it for lower roles.
+    # [#s87t0v]
+    # [#scegqu]
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
 
     drivers = frappe.get_all(
@@ -290,8 +290,8 @@ def _drivers_pane(unscoped, projects) -> dict:
 
     driver_names = [d.name for d in drivers]
 
-    # Drivers with a non-cancelled trip today are "assigned". Bounded single
-    # query over today's trips for exactly this driver set (no N+1).
+    # [#3e131u]
+    # [#4v5hhl]
     assigned_today = set(
         frappe.get_all(
             "Dispatch Trip",

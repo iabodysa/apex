@@ -14,8 +14,8 @@ def get_data(data=None):
     data.setdefault("transactions", [])
     data.setdefault("non_standard_fieldnames", {})
     data["fieldname"] = data.get("fieldname") or "supplier"
-    # Accommodation Lease / Subcontractor docs use "supplier" (the default);
-    # only the ledger/assignment use billed_to_supplier.
+    # [#7omxvt]
+    # [#6ewx1m]
     data["non_standard_fieldnames"].update({
         "Accommodation Assignment": "billed_to_supplier",
         "Accommodation Ledger": "billed_to_supplier",
@@ -27,8 +27,8 @@ def get_data(data=None):
          "items": ["Subcontractor Service Contract", "Subcontractor Service Order"]},
         {"label": "Cost Recovery",
          "items": ["Accommodation Ledger"]},
-        # Salis (Movement) — the rental office is an ERPNext Supplier; reference
-        # links only. Settlement routes through a Payment Request record; no GL Entry is posted here.
+        # [#4iw7la]
+        # [#dhlj8s]
         {"label": "Fleet (Salis)",
          "items": ["Rental Office"]},
     ])

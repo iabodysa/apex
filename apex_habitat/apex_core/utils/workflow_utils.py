@@ -19,8 +19,8 @@ import re
 import frappe
 from frappe.desk.notifications import clear_doctype_notifications
 
-# workflow_state_field is a DocType fieldname; validate it before interpolating it as
-# a SQL column identifier (defence in depth — it comes from the Workflow master).
+# [#8iuqy8]
+# [#6cex7z]
 _IDENT = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 
@@ -35,8 +35,8 @@ def cleanup_orphaned_workflow_actions():
         if not (dt and sf) or not _IDENT.match(sf) or not frappe.db.table_exists(dt):
             continue
         try:
-            # Case B — the document has moved past the action's recorded state.
-            # IS NOT NULL skips a document mid-save (transient null state).
+            # [#pb4ltx]
+            # [#re59y8]
             frappe.db.sql(
                 f"""DELETE wa FROM `tabWorkflow Action` wa
                     INNER JOIN `tab{dt}` doc ON doc.name = wa.reference_name
@@ -44,7 +44,7 @@ def cleanup_orphaned_workflow_actions():
                       AND doc.`{sf}` IS NOT NULL AND doc.`{sf}` != wa.workflow_state""",
                 {"dt": dt},
             )
-            # Case A — the referenced document was hard-deleted (bypassed on_trash).
+            # [#4e8ku5]
             frappe.db.sql(
                 f"""DELETE FROM `tabWorkflow Action`
                     WHERE status = 'Open' AND reference_doctype = %(dt)s
@@ -56,11 +56,11 @@ def cleanup_orphaned_workflow_actions():
             frappe.db.rollback()
             frappe.log_error(title=f"cleanup_orphaned_workflow_actions: {dt}")
 
-    # Case C — the reference DocType itself no longer exists (retired/renamed) or has
-    # no table. Such a doctype has no active Workflow to drive Case A/B above, so its
-    # Open actions are permanently orphaned: they pollute every approver's Action Inbox
-    # AND crash it (get_transitions can't import the deleted controller). The per-
-    # workflow loop above can never reach them, so sweep them by reference_doctype here.
+    # [#s6xp2y]
+    # [#kbdz7f]
+    # [#92soho]
+    # [#22dcrv]
+    # [#des516]
     open_doctypes = frappe.get_all(
         "Workflow Action", filters={"status": "Open"}, pluck="reference_doctype", distinct=True
     )
@@ -74,5 +74,5 @@ def cleanup_orphaned_workflow_actions():
             frappe.db.rollback()
             frappe.log_error(title=f"cleanup_orphaned_workflow_actions (missing DocType): {dt}")
 
-    # Refresh the notification badge (accepts a doctype name; a no-op if unconfigured).
+    # [#e20f3k]
     clear_doctype_notifications("Workflow Action")

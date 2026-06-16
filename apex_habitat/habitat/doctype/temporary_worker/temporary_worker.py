@@ -27,9 +27,9 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days
 
-#: Standard temporary window in days.
+# [#yx0u0i]
 DEFAULT_WINDOW_DAYS = 30
-#: Hard upper bound on the temporary window (extension ceiling).
+# [#ocm9et]
 MAX_WINDOW_DAYS = 90
 
 

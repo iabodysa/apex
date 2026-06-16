@@ -43,7 +43,7 @@ class TestV090Pages(ApexHabitatTestCase):
         quick_check_in(bed=self.bed1, employee=self.employee, project=self.project,
                        check_in_date="2026-05-01", cost_center=self.cc)
         transfer_occupant(source_bed=self.bed1, target_bed=self.bed2, transfer_date="2026-05-02")
-        # active assignment now sits on bed2; beds swapped status
+        # [#llxgyj]
         self.assertTrue(frappe.db.exists("Accommodation Assignment",
                         {"bed": self.bed2, "docstatus": 1, "check_out_date": ["is", "not set"]}))
         self.assertEqual(frappe.db.get_value("Accommodation Bed", self.bed1, "status"), "Available")

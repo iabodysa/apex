@@ -18,9 +18,9 @@ from frappe.rate_limiter import rate_limit
 
 from apex_habitat.salis.api.driver_portal import _require_enabled, _resolve_driver
 
-# Worker-transport requests are the workforce-moving transport types: Site Transport
-# (accommodation -> site) and Inter-City Relocation. These carry the worker manifest;
-# an Administrative Trip does not and is excluded from the worker route view.
+# [#9w7fn9]
+# [#fubjn3]
+# [#lkv3s7]
 WORKER_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 
 
@@ -64,9 +64,9 @@ def _today_worker_trips(driver):
     )
     worker_trips = []
     for t in trips:
-        # The Dispatch Trip's transport_request is a read-only fetch from its
-        # Route Plan; resolve it through the route plan if the fetch left it blank
-        # so service-line filtering and the manifest lookup stay reliable.
+        # [#mtdvtp]
+        # [#bnxnpb]
+        # [#a2aani]
         if not t.get("transport_request") and t.get("route_plan"):
             t["transport_request"] = frappe.db.get_value(
                 "Route Plan", t["route_plan"], "transport_request"
@@ -254,8 +254,8 @@ def get_my_worker_route_summary() -> dict:
         stops = _ordered_stops(t.get("route_plan"))
         stop_count += len(stops)
         if next_pickup is None:
-            # Trips are already ordered by depart_time; the first housing-pickup
-            # stop on the earliest trip is the driver's next pickup.
+            # [#lxjk3w]
+            # [#auqbri]
             for s in stops:
                 if s.get("accommodation_building") and s.get("pickup"):
                     pickup = s["pickup"]
@@ -280,20 +280,20 @@ def get_my_worker_route_summary() -> dict:
     }
 
 
-# ────────────────────────── Worker self-service (Masar app) ──────────────────────────
-#
-# These endpoints power the worker-facing Masar SPA (/masar). Workers are NOT
-# Frappe users: identity comes from a personal, unguessable ``token`` (Masar
-# Worker Token) that resolves server-side to exactly ONE Employee. The client
-# NEVER supplies an employee id; every query below is scoped to the resolved
-# employee, so a token can only ever surface its own worker's data — no
-# cross-worker leakage. All endpoints are guest-accessible and read-mostly; the
-# single writer (create_worker_request) reuses the native Accommodation Resident
-# Request channel and posts no GL.
+# [#herhre]
+# [#od1fgp]
+# [#5vtg90]
+# [#a5s43f]
+# [#nhytps]
+# [#syv03x]
+# [#ajbowt]
+# [#k0dryc]
+# [#qllixb]
+# [#aupt7h]
 
-# Request categories the worker app exposes (a curated subset of the native
-# Accommodation Resident Request "Category" options). VALUES stay English — they
-# are sent straight to the DocType Select; the SPA translates only the labels.
+# [#4hmdtd]
+# [#q4inn8]
+# [#2auq2k]
 WORKER_REQUEST_CATEGORIES = (
     "Maintenance",
     "Cleaning",
@@ -328,8 +328,8 @@ def _resolve_worker(token):
     )
     if not row or not row.get("employee"):
         frappe.throw(_("This worker link is invalid or has been disabled."), frappe.PermissionError)
-    # Fail closed for an offboarded worker even if their token was never disabled:
-    # a Left/Inactive employee's link must stop resolving.
+    # [#p8uqut]
+    # [#s5pcrs]
     if frappe.db.get_value("Employee", row["employee"], "status") in ("Inactive", "Left"):
         frappe.throw(_("This worker link is invalid or has been disabled."), frappe.PermissionError)
     return row["employee"]
@@ -367,9 +367,9 @@ def get_worker_context(token=None):
     emp = _employee_doc(employee)
 
     documents = []
-    # Iqama / residence permit. Field names vary across HR setups (a custom
-    # "iqama"/"iqama_no" + "iqama_expiry", or the standard HRMS "valid_upto" used
-    # for the residence document). Read defensively; surface only when present.
+    # [#rvjx1e]
+    # [#6bkzc8]
+    # [#36b19s]
     iqama_no = emp.get("iqama") or emp.get("iqama_no")
     iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
     if iqama_no or iqama_expiry:
@@ -381,7 +381,7 @@ def get_worker_context(token=None):
                 "days_left": _days_until(iqama_expiry),
             }
         )
-    # Passport — standard HRMS fields passport_number + (custom) passport_expiry.
+    # [#lqplke]
     passport_no = emp.get("passport_number")
     passport_expiry = emp.get("passport_expiry")
     if passport_no:
@@ -480,13 +480,13 @@ def get_worker_accommodation(token=None):
                     "name": frappe.utils.get_fullname(user) or user,
                     "phone": frappe.db.get_value("User", user, "mobile_no"),
                 }
-            # Address is owned by the Accommodation Site (single source of truth).
-            # Fall back to any address still linked directly to the building so older
-            # records keep showing one during the transition.
+            # [#670h2z]
+            # [#6tfz71]
+            # [#r93gcg]
             _addr = get_address_text("Accommodation Site", b.get("site")) or get_address_text(
                 "Accommodation Building", assignment["building"]
             )
-            # City is autonamed by city_name, so the link value IS the city name.
+            # [#b51lj6]
             building = {
                 "name": b.get("name"),
                 "building_name": b.get("building_name"),
@@ -680,11 +680,11 @@ def create_worker_request(token=None, category=None, subject=None, body=None, pr
         frappe.throw(_("Please describe your request."))
     description = body if not subject else (f"{subject}\n\n{body}" if body else subject)
 
-    # Housing context comes from the worker's OWN active assignment, server-side.
-    # A worker with no active assignment can still raise a request (e.g. a
-    # complaint or a custody item), but it must not look like a located housing
-    # issue: leave building/room/bed unset and flag the missing context in the
-    # description so a supervisor can triage it instead of it sitting orphaned.
+    # [#4osfna]
+    # [#kpplb6]
+    # [#9h9sk9]
+    # [#j1jox4]
+    # [#su3mgn]
     assignment = _active_assignment(employee)
     building = room = bed = None
     if assignment:

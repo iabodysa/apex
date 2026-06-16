@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 """M-20: coverage for four submittable controllers that carry real validate
 guards and on_submit / on_cancel side-effects but previously had no test:
@@ -78,8 +78,8 @@ class TestVehicleHandover(_SalisMastersMixin, FrappeTestCase):
             "from_driver": self._driver(),
             "to_driver": self._driver(),
             "handover_date": today(),
-            # Valid odometer (>= the vehicle's current) so this test isolates the
-            # missing-signed-evidence guard rather than the odometer guard.
+            # [#ros2ef]
+            # [#t3ai7o]
             "odometer_reading": 1500,
         }).insert(ignore_permissions=True)
         with self.assertRaises(frappe.ValidationError):
@@ -119,7 +119,7 @@ class TestVehicleDamageWriteOff(_SalisMastersMixin, FrappeTestCase):
                 "vehicle": v,
                 "status": "Under Review",
                 "estimated_cost": 500,
-                # evidence intentionally omitted
+                # [#3tnz1t]
             }).insert(ignore_permissions=True)
 
     def test_valid_open_case_inserts_and_submits(self):

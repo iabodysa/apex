@@ -57,7 +57,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # --- fixtures --------------------------------------------------------------
+    # [#5dnwsf]
 
     def _driver(self, name, vehicle=None):
         d = frappe.db.get_value("Salis Driver", {"full_name": name}, "name")
@@ -105,7 +105,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         ).insert(ignore_permissions=True)
         return fec
 
-    # --- legal transition by the right role ------------------------------------
+    # [#8rmafi]
 
     def test_legal_start_then_clear(self):
         driver = self._driver("DC Driver Legal")
@@ -118,7 +118,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.assertEqual(dc.status, "In Progress")
         self.assertEqual(dc.docstatus, 0)
 
-        # A Fleet Manager clears it (submitting the document).
+        # [#9yjepg]
         frappe.set_user(self.manager)
         self.assertIn("Clear", _actions(dc))
         apply_workflow(dc, "Clear")
@@ -126,7 +126,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.assertEqual(dc.status, "Cleared")
         self.assertEqual(dc.docstatus, 1)
 
-    # --- wrong role is blocked -------------------------------------------------
+    # [#4fc2j1]
 
     def test_supervisor_cannot_clear(self):
         driver = self._driver("DC Driver WrongRole")
@@ -135,19 +135,19 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         apply_workflow(dc, "Start Processing")
         dc.reload()
 
-        # The submitting "Clear" action is Fleet-Manager-only — not offered to a
-        # Fleet Supervisor (who holds no submit right).
+        # [#5jaho3]
+        # [#se190d]
         frappe.set_user(self.supervisor)
         self.assertNotIn("Clear", _actions(dc))
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(dc, "Clear")
 
-    # --- Clear blocked while an open case exists, allowed when clear -----------
+    # [#hwc1ff]
 
     def test_clear_blocked_while_open_case_then_allowed(self):
-        # A fresh driver per run so the open-case counter is deterministic (the
-        # _driver helper finds an existing driver by name; a unique name avoids
-        # counting cases left by a prior run).
+        # [#1pqrjb]
+        # [#8ltgon]
+        # [#iursx6]
         driver = self._driver("DC Driver OpenCase " + frappe.generate_hash(length=6))
         fec = self._open_fuel_exception(driver)
         dc = self._new_clearance(driver)
@@ -155,7 +155,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         frappe.set_user(self.supervisor)
         apply_workflow(dc, "Start Processing")
         dc.reload()
-        # The open case is counted, so the precondition condition removes Clear.
+        # [#4kqirc]
         self.assertEqual(dc.outstanding_fuel_exceptions, 1)
 
         frappe.set_user(self.manager)
@@ -163,17 +163,17 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(dc, "Clear")
 
-        # Resolve the case (set the closed status directly — this test exercises
-        # the Driver Clearance counter, not the Fuel Exception Case state machine)
-        # and re-validate the clearance so the counter refreshes.
+        # [#2m5euo]
+        # [#ri5w27]
+        # [#b835ul]
         frappe.set_user("Administrator")
         frappe.db.set_value("Fuel Exception Case", fec.name, "status", "Resolved")
         dc.reload()
-        dc.save(ignore_permissions=True)  # recompute outstanding counters
+        dc.save(ignore_permissions=True)  # [#kz4h3l]
         dc.reload()
         self.assertEqual(dc.outstanding_fuel_exceptions, 0)
 
-        # Now Clear is offered and succeeds.
+        # [#g7fjtt]
         frappe.set_user(self.manager)
         self.assertIn("Clear", _actions(dc))
         apply_workflow(dc, "Clear")
@@ -182,7 +182,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.assertEqual(dc.docstatus, 1)
 
     def test_clear_blocked_while_returns_incomplete(self):
-        # The same condition gates on the three return checkboxes.
+        # [#9327g9]
         driver = self._driver("DC Driver NoReturn")
         dc = self._new_clearance(driver, returned=False)
         frappe.set_user(self.supervisor)
@@ -191,7 +191,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         frappe.set_user(self.manager)
         self.assertNotIn("Clear", _actions(dc))
 
-    # --- on_submit release side-effect -----------------------------------------
+    # [#3mf43h]
 
     def test_clear_releases_driver_and_clears_vehicle(self):
         vehicle = self._vehicle("DC-REL-1")
@@ -202,21 +202,21 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
 
         dc = self._new_clearance(driver)
         frappe.set_user(self.manager)
-        # Clear directly from Open (a Manager path exists from Open too).
+        # [#ef6jf5]
         self.assertIn("Clear", _actions(dc))
         apply_workflow(dc, "Clear")
         frappe.set_user("Administrator")
         dc.reload()
         self.assertEqual(dc.status, "Cleared")
 
-        # Side-effect: driver -> Released and current_vehicle cleared.
+        # [#ikyxt9]
         driver_row = frappe.db.get_value(
             "Salis Driver", driver, ["status", "current_vehicle"], as_dict=True
         )
         self.assertEqual(driver_row.status, "Released")
         self.assertIsNone(driver_row.current_vehicle)
 
-    # --- post-submit transition is REACHABLE (the bug being fixed) -------------
+    # [#7hace9]
 
     def test_post_submit_cancel_reachable(self):
         driver = self._driver("DC Driver PostSubmit")
@@ -227,8 +227,8 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.assertEqual(dc.status, "Cleared")
         self.assertEqual(dc.docstatus, 1)
 
-        # The frozen-post-submit bug: a transition off a docstatus=1 document is
-        # reachable (Cancel -> docstatus 2).
+        # [#k78knk]
+        # [#cv697j]
         self.assertIn("Cancel", _actions(dc))
         apply_workflow(dc, "Cancel")
         dc.reload()

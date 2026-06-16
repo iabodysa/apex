@@ -20,8 +20,8 @@ from frappe import _
 
 PARTY_EMPLOYEE = "Employee"
 PARTY_TEMPORARY_WORKER = "Temporary Worker"
-# Select options string shared by every ``party_type`` field. Keep in step with the
-# DocType JSON ``party_type.options``.
+# [#rkpm23]
+# [#2emlja]
 PARTY_TYPE_OPTIONS = f"{PARTY_EMPLOYEE}\n{PARTY_TEMPORARY_WORKER}"
 
 
@@ -47,7 +47,7 @@ def sync_party_employee(
         ``"employee"``; the custody doctypes use ``"issued_to_employee"`` /
         ``"returned_by_employee"``.
     """
-    # 1) Inherit identity from a parent record (e.g. Accommodation Assignment).
+    # [#kr3uxp]
     if derive_from and not doc.get("party"):
         parent = doc.get(derive_from)
         if parent:
@@ -56,25 +56,25 @@ def sync_party_employee(
             if row and row[0]:
                 doc.party_type, doc.party = row[0], row[1]
 
-    # 2) Normalise an absent party_type to Employee when a legacy Employee link is set,
-    #    so code paths that build a doc dict directly (e.g. the daily cost engine) —
-    #    which do not get the field default applied — still produce a matching party.
+    # [#jaecgk]
+    # [#hmvmbn]
+    # [#cqvi77]
     if not doc.get("party_type") and doc.get(employee_field):
         doc.party_type = PARTY_EMPLOYEE
 
-    # [AHX-INV-0004] Mirror between party and the legacy Employee link (employee_field).
+    # [#nx8ptb]
     if doc.get("party_type") == PARTY_EMPLOYEE:
         if doc.get("party"):
             setattr(doc, employee_field, doc.party)
         elif doc.get(employee_field):
             doc.party = doc.get(employee_field)
     elif doc.get("party_type") == PARTY_TEMPORARY_WORKER:
-        # No Employee yet — leave the Employee link empty so the cost engine skips it.
+        # [#mf8bv0]
         setattr(doc, employee_field, None)
 
-    # 4) Optional integrity guard (replaces the legacy field-level ``reqd``).
+    # [#an4kvj]
     if require_party and not doc.get("party") and not doc.get(employee_field):
-        # MandatoryError (a ValidationError subclass): the party/employee identity
-        # replaces the old field-level reqd, so this stays the same exception class
-        # callers and tests already expect for a missing identity.
+        # [#2bqfpi]
+        # [#dettx7]
+        # [#puro99]
         frappe.throw(_("Resident / worker is required."), frappe.MandatoryError)

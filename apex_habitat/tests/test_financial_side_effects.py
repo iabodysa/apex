@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 import frappe
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
@@ -7,7 +7,7 @@ from apex_habitat.tests.test_utils import ApexHabitatTestCase
 
 class TestFinancialSideEffects(ApexHabitatTestCase):
     def setUp(self):
-        # Create dependencies for tests
+        # [#bvxtum]
         self.company = frappe.db.get_value("Company", {})
         if not self.company:
             comp = frappe.get_doc({
@@ -46,7 +46,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
             emp.insert(ignore_permissions=True)
             self.employee = emp.name
 
-        # Create Site & Building
+        # [#7seiyd]
         site_name = "Test Financial Site"
         if not frappe.db.exists("Accommodation Site", site_name):
             self.site = frappe.get_doc({
@@ -69,7 +69,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         else:
             self.building = frappe.get_doc("Accommodation Building", building_name)
 
-        # Create Custody Asset Category & Article
+        # [#7tfwmd]
         category_name = "Furniture"
         if not frappe.db.exists("Custody Asset Category", category_name):
             cat = frappe.get_doc({
@@ -94,8 +94,8 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         else:
             self.article = existing_article
 
-        # Create Salary Structure scoped to this company (avoid collision with
-        # any test fixtures from hrms that may share generic names).
+        # [#rjjs6t]
+        # [#q66hew]
         struct_name = f"Apex Habitat Test Salary Structure {self.company}"
         existing_struct = frappe.db.get_value(
             "Salary Structure",
@@ -114,10 +114,10 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
                 struct.insert(ignore_permissions=True)
                 struct.submit()
             except Exception:
-                # If submit isn't allowed/required in this hrms version, ignore.
+                # [#edw9vv]
                 pass
 
-        # Assign Salary Structure to Employee
+        # [#2yiu3e]
         if not frappe.db.exists(
             "Salary Structure Assignment",
             {"employee": self.employee, "salary_structure": struct_name},
@@ -134,24 +134,24 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
                 assignment.insert(ignore_permissions=True)
                 assignment.submit()
             except Exception:
-                # Salary structure assignment depends on hrms internals
-                # (default salary structure config, payroll period, etc.).
-                # The downstream test only verifies that an Additional Salary
-                # Deduction is NOT created — it does not need the assignment
-                # to actually post. Tolerate failure here.
+                # [#lij2jj]
+                # [#koeqqy]
+                # [#moq94e]
+                # [#t9o5pi]
+                # [#c8jfyv]
                 pass
 
     def test_custody_damage_no_additional_salary_without_salary_component(self):
-        # Ensure enable_damage_deduction is set
+        # [#ohrb4y]
         settings = frappe.get_single("Habitat Settings")
         settings.enable_damage_deduction = 1
         settings.max_damage_deduction_per_checkout_sar = 500
         settings.save()
 
-        # Delete any existing Salary Components of type Deduction to simulate unconfigured environment
+        # [#7ryq3e]
         frappe.db.delete("Salary Component", {"type": "Deduction"})
 
-        # Create Custody Damage Assessment
+        # [#hojcvo]
         doc = frappe.get_doc({
             "doctype": "Custody Damage Assessment",
             "employee": self.employee,
@@ -168,12 +168,12 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         doc.insert(ignore_permissions=True)
         doc.submit()
 
-        # Assert no Additional Salary Deduction Entry is linked
+        # [#p1p5sh]
         doc.reload()
         self.assertIsNone(doc.deduction_entry, "Additional Salary deduction should not be generated without configured deduction Salary Component.")
 
     def test_custody_damage_no_additional_salary_without_explicit_setting(self):
-        # Create a Deduction Salary Component
+        # [#k5bxdz]
         comp_name = "Test Deduction Component"
         if not frappe.db.exists("Salary Component", comp_name):
             comp = frappe.get_doc({
@@ -187,7 +187,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         settings.enable_damage_deduction = 1
         settings.save()
 
-        # Create Custody Damage Assessment
+        # [#hojcvo]
         doc = frappe.get_doc({
             "doctype": "Custody Damage Assessment",
             "employee": self.employee,
@@ -204,7 +204,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         doc.insert(ignore_permissions=True)
         doc.submit()
 
-        # Assert no Additional Salary Deduction Entry is linked because it was not explicitly configured in Settings
+        # [#fms6dm]
         doc.reload()
         self.assertIsNone(doc.deduction_entry, "Additional Salary deduction should not be generated unless explicitly configured in Settings.")
 

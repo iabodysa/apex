@@ -16,14 +16,14 @@ DEFAULTS = {
 
 def execute():
     try:
-        # Skip-missing: module/doctype not migrated yet on this site.
+        # [#6q95mw]
         if not frappe.db.exists("DocType", "Salis Portal Theme"):
             return
 
         settings = frappe.get_single("Salis Portal Theme")
         changed = False
 
-        # Only fill blanks — respect any value an admin already set.
+        # [#gxo0m2]
         for field, value in DEFAULTS.items():
             if settings.meta.has_field(field) and not settings.get(field):
                 settings.set(field, value)
@@ -33,7 +33,7 @@ def execute():
             settings.save(ignore_permissions=True)  # audit-ok
             frappe.db.commit()
     except Exception:
-        # A seed must NEVER crash install/migrate — log and continue.
+        # [#kzfk4g]
         frappe.db.rollback()
         frappe.log_error(
             title="seed_salis_portal_theme failed",

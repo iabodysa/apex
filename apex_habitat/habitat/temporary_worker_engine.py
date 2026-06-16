@@ -18,12 +18,12 @@ from frappe import _
 
 from apex_habitat.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
 
-# SQL identifier guard — doctype names and field names interpolated into raw SQL must
-# match this pattern (mirrors apex_core/utils/workflow_utils.py).
+# [#6jyw6i]
+# [#8jjxrr]
 _IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_ ]*$")
 
-# Every doctype carrying the party_type/party Dynamic Link, mapped to its legacy
-# Employee Link fieldname (kept as a read-only mirror).
+# [#644nte]
+# [#adrjlo]
 PARTY_DOCTYPES = {
     "Accommodation Assignment": "employee",
     "Accommodation Checkout": "employee",
@@ -56,7 +56,7 @@ def link_temporary_workers() -> None:
         if not workers:
             break
         for tw in workers:
-            try:  # per-row isolation: one bad worker never aborts the batch
+            try:  # [#s7axbr]
                 employee = _match_employee(tw)
                 if employee:
                     _link(tw, employee)
@@ -113,13 +113,13 @@ def _link(tw, employee: str) -> None:
     """Link a Temporary Worker to an Employee: re-point party across docs, back-date the
     skipped accommodation cost, then stamp the link and mark Linked."""
     from frappe.utils import now_datetime
-    # Lazy import keeps this module load-safe and avoids any import cycle with tasks.
+    # [#2h66fp]
     from apex_habitat.habitat.tasks import backdate_assignment_cost
 
     _repoint_party(tw.name, employee)
 
-    # Back-date the accommodation cost skipped while the worker had no Employee, for
-    # each assignment now re-pointed to this Employee (from its check-in date).
+    # [#99k73d]
+    # [#2iaomj]
     for asg in frappe.get_all(
         "Accommodation Assignment",
         filters={"employee": employee, "docstatus": 1, "check_out_date": ["is", "not set"]},
@@ -141,9 +141,9 @@ def _link(tw, employee: str) -> None:
             ),
         )
     except Exception:
-        # The comment is cosmetic. Log the failure but do NOT rollback — a rollback
-        # here would silently undo the substantive work above (party re-point,
-        # cost back-dating, status='Linked'), leaving the worker stuck Active.
+        # [#d8fb2c]
+        # [#ptn9yi]
+        # [#bslq3y]
         frappe.log_error(frappe.get_traceback(), "Temporary Worker link: comment failed")
 
 

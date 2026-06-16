@@ -21,7 +21,7 @@ AUTHORITY_ROLES = [
 
 def execute():
     for role_name in AUTHORITY_ROLES:
-        # Existence-guard — never rely on ignore_if_duplicate.
+        # [#5a4p42]
         if frappe.db.exists("Role", role_name):
             continue
         try:
@@ -34,7 +34,7 @@ def execute():
             )
             doc.insert(ignore_permissions=True)  # audit-ok
         except Exception:
-            # A seed must NEVER crash install/migrate — log and continue.
+            # [#kzfk4g]
             frappe.db.rollback()
             frappe.log_error(
                 title=f"seed_salis_authority_roles failed: {role_name}",

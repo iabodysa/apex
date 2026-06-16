@@ -38,16 +38,16 @@ class TestChangeLogPopup(unittest.TestCase):
         change_log_file = APP_ROOT / "change_log" / f"v{major}" / f"v{version.replace('.', '_')}.md"
         content = change_log_file.read_text(encoding="utf-8")
 
-        # A top-level heading that names the version (e.g. "# Apex 1.1.0").
+        # [#odsxfe]
         self.assertRegex(
             content,
             re.compile(rf"^#\s+.*{re.escape(version)}", re.MULTILINE),
             f"Changelog {change_log_file.name} must open with a heading naming version {version}.",
         )
 
-        # At least three bullet points — a real release note, not a stub.
-        # (The "What changed" heading was retired in v1.51.0; the bullets under the
-        # summary now carry the user-visible updates.)
+        # [#h1vtaj]
+        # [#49a0yb]
+        # [#thiyrm]
         bullets = re.findall(r"^\s*[-*]\s+\S", content, re.MULTILINE)
         self.assertGreaterEqual(
             len(bullets),

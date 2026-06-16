@@ -30,8 +30,8 @@ class TestDriverPortalDisabledFlag(FrappeTestCase):
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 0)
 
 	def tearDown(self):
-		# Restore the kill-switch to ON so the Single is left enabled for any
-		# sibling suite that assumes the live default.
+		# [#qi25ie]
+		# [#6xamt0]
 		frappe.set_user("Administrator")
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
 

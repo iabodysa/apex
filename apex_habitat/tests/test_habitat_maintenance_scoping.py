@@ -39,9 +39,9 @@ def _ensure_role(name):
     return name
 
 
-# A guaranteed-present, non-privileged desk role. Using a stock Frappe role
-# keeps the "ordinary raiser" fixtures independent of the Habitat role seeder
-# (the resident-facing roles are not provisioned on a bare test site).
+# [#ey5k9n]
+# [#8aod7z]
+# [#s950ds]
 NON_PRIVILEGED_ROLE = "Blogger"
 
 
@@ -54,9 +54,9 @@ class TestMaintenanceRequestQuery(FrappeTestCase):
         super().setUpClass()
         frappe.set_user("Administrator")
         _ensure_role("Resident Request Coordinator")
-        # A non-privileged user that can raise tickets but not oversee them.
+        # [#3h902m]
         cls.requester = _user("mr_requester@example.com", NON_PRIVILEGED_ROLE)
-        # Privileged oversight roles.
+        # [#j192cv]
         cls.coordinator = _user(
             "mr_coordinator@example.com", "Resident Request Coordinator"
         )
@@ -101,9 +101,9 @@ class TestMaintenanceRequestQuery(FrappeTestCase):
         """
         evil = "x' or '1'='1"
         frag = maintenance_request_query(user=evil)
-        # The escaped form is present verbatim...
+        # [#kvsq9j]
         self.assertIn(frappe.db.escape(evil), frag)
-        # ...and the raw, unescaped break-out string never appears unescaped.
+        # [#nb7ml2]
         self.assertNotIn("= x' or '1'='1", frag)
 
 

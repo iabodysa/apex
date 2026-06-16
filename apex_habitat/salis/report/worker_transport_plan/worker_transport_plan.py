@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 import frappe
 
@@ -20,8 +20,8 @@ def execute(filters=None):
         {"label": frappe._("Driver"), "fieldname": "assigned_driver", "fieldtype": "Link", "options": "Salis Driver", "width": 160},
     ]
 
-    # Worker transport plan covers the workforce-moving transport types (the worker
-    # manifest lines): Site Transport (accommodation -> site) and Inter-City Relocation.
+    # [#gyu6dw]
+    # [#3xhvde]
     query_filters = {"service_line": ["in", ["Site Transport", "Inter-City Relocation"]]}
 
     for field in ("request_type", "status"):

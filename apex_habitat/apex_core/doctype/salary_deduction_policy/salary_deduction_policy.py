@@ -22,7 +22,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-# KSA Labor Law Art. 91 statutory ceiling on combined wage deductions.
+# [#51gob4]
 KSA_MAX_TOTAL_DEDUCTION_PERCENT = 50.0
 
 

@@ -50,17 +50,17 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		# A requester (Project tier) and a separate approver (Operations tier).
+		# [#k91rxo]
 		cls.requester = _user("frwf_req@example.com", "Fleet Project Manager")
 		cls.manager = _user("frwf_mgr@example.com", "Fleet Manager")
-		# A user who is BOTH a maker role and Fleet Manager — used to prove the SoD
-		# condition is what blocks self-approval, not a role gap.
+		# [#hd37w7]
+		# [#m05xw9]
 		cls.manager_maker = _user("frwf_mgrmaker@example.com", "Fleet Manager")
 		frappe.get_doc("User", cls.manager_maker).add_roles("Fleet Project Manager")
 		cls.project = cls._project("FR Workflow Project")
 		cls.vehicle = cls._vehicle("FR-WF-1")
-		# Scoped approver roles need a Project User Permission to read/transition a
-		# project-scoped Fuel Request.
+		# [#9y5ylg]
+		# [#tsti4z]
 		for u in (cls.requester, cls.manager, cls.manager_maker):
 			if not frappe.db.exists(
 				"User Permission", {"user": u, "allow": "Project", "for_value": cls.project}
@@ -78,7 +78,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	# ------------------------------------------------------------------ helpers
+	# [#4lslw6]
 
 	@staticmethod
 	def _project(name):
@@ -148,7 +148,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		if frappe.db.exists("Fuel Quota", name):
 			frappe.delete_doc("Fuel Quota", name, ignore_permissions=True, force=True)
 
-	# ------------------------------------------------------------------ tests
+	# [#idl6yv]
 
 	def test_workflow_is_seeded_and_active(self):
 		self.assertEqual(get_workflow_name("Fuel Request"), WORKFLOW)
@@ -157,7 +157,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 			frappe.db.get_value("Workflow", WORKFLOW, "workflow_state_field"), "status"
 		)
 
-	# --- post-submit reachability, per request_type ----------------------------
+	# [#md6m45]
 
 	def test_standard_post_submit_pending_approved_done(self):
 		fr = self._new("Standard", requested_litres=8, amount=120)
@@ -169,10 +169,10 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		fr.reload()
 		self.assertEqual(fr.status, "Approved")
 		self.assertEqual(fr.docstatus, 1)
-		# The approver is stamped (controller defence-in-depth).
+		# [#bv532f]
 		self.assertEqual(fr.approved_by, self.manager)
 
-		# The frozen-post-submit bug: Complete must succeed on a docstatus=1 doc.
+		# [#dlyu13]
 		self.assertIn("Complete", _actions(fr))
 		apply_workflow(fr, "Complete")
 		fr.reload()
@@ -192,7 +192,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		self.assertEqual(fr.status, "Done")
 		self.assertEqual(fr.docstatus, 1)
 
-		# Revert is offered for a Top-up and reachable post-submit.
+		# [#73olwn]
 		self.assertIn("Revert", _actions(fr))
 		apply_workflow(fr, "Revert")
 		fr.reload()
@@ -211,12 +211,12 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		self.assertEqual(fr.status, "Done")
 		self.assertEqual(fr.docstatus, 1)
 
-	# --- Segregation of Duties: requester cannot approve their own request ------
+	# [#fqljip]
 
 	def test_sod_requester_cannot_approve(self):
-		# manager_maker holds BOTH Fleet Manager and Fleet Project Manager, so only
-		# the SoD condition (requested_by != session.user) stands between them and
-		# self-approval.
+		# [#f1afl3]
+		# [#zjk01p]
+		# [#286nf7]
 		fr = self._new("Standard", requested_by=self.manager_maker, requested_litres=5)
 
 		frappe.set_user(self.manager_maker)
@@ -224,14 +224,14 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			apply_workflow(fr, "Approve")
 
-		# A different Fleet Manager CAN approve the same request.
+		# [#52bzgh]
 		frappe.set_user(self.manager)
 		self.assertIn("Approve", _actions(fr))
 		apply_workflow(fr, "Approve")
 		fr.reload()
 		self.assertEqual(fr.status, "Approved")
 
-	# --- type-aware transitions (the conditions) -------------------------------
+	# [#bvtw55]
 
 	def test_revert_is_topup_only(self):
 		"""A Standard request, once Done, is NOT offered Revert (Top-up only)."""
@@ -264,7 +264,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		self.assertEqual(std.status, "Failed")
 		self.assertEqual(std.docstatus, 1)
 
-	# --- the Standard quota side-effect fires on the post-submit Done transition -
+	# [#ruu7t4]
 
 	def test_standard_quota_applied_on_post_submit_done(self):
 		q = self._quota()
@@ -273,18 +273,18 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		frappe.set_user(self.manager)
 		apply_workflow(fr, "Approve")
 		fr.reload()
-		# Not yet consumed at Approved (the side-effect is keyed on Done).
+		# [#ryxdl2]
 		self.assertEqual(fr.quota_applied, 0)
 		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 0)
 
-		# Reaching Done post-submit applies the consumption (on_update_after_submit).
+		# [#mnbh8f]
 		apply_workflow(fr, "Complete")
 		fr.reload()
 		self.assertEqual(fr.status, "Done")
 		self.assertEqual(fr.quota_applied, 1)
 		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 8)
 
-		# Cancelling the Done request reverses the consumption (idempotency holds).
+		# [#pu20vo]
 		frappe.set_user(self.manager)
 		apply_workflow(fr, "Cancel")
 		fr.reload()

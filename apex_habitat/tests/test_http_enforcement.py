@@ -20,7 +20,7 @@ APP_ROOT = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "..")
 )
 
-# Write-operation AST call names that flag a function as performing writes.
+# [#qgv4yl]
 WRITE_CALLS = {
     "insert",
     "save",
@@ -36,32 +36,32 @@ WRITE_CALLS = {
     "rename_doc",
 }
 
-# Allowlist: bare @frappe.whitelist() functions that are safe without
-# methods=["POST"] because they only return data (read-only mapping helpers).
-# Each entry is (module_relative_path, function_name, reason).
-# make_work_order was previously allowlisted here as a read-only get_mapped_doc
-# mapper. It is now declared methods=["POST"] explicitly (frappe.model.open_mapped_doc
-# issues a POST), so it no longer needs an exemption and was removed from this list.
+# [#b79kz2]
+# [#qebnve]
+# [#8w4uyz]
+# [#t31pja]
+# [#ijdcci]
+# [#je41lx]
 SAFE_ALLOWLIST = []
 
 
-# --- Permission-recheck guard (T-099) -------------------------------------
-#
-# AST call names that count as an explicit server-side permission check. A
-# write endpoint must either call one of these (so Frappe's permission system —
-# including per-doc has_permission hooks — gates the write) or be an
-# identity/token-resolved guest writer in PERMISSION_RECHECK_ALLOWLIST below.
+# [#lorhza]
+# [#od1fgp]
+# [#hiho29]
+# [#5u5mtv]
+# [#tiajk1]
+# [#j2qeze]
 PERMISSION_CALLS = {"has_permission", "check_permission"}
 
-# Token-/identity-resolved write endpoints that are EXEMPT from the
-# has_permission requirement because their authorisation comes from a movement
-# token or a server-side identity resolution, NOT from the Frappe permission
-# system (a Guest, or a portal caller, has no desk role to has_permission-check
-# against). Each entry is (module_relative_path, function_name, reason).
-#
-# These were enumerated by auditing every POST write endpoint; only the
-# genuinely token/identity-resolved guest writers are listed. Anything else that
-# writes MUST call has_permission / check_permission.
+# [#oxb3l2]
+# [#3l0r0x]
+# [#2vt5z6]
+# [#kmywx7]
+# [#kyv1a7]
+# [#od1fgp]
+# [#meszsp]
+# [#q3twrj]
+# [#jvwoyq]
 PERMISSION_RECHECK_ALLOWLIST = [
     (
         "habitat/web_form/accommodation_resident_request/accommodation_resident_request.py",
@@ -132,7 +132,7 @@ def _has_write_call(func_node):
     """Return True if the function body contains any recognised write call."""
     for node in ast.walk(func_node):
         if isinstance(node, ast.Call):
-            # frappe.db.insert(...), doc.save(), doc.insert(), etc.
+            # [#3veun4]
             if isinstance(node.func, ast.Attribute):
                 if node.func.attr in WRITE_CALLS:
                     return True
@@ -169,7 +169,7 @@ def _is_bare_whitelist(decorator):
     if not isinstance(decorator, ast.Call):
         return False
     func = decorator.func
-    # Accept frappe.whitelist or just whitelist
+    # [#odry0o]
     is_whitelist = (
         (isinstance(func, ast.Attribute) and func.attr == "whitelist")
         or (isinstance(func, ast.Name) and func.id == "whitelist")
@@ -236,8 +236,8 @@ def _collect_permission_violations():
         except SyntaxError:
             continue
 
-        # Index module-level functions so delegation can be followed within the
-        # same file.
+        # [#i1u23c]
+        # [#t38u3p]
         local_funcs = {
             n.name: n
             for n in ast.walk(tree)
@@ -250,8 +250,8 @@ def _collect_permission_violations():
             if not any(_is_whitelisted(d) for d in node.decorator_list):
                 continue
 
-            # Is this endpoint a writer — directly, or via a one-hop local
-            # delegate (e.g. create_routed_payment -> route_payment)?
+            # [#hrzwy8]
+            # [#i5xvf5]
             writes = _has_write_call(node)
             delegates = _called_local_funcs(node)
             if not writes:
@@ -266,8 +266,8 @@ def _collect_permission_violations():
             if (rel, node.name) in allow_keys:
                 continue
 
-            # Permission check may sit in the endpoint OR in a one-hop local
-            # delegate it calls.
+            # [#npp610]
+            # [#q27tr8]
             checked = _has_permission_call(node)
             if not checked:
                 for callee in delegates:
@@ -300,14 +300,14 @@ def _collect_violations():
         for node in ast.walk(tree):
             if not isinstance(node, ast.FunctionDef):
                 continue
-            # Check if any decorator is a bare @frappe.whitelist()
+            # [#jimlha]
             bare = [d for d in node.decorator_list if _is_bare_whitelist(d)]
             if not bare:
                 continue
-            # The function has a bare whitelist — does it write?
+            # [#ttz163]
             if not _has_write_call(node):
                 continue
-            # Write found — check allowlist
+            # [#h6stsz]
             if (rel, node.name) in safe_keys:
                 continue
             violations.append((rel, node.name, node.lineno))

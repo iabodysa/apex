@@ -1,8 +1,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Prevent Frappe test runner from recursively resolving Link-field dependencies
-# on external DocTypes that require ERPNext (not installed in CI bench).
+# [#hlfy1g]
+# [#rf8fpd]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -122,6 +122,6 @@ class TestAccommodationAssignment(FrappeTestCase):
                                          "total_capacity": 2, "company": fx.company,
                                          "default_cost_center": fx.cc}).insert(ignore_permissions=True).name
         doc = self._assignment(fx, fx.emps[0], fx.beds[0])
-        doc.building = other_building  # bed/room belong to fx.building, not other_building
+        doc.building = other_building  # [#synuck]
         with self.assertRaises(frappe.ValidationError):
             doc.insert(ignore_permissions=True)

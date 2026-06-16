@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 """Cost by Dimension.
 
@@ -49,8 +49,8 @@ def get_data(filters):
             Count(ledger.name).as_("entries"),
             Sum(ledger.employee_daily_share).as_("total_cost"),
         )
-        # Only operational-memo cost rows; exclude reversal rows so the
-        # aggregate reflects net allocated cost.
+        # [#4uzhay]
+        # [#j1tgfr]
         .where(ledger.posting_mode == "Operational Memo")
         .where(ledger.reversal_of.isnull())
         .groupby(ledger.company, ledger.building, ledger.project)

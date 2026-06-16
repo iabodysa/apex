@@ -20,7 +20,7 @@ from frappe import _
 
 BATCH_SIZE = 500
 
-#: DocType that backs operational alerts (module Salis, NOT submittable).
+# [#ovfju0]
 ALERT_DOCTYPE = "Operations Alert"
 
 
@@ -62,7 +62,7 @@ def _raise_alert(
     """
     from frappe.utils import now_datetime, today
 
-    # --- Idempotency guard: one Open alert per (type, subject, day) -----------
+    # [#l68fdr]
     dedupe_filters = {
         "alert_type": alert_type,
         "status": "Open",
@@ -84,7 +84,7 @@ def _raise_alert(
         )
         return None
 
-    # --- Insert the alert record ---------------------------------------------
+    # [#p8b17w]
     alert_name = None
     try:
         alert = frappe.get_doc(
@@ -109,7 +109,7 @@ def _raise_alert(
         )
         return None
 
-    # --- Drop a timeline comment on the source doc (best-effort) -------------
+    # [#fkil1p]
     if source_doctype and source_name:
         try:
             frappe.get_doc(source_doctype, source_name).add_comment("Comment", message)
@@ -123,9 +123,9 @@ def _raise_alert(
     return alert_name
 
 
-# ---------------------------------------------------------------------------
-# Daily jobs
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#lpng6f]
+# [#rudcur]
 
 
 def driver_license_expiry_watch() -> None:
@@ -139,9 +139,9 @@ def driver_license_expiry_watch() -> None:
 
     today_str = today()
     logger = frappe.logger()
-    # Compliance documents (driver licences) need at least 30 days' lead
-    # notice. Prefer a dedicated ``license_alert_lead_days`` (default 30); else
-    # fall back to the generic ``alert_lead_days`` but never below 30 days.
+    # [#nrqqsv]
+    # [#lrh2xf]
+    # [#fmi97y]
     LICENSE_MIN_LEAD_DAYS = 30
     license_lead = _settings_int("license_alert_lead_days", LICENSE_MIN_LEAD_DAYS)
     lead_days = max(license_lead, _settings_int("alert_lead_days", 7), LICENSE_MIN_LEAD_DAYS)
@@ -161,8 +161,8 @@ def driver_license_expiry_watch() -> None:
         for d in drivers:
             try:
                 days = date_diff(d.license_expiry, today_str)
-                # Reference the driver by docname only — never embed PII
-                # (full_name / national_id / phone) in alert text.
+                # [#lc02pq]
+                # [#kjtak2]
                 who = d.name
                 if days < 0:
                     msg = (f"driver_license_expiry_watch: driver {who} licence expired "
@@ -203,7 +203,7 @@ def idle_vehicle_watch() -> None:
     idle_days = _settings_int("idle_vehicle_days", 7)
     cutoff = add_days(today_str, -idle_days)
 
-    # One grouped read: every vehicle with at least one qualifying recent trip.
+    # [#hash2u]
     try:
         rows = frappe.db.sql(
             """
@@ -243,9 +243,9 @@ def idle_vehicle_watch() -> None:
             try:
                 if v.name in vehicles_with_recent_trip:
                     continue
-                # Reference the vehicle by docname only — never embed
-                # plate_number (PII-adjacent) in alert text; the alert links
-                # the vehicle record.
+                # [#2qolrc]
+                # [#5x104h]
+                # [#a7utyn]
                 msg = (f"idle_vehicle_watch: vehicle {v.name} has had no dispatch "
                        f"trip in the last {idle_days} days.")
                 logger.warning(msg)
@@ -300,7 +300,7 @@ def unreverted_topup_watch() -> None:
 
         for t in topups:
             try:
-                # --- Auto-revert the overdue temporary top-up ----------------
+                # [#2o6ymh]
                 doc = frappe.get_doc("Fuel Request", t.name)
                 doc.reverted = 1
                 doc.status = "Reverted"
@@ -312,7 +312,7 @@ def unreverted_topup_watch() -> None:
                     ),
                 )
 
-                # --- Still raise the alert -----------------------------------
+                # [#dds2q0]
                 msg = (f"unreverted_topup_watch: temporary top-up {t.name} "
                        f"({t.topup_litres} L) was due to be reverted on "
                        f"{t.revert_due_date}; it has now been auto-reverted.")
@@ -392,10 +392,10 @@ def missing_attendance_watch() -> None:
     today_str = today()
     logger = frappe.logger()
 
-    # One grouped read: every driver who already has a submitted attendance
-    # today. Previously this ran one ``exists`` per active driver (N+1); now the
-    # "has attendance" set is fetched once and the gap set is the difference in
-    # memory — same behaviour, one DB round trip for the attendance data.
+    # [#ocptna]
+    # [#h4tnrq]
+    # [#3o85nl]
+    # [#i2t4gx]
     try:
         rows = frappe.db.sql(
             """
@@ -434,8 +434,8 @@ def missing_attendance_watch() -> None:
             try:
                 if d.name in drivers_with_attendance:
                     continue
-                # Reference the driver by docname only — never embed PII
-                # (full_name / national_id / phone) in alert text.
+                # [#lc02pq]
+                # [#kjtak2]
                 who = d.name
                 msg = (f"missing_attendance_watch: no attendance recorded today for "
                        f"active driver {who}.")
@@ -501,9 +501,9 @@ def vehicle_compliance_expiry_watch() -> None:
         start += BATCH_SIZE
 
 
-# ---------------------------------------------------------------------------
-# Alert reconciliation (auto-resolve)
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#t3zebo]
+# [#rudcur]
 
 
 def _resolve_alert(alert_name: str, reason: str) -> bool:
@@ -522,8 +522,8 @@ def _resolve_alert(alert_name: str, reason: str) -> bool:
     if current == "Resolved":
         return False
 
-    # Stamp status + audit fields in one write so the resolved row is always
-    # internally consistent (a Resolved alert always has resolved_on set).
+    # [#62985p]
+    # [#hs6erj]
     frappe.db.set_value(
         ALERT_DOCTYPE,
         alert_name,
@@ -539,8 +539,8 @@ def _resolve_alert(alert_name: str, reason: str) -> bool:
             "Info", _("Auto-resolved: {0}").format(reason)
         )
     except Exception:
-        # The status flip is the source of truth; a failed comment must not
-        # roll it back. Log and carry on.
+        # [#x4d7cq]
+        # [#5vzbfq]
         frappe.log_error(
             message=frappe.get_traceback(),
             title=f"Alert resolve comment failed for {alert_name}"[:140],
@@ -620,7 +620,7 @@ def reconcile_operations_alerts() -> None:
     logger = frappe.logger()
     resolved_count = 0
 
-    # --- Bulk pre-computation (no per-alert N+1) -----------------------------
+    # [#tkdam4]
     idle_days = _settings_int("idle_vehicle_days", 7)
     lead_days = _settings_int("alert_lead_days", 30)
     license_lead = max(
@@ -632,7 +632,7 @@ def reconcile_operations_alerts() -> None:
     idle_cutoff = add_days(today_str, -idle_days)
     pending_cutoff = add_days(today_str, -pending_max_days)
 
-    # Vehicles with a qualifying recent trip (Idle Vehicle clears).
+    # [#7t90d4]
     vehicles_with_recent_trip = {
         r["vehicle"]
         for r in frappe.db.sql(
@@ -647,8 +647,8 @@ def reconcile_operations_alerts() -> None:
         )
     }
 
-    # Vehicles that STILL have an expired/expiring compliance row (License Expiry
-    # stays open). The set of "clear" vehicles is the complement.
+    # [#fy8oa5]
+    # [#l6a1he]
     horizon = add_days(today_str, lead_days)
     vehicles_with_open_compliance = {
         r["parent"]
@@ -662,7 +662,7 @@ def reconcile_operations_alerts() -> None:
         )
     }
 
-    # Vehicles / drivers that STILL have an overdue Pending fuel request.
+    # [#75vd0f]
     overdue_request_vehicles = set()
     overdue_request_drivers = set()
     for r in frappe.db.sql(
@@ -678,17 +678,17 @@ def reconcile_operations_alerts() -> None:
         if r["driver"]:
             overdue_request_drivers.add(r["driver"])
 
-    # Vehicles that STILL breach an "Excessive Topup" source. There are two
-    # raisers and an alert row cannot be attributed to one of them after the
-    # fact, so an Excessive Topup alert clears only when BOTH sources are clear
-    # for its vehicle:
-    #   (1) unreverted_topup_watch — an unreverted temporary top-up that is past
-    #       its revert-due date (the watcher reverts these on its pass, so a
-    #       cleared one is genuinely no longer breaching);
-    #   (2) monthly_fuel_reconciliation — current-month ledgered consumption
-    #       above the active quota by more than OVERAGE_MARGIN.
-    # This is deliberately conservative: it never closes an alert while either
-    # underlying breach for that vehicle still holds.
+    # [#mad9uw]
+    # [#4jbnf5]
+    # [#mfllxq]
+    # [#ouw9uk]
+    # [#kedtxe]
+    # [#jsini2]
+    # [#ptb2wy]
+    # [#hmv1gv]
+    # [#fvpfsi]
+    # [#k7n9wi]
+    # [#9pj5m5]
     excessive_topup_vehicles = {
         r["vehicle"]
         for r in frappe.db.sql(
@@ -730,7 +730,7 @@ def reconcile_operations_alerts() -> None:
     def _driver_active(driver: str | None) -> bool:
         return bool(driver) and frappe.db.get_value("Salis Driver", driver, "status") == "Active"
 
-    # --- Iterate open alerts and resolve the cleared ones --------------------
+    # [#f3er9w]
     start = 0
     while True:
         alerts = frappe.get_all(
@@ -787,11 +787,11 @@ def reconcile_operations_alerts() -> None:
                             clear, reason = True, "attendance has since been recorded"
 
                 elif atype == "Excessive Topup":
-                    # Clears only when neither Excessive Topup source still
-                    # breaches for the vehicle (overdue unreverted temp top-up
-                    # AND current-month quota overage are both gone). A breach
-                    # with no vehicle reference cannot be re-evaluated and is
-                    # left for a human.
+                    # [#901qyj]
+                    # [#bxnict]
+                    # [#8dr2k6]
+                    # [#h2o6sn]
+                    # [#pgaj5m]
                     if a.vehicle and a.vehicle not in excessive_topup_vehicles:
                         clear, reason = True, "no fuel overage or unreverted top-up remains for the vehicle"
 
@@ -812,9 +812,9 @@ def reconcile_operations_alerts() -> None:
     )
 
 
-# ---------------------------------------------------------------------------
-# Weekly job
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#gj6d5t]
+# [#rudcur]
 
 
 def vehicle_utilization_summary() -> None:
@@ -832,11 +832,11 @@ def vehicle_utilization_summary() -> None:
     window_start = add_days(today_str, -7)
     logger = frappe.logger()
 
-    # One grouped read: trip count and total distance per vehicle over the
-    # window. Previously this ran one ``get_all`` per active vehicle (N+1); now
-    # the per-vehicle aggregates are fetched once and looked up in memory. Only
-    # positive odometer deltas count toward distance (mirrors the prior
-    # ``e_odo > s_odo`` guard), so the SQL clamps negatives to zero.
+    # [#pjk8kd]
+    # [#q5cjsw]
+    # [#8dsfl3]
+    # [#ixyw1v]
+    # [#9z2bwh]
     try:
         agg_rows = frappe.db.sql(
             """
@@ -883,8 +883,8 @@ def vehicle_utilization_summary() -> None:
             try:
                 trip_count, distance = util_by_vehicle.get(v.name, (0, 0))
 
-                # Reference the vehicle by docname only — never embed
-                # plate_number (PII-adjacent) in alert/log text.
+                # [#2qolrc]
+                # [#m0czrc]
                 logger.info(
                     f"vehicle_utilization_summary: {v.name} — {trip_count} trips, "
                     f"{distance} km over the last 7 days."
@@ -932,9 +932,9 @@ def _overstay_stops() -> list:
         },
         fields=["name", "vehicle", "stop_date"],
     )
-    # The maintenance Vehicle Stop set the vehicle out of service (a stop sets
-    # status Stopped; the /fleet workshop action sets Under Maintenance); drop any
-    # vehicle already recovered to Active (its stop should be closed).
+    # [#n6v7wp]
+    # [#ln9wtp]
+    # [#2lmcmv]
     return [
         r
         for r in rows
@@ -972,9 +972,9 @@ def get_workshop_overstay_count(filters=None) -> dict:
     """
     from apex_habitat.salis.api.dispatch_board import _permitted_projects
 
-    # Chokepoint: require Salis Vehicle read (matches get_fleet_os). The project
-    # scope below already limits the count; this rejects a caller with no fleet
-    # visibility outright instead of returning a silent zero.
+    # [#t7x2c6]
+    # [#dh3hob]
+    # [#q2d70z]
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     vehicles = {r.vehicle for r in _overstay_stops()}
     if not vehicles:

@@ -1,5 +1,5 @@
-# Shared server-side helpers for the Salis fleet module.
-# Imported by Salis DocType controllers — keep side-effect free at import time.
+# [#m93k48]
+# [#4oo5mt]
 
 import frappe
 from frappe import _
@@ -18,9 +18,9 @@ def lock_driver(name):
 		frappe.db.sql("SELECT name FROM `tabSalis Driver` WHERE name=%s FOR UPDATE", name)
 
 
-# Transport Request states keyed to their workflow docstatus, used by the
-# cross-doc drive fallback so a direct state set stays consistent with the
-# Transport Request Workflow.
+# [#6hjuyp]
+# [#i6rk0q]
+# [#lb44rw]
 _TR_STATE_DOCSTATUS = {
 	"New": 0,
 	"Validated": 0,
@@ -31,8 +31,8 @@ _TR_STATE_DOCSTATUS = {
 	"Cancelled": 2,
 }
 
-# Transport Request states that are terminal and must never be reopened by a
-# cross-doc drive.
+# [#bvqtne]
+# [#o780kv]
 _TR_TERMINAL = {"Fulfilled", "Cancelled"}
 
 
@@ -66,7 +66,7 @@ def drive_transport_request(tr_name, action, target_state, extra_fields=None):
 	if current == target_state:
 		return current
 
-	# 1) Prefer the native workflow transition when it is available to the user.
+	# [#dqm5hp]
 	try:
 		from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 
@@ -79,22 +79,22 @@ def drive_transport_request(tr_name, action, target_state, extra_fields=None):
 					frappe.db.set_value("Transport Request", tr_name, extra_fields)
 				return target_state
 	except Exception:
-		# Fall through to the guarded direct write — never abort the parent
-		# Movement transaction because the workflow path was unavailable.
+		# [#ozcdk1]
+		# [#d97ngl]
 		frappe.log_error(
 			frappe.get_traceback(), "Salis: workflow drive fell back to direct write"
 		)
 
-	# 2) Guarded fallback: direct write consistent with the workflow docstatus map.
+	# [#ehktbx]
 	values = {"status": target_state}
 	if extra_fields:
 		values.update(extra_fields)
 
 	target_docstatus = _TR_STATE_DOCSTATUS.get(target_state)
 	if target_docstatus is not None:
-		# Keep docstatus aligned with the workflow so the document is not left in
-		# an inconsistent submitted/draft state. set_value writes the column
-		# directly; the workflow comment is added for an auditable trail.
+		# [#2f585u]
+		# [#coqty5]
+		# [#jikjgh]
 		values["docstatus"] = target_docstatus
 
 	frappe.db.set_value("Transport Request", tr_name, values)
@@ -143,26 +143,26 @@ def revert_transport_request(tr_name, from_state, to_state, dispatch_trip=None, 
 	return to_state
 
 
-# ---------------------------------------------------------------------------
-# Rider (mandub) leave / inactive guard  — T-119
-# ---------------------------------------------------------------------------
-#
-# Source of truth (native-first):
-#   * HRMS Employee.status — the canonical employment state. Options are
-#     Active / Inactive / Suspended / Left; an offboarded rider is Inactive or
-#     Left (same set already used by salis/api/masar.py).
-#   * HRMS Leave Application — a submitted (docstatus 1), Approved application
-#     whose [from_date, to_date] covers today means the rider is on leave now.
-#   * Salis Driver.status — the local deployment state (Active / Stopped /
-#     On Leave / Released); anything other than Active also takes the rider out
-#     of the dispatchable pool (matches salis/api/dispatch_board.py).
-#
-# These three are read-only signals here; this module never writes them.
+# [#rudcur]
+# [#a14lsl]
+# [#rudcur]
+# [#od1fgp]
+# [#mi7kb7]
+# [#pv54sm]
+# [#quk5qw]
+# [#928rtb]
+# [#icmtmn]
+# [#8df88j]
+# [#gsprty]
+# [#luzxc6]
+# [#ehovaf]
+# [#od1fgp]
+# [#9mwcp3]
 
-#: Employee.status values that mean the person is no longer an active employee.
+# [#b2ydmt]
 INACTIVE_EMPLOYEE_STATUSES = ("Inactive", "Left", "Suspended")
 
-#: Salis Driver.status values (other than Active) that block a new delivery.
+# [#8gxeqv]
 BLOCKING_DRIVER_STATUSES = ("Stopped", "On Leave", "Released")
 
 
@@ -197,7 +197,7 @@ def rider_block_reason(driver, on_date=None):
 
 	label = drv.full_name or driver
 
-	# 1) Employee employment status (HRMS is the source of truth).
+	# [#pi1fg0]
 	if drv.employee:
 		emp_status = frappe.db.get_value("Employee", drv.employee, "status")
 		if emp_status in INACTIVE_EMPLOYEE_STATUSES:
@@ -205,14 +205,14 @@ def rider_block_reason(driver, on_date=None):
 				label, _(emp_status)
 			)
 
-		# 2) Approved leave covering the date.
+		# [#8bcr5n]
 		leave = _approved_leave_on(drv.employee, on_date)
 		if leave:
 			return _(
 				"Rider {0} is on approved leave ({1}) covering {2} and cannot receive a vehicle or fuel."
 			).format(label, leave, on_date)
 
-	# 3) Local Salis Driver deployment status.
+	# [#8pab9g]
 	if drv.status in BLOCKING_DRIVER_STATUSES:
 		return _("Rider {0} is marked {1} and cannot receive a vehicle or fuel.").format(
 			label, _(drv.status)
@@ -244,8 +244,8 @@ def _approved_leave_on(employee, on_date):
 			limit=1,
 		)
 	except Exception:
-		# Leave Application DocType missing / HRMS not installed — fail open on
-		# the leave check (the Employee-status and driver-status checks still run).
+		# [#7w2pmk]
+		# [#kd4v2n]
 		return None
 	return rows[0] if rows else None
 
@@ -278,7 +278,7 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
 		return []
 
 	try:
-		# --- Idempotency: skip if an open clearance ToDo already exists ----------
+		# [#9cg5zb]
 		existing = frappe.get_all(
 			"ToDo",
 			filters={
@@ -290,7 +290,7 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
 		)
 
 		assignees = _clearance_assignees(driver)
-		# Don't re-assign a user who already has an open task for this rider.
+		# [#jyt1zs]
 		assignees = [u for u in assignees if u not in existing]
 		if not assignees:
 			return []
@@ -317,7 +317,7 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
 			).insert(ignore_permissions=True)  # audit-ok
 			created.append(todo.name)
 
-		# Surface the follow-up on the triggering document's own timeline.
+		# [#8nptsk]
 		if source_doctype and source_name:
 			add_timeline_note(source_doctype, source_name, description)
 
@@ -336,7 +336,7 @@ def _clearance_assignees(driver):
 	Guest and disabled users are filtered out."""
 	candidates = []
 
-	# 1) Supervisor on the driver's current (submitted, Active) Vehicle Assignment.
+	# [#mlvwb0]
 	assignment_sup = frappe.get_all(
 		"Vehicle Assignment",
 		filters={"driver": driver, "docstatus": 1, "status": "Active"},
@@ -347,12 +347,12 @@ def _clearance_assignees(driver):
 	if assignment_sup and assignment_sup[0].supervisor:
 		candidates.append(assignment_sup[0].supervisor)
 
-	# 2) Supervisor recorded on the Salis Driver master.
+	# [#kk2iga]
 	driver_sup = frappe.db.get_value("Salis Driver", driver, "supervisor")
 	if driver_sup:
 		candidates.append(driver_sup)
 
-	# 3) Fallback: every Fleet Supervisor role holder.
+	# [#2bvm35]
 	if not candidates:
 		candidates = frappe.get_all(
 			"Has Role",
@@ -360,7 +360,7 @@ def _clearance_assignees(driver):
 			pluck="parent",
 		)
 
-	# De-dupe, drop system users, keep only enabled real users.
+	# [#9rakzi]
 	seen = []
 	for user in candidates:
 		if (

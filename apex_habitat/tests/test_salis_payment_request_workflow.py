@@ -55,18 +55,18 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # An operational maker and the two finance approvers.
+        # [#8s010i]
         cls.maker = _user("pr_maker@example.com", "Fleet Project Manager")
         cls.manager = _user("pr_mgr@example.com", "Fleet Manager")
         cls.finance = _user("pr_fin@example.com", "Finance Manager")
-        # A user who is BOTH a maker role and Finance Manager — used to prove the
-        # SoD condition is what blocks self-approval, not a role gap.
+        # [#keqcsv]
+        # [#219xf9]
         cls.finance_maker = _user("pr_finmaker@example.com", "Finance Manager")
         frappe.get_doc("User", cls.finance_maker).add_roles("Fleet Project Manager")
-        # Salis Payment Request is project-scoped: the scoped maker roles must
-        # hold a User Permission for the request's project, else row-scoping
-        # (correctly) denies them read/act on it. Grant the project to every
-        # maker-capable user; the Finance Manager approver is unscoped.
+        # [#lzfsbs]
+        # [#5cqzvq]
+        # [#trh25z]
+        # [#r845yv]
         cls.project = cls._project("PR Workflow Project")
         for u in (cls.maker, cls.finance_maker):
             cls._grant_project(u, cls.project)
@@ -131,7 +131,7 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         pr.reload()
         return pr
 
-    # --- legal transition by the right role ------------------------------------
+    # [#8rmafi]
 
     def test_legal_submit_then_approve_submits(self):
         pr = self._new_request()
@@ -144,44 +144,44 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         self.assertEqual(pr.status, "Pending Finance")
         self.assertEqual(pr.docstatus, 0)
 
-        # Approve (Finance) submits the document (docstatus 0 -> 1).
+        # [#tvv1dk]
         frappe.set_user(self.finance)
         self.assertIn("Approve (Finance)", _actions(pr))
         apply_workflow(pr, "Approve (Finance)")
         pr.reload()
         self.assertEqual(pr.status, "Approved by Finance")
         self.assertEqual(pr.docstatus, 1)
-        # The approver is stamped (defence-in-depth controller gate).
+        # [#n9xmsz]
         self.assertEqual(pr.finance_approved_by, self.finance)
 
-    # --- wrong role is blocked -------------------------------------------------
+    # [#4fc2j1]
 
     def test_wrong_role_cannot_approve_or_pay(self):
         pr = self._pending()
-        # A Fleet Manager (operational) is offered no finance approval action.
+        # [#ol97zg]
         frappe.set_user(self.manager)
         offered = _actions(pr)
         self.assertNotIn("Approve (Finance)", offered)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(pr, "Approve (Finance)")
 
-    # --- Approve / Mark Paid are Finance-exclusive -----------------------------
+    # [#4cxpj2]
 
     def test_approve_and_pay_are_finance_only(self):
         pr = self._pending()
 
-        # A Fleet Manager is NOT offered Approve (Finance).
+        # [#1zpks7]
         frappe.set_user(self.manager)
         self.assertNotIn("Approve (Finance)", _actions(pr))
 
-        # A Finance Manager (different person from the requester) is offered it.
+        # [#lwf3m4]
         frappe.set_user(self.finance)
         self.assertIn("Approve (Finance)", _actions(pr))
         apply_workflow(pr, "Approve (Finance)")
         pr.reload()
         self.assertEqual(pr.status, "Approved by Finance")
 
-        # Mark Paid is likewise Finance-only.
+        # [#jem3q4]
         frappe.set_user(self.manager)
         self.assertNotIn("Mark Paid", _actions(pr))
         frappe.set_user(self.finance)
@@ -191,12 +191,12 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         self.assertEqual(pr.status, "Paid")
         self.assertEqual(pr.docstatus, 1)
 
-    # --- Segregation of Duties: requester cannot approve/pay their own ---------
+    # [#bi3lgq]
 
     def test_sod_requester_cannot_approve(self):
-        # finance_maker holds BOTH Finance Manager and Fleet Project Manager, so
-        # only the SoD condition (requested_by != session.user) stands between
-        # them and self-approval.
+        # [#b96rij]
+        # [#11xoun]
+        # [#ihqq5s]
         pr = self._pending(requested_by=self.finance_maker)
 
         frappe.set_user(self.finance_maker)
@@ -204,7 +204,7 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(pr, "Approve (Finance)")
 
-        # A different Finance Manager CAN approve the same request.
+        # [#9w4cme]
         frappe.set_user(self.finance)
         self.assertIn("Approve (Finance)", _actions(pr))
         apply_workflow(pr, "Approve (Finance)")
@@ -212,8 +212,8 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         self.assertEqual(pr.status, "Approved by Finance")
 
     def test_sod_requester_cannot_mark_paid(self):
-        # Approve as a neutral finance user, then the requester (who also holds
-        # Finance Manager) must still be blocked from paying their own request.
+        # [#1cva9p]
+        # [#1apmjg]
         pr = self._approved(requested_by=self.finance_maker)
         self.assertEqual(pr.status, "Approved by Finance")
 
@@ -222,32 +222,32 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(pr, "Mark Paid")
 
-        # A different Finance Manager CAN mark the same request paid.
+        # [#4rfs4h]
         frappe.set_user(self.finance)
         self.assertIn("Mark Paid", _actions(pr))
         apply_workflow(pr, "Mark Paid")
         pr.reload()
         self.assertEqual(pr.status, "Paid")
 
-    # --- post-submit transition is REACHABLE (the bug being fixed) -------------
+    # [#7hace9]
 
     def test_post_submit_mark_paid_reachable(self):
         pr = self._approved()
         self.assertEqual(pr.docstatus, 1)
 
-        # The frozen-post-submit bug: Mark Paid must succeed on a docstatus=1 doc.
+        # [#57sef5]
         frappe.set_user(self.finance)
         self.assertIn("Mark Paid", _actions(pr))
         apply_workflow(pr, "Mark Paid")
         pr.reload()
         self.assertEqual(pr.status, "Paid")
         self.assertEqual(pr.docstatus, 1)
-        # The approver stamp set at the Approve step persists into Paid: it is the
-        # immutable evidence the payment router gates on, so a paid request always
-        # carries it (the Approve→Paid transition never blanks it).
+        # [#hle001]
+        # [#7bstng]
+        # [#dtsi0r]
         self.assertEqual(pr.finance_approved_by, self.finance)
 
-    # --- the no-GL boundary holds ----------------------------------------------
+    # [#dbvsmy]
 
     def test_mark_paid_posts_no_gl(self):
         pr = self._approved()
@@ -257,7 +257,7 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         pr.reload()
         self.assertEqual(pr.status, "Paid")
 
-        # No GL Entry / Payment Entry is created for the payment request.
+        # [#dm8kwr]
         if frappe.db.exists("DocType", "GL Entry"):
             gl = frappe.get_all(
                 "GL Entry",

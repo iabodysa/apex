@@ -23,7 +23,7 @@ from frappe.model.document import Document
 
 from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
-TOKEN_BYTES = 24  # ~32 url-safe chars of entropy — unguessable.
+TOKEN_BYTES = 24  # [#9dvf8n]
 
 
 def _new_token() -> str:
@@ -32,21 +32,21 @@ def _new_token() -> str:
         candidate = frappe.generate_hash(length=TOKEN_BYTES * 2)
         if not frappe.db.exists("Masar Worker Token", {"token": candidate}):
             return candidate
-    # Astronomically unlikely; fail loudly rather than risk a collision.
+    # [#meurni]
     frappe.throw(_("Could not generate a unique worker token. Please try again."))
 
 
 class MasarWorkerToken(Document):
-    # NOTE on hook order: Frappe runs before_validate BEFORE before_insert on a
-    # new doc, i.e. the reverse of these methods' top-to-bottom (visual) order in
-    # this file. So when adding future employee-dependent insert logic, place it
-    # in before_insert (it can rely on before_validate's party sync having already
-    # run); do not assume before_insert runs first just because it is written first.
+    # [#azpt87]
+    # [#5m27uy]
+    # [#je0z47]
+    # [#spswqu]
+    # [#io3xbm]
     def before_validate(self):
         sync_party_employee(self, require_party=True)
 
     def before_insert(self):
-        # Always mint server-side; never accept a client-supplied token value.
+        # [#o0vq6x]
         self.token = _new_token()
         self.last_generated_on = frappe.utils.now_datetime()
         self.last_generated_by = frappe.session.user
@@ -90,7 +90,7 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
     if frappe.utils.cint(regenerate) and doc.token:
         doc.regenerate()
     elif not doc.token:
-        # A row that somehow has no token (e.g. legacy import) — mint one.
+        # [#8qos75]
         doc.regenerate()
 
     link = _worker_link(doc.token)
@@ -101,7 +101,7 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
         "token": doc.token,
         "link": link,
         "qr": masar_qr_data_uri(link),
-        # Worker phone for the optional WhatsApp share (browser-only wa.me link).
+        # [#768ksi]
         "phone": frappe.db.get_value("Employee", doc.employee, "cell_number"),
     }
 
@@ -144,7 +144,7 @@ def masar_qr_data_uri(text: str):
         import io
         from base64 import b64encode
 
-        import pyqrcode  # bundled with frappe (see frappe.twofactor)
+        import pyqrcode  # [#9xz9bo]
 
         q = pyqrcode.create(text)
         buf = io.BytesIO()

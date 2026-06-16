@@ -45,7 +45,7 @@ def get_data(filters):
                 "qty", "unit_cost_sar"],
     )
 
-    # Aggregate signed qty per (building, holder, item).
+    # [#3pq97l]
     agg = {}
     for r in rows:
         key = (r.building, r.employee or "", r.item_type, r.item)

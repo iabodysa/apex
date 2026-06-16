@@ -7,6 +7,6 @@ from frappe.model.document import Document
 
 class CustodyDamageItem(Document):
     def before_save(self):
-        # Validate document properties
+        # [#2qfbj3]
         if not self.doctype:
             return

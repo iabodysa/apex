@@ -37,7 +37,7 @@ from apex_habitat.habitat.permissions import (
 from apex_habitat.setup import create_role_profiles, create_roles
 from apex_habitat.tests._helpers import _user
 
-# The four operational roles added by this alignment pass.
+# [#3tixf0]
 NEW_ROLES = [
     "Maintenance Technician",
     "Cleaning Supervisor",
@@ -45,7 +45,7 @@ NEW_ROLES = [
     "Resident Request Coordinator",
 ]
 
-# The four Role Profiles that bundle them (one role each).
+# [#htrowa]
 NEW_PROFILES = [
     "Habitat Maintenance Technician",
     "Habitat Cleaning Supervisor",
@@ -53,7 +53,7 @@ NEW_PROFILES = [
     "Habitat Resident Request Coordinator",
 ]
 
-# Privileged oversight roles that must see every Maintenance Request.
+# [#i0mepp]
 PRIVILEGED_ROLES = [
     "Accommodation Manager",
     "Resident Supervisor",
@@ -61,7 +61,7 @@ PRIVILEGED_ROLES = [
     "System Manager",
 ]
 
-# DocTypes on which Internal Auditor must be read+report-only.
+# [#l544q3]
 AUDITOR_DOCTYPES = [
     "Custody Issue",
     "Custody Return",
@@ -82,8 +82,8 @@ class TestRoleProfileIdempotency(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # Seed once so the rows exist regardless of whether after_install ran on
-        # this site. Create-only / idempotent.
+        # [#9kn7hu]
+        # [#skkep1]
         create_roles()
         create_role_profiles()
         frappe.db.commit()
@@ -109,10 +109,10 @@ class TestRoleProfileIdempotency(FrappeTestCase):
         before_profiles = {
             p: frappe.db.count("Role Profile", {"name": p}) for p in NEW_PROFILES
         }
-        # Re-running the seeders must be a no-op (mirrors a second bench migrate).
-        # No commit: the counts below read uncommitted writes within the same
-        # transaction, so idempotency is provable without landing data permanently
-        # (a mid-test commit would bypass the FrappeTestCase rollback safety net).
+        # [#dyqt5z]
+        # [#86gcnw]
+        # [#ttyhw3]
+        # [#coljqa]
         create_roles()
         create_role_profiles()
         for role, count in before_roles.items():
@@ -130,9 +130,9 @@ class TestRoleProfileIdempotency(FrappeTestCase):
             "Habitat Resident Request Coordinator": "Resident Request Coordinator",
         }
         for profile, role in expected.items():
-            # Read the bundled roles off the loaded document's child table rather
-            # than querying the child DocType directly, so the assertion does not
-            # depend on the child table being independently listable.
+            # [#969wf2]
+            # [#iw6nh2]
+            # [#gy21wj]
             roles = [r.role for r in frappe.get_doc("Role Profile", profile).roles]
             self.assertEqual(
                 roles, [role], f"{profile!r} must bundle exactly [{role!r}]"
@@ -148,11 +148,11 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
         super().setUpClass()
         frappe.set_user("Administrator")
         create_roles()
-        # A user holding ONLY 'Maintenance Technician' (no manager/oversight role).
+        # [#raxojd]
         cls.tech = _user("mra_tech@example.com", "Maintenance Technician")
-        # A second ordinary raiser used as the "other owner".
+        # [#gyqsiz]
         cls.other = _user("mra_other@example.com", "Maintenance Technician")
-        # Privileged oversight users — one per privileged role.
+        # [#2cq5hq]
         cls.privileged = {
             role: _user(
                 "mra_{}@example.com".format(role.replace(" ", "_").lower()), role
@@ -175,7 +175,7 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
             }
         )
 
-    # ----- T4: a non-privileged technician CAN raise, and owns the ticket ----- #
+    # [#azuc6w]
 
     def test_technician_can_raise_and_owns_the_request(self):
         frappe.set_user(self.tech)
@@ -190,15 +190,15 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
                     "issue_description": "Tap dripping in shared bathroom",
                 }
             )
-            # Real permission path (no ignore_permissions): the 'All' create
-            # DocPerm authorises the insert; ignore_links because the QA building/
-            # room fixtures are not provisioned and are irrelevant to ownership.
+            # [#18poy9]
+            # [#nr94tv]
+            # [#ar8ler]
             doc.insert(ignore_links=True)
             name = doc.name
         finally:
             frappe.set_user("Administrator")
         try:
-            # T4: owner and reported_by are both the raising user, server-stamped.
+            # [#l875dm]
             self.assertEqual(doc.reported_by, self.tech)
             self.assertEqual(doc.owner, self.tech)
             self.assertEqual(doc.owner, doc.reported_by)
@@ -207,7 +207,7 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
                 "Maintenance Request", name, force=True, ignore_permissions=True
             )
 
-    # ----- a non-privileged user cannot SEE another user's ticket ----- #
+    # [#5wl73r]
 
     def test_technician_query_is_owner_scoped(self):
         frag = maintenance_request_query(user=self.tech)
@@ -217,7 +217,7 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
         )
 
     def test_technician_cannot_read_a_non_owned_request(self):
-        # A ticket owned by someone else, not assigned to the technician.
+        # [#r4ufax]
         self.assertFalse(
             maintenance_request_has_permission(
                 self._doc(owner=self.other), "read", user=self.tech
@@ -232,7 +232,7 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
         )
 
     def test_assignee_can_read_assigned_request(self):
-        # assigned_to == user grants visibility even on a ticket owned by another.
+        # [#wqag47]
         self.assertTrue(
             maintenance_request_has_permission(
                 self._doc(owner=self.other, assigned_to=self.tech),
@@ -241,7 +241,7 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
             )
         )
 
-    # ----- privileged roles see everything (regression guard) ----- #
+    # [#bhlfxr]
 
     def test_privileged_roles_have_no_query_restriction(self):
         for role, user in self.privileged.items():
@@ -298,8 +298,8 @@ class TestInternalAuditorReadOnly(FrappeTestCase):
                 )
 
     def test_auditor_read_resolves_via_role_permissions(self):
-        # Cross-check against the live permission engine: the role-permission
-        # resolution must grant read but withhold every write right.
+        # [#huh4em]
+        # [#nx4eh4]
         from frappe.permissions import get_role_permissions
 
         original = frappe.session.user

@@ -17,7 +17,7 @@ from apex_habitat.salis.utils import add_timeline_note
 
 class VehicleDamageWriteOff(Document):
     def validate(self):
-        # Evidence is mandatory before the case can advance beyond Open.
+        # [#jsysq9]
         if self.status and self.status != "Open" and not self.evidence:
             frappe.throw(_("Evidence is required before moving the write-off case beyond Open."))
         self._stamp_approver()
@@ -38,7 +38,7 @@ class VehicleDamageWriteOff(Document):
             _("Damage write-off {0} cancelled.").format(self.name),
         )
 
-    # ------------------------------------------------------------------ helpers
+    # [#4lslw6]
 
     def _stamp_approver(self):
         if self.status == "Approved" and not self.approved_by:

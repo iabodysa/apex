@@ -25,9 +25,9 @@ class TestSalisFleetScoping(FrappeTestCase):
         super().setUpClass()
         frappe.set_user("Administrator")
         cls.pa = cls._project("Fleet Scope A")
-        cls.sup = _user("fleet_sup@example.com", "Fleet Supervisor")   # scoped to pa
-        cls.mgr = _user("fleet_mgr@example.com", "Fleet Manager")      # unscoped oversight
-        cls.drv = _user("fleet_drv@example.com", "Driver")             # scoped, no project grant
+        cls.sup = _user("fleet_sup@example.com", "Fleet Supervisor")   # [#8j7xbz]
+        cls.mgr = _user("fleet_mgr@example.com", "Fleet Manager")      # [#11zo7x]
+        cls.drv = _user("fleet_drv@example.com", "Driver")             # [#hvm9mm]
         if not frappe.db.exists(
             "User Permission", {"allow": "Project", "for_value": cls.pa, "user": cls.sup}
         ):
@@ -44,7 +44,7 @@ class TestSalisFleetScoping(FrappeTestCase):
             ).name
         return p
 
-    # --- list-query scoping (the F-01 / F-08 leak) -----------------------------
+    # [#cz5b30]
 
     def test_vehicle_query_scoped_for_supervisor(self):
         frag = salis_vehicle_query(self.sup)
@@ -55,15 +55,15 @@ class TestSalisFleetScoping(FrappeTestCase):
         self.assertEqual(salis_vehicle_query(self.mgr), "")
 
     def test_driver_query_preserves_self_profile(self):
-        # Scoped supervisor: project scope OR owner, so the if_owner self row survives.
+        # [#9re369]
         frag = salis_driver_query(self.sup)
         self.assertIn("owner", frag)
         self.assertIn(self.pa, frag)
-        # A Driver with no project grant sees ONLY their own row (owner; no project list).
+        # [#7v1slm]
         drv_frag = salis_driver_query(self.drv)
         self.assertIn("owner", drv_frag)
         self.assertNotIn(self.pa, drv_frag)
-        # Oversight: no restriction.
+        # [#8nsgcc]
         self.assertEqual(salis_driver_query(self.mgr), "")
 
     def test_manifest_query_scoped_for_supervisor(self):
@@ -71,41 +71,41 @@ class TestSalisFleetScoping(FrappeTestCase):
         self.assertEqual(passenger_manifest_query(self.mgr), "")
 
     def test_trip_start_log_query_preserves_self_records(self):
-        # M-4: a scoped supervisor sees project-in-scope OR their own logs.
+        # [#r9enxb]
         frag = trip_start_log_query(self.sup)
         self.assertIn("owner", frag)
         self.assertIn("route_plan", frag)
         self.assertIn(self.pa, frag)
-        # A Driver with no project grant sees ONLY their own logs (owner; no project).
+        # [#ox5dyr]
         drv_frag = trip_start_log_query(self.drv)
         self.assertIn("owner", drv_frag)
         self.assertNotIn("route_plan", drv_frag)
         self.assertNotIn(self.pa, drv_frag)
-        # Oversight: no restriction.
+        # [#8nsgcc]
         self.assertEqual(trip_start_log_query(self.mgr), "")
 
     def test_trip_start_log_has_permission_owner_and_scope(self):
-        # M-4: the owner-aware hook never blocks a Driver from their own log,
-        # mirrors project scope otherwise, and defers entirely for oversight.
+        # [#mt38mf]
+        # [#3l3pag]
         own = frappe._dict(
             {"doctype": "Trip Start Log", "owner": self.drv, "route_plan": None}
         )
         self.assertIsNone(
             trip_start_log_has_permission(own, "write", user=self.drv)
         )
-        # A non-owned, project-less log is invisible to a scoped user.
+        # [#t71tb9]
         foreign = frappe._dict(
             {"doctype": "Trip Start Log", "owner": "someone@example.com", "route_plan": None}
         )
         self.assertFalse(
             trip_start_log_has_permission(foreign, "read", user=self.sup)
         )
-        # Oversight defers regardless.
+        # [#t81uwp]
         self.assertIsNone(
             trip_start_log_has_permission(foreign, "read", user=self.mgr)
         )
 
-    # --- per-doc has_permission for Salis Vehicle ------------------------------
+    # [#nmn4of]
 
     def test_vehicle_has_permission(self):
         v_in = frappe._dict({"doctype": "Salis Vehicle", "project": self.pa})

@@ -31,11 +31,11 @@ class FuelDailyLog(Document):
 		)
 
 	def on_trash(self):
-		# This log is non-submittable, so deletion is its only correction path.
-		# If the fuel accrual engine already ledgered it, the consumption must not
-		# linger in the Fuel Consumption Ledger once the source is gone: post a
-		# negative mirror row so the source nets to zero while the audit pair is
-		# kept. Idempotent and a no-op when the log was never ledgered.
+		# [#20djvr]
+		# [#qdv2z9]
+		# [#l8tkzu]
+		# [#iuum6r]
+		# [#ntgwmq]
 		from apex_habitat.salis.fuel_engine import reverse_fuel_ledger
 
 		reverse_fuel_ledger("Fuel Daily Log", self.name)

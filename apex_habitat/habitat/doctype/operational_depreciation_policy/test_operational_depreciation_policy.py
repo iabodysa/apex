@@ -1,8 +1,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Prevent Frappe test runner from recursively resolving Link-field dependencies
-# on external DocTypes that require ERPNext (not installed in CI bench).
+# [#hlfy1g]
+# [#rf8fpd]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -51,8 +51,8 @@ class TestOperationalDepreciationPolicy(FrappeTestCase):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
     def test_zero_useful_life_raises(self):
-        # 0 passes the reqd check (it is a value, not empty) but is logically invalid —
-        # the controller must reject it so assets can't "never depreciate" (bug #8).
+        # [#cd2so3]
+        # [#8ac243]
         doc = frappe.get_doc({
             "doctype": "Operational Depreciation Policy",
             "policy_name": "QA Zero Life",

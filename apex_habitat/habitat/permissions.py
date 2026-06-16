@@ -1,42 +1,42 @@
 # Copyright (c) 2026, AFMCO Support Services Co. Ltd
-# Owner-scoped row security for Habitat Maintenance Request intake.
-#
-# Design (universal intake, private tickets):
-#   - Maintenance Request grants the "All" role a CREATE-only DocPerm, so any
-#     authenticated user can raise a ticket without holding an operational role.
-#   - That same "All" DocPerm reads with ``if_owner``, so by the standard
-#     permission engine a raiser can read only the rows they own.
-#   - The query/has_permission functions below extend that owner read to also
-#     cover the user the ticket is ``assigned_to`` (the technician working it),
-#     while still hiding every other user's tickets — none can enumerate or open
-#     a ticket they neither raised nor were assigned.
-#   - A small set of privileged oversight roles (PRIVILEGED_ROLES) and the
-#     Administrator are NOT scoped: they see and act on every ticket. Their
-#     access is governed entirely by their own DocPerms (read/write/submit),
-#     which these functions defer to (query returns "" / has_permission returns
-#     None) and never widen.
-#
-# Ownership reliability (T4): the Maintenance Request controller forces
-# ``reported_by`` to ``frappe.session.user`` server-side on intake, and Frappe
-# stamps ``owner`` with the creating user, so the ``owner``-based scope here is a
-# trustworthy identity boundary — a client cannot spoof who raised a ticket to
-# see another user's row.
-#
-# Pattern (mirrors apex_habitat/salis/permissions.py):
-#   - ``maintenance_request_query`` is wired in ``permission_query_conditions``
-#     and returns a SQL WHERE fragment ("" = no restriction) confining the
-#     list/report views to the user's own + assigned tickets.
-#   - ``maintenance_request_has_permission`` is wired in ``has_permission`` and
-#     enforces the same boundary on individual document access. It returns None
-#     to defer to Frappe's default resolution (for privileged users) or True/
-#     False for the scoped owner/assignee check — the same None/False/True
-#     contract as the Salis scoped hooks, so it composes with DocPerms and never
-#     widens access.
+# [#ku98lq]
+# [#od1fgp]
+# [#t02pbh]
+# [#8cgrr9]
+# [#sgm0yc]
+# [#csif22]
+# [#a2muhx]
+# [#ejogmk]
+# [#3osjs0]
+# [#735jde]
+# [#fnh3pb]
+# [#okb0al]
+# [#fpcc8d]
+# [#7mdz5j]
+# [#hywg6c]
+# [#invybj]
+# [#od1fgp]
+# [#olbmkx]
+# [#kf4t7l]
+# [#so7thk]
+# [#i2hl56]
+# [#38sd6j]
+# [#od1fgp]
+# [#d9hky7]
+# [#brv2vl]
+# [#8l32ye]
+# [#gyh52w]
+# [#rm6tbr]
+# [#9lm55p]
+# [#ojyca6]
+# [#cm1hyq]
+# [#gup0uc]
+# [#9mg23p]
 
 import frappe
 
-# Oversight roles that see every Maintenance Request (no owner scoping). Their
-# visibility is bounded only by their own read/write DocPerms.
+# [#ickhtk]
+# [#dix5c1]
 PRIVILEGED_ROLES = {
     "System Manager",
     "Accommodation Manager",
@@ -107,21 +107,21 @@ def maintenance_request_has_permission(doc, ptype, user=None):
     return False
 
 
-# ---------------------------------------------------------------------------
-# Building-scoped row security for the Housing Supervisor
-# ---------------------------------------------------------------------------
-# A Housing Supervisor (the "Resident Supervisor" role) is bound to the
-# building(s) he is responsible for via a User Permission on "Accommodation
-# Building" (one supervisor may cover MANY buildings). Within that scope he may
-# only: house residents (Accommodation Assignment), issue custody from the store
-# (Custody Issue), and oversee cleaning (Cleaning Log) for HIS buildings — and he
-# sees only his buildings. This mirrors the Salis fleet-supervisor project scope
-# (apex_habitat/salis/permissions.py), with "building" in place of "project".
-#
-# Oversight roles below see every building (no scoping); their access is bounded
-# only by their own DocPerms. NOTE: "Resident Supervisor" is intentionally NOT
-# here — he is the scoped role. (He remains owner-unscoped for Maintenance
-# Request via PRIVILEGED_ROLES above; that is an independent concern.)
+# [#rudcur]
+# [#bjdq1v]
+# [#rudcur]
+# [#d54n8w]
+# [#seqitg]
+# [#fd2dyj]
+# [#2ficre]
+# [#7qevi1]
+# [#sgw41f]
+# [#echwkz]
+# [#od1fgp]
+# [#pfv7mp]
+# [#ry51gx]
+# [#egaa92]
+# [#e1f007]
 HOUSING_UNSCOPED_ROLES = {
     "System Manager",
     "Accommodation Manager",
@@ -164,7 +164,7 @@ def _building_condition(user=None, column="`building`"):
     return "{column} in ({values})".format(column=column, values=escaped)
 
 
-# permission_query_conditions — DocTypes with a direct `building` Link field.
+# [#i5s8n2]
 def accommodation_assignment_query(user=None):
     return _building_condition(user)
 
@@ -178,7 +178,7 @@ def cleaning_log_query(user=None):
 
 
 def accommodation_building_query(user=None):
-    # The building IS the row, so scope on its own `name`.
+    # [#kz32wg]
     return _building_condition(user, column="`name`")
 
 
@@ -199,7 +199,7 @@ def building_scoped_has_permission(doc, ptype, user=None):
         building = getattr(doc, "building", None)
 
     if not building:
-        # Scoped user + a building-less record: deny, mirroring the list query
-        # (which shows scoped users nothing when the scope column is absent).
+        # [#9o5sua]
+        # [#n2wajb]
         return False
     return None if building in _allowed_buildings(user) else False

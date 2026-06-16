@@ -20,11 +20,11 @@ patches.txt keeps resolving on already-installed sites; it seeds nothing.
 
 import frappe  # noqa: F401  (kept for parity with the seed module contract)
 
-# Intentionally empty: these generic role names are no longer owned/seeded.
+# [#gy4sln]
 OPERATIONS_ROLES: list[str] = []
 
 
 def execute():
-    # No-op by design — see module docstring. Left as a function so the
-    # patches.txt entry and after_install wiring continue to resolve.
+    # [#qjrzlz]
+    # [#49bv07]
     return

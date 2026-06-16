@@ -21,10 +21,10 @@ from apex_habitat.tests._helpers import _user
 
 LEDGER = "Rental Accrual Ledger"
 
-# Prune the auto-record dependency walk: Rental Settlement links to Salis Payment
-# Request, whose Payment Entry link pulls in the ERPNext payment/gateway chain
-# (Payment Gateway is not installed in the CI bench). These tests build their own
-# settlements + accrual rows, so that whole subtree is ignored here.
+# [#mx4j69]
+# [#qaxc5w]
+# [#durv9z]
+# [#2waxmt]
 test_ignore = [
     "Company",
     "Cost Center",
@@ -48,8 +48,8 @@ def _settled(name):
 class TestRentalSettlementStamping(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # Masters re-materialised per test (FrappeTestCase rolls the connection
-        # back after each test, which would wipe uncommitted setUpClass inserts).
+        # [#2lp3s0]
+        # [#448yij]
         self.requester = _user("rss_req@example.com", "Fleet Project Manager")
         self.manager = _user("rss_mgr@example.com", "Fleet Manager")
         self.office = self._office("RSS Stamp Office")
@@ -138,7 +138,7 @@ class TestRentalSettlementStamping(FrappeTestCase):
         row = self._accrual_row()
         rs = self._settlement()
 
-        # Pre: unsettled, unlinked.
+        # [#h2vh0r]
         self.assertEqual(_settled(row).settled, 0)
         self.assertIsNone(_settled(row).rental_settlement)
 
@@ -154,8 +154,8 @@ class TestRentalSettlementStamping(FrappeTestCase):
         self.assertIsNone(s2.rental_settlement, "Cancel must clear the link.")
 
     def test_validate_cross_checks_ledger_total(self):
-        # 100 + 200 accrued in the ledger across two rows (distinct dates to avoid
-        # the UNIQUE (vehicle, accrual_date) collision).
+        # [#co4d1j]
+        # [#m4a135]
         self._accrual_row(amount=100)
         r2 = frappe.get_doc(
             {

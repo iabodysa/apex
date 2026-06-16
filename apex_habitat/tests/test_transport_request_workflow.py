@@ -48,13 +48,13 @@ class TestTransportRequestWorkflow(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # A requester (Operations-style) and two approvers at different tiers.
+        # [#cpx0h7]
         cls.requester = _user("tr_req@example.com", "Fleet Project Manager")
         cls.supervisor = _user("tr_sup@example.com", "Fleet Supervisor")
         cls.manager = _user("tr_mgr@example.com", "Fleet Manager")
         cls.project = cls._project("TR Workflow Project")
-        # Scoped roles (Fleet Supervisor / Fleet Project Manager) need a Project
-        # User Permission to read/transition project-scoped Transport Requests.
+        # [#893q2r]
+        # [#mjs8et]
         for u in (cls.requester, cls.supervisor):
             if not frappe.db.exists(
                 "User Permission",
@@ -104,9 +104,9 @@ class TestTransportRequestWorkflow(FrappeTestCase):
     def _big_worker_tr(self):
         """An Inter-City Relocation whose worker count exceeds the Operations
         threshold (default 20) so the server sets needs_operations=1."""
-        # worker_count is derived by row count; employee (a Link) is left unset so
-        # the test does not depend on seeded Employee master data. Rows carry only
-        # a pickup_point.
+        # [#ka1rfm]
+        # [#sdvv9n]
+        # [#or1tdv]
         workers = [{"pickup_point": f"P{i}"} for i in range(25)]
         tr = frappe.get_doc({
             "doctype": "Transport Request",
@@ -122,7 +122,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         }).insert(ignore_permissions=True)
         return tr
 
-    # --- server-side DoA derivation (the gate cannot be under-stated) ----------
+    # [#ea375i]
 
     def test_needs_operations_is_server_derived(self):
         small = self._new_tr()
@@ -131,7 +131,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(big.worker_count, 25)
         self.assertEqual(big.needs_operations, 1)
 
-    # --- legal transition by the right role ------------------------------------
+    # [#8rmafi]
 
     def test_legal_validate_then_authorize_passes(self):
         tr = self._new_tr()
@@ -143,7 +143,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.status, "Validated")
         self.assertEqual(tr.docstatus, 0)
 
-        # A different Fleet Manager authorizes (Operations tier always allowed).
+        # [#p9pvx0]
         frappe.set_user(self.manager)
         self.assertIn("Authorize (Operations)", _actions(tr))
         apply_workflow(tr, "Authorize (Operations)")
@@ -151,7 +151,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.status, "Approved")
         self.assertEqual(tr.docstatus, 1)
 
-    # --- wrong role is blocked -------------------------------------------------
+    # [#4fc2j1]
 
     def test_wrong_role_cannot_authorize(self):
         tr = self._new_tr()
@@ -159,8 +159,8 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         apply_workflow(tr, "Validate")
         tr.reload()
 
-        # The requester holds only Fleet Project Manager — neither approve
-        # transition is offered to that role.
+        # [#8m86qo]
+        # [#2nr67v]
         frappe.set_user(self.requester)
         offered = _actions(tr)
         self.assertNotIn("Authorize (Operations)", offered)
@@ -168,11 +168,11 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(tr, "Authorize (Operations)")
 
-    # --- Segregation of Duties: requester cannot authorize their own request ---
+    # [#dackzs]
 
     def test_sod_requester_cannot_authorize(self):
-        # The requester is also a Fleet Manager here, so only the SoD condition
-        # (requested_by != session.user) stands between them and self-approval.
+        # [#212r3p]
+        # [#3l7ns7]
         approver_requester = _user("tr_selfapprove@example.com", "Fleet Manager")
         tr = self._new_tr(requested_by=approver_requester)
 
@@ -181,16 +181,16 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         tr.reload()
 
         frappe.set_user(approver_requester)
-        # SoD condition removes the transition for the requester themselves.
+        # [#4z257m]
         self.assertNotIn("Authorize (Operations)", _actions(tr))
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(tr, "Authorize (Operations)")
 
-        # A different Fleet Manager CAN authorize the same request.
+        # [#gx1hr0]
         frappe.set_user(self.manager)
         self.assertIn("Authorize (Operations)", _actions(tr))
 
-    # --- Delegation of Authority: under-tier approver blocked ------------------
+    # [#brrn9k]
 
     def test_doa_under_tier_supervisor_blocked_on_ops_request(self):
         tr = self._big_worker_tr()
@@ -200,15 +200,15 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         apply_workflow(tr, "Validate")
         tr.reload()
 
-        # needs_operations gates OFF the Regional (Fleet Supervisor) path; the
-        # supervisor is left with no authorize action.
+        # [#aup4he]
+        # [#95o1d8]
         frappe.set_user(self.supervisor)
         offered = _actions(tr)
         self.assertNotIn("Authorize (Regional)", offered)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(tr, "Authorize (Regional)")
 
-        # Only the Operations tier (Fleet Manager) can authorize it.
+        # [#4je7ml]
         frappe.set_user(self.manager)
         self.assertIn("Authorize (Operations)", _actions(tr))
         apply_workflow(tr, "Authorize (Operations)")
@@ -216,17 +216,17 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.status, "Approved")
 
     def test_regional_path_available_for_small_request(self):
-        # Mirror: a small request keeps the Regional (Supervisor) path open.
+        # [#gjuad9]
         tr = self._new_tr()
         frappe.set_user(self.supervisor)
         apply_workflow(tr, "Validate")
         tr.reload()
         frappe.set_user(self.supervisor)
-        # Supervisor != requester (requester is Fleet Project Manager), so SoD is
-        # satisfied and the Regional authorize is offered.
+        # [#qrada1]
+        # [#dsiw6t]
         self.assertIn("Authorize (Regional)", _actions(tr))
 
-    # --- post-submit transition is REACHABLE (the bug being fixed) -------------
+    # [#7hace9]
 
     def test_post_submit_transitions_reachable_via_workflow(self):
         tr = self._new_tr()
@@ -239,7 +239,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.status, "Approved")
         self.assertEqual(tr.docstatus, 1)
 
-        # The frozen-post-submit bug: these must now succeed on a docstatus=1 doc.
+        # [#zcfjrr]
         frappe.set_user(self.supervisor)
         self.assertIn("Schedule", _actions(tr))
         apply_workflow(tr, "Schedule")
@@ -253,7 +253,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.status, "Fulfilled")
         self.assertEqual(tr.docstatus, 1)
 
-    # --- cross-document drives -------------------------------------------------
+    # [#cmmi86]
 
     def _approved_tr(self):
         tr = self._new_tr()
@@ -306,11 +306,11 @@ class TestTransportRequestWorkflow(FrappeTestCase):
             "status": "Planned",
         }).insert(ignore_permissions=True)
 
-        # Status transitions are now owned by the native Dispatch Trip Workflow.
-        # Dispatch (draft -> draft), then stamp the completion fields while still a
-        # draft, then Complete (the submit transition, draft -> submitted) which
-        # fires on_submit: odometer + drive the TR to Fulfilled. Administrator
-        # drives the workflow here.
+        # [#fj9wto]
+        # [#c5m63k]
+        # [#p7e9je]
+        # [#nsd4f4]
+        # [#sh3252]
         apply_workflow(dt, "Dispatch")
         dt.reload()
         self.assertEqual(dt.status, "Dispatched")
@@ -328,9 +328,9 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.dispatch_trip, dt.name)
         self.assertEqual(tr.assigned_vehicle, vehicle)
 
-        # Cancelling the completed trip reverts the request to Scheduled (system
-        # reversal; workflows are forward-only). Cancel is the submitted ->
-        # cancelled workflow transition.
+        # [#ad4e8h]
+        # [#23mi2d]
+        # [#exfnu5]
         apply_workflow(dt, "Cancel")
         dt.reload()
         self.assertEqual(dt.status, "Cancelled")
@@ -357,7 +357,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
             }).insert(ignore_permissions=True).name
         return d
 
-    # --- the QR / web-form draft-insert path still works -----------------------
+    # [#hyt0ak]
 
     def test_web_form_draft_insert_starts_at_initial_state(self):
         from apex_habitat.salis.web_form.transport_request.transport_request import (

@@ -17,8 +17,8 @@ class TestProjectScoping(FrappeTestCase):
         frappe.set_user("Administrator")
         cls.pa = cls._project("Scope A")
         cls.pb = cls._project("Scope B")
-        cls.sup = _user("scope_sup@example.com", "Fleet Supervisor")   # scoped
-        cls.mgr = _user("scope_mgr@example.com", "Fleet Manager")      # unscoped
+        cls.sup = _user("scope_sup@example.com", "Fleet Supervisor")   # [#pv84q9]
+        cls.mgr = _user("scope_mgr@example.com", "Fleet Manager")      # [#f1j142]
         if not frappe.db.exists("User Permission",
                                 {"allow": "Project", "for_value": cls.pa, "user": cls.sup}):
             frappe.get_doc({"doctype": "User Permission", "allow": "Project",

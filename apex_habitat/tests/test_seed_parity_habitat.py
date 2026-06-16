@@ -46,8 +46,8 @@ class TestKanbanBoardSpec(unittest.TestCase):
     def test_spec_metadata(self):
         spec = _spec("Kanban Board")
         self.assertEqual(spec["doctype"], "Kanban Board")
-        # Kanban Board auto-names from kanban_board_name, so the existence guard
-        # matches on that field rather than ``name``.
+        # [#6zq2al]
+        # [#33ttx2]
         self.assertEqual(spec["key"], "kanban_board_name")
         self.assertTrue(spec["create_only"])
 
@@ -68,8 +68,8 @@ class TestAutoEmailReportNotExternalised(unittest.TestCase):
         self.assertEqual(load_specs("habitat", only=["Auto Email Report"]), [])
 
     def test_legacy_seeder_resolves_dynamic_fields(self):
-        # Pin the reason: the seeder builds email_to and report_type from the
-        # live database, so they are not static constants.
+        # [#6yr8qk]
+        # [#bdfdlw]
         import inspect
 
         from apex_habitat.apex_core.setup.seeders import habitat_auto_email_reports_seed as auto_email_reports_seed

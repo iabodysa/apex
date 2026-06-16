@@ -21,7 +21,7 @@ class TestHousingSupervisorScope(FrappeTestCase):
         with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
             P, "_allowed_buildings", return_value=["BLDG-1"]
         ):
-            # list/report WHERE fragment confines to the allowed building(s)
+            # [#m7luyx]
             cond = P._building_condition(user="sup")
             self.assertIn("BLDG-1", cond)
             self.assertIn("`building`", cond)
@@ -31,14 +31,14 @@ class TestHousingSupervisorScope(FrappeTestCase):
                     frappe._dict(doctype=dt, **kw), "read", user="sup"
                 )
 
-            # transactions: in-scope defers (None), out-of-scope blocks (False)
+            # [#ja5exi]
             self.assertIsNone(hp("Custody Issue", building="BLDG-1"))
             self.assertFalse(hp("Custody Issue", building="BLDG-2"))
             self.assertIsNone(hp("Accommodation Assignment", building="BLDG-1"))
             self.assertFalse(hp("Cleaning Log", building="BLDG-2"))
-            # a building-less record is denied (mirrors the list query)
+            # [#j2hedt]
             self.assertFalse(hp("Cleaning Log", building=None))
-            # the building itself is scoped on its own name
+            # [#7ejbh2]
             self.assertIsNone(hp("Accommodation Building", name="BLDG-1"))
             self.assertFalse(hp("Accommodation Building", name="BLDG-2"))
 

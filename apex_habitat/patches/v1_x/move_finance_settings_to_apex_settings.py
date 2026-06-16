@@ -21,7 +21,7 @@ PRUNE (remove module + the patches.txt line) once every deployed site has run it
 
 import frappe
 
-# field -> the Apex Settings factory default to treat as "unset / safe to overwrite"
+# [#9684r2]
 MOVED_FIELDS = {
     "default_payment_method": "Payment Entry",
     "enable_gl_posting": "0",
@@ -38,9 +38,9 @@ def execute():
         changed = False
 
         for field, factory_default in MOVED_FIELDS.items():
-            # Read the lingering value straight from tabSingles. The field is no
-            # longer in the Habitat Settings meta, so get_single_value() would
-            # throw "Field ... does not exist"; the query builder does not.
+            # [#jod0jh]
+            # [#kxbubb]
+            # [#1hzmot]
             rows = (
                 frappe.qb.from_(singles)
                 .select(singles.value)
@@ -52,8 +52,8 @@ def execute():
 
             old_value = rows[0][0]
 
-            # Only adopt the old value if Apex Settings is still at its factory
-            # default (i.e. an admin has not already set it on the new home).
+            # [#7tl274]
+            # [#huuala]
             current = apex.get(field)
             current_str = "" if current is None else str(current)
             if old_value not in (None, "") and current_str == str(factory_default):
@@ -63,15 +63,15 @@ def execute():
         if changed:
             apex.save(ignore_permissions=True)  # audit-ok
 
-        # Delete the orphan rows so the dropped fields leave no residue and a
-        # re-run is a pure no-op.
+        # [#6kca52]
+        # [#mdh4wd]
         frappe.qb.from_(singles).delete().where(
             (singles.doctype == "Habitat Settings")
             & (singles.field.isin(list(MOVED_FIELDS)))
         ).run()
         frappe.db.commit()
     except Exception:
-        # A migration patch must NEVER crash migrate — log and continue.
+        # [#nxnov8]
         frappe.db.rollback()
         frappe.log_error(
             title="move_finance_settings_to_apex_settings failed",

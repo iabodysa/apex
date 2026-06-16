@@ -3,7 +3,7 @@ import frappe
 
 
 MAINTENANCE_MATERIAL_CATALOG = [
-    # Electrical (13)
+    # [#7r3ev6]
     {"material_name": "Electrical Wires and Cables", "material_category": "Electrical", "default_uom": "Meter"},
     {"material_name": "Distribution Board", "material_category": "Electrical", "default_uom": "Piece"},
     {"material_name": "Electrical Junction Boxes", "material_category": "Electrical", "default_uom": "Piece"},
@@ -17,7 +17,7 @@ MAINTENANCE_MATERIAL_CATALOG = [
     {"material_name": "LED Bulbs", "material_category": "Electrical", "default_uom": "Piece"},
     {"material_name": "LED Strip Lights", "material_category": "Electrical", "default_uom": "Meter"},
     {"material_name": "Wall/Ceiling Lights", "material_category": "Electrical", "default_uom": "Piece"},
-    # Air Conditioning (10)
+    # [#4vsglu]
     {"material_name": "Compressor", "material_category": "Air Conditioning", "default_uom": "Piece"},
     {"material_name": "Capacitor", "material_category": "Air Conditioning", "default_uom": "Piece"},
     {"material_name": "Contactor", "material_category": "Air Conditioning", "default_uom": "Piece"},
@@ -28,13 +28,13 @@ MAINTENANCE_MATERIAL_CATALOG = [
     {"material_name": "Fan Motor", "material_category": "Air Conditioning", "default_uom": "Piece"},
     {"material_name": "Louvers", "material_category": "Air Conditioning", "default_uom": "Piece"},
     {"material_name": "Air Filters", "material_category": "Air Conditioning", "default_uom": "Piece"},
-    # Plumbing (5)
+    # [#9dzmyg]
     {"material_name": "Thermal Pipes", "material_category": "Plumbing", "default_uom": "Meter"},
     {"material_name": "PVC Sewage Pipes", "material_category": "Plumbing", "default_uom": "Meter"},
     {"material_name": "Fittings", "material_category": "Plumbing", "default_uom": "Piece"},
     {"material_name": "Burial Valves", "material_category": "Plumbing", "default_uom": "Piece"},
     {"material_name": "Pipe Glue", "material_category": "Plumbing", "default_uom": "Can"},
-    # Sanitary Fixtures (10)
+    # [#2kni4e]
     {"material_name": "Sink Basins", "material_category": "Sanitary Fixtures", "default_uom": "Piece"},
     {"material_name": "Toilets", "material_category": "Sanitary Fixtures", "default_uom": "Piece"},
     {"material_name": "Bathtub or Shower Box", "material_category": "Sanitary Fixtures", "default_uom": "Piece"},

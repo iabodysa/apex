@@ -5,10 +5,10 @@ only on that driver's records; the client never supplies the driver id."""
 import frappe
 from frappe import _
 
-# Salis "staff" roles — desk operators who manage the fleet rather than drive it.
-# An unlinked user holding any of these is greeted as staff (not an error) and is
-# offered the relevant desk links below. Kept in sync with the page/workspace role
-# lists; this is a *display* hint only — every action endpoint stays driver-scoped.
+# [#hwcpol]
+# [#bwtavl]
+# [#sjjo1m]
+# [#e3hbs8]
 STAFF_ROLES = (
 	"Fleet Manager",
 	"Fleet Project Manager",
@@ -69,20 +69,20 @@ def _staff_links(user=None):
 	roles = set(frappe.get_roles(user))
 	links = []
 
-	# Salis workspace — any staff role.
+	# [#lprxhy]
 	if user == "Administrator" or roles & set(STAFF_ROLES):
 		links.append({"label": "Salis Workspace", "url": "/app/salis"})
 
-	# Dispatch Board — operations roles that run dispatch.
+	# [#gqu67m]
 	dispatch_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Fleet Supervisor"}
 	if user == "Administrator" or roles & dispatch_roles:
 		links.append({"label": "Dispatch Board", "url": "/app/salis-dispatch-board"})
 
-	# Transport Request list — gated by real DocType read permission.
+	# [#6wnlp4]
 	if frappe.has_permission("Transport Request", "read", user=user):
 		links.append({"label": "Transport Requests", "url": "/app/transport-request"})
 
-	# Fuel Approval Console — finance/fleet approval roles.
+	# [#lu946y]
 	fuel_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Finance Manager"}
 	if user == "Administrator" or roles & fuel_roles:
 		links.append({"label": "Fuel Approval Console", "url": "/app/fuel-approval-console"})
@@ -107,7 +107,7 @@ def get_driver_context():
 	bare error. Action endpoints remain strictly driver-scoped (unchanged)."""
 	user = frappe.session.user
 	if not _portal_enabled():
-		# Even disabled, tell a staff user how to reach the desk.
+		# [#5i4l5k]
 		staff = _is_staff(user)
 		return {
 			"enabled": False,
@@ -133,9 +133,9 @@ def get_driver_context():
 		["name", "full_name", "status", "current_vehicle", "license_expiry"],
 		as_dict=True,
 	)
-	# Stringify date fields so the HTTP JSON response always serializes. A raw
-	# date object can 500 the bootstrap call, which the SPA previously mis-rendered
-	# as "not linked to a driver profile".
+	# [#pr5ip2]
+	# [#3qlhn1]
+	# [#n2an9e]
 	if d and d.get("license_expiry"):
 		d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
 	return {"enabled": True, "linked": True, "driver": d}
@@ -178,7 +178,7 @@ def get_my_vehicle():
 	vehicle = frappe.db.get_value("Salis Driver", driver, "current_vehicle")
 	assignment = None
 	if not vehicle:
-		# Fall back to an Active Vehicle Assignment for this driver.
+		# [#5pin6i]
 		assignment = frappe.db.get_value(
 			"Vehicle Assignment",
 			{"driver": driver, "status": "Active"},
@@ -197,9 +197,9 @@ def get_my_vehicle():
 		as_dict=True,
 	) or {}
 
-	# Surface the active-assignment start date when available (either the matched
-	# fallback assignment, or — when the vehicle came from current_vehicle — the
-	# driver's Active Vehicle Assignment for that same vehicle, if one exists).
+	# [#mhdkx4]
+	# [#lu2zhh]
+	# [#nkqese]
 	if assignment is None:
 		assignment = frappe.db.get_value(
 			"Vehicle Assignment",
@@ -374,8 +374,8 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 	vehicle = vehicle or frappe.db.get_value("Salis Driver", driver, "current_vehicle")
 	if not vehicle:
 		frappe.throw(_("No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel."))
-	# Never trust a client-supplied vehicle: it must actually be bound to this
-	# driver (their current vehicle or an Active Vehicle Assignment).
+	# [#b0uhw7]
+	# [#p28734]
 	if not _vehicle_bound_to_driver(driver, vehicle):
 		frappe.throw(
 			_("That vehicle is not assigned to you. You can only request fuel for your own vehicle."),
@@ -427,8 +427,8 @@ def raise_support_ticket(category, priority, subject, description):
 		"description": description,
 		"status": "Open",
 	}
-	# Only set the masters when they exist as seeded records, so a partially
-	# seeded site never trips Link validation on insert.
+	# [#avcj71]
+	# [#e0dia3]
 	if category and frappe.db.exists("Issue Type", category):
 		data["issue_type"] = category
 	if priority and frappe.db.exists("Issue Priority", priority):

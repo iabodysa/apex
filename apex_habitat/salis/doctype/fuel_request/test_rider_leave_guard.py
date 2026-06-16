@@ -111,7 +111,7 @@ class TestRiderLeaveGuard(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # ------------------------------------------------------------------ util
+    # [#gupim5]
 
     def test_active_rider_is_not_blocked(self):
         driver = _driver("T119 Active Rider", status="Active")
@@ -135,14 +135,14 @@ class TestRiderLeaveGuard(FrappeTestCase):
         if not frappe.db.exists("DocType", "Employee"):
             self.skipTest("Employee DocType not installed on this bench.")
         emp = self._left_employee("T119 Left Emp")
-        # Driver itself Active, but the linked Employee is Left -> blocked.
+        # [#5oqmo6]
         driver = _driver("T119 EmpLeft Rider", status="Active", employee=emp)
         reason = rider_block_reason(driver)
         self.assertTrue(
             reason, "A rider linked to a Left Employee must be blocked."
         )
 
-    # --------------------------------------------------------- controllers
+    # [#kvoqh4]
 
     def test_fuel_request_rejected_for_onleave_rider(self):
         driver = _driver("T119 Fuel OnLeave", status="On Leave", supervisor=self.supervisor)
@@ -161,7 +161,7 @@ class TestRiderLeaveGuard(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             fr.insert(ignore_permissions=True)
 
-        # ... and the supervisor clearance task was opened (idempotently).
+        # [#fg9kbo]
         todos = _open_clearance_todos(driver)
         self.assertTrue(
             todos, "An on-leave rider's fuel request must open a clearance ToDo."
@@ -222,7 +222,7 @@ class TestRiderLeaveGuard(FrappeTestCase):
                 "status": "Pending",
             }
         )
-        fr.insert(ignore_permissions=True)  # must not raise
+        fr.insert(ignore_permissions=True)  # [#3vfaf1]
         self.assertTrue(fr.name)
         self.assertFalse(
             _open_clearance_todos(driver),
@@ -242,7 +242,7 @@ class TestRiderLeaveGuard(FrappeTestCase):
         )
         self.addCleanup(lambda: self._purge_todos(driver))
 
-    # ------------------------------------------------------------------ helpers
+    # [#4lslw6]
 
     @staticmethod
     def _left_employee(name):
@@ -261,7 +261,7 @@ class TestRiderLeaveGuard(FrappeTestCase):
                 "gender": "Male",
                 "date_of_birth": "1990-01-01",
                 "date_of_joining": add_days(today(), -3650),
-                # ERPNext requires a relieving date for a Left employee.
+                # [#azgwcf]
                 "relieving_date": add_days(today(), -1),
             }
         )

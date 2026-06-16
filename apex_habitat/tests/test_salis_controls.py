@@ -88,9 +88,9 @@ class TestPaymentRequestSoD(FrappeTestCase):
             u.insert(ignore_permissions=True)
         else:
             u = frappe.get_doc("User", email)
-        # Finance Manager (to approve) plus an operational maker role (to raise /
-        # submit-to-finance), so the only thing standing between a requester and
-        # self-approval is the SoD condition, not a role gap.
+        # [#q8fhd5]
+        # [#msrql2]
+        # [#iy2eic]
         for role in ("Finance Manager", "Fleet Project Manager"):
             if role not in frappe.get_roles(email):
                 u.add_roles(role)
@@ -114,7 +114,7 @@ class TestPaymentRequestSoD(FrappeTestCase):
         doc = self._pending_request_by(self.fin1)
         self.assertEqual(doc.requested_by, self.fin1)
         frappe.set_user(self.fin1)
-        # The SoD condition removes the approve transition for the requester.
+        # [#gy1ytr]
         self.assertNotIn("Approve (Finance)", {t.action for t in get_transitions(doc)})
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(doc, "Approve (Finance)")
@@ -129,7 +129,7 @@ class TestPaymentRequestSoD(FrappeTestCase):
         self.assertEqual(doc.status, "Approved by Finance")
         self.assertEqual(doc.docstatus, 1)
         self.assertEqual(doc.finance_approved_by, self.fin2)
-        # Approve (Finance) submits the document; cancel before deleting.
+        # [#d8k6ig]
         frappe.set_user("Administrator")
         doc.reload()
         doc.cancel()

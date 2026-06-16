@@ -20,9 +20,9 @@ Routes are verified against the shipped artifacts:
 
 import frappe
 
-# Same shape as Habitat's _LINKS: label-keyed, additive, is_standard = 0 so the
-# customer can remove them. Workspace + key operational page reachable in one click;
-# native Ctrl+/ keyboard shortcuts continue to surface these routes unchanged.
+# [#d28ra0]
+# [#26uf6u]
+# [#g6svkr]
 _LINKS = [
     {"item_label": "Apex Salis — Movement & Fleet", "item_type": "Route", "route": "/app/salis"},
     {"item_label": "Apex Salis — Dispatch Board", "item_type": "Route", "route": "/app/salis-dispatch-board"},
@@ -51,10 +51,10 @@ def seed_salis_navbar_help_links():
             settings.save(ignore_permissions=True)  # audit-ok
             frappe.db.commit()
     except Exception:
-        # Log FIRST so the error row is never discarded. This only ever does a
-        # single Single.save() (committed in the try), so on failure there is no
-        # partial work of ours to undo — a global rollback() would only discard
-        # unrelated pending writes from the surrounding seed run, so we don't.
+        # [#fck130]
+        # [#29qada]
+        # [#14styk]
+        # [#rf3xdh]
         frappe.log_error(
             title="seed_salis_navbar_help_links failed",
             message=frappe.get_traceback(),

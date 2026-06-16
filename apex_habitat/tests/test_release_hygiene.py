@@ -31,19 +31,19 @@ HOOKS_PY = os.path.join(APP_ROOT, "hooks.py")
 ARABIC = re.compile(r"[؀-ۿ]")
 PLACEHOLDER = re.compile(r"\{\d+")
 
-# Brand / proper-noun source strings that legitimately stay in Latin script even
-# in the Arabic column — a brand mark is shown verbatim, not transliterated
-# (the Arabic translation keeps the Latin brand token verbatim inside the text).
-# Keep this set tiny and explicit; it is the ONLY exception to "every row has
-# Arabic". An entry here must be a genuine proper noun, not English left
-# untranslated.
+# [#a8nbmj]
+# [#id9zro]
+# [#iqg0f5]
+# [#ao90el]
+# [#1744ic]
+# [#jkrr5g]
 LATIN_BRAND_SOURCES = {"AFMCO"}
 
-# A role name is "test-shaped" if the substring "test" appears (case-insensitive)
-# as a standalone word, OR it is one of the known Frappe-core test fixtures.
-# Frappe ships these in frappe/core/doctype/role/test_records.json and only
-# creates them when its own test suite runs on a site; the app must never
-# package or declare any of them.
+# [#kt9842]
+# [#9nvgmn]
+# [#kqn355]
+# [#kslw0f]
+# [#h6ru9t]
 TEST_ROLE_RE = re.compile(r"(?:^|[\s_])test(?:$|[\s_0-9])", re.IGNORECASE)
 KNOWN_FRAPPE_TEST_ROLES = {
     "_Test Role",
@@ -73,7 +73,7 @@ def _expected_naming_rule(autoname):
         return 'By "Naming Series" field'
     if a.startswith("format:"):
         return "Expression"
-    if re.search(r"\.#+", a):  # old-style series embedded in autoname, e.g. "TFL-.######"
+    if re.search(r"\.#+", a):  # [#abkkxs]
         return "Expression (old style)"
     return None
 
@@ -175,7 +175,7 @@ class TestNoTestRolesShipped(unittest.TestCase):
                 exec(compile(fh.read(), path, "exec"), ns)  # noqa: S102 (trusted, in-repo)
             self.assertIn(const, ns, f"{rel} no longer defines {const}")
             for entry in ns[const]:
-                # SALIS_ROLES holds (name, ...) tuples; the others hold names.
+                # [#l3aot2]
                 name = entry[0] if isinstance(entry, (tuple, list)) else entry
                 roles.add(name)
         return roles
@@ -196,10 +196,10 @@ class TestNoTestRolesShipped(unittest.TestCase):
                 continue
             with open(path, encoding="utf-8") as fh:
                 text = fh.read()
-            # "roles": [ ... ] used by dashboard/notification seeds.
+            # [#fs6juk]
             for m in re.finditer(r'"roles"\s*:\s*(\[[^\]]*\])', text):
                 roles.update(quoted.findall(m.group(1)))
-            # hooks.py Role fixtures: {"dt": "Role", "filters": [["name", "in", [...]]]}
+            # [#a148rs]
             for m in re.finditer(
                 r'"dt"\s*:\s*"Role".*?\[\s*"name"\s*,\s*"in"\s*,\s*(\[[^\]]*\])',
                 text,
@@ -255,8 +255,8 @@ class TestNoTestRolesShipped(unittest.TestCase):
         return roles
 
     def test_detector_recognises_known_fixtures(self):
-        # Guard the guard: the matcher must flag the names we are protecting
-        # against, and must NOT flag the real business roles the app ships.
+        # [#cu9j0q]
+        # [#e1z5m4]
         for bad in ("_Test Role", "_Test Role 4", "Test Role", "Some test role"):
             self.assertTrue(_is_test_role(bad), f"should flag {bad!r}")
         for good in (
@@ -276,8 +276,8 @@ class TestNoTestRolesShipped(unittest.TestCase):
 
     def test_app_source_declares_no_seed_or_fixture_test_role(self):
         declared = self._all_declared_roles()
-        # Sanity: the scan must actually find the app's real roles, otherwise a
-        # silent parse regression could make this guard vacuously pass.
+        # [#fpl0a6]
+        # [#o6hh9s]
         self.assertIn("Fleet Manager", declared, "role scan found nothing — parser broke")
         offenders = sorted(r for r in declared if _is_test_role(r))
         self.assertEqual(
@@ -311,7 +311,7 @@ class TestNamingRuleConsistency(unittest.TestCase):
         return out
 
     def test_scan_finds_doctypes(self):
-        # Guard the guard: a parser regression must not make this vacuously pass.
+        # [#d0qoco]
         names = {n for n, _, _ in self._doctypes()}
         self.assertIn("Accommodation Bed", names, "DocType scan found nothing — parser broke")
 
@@ -354,11 +354,11 @@ class TestNoFutureDatedModified(unittest.TestCase):
     def test_no_modified_in_the_future(self):
         import datetime
 
-        # `modified` strings are naive and are often stamped in LOCAL time, while
-        # CI runs in UTC — a naive compare to "now" would flag a stamp made a few
-        # hours ago in a UTC+N zone as "future". Tolerate 2 days of skew (well
-        # above any timezone offset) so the guard only fires on the real defect:
-        # hand-authored dates DAYS/years ahead (the migrate-skip-trap).
+        # [#iw0xf8]
+        # [#31c34k]
+        # [#beshpr]
+        # [#9faicn]
+        # [#km2hsn]
         horizon = datetime.datetime.now() + datetime.timedelta(days=2)
         offenders = []
         for fp in glob.glob(os.path.join(APP_ROOT, "*", "**", "*.json"), recursive=True):

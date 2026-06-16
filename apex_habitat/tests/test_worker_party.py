@@ -20,8 +20,8 @@ import unittest
 
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
-# (relative json path, party_type reqd, party_type read_only, party read_only,
-#  party_type label, party label)
+# [#9fiaqz]
+# [#5zn7hs]
 DOCTYPE_SPECS = {
     "Accommodation Assignment": ("habitat/doctype/accommodation_assignment/accommodation_assignment.json", 1, 0, 0, "Resident Type", "Resident"),
     "Accommodation Checkout": ("habitat/doctype/accommodation_checkout/accommodation_checkout.json", 0, 1, 1, "Resident Type", "Resident"),
@@ -32,9 +32,9 @@ DOCTYPE_SPECS = {
     "Masar Worker Token": ("apex_core/doctype/masar_worker_token/masar_worker_token.json", 1, 0, 0, "Worker Type", "Worker"),
 }
 
-# Batch 3 — TIER-2 custody. (relative json path, Employee link fieldname). These use
-# "Worker Type"/"Worker" labels, an optional (not-reqd) party_type, an editable party,
-# and a read-only Employee link under a doctype-specific name.
+# [#o85oxg]
+# [#4sxjje]
+# [#cmx67n]
 CUSTODY_SPECS = {
     "Custody Issue": ("habitat/doctype/custody_issue/custody_issue.json", "issued_to_employee"),
     "Custody Return": ("habitat/doctype/custody_return/custody_return.json", "returned_by_employee"),
@@ -70,12 +70,12 @@ class TestPartyFieldsInSchema(unittest.TestCase):
             self.assertEqual(party.get("label"), party_label, f"{dt}: party label")
             self.assertEqual(bool(party.get("read_only")), bool(party_ro), f"{dt}: party read_only")
 
-            # employee is now a read-only mirror, never mandatory.
+            # [#308o1s]
             self.assertTrue(emp.get("read_only"), f"{dt}: employee must be read_only")
             self.assertFalse(emp.get("reqd"), f"{dt}: employee must not be reqd")
             self.assertEqual(emp.get("options"), "Employee", f"{dt}: employee.options changed")
 
-            # When an explicit field_order exists, the party pair must precede employee.
+            # [#jrtffz]
             if field_order:
                 for fn in ("party_type", "party", "employee"):
                     self.assertIn(fn, field_order, f"{dt}: {fn} missing from field_order")
@@ -102,7 +102,7 @@ class TestPartyFieldsInSchema(unittest.TestCase):
             self.assertEqual(party.get("label"), "Worker", f"{dt}: party label")
             self.assertFalse(party.get("read_only"), f"{dt}: custody party must stay editable")
 
-            # The Employee link is now a read-only mirror.
+            # [#lgvec7]
             self.assertTrue(emp.get("read_only"), f"{dt}: {emp_field} must be read_only")
             self.assertEqual(emp.get("options"), "Employee", f"{dt}: {emp_field}.options changed")
 
@@ -112,10 +112,10 @@ class TestPartyFieldsInSchema(unittest.TestCase):
                 self.assertLess(field_order.index("party"), field_order.index(emp_field), f"{dt}: party after {emp_field}")
 
 
-# --- helper logic ---------------------------------------------------------
-# Stub a minimal `frappe` only if one is not already importable (mirrors
-# tests/test_release_hygiene). Under bench the real frappe is used; standalone
-# the stub lets the pure mirror logic run with no live site.
+# [#f9d9bl]
+# [#8wsoyo]
+# [#bu8yhr]
+# [#p39gby]
 if "frappe" not in sys.modules:
     _fake = types.ModuleType("frappe")
 
@@ -160,7 +160,7 @@ class TestSyncPartyEmployee(unittest.TestCase):
         self.assertEqual(doc.employee, "HR-EMP-0001")
 
     def test_legacy_employee_backfills_party(self):
-        # A doc built directly (e.g. the daily cost engine) with only `employee`
+        # [#cvvot8]
         # set and no party_type: normalise to Employee, derive party.
         doc = _Doc(employee="HR-EMP-0002")
         sync_party_employee(doc)
@@ -178,11 +178,11 @@ class TestSyncPartyEmployee(unittest.TestCase):
 
     def test_require_party_passes_with_employee_only(self):
         doc = _Doc(employee="HR-EMP-0003")
-        sync_party_employee(doc, require_party=True)  # must not raise
+        sync_party_employee(doc, require_party=True)  # [#3vfaf1]
         self.assertEqual(doc.party, "HR-EMP-0003")
 
     def test_employee_field_param_mirrors_named_link(self):
-        # Batch 3: custody doctypes mirror party to a differently-named Employee link.
+        # [#fuzw50]
         doc = _Doc(party_type=PARTY_EMPLOYEE, party="HR-EMP-1", issued_to_employee=None)
         sync_party_employee(doc, employee_field="issued_to_employee")
         self.assertEqual(doc.issued_to_employee, "HR-EMP-1")
@@ -216,8 +216,8 @@ class TestTemporaryWorkerLink(unittest.TestCase):
             "Custody Return": "returned_by_employee",
             "Custody Damage Assessment": "employee",
         }
-        # The re-point map must cover exactly the party-bearing doctypes with the right
-        # Employee-mirror field, else linking would miss or mis-set a record.
+        # [#rm9c5a]
+        # [#g51kbi]
         self.assertEqual(PARTY_DOCTYPES, expected)
         all_paths = {dt: v[0] for dt, v in {**DOCTYPE_SPECS, **CUSTODY_SPECS}.items()}
         for dt, emp_field in PARTY_DOCTYPES.items():
@@ -241,7 +241,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
             src = fh.read()
         self.assertIn("party_type=None, party=None", src, "quick_check_in is not party-aware")
-        # The legacy `employee` alias must still be accepted (backward compatibility).
+        # [#7mg3jf]
         self.assertIn('party_type, party = "Employee", employee', src)
 
     def test_bed_has_is_temporary_flag(self):
@@ -256,7 +256,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn("def get_arrival_card(party_type=None, party=None, employee=None)", src)
         self.assertIn("def search_arrivals_workers(", src)
         self.assertIn("def register_temporary_worker(", src)
-        # The supervisor may register ONLY a Temporary Worker — never an Employee.
+        # [#15svuv]
         self.assertIn('"doctype": "Temporary Worker"', src)
         self.assertNotIn('"doctype": "Employee"', src)
 
@@ -265,10 +265,10 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
         ) as fh:
             js = fh.read()
-        # The read-only floor-map reuses the Front Desk reader, not a new endpoint.
+        # [#6ptkdp]
         self.assertIn("apex_habitat.habitat.api.front_desk.get_building_grid", js)
         self.assertIn("class ArrivalsDesk", js)
-        self.assertIn("arrivals-desk", js)  # scoped brand root
+        self.assertIn("arrivals-desk", js)  # [#lnoqyd]
 
     def test_arrivals_page_search_register_one_modal(self):
         with open(
@@ -277,7 +277,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             js = fh.read()
         self.assertIn("search_arrivals_workers", js)
         self.assertIn("register_temporary_worker", js)
-        # The design allows exactly ONE modal in the whole page — the passport register.
+        # [#32zn3u]
         self.assertEqual(js.count("new frappe.ui.Dialog"), 1, "Arrivals Desk must keep exactly one modal")
 
     def test_arrivals_page_houses_via_quick_check_in(self):
@@ -285,18 +285,18 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
         ) as fh:
             js = fh.read()
-        # Housing reuses the Front Desk writer with the active worker's native party.
+        # [#capvrx]
         self.assertIn("apex_habitat.habitat.api.front_desk.quick_check_in", js)
         self.assertIn("party_type: worker.party_type", js)
-        self.assertIn("this.cart", js)  # the session arrivals cart drives the later stages
+        self.assertIn("this.cart", js)  # [#py3nht]
 
     def test_over_capacity_mints_temporary_bed(self):
         with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
             src = fh.read()
         self.assertIn("def house_over_capacity(", src)
-        self.assertIn('"is_temporary": 1', src)  # the minted bed is flagged temporary
-        self.assertIn("quick_check_in", src)  # the cap is delegated to the assignment, not recomputed
-        # The grid must expose is_temporary so the floor-map can mark the virtual bed.
+        self.assertIn('"is_temporary": 1', src)  # [#823gp6]
+        self.assertIn("quick_check_in", src)  # [#c8bpuy]
+        # [#r94oxg]
         with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
             grid = fh.read()
         self.assertIn('"is_temporary": bed.is_temporary', grid)
@@ -307,9 +307,9 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         ) as fh:
             js = fh.read()
         self.assertIn("apex_habitat.habitat.api.custody_kiosk.issue_cart", js)
-        self.assertIn("Custody deferred", js)  # a Temporary Worker's custody is deferred, not posted
-        # Custody is a multi-item STORE cart (catalog + accumulate lines + issue once),
-        # not the old single-article get_list path.
+        self.assertIn("Custody deferred", js)  # [#ikrv9n]
+        # [#7ee3xf]
+        # [#lbkt3t]
         self.assertIn("custody_kiosk.get_kiosk_catalog", js)
         self.assertIn("_custody_lines", js)
         self.assertNotIn("get_list('Custody Article'", js)
@@ -318,12 +318,12 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
             src = fh.read()
         self.assertIn("def get_arrival_slip(", src)
-        self.assertIn("frappe.render_template", src)  # a print VIEW, not a Print Format doctype
+        self.assertIn("frappe.render_template", src)  # [#5i18u4]
         with open(
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
         ) as fh:
             js = fh.read()
-        # Group QR (one call for all housed Employees, no per-worker call, no popup).
+        # [#37bwkl]
         self.assertIn("batch_issue_worker_links", js)
         self.assertNotIn("show_worker_link_dialog", js)
         self.assertIn("get_arrival_slip", js)
@@ -333,16 +333,16 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         ) as fh:
             masar = fh.read()
         self.assertIn("def batch_issue_worker_links(", masar)
-        self.assertIn("def masar_qr_data_uri(", masar)  # the QR helper is now public
+        self.assertIn("def masar_qr_data_uri(", masar)  # [#hsla1f]
 
     def test_print_slips_terms_signature_and_qr(self):
         with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
             src = fh.read()
-        # Three signed print views (Jinja, no Print Format doctype) + embedded QR.
+        # [#ro6hpi]
         self.assertIn("def get_checkin_slip(", src)
         self.assertIn("def get_custody_handover_slip(", src)
-        self.assertIn("masar_qr_data_uri(_worker_link", src)  # the worker QR is embedded in the slip
-        self.assertNotIn("#00844e", src)  # neutral print colours (de-branded)
+        self.assertIn("masar_qr_data_uri(_worker_link", src)  # [#gp5a8y]
+        self.assertNotIn("#00844e", src)  # [#9n35yx]
         with open(
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
         ) as fh:
@@ -354,15 +354,15 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
     def test_grid_occupant_shows_party_name(self):
         with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
             src = fh.read()
-        # A housed Temporary Worker's occupant must show a name (its employee mirror is empty).
-        self.assertIn('"party_type", "party"', src)  # the grid fetches the party
-        self.assertIn("tw_names", src)  # resolved in one bulk Temporary Worker lookup
+        # [#oarm6k]
+        self.assertIn('"party_type", "party"', src)  # [#dsjafg]
+        self.assertIn("tw_names", src)  # [#7dxggs]
         self.assertIn("worker_name", src)
 
     def test_arrivals_page_no_orphan_dollar_refs(self):
-        # Regression guard: every `this.$x` USED in the page must also be CREATED.
-        # (The v1.34.0 rebuild dropped the this.$stages creation → a load-time crash
-        # that node --check could not catch.)
+        # [#mjnohm]
+        # [#5zp6th]
+        # [#dr4a2o]
         import re
 
         with open(
@@ -377,9 +377,9 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         with open(os.path.join(APP_ROOT, "patches", "v1_x", "ensure_web_form_route.py"), encoding="utf-8") as fh:
             src = fh.read()
         self.assertIn("def execute(", src)
-        self.assertIn('frappe.db.exists("Web Form"', src)  # guarded: a no-op when absent
+        self.assertIn('frappe.db.exists("Web Form"', src)  # [#nsadxz]
         self.assertIn("set_value", src)
-        self.assertNotIn("make_route_to_web_form(", src)  # must NOT call the v15-removed helper (prose mention is fine)
+        self.assertNotIn("make_route_to_web_form(", src)  # [#m183h0]
         with open(os.path.join(APP_ROOT, "patches.txt"), encoding="utf-8") as fh:
             self.assertIn("v1_x.ensure_web_form_route", fh.read())
 
@@ -388,9 +388,9 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
         ) as fh:
             js = fh.read()
-        self.assertIn("frappe.new_doc('Transport Request'", js)  # ONE request, reuses the form
-        self.assertIn("Unregistered manifest", js)  # TWs board via the trip's unregistered path
-        self.assertIn("party_type === 'Employee'", js)  # request passengers are Employees only
+        self.assertIn("frappe.new_doc('Transport Request'", js)  # [#csb2dv]
+        self.assertIn("Unregistered manifest", js)  # [#1us0bs]
+        self.assertIn("party_type === 'Employee'", js)  # [#glfm9i]
 
 
 if __name__ == "__main__":

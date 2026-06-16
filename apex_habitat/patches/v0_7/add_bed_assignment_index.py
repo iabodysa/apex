@@ -15,9 +15,9 @@ def execute():
     if not frappe.db.exists("DocType", "Accommodation Assignment"):
         return
 
-    # Add index on `bed` field. ADD INDEX IF NOT EXISTS is idempotent, so any
-    # exception here is a genuine failure (lock, missing column, etc.) and must
-    # be surfaced — not silently swallowed.
+    # [#5clrvg]
+    # [#nfgngf]
+    # [#c68fuh]
     try:
         frappe.db.sql(
             "ALTER TABLE `tabAccommodation Assignment` "
@@ -30,7 +30,7 @@ def execute():
         )
         raise
 
-    # Add composite index on (bed, docstatus, check_out_date) for occupancy queries
+    # [#trbyb1]
     try:
         frappe.db.sql(
             "ALTER TABLE `tabAccommodation Assignment` "

@@ -58,15 +58,15 @@ class TestDispatchTripWorkflow(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # A scoped supervisor + project manager (dispatch operators) and an
-        # unscoped Fleet Manager (completes / cancels).
+        # [#sojra9]
+        # [#qqch0y]
         cls.supervisor = _user("dtwf_sup@example.com", "Fleet Supervisor")
         cls.pmanager = _user("dtwf_pm@example.com", "Fleet Project Manager")
         cls.manager = _user("dtwf_mgr@example.com", "Fleet Manager")
         cls.project = cls._project("DT Workflow Project")
-        # Scoped operational roles (Fleet Supervisor / Fleet Project Manager) need
-        # a Project User Permission to read/transition project-scoped docs in the
-        # chain (Transport Request / Route Plan / Dispatch Trip).
+        # [#gpwqm1]
+        # [#8m4dvs]
+        # [#3b3fha]
         for u in (cls.supervisor, cls.pmanager):
             if not frappe.db.exists(
                 "User Permission",
@@ -85,7 +85,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # ------------------------------------------------------------------ helpers
+    # [#4lslw6]
 
     @staticmethod
     def _project(name):
@@ -135,7 +135,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
             "source_channel": "Desk",
             "status": "New",
         }).insert(ignore_permissions=True)
-        # Drive the TR through its own workflow to Approved.
+        # [#o8tsd4]
         frappe.set_user(self.supervisor)
         apply_workflow(tr, "Validate")
         tr.reload()
@@ -143,7 +143,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         apply_workflow(tr, "Authorize (Operations)")
         frappe.set_user("Administrator")
         tr.reload()
-        # Submitting a Route Plan drives the TR to Scheduled (cross-doc drive).
+        # [#kk6ux5]
         rp = frappe.get_doc({
             "doctype": "Route Plan",
             "route_name": "DT WF Route",
@@ -209,7 +209,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
                 "Transport Request", tr_name, ignore_permissions=True, force=True
             )
 
-    # ------------------------------------------------------------------ seeded
+    # [#4u2stk]
 
     def test_workflow_is_seeded_and_active(self):
         self.assertEqual(get_workflow_name("Dispatch Trip"), WORKFLOW)
@@ -217,7 +217,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.assertEqual(
             frappe.db.get_value("Workflow", WORKFLOW, "workflow_state_field"), "status"
         )
-        # Docstatus map: the submit point is Completed, the cancel is Cancelled.
+        # [#mh6twg]
         states = {
             s.state: s.doc_status
             for s in frappe.get_doc("Workflow", WORKFLOW).states
@@ -227,7 +227,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.assertEqual(states["Completed"], "1")
         self.assertEqual(states["Cancelled"], "2")
 
-    # ------------------------------------------------------------------ happy walk + cross-doc
+    # [#1kynk2]
 
     def test_walk_to_completed_drives_tr_to_fulfilled_and_updates_odometer(self):
         tr, rp = self._scheduled_tr()
@@ -236,7 +236,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         dt = self._new_trip(rp, vehicle, driver)
         self.assertEqual(dt.docstatus, 0)
 
-        # Planned --Dispatch--> Dispatched, by a scoped supervisor (role gate).
+        # [#574kc1]
         frappe.set_user(self.supervisor)
         self.assertIn("Dispatch", _actions(dt))
         apply_workflow(dt, "Dispatch")
@@ -244,14 +244,14 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.assertEqual(dt.status, "Dispatched")
         self.assertEqual(dt.docstatus, 0)
 
-        # Stamp the completion fields while still a draft (writable), then Complete.
+        # [#7vhwiz]
         dt.completion_notes = "Delivered on time."
         dt.odometer_start = 100
         dt.odometer_end = 260
         dt.save(ignore_permissions=True)
 
-        # Complete is the submit transition; a Fleet Supervisor lacks submit and is
-        # NOT offered it — only Fleet Project Manager / Fleet Manager.
+        # [#r3mmh1]
+        # [#c15jct]
         frappe.set_user(self.supervisor)
         self.assertNotIn("Complete", _actions(dt))
 
@@ -262,23 +262,23 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.assertEqual(dt.status, "Completed")
         self.assertEqual(dt.docstatus, 1)
 
-        # Cross-doc drive: the linked Transport Request reached Fulfilled.
+        # [#o7li2t]
         tr.reload()
         self.assertEqual(tr.status, "Fulfilled")
         self.assertEqual(tr.dispatch_trip, dt.name)
         self.assertEqual(tr.assigned_vehicle, vehicle)
         self.assertEqual(tr.assigned_driver, driver)
 
-        # Side-effect: vehicle odometer advanced to the trip end reading.
+        # [#l148va]
         self.assertEqual(
             frappe.db.get_value("Salis Vehicle", vehicle, "odometer"), 260
         )
-        # The Trip Fulfilment Ledger row was posted.
+        # [#en8des]
         self.assertTrue(
             frappe.db.exists("Trip Fulfilment Ledger", {"dispatch_trip": dt.name})
         )
 
-    # ------------------------------------------------------------------ cancel / call-off reversal
+    # [#22q2z9]
 
     def test_cancel_completed_trip_reverses_fulfilment(self):
         tr, rp = self._scheduled_tr()
@@ -300,7 +300,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
             frappe.db.exists("Trip Fulfilment Ledger", {"dispatch_trip": dt.name})
         )
 
-        # Cancel (submitted Completed -> Cancelled) fires on_cancel reversal.
+        # [#b9sbyw]
         dt.reload()
         frappe.set_user(self.manager)
         self.assertIn("Cancel", _actions(dt))
@@ -309,7 +309,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.assertEqual(dt.status, "Cancelled")
         self.assertEqual(dt.docstatus, 2)
 
-        # Reversal: TR rolled back Fulfilled -> Scheduled, link cleared, ledger gone.
+        # [#bxsj5q]
         tr.reload()
         self.assertEqual(tr.status, "Scheduled")
         self.assertIsNone(tr.dispatch_trip)
@@ -318,7 +318,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
             frappe.db.exists("Trip Fulfilment Ledger", {"dispatch_trip": dt.name})
         )
 
-    # ------------------------------------------------------------------ illegal jumps blocked
+    # [#jtx9ry]
 
     def test_illegal_jump_planned_to_completed_blocked(self):
         tr, rp = self._scheduled_tr()
@@ -326,7 +326,7 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         driver = self._driver("DT WF Driver 3")
         dt = self._new_trip(rp, vehicle, driver)
 
-        # From Planned, Complete is not offered (must go through Dispatched first).
+        # [#3cocd3]
         frappe.set_user(self.manager)
         offered = _actions(dt)
         self.assertIn("Dispatch", offered)
@@ -344,17 +344,17 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         dt = self._new_trip(rp, vehicle, driver)
 
         frappe.set_user(self.manager)
-        self.assertNotIn("Cancel", _actions(dt))  # Planned
+        self.assertNotIn("Cancel", _actions(dt))  # [#2zt7mp]
         apply_workflow(dt, "Dispatch")
         dt.reload()
         frappe.set_user(self.manager)
-        self.assertNotIn("Cancel", _actions(dt))  # Dispatched
+        self.assertNotIn("Cancel", _actions(dt))  # [#ct48fs]
 
-    # ------------------------------------------------------------------ initial-status guard kept
+    # [#5hxi9y]
 
     def test_insert_at_completed_blocked(self):
-        # The initial-status guard stays in the controller (the workflow cannot
-        # cover a direct insert at a later/terminal status).
+        # [#mofmwl]
+        # [#aannby]
         with self.assertRaises(frappe.ValidationError):
             frappe.get_doc(
                 {"doctype": "Dispatch Trip", "status": "Completed"}

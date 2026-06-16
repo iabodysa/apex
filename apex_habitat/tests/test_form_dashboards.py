@@ -22,7 +22,7 @@ class TestFormDashboards(ApexHabitatTestCase):
         self.assertIn("Native HR", labels, "native transactions must be preserved (merge, not replace)")
         self.assertIn("Custody", labels)
         self.assertEqual(out["non_standard_fieldnames"]["Custody Issue"], "issued_to_employee")
-        # the old no-arg signature would TypeError here:
+        # [#tg0lpn]
         self.assertIsInstance(employee_links.get_data(data=None), dict)
 
     def test_supplier_override_merges_native(self):

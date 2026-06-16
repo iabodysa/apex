@@ -1,8 +1,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Prevent Frappe test runner from recursively resolving Link-field dependencies
-# on external DocTypes that require ERPNext (not installed in CI bench).
+# [#hlfy1g]
+# [#rf8fpd]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -76,7 +76,7 @@ class TestBuildingLicense(FrappeTestCase):
             "expiry_date": "2027-01-01",
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
-        # Not a renewal yet — no forward extension has happened.
+        # [#s41pv8]
         self.assertFalse(doc.last_renewal_date)
 
         doc.expiry_date = "2028-01-01"
@@ -106,13 +106,13 @@ class TestBuildingLicense(FrappeTestCase):
         })
         original.flags.ignore_links = True
         original.insert(ignore_permissions=True, ignore_links=True)
-        # Walk the real lifecycle: submit then cancel, so the native
-        # validate_amended_from guard (original must be cancelled) is satisfied.
+        # [#cprgny]
+        # [#5gsorl]
         original.submit()
         original.cancel()
 
-        # The amended copy: a brand-new doc pointing back at the cancelled
-        # original via amended_from, carrying a later expiry.
+        # [#sz534a]
+        # [#mtxop4]
         amended = frappe.get_doc({
             "doctype": "Building License",
             "naming_series": "BLDG-LIC-.YYYY.-.####",
@@ -152,9 +152,9 @@ class TestBuildingLicense(FrappeTestCase):
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
 
-        # Drive the same computation renew() performs, then save with links ignored
-        # (the renew() endpoint itself does a plain save, which the QA bench's
-        # missing masters would reject — not a defect in the renewal logic).
+        # [#nvwz0c]
+        # [#cydubm]
+        # [#m6d8u3]
         from frappe.utils import getdate, add_days
         target = getdate(add_days(doc.expiry_date, 30))
         doc.expiry_date = target
@@ -167,7 +167,7 @@ class TestBuildingLicense(FrappeTestCase):
         self.assertEqual(getdate(doc.expiry_date), target)
         self.assertEqual(str(doc.last_renewal_date), today())
         self.assertEqual(doc.status, "Active")
-        # Sanity: the whitelisted endpoint exists and is callable.
+        # [#40vubu]
         self.assertTrue(callable(blc.renew))
 
         frappe.delete_doc("Building License", doc.name, force=True, ignore_permissions=True)

@@ -41,9 +41,9 @@ class TestResidentRequestCoordinatorPerms(unittest.TestCase):
     def setUp(self):
         self.perms = _load_perms()
 
-    # ------------------------------------------------------------------ #
-    # New rows — Resident Request Coordinator                              #
-    # ------------------------------------------------------------------ #
+    # [#b52sau]
+    # [#4id7pq]
+    # [#b52sau]
 
     def test_permlevel0_row_present(self):
         rows = _rows_for(self.perms, ROLE, 0)
@@ -72,9 +72,9 @@ class TestResidentRequestCoordinatorPerms(unittest.TestCase):
         self.assertEqual(row.get("read"), 1)
         self.assertEqual(row.get("write"), 1)
 
-    # ------------------------------------------------------------------ #
-    # Regression — existing roles untouched                               #
-    # ------------------------------------------------------------------ #
+    # [#b52sau]
+    # [#78g71j]
+    # [#b52sau]
 
     def test_existing_permlevel0_roles_still_present(self):
         for role in ("System Manager", "Accommodation Manager", "Resident Supervisor"):
@@ -91,7 +91,7 @@ class TestResidentRequestCoordinatorPerms(unittest.TestCase):
         self.assertEqual(row.get("delete"), 1, "System Manager permlevel-0 delete must remain")
 
     def test_total_perm_rows(self):
-        # 3 existing roles × 2 levels + 1 new role × 2 levels = 8 rows
+        # [#slfng9]
         self.assertEqual(len(self.perms), 8)
 
 

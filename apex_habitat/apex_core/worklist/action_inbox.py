@@ -24,9 +24,9 @@ from frappe.model.workflow import get_workflow_name, get_workflow_state_field
 @frappe.whitelist()
 def get_pending_actions() -> dict:
     """Return ``{workflow_actions, todos}`` awaiting the current user's action."""
-    # Source 1 — workflow approvals. frappe.get_list (NOT get_all) so the framework's
-    # get_permission_query_conditions scopes the rows to the user's permitted roles +
-    # status='Open'. limit_page_length is explicit (the default of 20 would truncate).
+    # [#7n7s89]
+    # [#n0xjk5]
+    # [#nvep0i]
     workflow_actions = frappe.get_list(
         "Workflow Action",
         filters={"status": "Open"},
@@ -38,9 +38,9 @@ def get_pending_actions() -> dict:
     for wa in workflow_actions:
         wa["source"] = "workflow"
 
-    # Source 2 — open assignments to this user that point at a real document
-    # (reference_type set drops note-only ToDos; allocated_to=self drops tasks the
-    # user assigned to others).
+    # [#qf8dlw]
+    # [#slbsck]
+    # [#f9av3c]
     todos = frappe.get_list(
         "ToDo",
         filters={
@@ -94,12 +94,12 @@ def _drop_stale(rows: list) -> list:
 
     kept: list = []
     for doctype, group in by_doctype.items():
-        # A retired/renamed reference DocType (its record is gone) leaves permanently
-        # orphaned Open actions whose controller can no longer be imported — returning
-        # them crashes the inbox the instant the desk fetches their transitions
-        # (frappe.model.workflow.get_transitions -> get_controller -> ImportError). Drop
-        # them here so the inbox can never crash on an orphan; the daily
-        # cleanup_orphaned_workflow_actions (Case C) purges the rows for good.
+        # [#rimoiv]
+        # [#gefs8a]
+        # [#6ygxts]
+        # [#r12vl5]
+        # [#r8vjbg]
+        # [#b7o40z]
         if not frappe.db.exists("DocType", doctype):
             frappe.logger().info(
                 f"action_inbox: dropped {len(group)} Open action(s) for missing DocType {doctype!r}"
@@ -109,7 +109,7 @@ def _drop_stale(rows: list) -> list:
             workflow = get_workflow_name(doctype)
             state_field = get_workflow_state_field(workflow) if workflow else None
             if not state_field:
-                kept.extend(group)  # no active workflow/state field — cannot verify, keep
+                kept.extend(group)  # [#o4elq9]
                 continue
             names = [r["reference_name"] for r in group]
             live = {

@@ -41,15 +41,15 @@ from apex_habitat.tests._helpers import _user
 
 LEDGER = "Rental Accrual Ledger"
 
-# Keep the Frappe runner from auto-building test records for Link-field deps that
-# pull in ERPNext finance DocTypes not present in the CI bench. The new
-# ``rental_settlement`` link on this ledger introduces a Rental Settlement ->
-# Salis Payment Request -> Payment Entry -> Payment Gateway chain that the
-# dependency walker would otherwise try to materialise (Payment Gateway is not
-# installed). These tests build their own Rental Settlement / accrual rows
-# explicitly, so the auto-record dependency on that whole subtree is pruned here
-# (Rental Settlement at the top severs the chain). Mirrors the colocated fuel
-# ledger test's test_ignore.
+# [#mj7593]
+# [#eca33h]
+# [#ok0ooj]
+# [#lwvkn2]
+# [#8tefmd]
+# [#8y9mwu]
+# [#99n9wo]
+# [#mxnlt6]
+# [#3ed32j]
 test_ignore = [
     "Company",
     "Cost Center",
@@ -73,25 +73,25 @@ def _settled(name):
 class TestRentalSettlementReconciliation(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # Masters are (re)materialised per-test, not in setUpClass: FrappeTestCase
-        # rolls the whole connection back after each test, which would wipe
-        # uncommitted setUpClass inserts and leave later tests with dangling
-        # Link targets. get-or-create here is rollback-safe and idempotent.
+        # [#r0obfv]
+        # [#euo7k6]
+        # [#a0hzc7]
+        # [#2uqvup]
         self.requester = _user("ral_req@example.com", "Fleet Project Manager")
         self.manager = _user("ral_mgr@example.com", "Fleet Manager")
         self.finance = _user("ral_fin@example.com", "Finance Manager")
         self.office = self._office("RAL Recon Office")
         self.other_office = self._office("RAL Other Office")
         self.vehicle = self._vehicle("RAL RECON 1")
-        # A fixed in-period day (first of the current month) so the period window
-        # always contains the seeded accrual rows regardless of the run date.
+        # [#3trrm7]
+        # [#469h3w]
         self.period = today()[:7]
         self.accrual_date = str(get_first_day(getdate(today())))
 
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # --- builders ------------------------------------------------------------
+    # [#4k5omo]
 
     @staticmethod
     def _office(name):
@@ -157,7 +157,7 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         frappe.set_user("Administrator")
         if not frappe.db.exists("Rental Settlement", name):
             return
-        # Release any rows still linked so the delete leaves no dangling link.
+        # [#pvn9zo]
         rental_engine.release_settlement(name)
         doc = frappe.get_doc("Rental Settlement", name)
         if doc.docstatus == 1:
@@ -196,11 +196,11 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         rs.reload()
         return rs
 
-    # --- stamp on approve ----------------------------------------------------
+    # [#es8hhg]
 
     def test_approve_stamps_office_period_rows_only(self):
-        # Two rows in the target office+period, one in another office, one in the
-        # previous period — only the first two should be stamped.
+        # [#e2ql8r]
+        # [#eb0s15]
         in1 = self._accrual_row(self.office, self.accrual_date)
         in2 = self._accrual_row(self.office, self.accrual_date, amount=150)
         other_office = self._accrual_row(self.other_office, self.accrual_date)
@@ -218,12 +218,12 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
             self.assertEqual(s.settled, 1, f"{n} must be settled after approve")
             self.assertEqual(s.rental_settlement, rs.name, f"{n} must link to the settlement")
 
-        # Untouched: other office, other period.
+        # [#jt8qpb]
         self.assertEqual(_settled(other_office).settled, 0)
         self.assertIsNone(_settled(other_office).rental_settlement)
         self.assertEqual(_settled(prev_period).settled, 0)
 
-    # --- idempotent: Approve then Mark Paid, and a second settlement ----------
+    # [#gljtr3]
 
     def test_stamp_is_idempotent_across_postsubmit_saves(self):
         row = self._accrual_row(self.office, self.accrual_date)
@@ -231,15 +231,15 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         self._approve(rs)
         self.assertEqual(_settled(row).settled, 1)
 
-        # Mark Paid is a second post-submit save -> on_update_after_submit fires
-        # again. The row is already settled, so stamp_settlement must touch
-        # nothing and the link must stay on the SAME settlement.
+        # [#1y5a08]
+        # [#enwwtj]
+        # [#1q3kvo]
         self._mark_paid(rs)
         s = _settled(row)
         self.assertEqual(s.settled, 1)
         self.assertEqual(s.rental_settlement, rs.name)
 
-        # Direct re-stamp call is a no-op (returns 0 newly-stamped).
+        # [#oiu6lg]
         n = rental_engine.stamp_settlement(rs.name, self.office, self.period)
         self.assertEqual(n, 0, "Re-stamping an already-settled period must stamp 0 rows.")
 
@@ -249,8 +249,8 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         self._approve(rs1)
         self.assertEqual(_settled(row).rental_settlement, rs1.name)
 
-        # A second settlement for the same office+period must NOT re-point the
-        # already-settled row.
+        # [#2aise3]
+        # [#3nay7r]
         rs2 = self._settlement()
         self._approve(rs2)
         self.assertEqual(
@@ -258,7 +258,7 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
             "An already-settled row must never be re-pointed to a second settlement.",
         )
 
-    # --- release on cancel ---------------------------------------------------
+    # [#e4qhlm]
 
     def test_cancel_releases_rows(self):
         row = self._accrual_row(self.office, self.accrual_date)
@@ -272,13 +272,13 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         self.assertEqual(s.settled, 0, "Cancel must release the row (settled = 0).")
         self.assertIsNone(s.rental_settlement, "Cancel must clear the settlement link.")
 
-    # --- report Settled / Outstanding split reflects reality -----------------
+    # [#nnjqse]
 
     def test_report_split_reflects_stamping(self):
         self._accrual_row(self.office, self.accrual_date, amount=100)
         self._accrual_row(self.office, self.accrual_date, amount=150)
 
-        # Before settlement: all outstanding.
+        # [#13cswl]
         _, before = rental_cost_by_office(
             {"rental_office": self.office,
              "from_date": self.accrual_date, "to_date": self.accrual_date}
@@ -290,7 +290,7 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         rs = self._settlement()
         self._approve(rs)
 
-        # After: the same 250 now shows as settled, outstanding zero.
+        # [#59bilb]
         _, after = rental_cost_by_office(
             {"rental_office": self.office,
              "from_date": self.accrual_date, "to_date": self.accrual_date}
@@ -299,12 +299,12 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         self.assertEqual(flt(bucket_after["settled_amount"]), 250.0)
         self.assertEqual(flt(bucket_after["outstanding_amount"]), 0.0)
 
-    # --- accrued_total cross-check / derivation ------------------------------
+    # [#nrkpqk]
 
     def test_accrued_total_derived_from_ledger_when_no_lines(self):
-        # 100 + 150 accrued in the ledger; settlement has NO vehicle lines, so
-        # accrued_total must be DERIVED from the ledger and the cross-check fields
-        # populated.
+        # [#el9k8w]
+        # [#p8pr8v]
+        # [#ozlxh4]
         self._accrual_row(self.office, self.accrual_date, amount=100)
         self._accrual_row(self.office, self.accrual_date, amount=150)
         rs = self._settlement(claimed=300)
@@ -313,12 +313,12 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         self.assertEqual(flt(rs.accrued_total), 250.0,
                          "With no vehicle lines, accrued_total must derive from the ledger.")
         self.assertEqual(flt(rs.ledger_variance), 0.0)
-        # claimed 300 vs accrued 250 -> variance 50.
+        # [#6xzed9]
         self.assertEqual(flt(rs.variance), 50.0)
 
     def test_ledger_variance_surfaces_line_disagreement(self):
-        # Ledger says 250, but the hand-entered line claims only 200 accrued ->
-        # ledger_variance must surface the -50 gap (entered lines vs reality).
+        # [#nlb9ji]
+        # [#anoqg5]
         self._accrual_row(self.office, self.accrual_date, amount=250)
         rs = self._settlement(
             claimed=200,
@@ -330,11 +330,11 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
         self.assertEqual(flt(rs.ledger_variance), -50.0,
                          "ledger_variance must expose the lines-vs-ledger gap.")
 
-    # --- monthly reconciliation ---------------------------------------------
+    # [#3jzk0p]
 
     def test_monthly_reconciliation_flags_unsettled_closed_period(self):
-        # The job flags the CLOSED period (last month). Seed an unsettled row in
-        # last month for a dedicated office and assert exactly one alert.
+        # [#gnyd0x]
+        # [#1qn8fp]
         recon_office = self._office("RAL Recon Closed Office")
         closed_anchor = getdate(add_months(getdate(today()), -1))
         closed_date = str(get_first_day(closed_anchor))
@@ -359,12 +359,12 @@ class TestRentalSettlementReconciliation(FrappeTestCase):
 
         rental_engine.monthly_rental_reconciliation()
         first = _count()
-        # Idempotent: a second run must not raise a duplicate.
+        # [#m90cvl]
         rental_engine.monthly_rental_reconciliation()
         second = _count()
         self.assertEqual(first, 1, "Closed-period unsettled office must raise exactly one alert.")
         self.assertEqual(second, 1, "Re-running reconciliation must not duplicate the alert.")
-        # Sanity: the closed period string is what the alert message carries.
+        # [#8goqud]
         self.assertIn(
             closed_period,
             frappe.db.get_value(

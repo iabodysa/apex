@@ -36,8 +36,8 @@ def validate(doc, method=None):
     if not (0 <= share <= 100):
         frappe.throw(_("Utility Cost Share must be between 0 and 100."))
 
-    # Reject a second lease whose term overlaps an existing (non-cancelled) lease
-    # for the same building.
+    # [#a8j0ea]
+    # [#sl5dlp]
     if doc.building and doc.lease_start_date and doc.lease_end_date:
         conflict = frappe.db.exists(
             "Accommodation Lease",
@@ -87,8 +87,8 @@ def _build_schedule(doc):
 def regenerate_schedule(name):
     """Force-rebuild the payment schedule (clears existing rows)."""
     doc = frappe.get_doc("Accommodation Lease", name)
-    # Document-level check (doc=) so if_owner / User Permissions / controller
-    # has_permission hooks apply, not just the blanket DocType-level write role.
+    # [#3pod0h]
+    # [#hi8ipb]
     frappe.has_permission("Accommodation Lease", "write", doc=doc, throw=True)
 
     if doc.docstatus != 0:

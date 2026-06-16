@@ -28,7 +28,7 @@ def on_submit(doc, method=None):
     if getattr(settings, "enable_damage_deduction", 0) and doc.employee:
         logger = frappe.logger()
 
-        # Calculate deduction amount, capped by settings limit if defined
+        # [#qnvow3]
         amount = flt(doc.total_estimated_replacement_cost_sar)
         max_deduction = flt(getattr(settings, "max_damage_deduction_per_checkout_sar", 500))
         if max_deduction > 0 and amount > max_deduction:
@@ -40,7 +40,7 @@ def on_submit(doc, method=None):
             )
             return
 
-        # Fetch company from the employee record
+        # [#dzp522]
         company = frappe.db.get_value("Employee", doc.employee, "company")
         if not company:
             logger.warning(
@@ -57,15 +57,15 @@ def on_submit(doc, method=None):
             )
             return
 
-        # Validate that the configured salary component is a Deduction type
+        # [#9junki]
         component_type = frappe.db.get_value("Salary Component", salary_component, "type")
         if component_type != "Deduction":
             frappe.throw(_("Salary component {0} must be of type Deduction for damage assessments.").format(salary_component))
 
-        # Create the Draft Additional Salary. Do NOT swallow a failure here: an
-        # insert error must propagate so the submit aborts atomically, rather than
-        # leaving docstatus=1 with no deduction. (A rollback inside on_submit would
-        # also corrupt the in-flight submit transaction.)
+        # [#dtjk2b]
+        # [#fohbje]
+        # [#bq8u25]
+        # [#j44d3i]
         add_sal = frappe.get_doc({
             "doctype": "Additional Salary",
             "employee": doc.employee,
@@ -75,13 +75,13 @@ def on_submit(doc, method=None):
             "company": company,
             "remarks": f"Deduction for custody damage assessment {doc.name}"
         })
-        # ignore_permissions=True: this is a system-generated deduction memo, not a
-        # user action. A non-HR submitter (e.g. a Housing Supervisor) lacks Additional
-        # Salary create rights and would otherwise have the whole submit blocked. It
-        # stays auditable — left as a draft, logged, and linked back via deduction_entry.
+        # [#hy6qbk]
+        # [#mtl3xx]
+        # [#bzjfay]
+        # [#1cioh0]
         add_sal.insert(ignore_permissions=True)
 
-        # Link it back to this document
+        # [#bnva67]
         frappe.db.set_value("Custody Damage Assessment", doc.name, "deduction_entry", add_sal.name)
 
         logger.info(

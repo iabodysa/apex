@@ -19,8 +19,8 @@ def load_template_into_doc(doctype, docname, issue_type):
         frappe.throw(_("Template loading is only supported for Maintenance Request and Maintenance Work Order."))
 
     doc = frappe.get_doc(doctype, docname)
-    # Document-level check (doc=) so if_owner / User Permissions / controller
-    # has_permission hooks apply, not just the blanket DocType-level write role.
+    # [#3pod0h]
+    # [#hi8ipb]
     frappe.has_permission(doctype, "write", doc=doc, throw=True)
 
     templates = frappe.get_all(

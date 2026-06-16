@@ -49,23 +49,23 @@ VALID_STATUSES = (
     "Cancelled",
 )
 
-# The settled states: once the settlement is Approved (the Workflow submit point)
-# or Paid, its rental_office+period accrual rows are considered settled and are
-# stamped onto it. Both are docstatus=1 in the Rental Settlement Workflow.
+# [#7hff9v]
+# [#iws936]
+# [#4l45t3]
 SETTLED_STATUSES = ("Approved", "Paid")
 
 
 class RentalSettlement(Document):
     def before_insert(self):
-        # Stamp the requester server-side (read-only field) so the
-        # segregation-of-duties / maker-checker gate cannot be spoofed.
+        # [#awqu0h]
+        # [#sl3oie]
         if not self.requested_by:
             self.requested_by = frappe.session.user
 
     def validate(self):
-        # The Select still carries the known states for filtering/colour, but the
-        # Rental Settlement Workflow owns *transitions* — this only rejects an
-        # unknown value.
+        # [#o9cdl2]
+        # [#qmgtk6]
+        # [#ryyojr]
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
@@ -80,25 +80,25 @@ class RentalSettlement(Document):
 
         accrued = 0.0
         for row in self.vehicles:
-            # Derive the line amount from days * daily_rate when not supplied.
+            # [#gzqo66]
             computed = flt(row.days) * flt(row.daily_rate)
             if not row.amount:
                 row.amount = computed
-            # Positivity guard: a negative day count, rate or amount must never
-            # flow into the accrued total or the downstream Payment Request.
+            # [#de54vh]
+            # [#n2fb6n]
             if flt(row.days) < 0 or flt(row.daily_rate) < 0 or flt(row.amount) < 0:
                 frappe.throw(
                     _("Row {0}: Days, Daily Rate and Amount cannot be negative.").format(row.idx)
                 )
             accrued += flt(row.amount)
 
-        # Cross-check / derive against the LINKED Rental Accrual Ledger rows for
-        # this office+period — the machine-written source of truth for what was
-        # actually accrued. When the office has no hand-entered vehicle lines, the
-        # ledger figure IS the accrued total (the controller no longer depends on
-        # someone re-keying the days). When lines ARE present, the ledger figure
-        # is still stored alongside so the variance against reality is visible and
-        # auditable rather than the settlement only checking its own arithmetic.
+        # [#rsla91]
+        # [#j0v6k5]
+        # [#7vji16]
+        # [#5f2rd0]
+        # [#3qd2aq]
+        # [#l50qz1]
+        # [#s5q5z7]
         from apex_habitat.salis.rental_engine import linked_accrued_total
 
         ledger_total = linked_accrued_total(self.rental_office, self.period_month)
@@ -112,23 +112,23 @@ class RentalSettlement(Document):
         self.ledger_variance = flt(self.accrued_total) - flt(ledger_total)
         self.variance = flt(self.claimed_total) - flt(self.accrued_total)
 
-        # Totals sanity guard: neither the claimed amount nor the derived accrued
-        # total may be negative, so no negative value can flow into
-        # create_payment_request() and on to the Finance gate. A zero accrued
-        # total is a legitimate not-yet-accrued state (the settlement can still sit
-        # in the workflow); the actual zero-amount payable is blocked downstream by
-        # the Salis Payment Request's own "Amount must be greater than zero" guard.
+        # [#rp61et]
+        # [#1rp64d]
+        # [#ov33y0]
+        # [#gdz4rf]
+        # [#68s18p]
+        # [#ny9f16]
         if flt(self.claimed_total) < 0 or flt(self.accrued_total) < 0:
             frappe.throw(
                 _("Claimed Total and Accrued Total cannot be negative.")
             )
 
-    # --- Settlement <-> Accrual Ledger stamping --------------------------------
-    # Status transitions (incl. the submit at "Approved") are driven by the
-    # Rental Settlement Workflow, which saves the document. on_submit covers a
-    # direct submit; on_update_after_submit covers the post-submit workflow
-    # transitions (Approve -> Approved, Mark Paid -> Paid) that the controller
-    # would otherwise never see. Both funnel into one idempotent stamp.
+    # [#6dwuu8]
+    # [#hhmd0i]
+    # [#sau6ax]
+    # [#b655dg]
+    # [#2ukarr]
+    # [#ktcad9]
 
     def on_submit(self):
         self._sync_accrual_stamp()
@@ -137,9 +137,9 @@ class RentalSettlement(Document):
         self._sync_accrual_stamp()
 
     def on_cancel(self):
-        # Release the rows so a cancelled settlement no longer counts as settled
-        # in the Rental Cost by Office report and a re-issued settlement can claim
-        # the same accrual days.
+        # [#2bh20k]
+        # [#eixf9m]
+        # [#iytl5a]
         from apex_habitat.salis.rental_engine import release_settlement
 
         release_settlement(self.name)

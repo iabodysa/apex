@@ -20,8 +20,8 @@ def _ensure_test_driver():
 			u.add_roles("Driver")
 			u.insert(ignore_permissions=True)
 		except frappe.DuplicateEntryError:
-			# Full-suite cache/DB skew: exists() above can report the user absent while
-			# a sibling class's row persists. Idempotent — the user exists either way.
+			# [#c2sxop]
+			# [#lmyw8o]
 			pass
 	emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
 	if not emp:
@@ -100,9 +100,9 @@ class TestDriverPortal(FrappeTestCase):
 		att = frappe.get_doc("Driver Attendance", res["name"])
 		self.assertEqual(att.driver, drv)
 		self.assertEqual(str(att.attendance_date), frappe.utils.today())
-		# A portal check-in is an authoritative presence record: it is SUBMITTED,
-		# not left in draft, so the attendance watcher (which keys on docstatus=1)
-		# recognises it and raises no perpetual Supervisor Delay alert.
+		# [#busqtw]
+		# [#ouyevk]
+		# [#hzvlw2]
 		self.assertEqual(att.docstatus, 1, "Portal check-in must submit the attendance.")
 		frappe.set_user("Administrator")
 
@@ -114,8 +114,8 @@ class TestDriverPortal(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("Fuel Request", fr["name"], "status"), "Pending")
 		tk = driver_portal.raise_support_ticket(category="Vehicle", priority="High",
 		                                        subject="Brakes", description="Soft pedal")
-		# Support tickets are now native ERPNext Issues; the driver is stamped on
-		# the custom_driver Link, identity-resolved server-side.
+		# [#gxj5o3]
+		# [#b7najh]
 		self.assertEqual(frappe.db.get_value("Issue", tk["name"], "custom_driver"), drv)
 		frappe.set_user("Administrator")
 
@@ -156,7 +156,7 @@ class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 		frappe.set_user("Administrator")
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
 		cls.drv = _ensure_test_driver()
-		# Driver must be Active for missing_attendance_watch to consider it.
+		# [#pch2pa]
 		frappe.db.set_value("Salis Driver", cls.drv, "status", "Active")
 		cls.user = frappe.db.get_value(
 			"Employee", frappe.db.get_value("Salis Driver", cls.drv, "employee"), "user_id"
@@ -188,7 +188,7 @@ class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 			reconcile_operations_alerts,
 		)
 
-		# Baseline: genuine gap -> watcher raises exactly one Supervisor Delay alert.
+		# [#424dlt]
 		self._purge()
 		missing_attendance_watch()
 		self.assertEqual(
@@ -196,7 +196,7 @@ class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 			"A driver with no attendance must raise one Supervisor Delay alert.",
 		)
 
-		# Driver checks in through the portal (resolves to self server-side).
+		# [#sz5t9x]
 		frappe.set_user(self.user)
 		res = driver_portal.driver_check_in()
 		frappe.set_user("Administrator")
@@ -205,8 +205,8 @@ class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 			"Portal check-in must leave a SUBMITTED attendance for the watcher to see.",
 		)
 
-		# (1) The reconcile pass now sees a submitted attendance for the day the
-		#     alert was raised and resolves the previously-perpetual alert.
+		# [#rbuwpu]
+		# [#ey7t1b]
 		reconcile_operations_alerts()
 		self.assertEqual(
 			self._open_alerts(), [],
@@ -214,8 +214,8 @@ class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 			"checked in via the portal.",
 		)
 
-		# (2) Re-running the watcher after the check-in raises NO new alert — the
-		#     compliant portal user no longer floods a fresh alert each day.
+		# [#edbqts]
+		# [#gnpry9]
 		missing_attendance_watch()
 		self.assertEqual(
 			self._open_alerts(), [],

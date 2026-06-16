@@ -69,12 +69,12 @@ class TestMasarSummaryEndpoint(_WorkerTripMixin, FrappeTestCase):
 
         self.assertEqual(summary["driver"], self.driver)
         self.assertEqual(summary["date"], frappe.utils.today())
-        # The fixture builds one trip with two stops and a two-worker manifest.
+        # [#e7xa0j]
         self.assertGreaterEqual(summary["trip_count"], 1)
         self.assertGreaterEqual(summary["stop_count"], 2)
         self.assertGreaterEqual(summary["expected_total"], 2)
 
-        # next_pickup points at the housing-pickup stop with the linked building.
+        # [#abj8i3]
         self.assertIsNotNone(summary["next_pickup"])
         self.assertEqual(summary["next_pickup"]["dispatch_trip"], dt.name)
         self.assertEqual(summary["next_pickup"]["sequence"], 1)
@@ -151,10 +151,10 @@ class TestMasarPageContext(_WorkerTripMixin, FrappeTestCase):
             ctx = masar_page.get_context(frappe._dict())
             self.assertEqual(ctx.no_cache, 1)
             self.assertTrue(ctx.portal_theme)
-            # csrf is a string (a real token in a browser request; "" in a
-            # session-less render — never a 500).
+            # [#fnpq21]
+            # [#kdkgqz]
             self.assertIsInstance(ctx.csrf_token, str)
-            # No token in the query → empty pass-through; never an employee id.
+            # [#710l1o]
             self.assertEqual(ctx.masar_token, "")
         finally:
             frappe.local.form_dict = frappe._dict()

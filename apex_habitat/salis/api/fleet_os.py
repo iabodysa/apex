@@ -29,23 +29,23 @@ from frappe.utils import getdate, today
 from apex_habitat.salis.api.dispatch_board import _permitted_projects
 from apex_habitat.salis.utils import lock_driver, lock_vehicle
 
-# ── Salis Vehicle.status → the design's vehicle_status vocabulary ────────────
-# The design uses: assigned / available / workshop / stopped / stolen.
-# Salis Vehicle.status is: Active / Stopped / Under Maintenance / Released.
-# "assigned" vs "available" is decided by current_driver (Active + a driver is
-# assigned, Active + no driver is available). There is no native "stolen"
-# status — a Theft incident flips the vehicle to Stopped and nulls the driver
-# (see Vehicle Incident.on_submit), so it surfaces here as "stopped".
+# [#9tkuh4]
+# [#fo1z63]
+# [#65j7is]
+# [#kgimnt]
+# [#5aqx9y]
+# [#5kmolk]
+# [#5pzdlz]
 _STATUS_MAP = {
     "Stopped": "stopped",
     "Under Maintenance": "workshop",
     "Released": "stopped",
 }
 
-# Vehicle Stop.stop_reason is a fixed Select; "Accident"/"Violation" require an
-# attached evidence file at submit (before_submit gate). The dashboard's quick
-# stop has no attachment, so we map free-text reasons to a no-evidence option
-# and default to "Other".
+# [#lf7qyr]
+# [#oqa9r6]
+# [#e27bhs]
+# [#evgxmo]
 _STOP_REASON_MAP = {
     "maintenance": "Maintenance",
     "rental return": "Rental Return",
@@ -67,8 +67,8 @@ def _sheet_for(category: str | None) -> str:
     if not category:
         return "CAR"
     upper = category.upper()
-    # Match English and Arabic ("dabbab"/"darraj") motorcycle terms; the Arabic is
-    # kept as \u escapes so this source file stays ASCII (English-first rule).
+    # [#7ur0k1]
+    # [#fry5w7]
     if any(tok in upper for tok in ("MOTOR", "BIKE", "SCOOTER", "\u062f\u0628\u0627\u0628", "\u062f\u0631\u0627\u062c")):
         return "MOTORCYCLE"
     return "CAR"
@@ -92,9 +92,9 @@ def _resolve_plate(plate: str) -> str:
     return name
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# READ
-# ════════════════════════════════════════════════════════════════════════════
+# [#mdc0uu]
+# [#bfnq27]
+# [#mdc0uu]
 @frappe.whitelist()
 def get_fleet_os():
     """Return the full fleet in the design's exact shape (a ``vehicles`` list).
@@ -104,9 +104,9 @@ def get_fleet_os():
     fuel lookup).
     """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
-    # Driver phone + external id are permlevel-1 PII on Salis Driver, granted only
-    # to Fleet Manager / System Manager. frappe.get_all defaults to ignore_permissions
-    # (no permlevel strip), so gate them here: lower roles get the names, not the PII.
+    # [#jtpjlv]
+    # [#hjzryw]
+    # [#fjxbcn]
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
     unscoped, projects = _permitted_projects()
     if not unscoped and not projects:
@@ -126,7 +126,7 @@ def get_fleet_os():
     if not vehicles:
         return {"vehicles": []}
 
-    # ── Category → fuel + sheet (one query, then in-memory map) ──────────────
+    # [#kgmpae]
     cat_names = list({v.vehicle_category for v in vehicles if v.get("vehicle_category")})
     cat_fuel: dict[str, str] = {}
     if cat_names:
@@ -137,10 +137,10 @@ def get_fleet_os():
         ):
             cat_fuel[c.name] = (c.default_fuel_type or "").upper()
 
-    # ── Every referenced driver in one query ─────────────────────────────────
+    # [#ntmduq]
     driver_names = {v.current_driver for v in vehicles if v.get("current_driver")}
 
-    # ── All assignments for the in-scope vehicles in one query → history ─────
+    # [#qiund2]
     plates = [v.name for v in vehicles]
     assignments = frappe.get_all(
         "Vehicle Assignment",
@@ -166,7 +166,7 @@ def get_fleet_os():
     history_by_vehicle: dict[str, list] = {}
     for a in assignments:
         d = drivers.get(a.driver) or {}
-        # Submitted+Active assignment → "Active"; everything else → "Stopped".
+        # [#2lg9p3]
         is_active = a.status == "Active" and a.docstatus == 1 and not a.end_date
         history_by_vehicle.setdefault(a.vehicle, []).append({
             "driver_id": ((d.get("driver_id") or a.driver or "") if show_pii else ""),
@@ -188,11 +188,11 @@ def get_fleet_os():
     for v in vehicles:
         cd = None
         if v.get("current_driver"):
-            # The current driver IS the live custody spell, so give it the FULL
-            # history-item shape the design's render code reads (it calls
-            # current_driver.project.trim(), .date_receive, … — a partial object
-            # would throw "undefined.trim()"). Prefer the open active history row
-            # (it carries the real dates/project); else default every field to "".
+            # [#jhe847]
+            # [#8srfq8]
+            # [#gmlv5i]
+            # [#56ra6u]
+            # [#f27432]
             hist = history_by_vehicle.get(v.name, [])
             active = next((h for h in hist if h.get("status") == "Active" and not h.get("date_deliver")), None)
             if active:
@@ -212,14 +212,14 @@ def get_fleet_os():
             "fuel": cat_fuel.get(v.vehicle_category, ""),
             "rental_office": v.rental_office or "",
             "sheet": _sheet_for(v.vehicle_category),
-            "area": "",  # no native area field; project area unavailable → ""
+            "area": "",  # [#6ptyey]
             "project": v.project or "",
             "vehicle_status": _vehicle_status(v.status, bool(v.get("current_driver"))),
             "workshop_notes": "",
             "workshop_date": "",
             "current_driver": cd,
             "history": history_by_vehicle.get(v.name, []),
-            # design-only client fields the render/init code touches:
+            # [#9g1sfn]
             "damages": [],
             "accidents": [],
             "stolen_info": None,
@@ -229,9 +229,9 @@ def get_fleet_os():
     return {"vehicles": out}
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# WRITE — every endpoint POST-only, permission-gated, reuses real controllers
-# ════════════════════════════════════════════════════════════════════════════
+# [#mdc0uu]
+# [#kcvqbz]
+# [#mdc0uu]
 @frappe.whitelist(methods=["POST"])
 def reassign(plate, driver_id, date=None):
     """Assign a driver to a vehicle by creating a submitted Vehicle Assignment.
@@ -251,16 +251,16 @@ def reassign(plate, driver_id, date=None):
         driver = driver_id
     if not driver:
         frappe.throw(_("Driver {0} not found.").format(driver_id))
-    # Scope the DRIVER too (T-148): _resolve_plate gates the vehicle, but the driver
-    # comes straight from caller input; without this a scoped supervisor could pair an
-    # out-of-scope driver to an in-scope vehicle. Fires the salis_driver scope hook.
+    # [#doark9]
+    # [#2znemb]
+    # [#rv4edb]
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
     lock_vehicle(vehicle)
     lock_driver(driver)
 
     start = getdate(date) if date else getdate(today())
 
-    # End any open assignment for this vehicle first (one active driver at a time).
+    # [#gtecq9]
     open_rows = frappe.get_all(
         "Vehicle Assignment",
         filters={"vehicle": vehicle, "status": "Active", "docstatus": 1},
@@ -278,8 +278,8 @@ def reassign(plate, driver_id, date=None):
         "status": "Active",
     })
     doc.insert()
-    # Propagate a blocked submit like stop_vehicle: a swallowed on_submit re-check
-    # lets a racing reassign clobber the live mirror behind a draft. [T-260]
+    # [#pt7ksd]
+    # [#njnkmw]
     doc.submit()
 
     frappe.db.set_value("Salis Vehicle", vehicle, "current_driver", driver)
@@ -310,9 +310,9 @@ def stop_vehicle(plate, reason=None):
         "notes": (reason or ""),
     })
     doc.insert()
-    doc.submit()  # flips Salis Vehicle.status -> Stopped
+    doc.submit()  # [#mx3ts3]
 
-    # Release the driver: end the open assignment + clear both link sides.
+    # [#9hy3v4]
     if current_driver:
         for r in frappe.get_all(
             "Vehicle Assignment",
@@ -344,7 +344,7 @@ def report_theft(plate, location=None, report_number=None):
         "description": _("Reported stolen from the Fleet OS dashboard."),
     })
     doc.insert()
-    doc.submit()  # controller nulls driver + flags vehicle
+    doc.submit()  # [#taa8d4]
     return {"ok": True, "incident": doc.name}
 
 

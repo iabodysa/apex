@@ -33,7 +33,7 @@ class TestResidentRequestToDo(ApexHabitatTestCase):
         doc.save(ignore_permissions=True)
         self.assertEqual(len(_open_todos(doc.name)), 1, "assigning must create one ToDo")
 
-        # Idempotent: saving again does not create a second ToDo.
+        # [#f0hsri]
         doc.save(ignore_permissions=True)
         self.assertEqual(len(_open_todos(doc.name)), 1, "no duplicate ToDo on re-save")
 

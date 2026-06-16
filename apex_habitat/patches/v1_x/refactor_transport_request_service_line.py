@@ -1,17 +1,17 @@
 import frappe
 
-# Legacy Workers/Representatives division values -> new transport-type service_line.
-# 'Workers' is disambiguated below by request_type (an inter-city relocation keeps its
-# own transport type); 'Representatives' was always the administrative document trip
-# (gov item 62), submitted as a transport request, so it stays a transport request.
+# [#jr7ble]
+# [#rgirz5]
+# [#mpecqz]
+# [#f8gg08]
 _REPRESENTATIVES = "Representatives"
 _WORKERS = "Workers"
 _ADMINISTRATIVE_TRIP = "Administrative Trip"
 _INTER_CITY_RELOCATION = "Inter-City Relocation"
 _SITE_TRANSPORT = "Site Transport"
 
-# The legacy request_type that, for a 'Workers' row, maps to the Inter-City
-# Relocation transport type rather than the default Site Transport.
+# [#4cmbpo]
+# [#9lgjdr]
 _INTER_CITY_REQUEST_TYPE = "Inter-City Relocation"
 
 
@@ -35,8 +35,8 @@ def execute():
     if not frappe.db.table_exists("Transport Request"):
         return
 
-    # Guard: nothing to do unless at least one legacy value is still present. This is
-    # what makes the patch a clean no-op on fresh installs and on every re-run.
+    # [#af3497]
+    # [#acfh7u]
     legacy_rows = frappe.db.get_all(
         "Transport Request",
         filters={"service_line": ["in", [_WORKERS, _REPRESENTATIVES]]},
@@ -52,8 +52,8 @@ def execute():
             new_value = _INTER_CITY_RELOCATION
         else:
             new_value = _SITE_TRANSPORT
-        # update_modified=False: a value remap is not a business edit and must not
-        # disturb modified/modified_by or trip-the standard-JSON migrate-skip.
+        # [#l9lhsv]
+        # [#5awofw]
         frappe.db.set_value(
             "Transport Request",
             row.name,

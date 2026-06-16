@@ -28,7 +28,7 @@ import os
 
 import frappe
 
-# Workflow definitions to seed: the folder name under salis/workflow/.
+# [#a5mysb]
 _WORKFLOW_DIRS = [
     "transport_request_workflow",
     "rental_settlement_workflow",
@@ -38,18 +38,18 @@ _WORKFLOW_DIRS = [
     "fuel_claim_workflow",
     "fuel_exception_case_workflow",
     "dispatch_trip_workflow",
-    # Movement cost + write-off approvals: migrated off the custom tier engine
-    # onto native Frappe Workflow (the approve transition carries the authority).
+    # [#ajrjio]
+    # [#h7hlg7]
     "movement_cost_recovery_workflow",
     "movement_cost_transfer_workflow",
     "vehicle_damage_write_off_workflow",
 ]
 
-# State -> indicator style, mirroring each DocType's status indicator colours so
-# the Workflow widget matches the list/state colours. Shared across the seeded
-# workflows; a state name reused by more than one workflow keeps the same style.
+# [#baqnup]
+# [#97rvot]
+# [#3ik2ia]
 _STATE_STYLE = {
-    # Transport Request
+    # [#3nvxuq]
     "New": "Primary",
     "Validated": "Primary",
     "Approved": "Primary",
@@ -57,39 +57,39 @@ _STATE_STYLE = {
     "Fulfilled": "Success",
     "Rejected": "Danger",
     "Cancelled": "Danger",
-    # Rental Settlement
+    # [#e5daqi]
     "Draft": "Primary",
     "Reconciled": "Warning",
     "Disputed": "Danger",
     "Paid": "Success",
-    # Driver Clearance
+    # [#5btnoo]
     "Open": "Warning",
     "In Progress": "Primary",
     "Cleared": "Success",
     "Blocked": "Danger",
-    # Salis Payment Request (Draft / Paid / Rejected / Cancelled reuse the above)
+    # [#c9eoqy]
     "Pending Finance": "Warning",
     "Approved by Finance": "Primary",
-    # Support Ticket (New / In Progress / Cancelled reuse the styles above)
+    # [#qvlynr]
     "Waiting": "Warning",
     "Resolved": "Primary",
     "Closed": "Success",
-    # Completed (Success) — reused by Dispatch Trip and others below.
+    # [#fcgko3]
     "Completed": "Success",
-    # Fuel Request (Pending / Approved / Cancelled reuse the styles above;
-    # mirrors the Fuel Request list/indicator colours)
+    # [#p4eqxx]
+    # [#c6cvon]
     "Done": "Success",
     "Failed": "Danger",
     "Reverted": "Warning",
-    # Fuel Claim (Draft / Reconciled / Approved / Disputed / Closed reuse the
-    # styles above; mirrors the Fuel Claim list/indicator colours)
+    # [#lfwioi]
+    # [#pr5vxa]
     "Submitted to Movement": "Warning",
-    # Fuel Exception Case (Open / Resolved / Rejected / Closed reuse the styles
-    # above)
+    # [#ah4a60]
+    # [#eph0i5]
     "Under Investigation": "Primary",
     "Evidence Required": "Warning",
-    # Dispatch Trip (Completed / Cancelled reuse the styles above; mirrors the
-    # Dispatch Trip list/indicator colours Blue / Orange / Green / Red).
+    # [#8t8nil]
+    # [#h6ce7r]
     "Planned": "Primary",
     "Dispatched": "Warning",
 }
@@ -143,10 +143,10 @@ def _seed_one(definition):
     workflow now exists, False if it was skipped (e.g. document type missing)."""
     document_type = definition["document_type"]
     if not frappe.db.exists("DocType", document_type):
-        return False  # module not migrated yet — skip silently
+        return False  # [#fwtsf9]
 
-    # The masters the child rows Link to must exist before the Workflow is saved,
-    # otherwise the Link validation raises and aborts.
+    # [#5y2gs0]
+    # [#pvtjqs]
     for state in definition.get("states", []):
         _ensure_workflow_state(state["state"])
     for transition in definition.get("transitions", []):
@@ -155,9 +155,9 @@ def _seed_one(definition):
 
     name = definition["name"]
     if frappe.db.exists("Workflow", name):
-        # Already present — leave the admin's copy untouched (it may have been
-        # tuned on-site). Just make sure exactly this one is the active workflow
-        # for the document type.
+        # [#c3i9i8]
+        # [#gmn8wf]
+        # [#rlqkhv]
         if definition.get("is_active") and not frappe.db.get_value("Workflow", name, "is_active"):
             doc = frappe.get_doc("Workflow", name)
             doc.is_active = 1
@@ -195,8 +195,8 @@ def _seed_one(definition):
             },
         )
 
-    # Frappe's Workflow autoname is by workflow_name; force the documented name so
-    # the existence guard above is stable across re-runs.
+    # [#pm8lo5]
+    # [#e42g56]
     doc.name = name
     doc.flags.name_set = True
     doc.insert(ignore_permissions=True)  # audit-ok
@@ -208,17 +208,17 @@ def seed_salis_workflows():
     on the target DocType and every referenced state/action master — safe to
     re-run (install + every migrate)."""
     for dir_name in _WORKFLOW_DIRS:
-        # Per-item savepoint: a failing workflow rolls back only its own partial
-        # writes, never the workflows already seeded earlier in this same run.
+        # [#cli24y]
+        # [#h812l4]
         sp = "wf_seed"
         frappe.db.savepoint(sp)
         try:
             definition = _load_definition(dir_name)
             _seed_one(definition)
         except Exception:
-            # A seed must NEVER crash install/migrate — log FIRST (before any
-            # rollback, so the log row is never discarded), then undo just this
-            # item via the savepoint and continue.
+            # [#pt3b94]
+            # [#ifs7db]
+            # [#lk2fbk]
             frappe.log_error(
                 title=f"seed_salis_workflows failed: {dir_name}",
                 message=frappe.get_traceback(),

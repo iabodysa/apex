@@ -1,6 +1,6 @@
-# Package name (internal identifier) stays "apex_habitat" — renaming the package is a
-# breaking, major change. The user-facing title is decoupled from the Habitat module:
-# "Apex" hosts the Habitat (accommodation) and Salis (movement/fleet) modules.
+# [#b4hlng]
+# [#6tfpa4]
+# [#92qnpg]
 app_name = "apex_habitat"
 app_title = "Apex"
 app_publisher = "AFMCO Support Services Co. Ltd"
@@ -8,28 +8,28 @@ app_description = "Apex — workforce operations suite: Habitat (accommodation &
 app_email = "afm@afmcoltd.com"
 app_license = "MIT"
 
-# Required Frappe apps
+# [#kk7yf0]
 required_apps = ["frappe", "erpnext", "hrms"]
 
-# Frappe v15: export type annotations in DocType controllers when supported
+# [#9m1nu9]
 export_python_type_annotations = True
 
-# Shared desk JS: the Masar worker-link dialog (QR + wa.me share + phone
-# normalisation) consolidated from 3 duplicated copies into one bundle.
+# [#abcrib]
+# [#c9z8l6]
 app_include_js = ["masar_worker_link.bundle.js"]
 
-# First-install Setup Wizard: an extra "Apex Configuration" slide on the native
-# Frappe setup wizard (fresh site) where the operator chooses the payment method
-# and the salary-deduction / GL-posting toggles (all OFF by default). The choices
-# are applied to Habitat Settings server-side at completion. Change later anytime
-# in Habitat Settings; the wizard runs once.
+# [#mljwym]
+# [#gx5ils]
+# [#qu7skh]
+# [#muhku4]
+# [#t61jgv]
 setup_wizard_requires = "assets/apex_habitat/js/apex_setup_wizard.js"
 setup_wizard_complete = "apex_habitat.apex_core.setup.setup_wizard.setup_wizard_complete"
 
 
-# Single functional module: Habitat
+# [#pjyorr]
 
-# Document lifecycle hooks
+# [#j0knn7]
 doc_events = {
     "Accommodation Site": {},
     "Accommodation Bed": {},
@@ -83,7 +83,7 @@ doc_events = {
     },
     "Custody Article": {},
     "Custody Asset Category": {},
-    # Phase 5 — Custody and Operational Depreciation
+    # [#k4s7wl]
     "Idle Resident Report": {
         "validate": "apex_habitat.habitat.doctype.idle_resident_report.idle_resident_report.validate",
         "after_insert": "apex_habitat.habitat.doctype.idle_resident_report.idle_resident_report.after_insert",
@@ -114,7 +114,7 @@ doc_events = {
         "validate": "apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financial_depreciation_snapshot.validate",
         "before_cancel": "apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financial_depreciation_snapshot.before_cancel",
     },
-    # Phase 6 gaps
+    # [#fc2p7q]
     "Facility Asset": {},
     "Facility Asset Custody Assignment": {},
     "Facility Asset Movement": {
@@ -139,7 +139,7 @@ doc_events = {
         "on_submit": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.on_submit",
         "before_cancel": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.before_cancel",
     },
-    # Phase 7 gaps
+    # [#9rv3zv]
     "Scheduled Task Instance": {
         "validate": "apex_habitat.habitat.doctype.scheduled_task_instance.scheduled_task_instance.validate",
         "on_submit": "apex_habitat.habitat.doctype.scheduled_task_instance.scheduled_task_instance.on_submit",
@@ -151,7 +151,7 @@ doc_events = {
     },
 }
 
-# Scheduled tasks
+# [#hsa89r]
 scheduler_events = {
     "daily": [
         "apex_habitat.habitat.tasks.daily_accommodation_cost_allocation",
@@ -162,10 +162,10 @@ scheduler_events = {
         "apex_habitat.habitat.tasks.idle_resident_aging",
         "apex_habitat.habitat.tasks.daily_scheduled_task_instance_generator",
         "apex_habitat.habitat.tasks.daily_occupancy_snapshot",
-        # Arrival redesign (Batch 5): link matured Temporary Workers to Employees by
-        # passport match (re-point party + back-date cost); expire lapsed windows + notify HR.
+        # [#gvuy90]
+        # [#pcj3xk]
         "apex_habitat.habitat.temporary_worker_engine.link_temporary_workers",
-        # Salis fleet module
+        # [#p5yxar]
         "apex_habitat.salis.tasks.driver_license_expiry_watch",
         "apex_habitat.salis.tasks.idle_vehicle_watch",
         "apex_habitat.salis.tasks.unreverted_topup_watch",
@@ -176,9 +176,9 @@ scheduler_events = {
         "apex_habitat.salis.tasks.reconcile_operations_alerts",
         "apex_habitat.salis.fuel_engine.accrue_fuel_consumption",
         "apex_habitat.salis.rental_engine.daily_rental_accrual",
-        # Action Inbox: prune orphaned Open Workflow Actions (the doc moved on or was
-        # deleted) so the inbox never shows stale items. Deletes only Open rows;
-        # Completed rows are the audit trail and are left untouched.
+        # [#5ov0x2]
+        # [#em9ytk]
+        # [#syq0vg]
         "apex_habitat.apex_core.utils.workflow_utils.cleanup_orphaned_workflow_actions",
     ],
     "weekly": [
@@ -189,42 +189,42 @@ scheduler_events = {
     ],
     "monthly": [
         "apex_habitat.salis.fuel_engine.monthly_fuel_reconciliation",
-        # Mirror of the fuel reconciliation: flag any Rental Office that still has
-        # unsettled Rental Accrual Ledger rows for the just-closed period (no
-        # submitted Rental Settlement claimed them) with an Operations Alert.
+        # [#k5fyzy]
+        # [#bx90uq]
+        # [#jsmo1j]
         "apex_habitat.salis.rental_engine.monthly_rental_reconciliation",
     ],
 }
 
-# Log Settings auto-clearing for the unbounded, scheduler-written DocTypes.
-# daily_maintenance (run_log_clean_up) calls each controller's clear_old_logs(days)
-# at the retention below. These are operational/time-series growth, NOT financial
-# ledgers: the financial ledgers (Accommodation/Fuel Consumption/Rental Accrual)
-# are deliberately NOT listed here — they carry audit significance and must persist.
+# [#pgcxia]
+# [#mlxnu7]
+# [#4wg5xx]
+# [#em3yq2]
+# [#mghecf]
 default_log_clearing_doctypes = {
     "Operations Alert": 90,
     "Accommodation Occupancy Snapshot": 365,
     "Vehicle Utilisation Snapshot": 365,
-    # Non-financial, submittable point-in-time snapshot (no GL impact). 2-year
-    # retention caps growth; clear_old_logs purges only submitted rows + their
-    # child items. Drafts and the financial ledgers above stay untouched.
+    # [#p89hok]
+    # [#ttlw7k]
+    # [#hhh2cg]
     "Non-Financial Depreciation Snapshot": 730,
 }
 
-# Employee form dashboard: surface housing and custody records
+# [#9cgm64]
 override_doctype_dashboards = {
     "Employee": "apex_habitat.habitat.api.employee_links.get_data",
     "Supplier": "apex_habitat.habitat.api.supplier_links.get_data",
 }
 
-# Salis: project-based row scoping — supervisors/PMs see only
-# the projects they hold a User Permission for; oversight roles see all.
-# Habitat: Maintenance Request is universal-intake but owner-private — any user
-# may raise a ticket, yet a non-privileged raiser sees only their own + assigned
-# rows (privileged oversight roles see all). See habitat/permissions.py.
+# [#eshwew]
+# [#bw7k33]
+# [#ijx3j8]
+# [#tgdflb]
+# [#5ewfhq]
 permission_query_conditions = {
     "Maintenance Request": "apex_habitat.habitat.permissions.maintenance_request_query",
-    # Housing Supervisor — building-scoped (Resident Supervisor sees only his buildings).
+    # [#rkupl9]
     "Accommodation Assignment": "apex_habitat.habitat.permissions.accommodation_assignment_query",
     "Custody Issue": "apex_habitat.habitat.permissions.custody_issue_query",
     "Cleaning Log": "apex_habitat.habitat.permissions.cleaning_log_query",
@@ -235,7 +235,7 @@ permission_query_conditions = {
     "Trip Start Log": "apex_habitat.salis.permissions.trip_start_log_query",
     "Transport Request": "apex_habitat.salis.permissions.transport_request_query",
     "Route Plan": "apex_habitat.salis.permissions.route_plan_query",
-    # Salis support now rides on native ERPNext Issue (Support Ticket retired).
+    # [#r3p52p]
     "Issue": "apex_habitat.salis.permissions.support_ticket_query",
     "Fuel Claim": "apex_habitat.salis.permissions.fuel_claim_query",
     "Fuel Quota": "apex_habitat.salis.permissions.fuel_quota_query",
@@ -247,11 +247,11 @@ permission_query_conditions = {
 }
 
 has_permission = {
-    # Habitat: per-document owner-scope for Maintenance Request (mirrors the
-    # permission_query_conditions entry above) — confines form/REST/link reads to
-    # the ticket's owner/assignee, deferring to DocPerms for privileged roles.
+    # [#hwtm5f]
+    # [#3eiuqj]
+    # [#bbzqdw]
     "Maintenance Request": "apex_habitat.habitat.permissions.maintenance_request_has_permission",
-    # Housing Supervisor — per-document building scope (mirrors the query above).
+    # [#6mspex]
     "Accommodation Assignment": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Custody Issue": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Cleaning Log": "apex_habitat.habitat.permissions.building_scoped_has_permission",
@@ -259,172 +259,172 @@ has_permission = {
     "Vehicle Assignment": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Dispatch Trip": "apex_habitat.salis.permissions.scoped_has_permission",
-    # Trip Start Log carries an if_owner self-record read for the Driver role (a
-    # Driver reads the logs they created) alongside project-scoped supervisor
-    # reads, so it needs the owner-aware hook — the bare scoped one would deny a
-    # Driver their own project-tagged log.
+    # [#gsmiph]
+    # [#og0l6z]
+    # [#2x69y0]
+    # [#phomll]
     "Trip Start Log": "apex_habitat.salis.permissions.trip_start_log_has_permission",
     "Transport Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Route Plan": "apex_habitat.salis.permissions.scoped_has_permission",
-    # Salis support now rides on native ERPNext Issue (Support Ticket retired).
+    # [#r3p52p]
     "Issue": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Claim": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Quota": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Exception Case": "apex_habitat.salis.permissions.scoped_has_permission",
     "Salis Payment Request": "apex_habitat.salis.permissions.payment_sod_has_permission",
     "Salis Vehicle": "apex_habitat.salis.permissions.scoped_has_permission",
-    # Salis Driver carries an if_owner self-profile read alongside project-scoped
-    # supervisor reads, so it needs the owner-aware hook (the bare scoped one would
-    # deny a Driver their own project-tagged row). Passenger Manifest is purely
-    # project-scoped via its Route Plan / Dispatch Trip chain. Both were filtered
-    # in the list view (permission_query_conditions) but had no has_permission
-    # entry, leaving direct form/REST/link access to other projects' rows open.
+    # [#11cgi1]
+    # [#eyx9hh]
+    # [#18sr1a]
+    # [#b1ux9z]
+    # [#4cjem3]
+    # [#h64xj0]
     "Salis Driver": "apex_habitat.salis.permissions.salis_driver_has_permission",
     "Passenger Manifest": "apex_habitat.salis.permissions.scoped_has_permission",
 }
 
-# Fixtures shipped with the app
-#
-# NOTE: Safety Task Catalog is intentionally NOT fixtured. It is provisioned as a
-# create-only seed (setup.create_safety_task_catalogs, existence-guarded on
-# task_code), so the 10 standard tasks appear on install while any tasks the
-# customer adds or edits survive every migrate. A fixture would re-import and
-# OVERWRITE those edits on each migrate — the opposite of the intended semantics.
+# [#j2jahj]
+# [#od1fgp]
+# [#mh56eb]
+# [#lq5jvw]
+# [#af8wb0]
+# [#jd7vy0]
+# [#35i126]
 fixtures = [
-    # All Habitat custom roles in a single consolidated entry (Prompt 14
-    # role-alignment pass).  ERPNext/HRMS-owned roles (Purchase User, Stock User,
-    # HR User, Maintenance User, Internal Auditor) are intentionally NOT listed
-    # here — fixtured only the uniquely-ours roles to avoid clobbering framework
-    # ownership.
+    # [#4gnzjj]
+    # [#e8ce9w]
+    # [#sz995o]
+    # [#g5fgnw]
+    # [#veb6ya]
     {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
-    # Operational roles added in v1.50.9 — separate entry so existing fixture is not mutated.
+    # [#r96a4x]
     {"dt": "Role", "filters": [["name", "in", ["Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
-    # Habitat Role Profiles are intentionally NOT fixtured. They are provisioned
-    # solely by the idempotent seeder (setup.create_role_profiles, existence-guarded
-    # on name), wired into both after_install and after_migrate. A fixture import
-    # runs Role Profile.on_update -> queue_action("update_all_users"), which takes a
-    # document file-lock BEFORE enqueuing the (worker-bound) job. On `bench migrate`
-    # there is no worker and no after_job cycle to drain the lock, so the lock file
-    # persists and every subsequent migrate re-imports the same fixture and aborts
-    # with DocumentLockedError. The seeder avoids this entirely (see create_role_profiles).
-    # Salis (Movement) custom roles — only the uniquely-ours, post-consolidation
-    # roles are fixtured. Core/generic roles (Fleet Manager, Driver) are
-    # existence-guarded in the seeds, never fixtured, to avoid clobbering
-    # ERPNext/HRMS-owned roles. The merged role names (Fleet Operations Manager,
-    # Fleet Regional Manager -> Fleet Manager; Legal Officer -> Government Relations
-    # Officer) are intentionally NOT fixtured and NOT seeded: the role-creation
-    # seeders (patches/v1_0/seed_salis_authority_roles.py +
-    # seed_salis_operations_roles.py) simply omit those names from their seed lists,
-    # so a fresh install never creates them. (There is no consolidate_salis_roles
-    # patch; the audit reference to one was stale. Re-pointing an EXISTING user from
-    # an old role name to the merged one — if any legacy site still has them — is an
-    # owner decision and is not automated here.)
+    # [#520way]
+    # [#7bt0pe]
+    # [#jsfs5k]
+    # [#gev0bm]
+    # [#gdsy32]
+    # [#pabj7t]
+    # [#tggw3r]
+    # [#kfmohf]
+    # [#tbejsi]
+    # [#1ugzrc]
+    # [#gtjbvc]
+    # [#sdjg7g]
+    # [#au3kly]
+    # [#k35fwa]
+    # [#7m6xo8]
+    # [#b7n1ld]
+    # [#ahi4wp]
+    # [#gk151m]
+    # [#hz6fs5]
+    # [#q0og0m]
     {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Supervisor", "Government Relations Officer"]]]},
-    # Salis-on-Issue: the Issue.custom_driver Custom Field ships via the
-    # sync_customizations file salis/custom/issue.json (auto-applied on migrate),
-    # so no Custom Field fixture is needed here.
-    # Print Format and Web Form are standard module files (is_standard=1)
-    # under habitat/print_format/ and habitat/web_form/ — loaded automatically
-    # by bench migrate via import_file, no fixture entry needed.
+    # [#d4kytf]
+    # [#6v4nh9]
+    # [#qk5d97]
+    # [#2d2duu]
+    # [#4ag5qx]
+    # [#rq1lnx]
 ]
 
-# First-install bootstrap: Habitat + Salis (each existence-guarded/idempotent).
+# [#sqws11]
 after_install = [
     "apex_habitat.setup.after_install",
     "apex_habitat.salis.setup.after_install",
-    # Data-driven seed loader (apex_core/setup/data/<module>/*.json) — create-only:
-    # Email Templates, Assignment Rules, Kanban Boards (both modules) + Habitat
-    # maintenance materials/templates. Runs alongside the legacy *_seed.py (also
-    # create-only) until those are retired; parity-verified in
-    # tests/test_seed_parity_*. SLA + Issue Type/Priority JSON are apply:false
-    # (sourced by issue_seed); Auto Email Report stays a seeder (runtime fields).
+    # [#4igo0x]
+    # [#1ana8n]
+    # [#n9cbmp]
+    # [#8fz94p]
+    # [#9h5e6a]
+    # [#ajcv1c]
     "apex_habitat.apex_core.setup.seed.seed_all",
-    # Salis Kanban Boards, Assignment Rules and Email Templates are provisioned by
-    # the data-driven loader (seed_all, above) from create-only JSON under
-    # apex_core/setup/data/salis/ — the hand-written salis seeders were retired in the
-    # seed consolidation (M-10/M-11). (Notifications ship as is_standard JSON under
-    # salis/notification/, imported by migrate.)
-    # Salis navbar Help-dropdown links — mirrors Habitat's add_navbar_help_links
-    # patch (Navbar Settings is a Single, never fixtured; additive + idempotent,
-    # never clobbers the customer's navbar). Surfaces the Salis workspace and the
-    # Dispatch Board page one click away from the desk Help menu.
+    # [#oja7bv]
+    # [#sdx5lt]
+    # [#6nmzbi]
+    # [#o9ve9s]
+    # [#43lh6e]
+    # [#pz09u4]
+    # [#rb30tj]
+    # [#ewfnmb]
+    # [#8mlxun]
     "apex_habitat.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
-    # Salis Auto Email Reports — created disabled, addressed to Administrator as a
-    # placeholder. Kept as a seeder (runtime recipient fields, not externalised to
-    # JSON). Idempotent + existence-guarded; also run on after_migrate / v1_x patch.
+    # [#oy8lk9]
+    # [#q9ipfy]
+    # [#20vkro]
     "apex_habitat.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
-    # Salis native Workflow Spine — Transport Request (first-mover). Frappe does
-    # not auto-import a Workflow from a module folder, so the shipped JSON is
-    # applied by this idempotent, existence-guarded seed (also run on
-    # after_migrate and from the v1_x patch — single source of truth).
+    # [#9sa483]
+    # [#hkvjbo]
+    # [#3o2g6u]
+    # [#osm7a2]
     "apex_habitat.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
-    # Salis support-on-Issue masters — Issue Types / Priorities / default SLA +
-    # the core-Issue role DocPerms drivers and fleet staff need (Support Ticket
-    # retired). Idempotent + existence-guarded; also run on after_migrate.
+    # [#cfecy2]
+    # [#iilmc6]
+    # [#d5c5v1]
     "apex_habitat.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
 ]
 
-# after_sync runs right after sync_dashboards on install. The Salis/Movement
-# dashboards that used to be hand-seeded here are now shipped as native
-# is_standard=1 module JSON under salis/salis_dashboard/<slug>/<slug>.json (and
-# habitat/habitat_dashboard/... for Habitat), which sync_dashboards imports on
-# both install and migrate — exactly like ERPNext. The runtime seeders are retired
-# (no-op stubs) and their double-provisioning of charts/cards is removed, so there
-# is nothing left to wire here.
+# [#j55yx5]
+# [#jreze8]
+# [#azlvia]
+# [#l59eg6]
+# [#ak6ti5]
+# [#qzphva]
+# [#oxcf2t]
 after_sync = []
-# Dashboards now ship as is_standard JSON (imported by sync_dashboards), so the old
-# after_migrate dashboard seeds are gone. The seed loader keeps other records in sync.
+# [#ba50gn]
+# [#l6tdg4]
 after_migrate = [
-    # Data-driven seed loader (apex_core/setup/data/<module>/*.json) — create-only;
-    # keeps installed sites in sync. Runs alongside the legacy *_seed.py until
-    # those are retired (parity-verified in tests/test_seed_parity_*).
+    # [#anrsy5]
+    # [#2xd768]
+    # [#9n0j29]
     "apex_habitat.apex_core.setup.seed.seed_all",
-    # Habitat operational Notifications now ship as is_standard JSON under
-    # habitat/notification/, so they are imported by migrate — no seed entry is
-    # needed here.
-    # Habitat Kanban Boards, Assignment Rules and Email Templates are provisioned by
-    # the data-driven loader (seed_all, above). Auto Email Reports stay a seeder
-    # (runtime recipient fields). Idempotent + existence-guarded; running on every
-    # migrate keeps existing sites in sync.
+    # [#t2h62w]
+    # [#jbc6xu]
+    # [#7sclsj]
+    # [#t0ctoo]
+    # [#qivocy]
+    # [#8afvl8]
+    # [#t99gij]
     "apex_habitat.apex_core.setup.seeders.habitat_auto_email_reports_seed.seed_auto_email_reports",
-    # Salis Kanban Boards + Assignment Rules are provisioned by the data-driven
-    # loader (seed_all, above). (Notifications ship as is_standard JSON under
-    # salis/notification/, imported by migrate.)
-    # Salis navbar Help-dropdown links — keep already-installed sites in sync on
-    # migrate (idempotent; appends only the links that are missing).
+    # [#aiw32l]
+    # [#os4xpa]
+    # [#43lh6e]
+    # [#gqvbgy]
+    # [#9jbxb8]
     "apex_habitat.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
-    # Salis Auto Email Reports — kept as a seeder (runtime recipient fields); the
-    # Email Templates moved to the data-driven loader (seed_all, above). Idempotent.
+    # [#fv8m5a]
+    # [#hfitcu]
     "apex_habitat.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
-    # Salis native Workflow Spine — keep already-installed sites in sync on
-    # migrate (idempotent + existence-guarded; created only if absent, never
-    # clobbers an on-site-tuned Workflow).
+    # [#svrpde]
+    # [#h4igl2]
+    # [#4g9zu3]
     "apex_habitat.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
-    # Salis support-on-Issue masters — keep already-installed sites in sync on
-    # migrate (idempotent + existence-guarded; seeds Issue Types/Priorities/SLA
-    # and grants the core-Issue role DocPerms via Custom DocPerm rows).
+    # [#4o7457]
+    # [#din3u8]
+    # [#4w3tkh]
     "apex_habitat.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
-    # Salis Settings defaults — fill-blanks-only (never clobbers an admin's edits).
-    # after_install + a run-once patch seed this on fresh/legacy sites, but NOT on
-    # ordinary migrate, so a newly-added default key would never reach an already-
-    # upgraded site. Re-running the same idempotent seed here closes that gap.
+    # [#4casx8]
+    # [#mty2qp]
+    # [#77175v]
+    # [#4lhwow]
     "apex_habitat.patches.v1_0.seed_salis_settings.execute",
-    # Habitat roles + Role Profiles — keep already-installed sites in sync on
-    # migrate (create-only/existence-guarded). after_install seeds them on a fresh
-    # install; this delivers newly-added roles/profiles to UPGRADING sites. Role
-    # Profiles are NOT fixtured (see fixtures/ above — a fixture import triggers
-    # Role Profile.on_update's locking queue_action and breaks migrate); this
-    # idempotent seeder is the single source of truth, and its inserts release the
-    # controller's stale document lock so migrate stays lock-free.
+    # [#1kg78y]
+    # [#9jp1cl]
+    # [#ojghh5]
+    # [#odxznc]
+    # [#ak34qe]
+    # [#plmz05]
+    # [#rjgpff]
     "apex_habitat.setup.create_roles",
     "apex_habitat.setup.create_role_profiles",
 ]
 
-# A fresh test site has no Company or ERPNext master data until the setup wizard
-# runs, so any test that inserts a Company would fail (Warehouse Type "Transit"
-# missing). This hook provisions the site once before the suite runs — see
-# apex_habitat/tests/before_tests.py.
+# [#88aspj]
+# [#ai14rs]
+# [#8fxciq]
+# [#is2g6c]
 before_tests = "apex_habitat.tests.before_tests.before_tests"
 
-# Frappe What's New feed — appears in desk notification area, not as a popup
+# [#p8ikte]
 get_changelog_feed = "apex_habitat.apex_core.utils.changelog.get_changelog_feed"

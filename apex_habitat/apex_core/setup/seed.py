@@ -85,10 +85,10 @@ def load_specs(module_dir, only=None, data_root=None):
             "doctype": raw["doctype"],
             "key": raw["key"],
             "create_only": raw.get("create_only", True),
-            # apply=False marks a file kept only for parity documentation (e.g. a
-            # record whose mandatory fields are resolved at runtime, like an SLA's
-            # holiday_list) — load_specs still returns it for tests, but seed()
-            # never applies it.
+            # [#878c7g]
+            # [#dq3u67]
+            # [#8n11ca]
+            # [#do0hi5]
             "apply": raw.get("apply", True),
             "records": raw["records"],
             "__source__": fname,
@@ -152,10 +152,10 @@ def apply_spec(spec):
         frappe.db.savepoint(savepoint)
         try:
             doc = frappe.get_doc({"doctype": doctype, **record})
-            # ignore_if_duplicate mirrors Frappe core's own seeding idiom
-            # (frappe.desk.page.setup_wizard.setup_wizard.make_records); it is a
-            # belt-and-suspenders companion to the create_only existence guard
-            # above for DocTypes whose natural key is also their name.
+            # [#pvs8pu]
+            # [#jtklsf]
+            # [#m7yrau]
+            # [#fxnzle]
             doc.insert(ignore_permissions=True, ignore_if_duplicate=True)  # audit-ok
             created += 1
         except Exception:  # noqa: BLE001 — one bad record must not abort the batch
@@ -177,7 +177,7 @@ def seed(module_dir, only=None):
     totals = {"created": 0, "skipped": 0, "failed": 0}
     for spec in load_specs(module_dir, only=only):
         if not spec.get("apply", True):
-            continue  # parity-only file (see load_specs) — sourced by a seeder
+            continue  # [#kxzv90]
         result = apply_spec(spec)
         for k in totals:
             totals[k] += result[k]
@@ -185,7 +185,7 @@ def seed(module_dir, only=None):
     return totals
 
 
-# Modules that ship JSON seed data under apex_core/setup/data/<module>/.
+# [#2wsx46]
 _MODULES = ("habitat", "salis")
 
 

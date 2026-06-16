@@ -13,13 +13,13 @@ from apex_habitat.apex_core.setup.seeders.maintenance_material_template_seed imp
 
 class TestMaterialTemplateCoverage(ApexHabitatTestCase):
     def test_every_issue_type_has_active_template(self):
-        seed_templates()  # idempotent
+        seed_templates()  # [#1jpp39]
 
         meta = frappe.get_meta("Maintenance Request")
         issue_field = meta.get_field("issue_type")
         options = [o.strip() for o in (issue_field.options or "").split("\n") if o.strip()]
 
-        # "Other" is an intentional catch-all with no dedicated template.
+        # [#a7c6g4]
         expected = [o for o in options if o != "Other"]
         self.assertTrue(expected, "no issue_type options found")
 

@@ -86,16 +86,16 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
         "Other": "annual_other_expenses_sar"
     }
 
-    # One building per job: fetch + validate it once, then paginate its assignments.
+    # [#jonoe2]
     if not frappe.db.exists("Accommodation Building", building):
         logger.warning(
             f"allocate_building_accommodation_cost: Building {building} not found. Skipping."
         )
         return
     building_doc = frappe.get_doc("Accommodation Building", building)
-    # Keep rent fresh: the stored annual_rent_sar is a before_save cache that can lag a
-    # mid-period lease change, and this is the authoritative cost-recovery path, so
-    # re-derive it from the active lease in memory before reading the cost fields.
+    # [#ift93i]
+    # [#p6afo6]
+    # [#n117v7]
     from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import apply_active_lease
     apply_active_lease(building_doc)
     capacity = flt(building_doc.total_capacity)
@@ -134,11 +134,11 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
                 if annual_cost <= 0:
                     continue
 
-                # Compute employee daily share using leap-year-aware denominator
+                # [#6bn5wc]
                 daily_cost = flt(annual_cost / days_in_year, 5)
                 daily_share = flt(daily_cost / capacity, 5)
 
-                # Idempotence check: check if a ledger entry already exists
+                # [#69dc6m]
                 exists = frappe.db.exists(
                     "Accommodation Ledger",
                     {
@@ -176,9 +176,9 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
                     })
                     ledger_entry.insert(ignore_permissions=True)  # audit-ok — scheduler-run cost allocation, no user session
                 except frappe.exceptions.DuplicateEntryError:
-                    frappe.db.rollback()  # unique index is the backstop — treat as idempotent no-op
+                    frappe.db.rollback()  # [#g4zbzv]
                 except Exception as e:
-                    frappe.db.rollback()  # T-02: rollback before log_error to avoid aborted-transaction errors
+                    frappe.db.rollback()  # [#9hso8i]
                     logger.error(
                         f"allocate_building_accommodation_cost: Failed to insert ledger row for assignment {asgn.name}, cost {ledger_type}: {e}"
                     )
@@ -216,7 +216,7 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
     except frappe.DoesNotExistError:
         return 0
     from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import apply_active_lease
-    apply_active_lease(building)  # re-derive rent from the active lease (cache may lag)
+    apply_active_lease(building)  # [#ijk615]
     capacity = flt(building.total_capacity)
     if capacity <= 0:
         return 0
@@ -296,7 +296,7 @@ def daily_building_license_expiry_check() -> None:
     today_str = today()
     logger = frappe.logger()
 
-    # Paginate submitted active licenses at 500/batch
+    # [#p8yur6]
     start = 0
     batch_size = 500
     while True:
@@ -336,7 +336,7 @@ def daily_building_license_expiry_check() -> None:
                         logger.warning(msg)
                         _notify_operational("Building License", lic.name, msg)
             except Exception:
-                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
+                frappe.db.rollback()  # [#7kjob3]
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"License expiry check failed for {lic.name}"[:140],
@@ -362,7 +362,7 @@ def _raise_maintenance_alert(
     """
     from frappe.utils import now_datetime, today
 
-    alert_type = "Maintenance Overdue"  # dedicated Operations Alert type for an overdue ticket
+    alert_type = "Maintenance Overdue"  # [#ihzt5o]
     severity = "Critical" if priority == "Critical" else "Warning"
     message = (
         f"open_maintenance_escalation: Maintenance Request {req_name} "
@@ -371,7 +371,7 @@ def _raise_maintenance_alert(
         f"(threshold: {threshold_hours} hours)."
     )[:2000]
 
-    # --- Idempotency guard: one Open alert per (Maintenance Request name, day) ---
+    # [#sa9w87]
     try:
         today_str = today()
         if frappe.db.exists(
@@ -392,7 +392,7 @@ def _raise_maintenance_alert(
         )
         return
 
-    # --- Insert the alert record ---
+    # [#m2omcq]
     try:
         frappe.get_doc(
             {
@@ -412,7 +412,7 @@ def _raise_maintenance_alert(
         )
         return
 
-    # --- Drop a timeline comment on the Maintenance Request (best-effort) ---
+    # [#1i99p2]
     try:
         frappe.get_doc("Maintenance Request", req_name).add_comment("Comment", message)
     except Exception:
@@ -436,11 +436,11 @@ def open_maintenance_escalation() -> None:
     now = now_datetime()
     logger = frappe.logger()
 
-    # Rules: (Hours open threshold)
-    # Critical: > 24 hours
-    # High: > 72 hours
-    # Medium: > 168 hours
-    # Low: > 336 hours
+    # [#jc0ys4]
+    # [#ci0vwo]
+    # [#5mb7vc]
+    # [#14vom9]
+    # [#97ba2a]
     thresholds = {
         "Critical": 24,
         "High": 72,
@@ -448,7 +448,7 @@ def open_maintenance_escalation() -> None:
         "Low": 336
     }
 
-    # Paginate non-cancelled open maintenance requests at 500/batch
+    # [#9sjghe]
     start = 0
     batch_size = 500
     while True:
@@ -466,7 +466,7 @@ def open_maintenance_escalation() -> None:
             break
 
         for req in open_requests:
-            try:  # T-03: isolate per-row errors so one bad row does not abort the whole batch
+            try:  # [#jrhqtd]
                 priority = req.priority or "Medium"
                 threshold_hours = thresholds.get(priority, 168)
 
@@ -676,10 +676,10 @@ def weekly_occupancy_sync() -> None:
     """
     batch_size = 500
 
-    # --- Room pass ---
-    # Pre-aggregate active occupants per room in one grouped query, then iterate
-    # rooms (carrying bed_capacity in the same read) instead of issuing one
-    # count + one get_value per room (N+1). Behaviour preserved.
+    # [#6miocv]
+    # [#i2w6jq]
+    # [#7zn79c]
+    # [#k7ew34]
     active_by_room = {
         r["room"]: int(r["n"] or 0)
         for r in frappe.db.sql(
@@ -727,7 +727,7 @@ def weekly_occupancy_sync() -> None:
                     update_modified=False,
                 )
             except Exception:
-                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
+                frappe.db.rollback()  # [#7kjob3]
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Occupancy sync failed for room {room.name}"[:140],
@@ -737,12 +737,12 @@ def weekly_occupancy_sync() -> None:
 
     frappe.logger().info("weekly_occupancy_sync: room occupancy counters refreshed.")
 
-    # --- Building pass ---
-    # Guard: skip buildings with no rooms to avoid division by zero in
-    # occupancy_percent calculation. Room counts and active occupants are
-    # pre-aggregated per building in one grouped query each, and capacity is
-    # carried in the building read, instead of two counts + one get_value per
-    # building (N+1). Behaviour preserved.
+    # [#dfo1c9]
+    # [#hq4urf]
+    # [#5516ep]
+    # [#kgelfi]
+    # [#jkxyju]
+    # [#ot1cha]
     rooms_per_building = {
         r["building"]: int(r["n"] or 0)
         for r in frappe.db.sql(
@@ -785,7 +785,7 @@ def weekly_occupancy_sync() -> None:
             try:
                 total_rooms = rooms_per_building.get(building.name, 0)
                 if not total_rooms:
-                    # Building has no rooms — skip to avoid division by zero.
+                    # [#o6i4do]
                     continue
 
                 active = active_by_building.get(building.name, 0)
@@ -801,7 +801,7 @@ def weekly_occupancy_sync() -> None:
                     update_modified=False,
                 )
             except Exception:
-                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
+                frappe.db.rollback()  # [#7kjob3]
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Occupancy sync failed for building {building.name}"[:140],
@@ -828,8 +828,8 @@ def daily_occupancy_snapshot() -> None:
     year = int(snapshot_date[:4])
     days_in_year = 366 if calendar.isleap(year) else 365
 
-    # --- Pre-aggregate all per-building inputs in a handful of grouped reads ---
-    # Buildings already snapshotted today (idempotency set).
+    # [#oh0s0q]
+    # [#f2eg5h]
     already = {
         r["building"]
         for r in frappe.get_all(
@@ -840,8 +840,8 @@ def daily_occupancy_snapshot() -> None:
         if r["building"]
     }
 
-    # Room counts per building, broken down by status, in one grouped query.
-    # rooms_by_building[building] = {"_total": n, "Full": n, "Partially Occupied": n, "Available": n}
+    # [#kubmk9]
+    # [#endyqz]
     rooms_by_building: dict = {}
     for r in frappe.db.sql(
         """
@@ -856,7 +856,7 @@ def daily_occupancy_snapshot() -> None:
         bucket[r["status"]] = int(r["n"] or 0)
         bucket["_total"] += int(r["n"] or 0)
 
-    # Active occupants per building (submitted assignments, not checked out).
+    # [#ericll]
     active_by_building = {
         r["building"]: int(r["n"] or 0)
         for r in frappe.db.sql(
@@ -872,7 +872,7 @@ def daily_occupancy_snapshot() -> None:
         )
     }
 
-    # Building capacity + annual cost per capacity (one read instead of 2/building).
+    # [#fetoxi]
     building_meta = {
         b["name"]: b
         for b in frappe.get_all(
@@ -939,7 +939,7 @@ def weekly_safety_task_compliance_scan() -> None:
 
     total_overdue = 0
 
-    # Paginate overdue instances at 500/batch
+    # [#5jykuy]
     start = 0
     batch_size = 500
     while True:
@@ -961,7 +961,7 @@ def weekly_safety_task_compliance_scan() -> None:
                     f"Scheduled task {inst.name} ({inst.template}) is overdue (was due {inst.due_date}).",
                 )
             except Exception:
-                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
+                frappe.db.rollback()  # [#7kjob3]
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Safety compliance scan failed for {inst.name}"[:140],
@@ -991,7 +991,7 @@ def daily_scheduled_task_instance_generator() -> None:
     today_date = getdate(today_str)
     logger = frappe.logger()
 
-    # Paginate active templates at 500/batch
+    # [#ainxxl]
     start = 0
     batch_size = 500
     while True:
@@ -1006,8 +1006,8 @@ def daily_scheduled_task_instance_generator() -> None:
             break
 
         for tmpl in templates:
-            # Skip templates pointing at a building that no longer exists, so the
-            # generator does not log a LinkValidationError on every run.
+            # [#9umys1]
+            # [#5m8m8y]
             if tmpl.building and not frappe.db.exists("Accommodation Building", tmpl.building):
                 logger.warning(
                     "daily_scheduled_task_instance_generator: skipping template %s — building %s not found.",
@@ -1056,7 +1056,7 @@ def daily_scheduled_task_instance_generator() -> None:
                     period_key,
                 )
             except Exception as e:  # noqa: BLE001
-                frappe.db.rollback()  # T-05: rollback before log_error to avoid aborted-transaction errors
+                frappe.db.rollback()  # [#7kjob3]
                 logger.error(
                     "daily_scheduled_task_instance_generator: Failed to create STI for template %s: %s",
                     tmpl.name,

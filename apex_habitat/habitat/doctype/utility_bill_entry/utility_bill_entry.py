@@ -33,15 +33,15 @@ def validate(doc, method=None):
         if doc.billing_period_to < doc.billing_period_from:
             frappe.throw(_("Billing Period To must be on or after Billing Period From."))
 
-    # Prevent a duplicate bill for the same account + billing period, which would
-    # post the cost to the Accommodation Ledger twice.
+    # [#s0auh6]
+    # [#jbitc9]
     if doc.utility_account and doc.billing_period_from and doc.billing_period_to:
         duplicate = frappe.db.exists(
             "Utility Bill Entry",
             {
-                # Scope the dup key to the cost-posting model: a bill is posted per
-                # company + building, so two companies (or two buildings) may share
-                # the same account + period without being duplicates of each other.
+                # [#ri93vq]
+                # [#3rvpcs]
+                # [#37opvl]
                 "company": doc.company,
                 "building": doc.building,
                 "utility_account": doc.utility_account,

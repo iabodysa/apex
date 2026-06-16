@@ -49,9 +49,9 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		# A raiser (Project tier) and a separate resolver (Operations tier). A user
-		# who is BOTH a maker role and Fleet Manager proves the SoD condition is
-		# what blocks self-resolution, not a role gap.
+		# [#a3z82l]
+		# [#b7xfl6]
+		# [#ari28f]
 		cls.raiser = _user("fecw_raiser@example.com", "Fleet Project Manager")
 		cls.manager = _user("fecw_mgr@example.com", "Fleet Manager")
 		cls.manager_maker = _user("fecw_mgrmaker@example.com", "Fleet Manager")
@@ -75,7 +75,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	# ------------------------------------------------------------------ helpers
+	# [#4lslw6]
 
 	@staticmethod
 	def _project(name):
@@ -139,7 +139,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 				pass
 		frappe.delete_doc("Fuel Exception Case", name, ignore_permissions=True, force=True)
 
-	# ------------------------------------------------------------------ tests
+	# [#idl6yv]
 
 	def test_workflow_is_seeded_and_active(self):
 		self.assertEqual(get_workflow_name("Fuel Exception Case"), WORKFLOW)
@@ -148,7 +148,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 			frappe.db.get_value("Workflow", WORKFLOW, "workflow_state_field"), "status"
 		)
 
-	# --- happy path incl. the post-submit transition ---------------------------
+	# [#dws0r5]
 
 	def test_investigate_resolve_then_close(self):
 		fec = self._new()
@@ -171,25 +171,25 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		fec.reload()
 		self.assertEqual(fec.status, "Under Investigation")
 
-		# Resolve submits (docstatus 0 -> 1); the native Resolve transition (an
-		# authorized role + SoD) plus the controller's evidence gate are the gates now.
+		# [#nafhw9]
+		# [#sfcmam]
 		self.assertIn("Resolve", _actions(fec))
 		apply_workflow(fec, "Resolve")
 		fec.reload()
 		self.assertEqual(fec.status, "Resolved")
 		self.assertEqual(fec.docstatus, 1)
-		# The non-raiser closer is stamped (controller defence-in-depth).
+		# [#mx6p59]
 		self.assertEqual(fec.closed_by, self.manager)
 
-		# The frozen-post-submit bug: Close must succeed on a docstatus=1 doc.
-		# Closed is a docstatus-1 finalize (not a cancel), so it stays submitted.
+		# [#r59gdt]
+		# [#9wlqs2]
 		self.assertIn("Close", _actions(fec))
 		apply_workflow(fec, "Close")
 		fec.reload()
 		self.assertEqual(fec.status, "Closed")
 		self.assertEqual(fec.docstatus, 1)
 
-	# --- Reject exit ------------------------------------------------------------
+	# [#eyhmje]
 
 	def test_reject_then_close(self):
 		fec = self._investigating()
@@ -206,12 +206,12 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		self.assertEqual(fec.status, "Closed")
 		self.assertEqual(fec.docstatus, 1)
 
-	# --- Segregation of Duties: raiser cannot resolve their own case ------------
+	# [#bg0qz1]
 
 	def test_sod_raiser_cannot_resolve(self):
-		# manager_maker holds BOTH Fleet Manager and Fleet Project Manager, so only
-		# the SoD condition (reported_by != session.user) stands between them and
-		# self-resolution.
+		# [#f1afl3]
+		# [#939y41]
+		# [#opb2ff]
 		fec = self._investigating(reported_by=self.manager_maker)
 
 		frappe.set_user(self.manager_maker)
@@ -219,7 +219,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			apply_workflow(fec, "Resolve")
 
-		# A different Fleet Manager CAN resolve the same case.
+		# [#q08pg4]
 		frappe.set_user(self.manager)
 		self.assertIn("Resolve", _actions(fec))
 		apply_workflow(fec, "Resolve")
@@ -227,7 +227,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		self.assertEqual(fec.status, "Resolved")
 		self.assertEqual(fec.docstatus, 1)
 
-	# --- the Delegation-of-Authority gate still fires on submit -----------------
+	# [#ppw0fw]
 
 	def test_resolve_succeeds_via_workflow_gate(self):
 		"""Approval authority now lives in the native workflow's Resolve transition
@@ -241,7 +241,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		fec.reload()
 		self.assertEqual(fec.docstatus, 1)
 
-	# --- evidence is required before resolution (controller gate) ---------------
+	# [#9l2fdg]
 
 	def test_resolve_blocked_without_evidence(self):
 		fec = self._investigating(with_evidence=False)

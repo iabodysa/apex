@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 """Movement KPI Summary — a one-glance, ORM-only roll-up of the Movement
 operational KPIs surfaced on the Movement Operations Dashboard.
@@ -54,9 +54,9 @@ def execute(filters=None):
     to_date = filters.get("to_date")
 
     def date_range(field):
-        # period_month is a YYYY-MM Data field; comparing it against full YYYY-MM-DD
-        # bounds silently drops the whole partial month (e.g. a mid-month from_date
-        # excludes its own month). Truncate the bounds to YYYY-MM for that field.
+        # [#3op9y7]
+        # [#qhzipf]
+        # [#9lkqaz]
         lo, hi = from_date, to_date
         if field == "period_month":
             lo = lo[:7] if lo else lo
@@ -82,7 +82,7 @@ def execute(filters=None):
                     "note": frappe._("Source not installed: {0}").format(missing_doctype or "")}
         return {"kpi": label, "value": value, "note": ""}
 
-    # --- Trips (Dispatch Trip exists) ---
+    # [#e78of2]
     completed_filters = {"status": "Completed"}
     completed_filters.update(date_range("trip_date"))
     total_filters = {}
@@ -105,7 +105,7 @@ def execute(filters=None):
             "Transport Request"),
         row(frappe._("Open Fuel Exception Cases"),
             _count("Fuel Exception Case", {"status": "Open"}), "Fuel Exception Case"),
-        # Engine-backed KPIs (guarded).
+        # [#451yav]
         row(frappe._("Trip Fulfilment Ledger Rows"),
             _count("Trip Fulfilment Ledger", date_range("trip_date")),
             "Trip Fulfilment Ledger"),

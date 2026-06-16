@@ -26,29 +26,29 @@ stale is_standard=0 rows are simply removed (not re-imported).
 
 import frappe
 
-# Every Dashboard name the three retired seeders created as is_standard=0.
+# [#9o3tww]
 LEGACY_DASHBOARDS = [
-    # habitat_dashboard_seed.py
+    # [#h55sfk]
     "Habitat Dashboard",
     "Accommodation Manager Dashboard",
     "Resident Supervisor Dashboard",
     "Finance Manager Dashboard",
     "Internal Auditor Dashboard",
-    # salis_dashboard_seed.py
+    # [#eavzps]
     "Fleet Manager Dashboard",
     "Fleet Supervisor Dashboard",
-    "Salis Finance Manager Dashboard",  # not re-shipped (0 standard charts)
+    "Salis Finance Manager Dashboard",  # [#ak5kq1]
     "Salis - Workers Transport",
     "Salis - Representatives Fleet",
-    # salis_movement_dashboard_seed.py
-    "Movement Operations Dashboard",  # not re-shipped (0 standard charts)
+    # [#nkctau]
+    "Movement Operations Dashboard",  # [#ak5kq1]
 ]
 
 
 def execute():
     for name in LEGACY_DASHBOARDS:
-        # Guard: only delete a stale runtime-built (is_standard=0) row. Never touch a
-        # row already promoted to is_standard=1 or an admin-created Dashboard.
+        # [#mxgrde]
+        # [#5v465w]
         if frappe.db.get_value("Dashboard", name, "is_standard") == 0:
             frappe.delete_doc("Dashboard", name, force=True, ignore_permissions=True)
     frappe.db.commit()

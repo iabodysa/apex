@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 from collections import defaultdict
 
@@ -139,9 +139,9 @@ def _maintenance(building_names):
         fields=["building", "status"],
     )
     for r in rows:
-        # Maintenance Request states: Open/Assigned/In Progress/Resolved/Closed/Reopened.
-        # Assigned and Reopened are active work too — count them as open (they
-        # previously fell through both branches, undercounting open_maintenance).
+        # [#ppkdxt]
+        # [#gmpywp]
+        # [#l9q32y]
         if r.status in ("Open", "In Progress", "Assigned", "Reopened"):
             result[r.building]["open"] += 1
         elif r.status in ("Resolved", "Closed"):

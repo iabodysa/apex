@@ -17,7 +17,7 @@ def execute():
     try:
         seed_salis_auto_email_reports()
     except Exception:
-        # A seed must NEVER crash install/migrate — log and continue.
+        # [#kzfk4g]
         frappe.db.rollback()
         frappe.log_error(
             title="seed_salis_communications failed: seed_salis_auto_email_reports",

@@ -1,17 +1,17 @@
 # Copyright (c) 2026, AFMCO Support Services Co. Ltd
-# Project-based row scoping for Salis transactional DocTypes.
-#
-# By default every role acts across all projects.
-# Supervisors and project managers must be scoped to the projects they are
-# granted via a User Permission on "Project". A small set of oversight roles
-# remain unscoped (see UNSCOPED_ROLES) and continue to see every project.
-#
-# Pattern:
-#   - permission_query_conditions hooks call the per-DocType <doctype>_query
-#     functions below. Each returns a SQL WHERE fragment (or "" for unscoped
-#     users) that restricts the list/report views to the allowed projects.
-#   - the has_permission hook calls scoped_has_permission to enforce the same
-#     restriction on individual document access.
+# [#s6du5z]
+# [#od1fgp]
+# [#ep2de0]
+# [#p7ag56]
+# [#meyg1s]
+# [#6iknhj]
+# [#od1fgp]
+# [#kjbhv0]
+# [#4kx45i]
+# [#kh72n4]
+# [#5h5qa8]
+# [#id2e30]
+# [#dy89gw]
 
 import frappe
 
@@ -19,13 +19,13 @@ UNSCOPED_ROLES = {
     "System Manager",
     "Fleet Manager",
     "Internal Auditor",
-    # Finance Manager is a central finance-control role, not a project-bound
-    # operator: across the operational DocTypes it holds read/report oversight,
-    # and on the finance-boundary DocTypes (Salis Payment Request, Fuel Claim,
-    # Rental Settlement) it is THE cross-project approver/payer. Scoping it to a
-    # single project would make it unable to approve payments for other projects,
-    # so — like Internal Auditor — it sees every project. (Maker != checker is
-    # still enforced separately by the SoD hooks/workflow conditions.)
+    # [#qn65ig]
+    # [#icc6x9]
+    # [#lhr1cf]
+    # [#7gggog]
+    # [#3krh1h]
+    # [#jizha1]
+    # [#9t1fty]
     "Finance Manager",
 }
 
@@ -71,10 +71,10 @@ def _project_condition(user, column="`project`"):
     return "{column} in ({values})".format(column=column, values=escaped)
 
 
-# ---------------------------------------------------------------------------
-# Per-DocType permission_query_conditions functions
-# ---------------------------------------------------------------------------
-# DocTypes with a direct `project` Link field.
+# [#rudcur]
+# [#elodcg]
+# [#rudcur]
+# [#7kux9m]
 
 def vehicle_assignment_query(user=None):
     return _project_condition(user)
@@ -159,8 +159,8 @@ def trip_start_log_query(user=None):
 
     projects = _allowed_projects(user)
     if not projects:
-        # No project grant: the only legitimate visibility is the user's own
-        # Trip Start Log rows (the if_owner self records). Everything else hidden.
+        # [#ss0io8]
+        # [#adwi88]
         return own
 
     escaped = ", ".join(frappe.db.escape(p) for p in projects)
@@ -201,8 +201,8 @@ def salis_driver_query(user=None):
 
     projects = _allowed_projects(user)
     if not projects:
-        # No project grant: the only legitimate visibility is the user's own
-        # driver row (the if_owner self-profile). Everything else is hidden.
+        # [#ss0io8]
+        # [#s51hgx]
         return own
 
     escaped = ", ".join(frappe.db.escape(p) for p in projects)
@@ -242,9 +242,9 @@ def passenger_manifest_query(user=None):
     )
 
 
-# ---------------------------------------------------------------------------
-# Shared has_permission hook
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#np2ldl]
+# [#rudcur]
 
 def _doc_project(doc):
     """Resolve the project a document belongs to, including the docs that reach
@@ -261,8 +261,8 @@ def _doc_project(doc):
             return frappe.db.get_value("Route Plan", route_plan, "project")
 
     if doctype == "Passenger Manifest":
-        # The manifest may carry route_plan directly, or only a dispatch_trip
-        # (which links to the Route Plan). Resolve via either path.
+        # [#5jyihp]
+        # [#ghu1og]
         route_plan = getattr(doc, "route_plan", None)
         if not route_plan:
             dispatch_trip = getattr(doc, "dispatch_trip", None)
@@ -288,16 +288,16 @@ def scoped_has_permission(doc, ptype, user=None):
 
     project = _doc_project(doc)
     if not project:
-        # Project-less doc. Ownership is an independent, legitimate access basis
-        # (an if_owner permission row), so defer to Frappe's default resolution
-        # when the acting user owns the doc — e.g. a Driver reading the Support
-        # Ticket they raised, where the row carries no project. This does not
-        # widen project scope: every project-BEARING doc is still filtered below.
+        # [#6ucwfi]
+        # [#rg9dmd]
+        # [#6qpzwq]
+        # [#6vmnt8]
+        # [#6ll8c3]
         if getattr(doc, "owner", None) == user:
             return None
-        # Otherwise deny, to mirror the list-view query condition (which shows
-        # scoped users nothing when the project is absent). Without this, a
-        # project-less record would bypass scoping.
+        # [#e6vft7]
+        # [#2sjzpe]
+        # [#c6r4ab]
         return False
 
     if project not in _allowed_projects(user):
@@ -329,14 +329,14 @@ def salis_driver_has_permission(doc, ptype, user=None):
     if _is_unscoped(user):
         return None
 
-    # The Driver's own row is always readable, regardless of its project tag.
+    # [#ftupdr]
     if getattr(doc, "owner", None) == user:
         return None
 
     project = _doc_project(doc)
     if not project:
-        # Project-less, non-owned driver row: a scoped user sees nothing, mirroring
-        # the list query (which only admits project-in-scope OR owner == me).
+        # [#tpjyaq]
+        # [#i0987i]
         return False
 
     if project not in _allowed_projects(user):
@@ -368,14 +368,14 @@ def trip_start_log_has_permission(doc, ptype, user=None):
     if _is_unscoped(user):
         return None
 
-    # The Driver's own log is always accessible, regardless of its project chain.
+    # [#o4dfxj]
     if getattr(doc, "owner", None) == user:
         return None
 
     project = _doc_project(doc)
     if not project:
-        # Project-less, non-owned log: a scoped user sees nothing, mirroring the
-        # list query (which only admits project-in-scope OR owner == me).
+        # [#du5o5h]
+        # [#hurett]
         return False
 
     if project not in _allowed_projects(user):
@@ -384,17 +384,17 @@ def trip_start_log_has_permission(doc, ptype, user=None):
     return None
 
 
-# ---------------------------------------------------------------------------
-# Segregation of duties (requester cannot approve)
-# ---------------------------------------------------------------------------
-# A user who holds both an operational role and the finance role must not be
-# able to self-approve their own payment requests. This enforces
-# approver != requester at the permission layer, in addition to the
-# controller-level check, so a Finance-exclusive transition (Approved by
-# Finance / Paid) on a document the acting user requested or created is
-# blocked regardless of how the transition is attempted.
+# [#rudcur]
+# [#dm2ry4]
+# [#rudcur]
+# [#1cn5cw]
+# [#4286wl]
+# [#16mmia]
+# [#dbm02s]
+# [#5hgum1]
+# [#47ajeg]
 
-# Statuses that represent a Finance-exclusive approval/payment outcome.
+# [#f1a2vi]
 FINANCE_EXCLUSIVE_STATES = {
     "Approved by Finance",
     "Paid",
@@ -426,12 +426,12 @@ def payment_sod_has_permission(doc, ptype, user=None):
     if getattr(doc, "doctype", None) != "Salis Payment Request":
         return None
 
-    # (1) Project scope first. A False here is an unconditional deny regardless
-    # of the action; None means scope does not object, so fall through to SoD.
+    # [#lj9evu]
+    # [#tjsy6v]
     if scoped_has_permission(doc, ptype, user=user) is False:
         return False
 
-    # (2) Segregation of duties (maker != checker) for Finance-exclusive moves.
+    # [#j3giia]
     if ptype not in ("submit", "write"):
         return None
 

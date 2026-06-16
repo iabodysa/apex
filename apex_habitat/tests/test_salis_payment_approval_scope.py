@@ -99,17 +99,17 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
         frappe.set_user("Administrator")
         cls.pa = _project("PayScope A")
         cls.pb = _project("PayScope B")
-        # Fleet Supervisor has read but not submit -> ideal for read-leak tests.
+        # [#kon5mb]
         cls.sup = _user("payscope_sup@example.com", "Fleet Supervisor")
         _grant_project(cls.sup, cls.pa)
-        # Unscoped oversight role: sees every project.
+        # [#389vnd]
         cls.mgr = _user("payscope_mgr@example.com", "Fleet Manager")
         cls.pr_a = _payment_request(cls.pa)
         cls.pr_b = _payment_request(cls.pb)
-        # The leak surface: a project-less request. Native User-Permission link
-        # matching admits this row to every scoped user; only the app hook denies
-        # it. Owned by Administrator so the "owner defers" branch never applies to
-        # our scoped supervisor.
+        # [#tqqoiz]
+        # [#soj79k]
+        # [#tt42sb]
+        # [#7qqlyn]
         cls.pr_null = _payment_request(None)
 
     @classmethod
@@ -124,7 +124,7 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # --- list view (permission_query_conditions) ---------------------------
+    # [#k58svw]
     def test_list_excludes_projectless_for_scoped_user(self):
         """The true leak: a project-less row must NOT appear for a scoped user."""
         frappe.set_user(self.sup)
@@ -137,7 +137,7 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
             names,
             "scoped supervisor must NOT see a project-less payment request",
         )
-        # Defense in depth: a wrong-project row must also be excluded.
+        # [#cbxl5n]
         self.assertNotIn(self.pr_b.name, names)
 
     def test_unscoped_manager_lists_all_projects(self):
@@ -149,7 +149,7 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
             self.pr_null.name, names, "oversight role must still see project-less rows"
         )
 
-    # --- per-document has_permission (the function wired in hooks) ----------
+    # [#4u27j7]
     def test_doc_read_allowed_in_scope(self):
         frappe.set_user(self.sup)
         doc = frappe.get_doc("Salis Payment Request", self.pr_a.name)
@@ -157,8 +157,8 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
 
     def test_doc_read_denied_projectless(self):
         frappe.set_user(self.sup)
-        # The wired has_permission must veto the project-less document for a
-        # scoped user who does not own it.
+        # [#8y66o9]
+        # [#2xj456]
         self.assertFalse(
             payment_sod_has_permission(
                 frappe.get_doc("Salis Payment Request", self.pr_null.name),
@@ -215,10 +215,10 @@ class TestScopingDoesNotWeakenSoD(FrappeTestCase):
         super().setUpClass()
         frappe.set_user("Administrator")
         cls.pa = _project("SoDScope A")
-        # Fleet Project Manager: scoped, can submit -> the realistic self-approver.
+        # [#kkf85o]
         cls.requester = _user("sod_pm@example.com", "Fleet Project Manager")
         _grant_project(cls.requester, cls.pa)
-        # A different in-scope user who legitimately may authorize.
+        # [#8dptks]
         cls.other = _user("sod_pm_other@example.com", "Fleet Project Manager")
         _grant_project(cls.other, cls.pa)
 
@@ -237,7 +237,7 @@ class TestScopingDoesNotWeakenSoD(FrappeTestCase):
         )
 
     def test_payment_self_approval_still_blocked_in_scope(self):
-        # In-scope project, but the requester tries to push it to a Finance state.
+        # [#4sze5h]
         doc = self._payment_doc("Approved by Finance", requested_by=self.requester)
         self.assertFalse(
             payment_sod_has_permission(doc, "submit", user=self.requester),

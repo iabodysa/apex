@@ -72,7 +72,7 @@ def daily_rental_accrual() -> None:
     posting_date = today()
     logger = frappe.logger()
 
-    # Resolved once per run as the fallback when a vehicle has no company set.
+    # [#9y8ifl]
     from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_default_company
 
     _default_company = get_default_company()
@@ -93,7 +93,7 @@ def daily_rental_accrual() -> None:
         for vehicle_row in vehicles:
             vehicle = vehicle_row.name
             try:
-                # Idempotence: one row per vehicle per day.
+                # [#21nfp2]
                 if frappe.db.exists(
                     "Rental Accrual Ledger",
                     {"vehicle": vehicle, "accrual_date": posting_date},
@@ -106,8 +106,8 @@ def daily_rental_accrual() -> None:
                 if not in_service:
                     continue
 
-                # Source traceability: the originating record is the open
-                # Rental Vehicle Movement (Receipt) when known, else the vehicle.
+                # [#et83rk]
+                # [#imu51o]
                 if movement_name:
                     source_doctype = "Rental Vehicle Movement"
                     source_name = movement_name
@@ -115,9 +115,9 @@ def daily_rental_accrual() -> None:
                     source_doctype = "Salis Vehicle"
                     source_name = vehicle
 
-                # Carry the owning company for reporting grouping: the vehicle's
-                # own company, else the Salis Settings default. Reference only -
-                # this memo posts no GL.
+                # [#okc2sv]
+                # [#5nu64s]
+                # [#lyt6rs]
                 company = vehicle_row.company or _default_company
 
                 frappe.get_doc(
@@ -146,9 +146,9 @@ def daily_rental_accrual() -> None:
     logger.info("daily_rental_accrual: rental accrual memos written.")
 
 
-# ---------------------------------------------------------------------------
-# Settlement stamping (Rental Accrual Ledger -> Rental Settlement link)
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#8z6gqt]
+# [#rudcur]
 
 
 def _period_bounds(period_month: str) -> tuple[str, str] | None:
@@ -197,9 +197,9 @@ def linked_accrued_total(rental_office: str, period_month: str) -> float:
     if not rental_office or not bounds:
         return 0.0
     first_day, last_day = bounds
-    # Raw aggregate (mirrors fuel_engine's SUM): frappe.get_all forbids SQL
-    # functions in `fields`. Original rows only (reversal_of NULL) so a reversal
-    # memo never inflates the accrued figure.
+    # [#684atz]
+    # [#sdysmh]
+    # [#i4r12e]
     total = frappe.db.sql(
         """
         SELECT COALESCE(SUM(amount), 0)
@@ -231,16 +231,16 @@ def stamp_settlement(settlement: str, rental_office: str, period_month: str) -> 
     if not filters:
         return 0
 
-    # No-double-stamp guard: only rows that are still UNSETTLED are eligible.
-    # ``settled = 0`` is the authoritative "not yet stamped" marker — stamping
-    # always sets ``settled = 1`` and the link together (and release resets both
-    # together), so a ``settled = 0`` row is by construction owned by no
-    # settlement. This both makes the operation idempotent (a second call for
-    # this settlement finds its rows already settled and skips them) and never
-    # re-points a row already claimed by another settlement (it is settled = 1,
-    # hence excluded). Keying on settled = 0 also sidesteps the SQL NULL-vs-IN
-    # trap: a freshly accrued row has rental_settlement = NULL, which an
-    # ``["in", [None, ...]]`` filter would silently miss.
+    # [#3qprmy]
+    # [#qhc9g0]
+    # [#muzkry]
+    # [#mc5dwi]
+    # [#o4fvjp]
+    # [#2r8w5f]
+    # [#fzl8gq]
+    # [#7a9jst]
+    # [#s1wlia]
+    # [#9idi5e]
     filters = dict(filters)
     filters["settled"] = 0
 
@@ -248,8 +248,8 @@ def stamp_settlement(settlement: str, rental_office: str, period_month: str) -> 
     if not names:
         return 0
 
-    # update_modified=False keeps the machine-written memo's audit timestamp
-    # stable; the link + flag are system metadata, not a content edit.
+    # [#lvsks3]
+    # [#g6a7hd]
     frappe.db.set_value(
         LEDGER_DOCTYPE,
         {"name": ["in", names]},
@@ -285,9 +285,9 @@ def release_settlement(settlement: str) -> int:
     return len(names)
 
 
-# ---------------------------------------------------------------------------
-# Monthly reconciliation
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#opciz9]
+# [#rudcur]
 
 
 def _rental_alert_already_raised(rental_office: str, period_month: str) -> bool:
@@ -331,16 +331,16 @@ def monthly_rental_reconciliation() -> None:
     """
     from frappe.utils import add_months, get_first_day, get_last_day, getdate, now_datetime
 
-    # The CLOSED period is last month, so a settlement raised early in the new
-    # month has time to land before the office is flagged.
+    # [#lowlon]
+    # [#os5iaw]
     closed_anchor = getdate(add_months(getdate(today()), -1))
     period_month = str(closed_anchor)[:7]
     first_day, last_day = str(get_first_day(closed_anchor)), str(get_last_day(closed_anchor))
     logger = frappe.logger()
 
-    # Offices that still have unsettled ORIGINAL accrual rows in the closed
-    # period, with the outstanding sum per office. Raw aggregate (frappe.get_all
-    # forbids SQL functions in `fields`); mirrors fuel_engine's SUM idiom.
+    # [#sa80h6]
+    # [#6eambz]
+    # [#mwj2df]
     rows = frappe.db.sql(
         """
         SELECT rental_office, COALESCE(SUM(amount), 0) AS outstanding

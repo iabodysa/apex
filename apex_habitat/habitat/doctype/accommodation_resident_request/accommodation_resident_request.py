@@ -12,13 +12,13 @@ class AccommodationResidentRequest(Document):
     pass
 
 
-# Category → target DocType routing for conversion. A resident request is a
-# triage funnel; once a supervisor decides what it really is, it is converted
-# into the operational record that actually does the work. Physical-issue
-# categories become a Maintenance Request (the dominant operational sink),
-# Safety becomes a Habitat Safety Incident, and custody/facility-item requests
-# become a Custody Issue. Categories with no operational target (Complaint,
-# Suggestion, Reimbursement, Other) are resolved on the request itself.
+# [#dojvco]
+# [#dvwgwi]
+# [#6wuno8]
+# [#oeibgt]
+# [#8yax5d]
+# [#929tdo]
+# [#91azr6]
 _CATEGORY_TARGET = {
     "Maintenance": "Maintenance Request",
     "Water": "Maintenance Request",
@@ -32,9 +32,9 @@ _CATEGORY_TARGET = {
     "Custody": "Custody Issue",
 }
 
-# The resident-request Category vocabulary is broader than the Maintenance
-# Request Issue Type vocabulary; map each convertible category onto a valid
-# Issue Type option so the mapped ticket passes its own validation.
+# [#oc09f7]
+# [#h3xt26]
+# [#3rx2wp]
 _CATEGORY_TO_ISSUE_TYPE = {
     "Maintenance": "Other",
     "Water": "Plumbing",
@@ -49,11 +49,11 @@ _CATEGORY_TO_ISSUE_TYPE = {
 
 
 def before_insert(doc, method=None):
-    # Note: the spam honeypot is enforced at the public web-form handler
-    # (submit_resident_request), which inspects the honeypot Web Form field and
-    # discards bot submissions before any document is built. There is no
-    # honeypot field on this DocType, so no inert controller-side check is kept
-    # here (it would always read None and never fire).
+    # [#t6k3lg]
+    # [#191rhm]
+    # [#csemjd]
+    # [#ekmtvc]
+    # [#jy7qnx]
     if not doc.anonymous_tracking_code:
         doc.anonymous_tracking_code = frappe.generate_hash(length=8).upper()
 
@@ -181,9 +181,9 @@ def _apply_priority_rules(doc):
     )
 
     def _matches(term):
-        # Word/token-boundary match so a short token like "ac" only fires on the
-        # standalone word (e.g. "ac is broken"), not as a substring of unrelated
-        # words such as machine/jacket/replace/contact/back/space.
+        # [#pwhqtz]
+        # [#p1lmz6]
+        # [#lmd8ij]
         return re.search(r"\b" + re.escape(term) + r"\b", text) is not None
 
     if any(_matches(term) for term in critical_terms):
@@ -192,15 +192,15 @@ def _apply_priority_rules(doc):
         doc.priority = "High"
 
 
-# ---------------------------------------------------------------------------
-# Conversion: turn a triaged resident request into the operational record that
-# does the work, and stamp the back-link (target_doctype / target_document) so
-# the request keeps a permanent, read-only trace of what it became. Mirrors the
-# Maintenance Request -> Work Order pattern (frappe.model.mapper.get_mapped_doc),
-# but creates and saves the target server-side so the traceability fields always
-# populate — for desk users and programmatic callers alike — and so the request
-# can never be "converted" twice.
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#6lr7y8]
+# [#4fs9jj]
+# [#hv1ioz]
+# [#djcs9g]
+# [#1v6swm]
+# [#4ivwxk]
+# [#ma2uhs]
+# [#rudcur]
 
 
 @frappe.whitelist(methods=["POST"])
@@ -216,7 +216,7 @@ def convert_request(source_name):
 
     source = frappe.get_doc("Accommodation Resident Request", source_name)
 
-    # Already converted — return the existing link, do not create a second target.
+    # [#hau1ba]
     if source.target_doctype and source.target_document:
         if frappe.db.exists(source.target_doctype, source.target_document):
             return {
@@ -255,8 +255,8 @@ def _link_target_to_request(source, target_doctype, target_name):
     server-side without re-running the request's own validate/on_update mid-flow,
     and without a timestamp-mismatch race."""
     updates = {"target_doctype": target_doctype, "target_document": target_name}
-    # Move the request out of its intake states once work has a home, but never
-    # override a terminal state (Resolved/Rejected/Closed).
+    # [#h9xuau]
+    # [#q4p36b]
     if source.status in (None, "", "New", "Triaged", "Assigned"):
         updates["status"] = "In Progress"
     frappe.db.set_value("Accommodation Resident Request", source.name, updates)
@@ -285,8 +285,8 @@ def _build_safety_incident(source):
     target.incident_datetime = frappe.utils.now_datetime()
     target.accommodation_building = source.building
     target.specific_location = source.issue_location
-    # Map request priority onto the incident severity vocabulary
-    # (Low / Medium / High / Severe / Critical).
+    # [#nstnl0]
+    # [#s4oovn]
     _severity_map = {"Critical": "Critical", "High": "High", "Medium": "Medium", "Low": "Low"}
     target.severity = _severity_map.get(source.priority, "Medium")
     target.description = source.description or _("Converted from resident request {0}").format(source.name)

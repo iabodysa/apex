@@ -26,20 +26,20 @@ from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
 class EmployeeDeductionAcknowledgment(Document):
     def validate(self):
-        # Keep party_type / party and the read-only Employee mirror in step, exactly
-        # like the other housed-worker doctypes. Self-contained: touches only this doc.
+        # [#krwdnk]
+        # [#fvj3hy]
         sync_party_employee(self, require_party=True)
         if self.approval_status == "Approved":
             if not self.approved_on:
                 self.approved_on = now_datetime()
         else:
-            # Clear the approval stamp if it is moved off Approved.
+            # [#2bs0al]
             self.approved_on = None
             self.approved_by = None
 
     def on_submit(self):
-        # A submitted acknowledgment is the consent of record: it must actually carry
-        # consent. Kept self-contained (no cross-doctype wiring in the skeleton).
+        # [#df5213]
+        # [#csmvpm]
         from frappe import _, throw
 
         if not self.consent_given:

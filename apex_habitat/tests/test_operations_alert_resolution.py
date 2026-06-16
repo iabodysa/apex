@@ -32,9 +32,9 @@ from apex_habitat.salis.tasks import (
 )
 
 
-# ---------------------------------------------------------------------------
-# helpers
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#cwxm51]
+# [#rudcur]
 
 
 def _vehicle(plate, status="Active"):
@@ -143,9 +143,9 @@ def _purge_attendance(driver, when=None):
 		frappe.delete_doc("Driver Attendance", n, force=True, ignore_permissions=True)
 
 
-# ---------------------------------------------------------------------------
-# Idle Vehicle — periodic raise -> clear -> resolve via real watcher
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#g0mgfi]
+# [#rudcur]
 
 
 class TestIdleVehicleRaiseClearResolve(FrappeTestCase):
@@ -153,7 +153,7 @@ class TestIdleVehicleRaiseClearResolve(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		# A vehicle with NO recent trip -> idle_vehicle_watch raises an alert.
+		# [#phkn7v]
 		cls.vehicle = _vehicle("OAR IDLE 1", status="Active")
 		_purge_alerts("Idle Vehicle", vehicle=cls.vehicle)
 
@@ -163,15 +163,15 @@ class TestIdleVehicleRaiseClearResolve(FrappeTestCase):
 		_purge_alerts("Idle Vehicle", vehicle=cls.vehicle)
 
 	def test_raise_then_resolve_on_clear(self):
-		# 1) breach -> watcher raises an Open Idle Vehicle alert.
+		# [#kcs9sq]
 		idle_vehicle_watch()
 		opened = _open_alerts("Idle Vehicle", vehicle=self.vehicle)
 		self.assertEqual(len(opened), 1, "Idle vehicle must raise exactly one Open alert.")
 
-		# 2) clear the condition: the vehicle is no longer Active.
+		# [#rqan2k]
 		frappe.db.set_value("Salis Vehicle", self.vehicle, "status", "Stopped")
 
-		# 3) re-run the resolver -> alert auto-resolves, with resolved_on stamped.
+		# [#7yd6v0]
 		reconcile_operations_alerts()
 
 		alert = frappe.db.get_value(
@@ -184,21 +184,21 @@ class TestIdleVehicleRaiseClearResolve(FrappeTestCase):
 		self.assertIsNotNone(alert.resolved_on, "resolved_on must be stamped on resolution.")
 		self.assertTrue(alert.resolution_note, "resolution_note must record the reason.")
 
-		# 4) not duplicated and no new Open alert reappears for the same subject.
+		# [#9v152d]
 		self.assertEqual(
 			_open_alerts("Idle Vehicle", vehicle=self.vehicle), [],
 			"No Open Idle Vehicle alert should remain once the vehicle is inactive.",
 		)
 
 	def test_still_breaching_stays_open(self):
-		# A different, still-Active vehicle with no trips stays breaching.
+		# [#3lfz7a]
 		v = _vehicle("OAR IDLE 2", status="Active")
 		self.addCleanup(lambda: _purge_alerts("Idle Vehicle", vehicle=v))
 		idle_vehicle_watch()
 		opened = _open_alerts("Idle Vehicle", vehicle=v)
 		self.assertEqual(len(opened), 1)
 
-		# Condition still holds (vehicle Active, still no trip) -> stays Open.
+		# [#k8kx48]
 		reconcile_operations_alerts()
 		self.assertEqual(
 			frappe.db.get_value("Operations Alert", opened[0], "status"), "Open",
@@ -219,7 +219,7 @@ class TestIdleVehicleRaiseClearResolve(FrappeTestCase):
 		)
 		self.assertEqual(first.status, "Resolved")
 
-		# Re-run: must not error, must not flip-flop, must not re-stamp resolved_on.
+		# [#r5xrry]
 		reconcile_operations_alerts()
 		second = frappe.db.get_value(
 			"Operations Alert", name, ["status", "resolved_on"], as_dict=True
@@ -231,9 +231,9 @@ class TestIdleVehicleRaiseClearResolve(FrappeTestCase):
 		)
 
 
-# ---------------------------------------------------------------------------
-# Supervisor Delay — attendance gap raise -> record attendance -> resolve
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#gp6fp8]
+# [#rudcur]
 
 
 class TestAttendanceGapResolve(FrappeTestCase):
@@ -242,8 +242,8 @@ class TestAttendanceGapResolve(FrappeTestCase):
 		super().setUpClass()
 		frappe.set_user("Administrator")
 		cls.driver = _driver("OAR Gap Driver", status="Active")
-		# Start from a genuine gap: clear any residual attendance/alerts (a prior
-		# run records attendance to drive the resolve, so this guards re-runs).
+		# [#sc6ltq]
+		# [#d35cry]
 		_purge_attendance(cls.driver)
 		_purge_alerts("Supervisor Delay", driver=cls.driver)
 
@@ -258,13 +258,13 @@ class TestAttendanceGapResolve(FrappeTestCase):
 		opened = _open_alerts("Supervisor Delay", driver=self.driver)
 		self.assertEqual(len(opened), 1, "A missing-attendance driver must raise one alert.")
 
-		# Resolver before attendance: condition still holds -> stays Open.
+		# [#bs5qf3]
 		reconcile_operations_alerts()
 		self.assertEqual(
 			frappe.db.get_value("Operations Alert", opened[0], "status"), "Open"
 		)
 
-		# Record attendance for the day the alert was raised -> clears.
+		# [#napb9o]
 		_attendance(self.driver)
 		reconcile_operations_alerts()
 		self.assertEqual(
@@ -273,9 +273,9 @@ class TestAttendanceGapResolve(FrappeTestCase):
 		)
 
 
-# ---------------------------------------------------------------------------
-# Excessive Topup — resolve immediately on the revert source event
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#nuu4ec]
+# [#rudcur]
 
 
 class TestExcessiveTopupResolveOnRevert(FrappeTestCase):
@@ -300,7 +300,7 @@ class TestExcessiveTopupResolveOnRevert(FrappeTestCase):
 		return a.name
 
 	def test_revert_event_resolves_open_excessive_topup_alert(self):
-		# A temporary top-up, driven to Done, with an open Excessive Topup alert.
+		# [#5qjs6j]
 		doc = frappe.get_doc(
 			{
 				"doctype": "Fuel Request",
@@ -321,7 +321,7 @@ class TestExcessiveTopupResolveOnRevert(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Operations Alert", alert, "status"), "Open")
 
-		# Source event: revert the top-up. The controller hook must resolve it.
+		# [#p6s2q7]
 		doc.reload()
 		doc.reverted = 1
 		doc.status = "Reverted"
@@ -337,7 +337,7 @@ class TestExcessiveTopupResolveOnRevert(FrappeTestCase):
 		self.assertIsNotNone(row.resolved_on)
 
 	def test_revert_event_is_a_noop_without_matching_alert(self):
-		# Reverting with no open alert for the vehicle must not error or create one.
+		# [#nkym1m]
 		doc = frappe.get_doc(
 			{
 				"doctype": "Fuel Request",
@@ -358,15 +358,15 @@ class TestExcessiveTopupResolveOnRevert(FrappeTestCase):
 		doc.reload()
 		doc.reverted = 1
 		doc.status = "Reverted"
-		doc.save(ignore_permissions=True)  # must not raise
+		doc.save(ignore_permissions=True)  # [#3vfaf1]
 		self.assertEqual(
 			frappe.db.get_value("Fuel Request", name, "status"), "Reverted"
 		)
 
 
-# ---------------------------------------------------------------------------
-# Excessive Topup — periodic resolver clears the overdue-top-up source
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#k6v00q]
+# [#rudcur]
 
 
 class TestExcessiveTopupPeriodicResolve(FrappeTestCase):
@@ -380,7 +380,7 @@ class TestExcessiveTopupPeriodicResolve(FrappeTestCase):
 		_purge_alerts("Excessive Topup", vehicle=self.vehicle)
 
 	def test_periodic_resolver_keeps_open_while_overdue_topup_breaches(self):
-		# Overdue unreverted temporary top-up -> Excessive Topup source breaches.
+		# [#q2j0vc]
 		doc = frappe.get_doc(
 			{
 				"doctype": "Fuel Request",
@@ -397,7 +397,7 @@ class TestExcessiveTopupPeriodicResolve(FrappeTestCase):
 		name = doc.name
 		self.addCleanup(lambda: _purge_request(name))
 
-		# Raise an Excessive Topup alert as the monthly engine would.
+		# [#tpofiq]
 		alert = frappe.get_doc(
 			{
 				"doctype": "Operations Alert",
@@ -410,21 +410,21 @@ class TestExcessiveTopupPeriodicResolve(FrappeTestCase):
 			}
 		).insert(ignore_permissions=True).name
 
-		# While the overdue top-up is still unreverted, the source still breaches
-		# -> the periodic resolver must NOT close the alert.
+		# [#ery99u]
+		# [#9upp4f]
 		reconcile_operations_alerts()
 		self.assertEqual(
 			frappe.db.get_value("Operations Alert", alert, "status"), "Open",
 			"Excessive Topup must stay Open while an overdue top-up is unreverted.",
 		)
 
-		# Clear the source via the real watcher (it reverts the overdue top-up).
+		# [#2n2gj0]
 		unreverted_topup_watch()
 		self.assertEqual(frappe.db.get_value("Fuel Request", name, "reverted"), 1)
 
-		# Now the periodic resolver clears the (pre-existing) alert. The watcher
-		# may have raised its own fresh notice; both must end Resolved once the
-		# source is clear, so no Open Excessive Topup remains for the vehicle.
+		# [#5d0tru]
+		# [#mqd2as]
+		# [#9bw957]
 		reconcile_operations_alerts()
 		self.assertEqual(
 			frappe.db.get_value("Operations Alert", alert, "status"), "Resolved",

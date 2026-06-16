@@ -27,12 +27,12 @@ class TestDriverPortalProfile(FrappeTestCase):
 		super().setUpClass()
 		frappe.set_user("Administrator")
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
-		# driver_a has a current_vehicle (set by the helper).
+		# [#21th9u]
 		cls.driver_a = _ensure_test_driver()
 		cls.user_a = frappe.db.get_value(
 			"Employee", frappe.db.get_value("Salis Driver", cls.driver_a, "employee"), "user_id"
 		)
-		# driver_b is a different, vehicle-less driver.
+		# [#fd4z5v]
 		cls.driver_b, cls.user_b = _driver_without_vehicle("drv_noveh@example.com")
 
 	def tearDown(self):
@@ -44,7 +44,7 @@ class TestDriverPortalProfile(FrappeTestCase):
 		profile = driver_portal.get_driver_profile()
 		self.assertEqual(profile["name"], self.driver_a)
 		self.assertIn("full_name", profile)
-		self.assertIn("license_expiry", profile)  # present (may be None), always JSON-safe
+		self.assertIn("license_expiry", profile)  # [#bdua74]
 
 	def test_profile_is_identity_scoped_not_foreign(self):
 		"""A foreign driver (driver_b) calling get_driver_profile() gets THEIR OWN
@@ -91,7 +91,7 @@ class TestDriverPortalVehicle(FrappeTestCase):
 			"Employee", frappe.db.get_value("Salis Driver", cls.driver_a, "employee"), "user_id"
 		)
 		cls.vehicle_a = frappe.db.get_value("Salis Driver", cls.driver_a, "current_vehicle")
-		# A second driver with NO current_vehicle and no Active Vehicle Assignment.
+		# [#ckv6s4]
 		cls.driver_b, cls.user_b = _driver_without_vehicle("drv_noveh@example.com")
 
 	def tearDown(self):

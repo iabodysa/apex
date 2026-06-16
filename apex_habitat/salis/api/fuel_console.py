@@ -104,8 +104,8 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
 
     unscoped, projects = _permitted_projects()
 
-    # Intersect an explicitly requested project with the permitted scope. A
-    # scoped user must never be able to widen their view via the argument.
+    # [#dexv1m]
+    # [#td1m9f]
     if project:
         if unscoped:
             projects = [project]
@@ -113,10 +113,10 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
         elif project in (projects or []):
             projects = [project]
         else:
-            # Requested project is outside the caller's scope: empty queue.
+            # [#7snhxd]
             return []
 
-    # Scoped user with no permitted project => empty queue (mirrors `1=0`).
+    # [#mzzcxc]
     if not unscoped and not projects:
         return []
 
@@ -145,7 +145,7 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
     if not rows:
         return []
 
-    # Resolve display titles in bounded bulk reads (no N+1).
+    # [#a5510z]
     vehicle_names = list({r.vehicle for r in rows if r.vehicle})
     driver_names = list({r.driver for r in rows if r.driver})
 
@@ -229,8 +229,8 @@ def approve_fuel_request(name: str) -> dict:
 
     apply_workflow(doc, "Approve")
 
-    # The transition is captured natively by Version (track_changes) + the
-    # automatic Workflow comment; the controller stamps approved_by.
+    # [#nh3zuj]
+    # [#kzt3ec]
     return {"name": doc.name, "status": doc.status}
 
 
@@ -272,5 +272,5 @@ def reject_fuel_request(name: str, reason: str | None = None) -> dict:
     if reason:
         doc.add_comment("Comment", _("Rejected: {0}").format(reason))
 
-    # The transition is captured natively by Version (track_changes) + auto-comment.
+    # [#492bey]
     return {"name": doc.name, "status": doc.status}

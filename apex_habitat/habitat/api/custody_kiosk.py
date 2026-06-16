@@ -56,7 +56,7 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
         order_by="article_name asc",
     )
 
-    # Optional store balances — ONE grouped pass over the ledger (no N+1).
+    # [#hg3jn2]
     balances: dict[str, float] = {}
     if building:
         frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)

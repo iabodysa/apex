@@ -50,12 +50,12 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # A requester (operational maker) and the two approver tiers.
+        # [#hrtmt8]
         cls.requester = _user("rs_req@example.com", "Fleet Project Manager")
         cls.manager = _user("rs_mgr@example.com", "Fleet Manager")
         cls.finance = _user("rs_fin@example.com", "Finance Manager")
-        # A user who is BOTH the requester role and Finance Manager — used to
-        # prove the SoD condition is what blocks self-payment, not a role gap.
+        # [#3wvp7a]
+        # [#9kdt8t]
         cls.finance_maker = _user("rs_finmaker@example.com", "Finance Manager")
         frappe.get_doc("User", cls.finance_maker).add_roles("Fleet Project Manager")
         cls.office = cls._office("RS Workflow Office")
@@ -106,21 +106,21 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         rs.reload()
         return rs
 
-    # --- F-04: a payment request may only be raised on an Approved settlement ---
+    # [#ixkqdz]
 
     def test_payment_request_only_on_approved_settlement(self):
-        # An Approved (submitted) settlement can raise a payment request.
+        # [#ih693b]
         rs = self._approved()
         pr = rs.create_payment_request()
         self.assertTrue(frappe.db.exists("Salis Payment Request", pr))
-        # A submitted-but-Disputed settlement is blocked by the F-04 guard.
+        # [#e8gidb]
         rs2 = self._approved()
         frappe.db.set_value("Rental Settlement", rs2.name, "status", "Disputed")
         rs2.reload()
         with self.assertRaises(frappe.ValidationError):
             rs2.create_payment_request()
 
-    # --- legal transition by the right role ------------------------------------
+    # [#8rmafi]
 
     def test_legal_reconcile_then_approve_submits(self):
         rs = self._new_settlement()
@@ -133,37 +133,37 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         self.assertEqual(rs.status, "Reconciled")
         self.assertEqual(rs.docstatus, 0)
 
-        # Approve submits the document (docstatus 0 -> 1).
+        # [#plwkl4]
         self.assertIn("Approve", _actions(rs))
         apply_workflow(rs, "Approve")
         rs.reload()
         self.assertEqual(rs.status, "Approved")
         self.assertEqual(rs.docstatus, 1)
 
-    # --- wrong role is blocked -------------------------------------------------
+    # [#4fc2j1]
 
     def test_wrong_role_cannot_approve_or_pay(self):
         rs = self._reconciled()
-        # The Fleet Project Manager (requester role) is offered no approve/pay.
+        # [#qk2xnd]
         frappe.set_user(self.requester)
         offered = _actions(rs)
         self.assertNotIn("Approve", offered)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(rs, "Approve")
 
-    # --- Mark Paid is Finance-exclusive ----------------------------------------
+    # [#svqiu8]
 
     def test_mark_paid_is_finance_only(self):
         rs = self._approved()
         self.assertEqual(rs.status, "Approved")
 
-        # A Fleet Manager (operational) is NOT offered Mark Paid.
+        # [#g109cc]
         frappe.set_user(self.manager)
         self.assertNotIn("Mark Paid", _actions(rs))
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(rs, "Mark Paid")
 
-        # A Finance Manager (different person from the requester) is offered it.
+        # [#lwf3m4]
         frappe.set_user(self.finance)
         self.assertIn("Mark Paid", _actions(rs))
         apply_workflow(rs, "Mark Paid")
@@ -171,12 +171,12 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         self.assertEqual(rs.status, "Paid")
         self.assertEqual(rs.docstatus, 1)
 
-    # --- Segregation of Duties: requester cannot pay their own settlement ------
+    # [#f78bb6]
 
     def test_sod_requester_cannot_mark_paid(self):
-        # finance_maker holds BOTH Finance Manager and Fleet Project Manager, so
-        # only the SoD condition (requested_by != session.user) stands between
-        # them and self-payment.
+        # [#b96rij]
+        # [#11xoun]
+        # [#6wc3kn]
         rs = self._approved(requested_by=self.finance_maker)
 
         frappe.set_user(self.finance_maker)
@@ -184,7 +184,7 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(rs, "Mark Paid")
 
-        # A different Finance Manager CAN mark the same settlement paid.
+        # [#5faktr]
         frappe.set_user(self.finance)
         self.assertIn("Mark Paid", _actions(rs))
         apply_workflow(rs, "Mark Paid")
@@ -192,8 +192,8 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         self.assertEqual(rs.status, "Paid")
 
     def test_sod_requester_cannot_self_approve(self):
-        # The approve step is likewise SoD-gated. A Fleet Manager who is also the
-        # requester cannot approve their own settlement.
+        # [#a7w9zk]
+        # [#7f1dk2]
         mgr_maker = _user("rs_mgrmaker@example.com", "Fleet Manager")
         rs = self._reconciled(requested_by=mgr_maker)
         frappe.set_user(mgr_maker)
@@ -201,13 +201,13 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(rs, "Approve")
 
-    # --- post-submit transition is REACHABLE (the bug being fixed) -------------
+    # [#7hace9]
 
     def test_post_submit_mark_paid_reachable(self):
         rs = self._approved()
         self.assertEqual(rs.docstatus, 1)
 
-        # The frozen-post-submit bug: Mark Paid must succeed on a docstatus=1 doc.
+        # [#57sef5]
         frappe.set_user(self.finance)
         self.assertIn("Mark Paid", _actions(rs))
         apply_workflow(rs, "Mark Paid")
@@ -215,7 +215,7 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         self.assertEqual(rs.status, "Paid")
         self.assertEqual(rs.docstatus, 1)
 
-    # --- the no-GL boundary holds ----------------------------------------------
+    # [#dbvsmy]
 
     def test_mark_paid_posts_no_gl(self):
         rs = self._approved()
@@ -225,7 +225,7 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         rs.reload()
         self.assertEqual(rs.status, "Paid")
 
-        # No GL Entry / Payment Entry is created for the settlement.
+        # [#p04s3h]
         if frappe.db.exists("DocType", "GL Entry"):
             gl = frappe.get_all(
                 "GL Entry",

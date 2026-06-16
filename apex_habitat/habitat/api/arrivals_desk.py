@@ -34,7 +34,7 @@ PARTY_TEMPORARY_WORKER = "Temporary Worker"
 @frappe.whitelist()
 def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     """Party-aware arrival snapshot for one worker (Employee or Temporary Worker)."""
-    # Legacy alias: a bare `employee` means an Employee party (back-compat).
+    # [#r90cwx]
     if not party and employee:
         party_type, party = PARTY_EMPLOYEE, employee
     if not (party_type and party):
@@ -55,8 +55,8 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     else:
         frappe.throw(_("Unknown party type: {0}").format(party_type))
 
-    # Active accommodation assignment — same semantics as the Front Desk board,
-    # now keyed on the native party instead of employee.
+    # [#l7hfv8]
+    # [#8alg4v]
     assignment = (
         frappe.db.get_value(
             "Accommodation Assignment",
@@ -71,9 +71,9 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         frappe.db.get_value("Accommodation Bed", current_bed, "bed_code") if current_bed else None
     )
 
-    # Custody balance comes from the (Employee-scoped) Accommodation Stock Ledger.
-    # A Temporary Worker's custody stock is DEFERRED by design (no posting until he
-    # is linked to an Employee), so his ledger balance reads 0 here — correct.
+    # [#598pl4]
+    # [#r06gnw]
+    # [#oidwew]
     custody_count = 0
     if party_type == PARTY_EMPLOYEE:
         rows = frappe.get_all(
@@ -94,15 +94,15 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     return {
         "party_type": party_type,
         "party": party,
-        "employee": party if party_type == PARTY_EMPLOYEE else None,  # legacy key
-        "employee_name": worker_name,  # legacy key
+        "employee": party if party_type == PARTY_EMPLOYEE else None,  # [#nzy15g]
+        "employee_name": worker_name,  # [#nzy15g]
         "worker_name": worker_name,
         "image": image,
         "project": assignment.get("project"),
         "current_building": assignment.get("building"),
         "current_bed": current_bed,
         "current_bed_code": current_bed_code,
-        # Formatted check-in date of the active assignment; null when not housed.
+        # [#8hjo6q]
         "check_in_date": (
             frappe.utils.formatdate(assignment.get("check_in_date")) if assignment.get("check_in_date") else None
         ),
@@ -122,9 +122,9 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     txt = (txt or "").strip()
     results = []
 
-    # Parties already housed (an active, not-checked-out assignment) are excluded so the
-    # picker offers only assignable workers. The Accommodation Assignment validate is the
-    # backstop, but offering a housed worker only to fail on save is poor UX.
+    # [#51mybl]
+    # [#rhcu3r]
+    # [#r47ng8]
     housed = frappe.get_all(
         "Accommodation Assignment",
         filters={"docstatus": 1, "check_out_date": ["is", "not set"]},
@@ -267,14 +267,14 @@ def house_over_capacity(room, party_type, party, project, check_in_date=None) ->
     return {**result, "is_temporary": True, "bed_code": bed.bed_code}
 
 
-# ---------------------------------------------------------------------------
-# Printable slips — plain server-rendered HTML the desk opens in a print window.
-# These are deliberately NOT Print Format doctypes (the design asked for print
-# VIEWS the desk drives directly). Jinja autoescapes every value, so the slips
-# are safe with untrusted worker names. Neutral print colours throughout
-# (#1a1a2e heading, #555 muted, #ccc rules) — no brand colour, so they read
-# cleanly on a black-and-white office printer.
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#lfexu9]
+# [#m6vl1u]
+# [#4j1dsm]
+# [#lns8e3]
+# [#one66a]
+# [#2h33xa]
+# [#rudcur]
 
 
 def _company_name() -> str:
@@ -360,8 +360,8 @@ def get_arrival_slip(party_type, party) -> dict:
     return {"html": frappe.render_template(ARRIVAL_SLIP_TEMPLATE, ctx), "title": ctx["worker_name"]}
 
 
-# Standard housing terms acknowledged on check-in. English source strings only;
-# kept short and operational so the slip fits one page and reads at a glance.
+# [#4bbhh2]
+# [#aa3bdr]
 HOUSING_TERMS = [
     "Keep the accommodation and shared areas clean and tidy.",
     "No unauthorised guests or visitors are allowed in the accommodation.",
@@ -430,8 +430,8 @@ def get_checkin_slip(party_type, party) -> dict:
     card = get_arrival_card(party_type=party_type, party=party)
     building = card.get("current_building")
     if building:
-        # Defense-in-depth: explicitly gate the building read before exposing its
-        # address/city, matching front_desk.get_building_grid and safety_map.get_safety_map.
+        # [#5phui5]
+        # [#bxlpp2]
         frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
     bldg = (
         frappe.db.get_value("Accommodation Building", building, ["city"], as_dict=True)
@@ -527,7 +527,7 @@ def get_custody_handover_slip(custody_issue) -> dict:
         or doc.issued_to_employee
     )
 
-    # ONE bulk lookup of the article masters for name + unit of measure.
+    # [#ge5xi0]
     article_ids = list({row.article for row in doc.items if row.article})
     masters = {}
     if article_ids:

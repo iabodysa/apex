@@ -63,7 +63,7 @@ def get_building_grid(building: str) -> dict:
 
     building_title = frappe.db.get_value("Accommodation Building", building, "building_name") or building
 
-    # Q1 — rooms in the building.
+    # [#pyw7i4]
     rooms = frappe.get_all(
         "Accommodation Room",
         filters={"building": building},
@@ -80,8 +80,8 @@ def get_building_grid(building: str) -> dict:
     )
     rooms_by_name = {r.name: r for r in rooms}
 
-    # Q2 — beds in the building joined to their room (one query; the join
-    # replaces per-bed room lookups).
+    # [#mcr7zn]
+    # [#jxnwqp]
     Bed = frappe.qb.DocType("Accommodation Bed")
     Room = frappe.qb.DocType("Accommodation Room")
     bed_rows = (
@@ -103,7 +103,7 @@ def get_building_grid(building: str) -> dict:
         .run(as_dict=True)
     )
 
-    # Q3 — active assignments in the building.
+    # [#9xuir3]
     assignments = frappe.get_all(
         "Accommodation Assignment",
         filters={
@@ -115,8 +115,8 @@ def get_building_grid(building: str) -> dict:
     )
     assignments_by_bed = {a.bed: a for a in assignments}
 
-    # Resolve display names for Temporary Worker occupants (their `employee_name`
-    # mirror is empty by design) — ONE bulk query, no per-bed round trip.
+    # [#8z2bm2]
+    # [#pfrs8e]
     tw_names: dict[str, str] = {}
     tw_parties = {a.party for a in assignments if a.party_type == "Temporary Worker" and a.party}
     if tw_parties:
@@ -125,8 +125,8 @@ def get_building_grid(building: str) -> dict:
         ):
             tw_names[row.name] = row.worker_name
 
-    # Q4 — custody presence per active assignment (one bulk query, grouped by
-    # parent — NOT one query per assignment).
+    # [#tv17qf]
+    # [#7a7uti]
     custody_parents: set[str] = set()
     assignment_names = [a.name for a in assignments]
     if assignment_names:
@@ -141,7 +141,7 @@ def get_building_grid(building: str) -> dict:
         )
         custody_parents = {c.parent for c in custody_rows}
 
-    # Merge in Python — group beds under rooms, rooms under floors.
+    # [#14owgh]
     summary = {"total_beds": 0, "available": 0, "occupied": 0, "blocked": 0, "out_of_service": 0}
     rooms_acc: dict[str, dict] = {}
 
@@ -161,8 +161,8 @@ def get_building_grid(building: str) -> dict:
         if color == "red":
             asg = assignments_by_bed.get(bed.bed)
             if asg:
-                # Occupant display name: the Employee name, or the Temporary Worker's
-                # worker_name (its employee mirror is empty by design).
+                # [#25jd7f]
+                # [#6xcepf]
                 occupant_name = (
                     asg.employee_name
                     or (tw_names.get(asg.party) if asg.party_type == "Temporary Worker" else None)
@@ -205,12 +205,12 @@ def get_building_grid(building: str) -> dict:
             }
         rooms_acc[room_name]["beds"].append(bed_payload)
 
-    # Group rooms by floor under the FUNCTIONAL floor_type scheme: floor 0 = Ground,
-    # negative = Basement, positive = upper floors. Only a genuinely NULL floor (never
-    # set) falls into the "Unassigned" bucket — 0 is Ground, not "unassigned".
+    # [#1hp3o7]
+    # [#5nwj1s]
+    # [#skk03q]
     floors_acc: dict = {}
     for room in rooms_acc.values():
-        key = room.pop("_floor")  # int (0 = Ground, <0 = Basement) or None = unassigned
+        key = room.pop("_floor")  # [#ewlx1f]
         floors_acc.setdefault(key, []).append(room)
 
     def _floor_label(n: int) -> str:
@@ -291,11 +291,11 @@ def quick_check_in(bed, employee=None, project=None, check_in_date=None,
     frappe.has_permission("Accommodation Assignment", "create", throw=True)
     frappe.has_permission("Accommodation Assignment", "submit", throw=True)
 
-    # party_type/party (Employee | Temporary Worker) is the native identity; a bare
-    # `employee` stays a legacy alias for an Employee party. The Assignment's
-    # before_validate (sync_party_employee) mirrors `employee` from the party, so a
-    # Temporary Worker is housed with an empty employee (the cost engine skips him
-    # until he is linked).
+    # [#k7r038]
+    # [#bfla6h]
+    # [#gs2zhb]
+    # [#70vj4k]
+    # [#sv0kr5]
     if not party and employee:
         party_type, party = "Employee", employee
 
@@ -369,8 +369,8 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_conditio
     if not assignment:
         frappe.throw(_("No active assignment found for bed {0}.").format(bed))
 
-    # Custody gate — route to the full Checkout form so clearance + damage
-    # assessment run interactively through the Checkout controller.
+    # [#1xmhhh]
+    # [#12f5w3]
     has_custody = bool(
         frappe.db.exists(
             "Accommodation Custody Item",

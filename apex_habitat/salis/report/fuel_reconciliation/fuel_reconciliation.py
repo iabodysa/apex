@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 """Fuel Reconciliation report.
 
@@ -36,7 +36,7 @@ def execute(filters=None):
         fields=["vehicle", "period_month", "litres", "amount"],
     )
 
-    # Group by (vehicle, period_month).
+    # [#evq572]
     groups = {}
     for row in rows:
         key = (row.vehicle or "", row.period_month or "")
@@ -54,7 +54,7 @@ def execute(filters=None):
         agg["total_litres"] += row.litres or 0
         agg["total_amount"] += row.amount or 0
 
-    # Look up the quota litres for each group and compute variance.
+    # [#gqv0cu]
     quota_cache = {}
     for key, agg in groups.items():
         vehicle, period_month = key

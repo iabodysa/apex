@@ -30,10 +30,10 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-# Known status values. The Select carries these for filtering / colour, but the
-# Fuel Claim Workflow owns the *transitions* (which status is reachable from
-# which, by whom). This controller only rejects an unknown value and pins the
-# initial status to Draft.
+# [#ip8yq8]
+# [#1ixgcv]
+# [#ak590k]
+# [#nmuvwd]
 VALID_STATUSES = (
 	"Draft",
 	"Submitted to Movement",
@@ -46,8 +46,8 @@ VALID_STATUSES = (
 
 class FuelClaim(Document):
 	def before_insert(self):
-		# Stamp the requester server-side (read-only field) so the
-		# segregation-of-duties / maker-checker gate cannot be spoofed.
+		# [#awqu0h]
+		# [#sl3oie]
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
 
@@ -58,8 +58,8 @@ class FuelClaim(Document):
 			frappe.throw(_("Invalid status: {0}").format(self.status))
 		if (self.claimed_litres or 0) <= 0:
 			frappe.throw(_("Claimed Litres must be greater than zero."))
-		# Guard the monetary side of the claim (the litres variance is already
-		# reconciled against the Fuel Consumption Ledger below).
+		# [#6wzbxk]
+		# [#nhwohx]
 		if (self.claimed_amount or 0) < 0:
 			frappe.throw(_("Claimed Amount cannot be negative."))
 		self._set_financial_defaults()
@@ -79,11 +79,11 @@ class FuelClaim(Document):
 		if not self.cost_center:
 			self.cost_center = get_default_cost_center()
 
-	# Approval authority on submit is enforced by the Fuel Claim Workflow's
-	# Approve transition (role-gated + SoD), not by this controller.
-	# Submit/cancel are recorded natively (Version track_changes + auto-comment).
+	# [#m058f8]
+	# [#osirom]
+	# [#9zovur]
 
-	# ------------------------------------------------------------------ helpers
+	# [#4lslw6]
 
 	def _compute_consumption(self):
 		"""Derive consumed litres from the Fuel Consumption Ledger and the

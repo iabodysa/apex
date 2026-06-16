@@ -20,7 +20,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-# The finding tables on the report whose rows are candidates for a ticket.
+# [#pdq7ji]
 _FINDING_TABLES = ("safety_findings", "maintenance_findings")
 
 
@@ -28,9 +28,9 @@ class SafetyInspectionReport(Document):
     def on_submit(self):
         self.generate_maintenance_requests()
 
-    # ------------------------------------------------------------------
-    # Fan-out
-    # ------------------------------------------------------------------
+    # [#7usew1]
+    # [#t8xr0s]
+    # [#7usew1]
     def generate_maintenance_requests(self):
         """Create one Maintenance Request per actionable finding and surface it.
 
@@ -53,8 +53,8 @@ class SafetyInspectionReport(Document):
                     self._ensure_surfaced(finding.generated_maintenance_request)
                     continue
                 mr_name = self._spawn_request(finding)
-                # Stamp the per-row back-link without re-running this submitted
-                # document's lifecycle: the child row is written directly.
+                # [#3yfjbk]
+                # [#nv82oa]
                 finding.db_set("generated_maintenance_request", mr_name)
                 self._surface(mr_name)
 
@@ -74,8 +74,8 @@ class SafetyInspectionReport(Document):
         mr.reported_by = self.inspector or frappe.session.user
         mr.status = "Open"
         mr.source_inspection = self.name
-        # ignore_permissions: the submit actor may lack direct Maintenance
-        # Request create rights; the controlled fan-out is the authority here.
+        # [#biju55]
+        # [#gek2ue]
         mr.insert(ignore_permissions=True)  # audit-ok
         return mr.name
 

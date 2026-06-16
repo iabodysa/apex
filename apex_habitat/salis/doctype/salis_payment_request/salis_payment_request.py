@@ -28,15 +28,15 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now
 
-# Roles that exclusively hold the authority to approve a payment or mark it
-# paid. This is the core finance-boundary control.
+# [#jtdmq6]
+# [#kukcs1]
 _FINANCE_ROLES = {"Finance Manager", "System Manager"}
 
-# Statuses whose entry requires finance authority.
+# [#7iq9b1]
 _FINANCE_GATED_STATUSES = {"Approved by Finance", "Paid"}
 
-# Known status values. The Select carries these for filtering/colour, but the
-# Salis Payment Request Workflow owns the *transitions*.
+# [#lhvvmn]
+# [#et2ykh]
 VALID_STATUSES = (
 	"Draft",
 	"Pending Finance",
@@ -53,27 +53,27 @@ class SalisPaymentRequest(Document):
 			self.requested_by = frappe.session.user
 
 	def validate(self):
-		# The Select still carries the known states for filtering/colour, but the
-		# Salis Payment Request Workflow owns *transitions* — this only rejects an
-		# unknown value.
+		# [#o9cdl2]
+		# [#19hvsf]
+		# [#ryyojr]
 		if self.status and self.status not in VALID_STATUSES:
 			frappe.throw(_("Invalid status: {0}").format(self.status))
 
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
 		self._set_financial_defaults()
-		# A negative amount passes the reqd check; block it before the request can
-		# reach the Finance approval gate.
+		# [#pi342z]
+		# [#dlnhxt]
 		if (self.amount or 0) <= 0:
 			frappe.throw(_("Amount must be greater than zero."))
-		# Server-own the approver stamp BEFORE the gate runs, so only the gate can
-		# write it (after the role + SoD checks).
+		# [#77g3bp]
+		# [#t10riw]
 		self._guard_finance_stamp()
 		self._enforce_finance_gate()
 
-	# Submit/cancel are recorded natively (Version track_changes + auto-comment).
+	# [#9zovur]
 
-	# ------------------------------------------------------------------ helpers
+	# [#4lslw6]
 
 	def _set_financial_defaults(self):
 		"""Default company and cost center from Salis Settings for reporting and
@@ -90,7 +90,7 @@ class SalisPaymentRequest(Document):
 
 	def _old_status(self):
 		previous = self.get_doc_before_save()
-		# A brand-new document has no prior state; treat it as Draft.
+		# [#5zvo3e]
 		return (previous.status if previous else None) or "Draft"
 
 	def _guard_finance_stamp(self):
@@ -131,12 +131,12 @@ class SalisPaymentRequest(Document):
 				_("You cannot approve or pay a Payment Request you raised; a different Finance approver is required.")
 			)
 
-		# Stamp the approver on entry to ANY finance-gated state ("Approved by
-		# Finance" AND "Paid"): control only reaches here once the finance-role and
-		# SoD checks above have passed, so the stamp is the durable proof the gate
-		# was cleared. The payment router trusts this stamp (not the mutable status)
-		# as its sole approval evidence, so it must be present on every gated entry
-		# -- including a transition straight to "Paid".
+		# [#q0v84e]
+		# [#41mqaa]
+		# [#ksszgc]
+		# [#e72eh9]
+		# [#bkz9an]
+		# [#qmcqdo]
 		if not self.finance_approved_by:
 			self.finance_approved_by = frappe.session.user
 		if not self.finance_approved_on:

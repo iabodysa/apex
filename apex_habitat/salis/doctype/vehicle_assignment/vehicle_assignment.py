@@ -115,7 +115,7 @@ class VehicleAssignment(Document):
         lock_vehicle(self.vehicle)
         lock_driver(self.driver)
 
-        # Re-check inside the lock to guard against a concurrent submission.
+        # [#slexq7]
         clash = self._overlapping("vehicle", self.vehicle)
         if clash:
             frappe.throw(
@@ -144,8 +144,8 @@ class VehicleAssignment(Document):
         )
 
     def on_cancel(self):
-        # Only clear the mirrors if they still point at THIS pairing; a newer
-        # assignment may have already overwritten them.
+        # [#5sx2jd]
+        # [#2aos6n]
         if frappe.db.get_value("Salis Vehicle", self.vehicle, "current_driver") == self.driver:
             frappe.db.set_value("Salis Vehicle", self.vehicle, "current_driver", None)
         if frappe.db.get_value("Salis Driver", self.driver, "current_vehicle") == self.vehicle:

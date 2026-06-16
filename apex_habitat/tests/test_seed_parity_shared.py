@@ -35,9 +35,9 @@ def _spec(module_dir, doctype):
 
 class TestMaintenanceMaterialParity(unittest.TestCase):
     def test_maintenance_material_spec_loads(self):
-        # MATERIAL_SEEDS was retired (T-050#3): habitat/maintenance_material.json is
-        # now the SINGLE source of truth, so there is no second source to diff. Assert
-        # the JSON still loads through the shared loader with the expected shape.
+        # [#jopjqm]
+        # [#o48xo8]
+        # [#jzswri]
         spec = _spec("habitat", "Maintenance Material")
         self.assertEqual(spec["key"], "material_name")
         self.assertTrue(spec["create_only"])
@@ -56,8 +56,8 @@ class TestMaintenanceMaterialParity(unittest.TestCase):
         self.assertEqual(spec["key"], "template_name")
         self.assertTrue(spec["create_only"])
 
-        # The seeder inserts template_name + issue_type + is_active=1 + items[]
-        # (each item: material + quantity, copied verbatim from the source).
+        # [#cgve2k]
+        # [#bo5o49]
         expected = [
             {
                 "template_name": t["template_name"],
@@ -100,19 +100,19 @@ class TestSalisIssueMasterParity(unittest.TestCase):
         self.assertEqual(len(spec["records"]), 1)
         rec = spec["records"][0]
 
-        # Scalar header fields the seeder sets (all but the dynamic holiday_list).
+        # [#2mudhy]
         self.assertEqual(rec["service_level"], issue_seed._SLA_NAME)
         self.assertEqual(rec["document_type"], "Issue")
         self.assertEqual(rec["default_service_level_agreement"], 1)
         self.assertEqual(rec["enabled"], 1)
         self.assertEqual(rec["apply_sla_for_resolution"], 1)
 
-        # holiday_list is resolved per-site at runtime — it MUST NOT be in the
-        # static JSON (this asserts the deliberate gap, so a future edit that
-        # hardcodes a site-specific holiday list fails this test loudly).
+        # [#i58u8z]
+        # [#44gkqo]
+        # [#a8y41s]
         self.assertNotIn("holiday_list", rec)
 
-        # priorities child rows, in source order, with the seeder's seconds math.
+        # [#a9z1vz]
         expected_priorities = [
             {
                 "priority": priority,
@@ -124,14 +124,14 @@ class TestSalisIssueMasterParity(unittest.TestCase):
         ]
         self.assertEqual(rec["priorities"], expected_priorities)
 
-        # 24x7 support window, one full-day row per weekday in source order.
+        # [#7eoemj]
         expected_window = [
             {"workday": day, "start_time": "00:00:00", "end_time": "23:59:59"}
             for day in issue_seed._WORKDAYS
         ]
         self.assertEqual(rec["support_and_resolution"], expected_window)
 
-        # SLA fulfilled when the Issue reaches a terminal state.
+        # [#7hwkjq]
         self.assertEqual(
             rec["sla_fulfilled_on"],
             [{"status": "Resolved"}, {"status": "Closed"}],

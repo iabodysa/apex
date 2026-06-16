@@ -30,8 +30,8 @@ from frappe.model.document import Document
 class MovementCostTransfer(Document):
 	def validate(self):
 		self._set_company_default()
-		# A negative amount passes the reqd check; a cost transfer must move a
-		# positive amount between projects.
+		# [#58xk1v]
+		# [#tu6mn0]
 		if (self.amount or 0) <= 0:
 			frappe.throw(_("Amount must be greater than zero."))
 		self._validate_distinct_targets()
@@ -47,13 +47,13 @@ class MovementCostTransfer(Document):
 
 			self.company = get_default_company()
 
-	# Crossing a project boundary requires Operations-tier authority; that gate
-	# is now enforced declaratively by the native "Movement Cost Transfer
-	# Workflow" (Approve / Reject restricted to Fleet Manager / System Manager),
-	# so no before_submit hook is needed here. Submit is recorded natively
-	# (Version track_changes + auto-comment).
+	# [#1tlwmh]
+	# [#hit3pm]
+	# [#cl30f9]
+	# [#ha2qh3]
+	# [#1d3cvw]
 
-	# ------------------------------------------------------------------ helpers
+	# [#4lslw6]
 
 	def _validate_distinct_targets(self):
 		"""A transfer must move cost between two different projects, and between

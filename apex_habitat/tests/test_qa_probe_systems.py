@@ -1,6 +1,6 @@
 # Copyright (c) 2026, AFMCO and contributors
-# QA PROBE — temporary module. Probes maintenance/safety logic, reports,
-# scheduled jobs, and onboarding permissions.
+# [#a2j66i]
+# [#lrwlsx]
 
 import frappe
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
@@ -43,12 +43,12 @@ class QASysBase(ApexHabitatTestCase):
 
 
 class TestMaintenanceSafety(QASysBase):
-    # Scenario 6a: Maintenance Request with issue_type Fire Safety + load_template_into_doc loads rows
+    # [#czwhww]
     def test_6a_load_template_fire_safety(self):
         from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_material_template import (
             load_template_into_doc,
         )
-        # Build a Fire Safety material template with one material
+        # [#1cuaoc]
         mat = frappe.get_doc({
             "doctype": "Maintenance Material", "material_name": "Extinguisher " + _hash(),
             "material_category": "General",
@@ -76,7 +76,7 @@ class TestMaintenanceSafety(QASysBase):
         self.assertGreaterEqual(res.get("rows_added", 0), 1, "BUG: Fire Safety template loaded 0 rows")
         self.assertGreaterEqual(len(mr.procurement_items), 1)
 
-    # Scenario 6b (FIXED): submit keeps Open; start_task -> In Progress; mark_completed -> Completed.
+    # [#gh865t]
     def test_6b_task_lifecycle_open_inprogress_completed(self):
         from apex_habitat.habitat.doctype.scheduled_task_instance.scheduled_task_instance import (
             start_task, mark_completed,
@@ -135,10 +135,10 @@ class TestReports(QASysBase):
                     if not columns:
                         failures.append(f"{r}/{label}: no columns returned")
                 except frappe.ValidationError as e:
-                    # A report that mandates a bounded date range (no silent
-                    # truncation) legitimately rejects the empty-filter case. That
-                    # is the intended guard, not a crash — only flag it for the
-                    # dated run, where the range is supplied.
+                    # [#kfg7hc]
+                    # [#o36o1b]
+                    # [#shmhna]
+                    # [#4bukpd]
                     if label == "empty":
                         print(f"\n[7] {r} (empty): requires date range (ok): {e}")
                     else:
@@ -181,14 +181,14 @@ class TestSchedulers(QASysBase):
 
 
 class TestOnboardingSafetyCatalog(QASysBase):
-    # Scenario 9: investigate the "Review the Safety Task Catalog" onboarding step
+    # [#f5ywhi]
     def test_9_safety_catalog_permissions_and_route(self):
         meta = frappe.get_meta("Safety Task Catalog")
         roles_with_read = [p.role for p in meta.permissions if p.read]
         print(f"\n[9] Safety Task Catalog roles with read={roles_with_read}")
         print(f"[9] istable={meta.istable} read_only={getattr(meta, 'read_only', None)}")
 
-        # Check the onboarding step config
+        # [#p8q20l]
         if frappe.db.exists("Onboarding Step", "Review the Safety Task Catalog"):
             step = frappe.get_doc("Onboarding Step", "Review the Safety Task Catalog")
             print(f"[9] step action={step.action} reference_document={step.reference_document} is_complete={step.is_complete}")
@@ -197,7 +197,7 @@ class TestOnboardingSafetyCatalog(QASysBase):
         else:
             print("[9] Onboarding Step 'Review the Safety Task Catalog' NOT found in DB.")
 
-        # Probe has_permission as each role using a temporary user
+        # [#900ntm]
         for role in ("Accommodation Manager", "Resident Supervisor"):
             if not frappe.db.exists("Role", role):
                 print(f"[9] Role '{role}' does NOT exist in this site. (Likely cause of broken onboarding action if roles never installed.)")
@@ -211,7 +211,7 @@ class TestOnboardingSafetyCatalog(QASysBase):
             try:
                 frappe.set_user(email)
                 has_read = frappe.has_permission("Safety Task Catalog", "read")
-                # Simulate the list-view permission (what the onboarding "View List" action needs)
+                # [#b9uhsh]
                 can_get_list = True
                 list_err = None
                 try:
@@ -223,6 +223,6 @@ class TestOnboardingSafetyCatalog(QASysBase):
             finally:
                 frappe.set_user("Administrator")
 
-        # Is the doctype attached to any workspace / module the roles can see?
+        # [#vq68sw]
         module = frappe.db.get_value("DocType", "Safety Task Catalog", "module")
         print(f"[9] Safety Task Catalog module={module}")

@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 import frappe
 from frappe.utils import flt
@@ -20,9 +20,9 @@ def execute(filters=None):
 
     filters = filters or {}
 
-    # Mandatory date range. One row per resident per day means this ledger grows
-    # by ~182,500 rows/yr for 500 employees, so an unbounded scan would silently
-    # truncate; require a bounded window instead.
+    # [#dh7zgk]
+    # [#7rvjwv]
+    # [#h6sbjd]
     from_date = filters.get("from_date")
     to_date = filters.get("to_date")
     if not (from_date and to_date):
@@ -57,8 +57,8 @@ def execute(filters=None):
             "source_line_id",
         ],
         order_by="posting_date desc",
-        # No limit_page_length: the mandatory date range above bounds the result
-        # set, so a hard cap would silently drop matching rows within the window.
+        # [#hfefe4]
+        # [#g63jby]
         limit_page_length=0,
     )
 

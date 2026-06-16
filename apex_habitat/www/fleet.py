@@ -18,7 +18,7 @@ CSRF guard. no_cache is set because the page renders per-user, live data.
 import frappe
 from frappe.sessions import get_csrf_token
 
-# Roles permitted to open the fleet dashboard.
+# [#qz7g63]
 FLEET_ROLES = {
     "System Manager",
     "Fleet Manager",
@@ -28,14 +28,14 @@ FLEET_ROLES = {
 
 
 def get_context(context):
-    # Admin dashboard: require a logged-in user. Guests go to login and back.
+    # [#sm0fgz]
     if frappe.session.user == "Guest":
         frappe.local.flags.redirect_location = "/login?redirect-to=/fleet"
         raise frappe.Redirect
 
     context.no_cache = 1
-    # Friendly no-role page instead of a raw PermissionError: the template shows
-    # the board only when the user holds a fleet role, otherwise a notice.
+    # [#ep2goe]
+    # [#t9r8m3]
     context.has_fleet_role = bool(FLEET_ROLES & set(frappe.get_roles()))
     if context.has_fleet_role:
         context.csrf_token = get_csrf_token()

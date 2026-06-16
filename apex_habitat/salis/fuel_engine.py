@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# For license information, please see license.txt
+# [#m4uz3c]
 
 """Fuel engine for the Salis Movement module.
 
@@ -30,8 +30,8 @@ LEDGER_DOCTYPE = "Fuel Consumption Ledger"
 ALERT_DOCTYPE = "Operations Alert"
 BATCH_SIZE = 500
 
-# Consumption is flagged only when it exceeds the quota by more than this
-# fraction, to avoid alerting on rounding/measurement noise.
+# [#rv8krt]
+# [#1iugvy]
 OVERAGE_MARGIN = 0.05
 
 
@@ -99,9 +99,9 @@ def _insert_ledger_row(
     ).insert(ignore_permissions=True)  # audit-ok
 
 
-# ---------------------------------------------------------------------------
-# Reversal
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#auns2j]
+# [#rudcur]
 
 
 def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
@@ -127,9 +127,9 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
     """
     from frappe.utils import flt, now_datetime
 
-    # Only the originating rows are reversible; a reversal row (``reversal_of``
-    # set) is never itself reversed. This is the same selector the Habitat
-    # ledgers use to find the row to negate.
+    # [#fq5vly]
+    # [#496vw1]
+    # [#tb40xw]
     originals = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={
@@ -150,14 +150,14 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
 
     posted = 0
     for row in originals:
-        # Double-reversal guard: skip if a reversal already points at this row.
-        # The reversal row is identified by reversal_of and deliberately leaves
-        # source_name unset (NULL). The composite UNIQUE index unique_fcl_source
-        # is on (source_type, source_name) with both columns nullable, and
-        # MariaDB treats NULL as distinct in a UNIQUE index — so the reversal can
-        # never collide with the original (whose source_name is always populated)
-        # nor with another reversal (all NULL source_name), regardless of the
-        # source_type value the Select field defaults to.
+        # [#lp8x7i]
+        # [#gf5dzl]
+        # [#4241ws]
+        # [#9x3vxy]
+        # [#7w18zq]
+        # [#pblpqh]
+        # [#h3zwco]
+        # [#9v3pe4]
         if frappe.db.exists(LEDGER_DOCTYPE, {"reversal_of": row.name}):
             continue
 
@@ -180,9 +180,9 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
     return posted
 
 
-# ---------------------------------------------------------------------------
-# Daily accrual
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#9ez3qf]
+# [#rudcur]
 
 
 def accrue_fuel_consumption() -> None:
@@ -202,7 +202,7 @@ def accrue_fuel_consumption() -> None:
     yesterday_str = add_days(today_str, -1)
     logger = frappe.logger()
 
-    # --- Fuel Daily Log ------------------------------------------------------
+    # [#gkg51n]
     start = 0
     while True:
         logs = frappe.get_all(
@@ -240,26 +240,26 @@ def accrue_fuel_consumption() -> None:
 
         start += BATCH_SIZE
 
-    # --- Done Fuel Requests --------------------------------------------------
-    # Accrual is driven off the COMPLETION event, not ``request_date``: a request
-    # created earlier that only flips to "Done" today (or any later day) would be
-    # missed by a ``request_date in [yesterday, today]`` window and its litres
-    # would silently vanish. Instead we select every submitted Done request that
-    # has not yet been ledgered (``ledgered = 0``), regardless of request_date,
-    # and stamp ``ledgered = 1`` once its row is posted. Idempotent on three
-    # levels: the ``ledgered`` flag, the ``(source_type, source_name)``
-    # check-then-insert guard, and the DB-level UNIQUE index on the ledger
-    # (``unique_fcl_source`` on ``(source_type, source_name)`` — maintained by
-    # ``fuel_consumption_ledger.on_doctype_update`` and the migrate de-dup patch,
-    # so even two racing accrual runs cannot double-post the same source).
-    #
-    # Pagination note: every successfully-handled row leaves the ``ledgered = 0``
-    # set, so the set shrinks as we drain it. We therefore re-query from offset 0
-    # rather than advancing ``limit_start`` (which would skip un-handled rows once
-    # earlier rows are stamped). A row that cannot be advanced this run — a
-    # transient insert failure that rolls back and keeps ``ledgered = 0`` — would
-    # otherwise loop forever, so we stop once a batch makes zero forward progress;
-    # such rows are retried on the next scheduled run.
+    # [#k203nw]
+    # [#avs585]
+    # [#in4sh4]
+    # [#pfkyoe]
+    # [#36dizl]
+    # [#zg7u1f]
+    # [#i76skw]
+    # [#b3jpqu]
+    # [#fvterp]
+    # [#aara5q]
+    # [#iqrv5a]
+    # [#3322zs]
+    # [#od1fgp]
+    # [#r1zolf]
+    # [#8ou4v7]
+    # [#sn6tqf]
+    # [#cozzh1]
+    # [#e7dvzf]
+    # [#gx09py]
+    # [#jgjco2]
     while True:
         requests = frappe.get_all(
             "Fuel Request",
@@ -279,17 +279,17 @@ def accrue_fuel_consumption() -> None:
         for req in requests:
             try:
                 if not req.vehicle:
-                    # Terminally un-ledgerable (a ledger row requires a vehicle);
-                    # stamp it so it leaves the scan set instead of looping.
+                    # [#7qij50]
+                    # [#n4tkmy]
                     frappe.db.set_value(
                         "Fuel Request", req.name, "ledgered", 1, update_modified=False
                     )
                     progressed = True
                     continue
                 if _ledger_exists("Fuel Request", req.name):
-                    # Already ledgered by a prior run that did not get to stamp
-                    # the flag (e.g. crash between insert and set_value); reconcile
-                    # the flag so this row is not re-scanned every day.
+                    # [#q7llja]
+                    # [#90duhi]
+                    # [#pxpzm8]
                     frappe.db.set_value(
                         "Fuel Request", req.name, "ledgered", 1, update_modified=False
                     )
@@ -317,16 +317,16 @@ def accrue_fuel_consumption() -> None:
                 )
 
         if not progressed:
-            # No row in this batch could be drained (all transiently failing);
-            # avoid an infinite loop — the next scheduled run will retry them.
+            # [#iz30nf]
+            # [#c4f0st]
             break
 
     logger.info("accrue_fuel_consumption: fuel consumption ledger updated.")
 
 
-# ---------------------------------------------------------------------------
-# Monthly reconciliation
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#opciz9]
+# [#rudcur]
 
 
 def _alert_already_raised(vehicle: str, period_month: str) -> bool:

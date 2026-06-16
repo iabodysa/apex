@@ -19,9 +19,9 @@ def get_data(data=None):
         "Custody Issue": "issued_to_employee",
         "Custody Return": "returned_by_employee",
         "Scheduled Task Instance": "assigned_to",
-        # Salis Driver Attendance / Vehicle Handover reference the worker via
-        # the Salis Driver record, so they surface on the Driver form (one hop),
-        # not here. The Movement docs below link Employee directly via "employee".
+        # [#2q8wkl]
+        # [#hi0ia0]
+        # [#isg41y]
     })
     data["transactions"].extend([
         {"label": "Accommodation",
@@ -30,7 +30,7 @@ def get_data(data=None):
          "items": ["Custody Issue", "Custody Return", "Custody Damage Assessment"]},
         {"label": "Tasks",
          "items": ["Scheduled Task Instance"]},
-        # Salis (Movement) — reference links to HRMS records; writes no accounting documents.
+        # [#ond8iw]
         {"label": "Salis",
          "items": ["Salis Driver", "Movement Cost Recovery"]},
     ])

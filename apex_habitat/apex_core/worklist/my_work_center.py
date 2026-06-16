@@ -37,10 +37,10 @@ from frappe.utils import add_to_date, now_datetime
 
 from apex_habitat.apex_core.worklist.action_inbox import get_pending_actions
 
-# Per-DocType worklist registry used ONLY for the "submitted by me" / "approved last
-# 48h" Number Cards. state_field is "status"; "mine" is always owner == session user.
-# This registry is NOT the source for needs_action / workflow_actions — those come
-# from Frappe's native Workflow Action DocType via get_pending_actions().
+# [#ttr0oz]
+# [#qxpijl]
+# [#12vsj4]
+# [#bdx7fz]
 WORKLIST_REGISTRY: dict[str, dict] = {
     "Maintenance Request": {
         "active": ["Open", "Assigned", "In Progress", "Reopened"],
@@ -132,13 +132,13 @@ def get_my_work() -> dict:
       summary            dict  — {needs_action: int, assigned: int, mentions: int,
                                    notifications: int}
     """
-    # Surface 1: needs_action — native Workflow Action (auto-scoped by framework hook)
-    # + open ToDos allocated to this user. get_pending_actions() uses frappe.get_list
-    # (NOT get_all) so the permission hook fires for Workflow Actions.
-    needs_action = get_pending_actions()  # returns {workflow_actions, todos}
+    # [#5wk9av]
+    # [#m9muvz]
+    # [#qfbfxu]
+    needs_action = get_pending_actions()  # [#3xiq2n]
 
-    # Surface 2: notifications — Notification Log scoped by for_user (search-indexed;
-    # ORM permission layer also enforces for_user = session user automatically).
+    # [#fglhbi]
+    # [#r22i3g]
     notifications = frappe.get_list(
         "Notification Log",
         filters={"for_user": frappe.session.user},
@@ -147,13 +147,13 @@ def get_my_work() -> dict:
         limit_page_length=50,
     )
 
-    # Surface 3: mentions — [] in Phase 1 (Notification Log type='Mention' in Phase 2)
+    # [#rduyys]
     mentions: list = []
 
-    # Surface 4: field_references — [] reserved for Phase 2+
+    # [#ov3i3r]
     field_references: list = []
 
-    # Summary counts for badge/card display
+    # [#nbz4tu]
     workflow_actions = needs_action.get("workflow_actions", [])
     todos = needs_action.get("todos", [])
     summary = {

@@ -19,20 +19,20 @@ DEFAULTS = {
 
 def execute():
     try:
-        # Skip-missing: module/doctype not migrated yet on this site.
+        # [#6q95mw]
         if not frappe.db.exists("DocType", "Salis Settings"):
             return
 
         settings = frappe.get_single("Salis Settings")
         changed = False
 
-        # Only fill blanks — respect any value an admin already set.
+        # [#gxo0m2]
         for field, value in DEFAULTS.items():
             if settings.meta.has_field(field) and not settings.get(field):
                 settings.set(field, value)
                 changed = True
 
-        # Skip-missing dependencies: link a Company only if exactly one exists.
+        # [#8od6b3]
         if settings.meta.has_field("default_company") and not settings.get(
             "default_company"
         ):
@@ -41,7 +41,7 @@ def execute():
                 settings.default_company = companies[0]
                 changed = True
 
-        # Cost Center only if exactly one (non-group) exists for the chosen company.
+        # [#4ooxdd]
         if settings.meta.has_field("default_cost_center") and not settings.get(
             "default_cost_center"
         ):
@@ -59,7 +59,7 @@ def execute():
             settings.save(ignore_permissions=True)  # audit-ok
             frappe.db.commit()
     except Exception:
-        # A seed must NEVER crash install/migrate — log and continue.
+        # [#kzfk4g]
         frappe.db.rollback()
         frappe.log_error(
             title="seed_salis_settings failed",

@@ -53,23 +53,23 @@ import unittest
 
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
-# ---------------------------------------------------------------------------
-# Reviewed, known-safe interpolating helpers (T-099).
-#
-# Each entry is (module_relative_path, function_name, reason). A function here
-# is exempt from the interpolation rule because it was hand-audited: every
-# interpolated identifier is an internally-derived schema name (a DocType or
-# fieldname), validated against an identifier allowlist and/or proven to exist
-# in the schema, never an attacker-controlled value, and the row VALUES are
-# always bound as query parameters.
-#
-# These are the three helpers named as known-safe in T-099. They are listed at
-# the actual function where the interpolation occurs (the public entry point
-# delegates to it):
-#   * temporary_worker_engine link path  -> _repoint_party
-#   * workflow_utils.cleanup_orphaned_workflow_actions
-#   * ledger_index.add_unique_guarded path -> _log_blocking_duplicates
-# ---------------------------------------------------------------------------
+# [#rudcur]
+# [#59r3ju]
+# [#od1fgp]
+# [#5v2cgu]
+# [#lfmg63]
+# [#9g9pqo]
+# [#460hc7]
+# [#t9pft6]
+# [#jtw8ov]
+# [#od1fgp]
+# [#9noltp]
+# [#10x5vk]
+# [#msfey6]
+# [#3jkhle]
+# [#3atshv]
+# [#cfxpmr]
+# [#rudcur]
 SAFE_ALLOWLIST = [
     (
         "habitat/temporary_worker_engine.py",
@@ -99,19 +99,19 @@ SAFE_ALLOWLIST = [
     ),
 ]
 
-# Call attribute names that signal an identifier allowlist / escaping guard in
-# the same function. Presence of any of these means the author is validating or
-# escaping the interpolated identifier before it reaches the SQL text.
+# [#m3kdge]
+# [#ae60b0]
+# [#9ojl6z]
 GUARD_CALL_ATTRS = {"match", "fullmatch", "escape"}
-# Bare-name guard calls (e.g. `escape(ident)`).
+# [#2p8w28]
 GUARD_CALL_NAMES = {"escape"}
 
 
 def _python_files():
     pattern = os.path.join(APP_ROOT, "**", "*.py")
     files = sorted(glob.glob(pattern, recursive=True))
-    # Exclude test files: they may construct illustrative unsafe strings on
-    # purpose, and they are not a runtime surface.
+    # [#l0zypt]
+    # [#row5ml]
     out = []
     for f in files:
         rel = os.path.relpath(f, APP_ROOT)
@@ -129,7 +129,7 @@ def _is_frappe_db_sql(call):
         return False
     if func.attr not in {"sql", "multisql"}:
         return False
-    # func.value must be `frappe.db` (Attribute attr == "db").
+    # [#skojjg]
     inner = func.value
     return isinstance(inner, ast.Attribute) and inner.attr == "db"
 
@@ -160,7 +160,7 @@ def _interpolated_names(first_arg):
     A plain string literal, or a string with only %s placeholders passed to the
     driver, is NOT interpolated.
     """
-    # f-string: JoinedStr with at least one FormattedValue.
+    # [#ala8nd]
     if isinstance(first_arg, ast.JoinedStr):
         names = set()
         has_expr = False
@@ -170,7 +170,7 @@ def _interpolated_names(first_arg):
                 names |= _names_in(v.value)
         return (has_expr, names)
 
-    # "...".format(...)  (possibly on a parenthesised / concatenated literal)
+    # [#owjwkd]
     fmt_names = _format_call_names(first_arg)
     if fmt_names is not None:
         return (True, fmt_names)
@@ -240,14 +240,14 @@ def _enclosing_function(tree, target_node):
         start = fn.lineno
         end = getattr(fn, "end_lineno", None)
         if end is None:
-            # Fallback for older ASTs without end_lineno: take the max lineno of
-            # any descendant that actually carries one.
+            # [#s96wsn]
+            # [#818q74]
             end = max(
                 (d.lineno for d in ast.walk(fn) if hasattr(d, "lineno")),
                 default=fn.lineno,
             )
         if start <= target_node.lineno <= end:
-            if best is None or fn.lineno > best.lineno:  # innermost wins
+            if best is None or fn.lineno > best.lineno:  # [#9km3nl]
                 best = fn
     return best
 
@@ -271,24 +271,24 @@ def _collect_violations():
             if not (isinstance(node, ast.Call) and _is_frappe_db_sql(node)):
                 continue
             if not node.args:
-                continue  # query passed by keyword / unusual; not our shape
+                continue  # [#ayzxvh]
             first = node.args[0]
             is_interp, names = _interpolated_names(first)
             if not is_interp:
                 continue
 
-            # Exemption 1: every interpolated name is a module-level constant.
+            # [#myzidu]
             if names and names <= module_names:
                 continue
 
             fn = _enclosing_function(tree, node)
             fn_name = fn.name if fn else "<module>"
 
-            # Exemption 3: reviewed allowlist.
+            # [#8pnlih]
             if (rel, fn_name) in safe_keys:
                 continue
 
-            # Exemption 2: an identifier guard / escape in the same function.
+            # [#ftjcsv]
             if fn is not None and _function_has_guard(fn):
                 continue
 

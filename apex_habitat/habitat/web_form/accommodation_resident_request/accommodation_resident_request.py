@@ -28,21 +28,21 @@ def submit_resident_request(
       existing QR forms and external callers.
     - ``website_field`` is a honeypot; any non-empty value is rejected.
     """
-    # Fix 3b: honeypot — silently succeed but discard bot submissions
+    # [#lk2u5r]
     if website_field:
         return {"name": None, "tracking_code": None}
 
-    # Fix 3d: server-side length cap on description
+    # [#7inzlf]
     if len(description or "") > 2000:
         frappe.throw(_("Description is too long. Please keep it under 2000 characters."))
 
-    # Fix 3a: map public param names to the correct DocType fieldnames
+    # [#ltg9k2]
     doc = frappe.get_doc({
         "doctype": "Accommodation Resident Request",
         "location_token": location_token,
-        "request_category": request_type,   # was incorrectly keyed as request_type
+        "request_category": request_type,   # [#nnkung]
         "description": description,
-        "mobile_number": contact_number,    # was incorrectly keyed as contact_number
+        "mobile_number": contact_number,    # [#kitufc]
         "source_channel": "QR Web Form",
     })
     doc.insert(ignore_permissions=True)  # audit-ok — guest QR web-form intake, rate-limited + honeypot-guarded
