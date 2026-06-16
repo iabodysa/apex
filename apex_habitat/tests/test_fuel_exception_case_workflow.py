@@ -49,9 +49,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		# [#a3z82l]
-		# [#b7xfl6]
-		# [#ari28f]
+		# [#8xce09]
 		cls.raiser = _user("fecw_raiser@example.com", "Fleet Project Manager")
 		cls.manager = _user("fecw_mgr@example.com", "Fleet Manager")
 		cls.manager_maker = _user("fecw_mgrmaker@example.com", "Fleet Manager")
@@ -75,7 +73,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	# [#4lslw6]
+	# [#m88md8]
 
 	@staticmethod
 	def _project(name):
@@ -139,7 +137,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 				pass
 		frappe.delete_doc("Fuel Exception Case", name, ignore_permissions=True, force=True)
 
-	# [#idl6yv]
+	# [#stmhgc]
 
 	def test_workflow_is_seeded_and_active(self):
 		self.assertEqual(get_workflow_name("Fuel Exception Case"), WORKFLOW)
@@ -148,7 +146,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 			frappe.db.get_value("Workflow", WORKFLOW, "workflow_state_field"), "status"
 		)
 
-	# [#dws0r5]
+	# [#cu9yjg]
 
 	def test_investigate_resolve_then_close(self):
 		fec = self._new()
@@ -171,25 +169,23 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		fec.reload()
 		self.assertEqual(fec.status, "Under Investigation")
 
-		# [#nafhw9]
-		# [#sfcmam]
+		# [#abcjy2]
 		self.assertIn("Resolve", _actions(fec))
 		apply_workflow(fec, "Resolve")
 		fec.reload()
 		self.assertEqual(fec.status, "Resolved")
 		self.assertEqual(fec.docstatus, 1)
-		# [#mx6p59]
+		# [#ewwn4o]
 		self.assertEqual(fec.closed_by, self.manager)
 
-		# [#r59gdt]
-		# [#9wlqs2]
+		# [#6nye7p]
 		self.assertIn("Close", _actions(fec))
 		apply_workflow(fec, "Close")
 		fec.reload()
 		self.assertEqual(fec.status, "Closed")
 		self.assertEqual(fec.docstatus, 1)
 
-	# [#eyhmje]
+	# [#udtfr4]
 
 	def test_reject_then_close(self):
 		fec = self._investigating()
@@ -206,12 +202,10 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		self.assertEqual(fec.status, "Closed")
 		self.assertEqual(fec.docstatus, 1)
 
-	# [#bg0qz1]
+	# [#4c4gtv]
 
 	def test_sod_raiser_cannot_resolve(self):
-		# [#f1afl3]
-		# [#939y41]
-		# [#opb2ff]
+		# [#57qim8]
 		fec = self._investigating(reported_by=self.manager_maker)
 
 		frappe.set_user(self.manager_maker)
@@ -219,7 +213,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			apply_workflow(fec, "Resolve")
 
-		# [#q08pg4]
+		# [#rnl62q]
 		frappe.set_user(self.manager)
 		self.assertIn("Resolve", _actions(fec))
 		apply_workflow(fec, "Resolve")
@@ -227,7 +221,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		self.assertEqual(fec.status, "Resolved")
 		self.assertEqual(fec.docstatus, 1)
 
-	# [#ppw0fw]
+	# [#eqvzoy]
 
 	def test_resolve_succeeds_via_workflow_gate(self):
 		"""Approval authority now lives in the native workflow's Resolve transition
@@ -241,7 +235,7 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 		fec.reload()
 		self.assertEqual(fec.docstatus, 1)
 
-	# [#9l2fdg]
+	# [#3ztwsi]
 
 	def test_resolve_blocked_without_evidence(self):
 		fec = self._investigating(with_evidence=False)

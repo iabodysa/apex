@@ -19,9 +19,7 @@ def get_data(data=None):
         "Custody Issue": "issued_to_employee",
         "Custody Return": "returned_by_employee",
         "Scheduled Task Instance": "assigned_to",
-        # [#2q8wkl]
-        # [#hi0ia0]
-        # [#isg41y]
+        # [#ofva29]
     })
     data["transactions"].extend([
         {"label": "Accommodation",
@@ -30,7 +28,7 @@ def get_data(data=None):
          "items": ["Custody Issue", "Custody Return", "Custody Damage Assessment"]},
         {"label": "Tasks",
          "items": ["Scheduled Task Instance"]},
-        # [#ond8iw]
+        # [#9vzeew]
         {"label": "Salis",
          "items": ["Salis Driver", "Movement Cost Recovery"]},
     ])

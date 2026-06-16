@@ -63,15 +63,14 @@ def validate(doc, method=None):
 
     building = frappe.get_doc("Accommodation Building", doc.building)
 
-    # [#8fxncv]
+    # [#qwgdi0]
     if not doc.project:
         frappe.throw(_("Project is required."))
 
     if not doc.cost_center:
         doc.cost_center = building.default_cost_center
     if not doc.cost_center and building.company:
-        # [#g134i4]
-        # [#frln10]
+        # [#nid8zr]
         doc.cost_center = frappe.get_cached_value("Company", building.company, "cost_center")
     if not doc.cost_center:
         frappe.throw(
@@ -80,17 +79,14 @@ def validate(doc, method=None):
             )
         )
 
-    # [#bdjrcz]
+    # [#6nmh1l]
     if doc.stay_type == "Temporary":
         if not doc.expected_checkout_date:
             frappe.throw(_("Expected check-out date is required for temporary stays."))
         if doc.check_in_date and doc.expected_checkout_date < doc.check_in_date:
             frappe.throw(_("Expected check-out date cannot be earlier than the check-in date."))
 
-    # [#qbfqwj]
-    # [#n2avq3]
-    # [#o6z1si]
-    # [#13utv7]
+    # [#ie52i1]
     if doc.employee:
         active_asg = frappe.db.get_value(
             "Accommodation Assignment",
@@ -109,9 +105,7 @@ def validate(doc, method=None):
                 )
             )
     elif doc.party and doc.party_type:
-        # [#klx6kc]
-        # [#f4gvob]
-        # [#tv5q3j]
+        # [#oa0g50]
         dup = frappe.db.get_value(
             "Accommodation Assignment",
             {
@@ -130,19 +124,19 @@ def validate(doc, method=None):
                 )
             )
 
-    # [#6nx3t9]
+    # [#p7c6qr]
     bed_room = frappe.db.get_value("Accommodation Bed", doc.bed, "room")
     if bed_room != doc.room:
         frappe.throw(_("Selected Bed {0} does not belong to Room {1}").format(doc.bed, doc.room))
 
-    # [#mizob0]
+    # [#jcdpm8]
     room_doc = frappe.get_doc("Accommodation Room", doc.room)
     if room_doc.building != doc.building:
         frappe.throw(
             _("Selected Room {0} does not belong to Building {1}").format(doc.room, doc.building)
         )
         
-    # [#3ce5id]
+    # [#agde2c]
     if room_doc.readiness_status in ["Needs Repair", "Needs Cleaning", "Out of Service"]:
         frappe.throw(
             _("Room {0} is currently '{1}' and cannot be assigned to an employee.").format(
@@ -150,7 +144,7 @@ def validate(doc, method=None):
             )
         )
 
-    # [#br20j8]
+    # [#lxozz0]
     bed_doc = frappe.get_doc("Accommodation Bed", doc.bed)
     if bed_doc.status == "Out of Service":
         frappe.throw(_("Selected Bed {0} is Out of Service").format(doc.bed))
@@ -199,7 +193,7 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    # [#izebf3]
+    # [#el1zj2]
     frappe.db.sql(
         "SELECT `status` FROM `tabAccommodation Bed` WHERE `name` = %s FOR UPDATE",
         doc.bed,

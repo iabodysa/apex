@@ -69,12 +69,12 @@ class TestMasarSummaryEndpoint(_WorkerTripMixin, FrappeTestCase):
 
         self.assertEqual(summary["driver"], self.driver)
         self.assertEqual(summary["date"], frappe.utils.today())
-        # [#e7xa0j]
+        # [#j4he47]
         self.assertGreaterEqual(summary["trip_count"], 1)
         self.assertGreaterEqual(summary["stop_count"], 2)
         self.assertGreaterEqual(summary["expected_total"], 2)
 
-        # [#abj8i3]
+        # [#tm5i9n]
         self.assertIsNotNone(summary["next_pickup"])
         self.assertEqual(summary["next_pickup"]["dispatch_trip"], dt.name)
         self.assertEqual(summary["next_pickup"]["sequence"], 1)
@@ -151,10 +151,9 @@ class TestMasarPageContext(_WorkerTripMixin, FrappeTestCase):
             ctx = masar_page.get_context(frappe._dict())
             self.assertEqual(ctx.no_cache, 1)
             self.assertTrue(ctx.portal_theme)
-            # [#fnpq21]
-            # [#kdkgqz]
+            # [#b9e62g]
             self.assertIsInstance(ctx.csrf_token, str)
-            # [#710l1o]
+            # [#p4chw1]
             self.assertEqual(ctx.masar_token, "")
         finally:
             frappe.local.form_dict = frappe._dict()

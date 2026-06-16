@@ -21,7 +21,7 @@ PRUNE (remove module + the patches.txt line) once every deployed site has run it
 
 import frappe
 
-# [#9684r2]
+# [#n1agup]
 MOVED_FIELDS = {
     "default_payment_method": "Payment Entry",
     "enable_gl_posting": "0",
@@ -38,9 +38,7 @@ def execute():
         changed = False
 
         for field, factory_default in MOVED_FIELDS.items():
-            # [#jod0jh]
-            # [#kxbubb]
-            # [#1hzmot]
+            # [#sfqxge]
             rows = (
                 frappe.qb.from_(singles)
                 .select(singles.value)
@@ -52,8 +50,7 @@ def execute():
 
             old_value = rows[0][0]
 
-            # [#7tl274]
-            # [#huuala]
+            # [#fel8e3]
             current = apex.get(field)
             current_str = "" if current is None else str(current)
             if old_value not in (None, "") and current_str == str(factory_default):
@@ -63,15 +60,14 @@ def execute():
         if changed:
             apex.save(ignore_permissions=True)  # audit-ok
 
-        # [#6kca52]
-        # [#mdh4wd]
+        # [#9rt94w]
         frappe.qb.from_(singles).delete().where(
             (singles.doctype == "Habitat Settings")
             & (singles.field.isin(list(MOVED_FIELDS)))
         ).run()
         frappe.db.commit()
     except Exception:
-        # [#nxnov8]
+        # [#19ji2j]
         frappe.db.rollback()
         frappe.log_error(
             title="move_finance_settings_to_apex_settings failed",

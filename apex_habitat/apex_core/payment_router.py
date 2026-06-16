@@ -40,10 +40,7 @@ from apex_habitat.apex_core.doctype.apex_settings.apex_settings import gl_postin
 
 SOURCE_DOCTYPE = "Salis Payment Request"
 
-# [#fp9fyu]
-# [#t9qszv]
-# [#cufhur]
-# [#642vqq]
+# [#asggke]
 DEFAULT_TARGET_DOCTYPE = "Payment Request"
 
 
@@ -57,8 +54,7 @@ def get_target_doctype(settings=None) -> str:
     settings = settings or frappe.get_single("Payment Routing Settings")
     return settings.target_payment_doctype or DEFAULT_TARGET_DOCTYPE
 
-# [#rcwf7j]
-# [#dyphhj]
+# [#qj7x3p]
 _FALLBACK_CURRENCY = "SAR"
 
 
@@ -125,7 +121,7 @@ def _apply_field_map(target, source, field_map) -> None:
     for row in field_map:
         target_field = (row.target_fieldname or "").strip()
         if not target_field:
-            # [#6v9bve]
+            # [#ked8f9]
             continue
         if row.is_static:
             value = row.static_value
@@ -160,18 +156,11 @@ def route_payment(payment_request: str) -> str:
     settings = frappe.get_single("Payment Routing Settings")
     target_doctype = get_target_doctype(settings)
 
-    # [#58agmm]
-    # [#62d4rs]
-    # [#1ymyoq]
-    # [#93rjxu]
+    # [#huthxu]
     frappe.db.get_value(SOURCE_DOCTYPE, payment_request, "name", for_update=True)
     source = frappe.get_doc(SOURCE_DOCTYPE, payment_request)
 
-    # [#dpzek9]
-    # [#th1tyi]
-    # [#kek961]
-    # [#p7p83c]
-    # [#an7p80]
+    # [#t1cwmn]
     frappe.has_permission(SOURCE_DOCTYPE, "write", doc=source, throw=True)
     frappe.has_permission(SOURCE_DOCTYPE, "submit", doc=source, throw=True)
 
@@ -180,27 +169,21 @@ def route_payment(payment_request: str) -> str:
             _("This payment request is not finance-approved yet; it cannot be paid.")
         )
 
-    # [#tksu31]
+    # [#qrnwir]
     if source.linked_payment_entry:
         return source.linked_payment_entry
 
     target = frappe.new_doc(target_doctype)
     _apply_field_map(target, source, settings.field_map or [])
-    # [#4gxinh]
-    # [#tjvbch]
-    # [#2yxt5g]
+    # [#5dt0v6]
     _ensure_target_currency(target, source)
     target.insert(ignore_permissions=True)
 
-    # [#ljvbql]
-    # [#450dmg]
-    # [#oy2d3o]
-    # [#2xccvh]
+    # [#92jq1c]
     if settings.auto_submit_target and target.meta.is_submittable and gl_posting_enabled():
         target.submit()
 
-    # [#4fpafg]
-    # [#p48huq]
+    # [#rx80aq]
     source.db_set("linked_payment_entry", target.name)
 
     return target.name

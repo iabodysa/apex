@@ -66,7 +66,7 @@ def get_data(filters):
         order_by="billed_to_supplier asc, employee asc",
     )
 
-    # [#1ud4i5]
+    # [#lp6nvr]
     markup_enabled = frappe.db.get_single_value("Habitat Settings", "enable_supplier_markup")
     markup_pct = flt(frappe.db.get_single_value("Habitat Settings", "supplier_markup_percent")) if markup_enabled else 0.0
 

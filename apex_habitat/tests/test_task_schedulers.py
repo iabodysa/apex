@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 """Unit tests for habitat/tasks.py scheduler functions.
 
 These tests use unittest.mock to avoid needing a live Frappe database.
@@ -22,7 +22,7 @@ class TestWeeklyOccupancySyncEmptyBuilding(unittest.TestCase):
         for b in buildings:
             total_rooms = room_counts.get(b, 0)
             if not total_rooms:
-                # [#lta7ec]
+                # [#g0v5hn]
                 continue
             active = active_counts.get(b, 0)
             total_capacity = capacities.get(b, 0)
@@ -73,7 +73,7 @@ class TestLedgerTypeOptions(unittest.TestCase):
     """Finding 1: Accommodation Ledger ledger_type Select must include all
     utility_type values from Utility Account."""
 
-    # [#33vpvh]
+    # [#q5c3pm]
     LEDGER_TYPE_OPTIONS = {
         "Rent",
         "Electricity",
@@ -87,7 +87,7 @@ class TestLedgerTypeOptions(unittest.TestCase):
         "Other",
     }
 
-    # [#cncxq9]
+    # [#f15ecz]
     UTILITY_TYPES = {"Electricity", "Water", "Gas", "Internet", "Telecom"}
 
     def test_all_utility_types_covered_by_ledger_type(self):
@@ -131,10 +131,10 @@ class TestDeadBeforeSaveGuardsRemoved(unittest.TestCase):
                 "apex_habitat.habitat.doctype.accommodation_custody_item.accommodation_custody_item",
                 "AccommodationCustodyItem",
             )
-            # [#cml9bl]
+            # [#scivu8]
             import inspect
             if bs is not None:
-                # [#t0rxcu]
+                # [#f3k0ws]
                 src = inspect.getsource(bs)
                 self.assertNotIn('frappe.throw("DocType mismatch")', src)
         except ImportError:

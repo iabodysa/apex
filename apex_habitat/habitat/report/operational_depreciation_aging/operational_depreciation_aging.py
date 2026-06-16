@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 import frappe
 
@@ -74,13 +74,13 @@ def execute(filters=None):
         },
     ]
 
-    # [#dxhxlh]
+    # [#p66spa]
     parent_filters = {"docstatus": 1}
     if filters:
         if filters.get("from_date"):
             parent_filters["snapshot_date"] = [">=", filters["from_date"]]
         if filters.get("to_date"):
-            # [#c1i9j5]
+            # [#7tznk7]
             if filters.get("from_date"):
                 parent_filters["snapshot_date"] = [
                     "between",
@@ -91,7 +91,7 @@ def execute(filters=None):
         if filters.get("building"):
             parent_filters["building"] = filters["building"]
 
-    # [#jwrd3v]
+    # [#ckl6h1]
     snapshots = frappe.get_all(
         "Non-Financial Depreciation Snapshot",
         filters=parent_filters,
@@ -104,10 +104,10 @@ def execute(filters=None):
 
     snapshot_names = [s["name"] for s in snapshots]
 
-    # [#p69hiu]
+    # [#ohro9p]
     snapshot_map = {s["name"]: s for s in snapshots}
 
-    # [#ryy27a]
+    # [#kxoj8n]
     child_rows = frappe.get_all(
         "Depreciation Snapshot Item",
         filters={"parent": ["in", snapshot_names], "parenttype": "Non-Financial Depreciation Snapshot"},
@@ -118,7 +118,7 @@ def execute(filters=None):
     if not child_rows:
         return columns, []
 
-    # [#o4yj67]
+    # [#2e7g58]
     unique_articles = list({row["article"] for row in child_rows if row.get("article")})
     article_category_map = {}
     if unique_articles:
@@ -135,13 +135,13 @@ def execute(filters=None):
         original_cost = row.get("original_cost_sar") or 0
         book_value = row.get("book_value_sar") or 0
 
-        # [#d7l51v]
+        # [#n01hq2]
         if original_cost:
             depreciation_pct = min((original_cost - book_value) / original_cost * 100, 100.0)
         else:
             depreciation_pct = 0.0
 
-        # [#a59bgy]
+        # [#baku41]
         if not original_cost and book_value:
             status = "Data Error"
         elif book_value > 0:

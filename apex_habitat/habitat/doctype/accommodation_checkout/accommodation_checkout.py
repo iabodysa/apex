@@ -123,17 +123,14 @@ def resolve_damage_assessment_building(assignment, bed):
 
 
 def on_submit(doc, method=None):
-    # [#3hehe7]
-    # [#nj5yjx]
-    # [#3dlx73]
-    # [#s2lw5t]
+    # [#gn7wq6]
     already = frappe.db.get_value(
         "Accommodation Assignment", doc.assignment, "check_out_date", for_update=True
     )
     if already:
         frappe.throw(_("This assignment was already checked out on {0}.").format(already))
 
-    # [#9mhk9f]
+    # [#qwaafd]
     assignment = frappe.get_doc("Accommodation Assignment", doc.assignment)
     assignment.db_set("check_out_date", doc.checkout_date)
     assignment.add_comment("Comment", _("Check-out processed via {0} on {1}").format(doc.name, doc.checkout_date))
@@ -142,8 +139,7 @@ def on_submit(doc, method=None):
     frappe.db.set_value("Accommodation Room", assignment.room, "readiness_status", "Needs Cleaning")
     recalculate_spatial(assignment.room, assignment.building)
 
-    # [#7bdpt9]
-    # [#n0gcis]
+    # [#dyqylo]
     if doc.custody_return_items:
         has_damage = any(item.return_status in ("Damaged", "Lost") for item in doc.custody_return_items)
 

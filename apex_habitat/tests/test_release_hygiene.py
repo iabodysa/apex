@@ -31,19 +31,10 @@ HOOKS_PY = os.path.join(APP_ROOT, "hooks.py")
 ARABIC = re.compile(r"[؀-ۿ]")
 PLACEHOLDER = re.compile(r"\{\d+")
 
-# [#a8nbmj]
-# [#id9zro]
-# [#iqg0f5]
-# [#ao90el]
-# [#1744ic]
-# [#jkrr5g]
+# [#oy1z45]
 LATIN_BRAND_SOURCES = {"AFMCO"}
 
-# [#kt9842]
-# [#9nvgmn]
-# [#kqn355]
-# [#kslw0f]
-# [#h6ru9t]
+# [#bsvh0z]
 TEST_ROLE_RE = re.compile(r"(?:^|[\s_])test(?:$|[\s_0-9])", re.IGNORECASE)
 KNOWN_FRAPPE_TEST_ROLES = {
     "_Test Role",
@@ -175,7 +166,7 @@ class TestNoTestRolesShipped(unittest.TestCase):
                 exec(compile(fh.read(), path, "exec"), ns)  # noqa: S102 (trusted, in-repo)
             self.assertIn(const, ns, f"{rel} no longer defines {const}")
             for entry in ns[const]:
-                # [#l3aot2]
+                # [#fz2jvh]
                 name = entry[0] if isinstance(entry, (tuple, list)) else entry
                 roles.add(name)
         return roles
@@ -196,10 +187,10 @@ class TestNoTestRolesShipped(unittest.TestCase):
                 continue
             with open(path, encoding="utf-8") as fh:
                 text = fh.read()
-            # [#fs6juk]
+            # [#8bv3s4]
             for m in re.finditer(r'"roles"\s*:\s*(\[[^\]]*\])', text):
                 roles.update(quoted.findall(m.group(1)))
-            # [#a148rs]
+            # [#mhln5m]
             for m in re.finditer(
                 r'"dt"\s*:\s*"Role".*?\[\s*"name"\s*,\s*"in"\s*,\s*(\[[^\]]*\])',
                 text,
@@ -255,8 +246,7 @@ class TestNoTestRolesShipped(unittest.TestCase):
         return roles
 
     def test_detector_recognises_known_fixtures(self):
-        # [#cu9j0q]
-        # [#e1z5m4]
+        # [#pack7e]
         for bad in ("_Test Role", "_Test Role 4", "Test Role", "Some test role"):
             self.assertTrue(_is_test_role(bad), f"should flag {bad!r}")
         for good in (
@@ -276,8 +266,7 @@ class TestNoTestRolesShipped(unittest.TestCase):
 
     def test_app_source_declares_no_seed_or_fixture_test_role(self):
         declared = self._all_declared_roles()
-        # [#fpl0a6]
-        # [#o6hh9s]
+        # [#cdebmq]
         self.assertIn("Fleet Manager", declared, "role scan found nothing — parser broke")
         offenders = sorted(r for r in declared if _is_test_role(r))
         self.assertEqual(
@@ -311,7 +300,7 @@ class TestNamingRuleConsistency(unittest.TestCase):
         return out
 
     def test_scan_finds_doctypes(self):
-        # [#d0qoco]
+        # [#hi39j1]
         names = {n for n, _, _ in self._doctypes()}
         self.assertIn("Accommodation Bed", names, "DocType scan found nothing — parser broke")
 
@@ -354,11 +343,7 @@ class TestNoFutureDatedModified(unittest.TestCase):
     def test_no_modified_in_the_future(self):
         import datetime
 
-        # [#iw0xf8]
-        # [#31c34k]
-        # [#beshpr]
-        # [#9faicn]
-        # [#km2hsn]
+        # [#lthu2d]
         horizon = datetime.datetime.now() + datetime.timedelta(days=2)
         offenders = []
         for fp in glob.glob(os.path.join(APP_ROOT, "*", "**", "*.json"), recursive=True):

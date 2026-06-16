@@ -19,7 +19,7 @@ def validate(doc, method=None):
     _validate_status_transition(doc)
 
 
-# [#7yszca]
+# [#s5jmv1]
 _DEPARTMENT_ROLE = {
     "HR": "HR Manager",
     "Operations": "Accommodation Manager",
@@ -45,10 +45,7 @@ def after_insert(doc, method=None):
     ]
     if not assignees:
         return
-    # [#94y1w6]
-    # [#7iw13h]
-    # [#6h53zk]
-    # [#anejmw]
+    # [#foc6qa]
     _perm_flag = frappe.flags.ignore_permissions
     frappe.flags.ignore_permissions = True
     try:

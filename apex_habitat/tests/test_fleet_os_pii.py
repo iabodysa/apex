@@ -18,8 +18,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api.fleet_os import get_fleet_os
 
-# [#hdpjau]
-# [#b3us0i]
+# [#7f5zbd]
 PHONE = "0500000000"
 
 

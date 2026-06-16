@@ -34,7 +34,7 @@ PARTY_TEMPORARY_WORKER = "Temporary Worker"
 @frappe.whitelist()
 def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     """Party-aware arrival snapshot for one worker (Employee or Temporary Worker)."""
-    # [#r90cwx]
+    # [#e74n5x]
     if not party and employee:
         party_type, party = PARTY_EMPLOYEE, employee
     if not (party_type and party):
@@ -55,8 +55,7 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     else:
         frappe.throw(_("Unknown party type: {0}").format(party_type))
 
-    # [#l7hfv8]
-    # [#8alg4v]
+    # [#e8oxzs]
     assignment = (
         frappe.db.get_value(
             "Accommodation Assignment",
@@ -71,9 +70,7 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         frappe.db.get_value("Accommodation Bed", current_bed, "bed_code") if current_bed else None
     )
 
-    # [#598pl4]
-    # [#r06gnw]
-    # [#oidwew]
+    # [#rx0tdj]
     custody_count = 0
     if party_type == PARTY_EMPLOYEE:
         rows = frappe.get_all(
@@ -102,7 +99,7 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         "current_building": assignment.get("building"),
         "current_bed": current_bed,
         "current_bed_code": current_bed_code,
-        # [#8hjo6q]
+        # [#g5e2pw]
         "check_in_date": (
             frappe.utils.formatdate(assignment.get("check_in_date")) if assignment.get("check_in_date") else None
         ),
@@ -122,9 +119,7 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     txt = (txt or "").strip()
     results = []
 
-    # [#51mybl]
-    # [#rhcu3r]
-    # [#r47ng8]
+    # [#jibprz]
     housed = frappe.get_all(
         "Accommodation Assignment",
         filters={"docstatus": 1, "check_out_date": ["is", "not set"]},
@@ -267,14 +262,7 @@ def house_over_capacity(room, party_type, party, project, check_in_date=None) ->
     return {**result, "is_temporary": True, "bed_code": bed.bed_code}
 
 
-# [#rudcur]
-# [#lfexu9]
-# [#m6vl1u]
-# [#4j1dsm]
-# [#lns8e3]
-# [#one66a]
-# [#2h33xa]
-# [#rudcur]
+# [#6vab3q]
 
 
 def _company_name() -> str:
@@ -360,8 +348,7 @@ def get_arrival_slip(party_type, party) -> dict:
     return {"html": frappe.render_template(ARRIVAL_SLIP_TEMPLATE, ctx), "title": ctx["worker_name"]}
 
 
-# [#4bbhh2]
-# [#aa3bdr]
+# [#25mjhm]
 HOUSING_TERMS = [
     "Keep the accommodation and shared areas clean and tidy.",
     "No unauthorised guests or visitors are allowed in the accommodation.",
@@ -430,8 +417,7 @@ def get_checkin_slip(party_type, party) -> dict:
     card = get_arrival_card(party_type=party_type, party=party)
     building = card.get("current_building")
     if building:
-        # [#5phui5]
-        # [#bxlpp2]
+        # [#t07zu3]
         frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
     bldg = (
         frappe.db.get_value("Accommodation Building", building, ["city"], as_dict=True)
@@ -527,7 +513,7 @@ def get_custody_handover_slip(custody_issue) -> dict:
         or doc.issued_to_employee
     )
 
-    # [#ge5xi0]
+    # [#7oz3gh]
     article_ids = list({row.article for row in doc.items if row.article})
     masters = {}
     if article_ids:

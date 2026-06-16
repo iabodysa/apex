@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 import frappe
 from frappe.utils import getdate, today, add_days
@@ -48,7 +48,7 @@ def execute(filters=None):
         order_by="cleaning_date desc, building asc",
     )
 
-    # [#r9w9ws]
+    # [#3b8i2k]
     all_log_names = [log.name for log in logs]
     room_rows = []
     if all_log_names:
@@ -66,7 +66,7 @@ def execute(filters=None):
         if rr.cleaned:
             room_cleaned[rr.parent] += 1
 
-    # [#m9aclk]
+    # [#4f0bon]
     all_cleaner_employees = list({log.cleaner_employee for log in logs if log.cleaner_employee})
     employee_name_map = {}
     if all_cleaner_employees:

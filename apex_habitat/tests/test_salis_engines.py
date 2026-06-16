@@ -165,7 +165,7 @@ class TestFuelAccrualLateDone(FrappeTestCase):
         name = self._make_done_request(old_date)
         self.addCleanup(lambda: self._cleanup(name))
 
-        # [#jtu3ox]
+        # [#55bt65]
         self.assertEqual(frappe.db.get_value("Fuel Request", name, "ledgered"), 0)
         frappe.db.delete("Fuel Consumption Ledger", {"source_type": "Fuel Request", "source_name": name})
 
@@ -177,7 +177,7 @@ class TestFuelAccrualLateDone(FrappeTestCase):
         self.assertEqual(frappe.db.get_value("Fuel Request", name, "ledgered"), 1,
                          "Request must be flagged ledgered after accrual.")
 
-        # [#1i7bkj]
+        # [#rla1hx]
         accrue_fuel_consumption()
         rows_again = frappe.db.count("Fuel Consumption Ledger",
                                      {"source_type": "Fuel Request", "source_name": name})
@@ -221,8 +221,7 @@ class TestFuelLedgerSourceUniqueIndex(FrappeTestCase):
                 "source_type": "Fuel Daily Log", "source_name": self.SOURCE_NAME}
 
     def test_unique_constraint_exists_on_source_key(self):
-        # [#giiozc]
-        # [#snve8l]
+        # [#93hyar]
         constraints = frappe.db.sql(
             """SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS
                WHERE table_schema = DATABASE() AND table_name = %s
@@ -237,13 +236,10 @@ class TestFuelLedgerSourceUniqueIndex(FrappeTestCase):
         )
 
     def test_duplicate_source_row_rejected_by_db(self):
-        # [#ej2dql]
+        # [#icn3d4]
         frappe.get_doc(self._row()).insert(ignore_permissions=True)
 
-        # [#4ia8vh]
-        # [#nlma4f]
-        # [#alya3y]
-        # [#ck0zi4]
+        # [#53huw3]
         from pymysql.err import IntegrityError as MySQLIntegrityError
 
         with self.assertRaises((frappe.UniqueValidationError, MySQLIntegrityError)):
@@ -265,17 +261,17 @@ class TestOperationsAlertAutoResolve(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # [#pikt0l]
+        # [#h7huot]
         cls.driver_ok = frappe.db.get_value("Salis Driver", {"full_name": "Resolve OK Driver"}, "name")
         if not cls.driver_ok:
             cls.driver_ok = frappe.get_doc({"doctype": "Salis Driver", "full_name": "Resolve OK Driver",
                                             "status": "Active"}).insert(ignore_permissions=True).name
-        # [#9dm9ug]
+        # [#amrby2]
         cls.driver_gap = frappe.db.get_value("Salis Driver", {"full_name": "Resolve Gap Driver"}, "name")
         if not cls.driver_gap:
             cls.driver_gap = frappe.get_doc({"doctype": "Salis Driver", "full_name": "Resolve Gap Driver",
                                              "status": "Active"}).insert(ignore_permissions=True).name
-        # [#9qbd9n]
+        # [#1wx0gi]
         cls.vehicle_inactive = frappe.db.get_value("Salis Vehicle", {"plate_number": "RESOLVE OFF 1"}, "name")
         if not cls.vehicle_inactive:
             cls.vehicle_inactive = frappe.get_doc({"doctype": "Salis Vehicle", "plate_number": "RESOLVE OFF 1",
@@ -283,7 +279,7 @@ class TestOperationsAlertAutoResolve(FrappeTestCase):
         else:
             frappe.db.set_value("Salis Vehicle", cls.vehicle_inactive, "status", "Stopped")
 
-        # [#6g8vus]
+        # [#nw7np8]
         if not frappe.db.exists("Driver Attendance",
                                 {"driver": cls.driver_ok, "attendance_date": frappe.utils.today(),
                                  "docstatus": 1}):
@@ -305,11 +301,11 @@ class TestOperationsAlertAutoResolve(FrappeTestCase):
         return a.name
 
     def test_resolves_cleared_and_keeps_valid(self):
-        # [#ad6kmw]
+        # [#dmkpum]
         a_ok = self._open_alert("Supervisor Delay", "Info", driver=self.driver_ok)
-        # [#s6sm4o]
+        # [#g74tb2]
         a_gap = self._open_alert("Supervisor Delay", "Info", driver=self.driver_gap)
-        # [#cj0uem]
+        # [#op7fpg]
         a_idle = self._open_alert("Idle Vehicle", "Info", vehicle=self.vehicle_inactive)
         for n in (a_ok, a_gap, a_idle):
             self.addCleanup(lambda n=n: self._cleanup(n))
@@ -330,7 +326,7 @@ class TestOperationsAlertAutoResolve(FrappeTestCase):
         reconcile_operations_alerts()
         first = frappe.db.get_value("Operations Alert", a_idle, "status")
 
-        # [#7icmqu]
+        # [#91dvdr]
         reconcile_operations_alerts()
         second = frappe.db.get_value("Operations Alert", a_idle, "status")
 

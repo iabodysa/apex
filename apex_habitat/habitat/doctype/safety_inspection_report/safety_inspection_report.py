@@ -20,7 +20,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-# [#pdq7ji]
+# [#2amqm6]
 _FINDING_TABLES = ("safety_findings", "maintenance_findings")
 
 
@@ -28,9 +28,7 @@ class SafetyInspectionReport(Document):
     def on_submit(self):
         self.generate_maintenance_requests()
 
-    # [#7usew1]
-    # [#t8xr0s]
-    # [#7usew1]
+    # [#g5aqzg]
     def generate_maintenance_requests(self):
         """Create one Maintenance Request per actionable finding and surface it.
 
@@ -53,8 +51,7 @@ class SafetyInspectionReport(Document):
                     self._ensure_surfaced(finding.generated_maintenance_request)
                     continue
                 mr_name = self._spawn_request(finding)
-                # [#3yfjbk]
-                # [#nv82oa]
+                # [#jxe3la]
                 finding.db_set("generated_maintenance_request", mr_name)
                 self._surface(mr_name)
 
@@ -74,8 +71,7 @@ class SafetyInspectionReport(Document):
         mr.reported_by = self.inspector or frappe.session.user
         mr.status = "Open"
         mr.source_inspection = self.name
-        # [#biju55]
-        # [#gek2ue]
+        # [#ivpfs7]
         mr.insert(ignore_permissions=True)  # audit-ok
         return mr.name
 

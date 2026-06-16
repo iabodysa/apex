@@ -18,12 +18,10 @@ from frappe import _
 
 from apex_habitat.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
 
-# [#6jyw6i]
-# [#8jjxrr]
+# [#tutwiu]
 _IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_ ]*$")
 
-# [#644nte]
-# [#adrjlo]
+# [#g9r6ee]
 PARTY_DOCTYPES = {
     "Accommodation Assignment": "employee",
     "Accommodation Checkout": "employee",
@@ -113,13 +111,12 @@ def _link(tw, employee: str) -> None:
     """Link a Temporary Worker to an Employee: re-point party across docs, back-date the
     skipped accommodation cost, then stamp the link and mark Linked."""
     from frappe.utils import now_datetime
-    # [#2h66fp]
+    # [#1ouyds]
     from apex_habitat.habitat.tasks import backdate_assignment_cost
 
     _repoint_party(tw.name, employee)
 
-    # [#99k73d]
-    # [#2iaomj]
+    # [#28clra]
     for asg in frappe.get_all(
         "Accommodation Assignment",
         filters={"employee": employee, "docstatus": 1, "check_out_date": ["is", "not set"]},
@@ -141,9 +138,7 @@ def _link(tw, employee: str) -> None:
             ),
         )
     except Exception:
-        # [#d8fb2c]
-        # [#ptn9yi]
-        # [#bslq3y]
+        # [#l55n57]
         frappe.log_error(frappe.get_traceback(), "Temporary Worker link: comment failed")
 
 

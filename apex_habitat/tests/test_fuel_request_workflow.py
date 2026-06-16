@@ -50,17 +50,15 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		# [#k91rxo]
+		# [#mom18y]
 		cls.requester = _user("frwf_req@example.com", "Fleet Project Manager")
 		cls.manager = _user("frwf_mgr@example.com", "Fleet Manager")
-		# [#hd37w7]
-		# [#m05xw9]
+		# [#npt94d]
 		cls.manager_maker = _user("frwf_mgrmaker@example.com", "Fleet Manager")
 		frappe.get_doc("User", cls.manager_maker).add_roles("Fleet Project Manager")
 		cls.project = cls._project("FR Workflow Project")
 		cls.vehicle = cls._vehicle("FR-WF-1")
-		# [#9y5ylg]
-		# [#tsti4z]
+		# [#pwic2j]
 		for u in (cls.requester, cls.manager, cls.manager_maker):
 			if not frappe.db.exists(
 				"User Permission", {"user": u, "allow": "Project", "for_value": cls.project}
@@ -78,7 +76,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	# [#4lslw6]
+	# [#m88md8]
 
 	@staticmethod
 	def _project(name):
@@ -148,7 +146,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		if frappe.db.exists("Fuel Quota", name):
 			frappe.delete_doc("Fuel Quota", name, ignore_permissions=True, force=True)
 
-	# [#idl6yv]
+	# [#stmhgc]
 
 	def test_workflow_is_seeded_and_active(self):
 		self.assertEqual(get_workflow_name("Fuel Request"), WORKFLOW)
@@ -157,7 +155,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 			frappe.db.get_value("Workflow", WORKFLOW, "workflow_state_field"), "status"
 		)
 
-	# [#md6m45]
+	# [#m9pgqc]
 
 	def test_standard_post_submit_pending_approved_done(self):
 		fr = self._new("Standard", requested_litres=8, amount=120)
@@ -169,10 +167,10 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		fr.reload()
 		self.assertEqual(fr.status, "Approved")
 		self.assertEqual(fr.docstatus, 1)
-		# [#bv532f]
+		# [#6vbrv7]
 		self.assertEqual(fr.approved_by, self.manager)
 
-		# [#dlyu13]
+		# [#ph0ivm]
 		self.assertIn("Complete", _actions(fr))
 		apply_workflow(fr, "Complete")
 		fr.reload()
@@ -192,7 +190,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		self.assertEqual(fr.status, "Done")
 		self.assertEqual(fr.docstatus, 1)
 
-		# [#73olwn]
+		# [#gtncgf]
 		self.assertIn("Revert", _actions(fr))
 		apply_workflow(fr, "Revert")
 		fr.reload()
@@ -211,12 +209,10 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		self.assertEqual(fr.status, "Done")
 		self.assertEqual(fr.docstatus, 1)
 
-	# [#fqljip]
+	# [#fys6d3]
 
 	def test_sod_requester_cannot_approve(self):
-		# [#f1afl3]
-		# [#zjk01p]
-		# [#286nf7]
+		# [#61e573]
 		fr = self._new("Standard", requested_by=self.manager_maker, requested_litres=5)
 
 		frappe.set_user(self.manager_maker)
@@ -224,14 +220,14 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			apply_workflow(fr, "Approve")
 
-		# [#52bzgh]
+		# [#psl18k]
 		frappe.set_user(self.manager)
 		self.assertIn("Approve", _actions(fr))
 		apply_workflow(fr, "Approve")
 		fr.reload()
 		self.assertEqual(fr.status, "Approved")
 
-	# [#bvtw55]
+	# [#toifw5]
 
 	def test_revert_is_topup_only(self):
 		"""A Standard request, once Done, is NOT offered Revert (Top-up only)."""
@@ -264,7 +260,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		self.assertEqual(std.status, "Failed")
 		self.assertEqual(std.docstatus, 1)
 
-	# [#ruu7t4]
+	# [#cj1ock]
 
 	def test_standard_quota_applied_on_post_submit_done(self):
 		q = self._quota()
@@ -273,18 +269,18 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 		frappe.set_user(self.manager)
 		apply_workflow(fr, "Approve")
 		fr.reload()
-		# [#ryxdl2]
+		# [#lbzv3j]
 		self.assertEqual(fr.quota_applied, 0)
 		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 0)
 
-		# [#mnbh8f]
+		# [#5uqtx1]
 		apply_workflow(fr, "Complete")
 		fr.reload()
 		self.assertEqual(fr.status, "Done")
 		self.assertEqual(fr.quota_applied, 1)
 		self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 8)
 
-		# [#pu20vo]
+		# [#r6gkdq]
 		frappe.set_user(self.manager)
 		apply_workflow(fr, "Cancel")
 		fr.reload()

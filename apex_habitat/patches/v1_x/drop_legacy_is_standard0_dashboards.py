@@ -26,29 +26,28 @@ stale is_standard=0 rows are simply removed (not re-imported).
 
 import frappe
 
-# [#9o3tww]
+# [#e2b5sl]
 LEGACY_DASHBOARDS = [
-    # [#h55sfk]
+    # [#tl8wn8]
     "Habitat Dashboard",
     "Accommodation Manager Dashboard",
     "Resident Supervisor Dashboard",
     "Finance Manager Dashboard",
     "Internal Auditor Dashboard",
-    # [#eavzps]
+    # [#7magu0]
     "Fleet Manager Dashboard",
     "Fleet Supervisor Dashboard",
     "Salis Finance Manager Dashboard",  # [#ak5kq1]
     "Salis - Workers Transport",
     "Salis - Representatives Fleet",
-    # [#nkctau]
+    # [#8tcr2g]
     "Movement Operations Dashboard",  # [#ak5kq1]
 ]
 
 
 def execute():
     for name in LEGACY_DASHBOARDS:
-        # [#mxgrde]
-        # [#5v465w]
+        # [#33ivx9]
         if frappe.db.get_value("Dashboard", name, "is_standard") == 0:
             frappe.delete_doc("Dashboard", name, force=True, ignore_permissions=True)
     frappe.db.commit()

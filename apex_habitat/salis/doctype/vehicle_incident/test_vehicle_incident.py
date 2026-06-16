@@ -15,9 +15,7 @@ from frappe.utils import add_days, today
 class TestVehicleIncident(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # [#6u8wvq]
-        # [#2ciqiy]
-        # [#1wxuaa]
+        # [#gn6wfx]
         tag = self._testMethodName
         self.driver = frappe.get_doc(
             {"doctype": "Salis Driver", "full_name": f"Incident Driver {tag}", "status": "Active"}
@@ -52,7 +50,7 @@ class TestVehicleIncident(FrappeTestCase):
             frappe.db.get_value("Salis Driver", self.driver, "current_vehicle"),
             "theft must clear the driver's current vehicle",
         )
-        # [#t32yoo]
+        # [#6y3htq]
         inc.reload()
         self.assertEqual(inc.previous_vehicle_status, "Active")
         self.assertEqual(inc.previous_driver, self.driver)

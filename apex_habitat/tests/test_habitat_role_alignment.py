@@ -37,7 +37,7 @@ from apex_habitat.habitat.permissions import (
 from apex_habitat.setup import create_role_profiles, create_roles
 from apex_habitat.tests._helpers import _user
 
-# [#3tixf0]
+# [#9o4st8]
 NEW_ROLES = [
     "Maintenance Technician",
     "Cleaning Supervisor",
@@ -45,7 +45,7 @@ NEW_ROLES = [
     "Resident Request Coordinator",
 ]
 
-# [#htrowa]
+# [#1v581y]
 NEW_PROFILES = [
     "Habitat Maintenance Technician",
     "Habitat Cleaning Supervisor",
@@ -53,7 +53,7 @@ NEW_PROFILES = [
     "Habitat Resident Request Coordinator",
 ]
 
-# [#i0mepp]
+# [#8rltpv]
 PRIVILEGED_ROLES = [
     "Accommodation Manager",
     "Resident Supervisor",
@@ -61,7 +61,7 @@ PRIVILEGED_ROLES = [
     "System Manager",
 ]
 
-# [#l544q3]
+# [#9g0uai]
 AUDITOR_DOCTYPES = [
     "Custody Issue",
     "Custody Return",
@@ -82,8 +82,7 @@ class TestRoleProfileIdempotency(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # [#9kn7hu]
-        # [#skkep1]
+        # [#l0z8d5]
         create_roles()
         create_role_profiles()
         frappe.db.commit()
@@ -109,10 +108,7 @@ class TestRoleProfileIdempotency(FrappeTestCase):
         before_profiles = {
             p: frappe.db.count("Role Profile", {"name": p}) for p in NEW_PROFILES
         }
-        # [#dyqt5z]
-        # [#86gcnw]
-        # [#ttyhw3]
-        # [#coljqa]
+        # [#74ju57]
         create_roles()
         create_role_profiles()
         for role, count in before_roles.items():
@@ -130,9 +126,7 @@ class TestRoleProfileIdempotency(FrappeTestCase):
             "Habitat Resident Request Coordinator": "Resident Request Coordinator",
         }
         for profile, role in expected.items():
-            # [#969wf2]
-            # [#iw6nh2]
-            # [#gy21wj]
+            # [#4y41c3]
             roles = [r.role for r in frappe.get_doc("Role Profile", profile).roles]
             self.assertEqual(
                 roles, [role], f"{profile!r} must bundle exactly [{role!r}]"
@@ -148,11 +142,11 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
         super().setUpClass()
         frappe.set_user("Administrator")
         create_roles()
-        # [#raxojd]
+        # [#fizkrr]
         cls.tech = _user("mra_tech@example.com", "Maintenance Technician")
-        # [#gyqsiz]
+        # [#3flk8c]
         cls.other = _user("mra_other@example.com", "Maintenance Technician")
-        # [#2cq5hq]
+        # [#rdgulg]
         cls.privileged = {
             role: _user(
                 "mra_{}@example.com".format(role.replace(" ", "_").lower()), role
@@ -175,7 +169,7 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
             }
         )
 
-    # [#azuc6w]
+    # [#72ccnr]
 
     def test_technician_can_raise_and_owns_the_request(self):
         frappe.set_user(self.tech)
@@ -190,15 +184,13 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
                     "issue_description": "Tap dripping in shared bathroom",
                 }
             )
-            # [#18poy9]
-            # [#nr94tv]
-            # [#ar8ler]
+            # [#8yri7d]
             doc.insert(ignore_links=True)
             name = doc.name
         finally:
             frappe.set_user("Administrator")
         try:
-            # [#l875dm]
+            # [#2klbw0]
             self.assertEqual(doc.reported_by, self.tech)
             self.assertEqual(doc.owner, self.tech)
             self.assertEqual(doc.owner, doc.reported_by)
@@ -207,7 +199,7 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
                 "Maintenance Request", name, force=True, ignore_permissions=True
             )
 
-    # [#5wl73r]
+    # [#asyc98]
 
     def test_technician_query_is_owner_scoped(self):
         frag = maintenance_request_query(user=self.tech)
@@ -217,7 +209,7 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
         )
 
     def test_technician_cannot_read_a_non_owned_request(self):
-        # [#r4ufax]
+        # [#kpc5xu]
         self.assertFalse(
             maintenance_request_has_permission(
                 self._doc(owner=self.other), "read", user=self.tech
@@ -232,7 +224,7 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
         )
 
     def test_assignee_can_read_assigned_request(self):
-        # [#wqag47]
+        # [#gmkrru]
         self.assertTrue(
             maintenance_request_has_permission(
                 self._doc(owner=self.other, assigned_to=self.tech),
@@ -241,7 +233,7 @@ class TestMaintenanceRequestOwnerIsolation(FrappeTestCase):
             )
         )
 
-    # [#bhlfxr]
+    # [#cjncnb]
 
     def test_privileged_roles_have_no_query_restriction(self):
         for role, user in self.privileged.items():
@@ -298,8 +290,7 @@ class TestInternalAuditorReadOnly(FrappeTestCase):
                 )
 
     def test_auditor_read_resolves_via_role_permissions(self):
-        # [#huh4em]
-        # [#nx4eh4]
+        # [#1rjvse]
         from frappe.permissions import get_role_permissions
 
         original = frappe.session.user

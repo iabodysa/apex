@@ -27,14 +27,13 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, now, today
 
-# [#hks9dm]
-# [#knflry]
+# [#nn9apu]
 _OPEN_MAINTENANCE_STATUSES = ["Open", "Assigned", "In Progress", "Reopened"]
 
-# [#7fqvpy]
+# [#egi9xg]
 _RED_PRIORITIES = {"High", "Critical"}
 
-# [#trwgfo]
+# [#k991sg]
 _DAMAGE_RECENCY_DAYS = 14
 
 
@@ -78,14 +77,14 @@ def get_safety_map(building):
         frappe.db.get_value("Accommodation Building", building, "building_name") or building
     )
 
-    # [#pyw7i4]
+    # [#nl1hpu]
     rooms = frappe.get_all(
         "Accommodation Room",
         filters={"building": building},
         fields=["name", "room_number", "floor", "room_type", "status", "readiness_status"],
     )
 
-    # [#a6pjd1]
+    # [#fhl4fp]
     maint_rows = frappe.get_all(
         "Maintenance Request",
         filters={
@@ -104,7 +103,7 @@ def get_safety_map(building):
         if m.priority in _RED_PRIORITIES:
             agg["has_red"] = True
 
-    # [#1h0fav]
+    # [#koufoz]
     cutoff = add_days(today(), -_DAMAGE_RECENCY_DAYS)
     recent_damage_count = frappe.db.count(
         "Custody Damage Assessment",
@@ -116,7 +115,7 @@ def get_safety_map(building):
     )
     has_recent_damage = bool(recent_damage_count)
 
-    # [#ef2vq8]
+    # [#lmkkjm]
     summary = {"total_rooms": 0, "red": 0, "amber": 0, "green": 0}
     floors_acc: dict = {}
 
@@ -224,7 +223,7 @@ def log_building_inspection(building, floor=None, zone_label=None,
     if not building:
         frappe.throw(_("A building is required to log an inspection."))
 
-    # [#9m9v0f]
+    # [#c53rux]
     scope_bits = []
     if floor:
         scope_bits.append(_("Floor {0}").format(floor))
@@ -236,7 +235,7 @@ def log_building_inspection(building, floor=None, zone_label=None,
     if scope_prefix:
         description = f"{scope_prefix}: {description}"
 
-    # [#gp2754]
+    # [#1xwiff]
     severity = "Low"
     safety_clear = 0
     if overall_result == "Fail":

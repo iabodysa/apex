@@ -1,6 +1,4 @@
-# [#b4hlng]
-# [#6tfpa4]
-# [#92qnpg]
+# [#dvwfff]
 app_name = "apex_habitat"
 app_title = "Apex"
 app_publisher = "AFMCO Support Services Co. Ltd"
@@ -8,28 +6,23 @@ app_description = "Apex — workforce operations suite: Habitat (accommodation &
 app_email = "afm@afmcoltd.com"
 app_license = "MIT"
 
-# [#kk7yf0]
+# [#4d5ed9]
 required_apps = ["frappe", "erpnext", "hrms"]
 
-# [#9m1nu9]
+# [#3n2bsa]
 export_python_type_annotations = True
 
-# [#abcrib]
-# [#c9z8l6]
+# [#9molmh]
 app_include_js = ["masar_worker_link.bundle.js"]
 
-# [#mljwym]
-# [#gx5ils]
-# [#qu7skh]
-# [#muhku4]
-# [#t61jgv]
+# [#dfjden]
 setup_wizard_requires = "assets/apex_habitat/js/apex_setup_wizard.js"
 setup_wizard_complete = "apex_habitat.apex_core.setup.setup_wizard.setup_wizard_complete"
 
 
-# [#pjyorr]
+# [#nc1irs]
 
-# [#j0knn7]
+# [#34xywz]
 doc_events = {
     "Accommodation Site": {},
     "Accommodation Bed": {},
@@ -83,7 +76,7 @@ doc_events = {
     },
     "Custody Article": {},
     "Custody Asset Category": {},
-    # [#k4s7wl]
+    # [#ojl68r]
     "Idle Resident Report": {
         "validate": "apex_habitat.habitat.doctype.idle_resident_report.idle_resident_report.validate",
         "after_insert": "apex_habitat.habitat.doctype.idle_resident_report.idle_resident_report.after_insert",
@@ -114,7 +107,7 @@ doc_events = {
         "validate": "apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financial_depreciation_snapshot.validate",
         "before_cancel": "apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financial_depreciation_snapshot.before_cancel",
     },
-    # [#fc2p7q]
+    # [#i91sa1]
     "Facility Asset": {},
     "Facility Asset Custody Assignment": {},
     "Facility Asset Movement": {
@@ -139,7 +132,7 @@ doc_events = {
         "on_submit": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.on_submit",
         "before_cancel": "apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order.before_cancel",
     },
-    # [#9rv3zv]
+    # [#rt1blm]
     "Scheduled Task Instance": {
         "validate": "apex_habitat.habitat.doctype.scheduled_task_instance.scheduled_task_instance.validate",
         "on_submit": "apex_habitat.habitat.doctype.scheduled_task_instance.scheduled_task_instance.on_submit",
@@ -151,7 +144,7 @@ doc_events = {
     },
 }
 
-# [#hsa89r]
+# [#qjzdot]
 scheduler_events = {
     "daily": [
         "apex_habitat.habitat.tasks.daily_accommodation_cost_allocation",
@@ -162,10 +155,9 @@ scheduler_events = {
         "apex_habitat.habitat.tasks.idle_resident_aging",
         "apex_habitat.habitat.tasks.daily_scheduled_task_instance_generator",
         "apex_habitat.habitat.tasks.daily_occupancy_snapshot",
-        # [#gvuy90]
-        # [#pcj3xk]
+        # [#8d555o]
         "apex_habitat.habitat.temporary_worker_engine.link_temporary_workers",
-        # [#p5yxar]
+        # [#3mjdri]
         "apex_habitat.salis.tasks.driver_license_expiry_watch",
         "apex_habitat.salis.tasks.idle_vehicle_watch",
         "apex_habitat.salis.tasks.unreverted_topup_watch",
@@ -176,9 +168,7 @@ scheduler_events = {
         "apex_habitat.salis.tasks.reconcile_operations_alerts",
         "apex_habitat.salis.fuel_engine.accrue_fuel_consumption",
         "apex_habitat.salis.rental_engine.daily_rental_accrual",
-        # [#5ov0x2]
-        # [#em9ytk]
-        # [#syq0vg]
+        # [#ptjnq1]
         "apex_habitat.apex_core.utils.workflow_utils.cleanup_orphaned_workflow_actions",
     ],
     "weekly": [
@@ -189,42 +179,30 @@ scheduler_events = {
     ],
     "monthly": [
         "apex_habitat.salis.fuel_engine.monthly_fuel_reconciliation",
-        # [#k5fyzy]
-        # [#bx90uq]
-        # [#jsmo1j]
+        # [#payd2f]
         "apex_habitat.salis.rental_engine.monthly_rental_reconciliation",
     ],
 }
 
-# [#pgcxia]
-# [#mlxnu7]
-# [#4wg5xx]
-# [#em3yq2]
-# [#mghecf]
+# [#ow8j67]
 default_log_clearing_doctypes = {
     "Operations Alert": 90,
     "Accommodation Occupancy Snapshot": 365,
     "Vehicle Utilisation Snapshot": 365,
-    # [#p89hok]
-    # [#ttlw7k]
-    # [#hhh2cg]
+    # [#263f83]
     "Non-Financial Depreciation Snapshot": 730,
 }
 
-# [#9cgm64]
+# [#4z2uut]
 override_doctype_dashboards = {
     "Employee": "apex_habitat.habitat.api.employee_links.get_data",
     "Supplier": "apex_habitat.habitat.api.supplier_links.get_data",
 }
 
-# [#eshwew]
-# [#bw7k33]
-# [#ijx3j8]
-# [#tgdflb]
-# [#5ewfhq]
+# [#2pnntm]
 permission_query_conditions = {
     "Maintenance Request": "apex_habitat.habitat.permissions.maintenance_request_query",
-    # [#rkupl9]
+    # [#8oiixt]
     "Accommodation Assignment": "apex_habitat.habitat.permissions.accommodation_assignment_query",
     "Custody Issue": "apex_habitat.habitat.permissions.custody_issue_query",
     "Cleaning Log": "apex_habitat.habitat.permissions.cleaning_log_query",
@@ -235,7 +213,7 @@ permission_query_conditions = {
     "Trip Start Log": "apex_habitat.salis.permissions.trip_start_log_query",
     "Transport Request": "apex_habitat.salis.permissions.transport_request_query",
     "Route Plan": "apex_habitat.salis.permissions.route_plan_query",
-    # [#r3p52p]
+    # [#pq1o3p]
     "Issue": "apex_habitat.salis.permissions.support_ticket_query",
     "Fuel Claim": "apex_habitat.salis.permissions.fuel_claim_query",
     "Fuel Quota": "apex_habitat.salis.permissions.fuel_quota_query",
@@ -247,11 +225,9 @@ permission_query_conditions = {
 }
 
 has_permission = {
-    # [#hwtm5f]
-    # [#3eiuqj]
-    # [#bbzqdw]
+    # [#jgdlwi]
     "Maintenance Request": "apex_habitat.habitat.permissions.maintenance_request_has_permission",
-    # [#6mspex]
+    # [#s6j0i9]
     "Accommodation Assignment": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Custody Issue": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Cleaning Log": "apex_habitat.habitat.permissions.building_scoped_has_permission",
@@ -259,172 +235,74 @@ has_permission = {
     "Vehicle Assignment": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Dispatch Trip": "apex_habitat.salis.permissions.scoped_has_permission",
-    # [#gsmiph]
-    # [#og0l6z]
-    # [#2x69y0]
-    # [#phomll]
+    # [#s72nfj]
     "Trip Start Log": "apex_habitat.salis.permissions.trip_start_log_has_permission",
     "Transport Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Route Plan": "apex_habitat.salis.permissions.scoped_has_permission",
-    # [#r3p52p]
+    # [#pq1o3p]
     "Issue": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Claim": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Quota": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Exception Case": "apex_habitat.salis.permissions.scoped_has_permission",
     "Salis Payment Request": "apex_habitat.salis.permissions.payment_sod_has_permission",
     "Salis Vehicle": "apex_habitat.salis.permissions.scoped_has_permission",
-    # [#11cgi1]
-    # [#eyx9hh]
-    # [#18sr1a]
-    # [#b1ux9z]
-    # [#4cjem3]
-    # [#h64xj0]
+    # [#1v1380]
     "Salis Driver": "apex_habitat.salis.permissions.salis_driver_has_permission",
     "Passenger Manifest": "apex_habitat.salis.permissions.scoped_has_permission",
 }
 
-# [#j2jahj]
-# [#od1fgp]
-# [#mh56eb]
-# [#lq5jvw]
-# [#af8wb0]
-# [#jd7vy0]
-# [#35i126]
+# [#eo76cf]
 fixtures = [
-    # [#4gnzjj]
-    # [#e8ce9w]
-    # [#sz995o]
-    # [#g5fgnw]
-    # [#veb6ya]
+    # [#qzi031]
     {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
-    # [#r96a4x]
+    # [#r86uty]
     {"dt": "Role", "filters": [["name", "in", ["Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
-    # [#520way]
-    # [#7bt0pe]
-    # [#jsfs5k]
-    # [#gev0bm]
-    # [#gdsy32]
-    # [#pabj7t]
-    # [#tggw3r]
-    # [#kfmohf]
-    # [#tbejsi]
-    # [#1ugzrc]
-    # [#gtjbvc]
-    # [#sdjg7g]
-    # [#au3kly]
-    # [#k35fwa]
-    # [#7m6xo8]
-    # [#b7n1ld]
-    # [#ahi4wp]
-    # [#gk151m]
-    # [#hz6fs5]
-    # [#q0og0m]
+    # [#e3f5ip]
     {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Supervisor", "Government Relations Officer"]]]},
-    # [#d4kytf]
-    # [#6v4nh9]
-    # [#qk5d97]
-    # [#2d2duu]
-    # [#4ag5qx]
-    # [#rq1lnx]
+    # [#40ogr7]
 ]
 
-# [#sqws11]
+# [#6mioka]
 after_install = [
     "apex_habitat.setup.after_install",
     "apex_habitat.salis.setup.after_install",
-    # [#4igo0x]
-    # [#1ana8n]
-    # [#n9cbmp]
-    # [#8fz94p]
-    # [#9h5e6a]
-    # [#ajcv1c]
+    # [#imj0oa]
     "apex_habitat.apex_core.setup.seed.seed_all",
-    # [#oja7bv]
-    # [#sdx5lt]
-    # [#6nmzbi]
-    # [#o9ve9s]
-    # [#43lh6e]
-    # [#pz09u4]
-    # [#rb30tj]
-    # [#ewfnmb]
-    # [#8mlxun]
+    # [#kn80cn]
     "apex_habitat.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
-    # [#oy8lk9]
-    # [#q9ipfy]
-    # [#20vkro]
+    # [#917n9u]
     "apex_habitat.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
-    # [#9sa483]
-    # [#hkvjbo]
-    # [#3o2g6u]
-    # [#osm7a2]
+    # [#zy072c]
     "apex_habitat.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
-    # [#cfecy2]
-    # [#iilmc6]
-    # [#d5c5v1]
+    # [#2oqhfm]
     "apex_habitat.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
 ]
 
-# [#j55yx5]
-# [#jreze8]
-# [#azlvia]
-# [#l59eg6]
-# [#ak6ti5]
-# [#qzphva]
-# [#oxcf2t]
+# [#6xge34]
 after_sync = []
-# [#ba50gn]
-# [#l6tdg4]
+# [#dczcal]
 after_migrate = [
-    # [#anrsy5]
-    # [#2xd768]
-    # [#9n0j29]
+    # [#2k7wg7]
     "apex_habitat.apex_core.setup.seed.seed_all",
-    # [#t2h62w]
-    # [#jbc6xu]
-    # [#7sclsj]
-    # [#t0ctoo]
-    # [#qivocy]
-    # [#8afvl8]
-    # [#t99gij]
+    # [#gmne6k]
     "apex_habitat.apex_core.setup.seeders.habitat_auto_email_reports_seed.seed_auto_email_reports",
-    # [#aiw32l]
-    # [#os4xpa]
-    # [#43lh6e]
-    # [#gqvbgy]
-    # [#9jbxb8]
+    # [#5lhe9n]
     "apex_habitat.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
-    # [#fv8m5a]
-    # [#hfitcu]
+    # [#puz3yc]
     "apex_habitat.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
-    # [#svrpde]
-    # [#h4igl2]
-    # [#4g9zu3]
+    # [#mv2xth]
     "apex_habitat.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
-    # [#4o7457]
-    # [#din3u8]
-    # [#4w3tkh]
+    # [#tk37r7]
     "apex_habitat.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
-    # [#4casx8]
-    # [#mty2qp]
-    # [#77175v]
-    # [#4lhwow]
+    # [#hi9721]
     "apex_habitat.patches.v1_0.seed_salis_settings.execute",
-    # [#1kg78y]
-    # [#9jp1cl]
-    # [#ojghh5]
-    # [#odxznc]
-    # [#ak34qe]
-    # [#plmz05]
-    # [#rjgpff]
+    # [#byftwb]
     "apex_habitat.setup.create_roles",
     "apex_habitat.setup.create_role_profiles",
 ]
 
-# [#88aspj]
-# [#ai14rs]
-# [#8fxciq]
-# [#is2g6c]
+# [#10mrjh]
 before_tests = "apex_habitat.tests.before_tests.before_tests"
 
-# [#p8ikte]
+# [#susk3d]
 get_changelog_feed = "apex_habitat.apex_core.utils.changelog.get_changelog_feed"

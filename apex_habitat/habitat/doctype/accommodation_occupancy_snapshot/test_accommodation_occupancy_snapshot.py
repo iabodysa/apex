@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO Support Services Co. Ltd and Contributors
-# [#hbxspc]
+# [#gi2kqa]
 
 import frappe
 from frappe.tests.utils import FrappeTestCase

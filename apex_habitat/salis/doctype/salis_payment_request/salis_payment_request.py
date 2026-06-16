@@ -28,15 +28,13 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now
 
-# [#jtdmq6]
-# [#kukcs1]
+# [#72wj77]
 _FINANCE_ROLES = {"Finance Manager", "System Manager"}
 
-# [#7iq9b1]
+# [#h4c606]
 _FINANCE_GATED_STATUSES = {"Approved by Finance", "Paid"}
 
-# [#lhvvmn]
-# [#et2ykh]
+# [#j18gl5]
 VALID_STATUSES = (
 	"Draft",
 	"Pending Finance",
@@ -53,27 +51,23 @@ class SalisPaymentRequest(Document):
 			self.requested_by = frappe.session.user
 
 	def validate(self):
-		# [#o9cdl2]
-		# [#19hvsf]
-		# [#ryyojr]
+		# [#3b4mlx]
 		if self.status and self.status not in VALID_STATUSES:
 			frappe.throw(_("Invalid status: {0}").format(self.status))
 
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
 		self._set_financial_defaults()
-		# [#pi342z]
-		# [#dlnhxt]
+		# [#lme2on]
 		if (self.amount or 0) <= 0:
 			frappe.throw(_("Amount must be greater than zero."))
-		# [#77g3bp]
-		# [#t10riw]
+		# [#fyykgk]
 		self._guard_finance_stamp()
 		self._enforce_finance_gate()
 
-	# [#9zovur]
+	# [#hbyegp]
 
-	# [#4lslw6]
+	# [#m88md8]
 
 	def _set_financial_defaults(self):
 		"""Default company and cost center from Salis Settings for reporting and
@@ -90,7 +84,7 @@ class SalisPaymentRequest(Document):
 
 	def _old_status(self):
 		previous = self.get_doc_before_save()
-		# [#5zvo3e]
+		# [#mp8kt3]
 		return (previous.status if previous else None) or "Draft"
 
 	def _guard_finance_stamp(self):
@@ -131,12 +125,7 @@ class SalisPaymentRequest(Document):
 				_("You cannot approve or pay a Payment Request you raised; a different Finance approver is required.")
 			)
 
-		# [#q0v84e]
-		# [#41mqaa]
-		# [#ksszgc]
-		# [#e72eh9]
-		# [#bkz9an]
-		# [#qmcqdo]
+		# [#fykrtv]
 		if not self.finance_approved_by:
 			self.finance_approved_by = frappe.session.user
 		if not self.finance_approved_on:

@@ -20,7 +20,7 @@ APP_ROOT = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "..")
 )
 
-# [#qgv4yl]
+# [#21zdiy]
 WRITE_CALLS = {
     "insert",
     "save",
@@ -36,32 +36,14 @@ WRITE_CALLS = {
     "rename_doc",
 }
 
-# [#b79kz2]
-# [#qebnve]
-# [#8w4uyz]
-# [#t31pja]
-# [#ijdcci]
-# [#je41lx]
+# [#tnlcz2]
 SAFE_ALLOWLIST = []
 
 
-# [#lorhza]
-# [#od1fgp]
-# [#hiho29]
-# [#5u5mtv]
-# [#tiajk1]
-# [#j2qeze]
+# [#68gsyt]
 PERMISSION_CALLS = {"has_permission", "check_permission"}
 
-# [#oxb3l2]
-# [#3l0r0x]
-# [#2vt5z6]
-# [#kmywx7]
-# [#kyv1a7]
-# [#od1fgp]
-# [#meszsp]
-# [#q3twrj]
-# [#jvwoyq]
+# [#dha1uj]
 PERMISSION_RECHECK_ALLOWLIST = [
     (
         "habitat/web_form/accommodation_resident_request/accommodation_resident_request.py",
@@ -132,7 +114,7 @@ def _has_write_call(func_node):
     """Return True if the function body contains any recognised write call."""
     for node in ast.walk(func_node):
         if isinstance(node, ast.Call):
-            # [#3veun4]
+            # [#oss4x5]
             if isinstance(node.func, ast.Attribute):
                 if node.func.attr in WRITE_CALLS:
                     return True
@@ -169,7 +151,7 @@ def _is_bare_whitelist(decorator):
     if not isinstance(decorator, ast.Call):
         return False
     func = decorator.func
-    # [#odry0o]
+    # [#s1tia9]
     is_whitelist = (
         (isinstance(func, ast.Attribute) and func.attr == "whitelist")
         or (isinstance(func, ast.Name) and func.id == "whitelist")
@@ -236,8 +218,7 @@ def _collect_permission_violations():
         except SyntaxError:
             continue
 
-        # [#i1u23c]
-        # [#t38u3p]
+        # [#q7g9d0]
         local_funcs = {
             n.name: n
             for n in ast.walk(tree)
@@ -250,8 +231,7 @@ def _collect_permission_violations():
             if not any(_is_whitelisted(d) for d in node.decorator_list):
                 continue
 
-            # [#hrzwy8]
-            # [#i5xvf5]
+            # [#boq4cv]
             writes = _has_write_call(node)
             delegates = _called_local_funcs(node)
             if not writes:
@@ -266,8 +246,7 @@ def _collect_permission_violations():
             if (rel, node.name) in allow_keys:
                 continue
 
-            # [#npp610]
-            # [#q27tr8]
+            # [#a9el4t]
             checked = _has_permission_call(node)
             if not checked:
                 for callee in delegates:
@@ -300,14 +279,14 @@ def _collect_violations():
         for node in ast.walk(tree):
             if not isinstance(node, ast.FunctionDef):
                 continue
-            # [#jimlha]
+            # [#s9nulg]
             bare = [d for d in node.decorator_list if _is_bare_whitelist(d)]
             if not bare:
                 continue
-            # [#ttz163]
+            # [#hz4b3c]
             if not _has_write_call(node):
                 continue
-            # [#h6stsz]
+            # [#9jo2d6]
             if (rel, node.name) in safe_keys:
                 continue
             violations.append((rel, node.name, node.lineno))

@@ -131,8 +131,7 @@ def _notify_finance_on_cost_center_shift(doc):
     if not recipients:
         return
 
-    # [#4dbfxf]
-    # [#eteb4m]
+    # [#d5vtlw]
     from apex_habitat.apex_core.utils.email_gate import email_enabled
     if not email_enabled():
         frappe.logger().info(

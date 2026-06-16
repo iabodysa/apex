@@ -18,7 +18,7 @@ CSRF guard. no_cache is set because the page renders per-user, live data.
 import frappe
 from frappe.sessions import get_csrf_token
 
-# [#qz7g63]
+# [#i6khen]
 FLEET_ROLES = {
     "System Manager",
     "Fleet Manager",
@@ -28,14 +28,13 @@ FLEET_ROLES = {
 
 
 def get_context(context):
-    # [#sm0fgz]
+    # [#nyktq0]
     if frappe.session.user == "Guest":
         frappe.local.flags.redirect_location = "/login?redirect-to=/fleet"
         raise frappe.Redirect
 
     context.no_cache = 1
-    # [#ep2goe]
-    # [#t9r8m3]
+    # [#4h1dwk]
     context.has_fleet_role = bool(FLEET_ROLES & set(frappe.get_roles()))
     if context.has_fleet_role:
         context.csrf_token = get_csrf_token()

@@ -21,7 +21,7 @@ class TestHousingSupervisorScope(FrappeTestCase):
         with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
             P, "_allowed_buildings", return_value=["BLDG-1"]
         ):
-            # [#m7luyx]
+            # [#328ntc]
             cond = P._building_condition(user="sup")
             self.assertIn("BLDG-1", cond)
             self.assertIn("`building`", cond)
@@ -31,14 +31,14 @@ class TestHousingSupervisorScope(FrappeTestCase):
                     frappe._dict(doctype=dt, **kw), "read", user="sup"
                 )
 
-            # [#ja5exi]
+            # [#6wozrv]
             self.assertIsNone(hp("Custody Issue", building="BLDG-1"))
             self.assertFalse(hp("Custody Issue", building="BLDG-2"))
             self.assertIsNone(hp("Accommodation Assignment", building="BLDG-1"))
             self.assertFalse(hp("Cleaning Log", building="BLDG-2"))
-            # [#j2hedt]
+            # [#nz69fx]
             self.assertFalse(hp("Cleaning Log", building=None))
-            # [#7ejbh2]
+            # [#5sn7zx]
             self.assertIsNone(hp("Accommodation Building", name="BLDG-1"))
             self.assertFalse(hp("Accommodation Building", name="BLDG-2"))
 

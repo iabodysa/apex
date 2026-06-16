@@ -1,8 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# [#hlfy1g]
-# [#rf8fpd]
+# [#8evoal]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -67,9 +66,7 @@ class TestSafetyInspectionReport(FrappeTestCase):
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
-    # [#7usew1]
-    # [#3j4llj]
-    # [#7usew1]
+    # [#bd7wcm]
 
     def _ensure_location(self):
         """Create real Accommodation Building + Room records so the Maintenance
@@ -80,17 +77,11 @@ class TestSafetyInspectionReport(FrappeTestCase):
             frappe.get_doc({
                 "doctype": "Accommodation Building",
                 "building_name": "T103-BLDG",
-                # [#83cvs4]
-                # [#20hga2]
+                # [#tm0kvn]
                 "total_capacity": 10,
             }).insert(ignore_permissions=True, ignore_links=True)
         if not frappe.db.exists("Accommodation Room", "T103-ROOM"):
-            # [#miqh4t]
-            # [#sztdd2]
-            # [#41p3kk]
-            # [#mrljlj]
-            # [#g4pkwt]
-            # [#dp2m1s]
+            # [#64yd4v]
             frappe.get_doc({
                 "doctype": "Accommodation Room",
                 "building": "T103-BLDG",
@@ -115,14 +106,14 @@ class TestSafetyInspectionReport(FrappeTestCase):
                 "status": "Open",
             })
         if with_noise:
-            # [#burphn]
+            # [#mlfw3r]
             findings.append({
                 "finding_category": "General",
                 "description": "Observation only, no ticket",
                 "room": room,
                 "status": "Open",
             })
-            # [#ngnlfz]
+            # [#53hh0m]
             findings.append({
                 "finding_category": "Maintenance",
                 "description": "Already fixed on the spot",
@@ -144,9 +135,7 @@ class TestSafetyInspectionReport(FrappeTestCase):
                                  filters={"source_inspection": report_name}, pluck="name"):
             frappe.delete_doc("Maintenance Request", mr, force=True, ignore_permissions=True)
         if frappe.db.exists("Safety Inspection Report", report_name):
-            # [#38b52p]
-            # [#9ont8q]
-            # [#arhbzb]
+            # [#if0ax8]
             report = frappe.get_doc("Safety Inspection Report", report_name)
             if report.docstatus == 1:
                 report.cancel()
@@ -169,7 +158,7 @@ class TestSafetyInspectionReport(FrappeTestCase):
                 filters={"source_inspection": report.name},
                 fields=["name", "room", "building", "issue_type", "priority"],
             )
-            # [#i947cd]
+            # [#2xwysp]
             self.assertEqual(len(mrs), n,
                              f"expected {n} Maintenance Requests, got {len(mrs)}")
             for mr in mrs:
@@ -178,20 +167,18 @@ class TestSafetyInspectionReport(FrappeTestCase):
                 self.assertEqual(mr.issue_type, "Plumbing")
                 self.assertEqual(mr.priority, "High")
 
-            # [#qg5czv]
+            # [#5fy3ci]
             report.reload()
             self.assertEqual(len(report.linked_maintenance_requests), n)
             surfaced = {r.maintenance_request for r in report.linked_maintenance_requests}
             self.assertEqual(surfaced, {m.name for m in mrs})
 
-            # [#fb4yhn]
+            # [#578w7r]
             linked_findings = [f for f in report.safety_findings
                                if f.generated_maintenance_request]
             self.assertEqual(len(linked_findings), n)
 
-            # [#heq76w]
-            # [#aznyse]
-            # [#lytunr]
+            # [#ghcv4q]
             report.generate_maintenance_requests()
             mrs_after = frappe.get_all("Maintenance Request",
                                        filters={"source_inspection": report.name}, pluck="name")

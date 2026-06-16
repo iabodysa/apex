@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 from collections import defaultdict
 
@@ -139,9 +139,7 @@ def _maintenance(building_names):
         fields=["building", "status"],
     )
     for r in rows:
-        # [#ppkdxt]
-        # [#gmpywp]
-        # [#l9q32y]
+        # [#470524]
         if r.status in ("Open", "In Progress", "Assigned", "Reopened"):
             result[r.building]["open"] += 1
         elif r.status in ("Resolved", "Closed"):

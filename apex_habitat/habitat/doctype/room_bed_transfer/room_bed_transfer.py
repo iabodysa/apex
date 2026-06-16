@@ -29,33 +29,26 @@ def validate(doc, method=None):
     elif bed_status == "Occupied":
         frappe.throw(_("Target bed is already occupied."))
 
-    # [#aded21]
+    # [#fylvr5]
     bed_room = frappe.db.get_value("Accommodation Bed", doc.to_bed, "room")
     if bed_room is not None and bed_room != doc.to_room:
         frappe.throw(_("Target Bed {0} does not belong to Room {1}").format(doc.to_bed, doc.to_room))
 
-    # [#ljls64]
-    # [#mh6t7o]
-    # [#o6882o]
+    # [#c91vez]
     to_building = frappe.db.get_value("Accommodation Room", doc.to_room, "building")
     if to_building is not None and not to_building:
         frappe.throw(_("Target Room {0} is not associated with any Building.").format(doc.to_room))
 
 
 def on_submit(doc, method=None):
-    # [#o6c8i6]
-    # [#m6sbrx]
-    # [#jte9tq]
+    # [#lfwp8g]
     asg = frappe.db.get_value(
         "Accommodation Assignment", doc.assignment, ["docstatus", "check_out_date"], as_dict=True
     )
     if not asg or asg.docstatus != 1 or asg.check_out_date:
         frappe.throw(_("This transfer needs an active (checked-in) assignment to move."))
 
-    # [#ciab8g]
-    # [#ghxtrn]
-    # [#mey7v8]
-    # [#qe742a]
+    # [#hzjmc4]
     locked_status = frappe.db.get_value("Accommodation Bed", doc.to_bed, "status", for_update=True)
     if locked_status == "Out of Service":
         frappe.throw(_("Target Bed {0} is Out of Service.").format(doc.to_bed))

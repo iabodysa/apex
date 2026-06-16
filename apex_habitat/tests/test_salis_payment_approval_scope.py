@@ -99,17 +99,14 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
         frappe.set_user("Administrator")
         cls.pa = _project("PayScope A")
         cls.pb = _project("PayScope B")
-        # [#kon5mb]
+        # [#l2h06o]
         cls.sup = _user("payscope_sup@example.com", "Fleet Supervisor")
         _grant_project(cls.sup, cls.pa)
-        # [#389vnd]
+        # [#kcdzz9]
         cls.mgr = _user("payscope_mgr@example.com", "Fleet Manager")
         cls.pr_a = _payment_request(cls.pa)
         cls.pr_b = _payment_request(cls.pb)
-        # [#tqqoiz]
-        # [#soj79k]
-        # [#tt42sb]
-        # [#7qqlyn]
+        # [#de2xh6]
         cls.pr_null = _payment_request(None)
 
     @classmethod
@@ -124,7 +121,7 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # [#k58svw]
+    # [#qtdiyw]
     def test_list_excludes_projectless_for_scoped_user(self):
         """The true leak: a project-less row must NOT appear for a scoped user."""
         frappe.set_user(self.sup)
@@ -137,7 +134,7 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
             names,
             "scoped supervisor must NOT see a project-less payment request",
         )
-        # [#cbxl5n]
+        # [#tvl2kx]
         self.assertNotIn(self.pr_b.name, names)
 
     def test_unscoped_manager_lists_all_projects(self):
@@ -149,7 +146,7 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
             self.pr_null.name, names, "oversight role must still see project-less rows"
         )
 
-    # [#4u27j7]
+    # [#tky317]
     def test_doc_read_allowed_in_scope(self):
         frappe.set_user(self.sup)
         doc = frappe.get_doc("Salis Payment Request", self.pr_a.name)
@@ -157,8 +154,7 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
 
     def test_doc_read_denied_projectless(self):
         frappe.set_user(self.sup)
-        # [#8y66o9]
-        # [#2xj456]
+        # [#oe9n6y]
         self.assertFalse(
             payment_sod_has_permission(
                 frappe.get_doc("Salis Payment Request", self.pr_null.name),
@@ -215,10 +211,10 @@ class TestScopingDoesNotWeakenSoD(FrappeTestCase):
         super().setUpClass()
         frappe.set_user("Administrator")
         cls.pa = _project("SoDScope A")
-        # [#kkf85o]
+        # [#a5dp4c]
         cls.requester = _user("sod_pm@example.com", "Fleet Project Manager")
         _grant_project(cls.requester, cls.pa)
-        # [#8dptks]
+        # [#ge4s2o]
         cls.other = _user("sod_pm_other@example.com", "Fleet Project Manager")
         _grant_project(cls.other, cls.pa)
 
@@ -237,7 +233,7 @@ class TestScopingDoesNotWeakenSoD(FrappeTestCase):
         )
 
     def test_payment_self_approval_still_blocked_in_scope(self):
-        # [#4sze5h]
+        # [#4tkf3q]
         doc = self._payment_doc("Approved by Finance", requested_by=self.requester)
         self.assertFalse(
             payment_sod_has_permission(doc, "submit", user=self.requester),

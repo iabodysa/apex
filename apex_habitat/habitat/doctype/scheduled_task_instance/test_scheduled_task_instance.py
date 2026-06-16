@@ -1,8 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# [#hlfy1g]
-# [#rf8fpd]
+# [#8evoal]
 test_ignore = [
     "Additional Salary",
     "Asset",

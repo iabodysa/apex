@@ -104,8 +104,7 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
 
     unscoped, projects = _permitted_projects()
 
-    # [#dexv1m]
-    # [#td1m9f]
+    # [#li9kuz]
     if project:
         if unscoped:
             projects = [project]
@@ -113,10 +112,10 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
         elif project in (projects or []):
             projects = [project]
         else:
-            # [#7snhxd]
+            # [#5unc6e]
             return []
 
-    # [#mzzcxc]
+    # [#mv655w]
     if not unscoped and not projects:
         return []
 
@@ -145,7 +144,7 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
     if not rows:
         return []
 
-    # [#a5510z]
+    # [#ooth66]
     vehicle_names = list({r.vehicle for r in rows if r.vehicle})
     driver_names = list({r.driver for r in rows if r.driver})
 
@@ -229,8 +228,7 @@ def approve_fuel_request(name: str) -> dict:
 
     apply_workflow(doc, "Approve")
 
-    # [#nh3zuj]
-    # [#kzt3ec]
+    # [#rlur7z]
     return {"name": doc.name, "status": doc.status}
 
 
@@ -272,5 +270,5 @@ def reject_fuel_request(name: str, reason: str | None = None) -> dict:
     if reason:
         doc.add_comment("Comment", _("Rejected: {0}").format(reason))
 
-    # [#492bey]
+    # [#6u3gy4]
     return {"name": doc.name, "status": doc.status}

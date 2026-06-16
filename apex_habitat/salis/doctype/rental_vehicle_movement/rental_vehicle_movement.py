@@ -36,8 +36,7 @@ class RentalVehicleMovement(Document):
             frappe.throw(_("Daily Rate cannot be negative."))
 
     def on_submit(self):
-        # [#czfkoc]
-        # [#8jahxk]
+        # [#3lgl85]
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,

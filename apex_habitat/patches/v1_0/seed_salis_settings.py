@@ -19,20 +19,20 @@ DEFAULTS = {
 
 def execute():
     try:
-        # [#6q95mw]
+        # [#4xotau]
         if not frappe.db.exists("DocType", "Salis Settings"):
             return
 
         settings = frappe.get_single("Salis Settings")
         changed = False
 
-        # [#gxo0m2]
+        # [#762qa4]
         for field, value in DEFAULTS.items():
             if settings.meta.has_field(field) and not settings.get(field):
                 settings.set(field, value)
                 changed = True
 
-        # [#8od6b3]
+        # [#qw32de]
         if settings.meta.has_field("default_company") and not settings.get(
             "default_company"
         ):
@@ -41,7 +41,7 @@ def execute():
                 settings.default_company = companies[0]
                 changed = True
 
-        # [#4ooxdd]
+        # [#skud6a]
         if settings.meta.has_field("default_cost_center") and not settings.get(
             "default_cost_center"
         ):
@@ -59,7 +59,7 @@ def execute():
             settings.save(ignore_permissions=True)  # audit-ok
             frappe.db.commit()
     except Exception:
-        # [#kzfk4g]
+        # [#r786tj]
         frappe.db.rollback()
         frappe.log_error(
             title="seed_salis_settings failed",

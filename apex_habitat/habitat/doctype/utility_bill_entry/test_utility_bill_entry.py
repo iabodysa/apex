@@ -1,8 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# [#hlfy1g]
-# [#rf8fpd]
+# [#8evoal]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -61,7 +60,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
 
-    # [#is5nbc]
+    # [#elxeu9]
     def _bill(self, **kw):
         base = {
             "doctype": "Utility Bill Entry", "naming_series": "UTIL-BILL-.YYYY.-.#####",
@@ -86,8 +85,8 @@ class TestUtilityBillEntry(FrappeTestCase):
         m = frappe.generate_hash(length=6)
         first = self._bill(company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m)
         first.insert(ignore_permissions=True, ignore_links=True)
-        # [#ngobji]
+        # [#hottg0]
         validate(self._bill(company="QA-CO-" + m, building="QA-BLD-2", utility_account="ACC-" + m))
-        # [#ph03g4]
+        # [#s61pik]
         validate(self._bill(company="QA-CO-OTHER-" + m, building="QA-BLD-1", utility_account="ACC-" + m))
         frappe.delete_doc("Utility Bill Entry", first.name, force=True, ignore_permissions=True)

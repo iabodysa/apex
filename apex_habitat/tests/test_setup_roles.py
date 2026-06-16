@@ -87,7 +87,7 @@ class TestCreateRolesList(unittest.TestCase):
         )
 
     def test_total_role_count(self):
-        # [#imonrc]
+        # [#3tgwn1]
         self.assertEqual(len(self.roles), 8)
 
 
@@ -131,8 +131,7 @@ class TestCreateRoleProfilesDict(unittest.TestCase):
             )
 
     def test_no_duplicate_profile_names(self):
-        # [#clgig7]
-        # [#nfpezh]
+        # [#4osqz9]
         import apex_habitat.setup as setup_mod
 
         tree = ast.parse(inspect.getsource(setup_mod.create_role_profiles))

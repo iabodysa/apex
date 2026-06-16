@@ -52,7 +52,7 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         }).insert(ignore_permissions=True).name
 
     def test_supplier_propagation_and_report_markup(self):
-        # [#nf2ofu]
+        # [#3orr8w]
         a = frappe.get_doc({
             "doctype": "Accommodation Assignment", "employee": self.employee, "project": self.project,
             "cost_center": self.cost_center, "building": self.building.name, "room": self.room,
@@ -62,17 +62,16 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         a.insert(ignore_permissions=True)
         a.submit()
 
-        # [#4gb2gz]
+        # [#phnc3g]
         settings = frappe.get_single("Habitat Settings")
         settings.enable_supplier_markup = 1
         settings.supplier_markup_percent = 5.0
         settings.save(ignore_permissions=True)
 
-        # [#8dbl2q]
-        # [#s935ec]
+        # [#p0kcvu]
         allocate_building_accommodation_cost(self.building.name)
 
-        # [#jqzege]
+        # [#bb1xf4]
         rows = frappe.get_all("Accommodation Ledger",
                               filters={"assignment": a.name},
                               fields=["billed_to_supplier", "employee_daily_share"])
@@ -82,7 +81,7 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         base = flt(sum(flt(r.employee_daily_share) for r in rows), 2)
         self.assertGreater(base, 0, "expected a non-zero daily share from annual_rent")
 
-        # [#5mu81k]
+        # [#lul8o8]
         today = getdate()
         columns, data = execute({"month": today.month, "year": today.year, "supplier": self.supplier})
         mine = [d for d in data if d["billed_to_supplier"] == self.supplier and d["employee"] == self.employee]
@@ -94,9 +93,7 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         self.assertAlmostEqual(row["total_deduction"], flt(base + base * 0.05, 2), places=2)
 
     def test_dispatcher_enqueues_per_building(self):
-        # [#fmb537]
-        # [#bcaty6]
-        # [#7o0j17]
+        # [#ds1v02]
         from unittest.mock import patch
 
         a = frappe.get_doc({

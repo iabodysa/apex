@@ -30,8 +30,7 @@ class TestDriverPortalDisabledFlag(FrappeTestCase):
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 0)
 
 	def tearDown(self):
-		# [#qi25ie]
-		# [#6xamt0]
+		# [#836nbx]
 		frappe.set_user("Administrator")
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
 

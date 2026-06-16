@@ -29,23 +29,14 @@ from frappe.utils import getdate, today
 from apex_habitat.salis.api.dispatch_board import _permitted_projects
 from apex_habitat.salis.utils import lock_driver, lock_vehicle
 
-# [#9tkuh4]
-# [#fo1z63]
-# [#65j7is]
-# [#kgimnt]
-# [#5aqx9y]
-# [#5kmolk]
-# [#5pzdlz]
+# [#mqc6q1]
 _STATUS_MAP = {
     "Stopped": "stopped",
     "Under Maintenance": "workshop",
     "Released": "stopped",
 }
 
-# [#lf7qyr]
-# [#oqa9r6]
-# [#e27bhs]
-# [#evgxmo]
+# [#90ru7b]
 _STOP_REASON_MAP = {
     "maintenance": "Maintenance",
     "rental return": "Rental Return",
@@ -67,8 +58,7 @@ def _sheet_for(category: str | None) -> str:
     if not category:
         return "CAR"
     upper = category.upper()
-    # [#7ur0k1]
-    # [#fry5w7]
+    # [#8m3t6n]
     if any(tok in upper for tok in ("MOTOR", "BIKE", "SCOOTER", "\u062f\u0628\u0627\u0628", "\u062f\u0631\u0627\u062c")):
         return "MOTORCYCLE"
     return "CAR"
@@ -92,9 +82,7 @@ def _resolve_plate(plate: str) -> str:
     return name
 
 
-# [#mdc0uu]
-# [#bfnq27]
-# [#mdc0uu]
+# [#tnn6ln]
 @frappe.whitelist()
 def get_fleet_os():
     """Return the full fleet in the design's exact shape (a ``vehicles`` list).
@@ -104,9 +92,7 @@ def get_fleet_os():
     fuel lookup).
     """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
-    # [#jtpjlv]
-    # [#hjzryw]
-    # [#fjxbcn]
+    # [#8178ig]
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
     unscoped, projects = _permitted_projects()
     if not unscoped and not projects:
@@ -126,7 +112,7 @@ def get_fleet_os():
     if not vehicles:
         return {"vehicles": []}
 
-    # [#kgmpae]
+    # [#f8i05f]
     cat_names = list({v.vehicle_category for v in vehicles if v.get("vehicle_category")})
     cat_fuel: dict[str, str] = {}
     if cat_names:
@@ -137,10 +123,10 @@ def get_fleet_os():
         ):
             cat_fuel[c.name] = (c.default_fuel_type or "").upper()
 
-    # [#ntmduq]
+    # [#ev30tz]
     driver_names = {v.current_driver for v in vehicles if v.get("current_driver")}
 
-    # [#qiund2]
+    # [#nfkzsx]
     plates = [v.name for v in vehicles]
     assignments = frappe.get_all(
         "Vehicle Assignment",
@@ -166,7 +152,7 @@ def get_fleet_os():
     history_by_vehicle: dict[str, list] = {}
     for a in assignments:
         d = drivers.get(a.driver) or {}
-        # [#2lg9p3]
+        # [#cpmrad]
         is_active = a.status == "Active" and a.docstatus == 1 and not a.end_date
         history_by_vehicle.setdefault(a.vehicle, []).append({
             "driver_id": ((d.get("driver_id") or a.driver or "") if show_pii else ""),
@@ -188,11 +174,7 @@ def get_fleet_os():
     for v in vehicles:
         cd = None
         if v.get("current_driver"):
-            # [#jhe847]
-            # [#8srfq8]
-            # [#gmlv5i]
-            # [#56ra6u]
-            # [#f27432]
+            # [#8sgfo9]
             hist = history_by_vehicle.get(v.name, [])
             active = next((h for h in hist if h.get("status") == "Active" and not h.get("date_deliver")), None)
             if active:
@@ -219,7 +201,7 @@ def get_fleet_os():
             "workshop_date": "",
             "current_driver": cd,
             "history": history_by_vehicle.get(v.name, []),
-            # [#9g1sfn]
+            # [#a3imrv]
             "damages": [],
             "accidents": [],
             "stolen_info": None,
@@ -229,9 +211,7 @@ def get_fleet_os():
     return {"vehicles": out}
 
 
-# [#mdc0uu]
-# [#kcvqbz]
-# [#mdc0uu]
+# [#76c7tt]
 @frappe.whitelist(methods=["POST"])
 def reassign(plate, driver_id, date=None):
     """Assign a driver to a vehicle by creating a submitted Vehicle Assignment.
@@ -251,16 +231,14 @@ def reassign(plate, driver_id, date=None):
         driver = driver_id
     if not driver:
         frappe.throw(_("Driver {0} not found.").format(driver_id))
-    # [#doark9]
-    # [#2znemb]
-    # [#rv4edb]
+    # [#cs6rw5]
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
     lock_vehicle(vehicle)
     lock_driver(driver)
 
     start = getdate(date) if date else getdate(today())
 
-    # [#gtecq9]
+    # [#i6xasc]
     open_rows = frappe.get_all(
         "Vehicle Assignment",
         filters={"vehicle": vehicle, "status": "Active", "docstatus": 1},
@@ -278,8 +256,7 @@ def reassign(plate, driver_id, date=None):
         "status": "Active",
     })
     doc.insert()
-    # [#pt7ksd]
-    # [#njnkmw]
+    # [#ica9oh]
     doc.submit()
 
     frappe.db.set_value("Salis Vehicle", vehicle, "current_driver", driver)
@@ -312,7 +289,7 @@ def stop_vehicle(plate, reason=None):
     doc.insert()
     doc.submit()  # [#mx3ts3]
 
-    # [#9hy3v4]
+    # [#q5vodj]
     if current_driver:
         for r in frappe.get_all(
             "Vehicle Assignment",

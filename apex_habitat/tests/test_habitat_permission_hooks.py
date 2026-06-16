@@ -63,8 +63,7 @@ class TestMaintenanceRequestScopingWiring(unittest.TestCase):
         self.assertTrue(callable(maintenance_request_has_permission))
 
     def test_doc_events_before_save_left_intact(self):
-        # [#ai2tjh]
-        # [#kotkqq]
+        # [#l5c86z]
         self.assertEqual(
             self.hooks.doc_events["Maintenance Request"]["before_save"],
             "apex_habitat.habitat.doctype.maintenance_request."
@@ -100,7 +99,7 @@ class TestNewRoleFixture(unittest.TestCase):
             if not (isinstance(entry, dict) and entry.get("dt") == "Role"):
                 continue
             for flt in entry.get("filters", []) or []:
-                # [#k3e8bz]
+                # [#hiejf5]
                 if (
                     isinstance(flt, (list, tuple))
                     and len(flt) == 3
@@ -127,9 +126,7 @@ class TestNewRoleFixture(unittest.TestCase):
         )
 
     def test_new_role_fixture_is_complementary_not_merged(self):
-        # [#r6fy0j]
-        # [#bhclxg]
-        # [#67m0a3]
+        # [#j4kye3]
         sets = self._role_filter_sets()
         self.assertNotIn(
             self.NEW_ROLES | self.EXISTING_HABITAT_ROLES,
@@ -139,8 +136,7 @@ class TestNewRoleFixture(unittest.TestCase):
         )
 
     def test_no_new_role_clobbers_a_native_role(self):
-        # [#487lli]
-        # [#gy42k0]
+        # [#175v0x]
         native = {
             "Employee",
             "HR Manager",

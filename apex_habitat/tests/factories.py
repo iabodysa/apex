@@ -7,8 +7,7 @@ Usage:
 from __future__ import annotations
 import frappe
 
-# [#hlfy1g]
-# [#rf8fpd]
+# [#8evoal]
 test_ignore = [
     "Additional Salary",
     "Asset",

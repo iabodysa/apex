@@ -1,17 +1,13 @@
 import frappe
 
-# [#jr7ble]
-# [#rgirz5]
-# [#mpecqz]
-# [#f8gg08]
+# [#eapxvv]
 _REPRESENTATIVES = "Representatives"
 _WORKERS = "Workers"
 _ADMINISTRATIVE_TRIP = "Administrative Trip"
 _INTER_CITY_RELOCATION = "Inter-City Relocation"
 _SITE_TRANSPORT = "Site Transport"
 
-# [#4cmbpo]
-# [#9lgjdr]
+# [#73g7i7]
 _INTER_CITY_REQUEST_TYPE = "Inter-City Relocation"
 
 
@@ -35,8 +31,7 @@ def execute():
     if not frappe.db.table_exists("Transport Request"):
         return
 
-    # [#af3497]
-    # [#acfh7u]
+    # [#nkgab9]
     legacy_rows = frappe.db.get_all(
         "Transport Request",
         filters={"service_line": ["in", [_WORKERS, _REPRESENTATIVES]]},
@@ -52,8 +47,7 @@ def execute():
             new_value = _INTER_CITY_RELOCATION
         else:
             new_value = _SITE_TRANSPORT
-        # [#l9lhsv]
-        # [#5awofw]
+        # [#m4p8nq]
         frappe.db.set_value(
             "Transport Request",
             row.name,

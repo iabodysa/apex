@@ -19,7 +19,7 @@ class VehicleStop(Document):
             self.ownership_at_stop = frappe.db.get_value("Salis Vehicle", self.vehicle, "ownership")
 
     def before_submit(self):
-        # [#ku7cqs]
+        # [#rx155z]
         if self.stop_reason in ("Accident", "Violation") and not self.evidence:
             frappe.throw(
                 _("Evidence is required to submit a stop with reason {0}.").format(_(self.stop_reason))
@@ -28,7 +28,7 @@ class VehicleStop(Document):
     def on_submit(self):
         lock_vehicle(self.vehicle)
 
-        # [#bp5wlg]
+        # [#td8oap]
         self.db_set("previous_status", frappe.db.get_value("Salis Vehicle", self.vehicle, "status"))
 
         frappe.db.set_value("Salis Vehicle", self.vehicle, "status", "Stopped")
@@ -43,11 +43,7 @@ class VehicleStop(Document):
     def on_cancel(self):
         lock_vehicle(self.vehicle)
 
-        # [#r0a24i]
-        # [#iodhu1]
-        # [#r47amw]
-        # [#cn2wtu]
-        # [#d0gbu0]
+        # [#rmv8rq]
         another_stop_in_force = frappe.db.exists(
             "Vehicle Stop",
             {"vehicle": self.vehicle, "docstatus": 1, "name": ["!=", self.name]},

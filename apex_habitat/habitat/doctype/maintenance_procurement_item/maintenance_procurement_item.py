@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# [#m4uz3c]
+# [#j03s5a]
 
 from frappe.model.document import Document
 

@@ -5,10 +5,7 @@ only on that driver's records; the client never supplies the driver id."""
 import frappe
 from frappe import _
 
-# [#hwcpol]
-# [#bwtavl]
-# [#sjjo1m]
-# [#e3hbs8]
+# [#g14lmr]
 STAFF_ROLES = (
 	"Fleet Manager",
 	"Fleet Project Manager",
@@ -69,20 +66,20 @@ def _staff_links(user=None):
 	roles = set(frappe.get_roles(user))
 	links = []
 
-	# [#lprxhy]
+	# [#9qndfi]
 	if user == "Administrator" or roles & set(STAFF_ROLES):
 		links.append({"label": "Salis Workspace", "url": "/app/salis"})
 
-	# [#gqu67m]
+	# [#8ubj1y]
 	dispatch_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Fleet Supervisor"}
 	if user == "Administrator" or roles & dispatch_roles:
 		links.append({"label": "Dispatch Board", "url": "/app/salis-dispatch-board"})
 
-	# [#6wnlp4]
+	# [#cd8prs]
 	if frappe.has_permission("Transport Request", "read", user=user):
 		links.append({"label": "Transport Requests", "url": "/app/transport-request"})
 
-	# [#lu946y]
+	# [#mpoxzg]
 	fuel_roles = {"System Manager", "Fleet Manager", "Fleet Project Manager", "Finance Manager"}
 	if user == "Administrator" or roles & fuel_roles:
 		links.append({"label": "Fuel Approval Console", "url": "/app/fuel-approval-console"})
@@ -107,7 +104,7 @@ def get_driver_context():
 	bare error. Action endpoints remain strictly driver-scoped (unchanged)."""
 	user = frappe.session.user
 	if not _portal_enabled():
-		# [#5i4l5k]
+		# [#p6q8jd]
 		staff = _is_staff(user)
 		return {
 			"enabled": False,
@@ -133,9 +130,7 @@ def get_driver_context():
 		["name", "full_name", "status", "current_vehicle", "license_expiry"],
 		as_dict=True,
 	)
-	# [#pr5ip2]
-	# [#3qlhn1]
-	# [#n2an9e]
+	# [#1grmf3]
 	if d and d.get("license_expiry"):
 		d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
 	return {"enabled": True, "linked": True, "driver": d}
@@ -178,7 +173,7 @@ def get_my_vehicle():
 	vehicle = frappe.db.get_value("Salis Driver", driver, "current_vehicle")
 	assignment = None
 	if not vehicle:
-		# [#5pin6i]
+		# [#n00nxa]
 		assignment = frappe.db.get_value(
 			"Vehicle Assignment",
 			{"driver": driver, "status": "Active"},
@@ -197,9 +192,7 @@ def get_my_vehicle():
 		as_dict=True,
 	) or {}
 
-	# [#mhdkx4]
-	# [#lu2zhh]
-	# [#nkqese]
+	# [#kcrj1g]
 	if assignment is None:
 		assignment = frappe.db.get_value(
 			"Vehicle Assignment",
@@ -374,8 +367,7 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 	vehicle = vehicle or frappe.db.get_value("Salis Driver", driver, "current_vehicle")
 	if not vehicle:
 		frappe.throw(_("No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel."))
-	# [#b0uhw7]
-	# [#p28734]
+	# [#c6nmir]
 	if not _vehicle_bound_to_driver(driver, vehicle):
 		frappe.throw(
 			_("That vehicle is not assigned to you. You can only request fuel for your own vehicle."),
@@ -427,8 +419,7 @@ def raise_support_ticket(category, priority, subject, description):
 		"description": description,
 		"status": "Open",
 	}
-	# [#avcj71]
-	# [#e0dia3]
+	# [#3u8b90]
 	if category and frappe.db.exists("Issue Type", category):
 		data["issue_type"] = category
 	if priority and frappe.db.exists("Issue Priority", priority):

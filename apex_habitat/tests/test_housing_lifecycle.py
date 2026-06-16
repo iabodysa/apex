@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 import frappe
 from frappe.utils import getdate
@@ -8,7 +8,7 @@ from apex_habitat.tests.test_utils import ApexHabitatTestCase
 
 class TestHousingLifecycle(ApexHabitatTestCase):
     def setUp(self):
-        # [#bvxtum]
+        # [#2uh11u]
         self.company = frappe.db.get_value("Company", {})
         if not self.company:
             comp = frappe.get_doc({
@@ -47,13 +47,10 @@ class TestHousingLifecycle(ApexHabitatTestCase):
             emp.insert(ignore_permissions=True)
             self.employee = emp.name
 
-        # [#21sbee]
+        # [#g3uw2u]
         self.cost_center = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0}) or frappe.db.get_value("Cost Center", {})
 
-        # [#9onmh1]
-        # [#o6vu7h]
-        # [#i1fy31]
-        # [#hqat11]
+        # [#2ky77n]
         suffix = frappe.generate_hash(length=6)
         self.site = frappe.get_doc({
             "doctype": "Accommodation Site",
@@ -88,7 +85,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         self.bed.insert(ignore_permissions=True)
 
     def test_checkout_preserves_assignment_history(self):
-        # [#td5i9g]
+        # [#roaq7a]
         assignment = frappe.get_doc({
             "doctype": "Accommodation Assignment",
             "employee": self.employee,
@@ -106,7 +103,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         self.assertEqual(assignment.docstatus, 1)
         self.assertIsNone(assignment.check_out_date)
 
-        # [#1hzu0q]
+        # [#rp84s0]
         checkout = frappe.get_doc({
             "doctype": "Accommodation Checkout",
             "assignment": assignment.name,
@@ -116,12 +113,12 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         checkout.insert(ignore_permissions=True)
         checkout.submit()
 
-        # [#aa8pto]
+        # [#nc32kn]
         assignment.reload()
         self.assertEqual(getdate(assignment.check_out_date), getdate("2026-05-21"))
         self.assertEqual(assignment.docstatus, 1, "Assignment should not be cancelled (docstatus 2) on checkout; history should be preserved.")
         
-        # [#50duww]
+        # [#me5am6]
         self.assertEqual(frappe.db.get_value("Accommodation Bed", self.bed.name, "status"), "Available")
 
     def test_checkout_pending_clearance_resolves_employee_name(self):
@@ -145,7 +142,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         assignment.insert(ignore_permissions=True)
         assignment.submit()
 
-        # [#dkodzn]
+        # [#b1tocv]
         checkout = frappe.get_doc({
             "doctype": "Accommodation Checkout",
             "assignment": assignment.name,

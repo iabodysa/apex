@@ -1,8 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# [#hlfy1g]
-# [#rf8fpd]
+# [#8evoal]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -61,11 +60,7 @@ class TestFacilityAssetMovement(FrappeTestCase):
             validate(doc)
 
     def test_intercompany_detected_in_validate_enforces_gate(self):
-        # [#qsfebp]
-        # [#h7lbmj]
-        # [#ol3anl]
-        # [#p3oz76]
-        # [#9v2lzx]
+        # [#18ae8f]
         from apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement import validate
 
         doc = frappe.get_doc({
@@ -76,7 +71,7 @@ class TestFacilityAssetMovement(FrappeTestCase):
             "to_building": "BLDG-B",
             "from_company": "Company X",
             "to_company": "Company Y",
-            # [#36d9d2]
+            # [#tf8rdy]
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)

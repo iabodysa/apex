@@ -36,8 +36,7 @@ def validate(doc, method=None):
     if not (0 <= share <= 100):
         frappe.throw(_("Utility Cost Share must be between 0 and 100."))
 
-    # [#a8j0ea]
-    # [#sl5dlp]
+    # [#i29e7n]
     if doc.building and doc.lease_start_date and doc.lease_end_date:
         conflict = frappe.db.exists(
             "Accommodation Lease",
@@ -87,8 +86,7 @@ def _build_schedule(doc):
 def regenerate_schedule(name):
     """Force-rebuild the payment schedule (clears existing rows)."""
     doc = frappe.get_doc("Accommodation Lease", name)
-    # [#3pod0h]
-    # [#hi8ipb]
+    # [#eu1e7a]
     frappe.has_permission("Accommodation Lease", "write", doc=doc, throw=True)
 
     if doc.docstatus != 0:

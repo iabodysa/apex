@@ -19,7 +19,7 @@ class TestMaterialTemplateCoverage(ApexHabitatTestCase):
         issue_field = meta.get_field("issue_type")
         options = [o.strip() for o in (issue_field.options or "").split("\n") if o.strip()]
 
-        # [#a7c6g4]
+        # [#eqixfg]
         expected = [o for o in options if o != "Other"]
         self.assertTrue(expected, "no issue_type options found")
 

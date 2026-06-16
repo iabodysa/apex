@@ -55,18 +55,14 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # [#8s010i]
+        # [#ev7ecg]
         cls.maker = _user("pr_maker@example.com", "Fleet Project Manager")
         cls.manager = _user("pr_mgr@example.com", "Fleet Manager")
         cls.finance = _user("pr_fin@example.com", "Finance Manager")
-        # [#keqcsv]
-        # [#219xf9]
+        # [#qov9sz]
         cls.finance_maker = _user("pr_finmaker@example.com", "Finance Manager")
         frappe.get_doc("User", cls.finance_maker).add_roles("Fleet Project Manager")
-        # [#lzfsbs]
-        # [#5cqzvq]
-        # [#trh25z]
-        # [#r845yv]
+        # [#djtbkz]
         cls.project = cls._project("PR Workflow Project")
         for u in (cls.maker, cls.finance_maker):
             cls._grant_project(u, cls.project)
@@ -131,7 +127,7 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         pr.reload()
         return pr
 
-    # [#8rmafi]
+    # [#6regdy]
 
     def test_legal_submit_then_approve_submits(self):
         pr = self._new_request()
@@ -144,44 +140,44 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         self.assertEqual(pr.status, "Pending Finance")
         self.assertEqual(pr.docstatus, 0)
 
-        # [#tvv1dk]
+        # [#b002ev]
         frappe.set_user(self.finance)
         self.assertIn("Approve (Finance)", _actions(pr))
         apply_workflow(pr, "Approve (Finance)")
         pr.reload()
         self.assertEqual(pr.status, "Approved by Finance")
         self.assertEqual(pr.docstatus, 1)
-        # [#n9xmsz]
+        # [#he603w]
         self.assertEqual(pr.finance_approved_by, self.finance)
 
-    # [#4fc2j1]
+    # [#rwqrmp]
 
     def test_wrong_role_cannot_approve_or_pay(self):
         pr = self._pending()
-        # [#ol97zg]
+        # [#q1y6wf]
         frappe.set_user(self.manager)
         offered = _actions(pr)
         self.assertNotIn("Approve (Finance)", offered)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(pr, "Approve (Finance)")
 
-    # [#4cxpj2]
+    # [#ong74l]
 
     def test_approve_and_pay_are_finance_only(self):
         pr = self._pending()
 
-        # [#1zpks7]
+        # [#g1vfqm]
         frappe.set_user(self.manager)
         self.assertNotIn("Approve (Finance)", _actions(pr))
 
-        # [#lwf3m4]
+        # [#i6pb1n]
         frappe.set_user(self.finance)
         self.assertIn("Approve (Finance)", _actions(pr))
         apply_workflow(pr, "Approve (Finance)")
         pr.reload()
         self.assertEqual(pr.status, "Approved by Finance")
 
-        # [#jem3q4]
+        # [#9cov55]
         frappe.set_user(self.manager)
         self.assertNotIn("Mark Paid", _actions(pr))
         frappe.set_user(self.finance)
@@ -191,12 +187,10 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         self.assertEqual(pr.status, "Paid")
         self.assertEqual(pr.docstatus, 1)
 
-    # [#bi3lgq]
+    # [#3ehyhh]
 
     def test_sod_requester_cannot_approve(self):
-        # [#b96rij]
-        # [#11xoun]
-        # [#ihqq5s]
+        # [#sfheu6]
         pr = self._pending(requested_by=self.finance_maker)
 
         frappe.set_user(self.finance_maker)
@@ -204,7 +198,7 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(pr, "Approve (Finance)")
 
-        # [#9w4cme]
+        # [#9tcigo]
         frappe.set_user(self.finance)
         self.assertIn("Approve (Finance)", _actions(pr))
         apply_workflow(pr, "Approve (Finance)")
@@ -212,8 +206,7 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         self.assertEqual(pr.status, "Approved by Finance")
 
     def test_sod_requester_cannot_mark_paid(self):
-        # [#1cva9p]
-        # [#1apmjg]
+        # [#q2q4o5]
         pr = self._approved(requested_by=self.finance_maker)
         self.assertEqual(pr.status, "Approved by Finance")
 
@@ -222,32 +215,30 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(pr, "Mark Paid")
 
-        # [#4rfs4h]
+        # [#cbtqkf]
         frappe.set_user(self.finance)
         self.assertIn("Mark Paid", _actions(pr))
         apply_workflow(pr, "Mark Paid")
         pr.reload()
         self.assertEqual(pr.status, "Paid")
 
-    # [#7hace9]
+    # [#4l0dab]
 
     def test_post_submit_mark_paid_reachable(self):
         pr = self._approved()
         self.assertEqual(pr.docstatus, 1)
 
-        # [#57sef5]
+        # [#j1qu0h]
         frappe.set_user(self.finance)
         self.assertIn("Mark Paid", _actions(pr))
         apply_workflow(pr, "Mark Paid")
         pr.reload()
         self.assertEqual(pr.status, "Paid")
         self.assertEqual(pr.docstatus, 1)
-        # [#hle001]
-        # [#7bstng]
-        # [#dtsi0r]
+        # [#opmjof]
         self.assertEqual(pr.finance_approved_by, self.finance)
 
-    # [#dbvsmy]
+    # [#3sowtq]
 
     def test_mark_paid_posts_no_gl(self):
         pr = self._approved()
@@ -257,7 +248,7 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         pr.reload()
         self.assertEqual(pr.status, "Paid")
 
-        # [#dm8kwr]
+        # [#snwj4c]
         if frappe.db.exists("DocType", "GL Entry"):
             gl = frappe.get_all(
                 "GL Entry",

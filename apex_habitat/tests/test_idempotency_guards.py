@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 """Reproduction tests for duplicate-record / idempotency guards.
 
 Covers two reported scenarios:
@@ -57,7 +57,7 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
         b.insert(ignore_permissions=True)
         return b
 
-    # [#aem1b9]
+    # [#c9usac]
     def test_room_generator_run_twice_creates_no_duplicates(self):
         abbr = "T" + frappe.generate_hash(length=3).upper()
         building = self._make_building(abbr)
@@ -69,7 +69,7 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
                 "Accommodation Room", {"building": building.name}, pluck="name")]}
         )
 
-        # [#bs022r]
+        # [#ooixjh]
         second = generate_rooms_and_beds(building.name)
         rooms_after_second = frappe.db.count("Accommodation Room", {"building": building.name})
         beds_after_second = frappe.db.count(
@@ -92,7 +92,7 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
             f"Bed count changed on re-run ({beds_after_first} -> {beds_after_second}): duplicate beds created.",
         )
 
-    # [#oet07m]
+    # [#gwmc0i]
     def _assignment(self, building, room, bed):
         a = frappe.get_doc({
             "doctype": "Accommodation Assignment",
@@ -121,7 +121,7 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
         checkout1.insert(ignore_permissions=True)
         checkout1.submit()
 
-        # [#1m4ikq]
+        # [#llp6ab]
         checkout2 = frappe.get_doc({
             "doctype": "Accommodation Checkout", "assignment": assignment.name,
             "checkout_date": "2026-05-22", "checkout_reason": "Internal Transfer",

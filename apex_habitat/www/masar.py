@@ -26,22 +26,16 @@ from apex_habitat.salis.doctype.salis_portal_theme.salis_portal_theme import (
 
 
 def get_context(context):
-	# [#88swmm]
-	# [#qmqppr]
+	# [#kqaxzl]
 	context.no_cache = 1
 
-	# [#sn2mtb]
-	# [#atilnz]
-	# [#w4wmsj]
-	# [#mc35n2]
-	# [#62mf34]
+	# [#ktvbza]
 	try:
 		context.csrf_token = get_csrf_token()
 	except Exception:
 		context.csrf_token = ""
 
-	# [#ruhxyh]
-	# [#o7gh0y]
+	# [#tvmj3m]
 	context.masar_token = frappe.form_dict.get("w") or ""
 
 	appearance = get_portal_appearance()

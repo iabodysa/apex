@@ -8,7 +8,7 @@ import frappe
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
 from apex_habitat.tests import factories
 
-# [#t6gatv]
+# [#5tgk0h]
 test_ignore = factories.test_ignore
 
 
@@ -48,15 +48,14 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
         self.assertTrue(res["target_document"])
         self.assertFalse(res["already_converted"])
 
-        # [#66h7g4]
+        # [#jaachd]
         req.reload()
         self.assertEqual(req.target_doctype, "Maintenance Request")
         self.assertEqual(req.target_document, res["target_document"])
-        # [#fk6pic]
+        # [#7bspo0]
         self.assertEqual(req.status, "In Progress")
 
-        # [#kvbm2g]
-        # [#a2w7ml]
+        # [#s66kcv]
         mr = frappe.get_doc("Maintenance Request", res["target_document"])
         self.assertEqual(mr.building, "RRC-BLDG")
         self.assertEqual(mr.room, "RRC-BLDG-R01")
@@ -73,7 +72,7 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
         self.assertTrue(second["already_converted"])
         self.assertEqual(first["target_document"], second["target_document"])
 
-        # [#8jjyla]
+        # [#2cpc8r]
         count = frappe.db.count("Maintenance Request",
                                 {"name": first["target_document"]})
         self.assertEqual(count, 1)
@@ -97,14 +96,13 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
         with self.assertRaises(frappe.exceptions.ValidationError):
             self._convert(req.name)
 
-        # [#4c7qzj]
+        # [#3ygvnj]
         req.reload()
         self.assertFalse(req.target_doctype)
         self.assertFalse(req.target_document)
 
     def test_terminal_status_is_not_overridden_on_convert(self):
-        # [#24vj8a]
-        # [#99aqiq]
+        # [#ca7ou4]
         req = self._new_request(category="Maintenance", status="Resolved",
                                 resolution_notes="Closed at source")
         res = self._convert(req.name)

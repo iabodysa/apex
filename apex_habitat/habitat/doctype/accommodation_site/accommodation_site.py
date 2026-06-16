@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-# [#m4uz3c]
+# [#j03s5a]
 
 from frappe.model.document import Document
 
 
 class AccommodationSite(Document):
     def onload(self):
-        # [#d2spls]
-        # [#h4hqjz]
+        # [#qf3k0t]
         from frappe.contacts.address_and_contact import load_address_and_contact
 
         load_address_and_contact(self)

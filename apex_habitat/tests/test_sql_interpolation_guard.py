@@ -53,23 +53,7 @@ import unittest
 
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
-# [#rudcur]
-# [#59r3ju]
-# [#od1fgp]
-# [#5v2cgu]
-# [#lfmg63]
-# [#9g9pqo]
-# [#460hc7]
-# [#t9pft6]
-# [#jtw8ov]
-# [#od1fgp]
-# [#9noltp]
-# [#10x5vk]
-# [#msfey6]
-# [#3jkhle]
-# [#3atshv]
-# [#cfxpmr]
-# [#rudcur]
+# [#o9meu1]
 SAFE_ALLOWLIST = [
     (
         "habitat/temporary_worker_engine.py",
@@ -99,19 +83,16 @@ SAFE_ALLOWLIST = [
     ),
 ]
 
-# [#m3kdge]
-# [#ae60b0]
-# [#9ojl6z]
+# [#2m5lk7]
 GUARD_CALL_ATTRS = {"match", "fullmatch", "escape"}
-# [#2p8w28]
+# [#i1lqzu]
 GUARD_CALL_NAMES = {"escape"}
 
 
 def _python_files():
     pattern = os.path.join(APP_ROOT, "**", "*.py")
     files = sorted(glob.glob(pattern, recursive=True))
-    # [#l0zypt]
-    # [#row5ml]
+    # [#4x1u6c]
     out = []
     for f in files:
         rel = os.path.relpath(f, APP_ROOT)
@@ -129,7 +110,7 @@ def _is_frappe_db_sql(call):
         return False
     if func.attr not in {"sql", "multisql"}:
         return False
-    # [#skojjg]
+    # [#gl32l1]
     inner = func.value
     return isinstance(inner, ast.Attribute) and inner.attr == "db"
 
@@ -160,7 +141,7 @@ def _interpolated_names(first_arg):
     A plain string literal, or a string with only %s placeholders passed to the
     driver, is NOT interpolated.
     """
-    # [#ala8nd]
+    # [#i51q46]
     if isinstance(first_arg, ast.JoinedStr):
         names = set()
         has_expr = False
@@ -170,7 +151,7 @@ def _interpolated_names(first_arg):
                 names |= _names_in(v.value)
         return (has_expr, names)
 
-    # [#owjwkd]
+    # [#b8hqzg]
     fmt_names = _format_call_names(first_arg)
     if fmt_names is not None:
         return (True, fmt_names)
@@ -240,8 +221,7 @@ def _enclosing_function(tree, target_node):
         start = fn.lineno
         end = getattr(fn, "end_lineno", None)
         if end is None:
-            # [#s96wsn]
-            # [#818q74]
+            # [#2nygtb]
             end = max(
                 (d.lineno for d in ast.walk(fn) if hasattr(d, "lineno")),
                 default=fn.lineno,
@@ -277,18 +257,18 @@ def _collect_violations():
             if not is_interp:
                 continue
 
-            # [#myzidu]
+            # [#3iuyy9]
             if names and names <= module_names:
                 continue
 
             fn = _enclosing_function(tree, node)
             fn_name = fn.name if fn else "<module>"
 
-            # [#8pnlih]
+            # [#ejqirz]
             if (rel, fn_name) in safe_keys:
                 continue
 
-            # [#ftjcsv]
+            # [#63u385]
             if fn is not None and _function_has_guard(fn):
                 continue
 

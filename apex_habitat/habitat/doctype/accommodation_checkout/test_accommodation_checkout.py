@@ -1,8 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# [#hlfy1g]
-# [#rf8fpd]
+# [#8evoal]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -56,11 +55,7 @@ class TestAccommodationCheckout(FrappeTestCase):
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
-    # [#qpe3l4]
-    # [#wgr4kv]
-    # [#na9sma]
-    # [#p7rtxf]
-    # [#ksjvhz]
+    # [#8qaw6l]
 
     def test_resolve_building_prefers_assignment(self):
         from apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout import (
@@ -70,7 +65,7 @@ class TestAccommodationCheckout(FrappeTestCase):
         self.assertEqual(resolve_damage_assessment_building(assignment, None), "QA-BLDG-A")
 
     def test_resolve_building_assignment_wins_over_bed(self):
-        # [#1d9y1w]
+        # [#mv02qy]
         from apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout import (
             resolve_damage_assessment_building,
         )
@@ -80,7 +75,7 @@ class TestAccommodationCheckout(FrappeTestCase):
         )
 
     def test_resolve_building_never_empty_string(self):
-        # [#sgvlk2]
+        # [#pdkwyk]
         from apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout import (
             resolve_damage_assessment_building,
         )
@@ -102,7 +97,7 @@ class TestAccommodationCheckout(FrappeTestCase):
         self.assertIn("for_update=True", src)
         self.assertIn("check_out_date", src)
 
-    # [#nluqet]
+    # [#10md08]
 
     def test_on_submit_uses_correct_damage_assessment_fieldnames(self):
         """on_submit() auto-creates a Custody Damage Assessment using the correct
@@ -118,14 +113,14 @@ class TestAccommodationCheckout(FrappeTestCase):
             accommodation_checkout as mod,
         )
         src = inspect.getsource(mod.on_submit)
-        # [#nwaowf]
+        # [#ozynyi]
         self.assertIn('"article"', src, "on_submit must map 'article' to Custody Damage Item")
         self.assertIn('"damage_description"', src,
                       "on_submit must set 'damage_description' on the damage item")
         self.assertIn('"estimated_replacement_cost_sar"', src,
                       "on_submit must set 'estimated_replacement_cost_sar' on the damage item")
 
-        # [#330yc6]
+        # [#73y8nk]
         meta = frappe.get_meta("Custody Damage Item")
         fieldnames = {f.fieldname for f in meta.fields}
         for expected in ("article", "damage_description", "estimated_replacement_cost_sar"):

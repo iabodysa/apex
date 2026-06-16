@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 """Duplicate-safe composite UNIQUE index helper for the machine-written Habitat
 ledgers/snapshots.
@@ -101,6 +101,5 @@ def add_unique_guarded(doctype: str, fields: list[str], constraint_name: str) ->
         _log_blocking_duplicates(doctype, fields, constraint_name)
         return False
 
-    # [#o4nsqd]
-    # [#hhn994]
+    # [#ouxvnt]
     return _constraint_exists(doctype, constraint_name)

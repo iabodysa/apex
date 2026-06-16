@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 """My Work Center — Universal My Work Workspace (Phase 1).
 
 Tests cover:
@@ -27,9 +27,7 @@ def _h(n=6):
     return frappe.generate_hash(length=n)
 
 
-# [#rudcur]
-# [#tuk2ir]
-# [#rudcur]
+# [#kzx0d5]
 
 class TestMyWorkCenterSourceGuards(unittest.TestCase):
     """Architectural boundary guards: assert correct sourcing without a live site."""
@@ -48,9 +46,7 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
         ) as fh:
             return fh.read()
 
-    # [#fb7fqw]
-    # [#fvp9ys]
-    # [#999jy8]
+    # [#rkzzxc]
     def test_workflow_actions_not_driven_by_worklist_registry(self):
         inbox_src = self._inbox_src()
         self.assertNotIn(
@@ -60,8 +56,7 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             "workflow approvals are sourced from Frappe's native Workflow Action DocType.",
         )
 
-    # [#j6u79d]
-    # [#lrdnzc]
+    # [#ncws0v]
     def test_workflow_action_is_primary_needs_action_source(self):
         inbox_src = self._inbox_src()
         self.assertIn(
@@ -69,7 +64,7 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             inbox_src,
             "action_inbox.py must define get_pending_actions()",
         )
-        # [#itpz5r]
+        # [#iq9bbu]
         wa_pos = inbox_src.find('"Workflow Action"')
         todo_pos = inbox_src.find('"ToDo"')
         self.assertGreater(wa_pos, -1, "'Workflow Action' must appear in action_inbox.py")
@@ -79,14 +74,14 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             todo_pos,
             "'Workflow Action' must be queried BEFORE 'ToDo' in get_pending_actions()",
         )
-        # [#5z5my8]
+        # [#115vux]
         self.assertIn(
             '"workflow_actions"',
             inbox_src,
             "get_pending_actions() must return a dict with key 'workflow_actions'",
         )
 
-    # [#d1zgwi]
+    # [#rbjfj9]
     def test_todo_rows_scoped_to_session_user(self):
         inbox_src = self._inbox_src()
         self.assertIn(
@@ -96,7 +91,7 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             '"allocated_to": frappe.session.user to scope tasks to the calling user.',
         )
 
-    # [#o9qsvo]
+    # [#6a3iut]
     def test_notifications_scoped_by_for_user(self):
         mwc_src = self._mwc_src()
         self.assertIn(
@@ -105,10 +100,7 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             "Notification Log query in my_work_center.py must use "
             '"for_user": frappe.session.user for user isolation.',
         )
-        # [#s33ylq]
-        # [#e7hfuv]
-        # [#gz2l8h]
-        # [#dx3tyc]
+        # [#ar38di]
         notif_block_start = mwc_src.find('"Notification Log"')
         self.assertGreater(notif_block_start, -1, "'Notification Log' must be queried")
         notif_block = mwc_src[notif_block_start : notif_block_start + 400]
@@ -118,8 +110,7 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
             "for_user must appear in the Notification Log query block",
         )
 
-    # [#618rvt]
-    # [#ob8akd]
+    # [#rv7wz8]
     def test_get_my_work_surfaces_needs_action_from_get_pending_actions(self):
         mwc_src = self._mwc_src()
         self.assertIn(
@@ -134,9 +125,7 @@ class TestMyWorkCenterSourceGuards(unittest.TestCase):
         )
 
 
-# [#rudcur]
-# [#353eg6]
-# [#rudcur]
+# [#99c5up]
 
 class TestMyWorkWorkspaceJSON(unittest.TestCase):
     """Guards on the My Work workspace JSON fixture."""
@@ -149,9 +138,7 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
         with open(path, encoding="utf-8") as fh:
             return json.load(fh)
 
-    # [#n7dgy3]
-    # [#efpje1]
-    # [#6xh7f8]
+    # [#o24a7r]
     def test_my_work_has_no_maintenance_requests_shortcut(self):
         ws = self._ws()
         shortcut_labels = [s.get("label", "") for s in ws.get("shortcuts", [])]
@@ -177,9 +164,7 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
             "'mwScReq' content item (My Maintenance Requests shortcut) must be removed.",
         )
 
-    # [#k1i5ao]
-    # [#3xkho3]
-    # [#o2ol1l]
+    # [#2dwx5h]
     def test_my_work_is_native_widgets_no_custom_block(self):
         import json
         ws = self._ws()
@@ -197,7 +182,7 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
             "shortcut", types, "My Work must include the native Action Inbox shortcut."
         )
 
-    # [#jdwn2o]
+    # [#diqbmd]
     def test_my_work_roles_is_empty(self):
         ws = self._ws()
         self.assertEqual(
@@ -207,9 +192,7 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
             "universal personal workspace visible to every desk user.",
         )
 
-    # [#sgxq56]
-    # [#lkn1us]
-    # [#8jvfl1]
+    # [#135w1h]
     def test_my_work_has_action_inbox_shortcut(self):
         import json
         ws = self._ws()
@@ -229,8 +212,7 @@ class TestMyWorkWorkspaceJSON(unittest.TestCase):
             "'mwScInbox' content item (Action Inbox shortcut) must be present.",
         )
 
-    # [#k95xqu]
-    # [#dum7zs]
+    # [#9nlthh]
     def test_my_work_custom_blocks_child_table_empty(self):
         ws = self._ws()
         self.assertEqual(
@@ -251,7 +233,7 @@ class TestLaunchpadWorkspaceJSON(unittest.TestCase):
         with open(path, encoding="utf-8") as fh:
             return json.load(fh)
 
-    # [#rsv4oq]
+    # [#bj01n1]
     def test_launchpad_has_exactly_one_my_work_entry(self):
         import json
         ws = self._ws()
@@ -280,9 +262,7 @@ class TestLaunchpadWorkspaceJSON(unittest.TestCase):
         )
 
 
-# [#rudcur]
-# [#oq7uzd]
-# [#rudcur]
+# [#pmyj4u]
 
 class TestMyWorkCenter(ApexHabitatTestCase):
     """Shape, isolation, and access tests that require a running site."""
@@ -290,38 +270,35 @@ class TestMyWorkCenter(ApexHabitatTestCase):
     def test_shape(self):
         """get_my_work() must return the Phase 1 response shape."""
         w = get_my_work()
-        # [#p5zhh1]
+        # [#5wausm]
         for k in ("needs_action", "notifications", "mentions", "field_references", "summary"):
             self.assertIn(k, w, f"get_my_work() response must contain key '{k}'")
-        # [#skhd3p]
+        # [#na3aqf]
         self.assertIn("workflow_actions", w["needs_action"])
         self.assertIn("todos", w["needs_action"])
         self.assertIsInstance(w["needs_action"]["workflow_actions"], list)
         self.assertIsInstance(w["needs_action"]["todos"], list)
-        # [#ad1ndb]
+        # [#rdlefx]
         self.assertIsInstance(w["notifications"], list)
         self.assertIsInstance(w["mentions"], list)
         self.assertIsInstance(w["field_references"], list)
-        # [#krr1w8]
+        # [#bdq4bv]
         summary = w["summary"]
         for sk in ("needs_action", "assigned", "mentions", "notifications"):
             self.assertIn(sk, summary)
             self.assertIsInstance(summary[sk], int)
-        # [#nnct8y]
+        # [#46sawi]
         self.assertEqual(w["mentions"], [], "mentions must be [] in Phase 1")
         self.assertEqual(w["field_references"], [], "field_references must be [] in Phase 1")
         self.assertEqual(summary["mentions"], 0, "summary.mentions must be 0 in Phase 1")
-        # [#t563rv]
+        # [#ds2clh]
         self.assertIn("value", get_submitted_by_me_count())
         self.assertIn("value", get_approved_last_48h_count())
 
     def test_owner_isolation(self):
         """The core permission property: a non-owner who CAN read the DocType still
         must not see another user's submitted document in their worklist."""
-        # [#ns9mtu]
-        # [#k5qg0i]
-        # [#4zgu6q]
-        # [#lshtco]
+        # [#3f8rbh]
         cat = (frappe.get_meta("Accommodation Resident Request")
                .get_field("request_category").options.split("\n")[0].strip())
         frappe.get_doc({
@@ -330,12 +307,11 @@ class TestMyWorkCenter(ApexHabitatTestCase):
             "description": "worklist-test " + _h(),
         }).insert(ignore_permissions=True)  # [#1b55d8]
 
-        # [#1mhwde]
+        # [#a53bv1]
         my_count = get_submitted_by_me_count()["value"]
         self.assertGreaterEqual(my_count, 0)  # [#k3b78m]
 
-        # [#3pe1ue]
-        # [#jso1ty]
+        # [#b2mog1]
         other_email = "wl_other_" + _h() + "@example.com"
         if not frappe.db.exists("User", other_email):
             frappe.get_doc({
@@ -348,10 +324,7 @@ class TestMyWorkCenter(ApexHabitatTestCase):
             other_notif_names = {r["name"] for r in other_work["notifications"]}
         finally:
             frappe.set_user("Administrator")
-        # [#ey7d5i]
-        # [#9n1uaj]
-        # [#8bko2s]
-        # [#3st9yc]
+        # [#a4t976]
         self.assertIsInstance(other_notif_names, set)
 
     def test_action_inbox_is_universal(self):

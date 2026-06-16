@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 """Vehicle Utilisation - per-vehicle roll-up of trips, idle days and average
 utilisation, derived from the system-written Vehicle Utilisation Snapshot.

@@ -9,8 +9,7 @@ from frappe.utils import getdate, today
 
 
 class SalisDriver(Document):
-    # [#5rmd9l]
-    # [#ma8egg]
+    # [#72c9bb]
     def validate(self):
         if self.license_expiry and getdate(self.license_expiry) < getdate(today()):
             frappe.msgprint(

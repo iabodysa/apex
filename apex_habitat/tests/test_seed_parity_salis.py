@@ -50,7 +50,7 @@ class TestSalisAssignmentRuleSpec(unittest.TestCase):
 class TestSalisKanbanBoardSpec(unittest.TestCase):
     def test_spec_shape(self):
         spec = _spec("Kanban Board")
-        # [#gthhuq]
+        # [#iy63b3]
         self.assertEqual(spec["key"], "kanban_board_name")
         self.assertTrue(spec["create_only"])
         self.assertEqual(len(spec["records"]), 2)
@@ -60,8 +60,7 @@ class TestSalisKanbanBoardSpec(unittest.TestCase):
 
 class TestSalisAutoEmailReportNotExternalised(unittest.TestCase):
     def test_auto_email_report_is_not_externalised(self):
-        # [#6ap3u4]
-        # [#rchip6]
+        # [#3cpddz]
         self.assertEqual(load_specs("salis", only=["Auto Email Report"]), [])
         self.assertFalse(
             os.path.exists(os.path.join(DATA_ROOT, "salis", "auto_email_report.json")),

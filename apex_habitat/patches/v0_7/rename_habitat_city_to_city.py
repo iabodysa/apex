@@ -11,7 +11,7 @@ import frappe
 
 def execute():
     if not frappe.db.exists("DocType", "Habitat City"):
-        # [#bfxuxf]
+        # [#1vr3sz]
         return
 
     frappe.rename_doc(

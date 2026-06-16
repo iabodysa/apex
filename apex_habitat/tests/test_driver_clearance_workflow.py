@@ -57,7 +57,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # [#5dnwsf]
+    # [#5hz0bi]
 
     def _driver(self, name, vehicle=None):
         d = frappe.db.get_value("Salis Driver", {"full_name": name}, "name")
@@ -105,7 +105,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         ).insert(ignore_permissions=True)
         return fec
 
-    # [#8rmafi]
+    # [#6regdy]
 
     def test_legal_start_then_clear(self):
         driver = self._driver("DC Driver Legal")
@@ -118,7 +118,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.assertEqual(dc.status, "In Progress")
         self.assertEqual(dc.docstatus, 0)
 
-        # [#9yjepg]
+        # [#84rej3]
         frappe.set_user(self.manager)
         self.assertIn("Clear", _actions(dc))
         apply_workflow(dc, "Clear")
@@ -126,7 +126,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.assertEqual(dc.status, "Cleared")
         self.assertEqual(dc.docstatus, 1)
 
-    # [#4fc2j1]
+    # [#rwqrmp]
 
     def test_supervisor_cannot_clear(self):
         driver = self._driver("DC Driver WrongRole")
@@ -135,19 +135,16 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         apply_workflow(dc, "Start Processing")
         dc.reload()
 
-        # [#5jaho3]
-        # [#se190d]
+        # [#o4pye0]
         frappe.set_user(self.supervisor)
         self.assertNotIn("Clear", _actions(dc))
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(dc, "Clear")
 
-    # [#hwc1ff]
+    # [#8mpi4p]
 
     def test_clear_blocked_while_open_case_then_allowed(self):
-        # [#1pqrjb]
-        # [#8ltgon]
-        # [#iursx6]
+        # [#ib4mi7]
         driver = self._driver("DC Driver OpenCase " + frappe.generate_hash(length=6))
         fec = self._open_fuel_exception(driver)
         dc = self._new_clearance(driver)
@@ -155,7 +152,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         frappe.set_user(self.supervisor)
         apply_workflow(dc, "Start Processing")
         dc.reload()
-        # [#4kqirc]
+        # [#n3xi14]
         self.assertEqual(dc.outstanding_fuel_exceptions, 1)
 
         frappe.set_user(self.manager)
@@ -163,9 +160,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(dc, "Clear")
 
-        # [#2m5euo]
-        # [#ri5w27]
-        # [#b835ul]
+        # [#2i0hxh]
         frappe.set_user("Administrator")
         frappe.db.set_value("Fuel Exception Case", fec.name, "status", "Resolved")
         dc.reload()
@@ -173,7 +168,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         dc.reload()
         self.assertEqual(dc.outstanding_fuel_exceptions, 0)
 
-        # [#g7fjtt]
+        # [#aaa5i3]
         frappe.set_user(self.manager)
         self.assertIn("Clear", _actions(dc))
         apply_workflow(dc, "Clear")
@@ -182,7 +177,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.assertEqual(dc.docstatus, 1)
 
     def test_clear_blocked_while_returns_incomplete(self):
-        # [#9327g9]
+        # [#7o9cv9]
         driver = self._driver("DC Driver NoReturn")
         dc = self._new_clearance(driver, returned=False)
         frappe.set_user(self.supervisor)
@@ -191,7 +186,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         frappe.set_user(self.manager)
         self.assertNotIn("Clear", _actions(dc))
 
-    # [#3mf43h]
+    # [#3i99er]
 
     def test_clear_releases_driver_and_clears_vehicle(self):
         vehicle = self._vehicle("DC-REL-1")
@@ -202,21 +197,21 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
 
         dc = self._new_clearance(driver)
         frappe.set_user(self.manager)
-        # [#ef6jf5]
+        # [#fxmqg4]
         self.assertIn("Clear", _actions(dc))
         apply_workflow(dc, "Clear")
         frappe.set_user("Administrator")
         dc.reload()
         self.assertEqual(dc.status, "Cleared")
 
-        # [#ikyxt9]
+        # [#js9bks]
         driver_row = frappe.db.get_value(
             "Salis Driver", driver, ["status", "current_vehicle"], as_dict=True
         )
         self.assertEqual(driver_row.status, "Released")
         self.assertIsNone(driver_row.current_vehicle)
 
-    # [#7hace9]
+    # [#4l0dab]
 
     def test_post_submit_cancel_reachable(self):
         driver = self._driver("DC Driver PostSubmit")
@@ -227,8 +222,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.assertEqual(dc.status, "Cleared")
         self.assertEqual(dc.docstatus, 1)
 
-        # [#k78knk]
-        # [#cv697j]
+        # [#qssica]
         self.assertIn("Cancel", _actions(dc))
         apply_workflow(dc, "Cancel")
         dc.reload()

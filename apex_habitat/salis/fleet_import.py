@@ -43,7 +43,7 @@ def run(csv_dir=None):
     csv_dir = os.path.abspath(csv_dir)
     out = {"csv_dir": csv_dir}
 
-    # [#a2zdu8]
+    # [#1iltlx]
     made = 0
     for r in _read(csv_dir, "vehicle_category.csv"):
         cn = (r.get("category_name") or "").strip()
@@ -57,7 +57,7 @@ def run(csv_dir=None):
                 pass
     out["categories_new"] = made
 
-    # [#t0ys01]
+    # [#aywlvk]
     made = 0
     for r in _read(csv_dir, "rental_office.csv"):
         on = (r.get("office_name") or "").strip()
@@ -70,7 +70,7 @@ def run(csv_dir=None):
                 pass
     out["offices_new"] = made
 
-    # [#fdu5q4]
+    # [#98tx2n]
     proj = {}
     for r in _read(csv_dir, "project.csv"):
         pn = (r.get("project_name") or "").strip()
@@ -85,7 +85,7 @@ def run(csv_dir=None):
         proj[pn] = name
     out["projects"] = len(proj)
 
-    # [#bz8m4k]
+    # [#qf4l9a]
     drv = {}
     for r in _read(csv_dir, "salis_driver.csv"):
         did = (r.get("driver_id") or "").strip()
@@ -106,7 +106,7 @@ def run(csv_dir=None):
         drv[did] = name
     out["drivers"] = len(drv)
 
-    # [#3wp485]
+    # [#nb5cey]
     veh = {}
     for r in _read(csv_dir, "salis_vehicle.csv"):
         plate = (r.get("plate_number") or "").strip()
@@ -129,7 +129,7 @@ def run(csv_dir=None):
         veh[plate] = name
     out["vehicles"] = len(veh)
 
-    # [#bnwnyn]
+    # [#m31j10]
     mirrored = 0
     for r in _read(csv_dir, "salis_vehicle_current_driver_patch.csv"):
         vn = veh.get((r.get("plate_number") or "").strip())
@@ -140,7 +140,7 @@ def run(csv_dir=None):
             mirrored += 1
     out["mirrored"] = mirrored
 
-    # [#489xak]
+    # [#d3sykg]
     loaded = skipped = 0
     for r in _read(csv_dir, "vehicle_assignment_clean.csv"):
         vn = veh.get((r.get("vehicle") or "").strip())

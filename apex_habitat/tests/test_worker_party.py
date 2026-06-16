@@ -20,8 +20,7 @@ import unittest
 
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
-# [#9fiaqz]
-# [#5zn7hs]
+# [#eezzqo]
 DOCTYPE_SPECS = {
     "Accommodation Assignment": ("habitat/doctype/accommodation_assignment/accommodation_assignment.json", 1, 0, 0, "Resident Type", "Resident"),
     "Accommodation Checkout": ("habitat/doctype/accommodation_checkout/accommodation_checkout.json", 0, 1, 1, "Resident Type", "Resident"),
@@ -32,9 +31,7 @@ DOCTYPE_SPECS = {
     "Masar Worker Token": ("apex_core/doctype/masar_worker_token/masar_worker_token.json", 1, 0, 0, "Worker Type", "Worker"),
 }
 
-# [#o85oxg]
-# [#4sxjje]
-# [#cmx67n]
+# [#dzjvxv]
 CUSTODY_SPECS = {
     "Custody Issue": ("habitat/doctype/custody_issue/custody_issue.json", "issued_to_employee"),
     "Custody Return": ("habitat/doctype/custody_return/custody_return.json", "returned_by_employee"),
@@ -70,12 +67,12 @@ class TestPartyFieldsInSchema(unittest.TestCase):
             self.assertEqual(party.get("label"), party_label, f"{dt}: party label")
             self.assertEqual(bool(party.get("read_only")), bool(party_ro), f"{dt}: party read_only")
 
-            # [#308o1s]
+            # [#19e4tn]
             self.assertTrue(emp.get("read_only"), f"{dt}: employee must be read_only")
             self.assertFalse(emp.get("reqd"), f"{dt}: employee must not be reqd")
             self.assertEqual(emp.get("options"), "Employee", f"{dt}: employee.options changed")
 
-            # [#jrtffz]
+            # [#6b54dy]
             if field_order:
                 for fn in ("party_type", "party", "employee"):
                     self.assertIn(fn, field_order, f"{dt}: {fn} missing from field_order")
@@ -102,7 +99,7 @@ class TestPartyFieldsInSchema(unittest.TestCase):
             self.assertEqual(party.get("label"), "Worker", f"{dt}: party label")
             self.assertFalse(party.get("read_only"), f"{dt}: custody party must stay editable")
 
-            # [#lgvec7]
+            # [#ifezau]
             self.assertTrue(emp.get("read_only"), f"{dt}: {emp_field} must be read_only")
             self.assertEqual(emp.get("options"), "Employee", f"{dt}: {emp_field}.options changed")
 
@@ -112,10 +109,7 @@ class TestPartyFieldsInSchema(unittest.TestCase):
                 self.assertLess(field_order.index("party"), field_order.index(emp_field), f"{dt}: party after {emp_field}")
 
 
-# [#f9d9bl]
-# [#8wsoyo]
-# [#bu8yhr]
-# [#p39gby]
+# [#kthuni]
 if "frappe" not in sys.modules:
     _fake = types.ModuleType("frappe")
 
@@ -160,7 +154,7 @@ class TestSyncPartyEmployee(unittest.TestCase):
         self.assertEqual(doc.employee, "HR-EMP-0001")
 
     def test_legacy_employee_backfills_party(self):
-        # [#cvvot8]
+        # [#og162e]
         # set and no party_type: normalise to Employee, derive party.
         doc = _Doc(employee="HR-EMP-0002")
         sync_party_employee(doc)
@@ -182,7 +176,7 @@ class TestSyncPartyEmployee(unittest.TestCase):
         self.assertEqual(doc.party, "HR-EMP-0003")
 
     def test_employee_field_param_mirrors_named_link(self):
-        # [#fuzw50]
+        # [#r4j0my]
         doc = _Doc(party_type=PARTY_EMPLOYEE, party="HR-EMP-1", issued_to_employee=None)
         sync_party_employee(doc, employee_field="issued_to_employee")
         self.assertEqual(doc.issued_to_employee, "HR-EMP-1")
@@ -216,8 +210,7 @@ class TestTemporaryWorkerLink(unittest.TestCase):
             "Custody Return": "returned_by_employee",
             "Custody Damage Assessment": "employee",
         }
-        # [#rm9c5a]
-        # [#g51kbi]
+        # [#hixqmn]
         self.assertEqual(PARTY_DOCTYPES, expected)
         all_paths = {dt: v[0] for dt, v in {**DOCTYPE_SPECS, **CUSTODY_SPECS}.items()}
         for dt, emp_field in PARTY_DOCTYPES.items():
@@ -241,7 +234,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
             src = fh.read()
         self.assertIn("party_type=None, party=None", src, "quick_check_in is not party-aware")
-        # [#7mg3jf]
+        # [#88rmkq]
         self.assertIn('party_type, party = "Employee", employee', src)
 
     def test_bed_has_is_temporary_flag(self):
@@ -256,7 +249,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn("def get_arrival_card(party_type=None, party=None, employee=None)", src)
         self.assertIn("def search_arrivals_workers(", src)
         self.assertIn("def register_temporary_worker(", src)
-        # [#15svuv]
+        # [#e72uw3]
         self.assertIn('"doctype": "Temporary Worker"', src)
         self.assertNotIn('"doctype": "Employee"', src)
 
@@ -265,7 +258,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
         ) as fh:
             js = fh.read()
-        # [#6ptkdp]
+        # [#2tz9nc]
         self.assertIn("apex_habitat.habitat.api.front_desk.get_building_grid", js)
         self.assertIn("class ArrivalsDesk", js)
         self.assertIn("arrivals-desk", js)  # [#lnoqyd]
@@ -277,7 +270,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             js = fh.read()
         self.assertIn("search_arrivals_workers", js)
         self.assertIn("register_temporary_worker", js)
-        # [#32zn3u]
+        # [#5sm4oe]
         self.assertEqual(js.count("new frappe.ui.Dialog"), 1, "Arrivals Desk must keep exactly one modal")
 
     def test_arrivals_page_houses_via_quick_check_in(self):
@@ -285,7 +278,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
         ) as fh:
             js = fh.read()
-        # [#capvrx]
+        # [#f9xei3]
         self.assertIn("apex_habitat.habitat.api.front_desk.quick_check_in", js)
         self.assertIn("party_type: worker.party_type", js)
         self.assertIn("this.cart", js)  # [#py3nht]
@@ -296,7 +289,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn("def house_over_capacity(", src)
         self.assertIn('"is_temporary": 1', src)  # [#823gp6]
         self.assertIn("quick_check_in", src)  # [#c8bpuy]
-        # [#r94oxg]
+        # [#hc43yl]
         with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
             grid = fh.read()
         self.assertIn('"is_temporary": bed.is_temporary', grid)
@@ -308,8 +301,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             js = fh.read()
         self.assertIn("apex_habitat.habitat.api.custody_kiosk.issue_cart", js)
         self.assertIn("Custody deferred", js)  # [#ikrv9n]
-        # [#7ee3xf]
-        # [#lbkt3t]
+        # [#ed11rf]
         self.assertIn("custody_kiosk.get_kiosk_catalog", js)
         self.assertIn("_custody_lines", js)
         self.assertNotIn("get_list('Custody Article'", js)
@@ -323,7 +315,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
         ) as fh:
             js = fh.read()
-        # [#37bwkl]
+        # [#6bviy0]
         self.assertIn("batch_issue_worker_links", js)
         self.assertNotIn("show_worker_link_dialog", js)
         self.assertIn("get_arrival_slip", js)
@@ -338,7 +330,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
     def test_print_slips_terms_signature_and_qr(self):
         with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
             src = fh.read()
-        # [#ro6hpi]
+        # [#6sa3jq]
         self.assertIn("def get_checkin_slip(", src)
         self.assertIn("def get_custody_handover_slip(", src)
         self.assertIn("masar_qr_data_uri(_worker_link", src)  # [#gp5a8y]
@@ -354,15 +346,13 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
     def test_grid_occupant_shows_party_name(self):
         with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
             src = fh.read()
-        # [#oarm6k]
+        # [#qyrxpi]
         self.assertIn('"party_type", "party"', src)  # [#dsjafg]
         self.assertIn("tw_names", src)  # [#7dxggs]
         self.assertIn("worker_name", src)
 
     def test_arrivals_page_no_orphan_dollar_refs(self):
-        # [#mjnohm]
-        # [#5zp6th]
-        # [#dr4a2o]
+        # [#delprr]
         import re
 
         with open(

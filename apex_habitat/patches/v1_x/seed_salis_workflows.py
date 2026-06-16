@@ -26,7 +26,7 @@ def execute():
     try:
         seed_salis_workflows()
     except Exception:
-        # [#kzfk4g]
+        # [#r786tj]
         frappe.db.rollback()
         frappe.log_error(
             title="seed_salis_workflows patch failed",

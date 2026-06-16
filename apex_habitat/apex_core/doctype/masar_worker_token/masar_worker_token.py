@@ -32,21 +32,17 @@ def _new_token() -> str:
         candidate = frappe.generate_hash(length=TOKEN_BYTES * 2)
         if not frappe.db.exists("Masar Worker Token", {"token": candidate}):
             return candidate
-    # [#meurni]
+    # [#s3grro]
     frappe.throw(_("Could not generate a unique worker token. Please try again."))
 
 
 class MasarWorkerToken(Document):
-    # [#azpt87]
-    # [#5m27uy]
-    # [#je0z47]
-    # [#spswqu]
-    # [#io3xbm]
+    # [#pewmoc]
     def before_validate(self):
         sync_party_employee(self, require_party=True)
 
     def before_insert(self):
-        # [#o0vq6x]
+        # [#img31u]
         self.token = _new_token()
         self.last_generated_on = frappe.utils.now_datetime()
         self.last_generated_by = frappe.session.user
@@ -90,7 +86,7 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
     if frappe.utils.cint(regenerate) and doc.token:
         doc.regenerate()
     elif not doc.token:
-        # [#8qos75]
+        # [#gl1eyq]
         doc.regenerate()
 
     link = _worker_link(doc.token)
@@ -101,7 +97,7 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
         "token": doc.token,
         "link": link,
         "qr": masar_qr_data_uri(link),
-        # [#768ksi]
+        # [#p7spkl]
         "phone": frappe.db.get_value("Employee", doc.employee, "cell_number"),
     }
 

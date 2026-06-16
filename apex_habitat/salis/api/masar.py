@@ -18,9 +18,7 @@ from frappe.rate_limiter import rate_limit
 
 from apex_habitat.salis.api.driver_portal import _require_enabled, _resolve_driver
 
-# [#9w7fn9]
-# [#fubjn3]
-# [#lkv3s7]
+# [#6ddse8]
 WORKER_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 
 
@@ -64,9 +62,7 @@ def _today_worker_trips(driver):
     )
     worker_trips = []
     for t in trips:
-        # [#mtdvtp]
-        # [#bnxnpb]
-        # [#a2aani]
+        # [#pmk91w]
         if not t.get("transport_request") and t.get("route_plan"):
             t["transport_request"] = frappe.db.get_value(
                 "Route Plan", t["route_plan"], "transport_request"
@@ -254,8 +250,7 @@ def get_my_worker_route_summary() -> dict:
         stops = _ordered_stops(t.get("route_plan"))
         stop_count += len(stops)
         if next_pickup is None:
-            # [#lxjk3w]
-            # [#auqbri]
+            # [#jpju0q]
             for s in stops:
                 if s.get("accommodation_building") and s.get("pickup"):
                     pickup = s["pickup"]
@@ -280,20 +275,9 @@ def get_my_worker_route_summary() -> dict:
     }
 
 
-# [#herhre]
-# [#od1fgp]
-# [#5vtg90]
-# [#a5s43f]
-# [#nhytps]
-# [#syv03x]
-# [#ajbowt]
-# [#k0dryc]
-# [#qllixb]
-# [#aupt7h]
+# [#74dyev]
 
-# [#4hmdtd]
-# [#q4inn8]
-# [#2auq2k]
+# [#r00mpe]
 WORKER_REQUEST_CATEGORIES = (
     "Maintenance",
     "Cleaning",
@@ -328,8 +312,7 @@ def _resolve_worker(token):
     )
     if not row or not row.get("employee"):
         frappe.throw(_("This worker link is invalid or has been disabled."), frappe.PermissionError)
-    # [#p8uqut]
-    # [#s5pcrs]
+    # [#58u5n5]
     if frappe.db.get_value("Employee", row["employee"], "status") in ("Inactive", "Left"):
         frappe.throw(_("This worker link is invalid or has been disabled."), frappe.PermissionError)
     return row["employee"]
@@ -367,9 +350,7 @@ def get_worker_context(token=None):
     emp = _employee_doc(employee)
 
     documents = []
-    # [#rvjx1e]
-    # [#6bkzc8]
-    # [#36b19s]
+    # [#nvwidj]
     iqama_no = emp.get("iqama") or emp.get("iqama_no")
     iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
     if iqama_no or iqama_expiry:
@@ -381,7 +362,7 @@ def get_worker_context(token=None):
                 "days_left": _days_until(iqama_expiry),
             }
         )
-    # [#lqplke]
+    # [#p42hfv]
     passport_no = emp.get("passport_number")
     passport_expiry = emp.get("passport_expiry")
     if passport_no:
@@ -480,13 +461,11 @@ def get_worker_accommodation(token=None):
                     "name": frappe.utils.get_fullname(user) or user,
                     "phone": frappe.db.get_value("User", user, "mobile_no"),
                 }
-            # [#670h2z]
-            # [#6tfz71]
-            # [#r93gcg]
+            # [#le3pcb]
             _addr = get_address_text("Accommodation Site", b.get("site")) or get_address_text(
                 "Accommodation Building", assignment["building"]
             )
-            # [#b51lj6]
+            # [#s4cggu]
             building = {
                 "name": b.get("name"),
                 "building_name": b.get("building_name"),
@@ -680,11 +659,7 @@ def create_worker_request(token=None, category=None, subject=None, body=None, pr
         frappe.throw(_("Please describe your request."))
     description = body if not subject else (f"{subject}\n\n{body}" if body else subject)
 
-    # [#4osfna]
-    # [#kpplb6]
-    # [#9h9sk9]
-    # [#j1jox4]
-    # [#su3mgn]
+    # [#djhanf]
     assignment = _active_assignment(employee)
     building = room = bed = None
     if assignment:

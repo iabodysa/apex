@@ -35,9 +35,7 @@ def _spec(module_dir, doctype):
 
 class TestMaintenanceMaterialParity(unittest.TestCase):
     def test_maintenance_material_spec_loads(self):
-        # [#jopjqm]
-        # [#o48xo8]
-        # [#jzswri]
+        # [#to9x1v]
         spec = _spec("habitat", "Maintenance Material")
         self.assertEqual(spec["key"], "material_name")
         self.assertTrue(spec["create_only"])
@@ -56,8 +54,7 @@ class TestMaintenanceMaterialParity(unittest.TestCase):
         self.assertEqual(spec["key"], "template_name")
         self.assertTrue(spec["create_only"])
 
-        # [#cgve2k]
-        # [#bo5o49]
+        # [#72d3hp]
         expected = [
             {
                 "template_name": t["template_name"],
@@ -100,19 +97,17 @@ class TestSalisIssueMasterParity(unittest.TestCase):
         self.assertEqual(len(spec["records"]), 1)
         rec = spec["records"][0]
 
-        # [#2mudhy]
+        # [#tqsh6f]
         self.assertEqual(rec["service_level"], issue_seed._SLA_NAME)
         self.assertEqual(rec["document_type"], "Issue")
         self.assertEqual(rec["default_service_level_agreement"], 1)
         self.assertEqual(rec["enabled"], 1)
         self.assertEqual(rec["apply_sla_for_resolution"], 1)
 
-        # [#i58u8z]
-        # [#44gkqo]
-        # [#a8y41s]
+        # [#tk4dzs]
         self.assertNotIn("holiday_list", rec)
 
-        # [#a9z1vz]
+        # [#506694]
         expected_priorities = [
             {
                 "priority": priority,
@@ -124,14 +119,14 @@ class TestSalisIssueMasterParity(unittest.TestCase):
         ]
         self.assertEqual(rec["priorities"], expected_priorities)
 
-        # [#7eoemj]
+        # [#5ylg43]
         expected_window = [
             {"workday": day, "start_time": "00:00:00", "end_time": "23:59:59"}
             for day in issue_seed._WORKDAYS
         ]
         self.assertEqual(rec["support_and_resolution"], expected_window)
 
-        # [#7hwkjq]
+        # [#babos9]
         self.assertEqual(
             rec["sla_fulfilled_on"],
             [{"status": "Resolved"}, {"status": "Closed"}],

@@ -41,8 +41,7 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    # [#o9fo3q]
-    # [#bdjfia]
+    # [#k7123c]
     if doc.status not in ("In Progress", "Completed", "Cancelled"):
         doc.db_set("status", "Open")
 
@@ -56,8 +55,7 @@ def before_cancel(doc, method=None):
 def start_task(task_instance):
     """Transition Scheduled Task Instance from Open to In Progress."""
     doc = frappe.get_doc("Scheduled Task Instance", task_instance)
-    # [#3pod0h]
-    # [#hi8ipb]
+    # [#eu1e7a]
     frappe.has_permission("Scheduled Task Instance", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:

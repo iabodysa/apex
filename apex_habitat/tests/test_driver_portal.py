@@ -20,8 +20,7 @@ def _ensure_test_driver():
 			u.add_roles("Driver")
 			u.insert(ignore_permissions=True)
 		except frappe.DuplicateEntryError:
-			# [#c2sxop]
-			# [#lmyw8o]
+			# [#1b2cml]
 			pass
 	emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
 	if not emp:
@@ -100,9 +99,7 @@ class TestDriverPortal(FrappeTestCase):
 		att = frappe.get_doc("Driver Attendance", res["name"])
 		self.assertEqual(att.driver, drv)
 		self.assertEqual(str(att.attendance_date), frappe.utils.today())
-		# [#busqtw]
-		# [#ouyevk]
-		# [#hzvlw2]
+		# [#ej6tem]
 		self.assertEqual(att.docstatus, 1, "Portal check-in must submit the attendance.")
 		frappe.set_user("Administrator")
 
@@ -114,8 +111,7 @@ class TestDriverPortal(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("Fuel Request", fr["name"], "status"), "Pending")
 		tk = driver_portal.raise_support_ticket(category="Vehicle", priority="High",
 		                                        subject="Brakes", description="Soft pedal")
-		# [#gxj5o3]
-		# [#b7najh]
+		# [#5sak8a]
 		self.assertEqual(frappe.db.get_value("Issue", tk["name"], "custom_driver"), drv)
 		frappe.set_user("Administrator")
 
@@ -156,7 +152,7 @@ class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 		frappe.set_user("Administrator")
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
 		cls.drv = _ensure_test_driver()
-		# [#pch2pa]
+		# [#s10x5i]
 		frappe.db.set_value("Salis Driver", cls.drv, "status", "Active")
 		cls.user = frappe.db.get_value(
 			"Employee", frappe.db.get_value("Salis Driver", cls.drv, "employee"), "user_id"
@@ -188,7 +184,7 @@ class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 			reconcile_operations_alerts,
 		)
 
-		# [#424dlt]
+		# [#fibtfn]
 		self._purge()
 		missing_attendance_watch()
 		self.assertEqual(
@@ -196,7 +192,7 @@ class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 			"A driver with no attendance must raise one Supervisor Delay alert.",
 		)
 
-		# [#sz5t9x]
+		# [#98kf3q]
 		frappe.set_user(self.user)
 		res = driver_portal.driver_check_in()
 		frappe.set_user("Administrator")
@@ -205,8 +201,7 @@ class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 			"Portal check-in must leave a SUBMITTED attendance for the watcher to see.",
 		)
 
-		# [#rbuwpu]
-		# [#ey7t1b]
+		# [#5z1fqj]
 		reconcile_operations_alerts()
 		self.assertEqual(
 			self._open_alerts(), [],
@@ -214,8 +209,7 @@ class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 			"checked in via the portal.",
 		)
 
-		# [#edbqts]
-		# [#gnpry9]
+		# [#j27pvq]
 		missing_attendance_watch()
 		self.assertEqual(
 			self._open_alerts(), [],

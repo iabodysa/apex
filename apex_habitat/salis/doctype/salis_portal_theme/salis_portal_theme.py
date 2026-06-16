@@ -15,9 +15,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-# [#kxcp60]
-# [#8qz204]
-# [#bni0td]
+# [#no616m]
 THEME_SLUGS = {
 	"AFMCO": "afmco",
 	"Frappe Standard": "frappe",
@@ -31,9 +29,7 @@ DEFAULT_SLUG = "afmco"
 
 class SalisPortalTheme(Document):
 	def validate(self):
-		# [#qsb0ce]
-		# [#pikiv6]
-		# [#5fhuji]
+		# [#5ec5in]
 		if self.theme and self.theme not in THEME_SLUGS:
 			frappe.throw(_("Invalid portal theme: {0}").format(self.theme))
 
@@ -54,14 +50,13 @@ def get_portal_appearance() -> dict:
 	logo = ""
 	show_brand = True
 
-	# [#dd3nmj]
-	# [#ndp5dp]
+	# [#bs67p4]
 	if frappe.db.exists("DocType", "Salis Portal Theme"):
 		settings = frappe.get_cached_doc("Salis Portal Theme")
 		theme_slug = THEME_SLUGS.get(settings.theme or DEFAULT_THEME, DEFAULT_SLUG)
 		accent = (settings.accent_color or "").strip()
 		logo = (settings.brand_logo or "").strip()
-		# [#692d05]
+		# [#nga98z]
 		show_brand = bool(settings.show_brand) if settings.get("show_brand") is not None else True
 
 	return {

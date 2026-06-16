@@ -39,7 +39,4 @@ class MovementCostRecovery(Document):
 		if not self.cost_center:
 			self.cost_center = get_default_cost_center()
 
-	# [#sdm911]
-	# [#or2sf2]
-	# [#3bffhv]
-	# [#fxq3hf]
+	# [#m7rmjl]

@@ -48,13 +48,12 @@ class TestTransportRequestWorkflow(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # [#cpx0h7]
+        # [#al91x0]
         cls.requester = _user("tr_req@example.com", "Fleet Project Manager")
         cls.supervisor = _user("tr_sup@example.com", "Fleet Supervisor")
         cls.manager = _user("tr_mgr@example.com", "Fleet Manager")
         cls.project = cls._project("TR Workflow Project")
-        # [#893q2r]
-        # [#mjs8et]
+        # [#l27h20]
         for u in (cls.requester, cls.supervisor):
             if not frappe.db.exists(
                 "User Permission",
@@ -104,9 +103,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
     def _big_worker_tr(self):
         """An Inter-City Relocation whose worker count exceeds the Operations
         threshold (default 20) so the server sets needs_operations=1."""
-        # [#ka1rfm]
-        # [#sdvv9n]
-        # [#or1tdv]
+        # [#s7h8pv]
         workers = [{"pickup_point": f"P{i}"} for i in range(25)]
         tr = frappe.get_doc({
             "doctype": "Transport Request",
@@ -122,7 +119,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         }).insert(ignore_permissions=True)
         return tr
 
-    # [#ea375i]
+    # [#3jamj8]
 
     def test_needs_operations_is_server_derived(self):
         small = self._new_tr()
@@ -131,7 +128,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(big.worker_count, 25)
         self.assertEqual(big.needs_operations, 1)
 
-    # [#8rmafi]
+    # [#6regdy]
 
     def test_legal_validate_then_authorize_passes(self):
         tr = self._new_tr()
@@ -143,7 +140,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.status, "Validated")
         self.assertEqual(tr.docstatus, 0)
 
-        # [#p9pvx0]
+        # [#8akzu2]
         frappe.set_user(self.manager)
         self.assertIn("Authorize (Operations)", _actions(tr))
         apply_workflow(tr, "Authorize (Operations)")
@@ -151,7 +148,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.status, "Approved")
         self.assertEqual(tr.docstatus, 1)
 
-    # [#4fc2j1]
+    # [#rwqrmp]
 
     def test_wrong_role_cannot_authorize(self):
         tr = self._new_tr()
@@ -159,8 +156,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         apply_workflow(tr, "Validate")
         tr.reload()
 
-        # [#8m86qo]
-        # [#2nr67v]
+        # [#mlauh0]
         frappe.set_user(self.requester)
         offered = _actions(tr)
         self.assertNotIn("Authorize (Operations)", offered)
@@ -168,11 +164,10 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(tr, "Authorize (Operations)")
 
-    # [#dackzs]
+    # [#9rurkc]
 
     def test_sod_requester_cannot_authorize(self):
-        # [#212r3p]
-        # [#3l7ns7]
+        # [#d308xy]
         approver_requester = _user("tr_selfapprove@example.com", "Fleet Manager")
         tr = self._new_tr(requested_by=approver_requester)
 
@@ -181,16 +176,16 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         tr.reload()
 
         frappe.set_user(approver_requester)
-        # [#4z257m]
+        # [#3f3x5i]
         self.assertNotIn("Authorize (Operations)", _actions(tr))
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(tr, "Authorize (Operations)")
 
-        # [#gx1hr0]
+        # [#jy5rz2]
         frappe.set_user(self.manager)
         self.assertIn("Authorize (Operations)", _actions(tr))
 
-    # [#brrn9k]
+    # [#tkit1f]
 
     def test_doa_under_tier_supervisor_blocked_on_ops_request(self):
         tr = self._big_worker_tr()
@@ -200,15 +195,14 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         apply_workflow(tr, "Validate")
         tr.reload()
 
-        # [#aup4he]
-        # [#95o1d8]
+        # [#76g0nm]
         frappe.set_user(self.supervisor)
         offered = _actions(tr)
         self.assertNotIn("Authorize (Regional)", offered)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(tr, "Authorize (Regional)")
 
-        # [#4je7ml]
+        # [#svozff]
         frappe.set_user(self.manager)
         self.assertIn("Authorize (Operations)", _actions(tr))
         apply_workflow(tr, "Authorize (Operations)")
@@ -216,17 +210,16 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.status, "Approved")
 
     def test_regional_path_available_for_small_request(self):
-        # [#gjuad9]
+        # [#8oibo0]
         tr = self._new_tr()
         frappe.set_user(self.supervisor)
         apply_workflow(tr, "Validate")
         tr.reload()
         frappe.set_user(self.supervisor)
-        # [#qrada1]
-        # [#dsiw6t]
+        # [#2ciymj]
         self.assertIn("Authorize (Regional)", _actions(tr))
 
-    # [#7hace9]
+    # [#4l0dab]
 
     def test_post_submit_transitions_reachable_via_workflow(self):
         tr = self._new_tr()
@@ -239,7 +232,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.status, "Approved")
         self.assertEqual(tr.docstatus, 1)
 
-        # [#zcfjrr]
+        # [#8gmmh9]
         frappe.set_user(self.supervisor)
         self.assertIn("Schedule", _actions(tr))
         apply_workflow(tr, "Schedule")
@@ -253,7 +246,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.status, "Fulfilled")
         self.assertEqual(tr.docstatus, 1)
 
-    # [#cmmi86]
+    # [#q4vbsq]
 
     def _approved_tr(self):
         tr = self._new_tr()
@@ -306,11 +299,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
             "status": "Planned",
         }).insert(ignore_permissions=True)
 
-        # [#fj9wto]
-        # [#c5m63k]
-        # [#p7e9je]
-        # [#nsd4f4]
-        # [#sh3252]
+        # [#tpap6c]
         apply_workflow(dt, "Dispatch")
         dt.reload()
         self.assertEqual(dt.status, "Dispatched")
@@ -328,9 +317,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
         self.assertEqual(tr.dispatch_trip, dt.name)
         self.assertEqual(tr.assigned_vehicle, vehicle)
 
-        # [#ad4e8h]
-        # [#23mi2d]
-        # [#exfnu5]
+        # [#t0b655]
         apply_workflow(dt, "Cancel")
         dt.reload()
         self.assertEqual(dt.status, "Cancelled")
@@ -357,7 +344,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
             }).insert(ignore_permissions=True).name
         return d
 
-    # [#hyt0ak]
+    # [#4u99m3]
 
     def test_web_form_draft_insert_starts_at_initial_state(self):
         from apex_habitat.salis.web_form.transport_request.transport_request import (

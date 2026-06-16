@@ -75,8 +75,7 @@ class TestPaymentRouter(FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # [#t3qt92]
-        # [#qgce3j]
+        # [#nhevq4]
         frappe.set_user("Administrator")
         if frappe.db.exists("DocType", STUB_DOCTYPE):
             frappe.delete_doc("DocType", STUB_DOCTYPE, force=1, ignore_permissions=True)
@@ -85,16 +84,16 @@ class TestPaymentRouter(FrappeTestCase):
 
     def setUp(self):
         frappe.set_user("Administrator")
-        # [#4j2wuf]
+        # [#j22s37]
         s = frappe.get_single(SETTINGS)
         s.target_payment_doctype = None
         s.auto_submit_target = 0
         s.set("field_map", [])
         s.save(ignore_permissions=True)
-        # [#jsso5f]
+        # [#5hd2hx]
         self._set_gl_posting(False)
 
-    # [#4lslw6]
+    # [#f9hua6]
 
     def _set_gl_posting(self, enabled):
         """Flip the app-wide enable_gl_posting flag the router's GL gate reads."""
@@ -123,9 +122,7 @@ class TestPaymentRouter(FrappeTestCase):
         doc = frappe.get_doc(data)
         doc.insert(ignore_permissions=True)
         doc.submit()
-        # [#25csv8]
-        # [#hxqj3m]
-        # [#m8rh9p]
+        # [#j5jo49]
         doc.status = "Approved by Finance"
         doc.save(ignore_permissions=True)
         doc.db_set("finance_approved_by", "Administrator", update_modified=False)
@@ -140,11 +137,10 @@ class TestPaymentRouter(FrappeTestCase):
         s.save(ignore_permissions=True)
         return s
 
-    # [#3xl7dj]
+    # [#6b1p7m]
 
     def test_default_target_is_native_payment_request(self):
-        # [#o3b3b3]
-        # [#i6589l]
+        # [#mmhyr3]
         s = frappe.get_single(SETTINGS)
         self.assertFalse(s.target_payment_doctype)
         self.assertEqual(get_target_doctype(s), "Payment Request")
@@ -170,7 +166,7 @@ class TestPaymentRouter(FrappeTestCase):
             self.skipTest("ERPNext Payment Request not installed on this site")
 
         pr = self._approved_request(amount=750.00, remarks="Default-route to native")
-        # [#h1aywl]
+        # [#9p959q]
         self._configure(
             None,
             [
@@ -183,35 +179,31 @@ class TestPaymentRouter(FrappeTestCase):
         )
 
         pr_mod = "erpnext.accounts.doctype.payment_request.payment_request"
-        # [#narjou]
-        # [#qok7bt]
-        # [#5ql84e]
+        # [#hoplry]
         with (
             patch(f"{pr_mod}.get_amount", return_value=750.00),
             patch(f"{pr_mod}.get_existing_payment_request_amount", return_value=0),
         ):
             created = route_payment(pr.name)
 
-        # [#nn6etr]
-        # [#e4a2g6]
+        # [#3vgho2]
         self.assertTrue(frappe.db.exists("Payment Request", created))
         built = frappe.get_doc("Payment Request", created)
         self.assertEqual(built.doctype, "Payment Request")
         self.assertEqual(built.reference_doctype, SOURCE_DOCTYPE)
         self.assertEqual(built.reference_name, pr.name)
         self.assertEqual(float(built.grand_total), 750.00)
-        # [#37rumh]
-        # [#37bsuq]
+        # [#nmut1t]
         self.assertTrue(built.currency, "router must default the target currency")
 
-        # [#iscggq]
+        # [#12z6l1]
         pr.reload()
         self.assertEqual(pr.linked_payment_entry, created)
 
-    # [#kjn84p]
+    # [#nxo01o]
 
     def test_not_approved_request_throws(self):
-        # [#lfxqz9]
+        # [#7sj7h2]
         pr = frappe.get_doc(
             {
                 "doctype": "Salis Payment Request",
@@ -247,8 +239,7 @@ class TestPaymentRouter(FrappeTestCase):
             }
         )
         pr.insert(ignore_permissions=True)
-        # [#rcjrir]
-        # [#kcopxy]
+        # [#9ptnct]
         frappe.db.set_value("Salis Payment Request", pr.name, "status", "Paid", update_modified=False)
         pr.reload()
         self.assertEqual(pr.status, "Paid")
@@ -259,7 +250,7 @@ class TestPaymentRouter(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError) as cm:
             route_payment(pr.name)
         self.assertIn("not finance-approved", str(cm.exception))
-        # [#5ud3l0]
+        # [#bgiokc]
         self.assertEqual(frappe.db.count("Note"), notes_before)
 
     def test_forged_finance_stamp_is_stripped_and_does_not_route(self):
@@ -296,11 +287,11 @@ class TestPaymentRouter(FrappeTestCase):
         self.assertIn("not finance-approved", str(cm.exception))
         self.assertEqual(frappe.db.count("Note"), notes_before)
 
-    # [#lwdrsh]
+    # [#s1tyq2]
 
     def test_field_map_builds_target(self):
         pr = self._approved_request(amount=987.00, remarks="Pay the office")
-        # [#mqensp]
+        # [#tkhqse]
         self._configure(
             "Note",
             [
@@ -313,17 +304,17 @@ class TestPaymentRouter(FrappeTestCase):
         self.assertTrue(frappe.db.exists("Note", created))
 
         note = frappe.get_doc("Note", created)
-        # [#rqjxzy]
+        # [#a4vb9h]
         self.assertEqual(note.title, pr.name)
         self.assertEqual(note.content, "Pay the office")
-        # [#ny1ut6]
+        # [#7w9xgi]
         self.assertEqual(int(note.public), 1)
 
-        # [#iv1mf6]
+        # [#pl04zt]
         pr.reload()
         self.assertEqual(pr.linked_payment_entry, created)
 
-    # [#qi3ixm]
+    # [#mxp9eu]
 
     def test_idempotent_second_call_returns_same(self):
         pr = self._approved_request()
@@ -332,7 +323,7 @@ class TestPaymentRouter(FrappeTestCase):
         first = route_payment(pr.name)
         notes_after_first = frappe.db.count("Note")
 
-        # [#jpikra]
+        # [#idiro9]
         second = route_payment(pr.name)
         self.assertEqual(first, second)
         self.assertEqual(frappe.db.count("Note"), notes_after_first)
@@ -358,11 +349,11 @@ class TestPaymentRouter(FrappeTestCase):
                 route_payment(pr.name)
         finally:
             frappe.set_user("Administrator")
-        # [#ifrov4]
+        # [#4km5p0]
         self.assertEqual(frappe.db.count("Note"), notes_before)
 
     def test_whitelisted_endpoint_routes(self):
-        # [#tjyp1q]
+        # [#bmi2c4]
         pr = self._approved_request()
         self._configure("Note", [{"target_fieldname": "title", "source_fieldname": "name"}])
         created = create_routed_payment(pr.name)
@@ -370,10 +361,10 @@ class TestPaymentRouter(FrappeTestCase):
         pr.reload()
         self.assertEqual(pr.linked_payment_entry, created)
 
-    # [#3glx47]
+    # [#c7o16k]
 
     def test_auto_submit_submits_submittable_target_when_gl_on(self):
-        # [#l2dcxf]
+        # [#lwpe1f]
         self._set_gl_posting(True)
         pr = self._approved_request(amount=555.00)
         self._configure(
@@ -391,9 +382,7 @@ class TestPaymentRouter(FrappeTestCase):
         self.assertEqual(target.party, "AFMCO")
 
     def test_auto_submit_blocked_when_gl_off_leaves_draft(self):
-        # [#fi2jcg]
-        # [#4nnm50]
-        # [#24ce7i]
+        # [#3r5w8w]
         pr = self._approved_request(amount=321.00)
         self._configure(
             STUB_DOCTYPE,
@@ -403,14 +392,12 @@ class TestPaymentRouter(FrappeTestCase):
         created = route_payment(pr.name)
         target = frappe.get_doc(STUB_DOCTYPE, created)
         self.assertEqual(target.docstatus, 0)  # [#p63ok1]
-        # [#nugl3g]
-        # [#6sfyje]
+        # [#56enlx]
         pr.reload()
         self.assertEqual(pr.linked_payment_entry, created)
 
     def test_no_auto_submit_leaves_draft(self):
-        # [#5vbdhh]
-        # [#kd80tp]
+        # [#ck9w8i]
         self._set_gl_posting(True)
         pr = self._approved_request()
         self._configure(

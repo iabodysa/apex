@@ -63,7 +63,7 @@ def get_building_grid(building: str) -> dict:
 
     building_title = frappe.db.get_value("Accommodation Building", building, "building_name") or building
 
-    # [#pyw7i4]
+    # [#nl1hpu]
     rooms = frappe.get_all(
         "Accommodation Room",
         filters={"building": building},
@@ -80,8 +80,7 @@ def get_building_grid(building: str) -> dict:
     )
     rooms_by_name = {r.name: r for r in rooms}
 
-    # [#mcr7zn]
-    # [#jxnwqp]
+    # [#hm7m0e]
     Bed = frappe.qb.DocType("Accommodation Bed")
     Room = frappe.qb.DocType("Accommodation Room")
     bed_rows = (
@@ -103,7 +102,7 @@ def get_building_grid(building: str) -> dict:
         .run(as_dict=True)
     )
 
-    # [#9xuir3]
+    # [#3pej3p]
     assignments = frappe.get_all(
         "Accommodation Assignment",
         filters={
@@ -115,8 +114,7 @@ def get_building_grid(building: str) -> dict:
     )
     assignments_by_bed = {a.bed: a for a in assignments}
 
-    # [#8z2bm2]
-    # [#pfrs8e]
+    # [#5i2m4q]
     tw_names: dict[str, str] = {}
     tw_parties = {a.party for a in assignments if a.party_type == "Temporary Worker" and a.party}
     if tw_parties:
@@ -125,8 +123,7 @@ def get_building_grid(building: str) -> dict:
         ):
             tw_names[row.name] = row.worker_name
 
-    # [#tv17qf]
-    # [#7a7uti]
+    # [#cxv258]
     custody_parents: set[str] = set()
     assignment_names = [a.name for a in assignments]
     if assignment_names:
@@ -141,7 +138,7 @@ def get_building_grid(building: str) -> dict:
         )
         custody_parents = {c.parent for c in custody_rows}
 
-    # [#14owgh]
+    # [#ikbfoc]
     summary = {"total_beds": 0, "available": 0, "occupied": 0, "blocked": 0, "out_of_service": 0}
     rooms_acc: dict[str, dict] = {}
 
@@ -161,8 +158,7 @@ def get_building_grid(building: str) -> dict:
         if color == "red":
             asg = assignments_by_bed.get(bed.bed)
             if asg:
-                # [#25jd7f]
-                # [#6xcepf]
+                # [#l1k03s]
                 occupant_name = (
                     asg.employee_name
                     or (tw_names.get(asg.party) if asg.party_type == "Temporary Worker" else None)
@@ -205,9 +201,7 @@ def get_building_grid(building: str) -> dict:
             }
         rooms_acc[room_name]["beds"].append(bed_payload)
 
-    # [#1hp3o7]
-    # [#5nwj1s]
-    # [#skk03q]
+    # [#tdh4h2]
     floors_acc: dict = {}
     for room in rooms_acc.values():
         key = room.pop("_floor")  # [#ewlx1f]
@@ -291,11 +285,7 @@ def quick_check_in(bed, employee=None, project=None, check_in_date=None,
     frappe.has_permission("Accommodation Assignment", "create", throw=True)
     frappe.has_permission("Accommodation Assignment", "submit", throw=True)
 
-    # [#k7r038]
-    # [#bfla6h]
-    # [#gs2zhb]
-    # [#70vj4k]
-    # [#sv0kr5]
+    # [#r8vwzx]
     if not party and employee:
         party_type, party = "Employee", employee
 
@@ -369,8 +359,7 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_conditio
     if not assignment:
         frappe.throw(_("No active assignment found for bed {0}.").format(bed))
 
-    # [#1xmhhh]
-    # [#12f5w3]
+    # [#f8dq4j]
     has_custody = bool(
         frappe.db.exists(
             "Accommodation Custody Item",

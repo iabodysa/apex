@@ -39,9 +39,7 @@ def _ensure_role(name):
     return name
 
 
-# [#ey5k9n]
-# [#8aod7z]
-# [#s950ds]
+# [#9lw62p]
 NON_PRIVILEGED_ROLE = "Blogger"
 
 
@@ -54,9 +52,9 @@ class TestMaintenanceRequestQuery(FrappeTestCase):
         super().setUpClass()
         frappe.set_user("Administrator")
         _ensure_role("Resident Request Coordinator")
-        # [#3h902m]
+        # [#jsrqcb]
         cls.requester = _user("mr_requester@example.com", NON_PRIVILEGED_ROLE)
-        # [#j192cv]
+        # [#rnz9xk]
         cls.coordinator = _user(
             "mr_coordinator@example.com", "Resident Request Coordinator"
         )
@@ -101,9 +99,9 @@ class TestMaintenanceRequestQuery(FrappeTestCase):
         """
         evil = "x' or '1'='1"
         frag = maintenance_request_query(user=evil)
-        # [#kvsq9j]
+        # [#qa12lg]
         self.assertIn(frappe.db.escape(evil), frag)
-        # [#nb7ml2]
+        # [#q66sg8]
         self.assertNotIn("= x' or '1'='1", frag)
 
 

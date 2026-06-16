@@ -44,7 +44,7 @@ class TestSalisFleetScoping(FrappeTestCase):
             ).name
         return p
 
-    # [#cz5b30]
+    # [#tlagf1]
 
     def test_vehicle_query_scoped_for_supervisor(self):
         frag = salis_vehicle_query(self.sup)
@@ -55,15 +55,15 @@ class TestSalisFleetScoping(FrappeTestCase):
         self.assertEqual(salis_vehicle_query(self.mgr), "")
 
     def test_driver_query_preserves_self_profile(self):
-        # [#9re369]
+        # [#16p2k1]
         frag = salis_driver_query(self.sup)
         self.assertIn("owner", frag)
         self.assertIn(self.pa, frag)
-        # [#7v1slm]
+        # [#sxwqtz]
         drv_frag = salis_driver_query(self.drv)
         self.assertIn("owner", drv_frag)
         self.assertNotIn(self.pa, drv_frag)
-        # [#8nsgcc]
+        # [#iuhzj4]
         self.assertEqual(salis_driver_query(self.mgr), "")
 
     def test_manifest_query_scoped_for_supervisor(self):
@@ -71,41 +71,40 @@ class TestSalisFleetScoping(FrappeTestCase):
         self.assertEqual(passenger_manifest_query(self.mgr), "")
 
     def test_trip_start_log_query_preserves_self_records(self):
-        # [#r9enxb]
+        # [#a0piq0]
         frag = trip_start_log_query(self.sup)
         self.assertIn("owner", frag)
         self.assertIn("route_plan", frag)
         self.assertIn(self.pa, frag)
-        # [#ox5dyr]
+        # [#ix7j3f]
         drv_frag = trip_start_log_query(self.drv)
         self.assertIn("owner", drv_frag)
         self.assertNotIn("route_plan", drv_frag)
         self.assertNotIn(self.pa, drv_frag)
-        # [#8nsgcc]
+        # [#iuhzj4]
         self.assertEqual(trip_start_log_query(self.mgr), "")
 
     def test_trip_start_log_has_permission_owner_and_scope(self):
-        # [#mt38mf]
-        # [#3l3pag]
+        # [#m9kv5z]
         own = frappe._dict(
             {"doctype": "Trip Start Log", "owner": self.drv, "route_plan": None}
         )
         self.assertIsNone(
             trip_start_log_has_permission(own, "write", user=self.drv)
         )
-        # [#t71tb9]
+        # [#coluet]
         foreign = frappe._dict(
             {"doctype": "Trip Start Log", "owner": "someone@example.com", "route_plan": None}
         )
         self.assertFalse(
             trip_start_log_has_permission(foreign, "read", user=self.sup)
         )
-        # [#t81uwp]
+        # [#5tb95b]
         self.assertIsNone(
             trip_start_log_has_permission(foreign, "read", user=self.mgr)
         )
 
-    # [#nmn4of]
+    # [#qo03wb]
 
     def test_vehicle_has_permission(self):
         v_in = frappe._dict({"doctype": "Salis Vehicle", "project": self.pa})

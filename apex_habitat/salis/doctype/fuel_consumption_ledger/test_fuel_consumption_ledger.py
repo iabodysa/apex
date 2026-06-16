@@ -19,9 +19,7 @@ from apex_habitat.salis.fuel_engine import accrue_fuel_consumption, reverse_fuel
 
 LEDGER = "Fuel Consumption Ledger"
 
-# [#rgt0ui]
-# [#8dsjls]
-# [#2upvdd]
+# [#t0h2nq]
 test_ignore = [
     "Company",
     "Cost Center",
@@ -58,7 +56,7 @@ class TestFuelLedgerReversalDirect(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         self._purge()
-        # [#liynkv]
+        # [#ih09ij]
         frappe.get_doc(
             {
                 "doctype": LEDGER,
@@ -94,7 +92,7 @@ class TestFuelLedgerReversalDirect(FrappeTestCase):
         posted = reverse_fuel_ledger("Fuel Daily Log", self.SOURCE)
         self.assertEqual(posted, 1, "Exactly one reversal row must be posted.")
 
-        # [#ncl5g2]
+        # [#1wtbow]
         rev = frappe.get_all(
             LEDGER,
             filters={"reversal_of": original},
@@ -105,7 +103,7 @@ class TestFuelLedgerReversalDirect(FrappeTestCase):
         self.assertEqual(flt(rev[0].amount), -600.0)
         self.assertEqual(rev[0].vehicle, self.vehicle)
 
-        # [#l8x6es]
+        # [#e2ktzb]
         rows = _rows_for_original(original)
         self.assertEqual(flt(sum(flt(r.litres) for r in rows)), 0.0)
         self.assertEqual(flt(sum(flt(r.amount) for r in rows)), 0.0)
@@ -157,7 +155,7 @@ class TestFuelDailyLogDeleteReverses(FrappeTestCase):
             lambda: frappe.db.delete(LEDGER, {"source_type": "Fuel Daily Log", "source_name": log_name})
         )
 
-        # [#9jj8by]
+        # [#dxreq2]
         accrue_fuel_consumption()
         original = frappe.get_value(
             LEDGER, {"source_type": "Fuel Daily Log", "source_name": log_name}, "name"
@@ -165,7 +163,7 @@ class TestFuelDailyLogDeleteReverses(FrappeTestCase):
         self.assertTrue(original, "Daily log must be ledgered by accrual before the delete test.")
         self.addCleanup(lambda: frappe.db.delete(LEDGER, {"reversal_of": original}))
 
-        # [#5d6tyu]
+        # [#6h15qh]
         frappe.delete_doc("Fuel Daily Log", log_name, force=True, ignore_permissions=True)
 
         rev = frappe.get_all(LEDGER, filters={"reversal_of": original}, fields=["litres", "amount"])
@@ -240,7 +238,7 @@ class TestFuelRequestCancelReverses(FrappeTestCase):
         self.assertTrue(original, "Done request must be ledgered before cancel.")
         self.addCleanup(lambda: frappe.db.delete(LEDGER, {"reversal_of": original}))
 
-        # [#fbxefe]
+        # [#fwj30h]
         doc.reload()
         doc.cancel()
 
@@ -252,6 +250,6 @@ class TestFuelRequestCancelReverses(FrappeTestCase):
         rows = _rows_for_original(original)
         self.assertEqual(flt(sum(flt(r.litres) for r in rows)), 0.0)
 
-        # [#37ddyv]
+        # [#8b8d5n]
         again = reverse_fuel_ledger("Fuel Request", name)
         self.assertEqual(again, 0, "A second reversal pass must not double-post.")

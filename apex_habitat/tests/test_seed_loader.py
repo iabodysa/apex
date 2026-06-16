@@ -23,7 +23,7 @@ class TestSeedLoaderStructure(unittest.TestCase):
         self.assertEqual(spec["key"], "name")
         self.assertTrue(spec["create_only"])
         self.assertEqual(len(spec["records"]), 3)
-        # [#3avk34]
+        # [#cvogqp]
         self.assertTrue(os.path.isdir(os.path.join(DATA_ROOT, "habitat")))
 
     def test_only_filter_excludes_other_doctypes(self):

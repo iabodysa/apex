@@ -30,10 +30,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-# [#ip8yq8]
-# [#1ixgcv]
-# [#ak590k]
-# [#nmuvwd]
+# [#6n814k]
 VALID_STATUSES = (
 	"Draft",
 	"Submitted to Movement",
@@ -46,8 +43,7 @@ VALID_STATUSES = (
 
 class FuelClaim(Document):
 	def before_insert(self):
-		# [#awqu0h]
-		# [#sl3oie]
+		# [#lmqimg]
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
 
@@ -58,8 +54,7 @@ class FuelClaim(Document):
 			frappe.throw(_("Invalid status: {0}").format(self.status))
 		if (self.claimed_litres or 0) <= 0:
 			frappe.throw(_("Claimed Litres must be greater than zero."))
-		# [#6wzbxk]
-		# [#nhwohx]
+		# [#a05dfs]
 		if (self.claimed_amount or 0) < 0:
 			frappe.throw(_("Claimed Amount cannot be negative."))
 		self._set_financial_defaults()
@@ -79,11 +74,9 @@ class FuelClaim(Document):
 		if not self.cost_center:
 			self.cost_center = get_default_cost_center()
 
-	# [#m058f8]
-	# [#osirom]
-	# [#9zovur]
+	# [#a4g9yp]
 
-	# [#4lslw6]
+	# [#m88md8]
 
 	def _compute_consumption(self):
 		"""Derive consumed litres from the Fuel Consumption Ledger and the

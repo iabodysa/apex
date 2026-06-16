@@ -103,7 +103,7 @@ class TestFuelMergeShape(FrappeTestCase):
 		self.assertTrue(meta.has_field("request_type"))
 		options = (meta.get_field("request_type").options or "").split("\n")
 		self.assertEqual([o for o in options if o], ["Standard", "Top-up", "Chip"])
-		# [#fv1og3]
+		# [#7m3vxc]
 		for f in (
 			"topup_litres", "is_temporary", "revert_due_date", "reverted",
 			"chip_number", "action", "inactivity_evidence",
@@ -296,17 +296,16 @@ class TestFuelRequestChip(FrappeTestCase):
 		name = doc.name
 		self.addCleanup(lambda: _purge(name))
 
-		# [#9e9k1v]
+		# [#h93m1u]
 		self.assertRaises(frappe.ValidationError, doc.submit)
 
-		# [#q6q2mc]
-		# [#x9hdbu]
+		# [#nzk62t]
 		doc = frappe.get_doc("Fuel Request", name)
 		doc.inactivity_evidence = "/files/evidence.pdf"
 		doc.save(ignore_permissions=True)
 		self.assertRaises(frappe.ValidationError, doc.submit)
 
-		# [#glbuyk]
+		# [#6xsbgv]
 		doc = frappe.get_doc("Fuel Request", name)
 		doc.inactivity_evidence = "/files/evidence.pdf"
 		doc.owner_acknowledged = 1
@@ -345,9 +344,7 @@ class TestFuelRequestTypeGuards(FrappeTestCase):
 		})
 		doc.insert(ignore_permissions=True)
 		self.addCleanup(lambda: _purge(doc.name))
-		# [#d9dqdc]
-		# [#dkwyzf]
-		# [#f13rz1]
+		# [#n5y0oc]
 		if get_workflow_name("Fuel Request") == "Fuel Request Workflow":
 			from frappe.model.workflow import apply_workflow
 			with self.assertRaises(frappe.ValidationError):

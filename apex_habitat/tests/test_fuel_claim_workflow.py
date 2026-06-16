@@ -47,9 +47,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		frappe.set_user("Administrator")
-		# [#2x6s2e]
-		# [#t6jx9e]
-		# [#m05xw9]
+		# [#bytxga]
 		cls.requester = _user("fcw_req@example.com", "Fleet Project Manager")
 		cls.manager = _user("fcw_mgr@example.com", "Fleet Manager")
 		cls.manager_maker = _user("fcw_mgrmaker@example.com", "Fleet Manager")
@@ -73,7 +71,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
-	# [#4lslw6]
+	# [#m88md8]
 
 	@staticmethod
 	def _project(name):
@@ -134,7 +132,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 				pass
 		frappe.delete_doc("Fuel Claim", name, ignore_permissions=True, force=True)
 
-	# [#idl6yv]
+	# [#stmhgc]
 
 	def test_workflow_is_seeded_and_active(self):
 		self.assertEqual(get_workflow_name("Fuel Claim"), WORKFLOW)
@@ -143,7 +141,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 			frappe.db.get_value("Workflow", WORKFLOW, "workflow_state_field"), "status"
 		)
 
-	# [#dws0r5]
+	# [#cu9yjg]
 
 	def test_reconcile_approve_then_close(self):
 		fc = self._new()
@@ -162,24 +160,21 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		self.assertEqual(fc.status, "Reconciled")
 		self.assertEqual(fc.docstatus, 0)
 
-		# [#oa0bf8]
-		# [#qdwa7u]
+		# [#5s7xwx]
 		self.assertIn("Approve", _actions(fc))
 		apply_workflow(fc, "Approve")
 		fc.reload()
 		self.assertEqual(fc.status, "Approved")
 		self.assertEqual(fc.docstatus, 1)
 
-		# [#r59gdt]
-		# [#848vr4]
-		# [#e2ddcm]
+		# [#828sio]
 		self.assertIn("Close", _actions(fc))
 		apply_workflow(fc, "Close")
 		fc.reload()
 		self.assertEqual(fc.status, "Closed")
 		self.assertEqual(fc.docstatus, 1)
 
-	# [#bpwy18]
+	# [#iv08wh]
 
 	def test_dispute_then_resubmit(self):
 		fc = self._reconciled()
@@ -196,12 +191,10 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		self.assertEqual(fc.status, "Submitted to Movement")
 		self.assertEqual(fc.docstatus, 0)
 
-	# [#7tbox3]
+	# [#5sd83a]
 
 	def test_sod_requester_cannot_approve(self):
-		# [#f1afl3]
-		# [#zjk01p]
-		# [#286nf7]
+		# [#61e573]
 		fc = self._reconciled(requested_by=self.manager_maker)
 
 		frappe.set_user(self.manager_maker)
@@ -209,7 +202,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			apply_workflow(fc, "Approve")
 
-		# [#9gg153]
+		# [#5k9urr]
 		frappe.set_user(self.manager)
 		self.assertIn("Approve", _actions(fc))
 		apply_workflow(fc, "Approve")
@@ -217,7 +210,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		self.assertEqual(fc.status, "Approved")
 		self.assertEqual(fc.docstatus, 1)
 
-	# [#qmp2y3]
+	# [#df22x0]
 
 	def test_approve_succeeds_via_workflow_gate(self):
 		"""Approval authority now lives entirely in the native workflow's Approve
@@ -232,7 +225,7 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 		self.assertEqual(fc.docstatus, 1)
 		self.assertEqual(fc.status, "Approved")
 
-	# [#dbvsmy]
+	# [#b2z19z]
 
 	def test_approve_and_close_post_no_gl(self):
 		fc = self._reconciled()

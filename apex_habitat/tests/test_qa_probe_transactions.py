@@ -1,7 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#193dth]
-# [#fw02ly]
-# [#dww5y2]
+# [#plvx64]
 
 import frappe
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
@@ -27,8 +25,7 @@ class QABase(ApexHabitatTestCase):
         self.project = frappe.db.get_value("Project", {}) or frappe.get_doc({
             "doctype": "Project", "project_name": "Test Project", "company": self.company,
         }).insert(ignore_permissions=True).name
-        # [#tmk85t]
-        # [#5fm3o7]
+        # [#91r2jb]
         self.employee = frappe.get_doc({
             "doctype": "Employee", "first_name": "QA Emp " + _hash(),
             "company": self.company, "gender": "Male",
@@ -75,7 +72,7 @@ class QABase(ApexHabitatTestCase):
 
 
 class TestRoomGenerator(QABase):
-    # [#kdjdw1]
+    # [#jyrwfb]
     def test_1a_rerun_same_plan_no_duplicates(self):
         b = self._make_building(room_count=3)
         generate_rooms_and_beds(b.name)
@@ -86,7 +83,7 @@ class TestRoomGenerator(QABase):
         self.assertEqual(after, before, "BUG: re-run created duplicate rooms")
         self.assertEqual(res["created_rooms"], 0)
 
-    # [#nhmjx3]
+    # [#od7oek]
     def test_1b_change_room_type_updates_existing(self):
         b = self._make_building(room_count=3, room_type="Standard")
         generate_rooms_and_beds(b.name)
@@ -102,7 +99,7 @@ class TestRoomGenerator(QABase):
         self.assertGreaterEqual(res.get("updated_rooms", 0), 1)
         self.assertEqual(res.get("created_rooms"), 0)
 
-    # [#kt39lv]
+    # [#a0gtk7]
     def test_1c_increase_room_count_requires_confirmation(self):
         b = self._make_building(room_count=3)
         generate_rooms_and_beds(b.name)
@@ -112,7 +109,7 @@ class TestRoomGenerator(QABase):
         b.floor_plan[0].room_count = 5
         b.save(ignore_permissions=True)
 
-        # [#o96ovx]
+        # [#dz2rbh]
         res = generate_rooms_and_beds(b.name)
         mid = frappe.db.count("Accommodation Room", {"building": b.name})
         print(f"\n[1c] no-confirm before={before} after={mid} created={res.get('created_rooms')} pending={res.get('pending_new_rooms')} needs_confirmation={res.get('needs_confirmation')}")
@@ -121,7 +118,7 @@ class TestRoomGenerator(QABase):
         self.assertEqual(mid, before, "no rooms may be created without confirmation")
         self.assertEqual(res.get("pending_new_rooms"), 2)
 
-        # [#h8y897]
+        # [#76jxz7]
         res2 = generate_rooms_and_beds(b.name, confirm_new_rooms=1)
         after = frappe.db.count("Accommodation Room", {"building": b.name})
         print(f"[1c] confirmed after={after} created={res2.get('created_rooms')}")
@@ -130,7 +127,7 @@ class TestRoomGenerator(QABase):
 
 
 class TestCheckout(QABase):
-    # [#ifh5t5]
+    # [#jvfrqh]
     def test_2_double_checkout_rejected(self):
         b = self._make_building()
         generate_rooms_and_beds(b.name)
@@ -160,7 +157,7 @@ class TestCheckout(QABase):
 
 
 class TestCancelledRecreate(QABase):
-    # [#2n7fs5]
+    # [#pmjdgz]
     def test_3_cancelled_assignment_allows_recreate(self):
         b = self._make_building()
         generate_rooms_and_beds(b.name)
@@ -180,7 +177,7 @@ class TestCancelledRecreate(QABase):
         print(f"[3] re-create after cancel allowed={allowed} err={err}")
         self.assertTrue(allowed, f"BUG: cancelled assignment wrongly blocked re-create: {err}")
 
-    # [#tim5ai]
+    # [#2hduyn]
     def test_3b_recheckout_after_checkout_cancel(self):
         b = self._make_building()
         generate_rooms_and_beds(b.name)
@@ -252,7 +249,7 @@ class TestCustody(QABase):
         r.submit()
         return r
 
-    # [#rihp0f]
+    # [#fee3o1]
     def test_4a_over_return_rejected(self):
         art = self._article()
         issue = self._issue(art, qty=5)
@@ -266,11 +263,11 @@ class TestCustody(QABase):
         print(f"\n[4a] over-return (10 of 5 issued) rejected={rejected} err={err}")
         issue.reload()
         print(f"[4a] issue status after over-return attempt={issue.status}")
-        # [#mzttia]
+        # [#3g5qhp]
         self.assertTrue(rejected, "over-quantity custody return must be rejected")
         self.assertNotEqual(issue.status, "Returned", "over-return must not mark the issue Returned")
 
-    # [#59rb25]
+    # [#r2oxpn]
     def test_4b_double_full_return(self):
         art = self._article()
         issue = self._issue(art, qty=5)
@@ -283,10 +280,10 @@ class TestCustody(QABase):
         except Exception as e:
             err = str(e)
         print(f"\n[4b] second full return rejected={rejected} err={err}")
-        # [#gr5pjc]
+        # [#33yq43]
         self.assertTrue(rejected, "second full custody return must be rejected")
 
-    # [#m19jcp]
+    # [#ohimc7]
     def test_4c_two_issues_same_article_employee(self):
         art = self._article()
         self._issue(art, qty=2)
@@ -320,7 +317,7 @@ class TestDuplicateOverlap(QABase):
         b.submit()
         return b
 
-    # [#d35vmi]
+    # [#pcy62y]
     def test_5a_duplicate_utility_bill(self):
         b = self._make_building()
         acc = self._utility_account(b.name)
@@ -333,10 +330,10 @@ class TestDuplicateOverlap(QABase):
         except Exception as e:
             err = str(e)
         print(f"\n[5a] duplicate utility bill (same account+period) rejected={rejected} err={err}")
-        # [#j3tmhz]
+        # [#ld1x29]
         self.assertTrue(rejected, "duplicate utility bill must be rejected")
 
-    # [#37alse]
+    # [#gxkhtt]
     def _lease(self, building, start, end, first_pay):
         lease = frappe.get_doc({
             "doctype": "Accommodation Lease", "naming_series": "ACC-LEASE-.YYYY.-.####",
@@ -359,10 +356,10 @@ class TestDuplicateOverlap(QABase):
             allowed = False
             err = str(e)
         print(f"\n[5b] overlapping lease same building allowed={allowed} err={err}")
-        # [#i5pynn]
+        # [#1mwpx6]
         self.assertFalse(allowed, "overlapping leases for the same building must be rejected")
 
-    # [#qbuev1]
+    # [#rndih9]
     def test_5c_two_work_orders_same_request(self):
         b = self._make_building()
         room, _bed = self._first_room_bed(b.name) if frappe.db.count("Accommodation Room", {"building": b.name}) else (None, None)
@@ -396,5 +393,5 @@ class TestDuplicateOverlap(QABase):
             allowed = False
             err = str(e)
         print(f"\n[5c] second work order same request allowed={allowed} err={err}")
-        # [#3gcyf4]
+        # [#o0lect]
         self.assertFalse(allowed, "a second Work Order for the same Maintenance Request must be rejected")

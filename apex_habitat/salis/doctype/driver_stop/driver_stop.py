@@ -24,7 +24,7 @@ class DriverStop(Document):
                 frappe.throw(_("Select the vehicle to release."))
 
     def before_submit(self):
-        # [#ku7cqs]
+        # [#rx155z]
         if self.stop_reason in ("Violation", "Termination") and not self.evidence:
             frappe.throw(
                 _("Evidence is required to submit a stop with reason {0}.").format(_(self.stop_reason))
@@ -33,7 +33,7 @@ class DriverStop(Document):
     def on_submit(self):
         lock_driver(self.driver)
 
-        # [#bp5wlg]
+        # [#td8oap]
         self.db_set("previous_status", frappe.db.get_value("Salis Driver", self.driver, "status"))
 
         frappe.db.set_value("Salis Driver", self.driver, "status", "Stopped")
@@ -45,7 +45,7 @@ class DriverStop(Document):
                 self.related_vehicle,
                 {"status": "Released", "current_driver": None},
             )
-            # [#8lr343]
+            # [#9hcb5j]
             if frappe.db.get_value("Salis Driver", self.driver, "current_vehicle") == self.related_vehicle:
                 frappe.db.set_value("Salis Driver", self.driver, "current_vehicle", None)
 
@@ -59,11 +59,7 @@ class DriverStop(Document):
     def on_cancel(self):
         lock_driver(self.driver)
 
-        # [#r5w7ui]
-        # [#5rg79f]
-        # [#1mta1b]
-        # [#rklujf]
-        # [#c0lrq8]
+        # [#g024t7]
         another_stop_in_force = frappe.db.exists(
             "Driver Stop",
             {"driver": self.driver, "docstatus": 1, "name": ["!=", self.name]},
@@ -75,8 +71,7 @@ class DriverStop(Document):
             restore = self.previous_status or "Active"
             frappe.db.set_value("Salis Driver", self.driver, "status", restore)
 
-        # [#ekxt41]
-        # [#1k6eth]
+        # [#99mc4z]
         if self.release_vehicle and self.related_vehicle:
             lock_vehicle(self.related_vehicle)
             current_driver = frappe.db.get_value("Salis Vehicle", self.related_vehicle, "current_driver")

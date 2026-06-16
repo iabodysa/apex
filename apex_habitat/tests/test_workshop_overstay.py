@@ -16,7 +16,7 @@ class TestWorkshopOverstay(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def _vehicle_with_maintenance_stop(self, stop_days_ago):
-        # [#5wbd96]
+        # [#atg6pq]
         plate = "WO " + self._testMethodName
         vehicle = frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
@@ -51,7 +51,7 @@ class TestWorkshopOverstay(FrappeTestCase):
 
     def test_recovered_vehicle_no_alert(self):
         vehicle = self._vehicle_with_maintenance_stop(20)
-        # [#tdk54g]
+        # [#qsakev]
         frappe.db.set_value("Salis Vehicle", vehicle, "status", "Active")
         workshop_overstay_watch()
         self.assertFalse(

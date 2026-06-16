@@ -53,26 +53,23 @@ def apply_apex_setup(args=None):
 
     payment_method = args.get("apex_default_payment_method")
 
-    # [#knd5u7]
+    # [#55h4xa]
     apex = frappe.get_single("Apex Settings")
     if payment_method:
         apex.default_payment_method = payment_method
-    # [#cyuc3q]
+    # [#gatccs]
     apex.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
     apex.save(ignore_permissions=True)
 
-    # [#4e5jex]
+    # [#lufx4w]
     settings = frappe.get_single("Habitat Settings")
-    # [#d1oej5]
+    # [#bbeka8]
     settings.enable_housing_allowance_deduction = 1 if cint(args.get("apex_deduct_housing_allowance")) else 0
     settings.enable_damage_deduction = 1 if cint(args.get("apex_deduct_damage")) else 0
     try:
         settings.save(ignore_permissions=True)
     except frappe.ValidationError:
-        # [#3jakkl]
-        # [#g1g2gb]
-        # [#p8nhid]
-        # [#qwowt8]
+        # [#44x8l9]
         frappe.clear_last_message()
         settings.reload()
         settings.enable_housing_allowance_deduction = 0

@@ -28,7 +28,7 @@ def on_submit(doc, method=None):
     if getattr(settings, "enable_damage_deduction", 0) and doc.employee:
         logger = frappe.logger()
 
-        # [#qnvow3]
+        # [#cgz16m]
         amount = flt(doc.total_estimated_replacement_cost_sar)
         max_deduction = flt(getattr(settings, "max_damage_deduction_per_checkout_sar", 500))
         if max_deduction > 0 and amount > max_deduction:
@@ -40,7 +40,7 @@ def on_submit(doc, method=None):
             )
             return
 
-        # [#dzp522]
+        # [#m8u7fg]
         company = frappe.db.get_value("Employee", doc.employee, "company")
         if not company:
             logger.warning(
@@ -57,15 +57,12 @@ def on_submit(doc, method=None):
             )
             return
 
-        # [#9junki]
+        # [#kfnh9k]
         component_type = frappe.db.get_value("Salary Component", salary_component, "type")
         if component_type != "Deduction":
             frappe.throw(_("Salary component {0} must be of type Deduction for damage assessments.").format(salary_component))
 
-        # [#dtjk2b]
-        # [#fohbje]
-        # [#bq8u25]
-        # [#j44d3i]
+        # [#s89pd2]
         add_sal = frappe.get_doc({
             "doctype": "Additional Salary",
             "employee": doc.employee,
@@ -75,13 +72,10 @@ def on_submit(doc, method=None):
             "company": company,
             "remarks": f"Deduction for custody damage assessment {doc.name}"
         })
-        # [#hy6qbk]
-        # [#mtl3xx]
-        # [#bzjfay]
-        # [#1cioh0]
+        # [#555m5p]
         add_sal.insert(ignore_permissions=True)
 
-        # [#bnva67]
+        # [#rbyvmi]
         frappe.db.set_value("Custody Damage Assessment", doc.name, "deduction_entry", add_sal.name)
 
         logger.info(

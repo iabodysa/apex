@@ -55,18 +55,18 @@ class TestOccupancySnapshot(ApexHabitatTestCase):
         self.assertEqual(snaps[0].occupancy_percent, 25.0)
         self.assertEqual(snaps[0].available_capacity, 3)
 
-        # [#2ce9wq]
+        # [#1voa1d]
         daily_occupancy_snapshot()
         self.assertEqual(
             frappe.db.count("Accommodation Occupancy Snapshot",
                             {"building": self.building.name, "snapshot_date": today()}),
             1, "snapshot must be idempotent per building per day")
 
-        # [#4qbk2h]
+        # [#tuhvo3]
         meta = frappe.get_meta("Accommodation Occupancy Snapshot")
         self.assertFalse(any(p.create for p in meta.permissions), "snapshot must be read-only (no create)")
 
-        # [#o2tbrp]
+        # [#riybvv]
         columns, data, *_ = execute({"from_date": today(), "to_date": today(), "building": self.building.name})
         mine = [d for d in data if d["building"] == self.building.name]
         self.assertEqual(len(mine), 1)

@@ -49,7 +49,7 @@ ASSIGNMENT_CONTROLLER = os.path.normpath(
     )
 )
 
-# [#3qounl]
+# [#1od4cm]
 FOR_UPDATE_FRAGMENT = "FOR UPDATE"
 
 
@@ -101,7 +101,7 @@ class TestBedBookingConcurrencyGuard(unittest.TestCase):
             "The submit hook has been renamed or removed.",
         )
 
-        # [#32mlh2]
+        # [#p8iao3]
         source_lines = source.splitlines()
         start = on_submit_node.lineno - 1
         end = on_submit_node.end_lineno

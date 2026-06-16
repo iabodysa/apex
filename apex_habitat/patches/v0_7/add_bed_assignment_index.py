@@ -15,9 +15,7 @@ def execute():
     if not frappe.db.exists("DocType", "Accommodation Assignment"):
         return
 
-    # [#5clrvg]
-    # [#nfgngf]
-    # [#c68fuh]
+    # [#44ssmk]
     try:
         frappe.db.sql(
             "ALTER TABLE `tabAccommodation Assignment` "
@@ -30,7 +28,7 @@ def execute():
         )
         raise
 
-    # [#trbyb1]
+    # [#cfszw1]
     try:
         frappe.db.sql(
             "ALTER TABLE `tabAccommodation Assignment` "

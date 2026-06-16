@@ -31,10 +31,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-# [#ip8yq8]
-# [#puqmux]
-# [#rro23r]
-# [#xtxs2k]
+# [#26k8q4]
 VALID_STATUSES = (
 	"Open",
 	"Under Investigation",
@@ -44,12 +41,7 @@ VALID_STATUSES = (
 	"Closed",
 )
 
-# [#f63jiu]
-# [#pjdqn5]
-# [#94u6s5]
-# [#tk7kyc]
-# [#fw7ecx]
-# [#fy9jar]
+# [#i41sti]
 _CLOSING_STATUSES = {"Resolved", "Closed"}
 
 
@@ -64,12 +56,9 @@ class FuelExceptionCase(Document):
 		self._guard_initial_status()
 		self._enforce_closure_controls()
 
-	# [#m4vjrp]
-	# [#nt09ke]
-	# [#bnm6hu]
-	# [#1d3cvw]
+	# [#hk8b8a]
 
-	# [#4lslw6]
+	# [#m88md8]
 
 	def _default_reporter(self):
 		"""Default the raiser to the current session user when blank."""

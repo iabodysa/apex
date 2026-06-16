@@ -1,8 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# [#hlfy1g]
-# [#rf8fpd]
+# [#8evoal]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -76,7 +75,7 @@ class TestBuildingLicense(FrappeTestCase):
             "expiry_date": "2027-01-01",
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
-        # [#s41pv8]
+        # [#hp95rq]
         self.assertFalse(doc.last_renewal_date)
 
         doc.expiry_date = "2028-01-01"
@@ -106,13 +105,11 @@ class TestBuildingLicense(FrappeTestCase):
         })
         original.flags.ignore_links = True
         original.insert(ignore_permissions=True, ignore_links=True)
-        # [#cprgny]
-        # [#5gsorl]
+        # [#5mkxcg]
         original.submit()
         original.cancel()
 
-        # [#sz534a]
-        # [#mtxop4]
+        # [#gjyeer]
         amended = frappe.get_doc({
             "doctype": "Building License",
             "naming_series": "BLDG-LIC-.YYYY.-.####",
@@ -152,9 +149,7 @@ class TestBuildingLicense(FrappeTestCase):
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
 
-        # [#nvwz0c]
-        # [#cydubm]
-        # [#m6d8u3]
+        # [#asohtq]
         from frappe.utils import getdate, add_days
         target = getdate(add_days(doc.expiry_date, 30))
         doc.expiry_date = target
@@ -167,7 +162,7 @@ class TestBuildingLicense(FrappeTestCase):
         self.assertEqual(getdate(doc.expiry_date), target)
         self.assertEqual(str(doc.last_renewal_date), today())
         self.assertEqual(doc.status, "Active")
-        # [#40vubu]
+        # [#6x7dn4]
         self.assertTrue(callable(blc.renew))
 
         frappe.delete_doc("Building License", doc.name, force=True, ignore_permissions=True)

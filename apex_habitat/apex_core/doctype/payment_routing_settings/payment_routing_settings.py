@@ -46,9 +46,7 @@ class PaymentRoutingSettings(Document):
                 )
             seen.add(target)
             if row.is_static:
-                # [#51od3z]
-                # [#ovp7np]
-                # [#na9pzl]
+                # [#hju7o1]
                 if (row.source_fieldname or "").strip():
                     frappe.throw(
                         _("Field Map row {0}: clear Source Fieldname on a Static row.").format(

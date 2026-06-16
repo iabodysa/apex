@@ -38,15 +38,11 @@ from frappe.utils import today
 
 from apex_habitat.salis.permissions import _allowed_projects, _is_unscoped
 
-# [#janynu]
-# [#l0rctv]
-# [#k5l4f8]
-# [#grwt8u]
+# [#1f7jod]
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 TRIP_STATUSES = ["Planned", "Dispatched", "Completed", "Cancelled"]
 
-# [#a1qqki]
-# [#lwg4x9]
+# [#n0q8c1]
 CLOSED_REQUEST_STATUSES = {"Scheduled", "Fulfilled", "Rejected", "Cancelled"}
 
 
@@ -110,8 +106,7 @@ def get_dispatch_board(project: str | None = None) -> dict:
 
     unscoped, projects = _permitted_projects()
 
-    # [#dexv1m]
-    # [#td1m9f]
+    # [#li9kuz]
     if project:
         if unscoped:
             projects = [project]
@@ -119,10 +114,10 @@ def get_dispatch_board(project: str | None = None) -> dict:
         elif project in (projects or []):
             projects = [project]
         else:
-            # [#po0f3x]
+            # [#qltiv4]
             projects = []
 
-    # [#67ww5h]
+    # [#rn48et]
     if not unscoped and not projects:
         return _empty_board(unscoped, projects, project)
 
@@ -268,8 +263,7 @@ def _drivers_pane(unscoped, projects) -> dict:
     """
     driver_filters = _project_filter(unscoped, projects)
     driver_filters["status"] = "Active"
-    # [#s87t0v]
-    # [#scegqu]
+    # [#2xijms]
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
 
     drivers = frappe.get_all(
@@ -290,8 +284,7 @@ def _drivers_pane(unscoped, projects) -> dict:
 
     driver_names = [d.name for d in drivers]
 
-    # [#3e131u]
-    # [#4v5hhl]
+    # [#7h631j]
     assigned_today = set(
         frappe.get_all(
             "Dispatch Trip",

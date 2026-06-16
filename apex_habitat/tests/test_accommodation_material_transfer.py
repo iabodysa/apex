@@ -51,7 +51,7 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
                                "default_cost_center": cc}).insert(ignore_permissions=True).name
 
     def _seed_store(self, building, qty):
-        # [#s1ca97]
+        # [#gu1dfd]
         post_stock_entry(item_type="Custody Article", item=self.article, qty=qty,
                          building=building, voucher_type="Opening Stock", voucher_no="OPEN-" + _h())
 
@@ -66,7 +66,7 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
     def test_ship_then_receive_moves_between_stores(self):
         self._seed_store(self.b1, 10)
         t = self._transfer(4)
-        # [#67a3y3]
+        # [#hqowr0]
         self.assertEqual(t.status, "In Transit")
         self.assertEqual(get_store_balance("Custody Article", self.article, self.b1), 6.0)
         self.assertEqual(get_store_balance("Custody Article", self.article, self.b2), 0.0)
@@ -95,13 +95,12 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
         settings = frappe.get_single("Habitat Settings")
         settings.notify_finance_on_liability_transfer = 1 if on else 0
         settings.finance_notification_email = email if on else None
-        # [#53v7c2]
+        # [#9i3q24]
         settings.enable_email_notifications = 1 if on else 0
         settings.save(ignore_permissions=True)
 
     def test_cross_cost_center_receipt_emails_finance_when_enabled(self):
-        # [#nnypm6]
-        # [#a4ez52]
+        # [#izrzyc]
         self.assertNotEqual(self.cc1, self.cc2)
         self._set_finance_toggle(True)
         self._seed_store(self.b1, 10)
@@ -120,7 +119,7 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
         mock_send.assert_not_called()
 
     def test_stock_balance_report_reflects_transfer(self):
-        # [#kqhxhk]
+        # [#2gtebt]
         self._set_finance_toggle(False)
         self._seed_store(self.b1, 10)
         t = self._transfer(4)
@@ -132,7 +131,7 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
         self.assertEqual(by_building[self.b2]["balance_qty"], 4.0)
 
     def test_no_finance_email_when_same_cost_center(self):
-        # [#9nkuop]
+        # [#pgcc14]
         frappe.db.set_value("Accommodation Building", self.b2, "default_cost_center", self.cc1)
         self._set_finance_toggle(True)
         self._seed_store(self.b1, 10)

@@ -19,8 +19,7 @@ def load_template_into_doc(doctype, docname, issue_type):
         frappe.throw(_("Template loading is only supported for Maintenance Request and Maintenance Work Order."))
 
     doc = frappe.get_doc(doctype, docname)
-    # [#3pod0h]
-    # [#hi8ipb]
+    # [#eu1e7a]
     frappe.has_permission(doctype, "write", doc=doc, throw=True)
 
     templates = frappe.get_all(

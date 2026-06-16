@@ -31,11 +31,7 @@ class FuelDailyLog(Document):
 		)
 
 	def on_trash(self):
-		# [#20djvr]
-		# [#qdv2z9]
-		# [#l8tkzu]
-		# [#iuum6r]
-		# [#ntgwmq]
+		# [#dp8lfk]
 		from apex_habitat.salis.fuel_engine import reverse_fuel_ledger
 
 		reverse_fuel_ledger("Fuel Daily Log", self.name)

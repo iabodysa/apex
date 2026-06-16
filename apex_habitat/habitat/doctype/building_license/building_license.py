@@ -30,9 +30,7 @@ class BuildingLicense(Document):
             return
 
         if self.is_new():
-            # [#6fm4mh]
-            # [#a7hivx]
-            # [#a3tjs0]
+            # [#nkhxjc]
             amended_from = getattr(self, "amended_from", None)
             previous_expiry = (
                 frappe.db.get_value("Building License", amended_from, "expiry_date")

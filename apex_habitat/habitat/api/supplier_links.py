@@ -14,8 +14,7 @@ def get_data(data=None):
     data.setdefault("transactions", [])
     data.setdefault("non_standard_fieldnames", {})
     data["fieldname"] = data.get("fieldname") or "supplier"
-    # [#7omxvt]
-    # [#6ewx1m]
+    # [#job590]
     data["non_standard_fieldnames"].update({
         "Accommodation Assignment": "billed_to_supplier",
         "Accommodation Ledger": "billed_to_supplier",
@@ -27,8 +26,7 @@ def get_data(data=None):
          "items": ["Subcontractor Service Contract", "Subcontractor Service Order"]},
         {"label": "Cost Recovery",
          "items": ["Accommodation Ledger"]},
-        # [#4iw7la]
-        # [#dhlj8s]
+        # [#6f1937]
         {"label": "Fleet (Salis)",
          "items": ["Rental Office"]},
     ])

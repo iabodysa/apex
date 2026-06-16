@@ -46,8 +46,7 @@ class TestKanbanBoardSpec(unittest.TestCase):
     def test_spec_metadata(self):
         spec = _spec("Kanban Board")
         self.assertEqual(spec["doctype"], "Kanban Board")
-        # [#6zq2al]
-        # [#33ttx2]
+        # [#ophblp]
         self.assertEqual(spec["key"], "kanban_board_name")
         self.assertTrue(spec["create_only"])
 
@@ -68,8 +67,7 @@ class TestAutoEmailReportNotExternalised(unittest.TestCase):
         self.assertEqual(load_specs("habitat", only=["Auto Email Report"]), [])
 
     def test_legacy_seeder_resolves_dynamic_fields(self):
-        # [#6yr8qk]
-        # [#bdfdlw]
+        # [#4n0oed]
         import inspect
 
         from apex_habitat.apex_core.setup.seeders import habitat_auto_email_reports_seed as auto_email_reports_seed

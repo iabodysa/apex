@@ -58,7 +58,7 @@ def get_building_layout(building: str) -> dict:
     for room in rooms:
         room["room_color"] = _color(room)
 
-    # [#4g04ju]
+    # [#2bd4qb]
     floors_map = {}
     for room in rooms:
         floor_num = room.floor if room.floor is not None else 0
@@ -81,7 +81,7 @@ def get_building_layout(building: str) -> dict:
             "rooms": floor_rooms,
         })
 
-    # [#71e6i5]
+    # [#a2e592]
     summary = {"available": 0, "partial": 0, "full": 0, "maintenance": 0}
     for room in rooms:
         c = room["room_color"]

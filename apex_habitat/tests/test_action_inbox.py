@@ -25,7 +25,7 @@ class TestActionInboxAPI(unittest.TestCase):
         self.assertIn("def get_pending_actions(", src)
         self.assertIn('"Workflow Action"', src)
         self.assertIn('"ToDo"', src)
-        # [#dv6fdy]
+        # [#h1ol11]
         self.assertIn("frappe.get_list(", src)
 
     def test_pending_only_no_doa_no_timewindow(self):
@@ -33,7 +33,7 @@ class TestActionInboxAPI(unittest.TestCase):
         self.assertIn('"status": "Open"', src)  # [#8d5r0j]
         self.assertIn("get_workflow_state_field", src)  # [#sxou0d]
         self.assertIn('"allocated_to": frappe.session.user', src)  # [#k6ig3d]
-        # [#qc6pvo]
+        # [#1ahyym]
         self.assertNotIn(".insert(", src)
         self.assertNotIn("frappe.new_doc(", src)
 
@@ -46,15 +46,13 @@ class TestOrphanCleanup(unittest.TestCase):
         self.assertIn("status = 'Open'", src)  # [#egnqf8]
         self.assertIn("DELETE", src)  # [#t4bne9]
         self.assertIn("table_exists", src)  # [#j33fj5]
-        # [#41971m]
-        # [#n3mmxg]
+        # [#ebxk7a]
         self.assertIn('frappe.db.exists("DocType"', src)
         with open(os.path.join(APP_ROOT, "hooks.py"), encoding="utf-8") as fh:
             self.assertIn("workflow_utils.cleanup_orphaned_workflow_actions", fh.read())  # [#qq4zux]
 
     def test_inbox_drops_actions_for_missing_doctype(self):
-        # [#6rk5di]
-        # [#c87w2z]
+        # [#jrtiiz]
         self.assertIn('frappe.db.exists("DocType"', _src())
 
 
@@ -76,7 +74,7 @@ class TestActionInboxPage(unittest.TestCase):
             js = fh.read()
         assigned = set(re.findall(r"this\.(\$[A-Za-z_]+)\s*=", js))
         used = set(re.findall(r"this\.(\$[A-Za-z_]+)\b", js))
-        # [#pw755i]
+        # [#kpw6qz]
         self.assertEqual((used - assigned) - {"$x"}, set(), "this.$ used but never created")
 
     def test_page_json_standard_no_all_role(self):
@@ -95,8 +93,7 @@ class TestActionInboxPage(unittest.TestCase):
             os.path.join(APP_ROOT, "apex_core", "workspace", "launchpad", "launchpad.json"), encoding="utf-8"
         ) as fh:
             ws = json.load(fh)
-        # [#5jilk2]
-        # [#jwm9ol]
+        # [#l7nk6m]
         self.assertTrue(any(s.get("link_to") == "My Work" for s in ws.get("shortcuts", [])))
         self.assertIn("acScMyWork", ws.get("content", ""))  # [#2bf67b]
 
@@ -163,9 +160,9 @@ class TestActionInboxOrphanHandling(FrappeTestCase):
             },
         ]
         kept = {r["reference_doctype"] for r in _drop_stale(rows)}
-        # [#auoj1n]
+        # [#cwlnaq]
         self.assertNotIn(self.MISSING_DT, kept)
-        # [#4yk4mp]
+        # [#p7mv7h]
         self.assertIn("ToDo", kept)
 
     def test_cleanup_purges_open_actions_for_missing_doctype(self):

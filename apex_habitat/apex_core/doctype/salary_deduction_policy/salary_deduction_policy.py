@@ -22,7 +22,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-# [#51gob4]
+# [#bi6a6t]
 KSA_MAX_TOTAL_DEDUCTION_PERCENT = 50.0
 
 

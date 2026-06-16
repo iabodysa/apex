@@ -49,23 +49,18 @@ VALID_STATUSES = (
     "Cancelled",
 )
 
-# [#7hff9v]
-# [#iws936]
-# [#4l45t3]
+# [#qxois4]
 SETTLED_STATUSES = ("Approved", "Paid")
 
 
 class RentalSettlement(Document):
     def before_insert(self):
-        # [#awqu0h]
-        # [#sl3oie]
+        # [#h8tozh]
         if not self.requested_by:
             self.requested_by = frappe.session.user
 
     def validate(self):
-        # [#o9cdl2]
-        # [#qmgtk6]
-        # [#ryyojr]
+        # [#5xxjqd]
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
@@ -80,25 +75,18 @@ class RentalSettlement(Document):
 
         accrued = 0.0
         for row in self.vehicles:
-            # [#gzqo66]
+            # [#6vpx3f]
             computed = flt(row.days) * flt(row.daily_rate)
             if not row.amount:
                 row.amount = computed
-            # [#de54vh]
-            # [#n2fb6n]
+            # [#axx6jh]
             if flt(row.days) < 0 or flt(row.daily_rate) < 0 or flt(row.amount) < 0:
                 frappe.throw(
                     _("Row {0}: Days, Daily Rate and Amount cannot be negative.").format(row.idx)
                 )
             accrued += flt(row.amount)
 
-        # [#rsla91]
-        # [#j0v6k5]
-        # [#7vji16]
-        # [#5f2rd0]
-        # [#3qd2aq]
-        # [#l50qz1]
-        # [#s5q5z7]
+        # [#j5emvu]
         from apex_habitat.salis.rental_engine import linked_accrued_total
 
         ledger_total = linked_accrued_total(self.rental_office, self.period_month)
@@ -112,23 +100,13 @@ class RentalSettlement(Document):
         self.ledger_variance = flt(self.accrued_total) - flt(ledger_total)
         self.variance = flt(self.claimed_total) - flt(self.accrued_total)
 
-        # [#rp61et]
-        # [#1rp64d]
-        # [#ov33y0]
-        # [#gdz4rf]
-        # [#68s18p]
-        # [#ny9f16]
+        # [#66n04g]
         if flt(self.claimed_total) < 0 or flt(self.accrued_total) < 0:
             frappe.throw(
                 _("Claimed Total and Accrued Total cannot be negative.")
             )
 
-    # [#6dwuu8]
-    # [#hhmd0i]
-    # [#sau6ax]
-    # [#b655dg]
-    # [#2ukarr]
-    # [#ktcad9]
+    # [#m6z7eo]
 
     def on_submit(self):
         self._sync_accrual_stamp()
@@ -137,9 +115,7 @@ class RentalSettlement(Document):
         self._sync_accrual_stamp()
 
     def on_cancel(self):
-        # [#2bh20k]
-        # [#eixf9m]
-        # [#iytl5a]
+        # [#h4un2r]
         from apex_habitat.salis.rental_engine import release_settlement
 
         release_settlement(self.name)

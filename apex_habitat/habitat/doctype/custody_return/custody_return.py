@@ -28,7 +28,7 @@ def _validate_return_quantities(doc):
     returns for the linked Custody Issue (prevents over-return and duplicate
     full returns)."""
     if not doc.custody_issue or not frappe.db.exists("Custody Issue", doc.custody_issue):
-        # [#1bgxxw]
+        # [#dbfknr]
         return
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
     if issue.docstatus != 1:
@@ -38,7 +38,7 @@ def _validate_return_quantities(doc):
     for it in issue.items:
         issued[it.article] = issued.get(it.article, 0) + (it.qty or 0)
 
-    # [#nm9opi]
+    # [#g4zyqi]
     prior_returns = frappe.get_all(
         "Custody Return",
         filters={"custody_issue": issue.name, "docstatus": 1, "name": ["!=", doc.name or ""]},
@@ -53,7 +53,7 @@ def _validate_return_quantities(doc):
         ):
             prior[r.article] = prior.get(r.article, 0) + (r.qty or 0)
 
-    # [#4f8bwp]
+    # [#os6i9c]
     this_doc = {}
     for row in doc.items:
         this_doc[row.article] = this_doc.get(row.article, 0) + (row.qty or 0)
@@ -160,8 +160,7 @@ def before_cancel(doc, method=None):
 
 def on_cancel(doc, method=None):
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
-    # [#cityzj]
-    # [#g7wi57]
+    # [#f6blww]
     try:
         status = _issue_return_progress(issue, exclude=doc.name)
         if issue.status != status:

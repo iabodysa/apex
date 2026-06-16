@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 import frappe
 
@@ -20,8 +20,7 @@ def execute(filters=None):
         {"label": frappe._("Driver"), "fieldname": "assigned_driver", "fieldtype": "Link", "options": "Salis Driver", "width": 160},
     ]
 
-    # [#gyu6dw]
-    # [#3xhvde]
+    # [#2uljoq]
     query_filters = {"service_line": ["in", ["Site Transport", "Inter-City Relocation"]]}
 
     for field in ("request_type", "status"):

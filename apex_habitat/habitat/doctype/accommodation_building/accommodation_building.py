@@ -137,14 +137,7 @@ def before_save(doc, method=None):
 
     apply_active_lease(doc)
 
-    # [#iqxphu]
-    # [#7jmoc0]
-    # [#f8sg5k]
-    # [#49zl1g]
-    # [#5ms5xy]
-    # [#6hwwra]
-    # [#80urdq]
-    # [#19n33x]
+    # [#c25afp]
     _capacity_count = _derive_total_capacity(doc.name)
     if _capacity_count is not None:
         doc.total_capacity = _capacity_count
@@ -172,15 +165,14 @@ def before_save(doc, method=None):
     if doc.total_capacity:
         doc.occupancy_percent = (doc.current_occupants / doc.total_capacity) * 100
 
-    # [#aq6p1x]
-    # [#mltsih]
+    # [#cowl53]
     doc.total_rooms = frappe.db.count("Accommodation Room", {"building": doc.name})
     _floor_values = frappe.db.get_all(
         "Accommodation Room", filters={"building": doc.name}, pluck="floor", distinct=True
     )
     doc.total_floors = len([f for f in _floor_values if f is not None])
 
-    # [#sdut8c]
+    # [#c9s718]
     if doc.floor_plan and doc.setup_status == "Draft":
         doc.setup_status = "Rooms Planned"
 
@@ -232,8 +224,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
     needs_confirmation flag. Never deletes existing records.
     """
     doc = frappe.get_doc("Accommodation Building", building_name)
-    # [#3pod0h]
-    # [#hi8ipb]
+    # [#eu1e7a]
     frappe.has_permission("Accommodation Building", "write", doc=doc, throw=True)
 
     abbreviation = (doc.abbreviation or "").strip() or doc.building_name[:4].upper().strip()
@@ -241,9 +232,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
     if not doc.floor_plan:
         frappe.throw(_("No floor plan defined. Add floor rows before generating."))
 
-    # [#6daw2h]
-    # [#mquqxs]
-    # [#7toz4m]
+    # [#caqr8g]
     _seen_floor_codes: dict[str, int] = {}
     for _row in doc.floor_plan:
         _fc = _floor_code(_row.floor_type, int(_row.floor_number or 0))
@@ -259,7 +248,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
             )
         _seen_floor_codes[_fc] = _fn
 
-    # [#k0y6pt]
+    # [#jcmjsz]
     existing_room_rows = frappe.db.get_all(
         "Accommodation Room",
         filters={"building": building_name},
@@ -267,7 +256,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
     )
     existing_room_map = {r.room_number: r.name for r in existing_room_rows}
 
-    # [#nyxumg]
+    # [#fkd615]
     Bed = DocType("Accommodation Bed")
     Room = DocType("Accommodation Room")
 
@@ -282,8 +271,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
     existing_bed_codes = {r[0] for r in _bed_rows}
 
     confirm_new_rooms = int(confirm_new_rooms or 0)
-    # [#94zrz0]
-    # [#ag0tri]
+    # [#4qhyuv]
     is_first_generation = len(existing_room_map) == 0
     allow_create = is_first_generation or bool(confirm_new_rooms)
 
@@ -312,7 +300,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
 
         if count <= 0:
             continue
-        # [#4o8smx]
+        # [#k8dzcj]
         if gen_beds and capacity <= 0:
             frappe.throw(
                 _("Beds per Room must be greater than 0 when Auto-Generate Beds is enabled. Floor {0}, type {1}.").format(floor_num, rtype)
@@ -329,8 +317,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
 
             if room_number in existing_room_map:
                 room_doc_name = existing_room_map[room_number]
-                # [#424ic2]
-                # [#ks2okb]
+                # [#h26quk]
                 current = frappe.db.get_value(
                     "Accommodation Room", room_doc_name,
                     ["room_type", "bed_capacity"], as_dict=True,
@@ -341,10 +328,10 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
                 if current and (current.bed_capacity or 0) != capacity:
                     old_cap = int(current.bed_capacity or 0)
                     if capacity >= old_cap:
-                        # [#gdio9k]
+                        # [#trx8ab]
                         updates["bed_capacity"] = capacity
                     else:
-                        # [#t84nuk]
+                        # [#ea5tqj]
                         if not confirm_capacity_reduction:
                             pending_capacity_reductions += 1
                         else:
@@ -378,7 +365,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
                 else:
                     skipped_rooms += 1
             else:
-                # [#89mqew]
+                # [#4cp8q8]
                 if not allow_create:
                     pending_new_rooms += 1
                     continue
@@ -407,7 +394,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
                     if bed_code in existing_bed_codes:
                         skipped_beds += 1
                     elif not allow_create:
-                        # [#sd11di]
+                        # [#gzcnzc]
                         pending_new_beds += 1
                     else:
                         try:
@@ -424,16 +411,12 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
                         except Exception as exc:
                             row_failures.append(_("Bed {0}: {1}").format(bed_code, str(exc)))
 
-    # [#2gc5li]
+    # [#o7ywrx]
     if created_rooms > 0 or created_beds > 0 or updated_rooms > 0:
         _floor_values = frappe.db.get_all(
             "Accommodation Room", filters={"building": building_name}, pluck="floor", distinct=True
         )
-        # [#2q14mc]
-        # [#456j7p]
-        # [#ifuco4]
-        # [#igybw8]
-        # [#n24e27]
+        # [#bcpp7m]
         _capacity_count = _derive_total_capacity(building_name)
         frappe.db.set_value("Accommodation Building", building_name, {
             "setup_status": "Rooms Generated",
@@ -444,8 +427,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
             "total_capacity": int(_capacity_count or 0),
         })
 
-    # [#efxg5n]
-    # [#qe1dmz]
+    # [#shn7rw]
 
     needs_confirmation = (pending_new_rooms > 0 or pending_new_beds > 0 or pending_capacity_reductions > 0)
     summary = {
@@ -464,8 +446,7 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
     }
 
     if needs_confirmation:
-        # [#4dorjc]
-        # [#hv9lm0]
+        # [#hynb42]
         msg = _("The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.").format(pending_new_rooms, pending_new_beds, updated_rooms)
         if pending_capacity_reductions:
             msg += " " + _("{0} room(s) have a planned capacity reduction pending confirmation.").format(pending_capacity_reductions)
@@ -501,9 +482,7 @@ def generate_safety_setup(building_name):
     Building License records are NOT created — they require a real license_number.
     The summary lists recommended license types for the operator to create manually.
     """
-    # [#3pod0h]
-    # [#hi8ipb]
-    # [#aqsg2x]
+    # [#5fc1fk]
     frappe.has_permission("Accommodation Building", "write", doc=building_name, throw=True)
 
     catalogs = frappe.get_all(
@@ -522,7 +501,7 @@ def generate_safety_setup(building_name):
     catalog_failures = []
 
     for catalog in catalogs:
-        # [#do4jt1]
+        # [#shlhjr]
         if not catalog.applicable_to_all_buildings:
             scope_exists = frappe.db.exists(
                 "Safety Task Building Scope",
@@ -535,12 +514,7 @@ def generate_safety_setup(building_name):
                     scope.parenttype = "Safety Task Catalog"
                     scope.parentfield = "applicable_buildings"
                     scope.building = building_name
-                    # [#3h285v]
-                    # [#amncrd]
-                    # [#lsebzm]
-                    # [#beszl7]
-                    # [#3v5p05]
-                    # [#8qu64y]
+                    # [#mx2kmt]
                     scope.insert(ignore_permissions=True)  # audit-ok — gated by Accommodation Building write (above); generator-only cross-doctype op
                     created_scopes += 1
                 except Exception as exc:
@@ -550,7 +524,7 @@ def generate_safety_setup(building_name):
             else:
                 skipped_scopes += 1
 
-        # [#2byh0m]
+        # [#czmvar]
         template_exists = frappe.db.exists(
             "Scheduled Task Template",
             {"building": building_name, "safety_task_catalog": catalog.name},
@@ -577,10 +551,7 @@ def generate_safety_setup(building_name):
                     "safety_task_catalog": catalog.name,
                     "frequency": template_freq,
                     "is_active": 1,
-                # [#b6clkb]
-                # [#l3z05d]
-                # [#8unpnf]
-                # [#stkral]
+                # [#18qll3]
                 }).insert(ignore_permissions=True)  # audit-ok — same building-write gate (above); generator-only
                 created_templates += 1
             except Exception as exc:
@@ -595,8 +566,7 @@ def generate_safety_setup(building_name):
         "safety_setup_generated_on": today(),
         "safety_setup_generated_by": frappe.session.user,
     })
-    # [#efxg5n]
-    # [#qe1dmz]
+    # [#shn7rw]
 
     summary = {
         "created_templates": created_templates,
@@ -627,8 +597,7 @@ def generate_safety_setup(building_name):
 @frappe.whitelist(methods=["POST"])
 def update_room_inventory(room_name, readiness_status, inventory_notes=None):
     """Allow supervisor to record room readiness without opening full form."""
-    # [#g1s7r8]
-    # [#qj4wa1]
+    # [#6s3c91]
     if not frappe.has_permission("Accommodation Room", "write", doc=room_name):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -644,5 +613,5 @@ def update_room_inventory(room_name, readiness_status, inventory_notes=None):
         updates["inventory_notes"] = inventory_notes
 
     frappe.db.set_value("Accommodation Room", room_name, updates)
-    # [#25dg11]
+    # [#4dqukg]
     return {"ok": True}

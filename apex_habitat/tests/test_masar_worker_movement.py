@@ -155,7 +155,7 @@ class _WorkerTripMixin:
                 ],
             }
         ).insert(ignore_permissions=True)
-        # [#sr4wvs]
+        # [#aj1ze2]
         tr.reload()
 
         rp = frappe.get_doc(
@@ -260,7 +260,7 @@ class TestTripStartLogController(_WorkerTripMixin, FrappeTestCase):
         tr, rp, dt = self._worker_trip(
             self.driver, self.project, self.building, [self.w1, self.w2], "TSL Route A"
         )
-        # [#5wi2do]
+        # [#f3ue6h]
         self.assertEqual(tr.worker_count, 2)
 
         log = frappe.get_doc(
@@ -286,11 +286,10 @@ class TestTripStartLogController(_WorkerTripMixin, FrappeTestCase):
                 "Trip Start Log", log.name, ignore_permissions=True, force=True
             )
         )
-        # [#6ub6aa]
-        # [#nhzlou]
+        # [#ksolmx]
         self.assertEqual(log.expected_count, 2)
         self.assertEqual(log.boarded_count, 1)
-        # [#4zb0oq]
+        # [#2ouc2e]
         self.assertEqual(log.transport_request, tr.name)
         self.assertEqual(log.route_plan, rp.name)
 
@@ -440,7 +439,7 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
         cls.driver = _ensure_test_driver()
         cls.driver_user = _driver_user_for(cls.driver)
         cls.w1 = _employee("Masar EP Worker One")
-        # [#kvd31w]
+        # [#n2d8l0]
         cls.other_driver, cls.other_user = _ensure_driver_chain(
             "masar_other_drv@example.com", "Masar Other"
         )
@@ -455,7 +454,7 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
         tr, rp, dt = self._worker_trip(
             self.driver, self.project, self.building, [self.w1], "EP Route A"
         )
-        # [#jvbbnq]
+        # [#8b85uv]
         frappe.set_user(self.driver_user)
         payload = masar.get_my_worker_route_today()
 
@@ -465,10 +464,10 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
         self.assertIn(dt.name, names)
 
         trip = next(t for t in payload["trips"] if t["dispatch_trip"] == dt.name)
-        # [#xjsh8j]
+        # [#pz81yt]
         self.assertEqual(trip["expected_count"], 1)
         self.assertEqual(trip["workers"][0]["employee"], self.w1)
-        # [#5z6fzr]
+        # [#cjmx2z]
         self.assertEqual([s["sequence"] for s in trip["stops"]], [1, 2])
         pickup_stop = trip["stops"][0]
         self.assertEqual(pickup_stop["accommodation_building"], self.building)
@@ -482,11 +481,11 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
     def test_endpoint_is_identity_scoped_to_self(self):
         """A different driver does not see another driver's worker route — the
         endpoint resolves the SESSION user, never a supplied id."""
-        # [#5ncwnl]
+        # [#iqjipe]
         tr, rp, dt = self._worker_trip(
             self.driver, self.project, self.building, [self.w1], "EP Route B"
         )
-        # [#htpwnj]
+        # [#tu0oi1]
         frappe.set_user(self.other_user)
         payload = masar.get_my_worker_route_today()
         self.assertEqual(payload["driver"], self.other_driver)
@@ -518,8 +517,7 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
                 "service_line": "Administrative Trip",
                 "request_type": "Administrative Trip / Document Signing",
                 "project": self.project,
-                # [#3z0g4o]
-                # [#cb1jyk]
+                # [#per8o9]
                 "representative": _employee("EP Representative"),
                 "destination": "Ministry",
                 "from_location": "HQ",

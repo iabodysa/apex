@@ -10,9 +10,6 @@ from frappe.utils import flt
 
 class OperationalDepreciationPolicy(Document):
     def validate(self):
-        # [#hfsb8e]
-        # [#putscs]
-        # [#8eon6a]
-        # [#6zgvyk]
+        # [#aubbvz]
         if self.useful_life_years is not None and flt(self.useful_life_years) <= 0:
             frappe.throw(_("Useful Life (Years) must be greater than zero."))

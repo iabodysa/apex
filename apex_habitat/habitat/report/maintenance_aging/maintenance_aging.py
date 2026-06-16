@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 import frappe
 from frappe.utils import getdate, today
@@ -66,7 +66,7 @@ def execute(filters=None):
             "cost_of_repair": row.cost_of_repair or 0,
         })
 
-    # [#209r4a]
+    # [#b3apo5]
     data.sort(key=lambda r: (-(r["sla_breached"]), _PRIORITY_ORDER.get(r["priority"], 99), -r["age_days"]))
 
     return columns, data, None, _build_chart(data)

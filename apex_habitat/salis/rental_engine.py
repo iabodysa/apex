@@ -72,7 +72,7 @@ def daily_rental_accrual() -> None:
     posting_date = today()
     logger = frappe.logger()
 
-    # [#9y8ifl]
+    # [#1vvs74]
     from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_default_company
 
     _default_company = get_default_company()
@@ -93,7 +93,7 @@ def daily_rental_accrual() -> None:
         for vehicle_row in vehicles:
             vehicle = vehicle_row.name
             try:
-                # [#21nfp2]
+                # [#fyh27m]
                 if frappe.db.exists(
                     "Rental Accrual Ledger",
                     {"vehicle": vehicle, "accrual_date": posting_date},
@@ -106,8 +106,7 @@ def daily_rental_accrual() -> None:
                 if not in_service:
                     continue
 
-                # [#et83rk]
-                # [#imu51o]
+                # [#rwjtnf]
                 if movement_name:
                     source_doctype = "Rental Vehicle Movement"
                     source_name = movement_name
@@ -115,9 +114,7 @@ def daily_rental_accrual() -> None:
                     source_doctype = "Salis Vehicle"
                     source_name = vehicle
 
-                # [#okc2sv]
-                # [#5nu64s]
-                # [#lyt6rs]
+                # [#dkaqd1]
                 company = vehicle_row.company or _default_company
 
                 frappe.get_doc(
@@ -146,9 +143,7 @@ def daily_rental_accrual() -> None:
     logger.info("daily_rental_accrual: rental accrual memos written.")
 
 
-# [#rudcur]
-# [#8z6gqt]
-# [#rudcur]
+# [#68shm1]
 
 
 def _period_bounds(period_month: str) -> tuple[str, str] | None:
@@ -197,9 +192,7 @@ def linked_accrued_total(rental_office: str, period_month: str) -> float:
     if not rental_office or not bounds:
         return 0.0
     first_day, last_day = bounds
-    # [#684atz]
-    # [#sdysmh]
-    # [#i4r12e]
+    # [#ti294u]
     total = frappe.db.sql(
         """
         SELECT COALESCE(SUM(amount), 0)
@@ -231,16 +224,7 @@ def stamp_settlement(settlement: str, rental_office: str, period_month: str) -> 
     if not filters:
         return 0
 
-    # [#3qprmy]
-    # [#qhc9g0]
-    # [#muzkry]
-    # [#mc5dwi]
-    # [#o4fvjp]
-    # [#2r8w5f]
-    # [#fzl8gq]
-    # [#7a9jst]
-    # [#s1wlia]
-    # [#9idi5e]
+    # [#h5i2z1]
     filters = dict(filters)
     filters["settled"] = 0
 
@@ -248,8 +232,7 @@ def stamp_settlement(settlement: str, rental_office: str, period_month: str) -> 
     if not names:
         return 0
 
-    # [#lvsks3]
-    # [#g6a7hd]
+    # [#fnxy3d]
     frappe.db.set_value(
         LEDGER_DOCTYPE,
         {"name": ["in", names]},
@@ -285,9 +268,7 @@ def release_settlement(settlement: str) -> int:
     return len(names)
 
 
-# [#rudcur]
-# [#opciz9]
-# [#rudcur]
+# [#axtgzu]
 
 
 def _rental_alert_already_raised(rental_office: str, period_month: str) -> bool:
@@ -331,16 +312,13 @@ def monthly_rental_reconciliation() -> None:
     """
     from frappe.utils import add_months, get_first_day, get_last_day, getdate, now_datetime
 
-    # [#lowlon]
-    # [#os5iaw]
+    # [#6e4o53]
     closed_anchor = getdate(add_months(getdate(today()), -1))
     period_month = str(closed_anchor)[:7]
     first_day, last_day = str(get_first_day(closed_anchor)), str(get_last_day(closed_anchor))
     logger = frappe.logger()
 
-    # [#sa80h6]
-    # [#6eambz]
-    # [#mwj2df]
+    # [#1gqu7m]
     rows = frappe.db.sql(
         """
         SELECT rental_office, COALESCE(SUM(amount), 0) AS outstanding

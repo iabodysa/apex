@@ -12,10 +12,7 @@ from apex_habitat.apex_core.setup.seeders.maintenance_material_template_seed imp
     seed_templates,
 )
 
-# [#tdzfti]
-# [#73cp2g]
-# [#nzv30u]
-# [#hhmott]
+# [#1e17u4]
 
 
 def after_install():
@@ -31,7 +28,7 @@ def after_install():
     seed_auto_email_reports()
     seed_habitat_dashboard()
     seed_role_dashboards()
-    # [#79zrk7]
+    # [#d3h8rl]
     frappe.clear_cache()
 
 
@@ -56,11 +53,11 @@ def create_roles():
 
 def create_role_profiles():
     profiles = {
-        # [#tw1apq]
+        # [#4hbrle]
         "Habitat Accommodation Manager": ["Accommodation Manager", "System Manager"],
         "Habitat Resident Supervisor": ["Resident Supervisor"],
         "Habitat Finance Reviewer": ["Finance Manager", "Internal Auditor"],
-        # [#ld2kdg]
+        # [#aeif1q]
         "Habitat Maintenance Technician": ["Maintenance Technician"],
         "Habitat Cleaning Supervisor": ["Cleaning Supervisor"],
         "Habitat Safety Officer": ["Safety Officer"],
@@ -73,14 +70,7 @@ def create_role_profiles():
             for role in roles:
                 doc.append("roles", {"role": role})
             doc.insert(ignore_permissions=True)
-            # [#ovf90l]
-            # [#lhb3wp]
-            # [#mu8pjm]
-            # [#fh4biw]
-            # [#mbs3ra]
-            # [#382o9s]
-            # [#or6xye]
-            # [#t6qrfu]
+            # [#7cx306]
             doc.unlock()
 
 
@@ -122,9 +112,7 @@ def create_custody_articles():
 
 
 def create_operational_depreciation_policies():
-    # [#4daupz]
-    # [#nv6rzg]
-    # [#e8tpuj]
+    # [#devsf7]
     policies = [
         {"policy_name": "Linen - 12 Months", "useful_life_years": 1},
         {"policy_name": "Keys and Cards - 24 Months", "useful_life_years": 2},
@@ -140,9 +128,7 @@ def create_operational_depreciation_policies():
 
 
 def create_safety_task_catalogs():
-    # [#jl1qzc]
-    # [#fsripa]
-    # [#m92sax]
+    # [#saqivo]
     tasks = [
         {"task_code": "SAF-001", "task_title": "Daily Cleanliness Assessment", "task_title_en": "Daily Cleanliness Assessment", "department": "Health and Hygiene", "frequency": "Daily", "priority": "Medium", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Check common areas, corridors, and bathrooms for cleanliness."},
         {"task_code": "SAF-002", "task_title": "Daily Exit Obstruction Check", "task_title_en": "Daily Exit Obstruction Check", "department": "Fire Safety", "frequency": "Daily", "priority": "High", "applicable_to_all_buildings": 1, "is_active": 1, "instructions": "Ensure all emergency exits and fire doors are clear of obstructions."},

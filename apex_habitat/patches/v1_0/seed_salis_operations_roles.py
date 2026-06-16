@@ -20,11 +20,10 @@ patches.txt keeps resolving on already-installed sites; it seeds nothing.
 
 import frappe  # noqa: F401  (kept for parity with the seed module contract)
 
-# [#gy4sln]
+# [#kctdks]
 OPERATIONS_ROLES: list[str] = []
 
 
 def execute():
-    # [#qjrzlz]
-    # [#49bv07]
+    # [#g68487]
     return

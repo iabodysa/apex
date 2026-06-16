@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 """M-20: coverage for four submittable controllers that carry real validate
 guards and on_submit / on_cancel side-effects but previously had no test:
@@ -78,8 +78,7 @@ class TestVehicleHandover(_SalisMastersMixin, FrappeTestCase):
             "from_driver": self._driver(),
             "to_driver": self._driver(),
             "handover_date": today(),
-            # [#ros2ef]
-            # [#t3ai7o]
+            # [#8s7z7r]
             "odometer_reading": 1500,
         }).insert(ignore_permissions=True)
         with self.assertRaises(frappe.ValidationError):
@@ -119,7 +118,7 @@ class TestVehicleDamageWriteOff(_SalisMastersMixin, FrappeTestCase):
                 "vehicle": v,
                 "status": "Under Review",
                 "estimated_cost": 500,
-                # [#3tnz1t]
+                # [#mziv9p]
             }).insert(ignore_permissions=True)
 
     def test_valid_open_case_inserts_and_submits(self):

@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 import frappe
 from frappe.utils import getdate, today
@@ -32,7 +32,7 @@ def execute(filters=None):
     if not checkouts:
         return columns, []
 
-    # [#oyqqg5]
+    # [#c1vjzi]
     all_beds = list({co.bed for co in checkouts if co.bed})
     bed_building_map = {}
     if all_beds:
@@ -43,7 +43,7 @@ def execute(filters=None):
         )
         bed_building_map = {b.name: b.building for b in bed_rows}
 
-    # [#pbd5rm]
+    # [#mpblgu]
     building_filter = filters.get("building")
     if building_filter:
         checkouts = [
@@ -56,7 +56,7 @@ def execute(filters=None):
 
     all_employees = list({co.employee for co in checkouts if co.employee})
 
-    # [#r38u93]
+    # [#3wwr48]
     emp_name_map = {}
     if all_employees:
         emp_name_map = {
@@ -68,7 +68,7 @@ def execute(filters=None):
             )
         }
 
-    # [#pazc64]
+    # [#7kb61x]
     issue_count_map = {}
     if all_employees:
         issue_rows = frappe.get_all(
@@ -79,7 +79,7 @@ def execute(filters=None):
         )
         issue_count_map = {r.issued_to_employee: r.issue_count for r in issue_rows}
 
-    # [#8lkahl]
+    # [#5jlugb]
     damage_map = {}
     if all_employees:
         damage_rows = frappe.get_all(
@@ -88,7 +88,7 @@ def execute(filters=None):
             fields=["employee", "name"],
             order_by="name asc",
         )
-        # [#iqomes]
+        # [#5kjdyq]
         for dr in damage_rows:
             if dr.employee not in damage_map:
                 damage_map[dr.employee] = dr.name
@@ -101,7 +101,7 @@ def execute(filters=None):
         damage = damage_map.get(co.employee, "") if co.employee else ""
         days_since = (today_date - getdate(co.checkout_date)).days if co.checkout_date else 0
 
-        # [#k0tn8v]
+        # [#nlghie]
         if not co.custody_cleared or open_issues or damage:
             data.append({
                 "name": co.name,

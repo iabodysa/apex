@@ -28,7 +28,7 @@ import os
 
 import frappe
 
-# [#a5mysb]
+# [#nhjgdf]
 _WORKFLOW_DIRS = [
     "transport_request_workflow",
     "rental_settlement_workflow",
@@ -38,18 +38,15 @@ _WORKFLOW_DIRS = [
     "fuel_claim_workflow",
     "fuel_exception_case_workflow",
     "dispatch_trip_workflow",
-    # [#ajrjio]
-    # [#h7hlg7]
+    # [#bxfoca]
     "movement_cost_recovery_workflow",
     "movement_cost_transfer_workflow",
     "vehicle_damage_write_off_workflow",
 ]
 
-# [#baqnup]
-# [#97rvot]
-# [#3ik2ia]
+# [#ijqd52]
 _STATE_STYLE = {
-    # [#3nvxuq]
+    # [#80vakv]
     "New": "Primary",
     "Validated": "Primary",
     "Approved": "Primary",
@@ -57,39 +54,35 @@ _STATE_STYLE = {
     "Fulfilled": "Success",
     "Rejected": "Danger",
     "Cancelled": "Danger",
-    # [#e5daqi]
+    # [#rtbkfv]
     "Draft": "Primary",
     "Reconciled": "Warning",
     "Disputed": "Danger",
     "Paid": "Success",
-    # [#5btnoo]
+    # [#4i7fog]
     "Open": "Warning",
     "In Progress": "Primary",
     "Cleared": "Success",
     "Blocked": "Danger",
-    # [#c9eoqy]
+    # [#r2yz72]
     "Pending Finance": "Warning",
     "Approved by Finance": "Primary",
-    # [#qvlynr]
+    # [#poky3p]
     "Waiting": "Warning",
     "Resolved": "Primary",
     "Closed": "Success",
-    # [#fcgko3]
+    # [#9nszle]
     "Completed": "Success",
-    # [#p4eqxx]
-    # [#c6cvon]
+    # [#bbzd6n]
     "Done": "Success",
     "Failed": "Danger",
     "Reverted": "Warning",
-    # [#lfwioi]
-    # [#pr5vxa]
+    # [#mrgswh]
     "Submitted to Movement": "Warning",
-    # [#ah4a60]
-    # [#eph0i5]
+    # [#8wu4sl]
     "Under Investigation": "Primary",
     "Evidence Required": "Warning",
-    # [#8t8nil]
-    # [#h6ce7r]
+    # [#c13yy3]
     "Planned": "Primary",
     "Dispatched": "Warning",
 }
@@ -145,8 +138,7 @@ def _seed_one(definition):
     if not frappe.db.exists("DocType", document_type):
         return False  # [#fwtsf9]
 
-    # [#5y2gs0]
-    # [#pvtjqs]
+    # [#t2iz8u]
     for state in definition.get("states", []):
         _ensure_workflow_state(state["state"])
     for transition in definition.get("transitions", []):
@@ -155,9 +147,7 @@ def _seed_one(definition):
 
     name = definition["name"]
     if frappe.db.exists("Workflow", name):
-        # [#c3i9i8]
-        # [#gmn8wf]
-        # [#rlqkhv]
+        # [#3imdxa]
         if definition.get("is_active") and not frappe.db.get_value("Workflow", name, "is_active"):
             doc = frappe.get_doc("Workflow", name)
             doc.is_active = 1
@@ -195,8 +185,7 @@ def _seed_one(definition):
             },
         )
 
-    # [#pm8lo5]
-    # [#e42g56]
+    # [#8o993l]
     doc.name = name
     doc.flags.name_set = True
     doc.insert(ignore_permissions=True)  # audit-ok
@@ -208,17 +197,14 @@ def seed_salis_workflows():
     on the target DocType and every referenced state/action master — safe to
     re-run (install + every migrate)."""
     for dir_name in _WORKFLOW_DIRS:
-        # [#cli24y]
-        # [#h812l4]
+        # [#3iky5e]
         sp = "wf_seed"
         frappe.db.savepoint(sp)
         try:
             definition = _load_definition(dir_name)
             _seed_one(definition)
         except Exception:
-            # [#pt3b94]
-            # [#ifs7db]
-            # [#lk2fbk]
+            # [#5rxgad]
             frappe.log_error(
                 title=f"seed_salis_workflows failed: {dir_name}",
                 message=frappe.get_traceback(),

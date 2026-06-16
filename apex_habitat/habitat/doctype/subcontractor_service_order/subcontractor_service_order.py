@@ -22,8 +22,7 @@ def before_save(doc, method=None):
 def start_work(service_order):
     """Transition Subcontractor Service Order from Scheduled to In Progress."""
     doc = frappe.get_doc("Subcontractor Service Order", service_order)
-    # [#3pod0h]
-    # [#hi8ipb]
+    # [#eu1e7a]
     frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:

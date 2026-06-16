@@ -12,11 +12,7 @@ class MaintenanceRequest(Document):
 
 
 def before_save(doc, method=None):
-    # [#3s7d9g]
-    # [#20djfc]
-    # [#fmy19q]
-    # [#g1egz8]
-    # [#mlzvw8]
+    # [#51y4un]
     if doc.is_new() and not doc.reported_by:
         doc.reported_by = frappe.session.user
 

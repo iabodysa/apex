@@ -7,6 +7,6 @@ from frappe.model.document import Document
 
 class DepreciationSnapshotItem(Document):
     def before_save(self):
-        # [#2qfbj3]
+        # [#tgyggb]
         if not self.doctype:
             return

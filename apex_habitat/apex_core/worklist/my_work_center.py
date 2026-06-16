@@ -37,10 +37,7 @@ from frappe.utils import add_to_date, now_datetime
 
 from apex_habitat.apex_core.worklist.action_inbox import get_pending_actions
 
-# [#ttr0oz]
-# [#qxpijl]
-# [#12vsj4]
-# [#bdx7fz]
+# [#eq6kr7]
 WORKLIST_REGISTRY: dict[str, dict] = {
     "Maintenance Request": {
         "active": ["Open", "Assigned", "In Progress", "Reopened"],
@@ -132,13 +129,10 @@ def get_my_work() -> dict:
       summary            dict  — {needs_action: int, assigned: int, mentions: int,
                                    notifications: int}
     """
-    # [#5wk9av]
-    # [#m9muvz]
-    # [#qfbfxu]
+    # [#mc2zat]
     needs_action = get_pending_actions()  # [#3xiq2n]
 
-    # [#fglhbi]
-    # [#r22i3g]
+    # [#hz0pz2]
     notifications = frappe.get_list(
         "Notification Log",
         filters={"for_user": frappe.session.user},
@@ -147,13 +141,13 @@ def get_my_work() -> dict:
         limit_page_length=50,
     )
 
-    # [#rduyys]
+    # [#c9j4h5]
     mentions: list = []
 
-    # [#ov3i3r]
+    # [#7s7qv1]
     field_references: list = []
 
-    # [#nbz4tu]
+    # [#2q405h]
     workflow_actions = needs_action.get("workflow_actions", [])
     todos = needs_action.get("todos", [])
     summary = {

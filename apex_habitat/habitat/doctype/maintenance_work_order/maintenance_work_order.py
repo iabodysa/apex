@@ -16,7 +16,7 @@ def validate(doc, method=None):
     if doc.planned_end_date and doc.planned_start_date:
         if doc.planned_end_date < doc.planned_start_date:
             frappe.throw(_("Planned End Date must be on or after Planned Start Date."))
-    # [#shqakk]
+    # [#j3wyod]
     if doc.maintenance_request:
         dup = frappe.db.exists(
             "Maintenance Work Order",
@@ -56,8 +56,7 @@ def before_cancel(doc, method=None):
 def start_work(work_order):
     """Transition Maintenance Work Order from Planned to In Progress."""
     doc = frappe.get_doc("Maintenance Work Order", work_order)
-    # [#3pod0h]
-    # [#hi8ipb]
+    # [#eu1e7a]
     frappe.has_permission("Maintenance Work Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
@@ -112,8 +111,7 @@ def mark_completed(work_order, completion_notes=None):
             {"source_doctype": "Maintenance Work Order", "source_name": doc.name},
         )
         if cost > 0 and not already_posted:
-            # [#19j1gi]
-            # [#t4xez9]
+            # [#c07kbo]
             frappe.get_doc({
                 "doctype": "Accommodation Ledger",
                 "posting_date": doc.actual_end_date or today(),

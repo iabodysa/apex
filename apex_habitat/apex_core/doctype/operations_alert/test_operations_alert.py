@@ -4,8 +4,7 @@ from frappe.utils import add_days, now_datetime
 
 from apex_habitat.apex_core.doctype.operations_alert.operations_alert import OperationsAlert
 
-# [#gim548]
-# [#66rs26]
+# [#3hbe1z]
 test_ignore = ["Salis Vehicle", "Salis Driver"]
 
 
@@ -24,7 +23,7 @@ class TestOperationsAlertRetention(FrappeTestCase):
             "message": "QA retention fixture",
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
-        # [#1dpub4]
+        # [#shgfhw]
         frappe.db.set_value(
             "Operations Alert", doc.name, "modified",
             add_days(now_datetime(), -age_days), update_modified=False,
@@ -42,7 +41,7 @@ class TestOperationsAlertRetention(FrappeTestCase):
         self.assertFalse(frappe.db.exists("Operations Alert", name))
 
     def test_open_alert_is_never_cleared(self):
-        # [#j1ww5c]
+        # [#hg88v4]
         name = self._make_alert("Open", age_days=400)
         OperationsAlert.clear_old_logs(days=90)
         self.assertTrue(frappe.db.exists("Operations Alert", name))
@@ -58,7 +57,7 @@ class TestOperationsAlertRetention(FrappeTestCase):
         self.assertTrue(frappe.db.exists("Operations Alert", name))
 
     def test_resolved_without_resolved_on_falls_back_to_modified(self):
-        # [#68jph9]
+        # [#31npav]
         name = self._make_alert("Resolved", age_days=200, resolved_age_days=None)
         OperationsAlert.clear_old_logs(days=90)
         self.assertFalse(frappe.db.exists("Operations Alert", name))

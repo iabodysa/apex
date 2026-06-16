@@ -30,15 +30,15 @@ def submit_transport_request(
     The controller (``before_insert``) tags ``source_channel='Web QR'`` and
     generates the ``anonymous_tracking_code`` for guest submissions.
     """
-    # [#jykmh6]
+    # [#hodie9]
     if website_field:
         return {"name": None, "tracking_code": None}
 
-    # [#ml8ltv]
+    # [#erdpdq]
     if len(purpose or "") > 2000:
         frappe.throw(_("Purpose is too long. Please keep it under 2000 characters."))
 
-    # [#in7thc]
+    # [#e5r9og]
     try:
         count = int(passenger_count)
     except (TypeError, ValueError):
@@ -48,10 +48,7 @@ def submit_transport_request(
     elif count > 50:
         count = 50
 
-    # [#8045nk]
-    # [#pcoadu]
-    # [#p5wm8x]
-    # [#qulkfo]
+    # [#mes56r]
     doc = frappe.get_doc({
         "doctype": "Transport Request",
         "service_line": "Administrative Trip",

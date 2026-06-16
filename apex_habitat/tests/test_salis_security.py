@@ -91,16 +91,13 @@ class TestFuelConsoleScoping(FrappeTestCase):
         frappe.set_user("Administrator")
         cls.pa = _project("FuelConsole A")
         cls.pb = _project("FuelConsole B")
-        # [#cqmsve]
-        # [#gsvykl]
-        # [#r2ws6l]
+        # [#9xi43d]
         cls.sup = _user("fc_sup@example.com", "Fleet Supervisor")
         _grant_project(cls.sup, cls.pa)
-        # [#7t72wf]
-        # [#g2eyis]
+        # [#2wsmz7]
         cls.pm = _user("fc_pm@example.com", "Fleet Project Manager")
         _grant_project(cls.pm, cls.pa)
-        # [#fmto24]
+        # [#k2pn02]
         cls.mgr = _user("fc_mgr@example.com", "Fleet Manager")
         cls.veh_a = _vehicle("FC AAA 1", cls.pa)
         cls.veh_b = _vehicle("FC BBB 1", cls.pb)
@@ -142,7 +139,7 @@ class TestFuelConsoleScoping(FrappeTestCase):
         frappe.set_user(self.sup)
         with self.assertRaises(frappe.PermissionError):
             fuel_console.approve_fuel_request(self.fr_b.name)
-        # [#4s6kiz]
+        # [#4ob854]
         self.assertEqual(
             frappe.db.get_value("Fuel Request", self.fr_b.name, "status"), "Pending"
         )
@@ -156,8 +153,7 @@ class TestFuelConsoleScoping(FrappeTestCase):
         )
 
     def test_scoped_user_can_approve_in_scope(self):
-        # [#4djnnb]
-        # [#nkdtar]
+        # [#mm3wa3]
         own = _pending_fuel_request(self.pa, self.veh_a)
         frappe.set_user(self.pm)
         res = fuel_console.approve_fuel_request(own.name)
@@ -205,7 +201,7 @@ class TestSupportTicketScoping(FrappeTestCase):
         """A Driver's own project-less ticket must defer to if_owner, not be
         blocked by project scoping."""
         drv_user = _user("tk_driver@example.com", "Driver")
-        # [#qaflrt]
+        # [#cm8981]
         self.assertIsNone(
             scoped_has_permission(
                 self._ticket(project=None, owner=drv_user), "read", user=drv_user

@@ -38,16 +38,14 @@ class TestChangeLogPopup(unittest.TestCase):
         change_log_file = APP_ROOT / "change_log" / f"v{major}" / f"v{version.replace('.', '_')}.md"
         content = change_log_file.read_text(encoding="utf-8")
 
-        # [#odsxfe]
+        # [#py4lhj]
         self.assertRegex(
             content,
             re.compile(rf"^#\s+.*{re.escape(version)}", re.MULTILINE),
             f"Changelog {change_log_file.name} must open with a heading naming version {version}.",
         )
 
-        # [#h1vtaj]
-        # [#49a0yb]
-        # [#thiyrm]
+        # [#rescmm]
         bullets = re.findall(r"^\s*[-*]\s+\S", content, re.MULTILINE)
         self.assertGreaterEqual(
             len(bullets),

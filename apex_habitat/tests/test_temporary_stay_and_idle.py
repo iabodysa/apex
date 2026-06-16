@@ -40,7 +40,7 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
         with self.assertRaises(frappe.ValidationError):
             self._assignment("Temporary", "2026-04-20").insert(ignore_permissions=True)
 
-    # [#mgj01u]
+    # [#3yvblc]
     def _idle(self, **kw):
         doc = frappe.get_doc({
             "doctype": "Idle Resident Report", "naming_series": "IDLE-.YYYY.-.####",
@@ -61,7 +61,7 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
             self._idle().insert(ignore_permissions=True)
 
     def test_idle_after_insert_routes_todo_to_department_role(self):
-        # [#lmpauc]
+        # [#fp3msv]
         email = f"mgr{_h()}@test.com".lower()
         user = frappe.get_doc({"doctype": "User", "email": email, "first_name": "Mgr",
                                "send_welcome_email": 0,

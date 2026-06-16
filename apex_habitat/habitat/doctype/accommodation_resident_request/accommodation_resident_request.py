@@ -12,13 +12,7 @@ class AccommodationResidentRequest(Document):
     pass
 
 
-# [#dojvco]
-# [#dvwgwi]
-# [#6wuno8]
-# [#oeibgt]
-# [#8yax5d]
-# [#929tdo]
-# [#91azr6]
+# [#56rign]
 _CATEGORY_TARGET = {
     "Maintenance": "Maintenance Request",
     "Water": "Maintenance Request",
@@ -32,9 +26,7 @@ _CATEGORY_TARGET = {
     "Custody": "Custody Issue",
 }
 
-# [#oc09f7]
-# [#h3xt26]
-# [#3rx2wp]
+# [#k8sj0e]
 _CATEGORY_TO_ISSUE_TYPE = {
     "Maintenance": "Other",
     "Water": "Plumbing",
@@ -49,11 +41,7 @@ _CATEGORY_TO_ISSUE_TYPE = {
 
 
 def before_insert(doc, method=None):
-    # [#t6k3lg]
-    # [#191rhm]
-    # [#csemjd]
-    # [#ekmtvc]
-    # [#jy7qnx]
+    # [#dpfma0]
     if not doc.anonymous_tracking_code:
         doc.anonymous_tracking_code = frappe.generate_hash(length=8).upper()
 
@@ -181,9 +169,7 @@ def _apply_priority_rules(doc):
     )
 
     def _matches(term):
-        # [#pwhqtz]
-        # [#p1lmz6]
-        # [#lmd8ij]
+        # [#kgat6r]
         return re.search(r"\b" + re.escape(term) + r"\b", text) is not None
 
     if any(_matches(term) for term in critical_terms):
@@ -192,15 +178,7 @@ def _apply_priority_rules(doc):
         doc.priority = "High"
 
 
-# [#rudcur]
-# [#6lr7y8]
-# [#4fs9jj]
-# [#hv1ioz]
-# [#djcs9g]
-# [#1v6swm]
-# [#4ivwxk]
-# [#ma2uhs]
-# [#rudcur]
+# [#eqz12c]
 
 
 @frappe.whitelist(methods=["POST"])
@@ -216,7 +194,7 @@ def convert_request(source_name):
 
     source = frappe.get_doc("Accommodation Resident Request", source_name)
 
-    # [#hau1ba]
+    # [#cw0q8i]
     if source.target_doctype and source.target_document:
         if frappe.db.exists(source.target_doctype, source.target_document):
             return {
@@ -255,8 +233,7 @@ def _link_target_to_request(source, target_doctype, target_name):
     server-side without re-running the request's own validate/on_update mid-flow,
     and without a timestamp-mismatch race."""
     updates = {"target_doctype": target_doctype, "target_document": target_name}
-    # [#h9xuau]
-    # [#q4p36b]
+    # [#6u3aq4]
     if source.status in (None, "", "New", "Triaged", "Assigned"):
         updates["status"] = "In Progress"
     frappe.db.set_value("Accommodation Resident Request", source.name, updates)
@@ -285,8 +262,7 @@ def _build_safety_incident(source):
     target.incident_datetime = frappe.utils.now_datetime()
     target.accommodation_building = source.building
     target.specific_location = source.issue_location
-    # [#nstnl0]
-    # [#s4oovn]
+    # [#qblrl5]
     _severity_map = {"Critical": "Critical", "High": "High", "Medium": "Medium", "Low": "Low"}
     target.severity = _severity_map.get(source.priority, "Medium")
     target.description = source.description or _("Converted from resident request {0}").format(source.name)

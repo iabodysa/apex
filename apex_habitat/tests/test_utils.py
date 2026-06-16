@@ -12,7 +12,7 @@ try:
     from frappe.tests.utils import FrappeTestCase
     UnitTestCase = FrappeTestCase
 except Exception:  # pragma: no cover
-    # [#gq16jt]
+    # [#6ahmdc]
     frappe = None
     FrappeTestCase = object  # type: ignore
     UnitTestCase = object  # type: ignore

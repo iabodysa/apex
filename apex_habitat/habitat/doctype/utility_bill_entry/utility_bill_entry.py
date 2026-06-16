@@ -33,15 +33,12 @@ def validate(doc, method=None):
         if doc.billing_period_to < doc.billing_period_from:
             frappe.throw(_("Billing Period To must be on or after Billing Period From."))
 
-    # [#s0auh6]
-    # [#jbitc9]
+    # [#egssfj]
     if doc.utility_account and doc.billing_period_from and doc.billing_period_to:
         duplicate = frappe.db.exists(
             "Utility Bill Entry",
             {
-                # [#ri93vq]
-                # [#3rvpcs]
-                # [#37opvl]
+                # [#p1ktdw]
                 "company": doc.company,
                 "building": doc.building,
                 "utility_account": doc.utility_account,

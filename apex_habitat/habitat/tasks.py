@@ -86,16 +86,14 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
         "Other": "annual_other_expenses_sar"
     }
 
-    # [#jonoe2]
+    # [#3r52d7]
     if not frappe.db.exists("Accommodation Building", building):
         logger.warning(
             f"allocate_building_accommodation_cost: Building {building} not found. Skipping."
         )
         return
     building_doc = frappe.get_doc("Accommodation Building", building)
-    # [#ift93i]
-    # [#p6afo6]
-    # [#n117v7]
+    # [#el5lmg]
     from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import apply_active_lease
     apply_active_lease(building_doc)
     capacity = flt(building_doc.total_capacity)
@@ -134,11 +132,11 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
                 if annual_cost <= 0:
                     continue
 
-                # [#6bn5wc]
+                # [#pqghnl]
                 daily_cost = flt(annual_cost / days_in_year, 5)
                 daily_share = flt(daily_cost / capacity, 5)
 
-                # [#69dc6m]
+                # [#4g0jys]
                 exists = frappe.db.exists(
                     "Accommodation Ledger",
                     {
@@ -296,7 +294,7 @@ def daily_building_license_expiry_check() -> None:
     today_str = today()
     logger = frappe.logger()
 
-    # [#p8yur6]
+    # [#bz69zh]
     start = 0
     batch_size = 500
     while True:
@@ -371,7 +369,7 @@ def _raise_maintenance_alert(
         f"(threshold: {threshold_hours} hours)."
     )[:2000]
 
-    # [#sa9w87]
+    # [#glisou]
     try:
         today_str = today()
         if frappe.db.exists(
@@ -392,7 +390,7 @@ def _raise_maintenance_alert(
         )
         return
 
-    # [#m2omcq]
+    # [#rx9vmh]
     try:
         frappe.get_doc(
             {
@@ -412,7 +410,7 @@ def _raise_maintenance_alert(
         )
         return
 
-    # [#1i99p2]
+    # [#q02x8v]
     try:
         frappe.get_doc("Maintenance Request", req_name).add_comment("Comment", message)
     except Exception:
@@ -436,11 +434,7 @@ def open_maintenance_escalation() -> None:
     now = now_datetime()
     logger = frappe.logger()
 
-    # [#jc0ys4]
-    # [#ci0vwo]
-    # [#5mb7vc]
-    # [#14vom9]
-    # [#97ba2a]
+    # [#6x8ro4]
     thresholds = {
         "Critical": 24,
         "High": 72,
@@ -448,7 +442,7 @@ def open_maintenance_escalation() -> None:
         "Low": 336
     }
 
-    # [#9sjghe]
+    # [#bz0n3e]
     start = 0
     batch_size = 500
     while True:
@@ -676,10 +670,7 @@ def weekly_occupancy_sync() -> None:
     """
     batch_size = 500
 
-    # [#6miocv]
-    # [#i2w6jq]
-    # [#7zn79c]
-    # [#k7ew34]
+    # [#d7yd9d]
     active_by_room = {
         r["room"]: int(r["n"] or 0)
         for r in frappe.db.sql(
@@ -737,12 +728,7 @@ def weekly_occupancy_sync() -> None:
 
     frappe.logger().info("weekly_occupancy_sync: room occupancy counters refreshed.")
 
-    # [#dfo1c9]
-    # [#hq4urf]
-    # [#5516ep]
-    # [#kgelfi]
-    # [#jkxyju]
-    # [#ot1cha]
+    # [#qm5tz5]
     rooms_per_building = {
         r["building"]: int(r["n"] or 0)
         for r in frappe.db.sql(
@@ -785,7 +771,7 @@ def weekly_occupancy_sync() -> None:
             try:
                 total_rooms = rooms_per_building.get(building.name, 0)
                 if not total_rooms:
-                    # [#o6i4do]
+                    # [#qtpe2y]
                     continue
 
                 active = active_by_building.get(building.name, 0)
@@ -828,8 +814,7 @@ def daily_occupancy_snapshot() -> None:
     year = int(snapshot_date[:4])
     days_in_year = 366 if calendar.isleap(year) else 365
 
-    # [#oh0s0q]
-    # [#f2eg5h]
+    # [#tt1y1j]
     already = {
         r["building"]
         for r in frappe.get_all(
@@ -840,8 +825,7 @@ def daily_occupancy_snapshot() -> None:
         if r["building"]
     }
 
-    # [#kubmk9]
-    # [#endyqz]
+    # [#90367k]
     rooms_by_building: dict = {}
     for r in frappe.db.sql(
         """
@@ -856,7 +840,7 @@ def daily_occupancy_snapshot() -> None:
         bucket[r["status"]] = int(r["n"] or 0)
         bucket["_total"] += int(r["n"] or 0)
 
-    # [#ericll]
+    # [#6kydth]
     active_by_building = {
         r["building"]: int(r["n"] or 0)
         for r in frappe.db.sql(
@@ -872,7 +856,7 @@ def daily_occupancy_snapshot() -> None:
         )
     }
 
-    # [#fetoxi]
+    # [#im8xs8]
     building_meta = {
         b["name"]: b
         for b in frappe.get_all(
@@ -939,7 +923,7 @@ def weekly_safety_task_compliance_scan() -> None:
 
     total_overdue = 0
 
-    # [#5jykuy]
+    # [#4qriyf]
     start = 0
     batch_size = 500
     while True:
@@ -991,7 +975,7 @@ def daily_scheduled_task_instance_generator() -> None:
     today_date = getdate(today_str)
     logger = frappe.logger()
 
-    # [#ainxxl]
+    # [#78c2rg]
     start = 0
     batch_size = 500
     while True:
@@ -1006,8 +990,7 @@ def daily_scheduled_task_instance_generator() -> None:
             break
 
         for tmpl in templates:
-            # [#9umys1]
-            # [#5m8m8y]
+            # [#hs4wc0]
             if tmpl.building and not frappe.db.exists("Accommodation Building", tmpl.building):
                 logger.warning(
                     "daily_scheduled_task_instance_generator: skipping template %s — building %s not found.",

@@ -52,19 +52,15 @@ from apex_habitat.salis.utils import (
 
 REQUEST_TYPES = ("Standard", "Top-up", "Chip")
 
-# [#ip8yq8]
-# [#gpwe2c]
-# [#ak590k]
-# [#8rwd5f]
+# [#eklmjo]
 VALID_STATUSES = ("Pending", "Approved", "Done", "Failed", "Reverted", "Cancelled")
 
 
 class FuelRequest(Document):
-	# [#6yoecv]
+	# [#8q3d7t]
 
 	def before_insert(self):
-		# [#p176r1]
-		# [#cmsxtp]
+		# [#52mb5t]
 		if not self.requested_by:
 			self.requested_by = frappe.session.user
 
@@ -110,19 +106,13 @@ class FuelRequest(Document):
 			frappe.throw(reason)
 
 	def before_submit(self):
-		# [#l2b6c9]
-		# [#tlw8h9]
-		# [#rrgh3g]
-		# [#gbaw4t]
-		# [#egkx12]
+		# [#g1h3oq]
 		if self.request_type == "Chip":
 			self._guard_chip_cancellation()
 
 	def on_submit(self):
 		if self.request_type == "Standard":
-			# [#7ehveh]
-			# [#fv7irq]
-			# [#1bpaxx]
+			# [#psnx54]
 			if self.status == "Done":
 				self._apply_quota_consumption()
 		elif self.request_type == "Top-up":
@@ -155,12 +145,7 @@ class FuelRequest(Document):
 		if self.request_type == "Standard" and self.status == "Done":
 			self._apply_quota_consumption()
 
-		# [#42r4yy]
-		# [#77jjcv]
-		# [#tnpsft]
-		# [#57eag0]
-		# [#f5r2ip]
-		# [#t5dwgu]
+		# [#suwuvv]
 		if (
 			self.request_type == "Top-up"
 			and self.reverted
@@ -185,17 +170,12 @@ class FuelRequest(Document):
 				),
 			)
 
-		# [#bgxffd]
-		# [#qfkt79]
-		# [#m2nlyj]
-		# [#rwcftn]
-		# [#cp3r3k]
-		# [#os9hds]
+		# [#cx0ks8]
 		from apex_habitat.salis.fuel_engine import reverse_fuel_ledger
 
 		reverse_fuel_ledger("Fuel Request", self.name)
 
-	# [#jlrxc6]
+	# [#nnui1a]
 
 	def _validate_standard(self):
 		if (self.requested_litres or 0) <= 0:
@@ -216,7 +196,7 @@ class FuelRequest(Document):
 				_("A chip number is required to {0} a fuel chip.").format(_(self.action))
 			)
 
-	# [#7v3fqw]
+	# [#8omjd6]
 
 	def _guard_initial_status(self):
 		"""A new request must be created at the initial state (Pending). Later
@@ -234,7 +214,7 @@ class FuelRequest(Document):
 		if self.status == "Approved" and not self.approved_by:
 			self.approved_by = frappe.session.user
 
-	# [#m928oh]
+	# [#k58r6v]
 
 	def _warn_overdue_temporary(self):
 		if not self.is_temporary or self.reverted:
@@ -248,7 +228,7 @@ class FuelRequest(Document):
 				title=_("Temporary Top-up Not Reverted"),
 			)
 
-	# [#r9urke]
+	# [#kuicp1]
 
 	def _guard_chip_cancellation(self):
 		if self.action == "Cancel":
@@ -261,7 +241,7 @@ class FuelRequest(Document):
 					_("Owner acknowledgement is required to submit a fuel chip cancellation.")
 				)
 
-	# [#sp2u9x]
+	# [#5u90n1]
 
 	def _apply_quota_consumption(self):
 		"""Idempotently add requested_litres to the quota's consumed_litres."""

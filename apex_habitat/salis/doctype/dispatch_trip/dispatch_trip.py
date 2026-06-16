@@ -178,10 +178,7 @@ class DispatchTrip(Document):
             )
             or 0
         )
-        # [#8ez8do]
-        # [#t7ckm5]
-        # [#2qg484]
-        # [#m92y7v]
+        # [#dtn16g]
         has_timestamps = 1 if (self.return_time and self.depart_time) else 0
         ledger = frappe.new_doc("Trip Fulfilment Ledger")
         ledger.update(
@@ -207,9 +204,7 @@ class DispatchTrip(Document):
         Trip Fulfilment Ledger. Odometer is monotonic and is intentionally not
         rolled back."""
         if self.transport_request:
-            # [#2x71uf]
-            # [#2af07c]
-            # [#hpcd3f]
+            # [#obmit8]
             revert_transport_request(
                 self.transport_request,
                 from_state="Fulfilled",
@@ -230,4 +225,4 @@ class DispatchTrip(Document):
             frappe.delete_doc(
                 "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True  # audit-ok
             )
-        # [#hbrld3]
+        # [#r7e254]

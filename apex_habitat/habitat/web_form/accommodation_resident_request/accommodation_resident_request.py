@@ -28,15 +28,15 @@ def submit_resident_request(
       existing QR forms and external callers.
     - ``website_field`` is a honeypot; any non-empty value is rejected.
     """
-    # [#lk2u5r]
+    # [#q0bt8w]
     if website_field:
         return {"name": None, "tracking_code": None}
 
-    # [#7inzlf]
+    # [#oskg6d]
     if len(description or "") > 2000:
         frappe.throw(_("Description is too long. Please keep it under 2000 characters."))
 
-    # [#ltg9k2]
+    # [#nxrqsg]
     doc = frappe.get_doc({
         "doctype": "Accommodation Resident Request",
         "location_token": location_token,

@@ -85,10 +85,7 @@ def load_specs(module_dir, only=None, data_root=None):
             "doctype": raw["doctype"],
             "key": raw["key"],
             "create_only": raw.get("create_only", True),
-            # [#878c7g]
-            # [#dq3u67]
-            # [#8n11ca]
-            # [#do0hi5]
+            # [#oheobt]
             "apply": raw.get("apply", True),
             "records": raw["records"],
             "__source__": fname,
@@ -152,10 +149,7 @@ def apply_spec(spec):
         frappe.db.savepoint(savepoint)
         try:
             doc = frappe.get_doc({"doctype": doctype, **record})
-            # [#pvs8pu]
-            # [#jtklsf]
-            # [#m7yrau]
-            # [#fxnzle]
+            # [#aurulp]
             doc.insert(ignore_permissions=True, ignore_if_duplicate=True)  # audit-ok
             created += 1
         except Exception:  # noqa: BLE001 — one bad record must not abort the batch
@@ -185,7 +179,7 @@ def seed(module_dir, only=None):
     return totals
 
 
-# [#2wsx46]
+# [#jz830j]
 _MODULES = ("habitat", "salis")
 
 

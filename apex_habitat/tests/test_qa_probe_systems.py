@@ -1,6 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#a2j66i]
-# [#lrwlsx]
+# [#izsfav]
 
 import frappe
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
@@ -43,12 +42,12 @@ class QASysBase(ApexHabitatTestCase):
 
 
 class TestMaintenanceSafety(QASysBase):
-    # [#czwhww]
+    # [#gvxz1d]
     def test_6a_load_template_fire_safety(self):
         from apex_habitat.habitat.doctype.maintenance_material_template.maintenance_material_template import (
             load_template_into_doc,
         )
-        # [#1cuaoc]
+        # [#7u37y7]
         mat = frappe.get_doc({
             "doctype": "Maintenance Material", "material_name": "Extinguisher " + _hash(),
             "material_category": "General",
@@ -76,7 +75,7 @@ class TestMaintenanceSafety(QASysBase):
         self.assertGreaterEqual(res.get("rows_added", 0), 1, "BUG: Fire Safety template loaded 0 rows")
         self.assertGreaterEqual(len(mr.procurement_items), 1)
 
-    # [#gh865t]
+    # [#8g7taa]
     def test_6b_task_lifecycle_open_inprogress_completed(self):
         from apex_habitat.habitat.doctype.scheduled_task_instance.scheduled_task_instance import (
             start_task, mark_completed,
@@ -135,10 +134,7 @@ class TestReports(QASysBase):
                     if not columns:
                         failures.append(f"{r}/{label}: no columns returned")
                 except frappe.ValidationError as e:
-                    # [#kfg7hc]
-                    # [#o36o1b]
-                    # [#shmhna]
-                    # [#4bukpd]
+                    # [#sc11fa]
                     if label == "empty":
                         print(f"\n[7] {r} (empty): requires date range (ok): {e}")
                     else:
@@ -181,14 +177,14 @@ class TestSchedulers(QASysBase):
 
 
 class TestOnboardingSafetyCatalog(QASysBase):
-    # [#f5ywhi]
+    # [#5ssvsa]
     def test_9_safety_catalog_permissions_and_route(self):
         meta = frappe.get_meta("Safety Task Catalog")
         roles_with_read = [p.role for p in meta.permissions if p.read]
         print(f"\n[9] Safety Task Catalog roles with read={roles_with_read}")
         print(f"[9] istable={meta.istable} read_only={getattr(meta, 'read_only', None)}")
 
-        # [#p8q20l]
+        # [#3xzl3p]
         if frappe.db.exists("Onboarding Step", "Review the Safety Task Catalog"):
             step = frappe.get_doc("Onboarding Step", "Review the Safety Task Catalog")
             print(f"[9] step action={step.action} reference_document={step.reference_document} is_complete={step.is_complete}")
@@ -197,7 +193,7 @@ class TestOnboardingSafetyCatalog(QASysBase):
         else:
             print("[9] Onboarding Step 'Review the Safety Task Catalog' NOT found in DB.")
 
-        # [#900ntm]
+        # [#bnapvy]
         for role in ("Accommodation Manager", "Resident Supervisor"):
             if not frappe.db.exists("Role", role):
                 print(f"[9] Role '{role}' does NOT exist in this site. (Likely cause of broken onboarding action if roles never installed.)")
@@ -211,7 +207,7 @@ class TestOnboardingSafetyCatalog(QASysBase):
             try:
                 frappe.set_user(email)
                 has_read = frappe.has_permission("Safety Task Catalog", "read")
-                # [#b9uhsh]
+                # [#2wswl5]
                 can_get_list = True
                 list_err = None
                 try:
@@ -223,6 +219,6 @@ class TestOnboardingSafetyCatalog(QASysBase):
             finally:
                 frappe.set_user("Administrator")
 
-        # [#vq68sw]
+        # [#lio7qd]
         module = frappe.db.get_value("DocType", "Safety Task Catalog", "module")
         print(f"[9] Safety Task Catalog module={module}")

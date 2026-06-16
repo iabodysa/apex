@@ -1,8 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# [#hlfy1g]
-# [#rf8fpd]
+# [#8evoal]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -51,8 +50,7 @@ class TestOperationalDepreciationPolicy(FrappeTestCase):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
     def test_zero_useful_life_raises(self):
-        # [#cd2so3]
-        # [#8ac243]
+        # [#roxncg]
         doc = frappe.get_doc({
             "doctype": "Operational Depreciation Policy",
             "policy_name": "QA Zero Life",

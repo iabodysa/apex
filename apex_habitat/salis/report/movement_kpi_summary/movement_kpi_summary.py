@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 """Movement KPI Summary — a one-glance, ORM-only roll-up of the Movement
 operational KPIs surfaced on the Movement Operations Dashboard.
@@ -54,9 +54,7 @@ def execute(filters=None):
     to_date = filters.get("to_date")
 
     def date_range(field):
-        # [#3op9y7]
-        # [#qhzipf]
-        # [#9lkqaz]
+        # [#4nlki0]
         lo, hi = from_date, to_date
         if field == "period_month":
             lo = lo[:7] if lo else lo
@@ -82,7 +80,7 @@ def execute(filters=None):
                     "note": frappe._("Source not installed: {0}").format(missing_doctype or "")}
         return {"kpi": label, "value": value, "note": ""}
 
-    # [#e78of2]
+    # [#nf72uy]
     completed_filters = {"status": "Completed"}
     completed_filters.update(date_range("trip_date"))
     total_filters = {}
@@ -105,7 +103,7 @@ def execute(filters=None):
             "Transport Request"),
         row(frappe._("Open Fuel Exception Cases"),
             _count("Fuel Exception Case", {"status": "Open"}), "Fuel Exception Case"),
-        # [#451yav]
+        # [#4f2n09]
         row(frappe._("Trip Fulfilment Ledger Rows"),
             _count("Trip Fulfilment Ledger", date_range("trip_date")),
             "Trip Fulfilment Ledger"),

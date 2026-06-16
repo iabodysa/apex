@@ -27,7 +27,7 @@ def execute():
     skipped = 0
 
     for site in sites:
-        # [#jvx59x]
+        # [#kurcce]
         already_linked = frappe.db.exists(
             "Dynamic Link",
             {
@@ -40,7 +40,7 @@ def execute():
             skipped += 1
             continue
 
-        # [#8eef64]
+        # [#iffmq8]
         city_val = (site.city or "").strip()
         district_val = (site.district or "").strip()
         if not city_val and not district_val:
@@ -51,7 +51,7 @@ def execute():
         try:
             frappe.db.savepoint(savepoint)
 
-            # [#msqbbu]
+            # [#m52vzj]
             title_parts = [site.name]
             if city_val:
                 title_parts.append(city_val)
@@ -62,7 +62,7 @@ def execute():
                     "doctype": "Address",
                     "address_title": address_title,
                     "address_type": "Office",
-                    # [#jj7g3g]
+                    # [#q0xkyw]
                     "address_line1": district_val or city_val,
                     # city field on Address DocType: City name (plain text accepted by Frappe).
                     "city": city_val or district_val,

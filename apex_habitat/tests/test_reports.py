@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 import frappe
 from frappe.utils import add_days, getdate
@@ -64,7 +64,7 @@ class TestReports(ApexHabitatTestCase):
             self.assertIsNone(chart, "Chart must be None when the report has no rows.")
             return
         if chart is None:
-            # [#f6vyy2]
+            # [#5uypno]
             return
         self.assertIsInstance(chart, dict, "Chart must be a dict.")
         self.assertIn(chart.get("type"), ("bar", "line", "percentage", "pie", "donut"))
@@ -80,13 +80,13 @@ class TestReports(ApexHabitatTestCase):
             self.assertEqual(len(ds["values"]), len(cdata["labels"]),
                              "Chart dataset values must align with labels.")
 
-    # [#9hwft2]
+    # [#pvbjao]
 
     def test_accommodation_occupancy_summary(self):
         self._assert_report_shape(execute_occupancy())
 
     def test_accommodation_cost_distribution(self):
-        # [#jvew7m]
+        # [#4mhxbb]
         self._assert_report_shape(
             execute_cost({"from_date": "2026-01-01", "to_date": "2026-12-31"})
         )
@@ -104,7 +104,7 @@ class TestReports(ApexHabitatTestCase):
     def test_checkout_pending_clearance_shape(self):
         result = execute_checkout_clearance()
         self._assert_report_shape(result)
-        # [#50f4ak]
+        # [#mm0fu0]
         self.assertIn("employee_name", [c.get("fieldname") for c in result[0]])
 
     def test_scheduled_task_compliance(self):
@@ -114,7 +114,7 @@ class TestReports(ApexHabitatTestCase):
         self._assert_report_shape(execute_maintenance())
 
     def test_accommodation_ledger_summary(self):
-        # [#jvew7m]
+        # [#4mhxbb]
         self._assert_report_shape(
             execute_ledger_summary({"from_date": "2026-01-01", "to_date": "2026-12-31"})
         )
@@ -138,7 +138,7 @@ class TestReports(ApexHabitatTestCase):
     def test_salis_payment_register(self):
         self._assert_report_shape(execute_payment())
 
-    # [#byg86j]
+    # [#4yez14]
 
     def test_utility_variance_report_chart(self):
         self._assert_chart_report(execute_utility())
@@ -164,7 +164,7 @@ class TestReports(ApexHabitatTestCase):
     def test_transport_fulfilment_sla_chart(self):
         self._assert_chart_report(execute_transport_sla())
 
-    # [#twcx5a]
+    # [#7hg7h3]
 
     def test_project_filter_narrows_results(self):
         """Seed two Accommodation Ledger memo rows under two different projects and
@@ -189,9 +189,7 @@ class TestReports(ApexHabitatTestCase):
             "doctype": "Project", "project_name": "PB " + _h(), "company": company,
         }).insert(ignore_permissions=True).name
 
-        # [#nqqufv]
-        # [#ev9ejl]
-        # [#j72zhe]
+        # [#pgwkti]
         prefix = "FILTER-" + _h(6) + "-"
         src_a, src_b = prefix + "A", prefix + "B"
         for project, src in ((project_a, src_a), (project_b, src_b)):
@@ -211,12 +209,7 @@ class TestReports(ApexHabitatTestCase):
         def _mine(rows):
             return [r for r in rows if (r.get("source_name") or "").startswith(prefix)]
 
-        # [#osr5es]
-        # [#jn0u9j]
-        # [#cwk7m9]
-        # [#ruxz4f]
-        # [#rypeai]
-        # [#bmn23c]
+        # [#sci3pj]
         window = {
             "from_date": str(add_days(getdate(), -1)),
             "to_date": str(add_days(getdate(), 1)),
@@ -228,7 +221,7 @@ class TestReports(ApexHabitatTestCase):
         self.assertEqual(len(_mine(all_rows)), 2, "Both seeded ledger rows should be visible unfiltered.")
         self.assertEqual(len(_mine(a_rows)), 1, "Project filter must narrow to project_a's single row.")
         self.assertEqual(len(_mine(b_rows)), 1, "Project filter must narrow to project_b's single row.")
-        # [#959jze]
+        # [#9kj9wl]
         self.assertEqual(_mine(a_rows)[0]["source_name"], src_a,
                          "project_a filter must return only project_a's row.")
         self.assertEqual(_mine(b_rows)[0]["source_name"], src_b,

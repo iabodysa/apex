@@ -1,17 +1,5 @@
 # Copyright (c) 2026, AFMCO Support Services Co. Ltd
-# [#s6du5z]
-# [#od1fgp]
-# [#ep2de0]
-# [#p7ag56]
-# [#meyg1s]
-# [#6iknhj]
-# [#od1fgp]
-# [#kjbhv0]
-# [#4kx45i]
-# [#kh72n4]
-# [#5h5qa8]
-# [#id2e30]
-# [#dy89gw]
+# [#a7e2jk]
 
 import frappe
 
@@ -19,13 +7,7 @@ UNSCOPED_ROLES = {
     "System Manager",
     "Fleet Manager",
     "Internal Auditor",
-    # [#qn65ig]
-    # [#icc6x9]
-    # [#lhr1cf]
-    # [#7gggog]
-    # [#3krh1h]
-    # [#jizha1]
-    # [#9t1fty]
+    # [#m3bfwj]
     "Finance Manager",
 }
 
@@ -71,10 +53,7 @@ def _project_condition(user, column="`project`"):
     return "{column} in ({values})".format(column=column, values=escaped)
 
 
-# [#rudcur]
-# [#elodcg]
-# [#rudcur]
-# [#7kux9m]
+# [#89nxdl]
 
 def vehicle_assignment_query(user=None):
     return _project_condition(user)
@@ -159,8 +138,7 @@ def trip_start_log_query(user=None):
 
     projects = _allowed_projects(user)
     if not projects:
-        # [#ss0io8]
-        # [#adwi88]
+        # [#7eocrd]
         return own
 
     escaped = ", ".join(frappe.db.escape(p) for p in projects)
@@ -201,8 +179,7 @@ def salis_driver_query(user=None):
 
     projects = _allowed_projects(user)
     if not projects:
-        # [#ss0io8]
-        # [#s51hgx]
+        # [#5hk4nq]
         return own
 
     escaped = ", ".join(frappe.db.escape(p) for p in projects)
@@ -242,9 +219,7 @@ def passenger_manifest_query(user=None):
     )
 
 
-# [#rudcur]
-# [#np2ldl]
-# [#rudcur]
+# [#2huj0w]
 
 def _doc_project(doc):
     """Resolve the project a document belongs to, including the docs that reach
@@ -261,8 +236,7 @@ def _doc_project(doc):
             return frappe.db.get_value("Route Plan", route_plan, "project")
 
     if doctype == "Passenger Manifest":
-        # [#5jyihp]
-        # [#ghu1og]
+        # [#qiimpb]
         route_plan = getattr(doc, "route_plan", None)
         if not route_plan:
             dispatch_trip = getattr(doc, "dispatch_trip", None)
@@ -288,16 +262,10 @@ def scoped_has_permission(doc, ptype, user=None):
 
     project = _doc_project(doc)
     if not project:
-        # [#6ucwfi]
-        # [#rg9dmd]
-        # [#6qpzwq]
-        # [#6vmnt8]
-        # [#6ll8c3]
+        # [#n18ea0]
         if getattr(doc, "owner", None) == user:
             return None
-        # [#e6vft7]
-        # [#2sjzpe]
-        # [#c6r4ab]
+        # [#kmesp4]
         return False
 
     if project not in _allowed_projects(user):
@@ -329,14 +297,13 @@ def salis_driver_has_permission(doc, ptype, user=None):
     if _is_unscoped(user):
         return None
 
-    # [#ftupdr]
+    # [#jc6moa]
     if getattr(doc, "owner", None) == user:
         return None
 
     project = _doc_project(doc)
     if not project:
-        # [#tpjyaq]
-        # [#i0987i]
+        # [#kk3lw5]
         return False
 
     if project not in _allowed_projects(user):
@@ -368,14 +335,13 @@ def trip_start_log_has_permission(doc, ptype, user=None):
     if _is_unscoped(user):
         return None
 
-    # [#o4dfxj]
+    # [#dz5z4x]
     if getattr(doc, "owner", None) == user:
         return None
 
     project = _doc_project(doc)
     if not project:
-        # [#du5o5h]
-        # [#hurett]
+        # [#ocig5t]
         return False
 
     if project not in _allowed_projects(user):
@@ -384,17 +350,9 @@ def trip_start_log_has_permission(doc, ptype, user=None):
     return None
 
 
-# [#rudcur]
-# [#dm2ry4]
-# [#rudcur]
-# [#1cn5cw]
-# [#4286wl]
-# [#16mmia]
-# [#dbm02s]
-# [#5hgum1]
-# [#47ajeg]
+# [#m6o851]
 
-# [#f1a2vi]
+# [#6wflvq]
 FINANCE_EXCLUSIVE_STATES = {
     "Approved by Finance",
     "Paid",
@@ -426,12 +384,11 @@ def payment_sod_has_permission(doc, ptype, user=None):
     if getattr(doc, "doctype", None) != "Salis Payment Request":
         return None
 
-    # [#lj9evu]
-    # [#tjsy6v]
+    # [#9u08t6]
     if scoped_has_permission(doc, ptype, user=user) is False:
         return False
 
-    # [#j3giia]
+    # [#n6cjcu]
     if ptype not in ("submit", "write"):
         return None
 

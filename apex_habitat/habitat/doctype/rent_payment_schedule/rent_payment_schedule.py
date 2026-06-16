@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# [#m4uz3c]
+# [#j03s5a]
 
 import frappe
 from frappe.model.document import Document
 
 class RentPaymentSchedule(Document):
     def before_save(self):
-        # [#2qfbj3]
+        # [#tgyggb]
         if self.doctype != "Rent Payment Schedule":
             frappe.throw("DocType mismatch")

@@ -21,10 +21,7 @@ from apex_habitat.tests._helpers import _user
 
 LEDGER = "Rental Accrual Ledger"
 
-# [#mx4j69]
-# [#qaxc5w]
-# [#durv9z]
-# [#2waxmt]
+# [#qd5yeu]
 test_ignore = [
     "Company",
     "Cost Center",
@@ -48,8 +45,7 @@ def _settled(name):
 class TestRentalSettlementStamping(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # [#2lp3s0]
-        # [#448yij]
+        # [#41w3ao]
         self.requester = _user("rss_req@example.com", "Fleet Project Manager")
         self.manager = _user("rss_mgr@example.com", "Fleet Manager")
         self.office = self._office("RSS Stamp Office")
@@ -138,7 +134,7 @@ class TestRentalSettlementStamping(FrappeTestCase):
         row = self._accrual_row()
         rs = self._settlement()
 
-        # [#h2vh0r]
+        # [#ffzyph]
         self.assertEqual(_settled(row).settled, 0)
         self.assertIsNone(_settled(row).rental_settlement)
 
@@ -154,8 +150,7 @@ class TestRentalSettlementStamping(FrappeTestCase):
         self.assertIsNone(s2.rental_settlement, "Cancel must clear the link.")
 
     def test_validate_cross_checks_ledger_total(self):
-        # [#co4d1j]
-        # [#m4a135]
+        # [#3o3afb]
         self._accrual_row(amount=100)
         r2 = frappe.get_doc(
             {

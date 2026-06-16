@@ -27,12 +27,12 @@ class TestDriverPortalProfile(FrappeTestCase):
 		super().setUpClass()
 		frappe.set_user("Administrator")
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
-		# [#21th9u]
+		# [#lrfchv]
 		cls.driver_a = _ensure_test_driver()
 		cls.user_a = frappe.db.get_value(
 			"Employee", frappe.db.get_value("Salis Driver", cls.driver_a, "employee"), "user_id"
 		)
-		# [#fd4z5v]
+		# [#r0qybk]
 		cls.driver_b, cls.user_b = _driver_without_vehicle("drv_noveh@example.com")
 
 	def tearDown(self):
@@ -91,7 +91,7 @@ class TestDriverPortalVehicle(FrappeTestCase):
 			"Employee", frappe.db.get_value("Salis Driver", cls.driver_a, "employee"), "user_id"
 		)
 		cls.vehicle_a = frappe.db.get_value("Salis Driver", cls.driver_a, "current_vehicle")
-		# [#ckv6s4]
+		# [#463tw3]
 		cls.driver_b, cls.user_b = _driver_without_vehicle("drv_noveh@example.com")
 
 	def tearDown(self):

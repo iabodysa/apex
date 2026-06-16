@@ -1,42 +1,9 @@
 # Copyright (c) 2026, AFMCO Support Services Co. Ltd
-# [#ku98lq]
-# [#od1fgp]
-# [#t02pbh]
-# [#8cgrr9]
-# [#sgm0yc]
-# [#csif22]
-# [#a2muhx]
-# [#ejogmk]
-# [#3osjs0]
-# [#735jde]
-# [#fnh3pb]
-# [#okb0al]
-# [#fpcc8d]
-# [#7mdz5j]
-# [#hywg6c]
-# [#invybj]
-# [#od1fgp]
-# [#olbmkx]
-# [#kf4t7l]
-# [#so7thk]
-# [#i2hl56]
-# [#38sd6j]
-# [#od1fgp]
-# [#d9hky7]
-# [#brv2vl]
-# [#8l32ye]
-# [#gyh52w]
-# [#rm6tbr]
-# [#9lm55p]
-# [#ojyca6]
-# [#cm1hyq]
-# [#gup0uc]
-# [#9mg23p]
+# [#of2x05]
 
 import frappe
 
-# [#ickhtk]
-# [#dix5c1]
+# [#mirgwe]
 PRIVILEGED_ROLES = {
     "System Manager",
     "Accommodation Manager",
@@ -107,21 +74,7 @@ def maintenance_request_has_permission(doc, ptype, user=None):
     return False
 
 
-# [#rudcur]
-# [#bjdq1v]
-# [#rudcur]
-# [#d54n8w]
-# [#seqitg]
-# [#fd2dyj]
-# [#2ficre]
-# [#7qevi1]
-# [#sgw41f]
-# [#echwkz]
-# [#od1fgp]
-# [#pfv7mp]
-# [#ry51gx]
-# [#egaa92]
-# [#e1f007]
+# [#qyfpkv]
 HOUSING_UNSCOPED_ROLES = {
     "System Manager",
     "Accommodation Manager",
@@ -164,7 +117,7 @@ def _building_condition(user=None, column="`building`"):
     return "{column} in ({values})".format(column=column, values=escaped)
 
 
-# [#i5s8n2]
+# [#63ah2p]
 def accommodation_assignment_query(user=None):
     return _building_condition(user)
 
@@ -178,7 +131,7 @@ def cleaning_log_query(user=None):
 
 
 def accommodation_building_query(user=None):
-    # [#kz32wg]
+    # [#3n6e22]
     return _building_condition(user, column="`name`")
 
 
@@ -199,7 +152,6 @@ def building_scoped_has_permission(doc, ptype, user=None):
         building = getattr(doc, "building", None)
 
     if not building:
-        # [#9o5sua]
-        # [#n2wajb]
+        # [#1i4wio]
         return False
     return None if building in _allowed_buildings(user) else False

@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 """M-6: Log Settings auto-clearing for the unbounded scheduler-written DocTypes.
 
@@ -27,8 +27,7 @@ from apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financ
 
 class TestLogClearing(FrappeTestCase):
     def test_clear_old_logs_methods_exist(self):
-        # [#b3mz7n]
-        # [#2epaa1]
+        # [#pysfr6]
         for cls in (
             OperationsAlert,
             AccommodationOccupancySnapshot,
@@ -51,7 +50,7 @@ class TestLogClearing(FrappeTestCase):
             self.assertIn(dt, hook, f"{dt} must be registered for log clearing.")
             self.assertEqual(int(hook[dt][-1]), retention)
 
-        # [#tgm9az]
+        # [#1jshup]
         for ledger in (
             "Accommodation Ledger",
             "Fuel Consumption Ledger",
@@ -62,9 +61,7 @@ class TestLogClearing(FrappeTestCase):
             )
 
     def test_clear_old_logs_deletes_only_aged_rows(self):
-        # [#idqwux]
-        # [#2e0wyu]
-        # [#6yp1jc]
+        # [#5edkg6]
         marker = frappe.generate_hash(length=8)
         old = frappe.get_doc({
             "doctype": "Operations Alert",
@@ -88,7 +85,7 @@ class TestLogClearing(FrappeTestCase):
             "message": f"NEW-{marker}",
         }).insert(ignore_permissions=True)
 
-        # [#jz555n]
+        # [#rmwtxu]
         for name in (old.name, aged_open.name):
             frappe.db.sql(
                 "update `tabOperations Alert` set modified=%s where name=%s",
@@ -111,10 +108,7 @@ class TestLogClearing(FrappeTestCase):
         )
 
     def test_depreciation_snapshot_clears_submitted_with_children_keeps_drafts(self):
-        # [#lq5mal]
-        # [#dfnplm]
-        # [#5wlrpi]
-        # [#bd3b3k]
+        # [#1qw342]
         marker = frappe.generate_hash(length=8)
 
         def make(suffix):
@@ -136,8 +130,7 @@ class TestLogClearing(FrappeTestCase):
         recent_sub = make("recentsub")
         old_draft = make("olddraft")
 
-        # [#m19wkq]
-        # [#k7bpmy]
+        # [#5vsgd7]
         for name in (old_sub.name, recent_sub.name):
             frappe.db.set_value(
                 "Non-Financial Depreciation Snapshot", name, "docstatus", 1, update_modified=False
@@ -150,7 +143,7 @@ class TestLogClearing(FrappeTestCase):
 
         NonFinancialDepreciationSnapshot.clear_old_logs(days=730)
 
-        # [#tpm4bm]
+        # [#h2um2i]
         self.assertFalse(
             frappe.db.exists("Non-Financial Depreciation Snapshot", old_sub.name),
             "Aged submitted snapshot should be cleared.",
@@ -160,7 +153,7 @@ class TestLogClearing(FrappeTestCase):
             0,
             "Child rows of a cleared snapshot must be deleted (no orphans).",
         )
-        # [#ljhg9n]
+        # [#3a3nup]
         self.assertTrue(
             frappe.db.exists("Non-Financial Depreciation Snapshot", recent_sub.name),
             "Recent submitted snapshot must survive.",

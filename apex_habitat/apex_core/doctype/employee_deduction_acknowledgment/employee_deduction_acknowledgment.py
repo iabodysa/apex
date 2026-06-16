@@ -26,20 +26,18 @@ from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
 class EmployeeDeductionAcknowledgment(Document):
     def validate(self):
-        # [#krwdnk]
-        # [#fvj3hy]
+        # [#1gzszy]
         sync_party_employee(self, require_party=True)
         if self.approval_status == "Approved":
             if not self.approved_on:
                 self.approved_on = now_datetime()
         else:
-            # [#2bs0al]
+            # [#5tit4i]
             self.approved_on = None
             self.approved_by = None
 
     def on_submit(self):
-        # [#df5213]
-        # [#csmvpm]
+        # [#1nlve5]
         from frappe import _, throw
 
         if not self.consent_given:

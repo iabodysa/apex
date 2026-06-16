@@ -13,9 +13,7 @@ class FacilityAssetMovement(Document):
 
 
 def validate(doc, method=None):
-    # [#pazy1g]
-    # [#8rs7p4]
-    # [#huovl7]
+    # [#mkyjak]
     _populate_company_fields(doc)
     _detect_intercompany(doc)
 

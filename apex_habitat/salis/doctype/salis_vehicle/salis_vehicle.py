@@ -12,8 +12,7 @@ _STATUS_RANK = {"Compliant": 0, "Expiring Soon": 1, "Expired": 2}
 
 
 class SalisVehicle(Document):
-    # [#eyb12w]
-    # [#1uyetq]
+    # [#cuw3j6]
     def validate(self):
         self._set_company_default()
         self._set_plate_normalized()
@@ -46,7 +45,7 @@ class SalisVehicle(Document):
         lead_days = self._get_alert_lead_days()
         soon_cutoff = add_days(today_date, lead_days)
 
-        # [#n9ggkr]
+        # [#isa0o3]
         row_to_parent = {
             "Expired": "Expired",
             "Expiring Soon": "Expiring Soon",
@@ -80,7 +79,7 @@ class SalisVehicle(Document):
                 worst_status = parent_status
 
         if worst_rank < 0:
-            # [#fjg9o7]
+            # [#6wml3f]
             self.compliance_status = "Not Tracked"
             self.next_expiry_date = None
             return

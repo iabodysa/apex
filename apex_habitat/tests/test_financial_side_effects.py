@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-# [#m4uz3c]
+# [#j03s5a]
 
 import frappe
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
@@ -7,7 +7,7 @@ from apex_habitat.tests.test_utils import ApexHabitatTestCase
 
 class TestFinancialSideEffects(ApexHabitatTestCase):
     def setUp(self):
-        # [#bvxtum]
+        # [#2uh11u]
         self.company = frappe.db.get_value("Company", {})
         if not self.company:
             comp = frappe.get_doc({
@@ -46,7 +46,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
             emp.insert(ignore_permissions=True)
             self.employee = emp.name
 
-        # [#7seiyd]
+        # [#gbrgot]
         site_name = "Test Financial Site"
         if not frappe.db.exists("Accommodation Site", site_name):
             self.site = frappe.get_doc({
@@ -69,7 +69,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         else:
             self.building = frappe.get_doc("Accommodation Building", building_name)
 
-        # [#7tfwmd]
+        # [#ryfpzi]
         category_name = "Furniture"
         if not frappe.db.exists("Custody Asset Category", category_name):
             cat = frappe.get_doc({
@@ -94,8 +94,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         else:
             self.article = existing_article
 
-        # [#rjjs6t]
-        # [#q66hew]
+        # [#9ztpd7]
         struct_name = f"Apex Habitat Test Salary Structure {self.company}"
         existing_struct = frappe.db.get_value(
             "Salary Structure",
@@ -114,10 +113,10 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
                 struct.insert(ignore_permissions=True)
                 struct.submit()
             except Exception:
-                # [#edw9vv]
+                # [#7p7lb1]
                 pass
 
-        # [#2yiu3e]
+        # [#65o794]
         if not frappe.db.exists(
             "Salary Structure Assignment",
             {"employee": self.employee, "salary_structure": struct_name},
@@ -134,24 +133,20 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
                 assignment.insert(ignore_permissions=True)
                 assignment.submit()
             except Exception:
-                # [#lij2jj]
-                # [#koeqqy]
-                # [#moq94e]
-                # [#t9o5pi]
-                # [#c8jfyv]
+                # [#gkpgth]
                 pass
 
     def test_custody_damage_no_additional_salary_without_salary_component(self):
-        # [#ohrb4y]
+        # [#t393jb]
         settings = frappe.get_single("Habitat Settings")
         settings.enable_damage_deduction = 1
         settings.max_damage_deduction_per_checkout_sar = 500
         settings.save()
 
-        # [#7ryq3e]
+        # [#b0j60b]
         frappe.db.delete("Salary Component", {"type": "Deduction"})
 
-        # [#hojcvo]
+        # [#cvlsab]
         doc = frappe.get_doc({
             "doctype": "Custody Damage Assessment",
             "employee": self.employee,
@@ -168,12 +163,12 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         doc.insert(ignore_permissions=True)
         doc.submit()
 
-        # [#p1p5sh]
+        # [#4bu0gp]
         doc.reload()
         self.assertIsNone(doc.deduction_entry, "Additional Salary deduction should not be generated without configured deduction Salary Component.")
 
     def test_custody_damage_no_additional_salary_without_explicit_setting(self):
-        # [#k5bxdz]
+        # [#paxi0y]
         comp_name = "Test Deduction Component"
         if not frappe.db.exists("Salary Component", comp_name):
             comp = frappe.get_doc({
@@ -187,7 +182,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         settings.enable_damage_deduction = 1
         settings.save()
 
-        # [#hojcvo]
+        # [#cvlsab]
         doc = frappe.get_doc({
             "doctype": "Custody Damage Assessment",
             "employee": self.employee,
@@ -204,7 +199,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         doc.insert(ignore_permissions=True)
         doc.submit()
 
-        # [#fms6dm]
+        # [#rrubmw]
         doc.reload()
         self.assertIsNone(doc.deduction_entry, "Additional Salary deduction should not be generated unless explicitly configured in Settings.")
 

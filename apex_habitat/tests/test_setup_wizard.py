@@ -17,9 +17,7 @@ from apex_habitat.apex_core.setup.setup_wizard import setup_wizard_complete
 
 class TestApexSetupWizard(FrappeTestCase):
     def test_payment_method_applies_and_toggles_stay_safe(self):
-        # [#mse14e]
-        # [#6y9p5x]
-        # [#i0msgg]
+        # [#ql6hkn]
         setup_wizard_complete(
             {
                 "apex_default_payment_method": "Payment Order",

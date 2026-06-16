@@ -21,25 +21,25 @@ from apex_habitat.salis.utils import add_timeline_note, lock_vehicle
 
 class VehicleIncident(Document):
     def validate(self):
-        # [#90trn2]
+        # [#cuwq5w]
         if self.incident_date and getdate(self.incident_date) > getdate(today()):
             frappe.throw(_("Incident date cannot be in the future."))
 
     def on_submit(self):
-        # [#e0k92e]
+        # [#2gzgc9]
         if self.incident_type != "Theft":
             return
 
         lock_vehicle(self.vehicle)
 
-        # [#3i7mrn]
+        # [#d721f6]
         prev_status, prev_driver = frappe.db.get_value(
             "Salis Vehicle", self.vehicle, ["status", "current_driver"]
         )
         self.db_set("previous_vehicle_status", prev_status)
         self.db_set("previous_driver", prev_driver)
 
-        # [#qwhpba]
+        # [#558p5y]
         frappe.db.set_value(
             "Salis Vehicle",
             self.vehicle,
@@ -61,8 +61,7 @@ class VehicleIncident(Document):
 
         lock_vehicle(self.vehicle)
 
-        # [#nes9rz]
-        # [#mp48se]
+        # [#pq10av]
         if self.previous_driver and not frappe.db.get_value(
             "Salis Vehicle", self.vehicle, "current_driver"
         ):
@@ -73,8 +72,7 @@ class VehicleIncident(Document):
                 "Salis Driver", self.previous_driver, "current_vehicle", self.vehicle
             )
 
-        # [#aj24lr]
-        # [#82mq04]
+        # [#nbueah]
         another_stop_in_force = frappe.db.exists(
             "Vehicle Stop", {"vehicle": self.vehicle, "docstatus": 1}
         )
