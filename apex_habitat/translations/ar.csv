@@ -2708,3 +2708,4 @@ Stop a Vehicle,أوقف مركبة
 Take a vehicle out of service by recording a Vehicle Stop.,أخرِج مركبة من الخدمة بتسجيل إيقاف مركبة.
 Operating Days This Month,أيام التشغيل هذا الشهر
 Vehicle Incident Statement,بيان بلاغ مركبة
+Vehicle {0} has been in the workshop since {1} (over {2} days).,المركبة {0} في الورشة منذ {1} (أكثر من {2} يوماً).

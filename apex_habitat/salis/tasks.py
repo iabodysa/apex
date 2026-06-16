@@ -905,3 +905,44 @@ def vehicle_utilization_summary() -> None:
         start += BATCH_SIZE
 
     logger.info("vehicle_utilization_summary: weekly summaries written.")
+
+
+def workshop_overstay_watch() -> None:
+    """Flag vehicles in the workshop longer than ``workshop_overstay_days``.
+
+    A vehicle is overstaying if it is still out of service (Stopped or Under
+    Maintenance) and carries a submitted Vehicle Stop (reason Maintenance) with no
+    ``return_date`` whose ``stop_date`` is on or before the cutoff
+    (``workshop_overstay_days``; Salis Settings, default 14). Raises one
+    "Maintenance Overdue" Operations Alert per vehicle, deduped daily by
+    ``_raise_alert``.
+    """
+    from frappe.utils import add_days, today
+
+    days = _settings_int("workshop_overstay_days", 14)
+    cutoff = add_days(today(), -days)
+    rows = frappe.get_all(
+        "Vehicle Stop",
+        filters={
+            "stop_reason": "Maintenance",
+            "docstatus": 1,
+            "return_date": ["in", [None, ""]],
+            "stop_date": ["<=", cutoff],
+        },
+        fields=["name", "vehicle", "stop_date"],
+    )
+    for r in rows:
+        if not r.vehicle:
+            continue
+        # The maintenance Vehicle Stop set the vehicle out of service (a stop sets
+        # status Stopped; the /fleet workshop action sets Under Maintenance); skip
+        # if it has already been recovered to Active (the stop should be closed).
+        if frappe.db.get_value("Salis Vehicle", r.vehicle, "status") not in ("Stopped", "Under Maintenance"):
+            continue
+        msg = _("Vehicle {0} has been in the workshop since {1} (over {2} days).").format(
+            r.vehicle, r.stop_date, days
+        )
+        _raise_alert(
+            "Maintenance Overdue", "Warning", msg,
+            source_doctype="Vehicle Stop", source_name=r.name, vehicle=r.vehicle,
+        )
