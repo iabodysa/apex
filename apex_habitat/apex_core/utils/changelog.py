@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.15 --------------------------------------------------------------
+    {
+        "title": "Apex 1.54.15 — the /fleet dashboard is rebuilt as a Vue single-page app (the fleet_portal portal, like /driver and /masar) while keeping the supervisor's exact board design; it reads and writes the same live Salis DocTypes through the same permission-gated API, drops the obsolete version/date line and the dead save and export buttons, adds loading, empty and error states plus a keyboard focus ring and a reduced-motion option, and shows a signed-in user without a fleet role a friendly notice instead of a raw error",
+        "app_name": "apex_habitat",
+        "link": "/fleet",
+        "creation": "2026-06-16 11:00:00",
+    },
     # v1.54.14 --------------------------------------------------------------
     {
         "title": "Apex 1.54.14 — security hardening for the Fleet dashboard from a skeptics audit: driver phone and external id (permlevel-1 fields) are now hidden from roles not granted them (Fleet Supervisor / Fleet Project Manager see names, not contact details) on both the Fleet dashboard and the Dispatch Board; reassigning a driver now permission-checks the driver as well as the vehicle and stamps the assignment's project, so a project-scoped supervisor cannot pair an out-of-scope driver to a vehicle",
