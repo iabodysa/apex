@@ -741,3 +741,20 @@ tbody tr:hover{background:var(--s1)}
   .cards-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
   .panel{width:100%;max-width:100%}
 }
+
+/* ─── Extra polish (Vue adoption) — subtle, additive; static look unchanged ─── */
+/* Gentle entrance so the board eases in after load. Runs on appearance only:
+   the grid/table container persists while filters change, so it is NOT replayed
+   on every filter tweak (only on load and on card/table view switch). */
+@keyframes fpBoardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.cards-grid,.table-wrap{animation:fpBoardIn .3s ease both}
+/* Keyboard focus ring — his hover cues are mouse-only; this aids keyboard users. */
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--blue);outline-offset:2px;border-radius:6px;
+}
+/* Smooth momentum when the results column scrolls. */
+.cards-wrap,.table-wrap{scroll-behavior:smooth}
+/* Respect prefers-reduced-motion: drop the pulse/entrance/slide for those users. */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}

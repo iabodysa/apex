@@ -6,8 +6,8 @@ live operations on it. So it requires a logged-in user AND a fleet role.
 
 Access gate:
   * Guests are redirected to /login (then back to /fleet).
-  * A logged-in user without any fleet role gets a PermissionError — the page
-    is not exposed to arbitrary users. The same Salis Vehicle / project scope
+  * A logged-in user without any fleet role gets a friendly "fleet role
+    required" page (not a raw 403). The same Salis Vehicle / project scope
     that the API enforces still applies to every read and write the page makes.
 
 The CSRF token is exposed (same pattern as driver.py) so the single-page app's
@@ -33,10 +33,10 @@ def get_context(context):
         frappe.local.flags.redirect_location = "/login?redirect-to=/fleet"
         raise frappe.Redirect
 
-    # Require a fleet role; otherwise the page is not exposed.
-    if not (FLEET_ROLES & set(frappe.get_roles())):
-        raise frappe.PermissionError(frappe._("Not permitted to view the fleet dashboard."))
-
     context.no_cache = 1
-    context.csrf_token = get_csrf_token()
+    # Friendly no-role page instead of a raw PermissionError: the template shows
+    # the board only when the user holds a fleet role, otherwise a notice.
+    context.has_fleet_role = bool(FLEET_ROLES & set(frappe.get_roles()))
+    if context.has_fleet_role:
+        context.csrf_token = get_csrf_token()
     return context
