@@ -1,0 +1,88 @@
+"""Schema-reference integrity: code/metadata must not point at a nonexistent target.
+
+Guards the class of bug fixed in 1.54.18 (workshop_overstay_days was read in code
+but missing from the DocType). Fails CI the moment a hook/card method path, a
+settings field, or a fetch_from source stops resolving.
+"""
+
+import glob
+import json
+import re
+
+import frappe
+from frappe.tests.utils import FrappeTestCase
+
+APP = frappe.get_app_path("apex_habitat")
+
+
+def _collect(value, out):
+    if isinstance(value, str):
+        if value.startswith("apex_habitat."):
+            out.add(value)
+    elif isinstance(value, dict):
+        for v in value.values():
+            _collect(v, out)
+    elif isinstance(value, (list, tuple)):
+        for v in value:
+            _collect(v, out)
+
+
+class TestSchemaIntegrity(FrappeTestCase):
+    def test_method_paths_resolve(self):
+        import apex_habitat.hooks as hooks
+
+        paths = set()
+        for v in vars(hooks).values():
+            _collect(v, paths)
+        for j in glob.glob(f"{APP}/**/number_card/*/*.json", recursive=True):
+            d = json.load(open(j, encoding="utf-8"))
+            if d.get("type") == "Custom" and d.get("method"):
+                paths.add(d["method"])
+        bad = []
+        for p in sorted(paths):
+            try:
+                frappe.get_attr(p)
+            except Exception:
+                bad.append(p)
+        self.assertEqual(bad, [], f"hook/card method paths that do not resolve: {bad}")
+
+    def test_settings_fields_exist(self):
+        pi = re.compile(r'_settings_int\(\s*["\']([a-z_0-9]+)["\']')
+        ps = re.compile(r'get_single_value\(\s*["\']([A-Za-z ]+Settings)["\']\s*,\s*["\']([a-z_0-9]+)["\']')
+        missing = []
+        for f in glob.glob(f"{APP}/**/*.py", recursive=True):
+            if "/tests/" in f:
+                continue
+            t = open(f, encoding="utf-8").read()
+            for m in pi.finditer(t):
+                if not frappe.get_meta("Salis Settings").get_field(m.group(1)):
+                    missing.append(f"Salis Settings.{m.group(1)}")
+            for m in ps.finditer(t):
+                dt, fld = m.group(1), m.group(2)
+                if frappe.db.exists("DocType", dt) and not frappe.get_meta(dt).get_field(fld):
+                    missing.append(f"{dt}.{fld}")
+        self.assertEqual(sorted(set(missing)), [], f"settings fields read in code but missing from the DocType: {sorted(set(missing))}")
+
+    def test_fetch_from_sources_exist(self):
+        bad = []
+        for j in glob.glob(f"{APP}/**/doctype/*/*.json", recursive=True):
+            try:
+                d = json.load(open(j, encoding="utf-8"))
+            except Exception:
+                continue
+            if d.get("doctype") != "DocType":
+                continue
+            links = {
+                f["fieldname"]: f.get("options")
+                for f in d.get("fields", [])
+                if f.get("fieldtype") in ("Link", "Dynamic Link") and f.get("fieldname")
+            }
+            for f in d.get("fields", []):
+                ff = f.get("fetch_from")
+                if not ff or "." not in ff:
+                    continue
+                link, src = ff.split(".", 1)
+                target = links.get(link)
+                if target and "." not in src and frappe.db.exists("DocType", target) and not frappe.get_meta(target).get_field(src):
+                    bad.append(f"{d['name']}.{f.get('fieldname')} ({ff})")
+        self.assertEqual(bad, [], f"fetch_from sources that do not exist: {bad}")

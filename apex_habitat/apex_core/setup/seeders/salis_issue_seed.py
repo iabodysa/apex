@@ -102,12 +102,6 @@ def _pick_holiday_list():
         hl = frappe.db.get_value("Company", company, "default_holiday_list")
         if hl and frappe.db.exists("Holiday List", hl):
             return hl
-    try:
-        default = frappe.db.get_single_value("HR Settings", "default_holiday_list")
-        if default and frappe.db.exists("Holiday List", default):
-            return default
-    except Exception:
-        pass
     return frappe.db.get_value("Holiday List", {}, "name")
 
 
