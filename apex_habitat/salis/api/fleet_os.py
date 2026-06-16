@@ -27,6 +27,7 @@ from frappe import _
 from frappe.utils import getdate, today
 
 from apex_habitat.salis.api.dispatch_board import _permitted_projects
+from apex_habitat.salis.utils import lock_driver, lock_vehicle
 
 # ── Salis Vehicle.status → the design's vehicle_status vocabulary ────────────
 # The design uses: assigned / available / workshop / stopped / stolen.
@@ -254,6 +255,8 @@ def reassign(plate, driver_id, date=None):
     # comes straight from caller input; without this a scoped supervisor could pair an
     # out-of-scope driver to an in-scope vehicle. Fires the salis_driver scope hook.
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
+    lock_vehicle(vehicle)
+    lock_driver(driver)
 
     start = getdate(date) if date else getdate(today())
 
@@ -294,6 +297,7 @@ def stop_vehicle(plate, reason=None):
     and the driver link cleared to match the released state.
     """
     vehicle = _resolve_plate(plate)
+    lock_vehicle(vehicle)
     stop_reason = _STOP_REASON_MAP.get((reason or "").strip().lower(), "Other")
 
     current_driver = frappe.db.get_value("Salis Vehicle", vehicle, "current_driver")
