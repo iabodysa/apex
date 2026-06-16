@@ -2692,3 +2692,17 @@ Not permitted to view the fleet dashboard.,غير مصرَّح لك بعرض ل�
 Plate is required.,اللوحة مطلوبة.
 Reported stolen from the Fleet OS dashboard.,أُبلغ عن السرقة من لوحة الأسطول.
 Vehicle {0} not found.,المركبة {0} غير موجودة.
+Bill a rental office for its vehicles and print the statement.,افتر مكتب تأجير على مركباته واطبع البيان.
+Close a Rental Settlement,إغلاق تسوية إيجار
+Create Rental Settlement,إنشاء تسوية إيجار
+Create Vehicle Incident,إنشاء بلاغ مركبة
+Create Vehicle Stop,إنشاء إيقاف مركبة
+Fleet Operations Go-Live,تشغيل الأسطول — الانطلاق
+Fleet Operations is live. Use Fleet Control to watch and act on the fleet.,تشغيل الأسطول جاهز. استخدم لوحة التحكّم لمراقبة الأسطول والتصرّف.
+Log an accident or theft against a vehicle.,سجّل حادثاً أو سرقة على مركبة.
+Open Fleet Control,افتح التحكّم بالأسطول
+Open the live Fleet Control board to watch and act on every vehicle.,افتح لوحة التحكّم الحيّة لمراقبة كل مركبة والتصرّف عليها.
+Record a Vehicle Incident,سجّل بلاغ مركبة
+Run your fleet from the live operations board.,أدِر أسطولك من لوحة التشغيل الحيّة.
+Stop a Vehicle,أوقف مركبة
+Take a vehicle out of service by recording a Vehicle Stop.,أخرِج مركبة من الخدمة بتسجيل إيقاف مركبة.

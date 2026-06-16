@@ -1,0 +1,31 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Fleet Operations Go-Live",
+ "title": "Fleet Operations Go-Live",
+ "module": "Salis",
+ "subtitle": "Run your fleet from the live operations board.",
+ "success_message": "Fleet Operations is live. Use Fleet Control to watch and act on the fleet.",
+ "is_complete": 0,
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Open Fleet Control"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Record a Vehicle Assignment"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Stop a Vehicle"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Record a Vehicle Incident"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Close a Rental Settlement"
+  }
+ ]
+}
