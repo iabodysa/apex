@@ -183,13 +183,24 @@ def get_fleet_os():
     for v in vehicles:
         cd = None
         if v.get("current_driver"):
-            d = drivers.get(v.current_driver) or {}
-            cd = {
-                "driver_id": (d.get("driver_id") or v.current_driver or ""),
-                "name_en": (d.get("full_name") or ""),
-                "name_ar": "",
-                "mobile": (d.get("phone") or ""),
-            }
+            # The current driver IS the live custody spell, so give it the FULL
+            # history-item shape the design's render code reads (it calls
+            # current_driver.project.trim(), .date_receive, … — a partial object
+            # would throw "undefined.trim()"). Prefer the open active history row
+            # (it carries the real dates/project); else default every field to "".
+            hist = history_by_vehicle.get(v.name, [])
+            active = next((h for h in hist if h.get("status") == "Active" and not h.get("date_deliver")), None)
+            if active:
+                cd = dict(active)
+            else:
+                d = drivers.get(v.current_driver) or {}
+                cd = {
+                    "driver_id": (d.get("driver_id") or v.current_driver or ""),
+                    "name_en": (d.get("full_name") or ""), "name_ar": "",
+                    "mobile": (d.get("phone") or ""), "date_receive": "", "date_deliver": "",
+                    "status": "Active", "project": (v.project or ""), "area": "",
+                    "reason": "", "notes": "", "branch_receive": "", "branch_deliver": "",
+                }
         out.append({
             "plate": v.plate_number or v.name,
             "vehicle_type": v.vehicle_category or "",

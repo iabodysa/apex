@@ -7,6 +7,13 @@ from frappe.utils import get_datetime
 # before inserting — fully idempotent.
 
 _RELEASES = [
+    # v1.54.13 --------------------------------------------------------------
+    {
+        "title": "Apex 1.54.13 — fix the Fleet dashboard cards failing to render: the /fleet board threw a script error and showed no vehicles because the API sent a vehicle's current driver as a partial record missing the project and date fields the card reads; the API now returns the current driver in the same full shape as a custody-history entry, so every card and detail panel renders",
+        "app_name": "apex_habitat",
+        "link": "/fleet",
+        "creation": "2026-06-16 09:30:00",
+    },
     # v1.54.12 --------------------------------------------------------------
     {
         "title": "Apex 1.54.12 — a new /fleet web dashboard serves the fleet supervisor's exact board design, but every vehicle, driver and custody record reads live from the Salis DocTypes, and its actions (reassign, stop, workshop in/out, recover, report theft) update the real records; it is open to logged-in fleet roles only, and the obsolete Save/Export buttons are gone now that the data lives in Apex",
