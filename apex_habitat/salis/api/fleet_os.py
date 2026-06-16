@@ -275,12 +275,9 @@ def reassign(plate, driver_id, date=None):
         "status": "Active",
     })
     doc.insert()
-    try:
-        doc.submit()
-    except frappe.ValidationError:
-        # If a submit gate blocks it, the document is still saved as a draft;
-        # we still flip the live links below so the operation is not lost.
-        pass
+    # Propagate a blocked submit like stop_vehicle: a swallowed on_submit re-check
+    # lets a racing reassign clobber the live mirror behind a draft. [T-260]
+    doc.submit()
 
     frappe.db.set_value("Salis Vehicle", vehicle, "current_driver", driver)
     frappe.db.set_value("Salis Driver", driver, "current_vehicle", vehicle)
