@@ -199,6 +199,7 @@ Arrival Context,سياق الوصول
 Arrival Date,تاريخ الوصول
 Arrival Date plus Window Days. Computed by the controller.,تاريخ الوصول زائد أيام النافذة. يحسبه المتحكم تلقائياً.
 Arrivals Desk,مكتب الوصول
+Arrived this session ({0}),وصلوا في هذه الجلسة ({0})
 Article,الصنف
 Article Details,تفاصيل الصنف
 Article Name,اسم الصنف
@@ -614,6 +615,7 @@ Covered Buildings,المباني المشمولة
 Create Accommodation Assignment,إنشاء تسكين
 Create Fuel Quota,إنشاء حصة وقود
 Create Payment,إنشاء دفعة
+Create QR for all ({0}),إنشاء رمز QR للجميع ({0})
 Create Rental Settlement,إنشاء تسوية إيجار
 Create Safety Inspection Report,إنشاء تقرير تفتيش سلامة
 Create Vehicle Assignment,إنشاء إسناد مركبة
@@ -988,6 +990,7 @@ Floor Number,رقم الطابق
 Floor Plan,مخطط الطوابق
 Floor Type,نوع الطابق
 Floor {0},الطابق {0}
+"Floor {0} ({1}): {2} room(s) × {3}, {4} bed(s) each",الطابق {0} ({1}): {2} غرفة × {3}، {4} سرير لكلِّ غرفة
 Floor {0} — {1},الطابق {0} — {1}
 Floors,الطوابق
 For Subcontractor or External Worker when Employee link is not available.,للمقاول من الباطن أو العامل الخارجي عند عدم توفّر ارتباط الموظف.
@@ -1222,6 +1225,7 @@ Issue Description,وصف المشكلة / وصف الصرف
 Issue Location,موقع المشكلة
 Issue Masar Link,إصدار رابط مسار
 Issue Type,نوع المشكلة / نوع الصرف
+Issue all ({0}),صرف الجميع ({0})
 Issue custody,صرف العهدة
 Issue custody first,اصرف العهدة أولاً
 Issued,مصروف
@@ -1804,6 +1808,7 @@ Previous Repairs,الإصلاحات السابقة
 Previous Repairs Confirmed,تم تأكيد الإصلاحات السابقة
 Previous Status,الحالة السابقة
 Previous Vehicle Status,حالة المركبة السابقة
+Print arrival cards ({0}),طباعة بطاقات الوصول ({0})
 Print handover,طباعة سند التسليم
 Print slip,طباعة القسيمة
 Priority,الأولوية
@@ -1828,6 +1833,7 @@ Purpose / Notes,الغرض / ملاحظات
 Purpose is too long. Please keep it under 2000 characters.,الغرض طويل جداً. يرجى إبقاؤه أقل من 2000 حرف.
 QR,رمز QR
 QR Web Form,نموذج ويب QR
+QR created for {0} worker(s),أُنشئ رمز QR لـ {0} عامل
 QR issued,صدر رمز QR
 Qty,الكمية
 Qty (signed),الكمية (موجبة/سالبة)
@@ -2763,6 +2769,7 @@ total_cost,التكلفة الإجمالية
 {0} applied,{0} مُطبَّق
 {0} awaiting approval,{0} بانتظار الموافقة
 {0} day(s),{0} يوم
+{0} material(s) loaded from template {1},حُمِّلت {0} مادّة من القالب {1}
 {0} of {1} beds available,{0} من {1} سرير متاح
 {0} open,{0} مفتوح
 {0} over threshold,{0} يتجاوز الحدّ

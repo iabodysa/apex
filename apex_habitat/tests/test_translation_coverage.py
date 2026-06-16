@@ -1,14 +1,15 @@
-"""Arabic-coverage guard for the fleet front-end surfaces.
+"""Arabic-coverage guard for the desk + www surfaces.
 
 `frappectl translates` enforces ar.csv coverage of every ``_()``/``__()`` call,
-but it runs locally — CI does not. A desk-JS or www string added without an
-ar.csv row therefore renders English inside the Arabic UI with nothing to catch
-it. This test locks the fleet surfaces (Salis desk pages + the ``/fleet`` www
-page): every translate-call string literal must have a non-empty ar.csv entry.
+but it runs locally — CI does not, and its missing-report also skips paren/`&`
+strings. A desk-JS or www string added without an ar.csv row therefore renders
+English inside the Arabic UI with nothing to catch it. This test locks every
+Salis / Habitat / Apex-Core desk page and the www pages: each translate-call
+string literal must have a non-empty ar.csv entry.
 
-Guards the class fixed in 1.54.19, where ``__("Exported {0} vehicles", [n])`` and
-``__("{0} open", [n])`` on the Fleet Control page had no Arabic (a multi-arg call
-the coverage scanner had been skipping).
+Guards the class fixed in 1.54.19 (``__("Exported {0} vehicles", [n])`` on the
+Fleet Control page had no Arabic — a multi-arg call the scanner skipped) and
+extended app-wide in 1.54.20.
 """
 
 import csv
@@ -54,12 +55,15 @@ class TestTranslationCoverage(FrappeTestCase):
                     rows[r[0]] = r[1]
         return rows
 
-    def test_fleet_surfaces_have_arabic(self):
+    def test_desk_surfaces_have_arabic(self):
         ar = self._ar()
-        files = glob.glob(f"{APP}/salis/**/*.js", recursive=True) + [
-            f"{APP}/www/fleet.html",
-            f"{APP}/www/fleet.py",
-        ]
+        files = (
+            glob.glob(f"{APP}/salis/**/*.js", recursive=True)
+            + glob.glob(f"{APP}/habitat/**/*.js", recursive=True)
+            + glob.glob(f"{APP}/apex_core/**/*.js", recursive=True)
+            + glob.glob(f"{APP}/www/*.html")
+            + glob.glob(f"{APP}/www/*.py")
+        )
         missing = []
         for f in files:
             try:
@@ -73,5 +77,5 @@ class TestTranslationCoverage(FrappeTestCase):
         self.assertEqual(
             sorted(set(missing)),
             [],
-            f"fleet-surface UI strings with no Arabic translation: {sorted(set(missing))}",
+            f"desk/www UI strings with no Arabic translation: {sorted(set(missing))}",
         )
