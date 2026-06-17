@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.54.23 — on the Accommodation Building form, switching the Site now immediately shows that site's address; it used to keep displaying the previously-saved site's address until you saved and reloaded",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-building",
+        "creation": "2026-06-17 18:00:00",
+    },
+    {
         "title": "Apex 1.54.22 — the driver portal's trip cards now show the vehicle plate number and route name instead of the internal record ids (VEH-…, RP-…) that used to appear",
         "app_name": "apex_habitat",
         "link": "/driver",
