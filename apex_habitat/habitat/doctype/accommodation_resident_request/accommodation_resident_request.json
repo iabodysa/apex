@@ -13,6 +13,7 @@
   "building",
   "room",
   "bed",
+  "no_active_assignment",
   "arr_col_location",
   "source_channel",
   "arr_sec_reporter",
@@ -90,6 +91,14 @@
    "label": "Bed",
    "options": "Accommodation Bed",
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "description": "No active accommodation assignment when raised — needs housing triage.",
+   "fieldname": "no_active_assignment",
+   "fieldtype": "Check",
+   "label": "No Active Assignment",
+   "read_only": 1
   },
   {
    "fieldname": "arr_col_location",
@@ -341,5 +350,5 @@
  "naming_rule": "By \"Naming Series\" field",
  "sort_field": "modified",
  "sort_order": "DESC",
- "modified": "2026-06-09 09:00:00.000000"
+ "modified": "2026-06-17 16:00:00.000000"
 }

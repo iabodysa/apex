@@ -666,8 +666,6 @@ def create_worker_request(token=None, category=None, subject=None, body=None, pr
         building = assignment.get("building")
         room = assignment.get("room")
         bed = assignment.get("bed")
-    else:
-        description = f"{description}\n\n[{_('No active accommodation assignment on file.')}]"
 
     doc = frappe.get_doc(
         {
@@ -679,6 +677,7 @@ def create_worker_request(token=None, category=None, subject=None, body=None, pr
             "building": building,
             "room": room,
             "bed": bed,
+            "no_active_assignment": 0 if assignment else 1,
             "request_category": category,
             "priority": priority,
             "description": description,
