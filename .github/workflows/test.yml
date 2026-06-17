@@ -33,6 +33,24 @@ jobs:
       - name: Scan for committed secrets (required)
         run: gitleaks detect --no-banner --redact --source .
 
+      - name: No Arabic in commit messages (forward-only)
+        run: |
+          set -uo pipefail
+          before="${{ github.event.before }}"
+          sha="${{ github.sha }}"
+          if git rev-parse --quiet --verify "${before}^{commit}" >/dev/null 2>&1; then
+            range="${before}..${sha}"
+          else
+            range="-1 ${sha}"
+          fi
+          hits=$(git log --no-merges --format='%H %s%n%b' $range | grep -nP '[\x{0600}-\x{06FF}]' || true)
+          if [ -n "$hits" ]; then
+            echo "Arabic found in commit message(s) on this push — keep subjects/bodies English:"
+            echo "$hits"
+            exit 1
+          fi
+          echo "commit messages clean (no Arabic)"
+
   test:
     runs-on: ubuntu-latest
 
