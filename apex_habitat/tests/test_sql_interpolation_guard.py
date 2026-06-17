@@ -9,16 +9,19 @@ positional argument is dynamically built by string interpolation is a SQL
 injection surface and is FORBIDDEN, unless the interpolated identifiers are
 provably safe.
 
-"Dynamically built" means the first argument is, at its root, either:
-  * an f-string (``ast.JoinedStr``) with at least one ``{...}`` expression, or
-  * a ``"...".format(...)`` / ``str.format(...)`` call, or
-  * a ``"..." % (...)`` percent-format whose left side is a *string literal*
-    carrying a ``%s``-style placeholder is NOT flagged — that is Frappe's
-    native parameterisation (the DB-API binds the values). Only Python-level
-    ``%`` formatting that splices an *identifier into the SQL text itself*
-    (i.e. ``str.__mod__`` building the query before it reaches the driver) is a
-    concern, and in this codebase that shape does not occur; f-string and
-    ``.format`` are the two real interpolation shapes, so those are what we gate.
+"Dynamically built" means the first argument is, at its root, one of:
+  * an f-string (``ast.JoinedStr``) with at least one ``{...}`` expression,
+  * a ``"...".format(...)`` / ``str.format(...)`` call,
+  * a ``+`` concatenation that splices a dynamic value into the SQL text
+    (``"SELECT ... " + dt``), or
+  * a ``%`` format that builds the SQL text in Python (``"... %s" % dt``).
+
+Native parameterisation is NOT flagged: a plain ``"... %s"`` / ``"... %(x)s"``
+string literal passed to ``frappe.db.sql`` with the values as the SECOND argument
+is an ``ast.Constant`` (not a BinOp), so the DB-API binds the values and the query
+text never carries the input. Only Python-level building of the query string
+before it reaches the driver (f-string, ``.format``, ``+``, ``%``) is a concern.
+(T-149 extended the gate from f-string/``.format`` to also cover ``+`` and ``%``.)
 
 Such a call is allowed only when ONE of the following holds:
 
@@ -132,14 +135,40 @@ def _format_call_names(node):
     return names
 
 
+def _binop_names(node):
+    """If ``node`` builds a string with ``+`` concatenation or ``%`` formatting
+    that splices a dynamic value into the SQL text *before* it reaches the driver
+    (``"SELECT ... " + dt`` or ``"... %s" % dt``), return the interpolated names;
+    else None.
+
+    A pure literal concatenation (``"a" "b"``) carries no dynamic value and is not
+    interpolation. Native parameterisation — a plain ``"... %s"`` string literal
+    passed with a values second argument — is an ``ast.Constant``, not a BinOp, so
+    it never reaches here and is never flagged.
+    """
+    if not isinstance(node, ast.BinOp) or not isinstance(node.op, (ast.Add, ast.Mod)):
+        return None
+    has_str = any(
+        isinstance(n, ast.Constant) and isinstance(n.value, str) for n in ast.walk(node)
+    )
+    has_dynamic = any(
+        isinstance(n, (ast.Name, ast.Call, ast.Attribute, ast.Subscript))
+        for n in ast.walk(node)
+    )
+    if not (has_str and has_dynamic):
+        return None
+    return _names_in(node)
+
+
 def _interpolated_names(first_arg):
     """Return (is_interpolated, names).
 
     ``is_interpolated`` is True when ``first_arg`` builds the query via an
-    f-string with expressions or a ``.format(...)`` call. ``names`` is the set
-    of identifier names spliced in (used to test the module-constant exemption).
-    A plain string literal, or a string with only %s placeholders passed to the
-    driver, is NOT interpolated.
+    f-string with expressions, a ``.format(...)`` call, ``+`` string
+    concatenation, or ``%`` formatting that splices a value into the SQL text.
+    ``names`` is the set of identifier names spliced in (used to test the
+    module-constant exemption). A plain string literal, or a string with only %s
+    placeholders passed to the driver as the second argument, is NOT interpolated.
     """
     # [#i51q46]
     if isinstance(first_arg, ast.JoinedStr):
@@ -155,6 +184,11 @@ def _interpolated_names(first_arg):
     fmt_names = _format_call_names(first_arg)
     if fmt_names is not None:
         return (True, fmt_names)
+
+    # + concatenation / % formatting that builds the SQL text in Python (T-149).
+    bin_names = _binop_names(first_arg)
+    if bin_names is not None:
+        return (True, bin_names)
 
     return (False, set())
 
@@ -309,6 +343,31 @@ class TestSqlInterpolationGuard(unittest.TestCase):
                 "SAFE_ALLOWLIST in test_sql_interpolation_guard.py with a "
                 "justification."
             )
+
+    def test_detector_flags_concat_and_percent(self):
+        """T-149: ``+`` concatenation and ``%`` formatting of the SQL text are
+        detected as interpolation, while native ``%s`` binding (values passed as
+        the second argument) and literal-only concatenation are not."""
+        for snippet in (
+            'frappe.db.sql("SELECT * FROM `tab" + dt + "`")',
+            'frappe.db.sql("SELECT * FROM `tab%s`" % dt)',
+        ):
+            first = ast.parse(snippet).body[0].value.args[0]
+            is_interp, names = _interpolated_names(first)
+            self.assertTrue(is_interp, f"interpolation not detected: {snippet}")
+            self.assertIn("dt", names)
+        # native parameterisation (placeholder in a literal, values bound) is safe
+        safe = ast.parse('frappe.db.sql("SELECT * FROM t WHERE x = %s", (val,))')
+        self.assertFalse(
+            _interpolated_names(safe.body[0].value.args[0])[0],
+            "native %s binding must not be flagged",
+        )
+        # explicit concatenation of only literals carries no dynamic value
+        lit = ast.parse('frappe.db.sql("SELECT 1" + " FROM t")')
+        self.assertFalse(
+            _interpolated_names(lit.body[0].value.args[0])[0],
+            "literal-only concatenation must not be flagged",
+        )
 
     def test_allowlist_entries_still_exist(self):
         """Every SAFE_ALLOWLIST entry must still resolve to a real function.
