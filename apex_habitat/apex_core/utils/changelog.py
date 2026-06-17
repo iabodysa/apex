@@ -174,7 +174,7 @@ _RELEASES = [
     },
     # [#j77kf6]
     {
-        "title": "Apex 1.53.2 — five core forms (Accommodation Assignment, Checkout, Lease, Maintenance Request, Custody Issue) re-laid-out for clarity: fields grouped by purpose, audit fields tucked into collapsed System tabs, and long notes, tables and attachments given full-width rows; layout-only",
+        "title": "Apex 1.53.2 — five core forms (Accommodation Assignment, Checkout, Lease, Maintenance Request, Custody Issue) re-laid-out for clarity: fields grouped by purpose, audit fields tucked into collapsed System tabs, and long notes, tables and attachments given full-width rows; layout-focused, plus Accommodation Checkout's sensitive financial fields gated to a higher permission level",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-assignment",
         "creation": "2026-06-11 09:00:00",
