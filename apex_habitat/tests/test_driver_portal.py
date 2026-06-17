@@ -90,6 +90,21 @@ class TestDriverPortal(FrappeTestCase):
 		self.assertIsInstance(driver_portal.my_support_tickets(), list)
 		frappe.set_user("Administrator")
 
+	def test_trips_show_human_labels_not_link_ids(self):
+		"""my_trips_today returns plate / route name, not raw link ids (T-169)."""
+		drv = _ensure_test_driver()
+		veh_id = frappe.db.get_value("Salis Driver", drv, "current_vehicle")
+		plate = frappe.db.get_value("Salis Vehicle", veh_id, "plate_number")
+		rp = frappe.get_doc(
+			{"doctype": "Route Plan", "route_name": "DP Test Route",
+			 "driver": drv, "vehicle": veh_id}
+		).insert(ignore_permissions=True)
+		trips = [{"name": "T1", "vehicle": veh_id, "route_plan": rp.name}]
+		driver_portal._label_trips(trips)
+		self.assertEqual(trips[0]["vehicle"], plate)
+		self.assertEqual(trips[0]["route_plan"], "DP Test Route")
+		self.assertNotEqual(trips[0]["vehicle"], veh_id)
+
 	def test_check_in_creates_attendance_for_self(self):
 		drv, user = self._driver_user()
 		self._clear_today_attendance(drv)

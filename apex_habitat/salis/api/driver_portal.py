@@ -213,12 +213,39 @@ def my_trips_today():
 	"""Today's Dispatch Trips for the current driver (read)."""
 	_require_enabled()
 	driver = _resolve_driver()
-	return frappe.get_all(
+	trips = frappe.get_all(
 		"Dispatch Trip",
 		filters={"driver": driver, "trip_date": frappe.utils.today()},
 		fields=["name", "route_plan", "vehicle", "depart_time", "return_time", "status"],
 		order_by="depart_time asc",
 	)
+	_label_trips(trips)  # [T-169] cards show plate / route name, not raw link ids
+	return trips
+
+
+def _label_trips(trips):
+	"""Swap route_plan / vehicle link ids for their human labels (Route Plan.
+	route_name, Salis Vehicle.plate_number) so the driver's cards read names."""
+
+	def labels(doctype, names, field):
+		if not names:
+			return {}
+		rows = frappe.get_all(
+			doctype, filters={"name": ["in", list(names)]}, fields=["name", field]
+		)
+		return {r["name"]: r[field] for r in rows}
+
+	plates = labels(
+		"Salis Vehicle", {t.get("vehicle") for t in trips if t.get("vehicle")}, "plate_number"
+	)
+	routes = labels(
+		"Route Plan", {t.get("route_plan") for t in trips if t.get("route_plan")}, "route_name"
+	)
+	for t in trips:
+		if t.get("vehicle"):
+			t["vehicle"] = plates.get(t["vehicle"], t["vehicle"])
+		if t.get("route_plan"):
+			t["route_plan"] = routes.get(t["route_plan"], t["route_plan"])
 
 
 @frappe.whitelist()
