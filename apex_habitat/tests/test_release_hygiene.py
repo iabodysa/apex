@@ -31,6 +31,24 @@ HOOKS_PY = os.path.join(APP_ROOT, "hooks.py")
 ARABIC = re.compile(r"[؀-ۿ]")
 PLACEHOLDER = re.compile(r"\{\d+")
 
+# The only places Arabic legitimately lives in the tree: the translation file,
+# print formats (bilingual is accepted), the portal i18n/UI bundles and the
+# owner-requested fleet board, plus tests (this file holds the ARABIC pattern) and
+# the git-ignored demo data. Everything else — production .py / .json / desk .js —
+# must be English-first (CLAUDE.md), so it is scanned by TestNoArabicInSource.
+ARABIC_HOMES = (
+    os.sep + "tests" + os.sep,
+    os.sep + "translations" + os.sep,
+    os.sep + "print_format" + os.sep,
+    "worker_portal",
+    "driver_portal",
+    "fleet_portal",
+    os.sep + "demo" + os.sep,
+    os.sep + "change_log" + os.sep,
+    os.path.join("www", "fleet.html"),
+    os.sep + "node_modules" + os.sep,
+)
+
 # [#oy1z45]
 LATIN_BRAND_SOURCES = {"AFMCO"}
 
@@ -361,6 +379,34 @@ class TestNoFutureDatedModified(unittest.TestCase):
                 offenders.append((os.path.relpath(fp, APP_ROOT), data.get("modified")))
         self.assertEqual(
             offenders, [], f"is_standard JSON carries a FUTURE `modified`: {offenders[:10]}"
+        )
+
+
+class TestNoArabicInSource(unittest.TestCase):
+    def test_no_arabic_in_published_code_or_metadata(self):
+        """Arabic must live only in the translation/print-format/portal-UI homes,
+        never in production .py / .json / desk .js (CLAUDE.md: English-first source;
+        UI Arabic belongs in translations/ar.csv). A leak here is the owner's
+        recurring 'language in the wrong place' class — this guard caught and locks
+        an Arabic gloss that had slipped into a salis/utils.py docstring."""
+        offenders = []
+        for ext in ("py", "json", "js"):
+            for path in glob.glob(os.path.join(APP_ROOT, "**", f"*.{ext}"), recursive=True):
+                if any(home in path for home in ARABIC_HOMES):
+                    continue
+                try:
+                    with open(path, encoding="utf-8") as fh:
+                        text = fh.read()
+                except (OSError, UnicodeDecodeError):
+                    continue
+                lines = [i + 1 for i, ln in enumerate(text.splitlines()) if ARABIC.search(ln)]
+                if lines:
+                    offenders.append(f"{os.path.relpath(path, APP_ROOT)}:{lines}")
+        self.assertEqual(
+            sorted(offenders),
+            [],
+            "Arabic found in published source — move it to translations/ar.csv: "
+            f"{sorted(offenders)}",
         )
 
 

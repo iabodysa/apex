@@ -229,7 +229,7 @@ def _approved_leave_on(employee, on_date):
 
 
 def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source_name=None):
-	"""Open a clearance/settlement (تصفية) task for the Movement Supervisor to
+	"""Open a clearance/settlement task for the Movement Supervisor to
 	recover the vehicle + custody from a rider who is on leave / inactive but
 	still holds a vehicle.
 
