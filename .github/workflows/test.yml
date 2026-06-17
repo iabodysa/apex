@@ -51,6 +51,17 @@ jobs:
           fi
           echo "commit messages clean (no Arabic)"
 
+      - name: No internal/experimental files tracked
+        run: |
+          set -uo pipefail
+          bad=$(git ls-files | grep -iE '(^|/)(\.claude|\.agents|archive|_staging|_todo|scratch|prompts)/|\.ipynb$|\.pptx$|\.bak$|\.old$' || true)
+          if [ -n "$bad" ]; then
+            echo "Internal/experimental files are tracked (keep them git-ignored, never published):"
+            echo "$bad"
+            exit 1
+          fi
+          echo "no internal/experimental files tracked"
+
   test:
     runs-on: ubuntu-latest
 

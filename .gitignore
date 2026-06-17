@@ -66,6 +66,7 @@ dist/
 archive/
 
 # Local-only scratch scripts and reports (never commit).
+scratch/
 *.command
 *.applescript
 flash_actions_report.json
