@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.54.21 — a worker who raises a housing request while having no active accommodation assignment no longer sees an English note inside their Arabic request: the orphaned-context signal is now a structured, translatable No Active Assignment flag on the request (which supervisors can filter) instead of free English text spliced into the description",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-resident-request",
+        "creation": "2026-06-17 16:30:00",
+    },
+    {
         "title": "Apex 1.54.20 — eight more Habitat desk strings now render in Arabic (the arrivals-desk action counters, the room-setup floor summary, and the maintenance template material-load message), and the Arabic-coverage guard test now spans the whole app's desk and www surfaces instead of only the fleet pages",
         "app_name": "apex_habitat",
         "link": "/app/arrivals-desk",
