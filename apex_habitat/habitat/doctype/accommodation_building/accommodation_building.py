@@ -18,17 +18,23 @@ class AccommodationBuilding(Document):
 
 
 @frappe.whitelist()
-def get_site_address(building_name):
+def get_site_address(building_name, site=None):
     """Return the plain-text address of the building's Accommodation Site.
 
     The address is owned by the Site (single source of truth); the building displays
-    it read-only so the same address is never entered twice. Empty string when the
-    building has no site or the site has no linked Address yet.
+    it read-only so the same address is never entered twice. ``site`` (the form's
+    current, possibly unsaved value) takes precedence over the building's stored site,
+    so the display tracks an in-form Site change before save (T-138). Empty string
+    when there is no site or the site has no linked Address yet.
     """
     frappe.has_permission("Accommodation Building", "read", doc=building_name, throw=True)
     from apex_habitat.apex_core.utils.addresses import get_address_text
 
-    site = frappe.db.get_value("Accommodation Building", building_name, "site")
+    if site:
+        # passed from the form — gate the read, never trust a client-supplied site
+        frappe.has_permission("Accommodation Site", "read", doc=site, throw=True)
+    else:
+        site = frappe.db.get_value("Accommodation Building", building_name, "site")
     return get_address_text("Accommodation Site", site)
 
 

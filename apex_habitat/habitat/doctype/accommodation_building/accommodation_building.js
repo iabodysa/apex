@@ -111,7 +111,7 @@ function _renderSiteAddress(frm) {
 
 	frappe.call({
 		method: "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.get_site_address",
-		args: { building_name: frm.doc.name },
+		args: { building_name: frm.doc.name, site: frm.doc.site },
 		callback: function (r) {
 			wrapper.empty();
 			const text = r.message;
