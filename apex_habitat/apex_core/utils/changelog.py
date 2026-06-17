@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.54.22 — the driver portal's trip cards now show the vehicle plate number and route name instead of the internal record ids (VEH-…, RP-…) that used to appear",
+        "app_name": "apex_habitat",
+        "link": "/driver",
+        "creation": "2026-06-17 17:00:00",
+    },
+    {
         "title": "Apex 1.54.21 — a worker who raises a housing request while having no active accommodation assignment no longer sees an English note inside their Arabic request: the orphaned-context signal is now a structured, translatable No Active Assignment flag on the request (which supervisors can filter) instead of free English text spliced into the description",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-resident-request",
