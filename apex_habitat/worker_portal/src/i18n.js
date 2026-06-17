@@ -34,7 +34,6 @@ const messages = {
     },
     nav: {
       profile: "Profile",
-      home: "Home",
       accommodation: "Accommodation",
       transport: "Transport",
       requests: "Requests",
@@ -161,7 +160,6 @@ const messages = {
     },
     nav: {
       profile: "ملفي",
-      home: "الرئيسية",
       accommodation: "السكن",
       transport: "النقل",
       requests: "الطلبات",
