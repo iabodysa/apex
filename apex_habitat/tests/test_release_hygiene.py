@@ -410,5 +410,54 @@ class TestNoArabicInSource(unittest.TestCase):
         )
 
 
+# Internal dev-process markers that must never leak into user-facing DocType
+# metadata. The business word "Internal" and setup-guidance "placeholder" are NOT
+# markers — they are legitimate domain text.
+INTERNAL_MARKERS = re.compile(
+    r"(T-\d{2,}|\bterminal-\d|\bTODO\b|\bFIXME\b|\bHACK\b|\bWIP\b|\bskeptic|by terminal)",
+    re.IGNORECASE,
+)
+_METADATA_TEXT_KEYS = {"description", "label", "documentation", "options"}
+
+
+class TestNoInternalMarkersInMetadata(unittest.TestCase):
+    def test_user_facing_metadata_has_no_dev_process_text(self):
+        """DocType descriptions / labels / Select options must not carry internal
+        dev-process text (a task id, a dev-terminal ref, a TODO, "by terminal", ...)
+        — that would surface internal workflow to operators (T-128 / publication
+        hygiene). The tree is clean today; this fails the build on a future leak."""
+        offenders = []
+        for path in glob.glob(os.path.join(APP_ROOT, "**", "*.json"), recursive=True):
+            if (os.sep + "node_modules" + os.sep in path) or (
+                os.sep + "print_format" + os.sep in path
+            ):
+                continue
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    payload = json.load(fh)
+            except (OSError, ValueError):
+                continue
+            rel = os.path.relpath(path, APP_ROOT)
+
+            def visit(obj, key=None):
+                if isinstance(obj, dict):
+                    for k, v in obj.items():
+                        visit(v, k)
+                elif isinstance(obj, list):
+                    for item in obj:
+                        visit(item, key)
+                elif isinstance(obj, str) and key in _METADATA_TEXT_KEYS:
+                    found = INTERNAL_MARKERS.search(obj)
+                    if found:
+                        offenders.append(f"{rel} [{key}] <{found.group(0)}>")
+
+            visit(payload)
+        self.assertEqual(
+            sorted(offenders),
+            [],
+            f"internal dev-process text in user-facing metadata: {sorted(offenders)}",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
