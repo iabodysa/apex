@@ -1,34 +1,13 @@
-"""Payment Router - configurable, mapping-driven payment integration.
+"""Payment Router - build the configured target payment from a finance-approved
+Salis Payment Request via the Payment Routing Settings field map (config-time, no
+hard-coded per-DocType branches); defaults to the native Payment Request when the
+target is unconfigured.
 
-The payment target differs per company / per server: one deployment posts an
-ERPNext Payment Entry, another a Payment Order, another a client's own custom
-payment DocType. Hard-wiring the target is wrong - it is a setting. This module
-reads **Payment Routing Settings** (a Single config record with a child-table
-field map) and builds the target payment document from a finance-approved
-**Salis Payment Request** by applying that mapping - with **no hard-coded
-per-DocType branches**.
-
-Why a custom construct and not ``frappe.model.mapper.get_mapped_doc``: that
-helper's ``field_map`` is supplied in Python at call time, so the source ->
-target fieldnames are baked into code. The requirement is **config-time**
-mapping a deployment admin edits without code. The dispatch here is still thin:
-it uses native ``frappe.new_doc`` / ``insert`` / ``submit`` and the target's own
-meta ``is_submittable``; only the mapping schema is custom.
-
-Boundary: this layer only **routes** the payment record - it writes no GL /
-Journal Entry of its own. General Ledger posting is governed separately by
-``enable_gl_posting`` (Apex Settings). In Frappe a payment document posts its
-ledger effect from its **own** ``on_submit`` (e.g. ERPNext ``Payment Request``
--> Payment Entry -> GL); so when GL posting is OFF the router must not *submit*
-a GL-posting target. The flag therefore gates the auto-submit step: OFF (the
-factory default) leaves the routed payment in Draft and nothing touches the
-ledger; ON lets ``auto_submit_target`` submit it so the native doc posts.
-
-Default target: when ``target_payment_doctype`` is unconfigured the router falls
-back to Frappe's native, submittable **Payment Request** DocType - the framework
-primitive for a payment intent - rather than throwing or inventing a custom doc.
-A deployment overrides it by setting the target (and, if a client ships its own
-payment DocType, by selecting that instead).
+Boundary: this layer routes only - it posts no GL itself. ``enable_gl_posting``
+(Apex Settings) gates the auto-submit step, because a native payment posts its
+ledger from its own ``on_submit``; OFF leaves the routed doc in Draft. [T-151] the
+fuller rationale (config-time mapping vs get_mapped_doc, the GL mechanics) is in the
+commit that tightened this docstring.
 """
 
 from __future__ import annotations
@@ -132,26 +111,12 @@ def _apply_field_map(target, source, field_map) -> None:
 
 
 def route_payment(payment_request: str) -> str:
-    """Create the configured target payment document from a Salis Payment Request.
-
-    Steps:
-      1. Read Payment Routing Settings; resolve the target DocType, defaulting to
-         native ``Payment Request`` when none is configured (never throws for an
-         unconfigured target - the native primitive is the default).
-      2. Load the source request; require it to be finance-approved (else throw).
-      3. Idempotency: if it already carries ``linked_payment_entry``, return that
-         (never create a second payment).
-      4. Build the target via the field map, insert it, and - when
-         ``auto_submit_target``, the target is submittable, AND GL posting is
-         enabled - submit it. Submitting is what drives the native doc's own GL
-         posting, so it is gated on ``enable_gl_posting``; with the flag OFF the
-         payment is routed but left in Draft and nothing posts to the ledger.
-      5. Stamp ``linked_payment_entry`` on the request with the created name.
-
-    This is an authorized finance action invoked behind the workflow/permission
-    gates, so the create is performed with ``ignore_permissions=True`` (the
-    target payment DocType's own roles may differ from the request's). Returns
-    the created (or already-linked) payment document name.
+    """Build (and optionally submit) the configured target payment from a
+    finance-approved Salis Payment Request, then stamp ``linked_payment_entry``.
+    Idempotent: returns the existing payment when already linked. Submit is gated on
+    ``auto_submit_target`` + a submittable target + ``enable_gl_posting`` (submit is
+    what posts the native doc's GL). The create uses ``ignore_permissions``, so the
+    caller's write/submit permission on the request is enforced just below. [T-151]
     """
     settings = frappe.get_single("Payment Routing Settings")
     target_doctype = get_target_doctype(settings)
@@ -191,11 +156,8 @@ def route_payment(payment_request: str) -> str:
 
 @frappe.whitelist(methods=["POST"])
 def create_routed_payment(payment_request: str) -> str:
-    """Whitelisted POST entry for the Create Payment desk action.
-
-    POST-only so a cacheable GET can never trigger this write (CSRF/cache guard in
-    ``tests/test_http_enforcement.py``). The caller's permission on the source
-    request is enforced at the chokepoint :func:`route_payment` (co-located with the
-    ``ignore_permissions`` side effects), so every caller is gated. Thin wrapper.
+    """Whitelisted POST entry for the Create Payment desk action - a thin wrapper
+    over :func:`route_payment` (which enforces the caller's permission). POST-only so
+    a cacheable GET cannot trigger this write (guarded in test_http_enforcement).
     """
     return route_payment(payment_request)

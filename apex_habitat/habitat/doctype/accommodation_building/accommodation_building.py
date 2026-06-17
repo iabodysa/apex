@@ -112,16 +112,10 @@ def apply_active_lease(doc):
 
 
 def _derive_total_capacity(building_name):
-    """The building's TRUE physical bed capacity = the count of its real, available
-    physical beds. A bed counts when it is NOT Out of Service and NOT a virtual
-    over-capacity bed (``is_temporary``); those two exclusions are what keep
-    total_capacity from over-counting retired beds or being inflated by the very
-    over-capacity placements the gate exists to catch.
-
-    Returns the count, or ``None`` when the building has NO bed record at all — the
-    pre-generation path, where there is nothing physical to count and the manually
-    entered planned figure is kept. (A building whose beds are all excluded still has
-    bed rows, so it correctly derives to 0, not None.)
+    """Count the building's real beds, excluding Out-of-Service and virtual
+    ``is_temporary`` over-capacity beds. ``None`` when it has no bed rows yet (the
+    pre-generation path — keep the manually-entered planned figure); 0 when it has
+    beds but all are excluded. [T-140]
     """
     if not frappe.db.exists("Accommodation Bed", {"building": building_name}):
         return None
