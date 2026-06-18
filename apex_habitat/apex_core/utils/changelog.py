@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.54.27 — a new Safety Round groups a building's safety-task checks for one cadence (daily, weekly, monthly, quarterly or annual) into one submittable round that derives a Pass / Needs Attention / Fail result, with a Safety Round Compliance report showing per task what still needs attention; the old Safety Inspection Report is retired in place (hidden and read-only, its records kept); and the Fleet dashboard now uses a clean professional Lucide icon set instead of emoji",
+        "app_name": "apex_habitat",
+        "link": "/app/safety-round",
+        "creation": "2026-06-18 14:00:00",
+    },
+    {
         "title": "Apex 1.54.26 — Accommodation Buildings that had an address recorded before the dedicated Building Address field now display it on the form automatically instead of falling back to the site's address; the one-time fill-in never overwrites a building that already has a Building Address, and leaves address-less buildings unchanged",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-building",
