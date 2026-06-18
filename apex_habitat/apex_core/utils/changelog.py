@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.54.26 — Accommodation Buildings that had an address recorded before the dedicated Building Address field now display it on the form automatically instead of falling back to the site's address; the one-time fill-in never overwrites a building that already has a Building Address, and leaves address-less buildings unchanged",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-building",
+        "creation": "2026-06-18 13:00:00",
+    },
+    {
         "title": "Apex 1.54.25 — assigning a building's Responsible Facility Supervisor now automatically scopes that supervisor's access to the building (the matching User Permission is created, moved, or removed to follow the field), so building access tracks the supervisor field instead of a separately-maintained permission",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-building",

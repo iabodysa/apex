@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+- [1.54.26](v1/v1_54_26.md)
 - [1.54.25](v1/v1_54_25.md) — A building's supervisor field now drives that supervisor's building access.
 - [1.54.24](v1/v1_54_24.md) — The Accommodation Building form can now carry its own address.
 - [1.54.23](v1/v1_54_23.md) — The Accommodation Building form's Site address display is now correct.
