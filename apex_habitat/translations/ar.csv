@@ -2782,3 +2782,15 @@ total_cost,التكلفة الإجمالية
 {0} total,{0} الإجمالي
 {0} {1} already has an active Accommodation Assignment: {2},{0} {1} لديه بالفعل إسناد سكن نشط: {2}
 {0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
+Cadence,الوتيرة
+Derived on submit from the statuses of the linked Safety Task Execution rows.,تُشتقّ عند الاعتماد من حالات تنفيذات مهام السلامة المرتبطة.
+Executed,المُنفَّذة
+Expected,المتوقَّعة
+Is Re-inspection,إعادة فحص
+Last Status,آخر حالة
+Needs Attention,بحاجة إلى انتباه
+Round,جولة
+Round Date,تاريخ الجولة
+Safety Round,جولة سلامة
+Set when this is a follow-up round repeating the same cadence for the building on the same date.,يُحدَّد متى تكون هذه جولةَ متابعةٍ تُكرّر الوتيرة نفسها للمبنى في التاريخ نفسه.
+"The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.

@@ -81,7 +81,7 @@
    "fieldtype": "Link",
    "label": "Executed By",
    "options": "User",
-   "default": "user",
+   "default": "__user",
    "idx": 7
   },
   {
@@ -107,6 +107,16 @@
    "options": "Safety Inspection Report",
    "description": "If execution discovered an issue requiring formal inspection",
    "idx": 11
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "safety_round",
+   "fieldtype": "Link",
+   "label": "Safety Round",
+   "options": "Safety Round",
+   "no_copy": 1,
+   "description": "The Safety Round this execution belongs to, if recorded as part of a round.",
+   "idx": 12
   },
   {
    "doctype": "DocField",
@@ -245,6 +255,7 @@
   "safety_task_execution_sec_evidence",
   "evidence_photo",
   "linked_inspection",
+  "safety_round",
   "linked_maintenance_request",
   "safety_task_execution_sec_large_text",
   "notes",
@@ -255,5 +266,5 @@
   "priority",
   "naming_series"
  ],
- "modified": "2026-06-08 21:00:00.000000"
+ "modified": "2026-06-18 21:14:39.944592"
 }

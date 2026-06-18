@@ -1,0 +1,173 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-06-18 12:00:00.000000",
+ "description": "A periodic safety round over a building for a given cadence. Groups the building's Safety Task Execution rows for that round and, on submit, derives an overall result from their statuses. Supersedes the legacy Safety Inspection Report.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "safety_round_tab_overview",
+  "safety_round_sec_overview",
+  "building",
+  "round_date",
+  "cadence",
+  "safety_round_overview_col",
+  "supervisor",
+  "is_reinspection",
+  "overall_result",
+  "safety_round_sec_system",
+  "naming_series",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "safety_round_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "safety_round_sec_overview",
+   "fieldtype": "Section Break",
+   "label": "Round"
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Accommodation Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "round_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Round Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cadence",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Cadence",
+   "options": "Daily\nWeekly\nMonthly\nQuarterly\nAnnual",
+   "reqd": 1
+  },
+  {
+   "fieldname": "safety_round_overview_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "__user",
+   "fieldname": "supervisor",
+   "fieldtype": "Link",
+   "label": "Supervisor",
+   "options": "User"
+  },
+  {
+   "default": "0",
+   "description": "Set when this is a follow-up round repeating the same cadence for the building on the same date.",
+   "fieldname": "is_reinspection",
+   "fieldtype": "Check",
+   "label": "Is Re-inspection"
+  },
+  {
+   "description": "Derived on submit from the statuses of the linked Safety Task Execution rows.",
+   "fieldname": "overall_result",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Overall Result",
+   "options": "\nPass\nNeeds Attention\nFail",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "safety_round_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "default": "SRN-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "SRN-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Safety Round",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Safety",
+   "link_doctype": "Safety Task Execution",
+   "link_fieldname": "safety_round"
+  }
+ ],
+ "modified": "2026-06-18 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Safety Round",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Safety Officer",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "building",
+ "track_changes": 1
+}

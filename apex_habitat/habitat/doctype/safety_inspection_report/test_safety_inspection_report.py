@@ -1,3 +1,6 @@
+import json
+import os
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -205,3 +208,38 @@ class TestSafetyInspectionReport(FrappeTestCase):
             self.assertEqual(len(report.linked_maintenance_requests), 0)
         finally:
             self._cleanup_report(report.name)
+
+
+class TestSafetyInspectionReportDeprecation(FrappeTestCase):
+    """[T-281] Safety Inspection Report is deprecated in place (not renamed or
+    deleted) in favour of Safety Round + the Safety Round Compliance report.
+    These are pure-file assertions on the DocType JSON, so they hold whether or
+    not the running site has migrated the schema."""
+
+    def _schema(self):
+        path = os.path.join(
+            os.path.dirname(__file__), "safety_inspection_report.json"
+        )
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+
+    def test_sir_json_is_hidden_and_read_only(self):
+        schema = self._schema()
+        self.assertEqual(schema.get("hidden"), 1, "SIR must be hidden")
+        self.assertEqual(schema.get("read_only"), 1, "SIR must be read_only")
+
+    def test_sir_description_marks_deprecation(self):
+        schema = self._schema()
+        self.assertIn("Deprecated", schema.get("description", ""),
+                      "SIR description must mark it as deprecated")
+        self.assertIn("Safety Round", schema.get("description", ""),
+                      "SIR description must point to Safety Round")
+
+    def test_sir_not_renamed_and_fields_intact(self):
+        # The housing_supervisor_report and other code query SIR by name, so the
+        # name and its fields must survive deprecation untouched.
+        schema = self._schema()
+        self.assertEqual(schema.get("name"), "Safety Inspection Report")
+        fieldnames = {f.get("fieldname") for f in schema.get("fields", [])}
+        for required in ("building", "inspection_date", "inspector", "safety_findings"):
+            self.assertIn(required, fieldnames, f"SIR lost field {required}")
