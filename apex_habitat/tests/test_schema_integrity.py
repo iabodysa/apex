@@ -107,6 +107,50 @@ class TestSchemaIntegrity(FrappeTestCase):
                     bad.append(f"{d['name']} number_card -> {nc['number_card_name']}")
         self.assertEqual(bad, [], f"workspace references that do not resolve: {bad}")
 
+    def test_workspace_content_blocks_resolve(self):
+        # [T-242] test_workspace_refs_resolve guards the shortcuts/links/charts/
+        # number_cards arrays; the `content` JSON is the actual rendered layout, and
+        # a block naming a card/chart/shortcut/quick-list absent from those arrays
+        # renders blank with no error. Guard each content block against the declared
+        # arrays, plus that every quick_list points at a real DocType.
+        ref = {
+            "chart": ("chart_name", "charts"),
+            "number_card": ("number_card_name", "number_cards"),
+            "shortcut": ("shortcut_name", "shortcuts"),
+            "quick_list": ("quick_list_name", "quick_lists"),
+            "card": ("card_name", "links"),
+        }
+        bad = []
+        for j in glob.glob(f"{APP}/**/workspace/*/*.json", recursive=True):
+            d = json.load(open(j, encoding="utf-8"))
+            name = d["name"]
+            declared = {
+                "charts": {c.get("chart_name") for c in d.get("charts", [])},
+                "number_cards": {c.get("number_card_name") for c in d.get("number_cards", [])},
+                "shortcuts": {s.get("label") for s in d.get("shortcuts", [])},
+                "quick_lists": {q.get("label") for q in d.get("quick_lists", [])},
+                "links": {link.get("label") for link in d.get("links", []) if link.get("type") == "Card Break"},
+            }
+            for q in d.get("quick_lists", []):
+                dt = q.get("document_type")
+                if dt and not frappe.db.exists("DocType", dt):
+                    bad.append(f"{name} quick_list -> DocType {dt} missing")
+            try:
+                blocks = json.loads(d.get("content") or "[]")
+            except (ValueError, TypeError):
+                bad.append(f"{name}: content is not valid JSON")
+                continue
+            for b in blocks:
+                if not isinstance(b, dict):
+                    continue
+                spec = ref.get(b.get("type"))
+                if not spec:
+                    continue
+                n = (b.get("data") or {}).get(spec[0])
+                if n and n not in declared[spec[1]]:
+                    bad.append(f"{name} content {b['type']} -> {n} (not in {spec[1]}[])")
+        self.assertEqual(bad, [], f"workspace content blocks that do not resolve: {bad}")
+
     def test_dashboard_chart_refs_resolve(self):
         bad = []
         for j in glob.glob(f"{APP}/**/dashboard_chart/*/*.json", recursive=True):
