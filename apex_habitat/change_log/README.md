@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+- [1.54.25](v1/v1_54_25.md) — A building's supervisor field now drives that supervisor's building access.
 - [1.54.24](v1/v1_54_24.md) — The Accommodation Building form can now carry its own address.
 - [1.54.23](v1/v1_54_23.md) — The Accommodation Building form's Site address display is now correct.
 - [1.54.22](v1/v1_54_22.md) — The driver portal's trip cards are now readable.
@@ -18,10 +19,10 @@ Every release, newest first. Each line links to that version's full note.
 - [1.54.13](v1/v1_54_13.md) — Fix the Fleet dashboard cards failing to render.
 - [1.54.12](v1/v1_54_12.md) — A new /fleet web dashboard — the supervisor's own fleet board, now live.
 - [1.54.11](v1/v1_54_11.md) — More Fleet Operations surfaces and the last schema fields.
-- [1.54.10](v1/v1_54_10.md) — Workspace fixes for Fleet Operations.
 
 ## 1.54.x
 
+- [1.54.25](v1/v1_54_25.md) — A building's supervisor field now drives that supervisor's building access.
 - [1.54.24](v1/v1_54_24.md) — The Accommodation Building form can now carry its own address.
 - [1.54.23](v1/v1_54_23.md) — The Accommodation Building form's Site address display is now correct.
 - [1.54.22](v1/v1_54_22.md) — The driver portal's trip cards are now readable.
