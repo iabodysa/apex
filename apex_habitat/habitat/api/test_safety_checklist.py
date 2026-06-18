@@ -13,18 +13,33 @@ Safety Task Execution per checklist line linked back to the round, and the
 round's overall_result matches the worst line status (a Poor -> Needs Attention;
 a Not Done -> Fail; all Good -> Pass). A second non-reinspection submit_round for
 the same (building, date, cadence) is rejected by the round's duplicate guard.
+
+get_due_cadences: returns only the cadences with no submitted round in the
+current period (today / this ISO week / this month / this quarter / this year),
+each with its expected tasks; the DUE set shrinks as rounds are submitted and
+re-opens when a period rolls over.
+
+submit_due_rounds: groups a multi-cadence result set by cadence, creates one
+Safety Round per cadence (links its executions, derives overall_result), rolls
+all rounds back together on failure, and attempts a manager email afterwards
+without letting a mail failure roll back a submitted round.
 """
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import today
+from frappe.utils import add_to_date, get_first_day, getdate, today
 
 from apex_habitat.habitat.api.safety_checklist import (
+    get_due_cadences,
     get_tasks_for_cadence,
+    submit_due_rounds,
     submit_round,
 )
+from apex_habitat.tests._helpers import _user
 from apex_habitat.tests.factories import make_building, make_company
 
 
@@ -98,6 +113,27 @@ class TestSafetyChecklist(FrappeTestCase):
                 "is_active": 1,
             }
         ).insert(ignore_permissions=True).name
+
+        # One applies-to-all task for EACH remaining cadence so every cadence is
+        # in scope for this building — needed by the get_due_cadences /
+        # submit_due_rounds tests. (Weekly + Monthly already seeded above.)
+        self.cadence_task = {
+            "Weekly": self.task_all,
+            "Monthly": self.task_other_cadence,
+        }
+        for cad in ("Daily", "Quarterly", "Annual"):
+            self.cadence_task[cad] = frappe.get_doc(
+                {
+                    "doctype": "Safety Task Catalog",
+                    "task_code": f"CHK-{cad[:3].upper()}-{tag}",
+                    "task_title": f"{cad} Task {tag}",
+                    "department": "Fire Safety",
+                    "frequency": cad,
+                    "priority": "High",
+                    "applicable_to_all_buildings": 1,
+                    "is_active": 1,
+                }
+            ).insert(ignore_permissions=True).name
 
     # -- get_tasks_for_cadence -------------------------------------------------
 
@@ -229,6 +265,233 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertEqual(
             frappe.db.get_value(
                 "Safety Round", result["safety_round"], "is_reinspection"
+            ),
+            1,
+        )
+
+    # -- get_due_cadences ------------------------------------------------------
+
+    def _insert_submitted_round(self, cadence, round_date):
+        """Insert + submit a Safety Round (with one execution) on an explicit
+        date, bypassing the API so the test can place a round on any day of the
+        current period to drive the DUE transitions."""
+        rnd = frappe.get_doc(
+            {
+                "doctype": "Safety Round",
+                "building": self.building,
+                "round_date": round_date,
+                "cadence": cadence,
+            }
+        ).insert(ignore_permissions=True)
+        frappe.get_doc(
+            {
+                "doctype": "Safety Task Execution",
+                "building": self.building,
+                "task": self.cadence_task[cadence],
+                "execution_date": round_date,
+                "execution_status": "Good",
+                "safety_round": rnd.name,
+            }
+        ).insert(ignore_permissions=True).submit()
+        rnd.submit()
+        return rnd.name
+
+    def _due_cadences(self):
+        result = get_due_cadences(self.building)
+        self.assertEqual(result["building"], self.building)
+        return {block["cadence"] for block in result["due"]}
+
+    def test_due_first_time_all_cadences_due(self):
+        # No prior rounds: every cadence with scoped tasks is due, ordered
+        # Daily -> Weekly -> Monthly -> Quarterly -> Annual.
+        result = get_due_cadences(self.building)
+        cadences = [block["cadence"] for block in result["due"]]
+        self.assertEqual(
+            cadences, ["Daily", "Weekly", "Monthly", "Quarterly", "Annual"]
+        )
+        # Each block carries the expected task and a non-empty period label.
+        for block in result["due"]:
+            self.assertTrue(block["period_label"])
+            names = {t["name"] for t in block["tasks"]}
+            self.assertIn(self.cadence_task[block["cadence"]], names)
+
+    def test_due_after_daily_round_today_omits_daily(self):
+        # A submitted Daily round today closes Daily for the rest of today; the
+        # longer cadences stay due.
+        submit_round(self.building, "Daily", today(), self._lines("Good"))
+        due = self._due_cadences()
+        self.assertNotIn("Daily", due)
+        self.assertEqual(due, {"Weekly", "Monthly", "Quarterly", "Annual"})
+
+    def test_due_weekly_round_this_week_omits_weekly_but_daily_still_due(self):
+        # A Weekly round recorded EARLIER this ISO week (a different day) closes
+        # Weekly for the whole week, yet Daily is still due "today" because the
+        # daily period is just today and no daily round exists.
+        # Monday of the current ISO week (== today only when today is Monday;
+        # either way it falls in this week's Mon-Sun window).
+        iso_monday = add_to_date(
+            today(), days=-getdate(today()).weekday(), as_string=True
+        )
+        self._insert_submitted_round("Weekly", iso_monday)
+        due = self._due_cadences()
+        self.assertNotIn("Weekly", due, "a Weekly round this ISO week closes Weekly")
+        self.assertIn("Daily", due, "Daily is still due — no daily round today")
+
+    def test_due_omits_cadence_with_no_scoped_tasks(self):
+        # Deactivate EVERY active Daily catalog task (the fixture plus any seeded
+        # on the site) so Daily has nothing to check; get_due_cadences then omits
+        # it, while Weekly — which still has the all-buildings fixture — stays due.
+        for name in frappe.get_all(
+            "Safety Task Catalog", {"frequency": "Daily", "is_active": 1}, pluck="name"
+        ):
+            frappe.db.set_value("Safety Task Catalog", name, "is_active", 0)
+        due = self._due_cadences()
+        self.assertNotIn("Daily", due)
+        self.assertIn("Weekly", due)
+
+    def test_due_monthly_round_last_month_does_not_close_this_month(self):
+        # A Monthly round dated in the PREVIOUS month is outside the current
+        # period, so Monthly is still due this month.
+        last_month = get_first_day(add_to_date(today(), months=-1), as_str=True)
+        self._insert_submitted_round("Monthly", last_month)
+        self.assertIn("Monthly", self._due_cadences())
+
+    # -- submit_due_rounds -----------------------------------------------------
+
+    def _results(self, *pairs):
+        """Build a multi-cadence results list from (cadence, status) pairs,
+        using each cadence's seeded all-buildings task."""
+        return [
+            {
+                "task": self.cadence_task[cadence],
+                "cadence": cadence,
+                "execution_status": status,
+            }
+            for cadence, status in pairs
+        ]
+
+    def test_submit_due_rounds_creates_one_round_per_cadence(self):
+        results = self._results(
+            ("Daily", "Good"), ("Weekly", "Poor"), ("Monthly", "Not Done")
+        )
+        with patch("apex_habitat.habitat.api.safety_checklist.frappe.sendmail"):
+            out = submit_due_rounds(self.building, today(), results)
+
+        self.assertTrue(out["ok"])
+        self.assertEqual(out["count"], 3)
+        # One round per cadence, ordered Daily -> Weekly -> Monthly, each with
+        # the overall_result derived from its single line.
+        self.assertEqual([r["cadence"] for r in out["rounds"]],
+                         ["Daily", "Weekly", "Monthly"])
+        by_cad = {r["cadence"]: r for r in out["rounds"]}
+        self.assertEqual(by_cad["Daily"]["overall_result"], "Pass")
+        self.assertEqual(by_cad["Weekly"]["overall_result"], "Needs Attention")
+        self.assertEqual(by_cad["Monthly"]["overall_result"], "Fail")
+
+        # Each round is submitted and links exactly its own execution.
+        for cad, r in by_cad.items():
+            self.assertEqual(
+                frappe.db.get_value("Safety Round", r["safety_round"], "docstatus"), 1
+            )
+            linked = frappe.get_all(
+                "Safety Task Execution",
+                filters={"safety_round": r["safety_round"], "docstatus": 1},
+                pluck="task",
+            )
+            self.assertEqual(linked, [self.cadence_task[cad]])
+
+    def test_submit_due_rounds_then_those_cadences_not_due(self):
+        # Submitting the due rounds closes exactly those cadences for the period.
+        results = self._results(("Daily", "Good"), ("Weekly", "Good"))
+        with patch("apex_habitat.habitat.api.safety_checklist.frappe.sendmail"):
+            submit_due_rounds(self.building, today(), results)
+        due = self._due_cadences()
+        self.assertNotIn("Daily", due)
+        self.assertNotIn("Weekly", due)
+        self.assertIn("Monthly", due)
+
+    def test_submit_due_rounds_rolls_back_all_on_failure(self):
+        # Cadences are processed Daily -> Weekly, so Daily is created FIRST and
+        # succeeds; then a pre-existing Weekly round makes the Weekly leg collide
+        # with the duplicate guard and throw. The OUTER savepoint must then roll
+        # back the already-created Daily round too — proving all-or-nothing.
+        self._insert_submitted_round("Weekly", today())
+        before_daily = frappe.db.count(
+            "Safety Round", {"building": self.building, "cadence": "Daily"}
+        )
+        results = self._results(("Daily", "Good"), ("Weekly", "Good"))
+        with self.assertRaises(frappe.ValidationError):
+            with patch("apex_habitat.habitat.api.safety_checklist.frappe.sendmail"):
+                submit_due_rounds(self.building, today(), results)
+        # The Daily round created before the Weekly failure was rolled back.
+        after_daily = frappe.db.count(
+            "Safety Round", {"building": self.building, "cadence": "Daily"}
+        )
+        self.assertEqual(after_daily, before_daily,
+                         "the successful Daily round must roll back with the failed Weekly")
+
+    # -- submit_due_rounds email ----------------------------------------------
+
+    def _enable_email(self):
+        settings = frappe.get_single("Habitat Settings")
+        settings.enable_email_notifications = 1
+        settings.save(ignore_permissions=True)
+
+    def test_submit_due_rounds_emails_manager(self):
+        # Seed an enabled Accommodation Manager with an email so a recipient
+        # resolves, turn the kill-switch on, and assert sendmail was called.
+        self._enable_email()
+        mgr = _user(f"safetymgr_{self._testMethodName}@example.com",
+                    "Accommodation Manager")
+        results = self._results(("Weekly", "Poor"))
+        with patch(
+            "apex_habitat.habitat.api.safety_checklist.frappe.sendmail"
+        ) as mock_send:
+            out = submit_due_rounds(self.building, today(), results)
+
+        self.assertTrue(out["emailed"], "manager email must be attempted")
+        self.assertEqual(mock_send.call_count, 1)
+        self.assertIn(mgr, mock_send.call_args.kwargs["recipients"])
+        # The body names the issue (a Poor line) for the Weekly round.
+        self.assertIn("Poor", mock_send.call_args.kwargs["message"])
+
+    def test_submit_due_rounds_no_recipient_sets_emailed_false(self):
+        # Kill-switch ON but NO Accommodation Manager / configured recipient ->
+        # emailed is False and the rounds still succeed (no throw).
+        self._enable_email()
+        # Strip any Accommodation Manager grants so no recipient resolves.
+        for u in frappe.get_all(
+            "Has Role", filters={"role": "Accommodation Manager"}, pluck="parent"
+        ):
+            frappe.db.delete("Has Role", {"parent": u, "role": "Accommodation Manager"})
+        results = self._results(("Weekly", "Good"))
+        with patch(
+            "apex_habitat.habitat.api.safety_checklist.frappe.sendmail"
+        ) as mock_send:
+            out = submit_due_rounds(self.building, today(), results)
+        self.assertTrue(out["ok"])
+        self.assertFalse(out["emailed"])
+        mock_send.assert_not_called()
+
+    def test_submit_due_rounds_mail_failure_does_not_roll_back(self):
+        # A sendmail explosion must NOT roll back the submitted rounds: the round
+        # persists and emailed comes back False.
+        self._enable_email()
+        _user(f"safetymgr2_{self._testMethodName}@example.com",
+              "Accommodation Manager")
+        results = self._results(("Weekly", "Good"))
+        with patch(
+            "apex_habitat.habitat.api.safety_checklist.frappe.sendmail",
+            side_effect=Exception("smtp down"),
+        ):
+            out = submit_due_rounds(self.building, today(), results)
+        self.assertTrue(out["ok"])
+        self.assertFalse(out["emailed"])
+        self.assertEqual(len(out["rounds"]), 1)
+        # The Weekly round really persisted (submitted) despite the mail error.
+        self.assertEqual(
+            frappe.db.get_value(
+                "Safety Round", out["rounds"][0]["safety_round"], "docstatus"
             ),
             1,
         )

@@ -33,6 +33,7 @@
   "license_expiry_days_before",
   "lease_expiry_days_before",
   "temporary_stay_days_before",
+  "safety_report_recipient",
   "supplier_cost_recovery_sec",
   "enable_supplier_markup",
   "habitat_settings_supplier_col",
@@ -224,6 +225,13 @@
    "label": "Temporary Stay Lead Days"
   },
   {
+   "description": "Email that receives the Safety Round report when a safety checklist round is submitted. If empty, the report goes to the Accommodation Manager(s).",
+   "fieldname": "safety_report_recipient",
+   "fieldtype": "Data",
+   "options": "Email",
+   "label": "Safety Report Recipient"
+  },
+  {
    "fieldname": "supplier_cost_recovery_sec",
    "fieldtype": "Section Break",
    "label": "Supplier Cost Recovery"
@@ -285,7 +293,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-06-19 00:27:27.407798",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Habitat Settings",

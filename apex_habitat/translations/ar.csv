@@ -2815,3 +2815,15 @@ Submit Round,اعتمِد الجولة
 Submitting round…,جارٍ اعتماد الجولة…
 There are no checklist tasks to submit.,لا مهامَّ في قائمة الفحص لاعتمادها.
 {0} tasks,{0} مهمّة
+A building is required to compute due cadences.,يلزم مبنى لحساب الوتائر المستحقّة.
+A building is required to submit rounds.,يلزم مبنى لاعتماد الجولات.
+A round date is required to submit rounds.,يلزم تاريخ الجولة لاعتماد الجولات.
+Each result line needs a cadence.,يحتاج كل سطر نتيجة إلى وتيرة.
+No issues recorded.,لا ملاحظات مسجّلة.
+No result lines to submit.,لا سطور نتائج لاعتمادها.
+Results must be a list.,يجب أن تكون النتائج قائمةً.
+Safety Report Recipient,مستلِم تقرير السلامة
+Safety rounds,جولات السلامة
+Safety rounds were recorded for {0} on {1}.,سُجِّلت جولات السلامة لـ{0} بتاريخ {1}.
+This page is for the safety team.,هذه الصفحة لفريق السلامة.
+Unknown cadence: {0},وتيرة غير معروفة: {0}

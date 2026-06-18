@@ -1,0 +1,254 @@
+/* Safety portal — AFMCO theme tokens (Growth Green / Deep Forest / Sand),
+   mirrored from worker_portal so the safety surface matches the rest of the
+   habitat portals. Components consume these CSS variables exclusively, so a
+   tenant can re-skin by swapping the token block. */
+
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+[data-theme="afmco"] {
+  --c-primary: #00844e;
+  --c-primary-ink: #ffffff;
+  --c-ink: #072b1a;
+  --c-ink-soft: #355040;
+  --c-canvas: #ece6d6;
+  --c-surface: #f8f5ee;
+  --c-surface-2: #ffffff;
+  --c-accent: #00844e;
+  --c-mint: #60d297;
+  --c-muted: #6f7e76;
+  --c-border: #ddd5c2;
+  --c-border-strong: #cabfa3;
+  --c-success: #00844e;
+  --c-success-bg: #d9f0e3;
+  --c-warning: #c9851f;
+  --c-warning-bg: #f7ead2;
+  --c-danger: #c0392b;
+  --c-danger-bg: #f6dcd8;
+  --c-header-bg: #072b1a;
+  --c-header-ink: #f8f5ee;
+  --c-header-accent: #60d297;
+  --c-arc: rgba(96, 210, 151, 0.16);
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 2px rgba(7, 43, 26, 0.04);
+  --shadow-lg: 0 10px 30px rgba(7, 43, 26, 0.1);
+  --border-width: 1px;
+
+  --font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-display: 28px;
+  --fs-h1: 22px;
+  --fs-h2: 20px;
+  --fs-h3: 16px;
+  --fs-body: 14px;
+  --fs-sm: 13px;
+  --fs-xs: 11px;
+  --fw-heading: 800;
+  --fw-semibold: 600;
+  --fw-body: 500;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+}
+
+[data-theme="dark"] {
+  --c-primary: #00a862;
+  --c-primary-ink: #04130c;
+  --c-ink: #e7efe9;
+  --c-ink-soft: #a6b6ac;
+  --c-canvas: #0f1714;
+  --c-surface: #15211b;
+  --c-surface-2: #1c2c24;
+  --c-accent: #60d297;
+  --c-mint: #60d297;
+  --c-muted: #7d8f84;
+  --c-border: #25362c;
+  --c-border-strong: #324a3c;
+  --c-success: #60d297;
+  --c-success-bg: rgba(96, 210, 151, 0.14);
+  --c-warning: #e0a02f;
+  --c-warning-bg: rgba(224, 160, 47, 0.16);
+  --c-danger: #ef6b5e;
+  --c-danger-bg: rgba(239, 107, 94, 0.16);
+  --c-header-bg: #0c130f;
+  --c-header-ink: #e7efe9;
+  --c-header-accent: #60d297;
+  --c-arc: rgba(96, 210, 151, 0.1);
+  --shadow: none;
+  --shadow-lg: none;
+}
+
+html,
+body {
+  background: var(--c-canvas);
+}
+body {
+  font-family: var(--font);
+  font-weight: var(--fw-body);
+  color: var(--c-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@layer components {
+  .app-shell {
+    @apply min-h-screen flex flex-col mx-auto w-full;
+    max-width: 480px;
+    background: var(--c-canvas);
+    color: var(--c-ink);
+  }
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--c-header-bg);
+    color: var(--c-header-ink);
+    overflow: hidden;
+  }
+
+  .hero-arc {
+    position: absolute;
+    pointer-events: none;
+    inset: 0;
+    z-index: 0;
+  }
+  .hero-arc svg {
+    position: absolute;
+    right: -28px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 150%;
+    width: auto;
+    color: var(--c-arc);
+  }
+  [dir="rtl"] .hero-arc svg {
+    right: auto;
+    left: -28px;
+    transform: translateY(-50%) scaleX(-1);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    line-height: 1;
+    padding: 5px 10px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.02em;
+  }
+  .pill-neutral {
+    background: color-mix(in srgb, var(--c-ink) 8%, transparent);
+    color: var(--c-ink-soft);
+  }
+  .pill-success {
+    background: var(--c-success-bg);
+    color: var(--c-success);
+  }
+  .pill-warning {
+    background: var(--c-warning-bg);
+    color: var(--c-warning);
+  }
+  .pill-danger {
+    background: var(--c-danger-bg);
+    color: var(--c-danger);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    font-family: var(--font);
+    font-size: var(--fs-h3);
+    font-weight: var(--fw-semibold);
+    line-height: 1;
+    border: var(--border-width) solid transparent;
+    cursor: pointer;
+    transition:
+      transform 0.06s ease,
+      filter 0.15s ease,
+      background 0.15s ease;
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn:disabled:active {
+    transform: none;
+  }
+  .btn-primary {
+    background: var(--c-primary);
+    color: var(--c-primary-ink);
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--c-ink);
+    border-color: var(--c-border-strong);
+  }
+
+  .section-title {
+    font-size: var(--fs-h2);
+    font-weight: var(--fw-heading);
+    color: var(--c-ink);
+    letter-spacing: -0.01em;
+  }
+
+  .spinner {
+    height: 32px;
+    width: 32px;
+    border-radius: 999px;
+    border: 3px solid color-mix(in srgb, var(--c-primary) 25%, transparent);
+    border-top-color: var(--c-primary);
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+.status-note {
+  text-align: center;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+}
+.status-ok {
+  color: var(--c-success);
+  background: var(--c-success-bg);
+}
+.status-err {
+  color: var(--c-danger);
+  background: var(--c-danger-bg);
+}
+
+.text-muted {
+  color: var(--c-muted);
+}
+.mx-auto {
+  margin-inline: auto;
+}

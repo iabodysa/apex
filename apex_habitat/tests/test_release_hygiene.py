@@ -43,9 +43,11 @@ ARABIC_HOMES = (
     "worker_portal",
     "driver_portal",
     "fleet_portal",
+    "safety_portal",
     os.sep + "demo" + os.sep,
     os.sep + "change_log" + os.sep,
     os.path.join("www", "fleet.html"),
+    os.path.join("www", "safety.html"),
     os.sep + "node_modules" + os.sep,
 )
 
