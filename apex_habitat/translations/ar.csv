@@ -2794,3 +2794,10 @@ Round Date,تاريخ الجولة
 Safety Round,جولة سلامة
 Set when this is a follow-up round repeating the same cadence for the building on the same date.,يُحدَّد متى تكون هذه جولةَ متابعةٍ تُكرّر الوتيرة نفسها للمبنى في التاريخ نفسه.
 "The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
+A building is required to build the checklist.,يلزم مبنى لبناء قائمة الفحص.
+A building is required to submit a round.,يلزم مبنى لاعتماد جولة.
+A cadence is required to build the checklist.,تلزم وتيرة لبناء قائمة الفحص.
+A cadence is required to submit a round.,تلزم وتيرة لاعتماد جولة.
+A round date is required to submit a round.,يلزم تاريخ جولة لاعتماد جولة.
+Checklist lines must be a list.,يجب أن تكون سطور قائمة الفحص قائمةً.
+Each checklist line needs a task and an execution status.,يحتاج كل سطر في قائمة الفحص إلى مهمة وحالة تنفيذ.
