@@ -18,20 +18,30 @@ class AccommodationBuilding(Document):
 
 
 @frappe.whitelist()
-def get_site_address(building_name, site=None):
-    """Return the plain-text address of the building's Accommodation Site.
+def get_site_address(building_name, site=None, building_address=None):
+    """Plain-text address shown on the building form.
 
-    The address is owned by the Site (single source of truth); the building displays
-    it read-only so the same address is never entered twice. ``site`` (the form's
-    current, possibly unsaved value) takes precedence over the building's stored site,
-    so the display tracks an in-form Site change before save (T-138). Empty string
-    when there is no site or the site has no linked Address yet.
+    Prefers the building's own selected Address (``building_address``, T-144); else
+    falls back to the Accommodation Site's address. ``site`` / ``building_address`` are
+    the form's current (possibly unsaved) values so the display tracks a change before
+    save (T-138); both are permission-gated, never trusted from the client. A ``None``
+    arg means "not supplied" and is read from the saved record; an empty string means
+    the form cleared it. Empty string when neither resolves to an Address.
     """
     frappe.has_permission("Accommodation Building", "read", doc=building_name, throw=True)
-    from apex_habitat.apex_core.utils.addresses import get_address_text
+    from apex_habitat.apex_core.utils.addresses import (
+        get_address_text,
+        get_address_text_by_name,
+    )
 
+    if building_address is None:
+        building_address = frappe.db.get_value(
+            "Accommodation Building", building_name, "building_address"
+        )
+    if building_address:
+        frappe.has_permission("Address", "read", doc=building_address, throw=True)
+        return get_address_text_by_name(building_address)
     if site:
-        # passed from the form — gate the read, never trust a client-supplied site
         frappe.has_permission("Accommodation Site", "read", doc=site, throw=True)
     else:
         site = frappe.db.get_value("Accommodation Building", building_name, "site")

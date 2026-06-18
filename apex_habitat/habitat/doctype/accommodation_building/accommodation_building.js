@@ -100,10 +100,10 @@ function _renderSiteAddress(frm) {
 	const wrapper = frm.get_field("address_html").$wrapper;
 	wrapper.empty();
 
-	if (!frm.doc.site) {
+	if (!frm.doc.site && !frm.doc.building_address) {
 		wrapper.append(
 			$('<p class="text-muted" style="font-size:13px;"></p>').text(
-				__("Select a Site to show its address. The address is managed on the Site.")
+				__("Select this building's address, or a Site, to show it here.")
 			)
 		);
 		return;
@@ -111,23 +111,21 @@ function _renderSiteAddress(frm) {
 
 	frappe.call({
 		method: "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.get_site_address",
-		args: { building_name: frm.doc.name, site: frm.doc.site },
+		args: {
+			building_name: frm.doc.name,
+			site: frm.doc.site,
+			building_address: frm.doc.building_address,
+		},
 		callback: function (r) {
 			wrapper.empty();
 			const text = r.message;
-			const hint = $('<p class="text-muted" style="font-size:12px;margin-top:6px;"></p>').text(
-				__("Managed on the Site.")
-			);
 			if (text) {
 				wrapper.append($("<div></div>").text(text));
 			} else {
 				wrapper.append(
-					$('<p class="text-muted" style="font-size:13px;"></p>').text(
-						__("No address recorded on the Site yet. Open the Site to add one.")
-					)
+					$('<p class="text-muted" style="font-size:13px;"></p>').text(__("No address recorded yet."))
 				);
 			}
-			wrapper.append(hint);
 		},
 	});
 }
@@ -227,6 +225,12 @@ frappe.ui.form.on("Accommodation Building", {
 
 	site(frm) {
 		// [#t62uep]
+		if (!frm.is_new()) {
+			_renderSiteAddress(frm);
+		}
+	},
+
+	building_address(frm) {
 		if (!frm.is_new()) {
 			_renderSiteAddress(frm);
 		}

@@ -345,6 +345,7 @@ Brand Logo,شعار العلامة التجارية
 Building,المبنى
 Building (Store),المبنى (المستودع)
 Building A,المبنى أ
+Building Address,عنوان المبنى
 Building B,المبنى ب
 Building Code Locked,رمز المبنى مقفل
 Building License,رخصة المبنى
@@ -1371,7 +1372,6 @@ Maintenance Work Orders Completed,أوامر عمل الصيانة المكتم�
 Maintenance Work Orders In Progress,أوامر عمل الصيانة قيد التنفيذ
 Maintenance Work Orders by Status,أوامر عمل الصيانة حسب الحالة
 Maintenance: {0},الصيانة: {0}
-Managed on the Site.,يُدار من خلال الموقع.
 Manifest Passenger,راكب الكشف
 Manual,يدوي
 Manual Entry,إدخال يدوي
@@ -1490,7 +1490,7 @@ No active Safety Task Catalog entries found. Run the app setup first.,لم يُ�
 No active accommodation assignment when raised — needs housing triage.,لا إسناد سكنٍ نشط عند الرفع — يحتاج فرزًا سكنيًّا.
 No active assignment found for bed {0}.,لا يوجد إسناد نشط للسرير {0}.
 No active template found for issue type: {0},لا يوجد قالب نشط لنوع البلاغ: {0}
-No address recorded on the Site yet. Open the Site to add one.,لا يوجد عنوان مسجّل على الموقع بعد. افتح الموقع لإضافة عنوان.
+No address recorded yet.,لا عنوان مُسجَّل بعد.
 No articles found.,لا توجد أصناف.
 No available drivers.,لا يوجد سائقون متاحون.
 No beds found for this building.,لا توجد أسرّة لهذا المبنى.
@@ -2194,7 +2194,6 @@ Search worker name or passport…,البحث باسم العامل أو جواز
 Security,أمن
 See who is currently housed across your buildings.,اطّلع على المقيمين حالياً في مبانيك.
 "Select 'Building' if leasing an entire building, or 'Apartment' if leasing a single unit.",اختر 'مبنى' إذا كان العقد لعمارة كاملة، أو 'شقة' إذا كان العقد لوحدة مستقلة.
-Select a Site to show its address. The address is managed on the Site.,اختر موقعًا لعرض عنوانه. يُدار العنوان من خلال الموقع.
 Select a building before issuing.,اختر مبنى قبل الصرف.
 Select a building to load the board.,اختر مبنى لتحميل اللوحة.
 Select a building to load the catalog.,اختر مبنى لتحميل الكتالوج.
@@ -2205,6 +2204,7 @@ Select an employee before issuing.,اختر موظفاً قبل الصرف.
 Select at least one passenger.,اختر راكباً واحداً على الأقل.
 Select from the Habitat material catalog. Optional — use instead of or alongside ERPNext Item.,اختر من كتالوج مواد Habitat. اختياري — استخدمه بدلاً من صنف ERPNext أو إلى جانبه.
 Select the vehicle to release.,اختر المركبة المراد تحريرها.
+"Select this building's address, or a Site, to show it here.",اختر عنوانَ هذا المبنى، أو موقعًا، لعرضه هنا.
 Selected Bed {0} does not belong to Room {1},السرير المحدد {0} لا ينتمي إلى الغرفة {1}
 Selected Bed {0} is Out of Service,السرير المحدد {0} خارج الخدمة
 Selected Bed {0} is already occupied by Assignment {1},السرير المحدد {0} مشغول بالفعل بالإسناد {1}
@@ -2452,6 +2452,7 @@ This assignment was already checked out on {0}.,تمت مغادرة هذا ال�
 This bed is in a room that is not ready. Resolve room readiness before check-in.,هذا السرير في غرفة غير جاهزة. عالج جاهزية الغرفة قبل تسجيل الدخول.
 This bed is out of service and cannot be assigned.,هذا السرير خارج الخدمة ولا يمكن تخصيصه.
 This building has no rooms or beds yet.,لا توجد غرف أو أسرّة في هذا المبنى بعد.
+"This building's own address. If empty, the Accommodation Site's address is shown.",عنوانُ هذا المبنى الخاصّ. إن تُرِك فارغًا، يُعرَض عنوانُ موقع السكن.
 This driver has been cleared on all movement-domain items listed below.,تم تخليص هذا السائق من جميع بنود نطاق الحركة المدرجة أدناه.
 This page is for the fleet team.,هذه الصفحة مخصّصة لفريق الأسطول.
 This payment request is not finance-approved yet; it cannot be paid.,طلب الدفع هذا لم يُعتمد ماليًا بعد؛ لا يمكن دفعه.
