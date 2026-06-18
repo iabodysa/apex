@@ -1,14 +1,14 @@
 {
  "doctype": "Onboarding Step",
  "name": "Record a Safety Inspection",
- "intro_text": "Log a building or floor safety inspection. Inspections feed the safety record and surface open findings that drive maintenance and compliance.",
+ "intro_text": "Open the Safety Checklist, pick a building and a cadence, set a status for each task, and submit the round. Each round records the building's safety pass and surfaces issues that drive maintenance and compliance.",
  "title": "Record a Safety Inspection",
- "action": "Create Entry",
- "reference_document": "Safety Inspection Report",
+ "action": "Go to Page",
+ "path": "safety-checklist",
  "is_single": 0,
  "is_complete": 0,
  "is_skipped": 0,
  "show_full_form": 0,
- "description": "Log your first building/floor safety inspection.",
- "action_label": "Create Safety Inspection Report"
+ "description": "Run your first safety round from the Safety Checklist.",
+ "action_label": "Open Safety Checklist"
 }

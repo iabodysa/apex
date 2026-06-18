@@ -2801,3 +2801,17 @@ A cadence is required to submit a round.,تلزم وتيرة لاعتماد جو
 A round date is required to submit a round.,يلزم تاريخ جولة لاعتماد جولة.
 Checklist lines must be a list.,يجب أن تكون سطور قائمة الفحص قائمةً.
 Each checklist line needs a task and an execution status.,يحتاج كل سطر في قائمة الفحص إلى مهمة وحالة تنفيذ.
+Could not load the checklist. Please try again.,تعذّر تحميل قائمة الفحص. حاول مرة أخرى.
+Could not submit the round. Please try again.,تعذّر اعتماد الجولة. حاول مرة أخرى.
+Loading checklist…,جارٍ تحميل قائمة الفحص…
+No safety tasks match this building and cadence.,لا مهامَّ سلامةٍ تطابق هذا المبنى وهذه الوتيرة.
+Open Safety Checklist,افتح قائمة فحص السلامة
+Pick a building and a cadence to build the checklist.,اختر مبنى ووتيرة لبناء قائمة الفحص.
+Round Submitted,اعتُمدت الجولة
+Round {0} submitted. Overall result: {1}.,اعتُمدت الجولة {0}. النتيجة الإجمالية: {1}.
+Run your first safety round from the Safety Checklist.,نفّذ أول جولة سلامة من قائمة فحص السلامة.
+Safety Checklist,قائمة فحص السلامة
+Submit Round,اعتمِد الجولة
+Submitting round…,جارٍ اعتماد الجولة…
+There are no checklist tasks to submit.,لا مهامَّ في قائمة الفحص لاعتمادها.
+{0} tasks,{0} مهمّة

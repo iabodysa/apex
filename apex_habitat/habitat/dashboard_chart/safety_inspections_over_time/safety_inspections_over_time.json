@@ -1,10 +1,10 @@
 {
- "based_on": "inspection_date",
+ "based_on": "round_date",
  "chart_name": "Safety Inspections Over Time",
  "chart_type": "Count",
  "doctype": "Dashboard Chart",
- "document_type": "Safety Inspection Report",
- "filters_json": "[[\"Safety Inspection Report\", \"docstatus\", \"=\", 1]]",
+ "document_type": "Safety Round",
+ "filters_json": "[[\"Safety Round\", \"docstatus\", \"=\", 1]]",
  "group_by_type": "Count",
  "is_public": 1,
  "is_standard": 1,
@@ -14,5 +14,5 @@
  "timeseries": 1,
  "timespan": "Last Year",
  "type": "Bar",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-06-18 12:00:00.000000"
 }
