@@ -738,3 +738,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 }
+/* [#lucide] Lucide inline-icon alignment. Emoji were swapped for <Icon> SVGs;
+   these rules center the icon inside chips/badges/buttons and tint the standalone
+   holders that no longer rely on font glyphs. Icons inherit currentColor. */
+.brand-badge{color:#fff}
+/* Standalone icon holders: render the SVG centered, no font-glyph descender. */
+.vc-sheet-icon,.empty-ic,.cf-icon,.stpick .sp-ico,.ac .ac-ico{
+  display:inline-flex;align-items:center;justify-content:center;line-height:0;
+}
+.empty-ic{color:var(--t4)}
+/* Small chips/badges that hold icon + text inline. */
+.incident-badge,.cdc-chip,.lock-pill,.tag,.tl-status{
+  display:inline-flex;align-items:center;gap:4px;
+}

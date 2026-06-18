@@ -16,6 +16,7 @@
  */
 import { ref, reactive, computed, onMounted } from "vue";
 import { call } from "./api.js";
+import Icon from "./components/Icon.vue";
 
 // ═══════════ DATA ═══════════
 const vehicles = ref([]);
@@ -113,24 +114,26 @@ function calcActiveDaysNum(v) {
 }
 const trim = (x) => (x || "").toString().trim();
 
-// Status badge meta (his SB map).
+// Status badge meta (his SB map). `ic` is the Lucide icon name rendered in the
+// badge; the label is plain text so it translates cleanly.
 const SB = {
-  assigned: { cls: "sb-assigned", label: "مُسند لسائق" },
-  available: { cls: "sb-available", label: "متاح في المكتب" },
-  workshop: { cls: "sb-workshop", label: "في الورشة" },
-  stopped: { cls: "sb-stopped", label: "متوقف" },
-  stolen: { cls: "sb-stolen", label: "🚨 مسروق" },
+  assigned: { cls: "sb-assigned", label: "مُسند لسائق", ic: "lock" },
+  available: { cls: "sb-available", label: "متاح في المكتب", ic: "circle-dot" },
+  workshop: { cls: "sb-workshop", label: "في الورشة", ic: "wrench" },
+  stopped: { cls: "sb-stopped", label: "متوقف", ic: "circle-pause" },
+  stolen: { cls: "sb-stolen", label: "مسروق", ic: "shield-alert" },
 };
 const sb = (v) => SB[v.vehicle_status] || SB.stopped;
-// Table short labels (his SL map).
+// Table short labels (his SL map) — plain text; the icon renders alongside.
 const SL = {
-  assigned: "✅ مُسند",
-  available: "🔵 متاح",
-  workshop: "🔧 ورشة",
-  stopped: "⏸ متوقف",
-  stolen: "🚨 مسروق",
+  assigned: "مُسند",
+  available: "متاح",
+  workshop: "ورشة",
+  stopped: "متوقف",
+  stolen: "مسروق",
 };
-const icon = (v) => (v.sheet === "CAR" ? "🚗" : "🏍");
+// Sheet-type icon name (car vs motorcycle).
+const icon = (v) => (v.sheet === "CAR" ? "car" : "bike");
 const initials = (d) => (d ? (d.name_ar || d.name_en || "") : "").slice(0, 2);
 
 // ═══════════ FILTER STATE (mirrors his applyFilters) ═══════════
@@ -291,7 +294,7 @@ const counts = computed(() => {
 const dateInfo = computed(() => {
   if (!hasDateFilter.value) return "";
   const labels = { receive: "الاستلام", deliver: "التسليم", any: "أي تاريخ" };
-  return `🔍 ${filtered.value.length} مركبة · فلتر ${labels[f.dateType]}: ${
+  return `${filtered.value.length} مركبة · فلتر ${labels[f.dateType]}: ${
     f.dateFrom || "…"
   } → ${f.dateTo || "اليوم"}`;
 });
@@ -350,16 +353,17 @@ function showToast(msg, type = "green") {
 }
 
 // ═══════════ CONFIRM ENGINE (his cfShow, promise-based) ═══════════
+// `icon` here is a Lucide icon name (rendered via <Icon> in the modal).
 const cf = reactive({
   open: false,
-  icon: "⚠️",
+  icon: "triangle-alert",
   title: "",
   msg: "",
   okLabel: "تأكيد",
   okCls: "btn-blue",
 });
 let cfResolve = null;
-function cfShow(title, msg, icon = "⚠️", okLabel = "تأكيد", okCls = "btn-blue") {
+function cfShow(title, msg, icon = "triangle-alert", okLabel = "تأكيد", okCls = "btn-blue") {
   cf.title = title;
   cf.msg = msg;
   cf.icon = icon;
@@ -399,14 +403,14 @@ async function submitReassign() {
   const v = panel.vehicle;
   if (!v) return;
   if (!trim(rf.nameAr) || !trim(rf.iqama)) {
-    showToast("⚠️ الاسم ورقم الإقامة مطلوبان", "amber");
+    showToast("الاسم ورقم الإقامة مطلوبان", "amber");
     return;
   }
   const ok = await cfShow(
     "تأكيد تخصيص السائق",
     `تخصيص "${trim(rf.nameAr)}" للمركبة ${v.plate}؟`,
-    "🔒",
-    "✅ تخصيص",
+    "lock",
+    "تخصيص",
     "btn-green"
   );
   if (!ok) return;
@@ -415,11 +419,11 @@ async function submitReassign() {
       type: "POST",
       args: { plate: v.plate, driver_id: trim(rf.iqama), date: rf.date || today() },
     });
-    showToast(`🔒 تم قفل الملف وتخصيص ${trim(rf.nameAr)} للمركبة ${v.plate}`, "green");
+    showToast(`تم قفل الملف وتخصيص ${trim(rf.nameAr)} للمركبة ${v.plate}`, "green");
     subForm.value = null;
     await reloadFleet();
   } catch (e) {
-    showToast("⚠️ " + serverMsg(e), "red");
+    showToast(serverMsg(e), "red");
   }
 }
 
@@ -437,7 +441,7 @@ async function confirmStop() {
   const ok = await cfShow(
     "إيقاف السائق",
     `إيقاف "${drName}" عن المركبة ${v.plate}؟`,
-    "⏹️",
+    "circle-pause",
     "تأكيد الإيقاف",
     "btn-red"
   );
@@ -454,11 +458,11 @@ async function confirmStop() {
       await call(POST("recover"), { type: "POST", args: { plate: v.plate } });
     const label =
       sf.nextStatus === "available" ? "متاحة" : sf.nextStatus === "workshop" ? "في الورشة" : "متوقفة";
-    showToast(`✅ تم إيقاف السائق — المركبة ${label}`, "green");
+    showToast(`تم إيقاف السائق — المركبة ${label}`, "green");
     subForm.value = null;
     await reloadFleet();
   } catch (e) {
-    showToast("⚠️ " + serverMsg(e), "red");
+    showToast(serverMsg(e), "red");
   }
 }
 
@@ -475,7 +479,7 @@ async function submitStolen() {
   const ok = await cfShow(
     "تسجيل بلاغ سرقة",
     `تسجيل سرقة المركبة ${v.plate}؟\nهذا الإجراء لا يمكن التراجع عنه بسهولة.`,
-    "🚨",
+    "shield-alert",
     "تأكيد التسجيل",
     "btn-red"
   );
@@ -485,11 +489,11 @@ async function submitStolen() {
       type: "POST",
       args: { plate: v.plate, location: trim(stf.location), report_number: trim(stf.police) },
     });
-    showToast("🚨 تم تسجيل بلاغ السرقة", "amber");
+    showToast("تم تسجيل بلاغ السرقة", "amber");
     subForm.value = null;
     await reloadFleet();
   } catch (e) {
-    showToast("⚠️ " + serverMsg(e), "red");
+    showToast(serverMsg(e), "red");
   }
 }
 
@@ -507,17 +511,17 @@ async function sendWorkshop(plate) {
   const v = vehicles.value.find((x) => x.plate === plate);
   if (!v) return;
   if (v.current_driver) {
-    showToast("⚠️ أوقف السائق أولاً قبل الإرسال للورشة", "amber");
+    showToast("أوقف السائق أولاً قبل الإرسال للورشة", "amber");
     return;
   }
-  const ok = await cfShow("إرسال للورشة", `إرسال المركبة ${plate} للورشة؟`, "🔧", "✅ إرسال", "btn-amber");
+  const ok = await cfShow("إرسال للورشة", `إرسال المركبة ${plate} للورشة؟`, "wrench", "إرسال", "btn-amber");
   if (!ok) return;
   try {
     await call(POST("workshop_in"), { type: "POST", args: { plate } });
-    showToast("🔧 تم إرسال المركبة للورشة", "amber");
+    showToast("تم إرسال المركبة للورشة", "amber");
     await reloadFleet();
   } catch (e) {
-    showToast("⚠️ " + serverMsg(e), "red");
+    showToast(serverMsg(e), "red");
   }
 }
 async function exitWorkshop(plate) {
@@ -526,30 +530,30 @@ async function exitWorkshop(plate) {
   const ok = await cfShow(
     "خروج من الورشة",
     `تأكيد خروج المركبة ${plate} من الورشة؟\nسيتم تعيينها كمتاحة.`,
-    "✅",
+    "circle-check",
     "تأكيد الخروج",
     "btn-green"
   );
   if (!ok) return;
   try {
     await call(POST("workshop_out"), { type: "POST", args: { plate } });
-    showToast("✅ خروج من الورشة — المركبة متاحة", "green");
+    showToast("خروج من الورشة — المركبة متاحة", "green");
     await reloadFleet();
   } catch (e) {
-    showToast("⚠️ " + serverMsg(e), "red");
+    showToast(serverMsg(e), "red");
   }
 }
 async function setAvailable(plate) {
   const v = vehicles.value.find((x) => x.plate === plate);
   if (!v) return;
-  const ok = await cfShow("تعيين كمتاح", `تعيين المركبة ${plate} كمتاحة في المكتب؟`, "🔵", "تأكيد", "btn-blue");
+  const ok = await cfShow("تعيين كمتاح", `تعيين المركبة ${plate} كمتاحة في المكتب؟`, "circle-dot", "تأكيد", "btn-blue");
   if (!ok) return;
   try {
     await call(POST("recover"), { type: "POST", args: { plate } });
-    showToast("🔵 المركبة متاحة في المكتب", "green");
+    showToast("المركبة متاحة في المكتب", "green");
     await reloadFleet();
   } catch (e) {
-    showToast("⚠️ " + serverMsg(e), "red");
+    showToast(serverMsg(e), "red");
   }
 }
 async function recoverVehicle(plate) {
@@ -558,17 +562,17 @@ async function recoverVehicle(plate) {
   const ok = await cfShow(
     "استرداد المركبة",
     `استرداد المركبة ${plate}\nوتعيينها كمتاحة؟`,
-    "🔓",
+    "lock-open",
     "تأكيد الاسترداد",
     "btn-green"
   );
   if (!ok) return;
   try {
     await call(POST("recover"), { type: "POST", args: { plate } });
-    showToast("✅ تم استرداد المركبة — متاحة الآن", "green");
+    showToast("تم استرداد المركبة — متاحة الآن", "green");
     await reloadFleet();
   } catch (e) {
-    showToast("⚠️ " + serverMsg(e), "red");
+    showToast(serverMsg(e), "red");
   }
 }
 function markStolen(plate) {
@@ -582,7 +586,7 @@ async function changeStatus(plate, newStatus) {
   if (!v) return;
   if (newStatus === v.vehicle_status) return;
   if (newStatus === "assigned" && !v.current_driver) {
-    showToast("⚠️ لا يوجد سائق — خصص سائقاً أولاً", "amber");
+    showToast("لا يوجد سائق — خصص سائقاً أولاً", "amber");
     return;
   }
   if (newStatus === "assigned") {
@@ -593,7 +597,7 @@ async function changeStatus(plate, newStatus) {
     (newStatus === "workshop" || newStatus === "available" || newStatus === "stopped" || newStatus === "stolen") &&
     v.current_driver
   ) {
-    showToast("⚠️ أوقف السائق الحالي أولاً", "amber");
+    showToast("أوقف السائق الحالي أولاً", "amber");
     return;
   }
   if (newStatus === "stolen") {
@@ -601,11 +605,11 @@ async function changeStatus(plate, newStatus) {
     return;
   }
   const labels = { assigned: "مُسند", available: "متاح", workshop: "في الورشة", stopped: "متوقف" };
-  const icons = { assigned: "🔒", available: "🔵", workshop: "🔧", stopped: "⏸" };
+  const icons = { assigned: "lock", available: "circle-dot", workshop: "wrench", stopped: "circle-pause" };
   const ok = await cfShow(
     "تغيير حالة المركبة",
     `تغيير حالة ${plate}\nمن: ${labels[v.vehicle_status] || v.vehicle_status}\nإلى: ${labels[newStatus] || newStatus}`,
-    icons[newStatus] || "⚠️",
+    icons[newStatus] || "triangle-alert",
     "تأكيد التغيير",
     "btn-blue"
   );
@@ -617,10 +621,10 @@ async function changeStatus(plate, newStatus) {
       await call(POST(wasWorkshop ? "workshop_out" : "recover"), { type: "POST", args: { plate } });
     else if (newStatus === "stopped")
       await call(POST("stop_vehicle"), { type: "POST", args: { plate, reason: "" } });
-    showToast("✅ تم تحديث حالة المركبة", "green");
+    showToast("تم تحديث حالة المركبة", "green");
     await reloadFleet();
   } catch (e) {
-    showToast("⚠️ " + serverMsg(e), "red");
+    showToast(serverMsg(e), "red");
   }
 }
 
@@ -638,7 +642,7 @@ function fuelView(v) {
   const fuelType = trim(v.fuel).toUpperCase();
   const isDiesel = fuelType === "DESIL" || fuelType === "DIESEL";
   const grade = v.fuel_grade || (isDiesel ? "DIESEL" : "91");
-  const gradeLabel = grade === "DIESEL" ? "🛢 ديزل" : grade === "95" ? "⛽ بنزين 95" : "⛽ بنزين 91";
+  const gradeLabel = grade === "DIESEL" ? "ديزل" : grade === "95" ? "بنزين 95" : "بنزين 91";
   const sarPerL = grade === "DIESEL" ? 0.69 : grade === "95" ? 2.33 : 2.18;
   const dailySAR = v.fuel_rate || 0;
   return {
@@ -655,13 +659,13 @@ function fuelView(v) {
   <!-- TOPBAR -->
   <div class="topbar">
     <div class="brand">
-      <div class="brand-badge">🚗</div>
+      <div class="brand-badge"><Icon name="car" :size="20" /></div>
       <div>
         <div class="brand-name">Fleet OS</div>
       </div>
     </div>
     <div class="search-bar">
-      <span class="si">🔍</span>
+      <span class="si"><Icon name="search" :size="15" /></span>
       <input v-model="f.search" placeholder="ابحث: لوحة، سائق، نوع، مكتب..." />
     </div>
     <div class="status-pills">
@@ -677,14 +681,14 @@ function fuelView(v) {
   <div class="layout">
     <!-- SIDEBAR -->
     <div class="sidebar">
-      <div class="sidebar-header"><span class="sidebar-title">🔧 الفلاتر والإحصائيات</span></div>
+      <div class="sidebar-header"><span class="sidebar-title"><Icon name="funnel" :size="13" /> الفلاتر والإحصائيات</span></div>
       <div class="sidebar-scroll">
         <div class="fg">
           <div class="fl">نوع المركبة</div>
           <div class="fchips">
             <button class="fchip" :class="{ on: f.sheet === '' }" @click="setSheet('')">الكل</button>
-            <button class="fchip" :class="{ on: f.sheet === 'CAR' }" @click="setSheet('CAR')">🚗 سيارات</button>
-            <button class="fchip" :class="{ on: f.sheet === 'MOTORCYCLE' }" @click="setSheet('MOTORCYCLE')">🏍 دبابات</button>
+            <button class="fchip" :class="{ on: f.sheet === 'CAR' }" @click="setSheet('CAR')"><Icon name="car" :size="15" /> سيارات</button>
+            <button class="fchip" :class="{ on: f.sheet === 'MOTORCYCLE' }" @click="setSheet('MOTORCYCLE')"><Icon name="bike" :size="15" /> دبابات</button>
           </div>
         </div>
         <div class="fg">
@@ -718,13 +722,13 @@ function fuelView(v) {
           <div class="fl">الوقود</div>
           <div class="fchips">
             <button class="fchip" :class="{ on: f.fuel === '' }" @click="setFuel('')">الكل</button>
-            <button class="fchip" :class="{ on: f.fuel === 'PETROL' }" @click="setFuel('PETROL')">⛽ بترول</button>
-            <button class="fchip" :class="{ on: f.fuel === 'DESIL' }" @click="setFuel('DESIL')">🛢 ديزل</button>
+            <button class="fchip" :class="{ on: f.fuel === 'PETROL' }" @click="setFuel('PETROL')"><Icon name="fuel" :size="15" /> بترول</button>
+            <button class="fchip" :class="{ on: f.fuel === 'DESIL' }" @click="setFuel('DESIL')"><Icon name="fuel" :size="15" /> ديزل</button>
           </div>
         </div>
         <div class="sep"></div>
         <div class="fg">
-          <div class="fl">📅 نوع بحث التاريخ</div>
+          <div class="fl"><Icon name="calendar" :size="13" /> نوع بحث التاريخ</div>
           <div class="fchips">
             <button class="fchip" :class="{ on: f.dateType === 'receive' }" @click="setDateType('receive')">الاستلام</button>
             <button class="fchip" :class="{ on: f.dateType === 'deliver' }" @click="setDateType('deliver')">التسليم</button>
@@ -752,9 +756,9 @@ function fuelView(v) {
         </div>
         <div v-if="hasDateFilter" style="font-size:10px;color:var(--t3);padding:4px 0">{{ dateInfo }}</div>
         <div class="sep"></div>
-        <button class="btn" style="width:100%;justify-content:center" @click="resetFilters">🔄 إعادة تعيين</button>
+        <button class="btn" style="width:100%;justify-content:center" @click="resetFilters"><Icon name="rotate-cw" :size="15" /> إعادة تعيين</button>
         <div class="sep"></div>
-        <div class="fl" style="margin-bottom:8px">📊 إحصائيات سريعة</div>
+        <div class="fl" style="margin-bottom:8px"><Icon name="chart-column" :size="13" /> إحصائيات سريعة</div>
         <div class="stat-mini-grid">
           <div class="stat-mini"><div class="stat-mini-n" style="color:var(--blue-l)">{{ counts.total }}</div><div class="stat-mini-l">إجمالي</div></div>
           <div class="stat-mini"><div class="stat-mini-n" style="color:var(--green-l)">{{ counts.assigned }}</div><div class="stat-mini-l">مُسند</div></div>
@@ -781,14 +785,14 @@ function fuelView(v) {
           </select>
         </div>
         <div class="view-tabs">
-          <button class="vt" :class="{ on: f.view === 'cards' }" @click="setView('cards')">⊞ كروت</button>
-          <button class="vt" :class="{ on: f.view === 'table' }" @click="setView('table')">☰ جدول</button>
+          <button class="vt" :class="{ on: f.view === 'cards' }" @click="setView('cards')"><Icon name="layout-grid" :size="14" /> كروت</button>
+          <button class="vt" :class="{ on: f.view === 'table' }" @click="setView('table')"><Icon name="list" :size="14" /> جدول</button>
         </div>
       </div>
 
       <!-- ERROR (persistent banner + retry) -->
       <div v-if="loadState === 'error'" class="fp-error-banner">
-        <span style="font-size:20px">⚠️</span>
+        <span style="color:var(--red-l)"><Icon name="triangle-alert" :size="20" /></span>
         <span class="fp-err-msg">تعذّر تحميل بيانات الأسطول: {{ loadError }}</span>
         <button class="btn btn-red" @click="loadFleet">إعادة المحاولة</button>
       </div>
@@ -808,7 +812,7 @@ function fuelView(v) {
       <!-- CARDS -->
       <div v-else-if="f.view === 'cards'" class="cards-wrap">
         <div v-if="!filtered.length" class="empty">
-          <div class="empty-ic">🚗</div>
+          <div class="empty-ic"><Icon name="car" :size="42" :stroke-width="1.5" /></div>
           <div>{{ anyFilterActive ? "لا نتائج مطابقة للفلاتر" : "لا توجد مركبات" }}</div>
           <div v-if="activeFilterChips.length" class="fp-empty-filters">
             الفلاتر النشطة:
@@ -827,17 +831,17 @@ function fuelView(v) {
             <div class="vc-top">
               <div><div class="vc-plate">{{ v.plate }}</div></div>
               <div class="vc-icon-area">
-                <span class="vc-sheet-icon">{{ icon(v) }}</span>
+                <span class="vc-sheet-icon"><Icon :name="icon(v)" :size="24" /></span>
                 <span class="vc-fuel-badge">{{ trim(v.fuel) || "—" }}</span>
               </div>
             </div>
             <div class="vc-meta">
               <div class="vc-type">{{ v.vehicle_type || "—" }}</div>
-              <div class="vc-office">🏢 {{ v.rental_office }} &middot; {{ trim(v.project) || "—" }} &middot; 📍 {{ v.area }}</div>
+              <div class="vc-office"><Icon name="building" :size="12" /> {{ v.rental_office }} &middot; {{ trim(v.project) || "—" }} &middot; <Icon name="pin" :size="12" /> {{ v.area }}</div>
             </div>
             <div class="vc-status-bar">
-              <span class="sbadge" :class="sb(v).cls"><span class="dot"></span>{{ sb(v).label }}</span>
-              <span v-if="v.vehicle_status === 'workshop' && v.workshop_date" style="font-size:10px;color:var(--orange-l);font-family:'JetBrains Mono',monospace">📅 {{ v.workshop_date }}</span>
+              <span class="sbadge" :class="sb(v).cls"><Icon :name="sb(v).ic" :size="13" />{{ sb(v).label }}</span>
+              <span v-if="v.vehicle_status === 'workshop' && v.workshop_date" style="font-size:10px;color:var(--orange-l);font-family:'JetBrains Mono',monospace;display:inline-flex;align-items:center;gap:3px"><Icon name="calendar" :size="11" /> {{ v.workshop_date }}</span>
               <span v-else-if="v.vehicle_status !== 'assigned' && v.vehicle_status !== 'workshop'" style="font-size:10px;color:var(--t3)">{{ v.history.length }} سائق سابق</span>
             </div>
             <!-- Fuel row (renders the "—" empty path; live API has no fuel rate) -->
@@ -854,11 +858,11 @@ function fuelView(v) {
                 </div>
               </div>
             </div>
-            <div v-if="v.vehicle_status === 'workshop'" class="vc-workshop-stripe">🔧 {{ v.workshop_notes || "في الصيانة" }}</div>
-            <div v-if="v.vehicle_status === 'stolen'" class="vc-stolen-stripe">🚨 مسروق <template v-if="v.stolen_info && v.stolen_info.date">· {{ v.stolen_info.date }}</template></div>
+            <div v-if="v.vehicle_status === 'workshop'" class="vc-workshop-stripe"><Icon name="wrench" :size="13" /> {{ v.workshop_notes || "في الصيانة" }}</div>
+            <div v-if="v.vehicle_status === 'stolen'" class="vc-stolen-stripe"><Icon name="shield-alert" :size="13" /> مسروق <template v-if="v.stolen_info && v.stolen_info.date">· {{ v.stolen_info.date }}</template></div>
             <div v-if="(v.damages || []).length || (v.accidents || []).length" style="padding:3px 14px;display:flex;gap:6px;border-top:1px solid var(--b1)">
-              <span v-if="(v.damages || []).length" style="font-size:10px;padding:2px 7px;background:var(--red-d);color:var(--red-l);border-radius:6px;border:1px solid rgba(220,38,38,.2)">🔨 {{ v.damages.length }} تلف</span>
-              <span v-if="(v.accidents || []).length" style="font-size:10px;padding:2px 7px;background:var(--amber-d);color:var(--amber-l);border-radius:6px;border:1px solid rgba(217,119,6,.2)">💥 {{ v.accidents.length }} حادثة</span>
+              <span v-if="(v.damages || []).length" style="font-size:10px;padding:2px 7px;background:var(--red-d);color:var(--red-l);border-radius:6px;border:1px solid rgba(220,38,38,.2);display:inline-flex;align-items:center;gap:3px"><Icon name="hammer" :size="11" /> {{ v.damages.length }} تلف</span>
+              <span v-if="(v.accidents || []).length" style="font-size:10px;padding:2px 7px;background:var(--amber-d);color:var(--amber-l);border-radius:6px;border:1px solid rgba(217,119,6,.2);display:inline-flex;align-items:center;gap:3px"><Icon name="crash" :size="11" /> {{ v.accidents.length }} حادثة</span>
             </div>
             <div v-if="v.current_driver" class="vc-driver">
               <div class="drv-av">{{ initials(v.current_driver) }}</div>
@@ -866,9 +870,13 @@ function fuelView(v) {
                 <div class="drv-name">{{ v.current_driver.name_ar || v.current_driver.name_en || "—" }}</div>
                 <div class="drv-since">منذ {{ v.current_driver.date_receive || "—" }} · {{ trim(v.current_driver.project) || "—" }}</div>
               </div>
-              <span class="lock-ico">🔒</span>
+              <span class="lock-ico"><Icon name="lock" :size="15" /></span>
             </div>
-            <div v-else class="no-driver">{{ v.vehicle_status === "available" ? "🔑 جاهزة للتخصيص" : v.vehicle_status === "workshop" ? "🔧 في الصيانة" : "⏸ خارج الخدمة" }}</div>
+            <div v-else class="no-driver">
+              <template v-if="v.vehicle_status === 'available'"><Icon name="key" :size="14" /> جاهزة للتخصيص</template>
+              <template v-else-if="v.vehicle_status === 'workshop'"><Icon name="wrench" :size="14" /> في الصيانة</template>
+              <template v-else><Icon name="circle-pause" :size="14" /> خارج الخدمة</template>
+            </div>
             <div v-if="calcTotalDaysNum(v) > 0" class="vc-dur">
               <div class="dur-label">
                 <span>إجمالي التشغيل: {{ calcTotalDaysNum(v) }} يوم</span>
@@ -878,25 +886,25 @@ function fuelView(v) {
             </div>
             <div class="vc-actions" @click.stop>
               <template v-if="v.vehicle_status === 'assigned'">
-                <button class="ac ac-stop" title="إيقاف السائق وقفل الملف" @click="quickStop(v.plate)"><span class="ac-ico">⏸</span>إيقاف</button>
-                <button class="ac ac-reassign" title="تفويض لسائق جديد" @click="quickReassign(v.plate)"><span class="ac-ico">🔄</span>تفويض</button>
-                <button class="ac ac-workshop" title="إرسال للورشة بعد الإيقاف" @click="quickStop(v.plate, true)"><span class="ac-ico">🔧</span>ورشة</button>
+                <button class="ac ac-stop" title="إيقاف السائق وقفل الملف" @click="quickStop(v.plate)"><span class="ac-ico"><Icon name="circle-pause" :size="14" /></span>إيقاف</button>
+                <button class="ac ac-reassign" title="تفويض لسائق جديد" @click="quickReassign(v.plate)"><span class="ac-ico"><Icon name="rotate-cw" :size="14" /></span>تفويض</button>
+                <button class="ac ac-workshop" title="إرسال للورشة بعد الإيقاف" @click="quickStop(v.plate, true)"><span class="ac-ico"><Icon name="wrench" :size="14" /></span>ورشة</button>
               </template>
               <template v-else-if="v.vehicle_status === 'available'">
-                <button class="ac ac-free" title="تخصيص سائق جديد" @click="quickReassign(v.plate)"><span class="ac-ico">🔑</span>تخصيص</button>
-                <button class="ac ac-workshop" title="إرسال للورشة" @click="sendWorkshop(v.plate)"><span class="ac-ico">🔧</span>ورشة</button>
+                <button class="ac ac-free" title="تخصيص سائق جديد" @click="quickReassign(v.plate)"><span class="ac-ico"><Icon name="key" :size="14" /></span>تخصيص</button>
+                <button class="ac ac-workshop" title="إرسال للورشة" @click="sendWorkshop(v.plate)"><span class="ac-ico"><Icon name="wrench" :size="14" /></span>ورشة</button>
               </template>
               <template v-else-if="v.vehicle_status === 'workshop'">
-                <button class="ac ac-free" title="خروج من الورشة" @click="exitWorkshop(v.plate)"><span class="ac-ico">✅</span>خروج</button>
-                <button class="ac ac-reassign" title="تخصيص سائق مباشرة" @click="quickReassign(v.plate)"><span class="ac-ico">🔑</span>تخصيص</button>
+                <button class="ac ac-free" title="خروج من الورشة" @click="exitWorkshop(v.plate)"><span class="ac-ico"><Icon name="circle-check" :size="14" /></span>خروج</button>
+                <button class="ac ac-reassign" title="تخصيص سائق مباشرة" @click="quickReassign(v.plate)"><span class="ac-ico"><Icon name="key" :size="14" /></span>تخصيص</button>
               </template>
               <template v-else>
-                <button class="ac ac-free" title="تعيين كمتاح" @click="setAvailable(v.plate)"><span class="ac-ico">🔵</span>متاح</button>
-                <button class="ac ac-workshop" title="إرسال للورشة" @click="sendWorkshop(v.plate)"><span class="ac-ico">🔧</span>ورشة</button>
+                <button class="ac ac-free" title="تعيين كمتاح" @click="setAvailable(v.plate)"><span class="ac-ico"><Icon name="circle-dot" :size="14" /></span>متاح</button>
+                <button class="ac ac-workshop" title="إرسال للورشة" @click="sendWorkshop(v.plate)"><span class="ac-ico"><Icon name="wrench" :size="14" /></span>ورشة</button>
               </template>
-              <button v-if="v.vehicle_status === 'stolen'" class="ac" style="border-color:rgba(124,58,237,.25);color:var(--purple-l)" @click="recoverVehicle(v.plate)"><span class="ac-ico">🔓</span>استرداد</button>
-              <button v-else-if="v.vehicle_status === 'available'" class="ac" style="border-color:rgba(220,38,38,.25);color:var(--red-l)" @click="markStolen(v.plate)"><span class="ac-ico">🚨</span>مسروق</button>
-              <button class="ac ac-hist" title="عرض السجل الكامل" @click="openPanel(v.plate, 5)"><span class="ac-ico">📋</span><span class="hist-n">{{ v.history.length }}</span></button>
+              <button v-if="v.vehicle_status === 'stolen'" class="ac" style="border-color:rgba(124,58,237,.25);color:var(--purple-l)" @click="recoverVehicle(v.plate)"><span class="ac-ico"><Icon name="lock-open" :size="14" /></span>استرداد</button>
+              <button v-else-if="v.vehicle_status === 'available'" class="ac" style="border-color:rgba(220,38,38,.25);color:var(--red-l)" @click="markStolen(v.plate)"><span class="ac-ico"><Icon name="shield-alert" :size="14" /></span>مسروق</button>
+              <button class="ac ac-hist" title="عرض السجل الكامل" @click="openPanel(v.plate, 5)"><span class="ac-ico"><Icon name="clipboard-list" :size="14" /></span><span class="hist-n">{{ v.history.length }}</span></button>
             </div>
           </div>
         </div>
@@ -921,20 +929,20 @@ function fuelView(v) {
             </tr>
           </thead>
           <tbody>
-            <tr v-if="!filtered.length"><td colspan="11"><div class="empty"><div class="empty-ic">🔍</div>لا نتائج</div></td></tr>
+            <tr v-if="!filtered.length"><td colspan="11"><div class="empty"><div class="empty-ic"><Icon name="search" :size="42" :stroke-width="1.5" /></div>لا نتائج</div></td></tr>
             <tr v-for="v in filtered" :key="v.plate" @click="openPanel(v.plate)">
-              <td>{{ icon(v) }}</td>
+              <td><Icon :name="icon(v)" :size="18" /></td>
               <td><span class="mono" style="font-weight:700;color:var(--t1)">{{ v.plate }}</span></td>
               <td>{{ v.vehicle_type }}</td>
               <td>{{ v.rental_office }}</td>
-              <td><span class="sbadge" :class="sb(v).cls" style="display:inline-flex">{{ SL[v.vehicle_status] || v.vehicle_status }}</span></td>
-              <td><template v-if="v.current_driver">{{ v.current_driver.name_ar || v.current_driver.name_en }} 🔒</template><span v-else style="color:var(--t3)">—</span></td>
+              <td><span class="sbadge" :class="sb(v).cls" style="display:inline-flex;gap:4px"><Icon :name="sb(v).ic" :size="12" />{{ SL[v.vehicle_status] || v.vehicle_status }}</span></td>
+              <td><template v-if="v.current_driver">{{ v.current_driver.name_ar || v.current_driver.name_en }} <Icon name="lock" :size="13" /></template><span v-else style="color:var(--t3)">—</span></td>
               <td>{{ trim(v.project) || "—" }}</td>
               <td>{{ v.area }}</td>
               <td style="color:var(--purple-l)">{{ v.history.length }}</td>
               <td style="color:var(--amber-l);font-family:'JetBrains Mono',monospace">{{ calcTotalDaysNum(v) ? calcTotalDaysNum(v) + " يوم" : "—" }}</td>
               <td @click.stop>
-                <button class="btn" style="padding:3px 10px;font-size:11px" @click="openPanel(v.plate)">تفاصيل ▶</button>
+                <button class="btn" style="padding:3px 10px;font-size:11px" @click="openPanel(v.plate)">تفاصيل <Icon name="chevron" :size="13" /></button>
               </td>
             </tr>
           </tbody>
@@ -952,38 +960,38 @@ function fuelView(v) {
       <div class="panel-head">
         <div class="ph-left">
           <div class="ph-plate">{{ panel.vehicle.plate }}</div>
-          <div class="ph-sub">{{ panel.vehicle.vehicle_type }} · {{ panel.vehicle.rental_office }} · {{ panel.vehicle.sheet === "CAR" ? "🚗 سيارة" : "🏍 دباب" }}</div>
+          <div class="ph-sub">{{ panel.vehicle.vehicle_type }} · {{ panel.vehicle.rental_office }} · <Icon :name="panel.vehicle.sheet === 'CAR' ? 'car' : 'bike'" :size="13" /> {{ panel.vehicle.sheet === "CAR" ? "سيارة" : "دباب" }}</div>
           <div class="ph-tags">
             <span class="tag">{{ trim(panel.vehicle.fuel) || "—" }}</span>
             <span class="tag">{{ trim(panel.vehicle.project) || "بدون مشروع" }}</span>
-            <span class="tag">📍 {{ panel.vehicle.area }}</span>
-            <span class="sbadge" :class="sb(panel.vehicle).cls" style="font-size:10px;display:inline-flex"><span class="dot"></span>{{ sb(panel.vehicle).label }}</span>
+            <span class="tag"><Icon name="pin" :size="11" /> {{ panel.vehicle.area }}</span>
+            <span class="sbadge" :class="sb(panel.vehicle).cls" style="font-size:10px;display:inline-flex;gap:4px"><Icon :name="sb(panel.vehicle).ic" :size="11" />{{ sb(panel.vehicle).label }}</span>
           </div>
         </div>
-        <button class="panel-close" @click="closePanel">✕</button>
+        <button class="panel-close" @click="closePanel"><Icon name="x" :size="18" /></button>
       </div>
       <div class="panel-tabs" style="flex-wrap:wrap">
-        <button class="ptab" :class="{ on: panel.tab === 0 }" @click="setPTab(0)">🏠 نظرة عامة</button>
-        <button class="ptab" :class="{ on: panel.tab === 1 }" @click="setPTab(1)">👤 السائق</button>
-        <button class="ptab" :class="{ on: panel.tab === 2 }" @click="setPTab(2)">⚙️ الحالة</button>
-        <button class="ptab" :class="{ on: panel.tab === 3 }" @click="setPTab(3)">🔨 التلفيات<span v-if="tabDmg" class="ptab-badge">{{ tabDmg }}</span></button>
-        <button class="ptab" :class="{ on: panel.tab === 4 }" @click="setPTab(4)">💥 الحوادث<span v-if="tabAcc" class="ptab-badge" style="background:var(--amber-l)">{{ tabAcc }}</span></button>
-        <button class="ptab" :class="{ on: panel.tab === 5 }" @click="setPTab(5)">📋 السجل</button>
+        <button class="ptab" :class="{ on: panel.tab === 0 }" @click="setPTab(0)"><Icon name="home" :size="14" /> نظرة عامة</button>
+        <button class="ptab" :class="{ on: panel.tab === 1 }" @click="setPTab(1)"><Icon name="user" :size="14" /> السائق</button>
+        <button class="ptab" :class="{ on: panel.tab === 2 }" @click="setPTab(2)"><Icon name="settings" :size="14" /> الحالة</button>
+        <button class="ptab" :class="{ on: panel.tab === 3 }" @click="setPTab(3)"><Icon name="hammer" :size="14" /> التلفيات<span v-if="tabDmg" class="ptab-badge">{{ tabDmg }}</span></button>
+        <button class="ptab" :class="{ on: panel.tab === 4 }" @click="setPTab(4)"><Icon name="crash" :size="14" /> الحوادث<span v-if="tabAcc" class="ptab-badge" style="background:var(--amber-l)">{{ tabAcc }}</span></button>
+        <button class="ptab" :class="{ on: panel.tab === 5 }" @click="setPTab(5)"><Icon name="clipboard-list" :size="14" /> السجل</button>
       </div>
       <div class="panel-body">
         <!-- TAB 0: OVERVIEW -->
         <div v-if="panel.tab === 0" class="pb on">
-          <div class="psect-title">📊 إحصائيات المركبة</div>
+          <div class="psect-title"><Icon name="chart-column" :size="14" /> إحصائيات المركبة</div>
           <div class="pstats">
             <div class="pstat"><div class="pstat-n" style="color:var(--purple-l)">{{ panel.vehicle.history.length }}</div><div class="pstat-l">إجمالي السائقين</div></div>
             <div class="pstat"><div class="pstat-n" style="color:var(--amber-l)">{{ calcTotalDaysNum(panel.vehicle) }}</div><div class="pstat-l">أيام التشغيل</div></div>
             <div class="pstat"><div class="pstat-n" style="color:var(--green-l)">{{ calcActiveDaysNum(panel.vehicle) }}</div><div class="pstat-l">أيام نشطة</div></div>
             <div class="pstat"><div class="pstat-n" style="color:var(--cyan-l)">{{ panel.vehicle.history.filter((h) => h.status === "Active").length }}</div><div class="pstat-l">مرات التفعيل</div></div>
           </div>
-          <div class="psect-title">🔍 تفاصيل المركبة</div>
+          <div class="psect-title"><Icon name="search" :size="14" /> تفاصيل المركبة</div>
           <div class="kv-grid">
             <div class="kv"><div class="kv-l">اللوحة</div><div class="kv-v mono" style="font-size:16px;letter-spacing:2px">{{ panel.vehicle.plate }}</div></div>
-            <div class="kv"><div class="kv-l">النوع</div><div class="kv-v">{{ panel.vehicle.sheet === "CAR" ? "🚗 سيارة" : "🏍 دباب" }}</div></div>
+            <div class="kv"><div class="kv-l">النوع</div><div class="kv-v"><Icon :name="panel.vehicle.sheet === 'CAR' ? 'car' : 'bike'" :size="14" /> {{ panel.vehicle.sheet === "CAR" ? "سيارة" : "دباب" }}</div></div>
             <div class="kv"><div class="kv-l">الطراز</div><div class="kv-v">{{ panel.vehicle.vehicle_type || "—" }}</div></div>
             <div class="kv"><div class="kv-l">الوقود</div><div class="kv-v">{{ panel.vehicle.fuel || "—" }}</div></div>
             <div class="kv"><div class="kv-l">مكتب الإيجار</div><div class="kv-v">{{ panel.vehicle.rental_office || "—" }}</div></div>
@@ -992,19 +1000,19 @@ function fuelView(v) {
             <div class="kv"><div class="kv-l">حالة المركبة</div><div class="kv-v">{{ sb(panel.vehicle).label }}</div></div>
           </div>
           <template v-if="panel.vehicle.current_driver">
-            <div class="psect-title">👤 السائق الحالي</div>
+            <div class="psect-title"><Icon name="user" :size="14" /> السائق الحالي</div>
             <div class="cur-driver-card">
               <div class="cdc-av">{{ initials(panel.vehicle.current_driver) }}</div>
               <div class="cdc-info">
                 <div class="cdc-name">{{ panel.vehicle.current_driver.name_ar || panel.vehicle.current_driver.name_en || "—" }}</div>
                 <div class="cdc-en">{{ panel.vehicle.current_driver.name_en || "" }}</div>
                 <div class="cdc-chips">
-                  <span class="cdc-chip">📞 {{ panel.vehicle.current_driver.mobile || "—" }}</span>
-                  <span class="cdc-chip">🪪 {{ panel.vehicle.current_driver.driver_id || "—" }}</span>
-                  <span class="cdc-chip">📅 {{ panel.vehicle.current_driver.date_receive || "—" }}</span>
+                  <span class="cdc-chip"><Icon name="phone" :size="11" /> {{ panel.vehicle.current_driver.mobile || "—" }}</span>
+                  <span class="cdc-chip"><Icon name="id-card" :size="11" /> {{ panel.vehicle.current_driver.driver_id || "—" }}</span>
+                  <span class="cdc-chip"><Icon name="calendar" :size="11" /> {{ panel.vehicle.current_driver.date_receive || "—" }}</span>
                 </div>
               </div>
-              <span class="lock-pill">🔒 نشط</span>
+              <span class="lock-pill"><Icon name="lock" :size="12" /> نشط</span>
             </div>
           </template>
         </div>
@@ -1012,7 +1020,7 @@ function fuelView(v) {
         <!-- TAB 1: DRIVER -->
         <div v-else-if="panel.tab === 1" class="pb on">
           <template v-if="panel.vehicle.current_driver">
-            <div class="alert alert-green">🔒 الملف مقفل — المركبة مُسندة للسائق {{ panel.vehicle.current_driver.name_ar || panel.vehicle.current_driver.name_en }}</div>
+            <div class="alert alert-green"><Icon name="lock" :size="15" /> الملف مقفل — المركبة مُسندة للسائق {{ panel.vehicle.current_driver.name_ar || panel.vehicle.current_driver.name_en }}</div>
             <div class="psect-title">بيانات السائق الحالي</div>
             <div class="kv-grid">
               <div class="kv"><div class="kv-l">الاسم عربي</div><div class="kv-v">{{ panel.vehicle.current_driver.name_ar || "—" }}</div></div>
@@ -1026,12 +1034,12 @@ function fuelView(v) {
             </div>
             <div class="psect-title">الإجراءات</div>
             <div style="display:flex;gap:8px">
-              <button class="btn btn-red" style="flex:1" @click="openStopForm">⏸ إيقاف وقفل الملف</button>
-              <button class="btn btn-green" style="flex:1" @click="openReassignForm">🔄 تفويض لسائق جديد</button>
+              <button class="btn btn-red" style="flex:1" @click="openStopForm"><Icon name="circle-pause" :size="15" /> إيقاف وقفل الملف</button>
+              <button class="btn btn-green" style="flex:1" @click="openReassignForm"><Icon name="rotate-cw" :size="15" /> تفويض لسائق جديد</button>
             </div>
             <!-- Stop sub-form -->
             <div v-if="subForm === 'stop'" style="margin-top:14px;border:1px solid rgba(244,63,94,.2);border-radius:var(--r2);padding:14px;background:var(--red-d)">
-              <div class="psect-title" style="color:var(--red-l)">⏸ إيقاف السائق وقفل الملف</div>
+              <div class="psect-title" style="color:var(--red-l)"><Icon name="circle-pause" :size="14" /> إيقاف السائق وقفل الملف</div>
               <div class="form-grid" style="margin-bottom:10px">
                 <div class="ff"><div class="fl">تاريخ التسليم *</div><input class="fi" type="date" v-model="sf.date" /></div>
                 <div class="ff"><div class="fl">فرع التسليم</div><input class="fi" v-model="sf.branch" placeholder="الفرع" /></div>
@@ -1045,22 +1053,22 @@ function fuelView(v) {
                 </div>
                 <div class="ff"><div class="fl">الحالة بعد الإيقاف</div>
                   <select class="fsel" v-model="sf.nextStatus">
-                    <option value="available">🔵 متاح في المكتب</option>
-                    <option value="workshop">🔧 إرسال للورشة</option>
-                    <option value="stopped">⏸ متوقف</option>
+                    <option value="available">متاح في المكتب</option>
+                    <option value="workshop">إرسال للورشة</option>
+                    <option value="stopped">متوقف</option>
                   </select>
                 </div>
               </div>
               <div class="ff"><div class="fl">ملاحظات</div><textarea class="fta" v-model="sf.notes" placeholder="أي ملاحظات..."></textarea></div>
               <div class="form-actions" style="margin-top:10px">
                 <button class="btn" @click="subForm = null">إلغاء</button>
-                <button class="btn btn-red" @click="confirmStop">⏸ تأكيد الإيقاف وقفل الملف</button>
+                <button class="btn btn-red" @click="confirmStop"><Icon name="circle-pause" :size="15" /> تأكيد الإيقاف وقفل الملف</button>
               </div>
             </div>
             <!-- Reassign sub-form -->
             <div v-if="subForm === 'reassign'" style="margin-top:14px;border:1px solid rgba(0,201,122,.2);border-radius:var(--r2);padding:14px;background:var(--green-d)">
-              <div class="psect-title" style="color:var(--green-l)">🔄 تفويض لسائق جديد</div>
-              <div class="alert alert-amber" style="margin-bottom:12px">⚠️ سيتم قفل ملف السائق الحالي ({{ panel.vehicle.current_driver.name_ar || panel.vehicle.current_driver.name_en || "—" }}) تلقائياً قبل فتح الملف الجديد</div>
+              <div class="psect-title" style="color:var(--green-l)"><Icon name="rotate-cw" :size="14" /> تفويض لسائق جديد</div>
+              <div class="alert alert-amber" style="margin-bottom:12px"><Icon name="triangle-alert" :size="15" /> سيتم قفل ملف السائق الحالي ({{ panel.vehicle.current_driver.name_ar || panel.vehicle.current_driver.name_en || "—" }}) تلقائياً قبل فتح الملف الجديد</div>
               <div class="psect-title" style="color:var(--green-l);margin-top:12px">بيانات السائق الجديد</div>
               <div class="form-grid">
                 <div class="ff"><div class="fl">الاسم بالعربي *</div><input class="fi" v-model="rf.nameAr" placeholder="اسم السائق" /></div>
@@ -1078,13 +1086,13 @@ function fuelView(v) {
               </div>
               <div class="form-actions" style="margin-top:12px">
                 <button class="btn" @click="subForm = null">إلغاء</button>
-                <button class="btn btn-green" @click="submitReassign">🔒 تخصيص وقفل الملف</button>
+                <button class="btn btn-green" @click="submitReassign"><Icon name="lock" :size="15" /> تخصيص وقفل الملف</button>
               </div>
             </div>
           </template>
           <template v-else>
-            <div v-if="panel.vehicle.vehicle_status === 'workshop'" class="alert alert-orange">🔧 المركبة في الورشة — أخرجها أولاً لتخصيص سائق</div>
-            <div v-if="panel.vehicle.vehicle_status === 'stopped'" class="alert alert-amber">⏸ المركبة متوقفة — غيّر حالتها لـ"متاح" لتخصيص سائق</div>
+            <div v-if="panel.vehicle.vehicle_status === 'workshop'" class="alert alert-orange"><Icon name="wrench" :size="15" /> المركبة في الورشة — أخرجها أولاً لتخصيص سائق</div>
+            <div v-if="panel.vehicle.vehicle_status === 'stopped'" class="alert alert-amber"><Icon name="circle-pause" :size="15" /> المركبة متوقفة — غيّر حالتها لـ"متاح" لتخصيص سائق</div>
             <div class="psect-title">تخصيص سائق جديد</div>
             <div class="form-grid">
               <div class="ff"><div class="fl">الاسم بالعربي *</div><input class="fi" v-model="rf.nameAr" placeholder="اسم السائق" /></div>
@@ -1101,7 +1109,7 @@ function fuelView(v) {
               <div class="ff"><div class="fl">فرع الاستلام</div><input class="fi" v-model="rf.branch" placeholder="الفرع" /></div>
             </div>
             <div class="form-actions" style="margin-top:12px">
-              <button class="btn btn-green" @click="submitReassign">🔒 تخصيص وقفل الملف</button>
+              <button class="btn btn-green" @click="submitReassign"><Icon name="lock" :size="15" /> تخصيص وقفل الملف</button>
             </div>
           </template>
         </div>
@@ -1111,32 +1119,32 @@ function fuelView(v) {
           <div class="psect-title">تغيير حالة المركبة</div>
           <div class="status-grid">
             <button class="stpick" :class="panel.vehicle.vehicle_status === 'assigned' ? 'cur-assigned' : ''" @click="changeStatus(panel.vehicle.plate, 'assigned')">
-              <span class="sp-ico">🔒</span><span class="sp-lbl" :style="{ color: panel.vehicle.vehicle_status === 'assigned' ? 'inherit' : 'var(--t2)' }">مُسند لسائق</span><span class="sp-desc">مرتبط بسائق نشط — الملف مقفل</span>
+              <span class="sp-ico"><Icon name="lock" :size="20" /></span><span class="sp-lbl" :style="{ color: panel.vehicle.vehicle_status === 'assigned' ? 'inherit' : 'var(--t2)' }">مُسند لسائق</span><span class="sp-desc">مرتبط بسائق نشط — الملف مقفل</span>
             </button>
             <button class="stpick" :class="panel.vehicle.vehicle_status === 'available' ? 'cur-available' : ''" @click="changeStatus(panel.vehicle.plate, 'available')">
-              <span class="sp-ico">🔑</span><span class="sp-lbl" :style="{ color: panel.vehicle.vehicle_status === 'available' ? 'inherit' : 'var(--t2)' }">متاح في المكتب</span><span class="sp-desc">جاهز للتخصيص لأي سائق</span>
+              <span class="sp-ico"><Icon name="key" :size="20" /></span><span class="sp-lbl" :style="{ color: panel.vehicle.vehicle_status === 'available' ? 'inherit' : 'var(--t2)' }">متاح في المكتب</span><span class="sp-desc">جاهز للتخصيص لأي سائق</span>
             </button>
             <button class="stpick" :class="panel.vehicle.vehicle_status === 'workshop' ? 'cur-workshop' : ''" @click="changeStatus(panel.vehicle.plate, 'workshop')">
-              <span class="sp-ico">🔧</span><span class="sp-lbl" :style="{ color: panel.vehicle.vehicle_status === 'workshop' ? 'inherit' : 'var(--t2)' }">في الورشة</span><span class="sp-desc">تحت الصيانة — غير متاح</span>
+              <span class="sp-ico"><Icon name="wrench" :size="20" /></span><span class="sp-lbl" :style="{ color: panel.vehicle.vehicle_status === 'workshop' ? 'inherit' : 'var(--t2)' }">في الورشة</span><span class="sp-desc">تحت الصيانة — غير متاح</span>
             </button>
             <button class="stpick" :class="panel.vehicle.vehicle_status === 'stopped' ? 'cur-stopped' : ''" @click="changeStatus(panel.vehicle.plate, 'stopped')">
-              <span class="sp-ico">⏸</span><span class="sp-lbl" :style="{ color: panel.vehicle.vehicle_status === 'stopped' ? 'inherit' : 'var(--t2)' }">متوقف</span><span class="sp-desc">خارج الخدمة مؤقتاً</span>
+              <span class="sp-ico"><Icon name="circle-pause" :size="20" /></span><span class="sp-lbl" :style="{ color: panel.vehicle.vehicle_status === 'stopped' ? 'inherit' : 'var(--t2)' }">متوقف</span><span class="sp-desc">خارج الخدمة مؤقتاً</span>
             </button>
             <button class="stpick" :class="panel.vehicle.vehicle_status === 'stolen' ? 'cur-stopped' : ''" @click="changeStatus(panel.vehicle.plate, 'stolen')">
-              <span class="sp-ico">🚨</span><span class="sp-lbl" :style="{ color: panel.vehicle.vehicle_status === 'stolen' ? 'inherit' : 'var(--t2)' }">مسروقة</span><span class="sp-desc">تم الإبلاغ عن السرقة</span>
+              <span class="sp-ico"><Icon name="shield-alert" :size="20" /></span><span class="sp-lbl" :style="{ color: panel.vehicle.vehicle_status === 'stolen' ? 'inherit' : 'var(--t2)' }">مسروقة</span><span class="sp-desc">تم الإبلاغ عن السرقة</span>
             </button>
           </div>
           <template v-if="panel.vehicle.vehicle_status === 'workshop'">
-            <button class="btn btn-green" style="width:100%;justify-content:center" @click="changeStatus(panel.vehicle.plate, 'available')">✅ خروج من الورشة — تعيين كمتاح</button>
+            <button class="btn btn-green" style="width:100%;justify-content:center" @click="changeStatus(panel.vehicle.plate, 'available')"><Icon name="circle-check" :size="15" /> خروج من الورشة — تعيين كمتاح</button>
           </template>
           <template v-if="panel.vehicle.vehicle_status === 'stolen'">
-            <button class="btn btn-green" style="width:100%;justify-content:center;margin-top:8px" @click="recoverVehicle(panel.vehicle.plate)">✅ استرداد المركبة — تعيين كمتاح</button>
+            <button class="btn btn-green" style="width:100%;justify-content:center;margin-top:8px" @click="recoverVehicle(panel.vehicle.plate)"><Icon name="lock-open" :size="15" /> استرداد المركبة — تعيين كمتاح</button>
           </template>
           <template v-if="panel.vehicle.vehicle_status === 'available' || panel.vehicle.vehicle_status === 'stopped'">
-            <div class="psect-title" style="color:var(--red-l)">🚨 تسجيل سرقة</div>
-            <button class="btn btn-red" style="width:100%;justify-content:center" @click="openStolenForm">🚨 تسجيل بلاغ سرقة</button>
+            <div class="psect-title" style="color:var(--red-l)"><Icon name="shield-alert" :size="14" /> تسجيل سرقة</div>
+            <button class="btn btn-red" style="width:100%;justify-content:center" @click="openStolenForm"><Icon name="shield-alert" :size="15" /> تسجيل بلاغ سرقة</button>
             <div v-if="subForm === 'stolen'" style="border:1px solid rgba(124,58,237,.2);border-radius:var(--r2);padding:14px;background:var(--purple-d);margin-top:10px">
-              <div class="psect-title" style="color:var(--purple-l)">🚨 تفاصيل بلاغ السرقة</div>
+              <div class="psect-title" style="color:var(--purple-l)"><Icon name="shield-alert" :size="14" /> تفاصيل بلاغ السرقة</div>
               <div class="form-grid">
                 <div class="ff"><div class="fl">تاريخ السرقة *</div><input class="fi" type="date" v-model="stf.date" /></div>
                 <div class="ff"><div class="fl">رقم بلاغ الشرطة</div><input class="fi mono" v-model="stf.police" placeholder="رقم المرجع" /></div>
@@ -1147,7 +1155,7 @@ function fuelView(v) {
               </div>
               <div class="form-actions" style="margin-top:10px">
                 <button class="btn" @click="subForm = null">إلغاء</button>
-                <button class="btn" style="background:var(--purple);color:#fff;border-color:var(--purple)" @click="submitStolen">🚨 تأكيد تسجيل السرقة</button>
+                <button class="btn" style="background:var(--purple);color:#fff;border-color:var(--purple)" @click="submitStolen"><Icon name="shield-alert" :size="15" /> تأكيد تسجيل السرقة</button>
               </div>
             </div>
           </template>
@@ -1155,15 +1163,15 @@ function fuelView(v) {
 
         <!-- TAB 3: DAMAGES (live API has none → empty state) -->
         <div v-else-if="panel.tab === 3" class="pb on">
-          <div class="psect-title">🔨 سجل التلفيات</div>
-          <div v-if="!(panel.vehicle.damages || []).length" class="empty"><div class="empty-ic">🔨</div><div>لا توجد تلفيات مسجلة</div></div>
+          <div class="psect-title"><Icon name="hammer" :size="14" /> سجل التلفيات</div>
+          <div v-if="!(panel.vehicle.damages || []).length" class="empty"><div class="empty-ic"><Icon name="hammer" :size="42" :stroke-width="1.5" /></div><div>لا توجد تلفيات مسجلة</div></div>
           <div v-for="(d, i) in panel.vehicle.damages || []" :key="i" class="incident-card">
             <div class="incident-card-head">
               <div style="display:flex;align-items:center;gap:8px">
-                <span class="incident-badge" :class="d.status === 'completed' ? 'incident-badge-ok' : ''">{{ d.status === "completed" ? "✅ مُصلح" : "🔨 تلف" }}</span>
+                <span class="incident-badge" :class="d.status === 'completed' ? 'incident-badge-ok' : ''"><Icon :name="d.status === 'completed' ? 'circle-check' : 'hammer'" :size="12" />{{ d.status === "completed" ? "مُصلح" : "تلف" }}</span>
                 <span style="font-size:12px;font-weight:600;color:var(--t1)">{{ d.date || "—" }}</span>
               </div>
-              <div style="display:flex;gap:6px"><span v-if="d.cost" style="font-size:11px;color:var(--amber-l);font-weight:600">💰 {{ d.cost }} ر.س</span></div>
+              <div style="display:flex;gap:6px"><span v-if="d.cost" style="font-size:11px;color:var(--amber-l);font-weight:600;display:inline-flex;align-items:center;gap:3px"><Icon name="banknote" :size="12" /> {{ d.cost }} ر.س</span></div>
             </div>
             <div class="incident-card-body">
               <div class="inc-row"><span class="inc-label">الوصف</span>{{ d.description || "—" }}</div>
@@ -1173,12 +1181,12 @@ function fuelView(v) {
 
         <!-- TAB 4: ACCIDENTS (live API has none → empty state) -->
         <div v-else-if="panel.tab === 4" class="pb on">
-          <div class="psect-title">💥 سجل الحوادث</div>
-          <div v-if="!(panel.vehicle.accidents || []).length" class="empty"><div class="empty-ic">💥</div><div>لا توجد حوادث مسجلة</div></div>
+          <div class="psect-title"><Icon name="crash" :size="14" /> سجل الحوادث</div>
+          <div v-if="!(panel.vehicle.accidents || []).length" class="empty"><div class="empty-ic"><Icon name="crash" :size="42" :stroke-width="1.5" /></div><div>لا توجد حوادث مسجلة</div></div>
           <div v-for="(a, i) in panel.vehicle.accidents || []" :key="i" class="incident-card">
             <div class="incident-card-head">
               <div style="display:flex;align-items:center;gap:8px">
-                <span class="incident-badge incident-badge-acc" :class="a.status === 'closed' ? 'incident-badge-ok' : ''">{{ a.status === "closed" ? "✅ مغلق" : "💥 حادثة" }}</span>
+                <span class="incident-badge incident-badge-acc" :class="a.status === 'closed' ? 'incident-badge-ok' : ''"><Icon :name="a.status === 'closed' ? 'circle-check' : 'crash'" :size="12" />{{ a.status === "closed" ? "مغلق" : "حادثة" }}</span>
                 <span style="font-size:12px;font-weight:600;color:var(--t1)">{{ a.date || "—" }}</span>
               </div>
             </div>
@@ -1190,19 +1198,19 @@ function fuelView(v) {
 
         <!-- TAB 5: LOG -->
         <div v-else-if="panel.tab === 5" class="pb on">
-          <div v-if="!panel.vehicle.history.length" class="empty"><div class="empty-ic">📋</div><div>لا توجد سجلات</div></div>
+          <div v-if="!panel.vehicle.history.length" class="empty"><div class="empty-ic"><Icon name="clipboard-list" :size="42" :stroke-width="1.5" /></div><div>لا توجد سجلات</div></div>
           <template v-else>
             <div class="psect-title">السجل الزمني الكامل ({{ panel.vehicle.history.length }} سائق)</div>
             <div class="tl">
               <div v-for="(item, i) in historyItems(panel.vehicle)" :key="i" class="tl-item">
-                <div class="tl-ic" :class="item.d.status === 'Active' ? 'ti-active' : 'ti-stopped'">👤</div>
+                <div class="tl-ic" :class="item.d.status === 'Active' ? 'ti-active' : 'ti-stopped'"><Icon name="user" :size="15" /></div>
                 <div class="tl-info">
                   <div class="tl-head">
                     {{ item.d.name_ar || item.d.name_en || "سائق" }}
-                    <span class="tl-status" :class="item.d.status === 'Active' ? 'tls-active' : 'tls-stopped'">{{ item.d.status === "Active" ? "✅ نشط" : "⏸ انتهى" }}</span>
+                    <span class="tl-status" :class="item.d.status === 'Active' ? 'tls-active' : 'tls-stopped'"><Icon :name="item.d.status === 'Active' ? 'circle-check' : 'circle-pause'" :size="11" />{{ item.d.status === "Active" ? "نشط" : "انتهى" }}</span>
                   </div>
-                  <div class="tl-sub">{{ item.d.name_en || "" }} · 📞 {{ item.d.mobile || "—" }} · 🪪 {{ item.d.driver_id || "—" }}</div>
-                  <div class="tl-sub">📦 {{ trim(item.d.project) || "—" }} · 📍 {{ item.d.area || "—" }} · 🏢 {{ item.d.branch_receive || "—" }}</div>
+                  <div class="tl-sub">{{ item.d.name_en || "" }} · <Icon name="phone" :size="11" /> {{ item.d.mobile || "—" }} · <Icon name="id-card" :size="11" /> {{ item.d.driver_id || "—" }}</div>
+                  <div class="tl-sub"><Icon name="package" :size="11" /> {{ trim(item.d.project) || "—" }} · <Icon name="pin" :size="11" /> {{ item.d.area || "—" }} · <Icon name="building" :size="11" /> {{ item.d.branch_receive || "—" }}</div>
                   <span class="tl-dates">{{ item.d.date_receive || "—" }} → {{ item.d.date_deliver || (item.d.status === "Active" ? "جارٍ" : "—") }}</span>
                   <span v-if="calcDur(item.d.date_receive, item.d.date_deliver || (item.d.status === 'Active' ? today() : ''))" class="tl-dur">{{ calcDur(item.d.date_receive, item.d.date_deliver || (item.d.status === "Active" ? today() : "")) }}</span>
                   <div v-if="item.d.reason" class="tl-reason">سبب: {{ item.d.reason }}</div>
@@ -1222,7 +1230,7 @@ function fuelView(v) {
   <!-- CUSTOM CONFIRM MODAL -->
   <div v-if="cf.open" class="cf-overlay" @click.self="cfDo(false)">
     <div class="cf-box">
-      <div class="cf-icon">{{ cf.icon }}</div>
+      <div class="cf-icon"><Icon :name="cf.icon" :size="36" :stroke-width="1.75" /></div>
       <div class="cf-title">{{ cf.title }}</div>
       <div class="cf-msg">{{ cf.msg }}</div>
       <div class="cf-btns">
