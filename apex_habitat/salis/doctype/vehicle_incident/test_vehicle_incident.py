@@ -7,6 +7,8 @@ rejected.
 
 from __future__ import annotations
 
+import json
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
@@ -40,6 +42,14 @@ class TestVehicleIncident(FrappeTestCase):
         data.update(overrides)
         return frappe.get_doc(data).insert(ignore_permissions=True)
 
+    def _card_count(self, card_name):
+        # [T-241] Count exactly as the Fleet Operations dashboard does: read the
+        # shipped Number Card's own document_type + filters_json and apply them,
+        # so this fails if the card's filter ever drifts from the incident
+        # status/type contract it depends on.
+        card = frappe.get_doc("Number Card", card_name)
+        return frappe.db.count(card.document_type, json.loads(card.filters_json or "[]"))
+
     def test_theft_stops_vehicle_and_clears_driver(self):
         inc = self._incident("Theft")
         inc.submit()
@@ -54,6 +64,41 @@ class TestVehicleIncident(FrappeTestCase):
         inc.reload()
         self.assertEqual(inc.previous_vehicle_status, "Active")
         self.assertEqual(inc.previous_driver, self.driver)
+
+    def test_theft_increments_open_incident_and_theft_cards(self):
+        # [T-241] The Fleet Operations dashboard counts open incidents and open
+        # thefts via two Number Cards; a submitted open Theft must register in both.
+        before_incidents = self._card_count("Open Vehicle Incidents")
+        before_theft = self._card_count("Open Theft Reports")
+
+        inc = self._incident("Theft")
+        inc.submit()
+        self.assertEqual(inc.status, "Open", "a submitted theft stays Open for the dashboard")
+        self.assertEqual(
+            self._card_count("Open Vehicle Incidents"),
+            before_incidents + 1,
+            "the Open Vehicle Incidents card must count the new theft",
+        )
+        self.assertEqual(
+            self._card_count("Open Theft Reports"),
+            before_theft + 1,
+            "the Open Theft Reports card must count the new theft",
+        )
+
+        # [T-241] An accident is an open incident but not a theft: it moves the
+        # general card only, proving the theft card's incident_type filter holds.
+        acc = self._incident("Accident", fault="Third party")
+        acc.submit()
+        self.assertEqual(
+            self._card_count("Open Vehicle Incidents"),
+            before_incidents + 2,
+            "the general card must also count the accident",
+        )
+        self.assertEqual(
+            self._card_count("Open Theft Reports"),
+            before_theft + 1,
+            "an accident must not change the theft card",
+        )
 
     def test_cancel_theft_restores_vehicle_and_driver(self):
         inc = self._incident("Theft")
