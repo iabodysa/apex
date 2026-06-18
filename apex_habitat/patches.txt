@@ -95,3 +95,10 @@ apex_habitat.patches.v1_x.refactor_transport_request_service_line
 # Rename the worker-transport Workspace 'Movement' -> 'Masar' so /app/masar
 # resolves (owner-reported 404). Idempotent; no-op on fresh installs / re-run.
 apex_habitat.patches.v1_x.rename_movement_workspace_to_masar
+
+# v1.54.x — backfill Accommodation Building.building_address (ONE-TIME, T-269). For each
+# building whose building_address is empty but which has a legacy default Address linked
+# via Dynamic Link, set building_address = get_default_address(...). Never clobbers a set
+# value; skips buildings with no resolvable Address. Idempotent, no-op on fresh installs.
+# PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v1_x.backfill_building_address_from_default_address
