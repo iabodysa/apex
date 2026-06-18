@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+- [1.54.24](v1/v1_54_24.md) — The Accommodation Building form can now carry its own address.
 - [1.54.23](v1/v1_54_23.md) — The Accommodation Building form's Site address display is now correct.
 - [1.54.22](v1/v1_54_22.md) — The driver portal's trip cards are now readable.
 - [1.54.21](v1/v1_54_21.md) — Housing requests from workers with no active accommodation assignment are now flagged cleanly.
@@ -18,10 +19,10 @@ Every release, newest first. Each line links to that version's full note.
 - [1.54.12](v1/v1_54_12.md) — A new /fleet web dashboard — the supervisor's own fleet board, now live.
 - [1.54.11](v1/v1_54_11.md) — More Fleet Operations surfaces and the last schema fields.
 - [1.54.10](v1/v1_54_10.md) — Workspace fixes for Fleet Operations.
-- [1.54.9](v1/v1_54_9.md) — Fix the worker-transport workspace route.
 
 ## 1.54.x
 
+- [1.54.24](v1/v1_54_24.md) — The Accommodation Building form can now carry its own address.
 - [1.54.23](v1/v1_54_23.md) — The Accommodation Building form's Site address display is now correct.
 - [1.54.22](v1/v1_54_22.md) — The driver portal's trip cards are now readable.
 - [1.54.21](v1/v1_54_21.md) — Housing requests from workers with no active accommodation assignment are now flagged cleanly.

@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.54.24 — the Accommodation Building form now has a Building Address field you can select; when set, the building's own address is shown instead of the Accommodation Site's, and the display updates the moment you change it",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-building",
+        "creation": "2026-06-18 09:30:00",
+    },
+    {
         "title": "Apex 1.54.23 — on the Accommodation Building form, switching the Site now immediately shows that site's address; it used to keep displaying the previously-saved site's address until you saved and reloaded",
         "app_name": "apex_habitat",
         "link": "/app/accommodation-building",
