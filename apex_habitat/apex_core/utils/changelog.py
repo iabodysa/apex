@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.54.28 — a new Safety Checklist desk page lets a supervisor pick a building and a cadence, tick off that cadence's safety tasks, and submit the whole round in one step (recording the round and each task result together and showing the overall result); it is open to the roles that can sign off a round and is linked from the Safety workspace; and the old Safety Inspection Report is now fully retired from the desk — its number card and trend chart read the new Safety Rounds and the safety onboarding step opens the new page",
+        "app_name": "apex_habitat",
+        "link": "/app/safety-checklist",
+        "creation": "2026-06-18 15:00:00",
+    },
+    {
         "title": "Apex 1.54.27 — a new Safety Round groups a building's safety-task checks for one cadence (daily, weekly, monthly, quarterly or annual) into one submittable round that derives a Pass / Needs Attention / Fail result, with a Safety Round Compliance report showing per task what still needs attention; the old Safety Inspection Report is retired in place (hidden and read-only, its records kept); and the Fleet dashboard now uses a clean professional Lucide icon set instead of emoji",
         "app_name": "apex_habitat",
         "link": "/app/safety-round",
