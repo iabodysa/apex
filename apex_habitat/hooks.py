@@ -45,6 +45,7 @@ doc_events = {
     "Scheduled Task Template": {},
     "Accommodation Building": {
         "before_save": "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.before_save",
+        "on_update": "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.on_update",
     },
     "Accommodation Assignment": {
         "validate": "apex_habitat.habitat.doctype.accommodation_assignment.accommodation_assignment.validate",

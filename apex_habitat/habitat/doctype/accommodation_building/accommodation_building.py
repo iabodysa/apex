@@ -139,6 +139,39 @@ def _derive_total_capacity(building_name):
     )
 
 
+# [T-254] responsible_facility_supervisor is the single source of truth for the
+# building-scoped User Permission; on_update reconciles the permission to the field.
+def _building_supervisor_permissions(user, building):
+    return frappe.get_all(
+        "User Permission",
+        filters={"user": user, "allow": "Accommodation Building", "for_value": building},
+        pluck="name",
+    )
+
+
+def on_update(doc, method=None):
+    """Reconcile the building-scoped User Permission to the supervisor field (T-254):
+    grant the new supervisor's permission for this building, drop the previous
+    supervisor's; other users and other buildings are untouched."""
+    before = doc.get_doc_before_save()
+    old_sup = before.responsible_facility_supervisor if before else None
+    new_sup = doc.responsible_facility_supervisor
+    if old_sup == new_sup:
+        return
+    if old_sup:
+        for perm in _building_supervisor_permissions(old_sup, doc.name):
+            frappe.delete_doc("User Permission", perm, ignore_permissions=True)  # audit-ok — system permission sync
+    if new_sup and not _building_supervisor_permissions(new_sup, doc.name):
+        frappe.get_doc(
+            {
+                "doctype": "User Permission",
+                "user": new_sup,
+                "allow": "Accommodation Building",
+                "for_value": doc.name,
+            }
+        ).insert(ignore_permissions=True)  # audit-ok — system permission sync, gated by building write
+
+
 def before_save(doc, method=None):
     _guard_abbreviation_lock(doc)
     if not doc.company:
