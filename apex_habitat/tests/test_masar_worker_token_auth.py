@@ -71,8 +71,10 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
         doc = frappe.get_doc(
             {
                 "doctype": "Masar Worker Token",
-                # party_type defaults to "Employee"; setting employee back-fills
-                # the required party via sync_party_employee.
+                # autoname is field:party, so party must be set before insert; the
+                # token's party IS the Employee (party_type Employee).
+                "party_type": "Employee",
+                "party": employee,
                 "employee": employee,
                 "enabled": enabled,
             }
