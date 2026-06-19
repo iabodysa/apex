@@ -5,6 +5,12 @@ const routes = [
   { path: "/attendance", name: "attendance", component: () => import("./pages/Attendance.vue") },
   { path: "/trips", name: "trips", component: () => import("./pages/Trips.vue") },
   { path: "/route", name: "route", component: () => import("./pages/Route.vue") },
+  {
+    path: "/route/:trip",
+    name: "trip-route",
+    component: () => import("./pages/Route.vue"),
+    props: true,
+  },
   { path: "/fuel", name: "fuel", component: () => import("./pages/Fuel.vue") },
   { path: "/tickets", name: "tickets", component: () => import("./pages/Tickets.vue") },
   { path: "/profile", name: "profile", component: () => import("./pages/Profile.vue") },

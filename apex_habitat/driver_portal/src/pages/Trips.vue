@@ -15,7 +15,12 @@
       <p class="text-sm text-muted">{{ t("trips.emptyHint") }}</p>
     </div>
 
-    <div v-for="t in trips.data" :key="t.name" class="card card-pad">
+    <router-link
+      v-for="t in trips.data"
+      :key="t.name"
+      :to="'/route/' + encodeURIComponent(t.name)"
+      class="card card-pad block"
+    >
       <div class="flex items-start justify-between gap-2">
         <div class="font-bold leading-tight">{{ t.route_plan || t.name }}</div>
         <span class="pill pill-accent shrink-0">{{ t.status }}</span>
@@ -25,8 +30,9 @@
         <span>{{ t.vehicle || "—" }}</span>
         <span class="text-muted">·</span>
         <span>{{ t.depart_time || "" }} → {{ t.return_time || "" }}</span>
+        <Icon name="route" :size="16" class="text-primary shrink-0 ms-auto" />
       </div>
-    </div>
+    </router-link>
   </div>
 </template>
 

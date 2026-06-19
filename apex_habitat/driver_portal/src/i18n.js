@@ -52,6 +52,7 @@ const messages = {
     },
     route: {
       title: "My Worker Route Today",
+      tripTitle: "Trip Route",
       departs: "Departs",
       expected: "{n} expected",
       stops: "Stops",
@@ -60,6 +61,8 @@ const messages = {
       workers: "Workers",
       empty: "No worker trips today",
       emptyHint: "You have no worker pickups scheduled for today.",
+      noRoutePlanned: "No route planned for this trip",
+      noRoutePlannedHint: "This trip has no route plan yet, so there are no stops to show.",
     },
     license: {
       expired: "expired",
@@ -186,6 +189,7 @@ const messages = {
     },
     route: {
       title: "مسار العمال اليوم",
+      tripTitle: "مسار الرحلة",
       departs: "المغادرة",
       expected: "{n} متوقع",
       stops: "المحطات",
@@ -194,6 +198,8 @@ const messages = {
       workers: "العمال",
       empty: "لا توجد رحلات عمال اليوم",
       emptyHint: "لا توجد لديك عمليات نقل عمال مجدولة لهذا اليوم.",
+      noRoutePlanned: "لا يوجد مسار مخطط لهذه الرحلة",
+      noRoutePlannedHint: "هذه الرحلة ليس لها خطة مسار بعد، لذا لا توجد محطات لعرضها.",
     },
     license: {
       expired: "منتهية",

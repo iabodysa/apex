@@ -422,6 +422,61 @@ def my_worker_route_today():
     return masar.get_my_worker_route_today()
 
 
+@frappe.whitelist()
+def my_trip_route(dispatch_trip):
+    """One trip's ordered route for the current driver (read). [T-170]
+
+    Backs the driver portal's per-trip drill-in: tapping a "My Trips" card opens
+    this single Dispatch Trip's ordered stops. Identity-scoped — the driver is
+    resolved from the session, never client-supplied — and the trip is returned
+    only when it belongs to that driver, so one driver can never read another's
+    trip by guessing a ``dispatch_trip`` id.
+
+    Reuses masar's read-only stop-ordering (``_ordered_stops``) so the timeline
+    shape matches the all-trips route view exactly; masar is imported, not edited.
+    A trip with no ``route_plan`` (e.g. an Administrative Trip, excluded from the
+    worker route) returns ``has_route_plan = False`` with an empty ``stops`` list,
+    letting the SPA show an explicit "no route planned" state rather than a blank.
+    Read-only, no commit, no GL."""
+    _require_enabled()
+    driver = _resolve_driver()
+
+    trip = frappe.db.get_value(
+        "Dispatch Trip",
+        {"name": dispatch_trip, "driver": driver},
+        ["name", "route_plan", "vehicle", "depart_time", "return_time", "status"],
+        as_dict=True,
+    )
+    # [#t170nf] Unknown id OR a trip that isn't this driver's both fail closed.
+    if not trip:
+        frappe.throw(_("Trip not found."), frappe.DoesNotExistError)
+
+    from apex_habitat.salis.api import masar
+
+    route_plan = trip.get("route_plan")
+    stops = masar._ordered_stops(route_plan)  # read-only reuse; masar unedited
+
+    vehicle = trip.get("vehicle")
+    if vehicle:
+        vehicle = frappe.db.get_value("Salis Vehicle", vehicle, "plate_number") or vehicle
+
+    return {
+        "dispatch_trip": trip["name"],
+        "route_plan": route_plan,
+        "route_name": (
+            (frappe.db.get_value("Route Plan", route_plan, "route_name") or route_plan)
+            if route_plan
+            else None
+        ),
+        "vehicle": vehicle,
+        "depart_time": masar._fmt_time(trip.get("depart_time")),
+        "return_time": masar._fmt_time(trip.get("return_time")),
+        "status": trip.get("status"),
+        "has_route_plan": bool(route_plan),
+        "stops": stops,
+    }
+
+
 @frappe.whitelist(methods=["POST"])
 def raise_support_ticket(category, priority, subject, description):
 	"""Raise a support ticket as a native ERPNext Issue (write).
