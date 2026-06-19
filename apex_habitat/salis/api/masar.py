@@ -632,6 +632,28 @@ def list_worker_requests(token=None):
     return rows
 
 
+def _custody_issued_by(custody_issue, building):
+    """Name the supervisor who issued a held article to the worker.
+
+    Custody Issue has no dedicated 'issued by' field, so the issuer is its
+    ``owner`` (the user who created/submitted it), resolved to a person name.
+    Falls back to the building's responsible facility supervisor, then None when
+    nothing resolves (the client renders its own placeholder). Never throws —
+    the worker view degrades gracefully."""
+    owner = None
+    if custody_issue:
+        owner = frappe.db.get_value("Custody Issue", custody_issue, "owner")
+    if owner:
+        return frappe.utils.get_fullname(owner) or owner
+    if building:
+        sup = frappe.db.get_value(
+            "Accommodation Building", building, "responsible_facility_supervisor"
+        )
+        if sup:
+            return frappe.utils.get_fullname(sup) or sup
+    return None
+
+
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_custody(token=None):
@@ -640,13 +662,17 @@ def get_worker_custody(token=None):
     Resolves the token to one Employee and returns their live custody holding,
     derived from the read-only Accommodation Stock Ledger — the same net-balance
     source as the ``Custody Outstanding by Worker`` report, not a Custody Issue
-    replay and not the org-wide dashboard total. Balance per (building, article)
-    is the signed sum of non-cancelled custody-article ledger rows for THIS
-    employee (issues add, returns reverse), so the net is what is still out.
-    Building is a display column, not a filter — a worker who moved buildings
-    still sees prior custody. Scoped strictly to the resolved employee; a
-    client-supplied id can never widen it. Zero/negative-net rows are dropped.
-    Read-only, no commit, no GL."""
+    replay. Balance per (building, article) is the signed sum of non-cancelled
+    custody-article ledger rows for THIS employee (issues add, returns reverse),
+    so the net is what is still out. A worker who moved buildings still sees
+    prior custody. Scoped strictly to the resolved employee; a client-supplied
+    id can never widen it. Zero/negative-net rows are dropped.
+
+    For each still-held item the worker view surfaces what matters to them — not
+    money: the ``received_date`` (posting date of the latest issue row), the
+    ``issued_by`` supervisor (the source Custody Issue's owner, resolved to a
+    full name; falls back to the building's responsible supervisor, else None),
+    and the ``building``. Read-only, no commit, no GL."""
     from frappe.utils import flt
 
     employee = _resolve_worker(token)
@@ -658,7 +684,17 @@ def get_worker_custody(token=None):
             "item_type": "Custody Article",
             "employee": employee,
         },
-        fields=["building", "item", "item_name", "uom", "qty", "unit_cost_sar"],
+        fields=[
+            "building",
+            "item",
+            "item_name",
+            "uom",
+            "qty",
+            "posting_date",
+            "voucher_type",
+            "voucher_no",
+        ],
+        order_by="posting_date asc, creation asc",
     )
 
     agg = {}
@@ -671,27 +707,29 @@ def get_worker_custody(token=None):
                 "item_name": r.item_name,
                 "building": r.building,
                 "uom": r.uom,
-                "unit_cost_sar": flt(r.unit_cost_sar),
                 "qty": 0.0,
+                "received_date": None,
+                "_issue_voucher": None,
             },
         )
         bucket["qty"] += flt(r.qty)
-        # [#cstdy1] last non-zero unit cost wins, mirroring the report
-        if r.unit_cost_sar:
-            bucket["unit_cost_sar"] = flt(r.unit_cost_sar)
+        # [#cstdy1] latest issue (positive) row drives the worker-facing
+        # "received date" + the source Custody Issue used to name the supervisor
+        if flt(r.qty) > 0:
+            bucket["received_date"] = _fmt_date(r.posting_date)
+            if r.voucher_type == "Custody Issue" and r.voucher_no:
+                bucket["_issue_voucher"] = r.voucher_no
 
     items = []
-    total_value = 0.0
     for bucket in agg.values():
         # [#cstdy2] only still-held positive net holdings; drop returned/zero rows
         if bucket["qty"] < 1e-9:
             continue
-        bucket["value_sar"] = flt(bucket["qty"]) * flt(bucket["unit_cost_sar"])
-        total_value += bucket["value_sar"]
+        bucket["issued_by"] = _custody_issued_by(bucket.pop("_issue_voucher"), bucket["building"])
         items.append(bucket)
 
     items.sort(key=lambda d: (d["item_name"] or d["item"] or "", d["building"] or ""))
-    return {"items": items, "total_value_sar": flt(total_value)}
+    return {"items": items}
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])

@@ -34,16 +34,10 @@
         </div>
 
         <dl class="space-y-3 text-sm mt-4">
+          <Row v-if="it.received_date" icon="calendar" :label="t('custody.receivedDate')" :value="it.received_date" />
+          <Row icon="user" :label="t('custody.issuedBy')" :value="it.issued_by" />
           <Row v-if="it.building" icon="building" :label="t('custody.building')" :value="it.building" />
-          <Row icon="card" :label="t('custody.unitCost')" :value="fmtMoney(it.unit_cost_sar)" />
-          <Row icon="layers" :label="t('custody.value')" :value="fmtMoney(it.value_sar)" />
         </dl>
-      </section>
-
-      <!-- Total value -->
-      <section class="card card-pad flex items-center justify-between">
-        <span class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("custody.total") }}</span>
-        <span class="text-lg font-extrabold">{{ fmtMoney(totalValue) }}</span>
       </section>
     </template>
 
@@ -72,16 +66,10 @@ const cus = createResource({
 const errorMessage = computed(() => resourceErrorMessage(cus.error));
 
 const items = computed(() => cus.data?.items || []);
-const totalValue = computed(() => cus.data?.total_value_sar || 0);
 
 function fmtQty(n) {
   const v = Number(n) || 0;
   return Number.isInteger(v) ? String(v) : v.toFixed(2);
-}
-
-function fmtMoney(n) {
-  const v = Number(n) || 0;
-  return `${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${t("custody.sar")}`;
 }
 
 const Row = (rprops) =>
