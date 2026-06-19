@@ -4,4 +4,4 @@ Apex Habitat
 Frappe Framework v15 application.
 """
 
-__version__ = "1.54.29"
+__version__ = "1.54.30"
