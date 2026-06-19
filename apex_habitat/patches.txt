@@ -102,3 +102,11 @@ apex_habitat.patches.v1_x.rename_movement_workspace_to_masar
 # value; skips buildings with no resolvable Address. Idempotent, no-op on fresh installs.
 # PRUNE once every deployed site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.backfill_building_address_from_default_address
+
+# v1.55.0 — retire the superseded Safety Checklist desk Page (T-290, ONE-TIME). The
+# /safety Vue portal (1.54.29) replaced the desk Page; its standard files were removed,
+# but the Page and its 'Record a Safety Inspection' onboarding step persist as DB orphans
+# on existing sites and the page 500s on click (load_assets on a missing dir). Deletes
+# both orphans. Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed
+# site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v1_x.retire_safety_checklist_desk_page
