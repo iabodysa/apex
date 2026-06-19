@@ -10,10 +10,21 @@
       </div>
       <div class="header-inner">
         <div class="header-bar">
-          <div class="header-brand">
-            <span class="header-mark"><Icon name="shield-check" :size="20" /></span>
-            <span class="header-word">{{ t("common.appName") }}</span>
+          <!-- Brand lockup. A tenant logo (Salis Portal Theme → Brand Logo) wins
+               over the default shield mark; show_brand=false hides it entirely. -->
+          <div v-if="showBrand" class="header-brand">
+            <img
+              v-if="brandLogo"
+              :src="brandLogo"
+              alt="AFMCO"
+              class="header-logo"
+            />
+            <template v-else>
+              <span class="header-mark"><Icon name="shield-check" :size="20" /></span>
+              <span class="header-word">{{ t("common.appName") }}</span>
+            </template>
           </div>
+          <span v-else class="header-word">{{ t("common.appName") }}</span>
           <LangToggle variant="header" />
         </div>
         <div class="greeting-block">
@@ -153,6 +164,13 @@ import CadenceSection from "./components/CadenceSection.vue";
 import { useI18n, resourceErrorMessage } from "./i18n";
 
 const { t, tEnum, dir } = useI18n();
+
+// Branding flags projected by the page template (www/safety.html). Default to
+// showing the brand; an explicit `false` hides it, and a tenant logo overrides
+// the default mark. The active theme itself is applied server-side via the
+// <html data-theme> attribute, exactly like /driver and /masar.
+const showBrand = computed(() => window.portal_show_brand !== false);
+const brandLogo = computed(() => window.portal_logo || "");
 
 // Keep the document direction/lang in sync with the toggle.
 watch(
@@ -344,6 +362,12 @@ function resultIcon(r) {
   color: var(--c-header-bg);
   background: var(--c-header-accent);
   flex-shrink: 0;
+}
+.header-logo {
+  height: 28px;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
 }
 .header-word {
   font-size: var(--fs-h3);
@@ -665,6 +689,29 @@ function resultIcon(r) {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* ---- tablet / iPad (≥768px) -----------------------------------------
+   The base layout is a phone column (capped by .app-shell in index.css).
+   On a wider viewport the shell widens to a comfortable centered column,
+   so give the header and content more breathing room and scale the
+   greeting up so the page doesn't look lost on an iPad. */
+@media (min-width: 768px) {
+  .header-inner {
+    padding: 24px 28px 28px;
+  }
+  .app-main {
+    padding: 28px 28px 56px;
+  }
+  .greeting-title {
+    font-size: var(--fs-display);
+  }
+  .due {
+    gap: 18px;
+  }
+  .due-intro .section-title {
+    font-size: var(--fs-h1);
   }
 }
 </style>

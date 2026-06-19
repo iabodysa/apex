@@ -63,6 +63,57 @@
   --sp-8: 32px;
 }
 
+/* Frappe Standard — neutral blue, lighter chrome (ported from the driver/worker
+   portals so /safety renders identically when the Salis Portal Theme is set to
+   "Frappe Standard"). */
+[data-theme="frappe"] {
+  --c-primary: #2490ef;
+  --c-primary-ink: #ffffff;
+  --c-ink: #1f272e;
+  --c-ink-soft: #525a62;
+  --c-canvas: #f4f5f6;
+  --c-surface: #ffffff;
+  --c-surface-2: #f9fafb;
+  --c-accent: #2490ef;
+  --c-mint: #28a745;
+  --c-muted: #6b7682;
+  --c-border: #e2e6e9;
+  --c-border-strong: #d1d8dd;
+  --c-success: #28a745;
+  --c-success-bg: #e6f4ea;
+  --c-warning: #cb8100;
+  --c-warning-bg: #fbf0d9;
+  --c-danger: #e03636;
+  --c-danger-bg: #fbe3e3;
+  --c-header-bg: #ffffff;
+  --c-header-ink: #1f272e;
+  --c-header-accent: #2490ef;
+  --c-arc: rgba(36, 144, 239, 0.08);
+
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 2px rgba(17, 43, 66, 0.08), 0 0 1px rgba(17, 43, 66, 0.12);
+  --shadow-lg: 0 4px 16px rgba(17, 43, 66, 0.12);
+  --border-width: 1px;
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Cairo", sans-serif;
+  --fw-heading: 700;
+  --fw-semibold: 600;
+  --fw-body: 400;
+}
+
+/* On Frappe Standard the header bar is light, so drop the dark-bar supergraphic
+   that only reads on the forest/dark chromes. */
+[data-theme="frappe"] .hero-arc {
+  display: none !important;
+}
+[data-theme="frappe"] .app-header {
+  border-bottom: 1px solid var(--c-border);
+  box-shadow: var(--shadow);
+}
+
 [data-theme="dark"] {
   --c-primary: #00a862;
   --c-primary-ink: #04130c;
@@ -90,6 +141,79 @@
   --shadow-lg: none;
 }
 
+/* Gemini — glassmorphic neon (ported from the driver/worker portals so /safety
+   renders identically when the Salis Portal Theme is set to "Gemini"). */
+[data-theme="gemini"] {
+  --c-canvas: #04050b;
+  --c-surface: rgba(15, 17, 26, 0.65);
+  --c-surface-2: rgba(15, 17, 26, 0.65);
+
+  --c-primary: #a855f7; /* Purple Glow */
+  --c-primary-ink: #ffffff;
+  --c-accent: #3b82f6; /* Blue Glow */
+  --c-mint: #06b6d4; /* Cyan Glow */
+
+  --c-ink: #f8fafc;
+  --c-ink-soft: #cbd5e1;
+  --c-muted: #64748b;
+
+  --c-border: rgba(148, 163, 184, 0.12);
+  --c-border-strong: rgba(148, 163, 184, 0.25);
+
+  --c-success: #10b981;
+  --c-success-bg: rgba(16, 185, 129, 0.15);
+  --c-warning: #f59e0b;
+  --c-warning-bg: rgba(245, 158, 11, 0.15);
+  --c-danger: #ef4444;
+  --c-danger-bg: rgba(239, 68, 68, 0.15);
+
+  --c-header-bg: rgba(4, 5, 11, 0.85);
+  --c-header-ink: #ffffff;
+  --c-header-accent: #a855f7;
+  --c-arc: rgba(168, 85, 247, 0.18);
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 48px rgba(168, 85, 247, 0.2);
+  --border-width: 1px;
+}
+
+/* Frosted-glass surfaces + the neon submit gradient, matching the other portals
+   so the Gemini chrome is consistent across /driver, /masar and /safety. */
+[data-theme="gemini"] .app-header,
+[data-theme="gemini"] .cadence,
+[data-theme="gemini"] .b-item,
+[data-theme="gemini"] .task,
+[data-theme="gemini"] .result-row {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: var(--c-surface);
+  box-shadow: var(--shadow);
+}
+[data-theme="gemini"] .btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #a855f7, #ec4899, #3b82f6);
+  background-size: 300% 300%;
+  animation: geminiGlow 4s ease infinite;
+  border: none;
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+@keyframes geminiGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 html,
 body {
   background: var(--c-canvas);
@@ -108,6 +232,14 @@ body {
     max-width: 480px;
     background: var(--c-canvas);
     color: var(--c-ink);
+  }
+  /* On iPad / tablet the phone-width column looks lost in the viewport. Widen
+     the centered shell to a comfortable reading column (≈720px). The shell is
+     mx-auto, so it stays centered with sand/canvas gutters either side. */
+  @media (min-width: 768px) {
+    .app-shell {
+      max-width: 720px;
+    }
   }
 
   .app-header {

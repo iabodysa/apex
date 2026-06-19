@@ -199,4 +199,22 @@ onMounted(async () => {
   color: var(--c-muted);
   flex-shrink: 0;
 }
+
+/* ---- tablet / iPad (≥768px) ----------------------------------------
+   Lay the building list out as a comfortable 2-column grid instead of a
+   single tall column, and give the hero a little more presence. The phone
+   layout (single column) is untouched below this breakpoint. */
+@media (min-width: 768px) {
+  .b-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .b-item {
+    padding: 16px;
+  }
+  .picker-title {
+    font-size: var(--fs-h1);
+  }
+}
 </style>

@@ -20,6 +20,10 @@ because the page renders per-user, live data.
 import frappe
 from frappe.sessions import get_csrf_token
 
+from apex_habitat.salis.doctype.salis_portal_theme.salis_portal_theme import (
+    get_portal_appearance,
+)
+
 # Roles allowed to run safety rounds from the portal. Matches the submit-capable
 # roles the safety_checklist API gates on (Safety Officer is intentionally
 # excluded: it cannot submit a Safety Round).
@@ -39,4 +43,12 @@ def get_context(context):
     context.has_safety_role = bool(SAFETY_ROLES & set(frappe.get_roles()))
     if context.has_safety_role:
         context.csrf_token = get_csrf_token()
+        # Appearance (theme + optional brand overrides) from the Salis Portal
+        # Theme — same projection as www/driver.py so /safety re-skins with the
+        # other portals. Only set for the authorised view.
+        appearance = get_portal_appearance()
+        context.portal_theme = appearance["theme"]
+        context.portal_accent = appearance["accent"]
+        context.portal_logo = appearance["logo"]
+        context.portal_show_brand = appearance["show_brand"]
     return context
