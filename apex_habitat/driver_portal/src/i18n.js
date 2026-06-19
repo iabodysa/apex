@@ -101,6 +101,18 @@ const messages = {
       checkOut: "Check Out",
       checkedInAt: "Checked in at {time}",
       checkedOutAt: "Checked out at {time}",
+      today: "Today",
+      notCheckedIn: "Not checked in yet",
+      checkedInLabel: "Checked in",
+      checkedOutLabel: "Checked out",
+      hoursPresent: "Hours present",
+      doneForToday: "You're done for today",
+      checkInDone: "Checked in. Have a good shift.",
+      checkOutDone: "Checked out. See you tomorrow.",
+      statusPresent: "Present",
+      statusLate: "Late",
+      statusAbsent: "Absent",
+      statusOnLeave: "On Leave",
     },
     trips: {
       title: "My Trips Today",
@@ -241,6 +253,18 @@ const messages = {
       checkOut: "تسجيل الخروج",
       checkedInAt: "تم تسجيل الدخول في {time}",
       checkedOutAt: "تم تسجيل الخروج في {time}",
+      today: "اليوم",
+      notCheckedIn: "لم يتم تسجيل الدخول بعد",
+      checkedInLabel: "تم تسجيل الدخول",
+      checkedOutLabel: "تم تسجيل الخروج",
+      hoursPresent: "ساعات الحضور",
+      doneForToday: "أنهيت يومك",
+      checkInDone: "تم تسجيل الدخول. نتمنى لك وردية موفقة.",
+      checkOutDone: "تم تسجيل الخروج. نراك غداً.",
+      statusPresent: "حاضر",
+      statusLate: "متأخر",
+      statusAbsent: "غائب",
+      statusOnLeave: "في إجازة",
     },
     trips: {
       title: "رحلاتي اليوم",
@@ -295,7 +319,7 @@ function detectInitial() {
   } catch (e) {
     // [#9qybx5]
   }
-  return "en";
+  return "ar"; // drivers default to Arabic (mirrors worker_portal/safety_portal)
 }
 
 // [#o7zbpi]

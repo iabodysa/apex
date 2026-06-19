@@ -129,24 +129,11 @@ const actions = [
     style:
       "background: var(--c-surface); color: var(--c-ink); border: var(--border-width) solid var(--c-border);",
   },
-  {
-    to: "/fuel",
-    icon: "fuel",
-    labelKey: "home.requestFuel",
-    style:
-      "background: var(--c-surface); color: var(--c-ink); border: var(--border-width) solid var(--c-border);",
-  },
+  // Fuel + Support moved to Profile > My Requests — not duplicated here.
   {
     to: "/profile",
     icon: "user",
     labelKey: "home.profile",
-    style:
-      "background: var(--c-surface); color: var(--c-ink); border: var(--border-width) solid var(--c-border);",
-  },
-  {
-    to: "/tickets",
-    icon: "help",
-    labelKey: "home.support",
     style:
       "background: var(--c-surface); color: var(--c-ink); border: var(--border-width) solid var(--c-border);",
   },

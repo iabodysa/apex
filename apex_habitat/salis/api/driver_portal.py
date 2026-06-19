@@ -275,6 +275,26 @@ def my_support_tickets():
 	return rows
 
 
+def _attendance_state(doc):
+	"""Project a Driver Attendance doc to the portal's state shape.
+
+	The single source of truth for what the SPA shows — identical in shape to
+	``get_today_attendance``'s return — so a check-in/out response updates the page
+	reactively without a reload. Time fields are stringified for JSON."""
+	check_in = frappe.utils.cstr(doc.check_in) if doc.check_in else None
+	check_out = frappe.utils.cstr(doc.check_out) if doc.check_out else None
+	return {
+		"name": doc.name,
+		"exists": True,
+		"checked_in": bool(check_in),
+		"checked_out": bool(check_out),
+		"status": doc.status,
+		"check_in": check_in,
+		"check_out": check_out,
+		"worked_hours": doc.worked_hours,
+	}
+
+
 def _today_attendance(driver):
 	name = frappe.db.get_value(
 		"Driver Attendance",
@@ -287,6 +307,56 @@ def _today_attendance(driver):
 		{"doctype": "Driver Attendance", "driver": driver,
 		 "attendance_date": frappe.utils.today(), "status": "Present"}
 	)
+
+
+@frappe.whitelist()
+def get_today_attendance():
+	"""Today's attendance state for the current driver (read).
+
+	Identity-scoped: the driver is resolved from the session, never client-supplied,
+	so this can only ever return the caller's own record. Read-only, no commit.
+
+	Returns the durable fields of today's persisted Driver Attendance —
+	``status``, ``check_in``, ``check_out``, ``worked_hours`` (Time fields
+	stringified so the JSON always serializes) — together with convenience
+	flags the portal uses to drive its button/label state:
+
+	* ``exists``       — a record for today is already on disk
+	* ``checked_in``   — ``check_in`` is stamped
+	* ``checked_out``  — ``check_out`` is stamped
+
+	When the driver has not recorded anything today, returns the same shape with
+	``exists = False`` and null times (a friendly "not checked in yet" state) —
+	never raises and never creates a row."""
+	_require_enabled()
+	driver = _resolve_driver()
+	row = frappe.db.get_value(
+		"Driver Attendance",
+		{"driver": driver, "attendance_date": frappe.utils.today(), "docstatus": ["<", 2]},
+		["name", "status", "check_in", "check_out", "worked_hours"],
+		as_dict=True,
+	)
+	if not row:
+		return {
+			"exists": False,
+			"checked_in": False,
+			"checked_out": False,
+			"status": None,
+			"check_in": None,
+			"check_out": None,
+			"worked_hours": None,
+		}
+	check_in = frappe.utils.cstr(row.get("check_in")) if row.get("check_in") else None
+	check_out = frappe.utils.cstr(row.get("check_out")) if row.get("check_out") else None
+	return {
+		"exists": True,
+		"checked_in": bool(check_in),
+		"checked_out": bool(check_out),
+		"status": row.get("status"),
+		"check_in": check_in,
+		"check_out": check_out,
+		"worked_hours": row.get("worked_hours"),
+	}
 
 
 def _persist_attendance(doc):
@@ -342,7 +412,7 @@ def driver_check_in(photo=None):
 	if photo:
 		doc.append("images", {"image": photo, "captured_at": frappe.utils.now_datetime()})
 	_persist_attendance(doc)
-	return {"name": doc.name, "check_in": str(doc.check_in)}
+	return _attendance_state(doc)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -365,7 +435,7 @@ def driver_check_out(photo=None):
 	if photo:
 		doc.append("images", {"image": photo, "captured_at": frappe.utils.now_datetime()})
 	_persist_attendance(doc)
-	return {"name": doc.name, "check_out": str(doc.check_out)}
+	return _attendance_state(doc)
 
 
 def _vehicle_bound_to_driver(driver, vehicle):
