@@ -437,6 +437,15 @@ class TestSafetyChecklist(FrappeTestCase):
         settings.enable_email_notifications = 1
         settings.save(ignore_permissions=True)
 
+    def _disable_email(self):
+        # Habitat Settings is a Single, so enable_email_notifications is sticky:
+        # an earlier test (or site setup) may have left it ON. Explicitly close
+        # the kill-switch instead of relying on the site default, so the
+        # kill-switch-off test asserts against the real OFF state.
+        settings = frappe.get_single("Habitat Settings")
+        settings.enable_email_notifications = 0
+        settings.save(ignore_permissions=True)
+
     def test_submit_due_rounds_emails_manager(self):
         # Seed an enabled Accommodation Manager with an email so a recipient
         # resolves, turn the kill-switch on, and assert sendmail was called.
@@ -488,6 +497,24 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertTrue(out["ok"])
         self.assertFalse(out["emailed"])
         self.assertEqual(len(out["rounds"]), 1)
+
+    def test_submit_due_rounds_kill_switch_off_sends_no_email(self):
+        # The email kill-switch is OFF by default: even with a resolvable manager,
+        # submit_due_rounds must send NO email and report emailed False — the
+        # production-safety contract (no surprise mail before email is enabled).
+        _user(f"safetymgr3_{self._testMethodName}@example.com", "Accommodation Manager")
+        # Explicitly close the kill-switch: Habitat Settings is a Single, so its
+        # value persists across tests — don't trust the site default to be OFF.
+        self._disable_email()
+        results = self._results(("Weekly", "Good"))
+        with patch(
+            "apex_habitat.habitat.api.safety_checklist.frappe.sendmail"
+        ) as mock_send:
+            out = submit_due_rounds(self.building, today(), results)
+        self.assertTrue(out["ok"])
+        self.assertFalse(out["emailed"], "no email may go out while the kill-switch is off")
+        mock_send.assert_not_called()
+        self.assertEqual(len(out["rounds"]), 1, "the round still records with email off")
         # The Weekly round really persisted (submitted) despite the mail error.
         self.assertEqual(
             frappe.db.get_value(
