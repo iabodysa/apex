@@ -196,7 +196,7 @@ defineProps({
 }
 /* Directional glyph: the chevron points "forward". In the RTL board, forward
    is leftward, so mirror it. currentColor keeps theme tinting intact. */
-:global([dir="rtl"]) .fp-icon-chevron {
+:global([dir="rtl"] .fp-icon-chevron) {
   transform: scaleX(-1);
 }
 </style>
