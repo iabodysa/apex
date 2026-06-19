@@ -2825,5 +2825,9 @@ Results must be a list.,يجب أن تكون النتائج قائمةً.
 Safety Report Recipient,مستلِم تقرير السلامة
 Safety rounds,جولات السلامة
 Safety rounds were recorded for {0} on {1}.,سُجِّلت جولات السلامة لـ{0} بتاريخ {1}.
+Custody Value in Employee Hands (SAR),قيمة العهدة لدى الموظفين (ريال)
+Damage Cost by Building,تكلفة الأضرار حسب المبنى
+Outstanding Qty,الكمية المتبقية
+Returns to Reconcile,مرتجعات للتسوية
 This page is for the safety team.,هذه الصفحة لفريق السلامة.
 Unknown cadence: {0},وتيرة غير معروفة: {0}
