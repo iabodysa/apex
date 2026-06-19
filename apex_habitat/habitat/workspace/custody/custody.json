@@ -169,6 +169,15 @@
    "link_to": "Accommodation Stock Balance",
    "idx": 15,
    "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Custody Outstanding by Worker",
+   "link_type": "Report",
+   "link_to": "Custody Outstanding by Worker",
+   "idx": 16,
+   "is_query_report": 1
   }
  ],
  "charts": [
@@ -225,5 +234,5 @@
    "idx": 2
   }
  ],
- "modified": "2026-06-19 00:00:00.000000"
+ "modified": "2026-06-19 20:17:15.043354"
 }
