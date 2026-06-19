@@ -4,6 +4,7 @@ const routes = [
   { path: "/", name: "profile", component: () => import("./pages/Profile.vue") },
   { path: "/accommodation", name: "accommodation", component: () => import("./pages/Accommodation.vue") },
   { path: "/transport", name: "transport", component: () => import("./pages/Transport.vue") },
+  { path: "/custody", name: "custody", component: () => import("./pages/Custody.vue") },
   { path: "/requests", name: "requests", component: () => import("./pages/Requests.vue") },
   // [#a7w9tx]
   { path: "/:pathMatch(.*)*", redirect: "/" },

@@ -36,6 +36,7 @@ const messages = {
       profile: "Profile",
       accommodation: "Accommodation",
       transport: "Transport",
+      custody: "Custody",
       requests: "Requests",
     },
     profile: {
@@ -73,6 +74,17 @@ const messages = {
       empty: "You have no active accommodation assignment.",
       emptyHint: "Contact your supervisor if this is wrong.",
       reportIssue: "Report a room issue",
+    },
+    custody: {
+      title: "My Custody",
+      qty: "Quantity",
+      building: "Building",
+      unitCost: "Unit cost",
+      value: "Value",
+      total: "Total value",
+      sar: "SAR",
+      empty: "You hold no custody items.",
+      emptyHint: "Items issued to you will appear here.",
     },
     transport: {
       title: "My Transport",
@@ -162,6 +174,7 @@ const messages = {
       profile: "ملفي",
       accommodation: "السكن",
       transport: "النقل",
+      custody: "العهدة",
       requests: "الطلبات",
     },
     profile: {
@@ -199,6 +212,17 @@ const messages = {
       empty: "لا يوجد لديك سكن مُعيَّن حالياً.",
       emptyHint: "تواصل مع مشرفك إذا كان هذا غير صحيح.",
       reportIssue: "الإبلاغ عن مشكلة في الغرفة",
+    },
+    custody: {
+      title: "عهدتي",
+      qty: "الكمية",
+      building: "المبنى",
+      unitCost: "سعر الوحدة",
+      value: "القيمة",
+      total: "إجمالي القيمة",
+      sar: "ريال",
+      empty: "لا توجد لديك عُهدة حالياً.",
+      emptyHint: "ستظهر هنا الأصناف المسلَّمة إليك.",
     },
     transport: {
       title: "نقلي",

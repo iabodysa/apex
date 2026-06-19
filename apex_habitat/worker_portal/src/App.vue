@@ -143,6 +143,7 @@ const tabs = [
   { to: "/", icon: "user", labelKey: "nav.profile" },
   { to: "/accommodation", icon: "building", labelKey: "nav.accommodation" },
   { to: "/transport", icon: "route", labelKey: "nav.transport" },
+  { to: "/custody", icon: "briefcase", labelKey: "nav.custody" },
   { to: "/requests", icon: "message", labelKey: "nav.requests" },
 ];
 </script>

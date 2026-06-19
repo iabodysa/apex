@@ -632,6 +632,68 @@ def list_worker_requests(token=None):
     return rows
 
 
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=60)
+def get_worker_custody(token=None):
+    """The custody articles the worker currently holds (read, token-scoped).
+
+    Resolves the token to one Employee and returns their live custody holding,
+    derived from the read-only Accommodation Stock Ledger — the same net-balance
+    source as the ``Custody Outstanding by Worker`` report, not a Custody Issue
+    replay and not the org-wide dashboard total. Balance per (building, article)
+    is the signed sum of non-cancelled custody-article ledger rows for THIS
+    employee (issues add, returns reverse), so the net is what is still out.
+    Building is a display column, not a filter — a worker who moved buildings
+    still sees prior custody. Scoped strictly to the resolved employee; a
+    client-supplied id can never widen it. Zero/negative-net rows are dropped.
+    Read-only, no commit, no GL."""
+    from frappe.utils import flt
+
+    employee = _resolve_worker(token)
+
+    rows = frappe.get_all(
+        "Accommodation Stock Ledger",
+        filters={
+            "is_cancelled": 0,
+            "item_type": "Custody Article",
+            "employee": employee,
+        },
+        fields=["building", "item", "item_name", "uom", "qty", "unit_cost_sar"],
+    )
+
+    agg = {}
+    for r in rows:
+        key = (r.building, r.item)
+        bucket = agg.setdefault(
+            key,
+            {
+                "item": r.item,
+                "item_name": r.item_name,
+                "building": r.building,
+                "uom": r.uom,
+                "unit_cost_sar": flt(r.unit_cost_sar),
+                "qty": 0.0,
+            },
+        )
+        bucket["qty"] += flt(r.qty)
+        # [#cstdy1] last non-zero unit cost wins, mirroring the report
+        if r.unit_cost_sar:
+            bucket["unit_cost_sar"] = flt(r.unit_cost_sar)
+
+    items = []
+    total_value = 0.0
+    for bucket in agg.values():
+        # [#cstdy2] only still-held positive net holdings; drop returned/zero rows
+        if bucket["qty"] < 1e-9:
+            continue
+        bucket["value_sar"] = flt(bucket["qty"]) * flt(bucket["unit_cost_sar"])
+        total_value += bucket["value_sar"]
+        items.append(bucket)
+
+    items.sort(key=lambda d: (d["item_name"] or d["item"] or "", d["building"] or ""))
+    return {"items": items, "total_value_sar": flt(total_value)}
+
+
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60 * 60)
 def create_worker_request(token=None, category=None, subject=None, body=None, priority=None):
