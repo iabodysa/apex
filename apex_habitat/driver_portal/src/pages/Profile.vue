@@ -70,6 +70,25 @@
         </dl>
       </section>
 
+      <!-- My Requests: secondary actions reachable from the profile rather
+           than the bottom tab bar (fuel request + support tickets). Each row
+           is a tappable mini-card, matching the Unlinked screen's link rows. -->
+      <div class="space-y-2">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-muted">
+          {{ t("profile.myRequests") }}
+        </h3>
+        <router-link to="/fuel" class="card card-pad flex items-center gap-3" style="text-decoration: none">
+          <Icon name="fuel" :size="18" class="text-primary shrink-0" />
+          <span class="text-sm font-semibold">{{ t("profile.fuelRequest") }}</span>
+          <Icon name="chevron" :size="18" class="ms-auto text-muted shrink-0" />
+        </router-link>
+        <router-link to="/tickets" class="card card-pad flex items-center gap-3" style="text-decoration: none">
+          <Icon name="help" :size="18" class="text-primary shrink-0" />
+          <span class="text-sm font-semibold">{{ t("profile.supportTickets") }}</span>
+          <Icon name="chevron" :size="18" class="ms-auto text-muted shrink-0" />
+        </router-link>
+      </div>
+
       <!-- Language selector lives on the profile too (besides the header). -->
       <section class="card card-pad">
         <div class="flex items-center gap-2">

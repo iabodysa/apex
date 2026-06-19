@@ -79,6 +79,9 @@ const messages = {
       currentVehicle: "Current vehicle",
       project: "Project",
       empty: "Your profile isn't available right now.",
+      myRequests: "My Requests",
+      fuelRequest: "Fuel Request",
+      supportTickets: "Support Tickets",
     },
     vehicle: {
       title: "My Vehicle",
@@ -216,6 +219,9 @@ const messages = {
       currentVehicle: "المركبة الحالية",
       project: "المشروع",
       empty: "ملفك غير متاح حالياً.",
+      myRequests: "طلباتي",
+      fuelRequest: "طلب بنزين",
+      supportTickets: "تذاكر الدعم",
     },
     vehicle: {
       title: "مركبتي",
