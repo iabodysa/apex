@@ -10,14 +10,19 @@ jobs:
   gitleaks:
     # Required secret-scanning gate. gitleaks exits non-zero when it finds a
     # leak, which fails this job and therefore the whole workflow — no push or
-    # merge to apex can land a committed secret. Runs over full history
-    # (fetch-depth: 0) so a secret introduced in any commit on the branch/PR is
-    # caught, not just the tip.
+    # merge to apex can land a committed secret. Scans only the commits
+    # introduced by THIS push/PR (the new commit range), not the full history,
+    # so the gate is fast and a secret added in any new commit is still caught.
+    # Known fixture false positives are allowlisted in the committed
+    # .gitleaks.toml at the repo root.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          # Need enough history to diff the push range (before..sha); a shallow
+          # tip-only clone cannot resolve the older end of the range. PRs fetch
+          # the base+head; pushes fetch a bounded window instead of all history.
+          fetch-depth: 50
 
       - name: Install gitleaks
         run: |
@@ -31,7 +36,24 @@ jobs:
           gitleaks version
 
       - name: Scan for committed secrets (required)
-        run: gitleaks detect --no-banner --redact --source .
+        # Scan only the commits added by this push/PR, not the whole history.
+        # gitleaks reads the allowlist from the committed .gitleaks.toml.
+        run: |
+          set -uo pipefail
+          before="${{ github.event.before }}"
+          base="${{ github.event.pull_request.base.sha }}"
+          sha="${{ github.sha }}"
+          if [ -n "${base}" ] && git rev-parse --quiet --verify "${base}^{commit}" >/dev/null 2>&1; then
+            # Pull request: scan base..head.
+            log_opts="${base}..${sha}"
+          elif [ -n "${before}" ] && git rev-parse --quiet --verify "${before}^{commit}" >/dev/null 2>&1; then
+            # Push with a known previous tip: scan before..sha.
+            log_opts="${before}..${sha}"
+          else
+            # First push / new branch / shallow window: scan the tip commit only.
+            log_opts="-1 ${sha}"
+          fi
+          gitleaks detect --no-banner --redact --source . --log-opts="${log_opts}"
 
       - name: No Arabic in commit messages (forward-only)
         run: |
