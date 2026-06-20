@@ -92,6 +92,18 @@ def _user_full_name(user=None):
 	return frappe.utils.get_fullname(user) or user
 
 
+def _project_label(code):
+	"""Resolve a Project link id (e.g. ``PROJ-0038``) to its display name.
+
+	The portal shows the project's human ``project_name`` (the Project DocType's
+	title field), not the autonamed series code. Returns the resolved name, or the
+	code itself as a fallback when the link is blank or cannot be resolved — so a
+	missing/renamed project never blanks the field. Read-only."""
+	if not code:
+		return code
+	return frappe.db.get_value("Project", code, "project_name") or code
+
+
 @frappe.whitelist()
 def get_driver_context():
 	"""Portal bootstrap (read): enabled flag, whether the user is linked to a
@@ -155,6 +167,9 @@ def get_driver_profile():
 	) or {}
 	if d.get("license_expiry"):
 		d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
+	# [#projlbl] portal shows the project's display name, not its series code
+	if d.get("project"):
+		d["project"] = _project_label(d["project"])
 	return d
 
 
@@ -191,6 +206,10 @@ def get_my_vehicle():
 		["name", "plate_number", "vehicle_category", "status", "ownership", "project"],
 		as_dict=True,
 	) or {}
+
+	# [#projlbl] portal shows the project's display name, not its series code
+	if v.get("project"):
+		v["project"] = _project_label(v["project"])
 
 	# [#kcrj1g]
 	if assignment is None:
