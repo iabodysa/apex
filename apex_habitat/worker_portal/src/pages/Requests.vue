@@ -54,18 +54,27 @@
     <!-- My requests -->
     <section v-if="list.data && list.data.length" class="space-y-3">
       <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("requests.mine") }}</h3>
-      <div v-for="r in list.data" :key="r.name" class="card card-pad">
+      <router-link
+        v-for="r in list.data"
+        :key="r.name"
+        :to="`/requests/${encodeURIComponent(r.name)}`"
+        class="card card-pad block"
+        style="text-decoration: none"
+      >
         <div class="flex items-start justify-between gap-2">
           <div class="font-bold leading-tight">{{ tEnum("requestCategory", r.request_category) }}</div>
           <span class="pill shrink-0" :class="statusPill(r.status)">{{ tEnum("requestStatus", r.status) }}</span>
         </div>
         <p class="mt-1 text-sm text-soft whitespace-pre-line line-clamp-3">{{ r.description }}</p>
-        <div class="mt-1 text-xs text-muted">{{ tEnum("priority", r.priority) }} · <bdi>{{ formatDate(r.creation) }}</bdi></div>
+        <div class="mt-1 flex items-center justify-between gap-2">
+          <div class="text-xs text-muted">{{ tEnum("priority", r.priority) }} · <bdi>{{ formatDate(r.creation) }}</bdi></div>
+          <Icon name="chevron" :size="16" class="text-muted shrink-0 row-chevron" />
+        </div>
         <div v-if="r.resolution_notes" class="mt-2 text-sm">
           <span class="text-muted">{{ t("requests.resolution") }}:</span>
           <span class="font-semibold"> {{ r.resolution_notes }}</span>
         </div>
-      </div>
+      </router-link>
     </section>
 
     <!-- Error loading the worker's request list: a revoked/disabled token
@@ -148,3 +157,11 @@ function formatDate(c) {
   return (c || "").slice(0, 10);
 }
 </script>
+
+<style scoped>
+/* The row chevron points toward the detail; flip it under RTL. No other
+   direction-specific rules (T-297) — the rest is logical-property layout. */
+[dir="rtl"] .row-chevron {
+  transform: scaleX(-1);
+}
+</style>

@@ -632,6 +632,135 @@ def list_worker_requests(token=None):
     return rows
 
 
+# [#t322rd]
+# Accommodation Resident Request has NO status-history child table, so the
+# detail timeline is reconstructed from the few durable timestamps the DocType
+# carries: creation (raised), modified (last update), and closed_on (settled).
+# Status states that are settled -> their closed point is closed_on||modified.
+_RESIDENT_REQUEST_SETTLED_STATES = ("Resolved", "Rejected", "Closed")
+
+
+def _request_status_timeline(req):
+    """A simple created -> current timeline for one resident request.
+
+    The DocType has no explicit per-status history table, so we build the
+    timeline from the available date fields: always a 'created' point (creation),
+    and — when the request has reached a settled state — a 'closed' point
+    (closed_on, falling back to modified). The current status is always carried
+    as the active step so the UI can highlight where the request stands. Each
+    point is ``{"key", "status", "timestamp"}`` with a bare string timestamp the
+    client localizes; ordered oldest -> newest."""
+    timeline = [
+        {
+            "key": "created",
+            "status": "New",
+            "timestamp": frappe.utils.cstr(req.get("creation")) if req.get("creation") else None,
+        }
+    ]
+    status = req.get("status")
+    if status in _RESIDENT_REQUEST_SETTLED_STATES:
+        timeline.append(
+            {
+                "key": "closed",
+                "status": status,
+                "timestamp": frappe.utils.cstr(req.get("closed_on") or req.get("modified"))
+                if (req.get("closed_on") or req.get("modified"))
+                else None,
+            }
+        )
+    else:
+        # Live request: surface the current state at its last-updated time so the
+        # timeline shows movement (New -> current) without inventing per-status dates.
+        if status and status != "New":
+            timeline.append(
+                {
+                    "key": "current",
+                    "status": status,
+                    "timestamp": frappe.utils.cstr(req.get("modified"))
+                    if req.get("modified")
+                    else None,
+                }
+            )
+    return timeline
+
+
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=60)
+def get_worker_request_detail(token=None, name=None):
+    """One of the worker's OWN resident requests, in full (read, token-scoped).
+
+    Resolves the token to a single Employee via ``_resolve_worker`` (the only
+    place identity is established), then fetches the Accommodation Resident
+    Request named ``name`` ONLY IF its ``employee`` equals that resolved worker —
+    the EXACT same ownership filter ``list_worker_requests`` uses. The lookup is
+    a single ``frappe.db.get_value`` keyed on BOTH ``name`` AND
+    ``employee=<resolved>``: a request belonging to any other worker simply does
+    not match and yields no row, at which point we raise
+    ``frappe.PermissionError``. The client-supplied ``name`` is therefore never
+    trusted on its own — it can only ever address the token-owner's own rows, so
+    this endpoint cannot be used to read another worker's request.
+
+    Returns the request's status, a reconstructed created -> current status
+    timeline (the DocType has no status-history child table, so it is built from
+    creation/modified/closed_on), the triage and resolution notes, the
+    category/priority/location/description, and the attachment file url if any.
+    Read-only, no commit, no GL."""
+    employee = _resolve_worker(token)
+
+    name = (name or "").strip()
+    if not name:
+        frappe.throw(_("A request reference is required."), frappe.PermissionError)
+
+    # [#t322own] Ownership gate: key the fetch on name AND employee=<resolved>,
+    # mirroring list_worker_requests' filter exactly. A request owned by another
+    # worker does not match -> no row -> PermissionError. The client name alone
+    # can never widen access beyond the token's own employee.
+    req = frappe.db.get_value(
+        "Accommodation Resident Request",
+        {"name": name, "employee": employee},
+        [
+            "name",
+            "request_category",
+            "priority",
+            "issue_location",
+            "description",
+            "status",
+            "triage_notes",
+            "resolution_notes",
+            "attachment",
+            "creation",
+            "modified",
+            "closed_on",
+        ],
+        as_dict=True,
+    )
+    if not req:
+        frappe.throw(
+            _("This request is not available or does not belong to you."),
+            frappe.PermissionError,
+        )
+
+    attachment_url = None
+    if req.get("attachment"):
+        attachment_url = frappe.utils.get_url(req["attachment"])
+
+    return {
+        "name": req["name"],
+        "status": req.get("status"),
+        "request_category": req.get("request_category"),
+        "priority": req.get("priority"),
+        "issue_location": req.get("issue_location"),
+        "description": req.get("description"),
+        "triage_notes": req.get("triage_notes"),
+        "resolution_notes": req.get("resolution_notes"),
+        "attachment": attachment_url,
+        "creation": frappe.utils.cstr(req.get("creation")) if req.get("creation") else None,
+        "modified": frappe.utils.cstr(req.get("modified")) if req.get("modified") else None,
+        "closed_on": frappe.utils.cstr(req.get("closed_on")) if req.get("closed_on") else None,
+        "timeline": _request_status_timeline(req),
+    }
+
+
 def _custody_issued_by(custody_issue, building):
     """Name the supervisor who issued a held article to the worker.
 
