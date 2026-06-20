@@ -34,7 +34,7 @@
         </div>
 
         <dl class="space-y-3 text-sm mt-4">
-          <Row v-if="it.received_date" icon="calendar" :label="t('custody.receivedDate')" :value="it.received_date" />
+          <Row v-if="it.received_date" icon="calendar" :label="t('custody.receivedDate')" :value="formatDate(it.received_date)" />
           <Row icon="user" :label="t('custody.issuedBy')" :value="it.issued_by" />
           <Row v-if="it.building" icon="building" :label="t('custody.building')" :value="it.building" />
         </dl>
@@ -53,6 +53,7 @@ import { computed, h } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
+import { formatDate } from "../datetime";
 import { TOKEN } from "../token";
 
 const { t } = useI18n();

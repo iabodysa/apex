@@ -28,7 +28,7 @@
           <Row v-if="p.designation" icon="briefcase" :label="t('profile.designation')" :value="p.designation" />
           <Row v-if="p.department" icon="layers" :label="t('profile.department')" :value="p.department" />
           <Row v-if="p.project" icon="briefcase" :label="t('profile.project')" :value="p.project" />
-          <Row v-if="p.date_of_joining" icon="calendar" :label="t('profile.joined')" :value="p.date_of_joining" />
+          <Row v-if="p.date_of_joining" icon="calendar" :label="t('profile.joined')" :value="formatDate(p.date_of_joining)" />
           <Row v-if="p.cell_number" icon="phone" :label="t('profile.phone')" :value="p.cell_number" />
         </dl>
       </section>
@@ -50,7 +50,7 @@
             <div class="flex items-center gap-2" :class="docColor(doc)">
               <dt class="text-muted">{{ t("profile.expires") }}</dt>
               <dd class="ms-auto font-semibold">
-                <bdi>{{ doc.expiry || t("profile.noExpiry") }}</bdi>
+                <bdi>{{ doc.expiry ? formatDate(doc.expiry) : t("profile.noExpiry") }}</bdi>
               </dd>
             </div>
           </dl>
@@ -82,6 +82,7 @@ import { computed, h } from "vue";
 import Icon from "../components/Icon.vue";
 import LangToggle from "../components/LangToggle.vue";
 import { useI18n } from "../i18n";
+import { formatDate } from "../datetime";
 
 const { t, tEnum } = useI18n();
 

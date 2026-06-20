@@ -45,9 +45,9 @@
         </div>
 
         <dl class="space-y-3 text-sm">
-          <Row icon="calendar" :label="t('accommodation.checkIn')" :value="acc.data.assignment.check_in_date" />
+          <Row icon="calendar" :label="t('accommodation.checkIn')" :value="formatDate(acc.data.assignment.check_in_date)" />
           <Row v-if="acc.data.assignment.stay_type" icon="clock" :label="t('accommodation.stayType')" :value="tEnum('stayType', acc.data.assignment.stay_type)" />
-          <Row v-if="acc.data.assignment.expected_checkout_date" icon="clock" :label="t('accommodation.expectedCheckout')" :value="acc.data.assignment.expected_checkout_date" />
+          <Row v-if="acc.data.assignment.expected_checkout_date" icon="clock" :label="t('accommodation.expectedCheckout')" :value="formatDate(acc.data.assignment.expected_checkout_date)" />
           <Row v-if="occupancy" icon="user" :label="t('accommodation.occupancy')" :value="occupancy" />
           <Row v-if="building?.address" icon="pin" :label="t('accommodation.address')" :value="building.address" />
         </dl>
@@ -103,6 +103,7 @@ import { computed, h } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
+import { formatDate } from "../datetime";
 import { TOKEN } from "../token";
 import { waLink } from "../phone";
 

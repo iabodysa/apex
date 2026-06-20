@@ -23,7 +23,7 @@
             </div>
             <div v-if="trip.pickup_point || trip.pickup_datetime" class="mt-0.5 text-sm text-muted">
               <span v-if="trip.pickup_point">{{ trip.pickup_point }}</span>
-              <span v-if="trip.depart_time || trip.pickup_datetime"> · <bdi>{{ trip.depart_time || formatDt(trip.pickup_datetime) }}</bdi></span>
+              <span v-if="trip.depart_time || trip.pickup_datetime"> · <bdi>{{ trip.depart_time ? formatTime(trip.depart_time) : formatDateTime(trip.pickup_datetime) }}</bdi></span>
             </div>
           </div>
           <span v-if="trip.status" class="pill pill-accent shrink-0">{{ tEnum("transportStatus", trip.status) }}</span>
@@ -66,7 +66,7 @@
               <div class="min-w-0">
                 <div class="font-semibold leading-tight">
                   {{ stop.stop_name || t("transport.stop") }}
-                  <span v-if="stop.planned_time" class="text-muted font-normal">· <bdi>{{ stop.planned_time }}</bdi></span>
+                  <span v-if="stop.planned_time" class="text-muted font-normal">· <bdi>{{ formatTime(stop.planned_time) }}</bdi></span>
                 </div>
                 <div v-if="stop.pickup" class="text-sm text-muted">
                   {{ stop.pickup.building_name || stop.accommodation_building }}
@@ -99,6 +99,7 @@ import { computed } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
+import { formatTime, formatDateTime } from "../datetime";
 import { TOKEN } from "../token";
 import { waLink } from "../phone";
 
@@ -111,10 +112,4 @@ const tr = createResource({
 });
 
 const errorMessage = computed(() => resourceErrorMessage(tr.error));
-
-function formatDt(dt) {
-  if (!dt) return "";
-  // Server sends "YYYY-MM-DD HH:MM:SS"; show date + HH:MM.
-  return dt.slice(0, 16).replace("T", " ");
-}
 </script>
