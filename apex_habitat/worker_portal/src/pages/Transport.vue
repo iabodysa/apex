@@ -1,5 +1,8 @@
 <template>
   <div class="space-y-5">
+    <!-- [T-320] pull-to-refresh indicator (page scrolls with the window) -->
+    <PullIndicator :distance="ptr.distance.value" :refreshing="ptr.refreshing.value" :threshold="ptr.THRESHOLD" />
+
     <h2 class="section-title">{{ t("transport.title") }}</h2>
 
     <template v-if="tr.loading">
@@ -102,10 +105,12 @@ import { computed } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
+import PullIndicator from "../components/PullIndicator.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatTime, formatDateTime } from "../datetime";
 import { TOKEN } from "../token";
 import { waLink } from "../phone";
+import { usePullToRefresh } from "../usePullToRefresh";
 
 const { t, tEnum } = useI18n();
 
@@ -114,6 +119,10 @@ const tr = createResource({
   params: { token: TOKEN },
   auto: true,
 });
+
+// [T-320] pull down at the top to refresh upcoming trips. reload() returns the
+// fetch promise, so the spinner keeps spinning until the data lands.
+const ptr = usePullToRefresh(() => tr.reload());
 
 const errorMessage = computed(() => resourceErrorMessage(tr.error));
 </script>
