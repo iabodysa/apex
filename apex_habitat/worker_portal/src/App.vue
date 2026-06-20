@@ -140,7 +140,8 @@ const showBrand = computed(() => window.portal_show_brand !== false);
 const brandLogo = computed(() => window.portal_logo || "");
 
 const tabs = [
-  { to: "/", icon: "user", labelKey: "nav.profile" },
+  { to: "/", icon: "home", labelKey: "nav.home" },
+  { to: "/profile", icon: "user", labelKey: "nav.profile" },
   { to: "/accommodation", icon: "building", labelKey: "nav.accommodation" },
   { to: "/transport", icon: "route", labelKey: "nav.transport" },
   { to: "/custody", icon: "briefcase", labelKey: "nav.custody" },
