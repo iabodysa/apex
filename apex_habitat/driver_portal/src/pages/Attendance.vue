@@ -2,6 +2,13 @@
   <div class="space-y-5">
     <h2 class="section-title">{{ t("attendance.title") }}</h2>
 
+    <!-- Initial load: spinner until the first state arrives. -->
+    <LoadingState v-if="today.loading && !state.exists" :label="t('common.loading')" />
+
+    <!-- Load failure: an explicit, retryable error state for the on-load fetch. -->
+    <ErrorState v-else-if="today.error" :message="err || t('errors.loadFailed')" @retry="today.reload()" />
+
+    <template v-else>
     <!-- Today's attendance state (fetched on load, updated reactively after each tap). -->
     <section class="card card-pad space-y-4">
       <div class="flex items-center justify-between gap-3">
@@ -57,6 +64,7 @@
 
     <p v-if="msg" class="status-note status-ok">{{ msg }}</p>
     <p v-if="err" class="status-note status-err">{{ err }}</p>
+    </template>
   </div>
 </template>
 
@@ -64,6 +72,8 @@
 import { computed, reactive, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import LoadingState from "../components/LoadingState.vue";
+import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
 
 const { t } = useI18n();

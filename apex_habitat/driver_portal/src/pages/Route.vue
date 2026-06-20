@@ -4,7 +4,9 @@
 
     <!-- Single-trip drill-in (from a "My Trips" card): /route/:trip -->
     <template v-if="singleTrip">
-      <div v-if="tripRoute.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
+      <LoadingState v-if="tripRoute.loading" :label="t('common.loading')" />
+
+      <ErrorState v-else-if="tripRoute.error" :message="t('errors.loadFailed')" @retry="tripRoute.reload()" />
 
       <template v-else-if="tripRoute.data">
         <section class="card card-pad space-y-3">
@@ -76,14 +78,14 @@
         </section>
       </template>
 
-      <div v-else class="card card-pad text-center">
-        <p class="text-sm text-muted">{{ t("route.empty") }}</p>
-      </div>
+      <EmptyState v-else :title="t('route.empty')" />
     </template>
 
     <!-- All-trips worker route (unchanged): /route -->
     <template v-else>
-      <div v-if="route.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
+      <LoadingState v-if="route.loading" :label="t('common.loading')" />
+
+      <ErrorState v-else-if="route.error" :message="t('errors.loadFailed')" @retry="route.reload()" />
 
       <template v-else-if="route.data && route.data.trips && route.data.trips.length">
         <section v-for="trip in route.data.trips" :key="trip.dispatch_trip" class="card card-pad space-y-3">
@@ -159,10 +161,7 @@
         </section>
       </template>
 
-      <div v-else class="card card-pad text-center">
-        <p class="text-sm text-muted">{{ t("route.empty") }}</p>
-        <p class="text-xs text-muted mt-1">{{ t("route.emptyHint") }}</p>
-      </div>
+      <EmptyState v-else :title="t('route.empty')" :hint="t('route.emptyHint')" />
     </template>
   </div>
 </template>
@@ -171,6 +170,9 @@
 import { computed } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import LoadingState from "../components/LoadingState.vue";
+import EmptyState from "../components/EmptyState.vue";
+import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
 
 const { t } = useI18n();

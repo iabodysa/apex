@@ -9,8 +9,11 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Brand: typeof import('./src/components/Brand.vue')['default']
+    EmptyState: typeof import('./src/components/EmptyState.vue')['default']
+    ErrorState: typeof import('./src/components/ErrorState.vue')['default']
     Icon: typeof import('./src/components/Icon.vue')['default']
     LangToggle: typeof import('./src/components/LangToggle.vue')['default']
+    LoadingState: typeof import('./src/components/LoadingState.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Unlinked: typeof import('./src/components/Unlinked.vue')['default']

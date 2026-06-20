@@ -45,15 +45,24 @@
     </section>
 
     <!-- My tickets -->
-    <section v-if="list.data && list.data.length" class="space-y-3">
+    <section class="space-y-3">
       <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("tickets.myTickets") }}</h3>
-      <div v-for="t in list.data" :key="t.name" class="card card-pad">
-        <div class="flex items-start justify-between gap-2">
-          <div class="font-bold leading-tight">{{ t.subject }}</div>
-          <span class="pill shrink-0" :class="statusPill(t.status)">{{ t.status }}</span>
+
+      <LoadingState v-if="list.loading" :label="t('common.loading')" />
+
+      <ErrorState v-else-if="list.error" :message="t('errors.loadFailed')" @retry="list.reload()" />
+
+      <EmptyState v-else-if="!list.data || !list.data.length" icon="help" />
+
+      <template v-else>
+        <div v-for="t in list.data" :key="t.name" class="card card-pad">
+          <div class="flex items-start justify-between gap-2">
+            <div class="font-bold leading-tight">{{ t.subject }}</div>
+            <span class="pill shrink-0" :class="statusPill(t.status)">{{ t.status }}</span>
+          </div>
+          <div class="mt-1 text-sm text-muted">{{ t.category }} · {{ t.priority }}</div>
         </div>
-        <div class="mt-1 text-sm text-muted">{{ t.category }} · {{ t.priority }}</div>
-      </div>
+      </template>
     </section>
   </div>
 </template>
@@ -62,6 +71,9 @@
 import { reactive, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import LoadingState from "../components/LoadingState.vue";
+import EmptyState from "../components/EmptyState.vue";
+import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
 
 const { t } = useI18n();

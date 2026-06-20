@@ -2,7 +2,9 @@
   <div class="space-y-5">
     <h2 class="section-title">{{ t("profile.title") }}</h2>
 
-    <div v-if="profile.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
+    <LoadingState v-if="profile.loading" :label="t('common.loading')" />
+
+    <ErrorState v-else-if="profile.error" :message="t('errors.loadFailed')" @retry="profile.reload()" />
 
     <template v-else-if="profile.data && profile.data.name">
       <!-- Identity card -->
@@ -99,9 +101,7 @@
       </section>
     </template>
 
-    <div v-else class="card card-pad text-center">
-      <p class="text-sm text-muted">{{ t("profile.empty") }}</p>
-    </div>
+    <EmptyState v-else :title="t('profile.empty')" />
   </div>
 </template>
 
@@ -110,6 +110,9 @@ import { computed } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import LangToggle from "../components/LangToggle.vue";
+import LoadingState from "../components/LoadingState.vue";
+import EmptyState from "../components/EmptyState.vue";
+import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
 
 const { t } = useI18n();

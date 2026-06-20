@@ -2,18 +2,16 @@
   <div class="space-y-4">
     <h2 class="section-title">{{ t("trips.title") }}</h2>
 
-    <div v-if="trips.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
+    <LoadingState v-if="trips.loading" :label="t('common.loading')" />
 
-    <div v-else-if="!trips.data || !trips.data.length" class="card card-pad text-center">
-      <div
-        class="avatar mx-auto mb-2 h-11 w-11"
-        style="background: color-mix(in srgb, var(--c-mint) 25%, transparent); color: var(--c-primary)"
-      >
-        <Icon name="route" :size="22" />
-      </div>
-      <p class="font-semibold">{{ t("trips.empty") }}</p>
-      <p class="text-sm text-muted">{{ t("trips.emptyHint") }}</p>
-    </div>
+    <ErrorState v-else-if="trips.error" :message="t('errors.loadFailed')" @retry="trips.reload()" />
+
+    <EmptyState
+      v-else-if="!trips.data || !trips.data.length"
+      icon="route"
+      :title="t('trips.empty')"
+      :hint="t('trips.emptyHint')"
+    />
 
     <router-link
       v-for="t in trips.data"
@@ -39,6 +37,9 @@
 <script setup>
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import LoadingState from "../components/LoadingState.vue";
+import EmptyState from "../components/EmptyState.vue";
+import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
 
 const { t } = useI18n();

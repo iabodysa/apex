@@ -2,7 +2,9 @@
   <div class="space-y-5">
     <h2 class="section-title">{{ t("vehicle.title") }}</h2>
 
-    <div v-if="vehicle.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
+    <LoadingState v-if="vehicle.loading" :label="t('common.loading')" />
+
+    <ErrorState v-else-if="vehicle.error" :message="t('errors.loadFailed')" @retry="vehicle.reload()" />
 
     <template v-else-if="v">
       <section class="card card-pad">
@@ -48,16 +50,12 @@
       </section>
     </template>
 
-    <div v-else class="card card-pad text-center">
-      <div
-        class="avatar mx-auto mb-2 h-11 w-11"
-        style="background: color-mix(in srgb, var(--c-mint) 25%, transparent); color: var(--c-primary)"
-      >
-        <Icon name="truck" :size="22" />
-      </div>
-      <p class="font-semibold">{{ t("vehicle.empty") }}</p>
-      <p class="text-sm text-muted">{{ t("vehicle.emptyHint") }}</p>
-    </div>
+    <EmptyState
+      v-else
+      icon="truck"
+      :title="t('vehicle.empty')"
+      :hint="t('vehicle.emptyHint')"
+    />
   </div>
 </template>
 
@@ -65,6 +63,9 @@
 import { computed } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import LoadingState from "../components/LoadingState.vue";
+import EmptyState from "../components/EmptyState.vue";
+import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
 
 const { t } = useI18n();
