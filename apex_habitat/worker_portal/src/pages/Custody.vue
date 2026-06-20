@@ -2,7 +2,10 @@
   <div class="space-y-5">
     <h2 class="section-title">{{ t("custody.title") }}</h2>
 
-    <div v-if="cus.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
+    <template v-if="cus.loading">
+      <Skeleton :lines="3" />
+      <Skeleton :lines="3" />
+    </template>
 
     <!-- Error: an invalid/disabled token (PermissionError) or a server failure
          must NOT masquerade as a benign "no custody" empty state. -->
@@ -52,6 +55,7 @@
 import { computed, h } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDate } from "../datetime";
 import { TOKEN } from "../token";

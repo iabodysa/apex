@@ -13,5 +13,6 @@ declare module 'vue' {
     LangToggle: typeof import('./src/components/LangToggle.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Skeleton: typeof import('./src/components/Skeleton.vue')['default']
   }
 }

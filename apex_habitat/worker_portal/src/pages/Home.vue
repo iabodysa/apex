@@ -2,7 +2,10 @@
   <div class="space-y-5">
     <h2 class="section-title">{{ t("home.title") }}</h2>
 
-    <div v-if="home.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
+    <template v-if="home.loading">
+      <Skeleton :lines="2" />
+      <Skeleton variant="stats" :lines="2" />
+    </template>
 
     <!-- Error: a revoked/disabled token (PermissionError) or a server failure
          must surface, not show as a benign empty state. -->
@@ -75,6 +78,7 @@
 import { computed, onUnmounted, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDateTime, formatTime } from "../datetime";
 import { TOKEN } from "../token";

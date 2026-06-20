@@ -139,7 +139,14 @@
       </button>
     </div>
 
-    <div v-else-if="!list.loading" class="card card-pad text-center">
+    <!-- List still loading: skeleton cards in place of the request rows. The
+         new-request form above stays interactive throughout. -->
+    <section v-else-if="list.loading" class="space-y-3">
+      <Skeleton :lines="2" />
+      <Skeleton :lines="2" />
+    </section>
+
+    <div v-else class="card card-pad text-center">
       <p class="text-sm text-muted">{{ t("requests.empty") }}</p>
     </div>
   </div>
@@ -149,6 +156,7 @@
 import { computed, reactive, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { TOKEN } from "../token";
 

@@ -2,7 +2,10 @@
   <div class="space-y-5">
     <h2 class="section-title">{{ t("transport.title") }}</h2>
 
-    <div v-if="tr.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
+    <template v-if="tr.loading">
+      <Skeleton :lines="4" />
+      <Skeleton :lines="3" />
+    </template>
 
     <!-- Error: a revoked/disabled token (PermissionError) or a server failure
          must surface, not show as a benign "no upcoming transport" empty state. -->
@@ -98,6 +101,7 @@
 import { computed } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatTime, formatDateTime } from "../datetime";
 import { TOKEN } from "../token";

@@ -618,6 +618,56 @@ body {
   transform: scaleX(-1);
 }
 
+/* [T-316] Skeleton loading placeholders (Skeleton.vue). GLOBAL on purpose so the
+   shimmer is shared and carries NO [dir=rtl] selector — the sweep is a symmetric
+   moving background-position, so it reads the same under LTR and RTL with no
+   direction-keyed rule (avoids the scoped [dir=rtl] pitfall, T-297). */
+.sk-line,
+.sk-block {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--c-ink) 8%, var(--c-surface));
+  /* the moving highlight; 200% lets background-position sweep across */
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--c-ink) 6%, transparent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: sk-shimmer 1.3s ease-in-out infinite;
+}
+.sk-line {
+  height: 12px;
+}
+/* width modifiers so lines look like real, ragged content */
+.sk-w-40 { width: 40%; }
+.sk-w-50 { width: 50%; }
+.sk-w-60 { width: 60%; }
+.sk-w-70 { width: 70%; }
+.sk-avatar {
+  height: 44px;
+  width: 44px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+@keyframes sk-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-line,
+  .sk-block {
+    animation: none;
+  }
+}
+
 /* [#85x56s] */
 .text-muted {
   color: var(--c-muted);

@@ -2,7 +2,10 @@
   <div class="space-y-5">
     <h2 class="section-title">{{ t("accommodation.title") }}</h2>
 
-    <div v-if="acc.loading" class="text-muted text-sm">{{ t("common.loading") }}</div>
+    <template v-if="acc.loading">
+      <Skeleton variant="stats" :lines="3" />
+      <Skeleton :lines="4" />
+    </template>
 
     <!-- Error: an invalid/disabled token (PermissionError) or a server failure
          must NOT masquerade as a benign "no assignment" empty state. -->
@@ -102,6 +105,7 @@
 import { computed, h } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
+import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDate } from "../datetime";
 import { TOKEN } from "../token";
