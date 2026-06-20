@@ -79,6 +79,22 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Arrivals Desk",
+   "link_type": "Page",
+   "link_to": "arrivals-desk",
+   "idx": 19
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Room Setup",
+   "link_type": "Page",
+   "link_to": "room-setup",
+   "idx": 20
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Lifecycle",
    "idx": 4
@@ -190,6 +206,15 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
+   "label": "Occupancy Trend",
+   "link_type": "Report",
+   "link_to": "Occupancy Trend",
+   "idx": 21,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Accommodation Manager Dashboard",
    "link_type": "Dashboard",
    "link_to": "Accommodation Manager Dashboard",
@@ -238,5 +263,5 @@
    "idx": 1
   }
  ],
- "modified": "2026-06-12 14:47:12.412413"
+ "modified": "2026-06-20 17:05:00.000000"
 }

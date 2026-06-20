@@ -341,6 +341,42 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Claim vs Consumption",
+   "link_type": "Report",
+   "link_to": "Fuel Claim vs Consumption",
+   "idx": 38,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Consumption Summary",
+   "link_type": "Report",
+   "link_to": "Fuel Consumption Summary",
+   "idx": 39,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Exception Register",
+   "link_type": "Report",
+   "link_to": "Fuel Exception Register",
+   "idx": 40,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Driver Attendance Summary",
+   "link_type": "Report",
+   "link_to": "Driver Attendance Summary",
+   "idx": 41,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Dashboards",
    "idx": 35
@@ -428,5 +464,5 @@
    "idx": 1
   }
  ],
- "modified": "2026-06-13 15:08:24.104965"
+ "modified": "2026-06-20 17:05:00.000000"
 }

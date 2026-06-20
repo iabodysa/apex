@@ -159,6 +159,15 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
+   "label": "Supplier Cost Recovery",
+   "link_type": "Report",
+   "link_to": "Supplier Cost Recovery",
+   "idx": 16,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Finance Manager Dashboard",
    "link_type": "Dashboard",
    "link_to": "Finance Manager Dashboard",
@@ -199,5 +208,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-12 14:47:12.412413"
+ "modified": "2026-06-20 17:05:00.000000"
 }

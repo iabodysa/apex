@@ -312,6 +312,33 @@
    "link_type": "Dashboard",
    "link_to": "Internal Auditor Dashboard",
    "idx": 31
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Round Compliance",
+   "link_type": "Report",
+   "link_to": "Safety Round Compliance",
+   "idx": 32,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Daily Cleaning Compliance",
+   "link_type": "Report",
+   "link_to": "Daily Cleaning Compliance",
+   "idx": 33,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Missed Cleaning Tasks",
+   "link_type": "Report",
+   "link_to": "Missed Cleaning Tasks",
+   "idx": 34,
+   "is_query_report": 1
   }
  ],
  "charts": [
@@ -380,5 +407,5 @@
    "idx": 1
   }
  ],
- "modified": "2026-06-18 12:00:00.000000"
+ "modified": "2026-06-20 17:05:00.000000"
 }

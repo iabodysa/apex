@@ -10,7 +10,7 @@
  "is_hidden": 0,
  "sequence_id": 5.0,
  "parent_page": "",
- "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwHdrGoTo\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Go To</b></span>\", \"col\": 12}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 6}}, {\"id\": \"mwScAlerts\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Alert\", \"col\": 6}}, {\"id\": \"mwHdrNumbers\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Numbers</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwHdrQueues\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Queues</b></span>\", \"col\": 12}}, {\"id\": \"mwQlApprovals\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Pending Approvals\", \"col\": 4}}, {\"id\": \"mwQlTasks\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Tasks\", \"col\": 4}}, {\"id\": \"mwQlMentions\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Mentions\", \"col\": 4}}]",
+ "content": "[{\"id\": \"mwHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"mwHdrGoTo\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Go To</b></span>\", \"col\": 12}}, {\"id\": \"mwScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 6}}, {\"id\": \"mwScAlerts\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Alert\", \"col\": 6}}, {\"id\": \"mwHdrNumbers\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Numbers</b></span>\", \"col\": 12}}, {\"id\": \"mwNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 4}}, {\"id\": \"mwNcSubmitted\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Submitted By Me\", \"col\": 4}}, {\"id\": \"mwNcApproved\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Approved Last 48h\", \"col\": 4}}, {\"id\": \"mwHdrQueues\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Queues</b></span>\", \"col\": 12}}, {\"id\": \"mwQlApprovals\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Pending Approvals\", \"col\": 4}}, {\"id\": \"mwQlTasks\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Tasks\", \"col\": 4}}, {\"id\": \"mwQlMentions\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Mentions\", \"col\": 4}}, {\"id\": \"mwHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"mwCardTools\", \"type\": \"card\", \"data\": {\"card_name\": \"Tools\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -30,7 +30,30 @@
    "idx": 2
   }
  ],
- "links": [],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Tools",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Action Inbox",
+   "link_type": "Page",
+   "link_to": "action-inbox",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Operations Alert",
+   "link_type": "DocType",
+   "link_to": "Operations Alert",
+   "idx": 3
+  }
+ ],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -77,5 +100,5 @@
   }
  ],
  "roles": [],
- "modified": "2026-06-12 14:47:12.412413"
+ "modified": "2026-06-20 17:05:00.000000"
 }
