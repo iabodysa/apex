@@ -16,7 +16,7 @@
 
     <template v-else-if="home.data">
       <!-- Next ride -->
-      <section class="card card-pad space-y-3">
+      <section class="card card-pad space-y-3" :class="{ 'card-primary': !alerts.length && ride }">
         <div class="flex items-center gap-2">
           <Icon name="route" :size="18" class="text-primary shrink-0 rtl-flip" />
           <span class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("home.nextRide") }}</span>
@@ -54,7 +54,7 @@
       </div>
 
       <!-- Documents to renew: only when there is at least one alert. -->
-      <section v-if="alerts.length" class="card card-pad space-y-3">
+      <section v-if="alerts.length" class="card card-pad card-primary space-y-3">
         <div class="flex items-center gap-2">
           <Icon name="alert" :size="18" class="text-warning shrink-0" />
           <span class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("home.alerts") }}</span>
