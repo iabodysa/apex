@@ -54,7 +54,7 @@
 
         <a v-if="building?.google_maps_url" :href="building.google_maps_url" target="_blank" rel="noopener"
            class="text-primary text-sm inline-flex items-center gap-1">
-          <Icon name="external" :size="14" /> {{ t("common.openMap") }}
+          <Icon name="external" :size="14" class="rtl-flip" /> {{ t("common.openMap") }}
         </a>
       </section>
 

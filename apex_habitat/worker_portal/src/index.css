@@ -605,6 +605,14 @@ body {
   background: var(--c-danger-bg);
 }
 
+/* [#rtlflp] RTL: horizontally mirror direction-bearing icons (chevron / external-link
+   / route / nav arrows) so they point the correct way. GLOBAL (plain class) on
+   purpose — a [dir=rtl] rule inside a Vue <style scoped> block compiles to a bare
+   [dir=rtl][data-v-...] that can mirror the whole page (see T-297). Keep this here. */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
 /* [#85x56s] */
 .text-muted {
   color: var(--c-muted);

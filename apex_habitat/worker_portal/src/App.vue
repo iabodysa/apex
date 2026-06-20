@@ -64,7 +64,7 @@
 
       <nav class="tabbar" :style="{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }">
         <router-link v-for="tab in tabs" :key="tab.to" :to="tab.to" class="tab">
-          <span class="tab-icon-wrap"><Icon :name="tab.icon" :size="22" /></span>
+          <span class="tab-icon-wrap"><Icon :name="tab.icon" :size="22" :class="{ 'rtl-flip': tab.icon === 'route' }" /></span>
           <span>{{ t(tab.labelKey) }}</span>
           <span class="tab-pip"></span>
         </router-link>
