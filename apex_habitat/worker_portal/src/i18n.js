@@ -73,6 +73,7 @@ const messages = {
       daysLeft: "{n} day(s) left",
       requestChange: "Request a data change",
       empty: "Your profile isn't available right now.",
+      emptyHint: "Try reopening your link, or ask your supervisor.",
     },
     accommodation: {
       title: "My Accommodation",
@@ -129,6 +130,7 @@ const messages = {
       submitted: "Request submitted",
       mine: "My requests",
       empty: "You haven't raised any requests yet.",
+      emptyHint: "Use the form above to raise your first request.",
       resolution: "Resolution",
       issueLocation: "Where is the issue?",
       issueLocationNone: "Not specified",
@@ -259,6 +261,7 @@ const messages = {
       daysLeft: "متبقٍ {n} يوم",
       requestChange: "طلب تعديل بيانات",
       empty: "ملفك غير متاح حالياً.",
+      emptyHint: "أعد فتح رابطك، أو تواصل مع مشرفك.",
     },
     accommodation: {
       title: "سكني",
@@ -315,6 +318,7 @@ const messages = {
       submitted: "تم إرسال الطلب",
       mine: "طلباتي",
       empty: "لم تقم بإنشاء أي طلبات بعد.",
+      emptyHint: "استخدم النموذج بالأعلى لرفع أوّل طلب.",
       resolution: "المعالجة",
       issueLocation: "أين توجد المشكلة؟",
       issueLocationNone: "غير محدد",

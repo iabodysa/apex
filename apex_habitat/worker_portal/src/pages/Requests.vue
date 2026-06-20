@@ -148,6 +148,7 @@
 
     <div v-else class="card card-pad text-center">
       <p class="text-sm text-muted">{{ t("requests.empty") }}</p>
+      <p class="text-xs text-muted mt-1">{{ t("requests.emptyHint") }}</p>
     </div>
   </div>
 </template>
