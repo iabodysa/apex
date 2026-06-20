@@ -786,3 +786,69 @@ def create_worker_request(token=None, category=None, subject=None, body=None, pr
     )
     doc.insert(ignore_permissions=True)  # audit-ok — employee resolved from token server-side
     return {"name": doc.name, "status": doc.status}
+
+
+# [#hometdy]
+# Document is "expiring soon" within this many days — mirrors the established
+# Habitat renewal lead (Building License default renewal_lead_days = 60). A
+# negative days_left (already past) always alerts.
+_DOCUMENT_ALERT_LEAD_DAYS = 60
+
+# Accommodation Resident Request states that are settled, so NOT counted as open.
+# (Status options: New / Triaged / Assigned / In Progress / Waiting Evidence /
+# Resolved / Rejected / Closed — see the DocType.)
+_RESIDENT_REQUEST_CLOSED_STATES = ("Resolved", "Rejected", "Closed")
+
+
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=60)
+def get_worker_home(token=None):
+    """The worker's composed home/today screen (read, token-scoped).
+
+    Resolves the token to one Employee and folds four already-exposed worker
+    surfaces into a single "today" payload, so the home screen makes one call:
+
+      * ``profile_alerts``    — the profile's own document items
+        (``get_worker_context``) filtered to those expiring soon (``days_left``
+        at or under the Habitat renewal lead) or already past; a list, possibly
+        empty.
+      * ``next_ride``         — the single soonest upcoming shuttle, the first of
+        ``get_worker_transport``'s already-time-ordered trips, or None.
+      * ``bed``               — the worker's current accommodation bed from
+        ``get_worker_accommodation``, or None.
+      * ``open_request_count`` — count of the worker's own resident requests
+        (``list_worker_requests``) not in a settled state.
+
+    Purely additive: it composes the existing token-scoped endpoints (each
+    re-resolves the same token via ``_resolve_worker``) and changes none of
+    them. Read-only, no commit, no GL."""
+    # [#hometdy] resolve once up front so a bad/disabled token fails closed here
+    # exactly as the sibling endpoints do (each re-resolves it too).
+    _resolve_worker(token)
+
+    profile = get_worker_context(token)
+    profile_alerts = [
+        d
+        for d in (profile.get("documents") or [])
+        if d.get("days_left") is not None and d["days_left"] <= _DOCUMENT_ALERT_LEAD_DAYS
+    ]
+
+    transport = get_worker_transport(token)
+    trips = transport.get("trips") or []
+    next_ride = trips[0] if trips else None
+
+    bed = get_worker_accommodation(token).get("bed")
+
+    open_request_count = sum(
+        1
+        for r in list_worker_requests(token)
+        if r.get("status") not in _RESIDENT_REQUEST_CLOSED_STATES
+    )
+
+    return {
+        "date": frappe.utils.today(),
+        "profile_alerts": profile_alerts,
+        "next_ride": next_ride,
+        "bed": bed,
+        "open_request_count": open_request_count,
+    }
