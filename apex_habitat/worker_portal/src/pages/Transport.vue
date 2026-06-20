@@ -77,6 +77,9 @@
             </li>
           </ol>
         </div>
+
+        <!-- No planned route yet: an explicit state so the trip card is never a bare/inert card. -->
+        <div v-else class="text-sm text-muted">{{ t("transport.noRoutePlanned") }}</div>
       </section>
 
       <router-link to="/requests" class="btn btn-outline" style="text-decoration: none">
