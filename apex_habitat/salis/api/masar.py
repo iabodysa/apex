@@ -1058,7 +1058,18 @@ def get_worker_home(token=None):
 
     transport = get_worker_transport(token)
     trips = transport.get("trips") or []
-    next_ride = trips[0] if trips else None
+    # [T-536] the "next" ride is the soonest UPCOMING trip, not the earliest one
+    # (which may already be in the past). trips are ordered by pickup_datetime asc.
+    now_dt = frappe.utils.now_datetime()
+    next_ride = next(
+        (
+            t
+            for t in trips
+            if t.get("pickup_datetime")
+            and frappe.utils.get_datetime(t["pickup_datetime"]) >= now_dt
+        ),
+        None,
+    )
 
     bed = get_worker_accommodation(token).get("bed")
 
