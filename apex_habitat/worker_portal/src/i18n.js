@@ -9,6 +9,7 @@ const messages = {
     common: {
       loading: "Loading…",
       retry: "Retry",
+      offline: "You're offline — showing last known info.",
       notAssigned: "Not assigned",
       none: "—",
       error: "Something went wrong.",
@@ -194,6 +195,7 @@ const messages = {
     common: {
       loading: "جارٍ التحميل…",
       retry: "إعادة المحاولة",
+      offline: "أنت دون اتصال — نعرض آخر معلومة معروفة.",
       notAssigned: "غير مُعيَّن",
       none: "—",
       error: "حدث خطأ ما.",

@@ -1,5 +1,16 @@
 <template>
   <div class="app-shell" :dir="dir">
+    <!-- [T-318] offline banner: tell the worker we are showing last-known info
+         when the device drops its connection. -->
+    <div
+      v-if="!online"
+      class="flex items-center justify-center gap-2 text-xs font-semibold"
+      style="background: var(--c-warning-bg); color: var(--c-warning); padding: 6px 12px"
+    >
+      <Icon name="alert" :size="14" />
+      <span>{{ t("common.offline") }}</span>
+    </div>
+
     <!-- No token at all: the link is incomplete. -->
     <div v-if="!hasToken" class="flex-1 grid place-items-center p-8 text-center">
       <div>
@@ -89,7 +100,7 @@
 </template>
 
 <script setup>
-import { computed, watch } from "vue";
+import { computed, watch, ref, onMounted, onUnmounted } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "./components/Icon.vue";
 import Brand from "./components/Brand.vue";
@@ -107,6 +118,18 @@ watch(
   },
   { immediate: true },
 );
+
+// [T-318] reactive connectivity so the shell can show an offline banner.
+const online = ref(typeof navigator === "undefined" ? true : navigator.onLine);
+const syncOnline = () => (online.value = navigator.onLine);
+onMounted(() => {
+  window.addEventListener("online", syncOnline);
+  window.addEventListener("offline", syncOnline);
+});
+onUnmounted(() => {
+  window.removeEventListener("online", syncOnline);
+  window.removeEventListener("offline", syncOnline);
+});
 
 const ctx = createResource({
   url: "apex_habitat.salis.api.masar.get_worker_context",
