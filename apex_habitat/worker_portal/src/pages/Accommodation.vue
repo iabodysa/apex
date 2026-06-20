@@ -32,11 +32,11 @@
         <div class="grid grid-cols-3 gap-3">
           <div class="stat">
             <div class="stat-label">{{ t("accommodation.room") }}</div>
-            <div class="stat-value">{{ room?.room_number || "—" }}</div>
+            <div class="stat-value"><bdi>{{ room?.room_number || "—" }}</bdi></div>
           </div>
           <div class="stat">
             <div class="stat-label">{{ t("accommodation.bed") }}</div>
-            <div class="stat-value">{{ bed?.bed_code || "—" }}</div>
+            <div class="stat-value"><bdi>{{ bed?.bed_code || "—" }}</bdi></div>
           </div>
           <div class="stat">
             <div class="stat-label">{{ t("accommodation.floor") }}</div>
@@ -67,7 +67,7 @@
           </span>
           <div class="min-w-0">
             <div class="font-bold truncate">{{ building.in_charge.name }}</div>
-            <div v-if="building.in_charge.phone" class="text-sm text-muted">{{ building.in_charge.phone }}</div>
+            <div v-if="building.in_charge.phone" class="text-sm text-muted"><bdi>{{ building.in_charge.phone }}</bdi></div>
           </div>
         </div>
         <div v-if="building.in_charge.phone" class="grid grid-cols-2 gap-3 mt-3">
@@ -136,6 +136,8 @@ const Row = (rprops) =>
   h("div", { class: "flex items-center gap-2" }, [
     h(Icon, { name: rprops.icon, size: 18, class: "text-primary shrink-0" }),
     h("dt", { class: "text-muted" }, rprops.label),
-    h("dd", { class: "ms-auto font-semibold" }, rprops.value || t("common.none")),
+    // <bdi> isolates Latin/numeric values (dates, occupancy) inside the RTL row;
+    // a no-op for Arabic/text values. [T-313]
+    h("dd", { class: "ms-auto font-semibold" }, h("bdi", null, rprops.value || t("common.none"))),
   ]);
 </script>

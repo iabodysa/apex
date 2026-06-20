@@ -45,12 +45,12 @@
           <dl class="mt-3 space-y-2 text-sm">
             <div v-if="doc.number" class="flex items-center gap-2">
               <dt class="text-muted">#</dt>
-              <dd class="ms-auto font-semibold">{{ doc.number }}</dd>
+              <dd class="ms-auto font-semibold"><bdi>{{ doc.number }}</bdi></dd>
             </div>
             <div class="flex items-center gap-2" :class="docColor(doc)">
               <dt class="text-muted">{{ t("profile.expires") }}</dt>
               <dd class="ms-auto font-semibold">
-                {{ doc.expiry || t("profile.noExpiry") }}
+                <bdi>{{ doc.expiry || t("profile.noExpiry") }}</bdi>
               </dd>
             </div>
           </dl>
@@ -93,7 +93,9 @@ const Row = (rprops) =>
   h("div", { class: "flex items-center gap-2" }, [
     h(Icon, { name: rprops.icon, size: 18, class: "text-primary shrink-0" }),
     h("dt", { class: "text-muted" }, rprops.label),
-    h("dd", { class: "ms-auto font-semibold" }, rprops.value || t("common.none")),
+    // <bdi> isolates Latin/numeric values (employee no., joined date, phone)
+    // inside the RTL row; a no-op for Arabic/text values. [T-313]
+    h("dd", { class: "ms-auto font-semibold" }, h("bdi", null, rprops.value || t("common.none"))),
   ]);
 
 const initial = computed(

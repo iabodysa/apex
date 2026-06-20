@@ -60,7 +60,7 @@
           <span class="pill shrink-0" :class="statusPill(r.status)">{{ tEnum("requestStatus", r.status) }}</span>
         </div>
         <p class="mt-1 text-sm text-soft whitespace-pre-line line-clamp-3">{{ r.description }}</p>
-        <div class="mt-1 text-xs text-muted">{{ tEnum("priority", r.priority) }} · {{ formatDate(r.creation) }}</div>
+        <div class="mt-1 text-xs text-muted">{{ tEnum("priority", r.priority) }} · <bdi>{{ formatDate(r.creation) }}</bdi></div>
         <div v-if="r.resolution_notes" class="mt-2 text-sm">
           <span class="text-muted">{{ t("requests.resolution") }}:</span>
           <span class="font-semibold"> {{ r.resolution_notes }}</span>

@@ -23,7 +23,7 @@
             </div>
             <div v-if="trip.pickup_point || trip.pickup_datetime" class="mt-0.5 text-sm text-muted">
               <span v-if="trip.pickup_point">{{ trip.pickup_point }}</span>
-              <span v-if="trip.depart_time || trip.pickup_datetime"> · {{ trip.depart_time || formatDt(trip.pickup_datetime) }}</span>
+              <span v-if="trip.depart_time || trip.pickup_datetime"> · <bdi>{{ trip.depart_time || formatDt(trip.pickup_datetime) }}</bdi></span>
             </div>
           </div>
           <span v-if="trip.status" class="pill pill-accent shrink-0">{{ tEnum("transportStatus", trip.status) }}</span>
@@ -35,7 +35,7 @@
             <Icon name="truck" :size="18" class="text-primary shrink-0" />
             <span class="text-muted">{{ t("transport.vehicle") }}</span>
             <span class="ms-auto font-semibold">
-              {{ trip.vehicle.plate_number || trip.vehicle.name }}
+              <bdi>{{ trip.vehicle.plate_number || trip.vehicle.name }}</bdi>
               <span v-if="trip.vehicle.vehicle_category" class="text-muted font-normal">· {{ trip.vehicle.vehicle_category }}</span>
             </span>
           </div>
@@ -66,7 +66,7 @@
               <div class="min-w-0">
                 <div class="font-semibold leading-tight">
                   {{ stop.stop_name || t("transport.stop") }}
-                  <span v-if="stop.planned_time" class="text-muted font-normal">· {{ stop.planned_time }}</span>
+                  <span v-if="stop.planned_time" class="text-muted font-normal">· <bdi>{{ stop.planned_time }}</bdi></span>
                 </div>
                 <div v-if="stop.pickup" class="text-sm text-muted">
                   {{ stop.pickup.building_name || stop.accommodation_building }}

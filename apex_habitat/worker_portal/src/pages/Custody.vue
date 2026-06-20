@@ -76,6 +76,8 @@ const Row = (rprops) =>
   h("div", { class: "flex items-center gap-2" }, [
     h(Icon, { name: rprops.icon, size: 18, class: "text-primary shrink-0" }),
     h("dt", { class: "text-muted" }, rprops.label),
-    h("dd", { class: "ms-auto font-semibold" }, rprops.value || t("common.none")),
+    // <bdi> isolates Latin/numeric values (received date) inside the RTL row;
+    // a no-op for Arabic/text values. [T-313]
+    h("dd", { class: "ms-auto font-semibold" }, h("bdi", null, rprops.value || t("common.none"))),
   ]);
 </script>
