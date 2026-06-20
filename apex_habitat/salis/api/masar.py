@@ -292,6 +292,30 @@ WORKER_REQUEST_CATEGORIES = (
     "Other",
 )
 
+# [#t306loc] Issue Location Select options — mirror the Accommodation Resident
+# Request DocType field exactly; a client value outside this set is dropped (the
+# field is optional, so no throw — it simply isn't set).
+WORKER_ISSUE_LOCATIONS = (
+    "Room",
+    "Bathroom",
+    "Kitchen",
+    "Common Area",
+    "Entrance",
+    "Staircase",
+    "External Area",
+    "Other",
+)
+
+# [#t306lang] Preferred Language Select options — mirror the DocType field. The
+# worker portal offers only the two it is localized in (English/Arabic); the
+# wider set is accepted here so the field stays in sync if the UI grows.
+WORKER_PREFERRED_LANGUAGES = ("English", "Arabic", "Urdu", "Hindi", "Bengali")
+
+# [#t306photo] Guest-uploadable request photo: only real image types, capped so a
+# guest POST can never push an oversized blob through the create endpoint.
+WORKER_PHOTO_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".heic", ".heif")
+WORKER_PHOTO_MAX_BYTES = 8 * 1024 * 1024
+
 
 def _resolve_worker(token):
     """Resolve a personal Masar token to its single Employee, or 403.
@@ -861,9 +885,60 @@ def get_worker_custody(token=None):
     return {"items": items}
 
 
+def _attach_worker_photo(doc, photo, photo_filename):
+    """Attach a guest-supplied request photo to ``doc`` and set ``doc.attachment``.
+
+    The image rides in as a base64 string (optionally a ``data:`` URI) on the same
+    token-scoped POST that created the request — there is NO separate guest upload
+    surface to harden. We validate the extension and decoded size ourselves, then
+    persist a PRIVATE File attached to the just-created request via the framework's
+    ``save_file`` (which re-checks the site max-file-size). The stored File path is
+    written back to the request's ``attachment`` field so the existing detail view
+    renders it. Returns silently on a blank/invalid photo — the field is optional,
+    so a bad image must never sink an otherwise valid request."""
+    from frappe.utils.file_manager import save_file
+
+    photo = (photo or "").strip()
+    if not photo:
+        return
+
+    fname = (photo_filename or "request-photo.jpg").strip() or "request-photo.jpg"
+    # Keep only the base name + a known image extension; default unknown to .jpg.
+    fname = fname.replace("\\", "/").split("/")[-1]
+    if not fname.lower().endswith(WORKER_PHOTO_EXTENSIONS):
+        fname = f"{fname}.jpg"
+
+    # Rough decoded-size guard BEFORE decode (base64 is ~4/3 of the bytes); the
+    # framework's check_max_file_size re-checks the exact size inside save_file.
+    payload = photo.split(",", 1)[1] if photo.startswith("data:") and "," in photo else photo
+    if len(payload) * 3 / 4 > WORKER_PHOTO_MAX_BYTES:
+        frappe.throw(_("The attached photo is too large."))
+
+    saved = save_file(
+        fname,
+        photo,
+        doc.doctype,
+        doc.name,
+        decode=True,
+        is_private=1,
+        df="attachment",
+    )
+    doc.db_set("attachment", saved.file_url)
+
+
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60 * 60)
-def create_worker_request(token=None, category=None, subject=None, body=None, priority=None):
+def create_worker_request(
+    token=None,
+    category=None,
+    subject=None,
+    body=None,
+    priority=None,
+    issue_location=None,
+    preferred_language=None,
+    photo=None,
+    photo_filename=None,
+):
     """Raise an Accommodation Resident Request for the worker (write, token-scoped).
 
     Reuses the native resident-request channel rather than inventing a ticketing
@@ -872,7 +947,13 @@ def create_worker_request(token=None, category=None, subject=None, body=None, pr
     can only ever be filed for the token's own worker, against their own housing.
     Inserts a single ``source_channel = QR Web Form`` request as ``requester_type
     = Worker``; posts no GL. ``subject`` is folded into the description (the native
-    DocType has no subject field)."""
+    DocType has no subject field).
+
+    The worker may additionally set ``issue_location`` and ``preferred_language``
+    (each validated against the DocType's Select options; an out-of-set value is
+    simply dropped, since both fields are optional) and attach a single ``photo``
+    (a base64 image persisted server-side as a private File on the new request via
+    ``_attach_worker_photo`` — no separate guest upload endpoint is exposed)."""
     employee = _resolve_worker(token)
 
     category = (category or "Other").strip()
@@ -881,6 +962,14 @@ def create_worker_request(token=None, category=None, subject=None, body=None, pr
     priority = (priority or "Low").strip()
     if priority not in ("Low", "Medium", "High", "Critical"):
         priority = "Low"
+
+    # [#t306loc] / [#t306lang] optional, drop anything outside the Select set
+    issue_location = (issue_location or "").strip()
+    if issue_location not in WORKER_ISSUE_LOCATIONS:
+        issue_location = None
+    preferred_language = (preferred_language or "").strip()
+    if preferred_language not in WORKER_PREFERRED_LANGUAGES:
+        preferred_language = None
 
     subject = (subject or "").strip()
     body = (body or "").strip()
@@ -909,11 +998,16 @@ def create_worker_request(token=None, category=None, subject=None, body=None, pr
             "no_active_assignment": 0 if assignment else 1,
             "request_category": category,
             "priority": priority,
+            "issue_location": issue_location,
+            "preferred_language": preferred_language,
             "description": description,
             "status": "New",
         }
     )
     doc.insert(ignore_permissions=True)  # audit-ok — employee resolved from token server-side
+    # [#t306photo] attach after insert so the File can bind to the saved name
+    if photo:
+        _attach_worker_photo(doc, photo, photo_filename)
     return {"name": doc.name, "status": doc.status}
 
 
