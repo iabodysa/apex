@@ -130,6 +130,78 @@ class TestDriverPortal(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("Issue", tk["name"], "custom_driver"), drv)
 		frappe.set_user("Administrator")
 
+	def test_check_in_leaves_check_out_empty(self):
+		"""T-537: a single check-in opens the shift and must NEVER stamp check-out.
+
+		Frappe core fills every Time field with nowtime() on a brand-new doc
+		(create_new.py set_dynamic_default_values), so without an explicit guard an
+		inserted Driver Attendance inherited a phantom check_out == check_in (an
+		instant zero-length "full day"). Check-in must leave check_out empty and the
+		shift open."""
+		drv, user = self._driver_user()
+		self._clear_today_attendance(drv)
+		frappe.set_user(user)
+		res = driver_portal.driver_check_in()
+		# [#t537co] the projected state the SPA applies must show an OPEN shift
+		self.assertTrue(res["checked_in"], "Check-in marks the driver present.")
+		self.assertFalse(res["checked_out"], "Check-in must NOT mark checked out.")
+		self.assertIsNone(res["check_out"], "Check-in must leave check_out empty.")
+		# [#t537db] and the persisted row must agree (no phantom stamp on disk)
+		frappe.set_user("Administrator")
+		row = frappe.db.get_value(
+			"Driver Attendance", res["name"], ["check_in", "check_out", "worked_hours"], as_dict=True
+		)
+		self.assertTrue(row.check_in, "check_in persisted.")
+		self.assertFalse(row.check_out, "check_out must be empty on the persisted row.")
+		self.assertEqual(row.worked_hours or 0, 0, "An open shift has no worked hours yet.")
+		frappe.set_user("Administrator")
+
+	def test_check_out_refuses_zero_length_day(self):
+		"""T-537: a check-out at or before check-in is rejected with a friendly error
+		rather than recording a zero-length shift."""
+		drv, user = self._driver_user()
+		self._clear_today_attendance(drv)
+		frappe.set_user(user)
+		ci = driver_portal.driver_check_in()
+		# Pin nowtime() to the check-in instant to simulate an immediate stray tap.
+		import apex_habitat.salis.api.driver_portal as dp_mod
+
+		original = dp_mod.frappe.utils.nowtime
+		dp_mod.frappe.utils.nowtime = lambda: ci["check_in"][:8]
+		try:
+			with self.assertRaises(frappe.ValidationError):
+				driver_portal.driver_check_out()
+		finally:
+			dp_mod.frappe.utils.nowtime = original
+		# The shift stays open; no check_out was written.
+		frappe.set_user("Administrator")
+		self.assertFalse(
+			frappe.db.get_value("Driver Attendance", ci["name"], "check_out"),
+			"A rejected zero-length check-out must not stamp check_out.",
+		)
+		frappe.set_user("Administrator")
+
+	def test_check_out_without_check_in_records_no_phantom(self):
+		"""T-537: checking out with no prior check-in records presence as a check-out
+		only — it must NOT fabricate a phantom check_in == check_out (zero-length day).
+		Frappe core stamps every blank Time field at insert, so this guards the
+		symmetric case of the check-in bug."""
+		drv, user = self._driver_user()
+		self._clear_today_attendance(drv)
+		frappe.set_user(user)
+		res = driver_portal.driver_check_out()
+		self.assertTrue(res["checked_out"], "Check-out is recorded.")
+		self.assertFalse(res["checked_in"], "No phantom check-in is created.")
+		self.assertIsNone(res["check_in"], "check_in stays empty when never checked in.")
+		frappe.set_user("Administrator")
+		row = frappe.db.get_value(
+			"Driver Attendance", res["name"], ["check_in", "check_out", "worked_hours"], as_dict=True
+		)
+		self.assertFalse(row.check_in, "No phantom check_in on the persisted row.")
+		self.assertTrue(row.check_out, "check_out persisted.")
+		self.assertEqual(row.worked_hours or 0, 0, "No fabricated worked hours.")
+		frappe.set_user("Administrator")
+
 	def test_check_out_updates_submitted_record(self):
 		"""Check-out stamps the SUBMITTED record (check_out / worked_hours are
 		allow_on_submit), so a full in->out day stays one submitted attendance with

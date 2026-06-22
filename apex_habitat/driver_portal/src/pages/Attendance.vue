@@ -46,7 +46,7 @@
       <button
         class="btn btn-primary"
         :disabled="loading || today.loading || state.checked_in"
-        @click="checkin.submit()"
+        @click="doCheckIn()"
       >
         <Icon name="calendar" :size="20" />
         {{ state.checked_in ? t("attendance.checkedInLabel") : t("attendance.checkIn") }}
@@ -54,7 +54,7 @@
       <button
         class="btn btn-dark"
         :disabled="loading || today.loading || !state.checked_in || state.checked_out"
-        @click="checkout.submit()"
+        @click="doCheckOut()"
       >
         <Icon name="calendar" :size="20" />
         {{ state.checked_out ? t("attendance.checkedOutLabel") : t("attendance.checkOut") }}
@@ -114,6 +114,11 @@ const today = createResource({
   onError: (e) => { err.value = e.messages?.[0] || t("errors.loadFailed"); },
 });
 
+// In-flight guard: while either action is submitting, `loading` is true so BOTH
+// buttons are disabled. Without it a stray double-tap on a phone could fire
+// check-out the instant check-in's response enabled it, stamping check_out a few
+// ms after check_in (a zero-length "full day"). The guard makes a single tap a
+// single action; the backend also refuses a check_out at/before check_in.
 const checkin = createResource({
   url: "apex_habitat.salis.api.driver_portal.driver_check_in",
   onSuccess: (r) => { apply(r); msg.value = t("attendance.checkInDone"); err.value = ""; },
@@ -124,6 +129,28 @@ const checkout = createResource({
   onSuccess: (r) => { apply(r); msg.value = t("attendance.checkOutDone"); err.value = ""; },
   onError: (e) => { err.value = e.messages?.[0] || t("common.error"); },
 });
+
+// Guarded submitters: set `loading` for the whole request so no second tap (on
+// either button) can fire while one is in flight.
+async function doCheckIn() {
+  if (loading.value || state.checked_in) return;
+  loading.value = true;
+  try {
+    await checkin.submit();
+  } finally {
+    loading.value = false;
+  }
+}
+async function doCheckOut() {
+  // Only act on a real prior check-in, and never when already checked out.
+  if (loading.value || !state.checked_in || state.checked_out) return;
+  loading.value = true;
+  try {
+    await checkout.submit();
+  } finally {
+    loading.value = false;
+  }
+}
 
 // "HH:MM:SS" (Frappe Time) -> "HH:MM" for display. Tolerates already-short values.
 function fmtTime(v) {

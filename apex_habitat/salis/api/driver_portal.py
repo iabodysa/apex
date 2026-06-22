@@ -426,6 +426,18 @@ def driver_check_in(photo=None):
 	driver = _resolve_driver()
 	doc = _today_attendance(driver)
 	doc.check_in = frappe.utils.nowtime()
+	# [#t537co] Check-in opens the shift; it must NEVER stamp check-out. Frappe core
+	# fills EVERY Time field with nowtime() on a brand-new doc (create_new.py
+	# set_dynamic_default_values, NOT gated on a field default), and insert()'s
+	# _set_defaults() copies that phantom onto our row via update_if_missing — so a
+	# bare check-in would persist check_out == check_in (an instant zero-length
+	# "full day"). Excluding check_out/worked_hours from update_if_missing keeps the
+	# phantom out; check-out is a separate, later action.
+	doc.check_out = None
+	doc.worked_hours = 0
+	for _field in ("check_out", "worked_hours"):
+		if _field not in doc.dont_update_if_missing:
+			doc.dont_update_if_missing.append(_field)
 	if not doc.status:
 		doc.status = "Present"
 	if photo:
@@ -448,13 +460,38 @@ def driver_check_out(photo=None):
 	_require_enabled()
 	driver = _resolve_driver()
 	doc = _today_attendance(driver)
-	doc.check_out = frappe.utils.nowtime()
+	now = frappe.utils.nowtime()
+	# [#t537zero] Refuse a zero-length (or negative) day: a check-out at or before the
+	# existing check-in would record check_out == check_in (worked_hours 0). Surface a
+	# friendly message instead of silently stamping an instant "full day".
+	if doc.check_in and not _is_after(doc.attendance_date, doc.check_in, now):
+		frappe.throw(
+			_("You can't check out at or before your check-in time. Try again in a moment.")
+		)
+	# [#t537co] If the driver checks out without ever checking in, the get-or-created
+	# row has no check-in; keep it that way. Frappe core phantom-fills every Time
+	# field with nowtime() at insert (see driver_check_in), which would otherwise
+	# fabricate a check_in == check_out (instant zero-length day). Record presence as
+	# a check-out only.
+	if not doc.check_in:
+		doc.check_in = None
+		if "check_in" not in doc.dont_update_if_missing:
+			doc.dont_update_if_missing.append("check_in")
+	doc.check_out = now
 	if not doc.status:
 		doc.status = "Present"
 	if photo:
 		doc.append("images", {"image": photo, "captured_at": frappe.utils.now_datetime()})
 	_persist_attendance(doc)
 	return _attendance_state(doc)
+
+
+def _is_after(attendance_date, earlier_time, later_time):
+	"""True when ``later_time`` is strictly after ``earlier_time`` (both Frappe Time
+	values on the same ``attendance_date``). Used to reject a zero-length shift."""
+	earlier = frappe.utils.get_datetime(f"{attendance_date} {earlier_time}")
+	later = frappe.utils.get_datetime(f"{attendance_date} {later_time}")
+	return frappe.utils.time_diff_in_seconds(later, earlier) > 0
 
 
 def _vehicle_bound_to_driver(driver, vehicle):
