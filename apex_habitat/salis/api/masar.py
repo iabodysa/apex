@@ -533,6 +533,22 @@ def get_worker_accommodation(token=None):
     }
 
 
+# [T-537] A trip is "upcoming" when its pickup is at or after this instant;
+# anything earlier is "past". Home's next_ride and Transport's upcoming list both
+# pivot on this one predicate so the two screens can never contradict each other.
+def _is_upcoming_pickup(pickup_datetime, now_dt=None):
+    """True when ``pickup_datetime`` (a backend string or datetime) is at or after
+    ``now_dt`` (defaults to now). A missing pickup is treated as upcoming so a
+    not-yet-scheduled request never silently drops off the worker's view."""
+    if not pickup_datetime:
+        return True
+    now_dt = now_dt or frappe.utils.now_datetime()
+    try:
+        return frappe.utils.get_datetime(pickup_datetime) >= now_dt
+    except Exception:
+        return True
+
+
 def _worker_transport_requests(employee):
     """Transport Requests whose worker manifest includes ``employee`` and that are
     still live (not Rejected/Cancelled/Fulfilled). Scoped via the child table."""
@@ -576,16 +592,25 @@ def _worker_transport_requests(employee):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_transport(token=None):
-    """The worker's upcoming shuttle(s) (read, token-scoped).
+    """The worker's shuttle(s), split into upcoming vs past (read, token-scoped).
 
     Resolves the token to one Employee and returns the transport requests that
     carry them — pickup point + time, the ordered route stops, and (when
     dispatched) the assigned vehicle/plate and driver name/contact. Scoped to the
     resolved employee via the Transport Request worker manifest; a worker on no
-    live request gets ``{"trips": []}``. Read-only, no GL."""
+    live request gets empty lists. Read-only, no GL.
+
+    [T-537] Each trip is tagged ``is_upcoming`` against ``now_datetime()`` (the
+    SAME predicate Home's next_ride uses), and the trips are partitioned into
+    ``upcoming`` and ``past`` so the Transport screen can never present a trip
+    that already departed as if it were the next ride — Home and Transport stay
+    in lock-step. ``trips`` is kept as an alias of ``upcoming`` for backward
+    compatibility with any caller that read the old flat list."""
     employee = _resolve_worker(token)
     requests = _worker_transport_requests(employee)
-    trips = []
+    now_dt = frappe.utils.now_datetime()
+    upcoming = []
+    past = []
     for req in requests:
         vehicle = None
         if req.get("assigned_vehicle"):
@@ -607,22 +632,33 @@ def get_worker_transport(token=None):
             depart_time = _fmt_time(
                 frappe.db.get_value("Dispatch Trip", req["dispatch_trip"], "depart_time")
             )
-        trips.append(
-            {
-                "transport_request": req["name"],
-                "request_type": req.get("request_type"),
-                "status": req.get("status"),
-                "pickup_point": req.get("pickup_point"),
-                "pickup_datetime": frappe.utils.cstr(req["pickup_datetime"])
-                if req.get("pickup_datetime")
-                else None,
-                "depart_time": depart_time,
-                "stops": _ordered_stops(req.get("route_plan")),
-                "vehicle": vehicle,
-                "driver": driver,
-            }
+        pickup_datetime = (
+            frappe.utils.cstr(req["pickup_datetime"]) if req.get("pickup_datetime") else None
         )
-    return {"date": frappe.utils.today(), "trips": trips}
+        is_upcoming = _is_upcoming_pickup(req.get("pickup_datetime"), now_dt)
+        trip = {
+            "transport_request": req["name"],
+            "request_type": req.get("request_type"),
+            "status": req.get("status"),
+            "pickup_point": req.get("pickup_point"),
+            "pickup_datetime": pickup_datetime,
+            "depart_time": depart_time,
+            "is_upcoming": is_upcoming,
+            "stops": _ordered_stops(req.get("route_plan")),
+            "vehicle": vehicle,
+            "driver": driver,
+        }
+        (upcoming if is_upcoming else past).append(trip)
+
+    # Past trips read newest-first (most recently departed at the top); upcoming
+    # stays soonest-first as the underlying query already ordered them.
+    past.reverse()
+    return {
+        "date": frappe.utils.today(),
+        "upcoming": upcoming,
+        "past": past,
+        "trips": upcoming,
+    }
 
 
 @frappe.whitelist(allow_guest=True)
@@ -1035,10 +1071,12 @@ def get_worker_home(token=None):
         (``get_worker_context``) filtered to those expiring soon (``days_left``
         at or under the Habitat renewal lead) or already past; a list, possibly
         empty.
-      * ``next_ride``         — the single soonest upcoming shuttle, the first of
-        ``get_worker_transport``'s already-time-ordered trips, or None.
+      * ``next_ride``         — the single soonest upcoming shuttle: the head of
+        ``get_worker_transport``'s ``upcoming`` partition (same now_datetime()
+        pivot Transport uses, so the two screens never contradict), or None.
       * ``bed``               — the worker's current accommodation bed from
-        ``get_worker_accommodation``, or None.
+        ``get_worker_accommodation``, ENRICHED with its building + room + check-in
+        so the Home chip reads as a real location, not a bare bed code; or None.
       * ``open_request_count`` — count of the worker's own resident requests
         (``list_worker_requests``) not in a settled state.
 
@@ -1057,21 +1095,32 @@ def get_worker_home(token=None):
     ]
 
     transport = get_worker_transport(token)
-    trips = transport.get("trips") or []
-    # [T-536] the "next" ride is the soonest UPCOMING trip, not the earliest one
-    # (which may already be in the past). trips are ordered by pickup_datetime asc.
-    now_dt = frappe.utils.now_datetime()
-    next_ride = next(
-        (
-            t
-            for t in trips
-            if t.get("pickup_datetime")
-            and frappe.utils.get_datetime(t["pickup_datetime"]) >= now_dt
-        ),
-        None,
-    )
+    # [T-536] / [T-537] the "next" ride is the soonest UPCOMING trip, never an
+    # already-departed one. get_worker_transport now partitions on the SAME
+    # now_datetime() predicate, so Home's next_ride is literally the head of the
+    # list Transport shows under "upcoming" — the two screens cannot disagree.
+    upcoming = transport.get("upcoming") or []
+    next_ride = upcoming[0] if upcoming else None
 
-    bed = get_worker_accommodation(token).get("bed")
+    # [T-538] the bed is shown on Home as a glanceable chip, but a bare bed code
+    # ("DEMO-R-103-B2") tells the worker nothing. Carry the building + room (and
+    # check-in) the accommodation endpoint already resolved so the chip reads as a
+    # real location. building/room may be None (degrade cleanly on the client).
+    acc = get_worker_accommodation(token)
+    bed = acc.get("bed")
+    if bed:
+        b = acc.get("building") or {}
+        r = acc.get("room") or {}
+        asg = acc.get("assignment") or {}
+        bed = {
+            **bed,
+            "building": b.get("name"),
+            "building_name": b.get("building_name"),
+            "room": r.get("name"),
+            "room_number": r.get("room_number"),
+            "floor": r.get("floor"),
+            "check_in_date": asg.get("check_in_date"),
+        }
 
     open_request_count = sum(
         1

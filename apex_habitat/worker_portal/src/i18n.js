@@ -116,6 +116,7 @@ const messages = {
       status: "Status",
       empty: "No upcoming transport",
       emptyHint: "You have no shuttle scheduled right now.",
+      past: "Past trips",
       reportIssue: "Report a transport issue",
     },
     requests: {
@@ -305,6 +306,7 @@ const messages = {
       status: "الحالة",
       empty: "لا يوجد نقل قادم",
       emptyHint: "لا توجد لديك رحلة مجدولة حالياً.",
+      past: "رحلات سابقة",
       reportIssue: "الإبلاغ عن مشكلة في النقل",
     },
     requests: {

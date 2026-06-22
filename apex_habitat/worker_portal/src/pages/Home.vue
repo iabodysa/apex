@@ -47,17 +47,38 @@
         <p v-else class="text-sm text-muted">{{ t("home.noRide") }}</p>
       </section>
 
-      <!-- Stat row: open requests + bed chip -->
-      <div class="grid gap-3" :class="bed ? 'grid-cols-2' : 'grid-cols-1'">
+      <!-- Open requests stat -->
+      <div class="grid gap-3 grid-cols-1">
         <div class="stat">
           <div class="stat-label">{{ t("home.openRequests") }}</div>
           <div class="stat-value">{{ home.data.open_request_count }}</div>
         </div>
-        <div v-if="bed" class="stat">
-          <div class="stat-label">{{ t("home.bed") }}</div>
-          <div class="stat-value"><bdi>{{ bed.bed_code || bed.name }}</bdi></div>
-        </div>
       </div>
+
+      <!-- My bed: building + room + bed, not just a bare code. Each code is
+           <bdi>-wrapped so the Latin bed/room ids stay LTR inside the RTL card. -->
+      <section v-if="bed" class="card card-pad space-y-2">
+        <div class="flex items-center gap-2">
+          <Icon name="home" :size="18" class="text-primary shrink-0" />
+          <span class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("home.bed") }}</span>
+          <span class="font-extrabold ms-auto shrink-0"><bdi>{{ bed.bed_code || bed.name }}</bdi></span>
+        </div>
+        <div v-if="bedBuilding" class="flex items-center gap-2 text-sm">
+          <Icon name="pin" :size="16" class="text-primary shrink-0" />
+          <span class="text-muted">{{ t("accommodation.building") }}</span>
+          <span class="ms-auto font-semibold"><bdi>{{ bedBuilding }}</bdi></span>
+        </div>
+        <div v-if="bedRoom" class="flex items-center gap-2 text-sm">
+          <Icon name="bed" :size="16" class="text-primary shrink-0" />
+          <span class="text-muted">{{ t("accommodation.room") }}</span>
+          <span class="ms-auto font-semibold"><bdi>{{ bedRoom }}</bdi><span v-if="bed.floor != null" class="text-muted font-normal"> · {{ t("accommodation.floor") }} <bdi>{{ bed.floor }}</bdi></span></span>
+        </div>
+        <div v-if="bed.check_in_date" class="flex items-center gap-2 text-sm">
+          <Icon name="clock" :size="16" class="text-primary shrink-0" />
+          <span class="text-muted">{{ t("accommodation.checkIn") }}</span>
+          <span class="ms-auto font-semibold"><bdi>{{ formatDate(bed.check_in_date) }}</bdi></span>
+        </div>
+      </section>
 
       <!-- Documents to renew: only when there is at least one alert. -->
       <section v-if="alerts.length" class="card card-pad card-primary space-y-3">
@@ -84,7 +105,7 @@ import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import PullIndicator from "../components/PullIndicator.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { formatDateTime, formatTime } from "../datetime";
+import { formatDate, formatDateTime, formatTime } from "../datetime";
 import { TOKEN } from "../token";
 import { usePullToRefresh } from "../usePullToRefresh";
 
@@ -107,6 +128,11 @@ const errorMessage = computed(() => resourceErrorMessage(home.error));
 const ride = computed(() => home.data?.next_ride || null);
 const bed = computed(() => home.data?.bed || null);
 const alerts = computed(() => home.data?.profile_alerts || []);
+
+// The bed chip now reads as a real location: prefer the human building/room name,
+// fall back to the id, and show nothing (clean omit) when neither exists.
+const bedBuilding = computed(() => bed.value?.building_name || bed.value?.building || "");
+const bedRoom = computed(() => bed.value?.room_number || bed.value?.room || "");
 
 // A ticking "now" so the relative hint stays honest; cleared on unmount.
 const now = ref(Date.now());
