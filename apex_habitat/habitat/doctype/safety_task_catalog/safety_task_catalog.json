@@ -1,178 +1,137 @@
 {
- "doctype": "DocType",
- "name": "Safety Task Catalog",
- "module": "Habitat",
- "custom": 0,
- "istable": 0,
- "engine": "InnoDB",
- "track_changes": 1,
+ "actions": [],
  "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
- "sort_field": "modified",
- "sort_order": "DESC",
+ "creation": "2026-06-08 23:36:36.593424",
  "description": "Reference catalog of standardized safety tasks. Each task defines its department, frequency, priority, and instructions.",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "safety_task_catalog_tab_overview",
+  "safety_task_catalog_sec_overview",
+  "task_title",
+  "department",
+  "safety_task_catalog_overview_col",
+  "task_code",
+  "frequency",
+  "priority",
+  "column_break_ftva",
+  "is_active",
+  "evidence_required",
+  "applicable_to_all_buildings",
+  "safety_task_catalog_sec_classification",
+  "instructions",
+  "safety_task_catalog_sec_large_text",
+  "applicable_buildings",
+  "naming_series"
+ ],
  "fields": [
   {
-   "doctype": "DocField",
    "fieldname": "safety_task_catalog_tab_overview",
    "fieldtype": "Tab Break",
    "label": "Overview"
   },
   {
-   "doctype": "DocField",
    "fieldname": "safety_task_catalog_sec_overview",
    "fieldtype": "Section Break",
    "label": "Task Identity"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "task_code",
-   "fieldtype": "Data",
-   "label": "Task Code",
-   "unique": 1,
-   "reqd": 1,
-   "description": "e.g., SAF-001, SEC-005",
-   "idx": 3
-  },
-  {
-   "doctype": "DocField",
    "fieldname": "task_title",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Task Title",
-   "reqd": 1,
-   "idx": 4
+   "reqd": 1
   },
   {
-   "doctype": "DocField",
+   "fieldname": "department",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Department",
+   "options": "Fire Safety\nHealth and Hygiene\nSecurity\nMaintenance\nDocumentation\nAwareness and Training\nCompliance and Licensing\nEmergency and Crisis",
+   "reqd": 1
+  },
+  {
    "fieldname": "safety_task_catalog_overview_col",
    "fieldtype": "Column Break"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "task_title_en",
+   "description": "e.g., SAF-001, SEC-005",
+   "fieldname": "task_code",
    "fieldtype": "Data",
-   "label": "Task Title (English)",
-   "idx": 5
+   "in_list_view": 1,
+   "label": "Task Code",
+   "reqd": 1,
+   "unique": 1
   },
   {
-   "doctype": "DocField",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Frequency",
+   "options": "Daily\nWeekly\nMonthly\nQuarterly\nAnnual\nAs Needed\nOn Entry",
+   "reqd": 1
+  },
+  {
+   "default": "High",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "High\nMedium\nLow"
+  },
+  {
+   "fieldname": "column_break_ftva",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Active"
+  },
+  {
+   "default": "0",
+   "fieldname": "evidence_required",
+   "fieldtype": "Check",
+   "label": "Photo Evidence Required"
+  },
+  {
+   "default": "1",
+   "fieldname": "applicable_to_all_buildings",
+   "fieldtype": "Check",
+   "label": "Applies to All Buildings"
+  },
+  {
    "fieldname": "safety_task_catalog_sec_classification",
    "fieldtype": "Section Break",
    "label": "Classification"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "department",
-   "fieldtype": "Select",
-   "label": "Department",
-   "options": "Fire Safety\nHealth and Hygiene\nSecurity\nMaintenance\nDocumentation\nAwareness and Training\nCompliance and Licensing\nEmergency and Crisis",
-   "reqd": 1,
-   "idx": 6
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "frequency",
-   "fieldtype": "Select",
-   "label": "Frequency",
-   "options": "Daily\nWeekly\nMonthly\nQuarterly\nAnnual\nAs Needed\nOn Entry",
-   "reqd": 1,
-   "idx": 7
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "safety_task_catalog_classification_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "priority",
-   "fieldtype": "Select",
-   "label": "Priority",
-   "options": "High\nMedium\nLow",
-   "default": "High",
-   "idx": 9
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "safety_task_catalog_sec_options",
-   "fieldtype": "Section Break",
-   "label": "Options"
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "evidence_required",
-   "fieldtype": "Check",
-   "label": "Photo Evidence Required",
-   "default": 0,
-   "idx": 10
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "applicable_to_all_buildings",
-   "fieldtype": "Check",
-   "label": "Applies to All Buildings",
-   "default": 1,
-   "idx": 11
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "safety_task_catalog_options_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "is_active",
-   "fieldtype": "Check",
-   "label": "Active",
-   "default": 1,
-   "idx": 12
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "safety_task_catalog_sec_large_text",
-   "fieldtype": "Section Break",
-   "label": "Execution Instructions",
-   "collapsible": 1
-  },
-  {
-   "doctype": "DocField",
    "fieldname": "instructions",
    "fieldtype": "Small Text",
-   "label": "Execution Instructions",
-   "idx": 15
+   "label": "Execution Instructions"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "safety_task_catalog_sec_table_applicable_buildings",
+   "collapsible": 1,
+   "fieldname": "safety_task_catalog_sec_large_text",
    "fieldtype": "Section Break",
-   "label": "Specific Buildings"
+   "label": "Execution Instructions"
   },
   {
-   "doctype": "DocField",
+   "depends_on": "eval:doc.applicable_to_all_buildings==0",
    "fieldname": "applicable_buildings",
    "fieldtype": "Table",
    "label": "Specific Buildings",
-   "options": "Safety Task Building Scope",
-   "depends_on": "eval:doc.applicable_to_all_buildings==0",
-   "idx": 18
+   "options": "Safety Task Building Scope"
   },
   {
-   "doctype": "DocField",
-   "fieldname": "safety_task_catalog_sec_system",
-   "fieldtype": "Section Break",
-   "label": "System",
-   "collapsible": 1
-  },
-  {
-   "doctype": "DocField",
+   "default": "STC-.####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "options": "STC-.####",
-   "default": "STC-.####",
-   "reqd": 1,
-   "idx": 13,
-   "hidden": 1
+   "reqd": 1
   }
  ],
  "links": [
@@ -187,65 +146,44 @@
    "link_fieldname": "safety_task_catalog"
   }
  ],
+ "modified": "2026-06-22 17:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Safety Task Catalog",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
    "create": 1,
    "delete": 1,
-   "report": 1,
+   "email": 1,
    "export": 1,
    "print": 1,
-   "email": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
    "share": 1,
-   "idx": 1
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
    "create": 1,
-   "idx": 2
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
   },
   {
-   "doctype": "DocPerm",
-   "role": "Resident Supervisor",
    "read": 1,
-   "idx": 3
+   "role": "Resident Supervisor"
   },
   {
-   "doctype": "DocPerm",
-   "role": "Safety Officer",
    "read": 1,
-   "idx": 4
+   "role": "Safety Officer"
   }
  ],
- "field_order": [
-  "safety_task_catalog_tab_overview",
-  "safety_task_catalog_sec_overview",
-  "task_code",
-  "task_title",
-  "safety_task_catalog_overview_col",
-  "task_title_en",
-  "safety_task_catalog_sec_classification",
-  "department",
-  "frequency",
-  "safety_task_catalog_classification_col",
-  "priority",
-  "safety_task_catalog_sec_options",
-  "evidence_required",
-  "applicable_to_all_buildings",
-  "safety_task_catalog_options_col",
-  "is_active",
-  "safety_task_catalog_sec_large_text",
-  "instructions",
-  "safety_task_catalog_sec_table_applicable_buildings",
-  "applicable_buildings",
-  "safety_task_catalog_sec_system",
-  "naming_series"
- ],
- "modified": "2026-06-08 21:00:00.000000"
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "task_title",
+ "track_changes": 1
 }
