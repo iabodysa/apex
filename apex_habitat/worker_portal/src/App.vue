@@ -162,12 +162,12 @@ const errorMessage = computed(() => resourceErrorMessage(ctx.error, "errors.inva
 const showBrand = computed(() => window.portal_show_brand !== false);
 const brandLogo = computed(() => window.portal_logo || "");
 
+// [T-nav] Bottom bar carries only the three primary destinations. The
+// secondary sections (accommodation/custody/requests) keep their routes and
+// are reached from a links section in Profile.
 const tabs = [
   { to: "/", icon: "home", labelKey: "nav.home" },
-  { to: "/profile", icon: "user", labelKey: "nav.profile" },
-  { to: "/accommodation", icon: "building", labelKey: "nav.accommodation" },
   { to: "/transport", icon: "route", labelKey: "nav.transport" },
-  { to: "/custody", icon: "briefcase", labelKey: "nav.custody" },
-  { to: "/requests", icon: "message", labelKey: "nav.requests" },
+  { to: "/profile", icon: "user", labelKey: "nav.profile" },
 ];
 </script>

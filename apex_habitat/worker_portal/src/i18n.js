@@ -57,6 +57,7 @@ const messages = {
     },
     profile: {
       title: "My Profile",
+      more: "More",
       employeeNo: "Employee No.",
       designation: "Designation",
       department: "Department",
@@ -245,6 +246,7 @@ const messages = {
     },
     profile: {
       title: "ملفي الشخصي",
+      more: "المزيد",
       employeeNo: "الرقم الوظيفي",
       designation: "المسمى الوظيفي",
       department: "القسم",
