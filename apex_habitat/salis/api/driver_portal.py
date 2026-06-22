@@ -173,15 +173,77 @@ def get_driver_profile():
 	return d
 
 
+# [#vehcmp] Compliance child rows the driver actually cares about, in the order
+# they should read on the card. "Operating Card"/"Other" are deliberately omitted —
+# a driver acts on the registration (istimara), insurance, and periodic inspection
+# (fahes) expiries; the rest is back-office. Keys are the stable Select option
+# values on Salis Vehicle Compliance.compliance_type.
+_DRIVER_COMPLIANCE_TYPES = (
+	"Registration (Istimara)",
+	"Insurance",
+	"Periodic Inspection",
+)
+
+
+def _vehicle_compliance(vehicle):
+	"""The driver-relevant compliance documents for a vehicle (read).
+
+	Reads the ``compliance_documents`` child table and returns one entry per
+	driver-relevant document type (registration/insurance/inspection) that has an
+	expiry date, newest-expiring first within each type kept. Each entry carries:
+
+	* ``compliance_type``  — stable English Select value (client maps to a label)
+	* ``document_number``  — may be blank
+	* ``expiry_date``      — ISO string (stringified so JSON serializes)
+	* ``days_to_expiry``   — signed int; negative = already expired
+	* ``state``            — ``expired`` | ``expiring`` (<= 30 days) | ``valid``
+
+	The amber/red threshold (``expiring`` at <= 30 days) is computed server-side so
+	the SPA needs no date math and both portal languages render identically. Returns
+	an empty list when the vehicle tracks no documents — the page omits the section.
+	"""
+	rows = frappe.get_all(
+		"Salis Vehicle Compliance",
+		filters={"parent": vehicle, "parenttype": "Salis Vehicle"},
+		fields=["compliance_type", "document_number", "expiry_date"],
+		order_by="expiry_date asc",
+	)
+	today = frappe.utils.getdate()
+	out = []
+	for r in rows:
+		if r.get("compliance_type") not in _DRIVER_COMPLIANCE_TYPES or not r.get("expiry_date"):
+			continue
+		days = frappe.utils.date_diff(r["expiry_date"], today)
+		out.append(
+			{
+				"compliance_type": r["compliance_type"],
+				"document_number": r.get("document_number") or None,
+				"expiry_date": frappe.utils.cstr(r["expiry_date"]),
+				"days_to_expiry": days,
+				"state": "expired" if days < 0 else ("expiring" if days <= 30 else "valid"),
+			}
+		)
+	return out
+
+
 @frappe.whitelist()
 def get_my_vehicle():
-	"""The current driver's CURRENT vehicle (read).
+	"""The current driver's CURRENT vehicle, enriched for the driver view (read).
 
 	Identity-scoped: resolves the driver from the session, then returns the vehicle
 	bound to them — their ``current_vehicle`` if set, otherwise the vehicle on an
 	Active Vehicle Assignment (the same binding rule ``_vehicle_bound_to_driver``
 	enforces for writes). Returns ``{"vehicle": None}`` (a friendly empty state) when
-	no vehicle is bound. Read-only, no commit."""
+	no vehicle is bound. Read-only, no commit.
+
+	The payload carries the fields a DRIVER acts on — plate, category, status,
+	odometer, planned fuel grade, the assignment start, the resolved project name,
+	and a ``compliance`` list (registration/insurance/inspection expiries with a
+	server-computed near-/over-expiry ``state``; see ``_vehicle_compliance``).
+	``compliance_status`` is the vehicle's rolled-up flag. Ownership (Owned/Rented)
+	is intentionally NOT surfaced: it is a back-office attribute with no meaning to a
+	driver. Empty fields are returned as null/[] so the SPA omits them cleanly.
+	"""
 	_require_enabled()
 	driver = _resolve_driver()
 
@@ -203,13 +265,17 @@ def get_my_vehicle():
 
 	v = frappe.db.get_value(
 		"Salis Vehicle", vehicle,
-		["name", "plate_number", "vehicle_category", "status", "ownership", "project"],
+		["name", "plate_number", "vehicle_category", "status", "odometer",
+		 "planned_fuel_grade", "compliance_status", "project"],
 		as_dict=True,
 	) or {}
 
 	# [#projlbl] portal shows the project's display name, not its series code
 	if v.get("project"):
 		v["project"] = _project_label(v["project"])
+
+	# [#vehcmp] driver-relevant expiries with a server-computed warning state
+	v["compliance"] = _vehicle_compliance(vehicle)
 
 	# [#kcrj1g]
 	if assignment is None:
