@@ -129,6 +129,21 @@
   },
   {
    "doctype": "DocField",
+   "fieldname": "safety_task_execution_sec_findings",
+   "fieldtype": "Section Break",
+   "label": "Findings",
+   "description": "Issues observed during this execution. On submit, each actionable finding (Issue Type + Room, not Resolved) spawns one Maintenance Request."
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "findings",
+   "fieldtype": "Table",
+   "label": "Findings",
+   "options": "Inspection Finding Item",
+   "idx": 14
+  },
+  {
+   "doctype": "DocField",
    "fieldname": "safety_task_execution_sec_large_text",
    "fieldtype": "Section Break",
    "label": "Notes",
@@ -257,6 +272,8 @@
   "linked_inspection",
   "safety_round",
   "linked_maintenance_request",
+  "safety_task_execution_sec_findings",
+  "findings",
   "safety_task_execution_sec_large_text",
   "notes",
   "safety_task_execution_sec_system",
@@ -266,5 +283,5 @@
   "priority",
   "naming_series"
  ],
- "modified": "2026-06-18 21:14:39.944592"
+ "modified": "2026-06-23 10:00:00.000000"
 }

@@ -30,6 +30,87 @@ def _notify_operational(source_doctype: str, source_name: str, message: str) -> 
         )
 
 
+def _notify_role_system(role: str, subject: str, message: str | None = None) -> None:
+    """Post an in-app (system) Notification Log of type Alert to every enabled user
+    holding ``role``.
+
+    Mirrors temporary_worker_engine._notify_hr: the in-desk alert the Wave-3 safety
+    jobs raise for the Safety Officer / Operations Director. Best-effort — a failure
+    rolls back and logs but never aborts the calling job. No recipients = no-op.
+    """
+    from frappe.utils.user import get_users_with_role
+
+    body = message or subject
+    try:
+        for user in get_users_with_role(role) or []:
+            frappe.get_doc({
+                "doctype": "Notification Log",
+                "for_user": user,
+                "type": "Alert",
+                "subject": subject[:140],
+                "email_content": body,
+            }).insert(ignore_permissions=True)  # audit-ok — scheduler-run system alert
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Safety system notify failed ({role})"[:140],
+        )
+
+
+def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_token: str) -> str | None:
+    """Insert an Operations Alert for a safety obligation breach (idempotent).
+
+    Mirrors _raise_maintenance_alert: existence-guarded on
+    ``(alert_type, status=Open, message LIKE %dedupe_token%, raised_on=today)`` so a
+    daily job never spams a duplicate. ``alert_type``/``severity`` MUST be valid
+    Operations Alert Select options (the DocType's option set is closed). Returns the
+    new alert name, or None when a duplicate was skipped or the insert failed.
+    """
+    from frappe.utils import now_datetime, today
+
+    today_str = today()
+    try:
+        if frappe.db.exists(
+            "Operations Alert",
+            {
+                "alert_type": alert_type,
+                "status": "Open",
+                "message": ["like", f"%{dedupe_token}%"],
+                "raised_on": ["between", [f"{today_str} 00:00:00", f"{today_str} 23:59:59"]],
+            },
+        ):
+            return None
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Safety alert dedupe check failed ({dedupe_token})"[:140],
+        )
+        return None
+
+    try:
+        alert = frappe.get_doc(
+            {
+                "doctype": "Operations Alert",
+                "alert_type": alert_type,
+                "severity": severity,
+                "status": "Open",
+                "raised_on": now_datetime(),
+                "message": message[:2000],
+            }
+        )
+        alert.insert(ignore_permissions=True)  # audit-ok — scheduler-run safety escalation
+        return alert.name
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Safety alert insert failed ({dedupe_token})"[:140],
+        )
+        return None
+
+
 def daily_accommodation_cost_allocation() -> None:
     """Scheduler entry — fan daily accommodation cost allocation out PER BUILDING
     to the native ``long`` queue, so the scheduler worker is never blocked on a
@@ -914,14 +995,36 @@ def daily_occupancy_snapshot() -> None:
     frappe.logger().info("daily_occupancy_snapshot: snapshots written.")
 
 
-def weekly_safety_task_compliance_scan() -> None:
-    """Scan for overdue Scheduled Task Instances and flag them as Overdue."""
-    from frappe.utils import today, getdate
+def _instance_priority(template: str | None) -> str:
+    """Resolve a Scheduled Task Instance's effective priority via its template's
+    linked Safety Task Catalog task. Returns "" when no priority can be derived."""
+    if not template:
+        return ""
+    catalog = frappe.db.get_value("Scheduled Task Template", template, "safety_task_catalog")
+    if not catalog:
+        return ""
+    return frappe.db.get_value("Safety Task Catalog", catalog, "priority") or ""
 
-    today_date = getdate(today())
+
+def daily_safety_task_compliance_scan() -> None:
+    """Daily — flag overdue Scheduled Task Instances Overdue and escalate the urgent ones.
+
+    An instance counts as overdue once today is past its due_date plus the configured
+    ``safety_overdue_grace_days`` (read as ``value or 0`` — a new Int on the Habitat
+    Settings Single may store 0). On flipping an instance to Overdue, the effective
+    priority is resolved through its template's Safety Task Catalog task: a High or
+    Critical task additionally raises an idempotent Operations Alert AND posts a system
+    Notification to the Safety Officer, so urgent safety lapses surface immediately.
+    Per-row error isolation; paginated 500/batch.
+    """
+    from frappe.utils import today, getdate, add_days
+
+    grace_days = frappe.db.get_single_value("Habitat Settings", "safety_overdue_grace_days") or 0
+    cutoff = str(getdate(add_days(today(), -int(grace_days))))
     logger = frappe.logger()
 
     total_overdue = 0
+    escalated = 0
 
     # [#4qriyf]
     start = 0
@@ -929,8 +1032,8 @@ def weekly_safety_task_compliance_scan() -> None:
     while True:
         overdue = frappe.get_all(
             "Scheduled Task Instance",
-            filters={"docstatus": 0, "status": ["in", ["Open", "In Progress"]], "due_date": ["<", str(today_date)]},
-            fields=["name", "due_date", "template"],
+            filters={"docstatus": 0, "status": ["in", ["Open", "In Progress"]], "due_date": ["<", cutoff]},
+            fields=["name", "due_date", "template", "building"],
             limit_start=start,
             limit_page_length=batch_size,
         )
@@ -944,6 +1047,25 @@ def weekly_safety_task_compliance_scan() -> None:
                     "Scheduled Task Instance", inst.name,
                     f"Scheduled task {inst.name} ({inst.template}) is overdue (was due {inst.due_date}).",
                 )
+                # [#wave3-prio] High/Critical -> Operations Alert + Safety Officer system alert.
+                priority = _instance_priority(inst.template)
+                if priority in ("High", "Critical"):
+                    msg = (
+                        f"daily_safety_task_compliance_scan: {priority}-priority scheduled task "
+                        f"{inst.name} ({inst.template}) is overdue (was due {inst.due_date})."
+                    )
+                    _raise_safety_alert(
+                        alert_type="Maintenance Overdue",
+                        severity="Critical" if priority == "Critical" else "Warning",
+                        message=msg,
+                        dedupe_token=inst.name,
+                    )
+                    _notify_role_system(
+                        "Safety Officer",
+                        subject=f"Overdue {priority} safety task: {inst.name}",
+                        message=msg,
+                    )
+                    escalated += 1
             except Exception:
                 frappe.db.rollback()  # [#7kjob3]
                 frappe.log_error(
@@ -956,10 +1078,11 @@ def weekly_safety_task_compliance_scan() -> None:
 
     if total_overdue:
         logger.warning(
-            f"weekly_safety_task_compliance_scan: Marked {total_overdue} Scheduled Task Instances as Overdue."
+            f"daily_safety_task_compliance_scan: Marked {total_overdue} Scheduled Task Instances "
+            f"as Overdue ({escalated} High/Critical escalated)."
         )
     else:
-        logger.info("weekly_safety_task_compliance_scan: No overdue instances found.")
+        logger.info("daily_safety_task_compliance_scan: No overdue instances found.")
 
 
 def daily_scheduled_task_instance_generator() -> None:
@@ -1051,3 +1174,158 @@ def daily_scheduled_task_instance_generator() -> None:
                 )
 
         start += batch_size
+
+
+def weekly_safety_coverage_gate() -> None:
+    """Weekly — every ACTIVE building must be covered by a submitted Weekly Safety
+    Round this week; flag the buildings that are not.
+
+    Gated by Habitat Settings ``require_weekly_all_building_coverage`` (read as
+    ``value if not None else 1`` — the gate defaults ON, but a falsy stored value on
+    the Single turns it off, per the Single new-field caveat). When the gate is ON,
+    each ACTIVE Accommodation Building (``status == "Active"``) with no submitted
+    Weekly-cadence Safety Round dated within the current ISO week raises an idempotent
+    Operations Alert and posts a system Notification to the Safety Officer. Per-row
+    error isolation.
+    """
+    from frappe.utils import today, getdate, add_days
+
+    require_coverage = frappe.db.get_single_value(
+        "Habitat Settings", "require_weekly_all_building_coverage"
+    )
+    require_coverage = require_coverage if require_coverage is not None else 1
+    if not require_coverage:
+        frappe.logger().info("weekly_safety_coverage_gate: coverage gate disabled — skipping.")
+        return
+
+    today_date = getdate(today())
+    week_start = add_days(today_date, -today_date.weekday())  # Monday
+    week_end = add_days(week_start, 6)  # Sunday
+    logger = frappe.logger()
+    uncovered = 0
+
+    start = 0
+    batch_size = 500
+    while True:
+        buildings = frappe.get_all(
+            "Accommodation Building",
+            filters={"status": "Active"},
+            fields=["name", "building_name"],
+            limit_start=start,
+            limit_page_length=batch_size,
+        )
+        if not buildings:
+            break
+
+        for b in buildings:
+            try:
+                covered = frappe.db.exists(
+                    "Safety Round",
+                    {
+                        "docstatus": 1,
+                        "cadence": "Weekly",
+                        "building": b.name,
+                        "round_date": ["between", [str(week_start), str(week_end)]],
+                    },
+                )
+                if covered:
+                    continue
+                label = b.building_name or b.name
+                msg = (
+                    f"weekly_safety_coverage_gate: building {label} ({b.name}) has no submitted "
+                    f"Weekly Safety Round for the week of {week_start} — {week_end}."
+                )
+                logger.warning(msg)
+                _raise_safety_alert(
+                    alert_type="Supervisor Delay",
+                    severity="Warning",
+                    message=msg,
+                    dedupe_token=b.name,
+                )
+                _notify_role_system(
+                    "Safety Officer",
+                    subject=f"Building not covered by a weekly safety round: {label}",
+                    message=msg,
+                )
+                uncovered += 1
+            except Exception:
+                frappe.db.rollback()
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Safety coverage gate failed for {b.name}"[:140],
+                )
+
+        start += batch_size
+
+    logger.info(f"weekly_safety_coverage_gate: {uncovered} active building(s) uncovered this week.")
+
+
+def audit_remediation_deadline_watch() -> None:
+    """Daily — flag submitted Client Audit Remediation Plans whose deadline has passed.
+
+    A submitted plan whose ``overall_status`` is not yet closed (anything other than
+    "Closed by Client" / "Overdue") and whose ``remediation_deadline`` is before today
+    is set to "Overdue", and a system Notification is posted to the plan's AFMCO owner
+    and to the Operations Director. Mirrors daily_building_license_expiry_check:
+    paginated 500/batch with per-row error isolation.
+    """
+    from frappe.utils import today, getdate
+
+    today_date = getdate(today())
+    logger = frappe.logger()
+    flagged = 0
+
+    start = 0
+    batch_size = 500
+    while True:
+        plans = frappe.get_all(
+            "Client Audit Remediation Plan",
+            filters={
+                "docstatus": 1,
+                "overall_status": ["not in", ["Closed by Client", "Overdue"]],
+                "remediation_deadline": ["<", str(today_date)],
+            },
+            fields=["name", "remediation_deadline", "afmco_owner", "client_project"],
+            limit_start=start,
+            limit_page_length=batch_size,
+        )
+        if not plans:
+            break
+
+        for plan in plans:
+            try:
+                frappe.db.set_value(
+                    "Client Audit Remediation Plan", plan.name, "overall_status", "Overdue"
+                )
+                msg = (
+                    f"audit_remediation_deadline_watch: remediation plan {plan.name} "
+                    f"(project {plan.client_project}) passed its deadline {plan.remediation_deadline} "
+                    f"and is now Overdue."
+                )
+                logger.warning(msg)
+                _notify_operational("Client Audit Remediation Plan", plan.name, msg)
+                # [#wave3-audit] notify the plan owner directly + the Operations Director role.
+                if plan.afmco_owner:
+                    frappe.get_doc({
+                        "doctype": "Notification Log",
+                        "for_user": plan.afmco_owner,
+                        "type": "Alert",
+                        "subject": f"Audit remediation overdue: {plan.name}"[:140],
+                        "email_content": msg,
+                    }).insert(ignore_permissions=True)  # audit-ok — scheduler-run owner alert
+                _notify_role_system(
+                    "Operations Director",
+                    subject=f"Audit remediation overdue: {plan.name}",
+                    message=msg,
+                )
+                flagged += 1
+            except Exception:
+                frappe.db.rollback()
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Audit remediation watch failed for {plan.name}"[:140],
+                )
+
+        start += batch_size
+
+    logger.info(f"audit_remediation_deadline_watch: {flagged} remediation plan(s) flagged Overdue.")

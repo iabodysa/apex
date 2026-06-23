@@ -156,6 +156,9 @@ scheduler_events = {
         "apex_habitat.habitat.tasks.idle_resident_aging",
         "apex_habitat.habitat.tasks.daily_scheduled_task_instance_generator",
         "apex_habitat.habitat.tasks.daily_occupancy_snapshot",
+        # [#wave3-safety]
+        "apex_habitat.habitat.tasks.daily_safety_task_compliance_scan",
+        "apex_habitat.habitat.tasks.audit_remediation_deadline_watch",
         # [#8d555o]
         "apex_habitat.habitat.temporary_worker_engine.link_temporary_workers",
         # [#3mjdri]
@@ -174,7 +177,8 @@ scheduler_events = {
     ],
     "weekly": [
         "apex_habitat.habitat.tasks.weekly_occupancy_sync",
-        "apex_habitat.habitat.tasks.weekly_safety_task_compliance_scan",
+        # [#wave3-safety]
+        "apex_habitat.habitat.tasks.weekly_safety_coverage_gate",
         "apex_habitat.salis.tasks.vehicle_utilization_summary",
         "apex_habitat.salis.utilisation_engine.weekly_vehicle_utilisation_snapshot",
     ],
@@ -208,6 +212,10 @@ permission_query_conditions = {
     "Custody Issue": "apex_habitat.habitat.permissions.custody_issue_query",
     "Cleaning Log": "apex_habitat.habitat.permissions.cleaning_log_query",
     "Accommodation Building": "apex_habitat.habitat.permissions.accommodation_building_query",
+    # [#wave4-safety]
+    "Safety Round": "apex_habitat.habitat.permissions.safety_round_query",
+    "Safety Task Execution": "apex_habitat.habitat.permissions.safety_task_execution_query",
+    "Scheduled Task Instance": "apex_habitat.habitat.permissions.scheduled_task_instance_query",
     "Vehicle Assignment": "apex_habitat.salis.permissions.vehicle_assignment_query",
     "Fuel Request": "apex_habitat.salis.permissions.fuel_request_query",
     "Dispatch Trip": "apex_habitat.salis.permissions.dispatch_trip_query",
@@ -233,6 +241,10 @@ has_permission = {
     "Custody Issue": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Cleaning Log": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Accommodation Building": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    # [#wave4-safety]
+    "Safety Round": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Safety Task Execution": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Scheduled Task Instance": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Vehicle Assignment": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Request": "apex_habitat.salis.permissions.scoped_has_permission",
     "Dispatch Trip": "apex_habitat.salis.permissions.scoped_has_permission",

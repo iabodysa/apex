@@ -42,6 +42,9 @@ def create_roles():
         "Cleaning Supervisor",
         "Safety Officer",
         "Resident Request Coordinator",
+        "Admin Manager",
+        "Operations Director",
+        "Facilities Supervisor",
     ]
     for role_name in roles:
         if not frappe.db.exists("Role", role_name):

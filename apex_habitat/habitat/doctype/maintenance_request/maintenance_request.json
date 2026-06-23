@@ -44,6 +44,7 @@
   "maintenance_request_tab_system",
   "maintenance_request_sec_automation",
   "source_inspection",
+  "source_execution",
   "maintenance_request_automation_col",
   "subcontractor_dispatched",
   "maintenance_request_system_col1",
@@ -275,6 +276,13 @@
    "fieldtype": "Link",
    "label": "Source Inspection Report",
    "options": "Safety Inspection Report"
+  },
+  {
+   "description": "Set automatically when this request is spawned from a failed safety task execution.",
+   "fieldname": "source_execution",
+   "fieldtype": "Link",
+   "label": "Source Safety Execution",
+   "options": "Safety Task Execution"
   },
   {
    "fieldname": "maintenance_request_automation_col",

@@ -34,6 +34,11 @@
   "lease_expiry_days_before",
   "temporary_stay_days_before",
   "safety_report_recipient",
+  "habitat_settings_sec_safety",
+  "safety_predue_days_before",
+  "safety_overdue_grace_days",
+  "habitat_settings_safety_col",
+  "require_weekly_all_building_coverage",
   "supplier_cost_recovery_sec",
   "enable_supplier_markup",
   "habitat_settings_supplier_col",
@@ -230,6 +235,36 @@
    "fieldtype": "Data",
    "options": "Email",
    "label": "Safety Report Recipient"
+  },
+  {
+   "fieldname": "habitat_settings_sec_safety",
+   "fieldtype": "Section Break",
+   "label": "Safety"
+  },
+  {
+   "default": "2",
+   "description": "Days before a safety task's due date to send a pre-due reminder.",
+   "fieldname": "safety_predue_days_before",
+   "fieldtype": "Int",
+   "label": "Safety Pre-Due Lead Days"
+  },
+  {
+   "default": "0",
+   "description": "Grace days after the due date before a safety task is flagged Overdue.",
+   "fieldname": "safety_overdue_grace_days",
+   "fieldtype": "Int",
+   "label": "Safety Overdue Grace Days"
+  },
+  {
+   "fieldname": "habitat_settings_safety_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "When ON, the weekly coverage gate requires every building to be covered by a safety round.",
+   "fieldname": "require_weekly_all_building_coverage",
+   "fieldtype": "Check",
+   "label": "Require Weekly All-Building Coverage"
   },
   {
    "fieldname": "supplier_cost_recovery_sec",

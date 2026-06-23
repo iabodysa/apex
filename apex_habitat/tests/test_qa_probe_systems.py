@@ -156,7 +156,10 @@ class TestSchedulers(QASysBase):
         "lease_expiry_watchlist",
         "daily_scheduled_task_instance_generator",
         "weekly_occupancy_sync",
-        "weekly_safety_task_compliance_scan",
+        # [#wave3-safety] renamed (was weekly_safety_task_compliance_scan) + new Wave-3 jobs
+        "daily_safety_task_compliance_scan",
+        "weekly_safety_coverage_gate",
+        "audit_remediation_deadline_watch",
     ]
 
     def test_8_all_schedulers_run(self):

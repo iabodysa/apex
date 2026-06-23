@@ -135,6 +135,21 @@ def accommodation_building_query(user=None):
     return _building_condition(user, column="`name`")
 
 
+# [#wave4-safety] Building-scope the safety records on their own `building` field, so
+# the Safety Officer / Resident Supervisor see only their buildings' rows while the
+# oversight roles in HOUSING_UNSCOPED_ROLES stay unrestricted.
+def safety_round_query(user=None):
+    return _building_condition(user)
+
+
+def safety_task_execution_query(user=None):
+    return _building_condition(user)
+
+
+def scheduled_task_instance_query(user=None):
+    return _building_condition(user)
+
+
 def building_scoped_has_permission(doc, ptype, user=None):
     """Deny a building-scoped user acting on a doc outside their buildings.
 
