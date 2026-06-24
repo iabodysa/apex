@@ -52,17 +52,20 @@ class TestSafetyChecklist(FrappeTestCase):
         self.building = make_building(name=f"Checklist Bldg {tag}").name
         self.other_building = make_building(name=f"Checklist Other {tag}").name
 
-        # Mode 1: a Weekly task that applies to every building.
+        # Mode 1: a Weekly task that applies to every building. evidence_required
+        # is 0: these tests drive rounds through the checklist API, which has no
+        # photo parameter, so a task demanding photo evidence cannot be submitted
+        # here. The Evidence Photo gate is covered directly in
+        # test_safety_task_execution.py, not through this API.
         self.task_all = frappe.get_doc(
             {
                 "doctype": "Safety Task Catalog",
                 "task_code": f"CHK-ALL-{tag}",
                 "task_title": f"All-Buildings Task {tag}",
-                "task_title_en": f"All-Buildings Task EN {tag}",
                 "department": "Fire Safety",
                 "frequency": "Weekly",
                 "priority": "High",
-                "evidence_required": 1,
+                "evidence_required": 0,
                 "instructions": "Check all extinguishers.",
                 "applicable_to_all_buildings": 1,
                 "is_active": 1,
@@ -172,10 +175,9 @@ class TestSafetyChecklist(FrappeTestCase):
             row["task_title"],
             frappe.db.get_value("Safety Task Catalog", self.task_all, "task_title"),
         )
-        self.assertEqual(row["task_title_en"], f"All-Buildings Task EN {self._testMethodName}")
         self.assertEqual(row["department"], "Fire Safety")
         self.assertEqual(row["priority"], "High")
-        self.assertEqual(row["evidence_required"], 1)
+        self.assertEqual(row["evidence_required"], 0)
         self.assertEqual(row["instructions"], "Check all extinguishers.")
 
     def test_get_tasks_other_cadence_returns_only_that_cadence(self):

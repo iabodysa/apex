@@ -829,7 +829,7 @@ function fuelView(v) {
             @click="openPanel(v.plate)"
           >
             <div class="vc-top">
-              <div><div class="vc-plate">{{ v.plate }}</div></div>
+              <div><div class="vc-plate"><bdi>{{ v.plate }}</bdi></div></div>
               <div class="vc-icon-area">
                 <span class="vc-sheet-icon"><Icon :name="icon(v)" :size="24" /></span>
                 <span class="vc-fuel-badge">{{ trim(v.fuel) || "—" }}</span>
@@ -841,7 +841,7 @@ function fuelView(v) {
             </div>
             <div class="vc-status-bar">
               <span class="sbadge" :class="sb(v).cls"><Icon :name="sb(v).ic" :size="13" />{{ sb(v).label }}</span>
-              <span v-if="v.vehicle_status === 'workshop' && v.workshop_date" style="font-size:10px;color:var(--orange-l);font-family:'JetBrains Mono',monospace;display:inline-flex;align-items:center;gap:3px"><Icon name="calendar" :size="11" /> {{ v.workshop_date }}</span>
+              <span v-if="v.vehicle_status === 'workshop' && v.workshop_date" style="font-size:10px;color:var(--orange-l);font-family:'JetBrains Mono',monospace;display:inline-flex;align-items:center;gap:3px"><Icon name="calendar" :size="11" /> <bdi>{{ v.workshop_date }}</bdi></span>
               <span v-else-if="v.vehicle_status !== 'assigned' && v.vehicle_status !== 'workshop'" style="font-size:10px;color:var(--t3)">{{ v.history.length }} سائق سابق</span>
             </div>
             <!-- Fuel row (renders the "—" empty path; live API has no fuel rate) -->
@@ -859,7 +859,7 @@ function fuelView(v) {
               </div>
             </div>
             <div v-if="v.vehicle_status === 'workshop'" class="vc-workshop-stripe"><Icon name="wrench" :size="13" /> {{ v.workshop_notes || "في الصيانة" }}</div>
-            <div v-if="v.vehicle_status === 'stolen'" class="vc-stolen-stripe"><Icon name="shield-alert" :size="13" /> مسروق <template v-if="v.stolen_info && v.stolen_info.date">· {{ v.stolen_info.date }}</template></div>
+            <div v-if="v.vehicle_status === 'stolen'" class="vc-stolen-stripe"><Icon name="shield-alert" :size="13" /> مسروق <template v-if="v.stolen_info && v.stolen_info.date">· <bdi>{{ v.stolen_info.date }}</bdi></template></div>
             <div v-if="(v.damages || []).length || (v.accidents || []).length" style="padding:3px 14px;display:flex;gap:6px;border-top:1px solid var(--b1)">
               <span v-if="(v.damages || []).length" style="font-size:10px;padding:2px 7px;background:var(--red-d);color:var(--red-l);border-radius:6px;border:1px solid rgba(220,38,38,.2);display:inline-flex;align-items:center;gap:3px"><Icon name="hammer" :size="11" /> {{ v.damages.length }} تلف</span>
               <span v-if="(v.accidents || []).length" style="font-size:10px;padding:2px 7px;background:var(--amber-d);color:var(--amber-l);border-radius:6px;border:1px solid rgba(217,119,6,.2);display:inline-flex;align-items:center;gap:3px"><Icon name="crash" :size="11" /> {{ v.accidents.length }} حادثة</span>
@@ -868,7 +868,7 @@ function fuelView(v) {
               <div class="drv-av">{{ initials(v.current_driver) }}</div>
               <div class="drv-info">
                 <div class="drv-name">{{ v.current_driver.name_ar || v.current_driver.name_en || "—" }}</div>
-                <div class="drv-since">منذ {{ v.current_driver.date_receive || "—" }} · {{ trim(v.current_driver.project) || "—" }}</div>
+                <div class="drv-since">منذ <bdi>{{ v.current_driver.date_receive || "—" }}</bdi> · {{ trim(v.current_driver.project) || "—" }}</div>
               </div>
               <span class="lock-ico"><Icon name="lock" :size="15" /></span>
             </div>
@@ -880,7 +880,7 @@ function fuelView(v) {
             <div v-if="calcTotalDaysNum(v) > 0" class="vc-dur">
               <div class="dur-label">
                 <span>إجمالي التشغيل: {{ calcTotalDaysNum(v) }} يوم</span>
-                <span>{{ v.history.length ? v.history[0].date_receive || "" : "" }}</span>
+                <span><bdi>{{ v.history.length ? v.history[0].date_receive || "" : "" }}</bdi></span>
               </div>
               <div class="dur-bar"><div class="dur-fill" :style="{ width: Math.min(100, Math.round((calcTotalDaysNum(v) / 400) * 100)) + '%' }"></div></div>
             </div>
@@ -932,7 +932,7 @@ function fuelView(v) {
             <tr v-if="!filtered.length"><td colspan="11"><div class="empty"><div class="empty-ic"><Icon name="search" :size="42" :stroke-width="1.5" /></div>لا نتائج</div></td></tr>
             <tr v-for="v in filtered" :key="v.plate" @click="openPanel(v.plate)">
               <td><Icon :name="icon(v)" :size="18" /></td>
-              <td><span class="mono" style="font-weight:700;color:var(--t1)">{{ v.plate }}</span></td>
+              <td><span class="mono" style="font-weight:700;color:var(--t1)"><bdi>{{ v.plate }}</bdi></span></td>
               <td>{{ v.vehicle_type }}</td>
               <td>{{ v.rental_office }}</td>
               <td><span class="sbadge" :class="sb(v).cls" style="display:inline-flex;gap:4px"><Icon :name="sb(v).ic" :size="12" />{{ SL[v.vehicle_status] || v.vehicle_status }}</span></td>
@@ -959,7 +959,7 @@ function fuelView(v) {
     <div v-if="panel.open && panel.vehicle" class="panel" style="display:flex">
       <div class="panel-head">
         <div class="ph-left">
-          <div class="ph-plate">{{ panel.vehicle.plate }}</div>
+          <div class="ph-plate"><bdi>{{ panel.vehicle.plate }}</bdi></div>
           <div class="ph-sub">{{ panel.vehicle.vehicle_type }} · {{ panel.vehicle.rental_office }} · <Icon :name="panel.vehicle.sheet === 'CAR' ? 'car' : 'bike'" :size="13" /> {{ panel.vehicle.sheet === "CAR" ? "سيارة" : "دباب" }}</div>
           <div class="ph-tags">
             <span class="tag">{{ trim(panel.vehicle.fuel) || "—" }}</span>
@@ -990,7 +990,7 @@ function fuelView(v) {
           </div>
           <div class="psect-title"><Icon name="search" :size="14" /> تفاصيل المركبة</div>
           <div class="kv-grid">
-            <div class="kv"><div class="kv-l">اللوحة</div><div class="kv-v mono" style="font-size:16px;letter-spacing:2px">{{ panel.vehicle.plate }}</div></div>
+            <div class="kv"><div class="kv-l">اللوحة</div><div class="kv-v mono" style="font-size:16px;letter-spacing:2px"><bdi>{{ panel.vehicle.plate }}</bdi></div></div>
             <div class="kv"><div class="kv-l">النوع</div><div class="kv-v"><Icon :name="panel.vehicle.sheet === 'CAR' ? 'car' : 'bike'" :size="14" /> {{ panel.vehicle.sheet === "CAR" ? "سيارة" : "دباب" }}</div></div>
             <div class="kv"><div class="kv-l">الطراز</div><div class="kv-v">{{ panel.vehicle.vehicle_type || "—" }}</div></div>
             <div class="kv"><div class="kv-l">الوقود</div><div class="kv-v">{{ panel.vehicle.fuel || "—" }}</div></div>
@@ -1007,9 +1007,9 @@ function fuelView(v) {
                 <div class="cdc-name">{{ panel.vehicle.current_driver.name_ar || panel.vehicle.current_driver.name_en || "—" }}</div>
                 <div class="cdc-en">{{ panel.vehicle.current_driver.name_en || "" }}</div>
                 <div class="cdc-chips">
-                  <span class="cdc-chip"><Icon name="phone" :size="11" /> {{ panel.vehicle.current_driver.mobile || "—" }}</span>
-                  <span class="cdc-chip"><Icon name="id-card" :size="11" /> {{ panel.vehicle.current_driver.driver_id || "—" }}</span>
-                  <span class="cdc-chip"><Icon name="calendar" :size="11" /> {{ panel.vehicle.current_driver.date_receive || "—" }}</span>
+                  <span class="cdc-chip"><Icon name="phone" :size="11" /> <bdi>{{ panel.vehicle.current_driver.mobile || "—" }}</bdi></span>
+                  <span class="cdc-chip"><Icon name="id-card" :size="11" /> <bdi>{{ panel.vehicle.current_driver.driver_id || "—" }}</bdi></span>
+                  <span class="cdc-chip"><Icon name="calendar" :size="11" /> <bdi>{{ panel.vehicle.current_driver.date_receive || "—" }}</bdi></span>
                 </div>
               </div>
               <span class="lock-pill"><Icon name="lock" :size="12" /> نشط</span>
@@ -1025,11 +1025,11 @@ function fuelView(v) {
             <div class="kv-grid">
               <div class="kv"><div class="kv-l">الاسم عربي</div><div class="kv-v">{{ panel.vehicle.current_driver.name_ar || "—" }}</div></div>
               <div class="kv"><div class="kv-l">الاسم إنجليزي</div><div class="kv-v">{{ panel.vehicle.current_driver.name_en || "—" }}</div></div>
-              <div class="kv"><div class="kv-l">رقم الإقامة</div><div class="kv-v mono">{{ panel.vehicle.current_driver.driver_id || "—" }}</div></div>
-              <div class="kv"><div class="kv-l">الجوال</div><div class="kv-v mono">{{ panel.vehicle.current_driver.mobile || "—" }}</div></div>
+              <div class="kv"><div class="kv-l">رقم الإقامة</div><div class="kv-v mono"><bdi>{{ panel.vehicle.current_driver.driver_id || "—" }}</bdi></div></div>
+              <div class="kv"><div class="kv-l">الجوال</div><div class="kv-v mono"><bdi>{{ panel.vehicle.current_driver.mobile || "—" }}</bdi></div></div>
               <div class="kv"><div class="kv-l">المشروع</div><div class="kv-v">{{ trim(panel.vehicle.current_driver.project) || "—" }}</div></div>
               <div class="kv"><div class="kv-l">المنطقة</div><div class="kv-v">{{ panel.vehicle.current_driver.area || "—" }}</div></div>
-              <div class="kv"><div class="kv-l">تاريخ الاستلام</div><div class="kv-v mono">{{ panel.vehicle.current_driver.date_receive || "—" }}</div></div>
+              <div class="kv"><div class="kv-l">تاريخ الاستلام</div><div class="kv-v mono"><bdi>{{ panel.vehicle.current_driver.date_receive || "—" }}</bdi></div></div>
               <div class="kv"><div class="kv-l">فرع الاستلام</div><div class="kv-v">{{ panel.vehicle.current_driver.branch_receive || "—" }}</div></div>
             </div>
             <div class="psect-title">الإجراءات</div>
@@ -1169,7 +1169,7 @@ function fuelView(v) {
             <div class="incident-card-head">
               <div style="display:flex;align-items:center;gap:8px">
                 <span class="incident-badge" :class="d.status === 'completed' ? 'incident-badge-ok' : ''"><Icon :name="d.status === 'completed' ? 'circle-check' : 'hammer'" :size="12" />{{ d.status === "completed" ? "مُصلح" : "تلف" }}</span>
-                <span style="font-size:12px;font-weight:600;color:var(--t1)">{{ d.date || "—" }}</span>
+                <span style="font-size:12px;font-weight:600;color:var(--t1)"><bdi>{{ d.date || "—" }}</bdi></span>
               </div>
               <div style="display:flex;gap:6px"><span v-if="d.cost" style="font-size:11px;color:var(--amber-l);font-weight:600;display:inline-flex;align-items:center;gap:3px"><Icon name="banknote" :size="12" /> {{ d.cost }} ر.س</span></div>
             </div>
@@ -1187,7 +1187,7 @@ function fuelView(v) {
             <div class="incident-card-head">
               <div style="display:flex;align-items:center;gap:8px">
                 <span class="incident-badge incident-badge-acc" :class="a.status === 'closed' ? 'incident-badge-ok' : ''"><Icon :name="a.status === 'closed' ? 'circle-check' : 'crash'" :size="12" />{{ a.status === "closed" ? "مغلق" : "حادثة" }}</span>
-                <span style="font-size:12px;font-weight:600;color:var(--t1)">{{ a.date || "—" }}</span>
+                <span style="font-size:12px;font-weight:600;color:var(--t1)"><bdi>{{ a.date || "—" }}</bdi></span>
               </div>
             </div>
             <div class="incident-card-body">
@@ -1209,9 +1209,9 @@ function fuelView(v) {
                     {{ item.d.name_ar || item.d.name_en || "سائق" }}
                     <span class="tl-status" :class="item.d.status === 'Active' ? 'tls-active' : 'tls-stopped'"><Icon :name="item.d.status === 'Active' ? 'circle-check' : 'circle-pause'" :size="11" />{{ item.d.status === "Active" ? "نشط" : "انتهى" }}</span>
                   </div>
-                  <div class="tl-sub">{{ item.d.name_en || "" }} · <Icon name="phone" :size="11" /> {{ item.d.mobile || "—" }} · <Icon name="id-card" :size="11" /> {{ item.d.driver_id || "—" }}</div>
+                  <div class="tl-sub">{{ item.d.name_en || "" }} · <Icon name="phone" :size="11" /> <bdi>{{ item.d.mobile || "—" }}</bdi> · <Icon name="id-card" :size="11" /> <bdi>{{ item.d.driver_id || "—" }}</bdi></div>
                   <div class="tl-sub"><Icon name="package" :size="11" /> {{ trim(item.d.project) || "—" }} · <Icon name="pin" :size="11" /> {{ item.d.area || "—" }} · <Icon name="building" :size="11" /> {{ item.d.branch_receive || "—" }}</div>
-                  <span class="tl-dates">{{ item.d.date_receive || "—" }} → {{ item.d.date_deliver || (item.d.status === "Active" ? "جارٍ" : "—") }}</span>
+                  <span class="tl-dates"><bdi>{{ item.d.date_receive || "—" }}</bdi> → <bdi>{{ item.d.date_deliver || (item.d.status === "Active" ? "جارٍ" : "—") }}</bdi></span>
                   <span v-if="calcDur(item.d.date_receive, item.d.date_deliver || (item.d.status === 'Active' ? today() : ''))" class="tl-dur">{{ calcDur(item.d.date_receive, item.d.date_deliver || (item.d.status === "Active" ? today() : "")) }}</span>
                   <div v-if="item.d.reason" class="tl-reason">سبب: {{ item.d.reason }}</div>
                   <div v-if="item.d.notes" class="tl-note">ملاحظة: {{ item.d.notes }}</div>

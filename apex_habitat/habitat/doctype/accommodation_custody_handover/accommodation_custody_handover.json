@@ -1,0 +1,256 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-06-23 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "ach_tab_overview",
+  "ach_sec_handover",
+  "naming_series",
+  "handover_date",
+  "status",
+  "ach_col_handover",
+  "from_building",
+  "to_building",
+  "ach_sec_parties",
+  "procurement_supervisor",
+  "ach_col_parties",
+  "receiving_supervisor",
+  "ach_sec_items",
+  "items",
+  "all_items_verified",
+  "ach_sec_otp",
+  "otp_hash",
+  "otp_expires_at",
+  "otp_attempts",
+  "otp_locked_until",
+  "otp_verified_on",
+  "ach_sec_system",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "ach_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "ach_sec_handover",
+   "fieldtype": "Section Break",
+   "label": "Handover"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "ACC-HND-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "handover_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Handover Date",
+   "reqd": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nPending Receipt\nUnder Review\nApproved\nConfirmed\nRejected\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ach_col_handover",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Procurement intake store that the goods leave.",
+   "fieldname": "from_building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "From Building",
+   "options": "Accommodation Building",
+   "reqd": 1
+  },
+  {
+   "description": "Receiving accommodation supervisor's building store that the goods land in.",
+   "fieldname": "to_building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "To Building",
+   "options": "Accommodation Building",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ach_sec_parties",
+   "fieldtype": "Section Break",
+   "label": "Parties"
+  },
+  {
+   "default": "__user",
+   "fieldname": "procurement_supervisor",
+   "fieldtype": "Link",
+   "label": "Procurement Supervisor",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ach_col_parties",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "receiving_supervisor",
+   "fieldtype": "Link",
+   "label": "Receiving Supervisor",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ach_sec_items",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Accommodation Material Transfer Item",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Set by the receiving supervisor once every line has been physically checked. Required before approval.",
+   "fieldname": "all_items_verified",
+   "fieldtype": "Check",
+   "label": "All Items Verified"
+  },
+  {
+   "fieldname": "ach_sec_otp",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "One-Time Password"
+  },
+  {
+   "fieldname": "otp_hash",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "OTP Hash",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "otp_expires_at",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "OTP Expires At",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "otp_attempts",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "OTP Attempts",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "otp_locked_until",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "OTP Locked Until",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "otp_verified_on",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "OTP Verified On",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "ach_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Accommodation Custody Handover",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-06-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Accommodation Custody Handover",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Procurement Supervisor",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

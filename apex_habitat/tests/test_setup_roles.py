@@ -3,8 +3,11 @@
 These tests are pure (no site needed): they inspect the role and profile lists
 defined in the seeder functions to prove:
 
-1. The four new operational roles are present in the roles list.
-2. The four existing roles are untouched.
+1. Every expected role is present in the roles list — the four original
+   operational roles, the four resident/facility roles, and the four later
+   governance/procurement roles (Admin Manager, Operations Director,
+   Facilities Supervisor, Procurement Supervisor).
+2. The four original roles are untouched.
 3. The four new Role Profiles are present in the profiles dict, each mapped
    to exactly the correct single role.
 4. The three existing Role Profiles are untouched.
@@ -13,6 +16,11 @@ defined in the seeder functions to prove:
 The idempotency property is proven structurally: each role name appears exactly
 once in the list (no duplicates that would cause a double insert), and each
 profile name appears exactly once as a dict key.
+
+The role-count check asserts the set of expected roles is exactly covered
+(every expected role present, no unexpected extras, no duplicates) rather than a
+brittle magic number, so the list can grow without silently passing a stale
+hard-coded count.
 """
 
 import ast
@@ -67,9 +75,25 @@ class TestCreateRolesList(unittest.TestCase):
         "Safety Officer",
         "Resident Request Coordinator",
     ]
+    # Roles added by the later safety build (Admin Manager / Operations Director /
+    # Facilities Supervisor) and Wave 0 (Procurement Supervisor).
+    GOVERNANCE_ROLES = [
+        "Admin Manager",
+        "Operations Director",
+        "Facilities Supervisor",
+        "Procurement Supervisor",
+    ]
+
+    @property
+    def EXPECTED_ROLES(self):
+        return self.EXISTING_ROLES + self.NEW_ROLES + self.GOVERNANCE_ROLES
 
     def setUp(self):
         self.roles = _roles_list()
+
+    def test_all_governance_roles_present(self):
+        for role in self.GOVERNANCE_ROLES:
+            self.assertIn(role, self.roles, f"Governance role missing: {role}")
 
     def test_all_existing_roles_present(self):
         for role in self.EXISTING_ROLES:
@@ -87,8 +111,14 @@ class TestCreateRolesList(unittest.TestCase):
         )
 
     def test_total_role_count(self):
-        # [#3tgwn1]
-        self.assertEqual(len(self.roles), 8)
+        # [#3tgwn1] Robust over a brittle magic count: the roles list must cover
+        # exactly the expected set (no missing, no unexpected extras).
+        self.assertEqual(
+            set(self.roles),
+            set(self.EXPECTED_ROLES),
+            "Roles list does not match the expected role set "
+            "(update EXPECTED_ROLES when create_roles changes).",
+        )
 
 
 class TestCreateRoleProfilesDict(unittest.TestCase):

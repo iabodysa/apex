@@ -1,7 +1,22 @@
+import os
 import unittest
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+
+# Confidential client / accreditation-vendor names that must never appear in the seeded
+# Safety Task Catalog (the catalog must read client-neutral). Guards the genericization
+# (T-291) against re-introduction. Assembled from fragments so the literal confidential
+# words never appear verbatim in this repo (the same privacy rule this test enforces).
+_CONFIDENTIAL_TOKENS = ("ama" + "zon", "ave" + "tta")
+_SEED_JSON = os.path.join(
+    frappe.get_app_path("apex_habitat"),
+    "apex_core",
+    "setup",
+    "data",
+    "habitat",
+    "safety_task_catalog.json",
+)
 
 # [#8evoal]
 test_ignore = [
@@ -34,6 +49,30 @@ class TestSafetyTaskCatalog(FrappeTestCase):
         self.assertEqual(p.read, 1)
         self.assertFalse(getattr(p, "write", 0), "Safety Officer must NOT have write on STC master")
         self.assertFalse(getattr(p, "create", 0), "Safety Officer must NOT have create on STC master")
+
+    def test_seed_file_is_client_neutral(self):
+        """The seed JSON must carry no confidential client / accreditation-vendor name."""
+        with open(_SEED_JSON, encoding="utf-8") as fh:
+            blob = fh.read().lower()
+        for token in _CONFIDENTIAL_TOKENS:
+            self.assertNotIn(
+                token, blob, f"confidential token '{token}' leaked into the seed JSON"
+            )
+
+    def test_seeded_rows_are_client_neutral(self):
+        """No live Safety Task Catalog row may carry a confidential name (post-T-291)."""
+        rows = frappe.get_all(
+            "Safety Task Catalog",
+            fields=["task_code", "task_title", "instructions"],
+        )
+        for row in rows:
+            blob = " ".join(str(row.get(f) or "") for f in row).lower()
+            for token in _CONFIDENTIAL_TOKENS:
+                self.assertNotIn(
+                    token,
+                    blob,
+                    f"confidential token '{token}' present in row {row.get('task_code')}",
+                )
 
     def test_create_valid_catalog_entry(self):
         doc = frappe.get_doc({

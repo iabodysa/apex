@@ -54,6 +54,10 @@ const messages = {
       alerts: "Documents to renew",
       alertExpired: "Expired",
       alertDaysLeft: "{n} day(s) left",
+      notifyHr: "Notify HR",
+      notifyHrSending: "Notifying…",
+      notifyHrDone: "HR notified",
+      notifyHrFailed: "Couldn't notify HR. Please try again.",
     },
     profile: {
       title: "My Profile",
@@ -244,6 +248,10 @@ const messages = {
       alerts: "مستندات بحاجة للتجديد",
       alertExpired: "منتهية",
       alertDaysLeft: "متبقٍ {n} يوم",
+      notifyHr: "إبلاغ الموارد البشرية",
+      notifyHrSending: "جارٍ الإبلاغ…",
+      notifyHrDone: "تم إبلاغ الموارد البشرية",
+      notifyHrFailed: "تعذّر إبلاغ الموارد البشرية. حاول مرة أخرى.",
     },
     profile: {
       title: "ملفي الشخصي",

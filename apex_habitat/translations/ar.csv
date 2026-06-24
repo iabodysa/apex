@@ -2,15 +2,26 @@
 A Fuel Claim must be created with status Draft; {0} is reached through the workflow.,يجب إنشاء مطالبة الوقود بالحالة مسودة؛ يتم الوصول إلى {0} عبر سير العمل.
 A Fuel Exception Case must be created with status Open; {0} is reached through the workflow.,يجب إنشاء حالة استثناء الوقود بالحالة مفتوحة؛ يتم الوصول إلى {0} عبر سير العمل.
 A Fuel Request must be created with status Pending; {0} is reached through the workflow.,يجب إنشاء طلب الوقود بالحالة قيد الانتظار؛ يتم الوصول إلى {0} عبر سير العمل.
+A Security-category finding requires photo evidence before it can escalate. Please attach an Evidence Photo before submitting.,يتطلب اكتشاف من فئة الأمن دليلاً بالصور قبل تصعيده. الرجاء إرفاق صورة دليل قبل التقديم.
 A Utility Bill Entry already exists for this account and billing period: {0},يوجد بالفعل تسجيل فاتورة خدمات عامة لهذا الحساب وفترة الفوترة: {0}
 A Work Order already exists for this Maintenance Request: {0},يوجد بالفعل أمر عمل لطلب الصيانة هذا: {0}
+A building is required to build the checklist.,يلزم مبنى لبناء قائمة الفحص.
+A building is required to compute due cadences.,يلزم مبنى لحساب الوتائر المستحقّة.
 A building is required to log an inspection.,المبنى مطلوب لتسجيل التفتيش.
+A building is required to submit a round.,يلزم مبنى لاعتماد جولة.
+A building is required to submit rounds.,يلزم مبنى لاعتماد الجولات.
+A cadence is required to build the checklist.,تلزم وتيرة لبناء قائمة الفحص.
+A cadence is required to submit a round.,تلزم وتيرة لاعتماد جولة.
 A chip action (Issue / Replace / Cancel) is required.,يلزم تحديد إجراء للشريحة (إصدار / استبدال / إلغاء).
 A chip number is required to {0} a fuel chip.,يلزم رقم شريحة من أجل {0} شريحة وقود.
 A completion photo is required before closing a Maintenance Work Order.,يجب إرفاق صورة إنجاز قبل إغلاق أمر عمل الصيانة.
 A handover discrepancy was recorded. Please raise a Vehicle Damage Write-Off for vehicle {0} to obtain tiered write-off approval.,سُجِّل تباينٌ في التسليم. الرجاء رفع إعدام تلف للمركبة {0} للحصول على موافقة الإعدام المُتدرّجة.
 A maintenance request raised automatically when the task execution indicates a repair is needed.,طلب صيانة يُنشأ آلياً عندما يشير تنفيذ المهمة إلى الحاجة لإصلاح.
 A new Dispatch Trip must start as Planned; {0} is reached through the workflow.,يجب أن تبدأ رحلة التشغيل الجديدة بالحالة مُخطَّطة؛ يتم الوصول إلى {0} عبر سير العمل.
+A reason is required to reject a handover.,يلزم سبب لرفض التسليم.
+A request reference is required.,مرجع الطلب مطلوب.
+A round date is required to submit a round.,يلزم تاريخ جولة لاعتماد جولة.
+A round date is required to submit rounds.,يلزم تاريخ الجولة لاعتماد الجولات.
 A submitted Accommodation Checkout already exists for this assignment: {0},توجد بالفعل مغادرة سكن مُقدَّمة لهذا التسكين: {0}
 A temporary top-up requires a revert due date.,تتطلب التعبئة المؤقتة تحديد تاريخ استحقاق للاسترجاع.
 A worker link token is required.,رمز رابط العامل مطلوب.
@@ -34,10 +45,12 @@ Accommodation Building (Pickup),مبنى السكن (نقطة الالتقاط)
 Accommodation Building and Project are required for an Accommodation to Project Shuttle.,مبنى السكن والمشروع مطلوبان لرحلة النقل من السكن إلى المشروع.
 Accommodation Checkout,مغادرة السكن
 Accommodation Cost Distribution,توزيع تكلفة السكن
+Accommodation Custody Handover,تسليم عهدة السكن
 Accommodation Custody Item,بند عهدة السكن
 Accommodation Custody Return Item,بند إرجاع عهدة السكن
 Accommodation Floor Plan,مخطط طوابق المبنى
 Accommodation Go-Live,إطلاق تشغيل السكن
+Accommodation Goods Receipt,استلام بضائع السكن
 Accommodation Lease,عقد الإيجار
 Accommodation Leases by Status,عقود السكن حسب الحالة
 Accommodation Ledger,دفتر تكاليف السكن
@@ -103,6 +116,7 @@ Add,إضافة
 Add Floor,إضافة طابق
 Add at least one floor with rooms.,أضِف طابقاً واحداً على الأقل بغرف.
 Add at least one item to the cart before issuing.,أضف صنفاً واحداً على الأقل قبل الصرف.
+Add at least one item to the cart before returning.,أضف بنداً واحداً على الأقل إلى السلة قبل الإرجاع.
 "Add the first driver, including license details used for clearance and dispatch.",أضف أول سائق، متضمناً بيانات الرخصة المستخدمة لإخلاء الطرف والتشغيل.
 "Add the first vehicle to the fleet so it can be assigned, fuelled, and dispatched.",أضف أول مركبة إلى الأسطول ليتسنى إسنادها وتزويدها بالوقود وتشغيلها.
 Additional Information,معلومات إضافية
@@ -126,6 +140,7 @@ Alerts,تنبيهات
 All,الكل
 All Assets Physically Verified,تم الجرد الفعلي لجميع الأصول
 All Custody Cleared,تم إخلاء طرف جميع العهد
+All Items Verified,تم التحقق من جميع البنود
 Allocation,تخصيص
 Allocation Audit,تدقيق التوزيع
 Allocation Basis,أساس التوزيع
@@ -176,6 +191,7 @@ Approval Status,حالة الاعتماد
 Approval failed for {0}.,فشلت الموافقة على {0}.
 Approvals,الموافقات
 Approve,اعتماد
+Approve Handover,اعتماد التسليم
 Approve and Generate,اعتماد وتوليد
 Approve fuel request {0}?,اعتماد طلب الوقود {0}؟
 Approved,معتمد
@@ -239,8 +255,10 @@ Assigns a vehicle to a driver and project for a defined period.,يُسنِد م�
 At least one asset line is required.,يجب إدخال بند أصول واحد على الأقل.
 At least one damaged item is required.,يجب إدخال بند تالف واحد على الأقل.
 At least one finding is required on a Maintenance Inspection Report.,يجب تسجيل ملاحظة واحدة على الأقل في تقرير فحص الصيانة.
+At least one item is required on a Custody Handover.,يلزم بند واحد على الأقل في تسليم العهدة.
 At least one item is required on a Custody Issue.,يجب إدخال صنف واحد على الأقل لصرف العهدة.
 At least one item is required on a Custody Return.,يجب إدخال صنف واحد على الأقل لإرجاع العهدة.
+At least one item is required on a Goods Receipt.,يلزم بند واحد على الأقل في استلام البضائع.
 At least one item is required on a Material Transfer.,يجب إدخال صنف واحد على الأقل في نقل المواد.
 At least one worker is required for an Inter-City Relocation.,يلزم عامل واحد على الأقل لعملية النقل بين المدن.
 Attach the signed legal opinion / policy approving these deductions under KSA Labor Law.,أرفق الرأي القانوني / السياسة الموقّعة التي تعتمد هذه الخصومات بموجب نظام العمل السعودي.
@@ -270,6 +288,7 @@ Auto-fetched from Building,يُجلب آلياً من المبنى
 Auto-filled from Utility Account. Adjust if different for this bill.,يُعبّأ تلقائياً من حساب الخدمة. عدّله إذا كان مختلفاً لهذه الفاتورة.
 Auto-generated from Accommodation Checkout {0}. Review replacement costs and submit.,أُنشئ تلقائيًا من مغادرة السكن {0}. راجع تكاليف الاستبدال ثم قدّمه.
 Auto-generated from safety inspection {0},مُنشأ تلقائيًا من تفتيش السلامة {0}
+Auto-generated from {0} {1},مُولَّد آلياً من {0} {1}
 Auto-generated summary of meter sharing calculation,ملخّص يُنشأ تلقائياً لحساب مشاركة العدّاد
 Auto-resolved: {0},تمت المعالجة تلقائيًا: {0}
 Auto-submit Target Payment,الترحيل التلقائي للدفعة المستهدفة
@@ -354,10 +373,12 @@ Building Store,مخزن المبنى
 Building arrival cards…,جارٍ إنشاء بطاقات الوصول…
 Building is required to mark Completed.,المبنى مطلوب للوسم كمكتمل.
 Building safety inspection.,تفتيش سلامة المبنى.
+Building {0} is not flagged as a Procurement Intake Store.,المبنى {0} غير مُعلَّم كمخزن استلام مشتريات.
 "Building-level fixed asset: CCTV camera, DVR/NVR, hard disk, router, switch, generator. Custody is on the supervisor, not on an employee.",أصل ثابت على مستوى المبنى: كاميرا مراقبة، مسجّل DVR/NVR، قرص صلب، موجّه، مبدّل، مولّد. العهدة على المشرف وليست على موظف.
 Buildings Granted,المباني المرخصة
 Buildings In Scope,المباني المشمولة بالعمل
 CCTV Camera,كاميرا مراقبة
+Cadence,الوتيرة
 Camera Access Building Scope,نطاق الوصول لكاميرات المبنى
 Camera Access Grant,منح صلاحية الوصول للكاميرات
 Cameras in Building,الكاميرات في المبنى
@@ -414,6 +435,7 @@ Checked in: {0},تسجيل الدخول: {0}
 Checked out: {0},تسجيل الخروج: {0}
 Checking in…,جارٍ تسجيل الدخول…
 Checking out…,جارٍ تسجيل المغادرة…
+Checklist lines must be a list.,يجب أن تكون سطور قائمة الفحص قائمةً.
 Checkout,مغادرة السكن
 Checkout Date,تاريخ تسجيل الخروج
 Checkout Details,تفاصيل المغادرة
@@ -523,13 +545,17 @@ Configure required safety controls. Use 'Generate Safety Setup' button to create
 Configuring Apex,تهيئة Apex
 Confirm,تأكيد
 Confirm Habitat Settings,اعتماد إعدادات هابيتات
+Confirm Handover,تأكيد التسليم
+Confirm Receipt,تأكيد الاستلام
 Confirm Salis Settings,اعتماد إعدادات سلس
 Confirm Transfer,تأكيد النقل
+Confirm that all items have been verified before approving.,أكِّد التحقق من جميع البنود قبل الاعتماد.
 Confirm the default payment method and the deduction and GL-posting toggles.,اعتمد طريقة الدفع الافتراضية ومفاتيح الاستقطاع والقيد المحاسبي.
 "Confirm the fleet defaults: company, cost center, approvals, and the fuel-request threshold.",اعتمد القيم الافتراضية للأسطول: الشركة، ومركز التكلفة، والاعتمادات، وحد طلب الوقود.
 Confirm the shared Apex settings that the Habitat and Salis modules build on.,اعتمد إعدادات أبيكس المشتركة التي تبني عليها وحدتا هابيتات وسلس.
 Confirm the standardized safety tasks that drive scheduled work.,راجع مهام السلامة القياسية التي تنشئ العمل المجدول.
 Confirm your safety catalog and log your first inspection.,اعتمد فهرس السلامة وسجّل أول تفتيش.
+Confirmed,مؤكَّد
 Consent Attachment,مرفق الموافقة
 Consent Date,تاريخ الموافقة
 Consent Given,تم منح الموافقة
@@ -583,6 +609,7 @@ Could not create the payment. Please try again.,تعذّر إنشاء الدفع
 Could not generate a unique worker token. Please try again.,تعذّر إنشاء رمز عامل فريد. يرجى المحاولة مجدداً.
 Could not issue the cart. Please review and try again.,تعذّر صرف السلة. يرجى المراجعة والمحاولة مجدداً.
 Could not load employee photo.,تعذّر تحميل صورة الموظف.
+Could not load held custody.,تعذّر تحميل العهدة المحتفظ بها.
 Could not load pending fuel requests.,تعذّر تحميل طلبات الوقود المعلّقة.
 Could not load the approval queue,تعذّر تحميل قائمة الاعتماد
 Could not load the board for this building.,تعذّر تحميل اللوحة لهذا المبنى.
@@ -590,6 +617,7 @@ Could not load the board. Check your connection and try again.,تعذّر تحم
 Could not load the building.,تعذّر تحميل المبنى.
 Could not load the building. Please retry.,تعذّر تحميل المبنى. يرجى المحاولة مجدداً.
 Could not load the catalog.,تعذّر تحميل السجل.
+Could not load the checklist. Please try again.,تعذّر تحميل قائمة الفحص. حاول مرة أخرى.
 Could not load the dispatch board. Please check your connection and try again.,تعذّر تحميل لوحة التوجيه. يرجى التحقق من اتصالك والمحاولة مجدداً.
 Could not load the material template. Please try again.,تعذّر تحميل قالب المواد. يرجى المحاولة مجدداً.
 Could not load the safety map. Please try again.,تعذّر تحميل خريطة السلامة. يرجى المحاولة مجدداً.
@@ -602,7 +630,9 @@ Could not post the reversal to the ledger. The cancellation was rejected.,تعذ
 Could not post the utility cost to the ledger. The bill was not submitted.,تعذّر ترحيل تكلفة المرافق إلى الدفتر. لم تُقدَّم الفاتورة.
 Could not read the payment settings. Please try again.,تعذّر قراءة إعدادات الدفع. يرجى المحاولة مجدداً.
 Could not regenerate the payment schedule. Please try again.,تعذّر إعادة توليد جدول الدفعات. يرجى المحاولة مجدداً.
+Could not return the cart. Please review and try again.,تعذّر إرجاع السلة. الرجاء المراجعة والمحاولة مرة أخرى.
 Could not save changes. Please try again or contact support.,تعذّر حفظ التغييرات. يرجى المحاولة مجدداً أو التواصل مع الدعم الفني.
+Could not submit the round. Please try again.,تعذّر اعتماد الجولة. حاول مرة أخرى.
 Could not update bed occupancy. The assignment was not submitted.,تعذّر تحديث إشغال السرير. لم يُقدَّم التسكين.
 Could not update the Service Order. Please try again.,تعذّر تحديث أمر الخدمة. يرجى المحاولة مجدداً.
 Could not update the Task Instance. Please try again.,تعذّر تحديث تنفيذ المهمة. يرجى المحاولة مجدداً.
@@ -661,20 +691,25 @@ Custody Handover,تسليم العهدة
 Custody Integration Mode,نمط ربط العهدة
 Custody Issue,صرف العهدة
 Custody Issue Item,بند صرف العهدة
+Custody Issue {0} is not held by the selected worker.,صرف العهدة {0} غير محتفظ به لدى العامل المحدد.
+Custody Issue {0} was not found or is not submitted.,صرف العهدة {0} غير موجود أو غير مُقدَّم.
 Custody Issues by Status,صرف العهد حسب الحالة
 Custody Items Pending Return,أصناف العهدة بانتظار الإرجاع
 Custody Kiosk,كشك العهد
 Custody Loss,فقدان عهدة
 Custody Master,بيانات العهد الأساسية
+Custody Outstanding by Worker,العهدة القائمة لكل عامل
 Custody Return,إرجاع العهدة
 Custody Return Item,بند إرجاع العهدة
 Custody Return Items,بنود إرجاع العهدة
 Custody Returned,تم إرجاع العهدة
+Custody Value in Employee Hands (SAR),قيمة العهدة لدى الموظفين (ريال)
 Custody deferred,أُجِّلت العهدة
 Custody issued to {0},صُرفت العهدة إلى {0}
 DVR/NVR,جهاز التسجيل DVR/NVR
 DVR/NVR Status,حالة جهاز التسجيل DVR/NVR
 Daily,يومي
+Daily Cleaning Compliance,الالتزام اليومي بالنظافة
 Daily Operations,العمليات اليومية
 Daily Rate,السعر اليومي
 Daily Rate cannot be negative.,لا يمكن أن يكون السعر اليومي سالباً.
@@ -685,6 +720,7 @@ Daily driver attendance record with check-in/out times and photographic evidence
 "Daily fuel consumption log for a vehicle: odometer, litres, amount, and platform.",سجل استهلاك وقود يومي لمركبة: عداد المسافة واللترات والمبلغ والمنصة.
 Damage,الضرر
 Damage Assessment,تقييم التلفيات
+Damage Cost by Building,تكلفة الأضرار حسب المبنى
 Damage Deduction,خصم الضرر
 Damage Deduction Amount (SAR),مبلغ خصم التلفيات (ريال)
 Damage Deduction Component,مكوّن خصم التلفيات
@@ -711,6 +747,7 @@ Days To Expiry,الأيام حتى الانتهاء
 Days a vehicle may remain in the workshop before a Maintenance Overdue alert is raised.,عددُ الأيام التي تبقى فيها المركبة في الورشة قبل إطلاق تنبيه «تأخّر الصيانة».
 Days before a Building License expiry date to flag it Expiring Soon (per-license renewal_lead_days still overrides).,عدد الأيام قبل تاريخ انتهاء رخصة المبنى لتمييزها بأنها ستنتهي قريباً (تظل قيمة renewal_lead_days الخاصة بكل رخصة هي المُرجّحة).
 Days before a building lease end date to flag it on the watchlist.,عدد الأيام قبل تاريخ انتهاء عقد إيجار المبنى لإدراجه في قائمة المراقبة.
+Days before a safety task's due date to send a pre-due reminder.,عدد الأيام قبل تاريخ استحقاق مهمة السلامة لإرسال تذكير مسبق.
 Days before a temporary stay's expected check-out date to flag it on the supervisor's watchlist.,عدد الأيام قبل تاريخ المغادرة المتوقع لإقامة مؤقتة لإدراجها في قائمة متابعة المشرف.
 Days before expiry to trigger renewal alert,عدد الأيام قبل الانتهاء لإطلاق تنبيه التجديد
 "Days the worker may remain on a passport-only basis. Standard 30, extendable to a maximum of 90.",عدد الأيام التي يجوز للعامل البقاء فيها بالاعتماد على جواز السفر فقط. القياسي 30، قابل للتمديد إلى حد أقصى 90.
@@ -756,6 +793,7 @@ Depreciation Policy,سياسة الإهلاك
 Depreciation Snapshot Item,بند لقطة الإهلاك
 Derived Fields,الحقول المشتقة
 Derived from the active Accommodation Lease (annualized). Read-only.,مشتق من عقد الإيجار الفعّال (محسوباً سنوياً). للقراءة فقط.
+Derived on submit from the statuses of the linked Safety Task Execution rows.,تُشتقّ عند الاعتماد من حالات تنفيذات مهام السلامة المرتبطة.
 Describe the issue,صف المشكلة
 Description,الوصف
 Description is too long. Please keep it under 2000 characters.,الوصف طويل جداً. يرجى الإبقاء عليه تحت 2000 حرف.
@@ -797,6 +835,7 @@ Drag an occupied bed onto an empty bed to transfer the resident.,اسحب سري
 Driver,سائق
 Driver Attendance,حضور السائق
 Driver Attendance Image,صورة حضور السائق
+Driver Attendance Summary,ملخص حضور السائقين
 Driver Availability,توفّر السائقين
 Driver Clearance,إخلاء طرف سائق
 Driver Clearance Certificate,شهادة إخلاء طرف السائق
@@ -830,7 +869,12 @@ ERPNext Item (Optional),عنصر ERPNext (اختياري)
 ERPNext Stock Integration,تكامل مخزون ERPNext
 Each cart line must have a quantity greater than zero.,يجب أن تكون كمية كل سطر في السلة أكبر من صفر.
 Each cart line must reference an article.,يجب أن يشير كل سطر في السلة إلى صنف.
+Each checklist line needs a task and an execution status.,يحتاج كل سطر في قائمة الفحص إلى مهمة وحالة تنفيذ.
 "Each custody item must be marked Returned, Lost, or Damaged before submission.",يجب تحديد كل بند عهدة كـ مُعاد أو مفقود أو تالف قبل التقديم.
+Each result line needs a cadence.,يحتاج كل سطر نتيجة إلى وتيرة.
+Each return line must have a quantity greater than zero.,يجب أن يكون لكل بند إرجاع كمية أكبر من صفر.
+Each return line must reference a Custody Issue.,يجب أن يشير كل بند إرجاع إلى صرف عهدة.
+Each return line must reference an article.,يجب أن يشير كل بند إرجاع إلى صنف.
 Edit Rooms and Beds,تعديل الغرف والأسرّة
 Electric,كهربائي
 Electrical,كهرباء / كهربائي
@@ -887,6 +931,7 @@ Evidence & Follow-up,الأدلة والمتابعة
 Evidence (Photo/Document),الإثبات (صورة/مستند)
 Evidence Notes,ملاحظات الإثبات
 Evidence Photo,صورة الإثبات
+Evidence Photo Required,صورة الدليل مطلوبة
 Evidence Required,إثبات مطلوب
 Evidence Submitted,تم تقديم الإثبات
 Evidence is required before moving the write-off case beyond Open.,الأدلة مطلوبة قبل نقل حالة الشطب إلى ما بعد «مفتوح».
@@ -897,6 +942,7 @@ Exception Type,نوع الاستثناء
 Exceptions,الاستثناءات
 Exceptions & Analytics,الاستثناءات والتحليلات
 Excessive Topup,تعبئة مفرطة
+Executed,المُنفَّذة
 Executed By,جهة التنفيذ
 Execution,التنفيذ
 Execution Date,تاريخ التنفيذ
@@ -904,6 +950,7 @@ Execution Instructions,تعليمات التنفيذ
 Execution Status,حالة التنفيذ
 Execution Time,وقت التنفيذ
 Exhausted,مستنفدة
+Expected,المتوقَّعة
 Expected Check-out Date,تاريخ المغادرة المتوقع
 Expected Count,العدد المتوقع
 "Expected boarding count, derived from the linked Transport Request's registered worker count.",عدد الصعود المتوقع، مشتق من عدد العمالة المسجّلين في طلب النقل المرتبط.
@@ -921,7 +968,9 @@ Export CSV,تصدير CSV
 Exported {0} vehicles,تمّ تصدير {0} مركبة
 Exterior,خارجي
 External Area,منطقة خارجية
+External Reference,مرجع خارجي
 External Worker,عامل خارجي
+External purchasing system PO or invoice number.,رقم أمر الشراء أو الفاتورة في نظام المشتريات الخارجي.
 External rental office that supplies rented vehicles to the fleet.,مكتب تأجير خارجي يزوّد الأسطول بالمركبات المستأجرة.
 Facility Asset,أصل المنشأة
 Facility Asset Custody Assignment,تخصيص عهدة أصول المنشأة
@@ -975,6 +1024,7 @@ First Aid Kit Required,حقيبة الإسعافات الأولية مطلوبة
 First Payment Date,تاريخ أول دفعة
 First Payment Date cannot be before Lease Start Date.,لا يمكن أن يكون تاريخ أول دفعة قبل تاريخ بداية عقد الإيجار.
 Fixed Asset (Capex),أصل ثابت (مصروفات رأس مالية)
+Flags a building that receives externally-purchased goods before they are handed over into custody.,يُعلِّم المبنى الذي يستلم البضائع المشتراة خارجياً قبل تسليمها إلى العهدة.
 Fleet,الأسطول
 Fleet Control,التحكّم بالأسطول
 Fleet Manager Dashboard,لوحة معلومات مدير الأسطول
@@ -1025,14 +1075,17 @@ Fuel Claim,مطالبة وقود
 Fuel Claim Register,سجل مطالبات الوقود
 Fuel Claim Variance by Month,انحراف مطالبات الوقود حسب الشهر
 Fuel Claim Voucher,سند مطالبة وقود
+Fuel Claim vs Consumption,مطالبات الوقود مقابل الاستهلاك
 Fuel Consumption (Litres),استهلاك الوقود (لترات)
 Fuel Consumption Ledger,دفتر استهلاك الوقود
+Fuel Consumption Summary,ملخص استهلاك الوقود
 Fuel Consumption by Month,استهلاك الوقود حسب الشهر
 Fuel Cost This Month,تكلفة الوقود هذا الشهر
 Fuel Cost by Month,تكلفة الوقود حسب الشهر
 Fuel Cost by Platform,تكلفة الوقود حسب المنصة
 Fuel Daily Log,السجل اليومي للوقود
 Fuel Exception Case,حالة استثناء وقود
+Fuel Exception Register,سجل استثناءات الوقود
 Fuel Level,مستوى الوقود
 Fuel Litres Dispensed This Month,لترات الوقود المصروفة هذا الشهر
 Fuel Misuse,إساءة استخدام الوقود
@@ -1087,6 +1140,7 @@ Getting Started,البدء
 Go To,الانتقال إلى
 Good,جيد
 Google Maps Link,رابط خرائط جوجل
+Grace days after the due date before a safety task is flagged Overdue.,أيام السماح بعد تاريخ الاستحقاق قبل تعليم مهمة السلامة كمتأخرة.
 "Grants viewing/admin credentials for CCTV systems to a specific user, scoped to one or more buildings.",يمنح صلاحيات المشاهدة/الإدارة لأنظمة المراقبة لمستخدم محدد، ضمن نطاق مبنى أو أكثر.
 Ground,أرضي
 Ground Floor,الطابق الأرضي
@@ -1099,16 +1153,21 @@ Habitat Internal / No Financial Posting,داخلي في Habitat / بدون تر�
 Habitat Safety Incident,حادثة سلامة سكنية
 Habitat Settings,إعدادات السكن
 Half,نصف
+Handed Over,تم التسليم
+Handover,تسليم
 Handover Check Items,بنود فحص التسليم
 Handover Date,تاريخ التسليم
 Handover Details,تفاصيل التسليم
 Handover Sign-Off,اعتماد التسليم
+Handover {0} can no longer be rejected.,لم يعد بالإمكان رفض التسليم {0}.
 Handover {0} cancelled.,أُلغي التسليم {0}.
+Handover {0} is closed; a new code cannot be issued.,التسليم {0} مغلق؛ لا يمكن إصدار رمز جديد.
 Hard Disk,القرص الصلب
 "Hard cap on the damage amount posted to Additional Salary for a single checkout, regardless of assessed value.",حد أقصى صارم لمبلغ الضرر المُرحَّل إلى الراتب الإضافي لمغادرة سكن واحدة، بغضّ النظر عن القيمة المُقدَّرة.
 Has Timestamps,يحتوي طوابع زمنية
 Has custody,لديه عهدة
 Health and Hygiene,الصحة والنظافة العامة
+Held: {0},بالعهدة: {0}
 High,عالية
 High Priority,أولوية عالية
 Hindi,الهندية
@@ -1176,6 +1235,7 @@ Installments,أقساط
 Insurance,التأمين
 Insurance Claim,مطالبة تأمين
 Insurance Policy,بوليصة التأمين
+Intake Building,مبنى الاستلام
 Integration Enabled,التكامل مُفعّل
 Integration Help,مساعدة التكامل
 Inter-City Relocation,ترحيل بين المدن
@@ -1202,6 +1262,7 @@ Invalid Odometer Reading,قراءة عداد مسافة غير صالحة
 Invalid Request Type: {0},نوع طلب غير صالح: {0}
 Invalid SQL identifier: doctype {0},معرّف SQL غير صالح: نوع المستند {0}
 Invalid SQL identifier: field {0},معرّف SQL غير صالح: الحقل {0}
+Invalid code.,رمز غير صحيح.
 Invalid or inactive location token.,رمز الموقع غير صالح أو غير مُفعّل.
 Invalid portal theme: {0},سمة بوابة غير صالحة: {0}
 Invalid readiness status.,حالة جاهزية غير صالحة.
@@ -1217,10 +1278,12 @@ Is Cancelled,ملغى
 Is Cross Region,عابر للمناطق
 Is External Supplier Worker?,هل هو عامل مورد خارجي؟
 Is Intercompany Movement,حركة بين الشركات
+Is Re-inspection,إعادة فحص
 Is Serialized,مرمز / ذو رقم تسلسلي
 Is Temporary,مؤقت
 Isolation,عزل
 Issue,مشكلة
+Issue Custody,صرف العهدة
 Issue Date,تاريخ الإصدار / تاريخ الصرف
 Issue Description,وصف المشكلة / وصف الصرف
 Issue Location,موقع المشكلة
@@ -1229,6 +1292,8 @@ Issue Type,نوع المشكلة / نوع الصرف
 Issue all ({0}),صرف الجميع ({0})
 Issue custody,صرف العهدة
 Issue custody first,اصرف العهدة أولاً
+Issue or return mode,وضع الصرف أو الإرجاع
+Issue: {0},الصرف: {0}
 Issued,مصروف
 Issued Custody Items,العهد المصروفة
 Issued To (Employee),المصروف للموظف
@@ -1264,6 +1329,7 @@ Last Modified By Role,آخر تعديل بواسطة صلاحية
 Last Movement Date,تاريخ آخر حركة
 Last Printed On,آخر طباعة في
 Last Renewed On,تاريخ آخر تجديد
+Last Status,آخر حالة
 Late,متأخر
 Launchpad,لوحة الانطلاق
 Lead days for driver licence-expiry alerts; the effective window is the larger of this and Alert Lead Days.,أيام التنبيه المسبق لانتهاء رخصة السائق؛ النافذةُ الفعليّة هي الأكبر بين هذه و«أيام التنبيه المسبق».
@@ -1330,6 +1396,7 @@ Live View Only,بث مباشر فقط
 Load Material Template,تحميل قالب المواد
 Loading actions…,جارٍ تحميل الإجراءات…
 Loading board…,جارٍ تحميل اللوحة…
+Loading checklist…,جارٍ تحميل قائمة الفحص…
 Loading map…,جارٍ تحميل الخريطة…
 Loading…,جارٍ التحميل…
 Location,الموقع
@@ -1419,9 +1486,11 @@ Method,الطريقة
 Middle,وسطي
 Migrated From,تم ترحيله من
 Min Occupancy %,أدنى نسبة إشغال
+Minutes a handover one-time password stays valid before it expires.,عدد الدقائق التي يبقى فيها رمز التحقق للتسليم صالحاً قبل انتهاء صلاحيته.
 Missed,فائت
 Missed Cleaning,تنظيف مفقود
 Missed Cleaning Logs,سجلات التنظيف الفائتة
+Missed Cleaning Tasks,مهام النظافة الفائتة
 Missed Reason,سبب التغيب
 Missed Subcontractor Visits,زيارات مقاول الباطن الفائتة
 Mobile Number,رقم الجوال
@@ -1468,6 +1537,7 @@ Naming Series,سلسلة الترقيم
 National ID,رقم الهوية الوطنية
 Nationality,الجنسية
 Navigate,التنقل
+Needs Attention,بحاجة إلى انتباه
 Needs Cleaning,يحتاج تنظيفاً
 Needs Improvement,يحتاج تحسيناً
 Needs Operations Authorization,يتطلب تفويض العمليات
@@ -1477,6 +1547,7 @@ New,جديد
 New Assignment,تخصيص جديد
 New Expiry Date,تاريخ الانتهاء الجديد
 New Hire,موظف جديد
+New One-Time Password,رمز تحقق جديد لمرة واحدة
 Next Expiry Date,تاريخ الانتهاء القادم
 Next: Approve,التالي: الاعتماد
 Next: Beds,التالي: الأسرّة
@@ -1497,6 +1568,7 @@ No beds found for this building.,لا توجد أسرّة لهذا المبنى.
 No category,بلا فئة
 No drivers assigned today.,لا يوجد سائقون مسندون اليوم.
 No floor plan defined. Add floor rows before generating.,لم يُحدَّد مخطط طوابق. أضف صفوف الطوابق قبل التوليد.
+No issues recorded.,لا ملاحظات مسجّلة.
 No open safety or maintenance signals for this building.,لا توجد إشارات سلامة أو صيانة مفتوحة لهذا المبنى.
 No open transport requests.,لا توجد طلبات نقل مفتوحة.
 No pending fuel requests for this project.,لا توجد طلبات وقود معلّقة لهذا المشروع.
@@ -1504,7 +1576,9 @@ No pending fuel requests. The queue is clear.,لا توجد طلبات وقود 
 No photo on file,لا توجد صورة
 No project yet,لا يوجد مشروع بعد
 No registered workers match. Register a new arrival below.,لا يوجد عمال مسجّلون مطابقون. سجّل وصولاً جديداً أدناه.
+No result lines to submit.,لا سطور نتائج لاعتمادها.
 No rooms found for this building.,لا توجد غرف لهذا المبنى.
+No safety tasks match this building and cadence.,لا مهامَّ سلامةٍ تطابق هذا المبنى وهذه الوتيرة.
 No trips scheduled for today.,لا توجد رحلات مجدولة لليوم.
 No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel.,لا توجد مركبة مسندة إليك. اطلب من مشرفك إسناد مركبة قبل طلب الوقود.
 No vehicles in scope.,لا توجد مركبات ضمن النطاق.
@@ -1517,6 +1591,7 @@ Not Found,غير موجود
 Not Installed,غير مثبت
 Not Recording,لا يسجل
 Not Tracked,غير متتبَّع
+Not a Procurement Intake Store,ليس مخزن استلام مشتريات
 Not permitted,غير مسموح
 Note,ملاحظة
 Notes,ملاحظات
@@ -1535,11 +1610,17 @@ Number of days the resident has been idle. Accrued by the v0.8.6 aging job; not 
 Number of days without a dispatch trip before an Active vehicle is flagged as idle.,عدد الأيام دون رحلة تشغيل قبل وسم المركبة النشطة بأنها خاملة.
 Number of times this asset has been moved between buildings.,عدد مرّات نقل هذا الأصل بين المباني.
 OK,سليم
+OTP Attempts,محاولات رمز التحقق
+OTP Expires At,انتهاء صلاحية رمز التحقق
+OTP Hash,بصمة رمز التحقق
+OTP Locked Until,قفل رمز التحقق حتى
+OTP Verified On,تاريخ التحقق من الرمز
 Occupancy,الإشغال
 Occupancy %,نسبة الإشغال (%)
 Occupancy % Trend,اتجاه نسبة الإشغال
 Occupancy Percent Trend,اتجاه نسبة الإشغال
 Occupancy Status,حالة الإشغال
+Occupancy Trend,اتجاه الإشغال
 Occupied,مشغول
 Occupied Beds,الأسرة المشغولة
 October,أكتوبر
@@ -1564,12 +1645,15 @@ On-Time %,نسبة الالتزام بالمواعيد %
 On-call Only,عند الطلب فقط
 One Time,مرة واحدة
 One row per scheduled rent payment on an Accommodation Lease. Linked to a Payment Entry once processed.,سطر لكل دفعة إيجار مجدولة على عقد الإيجار. يُربط بقيد دفع بمجرد معالجته.
+One-Time Password,رمز التحقق لمرة واحدة
 Only Finance can approve or mark a payment as paid. This step cannot be bypassed.,المالية فقط تعتمد أو تؤكّد الدفع. لا يمكن تجاوز هذه الخطوة.
 Only Open or In Progress Task Instances can be marked Completed.,لا يمكن إكمال إلا المهام المفتوحة أو قيد التنفيذ.
 Only Service Orders with status In Progress can be marked Missed.,لا يمكن تحديد حالة 'فائت' إلا لأوامر الخدمة ذات الحالة 'قيد التنفيذ'.
 Only Service Orders with status Scheduled can be marked In Progress.,لا يمكن تحديد حالة 'قيد التنفيذ' إلا لأوامر الخدمة ذات الحالة 'مجدول'.
 Only Task Instances with status Open can be marked In Progress.,لا يمكن تحديد حالة 'قيد التنفيذ' إلا لتنفيذات المهام ذات الحالة 'مفتوح'.
 Only Work Orders with status Planned can be marked In Progress.,لا يمكن تحديد حالة 'قيد التنفيذ' إلا لأوامر العمل ذات الحالة 'مخطط'.
+Only a handover Under Review can be approved.,لا يمكن اعتماد إلا تسليم قيد المراجعة.
+Only a submitted handover can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم مُقدَّم.
 Only a submitted transfer can be received.,لا يمكن استلام إلا النقل المعتمد.
 Only submitted Maintenance Work Orders can be marked Completed.,لا يمكن وسم أوامر عمل الصيانة كمكتملة إلا بعد اعتمادها.
 Only submitted Service Orders can be marked Missed.,لا يمكن تحديد حالة 'فائت' إلا لأوامر الخدمة المعتمدة.
@@ -1577,6 +1661,8 @@ Only submitted Service Orders can be started.,لا يمكن بدء تنفيذ أ
 Only submitted Task Instances can be marked Completed.,لا يمكن تحديد المهمة كمكتملة إلا بعد اعتمادها.
 Only submitted Task Instances can be started.,لا يمكن بدء تنفيذ المهام غير المعتمدة.
 Only submitted Work Orders can be started.,لا يمكن بدء تنفيذ أوامر العمل غير المعتمدة.
+Only the procurement supervisor or an Accommodation Manager may regenerate the code.,لا يجوز إعادة توليد الرمز إلا لمشرف المشتريات أو مدير السكن.
+Only the receiving supervisor or an Accommodation Manager may action this handover.,لا يجوز اتخاذ إجراء على هذا التسليم إلا للمشرف المستلم أو مدير السكن.
 Open,فتح
 Open Action Inbox,فتح صندوق الإجراءات
 Open Audit Remediation Plans,خطط معالجة التدقيق المفتوحة
@@ -1603,6 +1689,7 @@ Open Maintenance: {0},صيانة مفتوحة: {0}
 Open Movement Cost Recoveries,عمليات استرداد تكلفة حركة مفتوحة
 Open Resident Requests,طلبات الساكنين المفتوحة
 Open Room Setup from a building — no building was provided in the route.,افتح إعداد الغرف من مبنى — لم يُحدَّد مبنى في المسار.
+Open Safety Checklist,افتح قائمة فحص السلامة
 Open Safety Map,فتح خريطة السلامة
 Open Subcontractor Service Orders,أوامر خدمة مقاول الباطن المفتوحة
 Open Target Document,فتح المستند المستهدف
@@ -1651,6 +1738,7 @@ Other,أخرى
 Out of Service,خارج الخدمة
 Outstanding,مستحق
 Outstanding Fuel Exceptions,حالات استثناء وقود معلّقة
+Outstanding Qty,الكمية المتبقية
 Outstanding Recoveries,عمليات استرداد معلّقة
 Over Threshold,تجاوز الحد
 Over-Capacity Alert Threshold (%),حد تنبيه تجاوز الطاقة الاستيعابية (%)
@@ -1681,6 +1769,7 @@ Partial / Attention: {0},جزئي / انتباه: {0}
 Partially Occupied,مشغول جزئياً
 Partially Occupied Rooms,الغرف المشغولة جزئياً
 Partially Returned,مُرجَع جزئياً
+Parties,الأطراف
 Party,الطرف
 Party Type,نوع الطرف
 Pass,مجتاز
@@ -1718,6 +1807,7 @@ Pending Driver Clearances,إخلاءات طرف السائقين المعلّق�
 Pending Finance,بانتظار المالية
 Pending Fuel Requests,طلبات الوقود المعلقة
 Pending My Action,بانتظار اتخاذ إجرائي
+Pending Receipt,بانتظار الاستلام
 Pending Transport Requests,طلبات نقل معلّقة
 Pending Utility Bills,فواتير الخدمات المعلّقة
 Pending Vehicle Write-Offs,شطب المركبات المعلّق
@@ -1751,6 +1841,7 @@ Photographic evidence captured for a driver attendance record.,دليل مصوّ
 "Physical Location (e.g., Laundry Room, Floor 2 Hallway)",الموقع الفعلي (مثال: غرفة الغسيل، ممر الطابق 2)
 Physical facility asset movement with intercompany approval controls.,نقل مادي لأصل مرفق مع ضوابط اعتماد بين الشركات.
 Physical meter ID as printed on the meter or invoice,معرّف العدّاد الفعلي كما هو مطبوع على العدّاد أو الفاتورة
+Pick a building and a cadence to build the checklist.,اختر مبنى ووتيرة لبناء قائمة الفحص.
 Pick a building to start the arrival.,اختر مبنى لبدء الوصول.
 Pick a building…,اختر مبنى…
 Pick a project first.,اختر مشروعاً أولاً.
@@ -1817,8 +1908,12 @@ Priority: {0},الأولوية: {0}
 Process Fuel Claim,معالجة مطالبة وقود
 Process a Fuel Claim,معالجة مطالبة وقود
 Procurement,المشتريات
+Procurement Intake Store,مخزن استلام المشتريات
 Procurement Items,بنود المشتريات
 Procurement Items Required,يلزم بنود مشتريات
+Procurement Supervisor,مشرف المشتريات
+Procurement intake store that receives the externally-purchased goods.,مخزن استلام المشتريات الذي يستلم البضائع المشتراة خارجياً.
+Procurement intake store that the goods leave.,مخزن استلام المشتريات الذي تغادر منه البضائع.
 Project,المشروع
 Project Transfer,تحويل المشروع
 Project is required.,المشروع مطلوب.
@@ -1871,12 +1966,15 @@ Reallocation,إعادة تخصيص
 Reason,السبب
 Reason Category,سبب عدم التشغيل
 Receipt,استلام
+Receipt Date,تاريخ الاستلام
 Receive Transfer,استلام النقل
 Received,مُستلَم
 Received Date,تاريخ الاستلام
 Receiving Confirmed,تم تأكيد الاستلام
 Receiving Confirmed By,تأكيد الاستلام من قِبَل
 Receiving Confirmed By is required for intercompany asset movement.,حقل 'تأكيد الاستلام من قِبَل' مطلوب لحركة الأصول بين الشركات.
+Receiving Supervisor,المشرف المستلم
+Receiving accommodation supervisor's building store that the goods land in.,مخزن مبنى مشرف السكن المستلم الذي تصل إليه البضائع.
 Recent Assignments,الإسنادات الأخيرة
 Recent Error Logs,سجلات الأخطاء الأخيرة
 Recent Incidents,البلاغات الأخيرة
@@ -1912,6 +2010,7 @@ Reference-only link to the Finance/HR Payment Request handling the actual deduct
 Refresh,تحديث
 Refresh Board,تحديث اللوحة
 Refresh Map,تحديث الخريطة
+Regenerate OTP,إعادة توليد رمز التحقق
 Regenerate Payment Schedule,إعادة توليد جدول السداد
 Regenerate Token,إعادة توليد الرمز
 Regenerating invalidates the worker's current link and QR. Continue?,إعادة التوليد تُبطل رابط العامل ورمزه الحاليين. متابعة؟
@@ -1928,6 +2027,7 @@ Registration (Istimara),الاستمارة
 Reimbursement,تعويض
 Reject,رفض
 Reject Fuel Request,رفض طلب الوقود
+Reject Handover,رفض التسليم
 Rejected,مرفوض
 Rejected by Client,مرفوض من قِبل العميل
 Rejected: {0},مرفوض: {0}
@@ -2016,7 +2116,9 @@ Requests Served,الطلبات المخدومة
 Requests in category {0} are resolved directly and have no target document to create.,الطلبات في الفئة {0} تُحلّ مباشرةً ولا يوجد لها مستند مستهدف لإنشائه.
 Require Acknowledgment for All Deductions,اشتراط الإقرار لجميع الخصومات
 Require Employee Acknowledgment,اشتراط إقرار الموظف
+Require Handover OTP,طلب رمز تحقق للتسليم
 Require Internal Approval,اشتراط الاعتماد الداخلي
+Require Weekly All-Building Coverage,طلب تغطية أسبوعية لجميع المباني
 Require approval when an assignment or transfer crosses project boundaries.,اشتراط الموافقة عند تجاوز الإسناد أو النقل لحدود المشروع.
 Required before the case can move beyond Open.,"مطلوب قبل أن تتجاوز الحالة وضع ""مفتوحة""."
 Required for Accident or Violation stops.,مطلوب لحالات الإيقاف بسبب حادث أو مخالفة.
@@ -2049,18 +2151,24 @@ Responsible Facility Supervisor,مشرف المنشأة المسؤول
 Responsible Role,الصلاحية المسؤولة
 Responsible Worker,العامل المسؤول
 Result,النتيجة
+Results must be a list.,يجب أن تكون النتائج قائمةً.
 Retry,إعادة المحاولة
 Return,إرجاع
 Return Date,تاريخ الإرجاع
 Return Status,حالة الإرجاع
 Return Time,وقت العودة
+Return cart,سلة الإرجاع
+Return cart is empty.,سلة الإرجاع فارغة.
 Return from Leave,العودة من الإجازة
 Return from Repair,إعادة بعد الإصلاح
 Returned,مُعاد
 Returned By (Employee),أُعيد بواسطة (الموظف)
 Returned Items,الأصناف المعادة
 Returned from Leave,عائد من إجازة
+Returned from {0}: {1},تم الإرجاع من {0}: {1}
+Returning…,جارٍ الإرجاع…
 Returns And Outstanding Items,المرتجعات والبنود المعلّقة
+Returns to Reconcile,مرتجعات للتسوية
 Reversal Of,عكس قيد
 Reversal Status,حالة العكس
 Reversed {0} L from Fuel Request {1}.,تم عكس {0} لتر من طلب الوقود {1}.
@@ -2068,6 +2176,7 @@ Revert Due Date,تاريخ الاسترجاع المستحق
 Reverted,مُسترجَع
 Review Apex Integration Settings,مراجعة إعدادات تكامل أبيكس
 Review Integration Settings,مراجعة إعدادات التكامل
+Review and approve the handover before confirming receipt.,راجع التسليم واعتمده قبل تأكيد الاستلام.
 Review the Active Resident Register,راجع سجل الساكنين النشطين
 Review the Safety Task Catalog,مراجعة دليل مهام السلامة
 "Review the shared integration switchboard: frontend URL, API version, and allowed origins.",راجع لوحة التكامل المشتركة: رابط الواجهة، وإصدار الواجهة البرمجية، والمصادر المسموح بها.
@@ -2109,6 +2218,10 @@ Rooms Planned,تم تخطيط الغرف
 Rooms Total,إجمالي الغرف
 Rooms and beds created.,تم إنشاء الغرف والأسرّة.
 Rooms on Floor,عدد الغرف في الطابق
+Round,جولة
+Round Date,تاريخ الجولة
+Round Submitted,اعتُمدت الجولة
+Round {0} submitted. Overall result: {1}.,اعتُمدت الجولة {0}. النتيجة الإجمالية: {1}.
 Route,المسار
 Route Name,اسم المسار
 Route Plan,خطة المسار
@@ -2117,11 +2230,13 @@ Router,راوتر
 Routing & Tracking,التوجيه والتتبع
 "Row {0}: Days, Daily Rate and Amount cannot be negative.",الصف {0}: عدد الأيام والسعر اليومي والمبلغ لا يمكن أن تكون سالبة.
 Row {0}: Qty must be greater than zero.,الصف {0}: يجب أن تكون الكمية أكبر من صفر.
+Run your first safety round from the Safety Checklist.,نفّذ أول جولة سلامة من قائمة فحص السلامة.
 Run your fleet from the live operations board.,أدِر أسطولك من لوحة التشغيل الحيّة.
 SLA (Days),مستوى الخدمة (أيام)
 SLA Breached,تجاوز مستوى الخدمة
 SLA Breached — this request requires immediate attention.,تجاوز اتفاقية مستوى الخدمة — هذا الطلب يستلزم اهتماماً فورياً.
 Safety,السلامة
+Safety Checklist,قائمة فحص السلامة
 Safety Findings,ملاحظات السلامة
 Safety Inspection Report,تقرير فحص السلامة
 Safety Inspections,تفتيشات السلامة
@@ -2130,8 +2245,13 @@ Safety Inspections Recorded,فحوصات السلامة المسجلة
 Safety Map,خريطة السلامة
 Safety Open Findings,نتائج السلامة المفتوحة
 Safety Operations,عمليات السلامة
+Safety Overdue Grace Days,أيام سماح تأخر السلامة
+Safety Pre-Due Lead Days,أيام التنبيه المسبق للسلامة
 Safety Profile,ملف السلامة
 Safety Readiness,جاهزية السلامة
+Safety Report Recipient,مستلِم تقرير السلامة
+Safety Round,جولة سلامة
+Safety Round Compliance,الالتزام بجولات السلامة
 Safety Section — No Issues,قسم السلامة — لا توجد ملاحظات
 Safety Setup,إعداد السلامة
 Safety Setup Generated By,أنشأ إعداد السلامة
@@ -2145,6 +2265,8 @@ Safety Task Execution,تنفيذ مهمة السلامة
 Safety Task Executions by Result,تنفيذ مهام السلامة حسب النتيجة
 Safety and Task Master,بيانات السلامة والمهام
 Safety is set up. Scheduled tasks and inspections are active.,تم إعداد السلامة. المهام المجدولة والتفتيشات مفعّلة الآن.
+Safety rounds,جولات السلامة
+Safety rounds were recorded for {0} on {1}.,سُجِّلت جولات السلامة لـ{0} بتاريخ {1}.
 Salary Component,مكوّن الراتب
 Salary Component (Deduction type) used when posting custody damage as Additional Salary. Must exist in HRMS before enabling.,مكون الراتب (نوع خصم) المستخدم لترحيل تلفيات العهد كراتب إضافي. يجب أن يكون موجوداً في HRMS قبل التفعيل.
 Salary Deduction,خصم من الراتب
@@ -2199,6 +2321,9 @@ Select a building to load the board.,اختر مبنى لتحميل اللوحة
 Select a building to load the catalog.,اختر مبنى لتحميل الكتالوج.
 Select a building to load the map.,اختر مبنى لتحميل الخريطة.
 Select a row from the Rent Payment Schedule to generate a payment.,اختر صفاً من جدول الدفعات لتوليد الدفع.
+Select a worker before continuing.,اختر عاملاً قبل المتابعة.
+Select a worker before returning.,اختر عاملاً قبل الإرجاع.
+Select a worker to load held custody.,اختر عاملاً لتحميل العهدة المحتفظ بها.
 Select an employee before issuing.,اختر موظفاً قبل الصرف.
 "Select an employee, then tap items to issue.",اختر موظفاً ثم انقر على الأصناف لصرفها.
 Select at least one passenger.,اختر راكباً واحداً على الأقل.
@@ -2231,7 +2356,9 @@ Service Type,نوع الخدمة
 "Set a fuel quota, request fuel, and reconcile the claim.",حدد حصة وقود، واطلب الوقود، وطابق المطالبة.
 Set an Issue Type to make this finding actionable: on report submit it spawns a Maintenance Request of this type.,حدّد نوع مشكلة لجعل هذه النتيجة قابلة للتنفيذ: عند ترحيل التقرير يُنشئ طلب صيانة من هذا النوع.
 Set automatically when this request is generated from a safety inspection report.,يُضبط آلياً عند إنشاء هذا الطلب من تقرير تفتيش سلامة.
+Set automatically when this request is spawned from a failed safety task execution.,يُحدَّد آلياً عند إنشاء هذا الطلب من تنفيذ مهمة سلامة فاشلة.
 Set by the accrual engine once litres are posted to the Fuel Consumption Ledger. Guards against double-posting.,يُعيَّن بواسطة محرّك الاستحقاق بمجرد ترحيل اللترات إلى دفتر استهلاك الوقود. يحمي من الترحيل المزدوج.
+Set by the receiving supervisor once every line has been physically checked. Required before approval.,يحدده المشرف المستلم بعد فحص كل بند فعلياً. مطلوب قبل الاعتماد.
 Set by the scheduled task once the Iqama issues and a permanent Employee record is created.,يُعيَّن بواسطة المهمة المجدولة بمجرد صدور الإقامة وإنشاء سجل موظف دائم.
 Set externally after Finance posts payment. This DocType never creates a GL or Payment Entry.,يُعيَّن خارجيًا بعد ترحيل المالية للدفعة. هذا المستند لا يُنشئ أبدًا قيدًا محاسبيًا أو قيد دفع.
 "Set for quota-increase claims, which always require Operations-tier authority.",يُعيَّن لمطالبات زيادة الحصة، التي تتطلب دائمًا صلاحية على مستوى العمليات.
@@ -2245,6 +2372,7 @@ Set when the incident is escalated to a damage write-off.,يُضبط عند تص
 Set when the request is approved.,يُضبط عند اعتماد الطلب.
 Set when the transfer is approved.,يُضبط عند اعتماد التحويل.
 Set when the write-off case is approved.,يُضبط عند اعتماد حالة الشطب.
+Set when this is a follow-up round repeating the same cadence for the building on the same date.,يُحدَّد متى تكون هذه جولةَ متابعةٍ تُكرّر الوتيرة نفسها للمبنى في التاريخ نفسه.
 Set when this request's litres are posted to the quota's consumed total. Guards against double-application on resubmit.,يُعيَّن عند ترحيل لترات هذا الطلب إلى إجمالي الحصة المستهلك. يحمي من الاحتساب المزدوج عند إعادة التقديم.
 Set when this write-off was escalated from a Vehicle Incident.,يُضبط عند تصعيد هذا الشطب من بلاغ مركبة.
 Settings,الإعدادات
@@ -2259,6 +2387,7 @@ Setup and Master Data,الإعداد والبيانات الأساسية
 Severe,شديدة
 Severity,الخطورة
 Sewage Tank Suction,نزح خزان الصرف الصحي
+Share this code with the receiving supervisor: {0},شارك هذا الرمز مع المشرف المستلم: {0}
 Shared Masters,البيانات الرئيسية المشتركة
 Shared Meter,عدّاد مشترك
 Sharing Note,ملاحظة المشاركة
@@ -2294,6 +2423,7 @@ Source Incident,البلاغ المصدر
 Source Inspection Report,تقرير الفحص المصدر
 Source Line ID,معرّف سطر المصدر
 Source Reference,مرجع المصدر
+Source Safety Execution,تنفيذ السلامة المصدر
 Source Type,نوع المصدر
 Source and Tracking,المصدر والتتبّع
 Source and destination buildings must be different.,يجب أن يكون مبنى المصدر والوجهة مختلفين.
@@ -2312,6 +2442,7 @@ Standard Unit Cost (SAR),تكلفة الوحدة القياسية (ريال)
 "Standard: quota consumption + ledger posting. Top-up: add litres, optionally temporary. Chip: issue/replace/cancel a fuel chip.",قياسي: استهلاك الحصة + ترحيل الدفتر. تعبئة: إضافة لترات، مؤقتة اختياريًا. شريحة: إصدار/استبدال/إلغاء شريحة وقود.
 Start Date,تاريخ البدء
 Start Datetime,تاريخ ووقت البدء
+Start Review,بدء المراجعة
 Start Task,بدء المهمة
 Start Work,بدء العمل
 Started,بدأ
@@ -2349,6 +2480,7 @@ Subcontractor Service Order,أمر خدمة المقاول
 Subcontractor Service Orders by Status,أوامر خدمة مقاول الباطن حسب الحالة
 Subject,الموضوع
 Submit Request,إرسال الطلب
+Submit Round,اعتمِد الجولة
 Submit the settlement before raising a payment request.,اعتمد التسوية قبل إنشاء طلب دفع.
 Submittable: formal work order derived from a Maintenance Request.,قابل للاعتماد: أمر عمل رسمي مشتق من طلب صيانة.
 Submittable: official on-site maintenance inspection record.,قابل للاعتماد: سجل تفتيش صيانة ميداني رسمي.
@@ -2359,6 +2491,7 @@ Submittable: records the return of custody articles against a prior Custody Issu
 Submitted By Me,المُقدَّمة منّي
 Submitted To (Recipients),مقدم إلى (المستلمون)
 Submitted to Movement,مُرسل إلى الحركة
+Submitting round…,جارٍ اعتماد الجولة…
 Suggestion,اقتراح
 Sum of Fuel Consumption Ledger litres for this vehicle and period. Computed by the system.,مجموع لترات دفتر استهلاك الوقود لهذه المركبة وهذه الفترة. يحتسبه النظام.
 Sum of the linked Rental Accrual Ledger rows for this office and period — the machine-written source of truth. Reference cross-check.,مجموع صفوف دفتر استحقاق الإيجار المرتبطة لهذا المكتب والفترة — مصدر الحقيقة المكتوب آليًا. مرجع للمطابقة.
@@ -2375,6 +2508,7 @@ Supervisor accountable for this asset; appears on facility custody report,الم
 Supplier,المورّد
 Supplier Cost Recovery,استرداد تكلفة المورد
 Supplier Markup Percent,نسبة هامش المورد
+Supplier Name,اسم المورّد
 Supplier-Billed Cost This Month,التكلفة المحمَّلة على المورّد هذا الشهر
 Supporting evidence for the loss and its valuation. Required before the recovery can be Approved.,أدلة داعمة للخسارة وتقييمها. مطلوبة قبل أن يتسنى اعتماد الاسترداد.
 Surveillance,المراقبة
@@ -2432,6 +2566,8 @@ Termination,إنهاء خدمة
 That vehicle is not assigned to you. You can only request fuel for your own vehicle.,تلك المركبة غير مسندة إليك. يمكنك طلب الوقود لمركبتك فقط.
 The Dispatch Trip being executed; its linked Transport Request carries the worker manifest this log records boarding against.,رحلة التشغيل قيد التنفيذ؛ يحمل طلب النقل المرتبط بها قائمة العمّال التي يسجّل هذا السجل الصعود مقابلها.
 The HRMS Additional Salary deduction generated from this acknowledgment. Populated by the controller wiring in a later increment; read-only here.,خصم الراتب الإضافي في HRMS المُنشأ من هذا الإقرار. يُعبّأ بربط المتحكم في مرحلة لاحقة؛ للقراءة فقط هنا.
+"The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
+The attached photo is too large.,الصورة المرفقة كبيرة جداً.
 The building this asset was located in before its current location.,المبنى الذي كان هذا الأصل موجوداً فيه قبل موقعه الحالي.
 The closer must differ from the person who raised the case.,يجب أن يختلف من يُغلق الحالة عمّن رفعها.
 The consenting worker.,العامل الموافِق.
@@ -2439,6 +2575,9 @@ The consenting worker.,العامل الموافِق.
 The incoming driver acknowledges receiving the vehicle in the condition recorded above.,يقر السائق المستلم باستلام المركبة بالحالة المسجَّلة أعلاه.
 The linked Custody Issue {0} must be submitted before returning.,يجب تقديم صرف العهدة المرتبط {0} قبل الإرجاع.
 The new expiry date must be later than the current expiry date.,يجب أن يكون تاريخ الانتهاء الجديد لاحقًا لتاريخ الانتهاء الحالي.
+The one-time password has expired. Ask the procurement supervisor to regenerate it.,انتهت صلاحية رمز التحقق لمرة واحدة. اطلب من مشرف المشتريات إعادة توليده.
+The procurement supervisor and the receiving supervisor must be different people.,يجب أن يكون مشرف المشتريات والمشرف المستلم شخصين مختلفين.
+The procurement supervisor who shipped the goods cannot confirm their own receipt.,لا يمكن لمشرف المشتريات الذي شحن البضائع تأكيد استلامها بنفسه.
 "The property's landlord, modeled as a Supplier. Auto-filled from the active lease when set there.",مالك/مؤجّر العقار، ممثَّلاً كمورّد. يُعبّأ تلقائياً من العقد الفعّال عند ضبطه هناك.
 The route stop where this worker boarded (mirrors the Route Stop name on the trip's route).,محطة المسار التي صعد منها هذا العامل (تطابق اسم محطة المسار في مسار الرحلة).
 The user who raised this case. Set automatically.,المستخدم الذي أنشأ هذه الحالة. يُضبط آلياً.
@@ -2446,6 +2585,7 @@ The user who resolved or closed the case. Must differ from Reported By (segregat
 Theft,سرقة
 Theft report {0} cancelled.,أُلغي بلاغ السرقة {0}.
 Theme,السمة
+There are no checklist tasks to submit.,لا مهامَّ في قائمة الفحص لاعتمادها.
 This Custody Issue has no issued-to Employee; nothing to hand over.,سند صرف العهدة هذا لا يحمل موظفاً مصروفاً له؛ لا يوجد ما يُسلَّم.
 This Maintenance Work Order is already Completed.,أمر عمل الصيانة هذا مكتمل بالفعل.
 This assignment was already checked out on {0}.,تمت مغادرة هذا التسكين بالفعل في {0}.
@@ -2455,11 +2595,15 @@ This building has no rooms or beds yet.,لا توجد غرف أو أسرّة ف�
 "This building's own address. If empty, the Accommodation Site's address is shown.",عنوانُ هذا المبنى الخاصّ. إن تُرِك فارغًا، يُعرَض عنوانُ موقع السكن.
 This driver has been cleared on all movement-domain items listed below.,تم تخليص هذا السائق من جميع بنود نطاق الحركة المدرجة أدناه.
 This page is for the fleet team.,هذه الصفحة مخصّصة لفريق الأسطول.
+This page is for the safety team.,هذه الصفحة لفريق السلامة.
 This payment request is not finance-approved yet; it cannot be paid.,طلب الدفع هذا لم يُعتمد ماليًا بعد؛ لا يمكن دفعه.
+This request is not available or does not belong to you.,هذا الطلب غير متاح أو لا يخصك.
 This resident has custody items. Opening the full Checkout form to clear custody.,لدى هذا المقيم عُهد. يتم فتح نموذج تسجيل الخروج الكامل لتصفية العهدة.
+This safety task requires photo evidence. Please attach an Evidence Photo before submitting.,تتطلب مهمة السلامة هذه دليلاً بالصور. الرجاء إرفاق صورة دليل قبل التقديم.
 This vehicle is under maintenance and should not be dispatched.,هذه المركبة تحت الصيانة ولا يجوز توزيعها.
 This voucher reconciles the claimed fuel against consumption recorded in the Fuel Consumption Ledger. It does not post to the general ledger.,يسوّي هذا السند الوقود المطالب به مقابل الاستهلاك المسجَّل في دفتر استهلاك الوقود. لا يُرحَّل إلى الأستاذ العام.
 This will clear and rebuild the entire payment schedule. Continue?,سيؤدي هذا إلى حذف جدول الدفعات وإعادة بنائه بالكامل. هل تريد المتابعة؟
+This worker holds no returnable custody.,لا يحتفظ هذا العامل بأي عهدة قابلة للإرجاع.
 This worker link is invalid or has been disabled.,رابط العامل غير صالح أو تم تعطيله.
 This worker token is disabled — the personal link will not resolve.,رمز العامل معطّل — لن يعمل الرابط الشخصي.
 ThreeQuarter,ثلاثة أرباع
@@ -2478,6 +2622,8 @@ To Project,إلى المشروع
 To Room,إلى غرفة
 Today's Dispatch Trips,رحلات توجيه اليوم
 Token,الرمز
+Too many incorrect attempts. This handover is temporarily locked.,محاولات خاطئة كثيرة. هذا التسليم مقفل مؤقتاً.
+Tools,أدوات
 Tools and Consoles,الأدوات والوحدات
 Top-up,تعبئة
 Top-up Litres,لترات التعبئة
@@ -2552,6 +2698,7 @@ Trip Fulfilment Rate,معدل تنفيذ الرحلات
 Trip Start Log,سجل بدء الرحلة
 Trip Subject,موضوع الرحلة
 Trip fulfilment ledger. Maintained automatically by the system when a Dispatch Trip is completed and not edited manually.,دفتر تنفيذ الرحلات. يُحدّثه النظام آلياً عند اكتمال رحلة تشغيل، ولا يُحرّر يدوياً.
+Trip not found.,الرحلة غير موجودة.
 Trip {0} completed; odometer {1}.,اكتملت الرحلة {0}؛ عداد المسافة {1}.
 Trips,الرحلات
 Trips Count,عدد الرحلات
@@ -2577,6 +2724,7 @@ Unit Cost (SAR),تكلفة الوحدة (ريال)
 Unit of Measure,وحدة القياس
 Units Consumed,الوحدات المستهلكة
 Unknown,غير معروف
+Unknown cadence: {0},وتيرة غير معروفة: {0}
 Unknown party type: {0},نوع طرف غير معروف: {0}
 Unpaid,غير مدفوع
 Unregistered,غير مسجّل
@@ -2701,6 +2849,8 @@ What do you need help with?,ما الذي تحتاج المساعدة فيه؟
 "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",عند الإيقاف، تكون أسطر سجل السكن مذكرات تشغيلية دون أثر على دفتر الأستاذ العام.
 "When ON, checkout damage amounts post to Additional Salary. Default OFF.",عند التفعيل، تُرحَّل مبالغ تلف المغادرة إلى الراتب الإضافي. الافتراضي: إيقاف.
 "When ON, expiry/overdue scheduler jobs post a timeline comment on the source document. Email is controlled by the Notification DocType. When OFF, jobs run silently.",عند التفعيل، تنشر مهام المجدول الخاصة بالانتهاء/التأخر تعليقًا زمنيًا على المستند المصدر. يتحكم مستند الإشعار في البريد الإلكتروني. عند الإيقاف، تعمل المهام بصمت.
+"When ON, the weekly coverage gate requires every building to be covered by a safety round.",عند التفعيل، تتطلب بوابة التغطية الأسبوعية تغطية كل مبنى بجولة سلامة.
+"When ON, transferring externally-purchased goods into custody requires a one-time password confirmed by the receiving supervisor.",عند التفعيل، يتطلب نقل البضائع المشتراة خارجياً إلى العهدة رمز تحقق لمرة واحدة يؤكده المشرف المستلم.
 "When checked, the target field is set to the constant Static Value instead of copying from the request.",عند التحديد، يُضبط الحقل المستهدف على القيمة الثابتة بدلًا من نسخها من الطلب.
 When do you need pickup?,متى تحتاج إلى الاستقبال؟
 "When unchecked, the worker's personal Masar link stops resolving.",عند إلغاء التفعيل، يتوقف رابط مسار العامل الشخصي عن العمل.
@@ -2743,6 +2893,7 @@ Write-Off Operations Threshold (SAR),حد عمليات الشطب (ريال)
 "YYYY-MM, e.g. 2026-05",YYYY-MM، مثال: 2026-05
 Year,السنة
 Yes,نعم
+You can't check out at or before your check-in time. Try again in a moment.,لا يمكنك تسجيل المغادرة في وقت تسجيل الحضور أو قبله. حاول مرة أخرى بعد قليل.
 You cannot approve or pay a Payment Request you raised; a different Finance approver is required.,لا يمكنك الموافقة أو الدفع لطلب دفع أنشأته؛ يجب أن يوافق عليه معتمد مالي مختلف.
 Your Name (Optional),اسمك (اختياري)
 Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.
@@ -2779,66 +2930,8 @@ total_cost,التكلفة الإجمالية
 {0} room(s) have a planned capacity reduction pending confirmation.,{0} غرفة/غرف بها تخفيض سعة مخطط في انتظار التأكيد.
 "{0} rooms — {1} red, {2} amber",{0} غرفة — {1} أحمر، {2} كهرماني
 {0} surplus bed(s) retired (Out of Service).,أُحيلت {0} سرير/أسرّة زائدة إلى «خارج الخدمة».
+{0} tasks,{0} مهمّة
 {0} total,{0} الإجمالي
 {0} {1} already has an active Accommodation Assignment: {2},{0} {1} لديه بالفعل إسناد سكن نشط: {2}
+{0} {1} does not exist.,{0} {1} غير موجود.
 {0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
-Cadence,الوتيرة
-Derived on submit from the statuses of the linked Safety Task Execution rows.,تُشتقّ عند الاعتماد من حالات تنفيذات مهام السلامة المرتبطة.
-Executed,المُنفَّذة
-Expected,المتوقَّعة
-Is Re-inspection,إعادة فحص
-Last Status,آخر حالة
-Needs Attention,بحاجة إلى انتباه
-Round,جولة
-Round Date,تاريخ الجولة
-Safety Round,جولة سلامة
-Set when this is a follow-up round repeating the same cadence for the building on the same date.,يُحدَّد متى تكون هذه جولةَ متابعةٍ تُكرّر الوتيرة نفسها للمبنى في التاريخ نفسه.
-"The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
-A building is required to build the checklist.,يلزم مبنى لبناء قائمة الفحص.
-A building is required to submit a round.,يلزم مبنى لاعتماد جولة.
-A cadence is required to build the checklist.,تلزم وتيرة لبناء قائمة الفحص.
-A cadence is required to submit a round.,تلزم وتيرة لاعتماد جولة.
-A round date is required to submit a round.,يلزم تاريخ جولة لاعتماد جولة.
-Checklist lines must be a list.,يجب أن تكون سطور قائمة الفحص قائمةً.
-Each checklist line needs a task and an execution status.,يحتاج كل سطر في قائمة الفحص إلى مهمة وحالة تنفيذ.
-Could not load the checklist. Please try again.,تعذّر تحميل قائمة الفحص. حاول مرة أخرى.
-Could not submit the round. Please try again.,تعذّر اعتماد الجولة. حاول مرة أخرى.
-Loading checklist…,جارٍ تحميل قائمة الفحص…
-No safety tasks match this building and cadence.,لا مهامَّ سلامةٍ تطابق هذا المبنى وهذه الوتيرة.
-Open Safety Checklist,افتح قائمة فحص السلامة
-Pick a building and a cadence to build the checklist.,اختر مبنى ووتيرة لبناء قائمة الفحص.
-Round Submitted,اعتُمدت الجولة
-Round {0} submitted. Overall result: {1}.,اعتُمدت الجولة {0}. النتيجة الإجمالية: {1}.
-Run your first safety round from the Safety Checklist.,نفّذ أول جولة سلامة من قائمة فحص السلامة.
-Safety Checklist,قائمة فحص السلامة
-Submit Round,اعتمِد الجولة
-Submitting round…,جارٍ اعتماد الجولة…
-There are no checklist tasks to submit.,لا مهامَّ في قائمة الفحص لاعتمادها.
-{0} tasks,{0} مهمّة
-A building is required to compute due cadences.,يلزم مبنى لحساب الوتائر المستحقّة.
-A building is required to submit rounds.,يلزم مبنى لاعتماد الجولات.
-A round date is required to submit rounds.,يلزم تاريخ الجولة لاعتماد الجولات.
-Each result line needs a cadence.,يحتاج كل سطر نتيجة إلى وتيرة.
-No issues recorded.,لا ملاحظات مسجّلة.
-No result lines to submit.,لا سطور نتائج لاعتمادها.
-Results must be a list.,يجب أن تكون النتائج قائمةً.
-Safety Report Recipient,مستلِم تقرير السلامة
-Safety rounds,جولات السلامة
-Safety rounds were recorded for {0} on {1}.,سُجِّلت جولات السلامة لـ{0} بتاريخ {1}.
-Custody Value in Employee Hands (SAR),قيمة العهدة لدى الموظفين (ريال)
-Damage Cost by Building,تكلفة الأضرار حسب المبنى
-Outstanding Qty,الكمية المتبقية
-Returns to Reconcile,مرتجعات للتسوية
-This page is for the safety team.,هذه الصفحة لفريق السلامة.
-Unknown cadence: {0},وتيرة غير معروفة: {0}
-Custody Outstanding by Worker,العهدة القائمة لكل عامل
-Daily Cleaning Compliance,الالتزام اليومي بالنظافة
-Driver Attendance Summary,ملخص حضور السائقين
-Fuel Claim vs Consumption,مطالبات الوقود مقابل الاستهلاك
-Fuel Consumption Summary,ملخص استهلاك الوقود
-Fuel Exception Register,سجل استثناءات الوقود
-Missed Cleaning Tasks,مهام النظافة الفائتة
-Occupancy Trend,اتجاه الإشغال
-Safety Round Compliance,الالتزام بجولات السلامة
-Tools,أدوات
-Trip not found.,الرحلة غير موجودة.

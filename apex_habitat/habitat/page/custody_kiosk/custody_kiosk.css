@@ -1,5 +1,49 @@
 /* [#s01s5i] */
 
+/* [#modebar] — segmented Issue/Return toggle. Uses logical properties so it
+   mirrors correctly under [dir=rtl] without a scaleX flip. */
+.ck-modebar {
+	display: inline-flex;
+	gap: 0;
+	margin-block: 4px 12px;
+	border: 1px solid var(--border-color, #d1d8dd);
+	border-radius: 8px;
+	overflow: hidden;
+	background: var(--control-bg, #f4f5f6);
+}
+
+.ck-mode-btn {
+	appearance: none;
+	border: none;
+	background: transparent;
+	color: var(--text-color, #1f272e);
+	font-size: 14px;
+	font-weight: 600;
+	padding-block: 8px;
+	padding-inline: 22px;
+	cursor: pointer;
+	min-width: 96px;
+	transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
+}
+
+.ck-mode-btn + .ck-mode-btn {
+	border-inline-start: 1px solid var(--border-color, #d1d8dd);
+}
+
+.ck-mode-btn:hover {
+	background: var(--fg-hover-color, #e9ecef);
+}
+
+.ck-mode-btn.active {
+	background: var(--primary, #2490ef);
+	color: #fff;
+}
+
+.ck-mode-btn:focus-visible {
+	outline: 3px solid var(--primary, #2490ef);
+	outline-offset: -3px;
+}
+
 .ck-layout {
 	display: flex;
 	gap: 16px;
@@ -97,6 +141,15 @@
 	color: var(--text-muted, #74808b);
 }
 
+/* [#tilesub] — held-line source Custody Issue under the article meta. */
+.ck-tile-sub {
+	font-size: 11px;
+	margin-block-start: -2px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 /* [#qtak3m] */
 .ck-cart {
 	flex: 0 0 320px;
@@ -143,6 +196,23 @@
 	font-weight: 500;
 	flex: 1 1 auto;
 	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* [#cartinfo] — return cart line stacks the article name over its source issue. */
+.ck-cart-line-info {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.ck-cart-line-info .ck-cart-line-name {
+	flex: 0 0 auto;
+}
+
+.ck-cart-line-sub {
+	font-size: 11px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;

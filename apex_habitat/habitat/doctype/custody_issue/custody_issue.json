@@ -11,6 +11,7 @@
   "issue_date",
   "custody_issue_overview_col",
   "building",
+  "expected_return_date",
   "custody_issue_sec_worker",
   "party_type",
   "party",
@@ -60,6 +61,14 @@
    "options": "Accommodation Building",
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "description": "Due date for returning these custody items. Defaults from the article category's default custody days.",
+   "fieldname": "expected_return_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Expected Return Date"
   },
   {
    "fieldname": "custody_issue_sec_worker",
@@ -177,7 +186,7 @@
    "link_fieldname": "custody_issue"
   }
  ],
- "modified": "2026-06-08 20:00:00.000000",
+ "modified": "2026-06-24 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Issue",

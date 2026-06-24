@@ -1,0 +1,184 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-06-23 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "agr_tab_overview",
+  "agr_sec_receipt",
+  "naming_series",
+  "receipt_date",
+  "status",
+  "agr_col_receipt",
+  "intake_building",
+  "procurement_supervisor",
+  "agr_sec_source",
+  "external_reference",
+  "supplier_name",
+  "agr_sec_items",
+  "items",
+  "agr_sec_remarks",
+  "remarks",
+  "agr_sec_system",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "agr_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "agr_sec_receipt",
+   "fieldtype": "Section Break",
+   "label": "Receipt"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "ACC-GRN-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "receipt_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Receipt Date",
+   "reqd": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nReceived\nHanded Over\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "agr_col_receipt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Procurement intake store that receives the externally-purchased goods.",
+   "fieldname": "intake_building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Intake Building",
+   "options": "Accommodation Building",
+   "reqd": 1
+  },
+  {
+   "default": "__user",
+   "fieldname": "procurement_supervisor",
+   "fieldtype": "Link",
+   "label": "Procurement Supervisor",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "agr_sec_source",
+   "fieldtype": "Section Break",
+   "label": "Source Document"
+  },
+  {
+   "description": "External purchasing system PO or invoice number.",
+   "fieldname": "external_reference",
+   "fieldtype": "Data",
+   "label": "External Reference"
+  },
+  {
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name"
+  },
+  {
+   "fieldname": "agr_sec_items",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Accommodation Material Transfer Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "agr_sec_remarks",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "agr_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Accommodation Goods Receipt",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-06-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Accommodation Goods Receipt",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Procurement Supervisor",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

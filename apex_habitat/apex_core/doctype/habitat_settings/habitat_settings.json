@@ -39,6 +39,9 @@
   "safety_overdue_grace_days",
   "habitat_settings_safety_col",
   "require_weekly_all_building_coverage",
+  "habitat_settings_sec_custody_handover",
+  "require_handover_otp",
+  "handover_otp_validity_minutes",
   "supplier_cost_recovery_sec",
   "enable_supplier_markup",
   "habitat_settings_supplier_col",
@@ -265,6 +268,26 @@
    "fieldname": "require_weekly_all_building_coverage",
    "fieldtype": "Check",
    "label": "Require Weekly All-Building Coverage"
+  },
+  {
+   "fieldname": "habitat_settings_sec_custody_handover",
+   "fieldtype": "Section Break",
+   "label": "Custody Handover"
+  },
+  {
+   "default": "1",
+   "description": "When ON, transferring externally-purchased goods into custody requires a one-time password confirmed by the receiving supervisor.",
+   "fieldname": "require_handover_otp",
+   "fieldtype": "Check",
+   "label": "Require Handover OTP"
+  },
+  {
+   "default": "10",
+   "depends_on": "eval:doc.require_handover_otp==1",
+   "description": "Minutes a handover one-time password stays valid before it expires.",
+   "fieldname": "handover_otp_validity_minutes",
+   "fieldtype": "Int",
+   "label": "Handover OTP Validity (Minutes)"
   },
   {
    "fieldname": "supplier_cost_recovery_sec",

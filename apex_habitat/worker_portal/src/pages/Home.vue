@@ -87,10 +87,31 @@
           <span class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("home.alerts") }}</span>
         </div>
         <ul class="space-y-2">
-          <li v-for="doc in alerts" :key="doc.type" class="flex items-center gap-2 text-sm">
-            <Icon name="doc" :size="16" class="text-primary shrink-0" />
-            <span class="font-semibold">{{ t("profile." + doc.type) }}</span>
-            <span class="pill ms-auto shrink-0" :class="alertPill(doc).cls">{{ alertPill(doc).text }}</span>
+          <li v-for="doc in alerts" :key="doc.type" class="flex flex-col gap-2">
+            <div class="flex items-center gap-2 text-sm">
+              <Icon name="doc" :size="16" class="text-primary shrink-0" />
+              <span class="font-semibold">{{ t("profile." + doc.type) }}</span>
+              <span class="pill ms-auto shrink-0" :class="alertPill(doc).cls">{{ alertPill(doc).text }}</span>
+            </div>
+            <!-- [T-324] One-tap "notify HR" — only for an Iqama at or inside 30
+                 days. The server re-checks the window, so this is a UI affordance,
+                 not the gate. -->
+            <template v-if="canNotifyHr(doc)">
+              <button
+                v-if="!hrNotified"
+                class="btn btn-primary"
+                style="width: auto; align-self: flex-start; padding-inline: 18px"
+                :disabled="notifyHr.loading"
+                @click="sendNotifyHr"
+              >
+                {{ notifyHr.loading ? t("home.notifyHrSending") : t("home.notifyHr") }}
+              </button>
+              <p v-else class="status-ok flex items-center gap-2 text-sm" style="align-self: flex-start">
+                <Icon name="check" :size="16" class="shrink-0" />
+                {{ t("home.notifyHrDone") }}
+              </p>
+              <p v-if="notifyHrError" class="text-sm text-danger">{{ notifyHrError }}</p>
+            </template>
           </li>
         </ul>
       </section>
@@ -174,5 +195,33 @@ function alertPill(doc) {
   const d = doc.days_left;
   if (d != null && d < 0) return { cls: "pill-danger", text: t("home.alertExpired") };
   return { cls: "pill-warning", text: t("home.alertDaysLeft", { n: d }) };
+}
+
+// [T-324] The action threshold (30d) is tighter than the alert lead (60d) the
+// card uses, so only an Iqama at or inside 30 days offers the one-tap button.
+// The server re-checks this same window before raising anything.
+const IQAMA_NOTIFY_HR_LEAD_DAYS = 30;
+function canNotifyHr(doc) {
+  return (
+    doc.type === "iqama" && doc.days_left != null && doc.days_left <= IQAMA_NOTIFY_HR_LEAD_DAYS
+  );
+}
+
+const hrNotified = ref(false);
+const notifyHrError = ref("");
+const notifyHr = createResource({
+  url: "apex_habitat.salis.api.masar.notify_hr_iqama_expiring",
+  onSuccess: () => {
+    hrNotified.value = true;
+    notifyHrError.value = "";
+  },
+  onError: (e) => {
+    notifyHrError.value = resourceErrorMessage(e, "home.notifyHrFailed");
+  },
+});
+
+function sendNotifyHr() {
+  notifyHrError.value = "";
+  notifyHr.submit({ token: TOKEN });
 }
 </script>

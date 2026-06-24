@@ -67,7 +67,6 @@ _TASK_FIELDS = [
     "name",
     "task_code",
     "task_title",
-    "task_title_en",
     "department",
     "priority",
     "instructions",
@@ -96,10 +95,10 @@ def get_tasks_for_cadence(building, cadence):
 
     Returns:
         dict shaped as ``{"building", "cadence", "tasks": [...]}`` where each
-        task carries ``name``, ``task_code``, ``task_title``, ``task_title_en``,
-        ``department``, ``priority``, ``instructions``, and ``evidence_required``
-        — enough for the Page to render one checklist row per task. ``tasks`` is
-        ordered by ``task_code`` for a stable render.
+        task carries ``name``, ``task_code``, ``task_title``, ``department``,
+        ``priority``, ``instructions``, and ``evidence_required`` — enough for the
+        Page to render one checklist row per task. ``tasks`` is ordered by
+        ``task_code`` for a stable render.
     """
     frappe.has_permission("Safety Task Catalog", "read", throw=True)
 

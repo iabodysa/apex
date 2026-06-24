@@ -102,16 +102,14 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["rate", "note"]);
-const { t, tEnum, lang } = useI18n();
+const { t, tEnum } = useI18n();
 
 const noteOpen = ref(false);
 const hasNote = computed(() => !!(props.notes && props.notes.trim()));
 
-// Prefer the localized title in AR, fall back to the English title.
-const title = computed(() => {
-  if (lang.value === "en") return props.task.task_title_en || props.task.task_title || props.task.name;
-  return props.task.task_title || props.task.task_title_en || props.task.name;
-});
+// task_title is the English source string; Arabic is served by the translation
+// layer. One title field, translated — no parallel English column.
+const title = computed(() => props.task.task_title || props.task.name);
 
 const priorityLabel = computed(() => tEnum("priority", props.task.priority));
 const priorityPill = computed(() => {

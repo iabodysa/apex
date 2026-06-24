@@ -77,3 +77,46 @@ class TestSafetyTaskExecution(FrappeTestCase):
         })
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
+
+    # -- evidence enforcement (Safety Task Execution.validate) -----------------
+
+    def _evidence_task(self, evidence_required):
+        """Create a Safety Task Catalog row with the given evidence flag."""
+        return frappe.get_doc({
+            "doctype": "Safety Task Catalog",
+            "naming_series": "STC-.####",
+            "task_code": f"STC-EV-{frappe.generate_hash(length=4)}",
+            "task_title": "Evidence task",
+            "department": "Fire Safety",
+            "frequency": "Monthly",
+            "evidence_required": evidence_required,
+        }).insert(ignore_permissions=True).name
+
+    def test_evidence_required_task_without_photo_is_rejected(self):
+        """A task flagged evidence_required cannot be saved without an Evidence Photo."""
+        task = self._evidence_task(evidence_required=1)
+        doc = frappe.get_doc({
+            "doctype": "Safety Task Execution",
+            "execution_date": "2026-06-20",
+            "building": "QA-BLDG",
+            "task": task,
+            "execution_status": "Good",
+        })
+        with self.assertRaises(frappe.ValidationError):
+            doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_evidence_not_required_task_saves_without_photo(self):
+        """A task with evidence_required=0 saves with no Evidence Photo."""
+        task = self._evidence_task(evidence_required=0)
+        doc = frappe.get_doc({
+            "doctype": "Safety Task Execution",
+            "execution_date": "2026-06-20",
+            "building": "QA-BLDG",
+            "task": task,
+            "execution_status": "Good",
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        self.assertEqual(doc.execution_status, "Good")
+        frappe.delete_doc(
+            "Safety Task Execution", doc.name, force=True, ignore_permissions=True
+        )

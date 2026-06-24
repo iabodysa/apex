@@ -273,6 +273,13 @@ fixtures = [
     # [#e3f5ip]
     {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Supervisor", "Government Relations Officer"]]]},
     # [#40ogr7]
+    # [#t543ig] Item Group must load BEFORE Item so the item_group Link resolves on import.
+    {"dt": "Item Group", "filters": [["name", "in", [
+        "Accommodation Bedding", "Accommodation Furniture", "Accommodation Appliances",
+        "Accommodation Kitchenware", "Accommodation Sanitary and Cleaning",
+    ]]]},
+    # [#t543it] Worker-housing procurement catalog for the Items shopping surface.
+    {"dt": "Item", "filters": [["item_code", "like", "ACC-%"]]},
 ]
 
 # [#6mioka]

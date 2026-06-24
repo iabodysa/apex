@@ -110,3 +110,11 @@ apex_habitat.patches.v1_x.backfill_building_address_from_default_address
 # both orphans. Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed
 # site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.retire_safety_checklist_desk_page
+
+# v1.55.x — privacy: strip the confidential client / H&S-accreditation-vendor names from
+# already-seeded Safety Task Catalog rows (T-291, ONE-TIME). The seed file was genericized
+# to client-neutral wording; the create-only loader never rewrites existing rows, so this
+# re-applies the corrected task_title/instructions from the clean JSON to any
+# row still carrying a confidential token. Idempotent, no-op on fresh installs / re-run.
+# PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v1_x.genericize_safety_task_catalog_client

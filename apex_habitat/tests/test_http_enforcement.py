@@ -64,6 +64,13 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "token resolved server-side, not a desk permission.",
     ),
     (
+        "salis/api/masar.py",
+        "notify_hr_iqama_expiring",
+        "Masar guest endpoint. allow_guest; authorisation is the Masar worker "
+        "token resolved server-side (_resolve_worker), scope derived server-side, "
+        "explicit rate_limit. A Guest has no role to permission-check.",
+    ),
+    (
         "salis/api/driver_portal.py",
         "submit_fuel_request",
         "Driver portal. The Salis Driver is resolved from the session "

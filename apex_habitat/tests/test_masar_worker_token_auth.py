@@ -164,3 +164,102 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
                 masar._resolve_worker(token)
             with self.assertRaises(frappe.PermissionError):
                 masar.get_worker_context(token=token)
+
+
+class TestMasarNotifyHrIqamaExpiring(FrappeTestCase):
+    """[T-324] The one-tap 'notify HR my Iqama is expiring' contract.
+
+    notify_hr_iqama_expiring re-derives days_left from the Employee record (here
+    the ``valid_upto`` Iqama-expiry the resolver already falls back to) and raises
+    a native HR Notification Log ONLY inside the action window
+    (``_IQAMA_NOTIFY_HR_LEAD_DAYS`` == 30). The window gate is server-side, so a
+    worker comfortably outside 30 days is a silent no-op even though the same token
+    happily resolves — the client can never force HR spam by faking the threshold.
+    """
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    def _company(self):
+        return (
+            frappe.defaults.get_global_default("company")
+            or frappe.get_all("Company", limit=1)[0].name
+        )
+
+    def _worker_with_iqama_in(self, suffix, days_from_today):
+        """An Active Employee + enabled token whose Iqama (valid_upto) expires
+        ``days_from_today`` days out, returning ``(employee, token)``."""
+        tag = f"{self._testMethodName}-{suffix}"
+        emp = frappe.get_doc(
+            {
+                "doctype": "Employee",
+                "first_name": f"Masar Iqama {tag}",
+                "company": self._company(),
+                "status": "Active",
+                "gender": "Male",
+                "date_of_birth": "1990-01-01",
+                "date_of_joining": "2020-01-01",
+                "valid_upto": frappe.utils.add_days(frappe.utils.today(), days_from_today),
+            }
+        ).insert(ignore_permissions=True)
+        token = frappe.get_doc(
+            {
+                "doctype": "Masar Worker Token",
+                "party_type": "Employee",
+                "party": emp.name,
+                "employee": emp.name,
+                "enabled": 1,
+            }
+        ).insert(ignore_permissions=True).token
+        return emp.name, token
+
+    def _hr_notifications_for(self, employee):
+        """Count HR-targeted Notification Log rows raised for this employee."""
+        return frappe.db.count(
+            "Notification Log",
+            {"document_type": "Employee", "document_name": employee, "type": "Alert"},
+        )
+
+    def test_in_window_worker_notifies_hr(self):
+        """Iqama 15 days out (<= 30): the endpoint raises a Notification Log to the
+        HR inbox, scoped to this worker, and reports notified=True."""
+        employee, token = self._worker_with_iqama_in("soon", 15)
+        # Non-vacuous: no HR notification exists for this fresh worker yet.
+        self.assertEqual(self._hr_notifications_for(employee), 0)
+        # Non-vacuous: HR Manager (fallback System Manager) has at least one user,
+        # else the notification has no destination and the test proves nothing.
+        self.assertTrue(masar._hr_notify_recipients(), "an HR inbox recipient must exist")
+
+        res = masar.notify_hr_iqama_expiring(token=token)
+        self.assertTrue(res["notified"], "an in-window Iqama must notify HR")
+        self.assertEqual(res["days_left"], 15)
+        self.assertGreaterEqual(res["recipients"], 1)
+        # The native HR notification row was actually created for THIS worker.
+        self.assertGreaterEqual(
+            self._hr_notifications_for(employee), 1, "an HR Notification Log row must exist"
+        )
+
+    def test_out_of_window_worker_is_a_noop(self):
+        """Iqama 200 days out (> 30): the same token resolves, but the endpoint
+        raises NOTHING and reports notified=False — no HR row is created."""
+        employee, token = self._worker_with_iqama_in("later", 200)
+        # The token is genuinely valid (resolves to this worker) — only the window
+        # closes the action, not a bad token.
+        self.assertEqual(masar._resolve_worker(token), employee)
+
+        res = masar.notify_hr_iqama_expiring(token=token)
+        self.assertFalse(res["notified"], "an out-of-window Iqama must be a no-op")
+        self.assertEqual(res["days_left"], 200)
+        self.assertEqual(res["recipients"], 0)
+        self.assertEqual(
+            self._hr_notifications_for(employee), 0, "no HR row may be created out of window"
+        )
+
+    def test_blank_token_is_rejected(self):
+        """The write endpoint funnels through _resolve_worker, so a blank token
+        fails closed (PermissionError) before any notification is considered."""
+        with self.assertRaises(frappe.PermissionError):
+            masar.notify_hr_iqama_expiring(token="")

@@ -531,7 +531,7 @@ def generate_safety_setup(building_name):
     catalogs = frappe.get_all(
         "Safety Task Catalog",
         filters={"is_active": 1},
-        fields=["name", "task_code", "task_title_en", "task_title", "frequency", "applicable_to_all_buildings"],
+        fields=["name", "task_code", "task_title", "frequency", "applicable_to_all_buildings"],
     )
 
     if not catalogs:
@@ -584,7 +584,7 @@ def generate_safety_setup(building_name):
                 "On Entry": "On Entry",
             }
             template_freq = _freq_map.get(catalog.frequency, catalog.frequency)
-            title = catalog.task_title_en or catalog.task_code or catalog.task_title or catalog.name
+            title = catalog.task_title or catalog.task_code or catalog.name
             try:
                 frappe.get_doc({
                     "doctype": "Scheduled Task Template",

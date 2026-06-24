@@ -1135,3 +1135,86 @@ def get_worker_home(token=None):
         "bed": bed,
         "open_request_count": open_request_count,
     }
+
+
+# [T-324] The worker may one-tap "notify HR" only once their Iqama is inside this
+# window. Distinct from the 60-day _DOCUMENT_ALERT_LEAD_DAYS visual alert: the
+# action is the tighter, action-worthy threshold the task fixes at 30 days. The
+# server re-checks it from the Employee record, so a client can never trigger the
+# alert outside this window.
+_IQAMA_NOTIFY_HR_LEAD_DAYS = 30
+
+
+def _hr_notify_recipients():
+    """Enabled users to receive a worker's HR notification: HR Manager, falling
+    back to System Manager. Mirrors temporary_worker_engine._hr_recipients so the
+    Masar action lands in the same HR inbox the engine's automated alerts do."""
+    from frappe.utils.user import get_users_with_role
+
+    for role in ("HR Manager", "System Manager"):
+        users = get_users_with_role(role)
+        if users:
+            return users
+    return []
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=6, seconds=60 * 60)
+def notify_hr_iqama_expiring(token=None):
+    """One-tap: notify HR that the worker's Iqama is expiring (write, token-scoped).
+
+    Resolves the token to one Employee via ``_resolve_worker`` (the only place
+    identity is established — the client never supplies a worker id), re-reads
+    that Employee's Iqama number + expiry SERVER-SIDE, and recomputes
+    ``days_left``. The HR notification is raised ONLY when the Iqama is genuinely
+    inside the action window (``days_left`` is known and <=
+    ``_IQAMA_NOTIFY_HR_LEAD_DAYS``); a worker whose Iqama is comfortably valid, or
+    has no expiry on file, is a silent no-op (``{"notified": False}``) — the
+    client cannot force an alert by faking the threshold.
+
+    When in window, posts a native in-app ``Notification Log`` (type Alert) to the
+    HR inbox (HR Manager, fallback System Manager) — the SAME channel
+    ``temporary_worker_engine._notify_hr`` uses; no separate ticketing engine, no
+    GL. Tight ``rate_limit`` so the personal link cannot be used to spam HR.
+    Returns ``{"notified": bool, "days_left": int|None, "recipients": int}``."""
+    employee = _resolve_worker(token)
+    emp = _employee_doc(employee)
+
+    # [#nvwidj] same defensive field reads get_worker_context uses — Iqama field
+    # names vary by HR setup; recompute days_left from the record, never the client.
+    iqama_no = emp.get("iqama") or emp.get("iqama_no")
+    iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
+    days_left = _days_until(iqama_expiry)
+
+    if days_left is None or days_left > _IQAMA_NOTIFY_HR_LEAD_DAYS:
+        # Out of window (or no expiry on file): refuse silently, raise nothing.
+        return {"notified": False, "days_left": days_left, "recipients": 0}
+
+    worker_name = emp.get("employee_name") or employee
+    emp_no = emp.get("employee_number") or employee
+    if days_left < 0:
+        subject = _("Iqama EXPIRED — {0} ({1}) requests HR action").format(worker_name, emp_no)
+    else:
+        subject = _("Iqama expiring in {0} day(s) — {1} ({2}) requests HR action").format(
+            days_left, worker_name, emp_no
+        )
+    message = _(
+        "{0} (Employee {1}) used the Masar worker portal to flag that their Iqama "
+        "{2} is expiring (expiry {3}, {4} day(s) left). Please action the renewal."
+    ).format(worker_name, emp_no, iqama_no or _("on file"), _fmt_date(iqama_expiry), days_left)
+
+    recipients = _hr_notify_recipients()
+    for user in recipients:
+        frappe.get_doc(
+            {
+                "doctype": "Notification Log",
+                "for_user": user,
+                "type": "Alert",
+                "document_type": "Employee",
+                "document_name": employee,
+                "subject": subject[:140],
+                "email_content": message,
+            }
+        ).insert(ignore_permissions=True)  # audit-ok — worker resolved from token server-side
+
+    return {"notified": True, "days_left": days_left, "recipients": len(recipients)}

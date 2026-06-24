@@ -36,6 +36,7 @@
   "over_capacity_allowed",
   "accommodation_building_capacity_col",
   "over_capacity_threshold_percent",
+  "is_procurement_store",
   "accommodation_building_tab_financials",
   "accommodation_building_sec_financials",
   "annual_rent_sar",
@@ -270,6 +271,13 @@
    "fieldname": "over_capacity_threshold_percent",
    "fieldtype": "Percent",
    "label": "Over-Capacity Alert Threshold (%)"
+  },
+  {
+   "default": "0",
+   "description": "Flags a building that receives externally-purchased goods before they are handed over into custody.",
+   "fieldname": "is_procurement_store",
+   "fieldtype": "Check",
+   "label": "Procurement Intake Store"
   },
   {
    "fieldname": "accommodation_building_tab_financials",

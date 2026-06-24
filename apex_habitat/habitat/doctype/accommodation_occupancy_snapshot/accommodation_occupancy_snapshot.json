@@ -72,12 +72,14 @@
    "fieldname": "active_occupants",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Active Occupants"
+   "label": "Active Occupants",
+   "read_only": 1
   },
   {
    "fieldname": "total_capacity",
    "fieldtype": "Int",
-   "label": "Total Capacity"
+   "label": "Total Capacity",
+   "read_only": 1
   },
   {
    "fieldname": "occ_col_occ2",
@@ -86,13 +88,15 @@
   {
    "fieldname": "available_capacity",
    "fieldtype": "Int",
-   "label": "Available Capacity"
+   "label": "Available Capacity",
+   "read_only": 1
   },
   {
    "fieldname": "occupancy_percent",
    "fieldtype": "Percent",
    "in_list_view": 1,
-   "label": "Occupancy %"
+   "label": "Occupancy %",
+   "read_only": 1
   },
   {
    "fieldname": "occ_col_occ3",
@@ -101,7 +105,8 @@
   {
    "fieldname": "cost_bleeding",
    "fieldtype": "Currency",
-   "label": "Cost Bleeding (SAR)"
+   "label": "Cost Bleeding (SAR)",
+   "read_only": 1
   },
   {
    "fieldname": "sec_rooms",
@@ -111,7 +116,8 @@
   {
    "fieldname": "full_rooms",
    "fieldtype": "Int",
-   "label": "Full Rooms"
+   "label": "Full Rooms",
+   "read_only": 1
   },
   {
    "fieldname": "col_break_rooms",
@@ -120,7 +126,8 @@
   {
    "fieldname": "partial_rooms",
    "fieldtype": "Int",
-   "label": "Partially Occupied Rooms"
+   "label": "Partially Occupied Rooms",
+   "read_only": 1
   },
   {
    "fieldname": "occ_col_rooms3",
@@ -129,13 +136,14 @@
   {
    "fieldname": "available_rooms",
    "fieldtype": "Int",
-   "label": "Available Rooms"
+   "label": "Available Rooms",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-06-24 17:30:02.995464",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Occupancy Snapshot",

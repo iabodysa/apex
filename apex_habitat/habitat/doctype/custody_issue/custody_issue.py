@@ -5,6 +5,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import add_days, getdate
 from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
 
@@ -19,6 +20,26 @@ def validate(doc, method=None):
     for row in doc.items:
         if (row.qty or 0) <= 0:
             frappe.throw(_("Row {0}: Qty must be greater than zero.").format(row.idx))
+    _set_expected_return_date(doc)
+
+
+def _set_expected_return_date(doc):
+    """Default the return due date from the most conservative category window.
+    Only fills when blank so a manual override is preserved; uses the maximum
+    default_custody_days across the issued articles' categories."""
+    if doc.expected_return_date or not doc.issue_date:
+        return
+    max_days = 0
+    for row in doc.items:
+        if not row.article:
+            continue
+        category = frappe.db.get_value("Custody Article", row.article, "category")
+        if not category:
+            continue
+        days = frappe.db.get_value("Custody Asset Category", category, "default_custody_days") or 0
+        max_days = max(max_days, int(days))
+    if max_days > 0:
+        doc.expected_return_date = add_days(getdate(doc.issue_date), max_days)
 
 
 def on_submit(doc, method=None):
