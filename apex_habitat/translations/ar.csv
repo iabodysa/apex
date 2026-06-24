@@ -2276,6 +2276,7 @@ Salary Deduction Policy,سياسة الخصم من الراتب
 Salary Deduction Type Rule,قاعدة نوع الخصم من الراتب
 Salary component {0} must be of type Deduction for damage assessments.,مكوّن الراتب {0} يجب أن يكون من نوع خصم لتقييمات التلفيات.
 Salis,سلس
+Salis Active Drivers,السائقون النشطون
 Salis Dispatch Board,لوحة توجيه سلس
 Salis Driver,سائق
 Salis Fleet Master,بيانات أسطول سلس
@@ -2285,6 +2286,7 @@ Salis Go-Live,إطلاق تشغيل سلس
 Salis Payment Register,سجل المدفوعات
 Salis Payment Request,طلب دفع
 Salis Portal Theme,سمة بوابة سلس
+Salis Representatives Fleet Vehicles Stopped,المركبات الموقوفة
 Salis Settings,إعدادات سلس
 Salis Vehicle,مركبة
 Salis Vehicle Compliance,امتثال المركبة

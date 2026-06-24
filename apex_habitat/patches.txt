@@ -46,6 +46,11 @@ apex_habitat.patches.v1_0.seed_salis_portal_theme
 apex_habitat.patches.v1_x.seed_salis_communications
 apex_habitat.patches.v1_x.seed_salis_workflows
 
+# v1.55.x — seed the Accommodation Item Groups (PERMANENT, idempotent, NestedSet-safe).
+# Item Group is a NestedSet; a fixture import crashed fresh-site install on the NULL
+# lft/rgt root. Runs before sync_fixtures, so the groups exist when item.json loads.
+apex_habitat.patches.v1_x.seed_accommodation_item_groups
+
 # v1.50.8 — workspace canonical rename (ONE-TIME). Removes the four stale workspace
 # records left behind when Habitat/Accommodation/Facilities/Apex Core were renamed to
 # Habitat Hub/Housing/Safety/Launchpad. PRUNE once every deployed site has run it.

@@ -152,13 +152,14 @@ const greeting = computed(() => {
 const showBrand = computed(() => window.portal_show_brand !== false);
 const brandLogo = computed(() => window.portal_logo || "");
 
-// Bottom bar shows only the MAIN pages. Secondary actions (fuel request,
-// support tickets) live under "My Requests" on the Profile page — their
-// /fuel and /tickets routes stay reachable, just not as bottom tabs.
+// Five primary tabs, one per core screen. Attendance is reached from the Home
+// tiles; fuel/support live under "My Requests" on Profile — those routes stay
+// reachable, just not as bottom tabs.
 const tabs = [
   { to: "/", icon: "home", labelKey: "nav.home" },
-  { to: "/attendance", icon: "calendar", labelKey: "nav.attendance" },
   { to: "/trips", icon: "route", labelKey: "nav.trips" },
+  { to: "/vehicle", icon: "truck", labelKey: "nav.vehicle" },
+  { to: "/route", icon: "layers", labelKey: "nav.route" },
   { to: "/profile", icon: "user", labelKey: "nav.profile" },
 ];
 

@@ -1218,3 +1218,151 @@ def notify_hr_iqama_expiring(token=None):
         ).insert(ignore_permissions=True)  # audit-ok — worker resolved from token server-side
 
     return {"notified": True, "days_left": days_left, "recipients": len(recipients)}
+
+
+# [#t323] Boarding method recorded when a worker self-confirms from Masar. The
+# Trip Boarding Event Select carries QR (driver scan) / Manual (driver entry) /
+# Worker (this self-confirm) — reusing the SAME child table the driver QR scan
+# writes, never a parallel one.
+_WORKER_BOARDING_METHOD = "Worker"
+
+
+def _worker_today_dispatch_trip(employee, transport_request=None):
+    """Resolve the ONE today's Dispatch Trip this worker may confirm boarding on.
+
+    Resolved FORWARD from today's Dispatch Trips (Dispatch Trip -> Transport
+    Request -> worker manifest), the same direction the driver QR scan and the
+    driver route view resolve — NOT from the request's ``dispatch_trip``
+    back-link, which is only stamped once a trip is Completed (a worker boards
+    BEFORE completion). A trip qualifies only when its linked request carries
+    THIS employee on its manifest, so the resolution can never reach a trip the
+    worker is not on. A client-supplied ``transport_request`` only NARROWS that
+    own-set; an id the worker is not registered on simply does not match. Returns
+    ``(dispatch_trip, transport_request, stop_name, accommodation_building)`` or
+    None when the worker has no boardable trip today."""
+    trips = frappe.get_all(
+        "Dispatch Trip",
+        filters={
+            "trip_date": frappe.utils.today(),
+            "docstatus": ["<", 2],
+            "status": ["!=", "Cancelled"],
+        },
+        fields=["name", "route_plan", "transport_request"],
+        order_by="depart_time asc",
+    )
+    for t in trips:
+        req = t.get("transport_request")
+        if not req and t.get("route_plan"):
+            req = frappe.db.get_value("Route Plan", t["route_plan"], "transport_request")
+        if not req:
+            continue
+        if transport_request and req != transport_request:
+            continue
+        # Manifest membership IS the scope: the worker's own pickup row on this
+        # request, or no match (-> this trip is skipped).
+        row = frappe.db.get_value(
+            "Transport Request Worker",
+            {"parent": req, "parenttype": "Transport Request", "employee": employee},
+            ["pickup_point"],
+            as_dict=True,
+        )
+        if not row:
+            continue
+        building = frappe.db.get_value("Transport Request", req, "accommodation_building")
+        return t["name"], req, row.get("pickup_point"), building
+    return None
+
+
+def _get_or_create_trip_log(dispatch_trip):
+    """The trip's open (draft) Trip Start Log, created if none exists yet — the
+    same get-or-create the driver QR scan uses (salis/api/boarding.py), so a
+    worker self-confirm and a driver scan append to ONE shared log. A
+    submitted/cancelled log is not reused; a fresh draft is opened so a
+    post-submission confirm never mutates a closed record."""
+    existing = frappe.db.get_value(
+        "Trip Start Log", {"dispatch_trip": dispatch_trip, "docstatus": 0}, "name"
+    )
+    if existing:
+        return frappe.get_doc("Trip Start Log", existing)
+    log = frappe.get_doc(
+        {
+            "doctype": "Trip Start Log",
+            "dispatch_trip": dispatch_trip,
+            "status": "Started",
+            "start_datetime": frappe.utils.now_datetime(),
+        }
+    )
+    log.insert(ignore_permissions=True)  # audit-ok — trip resolved from token's own manifest
+    return log
+
+
+def _already_boarded(log, employee):
+    """True when this registered worker already has a boarding row on the log —
+    so a re-confirm is idempotent (no duplicate headcount)."""
+    return any(
+        (row.worker == employee and not row.is_unregistered)
+        for row in (log.boarding_events or [])
+    )
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=12, seconds=60 * 60)
+def confirm_boarding(token=None, transport_request=None):
+    """"I'm at the pickup": the worker self-confirms boarding (write, token-scoped).
+
+    Resolves the token to one Employee via ``_resolve_worker`` (the sole place
+    identity is established — the client never supplies a worker id), finds that
+    worker's relevant today's Dispatch Trip from their OWN manifest membership,
+    and appends a ``method = Worker`` Trip Boarding Event for THIS worker onto the
+    trip's draft Trip Start Log — the SAME child table + get-or-create log the
+    driver QR scan writes, so the two paths share one boarding manifest.
+
+    Strictly token-scoped: the boarding row is always written for the resolved
+    employee, and the optional ``transport_request`` can only narrow the worker's
+    own trip set (an id they are not registered on does not match). Re-confirming
+    is idempotent — a worker already on the manifest yields no second row
+    (``created = False``). A bad/blank/disabled token fails closed
+    (PermissionError) before any write; a worker with no boardable trip today is a
+    clean no-op (``{"trip": None}``). Posts no GL.
+
+    Returns ``{"created": bool, "dispatch_trip": str|None, "trip_start_log":
+    str|None, "boarded_count": int|None}``; ``{"trip": None}`` when nothing is
+    boardable today."""
+    employee = _resolve_worker(token)
+    transport_request = (transport_request or "").strip() or None
+
+    resolved = _worker_today_dispatch_trip(employee, transport_request)
+    if not resolved:
+        return {"trip": None, "created": False}
+    dispatch_trip, request_name, stop_name, building = resolved
+
+    log = _get_or_create_trip_log(dispatch_trip)
+
+    # Idempotent: a second confirm of the same worker adds no row.
+    if _already_boarded(log, employee):
+        return {
+            "created": False,
+            "dispatch_trip": dispatch_trip,
+            "transport_request": request_name,
+            "trip_start_log": log.name,
+            "boarded_count": log.boarded_count,
+        }
+
+    log.append(
+        "boarding_events",
+        {
+            "worker": employee,
+            "stop_name": stop_name,
+            "accommodation_building": building,
+            "boarded_at": frappe.utils.now_datetime(),
+            "method": _WORKER_BOARDING_METHOD,
+        },
+    )
+    log.save(ignore_permissions=True)  # audit-ok — worker + trip resolved from token server-side
+    return {
+        "created": True,
+        "dispatch_trip": dispatch_trip,
+        "transport_request": request_name,
+        "trip_start_log": log.name,
+        "boarded_count": log.boarded_count,
+    }

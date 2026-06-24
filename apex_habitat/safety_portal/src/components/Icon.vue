@@ -128,9 +128,12 @@ defineProps({
   vertical-align: -0.18em;
   flex-shrink: 0;
 }
-/* Directional glyphs point "forward"; in RTL forward is leftward, so mirror. */
-:global([dir="rtl"]) .sp-icon-chevron,
-:global([dir="rtl"]) .sp-icon-arrow-left {
+/* Directional glyphs point "forward"; in RTL forward is leftward, so mirror.
+   Keep the whole selector inside one :global() so the icon class survives
+   minification — a split :global([dir=rtl]) .class collapses to a bare
+   [dir=rtl] rule that flips ALL content. */
+:global([dir="rtl"] .sp-icon-chevron),
+:global([dir="rtl"] .sp-icon-arrow-left) {
   transform: scaleX(-1);
 }
 </style>

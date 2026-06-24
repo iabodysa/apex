@@ -202,7 +202,7 @@
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Salis Representatives Fleet Vehicles Stopped",
-   "label": "Vehicles Stopped",
+   "label": "Salis Representatives Fleet Vehicles Stopped",
    "idx": 4
   },
   {
@@ -214,7 +214,7 @@
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Salis Active Drivers",
-   "label": "Active Drivers",
+   "label": "Salis Active Drivers",
    "idx": 6
   },
   {
@@ -239,5 +239,5 @@
    "idx": 1
   }
  ],
- "modified": "2026-06-16 12:00:00.000000"
+ "modified": "2026-06-25 12:00:00.000000"
 }

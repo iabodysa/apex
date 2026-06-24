@@ -79,6 +79,14 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "Token-resolved writer.",
     ),
     (
+        "salis/api/masar.py",
+        "confirm_boarding",
+        "Masar guest endpoint. allow_guest; authorisation is the Masar worker "
+        "token resolved server-side (_resolve_worker), scope derived from the "
+        "worker's own trip manifest, explicit rate_limit. A Guest has no role to "
+        "permission-check.",
+    ),
+    (
         "salis/api/driver_portal.py",
         "submit_fuel_request",
         "Driver portal. The Salis Driver is resolved from the session "

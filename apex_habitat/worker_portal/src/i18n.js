@@ -122,6 +122,10 @@ const messages = {
       emptyHint: "You have no shuttle scheduled right now.",
       past: "Past trips",
       reportIssue: "Report a transport issue",
+      atPickup: "I'm at the pickup",
+      atPickupSending: "Confirming…",
+      atPickupDone: "Boarding confirmed",
+      atPickupFailed: "Couldn't confirm. Please try again.",
     },
     requests: {
       title: "My Requests",
@@ -316,6 +320,10 @@ const messages = {
       emptyHint: "لا توجد لديك رحلة مجدولة حالياً.",
       past: "رحلات سابقة",
       reportIssue: "الإبلاغ عن مشكلة في النقل",
+      atPickup: "أنا عند نقطة الاستلام",
+      atPickupSending: "جارٍ التأكيد…",
+      atPickupDone: "تم تأكيد الركوب",
+      atPickupFailed: "تعذّر التأكيد. حاول مرة أخرى.",
     },
     requests: {
       title: "طلباتي",

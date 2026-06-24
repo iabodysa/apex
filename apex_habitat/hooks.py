@@ -273,11 +273,8 @@ fixtures = [
     # [#e3f5ip]
     {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Supervisor", "Government Relations Officer"]]]},
     # [#40ogr7]
-    # [#t543ig] Item Group must load BEFORE Item so the item_group Link resolves on import.
-    {"dt": "Item Group", "filters": [["name", "in", [
-        "Accommodation Bedding", "Accommodation Furniture", "Accommodation Appliances",
-        "Accommodation Kitchenware", "Accommodation Sanitary and Cleaning",
-    ]]]},
+    # Item Group is a NestedSet — seeded via patch (seed_accommodation_item_groups),
+    # not fixtures, since a fixture import crashes on a fresh site's NULL-lft/rgt root.
     # [#t543it] Worker-housing procurement catalog for the Items shopping surface.
     {"dt": "Item", "filters": [["item_code", "like", "ACC-%"]]},
 ]

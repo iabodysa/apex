@@ -142,10 +142,12 @@ const badgeClass = computed(() => "badge-" + props.block.cadence.toLowerCase());
 .cadence-chevron-open {
   transform: rotate(90deg);
 }
-:global([dir="rtl"]) .cadence-chevron {
+/* Whole selector inside one :global() so the chevron class survives
+   minification; a split :global([dir=rtl]) .class collapses to a bare flip. */
+:global([dir="rtl"] .cadence-chevron) {
   transform: scaleX(-1);
 }
-:global([dir="rtl"]) .cadence-chevron-open {
+:global([dir="rtl"] .cadence-chevron-open) {
   transform: scaleX(-1) rotate(90deg);
 }
 

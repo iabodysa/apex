@@ -63,7 +63,9 @@ const offset = computed(() => {
 .ring-svg {
   transform: rotate(-90deg);
 }
-:global([dir="rtl"]) .ring-svg {
+/* Whole selector inside one :global() so .ring-svg survives minification;
+   a split :global([dir=rtl]) .ring-svg collapses to a bare content-flip. */
+:global([dir="rtl"] .ring-svg) {
   transform: rotate(-90deg) scaleX(-1);
 }
 .ring-track {

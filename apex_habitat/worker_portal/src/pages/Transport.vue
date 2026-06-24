@@ -87,6 +87,27 @@
 
         <!-- No planned route yet: an explicit state so the trip card is never a bare/inert card. -->
         <div v-else class="text-sm text-muted">{{ t("transport.noRoutePlanned") }}</div>
+
+        <!-- [T-323] "I'm at the pickup": one-tap worker boarding self-confirm. The
+             server resolves the worker from the token and writes the boarding
+             event onto this trip — the button is a UI affordance, not the gate. -->
+        <div>
+          <button
+            v-if="!confirmedTrips[trip.transport_request]"
+            class="btn btn-primary"
+            style="width: auto; padding-inline: 18px"
+            :disabled="boarding.loading && boardingFor === trip.transport_request"
+            @click="confirmBoarding(trip)"
+          >
+            <Icon name="check" :size="18" />
+            {{ boarding.loading && boardingFor === trip.transport_request ? t("transport.atPickupSending") : t("transport.atPickup") }}
+          </button>
+          <p v-else class="status-ok flex items-center gap-2 text-sm">
+            <Icon name="check" :size="16" class="shrink-0" />
+            {{ t("transport.atPickupDone") }}
+          </p>
+          <p v-if="boardingError && boardingFor === trip.transport_request" class="text-sm text-danger mt-1">{{ boardingError }}</p>
+        </div>
       </section>
 
       <!-- No upcoming trip, but past ones exist: say so explicitly so the screen
@@ -134,7 +155,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
@@ -165,4 +186,28 @@ const errorMessage = computed(() => resourceErrorMessage(tr.error));
 const upcoming = computed(() => tr.data?.upcoming || tr.data?.trips || []);
 const past = computed(() => tr.data?.past || []);
 const showPast = ref(false);
+
+// [T-323] worker boarding self-confirm. The server resolves the worker from the
+// token and writes the boarding event; this UI just records which trips the
+// worker has already confirmed so the card flips to a done state. Keyed by
+// transport_request so each card tracks its own state.
+const confirmedTrips = reactive({});
+const boardingFor = ref(null);
+const boardingError = ref("");
+const boarding = createResource({
+  url: "apex_habitat.salis.api.masar.confirm_boarding",
+  onSuccess: () => {
+    confirmedTrips[boardingFor.value] = true;
+    boardingError.value = "";
+  },
+  onError: (e) => {
+    boardingError.value = resourceErrorMessage(e, "transport.atPickupFailed");
+  },
+});
+
+function confirmBoarding(trip) {
+  boardingFor.value = trip.transport_request;
+  boardingError.value = "";
+  boarding.submit({ token: TOKEN, transport_request: trip.transport_request });
+}
 </script>
