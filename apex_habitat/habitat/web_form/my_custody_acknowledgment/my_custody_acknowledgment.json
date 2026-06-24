@@ -1,0 +1,101 @@
+{
+ "allow_comments": 0,
+ "allow_delete": 0,
+ "allow_edit": 0,
+ "allow_incomplete": 0,
+ "allow_multiple": 1,
+ "allow_print": 1,
+ "anonymous": 0,
+ "apply_document_permissions": 0,
+ "button_label": "Confirm Receipt",
+ "client_script": "",
+ "condition_json": "[]",
+ "creation": "2026-06-24 18:30:00.000000",
+ "doc_type": "Custody Acknowledgment",
+ "docstatus": 0,
+ "doctype": "Web Form",
+ "introduction_text": "Confirm that you have received the custody items issued to you. Tick the confirmation, or sign below if you prefer to acknowledge with a signature.",
+ "web_form_fields": [
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "custody_issue",
+   "fieldtype": "Link",
+   "hidden": 0,
+   "idx": 1,
+   "label": "Custody Issue",
+   "options": "Custody Issue",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "confirmation_method",
+   "fieldtype": "Select",
+   "hidden": 0,
+   "idx": 2,
+   "label": "Confirmation Method",
+   "options": "Confirmed Receipt\nSignature",
+   "reqd": 1
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "receipt_confirmed",
+   "fieldtype": "Check",
+   "hidden": 0,
+   "idx": 3,
+   "label": "I confirm I have received these items",
+   "reqd": 0
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "signature",
+   "fieldtype": "Signature",
+   "hidden": 0,
+   "idx": 4,
+   "label": "Signature (fallback)",
+   "reqd": 0
+  },
+  {
+   "allow_read_on_all_link_options": 0,
+   "doctype": "Web Form Field",
+   "fieldname": "holder_remarks",
+   "fieldtype": "Small Text",
+   "hidden": 0,
+   "idx": 5,
+   "label": "Remarks (Optional)",
+   "reqd": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": 1,
+ "login_required": 1,
+ "module": "Habitat",
+ "name": "my-custody-acknowledgment",
+ "published": 1,
+ "route": "my-custody-acknowledgment",
+ "show_attachments": 0,
+ "show_list": 1,
+ "list_columns": [
+  {
+   "doctype": "Web Form List Column",
+   "fieldname": "custody_issue",
+   "fieldtype": "Link",
+   "label": "Custody Issue"
+  },
+  {
+   "doctype": "Web Form List Column",
+   "fieldname": "acknowledged_on",
+   "fieldtype": "Datetime",
+   "label": "Acknowledged On"
+  }
+ ],
+ "list_title": "My Custody Acknowledgments",
+ "show_sidebar": 0,
+ "success_message": "Thank you. Your receipt of the custody items has been recorded.",
+ "success_title": "Receipt Confirmed",
+ "title": "My Custody Acknowledgment"
+}

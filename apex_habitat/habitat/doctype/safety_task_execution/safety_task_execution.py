@@ -34,8 +34,6 @@ class SafetyTaskExecution(Document):
         # is written so a re-run never duplicates a ticket.
         fan_out_findings(self.findings, self)
 
-    # -- validation ---------------------------------------------------------
-
     def _enforce_evidence(self):
         """Throw a clear English message when required photo evidence is missing.
 

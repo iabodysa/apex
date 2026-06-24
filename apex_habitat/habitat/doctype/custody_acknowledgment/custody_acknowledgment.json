@@ -1,0 +1,222 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-06-24 18:30:00.000000",
+ "description": "Holder's receipt confirmation for a Custody Issue, captured from the My Custody Acknowledgment Web Form (with a signature fallback).",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "cack_sec_issue",
+  "custody_issue",
+  "acknowledged_on",
+  "cack_col_issue",
+  "building",
+  "cack_sec_holder",
+  "party_type",
+  "party",
+  "cack_col_holder",
+  "acknowledged_by_employee",
+  "cack_sec_confirmation",
+  "confirmation_method",
+  "receipt_confirmed",
+  "cack_col_confirmation",
+  "signature",
+  "cack_sec_remarks",
+  "holder_remarks",
+  "cack_sec_system",
+  "naming_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "cack_sec_issue",
+   "fieldtype": "Section Break",
+   "label": "Custody Issue"
+  },
+  {
+   "description": "The submitted Custody Issue whose receipt is being acknowledged.",
+   "fieldname": "custody_issue",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Custody Issue",
+   "options": "Custody Issue",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "acknowledged_on",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Acknowledged On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cack_col_issue",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "custody_issue.building",
+   "fetch_if_empty": 1,
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Accommodation Building",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cack_sec_holder",
+   "fieldtype": "Section Break",
+   "label": "Holder"
+  },
+  {
+   "default": "Employee",
+   "fetch_from": "custody_issue.party_type",
+   "fetch_if_empty": 1,
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Worker Type",
+   "options": "Employee\nTemporary Worker",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "custody_issue.party",
+   "fetch_if_empty": 1,
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Worker",
+   "options": "party_type",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "cack_col_holder",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "custody_issue.issued_to_employee",
+   "fetch_if_empty": 1,
+   "fieldname": "acknowledged_by_employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Acknowledged By (Employee)",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cack_sec_confirmation",
+   "fieldtype": "Section Break",
+   "label": "Confirmation"
+  },
+  {
+   "default": "Confirmed Receipt",
+   "description": "Confirmed Receipt is the primary path. Choose Signature when the holder cannot type-confirm and signs instead.",
+   "fieldname": "confirmation_method",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Confirmation Method",
+   "options": "Confirmed Receipt\nSignature",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.confirmation_method=='Confirmed Receipt'",
+   "description": "I confirm I have received the custody items listed on this Custody Issue.",
+   "fieldname": "receipt_confirmed",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "I Confirm Receipt"
+  },
+  {
+   "fieldname": "cack_col_confirmation",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.confirmation_method=='Signature'",
+   "description": "Fallback when the holder cannot tick the confirmation: sign here to acknowledge receipt.",
+   "fieldname": "signature",
+   "fieldtype": "Signature",
+   "label": "Signature"
+  },
+  {
+   "fieldname": "cack_sec_remarks",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "holder_remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "cack_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "default": "CUST-ACK-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "CUST-ACK-.YYYY.-.#####"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-06-24 18:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Custody Acknowledgment",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "custody_issue",
+ "track_changes": 1
+}

@@ -6,7 +6,7 @@ from frappe.tests.utils import FrappeTestCase
 
 # Confidential client / accreditation-vendor names that must never appear in the seeded
 # Safety Task Catalog (the catalog must read client-neutral). Guards the genericization
-# (T-291) against re-introduction. Assembled from fragments so the literal confidential
+# against re-introduction. Assembled from fragments so the literal confidential
 # words never appear verbatim in this repo (the same privacy rule this test enforces).
 _CONFIDENTIAL_TOKENS = ("ama" + "zon", "ave" + "tta")
 _SEED_JSON = os.path.join(
@@ -60,7 +60,7 @@ class TestSafetyTaskCatalog(FrappeTestCase):
             )
 
     def test_seeded_rows_are_client_neutral(self):
-        """No live Safety Task Catalog row may carry a confidential name (post-T-291)."""
+        """No live Safety Task Catalog row may carry a confidential name."""
         rows = frappe.get_all(
             "Safety Task Catalog",
             fields=["task_code", "task_title", "instructions"],

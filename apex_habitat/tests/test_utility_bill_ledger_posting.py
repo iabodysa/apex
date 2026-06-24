@@ -61,7 +61,7 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # ---- helpers -----------------------------------------------------------
+    # helpers
 
     def _bill(self, **overrides):
         """Build a Utility Bill Entry on this test's account.
@@ -109,7 +109,7 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
             return [r for r in rows if r.reversal_of]
         return rows
 
-    # ---- tests -------------------------------------------------------------
+    # tests
 
     def test_seed_is_present(self):
         # [#non-vacuous] Guard the whole file: if the seed silently failed, the

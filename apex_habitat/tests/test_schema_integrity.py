@@ -108,7 +108,7 @@ class TestSchemaIntegrity(FrappeTestCase):
         self.assertEqual(bad, [], f"workspace references that do not resolve: {bad}")
 
     def test_workspace_content_blocks_resolve(self):
-        # [T-242] test_workspace_refs_resolve guards the shortcuts/links/charts/
+        # test_workspace_refs_resolve guards the shortcuts/links/charts/
         # number_cards arrays; the `content` JSON is the actual rendered layout, and
         # a block naming a card/chart/shortcut/quick-list absent from those arrays
         # renders blank with no error. Guard each content block against the declared

@@ -138,7 +138,7 @@ class TestSafetyChecklist(FrappeTestCase):
                 }
             ).insert(ignore_permissions=True).name
 
-    # -- get_tasks_for_cadence -------------------------------------------------
+    # get_tasks_for_cadence
 
     def test_get_tasks_returns_exactly_in_scope_tasks(self):
         result = get_tasks_for_cadence(self.building, "Weekly")
@@ -189,7 +189,7 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertNotIn(self.task_all, names)
         self.assertNotIn(self.task_scoped, names)
 
-    # -- submit_round ----------------------------------------------------------
+    # submit_round
 
     def _lines(self, *statuses):
         # Use the in-scope tasks, cycling if more statuses than tasks.
@@ -271,7 +271,7 @@ class TestSafetyChecklist(FrappeTestCase):
             1,
         )
 
-    # -- get_due_cadences ------------------------------------------------------
+    # get_due_cadences
 
     def _insert_submitted_round(self, cadence, round_date):
         """Insert + submit a Safety Round (with one execution) on an explicit
@@ -358,7 +358,7 @@ class TestSafetyChecklist(FrappeTestCase):
         self._insert_submitted_round("Monthly", last_month)
         self.assertIn("Monthly", self._due_cadences())
 
-    # -- submit_due_rounds -----------------------------------------------------
+    # submit_due_rounds
 
     def _results(self, *pairs):
         """Build a multi-cadence results list from (cadence, status) pairs,
@@ -432,7 +432,7 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertEqual(after_daily, before_daily,
                          "the successful Daily round must roll back with the failed Weekly")
 
-    # -- submit_due_rounds email ----------------------------------------------
+    # submit_due_rounds email
 
     def _enable_email(self):
         settings = frappe.get_single("Habitat Settings")

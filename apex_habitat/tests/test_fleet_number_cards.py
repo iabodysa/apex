@@ -10,7 +10,7 @@ card silently shows 0/blank with NO error. This locks two things down:
   PART 2 (behavioural) — seeding one matching row moves the card's count by exactly 1,
   proving the shipped filter actually selects the data it claims to.
 
-Open Theft Reports (the derived "stolen" card) is covered behaviourally by T-241 in
+Open Theft Reports (the derived "stolen" card) is covered behaviourally in
 salis/doctype/vehicle_incident/test_vehicle_incident.py, so it is not retested here.
 Custom-card method resolution and dashboard-chart doc_type/based_on live in
 tests/test_schema_integrity.py and are not duplicated.
@@ -51,7 +51,7 @@ def _filter_fieldnames(filters_json):
 
 class TestFleetNumberCardsStructure(FrappeTestCase):
     def test_document_type_card_fields_exist(self):
-        # [T-245] Every filtered field (and Sum/Average aggregate field) on a
+        # Every filtered field (and Sum/Average aggregate field) on a
         # Document Type card must resolve on the card's document_type, else the
         # metric silently reads 0/blank.
         bad = []
@@ -104,7 +104,7 @@ class TestFleetNumberCardsBehaviour(FrappeTestCase):
         ).insert(ignore_permissions=True)
 
     def test_active_vehicles_card_counts_new_active_vehicle(self):
-        # [T-245] Active Vehicles filters Salis Vehicle status=Active.
+        # Active Vehicles filters Salis Vehicle status=Active.
         before = self._card_count("Active Vehicles")
         self._vehicle("Active")
         self.assertEqual(
@@ -114,7 +114,7 @@ class TestFleetNumberCardsBehaviour(FrappeTestCase):
         )
 
     def test_under_maintenance_card_counts_new_maintenance_vehicle(self):
-        # [T-245] Vehicles Under Maintenance filters Salis Vehicle status=Under Maintenance.
+        # Vehicles Under Maintenance filters Salis Vehicle status=Under Maintenance.
         before = self._card_count("Vehicles Under Maintenance")
         self._vehicle("Under Maintenance")
         self.assertEqual(

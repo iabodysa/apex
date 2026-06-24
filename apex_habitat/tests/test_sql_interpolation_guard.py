@@ -1,4 +1,4 @@
-"""Regression test: SQL string-interpolation guard (T-099, CI gate).
+"""Regression test: SQL string-interpolation guard (CI gate).
 
 File-level test — no Frappe site needed. Pure ``ast`` + stdlib.
 
@@ -21,7 +21,6 @@ string literal passed to ``frappe.db.sql`` with the values as the SECOND argumen
 is an ``ast.Constant`` (not a BinOp), so the DB-API binds the values and the query
 text never carries the input. Only Python-level building of the query string
 before it reaches the driver (f-string, ``.format``, ``+``, ``%``) is a concern.
-(T-149 extended the gate from f-string/``.format`` to also cover ``+`` and ``%``.)
 
 Such a call is allowed only when ONE of the following holds:
 
@@ -38,7 +37,7 @@ Such a call is allowed only when ONE of the following holds:
      then f-string it" pattern.
 
   3. The enclosing function is named in ``SAFE_ALLOWLIST`` — a reviewed,
-     known-safe helper. Seeded with the three helpers called out in T-099.
+     known-safe helper. Seeded with the three known-safe SQL helpers.
 
 If none holds, the call is a violation and this test fails, naming the file,
 line, and function so the author either parameterises the query (bind values
@@ -185,7 +184,7 @@ def _interpolated_names(first_arg):
     if fmt_names is not None:
         return (True, fmt_names)
 
-    # + concatenation / % formatting that builds the SQL text in Python (T-149).
+    # + concatenation / % formatting that builds the SQL text in Python.
     bin_names = _binop_names(first_arg)
     if bin_names is not None:
         return (True, bin_names)
@@ -345,7 +344,7 @@ class TestSqlInterpolationGuard(unittest.TestCase):
             )
 
     def test_detector_flags_concat_and_percent(self):
-        """T-149: ``+`` concatenation and ``%`` formatting of the SQL text are
+        """``+`` concatenation and ``%`` formatting of the SQL text are
         detected as interpolation, while native ``%s`` binding (values passed as
         the second argument) and literal-only concatenation are not."""
         for snippet in (

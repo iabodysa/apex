@@ -304,7 +304,7 @@ def my_trips_today():
 		fields=["name", "route_plan", "vehicle", "depart_time", "return_time", "status"],
 		order_by="depart_time asc",
 	)
-	_label_trips(trips)  # [T-169] cards show plate / route name, not raw link ids
+	_label_trips(trips)  # cards show plate / route name, not raw link ids
 	return trips
 
 
@@ -616,7 +616,7 @@ def my_worker_route_today():
 
 @frappe.whitelist()
 def my_trip_route(dispatch_trip):
-    """One trip's ordered route for the current driver (read). [T-170]
+    """One trip's ordered route for the current driver (read).
 
     Backs the driver portal's per-trip drill-in: tapping a "My Trips" card opens
     this single Dispatch Trip's ordered stops. Identity-scoped — the driver is

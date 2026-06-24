@@ -35,7 +35,7 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # --- fixtures ---------------------------------------------------------
+    # fixtures
 
     def _company(self):
         """A usable Company on this site (global default, else any)."""
@@ -83,7 +83,7 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
         self.assertEqual(doc.employee, employee, "fixture sanity: token bound to the employee")
         return doc.token
 
-    # --- the contract -----------------------------------------------------
+    # the contract
 
     def test_token_resolves_to_only_its_own_employee(self):
         """Two seeded workers, two tokens: token A resolves to A and ONLY A —
@@ -167,7 +167,7 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
 
 
 class TestMasarNotifyHrIqamaExpiring(FrappeTestCase):
-    """[T-324] The one-tap 'notify HR my Iqama is expiring' contract.
+    """The one-tap 'notify HR my Iqama is expiring' contract.
 
     notify_hr_iqama_expiring re-derives days_left from the Employee record (here
     the ``valid_upto`` Iqama-expiry the resolver already falls back to) and raises

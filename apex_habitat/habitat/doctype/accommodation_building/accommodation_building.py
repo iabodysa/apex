@@ -21,10 +21,10 @@ class AccommodationBuilding(Document):
 def get_site_address(building_name, site=None, building_address=None):
     """Plain-text address shown on the building form.
 
-    Prefers the building's own selected Address (``building_address``, T-144); else
+    Prefers the building's own selected Address (``building_address``); else
     falls back to the Accommodation Site's address. ``site`` / ``building_address`` are
     the form's current (possibly unsaved) values so the display tracks a change before
-    save (T-138); both are permission-gated, never trusted from the client. A ``None``
+    save; both are permission-gated, never trusted from the client. A ``None``
     arg means "not supplied" and is read from the saved record; an empty string means
     the form cleared it. Empty string when neither resolves to an Address.
     """
@@ -125,7 +125,7 @@ def _derive_total_capacity(building_name):
     """Count the building's real beds, excluding Out-of-Service and virtual
     ``is_temporary`` over-capacity beds. ``None`` when it has no bed rows yet (the
     pre-generation path — keep the manually-entered planned figure); 0 when it has
-    beds but all are excluded. [T-140]
+    beds but all are excluded.
     """
     if not frappe.db.exists("Accommodation Bed", {"building": building_name}):
         return None
@@ -139,7 +139,7 @@ def _derive_total_capacity(building_name):
     )
 
 
-# [T-254] responsible_facility_supervisor is the single source of truth for the
+# responsible_facility_supervisor is the single source of truth for the
 # building-scoped User Permission; on_update reconciles the permission to the field.
 def _building_supervisor_permissions(user, building):
     return frappe.get_all(
@@ -150,7 +150,7 @@ def _building_supervisor_permissions(user, building):
 
 
 def on_update(doc, method=None):
-    """Reconcile the building-scoped User Permission to the supervisor field (T-254):
+    """Reconcile the building-scoped User Permission to the supervisor field:
     grant the new supervisor's permission for this building, drop the previous
     supervisor's; other users and other buildings are untouched."""
     before = doc.get_doc_before_save()

@@ -1277,6 +1277,7 @@ Is Active,نشط
 Is Cancelled,ملغى
 Is Cross Region,عابر للمناطق
 Is External Supplier Worker?,هل هو عامل مورد خارجي؟
+Is Group,مجموعة
 Is Intercompany Movement,حركة بين الشركات
 Is Re-inspection,إعادة فحص
 Is Serialized,مرمز / ذو رقم تسلسلي
@@ -1429,6 +1430,7 @@ Maintenance Master,إدارة مواد الصيانة
 Maintenance Material,مادة الصيانة
 Maintenance Material Template,قالب مواد الصيانة
 Maintenance Material Template Item,عنصر قالب مواد الصيانة
+Parent Maintenance Material,مادة الصيانة الأصل
 Maintenance Overdue,صيانة متأخرة
 Maintenance Procurement Item,بند مشتريات الصيانة
 Maintenance Request,طلب صيانة

@@ -1,16 +1,8 @@
-// [T-320] Pull-to-refresh for window/body-scrolled pages (Home, Transport).
-//
-// The portal pages scroll with the document — there is no inner scroll
-// container — so we arm a pull only when the page is already at the very top
-// (window.scrollY === 0) and the finger moves DOWN. We track the drag with a
-// little resistance and, past a threshold, run onRefresh() and hold the
-// spinner until its promise settles, then spring back.
-//
-// Usage:
-//   const { distance, refreshing, armed } = usePullToRefresh(() => res.reload());
-// onRefresh may return a Promise (e.g. a frappe-ui resource .reload()); the
-// indicator stays in "refreshing" until it resolves OR rejects (a failed
-// refresh must still spring back, not hang).
+// Pull-to-refresh for window/body-scrolled pages (Home, Transport): the pages
+// scroll with the document, so a pull is armed only at the very top
+// (window.scrollY === 0) with a downward drag. onRefresh may return a Promise;
+// the indicator stays "refreshing" until it settles (a rejection must still
+// spring back, not hang).
 import { onMounted, onUnmounted, ref } from "vue";
 
 // Past ~70px of pull, releasing triggers a refresh.

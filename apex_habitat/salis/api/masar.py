@@ -533,7 +533,7 @@ def get_worker_accommodation(token=None):
     }
 
 
-# [T-537] A trip is "upcoming" when its pickup is at or after this instant;
+# A trip is "upcoming" when its pickup is at or after this instant;
 # anything earlier is "past". Home's next_ride and Transport's upcoming list both
 # pivot on this one predicate so the two screens can never contradict each other.
 def _is_upcoming_pickup(pickup_datetime, now_dt=None):
@@ -600,7 +600,7 @@ def get_worker_transport(token=None):
     resolved employee via the Transport Request worker manifest; a worker on no
     live request gets empty lists. Read-only, no GL.
 
-    [T-537] Each trip is tagged ``is_upcoming`` against ``now_datetime()`` (the
+    Each trip is tagged ``is_upcoming`` against ``now_datetime()`` (the
     SAME predicate Home's next_ride uses), and the trips are partitioned into
     ``upcoming`` and ``past`` so the Transport screen can never present a trip
     that already departed as if it were the next ride — Home and Transport stay
@@ -1095,14 +1095,14 @@ def get_worker_home(token=None):
     ]
 
     transport = get_worker_transport(token)
-    # [T-536] / [T-537] the "next" ride is the soonest UPCOMING trip, never an
+    # the "next" ride is the soonest UPCOMING trip, never an
     # already-departed one. get_worker_transport now partitions on the SAME
     # now_datetime() predicate, so Home's next_ride is literally the head of the
     # list Transport shows under "upcoming" — the two screens cannot disagree.
     upcoming = transport.get("upcoming") or []
     next_ride = upcoming[0] if upcoming else None
 
-    # [T-538] the bed is shown on Home as a glanceable chip, but a bare bed code
+    # the bed is shown on Home as a glanceable chip, but a bare bed code
     # ("DEMO-R-103-B2") tells the worker nothing. Carry the building + room (and
     # check-in) the accommodation endpoint already resolved so the chip reads as a
     # real location. building/room may be None (degrade cleanly on the client).
@@ -1137,7 +1137,7 @@ def get_worker_home(token=None):
     }
 
 
-# [T-324] The worker may one-tap "notify HR" only once their Iqama is inside this
+# The worker may one-tap "notify HR" only once their Iqama is inside this
 # window. Distinct from the 60-day _DOCUMENT_ALERT_LEAD_DAYS visual alert: the
 # action is the tighter, action-worthy threshold the task fixes at 30 days. The
 # server re-checks it from the Employee record, so a client can never trigger the

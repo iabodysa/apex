@@ -78,7 +78,7 @@ class TestSafetyTaskExecution(FrappeTestCase):
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
-    # -- evidence enforcement (Safety Task Execution.validate) -----------------
+    # evidence enforcement (Safety Task Execution.validate)
 
     def _evidence_task(self, evidence_required):
         """Create a Safety Task Catalog row with the given evidence flag."""

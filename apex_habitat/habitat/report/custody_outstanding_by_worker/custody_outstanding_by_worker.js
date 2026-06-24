@@ -1,5 +1,3 @@
-// [T-277]
-
 frappe.query_reports["Custody Outstanding by Worker"] = {
 	filters: [
 		{
