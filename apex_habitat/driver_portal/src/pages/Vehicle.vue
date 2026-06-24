@@ -64,7 +64,7 @@
             <dt class="min-w-0">
               <span class="font-semibold">{{ complianceLabel(doc.compliance_type) }}</span>
               <span class="text-muted block text-xs">
-                {{ doc.document_number || t("vehicle.noDocNumber") }}
+                <bdi>{{ doc.document_number || t("vehicle.noDocNumber") }}</bdi>
               </span>
             </dt>
             <dd class="ms-auto text-end shrink-0">

@@ -59,7 +59,7 @@
               {{ t("common.driverPortal") }}
             </p>
             <h1 class="text-xl font-extrabold leading-tight truncate" style="color: var(--c-header-ink)">
-              {{ greeting }}<span v-if="firstName">, {{ firstName }}</span>
+              {{ greeting }}<span v-if="firstName">, <bdi>{{ firstName }}</bdi></span>
             </h1>
           </div>
         </div>

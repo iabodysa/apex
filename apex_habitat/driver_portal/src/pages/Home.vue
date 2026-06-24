@@ -23,13 +23,13 @@
         <div class="flex items-center gap-2">
           <Icon name="truck" :size="18" class="text-primary shrink-0" />
           <span class="text-muted">{{ t("home.vehicle") }}</span>
-          <span class="ms-auto font-semibold">{{ ctx.driver.current_vehicle || t("common.notAssigned") }}</span>
+          <span class="ms-auto font-semibold"><bdi>{{ ctx.driver.current_vehicle || t("common.notAssigned") }}</bdi></span>
         </div>
         <div v-if="ctx.driver.license_expiry" class="flex items-center gap-2" :class="licenseColor">
           <Icon :name="licenseIcon" :size="18" class="shrink-0" />
           <span class="text-muted">{{ t("home.license") }}</span>
           <span class="ms-auto font-semibold">
-            {{ ctx.driver.license_expiry }}
+            <bdi>{{ ctx.driver.license_expiry }}</bdi>
             <span v-if="licenseHint" class="opacity-90">· {{ licenseHint }}</span>
           </span>
         </div>

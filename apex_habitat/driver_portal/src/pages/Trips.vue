@@ -20,14 +20,14 @@
       class="card card-pad block"
     >
       <div class="flex items-start justify-between gap-2">
-        <div class="font-bold leading-tight">{{ t.route_plan || t.name }}</div>
+        <div class="font-bold leading-tight"><bdi>{{ t.route_plan || t.name }}</bdi></div>
         <span class="pill pill-accent shrink-0">{{ t.status }}</span>
       </div>
       <div class="mt-2 flex items-center gap-2 text-sm text-soft">
         <Icon name="truck" :size="16" class="text-primary shrink-0" />
-        <span>{{ t.vehicle || "—" }}</span>
+        <span><bdi>{{ t.vehicle || "—" }}</bdi></span>
         <span class="text-muted">·</span>
-        <span>{{ t.depart_time || "" }} → {{ t.return_time || "" }}</span>
+        <span><bdi>{{ t.depart_time || "" }}</bdi> → <bdi>{{ t.return_time || "" }}</bdi></span>
         <Icon name="route" :size="16" class="text-primary shrink-0 ms-auto" />
       </div>
     </router-link>

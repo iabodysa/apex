@@ -2,6 +2,9 @@ import unittest
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import today
+
+from apex_habitat.tests.factories import make_building, make_company, make_room
 
 # [#8evoal]
 test_ignore = [
@@ -119,4 +122,111 @@ class TestSafetyTaskExecution(FrappeTestCase):
         self.assertEqual(doc.execution_status, "Good")
         frappe.delete_doc(
             "Safety Task Execution", doc.name, force=True, ignore_permissions=True
+        )
+
+    # failed-execution -> Maintenance Request escalation (on_submit)
+
+    def _exec_task(self):
+        """A catalog task with no photo requirement so a failed execution can be
+        submitted without an Evidence Photo (the escalation, not the photo gate,
+        is under test here)."""
+        return frappe.get_doc({
+            "doctype": "Safety Task Catalog",
+            "naming_series": "STC-.####",
+            "task_code": f"STC-MR-{frappe.generate_hash(length=4)}",
+            "task_title": "Escalation task",
+            "department": "Fire Safety",
+            "frequency": "Monthly",
+            "evidence_required": 0,
+        }).insert(ignore_permissions=True).name
+
+    def _failed_execution(self, building, task, status="Poor"):
+        ste = frappe.get_doc({
+            "doctype": "Safety Task Execution",
+            "execution_date": today(),
+            "building": building,
+            "task": task,
+            "execution_status": status,
+        }).insert(ignore_permissions=True)
+        ste.submit()
+        ste.reload()
+        return ste
+
+    def test_poor_execution_raises_and_links_maintenance_request(self):
+        """A Poor result raises ONE building-scoped Maintenance Request, links it
+        on linked_maintenance_request, and stamps source_execution back."""
+        make_company()
+        building = make_building(name="MR Esc Bldg Poor").name
+        make_room(building, room_number="MR-ESC-POOR-R01")
+        task = self._exec_task()
+
+        ste = self._failed_execution(building, task, "Poor")
+
+        self.assertTrue(ste.linked_maintenance_request, "an MR should be linked")
+        mr = frappe.get_doc("Maintenance Request", ste.linked_maintenance_request)
+        self.assertEqual(mr.building, building)
+        self.assertEqual(mr.source_execution, ste.name)
+        self.assertEqual(mr.status, "Open")
+        # Exactly one summary MR for this execution.
+        self.assertEqual(
+            frappe.db.count("Maintenance Request", {"source_execution": ste.name}), 1
+        )
+
+    def test_not_done_execution_raises_maintenance_request(self):
+        """Not Done is the second failing status and also escalates."""
+        make_company()
+        building = make_building(name="MR Esc Bldg NotDone").name
+        make_room(building, room_number="MR-ESC-ND-R01")
+        task = self._exec_task()
+
+        ste = self._failed_execution(building, task, "Not Done")
+        self.assertTrue(ste.linked_maintenance_request)
+
+    def test_good_execution_raises_no_maintenance_request(self):
+        """A passing (Good) result must NOT escalate to a Maintenance Request."""
+        make_company()
+        building = make_building(name="MR Esc Bldg Good").name
+        make_room(building, room_number="MR-ESC-GOOD-R01")
+        task = self._exec_task()
+
+        ste = self._failed_execution(building, task, "Good")
+        self.assertFalse(ste.linked_maintenance_request, "Good must not escalate")
+        self.assertEqual(
+            frappe.db.count("Maintenance Request", {"source_execution": ste.name}), 0
+        )
+
+    def test_escalation_is_idempotent_on_rerun(self):
+        """A defensive re-run of the escalation on an already-linked execution must
+        NOT create a second summary MR — the linked_maintenance_request guard
+        short-circuits once a live ticket exists."""
+        make_company()
+        building = make_building(name="MR Esc Bldg Rerun").name
+        make_room(building, room_number="MR-ESC-RERUN-R01")
+        task = self._exec_task()
+
+        ste = self._failed_execution(building, task, "Poor")
+        first_mr = ste.linked_maintenance_request
+        self.assertTrue(first_mr)
+
+        # Re-invoke the escalation directly (the path the back-link guard protects).
+        ste._escalate_failed_execution()
+        ste.reload()
+
+        self.assertEqual(ste.linked_maintenance_request, first_mr, "link unchanged")
+        self.assertEqual(
+            frappe.db.count("Maintenance Request", {"source_execution": ste.name}), 1,
+            "re-run must not spawn a second summary ticket",
+        )
+
+    def test_no_room_in_building_skips_escalation_gracefully(self):
+        """Maintenance Request.room is mandatory; a building with no rooms cannot
+        carry the summary ticket, so submit still succeeds and nothing is linked."""
+        make_company()
+        building = make_building(name="MR Esc Bldg NoRoom").name
+        task = self._exec_task()
+
+        ste = self._failed_execution(building, task, "Poor")
+        self.assertFalse(
+            ste.linked_maintenance_request,
+            "no room -> no summary MR, but submit must not fail",
         )

@@ -8,7 +8,7 @@
   .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
   .ah-meta .ah-lbl { background: #f8f4f4; font-weight: bold; width: 22%; }
   .ah-items { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-  .ah-items th { background: #8a1a1a; color: #fff; padding: 6px 8px; font-size: 11px; text-align: left; }
+  .ah-items th { background: #8a1a1a; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
   .ah-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
   .ah-items tr:nth-child(even) td { background: #faf6f6; }
   .ah-total { text-align: right; font-size: 14px; font-weight: bold; margin-bottom: 16px; }
@@ -18,7 +18,8 @@
   .ah-foot { margin-top: 20px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
 </style>
 
-<div class="ah-doc">
+<!-- dir follows the print language: rtl for Arabic, ltr otherwise -->
+<div class="ah-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   <div class="ah-head">
     <div>
       <h1>Custody Damage / Deduction Notice</h1>
@@ -48,10 +49,10 @@
     <thead>
       <tr>
         <th style="width:5%;">#</th>
-        <th>Article <span class="ah-ar">الصنف</span></th>
-        <th>Damage Description <span class="ah-ar">وصف التلف</span></th>
-        <th style="width:18%;">Serial No <span class="ah-ar">الرقم التسلسلي</span></th>
-        <th style="width:20%;">Replacement Cost (SAR) <span class="ah-ar">تكلفة الاستبدال</span></th>
+        <th>{{ _("Article") }}</th>
+        <th>{{ _("Damage Description") }}</th>
+        <th style="width:18%;">{{ _("Serial No") }}</th>
+        <th style="width:20%;">{{ _("Replacement Cost (SAR)") }}</th>
       </tr>
     </thead>
     <tbody>

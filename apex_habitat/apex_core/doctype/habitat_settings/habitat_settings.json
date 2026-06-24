@@ -16,6 +16,7 @@
   "enable_stock_posting",
   "auto_create_asset_movement_on_transfer",
   "habitat_settings_sec_housing",
+  "housing_office_number",
   "enable_housing_allowance_deduction",
   "deduction_activation_date",
   "authorized_by",
@@ -125,6 +126,13 @@
    "fieldname": "habitat_settings_sec_housing",
    "fieldtype": "Section Break",
    "label": "Housing Allowance Deduction"
+  },
+  {
+   "description": "Housing office contact number shown to workers on the Masar home My Contacts card.",
+   "fieldname": "housing_office_number",
+   "fieldtype": "Data",
+   "label": "Housing Office Number",
+   "options": "Phone"
   },
   {
    "default": "0",
@@ -351,7 +359,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-19 00:27:27.407798",
+ "modified": "2026-06-25 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Habitat Settings",

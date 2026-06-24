@@ -1137,6 +1137,57 @@ def get_worker_home(token=None):
     }
 
 
+def _building_in_charge(employee):
+    """The worker's current building in-charge contact, or None. Resolved from the
+    active assignment's building (``responsible_facility_supervisor`` User), the
+    same source the accommodation screen uses."""
+    assignment = _active_assignment(employee)
+    user = assignment and frappe.db.get_value(
+        "Accommodation Building", assignment.get("building"), "responsible_facility_supervisor"
+    )
+    if not user:
+        return None
+    return {
+        "name": frappe.utils.get_fullname(user) or user,
+        "phone": frappe.db.get_value("User", user, "mobile_no"),
+    }
+
+
+def _today_driver(employee):
+    """The driver of the worker's today Dispatch Trip, or None. Resolved forward
+    from today's trip on the worker's OWN manifest (via ``_worker_today_dispatch_trip``),
+    so it can never reach a driver the worker is not riding with today."""
+    resolved = _worker_today_dispatch_trip(employee)
+    if not resolved:
+        return None
+    driver = frappe.db.get_value("Dispatch Trip", resolved[0], "driver")
+    if not driver:
+        return None
+    d = frappe.db.get_value("Salis Driver", driver, ["full_name", "phone"], as_dict=True)
+    return d or None
+
+
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=60)
+def get_worker_contacts(token=None):
+    """The worker's key contacts for the Masar home (read, token-scoped).
+
+    Resolves the token to one Employee and returns the three contacts the home
+    My Contacts card shows: the building in-charge (from the active assignment's
+    building), today's driver (from the worker's own today Dispatch Trip), and the
+    housing office number (from Habitat Settings). Each is None/absent when not set,
+    so the card degrades cleanly. Scoped to the resolved employee; read-only, no GL."""
+    employee = _resolve_worker(token)
+    return {
+        "building_in_charge": _building_in_charge(employee),
+        "today_driver": _today_driver(employee),
+        "housing_office_number": frappe.db.get_single_value(
+            "Habitat Settings", "housing_office_number"
+        )
+        or None,
+    }
+
+
 # The worker may one-tap "notify HR" only once their Iqama is inside this
 # window. Distinct from the 60-day _DOCUMENT_ALERT_LEAD_DAYS visual alert: the
 # action is the tighter, action-worthy threshold the task fixes at 30 days. The

@@ -13,11 +13,11 @@
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
               <div class="font-extrabold leading-tight truncate">
-                {{ tripRoute.data.route_name || tripRoute.data.dispatch_trip }}
+                <bdi>{{ tripRoute.data.route_name || tripRoute.data.dispatch_trip }}</bdi>
               </div>
               <div class="mt-0.5 text-sm text-muted">
-                <span v-if="tripRoute.data.depart_time">{{ t("route.departs") }} {{ tripRoute.data.depart_time }}</span>
-                <span v-if="tripRoute.data.vehicle"> · {{ tripRoute.data.vehicle }}</span>
+                <span v-if="tripRoute.data.depart_time">{{ t("route.departs") }} <bdi>{{ tripRoute.data.depart_time }}</bdi></span>
+                <span v-if="tripRoute.data.vehicle"> · <bdi>{{ tripRoute.data.vehicle }}</bdi></span>
               </div>
             </div>
             <span v-if="tripRoute.data.status" class="pill pill-accent shrink-0">
@@ -43,7 +43,7 @@
                 <div class="min-w-0">
                   <div class="font-semibold leading-tight">
                     {{ stop.stop_name || t("route.stop") }}
-                    <span v-if="stop.planned_time" class="text-muted font-normal">· {{ stop.planned_time }}</span>
+                    <span v-if="stop.planned_time" class="text-muted font-normal">· <bdi>{{ stop.planned_time }}</bdi></span>
                   </div>
                   <div v-if="stop.pickup" class="text-sm text-muted">
                     {{ stop.pickup.building_name || stop.accommodation_building }}
@@ -92,11 +92,11 @@
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
               <div class="font-extrabold leading-tight truncate">
-                {{ trip.dispatch_trip }}
+                <bdi>{{ trip.dispatch_trip }}</bdi>
               </div>
               <div class="mt-0.5 text-sm text-muted">
-                <span v-if="trip.depart_time">{{ t("route.departs") }} {{ trip.depart_time }}</span>
-                <span v-if="trip.vehicle"> · {{ trip.vehicle }}</span>
+                <span v-if="trip.depart_time">{{ t("route.departs") }} <bdi>{{ trip.depart_time }}</bdi></span>
+                <span v-if="trip.vehicle"> · <bdi>{{ trip.vehicle }}</bdi></span>
               </div>
             </div>
             <span class="pill pill-accent shrink-0">
@@ -122,7 +122,7 @@
                 <div class="min-w-0">
                   <div class="font-semibold leading-tight">
                     {{ stop.stop_name || t("route.stop") }}
-                    <span v-if="stop.planned_time" class="text-muted font-normal">· {{ stop.planned_time }}</span>
+                    <span v-if="stop.planned_time" class="text-muted font-normal">· <bdi>{{ stop.planned_time }}</bdi></span>
                   </div>
                   <div v-if="stop.pickup" class="text-sm text-muted">
                     {{ stop.pickup.building_name || stop.accommodation_building }}
@@ -153,7 +153,7 @@
                 class="flex items-center gap-2 text-sm"
               >
                 <Icon name="user" :size="14" class="text-primary shrink-0" />
-                <span class="font-semibold">{{ w.employee_name || w.employee }}</span>
+                <span class="font-semibold"><bdi>{{ w.employee_name || w.employee }}</bdi></span>
                 <span v-if="w.pickup_point" class="text-muted">· {{ w.pickup_point }}</span>
               </li>
             </ul>

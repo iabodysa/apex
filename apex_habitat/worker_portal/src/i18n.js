@@ -59,6 +59,13 @@ const messages = {
       notifyHrDone: "HR notified",
       notifyHrFailed: "Couldn't notify HR. Please try again.",
     },
+    contacts: {
+      title: "My Contacts",
+      buildingInCharge: "Building in-charge",
+      todayDriver: "Today's driver",
+      housingOffice: "Housing office",
+      empty: "No contacts available right now.",
+    },
     profile: {
       title: "My Profile",
       more: "More",
@@ -256,6 +263,13 @@ const messages = {
       notifyHrSending: "جارٍ الإبلاغ…",
       notifyHrDone: "تم إبلاغ الموارد البشرية",
       notifyHrFailed: "تعذّر إبلاغ الموارد البشرية. حاول مرة أخرى.",
+    },
+    contacts: {
+      title: "جهات الاتصال",
+      buildingInCharge: "مسؤول المبنى",
+      todayDriver: "سائق اليوم",
+      housingOffice: "مكتب الإسكان",
+      empty: "لا توجد جهات اتصال متاحة حالياً.",
     },
     profile: {
       title: "ملفي الشخصي",

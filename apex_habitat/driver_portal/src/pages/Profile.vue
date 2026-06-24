@@ -30,12 +30,12 @@
           <div v-if="profile.data.phone" class="flex items-center gap-2">
             <Icon name="phone" :size="18" class="text-primary shrink-0" />
             <dt class="text-muted">{{ t("profile.phone") }}</dt>
-            <dd class="ms-auto font-semibold">{{ profile.data.phone }}</dd>
+            <dd class="ms-auto font-semibold"><bdi>{{ profile.data.phone }}</bdi></dd>
           </div>
           <div class="flex items-center gap-2">
             <Icon name="truck" :size="18" class="text-primary shrink-0" />
             <dt class="text-muted">{{ t("profile.currentVehicle") }}</dt>
-            <dd class="ms-auto font-semibold">{{ profile.data.current_vehicle || t("common.notAssigned") }}</dd>
+            <dd class="ms-auto font-semibold"><bdi>{{ profile.data.current_vehicle || t("common.notAssigned") }}</bdi></dd>
           </div>
           <div v-if="profile.data.project" class="flex items-center gap-2">
             <Icon name="briefcase" :size="18" class="text-primary shrink-0" />
@@ -45,7 +45,7 @@
           <div v-if="profile.data.employee" class="flex items-center gap-2">
             <Icon name="user" :size="18" class="text-primary shrink-0" />
             <dt class="text-muted">{{ t("profile.employee") }}</dt>
-            <dd class="ms-auto font-semibold">{{ profile.data.employee }}</dd>
+            <dd class="ms-auto font-semibold"><bdi>{{ profile.data.employee }}</bdi></dd>
           </div>
         </dl>
       </section>
@@ -59,13 +59,13 @@
           <div v-if="profile.data.license_number" class="flex items-center gap-2">
             <Icon name="badge" :size="18" class="text-primary shrink-0" />
             <dt class="text-muted">{{ t("profile.licenseNumber") }}</dt>
-            <dd class="ms-auto font-semibold">{{ profile.data.license_number }}</dd>
+            <dd class="ms-auto font-semibold"><bdi>{{ profile.data.license_number }}</bdi></dd>
           </div>
           <div v-if="profile.data.license_expiry" class="flex items-center gap-2" :class="licenseColor">
             <Icon :name="licenseIcon" :size="18" class="shrink-0" />
             <dt class="text-muted">{{ t("profile.licenseExpiry") }}</dt>
             <dd class="ms-auto font-semibold">
-              {{ profile.data.license_expiry }}
+              <bdi>{{ profile.data.license_expiry }}</bdi>
               <span v-if="licenseHint" class="opacity-90">· {{ licenseHint }}</span>
             </dd>
           </div>

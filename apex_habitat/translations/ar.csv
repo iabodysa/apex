@@ -319,6 +319,7 @@ Basis / Evidence is required before a recovery can be Approved.,يجب توفي�
 Bathroom,دورة المياه
 Bed,سرير
 Bed (if bed-specific),السرير (إذا كان مخصصاً لسرير محدد)
+Bed Board,لوحة الأسرّة
 Bed Capacity,الطاقة الاستيعابية (أسرة)
 Bed Code,رمز السرير
 Bed capacity per room exceeds maximum of 50. Floor {0}: {1} beds configured.,سعة الأسرّة لكل غرفة تتجاوز الحد الأقصى 50. الطابق {0}: تم تهيئة {1} سرير.
@@ -1179,8 +1180,10 @@ Housed {0} in a temporary bed,تمّ إسكان {0} في سرير مؤقّت
 Housing,السكن
 Housing Allowance Deduction,خصم بدل السكن
 Housing Allowance Suspended,تعليق بدل السكن
+Housing Office Number,رقم مكتب السكن
 Housing Request,طلب سكن
 Housing Supervisor Report,تقرير مشرف السكن
+Housing office contact number shown to workers on the Masar home My Contacts card.,رقم تواصل مكتب السكن الظاهر للعمّال في بطاقة جهات اتصالي بالصفحة الرئيسية لمسار.
 Housing over capacity…,السكن بطاقة زائدة…
 Housing…,الإسكان…
 How To Integrate,كيفية التكامل
@@ -2087,6 +2090,7 @@ Reopened,أُعيد فتحه
 Repair,إصلاح
 Replace,استبدال
 Replaced,مُستبدَل
+Replacement Cost (SAR),تكلفة الاستبدال (ريال)
 Report,تقرير
 Reported By,مُبلغ من قبل
 Reported On,تاريخ الإبلاغ
@@ -2269,6 +2273,7 @@ Safety and Task Master,بيانات السلامة والمهام
 Safety is set up. Scheduled tasks and inspections are active.,تم إعداد السلامة. المهام المجدولة والتفتيشات مفعّلة الآن.
 Safety rounds,جولات السلامة
 Safety rounds were recorded for {0} on {1}.,سُجِّلت جولات السلامة لـ{0} بتاريخ {1}.
+Safety task '{0}' failed on {1} (result: {2}). Repair required.,فشلت مهمة السلامة '{0}' بتاريخ {1} (النتيجة: {2}). يلزم إجراء إصلاح.
 Salary Component,مكوّن الراتب
 Salary Component (Deduction type) used when posting custody damage as Additional Salary. Must exist in HRMS before enabling.,مكون الراتب (نوع خصم) المستخدم لترحيل تلفيات العهد كراتب إضافي. يجب أن يكون موجوداً في HRMS قبل التفعيل.
 Salary Deduction,خصم من الراتب

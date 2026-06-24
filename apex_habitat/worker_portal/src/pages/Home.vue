@@ -116,11 +116,35 @@
         </ul>
       </section>
     </template>
+
+    <!-- My Contacts: building in-charge, today's driver, housing office.
+         Its own resource, so it renders even if the "today" payload is empty;
+         shown only once at least one contact resolves. -->
+    <section v-if="contacts.data && hasContacts" class="card card-pad space-y-4">
+      <div class="flex items-center gap-2">
+        <Icon name="phone" :size="18" class="text-primary shrink-0" />
+        <span class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("contacts.title") }}</span>
+      </div>
+
+      <ContactPerson v-if="buildingInCharge" :label="t('contacts.buildingInCharge')" :person="buildingInCharge" />
+      <ContactPerson v-if="todayDriver" :label="t('contacts.todayDriver')" :person="todayDriver" />
+
+      <div v-if="housingOffice" class="space-y-2">
+        <div class="flex items-center gap-2 text-sm">
+          <Icon name="building" :size="16" class="text-primary shrink-0" />
+          <span class="text-muted">{{ t("contacts.housingOffice") }}</span>
+          <span class="ms-auto font-semibold"><bdi>{{ housingOffice }}</bdi></span>
+        </div>
+        <a :href="'tel:' + housingOffice" class="btn btn-primary" style="text-decoration: none">
+          <Icon name="phone" :size="18" /> {{ t("common.call") }}
+        </a>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { computed, onUnmounted, ref } from "vue";
+import { computed, h, onUnmounted, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
@@ -128,6 +152,7 @@ import PullIndicator from "../components/PullIndicator.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDate, formatDateTime, formatTime } from "../datetime";
 import { TOKEN } from "../token";
+import { waLink } from "../phone";
 import { usePullToRefresh } from "../usePullToRefresh";
 
 const { t, tEnum } = useI18n();
@@ -140,9 +165,28 @@ const home = createResource({
   auto: true,
 });
 
+// The three home contacts (building in-charge, today's driver, housing office)
+// are a separate token-scoped call so they refresh with the page.
+const contacts = createResource({
+  url: "apex_habitat.salis.api.masar.get_worker_contacts",
+  params: { token: TOKEN },
+  auto: true,
+});
+const buildingInCharge = computed(() => contacts.data?.building_in_charge || null);
+// The driver carries full_name; normalize to the {name, phone} shape ContactPerson reads.
+const todayDriver = computed(() => {
+  const d = contacts.data?.today_driver;
+  return d ? { name: d.full_name, phone: d.phone } : null;
+});
+const housingOffice = computed(() => contacts.data?.housing_office_number || "");
+const hasContacts = computed(
+  () => !!(buildingInCharge.value || todayDriver.value || housingOffice.value)
+);
+
 // [T-320] pull down at the top to refresh today's payload. reload() returns the
-// fetch promise, so the spinner keeps spinning until the data lands.
-const ptr = usePullToRefresh(() => home.reload());
+// fetch promise, so the spinner keeps spinning until the data lands; the contacts
+// card refreshes alongside it.
+const ptr = usePullToRefresh(() => Promise.all([home.reload(), contacts.reload()]));
 
 const errorMessage = computed(() => resourceErrorMessage(home.error));
 
@@ -224,4 +268,46 @@ function sendNotifyHr() {
   notifyHrError.value = "";
   notifyHr.submit({ token: TOKEN });
 }
+
+// One contact row (in-charge / driver): role label, name + phone, and
+// tel/WhatsApp actions when a number is on file. Mirrors the Accommodation
+// in-charge block so the two screens read the same. <bdi> isolates the LTR phone.
+const ContactPerson = (cprops) => {
+  const p = cprops.person;
+  const phone = p.phone;
+  return h("div", { class: "space-y-2" }, [
+    h("div", { class: "flex items-center gap-3" }, [
+      h(
+        "span",
+        { class: "avatar h-10 w-10", style: "background: var(--c-mint); color: var(--c-ink)" },
+        h(Icon, { name: "user", size: 18 })
+      ),
+      h("div", { class: "min-w-0" }, [
+        h("div", { class: "text-xs text-muted" }, cprops.label),
+        h("div", { class: "font-bold truncate" }, p.name),
+        phone ? h("div", { class: "text-sm text-muted" }, h("bdi", null, phone)) : null,
+      ]),
+    ]),
+    phone
+      ? h("div", { class: "grid grid-cols-2 gap-3" }, [
+          h(
+            "a",
+            { href: "tel:" + phone, class: "btn btn-primary", style: "text-decoration: none" },
+            [h(Icon, { name: "phone", size: 18 }), " " + t("common.call")]
+          ),
+          h(
+            "a",
+            {
+              href: waLink(phone),
+              target: "_blank",
+              rel: "noopener",
+              class: "btn btn-accent",
+              style: "text-decoration: none",
+            },
+            [h(Icon, { name: "message", size: 18 }), " " + t("common.whatsapp")]
+          ),
+        ])
+      : null,
+  ]);
+};
 </script>
