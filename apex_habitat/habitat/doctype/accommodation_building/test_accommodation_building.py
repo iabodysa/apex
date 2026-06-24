@@ -193,6 +193,58 @@ class TestAccommodationBuilding(FrappeTestCase):
                 frappe.delete_doc("Accommodation Room", room, force=True, ignore_permissions=True)
             frappe.delete_doc("Accommodation Building", b.name, force=True, ignore_permissions=True)
 
+    def test_cctv_camera_count_derives_from_facility_assets(self):
+        """cctv_camera_count auto-counts the building's CCTV Camera Facility Assets,
+        excluding retired ones (Replaced/Scrapped), and is read-only — so a manual
+        value is overridden on save."""
+        self.assertEqual(
+            frappe.get_meta("Accommodation Building").get_field("cctv_camera_count").read_only, 1,
+            "cctv_camera_count must be read_only (auto-derived)",
+        )
+        m = frappe.generate_hash(length=6)
+        b = frappe.get_doc({
+            "doctype": "Accommodation Building",
+            "building_name": "QA CCTV " + m,
+            "cctv_camera_count": 99,  # manual value must be overridden
+        })
+        b.insert(ignore_permissions=True, ignore_links=True)
+        cams = []
+        try:
+            for i, status in enumerate(("Operational", "Faulty", "Scrapped")):
+                cam = frappe.get_doc({
+                    "doctype": "Facility Asset",
+                    "naming_series": "FAC-AST-.YYYY.-.####",
+                    "asset_name": f"QA Cam {m} {i}",
+                    "asset_category": "CCTV Camera",
+                    "building": b.name,
+                    "status": status,
+                    "responsible_supervisor": "Administrator",
+                })
+                cam.insert(ignore_permissions=True, ignore_links=True)
+                cams.append(cam.name)
+            # a non-CCTV asset must not be counted
+            other = frappe.get_doc({
+                "doctype": "Facility Asset",
+                "naming_series": "FAC-AST-.YYYY.-.####",
+                "asset_name": f"QA Gen {m}",
+                "asset_category": "Generator",
+                "building": b.name,
+                "responsible_supervisor": "Administrator",
+            })
+            other.insert(ignore_permissions=True, ignore_links=True)
+            cams.append(other.name)
+
+            b.save(ignore_permissions=True)
+            b.reload()
+            self.assertEqual(
+                b.cctv_camera_count, 2,
+                "counts Operational + Faulty CCTV cameras; excludes Scrapped and the Generator",
+            )
+        finally:
+            for name in cams:
+                frappe.delete_doc("Facility Asset", name, force=True, ignore_permissions=True)
+            frappe.delete_doc("Accommodation Building", b.name, force=True, ignore_permissions=True)
+
     def test_generate_rooms_and_beds_rejects_unauthorized_user(self):
         """Unauthorized user (Guest) must receive PermissionError from
         generate_rooms_and_beds, which guards with a doc-level write check."""

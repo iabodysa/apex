@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+- [1.55.14](v1/v1_55_14.md)
 - [1.55.13](v1/v1_55_13.md)
 - [1.55.12](v1/v1_55_12.md)
 - [1.55.11](v1/v1_55_11.md)

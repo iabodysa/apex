@@ -55,3 +55,25 @@ class TestCustodyIssue(FrappeTestCase):
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
+
+
+ACK_NOTIFICATION = "Habitat - Custody Acknowledgment Requested"
+
+
+class TestCustodyAcknowledgmentNotification(FrappeTestCase):
+    """The submit-time alert that makes the My Custody Acknowledgment Web Form
+    reachable to the holder without the raw URL."""
+
+    def test_notification_targets_holder_on_submit(self):
+        n = frappe.get_doc("Notification", ACK_NOTIFICATION)
+        self.assertEqual(n.document_type, "Custody Issue")
+        self.assertEqual(n.event, "Submit")
+        fields = [r.receiver_by_document_field for r in n.recipients]
+        self.assertIn("issued_to_employee", fields)
+
+    def test_message_renders_acknowledgment_form_link(self):
+        n = frappe.get_doc("Notification", ACK_NOTIFICATION)
+        rendered = frappe.render_template(n.message, {"doc": frappe._dict(name="CUST-ISS-QA")})
+        self.assertIn("/my-custody-acknowledgment", rendered)
+        # the holder lands pre-filtered to their own issue
+        self.assertIn("custody_issue=CUST-ISS-QA", rendered)

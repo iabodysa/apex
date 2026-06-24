@@ -481,11 +481,10 @@
    "label": "Surveillance"
   },
   {
-   "description": "Operator-entered count of active CCTV cameras in this building. There is no per-camera asset record to auto-count from.",
    "fieldname": "cctv_camera_count",
    "fieldtype": "Int",
    "label": "Active CCTV Cameras",
-   "read_only": 0,
+   "read_only": 1,
    "non_negative": 1
   },
   {
@@ -667,7 +666,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-06-18 09:00:00.000000",
+ "modified": "2026-06-25 02:26:01.357594",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Building",

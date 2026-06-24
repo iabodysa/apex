@@ -6,6 +6,8 @@ from collections import defaultdict
 import frappe
 from frappe.utils import add_days, getdate, today
 
+from apex_habitat.habitat import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -80,8 +82,19 @@ def _columns():
 
 def _get_buildings(building_filter):
     f = {"status": "Active"}
-    if building_filter:
+
+    # Match list/card scope: a building-scoped user sees only their User-Permission
+    # buildings, so the report can't leak buildings outside their scope.
+    if not permissions._building_is_unscoped(frappe.session.user):
+        allowed = permissions._allowed_buildings(frappe.session.user)
+        if building_filter:
+            allowed = [b for b in allowed if b == building_filter]
+        if not allowed:
+            return []
+        f["name"] = ["in", allowed]
+    elif building_filter:
         f["name"] = building_filter
+
     return frappe.get_all("Accommodation Building", filters=f, fields=["name"], order_by="name")
 
 

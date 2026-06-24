@@ -219,6 +219,14 @@
    "link_type": "Dashboard",
    "link_to": "Accommodation Manager Dashboard",
    "idx": 18
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Resident Supervisor Dashboard",
+   "link_type": "Dashboard",
+   "link_to": "Resident Supervisor Dashboard",
+   "idx": 22
   }
  ],
  "charts": [
@@ -263,5 +271,5 @@
    "idx": 1
   }
  ],
- "modified": "2026-06-25 12:00:00.000000"
+ "modified": "2026-06-25 23:30:00.000000"
 }

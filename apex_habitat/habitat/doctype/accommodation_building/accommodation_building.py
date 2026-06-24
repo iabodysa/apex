@@ -215,6 +215,16 @@ def before_save(doc, method=None):
     )
     doc.total_floors = len([f for f in _floor_values if f is not None])
 
+    # Active cameras = CCTV Facility Assets still installed (retired ones excluded).
+    doc.cctv_camera_count = frappe.db.count(
+        "Facility Asset",
+        {
+            "building": doc.name,
+            "asset_category": "CCTV Camera",
+            "status": ["not in", ("Replaced", "Scrapped")],
+        },
+    )
+
     # [#c9s718]
     if doc.floor_plan and doc.setup_status == "Draft":
         doc.setup_status = "Rooms Planned"

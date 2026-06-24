@@ -1,0 +1,26 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.docstatus == 1 and doc.issued_to_employee",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Custody Issue",
+ "enabled": 0,
+ "event": "Submit",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "<p>{{ _(\"Custody items have been issued to you\") }}: {{ doc.name }}.</p>\n<p>{{ _(\"Please confirm you have received them\") }}: <a href=\"{{ frappe.utils.get_url('/my-custody-acknowledgment?custody_issue=' ~ doc.name) }}\">{{ _(\"Acknowledge receipt\") }}</a></p>",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Custody Acknowledgment Requested",
+ "recipients": [
+  {
+   "receiver_by_document_field": "issued_to_employee"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Confirm Receipt of Custody Items: {{ doc.name }}",
+ "modified": "2026-06-25 12:00:00.000000"
+}

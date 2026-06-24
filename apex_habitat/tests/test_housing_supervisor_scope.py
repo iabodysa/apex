@@ -14,6 +14,9 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.habitat import permissions as P
+from apex_habitat.habitat.report.housing_supervisor_report import (
+    housing_supervisor_report as R,
+)
 
 
 class TestHousingSupervisorScope(FrappeTestCase):
@@ -64,6 +67,37 @@ class TestHousingSupervisorScope(FrappeTestCase):
             P, "_allowed_buildings", return_value=["BLDG-1"]
         ):
             self.assertIn("`name`", P.accommodation_building_query(user="sup"))
+
+    def test_report_scoped_supervisor_only_queries_his_buildings(self):
+        with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
+            P, "_allowed_buildings", return_value=["BLDG-1", "BLDG-2"]
+        ), patch.object(R.frappe, "get_all", return_value=[]) as ga:
+            R._get_buildings(None)
+            ga.assert_called_once()
+            self.assertEqual(ga.call_args.kwargs["filters"]["name"], ["in", ["BLDG-1", "BLDG-2"]])
+
+    def test_report_explicit_filter_intersected_with_scope(self):
+        with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
+            P, "_allowed_buildings", return_value=["BLDG-1"]
+        ), patch.object(R.frappe, "get_all", return_value=[]) as ga:
+            # In-scope filter narrows to that building; out-of-scope filter yields nothing.
+            R._get_buildings("BLDG-1")
+            self.assertEqual(ga.call_args.kwargs["filters"]["name"], ["in", ["BLDG-1"]])
+            self.assertEqual(R._get_buildings("BLDG-9"), [])
+
+    def test_report_scoped_supervisor_with_no_buildings_queries_nothing(self):
+        with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
+            P, "_allowed_buildings", return_value=[]
+        ), patch.object(R.frappe, "get_all", return_value=[]) as ga:
+            self.assertEqual(R._get_buildings(None), [])
+            ga.assert_not_called()
+
+    def test_report_unscoped_role_sees_all_active(self):
+        with patch.object(P, "_building_is_unscoped", return_value=True), patch.object(
+            R.frappe, "get_all", return_value=[]
+        ) as ga:
+            R._get_buildings(None)
+            self.assertEqual(ga.call_args.kwargs["filters"], {"status": "Active"})
 
 
 if __name__ == "__main__":

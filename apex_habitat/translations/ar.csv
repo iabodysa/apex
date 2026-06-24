@@ -80,6 +80,7 @@ Accrual Rows,أسطر الاستحقاق
 Accrued Total,إجمالي المستحق
 Accrued Total minus Ledger Accrued Total — non-zero means the entered vehicle lines disagree with the accrual ledger.,إجمالي الاستحقاق مطروحًا منه إجمالي استحقاق دفتر الأستاذ — أي قيمة غير صفرية تعني أن بنود المركبات المُدخلة لا تتطابق مع دفتر استحقاق الإيجار.
 Accrued total. Sum of the vehicle line amounts when lines are entered; otherwise derived from the linked Rental Accrual Ledger.,إجمالي الاستحقاق. مجموع مبالغ بنود المركبات عند إدخال البنود؛ وإلا فيُشتق من دفتر استحقاق الإيجار المرتبط.
+Acknowledge receipt,تأكيد الاستلام
 Acknowledged,مُستلم
 Acknowledged By,معتمد من قِبَل
 Acknowledged By (Finance),اعتمد من قِبَل (مالية)
@@ -682,6 +683,7 @@ Custody,العهدة
 Custody & Asset Integration,تكامل العهدة والأصول
 Custody Article,صنف العهدة
 Custody Asset Category,تصنيف أصول العهدة
+Custody items have been issued to you,تم تسليم عُهدة إليك
 Custody Cleared,تم إخلاء طرف العهدة
 Custody Damage Assessment,تقييم تلفيات العهدة
 Custody Damage Assessments,تقييمات تلف العهد
@@ -1433,7 +1435,6 @@ Maintenance Master,إدارة مواد الصيانة
 Maintenance Material,مادة الصيانة
 Maintenance Material Template,قالب مواد الصيانة
 Maintenance Material Template Item,عنصر قالب مواد الصيانة
-Parent Maintenance Material,مادة الصيانة الأصل
 Maintenance Overdue,صيانة متأخرة
 Maintenance Procurement Item,بند مشتريات الصيانة
 Maintenance Request,طلب صيانة
@@ -1770,6 +1771,7 @@ Ownership and Status,الملكية والحالة
 "Owning company, carried for reporting grouping. System-written; reference only, posts no GL.",الشركة المالكة، منقولة لأغراض تجميع التقارير. يكتبها النظام؛ للمرجع فقط، ولا تُرحّل أي قيد في دفتر الأستاذ العام.
 Owning company; defaulted from Salis Settings. Reference only — posts no GL.,الشركة المالكة؛ تُؤخذ افتراضيًا من إعدادات ساليس. للمرجعية فقط — لا تُنشئ قيدًا محاسبيًا.
 Paid,مدفوع
+Parent Maintenance Material,مادة الصيانة الأصل
 Partial / Attention: {0},جزئي / انتباه: {0}
 Partially Occupied,مشغول جزئياً
 Partially Occupied Rooms,الغرف المشغولة جزئياً
@@ -1875,6 +1877,7 @@ Platform Details,تفاصيل المنصة
 Platform Name,اسم المنصة
 Platform Name is required.,اسم المنصة مطلوب.
 Please attach a completion photo before marking as completed.,يرجى إرفاق صورة الإنجاز قبل وضع علامة مكتمل.
+Please confirm you have received them,يرجى تأكيد استلامك لها
 Please describe your request.,يرجى وصف طلبك.
 Plumbing,سباكة
 Police Report Number,رقم بلاغ الشرطة

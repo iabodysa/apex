@@ -42,6 +42,12 @@
           <Row v-if="it.building" icon="building" :label="t('custody.building')" :value="it.building" />
         </dl>
       </section>
+
+      <!-- The acknowledgment Web Form lives outside the SPA, so this is a plain
+           link, not a router-link. -->
+      <a :href="ackUrl" class="btn btn-outline" style="text-decoration: none">
+        <Icon name="check" :size="18" /> {{ t("custody.acknowledge") }}
+      </a>
     </template>
 
     <div v-else class="card card-pad text-center">
@@ -71,6 +77,9 @@ const cus = createResource({
 const errorMessage = computed(() => resourceErrorMessage(cus.error));
 
 const items = computed(() => cus.data?.items || []);
+
+// Frappe Web Form route (outside the SPA); the holder picks the issue there.
+const ackUrl = "/my-custody-acknowledgment";
 
 function fmtQty(n) {
   const v = Number(n) || 0;
