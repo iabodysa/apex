@@ -5,10 +5,13 @@
  "custom": 0,
  "istable": 0,
  "is_submittable": 0,
+ "is_tree": 1,
+ "nsm_parent_field": "parent_maintenance_material",
  "engine": "InnoDB",
  "track_changes": 1,
  "autoname": "field:material_name",
  "naming_rule": "By fieldname",
+ "search_fields": "parent_maintenance_material",
  "sort_field": "material_name",
  "sort_order": "ASC",
  "description": "Lightweight Habitat-owned catalog of maintenance materials. Not linked to ERPNext Stock/Item unless explicitly mapped.",
@@ -36,6 +39,24 @@
    "reqd": 1,
    "in_list_view": 1,
    "idx": 3
+  },
+  {
+   "bold": 1,
+   "fieldname": "parent_maintenance_material",
+   "fieldtype": "Link",
+   "label": "Parent Maintenance Material",
+   "options": "Maintenance Material",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "description": "Group nodes classify materials and are not selectable as a concrete material",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group",
+   "in_list_view": 1
   },
   {
    "fieldname": "maintenance_material_details_col",
@@ -95,6 +116,35 @@
    "fieldtype": "Small Text",
    "label": "Notes",
    "idx": 10
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "label": "lft",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "label": "rgt",
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "label": "old_parent",
+   "options": "Maintenance Material",
+   "hidden": 1,
+   "no_copy": 1,
+   "ignore_user_permissions": 1,
+   "print_hide": 1,
+   "report_hide": 1
   }
  ],
  "links": [
@@ -157,6 +207,8 @@
   "maintenance_material_sec_details",
   "material_name",
   "material_category",
+  "parent_maintenance_material",
+  "is_group",
   "maintenance_material_details_col",
   "default_uom",
   "is_active",
@@ -165,7 +217,10 @@
   "maintenance_material_costing_col",
   "erpnext_item",
   "maintenance_material_sec_notes",
-  "notes"
+  "notes",
+  "lft",
+  "rgt",
+  "old_parent"
  ],
- "modified": "2026-06-09 09:00:00.000000"
+ "modified": "2026-06-24 12:00:00.000000"
 }

@@ -71,6 +71,14 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "explicit rate_limit. A Guest has no role to permission-check.",
     ),
     (
+        "salis/api/boarding.py",
+        "scan_boarding_pass",
+        "Boarding scan endpoint. Authorisation is an HMAC-signed pass token "
+        "(signature + TTL + trip-manifest verified) bound to (trip, worker), not a "
+        "desk permission; every outcome is logged to Boarding Scan Log. "
+        "Token-resolved writer.",
+    ),
+    (
         "salis/api/driver_portal.py",
         "submit_fuel_request",
         "Driver portal. The Salis Driver is resolved from the session "
