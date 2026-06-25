@@ -14,6 +14,7 @@
   "employee_name",
   "accommodation_assignment_sec_placement",
   "building",
+  "responsible_facility_supervisor",
   "room",
   "bed",
   "accommodation_assignment_placement_col",
@@ -112,6 +113,16 @@
    "options": "Accommodation Building",
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "description": "Mirrors the building's supervisor so notifications can target the specific facility owner.",
+   "fetch_from": "building.responsible_facility_supervisor",
+   "fetch_if_empty": 1,
+   "fieldname": "responsible_facility_supervisor",
+   "fieldtype": "Link",
+   "label": "Responsible Facility Supervisor",
+   "options": "User",
+   "read_only": 1
   },
   {
    "fetch_from": "bed.room",
@@ -335,7 +346,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-06-09 11:00:00.000000",
+ "modified": "2026-06-25 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Assignment",

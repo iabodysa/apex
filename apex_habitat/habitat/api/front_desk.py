@@ -245,6 +245,100 @@ def get_building_grid(building: str) -> dict:
 
 
 @frappe.whitelist()
+def list_supervisor_buildings() -> list[dict]:
+    """Return the caller's allowed buildings, each with a server-computed bed mix.
+
+    Read-only portfolio header for the Front Desk (one chip per building). Scope
+    mirrors the list/card/report contract in ``habitat.permissions``: an unscoped
+    oversight role sees every Active building; a building-scoped user sees only
+    their User-Permission buildings; a scoped user with none sees ``[]``.
+
+    The bed mix is computed from a BOUNDED set of queries regardless of building
+    count — one Active-building query, then ONE bed/room aggregate across all the
+    in-scope buildings (no per-building round trip). Each building's counts come
+    from the same ``_bed_color`` rules as ``get_building_grid``; the client must
+    not recompute color.
+
+    Returns:
+        list of ``{building, building_title, total_beds, available, occupied,
+        blocked, oos, occupancy_pct}`` sorted by building title.
+    """
+    # [#scope-mirror] Same scope rule as housing_supervisor_report._get_buildings:
+    # confine a scoped user to their User-Permission buildings; [] when none.
+    from apex_habitat.habitat import permissions
+
+    f = {"status": "Active"}
+    if not permissions._building_is_unscoped(frappe.session.user):
+        allowed = permissions._allowed_buildings(frappe.session.user)
+        if not allowed:
+            return []
+        f["name"] = ["in", allowed]
+
+    buildings = frappe.get_all(
+        "Accommodation Building", filters=f, fields=["name", "building_name"]
+    )
+    if not buildings:
+        return []
+    building_names = [b.name for b in buildings]
+
+    # [#one-aggregate] Single bed/room read across every in-scope building, bucketed
+    # in Python via _bed_color — bounded no matter how many buildings are in scope.
+    Bed = frappe.qb.DocType("Accommodation Bed")
+    Room = frappe.qb.DocType("Accommodation Room")
+    bed_rows = (
+        frappe.qb.from_(Bed)
+        .left_join(Room)
+        .on(Bed.room == Room.name)
+        .select(
+            Bed.building,
+            Bed.status.as_("bed_status"),
+            Bed.condition,
+            Room.readiness_status,
+        )
+        .where(Bed.building.isin(building_names))
+        .run(as_dict=True)
+    )
+
+    mix = {
+        name: {"total_beds": 0, "available": 0, "occupied": 0, "blocked": 0, "oos": 0}
+        for name in building_names
+    }
+    for bed in bed_rows:
+        bucket = mix.get(bed.building)
+        if bucket is None:
+            continue
+        color = _bed_color(bed.bed_status, bed.condition, bed.readiness_status)
+        bucket["total_beds"] += 1
+        if color == "green":
+            bucket["available"] += 1
+        elif color == "red":
+            bucket["occupied"] += 1
+        elif color == "amber":
+            bucket["blocked"] += 1
+        else:
+            bucket["oos"] += 1
+
+    result = []
+    for b in buildings:
+        m = mix[b.name]
+        total = m["total_beds"]
+        result.append(
+            {
+                "building": b.name,
+                "building_title": b.building_name or b.name,
+                "total_beds": total,
+                "available": m["available"],
+                "occupied": m["occupied"],
+                "blocked": m["blocked"],
+                "oos": m["oos"],
+                "occupancy_pct": round(m["occupied"] / total * 100) if total else 0,
+            }
+        )
+    result.sort(key=lambda r: str(r["building_title"]))
+    return result
+
+
+@frappe.whitelist()
 def get_employee_card(employee):
     """Read-only HR identity card for the check-in dialog: name + profile photo.
     Lets the supervisor visually verify the worker before assigning a bed."""

@@ -32,6 +32,35 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
             "stay_type": stay_type, "expected_checkout_date": expected,
         })
 
+    def test_expected_checkout_notification_targets_building_supervisor(self):
+        # The Expected Checkout Approaching alert must resolve to the building's own
+        # responsible_facility_supervisor, not only the broad Resident Supervisor /
+        # Accommodation Manager roles. The supervisor is mirrored onto the assignment
+        # via fetch_from so the notification's receiver_by_document_field can read it.
+        from apex_habitat.tests.factories import make_bed, make_room
+
+        supervisor = f"sup{_h()}@test.com".lower()
+        frappe.get_doc({"doctype": "User", "email": supervisor, "first_name": "Sup",
+                        "send_welcome_email": 0}).insert(ignore_permissions=True)
+        frappe.db.set_value("Accommodation Building", self.building,
+                            "responsible_facility_supervisor", supervisor)
+
+        room = make_room(self.building, readiness_status="Ready")
+        bed = make_bed(room.name)
+        asg = self._assignment("Permanent")
+        asg.room = room.name
+        asg.bed = bed.name
+        asg.insert(ignore_permissions=True)
+
+        # fetch_from must have mirrored the building supervisor onto the assignment row.
+        self.assertEqual(asg.responsible_facility_supervisor, supervisor)
+
+        notification = frappe.get_doc("Notification", "Habitat - Expected Checkout Approaching")
+        context = {"doc": asg, "alert": notification, "comments": None}
+        recipients, _cc, _bcc = notification.get_list_of_recipients(asg, context)
+        self.assertIn(supervisor, recipients,
+                      "the building's responsible_facility_supervisor must be a recipient")
+
     def test_temporary_requires_expected_checkout_date(self):
         with self.assertRaises(frappe.ValidationError):
             self._assignment("Temporary").insert(ignore_permissions=True)

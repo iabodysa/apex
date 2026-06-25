@@ -8,9 +8,9 @@ operations to the real DocTypes.
 Contract: :func:`get_fleet_os` returns a ``vehicles`` list whose item / history
 shape matches exactly what the page's render code reads (``v.plate``,
 ``v.history``, ``v.current_driver``, ``h.date_receive`` …), so the design's
-render functions run unchanged. The reader is N+1-free: three bounded
-``get_all`` queries (vehicles, the drivers they reference, all assignments)
-plus the Vehicle Category lookup, then grouped in Python.
+render functions run unchanged. The reader is N+1-free: bounded ``get_all``
+queries (vehicles, the drivers they reference, all assignments, all incidents,
+all damage write-offs) plus the Vehicle Category lookup, then grouped in Python.
 
 Every endpoint is permission-gated on ``Salis Vehicle`` and project-scoped
 server-side through the SAME ``_permitted_projects`` resolver the dispatch
@@ -170,6 +170,64 @@ def get_fleet_os():
             "branch_deliver": "",
         })
 
+    # Open/recent incidents + write-offs per vehicle, grouped in Python (N+1-free).
+    # Scope is inherited: `plates` is already the project-permitted vehicle set.
+    incidents = frappe.get_all(
+        "Vehicle Incident",
+        filters={"vehicle": ["in", plates], "docstatus": 1},
+        fields=[
+            "vehicle", "incident_type", "incident_date", "location",
+            "report_number", "status", "estimated_cost", "description", "evidence",
+        ],
+        order_by="incident_date desc",
+        limit_page_length=0,
+    )
+    accidents_by_vehicle: dict[str, list] = {}
+    theft_by_vehicle: dict[str, dict] = {}
+    for inc in incidents:
+        row = {
+            "type": inc.incident_type or "",
+            "date": str(inc.incident_date or ""),
+            "location": inc.location or "",
+            "report_number": inc.report_number or "",
+            "status": "closed" if inc.status == "Closed" else (inc.status or "").lower(),
+            "cost": inc.estimated_cost or 0,
+            "estimated_cost": inc.estimated_cost or 0,
+            "description": inc.description or "",
+            "has_evidence": bool(inc.evidence),
+        }
+        if inc.incident_type == "Theft":
+            # First (most recent, non-closed preferred) theft drives the card stripe.
+            cur = theft_by_vehicle.get(inc.vehicle)
+            if cur is None or (cur.get("status") == "closed" and row["status"] != "closed"):
+                theft_by_vehicle[inc.vehicle] = row
+        else:
+            accidents_by_vehicle.setdefault(inc.vehicle, []).append(row)
+
+    write_offs = frappe.get_all(
+        "Vehicle Damage Write-Off",
+        filters={"vehicle": ["in", plates], "docstatus": 1},
+        fields=[
+            "name", "vehicle", "creation", "status", "estimated_cost",
+            "damage_description", "recommended_action", "evidence",
+        ],
+        order_by="creation desc",
+        limit_page_length=0,
+    )
+    damages_by_vehicle: dict[str, list] = {}
+    for w in write_offs:
+        damages_by_vehicle.setdefault(w.vehicle, []).append({
+            "case": w.name,
+            "date": str(getdate(w.creation) if w.creation else ""),
+            # Front-end shows a "repaired" chip on 'completed'; Approved/Closed map to it.
+            "status": "completed" if w.status in ("Approved", "Closed") else (w.status or "").lower(),
+            "cost": w.estimated_cost or 0,
+            "estimated_cost": w.estimated_cost or 0,
+            "recommended_action": w.recommended_action or "",
+            "description": w.damage_description or "",
+            "has_evidence": bool(w.evidence),
+        })
+
     out = []
     for v in vehicles:
         cd = None
@@ -202,9 +260,9 @@ def get_fleet_os():
             "current_driver": cd,
             "history": history_by_vehicle.get(v.name, []),
             # [#a3imrv]
-            "damages": [],
-            "accidents": [],
-            "stolen_info": None,
+            "damages": damages_by_vehicle.get(v.name, []),
+            "accidents": accidents_by_vehicle.get(v.name, []),
+            "stolen_info": theft_by_vehicle.get(v.name),
             "notes": "",
         })
 

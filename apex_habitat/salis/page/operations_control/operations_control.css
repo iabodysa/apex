@@ -73,6 +73,15 @@
 .fc-grid-table { display: block; }
 .fc-empty { padding: 40px; text-align: center; width: 100%; }
 
+/* Scope-gap state (scoped user with no fleet project) — bordered panel, distinct from the plain no-match line. */
+.fc-empty-scope {
+	border: 1px solid var(--border-color, #e2e2e2);
+	border-radius: var(--border-radius-md, 8px);
+	background: var(--control-bg, #f4f5f6);
+}
+.fc-empty-title { font-weight: 600; font-size: 14px; margin-block-end: 6px; }
+.fc-empty-hint { font-size: 13px; }
+
 /* Failure state with Retry, shown when get_fleet / get_vehicle_detail errors or returns no payload. */
 .fc-error {
 	width: 100%;

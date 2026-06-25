@@ -19,7 +19,7 @@ const STATUS_COLOR = {
 class FleetControl {
 	constructor(page) {
 		this.page = page;
-		this.data = { vehicles: [], summary: null, offices: [], projects: [], statuses: [] };
+		this.data = { vehicles: [], summary: null, offices: [], projects: [], statuses: [], unscoped: false };
 		this.filters = { status: "", rental_office: "", project: "", search: "" };
 		this.view = "cards";
 	}
@@ -183,11 +183,29 @@ class FleetControl {
 		this.$grid.empty();
 		this.$grid.toggleClass("fc-grid-table", this.view === "table");
 		if (!this.data.vehicles.length) {
-			$('<div class="fc-empty text-muted"></div>').text(__("No vehicles match the current filters.")).appendTo(this.$grid);
+			this._render_empty();
 			return;
 		}
 		if (this.view === "table") this._render_table();
 		else this.data.vehicles.forEach((v) => this._render_card(v));
+	}
+
+	// Two distinct zero-row states: a scope gap (scoped user with no fleet project)
+	// vs an over-filtered no-match. unscoped guards an empty-project oversight user.
+	_render_empty() {
+		if (!this.data.unscoped && (this.data.projects || []).length === 0) {
+			const $e = $('<div class="fc-empty fc-empty-scope"></div>').appendTo(this.$grid);
+			$('<div class="fc-empty-title"></div>')
+				.text(__("You have no fleet project assigned"))
+				.appendTo($e);
+			$('<div class="fc-empty-hint text-muted"></div>')
+				.text(__("Contact your Fleet Manager to be granted a project."))
+				.appendTo($e);
+			return;
+		}
+		$('<div class="fc-empty text-muted"></div>')
+			.text(__("No vehicles match the current filters."))
+			.appendTo(this.$grid);
 	}
 
 	_render_card(v) {

@@ -584,6 +584,7 @@ Consumption (kWh / m³),الاستهلاك (كيلوواط ساعي / متر م�
 Consumption period in YYYY-MM format (e.g. 2026-05).,فترة الاستهلاك بصيغة YYYY-MM (مثال: 2026-05).
 Contact,جهة الاتصال
 Contact Person,الشخص المسؤول
+Contact your Fleet Manager to be granted a project.,تواصل مع مدير الأسطول لمنحك مشروعًا.
 Contact your system administrator to request access.,تواصل مع مسؤول النظام لطلب الصلاحية.
 Contract Document,وثيقة العقد
 Contract End,نهاية العقد
@@ -1434,6 +1435,7 @@ Linked Payment Entry,قيد الدفع المرتبط
 Linked Safety Inspection Report,تقرير فحص السلامة المرتبط
 Litres,اللترات
 Litres cannot be negative.,لا يمكن أن تكون اللترات سالبة.
+Live Occupancy,الإشغال المباشر
 Live Queue,الطابور الحيّ
 Live View + Playback,بث مباشر + إعادة تشغيل
 Live View Only,بث مباشر فقط
@@ -1532,6 +1534,7 @@ Middle,وسطي
 Migrated From,تم ترحيله من
 Min Occupancy %,أدنى نسبة إشغال
 Minutes a handover one-time password stays valid before it expires.,عدد الدقائق التي يبقى فيها رمز التحقق للتسليم صالحاً قبل انتهاء صلاحيته.
+Mirrors the building's supervisor so notifications can target the specific facility owner.,يعكس مشرف المبنى لتوجيه الإشعارات إلى مالك المنشأة المحدد.
 Missed,فائت
 Missed Cleaning,تنظيف مفقود
 Missed Cleaning Logs,سجلات التنظيف الفائتة
@@ -2981,6 +2984,7 @@ Year,السنة
 Yes,نعم
 You can't check out at or before your check-in time. Try again in a moment.,لا يمكنك تسجيل المغادرة في وقت تسجيل الحضور أو قبله. حاول مرة أخرى بعد قليل.
 You cannot approve or pay a Payment Request you raised; a different Finance approver is required.,لا يمكنك الموافقة أو الدفع لطلب دفع أنشأته؛ يجب أن يوافق عليه معتمد مالي مختلف.
+You have no fleet project assigned,لا يوجد مشروع أسطول مُسنَد إليك
 You may only handle boarding for your own trips.,لا يمكنك إدارة الصعود إلا لرحلاتك الخاصة.
 Your Name (Optional),اسمك (اختياري)
 Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.

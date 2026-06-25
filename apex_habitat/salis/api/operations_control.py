@@ -22,13 +22,15 @@ from apex_habitat.salis.api.dispatch_board import _permitted_projects
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 
 
-def _empty(offices=None, projects=None):
+def _empty(offices=None, projects=None, unscoped=False):
     return {
         "vehicles": [],
         "summary": {"total": 0, "by_status": {s: 0 for s in VEHICLE_STATUSES}, "open_incidents": 0},
         "offices": offices or [],
         "projects": projects or [],
         "statuses": VEHICLE_STATUSES,
+        # Lets the client tell a scoped-but-no-project gap apart from an empty filter.
+        "unscoped": unscoped,
     }
 
 
@@ -49,7 +51,7 @@ def get_fleet(status=None, rental_office=None, project=None, search=None):
         else list(projects or [])
     )
     if not unscoped and not projects:
-        return _empty(offices, proj_opts)
+        return _empty(offices, proj_opts, unscoped)
 
     filters = {}
     if not unscoped:
@@ -105,7 +107,14 @@ def get_fleet(status=None, rental_office=None, project=None, search=None):
         if v.status in summary["by_status"]:
             summary["by_status"][v.status] += 1
 
-    return {"vehicles": vehicles, "summary": summary, "offices": offices, "projects": proj_opts, "statuses": VEHICLE_STATUSES}
+    return {
+        "vehicles": vehicles,
+        "summary": summary,
+        "offices": offices,
+        "projects": proj_opts,
+        "statuses": VEHICLE_STATUSES,
+        "unscoped": unscoped,
+    }
 
 
 @frappe.whitelist()

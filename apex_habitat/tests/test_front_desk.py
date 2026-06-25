@@ -3,9 +3,16 @@
 available + room ready) and quick_check_in creates+submits a real Accommodation
 Assignment through the existing controller (bed turns red/occupied)."""
 
+from unittest.mock import patch
+
 import frappe
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
-from apex_habitat.habitat.api.front_desk import get_building_grid, quick_check_in
+from apex_habitat.habitat import permissions as P
+from apex_habitat.habitat.api.front_desk import (
+    get_building_grid,
+    list_supervisor_buildings,
+    quick_check_in,
+)
 
 
 def _h(n=4):
@@ -63,3 +70,79 @@ class TestFrontDesk(ApexHabitatTestCase):
         grid = get_building_grid(self.building)
         b = _find_bed(grid, self.bed)
         self.assertEqual(b["bed_color"], "amber", "available bed in a not-ready room is amber")
+
+
+def _make_building(company, cc, status="Active"):
+    site = frappe.get_doc({"doctype": "Accommodation Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+    return frappe.get_doc({"doctype": "Accommodation Building", "building_name": "B " + _h(),
+                           "site": site.name, "total_capacity": 4, "company": company,
+                           "status": status, "default_cost_center": cc}).insert(ignore_permissions=True).name
+
+
+def _make_bed(building, status="Available", readiness="Ready"):
+    room = frappe.get_doc({"doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+                           "building": building, "room_number": "R" + _h(),
+                           "bed_capacity": 2, "readiness_status": readiness}).insert(ignore_permissions=True).name
+    return frappe.get_doc({"doctype": "Accommodation Bed", "naming_series": "BED-.####",
+                           "room": room, "building": building, "bed_code": "B" + _h(),
+                           "status": status}).insert(ignore_permissions=True).name
+
+
+class TestSupervisorBuildings(ApexHabitatTestCase):
+    """T-448: list_supervisor_buildings — scope contract + server-computed bed mix."""
+
+    def setUp(self):
+        self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({
+            "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
+            "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
+        self.cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
+        # Building A: one green (available+ready) + one red (occupied) bed.
+        self.b_a = _make_building(self.company, self.cc)
+        _make_bed(self.b_a, status="Available", readiness="Ready")
+        _make_bed(self.b_a, status="Occupied", readiness="Ready")
+        # Building B: one amber (available + not-ready) bed only.
+        self.b_b = _make_building(self.company, self.cc)
+        _make_bed(self.b_b, status="Available", readiness="Needs Cleaning")
+
+    def _row(self, rows, building):
+        return next((r for r in rows if r["building"] == building), None)
+
+    def test_unscoped_user_sees_all_buildings_with_correct_mix(self):
+        with patch.object(P, "_building_is_unscoped", return_value=True):
+            rows = list_supervisor_buildings()
+        names = {r["building"] for r in rows}
+        # Unscoped role sees every Active building (incl. both test buildings).
+        self.assertIn(self.b_a, names)
+        self.assertIn(self.b_b, names)
+
+        a = self._row(rows, self.b_a)
+        self.assertEqual(a["total_beds"], 2)
+        self.assertEqual(a["available"], 1)
+        self.assertEqual(a["occupied"], 1)
+        self.assertEqual(a["blocked"], 0)
+        self.assertEqual(a["occupancy_pct"], 50)
+
+        b = self._row(rows, self.b_b)
+        self.assertEqual(b["blocked"], 1, "available bed in a not-ready room counts as blocked")
+        self.assertEqual(b["occupied"], 0)
+        self.assertEqual(b["occupancy_pct"], 0)
+
+    def test_one_building_scoped_user_sees_exactly_that_one(self):
+        with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
+            P, "_allowed_buildings", return_value=[self.b_a]
+        ):
+            rows = list_supervisor_buildings()
+        self.assertEqual([r["building"] for r in rows], [self.b_a])
+        self.assertEqual(rows[0]["total_beds"], 2)
+
+    def test_zero_building_scoped_user_sees_empty(self):
+        with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
+            P, "_allowed_buildings", return_value=[]
+        ):
+            self.assertEqual(list_supervisor_buildings(), [])
+
+    def test_rows_sorted_by_title(self):
+        with patch.object(P, "_building_is_unscoped", return_value=True):
+            rows = list_supervisor_buildings()
+        titles = [r["building_title"] for r in rows]
+        self.assertEqual(titles, sorted(titles))
