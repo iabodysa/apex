@@ -73,6 +73,21 @@
 .fc-grid-table { display: block; }
 .fc-empty { padding: 40px; text-align: center; width: 100%; }
 
+/* Failure state with Retry, shown when get_fleet / get_vehicle_detail errors or returns no payload. */
+.fc-error {
+	width: 100%;
+	padding: 24px;
+	text-align: center;
+	border: 1px solid var(--red-300, #f5b7b1);
+	border-radius: var(--border-radius-md, 8px);
+	background: var(--red-50, #fdedec);
+}
+.fc-error-msg {
+	color: var(--red-600, #c0392b);
+	margin-block-end: 12px;
+	font-size: 13px;
+}
+
 /* [#9r01s9] */
 .fc-card {
 	background: var(--card-bg, #fff);

@@ -1,13 +1,46 @@
 /* [#pt9jmh] */
 
+/* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
+   Growth Green / Deep Forest / Sand) so this desk page reads identically to the
+   Vue portal instead of the default desk chrome. Scoped to .sm-map so it never
+   leaks into the surrounding desk shell. */
 .sm-map {
-	padding: 8px 4px 32px;
+	--c-primary: #00844e;
+	--c-ink: #072b1a;
+	--c-ink-soft: #355040;
+	--c-surface: #f8f5ee;
+	--c-surface-2: #ffffff;
+	--c-muted: #6f7e76;
+	--c-border: #ddd5c2;
+	--c-border-strong: #cabfa3;
+	--c-success: #00844e;
+	--c-success-bg: #d9f0e3;
+	--c-warning: #c9851f;
+	--c-warning-bg: #f7ead2;
+	--c-danger: #c0392b;
+	--c-danger-bg: #f6dcd8;
+
+	--radius-sm: 8px;
+	--radius: 12px;
+	--shadow: 0 1px 2px rgba(7, 43, 26, 0.04);
+	--shadow-lg: 0 10px 30px rgba(7, 43, 26, 0.1);
+
+	--font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
+	--fw-heading: 800;
+	--fw-semibold: 600;
+
+	padding-block: 8px 32px;
+	padding-inline: 4px;
+	font-family: var(--font);
+	color: var(--c-ink);
 }
 
 .sm-empty {
-	padding: 48px 16px;
+	padding-block: 48px;
+	padding-inline: 16px;
 	text-align: center;
 	font-size: 15px;
+	color: var(--c-muted);
 }
 
 .sm-summary {
@@ -17,27 +50,31 @@
 	gap: 12px;
 	margin-bottom: 12px;
 	padding-bottom: 8px;
-	border-bottom: 1px solid var(--border-color, #d1d8dd);
+	border-bottom: 1px solid var(--c-border);
 }
 
 .sm-summary-title {
-	font-size: 18px;
-	font-weight: 600;
+	font-size: 20px;
+	font-weight: var(--fw-heading);
+	letter-spacing: -0.01em;
+	color: var(--c-ink);
 }
 
 .sm-summary-counts {
-	color: var(--text-muted, #74808b);
+	color: var(--c-muted);
 	font-size: 13px;
+	font-weight: var(--fw-semibold);
 }
 
 .sm-damage-banner {
-	background: #fff6e0;
-	border: 1px solid #f5a623;
-	color: #a96a00;
-	border-radius: 6px;
-	padding: 8px 12px;
+	background: var(--c-warning-bg);
+	border: 1px solid var(--c-warning);
+	color: var(--c-warning);
+	border-radius: var(--radius-sm);
+	padding-block: 8px;
+	padding-inline: 12px;
 	font-size: 13px;
-	font-weight: 500;
+	font-weight: var(--fw-semibold);
 	margin-bottom: 16px;
 }
 
@@ -47,10 +84,10 @@
 
 .sm-floor-header {
 	font-size: 14px;
-	font-weight: 600;
+	font-weight: var(--fw-semibold);
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
-	color: var(--text-muted, #74808b);
+	color: var(--c-muted);
 	margin-bottom: 10px;
 }
 
@@ -62,21 +99,24 @@
 
 /* [#i4lswp] */
 .sm-room {
-	border-radius: 8px;
-	padding: 14px 12px;
+	border-radius: var(--radius);
+	padding-block: 14px;
+	padding-inline: 12px;
 	min-height: 86px;
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
 	justify-content: space-between;
 	cursor: pointer;
-	border: 2px solid transparent;
+	border: 1px solid var(--c-border);
+	background: var(--c-surface-2);
+	box-shadow: var(--shadow);
 	user-select: none;
 	transition: transform 0.05s ease-in-out;
 }
 
 .sm-room:focus {
-	outline: 3px solid var(--primary, #2490ef);
+	outline: 3px solid var(--c-primary);
 	outline-offset: 2px;
 }
 
@@ -93,7 +133,7 @@
 	font-size: 11px;
 	text-transform: uppercase;
 	letter-spacing: 0.03em;
-	font-weight: 600;
+	font-weight: var(--fw-semibold);
 }
 
 .sm-room-badge--ok {
@@ -102,27 +142,28 @@
 
 /* [#t9fwi5] */
 .sm-room--red {
-	background: #fde8e8;
-	border-color: #d93025;
-	color: #b71c1c;
+	background: var(--c-danger-bg);
+	border-color: var(--c-danger);
+	color: var(--c-danger);
 }
 
 .sm-room--amber {
-	background: #fff6e0;
-	border-color: #f5a623;
-	color: #a96a00;
+	background: var(--c-warning-bg);
+	border-color: var(--c-warning);
+	color: var(--c-warning);
 }
 
 .sm-room--green {
-	background: #e6f4ea;
-	border-color: #34a853;
-	color: #1e7e34;
+	background: var(--c-success-bg);
+	border-color: var(--c-success);
+	color: var(--c-success);
 }
 
 /* [#j7hu5w] */
 .sm-zone {
-	border-radius: 8px;
-	padding: 14px 12px;
+	border-radius: var(--radius);
+	padding-block: 14px;
+	padding-inline: 12px;
 	min-height: 86px;
 	display: flex;
 	flex-direction: column;
@@ -130,15 +171,15 @@
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
-	border: 2px dashed var(--text-muted, #74808b);
-	background: var(--control-bg, #f4f5f6);
-	color: var(--text-muted, #74808b);
+	border: 2px dashed var(--c-border-strong);
+	background: var(--c-surface);
+	color: var(--c-muted);
 	user-select: none;
 	transition: transform 0.05s ease-in-out;
 }
 
 .sm-zone:focus {
-	outline: 3px solid var(--primary, #2490ef);
+	outline: 3px solid var(--c-primary);
 	outline-offset: 2px;
 }
 
@@ -153,7 +194,7 @@
 
 .sm-zone-label {
 	font-size: 12px;
-	font-weight: 600;
+	font-weight: var(--fw-semibold);
 	text-transform: uppercase;
 	letter-spacing: 0.03em;
 }
@@ -161,13 +202,13 @@
 /* [#9889xv] */
 @keyframes sm-pulse-anim {
 	0% {
-		box-shadow: 0 0 0 0 rgba(217, 48, 37, 0.45);
+		box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.45);
 	}
 	70% {
-		box-shadow: 0 0 0 10px rgba(217, 48, 37, 0);
+		box-shadow: 0 0 0 10px rgba(192, 57, 43, 0);
 	}
 	100% {
-		box-shadow: 0 0 0 0 rgba(217, 48, 37, 0);
+		box-shadow: 0 0 0 0 rgba(192, 57, 43, 0);
 	}
 }
 
@@ -181,13 +222,13 @@
 
 @keyframes sm-pulse-amber {
 	0% {
-		box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.45);
+		box-shadow: 0 0 0 0 rgba(201, 133, 31, 0.45);
 	}
 	70% {
-		box-shadow: 0 0 0 10px rgba(245, 166, 35, 0);
+		box-shadow: 0 0 0 10px rgba(201, 133, 31, 0);
 	}
 	100% {
-		box-shadow: 0 0 0 0 rgba(245, 166, 35, 0);
+		box-shadow: 0 0 0 0 rgba(201, 133, 31, 0);
 	}
 }
 
@@ -199,13 +240,13 @@
 
 /* [#q845gc] */
 .sm-skeleton {
-	padding: 8px 0 4px;
+	padding-block: 8px 4px;
 }
 
 .sm-skeleton-line {
 	height: 18px;
-	border-radius: 6px;
-	background: var(--control-bg, #f4f5f6);
+	border-radius: var(--radius-sm);
+	background: var(--c-surface);
 	margin-bottom: 16px;
 }
 
@@ -222,8 +263,8 @@
 
 .sm-skeleton-tile {
 	min-height: 86px;
-	border-radius: 8px;
-	background: var(--control-bg, #f4f5f6);
+	border-radius: var(--radius);
+	background: var(--c-surface);
 }
 
 .sm-skeleton-line,
@@ -243,14 +284,23 @@
 
 /* [#15p7yx] */
 .sm-error {
-	padding: 40px 16px;
+	padding-block: 40px;
+	padding-inline: 16px;
 	text-align: center;
 }
 
 .sm-error-msg {
-	color: var(--text-muted, #74808b);
+	color: var(--c-muted);
 	font-size: 15px;
 	margin-bottom: 16px;
+}
+
+.sm-map .sm-error-retry {
+	border-radius: var(--radius-sm);
+	border: 1px solid var(--c-border-strong);
+	background: var(--c-primary);
+	color: #ffffff;
+	font-weight: var(--fw-semibold);
 }
 
 @media (prefers-reduced-motion: reduce) {

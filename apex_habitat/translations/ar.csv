@@ -600,6 +600,7 @@ Cost,التكلفة
 Cost Allocation,توزيع التكلفة
 Cost Attribution,عزو التكلفة
 Cost Bearing (%),نسبة تحمّل التكلفة (٪)
+Cost Bleed by Building,هدر التكلفة حسب المبنى
 Cost Bleeding (SAR),هدر التكلفة (ريال)
 Cost Center,مركز التكلفة
 Cost Center is required. Please set it or configure a default Cost Center on Building {0}.,مركز التكلفة مطلوب. يُرجى تعيينه أو تهيئة مركز تكلفة افتراضي على المبنى {0}.
@@ -625,6 +626,7 @@ Could not create the payment. Please try again.,تعذّر إنشاء الدفع
 Could not generate a unique worker token. Please try again.,تعذّر إنشاء رمز عامل فريد. يرجى المحاولة مجدداً.
 Could not issue the cart. Please review and try again.,تعذّر صرف السلة. يرجى المراجعة والمحاولة مجدداً.
 Could not load employee photo.,تعذّر تحميل صورة الموظف.
+Could not load fleet data. Please try again.,تعذّر تحميل بيانات الأسطول. حاول مرة أخرى.
 Could not load held custody.,تعذّر تحميل العهدة المحتفظ بها.
 Could not load pending fuel requests.,تعذّر تحميل طلبات الوقود المعلّقة.
 Could not load the approval queue,تعذّر تحميل قائمة الاعتماد
@@ -826,6 +828,7 @@ Details,التفاصيل
 Diesel,ديزل
 Digital Signature,توقيع رقمي
 Direct,مباشر
+Direct / Company,مباشر / الشركة
 Direct Allocation,تخصيص مباشر
 Discrepancy,تباين
 Discrepancy Notes,ملاحظات التباين

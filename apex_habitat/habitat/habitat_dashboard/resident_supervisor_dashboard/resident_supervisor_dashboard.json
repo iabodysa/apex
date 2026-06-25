@@ -45,6 +45,10 @@
   {
    "chart": "Scheduled Task Instances by Status",
    "width": "Full"
+  },
+  {
+   "chart": "Cost Bleed by Building",
+   "width": "Half"
   }
  ],
  "dashboard_name": "Resident Supervisor Dashboard",

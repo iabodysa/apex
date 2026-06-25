@@ -90,7 +90,11 @@ class FleetControl {
 			method: "apex_habitat.salis.api.operations_control.get_fleet",
 			args: { ...this.filters },
 			callback: (r) => {
-				if (!r || !r.message) return;
+				// A 200 with no payload is still a failure here: surface it, don't blank-swallow.
+				if (!r || !r.message) {
+					this._render_board_error(() => this.refresh());
+					return;
+				}
 				this.data = r.message;
 				this._fill_select(this.$status, this.data.statuses, this.filters.status);
 				this._fill_select(this.$office, this.data.offices, this.filters.rental_office);
@@ -98,8 +102,43 @@ class FleetControl {
 				this._render_summary();
 				this._render();
 			},
+			error: (r) => this._render_board_error(() => this.refresh(), r),
 			always: () => this._set_loading(false),
 		});
+	}
+
+	// Render an error panel (with the server message) + Retry into a target element.
+	_render_error($target, retry, r) {
+		$target.empty();
+		const $panel = $('<div class="fc-error"></div>').appendTo($target);
+		$('<div class="fc-error-msg"></div>').text(this._error_text(r)).appendTo($panel);
+		const $btn = $('<button class="btn btn-sm btn-default fc-error-retry"></button>')
+			.text(__("Retry"))
+			.appendTo($panel);
+		$btn.on("click", () => retry());
+	}
+
+	// Best-effort human message from a failed frappe.call response. Rendered via .text() so it is auto-escaped.
+	_error_text(r) {
+		const raw = r && r._server_messages;
+		if (raw) {
+			try {
+				const first = JSON.parse(raw)[0];
+				const obj = typeof first === "string" ? JSON.parse(first) : first;
+				const msg = obj && obj.message ? obj.message : first;
+				if (msg) return String(msg).replace(/<[^>]*>/g, "").trim();
+			} catch (e) {
+				// fall through to the generic message
+			}
+		}
+		return __("Could not load fleet data. Please try again.");
+	}
+
+	// Full-board error state: clears the summary skeleton/chips too.
+	_render_board_error(retry, r) {
+		this.$summary.empty();
+		this.$grid.empty();
+		this._render_error(this.$grid, retry, r);
 	}
 
 	// Disable Refresh + show the top progress bar while a fetch is in flight (no blank screen, no double-click).
@@ -208,13 +247,21 @@ class FleetControl {
 			});
 			$a.appendTo($head);
 		});
-		const $body = $('<div class="fc-drawer-body text-muted"></div>').text(__("Loading…")).appendTo(this.$drawer);
+		const $body = $('<div class="fc-drawer-body"></div>').appendTo(this.$drawer);
+		this._load_detail(v, $body);
+	}
 
+	// Fetch the drawer detail; surface failures (incl. empty payload) with a Retry instead of leaving 'Loading…'.
+	_load_detail(v, $body) {
+		$body.empty().addClass("text-muted").text(__("Loading…"));
 		frappe.call({
 			method: "apex_habitat.salis.api.operations_control.get_vehicle_detail",
 			args: { vehicle: v.name },
 			callback: (r) => {
-				if (!r || !r.message) return;
+				if (!r || !r.message) {
+					this._render_error($body.removeClass("text-muted"), () => this._load_detail(v, $body));
+					return;
+				}
 				$body.empty().removeClass("text-muted");
 				this._detail_fields($body, r.message.vehicle);
 				this._detail_list($body, __("Recent Incidents"), r.message.incidents,
@@ -222,6 +269,8 @@ class FleetControl {
 				this._detail_list($body, __("Recent Assignments"), r.message.assignments,
 					(x) => `${x.start_date || ""} → ${x.end_date || __("open")} · ${x.driver || ""}`);
 			},
+			error: (r) =>
+				this._render_error($body.removeClass("text-muted"), () => this._load_detail(v, $body), r),
 		});
 	}
 

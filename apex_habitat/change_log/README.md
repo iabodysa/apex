@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+- [1.55.21](v1/v1_55_21.md) — A restyled safety map page, a resilient fleet board, a manager arrival-summary endpoint, broader safety-round reminders, and a cost-bleed-by-building chart.
 - [1.55.20](v1/v1_55_20.md) — Clearer salary-deduction help text, an internal alert-helper consolidation, a Rooms Needing Readiness metric card, a refined safety evidence-photo gate, and an expected-checkout reminder.
 - [1.55.19](v1/v1_55_19.md) — A printable safety round report, a worker-write security contract, an operations-control loading affordance, and a secret-scan comment fix.
 - [1.55.18](v1/v1_55_18.md) — A new home landing workspace, Arabic display fixes for the building dashboard and driver portal, custody damage-assessment alerts, and a new overdue-checkouts metric.

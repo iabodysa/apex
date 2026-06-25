@@ -58,6 +58,30 @@ def _notify_role_system(role: str, subject: str, message: str | None = None) -> 
         )
 
 
+def _notify_user_system(user: str | None, subject: str, message: str | None = None) -> None:
+    """Post an in-app (system) Notification Log of type Alert to ONE specific user.
+
+    Single-recipient sibling of _notify_role_system — used to reach the building's
+    own responsible supervisor (not the whole role). Falsy/disabled user = no-op.
+    """
+    if not user or not frappe.db.get_value("User", user, "enabled"):
+        return
+    try:
+        frappe.get_doc({
+            "doctype": "Notification Log",
+            "for_user": user,
+            "type": "Alert",
+            "subject": subject[:140],
+            "email_content": message or subject,
+        }).insert(ignore_permissions=True)  # audit-ok — scheduler-run system alert
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Safety user notify failed ({user})"[:140],
+        )
+
+
 def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_token: str) -> str | None:
     """Insert an Operations Alert for a safety obligation breach (idempotent).
 
@@ -1019,8 +1043,10 @@ def daily_safety_task_compliance_scan() -> None:
 
     Second pass: every ACTIVE Accommodation Building (``status == "Active"``) with ZERO
     submitted Safety Rounds of ANY cadence dated within the trailing
-    ``ZERO_ROUNDS_WINDOW_DAYS`` raises an idempotent Operations Alert and notifies the
-    Safety Officer. This is broader than ``weekly_safety_coverage_gate`` (which only
+    ``ZERO_ROUNDS_WINDOW_DAYS`` raises an idempotent Operations Alert, notifies the
+    Safety Officer, posts the reminder to the building timeline, and alerts the
+    building's own Responsible Facility Supervisor. This is broader than
+    ``weekly_safety_coverage_gate`` (which only
     checks for a *Weekly*-cadence round in the current ISO week): it catches buildings
     with no safety activity whatsoever. The alert carries a ``zero-rounds::<building>``
     dedupe token so daily reruns stay idempotent.
@@ -1104,7 +1130,7 @@ def daily_safety_task_compliance_scan() -> None:
         buildings = frappe.get_all(
             "Accommodation Building",
             filters={"status": "Active"},
-            fields=["name", "building_name"],
+            fields=["name", "building_name", "responsible_facility_supervisor"],
             limit_start=start,
             limit_page_length=batch_size,
         )
@@ -1138,6 +1164,14 @@ def daily_safety_task_compliance_scan() -> None:
                 )
                 _notify_role_system(
                     "Safety Officer",
+                    subject=f"No recent safety round: {label}",
+                    message=msg,
+                )
+                # Reach the building's own responsible supervisor: timeline note +
+                # a direct system alert (the role-wide ping above may not be them).
+                _notify_operational("Accommodation Building", b.name, msg)
+                _notify_user_system(
+                    b.responsible_facility_supervisor,
                     subject=f"No recent safety round: {label}",
                     message=msg,
                 )

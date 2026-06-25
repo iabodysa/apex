@@ -262,6 +262,107 @@ def house_over_capacity(room, party_type, party, project, check_in_date=None) ->
     return {**result, "is_temporary": True, "bed_code": bed.bed_code}
 
 
+@frappe.whitelist()
+def get_arrival_summary(date=None, building=None) -> dict:
+    """Read-only arrival telemetry for a manager strip / daily ops view.
+
+    Returns, for ``date`` (default today) and an optional ``building`` scope:
+    today's housed count, a by-supplier breakdown, manifest-completion %, and the
+    over-capacity placement count. Built from a BOUNDED set of bulk queries (no
+    per-row round trips), mirroring get_building_grid. Creates and locks nothing.
+    """
+    frappe.has_permission("Accommodation Assignment", "read", throw=True)
+    if building:
+        frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+    date = date or frappe.utils.today()
+
+    filters = {"check_in_date": date, "docstatus": 1}
+    if building:
+        filters["building"] = building
+    arrivals = frappe.get_all(
+        "Accommodation Assignment",
+        filters=filters,
+        fields=["name", "bed", "party_type", "party", "is_external_supplier", "billed_to_supplier"],
+    )
+    housed_count = len(arrivals)
+
+    # Resolve each arrival's supplier in bulk: Temporary Worker -> labour_supplier,
+    # external-billed Employee -> billed_to_supplier, else Direct.
+    tw_parties = [a.party for a in arrivals if a.party_type == PARTY_TEMPORARY_WORKER and a.party]
+    tw_supplier = {}
+    if tw_parties:
+        for row in frappe.get_all(
+            "Temporary Worker",
+            filters={"name": ["in", list(set(tw_parties))]},
+            fields=["name", "labour_supplier"],
+        ):
+            tw_supplier[row.name] = row.labour_supplier
+
+    counts: dict[str | None, int] = {}
+    for a in arrivals:
+        if a.party_type == PARTY_TEMPORARY_WORKER:
+            sup = tw_supplier.get(a.party)
+        elif a.is_external_supplier:
+            sup = a.billed_to_supplier
+        else:
+            sup = None
+        counts[sup] = counts.get(sup, 0) + 1
+
+    sup_ids = [s for s in counts if s]
+    sup_names = {}
+    if sup_ids:
+        for row in frappe.get_all(
+            "Supplier", filters={"name": ["in", sup_ids]}, fields=["name", "supplier_name"]
+        ):
+            sup_names[row.name] = row.supplier_name
+    by_supplier = sorted(
+        (
+            {
+                "supplier": s,
+                "supplier_name": sup_names.get(s) if s else _("Direct / Company"),
+                "count": c,
+            }
+            for s, c in counts.items()
+        ),
+        key=lambda r: r["count"],
+        reverse=True,
+    )
+
+    # Over-capacity placements = today's arrivals housed in a minted is_temporary
+    # bed (house_over_capacity), counted via one bulk bed lookup.
+    bed_ids = [a.bed for a in arrivals if a.bed]
+    over_capacity_count = 0
+    if bed_ids:
+        over_capacity_count = frappe.db.count(
+            "Accommodation Bed", {"name": ["in", list(set(bed_ids))], "is_temporary": 1}
+        )
+
+    # Manifest completion needs the pre-arrival manifest source (Arrival Batch).
+    # Until that DocType lands it is unmeasurable -> report None, never fake.
+    manifest_completion_pct = None
+    manifest_expected = None
+    if frappe.db.exists("DocType", "Arrival Batch"):
+        batch_filters = {"expected_date": date}
+        if building:
+            batch_filters["building"] = building
+        expected = 0
+        for b in frappe.get_all("Arrival Batch", filters=batch_filters, fields=["expected_count"]):
+            expected += int(b.get("expected_count") or 0)
+        manifest_expected = expected
+        if expected:
+            manifest_completion_pct = round(min(housed_count, expected) / expected * 100, 1)
+
+    return {
+        "date": date,
+        "building": building,
+        "housed_count": housed_count,
+        "by_supplier": by_supplier,
+        "over_capacity_count": over_capacity_count,
+        "manifest_expected": manifest_expected,
+        "manifest_completion_pct": manifest_completion_pct,
+    }
+
+
 # [#6vab3q]
 
 
