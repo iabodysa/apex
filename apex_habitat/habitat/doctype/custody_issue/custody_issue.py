@@ -20,7 +20,28 @@ def validate(doc, method=None):
     for row in doc.items:
         if (row.qty or 0) <= 0:
             frappe.throw(_("Row {0}: Qty must be greater than zero.").format(row.idx))
+    validate_serialized_rows(doc)
     _set_expected_return_date(doc)
+
+
+def validate_serialized_rows(doc):
+    """A serialized article is one physical unit per line: it needs a serial_no
+    and qty must be 1. Shared by Custody Issue and Custody Return."""
+    articles = [row.article for row in doc.items if row.article]
+    if not articles:
+        return
+    serialized = set(frappe.get_all(
+        "Custody Article",
+        filters={"name": ["in", articles], "is_serialized": 1},
+        pluck="name",
+    ))
+    for row in doc.items:
+        if row.article not in serialized:
+            continue
+        if not (row.serial_no or "").strip():
+            frappe.throw(_("Row {0}: Serial No is required for serialized article {1}.").format(row.idx, row.article))
+        if (row.qty or 0) != 1:
+            frappe.throw(_("Row {0}: Qty must be 1 for serialized article {1}.").format(row.idx, row.article))
 
 
 def _set_expected_return_date(doc):

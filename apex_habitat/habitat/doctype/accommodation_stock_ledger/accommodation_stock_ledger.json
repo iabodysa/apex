@@ -170,6 +170,7 @@
    "label": "System"
   },
   {
+   "collapsible": 1,
    "fieldname": "sec_context",
    "fieldtype": "Section Break",
    "label": "Movement Context"
@@ -212,6 +213,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "sec_status",
    "fieldtype": "Section Break",
    "label": "Reversal Status"
@@ -249,7 +251,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-06-25 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Stock Ledger",

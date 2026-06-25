@@ -194,7 +194,7 @@ const messages = {
     },
     greeting: {
       morning: "صباح الخير",
-      afternoon: "مساء الخير",
+      afternoon: "نهارك سعيد",
       evening: "مساء الخير",
     },
     nav: {

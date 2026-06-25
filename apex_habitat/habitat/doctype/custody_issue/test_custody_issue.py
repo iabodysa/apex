@@ -57,6 +57,41 @@ class TestCustodyIssue(FrappeTestCase):
             validate(doc)
 
 
+class TestCustodyIssueSerializedRules(FrappeTestCase):
+    """A serialized article must carry a serial_no and qty==1 on every line."""
+
+    def setUp(self):
+        h = frappe.generate_hash(length=4).upper()
+        cat = frappe.db.get_value("Custody Asset Category", {}) or frappe.get_doc({
+            "doctype": "Custody Asset Category", "category_name": "Cat " + h,
+        }).insert(ignore_permissions=True).name
+        self.article = frappe.get_doc({
+            "doctype": "Custody Article", "naming_series": "ART-.####",
+            "article_name": "Serial " + h, "category": cat, "is_serialized": 1,
+        }).insert(ignore_permissions=True).name
+
+    def _issue(self, qty, serial_no):
+        return frappe.get_doc({
+            "doctype": "Custody Issue", "issue_date": "2026-06-01", "building": "QA-BLDG",
+            "items": [{"doctype": "Custody Issue Item", "article": self.article,
+                       "qty": qty, "serial_no": serial_no}],
+        })
+
+    def test_serialized_requires_serial_no(self):
+        from apex_habitat.habitat.doctype.custody_issue.custody_issue import validate
+        with self.assertRaises(frappe.ValidationError):
+            validate(self._issue(qty=1, serial_no=""))
+
+    def test_serialized_requires_qty_one(self):
+        from apex_habitat.habitat.doctype.custody_issue.custody_issue import validate
+        with self.assertRaises(frappe.ValidationError):
+            validate(self._issue(qty=2, serial_no="SN-1"))
+
+    def test_serialized_passes_with_serial_and_qty_one(self):
+        from apex_habitat.habitat.doctype.custody_issue.custody_issue import validate
+        validate(self._issue(qty=1, serial_no="SN-1"))
+
+
 ACK_NOTIFICATION = "Habitat - Custody Acknowledgment Requested"
 
 

@@ -1,0 +1,11 @@
+{
+ "doctype": "Number Card",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Buildings Over Threshold",
+ "method": "apex_habitat.habitat.api.dashboard.get_buildings_over_threshold",
+ "module": "Habitat",
+ "name": "Buildings Over Threshold",
+ "type": "Custom",
+ "modified": "2026-06-25 00:00:00.000000"
+}

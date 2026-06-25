@@ -7,6 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 
 from apex_habitat.apex_core.utils.party_link import sync_party_employee
+from apex_habitat.habitat.doctype.custody_issue.custody_issue import validate_serialized_rows
 
 
 class CustodyReturn(Document):
@@ -20,6 +21,7 @@ def validate(doc, method=None):
     for row in doc.items:
         if (row.qty or 0) <= 0:
             frappe.throw(_("Row {0}: Qty must be greater than zero.").format(row.idx))
+    validate_serialized_rows(doc)
     _validate_return_quantities(doc)
 
 

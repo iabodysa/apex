@@ -13,6 +13,26 @@ def get_compliance_percent():
 
 
 @frappe.whitelist()
+def get_buildings_over_threshold(filters=None):
+    """Count buildings whose occupancy exceeds their OWN over-capacity threshold.
+
+    Row-relative (each building's occupancy_percent vs its own
+    over_capacity_threshold_percent) — a static Document Type filter cannot
+    compare two fields, so this is a Custom Number Card. An unset/zero threshold
+    falls back to the field default (120) rather than counting as a 0% threshold.
+    """
+    frappe.has_permission("Accommodation Building", "read", throw=True)
+    row = frappe.db.sql(
+        """
+        SELECT COUNT(*)
+        FROM `tabAccommodation Building`
+        WHERE occupancy_percent > COALESCE(NULLIF(over_capacity_threshold_percent, 0), 120)
+        """
+    )
+    return int(row[0][0]) if row else 0
+
+
+@frappe.whitelist()
 def get_custody_value_in_employee_hands():
     """Value-at-risk: SAR currently held in employee custody. [T-277]
 
