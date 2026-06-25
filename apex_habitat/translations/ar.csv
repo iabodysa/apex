@@ -3027,3 +3027,12 @@ total_cost,التكلفة الإجمالية
 {0} {1} already has an active Accommodation Assignment: {2},{0} {1} لديه بالفعل إسناد سكن نشط: {2}
 {0} {1} does not exist.,{0} {1} غير موجود.
 {0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
+Acknowledged by {0},تم الإقرار بواسطة {0}
+Resolved by {0},تمت المعالجة بواسطة {0}
+Mark Ready,تعليم كجاهزة
+Room marked ready.,تم تعليم الغرفة كجاهزة.
+{0} is not a valid readiness status.,{0} ليست حالة جاهزية صالحة.
+"No active buildings are in your scope. Ask an Accommodation Manager to grant you a building permission, then reopen this report.",لا توجد مبانٍ نشطة ضمن نطاقك. اطلب من مدير الإسكان منحك صلاحية على أحد المباني، ثم أعد فتح هذا التقرير.
+Source Checkout,تسجيل المغادرة المصدر
+"This worker is not linked to a permanent Employee yet, so the worker portal is not available.",هذا العامل غير مرتبط بموظف دائم بعد، لذا بوابة العامل غير متاحة.
+"A Masar worker link can only be issued to an Employee. This worker is linked once their Iqama is issued and a permanent Employee record exists.",لا يمكن إصدار رابط عامل مسار إلا لموظف. يُربط هذا العامل بمجرد إصدار إقامته ووجود سجل موظف دائم.

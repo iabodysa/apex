@@ -263,3 +263,98 @@ class TestMasarNotifyHrIqamaExpiring(FrappeTestCase):
         fails closed (PermissionError) before any notification is considered."""
         with self.assertRaises(frappe.PermissionError):
             masar.notify_hr_iqama_expiring(token="")
+
+
+class TestMasarEmployeeOnlyDecision(FrappeTestCase):
+    """Masar is Employee-only (T-325).
+
+    Every worker surface reads Employee-keyed data; a Temporary Worker has none
+    until the daily linking engine matches their passport to a real Employee. The
+    decision is enforced at two points and both must stay closed:
+      1. minting — the token controller refuses a Temporary-Worker party, so a
+         supervisor can never hand out a dead link; and
+      2. resolving — should a temp token exist anyway (e.g. a legacy/manual row),
+         ``_resolve_worker`` rejects it with a DISTINCT, honest message rather
+         than the misleading "invalid or has been disabled", while still failing
+         closed (PermissionError — it resolves to no one).
+    """
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    def _make_temporary_worker(self, suffix):
+        """An Active Temporary Worker (passport-only, no Employee yet)."""
+        tag = f"{self._testMethodName}-{suffix}"
+        return frappe.get_doc(
+            {
+                "doctype": "Temporary Worker",
+                "worker_name": f"Temp Worker {tag}",
+                "passport_number": f"T325-{frappe.generate_hash(length=10)}",
+                "arrival_date": frappe.utils.today(),
+                "status": "Active",
+            }
+        ).insert(ignore_permissions=True)
+
+    def test_controller_refuses_to_mint_a_temporary_worker_token(self):
+        """The token controller rejects a Temporary-Worker party at save, so no
+        dead Masar link can ever be issued for a worker with no Employee."""
+        tw = self._make_temporary_worker("mint")
+        with self.assertRaises(frappe.ValidationError):
+            frappe.get_doc(
+                {
+                    "doctype": "Masar Worker Token",
+                    "party_type": "Temporary Worker",
+                    "party": tw.name,
+                    "enabled": 1,
+                }
+            ).insert(ignore_permissions=True)
+        # Non-vacuous: the guard, not a missing party, blocked it — no row landed.
+        self.assertFalse(
+            frappe.db.exists("Masar Worker Token", {"party_type": "Temporary Worker", "party": tw.name}),
+            "no Temporary-Worker token row may be created",
+        )
+
+    def test_temporary_worker_token_resolves_with_a_distinct_message(self):
+        """A Temporary-Worker token (forced in below the controller, as a legacy
+        row would be) fails closed with the DISTINCT not-linked-yet message — not
+        the generic invalid/disabled one — and resolves to no employee."""
+        tw = self._make_temporary_worker("resolve")
+        forced_token = frappe.generate_hash(length=48)
+        # db_insert bypasses the controller guard + autoname, mirroring a row that
+        # predates the Employee-only enforcement; party_type is the temp worker and
+        # employee is empty exactly as sync_party_employee leaves it.
+        doc = frappe.get_doc(
+            {
+                "doctype": "Masar Worker Token",
+                "name": tw.name,
+                "party_type": "Temporary Worker",
+                "party": tw.name,
+                "employee": None,
+                "enabled": 1,
+                "token": forced_token,
+            }
+        )
+        doc.db_insert()
+        # Non-vacuous: the row genuinely exists, is enabled, and has no employee.
+        row = frappe.db.get_value(
+            "Masar Worker Token",
+            {"token": forced_token},
+            ["party_type", "employee", "enabled"],
+            as_dict=True,
+        )
+        self.assertEqual(row.party_type, "Temporary Worker")
+        self.assertFalse(row.employee, "a temp-worker token carries no employee")
+        self.assertEqual(row.enabled, 1)
+
+        with self.assertRaises(frappe.PermissionError) as ctx:
+            masar._resolve_worker(forced_token)
+        # The message is the honest temp-worker one, distinct from invalid/disabled.
+        self.assertIn("not linked to a permanent Employee", str(ctx.exception))
+        self.assertNotIn("invalid or has been disabled", str(ctx.exception))
+
+        # And the public guest endpoint fails closed the same way (no data leak).
+        with self.assertRaises(frappe.PermissionError):
+            masar.get_worker_context(token=forced_token)

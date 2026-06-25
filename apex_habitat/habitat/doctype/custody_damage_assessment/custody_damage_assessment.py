@@ -78,6 +78,18 @@ def on_submit(doc, method=None):
         # [#rbyvmi]
         frappe.db.set_value("Custody Damage Assessment", doc.name, "deduction_entry", add_sal.name)
 
+        # back-propagate the deduction onto the originating checkout so its
+        # Financials tab reflects the posted Additional Salary
+        if doc.source_checkout:
+            frappe.db.set_value(
+                "Accommodation Checkout",
+                doc.source_checkout,
+                {
+                    "linked_additional_salary": add_sal.name,
+                    "damage_deduction_amount": add_sal.amount,
+                },
+            )
+
         logger.info(
             f"custody_damage_assessment.on_submit: Draft Additional Salary {add_sal.name} "
             f"created for assessment {doc.name}."

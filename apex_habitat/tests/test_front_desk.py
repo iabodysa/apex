@@ -12,6 +12,7 @@ from apex_habitat.habitat.api.front_desk import (
     get_building_grid,
     list_supervisor_buildings,
     quick_check_in,
+    set_room_readiness,
 )
 
 
@@ -146,3 +147,59 @@ class TestSupervisorBuildings(ApexHabitatTestCase):
             rows = list_supervisor_buildings()
         titles = [r["building_title"] for r in rows]
         self.assertEqual(titles, sorted(titles))
+
+
+class TestSetRoomReadiness(ApexHabitatTestCase):
+    """T-453: set_room_readiness flips Accommodation Room.readiness_status, the
+    board reflects it, and a read-only role is refused the write."""
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+        self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({
+            "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
+            "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
+        self.cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
+        self.building = _make_building(self.company, self.cc)
+        self.room = frappe.get_doc({"doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+                                    "building": self.building, "room_number": "R" + _h(),
+                                    "bed_capacity": 2, "readiness_status": "Needs Cleaning"}).insert(ignore_permissions=True).name
+        self.bed = frappe.get_doc({"doctype": "Accommodation Bed", "naming_series": "BED-.####",
+                                   "room": self.room, "building": self.building, "bed_code": "B" + _h(),
+                                   "status": "Available"}).insert(ignore_permissions=True).name
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    def _user_with_roles(self, email, roles):
+        if not frappe.db.exists("User", email):
+            frappe.get_doc({
+                "doctype": "User", "email": email, "first_name": email.split("@")[0],
+                "roles": [{"role": r} for r in roles],
+            }).insert(ignore_permissions=True)
+        return email
+
+    def test_flip_to_ready_turns_bed_green_on_board(self):
+        # Not-ready room -> the available bed is amber on the board.
+        b = _find_bed(get_building_grid(self.building), self.bed)
+        self.assertEqual(b["bed_color"], "amber")
+
+        out = set_room_readiness(room=self.room, status="Ready")
+        self.assertEqual(out["readiness_status"], "Ready")
+        self.assertEqual(frappe.db.get_value("Accommodation Room", self.room, "readiness_status"), "Ready")
+
+        # Board now reflects the change: the same bed is green.
+        b2 = _find_bed(get_building_grid(self.building), self.bed)
+        self.assertEqual(b2["bed_color"], "green", "board reflects the readiness flip")
+
+    def test_invalid_status_is_rejected(self):
+        with self.assertRaises(frappe.ValidationError):
+            set_room_readiness(room=self.room, status="Sparkling")
+
+    def test_read_only_role_is_refused(self):
+        # Resident Supervisor has read (not write) on Accommodation Room.
+        frappe.set_user(self._user_with_roles("fd-readiness-ro@test.local", ["Resident Supervisor"]))
+        try:
+            with self.assertRaises(frappe.PermissionError):
+                set_room_readiness(room=self.room, status="Ready")
+        finally:
+            frappe.set_user("Administrator")

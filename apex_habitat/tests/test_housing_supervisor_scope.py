@@ -99,6 +99,36 @@ class TestHousingSupervisorScope(FrappeTestCase):
             R._get_buildings(None)
             self.assertEqual(ga.call_args.kwargs["filters"], {"status": "Active"})
 
+    def test_report_scope_gap_returns_guidance_message(self):
+        # A scoped user with zero buildings gets an explicit message, not a blank grid.
+        with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
+            P, "_allowed_buildings", return_value=[]
+        ):
+            res = R.execute({})
+            self.assertEqual(len(res), 3)
+            columns, data, message = res
+            self.assertEqual(data, [])
+            self.assertTrue(columns)
+            self.assertTrue(message)
+
+    def test_report_empty_estate_has_no_scope_message(self):
+        # An unscoped role with zero active buildings is a normal empty result, not a gap.
+        with patch.object(P, "_building_is_unscoped", return_value=True), patch.object(
+            R.frappe, "get_all", return_value=[]
+        ):
+            res = R.execute({})
+            self.assertEqual(len(res), 2)
+            self.assertEqual(res[1], [])
+
+    def test_report_out_of_scope_filter_is_not_a_gap(self):
+        # An explicit out-of-scope building filter is a normal empty filter, no guidance.
+        with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
+            P, "_allowed_buildings", return_value=["BLDG-1"]
+        ):
+            res = R.execute({"building": "BLDG-9"})
+            self.assertEqual(len(res), 2)
+            self.assertEqual(res[1], [])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -348,6 +348,34 @@ def get_employee_card(employee):
 
 
 @frappe.whitelist(methods=["POST"])
+def set_room_readiness(room, status):
+    """Set Accommodation Room.readiness_status from the Front Desk board.
+
+    A plain field write — NO posting, locking, or ledger logic. The Select value
+    is validated against the field's own options (read from meta, never a
+    hand-kept list) so it can't drift from the DocType. Permission is the
+    document-level ``write`` grant on Accommodation Room (checked below; a
+    read-only role such as Resident Supervisor is refused).
+
+    Args:
+        room: Accommodation Room docname.
+        status: one of the readiness_status Select options.
+
+    Returns:
+        dict: ``{"room": <docname>, "readiness_status": <status>}``.
+    """
+    frappe.has_permission("Accommodation Room", "write", doc=room, throw=True)
+
+    options = frappe.get_meta("Accommodation Room").get_field("readiness_status").options or ""
+    valid = [o for o in (opt.strip() for opt in options.split("\n")) if o]
+    if status not in valid:
+        frappe.throw(_("{0} is not a valid readiness status.").format(status))
+
+    frappe.db.set_value("Accommodation Room", room, "readiness_status", status)
+    return {"room": room, "readiness_status": status}
+
+
+@frappe.whitelist(methods=["POST"])
 def quick_check_in(bed, employee=None, project=None, check_in_date=None,
                    cost_center=None, assignment_type="New Assignment",
                    room_condition_snapshot=None, party_type=None, party=None):

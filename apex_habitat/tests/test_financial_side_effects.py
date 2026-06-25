@@ -2,6 +2,8 @@
 # [#j03s5a]
 
 import frappe
+from frappe.utils import flt
+
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
 
 
@@ -166,6 +168,72 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         # [#4bu0gp]
         doc.reload()
         self.assertIsNone(doc.deduction_entry, "Additional Salary deduction should not be generated without configured deduction Salary Component.")
+
+    def test_damage_deduction_back_propagates_to_source_checkout(self):
+        # back-link from the assessment to its checkout must post the deduction
+        # (Additional Salary + amount) onto the checkout's Financials tab
+        comp_name = "Test Deduction Component"
+        if not frappe.db.exists("Salary Component", comp_name):
+            frappe.get_doc({
+                "doctype": "Salary Component",
+                "salary_component": comp_name,
+                "type": "Deduction",
+            }).insert(ignore_permissions=True)
+
+        settings = frappe.get_single("Habitat Settings")
+        settings.enable_damage_deduction = 1
+        settings.max_damage_deduction_per_checkout_sar = 500
+        settings.damage_salary_component = comp_name
+        settings.save()
+
+        # draft checkout is the back-write target; QA assignment + ignore_links
+        # keeps validate's early-return path (no full assignment chain needed)
+        checkout = frappe.get_doc({
+            "doctype": "Accommodation Checkout",
+            "naming_series": "ACC-CHKOUT-.YYYY.-.####",
+            "assignment": "ACC-ASGN-QA",
+            "checkout_date": "2026-05-21",
+            "checkout_reason": "End of Contract",
+            "employee": self.employee,
+        })
+        checkout.insert(ignore_permissions=True, ignore_links=True)
+
+        assessment = frappe.get_doc({
+            "doctype": "Custody Damage Assessment",
+            "employee": self.employee,
+            "assessment_date": "2026-05-21",
+            "building": self.building.name,
+            "source_checkout": checkout.name,
+            "items": [
+                {
+                    "article": self.article,
+                    "damage_description": "Broken Chair",
+                    "estimated_replacement_cost_sar": 175.0,
+                }
+            ],
+        })
+        assessment.insert(ignore_permissions=True)
+        assessment.submit()
+        assessment.reload()
+
+        self.assertTrue(
+            assessment.deduction_entry,
+            "Additional Salary deduction should be generated when fully configured.",
+        )
+
+        checkout.reload()
+        self.assertEqual(
+            checkout.linked_additional_salary,
+            assessment.deduction_entry,
+            "Checkout must link the Additional Salary posted by its damage assessment.",
+        )
+        self.assertEqual(
+            flt(checkout.damage_deduction_amount),
+            175.0,
+            "Checkout must reflect the posted damage deduction amount.",
+        )
+
+        frappe.delete_doc("Accommodation Checkout", checkout.name, force=True, ignore_permissions=True)
 
     def test_custody_damage_no_additional_salary_without_explicit_setting(self):
         # [#paxi0y]

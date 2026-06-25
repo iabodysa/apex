@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+- [1.55.23](v1/v1_55_23.md) — Acknowledge/resolve actions on the operations alert queue, one-tap room readiness on the bed board, clearer guidance when no buildings are in scope, checkout that reflects its damage deduction, and Employee-only Masar worker links.
 - [1.55.22](v1/v1_55_22.md) — Clearer fleet-control empty states, checkout reminders that reach the building supervisor, truthful fleet incident panels, a supervisor buildings-portfolio endpoint, and a Housing live-occupancy metric row.
 - [1.55.21](v1/v1_55_21.md) — A restyled safety map page, a resilient fleet board, a manager arrival-summary endpoint, broader safety-round reminders, and a cost-bleed-by-building chart.
 - [1.55.20](v1/v1_55_20.md) — Clearer salary-deduction help text, an internal alert-helper consolidation, a Rooms Needing Readiness metric card, a refined safety evidence-photo gate, and an expected-checkout reminder.

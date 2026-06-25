@@ -337,16 +337,30 @@ def _resolve_worker(token):
     funnels through here, so data access is bound to the token's employee and can
     never be widened by a client-supplied id. An unknown, blank, or disabled
     token is rejected with a PermissionError (not a soft empty) so a bad link
-    fails closed."""
+    fails closed.
+
+    Masar is Employee-only by design (T-325): every worker surface reads
+    Employee-keyed HR/housing/custody/transport data, and a Temporary Worker has
+    none until the daily linking engine matches their passport to a real Employee.
+    A Temporary-Worker token therefore has no ``employee`` and is rejected here
+    with a DISTINCT, honest message (the link is valid but not active yet), not
+    the misleading invalid/disabled one."""
     token = (token or "").strip()
     if not token:
         frappe.throw(_("A worker link token is required."), frappe.PermissionError)
     row = frappe.db.get_value(
         "Masar Worker Token",
         {"token": token, "enabled": 1},
-        ["employee", "employee_name"],
+        ["employee", "employee_name", "party_type"],
         as_dict=True,
     )
+    # [#t325tw] A linkable token that simply isn't an Employee yet: explain that,
+    # don't cry "invalid" — the worker becomes reachable once HR links the Iqama.
+    if row and not row.get("employee") and row.get("party_type") == "Temporary Worker":
+        frappe.throw(
+            _("This worker is not linked to a permanent Employee yet, so the worker portal is not available."),
+            frappe.PermissionError,
+        )
     if not row or not row.get("employee"):
         frappe.throw(_("This worker link is invalid or has been disabled."), frappe.PermissionError)
     # [#58u5n5]

@@ -150,6 +150,8 @@ def on_submit(doc, method=None):
                 "employee": doc.employee,
                 "assessment_date": doc.checkout_date,
                 "building": building,
+                # back-link so the assessment can post its deduction back onto this checkout
+                "source_checkout": doc.name,
                 "remarks": _("Auto-generated from Accommodation Checkout {0}. Review replacement costs and submit.").format(doc.name),
             })
             for item in doc.custody_return_items:

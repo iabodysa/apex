@@ -26,6 +26,7 @@
   "custody_damage_assessment_sec_system",
   "naming_series",
   "deduction_entry",
+  "source_checkout",
   "amended_from"
  ],
  "fields": [
@@ -161,6 +162,14 @@
    "read_only": 1
   },
   {
+   "fieldname": "source_checkout",
+   "fieldtype": "Link",
+   "label": "Source Checkout",
+   "options": "Accommodation Checkout",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -173,7 +182,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-09 09:00:00.000000",
+ "modified": "2026-06-25 09:28:32.969356",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Damage Assessment",

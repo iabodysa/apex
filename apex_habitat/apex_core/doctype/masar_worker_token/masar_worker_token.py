@@ -40,6 +40,17 @@ class MasarWorkerToken(Document):
     # [#pewmoc]
     def before_validate(self):
         sync_party_employee(self, require_party=True)
+        # [#t325tw] Masar is Employee-only (T-325): a Temporary Worker has no
+        # Employee-keyed data to surface, so a temp token would mint a dead link.
+        # Refuse it at source; the daily linking engine re-points the party to a
+        # real Employee (raw SQL, so it is unaffected by this guard).
+        if self.party_type == "Temporary Worker":
+            frappe.throw(
+                _(
+                    "A Masar worker link can only be issued to an Employee. "
+                    "This worker is linked once their Iqama is issued and a permanent Employee record exists."
+                )
+            )
 
     def before_insert(self):
         # [#img31u]

@@ -144,6 +144,15 @@ class FrontDesk {
 					.text(`${__(room.room_type || "")} · ${room.current_occupancy || 0}/${room.bed_capacity || 0}`)
 					.appendTo($rh);
 
+				// [#mark-ready] Offer a one-tap "Mark Ready" only on not-ready rooms.
+				const NOT_READY = ["Needs Cleaning", "Needs Repair", "Out of Service"];
+				if (NOT_READY.includes(room.readiness_status)) {
+					$('<button class="btn btn-xs btn-default fd-room-ready"></button>')
+						.text(__("Mark Ready"))
+						.on("click", () => this._mark_room_ready(room.room))
+						.appendTo($rh);
+				}
+
 				const $beds = $('<div class="fd-beds"></div>').appendTo($room);
 				(room.beds || []).forEach((bed) => {
 					this._render_bed_card(bed, room, data.building).appendTo($beds);
@@ -178,6 +187,18 @@ class FrontDesk {
 			}
 		});
 		return $card;
+	}
+
+	_mark_room_ready(room) {
+		frappe.call({
+			method: "apex_habitat.habitat.api.front_desk.set_room_readiness",
+			args: { room: room, status: "Ready" },
+			callback: (r) => {
+				if (r.exc) return;
+				frappe.show_alert({ message: __("Room marked ready."), indicator: "green" });
+				this.refresh();
+			},
+		});
 	}
 
 	_on_bed_click(bed, room, building) {

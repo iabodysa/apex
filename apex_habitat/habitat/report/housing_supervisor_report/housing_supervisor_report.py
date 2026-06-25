@@ -19,6 +19,10 @@ def execute(filters=None):
     columns = _columns()
     buildings = _get_buildings(building_filter)
     if not buildings:
+        # Distinguish a permission scope gap from a genuinely empty estate, so a
+        # scoped user with zero buildings sees guidance, not a blank grid.
+        if _is_scope_gap(building_filter):
+            return columns, [], _no_scope_message()
         return columns, []
 
     building_names = [b.name for b in buildings]
@@ -96,6 +100,28 @@ def _get_buildings(building_filter):
         f["name"] = building_filter
 
     return frappe.get_all("Accommodation Building", filters=f, fields=["name"], order_by="name")
+
+
+def _is_scope_gap(building_filter):
+    """True when an empty result is a building-scope gap (a scoped user with no
+    User-Permission buildings) rather than a genuinely empty estate.
+
+    An explicit out-of-scope ``building_filter`` is treated as a normal empty
+    filter, not a scope gap.
+    """
+    user = frappe.session.user
+    if permissions._building_is_unscoped(user):
+        return False
+    if building_filter:
+        return False
+    return not permissions._allowed_buildings(user)
+
+
+def _no_scope_message():
+    return frappe._(
+        "No active buildings are in your scope. Ask an Accommodation Manager to grant you"
+        " a building permission, then reopen this report."
+    )
 
 
 def _occupancy(building_names):
