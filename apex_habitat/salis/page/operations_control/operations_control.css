@@ -157,6 +157,56 @@
 .fc-list { margin: 0; padding-left: 16px; font-size: 12.5px; }
 .fc-list li { margin: 2px 0; }
 
+/* Top progress bar: indeterminate sliding sweep while a fetch is in flight. */
+.fc-progress {
+	height: 3px;
+	margin-bottom: 8px;
+	border-radius: 3px;
+	overflow: hidden;
+	background: transparent;
+}
+.fc-progress-on {
+	background: var(--gray-200, #edf0f2);
+	position: relative;
+}
+.fc-progress-on::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	width: 40%;
+	border-radius: 3px;
+	background: var(--primary, #2490ef);
+	animation: fc-progress-slide 1s ease-in-out infinite;
+}
+@keyframes fc-progress-slide {
+	0% { inset-inline-start: -40%; }
+	100% { inset-inline-start: 100%; }
+}
+
+/* Skeleton placeholders shown before the first payload arrives. */
+.fc-skeleton {
+	cursor: default;
+	pointer-events: none;
+	min-height: 64px;
+	background: linear-gradient(
+		90deg,
+		var(--gray-100, #f4f5f6) 25%,
+		var(--gray-200, #edf0f2) 37%,
+		var(--gray-100, #f4f5f6) 63%
+	);
+	background-size: 400% 100%;
+	animation: fc-skeleton-shimmer 1.4s ease infinite;
+}
+.fc-skeleton:hover { box-shadow: none; transform: none; }
+@keyframes fc-skeleton-shimmer {
+	0% { background-position: 100% 50%; }
+	100% { background-position: 0 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.fc-progress-on::after,
+	.fc-skeleton { animation: none; }
+}
+
 @media (max-width: 768px) {
 	.fc-drawer.fc-open { flex-basis: 100%; width: 100%; }
 	.fc-body { flex-direction: column; }

@@ -20,7 +20,9 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
         }).insert(ignore_permissions=True)
 
     def _building(self, status="Active"):
-        abbr = "Z" + _hash(3)
+        # building_name is the autoname/PRIMARY key (unique) — use a full hash so
+        # repeated runs on a persistent test DB never collide (was _hash(3), too narrow).
+        abbr = "Z" + _hash()
         return frappe.get_doc({
             "doctype": "Accommodation Building",
             "building_name": f"Bldg {abbr}", "abbreviation": abbr,

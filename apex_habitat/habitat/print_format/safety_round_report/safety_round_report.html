@@ -1,0 +1,110 @@
+<style>
+  .ah-doc { font-family: Arial, sans-serif; color: #1a1a2e; font-size: 12px; }
+  .ah-doc h1 { font-size: 18px; margin: 0; }
+  .ah-doc .ah-sub { color: #666; font-size: 12px; margin-top: 2px; }
+  .ah-head { border-bottom: 3px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px;
+             display: flex; justify-content: space-between; align-items: flex-start; }
+  .ah-meta { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .ah-meta td { padding: 4px 8px; border: 1px solid #e2e2ea; vertical-align: top; }
+  .ah-meta .ah-lbl { background: #f4f4f8; font-weight: bold; width: 22%; }
+  .ah-result { display: inline-block; padding: 2px 10px; border-radius: 3px; font-weight: bold; }
+  .ah-result-pass { background: #e6f4ea; color: #137333; }
+  .ah-result-attention { background: #fef7e0; color: #b06000; }
+  .ah-result-fail { background: #fce8e6; color: #c5221f; }
+  .ah-items { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .ah-items th { background: #1a1a2e; color: #fff; padding: 6px 8px; font-size: 11px; text-align: start; }
+  .ah-items td { padding: 6px 8px; border: 1px solid #d8d8e0; }
+  .ah-items tr:nth-child(even) td { background: #f8f8fb; }
+  .ah-empty { padding: 10px; color: #999; font-style: italic; }
+  .ah-ar { color: #555; font-size: 10px; }
+  .ah-sign { width: 100%; margin-top: 28px; border-collapse: collapse; }
+  .ah-sign td { width: 50%; padding-top: 30px; border-top: 1px solid #1a1a2e; font-size: 11px; vertical-align: top; }
+  .ah-foot { margin-top: 24px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 6px; }
+</style>
+
+<!-- dir follows the print language: rtl for Arabic, ltr otherwise -->
+<div class="ah-doc" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
+  <div class="ah-head">
+    <div>
+      <h1>{{ _("Safety Round Report") }}</h1>
+      <div class="ah-sub">{{ doc.name }}</div>
+    </div>
+    <div style="text-align:right; font-size:11px; color:#666;">
+      {{ frappe.db.get_single_value("Habitat Settings", "company") or "" }}
+    </div>
+  </div>
+
+  <table class="ah-meta">
+    <tr>
+      <td class="ah-lbl">{{ _("Building") }}</td>
+      <td>{{ doc.building or "" }}</td>
+      <td class="ah-lbl">{{ _("Round Date") }}</td>
+      <td>{{ frappe.format(doc.round_date, {"fieldtype": "Date"}) }}</td>
+    </tr>
+    <tr>
+      <td class="ah-lbl">{{ _("Cadence") }}</td>
+      <td>{{ _(doc.cadence) if doc.cadence else "" }}</td>
+      <td class="ah-lbl">{{ _("Supervisor") }}</td>
+      <td>{{ frappe.db.get_value("User", doc.supervisor, "full_name") or doc.supervisor or "" }}</td>
+    </tr>
+    <tr>
+      <td class="ah-lbl">{{ _("Overall Result") }}</td>
+      <td>
+        {% if doc.overall_result == "Pass" %}
+          <span class="ah-result ah-result-pass">{{ _("Pass") }}</span>
+        {% elif doc.overall_result == "Needs Attention" %}
+          <span class="ah-result ah-result-attention">{{ _("Needs Attention") }}</span>
+        {% elif doc.overall_result == "Fail" %}
+          <span class="ah-result ah-result-fail">{{ _("Fail") }}</span>
+        {% else %}—{% endif %}
+      </td>
+      <td class="ah-lbl">{{ _("Re-inspection") }}</td>
+      <td>{{ _("Yes") if doc.is_reinspection else _("No") }}</td>
+    </tr>
+  </table>
+
+  {%- set executions = frappe.get_all("Safety Task Execution",
+        filters={"safety_round": doc.name},
+        fields=["task", "execution_status", "execution_date", "executed_by", "notes"],
+        order_by="execution_date asc, idx asc") -%}
+
+  <table class="ah-items">
+    <thead>
+      <tr>
+        <th style="width:5%;">#</th>
+        <th>{{ _("Task") }}</th>
+        <th style="width:14%;">{{ _("Status") }}</th>
+        <th style="width:14%;">{{ _("Date") }}</th>
+        <th style="width:18%;">{{ _("Executed By") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in executions %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>
+          {{ row.task or "" }}
+          {% if row.notes %}<div class="ah-ar">{{ row.notes }}</div>{% endif %}
+        </td>
+        <td>{{ _(row.execution_status) if row.execution_status else "" }}</td>
+        <td>{{ frappe.format(row.execution_date, {"fieldtype": "Date"}) }}</td>
+        <td>{{ frappe.db.get_value("User", row.executed_by, "full_name") or row.executed_by or "" }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="ah-empty">{{ _("No task executions recorded for this round.") }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table class="ah-sign">
+    <tr>
+      <td>{{ _("Inspected by (Supervisor)") }}</td>
+      <td style="text-align:right;">{{ _("Reviewed by") }}</td>
+    </tr>
+  </table>
+
+  <div class="ah-foot">
+    {{ _("This report records the safety tasks executed during the round and their outcomes.") }}
+    &bull; Apex Habitat &bull; {{ frappe.utils.now_datetime().strftime("%Y-%m-%d %H:%M") }}
+  </div>
+</div>

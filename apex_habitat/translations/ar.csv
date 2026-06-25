@@ -3006,3 +3006,9 @@ total_cost,التكلفة الإجمالية
 {0} {1} already has an active Accommodation Assignment: {2},{0} {1} لديه بالفعل إسناد سكن نشط: {2}
 {0} {1} does not exist.,{0} {1} غير موجود.
 {0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
+Safety Round Report,تقرير جولة السلامة
+Re-inspection,إعادة تفتيش
+Reviewed by,روجع بواسطة
+Inspected by (Supervisor),تم التفتيش بواسطة (المشرف)
+No task executions recorded for this round.,لا توجد مهام منفذة مسجلة لهذه الجولة.
+This report records the safety tasks executed during the round and their outcomes.,يوثّق هذا التقرير مهام السلامة المنفذة خلال الجولة ونتائجها.

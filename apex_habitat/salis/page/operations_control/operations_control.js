@@ -26,6 +26,7 @@ class FleetControl {
 
 	setup() {
 		this.$root = $('<div class="fc-root"></div>').appendTo(this.page.main);
+		this.$progress = $('<div class="fc-progress"></div>').appendTo(this.$root);
 		this.$summary = $('<div class="fc-summary"></div>').appendTo(this.$root);
 		this.$controls = $('<div class="fc-controls"></div>').appendTo(this.$root);
 		this.$body = $('<div class="fc-body"></div>').appendTo(this.$root);
@@ -37,6 +38,7 @@ class FleetControl {
 		this.page.add_button(__("Cards / Table"), () => this.toggle_view());
 
 		this._build_controls();
+		this._render_skeleton();
 		this.refresh();
 	}
 
@@ -83,6 +85,7 @@ class FleetControl {
 	}
 
 	refresh() {
+		this._set_loading(true);
 		frappe.call({
 			method: "apex_habitat.salis.api.operations_control.get_fleet",
 			args: { ...this.filters },
@@ -95,7 +98,26 @@ class FleetControl {
 				this._render_summary();
 				this._render();
 			},
+			always: () => this._set_loading(false),
 		});
+	}
+
+	// Disable Refresh + show the top progress bar while a fetch is in flight (no blank screen, no double-click).
+	_set_loading(active) {
+		this.$progress.toggleClass("fc-progress-on", active);
+		if (this.page.btn_primary) this.page.btn_primary.prop("disabled", active);
+	}
+
+	// Placeholder chips + cards shown on first load, before get_fleet returns.
+	_render_skeleton() {
+		this.$summary.empty();
+		for (let i = 0; i < 4; i++) {
+			$('<div class="fc-chip fc-skeleton"></div>').appendTo(this.$summary);
+		}
+		this.$grid.empty();
+		for (let i = 0; i < 6; i++) {
+			$('<div class="fc-card fc-skeleton"></div>').appendTo(this.$grid);
+		}
 	}
 
 	_render_summary() {

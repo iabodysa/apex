@@ -276,6 +276,19 @@ def get_my_worker_route_summary() -> dict:
 
 
 # [#74dyev]
+# Masar worker (token-scoped) endpoints — guest-callable over a personal link.
+#
+# Worker-write contract (every NEW write endpoint below MUST uphold all four, so
+# a personal link can never widen access or be used to spam):
+#   1. Call _resolve_worker(token) FIRST — the sole place a worker identity is
+#      established; never trust a client-supplied id.
+#   2. Derive ALL scope (employee/building/room/bed/trip) server-side from that
+#      resolved identity, not from request args.
+#   3. Carry an explicit @rate_limit(...) sized to the action.
+#   4. Mark each ignore_permissions write with an `# audit-ok` note stating the
+#      identity was resolved from the token server-side.
+# The live writes — create_worker_request (+ photo), notify_hr_iqama_expiring,
+# confirm_boarding — each follow this.
 
 # [#r00mpe]
 WORKER_REQUEST_CATEGORIES = (

@@ -1,6 +1,7 @@
 # Apex gitleaks configuration.
 # Extends the default ruleset and allowlists known false positives so the
-# CI secret scan (which scans full history) does not block on non-secrets.
+# CI secret scan (bounded to each push/PR commit range) does not block on
+# non-secrets.
 title = "Apex gitleaks config"
 
 [extend]
