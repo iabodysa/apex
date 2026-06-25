@@ -104,7 +104,8 @@ class TestCustodyAcknowledgmentNotification(FrappeTestCase):
         self.assertEqual(n.document_type, "Custody Issue")
         self.assertEqual(n.event, "Submit")
         fields = [r.receiver_by_document_field for r in n.recipients]
-        self.assertIn("issued_to_employee", fields)
+        # Recipient resolves to a real email via the user mirror, not the Employee docname.
+        self.assertIn("issued_to_user", fields)
 
     def test_message_renders_acknowledgment_form_link(self):
         n = frappe.get_doc("Notification", ACK_NOTIFICATION)

@@ -61,3 +61,56 @@ class TestCleaningLog(FrappeTestCase):
         })
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_submit_without_required_area_evidence_raises(self):
+        """The forbidden action: submit with no area photo evidence must fail."""
+        doc = frappe.get_doc({
+            "doctype": "Cleaning Log",
+            "naming_series": "CLEAN-.YYYY.-.####",
+            "building": "QA-BLDG",
+            "cleaning_date": "2026-06-15",
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        with self.assertRaises(frappe.exceptions.ValidationError):
+            doc.submit()
+        frappe.delete_doc("Cleaning Log", doc.name, force=True, ignore_permissions=True)
+
+    def test_submit_with_all_required_areas_passes(self):
+        """A Cleaned photo or an excused (N/A + note) row satisfies each area."""
+        doc = frappe.get_doc({
+            "doctype": "Cleaning Log",
+            "naming_series": "CLEAN-.YYYY.-.####",
+            "building": "QA-BLDG",
+            "cleaning_date": "2026-06-15",
+            "area_photos": [
+                {"area": "Bathrooms", "status": "Cleaned", "photo": "/files/qa-bath.jpg"},
+                {"area": "Kitchen", "status": "Cleaned", "photo": "/files/qa-kitchen.jpg"},
+                {"area": "Corridors", "status": "N/A", "note": "No corridor in this unit"},
+            ],
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        doc.submit()
+        self.assertEqual(doc.docstatus, 1)
+        # captured_at is server-stamped on the photo rows, never client-supplied.
+        photo_rows = [r for r in doc.area_photos if r.photo]
+        self.assertTrue(all(r.captured_at for r in photo_rows))
+        doc.cancel()
+        frappe.delete_doc("Cleaning Log", doc.name, force=True, ignore_permissions=True)
+
+    def test_submit_cleaned_area_without_photo_raises(self):
+        """A required area marked Cleaned but with no photo must fail the gate."""
+        doc = frappe.get_doc({
+            "doctype": "Cleaning Log",
+            "naming_series": "CLEAN-.YYYY.-.####",
+            "building": "QA-BLDG",
+            "cleaning_date": "2026-06-15",
+            "area_photos": [
+                {"area": "Bathrooms", "status": "Cleaned"},
+                {"area": "Kitchen", "status": "Cleaned", "photo": "/files/qa-kitchen.jpg"},
+                {"area": "Corridors", "status": "Cleaned", "photo": "/files/qa-corridor.jpg"},
+            ],
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        with self.assertRaises(frappe.exceptions.ValidationError):
+            doc.submit()
+        frappe.delete_doc("Cleaning Log", doc.name, force=True, ignore_permissions=True)

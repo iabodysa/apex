@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.utils import flt, today
+from frappe.utils import flt, now_datetime, today
 
 from apex_habitat.apex_core.utils.party_link import (
     PARTY_EMPLOYEE,
@@ -101,7 +101,9 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
 
 
 @frappe.whitelist(methods=["POST"])
-def issue_cart(employee: str, building: str, items_json: str) -> dict:
+def issue_cart(
+    employee: str, building: str, items_json: str, signature: str | None = None
+) -> dict:
     """Build and submit ONE Custody Issue from a kiosk cart.
 
     Builds a full Custody Issue (``issued_to_employee``, ``building``, and one
@@ -110,6 +112,11 @@ def issue_cart(employee: str, building: str, items_json: str) -> dict:
     ``on_submit`` (status -> Issued, then ``_post_custody_stock`` which posts to
     the Accommodation Stock Ledger — building store -1, employee custody +1 per
     line).
+
+    When the kiosk captures the recipient's signature at handover, the data-URL is
+    stored on the issue and ``acknowledged_on`` is stamped — in-person proof of
+    handover at issue time (distinct from the later Custody Acknowledgment record
+    the holder can file from the Web Form).
 
     This method adds NO posting, locking, or ledger logic of its own. It never
     writes a Stock Ledger row directly; the read-only ledger engine is reached
@@ -123,6 +130,7 @@ def issue_cart(employee: str, building: str, items_json: str) -> dict:
         employee: Employee docname (the responsible party).
         building: Accommodation Building docname (the source store).
         items_json: JSON string of ``[{"article": <name>, "qty": <int>}]``.
+        signature: optional signature data-URL captured at the kiosk.
 
     Returns:
         dict: ``{"custody_issue": <docname>}``.
@@ -153,6 +161,10 @@ def issue_cart(employee: str, building: str, items_json: str) -> dict:
             "items": rows,
         }
     )
+    signature = (signature or "").strip()
+    if signature:
+        doc.signature = signature
+        doc.acknowledged_on = now_datetime()
     doc.insert(ignore_permissions=False)
     doc.submit()
     return {"custody_issue": doc.name}

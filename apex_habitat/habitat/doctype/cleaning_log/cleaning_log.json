@@ -32,10 +32,13 @@
   "cleaning_log_sec_evidence",
   "evidence_photo",
   "evidence_notes",
+  "cleaning_log_sec_table_area_photos",
+  "area_photos",
   "cleaning_log_sec_table_room_details",
   "room_details",
   "cleaning_log_sec_system",
-  "naming_series"
+  "naming_series",
+  "amended_from"
  ],
  "fields": [
   {
@@ -194,6 +197,18 @@
    "label": "Evidence Notes"
   },
   {
+   "fieldname": "cleaning_log_sec_table_area_photos",
+   "fieldtype": "Section Break",
+   "label": "Area Photo Evidence"
+  },
+  {
+   "description": "Required common-area evidence. Bathrooms, Kitchen, and Corridors must each have a Cleaned photo or be marked Not Cleaned / N/A with a note before submit.",
+   "fieldname": "area_photos",
+   "fieldtype": "Table",
+   "label": "Area Photo Evidence",
+   "options": "Cleaning Area Photo"
+  },
+  {
    "fieldname": "cleaning_log_sec_table_room_details",
    "fieldtype": "Section Break",
    "label": "Room Cleaning Details"
@@ -218,10 +233,21 @@
    "label": "Series",
    "options": "CLEAN-.YYYY.-.####",
    "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Cleaning Log",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-06-09 09:00:00.000000",
+ "modified": "2026-06-26 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Cleaning Log",

@@ -186,6 +186,28 @@ function setDateType(v) {
 function setView(v) {
   f.view = v;
 }
+
+// Board density (compact tightens card rows so a large fleet fits), persisted
+// per user. Falls back to comfortable when storage is blocked/empty.
+const DENSITY_KEY = "fleet_portal_density";
+function initDensity() {
+  try {
+    const saved = localStorage.getItem(DENSITY_KEY);
+    if (saved === "compact" || saved === "comfortable") return saved;
+  } catch (e) {
+    /* storage blocked */
+  }
+  return "comfortable";
+}
+const density = ref(initDensity());
+function toggleDensity() {
+  density.value = density.value === "compact" ? "comfortable" : "compact";
+  try {
+    localStorage.setItem(DENSITY_KEY, density.value);
+  } catch (e) {
+    /* storage blocked */
+  }
+}
 function onSortCol(col) {
   if (sortCol.value === col) sortDir.value *= -1;
   else {
@@ -217,6 +239,7 @@ function resetFilters() {
   f.dateTo = "";
   sortCol.value = "plate";
   sortDir.value = 1;
+  triageFilter.value = "";
 }
 const hasDateFilter = computed(() => !!(f.dateFrom || f.dateTo));
 // No project is in scope for this user (an access gap, not just an empty board).
@@ -233,7 +256,8 @@ const anyFilterActive = computed(
       f.area ||
       f.office ||
       f.dateFrom ||
-      f.dateTo
+      f.dateTo ||
+      triageFilter.value
     )
 );
 
@@ -241,6 +265,13 @@ const anyFilterActive = computed(
 const filtered = computed(() => {
   const q = f.search.toLowerCase();
   let list = vehicles.value.filter((v) => {
+    if (triageFilter.value === "incidents") {
+      const open =
+        (v.damages || []).some((d) => d.status !== "completed") ||
+        (v.accidents || []).some((a) => a.status !== "closed");
+      if (!open) return false;
+    }
+    if (triageFilter.value === "expiring" && !expiryFlag(v).show) return false;
     if (f.status && v.vehicle_status !== f.status) return false;
     if (f.sheet && v.sheet !== f.sheet) return false;
     if (f.fuel && !(v.fuel || "").includes(f.fuel)) return false;
@@ -337,6 +368,27 @@ const counts = computed(() => {
     drivers: drivers.size,
   };
 });
+// Counts/KPIs are still resolving — drives the top-bar/sidebar shimmer so the
+// numbers don't flash 0 before the first load lands.
+const countsLoading = computed(() => loadState.value === "loading");
+
+// Derived triage counts (vehicles with an open incident / nearing expiry).
+// "Open incident" = an unrepaired damage or an unclosed accident on the reader.
+const triage = computed(() => {
+  const all = vehicles.value;
+  const hasOpenIncident = (v) =>
+    (v.damages || []).some((d) => d.status !== "completed") ||
+    (v.accidents || []).some((a) => a.status !== "closed");
+  return {
+    incidents: all.filter(hasOpenIncident).length,
+    expiring: all.filter((v) => expiryFlag(v).show).length,
+  };
+});
+// The two triage pills are opt-in client filters layered on the base list.
+const triageFilter = ref(""); // "" | incidents | expiring
+function setTriage(kind) {
+  triageFilter.value = triageFilter.value === kind ? "" : kind;
+}
 
 const dateInfo = computed(() => {
   if (!hasDateFilter.value) return "";
@@ -433,6 +485,26 @@ function cfDo(val) {
 }
 
 // ═══════════ ACTIONS → endpoints ═══════════
+// In-flight direct-POST card actions, keyed by plate. While a plate is busy its
+// card buttons disable + show a spinner so a slow POST can't be double-fired.
+const busyPlates = ref(new Set());
+const isBusy = (plate) => busyPlates.value.has(plate);
+function setBusy(plate, on) {
+  const next = new Set(busyPlates.value);
+  on ? next.add(plate) : next.delete(plate);
+  busyPlates.value = next;
+}
+// Run a card-action endpoint guarded against double-submit for that plate.
+async function runCardAction(plate, fn) {
+  if (isBusy(plate)) return;
+  setBusy(plate, true);
+  try {
+    await fn();
+  } finally {
+    setBusy(plate, false);
+  }
+}
+
 // Reassign sub-form model. The driver is chosen from the server-backed picker
 // (driverName = the canonical Salis Driver id sent to reassign); date is the
 // only other field sent. The rest are display-only context.
@@ -601,13 +673,15 @@ async function sendWorkshop(plate) {
     "btn-amber"
   );
   if (!ok) return;
-  try {
-    await call(POST("workshop_in"), { type: "POST", args: { plate } });
-    showToast(t("toast.sentToWorkshop"), "amber");
-    await reloadFleet();
-  } catch (e) {
-    showToast(serverMsg(e), "red");
-  }
+  await runCardAction(plate, async () => {
+    try {
+      await call(POST("workshop_in"), { type: "POST", args: { plate } });
+      showToast(t("toast.sentToWorkshop"), "amber");
+      await reloadFleet();
+    } catch (e) {
+      showToast(serverMsg(e), "red");
+    }
+  });
 }
 async function exitWorkshop(plate) {
   const v = vehicles.value.find((x) => x.plate === plate);
@@ -620,13 +694,15 @@ async function exitWorkshop(plate) {
     "btn-green"
   );
   if (!ok) return;
-  try {
-    await call(POST("workshop_out"), { type: "POST", args: { plate } });
-    showToast(t("toast.leftWorkshop"), "green");
-    await reloadFleet();
-  } catch (e) {
-    showToast(serverMsg(e), "red");
-  }
+  await runCardAction(plate, async () => {
+    try {
+      await call(POST("workshop_out"), { type: "POST", args: { plate } });
+      showToast(t("toast.leftWorkshop"), "green");
+      await reloadFleet();
+    } catch (e) {
+      showToast(serverMsg(e), "red");
+    }
+  });
 }
 async function setAvailable(plate) {
   const v = vehicles.value.find((x) => x.plate === plate);
@@ -639,13 +715,15 @@ async function setAvailable(plate) {
     "btn-blue"
   );
   if (!ok) return;
-  try {
-    await call(POST("recover"), { type: "POST", args: { plate } });
-    showToast(t("toast.availableAtOffice"), "green");
-    await reloadFleet();
-  } catch (e) {
-    showToast(serverMsg(e), "red");
-  }
+  await runCardAction(plate, async () => {
+    try {
+      await call(POST("recover"), { type: "POST", args: { plate } });
+      showToast(t("toast.availableAtOffice"), "green");
+      await reloadFleet();
+    } catch (e) {
+      showToast(serverMsg(e), "red");
+    }
+  });
 }
 async function recoverVehicle(plate) {
   const v = vehicles.value.find((x) => x.plate === plate);
@@ -658,13 +736,15 @@ async function recoverVehicle(plate) {
     "btn-green"
   );
   if (!ok) return;
-  try {
-    await call(POST("recover"), { type: "POST", args: { plate } });
-    showToast(t("toast.recovered"), "green");
-    await reloadFleet();
-  } catch (e) {
-    showToast(serverMsg(e), "red");
-  }
+  await runCardAction(plate, async () => {
+    try {
+      await call(POST("recover"), { type: "POST", args: { plate } });
+      showToast(t("toast.recovered"), "green");
+      await reloadFleet();
+    } catch (e) {
+      showToast(serverMsg(e), "red");
+    }
+  });
 }
 function markStolen(plate) {
   openPanel(plate, 2);
@@ -868,13 +948,20 @@ function expiryFlag(v) {
       <span class="si"><Icon name="search" :size="15" /></span>
       <input v-model="f.search" :placeholder="t('topbar.searchPlaceholder')" />
     </div>
-    <div class="status-pills">
+    <!-- KPI pills shimmer until the first load resolves so they don't flash 0 -->
+    <div v-if="countsLoading" class="status-pills">
+      <span v-for="n in 6" :key="n" class="sp fp-kpi-skel"></span>
+    </div>
+    <div v-else class="status-pills">
       <span class="sp sp-all" :class="{ active: f.status === '' }" @click="setSP('')">{{ counts.total }} {{ t("topbar.allVehicles") }}</span>
       <span class="sp sp-assigned" :class="{ active: f.status === 'assigned' }" @click="setSP('assigned')">{{ counts.assigned }} {{ t("statusShort.assigned") }}</span>
       <span class="sp sp-available" :class="{ active: f.status === 'available' }" @click="setSP('available')">{{ counts.available }} {{ t("statusShort.available") }}</span>
       <span class="sp sp-workshop" :class="{ active: f.status === 'workshop' }" @click="setSP('workshop')">{{ counts.workshop }} {{ t("statusShort.workshop") }}</span>
       <span class="sp sp-stopped" :class="{ active: f.status === 'stopped' }" @click="setSP('stopped')">{{ counts.stopped }} {{ t("statusShort.stopped") }}</span>
       <span class="sp sp-stolen" :class="{ active: f.status === 'stolen' }" @click="setSP('stolen')">{{ counts.stolen }} {{ t("statusShort.stolen") }}</span>
+      <!-- Derived triage pills (open incidents / expiring soon) → client filters -->
+      <span v-if="triage.incidents" class="sp sp-triage-incident" :class="{ active: triageFilter === 'incidents' }" @click="setTriage('incidents')"><Icon name="crash" :size="12" /> {{ triage.incidents }} {{ t("topbar.openIncidents") }}</span>
+      <span v-if="triage.expiring" class="sp sp-triage-expiry" :class="{ active: triageFilter === 'expiring' }" @click="setTriage('expiring')"><Icon name="shield-alert" :size="12" /> {{ triage.expiring }} {{ t("topbar.expiringSoon") }}</span>
     </div>
     <LangToggle />
   </div>
@@ -960,7 +1047,10 @@ function expiryFlag(v) {
         <button class="btn" style="width:100%;justify-content:center" @click="resetFilters"><Icon name="rotate-cw" :size="15" /> {{ t("sidebar.reset") }}</button>
         <div class="sep"></div>
         <div class="fl" style="margin-bottom:8px"><Icon name="chart-column" :size="13" /> {{ t("sidebar.quickStats") }}</div>
-        <div class="stat-mini-grid">
+        <div v-if="countsLoading" class="stat-mini-grid">
+          <div class="stat-mini fp-stat-skel" v-for="n in 7" :key="n"></div>
+        </div>
+        <div v-else class="stat-mini-grid">
           <div class="stat-mini"><div class="stat-mini-n" style="color:var(--blue-l)">{{ counts.total }}</div><div class="stat-mini-l">{{ t("sidebar.total") }}</div></div>
           <div class="stat-mini"><div class="stat-mini-n" style="color:var(--green-l)">{{ counts.assigned }}</div><div class="stat-mini-l">{{ t("sidebar.assigned") }}</div></div>
           <div class="stat-mini"><div class="stat-mini-n" style="color:var(--cyan-l)">{{ counts.available }}</div><div class="stat-mini-l">{{ t("sidebar.available") }}</div></div>
@@ -987,6 +1077,7 @@ function expiryFlag(v) {
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <button class="btn" :class="{ 'btn-blue': selectMode }" @click="toggleSelectMode"><Icon name="circle-check" :size="14" /> {{ t("bulk.selectVehicles") }}</button>
+          <button v-if="f.view === 'cards'" class="btn" :class="{ 'btn-blue': density === 'compact' }" :title="t('main.densityTitle')" @click="toggleDensity"><Icon :name="density === 'compact' ? 'list' : 'layout-grid'" :size="14" /> {{ density === 'compact' ? t("main.comfortable") : t("main.compact") }}</button>
           <div class="view-tabs">
             <button class="vt" :class="{ on: f.view === 'cards' }" @click="setView('cards')"><Icon name="layout-grid" :size="14" /> {{ t("main.cards") }}</button>
             <button class="vt" :class="{ on: f.view === 'table' }" @click="setView('table')"><Icon name="list" :size="14" /> {{ t("main.table") }}</button>
@@ -1035,12 +1126,12 @@ function expiryFlag(v) {
           </div>
           <button v-if="!isScopeEmpty && anyFilterActive" class="btn btn-blue" @click="resetFilters">{{ t("main.clearFilters") }}</button>
         </div>
-        <div v-else class="cards-grid">
+        <div v-else class="cards-grid" :class="{ 'fp-compact': density === 'compact' }">
           <div
             v-for="v in filtered"
             :key="v.plate"
             class="vcard"
-            :class="['vs-' + v.vehicle_status, { 'fp-sel': selectMode && isSelected(v.plate) }]"
+            :class="['vs-' + v.vehicle_status, { 'fp-sel': selectMode && isSelected(v.plate), 'fp-busy': isBusy(v.plate) }]"
             @click="selectMode ? toggleSelect(v.plate) : openPanel(v.plate)"
           >
             <div class="vc-top">
@@ -1112,26 +1203,27 @@ function expiryFlag(v) {
               </div>
               <div class="dur-bar"><div class="dur-fill" :style="{ width: Math.min(100, Math.round((calcTotalDaysNum(v) / 400) * 100)) + '%' }"></div></div>
             </div>
-            <div class="vc-actions" @click.stop>
+            <div class="vc-actions" :class="{ 'fp-actions-busy': isBusy(v.plate) }" @click.stop>
+              <span v-if="isBusy(v.plate)" class="fp-action-spin" :aria-label="t('card.working')"></span>
               <template v-if="v.vehicle_status === 'assigned'">
-                <button class="ac ac-stop" :title="t('card.stopTitle')" @click="quickStop(v.plate)"><span class="ac-ico"><Icon name="circle-pause" :size="14" /></span>{{ t("card.stop") }}</button>
-                <button class="ac ac-reassign" :title="t('card.reassignTitle')" @click="quickReassign(v.plate)"><span class="ac-ico"><Icon name="rotate-cw" :size="14" /></span>{{ t("card.reassign") }}</button>
-                <button class="ac ac-workshop" :title="t('card.sendWorkshopAfterStopTitle')" @click="quickStop(v.plate, true)"><span class="ac-ico"><Icon name="wrench" :size="14" /></span>{{ t("card.workshop") }}</button>
+                <button class="ac ac-stop" :disabled="isBusy(v.plate)" :title="t('card.stopTitle')" @click="quickStop(v.plate)"><span class="ac-ico"><Icon name="circle-pause" :size="14" /></span>{{ t("card.stop") }}</button>
+                <button class="ac ac-reassign" :disabled="isBusy(v.plate)" :title="t('card.reassignTitle')" @click="quickReassign(v.plate)"><span class="ac-ico"><Icon name="rotate-cw" :size="14" /></span>{{ t("card.reassign") }}</button>
+                <button class="ac ac-workshop" :disabled="isBusy(v.plate)" :title="t('card.sendWorkshopAfterStopTitle')" @click="quickStop(v.plate, true)"><span class="ac-ico"><Icon name="wrench" :size="14" /></span>{{ t("card.workshop") }}</button>
               </template>
               <template v-else-if="v.vehicle_status === 'available'">
-                <button class="ac ac-free" :title="t('card.assignNewTitle')" @click="quickReassign(v.plate)"><span class="ac-ico"><Icon name="key" :size="14" /></span>{{ t("card.assign") }}</button>
-                <button class="ac ac-workshop" :title="t('card.sendWorkshopTitle')" @click="sendWorkshop(v.plate)"><span class="ac-ico"><Icon name="wrench" :size="14" /></span>{{ t("card.workshop") }}</button>
+                <button class="ac ac-free" :disabled="isBusy(v.plate)" :title="t('card.assignNewTitle')" @click="quickReassign(v.plate)"><span class="ac-ico"><Icon name="key" :size="14" /></span>{{ t("card.assign") }}</button>
+                <button class="ac ac-workshop" :disabled="isBusy(v.plate)" :title="t('card.sendWorkshopTitle')" @click="sendWorkshop(v.plate)"><span class="ac-ico"><Icon name="wrench" :size="14" /></span>{{ t("card.workshop") }}</button>
               </template>
               <template v-else-if="v.vehicle_status === 'workshop'">
-                <button class="ac ac-free" :title="t('card.exitWorkshopTitle')" @click="exitWorkshop(v.plate)"><span class="ac-ico"><Icon name="circle-check" :size="14" /></span>{{ t("card.exit") }}</button>
-                <button class="ac ac-reassign" :title="t('card.assignDirectTitle')" @click="quickReassign(v.plate)"><span class="ac-ico"><Icon name="key" :size="14" /></span>{{ t("card.assign") }}</button>
+                <button class="ac ac-free" :disabled="isBusy(v.plate)" :title="t('card.exitWorkshopTitle')" @click="exitWorkshop(v.plate)"><span class="ac-ico"><Icon name="circle-check" :size="14" /></span>{{ t("card.exit") }}</button>
+                <button class="ac ac-reassign" :disabled="isBusy(v.plate)" :title="t('card.assignDirectTitle')" @click="quickReassign(v.plate)"><span class="ac-ico"><Icon name="key" :size="14" /></span>{{ t("card.assign") }}</button>
               </template>
               <template v-else>
-                <button class="ac ac-free" :title="t('card.setAvailableTitle')" @click="setAvailable(v.plate)"><span class="ac-ico"><Icon name="circle-dot" :size="14" /></span>{{ t("card.available") }}</button>
-                <button class="ac ac-workshop" :title="t('card.sendWorkshopTitle')" @click="sendWorkshop(v.plate)"><span class="ac-ico"><Icon name="wrench" :size="14" /></span>{{ t("card.workshop") }}</button>
+                <button class="ac ac-free" :disabled="isBusy(v.plate)" :title="t('card.setAvailableTitle')" @click="setAvailable(v.plate)"><span class="ac-ico"><Icon name="circle-dot" :size="14" /></span>{{ t("card.available") }}</button>
+                <button class="ac ac-workshop" :disabled="isBusy(v.plate)" :title="t('card.sendWorkshopTitle')" @click="sendWorkshop(v.plate)"><span class="ac-ico"><Icon name="wrench" :size="14" /></span>{{ t("card.workshop") }}</button>
               </template>
-              <button v-if="v.vehicle_status === 'stolen'" class="ac" style="border-color:rgba(124,58,237,.25);color:var(--purple-l)" :title="t('card.recoverTitle')" @click="recoverVehicle(v.plate)"><span class="ac-ico"><Icon name="lock-open" :size="14" /></span>{{ t("card.recover") }}</button>
-              <button v-else-if="v.vehicle_status === 'available'" class="ac" style="border-color:rgba(220,38,38,.25);color:var(--red-l)" :title="t('card.markStolenTitle')" @click="markStolen(v.plate)"><span class="ac-ico"><Icon name="shield-alert" :size="14" /></span>{{ t("card.markStolen") }}</button>
+              <button v-if="v.vehicle_status === 'stolen'" class="ac" style="border-color:rgba(124,58,237,.25);color:var(--purple-l)" :disabled="isBusy(v.plate)" :title="t('card.recoverTitle')" @click="recoverVehicle(v.plate)"><span class="ac-ico"><Icon name="lock-open" :size="14" /></span>{{ t("card.recover") }}</button>
+              <button v-else-if="v.vehicle_status === 'available'" class="ac" style="border-color:rgba(220,38,38,.25);color:var(--red-l)" :disabled="isBusy(v.plate)" :title="t('card.markStolenTitle')" @click="markStolen(v.plate)"><span class="ac-ico"><Icon name="shield-alert" :size="14" /></span>{{ t("card.markStolen") }}</button>
               <button class="ac ac-hist" :title="t('card.historyTitle')" @click="openPanel(v.plate, 5)"><span class="ac-ico"><Icon name="clipboard-list" :size="14" /></span><span class="hist-n">{{ v.history.length }}</span></button>
             </div>
           </div>

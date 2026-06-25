@@ -245,6 +245,34 @@ def get_building_grid(building: str) -> dict:
 
 
 @frappe.whitelist()
+def get_buildings_scope_state() -> dict:
+    """Explain WHY ``list_supervisor_buildings`` is empty, for a typed empty state.
+
+    Read-only. The list endpoint returns ``[]`` for two very different reasons —
+    a building-scoped user with no User-Permission buildings (a permission gap to
+    raise with an admin) versus no Active building existing at all. The client
+    can't tell them apart from an empty list, so it reads this when the list comes
+    back empty. Scope is the same ``permissions`` contract as the list endpoint.
+
+    Returns:
+        dict: ``{"is_scoped": bool, "active_buildings": int}``. ``is_scoped`` is
+        True when the caller is confined to User-Permission buildings (not an
+        oversight role); ``active_buildings`` is the count of Active buildings in
+        scope.
+    """
+    from apex_habitat.habitat import permissions
+
+    is_scoped = not permissions._building_is_unscoped(frappe.session.user)
+    f = {"status": "Active"}
+    if is_scoped:
+        allowed = permissions._allowed_buildings(frappe.session.user)
+        if not allowed:
+            return {"is_scoped": True, "active_buildings": 0}
+        f["name"] = ["in", allowed]
+    return {"is_scoped": is_scoped, "active_buildings": frappe.db.count("Accommodation Building", f)}
+
+
+@frappe.whitelist()
 def list_supervisor_buildings() -> list[dict]:
     """Return the caller's allowed buildings, each with a server-computed bed mix.
 

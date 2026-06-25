@@ -587,7 +587,37 @@ class CustodyKiosk {
 		}
 
 		const items = lines.map((l) => ({ article: l.article, qty: l.qty }));
+		this._capture_signature((signature) => this._submit_issue(items, signature));
+	}
 
+	// Capture the recipient's signature at handover; signing is optional so the
+	// kiosk still works when no pad input is taken (Skip submits without one).
+	_capture_signature(on_done) {
+		const dialog = new frappe.ui.Dialog({
+			title: __("Recipient Signature"),
+			fields: [
+				{
+					fieldname: "signature",
+					fieldtype: "Signature",
+					label: __("Sign to acknowledge receipt"),
+				},
+			],
+			primary_action_label: __("Issue"),
+			primary_action: () => {
+				const signature = dialog.get_value("signature");
+				dialog.hide();
+				on_done(signature);
+			},
+			secondary_action_label: __("Skip"),
+			secondary_action: () => {
+				dialog.hide();
+				on_done(null);
+			},
+		});
+		dialog.show();
+	}
+
+	_submit_issue(items, signature) {
 		this.$action_btn.prop("disabled", true);
 		frappe.call({
 			method: "apex_habitat.habitat.api.custody_kiosk.issue_cart",
@@ -595,6 +625,7 @@ class CustodyKiosk {
 				employee: this.employee,
 				building: this.building,
 				items_json: JSON.stringify(items),
+				signature: signature || null,
 			},
 			freeze: true,
 			freeze_message: __("Issuing…"),

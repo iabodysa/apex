@@ -15,6 +15,7 @@ class CustodyIssue(Document):
 
 def validate(doc, method=None):
     sync_party_employee(doc, employee_field="issued_to_employee")
+    _set_holder_user(doc)
     if not doc.items:
         frappe.throw(_("At least one item is required on a Custody Issue."))
     for row in doc.items:
@@ -22,6 +23,18 @@ def validate(doc, method=None):
             frappe.throw(_("Row {0}: Qty must be greater than zero.").format(row.idx))
     validate_serialized_rows(doc)
     _set_expected_return_date(doc)
+
+
+def _set_holder_user(doc):
+    """Mirror the holder's login user from the employee so receipt notifications
+    have a real address to send to (a notification recipient field must hold an
+    email/user, not an Employee docname). Runs after the employee is synced; the
+    declarative fetch_from on the form path can lag the controller-set employee."""
+    doc.issued_to_user = (
+        frappe.db.get_value("Employee", doc.issued_to_employee, "user_id")
+        if doc.issued_to_employee
+        else None
+    )
 
 
 def validate_serialized_rows(doc):

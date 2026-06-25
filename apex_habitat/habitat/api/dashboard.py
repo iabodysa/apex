@@ -91,3 +91,27 @@ def get_custody_value_in_employee_hands():
         """
     )
     return flt(total[0][0]) if total else 0.0
+
+
+def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:
+    """Top holders by outstanding custody value, same definition as the
+    value-in-hands card and the Outstanding-by-Worker report — net signed
+    (qty * unit_cost_sar) over non-cancelled Custody Article rows with an employee
+    set, grouped by employee. Holders whose net value is not positive are dropped.
+    One bounded grouped query; returns ``[{employee, value}]`` value-desc."""
+    rows = frappe.db.sql(
+        """
+        SELECT employee, COALESCE(SUM(qty * COALESCE(unit_cost_sar, 0)), 0) AS value
+        FROM `tabAccommodation Stock Ledger`
+        WHERE is_cancelled = 0
+          AND item_type = 'Custody Article'
+          AND employee IS NOT NULL AND employee != ''
+        GROUP BY employee
+        HAVING value > 0
+        ORDER BY value DESC
+        LIMIT %(limit)s
+        """,
+        {"limit": int(limit)},
+        as_dict=True,
+    )
+    return rows or []

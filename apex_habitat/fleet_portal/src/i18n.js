@@ -62,6 +62,8 @@ const messages = {
     topbar: {
       searchPlaceholder: "Search: plate, driver, type, office...",
       allVehicles: "All vehicles",
+      openIncidents: "Open incidents",
+      expiringSoon: "Expiring soon",
     },
     sidebar: {
       filtersAndStats: "Filters & statistics",
@@ -121,6 +123,9 @@ const messages = {
       sortLongestRunning: "Longest running",
       cards: "Cards",
       table: "Table",
+      compact: "Compact",
+      comfortable: "Comfortable",
+      densityTitle: "Toggle card density",
       loadError: "Couldn't load fleet data: {error}",
       noResultsFilters: "No results match the filters",
       noVehicles: "No vehicles",
@@ -150,6 +155,7 @@ const messages = {
       expired: "Compliance expired",
       expiringSoon: "Expiring soon",
       expiresInDays: "Expires in {n} day(s)",
+      working: "Working…",
       stopTitle: "Stop driver and lock the file",
       reassignTitle: "Reassign to a new driver",
       sendWorkshopAfterStopTitle: "Send to workshop after stopping",
@@ -414,6 +420,8 @@ const messages = {
     topbar: {
       searchPlaceholder: "ابحث: لوحة، سائق، نوع، مكتب...",
       allVehicles: "كل المركبات",
+      openIncidents: "بلاغات مفتوحة",
+      expiringSoon: "قارب على الانتهاء",
     },
     sidebar: {
       filtersAndStats: "الفلاتر والإحصائيات",
@@ -473,6 +481,9 @@ const messages = {
       sortLongestRunning: "الأطول تشغيلاً",
       cards: "كروت",
       table: "جدول",
+      compact: "مضغوط",
+      comfortable: "مريح",
+      densityTitle: "تبديل كثافة الكروت",
       loadError: "تعذّر تحميل بيانات الأسطول: {error}",
       noResultsFilters: "لا نتائج مطابقة للفلاتر",
       noVehicles: "لا توجد مركبات",
@@ -502,6 +513,7 @@ const messages = {
       expired: "انتهت المطابقة",
       expiringSoon: "قارب على الانتهاء",
       expiresInDays: "ينتهي خلال {n} يوم",
+      working: "جارٍ التنفيذ…",
       stopTitle: "إيقاف السائق وقفل الملف",
       reassignTitle: "تفويض لسائق جديد",
       sendWorkshopAfterStopTitle: "إرسال للورشة بعد الإيقاف",

@@ -20,12 +20,33 @@
   },
   {
    "doctype": "DocField",
+   "fieldname": "room_status",
+   "fieldtype": "Select",
+   "label": "Room Status",
+   "options": "Cleaned\nSkipped",
+   "default": "Cleaned",
+   "in_list_view": 1,
+   "columns": 2,
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "skip_reason",
+   "fieldtype": "Data",
+   "label": "Skip Reason",
+   "description": "Required when Room Status is Skipped.",
+   "depends_on": "eval:doc.room_status=='Skipped'",
+   "columns": 2,
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
    "fieldname": "cleaned",
    "fieldtype": "Check",
    "label": "Cleaned",
    "in_list_view": 1,
-   "columns": 3,
-   "idx": 2
+   "columns": 2,
+   "idx": 4
   },
   {
    "doctype": "DocField",
@@ -34,9 +55,9 @@
    "label": "Notes",
    "in_list_view": 1,
    "columns": 3,
-   "idx": 3
+   "idx": 5
   }
  ],
  "permissions": [],
- "modified": "2026-06-09 10:00:00.000000"
+ "modified": "2026-06-26 00:00:00.000000"
 }

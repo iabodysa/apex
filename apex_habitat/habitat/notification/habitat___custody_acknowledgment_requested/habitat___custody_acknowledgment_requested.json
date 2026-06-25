@@ -1,12 +1,12 @@
 {
  "attach_print": 0,
  "channel": "Email",
- "condition": "doc.docstatus == 1 and doc.issued_to_employee",
+ "condition": "doc.docstatus == 1 and doc.issued_to_user",
  "days_in_advance": 0,
  "docstatus": 0,
  "doctype": "Notification",
  "document_type": "Custody Issue",
- "enabled": 0,
+ "enabled": 1,
  "event": "Submit",
  "idx": 0,
  "is_standard": 1,
@@ -16,11 +16,11 @@
  "name": "Habitat - Custody Acknowledgment Requested",
  "recipients": [
   {
-   "receiver_by_document_field": "issued_to_employee"
+   "receiver_by_document_field": "issued_to_user"
   }
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Confirm Receipt of Custody Items: {{ doc.name }}",
- "modified": "2026-06-25 12:00:00.000000"
+ "modified": "2026-06-26 12:00:00.000000"
 }

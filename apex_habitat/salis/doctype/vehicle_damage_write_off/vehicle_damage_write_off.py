@@ -23,6 +23,7 @@ class VehicleDamageWriteOff(Document):
         self._stamp_approver()
 
     def on_submit(self):
+        self._stamp_source_incident()
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,
@@ -32,6 +33,7 @@ class VehicleDamageWriteOff(Document):
         )
 
     def on_cancel(self):
+        self._clear_source_incident()
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,
@@ -43,3 +45,18 @@ class VehicleDamageWriteOff(Document):
     def _stamp_approver(self):
         if self.status == "Approved" and not self.approved_by:
             self.approved_by = frappe.session.user
+
+    def _stamp_source_incident(self):
+        # Complete the escalation back-link: the incident's read_only write_off_case
+        # is only ever populated here, making the Incident<->Write-Off link bidirectional.
+        if self.source_incident:
+            frappe.db.set_value(
+                "Vehicle Incident", self.source_incident, "write_off_case", self.name
+            )
+
+    def _clear_source_incident(self):
+        # Reverse the back-link on cancel so no stale write_off_case pointer survives.
+        if self.source_incident:
+            frappe.db.set_value(
+                "Vehicle Incident", self.source_incident, "write_off_case", None
+            )

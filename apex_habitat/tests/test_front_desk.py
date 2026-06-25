@@ -10,6 +10,7 @@ from apex_habitat.tests.test_utils import ApexHabitatTestCase
 from apex_habitat.habitat import permissions as P
 from apex_habitat.habitat.api.front_desk import (
     get_building_grid,
+    get_buildings_scope_state,
     list_supervisor_buildings,
     quick_check_in,
     set_room_readiness,
@@ -147,6 +148,23 @@ class TestSupervisorBuildings(ApexHabitatTestCase):
             rows = list_supervisor_buildings()
         titles = [r["building_title"] for r in rows]
         self.assertEqual(titles, sorted(titles))
+
+    # An empty building list has two meanings; the scope-state endpoint
+    # tells them apart so the client can show the right empty copy.
+    def test_scope_state_flags_permission_gap_for_scoped_user_with_none(self):
+        with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
+            P, "_allowed_buildings", return_value=[]
+        ):
+            state = get_buildings_scope_state()
+        self.assertTrue(state["is_scoped"])
+        self.assertEqual(state["active_buildings"], 0)
+
+    def test_scope_state_unscoped_user_is_not_a_permission_gap(self):
+        with patch.object(P, "_building_is_unscoped", return_value=True):
+            state = get_buildings_scope_state()
+        self.assertFalse(state["is_scoped"])
+        # The seeded test buildings are Active, so the unscoped count is positive.
+        self.assertGreaterEqual(state["active_buildings"], 2)
 
 
 class TestSetRoomReadiness(ApexHabitatTestCase):

@@ -785,3 +785,41 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .fp-sel-box{width:16px;height:16px;cursor:pointer;accent-color:var(--blue);flex-shrink:0}
 .vcard.fp-sel{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-d)}
 tr.fp-sel{background:var(--blue-d)}
+
+/* Triage pills (open incidents / expiring soon) — icon+count, click to filter. */
+.sp-triage-incident,.sp-triage-expiry{display:inline-flex;align-items:center;gap:4px}
+.sp-triage-incident{background:var(--amber-d);color:var(--amber-l);border-color:rgba(217,119,6,.25)}
+.sp-triage-expiry{background:var(--red-d);color:var(--red-l);border-color:rgba(220,38,38,.25)}
+
+/* KPI / quick-stat loading shimmer — placeholder chips that don't render 0. */
+.fp-kpi-skel{
+  width:74px;height:23px;border-radius:20px;border-color:transparent;
+  background:var(--s2);background-image:linear-gradient(90deg,transparent,rgba(15,28,53,.06),transparent);
+  background-size:300px 100%;animation:fpShimmer 1.2s infinite;cursor:default;pointer-events:none;
+}
+.fp-stat-skel{
+  height:46px;overflow:hidden;
+  background:var(--s2);background-image:linear-gradient(90deg,transparent,rgba(15,28,53,.06),transparent);
+  background-size:300px 100%;animation:fpShimmer 1.2s infinite;
+}
+
+/* Compact density — tightens card rows so a large fleet fits on one screen. */
+.cards-grid.fp-compact{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:8px}
+.cards-grid.fp-compact .vc-meta{padding:0 12px 6px}
+.cards-grid.fp-compact .vc-fuel-row{padding:5px 12px}
+.cards-grid.fp-compact .vc-driver{padding:7px 12px}
+.cards-grid.fp-compact .vc-actions{padding:6px 10px}
+.cards-grid.fp-compact .ac{padding:4px 3px;font-size:9px}
+.cards-grid.fp-compact .vc-dur{padding:5px 12px}
+
+/* In-flight card action: dim + lock buttons, show a spinner (prevents double-submit). */
+.ac:disabled{opacity:.3;cursor:default;pointer-events:none}
+.vc-actions.fp-actions-busy{position:relative}
+.vc-actions.fp-actions-busy .ac{opacity:.35}
+.fp-action-spin{
+  position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;z-index:2;
+  border:2px solid var(--b3);border-top-color:var(--blue-l);border-radius:50%;
+  animation:fpSpin .7s linear infinite;
+}
+.vcard.fp-busy{opacity:.92}
+@keyframes fpSpin{to{transform:rotate(360deg)}}

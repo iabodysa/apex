@@ -188,6 +188,74 @@
 	font-weight: 600;
 }
 
+/* Legend that doubles as client-side filters. */
+.fd-legend {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 16px;
+	margin-block-end: 16px;
+}
+
+.fd-legend-key {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.fd-legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--text-muted, #74808b);
+}
+
+.fd-legend-dot {
+	width: 14px;
+	height: 14px;
+	border-radius: 4px;
+	border-width: 2px;
+	border-style: solid;
+	flex: 0 0 auto;
+}
+
+.fd-legend-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.fd-legend-filter {
+	font-size: 12px;
+	padding-block: 4px;
+	padding-inline: 10px;
+	border-radius: 14px;
+	border: 1px solid var(--border-color, #d1d8dd);
+	background: var(--card-bg, #fff);
+	color: var(--text-color, #1f272e);
+	cursor: pointer;
+}
+
+.fd-legend-filter:focus {
+	outline: 3px solid var(--primary, #2490ef);
+	outline-offset: 2px;
+}
+
+.fd-legend-filter--active {
+	border-color: var(--primary, #2490ef);
+	background: var(--blue-500, #2490ef);
+	color: var(--text-on-blue, #fff);
+	font-weight: 600;
+}
+
+/* Client-side filter hide classes — pure show/hide over the loaded grid. */
+.fd-bed--filtered,
+.fd-room--filtered,
+.fd-floor--filtered {
+	display: none;
+}
+
 .fd-floor {
 	margin-block-end: 24px;
 }
@@ -268,6 +336,39 @@
 
 .fd-bed:active {
 	transform: scale(0.98);
+}
+
+/* Busy state during a check-in/out round-trip: dim the card and overlay a small
+   spinner so the operator sees the clicked bed is working before the refresh. */
+.fd-bed--updating {
+	position: relative;
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+.fd-bed--updating::after {
+	content: "";
+	position: absolute;
+	inset-block-start: 6px;
+	inset-inline-end: 6px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	border: 2px solid var(--gray-400, #b9c0c7);
+	border-block-start-color: var(--primary, #2490ef);
+	animation: fd-spin 0.7s linear infinite;
+}
+
+@keyframes fd-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.fd-bed--updating::after {
+		animation: none;
+	}
 }
 
 .fd-bed-code {

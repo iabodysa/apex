@@ -15,6 +15,12 @@ class FrontDesk {
 	constructor(page) {
 		this.page = page;
 		this.building = null;
+		// Client-side board filters toggled from the legend (no server round-trip).
+		this.filters = {
+			only_available: false,
+			hide_out_of_service: false,
+			only_needs_readiness: false,
+		};
 	}
 
 	setup() {
@@ -46,8 +52,19 @@ class FrontDesk {
 		const $loading = $('<div class="fd-buildings-loading text-muted"></div>')
 			.text(__("Loading buildings…"))
 			.appendTo(this.$strip);
+		let permission_denied = false;
 		frappe.call({
 			method: "apex_habitat.habitat.api.front_desk.list_supervisor_buildings",
+			error_handlers: {
+				// A role without the building read grant is refused at the gate;
+				// surface the permission-gap copy, not a generic failure or retry.
+				PermissionError: () => {
+					permission_denied = true;
+					$loading.remove();
+					frappe.hide_msgprint();
+					this._render_strip_permission_gap();
+				},
+			},
 			callback: (r) => {
 				$loading.remove();
 				if (r.exc) {
@@ -58,6 +75,7 @@ class FrontDesk {
 				this._render_buildings();
 			},
 			error: () => {
+				if (permission_denied) return;
 				$loading.remove();
 				this._render_strip_error();
 			},
@@ -68,12 +86,21 @@ class FrontDesk {
 		this.$strip.empty();
 		const $err = $('<div class="fd-buildings-error"></div>').appendTo(this.$strip);
 		$('<span class="fd-buildings-error-msg"></span>')
-			.text(__("Could not load your buildings."))
+			.text(__("Could not load your buildings. Check your connection and try again."))
 			.appendTo($err);
 		$('<button class="btn btn-default btn-xs"></button>')
 			.text(__("Retry"))
 			.on("click", () => this._load_buildings())
 			.appendTo($err);
+	}
+
+	// Distinct from a connection error: the caller is allowed to use the desk but
+	// has no building assigned, so retry won't help — point them at an admin.
+	_render_strip_permission_gap() {
+		this.$strip.empty();
+		$('<div class="fd-buildings-empty text-muted"></div>')
+			.text(__("You don't have any building assigned. Ask an administrator to grant you a building."))
+			.appendTo(this.$strip);
 	}
 
 	// Free-bed-pressure color: red when full/over, amber when near-full, green
@@ -88,10 +115,7 @@ class FrontDesk {
 	_render_buildings() {
 		this.$strip.empty();
 		if (!this.buildings || !this.buildings.length) {
-			// Neutral placeholder; the permission-gap copy is owned elsewhere.
-			$('<div class="fd-buildings-empty text-muted"></div>')
-				.text(__("No buildings to show."))
-				.appendTo(this.$strip);
+			this._render_buildings_empty();
 			return;
 		}
 		const $row = $('<div class="fd-buildings-row"></div>').appendTo(this.$strip);
@@ -115,6 +139,29 @@ class FrontDesk {
 		});
 	}
 
+	// An empty building list has two meanings — a scoped supervisor with no
+	// assigned building (a permission gap) vs no Active building existing at all.
+	// The server tells them apart so the copy can be actionable, not generic.
+	_render_buildings_empty() {
+		this.$strip.empty();
+		const $empty = $('<div class="fd-buildings-empty text-muted"></div>')
+			.text(__("No buildings to show."))
+			.appendTo(this.$strip);
+		frappe.call({
+			method: "apex_habitat.habitat.api.front_desk.get_buildings_scope_state",
+			callback: (r) => {
+				if (r.exc || !r.message) return;
+				if (r.message.is_scoped && !r.message.active_buildings) {
+					$empty.text(
+						__("You don't have any building assigned. Ask an administrator to grant you a building.")
+					);
+				} else if (!r.message.active_buildings) {
+					$empty.text(__("No active buildings exist yet."));
+				}
+			},
+		});
+	}
+
 	_select_building(building) {
 		if (!building || building === this.building) return;
 		this.building = building;
@@ -126,9 +173,25 @@ class FrontDesk {
 		if (!this.building) return;
 		const requested = this.building;
 		this._render_loading();
+		// Typed permission failure: PermissionError carries exc_type, so the
+		// framework's per-request error_handlers hook is the reliable place to
+		// surface it (the generic error: callback gets no xhr on a 403). A retry
+		// won't help, so no Retry button — and we suppress the generic message.
+		let permission_denied = false;
 		frappe.call({
 			method: "apex_habitat.habitat.api.front_desk.get_building_grid",
 			args: { building: this.building },
+			error_handlers: {
+				PermissionError: () => {
+					permission_denied = true;
+					if (requested !== this.building) return;
+					frappe.hide_msgprint();
+					this._render_error(
+						__("You don't have permission to view this building."),
+						{ retry: false }
+					);
+				},
+			},
 			callback: (r) => {
 				// [#ojympt]
 				if (requested !== this.building) return;
@@ -139,8 +202,10 @@ class FrontDesk {
 				this._render_grid(r.message);
 			},
 			error: () => {
-				if (requested !== this.building) return;
-				this._render_error(__("Could not load the board. Check your connection and try again."));
+				if (requested !== this.building || permission_denied) return;
+				this._render_error(
+					__("Could not load the board. Check your connection and try again.")
+				);
 			},
 		});
 	}
@@ -164,14 +229,17 @@ class FrontDesk {
 		}
 	}
 
-	_render_error(message) {
+	_render_error(message, opts) {
+		const allow_retry = !opts || opts.retry !== false;
 		this.$container.empty();
 		const $err = $('<div class="fd-error"></div>').appendTo(this.$container);
 		$('<div class="fd-error-msg"></div>').text(message).appendTo($err);
-		$('<button class="btn btn-default btn-sm"></button>')
-			.text(__("Retry"))
-			.on("click", () => this.refresh())
-			.appendTo($err);
+		if (allow_retry) {
+			$('<button class="btn btn-default btn-sm"></button>')
+				.text(__("Retry"))
+				.on("click", () => this.refresh())
+				.appendTo($err);
+		}
 	}
 
 	_render_grid(data) {
@@ -191,11 +259,14 @@ class FrontDesk {
 
 		this._render_open_requests_badge($summary, data.building);
 
+		this._render_legend();
+
 		if (!data.floors || !data.floors.length) {
 			this._render_empty(__("No beds found for this building."));
 			return;
 		}
 
+		const NOT_READY = ["Needs Cleaning", "Needs Repair", "Out of Service"];
 		data.floors.forEach((floor) => {
 			const $floor = $('<div class="fd-floor"></div>').appendTo(this.$container);
 			$('<div class="fd-floor-header"></div>')
@@ -204,7 +275,10 @@ class FrontDesk {
 			const $rooms = $('<div class="fd-rooms"></div>').appendTo($floor);
 
 			(floor.rooms || []).forEach((room) => {
-				const $room = $('<div class="fd-room"></div>').appendTo($rooms);
+				const needs_readiness = NOT_READY.includes(room.readiness_status);
+				const $room = $('<div class="fd-room"></div>')
+					.attr("data-needs-readiness", needs_readiness ? "1" : "0")
+					.appendTo($rooms);
 				const $rh = $('<div class="fd-room-header"></div>').appendTo($room);
 				$('<span class="fd-room-number"></span>')
 					.text(`${__("Room")} ${room.room_number || room.room}`)
@@ -214,8 +288,7 @@ class FrontDesk {
 					.appendTo($rh);
 
 				// [#mark-ready] Offer a one-tap "Mark Ready" only on not-ready rooms.
-				const NOT_READY = ["Needs Cleaning", "Needs Repair", "Out of Service"];
-				if (NOT_READY.includes(room.readiness_status)) {
+				if (needs_readiness) {
 					$('<button class="btn btn-xs btn-default fd-room-ready"></button>')
 						.text(__("Mark Ready"))
 						.on("click", () => this._mark_room_ready(room.room))
@@ -224,9 +297,81 @@ class FrontDesk {
 
 				const $beds = $('<div class="fd-beds"></div>').appendTo($room);
 				(room.beds || []).forEach((bed) => {
-					this._render_bed_card(bed, room, data.building).appendTo($beds);
+					this._render_bed_card(bed, room, data.building)
+						.attr("data-color", bed.bed_color)
+						.appendTo($beds);
 				});
 			});
+		});
+
+		this._apply_filters();
+	}
+
+	// A legend that doubles as client-side filters. The color swatches name what
+	// each bed color means; three toggles narrow the board without a round-trip
+	// (filtering is purely show/hide over the already-loaded grid).
+	_render_legend() {
+		const $legend = $('<div class="fd-legend"></div>').appendTo(this.$container);
+
+		const swatches = [
+			["green", __("Available")],
+			["red", __("Occupied")],
+			["amber", __("Room not ready")],
+			["grey", __("Out of service")],
+		];
+		const $key = $('<div class="fd-legend-key"></div>').appendTo($legend);
+		swatches.forEach(([color, label]) => {
+			const $item = $('<span class="fd-legend-item"></span>').appendTo($key);
+			$(`<span class="fd-legend-dot fd-bed--${color}"></span>`).appendTo($item);
+			$('<span class="fd-legend-label"></span>').text(label).appendTo($item);
+		});
+
+		const toggles = [
+			["only_available", __("Show only available")],
+			["hide_out_of_service", __("Hide out of service")],
+			["only_needs_readiness", __("Rooms needing readiness")],
+		];
+		const $filters = $('<div class="fd-legend-filters"></div>').appendTo($legend);
+		toggles.forEach(([key, label]) => {
+			const active = this.filters[key];
+			const $btn = $('<button type="button" class="fd-legend-filter"></button>')
+				.toggleClass("fd-legend-filter--active", active)
+				.attr("aria-pressed", active ? "true" : "false")
+				.text(label)
+				.appendTo($filters);
+			$btn.on("click", () => {
+				this.filters[key] = !this.filters[key];
+				$btn.toggleClass("fd-legend-filter--active", this.filters[key]);
+				$btn.attr("aria-pressed", this.filters[key] ? "true" : "false");
+				this._apply_filters();
+			});
+		});
+	}
+
+	// Apply the active legend filters by hiding non-matching beds, then collapsing
+	// rooms/floors left with no visible bed. Pure client-side show/hide.
+	_apply_filters() {
+		const f = this.filters;
+		this.$container.find(".fd-bed").each((_i, el) => {
+			const $bed = $(el);
+			const color = $bed.attr("data-color");
+			let show = true;
+			if (f.only_available && color !== "green") show = false;
+			if (f.hide_out_of_service && color === "grey") show = false;
+			$bed.toggleClass("fd-bed--filtered", !show);
+		});
+		this.$container.find(".fd-room").each((_i, el) => {
+			const $room = $(el);
+			const needs_readiness = $room.attr("data-needs-readiness") === "1";
+			const has_visible_bed = $room.find(".fd-bed:not(.fd-bed--filtered)").length > 0;
+			const readiness_ok = !f.only_needs_readiness || needs_readiness;
+			$room.toggleClass("fd-room--filtered", !(has_visible_bed && readiness_ok));
+		});
+		// Collapse a floor whose every room is hidden.
+		this.$container.find(".fd-floor").each((_i, el) => {
+			const $floor = $(el);
+			const has_visible_room = $floor.find(".fd-room:not(.fd-room--filtered)").length > 0;
+			$floor.toggleClass("fd-floor--filtered", !has_visible_room);
 		});
 	}
 
@@ -275,7 +420,7 @@ class FrontDesk {
 				.appendTo($card);
 		}
 
-		const handler = () => this._on_bed_click(bed, room, building);
+		const handler = () => this._on_bed_click(bed, room, building, $card);
 		$card.on("click", handler);
 		$card.on("keydown", (e) => {
 			if (e.key === "Enter" || e.key === " ") {
@@ -284,6 +429,14 @@ class FrontDesk {
 			}
 		});
 		return $card;
+	}
+
+	// Mark/unmark a bed card busy during a check-in/out round-trip so the operator
+	// sees the clicked bed is working before the board refresh repaints it.
+	_set_bed_updating($card, busy) {
+		if (!$card) return;
+		$card.toggleClass("fd-bed--updating", !!busy);
+		$card.attr("aria-busy", busy ? "true" : null);
 	}
 
 	_mark_room_ready(room) {
@@ -298,13 +451,13 @@ class FrontDesk {
 		});
 	}
 
-	_on_bed_click(bed, room, building) {
+	_on_bed_click(bed, room, building, $card) {
 		switch (bed.bed_color) {
 			case "green":
-				this._open_check_in_dialog(bed, room, building);
+				this._open_check_in_dialog(bed, room, building, $card);
 				break;
 			case "red":
-				this._open_check_out_dialog(bed, room, building);
+				this._open_check_out_dialog(bed, room, building, $card);
 				break;
 			case "amber":
 				frappe.show_alert({
@@ -320,7 +473,7 @@ class FrontDesk {
 		}
 	}
 
-	_open_check_in_dialog(bed, room, building) {
+	_open_check_in_dialog(bed, room, building, $card) {
 		const context = `${building} · ${__("Room")} ${room.room_number || room.room} · ${bed.bed_code || bed.bed}`;
 		const d = new frappe.ui.Dialog({
 			title: __("Quick Check-in"),
@@ -431,6 +584,8 @@ class FrontDesk {
 			],
 			primary_action_label: __("Check In"),
 			primary_action: (values) => {
+				d.hide();
+				this._set_bed_updating($card, true);
 				frappe.call({
 					method: "apex_habitat.habitat.api.front_desk.quick_check_in",
 					args: {
@@ -442,24 +597,25 @@ class FrontDesk {
 						assignment_type: values.assignment_type || "New Assignment",
 						room_condition_snapshot: values.room_condition_snapshot || null,
 					},
-					freeze: true,
-					freeze_message: __("Checking in…"),
 					callback: (r) => {
-						if (r.exc || !r.message) return;
-						d.hide();
+						if (r.exc || !r.message) {
+							this._set_bed_updating($card, false);
+							return;
+						}
 						frappe.show_alert({
 							message: __("Checked in: {0}", [r.message.assignment]),
 							indicator: "green",
 						});
 						this.refresh();
 					},
+					error: () => this._set_bed_updating($card, false),
 				});
 			},
 		});
 		d.show();
 	}
 
-	_open_check_out_dialog(bed, room, building) {
+	_open_check_out_dialog(bed, room, building, $card) {
 		const occupant = bed.occupant || {};
 
 		// [#rukrv3]
@@ -513,6 +669,8 @@ class FrontDesk {
 			],
 			primary_action_label: __("Check Out"),
 			primary_action: (values) => {
+				d.hide();
+				this._set_bed_updating($card, true);
 				frappe.call({
 					method: "apex_habitat.habitat.api.front_desk.quick_check_out",
 					args: {
@@ -521,12 +679,13 @@ class FrontDesk {
 						checkout_reason: values.checkout_reason,
 						room_condition_snapshot: values.room_condition_snapshot || null,
 					},
-					freeze: true,
-					freeze_message: __("Checking out…"),
 					callback: (r) => {
-						if (r.exc || !r.message) return;
+						if (r.exc || !r.message) {
+							this._set_bed_updating($card, false);
+							return;
+						}
 						if (r.message.requires_full_form) {
-							d.hide();
+							this._set_bed_updating($card, false);
 							frappe.show_alert({
 								message: __("This resident has custody items. Opening the full Checkout form to clear custody."),
 								indicator: "orange",
@@ -534,13 +693,13 @@ class FrontDesk {
 							frappe.new_doc("Accommodation Checkout", { assignment: r.message.assignment });
 							return;
 						}
-						d.hide();
 						frappe.show_alert({
 							message: __("Checked out: {0}", [r.message.checkout]),
 							indicator: "green",
 						});
 						this.refresh();
 					},
+					error: () => this._set_bed_updating($card, false),
 				});
 			},
 		});

@@ -19,10 +19,15 @@
   "issued_to_employee",
   "custody_issue_worker_col2",
   "issued_to_name",
+  "issued_to_user",
   "custody_issue_sec_table_items",
   "items",
   "custody_issue_sec_large_text",
   "remarks",
+  "custody_issue_sec_handover",
+  "acknowledged_on",
+  "custody_issue_handover_col",
+  "signature",
   "custody_issue_sec_system",
   "status",
   "custody_issue_system_col1",
@@ -115,6 +120,16 @@
    "label": "Issued To (Free Text)"
   },
   {
+   "description": "Holder's login user, mirrored from the employee so receipt notifications can reach a real address.",
+   "fetch_from": "issued_to_employee.user_id",
+   "fetch_if_empty": 1,
+   "fieldname": "issued_to_user",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Issued To (User)",
+   "read_only": 1
+  },
+  {
    "fieldname": "custody_issue_sec_table_items",
    "fieldtype": "Section Break",
    "label": "Items"
@@ -134,6 +149,31 @@
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks"
+  },
+  {
+   "collapsible": 1,
+   "description": "Recipient's signature and acknowledgment captured in person at the kiosk when the items are handed over.",
+   "fieldname": "custody_issue_sec_handover",
+   "fieldtype": "Section Break",
+   "label": "Proof of Handover"
+  },
+  {
+   "description": "When the recipient acknowledged receipt at the kiosk.",
+   "fieldname": "acknowledged_on",
+   "fieldtype": "Datetime",
+   "label": "Acknowledged On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "custody_issue_handover_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Recipient's signature taken at handover time.",
+   "fieldname": "signature",
+   "fieldtype": "Signature",
+   "label": "Signature",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -186,7 +226,7 @@
    "link_fieldname": "custody_issue"
   }
  ],
- "modified": "2026-06-24 10:00:00.000000",
+ "modified": "2026-06-26 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Issue",
