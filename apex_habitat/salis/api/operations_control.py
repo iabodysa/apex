@@ -16,8 +16,11 @@ client-side CSV export of the current view.
 from __future__ import annotations
 
 import frappe
+from frappe import _
+from frappe.utils import getdate, today
 
 from apex_habitat.salis.api.dispatch_board import _permitted_projects
+from apex_habitat.salis.utils import lock_vehicle
 
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 
@@ -149,3 +152,45 @@ def get_vehicle_detail(vehicle):
         limit=10,
     )
     return {"vehicle": v, "incidents": incidents, "assignments": assignments}
+
+
+@frappe.whitelist(methods=["POST"])
+def release_vehicle(vehicle, return_date=None):
+    """Release a Stopped vehicle back to service from the Fleet Control drawer.
+
+    Closes the vehicle's open (submitted) Vehicle Stop through the NATIVE
+    submittable lifecycle: the release fields are stamped on the stop and the
+    document is then cancelled, so ``VehicleStop.on_cancel`` is what restores the
+    vehicle to its ``previous_status`` (controllers are not bypassed — we never
+    poke ``Salis Vehicle.status`` directly). Permission is re-checked on the
+    vehicle ("write") on top of the Page role grant.
+
+    ``return_date`` (the workshop-exit date) defaults to today; ``released_on`` is
+    stamped to today and ``released_by`` to the acting user. Returns the closed
+    stop name. Throws when the vehicle has no open stop (e.g. it is not Stopped,
+    or a concurrent release already closed it).
+    """
+    frappe.has_permission("Salis Vehicle", "write", doc=vehicle, throw=True)
+    lock_vehicle(vehicle)
+
+    stop = frappe.db.get_value(
+        "Vehicle Stop",
+        {"vehicle": vehicle, "docstatus": 1},
+        "name",
+        order_by="creation desc",
+    )
+    if not stop:
+        frappe.throw(_("This vehicle has no open stop to release."))
+
+    on = getdate(today())
+    ret = getdate(return_date) if return_date else on
+    # Audit stamps on the submitted stop; not allow_on_submit, so set them directly
+    # before the cancel transition runs the native reversal (on_cancel).
+    frappe.db.set_value(
+        "Vehicle Stop",
+        stop,
+        {"return_date": ret, "released_on": on, "released_by": frappe.session.user},
+    )
+    # on_cancel restores the vehicle's previous_status (controllers not bypassed).
+    frappe.get_doc("Vehicle Stop", stop).cancel()
+    return {"ok": True, "stop": stop}

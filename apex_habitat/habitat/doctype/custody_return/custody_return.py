@@ -177,3 +177,42 @@ def on_cancel(doc, method=None):
     )
     reverse_stock_entries("Custody Return", doc.name)
 
+
+_DAMAGED_CONDITIONS = ("Damaged", "Lost")
+
+
+@frappe.whitelist()
+def make_damage_assessment(source_name, target_doc=None):
+    """Open a draft Custody Damage Assessment pre-filled from a submitted return:
+    only the Damaged/Lost rows carry over, and the back-link + worker derive so the
+    coordinator just fills the per-item damage description and replacement cost."""
+    frappe.has_permission("Custody Return", "read", doc=source_name, throw=True)
+    from frappe.model.mapper import get_mapped_doc
+    from frappe.utils import nowdate
+
+    def set_missing_values(source, target):
+        target.custody_return = source.name
+        target.assessment_date = nowdate()
+
+    return get_mapped_doc(
+        "Custody Return",
+        source_name,
+        {
+            "Custody Return": {
+                "doctype": "Custody Damage Assessment",
+                "field_map": {
+                    "party_type": "party_type",
+                    "party": "party",
+                    "building": "building",
+                },
+            },
+            "Custody Return Item": {
+                "doctype": "Custody Damage Item",
+                "field_map": {"article": "article", "serial_no": "serial_no"},
+                "condition": lambda row: row.condition_on_return in _DAMAGED_CONDITIONS,
+            },
+        },
+        target_doc,
+        set_missing_values,
+    )
+

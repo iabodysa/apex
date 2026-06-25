@@ -108,6 +108,93 @@ class TestCustodyReturn(FrappeTestCase):
         self.assertEqual(_progress_from({"A": 5, "B": 5}, {"A": 5, "B": 5}), "Returned")
 
 
+class TestCustodyReturnDamageAssessment(FrappeTestCase):
+    """The 'Create Damage Assessment' action maps only Damaged/Lost rows from a
+    return into a pre-filled draft assessment that back-links the return."""
+
+    def setUp(self):
+        h = frappe.generate_hash(length=4).upper()
+        self.cat = frappe.get_doc({
+            "doctype": "Custody Asset Category", "category_name": "Cat " + h,
+        }).insert(ignore_permissions=True).name
+        self.damaged_article = frappe.get_doc({
+            "doctype": "Custody Article", "naming_series": "ART-.####",
+            "article_name": "Damaged " + h, "category": self.cat,
+        }).insert(ignore_permissions=True).name
+        self.good_article = frappe.get_doc({
+            "doctype": "Custody Article", "naming_series": "ART-.####",
+            "article_name": "Good " + h, "category": self.cat,
+        }).insert(ignore_permissions=True).name
+
+    def _return(self, conditions):
+        """A saved Custody Return with one row per (article, condition_on_return).
+        Links are placeholder strings (ignore_links) — the mapper reads by name and
+        never re-validates the source's links."""
+        doc = frappe.get_doc({
+            "doctype": "Custody Return",
+            "naming_series": "CUST-RET-.YYYY.-.####",
+            "return_date": "2026-07-01",
+            "custody_issue": "CUST-ISS-QA",
+            "building": "QA-BLDG",
+            "party_type": "Temporary Worker",
+            "party": "QA-TW",
+            "items": [
+                {"doctype": "Custody Return Item", "article": art, "qty": 1,
+                 "condition_on_return": cond}
+                for art, cond in conditions
+            ],
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        self.addCleanup(frappe.delete_doc, "Custody Return", doc.name,
+                        force=True, ignore_permissions=True)
+        return doc
+
+    def test_maps_only_damaged_and_lost_rows(self):
+        from apex_habitat.habitat.doctype.custody_return.custody_return import (
+            make_damage_assessment,
+        )
+        ret = self._return([
+            (self.good_article, "Good"),
+            (self.damaged_article, "Damaged"),
+        ])
+        target = make_damage_assessment(ret.name)
+        self.assertEqual(target.doctype, "Custody Damage Assessment")
+        self.assertEqual(target.custody_return, ret.name)
+        self.assertEqual(target.building, "QA-BLDG")
+        self.assertEqual(target.party_type, "Temporary Worker")
+        self.assertEqual(target.party, "QA-TW")
+        self.assertTrue(target.assessment_date)
+        self.assertEqual(len(target.items), 1)
+        self.assertEqual(target.items[0].article, self.damaged_article)
+
+    def test_lost_condition_also_carries_over(self):
+        from apex_habitat.habitat.doctype.custody_return.custody_return import (
+            make_damage_assessment,
+        )
+        ret = self._return([(self.damaged_article, "Lost")])
+        target = make_damage_assessment(ret.name)
+        self.assertEqual(len(target.items), 1)
+        self.assertEqual(target.items[0].article, self.damaged_article)
+
+    def test_no_damaged_rows_maps_no_items(self):
+        from apex_habitat.habitat.doctype.custody_return.custody_return import (
+            make_damage_assessment,
+        )
+        ret = self._return([(self.good_article, "Good")])
+        target = make_damage_assessment(ret.name)
+        self.assertEqual(len(target.items), 0)
+
+    def test_button_gated_on_docstatus_and_damaged_condition(self):
+        """The client button only appears for a submitted return that has a
+        Damaged/Lost row."""
+        import pathlib
+        js = pathlib.Path(__file__).with_name("custody_return.js").read_text()
+        self.assertIn("frm.doc.docstatus === 1", js)
+        self.assertIn("Damaged", js)
+        self.assertIn("Lost", js)
+        self.assertIn("make_damage_assessment", js)
+
+
 class TestCustodyReturnSerializedRules(FrappeTestCase):
     """The serialized-article guard is enforced on return as well as issue."""
 

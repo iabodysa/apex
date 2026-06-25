@@ -122,6 +122,8 @@ class FrontDesk {
 			)
 		);
 
+		this._render_open_requests_badge($summary, data.building);
+
 		if (!data.floors || !data.floors.length) {
 			this._render_empty(__("No beds found for this building."));
 			return;
@@ -158,6 +160,34 @@ class FrontDesk {
 					this._render_bed_card(bed, room, data.building).appendTo($beds);
 				});
 			});
+		});
+	}
+
+	_render_open_requests_badge($summary, building) {
+		// Async so the board paints without waiting; the badge clicks through to
+		// the Resident Request list filtered to this building + open statuses
+		// (statuses come from the server so the filter can't drift).
+		const requested = building;
+		frappe.call({
+			method: "apex_habitat.habitat.api.front_desk.building_open_requests",
+			args: { building: building },
+			callback: (r) => {
+				if (requested !== this.building || r.exc || !r.message) return;
+				const count = r.message.open_requests || 0;
+				const statuses = r.message.statuses || [];
+				const indicator = count > 0 ? "fd-summary-requests--open" : "";
+				$(`<span class="fd-summary-requests ${indicator}" role="button" tabindex="0"></span>`)
+					.text(__("{0} open requests", [count]))
+					.on("click keydown", (e) => {
+						if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return;
+						e.preventDefault();
+						frappe.set_route("List", "Accommodation Resident Request", {
+							building: building,
+							status: ["in", statuses],
+						});
+					})
+					.appendTo($summary);
+			},
 		});
 	}
 

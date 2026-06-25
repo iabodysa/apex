@@ -1,0 +1,30 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.status == 'Scheduled'",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Transport Request",
+ "enabled": 0,
+ "event": "Value Change",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"A trip has been scheduled\") }}: {{ doc.name }} ({{ _(\"driver\") }}: {{ doc.assigned_driver }}).",
+ "message_type": "HTML",
+ "module": "Salis",
+ "name": "Salis - Trip Scheduled",
+ "recipients": [
+  {
+   "receiver_by_role": "Fleet Supervisor"
+  },
+  {
+   "receiver_by_document_field": "requested_by"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Trip Scheduled: {{ doc.name }}",
+ "value_changed": "status",
+ "modified": "2026-06-25 12:00:00.000000"
+}

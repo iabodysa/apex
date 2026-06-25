@@ -27,7 +27,7 @@ from frappe import _
 from frappe.utils import getdate, today
 
 from apex_habitat.salis.api.dispatch_board import _permitted_projects
-from apex_habitat.salis.utils import lock_driver, lock_vehicle
+from apex_habitat.salis.utils import add_timeline_note, lock_driver, lock_vehicle
 
 # [#mqc6q1]
 _STATUS_MAP = {
@@ -401,7 +401,42 @@ def workshop_out(plate):
 
 @frappe.whitelist(methods=["POST"])
 def recover(plate):
-    """Recover a stopped/stolen vehicle back to service: status -> Active."""
+    """Recover a stopped/stolen vehicle back to service.
+
+    When the vehicle has an open Theft Vehicle Incident on record, close it in the
+    same transaction and restore the state it captured at report time
+    (``previous_driver`` / ``previous_vehicle_status``) — so a recovered vehicle is
+    not left with a Theft incident Open forever. With no theft on record (a plain
+    stop), recover simply returns the vehicle to Active.
+    """
     vehicle = _resolve_plate(plate)
-    frappe.db.set_value("Salis Vehicle", vehicle, "status", "Active")
-    return {"ok": True}
+    lock_vehicle(vehicle)
+
+    incident = frappe.db.get_value(
+        "Vehicle Incident",
+        {"vehicle": vehicle, "incident_type": "Theft", "docstatus": 1,
+         "status": ["in", ("Open", "Under Review")]},
+        ["name", "previous_driver", "previous_vehicle_status"],
+        as_dict=True,
+        order_by="creation desc",
+    )
+    if not incident:
+        frappe.db.set_value("Salis Vehicle", vehicle, "status", "Active")
+        return {"ok": True}
+
+    # Restore the pre-theft driver only if the vehicle is still free (mirror the
+    # incident's own on_cancel), then bring it back to its captured status.
+    if incident.previous_driver and not frappe.db.get_value(
+        "Salis Vehicle", vehicle, "current_driver"
+    ):
+        frappe.db.set_value("Salis Vehicle", vehicle, "current_driver", incident.previous_driver)
+        frappe.db.set_value("Salis Driver", incident.previous_driver, "current_vehicle", vehicle)
+
+    frappe.db.set_value(
+        "Salis Vehicle", vehicle, "status", incident.previous_vehicle_status or "Active"
+    )
+    frappe.db.set_value("Vehicle Incident", incident.name, "status", "Closed")
+    add_timeline_note(
+        "Salis Vehicle", vehicle, _("Recovered; theft report {0} closed.").format(incident.name)
+    )
+    return {"ok": True, "incident": incident.name}

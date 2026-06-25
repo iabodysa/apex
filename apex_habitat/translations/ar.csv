@@ -3036,3 +3036,15 @@ Room marked ready.,تم تعليم الغرفة كجاهزة.
 Source Checkout,تسجيل المغادرة المصدر
 "This worker is not linked to a permanent Employee yet, so the worker portal is not available.",هذا العامل غير مرتبط بموظف دائم بعد، لذا بوابة العامل غير متاحة.
 "A Masar worker link can only be issued to an Employee. This worker is linked once their Iqama is issued and a permanent Employee record exists.",لا يمكن إصدار رابط عامل مسار إلا لموظف. يُربط هذا العامل بمجرد إصدار إقامته ووجود سجل موظف دائم.
+Create Damage Assessment,إنشاء تقييم أضرار
+Recovered; theft report {0} closed.,تمت الاستعادة؛ أُغلق بلاغ السرقة {0}.
+Release vehicle,إخراج المركبة
+Release {0} back to service?,إعادة {0} إلى الخدمة؟
+This vehicle has no open stop to release.,لا يوجد إيقاف مفتوح لهذه المركبة لإخراجها.
+Vehicle released,تم إخراج المركبة
+{0} open requests,{0} طلبات مفتوحة
+This resident request has been resolved,تمت معالجة طلب الساكن
+Resident Request Resolved: {{ doc.name }},تمت معالجة طلب الساكن: {{ doc.name }}
+A trip has been scheduled,تمت جدولة رحلة
+driver,السائق
+Trip Scheduled: {{ doc.name }},تمت جدولة الرحلة: {{ doc.name }}

@@ -87,6 +87,22 @@
 	font-size: 13px;
 }
 
+.fd-summary-requests {
+	cursor: pointer;
+	font-size: 13px;
+	padding-block: 2px;
+	padding-inline: 8px;
+	border-radius: 10px;
+	color: var(--text-muted, #74808b);
+	background: var(--control-bg, #f4f5f6);
+}
+
+.fd-summary-requests--open {
+	color: var(--text-on-blue, #fff);
+	background: var(--blue-500, #2490ef);
+	font-weight: 600;
+}
+
 .fd-floor {
 	margin-bottom: 24px;
 }

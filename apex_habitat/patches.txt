@@ -130,3 +130,11 @@ apex_habitat.patches.v1_x.genericize_safety_task_catalog_client
 # send_system_notification on the live row. Idempotent, no-op on fresh installs / re-run.
 # PRUNE once every deployed site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.enable_custody_damage_assessment_notification
+
+# v1.55.x — backfill Accommodation Assignment.responsible_facility_supervisor (ONE-TIME,
+# T-569). The field fetches from building.responsible_facility_supervisor on save, so rows
+# saved before the field existed stay empty and the Expected Checkout reminder never reaches
+# the building supervisor for them. Copies the building's supervisor into each empty row.
+# Never clobbers a set value; skips buildings with no supervisor. Idempotent, no-op on
+# fresh installs / re-run. PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v1_x.backfill_assignment_facility_supervisor

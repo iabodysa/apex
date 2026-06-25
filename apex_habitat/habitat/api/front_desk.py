@@ -338,6 +338,47 @@ def list_supervisor_buildings() -> list[dict]:
     return result
 
 
+# Terminal Resident Request statuses; everything else counts as "open".
+_RESIDENT_REQUEST_CLOSED = ("Resolved", "Rejected", "Closed")
+
+
+def _open_resident_request_statuses() -> list[str]:
+    """Open statuses = the Select options minus the terminal set, read from meta
+    so a newly-added non-terminal status is automatically treated as open
+    (no hand-kept list to drift from the DocType)."""
+    options = frappe.get_meta("Accommodation Resident Request").get_field("status").options or ""
+    return [
+        o
+        for o in (opt.strip() for opt in options.split("\n"))
+        if o and o not in _RESIDENT_REQUEST_CLOSED
+    ]
+
+
+@frappe.whitelist()
+def building_open_requests(building: str) -> dict:
+    """Return the count of OPEN Accommodation Resident Requests for one building.
+
+    Read-only and permission-gated on the building (same gate as
+    ``get_building_grid``). "Open" is every status except the terminal set
+    (Resolved/Rejected/Closed); the open status list is returned too so the
+    client can route to the matching filtered list without hand-keeping it.
+
+    Args:
+        building: Accommodation Building docname.
+
+    Returns:
+        dict: ``{"building", "open_requests", "statuses"}``.
+    """
+    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+
+    statuses = _open_resident_request_statuses()
+    count = frappe.db.count(
+        "Accommodation Resident Request",
+        filters={"building": building, "status": ["in", statuses]},
+    )
+    return {"building": building, "open_requests": count, "statuses": statuses}
+
+
 @frappe.whitelist()
 def get_employee_card(employee):
     """Read-only HR identity card for the check-in dialog: name + profile photo.

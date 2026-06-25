@@ -265,6 +265,14 @@ class FleetControl {
 			});
 			$a.appendTo($head);
 		});
+		// Release back to service: closes the open Vehicle Stop natively (server side).
+		if (v.status === "Stopped") {
+			const $rel = $('<button class="btn btn-xs btn-default fc-action fc-release"></button>').text(
+				__("Release vehicle")
+			);
+			$rel.on("click", () => this.release_vehicle(v, $rel));
+			$rel.appendTo($head);
+		}
 		const $body = $('<div class="fc-drawer-body"></div>').appendTo(this.$drawer);
 		this._load_detail(v, $body);
 	}
@@ -316,6 +324,25 @@ class FleetControl {
 		}
 		const $ul = $('<ul class="fc-list"></ul>').appendTo($body);
 		items.forEach((x) => $("<li></li>").text(fmt(x)).appendTo($ul));
+	}
+
+	// Confirm, then close the vehicle's open stop on the server and refresh the board.
+	release_vehicle(v, $btn) {
+		frappe.confirm(__("Release {0} back to service?", [v.plate_number || v.name]), () => {
+			$btn.prop("disabled", true);
+			frappe.call({
+				method: "apex_habitat.salis.api.operations_control.release_vehicle",
+				args: { vehicle: v.name },
+				callback: (r) => {
+					if (r && r.message && r.message.ok) {
+						frappe.show_alert({ message: __("Vehicle released"), indicator: "green" });
+						this.$drawer.removeClass("fc-open");
+						this.refresh();
+					}
+				},
+				error: () => $btn.prop("disabled", false),
+			});
+		});
 	}
 
 	export_csv() {
