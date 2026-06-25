@@ -1,7 +1,7 @@
 {
  "attach_print": 0,
  "channel": "Email",
- "condition": "doc.status == 'Unpaid' and not doc.payment_entry",
+ "condition": "doc.status == 'Unpaid'",
  "date_changed": "due_date",
  "days_in_advance": 0,
  "docstatus": 0,
@@ -26,5 +26,5 @@
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
  "subject": "Rent Payment Due (Unpaid): SAR {{ doc.amount }}",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-06-25 10:00:00.000000"
 }

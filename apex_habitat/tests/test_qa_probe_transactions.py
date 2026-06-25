@@ -14,13 +14,16 @@ def _hash(n=4):
 
 class QABase(ApexHabitatTestCase):
     def setUp(self):
-        self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({
+        # Pick a deterministic company: get_value(.., {}) returns an arbitrary
+        # "first" row, which shifts across orderings once sibling tests commit
+        # extra Company rows, dragging in a mismatched cost center / lease company.
+        self.company = frappe.db.get_value("Company", {}, order_by="creation asc") or frappe.get_doc({
             "doctype": "Company", "company_name": "Test Company",
             "default_currency": "SAR", "country": "Saudi Arabia",
         }).insert(ignore_permissions=True).name
-        self.cost_center = (
-            frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company})
-            or frappe.db.get_value("Cost Center", {"is_group": 0})
+        # Keep the cost center inside the chosen company (no cross-company fallback).
+        self.cost_center = frappe.db.get_value(
+            "Cost Center", {"is_group": 0, "company": self.company}
         )
         self.project = frappe.db.get_value("Project", {}) or frappe.get_doc({
             "doctype": "Project", "project_name": "Test Project", "company": self.company,
@@ -335,9 +338,12 @@ class TestDuplicateOverlap(QABase):
 
     # [#gxkhtt]
     def _lease(self, building, start, end, first_pay):
+        # Pin company to this test's own selection so the lease never depends on
+        # the Habitat Settings single (global committed/cached state a sibling
+        # test may leave set or unset across orderings).
         lease = frappe.get_doc({
             "doctype": "Accommodation Lease", "naming_series": "ACC-LEASE-.YYYY.-.####",
-            "building": building, "status": "Active",
+            "building": building, "company": self.company, "status": "Active",
             "lease_start_date": start, "lease_end_date": end,
             "rent_amount": 1000, "billing_cycle": "Monthly", "first_payment_date": first_pay,
         })

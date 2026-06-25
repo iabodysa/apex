@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+- [1.55.15](v1/v1_55_15.md) — Rent payment schedule cleanup and a test-suite reliability fix.
 - [1.55.14](v1/v1_55_14.md)
 - [1.55.13](v1/v1_55_13.md)
 - [1.55.12](v1/v1_55_12.md)
