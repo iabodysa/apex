@@ -82,6 +82,9 @@
 .fc-empty-title { font-weight: 600; font-size: 14px; margin-block-end: 6px; }
 .fc-empty-hint { font-size: 13px; }
 
+/* Over-filtered no-match state: the Clear-filters reset sits under the message. */
+.fc-clear-filters { margin-block-start: 12px; }
+
 /* Failure state with Retry, shown when get_fleet / get_vehicle_detail errors or returns no payload. */
 .fc-error {
 	width: 100%;
@@ -127,6 +130,37 @@
 	letter-spacing: 0.02em;
 }
 .fc-card-meta { margin: 6px 0; font-size: 13px; }
+
+/* Dot-separated node groups (office·project, detail rows): the separator is a CSS
+ * pseudo-element between flex children, not a glued middot — RTL-safe in any order. */
+.fc-sep-dot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+}
+.fc-sep-dot > * + *::before {
+	content: "·";
+	margin-inline-end: 6px;
+	color: var(--text-muted, #888);
+}
+/* Driver line: icon + name as siblings, no emoji glued onto the string. */
+.fc-driver {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+.fc-driver-icon { display: inline-flex; color: var(--text-muted, #888); }
+.fc-driver-icon .icon { width: 14px; height: 14px; }
+/* Assignment range: start—end joined by an icon arrow (flips with the writing dir). */
+.fc-range {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+.fc-range-arrow { display: inline-flex; color: var(--text-muted, #888); }
+.fc-range-arrow .icon { width: 12px; height: 12px; }
+[dir="rtl"] .fc-range-arrow { transform: scaleX(-1); }
 .fc-card-foot {
 	display: flex;
 	justify-content: space-between;

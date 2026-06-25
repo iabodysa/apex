@@ -111,6 +111,8 @@ def get_fleet_os():
         fields=[
             "name", "plate_number", "vehicle_category", "status",
             "rental_office", "project", "current_driver",
+            "planned_fuel_grade", "planned_daily_fuel_sar",
+            "compliance_status", "next_expiry_date",
         ],
         order_by="plate_number asc",
         limit_page_length=0,
@@ -256,6 +258,12 @@ def get_fleet_os():
             "plate": v.plate_number or v.name,
             "vehicle_type": v.vehicle_category or "",
             "fuel": cat_fuel.get(v.vehicle_category, ""),
+            # Real planned-fuel plan off Salis Vehicle (was always the design's "—").
+            "planned_fuel_grade": v.planned_fuel_grade or "",
+            "planned_daily_fuel_sar": v.planned_daily_fuel_sar or 0,
+            # Compliance status + next expiry drive the card's pre-stop expiry flag.
+            "compliance_status": v.compliance_status or "",
+            "next_expiry_date": str(v.next_expiry_date or ""),
             "rental_office": v.rental_office or "",
             "sheet": _sheet_for(v.vehicle_category),
             "area": "",  # [#6ptyey]

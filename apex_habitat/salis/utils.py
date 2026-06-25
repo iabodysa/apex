@@ -365,5 +365,8 @@ def add_timeline_note(doctype, name, message):
 		return
 	try:
 		frappe.get_doc(doctype, name).add_comment("Info", message)
+	except frappe.DoesNotExistError:
+		# Target was rolled back/deleted — nothing to annotate; not an error worth logging.
+		return
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Salis: timeline note failed")

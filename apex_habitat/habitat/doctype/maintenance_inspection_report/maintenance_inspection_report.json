@@ -10,6 +10,7 @@
   "maintenance_inspection_report_sec_overview",
   "inspection_date",
   "building",
+  "facility_asset",
   "maintenance_inspection_report_overview_col",
   "inspection_type",
   "overall_result",
@@ -53,6 +54,15 @@
    "label": "Building",
    "options": "Accommodation Building",
    "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Optional: the specific Facility Asset this inspection covers. On submit its Last Inspected Date is stamped with the Inspection Date.",
+   "fieldname": "facility_asset",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Facility Asset",
+   "options": "Facility Asset",
    "search_index": 1
   },
   {
@@ -150,7 +160,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-12 09:30:00.000000",
+ "modified": "2026-06-25 16:43:41.100016",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Inspection Report",

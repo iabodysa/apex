@@ -492,6 +492,7 @@ Cleaning Logs Recorded,سجلات النظافة المسجلة
 Cleaning Record,سجل التنظيف
 Cleaning Staff Salary,رواتب عمالة النظافة
 Clear,مسح
+Clear filters,مسح المرشّحات
 Clearance,تخليص
 Clearance Reason,سبب إخلاء الطرف
 Clearance is blocked. Outstanding movement-domain items remain open.,التخليص موقوف. توجد بنود نطاق حركة مفتوحة لم تُسوَّ.
@@ -758,6 +759,7 @@ Dashboards & Reports,اللوحات والتقارير
 Date,التاريخ
 Date of the first payment. Subsequent payments are calculated from this date based on Billing Cycle.,تاريخ الدفعة الأولى. تُحسب الدفعات اللاحقة من هذا التاريخ بناءً على دورة الفوترة.
 Date of the most recent inspection of this asset. Set externally; no inspection flow stamps this automatically yet.,تاريخ آخر تفتيش لهذا الأصل. يُضبط خارجيًا؛ لا يوجد بعد مسار تفتيش يسجّله تلقائيًا.
+Date of the most recent inspection of this asset. Stamped on submit of a Maintenance Inspection Report that links this asset.,تاريخ آخر تفتيش لهذا الأصل. يُختم عند ترحيل تقرير فحص صيانة يربط هذا الأصل.
 Days,الأيام
 Days Housed,أيام الإسكان
 Days Idle,أيام عدم التشغيل
@@ -1781,6 +1783,7 @@ Optional logo shown in the portal header in place of the built-in brand mark.,ش
 Optional photo of the bed/room condition at check-in (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند الدخول (دليل تسليم).
 Optional photo of the bed/room condition at checkout (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند المغادرة (دليل تسليم).
 Optional primary accent colour override. Leave blank to use the theme default.,تجاوز اختياري للون التمييز الأساسي. اتركه فارغًا لاستخدام لون السمة الافتراضي.
+Optional: the specific Facility Asset this inspection covers. On submit its Last Inspected Date is stamped with the Inspection Date.,اختياري: أصل المنشأة المحدد الذي يغطيه هذا الفحص. عند الترحيل يُختم تاريخ آخر فحص له بتاريخ الفحص.
 Options,الخيارات
 Origin,المصدر
 Original Cost (SAR),التكلفة الأصلية (ريال)

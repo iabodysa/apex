@@ -200,7 +200,7 @@ class ArrivalsDesk {
 					is_tw ? __('Temp') : __('Emp')
 				}</span>` +
 				`<span class="ax-result-label">${frappe.utils.escape_html(row.label || '')}</span>` +
-				`<span class="ax-result-sub text-muted">${frappe.utils.escape_html(row.sub || '')}</span></div>`
+				`<span class="ax-result-sub text-muted"><bdi>${frappe.utils.escape_html(row.sub || '')}</bdi></span></div>`
 		).appendTo(this.$results);
 		const pick = () => {
 			this.$results.find('.ax-result').removeClass('ax-result--active');
@@ -238,7 +238,7 @@ class ArrivalsDesk {
 		const is_tw = card.party_type === 'Temporary Worker';
 		const bed = card.current_bed_code || card.current_bed || '';
 		const foot = card.has_housing
-			? `<span class="ax-active-bed">${__('Bed')}: ${frappe.utils.escape_html(bed)}</span>`
+			? `<span class="ax-active-bed">${__('Bed')}: <bdi>${frappe.utils.escape_html(bed)}</bdi></span>`
 			: `<span class="ax-active-hint">${__('Click a free bed to house him.')}</span>`;
 		this.$active.html(
 			`<div class="ax-active-card"><div class="ax-active-head">` +
@@ -399,7 +399,7 @@ class ArrivalsDesk {
 			const $item = $('<div class="ax-cart-item"></div>')
 				.html(
 					`<span class="ax-cart-name">${frappe.utils.escape_html(c.label || c.party)}</span>` +
-						`<span class="ax-cart-bed text-muted">${frappe.utils.escape_html(c.bed || '')}</span>`
+						`<span class="ax-cart-bed text-muted"><bdi>${frappe.utils.escape_html(c.bed || '')}</bdi></span>`
 				)
 				.appendTo($list);
 			// [#smadir]
@@ -629,10 +629,10 @@ class ArrivalsDesk {
 				const $item = $('<div class="ax-qr-item"></div>').appendTo(this.$qrBlock);
 				$('<div class="ax-qr-name"></div>').text(c.label || c.party).appendTo($item);
 				if (m.qr) $('<img class="ax-qr-img" alt="QR" />').attr('src', m.qr).appendTo($item);
-				$('<a class="ax-qr-link" target="_blank" rel="noopener"></a>')
-					.attr('href', m.link)
-					.text(m.link)
-					.appendTo($item);
+				// isolate the LTR Masar URL so it keeps order inside the RTL deck
+				const $link = $('<a class="ax-qr-link" target="_blank" rel="noopener"></a>').attr('href', m.link);
+				$('<bdi></bdi>').text(m.link).appendTo($link);
+				$link.appendTo($item);
 			});
 	}
 
@@ -863,7 +863,7 @@ class ArrivalsDesk {
 		return (
 			`<div class="ax-bed ax-bed--${color}${temp}" data-bed="${frappe.utils.escape_html(bed.bed || '')}"${a11y} ` +
 			`title="${frappe.utils.escape_html(bed.bed_code || '')}">` +
-			`<span class="ax-bed-code">${frappe.utils.escape_html(bed.bed_code || '')}</span>` +
+			`<span class="ax-bed-code"><bdi>${frappe.utils.escape_html(bed.bed_code || '')}</bdi></span>` +
 			`${occupant}${custody}</div>`
 		);
 	}

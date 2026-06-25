@@ -185,7 +185,7 @@
    "label": "Last Inspected Date",
    "read_only": 1,
    "idx": 19,
-   "description": "Date of the most recent inspection of this asset. Set externally; no inspection flow stamps this automatically yet."
+   "description": "Date of the most recent inspection of this asset. Stamped on submit of a Maintenance Inspection Report that links this asset."
   },
   {
    "doctype": "DocField",
@@ -318,5 +318,5 @@
   "movement_count",
   "last_movement_date"
  ],
- "modified": "2026-06-12 09:59:52.443056"
+ "modified": "2026-06-25 16:43:41.100016"
 }

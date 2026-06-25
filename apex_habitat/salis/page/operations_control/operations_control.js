@@ -33,6 +33,12 @@ function _expiry_phrase(date) {
 	return __("expired {0} ago", [_days_label(-days)]);
 }
 
+// Isolate an LTR token (plate, odometer, date, VEH-* id) inside RTL text so its
+// digits/latin chars don't reorder. escape_html guards the value as we go to HTML.
+function _bdi(value) {
+	return `<bdi>${frappe.utils.escape_html(value == null ? "" : String(value))}</bdi>`;
+}
+
 class FleetControl {
 	constructor(page) {
 		this.page = page;
@@ -42,7 +48,9 @@ class FleetControl {
 	}
 
 	setup() {
-		this.$root = $('<div class="fc-root"></div>').appendTo(this.page.main);
+		this.$root = $('<div class="fc-root"></div>')
+			.attr("dir", frappe.utils.is_rtl() ? "rtl" : "ltr")
+			.appendTo(this.page.main);
 		this.$progress = $('<div class="fc-progress"></div>').appendTo(this.$root);
 		this.$summary = $('<div class="fc-summary"></div>').appendTo(this.$root);
 		this.$controls = $('<div class="fc-controls"></div>').appendTo(this.$root);
@@ -222,9 +230,23 @@ class FleetControl {
 				.appendTo($e);
 			return;
 		}
-		$('<div class="fc-empty text-muted"></div>')
-			.text(__("No vehicles match the current filters."))
-			.appendTo(this.$grid);
+		const $e = $('<div class="fc-empty fc-empty-filtered text-muted"></div>').appendTo(this.$grid);
+		$('<div></div>').text(__("No vehicles match the current filters.")).appendTo($e);
+		// Escape hatch out of an over-filtered board: reset every filter + refetch.
+		const $clear = $('<button class="btn btn-sm btn-default fc-clear-filters"></button>')
+			.text(__("Clear filters"))
+			.appendTo($e);
+		$clear.on("click", () => this._clear_filters());
+	}
+
+	// Reset all filters (status/office/project/search) and reload the board.
+	_clear_filters() {
+		this.filters = { status: "", rental_office: "", project: "", search: "" };
+		if (this.$status) this.$status.val("");
+		if (this.$office) this.$office.val("");
+		if (this.$project) this.$project.val("");
+		if (this.$search) this.$search.val("");
+		this.refresh();
 	}
 
 	_render_card(v) {
@@ -232,15 +254,26 @@ class FleetControl {
 		const $c = $('<div class="fc-card"></div>').addClass("fc-accent-" + color);
 		$c.on("click", () => this.open_detail(v));
 		const $head = $('<div class="fc-card-head"></div>').appendTo($c);
-		$('<div class="fc-plate"></div>').text(v.plate_number || v.name).appendTo($head);
+		// Plate / VEH-* id is LTR: <bdi> keeps it from reversing inside an RTL card.
+		$('<div class="fc-plate"></div>').html(_bdi(v.plate_number || v.name)).appendTo($head);
 		$('<span class="indicator-pill"></span>').addClass(color).text(__(v.status || "")).appendTo($head);
 		const $meta = $('<div class="fc-card-meta"></div>').appendTo($c);
 		$('<div></div>').text(v.vehicle_category || __("No category")).appendTo($meta);
-		$('<div class="text-muted"></div>')
-			.text([v.rental_office, v.project].filter(Boolean).join(" · ") || "—")
-			.appendTo($meta);
+		// Office·project as separate nodes with a CSS dot separator — no string glue,
+		// so the middot doesn't strand between LTR/RTL tokens under RTL.
+		const $op = $('<div class="text-muted fc-sep-dot"></div>').appendTo($meta);
+		const parts = [v.rental_office, v.project].filter(Boolean);
+		if (!parts.length) $('<span></span>').text("—").appendTo($op);
+		else parts.forEach((p) => $("<span></span>").text(p).appendTo($op));
 		const $foot = $('<div class="fc-card-foot"></div>').appendTo($c);
-		$('<div></div>').text("👤 " + (v.current_driver_name || __("Unassigned"))).appendTo($foot);
+		// Driver: an icon node + a text node, not an emoji glued onto the string.
+		const $driver = $('<div class="fc-driver"></div>').appendTo($foot);
+		$('<span class="fc-driver-icon"></span>')
+			.html(frappe.utils.icon("users", "sm"))
+			.appendTo($driver);
+		$('<span class="fc-driver-name"></span>')
+			.text(v.current_driver_name || __("Unassigned"))
+			.appendTo($driver);
 		if (v.open_incidents) {
 			$('<span class="indicator-pill red fc-inc"></span>')
 				.text(__("{0} open", [v.open_incidents]))
@@ -280,7 +313,8 @@ class FleetControl {
 		const $close = $('<button class="btn btn-xs btn-default fc-close"></button>').text(__("Close"));
 		$close.on("click", () => this.$drawer.removeClass("fc-open"));
 		const $head = $('<div class="fc-drawer-head"></div>').appendTo(this.$drawer);
-		$('<div class="fc-drawer-title"></div>').text(v.plate_number || v.name).appendTo($head);
+		// Plate / VEH-* id is LTR: <bdi> isolates it inside the RTL drawer header.
+		$('<div class="fc-drawer-title"></div>').html(_bdi(v.plate_number || v.name)).appendTo($head);
 		$close.appendTo($head);
 		const $open = $('<a class="btn btn-xs btn-primary fc-form-link"></a>').text(__("Open Vehicle"));
 		$open.attr("href", "/app/salis-vehicle/" + encodeURIComponent(v.name)).appendTo($head);
@@ -318,10 +352,26 @@ class FleetControl {
 				}
 				$body.empty().removeClass("text-muted");
 				this._detail_fields($body, r.message.vehicle);
-				this._detail_list($body, __("Recent Incidents"), r.message.incidents,
-					(x) => `${x.incident_date || ""} · ${__(x.incident_type || "")} · ${__(x.status || "")}`);
-				this._detail_list($body, __("Recent Assignments"), r.message.assignments,
-					(x) => `${x.start_date || ""} → ${x.end_date || __("open")} · ${x.driver || ""}`);
+				// Incident row: date (LTR) · type · status as separate dot-separated nodes.
+				this._detail_list($body, __("Recent Incidents"), r.message.incidents, (x, $li) => {
+					$li.addClass("fc-sep-dot");
+					if (x.incident_date) $('<span></span>').html(_bdi(x.incident_date)).appendTo($li);
+					$("<span></span>").text(__(x.incident_type || "")).appendTo($li);
+					$("<span></span>").text(__(x.status || "")).appendTo($li);
+				});
+				// Assignment row: start→end as a node-pair joined by an icon arrow (no
+				// glued '→'), then the driver as its own dot-separated node.
+				this._detail_list($body, __("Recent Assignments"), r.message.assignments, (x, $li) => {
+					$li.addClass("fc-sep-dot");
+					const $range = $('<span class="fc-range"></span>').appendTo($li);
+					$('<span></span>').html(_bdi(x.start_date || "")).appendTo($range);
+					$('<span class="fc-range-arrow"></span>')
+						.html(frappe.utils.icon("right", "xs"))
+						.appendTo($range);
+					if (x.end_date) $('<span></span>').html(_bdi(x.end_date)).appendTo($range);
+					else $("<span></span>").text(__("open")).appendTo($range);
+					if (x.driver) $('<span></span>').html(_bdi(x.driver)).appendTo($li);
+				});
 			},
 			error: (r) =>
 				this._render_error($body.removeClass("text-muted"), () => this._load_detail(v, $body), r),
@@ -329,29 +379,35 @@ class FleetControl {
 	}
 
 	_detail_fields($body, d) {
+		// 3rd tuple flags an LTR value (odometer number / date) → wrapped in <bdi>
+		// so digits don't reverse inside the RTL detail list.
 		const rows = [
 			["Status", d.status], ["Category", d.vehicle_category], ["Driver", d.current_driver_name],
 			["Office", d.rental_office], ["Project", d.project], ["Ownership", d.ownership],
-			["Odometer", d.odometer], ["Planned Fuel", d.planned_fuel_grade],
-			["Compliance", d.compliance_status], ["Next Expiry", d.next_expiry_date],
+			["Odometer", d.odometer, true], ["Planned Fuel", d.planned_fuel_grade],
+			["Compliance", d.compliance_status], ["Next Expiry", d.next_expiry_date, true],
 		];
 		const $dl = $('<div class="fc-dl"></div>').appendTo($body);
-		rows.forEach(([k, val]) => {
+		rows.forEach(([k, val, ltr]) => {
 			if (val == null || val === "") return;
 			const $row = $('<div class="fc-dl-row"></div>').appendTo($dl);
 			$('<div class="fc-dl-k"></div>').text(__(k)).appendTo($row);
-			$('<div class="fc-dl-v"></div>').text(String(val)).appendTo($row);
+			const $v = $('<div class="fc-dl-v"></div>').appendTo($row);
+			if (ltr) $v.html(_bdi(val));
+			else $v.text(String(val));
 		});
 	}
 
-	_detail_list($body, title, items, fmt) {
+	// `build(x, $li)` appends separate DOM nodes into each row (RTL-safe — no glued
+	// string with a stranded middot/arrow); separators are CSS, not concatenation.
+	_detail_list($body, title, items, build) {
 		$('<div class="fc-drawer-sub"></div>').text(title).appendTo($body);
 		if (!items || !items.length) {
 			$('<div class="text-muted small"></div>').text(__("None.")).appendTo($body);
 			return;
 		}
 		const $ul = $('<ul class="fc-list"></ul>').appendTo($body);
-		items.forEach((x) => $("<li></li>").text(fmt(x)).appendTo($ul));
+		items.forEach((x) => build(x, $("<li></li>").appendTo($ul)));
 	}
 
 	// Confirm, then close the vehicle's open stop on the server and refresh the board.

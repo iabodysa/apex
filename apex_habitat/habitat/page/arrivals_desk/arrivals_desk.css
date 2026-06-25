@@ -31,8 +31,8 @@
 	min-width: 0;
 }
 .arrivals-desk .ax-zone-intake {
-	border-right: 1px solid var(--border-color, #d1d8dd);
-	padding-right: 12px;
+	border-inline-end: 1px solid var(--border-color, #d1d8dd);
+	padding-inline-end: 12px;
 }
 .arrivals-desk .ax-zone-floor {
 	display: flex;
@@ -40,8 +40,8 @@
 	overflow: hidden; /* the inner .ax-floor scrolls, the anchor row stays put */
 }
 .arrivals-desk .ax-zone-actions {
-	border-left: 1px solid var(--border-color, #d1d8dd);
-	padding-left: 12px;
+	border-inline-start: 1px solid var(--border-color, #d1d8dd);
+	padding-inline-start: 12px;
 }
 
 /* [#gcslyn] */
@@ -93,7 +93,7 @@
 .arrivals-desk .ax-floor {
 	flex: 1 1 auto;
 	overflow-y: auto;
-	padding-right: 6px;
+	padding-inline-end: 6px;
 }
 .arrivals-desk .ax-floor-group {
 	margin-bottom: 16px;
@@ -170,6 +170,10 @@
 	font-weight: 700;
 	letter-spacing: 0.2px;
 }
+/* letter-spacing distorts Arabic letter-joining — drop it under RTL */
+[dir="rtl"] .arrivals-desk .ax-bed-code {
+	letter-spacing: normal;
+}
 .arrivals-desk .ax-bed-occupant {
 	font-size: var(--text-xs);
 	white-space: nowrap;
@@ -178,8 +182,8 @@
 }
 .arrivals-desk .ax-bed-badge {
 	position: absolute;
-	top: 3px;
-	right: 4px;
+	inset-block-start: 3px;
+	inset-inline-end: 4px;
 	font-size: var(--text-xs);
 }
 
@@ -255,7 +259,7 @@
 }
 .arrivals-desk .ax-result-sub {
 	font-size: var(--text-xs);
-	margin-left: auto;
+	margin-inline-start: auto;
 	flex: 0 0 auto;
 }
 .arrivals-desk .ax-results-empty {
@@ -265,7 +269,7 @@
 .arrivals-desk .ax-register-row {
 	margin-top: 8px;
 	width: 100%;
-	text-align: left;
+	text-align: start;
 }
 .arrivals-desk .ax-register-plus {
 	font-weight: 700;
@@ -515,16 +519,16 @@
 		overflow: visible;
 	}
 	.arrivals-desk .ax-zone-intake {
-		border-right: 0;
-		padding-right: 0;
-		margin-bottom: 16px;
+		border-inline-end: 0;
+		padding-inline-end: 0;
+		margin-block-end: 16px;
 	}
 	.arrivals-desk .ax-zone-actions {
-		border-left: 0;
-		padding-left: 0;
-		border-top: 1px solid var(--border-color, #d1d8dd);
-		padding-top: 12px;
-		margin-top: 16px;
+		border-inline-start: 0;
+		padding-inline-start: 0;
+		border-block-start: 1px solid var(--border-color, #d1d8dd);
+		padding-block-start: 12px;
+		margin-block-start: 16px;
 	}
 }
 @media (prefers-reduced-motion: reduce) {
