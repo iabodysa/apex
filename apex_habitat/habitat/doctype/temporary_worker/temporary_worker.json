@@ -19,7 +19,6 @@
   "labour_supplier",
   "temporary_worker_arrival_context_col",
   "building",
-  "arrival_batch",
   "temporary_worker_sec_window",
   "window_days",
   "temporary_worker_window_col",
@@ -124,12 +123,6 @@
    "options": "Accommodation Building"
   },
   {
-   "description": "Operator-entered reference grouping arrivals that landed together (e.g. a flight or batch code). No automated Arrival Batch intake exists yet; set manually if used.",
-   "fieldname": "arrival_batch",
-   "fieldtype": "Data",
-   "label": "Arrival Batch Ref"
-  },
-  {
    "fieldname": "temporary_worker_sec_window",
    "fieldtype": "Section Break",
    "label": "Temporary Window"
@@ -199,7 +192,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-12 09:30:00.000000",
+ "modified": "2026-06-25 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Temporary Worker",

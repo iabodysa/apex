@@ -41,6 +41,11 @@ def get_site_address(building_name, site=None, building_address=None):
     if building_address:
         frappe.has_permission("Address", "read", doc=building_address, throw=True)
         return get_address_text_by_name(building_address)
+    # Surface a legacy own Address linked via Dynamic Link (pre-Link-field native widget)
+    # before falling back to the Site, so it is not silently shadowed (mirrors the portal).
+    own = get_address_text("Accommodation Building", building_name)
+    if own:
+        return own
     if site:
         frappe.has_permission("Accommodation Site", "read", doc=site, throw=True)
     else:

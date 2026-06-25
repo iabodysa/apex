@@ -394,27 +394,14 @@ def _today_attendance(driver):
 	)
 
 
-@frappe.whitelist()
-def get_today_attendance():
-	"""Today's attendance state for the current driver (read).
+def _today_attendance_state(driver):
+	"""Today's attendance state for ``driver`` as the portal's display shape (read).
 
-	Identity-scoped: the driver is resolved from the session, never client-supplied,
-	so this can only ever return the caller's own record. Read-only, no commit.
-
-	Returns the durable fields of today's persisted Driver Attendance —
-	``status``, ``check_in``, ``check_out``, ``worked_hours`` (Time fields
-	stringified so the JSON always serializes) — together with convenience
-	flags the portal uses to drive its button/label state:
-
-	* ``exists``       — a record for today is already on disk
-	* ``checked_in``   — ``check_in`` is stamped
-	* ``checked_out``  — ``check_out`` is stamped
-
-	When the driver has not recorded anything today, returns the same shape with
-	``exists = False`` and null times (a friendly "not checked in yet" state) —
-	never raises and never creates a row."""
-	_require_enabled()
-	driver = _resolve_driver()
+	The single source of truth shared by ``get_today_attendance`` and the
+	``get_my_today`` composite, so both render identically. Returns the durable
+	Driver Attendance fields (Time fields stringified for JSON) plus the
+	``exists``/``checked_in``/``checked_out`` flags; the not-recorded-yet case
+	returns the same shape with null times and never creates a row."""
 	row = frappe.db.get_value(
 		"Driver Attendance",
 		{"driver": driver, "attendance_date": frappe.utils.today(), "docstatus": ["<", 2]},
@@ -441,6 +428,125 @@ def get_today_attendance():
 		"check_in": check_in,
 		"check_out": check_out,
 		"worked_hours": row.get("worked_hours"),
+	}
+
+
+@frappe.whitelist()
+def get_today_attendance():
+	"""Today's attendance state for the current driver (read).
+
+	Identity-scoped: the driver is resolved from the session, never client-supplied,
+	so this can only ever return the caller's own record. Read-only, no commit.
+	The payload shape and flags are documented on ``_today_attendance_state``."""
+	_require_enabled()
+	driver = _resolve_driver()
+	return _today_attendance_state(driver)
+
+
+# [#clropn] A driver is "not cleared" while an exit clearance is still in any
+# unresolved state — Cleared/Cancelled are the only terminal states.
+_OPEN_CLEARANCE_STATUSES = ("Open", "In Progress", "Blocked")
+
+
+def _bound_vehicle(driver):
+	"""The vehicle bound to ``driver`` (current_vehicle, else Active Assignment), or None.
+	Same binding rule ``_vehicle_bound_to_driver`` enforces for fuel writes."""
+	vehicle = frappe.db.get_value("Salis Driver", driver, "current_vehicle")
+	if vehicle:
+		return vehicle
+	return frappe.db.get_value(
+		"Vehicle Assignment", {"driver": driver, "status": "Active"}, "vehicle"
+	)
+
+
+def _license_countdown(driver):
+	"""The driver's licence expiry with a server-computed near-/over-expiry state.
+
+	Mirrors ``_vehicle_compliance``: ``days_to_expiry`` is a signed int (negative =
+	already expired) and ``state`` is ``expired`` | ``expiring`` (<= 30 days) |
+	``valid``, so the SPA needs no date math. Returns null fields when the driver
+	records no licence expiry."""
+	expiry = frappe.db.get_value("Salis Driver", driver, "license_expiry")
+	if not expiry:
+		return {"expiry_date": None, "days_to_expiry": None, "state": None}
+	days = frappe.utils.date_diff(expiry, frappe.utils.getdate())
+	return {
+		"expiry_date": frappe.utils.cstr(expiry),
+		"days_to_expiry": days,
+		"state": "expired" if days < 0 else ("expiring" if days <= 30 else "valid"),
+	}
+
+
+def _next_trip_today(driver):
+	"""The driver's next actionable Dispatch Trip today, or None.
+
+	"Next" is the earliest-departing trip that is not yet Completed/Cancelled.
+	Route/vehicle link ids are swapped for their human labels (same as
+	``my_trips_today``), and the trip's Trip Start Log state is attached so the
+	portal can show whether execution has started without a second round-trip."""
+	trips = frappe.get_all(
+		"Dispatch Trip",
+		filters={
+			"driver": driver,
+			"trip_date": frappe.utils.today(),
+			"status": ["not in", ("Completed", "Cancelled")],
+		},
+		fields=["name", "route_plan", "vehicle", "depart_time", "return_time", "status"],
+		order_by="depart_time asc",
+		limit=1,
+	)
+	if not trips:
+		return None
+	trip = trips[0]
+	_label_trips([trip])
+	log = frappe.db.get_value(
+		"Trip Start Log",
+		{"dispatch_trip": trip["name"], "driver": driver, "docstatus": ["<", 2]},
+		["status", "start_datetime"],
+		as_dict=True,
+	)
+	trip["started"] = bool(log)
+	trip["trip_log_status"] = log.get("status") if log else None
+	trip["start_datetime"] = (
+		frappe.utils.cstr(log["start_datetime"]) if log and log.get("start_datetime") else None
+	)
+	return trip
+
+
+@frappe.whitelist()
+def get_my_today():
+	"""One composite "today" payload for the driver Home screen (read).
+
+	Identity-scoped: the driver is resolved from the session, never client-supplied.
+	Collapses what the Home screen otherwise stitches from several endpoints into a
+	single read so the dashboard paints in one round-trip:
+
+	* ``attendance``      — today's attendance state (see ``_today_attendance_state``)
+	* ``next_trip``       — the next not-done Dispatch Trip today (labelled, with its
+	                        Trip Start Log state), or null
+	* ``license``         — licence expiry + server-computed countdown/state
+	* ``vehicle_bound``   — the driver has a vehicle bound (current or active assignment)
+	* ``open_clearance``  — an exit clearance is still unresolved for the driver
+
+	Read-only, no commit. Blocked (403) when the portal is disabled or the caller is
+	not a linked driver."""
+	_require_enabled()
+	driver = _resolve_driver()
+	return {
+		"attendance": _today_attendance_state(driver),
+		"next_trip": _next_trip_today(driver),
+		"license": _license_countdown(driver),
+		"vehicle_bound": bool(_bound_vehicle(driver)),
+		"open_clearance": bool(
+			frappe.db.exists(
+				"Driver Clearance",
+				{
+					"driver": driver,
+					"status": ["in", _OPEN_CLEARANCE_STATUSES],
+					"docstatus": ["<", 2],
+				},
+			)
+		),
 	}
 
 

@@ -100,15 +100,8 @@ function _renderSiteAddress(frm) {
 	const wrapper = frm.get_field("address_html").$wrapper;
 	wrapper.empty();
 
-	if (!frm.doc.site && !frm.doc.building_address) {
-		wrapper.append(
-			$('<p class="text-muted" style="font-size:13px;"></p>').text(
-				__("Select this building's address, or a Site, to show it here.")
-			)
-		);
-		return;
-	}
-
+	// Always ask the server: it resolves the building's own Address (Link or legacy
+	// Dynamic Link) then the Site, so a legacy own-address shows even with no Site set.
 	frappe.call({
 		method: "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.get_site_address",
 		args: {
@@ -123,7 +116,9 @@ function _renderSiteAddress(frm) {
 				wrapper.append($("<div></div>").text(text));
 			} else {
 				wrapper.append(
-					$('<p class="text-muted" style="font-size:13px;"></p>').text(__("No address recorded yet."))
+					$('<p class="text-muted" style="font-size:13px;"></p>').text(
+						__("Select this building's address, or a Site, to show it here.")
+					)
 				);
 			}
 		},

@@ -1007,7 +1007,8 @@ def _instance_priority(template: str | None) -> str:
 
 
 def daily_safety_task_compliance_scan() -> None:
-    """Daily — flag overdue Scheduled Task Instances Overdue and escalate the urgent ones.
+    """Daily — flag overdue Scheduled Task Instances Overdue, escalate the urgent ones,
+    and flag active buildings with no safety round at all in the recent window.
 
     An instance counts as overdue once today is past its due_date plus the configured
     ``safety_overdue_grace_days`` (read as ``value or 0`` — a new Int on the Habitat
@@ -1015,6 +1016,15 @@ def daily_safety_task_compliance_scan() -> None:
     priority is resolved through its template's Safety Task Catalog task: a High or
     Critical task additionally raises an idempotent Operations Alert AND posts a system
     Notification to the Safety Officer, so urgent safety lapses surface immediately.
+
+    Second pass: every ACTIVE Accommodation Building (``status == "Active"``) with ZERO
+    submitted Safety Rounds of ANY cadence dated within the trailing
+    ``ZERO_ROUNDS_WINDOW_DAYS`` raises an idempotent Operations Alert and notifies the
+    Safety Officer. This is broader than ``weekly_safety_coverage_gate`` (which only
+    checks for a *Weekly*-cadence round in the current ISO week): it catches buildings
+    with no safety activity whatsoever. The alert carries a ``zero-rounds::<building>``
+    dedupe token so daily reruns stay idempotent.
+
     Per-row error isolation; paginated 500/batch.
     """
     from frappe.utils import today, getdate, add_days
@@ -1083,6 +1093,67 @@ def daily_safety_task_compliance_scan() -> None:
         )
     else:
         logger.info("daily_safety_task_compliance_scan: No overdue instances found.")
+
+    # Zero-rounds pass: active buildings with NO safety round of any cadence recently.
+    ZERO_ROUNDS_WINDOW_DAYS = 7
+    window_start = str(getdate(add_days(today(), -ZERO_ROUNDS_WINDOW_DAYS)))
+    no_rounds = 0
+
+    start = 0
+    while True:
+        buildings = frappe.get_all(
+            "Accommodation Building",
+            filters={"status": "Active"},
+            fields=["name", "building_name"],
+            limit_start=start,
+            limit_page_length=batch_size,
+        )
+        if not buildings:
+            break
+
+        for b in buildings:
+            try:
+                has_round = frappe.db.exists(
+                    "Safety Round",
+                    {
+                        "docstatus": 1,
+                        "building": b.name,
+                        "round_date": [">=", window_start],
+                    },
+                )
+                if has_round:
+                    continue
+                label = b.building_name or b.name
+                token = f"zero-rounds::{b.name}"
+                # Token embedded so _raise_safety_alert's message-LIKE dedupe matches.
+                msg = (
+                    f"daily_safety_task_compliance_scan [{token}]: building {label} has no "
+                    f"submitted Safety Round in the last {ZERO_ROUNDS_WINDOW_DAYS} days."
+                )
+                _raise_safety_alert(
+                    alert_type="Supervisor Delay",
+                    severity="Warning",
+                    message=msg,
+                    dedupe_token=token,
+                )
+                _notify_role_system(
+                    "Safety Officer",
+                    subject=f"No recent safety round: {label}",
+                    message=msg,
+                )
+                no_rounds += 1
+            except Exception:
+                frappe.db.rollback()  # [#7kjob3]
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Zero-rounds scan failed for {b.name}"[:140],
+                )
+
+        start += batch_size
+
+    logger.info(
+        f"daily_safety_task_compliance_scan: {no_rounds} active building(s) with no recent safety round."
+    )
 
 
 def daily_scheduled_task_instance_generator() -> None:

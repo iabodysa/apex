@@ -88,6 +88,27 @@ class TestBuildingAddressFallback(FrappeTestCase):
         self.assertIn("Own Street 9", text)      # stored own address wins
         self.assertNotIn("Site Street 7", text)  # not the stored site's
 
+    def test_legacy_dynamic_link_own_address_precedes_site(self):
+        """A legacy own Address linked via Dynamic Link (the pre-Link-field native
+        widget) and NO stored building_address must still surface on the form,
+        winning over the site's address instead of being silently shadowed."""
+        site = _ensure_site("T139 Reconcile Site")
+        _ensure_address(
+            "T139 Reconcile Site Addr", "Site Street 21", "Riyadh",
+            link_doctype="Accommodation Site", link_name=site,
+        )
+        # building_address Link field stays empty; the own address lives only in the
+        # native Dynamic Link, so the building must exist before the Address links to it.
+        bldg = make_building(name="T139 Reconcile Bldg", site=site).name
+        _ensure_address(
+            "T139 Reconcile Own Addr", "Legacy Own Street 23", "Jeddah",
+            link_doctype="Accommodation Building", link_name=bldg,
+        )
+
+        text = get_site_address(bldg)  # no args -> empty Link field, falls to Dynamic Link
+        self.assertIn("Legacy Own Street 23", text)  # the legacy own address surfaces
+        self.assertNotIn("Site Street 21", text)     # not shadowed by the site's
+
     def test_clearing_saved_own_address_falls_back_to_site(self):
         """Clearing the stored building_address on the record makes the next no-arg
         resolution fall back to the stored site again (the live fallback path)."""
