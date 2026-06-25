@@ -98,9 +98,15 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
 
         # [#9ztpd7] A submitted Salary Structure Assignment is the precondition
         # HRMS's Additional Salary checks on submit (validate_salary_structure); a
-        # bare site has none, so build one here. The structure carries one Earning
-        # (required to submit) and no tax component (so no Income Tax Slab is
-        # demanded), and the assignment's from_date precedes any test payroll_date.
+        # bare site has none, so build one here. Everything is bound to the
+        # EMPLOYEE's own company (not self.company, which can differ across test
+        # classes on a shared site) so the assignment's company == structure's
+        # company == employee's company and HRMS validate_company holds. The
+        # structure carries one Earning (required to submit) and no tax component
+        # (so no Income Tax Slab is demanded); from_date precedes any test
+        # payroll_date.
+        emp_company = frappe.db.get_value("Employee", self.employee, "company")
+
         earn_component = "Apex Habitat Test Earning"
         if not frappe.db.exists("Salary Component", earn_component):
             frappe.get_doc({
@@ -109,13 +115,15 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
                 "type": "Earning",
             }).insert(ignore_permissions=True)
 
-        struct_name = f"Apex Habitat Test Salary Structure {self.company}"
-        if not frappe.db.get_value("Salary Structure", {"name": struct_name, "docstatus": 1}):
+        struct_name = f"Apex Habitat Test Salary Structure {emp_company}"
+        if not frappe.db.get_value(
+            "Salary Structure", {"name": struct_name, "company": emp_company, "docstatus": 1}
+        ):
             struct = frappe.get_doc({
                 "doctype": "Salary Structure",
                 "name": struct_name,
                 "salary_structure_name": struct_name,
-                "company": self.company,
+                "company": emp_company,
                 "currency": "SAR",
                 "is_active": "Yes",
                 "payroll_frequency": "Monthly",
@@ -124,16 +132,17 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
             struct.insert(ignore_permissions=True)
             struct.submit()
 
-        if not frappe.db.exists(
+        has_assignment = frappe.db.exists(
             "Salary Structure Assignment",
-            {"employee": self.employee, "docstatus": 1},
-        ):
+            {"employee": self.employee, "salary_structure": struct_name, "docstatus": 1},
+        )
+        if not has_assignment:
             assignment = frappe.get_doc({
                 "doctype": "Salary Structure Assignment",
                 "employee": self.employee,
                 "salary_structure": struct_name,
                 "from_date": "2026-01-01",
-                "company": self.company,
+                "company": emp_company,
                 "currency": "SAR",
                 "base": 1000.0,
             })
