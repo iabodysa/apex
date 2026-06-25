@@ -471,19 +471,78 @@ def report_theft(plate, location=None, report_number=None):
 
 
 @frappe.whitelist(methods=["POST"])
-def workshop_in(plate):
-    """Send a vehicle to the workshop: Salis Vehicle.status -> Under Maintenance."""
+def workshop_in(plate, expected_return=None, notes=None):
+    """Send a vehicle to the workshop via a submittable Maintenance Vehicle Stop.
+
+    Mirrors stop_vehicle/report_theft/reassign: the workshop event is now an
+    audited submitted record, not a bare status flip. The Vehicle Stop controller
+    (reason Maintenance) captures previous_status, writes the timeline note/comment
+    and flips the vehicle to "Stopped"; we then set "Under Maintenance" so the
+    board's workshop lane stays distinct from a plain stop (both states are the
+    open-workshop set in tasks._overstay_stops, so the overstay rule still fires).
+
+    The stop's return_date is the ACTUAL workshop-exit date (empty == still in the
+    workshop, the invariant _overstay_stops/release rely on), so an EXPECTED return
+    is recorded in the notes rather than pre-filling that field.
+    """
     vehicle = _resolve_plate(plate)
+    lock_vehicle(vehicle)
+
+    note = (notes or "").strip()
+    if expected_return:
+        expected = _("Expected return: {0}").format(getdate(expected_return))
+        note = f"{note}\n{expected}".strip() if note else expected
+
+    doc = frappe.get_doc({
+        "doctype": "Vehicle Stop",
+        "vehicle": vehicle,
+        "stop_reason": "Maintenance",
+        "stop_date": getdate(today()),
+        "notes": note,
+    })
+    doc.insert()
+    doc.submit()  # on_submit captures previous_status + flips status to "Stopped".
+
+    # Distinguish the workshop lane from a plain stop on the board; previous_status
+    # was already captured by on_submit so the return path can still restore it.
     frappe.db.set_value("Salis Vehicle", vehicle, "status", "Under Maintenance")
-    return {"ok": True}
+    return {"ok": True, "stop": doc.name}
 
 
 @frappe.whitelist(methods=["POST"])
 def workshop_out(plate):
-    """Return a vehicle from the workshop: Salis Vehicle.status -> Active."""
+    """Return a vehicle from the workshop by closing its open Maintenance stop.
+
+    Mirrors operations_control.release_vehicle: stamp the workshop-exit fields on
+    the open submitted Maintenance Vehicle Stop and cancel it, so the cancel leaves
+    its own audit note. on_cancel only auto-restores when the vehicle still reads
+    "Stopped"; since workshop_in parks it at "Under Maintenance", we restore the
+    stop's captured previous_status here. Throws when there is no open workshop stop.
+    """
     vehicle = _resolve_plate(plate)
-    frappe.db.set_value("Salis Vehicle", vehicle, "status", "Active")
-    return {"ok": True}
+    lock_vehicle(vehicle)
+
+    stop = frappe.db.get_value(
+        "Vehicle Stop",
+        {"vehicle": vehicle, "stop_reason": "Maintenance", "docstatus": 1,
+         "return_date": ["is", "not set"]},
+        ["name", "previous_status"],
+        as_dict=True,
+        order_by="creation desc",
+    )
+    if not stop:
+        frappe.throw(_("This vehicle has no open workshop stop to return."))
+
+    on = getdate(today())
+    frappe.db.set_value(
+        "Vehicle Stop", stop.name,
+        {"return_date": on, "released_on": on, "released_by": frappe.session.user},
+    )
+    frappe.get_doc("Vehicle Stop", stop.name).cancel()
+    # on_cancel skips its restore while status != "Stopped"; bring it back explicitly.
+    if frappe.db.get_value("Salis Vehicle", vehicle, "status") == "Under Maintenance":
+        frappe.db.set_value("Salis Vehicle", vehicle, "status", stop.previous_status or "Active")
+    return {"ok": True, "stop": stop.name}
 
 
 @frappe.whitelist(methods=["POST"])

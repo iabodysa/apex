@@ -21,7 +21,10 @@ DEPARTURE_REASONS = ("Final Exit", "End of Contract")
 
 
 class AccommodationCheckout(Document):
-    pass
+    def before_submit(self):
+        # Custody-clearance gate. A class method so it auto-fires via run_method
+        # without a hooks.py doc_events entry.
+        before_submit(self)
 
 
 def validate(doc, method=None):
@@ -54,7 +57,9 @@ def validate(doc, method=None):
     if not doc.cost_center:
         doc.cost_center = assignment.cost_center
 
+    _autofetch_outstanding_custody(doc)
     _populate_issued_quantities(doc)
+    _roll_up_damage_deduction(doc)
 
     _VALID_TERMINAL = {"Returned", "Lost", "Damaged"}
     for row in doc.custody_return_items or []:
@@ -65,6 +70,32 @@ def validate(doc, method=None):
     if doc.custody_return_items:
         all_returned = all(r.return_status == "Returned" for r in doc.custody_return_items)
         doc.custody_cleared = 1 if all_returned else 0
+
+
+def before_submit(doc, method=None):
+    """Custody-clearance gate: the checkout cannot submit while the resident still
+    holds custody that has not been resolved. An article is resolved when its row
+    is marked Lost/Damaged, or marked Returned with the outstanding quantity
+    actually returned. validate() has already auto-fetched the outstanding set, so
+    a missing row here means it was deleted after the fetch — still a block."""
+    outstanding = _outstanding_custody_for_employee(doc.employee)
+    if not outstanding:
+        return
+    rows_by_article = {row.article: row for row in (doc.custody_return_items or []) if row.article}
+    unresolved = []
+    for article, qty in outstanding.items():
+        row = rows_by_article.get(article)
+        if row is None:
+            unresolved.append(article)
+            continue
+        if row.return_status == "Returned" and (row.quantity_returned or 0) < qty:
+            unresolved.append(article)
+    if unresolved:
+        frappe.throw(
+            _("Cannot check out while the resident still holds custody. Resolve each item (return it, or mark it Lost/Damaged): {0}").format(
+                ", ".join(sorted(unresolved))
+            )
+        )
 
 
 def _issued_quantities_for_employee(employee):
@@ -109,6 +140,58 @@ def _populate_issued_quantities(doc):
     for row in doc.custody_return_items:
         if row.article:
             row.quantity_issued = issued.get(row.article, 0)
+
+
+def _outstanding_custody_for_employee(employee):
+    """Net quantity of each Custody Article still in the employee's hands, taken
+    from the canonical Accommodation Stock Ledger balance (issue rows add, return
+    rows reverse). Returns {article: qty} for positive balances only.
+
+    This is the same definition the Custody Outstanding by Worker report and the
+    value-at-risk Number Card use; it is reused here rather than re-derived so the
+    checkout cannot drift to a second, conflicting notion of 'outstanding'."""
+    outstanding = {}
+    if not employee:
+        return outstanding
+    rows = frappe.get_all(
+        "Accommodation Stock Ledger",
+        filters={
+            "is_cancelled": 0,
+            "item_type": "Custody Article",
+            "employee": employee,
+        },
+        fields=["item", "qty"],
+    )
+    for r in rows:
+        outstanding[r.item] = outstanding.get(r.item, 0) + (r.qty or 0)
+    return {article: qty for article, qty in outstanding.items() if qty > 0}
+
+
+def _autofetch_outstanding_custody(doc):
+    """Add a custody-return row for every article the resident still holds that is
+    not already listed, so the checkout starts from the full outstanding set. Rows
+    already present (and any user edits to them) are preserved; this only fills
+    gaps, so it is safe to re-run on every save."""
+    outstanding = _outstanding_custody_for_employee(doc.employee)
+    if not outstanding:
+        return
+    listed = {row.article for row in (doc.custody_return_items or []) if row.article}
+    for article, qty in outstanding.items():
+        if article in listed:
+            continue
+        doc.append(
+            "custody_return_items",
+            {"article": article, "quantity_returned": 0, "return_status": "Returned"},
+        )
+
+
+def _roll_up_damage_deduction(doc):
+    """Parent damage_deduction_amount is the server-authoritative sum of the child
+    rows' deduction_amount — never hand-entered, so it always reconciles to the
+    lines."""
+    doc.damage_deduction_amount = sum(
+        (row.deduction_amount or 0) for row in (doc.custody_return_items or [])
+    )
 
 
 def resolve_damage_assessment_building(assignment, bed):

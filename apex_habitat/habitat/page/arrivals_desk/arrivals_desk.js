@@ -25,11 +25,14 @@ class ArrivalsDesk {
 		this._build_skeleton();
 		this._setup_anchor();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
+		this._load_strip();
 		this._render_empty(__('Pick a building to start the arrival.'));
 	}
 
 	_build_skeleton() {
 		this.$root = $('<div class="arrivals-desk"></div>').appendTo(this.page.main);
+		// Read-only telemetry strip (Arrivals today / Pending on manifest), building-agnostic.
+		this._build_strip();
 		// [#b5ku2i]
 		this.$body = $('<div class="ax-body"></div>').appendTo(this.$root);
 
@@ -60,6 +63,32 @@ class ArrivalsDesk {
 		this.$actions = $('<aside class="ax-zone ax-zone-actions"></aside>').appendTo(this.$body);
 
 		this._build_intake();
+	}
+
+	_build_strip() {
+		this.$strip = $('<div class="ax-strip" role="status" aria-live="polite"></div>').appendTo(this.$root);
+		const stat = (key, label) => {
+			const $cell = $('<div class="ax-strip-stat"></div>').appendTo(this.$strip);
+			$('<div class="ax-strip-num">—</div>').appendTo($cell).attr('data-stat', key);
+			$('<div class="ax-strip-label"></div>').text(label).appendTo($cell);
+		};
+		stat('arrivals_today', __('Arrivals today'));
+		stat('pending_on_manifest', __('Pending on manifest'));
+	}
+
+	_load_strip() {
+		// Read-only counts from the shared Custom Number Card methods; failures
+		// leave the dash placeholder rather than breaking the desk.
+		const set = (key, val) =>
+			this.$strip.find(`[data-stat="${key}"]`).text(frappe.format(val, { fieldtype: 'Int' }));
+		frappe
+			.xcall('apex_habitat.habitat.api.dashboard.get_arrivals_today')
+			.then((v) => set('arrivals_today', v))
+			.catch(() => {});
+		frappe
+			.xcall('apex_habitat.habitat.api.dashboard.get_pending_on_manifest')
+			.then((v) => set('pending_on_manifest', v))
+			.catch(() => {});
 	}
 
 	_setup_anchor() {
@@ -128,6 +157,7 @@ class ArrivalsDesk {
 	}
 
 	refresh() {
+		this._load_strip();
 		if (!this.building) return;
 		const requested = this.building;
 		this._render_loading();

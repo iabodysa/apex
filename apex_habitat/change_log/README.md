@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+- [1.55.31](v1/v1_55_31.md)
 - [1.55.30](v1/v1_55_30.md)
 - [1.55.29](v1/v1_55_29.md)
 - [1.55.28](v1/v1_55_28.md) — A one-click departure-transport hand-off from a resident check-out, in-app alerts for drivers, a server-side fleet export, the Arrival Batch on the Housing workspace, and right-to-left polish on the Front Desk board.

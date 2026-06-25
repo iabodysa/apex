@@ -169,3 +169,53 @@ def resolve_alert(name, note=None):
         "status": frappe.db.get_value(ALERT_DOCTYPE, name, "status"),
         "resolved": resolved,
     }
+
+
+def _median(values):
+    """Median of a non-empty numeric list (mean of the two middle items on even n)."""
+    ordered = sorted(values)
+    n = len(ordered)
+    mid = n // 2
+    if n % 2:
+        return ordered[mid]
+    return (ordered[mid - 1] + ordered[mid]) / 2
+
+
+@frappe.whitelist()
+def get_alert_median_resolve_days(filters=None):
+    """Custom Number Card: median days from ``raised_on`` to ``resolved_on``.
+
+    The resolution-latency twin of the open-alert queue: it measures how long
+    Resolved alerts took to close. Scoped through the SAME ``_permitted_projects``
+    resolver as the queue, so a scoped user's median covers only alerts on a
+    vehicle in a permitted project; a vehicle-less alert has no project anchor and
+    is excluded for scoped users (oversight roles see all). Only alerts with both
+    timestamps set are counted. ``filters`` is accepted and ignored (the widget
+    always passes it). Returns ``{value, fieldtype}`` per the Custom card contract.
+    """
+    frappe.has_permission(ALERT_DOCTYPE, "read", throw=True)
+    unscoped, projects = _permitted_projects()
+
+    alert_filters = {
+        "status": "Resolved",
+        "raised_on": ["is", "set"],
+        "resolved_on": ["is", "set"],
+    }
+    if not unscoped:
+        plates = _scoped_vehicles(unscoped, projects)
+        # A vehicle-less alert has no project anchor, so a scoped user never sees it.
+        alert_filters["vehicle"] = ["in", plates or [None]]
+
+    rows = frappe.get_all(
+        ALERT_DOCTYPE,
+        filters=alert_filters,
+        fields=["raised_on", "resolved_on"],
+        limit_page_length=0,
+    )
+    spans = [
+        (r.resolved_on - r.raised_on).total_seconds() / 86400.0
+        for r in rows
+        if r.resolved_on and r.raised_on
+    ]
+    value = round(_median(spans), 2) if spans else 0
+    return {"value": value, "fieldtype": "Float"}

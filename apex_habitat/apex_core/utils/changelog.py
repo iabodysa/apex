@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.55.31 — alert resolution time is now measured: the Fleet Operations dashboard gains an Open Alerts by Type breakdown and a median-days-to-resolve metric; the accommodation arrivals desk shows a live strip of arrivals housed today and workers still pending against arrival manifests, mirrored on the Housing workspace; vehicle handovers can load a reusable inspection checklist from a named Vehicle Handover Checklist Template with one button-press instead of retyping the same check items; an accommodation checkout now reconciles every outstanding custody item the resident still holds (auto-listing them, summing any damage deduction) and will not submit until each is returned or marked lost/damaged; and sending a vehicle to the workshop and bringing it back are now audited submittable maintenance-stop events that capture the reason and expected return rather than a bare status flip",
+        "app_name": "apex_habitat",
+        "link": "/app/vehicle-handover-checklist-template",
+        "creation": "2026-06-25 22:45:00",
+    },
+    {
         "title": "Apex 1.55.30 — fleet managers now receive a daily fleet-status digest by email; the accommodation arrivals desk flags a Temporary Worker whose stay window is closing or has lapsed (an amber/red chip on the search row and active card) and warns when housing a worker past that window; fuel-request approval now explains why an action was blocked — naming whether the approver lacks the required role or is the person who raised the request (segregation of duties) — instead of an opaque workflow error; the Front Desk replaces its cold building picker with a scope-aware chip strip color-weighted by free-bed pressure; plus an internal fleet-reader consolidation",
         "app_name": "apex_habitat",
         "link": "/app/auto-email-report",

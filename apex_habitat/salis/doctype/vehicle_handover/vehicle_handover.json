@@ -17,6 +17,7 @@
   "vehicle_handover_sec_condition",
   "condition_notes",
   "vehicle_handover_sec_checklist",
+  "checklist_template",
   "handover_check_items",
   "signed_evidence",
   "vehicle_handover_sec_discrepancy",
@@ -98,6 +99,13 @@
    "label": "Checklist & Evidence"
   },
   {
+   "description": "Pick a template, then use Load Checklist Template to populate the check items.",
+   "fieldname": "checklist_template",
+   "fieldtype": "Link",
+   "label": "Checklist Template",
+   "options": "Vehicle Handover Checklist Template"
+  },
+  {
    "fieldname": "handover_check_items",
    "fieldtype": "Table",
    "label": "Handover Check Items",
@@ -160,7 +168,7 @@
    "link_fieldname": "source_handover"
   }
  ],
- "modified": "2026-05-26 02:43:00.000000",
+ "modified": "2026-06-25 22:39:05.098591",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Handover",

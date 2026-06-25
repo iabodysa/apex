@@ -9,11 +9,14 @@ test_ignore = [
     "Accommodation Room",
     "Accommodation Site",
     "Additional Salary",
+    "Accommodation Stock Ledger",
     "Asset",
     "Asset Movement",
     "Company",
     "Cost Center",
     "Currency",
+    "Custody Article",
+    "Custody Asset Category",
     "Employee",
     "Item",
     "Payment Entry",
@@ -228,3 +231,106 @@ class TestAccommodationCheckout(FrappeTestCase):
         chk = self._checkout(fx, "Internal Transfer")
         with self.assertRaises(frappe.ValidationError):
             create_departure_transport(chk.name)
+
+    # Custody auto-fetch, submit gate, and deduction roll-up.
+
+    def _custody_article(self):
+        category = frappe.db.get_value("Custody Asset Category", {}) or frappe.get_doc(
+            {"doctype": "Custody Asset Category", "category_name": "C " + self._h()}
+        ).insert(ignore_permissions=True).name
+        return frappe.get_doc({
+            "doctype": "Custody Article", "naming_series": "CUST-ART-.####",
+            "article_name": "A " + self._h(), "category": category,
+            "unit_of_measure": "Each", "standard_unit_cost_sar": 100,
+        }).insert(ignore_permissions=True).name
+
+    def _hold(self, fx, article, qty):
+        """Post an issue row on the Accommodation Stock Ledger so the employee holds
+        `qty` of `article` in custody (the canonical outstanding source)."""
+        frappe.get_doc({
+            "doctype": "Accommodation Stock Ledger", "naming_series": "ACC-SLE-.YYYY.-.######",
+            "posting_date": "2026-06-15", "item_type": "Custody Article", "item": article,
+            "qty": qty, "unit_cost_sar": 100, "building": fx.building, "employee": fx.emp,
+        }).insert(ignore_permissions=True)
+
+    def _draft_checkout(self, fx, reason="End of Contract"):
+        return frappe.get_doc({
+            "doctype": "Accommodation Checkout", "naming_series": "ACC-CHKOUT-.YYYY.-.####",
+            "assignment": fx.assignment, "checkout_date": "2026-07-01", "checkout_reason": reason,
+        })
+
+    def test_save_autofetches_outstanding_custody(self):
+        """Saving a checkout pulls every article the resident still holds into
+        custody_return_items, even though none were entered by hand."""
+        fx = self._fixtures()
+        article = self._custody_article()
+        self._hold(fx, article, 2)
+        chk = self._draft_checkout(fx)
+        chk.insert(ignore_permissions=True)
+        chk.reload()
+        articles = {r.article for r in chk.custody_return_items}
+        self.assertIn(article, articles)
+
+    def test_autofetch_is_idempotent_and_preserves_edits(self):
+        """Re-saving does not duplicate auto-fetched rows and keeps user edits."""
+        fx = self._fixtures()
+        article = self._custody_article()
+        self._hold(fx, article, 1)
+        chk = self._draft_checkout(fx)
+        chk.insert(ignore_permissions=True)
+        chk.custody_return_items[0].return_status = "Damaged"
+        chk.save(ignore_permissions=True)
+        chk.reload()
+        rows = [r for r in chk.custody_return_items if r.article == article]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].return_status, "Damaged")
+
+    def test_submit_blocked_while_custody_unresolved(self):
+        """An outstanding article auto-fetched as Returned with zero qty returned is
+        unresolved, so submit is blocked."""
+        fx = self._fixtures()
+        article = self._custody_article()
+        self._hold(fx, article, 3)
+        chk = self._draft_checkout(fx)
+        chk.insert(ignore_permissions=True)
+        with self.assertRaises(frappe.ValidationError):
+            chk.submit()
+
+    def test_submit_passes_once_custody_resolved(self):
+        """Falsifies the gate: resolving the item (mark Damaged) lets submit proceed,
+        proving the block is driven by resolution state, not a blanket refusal."""
+        fx = self._fixtures()
+        article = self._custody_article()
+        self._hold(fx, article, 3)
+        chk = self._draft_checkout(fx)
+        chk.insert(ignore_permissions=True)
+        chk.custody_return_items[0].return_status = "Damaged"
+        chk.submit()
+        self.assertEqual(chk.docstatus, 1)
+
+    def test_returning_full_qty_resolves_the_gate(self):
+        """Marking Returned with the full outstanding quantity also clears the gate."""
+        fx = self._fixtures()
+        article = self._custody_article()
+        self._hold(fx, article, 2)
+        chk = self._draft_checkout(fx)
+        chk.insert(ignore_permissions=True)
+        chk.custody_return_items[0].return_status = "Returned"
+        chk.custody_return_items[0].quantity_returned = 2
+        chk.submit()
+        self.assertEqual(chk.docstatus, 1)
+
+    def test_damage_deduction_amount_rolls_up_child_rows(self):
+        """Parent damage_deduction_amount is the server-side sum of child
+        deduction_amount, not a hand-entered figure."""
+        fx = self._fixtures()
+        article = self._custody_article()
+        self._hold(fx, article, 1)
+        chk = self._draft_checkout(fx)
+        chk.insert(ignore_permissions=True)
+        chk.custody_return_items[0].return_status = "Damaged"
+        chk.custody_return_items[0].deduction_amount = 75
+        chk.damage_deduction_amount = 9999  # should be overwritten by the roll-up
+        chk.save(ignore_permissions=True)
+        chk.reload()
+        self.assertEqual(chk.damage_deduction_amount, 75)

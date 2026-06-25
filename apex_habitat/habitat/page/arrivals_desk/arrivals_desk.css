@@ -16,6 +16,8 @@
 	position: relative;
 	height: calc(100vh - var(--navbar-height) - var(--page-head-height) - 16px);
 	min-height: 420px;
+	display: flex;
+	flex-direction: column;
 }
 
 /* [#nz8rei] */
@@ -23,7 +25,8 @@
 	display: grid;
 	grid-template-columns: minmax(300px, 26%) 1fr minmax(320px, 28%);
 	gap: 12px;
-	height: 100%;
+	flex: 1;
+	min-height: 0;
 	overflow: hidden;
 }
 .arrivals-desk .ax-zone {
@@ -535,4 +538,29 @@
 	.arrivals-desk .ax-skeleton-room {
 		animation: none;
 	}
+}
+
+/* Read-only telemetry strip above the three-zone body. */
+.arrivals-desk .ax-strip {
+	display: flex;
+	gap: 24px;
+	flex-wrap: wrap;
+	padding-block: 8px;
+	margin-block-end: 8px;
+	border-block-end: 1px solid var(--border-color, #d1d8dd);
+}
+.arrivals-desk .ax-strip-stat {
+	display: flex;
+	flex-direction: column;
+	min-width: 96px;
+}
+.arrivals-desk .ax-strip-num {
+	font-size: 1.6rem;
+	font-weight: 700;
+	line-height: 1.1;
+	color: var(--heading-color, #1f272e);
+}
+.arrivals-desk .ax-strip-label {
+	font-size: 0.8rem;
+	color: var(--text-muted, #74808b);
 }

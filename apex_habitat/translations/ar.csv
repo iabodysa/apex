@@ -3120,3 +3120,25 @@ Only a Fleet Manager or Fleet Project Manager can {0} a fuel request.,يمكن �
 Loading buildings…,جاري تحميل المباني…
 Could not load your buildings.,تعذّر تحميل المباني الخاصة بك.
 No buildings to show.,لا توجد مبانٍ لعرضها.
+Open Alerts by Type,التنبيهات المفتوحة حسب النوع
+Median Alert Resolve Days,وسيط أيام حل التنبيه
+Arrivals today,الوافدون اليوم
+Pending on manifest,المتبقّون في كشف الوصول
+Arrivals Today,الوافدون اليوم
+Pending on Manifest,المتبقّون في كشف الوصول
+Checklist Template,قالب قائمة الفحص
+Vehicle Handover Checklist Template,قالب قائمة فحص تسليم المركبة
+Vehicle Handover Checklist Template Item,بند قالب قائمة فحص تسليم المركبة
+Checklist Items,بنود قائمة الفحص
+Default Remark,الملاحظة الافتراضية
+Load Checklist Template,تحميل قالب قائمة الفحص
+Loading checklist...,جارٍ تحميل قائمة الفحص...
+{0} check item(s) loaded from template {1},تم تحميل {0} بند فحص من القالب {1}
+Could not load the checklist template. Please try again.,تعذّر تحميل قالب قائمة الفحص. يرجى المحاولة مجدداً.
+Checklist template can only be loaded into a Draft handover.,لا يمكن تحميل قالب قائمة الفحص إلا في تسليم بحالة مسودة.
+Checklist template {0} is not active.,قالب قائمة الفحص {0} غير نشط.
+Pre-defined vehicle handover inspection checklist. Load its items into a Vehicle Handover's check items with one button-press.,قائمة فحص مُعرّفة مسبقاً لتسليم المركبة. حمّل بنودها إلى بنود فحص تسليم المركبة بضغطة زر واحدة.
+"Pick a template, then use Load Checklist Template to populate the check items.",اختر قالباً، ثم استخدم تحميل قالب قائمة الفحص لتعبئة بنود الفحص.
+"Cannot check out while the resident still holds custody. Resolve each item (return it, or mark it Lost/Damaged): {0}",لا يمكن إتمام المغادرة بينما لا يزال النزيل يحتفظ بعهدة. عالِج كل بند (أعِده، أو حدّده مفقوداً/تالفاً): {0}
+Expected return: {0},العودة المتوقعة: {0}
+This vehicle has no open workshop stop to return.,لا يوجد لهذه المركبة إيقاف ورشة مفتوح لإعادتها.

@@ -43,6 +43,7 @@ FLEET_CARDS = [
     "Salis Active Drivers",
     "Operating Days This Month",
     "Workshop Overstay",
+    "Median Alert Resolve Days",
 ]
 
 # Dashboard Charts on the Fleet Operations workspace (Trends block).
@@ -51,6 +52,7 @@ FLEET_CHARTS = [
     "Vehicle Utilisation",
     "Operating Days Trend",
     "Vehicle Activations",
+    "Open Alerts by Type",
 ]
 
 FLEET_ONBOARDING = "Fleet Operations Go-Live"
@@ -152,6 +154,38 @@ class TestFleetOpsRender(FrappeTestCase):
         stop.submit()  # flips the vehicle to Stopped (an overstay-eligible status)
         return vehicle
 
+    def _alerts(self):
+        # Open Alerts by Type (Group By, status in Open/Acknowledged) needs an open
+        # alert to plot; Median Alert Resolve Days (Custom) needs a Resolved alert
+        # with both raised_on and resolved_on so the median span is > 0.
+        vehicle = self._vehicle("Active", suffix="AL")
+        frappe.get_doc(
+            {
+                "doctype": "Operations Alert",
+                "alert_type": "Idle Vehicle",
+                "severity": "Warning",
+                "message": "render-proof open alert",
+                "vehicle": vehicle,
+                "status": "Open",
+            }
+        ).insert(ignore_permissions=True)
+        resolved = frappe.get_doc(
+            {
+                "doctype": "Operations Alert",
+                "alert_type": "Idle Vehicle",
+                "severity": "Warning",
+                "message": "render-proof resolved alert",
+                "vehicle": vehicle,
+                "status": "Resolved",
+            }
+        ).insert(ignore_permissions=True)
+        frappe.db.set_value(
+            "Operations Alert",
+            resolved.name,
+            {"raised_on": add_days(today(), -3), "resolved_on": today()},
+            update_modified=False,
+        )
+
     def _seed(self):
         # One Active vehicle anchors the incident + utilisation seeds.
         self._active_vehicle = self._vehicle("Active")
@@ -165,6 +199,7 @@ class TestFleetOpsRender(FrappeTestCase):
         self._snapshot(3, 4, 60.0)
         self._assignment_draft()  # Vehicle Activations
         self._overstay_vehicle()  # Workshop Overstay
+        self._alerts()  # Open Alerts by Type + Median Alert Resolve Days
 
     def _card_result(self, card_name):
         """Render a Number Card exactly as the widget does.

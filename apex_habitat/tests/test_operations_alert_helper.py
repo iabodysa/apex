@@ -8,6 +8,7 @@ re-pasting the system-write block.
 """
 
 import glob
+import os
 import re
 
 import frappe
@@ -33,7 +34,10 @@ class TestOperationsAlertWritePathGuard(FrappeTestCase):
     def test_no_unsanctioned_raw_inserts(self):
         offenders = []
         for f in glob.glob(f"{APP}/**/*.py", recursive=True):
-            if "/tests/" in f or f.endswith("test_operations_alert.py"):
+            # The guard steers PRODUCTION write-paths to the helper; test fixtures
+            # (under a tests/ dir or any test_*.py beside its module) legitimately
+            # build raw alerts to set up analytics scenarios.
+            if "/tests/" in f or os.path.basename(f).startswith("test_"):
                 continue
             rel = f.split("apex_habitat/", 2)[-1]
             if rel in _SANCTIONED:
