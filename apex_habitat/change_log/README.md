@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+- [1.55.25](v1/v1_55_25.md) — Fleet compliance-risk badges on the control board, building-scoped access to resident requests and idle reports, vehicle-theft and workshop-overstay alerts, a pre-arrival manifest (Arrival Batch), and a driver monthly-attendance view.
 - [1.55.24](v1/v1_55_24.md) — Resident-request and trip notifications, a one-time supervisor backfill, a Front Desk open-requests badge, a fleet release-vehicle action, recover now closes the theft report, and a one-click damage assessment from a custody return.
 - [1.55.23](v1/v1_55_23.md) — Acknowledge/resolve actions on the operations alert queue, one-tap room readiness on the bed board, clearer guidance when no buildings are in scope, checkout that reflects its damage deduction, and Employee-only Masar worker links.
 - [1.55.22](v1/v1_55_22.md) — Clearer fleet-control empty states, checkout reminders that reach the building supervisor, truthful fleet incident panels, a supervisor buildings-portfolio endpoint, and a Housing live-occupancy metric row.

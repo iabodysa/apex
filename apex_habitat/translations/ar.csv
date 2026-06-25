@@ -3048,3 +3048,24 @@ Resident Request Resolved: {{ doc.name }},تمت معالجة طلب الساك�
 A trip has been scheduled,تمت جدولة رحلة
 driver,السائق
 Trip Scheduled: {{ doc.name }},تمت جدولة الرحلة: {{ doc.name }}
+1 day,يوم واحد
+{0} days,{0} أيام
+expires in {0},ينتهي خلال {0}
+expired {0} ago,انتهى منذ {0}
+Arrival Batch,دفعة وصول
+Arrival Batch Worker,عامل دفعة الوصول
+Arrived As,وصل بصفة
+Expected Date,التاريخ المتوقع
+Expected Workers,العمال المتوقعون
+Title,العنوان
+Add at least one expected worker to the manifest.,أضف عاملاً واحداً متوقعاً على الأقل إلى البيان.
+Number of workers on the manifest. Computed from the Expected Workers rows.,عدد العمال في البيان. يُحتسب من صفوف العمال المتوقعين.
+Pre-arrival manifest: the workers a labour supplier expects to deliver to a building on a date. Feeds the Arrivals Desk reconciliation and manifest-completion telemetry.,بيان ما قبل الوصول: العمال الذين يتوقع مورّد العمالة تسليمهم إلى مبنى في تاريخ محدد. يغذّي مطابقة مكتب الوصول وقياس اكتمال البيان.
+Child: one expected worker on a pre-arrival manifest.,جدول فرعي: عامل واحد متوقع في بيان ما قبل الوصول.
+Set once this expected worker is matched to a registered arrival.,يُضبط بمجرد مطابقة هذا العامل المتوقع بوصول مسجَّل.
+"The pre-arrival manifest this worker was expected on, if any.",بيان ما قبل الوصول الذي كان يُتوقع إدراج هذا العامل ضمنه، إن وُجد.
+A vehicle has been reported stolen,تم الإبلاغ عن سرقة مركبة
+The vehicle has been taken out of service.,تم إخراج المركبة من الخدمة.
+A vehicle has overstayed in the workshop,تجاوزت مركبة المدة المسموح بها في الورشة
+Vehicle Theft Reported: {{ doc.vehicle }},الإبلاغ عن سرقة مركبة: {{ doc.vehicle }}
+Workshop Overstay: {{ doc.vehicle }},تجاوز مدة الورشة: {{ doc.vehicle }}

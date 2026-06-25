@@ -128,6 +128,9 @@ const messages = {
       statusLate: "Late",
       statusAbsent: "Absent",
       statusOnLeave: "On Leave",
+      history: "This month",
+      historyEmpty: "No attendance recorded this month yet.",
+      noTime: "—",
     },
     trips: {
       title: "My Trips Today",
@@ -286,6 +289,9 @@ const messages = {
       statusLate: "متأخر",
       statusAbsent: "غائب",
       statusOnLeave: "في إجازة",
+      history: "هذا الشهر",
+      historyEmpty: "لا يوجد حضور مسجَّل هذا الشهر بعد.",
+      noTime: "—",
     },
     trips: {
       title: "رحلاتي اليوم",

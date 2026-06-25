@@ -150,6 +150,16 @@ def scheduled_task_instance_query(user=None):
     return _building_condition(user)
 
 
+# Resident request + idle report carry their own `building` Link, so the same
+# building scope applies — a Resident Supervisor sees only their estate's rows.
+def accommodation_resident_request_query(user=None):
+    return _building_condition(user)
+
+
+def idle_resident_report_query(user=None):
+    return _building_condition(user)
+
+
 def building_scoped_has_permission(doc, ptype, user=None):
     """Deny a building-scoped user acting on a doc outside their buildings.
 

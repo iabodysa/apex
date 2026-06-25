@@ -17,6 +17,7 @@
   "arrival_date",
   "project",
   "labour_supplier",
+  "arrival_batch",
   "temporary_worker_arrival_context_col",
   "building",
   "temporary_worker_sec_window",
@@ -112,6 +113,14 @@
    "options": "Supplier"
   },
   {
+   "description": "The pre-arrival manifest this worker was expected on, if any.",
+   "fieldname": "arrival_batch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Arrival Batch",
+   "options": "Arrival Batch"
+  },
+  {
    "fieldname": "temporary_worker_arrival_context_col",
    "fieldtype": "Column Break"
   },
@@ -192,7 +201,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-25 00:00:00.000000",
+ "modified": "2026-06-25 12:04:34.314000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Temporary Worker",

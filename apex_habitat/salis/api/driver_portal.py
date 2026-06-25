@@ -443,6 +443,52 @@ def get_today_attendance():
 	return _today_attendance_state(driver)
 
 
+def _month_bounds(month=None):
+	"""(first_day, last_day) for ``month`` (``YYYY-MM``), defaulting to this month.
+
+	An unparseable/blank value falls back to the current month rather than raising,
+	so a malformed client param never 500s the history view."""
+	anchor = frappe.utils.getdate()
+	if month:
+		try:
+			anchor = frappe.utils.getdate(f"{month}-01")
+		except Exception:
+			pass
+	return frappe.utils.get_first_day(anchor), frappe.utils.get_last_day(anchor)
+
+
+@frappe.whitelist()
+def my_attendance(month=None):
+	"""The current driver's OWN attendance rows for a month (read).
+
+	Identity-scoped: the driver is resolved from the session, never client-supplied,
+	so this can only ever return the caller's own records — it cannot read another
+	driver's history. ``month`` is ``YYYY-MM`` and defaults to the current month.
+
+	Returns ``{"month", "rows"}`` where each row carries the date, status, and the
+	stringified check-in/out times (newest day first) — the same display vocabulary
+	the today card uses, so the SPA renders the month strip with no extra mapping.
+	Read-only, no commit."""
+	_require_enabled()
+	driver = _resolve_driver()
+	start, end = _month_bounds(month)
+	rows = frappe.get_all(
+		"Driver Attendance",
+		filters={
+			"driver": driver,
+			"attendance_date": ["between", [start, end]],
+			"docstatus": ["<", 2],
+		},
+		fields=["name", "attendance_date", "status", "check_in", "check_out", "worked_hours"],
+		order_by="attendance_date desc",
+	)
+	for r in rows:
+		r["attendance_date"] = frappe.utils.cstr(r["attendance_date"])
+		r["check_in"] = frappe.utils.cstr(r["check_in"]) if r.get("check_in") else None
+		r["check_out"] = frappe.utils.cstr(r["check_out"]) if r.get("check_out") else None
+	return {"month": frappe.utils.cstr(start)[:7], "rows": rows}
+
+
 # [#clropn] A driver is "not cleared" while an exit clearance is still in any
 # unresolved state — Cleared/Cancelled are the only terminal states.
 _OPEN_CLEARANCE_STATUSES = ("Open", "In Progress", "Blocked")

@@ -78,6 +78,7 @@ def get_fleet(status=None, rental_office=None, project=None, search=None):
         fields=[
             "name", "plate_number", "vehicle_category", "status", "ownership",
             "rental_office", "project", "current_driver", "odometer", "planned_fuel_grade",
+            "compliance_status", "next_expiry_date",
         ],
         order_by="plate_number asc",
         limit_page_length=0,

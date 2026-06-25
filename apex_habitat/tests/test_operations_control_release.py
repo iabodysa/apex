@@ -16,7 +16,7 @@ Two properties must hold:
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex_habitat.salis.api.operations_control import release_vehicle
+from apex_habitat.salis.api.operations_control import get_fleet, release_vehicle
 
 
 class TestOperationsControlRelease(FrappeTestCase):
@@ -114,3 +114,28 @@ class TestOperationsControlRelease(FrappeTestCase):
         frappe.set_user(self._auditor_user())
         with self.assertRaises(frappe.PermissionError):
             release_vehicle(vehicle)
+
+
+class TestOperationsControlFleet(FrappeTestCase):
+    """get_fleet must carry each vehicle's compliance fields to the cards, so the
+    board can flag at-risk vehicles without a second per-card read."""
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def test_get_fleet_returns_compliance_fields(self):
+        plate = "OCFLEET-COMP"
+        if not frappe.db.exists("Salis Vehicle", {"plate_number": plate}):
+            frappe.get_doc(
+                {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
+            ).insert(ignore_permissions=True)
+        name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
+        # Stamp the read-only compliance fields directly (no form gate in a test).
+        expiry = frappe.utils.add_days(frappe.utils.today(), 10)
+        frappe.db.set_value(
+            "Salis Vehicle", name, {"compliance_status": "Expiring Soon", "next_expiry_date": expiry}
+        )
+
+        row = next(v for v in get_fleet(search=plate)["vehicles"] if v["name"] == name)
+        self.assertEqual(row["compliance_status"], "Expiring Soon")
+        self.assertEqual(frappe.utils.getdate(row["next_expiry_date"]), frappe.utils.getdate(expiry))

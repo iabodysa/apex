@@ -1,0 +1,50 @@
+{
+ "doctype": "DocType",
+ "name": "Arrival Batch Worker",
+ "module": "Habitat",
+ "custom": 0,
+ "issingle": 0,
+ "istable": 1,
+ "engine": "InnoDB",
+ "description": "Child: one expected worker on a pre-arrival manifest.",
+ "fields": [
+  {
+   "doctype": "DocField",
+   "fieldname": "worker_name",
+   "fieldtype": "Data",
+   "label": "Worker Name",
+   "reqd": 1,
+   "in_list_view": 1,
+   "idx": 1
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "passport_number",
+   "fieldtype": "Data",
+   "label": "Passport Number",
+   "in_list_view": 1,
+   "idx": 2
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "nationality",
+   "fieldtype": "Link",
+   "label": "Nationality",
+   "options": "Country",
+   "idx": 3
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "temporary_worker",
+   "fieldtype": "Link",
+   "label": "Arrived As",
+   "options": "Temporary Worker",
+   "description": "Set once this expected worker is matched to a registered arrival.",
+   "read_only": 1,
+   "in_list_view": 1,
+   "idx": 4
+  }
+ ],
+ "permissions": [],
+ "modified": "2026-06-25 00:00:00.000000"
+}

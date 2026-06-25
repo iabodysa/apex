@@ -16,6 +16,23 @@ const STATUS_COLOR = {
 	Released: "gray",
 };
 
+// Compliance states that warrant a card flag, with the indicator colour.
+const COMPLIANCE_FLAG = { "Expiring Soon": "orange", Expired: "red" };
+
+// 'N days' / '1 day', localised, for embedding in the expiry phrase.
+function _days_label(n) {
+	return n === 1 ? __("1 day") : __("{0} days", [n]);
+}
+
+// Relative phrase for the next-expiry date: 'expires in N days' (future) or
+// 'expired N days ago' (past), localised via __().
+function _expiry_phrase(date) {
+	if (!date) return "";
+	const days = frappe.datetime.get_day_diff(date, frappe.datetime.get_today());
+	if (days >= 0) return __("expires in {0}", [_days_label(days)]);
+	return __("expired {0} ago", [_days_label(-days)]);
+}
+
 class FleetControl {
 	constructor(page) {
 		this.page = page;
@@ -225,6 +242,15 @@ class FleetControl {
 		if (v.open_incidents) {
 			$('<span class="indicator-pill red fc-inc"></span>')
 				.text(__("{0} open", [v.open_incidents]))
+				.appendTo($foot);
+		}
+		const flag = COMPLIANCE_FLAG[v.compliance_status];
+		if (flag) {
+			const rel = _expiry_phrase(v.next_expiry_date);
+			const label = rel ? __(v.compliance_status) + " · " + rel : __(v.compliance_status);
+			$('<span class="indicator-pill fc-compliance"></span>')
+				.addClass(flag)
+				.text(label)
 				.appendTo($foot);
 		}
 		$c.appendTo(this.$grid);

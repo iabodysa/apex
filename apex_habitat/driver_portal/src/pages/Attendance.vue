@@ -62,6 +62,31 @@
       <p v-if="state.checked_out" class="status-note status-ok">{{ t("attendance.doneForToday") }}</p>
     </section>
 
+    <!-- This month's history: a compact day list with status pill + stamped times. -->
+    <section class="card card-pad space-y-3">
+      <p class="text-sm font-semibold text-soft">{{ t("attendance.history") }}</p>
+      <LoadingState v-if="history.loading" :label="t('common.loading')" />
+      <p v-else-if="!rows.length" class="text-sm text-muted">{{ t("attendance.historyEmpty") }}</p>
+      <ul class="space-y-3">
+        <li v-for="(row, i) in rows" :key="row.name">
+          <div class="flex items-center gap-3">
+            <div class="min-w-0">
+              <p class="text-sm font-semibold leading-tight">
+                <bdi>{{ row.attendance_date }}</bdi>
+              </p>
+              <p class="text-xs text-muted">
+                <bdi>{{ fmtTime(row.check_in) || t("attendance.noTime") }}</bdi>
+                <span class="mx-1">·</span>
+                <bdi>{{ fmtTime(row.check_out) || t("attendance.noTime") }}</bdi>
+              </p>
+            </div>
+            <span class="pill ms-auto shrink-0" :class="rowPill(row.status)">{{ rowStatusLabel(row.status) }}</span>
+          </div>
+          <div v-if="i < rows.length - 1" class="divider mt-3"></div>
+        </li>
+      </ul>
+    </section>
+
     <p v-if="msg" class="status-note status-ok">{{ msg }}</p>
     <p v-if="err" class="status-note status-err">{{ err }}</p>
     </template>
@@ -121,12 +146,12 @@ const today = createResource({
 // single action; the backend also refuses a check_out at/before check_in.
 const checkin = createResource({
   url: "apex_habitat.salis.api.driver_portal.driver_check_in",
-  onSuccess: (r) => { apply(r); msg.value = t("attendance.checkInDone"); err.value = ""; },
+  onSuccess: (r) => { apply(r); msg.value = t("attendance.checkInDone"); err.value = ""; history.reload(); },
   onError: (e) => { err.value = e.messages?.[0] || t("common.error"); },
 });
 const checkout = createResource({
   url: "apex_habitat.salis.api.driver_portal.driver_check_out",
-  onSuccess: (r) => { apply(r); msg.value = t("attendance.checkOutDone"); err.value = ""; },
+  onSuccess: (r) => { apply(r); msg.value = t("attendance.checkOutDone"); err.value = ""; history.reload(); },
   onError: (e) => { err.value = e.messages?.[0] || t("common.error"); },
 });
 
@@ -172,22 +197,39 @@ const stateLabel = computed(() => {
   return t("attendance.notCheckedIn");
 });
 
-// Server status mapped to a localized label + pill colour.
-const statusLabel = computed(() => {
-  switch (state.status) {
+// Server attendance status -> localized label / pill colour. One source for both
+// the today card and the month history list, so the two never drift.
+function rowStatusLabel(status) {
+  switch (status) {
     case "Present": return t("attendance.statusPresent");
     case "Late": return t("attendance.statusLate");
     case "Absent": return t("attendance.statusAbsent");
     case "On Leave": return t("attendance.statusOnLeave");
-    default: return state.checked_in ? t("attendance.statusPresent") : t("common.none");
+    default: return t("common.none");
   }
-});
+}
+function rowPill(status) {
+  if (status === "Absent") return "pill-danger";
+  if (status === "Late") return "pill-warning";
+  if (status === "On Leave") return "pill-neutral";
+  return "pill-success";
+}
+
+// Today's headline status label/pill (falls back to the open-shift state).
+const statusLabel = computed(() =>
+  state.status ? rowStatusLabel(state.status) : (state.checked_in ? t("attendance.statusPresent") : t("common.none"))
+);
 const statePill = computed(() => {
-  if (state.status === "Absent") return "pill-danger";
-  if (state.status === "Late") return "pill-warning";
-  if (state.checked_in) return "pill-success";
-  return "pill-neutral";
+  if (state.status) return rowPill(state.status);
+  return state.checked_in ? "pill-success" : "pill-neutral";
 });
+
+// This month's attendance history for the signed-in driver (read, on load).
+const history = createResource({
+  url: "apex_habitat.salis.api.driver_portal.my_attendance",
+  auto: true,
+});
+const rows = computed(() => history.data?.rows ?? []);
 
 // Computed hours present. Prefer the server's worked_hours (set once both
 // stamps exist); otherwise derive from check-in -> check-out, or check-in ->
