@@ -20,7 +20,7 @@ from frappe import _
 from frappe.utils import getdate, today
 
 from apex_habitat.salis.api.fleet_reader import driver_names, scope_filter, scoped_vehicles
-from apex_habitat.salis.utils import lock_vehicle
+from apex_habitat.salis.utils import lock_driver, lock_vehicle
 
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 
@@ -250,3 +250,56 @@ def release_vehicle(vehicle, return_date=None):
     # on_cancel restores the vehicle's previous_status (controllers not bypassed).
     frappe.get_doc("Vehicle Stop", stop).cancel()
     return {"ok": True, "stop": stop}
+
+
+@frappe.whitelist(methods=["POST"])
+def reassign_driver(vehicle, driver, start_date=None):
+    """Reassign a vehicle's driver from the Fleet Control drawer.
+
+    Ends the vehicle's current Active Vehicle Assignment and starts a new one
+    through the NATIVE submit lifecycle: VehicleAssignment.on_submit is what
+    stamps Salis Vehicle.current_driver and the driver's current_vehicle, and its
+    validate/on_submit overlap guards still run (controllers are not bypassed). We
+    never poke the driver links directly. Permission is re-checked on the vehicle
+    ("write") on top of the Page role grant, and on the incoming driver ("write")
+    since the new assignment puts the company vehicle in their custody.
+
+    ``driver`` is the Salis Driver name (the detail drawer carries the name, not
+    the external driver_id). ``start_date`` defaults to today and dates the close
+    of the old assignment and the start of the new one. Returns the new
+    assignment name.
+    """
+    if not driver:
+        frappe.throw(_("Driver is required."))
+    frappe.has_permission("Salis Vehicle", "write", doc=vehicle, throw=True)
+    if not frappe.db.exists("Salis Driver", driver):
+        frappe.throw(_("Driver {0} not found.").format(driver))
+    frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
+    lock_vehicle(vehicle)
+    lock_driver(driver)
+
+    start = getdate(start_date) if start_date else getdate(today())
+
+    # End the open Active assignment(s) so the new one does not trip the
+    # one-active-assignment-per-vehicle overlap guard in VehicleAssignment.validate.
+    for r in frappe.get_all(
+        "Vehicle Assignment",
+        filters={"vehicle": vehicle, "status": "Active", "docstatus": 1},
+        fields=["name", "driver"],
+    ):
+        if r.driver == driver:
+            frappe.throw(_("Vehicle {0} is already assigned to driver {1}.").format(vehicle, driver))
+        frappe.db.set_value("Vehicle Assignment", r.name, {"status": "Ended", "end_date": start})
+
+    assignment = frappe.get_doc({
+        "doctype": "Vehicle Assignment",
+        "vehicle": vehicle,
+        "driver": driver,
+        "project": frappe.db.get_value("Salis Vehicle", vehicle, "project"),
+        "start_date": start,
+        "status": "Active",
+    })
+    assignment.insert()
+    # on_submit stamps current_driver / current_vehicle (controllers not bypassed).
+    assignment.submit()
+    return {"ok": True, "assignment": assignment.name}

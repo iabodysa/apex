@@ -12,7 +12,7 @@
  "title_field": "title",
  "sort_field": "expected_date",
  "sort_order": "DESC",
- "description": "Pre-arrival manifest: the workers a labour supplier expects to deliver to a building on a date. Feeds the Arrivals Desk reconciliation and manifest-completion telemetry.",
+ "description": "Pre-arrival manifest: the workers a labour supplier expects to deliver to a building on a date. Captured up front via the public Arrival Manifest web form (front-desk intake) and managed here as the backend record the Arrivals Desk reconciles real arrivals against. Title, Expected Count and each row's Arrived As are system-maintained (read-only by design).",
  "fields": [
   {
    "doctype": "DocField",
@@ -88,7 +88,7 @@
    "fieldname": "expected_count",
    "fieldtype": "Int",
    "label": "Expected Count",
-   "description": "Number of workers on the manifest. Computed from the Expected Workers rows.",
+   "description": "Number of workers on the manifest. Computed from the Expected Workers rows on save — read-only by design.",
    "read_only": 1,
    "in_list_view": 1,
    "idx": 9
@@ -106,6 +106,7 @@
    "fieldname": "title",
    "fieldtype": "Data",
    "label": "Title",
+   "description": "Auto-generated from Building and Expected Date on save. Read-only by design.",
    "read_only": 1,
    "idx": 11
   },
@@ -163,5 +164,6 @@
    "export": 1,
    "idx": 4
   }
- ]
+ ],
+ "modified": "2026-06-25 23:40:42.184627"
 }

@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+**[1.55.32](v1/v1_55_32.md)** · Feature — Reassign a vehicle's driver in one step, identify a worker by scanning their Iqama or personal link at check-in, and act on several vehicles at once from the fleet board.
 - [1.55.31](v1/v1_55_31.md)
 - [1.55.30](v1/v1_55_30.md)
 - [1.55.29](v1/v1_55_29.md)

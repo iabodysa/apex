@@ -292,6 +292,34 @@ const filtered = computed(() => {
   return list;
 });
 
+// ═══════════ MULTI-SELECT (bulk actions) ═══════════
+// Selection mode is opt-in (a toolbar toggle) so cards stay click-to-open by
+// default; picked plates drive the bulk bar and the two bulk endpoints.
+const selectMode = ref(false);
+const selected = ref(new Set());
+const selectedCount = computed(() => selected.value.size);
+const isSelected = (plate) => selected.value.has(plate);
+function toggleSelect(plate) {
+  const next = new Set(selected.value);
+  next.has(plate) ? next.delete(plate) : next.add(plate);
+  selected.value = next;
+}
+function clearSelection() {
+  selected.value = new Set();
+}
+function toggleSelectMode() {
+  selectMode.value = !selectMode.value;
+  if (!selectMode.value) clearSelection();
+}
+// Select-all spans the currently filtered list only (what the user can see).
+const allVisibleSelected = computed(
+  () => filtered.value.length > 0 && filtered.value.every((v) => selected.value.has(v.plate))
+);
+function toggleSelectAll() {
+  if (allVisibleSelected.value) clearSelection();
+  else selected.value = new Set(filtered.value.map((v) => v.plate));
+}
+
 // Header pill / sidebar stat counts (his updateStats, over the full fleet).
 const counts = computed(() => {
   const all = vehicles.value;
@@ -643,6 +671,69 @@ function markStolen(plate) {
   openStolenForm();
 }
 
+// ═══════════ BULK ACTIONS → bulk endpoints ═══════════
+// One free-text note feeds the matching arg (reason for stop / notes for
+// workshop), mirroring the single-vehicle reason/notes inputs.
+const bulkNote = ref("");
+const selectedPlates = () => Array.from(selected.value);
+
+// Surface the per-row summary the bulk endpoints return.
+function showBulkSummary(res) {
+  const r = res || {};
+  const type = (r.failed || 0) > 0 ? "amber" : "green";
+  showToast(t("bulk.summary", { ok: r.succeeded || 0, failed: r.failed || 0 }), type);
+}
+
+async function bulkStop() {
+  const plates = selectedPlates();
+  if (!plates.length) return;
+  const ok = await cfShow(
+    t("confirm.stopTitle"),
+    t("bulk.selected", { n: plates.length }),
+    "circle-pause",
+    t("bulk.stopSelected"),
+    "btn-red"
+  );
+  if (!ok) return;
+  try {
+    const res = await call(POST("bulk_stop_vehicles"), {
+      type: "POST",
+      args: { plates, reason: trim(bulkNote.value) },
+    });
+    showBulkSummary(res);
+    bulkNote.value = "";
+    clearSelection();
+    await reloadFleet();
+  } catch (e) {
+    showToast(serverMsg(e), "red");
+  }
+}
+
+async function bulkWorkshop() {
+  const plates = selectedPlates();
+  if (!plates.length) return;
+  const ok = await cfShow(
+    t("confirm.sendWorkshopTitle"),
+    t("bulk.selected", { n: plates.length }),
+    "wrench",
+    t("bulk.workshopSelected"),
+    "btn-amber"
+  );
+  if (!ok) return;
+  try {
+    const res = await call(POST("bulk_workshop_in"), {
+      type: "POST",
+      args: { plates, notes: trim(bulkNote.value) },
+    });
+    showBulkSummary(res);
+    bulkNote.value = "";
+    clearSelection();
+    await reloadFleet();
+  } catch (e) {
+    showToast(serverMsg(e), "red");
+  }
+}
+
 // Status-picker grid in the panel Status tab → routes to the right endpoint.
 async function changeStatus(plate, newStatus) {
   const v = vehicles.value.find((x) => x.plate === plate);
@@ -894,9 +985,23 @@ function expiryFlag(v) {
             <option value="duration_desc">{{ t("main.sortBy", { field: t("main.sortLongestRunning") }) }}</option>
           </select>
         </div>
-        <div class="view-tabs">
-          <button class="vt" :class="{ on: f.view === 'cards' }" @click="setView('cards')"><Icon name="layout-grid" :size="14" /> {{ t("main.cards") }}</button>
-          <button class="vt" :class="{ on: f.view === 'table' }" @click="setView('table')"><Icon name="list" :size="14" /> {{ t("main.table") }}</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="btn" :class="{ 'btn-blue': selectMode }" @click="toggleSelectMode"><Icon name="circle-check" :size="14" /> {{ t("bulk.selectVehicles") }}</button>
+          <div class="view-tabs">
+            <button class="vt" :class="{ on: f.view === 'cards' }" @click="setView('cards')"><Icon name="layout-grid" :size="14" /> {{ t("main.cards") }}</button>
+            <button class="vt" :class="{ on: f.view === 'table' }" @click="setView('table')"><Icon name="list" :size="14" /> {{ t("main.table") }}</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BULK ACTION BAR: visible once ≥1 vehicle is picked in select mode -->
+      <div v-if="selectMode && selectedCount" class="fp-bulk-bar">
+        <span class="fp-bulk-count">{{ t("bulk.selected", { n: selectedCount }) }}</span>
+        <input class="fp-bulk-note fs" v-model="bulkNote" :placeholder="t('stopForm.notesPlaceholder')" />
+        <div class="fp-bulk-actions">
+          <button class="btn btn-red" @click="bulkStop"><Icon name="circle-pause" :size="14" /> {{ t("bulk.stopSelected") }}</button>
+          <button class="btn btn-amber" @click="bulkWorkshop"><Icon name="wrench" :size="14" /> {{ t("bulk.workshopSelected") }}</button>
+          <button class="btn" @click="clearSelection"><Icon name="x" :size="14" /> {{ t("bulk.clear") }}</button>
         </div>
       </div>
 
@@ -935,11 +1040,14 @@ function expiryFlag(v) {
             v-for="v in filtered"
             :key="v.plate"
             class="vcard"
-            :class="'vs-' + v.vehicle_status"
-            @click="openPanel(v.plate)"
+            :class="['vs-' + v.vehicle_status, { 'fp-sel': selectMode && isSelected(v.plate) }]"
+            @click="selectMode ? toggleSelect(v.plate) : openPanel(v.plate)"
           >
             <div class="vc-top">
-              <div><div class="vc-plate"><bdi>{{ v.plate }}</bdi></div></div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input v-if="selectMode" type="checkbox" class="fp-sel-box" :checked="isSelected(v.plate)" @click.stop="toggleSelect(v.plate)" />
+                <div class="vc-plate"><bdi>{{ v.plate }}</bdi></div>
+              </div>
               <div class="vc-icon-area">
                 <span class="vc-sheet-icon"><Icon :name="icon(v)" :size="24" /></span>
                 <span class="vc-fuel-badge">{{ trim(v.fuel) || "—" }}</span>
@@ -1035,6 +1143,7 @@ function expiryFlag(v) {
         <table>
           <thead>
             <tr>
+              <th v-if="selectMode" style="width:34px"><input type="checkbox" class="fp-sel-box" :checked="allVisibleSelected" @click="toggleSelectAll" /></th>
               <th @click="onSortCol('sheet')">{{ t("table.colType") }}</th>
               <th @click="onSortCol('plate')">{{ t("table.colPlate") }}</th>
               <th @click="onSortCol('vehicle_type')">{{ t("table.colVehicle") }}</th>
@@ -1049,8 +1158,9 @@ function expiryFlag(v) {
             </tr>
           </thead>
           <tbody>
-            <tr v-if="!filtered.length"><td colspan="11"><div class="empty"><div class="empty-ic"><Icon :name="isScopeEmpty ? 'lock' : 'search'" :size="42" :stroke-width="1.5" /></div>{{ isScopeEmpty ? t("main.noScope") : t("main.noResults") }}</div></td></tr>
-            <tr v-for="v in filtered" :key="v.plate" @click="openPanel(v.plate)">
+            <tr v-if="!filtered.length"><td :colspan="selectMode ? 12 : 11"><div class="empty"><div class="empty-ic"><Icon :name="isScopeEmpty ? 'lock' : 'search'" :size="42" :stroke-width="1.5" /></div>{{ isScopeEmpty ? t("main.noScope") : t("main.noResults") }}</div></td></tr>
+            <tr v-for="v in filtered" :key="v.plate" :class="{ 'fp-sel': selectMode && isSelected(v.plate) }" @click="selectMode ? toggleSelect(v.plate) : openPanel(v.plate)">
+              <td v-if="selectMode" @click.stop><input type="checkbox" class="fp-sel-box" :checked="isSelected(v.plate)" @click.stop="toggleSelect(v.plate)" /></td>
               <td><Icon :name="icon(v)" :size="18" /></td>
               <td><span class="mono" style="font-weight:700;color:var(--t1)"><bdi>{{ v.plate }}</bdi></span></td>
               <td>{{ v.vehicle_type }}</td>

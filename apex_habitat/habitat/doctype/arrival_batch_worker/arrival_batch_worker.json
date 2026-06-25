@@ -39,12 +39,12 @@
    "fieldtype": "Link",
    "label": "Arrived As",
    "options": "Temporary Worker",
-   "description": "Set once this expected worker is matched to a registered arrival.",
+   "description": "Set automatically by the Arrivals Desk once this expected worker is matched to a registered arrival. Read-only by design.",
    "read_only": 1,
    "in_list_view": 1,
    "idx": 4
   }
  ],
  "permissions": [],
- "modified": "2026-06-25 00:00:00.000000"
+ "modified": "2026-06-25 23:40:16.619799"
 }

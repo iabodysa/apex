@@ -47,6 +47,19 @@ class TestArrivalBatch(FrappeTestCase):
         # A title is stamped for the list/link display.
         self.assertTrue(doc.title)
 
+    def test_system_maintained_fields_are_documented_read_only(self):
+        """Title, Expected Count and the row's Arrived As are derived/reconciled, not
+        hand-entered: each stays read-only and carries help text saying so, so the form
+        never presents them as fillable-but-broken."""
+        meta = frappe.get_meta("Arrival Batch")
+        for fieldname in ("title", "expected_count"):
+            field = meta.get_field(fieldname)
+            self.assertTrue(field.read_only, f"{fieldname} is read-only by design")
+            self.assertIn("read-only by design", (field.description or "").lower())
+        child = frappe.get_meta("Arrival Batch Worker").get_field("temporary_worker")
+        self.assertTrue(child.read_only, "Arrived As is read-only by design")
+        self.assertIn("read-only by design", (child.description or "").lower())
+
     def test_empty_manifest_is_rejected(self):
         """A batch with no expected workers is meaningless and must not save."""
         doc = frappe.get_doc({

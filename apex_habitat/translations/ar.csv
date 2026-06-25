@@ -291,6 +291,7 @@ Auto-derived from the building's physical beds.,مشتق آلياً من الأ�
 Auto-fetched from Building,يُجلب آلياً من المبنى
 Auto-filled from Utility Account. Adjust if different for this bill.,يُعبّأ تلقائياً من حساب الخدمة. عدّله إذا كان مختلفاً لهذه الفاتورة.
 Auto-generated from Accommodation Checkout {0}. Review replacement costs and submit.,أُنشئ تلقائيًا من مغادرة السكن {0}. راجع تكاليف الاستبدال ثم قدّمه.
+Auto-generated from Building and Expected Date on save. Read-only by design.,يُولَّد آلياً من المبنى والتاريخ المتوقع عند الحفظ. للقراءة فقط بحكم التصميم.
 Auto-generated from safety inspection {0},مُنشأ تلقائيًا من تفتيش السلامة {0}
 Auto-generated from {0} {1},مُولَّد آلياً من {0} {1}
 Auto-generated summary of meter sharing calculation,ملخّص يُنشأ تلقائياً لحساب مشاركة العدّاد
@@ -627,6 +628,7 @@ Could not complete the generation. Please try again.,تعذّر إتمام ال�
 Could not create the payment. Please try again.,تعذّر إنشاء الدفعة. يُرجى المحاولة مرة أخرى.
 Could not generate a unique worker token. Please try again.,تعذّر إنشاء رمز عامل فريد. يرجى المحاولة مجدداً.
 Could not issue the cart. Please review and try again.,تعذّر صرف السلة. يرجى المراجعة والمحاولة مجدداً.
+Could not identify the worker.,تعذّر تحديد هوية العامل.
 Could not load employee photo.,تعذّر تحميل صورة الموظف.
 Could not load fleet data. Please try again.,تعذّر تحميل بيانات الأسطول. حاول مرة أخرى.
 Could not load held custody.,تعذّر تحميل العهدة المحتفظ بها.
@@ -880,6 +882,7 @@ Driver is required.,السائق مطلوب.
 Driver license expired on {0}.,انتهت صلاحية رخصة السائق في {0}.
 Driver license has expired. Renew before assigning to trips.,انتهت صلاحية رخصة القيادة. يرجى التجديد قبل الإسناد للرحلات.
 Driver portal is not enabled.,بوابة السائق غير مفعّلة.
+Driver reassigned,تمت إعادة إسناد السائق
 "Driver stop record (violation, leave, termination, or transfer). May release the linked vehicle.",سجل إيقاف سائق (مخالفة أو إجازة أو إنهاء خدمة أو نقل). قد يُحرّر المركبة المرتبطة.
 Driver {0} already has an active assignment {1}.,السائق {0} لديه بالفعل إسناد نشط {1}.
 Driver {0} not found.,السائق {0} غير موجود.
@@ -942,6 +945,7 @@ Enable Stock Entry Posting,تفعيل ترحيل سندات المخزن
 Enable Supplier Markup,تفعيل هامش المورد
 Enable if this meter covers multiple units,فعّل هذا الخيار إذا كان هذا العدّاد يغطّي عدة وحدات
 Enabled,مفعّل
+Enter or scan an Iqama number or worker link.,أدخل أو امسح رقم إقامة أو رابط عامل.
 End Date,تاريخ الانتهاء
 End Date cannot be earlier than Start Date.,لا يمكن أن يكون تاريخ الانتهاء أقدم من تاريخ البداية.
 End Datetime,تاريخ ووقت الانتهاء
@@ -1599,6 +1603,7 @@ New Assignment,تخصيص جديد
 New Expiry Date,تاريخ الانتهاء الجديد
 New Hire,موظف جديد
 New One-Time Password,رمز تحقق جديد لمرة واحدة
+New driver,السائق الجديد
 Next Expiry Date,تاريخ الانتهاء القادم
 Next: Approve,التالي: الاعتماد
 Next: Beds,التالي: الأسرّة
@@ -1635,6 +1640,8 @@ No trips scheduled for today.,لا توجد رحلات مجدولة لليوم.
 No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel.,لا توجد مركبة مسندة إليك. اطلب من مشرفك إسناد مركبة قبل طلب الوقود.
 No vehicles in scope.,لا توجد مركبات ضمن النطاق.
 No vehicles match the current filters.,لا مركبات تطابق المرشّحات الحالية.
+No worker matched.,لا يوجد عامل مطابق.
+No worker matches {0}.,لا يوجد عامل مطابق لـ {0}.
 Non-Financial Depreciation Snapshot,لقطة إهلاك غير مالي
 None.,لا شيء.
 "Normalized plate (spaces removed, uppercased). Set automatically.",لوحة منسَّقة (دون مسافات وبأحرف كبيرة). تُضبط تلقائياً.
@@ -1661,6 +1668,7 @@ Number of days before an expiry or due date to start raising alerts.,عدد ال
 Number of days the resident has been idle. Accrued by the v0.8.6 aging job; not set manually.,عدد الأيام التي ظل فيها الساكن غير مشغّل. تتراكم عبر مهمة احتساب الأعمار في الإصدار v0.8.6؛ ولا تُضبط يدوياً.
 Number of days without a dispatch trip before an Active vehicle is flagged as idle.,عدد الأيام دون رحلة تشغيل قبل وسم المركبة النشطة بأنها خاملة.
 Number of times this asset has been moved between buildings.,عدد مرّات نقل هذا الأصل بين المباني.
+Number of workers on the manifest. Computed from the Expected Workers rows on save — read-only by design.,عدد العمال في البيان. يُحتسب من صفوف العمال المتوقعين عند الحفظ — للقراءة فقط بحكم التصميم.
 OK,سليم
 OTP Attempts,محاولات رمز التحقق
 OTP Expires At,انتهاء صلاحية رمز التحقق
@@ -2029,6 +2037,8 @@ Ready,جاهز
 Reallocation,إعادة تخصيص
 Reason,السبب
 Reason Category,سبب عدم التشغيل
+Reassign,إعادة الإسناد
+Reassign driver,إعادة إسناد السائق
 Receipt,استلام
 Receipt Date,تاريخ الاستلام
 Receive Transfer,استلام النقل
@@ -2367,6 +2377,8 @@ Sanitary Fixtures,تجهيزات صحية
 Satisfactory,مُرضٍ
 Save this code to follow up with your supervisor.,احتفظ بهذا الرمز للمتابعة مع مشرفك.
 Scan,مسح
+Scan Iqama / Worker Link,امسح الإقامة / رابط العامل
+"Scan or type an Iqama number or personal link, then press Enter to identify the worker.",امسح أو اكتب رقم إقامة أو رابطاً شخصياً، ثم اضغط Enter لتحديد هوية العامل.
 Scanned At,وقت المسح
 Schedule,الجدول الزمني
 Schedule & Status,الجدول والحالة
@@ -2404,6 +2416,7 @@ Select a worker to load held custody.,اختر عاملاً لتحميل الع�
 Select an employee before issuing.,اختر موظفاً قبل الصرف.
 "Select an employee, then tap items to issue.",اختر موظفاً ثم انقر على الأصناف لصرفها.
 Select at least one passenger.,اختر راكباً واحداً على الأقل.
+Select at least one vehicle.,اختر مركبة واحدة على الأقل.
 Select from the Habitat material catalog. Optional — use instead of or alongside ERPNext Item.,اختر من كتالوج مواد Habitat. اختياري — استخدمه بدلاً من صنف ERPNext أو إلى جانبه.
 Select the vehicle to release.,اختر المركبة المراد تحريرها.
 "Select this building's address, or a Site, to show it here.",اختر عنوانَ هذا المبنى، أو موقعًا، لعرضه هنا.
@@ -2432,6 +2445,7 @@ Service Type,نوع الخدمة
 "Set ON only after Legal/HR has reviewed the caps, the consent flow, and the per-type rules against current KSA Labor Law.",فعّل هذا فقط بعد أن تراجع الإدارة القانونية/الموارد البشرية الحدود القصوى ومسار الموافقة وقواعد كل نوع وفقًا لنظام العمل السعودي الحالي.
 "Set a fuel quota, request fuel, and reconcile the claim.",حدد حصة وقود، واطلب الوقود، وطابق المطالبة.
 Set an Issue Type to make this finding actionable: on report submit it spawns a Maintenance Request of this type.,حدّد نوع مشكلة لجعل هذه النتيجة قابلة للتنفيذ: عند ترحيل التقرير يُنشئ طلب صيانة من هذا النوع.
+Set automatically by the Arrivals Desk once this expected worker is matched to a registered arrival. Read-only by design.,يُضبط آلياً بواسطة مكتب الوصول بمجرد مطابقة هذا العامل المتوقع بوصول مُسجَّل. للقراءة فقط بحكم التصميم.
 Set automatically when this request is generated from a safety inspection report.,يُضبط آلياً عند إنشاء هذا الطلب من تقرير تفتيش سلامة.
 Set automatically when this request is spawned from a failed safety task execution.,يُحدَّد آلياً عند إنشاء هذا الطلب من تنفيذ مهمة سلامة فاشلة.
 Set by the accrual engine once litres are posted to the Fuel Consumption Ledger. Guards against double-posting.,يُعيَّن بواسطة محرّك الاستحقاق بمجرد ترحيل اللترات إلى دفتر استهلاك الوقود. يحمي من الترحيل المزدوج.
@@ -2640,6 +2654,7 @@ Temporary Top-up,تعبئة مؤقتة
 Temporary Top-up Not Reverted,تعبئة مؤقتة لم تُسترجَع
 Temporary Window,النافذة المؤقتة
 Temporary Worker,عامل مؤقت
+Temporary Worker — use the Arrivals Desk to house this worker.,عامل مؤقت — استخدم مكتب الوصول لتسكين هذا العامل.
 Temporary Worker {0} does not exist.,العامل المؤقت {0} غير موجود.
 Temporary workers board via the trip’s unregistered manifest.,لوحة العمال المؤقتين عبر بيان الرحلة غير المسجل.
 Terminated,مُنهى
@@ -2689,6 +2704,7 @@ This safety task requires photo evidence. Please attach an Evidence Photo before
 This vehicle is under maintenance and should not be dispatched.,هذه المركبة تحت الصيانة ولا يجوز توزيعها.
 This voucher reconciles the claimed fuel against consumption recorded in the Fuel Consumption Ledger. It does not post to the general ledger.,يسوّي هذا السند الوقود المطالب به مقابل الاستهلاك المسجَّل في دفتر استهلاك الوقود. لا يُرحَّل إلى الأستاذ العام.
 This will clear and rebuild the entire payment schedule. Continue?,سيؤدي هذا إلى حذف جدول الدفعات وإعادة بنائه بالكامل. هل تريد المتابعة؟
+This worker already holds an active bed.,هذا العامل يشغل بالفعل سريراً نشطاً.
 This worker holds no returnable custody.,لا يحتفظ هذا العامل بأي عهدة قابلة للإرجاع.
 This worker link is invalid or has been disabled.,رابط العامل غير صالح أو تم تعطيله.
 This worker token is disabled — the personal link will not resolve.,رمز العامل معطّل — لن يعمل الرابط الشخصي.
@@ -2889,6 +2905,7 @@ Vehicle {0} assigned to driver {1}.,تم إسناد المركبة {0} إلى ا
 Vehicle {0} handed over to driver {1}.,تم تسليم المركبة {0} إلى السائق {1}.
 Vehicle {0} has been in the workshop since {1} (over {2} days).,المركبة {0} في الورشة منذ {1} (أكثر من {2} يوماً).
 Vehicle {0} has expired compliance and cannot be dispatched/assigned.,المركبة {0} منتهية الامتثال ولا يمكن تشغيلها/إسنادها.
+Vehicle {0} is already assigned to driver {1}.,المركبة {0} مُسندة بالفعل إلى السائق {1}.
 Vehicle {0} is assigned to driver {1}.,المركبة {0} مُسندة إلى السائق {1}.
 Vehicle {0} not found.,المركبة {0} غير موجودة.
 Vehicle {0} reported stolen.,أُبلغ عن سرقة المركبة {0}.
@@ -3063,7 +3080,7 @@ Expected Workers,العمال المتوقعون
 Title,العنوان
 Add at least one expected worker to the manifest.,أضف عاملاً واحداً متوقعاً على الأقل إلى البيان.
 Number of workers on the manifest. Computed from the Expected Workers rows.,عدد العمال في البيان. يُحتسب من صفوف العمال المتوقعين.
-Pre-arrival manifest: the workers a labour supplier expects to deliver to a building on a date. Feeds the Arrivals Desk reconciliation and manifest-completion telemetry.,بيان ما قبل الوصول: العمال الذين يتوقع مورّد العمالة تسليمهم إلى مبنى في تاريخ محدد. يغذّي مطابقة مكتب الوصول وقياس اكتمال البيان.
+"Pre-arrival manifest: the workers a labour supplier expects to deliver to a building on a date. Captured up front via the public Arrival Manifest web form (front-desk intake) and managed here as the backend record the Arrivals Desk reconciles real arrivals against. Title, Expected Count and each row's Arrived As are system-maintained (read-only by design).",بيان ما قبل الوصول: العمال الذين يتوقع مورّد العمالة تسليمهم إلى مبنى في تاريخ محدد. يُلتقط مبدئياً عبر نموذج ويب بيان الوصول العام (إدخال مكتب الاستقبال) ويُدار هنا كسجل خلفي يطابق به مكتب الوصول الوصول الفعلي. العنوان والعدد المتوقع وحقل «وصل بصفة» في كل صف تُدار آلياً (للقراءة فقط بحكم التصميم).
 Child: one expected worker on a pre-arrival manifest.,جدول فرعي: عامل واحد متوقع في بيان ما قبل الوصول.
 Set once this expected worker is matched to a registered arrival.,يُضبط بمجرد مطابقة هذا العامل المتوقع بوصول مسجَّل.
 "The pre-arrival manifest this worker was expected on, if any.",بيان ما قبل الوصول الذي كان يُتوقع إدراج هذا العامل ضمنه، إن وُجد.

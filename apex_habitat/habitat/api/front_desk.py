@@ -388,6 +388,124 @@ def get_employee_card(employee):
     return {"employee_name": vals.get("employee_name"), "image": vals.get("image")}
 
 
+def _employee_iqama_field() -> str | None:
+    """The Employee field that holds the Iqama number, or None if this HR setup
+    has none. The field name varies across HR configs, so it is probed from meta
+    (same defensive stance Masar uses) rather than hard-coded."""
+    meta = frappe.get_meta("Employee")
+    for fieldname in ("iqama", "iqama_no", "iqama_number"):
+        if meta.has_field(fieldname):
+            return fieldname
+    return None
+
+
+def _has_active_assignment(party_type: str, party: str, employee: str | None) -> bool:
+    """True if the worker holds a live bed: a submitted Accommodation Assignment
+    with no check-out date. Matches on the Employee link when known (the assignment
+    is Employee-keyed once linked) else on the party_type/party pair."""
+    filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
+    if employee:
+        filters["employee"] = employee
+    else:
+        filters["party_type"] = party_type
+        filters["party"] = party
+    return bool(frappe.db.exists("Accommodation Assignment", filters))
+
+
+@frappe.whitelist()
+def resolve_worker(identifier: str) -> dict:
+    """Resolve a scanned identifier to one worker for the Front Desk check-in dialog.
+
+    Accepts either an Iqama number or a scanned personal Masar token and returns
+    the single matching worker, so the supervisor can confirm-and-go instead of
+    typing an Employee link. Read-only — no posting, locking, or document writes.
+
+    Resolution order (first match wins): the unique Masar token, then the Iqama on
+    Employee (only when this HR setup exposes an Iqama field), then a Temporary
+    Worker's Iqama (surfacing its linked permanent Employee when one exists).
+
+    Permission: gated on ``Employee`` read (the same gate as
+    ``get_employee_card``); a Temporary Worker result additionally requires
+    ``Temporary Worker`` read so it cannot leak across DocType permissions.
+
+    Args:
+        identifier: an Iqama number or a scanned Masar token.
+
+    Returns:
+        dict ``{found, party_type, party, employee, employee_name, image,
+        has_active_assignment, message}``. ``found`` is False with a message when
+        nothing matches.
+    """
+    frappe.has_permission("Employee", "read", throw=True)
+
+    identifier = (identifier or "").strip()
+    if not identifier:
+        return {"found": False, "message": _("Enter or scan an Iqama number or worker link.")}
+
+    party_type = party = employee = employee_name = image = None
+
+    # A Masar token is unique and unguessable; resolve it exactly first.
+    token_row = frappe.db.get_value(
+        "Masar Worker Token",
+        {"token": identifier, "enabled": 1},
+        ["party_type", "party", "employee", "employee_name"],
+        as_dict=True,
+    )
+    if token_row:
+        party_type = token_row.party_type
+        party = token_row.party
+        employee = token_row.employee
+        employee_name = token_row.employee_name
+
+    # Otherwise treat the identifier as an Iqama: Employee first (if this HR setup
+    # has an Iqama field), then Temporary Worker.
+    if not party:
+        iqama_field = _employee_iqama_field()
+        if iqama_field:
+            emp = frappe.db.get_value(
+                "Employee",
+                {iqama_field: identifier, "status": ["not in", ("Inactive", "Left")]},
+                ["name", "employee_name"],
+                as_dict=True,
+            )
+            if emp:
+                party_type, party, employee, employee_name = "Employee", emp.name, emp.name, emp.employee_name
+
+    if not party:
+        tw = frappe.db.get_value(
+            "Temporary Worker",
+            {"iqama_number": identifier},
+            ["name", "worker_name", "linked_employee"],
+            as_dict=True,
+        )
+        if tw:
+            party_type, party, employee_name = "Temporary Worker", tw.name, tw.worker_name
+            employee = tw.linked_employee or None
+
+    if not party:
+        return {"found": False, "message": _("No worker matches {0}.").format(identifier)}
+
+    # Don't leak Temporary Worker identity to a caller without that read grant.
+    if party_type == "Temporary Worker":
+        frappe.has_permission("Temporary Worker", "read", throw=True)
+
+    if employee:
+        image = frappe.db.get_value("Employee", employee, "image")
+        if not employee_name:
+            employee_name = frappe.db.get_value("Employee", employee, "employee_name")
+
+    return {
+        "found": True,
+        "party_type": party_type,
+        "party": party,
+        "employee": employee,
+        "employee_name": employee_name,
+        "image": image,
+        "has_active_assignment": _has_active_assignment(party_type, party, employee),
+        "message": None,
+    }
+
+
 @frappe.whitelist(methods=["POST"])
 def set_room_readiness(room, status):
     """Set Accommodation Room.readiness_status from the Front Desk board.

@@ -349,6 +349,15 @@ const messages = {
       statusWorkshop: "in workshop",
       statusStopped: "stopped",
     },
+    bulk: {
+      selectVehicles: "Select vehicles",
+      selectAll: "Select all",
+      selected: "{n} selected",
+      clear: "Clear",
+      stopSelected: "Stop selected",
+      workshopSelected: "Send selected to workshop",
+      summary: "{ok} succeeded, {failed} failed",
+    },
   },
   ar: {
     common: {
@@ -691,6 +700,15 @@ const messages = {
       statusAvailable: "متاحة",
       statusWorkshop: "في الورشة",
       statusStopped: "متوقفة",
+    },
+    bulk: {
+      selectVehicles: "تحديد المركبات",
+      selectAll: "تحديد الكل",
+      selected: "{n} محددة",
+      clear: "إلغاء التحديد",
+      stopSelected: "إيقاف المحددة",
+      workshopSelected: "إرسال المحددة للورشة",
+      summary: "{ok} ناجحة، {failed} فاشلة",
     },
   },
 };

@@ -1,8 +1,12 @@
 """Arrival Batch controller.
 
 A pre-arrival manifest: the workers a labour supplier expects to deliver to a
-building on a date. The Arrivals Desk reconciles real arrivals against it, and
-get_arrival_summary measures manifest completion from expected_count.
+building on a date. It is both a front-desk intake surface (suppliers submit it
+via the public Arrival Manifest web form) and the backend record the Arrivals
+Desk reconciles real arrivals against; get_arrival_summary measures manifest
+completion from expected_count. Title and expected_count are derived in validate
+and each row's "Arrived As" is set during reconciliation, so all three are
+read-only by design.
 """
 
 from __future__ import annotations

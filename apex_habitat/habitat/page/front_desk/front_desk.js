@@ -331,6 +331,48 @@ class FrontDesk {
 					options: `<div class="text-muted" style="margin-bottom:8px">${frappe.utils.escape_html(context)}</div>`,
 				},
 				{
+					fieldname: "scan",
+					label: __("Scan Iqama / Worker Link"),
+					fieldtype: "Data",
+					description: __("Scan or type an Iqama number or personal link, then press Enter to identify the worker."),
+					onchange: function () {
+						const id = (this.get_value && this.get_value()) || "";
+						if (!id.trim()) return;
+						frappe.call({
+							method: "apex_habitat.habitat.api.front_desk.resolve_worker",
+							args: { identifier: id.trim() },
+							callback: (r) => {
+								const $status = d.fields_dict.scan_status.$wrapper;
+								if (r.exc || !r.message) {
+									$status.html(`<div class="text-muted">${__("Could not identify the worker.")}</div>`);
+									return;
+								}
+								const m = r.message;
+								if (!m.found) {
+									$status.html(`<div class="text-muted">${frappe.utils.escape_html(m.message || __("No worker matched."))}</div>`);
+									return;
+								}
+								// One-tap prefill: an Employee match fills the link (firing its
+								// photo onchange); a Temporary Worker has no Employee link, so we
+								// only surface the identity and route housing to Arrivals Desk.
+								if (m.employee) {
+									d.set_value("employee", m.employee);
+								}
+								const warn = m.has_active_assignment
+									? `<div class="text-danger" style="margin-top:4px">${__("This worker already holds an active bed.")}</div>`
+									: "";
+								const tw = m.party_type === "Temporary Worker" && !m.employee
+									? `<div class="text-muted" style="margin-top:4px">${__("Temporary Worker — use the Arrivals Desk to house this worker.")}</div>`
+									: "";
+								$status.html(
+									`<div style="margin-top:4px"><b>${frappe.utils.escape_html(m.employee_name || m.party)}</b></div>${warn}${tw}`
+								);
+							},
+						});
+					},
+				},
+				{ fieldname: "scan_status", fieldtype: "HTML" },
+				{
 					fieldname: "employee",
 					label: __("Employee"),
 					fieldtype: "Link",

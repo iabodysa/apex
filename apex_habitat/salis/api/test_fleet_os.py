@@ -112,3 +112,57 @@ class TestWorkshopEvents(FrappeTestCase):
         # Falsify: with no open workshop stop the return must raise, not no-op.
         with self.assertRaises(frappe.ValidationError):
             fleet_os.workshop_out(self.plate)
+
+
+class TestBulkActions(FrappeTestCase):
+    """Bulk stop / workshop-in fan a single-vehicle action over many plates,
+    isolating each row so one bad plate can't abort the rest."""
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+        self.plates = []
+        for _i in range(2):
+            plate = f"BLK {frappe.generate_hash(length=6)}"
+            frappe.get_doc(
+                {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
+            ).insert(ignore_permissions=True)
+            self.plates.append(plate)
+
+    def test_bulk_stop_stops_every_selected_vehicle(self):
+        res = fleet_os.bulk_stop_vehicles(self.plates, reason="rental return")
+        self.assertTrue(res["ok"])
+        self.assertEqual(res["succeeded"], 2)
+        self.assertEqual(res["failed"], 0)
+        for plate in self.plates:
+            name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
+            self.assertEqual(frappe.db.get_value("Salis Vehicle", name, "status"), "Stopped")
+
+    def test_bulk_workshop_in_sends_every_selected_vehicle(self):
+        res = fleet_os.bulk_workshop_in(self.plates, notes="service")
+        self.assertTrue(res["ok"])
+        self.assertEqual(res["succeeded"], 2)
+        for plate in self.plates:
+            name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
+            self.assertEqual(
+                frappe.db.get_value("Salis Vehicle", name, "status"), "Under Maintenance"
+            )
+
+    def test_bulk_isolates_a_failing_row(self):
+        # One unknown plate must be reported failed while the valid ones still
+        # commit — proves the per-row savepoint isolation is non-vacuous.
+        ghost = f"NO-SUCH {frappe.generate_hash(length=6)}"
+        res = fleet_os.bulk_stop_vehicles([self.plates[0], ghost])
+        self.assertFalse(res["ok"])
+        self.assertEqual(res["succeeded"], 1)
+        self.assertEqual(res["failed"], 1)
+        by_plate = {r["plate"]: r for r in res["results"]}
+        self.assertTrue(by_plate[self.plates[0]]["ok"])
+        self.assertFalse(by_plate[ghost]["ok"])
+        self.assertIn("error", by_plate[ghost])
+        # The good row really stopped despite the sibling failure.
+        good = frappe.db.get_value("Salis Vehicle", {"plate_number": self.plates[0]}, "name")
+        self.assertEqual(frappe.db.get_value("Salis Vehicle", good, "status"), "Stopped")
+
+    def test_bulk_empty_selection_throws(self):
+        with self.assertRaises(frappe.ValidationError):
+            fleet_os.bulk_stop_vehicles([])

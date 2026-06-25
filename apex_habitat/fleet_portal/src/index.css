@@ -773,3 +773,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .incident-badge,.cdc-chip,.lock-pill,.tag,.tl-status{
   display:inline-flex;align-items:center;gap:4px;
 }
+
+/* Multi-select bulk-action bar + selection affordances. */
+.fp-bulk-bar{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:9px 16px;background:var(--blue-d);border-bottom:1px solid var(--b1);flex-shrink:0;
+}
+.fp-bulk-count{font-size:12px;font-weight:700;color:var(--blue-l);white-space:nowrap}
+.fp-bulk-note{flex:1;min-width:160px;max-width:340px}
+.fp-bulk-actions{display:flex;gap:8px;flex-wrap:wrap}
+.fp-sel-box{width:16px;height:16px;cursor:pointer;accent-color:var(--blue);flex-shrink:0}
+.vcard.fp-sel{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-d)}
+tr.fp-sel{background:var(--blue-d)}

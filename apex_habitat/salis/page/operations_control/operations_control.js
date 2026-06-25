@@ -335,6 +335,13 @@ class FleetControl {
 			$rel.on("click", () => this.release_vehicle(v, $rel));
 			$rel.appendTo($head);
 		}
+		// Reassign driver: a guided driver pick that ends the current assignment and
+		// starts a new one server-side, instead of opening a blank Vehicle Assignment.
+		const $reassign = $('<button class="btn btn-xs btn-default fc-action"></button>').text(
+			__("Reassign driver")
+		);
+		$reassign.on("click", () => this.reassign_driver(v, $reassign));
+		$reassign.appendTo($head);
 		const $body = $('<div class="fc-drawer-body"></div>').appendTo(this.$drawer);
 		this._load_detail(v, $body);
 	}
@@ -427,6 +434,39 @@ class FleetControl {
 				error: () => $btn.prop("disabled", false),
 			});
 		});
+	}
+
+	// Guided reassign: pick a Salis Driver, then end the current assignment and
+	// start a new one server-side (no blank Vehicle Assignment form).
+	reassign_driver(v, $btn) {
+		frappe.prompt(
+			[
+				{
+					fieldname: "driver",
+					fieldtype: "Link",
+					options: "Salis Driver",
+					label: __("New driver"),
+					reqd: 1,
+				},
+			],
+			({ driver }) => {
+				$btn.prop("disabled", true);
+				frappe.call({
+					method: "apex_habitat.salis.api.operations_control.reassign_driver",
+					args: { vehicle: v.name, driver },
+					callback: (r) => {
+						if (r && r.message && r.message.ok) {
+							frappe.show_alert({ message: __("Driver reassigned"), indicator: "green" });
+							this.$drawer.removeClass("fc-open");
+							this.refresh();
+						}
+					},
+					error: () => $btn.prop("disabled", false),
+				});
+			},
+			__("Reassign driver"),
+			__("Reassign")
+		);
 	}
 
 	export_csv() {

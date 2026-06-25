@@ -1000,7 +1000,8 @@ def _overstay_stops() -> list:
         filters={
             "stop_reason": "Maintenance",
             "docstatus": 1,
-            "return_date": ["in", [None, ""]],
+            # canonical "still open" check: matches NULL or empty return_date
+            "return_date": ["is", "not set"],
             "stop_date": ["<=", cutoff],
         },
         fields=["name", "vehicle", "stop_date"],

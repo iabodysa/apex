@@ -545,6 +545,68 @@ def workshop_out(plate):
     return {"ok": True, "stop": stop.name}
 
 
+def _coerce_plates(plates) -> list[str]:
+    """Normalize the plates param (a JSON array over HTTP, or a real list) to a
+    de-duplicated, order-preserving list of non-empty plate strings."""
+    parsed = frappe.parse_json(plates) if isinstance(plates, str) else plates
+    if not isinstance(parsed, (list, tuple)):
+        frappe.throw(_("Select at least one vehicle."))
+    seen: dict[str, None] = {}
+    for p in parsed:
+        key = str(p).strip()
+        if key:
+            seen.setdefault(key, None)
+    if not seen:
+        frappe.throw(_("Select at least one vehicle."))
+    return list(seen)
+
+
+def _bulk_apply(plates, action) -> dict:
+    """Run a single-vehicle fleet action over many plates, isolating each row.
+
+    Each plate runs inside its own savepoint so one row's failure (a permission
+    gap, a missing plate, a guard throw) rolls back only that row and is reported
+    back, instead of aborting the whole batch. Reuses the existing per-vehicle
+    controllers verbatim — no parallel mutation logic.
+    """
+    results = []
+    for plate in _coerce_plates(plates):
+        # savepoint name must be a valid SQL identifier (a hex hash can start
+        # with a digit, which MariaDB rejects) — prefix with a letter.
+        sp = "sp" + frappe.generate_hash(length=10)
+        frappe.db.savepoint(sp)
+        try:
+            res = action(plate)
+            frappe.db.release_savepoint(sp)
+            results.append({"plate": plate, "ok": True, **(res or {})})
+        except Exception as e:
+            frappe.db.rollback(save_point=sp)
+            results.append({"plate": plate, "ok": False, "error": str(e)})
+    succeeded = sum(1 for r in results if r["ok"])
+    return {
+        "ok": succeeded == len(results),
+        "succeeded": succeeded,
+        "failed": len(results) - succeeded,
+        "results": results,
+    }
+
+
+@frappe.whitelist(methods=["POST"])
+def bulk_stop_vehicles(plates, reason=None):
+    """Stop several vehicles at once, reusing stop_vehicle per plate."""
+    # Gate the batch up front; each plate is re-checked per-doc in _resolve_plate.
+    frappe.has_permission("Salis Vehicle", "write", throw=True)
+    return _bulk_apply(plates, lambda p: stop_vehicle(p, reason=reason))
+
+
+@frappe.whitelist(methods=["POST"])
+def bulk_workshop_in(plates, expected_return=None, notes=None):
+    """Send several vehicles to the workshop at once, reusing workshop_in per plate."""
+    # Gate the batch up front; each plate is re-checked per-doc in _resolve_plate.
+    frappe.has_permission("Salis Vehicle", "write", throw=True)
+    return _bulk_apply(plates, lambda p: workshop_in(p, expected_return=expected_return, notes=notes))
+
+
 @frappe.whitelist(methods=["POST"])
 def recover(plate):
     """Recover a stopped/stolen vehicle back to service.

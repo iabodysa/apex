@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.55.32 — reassigning a vehicle's driver is now a one-step action from the fleet control drawer: pick the new driver and the previous assignment is closed automatically, with a clear message if the vehicle is already on that driver; at check-in the accommodation front desk can identify a worker by scanning or typing their Iqama number or personal link and pressing Enter — the worker is matched in one tap, and anyone who already holds an active bed is flagged before you assign one; and the fleet board now lets you select several vehicles at once and either stop them or send them to the workshop in a single action, with each vehicle handled independently so one failure does not block the rest",
+        "app_name": "apex_habitat",
+        "link": "/fleet",
+        "creation": "2026-06-26 10:00:00",
+    },
+    {
         "title": "Apex 1.55.31 — alert resolution time is now measured: the Fleet Operations dashboard gains an Open Alerts by Type breakdown and a median-days-to-resolve metric; the accommodation arrivals desk shows a live strip of arrivals housed today and workers still pending against arrival manifests, mirrored on the Housing workspace; vehicle handovers can load a reusable inspection checklist from a named Vehicle Handover Checklist Template with one button-press instead of retyping the same check items; an accommodation checkout now reconciles every outstanding custody item the resident still holds (auto-listing them, summing any damage deduction) and will not submit until each is returned or marked lost/damaged; and sending a vehicle to the workshop and bringing it back are now audited submittable maintenance-stop events that capture the reason and expected return rather than a bare status flip",
         "app_name": "apex_habitat",
         "link": "/app/vehicle-handover-checklist-template",
