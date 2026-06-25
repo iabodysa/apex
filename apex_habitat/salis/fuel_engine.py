@@ -18,13 +18,16 @@ Two scheduled jobs:
   raises an "Excessive Topup" Operations Alert referencing the vehicle.
   Idempotent per vehicle+period+month.
 
-No GL is written. The Operations Alert insert is done directly here (querying the
-DocType) rather than importing ``salis.tasks`` to avoid coupling.
+No GL is written. The Operations Alert insert goes through the apex_core
+``insert_operations_alert`` helper (a leaf util) rather than importing
+``salis.tasks`` — no coupling, one place writes the record.
 """
 
 from __future__ import annotations
 
 import frappe
+
+from apex_habitat.apex_core.utils.operations_alert import insert_operations_alert
 
 LEDGER_DOCTYPE = "Fuel Consumption Ledger"
 ALERT_DOCTYPE = "Operations Alert"
@@ -327,10 +330,10 @@ def monthly_fuel_reconciliation() -> None:
     ``OVERAGE_MARGIN`` tolerance, an "Excessive Topup" Operations Alert is raised
     referencing the vehicle. Idempotent per vehicle+period within the month.
 
-    Per-row try/except isolates failures; no commit inside the loop. The alert is
-    inserted directly (no import of ``salis.tasks``) to avoid coupling.
+    Per-row try/except isolates failures; no commit inside the loop. The alert
+    insert goes through the apex_core helper (a leaf util, no salis.tasks coupling).
     """
-    from frappe.utils import flt, now_datetime, today
+    from frappe.utils import flt, today
 
     period_month = _period_month(today())
     logger = frappe.logger()
@@ -387,18 +390,13 @@ def monthly_fuel_reconciliation() -> None:
                     quota.name,
                 )
 
-                frappe.get_doc(
-                    {
-                        "doctype": ALERT_DOCTYPE,
-                        "alert_type": "Excessive Topup",
-                        "severity": "Critical",
-                        "status": "Open",
-                        "raised_on": now_datetime(),
-                        "vehicle": quota.vehicle,
-                        "driver": quota.driver,
-                        "message": message[:2000],
-                    }
-                ).insert(ignore_permissions=True)  # audit-ok
+                insert_operations_alert(
+                    alert_type="Excessive Topup",
+                    severity="Critical",
+                    message=message,
+                    vehicle=quota.vehicle,
+                    driver=quota.driver,
+                )
             except Exception:
                 frappe.db.rollback()
                 frappe.log_error(

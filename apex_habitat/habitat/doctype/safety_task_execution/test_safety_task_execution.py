@@ -95,22 +95,53 @@ class TestSafetyTaskExecution(FrappeTestCase):
             "evidence_required": evidence_required,
         }).insert(ignore_permissions=True).name
 
-    def test_evidence_required_task_without_photo_is_rejected(self):
-        """A task flagged evidence_required cannot be saved without an Evidence Photo."""
+    def test_failed_evidence_task_without_photo_is_rejected(self):
+        """A FAILED (Poor) result on an evidence_required task is blocked with no photo."""
         task = self._evidence_task(evidence_required=1)
         doc = frappe.get_doc({
             "doctype": "Safety Task Execution",
             "execution_date": "2026-06-20",
             "building": "QA-BLDG",
             "task": task,
-            "execution_status": "Good",
+            "execution_status": "Poor",
         })
         with self.assertRaises(frappe.ValidationError):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
-    def test_evidence_not_required_task_saves_without_photo(self):
-        """A task with evidence_required=0 saves with no Evidence Photo."""
-        task = self._evidence_task(evidence_required=0)
+    def test_not_done_evidence_task_without_photo_is_rejected(self):
+        """Not Done is the second failing status and is also blocked with no photo."""
+        task = self._evidence_task(evidence_required=1)
+        doc = frappe.get_doc({
+            "doctype": "Safety Task Execution",
+            "execution_date": "2026-06-20",
+            "building": "QA-BLDG",
+            "task": task,
+            "execution_status": "Not Done",
+        })
+        with self.assertRaises(frappe.ValidationError):
+            doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_failed_evidence_task_with_photo_passes(self):
+        """A FAILED result on an evidence_required task saves once a photo is attached."""
+        task = self._evidence_task(evidence_required=1)
+        doc = frappe.get_doc({
+            "doctype": "Safety Task Execution",
+            "execution_date": "2026-06-20",
+            "building": "QA-BLDG",
+            "task": task,
+            "execution_status": "Poor",
+            "evidence_photo": "/files/evidence.jpg",
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        self.assertEqual(doc.execution_status, "Poor")
+        frappe.delete_doc(
+            "Safety Task Execution", doc.name, force=True, ignore_permissions=True
+        )
+
+    def test_passing_evidence_task_without_photo_is_allowed(self):
+        """A passing (Good) result is NOT gated even when the task is evidence_required:
+        the photo proves a failure, and there is no failure to prove."""
+        task = self._evidence_task(evidence_required=1)
         doc = frappe.get_doc({
             "doctype": "Safety Task Execution",
             "execution_date": "2026-06-20",
@@ -120,6 +151,22 @@ class TestSafetyTaskExecution(FrappeTestCase):
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
         self.assertEqual(doc.execution_status, "Good")
+        frappe.delete_doc(
+            "Safety Task Execution", doc.name, force=True, ignore_permissions=True
+        )
+
+    def test_evidence_not_required_task_saves_without_photo(self):
+        """A failing result with evidence_required=0 saves with no Evidence Photo."""
+        task = self._evidence_task(evidence_required=0)
+        doc = frappe.get_doc({
+            "doctype": "Safety Task Execution",
+            "execution_date": "2026-06-20",
+            "building": "QA-BLDG",
+            "task": task,
+            "execution_status": "Poor",
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        self.assertEqual(doc.execution_status, "Poor")
         frappe.delete_doc(
             "Safety Task Execution", doc.name, force=True, ignore_permissions=True
         )

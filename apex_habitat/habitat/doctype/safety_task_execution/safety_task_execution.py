@@ -7,9 +7,9 @@ writing the finding's generated_maintenance_request back-link (idempotent). A
 Poor / Not Done overall result additionally raises one building-scoped summary
 Maintenance Request, stamped on linked_maintenance_request (also idempotent).
 
-Validation enforces photo evidence: a catalog task flagged evidence_required
-must carry an Evidence Photo, and a Security-category finding must carry one
-before it can drive an escalation.
+Validation enforces photo evidence: a FAILED outcome (Poor / Not Done) on a
+catalog task flagged evidence_required must carry an Evidence Photo, and a
+Security-category finding must carry one before it can drive an escalation.
 """
 
 from __future__ import annotations
@@ -103,8 +103,10 @@ class SafetyTaskExecution(Document):
         """Throw a clear English message when required photo evidence is missing.
 
         Two rules:
-          1. If the linked Safety Task Catalog task has evidence_required=1, an
-             Evidence Photo is mandatory for the whole execution.
+          1. A FAILED outcome (Poor / Not Done) on a Safety Task Catalog task
+             flagged evidence_required=1 must carry an Evidence Photo — a failed
+             check escalates to a Maintenance Request, so the failure needs proof.
+             A passing outcome is not gated.
           2. A Security-category finding (catalog category, or a finding row
              carrying the same category — best-effort) may not drive escalation
              without an Evidence Photo.
@@ -112,10 +114,11 @@ class SafetyTaskExecution(Document):
         if self.evidence_photo:
             return  # a photo is present — both rules are satisfied
 
-        if self._task_requires_evidence():
+        if self._failed_requires_evidence():
             frappe.throw(
-                _("This safety task requires photo evidence. "
-                  "Please attach an Evidence Photo before submitting."),
+                _("A failed safety task ({0}) on a task that requires evidence "
+                  "must carry a photo. Please attach an Evidence Photo before "
+                  "submitting.").format(self.execution_status),
                 title=_("Evidence Photo Required"),
             )
 
@@ -126,8 +129,14 @@ class SafetyTaskExecution(Document):
                 title=_("Evidence Photo Required"),
             )
 
-    def _task_requires_evidence(self) -> bool:
-        """True when the linked catalog task is flagged evidence_required."""
+    def _failed_requires_evidence(self) -> bool:
+        """True when a FAILED outcome on an evidence_required task lacks proof.
+
+        The photo is mandated only for a failing result (Poor / Not Done) — the
+        same statuses that escalate to a Maintenance Request — so the recorded
+        failure can be substantiated."""
+        if self.execution_status not in _REPAIR_NEEDED_STATUSES:
+            return False
         if not self.task:
             return False
         return bool(

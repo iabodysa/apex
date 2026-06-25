@@ -29,6 +29,8 @@ from __future__ import annotations
 import frappe
 from frappe.utils import flt, today
 
+from apex_habitat.apex_core.utils.operations_alert import insert_operations_alert
+
 LEDGER_DOCTYPE = "Rental Accrual Ledger"
 ALERT_DOCTYPE = "Operations Alert"
 BATCH_SIZE = 500
@@ -307,10 +309,10 @@ def monthly_rental_reconciliation() -> None:
 
     Reconciliation only — posts no GL and stamps nothing (stamping is the
     settlement's job, via :func:`stamp_settlement`). Per-row try/except isolates
-    failures; no commit inside the loop. The alert is inserted directly (no
-    import of ``salis.tasks``) to avoid coupling, exactly as the fuel engine does.
+    failures; no commit inside the loop. The alert insert goes through the
+    apex_core helper (a leaf util, no salis.tasks coupling), like the fuel engine.
     """
-    from frappe.utils import add_months, get_first_day, get_last_day, getdate, now_datetime
+    from frappe.utils import add_months, get_first_day, get_last_day, getdate
 
     # [#6e4o53]
     closed_anchor = getdate(add_months(getdate(today()), -1))
@@ -348,16 +350,11 @@ def monthly_rental_reconciliation() -> None:
                 "(office {0})"
             ).format(rental_office, period_month, round(outstanding, 2))
 
-            frappe.get_doc(
-                {
-                    "doctype": ALERT_DOCTYPE,
-                    "alert_type": "Unsettled Rental",
-                    "severity": "Warning",
-                    "status": "Open",
-                    "raised_on": now_datetime(),
-                    "message": message[:2000],
-                }
-            ).insert(ignore_permissions=True)  # audit-ok
+            insert_operations_alert(
+                alert_type="Unsettled Rental",
+                severity="Warning",
+                message=message,
+            )
         except Exception:
             frappe.db.rollback()
             frappe.log_error(

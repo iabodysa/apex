@@ -15,6 +15,7 @@ A cadence is required to submit a round.,تلزم وتيرة لاعتماد جو
 A chip action (Issue / Replace / Cancel) is required.,يلزم تحديد إجراء للشريحة (إصدار / استبدال / إلغاء).
 A chip number is required to {0} a fuel chip.,يلزم رقم شريحة من أجل {0} شريحة وقود.
 A completion photo is required before closing a Maintenance Work Order.,يجب إرفاق صورة إنجاز قبل إغلاق أمر عمل الصيانة.
+A failed safety task ({0}) on a task that requires evidence must carry a photo. Please attach an Evidence Photo before submitting.,مهمة سلامة راسبة ({0}) على مهمة تتطلب دليلاً يجب أن تحمل صورة. الرجاء إرفاق صورة دليل قبل التقديم.
 A handover discrepancy was recorded. Please raise a Vehicle Damage Write-Off for vehicle {0} to obtain tiered write-off approval.,سُجِّل تباينٌ في التسليم. الرجاء رفع إعدام تلف للمركبة {0} للحصول على موافقة الإعدام المُتدرّجة.
 A maintenance request raised automatically when the task execution indicates a repair is needed.,طلب صيانة يُنشأ آلياً عندما يشير تنفيذ المهمة إلى الحاجة لإصلاح.
 A new Dispatch Trip must start as Planned; {0} is reached through the workflow.,يجب أن تبدأ رحلة التشغيل الجديدة بالحالة مُخطَّطة؛ يتم الوصول إلى {0} عبر سير العمل.
@@ -180,10 +181,10 @@ Anonymous,مجهول الهوية
 Anonymous Tracking Code,رمز تتبع مجهول الهوية
 Apartment,شقة
 Apex Core is configured. The accommodation and fleet modules now share these settings.,تم تهيئة نواة أبيكس. تشترك الآن وحدتا السكن والأسطول في هذه الإعدادات.
+Apex Home,الرئيسية
 Apex Integration Settings,إعدادات تكامل أبيكس
 Apex Settings,إعدادات Apex
 Apex Setup,إعداد أبيكس
-Apex Home,الرئيسية
 Appearance,المظهر
 Applies to All Buildings,يسري على جميع المباني
 Apply an operational markup to external-supplier accommodation costs in the Supplier Cost Recovery report.,تطبيق هامش تشغيلي على تكاليف السكن الخاصة بالموردين الخارجيين في تقرير استرداد تكلفة المورّد.
@@ -511,6 +512,7 @@ Closed On,تاريخ الإغلاق
 Closed by Client,أُغلق من قِبل العميل
 Closed in the Last 48h,مُنجَزة آخر 48 ساعة
 Closing…,جارٍ الإغلاق…
+Combined ceiling for all deduction types per pay period; KSA Labor Law Art. 91 caps this at 50%.,السقف المجمّع لجميع أنواع الخصومات في كل فترة رواتب؛ يحدّده نظام العمل السعودي المادة 91 بحد أقصى 50%.
 Commercial Terms,الشروط التجارية
 Common Area,منطقة مشتركة
 Company,الشركة
@@ -977,6 +979,7 @@ Execution Time,وقت التنفيذ
 Exhausted,مستنفدة
 Expected,المتوقَّعة
 Expected Check-out Date,تاريخ المغادرة المتوقع
+Expected Checkout Approaching: {0},اقتراب موعد المغادرة المتوقع: {0}
 Expected Count,العدد المتوقع
 Expected Return Date,تاريخ الإرجاع المتوقع
 "Expected boarding count, derived from the linked Transport Request's registered worker count.",عدد الصعود المتوقع، مشتق من عدد العمالة المسجّلين في طلب النقل المرتبط.
@@ -1164,6 +1167,7 @@ Generating Safety Setup…,جارٍ إعداد منظومة السلامة…
 Generator,مولد كهربائي
 Generator Service,صيانة المولد الكهربائي
 Getting Started,البدء
+Global master switch for all salary deductions; off until legal review is recorded.,مفتاح رئيسي عام لجميع خصومات الرواتب؛ يبقى متوقفاً حتى تسجيل المراجعة القانونية.
 Go To,الانتقال إلى
 Good,جيد
 Google Maps Link,رابط خرائط جوجل
@@ -1256,6 +1260,7 @@ Indicates the resolved request has been recorded in the asset's maintenance hist
 Info,معلومة
 Information,معلومات
 Injury,إصابة
+Inspected by (Supervisor),تم التفتيش بواسطة (المشرف)
 Inspection,تفتيش
 Inspection Date,تاريخ الفحص
 Inspection Finding Item,بند ملاحظة التفتيش
@@ -1617,6 +1622,7 @@ No registered workers match. Register a new arrival below.,لا يوجد عما�
 No result lines to submit.,لا سطور نتائج لاعتمادها.
 No rooms found for this building.,لا توجد غرف لهذا المبنى.
 No safety tasks match this building and cadence.,لا مهامَّ سلامةٍ تطابق هذا المبنى وهذه الوتيرة.
+No task executions recorded for this round.,لا توجد مهام منفذة مسجلة لهذه الجولة.
 No trips scheduled for today.,لا توجد رحلات مجدولة لليوم.
 No vehicle is assigned to you. Ask your supervisor to assign one before requesting fuel.,لا توجد مركبة مسندة إليك. اطلب من مشرفك إسناد مركبة قبل طلب الوقود.
 No vehicles in scope.,لا توجد مركبات ضمن النطاق.
@@ -2007,6 +2013,7 @@ Raise a Transport Request,أنشئ طلب نقل
 Raised By,أُنشئ بواسطة
 Raised On,أُنشئ في
 Rating,التقييم
+Re-inspection,إعادة تفتيش
 Read-only — managed by the Room Setup wizard.,للقراءة فقط — يُدار عبر معالج إعداد الغرف.
 Readiness Status,حالة جاهزية الغرفة
 Ready,جاهز
@@ -2168,7 +2175,9 @@ Require Employee Acknowledgment,اشتراط إقرار الموظف
 Require Handover OTP,طلب رمز تحقق للتسليم
 Require Internal Approval,اشتراط الاعتماد الداخلي
 Require Weekly All-Building Coverage,طلب تغطية أسبوعية لجميع المباني
+Require an Employee Deduction Acknowledgment (worker consent) before any deduction posts.,اشتراط إقرار خصم من الموظف (موافقة العامل) قبل ترحيل أي خصم.
 Require approval when an assignment or transfer crosses project boundaries.,اشتراط الموافقة عند تجاوز الإسناد أو النقل لحدود المشروع.
+Require the worker's Employee Deduction Acknowledgment (consent) before this type posts; KSA Labor Law requires consent for wage deductions.,اشتراط إقرار خصم الموظف (موافقة العامل) قبل ترحيل هذا النوع؛ يوجب نظام العمل السعودي موافقة العامل على خصومات الأجر.
 Required before the case can move beyond Open.,"مطلوب قبل أن تتجاوز الحالة وضع ""مفتوحة""."
 Required for Accident or Violation stops.,مطلوب لحالات الإيقاف بسبب حادث أو مخالفة.
 Required for Violation or Termination stops.,مطلوب لحالات الإيقاف بسبب مخالفة أو إنهاء خدمة.
@@ -2229,6 +2238,7 @@ Review and approve the handover before confirming receipt.,راجع التسلي
 Review the Active Resident Register,راجع سجل الساكنين النشطين
 Review the Safety Task Catalog,مراجعة دليل مهام السلامة
 "Review the shared integration switchboard: frontend URL, API version, and allowed origins.",راجع لوحة التكامل المشتركة: رابط الواجهة، وإصدار الواجهة البرمجية، والمصادر المسموح بها.
+Reviewed by,روجع بواسطة
 Revoked,مُلغى
 Rework Required,يلزم إعادة العمل
 Rider {0} is marked {1} and cannot receive a vehicle or fuel.,الراكب {0} مُعلَّم بـ {1} ولا يمكنه استلام مركبة أو وقود.
@@ -2263,6 +2273,7 @@ Rooms,الغرف
 Rooms Cleaned,الغرف التي تم تنظيفها
 Rooms Generated,تم توليد الغرف
 Rooms Generated On,تاريخ توليد الغرف
+Rooms Needing Readiness,غرف بحاجة إلى تجهيز
 Rooms Planned,تم تخطيط الغرف
 Rooms Total,إجمالي الغرف
 Rooms and beds created.,تم إنشاء الغرف والأسرّة.
@@ -2303,6 +2314,7 @@ Safety Readiness,جاهزية السلامة
 Safety Report Recipient,مستلِم تقرير السلامة
 Safety Round,جولة سلامة
 Safety Round Compliance,الالتزام بجولات السلامة
+Safety Round Report,تقرير جولة السلامة
 Safety Section — No Issues,قسم السلامة — لا توجد ملاحظات
 Safety Setup,إعداد السلامة
 Safety Setup Generated By,أنشأ إعداد السلامة
@@ -2660,8 +2672,10 @@ This driver has been cleared on all movement-domain items listed below.,تم ت�
 This page is for the fleet team.,هذه الصفحة مخصّصة لفريق الأسطول.
 This page is for the safety team.,هذه الصفحة لفريق السلامة.
 This payment request is not finance-approved yet; it cannot be paid.,طلب الدفع هذا لم يُعتمد ماليًا بعد؛ لا يمكن دفعه.
+This report records the safety tasks executed during the round and their outcomes.,يوثّق هذا التقرير مهام السلامة المنفذة خلال الجولة ونتائجها.
 This request is not available or does not belong to you.,هذا الطلب غير متاح أو لا يخصك.
 This resident has custody items. Opening the full Checkout form to clear custody.,لدى هذا المقيم عُهد. يتم فتح نموذج تسجيل الخروج الكامل لتصفية العهدة.
+This resident's expected checkout date is approaching — please prepare the room and checkout,يقترب موعد المغادرة المتوقع لهذا النزيل — يرجى تجهيز الغرفة وإتمام إجراءات المغادرة
 This safety task requires photo evidence. Please attach an Evidence Photo before submitting.,تتطلب مهمة السلامة هذه دليلاً بالصور. الرجاء إرفاق صورة دليل قبل التقديم.
 This vehicle is under maintenance and should not be dispatched.,هذه المركبة تحت الصيانة ولا يجوز توزيعها.
 This voucher reconciles the claimed fuel against consumption recorded in the Fuel Consumption Ledger. It does not post to the general ledger.,يسوّي هذا السند الوقود المطالب به مقابل الاستهلاك المسجَّل في دفتر استهلاك الوقود. لا يُرحَّل إلى الأستاذ العام.
@@ -3006,9 +3020,3 @@ total_cost,التكلفة الإجمالية
 {0} {1} already has an active Accommodation Assignment: {2},{0} {1} لديه بالفعل إسناد سكن نشط: {2}
 {0} {1} does not exist.,{0} {1} غير موجود.
 {0}: {1} occupied bed(s) prevented capacity reduction.,{0}: {1} سرير/أسرّة مشغولة منعت تخفيض السعة.
-Safety Round Report,تقرير جولة السلامة
-Re-inspection,إعادة تفتيش
-Reviewed by,روجع بواسطة
-Inspected by (Supervisor),تم التفتيش بواسطة (المشرف)
-No task executions recorded for this round.,لا توجد مهام منفذة مسجلة لهذه الجولة.
-This report records the safety tasks executed during the round and their outcomes.,يوثّق هذا التقرير مهام السلامة المنفذة خلال الجولة ونتائجها.

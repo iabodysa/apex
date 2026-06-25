@@ -46,7 +46,7 @@
   },
   {
    "default": "0",
-   "description": "Global kill-switch for the entire salary-deduction layer. Default OFF: while OFF, no operational event raises any salary deduction, regardless of the per-type rules below. Turn ON only after legal review is recorded on the Compliance tab.",
+   "description": "Global master switch for all salary deductions; off until legal review is recorded.",
    "fieldname": "enable_salary_deductions",
    "fieldtype": "Check",
    "label": "Enable Salary Deductions"
@@ -76,7 +76,7 @@
   },
   {
    "default": "50",
-   "description": "Absolute ceiling on the COMBINED share of a worker's wage that all deduction types together may take in one pay period. KSA Labor Law Art. 91 sets this statutory maximum at 50%. The skeleton ships this lawful ceiling; the conservative per-type defaults sit well below it. Do not exceed 50 without legal review.",
+   "description": "Combined ceiling for all deduction types per pay period; KSA Labor Law Art. 91 caps this at 50%.",
    "fieldname": "global_max_percent_of_salary",
    "fieldtype": "Percent",
    "label": "Global Max % of Salary (all types)",
@@ -88,7 +88,7 @@
   },
   {
    "default": "1",
-   "description": "When ON (default), a submitted Employee Deduction Acknowledgment (consent record) is required for EVERY deduction across all types before it posts. This is the conservative, KSA-compliant default; clearing it is a legal-review decision and is overridden per type only with sign-off.",
+   "description": "Require an Employee Deduction Acknowledgment (worker consent) before any deduction posts.",
    "fieldname": "global_require_acknowledgment",
    "fieldtype": "Check",
    "label": "Require Acknowledgment for All Deductions"
@@ -198,7 +198,7 @@
  "icon": "fa fa-money",
  "issingle": 1,
  "links": [],
- "modified": "2026-06-13 09:00:00.000000",
+ "modified": "2026-06-25 06:43:07.306015",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salary Deduction Policy",
