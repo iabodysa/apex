@@ -3094,3 +3094,18 @@ Arrival Manifest,بيان الوصول
 Submit Manifest,إرسال البيان
 Expected Arrival Date,تاريخ الوصول المتوقع
 Your arrival manifest was submitted. The accommodation team will reconcile arrivals against it on the expected date.,تم إرسال بيان الوصول الخاص بك. سيقوم فريق السكن بمطابقة الوصول الفعلي مع البيان في التاريخ المتوقع.
+Departure transport for {0} ({1}). Raised from Accommodation Checkout {2}.,نقل مغادرة لـ {0} ({1}). تم إنشاؤه من إخلاء السكن {2}.
+Departure transport can only be raised for a submitted checkout.,لا يمكن إنشاء نقل المغادرة إلا لإخلاء سكن مُرحَّل.
+Departure transport applies only to a Final Exit or End of Contract checkout.,نقل المغادرة ينطبق فقط على إخلاء سكن لخروج نهائي أو نهاية عقد.
+A linked Employee is required to raise departure transport (the manifest cannot carry a Temporary Worker).,يلزم موظف مرتبط لإنشاء نقل المغادرة (لا يمكن للبيان أن يحمل عاملاً مؤقتاً).
+Departure Transport Request raised: {0},تم إنشاء طلب نقل المغادرة: {0}
+Arrange Departure Transport,ترتيب نقل المغادرة
+Raising departure transport…,جارٍ إنشاء نقل المغادرة…
+Departure Transport Request {0} raised.,تم إنشاء طلب نقل المغادرة {0}.
+Departure Transport Request,طلب نقل المغادرة
+Salis departure (relocation) transport raised for a Final Exit / End of Contract checkout.,نقل مغادرة (ترحيل) من ساليس تم إنشاؤه لإخلاء سكن لخروج نهائي / نهاية عقد.
+Driver User,مستخدم السائق
+Current Driver User,مستخدم السائق الحالي
+"The driver's portal/login user, mirrored from the linked Employee. Drives driver-facing notifications.",مستخدم بوابة/دخول السائق، منعكس من الموظف المرتبط. يوجِّه الإشعارات الموجَّهة للسائق.
+"The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",مستخدم دخول السائق، منعكس من السائق المرتبط. يوجِّه الإشعار الموجَّه للسائق.
+"The current driver's login user, mirrored from the assigned driver. Drives the driver-facing compliance notification.",مستخدم دخول السائق الحالي، منعكس من السائق المُسنَد. يوجِّه إشعار الامتثال الموجَّه للسائق.

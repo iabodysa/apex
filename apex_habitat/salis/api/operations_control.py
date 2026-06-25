@@ -10,7 +10,7 @@ supervisor a project they could not already see.
 
 The board answers "what is every vehicle's state, driver and open-incident load
 right now?" and powers a card/table view, a per-vehicle detail drawer, and a
-client-side CSV export of the current view.
+scoped server-side CSV export of the current filter set.
 """
 
 from __future__ import annotations
@@ -152,6 +152,37 @@ def get_fleet(status=None, rental_office=None, project=None, search=None):
         "statuses": VEHICLE_STATUSES,
         "unscoped": unscoped,
     }
+
+
+# (header label, vehicle field) — the export columns, mirroring the board's CSV columns.
+_EXPORT_COLUMNS = (
+    ("Plate", "plate_number"),
+    ("Category", "vehicle_category"),
+    ("Status", "status"),
+    ("Driver", "current_driver_name"),
+    ("Office", "rental_office"),
+    ("Project", "project"),
+    ("Ownership", "ownership"),
+    ("Odometer", "odometer"),
+    ("Open Incidents", "open_incidents"),
+)
+
+
+@frappe.whitelist()
+def export_fleet(status=None, rental_office=None, project=None, search=None):
+    """Stream the filtered fleet as a CSV download (native csv response).
+
+    Re-runs ``get_fleet`` server-side so the export carries the FULL
+    permission-/scope-consistent result — not just the rows the client happens to
+    have painted — and the two can never disagree about scope. A read: stays GET.
+    """
+    from frappe.utils.csvutils import build_csv_response
+
+    data = get_fleet(status=status, rental_office=rental_office, project=project, search=search)
+    fields = [field for _label, field in _EXPORT_COLUMNS]
+    rows = [[_(label) for label, _field in _EXPORT_COLUMNS]]
+    rows += [[v.get(f) if v.get(f) is not None else "" for f in fields] for v in data["vehicles"]]
+    build_csv_response(rows, "Fleet Control")
 
 
 @frappe.whitelist()

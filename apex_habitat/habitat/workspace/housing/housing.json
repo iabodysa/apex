@@ -88,6 +88,14 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
+   "label": "Arrival Batch",
+   "link_type": "DocType",
+   "link_to": "Arrival Batch",
+   "idx": 23
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Room Setup",
    "link_type": "Page",
    "link_to": "room-setup",
@@ -307,5 +315,5 @@
    "idx": 1
   }
  ],
- "modified": "2026-06-25 08:48:44.897736"
+ "modified": "2026-06-25 15:21:13.042965"
 }

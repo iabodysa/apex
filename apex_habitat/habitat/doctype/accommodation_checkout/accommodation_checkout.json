@@ -36,6 +36,7 @@
   "cancellation_reason",
   "accommodation_checkout_sec_system",
   "naming_series",
+  "departure_transport_request",
   "accommodation_checkout_overview_col2",
   "amended_from"
  ],
@@ -246,6 +247,15 @@
    "reqd": 1
   },
   {
+   "fieldname": "departure_transport_request",
+   "fieldtype": "Link",
+   "label": "Departure Transport Request",
+   "options": "Transport Request",
+   "no_copy": 1,
+   "read_only": 1,
+   "description": "Salis departure (relocation) transport raised for a Final Exit / End of Contract checkout."
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -257,7 +267,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-09 11:00:00.000000",
+ "modified": "2026-06-25 15:31:45.754867",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Checkout",

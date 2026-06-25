@@ -374,25 +374,12 @@ class FleetControl {
 	}
 
 	export_csv() {
-		const cols = [
-			["Plate", "plate_number"], ["Category", "vehicle_category"], ["Status", "status"],
-			["Driver", "current_driver_name"], ["Office", "rental_office"], ["Project", "project"],
-			["Ownership", "ownership"], ["Odometer", "odometer"], ["Open Incidents", "open_incidents"],
-		];
-		const rows = [cols.map((c) => c[0])];
-		this.data.vehicles.forEach((v) => rows.push(cols.map((c) => v[c[1]] == null ? "" : v[c[1]])));
-		const csv = rows
-			.map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-			.join("\n");
-		const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = "fleet_control.csv";
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
-		frappe.show_alert({ message: __("Exported {0} vehicles", [this.data.vehicles.length]), indicator: "green" });
+		// Server-side export: re-runs the scoped query so the file holds the FULL
+		// permission-/scope-consistent result, not just the painted rows. The native
+		// csv response (build_csv_response) is streamed via the standard POST download.
+		open_url_post(frappe.request.url, {
+			cmd: "apex_habitat.salis.api.operations_control.export_fleet",
+			...this.filters,
+		});
 	}
 }

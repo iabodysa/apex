@@ -40,7 +40,8 @@
   "vehicle_sec_system",
   "naming_series",
   "vehicle_sys_col",
-  "plate_normalized"
+  "plate_normalized",
+  "current_driver_user"
  ],
  "fields": [
   {
@@ -244,6 +245,16 @@
    "read_only": 1,
    "search_index": 1,
    "unique": 1
+  },
+  {
+   "description": "The current driver's login user, mirrored from the assigned driver. Drives the driver-facing compliance notification.",
+   "fetch_from": "current_driver.driver_user",
+   "fieldname": "current_driver_user",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Current Driver User",
+   "options": "User",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -334,7 +345,7 @@
    "link_fieldname": "vehicle"
   }
  ],
- "modified": "2026-06-08 20:00:00.000000",
+ "modified": "2026-06-25 15:31:22.728275",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Vehicle",

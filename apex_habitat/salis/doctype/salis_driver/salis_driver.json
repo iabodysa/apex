@@ -26,6 +26,7 @@
   "driver_compliance_col",
   "license_expiry",
   "driver_sec_system",
+  "driver_user",
   "naming_series"
  ],
  "fields": [
@@ -154,6 +155,16 @@
    "collapsible": 1
   },
   {
+   "description": "The driver's portal/login user, mirrored from the linked Employee. Drives driver-facing notifications.",
+   "fetch_from": "employee.user_id",
+   "fetch_if_empty": 1,
+   "fieldname": "driver_user",
+   "fieldtype": "Link",
+   "label": "Driver User",
+   "options": "User",
+   "read_only": 1
+  },
+  {
    "default": "DRV-.######",
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -242,7 +253,7 @@
    "link_fieldname": "driver"
   }
  ],
- "modified": "2026-06-08 20:00:00.000000",
+ "modified": "2026-06-25 15:31:22.728275",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Driver",

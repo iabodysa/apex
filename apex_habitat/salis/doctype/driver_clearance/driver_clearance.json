@@ -11,6 +11,7 @@
   "driver",
   "clearance_reason",
   "assigned_vehicle",
+  "driver_user",
   "driver_clearance_overview_col",
   "status",
   "naming_series",
@@ -62,6 +63,16 @@
    "fieldtype": "Link",
    "label": "Assigned Vehicle",
    "options": "Salis Vehicle",
+   "read_only": 1
+  },
+  {
+   "description": "The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",
+   "fetch_from": "driver.driver_user",
+   "fieldname": "driver_user",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Driver User",
+   "options": "User",
    "read_only": 1
   },
   {
@@ -155,7 +166,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-26 12:00:00.000000",
+ "modified": "2026-06-25 15:31:22.728275",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Driver Clearance",

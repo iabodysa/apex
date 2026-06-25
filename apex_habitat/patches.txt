@@ -145,3 +145,11 @@ apex_habitat.patches.v1_x.backfill_assignment_facility_supervisor
 # send_system_notification on the live rows. Idempotent, no-op on fresh installs / re-run.
 # PRUNE once every deployed site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.enable_salis_theft_overstay_notifications
+
+# v1.x — enable the driver-facing Blocked Driver Clearance + Vehicle Compliance Expiring
+# Soon notifications on existing sites (ONE-TIME, T-562). Notification.enabled is in
+# import_file.ignore_values, so migrate preserves the stale DB value and never applies the
+# JSON enabled flip; flip enabled + send_system_notification on the live rows. Idempotent,
+# no-op on fresh installs / re-run. PRUNE once every deployed site has run it (tracked in
+# tabPatch Log).
+apex_habitat.patches.v1_x.enable_salis_driver_notifications
