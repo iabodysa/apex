@@ -1300,6 +1300,8 @@ Identifiers,المعرّفات
 Identity,الهوية
 Identity type of the consenting worker. Mirrors the native party_type / party Dynamic Link used across the housed-worker doctypes.,نوع هوية العامل الموافِق. يعكس الرابط الديناميكي الأصلي party_type / party المستخدم عبر مستندات العمال المُسكَّنين.
 Idle Days,أيام التوقف
+Idle Report,تقرير الخمول
+Idle Report Status,حالة تقرير الخمول
 Idle Resident Report,تقرير مقيم غير مُشغَّل
 Idle Residents,الساكنون غير المشغّلين
 Idle Vehicle,مركبة خاملة
@@ -1676,6 +1678,7 @@ Next: Room Types,التالي: أنواع الغرف
 Night,ليلي
 No,لا
 No Active Assignment,بلا إسناد سكنٍ نشط
+No Project,لا يوجد مشروع
 No Salis Driver is linked to your account.,لا يوجد سائق سلس مرتبط بحسابك.
 No actions available.,لا توجد إجراءات متاحة.
 No active Safety Task Catalog entries found. Run the app setup first.,لم يُعثر على إدخالات نشطة في دليل مهام السلامة. يرجى تشغيل إعداد التطبيق أولاً.
@@ -1782,6 +1785,7 @@ Only Open or In Progress Task Instances can be marked Completed.,لا يمكن �
 Only Service Orders with status In Progress can be marked Missed.,لا يمكن تحديد حالة 'فائت' إلا لأوامر الخدمة ذات الحالة 'قيد التنفيذ'.
 Only Service Orders with status Scheduled can be marked In Progress.,لا يمكن تحديد حالة 'قيد التنفيذ' إلا لأوامر الخدمة ذات الحالة 'مجدول'.
 Only Task Instances with status Open can be marked In Progress.,لا يمكن تحديد حالة 'قيد التنفيذ' إلا لتنفيذات المهام ذات الحالة 'مفتوح'.
+Only Without an Idle Report,بدون تقرير خمول فقط
 Only Work Orders with status Planned can be marked In Progress.,لا يمكن تحديد حالة 'قيد التنفيذ' إلا لأوامر العمل ذات الحالة 'مخطط'.
 Only a Fleet Manager or Fleet Project Manager can {0} a fuel request.,يمكن فقط لمدير الأسطول أو مدير مشروع الأسطول {0} طلب وقود.
 Only a handover Under Review can be approved.,لا يمكن اعتماد إلا تسليم قيد المراجعة.
@@ -2068,6 +2072,7 @@ Procurement Supervisor,مشرف المشتريات
 Procurement intake store that receives the externally-purchased goods.,مخزن استلام المشتريات الذي يستلم البضائع المشتراة خارجياً.
 Procurement intake store that the goods leave.,مخزن استلام المشتريات الذي تغادر منه البضائع.
 Project,المشروع
+Project Status,حالة المشروع
 Project Supervisor,مشرف المشروع
 Project Transfer,تحويل المشروع
 Project is required.,المشروع مطلوب.

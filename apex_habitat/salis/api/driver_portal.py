@@ -308,6 +308,37 @@ def my_trips_today():
 	return trips
 
 
+@frappe.whitelist()
+def my_trips_recent(days=30, limit=50):
+	"""The current driver's recent Dispatch Trips, newest first (read).
+
+	Identity-scoped via endpoint-scoped ``get_all`` (the ``my_trips_today``
+	precedent): the driver is resolved from the session and every row is filtered on
+	that driver, so this can only return the caller's own trips. Backs the Trips
+	view's "recent/past" tab while ``my_trips_today`` stays the default — the SPA
+	switches endpoints, the card shape is identical (route/vehicle link ids swapped
+	for human labels by the same ``_label_trips``).
+
+	``days`` bounds the window (trip_date >= today - days; defaults to 30) and
+	``limit`` caps the rows, so the list never grows unbounded for a long-tenured
+	driver. ``trip_date`` is included (and stringified) so the SPA can group/sort by
+	day. Read-only, no commit."""
+	_require_enabled()
+	driver = _resolve_driver()
+	since = frappe.utils.add_days(frappe.utils.today(), -(frappe.utils.cint(days) or 30))
+	trips = frappe.get_all(
+		"Dispatch Trip",
+		filters={"driver": driver, "trip_date": [">=", since]},
+		fields=["name", "trip_date", "route_plan", "vehicle", "depart_time", "return_time", "status"],
+		order_by="trip_date desc, depart_time desc",
+		limit=frappe.utils.cint(limit) or 50,
+	)
+	_label_trips(trips)  # cards show plate / route name, not raw link ids
+	for t in trips:
+		t["trip_date"] = frappe.utils.cstr(t["trip_date"]) if t.get("trip_date") else None
+	return trips
+
+
 def _label_trips(trips):
 	"""Swap route_plan / vehicle link ids for their human labels (Route Plan.
 	route_name, Salis Vehicle.plate_number) so the driver's cards read names."""
@@ -751,6 +782,93 @@ def submit_fuel_request(litres, fuel_platform=None, vehicle=None):
 	)
 	doc.insert(ignore_permissions=True)  # audit-ok — driver resolved server-side
 	return {"name": doc.name}
+
+
+@frappe.whitelist()
+def my_fuel_quota(vehicle=None):
+	"""This month's Fuel Quota for the driver's bound vehicle (read).
+
+	Identity-scoped: the driver is resolved from the session, never client-supplied.
+	``vehicle`` is optional and, when given, is honoured only after the same binding
+	check fuel writes use (``_vehicle_bound_to_driver``) — so a driver can never read
+	another vehicle's quota by guessing an id; an unbound id falls back to the bound
+	vehicle. The quota row is the native Fuel Quota for (vehicle, this YYYY-MM period),
+	the same record the fuel engine keeps ``consumed_litres`` on.
+
+	Returns ``{"has_quota": False, ...}`` (a friendly empty state, never a 403) when no
+	vehicle is bound or no quota exists for the month, so the SPA omits the card.
+	``remaining_litres`` is server-computed (clamped at 0) so both languages render the
+	same number with no client math. Read-only, no commit."""
+	_require_enabled()
+	driver = _resolve_driver()
+
+	if not vehicle or not _vehicle_bound_to_driver(driver, vehicle):
+		vehicle = _bound_vehicle(driver)
+	if not vehicle:
+		return {"has_quota": False, "vehicle": None}
+
+	period_month = frappe.utils.today()[:7]
+	row = frappe.db.get_value(
+		"Fuel Quota",
+		{"vehicle": vehicle, "period_month": period_month, "docstatus": ["<", 2]},
+		["name", "monthly_litres", "monthly_amount", "consumed_litres", "status"],
+		as_dict=True,
+	)
+	if not row:
+		return {"has_quota": False, "vehicle": vehicle, "period_month": period_month}
+
+	monthly = frappe.utils.flt(row.get("monthly_litres"))
+	consumed = frappe.utils.flt(row.get("consumed_litres"))
+	return {
+		"has_quota": True,
+		"vehicle": vehicle,
+		"period_month": period_month,
+		"monthly_litres": monthly,
+		"monthly_amount": frappe.utils.flt(row.get("monthly_amount")),
+		"consumed_litres": consumed,
+		"remaining_litres": max(monthly - consumed, 0),
+		"status": row.get("status"),
+	}
+
+
+@frappe.whitelist()
+def my_fuel_requests(limit=30):
+	"""The current driver's OWN fuel-request history (read).
+
+	Identity-scoped via endpoint-scoped ``get_all`` (the ``my_trips_today`` precedent):
+	the driver is resolved from the session and every row is filtered on that driver,
+	so this can only return the caller's own requests — the client never supplies a
+	driver id. The Driver role holds no read DocPerm on Fuel Request by design (it is a
+	staff/oversight-read DocType); the endpoint itself is the authorization boundary, so
+	no Driver if_owner DocPerm is added (see the read-access decision on this endpoint).
+
+	Each row carries the request date, requested litres, status, and the Fuel Platform's
+	display label (link id swapped for ``platform_name`` like the trip cards), newest
+	first. Read-only, no commit."""
+	_require_enabled()
+	driver = _resolve_driver()
+	rows = frappe.get_all(
+		"Fuel Request",
+		filters={"driver": driver, "docstatus": ["<", 2]},
+		fields=["name", "request_date", "requested_litres", "status", "fuel_platform"],
+		order_by="request_date desc, creation desc",
+		limit=frappe.utils.cint(limit) or 30,
+	)
+	platforms = {r["fuel_platform"] for r in rows if r.get("fuel_platform")}
+	labels = {}
+	if platforms:
+		for p in frappe.get_all(
+			"Fuel Platform",
+			filters={"name": ["in", list(platforms)]},
+			fields=["name", "platform_name"],
+		):
+			labels[p["name"]] = p.get("platform_name") or p["name"]
+	for r in rows:
+		r["request_date"] = frappe.utils.cstr(r["request_date"]) if r.get("request_date") else None
+		r["requested_litres"] = frappe.utils.flt(r.get("requested_litres"))
+		if r.get("fuel_platform"):
+			r["fuel_platform"] = labels.get(r["fuel_platform"], r["fuel_platform"])
+	return rows
 
 
 @frappe.whitelist()

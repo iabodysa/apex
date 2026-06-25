@@ -113,3 +113,28 @@ class TestCustodyAcknowledgmentNotification(FrappeTestCase):
         self.assertIn("/my-custody-acknowledgment", rendered)
         # the holder lands pre-filtered to their own issue
         self.assertIn("custody_issue=CUST-ISS-QA", rendered)
+
+
+OVERDUE_NOTIFICATION = "Habitat - Custody Return Overdue"
+
+
+class TestCustodyReturnOverdueNotification(FrappeTestCase):
+    """The Days-After alert must reach the holder at a real address: the recipient
+    has to resolve to the issued_to_user mirror, never the Employee docname (which
+    fails Notification email validation and silently delivers to nobody)."""
+
+    def test_recipient_resolves_to_user_not_employee_docname(self):
+        n = frappe.get_doc("Notification", OVERDUE_NOTIFICATION)
+        self.assertEqual(n.document_type, "Custody Issue")
+        fields = [r.receiver_by_document_field for r in n.recipients if r.receiver_by_document_field]
+        self.assertIn("issued_to_user", fields)
+        self.assertNotIn("issued_to_employee", fields)
+
+    def test_issued_to_user_is_a_real_field_on_the_target(self):
+        meta = frappe.get_meta("Custody Issue")
+        self.assertTrue(meta.has_field("issued_to_user"))
+
+    def test_condition_guards_on_the_user_mirror(self):
+        # No mirrored user -> no recipient to email; the condition must short-circuit.
+        n = frappe.get_doc("Notification", OVERDUE_NOTIFICATION)
+        self.assertIn("issued_to_user", n.condition)

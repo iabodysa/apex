@@ -136,6 +136,10 @@ const messages = {
       title: "My Trips Today",
       empty: "No trips scheduled",
       emptyHint: "You have nothing on the board today.",
+      today: "Today",
+      recent: "Recent",
+      recentEmpty: "No recent trips",
+      recentEmptyHint: "You have no trips in the last 30 days.",
     },
     fuel: {
       title: "Request Fuel",
@@ -143,6 +147,15 @@ const messages = {
       placeholder: "e.g. 40",
       submit: "Submit Request",
       submitted: "Submitted: {name}",
+      quota: "This month's quota",
+      quotaAllowance: "Allowance",
+      quotaConsumed: "Consumed",
+      quotaRemaining: "Remaining",
+      litreUnit: "L",
+      history: "My Requests",
+      historyEmpty: "No fuel requests yet",
+      historyEmptyHint: "Your fuel requests will appear here.",
+      noPlatform: "—",
     },
     tickets: {
       title: "Support",
@@ -297,6 +310,10 @@ const messages = {
       title: "رحلاتي اليوم",
       empty: "لا توجد رحلات مجدولة",
       emptyHint: "لا يوجد لديك شيء على اللوحة اليوم.",
+      today: "اليوم",
+      recent: "الأخيرة",
+      recentEmpty: "لا توجد رحلات حديثة",
+      recentEmptyHint: "لا توجد لديك رحلات خلال آخر 30 يوماً.",
     },
     fuel: {
       title: "طلب وقود",
@@ -304,6 +321,15 @@ const messages = {
       placeholder: "مثال: 40",
       submit: "إرسال الطلب",
       submitted: "تم الإرسال: {name}",
+      quota: "حصة هذا الشهر",
+      quotaAllowance: "المخصص",
+      quotaConsumed: "المستهلك",
+      quotaRemaining: "المتبقي",
+      litreUnit: "لتر",
+      history: "طلباتي",
+      historyEmpty: "لا توجد طلبات وقود بعد",
+      historyEmptyHint: "ستظهر طلبات الوقود الخاصة بك هنا.",
+      noPlatform: "—",
     },
     tickets: {
       title: "الدعم",
@@ -340,6 +366,7 @@ const messages = {
 //   issueStatus   -> Issue.status (native ERPNext)
 //   issueCategory -> Issue Type masters (salis_issue_seed)
 //   issuePriority -> Issue Priority masters (salis_issue_seed)
+//   fuelStatus    -> Fuel Request.status
 const enums = {
   en: {
     tripStatus: {
@@ -368,6 +395,14 @@ const enums = {
       High: "High",
       Urgent: "Urgent",
     },
+    fuelStatus: {
+      Pending: "Pending",
+      Approved: "Approved",
+      Done: "Done",
+      Failed: "Failed",
+      Reverted: "Reverted",
+      Cancelled: "Cancelled",
+    },
   },
   ar: {
     tripStatus: {
@@ -395,6 +430,14 @@ const enums = {
       Medium: "متوسطة",
       High: "عالية",
       Urgent: "عاجلة",
+    },
+    fuelStatus: {
+      Pending: "قيد الانتظار",
+      Approved: "معتمد",
+      Done: "منفَّذ",
+      Failed: "فشل",
+      Reverted: "مُعاد",
+      Cancelled: "ملغى",
     },
   },
 };

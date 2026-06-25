@@ -684,6 +684,9 @@ body {
     background: var(--c-header-bg);
     color: var(--c-header-ink);
     overflow: hidden;
+    /* pad the notch/status-bar inset so the sticky header content clears
+       a notched phone's safe area (mirrors the tabbar's safe-area-inset-bottom). */
+    padding-top: env(safe-area-inset-top);
   }
 
   /* [#ssmlib] */
@@ -1030,6 +1033,16 @@ body {
   .sk-block {
     animation: none;
   }
+}
+
+/* Inline text link (e.g. "Open map") given a >=44px tap target so it
+   meets the touch minimum without looking like a button. The negative inline
+   margin keeps the text visually flush while the padding widens the hit area. */
+.link-tap {
+  min-height: 44px;
+  padding-block: 6px;
+  padding-inline: 4px;
+  margin-inline: -4px;
 }
 
 /* [#85x56s] */

@@ -33,6 +33,7 @@ ENUM_SOURCES = {
     "issueStatus": ("Issue", "status"),
     "issueCategory": _ISSUE_TYPES,
     "issuePriority": _ISSUE_PRIORITIES,
+    "fuelStatus": ("Fuel Request", "status"),
 }
 
 

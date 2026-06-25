@@ -1106,6 +1106,8 @@ def get_worker_home(token=None):
         so the Home chip reads as a real location, not a bare bed code; or None.
       * ``open_request_count`` — count of the worker's own resident requests
         (``list_worker_requests``) not in a settled state.
+      * ``iqama_days_left``    — whole days until the Iqama expires (or None),
+        surfaced for the Home glance tile regardless of the alert window.
 
     Purely additive: it composes the existing token-scoped endpoints (each
     re-resolves the same token via ``_resolve_worker``) and changes none of
@@ -1115,11 +1117,19 @@ def get_worker_home(token=None):
     _resolve_worker(token)
 
     profile = get_worker_context(token)
+    documents = profile.get("documents") or []
     profile_alerts = [
         d
-        for d in (profile.get("documents") or [])
+        for d in documents
         if d.get("days_left") is not None and d["days_left"] <= _DOCUMENT_ALERT_LEAD_DAYS
     ]
+    # Whole days until the Iqama expires, surfaced for the Home glance tile
+    # regardless of the alert window (None when no expiry is on file). Read from
+    # the documents profile already computed, not a second Employee read.
+    iqama_days_left = next(
+        (d.get("days_left") for d in documents if d.get("type") == "iqama"),
+        None,
+    )
 
     transport = get_worker_transport(token)
     # the "next" ride is the soonest UPCOMING trip, never an
@@ -1161,6 +1171,7 @@ def get_worker_home(token=None):
         "next_ride": next_ride,
         "bed": bed,
         "open_request_count": open_request_count,
+        "iqama_days_left": iqama_days_left,
     }
 
 

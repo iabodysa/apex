@@ -1,7 +1,7 @@
 {
  "attach_print": 0,
  "channel": "Email",
- "condition": "doc.docstatus == 1 and doc.status in ('Issued', 'Partially Returned')",
+ "condition": "doc.docstatus == 1 and doc.issued_to_user and doc.status in ('Issued', 'Partially Returned')",
  "date_changed": "expected_return_date",
  "days_in_advance": 1,
  "docstatus": 0,
@@ -20,11 +20,11 @@
    "receiver_by_role": "Accommodation Manager"
   },
   {
-   "receiver_by_document_field": "issued_to_employee"
+   "receiver_by_document_field": "issued_to_user"
   }
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Custody Return Overdue: {{ doc.name }}",
- "modified": "2026-06-24 10:00:00.000000"
+ "modified": "2026-06-26 13:00:00.000000"
 }

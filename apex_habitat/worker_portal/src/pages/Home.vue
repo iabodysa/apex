@@ -47,11 +47,20 @@
         <p v-else class="text-sm text-muted">{{ t("home.noRide") }}</p>
       </section>
 
-      <!-- Open requests stat -->
-      <div class="grid gap-3 grid-cols-1">
+      <!-- 3-up glance tiles: next ride · open requests · days to Iqama.
+           Each value is a compact glance; "—" when the datum is absent. -->
+      <div class="grid gap-3 grid-cols-3">
+        <div class="stat">
+          <div class="stat-label">{{ t("home.tileNextRide") }}</div>
+          <div class="stat-value truncate"><bdi>{{ nextRideTile }}</bdi></div>
+        </div>
         <div class="stat">
           <div class="stat-label">{{ t("home.openRequests") }}</div>
           <div class="stat-value">{{ home.data.open_request_count }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">{{ t("home.tileIqama") }}</div>
+          <div class="stat-value truncate" :class="iqamaTile.cls"><bdi>{{ iqamaTile.text }}</bdi></div>
         </div>
       </div>
 
@@ -233,6 +242,26 @@ const relativeHint = computed(() => {
   if (diffMin === 0) return t("home.now");
   if (diffMin < 60) return t("home.inM", { m: diffMin });
   return t("home.inHm", { h: Math.floor(diffMin / 60), m: diffMin % 60 });
+});
+
+// glance-tile values. Next-ride tile prefers the live relative hint
+// ("in 2h 5m" / "Now" / "Today"); for a ride on another day (no hint) it shows
+// the absolute moment, and "—" when there is no upcoming ride.
+const nextRideTile = computed(() => {
+  if (!ride.value) return t("common.none");
+  return relativeHint.value || rideWhen.value || t("common.none");
+});
+
+// Days-to-Iqama tile, colour-keyed by urgency: danger when expired, warning
+// within the 30-day action window, plain otherwise; "—" when no expiry on file.
+const iqamaTile = computed(() => {
+  const d = home.data?.iqama_days_left;
+  if (d == null) return { cls: "", text: t("common.none") };
+  if (d < 0) return { cls: "text-danger", text: t("home.expiredShort") };
+  return {
+    cls: d <= IQAMA_NOTIFY_HR_LEAD_DAYS ? "text-warning" : "",
+    text: t("home.daysShort", { n: d }),
+  };
 });
 
 function alertPill(doc) {
