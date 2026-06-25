@@ -189,6 +189,8 @@ class FleetControl {
 			chip(__(st), s.by_status[st] || 0, "fc-chip-" + (STATUS_COLOR[st] || "gray"))
 		);
 		chip(__("Open Incidents"), s.open_incidents || 0, "fc-chip-red");
+		chip(__("Compliance at risk"), s.compliance_at_risk || 0, "fc-chip-orange");
+		chip(__("Stopped > {0} days", [s.stopped_over_days || 0]), s.stopped_over_n || 0, "fc-chip-orange");
 	}
 
 	toggle_view() {

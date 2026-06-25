@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+- [1.55.27](v1/v1_55_27.md) — A pre-arrival manifest web form for labour suppliers, a verified-list driver picker for fleet reassign, a daily open-alerts digest for supervisors, an operations-control compliance summary, and notification reliability hardening.
 - [1.55.26](v1/v1_55_26.md) — Arrival-lifecycle alerts on the pre-arrival manifest, clearer fleet empty and access states, critical operations alerts routed to the project's supervisor, and a deduction-status indicator on damage assessments.
 - [1.55.25](v1/v1_55_25.md) — Fleet compliance-risk badges on the control board, building-scoped access to resident requests and idle reports, vehicle-theft and workshop-overstay alerts, a pre-arrival manifest (Arrival Batch), and a driver monthly-attendance view.
 - [1.55.24](v1/v1_55_24.md) — Resident-request and trip notifications, a one-time supervisor backfill, a Front Desk open-requests badge, a fleet release-vehicle action, recover now closes the theft report, and a one-click damage assessment from a custody return.

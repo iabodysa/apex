@@ -405,32 +405,57 @@ function cfDo(val) {
 }
 
 // ═══════════ ACTIONS → endpoints ═══════════
-// Reassign sub-form model (the only fields the live reassign endpoint uses are
-// driver_id + date; the rest mirror his form but aren't sent server-side).
-const rf = reactive({ nameAr: "", nameEn: "", iqama: "", mobile: "", project: "KEETA", area: "RIYADH", date: today(), branch: "" });
+// Reassign sub-form model. The driver is chosen from the server-backed picker
+// (driverName = the canonical Salis Driver id sent to reassign); date is the
+// only other field sent. The rest are display-only context.
+const rf = reactive({ driverName: "", driverLabel: "", date: today() });
+// Driver picker: query → results from search_drivers, with the chosen driver
+// pinned so reassign can never receive a free-typed (mis-resolvable) id.
+const dp = reactive({ query: "", results: [], open: false, loading: false });
+let dpTimer = null;
+function resetReassign() {
+  Object.assign(rf, { driverName: "", driverLabel: "", date: today() });
+  Object.assign(dp, { query: "", results: [], open: false, loading: false });
+}
+async function runDriverSearch() {
+  dp.loading = true;
+  try {
+    dp.results = (await call(POST("search_drivers"), { type: "GET", args: { q: trim(dp.query) } })) || [];
+    dp.open = true;
+  } catch (e) {
+    dp.results = [];
+    showToast(serverMsg(e), "red");
+  } finally {
+    dp.loading = false;
+  }
+}
+function onDriverQuery() {
+  // Picking a driver clears the pinned selection until a new one is chosen.
+  rf.driverName = "";
+  rf.driverLabel = "";
+  clearTimeout(dpTimer);
+  dpTimer = setTimeout(runDriverSearch, 250);
+}
+function pickDriver(d) {
+  rf.driverName = d.name;
+  rf.driverLabel = d.full_name || d.driver_id || d.name;
+  dp.query = rf.driverLabel + (d.driver_id ? " — " + d.driver_id : "");
+  dp.open = false;
+}
 function openReassignForm() {
-  Object.assign(rf, {
-    nameAr: "",
-    nameEn: "",
-    iqama: "",
-    mobile: "",
-    project: "KEETA",
-    area: "RIYADH",
-    date: today(),
-    branch: "",
-  });
+  resetReassign();
   subForm.value = "reassign";
 }
 async function submitReassign() {
   const v = panel.vehicle;
   if (!v) return;
-  if (!trim(rf.nameAr) || !trim(rf.iqama)) {
-    showToast(t("toast.nameIqamaRequired"), "amber");
+  if (!rf.driverName) {
+    showToast(t("toast.pickDriverRequired"), "amber");
     return;
   }
   const ok = await cfShow(
     t("confirm.reassignTitle"),
-    t("confirm.reassignMsg", { name: trim(rf.nameAr), plate: v.plate }),
+    t("confirm.reassignMsg", { name: rf.driverLabel, plate: v.plate }),
     "lock",
     t("confirm.reassignOk"),
     "btn-green"
@@ -439,9 +464,9 @@ async function submitReassign() {
   try {
     await call(POST("reassign"), {
       type: "POST",
-      args: { plate: v.plate, driver_id: trim(rf.iqama), date: rf.date || today() },
+      args: { plate: v.plate, driver_id: rf.driverName, date: rf.date || today() },
     });
-    showToast(t("toast.reassigned", { name: trim(rf.nameAr), plate: v.plate }), "green");
+    showToast(t("toast.reassigned", { name: rf.driverLabel, plate: v.plate }), "green");
     subForm.value = null;
     await reloadFleet();
   } catch (e) {
@@ -1122,22 +1147,24 @@ function fuelView(v) {
               <div class="alert alert-amber" style="margin-bottom:12px"><Icon name="triangle-alert" :size="15" /> {{ t("reassignForm.autoLockHint", { name: panel.vehicle.current_driver.name_ar || panel.vehicle.current_driver.name_en || t("common.none") }) }}</div>
               <div class="psect-title" style="color:var(--green-l);margin-top:12px">{{ t("reassignForm.newDriverData") }}</div>
               <div class="form-grid">
-                <div class="ff"><div class="fl">{{ t("reassignForm.nameAr") }} *</div><input class="fi" v-model="rf.nameAr" :placeholder="t('reassignForm.nameArPlaceholder')" /></div>
-                <div class="ff"><div class="fl">{{ t("reassignForm.nameEn") }}</div><input class="fi" v-model="rf.nameEn" :placeholder="t('reassignForm.nameEnPlaceholder')" /></div>
-                <div class="ff"><div class="fl">{{ t("reassignForm.iqama") }} *</div><input class="fi mono" v-model="rf.iqama" placeholder="2XXXXXXXXX" /></div>
-                <div class="ff"><div class="fl">{{ t("reassignForm.mobile") }} *</div><input class="fi" v-model="rf.mobile" placeholder="05XXXXXXXX" /></div>
-                <div class="ff"><div class="fl">{{ t("reassignForm.project") }}</div>
-                  <select class="fsel" v-model="rf.project"><option>KEETA</option><option>SHIPMENT</option><option>KEEMART</option><option>NINJA</option><option>NOON</option><option>ARAMEX</option></select>
-                </div>
-                <div class="ff"><div class="fl">{{ t("reassignForm.area") }}</div>
-                  <select class="fsel" v-model="rf.area"><option>RIYADH</option><option>JADAH</option><option>MAKA</option><option>DAMAM</option><option>TAIF</option></select>
+                <div class="ff" style="position:relative">
+                  <div class="fl">{{ t("reassignForm.driver") }} *</div>
+                  <input class="fi" v-model="dp.query" :placeholder="t('reassignForm.driverPlaceholder')" @input="onDriverQuery" @focus="dp.open = dp.results.length > 0" autocomplete="off" />
+                  <div v-if="dp.loading" class="dp-hint">{{ t("reassignForm.searching") }}</div>
+                  <div v-else-if="dp.open && !dp.results.length && trim(dp.query)" class="dp-hint">{{ t("reassignForm.noDrivers") }}</div>
+                  <ul v-if="dp.open && dp.results.length" class="dp-menu">
+                    <li v-for="d in dp.results" :key="d.name" class="dp-opt" @click="pickDriver(d)">
+                      <span class="dp-name">{{ d.full_name || d.name }}</span>
+                      <span v-if="d.driver_id" class="dp-meta mono"><bdi>{{ d.driver_id }}</bdi></span>
+                      <span v-if="d.phone" class="dp-meta mono"><bdi>{{ d.phone }}</bdi></span>
+                    </li>
+                  </ul>
                 </div>
                 <div class="ff"><div class="fl">{{ t("reassignForm.receiveDate") }}</div><input class="fi" type="date" v-model="rf.date" /></div>
-                <div class="ff"><div class="fl">{{ t("reassignForm.receiveBranch") }}</div><input class="fi" v-model="rf.branch" :placeholder="t('reassignForm.branchPlaceholder')" /></div>
               </div>
               <div class="form-actions" style="margin-top:12px">
                 <button class="btn" @click="subForm = null">{{ t("common.cancel") }}</button>
-                <button class="btn btn-green" @click="submitReassign"><Icon name="lock" :size="15" /> {{ t("reassignForm.assignAndLock") }}</button>
+                <button class="btn btn-green" :disabled="!rf.driverName" @click="submitReassign"><Icon name="lock" :size="15" /> {{ t("reassignForm.assignAndLock") }}</button>
               </div>
             </div>
           </template>
@@ -1146,21 +1173,23 @@ function fuelView(v) {
             <div v-if="panel.vehicle.vehicle_status === 'stopped'" class="alert alert-amber"><Icon name="circle-pause" :size="15" /> {{ t("driverTab.stoppedHint") }}</div>
             <div class="psect-title">{{ t("driverTab.assignNewDriver") }}</div>
             <div class="form-grid">
-              <div class="ff"><div class="fl">{{ t("reassignForm.nameAr") }} *</div><input class="fi" v-model="rf.nameAr" :placeholder="t('reassignForm.nameArPlaceholder')" /></div>
-              <div class="ff"><div class="fl">{{ t("reassignForm.nameEn") }}</div><input class="fi" v-model="rf.nameEn" :placeholder="t('reassignForm.nameEnPlaceholder')" /></div>
-              <div class="ff"><div class="fl">{{ t("reassignForm.iqama") }} *</div><input class="fi mono" v-model="rf.iqama" placeholder="2XXXXXXXXX" /></div>
-              <div class="ff"><div class="fl">{{ t("reassignForm.mobile") }} *</div><input class="fi" v-model="rf.mobile" placeholder="05XXXXXXXX" /></div>
-              <div class="ff"><div class="fl">{{ t("reassignForm.project") }}</div>
-                <select class="fsel" v-model="rf.project"><option>KEETA</option><option>SHIPMENT</option><option>KEEMART</option><option>NINJA</option><option>NOON</option><option>ARAMEX</option></select>
-              </div>
-              <div class="ff"><div class="fl">{{ t("reassignForm.area") }}</div>
-                <select class="fsel" v-model="rf.area"><option>RIYADH</option><option>JADAH</option><option>MAKA</option><option>DAMAM</option><option>TAIF</option></select>
+              <div class="ff" style="position:relative">
+                <div class="fl">{{ t("reassignForm.driver") }} *</div>
+                <input class="fi" v-model="dp.query" :placeholder="t('reassignForm.driverPlaceholder')" @input="onDriverQuery" @focus="dp.open = dp.results.length > 0" autocomplete="off" />
+                <div v-if="dp.loading" class="dp-hint">{{ t("reassignForm.searching") }}</div>
+                <div v-else-if="dp.open && !dp.results.length && trim(dp.query)" class="dp-hint">{{ t("reassignForm.noDrivers") }}</div>
+                <ul v-if="dp.open && dp.results.length" class="dp-menu">
+                  <li v-for="d in dp.results" :key="d.name" class="dp-opt" @click="pickDriver(d)">
+                    <span class="dp-name">{{ d.full_name || d.name }}</span>
+                    <span v-if="d.driver_id" class="dp-meta mono"><bdi>{{ d.driver_id }}</bdi></span>
+                    <span v-if="d.phone" class="dp-meta mono"><bdi>{{ d.phone }}</bdi></span>
+                  </li>
+                </ul>
               </div>
               <div class="ff"><div class="fl">{{ t("reassignForm.receiveDate") }}</div><input class="fi" type="date" v-model="rf.date" /></div>
-              <div class="ff"><div class="fl">{{ t("reassignForm.receiveBranch") }}</div><input class="fi" v-model="rf.branch" :placeholder="t('reassignForm.branchPlaceholder')" /></div>
             </div>
             <div class="form-actions" style="margin-top:12px">
-              <button class="btn btn-green" @click="submitReassign"><Icon name="lock" :size="15" /> {{ t("reassignForm.assignAndLock") }}</button>
+              <button class="btn btn-green" :disabled="!rf.driverName" @click="submitReassign"><Icon name="lock" :size="15" /> {{ t("reassignForm.assignAndLock") }}</button>
             </div>
           </template>
         </div>

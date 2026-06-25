@@ -170,6 +170,7 @@ scheduler_events = {
         "apex_habitat.salis.tasks.vehicle_compliance_expiry_watch",
         "apex_habitat.salis.tasks.workshop_overstay_watch",
         "apex_habitat.salis.tasks.reconcile_operations_alerts",
+        "apex_habitat.salis.tasks.daily_open_alerts_digest",
         "apex_habitat.salis.fuel_engine.accrue_fuel_consumption",
         "apex_habitat.salis.rental_engine.daily_rental_accrual",
         # [#ptjnq1]

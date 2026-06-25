@@ -139,3 +139,48 @@ class TestOperationsControlFleet(FrappeTestCase):
         row = next(v for v in get_fleet(search=plate)["vehicles"] if v["name"] == name)
         self.assertEqual(row["compliance_status"], "Expiring Soon")
         self.assertEqual(frappe.utils.getdate(row["next_expiry_date"]), frappe.utils.getdate(expiry))
+
+    def test_summary_counts_compliance_at_risk(self):
+        """The board summary counts the same 'at risk' compliance states the card
+        flags (Expiring Soon / Expired), and carries the stopped-overdue keys."""
+        plate = "OCFLEET-RISK"
+        if not frappe.db.exists("Salis Vehicle", {"plate_number": plate}):
+            frappe.get_doc(
+                {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
+            ).insert(ignore_permissions=True)
+        name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
+        frappe.db.set_value("Salis Vehicle", name, {"compliance_status": "Expired"})
+
+        summary = get_fleet(search=plate)["summary"]
+        self.assertGreaterEqual(summary["compliance_at_risk"], 1)
+        # The chip keys are always present so the client never renders undefined.
+        self.assertIn("stopped_over_n", summary)
+        self.assertIn("stopped_over_days", summary)
+
+    def test_summary_counts_stopped_over_n(self):
+        """A vehicle still Stopped on a Maintenance stop older than the overstay
+        cutoff is counted by stopped_over_n (reusing tasks._overstay_stops)."""
+        plate = "OCFLEET-OVERSTAY"
+        if not frappe.db.exists("Salis Vehicle", {"plate_number": plate}):
+            frappe.get_doc(
+                {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
+            ).insert(ignore_permissions=True)
+        name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
+        # Submit a Maintenance stop (puts the vehicle Stopped), then backdate stop_date
+        # well past the default 14-day cutoff so it is overstaying.
+        stop = frappe.get_doc(
+            {
+                "doctype": "Vehicle Stop",
+                "vehicle": name,
+                "stop_reason": "Maintenance",
+                "stop_date": frappe.utils.today(),
+            }
+        )
+        stop.insert(ignore_permissions=True)
+        stop.submit()
+        frappe.db.set_value(
+            "Vehicle Stop", stop.name, "stop_date", frappe.utils.add_days(frappe.utils.today(), -30)
+        )
+
+        summary = get_fleet(search=plate)["summary"]
+        self.assertGreaterEqual(summary["stopped_over_n"], 1)

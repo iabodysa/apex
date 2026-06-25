@@ -511,6 +511,95 @@ def vehicle_compliance_expiry_watch() -> None:
         start += BATCH_SIZE
 
 
+def daily_open_alerts_digest() -> None:
+    """Email each Fleet Supervisor a daily roll-up of their open Operations Alerts.
+
+    Complements the per-alert Critical notification (fires once on raise) with a
+    standing summary: every Open/Acknowledged alert, grouped by the denormalised
+    ``project_supervisor`` (the owning supervisor of the alert's project). Each
+    supervisor receives only their own bucket, so the digest respects the same
+    project boundary as the desk without re-deriving scope here.
+
+    Alerts with no ``project_supervisor`` (e.g. driver-only alerts that resolve no
+    project) have no owning supervisor and are skipped — oversight roles already
+    see every alert. Per-supervisor delivery is isolated (rollback before log) so
+    one bad recipient never aborts the rest. Idempotent enough for daily cadence:
+    re-running re-sends the current snapshot, it never mutates state.
+    """
+    from collections import defaultdict
+
+    from frappe.utils import escape_html, get_url_to_list
+
+    logger = frappe.logger()
+
+    by_supervisor: dict[str, list] = defaultdict(list)
+    start = 0
+    while True:
+        alerts = frappe.get_all(
+            ALERT_DOCTYPE,
+            filters={
+                "status": ["in", ["Open", "Acknowledged"]],
+                "project_supervisor": ["is", "set"],
+            },
+            fields=["name", "alert_type", "severity", "vehicle", "driver",
+                    "message", "project_supervisor"],
+            order_by="severity asc, raised_on asc",
+            limit_start=start,
+            limit_page_length=BATCH_SIZE,
+        )
+        if not alerts:
+            break
+        for a in alerts:
+            by_supervisor[a.project_supervisor].append(a)
+        start += BATCH_SIZE
+
+    if not by_supervisor:
+        logger.info("daily_open_alerts_digest: no open alerts with an owning supervisor.")
+        return
+
+    list_url = get_url_to_list(ALERT_DOCTYPE)
+    severities = ("Critical", "Warning", "Info")
+    sent = 0
+    for supervisor, rows in by_supervisor.items():
+        try:
+            if not frappe.db.get_value("User", supervisor, "enabled"):
+                continue
+            counts = {s: sum(1 for r in rows if r.severity == s) for s in severities}
+            summary = ", ".join(
+                _("{0}: {1}").format(_(s), counts[s]) for s in severities if counts[s]
+            )
+            items = "".join(
+                "<li>[{severity}] {atype} — {target}: {msg}</li>".format(
+                    severity=escape_html(_(r.severity)),
+                    atype=escape_html(_(r.alert_type)),
+                    target=escape_html(r.vehicle or r.driver or "—"),
+                    msg=escape_html((r.message or "")[:200]),
+                )
+                for r in rows
+            )
+            message = "{intro} ({summary}).<br><ul>{items}</ul><br><a href='{url}'>{cta}</a>".format(
+                intro=_("You have {0} open operations alert(s)").format(len(rows)),
+                summary=summary,
+                items=items,
+                url=list_url,
+                cta=_("Open the operations alert list"),
+            )
+            frappe.sendmail(
+                recipients=[supervisor],
+                subject=_("Daily Open Operations Alerts: {0}").format(len(rows)),
+                message=message,
+            )
+            sent += 1
+        except Exception:
+            frappe.db.rollback()
+            frappe.log_error(
+                message=frappe.get_traceback(),
+                title=f"Open-alerts digest failed for {supervisor}"[:140],
+            )
+
+    logger.info(f"daily_open_alerts_digest: sent {sent} supervisor digest(s).")
+
+
 # [#9kfa8z]
 
 

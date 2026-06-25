@@ -3086,3 +3086,11 @@ An over-capacity (temporary) bed was created to house a worker beyond the room's
 Arrivals Expected Today: {{ doc.building }} ({{ doc.expected_count }}),وصول متوقع اليوم: {{ doc.building }} ({{ doc.expected_count }})
 Manifest Not Reconciled: {{ doc.building }} ({{ doc.pending_arrival_count }} pending),بيان غير مُسوّى: {{ doc.building }} ({{ doc.pending_arrival_count }} معلّق)
 Over-Capacity Bed Created: {{ doc.building }},إنشاء سرير فوق السعة: {{ doc.building }}
+Compliance at risk,الامتثال في خطر
+Stopped > {0} days,متوقفة أكثر من {0} يوم
+Daily Open Operations Alerts: {0},تنبيهات العمليات المفتوحة اليومية: {0}
+Open the operations alert list,فتح قائمة تنبيهات العمليات
+Arrival Manifest,بيان الوصول
+Submit Manifest,إرسال البيان
+Expected Arrival Date,تاريخ الوصول المتوقع
+Your arrival manifest was submitted. The accommodation team will reconcile arrivals against it on the expected date.,تم إرسال بيان الوصول الخاص بك. سيقوم فريق السكن بمطابقة الوصول الفعلي مع البيان في التاريخ المتوقع.

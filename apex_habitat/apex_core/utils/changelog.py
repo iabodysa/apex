@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.55.27 — labour suppliers can submit a pre-arrival manifest from a public web form (the workers expected at a building on a date, which the accommodation team prepares beds for and reconciles arrivals against); reassigning a vehicle now picks the new driver from a verified, permitted list instead of a free-typed id, so a typo can no longer silently mis-assign; supervisors get a daily digest of their open operations alerts grouped by severity; the operations control board adds compliance-at-risk and stopped-over-threshold counts to its summary; and notification delivery is hardened so enabled alerts send dependably",
+        "app_name": "apex_habitat",
+        "link": "/arrival-manifest",
+        "creation": "2026-06-25 12:00:00",
+    },
+    {
         "title": "Apex 1.54.29 — the Safety Checklist is reworked into a smarter, faster mobile screen at /safety: it shows only the rounds that are due right now (daily, weekly, monthly and so on appear automatically from what was last done, so no cadence is picked by hand), each task is checked with one tap (pass, fail or issue) plus an optional note and the whole visit is submitted in one step, and a report is then emailed to the manager (the recipient is configurable in Habitat Settings, otherwise the Accommodation Manager)",
         "app_name": "apex_habitat",
         "link": "/safety",

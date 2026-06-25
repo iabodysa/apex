@@ -275,6 +275,81 @@ def get_fleet_os():
     return {"vehicles": out, "reason": None}
 
 
+@frappe.whitelist()
+def search_drivers(q=None, limit=20):
+    """Typeahead over Salis Driver backing the reassign picker.
+
+    Same gates as :func:`get_fleet_os`: read permission on Salis Driver, project
+    scope via ``_permitted_projects`` (a scoped supervisor only finds drivers on
+    a permitted-project vehicle or with no vehicle yet), and the permlevel-1 PII
+    gate on ``driver_id``/``phone`` — blanked for a role without it.
+
+    Each row carries the canonical Salis Driver ``name``; the picker binds THAT
+    (not free-typed text) so reassign resolves a real, permitted driver and a
+    typo can no longer silently mis-assign a vehicle.
+    """
+    frappe.has_permission("Salis Driver", "read", throw=True)
+    show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
+    unscoped, projects = _permitted_projects()
+    if not unscoped and not projects:
+        return []
+
+    try:
+        limit = max(1, min(int(limit), 50))
+    except (TypeError, ValueError):
+        limit = 20
+
+    filters = {"status": "Active"}
+    or_filters = None
+    term = (q or "").strip()
+    if term:
+        like = f"%{term}%"
+        # driver_id is permlevel-1; only let a PII-bearing role match on it.
+        or_filters = {"full_name": ["like", like]}
+        if show_pii:
+            or_filters["driver_id"] = ["like", like]
+
+    rows = frappe.get_all(
+        "Salis Driver",
+        filters=filters,
+        or_filters=or_filters,
+        fields=["name", "full_name", "driver_id", "phone", "current_vehicle", "project"],
+        order_by="full_name asc",
+        limit_page_length=limit * 3 if not unscoped else limit,
+    )
+
+    if not unscoped:
+        # Scope to drivers free or on a permitted-project vehicle. The driver's own
+        # project is advisory; the vehicle link is the operative scope (mirrors how
+        # get_fleet_os scopes by Salis Vehicle.project).
+        veh_names = {r.current_vehicle for r in rows if r.get("current_vehicle")}
+        permitted_veh = set()
+        if veh_names:
+            permitted_veh = {
+                v.name
+                for v in frappe.get_all(
+                    "Salis Vehicle",
+                    filters={"name": ["in", list(veh_names)], "project": ["in", projects]},
+                    fields=["name"],
+                )
+            }
+        rows = [
+            r for r in rows
+            if not r.get("current_vehicle") or r.current_vehicle in permitted_veh
+        ][:limit]
+
+    return [
+        {
+            "name": r.name,
+            "full_name": r.full_name or "",
+            "driver_id": (r.driver_id or "") if show_pii else "",
+            "phone": (r.phone or "") if show_pii else "",
+            "current_vehicle": r.current_vehicle or "",
+        }
+        for r in rows
+    ]
+
+
 # [#76c7tt]
 @frappe.whitelist(methods=["POST"])
 def reassign(plate, driver_id, date=None):

@@ -127,3 +127,59 @@ class TestArrivalBatch(FrappeTestCase):
             self.assertEqual(row.document_type, dt)
             self.assertEqual(row.event, event)
             self.assertTrue(row.is_standard)
+
+
+class TestArrivalManifestWebForm(FrappeTestCase):
+    """The public arrival-manifest Web Form: a labour supplier submits the expected
+    workers ahead of arrival and an Arrival Batch is created from it."""
+
+    WEB_FORM = "arrival-manifest"
+
+    def test_web_form_is_a_published_anonymous_intake(self):
+        """The Web Form targets Arrival Batch and accepts anonymous public submissions
+        at the arrival-manifest route (mirrors the transport-request intake)."""
+        wf = frappe.get_doc("Web Form", self.WEB_FORM)
+        self.assertEqual(wf.doc_type, "Arrival Batch")
+        self.assertEqual(wf.route, "arrival-manifest")
+        self.assertTrue(wf.published)
+        self.assertTrue(wf.anonymous)
+        self.assertFalse(wf.login_required)
+        self.assertTrue(wf.is_standard)
+
+    def test_web_form_exposes_the_manifest_child_table(self):
+        """The expected_workers child table is on the form so a supplier can list the
+        workers; building + date are required intake fields."""
+        wf = frappe.get_doc("Web Form", self.WEB_FORM)
+        by_name = {f.fieldname: f for f in wf.web_form_fields}
+        self.assertIn("expected_workers", by_name)
+        self.assertEqual(by_name["expected_workers"].fieldtype, "Table")
+        self.assertEqual(by_name["expected_workers"].options, "Arrival Batch Worker")
+        self.assertTrue(by_name["building"].reqd)
+        self.assertTrue(by_name["expected_date"].reqd)
+
+    def test_accept_creates_arrival_batch_from_a_guest_submission(self):
+        """Submitting the form through the native accept() path (the public, guest
+        flow) creates an Arrival Batch whose expected_count is derived from the rows."""
+        from frappe.website.doctype.web_form.web_form import accept
+
+        # accept() validates Links, so use a real Accommodation Building (it only
+        # requires a name) rather than the bare-string shortcut the sibling cases use.
+        building = frappe.get_doc({
+            "doctype": "Accommodation Building",
+            "building_name": "BLDG-" + _h(),
+        }).insert(ignore_permissions=True).name
+        payload = {
+            "building": building,
+            "expected_date": "2026-08-01",
+            "expected_workers": [
+                {"worker_name": "Worker " + _h(4), "passport_number": "P" + _h(8)},
+                {"worker_name": "Worker " + _h(4), "passport_number": "P" + _h(8)},
+            ],
+        }
+        doc = accept(web_form=self.WEB_FORM, data=frappe.as_json(payload))
+
+        self.assertEqual(doc.doctype, "Arrival Batch")
+        self.assertEqual(doc.building, building)
+        self.assertEqual(doc.expected_count, 2)
+        self.assertTrue(doc.title)
+        self.assertTrue(frappe.db.exists("Arrival Batch", doc.name))

@@ -24,11 +24,25 @@ from apex_habitat.salis.utils import lock_vehicle
 
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 
+# Compliance states that count a vehicle as "at risk" — the same two the card flags.
+COMPLIANCE_AT_RISK = ("Expiring Soon", "Expired")
 
-def _empty(offices=None, projects=None, unscoped=False):
+
+def _empty_summary(stopped_over_days):
+    return {
+        "total": 0,
+        "by_status": {s: 0 for s in VEHICLE_STATUSES},
+        "open_incidents": 0,
+        "compliance_at_risk": 0,
+        "stopped_over_n": 0,
+        "stopped_over_days": stopped_over_days,
+    }
+
+
+def _empty(offices=None, projects=None, unscoped=False, stopped_over_days=14):
     return {
         "vehicles": [],
-        "summary": {"total": 0, "by_status": {s: 0 for s in VEHICLE_STATUSES}, "open_incidents": 0},
+        "summary": _empty_summary(stopped_over_days),
         "offices": offices or [],
         "projects": projects or [],
         "statuses": VEHICLE_STATUSES,
@@ -44,8 +58,11 @@ def get_fleet(status=None, rental_office=None, project=None, search=None):
     All filters are optional. Project scope is enforced server-side: a scoped
     user with no permitted project gets an empty board.
     """
+    from apex_habitat.salis.tasks import _settings_int
+
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     unscoped, projects = _permitted_projects()
+    stopped_over_days = _settings_int("workshop_overstay_days", 14)
 
     offices = [o.name for o in frappe.get_all("Rental Office", fields=["name"], order_by="name asc")]
     proj_opts = (
@@ -54,7 +71,7 @@ def get_fleet(status=None, rental_office=None, project=None, search=None):
         else list(projects or [])
     )
     if not unscoped and not projects:
-        return _empty(offices, proj_opts, unscoped)
+        return _empty(offices, proj_opts, unscoped, stopped_over_days)
 
     filters = {}
     if not unscoped:
@@ -103,13 +120,29 @@ def get_fleet(status=None, rental_office=None, project=None, search=None):
         ):
             inc[r.vehicle] = r.c
 
-    summary = {"total": len(vehicles), "by_status": {s: 0 for s in VEHICLE_STATUSES}, "open_incidents": 0}
+    summary = {
+        "total": len(vehicles),
+        "by_status": {s: 0 for s in VEHICLE_STATUSES},
+        "open_incidents": 0,
+        "compliance_at_risk": 0,
+        "stopped_over_days": stopped_over_days,
+    }
     for v in vehicles:
         v["current_driver_name"] = names.get(v.get("current_driver"))
         v["open_incidents"] = inc.get(v.name, 0)
         summary["open_incidents"] += v["open_incidents"]
         if v.status in summary["by_status"]:
             summary["by_status"][v.status] += 1
+        if v.get("compliance_status") in COMPLIANCE_AT_RISK:
+            summary["compliance_at_risk"] += 1
+
+    # "Stopped > N days": reuse the workshop-overstay rule (single source of truth in
+    # tasks._overstay_stops) so the chip can never disagree with the alert / number card.
+    # Intersect with the already-scoped board so the count respects project scope.
+    from apex_habitat.salis.tasks import _overstay_stops
+
+    on_board = {v.name for v in vehicles}
+    summary["stopped_over_n"] = len({r.vehicle for r in _overstay_stops()} & on_board)
 
     return {
         "vehicles": vehicles,
