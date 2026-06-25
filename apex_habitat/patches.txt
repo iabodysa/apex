@@ -123,3 +123,10 @@ apex_habitat.patches.v1_x.retire_safety_checklist_desk_page
 # row still carrying a confidential token. Idempotent, no-op on fresh installs / re-run.
 # PRUNE once every deployed site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.genericize_safety_task_catalog_client
+
+# v1.55.x — enable the Custody Damage Assessment Created notification on existing sites
+# (ONE-TIME). Notification.enabled is in import_file.ignore_values, so migrate preserves
+# the stale DB value and never applies the JSON enabled flip; flip enabled +
+# send_system_notification on the live row. Idempotent, no-op on fresh installs / re-run.
+# PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v1_x.enable_custody_damage_assessment_notification

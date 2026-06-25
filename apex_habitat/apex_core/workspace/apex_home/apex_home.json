@@ -1,0 +1,105 @@
+{
+ "doctype": "Workspace",
+ "name": "Apex Home",
+ "label": "Apex Home",
+ "title": "Apex Home",
+ "module": "Apex Core",
+ "icon": "home",
+ "public": 1,
+ "is_default": 1,
+ "is_hidden": 0,
+ "sequence_id": 0.5,
+ "parent_page": "",
+ "content": "[{\"id\": \"ahHdrStart\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"ahOnboard\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Apex Setup\", \"col\": 12}}, {\"id\": \"ahHdrActions\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"ahScFrontDesk\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"ahScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"ahScMaint\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"ahScSafety\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Round\", \"col\": 3}}, {\"id\": \"ahHdrMetrics\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"ahNcOcc\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 4}}, {\"id\": \"ahNcAssign\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Accommodation Assignments\", \"col\": 4}}, {\"id\": \"ahNcVacant\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 4}}, {\"id\": \"ahNcMaint\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 4}}, {\"id\": \"ahNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 4}}, {\"id\": \"ahNcResReq\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Resident Requests\", \"col\": 4}}, {\"id\": \"ahHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Occupancy Trend</b></span>\", \"col\": 12}}, {\"id\": \"ahChartOcc\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Occupancy Percent Trend\", \"col\": 12}}, {\"id\": \"ahHdrQueue\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"ahQlMaint\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open Maintenance Requests\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "Page",
+   "label": "Front Desk",
+   "link_to": "front-desk",
+   "color": "Blue",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Accommodation Assignment",
+   "link_to": "Accommodation Assignment",
+   "color": "Grey",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Maintenance Request",
+   "link_to": "Maintenance Request",
+   "color": "Grey",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Safety Round",
+   "link_to": "Safety Round",
+   "color": "Grey",
+   "idx": 4
+  }
+ ],
+ "links": [],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Occupancy Percent Trend",
+   "label": "Occupancy Percent Trend"
+  }
+ ],
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Total Occupancy Percent",
+   "label": "Total Occupancy Percent",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Active Accommodation Assignments",
+   "label": "Active Accommodation Assignments",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Vacant Beds",
+   "label": "Vacant Beds",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Open Maintenance Requests",
+   "label": "Open Maintenance Requests",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Overdue Scheduled Tasks",
+   "label": "Overdue Scheduled Tasks",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Open Resident Requests",
+   "label": "Open Resident Requests",
+   "idx": 6
+  }
+ ],
+ "quick_lists": [
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "Maintenance Request",
+   "label": "Open Maintenance Requests",
+   "quick_list_filter": "[[\"status\", \"not in\", [\"Resolved\", \"Closed\"]]]",
+   "idx": 1
+  }
+ ],
+ "roles": [],
+ "modified": "2026-06-25 12:00:00.000000"
+}

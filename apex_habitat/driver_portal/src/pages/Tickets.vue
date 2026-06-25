@@ -11,20 +11,13 @@
           <label class="field-label">{{ t("tickets.category") }}</label>
           <!-- option VALUES stay English (sent to the API); only labels translate. -->
           <select v-model="form.category" class="select">
-            <option value="Vehicle">{{ t("tickets.catVehicle") }}</option>
-            <option value="Fuel">{{ t("tickets.catFuel") }}</option>
-            <option value="Attendance">{{ t("tickets.catAttendance") }}</option>
-            <option value="Salary">{{ t("tickets.catSalary") }}</option>
-            <option value="Other">{{ t("tickets.catOther") }}</option>
+            <option v-for="c in categories" :key="c" :value="c">{{ te("issueCategory", c) }}</option>
           </select>
         </div>
         <div>
           <label class="field-label">{{ t("tickets.priority") }}</label>
           <select v-model="form.priority" class="select">
-            <option value="Low">{{ t("tickets.prioLow") }}</option>
-            <option value="Medium">{{ t("tickets.prioMedium") }}</option>
-            <option value="High">{{ t("tickets.prioHigh") }}</option>
-            <option value="Urgent">{{ t("tickets.prioUrgent") }}</option>
+            <option v-for="p in priorities" :key="p" :value="p">{{ te("issuePriority", p) }}</option>
           </select>
         </div>
       </div>
@@ -58,9 +51,9 @@
         <div v-for="t in list.data" :key="t.name" class="card card-pad">
           <div class="flex items-start justify-between gap-2">
             <div class="font-bold leading-tight">{{ t.subject }}</div>
-            <span class="pill shrink-0" :class="statusPill(t.status)">{{ t.status }}</span>
+            <span class="pill shrink-0" :class="statusPill(t.status)">{{ te("issueStatus", t.status) }}</span>
           </div>
-          <div class="mt-1 text-sm text-muted">{{ t.category }} · {{ t.priority }}</div>
+          <div class="mt-1 text-sm text-muted">{{ te("issueCategory", t.category) }} · {{ te("issuePriority", t.priority) }}</div>
         </div>
       </template>
     </section>
@@ -74,9 +67,12 @@ import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
-import { useI18n } from "../i18n";
+import { useI18n, ISSUE_CATEGORIES, ISSUE_PRIORITIES } from "../i18n";
 
-const { t } = useI18n();
+const { t, te } = useI18n();
+
+const categories = ISSUE_CATEGORIES;
+const priorities = ISSUE_PRIORITIES;
 
 const err = ref("");
 const form = reactive({ category: "Vehicle", priority: "Medium", subject: "", description: "" });

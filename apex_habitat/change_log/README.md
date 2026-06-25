@@ -4,6 +4,7 @@ Every release, newest first. Each line links to that version's full note.
 
 ## Latest
 
+- [1.55.18](v1/v1_55_18.md) — A new home landing workspace, Arabic display fixes for the building dashboard and driver portal, custody damage-assessment alerts, and a new overdue-checkouts metric.
 - [1.55.17](v1/v1_55_17.md) — Arabic translation coverage, a one-call driver home summary, a model cleanup, a wider safety scan, and building address display reconciliation.
 - [1.55.16](v1/v1_55_16.md) — Custody serialized-article enforcement, a Buildings Over Threshold occupancy card, and form-layout and portal polish.
 - [1.55.15](v1/v1_55_15.md) — Rent payment schedule cleanup and a test-suite reliability fix.

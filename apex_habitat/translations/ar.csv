@@ -183,6 +183,7 @@ Apex Core is configured. The accommodation and fleet modules now share these set
 Apex Integration Settings,إعدادات تكامل أبيكس
 Apex Settings,إعدادات Apex
 Apex Setup,إعداد أبيكس
+Apex Home,الرئيسية
 Appearance,المظهر
 Applies to All Buildings,يسري على جميع المباني
 Apply an operational markup to external-supplier accommodation costs in the Supplier Cost Recovery report.,تطبيق هامش تشغيلي على تكاليف السكن الخاصة بالموردين الخارجيين في تقرير استرداد تكلفة المورّد.
@@ -1786,6 +1787,7 @@ Overall Result,النتيجة الإجمالية
 Overall Status,الحالة العامة
 Overdue,متأخر
 Overdue Audit Remediation Plans,خطط معالجة التدقيق المتأخرة
+Overdue Checkouts,مغادرات متأخرة
 Overdue Rental Settlements,تسويات الإيجار المتأخرة
 Overdue Returns,المرتجعات المتأخرة
 Overdue Safety Tasks,مهام السلامة المتأخرة
@@ -2707,6 +2709,7 @@ Total Invoice Amount (SAR),إجمالي مبلغ الفاتورة (ريال)
 Total Litres,إجمالي اللترات
 Total Movements Recorded,إجمالي الحركات المسجلة
 Total Occupancy %,إجمالي نسبة الإشغال (%)
+Total Occupancy Percent,إجمالي نسبة الإشغال
 Total Procurement Cost (SAR),إجمالي تكلفة المشتريات (ريال)
 Total Recovered,إجمالي المسترد
 Total Rooms,إجمالي الغرف

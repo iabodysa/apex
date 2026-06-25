@@ -152,15 +152,6 @@ const messages = {
       descriptionPlaceholder: "Describe the issue",
       raise: "Raise Ticket",
       myTickets: "My tickets",
-      catVehicle: "Vehicle",
-      catFuel: "Fuel",
-      catAttendance: "Attendance",
-      catSalary: "Salary",
-      catOther: "Other",
-      prioLow: "Low",
-      prioMedium: "Medium",
-      prioHigh: "High",
-      prioUrgent: "Urgent",
     },
     unlinked: {
       staffHint:
@@ -319,15 +310,6 @@ const messages = {
       descriptionPlaceholder: "صف المشكلة",
       raise: "إنشاء تذكرة",
       myTickets: "تذاكري",
-      catVehicle: "مركبة",
-      catFuel: "وقود",
-      catAttendance: "حضور",
-      catSalary: "راتب",
-      catOther: "أخرى",
-      prioLow: "منخفضة",
-      prioMedium: "متوسطة",
-      prioHigh: "عالية",
-      prioUrgent: "عاجلة",
     },
     unlinked: {
       staffHint:
@@ -341,6 +323,80 @@ const messages = {
     },
   },
 };
+
+// Server enum values (DocType Select options / Issue masters) shown in the portal,
+// mapped to a localized label per namespace. Stored values stay English for the API
+// round-trip; only the displayed label localizes. translateEnum falls back to the raw
+// value, so a NEW/renamed option renders English in Arabic mode — test_driver_portal
+// _enum_coverage locks every namespace to its live source options so that drift fails
+// the build. Keys are the exact stored values.
+//   tripStatus    -> Dispatch Trip.status
+//   issueStatus   -> Issue.status (native ERPNext)
+//   issueCategory -> Issue Type masters (salis_issue_seed)
+//   issuePriority -> Issue Priority masters (salis_issue_seed)
+const enums = {
+  en: {
+    tripStatus: {
+      Planned: "Planned",
+      Dispatched: "Dispatched",
+      Completed: "Completed",
+      Cancelled: "Cancelled",
+    },
+    issueStatus: {
+      Open: "Open",
+      Replied: "Replied",
+      "On Hold": "On Hold",
+      Resolved: "Resolved",
+      Closed: "Closed",
+    },
+    issueCategory: {
+      Vehicle: "Vehicle",
+      Fuel: "Fuel",
+      Attendance: "Attendance",
+      Salary: "Salary",
+      Other: "Other",
+    },
+    issuePriority: {
+      Low: "Low",
+      Medium: "Medium",
+      High: "High",
+      Urgent: "Urgent",
+    },
+  },
+  ar: {
+    tripStatus: {
+      Planned: "مخططة",
+      Dispatched: "منطلقة",
+      Completed: "مكتملة",
+      Cancelled: "ملغاة",
+    },
+    issueStatus: {
+      Open: "مفتوحة",
+      Replied: "تم الرد",
+      "On Hold": "معلّقة",
+      Resolved: "محلولة",
+      Closed: "مغلقة",
+    },
+    issueCategory: {
+      Vehicle: "مركبة",
+      Fuel: "وقود",
+      Attendance: "حضور",
+      Salary: "راتب",
+      Other: "أخرى",
+    },
+    issuePriority: {
+      Low: "منخفضة",
+      Medium: "متوسطة",
+      High: "عالية",
+      Urgent: "عاجلة",
+    },
+  },
+};
+
+// The ordered option values per ticket-form dropdown, single-sourced from `enums`
+// so the form, the rendered list, and the coverage test never drift apart.
+export const ISSUE_CATEGORIES = Object.keys(enums.en.issueCategory);
+export const ISSUE_PRIORITIES = Object.keys(enums.en.issuePriority);
 
 function detectInitial() {
   try {
@@ -372,6 +428,14 @@ export function translate(key, params) {
   return interpolate(fallback != null ? fallback : key, params);
 }
 
+// Localize a stored server enum value; returns the raw value if the namespace or
+// key is unknown (so an unmapped option degrades to English, never blanks).
+export function translateEnum(namespace, value) {
+  if (value == null || value === "") return value;
+  const ns = (enums[lang.value] || {})[namespace] || (enums.en || {})[namespace];
+  return (ns && ns[value]) != null ? ns[value] : value;
+}
+
 export function setLang(next) {
   if (!SUPPORTED.includes(next)) return;
   lang.value = next;
@@ -387,6 +451,7 @@ const dir = computed(() => (lang.value === "ar" ? "rtl" : "ltr"));
 export function useI18n() {
   return {
     t: (key, params) => translate(key, params),
+    te: (namespace, value) => translateEnum(namespace, value),
     lang,
     dir,
     setLang,

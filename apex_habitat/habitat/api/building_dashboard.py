@@ -8,6 +8,7 @@ client-side (accommodation_building.js) from this whitelisted reader.
 from __future__ import annotations
 
 import frappe
+from frappe import _
 from frappe.utils import flt
 
 
@@ -69,19 +70,19 @@ def get_building_layout(building: str) -> dict:
     floors = []
     for floor_num in sorted(floors_map.keys()):
         floor_rooms = floors_map[floor_num]
+        # Translate at runtime so the Arabic UI gets Arabic floor labels.
         if floor_num == 0:
-            floor_label = "Ground Floor"
+            floor_label = _("Ground Floor")
         elif floor_num < 0:
-            floor_label = f"Basement {abs(floor_num)}"
+            floor_label = _("Basement {0}").format(abs(floor_num))
         else:
-            floor_label = f"Floor {floor_num}"
+            floor_label = _("Floor {0}").format(floor_num)
         floors.append({
             "floor": floor_num,
             "floor_label": floor_label,
             "rooms": floor_rooms,
         })
 
-    # [#a2e592]
     summary = {"available": 0, "partial": 0, "full": 0, "maintenance": 0}
     for room in rooms:
         c = room["room_color"]
