@@ -3112,3 +3112,11 @@ Current Driver User,مستخدم السائق الحالي
 "The driver's portal/login user, mirrored from the linked Employee. Drives driver-facing notifications.",مستخدم بوابة/دخول السائق، منعكس من الموظف المرتبط. يوجِّه الإشعارات الموجَّهة للسائق.
 "The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",مستخدم دخول السائق، منعكس من السائق المرتبط. يوجِّه الإشعار الموجَّه للسائق.
 "The current driver's login user, mirrored from the assigned driver. Drives the driver-facing compliance notification.",مستخدم دخول السائق الحالي، منعكس من السائق المُسنَد. يوجِّه إشعار الامتثال الموجَّه للسائق.
+Window ends in {0}d,تنتهي المهلة خلال {0} يوم
+Window expired {0}d ago,انتهت المهلة منذ {0} يوم
+Temporary Worker {0}'s stay window expired on {1}.,انتهت مهلة إقامة العامل المؤقت {0} في {1}.
+You cannot {0} a fuel request you raised yourself (segregation of duties).,لا يمكنك {0} طلب وقود أنشأته بنفسك (الفصل بين المهام).
+Only a Fleet Manager or Fleet Project Manager can {0} a fuel request.,يمكن فقط لمدير الأسطول أو مدير مشروع الأسطول {0} طلب وقود.
+Loading buildings…,جاري تحميل المباني…
+Could not load your buildings.,تعذّر تحميل المباني الخاصة بك.
+No buildings to show.,لا توجد مبانٍ لعرضها.

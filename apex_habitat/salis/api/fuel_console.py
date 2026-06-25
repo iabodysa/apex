@@ -14,7 +14,11 @@ mirroring the Habitat Front Desk pattern:
   workflow's role gate, Segregation-of-Duties condition
   (``requested_by != session.user``) and docstatus transition all apply — the
   console can never bypass them. They add NO posting or status logic of their
-  own, and never touch the database with raw SQL.
+  own, and never touch the database with raw SQL. When the gate blocks the
+  caller, ``_drive_fuel_action`` inspects the available transitions first and
+  raises a typed ``PermissionError`` naming the cause (missing approver role vs
+  self-approval) instead of the framework's opaque "Not a valid Workflow Action"
+  (HTTP 417); the gate itself is still fully enforced.
 
 Project scoping is enforced SERVER-SIDE and reuses the canonical Salis row-scope
 helpers in :mod:`apex_habitat.salis.permissions` (``_is_unscoped`` /
@@ -36,10 +40,44 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.model.workflow import apply_workflow
+from frappe.model.workflow import apply_workflow, get_transitions
 from frappe.utils import date_diff, flt, today
 
 from apex_habitat.salis.permissions import _allowed_projects, _is_unscoped
+
+
+def _drive_fuel_action(doc, action: str) -> None:
+    """Apply a Fuel Request Workflow ``action``, degrading the gate gracefully.
+
+    ``apply_workflow`` throws a raw ``WorkflowTransitionError`` ("Not a valid
+    Workflow Action", surfaced as HTTP 417) whenever the action is not an
+    available transition for the caller — which happens both when the caller
+    lacks an approver role AND when the Segregation-of-Duties condition
+    (``requested_by != session.user``) blocks self-approval. We first inspect the
+    available transitions (the same framework path, so the role + SoD gate is
+    NEVER bypassed) and, when the action is absent, throw a typed message that
+    names the actual cause instead of the opaque framework error.
+    """
+    available = {t.action for t in get_transitions(doc)}
+    if action in available:
+        apply_workflow(doc, action)
+        return
+
+    # Distinguish the two reasons the transition is unavailable so the operator
+    # sees why, not "Not a valid Workflow Action".
+    if doc.get("requested_by") == frappe.session.user:
+        frappe.throw(
+            _("You cannot {0} a fuel request you raised yourself (segregation of duties).").format(
+                action.lower()
+            ),
+            frappe.PermissionError,
+        )
+    frappe.throw(
+        _("Only a Fleet Manager or Fleet Project Manager can {0} a fuel request.").format(
+            action.lower()
+        ),
+        frappe.PermissionError,
+    )
 
 
 def _permitted_projects():
@@ -226,7 +264,7 @@ def approve_fuel_request(name: str) -> dict:
             )
         )
 
-    apply_workflow(doc, "Approve")
+    _drive_fuel_action(doc, "Approve")
 
     # [#rlur7z]
     return {"name": doc.name, "status": doc.status}
@@ -265,7 +303,7 @@ def reject_fuel_request(name: str, reason: str | None = None) -> dict:
             )
         )
 
-    apply_workflow(doc, "Reject")
+    _drive_fuel_action(doc, "Reject")
 
     if reason:
         doc.add_comment("Comment", _("Rejected: {0}").format(reason))

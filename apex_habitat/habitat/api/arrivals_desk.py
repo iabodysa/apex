@@ -31,6 +31,17 @@ PARTY_EMPLOYEE = "Employee"
 PARTY_TEMPORARY_WORKER = "Temporary Worker"
 
 
+def _expiry_days(expiry_date) -> int | None:
+    """Whole days from today until a Temporary Worker's window expiry.
+
+    Negative once the window has lapsed, ``0`` on the expiry day, ``None`` when
+    no expiry is set. Computed server-side so the desk renders a single source of
+    truth (no client-side date math)."""
+    if not expiry_date:
+        return None
+    return frappe.utils.date_diff(expiry_date, frappe.utils.today())
+
+
 @frappe.whitelist()
 def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     """Party-aware arrival snapshot for one worker (Employee or Temporary Worker)."""
@@ -40,6 +51,7 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     if not (party_type and party):
         frappe.throw(_("party_type and party are required."))
 
+    tw_expiry = None
     if party_type == PARTY_EMPLOYEE:
         frappe.has_permission("Employee", "read", throw=True)
         info = frappe.db.get_value("Employee", party, ["employee_name", "image"], as_dict=True) or {}
@@ -48,10 +60,13 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         worker_name, image = info.get("employee_name"), info.get("image")
     elif party_type == PARTY_TEMPORARY_WORKER:
         frappe.has_permission("Temporary Worker", "read", throw=True)
-        info = frappe.db.get_value("Temporary Worker", party, ["worker_name"], as_dict=True) or {}
+        info = frappe.db.get_value(
+            "Temporary Worker", party, ["worker_name", "expiry_date"], as_dict=True
+        ) or {}
         if not info:
             frappe.throw(_("Temporary Worker {0} does not exist.").format(party))
         worker_name, image = info.get("worker_name"), None
+        tw_expiry = info.get("expiry_date")
     else:
         frappe.throw(_("Unknown party type: {0}").format(party_type))
 
@@ -108,6 +123,9 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         "has_custody": bool(custody_count),
         "masar_enabled": masar_enabled,
         "masar_status": "issued" if masar_enabled else "pending",
+        # Temporary-window telemetry for the desk's expiry chip.
+        "expiry_date": frappe.utils.formatdate(tw_expiry) if tw_expiry else None,
+        "expiry_days": _expiry_days(tw_expiry),
     }
 
 
@@ -163,7 +181,7 @@ def search_arrivals_workers(building=None, txt=None) -> list:
                 if txt
                 else None
             ),
-            fields=["name", "worker_name", "passport_number"],
+            fields=["name", "worker_name", "passport_number", "expiry_date"],
             order_by="modified desc",
             limit_page_length=15,
         )
@@ -173,6 +191,9 @@ def search_arrivals_workers(building=None, txt=None) -> list:
                 "party": t.name,
                 "label": t.worker_name or t.name,
                 "sub": _("Passport {0}").format(t.passport_number or "—"),
+                # So a search row can flag a worker whose window is closing/lapsed.
+                "expiry_date": frappe.utils.formatdate(t.expiry_date) if t.expiry_date else None,
+                "expiry_days": _expiry_days(t.expiry_date),
             }
             for t in tws
             if t.name not in housed_tw

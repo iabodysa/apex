@@ -166,6 +166,43 @@ class TestFuelConsoleScoping(FrappeTestCase):
         own.cancel()
         frappe.delete_doc("Fuel Request", own.name, ignore_permissions=True, force=True)
 
+    def test_role_gap_gives_typed_message_not_raw_workflow_error(self):
+        """A Fleet Supervisor has write on Fuel Request but is NOT an approver
+        role, so the workflow Approve transition is unavailable. The console must
+        degrade that into a typed PermissionError naming the role gap, never the
+        raw WorkflowTransitionError ('Not a valid Workflow Action' / HTTP 417),
+        and the request must stay Pending."""
+        from frappe.model.workflow import WorkflowTransitionError
+
+        own = _pending_fuel_request(self.pa, self.veh_a)
+        frappe.set_user(self.sup)
+        with self.assertRaises(frappe.PermissionError) as ctx:
+            fuel_console.approve_fuel_request(own.name)
+        self.assertNotIsInstance(ctx.exception, WorkflowTransitionError)
+        self.assertIn("Fleet Manager", str(ctx.exception))
+        self.assertEqual(
+            frappe.db.get_value("Fuel Request", own.name, "status"), "Pending"
+        )
+
+    def test_self_approval_gives_typed_message_not_raw_workflow_error(self):
+        """An approver who is the requester is blocked by the SoD condition
+        (requested_by != session.user), so the Approve transition is unavailable.
+        The console must surface a typed self-approval message, not the raw
+        workflow error, and leave the request Pending."""
+        from frappe.model.workflow import WorkflowTransitionError
+
+        # The request is raised BY the approver, so requested_by == the approver.
+        frappe.set_user(self.pm)
+        own = _pending_fuel_request(self.pa, self.veh_a)
+        self.assertEqual(own.requested_by, self.pm)
+        with self.assertRaises(frappe.PermissionError) as ctx:
+            fuel_console.approve_fuel_request(own.name)
+        self.assertNotIsInstance(ctx.exception, WorkflowTransitionError)
+        self.assertIn("segregation of duties", str(ctx.exception).lower())
+        self.assertEqual(
+            frappe.db.get_value("Fuel Request", own.name, "status"), "Pending"
+        )
+
 
 class TestSupportTicketScoping(FrappeTestCase):
     """Issue (support tickets): project row-scope for supervisors, if_owner for

@@ -19,7 +19,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, today
 
-from apex_habitat.salis.api.dispatch_board import _permitted_projects
+from apex_habitat.salis.api.fleet_reader import driver_names, scope_filter, scoped_vehicles
 from apex_habitat.salis.utils import lock_vehicle
 
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
@@ -61,7 +61,7 @@ def get_fleet(status=None, rental_office=None, project=None, search=None):
     from apex_habitat.salis.tasks import _settings_int
 
     frappe.has_permission("Salis Vehicle", "read", throw=True)
-    unscoped, projects = _permitted_projects()
+    unscoped, projects, base_filters = scope_filter()
     stopped_over_days = _settings_int("workshop_overstay_days", 14)
 
     offices = [o.name for o in frappe.get_all("Rental Office", fields=["name"], order_by="name asc")]
@@ -70,44 +70,35 @@ def get_fleet(status=None, rental_office=None, project=None, search=None):
         if unscoped
         else list(projects or [])
     )
-    if not unscoped and not projects:
+    # base_filters is None only for a scoped user with no permitted project (access gap).
+    if base_filters is None:
         return _empty(offices, proj_opts, unscoped, stopped_over_days)
 
-    filters = {}
-    if not unscoped:
-        filters["project"] = ["in", projects]
+    extra = {}
     if status in VEHICLE_STATUSES:
-        filters["status"] = status
+        extra["status"] = status
     if rental_office:
-        filters["rental_office"] = rental_office
+        extra["rental_office"] = rental_office
     if project and (unscoped or project in (projects or [])):
-        filters["project"] = project
+        extra["project"] = project
 
     or_filters = None
     if search:
         like = ["like", f"%{search}%"]
         or_filters = {"plate_number": like, "vehicle_category": like, "current_driver": like}
 
-    vehicles = frappe.get_all(
-        "Salis Vehicle",
-        filters=filters,
-        or_filters=or_filters,
+    vehicles = scoped_vehicles(
         fields=[
             "name", "plate_number", "vehicle_category", "status", "ownership",
             "rental_office", "project", "current_driver", "odometer", "planned_fuel_grade",
             "compliance_status", "next_expiry_date",
         ],
-        order_by="plate_number asc",
-        limit_page_length=0,
+        base_filters=base_filters,
+        extra_filters=extra,
+        or_filters=or_filters,
     )
 
-    driver_ids = list({v.current_driver for v in vehicles if v.get("current_driver")})
-    names = {}
-    if driver_ids:
-        names = {
-            d.name: d.full_name
-            for d in frappe.get_all("Salis Driver", filters={"name": ["in", driver_ids]}, fields=["name", "full_name"])
-        }
+    names = driver_names(vehicles)
 
     plates = [v.name for v in vehicles]
     inc = {}

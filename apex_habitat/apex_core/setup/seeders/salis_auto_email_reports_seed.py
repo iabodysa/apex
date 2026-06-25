@@ -1,6 +1,7 @@
 """Seed native Frappe Auto Email Reports that email an existing Salis Script Report
 on a schedule. These are the periodic movement/fleet operational digests:
 
+- Salis Fleet Register        — Daily   (Fleet Managers — fleet-status snapshot)
 - Fuel Reconciliation         — Monthly (Finance / Fleet Manager)
 - Cost Recovery Aging         — Weekly  (Finance — chase open recoveries)
 - Transport Fulfilment SLA    — Weekly  (Fleet Manager — service-level watch)
@@ -23,6 +24,8 @@ the master toggle being OFF by default is upheld here without extra logic.
 import frappe
 
 _REPORTS = [
+    # Daily fleet-status snapshot (plate/status/driver/project) for fleet managers.
+    {"report": "Salis Fleet Register", "frequency": "Daily"},
     {"report": "Fuel Reconciliation", "frequency": "Monthly"},
     {"report": "Cost Recovery Aging", "frequency": "Weekly"},
     {"report": "Transport Fulfilment SLA", "frequency": "Weekly"},

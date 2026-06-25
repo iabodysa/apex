@@ -373,6 +373,28 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         with open(os.path.join(APP_ROOT, "patches.txt"), encoding="utf-8") as fh:
             self.assertIn("v1_x.ensure_web_form_route", fh.read())
 
+    def test_arrivals_surface_temporary_worker_expiry(self):
+        # The desk readers expose the Temporary Worker window + the page chips it.
+        with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
+            api = fh.read()
+        self.assertIn("def _expiry_days(", api)
+        self.assertIn('"expiry_days": _expiry_days(', api)
+        with open(
+            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
+        ) as fh:
+            js = fh.read()
+        self.assertIn("_expiry_chip(", js)
+        self.assertIn("Window ends in {0}d", js)
+        # The housing-past-expiry guard lives in the assignment controller (all paths).
+        with open(
+            os.path.join(
+                APP_ROOT, "habitat", "doctype", "accommodation_assignment", "accommodation_assignment.py"
+            ),
+            encoding="utf-8",
+        ) as fh:
+            ctrl = fh.read()
+        self.assertIn("_flag_temporary_worker_past_expiry", ctrl)
+
     def test_transport_one_request_employees_only(self):
         with open(
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"

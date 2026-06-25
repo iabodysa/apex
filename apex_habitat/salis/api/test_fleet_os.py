@@ -15,7 +15,9 @@ from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api import fleet_os
 
-_RESOLVER = "apex_habitat.salis.api.fleet_os._permitted_projects"
+# get_fleet_os resolves scope through the shared fleet_reader service, so the
+# project-scope resolver is patched there (its single home).
+_RESOLVER = "apex_habitat.salis.api.fleet_reader._permitted_projects"
 
 
 class TestFleetOSEmptyReason(FrappeTestCase):

@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.55.30 — fleet managers now receive a daily fleet-status digest by email; the accommodation arrivals desk flags a Temporary Worker whose stay window is closing or has lapsed (an amber/red chip on the search row and active card) and warns when housing a worker past that window; fuel-request approval now explains why an action was blocked — naming whether the approver lacks the required role or is the person who raised the request (segregation of duties) — instead of an opaque workflow error; the Front Desk replaces its cold building picker with a scope-aware chip strip color-weighted by free-bed pressure; plus an internal fleet-reader consolidation",
+        "app_name": "apex_habitat",
+        "link": "/app/auto-email-report",
+        "creation": "2026-06-25 17:30:00",
+    },
+    {
         "title": "Apex 1.55.29 — the Fleet card now shows each vehicle's real planned fuel (its planned fuel grade and planned daily fuel cost) instead of a placeholder, and gains a compliance badge that warns when a vehicle's documents are expiring or expired; the Fleet app and the Front Desk arrivals board read cleanly right-to-left in Arabic; submitting a Maintenance Inspection Report that names a Facility Asset now auto-stamps that asset's Last Inspected Date with the inspection date (advancing only to the most recent, and recomputing if a report is cancelled); plus reliability hardening",
         "app_name": "apex_habitat",
         "link": "/fleet",

@@ -200,7 +200,8 @@ class ArrivalsDesk {
 					is_tw ? __('Temp') : __('Emp')
 				}</span>` +
 				`<span class="ax-result-label">${frappe.utils.escape_html(row.label || '')}</span>` +
-				`<span class="ax-result-sub text-muted"><bdi>${frappe.utils.escape_html(row.sub || '')}</bdi></span></div>`
+				`<span class="ax-result-sub text-muted"><bdi>${frappe.utils.escape_html(row.sub || '')}</bdi></span>` +
+				`${this._expiry_chip(row)}</div>`
 		).appendTo(this.$results);
 		const pick = () => {
 			this.$results.find('.ax-result').removeClass('ax-result--active');
@@ -230,6 +231,21 @@ class ArrivalsDesk {
 			);
 	}
 
+	// Amber "window ends" / red "expired" chip from the server-computed
+	// expiry_days (negative = lapsed). Returns '' for an Employee or no window.
+	_expiry_chip(item) {
+		const d = item && item.expiry_days;
+		if (d === null || d === undefined) return '';
+		if (d < 0) {
+			return `<span class="indicator-pill no-indicator-dot red">${__('Window expired {0}d ago', [
+				Math.abs(d),
+			])}</span>`;
+		}
+		return `<span class="indicator-pill no-indicator-dot orange">${__('Window ends in {0}d', [
+			d,
+		])}</span>`;
+	}
+
 	_render_active_card(card) {
 		if (!card) {
 			this.$active.empty();
@@ -245,7 +261,7 @@ class ArrivalsDesk {
 				`<span class="ax-active-name">${frappe.utils.escape_html(card.worker_name || card.party)}</span>` +
 				`<span class="indicator-pill no-indicator-dot ${is_tw ? 'orange' : 'green'}">${
 					is_tw ? __('Temporary Worker') : __('Employee')
-				}</span></div>` +
+				}</span>${this._expiry_chip(card)}</div>` +
 				`<div class="ax-active-sub text-muted">${
 					card.project ? frappe.utils.escape_html(card.project) : __('No project yet')
 				}</div>` +

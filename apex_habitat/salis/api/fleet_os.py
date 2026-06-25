@@ -27,6 +27,7 @@ from frappe import _
 from frappe.utils import getdate, today
 
 from apex_habitat.salis.api.dispatch_board import _permitted_projects
+from apex_habitat.salis.api.fleet_reader import scope_filter, scoped_vehicles
 from apex_habitat.salis.utils import add_timeline_note, lock_driver, lock_vehicle
 
 # [#mqc6q1]
@@ -100,22 +101,19 @@ def get_fleet_os():
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     # [#8178ig]
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
-    unscoped, projects = _permitted_projects()
-    if not unscoped and not projects:
+    _unscoped, _projects, base_filters = scope_filter()
+    # base_filters is None only for a scoped user with no permitted project.
+    if base_filters is None:
         return {"vehicles": [], "reason": "scope_empty"}
 
-    v_filters = {} if unscoped else {"project": ["in", projects]}
-    vehicles = frappe.get_all(
-        "Salis Vehicle",
-        filters=v_filters,
+    vehicles = scoped_vehicles(
         fields=[
             "name", "plate_number", "vehicle_category", "status",
             "rental_office", "project", "current_driver",
             "planned_fuel_grade", "planned_daily_fuel_sar",
             "compliance_status", "next_expiry_date",
         ],
-        order_by="plate_number asc",
-        limit_page_length=0,
+        base_filters=base_filters,
     )
     if not vehicles:
         return {"vehicles": [], "reason": "data_empty"}

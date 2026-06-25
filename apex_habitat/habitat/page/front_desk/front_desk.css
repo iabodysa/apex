@@ -14,6 +14,86 @@
 	font-size: 15px;
 }
 
+/* Scope-aware building chip strip — the primary building selector. */
+.fd-buildings {
+	padding-inline: 4px;
+	padding-block-start: 8px;
+	direction: inherit;
+}
+
+.fd-buildings-loading,
+.fd-buildings-empty {
+	font-size: 13px;
+	padding-block: 8px;
+}
+
+.fd-buildings-error {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding-block: 8px;
+}
+
+.fd-buildings-error-msg {
+	font-size: 13px;
+	color: var(--text-color, #1f272e);
+}
+
+.fd-buildings-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.fd-building-chip {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 8px;
+	padding-block: 6px;
+	padding-inline: 12px;
+	border-radius: 16px;
+	border: 1px solid var(--border-color, #d1d8dd);
+	background: var(--card-bg, #fff);
+	cursor: pointer;
+	font-size: 13px;
+	max-width: 280px;
+}
+
+.fd-building-chip:focus {
+	outline: 3px solid var(--primary, #2490ef);
+	outline-offset: 2px;
+}
+
+.fd-building-chip-name {
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.fd-building-chip-counts {
+	font-weight: 700;
+}
+
+/* Free-bed-pressure weighting: a left edge bar keyed to the same palette as the
+   bed cards (green free / amber near-full / red full-or-over). */
+.fd-building-chip--green {
+	border-inline-start: 4px solid #34a853;
+}
+
+.fd-building-chip--amber {
+	border-inline-start: 4px solid #f5a623;
+}
+
+.fd-building-chip--red {
+	border-inline-start: 4px solid #d93025;
+}
+
+.fd-building-chip--selected {
+	border-color: var(--primary, #2490ef);
+	box-shadow: 0 0 0 1px var(--primary, #2490ef);
+}
+
 /* [#iu6cwl] */
 .fd-error {
 	padding-block: 48px;

@@ -18,31 +18,14 @@ class FrontDesk {
 	}
 
 	setup() {
+		this.$strip = $('<div class="fd-buildings"></div>').appendTo(this.page.main);
 		this.$container = $('<div class="fd-board"></div>').appendTo(this.page.main);
 		this._render_empty(__("Select a building to load the board."));
 		this._setup_controls();
+		this._load_buildings();
 	}
 
 	_setup_controls() {
-		// [#cvc2vf]
-		this.building_field = this.page.add_field({
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Accommodation Building",
-			change: () => {
-				const val = this.building_field.get_value();
-				if (val && val !== this.building) {
-					this.building = val;
-					this.refresh();
-				} else if (!val && this.building) {
-					// [#50f1po]
-					this.building = null;
-					this._render_empty(__("Select a building to load the board."));
-				}
-			},
-		});
-
 		this.page.set_primary_action(__("Refresh Board"), () => {
 			if (this.building) {
 				this.refresh();
@@ -53,6 +36,90 @@ class FrontDesk {
 				});
 			}
 		}, "refresh");
+	}
+
+	// Scope-aware chip strip from list_supervisor_buildings(): one chip per
+	// allowed building, color-weighted by free-bed pressure. The chip is the
+	// primary building selector (replaces the cold Link field).
+	_load_buildings() {
+		this.$strip.empty();
+		const $loading = $('<div class="fd-buildings-loading text-muted"></div>')
+			.text(__("Loading buildings…"))
+			.appendTo(this.$strip);
+		frappe.call({
+			method: "apex_habitat.habitat.api.front_desk.list_supervisor_buildings",
+			callback: (r) => {
+				$loading.remove();
+				if (r.exc) {
+					this._render_strip_error();
+					return;
+				}
+				this.buildings = r.message || [];
+				this._render_buildings();
+			},
+			error: () => {
+				$loading.remove();
+				this._render_strip_error();
+			},
+		});
+	}
+
+	_render_strip_error() {
+		this.$strip.empty();
+		const $err = $('<div class="fd-buildings-error"></div>').appendTo(this.$strip);
+		$('<span class="fd-buildings-error-msg"></span>')
+			.text(__("Could not load your buildings."))
+			.appendTo($err);
+		$('<button class="btn btn-default btn-xs"></button>')
+			.text(__("Retry"))
+			.on("click", () => this._load_buildings())
+			.appendTo($err);
+	}
+
+	// Free-bed-pressure color: red when full/over, amber when near-full, green
+	// when beds are free. Derived client-side from the server counts; the bed
+	// board's own colors stay server-computed.
+	_building_pressure(b) {
+		if ((b.available || 0) <= 0) return "red";
+		if ((b.occupancy_pct || 0) >= 85) return "amber";
+		return "green";
+	}
+
+	_render_buildings() {
+		this.$strip.empty();
+		if (!this.buildings || !this.buildings.length) {
+			// Neutral placeholder; the permission-gap copy is owned elsewhere.
+			$('<div class="fd-buildings-empty text-muted"></div>')
+				.text(__("No buildings to show."))
+				.appendTo(this.$strip);
+			return;
+		}
+		const $row = $('<div class="fd-buildings-row"></div>').appendTo(this.$strip);
+		this.buildings.forEach((b) => {
+			const pressure = this._building_pressure(b);
+			const is_selected = b.building === this.building;
+			const selected = is_selected ? " fd-building-chip--selected" : "";
+			const $chip = $(
+				`<button class="fd-building-chip fd-building-chip--${pressure}${selected}" type="button"></button>`
+			).appendTo($row);
+			$chip.attr("aria-pressed", is_selected);
+			$chip.attr("title", b.building_title || b.building);
+			$('<span class="fd-building-chip-name"></span>')
+				.text(b.building_title || b.building)
+				.appendTo($chip);
+			// LTR-isolate the fraction so it does not reverse beside Arabic names.
+			$('<span class="fd-building-chip-counts" dir="ltr"></span>')
+				.text(`${b.available || 0}/${b.total_beds || 0}`)
+				.appendTo($chip);
+			$chip.on("click", () => this._select_building(b.building));
+		});
+	}
+
+	_select_building(building) {
+		if (!building || building === this.building) return;
+		this.building = building;
+		this._render_buildings();
+		this.refresh();
 	}
 
 	refresh() {

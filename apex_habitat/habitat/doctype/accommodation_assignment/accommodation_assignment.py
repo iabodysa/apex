@@ -18,6 +18,29 @@ class AccommodationAssignment(Document):
     pass
 
 
+def _flag_temporary_worker_past_expiry(doc) -> None:
+    """Soft-flag housing a Temporary Worker whose passport-only window has lapsed.
+
+    Non-blocking on purpose: a supervisor may still need to house an over-window
+    worker pending Iqama issuance, so this warns rather than throws. The check-in
+    date (or today) is compared against the worker's computed ``expiry_date``.
+    """
+    if doc.party_type != "Temporary Worker" or not doc.party:
+        return
+    expiry = frappe.db.get_value("Temporary Worker", doc.party, "expiry_date")
+    if not expiry:
+        return
+    as_of = doc.check_in_date or frappe.utils.today()
+    if frappe.utils.getdate(expiry) < frappe.utils.getdate(as_of):
+        frappe.msgprint(
+            _("Temporary Worker {0}'s stay window expired on {1}.").format(
+                doc.party, frappe.utils.formatdate(expiry)
+            ),
+            indicator="orange",
+            alert=True,
+        )
+
+
 def recalculate_room_occupancy(room_name: str) -> None:
     if not room_name:
         return
@@ -123,6 +146,8 @@ def validate(doc, method=None):
                     _(doc.party_type), doc.party, dup
                 )
             )
+
+    _flag_temporary_worker_past_expiry(doc)
 
     # [#p7c6qr]
     bed_room = frappe.db.get_value("Accommodation Bed", doc.bed, "room")
