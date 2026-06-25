@@ -1,0 +1,27 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.pending_arrival_count > 0",
+ "date_changed": "expected_date",
+ "days_in_advance": 1,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Arrival Batch",
+ "enabled": 0,
+ "event": "Days After",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"This arrival manifest has not been fully reconciled — workers are still unhoused after the expected date\") }}: {{ doc.name }} ({{ doc.building }}, {{ doc.pending_arrival_count }} {{ _(\"of\") }} {{ doc.expected_count }} {{ _(\"pending\") }}).",
+ "message_type": "HTML",
+ "module": "Habitat",
+ "name": "Habitat - Manifest Not Reconciled",
+ "recipients": [
+  {
+   "receiver_by_role": "Accommodation Manager"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Manifest Not Reconciled: {{ doc.building }} ({{ doc.pending_arrival_count }} pending)",
+ "modified": "2026-06-25 13:01:33.269538"
+}

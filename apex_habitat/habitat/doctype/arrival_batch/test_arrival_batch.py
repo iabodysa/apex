@@ -89,3 +89,41 @@ class TestArrivalBatch(FrappeTestCase):
         r = get_arrival_summary(date=self.date, building=self.building)
         self.assertEqual(r["manifest_expected"], 4)
         self.assertEqual(r["manifest_completion_pct"], 50.0)
+
+    def test_pending_arrival_count_drives_reconciliation_alert(self):
+        """pending_arrival_count = expected minus housed (clamped at 0); this is what
+        the Manifest Not Reconciled notification condition checks."""
+        doc = self._batch(["A", "B", "C"])  # expected 3
+        # Nothing housed yet -> all pending.
+        self.assertEqual(doc.pending_arrival_count, 3)
+
+        # House one worker on the date in this building.
+        asgn = frappe.get_doc({
+            "doctype": "Accommodation Assignment",
+            "naming_series": "ACC-ASGN-.YYYY.-.####",
+            "party_type": "Employee",
+            "party": "EMP-" + _h(),
+            "employee": "EMP-" + _h(),
+            "building": self.building,
+        }).insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        frappe.db.set_value("Accommodation Assignment", asgn.name,
+                            {"docstatus": 1, "check_in_date": self.date},
+                            update_modified=False)
+        self.assertEqual(doc.pending_arrival_count, 2)
+
+    def test_arrival_notifications_are_registered(self):
+        """The three arrival-lifecycle Notifications exist as standard records wired
+        to the right event/document_type (the manifest condition uses the property)."""
+        expected = {
+            "Habitat - Arrival Batch Due Today": ("Arrival Batch", "Days Before"),
+            "Habitat - Manifest Not Reconciled": ("Arrival Batch", "Days After"),
+            "Habitat - Over Capacity Used": ("Accommodation Bed", "New"),
+        }
+        for name, (dt, event) in expected.items():
+            self.assertTrue(frappe.db.exists("Notification", name), f"{name} exists")
+            row = frappe.db.get_value(
+                "Notification", name, ["document_type", "event", "is_standard"], as_dict=True
+            )
+            self.assertEqual(row.document_type, dt)
+            self.assertEqual(row.event, event)
+            self.assertTrue(row.is_standard)

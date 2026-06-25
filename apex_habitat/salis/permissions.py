@@ -35,6 +35,34 @@ def _is_unscoped(user):
     return bool(user_roles & UNSCOPED_ROLES)
 
 
+def _project_supervisor(project):
+    """Return the supervisor User scoped to ``project``, or None.
+
+    The reverse of ``_allowed_projects``: a project's supervisor is the enabled,
+    non-oversight User who holds a User Permission for that Project. When several
+    qualify, the lowest user id is returned deterministically so the resolution is
+    stable. Oversight roles are excluded — they see every project and are not a
+    project's owning supervisor.
+    """
+    if not project:
+        return None
+    users = frappe.get_all(
+        "User Permission",
+        filters={"allow": "Project", "for_value": project},
+        pluck="user",
+        order_by="user asc",
+    )
+    for user in users:
+        if user in ("Administrator", "Guest"):
+            continue
+        if not frappe.db.get_value("User", user, "enabled"):
+            continue
+        if _is_unscoped(user):
+            continue
+        return user
+    return None
+
+
 def _project_condition(user, column="`project`"):
     """Build the SQL fragment restricting `column` to the allowed projects.
 

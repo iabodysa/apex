@@ -14,6 +14,31 @@ class CustodyDamageAssessment(Document):
     pass
 
 
+@frappe.whitelist()
+def get_deduction_status(assessment):
+    """Live status of the deduction linked to a Custody Damage Assessment.
+
+    Read-only and computed on demand so the manager sees the current state of
+    the Additional Salary rather than a stale stored copy.
+    """
+    entry = frappe.db.get_value("Custody Damage Assessment", assessment, "deduction_entry")
+    if not entry:
+        return {"entry": None, "status": "Not Created"}
+
+    docstatus = frappe.db.get_value("Additional Salary", entry, "docstatus")
+    if docstatus == 2:
+        return {"entry": entry, "status": "Cancelled"}
+    if docstatus == 0:
+        return {"entry": entry, "status": "Draft"}
+
+    # docstatus 1: Paid once a submitted Salary Slip has consumed it
+    paid = frappe.db.exists(
+        "Salary Detail",
+        {"additional_salary": entry, "parenttype": "Salary Slip", "docstatus": 1},
+    )
+    return {"entry": entry, "status": "Paid" if paid else "Submitted"}
+
+
 def validate(doc, method=None):
     sync_party_employee(doc)
     if not doc.items:

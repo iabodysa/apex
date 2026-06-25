@@ -3069,3 +3069,20 @@ The vehicle has been taken out of service.,تم إخراج المركبة من �
 A vehicle has overstayed in the workshop,تجاوزت مركبة المدة المسموح بها في الورشة
 Vehicle Theft Reported: {{ doc.vehicle }},الإبلاغ عن سرقة مركبة: {{ doc.vehicle }}
 Workshop Overstay: {{ doc.vehicle }},تجاوز مدة الورشة: {{ doc.vehicle }}
+Deduction: {0},الخصم: {0}
+Not Created,غير مُنشأ
+Submitted,مُعتمد
+A Critical operations alert was raised,تم رفع تنبيه عمليات حرج
+Critical Operations Alert,تنبيه عمليات حرج
+Project Supervisor,مشرف المشروع
+"The vehicle's project supervisor, resolved when the alert is raised; drives the Critical-alert notification.",مشرف مشروع المركبة، يُحدَّد عند رفع التنبيه؛ يقود إشعار التنبيه الحرج.
+Critical Operations Alert: {{ doc.alert_type }},تنبيه عمليات حرج: {{ doc.alert_type }}
+Workers are expected to arrive at this building today — prepare beds and custody,من المتوقع وصول عمال إلى هذا المبنى اليوم — جهّز الأسرّة والعهدة
+expected,متوقع
+This arrival manifest has not been fully reconciled — workers are still unhoused after the expected date,لم تتم تسوية بيان الوصول هذا بالكامل — لا يزال هناك عمال دون سكن بعد التاريخ المتوقع
+of,من
+pending,معلّق
+An over-capacity (temporary) bed was created to house a worker beyond the room's physical capacity,تم إنشاء سرير فوق السعة (مؤقت) لإسكان عامل يتجاوز السعة الفعلية للغرفة
+Arrivals Expected Today: {{ doc.building }} ({{ doc.expected_count }}),وصول متوقع اليوم: {{ doc.building }} ({{ doc.expected_count }})
+Manifest Not Reconciled: {{ doc.building }} ({{ doc.pending_arrival_count }} pending),بيان غير مُسوّى: {{ doc.building }} ({{ doc.pending_arrival_count }} معلّق)
+Over-Capacity Bed Created: {{ doc.building }},إنشاء سرير فوق السعة: {{ doc.building }}

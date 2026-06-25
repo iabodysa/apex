@@ -17,6 +17,7 @@
   "operations_alert_sec_system",
   "status",
   "raised_on",
+  "project_supervisor",
   "operations_alert_system_col",
   "resolved_on",
   "resolution_note"
@@ -59,6 +60,14 @@
    "fieldname": "raised_on",
    "fieldtype": "Datetime",
    "label": "Raised On"
+  },
+  {
+   "description": "The vehicle's project supervisor, resolved when the alert is raised; drives the Critical-alert notification.",
+   "fieldname": "project_supervisor",
+   "fieldtype": "Link",
+   "label": "Project Supervisor",
+   "options": "User",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.status==\"Resolved\"",
@@ -118,7 +127,7 @@
  "icon": "fa fa-exclamation-triangle",
  "is_submittable": 0,
  "links": [],
- "modified": "2026-06-12 10:00:00.000000",
+ "modified": "2026-06-25 13:10:06.235219",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Operations Alert",

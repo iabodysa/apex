@@ -90,13 +90,19 @@ def get_fleet_os():
     Project scope is enforced server-side: a scoped user with no permitted
     project gets an empty list. N+1-free (three bounded queries + the category
     fuel lookup).
+
+    An empty result carries a typed ``reason`` so the page can tell the two apart:
+    ``scope_empty`` (the user is scoped to no project — an access gap) vs
+    ``data_empty`` (the permitted fleet is genuinely empty). A non-empty result
+    has ``reason: None``. Filtered-empty stays a client concern (the page knows
+    its own active filters).
     """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     # [#8178ig]
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
     unscoped, projects = _permitted_projects()
     if not unscoped and not projects:
-        return {"vehicles": []}
+        return {"vehicles": [], "reason": "scope_empty"}
 
     v_filters = {} if unscoped else {"project": ["in", projects]}
     vehicles = frappe.get_all(
@@ -110,7 +116,7 @@ def get_fleet_os():
         limit_page_length=0,
     )
     if not vehicles:
-        return {"vehicles": []}
+        return {"vehicles": [], "reason": "data_empty"}
 
     # [#f8i05f]
     cat_names = list({v.vehicle_category for v in vehicles if v.get("vehicle_category")})
@@ -266,7 +272,7 @@ def get_fleet_os():
             "notes": "",
         })
 
-    return {"vehicles": out}
+    return {"vehicles": out, "reason": None}
 
 
 # [#76c7tt]

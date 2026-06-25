@@ -20,3 +20,19 @@ class ArrivalBatch(Document):
         if not self.expected_count:
             frappe.throw(_("Add at least one expected worker to the manifest."))
         self.title = f"{self.building} - {frappe.utils.formatdate(self.expected_date)}"
+
+    @property
+    def pending_arrival_count(self) -> int:
+        # Manifest reconciliation = expected workers minus those actually housed in
+        # this building on the expected date (mirrors get_arrival_summary). Drives
+        # the manifest_not_reconciled Notification condition, which runs in a
+        # restricted eval where frappe.db is unavailable — so it lives here.
+        housed = frappe.db.count(
+            "Accommodation Assignment",
+            {
+                "building": self.building,
+                "check_in_date": self.expected_date,
+                "docstatus": 1,
+            },
+        )
+        return max(int(self.expected_count or 0) - housed, 0)

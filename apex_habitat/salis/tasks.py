@@ -38,6 +38,25 @@ def _settings_int(fieldname: str, default: int) -> int:
         return default
 
 
+def _resolve_project_supervisor(vehicle: str | None) -> str | None:
+    """Resolve the vehicle's project supervisor User, or None.
+
+    Denormalised onto the Operations Alert so the Critical-alert Notification can
+    reach the specific project's supervisor (a User Permission holder) — Frappe
+    notification recipients cannot follow the vehicle -> project -> supervisor
+    chain declaratively. Never raises: a lookup failure must not abort the job.
+    """
+    if not vehicle:
+        return None
+    try:
+        from apex_habitat.salis.permissions import _project_supervisor
+
+        project = frappe.db.get_value("Salis Vehicle", vehicle, "project")
+        return _project_supervisor(project)
+    except Exception:
+        return None
+
+
 def _raise_alert(
     alert_type: str,
     severity: str,
@@ -86,6 +105,7 @@ def _raise_alert(
 
     # [#sqhguz]
     alert_name = None
+    project_supervisor = _resolve_project_supervisor(vehicle)
     try:
         alert = frappe.get_doc(
             {
@@ -96,6 +116,7 @@ def _raise_alert(
                 "raised_on": now_datetime(),
                 "vehicle": vehicle,
                 "driver": driver,
+                "project_supervisor": project_supervisor,
                 "message": message[:2000],
             }
         )

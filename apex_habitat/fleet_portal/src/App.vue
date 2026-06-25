@@ -36,6 +36,8 @@ watch(
 const vehicles = ref([]);
 const loadState = ref("loading"); // loading | ready | error
 const loadError = ref("");
+// Typed empty reason from the API: scope_empty | data_empty | null.
+const loadReason = ref(null);
 
 const GET = "apex_habitat.salis.api.fleet_os.get_fleet_os";
 const POST = (m) => "apex_habitat.salis.api.fleet_os." + m;
@@ -55,6 +57,7 @@ async function loadFleet() {
   try {
     const r = await call(GET);
     vehicles.value = ((r && r.vehicles) || []).map(normalize);
+    loadReason.value = (r && r.reason) || null;
     loadState.value = "ready";
   } catch (e) {
     loadError.value = serverMsg(e);
@@ -66,6 +69,7 @@ async function reloadFleet() {
   try {
     const r = await call(GET);
     vehicles.value = ((r && r.vehicles) || []).map(normalize);
+    loadReason.value = (r && r.reason) || null;
   } catch (e) {
     /* keep the last good list; the action toast already reported success */
   }
@@ -215,6 +219,9 @@ function resetFilters() {
   sortDir.value = 1;
 }
 const hasDateFilter = computed(() => !!(f.dateFrom || f.dateTo));
+// No project is in scope for this user (an access gap, not just an empty board).
+const isScopeEmpty = computed(() => loadReason.value === "scope_empty");
+
 const anyFilterActive = computed(
   () =>
     !!(
@@ -852,13 +859,13 @@ function fuelView(v) {
       <!-- CARDS -->
       <div v-else-if="f.view === 'cards'" class="cards-wrap">
         <div v-if="!filtered.length" class="empty">
-          <div class="empty-ic"><Icon name="car" :size="42" :stroke-width="1.5" /></div>
-          <div>{{ anyFilterActive ? t("main.noResultsFilters") : t("main.noVehicles") }}</div>
-          <div v-if="activeFilterChips.length" class="fp-empty-filters">
+          <div class="empty-ic"><Icon :name="isScopeEmpty ? 'lock' : 'car'" :size="42" :stroke-width="1.5" /></div>
+          <div>{{ isScopeEmpty ? t("main.noScope") : anyFilterActive ? t("main.noResultsFilters") : t("main.noVehicles") }}</div>
+          <div v-if="!isScopeEmpty && activeFilterChips.length" class="fp-empty-filters">
             {{ t("main.activeFilters") }}
             <span class="fp-chip" v-for="(c, i) in activeFilterChips" :key="i">{{ c }}</span>
           </div>
-          <button v-if="anyFilterActive" class="btn btn-blue" @click="resetFilters">{{ t("main.clearFilters") }}</button>
+          <button v-if="!isScopeEmpty && anyFilterActive" class="btn btn-blue" @click="resetFilters">{{ t("main.clearFilters") }}</button>
         </div>
         <div v-else class="cards-grid">
           <div
@@ -969,7 +976,7 @@ function fuelView(v) {
             </tr>
           </thead>
           <tbody>
-            <tr v-if="!filtered.length"><td colspan="11"><div class="empty"><div class="empty-ic"><Icon name="search" :size="42" :stroke-width="1.5" /></div>{{ t("main.noResults") }}</div></td></tr>
+            <tr v-if="!filtered.length"><td colspan="11"><div class="empty"><div class="empty-ic"><Icon :name="isScopeEmpty ? 'lock' : 'search'" :size="42" :stroke-width="1.5" /></div>{{ isScopeEmpty ? t("main.noScope") : t("main.noResults") }}</div></td></tr>
             <tr v-for="v in filtered" :key="v.plate" @click="openPanel(v.plate)">
               <td><Icon :name="icon(v)" :size="18" /></td>
               <td><span class="mono" style="font-weight:700;color:var(--t1)"><bdi>{{ v.plate }}</bdi></span></td>
