@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.55.33 — drivers and workers get a self-service glance: in the driver app you see your fuel quota and remaining litres, your fuel-request history and your recent trips alongside today's, and the worker app's home screen leads with your next ride, your open requests and the days until your Iqama expires; custody becomes auditable end to end — capture the recipient's signature at handover, acknowledge-receipt and overdue-return alerts now reach the right person, and a new view shows top holders by custody value; a report flags workers still housed after their project has ended so a manager can act before the cost keeps bleeding; a cleaning round now requires its photos attached before it can be submitted; and the Front Desk and fleet board gain clearer permission and empty states, per-item progress as bulk actions run, and quicker filters",
+        "app_name": "apex_habitat",
+        "link": "/app/query-report/Idle Resident Candidates",
+        "creation": "2026-06-26 14:00:00",
+    },
+    {
         "title": "Apex 1.55.32 — reassigning a vehicle's driver is now a one-step action from the fleet control drawer: pick the new driver and the previous assignment is closed automatically, with a clear message if the vehicle is already on that driver; at check-in the accommodation front desk can identify a worker by scanning or typing their Iqama number or personal link and pressing Enter — the worker is matched in one tap, and anyone who already holds an active bed is flagged before you assign one; and the fleet board now lets you select several vehicles at once and either stop them or send them to the workshop in a single action, with each vehicle handled independently so one failure does not block the rest",
         "app_name": "apex_habitat",
         "link": "/fleet",
