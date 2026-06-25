@@ -96,47 +96,49 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         else:
             self.article = existing_article
 
-        # [#9ztpd7]
+        # [#9ztpd7] A submitted Salary Structure Assignment is the precondition
+        # HRMS's Additional Salary checks on submit (validate_salary_structure); a
+        # bare site has none, so build one here. The structure carries one Earning
+        # (required to submit) and no tax component (so no Income Tax Slab is
+        # demanded), and the assignment's from_date precedes any test payroll_date.
+        earn_component = "Apex Habitat Test Earning"
+        if not frappe.db.exists("Salary Component", earn_component):
+            frappe.get_doc({
+                "doctype": "Salary Component",
+                "salary_component": earn_component,
+                "type": "Earning",
+            }).insert(ignore_permissions=True)
+
         struct_name = f"Apex Habitat Test Salary Structure {self.company}"
-        existing_struct = frappe.db.get_value(
-            "Salary Structure",
-            {"name": struct_name, "company": self.company},
-        )
-        if not existing_struct:
+        if not frappe.db.get_value("Salary Structure", {"name": struct_name, "docstatus": 1}):
             struct = frappe.get_doc({
                 "doctype": "Salary Structure",
                 "name": struct_name,
                 "salary_structure_name": struct_name,
                 "company": self.company,
+                "currency": "SAR",
                 "is_active": "Yes",
                 "payroll_frequency": "Monthly",
+                "earnings": [{"salary_component": earn_component, "amount": 1000.0}],
             })
-            try:
-                struct.insert(ignore_permissions=True)
-                struct.submit()
-            except Exception:
-                # [#7p7lb1]
-                pass
+            struct.insert(ignore_permissions=True)
+            struct.submit()
 
-        # [#65o794]
         if not frappe.db.exists(
             "Salary Structure Assignment",
-            {"employee": self.employee, "salary_structure": struct_name},
+            {"employee": self.employee, "docstatus": 1},
         ):
-            try:
-                assignment = frappe.get_doc({
-                    "doctype": "Salary Structure Assignment",
-                    "employee": self.employee,
-                    "salary_structure": struct_name,
-                    "from_date": "2026-01-01",
-                    "company": self.company,
-                    "base": 1000.0,
-                })
-                assignment.insert(ignore_permissions=True)
-                assignment.submit()
-            except Exception:
-                # [#gkpgth]
-                pass
+            assignment = frappe.get_doc({
+                "doctype": "Salary Structure Assignment",
+                "employee": self.employee,
+                "salary_structure": struct_name,
+                "from_date": "2026-01-01",
+                "company": self.company,
+                "currency": "SAR",
+                "base": 1000.0,
+            })
+            assignment.insert(ignore_permissions=True)
+            assignment.submit()
 
     def test_custody_damage_no_additional_salary_without_salary_component(self):
         # [#t393jb]
