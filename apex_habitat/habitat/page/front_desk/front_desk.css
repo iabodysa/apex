@@ -1,31 +1,36 @@
 /* [#7jjeem] */
 
+/* Inherit document direction so the floor→room→bed board mirrors in Arabic. */
 .fd-board {
-	padding: 8px 4px 32px;
+	padding-block: 8px 32px;
+	padding-inline: 4px;
+	direction: inherit;
 }
 
 .fd-empty {
-	padding: 48px 16px;
+	padding-block: 48px;
+	padding-inline: 16px;
 	text-align: center;
 	font-size: 15px;
 }
 
 /* [#iu6cwl] */
 .fd-error {
-	padding: 48px 16px;
+	padding-block: 48px;
+	padding-inline: 16px;
 	text-align: center;
 }
 
 .fd-error-msg {
 	font-size: 15px;
 	color: var(--text-color, #1f272e);
-	margin-bottom: 12px;
+	margin-block-end: 12px;
 }
 
 /* [#nt52v9] */
 .fd-loading-label {
 	font-size: 13px;
-	margin-bottom: 12px;
+	margin-block-end: 12px;
 }
 
 .fd-skeleton-rooms {
@@ -72,9 +77,9 @@
 	flex-wrap: wrap;
 	align-items: baseline;
 	gap: 12px;
-	margin-bottom: 16px;
-	padding-bottom: 8px;
-	border-bottom: 1px solid var(--border-color, #d1d8dd);
+	margin-block-end: 16px;
+	padding-block-end: 8px;
+	border-block-end: 1px solid var(--border-color, #d1d8dd);
 }
 
 .fd-summary-title {
@@ -104,7 +109,7 @@
 }
 
 .fd-floor {
-	margin-bottom: 24px;
+	margin-block-end: 24px;
 }
 
 .fd-floor-header {
@@ -113,7 +118,13 @@
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 	color: var(--text-muted, #74808b);
-	margin-bottom: 10px;
+	margin-block-end: 10px;
+}
+
+/* Letter-spacing and uppercasing break Arabic shaping — drop them in RTL. */
+[dir="rtl"] .fd-floor-header {
+	letter-spacing: normal;
+	text-transform: none;
 }
 
 .fd-rooms {
@@ -135,7 +146,7 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: baseline;
-	margin-bottom: 10px;
+	margin-block-end: 10px;
 	gap: 8px;
 }
 
@@ -158,7 +169,8 @@
 /* [#12ykxv] */
 .fd-bed {
 	border-radius: 8px;
-	padding: 12px 10px;
+	padding-block: 12px;
+	padding-inline: 10px;
 	min-height: 84px;
 	display: flex;
 	flex-direction: column;
@@ -187,6 +199,11 @@
 	font-size: 11px;
 	text-transform: uppercase;
 	letter-spacing: 0.03em;
+}
+
+[dir="rtl"] .fd-bed-badge {
+	letter-spacing: normal;
+	text-transform: none;
 }
 
 .fd-bed-occupant {

@@ -14,6 +14,11 @@ from frappe.utils import getdate
 from apex_habitat.habitat.doctype.accommodation_assignment.accommodation_assignment import recalculate_spatial
 from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
+# Checkouts that end the worker's stay in the country/contract — the only reasons
+# that warrant a Salis departure (relocation) transport, mirroring the arrival
+# hand-off direction. An internal/project transfer keeps the worker on site.
+DEPARTURE_REASONS = ("Final Exit", "End of Contract")
+
 
 class AccommodationCheckout(Document):
     pass
@@ -200,3 +205,64 @@ def on_cancel(doc, method=None):
             frappe.db.set_value("Accommodation Bed", doc.bed, "status", "Occupied")
 
         recalculate_spatial(assignment.room, assignment.building)
+
+
+def _build_departure_transport(checkout, assignment):
+    """Construct (not yet inserted) the departure Transport Request for a checkout.
+
+    Modelled as Inter-City Relocation — the Salis transport type that carries a
+    worker manifest and needs no project (the worker is leaving, not heading to a
+    site). The Transport Request Worker child links an Employee only, so a
+    Temporary-Worker checkout (no employee) cannot be manifested and is rejected
+    by the caller before reaching here.
+    """
+    building = assignment.get("building")
+    return frappe.get_doc({
+        "doctype": "Transport Request",
+        "service_line": "Inter-City Relocation",
+        "request_type": "Inter-City Relocation",
+        "accommodation_building": building,
+        "requested_by": frappe.session.user,
+        "source_channel": "Desk",
+        "status": "New",
+        "from_location": frappe.db.get_value("Accommodation Building", building, "building_name") if building else None,
+        "purpose": _("Departure transport for {0} ({1}). Raised from Accommodation Checkout {2}.").format(
+            checkout.employee, checkout.checkout_reason, checkout.name
+        ),
+        "workers": [{"employee": checkout.employee, "pickup_point": building}],
+    })
+
+
+@frappe.whitelist(methods=["POST"])
+def create_departure_transport(checkout):
+    """Offer/raise the departure Transport Request for a Final Exit / End of
+    Contract checkout, back-linking it onto the checkout. Idempotent: returns the
+    already-linked request name if one was raised before."""
+    doc = frappe.get_doc("Accommodation Checkout", checkout)
+    doc.check_permission("write")
+
+    if doc.docstatus != 1:
+        frappe.throw(_("Departure transport can only be raised for a submitted checkout."))
+
+    if doc.checkout_reason not in DEPARTURE_REASONS:
+        frappe.throw(
+            _("Departure transport applies only to a Final Exit or End of Contract checkout.")
+        )
+
+    if doc.departure_transport_request and frappe.db.exists(
+        "Transport Request", doc.departure_transport_request
+    ):
+        return doc.departure_transport_request
+
+    if not doc.employee:
+        frappe.throw(
+            _("A linked Employee is required to raise departure transport (the manifest cannot carry a Temporary Worker).")
+        )
+
+    assignment = frappe.get_doc("Accommodation Assignment", doc.assignment)
+    request = _build_departure_transport(doc, assignment)
+    request.insert(ignore_permissions=True)  # audit-ok — cross-module hand-off on the supervisor's behalf
+
+    doc.db_set("departure_transport_request", request.name)
+    doc.add_comment("Comment", _("Departure Transport Request raised: {0}").format(request.name))
+    return request.name

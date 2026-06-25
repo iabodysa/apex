@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.55.28 — completing a Final Exit or End of Contract resident check-out now offers a one-click Arrange Departure Transport button that raises the relocation transport for that worker and links it back to the check-out (idempotent — asking twice reuses the same request); drivers now get in-app alerts when their own clearance is blocked or their vehicle's compliance is expiring soon; the Fleet Control board's Export CSV now builds the file on the server from the current filters so it holds every vehicle you are permitted to see rather than only the painted rows; the pre-arrival manifest (Arrival Batch) gains its own link on the Housing workspace; and the Front Desk bed board now mirrors cleanly right-to-left in Arabic",
+        "app_name": "apex_habitat",
+        "link": "/app/accommodation-checkout",
+        "creation": "2026-06-25 16:00:00",
+    },
+    {
         "title": "Apex 1.55.27 — labour suppliers can submit a pre-arrival manifest from a public web form (the workers expected at a building on a date, which the accommodation team prepares beds for and reconciles arrivals against); reassigning a vehicle now picks the new driver from a verified, permitted list instead of a free-typed id, so a typo can no longer silently mis-assign; supervisors get a daily digest of their open operations alerts grouped by severity; the operations control board adds compliance-at-risk and stopped-over-threshold counts to its summary; and notification delivery is hardened so enabled alerts send dependably",
         "app_name": "apex_habitat",
         "link": "/arrival-manifest",

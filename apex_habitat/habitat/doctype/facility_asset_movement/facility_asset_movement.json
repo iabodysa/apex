@@ -257,6 +257,7 @@
    "label": "Remarks"
   },
   {
+   "collapsible": 1,
    "fieldname": "facility_asset_movement_sec_system",
    "fieldtype": "Section Break",
    "label": "System"
@@ -285,7 +286,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-09 11:00:00.000000",
+ "modified": "2026-06-25 15:41:32.423354",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Facility Asset Movement",

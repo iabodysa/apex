@@ -7,7 +7,7 @@
  "docstatus": 0,
  "doctype": "Notification",
  "document_type": "Salis Vehicle",
- "enabled": 0,
+ "enabled": 1,
  "event": "Days Before",
  "idx": 0,
  "is_standard": 1,
@@ -16,6 +16,9 @@
  "module": "Salis",
  "name": "Salis - Vehicle Compliance Expiring Soon",
  "recipients": [
+  {
+   "receiver_by_document_field": "current_driver_user"
+  },
   {
    "receiver_by_role": "Fleet Manager"
   },
@@ -26,8 +29,8 @@
    "receiver_by_role": "Government Relations Officer"
   }
  ],
- "send_system_notification": 0,
+ "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Vehicle Compliance Expiring Soon: {{ doc.name }}",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-06-25 15:31:22.728275"
 }

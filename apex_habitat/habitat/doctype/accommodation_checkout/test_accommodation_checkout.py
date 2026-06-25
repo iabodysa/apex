@@ -3,6 +3,11 @@ from frappe.tests.utils import FrappeTestCase
 
 # [#8evoal]
 test_ignore = [
+    "Accommodation Assignment",
+    "Accommodation Bed",
+    "Accommodation Building",
+    "Accommodation Room",
+    "Accommodation Site",
     "Additional Salary",
     "Asset",
     "Asset Movement",
@@ -17,6 +22,7 @@ test_ignore = [
     "Role",
     "Salary Component",
     "Supplier",
+    "Transport Request",
     "User",
 ]
 
@@ -137,3 +143,88 @@ class TestAccommodationCheckout(FrappeTestCase):
         self.assertIn("items", fieldnames,
                       "'items' table field must exist on Custody Damage Assessment")
         self.assertEqual(fieldnames["items"].options, "Custody Damage Item")
+
+    # --- Departure transport hand-off ---
+
+    def _h(self):
+        return frappe.generate_hash(length=4).upper()
+
+    def _fixtures(self):
+        """Real, internally-consistent housing chain + a submitted assignment so a
+        checkout can be created and the departure hand-off exercised end-to-end."""
+        company = frappe.db.get_value("Company", {}) or frappe.get_doc({
+            "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
+            "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
+        cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": company}) \
+            or frappe.db.get_value("Cost Center", {"is_group": 0})
+        site = frappe.get_doc({"doctype": "Accommodation Site",
+                               "site_name": self._h() + self._h()}).insert(ignore_permissions=True).name
+        building = frappe.get_doc({"doctype": "Accommodation Building", "building_name": "B " + self._h(),
+                                   "site": site, "total_capacity": 4, "company": company,
+                                   "default_cost_center": cc}).insert(ignore_permissions=True).name
+        room = frappe.get_doc({"doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+                               "building": building, "room_number": "R" + self._h(), "bed_capacity": 4,
+                               "readiness_status": "Ready"}).insert(ignore_permissions=True).name
+        bed = frappe.get_doc({"doctype": "Accommodation Bed", "naming_series": "BED-.####", "room": room,
+                              "building": building, "bed_code": "B" + self._h(),
+                              "status": "Available"}).insert(ignore_permissions=True).name
+        project = frappe.get_doc({"doctype": "Project",
+                                  "project_name": "P " + self._h()}).insert(ignore_permissions=True).name
+        emp = frappe.get_doc({"doctype": "Employee", "first_name": "E " + self._h(), "company": company,
+                              "gender": "Male", "date_of_birth": "1990-01-01",
+                              "date_of_joining": "2020-01-01"}).insert(ignore_permissions=True).name
+        assignment = frappe.get_doc({"doctype": "Accommodation Assignment", "naming_series": "ACC-ASGN-.YYYY.-.####",
+                                     "employee": emp, "project": project, "building": building, "room": room,
+                                     "bed": bed, "cost_center": cc, "check_in_date": "2026-06-01",
+                                     "assignment_type": "New Assignment"})
+        assignment.submit()
+        return frappe._dict(company=company, building=building, project=project, emp=emp,
+                            assignment=assignment.name)
+
+    def _checkout(self, fx, reason="Final Exit"):
+        doc = frappe.get_doc({"doctype": "Accommodation Checkout", "naming_series": "ACC-CHKOUT-.YYYY.-.####",
+                              "assignment": fx.assignment, "checkout_date": "2026-07-01",
+                              "checkout_reason": reason})
+        doc.submit()
+        return doc
+
+    def test_final_exit_checkout_raises_linked_departure_transport(self):
+        """A Final Exit checkout produces a linked Inter-City Relocation Transport
+        Request carrying the resident employee."""
+        from apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout import (
+            create_departure_transport,
+        )
+        fx = self._fixtures()
+        chk = self._checkout(fx, "Final Exit")
+        tr_name = create_departure_transport(chk.name)
+        self.assertTrue(tr_name)
+
+        chk.reload()
+        self.assertEqual(chk.departure_transport_request, tr_name)
+
+        tr = frappe.get_doc("Transport Request", tr_name)
+        self.assertEqual(tr.service_line, "Inter-City Relocation")
+        self.assertEqual(tr.request_type, "Inter-City Relocation")
+        self.assertEqual(tr.accommodation_building, fx.building)
+        self.assertEqual([w.employee for w in tr.workers], [fx.emp])
+
+    def test_departure_transport_is_idempotent(self):
+        """Calling the hand-off twice returns the same request, not a duplicate."""
+        from apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout import (
+            create_departure_transport,
+        )
+        fx = self._fixtures()
+        chk = self._checkout(fx, "End of Contract")
+        first = create_departure_transport(chk.name)
+        second = create_departure_transport(chk.name)
+        self.assertEqual(first, second)
+
+    def test_non_departure_reason_rejected(self):
+        """An Internal Transfer checkout is not a departure and must be refused."""
+        from apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout import (
+            create_departure_transport,
+        )
+        fx = self._fixtures()
+        chk = self._checkout(fx, "Internal Transfer")
+        with self.assertRaises(frappe.ValidationError):
+            create_departure_transport(chk.name)

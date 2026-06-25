@@ -6,7 +6,7 @@
  "docstatus": 0,
  "doctype": "Notification",
  "document_type": "Driver Clearance",
- "enabled": 0,
+ "enabled": 1,
  "event": "Value Change",
  "idx": 0,
  "is_standard": 1,
@@ -16,15 +16,18 @@
  "name": "Salis - Blocked Driver Clearance",
  "recipients": [
   {
+   "receiver_by_document_field": "driver_user"
+  },
+  {
    "receiver_by_role": "Fleet Manager"
   },
   {
    "receiver_by_role": "Fleet Supervisor"
   }
  ],
- "send_system_notification": 0,
+ "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Driver Clearance Blocked: {{ doc.name }}",
  "value_changed": "status",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-06-25 15:31:22.728275"
 }

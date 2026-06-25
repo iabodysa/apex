@@ -1,0 +1,26 @@
+import frappe
+
+_NOTIFICATIONS = (
+    "Salis - Blocked Driver Clearance",
+    "Salis - Vehicle Compliance Expiring Soon",
+)
+
+
+def execute():
+    # Notification.enabled is in import_file.ignore_values, so migrate preserves the
+    # old DB value and never picks up the JSON enabled flip on already-installed sites;
+    # set it directly here. Idempotent; no-op on fresh installs (JSON ships enabled=1).
+    for name in _NOTIFICATIONS:
+        if not frappe.db.exists("Notification", name):
+            continue
+        current = frappe.db.get_value(
+            "Notification", name, ["enabled", "send_system_notification"], as_dict=True
+        )
+        if current.enabled and current.send_system_notification:
+            continue
+        frappe.db.set_value(
+            "Notification",
+            name,
+            {"enabled": 1, "send_system_notification": 1},
+            update_modified=False,
+        )
