@@ -7,7 +7,7 @@
  "docstatus": 0,
  "doctype": "Notification",
  "document_type": "Custody Issue",
- "enabled": 0,
+ "enabled": 1,
  "event": "Days After",
  "idx": 0,
  "is_standard": 1,
@@ -26,5 +26,5 @@
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Custody Return Overdue: {{ doc.name }}",
- "modified": "2026-06-26 13:00:00.000000"
+ "modified": "2026-06-26 02:25:14.210664"
 }

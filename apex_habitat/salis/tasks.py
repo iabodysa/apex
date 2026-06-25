@@ -530,7 +530,15 @@ def daily_open_alerts_digest() -> None:
 
     from frappe.utils import escape_html, get_url_to_list
 
+    from apex_habitat.apex_core.utils.email_gate import email_enabled
+
     logger = frappe.logger()
+
+    # Master email kill-switch (default OFF): without it the daily send floods
+    # OutgoingEmailError on a site with no outgoing Email Account configured.
+    if not email_enabled():
+        logger.info("daily_open_alerts_digest: email disabled (Habitat Settings); skipped.")
+        return
 
     by_supervisor: dict[str, list] = defaultdict(list)
     start = 0

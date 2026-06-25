@@ -19,6 +19,10 @@ class TestOpenAlertsDigest(FrappeTestCase):
 
     def setUp(self):
         frappe.set_user("Administrator")
+        # The digest is gated behind the master email kill-switch (default OFF).
+        # Turn it ON so the content/bucketing tests below exercise the send path;
+        # the disabled-no-op case re-flips it locally.
+        frappe.db.set_single_value("Habitat Settings", "enable_email_notifications", 1)
         # The job reads every open alert globally, so clear this module's prior
         # rows for a deterministic snapshot (per-test isolation can leak inserts
         # past the savepoint when a side-effect commits).
@@ -78,6 +82,22 @@ class TestOpenAlertsDigest(FrappeTestCase):
         self._alert("Critical", None)
         sent = self._run_capturing_mail()
         self.assertEqual(sent, [])
+
+    def test_no_sendmail_when_email_disabled(self):
+        # With the master kill-switch OFF the digest must short-circuit before any
+        # send — proving it cannot flood OutgoingEmailError on an email-less site.
+        self._alert("Critical", self.sup_a)
+        frappe.db.set_single_value("Habitat Settings", "enable_email_notifications", 0)
+
+        calls = []
+        original = frappe.sendmail
+        frappe.sendmail = lambda **kw: calls.append(kw)
+        try:
+            tasks.daily_open_alerts_digest()
+        finally:
+            frappe.sendmail = original
+
+        self.assertEqual(calls, [], "digest attempted a send while email was disabled")
 
     def test_job_is_registered_in_daily_scheduler(self):
         from apex_habitat import hooks

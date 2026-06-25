@@ -22,6 +22,27 @@ ALERT_DOCTYPE = "Operations Alert"
 _MESSAGE_MAX = 2000
 
 
+def _project_supervisor_for_vehicle(vehicle: str | None) -> str | None:
+    """Resolve the vehicle's project supervisor User, or None.
+
+    Denormalised onto the alert so the Critical-alert Notification can reach the
+    specific project's supervisor (its ``receiver_by_document_field`` cannot
+    follow the vehicle -> project -> supervisor chain declaratively). Office-scoped
+    alerts pass no vehicle and correctly resolve None — the notification condition
+    requires ``project_supervisor`` and skips them. Never raises: a lookup failure
+    must not abort the calling job.
+    """
+    if not vehicle:
+        return None
+    try:
+        from apex_habitat.salis.permissions import _project_supervisor
+
+        project = frappe.db.get_value("Salis Vehicle", vehicle, "project")
+        return _project_supervisor(project)
+    except Exception:
+        return None
+
+
 def insert_operations_alert(
     alert_type: str,
     severity: str,
@@ -49,6 +70,7 @@ def insert_operations_alert(
                 "raised_on": now_datetime(),
                 "vehicle": vehicle,
                 "driver": driver,
+                "project_supervisor": _project_supervisor_for_vehicle(vehicle),
                 "message": (message or "")[:_MESSAGE_MAX],
             }
         )

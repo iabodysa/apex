@@ -1,0 +1,27 @@
+import frappe
+
+_NOTIFICATION = "Habitat - Custody Return Overdue"
+
+
+def execute():
+    # Notification.enabled is in import_file.ignore_values, so migrate preserves the
+    # old DB value and never picks up the JSON enabled flip on already-installed sites;
+    # set it directly here. Idempotent; no-op on fresh installs (JSON ships enabled=1).
+    if not frappe.db.exists("Notification", _NOTIFICATION):
+        return
+
+    current = frappe.db.get_value(
+        "Notification",
+        _NOTIFICATION,
+        ["enabled", "send_system_notification"],
+        as_dict=True,
+    )
+    if current.enabled and current.send_system_notification:
+        return
+
+    frappe.db.set_value(
+        "Notification",
+        _NOTIFICATION,
+        {"enabled": 1, "send_system_notification": 1},
+        update_modified=False,
+    )

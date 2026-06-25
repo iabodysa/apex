@@ -15,6 +15,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.apex_core.utils.operations_alert import insert_operations_alert
+from apex_habitat.tests._helpers import _user
 
 APP = frappe.get_app_path("apex_habitat")
 
@@ -78,3 +79,67 @@ class TestInsertOperationsAlert(FrappeTestCase):
         self.assertTrue(name)
         self.addCleanup(frappe.delete_doc, "Operations Alert", name, force=True, ignore_permissions=True)
         self.assertLessEqual(len(frappe.db.get_value("Operations Alert", name, "message")), 2000)
+
+
+class TestInsertOperationsAlertResolvesSupervisor(FrappeTestCase):
+    """The shared helper must denormalise project_supervisor onto the alert, or the
+    enabled Critical-alert Notification (receiver_by_document_field: project_supervisor)
+    fires with an empty recipient. Proves both directions: a vehicle whose project has
+    a supervisor resolves that real User; no vehicle stays None."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.project = frappe.db.get_value("Project", {"project_name": "OA Supervisor Probe"}, "name") or (
+            frappe.get_doc({"doctype": "Project", "project_name": "OA Supervisor Probe"})
+            .insert(ignore_permissions=True)
+            .name
+        )
+        cls.sup = _user("oa_sup_probe@example.com", "Fleet Supervisor")
+        if not frappe.db.exists(
+            "User Permission", {"allow": "Project", "for_value": cls.project, "user": cls.sup}
+        ):
+            frappe.get_doc(
+                {"doctype": "User Permission", "allow": "Project",
+                 "for_value": cls.project, "user": cls.sup}
+            ).insert(ignore_permissions=True)
+        cls.vehicle = (
+            frappe.get_doc(
+                {"doctype": "Salis Vehicle",
+                 "plate_number": "OA-PROBE-" + frappe.generate_hash(length=4),
+                 "project": cls.project}
+            )
+            .insert(ignore_permissions=True)
+            .name
+        )
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def test_supervisor_resolved_from_vehicle_project(self):
+        name = insert_operations_alert(
+            alert_type="Excessive Topup",
+            severity="Critical",
+            message="supervisor-resolution probe",
+            vehicle=self.vehicle,
+        )
+        self.assertTrue(name)
+        self.addCleanup(frappe.delete_doc, "Operations Alert", name, force=True, ignore_permissions=True)
+        self.assertEqual(
+            frappe.db.get_value("Operations Alert", name, "project_supervisor"),
+            self.sup,
+            "critical alert from a project-vehicle must carry that project's supervisor",
+        )
+
+    def test_no_vehicle_leaves_supervisor_empty(self):
+        # Office-scoped alerts pass no vehicle; the notification condition requires
+        # project_supervisor and correctly skips them — never an empty-recipient send.
+        name = insert_operations_alert(
+            alert_type="Unsettled Rental",
+            severity="Warning",
+            message="no-vehicle probe",
+        )
+        self.assertTrue(name)
+        self.addCleanup(frappe.delete_doc, "Operations Alert", name, force=True, ignore_permissions=True)
+        self.assertFalse(frappe.db.get_value("Operations Alert", name, "project_supervisor"))
