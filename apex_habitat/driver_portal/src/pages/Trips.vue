@@ -64,6 +64,17 @@
         </div>
       </router-link>
 
+      <!-- One-tap navigation to the trip's first stop (same deep-link as Route). -->
+      <a
+        v-if="trip.google_maps_url"
+        :href="trip.google_maps_url"
+        target="_blank"
+        rel="noopener"
+        class="text-primary text-sm inline-flex items-center gap-1 mt-2"
+      >
+        <Icon name="map-pin" :size="14" /> {{ t("route.openMap") }}
+      </a>
+
       <!-- Execution actions (today only): start → complete, writing a Trip Start Log. -->
       <div v-if="tab === 'today'" class="mt-3 flex items-center gap-2">
         <span v-if="trip.trip_log_status === 'Completed'" class="pill pill-success">

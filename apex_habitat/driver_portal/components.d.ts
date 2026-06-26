@@ -12,6 +12,7 @@ declare module 'vue' {
     EmptyState: typeof import('./src/components/EmptyState.vue')['default']
     ErrorState: typeof import('./src/components/ErrorState.vue')['default']
     Icon: typeof import('./src/components/Icon.vue')['default']
+    InstallHint: typeof import('./src/components/InstallHint.vue')['default']
     LangToggle: typeof import('./src/components/LangToggle.vue')['default']
     LoadingState: typeof import('./src/components/LoadingState.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

@@ -33,6 +33,15 @@
 
     <!-- Request fuel -->
     <section class="card card-pad space-y-4">
+      <!-- What this request is: a Standard (quota-consuming) request, plus the
+           approval-threshold note so the driver knows when approval kicks in. -->
+      <div class="fuel-note">
+        <p class="font-semibold leading-tight">{{ t("fuel.typeStandard") }}</p>
+        <p class="text-sm text-muted mt-0.5">{{ t("fuel.typeStandardHint") }}</p>
+        <p v-if="thresholdNote" class="text-sm text-muted mt-1">
+          <Icon name="alert" :size="14" class="text-warning shrink-0 inline" /> {{ thresholdNote }}
+        </p>
+      </div>
       <div>
         <label class="field-label" for="fuel-litres">{{ t("fuel.litres") }}</label>
         <input
@@ -125,6 +134,15 @@ function submit() {
 
 const quotaRow = computed(() => (quota.data?.has_quota ? quota.data : null));
 
+// Approval-threshold copy: server returns the Salis Settings litre threshold on
+// the quota read (present even with no quota). 0/blank means no threshold, so the
+// note is omitted. Litres are locale-shaped to match the rest of the screen.
+const thresholdNote = computed(() => {
+  const lt = quota.data?.approval_threshold_litres;
+  if (!lt || Number(lt) <= 0) return null;
+  return t("fuel.approvalThreshold", { litres: litreText(lt) });
+});
+
 // Quota bar fill: consumed as a % of the monthly allowance, clamped to [0,100]
 // so an over-consumed quota still renders a full (not overflowing) bar.
 const usedPct = computed(() => {
@@ -160,5 +178,10 @@ function statusPill(status) {
   border-radius: 999px;
   background: var(--c-primary, #2563eb);
   transition: width 0.3s ease;
+}
+.fuel-note {
+  padding: 12px;
+  border-radius: var(--radius, 12px);
+  background: color-mix(in srgb, var(--c-mint, #d1fae5) 25%, transparent);
 }
 </style>

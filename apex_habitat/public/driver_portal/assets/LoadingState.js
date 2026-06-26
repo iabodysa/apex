@@ -1,1 +1,1 @@
-import{o as s,g as a,t as o,u as n,s as c}from"./index.js";const r={class:"text-muted text-sm"},_={__name:"LoadingState",props:{label:{type:String,default:""}},setup(t){const{t:e}=c();return(l,i)=>(s(),a("div",r,o(t.label||n(e)("common.loading")),1))}};export{_};
+import{o as a,i as s,u as o,v as n,w as c}from"./index.js";const r={class:"text-muted text-sm"},_={__name:"LoadingState",props:{label:{type:String,default:""}},setup(t){const{t:e}=c();return(l,i)=>(a(),s("div",r,o(t.label||n(e)("common.loading")),1))}};export{_};

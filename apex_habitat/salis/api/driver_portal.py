@@ -345,6 +345,8 @@ def get_my_vehicle():
 		if assignment and assignment.get("start_date")
 		else None
 	)
+	# [#vehmap] last-known site deep-link (derived from the latest trip route — no GPS field)
+	v["last_site_maps_url"] = _vehicle_last_site_maps_url(vehicle)
 	return {"vehicle": v}
 
 
@@ -359,6 +361,7 @@ def my_trips_today():
 		fields=["name", "route_plan", "vehicle", "depart_time", "return_time", "status"],
 		order_by="depart_time asc",
 	)
+	_attach_trip_maps(trips)  # one-tap Maps before _label_trips overwrites route_plan
 	_label_trips(trips)  # cards show plate / route name, not raw link ids
 	_attach_trip_log_state(trips, driver)  # cards show started/completed without a second call
 	return trips
@@ -389,6 +392,7 @@ def my_trips_recent(days=30, limit=50):
 		order_by="trip_date desc, depart_time desc",
 		limit=frappe.utils.cint(limit) or 50,
 	)
+	_attach_trip_maps(trips)  # one-tap Maps before _label_trips overwrites route_plan
 	_label_trips(trips)  # cards show plate / route name, not raw link ids
 	for t in trips:
 		t["trip_date"] = frappe.utils.cstr(t["trip_date"]) if t.get("trip_date") else None
@@ -418,6 +422,53 @@ def _label_trips(trips):
 			t["vehicle"] = plates.get(t["vehicle"], t["vehicle"])
 		if t.get("route_plan"):
 			t["route_plan"] = routes.get(t["route_plan"], t["route_plan"])
+
+
+def _route_first_stop_maps_url(route_plan):
+	"""The Google Maps deep-link for a route plan's first mapped stop, or None.
+
+	Reuses masar's read-only ``_ordered_stops`` so the URL is the exact one the
+	Route screen already renders. Returns the first stop pickup that carries a
+	``google_maps_url`` (the trip's first navigable destination), so a Trips/
+	next-trip card can offer the same one-tap navigation. Read-only."""
+	if not route_plan:
+		return None
+	from apex_habitat.salis.api import masar
+
+	for stop in masar._ordered_stops(route_plan):  # read-only reuse; masar unedited
+		pickup = stop.get("pickup") or {}
+		if pickup.get("google_maps_url"):
+			return pickup["google_maps_url"]
+	return None
+
+
+def _vehicle_last_site_maps_url(vehicle):
+	"""The Maps deep-link for the vehicle's last-known site, or None.
+
+	Salis Vehicle records no GPS/coordinate field, so "last-known site" is derived
+	from where the vehicle was last operated: the most recent Dispatch Trip's route
+	first mapped stop. Reuses ``_route_first_stop_maps_url`` (read-only); returns None
+	when the vehicle has no trip with a mappable route, so the card omits the link."""
+	if not vehicle:
+		return None
+	rp = frappe.db.get_value(
+		"Dispatch Trip",
+		{"vehicle": vehicle, "route_plan": ["is", "set"]},
+		"route_plan",
+		order_by="trip_date desc, creation desc",
+	)
+	return _route_first_stop_maps_url(rp)
+
+
+def _attach_trip_maps(trips):
+	"""Stamp each trip with ``google_maps_url`` (its first mapped stop's deep-link).
+	Must run BEFORE ``_label_trips`` overwrites ``route_plan`` with the route name."""
+	cache = {}
+	for t in trips:
+		rp = t.get("route_plan")
+		if rp and rp not in cache:
+			cache[rp] = _route_first_stop_maps_url(rp)
+		t["google_maps_url"] = cache.get(rp)
 
 
 def _attach_trip_log_state(trips, driver):
@@ -650,6 +701,7 @@ def _next_trip_today(driver):
 	if not trips:
 		return None
 	trip = trips[0]
+	_attach_trip_maps([trip])  # one-tap Maps before _label_trips overwrites route_plan
 	_label_trips([trip])
 	log = frappe.db.get_value(
 		"Trip Start Log",
@@ -879,8 +931,13 @@ def my_fuel_quota(vehicle=None):
 
 	if not vehicle or not _vehicle_bound_to_driver(driver, vehicle):
 		vehicle = _bound_vehicle(driver)
+	# Approval threshold (litres) so the Fuel screen can state which requests need
+	# approval; 0/blank on the Single means "no threshold" (every request auto-flows).
+	threshold = frappe.utils.flt(
+		frappe.db.get_single_value("Salis Settings", "fuel_request_approval_threshold_litres")
+	)
 	if not vehicle:
-		return {"has_quota": False, "vehicle": None}
+		return {"has_quota": False, "vehicle": None, "approval_threshold_litres": threshold}
 
 	period_month = frappe.utils.today()[:7]
 	row = frappe.db.get_value(
@@ -890,7 +947,12 @@ def my_fuel_quota(vehicle=None):
 		as_dict=True,
 	)
 	if not row:
-		return {"has_quota": False, "vehicle": vehicle, "period_month": period_month}
+		return {
+			"has_quota": False,
+			"vehicle": vehicle,
+			"period_month": period_month,
+			"approval_threshold_litres": threshold,
+		}
 
 	monthly = frappe.utils.flt(row.get("monthly_litres"))
 	consumed = frappe.utils.flt(row.get("consumed_litres"))
@@ -903,6 +965,7 @@ def my_fuel_quota(vehicle=None):
 		"consumed_litres": consumed,
 		"remaining_litres": max(monthly - consumed, 0),
 		"status": row.get("status"),
+		"approval_threshold_litres": threshold,
 	}
 
 

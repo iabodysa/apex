@@ -65,7 +65,14 @@
         </div>
       </header>
 
-      <main class="flex-1 px-4 pt-5 pb-28">
+      <main class="flex-1 px-4 pt-5 pb-28 space-y-5">
+        <!-- Offline banner: writes are blocked, reads fall back to cached data. -->
+        <div v-if="!online" class="offline-banner">
+          <Icon name="alert" :size="16" class="shrink-0" />
+          <span>{{ t("offline.banner") }}</span>
+        </div>
+        <!-- First-visit Add-to-Home-Screen hint (self-hides when installed/dismissed). -->
+        <InstallHint />
         <router-view :ctx="ctx.data" />
       </main>
 
@@ -112,8 +119,10 @@ import Icon from "./components/Icon.vue";
 import Brand from "./components/Brand.vue";
 import LangToggle from "./components/LangToggle.vue";
 import Toast from "./components/Toast.vue";
+import InstallHint from "./components/InstallHint.vue";
 import { useI18n } from "./i18n";
 import { clearToasts } from "./toast";
+import { online } from "./cache";
 
 const { t, dir } = useI18n();
 
@@ -186,3 +195,17 @@ const unlinkedCtx = computed(() => {
   };
 });
 </script>
+
+<style scoped>
+.offline-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius, 12px);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: var(--c-warning-bg, #fef3c7);
+  color: var(--c-warning, #92400e);
+}
+</style>

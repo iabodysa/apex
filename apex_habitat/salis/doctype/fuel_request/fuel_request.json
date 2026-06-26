@@ -48,6 +48,7 @@
   "fuel_request_sec_actors_col1",
   "approved_by",
   "fuel_request_sec_system",
+  "driver_user",
   "naming_series",
   "amended_from",
   "fuel_request_sec_system_col1",
@@ -323,6 +324,16 @@
    "collapsible": 1
   },
   {
+   "description": "The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",
+   "fetch_from": "driver.driver_user",
+   "fetch_if_empty": 1,
+   "fieldname": "driver_user",
+   "fieldtype": "Link",
+   "label": "Driver User",
+   "options": "User",
+   "read_only": 1
+  },
+  {
    "default": "FR-.######",
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -385,7 +396,7 @@
    "link_fieldname": "fuel_request"
   }
  ],
- "modified": "2026-06-11 12:00:00.000000",
+ "modified": "2026-06-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Request",

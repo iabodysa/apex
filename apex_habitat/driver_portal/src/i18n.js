@@ -18,6 +18,17 @@ const messages = {
       staff: "Staff",
       goToApp: "Go to the main app",
     },
+    install: {
+      title: "Add to Home Screen",
+      body: "Install Salis Driver for quick, full-screen access.",
+      manual: "Tap Share, then “Add to Home Screen”.",
+      add: "Install",
+      dismiss: "Not now",
+    },
+    offline: {
+      banner: "You're offline. Showing saved data; changes are paused.",
+      stale: "Offline — showing last saved data.",
+    },
     lang: {
       label: "Language",
       en: "EN",
@@ -156,6 +167,7 @@ const messages = {
       problemSent: "Problem reported",
       cancel: "Cancel",
       send: "Send",
+      lastSite: "Last-known site",
     },
     attendance: {
       title: "Daily Attendance",
@@ -179,6 +191,8 @@ const messages = {
       history: "This month",
       historyEmpty: "No attendance recorded this month yet.",
       noTime: "—",
+      photo: "Shift photo",
+      photoAttached: "Photo attached",
     },
     trips: {
       title: "My Trips Today",
@@ -201,6 +215,9 @@ const messages = {
       placeholder: "e.g. 40",
       submit: "Submit Request",
       submitted: "Submitted: {name}",
+      typeStandard: "Standard fuel request",
+      typeStandardHint: "This creates a standard request that draws on your monthly quota.",
+      approvalThreshold: "Requests over {litres} need approval.",
       quota: "This month's quota",
       quotaAllowance: "Allowance",
       quotaConsumed: "Consumed",
@@ -263,6 +280,17 @@ const messages = {
       driverPortal: "بوابة السائق",
       staff: "موظف",
       goToApp: "الذهاب إلى التطبيق الرئيسي",
+    },
+    install: {
+      title: "إضافة إلى الشاشة الرئيسية",
+      body: "ثبّت تطبيق سائق سالس للوصول السريع بملء الشاشة.",
+      manual: "اضغط على مشاركة، ثم «إضافة إلى الشاشة الرئيسية».",
+      add: "تثبيت",
+      dismiss: "ليس الآن",
+    },
+    offline: {
+      banner: "أنت غير متصل. تُعرض بيانات محفوظة، وتم إيقاف التغييرات مؤقتاً.",
+      stale: "غير متصل — تُعرض آخر بيانات محفوظة.",
     },
     lang: {
       label: "اللغة",
@@ -402,6 +430,7 @@ const messages = {
       problemSent: "تم الإبلاغ عن المشكلة",
       cancel: "إلغاء",
       send: "إرسال",
+      lastSite: "آخر موقع معروف",
     },
     attendance: {
       title: "الحضور اليومي",
@@ -425,6 +454,8 @@ const messages = {
       history: "هذا الشهر",
       historyEmpty: "لا يوجد حضور مسجَّل هذا الشهر بعد.",
       noTime: "—",
+      photo: "صورة الوردية",
+      photoAttached: "تم إرفاق الصورة",
     },
     trips: {
       title: "رحلاتي اليوم",
@@ -447,6 +478,9 @@ const messages = {
       placeholder: "مثال: 40",
       submit: "إرسال الطلب",
       submitted: "تم الإرسال: {name}",
+      typeStandard: "طلب وقود قياسي",
+      typeStandardHint: "يُنشئ هذا طلباً قياسياً يُخصم من حصتك الشهرية.",
+      approvalThreshold: "الطلبات التي تتجاوز {litres} تحتاج إلى موافقة.",
       quota: "حصة هذا الشهر",
       quotaAllowance: "المخصص",
       quotaConsumed: "المستهلك",

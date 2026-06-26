@@ -2,8 +2,17 @@
   "name": "Salis Driver",
   "short_name": "Driver",
   "start_url": "/driver",
+  "scope": "/driver",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#f9fafb",
   "theme_color": "#00844E",
-  "icons": []
+  "icons": [
+    {
+      "src": "/assets/apex_habitat/driver_portal/afmco-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }

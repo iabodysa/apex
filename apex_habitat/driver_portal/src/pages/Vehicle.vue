@@ -76,7 +76,7 @@
       </section>
 
       <!-- Assignment: where the vehicle belongs + since when -->
-      <section v-if="v.project || v.assignment_start" class="card card-pad">
+      <section v-if="v.project || v.assignment_start || v.last_site_maps_url" class="card card-pad">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
           {{ t("home.myVehicle") }}
         </h3>
@@ -90,6 +90,19 @@
             <Icon name="calendar" :size="18" class="text-primary shrink-0" />
             <dt class="text-muted">{{ t("vehicle.assignmentStart") }}</dt>
             <dd class="ms-auto font-semibold"><bdi>{{ v.assignment_start }}</bdi></dd>
+          </div>
+          <!-- Last-known site (derived from the latest trip route): one-tap Maps. -->
+          <div v-if="v.last_site_maps_url" class="flex items-center gap-2">
+            <Icon name="map-pin" :size="18" class="text-primary shrink-0" />
+            <dt class="text-muted">{{ t("vehicle.lastSite") }}</dt>
+            <a
+              :href="v.last_site_maps_url"
+              target="_blank"
+              rel="noopener"
+              class="ms-auto text-primary font-semibold inline-flex items-center gap-1"
+            >
+              <Icon name="external" :size="14" /> {{ t("route.openMap") }}
+            </a>
           </div>
         </dl>
       </section>

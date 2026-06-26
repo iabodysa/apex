@@ -1,5 +1,12 @@
 <template>
   <div class="space-y-5">
+    <!-- Stale-data note: shown only when the live "today" read failed and we're
+         rendering the last-known cached snapshot (offline). -->
+    <div v-if="isStale" class="stale-note">
+      <Icon name="alert" :size="14" class="shrink-0" />
+      <span>{{ t("offline.stale") }}</span>
+    </div>
+
     <!-- Driver identity (compact). -->
     <section class="card card-pad">
       <div class="flex items-center gap-3">
@@ -79,6 +86,16 @@
             {{ t("home.viewTrip") }} <Icon name="chevron" :size="14" />
           </router-link>
         </div>
+        <!-- One-tap navigation to the next trip's first stop (same deep-link as Route). -->
+        <a
+          v-if="nextTrip.google_maps_url"
+          :href="nextTrip.google_maps_url"
+          target="_blank"
+          rel="noopener"
+          class="text-primary text-sm inline-flex items-center gap-1 mt-2"
+        >
+          <Icon name="map-pin" :size="14" /> {{ t("route.openMap") }}
+        </a>
       </template>
       <p v-else class="text-sm text-muted">{{ t("home.noTripToday") }}</p>
     </section>
@@ -124,10 +141,11 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import { useI18n } from "../i18n";
+import { cacheGet, cacheSet } from "../cache";
 
 const { t, n, fmtTime } = useI18n();
 
@@ -146,11 +164,23 @@ const statusPill = computed(() => {
 
 // One composite "today" read (attendance + next trip + license + vehicle/clearance
 // flags) so the dashboard paints in a single round-trip. Server-computed, no math.
+// The last good payload is cached so a network drop renders stale-but-labelled
+// data (see staleToday) instead of an empty dashboard.
+const CACHE_KEY = "get_my_today";
+const staleToday = ref(null); // last-known payload, shown only when the live read fails
 const today = createResource({
   url: "apex_habitat.salis.api.driver_portal.get_my_today",
   auto: true,
+  onSuccess: (r) => { staleToday.value = null; cacheSet(CACHE_KEY, r); },
+  onError: () => {
+    const cached = cacheGet(CACHE_KEY);
+    if (cached) staleToday.value = cached;
+  },
 });
-const td = computed(() => today.data || {});
+// Live data when present; otherwise the cached snapshot (offline). td drives the UI.
+const td = computed(() => today.data || staleToday.value?.data || {});
+// True while showing cached data because the live read failed — drives the label.
+const isStale = computed(() => !today.data && !!staleToday.value);
 
 // Native Notification Log rows for this user (identity-scoped server-side).
 const notes = createResource({
@@ -258,3 +288,17 @@ const actions = [
   },
 ];
 </script>
+
+<style scoped>
+.stale-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius, 12px);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: var(--c-warning-bg, #fef3c7);
+  color: var(--c-warning, #92400e);
+}
+</style>

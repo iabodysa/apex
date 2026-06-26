@@ -1231,6 +1231,7 @@ Fuel Reconciliation,مطابقة الوقود
 Fuel Request,طلب وقود
 Fuel Request Approval Threshold (Litres),حد اعتماد طلب الوقود (لترات)
 Fuel Request Approval Threshold cannot be negative.,لا يمكن أن يكون حد اعتماد طلب الوقود سالباً.
+Fuel Request Decision:,قرار طلب الوقود:
 Fuel Request Pending Max Days,الحد الأقصى لأيام انتظار طلب الوقود
 Fuel Requests Approved This Month,طلبات الوقود المعتمدة هذا الشهر
 Fuel Requests by Status,طلبات الوقود حسب الحالة
@@ -3025,6 +3026,7 @@ Trip Fulfilment Rate,معدل تنفيذ الرحلات
 Trip Scheduled: {{ doc.name }},تمت جدولة الرحلة: {{ doc.name }}
 Trip Start Log,سجل بدء الرحلة
 Trip Subject,موضوع الرحلة
+Trip Tomorrow:,رحلة الغد:
 Trip fulfilment ledger. Maintained automatically by the system when a Dispatch Trip is completed and not edited manually.,دفتر تنفيذ الرحلات. يُحدّثه النظام آلياً عند اكتمال رحلة تشغيل، ولا يُحرّر يدوياً.
 Trip not found.,الرحلة غير موجودة.
 Trip {0} completed; odometer {1}.,اكتملت الرحلة {0}؛ عداد المسافة {1}.
@@ -3251,11 +3253,13 @@ You cannot approve or pay a Payment Request you raised; a different Finance appr
 You cannot {0} a fuel request you raised yourself (segregation of duties).,لا يمكنك {0} طلب وقود أنشأته بنفسك (الفصل بين المهام).
 You don't have any building assigned. Ask an administrator to grant you a building.,لا يوجد لديك أي مبنى مُسند. اطلب من المسؤول منحك مبنى.
 You don't have permission to view this building.,ليس لديك صلاحية لعرض هذا المبنى.
+You have a trip assigned for tomorrow,لديك رحلة مجدولة غدًا
 You have no fleet project assigned,لا يوجد مشروع أسطول مُسنَد إليك
 You may only handle boarding for your own trips.,لا يمكنك إدارة الصعود إلا لرحلاتك الخاصة.
 Your Name (Optional),اسمك (اختياري)
 Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.
 Your arrival manifest was submitted. The accommodation team will reconcile arrivals against it on the expected date.,تم إرسال بيان الوصول الخاص بك. سيقوم فريق السكن بمطابقة الوصول الفعلي مع البيان في التاريخ المتوقع.
+Your fuel request has been decided,تم البت في طلب الوقود الخاص بك
 Your incident report was submitted. A supervisor will review and confirm it.,تم إرسال بلاغ الحادثة. سيقوم المشرف بمراجعته وتأكيده.
 Your licence isn't due for renewal yet.,رخصتك لا تستحق التجديد بعد.
 Your request has been submitted. Save your tracking code shown below to follow up with your supervisor.,تم تقديم طلبك. احفظ رمز التتبع أدناه للمتابعة مع مشرفك.

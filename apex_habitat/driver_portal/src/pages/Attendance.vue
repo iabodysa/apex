@@ -43,9 +43,29 @@
     <!-- Actions: each button reflects the current state — no blind re-submit. -->
     <section class="card card-pad space-y-3">
       <p class="text-sm text-soft">{{ t("attendance.hint") }}</p>
+
+      <!-- Optional shift photo: camera-friendly on a phone, uploaded then stamped
+           on the attendance record. Hidden once the shift is done. -->
+      <div v-if="!state.checked_out">
+        <label class="field-label" for="att-photo">{{ t("attendance.photo") }}</label>
+        <input
+          id="att-photo"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          class="input"
+          :disabled="loading || uploading"
+          @change="onPhoto"
+        />
+        <p v-if="uploading" class="mt-1 text-xs text-muted">{{ t("common.loading") }}</p>
+        <p v-else-if="photoName" class="mt-1 text-xs text-success">
+          {{ t("attendance.photoAttached") }}: {{ photoName }}
+        </p>
+      </div>
+
       <button
         class="btn btn-primary"
-        :disabled="loading || today.loading || state.checked_in"
+        :disabled="loading || uploading || today.loading || state.checked_in"
         @click="doCheckIn()"
       >
         <Icon name="calendar" :size="20" />
@@ -53,7 +73,7 @@
       </button>
       <button
         class="btn btn-dark"
-        :disabled="loading || today.loading || !state.checked_in || state.checked_out"
+        :disabled="loading || uploading || today.loading || !state.checked_in || state.checked_out"
         @click="doCheckOut()"
       >
         <Icon name="calendar" :size="20" />
@@ -101,12 +121,38 @@ import Skeleton from "../components/Skeleton.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
+import { uploadPrivateFile } from "../upload";
 
 const { t, fmtTime } = useI18n();
 
 // On-load fetch error only; action feedback goes through transient toasts.
 const err = ref("");
 const loading = ref(false);
+
+// Optional shift photo: uploaded first (its File url kept), then passed to the
+// next check-in/out so it lands in Driver Attendance.images. Cleared after use.
+const photoUrl = ref(null);
+const photoName = ref("");
+const uploading = ref(false);
+
+async function onPhoto(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  uploading.value = true;
+  try {
+    photoUrl.value = await uploadPrivateFile(file);
+    photoName.value = photoUrl.value ? file.name : "";
+  } catch (_e) {
+    pushToast(t("common.error"), "err");
+  } finally {
+    uploading.value = false;
+  }
+}
+
+function clearPhoto() {
+  photoUrl.value = null;
+  photoName.value = "";
+}
 
 // Single reactive source of truth for today's attendance. Seeded by the
 // on-load fetch, then mutated in place by each check-in/out response so the
@@ -147,32 +193,32 @@ const today = createResource({
 // single action; the backend also refuses a check_out at/before check_in.
 const checkin = createResource({
   url: "apex_habitat.salis.api.driver_portal.driver_check_in",
-  onSuccess: (r) => { apply(r); pushToast(t("attendance.checkInDone"), "ok"); history.reload(); },
+  onSuccess: (r) => { apply(r); clearPhoto(); pushToast(t("attendance.checkInDone"), "ok"); history.reload(); },
   onError: (e) => { pushToast(e.messages?.[0] || t("common.error"), "err"); },
 });
 const checkout = createResource({
   url: "apex_habitat.salis.api.driver_portal.driver_check_out",
-  onSuccess: (r) => { apply(r); pushToast(t("attendance.checkOutDone"), "ok"); history.reload(); },
+  onSuccess: (r) => { apply(r); clearPhoto(); pushToast(t("attendance.checkOutDone"), "ok"); history.reload(); },
   onError: (e) => { pushToast(e.messages?.[0] || t("common.error"), "err"); },
 });
 
 // Guarded submitters: set `loading` for the whole request so no second tap (on
 // either button) can fire while one is in flight.
 async function doCheckIn() {
-  if (loading.value || state.checked_in) return;
+  if (loading.value || uploading.value || state.checked_in) return;
   loading.value = true;
   try {
-    await checkin.submit();
+    await checkin.submit({ photo: photoUrl.value });
   } finally {
     loading.value = false;
   }
 }
 async function doCheckOut() {
   // Only act on a real prior check-in, and never when already checked out.
-  if (loading.value || !state.checked_in || state.checked_out) return;
+  if (loading.value || uploading.value || !state.checked_in || state.checked_out) return;
   loading.value = true;
   try {
-    await checkout.submit();
+    await checkout.submit({ photo: photoUrl.value });
   } finally {
     loading.value = false;
   }
