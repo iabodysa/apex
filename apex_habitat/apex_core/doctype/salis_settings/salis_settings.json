@@ -20,6 +20,12 @@
   "fuel_pending_max_days",
   "salis_settings_sec_portal",
   "enable_driver_portal",
+  "salis_settings_sec_web_push",
+  "enable_web_push",
+  "web_push_vapid_subject",
+  "salis_settings_web_push_col",
+  "web_push_vapid_public_key",
+  "web_push_vapid_private_key",
   "salis_settings_tab_approvals",
   "salis_settings_sec_approvals",
   "enable_approvals",
@@ -128,6 +134,44 @@
    "label": "Enable Driver Portal"
   },
   {
+   "depends_on": "enable_driver_portal",
+   "fieldname": "salis_settings_sec_web_push",
+   "fieldtype": "Section Break",
+   "label": "Driver Web Push"
+  },
+  {
+   "default": "0",
+   "description": "Send background push notifications (trip assigned, fuel approved) to opted-in driver devices. Requires a VAPID key pair below and the pywebpush package on the server; until both are present every push is a safe no-op.",
+   "fieldname": "enable_web_push",
+   "fieldtype": "Check",
+   "label": "Enable Driver Web Push"
+  },
+  {
+   "depends_on": "enable_web_push",
+   "description": "VAPID 'sub' claim — a mailto: or https: contact the push service can reach (e.g. mailto:ops@yourcompany.com).",
+   "fieldname": "web_push_vapid_subject",
+   "fieldtype": "Data",
+   "label": "VAPID Subject"
+  },
+  {
+   "fieldname": "salis_settings_web_push_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "enable_web_push",
+   "description": "VAPID public key (base64url). Handed to the browser to subscribe; safe to expose.",
+   "fieldname": "web_push_vapid_public_key",
+   "fieldtype": "Small Text",
+   "label": "VAPID Public Key"
+  },
+  {
+   "depends_on": "enable_web_push",
+   "description": "VAPID private key. Secret — stored encrypted, never exposed to the client.",
+   "fieldname": "web_push_vapid_private_key",
+   "fieldtype": "Password",
+   "label": "VAPID Private Key"
+  },
+  {
    "fieldname": "salis_settings_tab_approvals",
    "fieldtype": "Tab Break",
    "label": "Approvals"
@@ -226,7 +270,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-16 14:00:00.000000",
+ "modified": "2026-06-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

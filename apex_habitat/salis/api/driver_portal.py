@@ -1865,3 +1865,98 @@ def get_my_notifications(limit=20):
 		r["body"] = frappe.utils.strip_html_tags(r.get("email_content") or "").strip() or None
 		r.pop("email_content", None)
 	return rows
+
+
+@frappe.whitelist()
+def get_push_config():
+	"""Web Push opt-in config for the SPA (read).
+
+	Identity-scoped: only a linked driver behind an enabled portal gets here. Returns
+	whether background push is configured (the operator enabled it AND a VAPID key pair
+	is present) and, when so, the PUBLIC VAPID key the browser subscribes with. The
+	private key is never exposed. ``subscribed`` reports whether this user already has
+	an enabled device, so the SPA shows the right opt-in/opt-out state.
+
+	When push is unconfigured this is a friendly ``{"enabled": False}`` (never a 403),
+	so the SPA simply hides the opt-in — the no-op-until-wired contract end to end."""
+	_require_enabled()
+	driver = _resolve_driver()
+	from apex_habitat.salis.api import web_push
+
+	key = web_push.public_key()
+	if not key:
+		return {"enabled": False, "subscribed": False}
+	return {
+		"enabled": True,
+		"vapid_public_key": key,
+		"subscribed": bool(
+			frappe.db.exists(
+				"Driver Push Subscription",
+				{"driver": driver, "user": frappe.session.user, "enabled": 1},
+			)
+		),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
+	"""Store (or refresh) the driver's Web Push subscription on opt-in (write).
+
+	Identity-scoped: the driver is resolved from the session, never client-supplied, so
+	a subscription is always bound to the caller's own driver. The browser passes its
+	PushSubscription endpoint + keys; the endpoint is unique, so a re-subscribe on the
+	same device updates the existing row (re-enabling it and refreshing its keys) rather
+	than duplicating. Refused (403) when push is not configured, so the client cannot
+	bank a subscription against a portal that can never deliver. Returns ``{"name": ...}``.
+	"""
+	_require_enabled()
+	driver = _resolve_driver()
+	endpoint = (endpoint or "").strip()
+	if not endpoint:
+		frappe.throw(_("A push subscription endpoint is required."))
+
+	from apex_habitat.salis.api import web_push
+
+	if not web_push.is_configured():
+		frappe.throw(_("Background notifications are not enabled."), frappe.PermissionError)
+
+	existing = frappe.db.get_value("Driver Push Subscription", {"endpoint": endpoint}, "name")
+	doc = (
+		frappe.get_doc("Driver Push Subscription", existing)
+		if existing
+		else frappe.new_doc("Driver Push Subscription")
+	)
+	doc.update(
+		{
+			"driver": driver,
+			"user": frappe.session.user,
+			"endpoint": endpoint,
+			"p256dh": p256dh,
+			"auth": auth,
+			"user_agent": user_agent,
+			"enabled": 1,
+			"last_seen": frappe.utils.now_datetime(),
+		}
+	)
+	doc.save(ignore_permissions=True)  # audit-ok — driver resolved from session identity
+	return {"name": doc.name}
+
+
+@frappe.whitelist(methods=["POST"])
+def delete_push_subscription(endpoint):
+	"""Opt the driver's device out of Web Push (write).
+
+	Identity-scoped: only the caller's own subscription (matched on driver + endpoint)
+	is disabled, so one driver can never opt another's device out. Disables rather than
+	deletes so the device history is auditable. Idempotent — an unknown endpoint is a
+	silent success. Returns ``{"disabled": bool}``."""
+	_require_enabled()
+	driver = _resolve_driver()
+	endpoint = (endpoint or "").strip()
+	name = frappe.db.get_value(
+		"Driver Push Subscription", {"driver": driver, "endpoint": endpoint}, "name"
+	)
+	if not name:
+		return {"disabled": False}
+	frappe.db.set_value("Driver Push Subscription", name, "enabled", 0)
+	return {"disabled": True}

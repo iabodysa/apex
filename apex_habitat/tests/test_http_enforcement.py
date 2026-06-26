@@ -182,6 +182,23 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "on the caller's own open Trip Start Log. Token/identity-resolved writer.",
     ),
     (
+        "salis/api/driver_portal.py",
+        "save_push_subscription",
+        "Driver portal. The Salis Driver is resolved from the session server-side "
+        "(_resolve_driver, never client-supplied); the Driver Push Subscription is "
+        "bound to the caller's own driver/user and saved with ignore_permissions "
+        "(audit-ok — session identity); refused unless push is configured. "
+        "Token/identity-resolved writer.",
+    ),
+    (
+        "salis/api/driver_portal.py",
+        "delete_push_subscription",
+        "Driver portal. The Salis Driver is resolved from the session server-side "
+        "(_resolve_driver); only the caller's own subscription (matched on "
+        "driver + endpoint) is disabled, so one driver can never opt another's "
+        "device out. Token/identity-resolved writer.",
+    ),
+    (
         "salis/doctype/rental_settlement/rental_settlement.py",
         "create_payment_request",
         "Doc-bound whitelisted method (def create_payment_request(self)). Frappe "

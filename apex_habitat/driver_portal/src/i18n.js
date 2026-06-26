@@ -87,6 +87,15 @@ const messages = {
       title: "Notifications",
       empty: "No new notifications",
     },
+    push: {
+      title: "Background notifications",
+      body: "Get a push for new trips and approvals even when the app is closed.",
+      enable: "Turn on",
+      disable: "Turn off",
+      on: "Background notifications are on.",
+      off: "Background notifications are off.",
+      denied: "Notifications are blocked. Allow them in your browser settings to turn this on.",
+    },
     route: {
       title: "My Worker Route Today",
       subtitle: "Stops, pickups, and passengers for your route.",
@@ -390,6 +399,15 @@ const messages = {
     notifications: {
       title: "الإشعارات",
       empty: "لا توجد إشعارات جديدة",
+    },
+    push: {
+      title: "الإشعارات في الخلفية",
+      body: "استلم إشعارًا بالرحلات والموافقات الجديدة حتى عندما يكون التطبيق مغلقًا.",
+      enable: "تفعيل",
+      disable: "إيقاف",
+      on: "تم تفعيل الإشعارات في الخلفية.",
+      off: "تم إيقاف الإشعارات في الخلفية.",
+      denied: "الإشعارات محظورة. اسمح بها في إعدادات المتصفح لتفعيل هذا الخيار.",
     },
     route: {
       title: "مسار العمال اليوم",

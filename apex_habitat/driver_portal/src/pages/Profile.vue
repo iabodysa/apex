@@ -174,6 +174,28 @@
           <div class="ms-auto"><LangToggle /></div>
         </div>
       </section>
+
+      <!-- Background push opt-in: shown only when the device supports push AND the
+           owner enabled+configured VAPID (canOfferPush). Hidden otherwise. -->
+      <section v-if="canOfferPush" class="card card-pad">
+        <div class="flex items-center gap-2">
+          <Icon name="bell" :size="18" class="text-primary shrink-0" />
+          <div class="min-w-0">
+            <div class="text-sm font-semibold">{{ t("push.title") }}</div>
+            <div class="text-xs text-muted">{{ t("push.body") }}</div>
+          </div>
+          <button
+            type="button"
+            class="btn btn-sm ms-auto shrink-0"
+            :class="isSubscribed ? 'btn-ghost' : 'btn-primary'"
+            :disabled="isBusy"
+            @click="togglePush"
+          >
+            {{ isSubscribed ? t("push.disable") : t("push.enable") }}
+          </button>
+        </div>
+        <div v-if="isDenied" class="text-xs text-warning mt-2">{{ t("push.denied") }}</div>
+      </section>
     </template>
 
     <EmptyState v-else :title="t('profile.empty')" />
@@ -181,7 +203,7 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import LangToggle from "../components/LangToggle.vue";
@@ -190,8 +212,27 @@ import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
+import {
+  initPush,
+  enablePush,
+  disablePush,
+  canOfferPush,
+  isSubscribed,
+  isBusy,
+  isDenied,
+} from "../push";
 
 const { t } = useI18n();
+
+// Load push config + any existing subscription when the profile opens, so the
+// toggle reflects the real state (and stays hidden when push is unconfigured).
+onMounted(initPush);
+
+async function togglePush() {
+  const ok = isSubscribed.value ? await disablePush() : await enablePush();
+  if (ok) pushToast(isSubscribed.value ? t("push.on") : t("push.off"), "ok");
+  else if (isDenied.value) pushToast(t("push.denied"), "err");
+}
 
 const profile = createResource({
   url: "apex_habitat.salis.api.driver_portal.get_driver_profile",
