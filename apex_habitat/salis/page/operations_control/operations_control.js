@@ -59,7 +59,6 @@ class FleetControl {
 		this.$drawer = $('<div class="fc-drawer"></div>').appendTo(this.$body);
 
 		this.page.set_primary_action(__("Refresh"), () => this.refresh(), "refresh");
-		this.page.add_button(__("Export CSV"), () => this.export_csv(), { icon: "download" });
 		this.page.add_button(__("Cards / Table"), () => this.toggle_view());
 
 		this._build_controls();
@@ -316,17 +315,18 @@ class FleetControl {
 		// Plate / VEH-* id is LTR: <bdi> isolates it inside the RTL drawer header.
 		$('<div class="fc-drawer-title"></div>').html(_bdi(v.plate_number || v.name)).appendTo($head);
 		$close.appendTo($head);
+		// Drawer actions are grouped by intent: open the record, then operate on this
+		// vehicle (reassign / release), then create related records last.
 		const $open = $('<a class="btn btn-xs btn-primary fc-form-link"></a>').text(__("Open Vehicle"));
 		$open.attr("href", "/app/salis-vehicle/" + encodeURIComponent(v.name)).appendTo($head);
-		// [#kv4vij]
-		["Vehicle Stop", "Vehicle Incident", "Vehicle Assignment"].forEach((doctype) => {
-			const $a = $('<button class="btn btn-xs btn-default fc-action"></button>').text("+ " + __(doctype));
-			$a.on("click", () => {
-				frappe.route_options = { vehicle: v.name };
-				frappe.new_doc(doctype);
-			});
-			$a.appendTo($head);
-		});
+
+		// Reassign driver: a guided driver pick that ends the current assignment and
+		// starts a new one server-side, instead of opening a blank Vehicle Assignment.
+		const $reassign = $('<button class="btn btn-xs btn-default fc-action"></button>').text(
+			__("Reassign driver")
+		);
+		$reassign.on("click", () => this.reassign_driver(v, $reassign));
+		$reassign.appendTo($head);
 		// Release back to service: closes the open Vehicle Stop natively (server side).
 		if (v.status === "Stopped") {
 			const $rel = $('<button class="btn btn-xs btn-default fc-action fc-release"></button>').text(
@@ -335,13 +335,15 @@ class FleetControl {
 			$rel.on("click", () => this.release_vehicle(v, $rel));
 			$rel.appendTo($head);
 		}
-		// Reassign driver: a guided driver pick that ends the current assignment and
-		// starts a new one server-side, instead of opening a blank Vehicle Assignment.
-		const $reassign = $('<button class="btn btn-xs btn-default fc-action"></button>').text(
-			__("Reassign driver")
-		);
-		$reassign.on("click", () => this.reassign_driver(v, $reassign));
-		$reassign.appendTo($head);
+		// [#kv4vij]
+		["Vehicle Assignment", "Vehicle Stop", "Vehicle Incident"].forEach((doctype) => {
+			const $a = $('<button class="btn btn-xs btn-default fc-action"></button>').text("+ " + __(doctype));
+			$a.on("click", () => {
+				frappe.route_options = { vehicle: v.name };
+				frappe.new_doc(doctype);
+			});
+			$a.appendTo($head);
+		});
 		const $body = $('<div class="fc-drawer-body"></div>').appendTo(this.$drawer);
 		this._load_detail(v, $body);
 	}
@@ -467,15 +469,5 @@ class FleetControl {
 			__("Reassign driver"),
 			__("Reassign")
 		);
-	}
-
-	export_csv() {
-		// Server-side export: re-runs the scoped query so the file holds the FULL
-		// permission-/scope-consistent result, not just the painted rows. The native
-		// csv response (build_csv_response) is streamed via the standard POST download.
-		open_url_post(frappe.request.url, {
-			cmd: "apex_habitat.salis.api.operations_control.export_fleet",
-			...this.filters,
-		});
 	}
 }

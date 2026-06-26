@@ -1521,3 +1521,140 @@ def audit_remediation_deadline_watch() -> None:
         start += batch_size
 
     logger.info(f"audit_remediation_deadline_watch: {flagged} remediation plan(s) flagged Overdue.")
+
+
+def weekly_custody_digest() -> None:
+    """Email each building's responsible supervisor a weekly custody roll-up.
+
+    Per building: open custody issues (Issued / Partially Returned), of those the
+    count already past ``expected_return_date``, the SAR value still in worker
+    hands (net signed ledger value, the same definition as the value-in-hands
+    card), and damage assessed month-to-date. Buildings are grouped by their
+    ``responsible_facility_supervisor`` so each supervisor receives only their own
+    buildings. Buildings with no supervisor, or a disabled supervisor user, are
+    skipped — oversight roles already see the dashboards.
+
+    Gated by the master email kill-switch; per-recipient delivery is isolated
+    (rollback before log) so one bad recipient never aborts the rest. Idempotent:
+    a re-run re-sends the current snapshot and mutates no state.
+    """
+    from collections import defaultdict
+
+    from frappe.utils import escape_html, flt, fmt_money, get_url_to_list, getdate, today
+
+    from apex_habitat.apex_core.utils.email_gate import email_enabled
+
+    logger = frappe.logger()
+
+    if not email_enabled():
+        logger.info("weekly_custody_digest: email disabled (Habitat Settings); skipped.")
+        return
+
+    buildings = frappe.get_all(
+        "Accommodation Building",
+        filters={"responsible_facility_supervisor": ["is", "set"]},
+        fields=["name", "responsible_facility_supervisor"],
+    )
+    if not buildings:
+        logger.info("weekly_custody_digest: no building has a responsible supervisor.")
+        return
+
+    today_str = str(getdate(today()))
+    month_start = str(getdate(today()).replace(day=1))
+
+    # Open custody issues per building, and how many are overdue.
+    open_counts: dict[str, int] = defaultdict(int)
+    overdue_counts: dict[str, int] = defaultdict(int)
+    for issue in frappe.get_all(
+        "Custody Issue",
+        filters={"status": ["in", ["Issued", "Partially Returned"]]},
+        fields=["building", "expected_return_date"],
+    ):
+        if not issue.building:
+            continue
+        open_counts[issue.building] += 1
+        if issue.expected_return_date and str(issue.expected_return_date) < today_str:
+            overdue_counts[issue.building] += 1
+
+    # Net custody value still in worker hands, per building (ledger is the
+    # canonical valuation, mirroring get_custody_value_in_employee_hands).
+    value_by_building: dict[str, float] = defaultdict(float)
+    for row in frappe.db.sql(
+        """
+        SELECT building, COALESCE(SUM(qty * COALESCE(unit_cost_sar, 0)), 0) AS value
+        FROM `tabAccommodation Stock Ledger`
+        WHERE is_cancelled = 0
+          AND item_type = 'Custody Article'
+          AND employee IS NOT NULL AND employee != ''
+          AND building IS NOT NULL AND building != ''
+        GROUP BY building
+        """,
+        as_dict=True,
+    ):
+        value_by_building[row.building] = flt(row.value)
+
+    # Damage assessed month-to-date per building (submitted assessments only).
+    damage_mtd: dict[str, float] = defaultdict(float)
+    for row in frappe.db.sql(
+        """
+        SELECT building, COALESCE(SUM(total_estimated_replacement_cost_sar), 0) AS cost
+        FROM `tabCustody Damage Assessment`
+        WHERE docstatus = 1
+          AND assessment_date >= %(month_start)s
+          AND building IS NOT NULL AND building != ''
+        GROUP BY building
+        """,
+        {"month_start": month_start},
+        as_dict=True,
+    ):
+        damage_mtd[row.building] = flt(row.cost)
+
+    by_supervisor: dict[str, list] = defaultdict(list)
+    for b in buildings:
+        by_supervisor[b.responsible_facility_supervisor].append(b.name)
+
+    list_url = get_url_to_list("Custody Issue")
+    sent = 0
+    for supervisor, names in by_supervisor.items():
+        try:
+            if not frappe.db.get_value("User", supervisor, "enabled"):
+                continue
+            rows = "".join(
+                "<tr><td>{b}</td><td>{open_}</td><td>{overdue}</td>"
+                "<td>{value}</td><td>{damage}</td></tr>".format(
+                    b=escape_html(name),
+                    open_=open_counts.get(name, 0),
+                    overdue=overdue_counts.get(name, 0),
+                    value=fmt_money(value_by_building.get(name, 0.0), currency="SAR"),
+                    damage=fmt_money(damage_mtd.get(name, 0.0), currency="SAR"),
+                )
+                for name in names
+            )
+            header = "<tr><th>{b}</th><th>{o}</th><th>{ov}</th><th>{v}</th><th>{d}</th></tr>".format(
+                b=_("Building"),
+                o=_("Open"),
+                ov=_("Overdue"),
+                v=_("Value in hands"),
+                d=_("Damage (MTD)"),
+            )
+            message = "{intro}<br><table border='1' cellpadding='4'>{header}{rows}</table><br><a href='{url}'>{cta}</a>".format(
+                intro=_("Weekly custody summary for your building(s):"),
+                header=header,
+                rows=rows,
+                url=list_url,
+                cta=_("Open the custody issue list"),
+            )
+            frappe.sendmail(
+                recipients=[supervisor],
+                subject=_("Weekly Custody Digest"),
+                message=message,
+            )
+            sent += 1
+        except Exception:
+            frappe.db.rollback()
+            frappe.log_error(
+                message=frappe.get_traceback(),
+                title=f"Custody digest failed for {supervisor}"[:140],
+            )
+
+    logger.info(f"weekly_custody_digest: sent {sent} supervisor digest(s).")

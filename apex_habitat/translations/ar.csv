@@ -792,6 +792,7 @@ Daily cleaning record per building with worker accountability and evidence contr
 Daily driver attendance record with check-in/out times and photographic evidence.,سجل حضور يومي للسائق مع أوقات الدخول والمغادرة وأدلة مصوّرة.
 "Daily fuel consumption log for a vehicle: odometer, litres, amount, and platform.",سجل استهلاك وقود يومي لمركبة: عداد المسافة واللترات والمبلغ والمنصة.
 Damage,الضرر
+Damage (MTD),التلف (منذ بداية الشهر)
 Damage Assessment,تقييم التلفيات
 Damage Cost by Building,تكلفة الأضرار حسب المبنى
 Damage Deduction,خصم الضرر
@@ -1846,6 +1847,7 @@ Open the Action Inbox,افتح صندوق الإجراءات
 Open the Dispatch Board,افتح لوحة التشغيل
 Open the Front Desk,افتح مكتب الاستقبال
 Open the Safety Map,افتح خريطة السلامة
+Open the custody issue list,فتح قائمة مشكلات العهدة
 Open the front desk and place your first resident.,افتح مكتب الاستقبال وأسكِن أول مقيم.
 Open the live Fleet Control board to watch and act on every vehicle.,افتح لوحة التحكّم الحيّة لمراقبة كل مركبة والتصرّف عليها.
 Open the operations alert list,فتح قائمة تنبيهات العمليات
@@ -3009,6 +3011,7 @@ Validity,الصلاحية
 Validity Period,فترة الصلاحية
 Value,القيمة
 Value (SAR),القيمة (ريال)
+Value in hands,القيمة في العهدة
 Variance,الانحراف
 Variance (L),الفرق (لتر)
 Variance ({0} L) exceeds 10% of the claimed volume - requires Operations-tier approval and a Finance consult note.,التباين ({0} لتر) يتجاوز 10% من الكمّيّة المُطالَب بها - يتطلّب موافقةً بمستوى العمليّات ومذكّرة استشارة ماليّة.
@@ -3094,6 +3097,8 @@ Water Tank Inspection Required,فحص خزان المياه مطلوب
 Web QR,رمز QR للويب
 Website,الموقع الإلكتروني
 Weekly,أسبوعي
+Weekly Custody Digest,ملخص العهدة الأسبوعي
+Weekly custody summary for your building(s):,ملخص العهدة الأسبوعي لمبانيك:
 What do you need help with?,ما الذي تحتاج المساعدة فيه؟
 What happened?,ماذا حدث؟
 "When OFF (default), accommodation assignment does not touch Salary Structure Assignment.",عند الإيقاف (الافتراضي)، لا يمسّ تسكين السكن إسناد هيكل الراتب.

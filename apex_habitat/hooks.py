@@ -179,6 +179,7 @@ scheduler_events = {
     ],
     "weekly": [
         "apex_habitat.habitat.tasks.weekly_occupancy_sync",
+        "apex_habitat.habitat.tasks.weekly_custody_digest",
         # [#wave3-safety]
         "apex_habitat.habitat.tasks.weekly_safety_coverage_gate",
         "apex_habitat.salis.tasks.vehicle_utilization_summary",
