@@ -150,6 +150,14 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
+   "label": "Housing Inventory",
+   "link_type": "DocType",
+   "link_to": "Housing Inventory",
+   "idx": 24
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
    "label": "Idle Resident Report",
    "link_type": "DocType",
    "link_to": "Idle Resident Report",
@@ -267,5 +275,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-27 09:00:00.000000"
+ "modified": "2026-06-28 09:00:00.000000"
 }

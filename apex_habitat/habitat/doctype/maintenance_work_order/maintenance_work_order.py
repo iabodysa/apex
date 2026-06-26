@@ -134,6 +134,10 @@ def mark_completed(work_order, completion_notes=None):
             if "status" in mr_status_field:
                 frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "Closed")
 
+        # db_set above fires no on_update doc_event, so reflect from this chokepoint.
+        from apex_habitat.habitat.doctype.housing_inventory.housing_inventory import reflect_completed_maintenance
+        reflect_completed_maintenance(doc)
+
         already_posted = frappe.db.exists(
             "Accommodation Ledger",
             {"source_doctype": "Maintenance Work Order", "source_name": doc.name},
