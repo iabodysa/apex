@@ -20,6 +20,11 @@ class ArrivalsDesk {
 		this.custodyIssued = false; // any custody handed over this session
 		this.cardIssued = false; // any Masar arrival link issued this session
 		this.transportStarted = false; // a transport request was created this session
+		this.mrzOcrEnabled = false; // passport MRZ camera autofill (Habitat Settings flag)
+		frappe.db
+			.get_single_value('Habitat Settings', 'enable_passport_mrz_ocr')
+			.then((v) => (this.mrzOcrEnabled = !!v))
+			.catch(() => {});
 		// [#frsjh3]
 		this.page.hide_form();
 		this._build_skeleton();
@@ -426,6 +431,8 @@ class ArrivalsDesk {
 		const d = new frappe.ui.Dialog({
 			title: __('Register New Arrival (Passport)'),
 			fields: [
+				// Passport MRZ camera autofill (feature-flagged); manual entry stays below.
+				{ fieldname: 'mrz_scan', fieldtype: 'HTML' },
 				{ fieldname: 'worker_name', label: __('Worker Name'), fieldtype: 'Data', reqd: 1, default: pf.worker_name },
 				{ fieldname: 'passport_number', label: __('Passport Number'), fieldtype: 'Data', reqd: 1, default: pf.passport_number },
 				{ fieldname: 'cb1', fieldtype: 'Column Break' },
@@ -472,6 +479,52 @@ class ArrivalsDesk {
 		// Tag the modal so the mobile breakpoint can present it as a full-screen sheet.
 		d.$wrapper.addClass('ax-register-modal');
 		d.show();
+		if (this.mrzOcrEnabled) this._render_mrz_scan(d);
+	}
+
+	// [#mrzscan] Camera capture -> MRZ parse -> pre-fill. Only mounted when the
+	// Habitat Settings flag is on; manual entry below always remains the fallback.
+	_render_mrz_scan(d) {
+		const $wrap = $(d.get_field('mrz_scan').wrapper);
+		$wrap.empty();
+		const $box = $('<div class="ax-mrz-scan"></div>').appendTo($wrap);
+		// A capture-capable file input opens the rear camera on mobile; on desktop
+		// it is a normal file picker — same path, no separate getUserMedia plumbing.
+		const $input = $('<input type="file" accept="image/*" capture="environment" class="ax-mrz-input" />').appendTo($box);
+		$('<button class="btn btn-sm btn-default ax-mrz-btn"></button>')
+			.text(__('Scan passport (MRZ)'))
+			.on('click', () => $input.trigger('click'))
+			.appendTo($box);
+		const $status = $('<span class="ax-mrz-status"></span>').appendTo($box);
+		$input.on('change', (e) => {
+			const file = e.target.files && e.target.files[0];
+			if (!file) return;
+			const reader = new FileReader();
+			reader.onload = () => this._scan_passport(d, reader.result, $status);
+			reader.readAsDataURL(file);
+		});
+	}
+
+	_scan_passport(d, dataUrl, $status) {
+		$status.text(__('Reading passport…'));
+		frappe.call({
+			method: 'apex_habitat.habitat.api.arrivals_desk.parse_passport',
+			args: { image: dataUrl },
+			callback: (r) => {
+				const res = r.message || {};
+				if (res.ok && res.fields) {
+					Object.keys(res.fields).forEach((k) => {
+						if (d.get_field(k)) d.set_value(k, res.fields[k]);
+					});
+					$status.text(__('Pre-filled — please verify.'));
+				} else if (res.reason === 'ocr_unavailable') {
+					$status.text(__('OCR engine not available — enter the details manually.'));
+				} else {
+					$status.text(__('Could not read the passport — enter the details manually.'));
+				}
+			},
+			error: () => $status.text(__('Scan failed — enter the details manually.')),
+		});
 	}
 
 	// [#2gxwhl]
@@ -1056,7 +1109,42 @@ class ArrivalsDesk {
 				const $link = $('<a class="ax-qr-link" target="_blank" rel="noopener"></a>').attr('href', m.link);
 				$('<bdi></bdi>').text(m.link).appendTo($link);
 				$link.appendTo($item);
+				// Per-worker: push the link to the worker's phone via the gateway. The
+				// gateway may be unconfigured (owner wires it) — handled as a no-op below.
+				if (m.phone) {
+					$('<button class="btn btn-xs btn-default ax-qr-send"></button>')
+						.text(__('Send via WhatsApp/SMS'))
+						.on('click', (e) => this._send_masar_message(c, $(e.currentTarget)))
+						.appendTo($item);
+				}
 			});
+	}
+
+	_send_masar_message(c, $btn) {
+		const m = c._card_qr || {};
+		$btn.prop('disabled', true).text(__('Sending…'));
+		frappe.call({
+			method: 'apex_habitat.habitat.api.arrivals_desk.send_masar_link_message',
+			args: { employee: c.party, phone: m.phone || null },
+			callback: (r) => {
+				const res = r.message || {};
+				if (res.queued) {
+					$btn.text(__('Sent ✓'));
+					frappe.show_alert({ message: __('Link sent to {0}', [c.label || c.party]), indicator: 'green' });
+				} else if (res.gateway_configured === false) {
+					// Owner has not wired a provider yet — say so, do not look broken.
+					$btn.prop('disabled', false).text(__('Send via WhatsApp/SMS'));
+					frappe.show_alert({
+						message: __('Messaging gateway is not configured yet (Apex Integration Settings).'),
+						indicator: 'orange',
+					});
+				} else {
+					$btn.prop('disabled', false).text(__('Send via WhatsApp/SMS'));
+					frappe.show_alert({ message: __('Could not send the link.'), indicator: 'red' });
+				}
+			},
+			error: () => $btn.prop('disabled', false).text(__('Send via WhatsApp/SMS')),
+		});
 	}
 
 	// [#9szus4]

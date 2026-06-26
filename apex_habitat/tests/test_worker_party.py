@@ -409,5 +409,34 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn("party_type === 'Employee'", js)  # [#glfm9i]
 
 
+class TestPassportMrzParser(unittest.TestCase):
+    """Deterministic specimen proof for the opt-in MRZ autofill parser.
+
+    parse_mrz_text is the pure, testable core of the camera-capture feature; OCR
+    is pluggable. Needs the real bench frappe (now_datetime for the century rule),
+    so it skips under the standalone stub."""
+
+    def _parser(self):
+        if isinstance(getattr(frappe, "utils", None), types.SimpleNamespace):
+            self.skipTest("needs the real bench frappe (now_datetime)")
+        from apex_habitat.habitat.api.arrivals_desk import parse_mrz_text
+
+        return parse_mrz_text
+
+    def test_parses_td3_specimen(self):
+        # Synthetic TD3 passport MRZ (two 44-char lines) — no real identity.
+        parse = self._parser()
+        text = "P<UTOSPECIMEN<<TRAVELLER<SAMPLE<<<<<<<<<<<<<<\nX123456785UTO8001011M3012315<<<<<<<<<<<<<<04"
+        out = parse(text)
+        self.assertEqual(out.get("passport_number"), "X12345678")
+        self.assertEqual(out.get("worker_name"), "TRAVELLER SAMPLE SPECIMEN")
+        self.assertEqual(out.get("expiry_date"), "2030-12-31")
+
+    def test_garbled_scan_degrades_to_empty(self):
+        # Too few MRZ lines -> nothing parsed (manual entry stays), never raises.
+        parse = self._parser()
+        self.assertEqual(parse("not a passport").get("passport_number"), None)
+
+
 if __name__ == "__main__":
     unittest.main()

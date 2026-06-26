@@ -208,6 +208,7 @@ Apex Home,الرئيسية
 Apex Integration Settings,إعدادات تكامل أبيكس
 Apex Settings,إعدادات Apex
 Apex Setup,إعداد أبيكس
+Apex messaging gateway test message.,رسالة اختبار بوابة مراسلة Apex.
 Appearance,المظهر
 Applies to All Buildings,يسري على جميع المباني
 Apply an operational markup to external-supplier accommodation costs in the Supplier Cost Recovery report.,تطبيق هامش تشغيلي على تكاليف السكن الخاصة بالموردين الخارجيين في تقرير استرداد تكلفة المورّد.
@@ -252,6 +253,7 @@ Arrival Manifest,بيان الوصول
 Arrival Slip,قسيمة الوصول
 Arrivals Desk,مكتب الوصول
 Arrivals Expected Today: {{ doc.building }} ({{ doc.expected_count }}),وصول متوقع اليوم: {{ doc.building }} ({{ doc.expected_count }})
+Arrivals Intake,استقبال الوافدين
 Arrivals Today,الوافدون اليوم
 Arrivals today,الوافدون اليوم
 Arrived As,وصل بصفة
@@ -713,11 +715,13 @@ Could not mark the Work Order as Completed. Please try again.,تعذّر وسم 
 Could not open the camera. Use the scan box instead.,تعذّر فتح الكاميرا. استخدم خانة المسح بدلاً من ذلك.
 Could not post the reversal to the ledger. The cancellation was rejected.,تعذّر ترحيل القيد العكسي إلى الدفتر. تم رفض الإلغاء.
 Could not post the utility cost to the ledger. The bill was not submitted.,تعذّر ترحيل تكلفة المرافق إلى الدفتر. لم تُقدَّم الفاتورة.
+Could not read the passport — enter the details manually.,تعذّرت قراءة الجواز — أدخل التفاصيل يدوياً.
 Could not read the payment settings. Please try again.,تعذّر قراءة إعدادات الدفع. يرجى المحاولة مجدداً.
 Could not regenerate the payment schedule. Please try again.,تعذّر إعادة توليد جدول الدفعات. يرجى المحاولة مجدداً.
 Could not resolve the scan. Please try again.,تعذّر تحديد نتيجة المسح. يرجى المحاولة مرة أخرى.
 Could not return the cart. Please review and try again.,تعذّر إرجاع السلة. الرجاء المراجعة والمحاولة مرة أخرى.
 Could not save changes. Please try again or contact support.,تعذّر حفظ التغييرات. يرجى المحاولة مجدداً أو التواصل مع الدعم الفني.
+Could not send the link.,تعذّر إرسال الرابط.
 Could not submit the round. Please try again.,تعذّر اعتماد الجولة. حاول مرة أخرى.
 Could not update bed occupancy. The assignment was not submitted.,تعذّر تحديث إشغال السرير. لم يُقدَّم التسكين.
 Could not update the Service Order. Please try again.,تعذّر تحديث أمر الخدمة. يرجى المحاولة مجدداً.
@@ -872,6 +876,7 @@ Deduction: {0},الخصم: {0}
 Deep Cleaning,نظافة عميقة
 Default Assignee (Employee),المكلف الافتراضي (الموظف)
 Default Beds,الأسرّة الافتراضية
+Default Channel,القناة الافتراضية
 Default Company,الشركة الافتراضية
 Default Cost Center,مركز التكلفة الافتراضي
 Default Currency,العملة الافتراضية
@@ -1033,7 +1038,9 @@ Enable ERPNext Asset Link,تفعيل الربط مع أصول ERPNext
 Enable Email Notifications,تفعيل إشعارات البريد الإلكتروني
 Enable GL Entry Posting,تفعيل ترحيل قيود دفتر الأستاذ العام
 Enable Housing Allowance Deduction,تفعيل خصم بدل السكن
+Enable Messaging Gateway,تفعيل بوابة المراسلة
 Enable Operational Notifications,تفعيل الإشعارات التشغيلية
+Enable Passport MRZ OCR Autofill,تفعيل التعبئة التلقائية لجواز السفر بالتعرّف الضوئي على المنطقة المقروءة آلياً
 Enable Salary Deductions,تفعيل الخصومات من الراتب
 Enable Stock Entry Posting,تفعيل ترحيل سندات المخزن
 Enable Supplier Markup,تفعيل هامش المورد
@@ -1267,6 +1274,9 @@ GPS Mismatch,عدم تطابق GPS
 Gas,غاز
 Gate Pass,تصريح بوابة
 Gate Pass Reference,رقم تصريح البوابة
+Gateway API Key,مفتاح واجهة البوابة البرمجية
+Gateway Help,مساعدة البوابة
+Gateway URL,رابط البوابة
 Gemini,جيميني
 General,عام
 General Details,تفاصيل عامة
@@ -1313,6 +1323,8 @@ Has Timestamps,يحتوي طوابع زمنية
 Has custody,لديه عهدة
 Health and Hygiene,الصحة والنظافة العامة
 Held: {0},بالعهدة: {0}
+"Hello {0},",مرحباً {0}،
+"Hello,",مرحباً،
 Hide out of service,إخفاء الخارجة عن الخدمة
 Hide this alert from the operations queue until this time; it reappears when the moment passes.,إخفاء هذا التنبيه من قائمة العمليات حتى هذا الوقت؛ ويعاود الظهور عند انقضاء الموعد.
 High,عالية
@@ -1336,6 +1348,7 @@ Housing Terms — {0},شروط السكن — {0}
 Housing office contact number shown to workers on the Masar home My Contacts card.,رقم تواصل مكتب السكن الظاهر للعمّال في بطاقة جهات اتصالي بالصفحة الرئيسية لمسار.
 Housing over capacity…,السكن بطاقة زائدة…
 Housing…,الإسكان…
+How The Gateway Works,كيف تعمل البوابة
 How To Integrate,كيفية التكامل
 How consent was captured.,كيف تم الحصول على الموافقة.
 How often a deduction of this type may recur for the same source until the balance is cleared.,عدد مرات تكرار خصم من هذا النوع لنفس المصدر حتى تسوية الرصيد.
@@ -1548,6 +1561,7 @@ Licenses Expiring Soon,الرخص التي ستنتهي قريباً
 Lifecycle,دورة الحياة
 Lightweight Habitat-owned catalog of maintenance materials. Not linked to ERPNext Stock/Item unless explicitly mapped.,فهرس مبسّط لمواد الصيانة تابع لهابيتات. غير مرتبط بمخزون/أصناف ERPNext ما لم يُربط صراحةً.
 Link after registration,الربط بعد التسجيل
+Link sent to {0},تم إرسال الرابط إلى {0}
 Linked,مرتبط
 Linked Accommodation Assignment already has a check-out date: {0},إسناد السكن المرتبط لديه بالفعل تاريخ مغادرة: {0}
 Linked Accommodation Assignment must be submitted.,يجب اعتماد التسكين المرتبط.
@@ -1659,6 +1673,8 @@ Median Alert Resolve Days,وسيط أيام حل التنبيه
 Medium,متوسطة
 Mentions,الإشارات
 Message,الرسالة
+Messaging Gateway,بوابة المراسلة
+Messaging gateway is not configured yet (Apex Integration Settings).,لم يتم إعداد بوابة المراسلة بعد (إعدادات تكامل Apex).
 Meter Number,رقم العدّاد
 Meter Readings,قراءات العداد
 Meter and Sharing,العدّاد والمشاركة
@@ -1760,6 +1776,7 @@ No buildings to show.,لا توجد مبانٍ لعرضها.
 No category,بلا فئة
 No drivers assigned today.,لا يوجد سائقون مسندون اليوم.
 No floor plan defined. Add floor rows before generating.,لم يُحدَّد مخطط طوابق. أضف صفوف الطوابق قبل التوليد.
+No image was captured.,لم يتم التقاط أي صورة.
 No issues recorded.,لا ملاحظات مسجّلة.
 No open safety or maintenance signals for this building.,لا توجد إشارات سلامة أو صيانة مفتوحة لهذا المبنى.
 No open transport requests.,لا توجد طلبات نقل مفتوحة.
@@ -1810,6 +1827,7 @@ Number of days without a dispatch trip before an Active vehicle is flagged as id
 Number of times this asset has been moved between buildings.,عدد مرّات نقل هذا الأصل بين المباني.
 Number of workers on the manifest. Computed from the Expected Workers rows on save — read-only by design.,عدد العمال في البيان. يُحتسب من صفوف العمال المتوقعين عند الحفظ — للقراءة فقط بحكم التصميم.
 Number of workers on the manifest. Computed from the Expected Workers rows.,عدد العمال في البيان. يُحتسب من صفوف العمال المتوقعين.
+OCR engine not available — enter the details manually.,محرك التعرّف الضوئي غير متاح — أدخل التفاصيل يدوياً.
 OK,سليم
 OTP Attempts,محاولات رمز التحقق
 OTP Expires At,انتهاء صلاحية رمز التحقق
@@ -1913,6 +1931,7 @@ Open the operations alert list,فتح قائمة تنبيهات العمليات
 Open the unified inbox that gathers everything pending your action across modules.,افتح الصندوق الموحد الذي يجمع كل ما ينتظر إجراءك عبر الوحدات.
 Open the visual Dispatch Board to plan trips and assign vehicles to requests.,افتح لوحة التشغيل المرئية لتخطيط الرحلات وإسناد المركبات للطلبات.
 Open the visual Front Desk board to check residents in and out.,افتح لوحة مكتب الاستقبال المرئية لتسجيل دخول الساكنين ومغادرتهم.
+Open your personal worker portal (Masar): {0},افتح بوابتك الشخصية للعامل (مسار): {0}
 Operating Card,بطاقة التشغيل
 Operating Days This Month,أيام التشغيل هذا الشهر
 Operating Days Trend,اتجاه أيام التشغيل
@@ -1938,6 +1957,7 @@ Optional logo shown in the portal header in place of the built-in brand mark.,ش
 Optional photo of the bed/room condition at check-in (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند الدخول (دليل تسليم).
 Optional photo of the bed/room condition at checkout (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند المغادرة (دليل تسليم).
 Optional primary accent colour override. Leave blank to use the theme default.,تجاوز اختياري للون التمييز الأساسي. اتركه فارغًا لاستخدام لون السمة الافتراضي.
+Optional sender id / from number the gateway should send as (when the provider requires it). Sent as sender_id in the request body.,معرّف مُرسِل / رقم إرسال اختياري ترسل البوابة باسمه (عندما يتطلّب المزوّد ذلك). يُرسَل بوصفه sender_id في جسم الطلب.
 Optional: the specific Facility Asset this inspection covers. On submit its Last Inspected Date is stamped with the Inspection Date.,اختياري: أصل المنشأة المحدد الذي يغطيه هذا الفحص. عند الترحيل يُختم تاريخ آخر فحص له بتاريخ الفحص.
 Options,الخيارات
 Origin,المصدر
@@ -2116,7 +2136,9 @@ Pre-Work,قبل العمل
 "Pre-arrival manifest: the workers a labour supplier expects to deliver to a building on a date. Captured up front via the public Arrival Manifest web form (front-desk intake) and managed here as the backend record the Arrivals Desk reconciles real arrivals against. Title, Expected Count and each row's Arrived As are system-maintained (read-only by design).",بيان ما قبل الوصول: العمال الذين يتوقع مورّد العمالة تسليمهم إلى مبنى في تاريخ محدد. يُلتقط مبدئياً عبر نموذج ويب بيان الوصول العام (إدخال مكتب الاستقبال) ويُدار هنا كسجل خلفي يطابق به مكتب الوصول الوصول الفعلي. العنوان والعدد المتوقع وحقل «وصل بصفة» في كل صف تُدار آلياً (للقراءة فقط بحكم التصميم).
 Pre-defined material sets per issue type. Load into Maintenance Request or Work Order procurement items.,مجموعات مواد معرّفة مسبقاً لكل نوع عطل. تُحمّل ضمن بنود توريد طلب الصيانة أو أمر العمل.
 Pre-defined vehicle handover inspection checklist. Load its items into a Vehicle Handover's check items with one button-press.,قائمة فحص مُعرّفة مسبقاً لتسليم المركبة. حمّل بنودها إلى بنود فحص تسليم المركبة بضغطة زر واحدة.
+Pre-filled — please verify.,تمت التعبئة المسبقة — يرجى التحقق.
 Preferred Language,اللغة المفضّلة
+Preferred channel passed to the gateway. The gateway provider decides actual delivery; this is the channel hint sent in the request payload.,القناة المفضّلة المُمرّرة إلى البوابة. مزوّد البوابة هو من يقرّر التسليم الفعلي؛ هذا تلميح للقناة يُرسَل ضمن حمولة الطلب.
 Prefix added before the room number (e.g. 'A' gives A101). Leave blank for numeric only.,"بادئة تُضاف قبل رقم الغرفة (مثال: ""A"" ينتج A101). اتركها فارغة للأرقام فقط."
 Present,حاضر
 Previous Building,المبنى السابق
@@ -2195,6 +2217,7 @@ Re-inspection,إعادة تفتيش
 Re: {0},رد: {0}
 Read-only — managed by the Room Setup wizard.,للقراءة فقط — يُدار عبر معالج إعداد الغرف.
 Readiness Status,حالة جاهزية الغرفة
+Reading passport…,جارٍ قراءة الجواز…
 Ready,جاهز
 Reallocation,إعادة تخصيص
 Reason,السبب
@@ -2504,6 +2527,7 @@ Run your fleet from the live operations board.,أدِر أسطولك من لوح
 SLA (Days),مستوى الخدمة (أيام)
 SLA Breached,تجاوز مستوى الخدمة
 SLA Breached — this request requires immediate attention.,تجاوز اتفاقية مستوى الخدمة — هذا الطلب يستلزم اهتماماً فورياً.
+SMS,رسالة نصية
 Safety,السلامة
 Safety Checklist,قائمة فحص السلامة
 Safety Findings,ملاحظات السلامة
@@ -2573,7 +2597,9 @@ Save this code to follow up with your supervisor.,احتفظ بهذا الرمز
 Scan,مسح
 Scan Iqama / Worker Link,امسح الإقامة / رابط العامل
 Scan a worker badge or an article barcode,امسح بطاقة عامل أو الرمز الشريطي لعهدة
+Scan failed — enter the details manually.,فشل المسح — أدخل التفاصيل يدوياً.
 "Scan or type an Iqama number or personal link, then press Enter to identify the worker.",امسح أو اكتب رقم إقامة أو رابطاً شخصياً، ثم اضغط Enter لتحديد هوية العامل.
+Scan passport (MRZ),مسح الجواز (المنطقة المقروءة آلياً)
 Scan with camera,المسح بالكاميرا
 Scanned At,وقت المسح
 Schedule,الجدول الزمني
@@ -2600,6 +2626,7 @@ Search articles…,البحث في المواد…
 Search failed. Please retry.,فشل البحث. يرجى إعادة المحاولة.
 Search plate or category,ابحث بلوحة أو فئة
 Search worker name or passport…,البحث باسم العامل أو جواز السفر…
+"Secret API key/token for the gateway, sent as an Authorization: Bearer header. Stored encrypted; never echoed back to the client.",مفتاح/رمز سرّي لواجهة البوابة البرمجية، يُرسَل ضمن ترويسة Authorization: Bearer. يُخزَّن مُشفّراً؛ ولا يُعاد إرساله إلى العميل أبداً.
 Security,أمن
 See who is currently housed across your buildings.,اطّلع على المقيمين حالياً في مبانيك.
 "Select 'Building' if leasing an entire building, or 'Apartment' if leasing a single unit.",اختر 'مبنى' إذا كان العقد لعمارة كاملة، أو 'شقة' إذا كان العقد لوحدة مستقلة.
@@ -2626,6 +2653,10 @@ Selected Bed {0} is already occupied by Assignment {1},السرير المحدد
 Selected Room {0} does not belong to Building {1},الغرفة المحددة {0} لا تنتمي إلى المبنى {1}
 Semi-Annual,نصف سنوي
 Send a memo-only notification to Finance when a Material Transfer moves stock between buildings on different cost centers. No GL Entry is posted.,إرسال إشعار مذكرة فقط إلى المالية عند نقل المواد للمخزون بين مبانٍ على مراكز تكلفة مختلفة. دون ترحيل أي قيد في دفتر الأستاذ العام.
+Send via WhatsApp/SMS,إرسال عبر واتساب/رسالة نصية
+Sender ID / From Number,معرّف المُرسِل / رقم الإرسال
+Sending…,جارٍ الإرسال…
+Sent ✓,تم الإرسال ✓
 September,سبتمبر
 Sequence,التسلسل
 Serial No,الرقم التسلسلي
@@ -2902,6 +2933,7 @@ The consenting worker.,العامل الموافِق.
 "The driver's portal/login user, mirrored from the linked Employee. Drives driver-facing notifications.",مستخدم بوابة/دخول السائق، منعكس من الموظف المرتبط. يوجِّه الإشعارات الموجَّهة للسائق.
 The incoming driver acknowledges receiving the vehicle in the condition recorded above.,يقر السائق المستلم باستلام المركبة بالحالة المسجَّلة أعلاه.
 The linked Custody Issue {0} must be submitted before returning.,يجب تقديم صرف العهدة المرتبط {0} قبل الإرجاع.
+The messaging gateway is not enabled or is missing its URL/API key. Configure it in Apex Integration Settings first.,بوابة المراسلة غير مُفعّلة أو ينقصها الرابط أو مفتاح الواجهة البرمجية. قم بإعدادها في إعدادات تكامل Apex أولاً.
 The new expiry date must be later than the current expiry date.,يجب أن يكون تاريخ الانتهاء الجديد لاحقًا لتاريخ الانتهاء الحالي.
 The one-time password has expired. Ask the procurement supervisor to regenerate it.,انتهت صلاحية رمز التحقق لمرة واحدة. اطلب من مشرف المشتريات إعادة توليده.
 "The pre-arrival manifest this worker was expected on, if any.",بيان ما قبل الوصول الذي كان يُتوقع إدراج هذا العامل ضمنه، إن وُجد.
@@ -2946,6 +2978,7 @@ This voucher reconciles the claimed fuel against consumption recorded in the Fue
 This will clear and rebuild the entire payment schedule. Continue?,سيؤدي هذا إلى حذف جدول الدفعات وإعادة بنائه بالكامل. هل تريد المتابعة؟
 This worker already holds an active bed.,هذا العامل يشغل بالفعل سريراً نشطاً.
 This worker does not hold: {0},هذا العامل لا يحمل: {0}
+This worker has no active Masar link yet. Create the QR first.,لا يملك هذا العامل رابط مسار فعّالاً بعد. أنشئ رمز الاستجابة السريعة أولاً.
 This worker holds no returnable custody.,لا يحتفظ هذا العامل بأي عهدة قابلة للإرجاع.
 "This worker is not linked to a permanent Employee yet, so the worker portal is not available.",هذا العامل غير مرتبط بموظف دائم بعد، لذا بوابة العامل غير متاحة.
 This worker link is invalid or has been disabled.,رابط العامل غير صالح أو تم تعطيله.
@@ -3210,6 +3243,8 @@ Weekly Custody Digest,ملخص العهدة الأسبوعي
 Weekly custody summary for your building(s):,ملخص العهدة الأسبوعي لمبانيك:
 What do you need help with?,ما الذي تحتاج المساعدة فيه؟
 What happened?,ماذا حدث؟
+WhatsApp,واتساب
+WhatsApp / SMS Gateway,بوابة واتساب / الرسائل النصية
 "When OFF (default), accommodation assignment does not touch Salary Structure Assignment.",عند الإيقاف (الافتراضي)، لا يمسّ تسكين السكن إسناد هيكل الراتب.
 "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",عند الإيقاف، تكون أسطر سجل السكن مذكرات تشغيلية دون أثر على دفتر الأستاذ العام.
 "When ON, checkout damage amounts post to Additional Salary. Default OFF.",عند التفعيل، تُرحَّل مبالغ تلف المغادرة إلى الراتب الإضافي. الافتراضي: إيقاف.

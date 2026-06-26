@@ -13,7 +13,17 @@
   "apex_integration_general_col",
   "allowed_origins",
   "apex_integration_sec_help",
-  "integration_help"
+  "integration_help",
+  "apex_integration_tab_gateway",
+  "apex_integration_sec_gateway",
+  "messaging_gateway_enabled",
+  "messaging_gateway_channel",
+  "messaging_gateway_url",
+  "apex_integration_gateway_col",
+  "messaging_gateway_api_key",
+  "messaging_gateway_sender_id",
+  "apex_integration_sec_gateway_help",
+  "messaging_gateway_help"
  ],
  "fields": [
   {
@@ -68,11 +78,71 @@
    "fieldtype": "Text Editor",
    "label": "Integration Help",
    "read_only": 1
+  },
+  {
+   "fieldname": "apex_integration_tab_gateway",
+   "fieldtype": "Tab Break",
+   "label": "Messaging Gateway"
+  },
+  {
+   "fieldname": "apex_integration_sec_gateway",
+   "fieldtype": "Section Break",
+   "label": "WhatsApp / SMS Gateway"
+  },
+  {
+   "default": "0",
+   "description": "Master switch for outbound WhatsApp/SMS messages (worker Masar links, ride and request status). When OFF (default), every send is a logged no-op. Turn ON only after the gateway URL and API key below are set.",
+   "fieldname": "messaging_gateway_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Messaging Gateway"
+  },
+  {
+   "default": "WhatsApp",
+   "description": "Preferred channel passed to the gateway. The gateway provider decides actual delivery; this is the channel hint sent in the request payload.",
+   "fieldname": "messaging_gateway_channel",
+   "fieldtype": "Select",
+   "label": "Default Channel",
+   "options": "WhatsApp\nSMS"
+  },
+  {
+   "description": "HTTPS endpoint of the generic message-send gateway, for example https://gateway.example.com/v1/messages. The app POSTs a JSON body { to, message, channel, sender_id } to this URL with the API key as a Bearer token. Provider-agnostic; the operator points this at their own WhatsApp/SMS provider or middleware.",
+   "fieldname": "messaging_gateway_url",
+   "fieldtype": "Data",
+   "label": "Gateway URL",
+   "options": "URL"
+  },
+  {
+   "fieldname": "apex_integration_gateway_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Secret API key/token for the gateway, sent as an Authorization: Bearer header. Stored encrypted; never echoed back to the client.",
+   "fieldname": "messaging_gateway_api_key",
+   "fieldtype": "Password",
+   "label": "Gateway API Key"
+  },
+  {
+   "description": "Optional sender id / from number the gateway should send as (when the provider requires it). Sent as sender_id in the request body.",
+   "fieldname": "messaging_gateway_sender_id",
+   "fieldtype": "Data",
+   "label": "Sender ID / From Number"
+  },
+  {
+   "fieldname": "apex_integration_sec_gateway_help",
+   "fieldtype": "Section Break",
+   "label": "How The Gateway Works"
+  },
+  {
+   "default": "<h4>Outbound WhatsApp / SMS</h4>\n<p>This app does not bundle a WhatsApp/SMS provider. It POSTs a small JSON message to a <b>generic HTTP gateway</b> you operate or subscribe to, so any provider (Twilio, an official WhatsApp Business API host, a local SMS aggregator, or your own middleware) can be wired without code changes.</p>\n<p>Set the <b>Gateway URL</b> and <b>API Key</b> above, then turn on <b>Enable Messaging Gateway</b>. The app sends, per message:</p>\n<pre>POST &lt;Gateway URL&gt;\nAuthorization: Bearer &lt;Gateway API Key&gt;\nContent-Type: application/json\n\n{ \"to\": \"+9665...\", \"message\": \"...\", \"channel\": \"WhatsApp\", \"sender_id\": \"...\" }</pre>\n<p>Adapt your provider or a thin middleware to accept that shape (or place a small translator in front of the real provider). While the gateway is disabled or unconfigured every send is a safe, logged no-op &mdash; nothing is dispatched.</p>",
+   "fieldname": "messaging_gateway_help",
+   "fieldtype": "Text Editor",
+   "label": "Gateway Help",
+   "read_only": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-05-30 13:00:00.000000",
+ "modified": "2026-06-26 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Apex Integration Settings",

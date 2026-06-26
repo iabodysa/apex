@@ -51,6 +51,8 @@
   "notify_finance_on_liability_transfer",
   "habitat_settings_store_col",
   "finance_notification_email",
+  "habitat_settings_sec_arrivals",
+  "enable_passport_mrz_ocr",
   "habitat_settings_sec_system",
   "last_modified_by_role"
  ],
@@ -345,6 +347,18 @@
    "options": "Email"
   },
   {
+   "fieldname": "habitat_settings_sec_arrivals",
+   "fieldtype": "Section Break",
+   "label": "Arrivals Intake"
+  },
+  {
+   "default": "0",
+   "description": "When ON, the Arrivals Desk register sheet offers a camera capture that reads a passport's machine-readable zone (MRZ) and pre-fills the name, passport number, nationality, and expiry. Requires an OCR engine to be available on the bench (see docs). When OFF (default) or when OCR is unavailable, manual entry is used.",
+   "fieldname": "enable_passport_mrz_ocr",
+   "fieldtype": "Check",
+   "label": "Enable Passport MRZ OCR Autofill"
+  },
+  {
    "fieldname": "habitat_settings_sec_system",
    "fieldtype": "Section Break",
    "label": "System",
@@ -359,7 +373,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-25 12:00:00.000000",
+ "modified": "2026-06-26 13:30:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Habitat Settings",

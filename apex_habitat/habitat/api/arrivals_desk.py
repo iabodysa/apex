@@ -42,6 +42,39 @@ def _expiry_days(expiry_date) -> int | None:
     return frappe.utils.date_diff(expiry_date, frappe.utils.today())
 
 
+@frappe.whitelist(methods=["POST"])
+def send_masar_link_message(employee, phone=None) -> dict:
+    """Send a worker their already-issued Masar link to their phone (WhatsApp/SMS).
+
+    The per-row desk action on the QR block: resolves the worker's enabled Masar
+    token (the link is server-produced, never trusted from the client — a missing
+    or disabled token is refused), then hands it to the settings-driven messaging
+    gateway. ``phone`` may be passed (the desk already has it from the link
+    issuer); when omitted the Employee's ``cell_number`` is read server-side.
+
+    Permission-gated on read of the Masar Worker Token (the same gate the slip QR
+    uses). Returns the gateway queue/no-op result; when the gateway is not
+    configured the send is a graceful no-op (``queued: False, reason:
+    not_configured``) so the desk can message the operator to wire it, never
+    erroring."""
+    from apex_habitat.salis.api import messaging_gateway
+
+    frappe.has_permission("Masar Worker Token", "read", throw=True)
+    token = (
+        frappe.db.get_value(
+            "Masar Worker Token", {"employee": employee}, ["token", "enabled"], as_dict=True
+        )
+        or {}
+    )
+    if not token.get("token") or not token.get("enabled"):
+        frappe.throw(_("This worker has no active Masar link yet. Create the QR first."))
+
+    result = messaging_gateway.send_masar_link(
+        employee, _worker_link(token["token"]), phone=phone
+    )
+    return {"gateway_configured": messaging_gateway.is_configured(), **result}
+
+
 @frappe.whitelist()
 def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     """Party-aware arrival snapshot for one worker (Employee or Temporary Worker)."""
@@ -258,6 +291,183 @@ def _link_manifest_row(batch_row, temporary_worker) -> None:
     if not frappe.has_permission("Arrival Batch", "write", doc=parent):
         return
     frappe.db.set_value("Arrival Batch Worker", batch_row, "temporary_worker", temporary_worker)
+
+
+# Passport MRZ (machine-readable zone) autofill for the register sheet.
+#
+# The MRZ is the two/three fixed-width OCR-B lines at the foot of a passport. The
+# PARSER below is pure, deterministic, and testable; the image->text OCR step is
+# pluggable (an optional bench engine) so the heavy/optional dependency is wired
+# by the operator, while the parse + the desk scaffold ship now. Feature-flagged
+# by Habitat Settings.enable_passport_mrz_ocr; manual entry always remains.
+
+# ISO 3166 alpha-3 -> human nationality, for the handful of labour-supply
+# nationalities the desk sees most; an unmapped code passes through as the raw
+# 3-letter code (still useful, never wrong).
+_MRZ_NATIONALITY = {
+    "IND": "Indian",
+    "PAK": "Pakistani",
+    "BGD": "Bangladeshi",
+    "NPL": "Nepali",
+    "LKA": "Sri Lankan",
+    "PHL": "Filipino",
+    "EGY": "Egyptian",
+    "SDN": "Sudanese",
+    "YEM": "Yemeni",
+    "IDN": "Indonesian",
+    "ETH": "Ethiopian",
+    "KEN": "Kenyan",
+    "UGA": "Ugandan",
+    "SAU": "Saudi",
+}
+
+
+def _mrz_yymmdd_to_date(value: str, is_expiry: bool) -> str | None:
+    """Convert an MRZ ``YYMMDD`` field to an ISO ``YYYY-MM-DD`` date, or None.
+
+    MRZ carries only a two-digit year. A birth date is always in the past; an
+    expiry is always in the future — so the century is inferred from that, not
+    guessed. Returns None on any non-numeric or out-of-range field rather than
+    raising (a bad scan must degrade to manual entry, never error)."""
+    import datetime
+
+    value = (value or "").strip()
+    if len(value) != 6 or not value.isdigit():
+        return None
+    yy, mm, dd = int(value[:2]), int(value[2:4]), int(value[4:6])
+    if not (1 <= mm <= 12 and 1 <= dd <= 31):
+        return None
+    current_yy = frappe.utils.now_datetime().year % 100
+    # A passport expiry is always 20xx (none are 19xx, and 21xx is decades off),
+    # so the two-digit year maps straight onto the 2000s. A birth date is in the
+    # past: this-century only if not future, else last century.
+    if is_expiry:
+        century = 2000
+    else:
+        century = 2000 if yy <= current_yy else 1900
+    try:
+        return datetime.date(century + yy, mm, dd).isoformat()
+    except ValueError:
+        return None
+
+
+def parse_mrz_text(text: str) -> dict:
+    """Parse passport MRZ text into ``{worker_name, passport_number, nationality,
+    expiry_date}``. Pure + deterministic — the testable core of the feature.
+
+    Handles the TD3 passport format (two 44-char lines). Line 1 carries the issuing
+    country and the name (``SURNAME<<GIVEN<NAMES``); line 2 the passport number,
+    nationality, birth date, sex, and expiry. The scan is rarely perfect, so each
+    field is extracted defensively and missing/garbled fields come back as None —
+    the desk pre-fills what parsed and the supervisor confirms the rest. Returns
+    only the keys that parsed (plus ``raw_lines`` for debugging)."""
+    import re
+
+    # Keep only plausible MRZ characters and split into the long fixed-width lines.
+    lines = [
+        re.sub(r"[^A-Z0-9<]", "", ln.strip().upper())
+        for ln in (text or "").splitlines()
+        if ln.strip()
+    ]
+    mrz_lines = [ln for ln in lines if len(ln) >= 30 and "<" in ln]
+    out: dict = {"raw_lines": mrz_lines}
+    if len(mrz_lines) < 2:
+        return out
+
+    line1, line2 = mrz_lines[0], mrz_lines[1]
+
+    # Line 1: 'P<XXX' issuing-country prefix, then SURNAME<<GIVEN<NAMES.
+    name_part = line1
+    m = re.match(r"^P[A-Z<]([A-Z]{3})(.*)$", line1)
+    if m:
+        out["nationality"] = _MRZ_NATIONALITY.get(m.group(1), m.group(1))
+        name_part = m.group(2)
+    if "<<" in name_part:
+        surname, _, given = name_part.partition("<<")
+        surname = surname.replace("<", " ").strip()
+        given = given.replace("<", " ").strip()
+        full = " ".join(p for p in (given, surname) if p)
+        if full:
+            out["worker_name"] = full
+
+    # Line 2: passport_no(9) check(1) nationality(3) dob(6) check(1) sex(1)
+    #         expiry(6) check(1) ...
+    passport_no = line2[:9].replace("<", "").strip()
+    if passport_no:
+        out["passport_number"] = passport_no
+    if len(line2) >= 13 and "nationality" not in out:
+        nat = line2[10:13].replace("<", "").strip()
+        if nat:
+            out["nationality"] = _MRZ_NATIONALITY.get(nat, nat)
+    if len(line2) >= 27:
+        expiry = _mrz_yymmdd_to_date(line2[21:27], is_expiry=True)
+        if expiry:
+            out["expiry_date"] = expiry
+    return out
+
+
+def _ocr_image_to_text(image: str) -> str | None:
+    """Best-effort OCR of a base64 passport image to raw text, or None.
+
+    The OCR engine is OPTIONAL and operator-provided: this tries the engines that
+    might be installed on the bench (``pytesseract`` over Pillow) and returns None
+    when none is available — at which point ``parse_passport`` reports that the
+    OCR engine must be enabled, and the desk falls back to manual entry. Kept fully
+    defensive so a missing dependency degrades gracefully rather than 500-ing."""
+    import base64
+    import io
+
+    payload = image.split(",", 1)[1] if image.startswith("data:") and "," in image else image
+    try:
+        raw = base64.b64decode(payload)
+    except Exception:
+        return None
+
+    try:
+        import pytesseract  # optional, operator-installed
+        from PIL import Image
+
+        img = Image.open(io.BytesIO(raw))
+        return pytesseract.image_to_string(img)
+    except Exception:
+        # No OCR engine on the bench (or it failed) — signal "unavailable".
+        return None
+
+
+@frappe.whitelist(methods=["POST"])
+def parse_passport(image) -> dict:
+    """Read a passport's MRZ from a captured image and return autofill fields.
+
+    The Arrivals Desk camera-capture endpoint: feature-flagged by Habitat
+    Settings ``enable_passport_mrz_ocr`` (a disabled flag returns
+    ``ok=False, reason=disabled`` so the desk keeps manual entry). Permission-gated
+    on create of Temporary Worker — the same right needed to register the arrival
+    this autofills. Runs OCR on the supplied base64 image, then the deterministic
+    MRZ parser, and returns ``{worker_name, passport_number, nationality,
+    expiry_date}`` for the register form to pre-fill. Nothing is written and the
+    image is not persisted; the supervisor reviews and submits the form. When no
+    OCR engine is available it returns ``ok=False, reason=ocr_unavailable`` so the
+    desk degrades to manual entry rather than erroring."""
+    frappe.has_permission("Temporary Worker", "create", throw=True)
+    if not frappe.db.get_single_value("Habitat Settings", "enable_passport_mrz_ocr"):
+        return {"ok": False, "reason": "disabled"}
+
+    image = (image or "").strip()
+    if not image:
+        frappe.throw(_("No image was captured."))
+
+    text = _ocr_image_to_text(image)
+    if text is None:
+        # Flag is on but no engine is wired — honest signal, manual entry stays.
+        return {"ok": False, "reason": "ocr_unavailable"}
+
+    fields = parse_mrz_text(text)
+    parsed = {
+        k: fields.get(k)
+        for k in ("worker_name", "passport_number", "nationality", "expiry_date")
+        if fields.get(k)
+    }
+    return {"ok": bool(parsed), "fields": parsed}
 
 
 @frappe.whitelist(methods=["POST"])
