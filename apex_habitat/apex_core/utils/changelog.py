@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.56 — operations now move in real time: the Fleet Control and Operations Control boards update on their own as vehicles and alerts change, so trouble shows the moment it happens; arrivals, front desk, the custody kiosk and the driver app get a deep rework — residents tint by project so same-project workers group together, the bed board opens straight to your building, a worker badge or article barcode hands custody out by scan, and drivers reply to tickets, report a problem, start a trip and check document expiries from the app; a resident signs the housing terms at check-in and the signature is kept on the assignment; a guided custody go-live walks a new site through defining articles, issuing, returning and assessing damage; the worker app reads fully in Arabic (labels like Left and Suspended no longer leak English) with a developer-mode demo so the worker and driver apps are not empty on first look; and the What's-New note now appears once per version instead of replaying the whole history, alongside reliability work and tighter write-permission checks",
+        "app_name": "apex_habitat",
+        "link": "/app/operations-control",
+        "creation": "2026-06-26 21:00:00",
+    },
+    {
         "title": "Apex 1.55 — the fleet board now keeps you ahead of trouble: a live alert bell shows the open-alert count updating on its own, and from its drawer you jump straight to the vehicle or the alert it belongs to; the board also stays usable when one data source hiccups (it shows the rest instead of going blank) and gains a per-vehicle timeline and clearer workshop status; a simple web form lets anyone report a fleet accident or theft for supervisor review before it takes effect; resident requests get a phone-friendly triage list that is colour-coded by priority, advances a request one tap at a time and can mark several as triaged at once; and custody now runs a daily check that flags held consumables past their usable life so they are replaced before they fail; plus reliability and Arabic-coverage improvements",
         "app_name": "apex_habitat",
         "link": "/fleet",
