@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.60 — keep a running count of what's in each building: a new housing inventory register tracks countable items (furniture, appliances, linen, kitchenware) per building and room, with expected against counted quantity, the variance, and each item's condition, and a completed maintenance work order on a linked item updates the matching row on its own (the maintenance date moves forward and a needs-maintenance flag clears) so nothing is re-keyed by hand; and a driver can opt in on their own device to receive background notifications, so a trip assignment or a fuel decision reaches them even when the app is closed (off until you turn it on and set it up in Settings, with nothing sent until then)",
+        "app_name": "apex_habitat",
+        "link": "/app/housing-inventory",
+        "creation": "2026-06-27 02:00:00",
+    },
+    {
         "title": "Apex 1.59.1 — reliability fixes: driver hours, fuel allocation, rental returns and maintenance close-out now record accurately and stay in step across the two fleet screens; amounts, ledgers and who can approve are unchanged, and nothing already recorded is disturbed",
         "app_name": "apex_habitat",
         "link": "/driver",
