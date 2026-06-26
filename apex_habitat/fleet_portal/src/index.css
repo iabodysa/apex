@@ -331,6 +331,40 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
   animation:panelIn .22s ease;z-index:201;
 }
 @keyframes panelIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+
+/* Alert bell (topbar) + the open-alerts drawer. The drawer opens from the side
+   nearest the bell (the inline-end edge), so it slides in from the right. */
+.alert-bell{
+  position:relative;width:38px;height:38px;border-radius:var(--r3);
+  border:1px solid var(--b2);background:none;color:var(--t2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;
+}
+.alert-bell:hover{color:var(--t1);border-color:var(--b3)}
+.alert-bell.active{color:var(--blue-l);border-color:var(--blue)}
+.alert-bell-badge{
+  position:absolute;top:-5px;inset-inline-end:-5px;min-width:17px;height:17px;padding:0 4px;
+  border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;line-height:1;
+}
+.alert-drawer{
+  position:fixed;top:0;inset-inline-end:0;bottom:0;width:420px;max-width:95vw;
+  background:#ffffff;border-inline-start:1px solid var(--b1);box-shadow:-4px 0 24px rgba(15,28,53,.1);
+  display:flex;flex-direction:column;overflow:hidden;z-index:201;
+}
+.alert-drawer .panel-body{gap:8px}
+.ad-empty{color:var(--t3);font-size:13px;text-align:center;padding:24px 0}
+.ad-row{
+  width:100%;text-align:inherit;border:1px solid;border-radius:var(--r3);
+  padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:6px;
+  font-family:inherit;transition:filter .15s;
+}
+.ad-row:hover{filter:brightness(1.04)}
+.ad-row-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ad-sev{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.ad-when{font-size:10px;color:var(--t3)}
+.ad-msg{font-size:12px;line-height:1.5;color:var(--t1)}
+.ad-meta{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--t3);flex-wrap:wrap}
+.ad-link{margin-inline-start:auto;font-weight:600;color:var(--blue-l)}
 .panel-head{
   padding:16px 20px;border-bottom:1px solid var(--b1);
   display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;

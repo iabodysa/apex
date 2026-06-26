@@ -59,6 +59,17 @@ const messages = {
     brand: {
       name: "Fleet OS",
     },
+    alerts: {
+      title: "Operations alerts",
+      bellTitle: "Open operations alerts",
+      empty: "No open alerts",
+      loadError: "Couldn't load alerts",
+      openInDesk: "Open in Desk",
+      viewVehicle: "View vehicle",
+      sevInfo: "Info",
+      sevWarning: "Warning",
+      sevCritical: "Critical",
+    },
     topbar: {
       searchPlaceholder: "Search: plate, driver, type, office...",
       allVehicles: "All vehicles",
@@ -417,6 +428,17 @@ const messages = {
     },
     brand: {
       name: "Fleet OS",
+    },
+    alerts: {
+      title: "تنبيهات التشغيل",
+      bellTitle: "تنبيهات التشغيل المفتوحة",
+      empty: "لا توجد تنبيهات مفتوحة",
+      loadError: "تعذّر تحميل التنبيهات",
+      openInDesk: "فتح في النظام",
+      viewVehicle: "عرض المركبة",
+      sevInfo: "معلومة",
+      sevWarning: "تحذير",
+      sevCritical: "حرج",
     },
     topbar: {
       searchPlaceholder: "ابحث: لوحة، سائق، نوع، مكتب...",

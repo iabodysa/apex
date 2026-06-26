@@ -80,6 +80,7 @@ async function reloadFleet() {
   }
 }
 onMounted(loadFleet);
+onMounted(loadAlerts);
 
 // ═══════════ LIVE POLL (see other supervisors' changes) ═══════════
 // A background refresh on an interval so the board reflects another user's
@@ -99,6 +100,7 @@ const pollPaused = computed(
 async function pollTick() {
   if (document.hidden || pollPaused.value) return;
   await reloadFleet();
+  await loadAlerts();
 }
 function startPoll() {
   if (pollTimer) return;
@@ -486,6 +488,54 @@ function setPTab(idx) {
 
 const tabDmg = computed(() => (panel.vehicle?.damages || []).length);
 const tabAcc = computed(() => (panel.vehicle?.accidents || []).length);
+
+// ═══════════ OPERATIONS ALERTS (bell + drawer) ═══════════
+// The bell badge shows summary.total from the scoped open-alert queue; the drawer
+// lists the rows. A row deep-links to its vehicle's panel when the plate is on the
+// board, else opens the Operations Alert in Desk (the alert stores no source doc).
+const ALERTS_GET = "apex_habitat.salis.api.operations_alerts.get_open_alerts";
+const alerts = ref([]);
+const alertTotal = ref(0);
+const alertsState = ref("idle"); // idle | loading | ready | error
+const alertsOpen = ref(false);
+
+async function loadAlerts() {
+  if (alertsState.value !== "ready") alertsState.value = "loading";
+  try {
+    const r = await call(ALERTS_GET);
+    alerts.value = (r && r.alerts) || [];
+    alertTotal.value = (r && r.summary && r.summary.total) || 0;
+    alertsState.value = "ready";
+  } catch (e) {
+    alertsState.value = "error";
+  }
+}
+function toggleAlerts() {
+  alertsOpen.value = !alertsOpen.value;
+  if (alertsOpen.value) loadAlerts();
+}
+function closeAlerts() {
+  alertsOpen.value = false;
+}
+const sevClass = (s) =>
+  s === "Critical" ? "alert-red" : s === "Info" ? "alert-green" : "alert-amber";
+const sevLabel = (s) => t("alerts.sev" + (s || "Warning"));
+
+// A row links to its vehicle's drawer if the plate is on the board; otherwise to
+// the Operations Alert record in Desk.
+function alertVehicleOnBoard(a) {
+  if (!a.plate_number) return null;
+  return vehicles.value.find((x) => x.plate === a.plate_number) || null;
+}
+function openAlertTarget(a) {
+  const v = alertVehicleOnBoard(a);
+  if (v) {
+    closeAlerts();
+    openPanel(v.plate);
+  } else {
+    window.open("/app/operations-alert/" + encodeURIComponent(a.name), "_blank");
+  }
+}
 
 // ═══════════ TOAST ═══════════
 const toast = reactive({ msg: "", type: "green", show: false });
@@ -1007,6 +1057,10 @@ function expiryFlag(v) {
       <span v-if="triage.incidents" class="sp sp-triage-incident" :class="{ active: triageFilter === 'incidents' }" @click="setTriage('incidents')"><Icon name="crash" :size="12" /> {{ triage.incidents }} {{ t("topbar.openIncidents") }}</span>
       <span v-if="triage.expiring" class="sp sp-triage-expiry" :class="{ active: triageFilter === 'expiring' }" @click="setTriage('expiring')"><Icon name="shield-alert" :size="12" /> {{ triage.expiring }} {{ t("topbar.expiringSoon") }}</span>
     </div>
+    <button class="alert-bell" :class="{ active: alertsOpen }" :title="t('alerts.bellTitle')" :aria-label="t('alerts.bellTitle')" @click="toggleAlerts">
+      <Icon name="bell" :size="18" />
+      <span v-if="alertTotal > 0" class="alert-bell-badge">{{ alertTotal > 99 ? "99+" : alertTotal }}</span>
+    </button>
     <LangToggle />
   </div>
 
@@ -1304,6 +1358,39 @@ function expiryFlag(v) {
       </div>
     </div>
   </div>
+
+  <!-- ALERT DRAWER -->
+  <transition name="fp-overlay">
+    <div v-if="alertsOpen" class="panel-overlay open" @click.self="closeAlerts"></div>
+  </transition>
+  <transition name="fp-panel">
+    <div v-if="alertsOpen" class="alert-drawer">
+      <div class="panel-head">
+        <div class="ph-left">
+          <div class="ph-plate"><Icon name="bell" :size="18" /> {{ t("alerts.title") }}</div>
+          <div class="ph-sub">{{ alertTotal }}</div>
+        </div>
+        <button class="panel-close" @click="closeAlerts"><Icon name="x" :size="18" /></button>
+      </div>
+      <div class="panel-body">
+        <div v-if="alertsState === 'loading'" class="ad-empty">{{ t("alerts.title") }}…</div>
+        <div v-else-if="alertsState === 'error'" class="alert alert-red">{{ t("alerts.loadError") }}</div>
+        <div v-else-if="!alerts.length" class="ad-empty">{{ t("alerts.empty") }}</div>
+        <button v-for="a in alerts" v-else :key="a.name" class="ad-row" :class="sevClass(a.severity)" @click="openAlertTarget(a)">
+          <div class="ad-row-top">
+            <span class="ad-sev">{{ sevLabel(a.severity) }}</span>
+            <span class="ad-when">{{ a.raised_on }}</span>
+          </div>
+          <div class="ad-msg">{{ a.message }}</div>
+          <div class="ad-meta">
+            <span v-if="a.plate_number"><bdi>{{ a.plate_number }}</bdi></span>
+            <span v-if="a.driver_name">· {{ a.driver_name }}</span>
+            <span class="ad-link">{{ alertVehicleOnBoard(a) ? t("alerts.viewVehicle") : t("alerts.openInDesk") }}</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </transition>
 
   <!-- PANEL (right drawer) -->
   <transition name="fp-overlay">

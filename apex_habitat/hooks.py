@@ -154,6 +154,7 @@ scheduler_events = {
         "apex_habitat.habitat.tasks.lease_expiry_watchlist",
         "apex_habitat.habitat.tasks.temporary_stay_checkout_watchlist",
         "apex_habitat.habitat.tasks.idle_resident_aging",
+        "apex_habitat.habitat.tasks.consumable_custody_expiry_watch",
         "apex_habitat.habitat.tasks.daily_scheduled_task_instance_generator",
         "apex_habitat.habitat.tasks.daily_occupancy_snapshot",
         # [#wave3-safety]

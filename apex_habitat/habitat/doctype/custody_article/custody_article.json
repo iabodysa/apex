@@ -79,6 +79,14 @@
    "idx": 10
   },
   {
+   "doctype": "DocField",
+   "fieldname": "consumable_lifespan_months",
+   "fieldtype": "Int",
+   "label": "Consumable Lifespan (Months)",
+   "description": "Service life of a consumable issue (linens, mattresses). 0 = no expiry; a daily job alerts on held items older than this.",
+   "idx": 11
+  },
+  {
    "fieldname": "custody_article_sec_large_text",
    "fieldtype": "Section Break",
    "label": "Notes & Image",
@@ -194,11 +202,12 @@
   "is_serialized",
   "custody_article_sec_costing",
   "standard_unit_cost_sar",
+  "consumable_lifespan_months",
   "custody_article_sec_large_text",
   "notes",
   "image",
   "custody_article_sec_system",
   "naming_series"
  ],
- "modified": "2026-06-09 09:00:00.000000"
+ "modified": "2026-06-26 04:03:31.784263"
 }

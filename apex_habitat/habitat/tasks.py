@@ -5,6 +5,7 @@ from __future__ import annotations
 import calendar
 
 import frappe
+from frappe import _
 
 
 def _notify_operational(source_doctype: str, source_name: str, message: str) -> None:
@@ -133,6 +134,92 @@ def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_tok
             title=f"Safety alert insert failed ({dedupe_token})"[:140],
         )
         return None
+
+
+def _raise_consumable_alert(message: str, dedupe_token: str) -> str | None:
+    """Raise a Consumable Expired Operations Alert (idempotent), via the shared helper.
+
+    Existence-guarded on ``(alert_type=Consumable Expired, status=Open,
+    message LIKE %dedupe_token%, raised_on=today)`` so the daily job never spams a
+    duplicate for the same held position. The insert itself goes through
+    ``insert_operations_alert`` (the one place that writes the record). Returns the
+    new alert name, or None when a duplicate was skipped or the insert failed.
+    """
+    from frappe.utils import today
+
+    from apex_habitat.apex_core.utils.operations_alert import insert_operations_alert
+
+    today_str = today()
+    try:
+        if frappe.db.exists(
+            "Operations Alert",
+            {
+                "alert_type": "Consumable Expired",
+                "status": "Open",
+                "message": ["like", f"%{dedupe_token}%"],
+                "raised_on": ["between", [f"{today_str} 00:00:00", f"{today_str} 23:59:59"]],
+            },
+        ):
+            return None
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Consumable alert dedupe check failed ({dedupe_token})"[:140],
+        )
+        return None
+
+    return insert_operations_alert("Consumable Expired", "Warning", message)
+
+
+def consumable_custody_expiry_watch() -> None:
+    """Flag held custody consumables past their per-article lifespan.
+
+    A held position is a net-positive (item, employee) balance in the
+    Accommodation Stock Ledger; its age is months since the EARLIEST still-held
+    issue posting. Articles carry their own ``consumable_lifespan_months`` (0 = no
+    expiry) so linens/mattresses age out without hardcoding a flat year. One
+    bounded grouped query; the alert is one Warning per over-age position per day.
+    """
+    from frappe.utils import getdate, today
+
+    rows = frappe.db.sql(
+        """
+        SELECT sle.item AS article, sle.employee AS employee,
+               SUM(sle.qty) AS net_qty, MIN(sle.posting_date) AS first_held,
+               art.article_name AS article_name,
+               art.consumable_lifespan_months AS lifespan
+        FROM `tabAccommodation Stock Ledger` sle
+        INNER JOIN `tabCustody Article` art ON art.name = sle.item
+        WHERE sle.is_cancelled = 0
+          AND sle.item_type = 'Custody Article'
+          AND sle.employee IS NOT NULL AND sle.employee != ''
+          AND art.consumable_lifespan_months > 0
+        GROUP BY sle.item, sle.employee
+        HAVING net_qty > 0
+        """,
+        as_dict=True,
+    )
+
+    today_date = getdate(today())
+    for r in rows:
+        if not r.first_held:
+            continue
+        held = getdate(r.first_held)
+        age_months = (today_date.year - held.year) * 12 + (today_date.month - held.month)
+        if today_date.day < held.day:
+            age_months -= 1
+        if age_months < int(r.lifespan or 0):
+            continue
+        emp_name = frappe.db.get_value("Employee", r.employee, "employee_name") or r.employee
+        token = f"{r.employee}:{r.article}"
+        # Token embedded so the message-LIKE dedupe in _raise_consumable_alert matches.
+        message = _(
+            "Consumable {0} held by {1} since {2} is {3} month(s) old, past its {4}-month lifespan."
+        ).format(
+            r.article_name or r.article, emp_name, r.first_held, age_months, int(r.lifespan or 0)
+        ) + f" [{token}]"
+        _raise_consumable_alert(message, dedupe_token=token)
 
 
 def daily_accommodation_cost_allocation() -> None:

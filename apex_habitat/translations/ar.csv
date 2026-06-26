@@ -615,6 +615,7 @@ Consent Date,تاريخ الموافقة
 Consent Given,تم منح الموافقة
 Consent Given must be checked before submitting the acknowledgment.,"يجب تحديد ""تم منح الموافقة"" قبل تقديم الإقرار."
 Consent Method,طريقة الموافقة
+Consumable Expired,مستهلك منتهي الصلاحية
 Consumed Litres,اللترات المستهلكة
 Consumed {0} L via Fuel Request {1}.,تم استهلاك {0} لتر عبر طلب الوقود {1}.
 Consumption,الاستهلاك
@@ -2264,6 +2265,7 @@ Replace,استبدال
 Replaced,مُستبدَل
 Replacement Cost (SAR),تكلفة الاستبدال (ريال)
 Report,تقرير
+Report Incident,الإبلاغ عن حادثة
 Reported By,مُبلغ من قبل
 Reported On,تاريخ الإبلاغ
 Reported stolen from the Fleet OS dashboard.,أُبلغ عن السرقة من لوحة الأسطول.
@@ -3093,6 +3095,7 @@ Web QR,رمز QR للويب
 Website,الموقع الإلكتروني
 Weekly,أسبوعي
 What do you need help with?,ما الذي تحتاج المساعدة فيه؟
+What happened?,ماذا حدث؟
 "When OFF (default), accommodation assignment does not touch Salary Structure Assignment.",عند الإيقاف (الافتراضي)، لا يمسّ تسكين السكن إسناد هيكل الراتب.
 "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",عند الإيقاف، تكون أسطر سجل السكن مذكرات تشغيلية دون أثر على دفتر الأستاذ العام.
 "When ON, checkout damage amounts post to Additional Salary. Default OFF.",عند التفعيل، تُرحَّل مبالغ تلف المغادرة إلى الراتب الإضافي. الافتراضي: إيقاف.
@@ -3161,6 +3164,7 @@ You may only handle boarding for your own trips.,لا يمكنك إدارة ال
 Your Name (Optional),اسمك (اختياري)
 Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.
 Your arrival manifest was submitted. The accommodation team will reconcile arrivals against it on the expected date.,تم إرسال بيان الوصول الخاص بك. سيقوم فريق السكن بمطابقة الوصول الفعلي مع البيان في التاريخ المتوقع.
+Your incident report was submitted. A supervisor will review and confirm it.,تم إرسال بلاغ الحادثة. سيقوم المشرف بمراجعته وتأكيده.
 Your request has been submitted. Save your tracking code shown below to follow up with your supervisor.,تم تقديم طلبك. احفظ رمز التتبع أدناه للمتابعة مع مشرفك.
 Your tracking code:,رمز المتابعة الخاص بك:
 Your transport request was submitted. Save your tracking code to follow up with your supervisor.,تم تقديم طلب التنقل. احفظ رمز التتبع للمتابعة مع مشرفك.
