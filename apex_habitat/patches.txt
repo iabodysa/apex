@@ -161,3 +161,15 @@ apex_habitat.patches.v1_x.enable_salis_driver_notifications
 # send_system_notification on the live row. Idempotent, no-op on fresh installs / re-run.
 # PRUNE once every deployed site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.enable_custody_return_overdue_notification
+
+# v1.x — seed a small demo worker-movement scenario (developer_mode only) so Masar +
+# the driver portal are not empty on a first look. Gated behind developer_mode +
+# required DocTypes; idempotent get-or-create on stable demo keys; generic placeholders
+# (no real PII); never aborts install/migrate. PERMANENT — fresh demo sites replay it.
+apex_habitat.patches.v1_x.seed_masar_demo_movement
+
+# v1.x — stamp last_known_versions[apex_habitat] for users already past the changelog
+# popup, so the version-feed migration to a tracked seen-version does not re-show old
+# release notes. Touches only the changelog-seen value; preserves other apps' entries.
+# Idempotent; no-op on fresh installs / re-run.
+apex_habitat.patches.v1_x.stamp_changelog_seen_version

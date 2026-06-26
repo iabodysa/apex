@@ -76,6 +76,9 @@
           <span class="tab-pip"></span>
         </router-link>
       </nav>
+
+      <!-- Transient toast host (auto-dismiss + cleared on route change). -->
+      <Toast />
     </template>
 
     <!-- A genuine server error: surface it. Never mis-render as "not linked". -->
@@ -102,14 +105,22 @@
 
 <script setup>
 import { computed, watch } from "vue";
+import { useRoute } from "vue-router";
 import { createResource } from "frappe-ui";
 import Unlinked from "./components/Unlinked.vue";
 import Icon from "./components/Icon.vue";
 import Brand from "./components/Brand.vue";
 import LangToggle from "./components/LangToggle.vue";
+import Toast from "./components/Toast.vue";
 import { useI18n } from "./i18n";
+import { clearToasts } from "./toast";
 
 const { t, dir } = useI18n();
+
+// Clear any transient toast when the route changes so a success message never
+// lingers onto the next screen.
+const route = useRoute();
+watch(() => route.fullPath, () => clearToasts());
 
 // Keep the document direction (and lang attribute) in sync with the chosen
 // language so native RTL applies to the whole page, scrollbars and inputs

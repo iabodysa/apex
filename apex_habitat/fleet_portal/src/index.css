@@ -783,6 +783,77 @@ tbody tr:hover{background:var(--s1)}
   .panel{width:100%;max-width:100%}
 }
 
+/* Mobile-only affordances (the Filters button, the sheet close, the backdrop)
+   are hidden on wider viewports; the phone media query reveals them. */
+.fp-mobile-only{display:none}
+.fp-filters-btn{position:relative}
+.fp-filters-dot{
+  position:absolute;top:-3px;inset-inline-end:-3px;width:8px;height:8px;
+  border-radius:50%;background:var(--blue);border:2px solid var(--bg2);
+}
+
+/* [#fpmob1] Phone layout: a single-column board, a horizontally scrollable
+   status-pill row, the filters/stats sidebar as a bottom sheet, and the detail
+   panel / alert drawer promoted to full-screen routes. RTL-aware (the page is
+   dir=rtl by default), so the sheet/panel use logical insets where they slide. */
+@media(max-width:640px){
+  .fp-mobile-only{display:inline-flex}
+
+  /* Compact top bar; search on its own row. */
+  .topbar{padding:8px 12px;gap:8px}
+  .brand-name{font-size:14px}
+  .search-bar{order:3;flex:1 1 100%;max-width:none}
+
+  /* Status pills: a single non-wrapping row the user swipes through. */
+  .status-pills{
+    order:4;flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;margin-right:0;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+    padding-bottom:2px;scroll-snap-type:x proximity;
+  }
+  .status-pills::-webkit-scrollbar{display:none}
+  .status-pills .sp{flex:0 0 auto;scroll-snap-align:start}
+
+  /* Cards stack to one column; table scrolls horizontally. */
+  .cards-grid{grid-template-columns:1fr}
+  .table-wrap{overflow-x:auto}
+  .main-header{flex-wrap:wrap;gap:8px}
+
+  /* Sidebar becomes a bottom sheet: hidden off-screen until toggled. */
+  .layout{display:block}
+  .fp-sheet-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;
+    backdrop-filter:blur(3px);
+  }
+  .sidebar{
+    position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;
+    max-height:82vh;border:none;border-top:1px solid var(--b1);
+    border-radius:16px 16px 0 0;box-shadow:0 -8px 30px rgba(15,28,53,.22);
+    transform:translateY(100%);transition:transform .26s ease;
+    z-index:160;
+  }
+  .sidebar.fp-sheet-open{transform:translateY(0)}
+  .sidebar-header{
+    position:relative;justify-content:space-between;
+    /* a grab-handle hint at the top of the sheet */
+  }
+  .sidebar-header::before{
+    content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);
+    width:36px;height:4px;border-radius:2px;background:var(--b3);
+  }
+  .fp-sheet-close{width:30px;height:30px}
+
+  /* Detail panel + alert drawer: full-screen routes on a phone. */
+  .panel,.alert-drawer{
+    width:100vw;max-width:100vw;inset:0;border:none;border-radius:0;
+  }
+  .panel-tabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  .panel-tabs::-webkit-scrollbar{display:none}
+  .panel-tabs .ptab{flex:0 0 auto}
+
+  /* Roomier tap targets for the in-card action buttons. */
+  .ac{padding:7px 9px}
+}
+
 /* [#t6dk0v] */
 @keyframes fpBoardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .cards-grid,.table-wrap{animation:fpBoardIn .3s ease both}

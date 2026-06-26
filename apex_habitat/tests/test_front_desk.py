@@ -128,6 +128,8 @@ class TestSupervisorBuildings(ApexHabitatTestCase):
         self.assertEqual(b["blocked"], 1, "available bed in a not-ready room counts as blocked")
         self.assertEqual(b["occupied"], 0)
         self.assertEqual(b["occupancy_pct"], 0)
+        # More than one building in scope: no auto-open hint (the user must pick).
+        self.assertFalse(a["auto"], "multi-building scope does not auto-open")
 
     def test_one_building_scoped_user_sees_exactly_that_one(self):
         with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
@@ -136,6 +138,9 @@ class TestSupervisorBuildings(ApexHabitatTestCase):
             rows = list_supervisor_buildings()
         self.assertEqual([r["building"] for r in rows], [self.b_a])
         self.assertEqual(rows[0]["total_beds"], 2)
+        # A single allowed building carries the auto-open hint so the Front Desk
+        # lands straight on a loaded board with no chip interaction.
+        self.assertTrue(rows[0]["auto"], "one-building supervisor gets auto:true")
 
     def test_zero_building_scoped_user_sees_empty(self):
         with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(

@@ -20,21 +20,23 @@
  "is_default": 0,
  "sequence_id": 2.0,
  "parent_page": "Habitat Hub",
- "content": "[{\"id\": \"WoNaZPIgru\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"338UshwXg9\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Accommodation Go-Live\", \"col\": 12}}, {\"id\": \"hsgHdrLive\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Occupancy</b></span>\", \"col\": 12}}, {\"id\": \"hsgLiveOcc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 3}}, {\"id\": \"hsgLiveVac1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"hsgLiveImm1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Imminent Checkouts\", \"col\": 3}}, {\"id\": \"hsgLiveReq1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Resident Requests\", \"col\": 3}}, {\"id\": \"hsgHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"hsgChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Occupancy Percent Trend\", \"col\": 12}}, {\"id\": \"tWodpekYHU\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"ArrDeskSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Arrivals Desk\", \"col\": 3}}, {\"id\": \"AU1DYOtzOC\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Bed Board\", \"col\": 3}}, {\"id\": \"JZ2mlB7OJD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"FSNXXOZrD2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Checkout\", \"col\": 3}}, {\"id\": \"eaKnJiXIZ1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"v7Z9nmSLK7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Accommodation Assignments\", \"col\": 3}}, {\"id\": \"GF9KY19jUm\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Accommodation Checkouts\", \"col\": 3}}, {\"id\": \"KZRPgiv9hj\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"qFcbP395oC\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Occupied Beds\", \"col\": 3}}, {\"id\": \"hsgBOThr01\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Buildings Over Threshold\", \"col\": 3}}, {\"id\": \"hsgOvdChk1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Checkouts\", \"col\": 3}}, {\"id\": \"hsgRmRdy01\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rooms Needing Readiness\", \"col\": 3}}, {\"id\": \"hsgArrToday1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Arrivals Today\", \"col\": 3}}, {\"id\": \"hsgPendMan1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending on Manifest\", \"col\": 3}}, {\"id\": \"hsgHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"hsgQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Active Assignments\", \"col\": 4}}, {\"id\": \"Ieufvl4kMj\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"mp4HU2s3nG\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}, {\"id\": \"W81gManmPJ\", \"type\": \"card\", \"data\": {\"card_name\": \"Lifecycle\", \"col\": 4}}, {\"id\": \"zmHoma085p\", \"type\": \"card\", \"data\": {\"card_name\": \"Residents and Rooms\", \"col\": 4}}, {\"id\": \"i36f9v7sIW\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "content": "[{\"id\": \"WoNaZPIgru\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"338UshwXg9\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Accommodation Go-Live\", \"col\": 12}}, {\"id\": \"hsgHdrLive\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Occupancy</b></span>\", \"col\": 12}}, {\"id\": \"hsgLiveOcc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 3}}, {\"id\": \"hsgLiveVac1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"hsgLiveImm1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Imminent Checkouts\", \"col\": 3}}, {\"id\": \"hsgLiveReq1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Resident Requests\", \"col\": 3}}, {\"id\": \"hsgHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"hsgChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Occupancy Percent Trend\", \"col\": 12}}, {\"id\": \"tWodpekYHU\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"AU1DYOtzOC\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"ArrDeskSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Arrivals Desk\", \"col\": 3}}, {\"id\": \"JZ2mlB7OJD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"FSNXXOZrD2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Checkout\", \"col\": 3}}, {\"id\": \"eaKnJiXIZ1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"v7Z9nmSLK7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Accommodation Assignments\", \"col\": 3}}, {\"id\": \"GF9KY19jUm\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Accommodation Checkouts\", \"col\": 3}}, {\"id\": \"KZRPgiv9hj\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"qFcbP395oC\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Occupied Beds\", \"col\": 3}}, {\"id\": \"hsgBOThr01\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Buildings Over Threshold\", \"col\": 3}}, {\"id\": \"hsgOvdChk1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Checkouts\", \"col\": 3}}, {\"id\": \"hsgRmRdy01\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rooms Needing Readiness\", \"col\": 3}}, {\"id\": \"hsgArrToday1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Arrivals Today\", \"col\": 3}}, {\"id\": \"hsgPendMan1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending on Manifest\", \"col\": 3}}, {\"id\": \"hsgHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"hsgQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Active Assignments\", \"col\": 4}}, {\"id\": \"hsgQlReq1\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"My Open Resident Requests\", \"col\": 4}}, {\"id\": \"Ieufvl4kMj\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"mp4HU2s3nG\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}, {\"id\": \"W81gManmPJ\", \"type\": \"card\", \"data\": {\"card_name\": \"Lifecycle\", \"col\": 4}}, {\"id\": \"zmHoma085p\", \"type\": \"card\", \"data\": {\"card_name\": \"Residents and Rooms\", \"col\": 4}}, {\"id\": \"i36f9v7sIW\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
    "type": "URL",
-   "label": "Arrivals Desk",
+   "label": "Front Desk",
    "idx": 1,
-   "url": "/app/arrivals-desk"
+   "color": "Blue",
+   "url": "/app/front-desk"
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "URL",
-   "label": "Bed Board",
+   "label": "Arrivals Desk",
    "idx": 2,
-   "url": "/app/front-desk"
+   "color": "Green",
+   "url": "/app/arrivals-desk"
   },
   {
    "doctype": "Workspace Shortcut",
@@ -325,7 +327,14 @@
    "label": "Active Assignments",
    "quick_list_filter": "[[\"docstatus\", \"=\", 1], [\"check_out_date\", \"is\", \"not set\"]]",
    "idx": 1
+  },
+  {
+   "doctype": "Workspace Quick List",
+   "document_type": "Accommodation Resident Request",
+   "label": "My Open Resident Requests",
+   "quick_list_filter": "[[\"status\", \"in\", [\"New\", \"Triaged\", \"Assigned\", \"In Progress\", \"Waiting Evidence\"]]]",
+   "idx": 2
   }
  ],
- "modified": "2026-06-25 22:40:41.848236"
+ "modified": "2026-06-26 04:30:00.000000"
 }

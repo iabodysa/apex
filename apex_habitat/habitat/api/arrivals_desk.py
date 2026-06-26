@@ -212,12 +212,16 @@ def register_temporary_worker(
     project=None,
     cell_number=None,
     iqama_number=None,
+    batch_row=None,
 ) -> dict:
     """Register a passport-only new arrival as a Temporary Worker, returned pre-selected
     for housing. A housing supervisor may create a Temporary Worker but NEVER an
     Employee — the doctype is hard-coded and Employee creation is HRMS-gated.
     The Temporary Worker controller enforces its own rules (unique passport, the
-    30/90-day window, expiry computation)."""
+    30/90-day window, expiry computation).
+
+    ``batch_row`` (optional) is an Arrival Batch Worker manifest line tapped on the
+    desk; on success its ``temporary_worker`` link is set so the manifest line ticks."""
     frappe.has_permission("Temporary Worker", "create", throw=True)
     doc = frappe.get_doc(
         {
@@ -233,12 +237,27 @@ def register_temporary_worker(
         }
     )
     doc.insert()
+    _link_manifest_row(batch_row, doc.name)
     return {
         "party_type": PARTY_TEMPORARY_WORKER,
         "party": doc.name,
         "label": doc.worker_name,
         "expiry_date": doc.expiry_date,
     }
+
+
+def _link_manifest_row(batch_row, temporary_worker) -> None:
+    """Tick a tapped Arrival Batch manifest line by linking it to the registered
+    Temporary Worker. Permission-gated on the parent Arrival Batch; best-effort
+    (a missing or already-linked row is a no-op, never blocks the registration)."""
+    if not (batch_row and temporary_worker):
+        return
+    parent = frappe.db.get_value("Arrival Batch Worker", batch_row, "parent")
+    if not parent:
+        return
+    if not frappe.has_permission("Arrival Batch", "write", doc=parent):
+        return
+    frappe.db.set_value("Arrival Batch Worker", batch_row, "temporary_worker", temporary_worker)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -384,6 +403,66 @@ def get_arrival_summary(date=None, building=None) -> dict:
     }
 
 
+@frappe.whitelist()
+def get_expected_arrivals(date=None, building=None) -> dict:
+    """Today's pre-arrival manifest (Arrival Batch) for the Intake zone.
+
+    Returns the expected workers for ``date`` (default today), optionally scoped to
+    one ``building``, each flagged ``arrived`` once its row has been matched to a
+    registered Temporary Worker (the batch row's ``temporary_worker`` link), plus a
+    running ``arrived``/``pending``/``total`` tally. Read-only; bounded queries; the
+    Arrival Batch DocType may not exist yet (returns an empty manifest then)."""
+    if not frappe.db.exists("DocType", "Arrival Batch"):
+        return {"date": date or frappe.utils.today(), "workers": [], "total": 0, "arrived": 0, "pending": 0}
+    frappe.has_permission("Arrival Batch", "read", throw=True)
+    if building:
+        frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+    date = date or frappe.utils.today()
+
+    filters = {"expected_date": date}
+    if building:
+        filters["building"] = building
+    batches = frappe.get_all(
+        "Arrival Batch", filters=filters, fields=["name", "building", "labour_supplier", "project"]
+    )
+    workers: list[dict] = []
+    if batches:
+        batch_meta = {b.name: b for b in batches}
+        rows = frappe.get_all(
+            "Arrival Batch Worker",
+            filters={"parent": ["in", [b.name for b in batches]], "parenttype": "Arrival Batch"},
+            fields=["name", "parent", "worker_name", "passport_number", "nationality", "temporary_worker"],
+            order_by="idx asc",
+        )
+        for r in rows:
+            b = batch_meta.get(r.parent)
+            workers.append(
+                {
+                    "batch": r.parent,
+                    "row": r.name,
+                    "worker_name": r.worker_name,
+                    "passport_number": r.passport_number,
+                    "nationality": r.nationality,
+                    "building": b.building if b else None,
+                    "labour_supplier": b.labour_supplier if b else None,
+                    "project": b.project if b else None,
+                    # Matched to a registered arrival -> this manifest line is ticked.
+                    "arrived": bool(r.temporary_worker),
+                    "temporary_worker": r.temporary_worker,
+                }
+            )
+    arrived = sum(1 for w in workers if w["arrived"])
+    total = len(workers)
+    return {
+        "date": date,
+        "building": building,
+        "workers": workers,
+        "total": total,
+        "arrived": arrived,
+        "pending": total - arrived,
+    }
+
+
 # [#6vab3q]
 
 
@@ -397,22 +476,37 @@ def _company_name() -> str:
     )
 
 
+def _slip_dir() -> str:
+    """Text direction for a printed slip, from the boot/user language (rtl for ar*)."""
+    lang = (frappe.local.lang or "en").lower()
+    return "rtl" if lang.startswith("ar") else "ltr"
+
+
+def _party_type_label(party_type) -> str:
+    """Translatable label for a raw party-type doctype name."""
+    if party_type == PARTY_EMPLOYEE:
+        return _("Employee")
+    if party_type == PARTY_TEMPORARY_WORKER:
+        return _("Temporary Worker")
+    return party_type or ""
+
+
 ARRIVAL_SLIP_TEMPLATE = """
-<div class="ax-slip" style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 24px auto;
+<div class="ax-slip" dir="{{ dir }}" lang="{{ lang }}" style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 24px auto;
             border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
-  <h2 style="color:#1a1a2e; margin:0 0 4px;">Arrival Slip</h2>
+  <h2 style="color:#1a1a2e; margin:0 0 4px;">{{ _("Arrival Slip") }}</h2>
   <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company }} &middot; {{ today }}</div>
   <table style="width:100%; font-size:14px; border-collapse:collapse;">
-    <tr><td style="padding:4px 0; color:#555;">Worker</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">Type</td><td style="padding:4px 0;">{{ party_type }}</td></tr>
-    {% if designation %}<tr><td style="padding:4px 0; color:#555;">Designation</td><td style="padding:4px 0;">{{ designation }}</td></tr>{% endif %}
-    {% if passport_number %}<tr><td style="padding:4px 0; color:#555;">Passport</td><td style="padding:4px 0;">{{ passport_number }}</td></tr>{% endif %}
-    {% if iqama_number %}<tr><td style="padding:4px 0; color:#555;">Iqama</td><td style="padding:4px 0;">{{ iqama_number }}</td></tr>{% endif %}
-    {% if nationality %}<tr><td style="padding:4px 0; color:#555;">Nationality</td><td style="padding:4px 0;">{{ nationality }}</td></tr>{% endif %}
-    <tr><td style="padding:4px 0; color:#555;">Building</td><td style="padding:4px 0;">{{ building }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">Bed</td><td style="padding:4px 0; font-weight:bold;">{{ bed }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">Project</td><td style="padding:4px 0;">{{ project }}</td></tr>
-    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">Check-in</td><td style="padding:4px 0;">{{ check_in_date }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Worker") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Type") }}</td><td style="padding:4px 0;">{{ party_type_label }}</td></tr>
+    {% if designation %}<tr><td style="padding:4px 0; color:#555;">{{ _("Designation") }}</td><td style="padding:4px 0;">{{ designation }}</td></tr>{% endif %}
+    {% if passport_number %}<tr><td style="padding:4px 0; color:#555;">{{ _("Passport") }}</td><td style="padding:4px 0;">{{ passport_number }}</td></tr>{% endif %}
+    {% if iqama_number %}<tr><td style="padding:4px 0; color:#555;">{{ _("Iqama") }}</td><td style="padding:4px 0;">{{ iqama_number }}</td></tr>{% endif %}
+    {% if nationality %}<tr><td style="padding:4px 0; color:#555;">{{ _("Nationality") }}</td><td style="padding:4px 0;">{{ nationality }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Bed") }}</td><td style="padding:4px 0; font-weight:bold;">{{ bed }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Project") }}</td><td style="padding:4px 0;">{{ project }}</td></tr>
+    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Check-in") }}</td><td style="padding:4px 0;">{{ check_in_date }}</td></tr>{% endif %}
   </table>
   {% if qr %}<div style="margin-top:16px;"><img src="{{ qr }}" style="width:120px;height:120px"></div>{% endif %}
   <style>@media print { body { margin:0; } .ax-slip { border:none; margin:0; max-width:none; } }</style>
@@ -433,6 +527,9 @@ def get_arrival_slip(party_type, party) -> dict:
     ctx = {
         "worker_name": card.get("worker_name") or card.get("party"),
         "party_type": party_type,
+        "party_type_label": _party_type_label(party_type),
+        "dir": _slip_dir(),
+        "lang": frappe.local.lang or "en",
         "building": card.get("current_building") or "",
         "bed": card.get("current_bed_code") or card.get("current_bed") or "",
         "project": card.get("project") or "",
@@ -482,44 +579,44 @@ HOUSING_TERMS = [
 
 
 CHECKIN_SLIP_TEMPLATE = """
-<div class="ax-slip" style="font-family: Arial, Helvetica, sans-serif; max-width: 560px; margin: 24px auto;
+<div class="ax-slip" dir="{{ dir }}" lang="{{ lang }}" style="font-family: Arial, Helvetica, sans-serif; max-width: 560px; margin: 24px auto;
             border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
-  <h2 style="color:#1a1a2e; margin:0 0 4px;">Accommodation Check-in</h2>
+  <h2 style="color:#1a1a2e; margin:0 0 4px;">{{ _("Accommodation Check-in") }}</h2>
   <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company }} &middot; {{ today }}</div>
   <table style="width:100%; font-size:14px; border-collapse:collapse;">
-    <tr><td style="padding:4px 0; color:#555;">Worker</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">Type</td><td style="padding:4px 0;">{{ party_type }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">Building</td><td style="padding:4px 0;">{{ building }}</td></tr>
-    {% if address %}<tr><td style="padding:4px 0; color:#555;">Address</td><td style="padding:4px 0;">{{ address }}</td></tr>{% endif %}
-    {% if city %}<tr><td style="padding:4px 0; color:#555;">City</td><td style="padding:4px 0;">{{ city }}</td></tr>{% endif %}
-    <tr><td style="padding:4px 0; color:#555;">Bed</td><td style="padding:4px 0; font-weight:bold;">{{ bed }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">Project</td><td style="padding:4px 0;">{{ project }}</td></tr>
-    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">Check-in</td><td style="padding:4px 0;">{{ check_in_date }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Worker") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Type") }}</td><td style="padding:4px 0;">{{ party_type_label }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building }}</td></tr>
+    {% if address %}<tr><td style="padding:4px 0; color:#555;">{{ _("Address") }}</td><td style="padding:4px 0;">{{ address }}</td></tr>{% endif %}
+    {% if city %}<tr><td style="padding:4px 0; color:#555;">{{ _("City") }}</td><td style="padding:4px 0;">{{ city }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Bed") }}</td><td style="padding:4px 0; font-weight:bold;">{{ bed }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Project") }}</td><td style="padding:4px 0;">{{ project }}</td></tr>
+    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Check-in") }}</td><td style="padding:4px 0;">{{ check_in_date }}</td></tr>{% endif %}
   </table>
 
   <div style="margin-top:20px; border:1px solid #ccc; border-radius:6px; padding:14px 18px;">
-    <div style="font-weight:bold; margin-bottom:8px; color:#1a1a2e;">Housing Terms &amp; Conditions</div>
-    <ol style="margin:0; padding-left:18px; color:#1a1a2e; font-size:13px; line-height:1.6;">
-      {% for term in terms %}<li>{{ term }}</li>{% endfor %}
+    <div style="font-weight:bold; margin-bottom:8px; color:#1a1a2e;">{{ _("Housing Terms & Conditions") }}</div>
+    <ol style="margin:0; padding-inline-start:18px; color:#1a1a2e; font-size:13px; line-height:1.6;">
+      {% for term in terms %}<li>{{ _(term) }}</li>{% endfor %}
     </ol>
   </div>
 
   <div style="margin-top:16px; font-size:13px; color:#1a1a2e;">
-    I have read and accept these terms and conditions.
+    {{ _("I have read and accept these terms and conditions.") }}
   </div>
 
   <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
     <tr>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Worker signature</td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Worker signature") }}</td>
       <td style="width:4%;"></td>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Date</td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Date") }}</td>
     </tr>
   </table>
   <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
     <tr>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Supervisor signature</td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Supervisor signature") }}</td>
       <td style="width:4%;"></td>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Date</td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Date") }}</td>
     </tr>
   </table>
   <style>@media print { body { margin:0; } .ax-slip { border:none; margin:0; max-width:none; } }</style>
@@ -549,6 +646,9 @@ def get_checkin_slip(party_type, party) -> dict:
     ctx = {
         "worker_name": card.get("worker_name") or card.get("party"),
         "party_type": party_type,
+        "party_type_label": _party_type_label(party_type),
+        "dir": _slip_dir(),
+        "lang": frappe.local.lang or "en",
         "building": building or "",
         "address": get_address_text("Accommodation Building", building),
         "city": bldg.get("city") or "",
@@ -563,24 +663,24 @@ def get_checkin_slip(party_type, party) -> dict:
 
 
 CUSTODY_HANDOVER_SLIP_TEMPLATE = """
-<div class="ax-slip" style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: 24px auto;
+<div class="ax-slip" dir="{{ dir }}" lang="{{ lang }}" style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: 24px auto;
             border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
-  <h2 style="color:#1a1a2e; margin:0 0 4px;">Custody Handover</h2>
+  <h2 style="color:#1a1a2e; margin:0 0 4px;">{{ _("Custody Handover") }}</h2>
   <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company }} &middot; {{ today }}</div>
   <table style="width:100%; font-size:14px; border-collapse:collapse;">
-    <tr><td style="padding:4px 0; color:#555;">Issued to</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">Reference</td><td style="padding:4px 0;">{{ custody_issue }}</td></tr>
-    {% if building %}<tr><td style="padding:4px 0; color:#555;">Building</td><td style="padding:4px 0;">{{ building }}</td></tr>{% endif %}
-    {% if issue_date %}<tr><td style="padding:4px 0; color:#555;">Issue date</td><td style="padding:4px 0;">{{ issue_date }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Issued to") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Reference") }}</td><td style="padding:4px 0;">{{ custody_issue }}</td></tr>
+    {% if building %}<tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building }}</td></tr>{% endif %}
+    {% if issue_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Issue date") }}</td><td style="padding:4px 0;">{{ issue_date }}</td></tr>{% endif %}
   </table>
 
   <table style="width:100%; margin-top:18px; font-size:13px; border-collapse:collapse;">
     <thead>
-      <tr style="border-bottom:1px solid #555; text-align:left;">
+      <tr style="border-bottom:1px solid #555; text-align:start;">
         <th style="padding:6px 4px; width:8%;">#</th>
-        <th style="padding:6px 4px;">Article</th>
-        <th style="padding:6px 4px; width:14%; text-align:right;">Qty</th>
-        {% if show_uom %}<th style="padding:6px 4px; width:18%;">UOM</th>{% endif %}
+        <th style="padding:6px 4px;">{{ _("Article") }}</th>
+        <th style="padding:6px 4px; width:14%; text-align:end;">{{ _("Qty") }}</th>
+        {% if show_uom %}<th style="padding:6px 4px; width:18%;">{{ _("UOM") }}</th>{% endif %}
       </tr>
     </thead>
     <tbody>
@@ -588,7 +688,7 @@ CUSTODY_HANDOVER_SLIP_TEMPLATE = """
       <tr style="border-bottom:1px solid #ccc;">
         <td style="padding:6px 4px;">{{ loop.index }}</td>
         <td style="padding:6px 4px;">{{ row.article_name }}</td>
-        <td style="padding:6px 4px; text-align:right;">{{ row.qty }}</td>
+        <td style="padding:6px 4px; text-align:end;">{{ row.qty }}</td>
         {% if show_uom %}<td style="padding:6px 4px;">{{ row.uom }}</td>{% endif %}
       </tr>
       {% endfor %}
@@ -596,21 +696,21 @@ CUSTODY_HANDOVER_SLIP_TEMPLATE = """
   </table>
 
   <div style="margin-top:16px; font-size:13px; color:#1a1a2e;">
-    I acknowledge that I have received the above items in good condition.
+    {{ _("I acknowledge that I have received the above items in good condition.") }}
   </div>
 
   <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
     <tr>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Worker signature</td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Worker signature") }}</td>
       <td style="width:4%;"></td>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Date</td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Date") }}</td>
     </tr>
   </table>
   <table style="width:100%; margin-top:28px; font-size:13px; border-collapse:collapse;">
     <tr>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Supervisor signature</td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Supervisor signature") }}</td>
       <td style="width:4%;"></td>
-      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">Date</td>
+      <td style="padding-top:8px; border-top:1px solid #555; width:48%;">{{ _("Date") }}</td>
     </tr>
   </table>
   <style>@media print { body { margin:0; } .ax-slip { border:none; margin:0; max-width:none; } }</style>
@@ -661,6 +761,8 @@ def get_custody_handover_slip(custody_issue) -> dict:
     ctx = {
         "worker_name": worker_name,
         "custody_issue": doc.name,
+        "dir": _slip_dir(),
+        "lang": frappe.local.lang or "en",
         "building": doc.building or "",
         "issue_date": frappe.utils.formatdate(doc.issue_date) if doc.issue_date else "",
         "company": _company_name(),

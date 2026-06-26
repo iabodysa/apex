@@ -153,6 +153,29 @@ def acknowledge_alert(name):
 
 
 @frappe.whitelist(methods=["POST"])
+def bulk_acknowledge_alerts(names):
+    """Acknowledge several Open alerts in one call (the queue's multi-select).
+
+    ``names`` is a JSON list (or list) of Operations Alert ids. Each row is run
+    through ``acknowledge_alert``, which re-checks ``write`` per alert server-side,
+    so a row the caller may not act on is skipped rather than trusted from the
+    client. Idempotent: an already-acknowledged/resolved row is left untouched.
+    Returns the ids that actually moved Open -> Acknowledged.
+    """
+    if isinstance(names, str):
+        names = frappe.parse_json(names)
+    acknowledged = []
+    for name in names or []:
+        try:
+            if acknowledge_alert(name).get("acknowledged"):
+                acknowledged.append(name)
+        except frappe.PermissionError:
+            # Skip a row the caller cannot act on; don't abort the whole batch.
+            continue
+    return {"ok": True, "acknowledged": acknowledged}
+
+
+@frappe.whitelist(methods=["POST"])
 def resolve_alert(name, note=None):
     """Resolve an Operations Alert, stamping ``resolved_on`` + ``resolution_note``.
 

@@ -61,11 +61,13 @@
       </button>
       <p v-if="state.checked_out" class="status-note status-ok">{{ t("attendance.doneForToday") }}</p>
     </section>
+    <!-- doneForToday above is a persistent shift-state note, not transient feedback. -->
+
 
     <!-- This month's history: a compact day list with status pill + stamped times. -->
     <section class="card card-pad space-y-3">
       <p class="text-sm font-semibold text-soft">{{ t("attendance.history") }}</p>
-      <LoadingState v-if="history.loading" :label="t('common.loading')" />
+      <Skeleton v-if="history.loading" :rows="3" />
       <p v-else-if="!rows.length" class="text-sm text-muted">{{ t("attendance.historyEmpty") }}</p>
       <ul class="space-y-3">
         <li v-for="(row, i) in rows" :key="row.name">
@@ -86,9 +88,6 @@
         </li>
       </ul>
     </section>
-
-    <p v-if="msg" class="status-note status-ok">{{ msg }}</p>
-    <p v-if="err" class="status-note status-err">{{ err }}</p>
     </template>
   </div>
 </template>
@@ -98,12 +97,14 @@ import { computed, reactive, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
+import Skeleton from "../components/Skeleton.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
+import { pushToast } from "../toast";
 
-const { t } = useI18n();
+const { t, fmtTime } = useI18n();
 
-const msg = ref("");
+// On-load fetch error only; action feedback goes through transient toasts.
 const err = ref("");
 const loading = ref(false);
 
@@ -146,13 +147,13 @@ const today = createResource({
 // single action; the backend also refuses a check_out at/before check_in.
 const checkin = createResource({
   url: "apex_habitat.salis.api.driver_portal.driver_check_in",
-  onSuccess: (r) => { apply(r); msg.value = t("attendance.checkInDone"); err.value = ""; history.reload(); },
-  onError: (e) => { err.value = e.messages?.[0] || t("common.error"); },
+  onSuccess: (r) => { apply(r); pushToast(t("attendance.checkInDone"), "ok"); history.reload(); },
+  onError: (e) => { pushToast(e.messages?.[0] || t("common.error"), "err"); },
 });
 const checkout = createResource({
   url: "apex_habitat.salis.api.driver_portal.driver_check_out",
-  onSuccess: (r) => { apply(r); msg.value = t("attendance.checkOutDone"); err.value = ""; history.reload(); },
-  onError: (e) => { err.value = e.messages?.[0] || t("common.error"); },
+  onSuccess: (r) => { apply(r); pushToast(t("attendance.checkOutDone"), "ok"); history.reload(); },
+  onError: (e) => { pushToast(e.messages?.[0] || t("common.error"), "err"); },
 });
 
 // Guarded submitters: set `loading` for the whole request so no second tap (on
@@ -175,13 +176,6 @@ async function doCheckOut() {
   } finally {
     loading.value = false;
   }
-}
-
-// "HH:MM:SS" (Frappe Time) -> "HH:MM" for display. Tolerates already-short values.
-function fmtTime(v) {
-  if (!v) return "";
-  const m = String(v).match(/(\d{1,2}):(\d{2})/);
-  return m ? `${m[1].padStart(2, "0")}:${m[2]}` : String(v);
 }
 
 function timeToMinutes(v) {

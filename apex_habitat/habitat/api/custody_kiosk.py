@@ -55,8 +55,10 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
 
     Returns:
         dict shaped as ``{has_images, building, articles}`` where each article is
-        ``{article, article_name, uom, image, store_balance}``. ``image`` may be
-        ``None`` (the client falls back to initials/placeholder).
+        ``{article, article_name, uom, image, standard_unit_cost_sar,
+        store_balance}``. ``image`` may be ``None`` (the client falls back to
+        initials/placeholder); ``standard_unit_cost_sar`` drives the cart value
+        subtotal client-side.
     """
     frappe.has_permission("Custody Article", "read", throw=True)
     articles = frappe.get_all(
@@ -66,6 +68,7 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
             "article_name",
             "unit_of_measure as uom",
             "image",
+            "standard_unit_cost_sar",
         ],
         order_by="article_name asc",
     )
@@ -102,11 +105,23 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
 
 @frappe.whitelist(methods=["POST"])
 def issue_cart(
-    employee: str, building: str, items_json: str, signature: str | None = None
+    building: str,
+    items_json: str,
+    party_type: str | None = None,
+    party: str | None = None,
+    employee: str | None = None,
+    signature: str | None = None,
 ) -> dict:
     """Build and submit ONE Custody Issue from a kiosk cart.
 
-    Builds a full Custody Issue (``issued_to_employee``, ``building``, and one
+    The recipient is given as a (``party_type``, ``party``) pair (Employee |
+    Temporary Worker) matching the Custody Issue Dynamic Link. The legacy
+    ``employee`` arg is still accepted and treated as ``party_type=Employee`` so
+    older callers keep working. The controller's ``sync_party_employee`` mirrors
+    an Employee party onto ``issued_to_employee`` (and leaves it empty for a
+    Temporary Worker), so the ledger only posts for an Employee recipient.
+
+    Builds a full Custody Issue (``party_type``/``party``, ``building``, and one
     Custody Issue Item row per cart line) and ``insert().submit()`` so ALL native
     controller behavior runs: ``validate`` (at least one item, each qty > 0) and
     ``on_submit`` (status -> Issued, then ``_post_custody_stock`` which posts to
@@ -127,9 +142,11 @@ def issue_cart(
     (checked explicitly below; defense in depth on top of the role grant).
 
     Args:
-        employee: Employee docname (the responsible party).
         building: Accommodation Building docname (the source store).
         items_json: JSON string of ``[{"article": <name>, "qty": <int>}]``.
+        party_type: ``Employee`` or ``Temporary Worker`` (the recipient kind).
+        party: the recipient docname for ``party_type``.
+        employee: legacy Employee docname; used when no ``party`` is given.
         signature: optional signature data-URL captured at the kiosk.
 
     Returns:
@@ -137,6 +154,11 @@ def issue_cart(
     """
     frappe.has_permission("Custody Issue", "create", throw=True)
     frappe.has_permission("Custody Issue", "submit", throw=True)
+
+    # Legacy callers pass only `employee`; treat it as an Employee party.
+    if not party and employee:
+        party_type, party = PARTY_EMPLOYEE, employee
+    party_type, party = _normalize_party(party_type, party)
 
     items = frappe.parse_json(items_json) or []
     if not isinstance(items, list) or not items:
@@ -157,7 +179,8 @@ def issue_cart(
             "doctype": "Custody Issue",
             "issue_date": today(),
             "building": building,
-            "issued_to_employee": employee,
+            "party_type": party_type,
+            "party": party,
             "items": rows,
         }
     )

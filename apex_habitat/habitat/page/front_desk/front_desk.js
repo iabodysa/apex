@@ -11,6 +11,28 @@ frappe.pages["front-desk"].on_page_load = function (wrapper) {
 	fd.setup();
 };
 
+// Persists the last building a multi-building user opened, so the board reopens
+// where they left off instead of cold.
+const LAST_BUILDING_KEY = "fd:last-building";
+
+// Locale-consistent digit grouping via the framework formatter — never
+// hand-concatenate a raw number. format_number (not the Int formatter, which
+// skips grouping) applies the system number format; precision 0 keeps it whole.
+function fd_int(n) {
+	return format_number(cint(n), null, 0);
+}
+
+// A "used/total" bed fraction, each side locale-formatted; the caller wraps it in
+// an LTR/bdi isolate so it does not reverse beside Arabic text.
+function fd_fraction(used, total) {
+	return `${fd_int(used)}/${fd_int(total)}`;
+}
+
+// A whole-number percent rendered with the locale's grouping + an isolated sign.
+function fd_percent(pct) {
+	return `${fd_int(pct)}%`;
+}
+
 class FrontDesk {
 	constructor(page) {
 		this.page = page;
@@ -120,23 +142,51 @@ class FrontDesk {
 		}
 		const $row = $('<div class="fd-buildings-row"></div>').appendTo(this.$strip);
 		this.buildings.forEach((b) => {
-			const pressure = this._building_pressure(b);
-			const is_selected = b.building === this.building;
-			const selected = is_selected ? " fd-building-chip--selected" : "";
-			const $chip = $(
-				`<button class="fd-building-chip fd-building-chip--${pressure}${selected}" type="button"></button>`
-			).appendTo($row);
-			$chip.attr("aria-pressed", is_selected);
-			$chip.attr("title", b.building_title || b.building);
-			$('<span class="fd-building-chip-name"></span>')
-				.text(b.building_title || b.building)
-				.appendTo($chip);
-			// LTR-isolate the fraction so it does not reverse beside Arabic names.
-			$('<span class="fd-building-chip-counts" dir="ltr"></span>')
-				.text(`${b.available || 0}/${b.total_beds || 0}`)
-				.appendTo($chip);
-			$chip.on("click", () => this._select_building(b.building));
+			this._render_building_chip($row, b);
 		});
+		this._auto_select_building();
+	}
+
+	// Land the operator straight on a loaded board with no Link interaction: a
+	// single allowed building (or the server's auto hint) opens immediately; a
+	// multi-building user reopens their last board if it is still in scope.
+	_auto_select_building() {
+		if (this.building) return;
+		const only = this.buildings.length === 1 || this.buildings.some((b) => b.auto);
+		if (only) {
+			const target = this.buildings.find((b) => b.auto) || this.buildings[0];
+			this._select_building(target.building);
+			return;
+		}
+		let last = null;
+		try {
+			last = localStorage.getItem(LAST_BUILDING_KEY);
+		} catch (e) {
+			last = null;
+		}
+		if (last && this.buildings.some((b) => b.building === last)) {
+			this._select_building(last);
+		}
+	}
+
+	_render_building_chip($row, b) {
+		const pressure = this._building_pressure(b);
+		const is_selected = b.building === this.building;
+		const selected = is_selected ? " fd-building-chip--selected" : "";
+		const $chip = $(
+			`<button class="fd-building-chip fd-building-chip--${pressure}${selected}" type="button"></button>`
+		).appendTo($row);
+		$chip.attr("aria-pressed", is_selected);
+		$chip.attr("title", b.building_title || b.building);
+		$('<span class="fd-building-chip-name"></span>')
+			.text(b.building_title || b.building)
+			.appendTo($chip);
+		// bdi LTR-isolates the locale-grouped fraction so it cannot reverse beside
+		// an Arabic building name.
+		$('<bdi class="fd-building-chip-counts" dir="ltr"></bdi>')
+			.text(fd_fraction(b.available, b.total_beds))
+			.appendTo($chip);
+		$chip.on("click", () => this._select_building(b.building));
 	}
 
 	// An empty building list has two meanings — a scoped supervisor with no
@@ -165,6 +215,11 @@ class FrontDesk {
 	_select_building(building) {
 		if (!building || building === this.building) return;
 		this.building = building;
+		try {
+			localStorage.setItem(LAST_BUILDING_KEY, building);
+		} catch (e) {
+			// Private-mode / storage-disabled: persistence is best-effort.
+		}
 		this._render_buildings();
 		this.refresh();
 	}
@@ -246,18 +301,7 @@ class FrontDesk {
 		this.$container.empty();
 
 		// [#pmav3l]
-		const s = data.summary || {};
-		const $summary = $('<div class="fd-summary"></div>').appendTo(this.$container);
-		$summary.append(
-			$('<span class="fd-summary-title"></span>').text(data.building_title || data.building)
-		);
-		$summary.append(
-			$('<span class="fd-summary-counts"></span>').text(
-				__("{0} of {1} beds available", [s.available || 0, s.total_beds || 0])
-			)
-		);
-
-		this._render_open_requests_badge($summary, data.building);
+		this._render_summary_bar(data);
 
 		this._render_legend();
 
@@ -280,12 +324,21 @@ class FrontDesk {
 					.attr("data-needs-readiness", needs_readiness ? "1" : "0")
 					.appendTo($rooms);
 				const $rh = $('<div class="fd-room-header"></div>').appendTo($room);
-				$('<span class="fd-room-number"></span>')
-					.text(`${__("Room")} ${room.room_number || room.room}`)
-					.appendTo($rh);
-				$('<span class="fd-room-meta"></span>')
-					.text(`${__(room.room_type || "")} · ${room.current_occupancy || 0}/${room.bed_capacity || 0}`)
-					.appendTo($rh);
+				// The room label keeps the word translatable but bdi-isolates the room
+				// code so the alphanumeric code is not reversed in an RTL locale.
+				const $rn = $('<span class="fd-room-number"></span>').appendTo($rh);
+				$rn.append(document.createTextNode(`${__("Room")} `));
+				$('<bdi dir="ltr"></bdi>').text(room.room_number || room.room).appendTo($rn);
+				// Room type stays in document direction; the occupancy fraction is
+				// LTR-isolated and locale-formatted.
+				const $rm = $('<span class="fd-room-meta"></span>').appendTo($rh);
+				const room_type = __(room.room_type || "");
+				if (room_type) {
+					$rm.append(document.createTextNode(`${room_type} · `));
+				}
+				$('<bdi dir="ltr"></bdi>')
+					.text(fd_fraction(room.current_occupancy, room.bed_capacity))
+					.appendTo($rm);
 
 				// [#mark-ready] Offer a one-tap "Mark Ready" only on not-ready rooms.
 				if (needs_readiness) {
@@ -305,6 +358,55 @@ class FrontDesk {
 		});
 
 		this._apply_filters();
+	}
+
+	// A position:sticky portfolio header: the building title, four mini-stats from
+	// the existing summary, and a thin occupancy meter. Presentational only — it
+	// reuses the grid's summary counts (no extra server call) and stays pinned
+	// while the operator scrolls floors.
+	_render_summary_bar(data) {
+		const s = data.summary || {};
+		const total = cint(s.total_beds);
+		const occupied = cint(s.occupied);
+		const pct = total ? Math.round((occupied / total) * 100) : 0;
+
+		const $bar = $('<div class="fd-summary" role="status" aria-live="polite"></div>').appendTo(
+			this.$container
+		);
+
+		const $head = $('<div class="fd-summary-head"></div>').appendTo($bar);
+		$('<span class="fd-summary-title"></span>')
+			.text(data.building_title || data.building)
+			.appendTo($head);
+		this._render_open_requests_badge($head, data.building);
+
+		const $stats = $('<div class="fd-summary-stats"></div>').appendTo($bar);
+		const stat = (key, label, value, tone) => {
+			const $stat = $(`<div class="fd-summary-stat fd-summary-stat--${tone}"></div>`).appendTo(
+				$stats
+			);
+			$('<bdi class="fd-summary-stat-num" dir="ltr"></bdi>').text(fd_int(value)).appendTo($stat);
+			$('<span class="fd-summary-stat-label"></span>').text(label).appendTo($stat);
+			$stat.attr("data-stat", key);
+		};
+		stat("available", __("Available"), s.available, "green");
+		stat("occupied", __("Occupied"), s.occupied, "red");
+		stat("blocked", __("Room not ready"), s.blocked, "amber");
+		stat("out_of_service", __("Out of service"), s.out_of_service, "grey");
+
+		const $meter = $('<div class="fd-summary-meter"></div>').appendTo($bar);
+		const $track = $(
+			`<div class="fd-summary-meter-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"></div>`
+		).appendTo($meter);
+		$('<div class="fd-summary-meter-fill"></div>')
+			.css("inline-size", `${pct}%`)
+			.appendTo($track);
+		$('<bdi class="fd-summary-meter-label" dir="ltr"></bdi>')
+			.text(fd_percent(pct))
+			.appendTo($meter);
+		$('<span class="fd-summary-meter-caption"></span>')
+			.text(__("{0} of {1} beds available", [fd_int(s.available), fd_int(s.total_beds)]))
+			.appendTo($meter);
 	}
 
 	// A legend that doubles as client-side filters. The color swatches name what
@@ -389,7 +491,7 @@ class FrontDesk {
 				const statuses = r.message.statuses || [];
 				const indicator = count > 0 ? "fd-summary-requests--open" : "";
 				$(`<span class="fd-summary-requests ${indicator}" role="button" tabindex="0"></span>`)
-					.text(__("{0} open requests", [count]))
+					.text(__("{0} open requests", [fd_int(count)]))
 					.on("click keydown", (e) => {
 						if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return;
 						e.preventDefault();
@@ -405,7 +507,9 @@ class FrontDesk {
 
 	_render_bed_card(bed, room, building) {
 		const $card = $(`<div class="fd-bed fd-bed--${bed.bed_color}" tabindex="0" role="button"></div>`);
-		$('<div class="fd-bed-code"></div>').text(bed.bed_code || bed.bed).appendTo($card);
+		// The bed code is a naming-series-style token; isolate it LTR so it renders
+		// left-to-right on its own line, even on an RTL board beside an Arabic name.
+		$('<bdi class="fd-bed-code" dir="ltr"></bdi>').text(bed.bed_code || bed.bed).appendTo($card);
 
 		let badge = "";
 		if (bed.bed_color === "green") badge = __("Available");

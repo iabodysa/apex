@@ -1,6 +1,7 @@
 <template>
   <div class="space-y-4">
     <h2 class="section-title">{{ t("trips.title") }}</h2>
+    <p class="-mt-2 text-sm text-soft">{{ t("trips.subtitle") }}</p>
 
     <!-- Today is the default view; Recent shows the last 30 days (loaded lazily). -->
     <div class="seg" role="tablist">
@@ -24,7 +25,7 @@
       </button>
     </div>
 
-    <LoadingState v-if="active.loading" :label="t('common.loading')" />
+    <Skeleton v-if="active.loading" :rows="3" />
 
     <ErrorState v-else-if="active.error" :message="t('errors.loadFailed')" @retry="active.reload()" />
 
@@ -49,8 +50,16 @@
       <div class="mt-2 flex items-center gap-2 text-sm text-soft">
         <Icon name="truck" :size="16" class="text-primary shrink-0" />
         <span><bdi>{{ trip.vehicle || "—" }}</bdi></span>
-        <span class="text-muted">·</span>
-        <span><bdi>{{ trip.depart_time || "" }}</bdi> → <bdi>{{ trip.return_time || "" }}</bdi></span>
+        <!-- Direction-neutral, labelled times: reads correctly in LTR and RTL with
+             no bare arrow. -->
+        <span v-if="trip.depart_time" class="text-muted">·</span>
+        <span v-if="trip.depart_time">
+          {{ t("home.depart") }} <bdi>{{ fmtTime(trip.depart_time) }}</bdi>
+        </span>
+        <span v-if="trip.return_time" class="text-muted">·</span>
+        <span v-if="trip.return_time">
+          {{ t("home.return") }} <bdi>{{ fmtTime(trip.return_time) }}</bdi>
+        </span>
         <Icon name="route" :size="16" class="text-primary shrink-0 ms-auto" />
       </div>
       <!-- The recent view spans days, so each card names its trip date. -->
@@ -66,12 +75,12 @@
 import { computed, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
-import LoadingState from "../components/LoadingState.vue";
+import Skeleton from "../components/Skeleton.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
 
-const { t, te } = useI18n();
+const { t, te, fmtTime } = useI18n();
 
 const tab = ref("today");
 

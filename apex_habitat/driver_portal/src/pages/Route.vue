@@ -1,10 +1,11 @@
 <template>
   <div class="space-y-5">
     <h2 class="section-title">{{ singleTrip ? t("route.tripTitle") : t("route.title") }}</h2>
+    <p v-if="!singleTrip" class="-mt-2 text-sm text-soft">{{ t("route.subtitle") }}</p>
 
     <!-- Single-trip drill-in (from a "My Trips" card): /route/:trip -->
     <template v-if="singleTrip">
-      <LoadingState v-if="tripRoute.loading" :label="t('common.loading')" />
+      <Skeleton v-if="tripRoute.loading" :rows="2" />
 
       <ErrorState v-else-if="tripRoute.error" :message="t('errors.loadFailed')" @retry="tripRoute.reload()" />
 
@@ -83,7 +84,7 @@
 
     <!-- All-trips worker route (unchanged): /route -->
     <template v-else>
-      <LoadingState v-if="route.loading" :label="t('common.loading')" />
+      <Skeleton v-if="route.loading" :rows="3" />
 
       <ErrorState v-else-if="route.error" :message="t('errors.loadFailed')" @retry="route.reload()" />
 
@@ -170,7 +171,7 @@
 import { computed } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
-import LoadingState from "../components/LoadingState.vue";
+import Skeleton from "../components/Skeleton.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";

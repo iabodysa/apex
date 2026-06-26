@@ -17,6 +17,7 @@ CSRF guard. no_cache is set because the page renders per-user, live data.
 
 import frappe
 from frappe.sessions import get_csrf_token
+from frappe.utils import cint
 
 # [#i6khen]
 FLEET_ROLES = {
@@ -38,4 +39,11 @@ def get_context(context):
     context.has_fleet_role = bool(FLEET_ROLES & set(frappe.get_roles()))
     if context.has_fleet_role:
         context.csrf_token = get_csrf_token()
+        # Socket.IO config so the SPA can subscribe to live fleet_update pushes.
+        # async disabled -> the page falls back to its poll (the flag tells it).
+        # site_name is the socket namespace (mirrors frappe.boot.sitename).
+        conf = frappe.get_site_config()
+        context.site_name = frappe.local.site
+        context.socketio_port = cint(conf.get("socketio_port")) or 9000
+        context.async_enabled = not cint(conf.get("disable_async"))
     return context

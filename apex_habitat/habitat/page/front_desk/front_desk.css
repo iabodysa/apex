@@ -152,14 +152,27 @@
 	}
 }
 
+/* Sticky portfolio header: stays pinned while the operator scrolls floors so the
+   live bed mix and occupancy meter are always in view. */
 .fd-summary {
+	position: sticky;
+	inset-block-start: 0;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-block-end: 16px;
+	padding-block: 10px;
+	padding-inline: 4px;
+	background: var(--fg-color, #fff);
+	border-block-end: 1px solid var(--border-color, #d1d8dd);
+}
+
+.fd-summary-head {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: baseline;
 	gap: 12px;
-	margin-block-end: 16px;
-	padding-block-end: 8px;
-	border-block-end: 1px solid var(--border-color, #d1d8dd);
 }
 
 .fd-summary-title {
@@ -167,9 +180,80 @@
 	font-weight: 600;
 }
 
-.fd-summary-counts {
+/* Four compact mini-stats keyed to the bed palette. */
+.fd-summary-stats {
+	display: flex;
+	gap: 10px;
+}
+
+.fd-summary-stat {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	padding-block: 4px;
+	padding-inline: 10px;
+	border-radius: 8px;
+	border-inline-start: 4px solid var(--border-color, #d1d8dd);
+	background: var(--control-bg, #f4f5f6);
+	white-space: nowrap;
+}
+
+.fd-summary-stat-num {
+	font-size: 16px;
+	font-weight: 700;
+}
+
+.fd-summary-stat-label {
+	font-size: 12px;
 	color: var(--text-muted, #74808b);
+}
+
+.fd-summary-stat--green {
+	border-inline-start-color: #34a853;
+}
+
+.fd-summary-stat--red {
+	border-inline-start-color: #d93025;
+}
+
+.fd-summary-stat--amber {
+	border-inline-start-color: #f5a623;
+}
+
+.fd-summary-stat--grey {
+	border-inline-start-color: #c2c8ce;
+}
+
+/* Thin occupancy progress meter under the mini-stats. */
+.fd-summary-meter {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.fd-summary-meter-track {
+	position: relative;
+	flex: 1 1 auto;
+	block-size: 6px;
+	border-radius: 3px;
+	background: var(--control-bg, #f4f5f6);
+	overflow: hidden;
+}
+
+.fd-summary-meter-fill {
+	block-size: 100%;
+	background: var(--blue-500, #2490ef);
+}
+
+.fd-summary-meter-label {
 	font-size: 13px;
+	font-weight: 700;
+}
+
+.fd-summary-meter-caption {
+	font-size: 12px;
+	color: var(--text-muted, #74808b);
+	white-space: nowrap;
 }
 
 .fd-summary-requests {
@@ -427,7 +511,30 @@
 		min-width: 100%;
 		flex-basis: 100%;
 	}
+	/* Keep a comfortable 44px+ touch target on the bed cards. */
 	.fd-bed {
 		min-height: 96px;
+	}
+	/* On a narrow viewport the chip strip and mini-stats scroll horizontally in one
+	   row instead of wrapping, so the board below stays compact. */
+	.fd-buildings-row {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		padding-block-end: 4px;
+	}
+	.fd-building-chip {
+		flex: 0 0 auto;
+		min-block-size: 44px;
+	}
+	.fd-summary-stats {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		padding-block-end: 2px;
+	}
+	.fd-summary-stat {
+		flex: 0 0 auto;
+		min-block-size: 44px;
 	}
 }

@@ -346,6 +346,9 @@ def list_supervisor_buildings() -> list[dict]:
         else:
             bucket["oos"] += 1
 
+    # Auto-open hint: a single allowed building lets the Front Desk land straight on
+    # a loaded board with no Link/chip interaction.
+    auto = len(buildings) == 1
     result = []
     for b in buildings:
         m = mix[b.name]
@@ -360,6 +363,7 @@ def list_supervisor_buildings() -> list[dict]:
                 "blocked": m["blocked"],
                 "oos": m["oos"],
                 "occupancy_pct": round(m["occupied"] / total * 100) if total else 0,
+                "auto": auto,
             }
         )
     result.sort(key=lambda r: str(r["building_title"]))

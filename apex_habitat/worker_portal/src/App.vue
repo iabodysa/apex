@@ -105,10 +105,20 @@ import { createResource } from "frappe-ui";
 import Icon from "./components/Icon.vue";
 import Brand from "./components/Brand.vue";
 import LangToggle from "./components/LangToggle.vue";
-import { useI18n, resourceErrorMessage } from "./i18n";
+import { useI18n, resourceErrorMessage, setEnumLabels } from "./i18n";
 import { TOKEN, hasToken } from "./token";
 
 const { t, dir } = useI18n();
+
+// Server-driven enum labels (DocType Select options + ar.csv), fetched once and
+// registered into i18n so tEnum localizes without a hand-maintained JS map.
+// English needs none (the label is the stored value), so only Arabic is loaded.
+const enumLabels = createResource({
+  url: "apex_habitat.salis.api.masar.get_enum_labels",
+  params: { lang: "ar" },
+  auto: true,
+  onSuccess: (data) => setEnumLabels("ar", data),
+});
 
 watch(
   dir,

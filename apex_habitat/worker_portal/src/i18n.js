@@ -427,89 +427,22 @@ const messages = {
   },
 };
 
-// [#swa23s]
-const enums = {
-  ar: {
-    // [#qtypp3]
-    status: {
-      Active: "نشط",
-      Inactive: "غير نشط",
-      Suspended: "موقوف",
-      Left: "منتهي الخدمة",
-    },
-    // [#36b0x4]
-    stayType: {
-      Permanent: "دائم",
-      Temporary: "مؤقت",
-    },
-    // [#ihaiue]
-    requestType: {
-      "Accommodation to Project Shuttle": "نقل من السكن إلى المشروع",
-      "Inter-City Relocation": "نقل بين المدن",
-      "Administrative Trip / Document Signing": "مهمة إدارية / توقيع مستندات",
-    },
-    // [#b5kbr2]
-    transportStatus: {
-      New: "جديد",
-      Validated: "تم التحقق",
-      Approved: "معتمد",
-      Scheduled: "مجدول",
-      Fulfilled: "مُنفَّذ",
-      Rejected: "مرفوض",
-      Cancelled: "ملغى",
-    },
-    // [#5mcbd5]
-    requestCategory: {
-      Maintenance: "صيانة",
-      Safety: "سلامة",
-      Cleaning: "نظافة",
-      "Pest Control": "مكافحة حشرات",
-      Custody: "عُهدة",
-      "Facility Item": "عنصر مرفق",
-      Water: "مياه",
-      Electrical: "كهرباء",
-      AC: "تكييف",
-      Plumbing: "سباكة",
-      Reimbursement: "تعويض",
-      Complaint: "شكوى",
-      Suggestion: "اقتراح",
-      Other: "أخرى",
-    },
-    // [#lk929b]
-    requestStatus: {
-      New: "جديد",
-      Triaged: "تم الفرز",
-      Assigned: "مُسنَد",
-      "In Progress": "قيد التنفيذ",
-      "Waiting Evidence": "بانتظار إثبات",
-      Resolved: "تمت المعالجة",
-      Rejected: "مرفوض",
-      Closed: "مغلق",
-    },
-    // [#asri7e]
-    priority: {
-      Low: "منخفضة",
-      Medium: "متوسطة",
-      High: "عالية",
-      Critical: "حرجة",
-    },
-    // [#t322il]
-    issueLocation: {
-      Room: "الغرفة",
-      Bathroom: "دورة المياه",
-      Kitchen: "المطبخ",
-      "Common Area": "منطقة مشتركة",
-      Entrance: "المدخل",
-      Staircase: "الدرج",
-      "External Area": "منطقة خارجية",
-      Other: "أخرى",
-    },
-  },
-};
+// Server enum labels keyed by language -> namespace -> { english_value: label }.
+// Single-sourced from the backend (DocType Select options + ar.csv) via
+// get_enum_labels and registered by the app shell at boot, so there is no
+// hand-maintained JS duplicate of the options to drift out of sync. English mode
+// needs no map (the label IS the stored English value).
+const enumLabels = ref({});
+
+export function setEnumLabels(lang_, labels) {
+  if (!SUPPORTED.includes(lang_)) return;
+  enumLabels.value = { ...enumLabels.value, [lang_]: labels || {} };
+}
 
 export function translateEnum(namespace, value) {
   if (value == null || value === "") return value;
-  const map = (enums[lang.value] || {})[namespace];
+  // English mode (and any unmapped value) renders the stored English value as-is.
+  const map = (enumLabels.value[lang.value] || {})[namespace];
   return (map && map[value]) || value;
 }
 

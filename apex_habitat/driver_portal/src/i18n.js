@@ -44,6 +44,7 @@ const messages = {
       vehicle: "Vehicle",
       license: "License",
       quickActions: "Quick actions",
+      more: "More",
       attendance: "Attendance",
       myTrips: "My Trips",
       requestFuel: "Request Fuel",
@@ -51,9 +52,29 @@ const messages = {
       profile: "My Profile",
       myVehicle: "My Vehicle",
       myRoute: "My Route",
+      today: "Today",
+      checkInNow: "Check in",
+      checkOutNow: "Check out",
+      doneForToday: "Done for today",
+      checkedInAt: "Checked in {time}",
+      notCheckedIn: "Not checked in yet",
+      nextTrip: "Next trip",
+      noTripToday: "No trip scheduled today",
+      depart: "Depart",
+      return: "Return",
+      viewTrip: "View trip",
+      alertLicense: "License expires in {n} day(s)",
+      alertLicenseExpired: "License expired",
+      alertNoVehicle: "No vehicle assigned",
+      alertClearance: "Open exit clearance",
+    },
+    notifications: {
+      title: "Notifications",
+      empty: "No new notifications",
     },
     route: {
       title: "My Worker Route Today",
+      subtitle: "Stops, pickups, and passengers for your route.",
       tripTitle: "Trip Route",
       departs: "Departs",
       expected: "{n} expected",
@@ -134,6 +155,7 @@ const messages = {
     },
     trips: {
       title: "My Trips Today",
+      subtitle: "Your scheduled trips and their status for today.",
       empty: "No trips scheduled",
       emptyHint: "You have nothing on the board today.",
       today: "Today",
@@ -218,6 +240,7 @@ const messages = {
       vehicle: "المركبة",
       license: "الرخصة",
       quickActions: "إجراءات سريعة",
+      more: "المزيد",
       attendance: "الحضور",
       myTrips: "رحلاتي",
       requestFuel: "طلب وقود",
@@ -225,9 +248,29 @@ const messages = {
       profile: "ملفي الشخصي",
       myVehicle: "مركبتي",
       myRoute: "مساري",
+      today: "اليوم",
+      checkInNow: "تسجيل الدخول",
+      checkOutNow: "تسجيل الخروج",
+      doneForToday: "أنهيت يومك",
+      checkedInAt: "تم تسجيل الدخول {time}",
+      notCheckedIn: "لم يتم تسجيل الدخول بعد",
+      nextTrip: "الرحلة التالية",
+      noTripToday: "لا توجد رحلة مجدولة اليوم",
+      depart: "المغادرة",
+      return: "العودة",
+      viewTrip: "عرض الرحلة",
+      alertLicense: "تنتهي الرخصة خلال {n} يوم",
+      alertLicenseExpired: "انتهت الرخصة",
+      alertNoVehicle: "لا توجد مركبة مُعيَّنة",
+      alertClearance: "إخلاء طرف مفتوح",
+    },
+    notifications: {
+      title: "الإشعارات",
+      empty: "لا توجد إشعارات جديدة",
     },
     route: {
       title: "مسار العمال اليوم",
+      subtitle: "المحطات ونقاط الالتقاط والركاب لمسارك.",
       tripTitle: "مسار الرحلة",
       departs: "المغادرة",
       expected: "{n} متوقع",
@@ -308,6 +351,7 @@ const messages = {
     },
     trips: {
       title: "رحلاتي اليوم",
+      subtitle: "رحلاتك المجدولة وحالتها لهذا اليوم.",
       empty: "لا توجد رحلات مجدولة",
       emptyHint: "لا يوجد لديك شيء على اللوحة اليوم.",
       today: "اليوم",
@@ -469,6 +513,39 @@ function interpolate(str, params) {
   return str.replace(/\{(\w+)\}/g, (m, k) => (params[k] != null ? params[k] : m));
 }
 
+// BCP-47 locale for Intl, keyed to the active UI language. Arabic uses the
+// Saudi locale so dates/numbers shape consistently with the rest of the app.
+const INTL_LOCALE = { ar: "ar-SA", en: "en-US" };
+function intlLocale() {
+  return INTL_LOCALE[lang.value] || "en-US";
+}
+
+// Locale-aware integer formatting (Intl.NumberFormat). Non-numeric input is
+// returned untouched so a server label never breaks the render.
+export function fmtNumber(n, opts) {
+  if (n == null || n === "" || isNaN(Number(n))) return n;
+  return new Intl.NumberFormat(intlLocale(), opts).format(Number(n));
+}
+
+// "HH:MM[:SS]" (Frappe Time) -> locale-aware short time. Falls back to the raw
+// value when it can't be parsed, so a malformed time never blanks the field.
+export function fmtTime(v) {
+  if (!v) return "";
+  const m = String(v).match(/(\d{1,2}):(\d{2})/);
+  if (!m) return String(v);
+  const d = new Date();
+  d.setHours(Number(m[1]), Number(m[2]), 0, 0);
+  return new Intl.DateTimeFormat(intlLocale(), { hour: "2-digit", minute: "2-digit" }).format(d);
+}
+
+// "YYYY-MM-DD" -> locale-aware medium date. Returns the raw value on a parse miss.
+export function fmtDate(v) {
+  if (!v) return "";
+  const d = new Date(String(v) + "T00:00:00");
+  if (isNaN(d.getTime())) return String(v);
+  return new Intl.DateTimeFormat(intlLocale(), { year: "numeric", month: "short", day: "numeric" }).format(d);
+}
+
 // [#90zqoh]
 export function translate(key, params) {
   const val = lookup(lang.value, key);
@@ -501,6 +578,9 @@ export function useI18n() {
   return {
     t: (key, params) => translate(key, params),
     te: (namespace, value) => translateEnum(namespace, value),
+    n: fmtNumber,
+    fmtTime,
+    fmtDate,
     lang,
     dir,
     setLang,

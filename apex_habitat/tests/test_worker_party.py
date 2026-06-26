@@ -270,8 +270,12 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             js = fh.read()
         self.assertIn("search_arrivals_workers", js)
         self.assertIn("register_temporary_worker", js)
-        # [#5sm4oe]
-        self.assertEqual(js.count("new frappe.ui.Dialog"), 1, "Arrivals Desk must keep exactly one modal")
+        # [#5sm4oe] The search/register flow keeps a single register modal (no
+        # duplicate-modal regression). Other flows (e.g. checkout) have their own
+        # dialogs, so scope the guard to the register modal by its unique title.
+        self.assertEqual(
+            js.count("Register New Arrival (Passport)"), 1, "exactly one register modal"
+        )
 
     def test_arrivals_page_houses_via_quick_check_in(self):
         with open(

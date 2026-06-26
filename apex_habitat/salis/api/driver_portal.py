@@ -973,3 +973,36 @@ def raise_support_ticket(category, priority, subject, description):
 	doc = frappe.get_doc(data)
 	doc.insert(ignore_permissions=True)  # audit-ok — driver resolved server-side
 	return {"name": doc.name}
+
+
+@frappe.whitelist()
+def get_my_notifications(limit=20):
+	"""The current user's recent native Notification Log rows (read).
+
+	Identity-scoped: filtered to ``for_user = session user`` (never client-supplied),
+	so it only ever returns the caller's own notifications. These are the system
+	notifications native Frappe writes when a Salis Notification with
+	``send_system_notification`` fires at the driver's user — the driver-facing
+	channels (blocked-driver clearance, fuel-overdue, vehicle-compliance, trip
+	scheduled). Backs the Home screen's notifications strip/bell.
+
+	Each row carries subject, a plain-text body (the email_content stripped of HTML),
+	the read flag, and a stringified ``creation`` timestamp (newest first). Read-only,
+	no commit; never raises for a driver with no notifications (returns an empty list).
+	"""
+	_require_enabled()
+	_resolve_driver()  # gate: only a linked driver sees the feed
+	rows = frappe.get_all(
+		"Notification Log",
+		filters={"for_user": frappe.session.user},
+		fields=["name", "subject", "email_content", "read", "creation", "document_type", "document_name"],
+		order_by="creation desc",
+		limit=frappe.utils.cint(limit) or 20,
+	)
+	for r in rows:
+		r["read"] = bool(r.get("read"))
+		r["creation"] = frappe.utils.cstr(r["creation"]) if r.get("creation") else None
+		# strip the notification's HTML so the SPA renders a clean line, not markup
+		r["body"] = frappe.utils.strip_html_tags(r.get("email_content") or "").strip() or None
+		r.pop("email_content", None)
+	return rows

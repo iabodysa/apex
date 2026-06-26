@@ -57,6 +57,27 @@ def _resolve_project_supervisor(vehicle: str | None) -> str | None:
         return None
 
 
+def _vehicle_project(vehicle: str | None) -> str | None:
+    """The vehicle's project, or None. Never raises (a lookup must not abort the job)."""
+    if not vehicle:
+        return None
+    try:
+        return frappe.db.get_value("Salis Vehicle", vehicle, "project")
+    except Exception:
+        return None
+
+
+def _publish_operations_alert(project: str | None = None) -> None:
+    """Signal the operations board to refetch its alert strip/queue. Broadcast to
+    the site room; the board filters by project client-side (a None project reloads
+    every open board). after_commit so subscribers read committed state. Best-effort:
+    a publish failure must never abort the scheduler job."""
+    try:
+        frappe.publish_realtime("operations_alert", {"project": project}, after_commit=True)
+    except Exception:
+        pass
+
+
 def _raise_alert(
     alert_type: str,
     severity: str,
@@ -129,6 +150,11 @@ def _raise_alert(
             title=f"Salis alert insert failed ({alert_type})"[:140],
         )
         return None
+
+    # Push the operations board to refetch when a new alert lands on a project in
+    # view (ahead of its poll). after_commit so subscribers read committed state;
+    # client filters by project, so a vehicle-less alert (no project) reloads all.
+    _publish_operations_alert(_vehicle_project(vehicle))
 
     # [#gg8xk4]
     if source_doctype and source_name:
@@ -823,6 +849,7 @@ def reconcile_operations_alerts() -> None:
         return bool(driver) and frappe.db.get_value("Salis Driver", driver, "status") == "Active"
 
     # [#dkxfl4]
+    resolved_projects: set[str | None] = set()
     start = 0
     while True:
         alerts = frappe.get_all(
@@ -885,6 +912,7 @@ def reconcile_operations_alerts() -> None:
 
                 if clear and _resolve_alert(a.name, reason):
                     resolved_count += 1
+                    resolved_projects.add(_vehicle_project(a.vehicle))
             except Exception:
                 frappe.db.rollback()
                 frappe.log_error(
@@ -893,6 +921,11 @@ def reconcile_operations_alerts() -> None:
                 )
 
         start += BATCH_SIZE
+
+    # Push the operations board to refetch once per project whose alert(s) cleared,
+    # so a resolved alert disappears without a manual Refresh.
+    for project in resolved_projects:
+        _publish_operations_alert(project)
 
     logger.info(
         f"reconcile_operations_alerts: resolved {resolved_count} alert(s) whose "

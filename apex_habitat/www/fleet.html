@@ -16,6 +16,12 @@
     <script>
       // Exposed to the SPA so its whitelisted POSTs pass Frappe's CSRF guard.
       window.csrf_token = "{{ csrf_token }}";
+      // Socket.IO config for live board updates (realtime.js subscribes here).
+      window.fleet_socket = {
+        site_name: "{{ site_name }}",
+        socketio_port: {{ socketio_port }},
+        enabled: {{ "true" if async_enabled else "false" }},
+      };
     </script>
     {%- endif %}
   </head>

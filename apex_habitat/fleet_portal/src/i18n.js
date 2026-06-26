@@ -77,6 +77,7 @@ const messages = {
       expiringSoon: "Expiring soon",
     },
     sidebar: {
+      filters: "Filters",
       filtersAndStats: "Filters & statistics",
       vehicleType: "Vehicle type",
       all: "All",
@@ -447,6 +448,7 @@ const messages = {
       expiringSoon: "قارب على الانتهاء",
     },
     sidebar: {
+      filters: "الفلاتر",
       filtersAndStats: "الفلاتر والإحصائيات",
       vehicleType: "نوع المركبة",
       all: "الكل",

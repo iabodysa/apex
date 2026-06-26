@@ -16,13 +16,13 @@ class CustodyKiosk {
 		this.page = page;
 		// [#mode01]
 		this.mode = "issue";
+		// Recipient (both modes) — party_type/party Dynamic Link pair.
+		this.party_type = "Employee";
+		this.party = null;
 		// Issue-mode state
-		this.employee = null;
 		this.building = null;
 		this.articles = [];
 		// Return-mode state
-		this.party_type = "Employee";
-		this.party = null;
 		this.held = [];
 		// [#kwkz4i]
 		this.cart = {};
@@ -36,32 +36,9 @@ class CustodyKiosk {
 	}
 
 	_setup_controls() {
-		// Issue-mode fields
-		this.employee_field = this.page.add_field({
-			fieldname: "employee",
-			label: __("Employee"),
-			fieldtype: "Link",
-			options: "Employee",
-			change: () => {
-				this.employee = this.employee_field.get_value() || null;
-			},
-		});
-
-		this.building_field = this.page.add_field({
-			fieldname: "building",
-			label: __("Building"),
-			fieldtype: "Link",
-			options: "Accommodation Building",
-			change: () => {
-				const val = this.building_field.get_value() || null;
-				if (val !== this.building) {
-					this.building = val;
-					this.refresh();
-				}
-			},
-		});
-
-		// [#party01]
+		// [#party01] — the recipient is a party_type/party pair (Employee |
+		// Temporary Worker) matching the Custody Issue Dynamic Link; it selects
+		// the issue recipient and the return holder in both modes.
 		this.party_type_field = this.page.add_field({
 			fieldname: "party_type",
 			label: __("Worker Type"),
@@ -76,7 +53,11 @@ class CustodyKiosk {
 					this.party_field.set_value("");
 					this._update_party_options();
 					this.return_cart = {};
-					this._render_held_empty(__("Select a worker to load held custody."));
+					if (this.mode === "return") {
+						this._render_held_empty(
+							__("Select a worker to load held custody.")
+						);
+					}
 					this._render_cart();
 				}
 			},
@@ -91,7 +72,25 @@ class CustodyKiosk {
 				const val = this.party_field.get_value() || null;
 				if (val !== this.party) {
 					this.party = val;
-					this.return_cart = {};
+					// Return mode reloads the holder's returnable custody; issue
+					// mode's catalog depends on building, not party.
+					if (this.mode === "return") {
+						this.return_cart = {};
+						this.refresh();
+					}
+				}
+			},
+		});
+
+		this.building_field = this.page.add_field({
+			fieldname: "building",
+			label: __("Building"),
+			fieldtype: "Link",
+			options: "Accommodation Building",
+			change: () => {
+				const val = this.building_field.get_value() || null;
+				if (val !== this.building) {
+					this.building = val;
 					this.refresh();
 				}
 			},
@@ -155,6 +154,11 @@ class CustodyKiosk {
 			.appendTo($cart);
 		this.$cart_lines = $('<div class="ck-cart-lines"></div>').appendTo($cart);
 		const $footer = $('<div class="ck-cart-footer"></div>').appendTo($cart);
+		// Value subtotal sits above the action button; aria-live so screen
+		// readers announce the running total as items are added/removed.
+		this.$subtotal = $(
+			`<div class="ck-cart-subtotal" role="status" aria-live="polite"></div>`
+		).appendTo($footer);
 		this.$action_btn = $(
 			`<button class="btn btn-primary btn-lg ck-action-btn"></button>`
 		)
@@ -183,11 +187,11 @@ class CustodyKiosk {
 			.attr("aria-pressed", String(is_return))
 			.attr("aria-selected", String(is_return));
 
-		// Show the fields that belong to this mode, hide the others.
-		this._toggle_field(this.employee_field, !is_return);
+		// The party_type/party pair selects the recipient in BOTH modes (issue
+		// recipient / return holder); the building store is an issue-only field.
+		this._toggle_field(this.party_type_field, true);
+		this._toggle_field(this.party_field, true);
 		this._toggle_field(this.building_field, !is_return);
-		this._toggle_field(this.party_type_field, is_return);
-		this._toggle_field(this.party_field, is_return);
 
 		// The catalog search filters articles in both modes.
 		this.$cart_header.text(is_return ? __("Return cart") : __("Cart"));
@@ -365,14 +369,11 @@ class CustodyKiosk {
 			.text(art.article_name || art.article)
 			.appendTo($tile);
 
-		const meta = [];
-		if (art.uom) meta.push(art.uom);
-		if (art.store_balance !== null && art.store_balance !== undefined) {
-			meta.push(__("In stock: {0}", [art.store_balance]));
-		}
-		if (meta.length) {
-			$('<div class="ck-tile-meta"></div>').text(meta.join(" · ")).appendTo($tile);
-		}
+		// UOM + in-stock count. The count is bidi-isolated in <bdi> and the
+		// number formatted via Frappe format_number, so an Arabic label never
+		// shares one bidi run with a Latin/grouped number.
+		const $meta = this._render_tile_meta(art.uom, art.store_balance);
+		if ($meta) $meta.appendTo($tile);
 
 		const add = () => this._add_to_cart(art);
 		$tile.on("click", add);
@@ -398,15 +399,15 @@ class CustodyKiosk {
 			.text(line.article_name || line.article)
 			.appendTo($tile);
 
-		const meta = [];
-		if (line.uom) meta.push(line.uom);
-		meta.push(__("Held: {0}", [line.qty]));
-		$('<div class="ck-tile-meta"></div>').text(meta.join(" · ")).appendTo($tile);
+		const $meta = this._render_tile_meta(line.uom, line.qty, __("Held: {0}"));
+		if ($meta) $meta.appendTo($tile);
 
-		// Each held line is tied to its source Custody Issue.
-		$('<div class="ck-tile-sub text-muted"></div>')
-			.text(__("Issue: {0}", [line.custody_issue]))
-			.appendTo($tile);
+		// Each held line is tied to its source Custody Issue (bidi-isolated).
+		const $sub = $('<div class="ck-tile-sub text-muted"></div>').appendTo($tile);
+		const [isub_before, isub_after] = __("Issue: {0}").split("{0}");
+		$("<span></span>").text(isub_before).appendTo($sub);
+		$("<bdi></bdi>").text(line.custody_issue).appendTo($sub);
+		if (isub_after !== undefined) $("<span></span>").text(isub_after).appendTo($sub);
 
 		const add = () => this._add_held_to_cart(line);
 		$tile.on("click", add);
@@ -427,6 +428,27 @@ class CustodyKiosk {
 		return parts.map((p) => p.charAt(0).toUpperCase()).join("") || "?";
 	}
 
+	// Build a tile meta line "UOM · <label with bdi-isolated count>". The count is
+	// formatted via Frappe format_number (Arabic-build digit grouping) and the
+	// {0} slot of the translated label is filled with a real <bdi> node, so the
+	// Arabic label + Latin number never share a bidi run. `template` is a
+	// translated format-string carrying one {0}. Returns a node or null.
+	_render_tile_meta(uom, count, template) {
+		const has_count = count !== null && count !== undefined;
+		if (!uom && !has_count) return null;
+		const $meta = $('<div class="ck-tile-meta"></div>');
+		if (uom) $("<span></span>").text(uom).appendTo($meta);
+		if (has_count) {
+			if (uom) $("<span></span>").text(" · ").appendTo($meta);
+			const tmpl = template || __("In stock: {0}");
+			const [before, after] = tmpl.split("{0}");
+			$("<span></span>").text(before).appendTo($meta);
+			$("<bdi></bdi>").text(format_number(flt(count))).appendTo($meta);
+			if (after !== undefined) $("<span></span>").text(after).appendTo($meta);
+		}
+		return $meta;
+	}
+
 	_add_to_cart(art) {
 		const existing = this.cart[art.article];
 		if (existing) {
@@ -436,6 +458,8 @@ class CustodyKiosk {
 				article: art.article,
 				article_name: art.article_name || art.article,
 				uom: art.uom,
+				// Unit cost drives the cart value subtotal; may be 0/undefined.
+				rate: flt(art.standard_unit_cost_sar),
 				qty: 1,
 			};
 		}
@@ -499,12 +523,15 @@ class CustodyKiosk {
 				.text(__("Cart is empty."))
 				.appendTo(this.$cart_lines);
 			this.$action_btn.prop("disabled", true);
+			this._render_subtotal(0);
 			return;
 		}
 
 		this.$action_btn.prop("disabled", false);
 
+		let total = 0;
 		lines.forEach((line) => {
+			total += flt(line.rate) * flt(line.qty);
 			const $line = $('<div class="ck-cart-line"></div>').appendTo(this.$cart_lines);
 			$('<div class="ck-cart-line-name"></div>').text(line.article_name).appendTo($line);
 
@@ -517,11 +544,32 @@ class CustodyKiosk {
 				.appendTo($stepper)
 				.on("click", () => this._change_qty(line.article, 1));
 		});
+
+		this._render_subtotal(total);
+	}
+
+	// Cart value subtotal (sum of qty x unit cost). Rendered only in Issue mode;
+	// formatted via Frappe format_currency so Arabic-build digit grouping + SAR
+	// symbol position are correct. The numeric value is bidi-isolated in a <bdi>.
+	_render_subtotal(total) {
+		if (!this.$subtotal) return;
+		if (this.mode === "return") {
+			this.$subtotal.empty().hide();
+			return;
+		}
+		this.$subtotal.show().empty();
+		$('<span class="ck-subtotal-label text-muted"></span>')
+			.text(__("Estimated value"))
+			.appendTo(this.$subtotal);
+		$('<span class="ck-subtotal-value"></span>')
+			.append($("<bdi></bdi>").text(format_currency(flt(total), "SAR")))
+			.appendTo(this.$subtotal);
 	}
 
 	// [#retcart]
 	_render_return_cart() {
 		this.$cart_lines.empty();
+		this._render_subtotal(0);
 		const lines = Object.values(this.return_cart);
 
 		if (!lines.length) {
@@ -567,9 +615,9 @@ class CustodyKiosk {
 
 	_issue() {
 		const lines = Object.values(this.cart);
-		if (!this.employee) {
+		if (!this.party) {
 			frappe.show_alert({
-				message: __("Select an employee before issuing."),
+				message: __("Select a worker before issuing."),
 				indicator: "orange",
 			});
 			return;
@@ -622,7 +670,8 @@ class CustodyKiosk {
 		frappe.call({
 			method: "apex_habitat.habitat.api.custody_kiosk.issue_cart",
 			args: {
-				employee: this.employee,
+				party_type: this.party_type,
+				party: this.party,
 				building: this.building,
 				items_json: JSON.stringify(items),
 				signature: signature || null,
@@ -640,7 +689,7 @@ class CustodyKiosk {
 					return;
 				}
 				frappe.show_alert({
-					message: __("Issued to {0}: {1}", [this.employee, r.message.custody_issue]),
+					message: __("Issued to {0}: {1}", [this.party, r.message.custody_issue]),
 					indicator: "green",
 				});
 				this.cart = {};

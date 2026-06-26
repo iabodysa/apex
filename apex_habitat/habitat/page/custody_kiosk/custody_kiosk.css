@@ -58,7 +58,7 @@
 
 /* [#glvo5q] */
 .ck-tools {
-	margin-bottom: 14px;
+	margin-block-end: 14px;
 }
 
 .ck-search {
@@ -244,6 +244,21 @@
 .ck-cart-footer {
 	padding: 14px 16px;
 	border-top: 1px solid var(--border-color, #d1d8dd);
+}
+
+/* [#cksub] — cart value subtotal, above the action button. */
+.ck-cart-subtotal {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+	margin-block-end: 12px;
+	font-size: 14px;
+}
+
+.ck-subtotal-value {
+	font-size: 18px;
+	font-weight: 700;
 }
 
 .ck-issue-btn {

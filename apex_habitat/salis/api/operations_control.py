@@ -26,6 +26,9 @@ VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 # Compliance states that count a vehicle as "at risk" — the same two the card flags.
 COMPLIANCE_AT_RISK = ("Expiring Soon", "Expired")
 
+# Compliance facet values the board filter offers (mapped 1:1 to the field's options).
+COMPLIANCE_FILTERS = ("Compliant", "Expiring Soon", "Expired")
+
 
 def _empty_summary(stopped_over_days):
     return {
@@ -51,11 +54,12 @@ def _empty(offices=None, projects=None, unscoped=False, stopped_over_days=14):
 
 
 @frappe.whitelist()
-def get_fleet(status=None, rental_office=None, project=None, search=None):
+def get_fleet(status=None, rental_office=None, project=None, search=None, compliance=None):
     """Return the filtered fleet with driver names and open-incident counts.
 
     All filters are optional. Project scope is enforced server-side: a scoped
-    user with no permitted project gets an empty board.
+    user with no permitted project gets an empty board. ``compliance`` narrows to
+    one of Compliant / Expiring Soon / Expired (the vehicle's compliance_status).
     """
     from apex_habitat.salis.tasks import _settings_int
 
@@ -80,6 +84,8 @@ def get_fleet(status=None, rental_office=None, project=None, search=None):
         extra["rental_office"] = rental_office
     if project and (unscoped or project in (projects or [])):
         extra["project"] = project
+    if compliance in COMPLIANCE_FILTERS:
+        extra["compliance_status"] = compliance
 
     or_filters = None
     if search:

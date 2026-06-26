@@ -16,6 +16,7 @@
  */
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from "vue";
 import { call } from "./api.js";
+import { connectFleetRealtime } from "./realtime.js";
 import Icon from "./components/Icon.vue";
 import LangToggle from "./components/LangToggle.vue";
 import { useI18n } from "./i18n";
@@ -117,13 +118,39 @@ function stopPoll() {
 function onVisibility() {
   if (document.hidden) return;
   if (!pollPaused.value) reloadFleet();
+  else realtimePending.value = true; // flush the missed update once free
 }
+
+// ═══════════ REALTIME (socket push, ahead of the poll) ═══════════
+// When a fleet mutator publishes `fleet_update`, refresh the board immediately
+// instead of waiting up to POLL_MS. A push that lands while the user is mid-
+// interaction (the same pollPaused guard) is deferred via a pending flag, then
+// flushed the moment they're free — so realtime never clobbers an open form or a
+// selection. The poll stays as the fallback when the socket can't connect.
+let stopRealtime = () => {};
+const realtimePending = ref(false);
+async function onRealtimeUpdate() {
+  if (document.hidden || pollPaused.value) {
+    realtimePending.value = true;
+    return;
+  }
+  realtimePending.value = false;
+  await reloadFleet();
+  await loadAlerts();
+}
+// Once the user finishes interacting, flush any update that arrived meanwhile.
+watch(pollPaused, (paused) => {
+  if (!paused && realtimePending.value && !document.hidden) onRealtimeUpdate();
+});
+
 onMounted(() => {
   startPoll();
+  stopRealtime = connectFleetRealtime(onRealtimeUpdate);
   document.addEventListener("visibilitychange", onVisibility);
 });
 onUnmounted(() => {
   stopPoll();
+  stopRealtime();
   document.removeEventListener("visibilitychange", onVisibility);
 });
 
@@ -231,6 +258,18 @@ function setDateType(v) {
 }
 function setView(v) {
   f.view = v;
+}
+
+// On phones the sidebar (filters + stats) is hidden and reached through a
+// bottom-sheet toggled here; on wider viewports the sheet state is inert (the
+// sidebar is always shown by CSS). Closed on resize back to desktop via the
+// overlay/CSS — the flag only drives the mobile `.fp-sheet-open` class.
+const filtersSheetOpen = ref(false);
+function toggleFiltersSheet() {
+  filtersSheetOpen.value = !filtersSheetOpen.value;
+}
+function closeFiltersSheet() {
+  filtersSheetOpen.value = false;
 }
 
 // Board density (compact tightens card rows so a large fleet fits), persisted
@@ -1065,9 +1104,14 @@ function expiryFlag(v) {
   </div>
 
   <div class="layout">
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="sidebar-header"><span class="sidebar-title"><Icon name="funnel" :size="13" /> {{ t("sidebar.filtersAndStats") }}</span></div>
+    <!-- Mobile filter-sheet backdrop (inert on desktop — the sheet CSS is phone-only) -->
+    <div v-if="filtersSheetOpen" class="fp-sheet-backdrop fp-mobile-only" @click="closeFiltersSheet"></div>
+    <!-- SIDEBAR (a bottom sheet on phones, a fixed column on wider viewports) -->
+    <div class="sidebar" :class="{ 'fp-sheet-open': filtersSheetOpen }">
+      <div class="sidebar-header">
+        <span class="sidebar-title"><Icon name="funnel" :size="13" /> {{ t("sidebar.filtersAndStats") }}</span>
+        <button class="panel-close fp-sheet-close fp-mobile-only" @click="closeFiltersSheet"><Icon name="x" :size="16" /></button>
+      </div>
       <div class="sidebar-scroll">
         <div class="fg">
           <div class="fl">{{ t("sidebar.vehicleType") }}</div>
@@ -1164,6 +1208,8 @@ function expiryFlag(v) {
     <div class="main">
       <div class="main-header">
         <div style="display:flex;align-items:center;gap:10px">
+          <!-- Mobile-only: opens the filters/stats bottom sheet (sidebar is hidden on phones) -->
+          <button class="btn fp-filters-btn fp-mobile-only" :class="{ 'btn-blue': anyFilterActive }" @click="toggleFiltersSheet"><Icon name="funnel" :size="14" /> {{ t("sidebar.filters") }}<span v-if="anyFilterActive" class="fp-filters-dot"></span></button>
           <span class="rcount">{{ t("main.vehicleCount", { n: filtered.length }) }}</span>
           <select class="fs" style="width:auto;font-size:11px" v-model="f.sort">
             <option value="plate">{{ t("main.sortBy", { field: t("main.sortPlate") }) }}</option>

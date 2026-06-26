@@ -50,14 +50,11 @@
       </button>
     </section>
 
-    <p v-if="msg" class="status-note status-ok">{{ msg }}</p>
-    <p v-if="err" class="status-note status-err">{{ err }}</p>
-
     <!-- My fuel-request history (identity-scoped read) -->
     <section class="space-y-3">
       <h3 class="text-sm font-bold uppercase tracking-wide text-muted">{{ t("fuel.history") }}</h3>
 
-      <LoadingState v-if="history.loading" :label="t('common.loading')" />
+      <Skeleton v-if="history.loading" :rows="3" />
 
       <ErrorState v-else-if="history.error" :message="t('errors.loadFailed')" @retry="history.reload()" />
 
@@ -92,16 +89,15 @@
 import { computed, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
-import LoadingState from "../components/LoadingState.vue";
+import Skeleton from "../components/Skeleton.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
+import { pushToast } from "../toast";
 
-const { t, te } = useI18n();
+const { t, te, n } = useI18n();
 
 const litres = ref(null);
-const msg = ref("");
-const err = ref("");
 
 const quota = createResource({
   url: "apex_habitat.salis.api.driver_portal.my_fuel_quota",
@@ -115,13 +111,12 @@ const history = createResource({
 const req = createResource({
   url: "apex_habitat.salis.api.driver_portal.submit_fuel_request",
   onSuccess: (r) => {
-    msg.value = t("fuel.submitted", { name: r.name });
-    err.value = "";
+    pushToast(t("fuel.submitted", { name: r.name }), "ok");
     litres.value = null;
     history.reload(); // new request shows in history without a manual refresh
     quota.reload();
   },
-  onError: (e) => { err.value = e.messages?.[0] || t("common.error"); },
+  onError: (e) => { pushToast(e.messages?.[0] || t("common.error"), "err"); },
 });
 
 function submit() {
@@ -138,10 +133,9 @@ const usedPct = computed(() => {
   return Math.min(100, Math.max(0, (q.consumed_litres / q.monthly_litres) * 100));
 });
 
-// Litres are localized for digit shaping; the unit suffix is translated.
-function litreText(n) {
-  const v = Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 1 });
-  return `${v} ${t("fuel.litreUnit")}`;
+// Litres localized for digit shaping (Intl, active-locale keyed); unit translated.
+function litreText(v) {
+  return `${n(Number(v || 0), { maximumFractionDigits: 1 })} ${t("fuel.litreUnit")}`;
 }
 
 // Map a Fuel Request status to a status pill (purely cosmetic).

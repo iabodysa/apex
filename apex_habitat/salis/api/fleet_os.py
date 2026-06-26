@@ -30,6 +30,21 @@ from apex_habitat.salis.api.dispatch_board import _permitted_projects
 from apex_habitat.salis.api.fleet_reader import scope_filter, scoped_vehicles
 from apex_habitat.salis.utils import add_timeline_note, lock_driver, lock_vehicle
 
+
+def _publish_fleet_update(plate: str | None = None, action: str | None = None) -> None:
+    """Signal the /fleet board to refetch ahead of its poll. Routed to the Salis
+    Vehicle doctype room; the socket server delivers only to recipients with read
+    permission, so scope is honoured without extra filtering. after_commit so
+    subscribers refetch committed state. The payload is advisory only — the SPA
+    refetches via get_fleet_os, it does not trust the message body."""
+    frappe.publish_realtime(
+        "fleet_update",
+        {"plate": plate, "action": action},
+        doctype="Salis Vehicle",
+        after_commit=True,
+    )
+
+
 # [#mqc6q1]
 _STATUS_MAP = {
     "Stopped": "stopped",
@@ -590,6 +605,7 @@ def reassign(plate, driver_id, date=None):
 
     frappe.db.set_value("Salis Vehicle", vehicle, "current_driver", driver)
     frappe.db.set_value("Salis Driver", driver, "current_vehicle", vehicle)
+    _publish_fleet_update(plate, "reassign")
     return {"ok": True, "assignment": doc.name}
 
 
@@ -628,6 +644,7 @@ def stop_vehicle(plate, reason=None):
             frappe.db.set_value("Vehicle Assignment", r.name, {"status": "Ended", "end_date": getdate(today())})
         frappe.db.set_value("Salis Vehicle", vehicle, "current_driver", None)
         frappe.db.set_value("Salis Driver", current_driver, "current_vehicle", None)
+    _publish_fleet_update(plate, "stop")
     return {"ok": True, "stop": doc.name}
 
 
@@ -651,6 +668,7 @@ def report_theft(plate, location=None, report_number=None):
     })
     doc.insert()
     doc.submit()  # [#taa8d4]
+    _publish_fleet_update(plate, "theft")
     return {"ok": True, "incident": doc.name}
 
 
@@ -690,6 +708,7 @@ def workshop_in(plate, expected_return=None, notes=None):
     # Distinguish the workshop lane from a plain stop on the board; previous_status
     # was already captured by on_submit so the return path can still restore it.
     frappe.db.set_value("Salis Vehicle", vehicle, "status", "Under Maintenance")
+    _publish_fleet_update(plate, "workshop_in")
     return {"ok": True, "stop": doc.name}
 
 
@@ -726,6 +745,7 @@ def workshop_out(plate):
     # on_cancel skips its restore while status != "Stopped"; bring it back explicitly.
     if frappe.db.get_value("Salis Vehicle", vehicle, "status") == "Under Maintenance":
         frappe.db.set_value("Salis Vehicle", vehicle, "status", stop.previous_status or "Active")
+    _publish_fleet_update(plate, "workshop_out")
     return {"ok": True, "stop": stop.name}
 
 
@@ -814,6 +834,7 @@ def recover(plate):
     )
     if not incident:
         frappe.db.set_value("Salis Vehicle", vehicle, "status", "Active")
+        _publish_fleet_update(plate, "recover")
         return {"ok": True}
 
     # Restore the pre-theft driver only if the vehicle is still free (mirror the
@@ -831,4 +852,5 @@ def recover(plate):
     add_timeline_note(
         "Salis Vehicle", vehicle, _("Recovered; theft report {0} closed.").format(incident.name)
     )
+    _publish_fleet_update(plate, "recover")
     return {"ok": True, "incident": incident.name}

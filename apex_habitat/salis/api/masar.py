@@ -388,6 +388,61 @@ def _days_until(value):
         return None
 
 
+# Masar SPA enum namespace -> (DocType, Select fieldname) it localizes. The SAME
+# pairs the worker portal renders via tEnum; keeping the source here (server-side)
+# is what lets us drive the labels from the live options + ar.csv instead of a
+# hand-maintained JS duplicate that silently drifts.
+_ENUM_SOURCES = {
+    "status": ("Employee", "status"),
+    "stayType": ("Accommodation Assignment", "stay_type"),
+    "requestType": ("Transport Request", "request_type"),
+    "transportStatus": ("Transport Request", "status"),
+    "requestCategory": ("Accommodation Resident Request", "request_category"),
+    "requestStatus": ("Accommodation Resident Request", "status"),
+    "priority": ("Accommodation Resident Request", "priority"),
+    "issueLocation": ("Accommodation Resident Request", "issue_location"),
+}
+
+
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=30, seconds=60)
+def get_enum_labels(lang="ar"):
+    """Localized labels for the worker portal's server enums (read, no identity).
+
+    Single source of truth for the Masar Select-option translations: for each enum
+    namespace the SPA renders, this reads the field's LIVE Select options from
+    ``frappe.get_meta`` and maps each English value to its translation from the
+    app's translation files (``ar.csv``) via ``frappe.translate.get_all_translations``. The
+    portal then needs no hand-maintained JS enum map — a new or renamed option is
+    picked up automatically, and the one place a label is authored is the CSV, so
+    the two can never drift (the recurring "English leaks into the Arabic UI"
+    class). The stored value stays English for round-trip; only the label is
+    localized.
+
+    Returns ``{namespace: {english_value: localized_label}}``. Only entries whose
+    translation differs from the raw value are included (English mode renders the
+    raw value, so identity entries add nothing). Public + cacheable: it exposes no
+    worker data, only option metadata + translations, so no token is required."""
+    lang = (lang or "ar").strip() or "ar"
+    from frappe.translate import get_all_translations
+
+    translations = get_all_translations(lang) or {}
+    out = {}
+    for ns, (doctype, field) in _ENUM_SOURCES.items():
+        meta_field = frappe.get_meta(doctype).get_field(field)
+        if not meta_field or not meta_field.options:
+            continue
+        labels = {}
+        for opt in meta_field.options.split("\n"):
+            opt = opt.strip()
+            # Skip blanks and only carry a real translation (identity adds nothing).
+            if opt and translations.get(opt) and translations[opt] != opt:
+                labels[opt] = translations[opt]
+        if labels:
+            out[ns] = labels
+    return out
+
+
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_context(token=None):

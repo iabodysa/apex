@@ -102,9 +102,11 @@
 
 /* [#9r01s9] */
 .fc-card {
+	position: relative;
 	background: var(--card-bg, #fff);
 	border: 1px solid var(--border-color, #e2e2e2);
-	border-left: 4px solid var(--gray-300, #ccc);
+	/* Logical inline-start so the status accent flips to the right edge under RTL. */
+	border-inline-start: 4px solid var(--gray-300, #ccc);
 	border-radius: var(--border-radius-md, 8px);
 	padding: 12px 14px;
 	cursor: pointer;
@@ -114,10 +116,10 @@
 	box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
 	transform: translateY(-1px);
 }
-.fc-accent-green { border-left-color: var(--green-500, #28a745); }
-.fc-accent-orange { border-left-color: var(--orange-500, #f0932b); }
-.fc-accent-red { border-left-color: var(--red-500, #e74c3c); }
-.fc-accent-gray { border-left-color: var(--gray-400, #aaa); }
+.fc-accent-green { border-inline-start-color: var(--green-500, #28a745); }
+.fc-accent-orange { border-inline-start-color: var(--orange-500, #f0932b); }
+.fc-accent-red { border-inline-start-color: var(--red-500, #e74c3c); }
+.fc-accent-gray { border-inline-start-color: var(--gray-400, #aaa); }
 .fc-card-head {
 	display: flex;
 	justify-content: space-between;
@@ -190,9 +192,12 @@
 	width: 320px;
 	opacity: 1;
 	border: 1px solid var(--border-color, #e2e2e2);
-	padding: 14px;
+	padding-block: 14px;
+	padding-inline: 14px;
 	position: sticky;
-	top: 10px;
+	/* Logical inset so the pinned drawer rides the trailing edge under RTL too. */
+	inset-block-start: 10px;
+	inset-inline-end: 0;
 }
 .fc-drawer-head {
 	display: flex;
@@ -212,7 +217,7 @@
 .fc-dl-row { display: flex; gap: 8px; padding: 3px 0; font-size: 13px; }
 .fc-dl-k { flex: 0 0 110px; color: var(--text-muted, #888); }
 .fc-dl-v { flex: 1 1 auto; font-weight: 500; }
-.fc-list { margin: 0; padding-left: 16px; font-size: 12.5px; }
+.fc-list { margin: 0; padding-inline-start: 16px; font-size: 12.5px; }
 .fc-list li { margin: 2px 0; }
 
 /* Top progress bar: indeterminate sliding sweep while a fetch is in flight. */
@@ -265,7 +270,154 @@
 	.fc-skeleton { animation: none; }
 }
 
-@media (max-width: 768px) {
-	.fc-drawer.fc-open { flex-basis: 100%; width: 100%; }
-	.fc-body { flex-direction: column; }
+/* Full-width severity alert strip above the board. Counters are buttons; the
+ * active one is outlined. A zero-alert state collapses to a calm all-clear line. */
+.fc-alert-strip {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 14px;
+	padding: 8px 10px;
+	border: 1px solid var(--border-color, #e2e2e2);
+	border-radius: var(--border-radius-md, 8px);
+	background: var(--card-bg, #fff);
 }
+.fc-alert-strip-clear {
+	color: var(--green-600, #1e7e34);
+	font-weight: 600;
+	font-size: 13px;
+}
+.fc-sev-counter {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	border: 1px solid transparent;
+	border-radius: 999px;
+	background: var(--control-bg, #f4f5f6);
+	cursor: pointer;
+	font-size: 12px;
+}
+.fc-sev-counter[aria-pressed="true"] {
+	border-color: var(--primary, #2490ef);
+	background: var(--primary-light, #e7f3ff);
+}
+.fc-sev-dot {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	flex: 0 0 auto;
+}
+.fc-sev-Critical { background: var(--red-500, #e74c3c); }
+.fc-sev-Warning { background: var(--orange-500, #f0932b); }
+.fc-sev-Info { background: var(--blue-500, #2490ef); }
+.fc-sev-count { font-weight: 700; }
+
+/* Per-card severity badge, top trailing corner, coloured by highest open severity. */
+.fc-card-sev {
+	position: absolute;
+	inset-block-start: 8px;
+	inset-inline-end: 8px;
+	min-width: 18px;
+	height: 18px;
+	padding: 0 5px;
+	border-radius: 999px;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 18px;
+	text-align: center;
+}
+.fc-card-sev.fc-sev-Critical { background: var(--red-500, #e74c3c); }
+.fc-card-sev.fc-sev-Warning { background: var(--orange-500, #f0932b); }
+.fc-card-sev.fc-sev-Info { background: var(--blue-500, #2490ef); }
+
+/* Live result count + sort control on the filter bar. */
+.fc-result-count { font-size: 12px; color: var(--text-muted, #888); margin-inline-start: auto; align-self: center; }
+.fc-summary .fc-chip { cursor: pointer; }
+.fc-summary .fc-chip[aria-pressed="true"] { outline: 2px solid var(--primary, #2490ef); outline-offset: -2px; }
+
+/* Alert-queue view: severity-sorted rows with inline ack/resolve + multi-select. */
+.fc-queue { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+.fc-queue-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 10px;
+	border: 1px solid var(--border-color, #e2e2e2);
+	border-inline-start: 4px solid var(--gray-300, #ccc);
+	border-radius: var(--border-radius-md, 8px);
+	background: var(--card-bg, #fff);
+}
+.fc-queue-row.fc-sev-row-Critical { border-inline-start-color: var(--red-500, #e74c3c); }
+.fc-queue-row.fc-sev-row-Warning { border-inline-start-color: var(--orange-500, #f0932b); }
+.fc-queue-row.fc-sev-row-Info { border-inline-start-color: var(--blue-500, #2490ef); }
+.fc-queue-main { flex: 1 1 auto; min-width: 0; }
+.fc-queue-msg { font-size: 13px; }
+.fc-queue-meta { font-size: 11.5px; color: var(--text-muted, #888); margin-block-start: 2px; }
+.fc-queue-actions { display: inline-flex; gap: 6px; flex: 0 0 auto; }
+.fc-queue-bulk { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+
+/* Open-alert block pinned at the top of the detail drawer. */
+.fc-drawer-alerts { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.fc-drawer-alert {
+	border: 1px solid var(--border-color, #e2e2e2);
+	border-inline-start: 3px solid var(--gray-300, #ccc);
+	border-radius: var(--border-radius-md, 8px);
+	padding: 6px 8px;
+}
+.fc-drawer-alert.fc-sev-row-Critical { border-inline-start-color: var(--red-500, #e74c3c); }
+.fc-drawer-alert.fc-sev-row-Warning { border-inline-start-color: var(--orange-500, #f0932b); }
+.fc-drawer-alert.fc-sev-row-Info { border-inline-start-color: var(--blue-500, #2490ef); }
+.fc-drawer-alert-actions { display: inline-flex; gap: 6px; margin-block-start: 4px; }
+
+/* Unified activity timeline in the drawer (incidents/stops/assignments/alerts). */
+.fc-timeline { list-style: none; margin: 0; padding: 0; }
+.fc-timeline li {
+	display: flex;
+	gap: 8px;
+	padding: 4px 0;
+	font-size: 12.5px;
+	border-block-end: 1px solid var(--border-color, #f0f0f0);
+}
+.fc-tl-kind { flex: 0 0 88px; color: var(--text-muted, #888); }
+
+@media (max-width: 768px) {
+	.fc-drawer.fc-open {
+		/* Full-screen overlay on a phone instead of an inline side panel. */
+		position: fixed;
+		inset: 0;
+		z-index: 1030;
+		width: 100%;
+		flex-basis: 100%;
+		border-radius: 0;
+		overflow-y: auto;
+	}
+	.fc-body { flex-direction: column; }
+	/* Tap targets ≥40px for one-thumb operation. */
+	.fc-queue-actions .btn,
+	.fc-drawer-alert-actions .btn,
+	.fc-sev-counter { min-height: 40px; }
+	/* Horizontally scroll the strip rather than wrapping to many rows. */
+	.fc-alert-strip { flex-wrap: nowrap; overflow-x: auto; }
+	.fc-alert-strip .fc-sev-counter { flex: 0 0 auto; }
+	/* Collapse the filter bar into a bottom sheet toggled by a Filters button. */
+	.fc-controls.fc-sheet {
+		position: fixed;
+		inset-inline: 0;
+		inset-block-end: 0;
+		z-index: 1031;
+		flex-direction: column;
+		align-items: stretch;
+		background: var(--card-bg, #fff);
+		border-block-start: 1px solid var(--border-color, #e2e2e2);
+		padding: 14px;
+		box-shadow: var(--shadow-lg, 0 -6px 24px rgba(0, 0, 0, 0.15));
+		max-height: 70vh;
+		overflow-y: auto;
+	}
+	.fc-controls.fc-sheet.fc-sheet-closed { display: none; }
+	.fc-sheet-toggle { display: inline-flex; }
+}
+.fc-sheet-toggle { display: none; }
