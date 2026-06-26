@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.58 — pickups now run by QR: a worker shows a boarding pass on their phone and the driver scans it from the app, so the boarded count and passenger list build themselves and any rider is one tap to call; a worker can request a ride for themselves and add unregistered co-travellers by name and ID; the fleet alert list becomes one you can work — take or assign an alert, snooze the ones that can wait, and see what is new since you last looked and what is overdue, with leaner filters; the worker app keeps showing its last saved information when the signal drops and now reads in Urdu, Hindi and Bengali too; and an optional Atelier theme plus a consistent desk style refine the look across portals and operator pages",
+        "app_name": "apex_habitat",
+        "link": "/app/operations-control",
+        "creation": "2026-06-26 23:55:00",
+    },
+    {
         "title": "Apex 1.57 — drivers now run their whole day from a phone-friendly app: they install it to the home screen and keep working offline (a banner shows when saved data is on screen), snap a shift photo at check-in, open a trip or vehicle in Google Maps with one tap, follow a fuel request and its decision, and watch their license, clearance and vehicle-compliance dates before they lapse — and a driver is now notified about tomorrow's trip and about a fuel request decision, in the app and by their usual channel; a supervisor can register a new driver on the spot before assigning a vehicle and capture a vehicle handover during a reassignment as a draft the manager reviews; and every workspace is leaner, opening straight to the portal or screen you use most with a short curated set of shortcuts and counters instead of extra charts and lists, alongside a clearer first-time fleet setup",
         "app_name": "apex_habitat",
         "link": "/driver",

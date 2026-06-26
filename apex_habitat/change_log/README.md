@@ -5,10 +5,11 @@ to that series' consolidated note (newest patch first inside).
 
 ## Latest
 
-**[1.57](v1/v1_57_0.md)** — Drivers now run their whole day from a phone-friendly app, and every workspace opens straight to the screen you actually use.
+**[1.58](v1/v1_58_0.md)** — Workers and drivers now run pickups by QR, workers can request a ride for themselves, and the fleet alert list is one you can actually work.
 
 ## All releases
 
+- [1.58](v1/v1_58_0.md) — Workers and drivers now run pickups by QR, workers can request a ride for themselves, and the fleet alert list is one you can actually work.
 - [1.57](v1/v1_57_0.md) — Drivers now run their whole day from a phone-friendly app, and every workspace opens straight to the screen you actually use.
 - [1.56](v1/v1_56_0.md) — Operations and fleet boards now move in real time, custody runs from a scan-and-go kiosk, and drivers handle their own day from the app.
 - [1.55](v1/v1_55_0.md) — Portal experience release: clearer worker custody and transport, a reworked driver portal, RTL fixes, and workspace wiring.
