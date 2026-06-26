@@ -2,14 +2,21 @@
   <div class="space-y-5">
     <h2 class="section-title">{{ t("accommodation.title") }}</h2>
 
-    <template v-if="acc.loading">
+    <!-- Stale note when rendering the last-known cached snapshot offline. -->
+    <div v-if="isStale" class="stale-note">
+      <Icon name="alert" :size="14" class="shrink-0" />
+      <span>{{ t("common.stale") }}</span>
+    </div>
+
+    <template v-if="acc.loading && !ad">
       <Skeleton variant="stats" :lines="3" />
       <Skeleton :lines="4" />
     </template>
 
-    <!-- Error: an invalid/disabled token (PermissionError) or a server failure
-         must NOT masquerade as a benign "no assignment" empty state. -->
-    <div v-else-if="acc.error" class="card card-pad text-center">
+    <!-- Error with NO cached fallback: an invalid/disabled token (PermissionError)
+         or a server failure must NOT masquerade as a benign "no assignment" empty
+         state. With a cached snapshot we render it (labelled stale) instead. -->
+    <div v-else-if="acc.error && !ad" class="card card-pad text-center">
       <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
       <p class="text-sm text-muted">{{ errorMessage }}</p>
       <button class="btn btn-primary mt-3" style="width: auto; padding-inline: 24px" @click="acc.reload()">
@@ -17,7 +24,7 @@
       </button>
     </div>
 
-    <template v-else-if="acc.data && acc.data.assignment">
+    <template v-else-if="ad && ad.assignment">
       <!-- Building / room / bed -->
       <section class="card card-pad space-y-4">
         <div class="flex items-center gap-3">
@@ -26,7 +33,7 @@
           </span>
           <div class="min-w-0">
             <div class="text-base font-extrabold leading-tight truncate">
-              {{ building?.building_name || acc.data.assignment.name }}
+              {{ building?.building_name || ad.assignment.name }}
             </div>
             <div v-if="buildingLocation" class="text-sm text-muted truncate">{{ buildingLocation }}</div>
           </div>
@@ -48,9 +55,9 @@
         </div>
 
         <dl class="space-y-3 text-sm">
-          <Row icon="calendar" :label="t('accommodation.checkIn')" :value="formatDate(acc.data.assignment.check_in_date)" />
-          <Row v-if="acc.data.assignment.stay_type" icon="clock" :label="t('accommodation.stayType')" :value="tEnum('stayType', acc.data.assignment.stay_type)" />
-          <Row v-if="acc.data.assignment.expected_checkout_date" icon="clock" :label="t('accommodation.expectedCheckout')" :value="formatDate(acc.data.assignment.expected_checkout_date)" />
+          <Row icon="calendar" :label="t('accommodation.checkIn')" :value="formatDate(ad.assignment.check_in_date)" />
+          <Row v-if="ad.assignment.stay_type" icon="clock" :label="t('accommodation.stayType')" :value="tEnum('stayType', ad.assignment.stay_type)" />
+          <Row v-if="ad.assignment.expected_checkout_date" icon="clock" :label="t('accommodation.expectedCheckout')" :value="formatDate(ad.assignment.expected_checkout_date)" />
           <Row v-if="occupancy" icon="user" :label="t('accommodation.occupancy')" :value="occupancy" />
           <Row v-if="building?.address" icon="pin" :label="t('accommodation.address')" :value="building.address" />
         </dl>
@@ -84,9 +91,9 @@
       </section>
 
       <!-- Notices -->
-      <section v-if="acc.data.assignment.notes" class="card card-pad">
+      <section v-if="ad.assignment.notes" class="card card-pad">
         <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-2">{{ t("accommodation.notes") }}</h3>
-        <p class="text-sm text-soft whitespace-pre-line">{{ acc.data.assignment.notes }}</p>
+        <p class="text-sm text-soft whitespace-pre-line">{{ ad.assignment.notes }}</p>
       </section>
 
       <router-link to="/requests" class="btn btn-outline" style="text-decoration: none">
@@ -102,7 +109,7 @@
 </template>
 
 <script setup>
-import { computed, h } from "vue";
+import { computed, h, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
@@ -110,20 +117,37 @@ import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDate } from "../datetime";
 import { TOKEN } from "../token";
 import { waLink } from "../phone";
+import { cacheGet, cacheSet } from "../cache";
 
 const { t, tEnum } = useI18n();
 
+// Cache the last good accommodation read so an offline drop renders it
+// stale-but-labelled instead of an error (mirrors the driver portal pattern).
+const CACHE_KEY = "get_worker_accommodation";
+const staleAcc = ref(null);
 const acc = createResource({
   url: "apex_habitat.salis.api.masar.get_worker_accommodation",
   params: { token: TOKEN },
   auto: true,
+  onSuccess: (r) => {
+    staleAcc.value = null;
+    cacheSet(CACHE_KEY, r);
+  },
+  onError: () => {
+    const cached = cacheGet(CACHE_KEY);
+    if (cached) staleAcc.value = cached;
+  },
 });
 
 const errorMessage = computed(() => resourceErrorMessage(acc.error));
 
-const building = computed(() => acc.data?.building);
-const room = computed(() => acc.data?.room);
-const bed = computed(() => acc.data?.bed);
+// Live data when present; otherwise the cached snapshot (offline). ad drives the UI.
+const ad = computed(() => acc.data || staleAcc.value?.data || null);
+const isStale = computed(() => !acc.data && !!staleAcc.value);
+
+const building = computed(() => ad.value?.building);
+const room = computed(() => ad.value?.room);
+const bed = computed(() => ad.value?.bed);
 
 const buildingLocation = computed(() => {
   const b = building.value;
@@ -146,3 +170,17 @@ const Row = (rprops) =>
     h("dd", { class: "ms-auto font-semibold" }, h("bdi", null, rprops.value || t("common.none"))),
   ]);
 </script>
+
+<style scoped>
+.stale-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius, 12px);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: var(--c-warning-bg, #fef3c7);
+  color: var(--c-warning, #92400e);
+}
+</style>

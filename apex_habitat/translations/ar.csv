@@ -279,6 +279,8 @@ Assets Moved This Month,الأصول المنقولة هذا الشهر
 Assets in Custody,الأصول في العهدة
 Assign a vehicle to a driver or project to start the movement lifecycle.,أسنِد مركبة إلى سائق أو مشروع لبدء دورة حياة الحركة.
 Assign an employee to a bed to start the accommodation lifecycle.,اربط الموظف بسرير لبدء دورة السكن.
+Assign to me,إسناد إليّ
+Assign to me ({0}),إسناد إليّ ({0})
 Assigned,مُسنَد
 Assigned Building,المبنى المخصص
 Assigned Driver,السائق المسند
@@ -289,6 +291,7 @@ Assigned To is required when status is Assigned.,حقل 'مخصص لـ' مطلو
 Assigned Today,المسندون اليوم
 Assigned Vehicle,المركبة المسندة
 Assigned to driver {0} via {1}.,أُسند إلى السائق {0} عبر {1}.
+Assigned to you,مُسنَد إليك
 Assignment,الإسناد
 Assignment Period,فترة الإسناد
 Assignment Type,نوع التسكين
@@ -804,6 +807,7 @@ Custody deferred,أُجِّلت العهدة
 Custody is live. Issue and return articles at the kiosk and assess any damage.,العهدة قيد التشغيل. اصرف المواد وأرجِعها من الكشك وقيّم أي ضرر.
 Custody issued to {0},صُرفت العهدة إلى {0}
 Custody items have been issued to you,تم تسليم عُهدة إليك
+Custom…,مخصص…
 DVR/NVR,جهاز التسجيل DVR/NVR
 DVR/NVR Status,حالة جهاز التسجيل DVR/NVR
 Daily,يومي
@@ -924,6 +928,7 @@ Discrepancy,تباين
 Discrepancy Notes,ملاحظات التباين
 Discrepancy Status,حالة التباين
 Discrepancy notes are required when the discrepancy status is Discrepancy.,ملاحظات التباين مطلوبة عندما تكون حالة التباين «تباين».
+Dismiss,تجاهل
 Dispatch,الإرسال
 Dispatch Date,تاريخ التشغيل
 Dispatch Trip,رحلة تشغيل
@@ -1309,6 +1314,7 @@ Has custody,لديه عهدة
 Health and Hygiene,الصحة والنظافة العامة
 Held: {0},بالعهدة: {0}
 Hide out of service,إخفاء الخارجة عن الخدمة
+Hide this alert from the operations queue until this time; it reappears when the moment passes.,إخفاء هذا التنبيه من قائمة العمليات حتى هذا الوقت؛ ويعاود الظهور عند انقضاء الموعد.
 High,عالية
 High Priority,أولوية عالية
 Hindi,الهندية
@@ -1660,6 +1666,7 @@ Method,الطريقة
 Middle,وسطي
 Migrated From,تم ترحيله من
 Min Occupancy %,أدنى نسبة إشغال
+Mine,الخاصة بي
 Minutes a handover one-time password stays valid before it expires.,عدد الدقائق التي يبقى فيها رمز التحقق للتسليم صالحاً قبل انتهاء صلاحيته.
 Mirrors the building's supervisor so notifications can target the specific facility owner.,يعكس مشرف المبنى لتوجيه الإشعارات إلى مالك المنشأة المحدد.
 Missed,فائت
@@ -1745,6 +1752,7 @@ No active assignment found for bed {0}.,لا يوجد إسناد نشط للسر
 No active buildings exist yet.,لا توجد مبانٍ نشطة بعد.
 No active template found for issue type: {0},لا يوجد قالب نشط لنوع البلاغ: {0}
 No address recorded yet.,لا عنوان مُسجَّل بعد.
+No alerts match the current filters.,لا توجد تنبيهات مطابقة للمرشحات الحالية.
 No articles found.,لا توجد أصناف.
 No available drivers.,لا يوجد سائقون متاحون.
 No beds found for this building.,لا توجد أسرّة لهذا المبنى.
@@ -2271,6 +2279,7 @@ Rejection failed for {0}.,فشل رفض {0}.
 Related Driver,السائق المرتبط
 Related Facility Asset,أصل المنشأة المرتبط
 Related Vehicle,المركبة المرتبطة
+Release,إطلاق
 Release Approved,الإصدار معتمد
 Release Approved By,اعتماد الإصدار من قِبَل
 Release Approved By is required for intercompany asset movement.,حقل 'اعتماد الإصدار من قِبَل' مطلوب لحركة الأصول بين الشركات.
@@ -2437,6 +2446,7 @@ Rework Required,يلزم إعادة العمل
 Rider {0} is marked {1} and cannot receive a vehicle or fuel.,الراكب {0} مُعلَّم بـ {1} ولا يمكنه استلام مركبة أو وقود.
 Rider {0} is {1} in their Employee record and cannot receive a vehicle or fuel.,الراكب {0} حالته {1} في سجل الموظف الخاص به ولا يمكنه استلام مركبة أو وقود.
 Risk,الخطورة
+Risk (default),الخطورة (افتراضي)
 Role,الدور
 Role Profile,ملف الدور الوظيفي
 Role that may approve a deduction of this type. Informational in the skeleton.,الدور الذي يجوز له اعتماد خصم من هذا النوع. للعلم فقط في الهيكل المبدئي.
@@ -2704,6 +2714,14 @@ Smoke Detectors Present,كاشفات الدخان موجودة
 Snapshot,لقطة
 Snapshot Date,تاريخ اللقطة
 Snapshots,اللقطات
+Snooze,تأجيل
+Snooze Until,التأجيل حتى
+Snooze alert,تأجيل التنبيه
+Snooze alerts,تأجيل التنبيهات
+Snooze selected ({0}),تأجيل المحدد ({0})
+Snooze until,تأجيل حتى
+Snoozed,مؤجَّل
+Snoozed by {0} ({1}),أجَّله {0} ({1})
 Sort,ترتيب
 Source,المصدر
 Source Channel,قناة المصدر
@@ -2729,6 +2747,7 @@ Specific Rate for this Building (SAR),تسعيرة المبنى الخاصة (ر
 Split air-conditioning unit for accommodation cooling. Durable appliance; periodic maintenance and refrigerant refill.,وحدة تكييف منفصلة لتبريد السكن. جهاز معمّر؛ صيانة دورية وإعادة تعبئة غاز التبريد.
 Sponsorship Fee,رسوم كفالة
 Staircase,الدرج
+Stale,متقادم
 Stamped automatically when Finance approves. Read-only.,يُختم آلياً عند اعتماد المالية. للقراءة فقط.
 Stand / wall electric fan for accommodation ventilation. Durable appliance.,مروحة كهربائية أرضية / جدارية لتهوية السكن. جهاز معمّر.
 Standard,قياسي
@@ -3061,6 +3080,7 @@ Units Consumed,الوحدات المستهلكة
 Unknown,غير معروف
 Unknown cadence: {0},وتيرة غير معروفة: {0}
 Unknown party type: {0},نوع طرف غير معروف: {0}
+Unowned,بلا مالك
 Unpaid,غير مدفوع
 Unregistered,غير مسجّل
 Unregistered manifest,كشف غير مسجّل
@@ -3273,6 +3293,7 @@ assignments,الإسنادات
 bed,سرير
 bed_status,حالة السرير
 beds,أسرة
+cleared,أُلغي
 damages,الأضرار
 datetime,التاريخ والوقت
 driver,السائق
@@ -3301,11 +3322,13 @@ room_type,نوع الغرفة
 salis_workers_transport Scheduled Awaiting Dispatch,مجدولة بانتظار الإرسال
 temporary top-up {0} was reverted,تم عكس التعبئة المؤقتة {0}
 total_cost,التكلفة الإجمالية
+until {0},حتى {0}
 workshop status,حالة الورشة
 {0} acknowledged,{0} تم الإقرار بها
 {0} active,{0} نشط
 {0} alerts,{0} تنبيه
 {0} applied,{0} مُطبَّق
+{0} assigned,تم إسناد {0}
 {0} awaiting approval,{0} بانتظار الموافقة
 {0} check item(s) loaded from template {1},تم تحميل {0} بند فحص من القالب {1}
 {0} day(s),{0} يوم
@@ -3315,6 +3338,8 @@ workshop status,حالة الورشة
 {0} is not a valid readiness status.,{0} ليست حالة جاهزية صالحة.
 {0} material(s) loaded from template {1},حُمِّلت {0} مادّة من القالب {1}
 {0} moved to {1},تم نقل {0} إلى {1}
+{0} new,{0} جديد
+{0} new Critical,{0} حرج جديد
 {0} occupied,{0} مشغول
 "{0} of {1} arrived, {2} pending",وصل {0} من {1}، {2} قيد الانتظار
 {0} of {1} beds available,{0} من {1} سرير متاح
@@ -3324,8 +3349,11 @@ workshop status,حالة الورشة
 {0} over capacity,{0} فوق السعة
 {0} over threshold,{0} يتجاوز الحدّ
 {0} payment rows generated.,أُنشئت {0} صفوف دفعات.
+{0} resolved,تم حل {0}
 {0} room(s) have a planned capacity reduction pending confirmation.,{0} غرفة/غرف بها تخفيض سعة مخطط في انتظار التأكيد.
 "{0} rooms — {1} red, {2} amber",{0} غرفة — {1} أحمر، {2} كهرماني
+{0} since {1},{0} منذ {1}
+{0} snoozed,تم تأجيل {0}
 {0} surplus bed(s) retired (Out of Service).,أُحيلت {0} سرير/أسرّة زائدة إلى «خارج الخدمة».
 {0} tasks,{0} مهمّة
 {0} total,{0} الإجمالي

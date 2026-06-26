@@ -143,6 +143,15 @@ watch(
   { immediate: true },
 );
 
+// The page template (www/driver.html) sets data-theme server-side, and all theme
+// tokens are scoped to [data-theme="…"] (a missing attribute silently falls back to
+// the afmco :root defaults, dropping any non-afmco theme like Atelier). Re-assert it
+// from the server-projected window.portal_theme only when absent, so the selected
+// theme still applies if a different shell (e.g. the built index.html) loads it.
+if (!document.documentElement.getAttribute("data-theme") && window.portal_theme) {
+  document.documentElement.setAttribute("data-theme", window.portal_theme);
+}
+
 const ctx = createResource({
   url: "apex_habitat.salis.api.driver_portal.get_driver_context",
   auto: true,

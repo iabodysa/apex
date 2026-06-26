@@ -75,6 +75,15 @@
         <Icon name="map-pin" :size="14" /> {{ t("route.openMap") }}
       </a>
 
+      <!-- Boarded headcount (today only): "N of M boarded" from the server counts. -->
+      <div
+        v-if="tab === 'today' && trip.expected_count"
+        class="mt-2 flex items-center gap-2 text-sm text-soft"
+      >
+        <Icon name="user" :size="16" class="text-primary shrink-0" />
+        <span>{{ t("trips.boardedOf", { n: trip.boarded_count || 0, m: trip.expected_count }) }}</span>
+      </div>
+
       <!-- Execution actions (today only): start → complete, writing a Trip Start Log. -->
       <div v-if="tab === 'today'" class="mt-3 flex items-center gap-2">
         <span v-if="trip.trip_log_status === 'Completed'" class="pill pill-success">
@@ -82,6 +91,15 @@
         </span>
         <template v-else-if="trip.started">
           <span class="pill pill-warning"><Icon name="route" :size="14" /> {{ t("trips.started") }}</span>
+          <!-- Boarding scanner is available once the trip is started (a manifest exists). -->
+          <button
+            v-if="trip.expected_count"
+            class="btn btn-accent"
+            style="width: auto; padding-inline: 16px"
+            @click="openScanner(trip)"
+          >
+            <Icon name="qr" :size="16" /> {{ t("trips.scanBoarding") }}
+          </button>
           <button class="btn btn-dark" style="width: auto; padding-inline: 16px" :disabled="busy === trip.name" @click="complete(trip)">
             {{ t("trips.complete") }}
           </button>
@@ -91,6 +109,9 @@
         </button>
       </div>
     </div>
+
+    <!-- QR boarding scanner (mounts only while open), scoped to the tapped trip. -->
+    <BoardingScanner v-if="scanTrip" @close="scanTrip = null" @boarded="onBoarded" />
   </div>
 </template>
 
@@ -101,12 +122,23 @@ import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
+import BoardingScanner from "../components/BoardingScanner.vue";
 import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
 
 const { t, te, fmtTime } = useI18n();
 
 const tab = ref("today");
+
+// The trip whose boarding scanner is open (null = closed). A Valid scan reloads
+// today's trips so the card's "N of M boarded" increments.
+const scanTrip = ref(null);
+function openScanner(trip) {
+  scanTrip.value = trip;
+}
+function onBoarded() {
+  today.reload();
+}
 
 const today = createResource({
   url: "apex_habitat.salis.api.driver_portal.my_trips_today",

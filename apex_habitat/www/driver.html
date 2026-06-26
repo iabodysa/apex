@@ -28,6 +28,9 @@
       // Branding flags consumed by the SPA shell (App.vue / Unlinked.vue).
       window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
       window.portal_logo = "{{ portal_logo or '' }}";
+      // Selected portal theme, so the SPA can re-assert data-theme if a different
+      // HTML shell (e.g. the built index.html) ever loads without the attribute.
+      window.portal_theme = "{{ portal_theme or 'afmco' }}";
     </script>
   </head>
   <body>

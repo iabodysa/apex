@@ -17,6 +17,7 @@
   "operations_alert_sec_system",
   "status",
   "raised_on",
+  "snooze_until",
   "project_supervisor",
   "operations_alert_system_col",
   "resolved_on",
@@ -60,6 +61,12 @@
    "fieldname": "raised_on",
    "fieldtype": "Datetime",
    "label": "Raised On"
+  },
+  {
+   "description": "Hide this alert from the operations queue until this time; it reappears when the moment passes.",
+   "fieldname": "snooze_until",
+   "fieldtype": "Datetime",
+   "label": "Snooze Until"
   },
   {
    "description": "The vehicle's project supervisor, resolved when the alert is raised; drives the Critical-alert notification.",
@@ -127,7 +134,7 @@
  "icon": "fa fa-exclamation-triangle",
  "is_submittable": 0,
  "links": [],
- "modified": "2026-06-26 04:03:31.784263",
+ "modified": "2026-06-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Operations Alert",

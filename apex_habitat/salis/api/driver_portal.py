@@ -2,6 +2,9 @@
 SPA at /driver. Every endpoint resolves the CURRENT user to a Salis Driver and acts
 only on that driver's records; the client never supplies the driver id."""
 
+import re
+from urllib.parse import quote
+
 import frappe
 from frappe import _
 
@@ -358,12 +361,13 @@ def my_trips_today():
 	trips = frappe.get_all(
 		"Dispatch Trip",
 		filters={"driver": driver, "trip_date": frappe.utils.today()},
-		fields=["name", "route_plan", "vehicle", "depart_time", "return_time", "status"],
+		fields=["name", "route_plan", "vehicle", "transport_request", "depart_time", "return_time", "status"],
 		order_by="depart_time asc",
 	)
 	_attach_trip_maps(trips)  # one-tap Maps before _label_trips overwrites route_plan
 	_label_trips(trips)  # cards show plate / route name, not raw link ids
 	_attach_trip_log_state(trips, driver)  # cards show started/completed without a second call
+	_attach_boarding_counts(trips, driver)  # cards show "N of M boarded"
 	return trips
 
 
@@ -422,6 +426,54 @@ def _label_trips(trips):
 			t["vehicle"] = plates.get(t["vehicle"], t["vehicle"])
 		if t.get("route_plan"):
 			t["route_plan"] = routes.get(t["route_plan"], t["route_plan"])
+
+
+def _stop_waypoint(stop):
+	"""A Google-Maps-directions waypoint string for one ordered stop, or None.
+
+	Prefers a ``lat,lng`` pair parsed from the stop's building ``google_maps_url``
+	(the most precise destination), then a free-form ``q=`` query inside that URL,
+	then the building name + city as a place query, then the stop's own location
+	text. Returns None only when the stop carries nothing navigable, so it is
+	skipped rather than breaking the chain."""
+	pickup = stop.get("pickup") or {}
+	url = pickup.get("google_maps_url") or ""
+	# @lat,lng or q=lat,lng embedded in a Google Maps link → exact coordinates.
+	m = re.search(r"[@?&=/](-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)", url)
+	if m:
+		return f"{m.group(1)},{m.group(2)}"
+	m = re.search(r"[?&]q=([^&]+)", url)
+	if m:
+		return m.group(1)
+	label = ", ".join(p for p in (pickup.get("building_name"), pickup.get("city")) if p)
+	if label:
+		return quote(label)
+	if stop.get("location"):
+		return quote(str(stop["location"]))
+	return None
+
+
+def _full_route_maps_url(route_plan):
+	"""A single Google Maps directions URL chaining every ordered stop as waypoints,
+	or None when fewer than two stops are navigable.
+
+	The last navigable stop is the ``destination``; the rest become ordered
+	``waypoints`` (Google caps these, so the chain is bounded at the first nine
+	intermediate points — still the whole short housing-pickup route in practice).
+	Reuses masar's read-only ``_ordered_stops`` so the sequence matches the route
+	view exactly. Read-only."""
+	from apex_habitat.salis.api import masar
+
+	points = [wp for s in masar._ordered_stops(route_plan) if (wp := _stop_waypoint(s))]
+	if len(points) < 2:
+		return None
+	destination = points[-1]
+	# Google Maps caps directions waypoints; keep the first nine intermediate stops.
+	waypoints = points[:-1][:9]
+	url = "https://www.google.com/maps/dir/?api=1&destination=" + destination
+	if waypoints:
+		url += "&waypoints=" + "|".join(waypoints)
+	return url
 
 
 def _route_first_stop_maps_url(route_plan):
@@ -488,6 +540,38 @@ def _attach_trip_log_state(trips, driver):
 		status = by_trip.get(t["name"])
 		t["started"] = t["name"] in by_trip
 		t["trip_log_status"] = status
+
+
+def _attach_boarding_counts(trips, driver):
+	"""Stamp each trip card with boarded / expected headcount for an "N of M boarded"
+	progress line. ``boarded_count`` comes from the trip's Trip Start Log (the
+	controller derives it from the boarding-event rows); ``expected_count`` is the
+	linked Transport Request's manifest size — read directly so a trip with no log
+	yet still shows "0 of M". One query per side keyed on the listed trips."""
+	names = [t["name"] for t in trips if t.get("name")]
+	if not names:
+		return
+	logs = frappe.get_all(
+		"Trip Start Log",
+		filters={"dispatch_trip": ["in", names], "driver": driver, "docstatus": ["<", 2]},
+		fields=["dispatch_trip", "boarded_count"],
+	)
+	boarded_by_trip = {
+		row["dispatch_trip"]: frappe.utils.cint(row.get("boarded_count")) for row in logs
+	}
+	# Expected = the trip's Transport Request manifest size (worker_count).
+	requests = {t.get("transport_request") for t in trips if t.get("transport_request")}
+	expected_by_request = {}
+	if requests:
+		for r in frappe.get_all(
+			"Transport Request",
+			filters={"name": ["in", list(requests)]},
+			fields=["name", "worker_count"],
+		):
+			expected_by_request[r["name"]] = frappe.utils.cint(r.get("worker_count"))
+	for t in trips:
+		t["boarded_count"] = boarded_by_trip.get(t["name"], 0)
+		t["expected_count"] = expected_by_request.get(t.get("transport_request"), 0)
 
 
 @frappe.whitelist()
@@ -1009,17 +1093,40 @@ def my_fuel_requests(limit=30):
 	return rows
 
 
+def _worker_phone(employee):
+    """The worker's contact number for a one-tap call, or None. Reads the Employee's
+    ``cell_number`` (the manifest's call target); a missing number simply omits the
+    call action. Read-only."""
+    if not employee:
+        return None
+    return frappe.db.get_value("Employee", employee, "cell_number") or None
+
+
+def _enrich_workers_with_phone(workers):
+    """Stamp each manifest worker dict with a ``phone`` for the tel: call action.
+    Mutates in place. One get per employee (the manifests are small)."""
+    for w in workers or []:
+        if "phone" not in w:
+            w["phone"] = _worker_phone(w.get("employee"))
+
+
 @frappe.whitelist()
 def my_worker_route_today():
     """The current driver's worker-transport route today (read), surfaced in the
     driver portal's "My Route" screen.
 
-    Thin identity-scoped wrapper over ``salis.api.masar.get_my_worker_route_today``
+    Identity-scoped wrapper over ``salis.api.masar.get_my_worker_route_today``
     (which resolves the session user to a Salis Driver server-side). Lives here so
-    the driver SPA calls one cohesive driver-portal API namespace. Read-only."""
+    the driver SPA calls one cohesive driver-portal API namespace. Augments each
+    trip's registered worker manifest with the worker's ``phone`` so the portal can
+    offer a one-tap call; masar is imported (read-only), not edited. Read-only."""
     from apex_habitat.salis.api import masar
 
-    return masar.get_my_worker_route_today()
+    data = masar.get_my_worker_route_today()
+    for trip in data.get("trips", []):
+        _enrich_workers_with_phone(trip.get("workers"))
+        trip["maps_route_url"] = _full_route_maps_url(trip.get("route_plan"))
+    return data
 
 
 @frappe.whitelist()
@@ -1044,7 +1151,7 @@ def my_trip_route(dispatch_trip):
     trip = frappe.db.get_value(
         "Dispatch Trip",
         {"name": dispatch_trip, "driver": driver},
-        ["name", "route_plan", "vehicle", "depart_time", "return_time", "status"],
+        ["name", "route_plan", "vehicle", "transport_request", "depart_time", "return_time", "status"],
         as_dict=True,
     )
     # [#t170nf] Unknown id OR a trip that isn't this driver's both fail closed.
@@ -1055,6 +1162,10 @@ def my_trip_route(dispatch_trip):
 
     route_plan = trip.get("route_plan")
     stops = masar._ordered_stops(route_plan)  # read-only reuse; masar unedited
+
+    # Registered worker manifest for this trip, each with a phone for a one-tap call.
+    workers = masar._registered_workers(trip.get("transport_request"))  # read-only reuse
+    _enrich_workers_with_phone(workers)
 
     vehicle = trip.get("vehicle")
     if vehicle:
@@ -1074,6 +1185,9 @@ def my_trip_route(dispatch_trip):
         "status": trip.get("status"),
         "has_route_plan": bool(route_plan),
         "stops": stops,
+        "workers": workers,
+        "expected_count": len(workers),
+        "maps_route_url": _full_route_maps_url(route_plan),
     }
 
 

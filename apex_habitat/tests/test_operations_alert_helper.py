@@ -27,8 +27,11 @@ _SANCTIONED = {
     "habitat/tasks.py",
 }
 
-# Matches an Operations Alert insert dict (literal name or the ALERT_DOCTYPE const).
-_RAW_INSERT = re.compile(r'"doctype":\s*(?:ALERT_DOCTYPE|["\']Operations Alert["\'])')
+# Matches an Operations Alert insert dict: "doctype" as the LEADING key of a doc
+# dict (the get_doc({...}).insert() shape). Anchoring to "{" + the leading key
+# avoids flagging a native helper payload (e.g. assign_to.add({"assign_to": ...,
+# "doctype": "Operations Alert"})) where doctype is not the dict's first key.
+_RAW_INSERT = re.compile(r'\{\s*"doctype":\s*(?:ALERT_DOCTYPE|["\']Operations Alert["\'])')
 
 
 class TestOperationsAlertWritePathGuard(FrappeTestCase):

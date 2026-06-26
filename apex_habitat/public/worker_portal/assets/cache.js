@@ -1,0 +1,1 @@
+const c="masar_portal_cache:";function r(e,t){try{localStorage.setItem(c+e,JSON.stringify({at:Date.now(),data:t}))}catch(a){}}function n(e){try{const t=localStorage.getItem(c+e);if(!t)return null;const a=JSON.parse(t);if(a&&"data"in a)return a}catch(t){}return null}export{r as a,n as c};

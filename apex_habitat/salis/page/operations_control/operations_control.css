@@ -46,12 +46,32 @@
 	color: var(--c-ink);
 }
 
+/* 'Since you last looked' delta banner: calm and hidden until there is something
+ * new, then a single quiet line with a dismiss. */
+.fc-since-banner { display: none; }
+.fc-since-banner.fc-since-on {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 12px;
+	padding: 6px 12px;
+	border: 1px solid var(--c-border-strong, #cabfa3);
+	border-radius: var(--border-radius-md, 8px);
+	background: var(--c-warning-bg, #f7ead2);
+	font-size: 12.5px;
+}
+.fc-since-text { font-weight: 600; color: var(--c-ink, #072b1a); }
+.fc-since-dismiss { margin-inline-start: auto; }
+
 /* [#4y59oc] */
+/* Merged counter row: status/incident/compliance chips AND severity/ownership
+ * facets share this one wrap, so the board has a single counter strip. */
 .fc-summary {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 10px;
 	margin-bottom: 14px;
+	align-items: stretch;
 }
 .fc-chip {
 	flex: 1 1 120px;
@@ -313,23 +333,13 @@
 	.fc-skeleton { animation: none; }
 }
 
-/* Full-width severity alert strip above the board. Counters are buttons; the
- * active one is outlined. A zero-alert state collapses to a calm all-clear line. */
-.fc-alert-strip {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	align-items: center;
-	margin-bottom: 14px;
-	padding: 8px 10px;
-	border: 1px solid var(--border-color, #e2e2e2);
-	border-radius: var(--border-radius-md, 8px);
-	background: var(--card-bg, #fff);
-}
-.fc-alert-strip-clear {
+/* Severity / ownership facet pills inside the merged counter row. Counters are
+ * buttons; the active one is outlined. The all-clear shows a calm inline pill. */
+.fc-alert-clear {
 	color: var(--green-600, #1e7e34);
 	font-weight: 600;
-	font-size: 13px;
+	cursor: default;
+	border-color: var(--c-border, #ddd5c2) !important;
 }
 .fc-sev-counter {
 	display: inline-flex;
@@ -341,7 +351,10 @@
 	background: var(--control-bg, #f4f5f6);
 	cursor: pointer;
 	font-size: 12px;
+	align-self: center;
 }
+/* Ownership facets sit just after the severity pills with a small lead gap. */
+.fc-own-counter:first-of-type { margin-inline-start: 6px; }
 .fc-sev-counter[aria-pressed="true"] {
 	border-color: var(--primary, #2490ef);
 	background: var(--primary-light, #e7f3ff);
@@ -399,8 +412,29 @@
 .fc-queue-main { flex: 1 1 auto; min-width: 0; }
 .fc-queue-msg { font-size: 13px; }
 .fc-queue-meta { font-size: 11.5px; color: var(--text-muted, #888); margin-block-start: 2px; }
-.fc-queue-actions { display: inline-flex; gap: 6px; flex: 0 0 auto; }
-.fc-queue-bulk { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.fc-queue-actions { display: inline-flex; gap: 6px; flex: 0 0 auto; flex-wrap: wrap; }
+.fc-queue-bulk { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+
+/* Owner chip on the queue meta line; an unowned alert is muted. */
+.fc-queue-owner { font-weight: 600; }
+.fc-queue-owner.fc-unowned { font-weight: 400; font-style: italic; color: var(--text-muted, #888); }
+
+/* Aging cue: a row open past its per-severity threshold gets a warm tint + a pill. */
+.fc-queue-aging { background: var(--c-warning-bg, #f7ead2); }
+.fc-queue-aging-pill {
+	font-weight: 700;
+	color: var(--c-danger, #c0392b);
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	font-size: 10.5px;
+}
+
+/* Snooze dropdown: a compact menu of preset windows + a custom option. */
+.fc-snooze { display: inline-block; }
+.fc-snooze-menu { min-width: 140px; font-size: 12.5px; }
+
+/* Secondary (demoted) sort option reads quieter than the default Risk order. */
+.fc-sort-secondary { color: var(--text-muted, #888); }
 
 /* Open-alert block pinned at the top of the detail drawer. */
 .fc-drawer-alerts { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
@@ -442,9 +476,6 @@
 	.fc-queue-actions .btn,
 	.fc-drawer-alert-actions .btn,
 	.fc-sev-counter { min-height: 40px; }
-	/* Horizontally scroll the strip rather than wrapping to many rows. */
-	.fc-alert-strip { flex-wrap: nowrap; overflow-x: auto; }
-	.fc-alert-strip .fc-sev-counter { flex: 0 0 auto; }
 	/* Collapse the filter bar into a bottom sheet toggled by a Filters button. */
 	.fc-controls.fc-sheet {
 		position: fixed;

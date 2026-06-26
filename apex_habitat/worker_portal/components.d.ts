@@ -12,6 +12,7 @@ declare module 'vue' {
     Icon: typeof import('./src/components/Icon.vue')['default']
     LangToggle: typeof import('./src/components/LangToggle.vue')['default']
     PullIndicator: typeof import('./src/components/PullIndicator.vue')['default']
+    QrCode: typeof import('./src/components/QrCode.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Skeleton: typeof import('./src/components/Skeleton.vue')['default']

@@ -5,6 +5,7 @@ const routes = [
   { path: "/profile", name: "profile", component: () => import("./pages/Profile.vue") },
   { path: "/accommodation", name: "accommodation", component: () => import("./pages/Accommodation.vue") },
   { path: "/transport", name: "transport", component: () => import("./pages/Transport.vue") },
+  { path: "/request-transport", name: "request-transport", component: () => import("./pages/RequestTransport.vue") },
   { path: "/custody", name: "custody", component: () => import("./pages/Custody.vue") },
   { path: "/requests", name: "requests", component: () => import("./pages/Requests.vue") },
   { path: "/requests/:name", name: "request-detail", component: () => import("./pages/RequestDetail.vue") },

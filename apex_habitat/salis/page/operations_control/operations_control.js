@@ -29,6 +29,13 @@ const SETTINGS_KEY = "operations-control";
 // Filters that round-trip through the route / saved settings.
 const ROUTE_FILTERS = ["status", "rental_office", "project", "search", "compliance"];
 
+// Snooze windows offered inline; the server resolves the actual deadline.
+const SNOOZE_PRESETS = [
+	["tomorrow", "Tomorrow"],
+	["2d", "In 2 days"],
+	["1w", "In a week"],
+];
+
 // 'N days' / '1 day', localised, for embedding in the expiry phrase.
 function _days_label(n) {
 	return n === 1 ? __("1 day") : __("{0} days", [n]);
@@ -54,14 +61,24 @@ class FleetControl {
 		this.page = page;
 		this.data = { vehicles: [], summary: null, offices: [], projects: [], statuses: [], unscoped: false };
 		this.filters = { status: "", rental_office: "", project: "", search: "", compliance: "" };
-		// Off-board view filters: alerts_only (cards), sort key, active severity facet.
-		this.alerts_only = false;
+		// Off-board view filters: sort key, active severity facet, ownership facet.
 		this.sort = "risk";
 		this.severity_filter = "";
+		// Ownership facet over the alert queue: '' (all) / 'mine' / 'unowned'.
+		this.ownership_filter = "";
 		// Per-vehicle open alerts + strip summary, refreshed alongside the fleet.
 		this.alerts = [];
 		this.alerts_by_vehicle = {};
-		this.alert_summary = { total: 0, by_severity: {} };
+		this.alert_summary = { total: 0, by_severity: {}, mine: 0, unowned: 0 };
+		// Per-severity aging cutoffs (hours) + the authoritative server clock; the
+		// browser time is never trusted for the open-too-long cue.
+		this.aging_hours = {};
+		this.server_now = null;
+		this.current_user = frappe.session.user;
+		// Last time this user opened the board (persisted), for the 'since you last
+		// looked' delta banner; captured on first load, then advanced on refresh.
+		this.last_seen = null;
+		this.resolved_since = 0;
 		this.view = "cards";
 		this.selected_alerts = new Set();
 	}
@@ -72,7 +89,9 @@ class FleetControl {
 			.attr("dir", frappe.utils.is_rtl() ? "rtl" : "ltr")
 			.appendTo(this.page.main);
 		this.$progress = $('<div class="fc-progress"></div>').appendTo(this.$root);
-		this.$strip = $('<div class="fc-alert-strip"></div>').appendTo(this.$root);
+		// One-line 'since you last looked' delta banner (calm/absent when nothing changed).
+		this.$banner = $('<div class="fc-since-banner"></div>').appendTo(this.$root);
+		// Single merged counter row: status/incidents/compliance facets + severity facets.
 		this.$summary = $('<div class="fc-summary"></div>').appendTo(this.$root);
 		// fc-sheet/-closed are inert above 768px; below it the bar becomes a bottom
 		// sheet toggled by the Filters button.
@@ -89,7 +108,7 @@ class FleetControl {
 			`<button class="btn btn-sm btn-default fc-sheet-toggle">${__("Filters")}</button>`
 		)
 			.on("click", () => this.$controls.toggleClass("fc-sheet-closed"))
-			.insertBefore(this.$strip);
+			.insertBefore(this.$summary);
 
 		this._build_controls();
 		this._render_skeleton();
@@ -142,24 +161,17 @@ class FleetControl {
 				this.refresh();
 			}, 350)
 		);
-		// 'Alerts only' narrows the card board to vehicles with an open alert.
-		const $alerts_wrap = $('<span class="fc-filter"></span>').appendTo(this.$controls);
-		$(`<label>${frappe.utils.escape_html(__("Alerts only"))}</label>`).appendTo($alerts_wrap);
-		this.$alerts_only = $('<input type="checkbox" class="fc-alerts-only">')
-			.prop("checked", this.alerts_only)
-			.on("change", () => {
-				this.alerts_only = this.$alerts_only.prop("checked");
-				this._render();
-			})
-			.appendTo($alerts_wrap);
-		// Sort control: risk-desc (default) vs plate-asc.
+		// Sort control: risk-desc is the primary, default order; plate-asc is the
+		// secondary alternative (demoted — it is listed after, and marked as such).
 		this.$sort = this._select(__("Sort"), () => {
 			this.sort = this.$sort.val() || "risk";
 			this._render();
 		});
 		this.$sort.empty();
-		$('<option value="risk"></option>').text(__("Risk")).appendTo(this.$sort);
-		$('<option value="plate"></option>').text(__("Plate")).appendTo(this.$sort);
+		$('<option value="risk"></option>').text(__("Risk (default)")).appendTo(this.$sort);
+		$('<option value="plate" class="fc-sort-secondary"></option>')
+			.text(__("Plate"))
+			.appendTo(this.$sort);
 		this.$sort.val(this.sort);
 		// Live '{n} vehicles' count, right-aligned in the filter bar.
 		this.$count = $('<span class="fc-result-count"></span>').appendTo(this.$controls);
@@ -205,17 +217,27 @@ class FleetControl {
 			}
 		});
 		frappe.route_options = null;
-		if (from_route) {
-			this.ready = Promise.resolve();
-			return;
-		}
+		// Always fetch the saved settings blob: it carries this user's last_seen for
+		// the delta banner, and (when not opened from a route) their saved scope.
 		this.ready = frappe.model.user_settings
 			.get(SETTINGS_KEY)
 			.then((s) => {
-				const saved = (s || {}).filters;
-				if (saved) ROUTE_FILTERS.forEach((k) => { if (saved[k]) this.filters[k] = saved[k]; });
+				const blob = s || {};
+				// last_seen is the prior visit; capture it before this load advances it.
+				this.last_seen = blob.last_seen || null;
+				const saved = blob.filters;
+				if (!from_route && saved)
+					ROUTE_FILTERS.forEach((k) => { if (saved[k]) this.filters[k] = saved[k]; });
 			})
 			.catch(() => {});
+	}
+
+	// Stamp 'now' as this user's last-seen marker (persisted) once the first alert
+	// set has rendered, so the next visit's banner measures from this moment.
+	_mark_seen() {
+		if (this._seen_marked) return;
+		this._seen_marked = true;
+		frappe.model.user_settings.save(SETTINGS_KEY, "last_seen", frappe.datetime.now_datetime());
 	}
 
 	// Persist the active filters two ways: into the page route (shareable URL,
@@ -256,33 +278,86 @@ class FleetControl {
 	}
 
 	// Pull the open-alert queue for the current project scope: one call feeds the
-	// severity strip, the per-card corner badge and the alert queue view. Keeps the
-	// alert axis a single source so the strip and the cards
-	// can never disagree. A failure leaves the strip empty (the board still loads).
+	// merged counter row, the per-card corner badge and the alert queue view, plus
+	// the aging thresholds, server clock and ownership counts. Keeps the alert axis
+	// a single source. A failure leaves the alerts empty (the board still loads).
 	_refresh_alerts() {
 		frappe.call({
 			method: "apex_habitat.salis.api.operations_alerts.get_open_alerts",
-			args: { project: this.filters.project || undefined },
+			args: { project: this.filters.project || undefined, since: this.last_seen || undefined },
 			callback: (r) => {
 				const m = (r && r.message) || { alerts: [], summary: { total: 0, by_severity: {} } };
 				this.alerts = m.alerts || [];
-				this.alert_summary = m.summary || { total: 0, by_severity: {} };
+				this.alert_summary = m.summary || { total: 0, by_severity: {}, mine: 0, unowned: 0 };
+				this.aging_hours = m.aging_hours || {};
+				this.server_now = m.server_now || null;
+				this.resolved_since = m.resolved_since || 0;
+				if (m.current_user) this.current_user = m.current_user;
 				this.alerts_by_vehicle = {};
 				this.alerts.forEach((a) => {
 					if (!a.vehicle) return;
 					(this.alerts_by_vehicle[a.vehicle] = this.alerts_by_vehicle[a.vehicle] || []).push(a);
 				});
-				this._render_strip();
+				// Rebuild the merged counter row so the severity/ownership facets reflect
+				// the fresh alert set alongside the fleet chips.
+				this._render_summary();
+				this._render_since_banner();
 				// Re-render so card badges / the queue reflect the fresh alert set.
 				this._render();
+				// Mark this visit only after the first render, then advance last_seen.
+				this._mark_seen();
 			},
 			error: () => {
 				this.alerts = [];
-				this.alert_summary = { total: 0, by_severity: {} };
+				this.alert_summary = { total: 0, by_severity: {}, mine: 0, unowned: 0 };
 				this.alerts_by_vehicle = {};
-				this._render_strip();
+				this._render_summary();
 			},
 		});
+	}
+
+	// One-line 'since you last looked' delta: alerts newly raised (still open) +
+	// alerts resolved (server-counted) since the user's prior visit. Calm/absent
+	// when nothing changed or there is no prior visit (first ever load). New
+	// arrivals are measured by raised_on against the persisted last_seen.
+	_render_since_banner() {
+		this.$banner.empty().removeClass("fc-since-on");
+		const since = this.last_seen;
+		if (!since) return;
+		const raised = (this.alerts || []).filter((a) => a.raised_on && a.raised_on > since);
+		const new_critical = raised.filter((a) => a.severity === "Critical").length;
+		const new_total = raised.length;
+		const resolved = this.resolved_since || 0;
+		// Nothing changed since last visit → stay calm and render nothing.
+		if (!new_total && !resolved) return;
+		this.$banner.addClass("fc-since-on");
+		const hhmm = since.slice(11, 16);
+		const parts = [];
+		if (new_critical) parts.push(__("{0} new Critical", [new_critical]));
+		else if (new_total) parts.push(__("{0} new", [new_total]));
+		if (resolved) parts.push(__("{0} resolved", [resolved]));
+		const phrase = __("{0} since {1}", [parts.join(", "), hhmm]);
+		$('<span class="fc-since-text"></span>').text(phrase).appendTo(this.$banner);
+		$('<button class="btn btn-xs btn-default fc-since-dismiss"></button>')
+			.text(__("Dismiss"))
+			.on("click", () => { this.last_seen = null; this._render_since_banner(); })
+			.appendTo(this.$banner);
+	}
+
+	// Hours an alert has been open, measured from raised_on against the SERVER clock
+	// (never the browser's), or null when undatable.
+	_alert_age_hours(a) {
+		if (!a.raised_on || !this.server_now) return null;
+		const ms = frappe.datetime.str_to_obj(this.server_now) - frappe.datetime.str_to_obj(a.raised_on);
+		return ms > 0 ? ms / 3600000 : 0;
+	}
+
+	// True when an alert has been open past its per-severity aging threshold.
+	_alert_is_aging(a) {
+		const limit = this.aging_hours[a.severity];
+		if (!limit) return false;
+		const age = this._alert_age_hours(a);
+		return age != null && age >= limit;
 	}
 
 	// Highest open severity for a vehicle (Critical > Warning > Info), or null.
@@ -348,43 +423,59 @@ class FleetControl {
 		}
 	}
 
-	// Full-width severity strip. Each counter toggles the matching severity facet
-	// on the board; an all-clear (zero open alerts) collapses to a calm message.
-	_render_strip() {
-		this.$strip.empty();
+	// Severity + ownership facets, appended to the merged counter row. Each is a
+	// one-click filter over the alert queue; the active one is outlined. Called
+	// only from _render_summary so the strip and the chips live in one row.
+	_render_severity_counters() {
 		const sev = (this.alert_summary && this.alert_summary.by_severity) || {};
 		const total = (this.alert_summary && this.alert_summary.total) || 0;
 		if (!total) {
-			$('<div class="fc-alert-strip-clear"></div>')
+			$('<div class="fc-sev-counter fc-alert-clear"></div>')
 				.text(__("All clear — no open alerts"))
-				.appendTo(this.$strip);
+				.appendTo(this.$summary);
 			return;
 		}
-		$('<span class="text-muted small"></span>').text(__("Alerts")).appendTo(this.$strip);
 		SEVERITY_ORDER.forEach((s) => {
 			const n = sev[s] || 0;
 			if (!n) return;
 			const active = this.severity_filter === s;
 			const $b = $('<button type="button" class="fc-sev-counter"></button>')
 				.attr("aria-pressed", active ? "true" : "false")
-				.appendTo(this.$strip);
+				.appendTo(this.$summary);
 			$('<span class="fc-sev-dot"></span>').addClass("fc-sev-" + s).appendTo($b);
 			$('<span class="fc-sev-count"></span>').text(n).appendTo($b);
 			$('<span></span>').text(__(s)).appendTo($b);
-			// Toggle the severity facet; it narrows the queue and the card board.
 			$b.on("click", () => {
 				this.severity_filter = active ? "" : s;
-				this._render_strip();
+				this._render_summary();
 				this._render();
 			});
 		});
+		// Ownership facets: Mine / Unowned over the alert queue (native _assign).
+		this._ownership_counter("mine", __("Mine"), this.alert_summary.mine || 0);
+		this._ownership_counter("unowned", __("Unowned"), this.alert_summary.unowned || 0);
 	}
 
+	// One ownership facet button (Mine / Unowned) for the merged counter row.
+	_ownership_counter(key, label, n) {
+		const active = this.ownership_filter === key;
+		const $b = $('<button type="button" class="fc-sev-counter fc-own-counter"></button>')
+			.attr("aria-pressed", active ? "true" : "false")
+			.appendTo(this.$summary);
+		$('<span class="fc-sev-count"></span>').text(n).appendTo($b);
+		$('<span></span>').text(label).appendTo($b);
+		$b.on("click", () => {
+			this.ownership_filter = active ? "" : key;
+			this._render_summary();
+			this._render();
+		});
+	}
+
+	// ONE merged counter row: status/incident/compliance chips THEN severity +
+	// ownership facets. Every counter is a one-click facet, not a static number.
 	_render_summary() {
 		this.$summary.empty();
 		const s = this.data.summary || { by_status: {}, total: 0, open_incidents: 0 };
-		// Each chip toggles the board filter that matches it (status / incidents /
-		// compliance), so the summary is a one-click facet, not a static number.
 		const chip = (label, value, cls, on_click, pressed) => {
 			const $c = $('<div class="fc-chip"></div>').addClass(cls || "").appendTo(this.$summary);
 			$('<div class="fc-chip-val"></div>').text(value).appendTo($c);
@@ -408,7 +499,7 @@ class FleetControl {
 			__("Open Incidents"),
 			s.open_incidents || 0,
 			"fc-chip-red",
-			() => { this.alerts_only = false; this.$alerts_only && this.$alerts_only.prop("checked", false); this._toggle_incidents(); },
+			() => this._toggle_incidents(),
 			this._incidents_only
 		);
 		chip(
@@ -419,6 +510,8 @@ class FleetControl {
 			this.filters.compliance === "Expired" || this.filters.compliance === "Expiring Soon"
 		);
 		chip(__("Stopped > {0} days", [s.stopped_over_days || 0]), s.stopped_over_n || 0, "fc-chip-orange");
+		// Append the alert severity + ownership facets into the SAME row.
+		this._render_severity_counters();
 	}
 
 	// Chip → filter toggles. Each flips its facet and refetches.
@@ -434,7 +527,7 @@ class FleetControl {
 		this._sync_controls();
 		this.refresh();
 	}
-	// Open-incidents is a client-side card narrowing (no server param), like alerts-only.
+	// Open-incidents is a client-side card narrowing (no server param).
 	_toggle_incidents() {
 		this._incidents_only = !this._incidents_only;
 		this._render();
@@ -469,10 +562,9 @@ class FleetControl {
 		return vehicles.slice().sort((a, b) => risk(b) - risk(a));
 	}
 
-	// Apply the client-side card facets (alerts-only, open-incidents, active severity).
+	// Apply the client-side card facets (open-incidents, active severity).
 	_visible_vehicles() {
 		let list = this.data.vehicles || [];
-		if (this.alerts_only) list = list.filter((v) => this.alerts_by_vehicle[v.name]);
 		if (this._incidents_only) list = list.filter((v) => v.open_incidents);
 		if (this.severity_filter)
 			list = list.filter((v) => this._vehicle_top_severity(v.name) === this.severity_filter);
@@ -606,34 +698,58 @@ class FleetControl {
 		});
 	}
 
+	// Apply the queue's client-side facets (active severity + ownership) to an alert.
+	_alert_matches_facets(a) {
+		if (this.severity_filter && a.severity !== this.severity_filter) return false;
+		if (this.ownership_filter === "mine" && !(a.assignees || []).includes(this.current_user))
+			return false;
+		if (this.ownership_filter === "unowned" && (a.assignees || []).length) return false;
+		return true;
+	}
+
 	// Alert-queue view: open Operations Alerts, severity-sorted, with inline
-	// Acknowledge/Resolve and checkbox multi-select + a single bulk-acknowledge.
+	// Acknowledge/Resolve/Assign/Snooze and checkbox multi-select + bulk actions.
 	_render_queue() {
 		this.$grid.empty().removeClass("fc-grid-table");
 		const sorted = (this.alerts || [])
-			.filter((a) => !this.severity_filter || a.severity === this.severity_filter)
+			.filter((a) => this._alert_matches_facets(a))
 			.slice()
 			.sort((a, b) => (SEVERITY_RANK[b.severity] || 0) - (SEVERITY_RANK[a.severity] || 0));
 		if (!sorted.length) {
 			const $e = $('<div class="fc-empty text-muted"></div>').appendTo(this.$grid);
-			$('<div></div>').text(__("All clear — no open alerts")).appendTo($e);
+			$('<div></div>')
+				.text(this.ownership_filter || this.severity_filter
+					? __("No alerts match the current filters.")
+					: __("All clear — no open alerts"))
+				.appendTo($e);
 			return;
 		}
-		// Bulk bar: select-all + acknowledge the currently selected ids in one call.
+		// Bulk bar: select-all + acknowledge / assign-to-me / snooze the selection.
 		const $bulk = $('<div class="fc-queue-bulk"></div>').appendTo(this.$grid);
 		const $all = $('<input type="checkbox">')
 			.on("change", () => {
 				this.selected_alerts = $all.prop("checked")
-					? new Set(sorted.filter((a) => a.status === "Open").map((a) => a.name))
+					? new Set(sorted.map((a) => a.name))
 					: new Set();
 				this._render_queue();
 			})
 			.appendTo($('<label class="fc-queue-bulk-all"></label>').appendTo($bulk));
 		$('<span></span>').text(__("Select all")).appendTo($all.parent());
+		const n = this.selected_alerts.size;
 		$('<button class="btn btn-xs btn-default"></button>')
-			.text(__("Acknowledge selected ({0})", [this.selected_alerts.size]))
-			.prop("disabled", !this.selected_alerts.size)
+			.text(__("Acknowledge selected ({0})", [n]))
+			.prop("disabled", !n)
 			.on("click", () => this._bulk_acknowledge())
+			.appendTo($bulk);
+		$('<button class="btn btn-xs btn-default"></button>')
+			.text(__("Assign to me ({0})", [n]))
+			.prop("disabled", !n)
+			.on("click", () => this._bulk_assign())
+			.appendTo($bulk);
+		$('<button class="btn btn-xs btn-default"></button>')
+			.text(__("Snooze selected ({0})", [n]))
+			.prop("disabled", !n)
+			.on("click", () => this._bulk_snooze())
 			.appendTo($bulk);
 
 		const $wrap = $('<div class="fc-queue"></div>').appendTo(this.$grid);
@@ -641,33 +757,48 @@ class FleetControl {
 	}
 
 	_render_queue_row(a, $wrap) {
+		const aging = this._alert_is_aging(a);
 		const $row = $('<div class="fc-queue-row"></div>')
 			.addClass("fc-sev-row-" + a.severity)
+			.toggleClass("fc-queue-aging", aging)
 			.appendTo($wrap);
-		if (a.status === "Open") {
-			$('<input type="checkbox" class="fc-queue-pick">')
-				.prop("checked", this.selected_alerts.has(a.name))
-				.on("change", (e) => {
-					if (e.target.checked) this.selected_alerts.add(a.name);
-					else this.selected_alerts.delete(a.name);
-					this._render_queue();
-				})
-				.appendTo($row);
-		}
+		// Any row can be selected for assign/snooze; acknowledge skips non-Open server-side.
+		$('<input type="checkbox" class="fc-queue-pick">')
+			.prop("checked", this.selected_alerts.has(a.name))
+			.on("change", (e) => {
+				if (e.target.checked) this.selected_alerts.add(a.name);
+				else this.selected_alerts.delete(a.name);
+				this._render_queue();
+			})
+			.appendTo($row);
 		const $main = $('<div class="fc-queue-main"></div>').appendTo($row);
 		$('<div class="fc-queue-msg"></div>').text(a.message || __(a.alert_type || "")).appendTo($main);
-		// Meta line: plate · type · age · status, dot-separated nodes (RTL-safe).
+		// Meta line: plate · type · age · status · owner, dot-separated (RTL-safe).
 		const $meta = $('<div class="fc-queue-meta fc-sep-dot"></div>').appendTo($main);
 		if (a.plate_number) $('<span></span>').html(_bdi(a.plate_number)).appendTo($meta);
 		$('<span></span>').text(__(a.alert_type || "")).appendTo($meta);
 		if (a.raised_on)
 			$('<span></span>').text(frappe.datetime.comment_when(a.raised_on)).appendTo($meta);
 		$('<span></span>').text(__(a.status || "")).appendTo($meta);
+		// Owner chip: who holds this alert (native _assign), or 'Unowned'.
+		const owners = a.assignee_names || [];
+		$('<span class="fc-queue-owner"></span>')
+			.text(owners.length ? owners.join(", ") : __("Unowned"))
+			.toggleClass("fc-unowned", !owners.length)
+			.appendTo($meta);
+		// Aging cue: open past its per-severity threshold. An Acknowledged-but-stale
+		// row is called out distinctly (it was seen but is sitting unresolved).
+		if (aging) {
+			$('<span class="fc-queue-aging-pill"></span>')
+				.text(a.status === "Acknowledged" ? __("Stale") : __("Overdue"))
+				.appendTo($meta);
+		}
 		this._alert_actions(a, $('<div class="fc-queue-actions"></div>').appendTo($row));
 	}
 
-	// Inline Acknowledge (Open only) + Resolve buttons shared by the queue and the
-	// drawer; both call the permission-gated server API and refresh the alert set.
+	// Inline Acknowledge (Open only) + Resolve + ownership (claim/release) + Snooze
+	// buttons shared by the queue and the drawer; all call the permission-gated
+	// server API and refresh the alert set.
 	_alert_actions(a, $into) {
 		if (a.status === "Open") {
 			$('<button class="btn btn-xs btn-default"></button>')
@@ -678,6 +809,21 @@ class FleetControl {
 				})
 				.appendTo($into);
 		}
+		// Ownership: claim (assign to me) when unheld by me, else release.
+		const mine = (a.assignees || []).includes(this.current_user);
+		$('<button class="btn btn-xs btn-default"></button>')
+			.text(mine ? __("Release") : __("Assign to me"))
+			.on("click", (e) => {
+				e.stopPropagation();
+				this._alert_action(
+					mine ? "unassign_alert" : "assign_alert",
+					{ name: a.name },
+					mine ? __("Released") : __("Assigned to you")
+				);
+			})
+			.appendTo($into);
+		// Snooze: a small menu of preset windows + a custom datetime.
+		this._snooze_button(a, $into);
 		$('<button class="btn btn-xs btn-default"></button>')
 			.text(__("Resolve"))
 			.on("click", (e) => {
@@ -685,6 +831,48 @@ class FleetControl {
 				this._alert_action("resolve_alert", { name: a.name }, __("Alert resolved"));
 			})
 			.appendTo($into);
+	}
+
+	// Snooze control: a dropdown of preset windows plus a 'Custom…' datetime prompt.
+	_snooze_button(a, $into) {
+		const $wrap = $('<span class="fc-snooze dropdown"></span>').appendTo($into);
+		$('<button class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown"></button>')
+			.text(__("Snooze"))
+			.appendTo($wrap);
+		const $menu = $('<ul class="dropdown-menu fc-snooze-menu"></ul>').appendTo($wrap);
+		SNOOZE_PRESETS.forEach(([key, label]) => {
+			$('<li><a href="#"></a></li>')
+				.find("a")
+				.text(__(label))
+				.on("click", (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					this._alert_action("snooze_alert", { name: a.name, preset: key }, __("Snoozed"));
+				})
+				.end()
+				.appendTo($menu);
+		});
+		$('<li><a href="#"></a></li>')
+			.find("a")
+			.text(__("Custom…"))
+			.on("click", (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				this._snooze_custom(a);
+			})
+			.end()
+			.appendTo($menu);
+	}
+
+	// Prompt for an explicit snooze-until datetime, then stamp it server-side.
+	_snooze_custom(a) {
+		frappe.prompt(
+			[{ fieldname: "until", fieldtype: "Datetime", label: __("Snooze until"), reqd: 1 }],
+			({ until }) =>
+				this._alert_action("snooze_alert", { name: a.name, until }, __("Snoozed")),
+			__("Snooze alert"),
+			__("Snooze")
+		);
 	}
 
 	// Single-alert action (acknowledge/resolve), then re-pull the alert set.
@@ -717,6 +905,46 @@ class FleetControl {
 				this._refresh_alerts();
 			},
 		});
+	}
+
+	// Bulk-assign the selected alerts to the caller in one call (native _assign);
+	// the endpoint re-checks write permission per alert server-side.
+	_bulk_assign() {
+		const names = Array.from(this.selected_alerts);
+		if (!names.length) return;
+		frappe.call({
+			method: "apex_habitat.salis.api.operations_alerts.bulk_assign_alerts",
+			args: { names },
+			callback: (r) => {
+				const n = (r && r.message && (r.message.assigned || []).length) || 0;
+				frappe.show_alert({ message: __("{0} assigned", [n]), indicator: "green" });
+				this.selected_alerts = new Set();
+				this._refresh_alerts();
+			},
+		});
+	}
+
+	// Bulk-snooze the selected alerts: prompt once for the window, then apply to all.
+	_bulk_snooze() {
+		const names = Array.from(this.selected_alerts);
+		if (!names.length) return;
+		frappe.prompt(
+			[{ fieldname: "until", fieldtype: "Datetime", label: __("Snooze until"), reqd: 1 }],
+			({ until }) => {
+				frappe.call({
+					method: "apex_habitat.salis.api.operations_alerts.bulk_snooze_alerts",
+					args: { names, until },
+					callback: (r) => {
+						const n = (r && r.message && (r.message.snoozed || []).length) || 0;
+						frappe.show_alert({ message: __("{0} snoozed", [n]), indicator: "green" });
+						this.selected_alerts = new Set();
+						this._refresh_alerts();
+					},
+				});
+			},
+			__("Snooze alerts"),
+			__("Snooze")
+		);
 	}
 
 	open_detail(v) {

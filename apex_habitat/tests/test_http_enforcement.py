@@ -65,6 +65,14 @@ PERMISSION_RECHECK_ALLOWLIST = [
     ),
     (
         "salis/api/masar.py",
+        "create_worker_transport_request",
+        "Masar guest endpoint. allow_guest; the worker is resolved server-side from "
+        "the token (_resolve_worker) and is the sole identity for the request — the "
+        "client never supplies a worker id; explicit rate_limit. A Guest has no role "
+        "to permission-check.",
+    ),
+    (
+        "salis/api/masar.py",
         "notify_hr_iqama_expiring",
         "Masar guest endpoint. allow_guest; authorisation is the Masar worker "
         "token resolved server-side (_resolve_worker), scope derived server-side, "

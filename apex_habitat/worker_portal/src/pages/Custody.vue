@@ -2,14 +2,21 @@
   <div class="space-y-5">
     <h2 class="section-title">{{ t("custody.title") }}</h2>
 
-    <template v-if="cus.loading">
+    <!-- Stale note when rendering the last-known cached snapshot offline. -->
+    <div v-if="isStale" class="stale-note">
+      <Icon name="alert" :size="14" class="shrink-0" />
+      <span>{{ t("common.stale") }}</span>
+    </div>
+
+    <template v-if="cus.loading && !cd">
       <Skeleton :lines="3" />
       <Skeleton :lines="3" />
     </template>
 
-    <!-- Error: an invalid/disabled token (PermissionError) or a server failure
-         must NOT masquerade as a benign "no custody" empty state. -->
-    <div v-else-if="cus.error" class="card card-pad text-center">
+    <!-- Error with NO cached fallback: an invalid/disabled token (PermissionError)
+         or a server failure must NOT masquerade as a benign "no custody" empty
+         state. With a cached snapshot we render it (labelled stale) instead. -->
+    <div v-else-if="cus.error && !cd" class="card card-pad text-center">
       <p class="text-sm font-bold mb-1">{{ t("errors.loadError") }}</p>
       <p class="text-sm text-muted">{{ errorMessage }}</p>
       <button class="btn btn-primary mt-3" style="width: auto; padding-inline: 24px" @click="cus.reload()">
@@ -58,25 +65,42 @@
 </template>
 
 <script setup>
-import { computed, h } from "vue";
+import { computed, h, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatDate } from "../datetime";
 import { TOKEN } from "../token";
+import { cacheGet, cacheSet } from "../cache";
 
 const { t } = useI18n();
 
+// Cache the last good custody read so an offline drop renders it
+// stale-but-labelled instead of an error (mirrors the driver portal pattern).
+const CACHE_KEY = "get_worker_custody";
+const staleCus = ref(null);
 const cus = createResource({
   url: "apex_habitat.salis.api.masar.get_worker_custody",
   params: { token: TOKEN },
   auto: true,
+  onSuccess: (r) => {
+    staleCus.value = null;
+    cacheSet(CACHE_KEY, r);
+  },
+  onError: () => {
+    const cached = cacheGet(CACHE_KEY);
+    if (cached) staleCus.value = cached;
+  },
 });
 
 const errorMessage = computed(() => resourceErrorMessage(cus.error));
 
-const items = computed(() => cus.data?.items || []);
+// Live data when present; otherwise the cached snapshot (offline).
+const cd = computed(() => cus.data || staleCus.value?.data || null);
+const isStale = computed(() => !cus.data && !!staleCus.value);
+
+const items = computed(() => cd.value?.items || []);
 
 // Frappe Web Form route (outside the SPA); the holder picks the issue there.
 const ackUrl = "/my-custody-acknowledgment";
@@ -95,3 +119,17 @@ const Row = (rprops) =>
     h("dd", { class: "ms-auto font-semibold" }, h("bdi", null, rprops.value || t("common.none"))),
   ]);
 </script>
+
+<style scoped>
+.stale-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius, 12px);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: var(--c-warning-bg, #fef3c7);
+  color: var(--c-warning, #92400e);
+}
+</style>

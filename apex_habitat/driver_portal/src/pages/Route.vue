@@ -67,6 +67,42 @@
                 </div>
               </li>
             </ol>
+
+            <!-- One-tap navigation chaining every stop as ordered waypoints. -->
+            <a
+              v-if="tripData.maps_route_url"
+              :href="tripData.maps_route_url"
+              target="_blank"
+              rel="noopener"
+              class="btn btn-outline mt-3"
+              style="width: auto; padding-inline: 16px"
+            >
+              <Icon name="map-pin" :size="16" /> {{ t("trips.fullRoute") }}
+            </a>
+          </div>
+
+          <!-- Registered worker manifest with a one-tap call. -->
+          <div v-if="tripData.workers && tripData.workers.length">
+            <div class="field-label">{{ t("route.workers") }}</div>
+            <ul class="space-y-1">
+              <li
+                v-for="(w, i) in tripData.workers"
+                :key="i"
+                class="flex items-center gap-2 text-sm"
+              >
+                <Icon name="user" :size="14" class="text-primary shrink-0" />
+                <span class="font-semibold"><bdi>{{ w.employee_name || w.employee }}</bdi></span>
+                <span v-if="w.pickup_point" class="text-muted">· {{ w.pickup_point }}</span>
+                <a
+                  v-if="w.phone"
+                  :href="'tel:' + w.phone"
+                  class="text-primary inline-flex items-center gap-1 ms-auto shrink-0"
+                  :aria-label="t('route.callWorker')"
+                >
+                  <Icon name="phone" :size="16" />
+                </a>
+              </li>
+            </ul>
           </div>
 
           <!-- No route plan for this trip: explicit state, distinct from "no trips today" -->
@@ -152,7 +188,19 @@
             </ol>
           </div>
 
-          <!-- Registered worker manifest -->
+          <!-- One-tap navigation chaining every stop as ordered waypoints. -->
+          <a
+            v-if="trip.maps_route_url"
+            :href="trip.maps_route_url"
+            target="_blank"
+            rel="noopener"
+            class="btn btn-outline"
+            style="width: auto; padding-inline: 16px"
+          >
+            <Icon name="map-pin" :size="16" /> {{ t("trips.fullRoute") }}
+          </a>
+
+          <!-- Registered worker manifest with a one-tap call. -->
           <div v-if="trip.workers && trip.workers.length">
             <div class="field-label">{{ t("route.workers") }}</div>
             <ul class="space-y-1">
@@ -164,6 +212,14 @@
                 <Icon name="user" :size="14" class="text-primary shrink-0" />
                 <span class="font-semibold"><bdi>{{ w.employee_name || w.employee }}</bdi></span>
                 <span v-if="w.pickup_point" class="text-muted">· {{ w.pickup_point }}</span>
+                <a
+                  v-if="w.phone"
+                  :href="'tel:' + w.phone"
+                  class="text-primary inline-flex items-center gap-1 ms-auto shrink-0"
+                  :aria-label="t('route.callWorker')"
+                >
+                  <Icon name="phone" :size="16" />
+                </a>
               </li>
             </ul>
           </div>

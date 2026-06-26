@@ -36,6 +36,8 @@
   "transport_request_sec_workers_list",
   "worker_count",
   "workers",
+  "transport_request_sec_adhoc",
+  "adhoc_passengers",
   "transport_request_sec_purpose",
   "purpose",
   "__tab_2",
@@ -241,6 +243,21 @@
    "options": "Transport Request Worker"
   },
   {
+   "depends_on": "eval:doc.service_line=='Site Transport' || doc.service_line=='Inter-City Relocation'",
+   "fieldname": "transport_request_sec_adhoc",
+   "fieldtype": "Section Break",
+   "label": "Additional (Unregistered) Passengers",
+   "collapsible": 1
+  },
+  {
+   "depends_on": "eval:doc.service_line=='Site Transport' || doc.service_line=='Inter-City Relocation'",
+   "description": "Riders who are not registered Employees on the manifest above (e.g. a guest or a not-yet-onboarded worker).",
+   "fieldname": "adhoc_passengers",
+   "fieldtype": "Table",
+   "label": "Additional Passengers",
+   "options": "Transport Request Ad Hoc Passenger"
+  },
+  {
    "fieldname": "transport_request_sec_purpose",
    "fieldtype": "Section Break",
    "label": "Purpose"
@@ -333,7 +350,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Source Channel",
-   "options": "Desk\nWeb QR"
+   "options": "Desk\nWeb QR\nMasar Worker"
   },
   {
    "fieldname": "site_token",
@@ -396,7 +413,7 @@
    "link_fieldname": "transport_request"
   }
  ],
- "modified": "2026-06-12 12:00:00.000000",
+ "modified": "2026-06-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",

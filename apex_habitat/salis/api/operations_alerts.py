@@ -20,12 +20,25 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.desk.form import assign_to
+from frappe.utils import add_to_date, get_datetime, now_datetime
 
 from apex_habitat.salis.api.dispatch_board import _permitted_projects
-from apex_habitat.salis.tasks import ALERT_DOCTYPE, _resolve_alert
+from apex_habitat.salis.tasks import ALERT_DOCTYPE, _resolve_alert, _settings_int
 
 OPEN_STATUSES = ["Open", "Acknowledged"]
 SEVERITIES = ["Info", "Warning", "Critical"]
+
+# Per-severity "open too long" thresholds (hours). Read from Salis Settings so ops
+# can tune them; the field may be absent, in which case _settings_int returns the
+# default — so this is configurable without a schema change to the alert.
+AGING_SETTING = {"Critical": "alert_aging_critical_hours", "Warning": "alert_aging_warning_hours", "Info": "alert_aging_info_hours"}
+AGING_DEFAULT = {"Critical": 4, "Warning": 24, "Info": 72}
+
+
+def _aging_thresholds() -> dict:
+    """Per-severity aging cutoffs in hours, from Settings (with sane fallbacks)."""
+    return {sev: _settings_int(AGING_SETTING[sev], AGING_DEFAULT[sev]) for sev in SEVERITIES}
 
 
 def _scoped_vehicles(unscoped, projects):
@@ -47,13 +60,17 @@ def _scoped_vehicles(unscoped, projects):
 
 
 @frappe.whitelist()
-def get_open_alerts(project=None, severity=None):
+def get_open_alerts(project=None, severity=None, since=None):
     """Return the Open/Acknowledged Operations Alert queue for the caller's scope.
 
     Read-only and project-scoped server-side: a scoped user only sees alerts whose
     vehicle belongs to a project they are permitted, and an optional ``project``
     narrows further but cannot widen past that scope. ``severity`` optionally
-    filters to one of Info/Warning/Critical.
+    filters to one of Info/Warning/Critical. Snoozed rows (``snooze_until`` still
+    in the future) are excluded so a deferred alert disappears until its moment
+    passes. Each row carries native ``_assign`` (the assignment column) so the
+    client can show the owner and offer the Mine/Unowned facet. ``since`` (the
+    user's last-seen time) drives a ``resolved_since`` count for the delta banner.
     """
     frappe.has_permission(ALERT_DOCTYPE, "read", throw=True)
     unscoped, projects = _permitted_projects()
@@ -64,9 +81,17 @@ def get_open_alerts(project=None, severity=None):
         else list(projects or [])
     )
 
+    now = now_datetime()
     filters = {"status": ["in", OPEN_STATUSES]}
     if severity in SEVERITIES:
         filters["severity"] = severity
+    # Exclude still-snoozed rows: keep only alerts whose snooze has lapsed or was
+    # never set. A list-of-lists or_filter is the native way to reference the same
+    # column twice (NULL OR past) — a dict would collapse the duplicate key.
+    or_filters = [
+        ["Operations Alert", "snooze_until", "is", "not set"],
+        ["Operations Alert", "snooze_until", "<=", now],
+    ]
 
     if project and (unscoped or project in (projects or [])):
         # Narrow to the vehicles of a single in-scope project.
@@ -83,9 +108,10 @@ def get_open_alerts(project=None, severity=None):
     alerts = frappe.get_all(
         ALERT_DOCTYPE,
         filters=filters,
+        or_filters=or_filters,
         fields=[
             "name", "alert_type", "severity", "status",
-            "vehicle", "driver", "message", "raised_on",
+            "vehicle", "driver", "message", "raised_on", "snooze_until", "_assign",
         ],
         order_by="raised_on desc",
         limit_page_length=0,
@@ -110,12 +136,30 @@ def get_open_alerts(project=None, severity=None):
             )
         }
 
-    summary = {"total": len(alerts), "by_severity": {s: 0 for s in SEVERITIES}}
+    # Parse native _assign (a JSON list of users) once per row into an assignees list.
+    for a in alerts:
+        a["assignees"] = frappe.parse_json(a.get("_assign")) or []
+    user = frappe.session.user
+    assignee_ids = list({u for a in alerts for u in a["assignees"]})
+    name_map = {
+        u.name: u.full_name
+        for u in frappe.get_all(
+            "User", filters={"name": ["in", assignee_ids]}, fields=["name", "full_name"]
+        )
+    } if assignee_ids else {}
+
+    summary = {"total": len(alerts), "by_severity": {s: 0 for s in SEVERITIES}, "mine": 0, "unowned": 0}
     for a in alerts:
         a["plate_number"] = plates_map.get(a.get("vehicle"))
         a["driver_name"] = drv_map.get(a.get("driver"))
+        a["assignee_names"] = [name_map.get(u, u) for u in a["assignees"]]
+        a["snooze_until"] = str(a["snooze_until"]) if a.get("snooze_until") else None
         if a.severity in summary["by_severity"]:
             summary["by_severity"][a.severity] += 1
+        if user in a["assignees"]:
+            summary["mine"] += 1
+        if not a["assignees"]:
+            summary["unowned"] += 1
 
     return {
         "alerts": alerts,
@@ -123,7 +167,25 @@ def get_open_alerts(project=None, severity=None):
         "projects": proj_opts,
         "severities": SEVERITIES,
         "unscoped": unscoped,
+        # Per-severity aging cutoffs (hours) + the server clock, so the client can
+        # flag a row open past its threshold without trusting the browser's time.
+        "aging_hours": _aging_thresholds(),
+        "server_now": str(now),
+        "current_user": user,
+        # Alerts resolved since the user's last visit, for the delta banner. Scoped
+        # by the SAME vehicle filter as the queue (reuse filters['vehicle']).
+        "resolved_since": _resolved_since(since, filters.get("vehicle")),
     }
+
+
+def _resolved_since(since, vehicle_filter) -> int:
+    """Count alerts resolved after ``since``, under the same vehicle scope as the queue."""
+    if not since:
+        return 0
+    resolved_filters = {"status": "Resolved", "resolved_on": [">", since]}
+    if vehicle_filter is not None:
+        resolved_filters["vehicle"] = vehicle_filter
+    return frappe.db.count(ALERT_DOCTYPE, resolved_filters)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -173,6 +235,124 @@ def bulk_acknowledge_alerts(names):
             # Skip a row the caller cannot act on; don't abort the whole batch.
             continue
     return {"ok": True, "acknowledged": acknowledged}
+
+
+@frappe.whitelist(methods=["POST"])
+def assign_alert(name, user=None):
+    """Take ownership of an alert (or assign it to ``user``) via native ``_assign``.
+
+    Delegates to ``frappe.desk.form.assign_to.add``, which creates the ToDo, writes
+    the ``_assign`` column and shares the doc — so the alert appears in the owner's
+    ToDo list with no custom field. ``user`` defaults to the caller (assign-to-me).
+    Permission is re-checked on the specific alert (assign_to.add re-checks too).
+    Idempotent: a duplicate assignment is swallowed as success.
+    """
+    frappe.has_permission(ALERT_DOCTYPE, "write", doc=name, throw=True)
+    target = user or frappe.session.user
+    assign_to.add({"assign_to": [target], "doctype": ALERT_DOCTYPE, "name": name})
+    return {"ok": True, "name": name, "assignees": _assignees(name)}
+
+
+@frappe.whitelist(methods=["POST"])
+def unassign_alert(name, user=None):
+    """Drop ``user`` (default the caller) from an alert's native ``_assign``.
+
+    Delegates to ``assign_to.remove``, which closes the ToDo and rewrites ``_assign``.
+    Permission is re-checked on the alert. No-op (still ``ok``) if not assigned.
+    """
+    frappe.has_permission(ALERT_DOCTYPE, "write", doc=name, throw=True)
+    target = user or frappe.session.user
+    try:
+        assign_to.remove(ALERT_DOCTYPE, name, target)
+    except Exception:
+        # Removing an assignment that isn't there must not error the caller.
+        pass
+    return {"ok": True, "name": name, "assignees": _assignees(name)}
+
+
+@frappe.whitelist(methods=["POST"])
+def bulk_assign_alerts(names, user=None):
+    """Assign several alerts to ``user`` (default the caller) in one call.
+
+    Each id is run through ``assign_alert``, which re-checks ``write`` per alert, so
+    a row the caller may not act on is skipped rather than trusted from the client.
+    Returns the ids actually assigned.
+    """
+    if isinstance(names, str):
+        names = frappe.parse_json(names)
+    assigned = []
+    for name in names or []:
+        try:
+            if assign_alert(name, user=user).get("ok"):
+                assigned.append(name)
+        except frappe.PermissionError:
+            continue
+    return {"ok": True, "assigned": assigned}
+
+
+def _assignees(name) -> list:
+    """The current native-_assign user list for an alert (post-mutation read-back)."""
+    return frappe.parse_json(frappe.db.get_value(ALERT_DOCTYPE, name, "_assign")) or []
+
+
+# Named snooze windows the UI offers, mapped to (unit, amount) for add_to_date.
+SNOOZE_PRESETS = {"tomorrow": ("days", 1), "2d": ("days", 2), "1w": ("days", 7)}
+
+
+def _snooze_target(preset=None, until=None):
+    """Resolve a snooze deadline from a named preset or an explicit datetime."""
+    if until:
+        return get_datetime(until)
+    if preset in SNOOZE_PRESETS:
+        unit, amount = SNOOZE_PRESETS[preset]
+        return add_to_date(now_datetime(), **{unit: amount})
+    return None
+
+
+@frappe.whitelist(methods=["POST"])
+def snooze_alert(name, preset=None, until=None):
+    """Hide an alert from the queue until a deadline by stamping ``snooze_until``.
+
+    The deadline comes from a named ``preset`` (tomorrow / 2d / 1w) or an explicit
+    ``until`` datetime. The queue reader excludes rows whose ``snooze_until`` is
+    still in the future, so the alert disappears now and reappears once it lapses.
+    Permission is re-checked on the alert. Pass an empty ``until`` with no preset to
+    clear a snooze.
+    """
+    frappe.has_permission(ALERT_DOCTYPE, "write", doc=name, throw=True)
+    target = _snooze_target(preset, until)
+    frappe.db.set_value(ALERT_DOCTYPE, name, "snooze_until", target, update_modified=True)
+    try:
+        when = _("until {0}").format(target) if target else _("cleared")
+        frappe.get_doc(ALERT_DOCTYPE, name).add_comment(
+            "Info", _("Snoozed by {0} ({1})").format(frappe.session.user, when)
+        )
+    except Exception:
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Alert snooze comment failed for {name}"[:140],
+        )
+    return {"ok": True, "name": name, "snooze_until": str(target) if target else None}
+
+
+@frappe.whitelist(methods=["POST"])
+def bulk_snooze_alerts(names, preset=None, until=None):
+    """Snooze several alerts in one call (the queue's multi-select).
+
+    Each id is run through ``snooze_alert``, which re-checks ``write`` per alert, so
+    a row the caller may not act on is skipped rather than trusted from the client.
+    Returns the ids actually snoozed.
+    """
+    if isinstance(names, str):
+        names = frappe.parse_json(names)
+    snoozed = []
+    for name in names or []:
+        try:
+            if snooze_alert(name, preset=preset, until=until).get("ok"):
+                snoozed.append(name)
+        except frappe.PermissionError:
+            continue
+    return {"ok": True, "snoozed": snoozed}
 
 
 @frappe.whitelist(methods=["POST"])

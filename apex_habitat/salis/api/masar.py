@@ -1510,3 +1510,166 @@ def confirm_boarding(token=None, transport_request=None):
         "trip_start_log": log.name,
         "boarded_count": log.boarded_count,
     }
+
+
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=60)
+def get_worker_boarding_pass(token=None, transport_request=None):
+    """The worker's own signed QR boarding pass for today's trip (read, token-scoped).
+
+    The driver scanner (salis/api/boarding.py) validates a per-(trip, worker)
+    HMAC-signed token; the same signed payload is what the worker shows as a QR for
+    the driver to scan. Here the worker resolves to a single Employee from their
+    token and the trip is resolved FORWARD from their own manifest membership (the
+    same ``_worker_today_dispatch_trip`` boarding self-confirm uses) — the client
+    never supplies a trip or worker id, so a pass can only ever be issued for the
+    token's own worker on a trip they are actually on. Reuses ``boarding._issue_token``
+    so the worker's QR and the driver's scanner share ONE signing scheme; issues no
+    DB write (a pass is just a signed claim). ``{"pass": None}`` when the worker has
+    no boardable trip today."""
+    from apex_habitat.salis.api import boarding
+
+    employee = _resolve_worker(token)
+    transport_request = (transport_request or "").strip() or None
+
+    resolved = _worker_today_dispatch_trip(employee, transport_request)
+    if not resolved:
+        return {"pass": None}
+    dispatch_trip, request_name, stop_name, _building = resolved
+
+    pass_token = boarding._issue_token(dispatch_trip, employee)
+    return {
+        "pass": {
+            "qr_payload": pass_token,
+            "dispatch_trip": dispatch_trip,
+            "transport_request": request_name,
+            "stop_name": stop_name,
+            "holder_name": frappe.db.get_value("Employee", employee, "employee_name"),
+            "expires_in_hours": boarding.PASS_TTL_HOURS,
+        }
+    }
+
+
+# [#masaradhoc] Ad-hoc passenger validation for a worker-initiated request: a name
+# and an ID document are required; the expiry, when supplied, must be a real date.
+# An ad-hoc row is an UNREGISTERED rider (no Employee), kept distinct from the
+# registered worker manifest so headcount + custody never confuse the two.
+def _clean_adhoc_passengers(passengers):
+    """Validate + normalize the client's ad-hoc passenger rows. Returns a list of
+    clean dicts ready to append to the request's ``adhoc_passengers`` table; throws
+    on a row missing a name or ID, or carrying an unparseable expiry."""
+    import json
+
+    if isinstance(passengers, str):
+        passengers = json.loads(passengers or "[]")
+    rows = []
+    for p in passengers or []:
+        full_name = (p.get("full_name") or "").strip()
+        id_number = (p.get("id_number") or "").strip()
+        if not full_name or not id_number:
+            frappe.throw(_("Each additional passenger needs a name and an ID number."))
+        expiry = (p.get("id_expiry") or "").strip() or None
+        if expiry:
+            try:
+                expiry = frappe.utils.getdate(expiry).isoformat()
+            except Exception:
+                frappe.throw(_("An additional passenger's ID expiry is not a valid date."))
+        rows.append(
+            {
+                "full_name": full_name[:140],
+                "id_number": id_number[:64],
+                "id_expiry": expiry,
+                "nationality": (p.get("nationality") or "").strip()[:64] or None,
+                "phone": (p.get("phone") or "").strip()[:32] or None,
+            }
+        )
+    return rows
+
+
+# [#masartr] Worker-initiated transport request: the worker portal offers only the
+# two worker service lines; the request type is derived from it (never trusted from
+# the client), matching the controller's SERVICE_LINE_REQUEST_TYPE map.
+_WORKER_TRANSPORT_SERVICE_REQUEST_TYPE = {
+    "Site Transport": "Accommodation to Project Shuttle",
+    "Inter-City Relocation": "Inter-City Relocation",
+}
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=6, seconds=60 * 60)
+def create_worker_transport_request(
+    token=None,
+    service_line=None,
+    from_location=None,
+    to_location=None,
+    pickup_datetime=None,
+    purpose=None,
+    adhoc_passengers=None,
+):
+    """Raise a Transport Request for the worker (write, token-scoped).
+
+    Reuses the native Transport Request channel (no parallel intake DocType). The
+    worker resolves to one Employee from their token (the sole identity source — the
+    client never supplies a worker id); that worker is ALWAYS added to the request's
+    registered manifest, and their active accommodation building + project seed the
+    request, so a request can only ever be filed for the token's own worker. The
+    worker may additionally list ad-hoc (unregistered) co-passengers — each a
+    name+ID(+expiry) row kept in a SEPARATE ``adhoc_passengers`` table so they stay
+    distinguishable from registered workers. ``service_line`` is constrained to the
+    two worker lines and the request type is derived from it server-side. The
+    request is created as a New draft (``source_channel = Masar Worker``) for the
+    fleet desk to validate/schedule; posts no GL. Tight ``rate_limit`` so a personal
+    link cannot spam the desk."""
+    employee = _resolve_worker(token)
+
+    service_line = (service_line or "Site Transport").strip()
+    if service_line not in _WORKER_TRANSPORT_SERVICE_REQUEST_TYPE:
+        service_line = "Site Transport"
+    request_type = _WORKER_TRANSPORT_SERVICE_REQUEST_TYPE[service_line]
+
+    from_location = (from_location or "").strip()[:140] or None
+    to_location = (to_location or "").strip()[:140] or None
+    purpose = (purpose or "").strip()
+    if purpose and len(purpose) > 2000:
+        frappe.throw(_("Purpose is too long. Please keep it under 2000 characters."))
+    if not purpose and not to_location:
+        frappe.throw(_("Please describe where you need to go."))
+
+    pickup_datetime = (pickup_datetime or "").strip() or None
+    if pickup_datetime:
+        try:
+            pickup_datetime = frappe.utils.get_datetime(pickup_datetime).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+        except Exception:
+            frappe.throw(_("The pickup date and time is not valid."))
+
+    adhoc_rows = _clean_adhoc_passengers(adhoc_passengers)
+
+    # [#masartrscope] employee's own active assignment seeds building/project — never
+    # taken from the client, so the request stays bound to the token's own worker.
+    assignment = _active_assignment(employee)
+    building = assignment.get("building") if assignment else None
+    project = assignment.get("project") if assignment else None
+    worker_name = frappe.db.get_value("Employee", employee, "employee_name")
+
+    doc = frappe.get_doc(
+        {
+            "doctype": "Transport Request",
+            "service_line": service_line,
+            "request_type": request_type,
+            "source_channel": "Masar Worker",
+            "requester_name": worker_name,
+            "accommodation_building": building if service_line == "Site Transport" else None,
+            "project": project,
+            "from_location": from_location,
+            "to_location": to_location,
+            "pickup_datetime": pickup_datetime,
+            "purpose": purpose,
+            "status": "New",
+            "workers": [{"employee": employee, "pickup_point": from_location}],
+            "adhoc_passengers": adhoc_rows,
+        }
+    )
+    doc.insert(ignore_permissions=True)  # audit-ok — worker resolved from token server-side
+    return {"name": doc.name, "status": doc.status, "adhoc_count": len(adhoc_rows)}

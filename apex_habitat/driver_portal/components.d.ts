@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BoardingScanner: typeof import('./src/components/BoardingScanner.vue')['default']
     Brand: typeof import('./src/components/Brand.vue')['default']
     EmptyState: typeof import('./src/components/EmptyState.vue')['default']
     ErrorState: typeof import('./src/components/ErrorState.vue')['default']
