@@ -63,7 +63,7 @@ def _project(company):
         "Project",
         {"project_name": _PROJECT},
         lambda: frappe.get_doc({"doctype": "Project", "project_name": _PROJECT}).insert(
-            ignore_permissions=True
+            ignore_permissions=True  # audit-ok
         ),
     )
 
@@ -74,7 +74,7 @@ def _site(company):
         {"site_name": _SITE},
         lambda: frappe.get_doc(
             {"doctype": "Accommodation Site", "site_name": _SITE, "company": company}
-        ).insert(ignore_permissions=True),
+        ).insert(ignore_permissions=True),  # audit-ok
     )
 
 
@@ -90,7 +90,7 @@ def _building(company):
                 "total_capacity": 40,
                 "google_maps_url": "https://maps.example/demo-residence-a",
             }
-        ).insert(ignore_permissions=True),
+        ).insert(ignore_permissions=True),  # audit-ok
     )
 
 
@@ -110,7 +110,7 @@ def _employee(first_name, company, user_id=None):
     }
     if user_id:
         doc["user_id"] = user_id
-    return frappe.get_doc(doc).insert(ignore_permissions=True).name
+    return frappe.get_doc(doc).insert(ignore_permissions=True).name  # audit-ok
 
 
 def _driver_user():
@@ -122,7 +122,7 @@ def _driver_user():
                 "first_name": _DRIVER_NAME,
                 "send_welcome_email": 0,
             }
-        ).insert(ignore_permissions=True)
+        ).insert(ignore_permissions=True)  # audit-ok
     user = frappe.get_doc("User", _DEMO_USER)
     if "Driver" not in frappe.get_roles(_DEMO_USER):
         user.add_roles("Driver")
@@ -142,7 +142,7 @@ def _driver(company):
                 "full_name": _DRIVER_NAME,
                 "status": "Active",
             }
-        ).insert(ignore_permissions=True),
+        ).insert(ignore_permissions=True),  # audit-ok
     )
 
 
@@ -172,7 +172,7 @@ def _transport_request(company, project, building, driver, workers):
                 "workers": [{"employee": e, "pickup_point": "Building Gate"} for e in workers],
             }
         )
-        .insert(ignore_permissions=True)
+        .insert(ignore_permissions=True)  # audit-ok
         .name
     )
 
@@ -206,7 +206,7 @@ def _route_plan(project, driver, building, transport_request, workers):
                 ],
             }
         )
-        .insert(ignore_permissions=True)
+        .insert(ignore_permissions=True)  # audit-ok
         .name
     )
 
@@ -228,7 +228,7 @@ def _dispatch_trip(driver, route_plan, transport_request):
                 "status": "Planned",
             }
         )
-        .insert(ignore_permissions=True)
+        .insert(ignore_permissions=True)  # audit-ok
         .name
     )
 
@@ -246,7 +246,7 @@ def _worker_token(employee):
             "party": employee,
             "employee": employee,
         }
-    ).insert(ignore_permissions=True)
+    ).insert(ignore_permissions=True)  # audit-ok
 
 
 def execute():
