@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.55.34 — the fleet board now keeps you ahead of trouble: a live alert bell shows the open-alert count updating on its own, and from its drawer you jump straight to the vehicle or the alert it belongs to; the board also stays usable when one data source hiccups (it shows the rest instead of going blank) and gains a per-vehicle timeline and clearer workshop status; a simple web form lets anyone report a fleet accident or theft for supervisor review before it takes effect; resident requests get a phone-friendly triage list that is colour-coded by priority, advances a request one tap at a time and can mark several as triaged at once; and custody now runs a daily check that flags held consumables past their usable life so they are replaced before they fail; plus reliability and Arabic-coverage improvements",
+        "app_name": "apex_habitat",
+        "link": "/fleet",
+        "creation": "2026-06-26 18:00:00",
+    },
+    {
         "title": "Apex 1.55.33 — drivers and workers get a self-service glance: in the driver app you see your fuel quota and remaining litres, your fuel-request history and your recent trips alongside today's, and the worker app's home screen leads with your next ride, your open requests and the days until your Iqama expires; custody becomes auditable end to end — capture the recipient's signature at handover, acknowledge-receipt and overdue-return alerts now reach the right person, and a new view shows top holders by custody value; a report flags workers still housed after their project has ended so a manager can act before the cost keeps bleeding; a cleaning round now requires its photos attached before it can be submitted; and the Front Desk and fleet board gain clearer permission and empty states, per-item progress as bulk actions run, and quicker filters",
         "app_name": "apex_habitat",
         "link": "/app/query-report/Idle Resident Candidates",
