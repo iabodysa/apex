@@ -214,6 +214,47 @@
   }
 }
 
+/* Atelier — premium editorial refinement of the AFMCO identity (ported from the
+   driver/worker portals so /safety renders identically when the Salis Portal
+   Theme is set to "Atelier"). Same brand palette, elevated finish. Keeps Cairo
+   for the RTL Arabic surface. */
+[data-theme="atelier"] {
+  --c-primary: #00844e;
+  --c-primary-ink: #ffffff;
+  --c-ink: #06241a;
+  --c-ink-soft: #3a5448;
+  --c-canvas: #efe9da;
+  --c-surface: #fffdf7;
+  --c-surface-2: #ffffff;
+  --c-accent: #00844e;
+  --c-mint: #5ccf94;
+  --c-muted: #6f7e76;
+  --c-border: #e2dac6;
+  --c-border-strong: #cdc1a4;
+  --c-success: #00844e;
+  --c-success-bg: #dcf1e5;
+  --c-warning: #b9791b;
+  --c-warning-bg: #f6e8cf;
+  --c-danger: #b83a2c;
+  --c-danger-bg: #f5dbd6;
+  --c-header-bg: #062019;
+  --c-header-ink: #f8f5ee;
+  --c-header-accent: #d8c79a; /* gold-leaf accent (drawn from sand) */
+  --c-arc: rgba(216, 199, 154, 0.14);
+
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --shadow: 0 1px 2px rgba(7, 43, 26, 0.04), 0 6px 16px rgba(7, 43, 26, 0.06);
+  --shadow-lg: 0 12px 32px rgba(7, 43, 26, 0.1);
+  --border-width: 1px;
+}
+
+/* Gold-leaf hairline under the header — understated luxury, not a new colour. */
+[data-theme="atelier"] .app-header {
+  border-bottom: 1px solid color-mix(in srgb, var(--c-header-accent) 35%, transparent);
+}
+
 html,
 body {
   background: var(--c-canvas);

@@ -1,0 +1,10 @@
+# Defense-in-depth: keep the local cred + screenshot artifacts out of git even if
+# the repo-root rules change. The committed helpers below are NOT ignored.
+.env.local
+*.local
+screenshots/
+*.png
+
+# The root `.env.*` rule would swallow the committed template — keep it tracked
+# (it holds NO real secret, only a change-me placeholder).
+!.env.local.example

@@ -21,6 +21,8 @@ THEME_SLUGS = {
 	"Frappe Standard": "frappe",
 	"Dark": "dark",
 	"Gemini": "gemini",
+	# Atelier: premium editorial refinement of the AFMCO identity (same palette, elevated finish).
+	"Atelier": "atelier",
 }
 
 DEFAULT_THEME = "AFMCO"

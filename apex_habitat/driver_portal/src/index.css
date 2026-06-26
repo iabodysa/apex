@@ -709,3 +709,62 @@ body {
   background: linear-gradient(90deg, #3b82f6, #a855f7);
   box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
 }
+
+/* Atelier — premium editorial refinement of the AFMCO identity. Same brand
+   palette (Growth Green / Deep Forest / Sand), elevated finish: soft depth,
+   warmer paper hierarchy, a gold-leaf header hairline, tighter editorial type. */
+[data-theme="atelier"] {
+  --c-primary: #00844e; /* Growth Green — unchanged brand primary */
+  --c-primary-ink: #ffffff;
+  --c-ink: #06241a; /* slightly deeper forest for crisper headings */
+  --c-ink-soft: #3a5448;
+  --c-canvas: #efe9da; /* soft sand canvas */
+  --c-surface: #fffdf7; /* true ivory paper — lifts cards off the sand */
+  --c-surface-2: #ffffff;
+  --c-accent: #00844e;
+  --c-mint: #5ccf94;
+  --c-muted: #6f7e76;
+  --c-border: #e2dac6;
+  --c-border-strong: #cdc1a4;
+  --c-success: #00844e;
+  --c-success-bg: #dcf1e5;
+  --c-warning: #b9791b;
+  --c-warning-bg: #f6e8cf;
+  --c-danger: #b83a2c;
+  --c-danger-bg: #f5dbd6;
+  --c-header-bg: #062019; /* deepened forest header */
+  --c-header-ink: #f8f5ee;
+  --c-header-accent: #d8c79a; /* gold-leaf accent (drawn from sand) */
+  --c-arc: rgba(216, 199, 154, 0.14); /* warm gold supergraphic arc */
+
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  /* whisper-soft elevation — the core "premium" lift over flat AFMCO */
+  --shadow: 0 1px 2px rgba(7, 43, 26, 0.04), 0 6px 16px rgba(7, 43, 26, 0.06);
+  --shadow-lg: 0 12px 32px rgba(7, 43, 26, 0.1);
+  --border-width: 1px;
+
+  --font: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-display: 30px;
+  --fw-heading: 800;
+  --fw-semibold: 600;
+  --fw-body: 500;
+}
+
+/* Gold-leaf hairline under the header — understated luxury, not a new colour. */
+[data-theme="atelier"] .app-header {
+  border-bottom: 1px solid color-mix(in srgb, var(--c-header-accent) 35%, transparent);
+}
+/* Editorial poise: tighter heading tracking. */
+[data-theme="atelier"] .section-title,
+[data-theme="atelier"] .stat-value {
+  letter-spacing: -0.02em;
+}
+/* Refined focus ring in brand green. */
+[data-theme="atelier"] .input:focus,
+[data-theme="atelier"] .select:focus,
+[data-theme="atelier"] .textarea:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 14%, transparent);
+}
