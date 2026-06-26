@@ -24,14 +24,22 @@
  "is_hidden": 0,
  "sequence_id": 4.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"fltChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Vehicle Utilisation\", \"col\": 12}}, {\"id\": \"fltHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"fltQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"fltQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"fltQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Handover\", \"col\": 3}}, {\"id\": \"fltQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"fltQ4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Fleet Register\", \"col\": 3}}, {\"id\": \"fltQ5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fleet & Fuel Dashboard\", \"col\": 3}}, {\"id\": \"fltHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"fltKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"fltKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"fltKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Active Assignments\", \"col\": 3}}, {\"id\": \"fltKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Vehicles Stopped\", \"col\": 3}}, {\"id\": \"fltKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Fuel Requests\", \"col\": 3}}, {\"id\": \"fltKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Spend This Month\", \"col\": 3}}, {\"id\": \"fltKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Exception Cases\", \"col\": 3}}, {\"id\": \"fltKM7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_fuel Litres Dispensed This Month\", \"col\": 3}}, {\"id\": \"fltHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"fltQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Pending Wash Requests\", \"col\": 4}}, {\"id\": \"fltHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"fltCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"fltCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Vehicle Custody\", \"col\": 4}}, {\"id\": \"fltCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"fltCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Rental & Cost Recovery\", \"col\": 4}}, {\"id\": \"fltCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Exceptions & Analytics\", \"col\": 4}}, {\"id\": \"fltCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"fltCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}]",
+ "content": "[{\"id\": \"fltHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"fltQP\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fleet Portal\", \"col\": 3}}, {\"id\": \"fltQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"fltQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"fltQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Handover\", \"col\": 3}}, {\"id\": \"fltQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"fltHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"fltKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"fltKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Representatives Fleet Vehicles Stopped\", \"col\": 3}}, {\"id\": \"fltKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Fuel Requests\", \"col\": 3}}, {\"id\": \"fltKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Exception Cases\", \"col\": 3}}, {\"id\": \"fltHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"fltCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"fltCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Vehicle Custody\", \"col\": 4}}, {\"id\": \"fltCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"fltCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Rental & Cost Recovery\", \"col\": 4}}, {\"id\": \"fltCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Exceptions & Analytics\", \"col\": 4}}, {\"id\": \"fltCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"fltCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}]",
  "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Fleet Portal",
+   "url": "/fleet",
+   "color": "Green",
+   "idx": 1
+  },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Salis Vehicle",
    "link_to": "Salis Vehicle",
-   "idx": 1,
+   "idx": 2,
    "stats_filter": "{\"status\": \"Active\"}",
    "format": "{} Active",
    "color": "Green"
@@ -41,36 +49,21 @@
    "type": "DocType",
    "label": "Vehicle Assignment",
    "link_to": "Vehicle Assignment",
-   "idx": 2
+   "idx": 3
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Vehicle Handover",
    "link_to": "Vehicle Handover",
-   "idx": 3
+   "idx": 4
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Fuel Request",
    "link_to": "Fuel Request",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Report",
-   "label": "Salis Fleet Register",
-   "link_to": "Salis Fleet Register",
-   "is_query_report": 1,
    "idx": 5
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Dashboard",
-   "label": "Fleet & Fuel Dashboard",
-   "link_to": "Salis - Representatives Fleet",
-   "idx": 6
   }
  ],
  "links": [
@@ -398,71 +391,33 @@
    "idx": 37
   }
  ],
- "charts": [
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Vehicle Utilisation",
-   "label": "Vehicle Utilisation"
-  }
- ],
+ "charts": [],
  "number_cards": [
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Active Vehicles",
-   "label": "Active Vehicles",
-   "idx": 1
-  },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Vehicles Under Maintenance",
    "label": "Vehicles Under Maintenance",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Salis Representatives Fleet Active Assignments",
-   "label": "Active Vehicle Assignments",
-   "idx": 3
+   "idx": 1
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Salis Representatives Fleet Vehicles Stopped",
    "label": "Vehicles Stopped",
-   "idx": 4
+   "idx": 2
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Pending Fuel Requests",
    "label": "Pending Fuel Requests",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Fuel Spend This Month",
-   "label": "Fuel Spend This Month",
-   "idx": 6
+   "idx": 3
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Open Fuel Exception Cases",
    "label": "Open Fuel Exception Cases",
-   "idx": 7
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "salis_fuel Litres Dispensed This Month",
-   "label": "Fuel Litres Dispensed This Month",
-   "idx": 8
+   "idx": 4
   }
  ],
- "quick_lists": [
-  {
-   "doctype": "Workspace Quick List",
-   "document_type": "Wash Request",
-   "label": "Pending Wash Requests",
-   "quick_list_filter": "[[\"status\",\"=\",\"Pending\"]]",
-   "idx": 1
-  }
- ],
- "modified": "2026-06-20 17:05:00.000000"
+ "quick_lists": [],
+ "modified": "2026-06-27 09:00:00.000000"
 }

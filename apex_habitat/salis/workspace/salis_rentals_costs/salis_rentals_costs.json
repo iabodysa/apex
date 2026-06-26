@@ -24,7 +24,7 @@
  "is_hidden": 0,
  "sequence_id": 6.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"rntHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"rntChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Rental Accrual Trend\", \"col\": 12}}, {\"id\": \"srcHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srcQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"srcQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Payment Request\", \"col\": 3}}, {\"id\": \"srcHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srcKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rental Accrual This Month\", \"col\": 3}}, {\"id\": \"srcKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cost Recovery Aging Backlog\", \"col\": 3}}, {\"id\": \"srcKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Active Rentals\", \"col\": 3}}, {\"id\": \"srcKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Settlements Pending Approval\", \"col\": 3}}, {\"id\": \"srcKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Rental Cost This Month\", \"col\": 3}}, {\"id\": \"rntHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"rntQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Settlements Awaiting Approval\", \"col\": 4}}, {\"id\": \"srcHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srcCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs and Settlement\", \"col\": 4}}, {\"id\": \"srcCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Engine Ledgers / Audit\", \"col\": 4}}, {\"id\": \"srcCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "content": "[{\"id\": \"srcHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srcQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"srcQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Payment Request\", \"col\": 3}}, {\"id\": \"srcHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srcKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Settlements Pending Approval\", \"col\": 3}}, {\"id\": \"srcKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cost Recovery Aging Backlog\", \"col\": 3}}, {\"id\": \"srcHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srcCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs and Settlement\", \"col\": 4}}, {\"id\": \"srcCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Engine Ledgers / Audit\", \"col\": 4}}, {\"id\": \"srcCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -188,30 +188,24 @@
    "is_query_report": 1
   }
  ],
- "charts": [
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Rental Accrual Trend",
-   "label": "Rental Accrual Trend"
-  }
- ],
+ "charts": [],
  "number_cards": [
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Rental Accrual This Month",
-   "label": "Rental Accrual This Month",
-   "idx": 1
-  },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Overdue Rental Settlements",
    "label": "Overdue Rental Settlements",
-   "idx": 2
+   "idx": 1
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Disputed Rental Settlements",
    "label": "Disputed Rental Settlements",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Salis Rentals Costs Settlements Pending Approval",
+   "label": "Settlements Pending Approval",
    "idx": 3
   },
   {
@@ -219,34 +213,8 @@
    "number_card_name": "Cost Recovery Aging Backlog",
    "label": "Cost Recovery Aging Backlog",
    "idx": 4
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Salis Rentals Costs Active Rentals",
-   "label": "Active Rentals",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Salis Rentals Costs Settlements Pending Approval",
-   "label": "Settlements Pending Approval",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Salis Rentals Costs Rental Cost This Month",
-   "label": "Rental Cost This Month",
-   "idx": 7
   }
  ],
- "quick_lists": [
-  {
-   "doctype": "Workspace Quick List",
-   "document_type": "Rental Settlement",
-   "label": "Settlements Awaiting Approval",
-   "quick_list_filter": "[[\"status\",\"in\",[\"Draft\",\"Reconciled\"]]]",
-   "idx": 1
-  }
- ],
- "modified": "2026-06-12 14:47:12.412413"
+ "quick_lists": [],
+ "modified": "2026-06-27 09:00:00.000000"
 }

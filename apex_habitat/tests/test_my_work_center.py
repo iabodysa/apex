@@ -343,20 +343,21 @@ class TestMyWorkCenter(ApexHabitatTestCase):
             "Action Inbox is a personal surface — it must have NO role restriction (universal access).",
         )
 
-    def test_my_work_quick_lists_are_scoped_doctypes(self):
-        """Owner-approved (v1.50.18): My Work shows native Quick Lists for Workflow
-        Action (role-scoped), ToDo and Notification Log — both ToDo and Notification
-        Log register get_permission_query_conditions, so a regular user sees only
-        their own rows (a System Manager sees all, which the owner accepts)."""
+    def test_my_work_has_no_quick_lists(self):
+        """2026-06-25 workspace design: no live Quick Lists on any public workspace.
+        The personal queues are reached through the Action Inbox page and the
+        Operations Alert shortcut instead."""
         import json
         path = frappe.get_app_path(
             "apex_habitat", "apex_core", "workspace", "my_work", "my_work.json"
         )
         with open(path) as f:
             ws = json.load(f)
-        dts = {q["document_type"] for q in ws.get("quick_lists", [])}
         self.assertEqual(
-            dts,
-            {"Workflow Action", "ToDo", "Notification Log"},
-            "My Work must show the three scoped Quick Lists (Workflow Action, ToDo, Notification Log).",
+            ws.get("quick_lists", []), [],
+            "My Work must carry no Quick Lists under the new design.",
+        )
+        self.assertNotIn(
+            "quick_list", ws.get("content", ""),
+            "My Work content blob must contain no quick_list blocks.",
         )

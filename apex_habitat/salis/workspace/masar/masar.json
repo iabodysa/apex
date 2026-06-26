@@ -27,14 +27,22 @@
  "is_hidden": 0,
  "sequence_id": 3.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"masChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Trip Fulfilment Over Time\", \"col\": 12}}, {\"id\": \"masHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"masQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"masQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"masQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Passenger Manifest\", \"col\": 3}}, {\"id\": \"masQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Route (Masar)\", \"col\": 3}}, {\"id\": \"masQ4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Transport Plan\", \"col\": 3}}, {\"id\": \"masQ5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Workers Transport Dashboard\", \"col\": 3}}, {\"id\": \"masHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"masKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Requests Open\", \"col\": 3}}, {\"id\": \"masKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_workers_transport Scheduled Awaiting Dispatch\", \"col\": 3}}, {\"id\": \"masKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_workers_transport Trips Dispatched Today\", \"col\": 3}}, {\"id\": \"masKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_workers_transport Passenger Manifests Today\", \"col\": 3}}, {\"id\": \"masKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Transport Fulfilled This Month\", \"col\": 3}}, {\"id\": \"masKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Inter-City Relocations This Month\", \"col\": 3}}, {\"id\": \"masKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Large Worker Moves Pending Escalation\", \"col\": 3}}, {\"id\": \"masKM7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport SLA Breaches Open\", \"col\": 3}}, {\"id\": \"masHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"masQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open Transport Requests\", \"col\": 4}}, {\"id\": \"masHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"masCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Transport Process\", \"col\": 4}}, {\"id\": \"masCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Shared Masters\", \"col\": 4}}, {\"id\": \"masCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"masCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}]",
+ "content": "[{\"id\": \"masHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"masQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Route (Masar)\", \"col\": 3}}, {\"id\": \"masQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"masQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"masQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Passenger Manifest\", \"col\": 3}}, {\"id\": \"masHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"masKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Requests Open\", \"col\": 3}}, {\"id\": \"masKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_workers_transport Scheduled Awaiting Dispatch\", \"col\": 3}}, {\"id\": \"masKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Large Worker Moves Pending Escalation\", \"col\": 3}}, {\"id\": \"masKM7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport SLA Breaches Open\", \"col\": 3}}, {\"id\": \"masHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"masCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Transport Process\", \"col\": 4}}, {\"id\": \"masCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Shared Masters\", \"col\": 4}}, {\"id\": \"masCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"masCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}]",
  "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Worker Route (Masar)",
+   "url": "/masar",
+   "color": "Green",
+   "idx": 1
+  },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Transport Request",
    "link_to": "Transport Request",
-   "idx": 1,
+   "idx": 2,
    "stats_filter": "{\"status\": [\"in\", [\"New\", \"Validated\", \"Approved\", \"Scheduled\"]]}",
    "format": "{} Open",
    "color": "Yellow"
@@ -44,37 +52,14 @@
    "type": "DocType",
    "label": "Dispatch Trip",
    "link_to": "Dispatch Trip",
-   "idx": 2
+   "idx": 3
   },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Passenger Manifest",
    "link_to": "Passenger Manifest",
-   "idx": 3
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "URL",
-   "label": "Worker Route (Masar)",
-   "url": "/masar",
-   "color": "Green",
    "idx": 4
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Report",
-   "label": "Worker Transport Plan",
-   "link_to": "Worker Transport Plan",
-   "is_query_report": 1,
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Dashboard",
-   "label": "Workers Transport Dashboard",
-   "link_to": "Salis - Workers Transport",
-   "idx": 6
   }
  ],
  "links": [
@@ -209,13 +194,7 @@
    "idx": 17
   }
  ],
- "charts": [
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Trip Fulfilment Over Time",
-   "label": "Trip Fulfilment Over Time"
-  }
- ],
+ "charts": [],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -231,49 +210,17 @@
   },
   {
    "doctype": "Workspace Number Card",
-   "number_card_name": "salis_workers_transport Trips Dispatched Today",
-   "label": "Trips Dispatched Today",
-   "idx": 3
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "salis_workers_transport Passenger Manifests Today",
-   "label": "Passenger Manifests Today",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Workers Transport Fulfilled This Month",
-   "label": "Workers Transport Fulfilled This Month",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Inter-City Relocations This Month",
-   "label": "Inter-City Relocations This Month",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Number Card",
    "number_card_name": "Large Worker Moves Pending Escalation",
    "label": "Large Worker Moves Pending Escalation",
-   "idx": 7
+   "idx": 3
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Transport SLA Breaches Open",
    "label": "Transport SLA Breaches Open",
-   "idx": 8
+   "idx": 4
   }
  ],
- "quick_lists": [
-  {
-   "doctype": "Workspace Quick List",
-   "document_type": "Transport Request",
-   "label": "Open Transport Requests",
-   "quick_list_filter": "[[\"status\",\"in\",[\"New\",\"Validated\",\"Approved\",\"Scheduled\"]]]",
-   "idx": 1
-  }
- ],
- "modified": "2026-06-13 15:08:24.104965"
+ "quick_lists": [],
+ "modified": "2026-06-27 09:00:00.000000"
 }

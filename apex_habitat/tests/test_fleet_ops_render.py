@@ -34,26 +34,16 @@ from frappe.utils import add_days, today
 # Open Theft Reports is also here; its behaviour is proven in
 # salis/doctype/vehicle_incident/test_vehicle_incident.py and re-proven below
 # through the render path for completeness.
+# Curated to the 2026-06-25 workspace design: only essential actionable cards.
 FLEET_CARDS = [
     "Open Vehicle Incidents",
     "Open Theft Reports",
-    "Active Vehicles",
     "Salis Representatives Fleet Vehicles Stopped",
-    "Vehicles Under Maintenance",
-    "Salis Active Drivers",
-    "Operating Days This Month",
     "Workshop Overstay",
-    "Median Alert Resolve Days",
 ]
 
-# Dashboard Charts on the Fleet Operations workspace (Trends block).
-FLEET_CHARTS = [
-    "Incidents by Type",
-    "Vehicle Utilisation",
-    "Operating Days Trend",
-    "Vehicle Activations",
-    "Open Alerts by Type",
-]
+# The new design carries no Dashboard Charts on public workspaces.
+FLEET_CHARTS = []
 
 FLEET_ONBOARDING = "Fleet Operations Go-Live"
 

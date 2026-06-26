@@ -10,7 +10,7 @@
  "is_hidden": 0,
  "sequence_id": 90.0,
  "parent_page": "",
- "content": "[{\"id\": \"acHdrMyWork\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>My Work</b></span>\", \"col\": 12}}, {\"id\": \"acScMyWork\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Work\", \"col\": 3}}, {\"id\": \"acHdrSettings\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Settings</b></span>\", \"col\": 12}}, {\"id\": \"acScHabitatSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"acScSalisSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Settings\", \"col\": 3}}, {\"id\": \"acScIntegrationSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Apex Integration Settings\", \"col\": 3}}, {\"id\": \"acScPortalTheme\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Portal Theme\", \"col\": 3}}, {\"id\": \"acHdrAccess\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Roles and Access</b></span>\", \"col\": 12}}, {\"id\": \"acScUser\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"User\", \"col\": 3}}, {\"id\": \"acScRole\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Role\", \"col\": 3}}, {\"id\": \"acScRoleProfile\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Role Profile\", \"col\": 3}}, {\"id\": \"acHdrTools\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Tools and Consoles</b></span>\", \"col\": 12}}, {\"id\": \"acScFuelConsole\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Approval Console\", \"col\": 3}}, {\"id\": \"acScDispatchBoard\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Dispatch Board\", \"col\": 3}}, {\"id\": \"acHdrHealth\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Admin Health</b></span>\", \"col\": 12}}, {\"id\": \"acNcPendingMine\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 3}}, {\"id\": \"acNcAlerts\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"acNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"acNcErrors\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 3}}, {\"id\": \"acHdrSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup and Master Data</b></span>\", \"col\": 12}}, {\"id\": \"acCardAccMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"acCardTaskMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety and Task Master\", \"col\": 4}}, {\"id\": \"acCardCustodyMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"acCardFacilityMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility and Utility Master\", \"col\": 4}}, {\"id\": \"acCardMaintMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Master\", \"col\": 4}}, {\"id\": \"acCardSalisMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Salis Fleet Master\", \"col\": 4}}, {\"id\": \"acCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 6}}, {\"id\": \"acCardWorkerAccess\", \"type\": \"card\", \"data\": {\"card_name\": \"Worker Access\", \"col\": 4}}]",
+ "content": "[{\"id\": \"acHdrActions\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"acScHabitatSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"acScSalisSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Settings\", \"col\": 3}}, {\"id\": \"acScIntegrationSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Apex Integration Settings\", \"col\": 3}}, {\"id\": \"acScUser\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"User\", \"col\": 3}}, {\"id\": \"acScRole\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Role\", \"col\": 3}}, {\"id\": \"acScMyWork\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Work\", \"col\": 3}}, {\"id\": \"acHdrHealth\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"acNcPendingMine\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 3}}, {\"id\": \"acNcAlerts\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"acNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"acNcErrors\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 3}}, {\"id\": \"acHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"acCardConsoles\", \"type\": \"card\", \"data\": {\"card_name\": \"Tools and Consoles\", \"col\": 4}}, {\"id\": \"acCardAccess\", \"type\": \"card\", \"data\": {\"card_name\": \"Roles and Access\", \"col\": 4}}, {\"id\": \"acCardAccMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"acCardTaskMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety and Task Master\", \"col\": 4}}, {\"id\": \"acCardCustodyMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"acCardFacilityMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility and Utility Master\", \"col\": 4}}, {\"id\": \"acCardMaintMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Master\", \"col\": 4}}, {\"id\": \"acCardSalisMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Salis Fleet Master\", \"col\": 4}}, {\"id\": \"acCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 6}}, {\"id\": \"acCardWorkerAccess\", \"type\": \"card\", \"data\": {\"card_name\": \"Worker Access\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -39,18 +39,10 @@
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
-   "label": "Salis Portal Theme",
-   "link_to": "Salis Portal Theme",
-   "color": "Blue",
-   "idx": 4
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
    "label": "User",
    "link_to": "User",
    "color": "Grey",
-   "idx": 5
+   "idx": 4
   },
   {
    "doctype": "Workspace Shortcut",
@@ -58,31 +50,7 @@
    "label": "Role",
    "link_to": "Role",
    "color": "Grey",
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Role Profile",
-   "link_to": "Role Profile",
-   "color": "Grey",
-   "idx": 7
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Page",
-   "label": "Fuel Approval Console",
-   "link_to": "fuel-approval-console",
-   "color": "Grey",
-   "idx": 8
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Page",
-   "label": "Salis Dispatch Board",
-   "link_to": "salis-dispatch-board",
-   "color": "Grey",
-   "idx": 9
+   "idx": 5
   },
   {
    "doctype": "Workspace Shortcut",
@@ -90,10 +58,54 @@
    "label": "My Work",
    "link_to": "My Work",
    "color": "Blue",
-   "idx": 10
+   "idx": 6
   }
  ],
  "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Tools and Consoles",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Approval Console",
+   "link_type": "Page",
+   "link_to": "fuel-approval-console",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Dispatch Board",
+   "link_type": "Page",
+   "link_to": "salis-dispatch-board",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Portal Theme",
+   "link_type": "DocType",
+   "link_to": "Salis Portal Theme",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Roles and Access",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Role Profile",
+   "link_type": "DocType",
+   "link_to": "Role Profile",
+   "idx": 1
+  },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
@@ -385,5 +397,5 @@
    "role": "Administrator"
   }
  ],
- "modified": "2026-06-12 14:47:12.412413"
+ "modified": "2026-06-27 09:00:00.000000"
 }

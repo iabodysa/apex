@@ -30,14 +30,30 @@
  "is_hidden": 0,
  "sequence_id": 2.0,
  "parent_page": "",
- "content": "[{\"id\": \"salisHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"salisOnb\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Salis Go-Live\", \"col\": 12}}, {\"id\": \"salisHdrTrend\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Trends</b></span>\", \"col\": 12}}, {\"id\": \"salisChart0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Vehicles by Status\", \"col\": 12}}, {\"id\": \"salHdrPortals\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Mobile Portals</b></span>\", \"col\": 12}}, {\"id\": \"salScDriver\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Portal\", \"col\": 3}}, {\"id\": \"salScMasar\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Route (Masar)\", \"col\": 3}}, {\"id\": \"salisHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salisQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"salisQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"salisQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"salisQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Issue\", \"col\": 3}}, {\"id\": \"salisHdrDash\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Division Views</b></span>\", \"col\": 12}}, {\"id\": \"salisDashWT\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Transport Plan\", \"col\": 3}}, {\"id\": \"salisDashRF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Fleet Register\", \"col\": 3}}, {\"id\": \"salisHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"salisKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"salisKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Transport Requests\", \"col\": 3}}, {\"id\": \"salisKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"salisKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Active Trips\", \"col\": 3}}, {\"id\": \"salisKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Active Drivers\", \"col\": 3}}, {\"id\": \"salisKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Vehicles In Service\", \"col\": 3}}, {\"id\": \"salHdrQ\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live Queue</b></span>\", \"col\": 12}}, {\"id\": \"salQl0\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open Transport Requests\", \"col\": 4}}, {\"id\": \"salisHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"salisCardNav_1\", \"type\": \"card\", \"data\": {\"card_name\": \"Transactions\", \"col\": 4}}, {\"id\": \"salisCardNav_2\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"salisCardNav_3\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"salisCardNav_4\", \"type\": \"card\", \"data\": {\"card_name\": \"Alerts\", \"col\": 4}}]",
+ "content": "[{\"id\": \"salisHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"salisOnb\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Salis Go-Live\", \"col\": 12}}, {\"id\": \"salisHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"salScDriver\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Portal\", \"col\": 3}}, {\"id\": \"salScMasar\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Route (Masar)\", \"col\": 3}}, {\"id\": \"salisQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"salisQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"salisHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"salisKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Transport Requests\", \"col\": 3}}, {\"id\": \"salisKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Active Trips\", \"col\": 3}}, {\"id\": \"salisKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"salisKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Vehicles\", \"col\": 3}}, {\"id\": \"salisHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"salisCardNav_1\", \"type\": \"card\", \"data\": {\"card_name\": \"Transactions\", \"col\": 4}}, {\"id\": \"salisCardNav_2\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"salisCardNav_3\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"salisCardNav_4\", \"type\": \"card\", \"data\": {\"card_name\": \"Alerts\", \"col\": 4}}]",
  "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Driver Portal",
+   "url": "/driver",
+   "color": "Green",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Worker Route (Masar)",
+   "url": "/masar",
+   "color": "Green",
+   "idx": 2
+  },
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
    "label": "Transport Request",
    "link_to": "Transport Request",
-   "idx": 1,
+   "idx": 3,
    "stats_filter": "{\"status\": [\"in\", [\"New\", \"Validated\", \"Approved\", \"Scheduled\"]]}",
    "format": "{} Open",
    "color": "Yellow"
@@ -47,53 +63,7 @@
    "type": "DocType",
    "label": "Fuel Request",
    "link_to": "Fuel Request",
-   "idx": 2
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Dispatch Trip",
-   "link_to": "Dispatch Trip",
-   "idx": 3
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "DocType",
-   "label": "Issue",
-   "link_to": "Issue",
    "idx": 4
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Report",
-   "label": "Worker Transport Plan",
-   "link_to": "Worker Transport Plan",
-   "is_query_report": 1,
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "Report",
-   "label": "Salis Fleet Register",
-   "link_to": "Salis Fleet Register",
-   "is_query_report": 1,
-   "idx": 6
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "URL",
-   "label": "Driver Portal",
-   "url": "/driver",
-   "color": "Green",
-   "idx": 7
-  },
-  {
-   "doctype": "Workspace Shortcut",
-   "type": "URL",
-   "label": "Worker Route (Masar)",
-   "url": "/masar",
-   "color": "Green",
-   "idx": 8
   }
  ],
  "links": [
@@ -133,6 +103,14 @@
    "label": "Issue",
    "link_type": "DocType",
    "link_to": "Issue",
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Vehicle",
+   "link_type": "DocType",
+   "link_to": "Salis Vehicle",
    "idx": 11
   },
   {
@@ -205,24 +183,18 @@
    "idx": 20
   }
  ],
- "charts": [
-  {
-   "doctype": "Workspace Chart",
-   "chart_name": "Vehicles by Status",
-   "label": "Vehicles by Status"
-  }
- ],
+ "charts": [],
  "number_cards": [
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Active Vehicles",
-   "label": "Active Vehicles",
-   "idx": 1
-  },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Open Transport Requests",
    "label": "Open Transport Requests",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Salis Active Trips",
+   "label": "Active Trips",
    "idx": 2
   },
   {
@@ -233,31 +205,11 @@
   },
   {
    "doctype": "Workspace Number Card",
-   "number_card_name": "Salis Active Trips",
-   "label": "Active Trips",
+   "number_card_name": "Active Vehicles",
+   "label": "Active Vehicles",
    "idx": 4
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Salis Active Drivers",
-   "label": "Active Drivers",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "number_card_name": "Salis Vehicles In Service",
-   "label": "Vehicles In Service",
-   "idx": 6
   }
  ],
- "quick_lists": [
-  {
-   "doctype": "Workspace Quick List",
-   "document_type": "Transport Request",
-   "label": "Open Transport Requests",
-   "quick_list_filter": "[[\"status\",\"in\",[\"New\",\"Validated\",\"Approved\",\"Scheduled\"]]]",
-   "idx": 1
-  }
- ],
- "modified": "2026-06-15 16:00:00.000000"
+ "quick_lists": [],
+ "modified": "2026-06-27 09:00:00.000000"
 }
