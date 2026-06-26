@@ -34,6 +34,10 @@ const messages = {
       send: "Send",
       cancel: "Cancel",
     },
+    update: {
+      available: "A new version is available.",
+      reload: "Reload",
+    },
     lang: {
       label: "Language",
       en: "EN",
@@ -148,6 +152,7 @@ const messages = {
       past: "Past trips",
       reportIssue: "Report a transport issue",
       requestNew: "Request transport",
+      openRoute: "Open route in Maps",
       atPickup: "I'm at the pickup",
       atPickupSending: "Confirming…",
       atPickupDone: "Boarding confirmed",
@@ -285,6 +290,10 @@ const messages = {
       send: "إرسال",
       cancel: "إلغاء",
     },
+    update: {
+      available: "يتوفّر إصدار جديد.",
+      reload: "إعادة التحميل",
+    },
     lang: {
       label: "اللغة",
       en: "EN",
@@ -399,6 +408,7 @@ const messages = {
       past: "رحلات سابقة",
       reportIssue: "الإبلاغ عن مشكلة في النقل",
       requestNew: "طلب نقل",
+      openRoute: "فتح المسار في الخرائط",
       atPickup: "أنا عند نقطة الاستلام",
       atPickupSending: "جارٍ التأكيد…",
       atPickupDone: "تم تأكيد الركوب",
@@ -536,6 +546,10 @@ const messages = {
       send: "بھیجیں",
       cancel: "منسوخ",
     },
+    update: {
+      available: "ایک نیا ورژن دستیاب ہے۔",
+      reload: "دوبارہ لوڈ کریں",
+    },
     lang: { label: "زبان", en: "EN", ar: "ع", english: "English", arabic: "العربية" },
     greeting: { morning: "صبح بخیر", afternoon: "شام بخیر", evening: "شام بخیر" },
     nav: {
@@ -640,6 +654,7 @@ const messages = {
       past: "گزشتہ سفر",
       reportIssue: "نقل و حمل کا مسئلہ رپورٹ کریں",
       requestNew: "نقل و حمل کی درخواست",
+      openRoute: "نقشے میں راستہ کھولیں",
       atPickup: "میں پک اپ پر ہوں",
       atPickupSending: "تصدیق ہو رہی ہے…",
       atPickupDone: "سوار ہونے کی تصدیق",
@@ -775,6 +790,10 @@ const messages = {
       send: "भेजें",
       cancel: "रद्द करें",
     },
+    update: {
+      available: "एक नया संस्करण उपलब्ध है।",
+      reload: "पुनः लोड करें",
+    },
     lang: { label: "भाषा", en: "EN", ar: "ع", english: "English", arabic: "العربية" },
     greeting: { morning: "सुप्रभात", afternoon: "नमस्कार", evening: "शुभ संध्या" },
     nav: {
@@ -879,6 +898,7 @@ const messages = {
       past: "पिछली यात्राएँ",
       reportIssue: "परिवहन समस्या रिपोर्ट करें",
       requestNew: "परिवहन अनुरोध",
+      openRoute: "मैप में रूट खोलें",
       atPickup: "मैं पिकअप पर हूँ",
       atPickupSending: "पुष्टि हो रही है…",
       atPickupDone: "सवारी की पुष्टि",
@@ -1014,6 +1034,10 @@ const messages = {
       send: "পাঠান",
       cancel: "বাতিল",
     },
+    update: {
+      available: "একটি নতুন সংস্করণ উপলব্ধ।",
+      reload: "পুনরায় লোড করুন",
+    },
     lang: { label: "ভাষা", en: "EN", ar: "ع", english: "English", arabic: "العربية" },
     greeting: { morning: "সুপ্রভাত", afternoon: "শুভ অপরাহ্ন", evening: "শুভ সন্ধ্যা" },
     nav: {
@@ -1118,6 +1142,7 @@ const messages = {
       past: "পূর্ববর্তী যাত্রা",
       reportIssue: "পরিবহন সমস্যা জানান",
       requestNew: "পরিবহনের অনুরোধ",
+      openRoute: "ম্যাপে রুট খুলুন",
       atPickup: "আমি পিকআপে আছি",
       atPickupSending: "নিশ্চিত করা হচ্ছে…",
       atPickupDone: "ওঠা নিশ্চিত",

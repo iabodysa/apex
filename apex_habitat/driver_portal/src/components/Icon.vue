@@ -104,6 +104,12 @@
     <template v-else-if="name === 'x'">
       <path d="M18 6 6 18" /><path d="m6 6 12 12" />
     </template>
+    <template v-else-if="name === 'refresh'">
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+      <path d="M8 16H3v5" />
+    </template>
     <template v-else-if="name === 'qr'">
       <rect width="5" height="5" x="3" y="3" rx="1" />
       <rect width="5" height="5" x="16" y="3" rx="1" />

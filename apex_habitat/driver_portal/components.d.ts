@@ -16,6 +16,7 @@ declare module 'vue' {
     InstallHint: typeof import('./src/components/InstallHint.vue')['default']
     LangToggle: typeof import('./src/components/LangToggle.vue')['default']
     LoadingState: typeof import('./src/components/LoadingState.vue')['default']
+    ManualBoarding: typeof import('./src/components/ManualBoarding.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Skeleton: typeof import('./src/components/Skeleton.vue')['default']

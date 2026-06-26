@@ -4,6 +4,10 @@ from frappe.tests.utils import FrappeTestCase
 from apex_habitat.salis.api import driver_portal
 from apex_habitat.salis.api.driver_portal import _resolve_driver
 
+# NOTE: test_masar_worker_movement imports _ensure_test_driver from THIS module, so a
+# top-level `from ... import` here would be circular. The worker-trip builder is therefore
+# imported lazily inside the helper that needs it (below).
+
 
 def _ensure_test_driver():
 	"""Create a User+Employee+Salis Driver chain for portal tests; return driver name.
@@ -303,3 +307,205 @@ class TestPortalCheckInNoPerpetualAlert(FrappeTestCase):
 			"A driver who has checked in via the portal must raise no Supervisor "
 			"Delay alert.",
 		)
+
+
+class _DriverTripBuilder:
+	"""Builds a worker trip bound to the test driver via the proven Masar mixin,
+	imported lazily to avoid the test_masar_worker_movement <-> test_driver_portal
+	import cycle. Mix into a FrappeTestCase that sets ``self.drv``."""
+
+	def _trip(self, workers, route):
+		from apex_habitat.tests.test_masar_worker_movement import _WorkerTripMixin
+
+		# _worker_trip uses self.addCleanup + self._purge; bind the mixin's _purge so
+		# the cleanup it registers resolves on this (non-mixin) test case.
+		self._purge = _WorkerTripMixin._purge
+		_tr, _rp, dt = _WorkerTripMixin._worker_trip(self, self.drv, self.project, self.building, workers, route)
+		# FrappeTestCase rolls back only at class end, so writes accumulate across the
+		# methods in a class. _purge drops the trip/route/request but NOT the Trip Start
+		# Log + Boarding Scan Log a board creates; clear those too so a reused dispatch-
+		# trip name (the naming counter is not durably advanced inside the held class
+		# transaction) can never inherit a prior method's open log / aboard worker.
+		self.addCleanup(lambda name=dt.name: self._purge_trip_boarding(name))
+		return dt
+
+	@staticmethod
+	def _purge_trip_boarding(dispatch_trip):
+		frappe.set_user("Administrator")
+		for log in frappe.get_all("Trip Start Log", filters={"dispatch_trip": dispatch_trip}, pluck="name"):
+			frappe.delete_doc("Trip Start Log", log, ignore_permissions=True, force=True)
+		for scan in frappe.get_all("Boarding Scan Log", filters={"dispatch_trip": dispatch_trip}, pluck="name"):
+			frappe.delete_doc("Boarding Scan Log", scan, ignore_permissions=True, force=True)
+
+
+class TestManualBoarding(_DriverTripBuilder, FrappeTestCase):
+	"""T-603: the no-scan fallback. A driver marks manifest workers aboard via
+	manual_board_workers; the write must append a Trip Boarding Event (method
+	Manual) and a Boarding Scan Log row, exactly as a QR scan does — and stay
+	idempotent and manifest-scoped."""
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		frappe.set_user("Administrator")
+		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
+		from apex_habitat.tests.test_masar_worker_movement import _building, _employee, _project
+
+		cls.drv = _ensure_test_driver()
+		cls.user = frappe.db.get_value(
+			"Employee", frappe.db.get_value("Salis Driver", cls.drv, "employee"), "user_id"
+		)
+		cls.project = _project("Manual Board Project")
+		cls.building = _building("Manual Board Building")
+		cls.w1 = _employee("Manual Board One")
+		cls.w2 = _employee("Manual Board Two")
+		cls.off = _employee("Manual Board Off Manifest")
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+
+	def _trip(self, route):
+		return super()._trip([self.w1, self.w2], route)
+
+	def test_manual_board_creates_boarding_and_audit_rows(self):
+		"""The core goal: a manual board appends a Manual Trip Boarding Event and a
+		Manual Boarding Scan Log row."""
+		dt = self._trip("Manual Route A")
+		frappe.set_user(self.user)
+		res = driver_portal.manual_board_workers(dt.name, frappe.as_json([self.w1]))
+		frappe.set_user("Administrator")
+
+		self.assertEqual(res["boarded"], [self.w1])
+		log = frappe.get_doc("Trip Start Log", res["trip_start_log"])
+		self.assertEqual(log.boarded_count, 1)
+		row = log.boarding_events[0]
+		self.assertEqual(row.worker, self.w1)
+		self.assertEqual(row.method, "Manual")
+		# A Manual Boarding Scan Log audit row exists for this worker.
+		scan = frappe.get_all(
+			"Boarding Scan Log",
+			filters={"dispatch_trip": dt.name, "worker": self.w1},
+			fields=["result", "method", "boarding_event_created"],
+		)
+		self.assertEqual(len(scan), 1)
+		self.assertEqual(scan[0]["result"], "Valid")
+		self.assertEqual(scan[0]["method"], "Manual")
+		self.assertEqual(scan[0]["boarding_event_created"], 1)
+
+	def test_manual_board_is_idempotent(self):
+		dt = self._trip("Manual Route B")
+		frappe.set_user(self.user)
+		first = driver_portal.manual_board_workers(dt.name, frappe.as_json([self.w1]))
+		second = driver_portal.manual_board_workers(dt.name, frappe.as_json([self.w1]))
+		frappe.set_user("Administrator")
+		self.assertEqual(first["boarded"], [self.w1])
+		self.assertEqual(second["boarded"], [])  # already aboard -> no second row
+		self.assertEqual(second["skipped"][0]["result"], "Duplicate")
+		log = frappe.get_doc("Trip Start Log", first["trip_start_log"])
+		self.assertEqual(log.boarded_count, 1)
+
+	def test_manual_board_rejects_off_manifest_worker(self):
+		dt = self._trip("Manual Route C")
+		frappe.set_user(self.user)
+		res = driver_portal.manual_board_workers(dt.name, frappe.as_json([self.off]))
+		frappe.set_user("Administrator")
+		self.assertEqual(res["boarded"], [])
+		self.assertEqual(res["skipped"][0]["result"], "Wrong Trip")
+
+	def test_manual_boarding_sheet_marks_aboard(self):
+		dt = self._trip("Manual Route D")
+		frappe.set_user(self.user)
+		driver_portal.manual_board_workers(dt.name, frappe.as_json([self.w1]))
+		sheet = driver_portal.manual_boarding_sheet(dt.name)
+		frappe.set_user("Administrator")
+		by_emp = {w["employee"]: w for w in sheet["workers"]}
+		self.assertTrue(by_emp[self.w1]["boarded"])
+		self.assertFalse(by_emp[self.w2]["boarded"])
+		self.assertEqual(sheet["boarded_count"], 1)
+
+
+class TestStopProgress(_DriverTripBuilder, FrappeTestCase):
+	"""T-605: per-stop checkpoints persist on the trip's Trip Start Log and survive
+	a reload (re-read)."""
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		frappe.set_user("Administrator")
+		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
+		from apex_habitat.tests.test_masar_worker_movement import _building, _employee, _project
+
+		cls.drv = _ensure_test_driver()
+		cls.user = frappe.db.get_value(
+			"Employee", frappe.db.get_value("Salis Driver", cls.drv, "employee"), "user_id"
+		)
+		cls.project = _project("Stop Progress Project")
+		cls.building = _building("Stop Progress Building")
+		cls.w1 = _employee("Stop Progress Worker")
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+
+	def tearDown(self):
+		frappe.set_user("Administrator")
+
+	def _trip(self, route):
+		return super()._trip([self.w1], route)
+
+	def test_mark_stop_requires_started_trip(self):
+		dt = self._trip("Stop Route A")
+		# my_trip_route is identity-scoped (driver resolved from the session), so it must
+		# run as the driver — Administrator owns no trip and would get "Trip not found".
+		frappe.set_user(self.user)
+		route = driver_portal.my_trip_route(dt.name)
+		stop = next(s for s in route["stops"] if s.get("route_stop"))
+		# No Trip Start Log yet -> marking a stop must be refused.
+		with self.assertRaises(frappe.ValidationError):
+			driver_portal.mark_stop_progress(dt.name, stop["route_stop"], done=1)
+		frappe.set_user("Administrator")
+
+	def test_stop_progress_persists_and_survives_reload(self):
+		dt = self._trip("Stop Route B")
+		frappe.set_user(self.user)
+		driver_portal.start_my_trip(dt.name)  # opens the Trip Start Log
+		route = driver_portal.my_trip_route(dt.name)
+		self.assertTrue(route["started"])
+		stop = next(s for s in route["stops"] if s.get("route_stop"))
+		self.assertFalse(stop["done"])
+
+		res = driver_portal.mark_stop_progress(
+			dt.name, stop["route_stop"], done=1, sequence=stop.get("sequence"),
+			stop_name=stop.get("stop_name"),
+		)
+		self.assertTrue(res["stop_progress"][stop["route_stop"]]["done"])
+
+		# Re-read (reload): the done-state must be reflected from the server.
+		reloaded = driver_portal.my_trip_route(dt.name)
+		frappe.set_user("Administrator")
+		marked = next(s for s in reloaded["stops"] if s["route_stop"] == stop["route_stop"])
+		self.assertTrue(marked["done"], "Stop done-state must survive a reload.")
+
+		# It persisted as a Trip Stop Progress row on the open Trip Start Log.
+		log_name = frappe.db.get_value(
+			"Trip Start Log", {"dispatch_trip": dt.name, "docstatus": 0}, "name"
+		)
+		rows = frappe.get_all(
+			"Trip Stop Progress",
+			filters={"parent": log_name, "parenttype": "Trip Start Log", "done": 1},
+			pluck="route_stop",
+		)
+		self.assertIn(stop["route_stop"], rows)
+
+	def test_stop_can_be_unmarked(self):
+		dt = self._trip("Stop Route C")
+		frappe.set_user(self.user)
+		driver_portal.start_my_trip(dt.name)
+		route = driver_portal.my_trip_route(dt.name)
+		stop = next(s for s in route["stops"] if s.get("route_stop"))
+		driver_portal.mark_stop_progress(dt.name, stop["route_stop"], done=1)
+		res = driver_portal.mark_stop_progress(dt.name, stop["route_stop"], done=0)
+		frappe.set_user("Administrator")
+		self.assertFalse(res["stop_progress"].get(stop["route_stop"], {}).get("done"))

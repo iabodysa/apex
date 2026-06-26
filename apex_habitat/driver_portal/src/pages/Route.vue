@@ -32,21 +32,41 @@
 
           <!-- Trip with a route plan: render its ordered stops (the trip road) -->
           <div v-if="tripData.has_route_plan && tripData.stops && tripData.stops.length">
-            <div class="field-label">{{ t("route.stops") }}</div>
+            <div class="flex items-center justify-between">
+              <div class="field-label">{{ t("route.stops") }}</div>
+              <span v-if="tripData.started" class="text-xs text-muted">
+                {{ t("route.stopsDone", { n: doneCount, m: tripData.stops.length }) }}
+              </span>
+            </div>
             <ol class="space-y-2">
               <li
                 v-for="(stop, i) in tripData.stops"
-                :key="i"
+                :key="stop.route_stop || i"
                 class="flex items-start gap-3"
+                :class="{ 'opacity-60': stop.done }"
               >
+                <!-- A started trip lets the driver tick each stop done; the box
+                     persists server-side (mark_stop_progress) and reflects on reload. -->
+                <button
+                  v-if="tripData.started && stop.route_stop"
+                  class="stop-check shrink-0"
+                  :class="{ 'is-done': stop.done }"
+                  :disabled="stopBusy === stop.route_stop"
+                  :aria-pressed="stop.done ? 'true' : 'false'"
+                  :aria-label="stop.done ? t('route.stopUndo') : t('route.stopDone')"
+                  @click="toggleStop(stop)"
+                >
+                  <Icon :name="stop.done ? 'badge' : 'route'" :size="14" />
+                </button>
                 <span
+                  v-else
                   class="avatar h-6 w-6 text-xs shrink-0"
                   style="background: var(--c-primary); color: var(--c-primary-ink); border-radius: var(--radius-sm)"
                 >
                   {{ stop.sequence || i + 1 }}
                 </span>
                 <div class="min-w-0">
-                  <div class="font-semibold leading-tight">
+                  <div class="font-semibold leading-tight" :class="{ 'line-through': stop.done }">
                     {{ stop.stop_name || t("route.stop") }}
                     <span v-if="stop.planned_time" class="text-muted font-normal">· <bdi>{{ stop.planned_time }}</bdi></span>
                   </div>
@@ -240,6 +260,7 @@ import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
 import { cacheGet, cacheSet } from "../cache";
+import { pushToast } from "../toast";
 
 const { t } = useI18n();
 
@@ -277,6 +298,47 @@ const routeData = computed(() => route.data || staleRoute.value?.data || null);
 const tripData = computed(() => tripRoute.data || staleTrip.value?.data || null);
 const routeStale = computed(() => !route.data && !!staleRoute.value);
 const tripStale = computed(() => !tripRoute.data && !!staleTrip.value);
+
+// --- Per-stop progress: a started trip lets the driver tick each stop done. The
+// state is persisted on the trip's Trip Start Log and re-rendered from the server on
+// reload; `stopBusy` holds the in-flight route_stop so its box disables (single tap).
+const doneCount = computed(
+  () => (tripData.value?.stops || []).filter((s) => s.done).length,
+);
+const stopBusy = ref(null);
+
+const stopProgress = createResource({
+  url: "apex_habitat.salis.api.driver_portal.mark_stop_progress",
+  onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
+});
+
+async function toggleStop(stop) {
+  if (!stop.route_stop || stopBusy.value) return;
+  stopBusy.value = stop.route_stop;
+  const next = !stop.done;
+  // Optimistic flip so the tick feels instant; reconciled from the server response.
+  stop.done = next;
+  try {
+    const res = await stopProgress.submit({
+      dispatch_trip: props.trip,
+      route_stop: stop.route_stop,
+      done: next ? 1 : 0,
+      sequence: stop.sequence,
+      stop_name: stop.stop_name,
+    });
+    // Reconcile every stop from the authoritative server map (keyed on route_stop).
+    const map = res?.stop_progress || {};
+    for (const s of tripData.value?.stops || []) {
+      const st = map[s.route_stop];
+      s.done = !!(st && st.done);
+      s.done_at = st ? st.done_at : null;
+    }
+  } catch (e) {
+    stop.done = !next; // revert the optimistic flip on failure
+  } finally {
+    stopBusy.value = null;
+  }
+}
 </script>
 
 <style scoped>
@@ -290,5 +352,24 @@ const tripStale = computed(() => !tripRoute.data && !!staleTrip.value);
   font-weight: 600;
   background: var(--c-warning-bg, #fef3c7);
   color: var(--c-warning, #92400e);
+}
+.stop-check {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm, 8px);
+  border: 2px solid var(--c-primary, #2563eb);
+  background: transparent;
+  color: var(--c-primary, #2563eb);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.stop-check.is-done {
+  background: var(--c-success, #00844e);
+  border-color: var(--c-success, #00844e);
+  color: #fff;
+}
+.stop-check:disabled {
+  opacity: 0.6;
 }
 </style>

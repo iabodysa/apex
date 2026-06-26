@@ -1,0 +1,68 @@
+// PWA new-build detection for the Salis Driver SPA. The SW (registered by
+// www/driver.html at root scope) installs a new build as a WAITING worker (no
+// auto-skipWaiting); we flip `updateReady` so the shell shows a reload banner,
+// and `applyUpdate()` tells the waiting worker to take over and reloads.
+
+import { ref } from "vue";
+
+export const updateReady = ref(false);
+
+let waitingWorker = null;
+let reloading = false;
+
+// Re-check for a new build hourly and whenever the tab refocuses, so a deploy is
+// surfaced without waiting for a manual reload.
+const UPDATE_POLL_MS = 60 * 60 * 1000;
+
+function trackInstalling(reg, worker) {
+  if (!worker) return;
+  worker.addEventListener("statechange", () => {
+    // A worker reaching "installed" while one already controls the page means a
+    // NEW build is ready (the first-ever install has no controller — not an
+    // update). reg.waiting is the worker to activate on reload.
+    if (worker.state === "installed" && navigator.serviceWorker.controller) {
+      waitingWorker = reg.waiting || worker;
+      updateReady.value = true;
+    }
+  });
+}
+
+export function initPwaUpdates() {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+
+  navigator.serviceWorker.ready
+    .then((reg) => {
+      // A worker may already be waiting (installed before this tab loaded).
+      if (reg.waiting && navigator.serviceWorker.controller) {
+        waitingWorker = reg.waiting;
+        updateReady.value = true;
+      }
+      reg.addEventListener("updatefound", () => trackInstalling(reg, reg.installing));
+
+      const poll = () => reg.update().catch(() => {});
+      setInterval(poll, UPDATE_POLL_MS);
+      window.addEventListener("focus", poll);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") poll();
+      });
+    })
+    .catch(() => {});
+
+  // When the new worker takes control (after SKIP_WAITING), reload once so the
+  // page is served by the new build. Guarded so it fires a single time.
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloading) return;
+    reloading = true;
+    window.location.reload();
+  });
+}
+
+export function applyUpdate() {
+  if (!waitingWorker) {
+    // No tracked waiting worker (e.g. it activated already) — a reload still
+    // lands the latest build under the network-first shell.
+    window.location.reload();
+    return;
+  }
+  waitingWorker.postMessage({ type: "SKIP_WAITING" });
+}

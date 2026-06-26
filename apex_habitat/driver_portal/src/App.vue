@@ -1,5 +1,13 @@
 <template>
   <div class="app-shell" :dir="dir">
+    <!-- New build available: a new service worker is installed and waiting. Tap
+         reload to activate it; controllerchange then reloads into the new build. -->
+    <div v-if="updateReady" class="update-banner">
+      <Icon name="refresh" :size="14" class="shrink-0" />
+      <span>{{ t("update.available") }}</span>
+      <button class="update-reload" @click="applyUpdate">{{ t("update.reload") }}</button>
+    </div>
+
     <!-- Loading -->
     <div v-if="ctx.loading" class="flex-1 grid place-items-center p-8">
       <div class="text-center">
@@ -123,8 +131,12 @@ import InstallHint from "./components/InstallHint.vue";
 import { useI18n } from "./i18n";
 import { clearToasts } from "./toast";
 import { online } from "./cache";
+import { updateReady, applyUpdate, initPwaUpdates } from "./pwa-updates";
 
 const { t, dir } = useI18n();
+
+// Watch the registered service worker for a new build and surface the reload banner.
+initPwaUpdates();
 
 // Clear any transient toast when the route changes so a success message never
 // lingers onto the next screen.
@@ -216,5 +228,22 @@ const unlinkedCtx = computed(() => {
   font-weight: 600;
   background: var(--c-warning-bg, #fef3c7);
   color: var(--c-warning, #92400e);
+}
+.update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--c-accent, #00844e);
+  color: #fff;
+}
+.update-reload {
+  font-weight: 700;
+  text-decoration: underline;
+  padding-inline: 6px;
+  color: #fff;
 }
 </style>

@@ -22,6 +22,8 @@
   "boarded_count",
   "sec_boarding",
   "boarding_events",
+  "sec_stops",
+  "stop_progress",
   "sec_system",
   "naming_series",
   "amended_from"
@@ -162,6 +164,20 @@
    "options": "Trip Boarding Event"
   },
   {
+   "collapsible": 1,
+   "fieldname": "sec_stops",
+   "fieldtype": "Section Break",
+   "label": "Stop Progress"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Per-stop completion the driver marks as the trip runs; persisted so it survives a reload.",
+   "fieldname": "stop_progress",
+   "fieldtype": "Table",
+   "label": "Stop Progress",
+   "options": "Trip Stop Progress"
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -174,7 +190,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-02 10:00:00.000000",
+ "modified": "2026-06-26 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Trip Start Log",

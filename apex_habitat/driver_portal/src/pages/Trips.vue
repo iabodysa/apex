@@ -100,6 +100,15 @@
           >
             <Icon name="qr" :size="16" /> {{ t("trips.scanBoarding") }}
           </button>
+          <!-- Manual fallback when a pass can't be scanned: tick the manifest aboard. -->
+          <button
+            v-if="trip.expected_count"
+            class="btn btn-outline"
+            style="width: auto; padding-inline: 16px"
+            @click="openManual(trip)"
+          >
+            <Icon name="user" :size="16" /> {{ t("trips.manualBoarding") }}
+          </button>
           <button class="btn btn-dark" style="width: auto; padding-inline: 16px" :disabled="busy === trip.name" @click="complete(trip)">
             {{ t("trips.complete") }}
           </button>
@@ -112,6 +121,8 @@
 
     <!-- QR boarding scanner (mounts only while open), scoped to the tapped trip. -->
     <BoardingScanner v-if="scanTrip" @close="scanTrip = null" @boarded="onBoarded" />
+    <!-- Manual-boarding fallback sheet, scoped to the tapped trip. -->
+    <ManualBoarding v-if="manualTrip" :trip="manualTrip.name" @close="manualTrip = null" @boarded="onBoarded" />
   </div>
 </template>
 
@@ -123,6 +134,7 @@ import Skeleton from "../components/Skeleton.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import BoardingScanner from "../components/BoardingScanner.vue";
+import ManualBoarding from "../components/ManualBoarding.vue";
 import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
 
@@ -135,6 +147,11 @@ const tab = ref("today");
 const scanTrip = ref(null);
 function openScanner(trip) {
   scanTrip.value = trip;
+}
+// The trip whose manual-boarding sheet is open (null = closed).
+const manualTrip = ref(null);
+function openManual(trip) {
+  manualTrip.value = trip;
 }
 function onBoarded() {
   today.reload();

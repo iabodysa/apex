@@ -93,8 +93,22 @@
           </ol>
         </div>
 
+        <!-- Full-route deep link: opens Google Maps with every ordered stop chained
+             as waypoints (the same route the driver navigates). Shown only when the
+             backend resolved two-plus navigable stops into a directions URL. -->
+        <a
+          v-if="trip.maps_route_url"
+          :href="trip.maps_route_url"
+          target="_blank"
+          rel="noopener"
+          class="btn btn-outline"
+          style="text-decoration: none"
+        >
+          <Icon name="route" :size="18" class="rtl-flip" /> {{ t("transport.openRoute") }}
+        </a>
+
         <!-- No planned route yet: an explicit state so the trip card is never a bare/inert card. -->
-        <div v-else class="text-sm text-muted">{{ t("transport.noRoutePlanned") }}</div>
+        <div v-else-if="!trip.stops || !trip.stops.length" class="text-sm text-muted">{{ t("transport.noRoutePlanned") }}</div>
 
         <!-- Boarding pass: the worker shows this signed QR to the driver to board.
              The same signed token the driver scanner validates; rendered only for

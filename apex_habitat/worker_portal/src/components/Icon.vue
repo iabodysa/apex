@@ -125,6 +125,10 @@
     <template v-else-if="name === 'check'">
       <path d="M20 6 9 17l-5-5" />
     </template>
+    <template v-else-if="name === 'refresh'">
+      <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
+      <path d="M21 3v5h-5" />
+    </template>
     <template v-else-if="name === 'image'">
       <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
       <circle cx="9" cy="9" r="2" />

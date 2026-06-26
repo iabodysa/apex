@@ -12,6 +12,9 @@ nothing here writes — it is read-only and feeds the future Phase 1b worker-vie
 UI inside the existing /driver portal. No GL, no side-effects.
 """
 
+import re
+from urllib.parse import quote
+
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
@@ -154,6 +157,51 @@ def _ordered_stops(route_plan):
             }
         )
     return stops
+
+
+def _stop_waypoint(stop):
+    """A Google-Maps-directions waypoint string for one ordered stop, or None.
+
+    Prefers a ``lat,lng`` pair parsed from the stop's building ``google_maps_url``
+    (the most precise destination), then a free-form ``q=`` query inside that URL,
+    then the building name + city as a place query, then the stop's own location
+    text. Returns None when the stop carries nothing navigable, so it is skipped
+    rather than breaking the chain. Mirrors the driver-portal twin so the worker
+    and driver open the identical multi-stop route."""
+    pickup = stop.get("pickup") or {}
+    url = pickup.get("google_maps_url") or ""
+    m = re.search(r"[@?&=/](-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)", url)
+    if m:
+        return f"{m.group(1)},{m.group(2)}"
+    m = re.search(r"[?&]q=([^&]+)", url)
+    if m:
+        return m.group(1)
+    label = ", ".join(p for p in (pickup.get("building_name"), pickup.get("city")) if p)
+    if label:
+        return quote(label)
+    if stop.get("location"):
+        return quote(str(stop["location"]))
+    return None
+
+
+def _full_route_maps_url(stops):
+    """A single Google Maps directions URL chaining every ordered stop as
+    waypoints, or None when fewer than two stops are navigable.
+
+    The last navigable stop is the ``destination``; the rest become ordered
+    ``waypoints`` (Google caps these, so the chain is bounded at the first nine
+    intermediate points — still the whole short housing-pickup route in practice).
+    Takes the already-resolved ``_ordered_stops`` list (the exact sequence the
+    Transport screen renders), so the worker's deep-link matches the driver's."""
+    points = [wp for s in stops if (wp := _stop_waypoint(s))]
+    if len(points) < 2:
+        return None
+    destination = points[-1]
+    waypoints = points[:-1][:9]
+    url = "https://www.google.com/maps/dir/?api=1&destination=" + destination
+    if waypoints:
+        url += "&waypoints=" + "|".join(waypoints)
+    return url
 
 
 @frappe.whitelist()
@@ -718,6 +766,7 @@ def get_worker_transport(token=None):
             frappe.utils.cstr(req["pickup_datetime"]) if req.get("pickup_datetime") else None
         )
         is_upcoming = _is_upcoming_pickup(req.get("pickup_datetime"), now_dt)
+        stops = _ordered_stops(req.get("route_plan"))
         trip = {
             "transport_request": req["name"],
             "request_type": req.get("request_type"),
@@ -726,7 +775,9 @@ def get_worker_transport(token=None):
             "pickup_datetime": pickup_datetime,
             "depart_time": depart_time,
             "is_upcoming": is_upcoming,
-            "stops": _ordered_stops(req.get("route_plan")),
+            "stops": stops,
+            # One-tap full-route navigation (all stops chained as Maps waypoints).
+            "maps_route_url": _full_route_maps_url(stops),
             "vehicle": vehicle,
             "driver": driver,
         }

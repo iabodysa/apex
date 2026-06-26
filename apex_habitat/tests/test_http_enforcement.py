@@ -165,6 +165,23 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "Log. Token/identity-resolved writer.",
     ),
     (
+        "salis/api/driver_portal.py",
+        "manual_board_workers",
+        "Driver portal. The Salis Driver is resolved from the session server-side "
+        "and the trip is honoured only when it belongs to that driver "
+        "(boarding._resolve_trip raises PermissionError otherwise); only workers on "
+        "the trip's own manifest are boarded and every attempt is logged to Boarding "
+        "Scan Log. Token/identity-resolved writer.",
+    ),
+    (
+        "salis/api/driver_portal.py",
+        "mark_stop_progress",
+        "Driver portal. The Salis Driver is resolved from the session server-side "
+        "and the trip is honoured only when it belongs to that driver "
+        "(_resolve_my_trip raises otherwise); the Trip Stop Progress row is written "
+        "on the caller's own open Trip Start Log. Token/identity-resolved writer.",
+    ),
+    (
         "salis/doctype/rental_settlement/rental_settlement.py",
         "create_payment_request",
         "Doc-bound whitelisted method (def create_payment_request(self)). Frappe "

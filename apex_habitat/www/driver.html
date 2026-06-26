@@ -36,5 +36,21 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/assets/apex_habitat/driver_portal/assets/index.js"></script>
+    <script>
+      // Register the Salis Driver PWA service worker. The worker is served from
+      // the ROOT (/driver-sw.min.js) so its scope can cover /driver — a service
+      // worker only controls URLs at or under its own path. It precaches the app
+      // shell (HTML + built bundle) and network-firsts the driver data API, so an
+      // offline reload still boots the SPA; a new build surfaces a reload banner.
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("/driver-sw.min.js", { scope: "/driver" })
+            .catch(function (err) {
+              console.warn("Driver SW registration failed", err);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

@@ -1162,6 +1162,9 @@ def my_trip_route(dispatch_trip):
 
     route_plan = trip.get("route_plan")
     stops = masar._ordered_stops(route_plan)  # read-only reuse; masar unedited
+    # Stamp each stop with its source Route Stop row name (stable key) + persisted
+    # done-state, so the SPA can mark stops and have it reflect on reload.
+    _attach_stop_progress(stops, route_plan, trip["name"], driver)
 
     # Registered worker manifest for this trip, each with a phone for a one-tap call.
     workers = masar._registered_workers(trip.get("transport_request"))  # read-only reuse
@@ -1184,6 +1187,13 @@ def my_trip_route(dispatch_trip):
         "return_time": masar._fmt_time(trip.get("return_time")),
         "status": trip.get("status"),
         "has_route_plan": bool(route_plan),
+        # Started gates the per-stop checkpoints — they persist on the open Trip Start Log.
+        "started": bool(
+            frappe.db.exists(
+                "Trip Start Log",
+                {"dispatch_trip": trip["name"], "driver": driver, "docstatus": 0},
+            )
+        ),
         "stops": stops,
         "workers": workers,
         "expected_count": len(workers),
@@ -1487,6 +1497,277 @@ def complete_my_trip(dispatch_trip):
 	doc.flags.ignore_permissions = True  # audit-ok — driver resolved from session identity
 	doc.save() if not doc.is_new() else doc.insert()
 	return _trip_log_state(driver, dispatch_trip)
+
+
+def _manifest_for_board(transport_request):
+	"""Manifest workers for a trip, each as ``{employee, employee_name, boarded}``
+	for the manual-boarding checklist. ``boarded`` is filled by the caller against the
+	trip's Trip Start Log so the sheet shows who is already aboard. Read-only."""
+	rows = frappe.get_all(
+		"Transport Request Worker",
+		filters={"parent": transport_request, "parenttype": "Transport Request"},
+		fields=["employee", "pickup_point"],
+		order_by="idx asc",
+	)
+	out = []
+	for r in rows:
+		if not r.get("employee"):
+			continue
+		out.append(
+			{
+				"employee": r["employee"],
+				"employee_name": frappe.db.get_value("Employee", r["employee"], "employee_name"),
+				"pickup_point": r.get("pickup_point"),
+				"boarded": False,
+			}
+		)
+	return out
+
+
+@frappe.whitelist()
+def manual_boarding_sheet(dispatch_trip):
+	"""The manual-boarding checklist for the driver's own trip (read).
+
+	The fallback when a pass can't be scanned: returns the trip's manifest workers
+	with an ``boarded`` flag (already aboard via any prior scan/manual board), so the
+	SPA can render a tick-list. Identity-scoped — the driver is resolved from the
+	session and the trip honoured only when it belongs to that driver (the same
+	guard the boarding writes use). Read-only, no commit."""
+	_require_enabled()
+	from apex_habitat.salis.api import boarding
+
+	_resolve_driver()  # gate: caller must be a linked driver
+	trip = boarding._resolve_trip(dispatch_trip)  # read-only reuse; enforces own-trip (else 403)
+
+	workers = _manifest_for_board(trip.get("transport_request"))
+	# Mark who is already aboard from the trip's open Trip Start Log (registered rows).
+	log_name = frappe.db.get_value(
+		"Trip Start Log", {"dispatch_trip": dispatch_trip, "docstatus": 0}, "name"
+	)
+	if log_name:
+		boarded = set(
+			frappe.get_all(
+				"Trip Boarding Event",
+				filters={"parent": log_name, "parenttype": "Trip Start Log", "is_unregistered": 0},
+				pluck="worker",
+			)
+		)
+		for w in workers:
+			w["boarded"] = w["employee"] in boarded
+	return {
+		"dispatch_trip": dispatch_trip,
+		"route_name": (
+			frappe.db.get_value("Route Plan", trip.get("route_plan"), "route_name")
+			if trip.get("route_plan")
+			else None
+		),
+		"workers": workers,
+		"boarded_count": sum(1 for w in workers if w["boarded"]),
+		"expected_count": len(workers),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def manual_board_workers(dispatch_trip, workers, stop_name=None, accommodation_building=None):
+	"""Mark one or more manifest workers aboard MANUALLY (write) — the no-scan fallback.
+
+	Mirrors ``boarding.scan_boarding_pass``'s write path minus the token check: for each
+	requested worker it get-or-creates the trip's draft Trip Start Log, appends a Trip
+	Boarding Event (method ``Manual``), and writes a Boarding Scan Log audit row (method
+	``Manual``, result ``Valid``) — so a manual board appears in the same audit trail a
+	scan does. Identity-scoped: the driver is resolved from the session and the trip is
+	honoured only when it belongs to that driver (``boarding._resolve_trip``); only workers
+	on the trip's manifest are accepted, and an already-aboard worker is a no-op (idempotent,
+	like a Duplicate scan). ``workers`` is a JSON list (or single id) of Employee ids.
+	Returns the per-worker outcome and the updated boarded count. No GL."""
+	_require_enabled()
+	from apex_habitat.salis.api import boarding
+
+	_resolve_driver()  # gate: caller must be a linked driver
+	trip = boarding._resolve_trip(dispatch_trip)  # read-only reuse; enforces own-trip (else 403)
+
+	requested = workers
+	if isinstance(requested, str):
+		try:
+			requested = frappe.parse_json(requested)
+		except Exception:
+			requested = [requested]
+	if not isinstance(requested, (list, tuple)):
+		requested = [requested]
+	requested = [w for w in requested if w]
+	if not requested:
+		frappe.throw(_("Select at least one worker to board."))
+
+	manifest = boarding._trip_manifest_workers(trip.get("transport_request"))  # read-only reuse
+	log = boarding._get_or_create_log(dispatch_trip)  # read-only reuse; draft TSL
+
+	boarded, skipped = [], []
+	for worker in requested:
+		if worker not in manifest:
+			# Off-manifest workers are audited as Wrong Trip, no boarding row.
+			_log_manual_scan(dispatch_trip, trip, worker, "Wrong Trip", log.name,
+			                  notes="Worker is not on this trip's manifest.")
+			skipped.append({"worker": worker, "result": "Wrong Trip"})
+			continue
+		if boarding._already_boarded(log, worker):  # read-only reuse; idempotent
+			_log_manual_scan(dispatch_trip, trip, worker, "Duplicate", log.name,
+			                 notes="Worker already boarded this trip.")
+			skipped.append({"worker": worker, "result": "Duplicate"})
+			continue
+		log.append(
+			"boarding_events",
+			{
+				"worker": worker,
+				"stop_name": stop_name,
+				"accommodation_building": accommodation_building,
+				"boarded_at": frappe.utils.now_datetime(),
+				"method": "Manual",
+			},
+		)
+		boarded.append(worker)
+
+	if boarded:
+		log.save(ignore_permissions=True)  # audit-ok — driver resolved server-side, own trip
+		for worker in boarded:
+			_log_manual_scan(dispatch_trip, trip, worker, "Valid", log.name,
+			                 boarding_created=1, accommodation_building=accommodation_building)
+
+	return {
+		"trip_start_log": log.name,
+		"boarded": boarded,
+		"skipped": skipped,
+		"boarded_count": log.boarded_count,
+	}
+
+
+def _log_manual_scan(dispatch_trip, trip, worker, result, trip_start_log,
+                     boarding_created=0, accommodation_building=None, notes=None):
+	"""Write one Boarding Scan Log row for a MANUAL board attempt (method ``Manual``).
+
+	The manual analogue of ``boarding._log_scan`` (which is QR-only and not editable from
+	here); same immutable-audit intent so a manual board shows in the Boarding Scan Log
+	alongside scans. No pass token exists for a manual board, so ``pass_token_hash`` stays
+	null."""
+	doc = frappe.get_doc(
+		{
+			"doctype": "Boarding Scan Log",
+			"dispatch_trip": dispatch_trip,
+			"trip_start_log": trip_start_log,
+			"transport_request": trip.get("transport_request") if trip else None,
+			"driver": trip.get("driver") if trip else None,
+			"worker": worker,
+			"accommodation_building": accommodation_building,
+			"result": result,
+			"method": "Manual",
+			"scanned_at": frappe.utils.now_datetime(),
+			"boarding_event_created": frappe.utils.cint(boarding_created),
+		}
+	)
+	doc.insert(ignore_permissions=True)  # audit-ok — manual board attempt is always recorded
+	return doc.name
+
+
+def _open_trip_log(dispatch_trip, driver):
+	"""The driver's open (draft) Trip Start Log doc for a trip, or None. Stop progress
+	is only kept on the live draft log — a submitted/cancelled log is closed."""
+	name = frappe.db.get_value(
+		"Trip Start Log",
+		{"dispatch_trip": dispatch_trip, "driver": driver, "docstatus": 0},
+		"name",
+	)
+	return frappe.get_doc("Trip Start Log", name) if name else None
+
+
+def _stop_progress_map(dispatch_trip, driver):
+	"""``{route_stop: {done, done_at}}`` from the trip's open Trip Start Log, so the
+	route view can reflect persisted per-stop completion on reload. Keyed on the source
+	Route Stop row name (stable across reloads). Empty when the trip isn't started."""
+	log = _open_trip_log(dispatch_trip, driver)
+	if not log:
+		return {}
+	out = {}
+	for row in log.stop_progress or []:
+		if row.route_stop:
+			out[row.route_stop] = {
+				"done": bool(row.done),
+				"done_at": frappe.utils.cstr(row.done_at) if row.done_at else None,
+			}
+	return out
+
+
+def _route_stop_names(route_plan):
+	"""The Route Stop child row names for a plan, in the SAME order masar._ordered_stops
+	returns its stops (sequence asc, idx asc) — so they zip 1:1 onto that list to give each
+	stop a stable identity for progress tracking. masar drops the row name, so it is
+	re-fetched here. Read-only."""
+	if not route_plan:
+		return []
+	return frappe.get_all(
+		"Route Stop",
+		filters={"parent": route_plan, "parenttype": "Route Plan"},
+		pluck="name",
+		order_by="sequence asc, idx asc",
+	)
+
+
+def _attach_stop_progress(stops, route_plan, dispatch_trip, driver):
+	"""Stamp each ordered stop with its ``route_stop`` (stable Route Stop row name) and
+	persisted ``done``/``done_at`` from the trip's open Trip Start Log. Mutates in place;
+	a not-started trip leaves every stop ``done=False``."""
+	if not stops:
+		return
+	names = _route_stop_names(route_plan)
+	progress = _stop_progress_map(dispatch_trip, driver)
+	for i, stop in enumerate(stops):
+		rs = names[i] if i < len(names) else None
+		stop["route_stop"] = rs
+		state = progress.get(rs) if rs else None
+		stop["done"] = bool(state and state.get("done"))
+		stop["done_at"] = state.get("done_at") if state else None
+
+
+@frappe.whitelist(methods=["POST"])
+def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_name=None):
+	"""Mark one route stop done/undone on the driver's STARTED trip (write).
+
+	Persists a Trip Stop Progress row on the trip's open Trip Start Log so per-stop
+	completion survives a reload. Identity-scoped (``_resolve_my_trip``); requires the
+	trip to be started (an open Trip Start Log must exist — the driver taps Start first).
+	Idempotent and reversible: a stop already tracked is updated in place (re-marking the
+	same state is a no-op), and ``done=0`` clears it. ``route_stop`` is the source Route
+	Stop child row name — the stable key matched across reloads. Server-authoritative, so
+	``ignore_permissions`` is set. No GL."""
+	_require_enabled()
+	driver = _resolve_driver()
+	_resolve_my_trip(dispatch_trip, driver)  # enforces own-trip; raises if not
+	log = _open_trip_log(dispatch_trip, driver)
+	if not log:
+		# A stop can only be marked on a started trip (stop state lives on the log).
+		frappe.throw(_("Start the trip before marking stops."))
+
+	done = frappe.utils.cint(done)
+	existing = next((r for r in (log.stop_progress or []) if r.route_stop == route_stop), None)
+	if existing:
+		existing.done = done
+		existing.done_at = frappe.utils.now_datetime() if done else None
+	else:
+		log.append(
+			"stop_progress",
+			{
+				"route_stop": route_stop,
+				"sequence": frappe.utils.cint(sequence) if sequence is not None else None,
+				"stop_name": stop_name,
+				"done": done,
+				"done_at": frappe.utils.now_datetime() if done else None,
+			},
+		)
+	log.flags.ignore_permissions = True  # audit-ok — driver resolved from session identity
+	log.save()
+	return {
+		"route_stop": route_stop,
+		"done": bool(done),
+		"stop_progress": _stop_progress_map(dispatch_trip, driver),
+	}
 
 
 @frappe.whitelist()

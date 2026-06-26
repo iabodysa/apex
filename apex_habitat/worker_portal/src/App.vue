@@ -1,5 +1,19 @@
 <template>
   <div class="app-shell" :dir="dir">
+    <!-- New build available: a new service worker is installed and waiting. Tap
+         reload to activate it; controllerchange then reloads into the new build. -->
+    <div
+      v-if="updateReady"
+      class="flex items-center justify-center gap-2 text-xs font-semibold"
+      style="background: var(--c-accent, #00844e); color: #fff; padding: 8px 12px"
+    >
+      <Icon name="refresh" :size="14" />
+      <span>{{ t("update.available") }}</span>
+      <button class="font-bold underline" style="padding-inline: 6px" @click="applyUpdate">
+        {{ t("update.reload") }}
+      </button>
+    </div>
+
     <!-- [T-318] offline banner: tell the worker we are showing last-known info
          when the device drops its connection. -->
     <div
@@ -107,6 +121,7 @@ import Brand from "./components/Brand.vue";
 import LangToggle from "./components/LangToggle.vue";
 import { useI18n, resourceErrorMessage, setEnumLabels } from "./i18n";
 import { TOKEN, hasToken } from "./token";
+import { updateReady, applyUpdate, initPwaUpdates } from "./pwa";
 
 const { t, dir } = useI18n();
 
@@ -135,6 +150,7 @@ const syncOnline = () => (online.value = navigator.onLine);
 onMounted(() => {
   window.addEventListener("online", syncOnline);
   window.addEventListener("offline", syncOnline);
+  initPwaUpdates();
 });
 onUnmounted(() => {
   window.removeEventListener("online", syncOnline);

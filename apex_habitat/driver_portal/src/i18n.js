@@ -29,6 +29,10 @@ const messages = {
       banner: "You're offline. Showing saved data; changes are paused.",
       stale: "Offline — showing last saved data.",
     },
+    update: {
+      available: "A new version is available.",
+      reload: "Reload",
+    },
     lang: {
       label: "Language",
       en: "EN",
@@ -98,6 +102,9 @@ const messages = {
       emptyHint: "You have no worker pickups scheduled for today.",
       noRoutePlanned: "No route planned for this trip",
       noRoutePlannedHint: "This trip has no route plan yet, so there are no stops to show.",
+      stopsDone: "{n} of {m} done",
+      stopDone: "Mark stop done",
+      stopUndo: "Mark stop not done",
     },
     license: {
       expired: "expired",
@@ -211,6 +218,7 @@ const messages = {
       startedAt: "Started {time}",
       boardedOf: "{n} of {m} boarded",
       scanBoarding: "Scan boarding",
+      manualBoarding: "Manual boarding",
       fullRoute: "Navigate full route",
     },
     boarding: {
@@ -232,6 +240,15 @@ const messages = {
       wrongTripHint: "This pass isn't for this trip's manifest.",
       expiredHint: "This pass is past its validity window.",
       invalidHint: "This pass couldn't be verified.",
+    },
+    manual: {
+      title: "Manual boarding",
+      hint: "Can't scan? Tick each worker who boarded, then confirm.",
+      aboard: "Aboard",
+      board: "Board ({n})",
+      boarded: "Boarded {n} worker(s)",
+      empty: "No workers on this trip's manifest.",
+      close: "Close",
     },
     fuel: {
       title: "Request Fuel",
@@ -316,6 +333,10 @@ const messages = {
       banner: "أنت غير متصل. تُعرض بيانات محفوظة، وتم إيقاف التغييرات مؤقتاً.",
       stale: "غير متصل — تُعرض آخر بيانات محفوظة.",
     },
+    update: {
+      available: "يتوفّر إصدار جديد.",
+      reload: "إعادة التحميل",
+    },
     lang: {
       label: "اللغة",
       en: "EN",
@@ -385,6 +406,9 @@ const messages = {
       emptyHint: "لا توجد لديك عمليات نقل عمال مجدولة لهذا اليوم.",
       noRoutePlanned: "لا يوجد مسار مخطط لهذه الرحلة",
       noRoutePlannedHint: "هذه الرحلة ليس لها خطة مسار بعد، لذا لا توجد محطات لعرضها.",
+      stopsDone: "{n} من {m} مكتملة",
+      stopDone: "تحديد المحطة كمكتملة",
+      stopUndo: "إلغاء اكتمال المحطة",
     },
     license: {
       expired: "منتهية",
@@ -498,6 +522,7 @@ const messages = {
       startedAt: "بدأت {time}",
       boardedOf: "صعد {n} من {m}",
       scanBoarding: "مسح الصعود",
+      manualBoarding: "صعود يدوي",
       fullRoute: "التنقل في كامل المسار",
     },
     boarding: {
@@ -519,6 +544,15 @@ const messages = {
       wrongTripHint: "هذه البطاقة ليست ضمن قائمة هذه الرحلة.",
       expiredHint: "هذه البطاقة تجاوزت مدة صلاحيتها.",
       invalidHint: "تعذّر التحقق من هذه البطاقة.",
+    },
+    manual: {
+      title: "الصعود اليدوي",
+      hint: "تعذّر المسح؟ حدّد كل عامل صعد، ثم أكّد.",
+      aboard: "على المتن",
+      board: "تأكيد الصعود ({n})",
+      boarded: "تم صعود {n} عامل",
+      empty: "لا يوجد عمال في قائمة هذه الرحلة.",
+      close: "إغلاق",
     },
     fuel: {
       title: "طلب وقود",
@@ -582,17 +616,11 @@ const messages = {
   },
 };
 
-// Server enum values (DocType Select options / Issue masters) shown in the portal,
-// mapped to a localized label per namespace. Stored values stay English for the API
-// round-trip; only the displayed label localizes. translateEnum falls back to the raw
-// value, so a NEW/renamed option renders English in Arabic mode — test_driver_portal
-// _enum_coverage locks every namespace to its live source options so that drift fails
-// the build. Keys are the exact stored values.
-//   tripStatus    -> Dispatch Trip.status
-//   issueStatus   -> Issue.status (native ERPNext)
-//   issueCategory -> Issue Type masters (salis_issue_seed)
-//   issuePriority -> Issue Priority masters (salis_issue_seed)
-//   fuelStatus    -> Fuel Request.status
+// Server enum values (Select options / Issue masters) per namespace -> localized label.
+// Stored values stay English for the API round-trip; only the label localizes, and
+// translateEnum falls back to the raw value (a new option renders English in Arabic).
+// test_driver_portal _enum_coverage locks each namespace to its live source options so
+// drift fails the build. Keys are the exact stored values.
 const enums = {
   en: {
     tripStatus: {
