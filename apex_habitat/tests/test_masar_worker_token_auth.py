@@ -18,6 +18,9 @@ get_worker_context endpoint on a migrated site with no production data.
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex_habitat.apex_core.doctype.masar_worker_token.masar_worker_token import (
+    get_or_create_for_employee,
+)
 from apex_habitat.salis.api import masar
 
 # Employee.status values the resolver fails closed on, verbatim from
@@ -358,3 +361,74 @@ class TestMasarEmployeeOnlyDecision(FrappeTestCase):
         # And the public guest endpoint fails closed the same way (no data leak).
         with self.assertRaises(frappe.PermissionError):
             masar.get_worker_context(token=forced_token)
+
+
+class TestMasarWorkerTokenAutoname(FrappeTestCase):
+    """A token created with ONLY the Employee link must name + validate.
+
+    autoname is ``field:party``, which set_new_name resolves BEFORE before_validate
+    runs. If party were derived only in before_validate, a token minted with just the
+    Employee link would fail naming with "Worker is required" before it ever reached
+    validation. before_insert mirrors employee -> party so naming has it; this is the
+    guard for that root-cause fix (the get_or_create_for_employee path passes no party).
+    """
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    def _company(self):
+        return (
+            frappe.defaults.get_global_default("company")
+            or frappe.get_all("Company", limit=1)[0].name
+        )
+
+    def _make_employee(self, suffix):
+        tag = f"{self._testMethodName}-{suffix}"
+        return (
+            frappe.get_doc(
+                {
+                    "doctype": "Employee",
+                    "first_name": f"Masar Autoname {tag}",
+                    "company": self._company(),
+                    "status": "Active",
+                    "gender": "Male",
+                    "date_of_birth": "1990-01-01",
+                    "date_of_joining": "2020-01-01",
+                }
+            )
+            .insert(ignore_permissions=True)
+            .name
+        )
+
+    def test_token_with_only_employee_names_and_validates(self):
+        """Insert a token supplying ONLY employee (no party / party_type). It must
+        insert, autoname to the employee (field:party, party derived from employee),
+        and back-fill party_type/party — exactly the case that previously threw."""
+        emp = self._make_employee("only-emp")
+        doc = frappe.get_doc(
+            {"doctype": "Masar Worker Token", "employee": emp}
+        ).insert(ignore_permissions=True)
+        # Named off party (== employee) and the mirror fields were back-filled.
+        self.assertEqual(doc.name, emp, "token must autoname to the employee via field:party")
+        self.assertEqual(doc.party, emp)
+        self.assertEqual(doc.party_type, "Employee")
+        self.assertEqual(doc.employee, emp)
+        self.assertTrue(doc.token, "a token must be minted on insert")
+
+    def test_get_or_create_for_brand_new_employee_succeeds(self):
+        """get_or_create_for_employee inserts {doctype, employee} with no party; it
+        must succeed for a brand-new Employee and return the named token row."""
+        emp = self._make_employee("goc")
+        # Non-vacuous: no token row exists for this fresh worker yet.
+        self.assertFalse(frappe.db.exists("Masar Worker Token", {"employee": emp}))
+        doc = get_or_create_for_employee(emp)
+        self.assertEqual(doc.employee, emp)
+        self.assertEqual(doc.name, emp)
+        self.assertEqual(doc.party, emp)
+        self.assertTrue(frappe.db.exists("Masar Worker Token", {"employee": emp}))
+        # Idempotent: a second call returns the same row, not a duplicate.
+        again = get_or_create_for_employee(emp)
+        self.assertEqual(again.name, doc.name)

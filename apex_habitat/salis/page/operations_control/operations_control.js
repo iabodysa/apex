@@ -796,30 +796,61 @@ class FleetControl {
 				}
 				$body.empty().removeClass("text-muted");
 				this._detail_fields($body, r.message.vehicle);
-				// Incident row: date (LTR) · type · status as separate dot-separated nodes.
-				this._detail_list($body, __("Recent Incidents"), r.message.incidents, (x, $li) => {
-					$li.addClass("fc-sep-dot");
-					if (x.incident_date) $('<span></span>').html(_bdi(x.incident_date)).appendTo($li);
-					$("<span></span>").text(__(x.incident_type || "")).appendTo($li);
-					$("<span></span>").text(__(x.status || "")).appendTo($li);
-				});
-				// Assignment row: start→end as a node-pair joined by an icon arrow (no
-				// glued '→'), then the driver as its own dot-separated node.
-				this._detail_list($body, __("Recent Assignments"), r.message.assignments, (x, $li) => {
-					$li.addClass("fc-sep-dot");
-					const $range = $('<span class="fc-range"></span>').appendTo($li);
-					$('<span></span>').html(_bdi(x.start_date || "")).appendTo($range);
-					$('<span class="fc-range-arrow"></span>')
-						.html(frappe.utils.icon("right", "xs"))
-						.appendTo($range);
-					if (x.end_date) $('<span></span>').html(_bdi(x.end_date)).appendTo($range);
-					else $("<span></span>").text(__("open")).appendTo($range);
-					if (x.driver) $('<span></span>').html(_bdi(x.driver)).appendTo($li);
-				});
+				// Master fields render immediately; the consolidated history loads under them.
+				this._load_timeline(v, $body);
 			},
 			error: (r) =>
 				this._render_error($body.removeClass("text-muted"), () => this._load_detail(v, $body), r),
 		});
+	}
+
+	// One consolidated, date-sorted feed (incidents · stops · assignments · resolved
+	// alerts) replacing the old separate Recent-Incidents / Recent-Assignments lists.
+	_load_timeline(v, $body) {
+		const $section = $('<div class="fc-drawer-timeline"></div>').appendTo($body);
+		$('<div class="fc-drawer-sub"></div>').text(__("Timeline")).appendTo($section);
+		const $loading = $('<div class="text-muted small"></div>').text(__("Loading…")).appendTo($section);
+		frappe.call({
+			method: "apex_habitat.salis.api.operations_control.get_vehicle_timeline",
+			args: { vehicle: v.name },
+			callback: (r) => {
+				$loading.remove();
+				const events = (r && r.message && r.message.events) || [];
+				if (!events.length) {
+					$('<div class="text-muted small"></div>').text(__("None.")).appendTo($section);
+					return;
+				}
+				const $ul = $('<ul class="fc-list fc-timeline"></ul>').appendTo($section);
+				events.forEach((e) => this._timeline_row(e, $("<li></li>").appendTo($ul)));
+			},
+			error: (r) => {
+				$loading.remove();
+				this._render_error($section, () => { $section.remove(); this._load_timeline(v, $body); }, r);
+			},
+		});
+	}
+
+	// Render one normalised timeline event. Each event kind contributes its own
+	// dot-separated nodes; the leading label says what KIND of event this is so the
+	// merged feed stays legible. Dates/ids are LTR (<bdi>) inside the RTL drawer.
+	_timeline_row(e, $li) {
+		$li.addClass("fc-sep-dot");
+		const KIND = { incident: "Incident", stop: "Stop", assignment: "Assignment", alert: "Alert" };
+		$('<span class="fc-timeline-kind"></span>').text(__(KIND[e.kind] || e.kind)).appendTo($li);
+		if (e.date) $("<span></span>").html(_bdi(e.date)).appendTo($li);
+		if (e.kind === "incident") {
+			$("<span></span>").text(__(e.incident_type || "")).appendTo($li);
+			if (e.status) $("<span></span>").text(__(e.status)).appendTo($li);
+		} else if (e.kind === "stop") {
+			$("<span></span>").text(__(e.stop_reason || "")).appendTo($li);
+			if (e.driver) $("<span></span>").html(_bdi(e.driver)).appendTo($li);
+		} else if (e.kind === "assignment") {
+			if (e.driver) $("<span></span>").html(_bdi(e.driver)).appendTo($li);
+			if (e.status) $("<span></span>").text(__(e.status)).appendTo($li);
+		} else if (e.kind === "alert") {
+			$("<span></span>").text(__(e.alert_type || "")).appendTo($li);
+			if (e.severity) $("<span></span>").text(__(e.severity)).appendTo($li);
+		}
 	}
 
 	_detail_fields($body, d) {
@@ -840,18 +871,6 @@ class FleetControl {
 			if (ltr) $v.html(_bdi(val));
 			else $v.text(String(val));
 		});
-	}
-
-	// `build(x, $li)` appends separate DOM nodes into each row (RTL-safe — no glued
-	// string with a stranded middot/arrow); separators are CSS, not concatenation.
-	_detail_list($body, title, items, build) {
-		$('<div class="fc-drawer-sub"></div>').text(title).appendTo($body);
-		if (!items || !items.length) {
-			$('<div class="text-muted small"></div>').text(__("None.")).appendTo($body);
-			return;
-		}
-		const $ul = $('<ul class="fc-list"></ul>').appendTo($body);
-		items.forEach((x) => build(x, $("<li></li>").appendTo($ul)));
 	}
 
 	// Confirm, then close the vehicle's open stop on the server and refresh the board.

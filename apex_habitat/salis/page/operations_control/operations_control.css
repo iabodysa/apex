@@ -154,15 +154,6 @@
 }
 .fc-driver-icon { display: inline-flex; color: var(--text-muted, #888); }
 .fc-driver-icon .icon { width: 14px; height: 14px; }
-/* Assignment range: start—end joined by an icon arrow (flips with the writing dir). */
-.fc-range {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-}
-.fc-range-arrow { display: inline-flex; color: var(--text-muted, #888); }
-.fc-range-arrow .icon { width: 12px; height: 12px; }
-[dir="rtl"] .fc-range-arrow { transform: scaleX(-1); }
 .fc-card-foot {
 	display: flex;
 	justify-content: space-between;
@@ -219,6 +210,16 @@
 .fc-dl-v { flex: 1 1 auto; font-weight: 500; }
 .fc-list { margin: 0; padding-inline-start: 16px; font-size: 12.5px; }
 .fc-list li { margin: 2px 0; }
+/* Consolidated timeline: no bullet markers; a small leading chip names each event kind. */
+.fc-timeline { padding-inline-start: 0; list-style: none; }
+.fc-timeline li { padding: 3px 0; }
+.fc-timeline-kind {
+	font-size: 10.5px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: var(--text-muted, #888);
+}
 
 /* Top progress bar: indeterminate sliding sweep while a fetch is in flight. */
 .fc-progress {

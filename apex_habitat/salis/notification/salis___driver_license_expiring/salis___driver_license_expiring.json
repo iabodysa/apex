@@ -1,0 +1,30 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.status == 'Active' and doc.driver_user",
+ "date_changed": "license_expiry",
+ "days_in_advance": 30,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Salis Driver",
+ "enabled": 1,
+ "event": "Days Before",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "{{ _(\"Your driving licence is expiring soon — please start the renewal\") }}: {{ doc.license_expiry }}.",
+ "message_type": "HTML",
+ "module": "Salis",
+ "name": "Salis - Driver License Expiring",
+ "recipients": [
+  {
+   "receiver_by_document_field": "driver_user"
+  },
+  {
+   "receiver_by_role": "Fleet Supervisor"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Driving Licence Expiring: {{ doc.full_name }}",
+ "modified": "2026-06-26 12:00:00.000000"
+}

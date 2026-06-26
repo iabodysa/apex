@@ -36,38 +36,50 @@
       :hint="tab === 'today' ? t('trips.emptyHint') : t('trips.recentEmptyHint')"
     />
 
-    <router-link
-      v-for="trip in active.data"
-      v-else
-      :key="trip.name"
-      :to="'/route/' + encodeURIComponent(trip.name)"
-      class="card card-pad block"
-    >
-      <div class="flex items-start justify-between gap-2">
-        <div class="font-bold leading-tight"><bdi>{{ trip.route_plan || trip.name }}</bdi></div>
-        <span class="pill pill-accent shrink-0">{{ te("tripStatus", trip.status) }}</span>
-      </div>
-      <div class="mt-2 flex items-center gap-2 text-sm text-soft">
-        <Icon name="truck" :size="16" class="text-primary shrink-0" />
-        <span><bdi>{{ trip.vehicle || "—" }}</bdi></span>
-        <!-- Direction-neutral, labelled times: reads correctly in LTR and RTL with
-             no bare arrow. -->
-        <span v-if="trip.depart_time" class="text-muted">·</span>
-        <span v-if="trip.depart_time">
-          {{ t("home.depart") }} <bdi>{{ fmtTime(trip.depart_time) }}</bdi>
+    <div v-for="trip in active.data" v-else :key="trip.name" class="card card-pad">
+      <router-link :to="'/route/' + encodeURIComponent(trip.name)" class="block" style="text-decoration: none; color: inherit">
+        <div class="flex items-start justify-between gap-2">
+          <div class="font-bold leading-tight"><bdi>{{ trip.route_plan || trip.name }}</bdi></div>
+          <span class="pill pill-accent shrink-0">{{ te("tripStatus", trip.status) }}</span>
+        </div>
+        <div class="mt-2 flex items-center gap-2 text-sm text-soft">
+          <Icon name="truck" :size="16" class="text-primary shrink-0" />
+          <span><bdi>{{ trip.vehicle || "—" }}</bdi></span>
+          <!-- Direction-neutral, labelled times: reads correctly in LTR and RTL with
+               no bare arrow. -->
+          <span v-if="trip.depart_time" class="text-muted">·</span>
+          <span v-if="trip.depart_time">
+            {{ t("home.depart") }} <bdi>{{ fmtTime(trip.depart_time) }}</bdi>
+          </span>
+          <span v-if="trip.return_time" class="text-muted">·</span>
+          <span v-if="trip.return_time">
+            {{ t("home.return") }} <bdi>{{ fmtTime(trip.return_time) }}</bdi>
+          </span>
+          <Icon name="route" :size="16" class="text-primary shrink-0 ms-auto" />
+        </div>
+        <!-- The recent view spans days, so each card names its trip date. -->
+        <div v-if="tab === 'recent' && trip.trip_date" class="mt-1 flex items-center gap-2 text-xs text-muted">
+          <Icon name="calendar" :size="14" class="text-primary shrink-0" />
+          <span><bdi>{{ trip.trip_date }}</bdi></span>
+        </div>
+      </router-link>
+
+      <!-- Execution actions (today only): start → complete, writing a Trip Start Log. -->
+      <div v-if="tab === 'today'" class="mt-3 flex items-center gap-2">
+        <span v-if="trip.trip_log_status === 'Completed'" class="pill pill-success">
+          <Icon name="badge" :size="14" /> {{ t("trips.completed") }}
         </span>
-        <span v-if="trip.return_time" class="text-muted">·</span>
-        <span v-if="trip.return_time">
-          {{ t("home.return") }} <bdi>{{ fmtTime(trip.return_time) }}</bdi>
-        </span>
-        <Icon name="route" :size="16" class="text-primary shrink-0 ms-auto" />
+        <template v-else-if="trip.started">
+          <span class="pill pill-warning"><Icon name="route" :size="14" /> {{ t("trips.started") }}</span>
+          <button class="btn btn-dark" style="width: auto; padding-inline: 16px" :disabled="busy === trip.name" @click="complete(trip)">
+            {{ t("trips.complete") }}
+          </button>
+        </template>
+        <button v-else class="btn btn-primary" style="width: auto; padding-inline: 16px" :disabled="busy === trip.name" @click="start(trip)">
+          <Icon name="route" :size="16" /> {{ t("trips.start") }}
+        </button>
       </div>
-      <!-- The recent view spans days, so each card names its trip date. -->
-      <div v-if="tab === 'recent' && trip.trip_date" class="mt-1 flex items-center gap-2 text-xs text-muted">
-        <Icon name="calendar" :size="14" class="text-primary shrink-0" />
-        <span><bdi>{{ trip.trip_date }}</bdi></span>
-      </div>
-    </router-link>
+    </div>
   </div>
 </template>
 
@@ -79,6 +91,7 @@ import Skeleton from "../components/Skeleton.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
+import { pushToast } from "../toast";
 
 const { t, te, fmtTime } = useI18n();
 
@@ -99,6 +112,40 @@ function showRecent() {
 }
 
 const active = computed(() => (tab.value === "recent" ? recent : today));
+
+// --- Trip execution: start → complete, writing a Trip Start Log. ---
+// `busy` holds the trip name in flight so its buttons disable (single tap = single write).
+const busy = ref(null);
+
+const startTrip = createResource({
+  url: "apex_habitat.salis.api.driver_portal.start_my_trip",
+  onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
+});
+const completeTrip = createResource({
+  url: "apex_habitat.salis.api.driver_portal.complete_my_trip",
+  onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
+});
+
+async function start(trip) {
+  if (busy.value) return;
+  busy.value = trip.name;
+  try {
+    await startTrip.submit({ dispatch_trip: trip.name });
+    today.reload(); // server re-stamps started/trip_log_status on each card
+  } finally {
+    busy.value = null;
+  }
+}
+async function complete(trip) {
+  if (busy.value) return;
+  busy.value = trip.name;
+  try {
+    await completeTrip.submit({ dispatch_trip: trip.name });
+    today.reload();
+  } finally {
+    busy.value = null;
+  }
+}
 </script>
 
 <style scoped>

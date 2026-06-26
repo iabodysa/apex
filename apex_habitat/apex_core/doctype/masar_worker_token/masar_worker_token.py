@@ -53,6 +53,12 @@ class MasarWorkerToken(Document):
             )
 
     def before_insert(self):
+        # autoname is field:party, which set_new_name resolves BEFORE before_validate
+        # runs — so a token created with only the Employee link (get_or_create_for_employee)
+        # would otherwise hit naming with an empty party ("Worker is required"). Mirror
+        # employee -> party here so naming has it; before_validate still runs the full
+        # require_party + Temporary-Worker guard.
+        sync_party_employee(self)
         # [#img31u]
         self.token = _new_token()
         self.last_generated_on = frappe.utils.now_datetime()

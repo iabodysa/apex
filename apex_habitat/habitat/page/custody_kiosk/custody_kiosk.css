@@ -59,11 +59,23 @@
 /* [#glvo5q] */
 .ck-tools {
 	margin-block-end: 14px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
 }
 
 .ck-search {
 	max-width: 360px;
 	font-size: 15px;
+}
+
+/* [#scancamcss] — live camera scan preview; capped so the dialog stays compact. */
+.ck-scan-video {
+	width: 100%;
+	max-height: 320px;
+	border-radius: 8px;
+	background: #000;
 }
 
 .ck-empty {

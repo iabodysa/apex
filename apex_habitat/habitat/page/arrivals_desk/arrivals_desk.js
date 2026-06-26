@@ -599,7 +599,42 @@ class ArrivalsDesk {
 		d.show();
 	}
 
+	// Capture the resident's housing-terms acceptance signature on the tablet before
+	// housing. Signing is optional (Skip still houses) so the deck never blocks when
+	// no pad input is taken. Mirrors the native Signature dialog used at custody handover.
+	_capture_terms_signature(worker, on_done) {
+		const dialog = new frappe.ui.Dialog({
+			title: __('Housing Terms — {0}', [worker.label || worker.party]),
+			fields: [
+				{
+					fieldname: 'terms_signature',
+					fieldtype: 'Signature',
+					label: __('Sign to accept the housing terms'),
+				},
+			],
+			primary_action_label: __('Accept & House'),
+			primary_action: () => {
+				const sig = dialog.get_value('terms_signature');
+				dialog.hide();
+				on_done(sig || null);
+			},
+			secondary_action_label: __('Skip'),
+			secondary_action: () => {
+				dialog.hide();
+				on_done(null);
+			},
+		});
+		dialog.show();
+	}
+
 	_house_in_bed(bed, $bed) {
+		// Capture terms acceptance first, then run the existing housing write path.
+		this._capture_terms_signature(this.active, (terms_signature) =>
+			this._do_house_in_bed(bed, $bed, terms_signature)
+		);
+	}
+
+	_do_house_in_bed(bed, $bed, terms_signature) {
 		const worker = this.active;
 		// Optimistic: the clicked bed turns red with a per-bed spinner immediately —
 		// no full-screen freeze + grid refetch. Reconciled from the reply, rolled back on exc.
@@ -619,6 +654,7 @@ class ArrivalsDesk {
 				party: worker.party,
 				project: this.project,
 				check_in_date: frappe.datetime.get_today(),
+				terms_signature: terms_signature || null,
 			},
 			callback: (r) => {
 				if (r.exc || !r.message) {

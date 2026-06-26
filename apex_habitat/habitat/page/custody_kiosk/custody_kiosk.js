@@ -96,7 +96,182 @@ class CustodyKiosk {
 			},
 		});
 
+		// [#scan01] — one scan box accelerates both modes: a worker-badge scan sets
+		// the party, an article-barcode scan adds the tile to the cart. A HID scanner
+		// types the code + Enter (Data field fires `change`); the box keeps focus so
+		// successive scans need no click. Optional camera scan is wired separately
+		// and only when the browser exposes BarcodeDetector (no dependency).
+		this.scan_field = this.page.add_field({
+			fieldname: "scan",
+			label: __("Scan"),
+			fieldtype: "Data",
+			description: __("Scan a worker badge or an article barcode"),
+			change: () => this._handle_scan(this.scan_field.get_value()),
+		});
+
 		this.page.set_primary_action(__("Refresh"), () => this.refresh(), "refresh");
+	}
+
+	// [#scan02] — route one scanned token via the server resolver, then clear and
+	// refocus the box for the next scan. The resolver classifies the token; the
+	// client only dispatches the result so issue/return logic stays one source.
+	_handle_scan(raw) {
+		const code = (raw || "").trim();
+		// Clear immediately so a scanner's trailing Enter can't double-fire and the
+		// box is ready for the next badge/barcode.
+		this.scan_field.set_value("");
+		if (!code) return;
+		frappe.call({
+			method: "apex_habitat.habitat.api.custody_kiosk.resolve_scan",
+			args: { code: code, party_type: this.party_type, building: this.building },
+			callback: (r) => {
+				const res = r.message || {};
+				if (res.kind === "worker") {
+					this._apply_worker_scan(res);
+				} else if (res.kind === "article") {
+					this._apply_article_scan(res.article);
+				} else {
+					frappe.show_alert({
+						message: __("No worker or article matched: {0}", [code]),
+						indicator: "orange",
+					});
+				}
+				this._focus_scan();
+			},
+			error: () => {
+				frappe.show_alert({
+					message: __("Could not resolve the scan. Please try again."),
+					indicator: "red",
+				});
+				this._focus_scan();
+			},
+		});
+	}
+
+	// [#scan03] — a worker badge sets the party; if the badge belongs to the other
+	// party kind the resolver returns it, so flip the selector to match. Setting the
+	// party field drives the same `change` path a manual pick does (return mode
+	// reloads held custody).
+	_apply_worker_scan(res) {
+		if (res.party_type && res.party_type !== this.party_type) {
+			this.party_type = res.party_type;
+			this.party_type_field.set_value(res.party_type);
+			this._update_party_options();
+		}
+		this.party = res.party;
+		this.party_field.set_value(res.party);
+		frappe.show_alert({
+			message: __("Worker set: {0}", [res.party_name || res.party]),
+			indicator: "green",
+		});
+		if (this.mode === "return") {
+			this.return_cart = {};
+			this.refresh();
+		}
+	}
+
+	// [#scan04] — an article barcode adds the tile to the active cart. Issue mode
+	// adds straight to the cart (one unit, like a tile tap). Return mode can only
+	// return what is held, so match the scan against the loaded held lines and add
+	// that line; otherwise hint that the worker does not hold it.
+	_apply_article_scan(art) {
+		if (!art || !art.article) return;
+		if (this.mode === "return") {
+			const line = (this.held || []).find((l) => l.article === art.article);
+			if (line) {
+				this._add_held_to_cart(line);
+				frappe.show_alert({
+					message: __("Added to return: {0}", [line.article_name || line.article]),
+					indicator: "green",
+				});
+			} else {
+				frappe.show_alert({
+					message: __("This worker does not hold: {0}", [art.article_name || art.article]),
+					indicator: "orange",
+				});
+			}
+			return;
+		}
+		this._add_to_cart(art);
+		frappe.show_alert({
+			message: __("Added: {0}", [art.article_name || art.article]),
+			indicator: "green",
+		});
+	}
+
+	_focus_scan() {
+		if (this.scan_field && this.scan_field.$input) {
+			this.scan_field.$input.focus();
+		}
+	}
+
+	_barcode_detector_supported() {
+		return typeof window !== "undefined" && "BarcodeDetector" in window;
+	}
+
+	// [#camscan] — open a live-camera barcode scan in a dialog. Uses the native
+	// BarcodeDetector + getUserMedia (no library); each detected code is routed
+	// through the same _handle_scan resolver as the HID/typed box. The dialog
+	// closes on the first hit; the camera + detect loop are always torn down on
+	// hide so no track is left running.
+	_open_camera_scan() {
+		if (!this._barcode_detector_supported()) return;
+		const dialog = new frappe.ui.Dialog({
+			title: __("Scan with camera"),
+			fields: [{ fieldname: "viewport", fieldtype: "HTML" }],
+		});
+		const $video = $('<video class="ck-scan-video" playsinline muted></video>');
+		dialog.fields_dict.viewport.$wrapper.append($video);
+
+		let stream = null;
+		let running = true;
+		const stop = () => {
+			running = false;
+			if (stream) {
+				stream.getTracks().forEach((t) => t.stop());
+				stream = null;
+			}
+		};
+		dialog.onhide = stop;
+
+		const detector = new window.BarcodeDetector();
+		const video = $video.get(0);
+		const tick = async () => {
+			if (!running) return;
+			try {
+				const codes = await detector.detect(video);
+				if (codes && codes.length) {
+					const value = codes[0].rawValue;
+					if (value) {
+						dialog.hide();
+						this._handle_scan(value);
+						return;
+					}
+				}
+			} catch (e) {
+				// Transient decode misses are expected between frames; keep looping.
+			}
+			if (running) requestAnimationFrame(tick);
+		};
+
+		navigator.mediaDevices
+			.getUserMedia({ video: { facingMode: "environment" } })
+			.then((s) => {
+				stream = s;
+				video.srcObject = s;
+				return video.play();
+			})
+			.then(() => requestAnimationFrame(tick))
+			.catch(() => {
+				stop();
+				frappe.show_alert({
+					message: __("Could not open the camera. Use the scan box instead."),
+					indicator: "orange",
+				});
+				dialog.hide();
+			});
+
+		dialog.show();
 	}
 
 	_update_party_options() {
@@ -145,6 +320,20 @@ class CustodyKiosk {
 			clearTimeout(search_timer);
 			search_timer = setTimeout(() => this._render_visible(), 120);
 		});
+
+		// [#scancam] — camera scan is an OPTIONAL accelerator on top of the always-on
+		// scan box; only show the button when the browser exposes the native
+		// BarcodeDetector API (Chrome/Edge), so there is no dependency and graceful
+		// degradation to the HID/typed scan box elsewhere.
+		if (this._barcode_detector_supported()) {
+			this.$scan_cam_btn = $(
+				`<button type="button" class="btn btn-default btn-sm ck-scan-cam"></button>`
+			)
+				.text(__("Scan with camera"))
+				.appendTo($tools)
+				.on("click", () => this._open_camera_scan());
+		}
+
 		this.$tiles = $('<div class="ck-tiles"></div>').appendTo($catalog);
 
 		// [#4232vl]

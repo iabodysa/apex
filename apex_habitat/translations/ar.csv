@@ -43,6 +43,7 @@ About,حول
 Absconding,هروب من العمل
 Absent,غائب
 Accent Color,لون التمييز
+Accept & House,قبول وإسكان
 Access Identity,هوية الوصول
 Access Level,مستوى الصلاحية
 Accident,حادث
@@ -134,6 +135,8 @@ Add at least one item to the cart before issuing.,أضف صنفاً واحداً
 Add at least one item to the cart before returning.,أضف بنداً واحداً على الأقل إلى السلة قبل الإرجاع.
 "Add the first driver, including license details used for clearance and dispatch.",أضف أول سائق، متضمناً بيانات الرخصة المستخدمة لإخلاء الطرف والتشغيل.
 "Add the first vehicle to the fleet so it can be assigned, fuelled, and dispatched.",أضف أول مركبة إلى الأسطول ليتسنى إسنادها وتزويدها بالوقود وتشغيلها.
+Added to return: {0},أُضيف إلى الإرجاع: {0}
+Added: {0},تمت الإضافة: {0}
 Additional Information,معلومات إضافية
 Additional Salary,راتب إضافي
 Additional Salary Deduction,خصم إضافي من الراتب
@@ -260,6 +263,7 @@ Article Name,اسم الصنف
 Article…,المادة…
 As Needed,عند الحاجة
 As On Date,حتى تاريخ
+Assess Damage,تقييم الضرر
 Assessment,التقييم
 Assessment Date,تاريخ التقييم
 Asset,أصل
@@ -406,6 +410,8 @@ Book Value (SAR),القيمة الدفترية (ريال)
 Bookkeeping,المسك المحاسبي
 Both a source bed and a target bed are required.,يلزم تحديد سرير المصدر وسرير الوجهة معاً.
 Brand Logo,شعار العلامة التجارية
+Build the catalog of issuable articles that the custody flow hands out.,ابنِ كتالوج المواد القابلة للصرف التي يصرفها مسار العهدة.
+Build your article catalog and issue your first custody at the kiosk.,ابنِ كتالوج المواد واصرف أول عهدة من الكشك.
 Building,المبنى
 Building (Store),المبنى (المستودع)
 Building A,المبنى أ
@@ -701,10 +707,12 @@ Could not load your work center. Please retry.,تعذّر تحميل مركز ع
 Could not load {0}.,تعذّر تحميل {0}.
 Could not log the inspection. Please try again.,تعذّر تسجيل التفتيش. يرجى المحاولة مجدداً.
 Could not mark the Work Order as Completed. Please try again.,تعذّر وسم أمر العمل كمكتمل. يرجى المحاولة مجدداً.
+Could not open the camera. Use the scan box instead.,تعذّر فتح الكاميرا. استخدم خانة المسح بدلاً من ذلك.
 Could not post the reversal to the ledger. The cancellation was rejected.,تعذّر ترحيل القيد العكسي إلى الدفتر. تم رفض الإلغاء.
 Could not post the utility cost to the ledger. The bill was not submitted.,تعذّر ترحيل تكلفة المرافق إلى الدفتر. لم تُقدَّم الفاتورة.
 Could not read the payment settings. Please try again.,تعذّر قراءة إعدادات الدفع. يرجى المحاولة مجدداً.
 Could not regenerate the payment schedule. Please try again.,تعذّر إعادة توليد جدول الدفعات. يرجى المحاولة مجدداً.
+Could not resolve the scan. Please try again.,تعذّر تحديد نتيجة المسح. يرجى المحاولة مرة أخرى.
 Could not return the cart. Please review and try again.,تعذّر إرجاع السلة. الرجاء المراجعة والمحاولة مرة أخرى.
 Could not save changes. Please try again or contact support.,تعذّر حفظ التغييرات. يرجى المحاولة مجدداً أو التواصل مع الدعم الفني.
 Could not submit the round. Please try again.,تعذّر اعتماد الجولة. حاول مرة أخرى.
@@ -720,6 +728,9 @@ Count of open Movement Cost Recovery records for this driver. Must be zero to cl
 Country,الدولة
 Covered Buildings,المباني المشمولة
 Create Accommodation Assignment,إنشاء تسكين
+Create Custody Article,إنشاء مادة عهدة
+Create Custody Damage Assessment,إنشاء تقييم ضرر عهدة
+Create Custody Return,إنشاء إرجاع عهدة
 Create Damage Assessment,إنشاء تقييم أضرار
 Create Fuel Quota,إنشاء حصة وقود
 Create Payment,إنشاء دفعة
@@ -769,6 +780,7 @@ Custody Damage Assessments,تقييمات تلف العهد
 Custody Damage Item,صنف العهدة التالف
 Custody Damage Register,سجل تلفيات العهد
 Custody Flow,مسار العهدة
+Custody Go-Live,تشغيل العهدة
 Custody Handover,تسليم العهدة
 Custody Integration Mode,نمط ربط العهدة
 Custody Issue,صرف العهدة
@@ -789,6 +801,7 @@ Custody Returned,تم إرجاع العهدة
 Custody Value (SAR),قيمة العهدة (ريال)
 Custody Value in Employee Hands (SAR),قيمة العهدة لدى الموظفين (ريال)
 Custody deferred,أُجِّلت العهدة
+Custody is live. Issue and return articles at the kiosk and assess any damage.,العهدة قيد التشغيل. اصرف المواد وأرجِعها من الكشك وقيّم أي ضرر.
 Custody issued to {0},صُرفت العهدة إلى {0}
 Custody items have been issued to you,تم تسليم عُهدة إليك
 DVR/NVR,جهاز التسجيل DVR/NVR
@@ -873,6 +886,7 @@ Default cost center used for fleet cost postings.,مركز التكلفة الا
 Default mode keeps all custody and depreciation inside Habitat with no financial posting.,الوضع الافتراضي يبقي كل العهد والإهلاك داخل Habitat دون أي ترحيل مالي.
 Default number of days items in this category may be held before return is due.,العدد الافتراضي للأيام التي يجوز فيها الاحتفاظ بأصناف هذه الفئة قبل استحقاق الإرجاع.
 Defaults to the session user on creation.,يُهيّأ افتراضياً إلى مستخدم الجلسة عند الإنشاء.
+Define Custody Articles,تعريف مواد العهدة
 "Define the first vehicle class (e.g. Sedan, Bus, Pickup) used to group fleet vehicles.",عرّف أول فئة مركبات (مثل سيدان أو حافلة أو بيك أب) لتصنيف مركبات الأسطول.
 "Define the floors: rooms per floor, floor type, and the default room type and bed count.",عرّف الطوابق: عدد الغرف لكل طابق، ونوع الطابق، ونوع الغرفة وعدد الأسرّة الافتراضي.
 Delegation-of-Authority Thresholds (SAR),حدود تفويض الصلاحيات (ريال)
@@ -962,6 +976,7 @@ Driver {0} already has an active assignment {1}.,السائق {0} لديه با�
 Driver {0} not found.,السائق {0} غير موجود.
 Driver {0} stopped: {1}.,تم إيقاف السائق {0}: {1}.
 Driver {0} was just assigned by {1}. Please review.,تم إسناد السائق {0} للتو بواسطة {1}. يُرجى المراجعة.
+Driving licence renewal,تجديد رخصة القيادة
 Drop target must be an available bed.,يجب أن يكون الهدف سريراً متاحاً.
 Drop-off To,نقطة الإنزال
 Dropoff,نقطة الوصول
@@ -1308,6 +1323,8 @@ Housing Office Number,رقم مكتب السكن
 Housing Request,طلب سكن
 Housing Supervisor Report,تقرير مشرف السكن
 Housing Terms & Conditions,شروط وأحكام السكن
+Housing Terms Acceptance,قبول شروط السكن
+Housing Terms — {0},شروط السكن — {0}
 Housing office contact number shown to workers on the Masar home My Contacts card.,رقم تواصل مكتب السكن الظاهر للعمّال في بطاقة جهات اتصالي بالصفحة الرئيسية لمسار.
 Housing over capacity…,السكن بطاقة زائدة…
 Housing…,الإسكان…
@@ -1429,6 +1446,8 @@ Issue Location,موقع المشكلة
 Issue Masar Link,إصدار رابط مسار
 Issue Type,نوع المشكلة / نوع الصرف
 Issue all ({0}),صرف الجميع ({0})
+Issue articles to a worker from the POS-style Custody Kiosk.,اصرف المواد لعامل من كشك العهدة بأسلوب نقاط البيع.
+Issue at the Kiosk,الصرف من الكشك
 Issue custody,صرف العهدة
 Issue custody first,اصرف العهدة أولاً
 Issue date,تاريخ الصرف
@@ -1750,6 +1769,7 @@ No vehicles in scope.,لا توجد مركبات ضمن النطاق.
 No vehicles match the current filters.,لا مركبات تطابق المرشّحات الحالية.
 No worker matched.,لا يوجد عامل مطابق.
 No worker matches {0}.,لا يوجد عامل مطابق لـ {0}.
+No worker or article matched: {0},لا يوجد عامل أو عهدة مطابقة: {0}
 Non-Financial Depreciation Snapshot,لقطة إهلاك غير مالي
 None.,لا شيء.
 "Normalized plate (spaces removed, uppercased). Set automatically.",لوحة منسَّقة (دون مسافات وبأحرف كبيرة). تُضبط تلقائياً.
@@ -1847,6 +1867,7 @@ Open Current Driver,فتح السائق الحالي
 Open Current Vehicle,فتح المركبة الحالية
 Open Custody Issues,طلبات صرف العهد المفتوحة
 Open Custody Issues: {0},عُهَد مفتوحة: {0}
+Open Custody Kiosk,فتح كشك العهدة
 Open Dispatch Board,فتح لوحة التشغيل
 Open Driver,فتح السائق
 Open Exposure,الانكشاف المفتوح
@@ -2059,6 +2080,7 @@ Platform,المنصة
 Platform Details,تفاصيل المنصة
 Platform Name,اسم المنصة
 Platform Name is required.,اسم المنصة مطلوب.
+Please action my driving licence renewal. Expiry on file: {0}.,يرجى مباشرة تجديد رخصة قيادتي. تاريخ الانتهاء المسجّل: {0}.
 Please attach a completion photo before marking as completed.,يرجى إرفاق صورة الإنجاز قبل وضع علامة مكتمل.
 Please confirm you have received them,يرجى تأكيد استلامك لها
 Please describe your request.,يرجى وصف طلبك.
@@ -2160,6 +2182,7 @@ Raised On,أُنشئ في
 Raising departure transport…,جارٍ إنشاء نقل المغادرة…
 Rating,التقييم
 Re-inspection,إعادة تفتيش
+Re: {0},رد: {0}
 Read-only — managed by the Room Setup wizard.,للقراءة فقط — يُدار عبر معالج إعداد الغرف.
 Readiness Status,حالة جاهزية الغرفة
 Ready,جاهز
@@ -2195,6 +2218,8 @@ Record a Vehicle Assignment,سجّل إسناد مركبة
 Record a Vehicle Incident,سجّل بلاغ مركبة
 "Record actual fuelling and spend, then reconcile it against the quota and request.",سجّل التزويد والإنفاق الفعلي، ثم طابقه مع الحصة والطلب.
 Record an Accommodation Assignment,تسجيل تسكين
+Record damage and its cost for returned articles.,سجّل الضرر وتكلفته للمواد المُرجعة.
+Record returned articles against their source Custody Issue.,سجّل المواد المُرجعة مقابل سند صرف العهدة الأصلي.
 Recording,يُسجِّل
 Records a vehicle stop event with reason and ownership context.,يسجّل حدث إيقاف مركبة مع السبب وسياق الملكية.
 Records damage on returned custody articles. A salary deduction is applied only when damage deduction is enabled in Habitat Settings.,يسجّل التلف في أصناف العهدة المرتجعة. ولا يُطبّق خصم من الراتب إلا عند تفعيل خصم التلف في إعدادات هابيتات.
@@ -2350,6 +2375,8 @@ Resident Request Resolved: {{ doc.name }},تمت معالجة طلب الساك�
 Resident Supervisor Dashboard,لوحة معلومات مشرف الساكنين
 Resident Type,نوع المقيم
 Resident request assigned for follow-up: {0},تم إسناد طلب المقيم للمتابعة: {0}
+Resident's signature accepting the housing terms at check-in.,توقيع الساكن بالموافقة على شروط السكن عند تسجيل الدخول.
+"Resident's signature accepting the housing terms, captured on the tablet at check-in.",توقيع الساكن بالموافقة على شروط السكن، يُلتقط على اللوحي عند تسجيل الدخول.
 Residents and Rooms,الساكنون والغرف
 Residual Value (%),القيمة المتبقية (%)
 Resignation,استقالة
@@ -2375,6 +2402,7 @@ Result,النتيجة
 Results must be a list.,يجب أن تكون النتائج قائمةً.
 Retry,إعادة المحاولة
 Return,إرجاع
+Return Custody,إرجاع العهدة
 Return Date,تاريخ الإرجاع
 Return Status,حالة الإرجاع
 Return Time,وقت العودة
@@ -2529,7 +2557,9 @@ Satisfactory,مُرضٍ
 Save this code to follow up with your supervisor.,احتفظ بهذا الرمز للمتابعة مع مشرفك.
 Scan,مسح
 Scan Iqama / Worker Link,امسح الإقامة / رابط العامل
+Scan a worker badge or an article barcode,امسح بطاقة عامل أو الرمز الشريطي لعهدة
 "Scan or type an Iqama number or personal link, then press Enter to identify the worker.",امسح أو اكتب رقم إقامة أو رابطاً شخصياً، ثم اضغط Enter لتحديد هوية العامل.
+Scan with camera,المسح بالكاميرا
 Scanned At,وقت المسح
 Schedule,الجدول الزمني
 Schedule & Status,الجدول والحالة
@@ -2646,6 +2676,7 @@ Show Brand,إظهار العلامة التجارية
 Show Link and QR,عرض الرابط ورمز QR
 Show Zero Balances,عرض الأرصدة الصفرية
 Show only available,عرض المتاح فقط
+Sign to accept the housing terms,وقّع للموافقة على شروط السكن
 Sign to acknowledge receipt,وقّع للإقرار بالاستلام
 Signature,توقيع
 Signed Evidence,إثبات موقّع
@@ -2829,6 +2860,8 @@ Temporary Worker — use the Arrivals Desk to house this worker.,عامل مؤق
 Temporary workers board via the trip’s unregistered manifest.,لوحة العمال المؤقتين عبر بيان الرحلة غير المسجل.
 Terminated,مُنهى
 Termination,إنهاء خدمة
+Terms Accepted On,تاريخ قبول الشروط
+Terms Signature,توقيع الموافقة
 Thank you. Your receipt of the custody items has been recorded.,شكراً لك. تم تسجيل استلامك أصناف العهدة.
 That vehicle is not assigned to you. You can only request fuel for your own vehicle.,تلك المركبة غير مسندة إليك. يمكنك طلب الوقود لمركبتك فقط.
 The Dispatch Trip being executed; its linked Transport Request carries the worker manifest this log records boarding against.,رحلة التشغيل قيد التنفيذ؛ يحمل طلب النقل المرتبط بها قائمة العمّال التي يسجّل هذا السجل الصعود مقابلها.
@@ -2888,6 +2921,7 @@ This vehicle is under maintenance and should not be dispatched.,هذه المر�
 This voucher reconciles the claimed fuel against consumption recorded in the Fuel Consumption Ledger. It does not post to the general ledger.,يسوّي هذا السند الوقود المطالب به مقابل الاستهلاك المسجَّل في دفتر استهلاك الوقود. لا يُرحَّل إلى الأستاذ العام.
 This will clear and rebuild the entire payment schedule. Continue?,سيؤدي هذا إلى حذف جدول الدفعات وإعادة بنائه بالكامل. هل تريد المتابعة؟
 This worker already holds an active bed.,هذا العامل يشغل بالفعل سريراً نشطاً.
+This worker does not hold: {0},هذا العامل لا يحمل: {0}
 This worker holds no returnable custody.,لا يحتفظ هذا العامل بأي عهدة قابلة للإرجاع.
 "This worker is not linked to a permanent Employee yet, so the worker portal is not available.",هذا العامل غير مرتبط بموظف دائم بعد، لذا بوابة العامل غير متاحة.
 This worker link is invalid or has been disabled.,رابط العامل غير صالح أو تم تعطيله.
@@ -2895,7 +2929,9 @@ This worker token is disabled — the personal link will not resolve.,رمز ا�
 ThreeQuarter,ثلاثة أرباع
 Tick for a contractor/temp hire not registered on the trip's worker manifest.,فعّله لمتعاقد/موظف مؤقت غير مسجّل في كشف عمالة الرحلة.
 Ticket,التذكرة
+Ticket not found.,التذكرة غير موجودة.
 Timed %,النسبة الموقّتة (%)
+Timeline,الجدول الزمني
 Title,العنوان
 To Bed,إلى سرير
 To Building,إلى مبنى
@@ -2998,6 +3034,7 @@ Trips Dispatched Today,الرحلات المُرسَلة اليوم
 Trips This Month,الرحلات هذا الشهر
 True when the trip recorded both a depart and return timestamp. Data-completeness flag — no planned return time is stored to judge punctuality against.,صحيح عندما تسجّل الرحلة طابعي وقت للمغادرة والعودة معًا. مؤشر اكتمال البيانات — لا يُخزَّن وقت عودة مخطط للحكم على الالتزام بالمواعيد مقابله.
 Type,النوع
+Type a message before sending.,اكتب رسالة قبل الإرسال.
 Typically IT Specialist,عادةً أخصائي تقنية المعلومات
 UOM,وحدة القياس
 URL,الرابط
@@ -3106,6 +3143,7 @@ Vehicle {0} reported stolen.,أُبلغ عن سرقة المركبة {0}.
 Vehicle {0} stopped: {1}.,تم إيقاف المركبة {0}: {1}.
 Vehicle {0} was just assigned by {1}. Please review.,تم إسناد المركبة {0} للتو بواسطة {1}. يُرجى المراجعة.
 Vehicle {0} was not re-linked on cancel; it is no longer free.,لم تُعَد المركبة {0} إلى الربط عند الإلغاء؛ لم تعد متاحة.
+Vehicle: {0},المركبة: {0}
 Vehicles,المركبات
 Vehicles In Service,المركبات في الخدمة
 Vehicles Stopped,المركبات الموقوفة
@@ -3155,6 +3193,7 @@ What happened?,ماذا حدث؟
 "When checked, the target field is set to the constant Static Value instead of copying from the request.",عند التحديد، يُضبط الحقل المستهدف على القيمة الثابتة بدلًا من نسخها من الطلب.
 When do you need pickup?,متى تحتاج إلى الاستقبال؟
 When the recipient acknowledged receipt at the kiosk.,وقت إقرار المستلم بالاستلام في الكشك.
+When the resident accepted the housing terms at the tablet.,وقت موافقة الساكن على شروط السكن على اللوحي.
 "When unchecked, the worker's personal Masar link stops resolving.",عند إلغاء التفعيل، يتوقف رابط مسار العامل الشخصي عن العمل.
 Where is the issue?,أين المشكلة؟
 Which lifecycle event on the source document raises the deduction.,أي حدث في دورة حياة المستند المصدر يُنشئ الخصم.
@@ -3184,6 +3223,7 @@ Worker Transport Plan,خطة نقل العمال
 Worker Type,نوع العامل
 "Worker accommodation blanket. Consumable bedding item, routinely purchased per site.",بطانية سكن العمال. صنف مفروشات استهلاكي يُشترى دورياً لكل موقع.
 Worker accommodation pillow. Consumable bedding item.,وسادة سكن العمال. صنف مفروشات استهلاكي.
+Worker set: {0},تم تعيين العامل: {0}
 Worker signature,توقيع العامل
 Worker towel. Consumable sanitary item.,منشفة عامل. صنف صحي استهلاكي.
 Worker {0} is not on this trip's manifest.,العامل {0} غير مدرج في كشف عمالة هذه الرحلة.
@@ -3217,6 +3257,7 @@ Your Name (Optional),اسمك (اختياري)
 Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.
 Your arrival manifest was submitted. The accommodation team will reconcile arrivals against it on the expected date.,تم إرسال بيان الوصول الخاص بك. سيقوم فريق السكن بمطابقة الوصول الفعلي مع البيان في التاريخ المتوقع.
 Your incident report was submitted. A supervisor will review and confirm it.,تم إرسال بلاغ الحادثة. سيقوم المشرف بمراجعته وتأكيده.
+Your licence isn't due for renewal yet.,رخصتك لا تستحق التجديد بعد.
 Your request has been submitted. Save your tracking code shown below to follow up with your supervisor.,تم تقديم طلبك. احفظ رمز التتبع أدناه للمتابعة مع مشرفك.
 Your tracking code:,رمز المتابعة الخاص بك:
 Your transport request was submitted. Save your tracking code to follow up with your supervisor.,تم تقديم طلب التنقل. احفظ رمز التتبع للمتابعة مع مشرفك.
@@ -3239,6 +3280,7 @@ fuel grades,أنواع الوقود
 incidents,البلاغات
 n/a,غير متاح
 none,لا شيء
+not recorded,غير مسجّل
 occupied,مشغول
 of,من
 on file,مُسجَّل

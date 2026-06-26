@@ -103,6 +103,141 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
     }
 
 
+@frappe.whitelist()
+def resolve_scan(code: str, party_type: str | None = None, building: str | None = None) -> dict:
+    """Classify a scanned code as a worker badge or an article barcode.
+
+    Read-only. A kiosk scanner (HID device or camera) yields one opaque token;
+    this resolves it without the operator pre-saying which kind it is. The token
+    is the natural docname: a worker badge is the Employee / Temporary Worker
+    docname, an article barcode is the Custody Article docname (its naming series,
+    e.g. ``CUST-ART-0001``) — so no barcode schema field is needed.
+
+    Resolution order, first hit wins:
+      1. worker — exact docname of ``party_type`` (Employee | Temporary Worker);
+      2. article — exact Custody Article docname, else a unique ``article_name``
+         match. When ``building`` is given the article carries the live store
+         balance, mirroring :func:`get_kiosk_catalog`.
+
+    A worker match returns the resolved ``party_type`` so the client can flip the
+    selector if the badge belongs to the other party kind. Returns
+    ``{"kind": "none"}`` when nothing matches (the client shows a not-found hint).
+
+    Args:
+        code: the raw scanned token (whitespace is trimmed).
+        party_type: the kiosk's current party kind; the worker probe targets it
+            first, then the other kind.
+        building: optional building; when set an article hit carries the live
+            store balance for that building.
+
+    Returns:
+        dict: ``{"kind": "worker", "party_type", "party", "party_name"}`` or
+        ``{"kind": "article", "article": {...}}`` (same shape as a catalog tile)
+        or ``{"kind": "none"}``.
+    """
+    code = (code or "").strip()
+    if not code:
+        return {"kind": "none"}
+
+    worker = _resolve_worker_scan(code, party_type)
+    if worker:
+        return worker
+
+    article = _resolve_article_scan(code, building)
+    if article:
+        return article
+
+    return {"kind": "none"}
+
+
+def _resolve_worker_scan(code: str, party_type: str | None) -> dict | None:
+    """Match a scanned token to an Employee / Temporary Worker docname.
+
+    Probes the current ``party_type`` first, then the other kind, so a badge for
+    the other party kind still resolves (the client flips the selector). Read-only
+    and permission-gated per party DocType. Returns ``None`` on no match.
+    """
+    party_type = (party_type or "").strip()
+    order = [party_type] if party_type in (PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER) else []
+    for pt in (PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER):
+        if pt not in order:
+            order.append(pt)
+
+    for pt in order:
+        if not frappe.has_permission(pt, "read"):
+            continue
+        if frappe.db.exists(pt, code):
+            # get_title_field always resolves (falls back to name).
+            title_field = frappe.get_meta(pt).get_title_field()
+            party_name = frappe.db.get_value(pt, code, title_field)
+            return {
+                "kind": "worker",
+                "party_type": pt,
+                "party": code,
+                "party_name": party_name or code,
+            }
+    return None
+
+
+def _resolve_article_scan(code: str, building: str | None) -> dict | None:
+    """Match a scanned token to a Custody Article and shape it as a catalog tile.
+
+    Matches the article docname first, then a UNIQUE ``article_name`` (a non-unique
+    name match is ignored — the operator must pick). When ``building`` is given the
+    tile carries the live store balance (same source as the catalog). Read-only and
+    permission-gated. Returns ``None`` on no/ambiguous match.
+    """
+    if not frappe.has_permission("Custody Article", "read"):
+        return None
+
+    fields = [
+        "name as article",
+        "article_name",
+        "unit_of_measure as uom",
+        "image",
+        "standard_unit_cost_sar",
+    ]
+    match = None
+    if frappe.db.exists("Custody Article", code):
+        match = frappe.db.get_value("Custody Article", code, fields, as_dict=True)
+    else:
+        by_name = frappe.get_all(
+            "Custody Article", filters={"article_name": code}, fields=fields, limit=2
+        )
+        if len(by_name) == 1:
+            match = by_name[0]
+    if not match:
+        return None
+
+    match["store_balance"] = _article_store_balance(match["article"], building)
+    return {"kind": "article", "article": match}
+
+
+def _article_store_balance(article: str, building: str | None) -> float | None:
+    """Live store balance (employee unset) for one article in one building.
+
+    Same ledger source as :func:`get_kiosk_catalog` but scoped to a single article
+    (a scan touches one tile, so one tiny query is fine — no N+1). Returns ``None``
+    when no building is given. Read-only.
+    """
+    if not building:
+        return None
+    if not frappe.has_permission("Accommodation Building", "read", doc=building):
+        return None
+    Ledger = frappe.qb.DocType("Accommodation Stock Ledger")
+    rows = (
+        frappe.qb.from_(Ledger)
+        .select(Ledger.qty)
+        .where(Ledger.item_type == "Custody Article")
+        .where(Ledger.item == article)
+        .where(Ledger.building == building)
+        .where(Ledger.is_cancelled == 0)
+        .where(Ledger.employee.isnull())
+        .run(as_dict=True)
+    )
+    return flt(sum(flt(r.qty) for r in rows))
+
+
 @frappe.whitelist(methods=["POST"])
 def issue_cart(
     building: str,

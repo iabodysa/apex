@@ -1,0 +1,27 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Custody Go-Live",
+ "title": "Custody Go-Live",
+ "module": "Habitat",
+ "subtitle": "Build your article catalog and issue your first custody at the kiosk.",
+ "success_message": "Custody is live. Issue and return articles at the kiosk and assess any damage.",
+ "is_complete": 0,
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Define Custody Articles"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Issue at the Kiosk"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Return Custody"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Assess Damage"
+  }
+ ]
+}

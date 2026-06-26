@@ -118,6 +118,45 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "(audit-ok — session identity). Token/identity-resolved writer.",
     ),
     (
+        "salis/api/driver_portal.py",
+        "reply_to_ticket",
+        "Driver portal. The Issue is resolved through _driver_issue, scoped to "
+        "the session driver's own custom_driver, so a driver can only reply on "
+        "their own ticket; the Communication is stamped with the caller's own "
+        "identity. Token/identity-resolved writer.",
+    ),
+    (
+        "salis/api/driver_portal.py",
+        "report_vehicle_problem",
+        "Driver portal. The Salis Driver and bound vehicle are resolved from the "
+        "session server-side; delegates to raise_support_ticket internals which "
+        "stamp the caller's own identity. Token/identity-resolved writer.",
+    ),
+    (
+        "salis/api/driver_portal.py",
+        "request_license_renewal",
+        "Driver portal. The Salis Driver is resolved from the session "
+        "server-side; refuses unless the caller's own licence is within the "
+        "renewal window; delegates to raise_support_ticket internals stamped with "
+        "the caller's identity. Token/identity-resolved writer.",
+    ),
+    (
+        "salis/api/driver_portal.py",
+        "start_my_trip",
+        "Driver portal. The Salis Driver is resolved from the session "
+        "server-side and the trip is honoured only when it belongs to that driver "
+        "(_resolve_my_trip raises otherwise); the Trip Start Log is the caller's "
+        "own record. Token/identity-resolved writer.",
+    ),
+    (
+        "salis/api/driver_portal.py",
+        "complete_my_trip",
+        "Driver portal. The Salis Driver is resolved from the session "
+        "server-side and the trip is honoured only when it belongs to that driver "
+        "(_resolve_my_trip raises otherwise); updates the caller's own Trip Start "
+        "Log. Token/identity-resolved writer.",
+    ),
+    (
         "salis/doctype/rental_settlement/rental_settlement.py",
         "create_payment_request",
         "Doc-bound whitelisted method (def create_payment_request(self)). Frappe "

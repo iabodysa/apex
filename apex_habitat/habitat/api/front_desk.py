@@ -138,6 +138,24 @@ def get_building_grid(building: str) -> dict:
         )
         custody_parents = {c.parent for c in custody_rows}
 
+    # Dominant project per room = the project held by the most active occupants in
+    # that room (the Arrivals board tints a room matching the selected worker's
+    # project so same-project residents are grouped). Tallied from the bed->room map
+    # already loaded above — no extra query.
+    bed_to_room = {b.bed: b.room for b in bed_rows}
+    room_project_tally: dict[str, dict[str, int]] = {}
+    for asg in assignments:
+        if not asg.project:
+            continue
+        room_name = bed_to_room.get(asg.bed)
+        if not room_name:
+            continue
+        room_project_tally.setdefault(room_name, {})
+        room_project_tally[room_name][asg.project] = room_project_tally[room_name].get(asg.project, 0) + 1
+    dominant_project_by_room = {
+        room_name: max(tally, key=tally.get) for room_name, tally in room_project_tally.items()
+    }
+
     # [#ikbfoc]
     summary = {"total_beds": 0, "available": 0, "occupied": 0, "blocked": 0, "out_of_service": 0}
     rooms_acc: dict[str, dict] = {}
@@ -196,6 +214,7 @@ def get_building_grid(building: str) -> dict:
                 "room_status": room_meta.status if room_meta else None,
                 "bed_capacity": room_meta.bed_capacity if room_meta else None,
                 "current_occupancy": room_meta.current_occupancy if room_meta else None,
+                "dominant_project": dominant_project_by_room.get(room_name),
                 "_floor": bed.room_floor,
                 "beds": [],
             }
@@ -569,7 +588,8 @@ def set_room_readiness(room, status):
 @frappe.whitelist(methods=["POST"])
 def quick_check_in(bed, employee=None, project=None, check_in_date=None,
                    cost_center=None, assignment_type="New Assignment",
-                   room_condition_snapshot=None, party_type=None, party=None):
+                   room_condition_snapshot=None, party_type=None, party=None,
+                   terms_signature=None):
     """Create and submit an Accommodation Assignment from the Front Desk board.
 
     Room and building are derived SERVER-SIDE from the bed (never trusted from
@@ -591,6 +611,8 @@ def quick_check_in(bed, employee=None, project=None, check_in_date=None,
         check_in_date: ISO date string.
         cost_center: optional Cost Center docname.
         assignment_type: Select value (defaults to "New Assignment").
+        terms_signature: optional housing-terms acceptance signature data-URI
+            captured on the tablet; stamps ``terms_accepted_on`` when present.
 
     Returns:
         dict: ``{"assignment": <docname>, "bed": <bed>}``.
@@ -619,6 +641,8 @@ def quick_check_in(bed, employee=None, project=None, check_in_date=None,
             "cost_center": cost_center,
             "assignment_type": assignment_type or "New Assignment",
             "room_condition_snapshot": room_condition_snapshot,
+            "terms_signature": terms_signature or None,
+            "terms_accepted_on": now() if terms_signature else None,
         }
     )
     doc.insert(ignore_permissions=False)

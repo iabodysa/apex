@@ -92,6 +92,59 @@ def _user_full_name(user=None):
 	return frappe.utils.get_fullname(user) or user
 
 
+def _fmt_date(value):
+	return frappe.utils.cstr(value) if value else None
+
+
+def _days_until(value):
+	"""Whole days from today until ``value``, or None — mirrors masar's helper so
+	a missing/unparseable expiry never raises."""
+	if not value:
+		return None
+	try:
+		return frappe.utils.date_diff(value, frappe.utils.today())
+	except Exception:
+		return None
+
+
+def _employee_documents(employee):
+	"""The linked Employee's Iqama/passport identity expiries, read defensively.
+
+	Mirrors ``masar.get_worker_context``: Employee field names vary across HR setups,
+	so every field is read via ``.get()`` on the cached doc and a missing field
+	surfaces as None rather than erroring. Returns a list of ``{type, number, expiry,
+	days_left}`` entries (only for documents on file), the same shape the Masar
+	profile consumes — so the SPA reuses one renderer. Read-only."""
+	if not employee or not frappe.db.exists("Employee", employee):
+		return []
+	emp = frappe.get_cached_doc("Employee", employee)
+	documents = []
+	# Same Iqama field fallbacks masar uses (iqama/iqama_no, iqama_expiry/valid_upto).
+	iqama_no = emp.get("iqama") or emp.get("iqama_no")
+	iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
+	if iqama_no or iqama_expiry:
+		documents.append(
+			{
+				"type": "iqama",
+				"number": iqama_no,
+				"expiry": _fmt_date(iqama_expiry),
+				"days_left": _days_until(iqama_expiry),
+			}
+		)
+	# Passport mirrors masar — surfaced only when a number is on file.
+	passport_no = emp.get("passport_number")
+	if passport_no:
+		documents.append(
+			{
+				"type": "passport",
+				"number": passport_no,
+				"expiry": _fmt_date(emp.get("passport_expiry")),
+				"days_left": _days_until(emp.get("passport_expiry")),
+			}
+		)
+	return documents
+
+
 def _project_label(code):
 	"""Resolve a Project link id (e.g. ``PROJ-0038``) to its display name.
 
@@ -170,6 +223,8 @@ def get_driver_profile():
 	# [#projlbl] portal shows the project's display name, not its series code
 	if d.get("project"):
 		d["project"] = _project_label(d["project"])
+	# Iqama/passport expiries from the linked Employee (defensive .get(), like masar)
+	d["documents"] = _employee_documents(d.get("employee"))
 	return d
 
 
@@ -305,6 +360,7 @@ def my_trips_today():
 		order_by="depart_time asc",
 	)
 	_label_trips(trips)  # cards show plate / route name, not raw link ids
+	_attach_trip_log_state(trips, driver)  # cards show started/completed without a second call
 	return trips
 
 
@@ -362,6 +418,25 @@ def _label_trips(trips):
 			t["vehicle"] = plates.get(t["vehicle"], t["vehicle"])
 		if t.get("route_plan"):
 			t["route_plan"] = routes.get(t["route_plan"], t["route_plan"])
+
+
+def _attach_trip_log_state(trips, driver):
+	"""Stamp each trip card with its Trip Start Log state (started / log status) so the
+	driver's Trips list can show start/complete without a per-card round-trip. One query
+	keyed on the driver's logs for the listed trips; trips with no log read as not started."""
+	names = [t["name"] for t in trips if t.get("name")]
+	if not names:
+		return
+	logs = frappe.get_all(
+		"Trip Start Log",
+		filters={"dispatch_trip": ["in", names], "driver": driver, "docstatus": ["<", 2]},
+		fields=["dispatch_trip", "status"],
+	)
+	by_trip = {row["dispatch_trip"]: row.get("status") for row in logs}
+	for t in trips:
+		status = by_trip.get(t["name"])
+		t["started"] = t["name"] in by_trip
+		t["trip_log_status"] = status
 
 
 @frappe.whitelist()
@@ -940,7 +1015,7 @@ def my_trip_route(dispatch_trip):
 
 
 @frappe.whitelist(methods=["POST"])
-def raise_support_ticket(category, priority, subject, description):
+def raise_support_ticket(category, priority, subject, description, attachment=None):
 	"""Raise a support ticket as a native ERPNext Issue (write).
 
 	Identity-scoped: the driver is resolved from the session, never client-supplied,
@@ -950,8 +1025,8 @@ def raise_support_ticket(category, priority, subject, description):
 	``apex_core.setup.seeders.salis_issue_seed``. A linked Service Level
 	Agreement (default for Issue) is
 	applied natively by ERPNext on insert, so the response/resolution clock starts
-	automatically. Returns ``{"name": ...}`` exactly as before so the portal SPA is
-	unchanged."""
+	automatically. ``attachment`` is an optional already-uploaded File url (the SPA
+	uploads the photo first) re-pointed at the new Issue. Returns ``{"name": ...}``."""
 	_require_enabled()
 	driver = _resolve_driver()
 	project = frappe.db.get_value("Salis Driver", driver, "project")
@@ -972,7 +1047,333 @@ def raise_support_ticket(category, priority, subject, description):
 		data["project"] = project
 	doc = frappe.get_doc(data)
 	doc.insert(ignore_permissions=True)  # audit-ok — driver resolved server-side
+	if attachment:
+		_attach_file(doc.doctype, doc.name, attachment)
 	return {"name": doc.name}
+
+
+def _attach_file(doctype, name, file_url):
+	"""Attach an already-uploaded private File to ``doctype``/``name`` (write).
+
+	The SPA uploads the photo first (frappe.client.attach_file / upload_file), which
+	creates a File row and returns its ``file_url``; this re-points that File at the
+	owning record so it shows in the Issue's attachments. Best-effort: a missing/blank
+	url is a silent no-op so a failed image upload never blocks the ticket itself."""
+	if not file_url:
+		return
+	existing = frappe.db.get_value("File", {"file_url": file_url}, "name")
+	if existing:
+		frappe.db.set_value(
+			"File", existing, {"attached_to_doctype": doctype, "attached_to_name": name}
+		)
+
+
+def _driver_issue(name, driver):
+	"""Fetch Issue ``name`` only when it belongs to ``driver`` (custom_driver), else
+	fail closed. The single scope guard shared by the ticket-detail + reply endpoints
+	so one driver can never read or post to another's Issue by guessing an id."""
+	issue = frappe.db.get_value(
+		"Issue",
+		{"name": name, "custom_driver": driver},
+		[
+			"name",
+			"subject",
+			"description",
+			"status",
+			"issue_type as category",
+			"priority",
+			"creation",
+			"response_by",
+			"resolution_by",
+			"first_responded_on",
+			"resolution_date",
+		],
+		as_dict=True,
+	)
+	if not issue:
+		frappe.throw(_("Ticket not found."), frappe.DoesNotExistError)
+	return issue
+
+
+@frappe.whitelist()
+def get_ticket(name):
+	"""One support ticket's detail + its conversation (read).
+
+	Identity-scoped: the driver is resolved from the session and the Issue is returned
+	only when its ``custom_driver`` is that driver, so one driver can never open
+	another's ticket. Returns the durable Issue fields plus the native SLA clock
+	(``response_by``/``resolution_by`` and when each was met) and the Issue's
+	Communications — the timeline the SPA's ticket detail renders. Dates are
+	stringified so the JSON always serializes. Read-only, no commit."""
+	_require_enabled()
+	driver = _resolve_driver()
+	issue = _driver_issue(name, driver)
+	for f in ("creation", "response_by", "resolution_by", "first_responded_on", "resolution_date"):
+		if issue.get(f):
+			issue[f] = frappe.utils.cstr(issue[f])
+	# Native Communications threaded against the Issue, oldest first (the reply log).
+	comms = frappe.get_all(
+		"Communication",
+		filters={"reference_doctype": "Issue", "reference_name": name},
+		fields=["name", "content", "sender", "sent_or_received", "communication_date"],
+		order_by="communication_date asc",
+	)
+	for c in comms:
+		c["communication_date"] = (
+			frappe.utils.cstr(c["communication_date"]) if c.get("communication_date") else None
+		)
+		# strip markup so the SPA renders a clean line, not raw HTML
+		c["content"] = frappe.utils.strip_html_tags(c.get("content") or "").strip() or None
+	issue["communications"] = comms
+	return issue
+
+
+@frappe.whitelist(methods=["POST"])
+def reply_to_ticket(name, message):
+	"""Post the driver's reply to their OWN ticket as a native Communication (write).
+
+	Identity-scoped: the Issue is resolved through ``_driver_issue`` (scoped to the
+	session driver's ``custom_driver``), so a driver can only reply on their own ticket.
+	Adds an ERPNext Communication threaded against the Issue (the same record type the
+	desk timeline shows) and reopens a resolved/closed ticket to Open so staff see the
+	new reply. Returns ``{"name": ...}`` of the new Communication. No GL."""
+	_require_enabled()
+	driver = _resolve_driver()
+	issue = _driver_issue(name, driver)
+	message = (message or "").strip()
+	if not message:
+		frappe.throw(_("Type a message before sending."))
+	comm = frappe.get_doc(
+		{
+			"doctype": "Communication",
+			"communication_type": "Communication",
+			"sent_or_received": "Received",
+			"reference_doctype": "Issue",
+			"reference_name": name,
+			"sender": frappe.session.user,
+			"subject": _("Re: {0}").format(issue.get("subject") or name),
+			"content": message,
+		}
+	)
+	comm.insert(ignore_permissions=True)  # audit-ok — Issue resolved server-side to this driver
+	# A driver reply revives a closed ticket so staff re-engage.
+	if issue.get("status") in ("Resolved", "Closed"):
+		frappe.db.set_value("Issue", name, "status", "Open")
+	return {"name": comm.name}
+
+
+@frappe.whitelist(methods=["POST"])
+def report_vehicle_problem(subject, description, priority=None):
+	"""Raise a Vehicle Issue prefilled with the driver's bound vehicle (write).
+
+	A thin identity-scoped wrapper over the same Issue-creation internals
+	``raise_support_ticket`` uses (issue_type fixed to ``Vehicle``), stamping the
+	driver's bound vehicle into the subject/description so the desk sees which vehicle
+	the report is about. The driver is resolved from the session, never client-supplied.
+	Returns ``{"name": ...}``. No GL."""
+	_require_enabled()
+	driver = _resolve_driver()
+	vehicle = _bound_vehicle(driver)
+	plate = frappe.db.get_value("Salis Vehicle", vehicle, "plate_number") if vehicle else None
+	# Vehicle context goes into the body (Issue has no native vehicle link).
+	body = description or ""
+	if plate or vehicle:
+		body = f"{body}\n\n" + _("Vehicle: {0}").format(plate or vehicle)
+	return raise_support_ticket("Vehicle", priority or "Medium", subject, body)
+
+
+@frappe.whitelist(methods=["POST"])
+def request_license_renewal():
+	"""Raise a Compliance Issue for the driver's licence renewal (write).
+
+	Fires only when the driver's licence is within 30 days of expiry or already
+	expired (the same window the Home/Profile banner uses); otherwise refuses so the
+	action can't be spammed. Reuses ``raise_support_ticket`` internals with the
+	``Compliance`` issue type, so the native SLA clock starts automatically. The driver
+	is resolved from the session. Returns ``{"name": ...}``. No GL."""
+	_require_enabled()
+	driver = _resolve_driver()
+	lic = _license_countdown(driver)
+	if lic.get("state") not in ("expired", "expiring"):
+		frappe.throw(_("Your licence isn't due for renewal yet."))
+	expiry = lic.get("expiry_date")
+	subject = _("Driving licence renewal")
+	body = _("Please action my driving licence renewal. Expiry on file: {0}.").format(
+		expiry or _("not recorded")
+	)
+	return raise_support_ticket("Compliance", "High", subject, body)
+
+
+def _resolve_my_trip(dispatch_trip, driver):
+	"""The Dispatch Trip ``dispatch_trip`` only when it belongs to ``driver``, else
+	fail closed. Shared scope guard for the trip-execution writes so one driver can
+	never start/complete another driver's trip by guessing an id."""
+	trip = frappe.db.get_value(
+		"Dispatch Trip",
+		{"name": dispatch_trip, "driver": driver},
+		["name", "vehicle", "route_plan", "transport_request", "trip_date"],
+		as_dict=True,
+	)
+	if not trip:
+		frappe.throw(_("Trip not found."), frappe.DoesNotExistError)
+	return trip
+
+
+def _trip_log_state(driver, dispatch_trip):
+	"""The driver's Trip Start Log state for a trip as the portal's display shape.
+	Mirrors the projection ``_next_trip_today`` attaches, so a start/complete response
+	updates the card reactively with no extra round-trip."""
+	log = frappe.db.get_value(
+		"Trip Start Log",
+		{"dispatch_trip": dispatch_trip, "driver": driver, "docstatus": ["<", 2]},
+		["name", "status", "start_datetime", "end_datetime"],
+		as_dict=True,
+	)
+	if not log:
+		return {"started": False, "trip_log_status": None, "start_datetime": None, "end_datetime": None}
+	return {
+		"started": True,
+		"name": log["name"],
+		"trip_log_status": log.get("status"),
+		"start_datetime": frappe.utils.cstr(log["start_datetime"]) if log.get("start_datetime") else None,
+		"end_datetime": frappe.utils.cstr(log["end_datetime"]) if log.get("end_datetime") else None,
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def start_my_trip(dispatch_trip):
+	"""Mark the driver's own trip Started, creating its Trip Start Log (write).
+
+	Identity-scoped: the driver is resolved from the session and the trip is honoured
+	only when it belongs to that driver (``_resolve_my_trip``). Gets-or-creates the
+	Trip Start Log for (trip, driver) and stamps ``start_datetime``; idempotent — a
+	second tap returns the existing state rather than duplicating. The Driver holds an
+	``if_owner`` DocPerm on Trip Start Log, and the write is server-authoritative
+	(driver resolved from session), so ``ignore_permissions`` is set. No GL — Trip Start
+	Log is a headcount/execution record only."""
+	_require_enabled()
+	driver = _resolve_driver()
+	trip = _resolve_my_trip(dispatch_trip, driver)
+	existing = frappe.db.get_value(
+		"Trip Start Log",
+		{"dispatch_trip": dispatch_trip, "driver": driver, "docstatus": ["<", 2]},
+		"name",
+	)
+	if not existing:
+		doc = frappe.get_doc(
+			{
+				"doctype": "Trip Start Log",
+				"dispatch_trip": dispatch_trip,
+				"driver": driver,
+				"vehicle": trip.get("vehicle"),
+				"trip_date": trip.get("trip_date") or frappe.utils.today(),
+				"status": "Started",
+				"start_datetime": frappe.utils.now_datetime(),
+			}
+		)
+		doc.insert(ignore_permissions=True)  # audit-ok — driver resolved server-side
+	return _trip_log_state(driver, dispatch_trip)
+
+
+@frappe.whitelist(methods=["POST"])
+def complete_my_trip(dispatch_trip):
+	"""Mark the driver's own trip Completed on its Trip Start Log (write).
+
+	Identity-scoped (``_resolve_my_trip``). Updates the existing log's status to
+	Completed and stamps ``end_datetime``; if the driver never tapped start, the log is
+	created and immediately completed so the day still records execution. Server-
+	authoritative, so ``ignore_permissions`` is set. No GL."""
+	_require_enabled()
+	driver = _resolve_driver()
+	trip = _resolve_my_trip(dispatch_trip, driver)
+	name = frappe.db.get_value(
+		"Trip Start Log",
+		{"dispatch_trip": dispatch_trip, "driver": driver, "docstatus": ["<", 2]},
+		"name",
+	)
+	if name:
+		doc = frappe.get_doc("Trip Start Log", name)
+	else:
+		doc = frappe.get_doc(
+			{
+				"doctype": "Trip Start Log",
+				"dispatch_trip": dispatch_trip,
+				"driver": driver,
+				"vehicle": trip.get("vehicle"),
+				"trip_date": trip.get("trip_date") or frappe.utils.today(),
+				"start_datetime": frappe.utils.now_datetime(),
+			}
+		)
+	doc.status = "Completed"
+	if not doc.end_datetime:
+		doc.end_datetime = frappe.utils.now_datetime()
+	doc.flags.ignore_permissions = True  # audit-ok — driver resolved from session identity
+	doc.save() if not doc.is_new() else doc.insert()
+	return _trip_log_state(driver, dispatch_trip)
+
+
+@frappe.whitelist()
+def my_clearance():
+	"""The driver's exit-clearance state + certificate link when issued (read).
+
+	Identity-scoped: the driver is resolved from the session, so this only ever
+	returns the caller's own Driver Clearance. Returns the latest clearance's status,
+	the blocking reason (open fuel-exception / cost-recovery counts that hold it), and
+	— once the clearance is submitted (Cleared) — the print URL for the Driver Clearance
+	Certificate so the driver can download the PDF. Returns ``{"has_clearance": False}``
+	(a friendly empty state, never a 403) when the driver has no clearance on record.
+	Read-only, no commit."""
+	_require_enabled()
+	driver = _resolve_driver()
+	row = frappe.db.get_value(
+		"Driver Clearance",
+		{"driver": driver, "docstatus": ["<", 2]},
+		[
+			"name",
+			"status",
+			"clearance_reason",
+			"vehicle_returned",
+			"fuel_chip_returned",
+			"custody_returned",
+			"outstanding_fuel_exceptions",
+			"outstanding_recoveries",
+			"docstatus",
+		],
+		as_dict=True,
+		order_by="creation desc",
+	)
+	if not row:
+		return {"has_clearance": False}
+
+	# A submitted, Cleared clearance is the issued state — expose the certificate PDF.
+	issued = row.get("docstatus") == 1 and row.get("status") == "Cleared"
+	certificate_url = None
+	if issued:
+		# Canonical download-pdf URL for the standard certificate print format.
+		from urllib.parse import urlencode
+
+		certificate_url = "/api/method/frappe.utils.print_format.download_pdf?" + urlencode(
+			{
+				"doctype": "Driver Clearance",
+				"name": row["name"],
+				"format": "Driver Clearance Certificate",
+				"no_letterhead": 0,
+			}
+		)
+	return {
+		"has_clearance": True,
+		"name": row["name"],
+		"status": row.get("status"),
+		"clearance_reason": row.get("clearance_reason"),
+		"issued": issued,
+		"blocked": row.get("status") == "Blocked",
+		"vehicle_returned": bool(row.get("vehicle_returned")),
+		"fuel_chip_returned": bool(row.get("fuel_chip_returned")),
+		"custody_returned": bool(row.get("custody_returned")),
+		"outstanding_fuel_exceptions": frappe.utils.cint(row.get("outstanding_fuel_exceptions")),
+		"outstanding_recoveries": frappe.utils.cint(row.get("outstanding_recoveries")),
+		"certificate_url": certificate_url,
+	}
 
 
 @frappe.whitelist()

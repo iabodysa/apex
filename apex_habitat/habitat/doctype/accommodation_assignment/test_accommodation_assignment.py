@@ -167,3 +167,24 @@ class TestAccommodationAssignment(FrappeTestCase):
         doc.insert(ignore_permissions=True)
         msgs = " ".join(m.get("message", "") for m in frappe.get_message_log())
         self.assertNotIn("expired", msgs.lower())
+
+    def test_terms_signature_fields_exist(self):
+        """The housing-terms acceptance fields are present and of the right type."""
+        meta = frappe.get_meta("Accommodation Assignment")
+        sig = meta.get_field("terms_signature")
+        self.assertIsNotNone(sig)
+        self.assertEqual(sig.fieldtype, "Signature")
+        self.assertIsNotNone(meta.get_field("terms_accepted_on"))
+
+    def test_terms_signature_persists(self):
+        """A captured terms signature is stored on the assignment."""
+        fx = self._fixtures()
+        data_uri = "data:image/png;base64,iVBORw0KGgo="
+        doc = self._assignment(fx, fx.emps[0], fx.beds[0])
+        doc.terms_signature = data_uri
+        doc.terms_accepted_on = frappe.utils.now()
+        doc.insert(ignore_permissions=True)
+        self.assertEqual(
+            frappe.db.get_value("Accommodation Assignment", doc.name, "terms_signature"),
+            data_uri,
+        )

@@ -33,6 +33,10 @@
   "billed_to_supplier",
   "accommodation_assignment_sec_checkin_evidence",
   "room_condition_snapshot",
+  "accommodation_assignment_sec_terms",
+  "terms_accepted_on",
+  "accommodation_assignment_terms_col",
+  "terms_signature",
   "accommodation_assignment_sec_table_custody_items",
   "custody_items",
   "accommodation_assignment_sec_large_text",
@@ -250,6 +254,33 @@
    "description": "Optional photo of the bed/room condition at check-in (handover evidence)."
   },
   {
+   "collapsible": 1,
+   "description": "Resident's signature accepting the housing terms, captured on the tablet at check-in.",
+   "fieldname": "accommodation_assignment_sec_terms",
+   "fieldtype": "Section Break",
+   "label": "Housing Terms Acceptance"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "When the resident accepted the housing terms at the tablet.",
+   "fieldname": "terms_accepted_on",
+   "fieldtype": "Datetime",
+   "label": "Terms Accepted On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accommodation_assignment_terms_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Resident's signature accepting the housing terms at check-in.",
+   "fieldname": "terms_signature",
+   "fieldtype": "Signature",
+   "label": "Terms Signature",
+   "read_only": 1
+  },
+  {
    "fieldname": "accommodation_assignment_sec_table_custody_items",
    "fieldtype": "Section Break",
    "label": "Issued Custody Items"
@@ -346,7 +377,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-06-25 12:00:00.000000",
+ "modified": "2026-06-26 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Assignment",

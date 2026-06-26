@@ -93,6 +93,26 @@
           </div>
         </dl>
       </section>
+
+      <!-- Report a problem with the bound vehicle (creates a Vehicle Issue). -->
+      <section class="card card-pad space-y-3">
+        <button v-if="!reporting" class="btn btn-outline" @click="reporting = true">
+          <Icon name="alert" :size="18" /> {{ t("vehicle.reportProblem") }}
+        </button>
+        <template v-else>
+          <textarea
+            v-model="problem"
+            :placeholder="t('vehicle.problemPlaceholder')"
+            class="textarea"
+          ></textarea>
+          <div class="flex gap-2">
+            <button class="btn btn-primary" :disabled="report.loading || !problem.trim()" @click="submitProblem">
+              <Icon name="help" :size="18" /> {{ t("vehicle.send") }}
+            </button>
+            <button class="btn btn-outline" @click="reporting = false">{{ t("vehicle.cancel") }}</button>
+          </div>
+        </template>
+      </section>
     </template>
 
     <EmptyState
@@ -105,13 +125,14 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import LoadingState from "../components/LoadingState.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
+import { pushToast } from "../toast";
 
 const { t } = useI18n();
 
@@ -119,6 +140,23 @@ const vehicle = createResource({
   url: "apex_habitat.salis.api.driver_portal.get_my_vehicle",
   auto: true,
 });
+
+// Report-a-problem: a Vehicle Issue prefilled server-side with the bound vehicle.
+const reporting = ref(false);
+const problem = ref("");
+const report = createResource({
+  url: "apex_habitat.salis.api.driver_portal.report_vehicle_problem",
+  onSuccess: () => {
+    pushToast(t("vehicle.problemSent"), "ok");
+    problem.value = "";
+    reporting.value = false;
+  },
+  onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
+});
+function submitProblem() {
+  if (!problem.value.trim()) return;
+  report.submit({ subject: t("vehicle.problemSubject"), description: problem.value.trim() });
+}
 
 const v = computed(() => vehicle.data?.vehicle || null);
 

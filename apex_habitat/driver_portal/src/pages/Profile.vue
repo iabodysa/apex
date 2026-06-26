@@ -70,6 +70,81 @@
             </dd>
           </div>
         </dl>
+
+        <!-- Renewal action surfaces only when the licence is near/over expiry. -->
+        <button
+          v-if="licenseDue"
+          class="btn btn-outline mt-3"
+          :disabled="renewal.loading"
+          @click="requestRenewal"
+        >
+          <Icon name="alert" :size="18" /> {{ t("profile.requestRenewal") }}
+        </button>
+      </section>
+
+      <!-- Identity documents: Iqama / passport expiry from the linked Employee
+           (server reads them defensively; omitted when none are on file). -->
+      <section v-if="documents.length" class="card card-pad">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
+          {{ t("profile.documents") }}
+        </h3>
+        <dl class="space-y-3 text-sm">
+          <div
+            v-for="docu in documents"
+            :key="docu.type"
+            class="flex items-center gap-2"
+            :class="docColor(docu)"
+          >
+            <Icon :name="docIcon(docu)" :size="18" class="shrink-0" />
+            <dt class="min-w-0">
+              <span class="font-semibold">{{ docLabel(docu.type) }}</span>
+              <span v-if="docu.number" class="text-muted block text-xs"><bdi>{{ docu.number }}</bdi></span>
+            </dt>
+            <dd class="ms-auto text-end shrink-0">
+              <span class="font-semibold"><bdi>{{ docu.expiry || t("profile.docNoExpiry") }}</bdi></span>
+              <span v-if="docHint(docu)" class="block text-xs opacity-90">{{ docHint(docu) }}</span>
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- Exit clearance: state + blocking items, with the certificate PDF when issued. -->
+      <section v-if="clearanceRow" class="card card-pad">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-muted mb-3">
+          {{ t("clearance.title") }}
+        </h3>
+        <div class="flex items-center justify-between gap-3">
+          <span class="text-sm text-muted">{{ t("clearance.status") }}</span>
+          <span class="pill" :class="clearancePill">{{ clearanceStatusLabel }}</span>
+        </div>
+        <dl class="mt-3 space-y-2 text-sm">
+          <div v-if="clearanceRow.clearance_reason" class="flex items-center gap-2">
+            <dt class="text-muted">{{ t("clearance.reason") }}</dt>
+            <dd class="ms-auto font-semibold">{{ clearanceRow.clearance_reason }}</dd>
+          </div>
+          <template v-if="clearanceRow.blocked">
+            <p class="text-xs text-warning">{{ t("clearance.blockedHint") }}</p>
+            <div v-if="clearanceRow.outstanding_fuel_exceptions" class="flex items-center gap-2 text-warning">
+              <Icon name="alert" :size="16" class="shrink-0" />
+              <dt>{{ t("clearance.openExceptions") }}</dt>
+              <dd class="ms-auto font-semibold"><bdi>{{ clearanceRow.outstanding_fuel_exceptions }}</bdi></dd>
+            </div>
+            <div v-if="clearanceRow.outstanding_recoveries" class="flex items-center gap-2 text-warning">
+              <Icon name="alert" :size="16" class="shrink-0" />
+              <dt>{{ t("clearance.openRecoveries") }}</dt>
+              <dd class="ms-auto font-semibold"><bdi>{{ clearanceRow.outstanding_recoveries }}</bdi></dd>
+            </div>
+          </template>
+        </dl>
+        <a
+          v-if="clearanceRow.issued && clearanceRow.certificate_url"
+          :href="clearanceRow.certificate_url"
+          target="_blank"
+          rel="noopener"
+          class="btn btn-primary mt-3"
+        >
+          <Icon name="badge" :size="18" /> {{ t("clearance.downloadCertificate") }}
+        </a>
       </section>
 
       <!-- My Requests: secondary actions reachable from the profile rather
@@ -114,6 +189,7 @@ import LoadingState from "../components/LoadingState.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n } from "../i18n";
+import { pushToast } from "../toast";
 
 const { t } = useI18n();
 
@@ -121,6 +197,16 @@ const profile = createResource({
   url: "apex_habitat.salis.api.driver_portal.get_driver_profile",
   auto: true,
 });
+
+// Exit-clearance state (status, blocking items, certificate URL when issued).
+const clearance = createResource({
+  url: "apex_habitat.salis.api.driver_portal.my_clearance",
+  auto: true,
+});
+const clearanceRow = computed(() => (clearance.data?.has_clearance ? clearance.data : null));
+
+// Identity-document expiries (Iqama/passport) from the linked Employee.
+const documents = computed(() => profile.data?.documents || []);
 
 const initial = computed(
   () => ((profile.data?.full_name || "?").trim().charAt(0).toUpperCase()) || "?",
@@ -159,5 +245,64 @@ const licenseHint = computed(() => {
   if (d < 0) return t("license.expired");
   if (d <= 30) return t("license.daysLeft", { n: d });
   return "";
+});
+
+// Renewal action shows only when the licence is within 30 days or expired —
+// the same window the server enforces on request_license_renewal.
+const licenseDue = computed(() => {
+  const d = daysToExpiry.value;
+  return d !== null && d <= 30;
+});
+const renewal = createResource({
+  url: "apex_habitat.salis.api.driver_portal.request_license_renewal",
+  onSuccess: () => pushToast(t("profile.renewalSent"), "ok"),
+  onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
+});
+function requestRenewal() {
+  renewal.submit();
+}
+
+// Document expiry → colour/icon/hint (same near/over-expiry vocabulary as the
+// licence + vehicle compliance; server gives signed days_left).
+function docLabel(type) {
+  return type === "iqama" ? t("profile.iqama") : t("profile.passport");
+}
+function docState(docu) {
+  const d = docu.days_left;
+  if (d == null) return "valid";
+  if (d < 0) return "expired";
+  if (d <= 30) return "expiring";
+  return "valid";
+}
+function docColor(docu) {
+  const s = docState(docu);
+  if (s === "expired") return "text-danger";
+  if (s === "expiring") return "text-warning";
+  return "";
+}
+function docIcon(docu) {
+  return docState(docu) === "valid" ? "badge" : "alert";
+}
+function docHint(docu) {
+  const d = docu.days_left;
+  if (d == null) return "";
+  if (d < 0) return t("license.expired");
+  if (d <= 30) return t("license.daysLeft", { n: d });
+  return "";
+}
+
+const clearancePill = computed(() => {
+  const s = (clearanceRow.value?.status || "").toLowerCase();
+  if (s === "cleared") return "pill-success";
+  if (s === "blocked") return "pill-danger";
+  if (s === "in progress") return "pill-warning";
+  return "pill-neutral";
+});
+const clearanceStatusLabel = computed(() => {
+  const c = clearanceRow.value;
+  if (!c) return "";
+  if (c.issued) return t("clearance.issued");
+  if (c.blocked) return t("clearance.blocked");
+  return c.status || t("common.none");
 });
 </script>

@@ -184,6 +184,102 @@ def get_vehicle_detail(vehicle):
     return {"vehicle": v, "incidents": incidents, "assignments": assignments}
 
 
+# How many of each event type to pull before merging, and the merged-feed cap. Kept
+# bounded (no limit_page_length=0) so a long-lived vehicle never returns an unbounded feed.
+TIMELINE_PER_SOURCE = 20
+TIMELINE_LIMIT = 40
+
+
+@frappe.whitelist()
+def get_vehicle_timeline(vehicle):
+    """Return one vehicle's consolidated operational history as a single date-sorted feed.
+
+    Unions four event sources into one timeline — Vehicle Incident, Vehicle Stop,
+    Vehicle Assignment and *resolved* Operations Alert — so the drawer shows the whole
+    operational story of a vehicle in one place instead of three disconnected lists.
+    Permission- and scope-gated identically to ``get_vehicle_detail``: read access to
+    the vehicle is the single chokepoint (once you may read the vehicle you may read its
+    own history). Bounded per source and overall, N+1-free (no per-row queries). Each
+    row is a normalised ``{kind, date, ...}`` event; ``date`` is ISO so the client sorts
+    and renders without reparsing per source.
+    """
+    frappe.has_permission("Salis Vehicle", "read", doc=vehicle, throw=True)
+    if not frappe.db.exists("Salis Vehicle", vehicle):
+        frappe.throw(_("Vehicle not found."))
+
+    events = []
+
+    for r in frappe.get_all(
+        "Vehicle Incident",
+        filters={"vehicle": vehicle},
+        fields=["name", "incident_type", "incident_date", "status", "location"],
+        order_by="incident_date desc",
+        limit=TIMELINE_PER_SOURCE,
+    ):
+        events.append({
+            "kind": "incident",
+            "date": str(r.incident_date) if r.incident_date else None,
+            "name": r.name,
+            "incident_type": r.incident_type,
+            "status": r.status,
+            "location": r.location,
+        })
+
+    for r in frappe.get_all(
+        "Vehicle Stop",
+        filters={"vehicle": vehicle, "docstatus": ["<", 2]},
+        fields=["name", "stop_reason", "stop_date", "return_date", "related_driver"],
+        order_by="stop_date desc",
+        limit=TIMELINE_PER_SOURCE,
+    ):
+        events.append({
+            "kind": "stop",
+            "date": str(r.stop_date) if r.stop_date else None,
+            "name": r.name,
+            "stop_reason": r.stop_reason,
+            "return_date": str(r.return_date) if r.return_date else None,
+            "driver": r.related_driver,
+        })
+
+    for r in frappe.get_all(
+        "Vehicle Assignment",
+        filters={"vehicle": vehicle},
+        fields=["name", "driver", "start_date", "end_date", "status"],
+        order_by="start_date desc",
+        limit=TIMELINE_PER_SOURCE,
+    ):
+        events.append({
+            "kind": "assignment",
+            "date": str(r.start_date) if r.start_date else None,
+            "name": r.name,
+            "driver": r.driver,
+            "end_date": str(r.end_date) if r.end_date else None,
+            "status": r.status,
+        })
+
+    # Only resolved alerts join the history; the open queue is shown live at the top of
+    # the drawer. Dated by resolved_on (its place on the timeline is when it closed).
+    for r in frappe.get_all(
+        "Operations Alert",
+        filters={"vehicle": vehicle, "status": "Resolved", "resolved_on": ["is", "set"]},
+        fields=["name", "alert_type", "severity", "resolved_on", "message"],
+        order_by="resolved_on desc",
+        limit=TIMELINE_PER_SOURCE,
+    ):
+        events.append({
+            "kind": "alert",
+            "date": str(r.resolved_on) if r.resolved_on else None,
+            "name": r.name,
+            "alert_type": r.alert_type,
+            "severity": r.severity,
+            "message": r.message,
+        })
+
+    # Date-sort the merged feed (newest first); undated rows sink to the bottom.
+    events.sort(key=lambda e: e["date"] or "", reverse=True)
+    return {"vehicle": vehicle, "events": events[:TIMELINE_LIMIT]}
+
+
 @frappe.whitelist(methods=["POST"])
 def release_vehicle(vehicle, return_date=None):
     """Release a Stopped vehicle back to service from the Fleet Control drawer.
