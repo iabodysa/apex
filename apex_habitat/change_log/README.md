@@ -5,10 +5,11 @@ to that series' consolidated note (newest patch first inside).
 
 ## Latest
 
-**[1.56](v1/v1_56_0.md)** — Operations and fleet boards now move in real time, custody runs from a scan-and-go kiosk, and drivers handle their own day from the app.
+**[1.57](v1/v1_57_0.md)** — Drivers now run their whole day from a phone-friendly app, and every workspace opens straight to the screen you actually use.
 
 ## All releases
 
+- [1.57](v1/v1_57_0.md) — Drivers now run their whole day from a phone-friendly app, and every workspace opens straight to the screen you actually use.
 - [1.56](v1/v1_56_0.md) — Operations and fleet boards now move in real time, custody runs from a scan-and-go kiosk, and drivers handle their own day from the app.
 - [1.55](v1/v1_55_0.md) — Portal experience release: clearer worker custody and transport, a reworked driver portal, RTL fixes, and workspace wiring.
 - [1.54](v1/v1_54_0.md) — Six business features: financial integration, salary-deduction layer, cost-field privacy, safety auto-tickets, rider guard, and model cleanup.

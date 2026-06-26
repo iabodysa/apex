@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.57 — drivers now run their whole day from a phone-friendly app: they install it to the home screen and keep working offline (a banner shows when saved data is on screen), snap a shift photo at check-in, open a trip or vehicle in Google Maps with one tap, follow a fuel request and its decision, and watch their license, clearance and vehicle-compliance dates before they lapse — and a driver is now notified about tomorrow's trip and about a fuel request decision, in the app and by their usual channel; a supervisor can register a new driver on the spot before assigning a vehicle and capture a vehicle handover during a reassignment as a draft the manager reviews; and every workspace is leaner, opening straight to the portal or screen you use most with a short curated set of shortcuts and counters instead of extra charts and lists, alongside a clearer first-time fleet setup",
+        "app_name": "apex_habitat",
+        "link": "/driver",
+        "creation": "2026-06-26 23:30:00",
+    },
+    {
         "title": "Apex 1.56 — operations now move in real time: the Fleet Control and Operations Control boards update on their own as vehicles and alerts change, so trouble shows the moment it happens; arrivals, front desk, the custody kiosk and the driver app get a deep rework — residents tint by project so same-project workers group together, the bed board opens straight to your building, a worker badge or article barcode hands custody out by scan, and drivers reply to tickets, report a problem, start a trip and check document expiries from the app; a resident signs the housing terms at check-in and the signature is kept on the assignment; a guided custody go-live walks a new site through defining articles, issuing, returning and assessing damage; the worker app reads fully in Arabic (labels like Left and Suspended no longer leak English) with a developer-mode demo so the worker and driver apps are not empty on first look; and the What's-New note now appears once per version instead of replaying the whole history, alongside reliability work and tighter write-permission checks",
         "app_name": "apex_habitat",
         "link": "/app/operations-control",
