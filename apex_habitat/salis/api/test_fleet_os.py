@@ -166,3 +166,199 @@ class TestBulkActions(FrappeTestCase):
     def test_bulk_empty_selection_throws(self):
         with self.assertRaises(frappe.ValidationError):
             fleet_os.bulk_stop_vehicles([])
+
+
+class TestReaderErrors(FrappeTestCase):
+    """A failing secondary reader degrades to a dismissible notice, not a blank
+    board: the vehicles still return and the failure is named in reader_errors."""
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def test_partial_reader_failure_is_signalled_not_thrown(self):
+        plate = f"RE {frappe.generate_hash(length=6)}"
+        frappe.get_doc(
+            {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
+        ).insert(ignore_permissions=True)
+
+        # Force only the incident reader to blow up; the board must still render.
+        real_get_all = frappe.get_all
+
+        def boom(doctype, *a, **kw):
+            if doctype == "Vehicle Incident":
+                raise RuntimeError("incident store offline")
+            return real_get_all(doctype, *a, **kw)
+
+        with patch(_RESOLVER, return_value=(True, None)), patch.object(frappe, "get_all", side_effect=boom):
+            r = fleet_os.get_fleet_os()
+
+        self.assertTrue(r["vehicles"], "the board must still return vehicles")
+        self.assertIn(plate, [v["plate"] for v in r["vehicles"]])
+        self.assertTrue(r["reader_errors"], "the failed reader must be signalled")
+        self.assertTrue(any("error" in e and "reader" in e for e in r["reader_errors"]))
+
+    def test_clean_read_has_empty_reader_errors(self):
+        # Non-vacuous: a healthy read carries the additive key, empty.
+        with patch(_RESOLVER, return_value=(True, None)):
+            r = fleet_os.get_fleet_os()
+        self.assertEqual(r["reader_errors"], [])
+
+    def test_empty_branches_carry_reader_errors_key(self):
+        # The additive key is present on both typed-empty branches too.
+        with patch(_RESOLVER, return_value=(False, [])):
+            scope_empty = fleet_os.get_fleet_os()
+        self.assertEqual(scope_empty["reason"], "scope_empty")
+        self.assertEqual(scope_empty["reader_errors"], [])
+
+
+class TestWorkshopLane(FrappeTestCase):
+    """get_fleet_os carries the workshop lane: entry date, days-in-workshop and
+    the overstay flag for a vehicle with an open Maintenance stop."""
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def _row_for(self, plate):
+        with patch(_RESOLVER, return_value=(True, None)):
+            for v in fleet_os.get_fleet_os().get("vehicles", []):
+                if v.get("plate") == plate:
+                    return v
+        return None
+
+    def test_workshop_fields_populate_for_a_vehicle_in_the_shop(self):
+        plate = f"WSL {frappe.generate_hash(length=6)}"
+        frappe.get_doc(
+            {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
+        ).insert(ignore_permissions=True)
+        fleet_os.workshop_in(plate, notes="gearbox")
+
+        row = self._row_for(plate)
+        self.assertIsNotNone(row)
+        self.assertEqual(row["vehicle_status"], "workshop")
+        self.assertTrue(row["workshop_date"], "the workshop entry date must be set")
+        self.assertIn("gearbox", row["workshop_notes"])
+        self.assertGreaterEqual(row["days_in_workshop"], 0)
+        self.assertIn("workshop_overstay", row)
+        # A fresh stop is not overstaying (the default cutoff is 14 days).
+        self.assertFalse(row["workshop_overstay"])
+
+    def test_non_workshop_vehicle_has_blank_lane(self):
+        plate = f"WSL {frappe.generate_hash(length=6)}"
+        frappe.get_doc(
+            {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
+        ).insert(ignore_permissions=True)
+        row = self._row_for(plate)
+        self.assertIsNotNone(row)
+        self.assertEqual(row["workshop_date"], "")
+        self.assertEqual(row["days_in_workshop"], 0)
+        self.assertFalse(row["workshop_overstay"])
+
+
+class TestStatusMeta(FrappeTestCase):
+    """get_status_meta server-drives the SPA status chips off the DocType Select."""
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def test_returns_translated_status_options(self):
+        res = fleet_os.get_status_meta()
+        values = [s["value"] for s in res["statuses"]]
+        # The canonical Salis Vehicle.status options must all be present as values.
+        for opt in ("Active", "Stopped", "Under Maintenance", "Released"):
+            self.assertIn(opt, values)
+        # Each row carries a non-empty label (translated display string).
+        self.assertTrue(all(s["label"] for s in res["statuses"]))
+
+
+class TestVehicleTimeline(FrappeTestCase):
+    """get_vehicle_timeline merges assignments + stops + incidents + alerts into
+    one descending feed, read-scoped and PII-gated."""
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def test_timeline_merges_every_source_descending(self):
+        plate = f"TL {frappe.generate_hash(length=6)}"
+        veh = (
+            frappe.get_doc(
+                {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
+            )
+            .insert(ignore_permissions=True)
+            .name
+        )
+        inc = frappe.get_doc(
+            {
+                "doctype": "Vehicle Incident",
+                "incident_type": "Accident",
+                "vehicle": veh,
+                "incident_date": "2026-06-02",
+                "description": "Side scrape.",
+                "status": "Open",
+            }
+        ).insert(ignore_permissions=True)
+        inc.submit()
+        # A stop on a later date so we can assert the descending order.
+        fleet_os.workshop_in(plate)  # creates a Maintenance Vehicle Stop dated today
+
+        res = fleet_os.get_vehicle_timeline(plate)
+        kinds = {e["kind"] for e in res["events"]}
+        self.assertIn("incident", kinds)
+        self.assertIn("stop", kinds)
+        # Descending by date: the most recent event (the stop, today) is first.
+        dates = [e["date"] for e in res["events"] if e["date"]]
+        self.assertEqual(dates, sorted(dates, reverse=True))
+
+    def test_timeline_blanks_driver_for_non_pii_role(self):
+        plate = f"TL {frappe.generate_hash(length=6)}"
+        veh = (
+            frappe.get_doc(
+                {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
+            )
+            .insert(ignore_permissions=True)
+            .name
+        )
+        driver = frappe.get_doc(
+            {
+                "doctype": "Salis Driver",
+                "full_name": "TL Driver",
+                "driver_id": f"TLD-{frappe.generate_hash(length=6)}",
+                "status": "Active",
+            }
+        ).insert(ignore_permissions=True)
+        asg = frappe.get_doc(
+            {
+                "doctype": "Vehicle Assignment",
+                "vehicle": veh,
+                "driver": driver.name,
+                "start_date": "2026-06-01",
+                "status": "Active",
+            }
+        ).insert(ignore_permissions=True)
+        asg.submit()
+
+        # PII visible for Administrator (permlevel-1 read on Salis Driver).
+        rows = [e for e in fleet_os.get_vehicle_timeline(plate)["events"] if e["kind"] == "assignment"]
+        self.assertTrue(rows)
+        self.assertEqual(rows[0]["driver"], driver.name)
+
+        # An unscoped oversight role WITHOUT permlevel-1 read (Internal Auditor) still
+        # sees the timeline, but the driver id is blanked — same gate as the reader.
+        email = "tl-timeline-auditor@test.local"
+        if not frappe.db.exists("User", email):
+            frappe.get_doc(
+                {
+                    "doctype": "User",
+                    "email": email,
+                    "first_name": "TL Timeline Auditor",
+                    "roles": [{"role": "Internal Auditor"}],
+                }
+            ).insert(ignore_permissions=True)
+        try:
+            frappe.set_user(email)
+            blanked = [
+                e for e in fleet_os.get_vehicle_timeline(plate)["events"] if e["kind"] == "assignment"
+            ]
+        finally:
+            frappe.set_user("Administrator")
+        self.assertTrue(blanked, "the timeline must STILL be visible (non-vacuous check)")
+        self.assertEqual(blanked[0]["driver"], "")

@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.utils import getdate, today
+from frappe.utils import date_diff, getdate, today
 
 from apex_habitat.salis.api.dispatch_board import _permitted_projects
 from apex_habitat.salis.api.fleet_reader import scope_filter, scoped_vehicles
@@ -65,10 +65,30 @@ def _sheet_for(category: str | None) -> str:
     return "CAR"
 
 
-def _resolve_plate(plate: str) -> str:
+def _read(reader_errors: list, reader: str, fn, default):
+    """Run one secondary reader, isolating its failure from the board.
+
+    The vehicle set is fatal (no board without it); every enrichment reader
+    (drivers, assignments, incidents, write-offs, category fuel) is best-effort —
+    a failure in one returns ``default`` and is recorded in ``reader_errors`` so
+    the page can show a dismissible inline notice instead of a blank screen.
+    """
+    try:
+        return fn()
+    except Exception:
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Fleet OS reader failed: {reader}"[:140],
+        )
+        reader_errors.append({"reader": reader, "error": _("Could not load {0}.").format(_(reader))})
+        return default
+
+
+def _resolve_plate(plate: str, ptype: str = "write") -> str:
     """Resolve a plate string from the dashboard to a Salis Vehicle name,
     permission-checked. Matches plate_number, then plate_normalized, then name.
-    Raises if not found or not permitted."""
+    Raises if not found or not permitted. ``ptype`` is "write" for the action
+    endpoints (the default) and "read" for read-only ones (the timeline)."""
     if not plate:
         frappe.throw(_("Plate is required."))
     name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
@@ -79,7 +99,7 @@ def _resolve_plate(plate: str) -> str:
         name = plate
     if not name:
         frappe.throw(_("Vehicle {0} not found.").format(plate))
-    frappe.has_permission("Salis Vehicle", "write", doc=name, throw=True)
+    frappe.has_permission("Salis Vehicle", ptype, doc=name, throw=True)
     return name
 
 
@@ -101,10 +121,11 @@ def get_fleet_os():
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     # [#8178ig]
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
+    reader_errors: list = []
     _unscoped, _projects, base_filters = scope_filter()
     # base_filters is None only for a scoped user with no permitted project.
     if base_filters is None:
-        return {"vehicles": [], "reason": "scope_empty"}
+        return {"vehicles": [], "reason": "scope_empty", "reader_errors": []}
 
     vehicles = scoped_vehicles(
         fields=[
@@ -116,44 +137,57 @@ def get_fleet_os():
         base_filters=base_filters,
     )
     if not vehicles:
-        return {"vehicles": [], "reason": "data_empty"}
+        return {"vehicles": [], "reason": "data_empty", "reader_errors": []}
 
     # [#f8i05f]
     cat_names = list({v.vehicle_category for v in vehicles if v.get("vehicle_category")})
-    cat_fuel: dict[str, str] = {}
-    if cat_names:
-        for c in frappe.get_all(
-            "Vehicle Category",
-            filters={"name": ["in", cat_names]},
-            fields=["name", "default_fuel_type"],
-        ):
-            cat_fuel[c.name] = (c.default_fuel_type or "").upper()
+
+    def _read_cat_fuel():
+        out: dict[str, str] = {}
+        if cat_names:
+            for c in frappe.get_all(
+                "Vehicle Category",
+                filters={"name": ["in", cat_names]},
+                fields=["name", "default_fuel_type"],
+            ):
+                out[c.name] = (c.default_fuel_type or "").upper()
+        return out
+
+    cat_fuel: dict[str, str] = _read(reader_errors, _("fuel grades"), _read_cat_fuel, {})
 
     # [#ev30tz]
     driver_names = {v.current_driver for v in vehicles if v.get("current_driver")}
 
     # [#nfkzsx]
     plates = [v.name for v in vehicles]
-    assignments = frappe.get_all(
-        "Vehicle Assignment",
-        filters={"vehicle": ["in", plates]},
-        fields=["vehicle", "driver", "project", "start_date", "end_date", "status", "docstatus"],
-        order_by="start_date asc",
-        limit_page_length=0,
+    assignments = _read(
+        reader_errors, _("assignments"),
+        lambda: frappe.get_all(
+            "Vehicle Assignment",
+            filters={"vehicle": ["in", plates]},
+            fields=["vehicle", "driver", "project", "start_date", "end_date", "status", "docstatus"],
+            order_by="start_date asc",
+            limit_page_length=0,
+        ),
+        [],
     )
     for a in assignments:
         if a.get("driver"):
             driver_names.add(a.driver)
 
-    drivers: dict[str, dict] = {}
-    if driver_names:
-        for d in frappe.get_all(
-            "Salis Driver",
-            filters={"name": ["in", list(driver_names)]},
-            fields=["name", "full_name", "driver_id", "phone"],
-            limit_page_length=0,
-        ):
-            drivers[d.name] = d
+    def _read_drivers():
+        out: dict[str, dict] = {}
+        if driver_names:
+            for d in frappe.get_all(
+                "Salis Driver",
+                filters={"name": ["in", list(driver_names)]},
+                fields=["name", "full_name", "driver_id", "phone"],
+                limit_page_length=0,
+            ):
+                out[d.name] = d
+        return out
+
+    drivers: dict[str, dict] = _read(reader_errors, _("drivers"), _read_drivers, {})
 
     history_by_vehicle: dict[str, list] = {}
     for a in assignments:
@@ -178,61 +212,100 @@ def get_fleet_os():
 
     # Open/recent incidents + write-offs per vehicle, grouped in Python (N+1-free).
     # Scope is inherited: `plates` is already the project-permitted vehicle set.
-    incidents = frappe.get_all(
-        "Vehicle Incident",
-        filters={"vehicle": ["in", plates], "docstatus": 1},
-        fields=[
-            "vehicle", "incident_type", "incident_date", "location",
-            "report_number", "status", "estimated_cost", "description", "evidence",
-        ],
-        order_by="incident_date desc",
-        limit_page_length=0,
-    )
-    accidents_by_vehicle: dict[str, list] = {}
-    theft_by_vehicle: dict[str, dict] = {}
-    for inc in incidents:
-        row = {
-            "type": inc.incident_type or "",
-            "date": str(inc.incident_date or ""),
-            "location": inc.location or "",
-            "report_number": inc.report_number or "",
-            "status": "closed" if inc.status == "Closed" else (inc.status or "").lower(),
-            "cost": inc.estimated_cost or 0,
-            "estimated_cost": inc.estimated_cost or 0,
-            "description": inc.description or "",
-            "has_evidence": bool(inc.evidence),
-        }
-        if inc.incident_type == "Theft":
-            # First (most recent, non-closed preferred) theft drives the card stripe.
-            cur = theft_by_vehicle.get(inc.vehicle)
-            if cur is None or (cur.get("status") == "closed" and row["status"] != "closed"):
-                theft_by_vehicle[inc.vehicle] = row
-        else:
-            accidents_by_vehicle.setdefault(inc.vehicle, []).append(row)
+    def _read_incidents():
+        incidents = frappe.get_all(
+            "Vehicle Incident",
+            filters={"vehicle": ["in", plates], "docstatus": 1},
+            fields=[
+                "vehicle", "incident_type", "incident_date", "location",
+                "report_number", "status", "estimated_cost", "description", "evidence",
+            ],
+            order_by="incident_date desc",
+            limit_page_length=0,
+        )
+        accidents: dict[str, list] = {}
+        theft: dict[str, dict] = {}
+        for inc in incidents:
+            row = {
+                "type": inc.incident_type or "",
+                "date": str(inc.incident_date or ""),
+                "location": inc.location or "",
+                "report_number": inc.report_number or "",
+                "status": "closed" if inc.status == "Closed" else (inc.status or "").lower(),
+                "cost": inc.estimated_cost or 0,
+                "estimated_cost": inc.estimated_cost or 0,
+                "description": inc.description or "",
+                "has_evidence": bool(inc.evidence),
+            }
+            if inc.incident_type == "Theft":
+                # First (most recent, non-closed preferred) theft drives the card stripe.
+                cur = theft.get(inc.vehicle)
+                if cur is None or (cur.get("status") == "closed" and row["status"] != "closed"):
+                    theft[inc.vehicle] = row
+            else:
+                accidents.setdefault(inc.vehicle, []).append(row)
+        return accidents, theft
 
-    write_offs = frappe.get_all(
-        "Vehicle Damage Write-Off",
-        filters={"vehicle": ["in", plates], "docstatus": 1},
-        fields=[
-            "name", "vehicle", "creation", "status", "estimated_cost",
-            "damage_description", "recommended_action", "evidence",
-        ],
-        order_by="creation desc",
-        limit_page_length=0,
+    accidents_by_vehicle, theft_by_vehicle = _read(
+        reader_errors, _("incidents"), _read_incidents, ({}, {})
     )
-    damages_by_vehicle: dict[str, list] = {}
-    for w in write_offs:
-        damages_by_vehicle.setdefault(w.vehicle, []).append({
-            "case": w.name,
-            "date": str(getdate(w.creation) if w.creation else ""),
-            # Front-end shows a "repaired" chip on 'completed'; Approved/Closed map to it.
-            "status": "completed" if w.status in ("Approved", "Closed") else (w.status or "").lower(),
-            "cost": w.estimated_cost or 0,
-            "estimated_cost": w.estimated_cost or 0,
-            "recommended_action": w.recommended_action or "",
-            "description": w.damage_description or "",
-            "has_evidence": bool(w.evidence),
-        })
+
+    def _read_write_offs():
+        write_offs = frappe.get_all(
+            "Vehicle Damage Write-Off",
+            filters={"vehicle": ["in", plates], "docstatus": 1},
+            fields=[
+                "name", "vehicle", "creation", "status", "estimated_cost",
+                "damage_description", "recommended_action", "evidence",
+            ],
+            order_by="creation desc",
+            limit_page_length=0,
+        )
+        damages: dict[str, list] = {}
+        for w in write_offs:
+            damages.setdefault(w.vehicle, []).append({
+                "case": w.name,
+                "date": str(getdate(w.creation) if w.creation else ""),
+                # Front-end shows a "repaired" chip on 'completed'; Approved/Closed map to it.
+                "status": "completed" if w.status in ("Approved", "Closed") else (w.status or "").lower(),
+                "cost": w.estimated_cost or 0,
+                "estimated_cost": w.estimated_cost or 0,
+                "recommended_action": w.recommended_action or "",
+                "description": w.damage_description or "",
+                "has_evidence": bool(w.evidence),
+            })
+        return damages
+
+    damages_by_vehicle: dict[str, list] = _read(reader_errors, _("damages"), _read_write_offs, {})
+
+    # Workshop lane: per-vehicle open Maintenance stop -> entry date, days-in-workshop,
+    # overstay flag and notes. Reuses tasks._overstay_stops (the single overstay rule)
+    # so the board can never disagree with the alert/number card.
+    def _read_workshop():
+        from apex_habitat.salis.tasks import _overstay_stops
+
+        stops = frappe.get_all(
+            "Vehicle Stop",
+            filters={
+                "vehicle": ["in", plates],
+                "stop_reason": "Maintenance",
+                "docstatus": 1,
+                "return_date": ["is", "not set"],
+            },
+            fields=["vehicle", "stop_date", "notes"],
+            order_by="stop_date asc",
+            limit_page_length=0,
+        )
+        # Earliest open stop per vehicle drives the lane (ordered asc above).
+        by_vehicle: dict[str, dict] = {}
+        for s in stops:
+            by_vehicle.setdefault(s.vehicle, s)
+        overstay = {r.vehicle for r in _overstay_stops()}
+        return by_vehicle, overstay
+
+    workshop_by_vehicle, workshop_overstay = _read(
+        reader_errors, _("workshop status"), _read_workshop, ({}, set())
+    )
 
     out = []
     for v in vehicles:
@@ -252,6 +325,8 @@ def get_fleet_os():
                     "status": "Active", "project": (v.project or ""), "area": "",
                     "reason": "", "notes": "", "branch_receive": "", "branch_deliver": "",
                 }
+        ws = workshop_by_vehicle.get(v.name)
+        ws_date = str(ws.stop_date) if ws and ws.stop_date else ""
         out.append({
             "plate": v.plate_number or v.name,
             "vehicle_type": v.vehicle_category or "",
@@ -267,8 +342,12 @@ def get_fleet_os():
             "area": "",  # [#6ptyey]
             "project": v.project or "",
             "vehicle_status": _vehicle_status(v.status, bool(v.get("current_driver"))),
-            "workshop_notes": "",
-            "workshop_date": "",
+            # Workshop lane: entry date, days-in-workshop and the overstay flag off the
+            # open Maintenance stop (the inline return is the existing workshop_out action).
+            "workshop_notes": (ws.notes or "") if ws else "",
+            "workshop_date": ws_date,
+            "days_in_workshop": (date_diff(today(), ws.stop_date) if ws and ws.stop_date else 0),
+            "workshop_overstay": v.name in workshop_overstay,
             "current_driver": cd,
             "history": history_by_vehicle.get(v.name, []),
             # [#a3imrv]
@@ -278,7 +357,7 @@ def get_fleet_os():
             "notes": "",
         })
 
-    return {"vehicles": out, "reason": None}
+    return {"vehicles": out, "reason": None, "reader_errors": reader_errors}
 
 
 @frappe.whitelist()
@@ -354,6 +433,111 @@ def search_drivers(q=None, limit=20):
         }
         for r in rows
     ]
+
+
+@frappe.whitelist()
+def get_status_meta():
+    """Return the Salis Vehicle ``status`` Select options as label/value pairs.
+
+    Server-drives the SPA's status chips so the front-end stops hand-keeping a
+    label map that drifts from the DocType Select. ``value`` is the canonical
+    English option (the stored value); ``label`` is the translated display
+    string. Read-gated like the rest of the dashboard.
+    """
+    frappe.has_permission("Salis Vehicle", "read", throw=True)
+    field = frappe.get_meta("Salis Vehicle").get_field("status")
+    options = [o.strip() for o in (field.options or "").split("\n") if o.strip()] if field else []
+    return {"statuses": [{"value": o, "label": _(o)} for o in options]}
+
+
+@frappe.whitelist()
+def get_vehicle_timeline(plate):
+    """Merged per-vehicle audit timeline for the /fleet panel Log tab.
+
+    One descending feed of the vehicle's assignments, stops, incidents and
+    Operations Alerts. Read-permission- and project-scope-gated through the SAME
+    ``_resolve_plate`` resolver the actions use (in read mode), and the
+    permlevel-1 PII gate blanks the driver id on assignment rows for a role
+    without it. N+1-free: one bounded ``get_all`` per source, merged in Python.
+    """
+    vehicle = _resolve_plate(plate, ptype="read")
+    show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
+
+    events: list[dict] = []
+
+    for a in frappe.get_all(
+        "Vehicle Assignment",
+        filters={"vehicle": vehicle},
+        fields=["name", "driver", "start_date", "end_date", "status", "docstatus"],
+        order_by="start_date desc",
+        limit_page_length=0,
+    ):
+        events.append({
+            "kind": "assignment",
+            "date": str(a.start_date or ""),
+            "title": _("Driver assigned"),
+            "ref_doctype": "Vehicle Assignment",
+            "ref_name": a.name,
+            "driver": (a.driver or "") if show_pii else "",
+            "status": a.status or "",
+            "end_date": str(a.end_date or ""),
+        })
+
+    for s in frappe.get_all(
+        "Vehicle Stop",
+        filters={"vehicle": vehicle, "docstatus": ["<", 2]},
+        fields=["name", "stop_reason", "stop_date", "return_date", "notes"],
+        order_by="stop_date desc",
+        limit_page_length=0,
+    ):
+        events.append({
+            "kind": "stop",
+            "date": str(s.stop_date or ""),
+            "title": _(s.stop_reason) if s.stop_reason else _("Stop"),
+            "ref_doctype": "Vehicle Stop",
+            "ref_name": s.name,
+            "return_date": str(s.return_date or ""),
+            "notes": s.notes or "",
+        })
+
+    for inc in frappe.get_all(
+        "Vehicle Incident",
+        filters={"vehicle": vehicle, "docstatus": ["<", 2]},
+        fields=["name", "incident_type", "incident_date", "status", "location"],
+        order_by="incident_date desc",
+        limit_page_length=0,
+    ):
+        events.append({
+            "kind": "incident",
+            "date": str(inc.incident_date or ""),
+            "title": _(inc.incident_type) if inc.incident_type else _("Incident"),
+            "ref_doctype": "Vehicle Incident",
+            "ref_name": inc.name,
+            "status": inc.status or "",
+            "location": inc.location or "",
+        })
+
+    for al in frappe.get_all(
+        "Operations Alert",
+        filters={"vehicle": vehicle},
+        fields=["name", "alert_type", "severity", "status", "raised_on", "message"],
+        order_by="raised_on desc",
+        limit_page_length=0,
+    ):
+        events.append({
+            "kind": "alert",
+            "date": str(al.raised_on or ""),
+            "title": _(al.alert_type) if al.alert_type else _("Alert"),
+            "ref_doctype": "Operations Alert",
+            "ref_name": al.name,
+            "severity": al.severity or "",
+            "status": al.status or "",
+            "message": al.message or "",
+        })
+
+    # Newest first; empty dates sort last (so undated rows never head the feed).
+    events.sort(key=lambda e: e.get("date") or "", reverse=True)
+    return {"events": events}
 
 
 # [#76c7tt]

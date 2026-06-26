@@ -146,6 +146,7 @@ Age,العمر
 Age (Days),العمر (أيام)
 Age (Years),العمر (سنوات)
 Air Conditioning,تكييف الهواء
+Alert,تنبيه
 Alert Lead Days,أيام التنبيه المسبق
 Alert Lead Days cannot be negative.,لا يمكن أن تكون أيام التنبيه المسبق سالبة.
 Alert Type,نوع التنبيه
@@ -685,6 +686,7 @@ Could not load this building. Please try again.,تعذّر تحميل هذا ا�
 Could not load your buildings.,تعذّر تحميل المباني الخاصة بك.
 Could not load your buildings. Check your connection and try again.,تعذّر تحميل المباني الخاصة بك. تحقّق من اتصالك وحاول مرة أخرى.
 Could not load your work center. Please retry.,تعذّر تحميل مركز عملك. أعد المحاولة.
+Could not load {0}.,تعذّر تحميل {0}.
 Could not log the inspection. Please try again.,تعذّر تسجيل التفتيش. يرجى المحاولة مجدداً.
 Could not mark the Work Order as Completed. Please try again.,تعذّر وسم أمر العمل كمكتمل. يرجى المحاولة مجدداً.
 Could not post the reversal to the ledger. The cancellation was rejected.,تعذّر ترحيل القيد العكسي إلى الدفتر. تم رفض الإلغاء.
@@ -932,6 +934,7 @@ Driver Operations,عمليات السائقين
 Driver Portal,بوابة السائق
 Driver Stop,إيقاف سائق
 Driver User,مستخدم السائق
+Driver assigned,تم إسناد سائق
 Driver is required.,السائق مطلوب.
 Driver license expired on {0}.,انتهت صلاحية رخصة السائق في {0}.
 Driver license has expired. Renew before assigning to trips.,انتهت صلاحية رخصة القيادة. يرجى التجديد قبل الإسناد للرحلات.
@@ -3161,11 +3164,14 @@ Your arrival manifest was submitted. The accommodation team will reconcile arriv
 Your request has been submitted. Save your tracking code shown below to follow up with your supervisor.,تم تقديم طلبك. احفظ رمز التتبع أدناه للمتابعة مع مشرفك.
 Your tracking code:,رمز المتابعة الخاص بك:
 Your transport request was submitted. Save your tracking code to follow up with your supervisor.,تم تقديم طلب التنقل. احفظ رمز التتبع للمتابعة مع مشرفك.
+assignments,الإسنادات
 bed,سرير
 bed_status,حالة السرير
 beds,أسرة
+damages,الأضرار
 datetime,التاريخ والوقت
 driver,السائق
+drivers,السائقون
 "e.g., SAF-001, SEC-005",مثل: SAF-001، SEC-005
 "e.g., Saudi Electricity Co., NWC, Mobily",مثل: الشركة السعودية للكهرباء، شركة المياه الوطنية، موبايلي
 entries,المدخلات
@@ -3173,6 +3179,8 @@ expected,متوقع
 expired {0} ago,انتهى منذ {0}
 expires in {0},ينتهي خلال {0}
 free,شاغر
+fuel grades,أنواع الوقود
+incidents,البلاغات
 n/a,غير متاح
 none,لا شيء
 occupied,مشغول
@@ -3186,6 +3194,7 @@ room_floor,طابق الغرفة
 room_type,نوع الغرفة
 temporary top-up {0} was reverted,تم عكس التعبئة المؤقتة {0}
 total_cost,التكلفة الإجمالية
+workshop status,حالة الورشة
 {0} active,{0} نشط
 {0} applied,{0} مُطبَّق
 {0} awaiting approval,{0} بانتظار الموافقة
