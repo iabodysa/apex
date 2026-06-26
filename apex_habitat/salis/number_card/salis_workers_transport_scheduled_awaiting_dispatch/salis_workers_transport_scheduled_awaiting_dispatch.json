@@ -1,7 +1,7 @@
 {
  "doctype": "Number Card",
  "name": "salis_workers_transport Scheduled Awaiting Dispatch",
- "label": "salis_workers_transport Scheduled Awaiting Dispatch",
+ "label": "Scheduled Awaiting Dispatch",
  "document_type": "Transport Request",
  "function": "Count",
  "is_public": 1,
@@ -12,5 +12,5 @@
  "color": "#ff5858",
  "module": "Salis",
  "filters_json": "[[\"Transport Request\", \"service_line\", \"in\", [\"Site Transport\", \"Inter-City Relocation\"]], [\"Transport Request\", \"status\", \"=\", \"Scheduled\"], [\"Transport Request\", \"dispatch_trip\", \"is\", \"not set\"]]",
- "modified": "2026-06-27 10:00:00.000000"
+ "modified": "2026-06-28 10:00:00.000000"
 }
