@@ -44,11 +44,44 @@
 	outline-offset: -3px;
 }
 
+/* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
+   Growth Green / Deep Forest / Sand) so this desk page reads identically to the
+   Vue portals. Local overrides of the desk theme vars re-skin every existing
+   var() reference to the editorial palette. Scoped to the two page roots
+   (.ck-modebar + .ck-layout) so it never leaks into the surrounding desk shell. */
+.ck-modebar,
+.ck-layout {
+	--c-primary: #00844e;
+	--c-ink: #072b1a;
+	--c-surface: #f8f5ee;
+	--c-surface-2: #ffffff;
+	--c-muted: #6f7e76;
+	--c-border: #ddd5c2;
+	--c-border-strong: #cabfa3;
+	--c-success: #00844e;
+	--c-warning: #c9851f;
+	--c-danger: #c0392b;
+
+	--font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
+	--fw-semibold: 600;
+
+	/* Re-skin the inherited desk palette to the editorial tokens. */
+	--primary: var(--c-primary);
+	--card-bg: var(--c-surface-2);
+	--control-bg: var(--c-surface);
+	--border-color: var(--c-border);
+	--text-muted: var(--c-muted);
+	--text-color: var(--c-ink);
+	--fg-hover-color: var(--c-surface);
+	font-family: var(--font);
+}
+
 .ck-layout {
 	display: flex;
 	gap: 16px;
 	align-items: flex-start;
 	padding: 8px 4px 32px;
+	color: var(--c-ink);
 }
 
 .ck-catalog {

@@ -1,7 +1,35 @@
 /* [#cwpffa] */
 
+/* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
+   Growth Green / Deep Forest / Sand) so this desk page reads identically to the
+   Vue portals. Local overrides of the desk theme vars re-skin every existing
+   var() reference to the editorial palette. Scoped to .tb-board so it never
+   leaks into the surrounding desk shell. */
 .tb-board {
+	--c-primary: #00844e;
+	--c-ink: #072b1a;
+	--c-surface: #f8f5ee;
+	--c-surface-2: #ffffff;
+	--c-muted: #6f7e76;
+	--c-border: #ddd5c2;
+	--c-success: #00844e;
+	--c-warning: #c9851f;
+	--c-danger: #c0392b;
+
+	--font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+	/* Re-skin the inherited desk palette to the editorial tokens. */
+	--primary: var(--c-primary);
+	--card-bg: var(--c-surface-2);
+	--fg-color: var(--c-surface-2);
+	--control-bg: var(--c-surface);
+	--border-color: var(--c-border);
+	--text-muted: var(--c-muted);
+	--red-600: var(--c-danger);
+
 	padding: 8px 4px 32px;
+	font-family: var(--font);
+	color: var(--c-ink);
 }
 
 .tb-help {

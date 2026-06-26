@@ -1,7 +1,49 @@
 /* [#dmydbv] */
 
+/* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
+   Growth Green / Deep Forest / Sand) so this desk page reads identically to the
+   Vue portals. Local overrides of the desk theme vars (--primary, --card-bg,
+   --border-color, --text-muted, status colours) re-skin every existing var()
+   reference below to the editorial palette without restyling each rule. Scoped to
+   .fc-root so it never leaks into the surrounding desk shell. */
 .fc-root {
+	--c-primary: #00844e;
+	--c-ink: #072b1a;
+	--c-ink-soft: #355040;
+	--c-surface: #f8f5ee;
+	--c-surface-2: #ffffff;
+	--c-muted: #6f7e76;
+	--c-border: #ddd5c2;
+	--c-border-strong: #cabfa3;
+	--c-success: #00844e;
+	--c-success-bg: #d9f0e3;
+	--c-warning: #c9851f;
+	--c-warning-bg: #f7ead2;
+	--c-danger: #c0392b;
+	--c-danger-bg: #f6dcd8;
+
+	--font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
+	--fw-heading: 800;
+	--fw-semibold: 600;
+
+	/* Re-skin the inherited desk palette to the editorial tokens. */
+	--primary: var(--c-primary);
+	--primary-light: var(--c-success-bg);
+	--card-bg: var(--c-surface-2);
+	--control-bg: var(--c-surface);
+	--border-color: var(--c-border);
+	--text-muted: var(--c-muted);
+	--green-500: var(--c-success);
+	--green-600: var(--c-success);
+	--orange-500: var(--c-warning);
+	--red-500: var(--c-danger);
+	--red-300: var(--c-border-strong);
+	--red-50: var(--c-danger-bg);
+	--red-600: var(--c-danger);
+
 	padding: 4px 2px 24px;
+	font-family: var(--font);
+	color: var(--c-ink);
 }
 
 /* [#4y59oc] */

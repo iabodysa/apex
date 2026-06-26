@@ -1,10 +1,42 @@
 /* [#7jjeem] */
 
+/* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
+   Growth Green / Deep Forest / Sand) so this desk page reads identically to the
+   Vue portals. Local overrides of the desk theme vars (incl. the blue accent →
+   editorial green) re-skin every existing var() reference. Scoped to the two page
+   roots (.fd-board + .fd-buildings) so it never leaks into the desk shell. The
+   bed-status hexes below are a deliberate functional palette, left untouched. */
+.fd-board,
+.fd-buildings {
+	--c-primary: #00844e;
+	--c-ink: #072b1a;
+	--c-surface: #f8f5ee;
+	--c-surface-2: #ffffff;
+	--c-muted: #6f7e76;
+	--c-border: #ddd5c2;
+
+	--font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+	/* Re-skin the inherited desk palette to the editorial tokens. */
+	--primary: var(--c-primary);
+	--blue-500: var(--c-primary);
+	--text-on-blue: #ffffff;
+	--card-bg: var(--c-surface-2);
+	--fg-color: var(--c-surface-2);
+	--control-bg: var(--c-surface);
+	--fg-hover-color: var(--c-surface);
+	--border-color: var(--c-border);
+	--text-muted: var(--c-muted);
+	--text-color: var(--c-ink);
+	font-family: var(--font);
+}
+
 /* Inherit document direction so the floor→room→bed board mirrors in Arabic. */
 .fd-board {
 	padding-block: 8px 32px;
 	padding-inline: 4px;
 	direction: inherit;
+	color: var(--c-ink);
 }
 
 .fd-empty {
