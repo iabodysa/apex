@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.59.1 — reliability fixes: driver hours, fuel allocation, rental returns and maintenance close-out now record accurately and stay in step across the two fleet screens; amounts, ledgers and who can approve are unchanged, and nothing already recorded is disturbed",
+        "app_name": "apex_habitat",
+        "link": "/driver",
+        "creation": "2026-06-27 01:00:00",
+    },
+    {
         "title": "Apex 1.59 — drivers can board a trip even when a pass won't scan: the driver ticks each worker who got on from the trip's passenger list and confirms, so the boarded count stays in step (and re-confirming a worker changes nothing), each trip shows boarded against expected, and the driver checks off each stop as the route is completed; from Masar a worker opens the whole pickup route in Google Maps with every stop chained in order; from the arrivals screen you can send a worker their personal Masar link over WhatsApp or SMS in one tap (off until you set up a gateway in Settings, and it only sends a link the worker already has) and scan a passport to pre-fill the arrival details for you to check (opt-in, manual entry always stays); and the worker and driver apps now show a small banner when a new version is ready so a tap loads the latest",
         "app_name": "apex_habitat",
         "link": "/driver",
