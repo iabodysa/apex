@@ -641,13 +641,21 @@ async function runCardAction(plate, fn) {
 // Reassign sub-form model. The driver is chosen from the server-backed picker
 // (driverName = the canonical Salis Driver id sent to reassign); date is the
 // only other field sent. The rest are display-only context.
-const rf = reactive({ driverName: "", driverLabel: "", date: today() });
+// captureHandover (+ odometer / checklistTemplate / conditionNotes) drive the
+// OPTIONAL Vehicle Handover capture; reassign succeeds independently of them.
+const rf = reactive({
+  driverName: "", driverLabel: "", date: today(),
+  captureHandover: false, odometer: null, checklistTemplate: "", conditionNotes: "",
+});
 // Driver picker: query → results from search_drivers, with the chosen driver
 // pinned so reassign can never receive a free-typed (mis-resolvable) id.
 const dp = reactive({ query: "", results: [], open: false, loading: false });
 let dpTimer = null;
 function resetReassign() {
-  Object.assign(rf, { driverName: "", driverLabel: "", date: today() });
+  Object.assign(rf, {
+    driverName: "", driverLabel: "", date: today(),
+    captureHandover: false, odometer: null, checklistTemplate: "", conditionNotes: "",
+  });
   Object.assign(dp, { query: "", results: [], open: false, loading: false });
 }
 async function runDriverSearch() {
@@ -679,6 +687,12 @@ function openReassignForm() {
   resetReassign();
   subForm.value = "reassign";
 }
+// New driver create-or-assign: open the native Salis Driver Web Form in a new
+// tab. The supervisor creates the driver there, returns, and searches for them
+// in the picker above — keeping the create path fully native (Web Form perms).
+function openNewDriverForm() {
+  window.open("/salis-driver", "_blank", "noopener");
+}
 async function submitReassign() {
   const v = panel.vehicle;
   if (!v) return;
@@ -700,6 +714,30 @@ async function submitReassign() {
       args: { plate: v.plate, driver_id: rf.driverName, date: rf.date || today() },
     });
     showToast(t("toast.reassigned", { name: rf.driverLabel, plate: v.plate }), "green");
+    // Optional handover: best-effort AFTER the assignment commits. A handover
+    // failure is surfaced but never undoes the reassign (the capture is optional).
+    if (rf.captureHandover) {
+      try {
+        const res = await call(POST("create_handover"), {
+          type: "POST",
+          args: {
+            plate: v.plate,
+            driver_id: rf.driverName,
+            date: rf.date || today(),
+            odometer: rf.odometer,
+            checklist_template: trim(rf.checklistTemplate),
+            condition_notes: rf.conditionNotes,
+          },
+        });
+        if (res && res.handover) {
+          showToast(t("toast.handoverDrafted", { name: res.handover }), "green");
+        } else {
+          showToast(t("toast.handoverSkipped"), "green");
+        }
+      } catch (e) {
+        showToast(t("toast.handoverFailed", { msg: serverMsg(e) }), "amber");
+      }
+    }
     subForm.value = null;
     await reloadFleet();
   } catch (e) {
@@ -1589,8 +1627,18 @@ function expiryFlag(v) {
                       <span v-if="d.phone" class="dp-meta mono"><bdi>{{ d.phone }}</bdi></span>
                     </li>
                   </ul>
+                  <button type="button" class="dp-newlink" @click="openNewDriverForm"><Icon name="user" :size="13" /> {{ t("reassignForm.newDriver") }}</button>
                 </div>
                 <div class="ff"><div class="fl">{{ t("reassignForm.receiveDate") }}</div><input class="fi" type="date" v-model="rf.date" /></div>
+              </div>
+              <label class="ho-toggle"><input type="checkbox" v-model="rf.captureHandover" /> {{ t("reassignForm.captureHandover") }}</label>
+              <div v-if="rf.captureHandover" class="ho-box">
+                <div class="form-grid">
+                  <div class="ff"><div class="fl">{{ t("reassignForm.odometer") }}</div><input class="fi mono" type="number" min="0" v-model="rf.odometer" /></div>
+                  <div class="ff"><div class="fl">{{ t("reassignForm.checklistTemplate") }}</div><input class="fi" v-model="rf.checklistTemplate" :placeholder="t('reassignForm.checklistPlaceholder')" /></div>
+                  <div class="ff" style="grid-column:1/-1"><div class="fl">{{ t("reassignForm.conditionNotes") }}</div><textarea class="fta" v-model="rf.conditionNotes"></textarea></div>
+                </div>
+                <div class="ho-hint"><Icon name="clipboard-list" :size="13" /> {{ t("reassignForm.handoverHint") }}</div>
               </div>
               <div class="form-actions" style="margin-top:12px">
                 <button class="btn" @click="subForm = null">{{ t("common.cancel") }}</button>
@@ -1615,8 +1663,18 @@ function expiryFlag(v) {
                     <span v-if="d.phone" class="dp-meta mono"><bdi>{{ d.phone }}</bdi></span>
                   </li>
                 </ul>
+                <button type="button" class="dp-newlink" @click="openNewDriverForm"><Icon name="user" :size="13" /> {{ t("reassignForm.newDriver") }}</button>
               </div>
               <div class="ff"><div class="fl">{{ t("reassignForm.receiveDate") }}</div><input class="fi" type="date" v-model="rf.date" /></div>
+            </div>
+            <label class="ho-toggle"><input type="checkbox" v-model="rf.captureHandover" /> {{ t("reassignForm.captureHandover") }}</label>
+            <div v-if="rf.captureHandover" class="ho-box">
+              <div class="form-grid">
+                <div class="ff"><div class="fl">{{ t("reassignForm.odometer") }}</div><input class="fi mono" type="number" min="0" v-model="rf.odometer" /></div>
+                <div class="ff"><div class="fl">{{ t("reassignForm.checklistTemplate") }}</div><input class="fi" v-model="rf.checklistTemplate" :placeholder="t('reassignForm.checklistPlaceholder')" /></div>
+                <div class="ff" style="grid-column:1/-1"><div class="fl">{{ t("reassignForm.conditionNotes") }}</div><textarea class="fta" v-model="rf.conditionNotes"></textarea></div>
+              </div>
+              <div class="ho-hint"><Icon name="clipboard-list" :size="13" /> {{ t("reassignForm.handoverHint") }}</div>
             </div>
             <div class="form-actions" style="margin-top:12px">
               <button class="btn btn-green" :disabled="!rf.driverName" @click="submitReassign"><Icon name="lock" :size="15" /> {{ t("reassignForm.assignAndLock") }}</button>

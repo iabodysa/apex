@@ -478,6 +478,14 @@ tbody td{padding:8px 12px;font-size:12px;color:var(--t2);max-width:160px;overflo
 .dp-name{font-weight:600;color:var(--t1)}
 .dp-meta{font-size:11px;color:var(--t3)}
 .form-actions{display:flex;gap:8px;justify-content:flex-end}
+.dp-newlink{
+  display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 2px;
+  background:none;border:none;cursor:pointer;font-size:11px;color:var(--blue-l);
+}
+.dp-newlink:hover{text-decoration:underline}
+.ho-toggle{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:12px;color:var(--t2);cursor:pointer}
+.ho-box{margin-top:10px;border:1px solid var(--b1);border-radius:var(--r3);padding:12px;background:var(--bg2)}
+.ho-hint{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--t3)}
 /* [#ol2qds] */
 .alert{border-radius:var(--r3);padding:12px 14px;font-size:12px;line-height:1.5;border:1px solid}
 .alert-amber{background:var(--amber-d);border-color:rgba(245,158,11,.25);color:var(--amber-l)}

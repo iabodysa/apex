@@ -610,6 +610,76 @@ def reassign(plate, driver_id, date=None):
 
 
 @frappe.whitelist(methods=["POST"])
+def create_handover(plate, driver_id, date=None, odometer=None, checklist_template=None, condition_notes=None):
+    """Create an OPTIONAL DRAFT Vehicle Handover for a just-reassigned vehicle.
+
+    Called by /fleet AFTER reassign succeeds, only when the supervisor ticked the
+    optional capture box. Reuses the native Vehicle Handover DocType/controller —
+    no parallel handover logic. It is left as a DRAFT (insert only, never submit):
+    the controller requires signed evidence before submit, so a manager later
+    attaches it and submits via Desk (where the checklist UI + print format live).
+
+    ``to_driver`` is the just-assigned driver; ``from_driver`` is the previous
+    driver, read from the most recent Ended assignment reassign left behind. With
+    no prior driver (a first-ever assignment) there is no custody to transfer, so
+    no handover is drafted — the caller shows that as a benign notice.
+    A checklist template, when given, is loaded via the existing template loader.
+    """
+    vehicle = _resolve_plate(plate)
+    if not driver_id:
+        frappe.throw(_("Driver is required."))
+
+    to_driver = frappe.db.get_value("Salis Driver", {"driver_id": driver_id}, "name")
+    if not to_driver and frappe.db.exists("Salis Driver", driver_id):
+        to_driver = driver_id
+    if not to_driver:
+        frappe.throw(_("Driver {0} not found.").format(driver_id))
+    frappe.has_permission("Vehicle Handover", "create", throw=True)
+
+    # Previous driver = the driver on the latest Ended assignment for this vehicle
+    # (reassign ends the prior Active row before opening the new one).
+    prev = frappe.get_all(
+        "Vehicle Assignment",
+        filters={"vehicle": vehicle, "status": "Ended", "driver": ["!=", to_driver]},
+        fields=["driver"],
+        order_by="end_date desc, creation desc",
+        limit_page_length=1,
+    )
+    from_driver = prev[0].driver if prev else None
+
+    # No prior custodian: a handover from nobody is not a real transfer, and the
+    # Handover.from_driver field fetch_if_empty-copies the vehicle's current_driver
+    # (already the NEW driver here), which would self-equal to_driver and fail the
+    # controller's "must differ" guard. Skip the draft instead of forcing one.
+    if not from_driver:
+        return {"ok": True, "handover": None, "skipped": "no_prior_driver"}
+
+    doc = frappe.get_doc({
+        "doctype": "Vehicle Handover",
+        "vehicle": vehicle,
+        "from_driver": from_driver,
+        "to_driver": to_driver,
+        "handover_date": getdate(date) if date else getdate(today()),
+        "condition_notes": condition_notes or "",
+    })
+    if odometer not in (None, ""):
+        try:
+            doc.odometer_reading = int(odometer)
+        except (TypeError, ValueError):
+            pass
+    doc.insert()
+
+    if checklist_template and frappe.db.exists("Vehicle Handover Checklist Template", checklist_template):
+        from apex_habitat.salis.doctype.vehicle_handover_checklist_template.vehicle_handover_checklist_template import (
+            load_template_into_doc,
+        )
+
+        load_template_into_doc(doc.name, checklist_template)
+
+    return {"ok": True, "handover": doc.name}
+
+
+@frappe.whitelist(methods=["POST"])
 def stop_vehicle(plate, reason=None):
     """Stop a vehicle and release its driver by submitting a Vehicle Stop.
 

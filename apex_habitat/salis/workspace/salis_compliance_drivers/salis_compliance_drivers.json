@@ -135,7 +135,7 @@
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Salis Compliance Drivers Licenses Expiring Soon",
-   "label": "Driver Licenses Expiring Soon",
+   "label": "Salis Compliance Drivers Licenses Expiring Soon",
    "idx": 2
   },
   {
@@ -152,5 +152,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-27 09:00:00.000000"
+ "modified": "2026-06-27 10:00:00.000000"
 }

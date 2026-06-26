@@ -194,7 +194,7 @@
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Salis Active Trips",
-   "label": "Active Trips",
+   "label": "Salis Active Trips",
    "idx": 2
   },
   {
@@ -211,5 +211,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-27 09:00:00.000000"
+ "modified": "2026-06-27 10:00:00.000000"
 }

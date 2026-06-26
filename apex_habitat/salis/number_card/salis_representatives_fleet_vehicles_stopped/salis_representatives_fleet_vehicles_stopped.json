@@ -1,7 +1,7 @@
 {
  "doctype": "Number Card",
  "name": "Salis Representatives Fleet Vehicles Stopped",
- "label": "Vehicles Stopped",
+ "label": "Salis Representatives Fleet Vehicles Stopped",
  "document_type": "Salis Vehicle",
  "function": "Count",
  "is_public": 1,
@@ -12,5 +12,5 @@
  "module": "Salis",
  "color": "#CB2929",
  "filters_json": "[[\"Salis Vehicle\", \"status\", \"=\", \"Stopped\"]]",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-06-27 10:00:00.000000"
 }

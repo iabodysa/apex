@@ -270,6 +270,71 @@ class TestStatusMeta(FrappeTestCase):
         self.assertTrue(all(s["label"] for s in res["statuses"]))
 
 
+class TestCreateHandover(FrappeTestCase):
+    """create_handover opens an OPTIONAL DRAFT Vehicle Handover after a reassign,
+    reusing the native controller; from_driver comes from the latest Ended row."""
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+        self.plate = f"HO {frappe.generate_hash(length=6)}"
+        self.vehicle = (
+            frappe.get_doc(
+                {"doctype": "Salis Vehicle", "plate_number": self.plate, "status": "Active"}
+            )
+            .insert(ignore_permissions=True)
+            .name
+        )
+
+    def _driver(self):
+        did = f"HOD-{frappe.generate_hash(length=6)}"
+        return (
+            frappe.get_doc(
+                {
+                    "doctype": "Salis Driver",
+                    "full_name": "HO Driver",
+                    "driver_id": did,
+                    "status": "Active",
+                }
+            )
+            .insert(ignore_permissions=True)
+        )
+
+    def test_draft_handover_carries_prev_and_new_driver(self):
+        # Reassign A then B; B's reassign Ends A's row, so from_driver=A, to_driver=B.
+        a, b = self._driver(), self._driver()
+        fleet_os.reassign(self.plate, a.driver_id)
+        fleet_os.reassign(self.plate, b.driver_id)
+
+        res = fleet_os.create_handover(self.plate, b.driver_id, odometer=120)
+        self.assertTrue(res["ok"])
+        ho = frappe.get_doc("Vehicle Handover", res["handover"])
+        # Left as an UNsubmitted draft (the controller needs signed evidence to submit).
+        self.assertEqual(ho.docstatus, 0)
+        self.assertEqual(ho.vehicle, self.vehicle)
+        self.assertEqual(ho.to_driver, b.name)
+        self.assertEqual(ho.from_driver, a.name)
+        self.assertEqual(ho.odometer_reading, 120)
+
+    def test_first_assignment_drafts_no_handover(self):
+        # First-ever assignment: no prior custodian, so no handover is drafted.
+        # (Forcing one would self-equal to_driver via the from_driver fetch_if_empty
+        # copy of current_driver and trip the controller's "must differ" guard.)
+        a = self._driver()
+        fleet_os.reassign(self.plate, a.driver_id)
+        res = fleet_os.create_handover(self.plate, a.driver_id)
+        self.assertTrue(res["ok"])
+        self.assertIsNone(res["handover"])
+        self.assertEqual(res.get("skipped"), "no_prior_driver")
+        # Non-vacuous: nothing was actually inserted for this vehicle.
+        self.assertEqual(
+            frappe.db.count("Vehicle Handover", {"vehicle": self.vehicle}), 0
+        )
+
+    def test_unknown_driver_throws(self):
+        with self.assertRaises(frappe.ValidationError):
+            fleet_os.create_handover(self.plate, f"NO-SUCH-{frappe.generate_hash(length=6)}")
+
+
 class TestVehicleTimeline(FrappeTestCase):
     """get_vehicle_timeline merges assignments + stops + incidents + alerts into
     one descending feed, read-scoped and PII-gated."""

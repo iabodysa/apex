@@ -2536,6 +2536,8 @@ Salary Deduction Type Rule,قاعدة نوع الخصم من الراتب
 Salary component {0} must be of type Deduction for damage assessments.,مكوّن الراتب {0} يجب أن يكون من نوع خصم لتقييمات التلفيات.
 Salis,سلس
 Salis Active Drivers,السائقون النشطون
+Salis Active Trips,رحلات نشطة
+Salis Compliance Drivers Licenses Expiring Soon,رخص قائدين قاربت الانتهاء
 Salis Dispatch Board,لوحة توجيه سلس
 Salis Driver,سائق
 Salis Fleet Master,بيانات أسطول سلس
@@ -2545,7 +2547,8 @@ Salis Go-Live,إطلاق تشغيل سلس
 Salis Payment Register,سجل المدفوعات
 Salis Payment Request,طلب دفع
 Salis Portal Theme,سمة بوابة سلس
-Salis Representatives Fleet Vehicles Stopped,المركبات الموقوفة
+Salis Rentals Costs Settlements Pending Approval,تسويات بانتظار الاعتماد
+Salis Representatives Fleet Vehicles Stopped,مركبات موقوفة
 Salis Settings,إعدادات سلس
 Salis Vehicle,مركبة
 Salis Vehicle Compliance,امتثال المركبة
@@ -3295,6 +3298,7 @@ pending,معلّق
 readiness_status,حالة الجاهزية
 room_floor,طابق الغرفة
 room_type,نوع الغرفة
+salis_workers_transport Scheduled Awaiting Dispatch,مجدولة بانتظار الإرسال
 temporary top-up {0} was reverted,تم عكس التعبئة المؤقتة {0}
 total_cost,التكلفة الإجمالية
 workshop status,حالة الورشة
