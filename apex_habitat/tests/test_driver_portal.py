@@ -339,7 +339,7 @@ class _DriverTripBuilder:
 
 
 class TestManualBoarding(_DriverTripBuilder, FrappeTestCase):
-	"""T-603: the no-scan fallback. A driver marks manifest workers aboard via
+	"""The no-scan fallback. A driver marks manifest workers aboard via
 	manual_board_workers; the write must append a Trip Boarding Event (method
 	Manual) and a Boarding Scan Log row, exactly as a QR scan does — and stay
 	idempotent and manifest-scoped."""
@@ -428,7 +428,7 @@ class TestManualBoarding(_DriverTripBuilder, FrappeTestCase):
 
 
 class TestStopProgress(_DriverTripBuilder, FrappeTestCase):
-	"""T-605: per-stop checkpoints persist on the trip's Trip Start Log and survive
+	"""Per-stop checkpoints persist on the trip's Trip Start Log and survive
 	a reload (re-read)."""
 
 	@classmethod
