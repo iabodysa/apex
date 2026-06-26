@@ -13,6 +13,7 @@ from frappe.model.document import Document
 
 class FuelQuota(Document):
 	def validate(self):
+		self._guard_duplicate()
 		monthly = self.monthly_litres or 0
 		consumed = self.consumed_litres or 0
 		if monthly and consumed > monthly:
@@ -22,6 +23,28 @@ class FuelQuota(Document):
 				),
 				indicator="orange",
 				title=_("Quota Exceeded"),
+			)
+
+	def _guard_duplicate(self):
+		"""One live quota per vehicle per period — a second (vehicle, period_month)
+		would double-allocate the same month. Scoped to docstatus < 2 so a
+		cancelled quota can be re-issued and an amendment of this same doc passes."""
+		if not (self.vehicle and self.period_month):
+			return
+		dup = frappe.db.exists(
+			"Fuel Quota",
+			{
+				"vehicle": self.vehicle,
+				"period_month": self.period_month,
+				"docstatus": ["<", 2],
+				"name": ["!=", self.name or ""],
+			},
+		)
+		if dup:
+			frappe.throw(
+				_("Fuel Quota {0} already exists for vehicle {1} in period {2}.").format(
+					dup, self.vehicle, self.period_month
+				)
 			)
 
 	# [#qzsfcl]

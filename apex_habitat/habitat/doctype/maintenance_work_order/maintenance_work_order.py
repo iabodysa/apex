@@ -9,7 +9,33 @@ from frappe.utils import flt
 
 
 class MaintenanceWorkOrder(Document):
-    pass
+    def on_cancel(self):
+        """Reverse the completion side-effects so a cancelled Work Order does not
+        leave an orphan Accommodation Ledger memo or a Maintenance Request stuck
+        Closed/In Progress.
+
+        Native class method (Frappe fires it on cancel; no hooks.py doc_event is
+        needed). Mirrors the Dispatch Trip / Fuel Request cancel-reversal pattern:
+        net out the operational memo this Work Order posted (keyed by
+        source_doctype/source_name) and release the linked request back to Open.
+        Open is the request's pre-Work-Order state; a request a human has since
+        moved to a terminal Resolved/Cancelled is left untouched."""
+        for row in frappe.get_all(
+            "Accommodation Ledger",
+            filters={"source_doctype": "Maintenance Work Order", "source_name": self.name},
+            pluck="name",
+        ):
+            frappe.delete_doc("Accommodation Ledger", row, ignore_permissions=True, force=True)  # audit-ok — reversing a system memo this Work Order posted
+
+        if not self.maintenance_request:
+            return
+        if not frappe.db.exists("DocType", "Maintenance Request"):
+            return
+        mr_status = frappe.db.get_value("Maintenance Request", self.maintenance_request, "status")
+        if mr_status in ("In Progress", "Closed"):
+            frappe.db.set_value(
+                "Maintenance Request", self.maintenance_request, "status", "Open"
+            )
 
 
 def validate(doc, method=None):
@@ -30,8 +56,10 @@ def validate(doc, method=None):
             frappe.throw(
                 _("A Work Order already exists for this Maintenance Request: {0}").format(dup)
             )
+    # Procurement lines carry estimated_cost (Maintenance Procurement Item has no
+    # "amount" field); summing a non-existent key left the total stuck at 0.
     doc.total_procurement_cost_sar = sum(
-        flt(row.get("amount") or 0) for row in (doc.procurement_items or [])
+        flt(row.get("estimated_cost") or 0) for row in (doc.procurement_items or [])
     )
     if doc.status in ("Completed", "Closed") and not doc.completion_photo:
         frappe.throw(_("A completion photo is required before closing a Maintenance Work Order."))

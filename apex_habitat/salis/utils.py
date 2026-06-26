@@ -17,6 +17,65 @@ def lock_driver(name):
 		frappe.db.sql("SELECT name FROM `tabSalis Driver` WHERE name=%s FOR UPDATE", name)
 
 
+def reassign_vehicle_driver(vehicle, driver, start_date=None, reject_same_driver=False):
+	"""End the vehicle's open Active assignment(s) and start a new submitted one.
+
+	The single native reassign operation shared by both supervisor surfaces (the
+	/fleet board and the Fleet Control drawer) so they can never diverge: ends
+	every open Active Vehicle Assignment for the vehicle, then inserts + submits a
+	new one. ``VehicleAssignment.on_submit`` is what stamps Salis Vehicle.current_driver
+	and Salis Driver.current_vehicle (controllers are not bypassed). Callers own
+	their own input resolution (plate->vehicle, external driver_id->driver) and
+	permission checks before calling. Returns the new assignment name.
+
+	``reject_same_driver`` throws when the vehicle is already assigned to ``driver``
+	(the drawer rejects a no-op reassign; the board allows a refresh)."""
+	lock_vehicle(vehicle)
+	lock_driver(driver)
+	start = getdate(start_date) if start_date else getdate(today())
+
+	for r in frappe.get_all(
+		"Vehicle Assignment",
+		filters={"vehicle": vehicle, "status": "Active", "docstatus": 1},
+		fields=["name", "driver"],
+	):
+		if reject_same_driver and r.driver == driver:
+			frappe.throw(
+				_("Vehicle {0} is already assigned to driver {1}.").format(vehicle, driver)
+			)
+		frappe.db.set_value("Vehicle Assignment", r.name, {"status": "Ended", "end_date": start})
+
+	assignment = frappe.get_doc({
+		"doctype": "Vehicle Assignment",
+		"vehicle": vehicle,
+		"driver": driver,
+		"project": frappe.db.get_value("Salis Vehicle", vehicle, "project"),
+		"start_date": start,
+		"status": "Active",
+	})
+	assignment.insert()
+	assignment.submit()
+	return assignment.name
+
+
+def close_open_stop(stop_name, return_date=None):
+	"""Close an open submitted Vehicle Stop through the native cancel lifecycle.
+
+	The single native stop-close operation shared by both supervisor surfaces:
+	stamps the workshop-exit audit fields (return_date / released_on / released_by)
+	on the submitted stop, then cancels it so ``VehicleStop.on_cancel`` runs the
+	reversal (the vehicle is not poked directly). Callers locate their own stop
+	(plain stop vs the open Maintenance stop) and re-check permission first."""
+	on = getdate(today())
+	ret = getdate(return_date) if return_date else on
+	frappe.db.set_value(
+		"Vehicle Stop",
+		stop_name,
+		{"return_date": ret, "released_on": on, "released_by": frappe.session.user},
+	)
+	frappe.get_doc("Vehicle Stop", stop_name).cancel()
+
+
 # [#tqf298]
 _TR_STATE_DOCSTATUS = {
 	"New": 0,

@@ -194,3 +194,48 @@ class TestMaintenanceRequest(FrappeTestCase):
         for role, p in level1.items():
             self.assertEqual(p.read, 1, f"{role} must have permlevel-1 read")
             self.assertEqual(p.write, 1, f"{role} must have permlevel-1 write")
+
+
+class TestMakeWorkOrder(FrappeTestCase):
+    """make_work_order must carry the context the Maintenance Work Order model
+    actually holds (request link, building, issue_type, Planned status) and must
+    NOT try to push fields the Work Order has no home for (room/bed/priority),
+    which get_mapped_doc would silently drop."""
+
+    def _request(self):
+        mr = frappe.get_doc({
+            "doctype": "Maintenance Request",
+            "naming_series": "MAINT-.YYYY.-.#####",
+            "building": "MWO-MAP-BLDG",
+            "room": "MWO-MAP-ROOM",
+            "reported_by": "Administrator",
+            "issue_type": "Electrical",
+            "priority": "Critical",
+            "issue_description": "Sparking socket",
+        })
+        mr.insert(ignore_permissions=True, ignore_links=True)
+        return mr
+
+    def test_mapped_work_order_carries_context(self):
+        from apex_habitat.habitat.doctype.maintenance_request.maintenance_request import (
+            make_work_order,
+        )
+
+        mr = self._request()
+        try:
+            wo = make_work_order(mr.name)
+            self.assertEqual(wo.doctype, "Maintenance Work Order")
+            self.assertEqual(wo.maintenance_request, mr.name)
+            self.assertEqual(wo.building, mr.building)
+            self.assertEqual(wo.issue_type, mr.issue_type)
+            self.assertEqual(wo.status, "Planned")
+            # The Work Order has no room/bed/priority — the mapper must not invent them.
+            meta_fields = {f.fieldname for f in frappe.get_meta("Maintenance Work Order").fields}
+            for absent in ("room", "bed", "priority"):
+                self.assertNotIn(absent, meta_fields,
+                                 f"Work Order unexpectedly has a {absent} field")
+                self.assertFalse(wo.get(absent),
+                                 f"mapper leaked {absent} onto the Work Order")
+        finally:
+            frappe.delete_doc("Maintenance Request", mr.name,
+                              force=True, ignore_permissions=True)

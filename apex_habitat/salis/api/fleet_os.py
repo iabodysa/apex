@@ -28,7 +28,12 @@ from frappe.utils import date_diff, getdate, today
 
 from apex_habitat.salis.api.dispatch_board import _permitted_projects
 from apex_habitat.salis.api.fleet_reader import scope_filter, scoped_vehicles
-from apex_habitat.salis.utils import add_timeline_note, lock_driver, lock_vehicle
+from apex_habitat.salis.utils import (
+    add_timeline_note,
+    close_open_stop,
+    lock_vehicle,
+    reassign_vehicle_driver,
+)
 
 
 def _publish_fleet_update(plate: str | None = None, action: str | None = None) -> None:
@@ -577,36 +582,13 @@ def reassign(plate, driver_id, date=None):
         frappe.throw(_("Driver {0} not found.").format(driver_id))
     # [#cs6rw5]
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
-    lock_vehicle(vehicle)
-    lock_driver(driver)
 
-    start = getdate(date) if date else getdate(today())
-
-    # [#i6xasc]
-    open_rows = frappe.get_all(
-        "Vehicle Assignment",
-        filters={"vehicle": vehicle, "status": "Active", "docstatus": 1},
-        fields=["name"],
-    )
-    for r in open_rows:
-        frappe.db.set_value("Vehicle Assignment", r.name, {"status": "Ended", "end_date": start})
-
-    doc = frappe.get_doc({
-        "doctype": "Vehicle Assignment",
-        "vehicle": vehicle,
-        "driver": driver,
-        "project": frappe.db.get_value("Salis Vehicle", vehicle, "project"),
-        "start_date": start,
-        "status": "Active",
-    })
-    doc.insert()
-    # [#ica9oh]
-    doc.submit()
-
-    frappe.db.set_value("Salis Vehicle", vehicle, "current_driver", driver)
-    frappe.db.set_value("Salis Driver", driver, "current_vehicle", vehicle)
+    # Shared native reassign (end Active assignment[s] + submit a new one). The new
+    # assignment's on_submit stamps current_driver / current_vehicle, so no manual
+    # link write is needed here. The board allows a refresh to the same driver.
+    assignment = reassign_vehicle_driver(vehicle, driver, date)
     _publish_fleet_update(plate, "reassign")
-    return {"ok": True, "assignment": doc.name}
+    return {"ok": True, "assignment": assignment}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -806,12 +788,9 @@ def workshop_out(plate):
     if not stop:
         frappe.throw(_("This vehicle has no open workshop stop to return."))
 
-    on = getdate(today())
-    frappe.db.set_value(
-        "Vehicle Stop", stop.name,
-        {"return_date": on, "released_on": on, "released_by": frappe.session.user},
-    )
-    frappe.get_doc("Vehicle Stop", stop.name).cancel()
+    # Shared native stop-close (stamp audit fields + cancel); same helper
+    # operations_control.release_vehicle uses.
+    close_open_stop(stop.name)
     # on_cancel skips its restore while status != "Stopped"; bring it back explicitly.
     if frappe.db.get_value("Salis Vehicle", vehicle, "status") == "Under Maintenance":
         frappe.db.set_value("Salis Vehicle", vehicle, "status", stop.previous_status or "Active")

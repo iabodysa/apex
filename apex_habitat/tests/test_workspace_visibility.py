@@ -22,9 +22,48 @@ WORKSPACE_GLOB = os.path.join(
     "*.json",
 )
 
+# All modules' workspaces / chart records, for the cross-module no-chart invariant.
+_APP = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+ALL_WORKSPACE_GLOB = os.path.join(_APP, "*", "workspace", "*", "*.json")
+ALL_CHART_GLOB = os.path.join(_APP, "*", "dashboard_chart", "*", "*.json")
+
 
 def _workspace_files():
     return sorted(glob.glob(WORKSPACE_GLOB))
+
+
+def _all_workspace_files():
+    return sorted(glob.glob(ALL_WORKSPACE_GLOB))
+
+
+def _chart_record_names():
+    """Every on-disk is_standard Dashboard Chart record name."""
+    names = set()
+    for path in glob.glob(ALL_CHART_GLOB):
+        with open(path, encoding="utf-8") as fh:
+            names.add(json.load(fh).get("name") or os.path.basename(os.path.dirname(path)))
+    return names
+
+
+def _workspace_referenced_charts():
+    """Every chart pinned onto a workspace, via the charts[] array or a content block."""
+    referenced = set()
+    for path in _all_workspace_files():
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+        for chart in data.get("charts", []):
+            if chart.get("chart_name"):
+                referenced.add(chart["chart_name"])
+        try:
+            blocks = json.loads(data.get("content") or "[]")
+        except (ValueError, TypeError):
+            continue
+        for block in blocks:
+            if isinstance(block, dict) and block.get("type") == "chart":
+                name = (block.get("data") or {}).get("chart_name")
+                if name:
+                    referenced.add(name)
+    return referenced
 
 
 class TestWorkspaceVisibility(unittest.TestCase):
@@ -89,6 +128,44 @@ class TestWorkspaceVisibility(unittest.TestCase):
                     f"Workspace '{workspace_name}' has an empty 'roles' list — it is world-visible. "
                     "Add at least one role restriction.",
                 )
+
+
+class TestNoChartWorkspaceDesign(unittest.TestCase):
+    """The lean public-workspace design ships NO charts on any workspace.
+
+    Every on-disk is_standard Dashboard Chart record is therefore an intentional
+    orphan (reachable only from the Dashboard Chart list, never pinned to a
+    workspace). This guard keeps that invariant from silently regressing: it fails
+    the moment a chart is wired onto a workspace, or a workspace references a chart
+    record that does not exist on disk.
+    """
+
+    def test_no_chart_is_wired_to_any_workspace(self):
+        wired = _workspace_referenced_charts()
+        self.assertEqual(
+            wired,
+            set(),
+            "the no-chart workspace design forbids pinning a Dashboard Chart to a "
+            f"workspace; remove these chart references: {sorted(wired)}",
+        )
+
+    def test_workspace_chart_refs_exist_on_disk(self):
+        # A workspace must never point at a chart record absent from disk; with the
+        # wired set empty this is vacuously true, but it guards the day a chart is
+        # (re-)wired against a deleted record.
+        missing = _workspace_referenced_charts() - _chart_record_names()
+        self.assertEqual(
+            missing,
+            set(),
+            f"workspace chart references with no matching on-disk record: {sorted(missing)}",
+        )
+
+    def test_scan_is_non_vacuous(self):
+        # Guard the guard: a glob that silently finds nothing would pass the
+        # invariant above for free. Chart records exist on disk and the workspace
+        # scan reaches every module's workspaces.
+        self.assertTrue(_chart_record_names(), "no Dashboard Chart records discovered on disk")
+        self.assertTrue(_all_workspace_files(), "no workspace JSON discovered across modules")
 
 
 if __name__ == "__main__":

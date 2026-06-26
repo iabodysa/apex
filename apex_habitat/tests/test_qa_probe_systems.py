@@ -102,6 +102,12 @@ class TestMaintenanceSafety(QASysBase):
         mark_completed(sti.name)
         sti.reload()
         self.assertEqual(sti.status, "Completed", "mark_completed must move In Progress -> Completed")
+        # completed_date auto-stamped on controlled completion (mirrors closed_on elsewhere)
+        self.assertEqual(
+            frappe.utils.getdate(sti.completed_date),
+            frappe.utils.getdate(),
+            "mark_completed must stamp completed_date",
+        )
 
 
 class TestReports(QASysBase):

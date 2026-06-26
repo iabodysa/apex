@@ -35,6 +35,52 @@ class RentalVehicleMovement(Document):
         if self.movement_type == "Receipt" and self.daily_rate is not None and self.daily_rate < 0:
             frappe.throw(_("Daily Rate cannot be negative."))
 
+        self._guard_lifecycle()
+
+    def _guard_lifecycle(self):
+        """Keep the Receipt/Return sequence sane so the accrual engine's in-service
+        window can't be corrupted: a Return needs a prior open Receipt to close,
+        and a second Receipt cannot open while one is already open (the vehicle is
+        in-service whenever it has a submitted Receipt with no later submitted
+        Return). Counts submitted movements only — that is the window the engine
+        derives. Skips amendments of this same document."""
+        if not (self.vehicle and self.movement_type):
+            return
+        if self._has_open_receipt():
+            if self.movement_type == "Receipt":
+                frappe.throw(
+                    _("Vehicle {0} already has an open rental Receipt; return it before a new Receipt.").format(
+                        self.vehicle
+                    )
+                )
+        elif self.movement_type == "Return":
+            frappe.throw(
+                _("Vehicle {0} has no open rental Receipt to return.").format(self.vehicle)
+            )
+
+    def _has_open_receipt(self) -> bool:
+        """True when the vehicle currently has a submitted Receipt with no later
+        submitted Return (the in-service window). Excludes this document and its
+        amendment lineage so re-amending a movement does not see itself."""
+        exclude = [n for n in (self.name, self.amended_from) if n]
+        movements = frappe.get_all(
+            "Rental Vehicle Movement",
+            filters={
+                "vehicle": self.vehicle,
+                "docstatus": 1,
+                "name": ["not in", exclude or [""]],
+            },
+            fields=["movement_type", "movement_date", "creation"],
+            order_by="movement_date asc, creation asc",
+        )
+        open_receipt = False
+        for m in movements:
+            if m.movement_type == "Receipt":
+                open_receipt = True
+            elif m.movement_type == "Return":
+                open_receipt = False
+        return open_receipt
+
     def on_submit(self):
         # [#3lgl85]
         add_timeline_note(

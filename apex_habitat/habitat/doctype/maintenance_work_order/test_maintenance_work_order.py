@@ -71,3 +71,110 @@ class TestMaintenanceWorkOrder(FrappeTestCase):
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
+
+
+class TestMaintenanceWorkOrderCancel(FrappeTestCase):
+    """on_cancel must net out the Accommodation Ledger memo the Work Order posted
+    on completion and release the linked Maintenance Request off Closed/In
+    Progress back to Open — so a cancel leaves no orphan ledger row or stuck
+    ticket."""
+
+    def _ensure_location(self):
+        if not frappe.db.exists("Accommodation Building", "MWO-CANCEL-BLDG"):
+            frappe.get_doc({
+                "doctype": "Accommodation Building",
+                "building_name": "MWO-CANCEL-BLDG",
+                "total_capacity": 4,
+            }).insert(ignore_permissions=True, ignore_links=True)
+        if not frappe.db.exists("Accommodation Room", "MWO-CANCEL-ROOM"):
+            frappe.get_doc({
+                "doctype": "Accommodation Room",
+                "building": "MWO-CANCEL-BLDG",
+                "room_number": "MWO-CANCEL-ROOM",
+                "bed_capacity": 2,
+            }).insert(ignore_permissions=True, ignore_links=True)
+        return "MWO-CANCEL-BLDG", "MWO-CANCEL-ROOM"
+
+    def _submit_request(self, building, room):
+        mr = frappe.get_doc({
+            "doctype": "Maintenance Request",
+            "naming_series": "MAINT-.YYYY.-.#####",
+            "building": building,
+            "room": room,
+            "reported_by": "Administrator",
+            "issue_type": "Plumbing",
+            "issue_description": "Leak under sink",
+        })
+        mr.insert(ignore_permissions=True, ignore_links=True)
+        mr.submit()
+        return mr
+
+    def _submit_work_order(self, mr, building):
+        wo = frappe.get_doc({
+            "doctype": "Maintenance Work Order",
+            "naming_series": "MWO-.YYYY.-.####",
+            "maintenance_request": mr.name,
+            "building": building,
+            "work_description": "Replace the worn washer",
+            "planned_start_date": "2026-06-10",
+            "planned_end_date": "2026-06-12",
+            "actual_start_date": "2026-06-11",
+            "actual_end_date": "2026-06-12",
+            "completion_photo": "/files/done.png",
+            # A priced procurement line so mark_completed posts a ledger memo.
+            "procurement_items": [{"item_description": "Tap washer", "quantity": 1, "estimated_cost": 25}],
+        })
+        wo.insert(ignore_permissions=True, ignore_links=True)
+        wo.submit()
+        return wo
+
+    def _ledger_rows(self, wo_name):
+        return frappe.get_all(
+            "Accommodation Ledger",
+            filters={"source_doctype": "Maintenance Work Order", "source_name": wo_name},
+            pluck="name",
+        )
+
+    def test_cancel_reverses_memo_and_releases_request(self):
+        from apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order import (
+            mark_completed,
+        )
+
+        building, room = self._ensure_location()
+        mr = self._submit_request(building, room)
+        wo = self._submit_work_order(mr, building)
+        try:
+            # Completion posts the memo and drives the request to Closed.
+            mark_completed(wo.name)
+            self.assertEqual(len(self._ledger_rows(wo.name)), 1,
+                             "completion should post exactly one ledger memo")
+            self.assertEqual(
+                frappe.db.get_value("Maintenance Request", mr.name, "status"), "Closed")
+
+            # Cancel must undo both.
+            wo.reload()
+            wo.cancellation_reason = "Duplicate work order"
+            wo.cancel()
+
+            self.assertEqual(self._ledger_rows(wo.name), [],
+                             "cancel must delete the orphan ledger memo")
+            self.assertEqual(
+                frappe.db.get_value("Maintenance Request", mr.name, "status"), "Open",
+                "cancel must release the request off Closed")
+        finally:
+            if frappe.db.exists("Maintenance Work Order", wo.name):
+                wo.reload()
+                if wo.docstatus == 1:
+                    wo.cancellation_reason = wo.cancellation_reason or "cleanup"
+                    wo.cancel()
+                frappe.delete_doc("Maintenance Work Order", wo.name,
+                                  force=True, ignore_permissions=True)
+            for row in self._ledger_rows(wo.name):
+                frappe.delete_doc("Accommodation Ledger", row,
+                                  force=True, ignore_permissions=True)
+            if frappe.db.exists("Maintenance Request", mr.name):
+                mr.reload()
+                if mr.docstatus == 1:
+                    mr.cancel()
+                frappe.delete_doc("Maintenance Request", mr.name,
+                                  force=True, ignore_permissions=True)

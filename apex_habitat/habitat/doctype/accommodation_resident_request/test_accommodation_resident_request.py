@@ -2,8 +2,12 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request import (
+    _apply_priority_rules,
     advance_triage_status,
     bulk_triage,
+)
+from apex_habitat.habitat.web_form.accommodation_resident_request.accommodation_resident_request import (
+    submit_resident_request,
 )
 
 
@@ -66,3 +70,52 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         a = self._request("New")
         res = bulk_triage(frappe.as_json([a.name]))
         self.assertEqual(res["advanced"], 1)
+
+    # --- Priority rule word-boundary matching ---
+
+    def test_priority_substring_does_not_false_bump(self):
+        """A description that only contains 'ac' as a substring of an ordinary word
+        (contact) must not be bumped to High — the bare-substring match was the bug."""
+        doc = frappe._dict(request_category="Other", description="please contact me", priority=None)
+        _apply_priority_rules(doc)
+        self.assertNotEqual(doc.priority, "High")
+
+    def test_priority_genuine_ac_request_bumps(self):
+        """A real A/C term as a whole word still escalates to High."""
+        doc = frappe._dict(request_category="AC", description="the ac is broken", priority=None)
+        _apply_priority_rules(doc)
+        self.assertEqual(doc.priority, "High")
+
+    def test_priority_air_conditioning_phrase_bumps(self):
+        """The multi-word 'air conditioning' high term also escalates."""
+        doc = frappe._dict(request_category="Other", description="air conditioning not working", priority=None)
+        _apply_priority_rules(doc)
+        self.assertEqual(doc.priority, "High")
+
+    # --- Web Form honeypot ---
+
+    def test_honeypot_filled_is_rejected(self):
+        """A non-empty honeypot field is treated as spam: the call short-circuits
+        with a null result and creates no request row."""
+        before = frappe.db.count("Accommodation Resident Request")
+        res = submit_resident_request(
+            location_token=None,
+            request_type="Maintenance",
+            description="spam body",
+            website_field="http://spam.example",
+        )
+        self.assertIsNone(res["name"])
+        self.assertEqual(frappe.db.count("Accommodation Resident Request"), before)
+
+    def test_honeypot_empty_passes(self):
+        """An empty honeypot lets a genuine submission through and creates a row
+        with a tracking code."""
+        res = submit_resident_request(
+            location_token=None,
+            request_type="Maintenance",
+            description="genuine request",
+            website_field="",
+        )
+        self.assertIsNotNone(res["name"])
+        self.assertTrue(res["tracking_code"])
+        self.assertTrue(frappe.db.exists("Accommodation Resident Request", res["name"]))

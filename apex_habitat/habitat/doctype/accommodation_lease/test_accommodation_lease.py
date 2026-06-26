@@ -61,3 +61,24 @@ class TestAccommodationLease(FrappeTestCase):
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
+
+    def test_schedule_rows_default_unpaid(self):
+        """Generated schedule rows are stamped 'Unpaid', never 'Paid'. The
+        'Generate Payment' button selects the next non-Paid row, so a fresh row
+        must read Unpaid for that selection to land on it (guards the row-pick
+        contract the form button depends on)."""
+        from apex_habitat.habitat.doctype.accommodation_lease.accommodation_lease import _build_schedule
+
+        doc = frappe.get_doc({
+            "doctype": "Accommodation Lease",
+            "naming_series": "ACC-LEASE-.YYYY.-.####",
+            "building": "QA-BLDG",
+            "lease_start_date": "2026-01-01",
+            "lease_end_date": "2026-06-30",
+            "rent_amount": 4000,
+            "first_payment_date": "2026-01-01",
+            "billing_cycle": "Monthly",
+        })
+        _build_schedule(doc)
+        self.assertTrue(doc.payment_schedule)
+        self.assertTrue(all(r.status == "Unpaid" for r in doc.payment_schedule))

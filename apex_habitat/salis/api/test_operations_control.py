@@ -6,7 +6,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
-from apex_habitat.salis.api import operations_control
+from apex_habitat.salis.api import fleet_os, operations_control
 
 
 class TestReassignDriver(FrappeTestCase):
@@ -80,3 +80,85 @@ class TestReassignDriver(FrappeTestCase):
     def test_reassign_requires_a_driver(self):
         with self.assertRaises(frappe.ValidationError):
             operations_control.reassign_driver(vehicle=self.vehicle, driver=None)
+
+
+class TestSupervisorSurfaceParity(FrappeTestCase):
+    """The /fleet board (fleet_os) and the Fleet Control drawer (operations_control)
+    drive reassign and stop-close through ONE shared helper, so the two surfaces
+    reach the same assignment/stop outcome for the same action."""
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def _vehicle(self):
+        return (
+            frappe.get_doc(
+                {
+                    "doctype": "Salis Vehicle",
+                    "plate_number": f"PAR {frappe.generate_hash(length=6)}",
+                    "status": "Active",
+                }
+            )
+            .insert(ignore_permissions=True)
+        )
+
+    def _driver(self):
+        return frappe.get_doc(
+            {
+                "doctype": "Salis Driver",
+                "full_name": f"Rider {frappe.generate_hash(length=6)}",
+                "driver_id": f"PARD-{frappe.generate_hash(length=6)}",
+                "status": "Active",
+            }
+        ).insert(ignore_permissions=True)
+
+    def test_reassign_reaches_same_outcome_on_both_surfaces(self):
+        # Board surface: fleet_os.reassign takes the EXTERNAL driver_id.
+        v1, d1 = self._vehicle(), self._driver()
+        fleet_os.reassign(v1.plate_number, d1.driver_id)
+        # Drawer surface: operations_control.reassign_driver takes the driver NAME.
+        v2, d2 = self._vehicle(), self._driver()
+        operations_control.reassign_driver(vehicle=v2.name, driver=d2.name)
+
+        # Same outcome: an Active assignment exists and the denormalized links are
+        # stamped (the shared helper relies on the assignment's on_submit for both).
+        for veh, drv in ((v1.name, d1.name), (v2.name, d2.name)):
+            self.assertEqual(frappe.db.get_value("Salis Vehicle", veh, "current_driver"), drv)
+            self.assertEqual(frappe.db.get_value("Salis Driver", drv, "current_vehicle"), veh)
+            self.assertTrue(
+                frappe.db.exists(
+                    "Vehicle Assignment",
+                    {"vehicle": veh, "driver": drv, "status": "Active", "docstatus": 1},
+                )
+            )
+
+    def test_stop_close_reaches_same_outcome_on_both_surfaces(self):
+        # Board surface: workshop_in then workshop_out closes the Maintenance stop.
+        v1 = self._vehicle()
+        fleet_os.workshop_in(v1.plate_number)
+        ws_stop = frappe.db.get_value(
+            "Vehicle Stop",
+            {"vehicle": v1.name, "stop_reason": "Maintenance", "docstatus": 1},
+            "name",
+        )
+        fleet_os.workshop_out(v1.plate_number)
+
+        # Drawer surface: a plain stop, then release_vehicle closes it.
+        v2 = self._vehicle()
+        stop_doc = frappe.get_doc(
+            {
+                "doctype": "Vehicle Stop",
+                "vehicle": v2.name,
+                "stop_reason": "Other",
+                "stop_date": today(),
+            }
+        ).insert(ignore_permissions=True)
+        stop_doc.submit()
+        operations_control.release_vehicle(vehicle=v2.name)
+
+        # Same outcome: each closed stop is cancelled with the exit date stamped, and
+        # the vehicle is restored to Active.
+        for stop_name, veh in ((ws_stop, v1.name), (stop_doc.name, v2.name)):
+            self.assertEqual(frappe.db.get_value("Vehicle Stop", stop_name, "docstatus"), 2)
+            self.assertTrue(frappe.db.get_value("Vehicle Stop", stop_name, "return_date"))
+            self.assertEqual(frappe.db.get_value("Salis Vehicle", veh, "status"), "Active")

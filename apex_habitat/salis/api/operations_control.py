@@ -16,10 +16,8 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.utils import getdate, today
-
 from apex_habitat.salis.api.fleet_reader import driver_names, scope_filter, scoped_vehicles
-from apex_habitat.salis.utils import lock_driver, lock_vehicle
+from apex_habitat.salis.utils import close_open_stop, lock_vehicle, reassign_vehicle_driver
 
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 
@@ -308,17 +306,9 @@ def release_vehicle(vehicle, return_date=None):
     if not stop:
         frappe.throw(_("This vehicle has no open stop to release."))
 
-    on = getdate(today())
-    ret = getdate(return_date) if return_date else on
-    # Audit stamps on the submitted stop; not allow_on_submit, so set them directly
-    # before the cancel transition runs the native reversal (on_cancel).
-    frappe.db.set_value(
-        "Vehicle Stop",
-        stop,
-        {"return_date": ret, "released_on": on, "released_by": frappe.session.user},
-    )
-    # on_cancel restores the vehicle's previous_status (controllers not bypassed).
-    frappe.get_doc("Vehicle Stop", stop).cancel()
+    # Shared native stop-close (stamp audit fields + cancel -> on_cancel restores
+    # previous_status); same helper the /fleet workshop_out uses.
+    close_open_stop(stop, return_date)
     return {"ok": True, "stop": stop}
 
 
@@ -345,31 +335,8 @@ def reassign_driver(vehicle, driver, start_date=None):
     if not frappe.db.exists("Salis Driver", driver):
         frappe.throw(_("Driver {0} not found.").format(driver))
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
-    lock_vehicle(vehicle)
-    lock_driver(driver)
 
-    start = getdate(start_date) if start_date else getdate(today())
-
-    # End the open Active assignment(s) so the new one does not trip the
-    # one-active-assignment-per-vehicle overlap guard in VehicleAssignment.validate.
-    for r in frappe.get_all(
-        "Vehicle Assignment",
-        filters={"vehicle": vehicle, "status": "Active", "docstatus": 1},
-        fields=["name", "driver"],
-    ):
-        if r.driver == driver:
-            frappe.throw(_("Vehicle {0} is already assigned to driver {1}.").format(vehicle, driver))
-        frappe.db.set_value("Vehicle Assignment", r.name, {"status": "Ended", "end_date": start})
-
-    assignment = frappe.get_doc({
-        "doctype": "Vehicle Assignment",
-        "vehicle": vehicle,
-        "driver": driver,
-        "project": frappe.db.get_value("Salis Vehicle", vehicle, "project"),
-        "start_date": start,
-        "status": "Active",
-    })
-    assignment.insert()
-    # on_submit stamps current_driver / current_vehicle (controllers not bypassed).
-    assignment.submit()
-    return {"ok": True, "assignment": assignment.name}
+    # Shared native reassign (end Active assignment[s] + submit a new one; on_submit
+    # stamps the driver links). The drawer rejects a no-op reassign to the same driver.
+    assignment = reassign_vehicle_driver(vehicle, driver, start_date, reject_same_driver=True)
+    return {"ok": True, "assignment": assignment}
