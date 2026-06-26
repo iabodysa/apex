@@ -206,6 +206,7 @@ const messages = {
       vehicleStatus: "Vehicle status",
       currentDriver: "Current driver",
       active: "Active",
+      fuelPlan: "Fuel plan",
     },
     driverTab: {
       lockedFor: "File locked — vehicle assigned to driver {name}",
@@ -564,6 +565,7 @@ const messages = {
       vehicleStatus: "حالة المركبة",
       currentDriver: "السائق الحالي",
       active: "نشط",
+      fuelPlan: "خطة الوقود",
     },
     driverTab: {
       lockedFor: "الملف مقفل — المركبة مُسندة للسائق {name}",

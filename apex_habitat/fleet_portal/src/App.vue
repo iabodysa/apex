@@ -14,7 +14,7 @@
  * persistence with no backing endpoint, so the panel renders their (empty)
  * read views — the only write surfaces kept are the six real endpoints.
  */
-import { ref, reactive, computed, onMounted, watch } from "vue";
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from "vue";
 import { call } from "./api.js";
 import Icon from "./components/Icon.vue";
 import LangToggle from "./components/LangToggle.vue";
@@ -80,6 +80,50 @@ async function reloadFleet() {
   }
 }
 onMounted(loadFleet);
+
+// ═══════════ LIVE POLL (see other supervisors' changes) ═══════════
+// A background refresh on an interval so the board reflects another user's
+// writes without a manual reload. Paused while the tab is hidden, the first
+// load hasn't landed, or the user is mid-interaction (a write in flight, a sub-
+// form/confirm open, or a selection active) so a tick can't clobber their state.
+const POLL_MS = 30000;
+let pollTimer = null;
+const pollPaused = computed(
+  () =>
+    loadState.value !== "ready" ||
+    cf.open ||
+    !!subForm.value ||
+    busyPlates.value.size > 0 ||
+    selected.value.size > 0
+);
+async function pollTick() {
+  if (document.hidden || pollPaused.value) return;
+  await reloadFleet();
+}
+function startPoll() {
+  if (pollTimer) return;
+  pollTimer = setInterval(pollTick, POLL_MS);
+}
+function stopPoll() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+}
+// Re-sync immediately when the tab regains focus (the user may have been away
+// long enough for the board to drift), then keep polling.
+function onVisibility() {
+  if (document.hidden) return;
+  if (!pollPaused.value) reloadFleet();
+}
+onMounted(() => {
+  startPoll();
+  document.addEventListener("visibilitychange", onVisibility);
+});
+onUnmounted(() => {
+  stopPoll();
+  document.removeEventListener("visibilitychange", onVisibility);
+});
 
 // Frappe surfaces thrown errors as a JSON-encoded _server_messages array; pull
 // the human message out of whatever shape arrived.
@@ -1144,44 +1188,11 @@ function expiryFlag(v) {
                 <span class="vc-fuel-badge">{{ trim(v.fuel) || "—" }}</span>
               </div>
             </div>
-            <div class="vc-meta">
-              <div class="vc-type">{{ v.vehicle_type || "—" }}</div>
-              <div class="vc-office"><Icon name="building" :size="12" /> {{ v.rental_office }} &middot; {{ trim(v.project) || "—" }} &middot; <Icon name="pin" :size="12" /> {{ v.area }}</div>
-            </div>
+            <!-- Card lead: state → driver → exception flags (fuel demoted to the panel) -->
             <div class="vc-status-bar">
               <span class="sbadge" :class="sb(v).cls"><Icon :name="sb(v).ic" :size="13" />{{ sb(v).label }}</span>
               <span v-if="v.vehicle_status === 'workshop' && v.workshop_date" style="font-size:10px;color:var(--orange-l);font-family:'JetBrains Mono',monospace;display:inline-flex;align-items:center;gap:3px"><Icon name="calendar" :size="11" /> <bdi>{{ v.workshop_date }}</bdi></span>
               <span v-else-if="v.vehicle_status !== 'assigned' && v.vehicle_status !== 'workshop'" style="font-size:10px;color:var(--t3)">{{ t("card.prevDrivers", { n: v.history.length }) }}</span>
-            </div>
-            <!-- Compliance flag: shows only for near (<=7d) / expired vehicles, never for compliant -->
-            <div
-              v-if="expiryFlag(v).show"
-              class="vc-expiry-stripe"
-              :class="expiryFlag(v).expired ? 'vc-expiry-expired' : 'vc-expiry-soon'"
-            >
-              <Icon name="shield-alert" :size="13" />
-              <span>{{ expiryFlag(v).label }}</span>
-              <bdi v-if="expiryFlag(v).date" class="vc-expiry-date">{{ expiryFlag(v).date }}</bdi>
-            </div>
-            <!-- Fuel row: real planned grade + SAR/day from Salis Vehicle (— only when unset) -->
-            <div class="vc-fuel-row" @click.stop>
-              <div>
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-                  <span class="fuel-grade-badge">{{ fuelView(v).gradeLabel }} · {{ fuelView(v).sarPerL }} {{ t("common.sarPerL") }}</span>
-                </div>
-                <div style="display:flex;align-items:baseline;gap:4px">
-                  <span class="fuel-sar-val">{{ fuelView(v).sarDisplay }}</span>
-                  <span class="fuel-sar-unit">{{ t("common.sar") }}</span>
-                  <span class="fuel-sar-period">{{ t("common.perDay") }}</span>
-                  <span v-if="fuelView(v).dailySAR > 0" class="fuel-monthly" style="margin-right:8px">· {{ fuelView(v).monDisplay }} {{ t("common.perMonthSuffix") }}</span>
-                </div>
-              </div>
-            </div>
-            <div v-if="v.vehicle_status === 'workshop'" class="vc-workshop-stripe"><Icon name="wrench" :size="13" /> {{ v.workshop_notes || t("card.inMaintenance") }}</div>
-            <div v-if="v.vehicle_status === 'stolen'" class="vc-stolen-stripe"><Icon name="shield-alert" :size="13" /> {{ t("card.stolen") }} <template v-if="v.stolen_info && v.stolen_info.date">· <bdi>{{ v.stolen_info.date }}</bdi></template></div>
-            <div v-if="(v.damages || []).length || (v.accidents || []).length" style="padding:3px 14px;display:flex;gap:6px;border-top:1px solid var(--b1)">
-              <span v-if="(v.damages || []).length" style="font-size:10px;padding:2px 7px;background:var(--red-d);color:var(--red-l);border-radius:6px;border:1px solid rgba(220,38,38,.2);display:inline-flex;align-items:center;gap:3px"><Icon name="hammer" :size="11" /> {{ t("card.damageCount", { n: v.damages.length }) }}</span>
-              <span v-if="(v.accidents || []).length" style="font-size:10px;padding:2px 7px;background:var(--amber-d);color:var(--amber-l);border-radius:6px;border:1px solid rgba(217,119,6,.2);display:inline-flex;align-items:center;gap:3px"><Icon name="crash" :size="11" /> {{ t("card.accidentCount", { n: v.accidents.length }) }}</span>
             </div>
             <div v-if="v.current_driver" class="vc-driver">
               <div class="drv-av">{{ initials(v.current_driver) }}</div>
@@ -1195,6 +1206,27 @@ function expiryFlag(v) {
               <template v-if="v.vehicle_status === 'available'"><Icon name="key" :size="14" /> {{ t("card.readyToAssign") }}</template>
               <template v-else-if="v.vehicle_status === 'workshop'"><Icon name="wrench" :size="14" /> {{ t("card.inMaintenance") }}</template>
               <template v-else><Icon name="circle-pause" :size="14" /> {{ t("card.outOfService") }}</template>
+            </div>
+            <!-- Compliance flag: shows only for near (<=7d) / expired vehicles, never for compliant -->
+            <div
+              v-if="expiryFlag(v).show"
+              class="vc-expiry-stripe"
+              :class="expiryFlag(v).expired ? 'vc-expiry-expired' : 'vc-expiry-soon'"
+            >
+              <Icon name="shield-alert" :size="13" />
+              <span>{{ expiryFlag(v).label }}</span>
+              <bdi v-if="expiryFlag(v).date" class="vc-expiry-date">{{ expiryFlag(v).date }}</bdi>
+            </div>
+            <div v-if="v.vehicle_status === 'workshop'" class="vc-workshop-stripe"><Icon name="wrench" :size="13" /> {{ v.workshop_notes || t("card.inMaintenance") }}</div>
+            <div v-if="v.vehicle_status === 'stolen'" class="vc-stolen-stripe"><Icon name="shield-alert" :size="13" /> {{ t("card.stolen") }} <template v-if="v.stolen_info && v.stolen_info.date">· <bdi>{{ v.stolen_info.date }}</bdi></template></div>
+            <div v-if="(v.damages || []).length || (v.accidents || []).length" style="padding:3px 14px;display:flex;gap:6px;border-top:1px solid var(--b1)">
+              <span v-if="(v.damages || []).length" style="font-size:10px;padding:2px 7px;background:var(--red-d);color:var(--red-l);border-radius:6px;border:1px solid rgba(220,38,38,.2);display:inline-flex;align-items:center;gap:3px"><Icon name="hammer" :size="11" /> {{ t("card.damageCount", { n: v.damages.length }) }}</span>
+              <span v-if="(v.accidents || []).length" style="font-size:10px;padding:2px 7px;background:var(--amber-d);color:var(--amber-l);border-radius:6px;border:1px solid rgba(217,119,6,.2);display:inline-flex;align-items:center;gap:3px"><Icon name="crash" :size="11" /> {{ t("card.accidentCount", { n: v.accidents.length }) }}</span>
+            </div>
+            <!-- Demoted context: vehicle type + office/project/area below the lead -->
+            <div class="vc-meta vc-meta-demoted">
+              <div class="vc-type">{{ v.vehicle_type || "—" }}</div>
+              <div class="vc-office"><Icon name="building" :size="12" /> {{ v.rental_office }} &middot; {{ trim(v.project) || "—" }} &middot; <Icon name="pin" :size="12" /> {{ v.area }}</div>
             </div>
             <div v-if="calcTotalDaysNum(v) > 0" class="vc-dur">
               <div class="dur-label">
@@ -1320,6 +1352,21 @@ function expiryFlag(v) {
             <div class="kv"><div class="kv-l">{{ t("panel.area") }}</div><div class="kv-v">{{ panel.vehicle.area || t("common.none") }}</div></div>
             <div class="kv"><div class="kv-l">{{ t("panel.project") }}</div><div class="kv-v">{{ trim(panel.vehicle.project) || t("common.none") }}</div></div>
             <div class="kv"><div class="kv-l">{{ t("panel.vehicleStatus") }}</div><div class="kv-v">{{ sb(panel.vehicle).label }}</div></div>
+          </div>
+          <!-- Fuel plan: demoted from the card to the detail panel -->
+          <div class="psect-title"><Icon name="fuel" :size="14" /> {{ t("panel.fuelPlan") }}</div>
+          <div class="vc-fuel-row" style="border-radius:var(--r2);border:1px solid var(--b1)">
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                <span class="fuel-grade-badge">{{ fuelView(panel.vehicle).gradeLabel }} · {{ fuelView(panel.vehicle).sarPerL }} {{ t("common.sarPerL") }}</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:4px">
+                <span class="fuel-sar-val">{{ fuelView(panel.vehicle).sarDisplay }}</span>
+                <span class="fuel-sar-unit">{{ t("common.sar") }}</span>
+                <span class="fuel-sar-period">{{ t("common.perDay") }}</span>
+                <span v-if="fuelView(panel.vehicle).dailySAR > 0" class="fuel-monthly" style="margin-inline-start:8px">· {{ fuelView(panel.vehicle).monDisplay }} {{ t("common.perMonthSuffix") }}</span>
+              </div>
+            </div>
           </div>
           <template v-if="panel.vehicle.current_driver">
             <div class="psect-title"><Icon name="user" :size="14" /> {{ t("panel.currentDriver") }}</div>

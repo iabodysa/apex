@@ -141,6 +141,7 @@ Admin Health,صحة الإدارة
 Administrative Details,تفاصيل إدارية
 Administrative Trip,رحلة إدارية
 Administrative Trip / Document Signing,رحلة إدارية / توقيع مستندات
+Advance this request to {0},تقديم هذا الطلب إلى {0}
 Age,العمر
 Age (Days),العمر (أيام)
 Age (Years),العمر (سنوات)
@@ -427,6 +428,7 @@ Cancellation Reason is required before cancelling a Maintenance Inspection Repor
 Cancellation Reason is required before cancelling a Maintenance Work Order.,يلزم تحديد سبب الإلغاء قبل إلغاء أمر عمل الصيانة.
 Cancellation Reason is required before cancelling a Scheduled Task Instance.,يلزم تحديد سبب الإلغاء قبل إلغاء سجل تنفيذ المهمة المجدولة.
 Cancelled,مُلغى
+Cannot advance {0} from {1} to {2} here. Open the request to set the required fields.,لا يمكن تقديم {0} من {1} إلى {2} هنا. افتح الطلب لتعبئة الحقول المطلوبة.
 Cannot cancel Custody Damage Assessment {0} because Additional Salary Deduction Entry {1} is already linked.,لا يمكن إلغاء تقييم تلفيات العهدة {0} لأن قيد الخصم الإضافي من الراتب {1} مرتبط به بالفعل.
 Cannot cancel Custody Issue {0} because it is referenced by active Custody Return {1}.,لا يمكن إلغاء صرف العهدة {0} لأنه مرجوع إليه من إرجاع عهدة نشط {1}.
 Cannot cancel Custody Return {0} because it is referenced by active Custody Damage Assessment {1}.,لا يمكن إلغاء إرجاع العهدة {0} لأنه مرجوع إليه من تقييم تلفيات عهدة نشط {1}.
@@ -1564,6 +1566,7 @@ Mark Completed,تحديد كمكتمل
 Mark Missed,تحديد كـ فائت
 Mark Ready,تعليم كجاهزة
 Mark Received,تأكيد الاستلام
+Mark Triaged,وضع علامة تم الفرز
 Mark as Completed,وسم كمكتمل
 Mark this Service Order as In Progress?,هل تريد تحديد حالة أمر الخدمة هذا كـ 'قيد التنفيذ'؟
 Mark this Service Order as Missed? This indicates the scheduled work was not completed on time.,هل تريد تحديد حالة أمر الخدمة هذا كـ 'فائت'؟ يشير ذلك إلى عدم اكتمال العمل المجدول في الوقت المحدد.
@@ -1626,6 +1629,7 @@ Monthly Rent (SAR),الإيجار الشهري (ريال)
 Monthly Retainer (SAR),المبلغ الشهري الثابت (ريال)
 Monthly fuel quota allocated to a vehicle/driver on a project. Tracks allocated vs consumed litres.,حصة وقود شهرية مخصّصة لمركبة/سائق في مشروع. تتتبّع اللترات المخصّصة مقابل المستهلكة.
 Morning,صباحي
+Move to {0},النقل إلى {0}
 Move {0} from {1} to {2}?,نقل {0} من {1} إلى {2}؟
 Moved By (Employee),نُقل بواسطة (الموظف)
 Movement,حركة
@@ -2523,6 +2527,7 @@ Select an employee before issuing.,اختر موظفاً قبل الصرف.
 Select at least one passenger.,اختر راكباً واحداً على الأقل.
 Select at least one vehicle.,اختر مركبة واحدة على الأقل.
 Select from the Habitat material catalog. Optional — use instead of or alongside ERPNext Item.,اختر من كتالوج مواد Habitat. اختياري — استخدمه بدلاً من صنف ERPNext أو إلى جانبه.
+Select one or more New requests first.,اختر طلباً جديداً واحداً أو أكثر أولاً.
 Select the vehicle to release.,اختر المركبة المراد تحريرها.
 "Select this building's address, or a Site, to show it here.",اختر عنوانَ هذا المبنى، أو موقعًا، لعرضه هنا.
 Selected Bed {0} does not belong to Room {1},السرير المحدد {0} لا ينتمي إلى الغرفة {1}
@@ -2917,6 +2922,7 @@ Transport request submitted successfully.,تم تقديم طلب التنقل ب
 Trends,الاتجاهات
 Triage Notes,ملاحظات الفرز
 Triaged,تم الفرز
+Triaging requests...,جارٍ فرز الطلبات...
 Trigger Event,الحدث المُشغِّل
 Trigger alert if monthly bill deviates from average by more than this percentage.,أطلق تنبيهاً إذا انحرفت الفاتورة الشهرية عن المتوسط بأكثر من هذه النسبة.
 Trip,الرحلة
@@ -3188,7 +3194,9 @@ total_cost,التكلفة الإجمالية
 {0} days,{0} أيام
 {0} is not a valid readiness status.,{0} ليست حالة جاهزية صالحة.
 {0} material(s) loaded from template {1},حُمِّلت {0} مادّة من القالب {1}
+{0} moved to {1},تم نقل {0} إلى {1}
 {0} of {1} beds available,{0} من {1} سرير متاح
+{0} of {1} marked Triaged,تم فرز {0} من {1}
 {0} open,{0} مفتوح
 {0} open requests,{0} طلبات مفتوحة
 {0} over threshold,{0} يتجاوز الحدّ

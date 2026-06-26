@@ -223,6 +223,8 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);font-si
 .sb-stolen{background:var(--purple-d);color:var(--purple-l);border:1px solid rgba(124,58,237,.2)}
 .sb-stolen .dot{background:var(--purple)}
 .vc-meta{padding:0 14px 10px;display:flex;flex-direction:column;gap:3px}
+/* Demoted context block (type/office) now sits below the lead, so it carries its own divider + top padding. */
+.vc-meta-demoted{padding:8px 14px;border-top:1px solid var(--b1)}
 .vc-type{font-size:13px;font-weight:600;color:var(--t1)}
 .vc-office{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:6px}
 .vc-status-bar{

@@ -279,3 +279,61 @@ def _build_custody_issue(source):
         target.party = source.party
     target.remarks = source.description or _("Converted from resident request {0}").format(source.name)
     return target
+
+
+# One-tap triage advance map. Only targets with no extra mandatory field are listed
+# — Assigned needs assigned_to and Resolved/Closed need resolution_notes, so those
+# are reached on the form, not by a list-view tap. Kept here (not in JS) so the
+# allowed progression is server-authoritative and shared by the row button and the
+# bulk action.
+_TRIAGE_NEXT = {
+    "New": "Triaged",
+    "Triaged": "In Progress",
+    "In Progress": "Waiting Evidence",
+    "Waiting Evidence": "In Progress",
+}
+
+
+@frappe.whitelist(methods=["POST"])
+def advance_triage_status(name, to_status):
+    """Advance one resident request to the next no-extra-data triage state from a
+    phone-friendly list view. Reuses the controller save path so the canonical
+    _validate_status_transition rule runs; rejects any jump that is not in the
+    guard-free progression. Idempotent: a request already at to_status is a no-op."""
+    frappe.has_permission("Accommodation Resident Request", "write", doc=name, throw=True)
+
+    doc = frappe.get_doc("Accommodation Resident Request", name)
+    if doc.status == to_status:
+        return {"name": doc.name, "status": doc.status, "changed": False}
+
+    expected = _TRIAGE_NEXT.get(doc.status or "New")
+    if to_status != expected:
+        frappe.throw(
+            _("Cannot advance {0} from {1} to {2} here. Open the request to set the required fields.").format(
+                doc.name, _(doc.status or "New"), _(to_status)
+            )
+        )
+
+    doc.status = to_status
+    doc.save()
+    return {"name": doc.name, "status": doc.status, "changed": True}
+
+
+@frappe.whitelist(methods=["POST"])
+def bulk_triage(names):
+    """Bulk-advance a selection of New requests to Triaged (the universal first
+    triage step). Skips any row not in New so a mixed selection partially applies
+    rather than failing whole. Returns the count actually advanced."""
+    if isinstance(names, str):
+        names = frappe.parse_json(names)
+
+    advanced = 0
+    for name in names or []:
+        frappe.has_permission("Accommodation Resident Request", "write", doc=name, throw=True)
+        doc = frappe.get_doc("Accommodation Resident Request", name)
+        if doc.status not in (None, "", "New"):
+            continue
+        doc.status = "Triaged"
+        doc.save()
+        advanced += 1
+    return {"advanced": advanced, "total": len(names or [])}
