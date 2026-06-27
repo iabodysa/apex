@@ -768,3 +768,72 @@ body {
 [data-theme="atelier"] .textarea:focus {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 14%, transparent);
 }
+
+/* Creative ("Nocturne") — the flagship distinctive-yet-professional theme.
+   A cool deep-navy editorial chrome with an electric-azure primary and a warm
+   amber accent — an unclaimed niche distinct from "dark" (brand forest-green)
+   and "gemini" (purple neon glass). No animation, no glassmorphism, no glow:
+   solid surfaces, crisp hairlines, restrained elevation — confident and calm.
+   High luminance separation keeps every text/control pair WCAG AA+ (ivory and
+   azure on near-black navy; see the theme block in the build verification).
+   Token-only re-skin: components consume the same --c-* / --radius / --shadow
+   variables, so the whole portal re-skins with no markup change. */
+[data-theme="creative"] {
+  --c-primary: #3ea6ff; /* Electric Azure — primary action / links (7.09:1 on canvas) */
+  --c-primary-ink: #04101f; /* near-black navy text on the bright azure button */
+  --c-ink: #eef2fb; /* Ivory — headings/body (16.39:1 on canvas) */
+  --c-ink-soft: #aab6d4; /* cool slate for secondary text (8.26:1 on surface) */
+  --c-canvas: #0d1424; /* deep navy page background */
+  --c-surface: #141d33; /* raised card navy */
+  --c-surface-2: #1b2742; /* hover / elevated paper */
+  --c-accent: #ffb454; /* Warm Amber — CTA accent (override target) */
+  --c-mint: #42d6a4; /* teal-mint success highlight */
+  --c-muted: #7e8bb0; /* muted label text (4.95:1 on surface) */
+  --c-border: #26314d; /* hairline on navy */
+  --c-border-strong: #364470;
+  --c-success: #42d6a4;
+  --c-success-bg: rgba(66, 214, 164, 0.14);
+  --c-warning: #ffc14d;
+  --c-warning-bg: rgba(255, 193, 77, 0.16);
+  --c-danger: #ff6b6b;
+  --c-danger-bg: rgba(255, 107, 107, 0.16);
+  --c-header-bg: #0a1120; /* deepest navy header bar */
+  --c-header-ink: #eef2fb;
+  --c-header-accent: #3ea6ff;
+  --c-arc: rgba(62, 166, 255, 0.12); /* azure hero supergraphic arc */
+
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  /* restrained cool elevation — depth without the gemini glow */
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.45);
+  --border-width: 1px;
+
+  --font: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-display: 30px;
+  --fw-heading: 800;
+  --fw-semibold: 600;
+  --fw-body: 500;
+}
+
+/* Azure header hairline — the signature creative accent line. */
+[data-theme="creative"] .app-header {
+  border-bottom: 1px solid color-mix(in srgb, var(--c-header-accent) 30%, transparent);
+}
+/* Editorial poise: tighter heading tracking. */
+[data-theme="creative"] .section-title,
+[data-theme="creative"] .stat-value {
+  letter-spacing: -0.02em;
+}
+/* Azure focus ring. */
+[data-theme="creative"] .input:focus,
+[data-theme="creative"] .select:focus,
+[data-theme="creative"] .textarea:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 22%, transparent);
+}
+/* Active tab pip carries the azure→amber creative duotone. */
+[data-theme="creative"] .tab.router-link-active .tab-pip {
+  background: linear-gradient(90deg, var(--c-primary), var(--c-accent));
+}

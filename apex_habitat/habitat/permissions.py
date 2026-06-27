@@ -53,6 +53,26 @@ def maintenance_request_query(user=None):
     return "(`owner` = {0} or `assigned_to` = {0})".format(escaped)
 
 
+# [#rptscope] Script Reports run on frappe.get_all (forced ignore_permissions), so the
+# owner/assignee row-scoping the desk list gets via maintenance_request_query above is
+# bypassed in report code — a non-privileged user would see every ticket's aging/backlog.
+# This mirrors that scope for report-side get_all: it tells the report whether to confine
+# rows to the tickets the user raised (owner) or was assigned (assigned_to). Privileged
+# oversight roles (per _is_privileged) and the Administrator stay unrestricted.
+def report_maintenance_request_scope(user=None):
+    """Return ``(restrict, user)`` for report-side maintenance-request scoping.
+
+    ``restrict`` is False for the Administrator and privileged oversight roles (the
+    report applies no extra filter — they see every ticket). When True the report must
+    confine its rows to ``owner == user OR assigned_to == user`` (e.g. via get_all's
+    ``or_filters``), matching the owner/assignee fragment in maintenance_request_query.
+    """
+    user = _resolve_user(user)
+    if _is_privileged(user):
+        return False, user
+    return True, user
+
+
 def maintenance_request_has_permission(doc, ptype, user=None):
     """Confine individual Maintenance Request access to its owner/assignee.
 

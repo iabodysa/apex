@@ -46,6 +46,8 @@ THEME_SLUGS = {
 	"Gemini": "gemini",
 	# Atelier: premium editorial refinement of the AFMCO identity (same palette, elevated finish).
 	"Atelier": "atelier",
+	# Creative ("Nocturne"): flagship deep-navy editorial chrome, electric-azure primary + warm amber accent.
+	"Creative": "creative",
 }
 
 DEFAULT_THEME = "AFMCO"

@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.habitat.permissions import report_maintenance_request_scope
+
 
 def execute(filters=None):
     columns = [
@@ -23,9 +25,17 @@ def execute(filters=None):
     if filters.get("cost_center"):
         query_filters["cost_center"] = filters["cost_center"]
 
+    # [#rptscope] AND the owner/assignee scope onto the report so a non-privileged user
+    # sees only the tickets they raised or were assigned; oversight roles see everything.
+    restrict, scope_user = report_maintenance_request_scope()
+    or_filters = (
+        {"owner": scope_user, "assigned_to": scope_user} if restrict else None
+    )
+
     data = frappe.get_all(
         "Maintenance Request",
         filters=query_filters,
+        or_filters=or_filters,
         fields=[
             "name",
             "building",

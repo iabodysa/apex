@@ -20,12 +20,12 @@
   },
   {
    "default": "AFMCO",
-   "description": "Portal design theme: AFMCO (flat brand default), Atelier (premium editorial refinement of AFMCO), Frappe Standard (neutral), Dark (AFMCO dark mode), or Gemini (glassmorphic).",
+   "description": "Portal design theme: AFMCO (flat brand default), Atelier (premium editorial refinement of AFMCO), Creative (flagship deep-navy editorial with electric-azure accent), Frappe Standard (neutral), Dark (AFMCO dark mode), or Gemini (glassmorphic).",
    "fieldname": "theme",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Theme",
-   "options": "AFMCO\nAtelier\nFrappe Standard\nDark\nGemini",
+   "options": "AFMCO\nAtelier\nCreative\nFrappe Standard\nDark\nGemini",
    "reqd": 1
   },
   {

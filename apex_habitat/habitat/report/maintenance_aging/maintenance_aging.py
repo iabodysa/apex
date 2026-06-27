@@ -4,6 +4,8 @@
 import frappe
 from frappe.utils import getdate, today
 
+from apex_habitat.habitat.permissions import report_maintenance_request_scope
+
 
 _PRIORITY_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
 _SLA_DAYS = {"Critical": 1, "High": 3, "Medium": 7, "Low": 14}
@@ -36,9 +38,17 @@ def execute(filters=None):
     if filters.get("cost_center"):
         query_filters["cost_center"] = filters["cost_center"]
 
+    # [#rptscope] AND the owner/assignee scope onto the report so a non-privileged user
+    # sees only the tickets they raised or were assigned; oversight roles see everything.
+    restrict, scope_user = report_maintenance_request_scope()
+    or_filters = (
+        {"owner": scope_user, "assigned_to": scope_user} if restrict else None
+    )
+
     rows = frappe.get_all(
         "Maintenance Request",
         filters=query_filters,
+        or_filters=or_filters,
         fields=[
             "name", "building", "issue_type", "priority", "status",
             "assigned_to", "cost_of_repair", "creation",

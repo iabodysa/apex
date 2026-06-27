@@ -34,6 +34,16 @@
     </div>
 
     <template v-else>
+      <!-- DRIVER ARRIVED: the driver marked arrival at this worker's pickup stop.
+           A green, reassuring band shown while the worker is still boarding. -->
+      <div v-if="driverArrived && !['Boarded', 'Absent'].includes(status)" class="bflow-panel bflow-arrived">
+        <div class="bflow-panel-head">
+          <Icon name="bus" :size="20" class="shrink-0 rtl-flip" />
+          <span class="bflow-panel-title">{{ t("boarding.arrivedTitle") }}</span>
+        </div>
+        <p class="bflow-line">{{ t("boarding.arrivedHint") }}</p>
+      </div>
+
       <!-- DEPARTING countdown: driver pressed depart; the vehicle leaves at
            notify_at + notify_window_seconds. Recomputed from the server stamp. -->
       <div v-if="departSecs !== null" class="bflow-panel bflow-departing">
@@ -175,6 +185,10 @@ const correctTripLabel = computed(() => {
   return wb.correct_trip || "";
 });
 const correctDriverPhone = computed(() => wrongBus.value?.correct_driver?.phone || "");
+
+// P-046: "your driver has arrived at your pickup" — set by the poll once the driver
+// marks arrival at this worker's own pickup stop. Null until then.
+const driverArrived = computed(() => !!props.boarding?.driver_arrived?.arrived);
 
 // Wait request: cap + counts. The flow allows it while the worker is still in a
 // boarding window (a trip exists and it isn't a terminal state).
@@ -344,6 +358,16 @@ function openPass() {
   font-size: var(--fs-h1);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
+}
+
+/* Driver arrived: a calm green band reassuring the worker to head out. */
+.bflow-arrived {
+  border-color: var(--c-success);
+  background: var(--c-success-bg);
+  color: var(--c-success);
+}
+.bflow-arrived .bflow-line {
+  color: inherit;
 }
 
 .bflow-rejected {

@@ -9,6 +9,8 @@
   "stop_name",
   "route_stop",
   "stop_col_break",
+  "arrived",
+  "arrived_at",
   "done",
   "done_at"
  ],
@@ -44,6 +46,20 @@
   {
    "fieldname": "stop_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "description": "Set when the driver marks arrival at this stop (the worker 'driver has arrived' signal).",
+   "fieldname": "arrived",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Arrived"
+  },
+  {
+   "fieldname": "arrived_at",
+   "fieldtype": "Datetime",
+   "label": "Arrived At"
   },
   {
    "columns": 1,

@@ -1655,6 +1655,8 @@ def _stop_progress_map(dispatch_trip, driver):
 			out[row.route_stop] = {
 				"done": bool(row.done),
 				"done_at": frappe.utils.cstr(row.done_at) if row.done_at else None,
+				"arrived": bool(row.arrived),
+				"arrived_at": frappe.utils.cstr(row.arrived_at) if row.arrived_at else None,
 			}
 	return out
 
@@ -1688,6 +1690,8 @@ def _attach_stop_progress(stops, route_plan, dispatch_trip, driver):
 		state = progress.get(rs) if rs else None
 		stop["done"] = bool(state and state.get("done"))
 		stop["done_at"] = state.get("done_at") if state else None
+		stop["arrived"] = bool(state and state.get("arrived"))
+		stop["arrived_at"] = state.get("arrived_at") if state else None
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1730,6 +1734,65 @@ def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_na
 	return {
 		"route_stop": route_stop,
 		"done": bool(done),
+		"stop_progress": _stop_progress_map(dispatch_trip, driver),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=None):
+	"""Driver action: "I've arrived at this pickup stop" (write).
+
+	The explicit arrival signal P-046 surfaces to the workers waiting at that stop.
+	Reuses the SAME Trip Stop Progress rail ``mark_stop_progress`` writes (one row
+	per route stop, keyed on the stable ``route_stop`` row name) — arrival is a new
+	flag on that row, not a new record — so the driver's per-stop state stays in one
+	place. Identity-scoped (``_resolve_my_trip``) and requires the trip to be started
+	(an open Trip Start Log must exist). Idempotent and reversible: ``arrived=0``
+	clears it; re-marking the same state is a no-op.
+
+	On arrival it publishes ``boarding_arrived`` to the Dispatch Trip room (the P-032
+	after_commit pattern, via the boarding flow's shared ``_publish``) so socketed
+	clients refresh; the durable arrival state on the row is what the guest worker
+	poll (``worker_trip_boarding``) reads — the delivery path for the worker's Masar
+	app, since guests have no socket. Server-authoritative, so ``ignore_permissions``
+	is set. No GL."""
+	from apex_habitat.salis.api.boarding_flow import _publish
+
+	_require_enabled()
+	driver = _resolve_driver()
+	_resolve_my_trip(dispatch_trip, driver)  # enforces own-trip; raises if not
+	log = _open_trip_log(dispatch_trip, driver)
+	if not log:
+		# Arrival lives on the trip log, so the trip must be started first.
+		frappe.throw(_("Start the trip before marking arrival."))
+
+	arrived = frappe.utils.cint(arrived)
+	existing = next((r for r in (log.stop_progress or []) if r.route_stop == route_stop), None)
+	if existing:
+		existing.arrived = arrived
+		existing.arrived_at = frappe.utils.now_datetime() if arrived else None
+	else:
+		log.append(
+			"stop_progress",
+			{
+				"route_stop": route_stop,
+				"sequence": frappe.utils.cint(sequence) if sequence is not None else None,
+				"stop_name": stop_name,
+				"arrived": arrived,
+				"arrived_at": frappe.utils.now_datetime() if arrived else None,
+			},
+		)
+	log.flags.ignore_permissions = True  # audit-ok — driver resolved from session identity
+	log.save()
+
+	# P-032: tell the trip room so any socketed client refreshes; the worker poll
+	# (worker_trip_boarding) carries the durable state for the guest Masar app.
+	if arrived:
+		_publish("boarding_arrived", dispatch_trip, {"route_stop": route_stop})
+
+	return {
+		"route_stop": route_stop,
+		"arrived": bool(arrived),
 		"stop_progress": _stop_progress_map(dispatch_trip, driver),
 	}
 

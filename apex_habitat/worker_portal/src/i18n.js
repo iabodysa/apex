@@ -203,6 +203,8 @@ const messages = {
       wrongBusYourDriver: "Your driver is {name}",
       wrongBusRoute: "Route: {route}",
       wrongBusHint: "Go to your assigned vehicle. Call or message your driver if you need help.",
+      arrivedTitle: "Your driver has arrived",
+      arrivedHint: "The driver is at your pickup point. Head out to board.",
     },
     reqTransport: {
       title: "Request transport",
@@ -496,6 +498,8 @@ const messages = {
       wrongBusYourDriver: "سائقك هو {name}",
       wrongBusRoute: "المسار: {route}",
       wrongBusHint: "توجّه إلى مركبتك المخصّصة. اتصل بسائقك أو راسله إن احتجت مساعدة.",
+      arrivedTitle: "وصل سائقك",
+      arrivedHint: "السائق عند نقطة استلامك. توجّه للركوب.",
     },
     reqTransport: {
       title: "طلب نقل",

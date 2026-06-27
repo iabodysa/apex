@@ -283,7 +283,9 @@ Arrivals Expected Today: {{ doc.building }} ({{ doc.expected_count }}),وصول 
 Arrivals Intake,استقبال الوافدين
 Arrivals Today,الوافدون اليوم
 Arrivals today,الوافدون اليوم
+Arrived,وصل
 Arrived As,وصل بصفة
+Arrived At,وقت الوصول
 Arrived this session ({0}),وصلوا في هذه الجلسة ({0})
 Article,الصنف
 Article Details,تفاصيل الصنف
@@ -840,6 +842,7 @@ Creating QR…,جارٍ إنشاء رمز الاستجابة السريعة…
 Creating payment...,جارٍ إنشاء الدفعة...
 Creating rooms and beds…,جارٍ إنشاء الغرف والأسرّة…
 Creating target document...,جارٍ إنشاء المستند المستهدف...
+Creative,إبداعي
 Credentials Delivered By,مُسلم بيانات الاعتماد
 Critical,حرج
 Critical Alert Aging Hours,ساعات تقادم التنبيه الحرج
@@ -2944,6 +2947,7 @@ Set to the session user on creation; read-only so the segregation-of-duties gate
 Set up your fleet and dispatch your first movement.,جهّز أسطولك ونفّذ أول حركة.
 Set when a subcontractor visit is created from this request,يُضبط عند إنشاء زيارة مقاول من هذا الطلب
 Set when a temporary top-up has been reverted (by the daily auto-revert job or manually). Allowed on submit so the scheduler can flip it.,يُضبط عند عكس تعبئة مؤقتة (بواسطة مهمة العكس التلقائي اليومية أو يدويًا). مسموح به عند الإرسال ليتمكن المجدول من تبديله.
+Set when the driver marks arrival at this stop (the worker 'driver has arrived' signal).,"يُضبط عند تسجيل السائق وصوله إلى هذه المحطة (إشارة ""وصل السائق"" للعامل)."
 Set when the driver marks this stop done.,يُضبط عندما يضع السائق علامة إنجاز هذه المحطة.
 Set when the driver/employee has acknowledged responsibility for the loss.,يُضبط عند إقرار السائق/الموظف بالمسؤولية عن الخسارة.
 Set when the incident is escalated to a damage write-off.,يُضبط عند تصعيد البلاغ إلى شطب أضرار.
@@ -3055,6 +3059,7 @@ Start Datetime,تاريخ ووقت البدء
 Start Review,بدء المراجعة
 Start Task,بدء المهمة
 Start Work,بدء العمل
+Start the trip before marking arrival.,ابدأ الرحلة قبل تسجيل الوصول.
 Start the trip before marking stops.,ابدأ الرحلة قبل وضع علامات على المحطات.
 Started,بدأ
 Starting Room Number,بداية ترقيم الغرف

@@ -214,6 +214,15 @@ PERMISSION_RECHECK_ALLOWLIST = [
     ),
     (
         "salis/api/driver_portal.py",
+        "mark_arrived",
+        "Driver portal. The Salis Driver is resolved from the session server-side "
+        "and the trip is honoured only when it belongs to that driver "
+        "(_resolve_my_trip raises otherwise); the arrival flag is written on the "
+        "caller's own open Trip Start Log Trip Stop Progress row (same rail as "
+        "mark_stop_progress). Token/identity-resolved writer.",
+    ),
+    (
+        "salis/api/driver_portal.py",
         "save_push_subscription",
         "Driver portal. The Salis Driver is resolved from the session server-side "
         "(_resolve_driver, never client-supplied); the Driver Push Subscription is "

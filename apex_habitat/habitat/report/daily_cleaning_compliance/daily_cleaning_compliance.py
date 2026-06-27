@@ -1,10 +1,29 @@
 # Copyright (c) 2026, AFMCO and contributors
 # [#j03s5a]
 
+"""Daily Cleaning Compliance.
+
+The compliance fact (rooms total / rooms cleaned / compliance %) is read from
+the immutable Cleaning Compliance Ledger, NOT from the mutable Cleaning Log Room
+Detail child rows. Each cleaned room posts one live ledger row on Cleaning Log
+submit, and a cancel/amend posts a negating reversal (both rows flagged
+is_cancelled), so a historical compliance figure does not change when the source
+Cleaning Log is later edited or cancelled. Only live rows (is_cancelled=0) feed
+the numerator/denominator.
+
+The supervisory columns (cleaner type, approval, rating, missed/rework flags,
+missed reason, scheduled task) are NOT posted facts — they are review state on
+the parent Cleaning Log — so they are enriched best-effort from the live log.
+They describe the log's current review status, while the compliance figure is the
+stable posted fact this report exists to protect.
+"""
+
 import frappe
 from frappe.utils import getdate, today, add_days
 
 from apex_habitat.habitat import permissions
+
+LEDGER_DOCTYPE = "Cleaning Compliance Ledger"
 
 
 def execute(filters=None):
@@ -30,60 +49,66 @@ def execute(filters=None):
         {"label": frappe._("Scheduled Task"), "fieldname": "scheduled_task_instance", "fieldtype": "Link", "options": "Scheduled Task Instance", "width": 140},
     ]
 
-    query_filters = {
-        "cleaning_date": ["between", [str(date_from), str(date_to)]],
+    # The compliance fact comes from the immutable ledger: one live row per
+    # cleaned room, posting_date == the source log's cleaning_date.
+    ledger_filters = {
+        "posting_date": ["between", [str(date_from), str(date_to)]],
+        "is_cancelled": 0,
     }
     if filters.get("building"):
-        query_filters["building"] = filters["building"]
-    if filters.get("missed_only"):
-        query_filters["missed_cleaning"] = 1
+        ledger_filters["building"] = filters["building"]
 
     # get_all forces ignore_permissions, bypassing the building row-scoping the desk
     # list gets via permission_query_conditions — re-apply the caller's building scope
-    # (Cleaning Log carries a direct building); oversight roles see all.
-    user = frappe.session.user
-    if not permissions._building_is_unscoped(user):
-        allowed = permissions._allowed_buildings(user)
-        if not allowed:
-            return columns, []
-        chosen = query_filters.get("building")
-        if chosen and chosen not in allowed:
+    # (the ledger carries a direct building); oversight roles see all.
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    chosen = ledger_filters.get("building")
+    if restrict:
+        if not allowed or (chosen and chosen not in allowed):
             return columns, []
         if not chosen:
-            query_filters["building"] = ["in", allowed]
+            ledger_filters["building"] = ["in", allowed]
 
-    logs = frappe.get_all(
-        "Cleaning Log",
-        filters=query_filters,
-        fields=[
-            "name", "cleaning_date", "building", "cleaner_type",
-            "cleaner_employee", "cleaned_by", "supervisor_approved",
-            "supervisor_rating", "missed_cleaning", "missed_reason",
-            "rework_required", "scheduled_task_instance",
-        ],
-        order_by="cleaning_date desc, building asc",
+    ledger_rows = frappe.get_all(
+        LEDGER_DOCTYPE,
+        filters=ledger_filters,
+        fields=["cleaning_log", "building", "posting_date", "cleaned"],
+        limit_page_length=0,
     )
 
-    # [#3b8i2k]
-    all_log_names = [log.name for log in logs]
-    room_rows = []
-    if all_log_names:
-        room_rows = frappe.get_all(
-            "Cleaning Log Room Detail",
-            filters={"parent": ["in", all_log_names], "parenttype": "Cleaning Log"},
-            fields=["parent", "cleaned"],
-        )
-
+    # Aggregate the immutable per-room facts up to one row per source log.
     from collections import defaultdict
-    room_totals = defaultdict(int)
-    room_cleaned = defaultdict(int)
-    for rr in room_rows:
-        room_totals[rr.parent] += 1
-        if rr.cleaned:
-            room_cleaned[rr.parent] += 1
+    log_total = defaultdict(int)
+    log_cleaned = defaultdict(int)
+    log_meta = {}
+    for row in ledger_rows:
+        log = row.cleaning_log
+        log_total[log] += 1
+        if row.cleaned:
+            log_cleaned[log] += 1
+        # The first row seen pins the log's building/date; all rows of a log share them.
+        log_meta.setdefault(log, {"building": row.building, "cleaning_date": row.posting_date})
 
-    # [#4f0bon]
-    all_cleaner_employees = list({log.cleaner_employee for log in logs if log.cleaner_employee})
+    log_names = list(log_total.keys())
+    if not log_names:
+        return columns, []
+
+    # [#4f0bon] Best-effort supervisory enrichment from the live Cleaning Log.
+    # These are review-state fields, not posted facts; a log dropped/cancelled
+    # since posting simply yields blanks (its compliance fact still stands).
+    enrich = {}
+    log_meta_rows = frappe.get_all(
+        "Cleaning Log",
+        filters={"name": ["in", log_names]},
+        fields=[
+            "name", "cleaner_type", "cleaner_employee", "cleaned_by",
+            "supervisor_approved", "supervisor_rating", "missed_cleaning",
+            "missed_reason", "rework_required", "scheduled_task_instance",
+        ],
+    )
+    enrich = {r.name: r for r in log_meta_rows}
+
+    all_cleaner_employees = list({r.cleaner_employee for r in log_meta_rows if r.cleaner_employee})
     employee_name_map = {}
     if all_cleaner_employees:
         emp_rows = frappe.get_all(
@@ -94,30 +119,35 @@ def execute(filters=None):
         employee_name_map = {e.name: e.employee_name for e in emp_rows}
 
     data = []
-    for log in logs:
-        total = room_totals[log.name]
-        cleaned = room_cleaned[log.name]
-        pct = (cleaned / total * 100) if total else (0.0 if log.missed_cleaning else 100.0)
+    for log in log_names:
+        total = log_total[log]
+        cleaned = log_cleaned[log]
+        pct = (cleaned / total * 100) if total else 0.0
 
-        cleaner_label = log.cleaned_by or ""
-        if log.cleaner_employee:
-            cleaner_label = employee_name_map.get(log.cleaner_employee) or log.cleaner_employee
+        meta = enrich.get(log)
+        cleaner_label = ""
+        if meta:
+            cleaner_label = meta.cleaned_by or ""
+            if meta.cleaner_employee:
+                cleaner_label = employee_name_map.get(meta.cleaner_employee) or meta.cleaner_employee
 
         data.append({
-            "name": log.name,
-            "cleaning_date": log.cleaning_date,
-            "building": log.building,
-            "cleaner_type": log.cleaner_type or "",
+            "name": log,
+            "cleaning_date": log_meta[log]["cleaning_date"],
+            "building": log_meta[log]["building"],
+            "cleaner_type": (meta.cleaner_type if meta else "") or "",
             "cleaner": cleaner_label,
             "rooms_total": total,
             "rooms_cleaned": cleaned,
             "compliance_pct": round(pct, 1),
-            "supervisor_approved": log.supervisor_approved,
-            "supervisor_rating": log.supervisor_rating or "",
-            "missed_cleaning": log.missed_cleaning,
-            "rework_required": log.rework_required,
-            "missed_reason": log.missed_reason or "",
-            "scheduled_task_instance": log.scheduled_task_instance or "",
+            "supervisor_approved": (meta.supervisor_approved if meta else 0),
+            "supervisor_rating": (meta.supervisor_rating if meta else "") or "",
+            "missed_cleaning": (meta.missed_cleaning if meta else 0),
+            "rework_required": (meta.rework_required if meta else 0),
+            "missed_reason": (meta.missed_reason if meta else "") or "",
+            "scheduled_task_instance": (meta.scheduled_task_instance if meta else "") or "",
         })
+
+    data.sort(key=lambda r: (str(r["cleaning_date"] or ""), r["building"] or ""), reverse=True)
 
     return columns, data

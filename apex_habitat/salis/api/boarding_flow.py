@@ -214,6 +214,58 @@ def _read_misboard(worker):
     return frappe.cache.get_value(_MISBOARD_CACHE_PREFIX + worker)
 
 
+# Driver-arrived signal (P-046) — surfaced to the worker poll.
+
+
+def _worker_pickup_arrival(dispatch_trip, building):
+    """The "driver has arrived at your pickup" state for the worker on this trip, or None.
+
+    The driver records arrival on a Trip Stop Progress row (the existing per-stop
+    rail, ``arrived``/``arrived_at`` flag) keyed on the source Route Stop row. The
+    worker's OWN pickup stop is the route stop whose ``accommodation_building``
+    matches the worker's transport-request building (the same building-match the
+    Masar transport view uses to scope a worker to his own pickup). This resolves
+    that worker-scoped route stop, then reads its arrival flag off the trip's open
+    Trip Start Log. Returns ``{"arrived": True, "arrived_at": ...}`` only when the
+    driver has marked arrival at the worker's own stop; otherwise None (the client
+    shows nothing). Read-only — a guest worker has no socket, so the poll is the
+    delivery path for this signal."""
+    if not (dispatch_trip and building):
+        return None
+    route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan")
+    if not route_plan:
+        return None
+    # The worker's own pickup route stop (matched on his building); first match wins.
+    route_stop = frappe.db.get_value(
+        "Route Stop",
+        {
+            "parent": route_plan,
+            "parenttype": "Route Plan",
+            "accommodation_building": building,
+        },
+        "name",
+    )
+    if not route_stop:
+        return None
+    log = frappe.db.get_value(
+        "Trip Start Log", {"dispatch_trip": dispatch_trip, "docstatus": 0}, "name"
+    )
+    if not log:
+        return None
+    row = frappe.db.get_value(
+        "Trip Stop Progress",
+        {"parent": log, "parenttype": "Trip Start Log", "route_stop": route_stop},
+        ["arrived", "arrived_at"],
+        as_dict=True,
+    )
+    if not row or not row.get("arrived"):
+        return None
+    return {
+        "arrived": True,
+        "arrived_at": frappe.utils.cstr(row.get("arrived_at")) if row.get("arrived_at") else None,
+    }
+
+
 # Grace gate.
 
 
@@ -558,9 +610,12 @@ def worker_trip_boarding(token=None):
 
     Resolves the token to one Employee and returns their state on today's trip —
     status, the active notify_at + window (for the client countdown),
-    wait_count/max, the poll cadence, and any wrong_bus correction (the correct
-    trip + driver phone) held as a transient hint from a misboarded scan. The
-    driver phone is returned only to the affected worker. Read-only.
+    wait_count/max, the poll cadence, any wrong_bus correction (the correct trip +
+    driver phone) held as a transient hint from a misboarded scan, and
+    ``driver_arrived`` (the "your driver has arrived at your pickup" signal — set
+    once the driver marks arrival at the worker's own pickup stop, else None; the
+    guest worker has no socket, so this poll is the delivery path). The driver phone
+    is returned only to the affected worker. Read-only.
 
     ``{"trip": None}`` with any pending misboard hint when the worker has no
     boardable trip on this bus; a worker not on the trip's boarding state gets a
@@ -581,6 +636,7 @@ def worker_trip_boarding(token=None):
             "wrong_bus": misboard or None,
         }
     dispatch_trip = resolved[0]
+    building = resolved[3]
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     # Robust auto-confirm: evaluate the worker-claim timeout on read so the worker
@@ -608,6 +664,9 @@ def worker_trip_boarding(token=None):
             "wait_window_seconds": get_boarding_setting("worker_wait_request_seconds"),
             "poll_seconds": poll_seconds,
             "wrong_bus": misboard or None,
+            # P-046: "your driver has arrived at your pickup" — read off the driver's
+            # arrival flag on this worker's own pickup stop. None when not yet arrived.
+            "driver_arrived": _worker_pickup_arrival(dispatch_trip, building),
         }
     )
     return state
