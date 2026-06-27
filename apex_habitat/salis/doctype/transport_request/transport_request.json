@@ -514,6 +514,18 @@
    "permlevel": 1,
    "read": 1,
    "role": "System Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
   }
  ],
  "row_format": "Dynamic",

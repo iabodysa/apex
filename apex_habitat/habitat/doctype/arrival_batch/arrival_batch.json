@@ -163,6 +163,37 @@
    "report": 1,
    "export": 1,
    "idx": 4
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "System Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1,
+   "idx": 5
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Accommodation Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1,
+   "idx": 6
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Resident Supervisor",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1,
+   "idx": 7
+  },
+  {
+   "doctype": "DocPerm",
+   "role": "Internal Auditor",
+   "permlevel": 1,
+   "read": 1,
+   "idx": 8
   }
  ],
  "modified": "2026-06-25 23:40:42.184627"

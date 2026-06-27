@@ -51,6 +51,7 @@
    "fieldname": "deduction_amount",
    "label": "Deduction Amount (SAR)",
    "fieldtype": "Currency",
+   "permlevel": 1,
    "idx": 5,
    "in_list_view": 1
   }

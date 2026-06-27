@@ -23,6 +23,7 @@
    "fieldtype": "Data",
    "label": "Passport Number",
    "in_list_view": 1,
+   "permlevel": 1,
    "idx": 2
   },
   {
@@ -31,6 +32,7 @@
    "fieldtype": "Link",
    "label": "Nationality",
    "options": "Country",
+   "permlevel": 1,
    "idx": 3
   },
   {

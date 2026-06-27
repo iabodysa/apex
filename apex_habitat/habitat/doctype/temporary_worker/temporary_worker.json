@@ -57,6 +57,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Passport Number",
+   "permlevel": 1,
    "reqd": 1,
    "search_index": 1,
    "set_only_once": 1,
@@ -67,7 +68,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Nationality",
-   "options": "Country"
+   "options": "Country",
+   "permlevel": 1
   },
   {
    "fieldname": "temporary_worker_identity_col",
@@ -77,13 +79,15 @@
    "description": "Usually blank on arrival; populated when the Iqama is issued before the worker is linked to a permanent Employee.",
    "fieldname": "iqama_number",
    "fieldtype": "Data",
-   "label": "Iqama Number"
+   "label": "Iqama Number",
+   "permlevel": 1
   },
   {
    "fieldname": "cell_number",
    "fieldtype": "Data",
    "label": "Cell Number",
-   "options": "Phone"
+   "options": "Phone",
+   "permlevel": 1
   },
   {
    "fieldname": "temporary_worker_sec_arrival_context",
@@ -243,6 +247,29 @@
    "export": 1,
    "read": 1,
    "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
    "role": "Internal Auditor"
   }
  ],
