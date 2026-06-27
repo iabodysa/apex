@@ -42,7 +42,7 @@
           <div class="font-bold leading-tight"><bdi>{{ trip.route_plan || trip.name }}</bdi></div>
           <span class="pill pill-accent shrink-0">{{ te("tripStatus", trip.status) }}</span>
         </div>
-        <div class="mt-2 flex items-center gap-2 text-sm text-soft">
+        <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-soft">
           <Icon name="truck" :size="16" class="text-primary shrink-0" />
           <span><bdi>{{ trip.vehicle || "—" }}</bdi></span>
           <!-- Direction-neutral, labelled times: reads correctly in LTR and RTL with
@@ -85,7 +85,7 @@
       </div>
 
       <!-- Execution actions (today only): start → complete, writing a Trip Start Log. -->
-      <div v-if="tab === 'today'" class="mt-3 flex items-center gap-2">
+      <div v-if="tab === 'today'" class="mt-3 flex flex-wrap items-center gap-2">
         <span v-if="trip.trip_log_status === 'Completed'" class="pill pill-success">
           <Icon name="badge" :size="14" /> {{ t("trips.completed") }}
         </span>

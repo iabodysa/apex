@@ -69,25 +69,42 @@
           </div>
         </div>
 
-        <!-- Ordered route stops -->
-        <div v-if="trip.stops && trip.stops.length">
-          <div class="field-label">{{ t("transport.stops") }}</div>
+        <!-- The worker's OWN two points: where the shuttle collects HIM (his
+             building) and where it is going (the route's drop-off). A worker is not
+             the driver, so other buildings' housing pickups are never shown. -->
+        <div v-if="myPickup(trip) || destination(trip)">
+          <div class="field-label">{{ t("transport.yourTrip") }}</div>
           <ol class="space-y-2">
-            <li v-for="(stop, i) in trip.stops" :key="i" class="flex items-start gap-3">
+            <li v-if="myPickup(trip)" class="flex items-start gap-3">
               <span class="avatar h-6 w-6 text-xs shrink-0"
                     style="background: var(--c-primary); color: var(--c-primary-ink); border-radius: var(--radius-sm)">
-                {{ stop.sequence || i + 1 }}
+                <Icon name="user" :size="13" />
               </span>
               <div class="min-w-0">
                 <div class="font-semibold leading-tight">
-                  {{ stop.stop_name || t("transport.stop") }}
-                  <span v-if="stop.planned_time" class="text-muted font-normal">· <bdi>{{ formatTime(stop.planned_time) }}</bdi></span>
+                  {{ t("transport.yourPickup") }}
+                  <span v-if="myPickup(trip).planned_time" class="text-muted font-normal">· <bdi>{{ formatTime(myPickup(trip).planned_time) }}</bdi></span>
                 </div>
-                <div v-if="stop.pickup" class="text-sm text-muted">
-                  {{ stop.pickup.building_name || stop.accommodation_building }}
-                  <span v-if="stop.pickup.city">, {{ stop.pickup.city }}</span>
+                <div v-if="myPickup(trip).pickup" class="text-sm text-muted">
+                  {{ myPickup(trip).pickup.building_name || myPickup(trip).accommodation_building }}
+                  <span v-if="myPickup(trip).pickup.city">, {{ myPickup(trip).pickup.city }}</span>
                 </div>
-                <div v-else-if="stop.location" class="text-sm text-muted">{{ stop.location }}</div>
+                <div v-else-if="myPickup(trip).location" class="text-sm text-muted">{{ myPickup(trip).location }}</div>
+              </div>
+            </li>
+            <li v-if="destination(trip)" class="flex items-start gap-3">
+              <span class="avatar h-6 w-6 text-xs shrink-0"
+                    style="background: var(--c-accent, var(--c-primary)); color: var(--c-primary-ink); border-radius: var(--radius-sm)">
+                <Icon name="route" :size="13" class="rtl-flip" />
+              </span>
+              <div class="min-w-0">
+                <div class="font-semibold leading-tight">
+                  {{ t("transport.destination") }}
+                  <span v-if="destination(trip).planned_time" class="text-muted font-normal">· <bdi>{{ formatTime(destination(trip).planned_time) }}</bdi></span>
+                </div>
+                <div class="text-sm text-muted">
+                  {{ destination(trip).location || destination(trip).stop_name }}
+                </div>
               </div>
             </li>
           </ol>
@@ -108,7 +125,7 @@
         </a>
 
         <!-- No planned route yet: an explicit state so the trip card is never a bare/inert card. -->
-        <div v-else-if="!trip.stops || !trip.stops.length" class="text-sm text-muted">{{ t("transport.noRoutePlanned") }}</div>
+        <div v-else-if="!myPickup(trip) && !destination(trip)" class="text-sm text-muted">{{ t("transport.noRoutePlanned") }}</div>
 
         <!-- Boarding pass: the worker shows this signed QR to the driver to board.
              The same signed token the driver scanner validates; rendered only for
@@ -122,20 +139,11 @@
           >
             <Icon name="card" :size="18" /> {{ t("boarding.show") }}
           </button>
-          <div v-else class="pass-panel">
-            <template v-if="boardingPass.loading">
+          <div v-else>
+            <div v-if="boardingPass.loading" class="pass-loading">
               <div class="spinner mx-auto"></div>
-            </template>
-            <template v-else-if="passData">
-              <p class="text-sm font-bold">{{ t("boarding.title") }}</p>
-              <p class="text-xs text-muted mb-1">{{ t("boarding.hint") }}</p>
-              <QrCode :value="passData.qr_payload" :size="208" :label="t('boarding.title')" />
-              <div class="text-sm mt-1">
-                <span class="text-muted">{{ t("boarding.holder") }}:</span>
-                <span class="font-semibold ms-1"><bdi>{{ passData.holder_name }}</bdi></span>
-              </div>
-              <span class="pill pill-neutral">{{ t("boarding.validFor", { h: passData.expires_in_hours }) }}</span>
-            </template>
+            </div>
+            <BoardingPass v-else-if="passData" :pass="passData" :trip="trip" />
             <p v-else-if="boardingPass.error" class="text-sm text-danger">{{ t("boarding.failed") }}</p>
             <p v-else class="text-sm text-muted">{{ t("boarding.none") }}</p>
           </div>
@@ -223,7 +231,7 @@ import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import PullIndicator from "../components/PullIndicator.vue";
-import QrCode from "../components/QrCode.vue";
+import BoardingPass from "../components/BoardingPass.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatTime, formatDateTime } from "../datetime";
 import { TOKEN } from "../token";
@@ -268,6 +276,23 @@ const isStale = computed(() => !tr.data && !!staleTr.value);
 const upcoming = computed(() => td.value?.upcoming || td.value?.trips || []);
 const past = computed(() => td.value?.past || []);
 const showPast = ref(false);
+
+// A worker is not the driver: he sees only HIS pickup + the route destination,
+// both scoped server-side. For an older cached payload that only carried the flat
+// `stops` list, fall back to the first housing pickup / the last stop so a stale
+// render still shows two sane points instead of the whole driver route.
+function myPickup(trip) {
+  if (trip.my_pickup) return trip.my_pickup;
+  const stops = trip.stops || [];
+  return stops.find((s) => s.accommodation_building) || stops[0] || null;
+}
+function destination(trip) {
+  if (trip.destination) return trip.destination;
+  const stops = trip.stops || [];
+  if (!stops.length) return null;
+  const last = stops[stops.length - 1];
+  return last === myPickup(trip) ? null : last;
+}
 
 // Boarding pass: fetched on demand (one signed token for the soonest trip).
 const showPass = ref(false);
@@ -318,13 +343,9 @@ function confirmBoarding(trip) {
   background: var(--c-warning-bg, #fef3c7);
   color: var(--c-warning, #92400e);
 }
-.pass-panel {
+.pass-loading {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px;
-  border-radius: var(--radius, 12px);
-  background: color-mix(in srgb, var(--c-ink) 4%, transparent);
+  justify-content: center;
+  padding: 24px;
 }
 </style>

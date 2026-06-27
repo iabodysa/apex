@@ -674,6 +674,45 @@ def _is_upcoming_pickup(pickup_datetime, now_dt=None):
         return True
 
 
+# [#wkrscope] A worker is NOT the driver: the driver navigates every housing
+# pickup (A/B/C) + the drop-off, but a worker only cares about TWO points — where
+# the shuttle collects HIM, and where it is going. These derive that worker-scoped
+# pair from the full ordered stop list so the Masar Transport view (and the
+# boarding pass) never leak other buildings' stops to a worker.
+def _worker_pickup_stop(stops, my_building):
+    """The worker's OWN pickup stop from the ordered route stops.
+
+    Prefers the housing pickup whose ``accommodation_building`` matches the
+    worker's active Accommodation Assignment building; falls back to the first
+    housing pickup (a stop carrying any ``accommodation_building``); finally to
+    the first stop. Returns None only for an empty route."""
+    if not stops:
+        return None
+    if my_building:
+        for s in stops:
+            if s.get("accommodation_building") == my_building:
+                return s
+    # Unresolved building (or no match): the first housing pickup, else first stop.
+    for s in stops:
+        if s.get("accommodation_building"):
+            return s
+    return stops[0]
+
+
+def _route_destination_stop(stops, my_pickup):
+    """The route's destination (final drop-off) stop.
+
+    The drop-off is the last stop on the ordered route — the point AFTER every
+    housing pickup. Returns None when the only stop is the worker's own pickup
+    (a single-stop route has no separate destination to show)."""
+    if not stops:
+        return None
+    last = stops[-1]
+    if my_pickup is not None and last is my_pickup:
+        return None
+    return last
+
+
 def _worker_transport_requests(employee):
     """Transport Requests whose worker manifest includes ``employee`` and that are
     still live (not Rejected/Cancelled/Fulfilled). Scoped via the child table."""
@@ -734,6 +773,10 @@ def get_worker_transport(token=None):
     employee = _resolve_worker(token)
     requests = _worker_transport_requests(employee)
     now_dt = frappe.utils.now_datetime()
+    # [#wkrscope] The worker's active housing building, resolved ONCE, scopes each
+    # trip's stops to the worker's own pickup (matched by accommodation_building).
+    assignment = _active_assignment(employee)
+    my_building = assignment.get("building") if assignment else None
     upcoming = []
     past = []
     for req in requests:
@@ -762,6 +805,14 @@ def get_worker_transport(token=None):
         )
         is_upcoming = _is_upcoming_pickup(req.get("pickup_datetime"), now_dt)
         stops = _ordered_stops(req.get("route_plan"))
+        # [#wkrscope] Scope the multi-stop route down to the worker's two points:
+        # his OWN pickup (matched to his building) + the route's destination. The
+        # worker is not the driver, so other buildings' housing pickups are never
+        # surfaced to him; the full `stops` list stays available for any caller
+        # that still needs it (e.g. the driver-facing summary), but the client
+        # renders only `my_pickup` + `destination`.
+        my_pickup = _worker_pickup_stop(stops, my_building)
+        destination = _route_destination_stop(stops, my_pickup)
         trip = {
             "transport_request": req["name"],
             "request_type": req.get("request_type"),
@@ -771,6 +822,8 @@ def get_worker_transport(token=None):
             "depart_time": depart_time,
             "is_upcoming": is_upcoming,
             "stops": stops,
+            "my_pickup": my_pickup,
+            "destination": destination,
             # One-tap full-route navigation (all stops chained as Maps waypoints).
             "maps_route_url": _full_route_maps_url(stops),
             "vehicle": vehicle,
@@ -1581,7 +1634,28 @@ def get_worker_boarding_pass(token=None, transport_request=None):
     resolved = _worker_today_dispatch_trip(employee, transport_request)
     if not resolved:
         return {"pass": None}
-    dispatch_trip, request_name, stop_name, _building = resolved
+    dispatch_trip, request_name, stop_name, building = resolved
+
+    # [#wkrscope] The pass shows the worker's OWN pickup + the route DESTINATION,
+    # not the generic per-request pickup_point ("Building Gate") for both. Resolve
+    # them from the route stops scoped to the worker's building (the SAME pair the
+    # Transport view renders), with safe fallbacks so the pass never goes blank.
+    route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan") or frappe.db.get_value(
+        "Transport Request", request_name, "route_plan"
+    )
+    stops = _ordered_stops(route_plan)
+    my_pickup = _worker_pickup_stop(stops, building)
+    destination = _route_destination_stop(stops, my_pickup)
+    pickup_label = (
+        (my_pickup.get("pickup") or {}).get("building_name")
+        or my_pickup.get("accommodation_building")
+        or my_pickup.get("stop_name")
+        if my_pickup
+        else None
+    )
+    destination_label = (
+        destination.get("location") or destination.get("stop_name") if destination else None
+    )
 
     pass_token = boarding._issue_token(dispatch_trip, employee)
     return {
@@ -1590,6 +1664,8 @@ def get_worker_boarding_pass(token=None, transport_request=None):
             "dispatch_trip": dispatch_trip,
             "transport_request": request_name,
             "stop_name": stop_name,
+            "pickup_label": pickup_label,
+            "destination_label": destination_label,
             "holder_name": frappe.db.get_value("Employee", employee, "employee_name"),
             "expires_in_hours": boarding.PASS_TTL_HOURS,
         }
