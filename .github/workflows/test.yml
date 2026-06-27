@@ -87,6 +87,29 @@ jobs:
       - name: Worker-portal phone normaliser unit test
         run: node apex_habitat/worker_portal/phone.test.mjs
 
+  spa-lockfiles:
+    # Validate each SPA portal's committed npm lockfile is in sync with its
+    # package.json. `npm ci` fails if the two disagree, so this gate keeps the
+    # frozen lockfiles honest and reproducible. Build is intentionally NOT run
+    # here (too flaky for CI). fleet_portal is excluded because it git-ignores
+    # its lockfile, so it has none to validate.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        portal: [worker_portal, driver_portal, safety_portal]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install from frozen lockfile
+        working-directory: apex_habitat/${{ matrix.portal }}
+        run: npm ci
+
   test:
     runs-on: ubuntu-latest
 

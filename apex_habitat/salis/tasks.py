@@ -1047,13 +1047,24 @@ def _overstay_stops() -> list:
         },
         fields=["name", "vehicle", "stop_date"],
     )
-    # [#3pcbzi]
+    # [#3pcbzi] Bulk-prefetch the vehicles' status in one query keyed on the stops'
+    # vehicle ids, instead of one get_value per stop (N+1). Filter the still-out-of-
+    # service set in memory — same rows as before.
+    vehicle_ids = {r.vehicle for r in rows if r.vehicle}
+    statuses = (
+        {
+            v["name"]: v["status"]
+            for v in frappe.get_all(
+                "Salis Vehicle", filters={"name": ["in", list(vehicle_ids)]}, fields=["name", "status"]
+            )
+        }
+        if vehicle_ids
+        else {}
+    )
     return [
         r
         for r in rows
-        if r.vehicle
-        and frappe.db.get_value("Salis Vehicle", r.vehicle, "status")
-        in ("Stopped", "Under Maintenance")
+        if r.vehicle and statuses.get(r.vehicle) in ("Stopped", "Under Maintenance")
     ]
 
 

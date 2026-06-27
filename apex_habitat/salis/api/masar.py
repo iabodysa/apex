@@ -63,21 +63,40 @@ def _today_worker_trips(driver):
         ],
         order_by="depart_time asc",
     )
-    worker_trips = []
-    for t in trips:
-        # [#pmk91w]
-        if not t.get("transport_request") and t.get("route_plan"):
-            t["transport_request"] = frappe.db.get_value(
-                "Route Plan", t["route_plan"], "transport_request"
+    if not trips:
+        return []
+    # [#pmk91w] Backfill transport_request from the route plan for trips missing it,
+    # then read each request's service_line. Both are bulk-prefetched (one query each,
+    # keyed on the collected ids) and indexed in memory, instead of two get_value
+    # calls per trip (N+1). Output is the same service-line-filtered trip list.
+    rp_ids = {t["route_plan"] for t in trips if not t.get("transport_request") and t.get("route_plan")}
+    if rp_ids:
+        rp_tr = {
+            r["name"]: r["transport_request"]
+            for r in frappe.get_all(
+                "Route Plan",
+                filters={"name": ["in", list(rp_ids)]},
+                fields=["name", "transport_request"],
             )
-        service_line = None
-        if t.get("transport_request"):
-            service_line = frappe.db.get_value(
-                "Transport Request", t["transport_request"], "service_line"
+        }
+        for t in trips:
+            if not t.get("transport_request") and t.get("route_plan"):
+                t["transport_request"] = rp_tr.get(t["route_plan"])
+
+    tr_ids = {t["transport_request"] for t in trips if t.get("transport_request")}
+    service_lines = (
+        {
+            r["name"]: r["service_line"]
+            for r in frappe.get_all(
+                "Transport Request",
+                filters={"name": ["in", list(tr_ids)]},
+                fields=["name", "service_line"],
             )
-        if service_line in WORKER_SERVICE_LINES:
-            worker_trips.append(t)
-    return worker_trips
+        }
+        if tr_ids
+        else {}
+    )
+    return [t for t in trips if service_lines.get(t.get("transport_request")) in WORKER_SERVICE_LINES]
 
 
 def _registered_workers(transport_request):
@@ -91,16 +110,25 @@ def _registered_workers(transport_request):
         fields=["employee", "pickup_point", "notes"],
         order_by="idx asc",
     )
+    # Bulk-prefetch the employee names in one query keyed on the manifest's
+    # employee ids, instead of one get_value per row (N+1).
+    emp_ids = {r["employee"] for r in rows if r.get("employee")}
+    emp_names = (
+        {
+            e["name"]: e["employee_name"]
+            for e in frappe.get_all(
+                "Employee", filters={"name": ["in", list(emp_ids)]}, fields=["name", "employee_name"]
+            )
+        }
+        if emp_ids
+        else {}
+    )
     workers = []
     for r in rows:
         workers.append(
             {
                 "employee": r.get("employee"),
-                "employee_name": (
-                    frappe.db.get_value("Employee", r["employee"], "employee_name")
-                    if r.get("employee")
-                    else None
-                ),
+                "employee_name": (emp_names.get(r["employee"]) if r.get("employee") else None),
                 "pickup_point": r.get("pickup_point"),
                 "notes": r.get("notes"),
             }
@@ -127,16 +155,26 @@ def _ordered_stops(route_plan):
         ],
         order_by="sequence asc, idx asc",
     )
+    # Bulk-prefetch the housing-pickup buildings in one query keyed on the stops'
+    # building ids, instead of one get_value per stop (N+1). Indexed by name below.
+    bldg_ids = {r["accommodation_building"] for r in rows if r.get("accommodation_building")}
+    buildings = (
+        {
+            b["name"]: b
+            for b in frappe.get_all(
+                "Accommodation Building",
+                filters={"name": ["in", list(bldg_ids)]},
+                fields=["name", "building_name", "city", "district", "google_maps_url"],
+            )
+        }
+        if bldg_ids
+        else {}
+    )
     stops = []
     for r in rows:
         building = None
         if r.get("accommodation_building"):
-            b = frappe.db.get_value(
-                "Accommodation Building",
-                r["accommodation_building"],
-                ["name", "building_name", "city", "district", "google_maps_url"],
-                as_dict=True,
-            )
+            b = buildings.get(r["accommodation_building"])
             if b:
                 building = {
                     "name": b.get("name"),

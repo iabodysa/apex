@@ -265,6 +265,285 @@ def setup_building_rooms(building_name, floors):
     )
 
 
+class _GenStats:
+    """Mutable accumulator threaded through the generator's per-row helpers so the
+    running counts fold in one place; the orchestrator builds the summary dict from it."""
+
+    def __init__(self):
+        self.created_rooms = 0
+        self.updated_rooms = 0
+        self.skipped_rooms = 0
+        self.pending_new_rooms = 0
+        self.created_beds = 0
+        self.skipped_beds = 0
+        self.pending_new_beds = 0
+        self.row_failures: list = []
+        self.pending_capacity_reductions = 0
+        self.retired_beds = 0
+        self.blocked_reductions: list = []
+
+
+def _validate_floor_plan(doc):
+    """Floor-plan preconditions: at least one row, and no two floors collapsing to the
+    same floor code (which would mint identical room numbers). [#caqr8g]"""
+    if not doc.floor_plan:
+        frappe.throw(_("No floor plan defined. Add floor rows before generating."))
+
+    _seen_floor_codes: dict[str, int] = {}
+    for _row in doc.floor_plan:
+        _fc = _floor_code(_row.floor_type, int(_row.floor_number or 0))
+        _fn = int(_row.floor_number or 0)
+        if _fc in _seen_floor_codes:
+            frappe.throw(
+                _("Floor plan conflict: floor {0} and floor {1} both produce floor code \"{2}\". "
+                  "Two floors cannot share the same code — they would generate identical room numbers. "
+                  "Assign distinct floor numbers or floor types.").format(
+                    _seen_floor_codes[_fc], _fn, _fc
+                ),
+                title=_("Duplicate Floor Code"),
+            )
+        _seen_floor_codes[_fc] = _fn
+
+
+def _load_existing(building_name):
+    """Pre-load the building's existing rooms (room_number -> name) and bed codes so the
+    generator stays idempotent without per-iteration lookups. [#jcmjsz][#fkd615]"""
+    existing_room_rows = frappe.db.get_all(
+        "Accommodation Room",
+        filters={"building": building_name},
+        fields=["name", "room_number"],
+    )
+    existing_room_map = {r.room_number: r.name for r in existing_room_rows}
+
+    Bed = DocType("Accommodation Bed")
+    Room = DocType("Accommodation Room")
+    _bed_rows = (
+        frappe.qb.from_(Bed)
+        .join(Room)
+        .on(Bed.room == Room.name)
+        .where(Room.building == building_name)
+        .select(Bed.bed_code)
+        .run(as_list=True)
+    )
+    existing_bed_codes = {r[0] for r in _bed_rows}
+    return existing_room_map, existing_bed_codes
+
+
+def _apply_capacity_reductions(room_number, capacity, old_cap, existing_bed_codes, stats):
+    """Retire the surplus beds when a room's planned capacity drops (confirmed path).
+    Sets each unoccupied, non-temporary surplus bed Out of Service; an occupied one blocks
+    the reduction. Returns True when the bed_capacity may be lowered (none blocked). [#ea5tqj]"""
+    _surplus_blocked = 0
+    for _b_idx in range(capacity + 1, old_cap + 1):
+        _surplus_code = f"{room_number}-B{_b_idx:02d}"
+        if not frappe.db.exists("Accommodation Bed", _surplus_code):
+            continue
+        _is_temp = frappe.db.get_value("Accommodation Bed", _surplus_code, "is_temporary")
+        if _is_temp:
+            continue
+        _occupied = frappe.db.exists(
+            "Accommodation Assignment",
+            {"bed": _surplus_code, "docstatus": 1, "check_out_date": ["is", "not set"]},
+        )
+        if _occupied:
+            _surplus_blocked += 1
+        else:
+            frappe.db.set_value("Accommodation Bed", _surplus_code, "status", "Out of Service")
+            existing_bed_codes.discard(_surplus_code)
+            stats.retired_beds += 1
+    if _surplus_blocked:
+        stats.blocked_reductions.append(
+            _("{0}: {1} occupied bed(s) prevented capacity reduction.").format(room_number, _surplus_blocked)
+        )
+        return False
+    return True
+
+
+def _reconcile_existing_room(room_doc_name, room_number, rtype, capacity,
+                             confirm_capacity_reduction, existing_bed_codes, stats):
+    """Bring one existing room in line with the plan: update room_type and bed_capacity.
+    A capacity INCREASE applies directly; a DECREASE needs confirmation and surplus-bed
+    retirement (delegated to _apply_capacity_reductions). [#h26quk][#trx8ab]"""
+    current = frappe.db.get_value(
+        "Accommodation Room", room_doc_name,
+        ["room_type", "bed_capacity"], as_dict=True,
+    )
+    updates = {}
+    if current and current.room_type != rtype:
+        updates["room_type"] = rtype
+    if current and (current.bed_capacity or 0) != capacity:
+        old_cap = int(current.bed_capacity or 0)
+        if capacity >= old_cap:
+            updates["bed_capacity"] = capacity
+        elif not confirm_capacity_reduction:
+            stats.pending_capacity_reductions += 1
+        elif _apply_capacity_reductions(room_number, capacity, old_cap, existing_bed_codes, stats):
+            updates["bed_capacity"] = capacity
+    if updates:
+        frappe.db.set_value("Accommodation Room", room_doc_name, updates)
+        stats.updated_rooms += 1
+    else:
+        stats.skipped_rooms += 1
+
+
+def _create_room(building_name, room_number, floor_num, rtype, capacity, existing_room_map, stats):
+    """Insert a NEW room from the plan and register it in the room map. Returns its name,
+    or None when the insert failed (recorded as a row failure). [#4cp8q8]"""
+    try:
+        room = frappe.get_doc({
+            "doctype": "Accommodation Room",
+            "building": building_name,
+            "room_number": room_number,
+            "floor": floor_num,
+            "room_type": rtype,
+            "bed_capacity": capacity,
+            "status": "Available",
+            "readiness_status": "Unknown",
+        })
+        room.insert(ignore_permissions=False)
+        existing_room_map[room_number] = room.name
+        stats.created_rooms += 1
+        return room.name
+    except Exception as exc:
+        stats.row_failures.append(_("Room {0}: {1}").format(room_number, str(exc)))
+        return None
+
+
+def _generate_beds_for_room(room_doc_name, room_number, capacity, allow_create, existing_bed_codes, stats):
+    """Mint the room's beds (codes ``{room}-B01..``), skipping any that already exist; when
+    new beds are not yet permitted they are counted pending, not created. [#gzcnzc]"""
+    for b in range(1, capacity + 1):
+        bed_code = f"{room_number}-B{b:02d}"
+        if bed_code in existing_bed_codes:
+            stats.skipped_beds += 1
+        elif not allow_create:
+            stats.pending_new_beds += 1
+        else:
+            try:
+                bed = frappe.get_doc({
+                    "doctype": "Accommodation Bed",
+                    "room": room_doc_name,
+                    "bed_code": bed_code,
+                    "status": "Available",
+                    "condition": "Good",
+                })
+                bed.insert(ignore_permissions=False)
+                existing_bed_codes.add(bed_code)
+                stats.created_beds += 1
+            except Exception as exc:
+                stats.row_failures.append(_("Bed {0}: {1}").format(bed_code, str(exc)))
+
+
+def _process_floor_row(row, abbreviation, building_name, allow_create,
+                       confirm_capacity_reduction, existing_room_map, existing_bed_codes, stats):
+    """Generate/reconcile every room (and its beds) for one floor-plan row, in seq order."""
+    floor_num = int(row.floor_number or 0)
+    floor_code = _floor_code(row.floor_type, floor_num)
+    start = int(row.starting_room_number or 1)
+    count = int(row.room_count or 0)
+    capacity = int(row.bed_capacity_per_room or 0)
+    rtype = row.room_type or "Standard"
+    gen_beds = int(row.generate_beds or 0)
+
+    if count <= 0:
+        return
+    # [#k8dzcj]
+    if gen_beds and capacity <= 0:
+        frappe.throw(
+            _("Beds per Room must be greater than 0 when Auto-Generate Beds is enabled. Floor {0}, type {1}.").format(floor_num, rtype)
+        )
+    if gen_beds and capacity > 50:
+        frappe.throw(
+            _("Bed capacity per room exceeds maximum of 50. Floor {0}: {1} beds configured.").format(floor_num, capacity)
+        )
+
+    prefix = (row.room_prefix or "").strip()
+    for i in range(count):
+        seq = start + i
+        room_number = _room_number(abbreviation, floor_code, prefix, seq)
+
+        if room_number in existing_room_map:
+            room_doc_name = existing_room_map[room_number]
+            _reconcile_existing_room(
+                room_doc_name, room_number, rtype, capacity,
+                confirm_capacity_reduction, existing_bed_codes, stats,
+            )
+        elif not allow_create:
+            stats.pending_new_rooms += 1
+            continue
+        else:
+            room_doc_name = _create_room(
+                building_name, room_number, floor_num, rtype, capacity, existing_room_map, stats
+            )
+            if room_doc_name is None:
+                continue
+
+        if gen_beds and room_doc_name:
+            _generate_beds_for_room(
+                room_doc_name, room_number, capacity, allow_create, existing_bed_codes, stats
+            )
+
+
+def _finalize_building_stats(building_name, stats):
+    """After any room/bed write, refresh the building's setup status + derived totals. [#o7ywrx]"""
+    if not (stats.created_rooms > 0 or stats.created_beds > 0 or stats.updated_rooms > 0):
+        return
+    _floor_values = frappe.db.get_all(
+        "Accommodation Room", filters={"building": building_name}, pluck="floor", distinct=True
+    )
+    # [#bcpp7m]
+    _capacity_count = _derive_total_capacity(building_name)
+    frappe.db.set_value("Accommodation Building", building_name, {
+        "setup_status": "Rooms Generated",
+        "setup_generated_on": today(),
+        "setup_generated_by": frappe.session.user,
+        "total_rooms": frappe.db.count("Accommodation Room", {"building": building_name}),
+        "total_floors": len([f for f in _floor_values if f is not None]),
+        "total_capacity": int(_capacity_count or 0),
+    })
+
+
+def _build_generation_result(stats):
+    """Assemble the summary dict and emit the operator msgprint from the run's stats. [#shn7rw]"""
+    needs_confirmation = (
+        stats.pending_new_rooms > 0 or stats.pending_new_beds > 0 or stats.pending_capacity_reductions > 0
+    )
+    summary = {
+        "created_rooms": stats.created_rooms,
+        "updated_rooms": stats.updated_rooms,
+        "skipped_rooms": stats.skipped_rooms,
+        "pending_new_rooms": stats.pending_new_rooms,
+        "created_beds": stats.created_beds,
+        "skipped_beds": stats.skipped_beds,
+        "pending_new_beds": stats.pending_new_beds,
+        "failures": stats.row_failures,
+        "needs_confirmation": needs_confirmation,
+        "pending_capacity_reductions": stats.pending_capacity_reductions,
+        "retired_beds": stats.retired_beds,
+        "blocked_reductions": stats.blocked_reductions,
+    }
+
+    if needs_confirmation:
+        # [#hynb42]
+        msg = _("The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.").format(stats.pending_new_rooms, stats.pending_new_beds, stats.updated_rooms)
+        if stats.pending_capacity_reductions:
+            msg += " " + _("{0} room(s) have a planned capacity reduction pending confirmation.").format(stats.pending_capacity_reductions)
+        indicator = "orange"
+    else:
+        msg = _("Generation complete. Rooms created: {0}, updated: {1}, skipped (existing): {2}. Beds created: {3}.").format(stats.created_rooms, stats.updated_rooms, stats.skipped_rooms, stats.created_beds)
+        if stats.retired_beds > 0:
+            msg += " " + _("{0} surplus bed(s) retired (Out of Service).").format(stats.retired_beds)
+        indicator = "green" if not stats.row_failures else "orange"
+    if stats.row_failures:
+        failure_lines = "<br>".join(stats.row_failures)
+        msg += "<br><br>" + _("Failures ({0}):").format(len(stats.row_failures)) + "<br>" + failure_lines
+    if stats.blocked_reductions:
+        msg += "<br><br>" + _("Capacity reductions blocked ({0} room(s) have occupied surplus beds):").format(len(stats.blocked_reductions)) + "<br>" + "<br>".join(stats.blocked_reductions)
+    frappe.msgprint(msg, title=_("Room and Bed Generation"), indicator=indicator)
+
+    return summary
+
+
 @frappe.whitelist(methods=["POST"])
 def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity_reduction=0):
     """
@@ -287,241 +566,24 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
 
     abbreviation = (doc.abbreviation or "").strip() or doc.building_name[:4].upper().strip()
 
-    if not doc.floor_plan:
-        frappe.throw(_("No floor plan defined. Add floor rows before generating."))
-
-    # [#caqr8g]
-    _seen_floor_codes: dict[str, int] = {}
-    for _row in doc.floor_plan:
-        _fc = _floor_code(_row.floor_type, int(_row.floor_number or 0))
-        _fn = int(_row.floor_number or 0)
-        if _fc in _seen_floor_codes:
-            frappe.throw(
-                _("Floor plan conflict: floor {0} and floor {1} both produce floor code \"{2}\". "
-                  "Two floors cannot share the same code — they would generate identical room numbers. "
-                  "Assign distinct floor numbers or floor types.").format(
-                    _seen_floor_codes[_fc], _fn, _fc
-                ),
-                title=_("Duplicate Floor Code"),
-            )
-        _seen_floor_codes[_fc] = _fn
-
-    # [#jcmjsz]
-    existing_room_rows = frappe.db.get_all(
-        "Accommodation Room",
-        filters={"building": building_name},
-        fields=["name", "room_number"],
-    )
-    existing_room_map = {r.room_number: r.name for r in existing_room_rows}
-
-    # [#fkd615]
-    Bed = DocType("Accommodation Bed")
-    Room = DocType("Accommodation Room")
-
-    _bed_rows = (
-        frappe.qb.from_(Bed)
-        .join(Room)
-        .on(Bed.room == Room.name)
-        .where(Room.building == building_name)
-        .select(Bed.bed_code)
-        .run(as_list=True)
-    )
-    existing_bed_codes = {r[0] for r in _bed_rows}
+    _validate_floor_plan(doc)
+    existing_room_map, existing_bed_codes = _load_existing(building_name)
 
     confirm_new_rooms = int(confirm_new_rooms or 0)
+    confirm_capacity_reduction = int(confirm_capacity_reduction or 0)
     # [#4qhyuv]
     is_first_generation = len(existing_room_map) == 0
     allow_create = is_first_generation or bool(confirm_new_rooms)
 
-    created_rooms = 0
-    updated_rooms = 0
-    skipped_rooms = 0
-    pending_new_rooms = 0
-    created_beds = 0
-    skipped_beds = 0
-    pending_new_beds = 0
-
-    row_failures = []
-    pending_capacity_reductions = 0
-    retired_beds = 0
-    blocked_reductions = []
-    confirm_capacity_reduction = int(confirm_capacity_reduction or 0)
-
+    stats = _GenStats()
     for row in sorted(doc.floor_plan, key=_floor_sort_key):
-        floor_num = int(row.floor_number or 0)
-        floor_code = _floor_code(row.floor_type, floor_num)
-        start = int(row.starting_room_number or 1)
-        count = int(row.room_count or 0)
-        capacity = int(row.bed_capacity_per_room or 0)
-        rtype = row.room_type or "Standard"
-        gen_beds = int(row.generate_beds or 0)
-
-        if count <= 0:
-            continue
-        # [#k8dzcj]
-        if gen_beds and capacity <= 0:
-            frappe.throw(
-                _("Beds per Room must be greater than 0 when Auto-Generate Beds is enabled. Floor {0}, type {1}.").format(floor_num, rtype)
-            )
-        if gen_beds and capacity > 50:
-            frappe.throw(
-                _("Bed capacity per room exceeds maximum of 50. Floor {0}: {1} beds configured.").format(floor_num, capacity)
-            )
-
-        prefix = (row.room_prefix or "").strip()
-        for i in range(count):
-            seq = start + i
-            room_number = _room_number(abbreviation, floor_code, prefix, seq)
-
-            if room_number in existing_room_map:
-                room_doc_name = existing_room_map[room_number]
-                # [#h26quk]
-                current = frappe.db.get_value(
-                    "Accommodation Room", room_doc_name,
-                    ["room_type", "bed_capacity"], as_dict=True,
-                )
-                updates = {}
-                if current and current.room_type != rtype:
-                    updates["room_type"] = rtype
-                if current and (current.bed_capacity or 0) != capacity:
-                    old_cap = int(current.bed_capacity or 0)
-                    if capacity >= old_cap:
-                        # [#trx8ab]
-                        updates["bed_capacity"] = capacity
-                    else:
-                        # [#ea5tqj]
-                        if not confirm_capacity_reduction:
-                            pending_capacity_reductions += 1
-                        else:
-                            _surplus_blocked = 0
-                            for _b_idx in range(capacity + 1, old_cap + 1):
-                                _surplus_code = f"{room_number}-B{_b_idx:02d}"
-                                if not frappe.db.exists("Accommodation Bed", _surplus_code):
-                                    continue
-                                _is_temp = frappe.db.get_value("Accommodation Bed", _surplus_code, "is_temporary")
-                                if _is_temp:
-                                    continue
-                                _occupied = frappe.db.exists(
-                                    "Accommodation Assignment",
-                                    {"bed": _surplus_code, "docstatus": 1, "check_out_date": ["is", "not set"]},
-                                )
-                                if _occupied:
-                                    _surplus_blocked += 1
-                                else:
-                                    frappe.db.set_value("Accommodation Bed", _surplus_code, "status", "Out of Service")
-                                    existing_bed_codes.discard(_surplus_code)
-                                    retired_beds += 1
-                            if _surplus_blocked:
-                                blocked_reductions.append(
-                                    _("{0}: {1} occupied bed(s) prevented capacity reduction.").format(room_number, _surplus_blocked)
-                                )
-                            else:
-                                updates["bed_capacity"] = capacity
-                if updates:
-                    frappe.db.set_value("Accommodation Room", room_doc_name, updates)
-                    updated_rooms += 1
-                else:
-                    skipped_rooms += 1
-            else:
-                # [#4cp8q8]
-                if not allow_create:
-                    pending_new_rooms += 1
-                    continue
-                try:
-                    room = frappe.get_doc({
-                        "doctype": "Accommodation Room",
-                        "building": building_name,
-                        "room_number": room_number,
-                        "floor": floor_num,
-                        "room_type": rtype,
-                        "bed_capacity": capacity,
-                        "status": "Available",
-                        "readiness_status": "Unknown",
-                    })
-                    room.insert(ignore_permissions=False)
-                    existing_room_map[room_number] = room.name
-                    room_doc_name = room.name
-                    created_rooms += 1
-                except Exception as exc:
-                    row_failures.append(_("Room {0}: {1}").format(room_number, str(exc)))
-                    continue
-
-            if gen_beds and room_doc_name:
-                for b in range(1, capacity + 1):
-                    bed_code = f"{room_number}-B{b:02d}"
-                    if bed_code in existing_bed_codes:
-                        skipped_beds += 1
-                    elif not allow_create:
-                        # [#gzcnzc]
-                        pending_new_beds += 1
-                    else:
-                        try:
-                            bed = frappe.get_doc({
-                                "doctype": "Accommodation Bed",
-                                "room": room_doc_name,
-                                "bed_code": bed_code,
-                                "status": "Available",
-                                "condition": "Good",
-                            })
-                            bed.insert(ignore_permissions=False)
-                            existing_bed_codes.add(bed_code)
-                            created_beds += 1
-                        except Exception as exc:
-                            row_failures.append(_("Bed {0}: {1}").format(bed_code, str(exc)))
-
-    # [#o7ywrx]
-    if created_rooms > 0 or created_beds > 0 or updated_rooms > 0:
-        _floor_values = frappe.db.get_all(
-            "Accommodation Room", filters={"building": building_name}, pluck="floor", distinct=True
+        _process_floor_row(
+            row, abbreviation, building_name, allow_create,
+            confirm_capacity_reduction, existing_room_map, existing_bed_codes, stats,
         )
-        # [#bcpp7m]
-        _capacity_count = _derive_total_capacity(building_name)
-        frappe.db.set_value("Accommodation Building", building_name, {
-            "setup_status": "Rooms Generated",
-            "setup_generated_on": today(),
-            "setup_generated_by": frappe.session.user,
-            "total_rooms": frappe.db.count("Accommodation Room", {"building": building_name}),
-            "total_floors": len([f for f in _floor_values if f is not None]),
-            "total_capacity": int(_capacity_count or 0),
-        })
 
-    # [#shn7rw]
-
-    needs_confirmation = (pending_new_rooms > 0 or pending_new_beds > 0 or pending_capacity_reductions > 0)
-    summary = {
-        "created_rooms": created_rooms,
-        "updated_rooms": updated_rooms,
-        "skipped_rooms": skipped_rooms,
-        "pending_new_rooms": pending_new_rooms,
-        "created_beds": created_beds,
-        "skipped_beds": skipped_beds,
-        "pending_new_beds": pending_new_beds,
-        "failures": row_failures,
-        "needs_confirmation": needs_confirmation,
-        "pending_capacity_reductions": pending_capacity_reductions,
-        "retired_beds": retired_beds,
-        "blocked_reductions": blocked_reductions,
-    }
-
-    if needs_confirmation:
-        # [#hynb42]
-        msg = _("The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.").format(pending_new_rooms, pending_new_beds, updated_rooms)
-        if pending_capacity_reductions:
-            msg += " " + _("{0} room(s) have a planned capacity reduction pending confirmation.").format(pending_capacity_reductions)
-        indicator = "orange"
-    else:
-        msg = _("Generation complete. Rooms created: {0}, updated: {1}, skipped (existing): {2}. Beds created: {3}.").format(created_rooms, updated_rooms, skipped_rooms, created_beds)
-        if retired_beds > 0:
-            msg += " " + _("{0} surplus bed(s) retired (Out of Service).").format(retired_beds)
-        indicator = "green" if not row_failures else "orange"
-    if row_failures:
-        failure_lines = "<br>".join(row_failures)
-        msg += "<br><br>" + _("Failures ({0}):").format(len(row_failures)) + "<br>" + failure_lines
-    if blocked_reductions:
-        msg += "<br><br>" + _("Capacity reductions blocked ({0} room(s) have occupied surplus beds):").format(len(blocked_reductions)) + "<br>" + "<br>".join(blocked_reductions)
-    frappe.msgprint(msg, title=_("Room and Bed Generation"), indicator=indicator)
-
-    return summary
+    _finalize_building_stats(building_name, stats)
+    return _build_generation_result(stats)
 
 
 @frappe.whitelist(methods=["POST"])

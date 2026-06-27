@@ -17,16 +17,10 @@ charts, and Dashboard.charts is a mandatory table, so it cannot be imported as a
 standard record. When those engine charts/cards are later shipped as is_standard
 JSON, add ``salis/salis_dashboard/movement_operations_dashboard/...json`` then.
 
-The public entrypoint below is kept as a NO-OP stub because hooks.py historically
-wired it into after_sync/after_migrate. A run-once patch
-(``patches/v1_x/drop_legacy_is_standard0_dashboards``) deletes the old
-is_standard=0 ``Movement Operations Dashboard`` row on upgrading sites.
+A run-once patch (``patches/v1_x/drop_legacy_is_standard0_dashboards``) deletes
+the old is_standard=0 ``Movement Operations Dashboard`` row on upgrading sites.
 
 Movement charts/cards that DO ship as is_standard JSON (e.g. Dispatch Trips by
 Status, Open Fuel Exception Cases, Rental Accrual This Month, Blocked Driver
 Clearances) are already surfaced on the shipped Salis dashboards.
 """
-
-
-def seed_movement_dashboards(*args, **kwargs):
-    """No-op after_sync/after_migrate entrypoint (retired — see module docstring)."""

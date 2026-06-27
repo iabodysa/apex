@@ -202,6 +202,19 @@ def consumable_custody_expiry_watch() -> None:
     )
 
     today_date = getdate(today())
+    # Bulk-prefetch the holders' employee names in one query keyed on the grouped
+    # rows' employee ids, instead of one get_value per held position (N+1).
+    emp_ids = {r.employee for r in rows if r.employee}
+    emp_names = (
+        {
+            e["name"]: e["employee_name"]
+            for e in frappe.get_all(
+                "Employee", filters={"name": ["in", list(emp_ids)]}, fields=["name", "employee_name"]
+            )
+        }
+        if emp_ids
+        else {}
+    )
     for r in rows:
         if not r.first_held:
             continue
@@ -211,7 +224,7 @@ def consumable_custody_expiry_watch() -> None:
             age_months -= 1
         if age_months < int(r.lifespan or 0):
             continue
-        emp_name = frappe.db.get_value("Employee", r.employee, "employee_name") or r.employee
+        emp_name = emp_names.get(r.employee) or r.employee
         token = f"{r.employee}:{r.article}"
         # Token embedded so the message-LIKE dedupe in _raise_consumable_alert matches.
         message = _(
@@ -804,7 +817,7 @@ def idle_resident_aging() -> None:
     Paginated 500/batch with per-row error isolation; posts a timeline note every
     7 idle days when operational notifications are enabled.
     """
-    from frappe.utils import date_diff, flt, today
+    from frappe.utils import date_diff, flt, getdate, today
 
     today_str = today()
     start = 0
@@ -820,18 +833,33 @@ def idle_resident_aging() -> None:
         if not reports:
             break
 
+        # Bulk-prefetch every ledger memo (assignment, posting_date <= today) for the
+        # batch's assignments in one query, grouped by assignment, instead of one
+        # get_all per report (N+1). The per-report reported_on..today window is then
+        # applied in memory below, so each report's cost bleed is unchanged.
+        asgn_ids = {r.assignment for r in reports if r.assignment and r.reported_on}
+        ledger_by_assignment: dict = {}
+        if asgn_ids:
+            for x in frappe.get_all(
+                "Accommodation Ledger",
+                filters={"assignment": ["in", list(asgn_ids)], "posting_date": ["<=", today_str]},
+                fields=["assignment", "posting_date", "employee_daily_share"],
+            ):
+                ledger_by_assignment.setdefault(x.assignment, []).append(x)
+
         for r in reports:
             try:
                 days = date_diff(today_str, r.reported_on) if r.reported_on else 0
                 cost = 0.0
                 if r.assignment and r.reported_on:
-                    rows = frappe.get_all(
-                        "Accommodation Ledger",
-                        filters={"assignment": r.assignment,
-                                 "posting_date": ["between", [r.reported_on, today_str]]},
-                        fields=["employee_daily_share"],
+                    reported_date = getdate(r.reported_on)
+                    cost = flt(
+                        sum(
+                            flt(x.employee_daily_share)
+                            for x in ledger_by_assignment.get(r.assignment, [])
+                            if getdate(x.posting_date) >= reported_date
+                        )
                     )
-                    cost = flt(sum(flt(x.employee_daily_share) for x in rows))
                 frappe.db.set_value(
                     "Idle Resident Report", r.name,
                     {"days_idle": days, "estimated_accommodation_cost_bleed_sar": cost},

@@ -25,17 +25,11 @@ Two dashboards this seeder built are intentionally NOT shipped as JSON:
   an empty Dashboard cannot be imported. It is dropped (and its old is_standard=0
   row, if present, is removed by the v1_x cleanup patch).
 
-The public entrypoint below is kept as a NO-OP stub because hooks.py historically
-wired it into after_sync/after_migrate. A run-once patch
-(``patches/v1_x/drop_legacy_is_standard0_dashboards``) deletes the old
-is_standard=0 Dashboard rows on upgrading sites so migrate re-imports them from
-the new JSON as is_standard=1.
+A run-once patch (``patches/v1_x/drop_legacy_is_standard0_dashboards``) deletes
+the old is_standard=0 Dashboard rows on upgrading sites so migrate re-imports
+them from the new JSON as is_standard=1.
 
 Do not re-add record-building logic here: the charts, cards, and the Dashboard
 parents are all is_standard JSON now, and Dashboard.validate forbids an
 is_standard Dashboard from referencing a non-standard chart/card.
 """
-
-
-def seed_salis_dashboards(*args, **kwargs):
-    """No-op after_sync/after_migrate entrypoint (retired — see module docstring)."""
