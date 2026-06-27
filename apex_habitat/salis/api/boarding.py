@@ -19,6 +19,8 @@ from frappe.rate_limiter import rate_limit
 from frappe.utils import cint, get_datetime, now_datetime
 from frappe.utils.password import get_encryption_key
 
+from apex_habitat.salis.utils import get_driver_for_user
+
 # A pass is valid for this many hours after issue (a trip is a same-day event).
 PASS_TTL_HOURS = 24
 
@@ -92,11 +94,9 @@ def _is_staff(user: str | None = None) -> bool:
 
 
 def _driver_for_user(user: str | None = None) -> str | None:
-    user = user or frappe.session.user
-    employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
-    if not employee:
-        return None
-    return frappe.db.get_value("Salis Driver", {"employee": employee}, "name")
+    # Thin alias of the shared salis.utils resolver (single source); preserves the
+    # soft None-on-unlinked behaviour _resolve_trip's own-trip gate depends on.
+    return get_driver_for_user(user)
 
 
 def _resolve_trip(dispatch_trip: str) -> dict:

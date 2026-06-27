@@ -32,13 +32,8 @@
     {%- endif %}
     <title>Masar</title>
     <script>
-      // autoescape is OFF on www templates, so every value injected into this
-      // inline <script> is emitted via tojson — JSON-encodes and escapes
-      // </script>, quotes, and backslashes so a hostile value cannot break out.
       window.csrf_token = {{ csrf_token | tojson }};
-      // The worker's personal token, forwarded to every whitelisted API call.
       window.masar_token = {{ masar_token | tojson }};
-      // Branding flags consumed by the SPA shell (App.vue).
       window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
       window.portal_logo = {{ (portal_logo or '') | tojson }};
     </script>

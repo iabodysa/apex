@@ -5,6 +5,20 @@ from frappe import _
 from frappe.utils import getdate, today
 
 
+def get_driver_for_user(user=None):
+	"""Return the Salis Driver name linked to ``user`` (session user if None), else None.
+
+	The single source for user -> Employee (user_id) -> Salis Driver (employee)
+	resolution. Soft (no throw) so unlinked callers (e.g. an admin previewing the
+	portal) get a friendly empty result, not a 403; callers that must have a driver
+	wrap this and throw on None (driver_portal._resolve_driver)."""
+	user = user or frappe.session.user
+	employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
+	if not employee:
+		return None
+	return frappe.db.get_value("Salis Driver", {"employee": employee}, "name")
+
+
 def lock_vehicle(name):
 	"""Row-lock a Salis Vehicle to prevent concurrent assignment/handover races."""
 	if name:

@@ -9,6 +9,7 @@ from frappe import _
 # is re-exported here for callers importing it from this module (maps_links is pure).
 from apex_habitat.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url
 from apex_habitat.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-exported)
+from apex_habitat.salis.utils import get_driver_for_user
 
 # [#g14lmr]
 STAFF_ROLES = (
@@ -27,14 +28,11 @@ def _portal_enabled():
 def _find_driver(user=None):
 	"""Return the Salis Driver name linked to the session user, or None.
 
-	Soft lookup with no exception — used by the portal bootstrap so an
-	unlinked user (e.g. an admin previewing the page) gets a friendly screen
-	instead of a 403 and an uncaught client error."""
-	user = user or frappe.session.user
-	employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
-	if not employee:
-		return None
-	return frappe.db.get_value("Salis Driver", {"employee": employee}, "name")
+	Thin alias of the shared ``salis.utils.get_driver_for_user`` (the single
+	resolver). Soft lookup with no exception — the portal bootstrap (and masar,
+	which imports ``_resolve_driver``) relies on an unlinked user getting a
+	friendly screen instead of a 403."""
+	return get_driver_for_user(user)
 
 
 def _resolve_driver(user=None):
