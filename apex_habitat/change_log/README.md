@@ -5,10 +5,11 @@ to that series' consolidated note (newest patch first inside).
 
 ## Latest
 
-**[1.60.1](v1/v1_60_1.md)** · Fix — Security hardening and reliability fixes across portals, fleet, custody and reports.
+**[1.60.2](v1/v1_60_2.md)** · Fix — The four self-service portals showed their startup script as visible text instead of running it; now fixed.
 
 ## All releases
 
+- [1.60.2](v1/v1_60_2.md) · Fix — The four self-service portals showed their startup script as visible text instead of running it; now fixed.
 - [1.60.1](v1/v1_60_1.md) · Fix — Security hardening and reliability fixes across portals, fleet, custody and reports.
 - [1.60.0](v1/v1_60_0.md) · Feature — Keep a running count of what's in each building, and let drivers get a push even when the app is closed.
 - [1.59.1](v1/v1_59_0.md) · Fix — Reliability fixes across driver attendance, fuel and rental movement, and maintenance.
