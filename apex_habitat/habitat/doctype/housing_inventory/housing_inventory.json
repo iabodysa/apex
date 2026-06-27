@@ -248,7 +248,7 @@
    "link_fieldname": "related_facility_asset"
   }
  ],
- "modified": "2026-06-26 00:00:00.000000",
+ "modified": "2026-06-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Inventory",
@@ -276,7 +276,8 @@
   },
   {
    "read": 1,
-   "role": "Resident Supervisor"
+   "role": "Resident Supervisor",
+   "write": 1
   },
   {
    "export": 1,

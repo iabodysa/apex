@@ -10,8 +10,10 @@ A Utility Bill Entry already overlaps this account's billing period: {0},يوج�
 A Work Order already exists for this Maintenance Request: {0},يوجد بالفعل أمر عمل لطلب الصيانة هذا: {0}
 A building is required to build the checklist.,يلزم مبنى لبناء قائمة الفحص.
 A building is required to compute due cadences.,يلزم مبنى لحساب الوتائر المستحقّة.
+A building is required to load the inventory.,يجب تحديد مبنى لتحميل المخزون.
 A building is required to log an inspection.,المبنى مطلوب لتسجيل التفتيش.
 A building is required to submit a round.,يلزم مبنى لاعتماد جولة.
+A building is required to submit counts.,يجب تحديد مبنى لإرسال أعداد الجرد.
 A building is required to submit rounds.,يلزم مبنى لاعتماد الجولات.
 A cadence is required to build the checklist.,تلزم وتيرة لبناء قائمة الفحص.
 A cadence is required to submit a round.,تلزم وتيرة لاعتماد جولة.
@@ -24,6 +26,7 @@ A driver clearance is blocked and must be resolved before the driver is redeploy
 A failed safety task ({0}) on a task that requires evidence must carry a photo. Please attach an Evidence Photo before submitting.,مهمة سلامة راسبة ({0}) على مهمة تتطلب دليلاً يجب أن تحمل صورة. الرجاء إرفاق صورة دليل قبل التقديم.
 A handover discrepancy was recorded. Please raise a Vehicle Damage Write-Off for vehicle {0} to obtain tiered write-off approval.,سُجِّل تباينٌ في التسليم. الرجاء رفع إعدام تلف للمركبة {0} للحصول على موافقة الإعدام المُتدرّجة.
 A large worker-transport request needs management escalation,طلب نقل عمال كبير يتطلب تصعيدًا إلى الإدارة
+A line is missing its item.,أحد السطور ينقصه الصنف.
 A linked Employee is required to raise departure transport (the manifest cannot carry a Temporary Worker).,يلزم موظف مرتبط لإنشاء نقل المغادرة (لا يمكن للبيان أن يحمل عاملاً مؤقتاً).
 A maintenance request has been assigned to you,تم إسناد طلب صيانة إليك
 A maintenance request raised automatically when the task execution indicates a repair is needed.,طلب صيانة يُنشأ آلياً عندما يشير تنفيذ المهمة إلى الحاجة لإصلاح.
@@ -815,6 +818,7 @@ Count of open Movement Cost Recovery records for this driver. Must be zero to cl
 Counted Quantity,الكمية المجرودة
 Counted minus expected; negative means a shortage.,المعدود ناقص المتوقع؛ القيمة السالبة تعني عجزًا.
 Country,الدولة
+Counts must be a list.,يجب أن تكون الأعداد قائمة.
 Covered Buildings,المباني المشمولة
 Create Accommodation Assignment,إنشاء تسكين
 Create Custody Article,إنشاء مادة عهدة
@@ -1602,8 +1606,10 @@ Invalid readiness status.,حالة جاهزية غير صالحة.
 Invalid status: {0},حالة غير صالحة: {0}
 Invalid submission.,تقديم غير صالح.
 Inventory Completed,اكتمل الجرد
+Inventory Count,جرد المخزون
 Inventory In Progress,الجرد جارٍ
 Inventory Notes,ملاحظات الجرد
+Inventory count,جرد المخزون
 Iqama,الإقامة
 Iqama EXPIRED — {0} ({1}) requests HR action,الإقامة منتهية — {0} ({1}) يطلب إجراءً من الموارد البشرية
 Iqama Number,رقم الإقامة
@@ -1650,6 +1656,7 @@ Item,صنف
 Item Description,وصف الصنف / البند
 Item Name,اسم الصنف
 Item Type,نوع الصنف
+Item {0} does not belong to this building.,الصنف {0} لا يتبع هذا المبنى.
 Items,الأصناف
 January,يناير
 July,يوليو
@@ -1962,6 +1969,7 @@ No available drivers.,لا يوجد سائقون متاحون.
 No beds found for this building.,لا توجد أسرّة لهذا المبنى.
 No buildings to show.,لا توجد مبانٍ لعرضها.
 No category,بلا فئة
+No count lines to submit.,لا توجد سطور جرد لإرسالها.
 No drivers assigned today.,لا يوجد سائقون مسندون اليوم.
 No floor plan defined. Add floor rows before generating.,لم يُحدَّد مخطط طوابق. أضف صفوف الطوابق قبل التوليد.
 No image was captured.,لم يتم التقاط أي صورة.
@@ -3257,6 +3265,7 @@ This driver has been cleared on all movement-domain items listed below.,تم ت�
 This fuel request has been pending approval for too long,ظل طلب الوقود هذا بانتظار الاعتماد لفترة طويلة جدًا
 "This license is submitted. Amend it (Cancel, then Amend) with the new expiry date to renew.",تم إرسال هذا الترخيص. عدّله (ألغِ، ثم عدّل) بتاريخ الانتهاء الجديد للتجديد.
 This page is for the fleet team.,هذه الصفحة مخصّصة لفريق الأسطول.
+This page is for the housing team.,هذه الصفحة مخصصة لفريق الإسكان.
 This page is for the safety team.,هذه الصفحة لفريق السلامة.
 This payment request is not finance-approved yet; it cannot be paid.,طلب الدفع هذا لم يُعتمد ماليًا بعد؛ لا يمكن دفعه.
 This push subscription endpoint is not allowed.,نقطة اشتراك الإشعارات هذه غير مسموح بها.
