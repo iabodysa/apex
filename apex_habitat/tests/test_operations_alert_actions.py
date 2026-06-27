@@ -20,6 +20,9 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api.operations_alerts import (
+	AGING_DEFAULT,
+	AGING_SETTING,
+	_aging_thresholds,
 	acknowledge_alert,
 	get_open_alerts,
 	resolve_alert,
@@ -177,3 +180,43 @@ class TestOpenAlertsQueueScope(FrappeTestCase):
 			frappe.set_user("Administrator")
 		self.assertIn(self.aa, names)
 		self.assertIn(self.ab, names, "an oversight role sees every project's alerts")
+
+
+class TestAlertAgingThresholds(FrappeTestCase):
+	"""The per-severity aging cutoffs the queue reads must come from real, defined
+	Salis Settings fields (they were referenced in code but missing on the DocType),
+	and must survive the Single new-field trap — a never-set or zeroed Int on a
+	Single stores 0, so the reader must fall back to the built-in default.
+	"""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+
+	def tearDown(self):
+		# Restore the persisted Single so a mutated value can't leak into other tests.
+		frappe.set_user("Administrator")
+		for field in AGING_SETTING.values():
+			frappe.db.set_single_value("Salis Settings", field, 0)
+
+	def test_aging_fields_defined_on_doctype(self):
+		# Each referenced fieldname must be a real Int field on the Salis Settings meta.
+		meta = frappe.get_meta("Salis Settings")
+		for field in AGING_SETTING.values():
+			df = meta.get_field(field)
+			self.assertIsNotNone(df, f"{field} must be a defined field on Salis Settings")
+			self.assertEqual(df.fieldtype, "Int", f"{field} must be an Int")
+
+	def test_falls_back_to_default_when_unset_or_zero(self):
+		# Single new-field trap: 0/unset must yield the built-in default, not 0 hours.
+		for field in AGING_SETTING.values():
+			frappe.db.set_single_value("Salis Settings", field, 0)
+		self.assertEqual(_aging_thresholds(), AGING_DEFAULT)
+
+	def test_reads_configured_value_when_set(self):
+		# A non-zero stored value overrides the default for that severity.
+		frappe.db.set_single_value("Salis Settings", AGING_SETTING["Warning"], 12)
+		thresholds = _aging_thresholds()
+		self.assertEqual(thresholds["Warning"], 12, "configured value must be read through")
+		self.assertEqual(
+			thresholds["Critical"], AGING_DEFAULT["Critical"], "unset severities keep the default"
+		)

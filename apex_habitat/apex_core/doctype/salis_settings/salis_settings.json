@@ -18,6 +18,9 @@
   "workshop_overstay_days",
   "salis_settings_alerts_col2",
   "fuel_pending_max_days",
+  "alert_aging_info_hours",
+  "alert_aging_warning_hours",
+  "alert_aging_critical_hours",
   "salis_settings_sec_portal",
   "enable_driver_portal",
   "salis_settings_sec_web_push",
@@ -120,6 +123,27 @@
    "fieldname": "fuel_pending_max_days",
    "fieldtype": "Int",
    "label": "Fuel Request Pending Max Days"
+  },
+  {
+   "default": "72",
+   "description": "Hours an open Info alert may age before the queue flags it as overdue. A blank or zero value falls back to the built-in default.",
+   "fieldname": "alert_aging_info_hours",
+   "fieldtype": "Int",
+   "label": "Info Alert Aging Hours"
+  },
+  {
+   "default": "24",
+   "description": "Hours an open Warning alert may age before the queue flags it as overdue. A blank or zero value falls back to the built-in default.",
+   "fieldname": "alert_aging_warning_hours",
+   "fieldtype": "Int",
+   "label": "Warning Alert Aging Hours"
+  },
+  {
+   "default": "4",
+   "description": "Hours an open Critical alert may age before the queue flags it as overdue. A blank or zero value falls back to the built-in default.",
+   "fieldname": "alert_aging_critical_hours",
+   "fieldtype": "Int",
+   "label": "Critical Alert Aging Hours"
   },
   {
    "fieldname": "salis_settings_sec_portal",
@@ -270,7 +294,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-26 12:00:00.000000",
+ "modified": "2026-06-27 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

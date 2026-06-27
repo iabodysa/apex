@@ -455,7 +455,9 @@ def submit_due_rounds(building, round_date, results):
     rolls back a submitted round; ``emailed`` reports whether mail was sent.
 
     Permission: caller must have ``submit`` on Safety Task Execution (same gate
-    as :func:`submit_round`).
+    as :func:`submit_round`) AND ``read`` on the target Accommodation Building —
+    the latter rejects a supervisor scoped off this building before any round is
+    created or the report is emailed.
 
     Args:
         building: Accommodation Building docname (source of truth).
@@ -472,6 +474,12 @@ def submit_due_rounds(building, round_date, results):
 
     if not building:
         frappe.throw(_("A building is required to submit rounds."))
+    # Scope gate: reject a caller without read on THIS building BEFORE any round
+    # is created or the report is emailed — a supervisor scoped off this building
+    # must not drive its due-rounds (defense-in-depth + fail-fast over the Safety
+    # Round controller's own building check, which only fires once a round inserts;
+    # this also blocks leaking the building via the report on an empty result set).
+    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
     if not round_date:
         frappe.throw(_("A round date is required to submit rounds."))
 

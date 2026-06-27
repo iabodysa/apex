@@ -40,11 +40,12 @@ def get_context(context):
 	# [#kqaxzl]
 	context.no_cache = 1
 
-	# [#ktvbza]
-	try:
-		context.csrf_token = get_csrf_token()
-	except Exception:
-		context.csrf_token = ""
+	# [#ktvbza] get_csrf_token() mints+returns a token for Guest too (it generates
+	# one if the session has none), so it does not legitimately fail here. The old
+	# blanket `except: csrf_token = ""` only ever produced a silently-empty token
+	# that made every Masar POST fail CSRF with no trace — let a real failure surface
+	# and be logged instead of swallowing the token.
+	context.csrf_token = get_csrf_token()
 
 	# [#tvmj3m] Charset-validate then HTML-escape the request-supplied token. The
 	# value is forwarded verbatim to the SPA, which resolves it server-side; only

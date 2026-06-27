@@ -130,6 +130,7 @@ const { t, dir } = useI18n();
 // English needs none (the label is the stored value), so only Arabic is loaded.
 const enumLabels = createResource({
   url: "apex_habitat.salis.api.masar.get_enum_labels",
+  method: "GET",
   params: { lang: "ar" },
   auto: true,
   onSuccess: (data) => setEnumLabels("ar", data),
@@ -157,8 +158,14 @@ onUnmounted(() => {
   window.removeEventListener("offline", syncOnline);
 });
 
+// Bootstrap read. method:"GET" is load-bearing: frappe-ui defaults to POST, which
+// is CSRF-validated and throws CSRFTokenError when window.csrf_token is absent/stale
+// at boot (a non-rendered shell or a pre-login PWA-cached shell). get_worker_context
+// is a pure read (identity is the token, no commit), so the CSRF-exempt GET path lets
+// Masar always load; write calls stay POST+CSRF.
 const ctx = createResource({
   url: "apex_habitat.salis.api.masar.get_worker_context",
+  method: "GET",
   params: { token: TOKEN },
   auto: hasToken,
 });

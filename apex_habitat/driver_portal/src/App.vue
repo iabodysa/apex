@@ -164,8 +164,15 @@ if (!document.documentElement.getAttribute("data-theme") && window.portal_theme)
   document.documentElement.setAttribute("data-theme", window.portal_theme);
 }
 
+// Bootstrap read. method:"GET" is load-bearing: frappe-ui defaults to POST, and
+// a POST is CSRF-validated (auth.validate_csrf_token) — so it throws CSRFTokenError
+// whenever window.csrf_token is absent/stale at boot (a non-rendered shell, a
+// pre-login PWA-cached shell, or a rotated session token). get_driver_context is a
+// pure read (identity from the session, no client-supplied scope), so serving it
+// over the CSRF-exempt GET path lets the portal always load; writes stay POST+CSRF.
 const ctx = createResource({
   url: "apex_habitat.salis.api.driver_portal.get_driver_context",
+  method: "GET",
   auto: true,
 });
 
