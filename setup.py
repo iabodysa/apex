@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="apex_habitat",
-    version="1.60.10",
+    version="1.60.11",
     description="Apex Habitat custom application for Frappe Framework v15.",
     packages=find_packages(),
     include_package_data=True,
