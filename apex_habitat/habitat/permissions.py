@@ -161,7 +161,7 @@ def idle_resident_report_query(user=None):
 
 
 # [#rptscope] Script Reports run on frappe.get_all, which forces ignore_permissions
-# (frappe/__init__.py get_all -> ignore_permissions=True), so the building row-scoping
+# (frappe/__init__.py get_all forces ignore_permissions), so the building row-scoping
 # the desk list gets via permission_query_conditions is bypassed in report code. This
 # helper consolidates the re-application: it returns the building filter a report must
 # AND onto its own get_all so a building-scoped user sees only their estates' rows while

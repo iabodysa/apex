@@ -82,7 +82,7 @@ def _project_condition(user, column="`project`"):
 
 
 # [#rptscope] Script Reports run on frappe.get_all, which forces ignore_permissions
-# (frappe/__init__.py get_all -> ignore_permissions=True), so the project row-scoping
+# (frappe/__init__.py get_all forces ignore_permissions), so the project row-scoping
 # the desk list gets via permission_query_conditions is bypassed in report code. This
 # helper consolidates the re-application that the Salis reports had duplicated inline:
 # it returns the project filter a report must AND onto its own get_all so a project-

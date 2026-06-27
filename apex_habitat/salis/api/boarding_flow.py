@@ -95,9 +95,9 @@ def ensure_trip_boarding_state(dispatch_trip, transport_request=None):
         )
         added += 1
     if added:
-        # audit-ok: trip authorised by the calling boarding path; allow_on_submit
-        # field, so a started (submitted) trip can still be seeded.
-        trip.save(ignore_permissions=True)
+        # trip authorised by the calling boarding path; allow_on_submit field lets a
+        # started (submitted) trip still be seeded.
+        trip.save(ignore_permissions=True)  # audit-ok
     return added
 
 
