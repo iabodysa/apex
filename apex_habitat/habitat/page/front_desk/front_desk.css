@@ -1,11 +1,31 @@
 /* [#7jjeem] */
 
+/* Shared bed-status palette. The same functional colours key the bed cards on the
+   front desk, the transfer board, and the arrivals desk; declared once here as
+   global custom properties (identical names across those pages) so no surface
+   carries the hexes inline. Free / amber (near-full) / full (red) / out-of-service
+   (grey), each as background / border / text. */
+:root {
+	--bed-free-bg: #e6f4ea;
+	--bed-free-border: #34a853;
+	--bed-free-text: #1e7e34;
+	--bed-full-bg: #fde8e8;
+	--bed-full-border: #d93025;
+	--bed-full-text: #b71c1c;
+	--bed-amber-bg: #fff6e0;
+	--bed-amber-border: #f5a623;
+	--bed-amber-text: #a96a00;
+	--bed-oos-bg: #f0f1f3;
+	--bed-oos-border: #c2c8ce;
+	--bed-oos-text: #74808b;
+}
+
 /* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
    Growth Green / Deep Forest / Sand) so this desk page reads identically to the
    Vue portals. Local overrides of the desk theme vars (incl. the blue accent →
    editorial green) re-skin every existing var() reference. Scoped to the two page
    roots (.fd-board + .fd-buildings) so it never leaks into the desk shell. The
-   bed-status hexes below are a deliberate functional palette, left untouched. */
+   bed-status colours use the shared --bed-* tokens above. */
 .fd-board,
 .fd-buildings {
 	--c-primary: #00844e;
@@ -110,15 +130,15 @@
 /* Free-bed-pressure weighting: a left edge bar keyed to the same palette as the
    bed cards (green free / amber near-full / red full-or-over). */
 .fd-building-chip--green {
-	border-inline-start: 4px solid #34a853;
+	border-inline-start: 4px solid var(--bed-free-border);
 }
 
 .fd-building-chip--amber {
-	border-inline-start: 4px solid #f5a623;
+	border-inline-start: 4px solid var(--bed-amber-border);
 }
 
 .fd-building-chip--red {
-	border-inline-start: 4px solid #d93025;
+	border-inline-start: 4px solid var(--bed-full-border);
 }
 
 .fd-building-chip--selected {
@@ -241,19 +261,19 @@
 }
 
 .fd-summary-stat--green {
-	border-inline-start-color: #34a853;
+	border-inline-start-color: var(--bed-free-border);
 }
 
 .fd-summary-stat--red {
-	border-inline-start-color: #d93025;
+	border-inline-start-color: var(--bed-full-border);
 }
 
 .fd-summary-stat--amber {
-	border-inline-start-color: #f5a623;
+	border-inline-start-color: var(--bed-amber-border);
 }
 
 .fd-summary-stat--grey {
-	border-inline-start-color: #c2c8ce;
+	border-inline-start-color: var(--bed-oos-border);
 }
 
 /* Thin occupancy progress meter under the mini-stats. */
@@ -513,28 +533,28 @@
 
 /* [#8op24p] */
 .fd-bed--green {
-	background: #e6f4ea;
-	border-color: #34a853;
-	color: #1e7e34;
+	background: var(--bed-free-bg);
+	border-color: var(--bed-free-border);
+	color: var(--bed-free-text);
 }
 
 .fd-bed--red {
-	background: #fde8e8;
-	border-color: #d93025;
-	color: #b71c1c;
+	background: var(--bed-full-bg);
+	border-color: var(--bed-full-border);
+	color: var(--bed-full-text);
 }
 
 .fd-bed--amber {
-	background: #fff6e0;
-	border-color: #f5a623;
-	color: #a96a00;
+	background: var(--bed-amber-bg);
+	border-color: var(--bed-amber-border);
+	color: var(--bed-amber-text);
 	cursor: not-allowed;
 }
 
 .fd-bed--grey {
-	background: #f0f1f3;
-	border-color: #c2c8ce;
-	color: #74808b;
+	background: var(--bed-oos-bg);
+	border-color: var(--bed-oos-border);
+	color: var(--bed-oos-text);
 	cursor: not-allowed;
 }
 

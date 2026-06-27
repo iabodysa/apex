@@ -124,9 +124,10 @@
    "fetch_from": "issued_to_employee.user_id",
    "fetch_if_empty": 1,
    "fieldname": "issued_to_user",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "hidden": 1,
    "label": "Issued To (User)",
+   "options": "User",
    "read_only": 1
   },
   {

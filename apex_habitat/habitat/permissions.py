@@ -287,6 +287,15 @@ def accommodation_bed_query(user=None):
     return _building_condition(user)
 
 
+# [#wave-b2] The Accommodation Stock Ledger is system-written and read-only, but a
+# scoped store-keeper / supervisor must see only their own buildings' ledger rows.
+# The row's `building` field (the store, reqd=1) is the scope anchor — reuse the
+# single-`building` query + the generic building_scoped_has_permission (wired in
+# hooks). from_building/to_building are movement context only, never the scope.
+def accommodation_stock_ledger_query(user=None):
+    return _building_condition(user)
+
+
 def _dual_building_condition(user=None):
     """WHERE fragment scoping a from_building/to_building doc to the user's estate.
 

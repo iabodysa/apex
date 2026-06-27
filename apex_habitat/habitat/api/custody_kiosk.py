@@ -38,6 +38,7 @@ from apex_habitat.apex_core.utils.party_link import (
     PARTY_EMPLOYEE,
     PARTY_TEMPORARY_WORKER,
 )
+from apex_habitat.habitat import permissions
 
 
 @frappe.whitelist()
@@ -366,14 +367,27 @@ def _open_party_custody(party_type: str, party: str) -> list[dict]:
     ``{custody_issue, building, issue_date, article, article_name, uom, qty}``
     with ``qty`` (remaining) > 0 only.
     """
+    issue_filters = {
+        "party_type": party_type,
+        "party": party,
+        "docstatus": 1,
+        "status": ["in", _OPEN_ISSUE_STATUSES],
+    }
+
+    # [#wave-b2] get_all forces ignore_permissions, bypassing the building row-scoping
+    # Custody Issue gets via permission_query_conditions; confine the open issues to
+    # the caller's buildings so a scoped supervisor never sees custody booked against
+    # another estate. Oversight roles (HOUSING_UNSCOPED_ROLES) stay unrestricted; a
+    # scoped user with no allowed building gets nothing.
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return []
+        issue_filters["building"] = ["in", allowed]
+
     issues = frappe.get_all(
         "Custody Issue",
-        filters={
-            "party_type": party_type,
-            "party": party,
-            "docstatus": 1,
-            "status": ["in", _OPEN_ISSUE_STATUSES],
-        },
+        filters=issue_filters,
         fields=["name", "building", "issue_date"],
         order_by="issue_date asc, name asc",
     )

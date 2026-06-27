@@ -16,6 +16,11 @@ from frappe import _
 from frappe.model.document import Document
 
 
+# A single manifest is a front-desk batch, not a payroll dump: cap the rows so a
+# guest cannot post an unbounded table through the public Arrival Manifest form.
+_MAX_EXPECTED_WORKERS = 500
+
+
 class ArrivalBatch(Document):
     def validate(self) -> None:
         # expected_count drives the manifest-completion telemetry; keep it in sync
@@ -23,6 +28,10 @@ class ArrivalBatch(Document):
         self.expected_count = len(self.expected_workers or [])
         if not self.expected_count:
             frappe.throw(_("Add at least one expected worker to the manifest."))
+        if self.expected_count > _MAX_EXPECTED_WORKERS:
+            frappe.throw(
+                _("A manifest can list at most {0} expected workers.").format(_MAX_EXPECTED_WORKERS)
+            )
         self.title = f"{self.building} - {frappe.utils.formatdate(self.expected_date)}"
 
     @property

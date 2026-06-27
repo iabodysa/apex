@@ -1,11 +1,31 @@
 /* [#niitf7] */
 
+/* Shared bed-status palette — the same functional colours the front desk and
+   transfer board use for their bed cards, declared once here as global custom
+   properties (identical names across those pages) so no surface carries the hexes
+   inline. Free / amber (near-full) / full (red) / out-of-service (grey), each as
+   background / border / text. */
+:root {
+	--bed-free-bg: #e6f4ea;
+	--bed-free-border: #34a853;
+	--bed-free-text: #1e7e34;
+	--bed-full-bg: #fde8e8;
+	--bed-full-border: #d93025;
+	--bed-full-text: #b71c1c;
+	--bed-amber-bg: #fff6e0;
+	--bed-amber-border: #f5a623;
+	--bed-amber-text: #a96a00;
+	--bed-oos-bg: #f0f1f3;
+	--bed-oos-border: #c2c8ce;
+	--bed-oos-text: #74808b;
+}
+
 /* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
    Growth Green / Deep Forest / Sand) so this desk page reads identically to the
    Vue portals. Local overrides of the desk theme vars (incl. the blue accent →
    editorial green) re-skin every existing var() reference. Scoped to
-   .arrivals-desk so it never leaks into the desk shell. The --ad-bed-* status
-   tokens below are a deliberate functional palette, left untouched. */
+   .arrivals-desk so it never leaks into the desk shell. The --ad-bed-* aliases
+   below map this page's semantic names onto the shared --bed-* tokens. */
 .arrivals-desk {
 	--c-primary: #00844e;
 	--c-ink: #072b1a;
@@ -29,18 +49,20 @@
 	font-family: var(--font);
 
 	/* [#qbeqtr] */
-	--ad-bed-free: #e6f4ea;
-	--ad-bed-free-text: #1e7e34;
-	--ad-bed-free-border: #34a853;
-	--ad-bed-occupied: #fde8e8;
-	--ad-bed-occupied-text: #b71c1c;
-	--ad-bed-occupied-border: #d93025;
-	--ad-bed-blocked: #fff6e0;
-	--ad-bed-blocked-text: #a96a00;
-	--ad-bed-blocked-border: #f5a623;
-	--ad-bed-oos: #f0f1f3;
-	--ad-bed-oos-text: #74808b;
-	--ad-bed-oos-border: #c2c8ce;
+	/* Semantic aliases onto the shared --bed-* palette (occupied = full red,
+	   blocked = amber); the page's existing var(--ad-bed-*) call sites are unchanged. */
+	--ad-bed-free: var(--bed-free-bg);
+	--ad-bed-free-text: var(--bed-free-text);
+	--ad-bed-free-border: var(--bed-free-border);
+	--ad-bed-occupied: var(--bed-full-bg);
+	--ad-bed-occupied-text: var(--bed-full-text);
+	--ad-bed-occupied-border: var(--bed-full-border);
+	--ad-bed-blocked: var(--bed-amber-bg);
+	--ad-bed-blocked-text: var(--bed-amber-text);
+	--ad-bed-blocked-border: var(--bed-amber-border);
+	--ad-bed-oos: var(--bed-oos-bg);
+	--ad-bed-oos-text: var(--bed-oos-text);
+	--ad-bed-oos-border: var(--bed-oos-border);
 	position: relative;
 	height: calc(100vh - var(--navbar-height) - var(--page-head-height) - 16px);
 	min-height: 420px;

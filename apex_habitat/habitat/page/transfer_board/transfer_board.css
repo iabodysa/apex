@@ -1,5 +1,25 @@
 /* [#cwpffa] */
 
+/* Shared bed-status palette — the same functional colours the front desk and
+   arrivals desk use for their bed cards, declared once here as global custom
+   properties (identical names across those pages) so no surface carries the hexes
+   inline. Free / amber (near-full) / full (red) / out-of-service (grey), each as
+   background / border / text. */
+:root {
+	--bed-free-bg: #e6f4ea;
+	--bed-free-border: #34a853;
+	--bed-free-text: #1e7e34;
+	--bed-full-bg: #fde8e8;
+	--bed-full-border: #d93025;
+	--bed-full-text: #b71c1c;
+	--bed-amber-bg: #fff6e0;
+	--bed-amber-border: #f5a623;
+	--bed-amber-text: #a96a00;
+	--bed-oos-bg: #f0f1f3;
+	--bed-oos-border: #c2c8ce;
+	--bed-oos-text: #74808b;
+}
+
 /* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
    Growth Green / Deep Forest / Sand) so this desk page reads identically to the
    Vue portals. Local overrides of the desk theme vars re-skin every existing
@@ -169,28 +189,28 @@
 
 /* [#fxxhpv] */
 .tb-bed--green {
-	background: #e6f4ea;
-	border-color: #34a853;
-	color: #1e7e34;
+	background: var(--bed-free-bg);
+	border-color: var(--bed-free-border);
+	color: var(--bed-free-text);
 }
 
 .tb-bed--red {
-	background: #fde8e8;
-	border-color: #d93025;
-	color: #b71c1c;
+	background: var(--bed-full-bg);
+	border-color: var(--bed-full-border);
+	color: var(--bed-full-text);
 }
 
 .tb-bed--amber {
-	background: #fff6e0;
-	border-color: #f5a623;
-	color: #a96a00;
+	background: var(--bed-amber-bg);
+	border-color: var(--bed-amber-border);
+	color: var(--bed-amber-text);
 	cursor: not-allowed;
 }
 
 .tb-bed--grey {
-	background: #f0f1f3;
-	border-color: #c2c8ce;
-	color: #74808b;
+	background: var(--bed-oos-bg);
+	border-color: var(--bed-oos-border);
+	color: var(--bed-oos-text);
 	cursor: not-allowed;
 }
 

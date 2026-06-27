@@ -162,7 +162,7 @@
    "label": "Supplier Cost Recovery",
    "link_type": "Report",
    "link_to": "Supplier Cost Recovery",
-   "idx": 16,
+   "idx": 15,
    "is_query_report": 1
   },
   {
@@ -171,7 +171,7 @@
    "label": "Finance Manager Dashboard",
    "link_type": "Dashboard",
    "link_to": "Finance Manager Dashboard",
-   "idx": 15
+   "idx": 16
   }
  ],
  "charts": [],

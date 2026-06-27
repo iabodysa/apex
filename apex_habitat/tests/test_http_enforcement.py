@@ -74,6 +74,21 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "guarded. A Guest has no role to permission-check.",
     ),
     (
+        "salis/web_form/vehicle_incident/vehicle_incident.py",
+        "submit_vehicle_incident",
+        "Public vehicle-incident intake. allow_guest; honeypot + per-IP rate-limit, "
+        "incident_type restricted to two safe options and free text bounded; inserts a "
+        "docstatus-0 draft only (no on_submit side-effect). A Guest has no role to "
+        "permission-check.",
+    ),
+    (
+        "habitat/web_form/arrival_manifest/arrival_manifest.py",
+        "submit_arrival_manifest",
+        "Public arrival-manifest intake. allow_guest; honeypot + per-IP rate-limit, "
+        "child rows capped and field-allowlisted (the read-only 'Arrived As' link can "
+        "never be guest-seeded). A Guest has no role to permission-check.",
+    ),
+    (
         "salis/api/masar.py",
         "create_worker_request",
         "Masar guest endpoint. allow_guest; authorisation is the Masar worker "

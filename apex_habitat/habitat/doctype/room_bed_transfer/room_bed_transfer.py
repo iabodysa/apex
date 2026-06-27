@@ -65,5 +65,20 @@ def on_submit(doc, method=None):
 
 
 def on_cancel(doc, method=None):
+    # Inverse of on_submit: free the target bed, re-occupy the original, and move the
+    # assignment back to where it was. The original room/building are derived from
+    # from_bed (the transfer stores no from_room/from_building of its own).
     frappe.db.set_value("Accommodation Bed", doc.to_bed, "status", "Available")
     frappe.db.set_value("Accommodation Bed", doc.from_bed, "status", "Occupied")
+
+    from_room = frappe.db.get_value("Accommodation Bed", doc.from_bed, "room")
+    from_building = (
+        frappe.db.get_value("Accommodation Room", from_room, "building") if from_room else None
+    )
+    # Only revert the assignment if it still points at this transfer's target; a later
+    # transfer or check-out may have moved it on, and we must not clobber that state.
+    assignment = frappe.get_doc("Accommodation Assignment", doc.assignment)
+    if assignment.bed == doc.to_bed:
+        assignment.db_set("bed", doc.from_bed)
+        assignment.db_set("room", from_room)
+        assignment.db_set("building", from_building)

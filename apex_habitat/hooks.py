@@ -261,6 +261,8 @@ permission_query_conditions = {
     "Arrival Batch": "apex_habitat.habitat.permissions.arrival_batch_query",
     "Accommodation Room": "apex_habitat.habitat.permissions.accommodation_room_query",
     "Accommodation Bed": "apex_habitat.habitat.permissions.accommodation_bed_query",
+    # [#wave-b2] read-only quantity ledger, scoped on its store `building`.
+    "Accommodation Stock Ledger": "apex_habitat.habitat.permissions.accommodation_stock_ledger_query",
     "Driver Attendance": "apex_habitat.salis.permissions.driver_attendance_query",
     "Driver Stop": "apex_habitat.salis.permissions.driver_stop_query",
     "Boarding Scan Log": "apex_habitat.salis.permissions.boarding_scan_log_query",
@@ -320,6 +322,8 @@ has_permission = {
     "Arrival Batch": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Accommodation Room": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Accommodation Bed": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    # [#wave-b2] form/REST read of a ledger row outside the user's store is denied.
+    "Accommodation Stock Ledger": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Driver Attendance": "apex_habitat.salis.permissions.driver_attendance_has_permission",
     "Driver Stop": "apex_habitat.salis.permissions.driver_stop_has_permission",
     "Boarding Scan Log": "apex_habitat.salis.permissions.boarding_scan_log_has_permission",

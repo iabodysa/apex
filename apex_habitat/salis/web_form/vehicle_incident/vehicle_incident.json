@@ -87,6 +87,14 @@
    "idx": 7,
    "label": "Reported By (Optional)",
    "reqd": 0
+  },
+  {
+   "doctype": "Web Form Field",
+   "fieldname": "website_field",
+   "fieldtype": "Data",
+   "label": "Website",
+   "hidden": 1,
+   "reqd": 0
   }
  ],
  "idx": 0,

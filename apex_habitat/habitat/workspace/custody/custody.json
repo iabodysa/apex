@@ -113,13 +113,13 @@
    "label": "Custody Kiosk",
    "link_type": "Page",
    "link_to": "custody-kiosk",
-   "idx": 7
+   "idx": 8
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Facility Assets",
-   "idx": 8
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -127,7 +127,7 @@
    "label": "Facility Asset",
    "link_type": "DocType",
    "link_to": "Facility Asset",
-   "idx": 9
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
@@ -135,7 +135,7 @@
    "label": "Facility Asset Custody Assignment",
    "link_type": "DocType",
    "link_to": "Facility Asset Custody Assignment",
-   "idx": 10
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -143,7 +143,7 @@
    "label": "Facility Asset Movement",
    "link_type": "DocType",
    "link_to": "Facility Asset Movement",
-   "idx": 11
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -151,13 +151,13 @@
    "label": "Non-Financial Depreciation Snapshot",
    "link_type": "DocType",
    "link_to": "Non-Financial Depreciation Snapshot",
-   "idx": 12
+   "idx": 13
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
-   "idx": 13
+   "idx": 14
   },
   {
    "doctype": "Workspace Link",
@@ -165,7 +165,7 @@
    "label": "Custody Damage Register",
    "link_type": "Report",
    "link_to": "Custody Damage Register",
-   "idx": 14,
+   "idx": 15,
    "is_query_report": 1
   },
   {
@@ -174,7 +174,7 @@
    "label": "Operational Depreciation Aging",
    "link_type": "Report",
    "link_to": "Operational Depreciation Aging",
-   "idx": 15,
+   "idx": 16,
    "is_query_report": 1
   },
   {
@@ -183,7 +183,7 @@
    "label": "Intercompany Movement Register",
    "link_type": "Report",
    "link_to": "Intercompany Movement Register",
-   "idx": 16,
+   "idx": 17,
    "is_query_report": 1
   },
   {
@@ -192,7 +192,7 @@
    "label": "Accommodation Stock Balance",
    "link_type": "Report",
    "link_to": "Accommodation Stock Balance",
-   "idx": 17,
+   "idx": 18,
    "is_query_report": 1
   },
   {
@@ -201,7 +201,7 @@
    "label": "Custody Outstanding by Worker",
    "link_type": "Report",
    "link_to": "Custody Outstanding by Worker",
-   "idx": 18,
+   "idx": 19,
    "is_query_report": 1
   }
  ],

@@ -53,12 +53,19 @@ def before_cancel(doc, method=None):
 
 
 def _compute_book_values(doc):
+    # Load each distinct policy once (rows often share a policy) to avoid an N+1
+    # get_doc per item; cache keyed by policy name.
+    policy_cache: dict[str, "Document"] = {}
+    for row in doc.items:
+        if row.policy and row.policy not in policy_cache:
+            policy_cache[row.policy] = frappe.get_doc(
+                "Operational Depreciation Policy", row.policy
+            )
+
     for row in doc.items:
         original = flt(row.original_cost_sar)
         age = flt(row.age_years)
-        policy = None
-        if row.policy:
-            policy = frappe.get_doc("Operational Depreciation Policy", row.policy)
+        policy = policy_cache.get(row.policy) if row.policy else None
         if policy and flt(policy.useful_life_years) > 0:  # [#dt9fyv]
             life = flt(policy.useful_life_years)
             residual_pct = flt(policy.residual_value_pct) / 100

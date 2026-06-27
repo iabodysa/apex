@@ -28,6 +28,7 @@ A linked Employee is required to raise departure transport (the manifest cannot 
 A maintenance request has been assigned to you,تم إسناد طلب صيانة إليك
 A maintenance request raised automatically when the task execution indicates a repair is needed.,طلب صيانة يُنشأ آلياً عندما يشير تنفيذ المهمة إلى الحاجة لإصلاح.
 A maintenance request spawned from a safety finding requires the Facilities Supervisor in parallel,طلب صيانة ناتج عن ملاحظة سلامة يتطلب إشراف مشرف المرافق بالتوازي
+A manifest can list at most {0} expected workers.,يمكن أن يضم كشف الوصول {0} عاملاً متوقعاً كحد أقصى.
 A new Dispatch Trip must start as Planned; {0} is reached through the workflow.,يجب أن تبدأ رحلة التشغيل الجديدة بالحالة مُخطَّطة؛ يتم الوصول إلى {0} عبر سير العمل.
 A new maintenance request awaits triage,طلب صيانة جديد بانتظار الفرز
 A new resident request has been received and awaits triage,تم استلام طلب ساكن جديد وهو بانتظار الفرز
@@ -266,6 +267,7 @@ Area Photo Evidence,إثبات صور المناطق
 Area evidence for {0} is required before submit.,إثبات المنطقة لـ {0} مطلوب قبل الترحيل.
 "Area {0} must have a Cleaned photo, or be marked Not Cleaned / N/A with a note.",يجب أن تحتوي المنطقة {0} على صورة (تم التنظيف)، أو أن تُعلَّم (لم يُنظَّف / لا ينطبق) مع ملاحظة.
 Arrange Departure Transport,ترتيب نقل المغادرة
+Arrival,وصول
 Arrival Batch,دفعة وصول
 Arrival Batch Ref,مرجع دفعة الوصول
 Arrival Batch Worker,عامل دفعة الوصول
@@ -312,12 +314,16 @@ Assign to me ({0}),إسناد إليّ ({0})
 Assigned,مُسنَد
 Assigned Building,المبنى المخصص
 Assigned Driver,السائق المسند
+Assigned Requests,الطلبات المُسندة
 Assigned Tasks,المهام المسندة
 Assigned To,مخصص لـ
 Assigned To (Employee),مخصص للموظف
 Assigned To is required when status is Assigned.,حقل 'مخصص لـ' مطلوب عندما تكون الحالة 'مُسنَد'.
 Assigned Today,المسندون اليوم
+Assigned Trip,الرحلة المُسندة
 Assigned Vehicle,المركبة المسندة
+Assigned requests need {0} seats but vehicle {1} seats only {2}.,تحتاج الطلبات المُسندة إلى {0} مقعداً لكن المركبة {1} تتسع لـ {2} فقط.
+Assigned to Trip,مُسند إلى رحلة
 Assigned to driver {0} via {1}.,أُسند إلى السائق {0} عبر {1}.
 Assigned to you,مُسنَد إليك
 Assignment,الإسناد
@@ -458,6 +464,7 @@ Boarding and Departure Flow,تدفق الصعود والمغادرة
 Book Value (SAR),القيمة الدفترية (ريال)
 Bookkeeping,المسك المحاسبي
 Both a source bed and a target bed are required.,يلزم تحديد سرير المصدر وسرير الوجهة معاً.
+Branch Coverage,تغطية الفرع
 Brand Logo,شعار العلامة التجارية
 Brand Logo must be an uploaded file (a /files/ path).,يجب أن يكون شعار العلامة التجارية ملفًا مرفوعًا (مسار /files/).
 Build the catalog of issuable articles that the custody flow hands out.,ابنِ كتالوج المواد القابلة للصرف التي يصرفها مسار العهدة.
@@ -584,6 +591,7 @@ Claimed Total minus Accrued Total.,إجمالي المطالب به ناقص إ�
 Claimed litres minus consumed litres. Positive = claim exceeds recorded consumption.,اللترات المطالب بها مطروحًا منها اللترات المستهلكة. القيمة الموجبة = المطالبة تتجاوز الاستهلاك المسجَّل.
 Classification,التصنيف
 "Classification of fleet vehicles (e.g., Sedan, Pickup, Bus).",تصنيف مركبات الأسطول (مثل سيدان أو بيك أب أو حافلة).
+Classifies why this trip is requested; the transport supervisor reads it when assigning requests onto a trip.,يصنّف سبب طلب هذه الرحلة؛ يطّلع عليه مشرف النقل عند إسناد الطلبات إلى الرحلة.
 Clean,سليم
 Cleaned,تم التنظيف
 Cleaner,عامل النظافة
@@ -996,6 +1004,7 @@ Derived on submit from the statuses of the linked Safety Task Execution rows.,ت
 Describe the issue,صف المشكلة
 Description,الوصف
 Description is too long. Please keep it under 2000 characters.,الوصف طويل جداً. يرجى الإبقاء عليه تحت 2000 حرف.
+Description is too long. Please keep it under 4000 characters.,الوصف طويل جداً. يُرجى إبقاؤه دون أربعة آلاف حرف.
 Designation,المسمى الوظيفي
 Desk,سطح المكتب
 Destination,الوجهة
@@ -1017,6 +1026,7 @@ Dismiss,تجاهل
 Dispatch,الإرسال
 Dispatch Date,تاريخ التشغيل
 Dispatch Trip,رحلة تشغيل
+Dispatch Trip Assigned Request,طلب مُسند لرحلة التسيير
 Dispatch Trips by Status,رحلات التشغيل حسب الحالة
 Dispatch readiness: {0} is required before submitting.,جاهزية التشغيل: {0} مطلوب قبل التقديم.
 Dispatched,تم التشغيل
@@ -1574,6 +1584,7 @@ Invalid SQL identifier: doctype {0},معرّف SQL غير صالح: نوع ال�
 Invalid SQL identifier: field {0},معرّف SQL غير صالح: الحقل {0}
 Invalid Token,رمز غير صالح
 Invalid code.,رمز غير صحيح.
+Invalid incident type.,نوع الحادث غير صالح.
 Invalid or inactive location token.,رمز الموقع غير صالح أو غير مُفعّل.
 Invalid portal theme: {0},سمة بوابة غير صالحة: {0}
 Invalid readiness status.,حالة جاهزية غير صالحة.
@@ -2187,6 +2198,7 @@ Passenger Manifest,كشف الركاب
 Passenger Manifests Today,كشوف الركاب اليوم
 Passenger Name,اسم الراكب
 Passenger counts above this number require Operations-tier authority.,أعداد الركاب التي تتجاوز هذا الرقم تتطلب صلاحية مستوى العمليات.
+"Passenger seats. When set (non-zero), the trip assignment capacity guard caps the assigned requests' workers at this number.",مقاعد الركاب. عند تعيينها (بقيمة غير صفرية) يحدّ ضابط سعة الإسناد عدد عمال الطلبات المُسندة عند هذا الرقم.
 Passengers,الركاب
 Passport,جواز السفر
 Passport Number,رقم الجواز
@@ -2574,6 +2586,7 @@ Request fuel for a vehicle to start the fuelling and reconciliation cycle.,اط�
 Request submitted successfully.,تم إرسال الطلب بنجاح.
 Requested By,مقدَّم بواسطة
 Requested By (Operations),طلب بواسطة (العمليات)
+Requested Count,العدد المطلوب
 Requested Litres,اللترات المطلوبة
 Requested Litres must be greater than zero.,يجب أن تكون اللترات المطلوبة أكبر من صفر.
 Requested volume ({0} L) exceeds the typical threshold of {1} L. Please verify before approving.,الكمّيّة المطلوبة ({0} لتر) تتجاوز الحدَّ المعتاد {1} لتر. الرجاء التحقّق قبل الاعتماد.
@@ -2839,6 +2852,7 @@ Search articles…,البحث في المواد…
 Search failed. Please retry.,فشل البحث. يرجى إعادة المحاولة.
 Search plate or category,ابحث بلوحة أو فئة
 Search worker name or passport…,البحث باسم العامل أو جواز السفر…
+Seat Capacity,سعة المقاعد
 Seconds a worker's 'please wait' request is held active (drives the client countdown). A blank or zero value falls back to the built-in default.,"عدد الثواني التي يظل فيها طلب ""يرجى الانتظار"" للعامل نشطًا (يحرك العد التنازلي في الواجهة). القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج."
 Seconds the worker has to respond after each driver notification (drives the client countdown). A blank or zero value falls back to the built-in default.,عدد الثواني المتاحة للعامل للرد بعد كل إشعار من السائق (يحرك العد التنازلي في الواجهة). القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج.
 "Secret API key/token for the gateway, sent as an Authorization: Bearer header. Stored encrypted; never echoed back to the client.",مفتاح/رمز سرّي لواجهة البوابة البرمجية، يُرسَل ضمن ترويسة Authorization: Bearer. يُخزَّن مُشفّراً؛ ولا يُعاد إرساله إلى العميل أبداً.
@@ -2915,6 +2929,7 @@ Set when the driver/employee has acknowledged responsibility for the loss.,يُ�
 Set when the incident is escalated to a damage write-off.,يُضبط عند تصعيد البلاغ إلى شطب أضرار.
 Set when the request is approved.,يُضبط عند اعتماد الطلب.
 Set when the transfer is approved.,يُضبط عند اعتماد التحويل.
+Set when the transport supervisor assigns this request onto a Dispatch Trip. Status remains workflow-owned; this is the preliminary assignment flag.,يُضبط عندما يُسند مشرف النقل هذا الطلب إلى رحلة تسيير. تبقى الحالة بيد سير العمل؛ وهذه إشارة الإسناد المبدئي.
 Set when the write-off case is approved.,يُضبط عند اعتماد حالة الشطب.
 Set when this is a follow-up round repeating the same cadence for the building on the same date.,يُحدَّد متى تكون هذه جولةَ متابعةٍ تُكرّر الوتيرة نفسها للمبنى في التاريخ نفسه.
 Set when this request's litres are posted to the quota's consumed total. Guards against double-application on resubmit.,يُعيَّن عند ترحيل لترات هذا الطلب إلى إجمالي الحصة المستهلك. يحمي من الاحتساب المزدوج عند إعادة التقديم.
@@ -2937,6 +2952,7 @@ Shared Masters,البيانات الرئيسية المشتركة
 Shared Meter,عدّاد مشترك
 Sharing Note,ملاحظة المشاركة
 Shift,الوردية
+Shift Relocation,نقل المناوبة
 Short code used to prefix generated room numbers.,رمز مختصر يُستخدم كبادئة لأرقام الغرف المُنشأة.
 Show AFMCO brand mark and wordmark in the portal header.,إظهار علامة وشعار AFMCO النصي في رأس البوابة.
 Show Brand,إظهار العلامة التجارية
@@ -3300,6 +3316,7 @@ Tracking,التتبع
 "Tracks remediation actions imposed by a client audit. Each action has owner, deadline, evidence.",يتتبّع إجراءات المعالجة المفروضة من تدقيق العميل. لكل إجراء مسؤول وموعد نهائي وإثبات.
 Tracks room setup progress. 'Draft' simply means rooms have not been set up yet — it advances automatically as you plan and generate rooms.,يتتبّع تقدّم إعداد الغرف. تعني حالة «مسودة» ببساطة أنّ الغرف لم تُجهّز بعد، وتتقدّم تلقائيًّا أثناء تخطيط الغرف وتوليدها.
 Tracks safety setup progress. 'Draft' simply means safety setup has not been generated yet — use 'Generate Safety Setup' to advance it.,يتتبّع تقدّم إعداد السلامة. تعني حالة «مسودة» ببساطة أنّ إعداد السلامة لم يُولّد بعد، استخدم «توليد إعداد السلامة» لتقدّمه.
+Training,تدريب
 Transactions,المعاملات
 Transfer,نقل
 Transfer Board,لوحة النقل
@@ -3315,13 +3332,16 @@ Transfers responsibility of one or more Facility Assets to a supervisor.,ينق�
 Transport,النقل
 Transport Fulfilment SLA,اتفاقية مستوى خدمة تنفيذ النقل
 Transport Process,عملية النقل
+Transport Purpose,غرض النقل
 Transport Request,طلب نقل
 Transport Request Ad Hoc Passenger,راكب عارض لطلب النقل
 Transport Request Worker,عامل طلب النقل
+Transport Request {0} does not exist.,طلب النقل {0} غير موجود.
 Transport Requests by Service Line,طلبات النقل حسب خط الخدمة
 Transport SLA Breaches Open,مخالفات اتفاقية مستوى خدمة النقل المفتوحة
 Transport Type,نوع النقل
 Transport request submitted successfully.,تم تقديم طلب التنقل بنجاح.
+Transport requests the supervisor has assigned onto this trip. The trip manifest is the union of these requests' workers (plus any Route Plan request).,طلبات النقل التي أسندها المشرف إلى هذه الرحلة. كشف الرحلة هو اتحاد عمال هذه الطلبات (إضافة إلى أي طلب في خطة المسار).
 Trends,الاتجاهات
 Triage Notes,ملاحظات الفرز
 Triaged,تم الفرز
@@ -3566,6 +3586,7 @@ Worker Wait Request (Seconds),طلب انتظار العامل (ثوانٍ)
 Worker Wait Request Max,الحد الأقصى لطلب انتظار العامل
 "Worker accommodation blanket. Consumable bedding item, routinely purchased per site.",بطانية سكن العمال. صنف مفروشات استهلاكي يُشترى دورياً لكل موقع.
 Worker accommodation pillow. Consumable bedding item.,وسادة سكن العمال. صنف مفروشات استهلاكي.
+Worker count fetched from the assigned request; feeds the trip capacity guard.,عدد العمال المجلوب من الطلب المُسند؛ يغذّي ضابط سعة الرحلة.
 Worker set: {0},تم تعيين العامل: {0}
 Worker signature,توقيع العامل
 Worker towel. Consumable sanitary item.,منشفة عامل. صنف صحي استهلاكي.
@@ -3591,9 +3612,11 @@ Wrong Trip,رحلة خاطئة
 "YYYY-MM, e.g. 2026-05",YYYY-MM، مثال: 2026-05
 Year,السنة
 Yes,نعم
+You are not permitted to assign transport requests.,لا تملك صلاحية إسناد طلبات النقل.
 You can't check out at or before your check-in time. Try again in a moment.,لا يمكنك تسجيل المغادرة في وقت تسجيل الحضور أو قبله. حاول مرة أخرى بعد قليل.
 You cannot approve or pay a Payment Request you raised; a different Finance approver is required.,لا يمكنك الموافقة أو الدفع لطلب دفع أنشأته؛ يجب أن يوافق عليه معتمد مالي مختلف.
 You cannot {0} a fuel request you raised yourself (segregation of duties).,لا يمكنك {0} طلب وقود أنشأته بنفسك (الفصل بين المهام).
+You do not have write permission on this Dispatch Trip.,لا تملك صلاحية الكتابة على رحلة التسيير هذه.
 You don't have any building assigned. Ask an administrator to grant you a building.,لا يوجد لديك أي مبنى مُسند. اطلب من المسؤول منحك مبنى.
 You don't have permission to view this building.,ليس لديك صلاحية لعرض هذا المبنى.
 You have a trip assigned for tomorrow,لديك رحلة مجدولة غدًا
@@ -3669,6 +3692,7 @@ workshop status,حالة الورشة
 {0} free,{0} متاح
 {0} free of {1} beds,{0} متاح من أصل {1} سرير
 {0} is not a valid readiness status.,{0} ليست حالة جاهزية صالحة.
+{0} is too long.,{0} طويل جداً.
 {0} material(s) loaded from template {1},حُمِّلت {0} مادّة من القالب {1}
 {0} moved to {1},تم نقل {0} إلى {1}
 {0} new,{0} جديد

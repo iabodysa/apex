@@ -26,6 +26,7 @@ from apex_habitat.apex_core.doctype.masar_worker_token.masar_worker_token import
     _worker_link,
     masar_qr_data_uri,
 )
+from apex_habitat.habitat import permissions
 
 PARTY_EMPLOYEE = "Employee"
 PARTY_TEMPORARY_WORKER = "Temporary Worker"
@@ -170,7 +171,20 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     txt = (txt or "").strip()
     results = []
 
-    # [#jibprz]
+    # [#wave-b2] get_all forces ignore_permissions, so the building row-scoping the
+    # Accommodation Assignment / Temporary Worker lists get via
+    # permission_query_conditions is bypassed here. Re-apply it report-side so a
+    # building-scoped supervisor sees only their estates' workers; the oversight roles
+    # in HOUSING_UNSCOPED_ROLES stay unrestricted. A scoped user with no allowed
+    # building gets nothing.
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    if restrict and not allowed:
+        return []
+
+    # [#jibprz] The housed-exclusion set stays UNSCOPED: a worker housed in ANY
+    # building must be excluded from the arrival-candidate lists (a worker already
+    # housed elsewhere is not an arrival here). Scoping it would wrongly resurface
+    # other-estate housed workers as available candidates.
     housed = frappe.get_all(
         "Accommodation Assignment",
         filters={"docstatus": 1, "check_out_date": ["is", "not set"]},
@@ -202,9 +216,15 @@ def search_arrivals_workers(building=None, txt=None) -> list:
         ]
 
     if frappe.has_permission("Temporary Worker", "read"):
+        # [#wave-b2] Temporary Worker carries its own `building`; confine a scoped
+        # supervisor's candidate list to their estates (Employee has no building
+        # field — its other-estate housed rows are already removed by housed_emp).
+        tw_filters = {"status": "Active"}
+        if restrict:
+            tw_filters["building"] = ["in", allowed]
         tws = frappe.get_all(
             "Temporary Worker",
-            filters={"status": "Active"},
+            filters=tw_filters,
             or_filters=(
                 [
                     ["worker_name", "like", f"%{txt}%"],

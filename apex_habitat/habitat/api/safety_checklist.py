@@ -106,6 +106,12 @@ def get_tasks_for_cadence(building, cadence):
         frappe.throw(_("A cadence is required to build the checklist."))
     if not building:
         frappe.throw(_("A building is required to build the checklist."))
+    # [#wave-b2] The catalog + Safety Round bulk reads below run on get_all/db.exists
+    # (ignore_permissions forced), so the building row-scoping the desk gets via
+    # permission_query_conditions is bypassed. Gate on read of THIS building so a
+    # scoped supervisor cannot build a checklist for an estate outside their scope;
+    # oversight roles pass through unrestricted.
+    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
 
     return {
         "building": building,
@@ -260,6 +266,11 @@ def get_due_cadences(building):
 
     if not building:
         frappe.throw(_("A building is required to compute due cadences."))
+    # [#wave-b2] Same scope gate as get_tasks_for_cadence: the per-cadence Safety Round
+    # due-checks + catalog reads below run ignore_permissions, so gate on read of THIS
+    # building to keep a scoped supervisor from probing an out-of-scope estate's
+    # due-rounds. Oversight roles pass through unrestricted.
+    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
 
     due = []
     for cadence in _CADENCE_ORDER:

@@ -27,6 +27,27 @@ class VehicleIncident(Document):
         # An estimated repair/loss cost cannot be negative.
         if flt(self.estimated_cost) < 0:
             frappe.throw(_("Estimated cost cannot be negative."))
+        self._guard_public_intake()
+
+    def _guard_public_intake(self):
+        # The Vehicle Incident web form is an intended anonymous (Guest) intake:
+        # it creates a docstatus-0 draft a supervisor reviews and submits. This
+        # guard hardens THAT path against a guest setting privileged disposition
+        # fields directly (the form omits them, but a raw POST to the stock
+        # accept() endpoint could carry extra keys) and bounds free-text spam.
+        # Runs on every insert, so it backstops every entry point.
+        if self.is_new() and frappe.session.user == "Guest":
+            # A guest may only open an incident, never pre-judge its disposition.
+            self.status = "Open"
+            for field in ("write_off_case", "previous_vehicle_status", "previous_driver"):
+                self.set(field, None)
+
+        # Bound the attacker-controllable free-text fields (defense-in-depth;
+        # applies to every author so the cap is uniform).
+        for field, limit in (("description", 4000), ("location", 280), ("report_number", 140), ("reported_by", 140)):
+            value = self.get(field)
+            if value and len(value) > limit:
+                frappe.throw(_("{0} is too long.").format(_(self.meta.get_label(field))))
 
     def on_submit(self):
         # [#2gzgc9]

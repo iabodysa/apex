@@ -177,12 +177,27 @@ def on_update(doc, method=None):
         ).insert(ignore_permissions=True)  # audit-ok — system permission sync, gated by building write
 
 
-def before_save(doc, method=None):
-    _guard_abbreviation_lock(doc)
-    if not doc.company:
-        from apex_habitat.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
-        doc.company = get_default_company()
+# Own fields whose change should retrigger the cost/occupancy rollup. The external
+# counts (occupancy/rooms/floors/cctv/capacity) have their own writers (the assignment
+# controller, weekly_occupancy_sync, and the room/bed generator), so editing the
+# building need only refresh when one of these inputs actually changed.
+_ROLLUP_TRIGGER_FIELDS = (
+    "annual_rent_sar",
+    "annual_electricity_sar",
+    "annual_water_sar",
+    "annual_cleaning_staff_sar",
+    "annual_supervision_sar",
+    "annual_other_expenses_sar",
+    "total_capacity",
+    "landlord",
+)
 
+
+def _recompute_capacity_and_cost(doc):
+    """Capacity + cost-per-capacity recompute. total_capacity is read-only and
+    system-derived from the live bed count, so every save must re-derive it (a bed
+    going Out-of-Service is an external change the building's own field-diff can't
+    see). Cheap: one count() + arithmetic — safe to run on every save."""
     apply_active_lease(doc)
 
     # [#c25afp]
@@ -206,6 +221,12 @@ def before_save(doc, method=None):
         doc.annual_cost_per_capacity_sar = 0
         doc.monthly_cost_per_capacity_sar = 0
 
+
+def _recompute_occupancy_and_structure(doc):
+    """Occupancy / room / floor / cctv recompute — several count() queries that don't
+    change unless an external writer (the assignment controller, the room/bed
+    generator, weekly_occupancy_sync) touched the related rows. Guarded behind the
+    trigger-field check so it doesn't run on every no-op building save."""
     doc.current_occupants = frappe.db.count(
         "Accommodation Assignment",
         {"building": doc.name, "docstatus": 1, "check_out_date": ["is", "not set"]},
@@ -229,6 +250,23 @@ def before_save(doc, method=None):
             "status": ["not in", ("Replaced", "Scrapped")],
         },
     )
+
+
+def before_save(doc, method=None):
+    _guard_abbreviation_lock(doc)
+    if not doc.company:
+        from apex_habitat.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
+        doc.company = get_default_company()
+
+    # total_capacity is the read-only physical-bed invariant — always re-derive it (and
+    # the cost ratios it drives) on every save; a bed going Out-of-Service won't show in
+    # the building's field-diff.
+    _recompute_capacity_and_cost(doc)
+
+    # The heavier occupancy/room/floor/cctv counts only change via their own external
+    # writers, so refresh them only on insert or when a relevant input field changed.
+    if doc.is_new() or any(doc.has_value_changed(f) for f in _ROLLUP_TRIGGER_FIELDS):
+        _recompute_occupancy_and_structure(doc)
 
     # [#c9s718]
     if doc.floor_plan and doc.setup_status == "Draft":

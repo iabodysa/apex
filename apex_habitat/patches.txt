@@ -179,3 +179,11 @@ apex_habitat.patches.v1_x.seed_demo_role_logins
 # release notes. Touches only the changelog-seen value; preserves other apps' entries.
 # Idempotent; no-op on fresh installs / re-run.
 apex_habitat.patches.v1_x.stamp_changelog_seen_version
+
+# v1.x — reconcile Custody Issue.issued_to_user to valid User names (ONE-TIME). The
+# field changed from a free Data field to Link -> User; runs AFTER model sync so the
+# Link constraint exists. Keeps already-valid User names, remaps an email match to its
+# User name, blanks truly unresolvable values (an invalid Link value would block later
+# saves). Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site
+# has run it (tracked in tabPatch Log).
+apex_habitat.patches.v1_x.map_custody_issue_user_to_link
