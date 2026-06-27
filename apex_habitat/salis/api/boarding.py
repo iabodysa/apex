@@ -158,6 +158,11 @@ def _get_or_create_log(dispatch_trip: str) -> "frappe.model.document.Document":
         }
     )
     log.insert(ignore_permissions=True)  # audit-ok: trip authorised in _resolve_trip
+    # The trip has now started: seed the per-worker boarding state from the
+    # manifest so the boarding/departure flow has its rows from the first scan.
+    from apex_habitat.salis.api.boarding_flow import ensure_trip_boarding_state
+
+    ensure_trip_boarding_state(dispatch_trip)
     return log
 
 
@@ -269,12 +274,21 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
         )
         return {"result": "Expired", "scan_log": log_name}
 
-    # [#bsl-manifest] The worker must still be on the trip's manifest.
+    # [#bsl-manifest] The worker must still be on the trip's manifest. When they
+    # are not, try to resolve their REAL trip today and return a structured
+    # WRONG_BUS correction (correct trip + that driver's phone, for the worker to
+    # find the right bus); fall back to the plain Wrong Trip result otherwise. The
+    # scan attempt is recorded either way.
     if worker not in _trip_manifest_workers(trip.get("transport_request")):
         log_name = _log_scan(
             dispatch_trip, trip, worker, "Wrong Trip", pass_token,
             notes="Worker is not on this trip's manifest.",
         )
+        from apex_habitat.salis.api.boarding_flow import build_wrong_bus_result
+
+        correction = build_wrong_bus_result(dispatch_trip, worker)
+        if correction:
+            return {"result": "Wrong Trip", "scan_log": log_name, **correction}
         return {"result": "Wrong Trip", "scan_log": log_name}
 
     # [#bsl-race] Serialize concurrent valid scans of the SAME trip: lock the
@@ -315,6 +329,10 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
         trip_start_log=log.name, boarding_created=1,
         accommodation_building=accommodation_building,
     )
+    # Reflect the boarding into the trip's flow state (Pending -> Boarded).
+    from apex_habitat.salis.api.boarding_flow import mark_boarded
+
+    mark_boarded(dispatch_trip, worker)
     return {
         "result": "Valid",
         "scan_log": scan_log,

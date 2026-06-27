@@ -24,6 +24,8 @@
   "odometer_end",
   "dispatch_trip_sec_completion",
   "completion_notes",
+  "dispatch_trip_sec_boarding",
+  "boarding_state",
   "dispatch_trip_sec_system",
   "driver_user",
   "naming_series",
@@ -144,6 +146,21 @@
    "label": "Completion Notes"
   },
   {
+   "collapsible": 1,
+   "fieldname": "dispatch_trip_sec_boarding",
+   "fieldtype": "Section Break",
+   "label": "Boarding State"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Per-manifest-worker boarding/departure state, populated from the manifest when the trip starts (first scan/self-confirm). System-maintained by the boarding flow.",
+   "fieldname": "boarding_state",
+   "fieldtype": "Table",
+   "label": "Boarding State",
+   "options": "Trip Boarding State",
+   "read_only": 1
+  },
+  {
    "fieldname": "dispatch_trip_sec_system",
    "fieldtype": "Section Break",
    "label": "System",
@@ -197,7 +214,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-06-26 12:00:00.000000",
+ "modified": "2026-06-27 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

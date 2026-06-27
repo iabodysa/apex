@@ -127,32 +127,19 @@
         <!-- No planned route yet: an explicit state so the trip card is never a bare/inert card. -->
         <div v-else-if="!myPickup(trip) && !destination(trip)" class="text-sm text-muted">{{ t("transport.noRoutePlanned") }}</div>
 
-        <!-- Boarding pass: the worker shows this signed QR to the driver to board.
-             The same signed token the driver scanner validates; rendered only for
-             the soonest upcoming trip (the one being boarded next). -->
-        <div v-if="trip === upcoming[0]">
-          <button
-            v-if="!showPass"
-            class="btn btn-outline"
-            style="width: auto; padding-inline: 18px"
-            @click="openPass"
-          >
-            <Icon name="card" :size="18" /> {{ t("boarding.show") }}
-          </button>
-          <div v-else>
-            <div v-if="boardingPass.loading" class="pass-loading">
-              <div class="spinner mx-auto"></div>
-            </div>
-            <BoardingPass v-else-if="passData" :pass="passData" :trip="trip" />
-            <p v-else-if="boardingPass.error" class="text-sm text-danger">{{ t("boarding.failed") }}</p>
-            <p v-else class="text-sm text-muted">{{ t("boarding.none") }}</p>
-          </div>
-        </div>
+        <!-- Live boarding flow for the soonest upcoming trip (the one being boarded
+             next): on-the-bus claim, departing countdown, wait request, rejection
+             re-claim, wrong-bus correction, and the full-screen boarding pass. -->
+        <BoardingFlow
+          v-if="trip === upcoming[0]"
+          :trip="trip"
+          :boarding="boardingState"
+          @refresh="boardingResource.reload()"
+        />
 
-        <!-- [T-323] "I'm at the pickup": one-tap worker boarding self-confirm. The
-             server resolves the worker from the token and writes the boarding
-             event onto this trip — the button is a UI affordance, not the gate. -->
-        <div>
+        <!-- [T-323] "I'm at the pickup": simple self-confirm for the OTHER upcoming
+             trips (the active boarding flow above owns the soonest one). -->
+        <div v-else>
           <button
             v-if="!confirmedTrips[trip.transport_request]"
             class="btn btn-primary"
@@ -212,26 +199,35 @@
       </router-link>
     </template>
 
-    <div v-else class="card card-pad text-center space-y-3">
-      <div>
-        <p class="text-sm text-muted">{{ t("transport.empty") }}</p>
-        <p class="text-xs text-muted mt-1">{{ t("transport.emptyHint") }}</p>
+    <div v-else class="space-y-3">
+      <!-- Wrong-bus correction can arrive even with no upcoming trip (the worker
+           scanned a vehicle that isn't theirs) — surface it before the empty copy. -->
+      <BoardingFlow
+        v-if="boardingState && boardingState.wrong_bus"
+        :trip="null"
+        :boarding="boardingState"
+      />
+      <div class="card card-pad text-center space-y-3">
+        <div>
+          <p class="text-sm text-muted">{{ t("transport.empty") }}</p>
+          <p class="text-xs text-muted mt-1">{{ t("transport.emptyHint") }}</p>
+        </div>
+        <!-- Even with no trip, the worker can request one. -->
+        <router-link to="/request-transport" class="btn btn-primary" style="text-decoration: none">
+          <Icon name="route" :size="18" class="rtl-flip" /> {{ t("transport.requestNew") }}
+        </router-link>
       </div>
-      <!-- Even with no trip, the worker can request one. -->
-      <router-link to="/request-transport" class="btn btn-primary" style="text-decoration: none">
-        <Icon name="route" :size="18" class="rtl-flip" /> {{ t("transport.requestNew") }}
-      </router-link>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, watch, onUnmounted } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import PullIndicator from "../components/PullIndicator.vue";
-import BoardingPass from "../components/BoardingPass.vue";
+import BoardingFlow from "../components/BoardingFlow.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
 import { formatTime, formatDateTime } from "../datetime";
 import { TOKEN } from "../token";
@@ -294,17 +290,49 @@ function destination(trip) {
   return last === myPickup(trip) ? null : last;
 }
 
-// Boarding pass: fetched on demand (one signed token for the soonest trip).
-const showPass = ref(false);
-const boardingPass = createResource({
-  url: "apex_habitat.salis.api.masar.get_worker_boarding_pass",
+// Live boarding state for the soonest trip (the server's worker_trip_boarding
+// state machine). Drives the boarding flow component. Polled adaptively: fast
+// (poll_seconds, ~10s) while a boarding window is active, off otherwise — the
+// app-shell's slow ~45s poll already refreshes the trip list for idle workers.
+const boardingResource = createResource({
+  url: "apex_habitat.salis.api.boarding_flow.worker_trip_boarding",
   params: { token: TOKEN },
+  auto: true,
 });
-const passData = computed(() => boardingPass.data?.pass || null);
-function openPass() {
-  showPass.value = true;
-  boardingPass.fetch();
+const boardingState = computed(() => boardingResource.data || null);
+
+// An "active boarding window" = a trip exists and isn't a terminal state. While
+// active, poll every poll_seconds; revert to no fast-poll when idle/Boarded.
+const boardingActive = computed(() => {
+  const b = boardingState.value;
+  return !!(b && b.dispatch_trip && !["Boarded", "Absent"].includes(b.status));
+});
+const pollSeconds = computed(() => boardingState.value?.poll_seconds || 10);
+
+let boardingTimer = null;
+function stopBoardingPoll() {
+  if (boardingTimer) {
+    clearInterval(boardingTimer);
+    boardingTimer = null;
+  }
 }
+function startBoardingPoll(seconds) {
+  stopBoardingPoll();
+  boardingTimer = setInterval(() => {
+    if (!document.hidden) boardingResource.reload();
+  }, seconds * 1000);
+}
+// Arm/disarm the fast poll as the window opens/closes; re-arm if the cadence
+// changes. The hidden-tab guard in the tick keeps a backgrounded tab quiet.
+watch(
+  [boardingActive, pollSeconds],
+  ([active, secs]) => {
+    if (active) startBoardingPoll(secs);
+    else stopBoardingPoll();
+  },
+  { immediate: true },
+);
+onUnmounted(stopBoardingPoll);
 
 // [T-323] worker boarding self-confirm. The server resolves the worker from the
 // token and writes the boarding event; this UI just records which trips the
@@ -342,10 +370,5 @@ function confirmBoarding(trip) {
   font-weight: 600;
   background: var(--c-warning-bg, #fef3c7);
   color: var(--c-warning, #92400e);
-}
-.pass-loading {
-  display: flex;
-  justify-content: center;
-  padding: 24px;
 }
 </style>

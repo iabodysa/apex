@@ -91,6 +91,16 @@
         </span>
         <template v-else-if="trip.started">
           <span class="pill pill-warning"><Icon name="route" :size="14" /> {{ t("trips.started") }}</span>
+          <!-- Boarding manifest: track who's aboard, confirm worker claims, notify
+               remaining, then depart. Available once started (boarding state exists). -->
+          <button
+            v-if="trip.expected_count"
+            class="btn btn-primary"
+            style="width: auto; padding-inline: 16px"
+            @click="openManifest(trip)"
+          >
+            <Icon name="user" :size="16" /> {{ t("manifest.open") }}
+          </button>
           <!-- Boarding scanner is available once the trip is started (a manifest exists). -->
           <button
             v-if="trip.expected_count"
@@ -123,6 +133,8 @@
     <BoardingScanner v-if="scanTrip" @close="scanTrip = null" @boarded="onBoarded" />
     <!-- Manual-boarding fallback sheet, scoped to the tapped trip. -->
     <ManualBoarding v-if="manualTrip" :trip="manualTrip.name" @close="manualTrip = null" @boarded="onBoarded" />
+    <!-- Boarding manifest / depart panel, scoped to the tapped started trip. -->
+    <BoardingManifest v-if="manifestTrip" :trip="manifestTrip.name" @close="manifestTrip = null" @finalized="onFinalized" />
   </div>
 </template>
 
@@ -135,6 +147,7 @@ import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import BoardingScanner from "../components/BoardingScanner.vue";
 import ManualBoarding from "../components/ManualBoarding.vue";
+import BoardingManifest from "../components/BoardingManifest.vue";
 import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
 import { connectDriverRealtime } from "../realtime.js";
@@ -154,8 +167,19 @@ const manualTrip = ref(null);
 function openManual(trip) {
   manualTrip.value = trip;
 }
+// The trip whose boarding manifest / depart panel is open (null = closed).
+const manifestTrip = ref(null);
+function openManifest(trip) {
+  manifestTrip.value = trip;
+}
 function onBoarded() {
   today.reload();
+}
+// Depart finalized the trip: refresh the card (its boarded/absent counts) and
+// close the panel so the summary doesn't linger.
+function onFinalized() {
+  today.reload();
+  manifestTrip.value = null;
 }
 
 const today = createResource({

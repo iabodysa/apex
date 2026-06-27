@@ -24,7 +24,12 @@ function cfg() {
 // dev server (different port from the socket port) target the socket port.
 function host(site, port) {
   const origin = window.location.origin;
-  if (window.dev_server) {
+  // window.dev_server is a Desk-only global and is NOT set on a www portal page,
+  // so read the injected flag first (server sets it from developer_mode). In dev
+  // (no nginx) we must target host:socketio_port; in prod nginx proxies the origin.
+  const c = (typeof window !== "undefined" && window.safety_socket) || {};
+  const dev = c.dev_server || window.dev_server;
+  if (dev) {
     const parts = origin.split(":");
     const base = parts.length > 2 ? parts[0] + ":" + parts[1] : origin;
     return base + ":" + port + "/" + site;

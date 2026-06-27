@@ -1,5 +1,7 @@
 <!-- Renders a scannable QR for `value` as crisp SVG (no canvas blur at any size).
-     Used for the worker's boarding pass; the encoder is dependency-free (qrcode.js). -->
+     Used for the worker's boarding pass; the encoder is dependency-free (qrcode.js).
+     Colors follow the active theme (via qrColor.js) but are contrast-clamped so the
+     code always stays scannable — verified by a round-trip jsQR decode test. -->
 <template>
   <svg
     v-if="matrix"
@@ -9,16 +11,17 @@
     role="img"
     :aria-label="label"
     shape-rendering="crispEdges"
-    style="display: block; background: #fff; border-radius: 8px"
+    :style="{ display: 'block', background: colors.light, borderRadius: '8px' }"
   >
-    <rect :width="dim" :height="dim" fill="#fff" />
-    <path :d="path" fill="#000" />
+    <rect :width="dim" :height="dim" :fill="colors.light" />
+    <path :d="path" :fill="colors.dark" />
   </svg>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref, onMounted, onUnmounted } from "vue";
 import { encodeQr } from "../qrcode";
+import { qrColors } from "../qrColor";
 
 const props = defineProps({
   value: { type: String, required: true },
@@ -26,6 +29,38 @@ const props = defineProps({
   // Quiet zone in modules (the spec requires 4 for reliable scanning).
   quiet: { type: Number, default: 4 },
   label: { type: String, default: "QR code" },
+  // When true, recolor the dark modules + light bg to the active theme (clamped
+  // for scannability). When false, plain black-on-white (the safe default).
+  themed: { type: Boolean, default: false },
+  // CSS custom-property names to read the theme's dark/light source colors from.
+  darkVar: { type: String, default: "--c-ink" },
+  lightVar: { type: String, default: "--c-surface" },
+});
+
+// Re-resolve the theme colors when the theme attribute or language (RTL) flips.
+// A MutationObserver on <html data-theme/dir> is the honest trigger: themes are
+// applied by a server-set attribute, not a Vue ref this component owns.
+const themeTick = ref(0);
+let observer = null;
+onMounted(() => {
+  if (typeof MutationObserver === "undefined") return;
+  observer = new MutationObserver(() => themeTick.value++);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme", "class"],
+  });
+});
+onUnmounted(() => observer && observer.disconnect());
+
+// Resolve {dark, light} from the active theme's computed CSS vars, contrast-clamped.
+// Non-themed (or SSR/no-DOM) renders fall back to plain black-on-white.
+const colors = computed(() => {
+  themeTick.value; // dependency: recompute when the theme attribute mutates
+  if (!props.themed || typeof window === "undefined") return { dark: "#000000", light: "#ffffff" };
+  const cs = getComputedStyle(document.documentElement);
+  const inkColor = cs.getPropertyValue(props.darkVar).trim();
+  const surfaceColor = cs.getPropertyValue(props.lightVar).trim();
+  return qrColors(inkColor, surfaceColor);
 });
 
 // Encode once per value; a malformed/oversized payload yields null (the parent

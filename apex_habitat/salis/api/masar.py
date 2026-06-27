@@ -1536,6 +1536,11 @@ def _get_or_create_trip_log(dispatch_trip):
         }
     )
     log.insert(ignore_permissions=True)  # audit-ok — trip resolved from token's own manifest
+    # The trip has now started: seed the per-worker boarding state from the
+    # manifest so the boarding/departure flow has its rows from the first confirm.
+    from apex_habitat.salis.api.boarding_flow import ensure_trip_boarding_state
+
+    ensure_trip_boarding_state(dispatch_trip)
     return log
 
 
@@ -1602,6 +1607,10 @@ def confirm_boarding(token=None, transport_request=None):
         },
     )
     log.save(ignore_permissions=True)  # audit-ok — worker + trip resolved from token server-side
+    # Reflect the self-confirm into the trip's flow state (Pending -> Boarded).
+    from apex_habitat.salis.api.boarding_flow import mark_boarded
+
+    mark_boarded(dispatch_trip, employee)
     return {
         "created": True,
         "dispatch_trip": dispatch_trip,

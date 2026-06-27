@@ -23,6 +23,15 @@
   "alert_aging_critical_hours",
   "salis_settings_sec_portal",
   "enable_driver_portal",
+  "salis_settings_sec_boarding_flow",
+  "boarding_notify_max_count",
+  "boarding_notify_window_seconds",
+  "boarding_grace_minutes",
+  "boarding_auto_confirm_minutes",
+  "salis_settings_boarding_flow_col",
+  "worker_wait_request_max",
+  "worker_wait_request_seconds",
+  "boarding_active_poll_seconds",
   "salis_settings_sec_web_push",
   "enable_web_push",
   "web_push_vapid_subject",
@@ -156,6 +165,64 @@
    "fieldname": "enable_driver_portal",
    "fieldtype": "Check",
    "label": "Enable Driver Portal"
+  },
+  {
+   "fieldname": "salis_settings_sec_boarding_flow",
+   "fieldtype": "Section Break",
+   "label": "Boarding and Departure Flow"
+  },
+  {
+   "default": "3",
+   "description": "Maximum 'remaining passengers' notifications the driver may send a worker before that worker can be marked Absent at departure. A blank or zero value falls back to the built-in default.",
+   "fieldname": "boarding_notify_max_count",
+   "fieldtype": "Int",
+   "label": "Boarding Notify Max Count"
+  },
+  {
+   "default": "60",
+   "description": "Seconds the worker has to respond after each driver notification (drives the client countdown). A blank or zero value falls back to the built-in default.",
+   "fieldname": "boarding_notify_window_seconds",
+   "fieldtype": "Int",
+   "label": "Boarding Notify Window (Seconds)"
+  },
+  {
+   "default": "3",
+   "description": "Grace period (minutes) from trip start before notify escalation and absence marking apply. A blank or zero value falls back to the built-in default.",
+   "fieldname": "boarding_grace_minutes",
+   "fieldtype": "Int",
+   "label": "Boarding Grace (Minutes)"
+  },
+  {
+   "default": "15",
+   "description": "Minutes after a worker self-claims boarding before it is auto-confirmed (Boarded) when the driver neither confirms nor rejects. A blank or zero value falls back to the built-in default.",
+   "fieldname": "boarding_auto_confirm_minutes",
+   "fieldtype": "Int",
+   "label": "Boarding Auto-Confirm (Minutes)"
+  },
+  {
+   "fieldname": "salis_settings_boarding_flow_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "3",
+   "description": "Maximum 'please wait' requests a worker may send the driver per trip. A blank or zero value falls back to the built-in default.",
+   "fieldname": "worker_wait_request_max",
+   "fieldtype": "Int",
+   "label": "Worker Wait Request Max"
+  },
+  {
+   "default": "60",
+   "description": "Seconds a worker's 'please wait' request is held active (drives the client countdown). A blank or zero value falls back to the built-in default.",
+   "fieldname": "worker_wait_request_seconds",
+   "fieldtype": "Int",
+   "label": "Worker Wait Request (Seconds)"
+  },
+  {
+   "default": "10",
+   "description": "How often (seconds) the worker portal polls its boarding state during an active trip. A blank or zero value falls back to the built-in default.",
+   "fieldname": "boarding_active_poll_seconds",
+   "fieldtype": "Int",
+   "label": "Boarding Active Poll (Seconds)"
   },
   {
    "depends_on": "enable_driver_portal",
@@ -294,7 +361,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-27 10:00:00.000000",
+ "modified": "2026-06-27 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

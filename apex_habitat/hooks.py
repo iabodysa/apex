@@ -190,6 +190,13 @@ scheduler_events = {
         # [#payd2f]
         "apex_habitat.salis.rental_engine.monthly_rental_reconciliation",
     ],
+    # Boarding two-sided confirmation: auto-confirm timed-out worker claims even
+    # when no read path fires; the timeout itself is read at runtime from settings.
+    "cron": {
+        "*/5 * * * *": [
+            "apex_habitat.salis.api.boarding_flow.auto_confirm_claimed_boardings",
+        ],
+    },
 }
 
 # [#ow8j67]

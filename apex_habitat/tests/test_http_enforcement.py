@@ -37,7 +37,23 @@ WRITE_CALLS = {
 }
 
 # [#tnlcz2]
-SAFE_ALLOWLIST = []
+SAFE_ALLOWLIST = [
+    (
+        "salis/api/boarding_flow.py",
+        "get_trip_boarding",
+        "Driver panel READ. The only write is a read-time _apply_auto_confirm save "
+        "that realises an already-elapsed worker-claim timeout (a system timeout, "
+        "not a client-driven write); it bumps no notify quota and publishes nothing. "
+        "Safe under GET.",
+    ),
+    (
+        "salis/api/boarding_flow.py",
+        "worker_trip_boarding",
+        "Worker boarding poll READ. The only write is the same read-time "
+        "_apply_auto_confirm save (system timeout realisation); the endpoint returns "
+        "the worker's own state and writes no client-driven data. Safe under GET.",
+    ),
+]
 
 
 # [#68gsyt]
@@ -205,6 +221,63 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "requires access to `self` to call it, the raised request is inserted "
         "WITH permissions (no ignore_permissions), and it is gated on "
         "self.docstatus==1 / status=='Approved'. Not a free-floating writer.",
+    ),
+    (
+        "salis/api/boarding_flow.py",
+        "get_trip_boarding",
+        "Driver panel read. The caller is authorised on the trip by "
+        "_resolve_trip_for_driver (boarding._resolve_trip: own trip for a driver, "
+        "any for Salis staff, raises PermissionError otherwise) before any access; "
+        "the only write is a read-time system-timeout auto-confirm. "
+        "Trip-scope-resolved.",
+    ),
+    (
+        "salis/api/boarding_flow.py",
+        "notify_remaining_passengers",
+        "Driver action. The caller is authorised on the trip by "
+        "_resolve_trip_for_driver (own trip for a driver, any for Salis staff, "
+        "raises PermissionError otherwise) before the write; only the trip's own "
+        "Pending rows are nudged. Trip-scope-resolved writer.",
+    ),
+    (
+        "salis/api/boarding_flow.py",
+        "worker_request_wait",
+        "Masar guest endpoint. allow_guest; the worker is resolved server-side from "
+        "the Masar token (_resolve_worker, never client-supplied) and only their own "
+        "row on their own today's trip is written; explicit rate_limit. A Guest has "
+        "no role to permission-check.",
+    ),
+    (
+        "salis/api/boarding_flow.py",
+        "worker_claim_boarded",
+        "Masar guest endpoint. allow_guest; the worker is resolved server-side from "
+        "the Masar token (_resolve_worker) and only their own boarding-state row on "
+        "their own today's trip is written; explicit rate_limit. A Guest has no role "
+        "to permission-check.",
+    ),
+    (
+        "salis/api/boarding_flow.py",
+        "driver_confirm_boarding",
+        "Driver action. The caller is authorised on the trip by "
+        "_resolve_trip_for_driver (own trip for a driver, any for Salis staff, "
+        "raises PermissionError otherwise) before the confirm/reject write. "
+        "Trip-scope-resolved writer.",
+    ),
+    (
+        "salis/api/boarding_flow.py",
+        "worker_trip_boarding",
+        "Masar guest poll. allow_guest; the worker is resolved server-side from the "
+        "Masar token (_resolve_worker) and returns only their own state; the lone "
+        "write is a read-time system-timeout auto-confirm. A Guest has no role to "
+        "permission-check.",
+    ),
+    (
+        "salis/api/boarding_flow.py",
+        "depart_and_finalize",
+        "Driver action. The caller is authorised on the trip by "
+        "_resolve_trip_for_driver (own trip for a driver, any for Salis staff, "
+        "raises PermissionError otherwise) before the finalize write. "
+        "Trip-scope-resolved writer.",
     ),
 ]
 

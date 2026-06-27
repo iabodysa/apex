@@ -54,7 +54,7 @@
     <div class="bpass-stub">
       <p class="bpass-hint">{{ t("boarding.hint") }}</p>
       <div class="bpass-qr">
-        <QrCode :value="pass.qr_payload" :size="200" :label="t('boarding.title')" />
+        <QrCode :value="pass.qr_payload" :size="200" :label="t('boarding.title')" themed />
       </div>
       <span class="bpass-validity">
         <Icon name="clock" :size="13" />
@@ -292,9 +292,10 @@ const pickupPoint = computed(() => {
   margin: 0;
 }
 .bpass-qr {
-  /* Always a clean white frame around the QR — the code itself stays white-bg +
-     4-module quiet zone (QrCode.vue) so it scans on any theme, including dark. */
-  background: #fff;
+  /* Frame follows the theme surface; the QR itself carries its own contrast-clamped
+     light bg + 4-module quiet zone (QrCode.vue), so the code stays scannable on any
+     theme (verified by a round-trip jsQR decode) while matching the ticket. */
+  background: var(--c-surface);
   padding: 10px;
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg, 0 2px 10px rgba(0, 0, 0, 0.12));

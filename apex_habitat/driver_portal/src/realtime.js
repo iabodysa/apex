@@ -10,6 +10,16 @@ import { io } from "socket.io-client";
 const EVENT = "driver_trip_update";
 const ROOM_DOCTYPE = "Dispatch Trip";
 
+// Boarding-flow events on the same Dispatch Trip room (salis.api.boarding_flow):
+// the manifest panel listens for these so a worker's claim / wait / boarding
+// change repaints without a manual refresh. Each payload carries dispatch_trip.
+const BOARDING_EVENTS = [
+  "boarding_update",
+  "wait_request",
+  "boarding_claim",
+  "boarding_rejected",
+];
+
 // Socket config is injected by www/driver.py via a <script> in driver.html.
 function cfg() {
   const c = (typeof window !== "undefined" && window.driver_socket) || {};
@@ -24,7 +34,12 @@ function cfg() {
 // dev server (different port from the socket port) target the socket port.
 function host(site, port) {
   const origin = window.location.origin;
-  if (window.dev_server) {
+  // window.dev_server is a Desk-only global and is NOT set on a www portal page,
+  // so read the injected flag first (server sets it from developer_mode). In dev
+  // (no nginx) we must target host:socketio_port; in prod nginx proxies the origin.
+  const c = (typeof window !== "undefined" && window.driver_socket) || {};
+  const dev = c.dev_server || window.dev_server;
+  if (dev) {
     const parts = origin.split(":");
     const base = parts.length > 2 ? parts[0] + ":" + parts[1] : origin;
     return base + ":" + port + "/" + site;
@@ -33,9 +48,11 @@ function host(site, port) {
 }
 
 // Start the realtime subscription. `onUpdate` runs on each received
-// driver_trip_update. Returns a teardown function; safe to call even if the
-// socket never started.
-export function connectDriverRealtime(onUpdate) {
+// driver_trip_update. Optional `onBoarding(event, payload)` runs on each
+// boarding-flow event (boarding_update / wait_request / boarding_claim /
+// boarding_rejected) on the same room. Returns a teardown function; safe to call
+// even if the socket never started.
+export function connectDriverRealtime(onUpdate, onBoarding) {
   const { site, port, enabled } = cfg();
   if (!enabled || !site) return () => {};
 
@@ -68,6 +85,18 @@ export function connectDriverRealtime(onUpdate) {
       /* never let a handler error bubble into the socket layer */
     }
   });
+  // Boarding-flow listeners (only attached when a handler is supplied).
+  if (onBoarding) {
+    for (const ev of BOARDING_EVENTS) {
+      socket.on(ev, (payload) => {
+        try {
+          onBoarding(ev, payload || {});
+        } catch (e) {
+          /* never let a handler error bubble into the socket layer */
+        }
+      });
+    }
+  }
   socket.on("connect_error", () => {
     /* swallow: the manual fetch is the fallback path */
   });
@@ -76,6 +105,7 @@ export function connectDriverRealtime(onUpdate) {
     try {
       socket.emit("doctype_unsubscribe", ROOM_DOCTYPE);
       socket.off(EVENT);
+      for (const ev of BOARDING_EVENTS) socket.off(ev);
       socket.disconnect();
     } catch (e) {
       /* already gone */
