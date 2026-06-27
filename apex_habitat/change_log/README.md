@@ -5,6 +5,7 @@ to that series' consolidated note (newest patch first inside).
 
 ## Latest
 
+- [1.60.4](v1/v1_60_4.md)
 **[1.60.3](v1/v1_60_3.md)** · Feature — Your driver and safety screens now update themselves, and the worker boarding pass shows just the trip a worker needs.
 
 ## All releases
