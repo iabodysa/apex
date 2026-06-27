@@ -775,7 +775,7 @@ class FleetControl {
 		$('<div class="fc-queue-msg"></div>').text(a.message || __(a.alert_type || "")).appendTo($main);
 		// Meta line: plate · type · age · status · owner, dot-separated (RTL-safe).
 		const $meta = $('<div class="fc-queue-meta fc-sep-dot"></div>').appendTo($main);
-		if (a.plate_number) $('<span></span>').html(_bdi(a.plate_number)).appendTo($meta);
+		if (a.vehicle_plate) $('<span></span>').html(_bdi(a.vehicle_plate)).appendTo($meta);
 		$('<span></span>').text(__(a.alert_type || "")).appendTo($meta);
 		if (a.raised_on)
 			$('<span></span>').text(frappe.datetime.comment_when(a.raised_on)).appendTo($meta);

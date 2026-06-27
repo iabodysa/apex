@@ -36,6 +36,7 @@ from __future__ import annotations
 import frappe
 from frappe.utils import today
 
+from apex_habitat.salis.api.enrich import vehicle_driver_titles
 from apex_habitat.salis.permissions import _allowed_projects, _is_unscoped
 
 # [#1f7jod]
@@ -238,7 +239,7 @@ def _trips_today_pane(unscoped, projects) -> dict:
         limit_page_length=0,
     )
 
-    _decorate_vehicle_driver_titles(rows)
+    vehicle_driver_titles(rows)  # bulk plate + driver-name enrichment (canonical vehicle_plate key)
     for r in rows:
         r["depart_time"] = str(r["depart_time"]) if r.get("depart_time") else None
         r["return_time"] = str(r["return_time"]) if r.get("return_time") else None
@@ -357,36 +358,3 @@ def _transport_requests_pane(unscoped, projects) -> dict:
         )
 
     return {"open": rows, "open_count": len(rows)}
-
-
-def _decorate_vehicle_driver_titles(rows) -> None:
-    """Attach ``vehicle_plate`` and ``driver_name`` to trip rows in bulk.
-
-    Resolves the display titles for every distinct vehicle and driver referenced
-    by ``rows`` in two bounded queries, then maps them back onto each row. Falls
-    back to the docname when a title is missing.
-    """
-    vehicle_names = list({r.vehicle for r in rows if r.get("vehicle")})
-    driver_names = list({r.driver for r in rows if r.get("driver")})
-
-    plate_by_vehicle: dict = {}
-    if vehicle_names:
-        for v in frappe.get_all(
-            "Salis Vehicle",
-            filters={"name": ["in", vehicle_names]},
-            fields=["name", "plate_number"],
-        ):
-            plate_by_vehicle[v.name] = v.get("plate_number")
-
-    name_by_driver: dict = {}
-    if driver_names:
-        for d in frappe.get_all(
-            "Salis Driver",
-            filters={"name": ["in", driver_names]},
-            fields=["name", "full_name"],
-        ):
-            name_by_driver[d.name] = d.get("full_name")
-
-    for r in rows:
-        r["vehicle_plate"] = plate_by_vehicle.get(r.get("vehicle")) or r.get("vehicle")
-        r["driver_name"] = name_by_driver.get(r.get("driver")) or r.get("driver")

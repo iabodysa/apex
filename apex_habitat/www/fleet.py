@@ -19,6 +19,8 @@ import frappe
 from frappe.sessions import get_csrf_token
 from frappe.utils import cint
 
+from apex_habitat.apex_core.utils.portal_bootstrap import guest_redirect
+
 # [#i6khen]
 FLEET_ROLES = {
     "System Manager",
@@ -30,9 +32,7 @@ FLEET_ROLES = {
 
 def get_context(context):
     # [#nyktq0]
-    if frappe.session.user == "Guest":
-        frappe.local.flags.redirect_location = "/login?redirect-to=/fleet"
-        raise frappe.Redirect
+    guest_redirect("/fleet")
 
     context.no_cache = 1
     # [#4h1dwk]

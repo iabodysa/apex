@@ -563,8 +563,8 @@ const sevLabel = (s) => t("alerts.sev" + (s || "Warning"));
 // A row links to its vehicle's drawer if the plate is on the board; otherwise to
 // the Operations Alert record in Desk.
 function alertVehicleOnBoard(a) {
-  if (!a.plate_number) return null;
-  return vehicles.value.find((x) => x.plate === a.plate_number) || null;
+  if (!a.vehicle_plate) return null;
+  return vehicles.value.find((x) => x.plate === a.vehicle_plate) || null;
 }
 function openAlertTarget(a) {
   const v = alertVehicleOnBoard(a);
@@ -1467,7 +1467,7 @@ function expiryFlag(v) {
           </div>
           <div class="ad-msg">{{ a.message }}</div>
           <div class="ad-meta">
-            <span v-if="a.plate_number"><bdi>{{ a.plate_number }}</bdi></span>
+            <span v-if="a.vehicle_plate"><bdi>{{ a.vehicle_plate }}</bdi></span>
             <span v-if="a.driver_name">· {{ a.driver_name }}</span>
             <span class="ad-link">{{ alertVehicleOnBoard(a) ? t("alerts.viewVehicle") : t("alerts.openInDesk") }}</span>
           </div>

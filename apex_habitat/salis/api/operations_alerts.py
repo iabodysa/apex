@@ -24,6 +24,7 @@ from frappe.desk.form import assign_to
 from frappe.utils import add_to_date, get_datetime, now_datetime
 
 from apex_habitat.salis.api.dispatch_board import _permitted_projects
+from apex_habitat.salis.api.enrich import vehicle_driver_titles
 from apex_habitat.salis.tasks import ALERT_DOCTYPE, _resolve_alert, _settings_int
 
 OPEN_STATUSES = ["Open", "Acknowledged"]
@@ -117,24 +118,10 @@ def get_open_alerts(project=None, severity=None, since=None):
         limit_page_length=0,
     )
 
-    veh_ids = list({a.vehicle for a in alerts if a.get("vehicle")})
-    plates_map = {}
-    if veh_ids:
-        plates_map = {
-            v.name: v.plate_number
-            for v in frappe.get_all(
-                "Salis Vehicle", filters={"name": ["in", veh_ids]}, fields=["name", "plate_number"]
-            )
-        }
-    drv_ids = list({a.driver for a in alerts if a.get("driver")})
-    drv_map = {}
-    if drv_ids:
-        drv_map = {
-            d.name: d.full_name
-            for d in frappe.get_all(
-                "Salis Driver", filters={"name": ["in", drv_ids]}, fields=["name", "full_name"]
-            )
-        }
+    # Bulk plate + driver-name enrichment (shared helper). Canonical key fix: the
+    # alert rows used to expose the plate as ``plate_number``; they now carry the
+    # ``vehicle_plate`` key every other Salis reader uses.
+    vehicle_driver_titles(alerts)
 
     # Parse native _assign (a JSON list of users) once per row into an assignees list.
     for a in alerts:
@@ -150,8 +137,6 @@ def get_open_alerts(project=None, severity=None, since=None):
 
     summary = {"total": len(alerts), "by_severity": {s: 0 for s in SEVERITIES}, "mine": 0, "unowned": 0}
     for a in alerts:
-        a["plate_number"] = plates_map.get(a.get("vehicle"))
-        a["driver_name"] = drv_map.get(a.get("driver"))
         a["assignee_names"] = [name_map.get(u, u) for u in a["assignees"]]
         a["snooze_until"] = str(a["snooze_until"]) if a.get("snooze_until") else None
         if a.severity in summary["by_severity"]:

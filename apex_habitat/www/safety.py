@@ -20,8 +20,9 @@ because the page renders per-user, live data.
 import frappe
 from frappe.sessions import get_csrf_token
 
-from apex_habitat.salis.doctype.salis_portal_theme.salis_portal_theme import (
-    get_portal_appearance,
+from apex_habitat.apex_core.utils.portal_bootstrap import (
+    apply_portal_appearance,
+    guest_redirect,
 )
 
 # Roles allowed to run safety rounds from the portal. Matches the submit-capable
@@ -35,20 +36,13 @@ SAFETY_ROLES = {
 
 
 def get_context(context):
-    if frappe.session.user == "Guest":
-        frappe.local.flags.redirect_location = "/login?redirect-to=/safety"
-        raise frappe.Redirect
+    guest_redirect("/safety")
 
     context.no_cache = 1
     context.has_safety_role = bool(SAFETY_ROLES & set(frappe.get_roles()))
     if context.has_safety_role:
         context.csrf_token = get_csrf_token()
-        # Appearance (theme + optional brand overrides) from the Salis Portal
-        # Theme — same projection as www/driver.py so /safety re-skins with the
-        # other portals. Only set for the authorised view.
-        appearance = get_portal_appearance()
-        context.portal_theme = appearance["theme"]
-        context.portal_accent = appearance["accent"]
-        context.portal_logo = appearance["logo"]
-        context.portal_show_brand = appearance["show_brand"]
+        # Appearance only for the authorised view (same projection as the other
+        # portals so /safety re-skins with them).
+        apply_portal_appearance(context)
     return context

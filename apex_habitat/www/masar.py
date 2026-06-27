@@ -23,9 +23,7 @@ import frappe
 from frappe.sessions import get_csrf_token
 from frappe.utils import escape_html
 
-from apex_habitat.salis.doctype.salis_portal_theme.salis_portal_theme import (
-	get_portal_appearance,
-)
+from apex_habitat.apex_core.utils.portal_bootstrap import apply_portal_appearance
 
 # [#wtk5x9] The personal token is minted by frappe.generate_hash (hex) — see
 # apex_core/doctype/masar_worker_token. Accept only the url-safe charset that a
@@ -55,12 +53,8 @@ def get_context(context):
 	raw_token = frappe.form_dict.get("w") or ""
 	context.masar_token = escape_html(raw_token) if _TOKEN_RE.match(raw_token) else ""
 
-	appearance = get_portal_appearance()
-	context.portal_theme = appearance["theme"]
 	# [#9tqm2e] accent/logo come from the (now validate()-guarded) Salis Portal
 	# Theme. They are emitted JS-safe via tojson (script) / colour-validated at the
 	# source (the <style> accent); not pre-escaped here to avoid double-encoding.
-	context.portal_accent = appearance["accent"]
-	context.portal_logo = appearance["logo"]
-	context.portal_show_brand = appearance["show_brand"]
+	apply_portal_appearance(context)
 	return context

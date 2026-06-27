@@ -43,6 +43,7 @@ from frappe import _
 from frappe.model.workflow import apply_workflow, get_transitions
 from frappe.utils import date_diff, flt, today
 
+from apex_habitat.salis.api.enrich import vehicle_driver_titles
 from apex_habitat.salis.permissions import _allowed_projects, _is_unscoped
 
 
@@ -182,27 +183,8 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
     if not rows:
         return []
 
-    # [#ooth66]
-    vehicle_names = list({r.vehicle for r in rows if r.vehicle})
-    driver_names = list({r.driver for r in rows if r.driver})
-
-    plate_by_vehicle: dict = {}
-    if vehicle_names:
-        for v in frappe.get_all(
-            "Salis Vehicle",
-            filters={"name": ["in", vehicle_names]},
-            fields=["name", "plate_number"],
-        ):
-            plate_by_vehicle[v.name] = v.get("plate_number")
-
-    name_by_driver: dict = {}
-    if driver_names:
-        for d in frappe.get_all(
-            "Salis Driver",
-            filters={"name": ["in", driver_names]},
-            fields=["name", "full_name"],
-        ):
-            name_by_driver[d.name] = d.get("full_name")
+    # [#ooth66] bulk plate + driver-name enrichment (shared helper; canonical vehicle_plate key)
+    vehicle_driver_titles(rows)
 
     threshold = _approval_threshold()
 
@@ -214,9 +196,9 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
             {
                 "name": r.name,
                 "vehicle": r.vehicle,
-                "vehicle_plate": plate_by_vehicle.get(r.vehicle) or r.vehicle,
+                "vehicle_plate": r.get("vehicle_plate"),
                 "driver": r.driver,
-                "driver_name": name_by_driver.get(r.driver) or r.driver,
+                "driver_name": r.get("driver_name"),
                 "project": r.project,
                 "fuel_platform": r.fuel_platform,
                 "fuel_quota": r.fuel_quota,

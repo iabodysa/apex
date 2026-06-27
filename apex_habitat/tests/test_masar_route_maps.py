@@ -10,7 +10,7 @@ destination, and the intermediate waypoints are capped at nine.
 
 from frappe.tests.utils import FrappeTestCase
 
-from apex_habitat.salis.api import masar
+from apex_habitat.salis.api import driver_portal, maps_links, masar
 
 
 def _stop(building_name=None, city=None, google_maps_url=None, location=None):
@@ -59,3 +59,30 @@ class TestMasarRouteMaps(FrappeTestCase):
         url = masar._full_route_maps_url(stops)
         self.assertEqual(url.count("|"), 8)  # 9 waypoints => 8 separators
         self.assertTrue(url.endswith("destination=S11&waypoints=" + "|".join(f"S{i}" for i in range(9))))
+
+    def test_driver_and_worker_build_identical_url(self):
+        # Both call sites must yield the SAME deep-link for the same ordered stops:
+        # masar/maps_links chain a resolved list; driver_portal resolves a plan via
+        # masar._ordered_stops first, then delegates to the same chainer.
+        stops = [
+            _stop(google_maps_url="https://maps.google.com/?q=24.1,46.1"),
+            _stop(building_name="Mid", city="Riyadh"),
+            _stop(location="Site"),
+        ]
+        original = masar._ordered_stops
+        masar._ordered_stops = lambda _plan: stops
+        try:
+            driver_url = driver_portal._full_route_maps_url("ANY-PLAN")
+        finally:
+            masar._ordered_stops = original
+        worker_url = masar._full_route_maps_url(stops)
+        shared_url = maps_links._full_route_maps_url(stops)
+        self.assertEqual(driver_url, worker_url)
+        self.assertEqual(worker_url, shared_url)
+        self.assertTrue(driver_url.startswith("https://www.google.com/maps/dir/?api=1&destination=Site"))
+
+    def test_shared_module_is_single_source(self):
+        # The dedup invariant: both modules expose the one shared builder, not copies.
+        self.assertIs(masar._stop_waypoint, maps_links._stop_waypoint)
+        self.assertIs(driver_portal._stop_waypoint, maps_links._stop_waypoint)
+        self.assertIs(masar._full_route_maps_url, maps_links._full_route_maps_url)
