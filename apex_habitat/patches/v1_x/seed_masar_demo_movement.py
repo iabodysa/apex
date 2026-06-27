@@ -3,17 +3,21 @@ not empty for a first look.
 
 A fresh site has no Dispatch Trips, Transport Requests, or Masar tokens, so both
 the driver portal (My Trips and My Route) and the Masar worker app render empty
-even for a correctly set-up user. This builds ONE complete, generic worker-shuttle
-scenario for today:
+even for a correctly set-up user. This builds ONE complete, coherent, generic
+worker-shuttle scenario in a SINGLE city (Riyadh):
 
   demo driver (User + Employee + Salis Driver)  ->  drives
-  Dispatch Trip (today)  ->  Route Plan (housing-pickup stop linked to a building)
-  ->  Transport Request (Site Transport, worker manifest)
-  with two demo worker Employees, one carrying a Masar Worker Token.
+  Dispatch Trip (today)  ->  Route Plan (housing-pickup stops linked to buildings
+  carrying REAL Riyadh coordinates)  ->  Transport Request (Site Transport, worker
+  manifest, future pickup so it reads as the worker's upcoming trip)
+  with two demo worker Employees; the first is HOUSED (submitted Accommodation
+  Assignment -> a real bed in building A) and carries a Masar Worker Token.
 
 After it runs: the demo driver's portal shows a trip under My Trips and a worker
-route under My Route, and the demo worker's ``/masar?w=<token>`` link shows an
-upcoming trip, accommodation, and contacts.
+route under My Route; the demo worker's ``/masar?w=<token>`` shows an UPCOMING
+trip (future pickup), their ACCOMMODATION (housed in building A), and contacts;
+and the one-tap maps link chains the three buildings' real Riyadh coordinates in
+order — no junk cross-city route.
 
 Idempotent and install-safe: every record is get-or-created by a stable demo key,
 so a re-run (or a second migrate) adds nothing; it is guarded behind the DocTypes
@@ -30,8 +34,26 @@ _WORKER_ONE = "Demo Worker One"
 _WORKER_TWO = "Demo Worker Two"
 _PROJECT = "Demo Transport Project"
 _SITE = "Demo Housing Site"
-_BUILDING = "Demo Residence A"
+_CITY = "Riyadh"
 _ROUTE = "Demo Morning Shuttle"
+
+# Three demo residences with DISTINCT real Riyadh coordinates, so the chained
+# route has genuine in-city waypoints in order (lat,lng -> a Google Maps `q=` URL
+# the maps-link builder reads back as exact coordinates). Building A is the one
+# the demo worker is housed in.
+_BUILDINGS = (
+    {"name": "Demo Residence A", "lat": "24.7136", "lng": "46.6753", "district": "Al Olaya"},
+    {"name": "Demo Residence B", "lat": "24.6877", "lng": "46.7219", "district": "Al Malaz"},
+    {"name": "Demo Residence C", "lat": "24.7743", "lng": "46.7386", "district": "Al Murabba"},
+)
+_BUILDING = _BUILDINGS[0]["name"]  # the worker's home building
+
+
+def _maps_url(lat, lng):
+    """A clean Google Maps place URL carrying exact coordinates the waypoint
+    builder reads back verbatim (``q=<lat>,<lng>``)."""
+    return f"https://www.google.com/maps?q={lat},{lng}"
+
 
 # Required DocTypes — if any is missing the scenario cannot be built; skip cleanly.
 _REQUIRED = (
@@ -41,6 +63,9 @@ _REQUIRED = (
     "Dispatch Trip",
     "Masar Worker Token",
     "Accommodation Building",
+    "Accommodation Room",
+    "Accommodation Bed",
+    "Accommodation Assignment",
 )
 
 
@@ -68,30 +93,117 @@ def _project(company):
     )
 
 
+def _city():
+    return _get_or_create(
+        "City",
+        {"city_name": _CITY},
+        lambda: frappe.get_doc({"doctype": "City", "city_name": _CITY}).insert(
+            ignore_permissions=True  # audit-ok
+        ),
+    )
+
+
 def _site(company):
+    city = _city()
     return _get_or_create(
         "Accommodation Site",
         {"site_name": _SITE},
         lambda: frappe.get_doc(
-            {"doctype": "Accommodation Site", "site_name": _SITE, "company": company}
-        ).insert(ignore_permissions=True),  # audit-ok
-    )
-
-
-def _building(company):
-    return _get_or_create(
-        "Accommodation Building",
-        {"building_name": _BUILDING},
-        lambda: frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
-                "building_name": _BUILDING,
-                "site": _site(company),
-                "total_capacity": 40,
-                "google_maps_url": "https://maps.example/demo-residence-a",
+                "doctype": "Accommodation Site",
+                "site_name": _SITE,
+                "company": company,
+                "city": city,
             }
         ).insert(ignore_permissions=True),  # audit-ok
     )
+
+
+def _building(spec, company, site):
+    city = _city()
+    return _get_or_create(
+        "Accommodation Building",
+        {"building_name": spec["name"]},
+        lambda: frappe.get_doc(
+            {
+                "doctype": "Accommodation Building",
+                "building_name": spec["name"],
+                "site": site,
+                "city": city,
+                "district": spec["district"],
+                "total_capacity": 40,
+                "google_maps_url": _maps_url(spec["lat"], spec["lng"]),
+            }
+        ).insert(ignore_permissions=True),  # audit-ok
+    )
+
+
+def _room(building):
+    """One ready demo room in ``building`` to hold the worker's bed."""
+    room_number = f"{_BUILDING} R-101"
+    return _get_or_create(
+        "Accommodation Room",
+        {"room_number": room_number},
+        lambda: frappe.get_doc(
+            {
+                "doctype": "Accommodation Room",
+                "building": building,
+                "room_number": room_number,
+                "floor": 1,
+                "room_type": "Worker",
+                "bed_capacity": 4,
+                "status": "Available",
+                "readiness_status": "Ready",
+            }
+        ).insert(ignore_permissions=True),  # audit-ok
+    )
+
+
+def _bed(room):
+    bed_code = f"{_BUILDING} B-1"
+    return _get_or_create(
+        "Accommodation Bed",
+        {"bed_code": bed_code},
+        lambda: frappe.get_doc(
+            {
+                "doctype": "Accommodation Bed",
+                "room": room,
+                "bed_code": bed_code,
+                "status": "Available",
+            }
+        ).insert(ignore_permissions=True),  # audit-ok
+    )
+
+
+def _assignment(employee, building, room, bed, project):
+    """House the demo worker in building A (submitted, open stay) so the Masar
+    accommodation card populates. Keyed on the worker's open assignment so a re-run
+    never opens a second one."""
+    existing = frappe.db.get_value(
+        "Accommodation Assignment",
+        {"employee": employee, "docstatus": 1, "check_out_date": ["is", "not set"]},
+        "name",
+    )
+    if existing:
+        return existing
+    doc = frappe.get_doc(
+        {
+            "doctype": "Accommodation Assignment",
+            "party_type": "Employee",
+            "party": employee,
+            "employee": employee,
+            "building": building,
+            "room": room,
+            "bed": bed,
+            "project": project,
+            "assignment_type": "New Assignment",
+            "stay_type": "Permanent",
+            "check_in_date": frappe.utils.today(),
+        }
+    )
+    doc.insert(ignore_permissions=True)  # audit-ok
+    doc.submit()
+    return doc.name
 
 
 def _employee(first_name, company, user_id=None):
@@ -146,15 +258,19 @@ def _driver(company):
     )
 
 
+def _pickup_datetime():
+    """Tomorrow 06:30 — a FUTURE pickup, so the worker's Masar Home and Transport
+    both read this as the upcoming trip no matter what time of day the demo is
+    opened (the upcoming/past split pivots on pickup vs now)."""
+    return f"{frappe.utils.add_days(frappe.utils.today(), 1)} 06:30:00"
+
+
 def _transport_request(company, project, building, driver, workers):
     name = frappe.db.get_value(
         "Transport Request", {"accommodation_building": building, "project": project}, "name"
     )
     if name:
         return name
-    # Pickup at today 06:30 + the driver assigned so the worker's Masar transport
-    # card shows a real time and a callable driver contact, not a bare row.
-    pickup = f"{frappe.utils.today()} 06:30:00"
     return (
         frappe.get_doc(
             {
@@ -165,7 +281,7 @@ def _transport_request(company, project, building, driver, workers):
                 "accommodation_building": building,
                 "from_location": building,
                 "to_location": "Project Site",
-                "pickup_datetime": pickup,
+                "pickup_datetime": _pickup_datetime(),
                 "assigned_driver": driver,
                 "source_channel": "Desk",
                 "status": "New",
@@ -177,10 +293,32 @@ def _transport_request(company, project, building, driver, workers):
     )
 
 
-def _route_plan(project, driver, building, transport_request, workers):
+def _route_plan(project, driver, buildings, transport_request, workers):
+    """The morning shuttle: a housing-pickup stop at each demo residence (each
+    carrying real Riyadh coordinates) in order, then the project drop-off. The
+    chained stops are what give the maps link real, in-order, in-city waypoints."""
     name = frappe.db.get_value("Route Plan", {"route_name": _ROUTE}, "name")
     if name:
         return name
+    stops = []
+    for i, b in enumerate(buildings, start=1):
+        stops.append(
+            {
+                "sequence": i,
+                "stop_name": f"Housing Pickup {i}",
+                "accommodation_building": b,
+                "location": "Building Gate",
+                "passengers": len(workers) if i == 1 else 0,
+            }
+        )
+    stops.append(
+        {
+            "sequence": len(buildings) + 1,
+            "stop_name": "Project Drop-off",
+            "location": "Project Site",
+            "passengers": 0,
+        }
+    )
     return (
         frappe.get_doc(
             {
@@ -189,21 +327,7 @@ def _route_plan(project, driver, building, transport_request, workers):
                 "transport_request": transport_request,
                 "project": project,
                 "driver": driver,
-                "stops": [
-                    {
-                        "sequence": 1,
-                        "stop_name": "Housing Pickup",
-                        "accommodation_building": building,
-                        "location": "Building Gate",
-                        "passengers": len(workers),
-                    },
-                    {
-                        "sequence": 2,
-                        "stop_name": "Project Drop-off",
-                        "location": "Project Site",
-                        "passengers": 0,
-                    },
-                ],
+                "stops": stops,
             }
         )
         .insert(ignore_permissions=True)  # audit-ok
@@ -212,7 +336,8 @@ def _route_plan(project, driver, building, transport_request, workers):
 
 
 def _dispatch_trip(driver, route_plan, transport_request):
-    # Keyed on the demo route plan so a re-run never opens a second trip.
+    # Keyed on the demo route plan so a re-run never opens a second trip. trip_date
+    # is today so the driver portal (which shows today's trips) is not empty.
     name = frappe.db.get_value("Dispatch Trip", {"route_plan": route_plan}, "name")
     if name:
         return name
@@ -231,6 +356,17 @@ def _dispatch_trip(driver, route_plan, transport_request):
         .insert(ignore_permissions=True)  # audit-ok
         .name
     )
+
+
+def _link_transport_request(transport_request, route_plan, dispatch_trip):
+    """Back-link the route plan + trip onto the request so the worker's Transport
+    screen can resolve the ordered stops (it reads ``route_plan`` off the request)
+    and a depart time. db_set so a re-run is a cheap idempotent no-op."""
+    tr = frappe.get_doc("Transport Request", transport_request)
+    if tr.route_plan != route_plan:
+        tr.db_set("route_plan", route_plan)
+    if tr.dispatch_trip != dispatch_trip:
+        tr.db_set("dispatch_trip", dispatch_trip)
 
 
 def _worker_token(employee):
@@ -262,15 +398,32 @@ def execute():
             return
 
         project = _project(company)
-        building = _building(company)
+        site = _site(company)
+        buildings = [_building(spec, company, site) for spec in _BUILDINGS]
+        home_building = buildings[0]
         driver = _driver(company)
         w1 = _employee(_WORKER_ONE, company)
         w2 = _employee(_WORKER_TWO, company)
         workers = [w1, w2]
 
-        tr = _transport_request(company, project, building, driver, workers)
-        rp = _route_plan(project, driver, building, tr, workers)
-        _dispatch_trip(driver, rp, tr)
+        # House the first demo worker in building A so /masar's accommodation card
+        # populates. Isolated: a housing failure must not discard the trip/route.
+        try:
+            room = _room(home_building)
+            bed = _bed(room)
+            _assignment(w1, home_building, room, bed, project)
+            frappe.db.commit()
+        except Exception:
+            frappe.db.rollback()
+            frappe.log_error(
+                title="seed_masar_demo_movement: accommodation",
+                message=frappe.get_traceback(),
+            )
+
+        tr = _transport_request(company, project, home_building, driver, workers)
+        rp = _route_plan(project, driver, buildings, tr, workers)
+        dt = _dispatch_trip(driver, rp, tr)
+        _link_transport_request(tr, rp, dt)
         frappe.db.commit()
 
         # The worker token is the Masar-app half; isolate it so a token failure does

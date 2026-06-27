@@ -25,8 +25,28 @@ class TestMasarRouteMaps(FrappeTestCase):
         wp = masar._stop_waypoint(_stop(google_maps_url="https://maps.google.com/?q=24.7136,46.6753"))
         self.assertEqual(wp, "24.7136,46.6753")
 
-    def test_waypoint_at_coords(self):
+    def test_waypoint_ignores_at_viewport_center(self):
+        # A bare `@lat,lng` is the map-center (viewport), NOT the place — it must
+        # not be grabbed; with nothing else navigable the stop resolves to None.
         wp = masar._stop_waypoint(_stop(google_maps_url="https://www.google.com/maps/@24.7,46.6,17z"))
+        self.assertIsNone(wp)
+
+    def test_waypoint_prefers_place_over_viewport_and_origin(self):
+        # A complex share URL with a `/dir/<origin>` leg and an `@` viewport AND a
+        # real place query must resolve to the PLACE (q=), not the decoy coords.
+        url = "https://www.google.com/maps/dir/24.0,46.0/@24.5,46.5,12z/data=!4m2?q=24.7136,46.6753"
+        wp = masar._stop_waypoint(_stop(google_maps_url=url))
+        self.assertEqual(wp, "24.7136,46.6753")
+
+    def test_waypoint_reads_place_embed_3d4d(self):
+        url = "https://www.google.com/maps/place/X/@24.5,46.5,17z/data=!3d24.7136!4d46.6753"
+        wp = masar._stop_waypoint(_stop(google_maps_url=url))
+        self.assertEqual(wp, "24.7136,46.6753")
+
+    def test_waypoint_clean_coord_url_unchanged(self):
+        # A clean coordinate URL (no @ viewport / no /dir leg) still resolves the
+        # bare lat,lng — behavior identical to before for simple links.
+        wp = masar._stop_waypoint(_stop(google_maps_url="https://maps.app/loc/24.7,46.6"))
         self.assertEqual(wp, "24.7,46.6")
 
     def test_waypoint_falls_back_to_building_city(self):
