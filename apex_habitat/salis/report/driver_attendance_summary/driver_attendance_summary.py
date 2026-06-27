@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.salis import permissions
+
 
 def execute(filters=None):
     columns = [
@@ -21,6 +23,24 @@ def execute(filters=None):
             attendance_filters["attendance_date"] = [">=", filters["from_date"]]
         elif filters.get("to_date"):
             attendance_filters["attendance_date"] = ["<=", filters["to_date"]]
+
+    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
+    # list gets via permission_query_conditions. Driver Attendance has no own project —
+    # it reaches one through its driver — so confine the records to the drivers in the
+    # caller's allowed projects; oversight roles see all.
+    user = frappe.session.user
+    if not permissions._is_unscoped(user):
+        allowed = permissions._allowed_projects(user)
+        if not allowed:
+            return columns, []
+        in_scope_drivers = frappe.get_all(
+            "Salis Driver",
+            filters={"project": ["in", allowed]},
+            pluck="name",
+        )
+        if not in_scope_drivers:
+            return columns, []
+        attendance_filters["driver"] = ["in", in_scope_drivers]
 
     records = frappe.get_all(
         "Driver Attendance",

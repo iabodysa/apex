@@ -1070,6 +1070,7 @@ Estimated Accommodation Cost Bleed (SAR),التكلفة المقدّرة لهد�
 Estimated Cost (SAR),التكلفة التقديرية (ريال)
 Estimated Replacement Cost (SAR),تكلفة الاستبدال التقديرية (ريال)
 Estimated Unit Cost,التكلفة التقديرية للوحدة
+Estimated cost cannot be negative.,لا يمكن أن تكون التكلفة التقديرية سالبة.
 Estimated value,القيمة التقديرية
 Evening,مسائي
 Evidence,الأدلة

@@ -1,6 +1,6 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Custody Outstanding by Worker — what each worker currently holds in custody,
-derived from the read-only Accommodation Stock Ledger. [T-277]
+derived from the read-only Accommodation Stock Ledger.
 
 A worker-first specialization of Accommodation Stock Balance: only Custody Article
 rows with an employee set (i.e. in someone's custody, not building store) are
@@ -11,6 +11,8 @@ the net is the live outstanding holding. Value = balance * unit cost."""
 import frappe
 from frappe import _
 from frappe.utils import flt, today
+
+from apex_habitat.habitat import permissions
 
 
 def execute(filters=None):
@@ -42,6 +44,20 @@ def get_data(filters):
         conditions["employee"] = filters["employee"]
     if filters.get("building"):
         conditions["building"] = filters["building"]
+
+    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
+    # list gets via permission_query_conditions — re-apply the caller's building scope
+    # (Accommodation Stock Ledger carries a direct building); oversight roles see all.
+    user = frappe.session.user
+    if not permissions._building_is_unscoped(user):
+        allowed = permissions._allowed_buildings(user)
+        if not allowed:
+            return []
+        chosen = conditions.get("building")
+        if chosen and chosen not in allowed:
+            return []
+        if not chosen:
+            conditions["building"] = ["in", allowed]
 
     rows = frappe.get_all(
         "Accommodation Stock Ledger",

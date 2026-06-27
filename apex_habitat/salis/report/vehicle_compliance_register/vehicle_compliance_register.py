@@ -4,6 +4,8 @@
 import frappe
 from frappe.utils import getdate, today, date_diff
 
+from apex_habitat.salis import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -28,6 +30,24 @@ def execute(filters=None):
             row_filters["expiry_date"] = ["between", [filters["from_date"], filters["to_date"]]]
         else:
             row_filters["expiry_date"] = ["<=", filters["to_date"]]
+
+    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
+    # list gets via permission_query_conditions. These are child rows on Salis Vehicle,
+    # which carries the project — so confine the rows to the vehicles (the parent) in
+    # the caller's allowed projects; oversight roles see all.
+    user = frappe.session.user
+    if not permissions._is_unscoped(user):
+        allowed = permissions._allowed_projects(user)
+        if not allowed:
+            return columns, []
+        in_scope_vehicles = frappe.get_all(
+            "Salis Vehicle",
+            filters={"project": ["in", allowed]},
+            pluck="name",
+        )
+        if not in_scope_vehicles:
+            return columns, []
+        row_filters["parent"] = ["in", in_scope_vehicles]
 
     rows = frappe.get_all(
         "Salis Vehicle Compliance",

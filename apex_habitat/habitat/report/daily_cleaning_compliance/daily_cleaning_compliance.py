@@ -4,6 +4,8 @@
 import frappe
 from frappe.utils import getdate, today, add_days
 
+from apex_habitat.habitat import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -35,6 +37,20 @@ def execute(filters=None):
         query_filters["building"] = filters["building"]
     if filters.get("missed_only"):
         query_filters["missed_cleaning"] = 1
+
+    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
+    # list gets via permission_query_conditions — re-apply the caller's building scope
+    # (Cleaning Log carries a direct building); oversight roles see all.
+    user = frappe.session.user
+    if not permissions._building_is_unscoped(user):
+        allowed = permissions._allowed_buildings(user)
+        if not allowed:
+            return columns, []
+        chosen = query_filters.get("building")
+        if chosen and chosen not in allowed:
+            return columns, []
+        if not chosen:
+            query_filters["building"] = ["in", allowed]
 
     logs = frappe.get_all(
         "Cleaning Log",

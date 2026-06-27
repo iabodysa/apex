@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.salis import permissions
+
 
 def execute(filters=None):
     columns = [
@@ -20,6 +22,24 @@ def execute(filters=None):
             log_filters["log_date"] = [">=", filters["from_date"]]
         elif filters.get("to_date"):
             log_filters["log_date"] = ["<=", filters["to_date"]]
+
+    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
+    # list gets via permission_query_conditions. Fuel Daily Log has no own project —
+    # it reaches one through its vehicle — so confine the logs to the vehicles in the
+    # caller's allowed projects; oversight roles see all.
+    user = frappe.session.user
+    if not permissions._is_unscoped(user):
+        allowed = permissions._allowed_projects(user)
+        if not allowed:
+            return columns, []
+        in_scope_vehicles = frappe.get_all(
+            "Salis Vehicle",
+            filters={"project": ["in", allowed]},
+            pluck="name",
+        )
+        if not in_scope_vehicles:
+            return columns, []
+        log_filters["vehicle"] = ["in", in_scope_vehicles]
 
     logs = frappe.get_all(
         "Fuel Daily Log",

@@ -74,3 +74,15 @@ class TestVehicleDamageWriteOff(FrappeTestCase):
             frappe.db.get_value("Vehicle Incident", self.incident, "write_off_case"),
             "an unrelated incident must not be touched when no source_incident is set",
         )
+
+    def test_negative_estimated_cost_is_rejected(self):
+        # a negative estimated cost is never a valid write-off amount.
+        with self.assertRaises(frappe.ValidationError):
+            self._write_off(estimated_cost=-1)
+
+    def test_non_negative_estimated_cost_is_allowed(self):
+        # Non-vacuous: the guard rejects only negatives; zero and positive pass.
+        zero = self._write_off(estimated_cost=0)
+        self.assertTrue(zero.name)
+        positive = self._write_off(estimated_cost=500)
+        self.assertTrue(positive.name)

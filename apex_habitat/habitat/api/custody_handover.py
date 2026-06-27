@@ -67,32 +67,45 @@ def confirm_handover(handover: str, otp: str):
             frappe.PermissionError,
         )
 
-    if doc.status == "Confirmed":
+    # Serialize concurrent confirms on this handover: FOR UPDATE makes a second
+    # caller block until the first commits, so two correct codes post the receive
+    # leg only once and two wrong guesses can't both read the same attempt count
+    # and each write back 1 (bypassing the lockout). All status/OTP reads below
+    # are RE-READ under this lock, not the stale pre-lock snapshot.
+    locked = frappe.db.get_value(
+        VOUCHER_TYPE, doc.name,
+        ["status", "otp_attempts", "otp_locked_until", "otp_expires_at", "otp_hash"],
+        as_dict=True, for_update=True,
+    )
+
+    if locked.status == "Confirmed":
         return doc.name
 
     now = now_datetime()
-    if doc.otp_locked_until and now < doc.otp_locked_until:
+    if locked.otp_locked_until and now < locked.otp_locked_until:
         frappe.throw(_("Too many incorrect attempts. This handover is temporarily locked."))
 
     otp_required = _otp_required()
 
-    if otp_required and doc.otp_expires_at and now > doc.otp_expires_at:
+    if otp_required and locked.otp_expires_at and now > locked.otp_expires_at:
         frappe.throw(_("The one-time password has expired. Ask the procurement supervisor to regenerate it."))
 
-    if otp_required and doc.status != "Approved":
+    if otp_required and locked.status != "Approved":
         frappe.throw(_("Review and approve the handover before confirming receipt."))
 
     if not otp_required:
         # OTP switched off: approval alone authorises the receive leg.
-        if doc.status != "Approved":
+        if locked.status != "Approved":
             frappe.throw(_("Review and approve the handover before confirming receipt."))
         return _post_receive_and_confirm(doc)
 
-    if doc.otp_hash and hmac.compare_digest(hash_otp(otp or "", doc.name), doc.otp_hash):
+    if locked.otp_hash and hmac.compare_digest(hash_otp(otp or "", doc.name), locked.otp_hash):
         return _post_receive_and_confirm(doc)
 
-    # Mismatch: count the strike, lock on the third, and reveal nothing.
-    attempts = (doc.otp_attempts or 0) + 1
+    # Mismatch: count the strike, lock on the third, reveal nothing. The count is
+    # read fresh under the FOR UPDATE lock above, so concurrent wrong guesses
+    # increment serially and cannot all stamp the same value to skip the lockout.
+    attempts = (locked.otp_attempts or 0) + 1
     if attempts >= MAX_OTP_ATTEMPTS:
         doc.db_set({
             "otp_attempts": 0,
@@ -103,13 +116,35 @@ def confirm_handover(handover: str, otp: str):
     frappe.throw(_("Invalid code."))
 
 
+def _receive_leg_posted(doc) -> bool:
+    """True once this handover's receive leg exists: a live positive-qty ledger
+    row landing in to_building under this voucher. Distinguishes the receive leg
+    from the ship leg (negative, in from_building), which shares the voucher_no."""
+    return bool(frappe.db.exists(
+        "Accommodation Stock Ledger",
+        {
+            "voucher_type": VOUCHER_TYPE,
+            "voucher_no": doc.name,
+            "building": doc.to_building,
+            "qty": [">", 0],
+            "is_cancelled": 0,
+        },
+    ))
+
+
 def _post_receive_and_confirm(doc):
     """Post the receive leg into the destination store, mark the handover
     Confirmed, stamp the verification time, and clear the stored hash. Idempotent
-    on status — re-entry after Confirmed posts nothing further."""
+    on the receive leg — re-entry posts nothing further (belt-and-braces with the
+    FOR UPDATE lock + Confirmed-status short-circuit in confirm_handover)."""
     from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
         post_stock_entry,
     )
+    # has_stock_entries keys on voucher_no, which the SHIP leg already satisfies;
+    # the receive leg is the positive row landing in to_building, so guard on
+    # exactly that shape so a re-entry can't double-post the receipt.
+    if _receive_leg_posted(doc):
+        return doc.name
     now = now_datetime()
     for row in doc.items:
         post_stock_entry(

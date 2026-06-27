@@ -166,6 +166,10 @@ def building_scoped_has_permission(doc, ptype, user=None):
     Returns None to defer to Frappe's default resolution (unscoped users / in-scope
     docs — keeps DocPerms intact), or False to block. The Accommodation Building doc
     is scoped on its own name; the transactions are scoped on their `building` field.
+
+    Deny-only + ptype-agnostic: it never branches on ``ptype``, so an out-of-building
+    doc is blocked for every action including ``submit`` — a scoped user can neither
+    read nor submit another estate's record.
     """
     user = _resolve_user(user)
     if _building_is_unscoped(user):
@@ -180,3 +184,127 @@ def building_scoped_has_permission(doc, ptype, user=None):
         # [#1i4wio]
         return False
     return None if building in _allowed_buildings(user) else False
+
+
+# [#wave5-tenant] close the cross-tenant read/submit gap on the remaining
+# building-bearing Habitat DocTypes. Single-`building` members reuse the helpers above
+# (pqc -> _building_condition, form/submit -> building_scoped_has_permission). The
+# transfer/movement/handover members carry NO single `building` (only from_building +
+# to_building), so they get the dual-column variants below: a row is in scope when
+# EITHER endpoint is the user's estate, and a cross-building doc is denied for every
+# action including submit.
+
+# single-`building` query members (reuse _building_condition)
+def facility_asset_custody_assignment_query(user=None):
+    return _building_condition(user)
+
+
+def non_financial_depreciation_snapshot_query(user=None):
+    return _building_condition(user)
+
+
+def custody_return_query(user=None):
+    return _building_condition(user)
+
+
+def custody_damage_assessment_query(user=None):
+    return _building_condition(user)
+
+
+def facility_asset_movement_query(user=None):
+    # [#dual] movement has from_building + to_building, not `building`.
+    return _dual_building_condition(user)
+
+
+def custody_acknowledgment_query(user=None):
+    return _building_condition(user)
+
+
+def accommodation_custody_handover_query(user=None):
+    # [#dual] handover has from_building + to_building, not `building`.
+    return _dual_building_condition(user)
+
+
+def accommodation_material_transfer_query(user=None):
+    # [#dual] transfer has from_building + to_building, not `building`.
+    return _dual_building_condition(user)
+
+
+def facility_asset_query(user=None):
+    return _building_condition(user)
+
+
+def housing_inventory_query(user=None):
+    return _building_condition(user)
+
+
+def building_license_query(user=None):
+    return _building_condition(user)
+
+
+def maintenance_work_order_query(user=None):
+    return _building_condition(user)
+
+
+# more single-`building` query members (reuse _building_condition)
+def accommodation_occupancy_snapshot_query(user=None):
+    return _building_condition(user)
+
+
+def temporary_worker_query(user=None):
+    return _building_condition(user)
+
+
+def arrival_batch_query(user=None):
+    return _building_condition(user)
+
+
+def accommodation_room_query(user=None):
+    return _building_condition(user)
+
+
+def accommodation_bed_query(user=None):
+    return _building_condition(user)
+
+
+def _dual_building_condition(user=None):
+    """WHERE fragment scoping a from_building/to_building doc to the user's estate.
+
+    A single fragment (pqc hooks AND-join, so the OR must live inside one fragment):
+    matches a row when EITHER endpoint is one of the user's allowed buildings. "" for
+    unscoped users; "1=0" when the user is scoped but has no allowed buildings.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return ""
+    buildings = _allowed_buildings(user)
+    if not buildings:
+        return "1=0"
+    escaped = ", ".join(frappe.db.escape(b) for b in buildings)
+    return "(`from_building` in ({values}) or `to_building` in ({values}))".format(
+        values=escaped
+    )
+
+
+def dual_building_scoped_has_permission(doc, ptype, user=None):
+    """Deny a scoped user acting on a from/to_building doc outside their estate.
+
+    Mirrors ``_dual_building_condition`` for the form view / REST / submit. Returns
+    None to defer (unscoped users / in-scope docs — DocPerms intact), or False to
+    block. In scope when EITHER endpoint is the user's building; a cross-building doc
+    (neither endpoint in scope) is denied for every action including submit.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return None
+
+    allowed = _allowed_buildings(user)
+    endpoints = [
+        getattr(doc, "from_building", None),
+        getattr(doc, "to_building", None),
+    ]
+    endpoints = [b for b in endpoints if b]
+    if not endpoints:
+        # [#1i4wio] a scoped user can never act on an estate-less transfer doc.
+        return False
+    return None if any(b in allowed for b in endpoints) else False

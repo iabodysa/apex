@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.salis import permissions
+
 
 def execute(filters=None):
     columns = [
@@ -19,6 +21,21 @@ def execute(filters=None):
         for field in ("vehicle_category", "ownership", "status", "project"):
             if filters.get(field):
                 query_filters[field] = filters[field]
+
+    # get_all forces ignore_permissions, so the row-scoping the desk list gets via
+    # permission_query_conditions is bypassed here — re-apply the caller's project
+    # scope (Salis Vehicle carries a direct project); oversight roles see all.
+    user = frappe.session.user
+    if not permissions._is_unscoped(user):
+        allowed = permissions._allowed_projects(user)
+        if not allowed:
+            return columns, []
+        chosen = query_filters.get("project")
+        if chosen and chosen not in allowed:
+            # an explicit out-of-scope project filter resolves to nothing
+            return columns, []
+        if not chosen:
+            query_filters["project"] = ["in", allowed]
 
     data = frappe.get_all(
         "Salis Vehicle",

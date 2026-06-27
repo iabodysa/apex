@@ -19,8 +19,10 @@ Coverage (adversarial / cross-role, not only the happy path):
     docstatus=1 document) — the frozen-post-submit bug being fixed.
 
 The tests drive the real ``frappe.model.workflow.apply_workflow`` as concrete
-users, exercising the same path a desk action takes. Driver Clearance is NOT
-project-scoped, so no Project User Permission is required.
+users, exercising the same path a desk action takes. Driver Clearance is
+project-scoped through its driver (Salis Driver -> project), so the scoped Fleet
+Supervisor is granted a Project User Permission and every test driver is anchored
+to that project; the oversight Fleet Manager needs no permission.
 """
 
 import unittest
@@ -50,6 +52,10 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         frappe.set_user("Administrator")
         cls.supervisor = _user("dc_sup@example.com", "Fleet Supervisor")
         cls.manager = _user("dc_mgr@example.com", "Fleet Manager")
+        # Driver Clearance is project-scoped through its driver; the non-oversight
+        # supervisor needs a Project User Permission to read/transition rows.
+        cls.project = cls._project("DC Workflow Project")
+        cls._user_perm(cls.supervisor, cls.project)
 
     def setUp(self):
         frappe.set_user("Administrator")
@@ -57,14 +63,37 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
+    @staticmethod
+    def _project(name):
+        p = frappe.db.get_value("Project", {"project_name": name}, "name")
+        if not p:
+            p = frappe.get_doc(
+                {"doctype": "Project", "project_name": name}
+            ).insert(ignore_permissions=True).name
+        return p
+
+    @staticmethod
+    def _user_perm(user, project):
+        if not frappe.db.exists(
+            "User Permission",
+            {"allow": "Project", "for_value": project, "user": user},
+        ):
+            frappe.get_doc(
+                {"doctype": "User Permission", "allow": "Project",
+                 "for_value": project, "user": user}
+            ).insert(ignore_permissions=True)
+
     # [#5hz0bi]
 
     def _driver(self, name, vehicle=None):
         d = frappe.db.get_value("Salis Driver", {"full_name": name}, "name")
         if not d:
             d = frappe.get_doc(
-                {"doctype": "Salis Driver", "full_name": name, "status": "Active"}
+                {"doctype": "Salis Driver", "full_name": name, "status": "Active",
+                 "project": self.project}
             ).insert(ignore_permissions=True).name
+        else:
+            frappe.db.set_value("Salis Driver", d, "project", self.project)
         if vehicle:
             frappe.db.set_value("Salis Driver", d, "current_vehicle", vehicle)
         return d

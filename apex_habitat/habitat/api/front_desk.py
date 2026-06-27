@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.rate_limiter import rate_limit
 from frappe.utils import now, today
 
 
@@ -463,7 +464,10 @@ def _has_active_assignment(party_type: str, party: str, employee: str | None) ->
     return bool(frappe.db.exists("Accommodation Assignment", filters))
 
 
+# Per-IP throttle matching the Masar read endpoints: a scanned identifier probe
+# must not become an Iqama/token-enumeration oracle from one address.
 @frappe.whitelist()
+@rate_limit(key="frappe.request.remote_addr", limit=60, seconds=60)
 def resolve_worker(identifier: str) -> dict:
     """Resolve a scanned identifier to one worker for the Front Desk check-in dialog.
 

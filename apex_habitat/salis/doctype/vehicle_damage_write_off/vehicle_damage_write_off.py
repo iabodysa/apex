@@ -11,6 +11,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 from apex_habitat.salis.utils import add_timeline_note
 
@@ -20,6 +21,9 @@ class VehicleDamageWriteOff(Document):
         # [#83ntz1]
         if self.status and self.status != "Open" and not self.evidence:
             frappe.throw(_("Evidence is required before moving the write-off case beyond Open."))
+        # A negative estimated cost is never a valid write-off amount.
+        if self.estimated_cost is not None and flt(self.estimated_cost) < 0:
+            frappe.throw(_("Estimated cost cannot be negative."))
         self._stamp_approver()
 
     def on_submit(self):

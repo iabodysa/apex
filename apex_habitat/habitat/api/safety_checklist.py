@@ -325,6 +325,12 @@ def submit_round(building, cadence, round_date, lines, is_reinspection=0):
         frappe.throw(_("A building is required to submit a round."))
     if not cadence:
         frappe.throw(_("A cadence is required to submit a round."))
+    # Reject any cadence outside the allowlist BEFORE _create_round runs: cadence
+    # feeds the savepoint identifier (f"..._{frappe.scrub(cadence)}"), so a value
+    # carrying a quote/semicolon must never reach that interpolation. Mirrors the
+    # guard submit_due_rounds already applies per line.
+    if cadence not in _CADENCE_ORDER:
+        frappe.throw(_("Unknown cadence: {0}").format(cadence))
     if not round_date:
         frappe.throw(_("A round date is required to submit a round."))
 

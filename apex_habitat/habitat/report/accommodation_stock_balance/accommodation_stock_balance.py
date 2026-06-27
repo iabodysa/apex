@@ -8,6 +8,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt, today
 
+from apex_habitat.habitat import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -37,6 +39,20 @@ def get_data(filters):
         conditions["item_type"] = filters["item_type"]
     if filters.get("employee"):
         conditions["employee"] = filters["employee"]
+
+    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
+    # list gets via permission_query_conditions — re-apply the caller's building scope
+    # (Accommodation Stock Ledger carries a direct building); oversight roles see all.
+    user = frappe.session.user
+    if not permissions._building_is_unscoped(user):
+        allowed = permissions._allowed_buildings(user)
+        if not allowed:
+            return []
+        chosen = conditions.get("building")
+        if chosen and chosen not in allowed:
+            return []
+        if not chosen:
+            conditions["building"] = ["in", allowed]
 
     rows = frappe.get_all(
         "Accommodation Stock Ledger",

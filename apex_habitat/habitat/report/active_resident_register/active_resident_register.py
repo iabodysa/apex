@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.habitat import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -24,6 +26,20 @@ def execute(filters=None):
         query_filters["building"] = filters["building"]
     if filters.get("project"):
         query_filters["project"] = filters["project"]
+
+    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
+    # list gets via permission_query_conditions — re-apply the caller's building scope
+    # (Accommodation Assignment carries a direct building); oversight roles see all.
+    user = frappe.session.user
+    if not permissions._building_is_unscoped(user):
+        allowed = permissions._allowed_buildings(user)
+        if not allowed:
+            return columns, []
+        chosen = query_filters.get("building")
+        if chosen and chosen not in allowed:
+            return columns, []
+        if not chosen:
+            query_filters["building"] = ["in", allowed]
 
     rows = frappe.get_all(
         "Accommodation Assignment",

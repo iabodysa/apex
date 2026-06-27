@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -43,3 +45,48 @@ class TestFuelQuotaUniqueness(FrappeTestCase):
         self._quota("2026-05")
         other = self._quota("2026-06")
         self.assertTrue(other.name)
+
+    def test_guard_locks_vehicle_before_exists_check(self):
+        """The duplicate guard must FOR-UPDATE lock the vehicle row BEFORE
+        the exists-check. Two concurrent creates serialize on that row lock, so the
+        loser sees the winner's row and is rejected -> exactly one live quota. We
+        assert the call order (lock precedes exists) since the test DB is not a
+        real concurrency harness; the second sequential create still raises."""
+        order = []
+        real_exists = frappe.db.exists
+
+        def track_exists(*args, **kwargs):
+            order.append("exists")
+            return real_exists(*args, **kwargs)
+
+        with patch(
+            "apex_habitat.salis.doctype.fuel_quota.fuel_quota.lock_vehicle",
+            side_effect=lambda name: order.append("lock"),
+        ), patch.object(frappe.db, "exists", side_effect=track_exists):
+            self._quota()
+
+        # lock_vehicle ran, and it ran before the first exists-check in the guard.
+        self.assertIn("lock", order)
+        self.assertIn("exists", order)
+        self.assertLess(
+            order.index("lock"),
+            order.index("exists"),
+            "the vehicle must be locked before the duplicate exists-check",
+        )
+
+    def test_concurrent_creates_yield_one_live_quota(self):
+        """Outcome: a second create for the same (vehicle, period) is rejected
+        and only one live quota survives (the serialized loser raises)."""
+        self._quota()
+        with self.assertRaises(frappe.ValidationError):
+            self._quota()
+        live = frappe.get_all(
+            "Fuel Quota",
+            filters={
+                "vehicle": self.vehicle,
+                "period_month": self.period,
+                "docstatus": ["<", 2],
+            },
+            pluck="name",
+        )
+        self.assertEqual(len(live), 1, "exactly one live quota must survive")

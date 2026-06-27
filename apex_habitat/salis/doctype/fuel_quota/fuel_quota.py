@@ -10,6 +10,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex_habitat.salis.utils import lock_vehicle
+
 
 class FuelQuota(Document):
 	def validate(self):
@@ -31,6 +33,9 @@ class FuelQuota(Document):
 		cancelled quota can be re-issued and an amendment of this same doc passes."""
 		if not (self.vehicle and self.period_month):
 			return
+		# Serialize concurrent creates for the same vehicle: without this lock two
+		# transactions both pass the exists-check below and double-allocate the month.
+		lock_vehicle(self.vehicle)
 		dup = frappe.db.exists(
 			"Fuel Quota",
 			{

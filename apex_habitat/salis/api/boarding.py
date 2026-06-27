@@ -15,6 +15,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.rate_limiter import rate_limit
 from frappe.utils import cint, get_datetime, now_datetime
 from frappe.utils.password import get_encryption_key
 
@@ -200,7 +201,10 @@ def _log_scan(
     return doc.name
 
 
+# Per-IP throttle matching the Masar read endpoints: pass issuance is a read but
+# must not be drivable as a bulk token-minting oracle from one address.
 @frappe.whitelist()
+@rate_limit(key="frappe.request.remote_addr", limit=60, seconds=60)
 def get_boarding_pass(dispatch_trip, worker):
     """Issue a signed QR boarding pass for ``worker`` on ``dispatch_trip`` (read).
 
@@ -272,6 +276,13 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
             notes="Worker is not on this trip's manifest.",
         )
         return {"result": "Wrong Trip", "scan_log": log_name}
+
+    # [#bsl-race] Serialize concurrent valid scans of the SAME trip: lock the
+    # Dispatch Trip row before get-or-create-log + the dup-check + append. Two
+    # scans of one (trip,worker) would otherwise both pass _already_boarded on a
+    # stale read and write two Trip Start Logs / two boarding events; the lock
+    # makes the second wait until the first commits, then it resolves to Duplicate.
+    frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 
     log = _get_or_create_log(dispatch_trip)
 

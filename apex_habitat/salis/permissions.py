@@ -247,6 +247,103 @@ def passenger_manifest_query(user=None):
     )
 
 
+# Indirect-tenant DocTypes: no own `project`, but a Salis Driver link carries it.
+# Scope each through `driver -> Salis Driver -> project`; where a Driver `if_owner`
+# DocPerm exists (Driver Attendance / Driver Stop / Boarding Scan Log) OR the
+# `owner = me` clause so the self-record path survives (mirrors salis_driver_query).
+# [#dr1tz9]
+
+def _driver_chain_condition(user, column="`driver`", with_owner=False):
+    """SQL fragment scoping a `driver`-link column through Salis Driver's project.
+
+    `column` is the back-quoted driver-link column on the target table (e.g.
+    ```driver``` or ```related_driver```). Returns "" for unscoped
+    oversight roles. When ``with_owner`` is True the project scope is OR-ed with
+    ``owner = me`` (for DocTypes whose Driver role reads its own rows via if_owner);
+    a scoped user with no allowed projects then falls back to their own rows, while
+    a non-owner DocType (``with_owner`` False) yields ``1=0``.
+    """
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return ""
+
+    own = "`owner` = {0}".format(frappe.db.escape(user))
+
+    projects = _allowed_projects(user)
+    if not projects:
+        # [#dr0own]
+        return own if with_owner else "1=0"
+
+    escaped = ", ".join(frappe.db.escape(p) for p in projects)
+    in_scope = (
+        "{column} in ("
+        "select `name` from `tabSalis Driver` where `project` in ({values})"
+        ")".format(column=column, values=escaped)
+    )
+    if with_owner:
+        return "({in_scope} or {own})".format(in_scope=in_scope, own=own)
+    return in_scope
+
+
+def driver_attendance_query(user=None):
+    """Driver Attendance links a `driver` (Salis Driver carries the project) and
+    grants the Driver role an `if_owner` read DocPerm, so scope project-OR-owner."""
+    return _driver_chain_condition(user, with_owner=True)
+
+
+def driver_stop_query(user=None):
+    """Driver Stop links a `driver`; the Driver role reads its own via if_owner."""
+    return _driver_chain_condition(user, with_owner=True)
+
+
+def boarding_scan_log_query(user=None):
+    """Boarding Scan Log links a `driver`; the Driver role reads its own via
+    if_owner. (It also links a dispatch_trip, but `driver` is the durable tenant
+    anchor present on every row.)"""
+    return _driver_chain_condition(user, with_owner=True)
+
+
+def vehicle_damage_write_off_query(user=None):
+    """Vehicle Damage Write-Off links a `driver`; no Driver DocPerm, so pure
+    project scope through Salis Driver."""
+    return _driver_chain_condition(user, with_owner=False)
+
+
+def vehicle_incident_query(user=None):
+    """Vehicle Incident links a `driver`; no Driver DocPerm -> pure project scope."""
+    return _driver_chain_condition(user, with_owner=False)
+
+
+def driver_clearance_query(user=None):
+    """Driver Clearance links a `driver`; no Driver DocPerm -> pure project scope."""
+    return _driver_chain_condition(user, with_owner=False)
+
+
+def vehicle_stop_query(user=None):
+    """Vehicle Stop reaches its tenant through `related_driver` (not `driver`); no
+    Driver DocPerm -> pure project scope through Salis Driver."""
+    return _driver_chain_condition(user, column="`related_driver`", with_owner=False)
+
+
+def movement_cost_transfer_query(user=None):
+    """Movement Cost Transfer carries TWO direct project Links (`from_project`,
+    `to_project`) rather than a single `project`. A scoped user may see a transfer
+    touching EITHER a from- or a to-project they are permitted for, so the fragment
+    admits a row whose either endpoint is in scope. "" for oversight; "1=0" when a
+    scoped user has no allowed projects. (Consistency with the other tenant docs;
+    no Driver DocPerm, so no owner clause.)"""
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return ""
+
+    projects = _allowed_projects(user)
+    if not projects:
+        return "1=0"
+
+    escaped = ", ".join(frappe.db.escape(p) for p in projects)
+    return "(`from_project` in ({v}) or `to_project` in ({v}))".format(v=escaped)
+
+
 # [#2huj0w]
 
 def _doc_project(doc):
@@ -376,6 +473,103 @@ def trip_start_log_has_permission(doc, ptype, user=None):
         return False
 
     return None
+
+
+# has_permission mirrors for the indirect-tenant DocTypes (form view / REST
+# resource / link reads), matching the permission_query_conditions above so the
+# direct-access path enforces the same project boundary as the list/report view.
+# [#dr2hpm]
+
+def _driver_chain_project(doc, driver_field="driver"):
+    """Resolve a doc's project through its Salis Driver link, or None."""
+    driver = getattr(doc, driver_field, None)
+    if not driver:
+        return None
+    return frappe.db.get_value("Salis Driver", driver, "project")
+
+
+def _driver_chain_has_permission(doc, user=None, driver_field="driver", with_owner=False):
+    """Deny a scoped user acting on a `driver`-linked doc outside their projects.
+
+    Resolves the doc's project through ``driver_field -> Salis Driver -> project``.
+    When ``with_owner`` is True (the doc grants the Driver role an if_owner perm),
+    the acting user's own row is always allowed — mirroring the OR-owner clause in
+    the matching query. Returns False to block, else None to defer to Frappe's
+    default resolution. Not folded into ``scoped_has_permission`` because that helper
+    reads ``doc.project`` directly, which these indirect-tenant docs do not carry.
+    """
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return None
+
+    # [#dr3own]
+    if with_owner and getattr(doc, "owner", None) == user:
+        return None
+
+    project = _driver_chain_project(doc, driver_field=driver_field)
+    if not project:
+        # [#dr4nul]
+        return None if with_owner and getattr(doc, "owner", None) == user else False
+
+    if project not in _allowed_projects(user):
+        return False
+
+    return None
+
+
+def driver_attendance_has_permission(doc, ptype, user=None):
+    """Mirror driver_attendance_query: project via driver, OR the Driver's own row."""
+    return _driver_chain_has_permission(doc, user=user, with_owner=True)
+
+
+def driver_stop_has_permission(doc, ptype, user=None):
+    """Mirror driver_stop_query: project via driver, OR the Driver's own row."""
+    return _driver_chain_has_permission(doc, user=user, with_owner=True)
+
+
+def boarding_scan_log_has_permission(doc, ptype, user=None):
+    """Mirror boarding_scan_log_query: project via driver, OR the Driver's own row."""
+    return _driver_chain_has_permission(doc, user=user, with_owner=True)
+
+
+def vehicle_damage_write_off_has_permission(doc, ptype, user=None):
+    """Mirror vehicle_damage_write_off_query: pure project scope via driver."""
+    return _driver_chain_has_permission(doc, user=user, with_owner=False)
+
+
+def vehicle_incident_has_permission(doc, ptype, user=None):
+    """Mirror vehicle_incident_query: pure project scope via driver."""
+    return _driver_chain_has_permission(doc, user=user, with_owner=False)
+
+
+def driver_clearance_has_permission(doc, ptype, user=None):
+    """Mirror driver_clearance_query: pure project scope via driver."""
+    return _driver_chain_has_permission(doc, user=user, with_owner=False)
+
+
+def vehicle_stop_has_permission(doc, ptype, user=None):
+    """Mirror vehicle_stop_query: pure project scope via the related_driver link."""
+    return _driver_chain_has_permission(doc, user=user, driver_field="related_driver", with_owner=False)
+
+
+def movement_cost_transfer_has_permission(doc, ptype, user=None):
+    """Mirror movement_cost_transfer_query: allow if EITHER from/to project is in
+    the scoped user's allowed set; deny otherwise. A transfer with neither endpoint
+    set is treated as project-less and deferred (no tenant to enforce)."""
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return None
+
+    from_project = getattr(doc, "from_project", None)
+    to_project = getattr(doc, "to_project", None)
+    if not from_project and not to_project:
+        # [#dr5nul]
+        return None
+
+    allowed = _allowed_projects(user)
+    if (from_project and from_project in allowed) or (to_project and to_project in allowed):
+        return None
+    return False
 
 
 # [#m6o851]
