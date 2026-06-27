@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.60.5 — assign several transport requests onto one trip: a supervisor groups requests on a Dispatch Trip, the manifest is the union of their workers, a seat-capacity guard stops over-filling a vehicle, and each trip carries its purpose; several lists and reports now stay inside the building you can see, the public vehicle-incident and arrival-manifest forms are hardened against abuse, and a custody item's issued-to is now a proper user link, alongside reliability and layout tidy-ups",
+        "app_name": "apex_habitat",
+        "link": "/app/dispatch-trip",
+        "creation": "2026-06-27 12:00:00",
+    },
+    {
         "title": "Apex 1.60.3 — your driver and safety screens now update themselves: the driver and safety apps refresh on their own the moment a trip or safety round changes, and the worker portal quietly refreshes while it is the screen you are looking at; the worker boarding pass is redesigned as a themed ticket that shows the worker only their own pickup and destination instead of the full driver route; opening a stop in Maps now drops you on the real place, trip cards fit small phone screens, safety reports are grouped into five clear sections, and more of the app reads correctly in Arabic",
         "app_name": "apex_habitat",
         "link": "/driver",
