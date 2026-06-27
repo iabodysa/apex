@@ -97,10 +97,10 @@ class CustodyKiosk {
 		});
 
 		// [#scan01] — one scan box accelerates both modes: a worker-badge scan sets
-		// the party, an article-barcode scan adds the tile to the cart. A HID scanner
-		// types the code + Enter (Data field fires `change`); the box keeps focus so
-		// successive scans need no click. Optional camera scan is wired separately
-		// and only when the browser exposes BarcodeDetector (no dependency).
+		// the party, an article-barcode scan adds the tile to the cart. A HID/USB
+		// scanner types the code + Enter (Data field fires `change`); the box keeps
+		// focus so successive scans need no click. This is the only Desk scan input —
+		// camera scanning is a mobile-portal feature, not a Desk page.
 		this.scan_field = this.page.add_field({
 			fieldname: "scan",
 			label: __("Scan"),
@@ -205,75 +205,6 @@ class CustodyKiosk {
 		}
 	}
 
-	_barcode_detector_supported() {
-		return typeof window !== "undefined" && "BarcodeDetector" in window;
-	}
-
-	// [#camscan] — open a live-camera barcode scan in a dialog. Uses the native
-	// BarcodeDetector + getUserMedia (no library); each detected code is routed
-	// through the same _handle_scan resolver as the HID/typed box. The dialog
-	// closes on the first hit; the camera + detect loop are always torn down on
-	// hide so no track is left running.
-	_open_camera_scan() {
-		if (!this._barcode_detector_supported()) return;
-		const dialog = new frappe.ui.Dialog({
-			title: __("Scan with camera"),
-			fields: [{ fieldname: "viewport", fieldtype: "HTML" }],
-		});
-		const $video = $('<video class="ck-scan-video" playsinline muted></video>');
-		dialog.fields_dict.viewport.$wrapper.append($video);
-
-		let stream = null;
-		let running = true;
-		const stop = () => {
-			running = false;
-			if (stream) {
-				stream.getTracks().forEach((t) => t.stop());
-				stream = null;
-			}
-		};
-		dialog.onhide = stop;
-
-		const detector = new window.BarcodeDetector();
-		const video = $video.get(0);
-		const tick = async () => {
-			if (!running) return;
-			try {
-				const codes = await detector.detect(video);
-				if (codes && codes.length) {
-					const value = codes[0].rawValue;
-					if (value) {
-						dialog.hide();
-						this._handle_scan(value);
-						return;
-					}
-				}
-			} catch (e) {
-				// Transient decode misses are expected between frames; keep looping.
-			}
-			if (running) requestAnimationFrame(tick);
-		};
-
-		navigator.mediaDevices
-			.getUserMedia({ video: { facingMode: "environment" } })
-			.then((s) => {
-				stream = s;
-				video.srcObject = s;
-				return video.play();
-			})
-			.then(() => requestAnimationFrame(tick))
-			.catch(() => {
-				stop();
-				frappe.show_alert({
-					message: __("Could not open the camera. Use the scan box instead."),
-					indicator: "orange",
-				});
-				dialog.hide();
-			});
-
-		dialog.show();
-	}
-
 	_update_party_options() {
 		// [#party02]
 		const target = this.party_type === "Temporary Worker" ? "Temporary Worker" : "Employee";
@@ -320,19 +251,6 @@ class CustodyKiosk {
 			clearTimeout(search_timer);
 			search_timer = setTimeout(() => this._render_visible(), 120);
 		});
-
-		// [#scancam] — camera scan is an OPTIONAL accelerator on top of the always-on
-		// scan box; only show the button when the browser exposes the native
-		// BarcodeDetector API (Chrome/Edge), so there is no dependency and graceful
-		// degradation to the HID/typed scan box elsewhere.
-		if (this._barcode_detector_supported()) {
-			this.$scan_cam_btn = $(
-				`<button type="button" class="btn btn-default btn-sm ck-scan-cam"></button>`
-			)
-				.text(__("Scan with camera"))
-				.appendTo($tools)
-				.on("click", () => this._open_camera_scan());
-		}
 
 		this.$tiles = $('<div class="ck-tiles"></div>').appendTo($catalog);
 

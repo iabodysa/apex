@@ -168,6 +168,12 @@ apex_habitat.patches.v1_x.enable_custody_return_overdue_notification
 # (no real PII); never aborts install/migrate. PERMANENT — fresh demo sites replay it.
 apex_habitat.patches.v1_x.seed_masar_demo_movement
 
+# v1.x — seed two ready-to-use demo logins (supervisor + employee personas) so the
+# owner can test each role-scoped surface; reuses the seed_masar_demo_movement demo
+# estate so the Project/trip exist first. Gated behind developer_mode + required
+# DocTypes; idempotent get-or-create on stable keys; never aborts install/migrate.
+apex_habitat.patches.v1_x.seed_demo_role_logins
+
 # v1.x — stamp last_known_versions[apex_habitat] for users already past the changelog
 # popup, so the version-feed migration to a tracked seen-version does not re-show old
 # release notes. Touches only the changelog-seen value; preserves other apps' entries.

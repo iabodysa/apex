@@ -200,14 +200,15 @@ const greeting = computed(() => {
 const showBrand = computed(() => window.portal_show_brand !== false);
 const brandLogo = computed(() => window.portal_logo || "");
 
-// Five primary tabs, one per core screen. Attendance is reached from the Home
-// tiles; fuel/support live under "My Requests" on Profile — those routes stay
-// reachable, just not as bottom tabs.
+// Bottom bar = the two primary jobs (Trips + Profile) plus Home, which hosts the
+// "More" hub. The secondary screens are nested, not demoted to dead routes:
+//   - Route          -> a Trips card (/route/:trip) and Home > More (standalone /route)
+//   - Vehicle, Attendance -> Home > More (and Profile surfaces the same data)
+//   - Fuel, Support  -> Profile > My Requests
+// Every route stays reachable; only the bottom-bar entries shrink to three.
 const tabs = [
   { to: "/", icon: "home", labelKey: "nav.home" },
   { to: "/trips", icon: "route", labelKey: "nav.trips" },
-  { to: "/vehicle", icon: "truck", labelKey: "nav.vehicle" },
-  { to: "/route", icon: "layers", labelKey: "nav.route" },
   { to: "/profile", icon: "user", labelKey: "nav.profile" },
 ];
 

@@ -6,17 +6,17 @@
 	display: inline-flex;
 	gap: 0;
 	margin-block: 4px 12px;
-	border: 1px solid var(--border-color, #d1d8dd);
+	border: 1px solid var(--border-color);
 	border-radius: 8px;
 	overflow: hidden;
-	background: var(--control-bg, #f4f5f6);
+	background: var(--control-bg);
 }
 
 .ck-mode-btn {
 	appearance: none;
 	border: none;
 	background: transparent;
-	color: var(--text-color, #1f272e);
+	color: var(--text-color);
 	font-size: 14px;
 	font-weight: 600;
 	padding-block: 8px;
@@ -27,53 +27,21 @@
 }
 
 .ck-mode-btn + .ck-mode-btn {
-	border-inline-start: 1px solid var(--border-color, #d1d8dd);
+	border-inline-start: 1px solid var(--border-color);
 }
 
 .ck-mode-btn:hover {
-	background: var(--fg-hover-color, #e9ecef);
+	background: var(--fg-hover-color);
 }
 
 .ck-mode-btn.active {
-	background: var(--primary, #2490ef);
-	color: #fff;
+	background: var(--primary);
+	color: var(--text-on-primary);
 }
 
 .ck-mode-btn:focus-visible {
-	outline: 3px solid var(--primary, #2490ef);
+	outline: 3px solid var(--primary);
 	outline-offset: -3px;
-}
-
-/* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
-   Growth Green / Deep Forest / Sand) so this desk page reads identically to the
-   Vue portals. Local overrides of the desk theme vars re-skin every existing
-   var() reference to the editorial palette. Scoped to the two page roots
-   (.ck-modebar + .ck-layout) so it never leaks into the surrounding desk shell. */
-.ck-modebar,
-.ck-layout {
-	--c-primary: #00844e;
-	--c-ink: #072b1a;
-	--c-surface: #f8f5ee;
-	--c-surface-2: #ffffff;
-	--c-muted: #6f7e76;
-	--c-border: #ddd5c2;
-	--c-border-strong: #cabfa3;
-	--c-success: #00844e;
-	--c-warning: #c9851f;
-	--c-danger: #c0392b;
-
-	--font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
-	--fw-semibold: 600;
-
-	/* Re-skin the inherited desk palette to the editorial tokens. */
-	--primary: var(--c-primary);
-	--card-bg: var(--c-surface-2);
-	--control-bg: var(--c-surface);
-	--border-color: var(--c-border);
-	--text-muted: var(--c-muted);
-	--text-color: var(--c-ink);
-	--fg-hover-color: var(--c-surface);
-	font-family: var(--font);
 }
 
 .ck-layout {
@@ -81,7 +49,6 @@
 	gap: 16px;
 	align-items: flex-start;
 	padding: 8px 4px 32px;
-	color: var(--c-ink);
 }
 
 .ck-catalog {
@@ -103,14 +70,6 @@
 	font-size: 15px;
 }
 
-/* [#scancamcss] — live camera scan preview; capped so the dialog stays compact. */
-.ck-scan-video {
-	width: 100%;
-	max-height: 320px;
-	border-radius: 8px;
-	background: #000;
-}
-
 .ck-empty {
 	padding: 48px 16px;
 	text-align: center;
@@ -125,10 +84,10 @@
 }
 
 .ck-tile {
-	border: 2px solid var(--border-color, #d1d8dd);
+	border: 2px solid var(--border-color);
 	border-radius: 10px;
 	padding: 12px;
-	background: var(--card-bg, #fff);
+	background: var(--card-bg);
 	cursor: pointer;
 	user-select: none;
 	display: flex;
@@ -139,11 +98,11 @@
 }
 
 .ck-tile:hover {
-	border-color: var(--primary, #2490ef);
+	border-color: var(--primary);
 }
 
 .ck-tile:focus {
-	outline: 3px solid var(--primary, #2490ef);
+	outline: 3px solid var(--primary);
 	outline-offset: 2px;
 }
 
@@ -156,7 +115,7 @@
 	height: 110px;
 	border-radius: 8px;
 	overflow: hidden;
-	background: var(--control-bg, #f4f5f6);
+	background: var(--control-bg);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -171,7 +130,7 @@
 .ck-tile-initials {
 	font-size: 34px;
 	font-weight: 700;
-	color: var(--text-muted, #74808b);
+	color: var(--text-muted);
 	letter-spacing: 0.04em;
 }
 
@@ -183,7 +142,7 @@
 
 .ck-tile-meta {
 	font-size: 12px;
-	color: var(--text-muted, #74808b);
+	color: var(--text-muted);
 }
 
 /* [#tilesub] — held-line source Custody Issue under the article meta. */
@@ -198,9 +157,9 @@
 /* [#qtak3m] */
 .ck-cart {
 	flex: 0 0 320px;
-	border: 1px solid var(--border-color, #d1d8dd);
+	border: 1px solid var(--border-color);
 	border-radius: 10px;
-	background: var(--card-bg, #fff);
+	background: var(--card-bg);
 	display: flex;
 	flex-direction: column;
 	position: sticky;
@@ -212,7 +171,7 @@
 	padding: 14px 16px;
 	font-size: 16px;
 	font-weight: 600;
-	border-bottom: 1px solid var(--border-color, #d1d8dd);
+	border-bottom: 1px solid var(--border-color);
 }
 
 .ck-cart-lines {
@@ -233,7 +192,7 @@
 	justify-content: space-between;
 	gap: 10px;
 	padding: 10px 16px;
-	border-bottom: 1px solid var(--border-color, #ebeef0);
+	border-bottom: 1px solid var(--border-color);
 }
 
 .ck-cart-line-name {
@@ -288,7 +247,7 @@
 
 .ck-cart-footer {
 	padding: 14px 16px;
-	border-top: 1px solid var(--border-color, #d1d8dd);
+	border-top: 1px solid var(--border-color);
 }
 
 /* [#cksub] — cart value subtotal, above the action button. */
@@ -332,7 +291,7 @@
 }
 
 .ck-skel {
-	background: var(--control-bg, #f4f5f6);
+	background: var(--control-bg);
 	border-radius: 6px;
 	animation: ck-skel-pulse 1.2s ease-in-out infinite;
 }
