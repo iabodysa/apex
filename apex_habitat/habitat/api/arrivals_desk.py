@@ -705,18 +705,18 @@ ARRIVAL_SLIP_TEMPLATE = """
 <div class="ax-slip" dir="{{ dir }}" lang="{{ lang }}" style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 24px auto;
             border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
   <h2 style="color:#1a1a2e; margin:0 0 4px;">{{ _("Arrival Slip") }}</h2>
-  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company }} &middot; {{ today }}</div>
+  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company | e }} &middot; {{ today | e }}</div>
   <table style="width:100%; font-size:14px; border-collapse:collapse;">
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Worker") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Type") }}</td><td style="padding:4px 0;">{{ party_type_label }}</td></tr>
-    {% if designation %}<tr><td style="padding:4px 0; color:#555;">{{ _("Designation") }}</td><td style="padding:4px 0;">{{ designation }}</td></tr>{% endif %}
-    {% if passport_number %}<tr><td style="padding:4px 0; color:#555;">{{ _("Passport") }}</td><td style="padding:4px 0;">{{ passport_number }}</td></tr>{% endif %}
-    {% if iqama_number %}<tr><td style="padding:4px 0; color:#555;">{{ _("Iqama") }}</td><td style="padding:4px 0;">{{ iqama_number }}</td></tr>{% endif %}
-    {% if nationality %}<tr><td style="padding:4px 0; color:#555;">{{ _("Nationality") }}</td><td style="padding:4px 0;">{{ nationality }}</td></tr>{% endif %}
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Bed") }}</td><td style="padding:4px 0; font-weight:bold;">{{ bed }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Project") }}</td><td style="padding:4px 0;">{{ project }}</td></tr>
-    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Check-in") }}</td><td style="padding:4px 0;">{{ check_in_date }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Worker") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name | e }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Type") }}</td><td style="padding:4px 0;">{{ party_type_label | e }}</td></tr>
+    {% if designation %}<tr><td style="padding:4px 0; color:#555;">{{ _("Designation") }}</td><td style="padding:4px 0;">{{ designation | e }}</td></tr>{% endif %}
+    {% if passport_number %}<tr><td style="padding:4px 0; color:#555;">{{ _("Passport") }}</td><td style="padding:4px 0;">{{ passport_number | e }}</td></tr>{% endif %}
+    {% if iqama_number %}<tr><td style="padding:4px 0; color:#555;">{{ _("Iqama") }}</td><td style="padding:4px 0;">{{ iqama_number | e }}</td></tr>{% endif %}
+    {% if nationality %}<tr><td style="padding:4px 0; color:#555;">{{ _("Nationality") }}</td><td style="padding:4px 0;">{{ nationality | e }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building | e }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Bed") }}</td><td style="padding:4px 0; font-weight:bold;">{{ bed | e }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Project") }}</td><td style="padding:4px 0;">{{ project | e }}</td></tr>
+    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Check-in") }}</td><td style="padding:4px 0;">{{ check_in_date | e }}</td></tr>{% endif %}
   </table>
   {% if qr %}<div style="margin-top:16px;"><img src="{{ qr }}" style="width:120px;height:120px"></div>{% endif %}
   <style>@media print { body { margin:0; } .ax-slip { border:none; margin:0; max-width:none; } }</style>
@@ -792,16 +792,16 @@ CHECKIN_SLIP_TEMPLATE = """
 <div class="ax-slip" dir="{{ dir }}" lang="{{ lang }}" style="font-family: Arial, Helvetica, sans-serif; max-width: 560px; margin: 24px auto;
             border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
   <h2 style="color:#1a1a2e; margin:0 0 4px;">{{ _("Accommodation Check-in") }}</h2>
-  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company }} &middot; {{ today }}</div>
+  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company | e }} &middot; {{ today | e }}</div>
   <table style="width:100%; font-size:14px; border-collapse:collapse;">
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Worker") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Type") }}</td><td style="padding:4px 0;">{{ party_type_label }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building }}</td></tr>
-    {% if address %}<tr><td style="padding:4px 0; color:#555;">{{ _("Address") }}</td><td style="padding:4px 0;">{{ address }}</td></tr>{% endif %}
-    {% if city %}<tr><td style="padding:4px 0; color:#555;">{{ _("City") }}</td><td style="padding:4px 0;">{{ city }}</td></tr>{% endif %}
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Bed") }}</td><td style="padding:4px 0; font-weight:bold;">{{ bed }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Project") }}</td><td style="padding:4px 0;">{{ project }}</td></tr>
-    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Check-in") }}</td><td style="padding:4px 0;">{{ check_in_date }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Worker") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name | e }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Type") }}</td><td style="padding:4px 0;">{{ party_type_label | e }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building | e }}</td></tr>
+    {% if address %}<tr><td style="padding:4px 0; color:#555;">{{ _("Address") }}</td><td style="padding:4px 0;">{{ address | e }}</td></tr>{% endif %}
+    {% if city %}<tr><td style="padding:4px 0; color:#555;">{{ _("City") }}</td><td style="padding:4px 0;">{{ city | e }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Bed") }}</td><td style="padding:4px 0; font-weight:bold;">{{ bed | e }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Project") }}</td><td style="padding:4px 0;">{{ project | e }}</td></tr>
+    {% if check_in_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Check-in") }}</td><td style="padding:4px 0;">{{ check_in_date | e }}</td></tr>{% endif %}
   </table>
 
   <div style="margin-top:20px; border:1px solid #ccc; border-radius:6px; padding:14px 18px;">
@@ -876,12 +876,12 @@ CUSTODY_HANDOVER_SLIP_TEMPLATE = """
 <div class="ax-slip" dir="{{ dir }}" lang="{{ lang }}" style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: 24px auto;
             border: 1px solid #ccc; border-radius: 8px; padding: 24px; color:#1a1a2e;">
   <h2 style="color:#1a1a2e; margin:0 0 4px;">{{ _("Custody Handover") }}</h2>
-  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company }} &middot; {{ today }}</div>
+  <div style="color:#555; font-size:12px; margin-bottom:16px;">{{ company | e }} &middot; {{ today | e }}</div>
   <table style="width:100%; font-size:14px; border-collapse:collapse;">
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Issued to") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name }}</td></tr>
-    <tr><td style="padding:4px 0; color:#555;">{{ _("Reference") }}</td><td style="padding:4px 0;">{{ custody_issue }}</td></tr>
-    {% if building %}<tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building }}</td></tr>{% endif %}
-    {% if issue_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Issue date") }}</td><td style="padding:4px 0;">{{ issue_date }}</td></tr>{% endif %}
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Issued to") }}</td><td style="padding:4px 0; font-weight:bold;">{{ worker_name | e }}</td></tr>
+    <tr><td style="padding:4px 0; color:#555;">{{ _("Reference") }}</td><td style="padding:4px 0;">{{ custody_issue | e }}</td></tr>
+    {% if building %}<tr><td style="padding:4px 0; color:#555;">{{ _("Building") }}</td><td style="padding:4px 0;">{{ building | e }}</td></tr>{% endif %}
+    {% if issue_date %}<tr><td style="padding:4px 0; color:#555;">{{ _("Issue date") }}</td><td style="padding:4px 0;">{{ issue_date | e }}</td></tr>{% endif %}
   </table>
 
   <table style="width:100%; margin-top:18px; font-size:13px; border-collapse:collapse;">
@@ -897,9 +897,9 @@ CUSTODY_HANDOVER_SLIP_TEMPLATE = """
       {% for row in items %}
       <tr style="border-bottom:1px solid #ccc;">
         <td style="padding:6px 4px;">{{ loop.index }}</td>
-        <td style="padding:6px 4px;">{{ row.article_name }}</td>
+        <td style="padding:6px 4px;">{{ row.article_name | e }}</td>
         <td style="padding:6px 4px; text-align:end;">{{ row.qty }}</td>
-        {% if show_uom %}<td style="padding:6px 4px;">{{ row.uom }}</td>{% endif %}
+        {% if show_uom %}<td style="padding:6px 4px;">{{ row.uom | e }}</td>{% endif %}
       </tr>
       {% endfor %}
     </tbody>

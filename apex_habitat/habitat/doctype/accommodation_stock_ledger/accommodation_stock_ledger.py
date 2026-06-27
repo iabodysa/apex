@@ -66,14 +66,30 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
     return doc.name
 
 
-def get_store_balance(item_type: str, item: str, building: str, employee=None) -> float:
+def get_store_balance(item_type: str, item: str, building: str, employee=None,
+                      for_update: bool = False) -> float:
     """Live signed-quantity balance for one item in a building's store (employee
-    unset) or in an employee's custody (employee set). Sums non-cancelled rows."""
-    filters = {
-        "item_type": item_type, "item": item, "building": building, "is_cancelled": 0,
-        "employee": employee if employee else ["is", "not set"],
-    }
-    rows = frappe.get_all("Accommodation Stock Ledger", filters=filters, fields=["qty"])
+    unset) or in an employee's custody (employee set). Sums non-cancelled rows.
+
+    for_update: take a SELECT ... FOR UPDATE on the summed rows so the balance read
+    is a locking current-read. A draining caller passes for_update=True to close the
+    TOCTOU race where two concurrent transfers/handovers both read the same balance,
+    both pass the availability check, and both post ship legs that drive the store
+    negative. The locking read serializes the second drain behind the first commit;
+    InnoDB predicate locking also blocks it from racing in a new mirror row."""
+    Ledger = frappe.qb.DocType("Accommodation Stock Ledger")
+    q = (
+        frappe.qb.from_(Ledger)
+        .select(Ledger.qty)
+        .where(Ledger.item_type == item_type)
+        .where(Ledger.item == item)
+        .where(Ledger.building == building)
+        .where(Ledger.is_cancelled == 0)
+    )
+    q = q.where(Ledger.employee == employee) if employee else q.where(Ledger.employee.isnull())
+    if for_update:
+        q = q.for_update()
+    rows = q.run(as_dict=True)
     return flt(sum(flt(r.qty) for r in rows))
 
 

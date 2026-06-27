@@ -76,7 +76,10 @@ class AccommodationCustodyHandover(Document):
         for row in self.items:
             needed[(row.item_type, row.item)] = needed.get((row.item_type, row.item), 0) + flt(row.qty)
         for (item_type, item), qty in needed.items():
-            available = get_store_balance(item_type, item, self.from_building)
+            # for_update: lock the source store's ledger rows before reading the
+            # balance so a concurrent handover/transfer draining the same store can't
+            # pass this check on a stale balance and overdraw it negative (TOCTOU).
+            available = get_store_balance(item_type, item, self.from_building, for_update=True)
             if qty > available:
                 frappe.throw(
                     _("Cannot hand over {0} unit(s) of {1} from {2}: only {3} available in the store.").format(

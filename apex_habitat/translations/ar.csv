@@ -43,6 +43,7 @@ About,حول
 Absconding,هروب من العمل
 Absent,غائب
 Accent Color,لون التمييز
+Accent Color must be a valid CSS colour.,يجب أن يكون لون التمييز لون CSS صالحًا.
 Accept & House,قبول وإسكان
 Access Identity,هوية الوصول
 Access Level,مستوى الصلاحية
@@ -417,6 +418,7 @@ Book Value (SAR),القيمة الدفترية (ريال)
 Bookkeeping,المسك المحاسبي
 Both a source bed and a target bed are required.,يلزم تحديد سرير المصدر وسرير الوجهة معاً.
 Brand Logo,شعار العلامة التجارية
+Brand Logo must be an uploaded file (a /files/ path).,يجب أن يكون شعار العلامة التجارية ملفًا مرفوعًا (مسار /files/).
 Build the catalog of issuable articles that the custody flow hands out.,ابنِ كتالوج المواد القابلة للصرف التي يصرفها مسار العهدة.
 Build your article catalog and issue your first custody at the kiosk.,ابنِ كتالوج المواد واصرف أول عهدة من الكشك.
 Building,المبنى

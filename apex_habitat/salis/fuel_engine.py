@@ -205,6 +205,11 @@ def accrue_fuel_consumption() -> None:
             break
 
         for log in logs:
+            # [#sp1dly] savepoint per row: a failing row rolls back ONLY itself;
+            # a bare frappe.db.rollback() would discard every sibling already
+            # ledgered in this same request transaction.
+            sp = "accrual_row"
+            frappe.db.savepoint(sp)
             try:
                 if not log.vehicle:
                     continue
@@ -221,7 +226,7 @@ def accrue_fuel_consumption() -> None:
                     logged_at=now_datetime(),
                 )
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=sp)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Fuel accrual failed for Daily Log {log.name}"[:140],
@@ -230,14 +235,24 @@ def accrue_fuel_consumption() -> None:
         start += BATCH_SIZE
 
     # [#hn7dnn]
+    # [#sp2trm] A row that deterministically fails to ledger stays ledgered=0,
+    # so re-querying the ledgered=0 set alone could spin forever (pinning CPU and
+    # — with the old whole-transaction rollback — zeroing the day's accrual). Track
+    # the names already attempted-and-failed and exclude them from the next query,
+    # so the working set strictly shrinks and the loop always terminates: a bad row
+    # is attempted once, then skipped.
+    failed_names: set[str] = set()
     while True:
+        filters = {
+            "docstatus": 1,
+            "status": "Done",
+            "ledgered": 0,
+        }
+        if failed_names:
+            filters["name"] = ["not in", list(failed_names)]
         requests = frappe.get_all(
             "Fuel Request",
-            filters={
-                "docstatus": 1,
-                "status": "Done",
-                "ledgered": 0,
-            },
+            filters=filters,
             fields=["name", "vehicle", "driver", "request_date", "requested_litres", "amount"],
             order_by="modified asc",
             limit_page_length=BATCH_SIZE,
@@ -247,6 +262,11 @@ def accrue_fuel_consumption() -> None:
 
         progressed = False
         for req in requests:
+            # [#sp1dly] savepoint per row — failing row rolls back only itself,
+            # so a sibling's ledger insert + ledgered=1 flag in this same request
+            # transaction survive (the old bare rollback discarded them all).
+            sp = "accrual_row"
+            frappe.db.savepoint(sp)
             try:
                 if not req.vehicle:
                     # [#9zss72]
@@ -277,7 +297,9 @@ def accrue_fuel_consumption() -> None:
                 )
                 progressed = True
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=sp)
+                # [#sp2trm] remember the failure so it can't be re-queried forever
+                failed_names.add(req.name)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Fuel accrual failed for Request {req.name}"[:140],
@@ -355,6 +377,10 @@ def monthly_fuel_reconciliation() -> None:
             break
 
         for quota in quotas:
+            # [#sp1dly] savepoint per row — isolate a failing alert insert so the
+            # other quotas reconciled in this run are not rolled back with it.
+            sp = "accrual_row"
+            frappe.db.savepoint(sp)
             try:
                 if not quota.vehicle:
                     continue
@@ -398,7 +424,7 @@ def monthly_fuel_reconciliation() -> None:
                     driver=quota.driver,
                 )
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=sp)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Fuel reconciliation failed for quota {quota.name}"[:140],

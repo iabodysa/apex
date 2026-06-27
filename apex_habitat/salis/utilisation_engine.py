@@ -41,6 +41,11 @@ def weekly_vehicle_utilisation_snapshot() -> None:
 		if not vehicle_names:
 			break
 		for vehicle_name in vehicle_names:
+			# [#sp1dly] savepoint per row: a failing vehicle rolls back ONLY its
+			# own snapshot; a bare frappe.db.rollback() would discard every snapshot
+			# already inserted for prior vehicles in this same transaction.
+			sp = "accrual_row"
+			frappe.db.savepoint(sp)
 			try:
 				if frappe.db.exists(
 					"Vehicle Utilisation Snapshot",
@@ -80,7 +85,7 @@ def weekly_vehicle_utilisation_snapshot() -> None:
 					}
 				).insert(ignore_permissions=True)  # audit-ok
 			except Exception:
-				frappe.db.rollback()
+				frappe.db.rollback(save_point=sp)
 				frappe.log_error(
 					message=frappe.get_traceback(),
 					title=f"Vehicle utilisation snapshot failed for {vehicle_name}"[:140],

@@ -94,6 +94,11 @@ def daily_rental_accrual() -> None:
 
         for vehicle_row in vehicles:
             vehicle = vehicle_row.name
+            # [#sp1dly] savepoint per row: a failing vehicle rolls back ONLY its
+            # own accrual; a bare frappe.db.rollback() would discard every accrual
+            # memo already inserted for prior vehicles in this same transaction.
+            sp = "accrual_row"
+            frappe.db.savepoint(sp)
             try:
                 # [#fyh27m]
                 if frappe.db.exists(
@@ -134,7 +139,7 @@ def daily_rental_accrual() -> None:
                     }
                 ).insert(ignore_permissions=True)  # audit-ok
             except Exception:
-                frappe.db.rollback()
+                frappe.db.rollback(save_point=sp)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Rental accrual failed for vehicle {vehicle}"[:140],
@@ -337,6 +342,10 @@ def monthly_rental_reconciliation() -> None:
 
     for row in rows:
         rental_office = row.rental_office
+        # [#sp1dly] savepoint per row — isolate a failing alert insert so the
+        # other offices flagged in this run survive.
+        sp = "accrual_row"
+        frappe.db.savepoint(sp)
         try:
             if not rental_office:
                 continue
@@ -356,7 +365,7 @@ def monthly_rental_reconciliation() -> None:
                 message=message,
             )
         except Exception:
-            frappe.db.rollback()
+            frappe.db.rollback(save_point=sp)
             frappe.log_error(
                 message=frappe.get_traceback(),
                 title=f"Rental reconciliation failed for office {rental_office}"[:140],

@@ -17,12 +17,23 @@ moved into the driver portal (/driver → "My Route"); see
 ``apex_habitat.salis.api.driver_portal.my_worker_route_today``.
 """
 
+import re
+
 import frappe
 from frappe.sessions import get_csrf_token
+from frappe.utils import escape_html
 
 from apex_habitat.salis.doctype.salis_portal_theme.salis_portal_theme import (
 	get_portal_appearance,
 )
+
+# [#wtk5x9] The personal token is minted by frappe.generate_hash (hex) — see
+# apex_core/doctype/masar_worker_token. Accept only the url-safe charset that a
+# real token can contain so a hostile ?w= payload (";</script>... etc.) is reduced
+# to "" before it ever reaches the inline <script>. Belt: the template also emits
+# it via tojson (the www renderer has autoescape OFF, so a bare "{{ }}" in a
+# <script> is a raw-injection sink).
+_TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
 def get_context(context):
@@ -35,11 +46,19 @@ def get_context(context):
 	except Exception:
 		context.csrf_token = ""
 
-	# [#tvmj3m]
-	context.masar_token = frappe.form_dict.get("w") or ""
+	# [#tvmj3m] Charset-validate then HTML-escape the request-supplied token. The
+	# value is forwarded verbatim to the SPA, which resolves it server-side; only
+	# the url-safe token charset is ever legitimate, so anything else (an XSS
+	# payload) is dropped to "". escape_html is a no-op for that charset (no double
+	# encoding) but keeps the source belt alongside the template's tojson emission.
+	raw_token = frappe.form_dict.get("w") or ""
+	context.masar_token = escape_html(raw_token) if _TOKEN_RE.match(raw_token) else ""
 
 	appearance = get_portal_appearance()
 	context.portal_theme = appearance["theme"]
+	# [#9tqm2e] accent/logo come from the (now validate()-guarded) Salis Portal
+	# Theme. They are emitted JS-safe via tojson (script) / colour-validated at the
+	# source (the <style> accent); not pre-escaped here to avoid double-encoding.
 	context.portal_accent = appearance["accent"]
 	context.portal_logo = appearance["logo"]
 	context.portal_show_brand = appearance["show_brand"]
