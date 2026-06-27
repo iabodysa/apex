@@ -1001,3 +1001,61 @@ def get_custody_handover_slip(custody_issue) -> dict:
         "show_uom": show_uom,
     }
     return {"html": frappe.render_template(CUSTODY_HANDOVER_SLIP_TEMPLATE, ctx), "title": worker_name}
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def buildings_with_capacity(doctype, txt, searchfield, start, page_len, filters):
+    """Link query for the Arrivals Desk building picker — only buildings that still
+    have at least one available (green) bed.
+
+    A standard Frappe Link query (the `get_query` contract) so the picker offers no
+    full building. Scope mirrors ``front_desk.list_supervisor_buildings``: an
+    unscoped oversight role sees every Active building, a building-scoped user only
+    their User-Permission buildings, a scoped user with none sees nothing. Free-bed
+    availability is computed from the same ``_bed_color`` rules as the board (one
+    bounded bed/room aggregate, not a per-building round trip), so a building is
+    offered only when its green-bed count is > 0.
+    """
+    from apex_habitat.habitat.api.front_desk import _bed_color
+
+    f = {"status": "Active"}
+    if not permissions._building_is_unscoped(frappe.session.user):
+        allowed = permissions._allowed_buildings(frappe.session.user)
+        if not allowed:
+            return []
+        f["name"] = ["in", allowed]
+    if txt:
+        f["building_name"] = ["like", f"%{txt}%"]
+
+    buildings = frappe.get_all(
+        "Accommodation Building", filters=f, fields=["name", "building_name"]
+    )
+    if not buildings:
+        return []
+    building_names = [b.name for b in buildings]
+
+    # One bed/room read across every in-scope building; bucket the green (available)
+    # count per building in Python via _bed_color — bounded regardless of count.
+    Bed = frappe.qb.DocType("Accommodation Bed")
+    Room = frappe.qb.DocType("Accommodation Room")
+    bed_rows = (
+        frappe.qb.from_(Bed)
+        .left_join(Room)
+        .on(Bed.room == Room.name)
+        .select(Bed.building, Bed.status.as_("bed_status"), Bed.condition, Room.readiness_status)
+        .where(Bed.building.isin(building_names))
+        .run(as_dict=True)
+    )
+    available = {name: 0 for name in building_names}
+    for bed in bed_rows:
+        if bed.building in available and _bed_color(bed.bed_status, bed.condition, bed.readiness_status) == "green":
+            available[bed.building] += 1
+
+    rows = [
+        (b.name, b.building_name or b.name)
+        for b in buildings
+        if available.get(b.name, 0) > 0
+    ]
+    rows.sort(key=lambda r: str(r[1]))
+    return rows[start : start + page_len] if page_len else rows

@@ -115,6 +115,11 @@ class ArrivalsDesk {
 				options: 'Accommodation Building',
 				label: __('Building'),
 				placeholder: __('Pick a building…'),
+				// Offer only buildings that still have an available bed (server-scoped,
+				// same free-bed rule as the board) — never a full building.
+				get_query: () => ({
+					query: 'apex_habitat.habitat.api.arrivals_desk.buildings_with_capacity',
+				}),
 				onchange: () => this._on_building_change(),
 			},
 			parent: $bWrap.get(0),

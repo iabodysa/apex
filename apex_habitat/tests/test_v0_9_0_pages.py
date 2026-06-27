@@ -65,6 +65,15 @@ class TestV090Pages(ApexHabitatTestCase):
         catalog = get_kiosk_catalog(self.building)
         self.assertTrue(any(a["article"] == article for a in catalog["articles"]))
 
+        # Custody Issue now rejects issuing more than the store holds; receive
+        # opening stock into the building store first so the kiosk issue can draw it.
+        from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+            post_stock_entry,
+        )
+        post_stock_entry(item_type="Custody Article", item=article, qty=2,
+                         building=self.building, voucher_type="Opening Stock",
+                         voucher_no="OPEN-" + _h())
+
         res = issue_cart(employee=self.employee, building=self.building,
                          items_json=json.dumps([{"article": article, "qty": 2}]))
         ci = res["custody_issue"]

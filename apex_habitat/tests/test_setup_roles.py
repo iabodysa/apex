@@ -125,7 +125,9 @@ class TestCreateRoleProfilesDict(unittest.TestCase):
     """Structural tests for the profiles dict in create_role_profiles()."""
 
     EXISTING_PROFILES = {
-        "Habitat Accommodation Manager": ["Accommodation Manager", "System Manager"],
+        # No System Manager — bundling it was a privilege escalation (every
+        # Accommodation Manager would carry full admin rights).
+        "Habitat Accommodation Manager": ["Accommodation Manager"],
         "Habitat Resident Supervisor": ["Resident Supervisor"],
         "Habitat Finance Reviewer": ["Finance Manager", "Internal Auditor"],
     }

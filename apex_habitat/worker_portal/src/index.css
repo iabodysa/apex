@@ -1035,6 +1035,35 @@ body {
   }
 }
 
+/* Live "driver on the way" indicator: a small pulsing dot. Theme-adaptive via the
+   primary token; the 16px box matches the sibling Icon size so the row aligns.
+   Symmetric pulse — no direction-keyed rule, so it reads the same in RTL/LTR. */
+.eta-dot {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.eta-dot::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--c-primary);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-primary) 55%, transparent);
+  animation: etaPulse 1.8s ease-out infinite;
+}
+@keyframes etaPulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-primary) 55%, transparent); }
+  70% { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eta-dot::before { animation: none; }
+}
+
 /* Inline text link (e.g. "Open map") given a >=44px tap target so it
    meets the touch minimum without looking like a button. The negative inline
    margin keeps the text visually flush while the padding widens the hit area. */

@@ -26,8 +26,15 @@
 
         <div class="header-inner relative z-[1] px-4 pt-4 pb-5">
           <div class="header-bar flex items-center justify-between gap-3">
-            <!-- Brand lockup -->
-            <div v-if="showBrand" class="flex items-center gap-2 min-w-0">
+            <!-- Brand lockup. Tappable home: with only Trips + Profile in the
+                 bottom bar, the brand is the one-tap return to the / dashboard. -->
+            <router-link
+              v-if="showBrand"
+              to="/"
+              class="flex items-center gap-2 min-w-0"
+              :aria-label="t('nav.home')"
+              style="text-decoration: none"
+            >
               <img
                 v-if="brandLogo"
                 :src="brandLogo"
@@ -40,14 +47,16 @@
                   AFMCO
                 </span>
               </template>
-            </div>
-            <span
+            </router-link>
+            <router-link
               v-else
+              to="/"
               class="text-lg font-extrabold tracking-tight"
-              style="color: var(--c-header-ink)"
+              :aria-label="t('nav.home')"
+              style="color: var(--c-header-ink); text-decoration: none"
             >
               Salis
-            </span>
+            </router-link>
 
             <!-- Language selector + driver avatar -->
             <div class="flex items-center gap-2 shrink-0">
@@ -200,14 +209,15 @@ const greeting = computed(() => {
 const showBrand = computed(() => window.portal_show_brand !== false);
 const brandLogo = computed(() => window.portal_logo || "");
 
-// Bottom bar = the two primary jobs (Trips + Profile) plus Home, which hosts the
-// "More" hub. The secondary screens are nested, not demoted to dead routes:
-//   - Route          -> a Trips card (/route/:trip) and Home > More (standalone /route)
-//   - Vehicle, Attendance -> Home > More (and Profile surfaces the same data)
-//   - Fuel, Support  -> Profile > My Requests
-// Every route stays reachable; only the bottom-bar entries shrink to three.
+// Bottom bar = the two primary jobs only: Trips + Profile. Everything else is
+// nested, not demoted to a dead route:
+//   - Home (the today/next-trip dashboard) -> the header greeting/brand taps to "/"
+//     and Profile > More links it, so the hub is one tap away from either tab.
+//   - Route                 -> a Trips card (/route/:trip) and Profile > More (/route)
+//   - Vehicle, Attendance   -> Profile > More
+//   - Fuel, Support         -> Profile > My Requests
+// Two thumb-reachable primaries; every route stays reachable.
 const tabs = [
-  { to: "/", icon: "home", labelKey: "nav.home" },
   { to: "/trips", icon: "route", labelKey: "nav.trips" },
   { to: "/profile", icon: "user", labelKey: "nav.profile" },
 ];

@@ -38,6 +38,9 @@ def get_context(context):
     # [#4h1dwk]
     context.has_fleet_role = bool(FLEET_ROLES & set(frappe.get_roles()))
     if context.has_fleet_role:
+        # Fail-closed capability flags the SPA reads; the driver lens only
+        # appears for a user that holds a fleet/driver-lens role.
+        context.fleet_caps = {"driver_lens": context.has_fleet_role}
         context.csrf_token = get_csrf_token()
         # Socket.IO config so the SPA can subscribe to live fleet_update pushes.
         # async disabled -> the page falls back to its poll (the flag tells it).

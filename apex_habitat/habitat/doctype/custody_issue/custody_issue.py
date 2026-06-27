@@ -77,8 +77,40 @@ def _set_expected_return_date(doc):
 
 
 def on_submit(doc, method=None):
+    _assert_source_availability(doc)
     doc.db_set("status", "Issued")
     _post_custody_stock(doc)
+
+
+def _assert_source_availability(doc):
+    """Reject the issue if the building store cannot cover the requested quantity
+    for any article (aggregated per article, in case of duplicate rows).
+
+    Mirrors Accommodation Custody Handover's source-availability gate: issuing must
+    not drive the store balance negative. Only the case where stock is actually
+    posted is checked — a free-text issue with no linked employee moves no stock
+    (see ``_post_custody_stock``), so it has nothing to verify."""
+    if not doc.issued_to_employee:
+        return
+    from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        get_store_balance,
+    )
+    needed = {}
+    for row in doc.items:
+        if not row.article:
+            continue
+        needed[row.article] = needed.get(row.article, 0) + (row.qty or 0)
+    for article, qty in needed.items():
+        # for_update: lock the store's ledger rows before reading the balance so a
+        # concurrent issue/handover/transfer draining the same store can't pass this
+        # check on a stale balance and overdraw it negative (TOCTOU).
+        available = get_store_balance("Custody Article", article, doc.building, for_update=True)
+        if qty > available:
+            frappe.throw(
+                _("Cannot issue {0} unit(s) of {1} from {2}: only {3} available in the store.").format(
+                    qty, article, doc.building, available
+                )
+            )
 
 
 def _post_custody_stock(doc):

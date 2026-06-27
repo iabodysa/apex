@@ -656,6 +656,57 @@ def movement_cost_transfer_has_permission(doc, ptype, user=None):
     return False
 
 
+# Operations Alert has no own `project` column; scope is derived through
+# `vehicle -> Salis Vehicle -> project` (see the two functions' docstrings). Closes
+# the cross-project leak where a scoped supervisor could see every project's alerts.
+
+def operations_alert_query(user=None):
+    """List/report scope for Operations Alert via the vehicle's project.
+
+    Returns "" (no restriction) for unscoped oversight roles. A scoped user is
+    confined to alerts whose `vehicle` resolves to a permitted project; alerts with
+    no vehicle (no project anchor) are excluded. A scoped user with no allowed
+    project sees nothing.
+    """
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return ""
+
+    projects = _allowed_projects(user)
+    if not projects:
+        return "1=0"
+
+    escaped = ", ".join(frappe.db.escape(p) for p in projects)
+    return (
+        "`vehicle` in ("
+        "select `name` from `tabSalis Vehicle` where `project` in ({values})"
+        ")".format(values=escaped)
+    )
+
+
+def operations_alert_has_permission(doc, ptype, user=None):
+    """Mirror operations_alert_query for direct form/REST/link access.
+
+    Resolves the alert's project through `vehicle -> Salis Vehicle -> project` and
+    denies a scoped user acting on an alert outside their permitted projects. A
+    vehicle-less alert (no project anchor) is denied for scoped users. Returns False
+    to block, else None to defer to Frappe's default resolution.
+    """
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return None
+
+    vehicle = getattr(doc, "vehicle", None)
+    project = frappe.db.get_value("Salis Vehicle", vehicle, "project") if vehicle else None
+    if not project:
+        return False
+
+    if project not in _allowed_projects(user):
+        return False
+
+    return None
+
+
 # [#m6o851]
 
 # [#6wflvq]

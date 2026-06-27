@@ -147,6 +147,26 @@
         </a>
       </section>
 
+      <!-- More: the secondary screens that left the bottom bar (Home dashboard,
+           Route, Vehicle, Attendance) nest here so the two primary tabs stay
+           Trips + Profile while every screen is one tap away. -->
+      <div class="space-y-2">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-muted">
+          {{ t("profile.more") }}
+        </h3>
+        <router-link
+          v-for="m in moreLinks"
+          :key="m.to"
+          :to="m.to"
+          class="card card-pad flex items-center gap-3"
+          style="text-decoration: none"
+        >
+          <Icon :name="m.icon" :size="18" class="text-primary shrink-0" />
+          <span class="text-sm font-semibold">{{ t(m.labelKey) }}</span>
+          <Icon name="chevron" :size="18" class="ms-auto text-muted shrink-0" />
+        </router-link>
+      </div>
+
       <!-- My Requests: secondary actions reachable from the profile rather
            than the bottom tab bar (fuel request + support tickets). Each row
            is a tappable mini-card, matching the Unlinked screen's link rows. -->
@@ -223,6 +243,15 @@ import {
 } from "../push";
 
 const { t } = useI18n();
+
+// The secondary screens nested under Profile now that the bottom bar is just
+// Trips + Profile. Each routes to an existing page; labels reuse the home.* keys.
+const moreLinks = [
+  { to: "/", icon: "home", labelKey: "profile.dashboard" },
+  { to: "/route", icon: "route", labelKey: "home.myRoute" },
+  { to: "/vehicle", icon: "truck", labelKey: "home.myVehicle" },
+  { to: "/attendance", icon: "calendar", labelKey: "home.attendance" },
+];
 
 // Load push config + any existing subscription when the profile opens, so the
 // toggle reflects the real state (and stays hidden when push is unconfigured).

@@ -230,6 +230,14 @@ class TestCustody(QABase):
     def _issue(self, article, qty=5, employee=None):
         if not getattr(self, "_cust_building", None):
             self._cust_building = self._make_building().name
+        # Custody Issue now rejects issuing more than the store holds; receive
+        # opening stock into the building store first so the issue can draw it.
+        from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+            post_stock_entry,
+        )
+        post_stock_entry(item_type="Custody Article", item=article, qty=qty,
+                         building=self._cust_building, voucher_type="Opening Stock",
+                         voucher_no="OPEN-" + _hash())
         i = frappe.get_doc({
             "doctype": "Custody Issue", "naming_series": "CUST-ISS-.####",
             "issue_date": "2026-05-01", "issued_to_employee": employee or self.employee,

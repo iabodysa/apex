@@ -509,6 +509,7 @@ Cannot cancel Custody Issue {0} because it is referenced by active Custody Retur
 Cannot cancel Custody Return {0} because it is referenced by active Custody Damage Assessment {1}.,لا يمكن إلغاء إرجاع العهدة {0} لأنه مرجوع إليه من تقييم تلفيات عهدة نشط {1}.
 "Cannot check out while the resident still holds custody. Resolve each item (return it, or mark it Lost/Damaged): {0}",لا يمكن إتمام المغادرة بينما لا يزال النزيل يحتفظ بعهدة. عالِج كل بند (أعِده، أو حدّده مفقوداً/تالفاً): {0}
 Cannot hand over {0} unit(s) of {1} from {2}: only {3} available in the store.,لا يمكن تسليم {0} وحدة من {1} من {2}: المتوفر في المخزن {3} فقط.
+Cannot issue {0} unit(s) of {1} from {2}: only {3} available in the store.,لا يمكن صرف {0} وحدة من {1} من {2}: المتوفر في المخزن {3} فقط.
 Cannot mark Missed before the scheduled date ({0}).,لا يمكن وضع علامة فائت قبل التاريخ المجدول ({0}).
 Cannot return {0} unit(s) of {1}: {2} were issued and {3} already returned.,لا يمكن إرجاع {0} وحدة من {1}: تم صرف {2} وأُرجعت {3} بالفعل.
 Cannot transfer {0} unit(s) of {1} from {2}: only {3} available in the store.,لا يمكن نقل {0} وحدة من {1} من {2}: المتوفر في المخزن {3} فقط.
@@ -2158,6 +2159,7 @@ Original Cost (SAR),التكلفة الأصلية (ريال)
 Other,أخرى
 Out of Service,خارج الخدمة
 Out of service,خارج الخدمة
+Outcome,النتيجة
 Outcome of validating the scanned pass token.,نتيجة التحقق من رمز التصريح الممسوح.
 Outstanding,مستحق
 Outstanding Fuel Exceptions,حالات استثناء وقود معلّقة
@@ -3371,6 +3373,8 @@ Trigger Event,الحدث المُشغِّل
 Trigger alert if monthly bill deviates from average by more than this percentage.,أطلق تنبيهاً إذا انحرفت الفاتورة الشهرية عن المتوسط بأكثر من هذه النسبة.
 Trip,الرحلة
 Trip Boarding Event,حدث صعود الرحلة
+Trip Boarding Ledger,سجل ركوب الرحلة
+Trip Boarding Ledger is a posted audit record and cannot be edited.,سجل ركوب الرحلة سجل تدقيق مُرحَّل ولا يمكن تعديله.
 Trip Boarding State,حالة صعود الرحلة
 Trip Cost,تكلفة الرحلة
 Trip Date,تاريخ الرحلة
@@ -3385,6 +3389,7 @@ Trip Start Log,سجل بدء الرحلة
 Trip Stop Progress,تقدم محطة الرحلة
 Trip Subject,موضوع الرحلة
 Trip Tomorrow:,رحلة الغد:
+Trip boarding ledger. One immutable row per worker's final boarding outcome on a finalized Dispatch Trip. Maintained automatically by the system; never edited manually.,سجل ركوب الرحلة. صف واحد غير قابل للتعديل لكل عامل يوثّق نتيجة الركوب النهائية في رحلة إيفاد مُنجَزة. يُحدَّث تلقائيًا بواسطة النظام؛ ولا يُحرَّر يدويًا.
 Trip end odometer ({0}) cannot be less than start ({1}).,عداد مسافة نهاية الرحلة ({0}) لا يمكن أن يكون أقل من البداية ({1}).
 Trip fulfilment ledger. Maintained automatically by the system when a Dispatch Trip is completed and not edited manually.,دفتر تنفيذ الرحلات. يُحدّثه النظام آلياً عند اكتمال رحلة تشغيل، ولا يُحرّر يدوياً.
 Trip not found.,الرحلة غير موجودة.

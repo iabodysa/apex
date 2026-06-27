@@ -24,7 +24,7 @@
  "is_hidden": 0,
  "sequence_id": 6.0,
  "parent_page": "Salis",
- "content": "[{\"id\": \"srcHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srcQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"srcQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Payment Request\", \"col\": 3}}, {\"id\": \"srcHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srcKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Settlements Pending Approval\", \"col\": 3}}, {\"id\": \"srcKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cost Recovery Aging Backlog\", \"col\": 3}}, {\"id\": \"srcHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srcCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs and Settlement\", \"col\": 4}}, {\"id\": \"srcCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Engine Ledgers / Audit\", \"col\": 4}}, {\"id\": \"srcCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "content": "[{\"id\": \"srcHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"srcQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"srcQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Payment Request\", \"col\": 3}}, {\"id\": \"srcHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"srcKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Settlements Pending Approval\", \"col\": 3}}, {\"id\": \"srcKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cost Recovery Aging Backlog\", \"col\": 3}}, {\"id\": \"srcHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"srcCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs and Settlement\", \"col\": 6}}, {\"id\": \"srcCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 6}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -91,38 +91,8 @@
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
-   "label": "Engine Ledgers / Audit",
-   "idx": 7
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Rental Accrual Ledger",
-   "link_type": "DocType",
-   "link_to": "Rental Accrual Ledger",
-   "idx": 8
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Fuel Consumption Ledger",
-   "link_type": "DocType",
-   "link_to": "Fuel Consumption Ledger",
-   "idx": 9
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Trip Fulfilment Ledger",
-   "link_type": "DocType",
-   "link_to": "Trip Fulfilment Ledger",
-   "idx": 10
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
    "label": "Reports",
-   "idx": 11
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -130,7 +100,7 @@
    "label": "Rental Settlement Register",
    "link_type": "Report",
    "link_to": "Rental Settlement Register",
-   "idx": 12,
+   "idx": 8,
    "is_query_report": 1
   },
   {
@@ -139,7 +109,7 @@
    "label": "Rental Cost by Office",
    "link_type": "Report",
    "link_to": "Rental Cost by Office",
-   "idx": 13,
+   "idx": 9,
    "is_query_report": 1
   },
   {
@@ -148,7 +118,7 @@
    "label": "Rental Variance Report",
    "link_type": "Report",
    "link_to": "Rental Variance Report",
-   "idx": 14,
+   "idx": 10,
    "is_query_report": 1
   },
   {
@@ -157,7 +127,7 @@
    "label": "Movement Cost Recovery Register",
    "link_type": "Report",
    "link_to": "Movement Cost Recovery Register",
-   "idx": 15,
+   "idx": 11,
    "is_query_report": 1
   },
   {
@@ -166,7 +136,7 @@
    "label": "Cost Recovery Aging",
    "link_type": "Report",
    "link_to": "Cost Recovery Aging",
-   "idx": 16,
+   "idx": 12,
    "is_query_report": 1
   },
   {
@@ -175,7 +145,7 @@
    "label": "Movement Cost Summary",
    "link_type": "Report",
    "link_to": "Movement Cost Summary",
-   "idx": 17,
+   "idx": 13,
    "is_query_report": 1
   },
   {
@@ -184,7 +154,7 @@
    "label": "Salis Payment Register",
    "link_type": "Report",
    "link_to": "Salis Payment Register",
-   "idx": 18,
+   "idx": 14,
    "is_query_report": 1
   }
  ],
@@ -216,5 +186,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-27 10:00:00.000000"
+ "modified": "2026-06-28 10:00:00.000000"
 }

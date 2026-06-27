@@ -1,49 +1,25 @@
 /* [#dmydbv] */
 
-/* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
-   Growth Green / Deep Forest / Sand) so this desk page reads identically to the
-   Vue portals. Local overrides of the desk theme vars (--primary, --card-bg,
-   --border-color, --text-muted, status colours) re-skin every existing var()
-   reference below to the editorial palette without restyling each rule. Scoped to
-   .fc-root so it never leaks into the surrounding desk shell. */
+/* Local semantic-status tokens, each aliasing a native Desk var (no bespoke hex,
+   dark-mode aware) so the page's var(--c-*) call sites stay unchanged while the
+   surface inherits the native desk theme. The severity/accent rules below already
+   reference the native --green-/orange-/red- scale and --primary directly. Scoped
+   to .fc-root. */
 .fc-root {
-	--c-primary: #00844e;
-	--c-ink: #072b1a;
-	--c-ink-soft: #355040;
-	--c-surface: #f8f5ee;
-	--c-surface-2: #ffffff;
-	--c-muted: #6f7e76;
-	--c-border: #ddd5c2;
-	--c-border-strong: #cabfa3;
-	--c-success: #00844e;
-	--c-success-bg: #d9f0e3;
-	--c-warning: #c9851f;
-	--c-warning-bg: #f7ead2;
-	--c-danger: #c0392b;
-	--c-danger-bg: #f6dcd8;
+	--c-ink: var(--text-color);
+	--c-border: var(--border-color);
+	--c-border-strong: var(--gray-400);
+	--c-success: var(--green-600);
+	--c-success-bg: var(--green-100);
+	--c-warning: var(--orange-600);
+	--c-warning-bg: var(--orange-100);
+	--c-danger: var(--red-600);
+	--c-danger-bg: var(--red-100);
 
-	--font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
-	--fw-heading: 800;
+	--fw-heading: 700;
 	--fw-semibold: 600;
 
-	/* Re-skin the inherited desk palette to the editorial tokens. */
-	--primary: var(--c-primary);
-	--primary-light: var(--c-success-bg);
-	--card-bg: var(--c-surface-2);
-	--control-bg: var(--c-surface);
-	--border-color: var(--c-border);
-	--text-muted: var(--c-muted);
-	--green-500: var(--c-success);
-	--green-600: var(--c-success);
-	--orange-500: var(--c-warning);
-	--red-500: var(--c-danger);
-	--red-300: var(--c-border-strong);
-	--red-50: var(--c-danger-bg);
-	--red-600: var(--c-danger);
-
 	padding: 4px 2px 24px;
-	font-family: var(--font);
-	color: var(--c-ink);
 }
 
 /* 'Since you last looked' delta banner: calm and hidden until there is something
@@ -60,7 +36,7 @@
 	background: var(--c-warning-bg, #f7ead2);
 	font-size: 12.5px;
 }
-.fc-since-text { font-weight: 600; color: var(--c-ink, #072b1a); }
+.fc-since-text { font-weight: 600; color: var(--text-color, #1f272e); }
 .fc-since-dismiss { margin-inline-start: auto; }
 
 /* [#4y59oc] */
@@ -339,7 +315,7 @@
 	color: var(--green-600, #1e7e34);
 	font-weight: 600;
 	cursor: default;
-	border-color: var(--c-border, #ddd5c2) !important;
+	border-color: var(--border-color, #d1d8dd) !important;
 }
 .fc-sev-counter {
 	display: inline-flex;
@@ -379,7 +355,7 @@
 	height: 18px;
 	padding: 0 5px;
 	border-radius: 999px;
-	color: #fff;
+	color: var(--text-on-blue, #fff);
 	font-size: 11px;
 	font-weight: 700;
 	line-height: 18px;

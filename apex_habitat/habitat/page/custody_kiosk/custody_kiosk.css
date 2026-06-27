@@ -36,7 +36,7 @@
 
 .ck-mode-btn.active {
 	background: var(--primary);
-	color: var(--text-on-primary);
+	color: var(--text-on-blue, #fff);
 }
 
 .ck-mode-btn:focus-visible {

@@ -29,9 +29,14 @@ frappe.ui.form.on("Accommodation Lease", {
 
 		if (frm.doc.docstatus === 1 && frm.doc.status !== "Expired" && frm.doc.status !== "Terminated") {
 			frm.add_custom_button(__("Generate Payment"), function() {
-				// [#37puzh]
+				// [#37puzh] Pick an OUTSTANDING (non-Paid) row: a manually checked
+				// row only if it is still unpaid, else the first non-Paid due row.
+				// Never re-pay a row already marked Paid.
 				const schedule = frm.doc.payment_schedule || [];
-				const selected = schedule.find(r => r.__checked) || schedule.find(r => r.status !== "Paid");
+				const checked = schedule.find(r => r.__checked);
+				const selected = (checked && checked.status !== "Paid")
+					? checked
+					: schedule.find(r => r.status !== "Paid");
 				if (!selected) {
 					frappe.msgprint({
 						message: __("Select a row from the Rent Payment Schedule to generate a payment."),

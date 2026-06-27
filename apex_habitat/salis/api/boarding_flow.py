@@ -660,6 +660,19 @@ def depart_and_finalize(dispatch_trip):
 
     _close_trip_log(dispatch_trip)
 
+    # Post each settled outcome to the immutable Trip Boarding Ledger so per-worker
+    # boarding reports stay stable when the operational boarding_state child is
+    # later edited. Best-effort: a posting failure must never abort the finalize.
+    try:
+        from apex_habitat.salis.boarding_engine import post_trip_boarding
+
+        post_trip_boarding(dispatch_trip)
+    except Exception:
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Trip boarding ledger post failed for {dispatch_trip}"[:140],
+        )
+
     _publish(
         "boarding_update",
         dispatch_trip,

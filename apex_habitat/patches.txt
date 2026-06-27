@@ -187,3 +187,10 @@ apex_habitat.patches.v1_x.stamp_changelog_seen_version
 # saves). Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site
 # has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.map_custody_issue_user_to_link
+
+# v1.60.8 — drop the bundled System Manager role from the existing Habitat
+# Accommodation Manager Role Profile (T-668, ONE-TIME). The seed fix only covers
+# fresh installs; this removes the privilege-escalation row on already-provisioned
+# sites. Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed
+# site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v1_x.drop_sysmgr_from_accommodation_manager_profile

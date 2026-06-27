@@ -135,6 +135,8 @@ const messages = {
       sortLongestRunning: "Longest running",
       cards: "Cards",
       table: "Table",
+      drivers: "By driver",
+      driversTitle: "Group the board by current driver",
       compact: "Compact",
       comfortable: "Comfortable",
       densityTitle: "Toggle card density",
@@ -145,6 +147,11 @@ const messages = {
       activeFilters: "Active filters:",
       clearFilters: "Clear filters",
       noResults: "No results",
+    },
+    lens: {
+      vehiclesCount: "{n} vehicle(s)",
+      unassigned: "Unassigned vehicles",
+      noAssignedVehicles: "No vehicle is currently assigned to a driver.",
     },
     card: {
       prevDrivers: "{n} previous driver(s)",
@@ -516,6 +523,8 @@ const messages = {
       sortLongestRunning: "الأطول تشغيلاً",
       cards: "كروت",
       table: "جدول",
+      drivers: "حسب السائق",
+      driversTitle: "تجميع اللوحة حسب السائق الحالي",
       compact: "مضغوط",
       comfortable: "مريح",
       densityTitle: "تبديل كثافة الكروت",
@@ -526,6 +535,11 @@ const messages = {
       activeFilters: "الفلاتر النشطة:",
       clearFilters: "مسح الفلاتر",
       noResults: "لا نتائج",
+    },
+    lens: {
+      vehiclesCount: "{n} مركبة",
+      unassigned: "مركبات غير مُسندة",
+      noAssignedVehicles: "لا توجد مركبة مُسندة لسائق حالياً.",
     },
     card: {
       prevDrivers: "{n} سائق سابق",

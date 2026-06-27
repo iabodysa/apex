@@ -144,18 +144,10 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Rental Accrual Ledger",
-   "link_type": "DocType",
-   "link_to": "Rental Accrual Ledger",
-   "idx": 11
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Rental Office",
    "link_type": "DocType",
    "link_to": "Rental Office",
-   "idx": 12
+   "idx": 11
   }
  ],
  "charts": [],
@@ -186,5 +178,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-27 09:00:00.000000"
+ "modified": "2026-06-28 09:00:00.000000"
 }

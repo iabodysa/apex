@@ -74,10 +74,22 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
             ).insert(ignore_permissions=True).name
         return o
 
+    @staticmethod
+    def _vehicle():
+        plate = "RSW-" + frappe.generate_hash(length=4).upper()
+        return frappe.get_doc(
+            {"doctype": "Salis Vehicle", "plate_number": plate,
+             "ownership": "Rented", "status": "Active"}
+        ).insert(ignore_permissions=True).name
+
     def _new_settlement(self, requested_by=None, **overrides):
         """A draft Rental Settlement stamped to ``requested_by`` (defaults to the
         standard requester). Inserted as Administrator so ``owner`` is
-        Administrator and the SoD gate is exercised purely via requested_by."""
+        Administrator and the SoD gate is exercised purely via requested_by.
+
+        Carries one vehicle line so accrued_total reconciles to the claimed_total;
+        a payment request is now capped at the reconciled accrued amount, so a
+        settlement with no accrual basis would cap the payable to zero."""
         data = {
             "doctype": "Rental Settlement",
             "rental_office": self.office,
@@ -85,6 +97,9 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
             "claimed_total": 1000,
             "requested_by": requested_by or self.requester,
             "status": "Draft",
+            "vehicles": [
+                {"vehicle": self._vehicle(), "days": 10, "daily_rate": 100, "amount": 1000},
+            ],
         }
         data.update(overrides)
         return frappe.get_doc(data).insert(ignore_permissions=True)

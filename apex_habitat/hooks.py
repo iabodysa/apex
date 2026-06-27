@@ -271,6 +271,8 @@ permission_query_conditions = {
     "Driver Clearance": "apex_habitat.salis.permissions.driver_clearance_query",
     "Vehicle Stop": "apex_habitat.salis.permissions.vehicle_stop_query",
     "Movement Cost Transfer": "apex_habitat.salis.permissions.movement_cost_transfer_query",
+    # Project-scope via the alert's vehicle; oversight roles unrestricted.
+    "Operations Alert": "apex_habitat.salis.permissions.operations_alert_query",
 }
 
 has_permission = {
@@ -332,6 +334,8 @@ has_permission = {
     "Driver Clearance": "apex_habitat.salis.permissions.driver_clearance_has_permission",
     "Vehicle Stop": "apex_habitat.salis.permissions.vehicle_stop_has_permission",
     "Movement Cost Transfer": "apex_habitat.salis.permissions.movement_cost_transfer_has_permission",
+    # Mirror operations_alert_query for direct form/REST/link access.
+    "Operations Alert": "apex_habitat.salis.permissions.operations_alert_has_permission",
 }
 
 # [#eo76cf]

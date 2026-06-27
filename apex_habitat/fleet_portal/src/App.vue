@@ -408,6 +408,48 @@ const filtered = computed(() => {
   return list;
 });
 
+// ═══════════ DRIVER-CENTRIC LENS (guarded, off by default) ═══════════
+// A read-only reorganization of the SAME scoped vehicles into per-driver groups.
+// It adds no data the board doesn't already hold (current_driver is on each
+// vehicle), so it exposes nothing beyond the project-scoped fleet the API
+// already returned. The toggle is GATED on a server-projected capability flag
+// (window.fleet_caps.driver_lens) and HIDDEN when the flag is absent — so the
+// lens is off by default and only the appropriate role can switch to it once the
+// /fleet page projects the flag. The board itself already requires a fleet role
+// (FLEET_ROLES gate in www/fleet.py) to load at all.
+const caps = (typeof window !== "undefined" && window.fleet_caps) || {};
+const canDriverLens = computed(() => caps.driver_lens === true);
+
+// Group the filtered vehicles by current driver. Assigned vehicles bucket under
+// their driver (keyed by the canonical driver name); everything without a current
+// driver falls into a single "Unassigned" group, rendered last.
+const driverGroups = computed(() => {
+  const byDriver = new Map();
+  const unassigned = [];
+  for (const v of filtered.value) {
+    const d = v.current_driver;
+    if (!d) {
+      unassigned.push(v);
+      continue;
+    }
+    const key = d.driver_id || d.name_en || d.name_ar || v.plate;
+    if (!byDriver.has(key)) {
+      byDriver.set(key, { key, driver: d, vehicles: [] });
+    }
+    byDriver.get(key).vehicles.push(v);
+  }
+  const groups = Array.from(byDriver.values()).sort((a, b) =>
+    (a.driver.name_ar || a.driver.name_en || "").localeCompare(
+      b.driver.name_ar || b.driver.name_en || "",
+      "ar"
+    )
+  );
+  if (unassigned.length) {
+    groups.push({ key: "__unassigned__", driver: null, vehicles: unassigned });
+  }
+  return groups;
+});
+
 // ═══════════ MULTI-SELECT (bulk actions) ═══════════
 // Selection mode is opt-in (a toolbar toggle) so cards stay click-to-open by
 // default; picked plates drive the bulk bar and the two bulk endpoints.
@@ -1263,6 +1305,8 @@ function expiryFlag(v) {
           <div class="view-tabs">
             <button class="vt" :class="{ on: f.view === 'cards' }" @click="setView('cards')"><Icon name="layout-grid" :size="14" /> {{ t("main.cards") }}</button>
             <button class="vt" :class="{ on: f.view === 'table' }" @click="setView('table')"><Icon name="list" :size="14" /> {{ t("main.table") }}</button>
+            <!-- Driver-centric lens: shown only when the server grants the capability -->
+            <button v-if="canDriverLens" class="vt" :class="{ on: f.view === 'drivers' }" :title="t('main.driversTitle')" @click="setView('drivers')"><Icon name="user" :size="14" /> {{ t("main.drivers") }}</button>
           </div>
         </div>
       </div>
@@ -1396,6 +1440,46 @@ function expiryFlag(v) {
               <button v-else-if="v.vehicle_status === 'available'" class="ac" style="border-color:rgba(220,38,38,.25);color:var(--red-l)" :disabled="isBusy(v.plate)" :title="t('card.markStolenTitle')" @click="markStolen(v.plate)"><span class="ac-ico"><Icon name="shield-alert" :size="14" /></span>{{ t("card.markStolen") }}</button>
               <button class="ac ac-hist" :title="t('card.historyTitle')" @click="openPanel(v.plate, 5)"><span class="ac-ico"><Icon name="clipboard-list" :size="14" /></span><span class="hist-n">{{ v.history.length }}</span></button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVER LENS: the same scoped vehicles grouped by current driver. A
+           read-only reorganization (no new data, no new endpoint) gated by
+           canDriverLens so f.view can only reach "drivers" when the capability is
+           granted. Each row deep-links to the existing vehicle panel. -->
+      <div v-else-if="f.view === 'drivers'" class="cards-wrap">
+        <div v-if="!filtered.length" class="empty">
+          <div class="empty-ic"><Icon :name="isScopeEmpty ? 'lock' : 'user'" :size="42" :stroke-width="1.5" /></div>
+          <div>{{ isScopeEmpty ? t("main.noScope") : anyFilterActive ? t("main.noResultsFilters") : t("main.noVehicles") }}</div>
+          <button v-if="!isScopeEmpty && anyFilterActive" class="btn btn-blue" @click="resetFilters">{{ t("main.clearFilters") }}</button>
+        </div>
+        <div v-else class="fp-lens">
+          <div v-for="g in driverGroups" :key="g.key" class="fp-lens-group">
+            <div class="fp-lens-head">
+              <span class="fp-lens-av">
+                <template v-if="g.driver"><bdi>{{ initials(g.driver) }}</bdi></template>
+                <Icon v-else name="car" :size="15" />
+              </span>
+              <span class="fp-lens-name">
+                <template v-if="g.driver">{{ g.driver.name_ar || g.driver.name_en || t("common.none") }}</template>
+                <template v-else>{{ t("lens.unassigned") }}</template>
+              </span>
+              <span class="fp-lens-count">{{ t("lens.vehiclesCount", { n: g.vehicles.length }) }}</span>
+            </div>
+            <button
+              v-for="v in g.vehicles"
+              :key="v.plate"
+              class="fp-lens-row"
+              :class="'vs-' + v.vehicle_status"
+              @click="openPanel(v.plate)"
+            >
+              <Icon :name="icon(v)" :size="16" class="shrink-0" />
+              <span class="fp-lens-plate mono"><bdi>{{ v.plate }}</bdi></span>
+              <span class="sbadge" :class="sb(v).cls"><Icon :name="sb(v).ic" :size="12" />{{ sl(v.vehicle_status) }}</span>
+              <span class="fp-lens-meta">{{ v.vehicle_type || "—" }} · {{ trim(v.project) || t("common.none") }}</span>
+              <Icon name="chevron" :size="14" class="fp-lens-chev shrink-0" />
+            </button>
           </div>
         </div>
       </div>

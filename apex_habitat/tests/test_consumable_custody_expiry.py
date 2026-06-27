@@ -43,6 +43,14 @@ class TestConsumableCustodyExpiry(ApexHabitatTestCase):
                                "consumable_lifespan_months": lifespan}).insert(ignore_permissions=True).name
 
     def _issue(self, article, issue_date, qty=2):
+        # Custody Issue now rejects issuing more than the store holds; receive
+        # opening stock into the building store first so the issue can draw it.
+        from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+            post_stock_entry,
+        )
+        post_stock_entry(item_type="Custody Article", item=article, qty=qty,
+                         building=self.building, voucher_type="Opening Stock",
+                         voucher_no="OPEN-" + _h(), posting_date=issue_date)
         i = frappe.get_doc({"doctype": "Custody Issue", "naming_series": "CUST-ISS-.####",
                             "issue_date": issue_date, "issued_to_employee": self.emp, "building": self.building})
         i.append("items", {"article": article, "qty": qty})

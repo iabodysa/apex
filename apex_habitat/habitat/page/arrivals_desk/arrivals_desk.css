@@ -1,53 +1,28 @@
 /* [#niitf7] */
 
-/* Shared bed-status palette — the same functional colours the front desk and
-   transfer board use for their bed cards, declared once here as global custom
-   properties (identical names across those pages) so no surface carries the hexes
-   inline. Free / amber (near-full) / full (red) / out-of-service (grey), each as
-   background / border / text. */
+/* Shared bed-status palette — the same functional status colours the front desk and
+   transfer board use for their bed cards. Each token aliases a native Desk colour-scale
+   var (no bespoke hex, dark-mode aware), declared once under the same names across
+   those pages so no surface carries hexes inline. Free (green) / amber (near-full) /
+   full (red) / out-of-service (grey). */
 :root {
-	--bed-free-bg: #e6f4ea;
-	--bed-free-border: #34a853;
-	--bed-free-text: #1e7e34;
-	--bed-full-bg: #fde8e8;
-	--bed-full-border: #d93025;
-	--bed-full-text: #b71c1c;
-	--bed-amber-bg: #fff6e0;
-	--bed-amber-border: #f5a623;
-	--bed-amber-text: #a96a00;
-	--bed-oos-bg: #f0f1f3;
-	--bed-oos-border: #c2c8ce;
-	--bed-oos-text: #74808b;
+	--bed-free-bg: var(--green-100);
+	--bed-free-border: var(--green-500);
+	--bed-free-text: var(--green-700);
+	--bed-full-bg: var(--red-100);
+	--bed-full-border: var(--red-500);
+	--bed-full-text: var(--red-700);
+	--bed-amber-bg: var(--yellow-100);
+	--bed-amber-border: var(--orange-500);
+	--bed-amber-text: var(--orange-700);
+	--bed-oos-bg: var(--gray-100);
+	--bed-oos-border: var(--gray-400);
+	--bed-oos-text: var(--gray-600);
 }
 
-/* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
-   Growth Green / Deep Forest / Sand) so this desk page reads identically to the
-   Vue portals. Local overrides of the desk theme vars (incl. the blue accent →
-   editorial green) re-skin every existing var() reference. Scoped to
-   .arrivals-desk so it never leaks into the desk shell. The --ad-bed-* aliases
-   below map this page's semantic names onto the shared --bed-* tokens. */
+/* The --ad-bed-* aliases below map this page's semantic names onto the shared
+   --bed-* tokens (themselves native Desk colour-scale vars). */
 .arrivals-desk {
-	--c-primary: #00844e;
-	--c-ink: #072b1a;
-	--c-surface: #f8f5ee;
-	--c-surface-2: #ffffff;
-	--c-muted: #6f7e76;
-	--c-border: #ddd5c2;
-	--font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
-
-	/* Re-skin the inherited desk palette to the editorial tokens. */
-	--primary: var(--c-primary);
-	--card-bg: var(--c-surface-2);
-	--fg-color: var(--c-surface-2);
-	--control-bg: var(--c-surface);
-	--bg-light-gray: var(--c-surface);
-	--fg-hover-color: var(--c-surface);
-	--border-color: var(--c-border);
-	--text-muted: var(--c-muted);
-	--text-color: var(--c-ink);
-	--heading-color: var(--c-ink);
-	font-family: var(--font);
-
 	/* [#qbeqtr] */
 	/* Semantic aliases onto the shared --bed-* palette (occupied = full red,
 	   blocked = amber); the page's existing var(--ad-bed-*) call sites are unchanged. */
@@ -239,7 +214,7 @@
 }
 .arrivals-desk .ax-step--done::before {
 	background: var(--ad-bed-free-border);
-	color: #fff;
+	color: var(--text-on-blue, #fff);
 }
 .arrivals-desk .ax-step--now {
 	border-color: var(--primary);
@@ -247,7 +222,7 @@
 }
 .arrivals-desk .ax-step--now::before {
 	background: var(--primary);
-	color: #fff;
+	color: var(--text-on-blue, #fff);
 }
 .arrivals-desk .ax-step--done:hover {
 	background: var(--fg-hover-color);
@@ -295,7 +270,7 @@
 	border-radius: 3px;
 	font-size: 0.65rem;
 	font-weight: 700;
-	color: #fff;
+	color: var(--text-on-blue, #fff);
 	background: var(--primary);
 	vertical-align: middle;
 }

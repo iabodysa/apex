@@ -42,6 +42,23 @@
             <span class="font-semibold"><bdi>{{ rideWhen }}</bdi></span>
             <span v-if="relativeHint" class="pill pill-neutral ms-auto shrink-0">{{ relativeHint }}</span>
           </div>
+
+          <!-- Live ETA slot. A true distance/time ETA needs a driver-side GPS
+               feed, which the fleet has NO source for yet (Salis records no
+               vehicle GPS/coordinate — see salis/api/driver_portal.py:464), so we
+               never fabricate one: rideEta is always null until that feed exists.
+               What IS real is the trip status — once the driver is Dispatched the
+               worker can trust they're on the way, so we show that truthful live
+               state instead. When the GPS feed lands, populate rideEta and this
+               same slot renders the real ETA. -->
+          <div v-if="rideEta" class="flex items-center gap-2 text-sm">
+            <Icon name="route" :size="16" class="text-primary shrink-0 rtl-flip" />
+            <span class="font-semibold">{{ t("home.etaArriving", { eta: rideEta }) }}</span>
+          </div>
+          <div v-else-if="rideEnRoute" class="flex items-center gap-2 text-sm">
+            <span class="eta-dot" aria-hidden="true"></span>
+            <span class="font-semibold text-primary">{{ t("home.enRoute") }}</span>
+          </div>
         </template>
 
         <p v-else class="text-sm text-muted">{{ t("home.noRide") }}</p>
@@ -201,6 +218,22 @@ const errorMessage = computed(() => resourceErrorMessage(home.error));
 
 const ride = computed(() => home.data?.next_ride || null);
 const bed = computed(() => home.data?.bed || null);
+
+// Live ride ETA — GATED behind a driver-GPS feed that does not exist yet.
+// PREMISE CHECK (T-331): the system has NO live driver location. Salis Vehicle
+// records no GPS/coordinate field (confirmed at salis/api/driver_portal.py:464),
+// and next_ride carries only a SCHEDULED depart_time/pickup_datetime + a status,
+// not a live position. So a real distance/time ETA cannot be computed here.
+// rideEta stays null (no fake ETA) until the next_ride payload gains a server-
+// computed `eta` from a driver-GPS feed; when it does, the card slot above
+// renders it automatically. FLAG: needs the driver-GPS feed.
+const rideEta = computed(() => ride.value?.eta || null);
+
+// What we CAN show truthfully today: the trip's own status. "Dispatched" is the
+// stored Salis trip status meaning the driver has left, so the worker can trust
+// they're on the way. Keyed on the raw stored English value (status is server-
+// driven; tEnum localizes the badge separately).
+const rideEnRoute = computed(() => ride.value?.status === "Dispatched");
 const alerts = computed(() => home.data?.profile_alerts || []);
 
 // The bed chip now reads as a real location: prefer the human building/room name,

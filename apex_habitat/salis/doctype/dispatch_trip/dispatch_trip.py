@@ -215,8 +215,18 @@ class DispatchTrip(Document):
             )
 
     def _validate_trip_times(self):
-        """Return Time must not precede Depart Time when both are set (a single-day
-        trip cannot return before it departs)."""
+        """Return Time must not precede Depart Time (a single-day trip cannot return
+        before it departs).
+
+        Guard the check to Completed trips only. A return is a recorded execution
+        fact, not a plan, so it is meaningful only at completion. This also avoids a
+        false positive on a freshly created Planned trip: Frappe auto-fills an unset
+        Time field with the creation-time nowtime (model.create_new), so a brand-new
+        trip carries a spurious return_time that can read as earlier than a later
+        depart_time depending on the wall-clock at creation.
+        """
+        if self.status != "Completed":
+            return
         if self.depart_time and self.return_time and self.return_time < self.depart_time:
             frappe.throw(
                 _("Return Time cannot be earlier than Depart Time.")
@@ -316,6 +326,12 @@ class DispatchTrip(Document):
             frappe.delete_doc(
                 "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True  # audit-ok
             )
+        # Reverse-not-delete the immutable per-worker boarding outcomes: post a
+        # negative mirror + flag the originals is_cancelled, so reports net out
+        # the cancelled trip while the audit record is preserved.
+        from apex_habitat.salis.boarding_engine import reverse_trip_boarding
+
+        reverse_trip_boarding(self.name)
         # [#r7e254]
 
 

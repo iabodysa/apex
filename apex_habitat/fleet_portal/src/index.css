@@ -938,3 +938,32 @@ tr.fp-sel{background:var(--blue-d)}
 }
 .vcard.fp-busy{opacity:.92}
 @keyframes fpSpin{to{transform:rotate(360deg)}}
+
+/* Driver-centric lens: per-driver groups of the same scoped vehicles. Reuses the
+   board tokens so it stays theme-consistent; flex rows are logical-flow so RTL
+   mirrors automatically (the page is dir="rtl"). */
+.fp-lens{display:flex;flex-direction:column;gap:14px;max-width:760px;margin:0 auto}
+.fp-lens-group{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden}
+.fp-lens-head{
+  display:flex;align-items:center;gap:9px;padding:9px 14px;
+  background:var(--bg3);border-bottom:1px solid var(--b1);
+}
+.fp-lens-av{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;background:var(--blue-d);color:var(--blue-l);
+  border:1px solid rgba(59,130,246,.2);
+}
+.fp-lens-name{font-size:13px;font-weight:700;color:var(--t1);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fp-lens-count{margin-inline-start:auto;font-size:11px;font-weight:600;color:var(--t3);flex-shrink:0}
+.fp-lens-row{
+  display:flex;align-items:center;gap:9px;width:100%;
+  padding:9px 14px;border:0;border-top:1px solid var(--b1);
+  background:var(--bg2);color:var(--t1);cursor:pointer;text-align:start;
+  font-family:inherit;font-size:13px;
+}
+.fp-lens-group .fp-lens-row:first-of-type{border-top:0}
+.fp-lens-row:hover{background:var(--s1)}
+.fp-lens-plate{font-weight:700;letter-spacing:1px;flex-shrink:0}
+.fp-lens-meta{margin-inline-start:auto;font-size:11px;color:var(--t3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fp-lens-chev{color:var(--t3);opacity:.7}

@@ -1,41 +1,14 @@
 /* [#7u6bya] */
 
-/* Editorial-light token block mirrored from the /safety portal (AFMCO theme:
-   Growth Green / Deep Forest / Sand) so this desk page reads identically to the
-   Vue portals. Local overrides of the desk theme vars re-skin every existing
-   var() reference to the editorial palette. Scoped to .room-setup so it never
-   leaks into the surrounding desk shell. */
 .room-setup {
-	--c-primary: #00844e;
-	--c-ink: #072b1a;
-	--c-surface: #f8f5ee;
-	--c-surface-2: #ffffff;
-	--c-muted: #6f7e76;
-	--c-border: #ddd5c2;
-	--c-success: #00844e;
-	--c-success-bg: #d9f0e3;
-	--font: "Montserrat", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
-
-	/* Re-skin the inherited desk palette to the editorial tokens. */
-	--primary: var(--c-primary);
-	--card-bg: var(--c-surface-2);
-	--fg-color: var(--c-surface-2);
-	--control-bg: var(--c-surface);
-	--border-color: var(--c-border);
-	--text-muted: var(--c-muted);
-	--green-100: var(--c-success-bg);
-	--green-700: var(--c-success);
-
 	max-width: 900px;
 	margin: 0 auto;
 	padding: 8px 0 70px;
-	font-family: var(--font);
-	color: var(--c-ink);
 }
 
 .rs-steps { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .rs-step { flex: 1; min-width: 84px; padding: 6px 8px; border-radius: 6px; background: var(--control-bg, #f4f5f6); color: var(--text-muted); font-size: 12px; text-align: center; }
-.rs-step.active { background: var(--primary, #2490ef); color: #fff; }
+.rs-step.active { background: var(--primary, #2490ef); color: var(--text-on-blue, #fff); }
 .rs-step.done { background: var(--green-100, #e3f6e3); color: var(--green-700, #1f7a1f); }
 .rs-step-no { display: inline-block; width: 18px; height: 18px; line-height: 18px; border-radius: 50%; background: rgba(0, 0, 0, 0.12); text-align: center; margin-right: 3px; font-weight: 600; }
 

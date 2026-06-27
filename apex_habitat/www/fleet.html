@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="/assets/apex_habitat/fleet_portal/assets/index.css" />
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
+      window.fleet_caps = {{ fleet_caps | tojson }};
       window.fleet_socket = {
         site_name: {{ site_name | tojson }},
         socketio_port: {{ socketio_port }},
