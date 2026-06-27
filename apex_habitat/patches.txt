@@ -194,3 +194,11 @@ apex_habitat.patches.v1_x.map_custody_issue_user_to_link
 # sites. Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed
 # site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.drop_sysmgr_from_accommodation_manager_profile
+
+# v1.x — adopt native Frappe Address for Rental Office (T-532, ONE-TIME). Rental Office
+# now wires the native Address (Address DocType + Dynamic Link, ERPNext pattern) via an
+# address_html field; this mirrors each office's legacy inline `city` value into a native
+# Address record. Runs AFTER model sync so the address_html field + Dynamic Link target
+# exist. Skips offices already linked or with no city; never deletes the inline value.
+# Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site has run it.
+apex_habitat.patches.v1_x.backfill_rental_office_native_address

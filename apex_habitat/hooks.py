@@ -157,6 +157,8 @@ scheduler_events = {
         "apex_habitat.habitat.tasks.consumable_custody_expiry_watch",
         "apex_habitat.habitat.tasks.daily_scheduled_task_instance_generator",
         "apex_habitat.habitat.tasks.daily_occupancy_snapshot",
+        # [#t554-clean] auto-create today's draft Cleaning Log per active building
+        "apex_habitat.habitat.tasks.daily_cleaning_log_generator",
         # [#wave3-safety]
         "apex_habitat.habitat.tasks.daily_safety_task_compliance_scan",
         "apex_habitat.habitat.tasks.audit_remediation_deadline_watch",

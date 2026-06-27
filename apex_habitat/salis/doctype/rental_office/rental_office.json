@@ -15,7 +15,9 @@
   "status",
   "rental_office_sec_contact",
   "contact_person",
-  "phone"
+  "phone",
+  "rental_office_sec_address",
+  "address_html"
  ],
  "fields": [
   {
@@ -79,6 +81,16 @@
    "fieldtype": "Data",
    "label": "Phone",
    "options": "Phone"
+  },
+  {
+   "fieldname": "rental_office_sec_address",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address"
   }
  ],
 "links": [
