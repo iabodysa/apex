@@ -4,6 +4,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.60.3 — your driver and safety screens now update themselves: the driver and safety apps refresh on their own the moment a trip or safety round changes, and the worker portal quietly refreshes while it is the screen you are looking at; the worker boarding pass is redesigned as a themed ticket that shows the worker only their own pickup and destination instead of the full driver route; opening a stop in Maps now drops you on the real place, trip cards fit small phone screens, safety reports are grouped into five clear sections, and more of the app reads correctly in Arabic",
+        "app_name": "apex_habitat",
+        "link": "/driver",
+        "creation": "2026-06-27 03:00:00",
+    },
+    {
         "title": "Apex 1.60 — keep a running count of what's in each building: a new housing inventory register tracks countable items (furniture, appliances, linen, kitchenware) per building and room, with expected against counted quantity, the variance, and each item's condition, and a completed maintenance work order on a linked item updates the matching row on its own (the maintenance date moves forward and a needs-maintenance flag clears) so nothing is re-keyed by hand; and a driver can opt in on their own device to receive background notifications, so a trip assignment or a fuel decision reaches them even when the app is closed (off until you turn it on and set it up in Settings, with nothing sent until then)",
         "app_name": "apex_habitat",
         "link": "/app/housing-inventory",
