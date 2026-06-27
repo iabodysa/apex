@@ -33,31 +33,37 @@ def validate(doc, method=None):
         if doc.billing_period_to < doc.billing_period_from:
             frappe.throw(_("Billing Period To must be on or after Billing Period From."))
 
-    # [#egssfj]
+    # [#egssfj] overlapping (not only exact) periods for the same building+account collide
     if doc.utility_account and doc.billing_period_from and doc.billing_period_to:
-        duplicate = frappe.db.exists(
+        overlap = frappe.db.get_value(
             "Utility Bill Entry",
             {
                 # [#p1ktdw]
                 "company": doc.company,
                 "building": doc.building,
                 "utility_account": doc.utility_account,
-                "billing_period_from": doc.billing_period_from,
-                "billing_period_to": doc.billing_period_to,
+                "billing_period_from": ["<=", doc.billing_period_to],
+                "billing_period_to": [">=", doc.billing_period_from],
                 "docstatus": ["!=", 2],
                 "name": ["!=", doc.name or ""],
             },
+            "name",
         )
-        if duplicate:
+        if overlap:
             frappe.throw(
-                _("A Utility Bill Entry already exists for this account and billing period: {0}").format(
-                    duplicate
+                _("A Utility Bill Entry already overlaps this account's billing period: {0}").format(
+                    overlap
                 )
             )
 
     _compute_meter_readings(doc)
     _compute_sharing(doc)
     _compute_variance(doc)
+
+    # reject negative amounts here; the intentional negative reversal is built
+    # directly in before_cancel and never routes through validate.
+    if flt(doc.total_bill_amount_sar) < 0 or flt(doc.bill_amount_sar) < 0:
+        frappe.throw(_("Bill amounts cannot be negative."))
 
 
 def on_submit(doc, method=None):
@@ -153,6 +159,11 @@ def _post_ledger_row(doc) -> None:
     Uses bill_amount_sar (the building's actual share after bearing calculation).
     The bill_share_note provides the audit trail for shared-meter cases.
     """
+    # idempotent: skip if a live (original, not-yet-reversed) ledger row already
+    # exists for this bill, so re-running the submit side-effect never double-posts.
+    if _live_ledger_row(doc.name):
+        return
+
     building = frappe.get_doc("Accommodation Building", doc.building)
 
     remarks = doc.bill_share_note or ""
@@ -173,3 +184,24 @@ def _post_ledger_row(doc) -> None:
         "allocation_period_end": doc.billing_period_to,
         **({"remarks": remarks} if remarks else {}),
     }).insert(ignore_permissions=True)
+
+
+def _live_ledger_row(source_name: str) -> str | None:
+    """Name of the live ledger row for this bill, or None.
+
+    Live = an original posting (reversal_of unset) that no later row reverses.
+    """
+    original = frappe.db.get_value(
+        "Accommodation Ledger",
+        {
+            "source_doctype": "Utility Bill Entry",
+            "source_name": source_name,
+            "reversal_of": ["is", "not set"],
+        },
+        "name",
+    )
+    if not original:
+        return None
+    if frappe.db.exists("Accommodation Ledger", {"reversal_of": original}):
+        return None
+    return original

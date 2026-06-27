@@ -18,6 +18,9 @@ logged, never returned to a client."""
 
 from __future__ import annotations
 
+import ipaddress
+from urllib.parse import urlparse
+
 import frappe
 
 _SETTINGS = "Salis Settings"
@@ -25,6 +28,49 @@ _SETTINGS = "Salis Settings"
 # A push payload is tiny by design (title + body + a deep-link path); keep the body
 # bounded regardless of caller so a push service never rejects an oversized message.
 _MAX_BODY_LEN = 300
+
+# SSRF allowlist: a PushSubscription endpoint is client-supplied yet becomes a
+# server-side POST target in ``_deliver``. Only the real browser push services may
+# ever be that target, so a hostile endpoint can never aim our server at an internal
+# host (cloud metadata, loopback, RFC-1918). Exact hosts plus dotted-suffix wildcards
+# for the per-region providers (Apple/Windows mint per-device subdomains).
+_PUSH_HOST_EXACT = frozenset(
+    {
+        "fcm.googleapis.com",  # Chrome / FCM
+        "updates.push.services.mozilla.com",  # Firefox
+    }
+)
+_PUSH_HOST_SUFFIX = (
+    ".push.apple.com",  # Safari (e.g. web.push.apple.com, <region>.push.apple.com)
+    ".notify.windows.com",  # Edge / WNS (e.g. <region>.notify.windows.com)
+)
+
+
+def is_allowed_push_endpoint(endpoint: str | None) -> bool:
+    """True only for an ``https://`` URL whose host is a known push provider.
+
+    The single SSRF gate for the web-push endpoint, shared by the save-time check and
+    the deliver-time re-check. Requires HTTPS (a push endpoint always is) and an exact
+    or dotted-suffix host match against the provider allowlist. A literal IP host is
+    refused outright — no provider is an IP, and this blocks loopback/link-local/private
+    /metadata targets (127/8, 10/8, 172.16/12, 192.168/16, 169.254/16, ::1) up front.
+    Suffix matches require a real subdomain label so ``evil-push.apple.com`` (no dot
+    boundary) and ``fcm.googleapis.com.evil.com`` (exact set) are both rejected."""
+    if not endpoint:
+        return False
+    parts = urlparse(endpoint.strip())
+    if parts.scheme != "https" or not parts.hostname:
+        return False
+    host = parts.hostname.lower()
+    # An IP literal is never a provider — reject so no private/loopback target slips in.
+    try:
+        ipaddress.ip_address(host)
+        return False
+    except ValueError:
+        pass
+    if host in _PUSH_HOST_EXACT:
+        return True
+    return any(host.endswith(suffix) and len(host) > len(suffix) for suffix in _PUSH_HOST_SUFFIX)
 
 
 def _vapid_config() -> dict | None:
@@ -88,6 +134,14 @@ def _deliver(cfg: dict, subscription: dict, payload: str) -> bool:
 	means the browser dropped the subscription, so the stale row is disabled. Any other
 	transport error is logged (title only — never the payload, endpoint, or key) and
 	swallowed, so one dead device never breaks a fan-out."""
+	# Defense in depth: re-gate the host before the POST so a row stored before the
+	# save-time allowlist (or tampered in the DB) can never make us POST to an internal
+	# target. A failing row is retired so the dead endpoint is not retried.
+	if not is_allowed_push_endpoint(subscription.get("endpoint")):
+		frappe.db.set_value("Driver Push Subscription", subscription["name"], "enabled", 0)
+		frappe.logger("web_push").info("send skipped: endpoint host not allowlisted")
+		return False
+
 	try:
 		from pywebpush import WebPushException, webpush
 	except ImportError:

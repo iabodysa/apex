@@ -6,7 +6,7 @@ A Fuel Exception Case must be created with status Open; {0} is reached through t
 A Fuel Request must be created with status Pending; {0} is reached through the workflow.,يجب إنشاء طلب الوقود بالحالة قيد الانتظار؛ يتم الوصول إلى {0} عبر سير العمل.
 A Masar worker link can only be issued to an Employee. This worker is linked once their Iqama is issued and a permanent Employee record exists.,لا يمكن إصدار رابط عامل مسار إلا لموظف. يُربط هذا العامل بمجرد إصدار إقامته ووجود سجل موظف دائم.
 A Security-category finding requires photo evidence before it can escalate. Please attach an Evidence Photo before submitting.,يتطلب اكتشاف من فئة الأمن دليلاً بالصور قبل تصعيده. الرجاء إرفاق صورة دليل قبل التقديم.
-A Utility Bill Entry already exists for this account and billing period: {0},يوجد بالفعل تسجيل فاتورة خدمات عامة لهذا الحساب وفترة الفوترة: {0}
+A Utility Bill Entry already overlaps this account's billing period: {0},يوجد بالفعل تسجيل فاتورة خدمات عامة يتداخل مع فترة فوترة هذا الحساب: {0}
 A Work Order already exists for this Maintenance Request: {0},يوجد بالفعل أمر عمل لطلب الصيانة هذا: {0}
 A building is required to build the checklist.,يلزم مبنى لبناء قائمة الفحص.
 A building is required to compute due cadences.,يلزم مبنى لحساب الوتائر المستحقّة.
@@ -392,6 +392,7 @@ Bill Amount (SAR),قيمة الفاتورة (ريال)
 Bill Identity,هوية الفاتورة
 Bill PDF,الفاتورة بصيغة PDF
 Bill a rental office for its vehicles and print the statement.,افتر مكتب تأجير على مركباته واطبع البيان.
+Bill amounts cannot be negative.,لا يمكن أن تكون مبالغ الفاتورة سالبة.
 Billed To Supplier,يُحاسَب على المورد
 Billing,الفوترة
 Billing Cycle,دورة الفوترة
@@ -2987,6 +2988,7 @@ This driver has been cleared on all movement-domain items listed below.,تم ت�
 This page is for the fleet team.,هذه الصفحة مخصّصة لفريق الأسطول.
 This page is for the safety team.,هذه الصفحة لفريق السلامة.
 This payment request is not finance-approved yet; it cannot be paid.,طلب الدفع هذا لم يُعتمد ماليًا بعد؛ لا يمكن دفعه.
+This push subscription endpoint is not allowed.,نقطة اشتراك الإشعارات هذه غير مسموح بها.
 This report records the safety tasks executed during the round and their outcomes.,يوثّق هذا التقرير مهام السلامة المنفذة خلال الجولة ونتائجها.
 This request is not available or does not belong to you.,هذا الطلب غير متاح أو لا يخصك.
 This resident has custody items. Opening the full Checkout form to clear custody.,لدى هذا المقيم عُهد. يتم فتح نموذج تسجيل الخروج الكامل لتصفية العهدة.

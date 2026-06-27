@@ -90,3 +90,102 @@ class TestUtilityBillEntry(FrappeTestCase):
         # [#s61pik]
         validate(self._bill(company="QA-CO-OTHER-" + m, building="QA-BLD-1", utility_account="ACC-" + m))
         frappe.delete_doc("Utility Bill Entry", first.name, force=True, ignore_permissions=True)
+
+    # ---- overlapping period (not only exact equal) is flagged ----
+    def test_overlapping_period_same_account_blocked(self):
+        from apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
+        m = frappe.generate_hash(length=6)
+        first = self._bill(
+            company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
+            billing_period_from="2026-06-01", billing_period_to="2026-06-30",
+        )
+        first.insert(ignore_permissions=True, ignore_links=True)
+        # straddles the tail of the first period -> overlap, not an exact match
+        overlapping = self._bill(
+            company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
+            billing_period_from="2026-06-15", billing_period_to="2026-07-15",
+        )
+        with self.assertRaises(frappe.ValidationError):
+            validate(overlapping)
+        # a disjoint later period for the same account is still allowed
+        validate(self._bill(
+            company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
+            billing_period_from="2026-07-01", billing_period_to="2026-07-31",
+        ))
+        frappe.delete_doc("Utility Bill Entry", first.name, force=True, ignore_permissions=True)
+
+    # ---- negative amounts rejected in validate, no ledger row posted ----
+    def test_negative_total_amount_raises(self):
+        from apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
+        m = frappe.generate_hash(length=6)
+        doc = self._bill(
+            company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
+            total_bill_amount_sar=-50, bill_amount_sar=0,
+        )
+        with self.assertRaises(frappe.ValidationError):
+            validate(doc)
+
+    def test_negative_bill_amount_raises_and_posts_no_ledger(self):
+        from apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
+        m = frappe.generate_hash(length=6)
+        src = "QA-UBE-NEG-" + m
+        doc = self._bill(
+            company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
+            bill_amount_sar=-100,
+        )
+        doc.name = src
+        with self.assertRaises(frappe.ValidationError):
+            validate(doc)
+        self.assertFalse(frappe.db.exists(
+            "Accommodation Ledger",
+            {"source_doctype": "Utility Bill Entry", "source_name": src},
+        ))
+
+    # ---- re-running the submit side-effect posts at most one live row ----
+    def _ledger_building(self, m):
+        bld = frappe.get_doc({
+            "doctype": "Accommodation Building", "building_name": "QA-LEDG-BLD-" + m,
+            "total_capacity": 10,
+        })
+        bld.insert(ignore_permissions=True, ignore_links=True)
+        return bld
+
+    def _ledger_count(self, src, reversal=None):
+        flt = {"source_doctype": "Utility Bill Entry", "source_name": src}
+        flt["reversal_of"] = ["is", "set"] if reversal else ["is", "not set"]
+        return frappe.db.count("Accommodation Ledger", flt)
+
+    def test_post_ledger_idempotent_on_rerun(self):
+        from apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry import _post_ledger_row
+        m = frappe.generate_hash(length=6)
+        bld = self._ledger_building(m)
+        src = "QA-UBE-IDEM-" + m
+        doc = self._bill(building=bld.name, utility_type="Electricity", bill_amount_sar=300)
+        doc.name = src
+        _post_ledger_row(doc)
+        _post_ledger_row(doc)  # re-run must be a no-op
+        self.assertEqual(self._ledger_count(src), 1)
+        frappe.delete_doc("Accommodation Building", bld.name, force=True, ignore_permissions=True)
+
+    def test_cancel_negative_reversal_still_posts(self):
+        from apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry import (
+            _post_ledger_row, before_cancel,
+        )
+        m = frappe.generate_hash(length=6)
+        bld = self._ledger_building(m)
+        src = "QA-UBE-REV-" + m
+        doc = self._bill(building=bld.name, utility_type="Electricity", bill_amount_sar=300)
+        doc.name = src
+        doc.cancellation_reason = "QA reversal test"
+        _post_ledger_row(doc)
+        before_cancel(doc)
+        # exactly one original + one negative reversal row
+        self.assertEqual(self._ledger_count(src), 1)
+        self.assertEqual(self._ledger_count(src, reversal=True), 1)
+        rev = frappe.db.get_value(
+            "Accommodation Ledger",
+            {"source_doctype": "Utility Bill Entry", "source_name": src, "reversal_of": ["is", "set"]},
+            "total_site_cost",
+        )
+        self.assertEqual(rev, -300)
+        frappe.delete_doc("Accommodation Building", bld.name, force=True, ignore_permissions=True)

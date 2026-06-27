@@ -1920,6 +1920,12 @@ def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
 	if not web_push.is_configured():
 		frappe.throw(_("Background notifications are not enabled."), frappe.PermissionError)
 
+	# SSRF gate: ``endpoint`` is client-supplied and later becomes a server-side POST
+	# target, so refuse anything but an https:// URL on a known push provider — blocks
+	# aiming the server at an internal/loopback/metadata host. See web_push allowlist.
+	if not web_push.is_allowed_push_endpoint(endpoint):
+		frappe.throw(_("This push subscription endpoint is not allowed."))
+
 	existing = frappe.db.get_value("Driver Push Subscription", {"endpoint": endpoint}, "name")
 	doc = (
 		frappe.get_doc("Driver Push Subscription", existing)

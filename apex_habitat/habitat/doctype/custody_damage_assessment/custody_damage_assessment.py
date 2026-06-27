@@ -21,6 +21,9 @@ def get_deduction_status(assessment):
     Read-only and computed on demand so the manager sees the current state of
     the Additional Salary rather than a stale stored copy.
     """
+    # whitelisted entry point: gate per-document read so a user without CDA
+    # read access can't probe another worker's deduction status (IDOR)
+    frappe.has_permission("Custody Damage Assessment", "read", doc=assessment, throw=True)
     entry = frappe.db.get_value("Custody Damage Assessment", assessment, "deduction_entry")
     if not entry:
         return {"entry": None, "status": "Not Created"}
@@ -49,6 +52,10 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
+    # idempotency guard: a re-fired on_submit must not post a second
+    # Additional Salary (mirrors the has_stock_entries/quota_applied idiom)
+    if doc.deduction_entry:
+        return
     settings = frappe.get_single("Habitat Settings")
     if getattr(settings, "enable_damage_deduction", 0) and doc.employee:
         logger = frappe.logger()

@@ -127,7 +127,7 @@ class TestDriverPortalWebPush(FrappeTestCase):
 	def test_opt_in_stores_scoped_subscription(self):
 		"""Opt-in creates one Driver Push Subscription bound to the resolved driver."""
 		self._configure_push()
-		endpoint = "https://push.example/endpoint-1"
+		endpoint = "https://fcm.googleapis.com/fcm/send/endpoint-1"
 		frappe.set_user(self.user)
 		res = driver_portal.save_push_subscription(
 			endpoint=endpoint, p256dh="pkey", auth="asecret", user_agent="UA/1.0"
@@ -149,7 +149,7 @@ class TestDriverPortalWebPush(FrappeTestCase):
 	def test_resubscribe_updates_in_place(self):
 		"""A re-subscribe on the same endpoint updates the row, never duplicates."""
 		self._configure_push()
-		endpoint = "https://push.example/endpoint-2"
+		endpoint = "https://fcm.googleapis.com/fcm/send/endpoint-2"
 		frappe.set_user(self.user)
 		first = driver_portal.save_push_subscription(endpoint=endpoint, p256dh="k1", auth="a1")
 		second = driver_portal.save_push_subscription(endpoint=endpoint, p256dh="k2", auth="a2")
@@ -162,7 +162,7 @@ class TestDriverPortalWebPush(FrappeTestCase):
 	def test_opt_out_disables_subscription(self):
 		"""Opt-out disables (audit-keeps) the driver's own device only."""
 		self._configure_push()
-		endpoint = "https://push.example/endpoint-3"
+		endpoint = "https://fcm.googleapis.com/fcm/send/endpoint-3"
 		frappe.set_user(self.user)
 		driver_portal.save_push_subscription(endpoint=endpoint, p256dh="k", auth="a")
 		out = driver_portal.delete_push_subscription(endpoint=endpoint)
@@ -178,7 +178,7 @@ class TestDriverPortalWebPush(FrappeTestCase):
 		self._configure_push()
 		frappe.set_user(self.user)
 		driver_portal.save_push_subscription(
-			endpoint="https://push.example/endpoint-4", p256dh="k", auth="a"
+			endpoint="https://fcm.googleapis.com/fcm/send/endpoint-4", p256dh="k", auth="a"
 		)
 		frappe.set_user("Administrator")
 		# pywebpush is intentionally not a dependency, so _deliver returns False and
