@@ -16,6 +16,8 @@ Optional filters: vehicle, from_date / to_date (applied to snapshot_date).
 import frappe
 from frappe import _
 
+from apex_habitat.salis import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -41,6 +43,23 @@ def execute(filters=None):
         query_filters["snapshot_date"] = [">=", filters["from_date"]]
     elif filters.get("to_date"):
         query_filters["snapshot_date"] = ["<=", filters["to_date"]]
+
+    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
+    # list gets via permission_query_conditions. The snapshot has no own project —
+    # it reaches one through its vehicle — so confine the rows to the vehicles in the
+    # caller's allowed projects; oversight roles see all.
+    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return columns, []
+        in_scope_vehicles = frappe.get_all(
+            "Salis Vehicle",
+            filters={"project": ["in", allowed]},
+            pluck="name",
+        )
+        if not in_scope_vehicles:
+            return columns, []
+        query_filters["vehicle"] = ["in", in_scope_vehicles]
 
     snapshots = frappe.get_all(
         "Vehicle Utilisation Snapshot",

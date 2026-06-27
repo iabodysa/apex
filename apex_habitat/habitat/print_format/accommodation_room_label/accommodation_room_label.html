@@ -1,4 +1,5 @@
-{% set building = frappe.get_doc("Accommodation Building", doc.building) %}
+{# Guard: room may have no building set — avoid get_doc DoesNotExistError #}
+{% set building = frappe.get_doc("Accommodation Building", doc.building) if doc.building else None %}
 <style>
   .room-label {
     width: 10cm;
@@ -59,7 +60,7 @@
 </style>
 
 <div class="room-label">
-  <div class="building-name">{{ building.building_name }}</div>
+  <div class="building-name">{{ building.building_name if building else "" }}</div>
   <div class="room-number">{{ doc.room_number }}</div>
   <div class="room-meta">
     {% if doc.floor %}Floor {{ doc.floor }} &nbsp;|&nbsp; {% endif %}

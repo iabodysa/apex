@@ -4,6 +4,8 @@
 import frappe
 from frappe.utils import getdate, today, add_days
 
+from apex_habitat.habitat import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -24,13 +26,26 @@ def execute(filters=None):
         {"label": frappe._("Days Since"), "fieldname": "days_since", "fieldtype": "Int", "width": 90},
     ]
 
-    query_filters = {
+    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
+    # list gets via permission_query_conditions; resolve the caller's building scope
+    # once and apply it to both the missed and the rework queries below.
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    chosen = filters.get("building")
+    if restrict:
+        if not allowed or (chosen and chosen not in allowed):
+            return columns, []
+
+    def apply_building_scope(qf):
+        if chosen:
+            qf["building"] = chosen
+        elif restrict:
+            qf["building"] = ["in", allowed]
+        return qf
+
+    query_filters = apply_building_scope({
         "cleaning_date": ["between", [str(date_from), str(date_to)]],
         "missed_cleaning": ["in", [1, "Yes"]],
-    }
-
-    if filters.get("building"):
-        query_filters["building"] = filters["building"]
+    })
 
     # [#komjl9]
     missed = frappe.get_all(
@@ -46,13 +61,11 @@ def execute(filters=None):
     )
 
     # [#eoq5v8]
-    rework_filters = {
+    rework_filters = apply_building_scope({
         "cleaning_date": ["between", [str(date_from), str(date_to)]],
         "rework_required": ["in", [1, "Yes"]],
         "missed_cleaning": ["in", [0, "No"]],
-    }
-    if filters.get("building"):
-        rework_filters["building"] = filters["building"]
+    })
 
     rework = frappe.get_all(
         "Cleaning Log",

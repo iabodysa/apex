@@ -14,6 +14,7 @@ class FacilityAssetMovement(Document):
 
 def validate(doc, method=None):
     # [#mkyjak]
+    _reconcile_origin(doc)
     _populate_company_fields(doc)
     _detect_intercompany(doc)
 
@@ -65,6 +66,34 @@ def on_cancel(doc, method=None):
 def before_cancel(doc, method=None):
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Facility Asset Movement."))
+
+
+def _reconcile_origin(doc):
+    """The origin is hand-entered and can drift from where the asset actually is.
+    Default blank from_* from the asset's recorded location, and reject a hand-entered
+    origin that contradicts it so the move can't start from a phantom location."""
+    if not doc.facility_asset:
+        return
+    asset = frappe.db.get_value(
+        "Facility Asset",
+        doc.facility_asset,
+        ["building", "location_in_building"],
+        as_dict=True,
+    )
+    if not asset:
+        return
+    if not doc.from_building:
+        doc.from_building = asset.building
+    elif asset.building and doc.from_building != asset.building:
+        frappe.throw(
+            _("From Building does not match the asset's current location ({0}).").format(asset.building)
+        )
+    if not doc.from_room:
+        doc.from_room = asset.location_in_building
+    elif asset.location_in_building and doc.from_room != asset.location_in_building:
+        frappe.throw(
+            _("From Room does not match the asset's current location ({0}).").format(asset.location_in_building)
+        )
 
 
 def _populate_company_fields(doc):

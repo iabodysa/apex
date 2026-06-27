@@ -25,9 +25,8 @@ def execute(filters=None):
     # get_all forces ignore_permissions, so the row-scoping the desk list gets via
     # permission_query_conditions is bypassed here — re-apply the caller's project
     # scope (Salis Vehicle carries a direct project); oversight roles see all.
-    user = frappe.session.user
-    if not permissions._is_unscoped(user):
-        allowed = permissions._allowed_projects(user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    if restrict:
         if not allowed:
             return columns, []
         chosen = query_filters.get("project")

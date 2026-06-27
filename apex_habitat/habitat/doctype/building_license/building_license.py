@@ -10,7 +10,13 @@ from frappe.utils import add_days, getdate, today
 
 class BuildingLicense(Document):
     def validate(self) -> None:
+        self._validate_dates()
         self._stamp_renewal_date()
+
+    def _validate_dates(self) -> None:
+        # Expiry must fall after issue; a backwards range is a data-entry error.
+        if self.issue_date and self.expiry_date and getdate(self.expiry_date) <= getdate(self.issue_date):
+            frappe.throw(_("Expiry Date must be after the Issue Date."))
 
     def _stamp_renewal_date(self) -> None:
         """Stamp ``last_renewal_date`` whenever the license is renewed.

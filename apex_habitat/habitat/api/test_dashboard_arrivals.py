@@ -10,11 +10,23 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
-from apex_habitat.habitat.api.dashboard import get_arrivals_today, get_pending_on_manifest
+from apex_habitat.habitat.api.dashboard import (
+    get_arrivals_today as _get_arrivals_today,
+    get_pending_on_manifest as _get_pending_on_manifest,
+)
 
 
 def _h(n=6):
     return frappe.generate_hash(length=n).upper()
+
+
+# Cards return the {value: n, ...df} dict contract; unwrap to the count here.
+def get_arrivals_today():
+    return _get_arrivals_today()["value"]
+
+
+def get_pending_on_manifest():
+    return _get_pending_on_manifest()["value"]
 
 
 class TestDashboardArrivals(FrappeTestCase):

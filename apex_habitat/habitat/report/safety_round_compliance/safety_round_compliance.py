@@ -21,6 +21,8 @@ status and a zero executed count.
 import frappe
 from frappe.utils import add_days, getdate, today
 
+from apex_habitat.habitat import permissions
+
 
 NEEDS_ATTENTION_STATUSES = ("Poor", "Not Done")
 
@@ -143,6 +145,17 @@ def _executions(cadence, building, date_from, date_to):
         query_filters["building"] = building
     if cadence:
         query_filters["frequency"] = cadence
+
+    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
+    # list gets via permission_query_conditions; confine executions to the caller's
+    # buildings so a scoped user never sees another estate's executions.
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    if restrict:
+        chosen = query_filters.get("building")
+        if not allowed or (chosen and chosen not in allowed):
+            return []
+        if not chosen:
+            query_filters["building"] = ["in", allowed]
 
     return frappe.get_all(
         "Safety Task Execution",

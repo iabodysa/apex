@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.habitat import permissions
+
 
 def execute(filters=None):
     columns = [
@@ -90,6 +92,17 @@ def execute(filters=None):
                 parent_filters["snapshot_date"] = ["<=", filters["to_date"]]
         if filters.get("building"):
             parent_filters["building"] = filters["building"]
+
+    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
+    # list gets via permission_query_conditions; re-apply the caller's building scope
+    # on the parent snapshot (the building-bearing record).
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    if restrict:
+        chosen = parent_filters.get("building")
+        if not allowed or (chosen and chosen not in allowed):
+            return columns, []
+        if not chosen:
+            parent_filters["building"] = ["in", allowed]
 
     # [#ckl6h1]
     snapshots = frappe.get_all(

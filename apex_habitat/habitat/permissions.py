@@ -160,6 +160,26 @@ def idle_resident_report_query(user=None):
     return _building_condition(user)
 
 
+# [#rptscope] Script Reports run on frappe.get_all, which forces ignore_permissions
+# (frappe/__init__.py get_all -> ignore_permissions=True), so the building row-scoping
+# the desk list gets via permission_query_conditions is bypassed in report code. This
+# helper consolidates the re-application: it returns the building filter a report must
+# AND onto its own get_all so a building-scoped user sees only their estates' rows while
+# the oversight roles in HOUSING_UNSCOPED_ROLES stay unrestricted.
+def report_building_scope(user=None):
+    """Return ``(restrict, allowed_buildings)`` for report-side building scoping.
+
+    ``restrict`` is False for unscoped oversight roles (the report applies no extra
+    filter — they see everything). When True the report must confine its rows to
+    ``allowed_buildings`` (an empty list means a scoped user with no permitted
+    building, i.e. the report should return no rows).
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return False, []
+    return True, _allowed_buildings(user)
+
+
 def building_scoped_has_permission(doc, ptype, user=None):
     """Deny a building-scoped user acting on a doc outside their buildings.
 

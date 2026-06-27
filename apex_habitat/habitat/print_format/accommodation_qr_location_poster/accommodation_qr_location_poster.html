@@ -41,23 +41,23 @@
 </style>
 
 <div class="qr-poster-container">
-    <div class="qr-poster-title">Need Help? Scan to Report</div>
-    <div class="qr-poster-subtitle">{{ doc.poster_title or "Resident Support Services" }}</div>
+    <div class="qr-poster-title">{{ _("Need Help? Scan to Report") }}</div>
+    <div class="qr-poster-subtitle">{{ doc.poster_title or _("Resident Support Services") }}</div>
 
     <div class="qr-code-wrapper">
         <img src="/api/method/frappe.utils.print_format.report_print?type=qr&data={{ doc.public_url | urlencode }}" class="qr-code-image" />
     </div>
 
     <div class="location-details">
-        <strong>Location Reference:</strong><br>
-        Site: {{ doc.accommodation_site or "N/A" }}<br>
-        Building: {{ doc.building or "N/A" }}<br>
-        Room: {{ doc.room or "N/A" }}<br>
-        Ref: {{ doc.name }}
+        <strong>{{ _("Location Reference") }}:</strong><br>
+        {{ _("Site") }}: {{ doc.accommodation_site or _("N/A") }}<br>
+        {{ _("Building") }}: {{ doc.building or _("N/A") }}<br>
+        {{ _("Room") }}: {{ doc.room or _("N/A") }}<br>
+        {{ _("Ref") }}: {{ doc.name }}
     </div>
 
     <div class="qr-poster-footer">
-        Point your phone camera at the QR code to open the request form.<br>
-        For life or safety emergencies, contact the accommodation supervisor directly.
+        {{ _("Point your phone camera at the QR code to open the request form.") }}<br>
+        {{ _("For life or safety emergencies, contact the accommodation supervisor directly.") }}
     </div>
 </div>

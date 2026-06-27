@@ -27,9 +27,8 @@ def execute(filters=None):
     # list gets via permission_query_conditions. Fuel Daily Log has no own project —
     # it reaches one through its vehicle — so confine the logs to the vehicles in the
     # caller's allowed projects; oversight roles see all.
-    user = frappe.session.user
-    if not permissions._is_unscoped(user):
-        allowed = permissions._allowed_projects(user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    if restrict:
         if not allowed:
             return columns, []
         in_scope_vehicles = frappe.get_all(

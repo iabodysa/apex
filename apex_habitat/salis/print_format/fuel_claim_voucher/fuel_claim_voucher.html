@@ -58,17 +58,18 @@
       </tr>
     </thead>
     <tbody>
+      {# Locale number formatting (thousands sep + precision) on litre Floats #}
       <tr>
         <td>Claimed Litres <span class="sal-ar">اللترات المُطالَب بها</span></td>
-        <td>{{ doc.claimed_litres or 0 }}</td>
+        <td>{{ frappe.format(doc.claimed_litres or 0, {"fieldtype": "Float"}) }}</td>
       </tr>
       <tr>
         <td>Consumed Litres (system) <span class="sal-ar">اللترات المُستهلَكة (النظام)</span></td>
-        <td>{{ doc.consumed_litres or 0 }}</td>
+        <td>{{ frappe.format(doc.consumed_litres or 0, {"fieldtype": "Float"}) }}</td>
       </tr>
       <tr>
         <td>Variance (L) <span class="sal-ar">الفرق (لتر)</span></td>
-        <td>{% if (doc.variance_litres or 0) > 0 %}<span class="sal-pos">{{ doc.variance_litres }}</span>{% else %}{{ doc.variance_litres or 0 }}{% endif %}</td>
+        <td>{% if (doc.variance_litres or 0) > 0 %}<span class="sal-pos">{{ frappe.format(doc.variance_litres, {"fieldtype": "Float"}) }}</span>{% else %}{{ frappe.format(doc.variance_litres or 0, {"fieldtype": "Float"}) }}{% endif %}</td>
       </tr>
       <tr>
         <td>Claimed Amount <span class="sal-ar">المبلغ المُطالَب به</span></td>

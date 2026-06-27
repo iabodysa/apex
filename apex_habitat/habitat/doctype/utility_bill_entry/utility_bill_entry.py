@@ -116,6 +116,9 @@ def before_cancel(doc, method=None):
 def _compute_meter_readings(doc) -> None:
     prev = flt(doc.meter_reading_previous)
     curr = flt(doc.meter_reading_current)
+    # A meter only advances; a current below previous is a misread, not zero usage.
+    if curr and prev and curr < prev:
+        frappe.throw(_("Current Meter Reading cannot be lower than the Previous Meter Reading."))
     if curr and prev and curr >= prev:
         doc.meter_units_consumed = round(curr - prev, 3)
     elif curr and not prev:

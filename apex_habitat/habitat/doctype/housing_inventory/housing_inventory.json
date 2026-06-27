@@ -91,6 +91,8 @@
    "label": "Location"
   },
   {
+   "fetch_from": "room.building",
+   "fetch_if_empty": 1,
    "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -101,8 +103,6 @@
    "search_index": 1
   },
   {
-   "fetch_from": "room.building",
-   "fetch_if_empty": 1,
    "fieldname": "room",
    "fieldtype": "Link",
    "label": "Room (if room-specific)",

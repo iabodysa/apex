@@ -91,7 +91,7 @@ class TestDashboardCustody(FrappeTestCase):
 
         # The whole-site scalar must include our exact net contribution and must
         # not be polluted by the cancelled or no-employee rows.
-        total = flt(get_custody_value_in_employee_hands())
+        total = flt(get_custody_value_in_employee_hands()["value"])
         self.assertGreaterEqual(total, self.net_value)
         # Cancelled (+99) and store (+7) rows would inflate it; their exclusion is
         # asserted directly below via the scoped sum, so total stays finite/sane.

@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.salis import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -35,6 +37,15 @@ def execute(filters=None):
         query_filters["pickup_datetime"] = [">=", from_date]
     elif to_date:
         query_filters["pickup_datetime"] = ["<=", to_date]
+
+    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
+    # list gets via permission_query_conditions; re-apply the caller's project scope
+    # (Transport Request carries a direct project); oversight roles see all.
+    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return columns, []
+        query_filters["project"] = ["in", allowed]
 
     data = frappe.get_all(
         "Transport Request",

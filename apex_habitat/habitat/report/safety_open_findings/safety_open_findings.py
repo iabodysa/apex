@@ -4,6 +4,8 @@
 import frappe
 from frappe.utils import getdate, today
 
+from apex_habitat.habitat import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -28,6 +30,16 @@ def execute(filters=None):
         query_filters["building"] = filters["building"]
     if filters.get("priority"):
         query_filters["priority"] = filters["priority"]
+
+    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
+    # list gets via permission_query_conditions; re-apply the caller's building scope.
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    if restrict:
+        chosen = query_filters.get("building")
+        if not allowed or (chosen and chosen not in allowed):
+            return columns, []
+        if not chosen:
+            query_filters["building"] = ["in", allowed]
 
     rows = frappe.get_all(
         "Safety Task Execution",

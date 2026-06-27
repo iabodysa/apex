@@ -14,6 +14,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import getdate
 
 from apex_habitat.salis.utils import add_timeline_note
 
@@ -46,11 +47,23 @@ class RentalVehicleMovement(Document):
         derives. Skips amendments of this same document."""
         if not (self.vehicle and self.movement_type):
             return
-        if self._has_open_receipt():
+        open_receipt_date = self._open_receipt_date()
+        if open_receipt_date is not None:
             if self.movement_type == "Receipt":
                 frappe.throw(
                     _("Vehicle {0} already has an open rental Receipt; return it before a new Receipt.").format(
                         self.vehicle
+                    )
+                )
+            # A Return dated before its open Receipt would corrupt the in-service window.
+            if (
+                self.movement_type == "Return"
+                and self.movement_date
+                and getdate(self.movement_date) < getdate(open_receipt_date)
+            ):
+                frappe.throw(
+                    _("Return date cannot be earlier than the open Receipt date ({0}).").format(
+                        open_receipt_date
                     )
                 )
         elif self.movement_type == "Return":
@@ -58,10 +71,11 @@ class RentalVehicleMovement(Document):
                 _("Vehicle {0} has no open rental Receipt to return.").format(self.vehicle)
             )
 
-    def _has_open_receipt(self) -> bool:
-        """True when the vehicle currently has a submitted Receipt with no later
-        submitted Return (the in-service window). Excludes this document and its
-        amendment lineage so re-amending a movement does not see itself."""
+    def _open_receipt_date(self):
+        """The movement_date of the vehicle's currently-open Receipt (a submitted
+        Receipt with no later submitted Return), or None when not in-service.
+        Excludes this document and its amendment lineage so re-amending a movement
+        does not see itself."""
         exclude = [n for n in (self.name, self.amended_from) if n]
         movements = frappe.get_all(
             "Rental Vehicle Movement",
@@ -73,13 +87,13 @@ class RentalVehicleMovement(Document):
             fields=["movement_type", "movement_date", "creation"],
             order_by="movement_date asc, creation asc",
         )
-        open_receipt = False
+        open_receipt_date = None
         for m in movements:
             if m.movement_type == "Receipt":
-                open_receipt = True
+                open_receipt_date = m.movement_date
             elif m.movement_type == "Return":
-                open_receipt = False
-        return open_receipt
+                open_receipt_date = None
+        return open_receipt_date
 
     def on_submit(self):
         # [#3lgl85]

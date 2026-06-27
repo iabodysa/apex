@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.habitat import permissions
+
 
 def execute(filters=None):
     columns = [
@@ -17,6 +19,18 @@ def execute(filters=None):
     query_filters = {"docstatus": 1}
     if filters and filters.get("building"):
         query_filters["building"] = filters["building"]
+
+    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
+    # list gets via permission_query_conditions; re-apply the caller's building scope.
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return columns, []
+        chosen = query_filters.get("building")
+        if chosen and chosen not in allowed:
+            return columns, []
+        if not chosen:
+            query_filters["building"] = ["in", allowed]
 
     data = frappe.get_all(
         "Custody Damage Assessment",

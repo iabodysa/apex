@@ -245,7 +245,7 @@ permission_query_conditions = {
     "Passenger Manifest": "apex_habitat.salis.permissions.passenger_manifest_query",
     # [#wave2-pqc] habitat tenant scoping (single-building unless noted)
     "Facility Asset Custody Assignment": "apex_habitat.habitat.permissions.facility_asset_custody_assignment_query",
-    "Non Financial Depreciation Snapshot": "apex_habitat.habitat.permissions.non_financial_depreciation_snapshot_query",
+    "Non-Financial Depreciation Snapshot": "apex_habitat.habitat.permissions.non_financial_depreciation_snapshot_query",
     "Custody Return": "apex_habitat.habitat.permissions.custody_return_query",
     "Custody Damage Assessment": "apex_habitat.habitat.permissions.custody_damage_assessment_query",
     "Accommodation Material Transfer": "apex_habitat.habitat.permissions.accommodation_material_transfer_query",
@@ -304,7 +304,7 @@ has_permission = {
     "Passenger Manifest": "apex_habitat.salis.permissions.scoped_has_permission",
     # [#wave2-pqc] habitat (3 dual-building use the dual helper)
     "Facility Asset Custody Assignment": "apex_habitat.habitat.permissions.building_scoped_has_permission",
-    "Non Financial Depreciation Snapshot": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Non-Financial Depreciation Snapshot": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Custody Return": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Custody Damage Assessment": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Custody Acknowledgment": "apex_habitat.habitat.permissions.building_scoped_has_permission",

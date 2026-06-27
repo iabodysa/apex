@@ -14,7 +14,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, today
+from frappe.utils import flt, getdate, today
 
 from apex_habitat.salis.utils import add_timeline_note, lock_vehicle
 
@@ -24,6 +24,9 @@ class VehicleIncident(Document):
         # [#cuwq5w]
         if self.incident_date and getdate(self.incident_date) > getdate(today()):
             frappe.throw(_("Incident date cannot be in the future."))
+        # An estimated repair/loss cost cannot be negative.
+        if flt(self.estimated_cost) < 0:
+            frappe.throw(_("Estimated cost cannot be negative."))
 
     def on_submit(self):
         # [#2gzgc9]

@@ -25,6 +25,9 @@ class MovementCostRecovery(Document):
 			frappe.throw(_("Amount must be greater than zero."))
 		if self.status == "Approved" and not self.basis_evidence:
 			frappe.throw(_("Basis / Evidence is required before a recovery can be Approved."))
+		# A recovery cannot be acknowledged or recovered until the party has accepted responsibility.
+		if self.status in ("Acknowledged", "Recovered") and not self.acknowledgement_received:
+			frappe.throw(_("Acknowledgement Received must be set before a recovery can be {0}.").format(_(self.status)))
 
 	def _set_financial_defaults(self):
 		"""Default company and cost center from Salis Settings for reporting and

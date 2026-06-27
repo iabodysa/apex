@@ -81,6 +81,27 @@ def _project_condition(user, column="`project`"):
     return "{column} in ({values})".format(column=column, values=escaped)
 
 
+# [#rptscope] Script Reports run on frappe.get_all, which forces ignore_permissions
+# (frappe/__init__.py get_all -> ignore_permissions=True), so the project row-scoping
+# the desk list gets via permission_query_conditions is bypassed in report code. This
+# helper consolidates the re-application that the Salis reports had duplicated inline:
+# it returns the project filter a report must AND onto its own get_all so a project-
+# scoped user sees only their projects' rows while the UNSCOPED_ROLES oversight roles
+# stay unrestricted.
+def report_project_scope(user=None):
+    """Return ``(restrict, allowed_projects)`` for report-side project scoping.
+
+    ``restrict`` is False for unscoped oversight roles (the report applies no extra
+    filter — they see everything). When True the report must confine its rows to
+    ``allowed_projects`` (an empty list means a scoped user with no permitted
+    project, i.e. the report should return no rows).
+    """
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return False, []
+    return True, _allowed_projects(user)
+
+
 # [#89nxdl]
 
 def vehicle_assignment_query(user=None):

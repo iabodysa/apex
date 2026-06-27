@@ -16,6 +16,8 @@ Optional filters: vehicle, period_month (YYYY-MM exact match).
 import frappe
 from frappe import _
 
+from apex_habitat.salis import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -39,6 +41,23 @@ def execute(filters=None):
         query_filters["vehicle"] = filters["vehicle"]
     if filters.get("period_month"):
         query_filters["period_month"] = filters["period_month"]
+
+    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
+    # list gets via permission_query_conditions. The ledger has no own project — it
+    # reaches one through its vehicle — so confine the rows to the vehicles in the
+    # caller's allowed projects; oversight roles see all.
+    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return columns, []
+        in_scope_vehicles = frappe.get_all(
+            "Salis Vehicle",
+            filters={"project": ["in", allowed]},
+            pluck="name",
+        )
+        if not in_scope_vehicles:
+            return columns, []
+        query_filters["vehicle"] = ["in", in_scope_vehicles]
 
     rows = frappe.get_all(
         "Fuel Consumption Ledger",

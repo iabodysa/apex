@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.habitat import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -37,9 +39,21 @@ def execute(filters=None):
     if filters.get("accounting_acknowledged") is not None:
         query_filters["accounting_acknowledged"] = filters["accounting_acknowledged"]
 
+    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
+    # list gets via permission_query_conditions. A movement carries no single `building`
+    # (only from_building + to_building), so a scoped user sees a row when EITHER
+    # endpoint is one of their estates — expressed as an OR via get_all's or_filters.
+    or_filters = None
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return columns, []
+        or_filters = {"from_building": ["in", allowed], "to_building": ["in", allowed]}
+
     rows = frappe.get_all(
         "Facility Asset Movement",
         filters=query_filters,
+        or_filters=or_filters,
         fields=[
             "name", "movement_date", "movement_category", "facility_asset",
             "from_building", "from_company", "to_building", "to_company",

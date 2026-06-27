@@ -30,6 +30,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 # [#26k8q4]
 VALID_STATUSES = (
@@ -51,6 +52,9 @@ class FuelExceptionCase(Document):
 
 	def validate(self):
 		self._default_reporter()
+		# A recovered amount is money clawed back — it can never be negative.
+		if flt(self.amount_recovered) < 0:
+			frappe.throw(_("Amount recovered cannot be negative."))
 		if self.status and self.status not in VALID_STATUSES:
 			frappe.throw(_("Invalid status: {0}").format(self.status))
 		self._guard_initial_status()

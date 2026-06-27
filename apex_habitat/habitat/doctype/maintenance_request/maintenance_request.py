@@ -5,6 +5,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class MaintenanceRequest(Document):
@@ -31,6 +32,9 @@ def _validate_status_rules(doc):
         frappe.throw(_("Assigned To is required when status is Assigned."))
     if status in ("Resolved", "Closed") and not doc.resolution_notes:
         frappe.throw(_("Resolution Notes are required to resolve or close a Maintenance Request."))
+    # A repair cost is a spend; a negative value is never valid.
+    if flt(doc.cost_of_repair) < 0:
+        frappe.throw(_("Cost of Repair cannot be negative."))
 
 
 @frappe.whitelist(methods=["POST"])

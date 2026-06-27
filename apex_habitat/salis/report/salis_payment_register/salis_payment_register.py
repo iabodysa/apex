@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.salis import permissions
+
 
 def execute(filters=None):
     columns = [
@@ -29,6 +31,17 @@ def execute(filters=None):
             query_filters["creation"] = [">=", filters["from_date"]]
         elif filters.get("to_date"):
             query_filters["creation"] = ["<=", filters["to_date"]]
+
+    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
+    # list gets via permission_query_conditions; re-apply the caller's project scope
+    # (Salis Payment Request carries a direct project); oversight roles see all.
+    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    if restrict:
+        chosen = query_filters.get("project")
+        if not allowed or (chosen and chosen not in allowed):
+            return columns, []
+        if not chosen:
+            query_filters["project"] = ["in", allowed]
 
     data = frappe.get_all(
         "Salis Payment Request",

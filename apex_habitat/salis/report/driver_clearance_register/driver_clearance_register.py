@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.salis import permissions
+
 
 def execute(filters=None):
     columns = [
@@ -28,6 +30,23 @@ def execute(filters=None):
             query_filters["creation"] = [">=", from_date]
         elif to_date:
             query_filters["creation"] = ["<=", to_date]
+
+    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
+    # list gets via permission_query_conditions. Driver Clearance has no own project —
+    # it reaches one through its driver — so confine the records to the drivers in the
+    # caller's allowed projects; oversight roles see all.
+    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return columns, []
+        in_scope_drivers = frappe.get_all(
+            "Salis Driver",
+            filters={"project": ["in", allowed]},
+            pluck="name",
+        )
+        if not in_scope_drivers:
+            return columns, []
+        query_filters["driver"] = ["in", in_scope_drivers]
 
     data = frappe.get_all(
         "Driver Clearance",

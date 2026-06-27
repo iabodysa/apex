@@ -7,11 +7,18 @@ they don't collide with pre-existing rows."""
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex_habitat.habitat.api.dashboard import get_buildings_over_threshold
+from apex_habitat.habitat.api.dashboard import (
+    get_buildings_over_threshold as _get_buildings_over_threshold,
+)
 
 
 def _h(n=6):
     return frappe.generate_hash(length=n).upper()
+
+
+# Card returns the {value: n, ...df} dict contract; unwrap to the count here.
+def get_buildings_over_threshold():
+    return _get_buildings_over_threshold()["value"]
 
 
 class TestBuildingsOverThreshold(FrappeTestCase):
@@ -66,7 +73,11 @@ class TestBuildingsOverThreshold(FrappeTestCase):
         self.assertEqual(get_buildings_over_threshold() - self.baseline, 1,
                          "occupancy over the 120 default counts when threshold unset")
 
-    def test_returns_plain_int_scalar(self):
-        val = get_buildings_over_threshold()
-        self.assertIsInstance(val, int, "Custom Number Card contract: a scalar number")
-        self.assertGreaterEqual(val, 0)
+    def test_returns_number_card_dict_contract(self):
+        res = _get_buildings_over_threshold()
+        # Custom Number Card contract: {value: <number>, ...df}.
+        self.assertIsInstance(res, dict, "Custom Number Card returns a dict, not a scalar")
+        self.assertIn("value", res, "the number must live under the 'value' key")
+        self.assertIsInstance(res["value"], int)
+        self.assertGreaterEqual(res["value"], 0)
+        self.assertEqual(res.get("fieldtype"), "Int")

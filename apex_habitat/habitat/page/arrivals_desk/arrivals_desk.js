@@ -91,13 +91,15 @@ class ArrivalsDesk {
 		// leave the dash placeholder rather than breaking the desk.
 		const set = (key, val) =>
 			this.$strip.find(`[data-stat="${key}"]`).text(frappe.format(val, { fieldtype: 'Int' }));
+		// Cards return the {value, ...df} Number Card contract; read .value.
+		const num = (r) => (r && typeof r === 'object' ? r.value : r);
 		frappe
 			.xcall('apex_habitat.habitat.api.dashboard.get_arrivals_today')
-			.then((v) => set('arrivals_today', v))
+			.then((v) => set('arrivals_today', num(v)))
 			.catch(() => {});
 		frappe
 			.xcall('apex_habitat.habitat.api.dashboard.get_pending_on_manifest')
-			.then((v) => set('pending_on_manifest', v))
+			.then((v) => set('pending_on_manifest', num(v)))
 			.catch(() => {});
 	}
 

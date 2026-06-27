@@ -10,6 +10,8 @@ reconciliation variance, by project / vehicle / period / status.
 import frappe
 from frappe import _
 
+from apex_habitat.salis import permissions
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -34,6 +36,17 @@ def execute(filters=None):
         query_filters["period_month"] = filters["period_month"]
     if filters.get("status"):
         query_filters["status"] = filters["status"]
+
+    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
+    # list gets via permission_query_conditions; re-apply the caller's project scope
+    # (Fuel Claim carries a direct project); oversight roles see all.
+    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    if restrict:
+        chosen = query_filters.get("project")
+        if not allowed or (chosen and chosen not in allowed):
+            return columns, []
+        if not chosen:
+            query_filters["project"] = ["in", allowed]
 
     data = frappe.get_all(
         "Fuel Claim",

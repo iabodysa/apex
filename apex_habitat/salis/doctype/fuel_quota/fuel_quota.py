@@ -9,6 +9,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 from apex_habitat.salis.utils import lock_vehicle
 
@@ -16,6 +17,9 @@ from apex_habitat.salis.utils import lock_vehicle
 class FuelQuota(Document):
 	def validate(self):
 		self._guard_duplicate()
+		# An allocation of zero or negative litres is not a quota — reject it.
+		if flt(self.monthly_litres) <= 0:
+			frappe.throw(_("Monthly litres must be greater than zero."))
 		monthly = self.monthly_litres or 0
 		consumed = self.consumed_litres or 0
 		if monthly and consumed > monthly:

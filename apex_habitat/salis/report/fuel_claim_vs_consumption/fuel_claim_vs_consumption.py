@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.salis import permissions
+
 
 def execute(filters=None):
     columns = [
@@ -25,6 +27,15 @@ def execute(filters=None):
             query_filters["period_month"] = [">=", filters["from_date"]]
         elif filters.get("to_date"):
             query_filters["period_month"] = ["<=", filters["to_date"]]
+
+    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
+    # list gets via permission_query_conditions; re-apply the caller's project scope
+    # (Fuel Claim carries a direct project); oversight roles see all.
+    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return columns, []
+        query_filters["project"] = ["in", allowed]
 
     data = frappe.get_all(
         "Fuel Claim",
