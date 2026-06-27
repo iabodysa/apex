@@ -10,7 +10,7 @@
  "is_hidden": 0,
  "sequence_id": 90.0,
  "parent_page": "",
- "content": "[{\"id\": \"acHdrActions\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"acScHabitatSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"acScSalisSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Settings\", \"col\": 3}}, {\"id\": \"acScIntegrationSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Apex Integration Settings\", \"col\": 3}}, {\"id\": \"acScUser\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"User\", \"col\": 3}}, {\"id\": \"acScRole\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Role\", \"col\": 3}}, {\"id\": \"acScMyWork\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Work\", \"col\": 3}}, {\"id\": \"acHdrHealth\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"acNcPendingMine\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 3}}, {\"id\": \"acNcAlerts\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"acNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"acNcErrors\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 3}}, {\"id\": \"acHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"acCardConsoles\", \"type\": \"card\", \"data\": {\"card_name\": \"Tools and Consoles\", \"col\": 4}}, {\"id\": \"acCardAccess\", \"type\": \"card\", \"data\": {\"card_name\": \"Roles and Access\", \"col\": 4}}, {\"id\": \"acCardAccMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"acCardTaskMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety and Task Master\", \"col\": 4}}, {\"id\": \"acCardCustodyMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"acCardFacilityMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility and Utility Master\", \"col\": 4}}, {\"id\": \"acCardMaintMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Master\", \"col\": 4}}, {\"id\": \"acCardSalisMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Salis Fleet Master\", \"col\": 4}}, {\"id\": \"acCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 6}}, {\"id\": \"acCardWorkerAccess\", \"type\": \"card\", \"data\": {\"card_name\": \"Worker Access\", \"col\": 4}}]",
+ "content": "[{\"id\": \"acHdrActions\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"acScHabitatSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Settings\", \"col\": 3}}, {\"id\": \"acScSalisSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Settings\", \"col\": 3}}, {\"id\": \"acScIntegrationSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Apex Integration Settings\", \"col\": 3}}, {\"id\": \"acScUser\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"User\", \"col\": 3}}, {\"id\": \"acScRole\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Role\", \"col\": 3}}, {\"id\": \"acScMyWork\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"My Work\", \"col\": 3}}, {\"id\": \"acScApexSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Apex Settings\", \"col\": 3}}, {\"id\": \"acScPaymentRoutingSettings\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Payment Routing Settings\", \"col\": 3}}, {\"id\": \"acScSalaryDeductionPolicy\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salary Deduction Policy\", \"col\": 3}}, {\"id\": \"acHdrHealth\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"acNcPendingMine\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending My Action\", \"col\": 3}}, {\"id\": \"acNcAlerts\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"acNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"acNcErrors\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Recent Error Logs\", \"col\": 3}}, {\"id\": \"acHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"acCardConsoles\", \"type\": \"card\", \"data\": {\"card_name\": \"Tools and Consoles\", \"col\": 4}}, {\"id\": \"acCardAccess\", \"type\": \"card\", \"data\": {\"card_name\": \"Roles and Access\", \"col\": 4}}, {\"id\": \"acCardAccMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation Master\", \"col\": 4}}, {\"id\": \"acCardTaskMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety and Task Master\", \"col\": 4}}, {\"id\": \"acCardCustodyMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Master\", \"col\": 4}}, {\"id\": \"acCardFacilityMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility and Utility Master\", \"col\": 4}}, {\"id\": \"acCardMaintMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Master\", \"col\": 4}}, {\"id\": \"acCardSalisMaster\", \"type\": \"card\", \"data\": {\"card_name\": \"Salis Fleet Master\", \"col\": 4}}, {\"id\": \"acCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 6}}, {\"id\": \"acCardWorkerAccess\", \"type\": \"card\", \"data\": {\"card_name\": \"Worker Access\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -59,6 +59,33 @@
    "link_to": "My Work",
    "color": "Blue",
    "idx": 6
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Apex Settings",
+   "link_to": "Apex Settings",
+   "color": "Grey",
+   "icon": "settings",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Payment Routing Settings",
+   "link_to": "Payment Routing Settings",
+   "color": "Grey",
+   "icon": "currency",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Salary Deduction Policy",
+   "link_to": "Salary Deduction Policy",
+   "color": "Grey",
+   "icon": "percentage",
+   "idx": 9
   }
  ],
  "links": [

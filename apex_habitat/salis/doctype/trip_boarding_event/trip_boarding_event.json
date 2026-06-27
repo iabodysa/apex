@@ -54,7 +54,7 @@
   },
   {
    "columns": 2,
-   "depends_on": "is_unregistered",
+   "depends_on": "eval:doc.is_unregistered",
    "description": "Identifier (e.g. Iqama/contractor id) for an unregistered worker.",
    "fieldname": "contractor_id",
    "fieldtype": "Data",

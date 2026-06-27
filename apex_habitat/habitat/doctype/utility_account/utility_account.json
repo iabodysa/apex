@@ -128,7 +128,7 @@
    "fieldtype": "Percent",
    "label": "Cost Bearing (%)",
    "default": "100",
-   "depends_on": "is_shared_meter",
+   "depends_on": "eval:doc.is_shared_meter==1",
    "description": "Percentage of the total invoice borne by this building/unit"
   },
   {

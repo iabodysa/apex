@@ -34,6 +34,27 @@ class TestRentalAccrualIdempotency(FrappeTestCase):
                 ignore_permissions=True)
             m.submit()
 
+    @classmethod
+    def tearDownClass(cls):
+        frappe.set_user("Administrator")
+        # Cancel and delete any submitted Rental Vehicle Movement for this vehicle,
+        # then delete the vehicle and office created specifically for this test class.
+        movements = frappe.db.get_all(
+            "Rental Vehicle Movement",
+            filters={"vehicle": cls.vehicle, "movement_type": "Receipt"},
+            pluck="name",
+        )
+        for m_name in movements:
+            doc = frappe.get_doc("Rental Vehicle Movement", m_name)
+            if doc.docstatus == 1:
+                doc.cancel()
+            frappe.delete_doc("Rental Vehicle Movement", m_name, force=True, ignore_permissions=True)
+        if cls.vehicle and frappe.db.exists("Salis Vehicle", cls.vehicle):
+            frappe.delete_doc("Salis Vehicle", cls.vehicle, force=True, ignore_permissions=True)
+        if cls.office and frappe.db.exists("Rental Office", cls.office):
+            frappe.delete_doc("Rental Office", cls.office, force=True, ignore_permissions=True)
+        super().tearDownClass()
+
     def test_accrual_is_idempotent(self):
         today = frappe.utils.today()
         frappe.db.delete("Rental Accrual Ledger", {"vehicle": self.vehicle, "accrual_date": today})
@@ -54,6 +75,13 @@ class TestUtilisationSnapshotIdempotency(FrappeTestCase):
         if not cls.vehicle:
             cls.vehicle = frappe.get_doc({"doctype": "Salis Vehicle", "plate_number": "UTIL ENG 1",
                                           "status": "Active"}).insert(ignore_permissions=True).name
+
+    @classmethod
+    def tearDownClass(cls):
+        frappe.set_user("Administrator")
+        if cls.vehicle and frappe.db.exists("Salis Vehicle", cls.vehicle):
+            frappe.delete_doc("Salis Vehicle", cls.vehicle, force=True, ignore_permissions=True)
+        super().tearDownClass()
 
     def test_snapshot_is_idempotent(self):
         today = frappe.utils.today()
@@ -86,6 +114,27 @@ class TestFuelReconciliationNoDuplicateAlert(FrappeTestCase):
                             "period_month": cls.period, "litres": 20, "amount": 300,
                             "source_type": "Fuel Daily Log", "source_name": "FUELRECTEST"}).insert(
                 ignore_permissions=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        frappe.set_user("Administrator")
+        # Delete the Fuel Consumption Ledger row seeded in setUpClass, then the
+        # submitted Fuel Quota (cancel first), then the vehicle.
+        frappe.db.delete("Fuel Consumption Ledger",
+                         {"vehicle": cls.vehicle, "source_name": "FUELRECTEST"})
+        quotas = frappe.db.get_all(
+            "Fuel Quota",
+            filters={"vehicle": cls.vehicle, "period_month": cls.period},
+            pluck="name",
+        )
+        for q_name in quotas:
+            doc = frappe.get_doc("Fuel Quota", q_name)
+            if doc.docstatus == 1:
+                doc.cancel()
+            frappe.delete_doc("Fuel Quota", q_name, force=True, ignore_permissions=True)
+        if cls.vehicle and frappe.db.exists("Salis Vehicle", cls.vehicle):
+            frappe.delete_doc("Salis Vehicle", cls.vehicle, force=True, ignore_permissions=True)
+        super().tearDownClass()
 
     def _window(self):
         from frappe.utils import get_first_day, get_last_day, getdate
@@ -123,6 +172,13 @@ class TestFuelAccrualLateDone(FrappeTestCase):
         if not cls.vehicle:
             cls.vehicle = frappe.get_doc({"doctype": "Salis Vehicle", "plate_number": "FUEL LATE 1",
                                           "status": "Active"}).insert(ignore_permissions=True).name
+
+    @classmethod
+    def tearDownClass(cls):
+        frappe.set_user("Administrator")
+        if cls.vehicle and frappe.db.exists("Salis Vehicle", cls.vehicle):
+            frappe.delete_doc("Salis Vehicle", cls.vehicle, force=True, ignore_permissions=True)
+        super().tearDownClass()
 
     def _make_done_request(self, request_date):
         """Create a Done Fuel Request whose request_date is in the past, walking
@@ -209,6 +265,13 @@ class TestFuelLedgerSourceUniqueIndex(FrappeTestCase):
                                           "status": "Active"}).insert(ignore_permissions=True).name
         frappe.db.delete("Fuel Consumption Ledger",
                          {"source_type": "Fuel Daily Log", "source_name": cls.SOURCE_NAME})
+
+    @classmethod
+    def tearDownClass(cls):
+        frappe.set_user("Administrator")
+        if cls.vehicle and frappe.db.exists("Salis Vehicle", cls.vehicle):
+            frappe.delete_doc("Salis Vehicle", cls.vehicle, force=True, ignore_permissions=True)
+        super().tearDownClass()
 
     def tearDown(self):
         frappe.set_user("Administrator")
@@ -332,6 +395,29 @@ class TestOperationsAlertAutoResolve(FrappeTestCase):
 
         self.assertEqual(first, "Resolved")
         self.assertEqual(second, "Resolved")
+
+    @classmethod
+    def tearDownClass(cls):
+        frappe.set_user("Administrator")
+        # Delete Driver Attendance records created for this test class, then
+        # the drivers and vehicle seeded in setUpClass.
+        if cls.driver_ok and frappe.db.exists("Salis Driver", cls.driver_ok):
+            attendances = frappe.db.get_all(
+                "Driver Attendance",
+                filters={"driver": cls.driver_ok, "attendance_date": frappe.utils.today()},
+                pluck="name",
+            )
+            for att_name in attendances:
+                att_doc = frappe.get_doc("Driver Attendance", att_name)
+                if att_doc.docstatus == 1:
+                    att_doc.cancel()
+                frappe.delete_doc("Driver Attendance", att_name, force=True, ignore_permissions=True)
+            frappe.delete_doc("Salis Driver", cls.driver_ok, force=True, ignore_permissions=True)
+        if cls.driver_gap and frappe.db.exists("Salis Driver", cls.driver_gap):
+            frappe.delete_doc("Salis Driver", cls.driver_gap, force=True, ignore_permissions=True)
+        if cls.vehicle_inactive and frappe.db.exists("Salis Vehicle", cls.vehicle_inactive):
+            frappe.delete_doc("Salis Vehicle", cls.vehicle_inactive, force=True, ignore_permissions=True)
+        super().tearDownClass()
 
     def _cleanup(self, name):
         frappe.set_user("Administrator")

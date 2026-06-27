@@ -225,7 +225,7 @@
    "label": "Boarding Active Poll (Seconds)"
   },
   {
-   "depends_on": "enable_driver_portal",
+   "depends_on": "eval:doc.enable_driver_portal",
    "fieldname": "salis_settings_sec_web_push",
    "fieldtype": "Section Break",
    "label": "Driver Web Push"
@@ -238,7 +238,7 @@
    "label": "Enable Driver Web Push"
   },
   {
-   "depends_on": "enable_web_push",
+   "depends_on": "eval:doc.enable_web_push",
    "description": "VAPID 'sub' claim — a mailto: or https: contact the push service can reach (e.g. mailto:ops@yourcompany.com).",
    "fieldname": "web_push_vapid_subject",
    "fieldtype": "Data",
@@ -249,14 +249,14 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "enable_web_push",
+   "depends_on": "eval:doc.enable_web_push",
    "description": "VAPID public key (base64url). Handed to the browser to subscribe; safe to expose.",
    "fieldname": "web_push_vapid_public_key",
    "fieldtype": "Small Text",
    "label": "VAPID Public Key"
   },
   {
-   "depends_on": "enable_web_push",
+   "depends_on": "eval:doc.enable_web_push",
    "description": "VAPID private key. Secret — stored encrypted, never exposed to the client.",
    "fieldname": "web_push_vapid_private_key",
    "fieldtype": "Password",

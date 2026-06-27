@@ -84,6 +84,19 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         })
         self.bed.insert(ignore_permissions=True)
 
+    def tearDown(self):
+        # Delete in reverse dependency order: bed → room → building → site.
+        # Company, Project, and Employee are NOT deleted here because setUp only
+        # creates them when none exist at all — they may be real or shared fixtures.
+        for doctype, name in [
+            ("Accommodation Bed", self.bed.name),
+            ("Accommodation Room", self.room.name),
+            ("Accommodation Building", self.building.name),
+            ("Accommodation Site", self.site.name),
+        ]:
+            if frappe.db.exists(doctype, name):
+                frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
+
     def test_checkout_preserves_assignment_history(self):
         # [#roaq7a]
         assignment = frappe.get_doc({
