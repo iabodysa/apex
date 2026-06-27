@@ -2025,6 +2025,7 @@ Odometer Start,عداد المسافة (البداية)
 Odometer cannot be negative.,لا يمكن أن تكون قراءة عداد المسافة سالبة.
 Odometer end ({0}) cannot be less than odometer start ({1}).,قراءة العدّاد النهائيّة ({0}) لا يمكن أن تقلّ عن القراءة الابتدائيّة ({1}).
 Odometer reading {0} cannot be lower than the vehicle's current {1}.,قراءة عداد المسافة {0} لا يمكن أن تكون أقل من القراءة الحالية للمركبة {1}.
+"Odometer start and end must be set together, or both left empty.",يجب تعيين عداد المسافة للبداية والنهاية معًا، أو ترك كليهما فارغًا.
 Office,مكتب
 Office Billing,فوترة المكاتب
 Office Details,تفاصيل المكتب
@@ -2655,6 +2656,7 @@ Return Date,تاريخ الإرجاع
 Return Date (Workshop Exit),تاريخ العودة (الخروج من الورشة)
 Return Status,حالة الإرجاع
 Return Time,وقت العودة
+Return Time cannot be earlier than Depart Time.,لا يمكن أن يكون وقت العودة أبكر من وقت المغادرة.
 Return cart,سلة الإرجاع
 Return cart is empty.,سلة الإرجاع فارغة.
 Return date cannot be earlier than the open Receipt date ({0}).,لا يمكن أن يكون تاريخ الإرجاع أقدم من تاريخ الاستلام المفتوح ({0}).
@@ -3356,6 +3358,7 @@ Trip Date,تاريخ الرحلة
 Trip Execution,تنفيذ الرحلة
 Trip Fulfilment Ledger,دفتر تنفيذ الرحلات
 Trip Fulfilment Ledger Rows,صفوف دفتر تنفيذ الرحلات
+Trip Fulfilment Ledger is a posted audit record and cannot be edited.,سجل تنفيذ الرحلة هو سجل تدقيق مرحَّل ولا يمكن تعديله.
 Trip Fulfilment Over Time,تنفيذ الرحلات عبر الزمن
 Trip Fulfilment Rate,معدل تنفيذ الرحلات
 Trip Scheduled: {{ doc.name }},تمت جدولة الرحلة: {{ doc.name }}

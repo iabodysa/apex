@@ -48,6 +48,7 @@ class DispatchTrip(Document):
         self._resolve_transport_request()
         self._guard_initial_status()
         self._validate_odometer()
+        self._validate_trip_times()
         self._enforce_compliance()
         self._require_completion_notes()
         self._enforce_capacity()
@@ -198,13 +199,28 @@ class DispatchTrip(Document):
             )
 
     def _validate_odometer(self):
-        if self.odometer_end is not None and self.odometer_start is not None:
-            if self.odometer_end < self.odometer_start:
-                frappe.throw(
-                    _("Trip end odometer ({0}) cannot be less than start ({1}).").format(
-                        self.odometer_end, self.odometer_start
-                    )
+        # Both-or-neither: a lone start or lone end reading is incomplete and would
+        # silently break distance/odometer-advance accounting on submit.
+        start_set = self.odometer_start is not None
+        end_set = self.odometer_end is not None
+        if start_set != end_set:
+            frappe.throw(
+                _("Odometer start and end must be set together, or both left empty.")
+            )
+        if start_set and end_set and self.odometer_end < self.odometer_start:
+            frappe.throw(
+                _("Trip end odometer ({0}) cannot be less than start ({1}).").format(
+                    self.odometer_end, self.odometer_start
                 )
+            )
+
+    def _validate_trip_times(self):
+        """Return Time must not precede Depart Time when both are set (a single-day
+        trip cannot return before it departs)."""
+        if self.depart_time and self.return_time and self.return_time < self.depart_time:
+            frappe.throw(
+                _("Return Time cannot be earlier than Depart Time.")
+            )
 
     def on_submit(self):
         if self.status == "Completed" and self.odometer_end and self.vehicle:

@@ -77,17 +77,9 @@
   },
   {
    "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Accommodation Ledger",
-   "link_type": "DocType",
-   "link_to": "Accommodation Ledger",
-   "idx": 5
-  },
-  {
-   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Masters and Contracts",
-   "idx": 6
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -95,7 +87,7 @@
    "label": "Subcontractor Service Contract",
    "link_type": "DocType",
    "link_to": "Subcontractor Service Contract",
-   "idx": 7
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
@@ -103,13 +95,13 @@
    "label": "Utility Account",
    "link_type": "DocType",
    "link_to": "Utility Account",
-   "idx": 8
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
-   "idx": 9
+   "idx": 8
   },
   {
    "doctype": "Workspace Link",
@@ -117,7 +109,7 @@
    "label": "Lease Expiry Watchlist",
    "link_type": "Report",
    "link_to": "Lease Expiry Watchlist",
-   "idx": 10,
+   "idx": 9,
    "is_query_report": 1
   },
   {
@@ -126,7 +118,7 @@
    "label": "Utility Variance Report",
    "link_type": "Report",
    "link_to": "Utility Variance Report",
-   "idx": 11,
+   "idx": 10,
    "is_query_report": 1
   },
   {
@@ -135,7 +127,7 @@
    "label": "Accommodation Cost Distribution",
    "link_type": "Report",
    "link_to": "Accommodation Cost Distribution",
-   "idx": 12,
+   "idx": 11,
    "is_query_report": 1
   },
   {
@@ -144,7 +136,7 @@
    "label": "Accommodation Ledger Summary",
    "link_type": "Report",
    "link_to": "Accommodation Ledger Summary",
-   "idx": 13,
+   "idx": 12,
    "is_query_report": 1
   },
   {
@@ -153,7 +145,7 @@
    "label": "Cost by Dimension",
    "link_type": "Report",
    "link_to": "Cost by Dimension",
-   "idx": 14,
+   "idx": 13,
    "is_query_report": 1
   },
   {
@@ -162,7 +154,7 @@
    "label": "Supplier Cost Recovery",
    "link_type": "Report",
    "link_to": "Supplier Cost Recovery",
-   "idx": 15,
+   "idx": 14,
    "is_query_report": 1
   },
   {
@@ -171,7 +163,7 @@
    "label": "Finance Manager Dashboard",
    "link_type": "Dashboard",
    "link_to": "Finance Manager Dashboard",
-   "idx": 16
+   "idx": 15
   }
  ],
  "charts": [],

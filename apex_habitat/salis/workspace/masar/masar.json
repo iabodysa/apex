@@ -119,14 +119,6 @@
   },
   {
    "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Trip Fulfilment Ledger",
-   "link_type": "DocType",
-   "link_to": "Trip Fulfilment Ledger",
-   "idx": 8
-  },
-  {
-   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Shared Masters",
    "idx": 9

@@ -184,14 +184,6 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Fuel Consumption Ledger",
-   "link_type": "DocType",
-   "link_to": "Fuel Consumption Ledger",
-   "idx": 16
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Fuel Exception Case",
    "link_type": "DocType",
    "link_to": "Fuel Exception Case",
@@ -230,14 +222,6 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Rental Accrual Ledger",
-   "link_type": "DocType",
-   "link_to": "Rental Accrual Ledger",
-   "idx": 22
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Movement Cost Recovery",
    "link_type": "DocType",
    "link_to": "Movement Cost Recovery",
@@ -272,14 +256,6 @@
    "link_type": "DocType",
    "link_to": "Salis Vehicle Compliance",
    "idx": 27
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Vehicle Utilisation Snapshot",
-   "link_type": "DocType",
-   "link_to": "Vehicle Utilisation Snapshot",
-   "idx": 28
   },
   {
    "doctype": "Workspace Link",

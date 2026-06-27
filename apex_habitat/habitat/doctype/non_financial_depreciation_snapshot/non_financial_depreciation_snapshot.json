@@ -94,6 +94,7 @@
    "options": "Depreciation Snapshot Item"
   }
  ],
+ "in_create": 1,
  "is_submittable": 1,
  "issingle": 0,
  "istable": 0,

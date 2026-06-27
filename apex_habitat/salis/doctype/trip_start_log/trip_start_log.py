@@ -32,23 +32,33 @@ class TripStartLog(Document):
     def _resolve_trip_context(self):
         """Backfill Transport Request / Route Plan from the Dispatch Trip when the
         fetch did not populate them (e.g. a row built in code), so the manifest
-        and project-scoping chain stay intact."""
+        and project-scoping chain stay intact.
+
+        Both fields come from the SAME Dispatch Trip, so fetch them in one query
+        rather than two sequential round-trips per validate."""
         if not self.dispatch_trip:
             return
+        if self.transport_request and self.route_plan:
+            return
+        trip = frappe.db.get_value(
+            "Dispatch Trip",
+            self.dispatch_trip,
+            ["transport_request", "route_plan"],
+            as_dict=True,
+        ) or {}
         if not self.transport_request:
-            self.transport_request = frappe.db.get_value(
-                "Dispatch Trip", self.dispatch_trip, "transport_request"
-            )
+            self.transport_request = trip.get("transport_request")
         if not self.route_plan:
-            self.route_plan = frappe.db.get_value(
-                "Dispatch Trip", self.dispatch_trip, "route_plan"
-            )
+            self.route_plan = trip.get("route_plan")
 
     def _validate_boarding_rows(self):
         """Each boarding row identifies exactly one worker: a registered Employee
         (``worker``) OR an unregistered contractor/temp (``is_unregistered`` with a
         name or contractor id). This keeps the headcount honest and the
-        unregistered path explicit."""
+        unregistered path explicit. No worker may board twice — a duplicate row
+        would inflate ``boarded_count`` and corrupt the headcount reconciliation."""
+        seen_workers = set()
+        seen_unregistered = set()
         for row in self.boarding_events:
             if row.is_unregistered:
                 if not (row.worker_name or row.contractor_id):
@@ -57,12 +67,31 @@ class TripStartLog(Document):
                             "Boarding row #{0}: an unregistered worker needs a name or a contractor/temp id."
                         ).format(row.idx)
                     )
+                # Dedup an unregistered worker by their contractor/temp id when given,
+                # else by name; case-insensitive so casing variants do not slip past.
+                key = (row.contractor_id or row.worker_name or "").strip().casefold()
+                if key:
+                    if key in seen_unregistered:
+                        frappe.throw(
+                            _(
+                                "Boarding row #{0}: this worker has already boarded on this trip."
+                            ).format(row.idx)
+                        )
+                    seen_unregistered.add(key)
             elif not row.worker:
                 frappe.throw(
                     _(
                         "Boarding row #{0}: select a Worker, or tick 'Unregistered' and give a name/id."
                     ).format(row.idx)
                 )
+            else:
+                if row.worker in seen_workers:
+                    frappe.throw(
+                        _(
+                            "Boarding row #{0}: worker {1} has already boarded on this trip."
+                        ).format(row.idx, row.worker)
+                    )
+                seen_workers.add(row.worker)
 
     def _derive_counts(self):
         """Derive both counts server-side; neither is hand-set.

@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex_habitat.salis.utils import get_driver_for_user
+
 UNSCOPED_ROLES = {
     "System Manager",
     "Fleet Manager",
@@ -140,27 +142,53 @@ def salis_payment_request_query(user=None):
     return _project_condition(user)
 
 
+def _own_driver_trips_condition(user):
+    """SQL fragment matching Dispatch Trips assigned to the acting user's driver.
+
+    Resolves the user -> Employee -> Salis Driver chain in SQL so the fragment
+    holds the trip's `driver` column to a driver linked to ``user``. Mirrors the
+    driver-own access basis used across the Salis driver-linked DocTypes — a Driver
+    reads the trips dispatched to them without needing a Project User Permission."""
+    return (
+        "`driver` in ("
+        "select `name` from `tabSalis Driver` where `employee` in ("
+        "select `name` from `tabEmployee` where `user_id` = {user}"
+        "))".format(user=frappe.db.escape(user))
+    )
+
+
 def dispatch_trip_query(user=None):
     """Dispatch Trip has no own `project` field; it links to a Route Plan.
 
     Scope it through the parent Route Plan's project so the same project
     boundary applies. The fragment references the Dispatch Trip table's
     `route_plan` column via a subquery on `tabRoute Plan`.
+
+    Like the other driver-linked Salis DocTypes, a Driver reads the trips
+    dispatched to them even without a Project User Permission: the project scope is
+    OR-ed with `driver = my driver` so a scoped Driver who holds no project still
+    sees their own trips, while a scoped supervisor stays confined to their projects.
+    Returns "" (no restriction) for unscoped oversight roles.
     """
     user = _resolve_user(user)
     if _is_unscoped(user):
         return ""
 
+    own = _own_driver_trips_condition(user)
+
     projects = _allowed_projects(user)
     if not projects:
-        return "1=0"
+        # No project scope: a Driver still sees their own trips; any other scoped
+        # user (no driver) is held to that same own-trips clause (matches nothing).
+        return own
 
     escaped = ", ".join(frappe.db.escape(p) for p in projects)
-    return (
+    in_scope = (
         "`route_plan` in ("
         "select `name` from `tabRoute Plan` where `project` in ({values})"
         ")".format(values=escaped)
     )
+    return "({in_scope} or {own})".format(in_scope=in_scope, own=own)
 
 
 def trip_start_log_query(user=None):
@@ -488,6 +516,41 @@ def trip_start_log_has_permission(doc, ptype, user=None):
     project = _doc_project(doc)
     if not project:
         # [#ocig5t]
+        return False
+
+    if project not in _allowed_projects(user):
+        return False
+
+    return None
+
+
+def dispatch_trip_has_permission(doc, ptype, user=None):
+    """Project-scope direct Dispatch Trip access, but never block a Driver from
+    reading their OWN trip.
+
+    Dispatch Trip reaches its project through the Route Plan chain (resolved by
+    ``_doc_project``); the prior hook (``scoped_has_permission``) enforced that
+    project boundary alone, which would deny a Driver opening a trip dispatched to
+    them — a Driver holds no Project User Permission and does not own the trip
+    (dispatchers create it). This mirrors ``dispatch_trip_query``: a trip whose
+    ``driver`` resolves to the acting user's Salis Driver is always allowed; every
+    other doc is confined to the user's allowed projects. The driver-own basis is
+    independent and valid, exactly like the if_owner basis on Trip Start Log /
+    Salis Driver.
+
+    Returns False to block, else None to defer to Frappe's default resolution.
+    """
+    user = _resolve_user(user)
+    if _is_unscoped(user):
+        return None
+
+    # Driver-own: the trip is dispatched to this user's Salis Driver.
+    own_driver = get_driver_for_user(user)
+    if own_driver and getattr(doc, "driver", None) == own_driver:
+        return None
+
+    project = _doc_project(doc)
+    if not project:
         return False
 
     if project not in _allowed_projects(user):

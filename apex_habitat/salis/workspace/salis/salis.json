@@ -111,13 +111,13 @@
    "label": "Salis Vehicle",
    "link_type": "DocType",
    "link_to": "Salis Vehicle",
-   "idx": 11
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
-   "idx": 12
+   "idx": 13
   },
   {
    "doctype": "Workspace Link",
@@ -125,7 +125,7 @@
    "label": "Movement KPI Summary",
    "link_type": "Report",
    "link_to": "Movement KPI Summary",
-   "idx": 13,
+   "idx": 14,
    "is_query_report": 1
   },
   {
@@ -135,7 +135,7 @@
    "link_type": "Report",
    "link_to": "Worker Transport Plan",
    "is_query_report": 1,
-   "idx": 14
+   "idx": 15
   },
   {
    "doctype": "Workspace Link",
@@ -144,13 +144,13 @@
    "link_type": "Report",
    "link_to": "Salis Fleet Register",
    "is_query_report": 1,
-   "idx": 15
+   "idx": 16
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Dashboards",
-   "idx": 16
+   "idx": 17
   },
   {
    "doctype": "Workspace Link",
@@ -158,7 +158,7 @@
    "label": "Fleet Manager Dashboard",
    "link_type": "Dashboard",
    "link_to": "Fleet Manager Dashboard",
-   "idx": 17
+   "idx": 18
   },
   {
    "doctype": "Workspace Link",
@@ -166,13 +166,13 @@
    "label": "Movement Operations Dashboard",
    "link_type": "Dashboard",
    "link_to": "Movement Operations Dashboard",
-   "idx": 18
+   "idx": 19
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Alerts",
-   "idx": 19
+   "idx": 20
   },
   {
    "doctype": "Workspace Link",
@@ -180,7 +180,7 @@
    "label": "Operations Alert",
    "link_type": "DocType",
    "link_to": "Operations Alert",
-   "idx": 20
+   "idx": 21
   }
  ],
  "charts": [],

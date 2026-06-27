@@ -289,7 +289,7 @@ has_permission = {
     "Idle Resident Report": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Vehicle Assignment": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Request": "apex_habitat.salis.permissions.scoped_has_permission",
-    "Dispatch Trip": "apex_habitat.salis.permissions.scoped_has_permission",
+    "Dispatch Trip": "apex_habitat.salis.permissions.dispatch_trip_has_permission",
     # [#s72nfj]
     "Trip Start Log": "apex_habitat.salis.permissions.trip_start_log_has_permission",
     "Transport Request": "apex_habitat.salis.permissions.scoped_has_permission",

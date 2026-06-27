@@ -20,7 +20,9 @@ class RoutePlan(Document):
         self._default_operations_requester()
 
     def on_submit(self):
-        self.fulfilled_by_movement = frappe.session.user
+        # A plain attribute set in on_submit (which runs AFTER the doc is saved)
+        # is never written back; db_set persists the fulfilling Movement planner.
+        self.db_set("fulfilled_by_movement", frappe.session.user)
         self._mark_request_scheduled()
 
     def _default_operations_requester(self):

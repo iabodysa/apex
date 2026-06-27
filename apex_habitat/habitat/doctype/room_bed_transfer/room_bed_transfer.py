@@ -34,9 +34,11 @@ def validate(doc, method=None):
     if bed_room is not None and bed_room != doc.to_room:
         frappe.throw(_("Target Bed {0} does not belong to Room {1}").format(doc.to_bed, doc.to_room))
 
-    # [#c91vez]
+    # [#c91vez] An unset Link returns None (not ""), so the old `is not None and not`
+    # guard never fired — a room with no building slipped through. `not to_building`
+    # catches both None and an empty value, so the integrity check actually runs.
     to_building = frappe.db.get_value("Accommodation Room", doc.to_room, "building")
-    if to_building is not None and not to_building:
+    if not to_building:
         frappe.throw(_("Target Room {0} is not associated with any Building.").format(doc.to_room))
 
 

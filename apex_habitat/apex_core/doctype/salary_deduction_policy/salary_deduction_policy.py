@@ -44,7 +44,11 @@ class SalaryDeductionPolicy(Document):
         """For each ENABLED type rule, keep its cap lawful and its Salary Component
         valid. Disabled rows are left untouched so a half-configured rule can be saved
         as a draft and finished later (it simply never fires while disabled)."""
-        global_cap = flt(self.global_max_percent_of_salary) or KSA_MAX_TOTAL_DEDUCTION_PERCENT
+        # A deliberate 0% global cap (deductions effectively disabled by ceiling) must
+        # be honoured, not swallowed by `or` as if unset; fall back to the legal ceiling
+        # only when the field is genuinely empty (None / "").
+        raw_cap = self.global_max_percent_of_salary
+        global_cap = flt(raw_cap) if raw_cap not in (None, "") else KSA_MAX_TOTAL_DEDUCTION_PERCENT
         for row in self.type_rules or []:
             if not row.enabled:
                 continue

@@ -173,14 +173,6 @@
   },
   {
    "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Accommodation Occupancy Snapshot",
-   "link_type": "DocType",
-   "link_to": "Accommodation Occupancy Snapshot",
-   "idx": 12
-  },
-  {
-   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
    "idx": 13

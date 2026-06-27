@@ -147,14 +147,6 @@
   },
   {
    "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Non-Financial Depreciation Snapshot",
-   "link_type": "DocType",
-   "link_to": "Non-Financial Depreciation Snapshot",
-   "idx": 13
-  },
-  {
-   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
    "idx": 14
