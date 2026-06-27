@@ -49,6 +49,27 @@ class SafetyRound(Document):
 
     def on_submit(self):
         self.db_set("overall_result", self._derive_overall_result())
+        # A submitted round closes its cadence for the period, so the /safety
+        # portal's due set changes — signal it to refetch.
+        self._publish_safety_update("submit")
+
+    def on_cancel(self):
+        # Cancelling reopens the cadence; the due set changes again.
+        self._publish_safety_update("cancel")
+
+    def _publish_safety_update(self, action: str) -> None:
+        """Signal the /safety portal to refetch its due set ahead of a manual
+        reload. Routed to the Safety Round doctype room; the socket server
+        delivers only to recipients with read permission, so building scope is
+        honoured without extra filtering. after_commit so subscribers refetch
+        committed state. The payload is advisory only — the SPA refetches via
+        get_due_cadences, it does not trust the message body."""
+        frappe.publish_realtime(
+            "safety_update",
+            {"building": self.building, "cadence": self.cadence, "action": action},
+            doctype="Safety Round",
+            after_commit=True,
+        )
 
     def _derive_overall_result(self):
         statuses = frappe.get_all(

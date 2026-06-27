@@ -27,6 +27,11 @@
       window.csrf_token = {{ csrf_token | tojson }};
       window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
       window.portal_logo = {{ (portal_logo or '') | tojson }};
+      window.safety_socket = {
+        site_name: {{ site_name | tojson }},
+        socketio_port: {{ socketio_port }},
+        enabled: {{ "true" if async_enabled else "false" }},
+      };
     </script>
     {%- endif %}
   </head>

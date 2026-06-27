@@ -8,6 +8,8 @@ a Not Done yields Fail, a Poor yields Needs Attention, all-good yields Pass.
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
@@ -96,3 +98,34 @@ class TestSafetyRound(FrappeTestCase):
         rnd.submit()
         rnd.reload()
         self.assertEqual(rnd.overall_result, "Pass")
+
+    def _safety_update_call(self, pub):
+        # Frappe itself fires doc_update/list_update on submit/cancel, so pick
+        # the safety_update call out of all publish_realtime calls (asserting it
+        # was emitted exactly once).
+        calls = [c for c in pub.call_args_list if c.args and c.args[0] == "safety_update"]
+        self.assertEqual(len(calls), 1, "exactly one safety_update must be published")
+        return calls[0]
+
+    def test_submit_publishes_safety_update(self):
+        # on_submit signals the /safety portal (whose due set just changed) to
+        # refetch: a safety_update event on the Safety Round room, after_commit.
+        rnd = self._round()
+        with patch.object(frappe, "publish_realtime") as pub:
+            rnd.submit()
+        args, kwargs = self._safety_update_call(pub)
+        self.assertEqual(kwargs.get("doctype"), "Safety Round")
+        self.assertTrue(kwargs.get("after_commit"))
+        self.assertEqual(args[1].get("building"), self.building)
+        self.assertEqual(args[1].get("action"), "submit")
+
+    def test_cancel_publishes_safety_update(self):
+        # Cancelling reopens the cadence; the portal must refetch too.
+        rnd = self._round()
+        rnd.submit()
+        with patch.object(frappe, "publish_realtime") as pub:
+            rnd.cancel()
+        args, kwargs = self._safety_update_call(pub)
+        self.assertEqual(kwargs.get("doctype"), "Safety Round")
+        self.assertTrue(kwargs.get("after_commit"))
+        self.assertEqual(args[1].get("action"), "cancel")

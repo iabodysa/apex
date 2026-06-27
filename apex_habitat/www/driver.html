@@ -32,6 +32,11 @@
       window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
       window.portal_logo = {{ (portal_logo or '') | tojson }};
       window.portal_theme = {{ (portal_theme or 'afmco') | tojson }};
+      window.driver_socket = {
+        site_name: {{ site_name | tojson }},
+        socketio_port: {{ socketio_port }},
+        enabled: {{ "true" if async_enabled else "false" }},
+      };
     </script>
   </head>
   <body>

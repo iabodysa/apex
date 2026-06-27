@@ -127,7 +127,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, onMounted, onUnmounted } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
@@ -137,6 +137,7 @@ import BoardingScanner from "../components/BoardingScanner.vue";
 import ManualBoarding from "../components/ManualBoarding.vue";
 import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
+import { connectDriverRealtime } from "../realtime.js";
 
 const { t, te, fmtTime } = useI18n();
 
@@ -172,6 +173,23 @@ function showRecent() {
 }
 
 const active = computed(() => (tab.value === "recent" ? recent : today));
+
+// ── Realtime (socket push, ahead of a manual refresh) ──
+// When a Dispatch Trip the driver can read changes (assignment / status / board),
+// the server publishes `driver_trip_update`; refetch today's trips at once. Every
+// failure is swallowed in realtime.js, so if the socket never connects the
+// existing fetch / pull-to-refresh still carries the trips. Recent is left to its
+// own lazy load (operational pushes are about today's active trips).
+let stopRealtime = () => {};
+function onTripUpdate() {
+  today.reload();
+}
+onMounted(() => {
+  stopRealtime = connectDriverRealtime(onTripUpdate);
+});
+onUnmounted(() => {
+  stopRealtime();
+});
 
 // --- Trip execution: start → complete, writing a Trip Start Log. ---
 // `busy` holds the trip name in flight so its buttons disable (single tap = single write).

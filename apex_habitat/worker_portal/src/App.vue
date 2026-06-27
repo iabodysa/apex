@@ -122,6 +122,7 @@ import LangToggle from "./components/LangToggle.vue";
 import { useI18n, resourceErrorMessage, setEnumLabels } from "./i18n";
 import { TOKEN, hasToken } from "./token";
 import { updateReady, applyUpdate, initPwaUpdates } from "./pwa";
+import { usePoll } from "./usePoll";
 
 const { t, dir } = useI18n();
 
@@ -171,6 +172,16 @@ const ctx = createResource({
 });
 
 const worker = computed(() => ctx.data && ctx.data.employee && ctx.data);
+
+// Auto-update for this GUEST portal: a guest has no Desk session and so cannot
+// join Frappe's permission-gated Socket.IO doctype rooms for server push — the
+// honest substitute is a foreground poll. Re-run the bootstrap context (the same
+// token-scoped read the app already loads; pages render off `ctx.data`) so an
+// upcoming-trip / "driver arrived" (P-046) change surfaces without a manual
+// pull-to-refresh. Reuses ctx.reload() — no new endpoint. Only when a token is
+// present (no point polling the "no link" / error shell). The composable keeps
+// it cheap: visible-only, refetch-on-show, no overlap, torn down on unmount.
+if (hasToken) usePoll(() => ctx.reload());
 
 const firstName = computed(
   () => (ctx.data?.employee_name || "").trim().split(/\s+/)[0] || "",

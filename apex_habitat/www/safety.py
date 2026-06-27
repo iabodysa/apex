@@ -19,6 +19,7 @@ because the page renders per-user, live data.
 
 import frappe
 from frappe.sessions import get_csrf_token
+from frappe.utils import cint
 
 from apex_habitat.apex_core.utils.portal_bootstrap import (
     apply_portal_appearance,
@@ -45,4 +46,11 @@ def get_context(context):
         # Appearance only for the authorised view (same projection as the other
         # portals so /safety re-skins with them).
         apply_portal_appearance(context)
+        # Socket.IO config so the SPA can subscribe to live safety_update pushes
+        # (mirrors www/fleet.py). async disabled -> the page falls back to its
+        # own fetch (the flag tells it). site_name is the socket namespace.
+        conf = frappe.get_site_config()
+        context.site_name = frappe.local.site
+        context.socketio_port = cint(conf.get("socketio_port")) or 9000
+        context.async_enabled = not cint(conf.get("disable_async"))
     return context

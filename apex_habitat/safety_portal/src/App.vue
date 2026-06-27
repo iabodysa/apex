@@ -155,13 +155,14 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "./components/Icon.vue";
 import LangToggle from "./components/LangToggle.vue";
 import BuildingPicker from "./components/BuildingPicker.vue";
 import CadenceSection from "./components/CadenceSection.vue";
 import { useI18n, resourceErrorMessage } from "./i18n";
+import { connectSafetyRealtime } from "./realtime.js";
 
 const { t, tEnum, dir } = useI18n();
 
@@ -308,6 +309,37 @@ async function doSubmit() {
   }
   submitted.value = res || submitRes.data || { ok: true, rounds: [], emailed: false };
 }
+
+// ---- realtime (socket push) --------------------------------------------
+// When a Safety Round is submitted/cancelled elsewhere, the DUE set for this
+// building changes, so refetch it immediately instead of waiting for a manual
+// reload. Guarded: only refetch when a building is selected, the tab is visible,
+// and the user is not mid-flow (no unrated ratings staged and not on the success
+// screen) so realtime never wipes an in-progress checklist. A push that lands
+// mid-flow is deferred and flushed once the user resets. Failure paths in the
+// socket layer are swallowed there; this is the refresh path only.
+let stopRealtime = () => {};
+const realtimePending = ref(false);
+const midFlow = computed(() => submitted.value !== null || totalRated.value > 0);
+function onRealtimeUpdate() {
+  if (!building.value || document.hidden || midFlow.value) {
+    realtimePending.value = true;
+    return;
+  }
+  realtimePending.value = false;
+  dueRes.fetch();
+}
+// Once the user clears the in-progress flow, flush any update that arrived meanwhile.
+watch(midFlow, (active) => {
+  if (!active && realtimePending.value && !document.hidden) onRealtimeUpdate();
+});
+
+onMounted(() => {
+  stopRealtime = connectSafetyRealtime(onRealtimeUpdate);
+});
+onUnmounted(() => {
+  stopRealtime();
+});
 
 // ---- greeting + result styling -----------------------------------------
 const greeting = computed(() => {

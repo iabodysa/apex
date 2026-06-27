@@ -60,6 +60,27 @@ class DispatchTrip(Document):
             "Route Plan", self.route_plan, "transport_request"
         )
 
+    def on_update(self):
+        self._publish_driver_update()
+
+    def _publish_driver_update(self):
+        """Signal subscribed drivers' portals to refetch their trips ahead of a
+        manual refresh, on any trip change (assignment / status / board). Routed to
+        the Dispatch Trip doctype room; the socket server delivers only to recipients
+        with read permission, and each driver's my_trips query is server-scoped to
+        their own trips, so scope is honoured. after_commit so subscribers read
+        committed state. The payload is advisory — the SPA refetches, it does not
+        trust the body. Best-effort: a publish failure must never abort the save."""
+        try:
+            frappe.publish_realtime(
+                "driver_trip_update",
+                {"name": self.name},
+                doctype="Dispatch Trip",
+                after_commit=True,
+            )
+        except Exception:
+            pass
+
     def before_submit(self):
         self._enforce_dispatch_readiness()
 
