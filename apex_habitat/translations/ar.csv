@@ -326,6 +326,7 @@ Assigned requests need {0} seats but vehicle {1} seats only {2}.,تحتاج ال
 Assigned to Trip,مُسند إلى رحلة
 Assigned to driver {0} via {1}.,أُسند إلى السائق {0} عبر {1}.
 Assigned to you,مُسنَد إليك
+Assignee,المُكلَّف
 Assignment,الإسناد
 Assignment Period,فترة الإسناد
 Assignment Type,نوع التسكين
@@ -602,6 +603,9 @@ Cleaner Type,نوع العامل
 Cleaning,خدمات النظافة
 Cleaning Area Photo,صورة منطقة التنظيف
 Cleaning Compliance %,نسبة الالتزام بالتنظيف
+Cleaning Compliance Ledger,سجل الامتثال للنظافة
+Cleaning Compliance Ledger rows are immutable and cannot be edited.,صفوف سجل الامتثال للنظافة غير قابلة للتغيير ولا يمكن تعديلها.
+Cleaning Compliance Ledger rows cannot be deleted.,لا يمكن حذف صفوف سجل الامتثال للنظافة.
 Cleaning Date,تاريخ التنظيف
 Cleaning Equipment,معدات نظافة
 Cleaning Log,سجل النظافة
@@ -1226,6 +1230,8 @@ External rental office that supplies rented vehicles to the fleet.,مكتب تأ
 Facility Asset,أصل المنشأة
 Facility Asset Custody Assignment,تخصيص عهدة أصول المنشأة
 Facility Asset Movement,حركة أصول المرافق
+Facility Asset Movement Ledger,سجل حركة أصول المنشأة
+Facility Asset Movement Ledger is a posted audit record and cannot be edited.,سجل حركة أصول المنشأة هو قيد تدقيق مُرحَّل ولا يمكن تعديله.
 Facility Assets,أصول المنشأة
 Facility Assets Needing Attention,أصول المنشأة التي تتطلب متابعة
 Facility Assets by Category,أصول المنشأة حسب التصنيف
@@ -1522,6 +1528,7 @@ If execution discovered an issue requiring formal inspection,إذا اكتشف �
 Image,صورة
 Immediate Action Taken,الإجراء الفوري المتّخذ
 Imminent Checkouts,مغادرات وشيكة
+Immutable Record,قيد غير قابل للتغيير
 In Progress,قيد التنفيذ
 In Storage,في المستودع
 In Transit,في الطريق
@@ -1772,6 +1779,8 @@ Maintained by movement processing.,يُحدَّث بواسطة معالجة ال
 Maintenance,صيانة
 Maintenance Aging,تقادم طلبات الصيانة
 Maintenance Backlog,متراكمات أعمال الصيانة
+Maintenance Cost Ledger,سجل تكاليف الصيانة
+Maintenance Cost Ledger rows are immutable and cannot be edited.,صفوف سجل تكاليف الصيانة غير قابلة للتغيير ولا يمكن تعديلها.
 Maintenance Count,عدد مرات الصيانة
 Maintenance Dispatch,إرسال للصيانة
 Maintenance Findings,ملاحظات الصيانة
@@ -1792,6 +1801,7 @@ Maintenance Work Order,أمر عمل صيانة
 Maintenance Work Orders Completed,أوامر عمل الصيانة المكتملة
 Maintenance Work Orders In Progress,أوامر عمل الصيانة قيد التنفيذ
 Maintenance Work Orders by Status,أوامر عمل الصيانة حسب الحالة
+Maintenance cost ledger. Maintained automatically by the system when a Maintenance Work Order is completed and not edited manually. One immutable row per procurement item.,سجل تكاليف الصيانة. يُحدَّث تلقائياً بواسطة النظام عند اكتمال أمر عمل صيانة، ولا يُحرَّر يدوياً. صف واحد غير قابل للتغيير لكل بند مشتريات.
 Maintenance: {0},الصيانة: {0}
 Manifest Not Reconciled: {{ doc.building }} ({{ doc.pending_arrival_count }} pending),بيان غير مُسوّى: {{ doc.building }} ({{ doc.pending_arrival_count }} معلّق)
 Manifest Passenger,راكب الكشف
@@ -1876,6 +1886,7 @@ Monthly litres must be greater than zero.,يجب أن تكون اللترات ا
 Morning,صباحي
 Move to {0},النقل إلى {0}
 Move {0} from {1} to {2}?,نقل {0} من {1} إلى {2}؟
+Moved By,نقله
 Moved By (Employee),نُقل بواسطة (الموظف)
 Movement,حركة
 Movement Audit,تدقيق الحركة
@@ -2360,6 +2371,7 @@ Procurement Items Required,يلزم بنود مشتريات
 Procurement Supervisor,مشرف المشتريات
 Procurement intake store that receives the externally-purchased goods.,مخزن استلام المشتريات الذي يستلم البضائع المشتراة خارجياً.
 Procurement intake store that the goods leave.,مخزن استلام المشتريات الذي تغادر منه البضائع.
+"Procurement item row idx (1-based) within the Work Order, so each item posts a distinct idempotency-keyed ledger row.",ترتيب صف بند المشتريات (يبدأ من واحد) ضمن أمر العمل، بحيث يُرحِّل كل بند صف سجل مستقلاً بمفتاح يمنع التكرار.
 Project,المشروع
 Project Status,حالة المشروع
 Project Supervisor,مشرف المشروع
@@ -2754,6 +2766,9 @@ SMS,رسالة نصية
 Safety,السلامة
 Safety Checklist,قائمة فحص السلامة
 Safety Equipment,معدات سلامة
+Safety Finding Ledger,سجل ملاحظات السلامة
+Safety Finding Ledger rows are immutable and cannot be edited.,صفوف سجل ملاحظات السلامة غير قابلة للتغيير ولا يمكن تعديلها.
+Safety Finding Ledger rows cannot be deleted. Cancel the Safety Round to post a reversal instead.,لا يمكن حذف صفوف سجل ملاحظات السلامة. ألغِ جولة السلامة لترحيل قيد عكسي بدلاً من ذلك.
 Safety Findings,ملاحظات السلامة
 Safety Inspection Report,تقرير فحص السلامة
 Safety Inspections,تفتيشات السلامة
@@ -2919,6 +2934,7 @@ Set by the receiving supervisor once every line has been physically checked. Req
 Set by the scheduled task once the Iqama issues and a permanent Employee record is created.,يُعيَّن بواسطة المهمة المجدولة بمجرد صدور الإقامة وإنشاء سجل موظف دائم.
 Set externally after Finance posts payment. This DocType never creates a GL or Payment Entry.,يُعيَّن خارجيًا بعد ترحيل المالية للدفعة. هذا المستند لا يُنشئ أبدًا قيدًا محاسبيًا أو قيد دفع.
 "Set for quota-increase claims, which always require Operations-tier authority.",يُعيَّن لمطالبات زيادة الحصة، التي تتطلب دائمًا صلاحية على مستوى العمليات.
+Set on the reversal row posted when the source movement is cancelled. The original row is preserved for audit.,يُضبط على الصف العكسي المُرحَّل عند إلغاء الحركة المصدر. يُحتفظ بالصف الأصلي للتدقيق.
 Set once this expected worker is matched to a registered arrival.,يُضبط بمجرد مطابقة هذا العامل المتوقع بوصول مسجَّل.
 Set the monthly litre allowance for a vehicle so consumption can be reconciled.,حدد البدل الشهري باللترات لمركبة ليتسنى مطابقة الاستهلاك.
 Set the number of beds in each room. Use − / + to adjust.,حدد عدد الأسرّة في كل غرفة. استخدم − / + للتعديل.
@@ -2985,6 +3001,7 @@ Smoke Detector,كاشف دخان
 Smoke Detectors Present,كاشفات الدخان موجودة
 Snapshot,لقطة
 Snapshot Date,تاريخ اللقطة
+Snapshot of the finding's status at the moment the round was submitted (e.g. Open / In Progress / Resolved). Immutable so a later edit of the parent finding cannot rewrite history.,لقطة لحالة الملاحظة عند لحظة اعتماد الجولة (مثل: مفتوحة / قيد المعالجة / مُغلقة). غير قابلة للتغيير حتى لا يُعيد تعديلٌ لاحق للملاحظة الأصل كتابة السجل التاريخي.
 Snapshots,اللقطات
 Snooze,تأجيل
 Snooze Until,التأجيل حتى
@@ -2998,6 +3015,7 @@ Sort,ترتيب
 Source,المصدر
 Source Channel,قناة المصدر
 Source Checkout,تسجيل المغادرة المصدر
+Source Detail No,رقم تفصيل المصدر
 Source DocType,نوع المستند المصدر
 "Source DocType the deduction originates from (for example Custody Damage Assessment, Accommodation Checkout).",نوع المستند المصدر الذي ينشأ منه الخصم (مثل تقييم تلف العهدة، مغادرة الإسكان).
 Source DocType:name this row was migrated from when Fuel Topup/Chip Request DocTypes merged into Fuel Request. Blank for native requests.,المستند:الاسم المصدري الذي تم ترحيل هذا الصف منه عند دمج مستندي تعبئة الوقود/طلب الشريحة في طلب الوقود. يُترك فارغًا للطلبات الأصلية.
@@ -3195,6 +3213,7 @@ The manifest worker this boarding state tracks.,عامل القائمة الذي
 The messaging gateway is not enabled or is missing its URL/API key. Configure it in Apex Integration Settings first.,بوابة المراسلة غير مُفعّلة أو ينقصها الرابط أو مفتاح الواجهة البرمجية. قم بإعدادها في إعدادات تكامل Apex أولاً.
 The new expiry date must be later than the current expiry date.,يجب أن يكون تاريخ الانتهاء الجديد لاحقًا لتاريخ الانتهاء الحالي.
 The one-time password has expired. Ask the procurement supervisor to regenerate it.,انتهت صلاحية رمز التحقق لمرة واحدة. اطلب من مشرف المشتريات إعادة توليده.
+The originating child row index (Inspection Finding Item idx) within the source execution. Part of the idempotency key so each finding row posts at most once.,ترتيب الصف الفرعي المصدر (ترتيب بند ملاحظة الفحص) ضمن التنفيذ المصدر. جزء من مفتاح منع التكرار بحيث يُرحَّل كل صف ملاحظة مرة واحدة على الأكثر.
 The pickup date and time is not valid.,تاريخ ووقت الالتقاط غير صالح.
 "The pre-arrival manifest this worker was expected on, if any.",بيان ما قبل الوصول الذي كان يُتوقع إدراج هذا العامل ضمنه، إن وُجد.
 The procurement supervisor and the receiving supervisor must be different people.,يجب أن يكون مشرف المشتريات والمشرف المستلم شخصين مختلفين.
@@ -3374,6 +3393,8 @@ Trips,الرحلات
 Trips Count,عدد الرحلات
 Trips Dispatched Today,الرحلات المُرسَلة اليوم
 Trips This Month,الرحلات هذا الشهر
+True on a reversal (negating) row posted when the Safety Round is cancelled. The original row is preserved for audit.,صحيح في الصف العكسي (المُلغي) المُرحَّل عند إلغاء جولة السلامة. يُحتفظ بالصف الأصلي للتدقيق.
+True when the finding's snapshot status was Resolved at posting time.,صحيح عندما تكون حالة لقطة الملاحظة مُغلقة وقت الترحيل.
 True when the trip recorded both a depart and return timestamp. Data-completeness flag — no planned return time is stored to judge punctuality against.,صحيح عندما تسجّل الرحلة طابعي وقت للمغادرة والعودة معًا. مؤشر اكتمال البيانات — لا يُخزَّن وقت عودة مخطط للحكم على الالتزام بالمواعيد مقابله.
 Type,النوع
 Type a message before sending.,اكتب رسالة قبل الإرسال.

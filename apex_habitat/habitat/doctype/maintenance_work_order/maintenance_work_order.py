@@ -27,6 +27,10 @@ class MaintenanceWorkOrder(Document):
         ):
             frappe.delete_doc("Accommodation Ledger", row, ignore_permissions=True, force=True)  # audit-ok — reversing a system memo this Work Order posted
 
+        # Per-item cost ledger is immutable: reverse (negative mirror row), never delete.
+        from apex_habitat.habitat.maintenance_engine import reverse_maintenance_cost
+        reverse_maintenance_cost(self.name)
+
         if not self.maintenance_request:
             return
         if not frappe.db.exists("DocType", "Maintenance Request"):
@@ -160,6 +164,11 @@ def mark_completed(work_order, completion_notes=None):
                 "allocation_period_end": doc.actual_end_date,
             }).insert(ignore_permissions=True)  # audit-ok — system ledger memo on completion, gated by Work Order write (above)
             ledger_posted = True
+
+        # Per-item immutable cost trail (stable under later cancellation). Idempotent,
+        # so re-completion never double-posts; separate from the aggregate memo above.
+        from apex_habitat.habitat.maintenance_engine import post_maintenance_cost
+        post_maintenance_cost(doc)
     except Exception:
         frappe.db.rollback()
         frappe.throw(_("Could not complete the Work Order. No changes were saved. Please try again or contact support."))

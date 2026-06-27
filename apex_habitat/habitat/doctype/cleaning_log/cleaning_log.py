@@ -22,6 +22,20 @@ class CleaningLog(Document):
         self._stamp_area_evidence()
         self._validate_area_evidence()
 
+    def on_submit(self):
+        # Post the immutable per-room Cleaning Compliance Ledger (system-written
+        # audit memo). Idempotent, so a re-submit of an amended log never doubles.
+        from apex_habitat.habitat.cleaning_engine import post_cleaning_compliance
+
+        post_cleaning_compliance(self)
+
+    def on_cancel(self):
+        # Reverse (negative mirror + is_cancelled) the rows this log posted so a
+        # cancelled/amended log nets out of every compliance sum; never deletes.
+        from apex_habitat.habitat.cleaning_engine import reverse_cleaning_compliance
+
+        reverse_cleaning_compliance(self.name)
+
     def _stamp_area_evidence(self):
         """Server-stamp who/when on any photo row that arrived unstamped.
 

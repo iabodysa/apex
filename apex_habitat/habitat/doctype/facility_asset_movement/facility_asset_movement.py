@@ -7,6 +7,11 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import today
 
+from apex_habitat.habitat.asset_movement_engine import (
+    post_asset_movement,
+    reverse_asset_movement,
+)
+
 
 class FacilityAssetMovement(Document):
     pass
@@ -33,6 +38,9 @@ def on_submit(doc, method=None):
     on Facility Asset (its fields are ``building``/``location_in_building``), so the
     guarded ``updates`` dict stayed empty — every movement was a silent no-op and the
     audit fields (previous_*/movement_count/last_movement_date) never populated."""
+    # Post the immutable from->to history row first; the in-place update below only
+    # tracks the current location, not the move history.
+    post_asset_movement(doc)
     asset = frappe.db.get_value(
         "Facility Asset",
         doc.facility_asset,
@@ -53,6 +61,9 @@ def on_submit(doc, method=None):
 
 def on_cancel(doc, method=None):
     """Revert the asset to where it came from when a submitted movement is cancelled."""
+    # Reverse the ledger (negated mirror row, not a delete) so the history stays
+    # auditable; runs even if the asset row was deleted after the move.
+    reverse_asset_movement(doc.doctype, doc.name)
     if not frappe.db.exists("Facility Asset", doc.facility_asset):
         return
     count = frappe.db.get_value("Facility Asset", doc.facility_asset, "movement_count") or 0
