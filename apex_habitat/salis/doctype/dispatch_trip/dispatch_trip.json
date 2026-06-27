@@ -12,6 +12,8 @@
   "dispatch_trip_sec_trip_col1",
   "trip_date",
   "status",
+  "dispatch_trip_sec_assigned_requests",
+  "assigned_requests",
   "dispatch_trip_sec_assignment",
   "vehicle",
   "dispatch_trip_sec_assignment_col1",
@@ -76,6 +78,19 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Planned\nDispatched\nCompleted\nCancelled"
+  },
+  {
+   "fieldname": "dispatch_trip_sec_assigned_requests",
+   "fieldtype": "Section Break",
+   "label": "Assigned Requests"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Transport requests the supervisor has assigned onto this trip. The trip manifest is the union of these requests' workers (plus any Route Plan request).",
+   "fieldname": "assigned_requests",
+   "fieldtype": "Table",
+   "label": "Assigned Requests",
+   "options": "Dispatch Trip Assigned Request"
   },
   {
    "fieldname": "dispatch_trip_sec_assignment",
@@ -214,7 +229,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-06-27 12:00:00.000000",
+ "modified": "2026-06-27 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

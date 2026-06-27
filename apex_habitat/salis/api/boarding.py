@@ -123,17 +123,17 @@ def _resolve_trip(dispatch_trip: str) -> dict:
     return trip
 
 
-def _trip_manifest_workers(transport_request: str | None) -> set[str]:
-    """The set of Employee ids registered on the trip's Transport Request
-    manifest. A pass is only honoured for a worker actually on the manifest."""
-    if not transport_request:
-        return set()
-    rows = frappe.get_all(
-        "Transport Request Worker",
-        filters={"parent": transport_request, "parenttype": "Transport Request"},
-        pluck="employee",
-    )
-    return {r for r in rows if r}
+def _trip_manifest_workers(
+    transport_request: str | None, dispatch_trip: str | None = None
+) -> set[str]:
+    """The set of Employee ids on the trip's expected manifest — the UNION of the
+    Route Plan Transport Request's workers and every assigned-request's workers. A
+    pass is only honoured for a worker actually on this union. Resolved through the
+    boarding_flow helper so the QR gate and the boarding-state seeding share one
+    definition of "on this trip"."""
+    from apex_habitat.salis.api.boarding_flow import _manifest_employees
+
+    return {e for e in _manifest_employees(dispatch_trip, transport_request) if e}
 
 
 def _get_or_create_log(dispatch_trip: str) -> "frappe.model.document.Document":
@@ -220,7 +220,7 @@ def get_boarding_pass(dispatch_trip, worker):
     is just a signed claim; it only matters when scanned."""
     trip = _resolve_trip(dispatch_trip)
 
-    manifest = _trip_manifest_workers(trip.get("transport_request"))
+    manifest = _trip_manifest_workers(trip.get("transport_request"), dispatch_trip)
     if worker not in manifest:
         frappe.throw(
             _("Worker {0} is not on this trip's manifest.").format(worker)
@@ -279,7 +279,7 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
     # WRONG_BUS correction (correct trip + that driver's phone, for the worker to
     # find the right bus); fall back to the plain Wrong Trip result otherwise. The
     # scan attempt is recorded either way.
-    if worker not in _trip_manifest_workers(trip.get("transport_request")):
+    if worker not in _trip_manifest_workers(trip.get("transport_request"), dispatch_trip):
         log_name = _log_scan(
             dispatch_trip, trip, worker, "Wrong Trip", pass_token,
             notes="Worker is not on this trip's manifest.",

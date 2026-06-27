@@ -1493,26 +1493,34 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
         fields=["name", "route_plan", "transport_request"],
         order_by="depart_time asc",
     )
+    from apex_habitat.salis.api.boarding_flow import _assigned_request_names
+
     for t in trips:
         req = t.get("transport_request")
         if not req and t.get("route_plan"):
             req = frappe.db.get_value("Route Plan", t["route_plan"], "transport_request")
-        if not req:
-            continue
-        if transport_request and req != transport_request:
-            continue
-        # Manifest membership IS the scope: the worker's own pickup row on this
-        # request, or no match (-> this trip is skipped).
-        row = frappe.db.get_value(
-            "Transport Request Worker",
-            {"parent": req, "parenttype": "Transport Request", "employee": employee},
-            ["pickup_point"],
-            as_dict=True,
-        )
-        if not row:
-            continue
-        building = frappe.db.get_value("Transport Request", req, "accommodation_building")
-        return t["name"], req, row.get("pickup_point"), building
+        # The worker may be on the Route Plan request OR on any request the
+        # supervisor assigned onto this trip; scan that union for their pickup row.
+        candidate_reqs = [req, *_assigned_request_names(t["name"])]
+        if transport_request:
+            candidate_reqs = [r for r in candidate_reqs if r == transport_request]
+        for candidate in candidate_reqs:
+            if not candidate:
+                continue
+            # Manifest membership IS the scope: the worker's own pickup row on this
+            # request, or no match (-> this request is skipped).
+            row = frappe.db.get_value(
+                "Transport Request Worker",
+                {"parent": candidate, "parenttype": "Transport Request", "employee": employee},
+                ["pickup_point"],
+                as_dict=True,
+            )
+            if not row:
+                continue
+            building = frappe.db.get_value(
+                "Transport Request", candidate, "accommodation_building"
+            )
+            return t["name"], candidate, row.get("pickup_point"), building
     return None
 
 

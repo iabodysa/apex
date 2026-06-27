@@ -50,6 +50,7 @@ class DispatchTrip(Document):
         self._validate_odometer()
         self._enforce_compliance()
         self._require_completion_notes()
+        self._enforce_capacity()
 
     def _resolve_transport_request(self):
         """Resolve the Transport Request from the Route Plan when not already set,
@@ -60,8 +61,29 @@ class DispatchTrip(Document):
             "Route Plan", self.route_plan, "transport_request"
         )
 
+    def _enforce_capacity(self):
+        """Cap the assigned requests' total workers at the vehicle's seat capacity.
+
+        Preliminary assignment guard: when the vehicle has a known seat_capacity
+        (non-zero) and assigned_requests are set, the sum of the requests' worker
+        counts must not exceed it. Skipped when capacity is unknown (0/unset) — the
+        field is optional and the existing Route Plan path carries no capacity."""
+        if not (self.vehicle and self.assigned_requests):
+            return
+        capacity = frappe.db.get_value("Salis Vehicle", self.vehicle, "seat_capacity") or 0
+        if capacity <= 0:
+            return
+        total = sum((row.requested_count or 0) for row in self.assigned_requests)
+        if total > capacity:
+            frappe.throw(
+                _(
+                    "Assigned requests need {0} seats but vehicle {1} seats only {2}."
+                ).format(total, self.vehicle, capacity)
+            )
+
     def on_update(self):
         self._publish_driver_update()
+        self._mark_assigned_requests()
 
     def _publish_driver_update(self):
         """Signal subscribed drivers' portals to refetch their trips ahead of a
@@ -80,6 +102,38 @@ class DispatchTrip(Document):
             )
         except Exception:
             pass
+
+    def _mark_assigned_requests(self):
+        """Best-effort: flag each assigned Transport Request as Assigned to this trip.
+
+        Sets the request's is_assigned flag + assigned_to_trip back-link so the
+        preliminary assignment is visible on the request, WITHOUT touching the
+        workflow-owned status (a native Workflow is forward-only and has no
+        "Assigned" state between Scheduled and Fulfilled; forcing one would break
+        the existing fulfilment chain). A terminal/cancelled request is skipped.
+        Swallowed per row so an un-writable request never aborts the trip save."""
+        for row in self.assigned_requests or []:
+            if not row.transport_request:
+                continue
+            try:
+                current = frappe.db.get_value(
+                    "Transport Request",
+                    row.transport_request,
+                    ["is_assigned", "assigned_to_trip", "status"],
+                    as_dict=True,
+                )
+                if not current or current.status in ("Cancelled", "Rejected"):
+                    continue
+                if current.is_assigned and current.assigned_to_trip == self.name:
+                    continue
+                frappe.db.set_value(
+                    "Transport Request",
+                    row.transport_request,
+                    {"is_assigned": 1, "assigned_to_trip": self.name},
+                    update_modified=False,
+                )
+            except Exception:
+                continue
 
     def before_submit(self):
         self._enforce_dispatch_readiness()
@@ -247,3 +301,51 @@ class DispatchTrip(Document):
                 "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True  # audit-ok
             )
         # [#r7e254]
+
+
+# Roles permitted to assign requests onto a trip (the transport-supervisor action).
+ASSIGNMENT_ROLES = ("Fleet Manager", "Fleet Project Manager", "Fleet Supervisor", "System Manager")
+
+
+@frappe.whitelist(methods=["POST"])
+def assign_requests_to_trip(dispatch_trip, transport_requests):
+    """Assign one-or-many Transport Requests onto a Dispatch Trip (supervisor action).
+
+    The preliminary assignment endpoint: appends each request to the trip's
+    assigned_requests child table (skipping duplicates) and saves, so the trip
+    manifest becomes the union of the assigned requests' workers and the capacity
+    guard runs. ``transport_requests`` is a request name or a JSON list of names.
+
+    Authorization (whitelisting is exposure, not authorization): the caller must
+    hold a transport-supervisor role AND write permission on this Dispatch Trip
+    (frappe.has_permission re-applies DocPerm + per-doc has_permission + User
+    Permission scoping). Returns the trip's resulting assigned-request names."""
+    if not (set(frappe.get_roles()) & set(ASSIGNMENT_ROLES)):
+        frappe.throw(
+            _("You are not permitted to assign transport requests."), frappe.PermissionError
+        )
+
+    trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
+    if not frappe.has_permission("Dispatch Trip", "write", doc=trip):
+        frappe.throw(
+            _("You do not have write permission on this Dispatch Trip."),
+            frappe.PermissionError,
+        )
+
+    if isinstance(transport_requests, str):
+        transport_requests = (
+            frappe.parse_json(transport_requests)
+            if transport_requests.strip().startswith("[")
+            else [transport_requests]
+        )
+
+    existing = {row.transport_request for row in (trip.assigned_requests or [])}
+    for request in transport_requests:
+        if not request or request in existing:
+            continue
+        if not frappe.db.exists("Transport Request", request):
+            frappe.throw(_("Transport Request {0} does not exist.").format(request))
+        trip.append("assigned_requests", {"transport_request": request})
+        existing.add(request)
+    trip.save()
+    return [row.transport_request for row in (trip.assigned_requests or [])]

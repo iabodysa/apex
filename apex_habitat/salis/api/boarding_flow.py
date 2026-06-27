@@ -52,12 +52,8 @@ def _publish(event, dispatch_trip, payload):
 # Trip Boarding State — populate from the manifest when the trip starts.
 
 
-def _manifest_employees(dispatch_trip, transport_request=None):
-    """The registered Employee ids on the trip's Transport Request manifest."""
-    if not transport_request:
-        transport_request = frappe.db.get_value(
-            "Dispatch Trip", dispatch_trip, "transport_request"
-        )
+def _request_workers(transport_request):
+    """Ordered Employee ids on one Transport Request's worker manifest."""
     if not transport_request:
         return []
     return frappe.get_all(
@@ -66,6 +62,37 @@ def _manifest_employees(dispatch_trip, transport_request=None):
         pluck="employee",
         order_by="idx asc",
     )
+
+
+def _assigned_request_names(dispatch_trip):
+    """The Transport Requests assigned onto the trip (the supervisor assignment)."""
+    if not dispatch_trip:
+        return []
+    return frappe.get_all(
+        "Dispatch Trip Assigned Request",
+        filters={"parent": dispatch_trip, "parenttype": "Dispatch Trip"},
+        pluck="transport_request",
+        order_by="idx asc",
+    )
+
+
+def _manifest_employees(dispatch_trip, transport_request=None):
+    """The trip's expected manifest: the de-duplicated UNION of the Route Plan
+    Transport Request's workers and every assigned-request's workers, preserving
+    first-seen order. The Route Plan path and the supervisor assignment path are
+    additive — a trip can carry either or both."""
+    if not transport_request:
+        transport_request = frappe.db.get_value(
+            "Dispatch Trip", dispatch_trip, "transport_request"
+        )
+    seen = set()
+    ordered = []
+    for request in [transport_request, *_assigned_request_names(dispatch_trip)]:
+        for employee in _request_workers(request):
+            if employee and employee not in seen:
+                seen.add(employee)
+                ordered.append(employee)
+    return ordered
 
 
 def ensure_trip_boarding_state(dispatch_trip, transport_request=None):
