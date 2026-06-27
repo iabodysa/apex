@@ -5,10 +5,11 @@ to that series' consolidated note (newest patch first inside).
 
 ## Latest
 
-**[1.60.0](v1/v1_60_0.md)** · Feature — Keep a running count of what's in each building, and let drivers get a push even when the app is closed.
+**[1.60.1](v1/v1_60_1.md)** · Fix — Security hardening and reliability fixes across portals, fleet, custody and reports.
 
 ## All releases
 
+- [1.60.1](v1/v1_60_1.md) · Fix — Security hardening and reliability fixes across portals, fleet, custody and reports.
 - [1.60.0](v1/v1_60_0.md) · Feature — Keep a running count of what's in each building, and let drivers get a push even when the app is closed.
 - [1.59.1](v1/v1_59_0.md) · Fix — Reliability fixes across driver attendance, fuel and rental movement, and maintenance.
 - [1.59](v1/v1_59_0.md) — Drivers can board a trip even when a pass won't scan, Masar opens the whole route in Maps, and you can send a worker their personal link straight to their phone.
