@@ -1400,11 +1400,14 @@ def daily_safety_task_compliance_scan() -> None:
 
 
 def daily_scheduled_task_instance_generator() -> None:
-    """Generate Scheduled Task Instance records for active templates due today.
+    """Generate Scheduled Task Instance records using the Assignment × Item pattern.
 
-    Runs daily. For each active Scheduled Task Template, checks whether a
-    Scheduled Task Instance already exists for the current period before creating.
-    Phase 7 — requires Scheduled Task Template and Scheduled Task Instance DocTypes.
+    Phase B redesign (T-552): iterates active Scheduled Task Assignments, then for
+    each active template item row creates one Scheduled Task Instance per
+    (assignment, task_catalog, due_date). The due_date is resolved from the item's
+    frequency_override if set, or the template-level frequency otherwise. Idempotent:
+    an existing non-cancelled instance for the same (assignment, task_catalog, due_date)
+    is skipped. Per-item error isolation; paginated 500/batch on assignments.
     """
     from frappe.utils import today, get_first_day, getdate
 
@@ -1412,82 +1415,109 @@ def daily_scheduled_task_instance_generator() -> None:
     today_date = getdate(today_str)
     logger = frappe.logger()
 
-    # [#78c2rg]
+    def _period_key(freq: str) -> str:
+        """Return the canonical due_date string for the given frequency."""
+        if freq == "Daily":
+            return today_str
+        if freq == "Weekly":
+            import datetime
+            week_start = today_date - datetime.timedelta(days=today_date.weekday())
+            return str(week_start)
+        if freq == "Monthly":
+            return str(get_first_day(today_date))
+        if freq == "Quarterly":
+            month = today_date.month
+            quarter_start_month = ((month - 1) // 3) * 3 + 1
+            return str(today_date.replace(month=quarter_start_month, day=1))
+        if freq == "Annually":
+            return str(today_date.replace(month=1, day=1))
+        return today_str
+
+    created = 0
     start = 0
     batch_size = 500
     while True:
-        templates = frappe.get_all(
-            "Scheduled Task Template",
+        assignments = frappe.get_all(
+            "Scheduled Task Assignment",
             filters={"is_active": 1},
-            fields=["name", "template_name", "frequency", "building", "assigned_to"],
+            fields=["name", "template", "building"],
             limit_start=start,
             limit_page_length=batch_size,
         )
-        if not templates:
+        if not assignments:
             break
 
-        for tmpl in templates:
-            # [#hs4wc0]
-            if tmpl.building and not frappe.db.exists("Accommodation Building", tmpl.building):
-                logger.warning(
-                    "daily_scheduled_task_instance_generator: skipping template %s — building %s not found.",
-                    tmpl.name,
-                    tmpl.building,
-                )
-                continue
-
-            freq = tmpl.frequency or "Monthly"
-            if freq == "Daily":
-                period_key = today_str
-            elif freq == "Weekly":
-                week_start = today_date - __import__("datetime").timedelta(days=today_date.weekday())
-                period_key = str(week_start)
-            elif freq == "Monthly":
-                period_key = str(get_first_day(today_date))
-            elif freq == "Quarterly":
-                month = today_date.month
-                quarter_start_month = ((month - 1) // 3) * 3 + 1
-                period_key = str(today_date.replace(month=quarter_start_month, day=1))
-            elif freq == "Annually":
-                period_key = str(today_date.replace(month=1, day=1))
-            else:
-                period_key = today_str
-
-            existing = frappe.db.exists(
-                "Scheduled Task Instance",
-                {"template": tmpl.name, "due_date": period_key, "docstatus": ["!=", 2]},
+        for assignment in assignments:
+            items = frappe.get_all(
+                "Scheduled Task Template Item",
+                filters={"parent": assignment.template, "is_active": 1},
+                fields=["task_catalog", "frequency_override", "title"],
             )
-            if existing:
-                continue
+            for item in items:
+                # Resolve effective frequency: item override → template default.
+                frequency = item.frequency_override
+                if not frequency:
+                    frequency = (
+                        frappe.db.get_value(
+                            "Scheduled Task Template", assignment.template, "frequency"
+                        )
+                        or "Monthly"
+                    )
 
-            try:
-                sti = frappe.get_doc({
-                    "doctype": "Scheduled Task Instance",
-                    "template": tmpl.name,
-                    "due_date": period_key,
-                    "assigned_to": tmpl.assigned_to,
-                    "status": "Open",
-                })
-                sti.insert(ignore_permissions=True)  # audit-ok — scheduler-run task generation, no user session
-                logger.info(
-                    "daily_scheduled_task_instance_generator: Created STI %s for template %s due %s.",
-                    sti.name,
-                    tmpl.name,
-                    period_key,
-                )
-            except Exception as e:  # noqa: BLE001
-                frappe.db.rollback()  # [#7kjob3]
-                logger.error(
-                    "daily_scheduled_task_instance_generator: Failed to create STI for template %s: %s",
-                    tmpl.name,
-                    e,
-                )
-                frappe.log_error(
-                    message=frappe.get_traceback(),
-                    title=f"STI generator failed for template {tmpl.name}"[:140],
-                )
+                due_date = _period_key(frequency)
+
+                # Idempotency guard: skip if a non-cancelled instance already exists.
+                if frappe.db.exists(
+                    "Scheduled Task Instance",
+                    {
+                        "assignment": assignment.name,
+                        "task_catalog": item.task_catalog,
+                        "due_date": due_date,
+                        "docstatus": ["!=", 2],
+                    },
+                ):
+                    continue
+
+                try:
+                    instance = frappe.get_doc({
+                        "doctype": "Scheduled Task Instance",
+                        "assignment": assignment.name,
+                        "task_catalog": item.task_catalog,
+                        "building": assignment.building,
+                        "template": assignment.template,
+                        "due_date": due_date,
+                        "status": "Open",
+                    })
+                    instance.insert(ignore_permissions=True)  # audit-ok — scheduler-run task generation
+                    created += 1
+                    logger.info(
+                        "daily_scheduled_task_instance_generator: created %s "
+                        "(assignment=%s, task_catalog=%s, due=%s).",
+                        instance.name,
+                        assignment.name,
+                        item.task_catalog,
+                        due_date,
+                    )
+                except Exception as e:  # noqa: BLE001
+                    frappe.db.rollback()  # [#7kjob3]
+                    logger.error(
+                        "daily_scheduled_task_instance_generator: failed for "
+                        "assignment=%s, task_catalog=%s: %s",
+                        assignment.name,
+                        item.task_catalog,
+                        e,
+                    )
+                    frappe.log_error(
+                        message=frappe.get_traceback(),
+                        title=(
+                            f"STI generator failed (assignment={assignment.name}, "
+                            f"task={item.task_catalog})"
+                        )[:140],
+                    )
 
         start += batch_size
+
+    logger.info(f"daily_scheduled_task_instance_generator: created {created} instance(s).")
 
 
 def weekly_safety_coverage_gate() -> None:

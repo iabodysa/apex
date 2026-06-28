@@ -1,27 +1,18 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Idempotency of the daily Scheduled Task Instance generator.
+"""Idempotency of the daily Scheduled Task Instance generator (Phase B, T-552).
 
-The generator's contract is ONE instance per template per period, enforced by a
-check-then-insert guard plus the composite UNIQUE backstop
-``unique_sti_template_due_status`` (scheduled_task_instance.on_doctype_update).
+The generator's contract is ONE instance per (assignment, task_catalog, period),
+enforced by a check-then-insert guard plus the composite UNIQUE backstop
+``unique_sti_assignment_catalog_due_status`` (scheduled_task_instance.on_doctype_update).
 The only existing coverage (qa_probe_systems test_8) smoke-runs every scheduler
 once and asserts no exception — it never RE-runs the generator and never counts
 the resulting instances. So a regression in the period_key computation or the
-exists() guard would silently spam a duplicate instance every day with nothing
-in CI catching it. This test runs the generator twice for the same period and
-asserts the per-template/per-period count stays at exactly one.
+exists() guard would silently spam duplicate instances with nothing in CI catching it.
+This test runs the generator twice for the same period and asserts the per-assignment/
+per-catalog/per-period count stays at exactly one.
 
-Verified against the DocType JSON:
-  Scheduled Task Template — required: template_name (Data, unique, also the
-    autoname `field:template_name`), frequency (Select; Monthly is a valid
-    option and the default). `building` is optional, so the fixture omits it to
-    stay self-contained (no Accommodation Building needed) and to skip the
-    generator's building-exists branch.
-  Scheduled Task Instance — `template` Link, `due_date` Date; the generator
-    inserts at docstatus 0 (Draft, it does NOT submit). The guard counts
-    {template, due_date, docstatus != 2}, so the assertion scopes the count the
-    same way and to THIS template only (the migrated site may carry other active
-    seed templates).
+Phase B design: the generator iterates Scheduled Task Assignment × Scheduled Task
+Template Item, so both must exist for the generator to produce an instance.
 """
 
 from __future__ import annotations
@@ -34,23 +25,93 @@ from frappe.utils import get_first_day, getdate, today
 class TestStiGeneratorIdempotency(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # Unique per-test fixture keyed off the method name (mirrors the Vehicle
-        # Incident pattern); template_name is also the autoname, so it is the
-        # link value the generator writes onto the instance.
-        self.template_name = f"STI Idempotency {self._testMethodName}"
-        self.template = (
-            frappe.get_doc(
-                {
-                    "doctype": "Scheduled Task Template",
-                    "template_name": self.template_name,
-                    "task_type": "Safety",
-                    "frequency": "Monthly",
-                    "is_active": 1,
-                }
-            )
-            .insert(ignore_permissions=True)
-            .name
+        method = self._testMethodName
+
+        # --- Safety Task Catalog fixture ---
+        catalog_code = f"STI-IDEM-{method}"[:20]
+        existing_cat = frappe.db.get_value(
+            "Safety Task Catalog", {"task_code": catalog_code}, "name"
         )
+        if existing_cat:
+            self.catalog = existing_cat
+        else:
+            cat_doc = frappe.get_doc({
+                "doctype": "Safety Task Catalog",
+                "naming_series": "STC-.####",
+                "task_title": f"Idempotency Test Task {method}",
+                "task_code": catalog_code,
+                "department": "Maintenance",
+                "frequency": "Monthly",
+                "priority": "Medium",
+                "is_active": 1,
+            })
+            cat_doc.insert(ignore_permissions=True)
+            self.catalog = cat_doc.name
+            self.addCleanup(
+                frappe.delete_doc, "Safety Task Catalog", self.catalog,
+                force=True, ignore_permissions=True,
+            )
+
+        # --- Accommodation Building fixture ---
+        bname = f"STI Idempotency Building {method}"
+        existing_bld = frappe.db.get_value(
+            "Accommodation Building", {"building_name": bname}, "name"
+        )
+        if existing_bld:
+            self.building = existing_bld
+        else:
+            bld_doc = frappe.get_doc({
+                "doctype": "Accommodation Building",
+                "building_name": bname,
+                "status": "Active",
+                "total_capacity": 10,
+            })
+            bld_doc.insert(ignore_permissions=True)
+            self.building = bld_doc.name
+            self.addCleanup(
+                frappe.delete_doc, "Accommodation Building", self.building,
+                force=True, ignore_permissions=True,
+            )
+
+        # --- Scheduled Task Template fixture (with one child item) ---
+        self.template_name = f"STI Idempotency {method}"
+        existing_tmpl = frappe.db.get_value(
+            "Scheduled Task Template", {"template_name": self.template_name}, "name"
+        )
+        if existing_tmpl:
+            frappe.delete_doc(
+                "Scheduled Task Template", existing_tmpl, force=True, ignore_permissions=True
+            )
+        tmpl_doc = frappe.get_doc({
+            "doctype": "Scheduled Task Template",
+            "template_name": self.template_name,
+            "task_type": "Safety",
+            "frequency": "Monthly",
+            "is_active": 1,
+            "template_items": [{"task_catalog": self.catalog, "is_active": 1}],
+        })
+        tmpl_doc.insert(ignore_permissions=True)
+        self.template = tmpl_doc.name
+        self.addCleanup(
+            frappe.delete_doc, "Scheduled Task Template", self.template,
+            force=True, ignore_permissions=True,
+        )
+
+        # --- Scheduled Task Assignment fixture ---
+        asgn_doc = frappe.get_doc({
+            "doctype": "Scheduled Task Assignment",
+            "template": self.template,
+            "building": self.building,
+            "effective_from": today(),
+            "is_active": 1,
+        })
+        asgn_doc.insert(ignore_permissions=True)
+        self.assignment = asgn_doc.name
+        self.addCleanup(
+            frappe.delete_doc, "Scheduled Task Assignment", self.assignment,
+            force=True, ignore_permissions=True,
+        )
+
         # Recompute the period_key exactly as the Monthly branch of the generator
         # does (first day of the current month) so the count is scoped to the
         # one period this run targets, independent of the calendar date.
@@ -58,14 +119,22 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
 
     def tearDown(self):
         frappe.set_user("Administrator")
+        # Purge any Scheduled Task Instances created by the generator for this fixture.
+        for name in frappe.get_all(
+            "Scheduled Task Instance",
+            filters={"assignment": self.assignment, "due_date": self.period_key},
+            pluck="name",
+        ):
+            frappe.delete_doc(
+                "Scheduled Task Instance", name, force=True, ignore_permissions=True
+            )
 
     def _instance_count(self):
-        # Scope to this template + this period, and exclude Cancelled (docstatus
-        # == 2) exactly as the generator's own existence guard does.
         return frappe.db.count(
             "Scheduled Task Instance",
             {
-                "template": self.template,
+                "assignment": self.assignment,
+                "task_catalog": self.catalog,
                 "due_date": self.period_key,
                 "docstatus": ["!=", 2],
             },
@@ -74,18 +143,16 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
     def test_generator_creates_one_instance_and_is_idempotent(self):
         from apex_habitat.habitat.tasks import daily_scheduled_task_instance_generator
 
-        # Non-vacuous precondition: the seeded template must be discoverable by
-        # the same scan the generator runs (active templates), and there must be
-        # no pre-existing instance for it this period.
+        # Non-vacuous precondition: the assignment must be discoverable.
         active = frappe.get_all(
-            "Scheduled Task Template",
-            filters={"is_active": 1, "name": self.template},
+            "Scheduled Task Assignment",
+            filters={"is_active": 1, "name": self.assignment},
             pluck="name",
         )
         self.assertIn(
-            self.template,
+            self.assignment,
             active,
-            "seed failed: the active-template scan did not find the fixture",
+            "seed failed: the active-assignment scan did not find the fixture",
         )
         self.assertEqual(
             self._instance_count(),
@@ -93,9 +160,7 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
             "fixture must start with no instance for its current period",
         )
 
-        # First run: the generator must create exactly one instance for the
-        # template's current period. (Also proves the seed/scan path works, so
-        # the idempotency assertion below is not vacuously satisfied by zero.)
+        # First run: generator must create exactly one instance.
         daily_scheduled_task_instance_generator()
         self.assertEqual(
             self._instance_count(),
@@ -103,8 +168,8 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
             "the first generator run must create exactly one instance",
         )
 
-        # Second run for the same period: the check-then-insert guard (backed by
-        # the unique_sti_template_due_status index) must create NO duplicate.
+        # Second run for the same period: the check-then-insert guard must not
+        # create a duplicate.
         daily_scheduled_task_instance_generator()
         self.assertEqual(
             self._instance_count(),

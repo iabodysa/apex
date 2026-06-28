@@ -13,26 +13,31 @@ class ScheduledTaskInstance(Document):
 
 
 def on_doctype_update():
-    """Hard idempotency backstop: a composite UNIQUE index on ``(template,
-    due_date, docstatus)`` so ``habitat.tasks.daily_scheduled_task_instance_generator``
-    cannot create two instances for the same template+period even if its
-    check-then-insert is bypassed by a race.
+    """Hard idempotency backstop for Scheduled Task Instance (Phase B, T-552).
 
-    Column choice: the generator's guard is
-    ``exists({template, due_date, docstatus != 2})`` — i.e. it treats Draft(0)
-    and Submitted(1) as the blocking set but lets a new instance be created after
-    the prior one is Cancelled(2). ``docstatus`` is therefore part of the key:
-    including it keeps a cancelled instance (and an amendment, which reuses the
-    template+due_date of its cancelled original) from colliding with a fresh
-    Open instance, while still blocking the duplicate Drafts the generator could
-    otherwise race-insert (it only ever inserts at docstatus 0). Guarded so
-    pre-existing duplicate data logs rather than aborting migrate."""
+    UNIQUE on ``(assignment, task_catalog, due_date, docstatus)``: one non-cancelled
+    instance per (assignment, task_catalog, due_date). ``docstatus`` in the key lets a
+    Cancelled(2) row coexist with a new Draft(0) for the same slot (amendment pattern)
+    while still blocking duplicate Drafts the generator could race-insert.
+
+    The legacy UNIQUE on ``(template, due_date, docstatus)`` is DROPPED here because
+    Phase B allows multiple assignments per template; that index would block the second
+    assignment from creating instances on the same day as the first.
+    """
     from apex_habitat.apex_core.utils.ledger_index import add_unique_guarded
+
+    # Drop the legacy single-assignment-per-template index if it still exists.
+    try:
+        frappe.db.sql(
+            "ALTER TABLE `tabScheduled Task Instance` DROP INDEX `unique_sti_template_due_status`"
+        )
+    except Exception:
+        pass  # index already absent — safe to ignore
 
     add_unique_guarded(
         "Scheduled Task Instance",
-        ["template", "due_date", "docstatus"],
-        constraint_name="unique_sti_template_due_status",
+        ["assignment", "task_catalog", "due_date", "docstatus"],
+        constraint_name="unique_sti_assignment_catalog_due_status",
     )
 
 

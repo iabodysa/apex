@@ -44,18 +44,9 @@
   },
   {
    "doctype": "DocField",
-   "fieldname": "building",
-   "fieldtype": "Link",
-   "label": "Building",
-   "options": "Accommodation Building",
-   "idx": 5,
-   "search_index": 1
-  },
-  {
-   "doctype": "DocField",
    "fieldname": "scheduled_task_template_details_col",
    "fieldtype": "Column Break",
-   "idx": 6
+   "idx": 5
   },
   {
    "doctype": "DocField",
@@ -65,7 +56,7 @@
    "options": "Daily\nWeekly\nMonthly\nQuarterly\nAnnually",
    "default": "Monthly",
    "reqd": 1,
-   "idx": 7
+   "idx": 6
   },
   {
    "doctype": "DocField",
@@ -73,7 +64,7 @@
    "fieldtype": "Link",
    "label": "Default Assignee (Employee)",
    "options": "Employee",
-   "idx": 8
+   "idx": 7
   },
   {
    "doctype": "DocField",
@@ -81,7 +72,22 @@
    "fieldtype": "Check",
    "label": "Is Active",
    "default": "1",
+   "idx": 8
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "scheduled_task_template_sec_items",
+   "fieldtype": "Section Break",
+   "label": "Task Items",
    "idx": 9
+  },
+  {
+   "doctype": "DocField",
+   "fieldname": "template_items",
+   "fieldtype": "Table",
+   "label": "Task Items",
+   "options": "Scheduled Task Template Item",
+   "idx": 10
   },
   {
    "doctype": "DocField",
@@ -89,7 +95,7 @@
    "fieldtype": "Section Break",
    "label": "Additional Information",
    "collapsible": 1,
-   "idx": 10
+   "idx": 11
   },
   {
    "doctype": "DocField",
@@ -97,20 +103,25 @@
    "fieldtype": "Link",
    "label": "Safety Task (from Catalog)",
    "options": "Safety Task Catalog",
-   "idx": 11
+   "idx": 12
   },
   {
    "doctype": "DocField",
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "label": "Description",
-   "idx": 12
+   "idx": 13
   }
  ],
 "links": [
   {
    "group": "Scheduling",
    "link_doctype": "Scheduled Task Instance",
+   "link_fieldname": "template"
+  },
+  {
+   "group": "Scheduling",
+   "link_doctype": "Scheduled Task Assignment",
    "link_fieldname": "template"
   }
  ],

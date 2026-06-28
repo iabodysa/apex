@@ -206,3 +206,14 @@ apex_habitat.patches.v1_x.backfill_rental_office_native_address
 # Accommodation Custody Handover → Custody Handover (T-551 v1.60.18).
 # PRUNE once every deployed site has run it.
 apex_habitat.patches.v1_x.rename_accommodation_goods_receipt_and_custody_handover
+
+# v1.x — T-552 Phase B: create one Scheduled Task Assignment per legacy template that
+# had a building set (ONE-TIME). The new Assignment DocType replaces the per-template
+# building field; this backfills existing templates so the new generator finds them.
+# Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site has run it.
+apex_habitat.patches.v1_x.migrate_scheduled_task_template_to_assignments
+# v1.x — T-552 Phase B: drop the legacy UNIQUE(template, due_date, docstatus) index
+# from Scheduled Task Instance. Phase B allows multiple assignments per template, so
+# that index blocks the second assignment from inserting on the same day. Replaced by
+# UNIQUE(assignment, task_catalog, due_date, docstatus). (ONE-TIME)
+apex_habitat.patches.v1_x.drop_scheduled_task_instance_legacy_index

@@ -9,6 +9,8 @@
   "scheduled_task_instance_tab_overview",
   "scheduled_task_instance_sec_overview",
   "template",
+  "assignment",
+  "task_catalog",
   "due_date",
   "completed_date",
   "scheduled_task_instance_overview_col",
@@ -42,6 +44,20 @@
    "label": "Template",
    "options": "Scheduled Task Template",
    "reqd": 1
+  },
+  {
+   "fieldname": "assignment",
+   "fieldtype": "Link",
+   "label": "Assignment",
+   "options": "Scheduled Task Assignment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "task_catalog",
+   "fieldtype": "Link",
+   "label": "Task Catalog",
+   "options": "Safety Task Catalog",
+   "read_only": 1
   },
   {
    "fieldname": "due_date",
@@ -98,7 +114,7 @@
    "label": "Administrative Details"
   },
   {
-   "fetch_from": "template.building",
+   "fetch_from": "assignment.building",
    "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -148,7 +164,7 @@
    "link_fieldname": "scheduled_task_instance"
   }
  ],
- "modified": "2026-06-12 09:30:00.000000",
+ "modified": "2026-06-28 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Scheduled Task Instance",
