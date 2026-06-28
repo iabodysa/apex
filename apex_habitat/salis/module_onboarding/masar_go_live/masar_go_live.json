@@ -1,0 +1,27 @@
+{
+ "doctype": "Module Onboarding",
+ "name": "Masar Go-Live",
+ "title": "Masar Go-Live",
+ "module": "Salis",
+ "subtitle": "Plan your first route, dispatch a trip, and confirm the passenger manifest.",
+ "success_message": "Masar is live. Use the Worker Route portal to manage transport requests and dispatch trips.",
+ "is_complete": 0,
+ "steps": [
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Raise a Transport Request"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Plan a Route"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Dispatch a Trip"
+  },
+  {
+   "doctype": "Onboarding Step Map",
+   "step": "Record a Passenger Manifest"
+  }
+ ]
+}

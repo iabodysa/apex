@@ -7,5 +7,5 @@ def execute():
         ("Accommodation Goods Receipt", "Goods Receipt"),
         ("Accommodation Custody Handover", "Custody Handover"),
     ]:
-        if frappe.db.exists("DocType", old_name):
+        if frappe.db.exists("DocType", old_name) and not frappe.db.exists("DocType", new_name):
             frappe.rename_doc("DocType", old_name, new_name, force=True)

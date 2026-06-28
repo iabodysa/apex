@@ -31,7 +31,7 @@
    "role": "System Manager"
   }
  ],
- "content": "[{\"id\": \"crHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"scdQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"scdQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Clearance\", \"col\": 3}}, {\"id\": \"scdQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Issue\", \"col\": 3}}, {\"id\": \"srcQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"srcQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Payment Request\", \"col\": 3}}, {\"id\": \"crHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"scdKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Blocked Driver Clearances\", \"col\": 3}}, {\"id\": \"scdKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Compliance Drivers Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"scdKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Expiring Vehicle Compliance\", \"col\": 3}}, {\"id\": \"scdKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport SLA Breaches Open\", \"col\": 3}}, {\"id\": \"srcKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Settlements Pending Approval\", \"col\": 3}}, {\"id\": \"srcKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cost Recovery Aging Backlog\", \"col\": 3}}, {\"id\": \"crHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"scdCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"scdCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Driver Operations\", \"col\": 4}}, {\"id\": \"srcCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs and Settlement\", \"col\": 4}}, {\"id\": \"crCardReports\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "content": "[{\"id\": \"crHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"crOnb0\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Compliance and Rentals Go-Live\", \"col\": 12}}, {\"id\": \"crHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"scdQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Driver\", \"col\": 3}}, {\"id\": \"scdQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Driver Clearance\", \"col\": 3}}, {\"id\": \"scdQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Issue\", \"col\": 3}}, {\"id\": \"srcQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rental Settlement\", \"col\": 3}}, {\"id\": \"srcQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Payment Request\", \"col\": 3}}, {\"id\": \"crHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"scdKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Blocked Driver Clearances\", \"col\": 3}}, {\"id\": \"scdKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Compliance Drivers Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"scdKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Expiring Vehicle Compliance\", \"col\": 3}}, {\"id\": \"scdKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport SLA Breaches Open\", \"col\": 3}}, {\"id\": \"srcKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Rental Settlements\", \"col\": 3}}, {\"id\": \"srcKM5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Rentals Costs Settlements Pending Approval\", \"col\": 3}}, {\"id\": \"srcKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cost Recovery Aging Backlog\", \"col\": 3}}, {\"id\": \"crHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"scdCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"scdCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Driver Operations\", \"col\": 4}}, {\"id\": \"srcCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Costs and Settlement\", \"col\": 4}}, {\"id\": \"crCardReports\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -92,14 +92,6 @@
    "type": "Card Break",
    "label": "Driver Operations",
    "idx": 3
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Salis Driver",
-   "link_type": "DocType",
-   "link_to": "Salis Driver",
-   "idx": 4
   },
   {
    "doctype": "Workspace Link",
@@ -303,5 +295,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-28 09:00:00.000000"
+ "modified": "2026-06-28 06:54:17.392877"
 }

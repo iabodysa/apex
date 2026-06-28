@@ -219,14 +219,6 @@
   },
   {
    "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Accommodation Material Transfer",
-   "link_type": "DocType",
-   "link_to": "Accommodation Material Transfer",
-   "idx": 22
-  },
-  {
-   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Maintenance Reports",
    "idx": 24

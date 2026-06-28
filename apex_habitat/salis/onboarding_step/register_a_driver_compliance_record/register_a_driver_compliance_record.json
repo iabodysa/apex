@@ -1,0 +1,14 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Register a Driver Compliance Record",
+ "title": "Register a Driver Compliance Record",
+ "intro_text": "Salis Vehicle Compliance tracks each vehicle's registration, insurance, and inspection expiry dates. Add the first compliance record so the workspace can alert you before documents lapse.",
+ "action": "Create Entry",
+ "reference_document": "Salis Vehicle Compliance",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 0,
+ "description": "Add the first vehicle compliance record so expiry alerts are active.",
+ "action_label": "Add Compliance Record"
+}
