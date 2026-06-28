@@ -25,9 +25,7 @@
   "safety_inspection_report_tab_system",
   "safety_inspection_report_sec_system",
   "naming_series",
-  "amended_from",
-  "safety_inspection_report_system_col",
-  "submitted_to"
+  "amended_from"
  ],
  "fields": [
   {
@@ -159,17 +157,6 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "safety_inspection_report_system_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Admin Manager, Operations Director, General Manager",
-   "fieldname": "submitted_to",
-   "fieldtype": "Small Text",
-   "label": "Submitted To (Recipients)",
-   "read_only": 1
   }
  ],
  "hidden": 1,
