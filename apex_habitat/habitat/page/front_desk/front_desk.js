@@ -34,6 +34,13 @@ function fd_percent(pct) {
 	return `${fd_int(pct)}%`;
 }
 
+// Map the server-computed bed_color name onto a NATIVE Frappe indicator color so
+// the status pill renders without any custom CSS (Desk pages ship no stylesheet).
+// Frappe has no "amber"/"grey" indicator -> use the native "orange"/"gray".
+function fd_indicator_color(bed_color) {
+	return { green: "green", red: "red", amber: "orange", grey: "gray" }[bed_color] || "gray";
+}
+
 class FrontDesk {
 	constructor(page) {
 		this.page = page;
@@ -425,7 +432,10 @@ class FrontDesk {
 		const $key = $('<div class="fd-legend-key"></div>').appendTo($legend);
 		swatches.forEach(([color, label]) => {
 			const $item = $('<span class="fd-legend-item"></span>').appendTo($key);
-			$(`<span class="fd-legend-dot fd-bed--${color}"></span>`).appendTo($item);
+			// Native indicator dot — same color vocabulary as the bed pills, no custom CSS.
+			$(`<span class="fd-legend-dot indicator ${fd_indicator_color(color)}"></span>`).appendTo(
+				$item
+			);
 			$('<span class="fd-legend-label"></span>').text(label).appendTo($item);
 		});
 
@@ -461,20 +471,21 @@ class FrontDesk {
 			let show = true;
 			if (f.only_available && color !== "green") show = false;
 			if (f.hide_out_of_service && color === "grey") show = false;
-			$bed.toggleClass("fd-bed--filtered", !show);
+			// Native Bootstrap display utility (ships with Frappe) — no custom CSS.
+			$bed.toggleClass("d-none", !show);
 		});
 		this.$container.find(".fd-room").each((_i, el) => {
 			const $room = $(el);
 			const needs_readiness = $room.attr("data-needs-readiness") === "1";
-			const has_visible_bed = $room.find(".fd-bed:not(.fd-bed--filtered)").length > 0;
+			const has_visible_bed = $room.find(".fd-bed:not(.d-none)").length > 0;
 			const readiness_ok = !f.only_needs_readiness || needs_readiness;
-			$room.toggleClass("fd-room--filtered", !(has_visible_bed && readiness_ok));
+			$room.toggleClass("d-none", !(has_visible_bed && readiness_ok));
 		});
 		// Collapse a floor whose every room is hidden.
 		this.$container.find(".fd-floor").each((_i, el) => {
 			const $floor = $(el);
-			const has_visible_room = $floor.find(".fd-room:not(.fd-room--filtered)").length > 0;
-			$floor.toggleClass("fd-floor--filtered", !has_visible_room);
+			const has_visible_room = $floor.find(".fd-room:not(.d-none)").length > 0;
+			$floor.toggleClass("d-none", !has_visible_room);
 		});
 	}
 
@@ -507,7 +518,7 @@ class FrontDesk {
 	}
 
 	_render_bed_card(bed, room, building) {
-		const $card = $(`<div class="fd-bed fd-bed--${bed.bed_color}" tabindex="0" role="button"></div>`);
+		const $card = $(`<div class="fd-bed" tabindex="0" role="button"></div>`);
 		// The bed code is a naming-series-style token; isolate it LTR so it renders
 		// left-to-right on its own line, even on an RTL board beside an Arabic name.
 		$('<bdi class="fd-bed-code" dir="ltr"></bdi>').text(bed.bed_code || bed.bed).appendTo($card);
@@ -517,7 +528,10 @@ class FrontDesk {
 		else if (bed.bed_color === "red") badge = __("Occupied");
 		else if (bed.bed_color === "amber") badge = __("Room not ready");
 		else badge = __("Out of Service");
-		$('<div class="fd-bed-badge"></div>').text(badge).appendTo($card);
+		// Native Frappe status pill — color-coded with no custom CSS.
+		$(`<span class="fd-bed-badge indicator-pill ${fd_indicator_color(bed.bed_color)}"></span>`)
+			.text(badge)
+			.appendTo($card);
 
 		if (bed.bed_color === "red" && bed.occupant) {
 			$('<div class="fd-bed-occupant"></div>')
@@ -540,7 +554,7 @@ class FrontDesk {
 	// sees the clicked bed is working before the board refresh repaints it.
 	_set_bed_updating($card, busy) {
 		if (!$card) return;
-		$card.toggleClass("fd-bed--updating", !!busy);
+		// aria-busy is the native busy signal; no custom busy-state CSS exists.
 		$card.attr("aria-busy", busy ? "true" : null);
 	}
 

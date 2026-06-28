@@ -25,6 +25,10 @@ setup_wizard_complete = "apex_habitat.apex_core.setup.setup_wizard.setup_wizard_
 
 # [#34xywz]
 doc_events = {
+    # Validate the Saudi National Address custom fields on the native Address.
+    "Address": {
+        "validate": "apex_habitat.habitat.address_customizations.validate",
+    },
     "Accommodation Site": {},
     "Accommodation Bed": {},
     "Accommodation Room": {},

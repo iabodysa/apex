@@ -39,25 +39,15 @@ def _notify_role_system(role: str, subject: str, message: str | None = None) -> 
     Mirrors temporary_worker_engine._notify_hr: the in-desk alert the Wave-3 safety
     jobs raise for the Safety Officer / Operations Director. Best-effort — a failure
     rolls back and logs but never aborts the calling job. No recipients = no-op.
+    Per-user delivery via the shared system_notify helper (the single Notification
+    Log writer).
     """
     from frappe.utils.user import get_users_with_role
 
-    body = message or subject
-    try:
-        for user in get_users_with_role(role) or []:
-            frappe.get_doc({
-                "doctype": "Notification Log",
-                "for_user": user,
-                "type": "Alert",
-                "subject": subject[:140],
-                "email_content": body,
-            }).insert(ignore_permissions=True)  # audit-ok — scheduler-run system alert
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Safety system notify failed ({role})"[:140],
-        )
+    from apex_habitat.apex_core.utils.system_notify import notify_user_system
+
+    for user in get_users_with_role(role) or []:
+        notify_user_system(user, subject, message)
 
 
 def _notify_user_system(user: str | None, subject: str, message: str | None = None) -> None:
@@ -65,23 +55,11 @@ def _notify_user_system(user: str | None, subject: str, message: str | None = No
 
     Single-recipient sibling of _notify_role_system — used to reach the building's
     own responsible supervisor (not the whole role). Falsy/disabled user = no-op.
+    Thin wrapper over the shared system_notify helper.
     """
-    if not user or not frappe.db.get_value("User", user, "enabled"):
-        return
-    try:
-        frappe.get_doc({
-            "doctype": "Notification Log",
-            "for_user": user,
-            "type": "Alert",
-            "subject": subject[:140],
-            "email_content": message or subject,
-        }).insert(ignore_permissions=True)  # audit-ok — scheduler-run system alert
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Safety user notify failed ({user})"[:140],
-        )
+    from apex_habitat.apex_core.utils.system_notify import notify_user_system
+
+    notify_user_system(user, subject, message)
 
 
 def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_token: str) -> str | None:
@@ -1650,13 +1628,11 @@ def audit_remediation_deadline_watch() -> None:
                 _notify_operational("Client Audit Remediation Plan", plan.name, msg)
                 # [#wave3-audit] notify the plan owner directly + the Operations Director role.
                 if plan.afmco_owner:
-                    frappe.get_doc({
-                        "doctype": "Notification Log",
-                        "for_user": plan.afmco_owner,
-                        "type": "Alert",
-                        "subject": f"Audit remediation overdue: {plan.name}"[:140],
-                        "email_content": msg,
-                    }).insert(ignore_permissions=True)  # audit-ok — scheduler-run owner alert
+                    _notify_user_system(
+                        plan.afmco_owner,
+                        f"Audit remediation overdue: {plan.name}",
+                        msg,
+                    )
                 _notify_role_system(
                     "Operations Director",
                     subject=f"Audit remediation overdue: {plan.name}",

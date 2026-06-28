@@ -154,19 +154,15 @@ def _expire(tw) -> None:
 
 
 def _notify_hr(message: str) -> None:
-    """Post an in-app Notification Log to HR Manager users (fallback System Manager)."""
-    try:
-        for user in _hr_recipients():
-            frappe.get_doc({
-                "doctype": "Notification Log",
-                "for_user": user,
-                "type": "Alert",
-                "subject": message[:140],
-                "email_content": message,
-            }).insert(ignore_permissions=True)  # audit-ok — system HR alert
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(message=frappe.get_traceback(), title="Temporary Worker HR notify failed"[:140])
+    """Post an in-app Notification Log to HR Manager users (fallback System Manager).
+
+    Per-user delivery via the shared system_notify helper (the single Notification
+    Log writer); the subject IS the message here.
+    """
+    from apex_habitat.apex_core.utils.system_notify import notify_user_system
+
+    for user in _hr_recipients():
+        notify_user_system(user, message)
 
 
 def _hr_recipients() -> list:

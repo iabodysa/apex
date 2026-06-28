@@ -36,6 +36,7 @@ from apex_habitat.tests.test_masar_worker_movement import (
     _ensure_driver_chain,
     _project,
 )
+from apex_habitat.salis.doctype.salis_portal_theme.salis_portal_theme import THEME_SLUGS
 from apex_habitat.www import masar as masar_page
 
 
@@ -179,7 +180,7 @@ class TestMasarPageContext(_WorkerTripMixin, FrappeTestCase):
         frappe.local.form_dict = frappe._dict()
         try:
             ctx = masar_page.get_context(frappe._dict())
-            self.assertIn(ctx.portal_theme, {"afmco", "frappe", "dark", "gemini"})
+            self.assertIn(ctx.portal_theme, set(THEME_SLUGS.values()))
             self.assertIsInstance(ctx.portal_show_brand, bool)
         finally:
             frappe.local.form_dict = frappe._dict()
