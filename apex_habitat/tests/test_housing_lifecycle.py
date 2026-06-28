@@ -131,8 +131,11 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         self.assertEqual(getdate(assignment.check_out_date), getdate("2026-05-21"))
         self.assertEqual(assignment.docstatus, 1, "Assignment should not be cancelled (docstatus 2) on checkout; history should be preserved.")
         
-        # [#me5am6]
-        self.assertEqual(frappe.db.get_value("Accommodation Bed", self.bed.name, "status"), "Available")
+        # [#me5am6] Bed must be freed and room must be queued for cleaning.
+        self.assertEqual(frappe.db.get_value("Accommodation Bed", self.bed.name, "status"), "Available",
+                         "on_submit must flip the bed status to Available")
+        self.assertEqual(frappe.db.get_value("Accommodation Room", self.room.name, "readiness_status"), "Needs Cleaning",
+                         "on_submit must set room readiness_status to Needs Cleaning")
 
     def test_checkout_pending_clearance_resolves_employee_name(self):
         """Checkout Pending Clearance shows the employee's display name, not just

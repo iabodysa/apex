@@ -4,7 +4,6 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "sequence",
   "stop_name",
   "accommodation_building",
   "location",
@@ -13,18 +12,12 @@
  ],
  "fields": [
   {
-   "columns": 1,
-   "fieldname": "sequence",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Sequence"
-  },
-  {
    "columns": 3,
    "fieldname": "stop_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Stop Name"
+   "label": "Stop Name",
+   "reqd": 1
   },
   {
    "columns": 2,

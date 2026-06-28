@@ -201,8 +201,9 @@ class DispatchTrip(Document):
     def _validate_odometer(self):
         # Both-or-neither: a lone start or lone end reading is incomplete and would
         # silently break distance/odometer-advance accounting on submit.
-        start_set = self.odometer_start is not None
-        end_set = self.odometer_end is not None
+        # Frappe stores empty Int fields as 0 in MySQL, so treat 0 as «not set».
+        start_set = bool(self.odometer_start)
+        end_set = bool(self.odometer_end)
         if start_set != end_set:
             frappe.throw(
                 _("Odometer start and end must be set together, or both left empty.")

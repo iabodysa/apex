@@ -89,7 +89,13 @@ class TestCustodyIssueSerializedRules(FrappeTestCase):
 
     def test_serialized_passes_with_serial_and_qty_one(self):
         from apex_habitat.habitat.doctype.custody_issue.custody_issue import validate
-        validate(self._issue(qty=1, serial_no="SN-1"))
+        doc = self._issue(qty=1, serial_no="SN-1")
+        validate(doc)
+        # Validate must not strip or mutate the serialized row.
+        self.assertEqual(len(doc.items), 1, "items list must survive validate unchanged")
+        row = doc.items[0]
+        self.assertEqual(row.qty, 1, "qty must remain 1 after validate")
+        self.assertEqual(row.serial_no, "SN-1", "serial_no must be preserved by validate")
 
 
 ACK_NOTIFICATION = "Habitat - Custody Acknowledgment Requested"

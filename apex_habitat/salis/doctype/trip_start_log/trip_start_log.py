@@ -28,6 +28,30 @@ class TripStartLog(Document):
         self._validate_boarding_rows()
         self._derive_counts()
         self._validate_times()
+        self._check_driver_ownership()
+
+    def _check_driver_ownership(self):
+        """Prevent a Salis Driver from writing another driver's Trip Start Log.
+
+        A user who holds the Driver role and is linked to a Salis Driver record
+        may only save TSLs whose ``driver`` field matches their own record.
+        Administrators and non-driver users (Fleet Manager, Supervisor, etc.)
+        are unrestricted.
+        """
+        if frappe.session.user == "Administrator":
+            return
+        # Resolve the Salis Driver record linked to the current portal user.
+        driver = frappe.db.get_value(
+            "Salis Driver", {"driver_user": frappe.session.user}, "name"
+        )
+        if not driver:
+            # Current user is not a driver — no ownership restriction applies.
+            return
+        if self.driver and self.driver != driver:
+            frappe.throw(
+                _("You can only save Trip Start Logs assigned to your own driver record."),
+                frappe.PermissionError,
+            )
 
     def _resolve_trip_context(self):
         """Backfill Transport Request / Route Plan from the Dispatch Trip when the

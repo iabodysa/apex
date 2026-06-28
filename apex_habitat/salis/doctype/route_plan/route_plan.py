@@ -9,6 +9,7 @@ is consulted, not the approver.
 from __future__ import annotations
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 from apex_habitat.salis.utils import drive_transport_request
@@ -16,6 +17,9 @@ from apex_habitat.salis.utils import drive_transport_request
 
 class RoutePlan(Document):
     def validate(self):
+        for stop in self.stops or []:
+            if not stop.stop_name:
+                frappe.throw(_("Row {0}: Stop Name is required").format(stop.idx))
         self.total_stops = len(self.stops or [])
         self._default_operations_requester()
 
