@@ -40,7 +40,7 @@
                 v-if="brandLogo"
                 :src="brandLogo"
                 alt="AFMCO"
-                class="h-7 w-auto max-w-[120px] object-contain"
+                class="brand-logo"
               />
               <template v-else>
                 <Brand mode="mark" :size="26" />
@@ -237,6 +237,19 @@ const unlinkedCtx = computed(() => {
 </script>
 
 <style scoped>
+/* Header brand logo: a fixed-height box with auto width + object-fit:contain so
+   an arbitrarily-shaped uploaded logo keeps its aspect (never stretched), capped
+   in width and given a little vertical breathing room inside the header bar. */
+.brand-logo {
+  display: block;
+  height: 28px;
+  width: auto;
+  max-width: 132px;
+  object-fit: contain;
+  object-position: left center;
+  padding-block: 2px;
+  margin-inline-end: 2px;
+}
 .offline-banner {
   display: flex;
   align-items: center;

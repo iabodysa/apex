@@ -97,6 +97,15 @@ class TestDashboardCustody(FrappeTestCase):
         # asserted directly below via the scoped sum, so total stays finite/sane.
         self.assertNotIn(99 * self.unit_cost, [total])
 
+    def test_value_in_hands_returns_number_card_dict_contract(self):
+        """Custom Number Card contract: {value: <number>, ...df} — a bare scalar
+        renders the value but drops the Currency/SAR format docfield."""
+        res = get_custody_value_in_employee_hands()
+        self.assertIsInstance(res, dict, "Custom Number Card returns a dict, not a scalar")
+        self.assertIn("value", res, "the number must live under the 'value' key")
+        self.assertEqual(res.get("fieldtype"), "Currency")
+        self.assertEqual(res.get("options"), "SAR")
+
     def test_report_balance_and_value_per_employee(self):
         """The report returns one row for this (employee, building, article) with
         the correct outstanding balance_qty and value_sar."""

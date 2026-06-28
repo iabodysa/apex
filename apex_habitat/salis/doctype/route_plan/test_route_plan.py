@@ -109,3 +109,34 @@ class TestRoutePlanP035(FrappeTestCase):
         self.assertEqual(idx_by_name["Alpha Gate"], 2)
         self.assertEqual(idx_by_name["Beta Block"], 3)
         self.assertEqual(idx_by_name["Gamma Hall"], 1)
+
+
+class TestRoutePlanFulfilmentStamp(FrappeTestCase):
+    """P-034: on_submit must PERSIST fulfilled_by_movement.
+
+    on_submit fires after the document row is already written, so a plain
+    ``self.fulfilled_by_movement = ...`` is never flushed back — only db_set
+    persists. The proof is a re-read straight from the DB after submit.
+    """
+
+    def test_fulfilled_by_movement_persisted_on_submit(self):
+        frappe.set_user("Administrator")
+        doc = frappe.get_doc(
+            {
+                "doctype": "Route Plan",
+                "route_name": "P-034 Persist Check",
+                "stops": [{"stop_name": "Alpha Gate"}],
+            }
+        )
+        doc.insert(ignore_permissions=True)
+        # Blank before submit (read-only field, never hand-set).
+        self.assertFalse(doc.fulfilled_by_movement)
+
+        doc.submit()
+
+        # Re-read straight from the DB (not the in-memory doc) — this is what
+        # would expose a non-persisted plain attribute assignment.
+        persisted = frappe.db.get_value(
+            "Route Plan", doc.name, "fulfilled_by_movement"
+        )
+        self.assertEqual(persisted, frappe.session.user)

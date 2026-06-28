@@ -133,3 +133,14 @@ class TestDashboardArrivals(FrappeTestCase):
         other_building = "BLDG-" + _h()
         self._batch(self.yesterday, 2, building=other_building)
         self.assertEqual(get_pending_on_manifest(), base + 2)
+
+    # return-shape contract (both cards)
+
+    def test_cards_return_number_card_dict_contract(self):
+        """Both methods return the Custom Number Card {value: n, ...df} dict, not a
+        bare scalar (a scalar renders but drops the format docfield)."""
+        for res in (_get_arrivals_today(), _get_pending_on_manifest()):
+            self.assertIsInstance(res, dict, "Custom Number Card returns a dict, not a scalar")
+            self.assertIn("value", res, "the number must live under the 'value' key")
+            self.assertIsInstance(res["value"], int)
+            self.assertEqual(res.get("fieldtype"), "Int")
