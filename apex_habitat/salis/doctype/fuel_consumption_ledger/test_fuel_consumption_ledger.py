@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Fuel Consumption Ledger — focused on the reversal path.
 
 When a ledgered fuel source is corrected — a Done Fuel Request is cancelled, or a

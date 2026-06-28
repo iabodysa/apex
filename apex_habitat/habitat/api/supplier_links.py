@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Supplier form-dashboard links for Apex Habitat.
 
 Wired via override_doctype_dashboards in hooks.py. Supplier is an ERPNext

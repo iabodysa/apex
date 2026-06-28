@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """End-to-end guard for the Fleet OS console write actions (salis/api/fleet_os.py).
 
 The dashboard's operations console drives six whitelisted POST actions. Two

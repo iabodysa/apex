@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Salis module install-time bootstrap.
 
 Wired into the app's ``after_install`` hook (as a list alongside the Habitat

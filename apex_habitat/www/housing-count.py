@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Housing Inventory count portal served at /housing-count.
 
 A mobile-first field surface (T-684) for the periodic Housing Inventory count:

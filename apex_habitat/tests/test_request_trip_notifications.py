@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Standard Notification records for the two lifecycle events surfaced to the
 coordinator (resident request resolved) and the dispatch desk / driver (trip
 scheduled).

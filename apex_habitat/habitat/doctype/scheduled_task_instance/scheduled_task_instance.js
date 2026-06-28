@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#f6nxz3]
 frappe.ui.form.on("Scheduled Task Instance", {
 	refresh(frm) {

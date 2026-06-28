@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """ONE-TIME backfill: create a native Frappe Address for each Rental Office that
 has an inline `city` value and does not yet have a linked Address record.
 

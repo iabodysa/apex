@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 frappe.query_reports["Custody Outstanding by Worker"] = {
 	filters: [
 		{

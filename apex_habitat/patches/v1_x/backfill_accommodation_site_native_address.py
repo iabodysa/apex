@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """ONE-TIME backfill: create a native Frappe Address for each Accommodation Site
 that has a city or district value and does not yet have a linked Address record.
 

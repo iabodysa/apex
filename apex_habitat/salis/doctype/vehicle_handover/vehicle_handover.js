@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 frappe.ui.form.on("Vehicle Handover", {
 	refresh(frm) {
 		// Only show active templates in the picker.

@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#dcpq47]
 frappe.ui.form.on("Room Bed Transfer", {
 	setup: function(frm) {

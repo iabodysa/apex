@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Route Plan regression tests — P-035.
 
 Covers:
@@ -8,7 +9,6 @@ Covers:
 """
 
 import frappe
-import pytest
 from frappe.tests.utils import FrappeTestCase
 
 test_ignore = [

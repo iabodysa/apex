@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Regression test: SQL string-interpolation guard (CI gate).
 
 File-level test — no Frappe site needed. Pure ``ast`` + stdlib.

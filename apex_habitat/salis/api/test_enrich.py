@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the shared Salis title-enrichment helper + the output-key drift fix.
 
 ``vehicle_driver_titles`` is the single bulk path that attaches the human-readable

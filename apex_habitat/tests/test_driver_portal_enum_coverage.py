@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Guard: the driver-portal enum translation maps must cover their live source values.
 
 The driver portal localizes server enum values (Dispatch Trip / Issue statuses and the

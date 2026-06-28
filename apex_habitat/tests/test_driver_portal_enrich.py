@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver-portal enrichment tests: the read-only, identity-scoped profile and
 vehicle endpoints.
 

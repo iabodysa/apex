@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Add performance index on Accommodation Assignment.bed field.
 
 MariaDB does not support partial (filtered) unique indexes, so true DB-level

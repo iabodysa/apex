@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Server-side guard for the Apex first-install Setup Wizard.
 
 The JS slide (public/js/apex_setup_wizard.js) renders only on a fresh site and is

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Weekly custody digest (``habitat.tasks.weekly_custody_digest``).
 
 Proves the job emails each building's responsible supervisor a roll-up of only

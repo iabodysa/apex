@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Onboarding-step render integrity: every shipped step must open a real target.
 
 Each Onboarding Step record drives the onboarding widget: clicking it opens a

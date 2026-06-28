@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Vehicle Assignment controller.
 
 The submitted Vehicle Assignment is the authoritative vehicle<->driver pairing.

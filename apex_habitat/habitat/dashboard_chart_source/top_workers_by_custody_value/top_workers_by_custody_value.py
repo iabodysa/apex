@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Top Workers by Custody Value — chart source over the Accommodation Stock Ledger.
 
 Reuses the canonical outstanding-custody-value definition (net signed

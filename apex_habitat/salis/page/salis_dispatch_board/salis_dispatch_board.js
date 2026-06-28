@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#mxen9j]
 
 frappe.pages["salis-dispatch-board"].on_page_load = function (wrapper) {

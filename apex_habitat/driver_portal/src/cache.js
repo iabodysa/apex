@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#t648-make-cache]
 // Offline cache for read-only "today"/route payloads. The driver portal is used
 // in the field where the network drops mid-shift; this lets a screen render the

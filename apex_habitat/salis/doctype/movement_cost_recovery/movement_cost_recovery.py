@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Movement Cost Recovery controller.
 
 Movement-domain control to recover losses (vehicle damage, fuel misuse,

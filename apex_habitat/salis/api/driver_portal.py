@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Salis Driver Portal — identity-scoped, no-financial-impact APIs for the mobile
 SPA at /driver. Every endpoint resolves the CURRENT user to a Salis Driver and acts
 only on that driver's records; the client never supplies the driver id."""

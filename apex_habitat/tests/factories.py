@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Shared test fixture helpers for Habitat doctypes.
 
 Usage:

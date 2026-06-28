@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Owner-scoping tests for the Habitat Maintenance Request permission layer.
 
 Maintenance Request intake is universal: any user can raise a ticket (the

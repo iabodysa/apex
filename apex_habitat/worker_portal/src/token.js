@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#s7slet]
 function readToken() {
   if (typeof window !== "undefined" && window.masar_token) {

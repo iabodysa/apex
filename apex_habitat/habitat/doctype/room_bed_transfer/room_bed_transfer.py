@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Room Bed Transfer controller.
 
 In-place move of an active occupant from one bed to another without closing

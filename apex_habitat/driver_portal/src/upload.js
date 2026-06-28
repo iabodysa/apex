@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Single private-file upload helper, shared by the screens that capture a photo
 // (Attendance check-in/out, Support ticket). Posts to Frappe's native upload_file
 // endpoint with the CSRF token the page shell injects, and returns the new File's

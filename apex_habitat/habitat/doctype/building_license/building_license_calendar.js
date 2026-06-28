@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 frappe.views.calendar["Building License"] = {
 	field_map: {
 		start: "expiry_date",

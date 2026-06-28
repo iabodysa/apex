@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Mirrors worker_portal/src/i18n.js: a tiny EN/AR dictionary with the same
 // translate / setLang / dir / useI18n machinery and a shared resource-error
 // mapper. Arabic strings live here, which is allowed for *_portal bundles.

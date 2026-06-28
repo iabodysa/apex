@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Drop the legacy is_standard=0 Dashboard rows so migrate re-imports them as
 is_standard=1 from the new native module JSON.
 

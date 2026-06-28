@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """ONE-TIME cleanup (T-668): drop the "System Manager" role from the existing
 "Habitat Accommodation Manager" Role Profile on already-provisioned sites.
 

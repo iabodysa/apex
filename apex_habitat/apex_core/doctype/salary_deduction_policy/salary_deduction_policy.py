@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Salary Deduction Policy (Single).
 
 Governs whether, and how, operational events (damage, rent, fuel, custody) may be

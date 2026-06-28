@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Operations Alert resolution-latency Custom Number Card.
 
 ``get_alert_median_resolve_days`` computes the median raised->resolved span (days)

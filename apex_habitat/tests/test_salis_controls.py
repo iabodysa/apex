@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Salis control fixes (segregation of duties, portal gating,
 attendance uniqueness). These cover behaviour that must hold regardless of any
 later workflow refactor."""

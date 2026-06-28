@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Guard for the Fleet Control drawer 'Release vehicle' action
 (salis/api/operations_control.release_vehicle).
 

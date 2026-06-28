@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Salis boarding/departure flow — driver "remaining passengers" notify, worker
 "please wait" request, the worker boarding poll, and the depart/finalize close.
 

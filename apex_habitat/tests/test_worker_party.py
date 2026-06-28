@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Pure-Python guards for Batches 2-3 of the arrival redesign (no live site required).
 
 Two things are locked in so they cannot silently regress:

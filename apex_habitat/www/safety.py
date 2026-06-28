@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Safety Rounds portal served at /safety.
 
 A mobile-first supervisor surface for the Safety Checklist (T-289): pick a

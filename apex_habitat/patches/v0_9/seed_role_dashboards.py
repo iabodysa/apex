@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed the 4 new role-based dashboards. Idempotent."""
 
 import frappe

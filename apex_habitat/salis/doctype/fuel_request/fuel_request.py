@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Fuel Request controller (unified).
 
 A single submittable fuel request whose ``request_type`` selects one of three

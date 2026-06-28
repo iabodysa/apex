@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed default Maintenance Material Templates on fresh install.
 
 T-050#3: Maintenance Material records are now the single source of truth via

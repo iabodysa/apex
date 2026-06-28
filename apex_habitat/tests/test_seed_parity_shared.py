@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Parity guards: the externalised shared seed JSON must exactly match the
 records the legacy ``*_seed.py`` modules intend to insert.
 

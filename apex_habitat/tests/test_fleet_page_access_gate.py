@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Access gate of the /fleet supervisor dashboard (www/fleet.py get_context).
 
 The fleet board is an ADMIN surface, not a guest portal, so its gate must hold:

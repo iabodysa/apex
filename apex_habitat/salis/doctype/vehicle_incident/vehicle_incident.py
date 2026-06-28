@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Vehicle Incident controller.
 
 Records a fleet incident event - an accident or a theft - against a vehicle.

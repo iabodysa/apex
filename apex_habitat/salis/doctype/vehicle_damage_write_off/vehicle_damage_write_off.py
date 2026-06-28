@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Vehicle Damage Write-Off controller.
 
 Submittable damage write-off case raised from a Vehicle Handover discrepancy.

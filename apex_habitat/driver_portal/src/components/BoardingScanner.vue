@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <!-- Full-screen camera boarding-pass scanner. Opens the rear camera, decodes the
        worker's QR with the native BarcodeDetector, and POSTs the token to

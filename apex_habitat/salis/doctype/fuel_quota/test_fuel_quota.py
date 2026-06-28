@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Fuel Quota per-vehicle-per-period uniqueness guard."""
 
 from __future__ import annotations

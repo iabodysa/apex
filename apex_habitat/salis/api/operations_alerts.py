@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Operations Alert action API (read the open queue + advance the status ladder),
 for the operations-control board and the /fleet alert drawer.
 

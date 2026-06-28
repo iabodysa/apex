@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for loading a Vehicle Handover Checklist Template into a handover."""
 
 import frappe

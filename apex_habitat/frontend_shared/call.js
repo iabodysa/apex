@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#t647-shared-call]
 // Single call() implementation shared by fleet_portal and safety_portal.
 // Each SPA's api.js re-exports from here via the @shared vite alias.

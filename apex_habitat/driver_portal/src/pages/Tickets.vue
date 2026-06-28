@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <div class="space-y-5">
     <!-- DETAIL: one ticket's SLA + conversation + reply (back returns to the list). -->

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Regression test: bed booking concurrency protection (#42).
 
 File-level test — no Frappe site needed. Uses ast and stdlib only.

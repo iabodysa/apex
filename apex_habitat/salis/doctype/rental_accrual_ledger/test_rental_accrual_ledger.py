@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Rental Accrual Ledger <-> Rental Settlement reconciliation.
 
 The rental accrual engine writes one machine-only Rental Accrual Ledger row per

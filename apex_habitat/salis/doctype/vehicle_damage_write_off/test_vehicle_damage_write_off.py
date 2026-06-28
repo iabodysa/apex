@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Vehicle Damage Write-Off controller.
 
 Proves the escalation back-link: submitting a write-off raised from a Vehicle

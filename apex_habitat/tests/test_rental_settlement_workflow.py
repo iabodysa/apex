@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Native Workflow tests for Rental Settlement (Workflow Spine, second-mover).
 
 These lock in the conversion of Rental Settlement from a status field with no

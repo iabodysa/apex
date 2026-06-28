@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#3nt923]
 frappe.ui.form.on("Accommodation Assignment", {
 	setup: function(frm) {

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Safety Checklist API.
 
 Covers the two whitelisted backend methods that power the Safety Checklist desk

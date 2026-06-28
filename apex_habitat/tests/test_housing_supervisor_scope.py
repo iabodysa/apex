@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Building-scope security for the Housing Supervisor (Resident Supervisor).
 
 Verifies the contract of habitat.permissions building scoping without heavy

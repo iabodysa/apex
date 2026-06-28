@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for workshop_overstay_watch: a maintenance Vehicle Stop left open past
 the cutoff raises a Maintenance Overdue Operations Alert; a recent one does not.
 """

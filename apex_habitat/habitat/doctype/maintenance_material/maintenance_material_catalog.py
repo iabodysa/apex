@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed the Maintenance Material catalog on fresh install."""
 import frappe
 

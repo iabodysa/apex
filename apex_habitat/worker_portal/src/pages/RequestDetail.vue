@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <div class="space-y-5">
     <!-- Back link: a logical-property layout (no dir-specific CSS) so it mirrors

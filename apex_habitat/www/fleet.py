@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Fleet OS — supervisor fleet dashboard served at /fleet.
 
 Unlike the driver portal (/driver) and the worker app (/masar), this is an

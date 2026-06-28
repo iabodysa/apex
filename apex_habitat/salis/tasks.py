@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Scheduled tasks for the Salis fleet-management module.
 
 Mirrors the Habitat ``tasks.py`` operating shape:

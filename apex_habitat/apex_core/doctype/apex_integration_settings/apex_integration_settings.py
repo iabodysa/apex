@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Apex Integration Settings controller.
 
 Single DocType that documents and surfaces how an external frontend integrates

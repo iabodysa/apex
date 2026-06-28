@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Building resolver/selector. Loads the buildings the signed-in user may read
      (standard frappe.client.get_list, role- and permission-scoped on the server)
      and lets them pick one. If the account is scoped to a single building it is

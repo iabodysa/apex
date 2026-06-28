@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Shared maintenance fan-out for inspection findings.
 
 A single actionable Inspection Finding Item (one carrying an issue_type and a

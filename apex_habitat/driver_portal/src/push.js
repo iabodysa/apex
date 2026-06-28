@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Web Push opt-in for the driver portal: lets the server deliver a background push
 // ("trip assigned", "fuel approved") to a driver whose app is closed.
 // The toggle appears only when all three hold (else hidden — no-op-until-wired):

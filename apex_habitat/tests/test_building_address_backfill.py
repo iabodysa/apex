@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """T-269: backfill Accommodation Building.building_address from the building's legacy
 default native Address (Dynamic Link) when the field is empty, without clobbering a
 building that already has one.

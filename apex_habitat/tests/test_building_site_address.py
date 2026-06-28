@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """get_site_address honours the form's current Site over the building's stored one.
 
 Regression for T-138: switching the Site dropdown before saving used to show the

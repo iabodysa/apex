@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Vehicle Handover Checklist Template controller."""
 
 import frappe

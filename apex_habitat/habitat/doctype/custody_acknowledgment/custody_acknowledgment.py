@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Custody Acknowledgment controller.
 
 Records a holder's receipt confirmation for a Custody Issue. Written from the

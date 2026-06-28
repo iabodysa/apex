@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Fuel Daily Log controller.
 
 Non-submittable daily fuel consumption record. Light validation; an audit entry

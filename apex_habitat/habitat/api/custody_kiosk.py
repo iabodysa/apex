@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Custody Kiosk — POS-style custody issue + return API (v0.9.0).
 
 A thin presentation + orchestration layer over the existing Custody Issue and

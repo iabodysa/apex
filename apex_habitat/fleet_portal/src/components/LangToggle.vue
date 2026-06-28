@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Language selector (English / Arabic). Flips the portal language and, via
      App.vue, the document direction. Token-driven to fit the Fleet OS topbar. -->
 <template>

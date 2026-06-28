@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Live board updates over Frappe's Socket.IO server: join the "Salis Vehicle"
 // doctype room (server gates the join on read permission) and refetch on each
 // `fleet_update`. The logged-in Desk session's `sid` cookie authenticates the

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed the operational Auto Email Reports (disabled, Administrator placeholder)
 on existing sites. Idempotent.
 """

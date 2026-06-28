@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Temporary Worker controller.
 
 A Temporary Worker is an unregistered worker who has arrived on a passport

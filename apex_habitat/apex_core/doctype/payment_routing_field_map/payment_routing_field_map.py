@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Payment Routing Field Map (child table).
 
 One row maps a single field onto the target payment DocType the router creates.

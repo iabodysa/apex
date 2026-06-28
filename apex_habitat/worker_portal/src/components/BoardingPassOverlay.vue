@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Full-viewport boarding-pass overlay (requirement A). Teleported to <body> so it
      escapes any section/card and covers the whole screen; dismissed by an X button
      OR a swipe-UP gesture. Theme-adaptive (var tokens) and RTL-safe (logical props).

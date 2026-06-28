@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver-portal feature-flag gating: when ``Salis Settings.enable_driver_portal``
 is OFF the portal must present a disabled state on bootstrap and refuse every write.
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#3h8kmi]
 const DEDUCTION_STATUS_COLORS = {
 	"Not Created": "gray",

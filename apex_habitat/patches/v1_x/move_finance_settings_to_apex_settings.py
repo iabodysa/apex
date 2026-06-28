@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Move the two app-wide finance settings from Habitat Settings to Apex Settings.
 
 ``default_payment_method`` and ``enable_gl_posting`` were relocated out of the

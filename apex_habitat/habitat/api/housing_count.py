@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Housing Inventory count API.
 
 The testable backend for the housing count portal (/housing-count): a mobile

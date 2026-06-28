@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Utility Bill Entry -> Accommodation Ledger money trail.
 
 Proves the financial side effects of habitat/doctype/utility_bill_entry:

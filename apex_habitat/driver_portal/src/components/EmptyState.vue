@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <!-- Shared empty state. Mirrors the existing card/card-pad/text-center
        empty blocks. All user-facing text is passed IN by the caller. -->

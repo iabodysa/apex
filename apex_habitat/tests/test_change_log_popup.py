@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Regression test: official Frappe change-log popup files.
 
 Frappe shows the "Updated To A New Version" Desk popup from files under

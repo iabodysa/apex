@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Trip Boarding State — child row of Dispatch Trip.
 
 One row per manifest worker, tracking the boarding/departure flow: whether they

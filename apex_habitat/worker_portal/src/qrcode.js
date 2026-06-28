@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Dependency-free QR encoder (byte mode, ECC level M, versions 1..14) so the SPA
 // renders the boarding-pass token without pulling a QR library. Per ISO/IEC 18004.
 

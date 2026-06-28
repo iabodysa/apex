@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#5runtp]
 frappe.provide("apex_habitat.setup");
 

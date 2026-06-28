@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Idempotency tests for the Salis background engines: re-running a daily/weekly
 job must never double-post its ledger/snapshot rows."""
 

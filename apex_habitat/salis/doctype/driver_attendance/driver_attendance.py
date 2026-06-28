@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver Attendance controller."""
 
 from __future__ import annotations

@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Guest worker portal has no Desk session (identity is the URL token), so it
 // cannot join Frappe's permission-gated Socket.IO rooms; substitute a cheap
 // visible-only foreground poll (paused while hidden, refetch-on-show, no overlap).

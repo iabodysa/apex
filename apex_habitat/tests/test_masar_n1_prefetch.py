@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Masar perf guard: the worker-route read path bulk-prefetches.
 
 The driver "my worker route today" endpoint folds three helpers that each used to

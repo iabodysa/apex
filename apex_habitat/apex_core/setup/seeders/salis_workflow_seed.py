@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed the Salis native Frappe Workflows from their shipped JSON definitions.
 
 Frappe's ``bench migrate`` does NOT auto-import a ``Workflow`` from a module

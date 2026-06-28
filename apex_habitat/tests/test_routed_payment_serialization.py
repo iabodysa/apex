@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Regression test (T-147): routed-payment creation is serialized so a source
 authorization yields EXACTLY ONE payment and EXACTLY ONE ledger post.
 

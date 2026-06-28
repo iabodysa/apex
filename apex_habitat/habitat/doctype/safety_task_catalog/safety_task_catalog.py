@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Safety Task Catalog controller."""
 
 from __future__ import annotations

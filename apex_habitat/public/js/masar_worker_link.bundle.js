@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#t52r33]
 
 frappe.provide("apex_habitat.masar");

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Project row-scoping tests for the has_permission hook: a scoped user may only
 act on documents in their granted projects (and not on project-less documents),
 while an oversight role sees everything."""

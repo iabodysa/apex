@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Transient toast store: a success/error message that auto-dismisses and is
 // cleared on route change, replacing the persistent status-note that lingered
 // after navigation. One module-level store so any page can push and a single

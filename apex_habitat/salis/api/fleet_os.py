@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Fleet OS supervisor dashboard API (read + live operations).
 
 Backs the ``/fleet`` www page, which is the fleet supervisor's single-screen

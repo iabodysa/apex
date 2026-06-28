@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Transfer Board API (v0.9.0).
 
 A thin presentation + orchestration layer over the existing Room Bed Transfer

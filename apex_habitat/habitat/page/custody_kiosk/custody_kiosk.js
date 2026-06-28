@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#qt2p0p]
 
 frappe.pages["custody-kiosk"].on_page_load = function (wrapper) {

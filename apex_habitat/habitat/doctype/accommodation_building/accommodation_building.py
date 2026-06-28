@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Accommodation Building controller.
 
 Top-level spatial entity. Auto-sums annual cost and recomputes occupancy.

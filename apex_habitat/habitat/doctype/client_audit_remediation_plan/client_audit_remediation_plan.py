@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Client Audit Remediation Plan controller."""
 
 from __future__ import annotations

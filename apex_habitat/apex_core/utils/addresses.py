@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Address helpers.
 
 Read a record's display address from the native Frappe **Address** DocType (linked

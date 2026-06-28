@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """QR boarding-pass + scan-validate tests (Salis driver passenger-boarding).
 
 Proves the end-to-end boarding flow on ``salis.api.boarding``:

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Vehicle Stop controller.
 
 Stops a vehicle, capturing its prior status into previous_status so the effect

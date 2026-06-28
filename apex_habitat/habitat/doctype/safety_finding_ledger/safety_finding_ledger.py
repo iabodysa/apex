@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Safety Finding Ledger controller.
 
 Read-only, machine-written immutable audit memo. One row is posted per finding

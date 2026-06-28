@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Fleet Operations workspace RENDER proof.
 
 The page-access / role / CSRF gate is covered by test_fleet_page_access_gate;

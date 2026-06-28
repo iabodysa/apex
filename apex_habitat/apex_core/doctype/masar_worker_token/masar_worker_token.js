@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#o4a9j5]
 frappe.ui.form.on("Masar Worker Token", {
 	refresh(frm) {

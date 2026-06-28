@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Native Workflow tests for Fuel Claim (Workflow Spine).
 
 These lock in the conversion of the Fuel Claim from a hand-rolled status machine

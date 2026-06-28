@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 frappe.views.calendar["Accommodation Lease"] = {
 	field_map: {
 		start: "lease_start_date",

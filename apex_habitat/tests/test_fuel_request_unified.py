@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Unified Fuel Request tests.
 
 The three former DocTypes (Fuel Request / Fuel Topup Request / Fuel Chip Request)

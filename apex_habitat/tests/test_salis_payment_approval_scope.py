@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Project row-scoping regression tests for ``Salis Payment Request``.
 
 The DocType carries a ``project`` Link field and is readable by the scoped

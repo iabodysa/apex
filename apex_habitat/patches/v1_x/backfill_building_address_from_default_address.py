@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """ONE-TIME backfill: set Accommodation Building.building_address from the building's
 legacy default native Address (linked via Dynamic Link) when the field is still empty.
 

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Apex Settings controller.
 
 App-wide configuration shared by every Apex module (Habitat and Salis). Holds

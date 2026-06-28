@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Regression test: workspace visibility (#24).
 
 File-level test — no Frappe site needed. Uses stdlib only.

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Unit tests for create_roles() and create_role_profiles() in setup.py.
 
 These tests are pure (no site needed): they inspect the role and profile lists

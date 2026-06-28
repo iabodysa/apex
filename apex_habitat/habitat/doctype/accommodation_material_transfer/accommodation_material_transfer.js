@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#hezt05]
 
 frappe.ui.form.on("Accommodation Material Transfer", {

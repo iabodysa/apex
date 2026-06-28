@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Operations Alert write-path guard + helper unit test.
 
 ``insert_operations_alert`` is the one place that writes an Operations Alert.

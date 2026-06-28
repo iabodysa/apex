@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Colocated tests for the Rental Settlement controller — the accrual-stamping
 half of the reconciliation, viewed from the settlement side.
 

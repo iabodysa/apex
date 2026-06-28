@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Rental Settlement controller.
 
 Monthly reconciliation of a Rental Office's claim against accrued rental days.

@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- AFMCO brand assets, rendered inline so they recolour with the active theme
      tokens (currentColor) and stay crisp at any size. Two parts:
 

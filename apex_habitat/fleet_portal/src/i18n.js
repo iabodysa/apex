@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Mirrors driver_portal/src/i18n.js: an EN/AR dictionary with a reactive
 // translate / setLang / dir / useI18n layer. Arabic strings live here, which is
 // allowed for *_portal bundles; code carries stable English keys only.

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """submit_round rejects a non-allowlisted cadence BEFORE the savepoint.
 
 cadence feeds the savepoint identifier in _create_round

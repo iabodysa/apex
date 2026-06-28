@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Regression test for the get_fleet_os PII permlevel gate (guards fix 1013da5).
 
 Driver phone and external id (``driver_id``) are permlevel-1 fields on Salis

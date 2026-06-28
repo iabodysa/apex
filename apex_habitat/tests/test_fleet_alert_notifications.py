@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Standard Notification records for two fleet events: a Vehicle Incident
 submitted as Theft, and a Workshop Overstay (Maintenance Overdue Operations
 Alert raised by ``workshop_overstay_watch``).

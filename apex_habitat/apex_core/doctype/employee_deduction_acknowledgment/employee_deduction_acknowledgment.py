@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Employee Deduction Acknowledgment (Mahdar Iqrar) controller.
 
 An employee CONSENT record for a single salary deduction (damage / rent / fuel /

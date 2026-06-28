@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#ns38m9]
 
 frappe.pages['action-inbox'].on_page_load = function (wrapper) {

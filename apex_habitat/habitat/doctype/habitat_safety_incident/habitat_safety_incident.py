@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Habitat Safety Incident controller.
 
 Formal accommodation/housing safety-incident record. Management escalation for

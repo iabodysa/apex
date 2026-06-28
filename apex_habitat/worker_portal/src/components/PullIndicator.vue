@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- [T-320] Pull-to-refresh indicator: a small spinner that slides down and fades
      in as the page is pulled past its top, then spins continuously while the
      refresh resolves. Driven by usePullToRefresh (distance / refreshing).

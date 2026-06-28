@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <div class="space-y-5">
     <!-- [T-320] pull-to-refresh indicator (page scrolls with the window) -->

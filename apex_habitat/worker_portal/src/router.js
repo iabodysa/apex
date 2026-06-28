@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 import { createRouter, createWebHashHistory } from "vue-router";
 
 const routes = [

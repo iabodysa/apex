@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Facility Asset Movement submittable side-effects (on_submit relocate / on_cancel revert).
 
 Guards a bug already shipped once: on_submit wrote to nonexistent

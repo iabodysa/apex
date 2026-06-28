@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Route Assignment controller.
 
 Links a Work Shift to a dispatch context.  Fetch chains populate shift details

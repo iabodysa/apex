@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Loading placeholder: shimmer blocks shaped like the real content, shown while
      a token-scoped resource is in flight (replaces a bare "Loading..." line).
 

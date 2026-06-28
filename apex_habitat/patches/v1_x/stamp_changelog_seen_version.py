@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Stamp this app's seen version into each already-onboarded User's
 ``last_known_versions`` so Frappe's native What's New popup does not replay the
 whole apex_habitat release history.

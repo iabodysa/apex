@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """One-command fleet data importer.
 
 Loads the CSVs produced by the local, git-ignored parser (``docs/etl_out/``)

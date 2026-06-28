@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Animated SVG progress ring: the "rated X / total" indicator on each cadence
      header. The stroke-dashoffset transitions, so the ring sweeps closed as the
      supervisor taps tasks. Colour shifts from accent (in progress) to success

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """get_my_today composite-read tests: the single "today" payload the driver Home
 screen paints from.
 

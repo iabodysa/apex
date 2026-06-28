@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Employee form-dashboard links for Apex Habitat.
 
 Wired via override_doctype_dashboards in hooks.py. Frappe calls this with the

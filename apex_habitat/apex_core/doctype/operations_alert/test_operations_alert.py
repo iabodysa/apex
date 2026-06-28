@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 import frappe
 from frappe.email.doctype.notification.notification import get_context
 from frappe.tests.utils import FrappeTestCase

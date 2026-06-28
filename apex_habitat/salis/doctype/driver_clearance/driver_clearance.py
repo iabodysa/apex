@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver Clearance controller.
 
 Movement-domain exit clearance for a driver. Confirms the driver has returned

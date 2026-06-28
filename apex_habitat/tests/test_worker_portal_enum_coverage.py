@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Guard: the Masar enum endpoint must cover the live Select options in Arabic.
 
 The Masar worker portal localizes server enum values (DocType Select options) for

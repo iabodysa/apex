@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Movement Cost Transfer controller.
 
 Inter-project cost-transfer control for Movement costs.

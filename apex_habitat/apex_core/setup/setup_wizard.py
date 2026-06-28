@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Apex first-install Setup Wizard integration (native Frappe setup wizard).
 
 On a fresh site, Frappe's setup wizard renders an extra "Apex Configuration" slide

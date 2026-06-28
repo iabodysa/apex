@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Salis Portal Theme controller.
 
 Single DocType that drives the look and feel of the Salis Driver Portal (the

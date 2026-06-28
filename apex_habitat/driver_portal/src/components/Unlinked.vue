@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <div class="flex-1 flex flex-col px-6 py-7 mx-auto w-full" style="max-width: 480px">
     <header class="mb-6 flex items-center gap-2">

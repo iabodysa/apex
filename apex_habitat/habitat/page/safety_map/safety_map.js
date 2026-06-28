@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#l7bpkl]
 
 frappe.pages["safety-map"].on_page_load = function (wrapper) {

@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#n8kglt]
 frappe.ui.form.on("Accommodation Checkout", {
 	refresh(frm) {

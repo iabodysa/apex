@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Renders a scannable QR for `value` as crisp SVG (no canvas blur at any size).
      Used for the worker's boarding pass; the encoder is dependency-free (qrcode.js).
      Colors follow the active theme (via qrColor.js) but are contrast-clamped so the

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Resilience tests for the Salis accrual engines.
 
 Covers two regressions in the per-row accrual loops:

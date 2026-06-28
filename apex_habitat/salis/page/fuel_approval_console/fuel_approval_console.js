@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#80d3f2]
 
 frappe.pages["fuel-approval-console"].on_page_load = function (wrapper) {

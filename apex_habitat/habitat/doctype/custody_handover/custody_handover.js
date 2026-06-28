@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 frappe.ui.form.on("Custody Handover", {
 	refresh(frm) {
 		if (frm.doc.docstatus !== 1) {

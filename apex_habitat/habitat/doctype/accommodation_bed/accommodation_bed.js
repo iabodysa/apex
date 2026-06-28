@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#3liu9f]
 frappe.ui.form.on("Accommodation Bed", {
 	refresh(frm) {

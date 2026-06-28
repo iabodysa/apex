@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """ONE-TIME privacy genericization: strip the confidential client/accreditation-vendor
 names from already-seeded Safety Task Catalog rows (T-291).
 

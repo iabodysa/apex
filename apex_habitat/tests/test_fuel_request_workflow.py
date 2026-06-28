@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Native Workflow tests for Fuel Request (Workflow Spine).
 
 These lock in the conversion of the unified Fuel Request from a hand-rolled

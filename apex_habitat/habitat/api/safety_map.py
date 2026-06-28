@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Safety Map API (v0.9.0).
 
 A thin presentation + orchestration layer over Maintenance Request, Custody

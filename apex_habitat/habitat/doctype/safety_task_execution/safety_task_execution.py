@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Safety Task Execution controller.
 
 A live execution captures findings observed in the field. On submit it fans out

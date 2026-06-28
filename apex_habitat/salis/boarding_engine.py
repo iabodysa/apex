@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Boarding ledger engine for the Salis Movement module.
 
 Posting engine that mirrors the immutable, source-traceable ledger idiom of

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Trip Boarding Ledger controller.
 
 Read-only, machine-written audit memo. One row is inserted per worker's final

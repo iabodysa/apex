@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Regression tests for Trip Start Log controller.
 
 Run with:

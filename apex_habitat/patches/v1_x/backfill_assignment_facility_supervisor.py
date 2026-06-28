@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """ONE-TIME backfill: set Accommodation Assignment.responsible_facility_supervisor
 from the row's building.responsible_facility_supervisor when it is still empty.
 

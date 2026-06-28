@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 frappe.views.calendar["Subcontractor Service Order"] = {
 	field_map: {
 		start: "scheduled_date",

@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <!-- First-visit "Add to Home Screen" hint. Shows once (dismissal persisted), and
        hides entirely once the app runs standalone. Where the browser supports a

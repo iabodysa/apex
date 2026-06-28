@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Security regression tests for the Salis permission layer.
 
 These lock in the audit hardening so it cannot silently regress:

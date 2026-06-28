@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Shared bulk title-enrichment for Salis board/console/alert readers.
 
 The dispatch board, fuel approval console and operations-alert queue each render

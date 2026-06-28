@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Cleaning Log controller.
 
 The mandatory-evidence gate is the Document.before_submit class method (Frappe

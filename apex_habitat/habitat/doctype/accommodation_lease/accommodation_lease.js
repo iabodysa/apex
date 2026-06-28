@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Decision: option (b) adopted — company populated via frappe.defaults.get_global_default
 // on onload for new documents. Rationale: better UX; the validate()-time fallback in
 // accommodation_lease.py remains as a safety net for programmatic document creation.

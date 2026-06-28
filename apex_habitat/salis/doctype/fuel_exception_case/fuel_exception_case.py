@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Fuel Exception Case controller.
 
 Submittable control record for disputed or suspicious fuel-control cases.

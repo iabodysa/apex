@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Native Workflow tests for Driver Clearance (Workflow Spine, second-mover).
 
 These lock in the conversion of Driver Clearance from a status field with no

@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- One DUE cadence rendered as a card: a sticky-feeling header carrying the
      cadence name, the server-supplied period_label, and an animated progress
      ring ("rated X / total"), over the stack of fast-tap task rows. The header

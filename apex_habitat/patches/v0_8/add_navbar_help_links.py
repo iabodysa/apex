@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Add Apex Habitat quick links to the navbar Help dropdown.
 
 Navbar Settings is a global Single, so we must NOT ship it as a fixture (that

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Masar Phase 1b — read-only "my worker route today" surface tests.
 
 Covers the additions of the standalone surface, all identity-scoped to the

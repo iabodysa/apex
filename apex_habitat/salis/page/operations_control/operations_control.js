@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#odtona]
 
 frappe.pages["operations-control"].on_page_load = function (wrapper) {

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Safety Round controller.
 
 Proves the duplicate guard fires for a repeated first round and that a marked

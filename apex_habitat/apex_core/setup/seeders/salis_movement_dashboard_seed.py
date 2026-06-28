@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """RETIRED — Movement dashboard provisioning moved to native is_standard=1 JSON.
 
 This seeder previously hand-built one ``Movement Operations Dashboard`` at runtime

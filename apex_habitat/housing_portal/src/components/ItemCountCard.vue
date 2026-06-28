@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- One inventory line: a numeric stepper that stages counted_quantity, a
      condition Select, and an optional note. The variance shown is the
      SERVER-DERIVED quantity_variance loaded with the row (read-only) — it is

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """
 Test utilities and fixtures for apex_habitat.
 

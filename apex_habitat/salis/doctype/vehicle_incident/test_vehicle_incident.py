@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Vehicle Incident controller.
 
 Proves the theft side effects and their reversal, that an accident records the

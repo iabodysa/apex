@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Salis driver passenger-boarding — QR boarding pass + scan-validate.
 
 The pass token is HMAC-signed (per-site key) so it cannot be forged client-side

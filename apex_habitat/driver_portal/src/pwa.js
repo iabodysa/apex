@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // PWA install affordance state for the driver portal. Captures the browser's
 // beforeinstallprompt event so the app can offer a real one-tap "Add to Home
 // Screen" where supported (Chrome/Android), and falls back to a hint card

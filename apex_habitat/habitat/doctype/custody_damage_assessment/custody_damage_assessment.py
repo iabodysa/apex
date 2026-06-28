@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Custody Damage Assessment controller."""
 
 from __future__ import annotations

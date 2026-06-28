@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """My Custody Acknowledgment Web Form context.
 
 Per-user, login-required form. Pre-fills the Custody Issue from an ``?issue=``

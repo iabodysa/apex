@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Test-site bootstrap for the apex_habitat suite.
 
 apex_habitat builds on ERPNext and HRMS. The framework auto-creates master data

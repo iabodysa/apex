@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """RETIRED — Salis Dashboards now ship as native is_standard=1 module JSON.
 
 The Salis role dashboards (Fleet Manager, Fleet Supervisor, Workers Transport,

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed Salis Settings default values.
 
 Idempotent and install-safe: only fills BLANK fields (never clobbers an

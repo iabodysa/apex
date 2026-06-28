@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Scheduled tasks for the Habitat module."""
 
 from __future__ import annotations

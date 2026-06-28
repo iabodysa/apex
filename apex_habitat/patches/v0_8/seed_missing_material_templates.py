@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed Maintenance Material catalog items and templates for issue types that
 previously had no template (Fire Safety, Furniture, Pest Control, Structural).
 

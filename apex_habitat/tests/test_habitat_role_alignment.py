@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Site-backed integration tests for the Habitat role/permission alignment pass.
 
 This module proves the alignment end-to-end against a live test site, complementing

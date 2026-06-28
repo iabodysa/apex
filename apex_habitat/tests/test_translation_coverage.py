@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Arabic-coverage guard for the desk + www surfaces.
 
 `frappectl translates` enforces ar.csv coverage of every ``_()``/``__()`` call,

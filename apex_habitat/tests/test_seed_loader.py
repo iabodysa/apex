@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Guards for the data-driven seed loader (apex_habitat.apex_core.setup.seed).
 
 The structural tests are pure (no site needed): they exercise ``load_specs``,

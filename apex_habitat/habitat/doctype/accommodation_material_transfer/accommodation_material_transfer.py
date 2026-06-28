@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Accommodation Material Transfer controller — moves Custody Article / Maintenance
 Material stock between two building stores via the Accommodation Stock Ledger.
 

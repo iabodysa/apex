@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Payment Router (config-time, mapping-driven dispatch).
 
 Proves the construct end to end against a real, finance-approved Salis Payment

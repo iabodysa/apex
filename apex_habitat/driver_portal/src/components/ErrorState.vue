@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <!-- Shared error state. Mirrors App.vue's bootstrap-error block: alert
        avatar + message + a retry button that emits `retry`. -->

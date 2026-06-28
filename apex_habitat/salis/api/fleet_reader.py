@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Shared fleet-reader service for the two Salis fleet surfaces.
 
 Both fleet views answer the same underlying question — "what is every permitted

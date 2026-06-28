@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Shared test helpers for the Salis test suite."""
 
 import frappe

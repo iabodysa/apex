@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Arrival Batch controller.
 
 A pre-arrival manifest: the workers a labour supplier expects to deliver to a

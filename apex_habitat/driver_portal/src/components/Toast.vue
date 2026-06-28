@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <!-- Transient toast stack: fixed above the tab bar, auto-dismissing. Lives once
        in App.vue; pages push via pushToast(). aria-live so it's announced. -->

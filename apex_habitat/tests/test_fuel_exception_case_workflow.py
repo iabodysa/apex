@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Native Workflow tests for Fuel Exception Case (Workflow Spine).
 
 These lock in the conversion of the Fuel Exception Case from a hand-rolled status

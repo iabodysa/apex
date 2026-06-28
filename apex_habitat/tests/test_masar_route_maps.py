@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Masar full-route Maps deep-link helpers (pure, no DB).
 
 Guards the worker-side ``_full_route_maps_url`` / ``_stop_waypoint`` contract so a

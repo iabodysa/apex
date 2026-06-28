@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Functional guard for the Salis Auto Email Report seeder.
 
 The seeder is the declarative delivery path for the periodic movement/fleet

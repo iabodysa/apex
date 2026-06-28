@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Safety Checklist API.
 
 The testable backend for the Safety Checklist desk Page (the Page UI/JS is a

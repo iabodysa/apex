@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Lightweight inline-SVG icon set (lucide geometry), cloned from safety_portal
      and trimmed to the icons this portal needs (plus a count-stepper minus/plus,
      a package/box item glyph and a filter glyph). Strokes use currentColor so

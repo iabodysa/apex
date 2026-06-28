@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Operational Depreciation Policy controller."""
 
 from __future__ import annotations

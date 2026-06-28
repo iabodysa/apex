@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed two ready-to-use demo logins so the owner can test the app as each role.
 
 A fresh dev/demo site has no per-role users, so trying out the role-scoped

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Daily open-alerts digest (``salis.tasks.daily_open_alerts_digest``).
 
 Proves the job groups Open/Acknowledged Operations Alerts by their owning

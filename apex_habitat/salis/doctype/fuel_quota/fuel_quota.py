@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Fuel Quota controller.
 
 Submittable monthly fuel allocation. Consumption is posted by Fuel Request;

@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // PWA new-build detection for the Masar SPA. The SW (registered by
 // www/masar.html at root scope) installs a new build as a WAITING worker (no
 // auto-skipWaiting); we flip `updateReady` so the shell shows a reload banner,

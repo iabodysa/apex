@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <!-- Shared loading row. Mirrors the per-page inline loading style
        (muted small text). Optional `label` overrides the default key. -->

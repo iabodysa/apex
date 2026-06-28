@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Accommodation Ledger controller.
 
 Hidden, machine-written cost allocation ledger. No DocPerm grants write/create

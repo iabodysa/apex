@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Masar worker "My Contacts" card endpoint.
 
 ``masar.get_worker_contacts`` resolves the worker from their personal Masar token

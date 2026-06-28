@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Work Shift controller.
 
 Master record for a named operational shift within a project.

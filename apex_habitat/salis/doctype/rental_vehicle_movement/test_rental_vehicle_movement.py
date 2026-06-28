@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Rental Vehicle Movement Receipt/Return lifecycle guard."""
 
 from __future__ import annotations

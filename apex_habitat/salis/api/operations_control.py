@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Fleet Control board API (read-only fleet view with details, for the
 ``operations-control`` desk page).
 

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Shape guards for the externalised Salis seed JSON files.
 
 The legacy ``salis/*_seed.py`` modules that these files replaced were retired in

@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#1b17ho]
 const DEFAULT_CC = "966"; // Saudi Arabia
 

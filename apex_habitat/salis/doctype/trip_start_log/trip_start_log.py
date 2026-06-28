@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Trip Start Log controller.
 
 Execution record for a worker-transport trip (the Workers division of Salis,

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Safety Round Compliance report.
 
 Proves execute() returns the expected per-task shape over seeded, submitted

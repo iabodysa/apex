@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Pure-Python release-hygiene guards (no live Frappe site required).
 
 These lock in three fixes made during the hardening overhaul so they cannot

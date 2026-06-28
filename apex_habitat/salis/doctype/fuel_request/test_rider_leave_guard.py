@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """T-119 — rider leave / inactive guard.
 
 A vehicle delivery (Vehicle Handover / Vehicle Assignment) and a Fuel Request

@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <div class="app-shell" :dir="dir">
     <!-- New build available: a new service worker is installed and waiting. Tap

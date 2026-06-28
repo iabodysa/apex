@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Masar (Worker Movement — the Workers division of Salis) Phase 1 backend tests.
 
 Covers the four deliverables of the backend foundation:

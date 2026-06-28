@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#lhs0n9]
 frappe.ui.form.on("Accommodation Resident Request", {
 	refresh(frm) {

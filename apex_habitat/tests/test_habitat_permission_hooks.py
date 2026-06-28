@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Wiring guards for the Habitat owner-scoped Maintenance Request hooks.
 
 These are pure-Python tests (no live Frappe site required): they import the

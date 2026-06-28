@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Safety Inspection Report controller.
 
 On submit, the report fans out: each ACTIONABLE finding (one carrying an

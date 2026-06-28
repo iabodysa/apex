@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Masar — worker self-service app shell (Vue SPA served at /masar).
 
 Masar is the worker's mobile self-service app: a transported and housed Employee

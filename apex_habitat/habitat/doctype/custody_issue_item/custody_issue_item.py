@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Custody Issue Item child table controller."""
 
 from __future__ import annotations

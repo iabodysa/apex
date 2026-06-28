@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#iupr5r]
 
 frappe.pages["transfer-board"].on_page_load = function (wrapper) {

@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 frappe.ui.form.on("Goods Receipt", {
 	intake_building(frm) {
 		if (!frm.doc.intake_building) {

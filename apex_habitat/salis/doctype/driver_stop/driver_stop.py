@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver Stop controller.
 
 Stops a driver, optionally releasing the linked vehicle. Prior driver status is

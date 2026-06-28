@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Rental Vehicle Movement controller.
 
 Captures the Receipt/Return lifecycle of a rented vehicle from a Rental Office.

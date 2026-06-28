@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit

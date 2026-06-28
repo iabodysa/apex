@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Guards for the Fleet OS reassign driver picker (salis/api/fleet_os.search_drivers).
 
 The reassign sub-form used to send a free-typed iqama as the driver id, so a typo

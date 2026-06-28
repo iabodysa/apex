@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#a5yn69]
 frappe.ui.form.on("Building License", {
 	refresh(frm) {

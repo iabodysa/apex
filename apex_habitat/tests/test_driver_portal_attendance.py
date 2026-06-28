@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """my_attendance(month) read tests: the driver's own month attendance history.
 
 my_attendance() returns the caller's own Driver Attendance rows for a month

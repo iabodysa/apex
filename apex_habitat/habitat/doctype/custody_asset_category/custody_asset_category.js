@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#kr2yxk]
 frappe.ui.form.on("Custody Asset Category", {
 	refresh(frm) {

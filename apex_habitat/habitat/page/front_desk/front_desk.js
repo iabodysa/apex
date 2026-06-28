@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#khaxgw]
 
 frappe.pages["front-desk"].on_page_load = function (wrapper) {

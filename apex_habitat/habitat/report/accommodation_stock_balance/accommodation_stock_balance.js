@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#38fmky]
 
 frappe.query_reports["Accommodation Stock Balance"] = {

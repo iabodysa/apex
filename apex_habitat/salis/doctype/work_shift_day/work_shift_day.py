@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Work Shift Day child table controller."""
 
 from __future__ import annotations

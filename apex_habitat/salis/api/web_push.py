@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver Web Push sender (settings-driven, no-op until VAPID is configured).
 
 Delivers a short background push — a trip assigned, a fuel request approved — to a

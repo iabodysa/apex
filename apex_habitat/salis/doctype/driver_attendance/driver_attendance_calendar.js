@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 frappe.views.calendar["Driver Attendance"] = {
 	field_map: {
 		start: "attendance_date",

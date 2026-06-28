@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Masar worker boarding self-confirm ("I'm at the pickup") — T-323.
 
 ``confirm_boarding`` (salis/api/masar.py) lets a tokenized worker self-confirm

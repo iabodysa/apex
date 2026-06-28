@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Custody Handover controller — the OTP-confirmed move of
 externally-purchased goods from the procurement intake store into a receiving
 accommodation supervisor's building store, via the Accommodation Stock Ledger.

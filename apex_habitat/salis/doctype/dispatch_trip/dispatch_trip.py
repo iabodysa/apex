@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Dispatch Trip controller.
 
 The FINAL status DocType on the Salis Workflow Spine. Status transitions are

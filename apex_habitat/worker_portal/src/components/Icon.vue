@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Lightweight inline-SVG icon set (lucide geometry), so the portal needs no
      icon dependency. Strokes use currentColor; size/strokeWidth are props. -->
 <template>

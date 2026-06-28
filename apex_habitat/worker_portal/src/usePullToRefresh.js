@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Pull-to-refresh for window/body-scrolled pages (Home, Transport): the pages
 // scroll with the document, so a pull is armed only at the very top
 // (window.scrollY === 0) with a downward drag. onRefresh may return a Promise;

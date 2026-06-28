@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver portal CSRF bootstrap test.
 
 A signed-in user's page context must carry the real session CSRF token. If it is

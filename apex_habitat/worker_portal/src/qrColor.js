@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Theme-adaptive QR colors that stay SCANNABLE. A QR decoder binarizes on
 // luminance, so the only hard requirement is a large light/dark separation with
 // the dark modules actually darker than the background. Given a desired

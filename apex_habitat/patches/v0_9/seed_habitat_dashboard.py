@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed the Habitat Dashboard on existing sites. Idempotent."""
 
 import frappe

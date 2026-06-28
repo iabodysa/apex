@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Arrivals Desk read + lookup API (party-aware).
 
 A presentation/lookup layer for the unified worker-arrival desk page. The page's

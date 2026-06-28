@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver portal identity-scope tests: a driver only sees their own data, and a
 fuel request without an assigned vehicle is rejected."""
 

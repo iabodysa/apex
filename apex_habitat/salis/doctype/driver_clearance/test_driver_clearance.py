@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver-facing Salis notification wiring (T-562).
 
 Proves that the two driver-relevant notifications resolve to the affected

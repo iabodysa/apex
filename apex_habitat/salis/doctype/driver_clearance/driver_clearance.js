@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#e2x1po]
 
 frappe.ui.form.on("Driver Clearance", {

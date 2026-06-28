@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Accommodation Assignment controller.
 
 The Assignment record IS the check-in and the active occupancy stay. It carries

@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <div class="space-y-5">
     <!-- Stale-data note: shown only when the live "today" read failed and we're

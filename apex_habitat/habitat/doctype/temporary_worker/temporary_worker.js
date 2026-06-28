@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#85mm1b]
 frappe.ui.form.on("Temporary Worker", {
 	window_days(frm) {

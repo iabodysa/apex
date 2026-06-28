@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Language selector: EN | ع. Flips the active portal language (and, via App.vue,
      the document direction). Token-driven segmented control; works on any theme. -->
 <template>

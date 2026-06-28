@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Idle Resident Candidates report.
 
 Proves execute() surfaces only active residents whose linked Project has ended

@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Lightweight inline-SVG icon set (lucide geometry), copied from fleet_portal
      and extended with the icons this portal needs. Strokes use currentColor so
      icons recolour with the active theme tokens; size/strokeWidth are props.

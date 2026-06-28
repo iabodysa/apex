@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Utility Bill Entry controller.
 
 On submit: calculates variance from the Utility Account average, posts a

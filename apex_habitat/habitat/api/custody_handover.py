@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Whitelisted API for the OTP-confirmed Custody Handover.
 
 Confirmation is fail-closed: lockout, then expiry, then the review-and-approve

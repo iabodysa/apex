@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Language selector. With more than two supported languages it renders a compact
      native <select> (works on every theme + screen reader); the value flips the
      active portal language and, via App.vue, the document direction. -->

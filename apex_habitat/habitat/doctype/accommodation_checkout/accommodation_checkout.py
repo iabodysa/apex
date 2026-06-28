@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Accommodation Checkout controller.
 
 Vacate transaction with a custody-clearance gate. Damage deduction posting is

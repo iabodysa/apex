@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """F-01 / F-08 row-scoping for Salis Vehicle, Salis Driver and Passenger Manifest.
 
 Closes the desk-list enumeration leak (a scoped Fleet Supervisor could list every

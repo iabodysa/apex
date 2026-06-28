@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Live trip updates over Frappe's Socket.IO server: join the "Dispatch Trip"
 // doctype room (the server gates the join on read permission, so a driver only
 // receives pushes for trips they can read) and refetch on each

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Maintenance Material controller (native NestedSet tree)."""
 from frappe.utils.nestedset import NestedSet
 

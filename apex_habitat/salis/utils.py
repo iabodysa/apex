@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 # [#2ksmt5]
 
 import frappe

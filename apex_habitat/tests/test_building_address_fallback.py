@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """get_site_address resolves the building's address from the SAVED record.
 
 Regression for T-143: the building-address-over-site fallback is live in the

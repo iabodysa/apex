@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt

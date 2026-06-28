@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <div class="space-y-4">
     <h2 class="section-title">{{ t("trips.title") }}</h2>

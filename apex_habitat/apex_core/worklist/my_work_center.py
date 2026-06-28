@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """My Work Center — Universal My Work workspace aggregator (Phase 1).
 
 ONE read API that unions the surfaces a user cares about, each scoped to the

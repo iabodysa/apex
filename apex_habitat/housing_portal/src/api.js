@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Thin call() over frappe's method endpoint, CSRF-signed from window.csrf_token
 // (set by www/housing-count.py). createResource handles the count endpoints; this
 // helper is used for the building picker's standard get_list call, where a plain

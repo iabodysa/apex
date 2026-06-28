@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """confirm_handover concurrency + idempotency hardening.
 
 confirm_handover now takes a FOR UPDATE lock on the handover row and re-reads

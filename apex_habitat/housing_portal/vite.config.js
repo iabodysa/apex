@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import frappeui from "frappe-ui/vite";

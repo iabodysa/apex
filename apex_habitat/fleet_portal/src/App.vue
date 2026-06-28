@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <script setup>
 /*
  * Fleet OS supervisor board — Vue 3 port of the supervisor's hand-made

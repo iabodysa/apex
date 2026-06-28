@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#7ffkxk]
 
 frappe.pages['arrivals-desk'].on_page_load = function (wrapper) {

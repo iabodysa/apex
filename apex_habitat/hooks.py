@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 # [#dvwfff]
 app_name = "apex_habitat"
 app_title = "Apex"

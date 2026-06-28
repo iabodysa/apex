@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed the Salis native Frappe Workflows (Transport Request, Rental Settlement,
 Driver Clearance, Salis Payment Request, Support Ticket, Sponsorship Transfer
 Case, Fuel Request — the Workflow Spine).

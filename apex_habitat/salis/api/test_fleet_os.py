@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Fleet OS dashboard reader's typed empty reason.
 
 get_fleet_os tells an empty board apart from an access gap: ``scope_empty`` (the

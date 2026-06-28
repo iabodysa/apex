@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // Locale-aware date/time formatting for the worker portal.
 //
 // The backend (salis/api/masar.py) sends bare strings: dates as "YYYY-MM-DD",

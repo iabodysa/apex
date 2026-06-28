@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Fix the navbar Help-dropdown link that pointed at the pre-rename workspace route
 (/app/operations-command-center) to the new /app/habitat. Idempotent.
 """

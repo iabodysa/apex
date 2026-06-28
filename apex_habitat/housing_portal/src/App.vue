@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <div class="app-shell" :dir="dir">
     <!-- Header: dark forest bar with the brand arc supergraphic. -->

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Masar worker-scope tests (P-045): a worker is NOT the driver.
 
 The driver navigates every housing pickup on a multi-building shuttle plus the

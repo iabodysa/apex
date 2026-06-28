@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#t648-make-cache]
 // Offline cache for read-only Masar payloads (transport / accommodation /
 // custody / home). Workers open the portal in the field where the network

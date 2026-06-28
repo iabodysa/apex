@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Salis Payment Request controller.
 
 Enforces the finance boundary: every payable item routes

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 import frappe
 
 from apex_habitat.apex_core.setup.seeders.habitat_auto_email_reports_seed import seed_auto_email_reports

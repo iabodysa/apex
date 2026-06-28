@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Room Bed Transfer submit/cancel side-effects: the bed occupancy swap.
 
 The shipped ``test_room_bed_transfer`` only ``insert(... ignore_links=True)``s and

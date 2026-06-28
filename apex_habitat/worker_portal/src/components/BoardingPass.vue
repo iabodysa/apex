@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- A real boarding-pass / ticket card for the worker's signed QR. Two stubs split
      by a perforated divider: an INFO stub (brand band + holder + labelled trip
      fields) and a QR stub on a clean white card. All colors are theme tokens so

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Real two-connection concurrency test for routed-payment (T-286, T-147 follow-up).
 
 The T-147 ``test_routed_payment_serialization`` asserts the duplicate-guard's

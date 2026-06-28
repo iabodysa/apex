@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Workflow housekeeping — orphaned Workflow Action cleanup (app-wide).
 
 Frappe creates a Workflow Action per permitted approver when a document enters a

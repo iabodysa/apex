@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """SSRF allowlist tests for the driver Web Push endpoint.
 
 The browser-supplied PushSubscription ``endpoint`` becomes a server-side POST target

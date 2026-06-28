@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed Habitat City with the main Saudi Arabian cities."""
 
 import frappe

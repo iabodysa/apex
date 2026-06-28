@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#oajw2e]
 frappe.ui.form.on("Accommodation Room", {
 	refresh(frm) {

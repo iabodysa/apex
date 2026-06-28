@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Data-driven seed loader (Apex Habitat).
 
 A single, minimal, create-only loader that replaces the hand-written

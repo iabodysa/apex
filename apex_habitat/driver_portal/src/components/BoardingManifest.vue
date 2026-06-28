@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <!-- Boarding manifest panel for a STARTED trip. Lists each Trip Boarding State
        worker with a status pill; a "Worker Claimed" row offers Confirm/Reject

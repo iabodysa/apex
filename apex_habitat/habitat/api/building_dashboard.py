@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """On-form dashboard metrics for the Accommodation Building form.
 
 Frappe's form `get_data()` only renders the links/transactions section; the

@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 frappe.web_form.after_load = function () {
 	var token = new URLSearchParams(window.location.search).get("token");
 	if (token) {

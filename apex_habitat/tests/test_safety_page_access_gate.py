@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Access gate of the /safety Safety Rounds portal (www/safety.py get_context).
 
 The Safety Checklist portal is an admin-style surface, not a guest link, so its

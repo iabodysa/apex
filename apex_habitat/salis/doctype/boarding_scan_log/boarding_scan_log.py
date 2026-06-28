@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Boarding Scan Log — append-only audit row for one QR boarding-pass scan.
 
 Each row records a single scan-validate attempt against a Dispatch Trip's QR

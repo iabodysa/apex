@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Salis Dispatch Board API (read-only glance board).
 
 A thin presentation layer over the Salis fleet DocTypes, mirroring the Habitat

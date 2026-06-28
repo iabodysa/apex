@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#l41jo9]
 frappe.ui.form.on("Maintenance Work Order", {
 	refresh(frm) {

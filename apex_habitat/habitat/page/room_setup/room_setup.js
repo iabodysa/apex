@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#gr1kmo]
 
 frappe.pages["room-setup"].on_page_load = function (wrapper) {

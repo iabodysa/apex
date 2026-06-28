@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Safety Round controller.
 
 A Safety Round is the periodic safety pass over one building for a given cadence

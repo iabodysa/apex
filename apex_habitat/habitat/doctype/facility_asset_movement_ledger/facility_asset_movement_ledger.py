@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Facility Asset Movement Ledger controller.
 
 Read-only, machine-written audit memo. One row is posted per submitted Facility

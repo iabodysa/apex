@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Schema-reference integrity: code/metadata must not point at a nonexistent target.
 
 Guards the class of bug fixed in 1.54.18 (workshop_overstay_days was read in code

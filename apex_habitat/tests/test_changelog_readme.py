@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """change_log/README.md must link every version popup — no skipped versions.
 
 The README is a derived mirror of the per-version notes under change_log/v1/. It

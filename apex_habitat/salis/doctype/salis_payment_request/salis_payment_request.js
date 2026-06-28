@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#go2egg]
 frappe.ui.form.on("Salis Payment Request", {
 	refresh(frm) {

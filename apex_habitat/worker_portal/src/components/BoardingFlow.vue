@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- The live boarding flow for the soonest upcoming trip. Renders off the server's
      worker_trip_boarding(token) snapshot (fast-polled while a boarding window is
      active) and drives the three write endpoints: claim "on the bus", request a

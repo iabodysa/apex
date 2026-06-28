@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Guards for the Unified Action Inbox aggregation API.
 
 Most tests are pure-Python source guards (no live site). ``TestActionInboxOrphanHandling``

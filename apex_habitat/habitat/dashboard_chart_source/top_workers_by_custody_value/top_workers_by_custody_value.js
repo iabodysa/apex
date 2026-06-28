@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 frappe.provide("frappe.dashboards.chart_sources");
 
 frappe.dashboards.chart_sources["Top Workers by Custody Value"] = {

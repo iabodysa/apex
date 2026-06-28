@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed the Salis Auto Email Reports on existing sites.
 
 The Salis Email Templates moved to the data-driven loader

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Fleet number-card guard: each Document Type card's metric stays wired to real fields.
 
 A `type: "Document Type"` Number Card computes its metric by applying

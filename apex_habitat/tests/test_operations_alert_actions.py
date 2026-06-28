@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Action API for the Salis ``Operations Alert`` queue (salis/api/operations_alerts.py).
 
 The operations-control board and the /fleet alert drawer read the open queue and

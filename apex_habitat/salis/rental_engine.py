@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Rental accrual engine for the Salis fleet module.
 
 Background engine — never hand-entered. Mirrors the Habitat daily cost

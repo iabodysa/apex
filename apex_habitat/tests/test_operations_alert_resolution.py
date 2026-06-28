@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Auto-resolution lifecycle for the Salis ``Operations Alert`` DocType.
 
 The Salis engines RAISE Operations Alerts (licence expiry, idle vehicle, overdue

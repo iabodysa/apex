@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Vehicle Handover controller.
 
 Transfers a vehicle from one driver to another, updating the vehicle's

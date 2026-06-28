@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Scheduled Task Instance controller."""
 
 from __future__ import annotations

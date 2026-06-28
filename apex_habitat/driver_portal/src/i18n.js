@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#7qn779]
 import { computed, ref } from "vue";
 

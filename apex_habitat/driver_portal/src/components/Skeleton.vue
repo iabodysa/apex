@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <!-- Shimmer placeholder rows shown while a list loads, instead of a bare
        loading line. `rows` controls how many card-shaped placeholders render. -->

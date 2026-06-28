@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Authorization boundary of the Masar worker self-service guest API.
 
 ``_resolve_worker`` (salis/api/masar.py) is the SOLE authorization for every

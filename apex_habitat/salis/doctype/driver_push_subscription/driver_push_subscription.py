@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver Push Subscription — a driver device's Web Push registration.
 
 One row per (driver, browser endpoint). Created on the driver's opt-in via the

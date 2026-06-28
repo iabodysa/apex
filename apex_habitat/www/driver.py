@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 import frappe
 from frappe.sessions import get_csrf_token
 from frappe.utils import cint

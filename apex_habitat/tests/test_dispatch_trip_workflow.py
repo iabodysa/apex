@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Native Workflow tests for Dispatch Trip (the FINAL status DocType on the
 Salis Workflow Spine).
 

@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#ka8ulk]
 frappe.ui.form.on("Custody Return", {
 	refresh(frm) {

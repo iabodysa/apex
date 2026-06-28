@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- One checklist task as a fast-tap row. Three big targets — Pass (green check),
      Fail (red x), Issue (amber triangle) — plus a pencil that expands an inline
      note. The whole row tints to the chosen verdict; a tap scales the button

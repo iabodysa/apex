@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 import { createApp } from "vue";
 import { setConfig, frappeRequest } from "frappe-ui";
 import App from "./App.vue";

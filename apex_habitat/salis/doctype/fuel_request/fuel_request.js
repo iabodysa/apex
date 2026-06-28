@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#jw1rmo]
 const FUEL_HIGH_LITRES_THRESHOLD = 200;
 

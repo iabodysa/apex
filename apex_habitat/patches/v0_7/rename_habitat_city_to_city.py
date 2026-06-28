@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Rename DocType 'Habitat City' → 'City'.
 
 DELETE THIS PATCH FILE on or after 2026-06-24 (30 days after deploy).

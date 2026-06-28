@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """RETIRED — Habitat Dashboards now ship as native is_standard=1 module JSON.
 
 The Habitat operations dashboard and the four role dashboards (Accommodation

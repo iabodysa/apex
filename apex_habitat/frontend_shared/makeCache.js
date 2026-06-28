@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#t648-make-cache]
 // makeCache(prefix) factory shared by driver_portal and worker_portal.
 // Each portal's cache.js calls this with its own namespace prefix and

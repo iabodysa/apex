@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver-user mirror fetch.
 
 Dispatch Trip and Fuel Request each carry a local read-only ``driver_user`` that

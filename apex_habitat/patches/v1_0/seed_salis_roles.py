@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed the 4 Salis fleet roles. Install-safe and idempotent.
 
 A failure on any single role is logged and skipped so that install/migrate

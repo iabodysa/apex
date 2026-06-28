@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Project row-scoping for the Salis indirect-tenant DocTypes.
 
 These DocTypes carry no own ``project`` field; they reach their tenant through a

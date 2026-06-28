@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Fuel Approval Console API (Salis).
 
 A thin presentation + orchestration layer over the Fuel Request controller,

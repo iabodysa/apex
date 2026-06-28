@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed the native ERPNext Issue masters that back the Salis (movement/fleet)
 support-ticket experience after Support Ticket was retired in favour of Issue +
 SLA.

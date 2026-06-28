@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Driver Web Push scaffold: the opt-in endpoints + the no-op-until-VAPID contract.
 
 Web Push delivery needs a VAPID key pair the operator provisions; until then every

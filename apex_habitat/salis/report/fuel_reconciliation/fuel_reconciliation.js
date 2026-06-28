@@ -1,3 +1,4 @@
+// Copyright (c) 2026, AFMCO and contributors
 // [#7r0wdm]
 frappe.query_reports["Fuel Reconciliation"] = {
 	filters: [

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Tests for the Safety Finding Ledger posting engine.
 
 Proves that submitting a Safety Round posts one immutable ledger row per finding

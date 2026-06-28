@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """State-machine tests: a document may only be created in its initial status
 (closing the insert-bypass), and illegal status jumps are rejected.
 

@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Habitat Settings controller.
 
 Single DocType holding global integration toggles. All defaults are

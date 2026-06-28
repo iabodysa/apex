@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Regression guard: the demo role-login seeder runs ONLY on a developer/demo
 site, never on a production migrate.
 

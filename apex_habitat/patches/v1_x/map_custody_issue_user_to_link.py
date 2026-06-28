@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """ONE-TIME data map: reconcile Custody Issue.issued_to_user values to valid User
 names now that the field is a Link -> User (was a free Data field).
 

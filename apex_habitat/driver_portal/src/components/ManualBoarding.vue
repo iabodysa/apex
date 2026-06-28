@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <!-- Manual-boarding fallback sheet. Shown when a pass can't be scanned: lists the
        trip's manifest workers with a tick per worker; confirming marks the ticked

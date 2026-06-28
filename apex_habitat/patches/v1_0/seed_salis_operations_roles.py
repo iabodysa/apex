@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed the Salis Operations-side approval-tier roles. Install-safe and idempotent.
 
 Consolidated (v1.x): the generic Operations approval roles this seed used to

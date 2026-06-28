@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Dispatch Trip realtime publish.
 
 A trip change (assignment / status / board) must push a ``driver_trip_update``

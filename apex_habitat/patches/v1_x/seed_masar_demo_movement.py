@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Seed a small demo worker-movement scenario so Masar + the driver portal are
 not empty for a first look.
 

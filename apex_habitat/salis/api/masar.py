@@ -1,3 +1,4 @@
+# Copyright (c) 2026, AFMCO and contributors
 """Masar (Worker Movement) driver-portal read APIs.
 
 Masar is the **Workers division of Salis** — the worker-transport experience on
