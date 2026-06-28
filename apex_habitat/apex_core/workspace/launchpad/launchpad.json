@@ -110,7 +110,7 @@
    "label": "Fuel Approval Console",
    "link_type": "Page",
    "link_to": "fuel-approval-console",
-   "idx": 1
+   "idx": 2
   },
   {
    "doctype": "Workspace Link",
@@ -118,7 +118,7 @@
    "label": "Salis Dispatch Board",
    "link_type": "Page",
    "link_to": "salis-dispatch-board",
-   "idx": 1
+   "idx": 3
   },
   {
    "doctype": "Workspace Link",
@@ -126,13 +126,13 @@
    "label": "Salis Portal Theme",
    "link_type": "DocType",
    "link_to": "Salis Portal Theme",
-   "idx": 1
+   "idx": 4
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Roles and Access",
-   "idx": 1
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -140,13 +140,13 @@
    "label": "Role Profile",
    "link_type": "DocType",
    "link_to": "Role Profile",
-   "idx": 1
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Logs",
-   "idx": 29
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -154,7 +154,7 @@
    "label": "Error Log",
    "link_type": "DocType",
    "link_to": "Error Log",
-   "idx": 30
+   "idx": 8
   },
   {
    "doctype": "Workspace Link",
@@ -162,13 +162,13 @@
    "label": "Scheduled Job Log",
    "link_type": "DocType",
    "link_to": "Scheduled Job Log",
-   "idx": 31
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Worker Access",
-   "idx": 32
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
@@ -176,7 +176,7 @@
    "label": "Masar Worker Token",
    "link_type": "DocType",
    "link_to": "Masar Worker Token",
-   "idx": 33
+   "idx": 11
   }
  ],
  "number_cards": [
@@ -221,5 +221,5 @@
    "role": "Administrator"
   }
  ],
- "modified": "2026-06-28 06:54:18.614958"
+ "modified": "2026-06-28 12:00:00.000000"
 }

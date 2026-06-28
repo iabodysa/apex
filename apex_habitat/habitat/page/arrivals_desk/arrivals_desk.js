@@ -90,8 +90,10 @@ class ArrivalsDesk {
 	_load_strip() {
 		// Read-only counts from the shared Custom Number Card methods; failures
 		// leave the dash placeholder rather than breaking the desk.
+		// Render a plain integer via .text(): frappe.format(Int) returns a
+		// <div>-wrapped string, which .text() would show as literal markup.
 		const set = (key, val) =>
-			this.$strip.find(`[data-stat="${key}"]`).text(frappe.format(val, { fieldtype: 'Int' }));
+			this.$strip.find(`[data-stat="${key}"]`).text(cint(val) || 0);
 		// Cards return the {value, ...df} Number Card contract; read .value.
 		const num = (r) => (r && typeof r === 'object' ? r.value : r);
 		frappe

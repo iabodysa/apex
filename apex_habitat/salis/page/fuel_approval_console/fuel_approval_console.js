@@ -12,63 +12,6 @@ frappe.pages["fuel-approval-console"].on_page_load = function (wrapper) {
 	fac.setup();
 };
 
-const FAC_STYLE_ID = "fac-board-styles";
-const FAC_STYLES = `
-.fac-board { padding: 4px 2px 24px; }
-.fac-summary { display: flex; align-items: baseline; justify-content: space-between;
-	flex-wrap: wrap; gap: 8px; margin: 4px 2px 16px; }
-.fac-summary-title { font-size: 1.1rem; font-weight: 600; }
-.fac-summary-counts { color: var(--text-muted); font-size: 0.85rem; }
-.fac-summary-counts .fac-over { color: var(--red-600, #c0392b); font-weight: 600; }
-.fac-empty { text-align: center; padding: 48px 16px; color: var(--text-muted);
-	border: 1px dashed var(--border-color); border-radius: var(--border-radius-lg, 10px);
-	background: var(--card-bg, var(--fg-color, #fff)); }
-.fac-empty-icon { font-size: 2rem; line-height: 1; margin-bottom: 8px; opacity: 0.6; }
-.fac-error { text-align: center; padding: 40px 16px; color: var(--text-muted);
-	border: 1px solid var(--red-300, #f5c2c2); border-radius: var(--border-radius-lg, 10px);
-	background: var(--red-50, #fdf3f3); }
-.fac-error-title { color: var(--red-600, #c0392b); font-weight: 600; margin-bottom: 6px; }
-.fac-error-detail { font-size: 0.85rem; margin-bottom: 14px; overflow-wrap: anywhere; }
-.fac-skeleton { background: linear-gradient(90deg,
-	var(--control-bg, #f0f1f3) 25%, var(--bg-color, #f8f9fa) 37%,
-	var(--control-bg, #f0f1f3) 63%); background-size: 400% 100%;
-	animation: fac-shimmer 1.4s ease infinite; border-radius: 6px; }
-.fac-skel-card { height: 184px; }
-@keyframes fac-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
-@media (prefers-reduced-motion: reduce) { .fac-skeleton { animation: none; } }
-.fac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-.fac-card { display: flex; flex-direction: column; gap: 12px;
-	background: var(--card-bg, var(--fg-color, #fff)); border: 1px solid var(--border-color);
-	border-radius: var(--border-radius-lg, 10px); padding: 16px;
-	box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.06)); transition: box-shadow 0.15s ease; }
-.fac-card:hover { box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.1)); }
-.fac-card--over { border-left: 4px solid var(--red-500, #e24c4c); }
-.fac-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.fac-card-identity { min-width: 0; }
-.fac-card-name { font-weight: 600; font-size: 0.98rem; line-height: 1.25; overflow-wrap: anywhere; }
-.fac-card-sub { color: var(--text-muted); font-size: 0.82rem; margin-top: 2px; }
-.fac-card-flag { flex: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
-	letter-spacing: 0.03em; color: var(--red-600, #c0392b); background: var(--red-100, #fde8e8);
-	border-radius: 999px; padding: 3px 8px; white-space: nowrap; }
-.fac-card-metrics { display: flex; gap: 20px; padding: 10px 0;
-	border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
-.fac-metric { display: flex; flex-direction: column; gap: 2px; }
-.fac-metric-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em;
-	color: var(--text-muted); }
-.fac-metric-value { font-size: 1.05rem; font-weight: 600; }
-.fac-card-body { display: flex; flex-direction: column; gap: 6px; }
-.fac-field { display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
-	font-size: 0.85rem; }
-.fac-field-label { color: var(--text-muted); flex: none; }
-.fac-field-value { text-align: right; overflow-wrap: anywhere; }
-.fac-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.fac-card-ref { font-family: var(--font-stack-mono, monospace); font-size: 0.74rem;
-	color: var(--text-muted); background: var(--control-bg, var(--bg-color, #f4f5f6));
-	border-radius: 6px; padding: 2px 7px; }
-.fac-card-actions { display: flex; gap: 8px; flex: none; }
-@media (max-width: 480px) { .fac-grid { grid-template-columns: 1fr; } }
-`;
-
 class FuelApprovalConsole {
 	constructor(page) {
 		this.page = page;
@@ -76,18 +19,11 @@ class FuelApprovalConsole {
 	}
 
 	setup() {
-		this._inject_styles();
+		// Desk page: no custom CSS (no bespoke <style> injection). Markup renders on
+		// native Desk styling (frappe.ui + native btn / text-muted classes).
 		this.$container = $('<div class="fac-board"></div>').appendTo(this.page.main);
 		this._setup_controls();
 		this.refresh();
-	}
-
-	_inject_styles() {
-		if (document.getElementById(FAC_STYLE_ID)) return;
-		const style = document.createElement("style");
-		style.id = FAC_STYLE_ID;
-		style.textContent = FAC_STYLES;
-		document.head.appendChild(style);
 	}
 
 	_setup_controls() {

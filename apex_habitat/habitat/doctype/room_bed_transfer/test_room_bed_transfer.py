@@ -92,6 +92,38 @@ class TestRoomBedTransfer(FrappeTestCase):
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True)
 
+    def test_transfer_to_room_without_building_is_rejected(self):
+        """RED->GREEN for the building-integrity guard: a transfer whose target room
+        carries no building must be rejected in validate(). The room is minted with
+        ignore_mandatory (building is reqd in the UI) + the field is cleared to be
+        certain, and its bed is Available and belongs to the room, so every earlier
+        validate gate passes and execution reaches the building guard."""
+        fx = self._fixtures()
+        no_bldg_room = frappe.get_doc({
+            "doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+            "room_number": "NB" + self._h(), "bed_capacity": 1,
+            "readiness_status": "Ready"}).insert(ignore_permissions=True, ignore_mandatory=True).name
+        # Be certain the guard sees an unset building even if a default crept in.
+        frappe.db.set_value("Accommodation Room", no_bldg_room, "building", None, update_modified=False)
+        no_bldg_bed = frappe.get_doc({
+            "doctype": "Accommodation Bed", "naming_series": "BED-.####", "room": no_bldg_room,
+            "bed_code": "NB" + self._h(),
+            "status": "Available"}).insert(ignore_permissions=True, ignore_mandatory=True).name
+
+        doc = frappe.get_doc({
+            "doctype": "Room Bed Transfer",
+            "naming_series": "RBT-.YYYY.-.####",
+            "assignment": fx.assignment,
+            "to_room": no_bldg_room,
+            "to_bed": no_bldg_bed,
+            "transfer_date": "2026-06-03",
+        })
+        with self.assertRaises(frappe.ValidationError):
+            doc.insert(ignore_permissions=True)
+
+        frappe.delete_doc("Accommodation Bed", no_bldg_bed, force=True, ignore_permissions=True)
+        frappe.delete_doc("Accommodation Room", no_bldg_room, force=True, ignore_permissions=True)
+
     def test_cancel_restores_assignment_to_origin(self):
         """RED->GREEN: submitting a transfer moves the assignment onto the target
         bed/room/building; cancelling must reverse the move and restore the origin
