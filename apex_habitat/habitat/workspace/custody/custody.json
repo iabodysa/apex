@@ -17,10 +17,11 @@
    "role": "System Manager"
   }
  ],
+ "is_standard": 1,
  "is_default": 0,
  "sequence_id": 6.0,
  "parent_page": "",
- "content": "[{\"id\": \"cstHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"cstOnb0\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Custody Go-Live\", \"col\": 12}}, {\"id\": \"GAJ58bRBht\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"cstScKiosk\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Kiosk\", \"col\": 3}}, {\"id\": \"h7rPQpwBDF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"Y3kWw6e9qD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"cstScGoodsReceipt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Goods Receipt\", \"col\": 3}}, {\"id\": \"cstHdrMetrics\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"cstNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Items Pending Return\", \"col\": 3}}, {\"id\": \"cxppVYIyNb\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"cstNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Returns\", \"col\": 3}}, {\"id\": \"h6sOtahi1Z\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"cstNcValue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Value in Employee Hands (SAR)\", \"col\": 3}}, {\"id\": \"f1V9RqLhsK\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"IxeVMDBiPa\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"xKUtrzTnmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"rRLLPGC6jF\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "content": "[{\"id\": \"cstHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"cstOnb0\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Custody Go-Live\", \"col\": 12}}, {\"id\": \"cstChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Custody Issues by Status\", \"col\": 12}}, {\"id\": \"GAJ58bRBht\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"cstScKiosk\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Kiosk\", \"col\": 3}}, {\"id\": \"h7rPQpwBDF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"Y3kWw6e9qD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"cstScGoodsReceipt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Goods Receipt\", \"col\": 3}}, {\"id\": \"cstHdrMetrics\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"cstNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Items Pending Return\", \"col\": 3}}, {\"id\": \"cxppVYIyNb\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"cstNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Returns\", \"col\": 3}}, {\"id\": \"h6sOtahi1Z\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"cstNcValue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Value in Employee Hands (SAR)\", \"col\": 3}}, {\"id\": \"f1V9RqLhsK\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"IxeVMDBiPa\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"xKUtrzTnmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"cstCardMasters\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"rRLLPGC6jF\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -195,9 +196,38 @@
    "link_to": "Custody Outstanding by Worker",
    "idx": 18,
    "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Masters",
+   "idx": 19
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Custody Article",
+   "link_type": "DocType",
+   "link_to": "Custody Article",
+   "idx": 20
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Custody Asset Category",
+   "link_type": "DocType",
+   "link_to": "Custody Asset Category",
+   "idx": 21
   }
  ],
- "charts": [],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Custody Issues by Status",
+   "label": "Custody Issues by Status",
+   "idx": 1
+  }
+ ],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -231,5 +261,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-27 09:00:00.000000"
+ "modified": "2026-06-29 10:00:00.000000"
 }

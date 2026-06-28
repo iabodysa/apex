@@ -131,29 +131,19 @@ class TestWorkspaceVisibility(unittest.TestCase):
                 )
 
 
-class TestNoChartWorkspaceDesign(unittest.TestCase):
-    """The lean public-workspace design ships NO charts on any workspace.
+class TestWorkspaceHeadlineCharts(unittest.TestCase):
+    """Each domain workspace pins a single headline Dashboard Chart (P-094).
 
-    Every on-disk is_standard Dashboard Chart record is therefore an intentional
-    orphan (reachable only from the Dashboard Chart list, never pinned to a
-    workspace). This guard keeps that invariant from silently regressing: it fails
-    the moment a chart is wired onto a workspace, or a workspace references a chart
-    record that does not exist on disk.
+    The earlier lean design shipped no charts; P-092/P-094 superseded it — every
+    domain workspace now surfaces one headline chart. The load-bearing invariant
+    is the silent-drop trap: a workspace that references a chart record absent
+    from disk renders nothing with no error. This guard enforces that every wired
+    chart resolves to an on-disk is_standard Dashboard Chart record.
     """
 
-    def test_no_chart_is_wired_to_any_workspace(self):
-        wired = _workspace_referenced_charts()
-        self.assertEqual(
-            wired,
-            set(),
-            "the no-chart workspace design forbids pinning a Dashboard Chart to a "
-            f"workspace; remove these chart references: {sorted(wired)}",
-        )
-
-    def test_workspace_chart_refs_exist_on_disk(self):
-        # A workspace must never point at a chart record absent from disk; with the
-        # wired set empty this is vacuously true, but it guards the day a chart is
-        # (re-)wired against a deleted record.
+    def test_every_wired_chart_exists_on_disk(self):
+        # A workspace must never point at a chart record absent from disk — Frappe
+        # silently drops the tile (no error) when the referenced record is missing.
         missing = _workspace_referenced_charts() - _chart_record_names()
         self.assertEqual(
             missing,
@@ -167,6 +157,10 @@ class TestNoChartWorkspaceDesign(unittest.TestCase):
         # scan reaches every module's workspaces.
         self.assertTrue(_chart_record_names(), "no Dashboard Chart records discovered on disk")
         self.assertTrue(_all_workspace_files(), "no workspace JSON discovered across modules")
+        self.assertTrue(
+            _workspace_referenced_charts(),
+            "no workspace headline charts discovered — the P-094 headline-chart design expects them",
+        )
 
 
 if __name__ == "__main__":

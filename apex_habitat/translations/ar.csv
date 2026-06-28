@@ -684,6 +684,7 @@ Compliance Status,حالة الامتثال
 Compliance Type,نوع الوثيقة
 Compliance and Audit Reports,تقارير الالتزام والتدقيق
 Compliance and Licensing,الامتثال والتراخيص
+Compliance and Rentals,الامتثال والإيجارات
 Compliance and Rentals Go-Live,إطلاق تشغيل الامتثال والإيجارات
 "Compliance and Rentals is live. Driver clearances, vehicle compliance, and rental settlements are tracked.",تم تشغيل الامتثال والإيجارات. يجري تتبّع إخلاء طرف السائقين وامتثال المركبات وتسويات الإيجار.
 Compliance at risk,الامتثال في خطر
@@ -775,6 +776,7 @@ Cost of Repair cannot be negative.,لا يمكن أن تكون تكلفة الإ
 Costing,احتساب التكلفة
 Costing & Mapping,احتساب التكلفة والربط
 Costs,التكاليف
+Costs and Leasing,التكاليف والتأجير
 Costs and Settlement,التكاليف والتسوية
 Could not apply {0},تعذّر تطبيق {0}
 Could not close the task,تعذّر إغلاق المهمة
@@ -1731,6 +1733,7 @@ Lease Expiry Watchlist,قائمة مراقبة انتهاء عقود الإيج�
 Lease Start Date,تاريخ بداية عقد الإيجار
 Lease payment reference: {0},مرجع دفعة الإيجار: {0}
 Leases by Status,عقود الإيجار حسب الحالة
+Leasing,التأجير
 Leave,إجازة
 Leave blank for permanent,اتركه فارغاً للدائم
 Ledger Accrued Total,إجمالي استحقاق دفتر الأستاذ
@@ -3167,6 +3170,7 @@ Subcontractor Dispatched,تم تكليف مقاول الباطن
 Subcontractor Service Contract,عقد خدمة مقاول الباطن
 Subcontractor Service Order,أمر خدمة المقاول
 Subcontractor Service Orders by Status,أوامر خدمة مقاول الباطن حسب الحالة
+Subcontractors,مقاولو الباطن
 Subject,الموضوع
 Submit Manifest,إرسال البيان
 Submit Request,إرسال الطلب
@@ -3528,6 +3532,7 @@ User Requesting Access,المستخدم طالب الصلاحية
 Usually blank on arrival; populated when the Iqama is issued before the worker is linked to a permanent Employee.,يكون فارغًا عادةً عند الوصول؛ يُملأ عند إصدار الإقامة قبل ربط العامل بموظف دائم.
 Utilisation,الاستغلال
 Utilisation %,نسبة الاستغلال %
+Utilities,المرافق
 Utility Account,حساب الخدمات العامة
 Utility Bill Entry,تسجيل فاتورة الخدمات العامة
 Utility Bills Under Review,فواتير الخدمات تحت المراجعة

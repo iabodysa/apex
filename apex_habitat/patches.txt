@@ -234,3 +234,10 @@ apex_habitat.patches.v1_x.drop_scheduled_task_instance_legacy_index
 # already configured. Idempotent, no-op on fresh installs / re-run. PRUNE once every
 # deployed site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.move_deduction_to_salary_policy
+
+# v1.x — remove the Workspaces + Module Onboardings orphaned by the P-048 14->8 merge
+# (ONE-TIME). migrate is import-only and never reconciles a deleted JSON, so the merged-away
+# rows linger on installed sites and shadow the new set. Deletes them by name; guards against
+# the case-insensitive "Costs"/"costs" + "Fleet"/"fleet" aliases of live workspaces.
+# Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site has run it.
+apex_habitat.patches.v1_x.cleanup_p048_orphan_workspaces

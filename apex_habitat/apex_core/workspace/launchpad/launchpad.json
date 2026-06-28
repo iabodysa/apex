@@ -6,6 +6,7 @@
  "module": "Apex Core",
  "icon": "setting",
  "public": 1,
+ "is_standard": 1,
  "is_default": 0,
  "is_hidden": 0,
  "sequence_id": 90.0,
@@ -221,5 +222,5 @@
    "role": "Administrator"
   }
  ],
- "modified": "2026-06-28 12:00:00.000000"
+ "modified": "2026-06-29 10:00:00.000000"
 }

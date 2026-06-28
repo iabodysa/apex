@@ -43,10 +43,8 @@ FLEET_CARDS = [
     "Workshop Overstay",
 ]
 
-# The new design carries no Dashboard Charts on public workspaces.
-FLEET_CHARTS = []
-
-FLEET_ONBOARDING = "Fleet Operations Go-Live"
+# P-094 headline-chart design: the fleet workspace pins one headline chart.
+FLEET_CHARTS = ["Fuel Spend Trend"]
 
 
 class TestFleetOpsRender(FrappeTestCase):
@@ -177,6 +175,27 @@ class TestFleetOpsRender(FrappeTestCase):
             update_modified=False,
         )
 
+    def _fuel_request(self):
+        # Fuel Spend Trend sums Fuel Request.amount (status=Done) by request_date.
+        # A new request is guarded to status Pending; the Done status + amount are
+        # reached through the workflow, so set them via db (same bypass _alerts uses)
+        # to land a real row the chart can sum without driving the full workflow.
+        req = frappe.get_doc(
+            {
+                "doctype": "Fuel Request",
+                "request_type": "Standard",
+                "vehicle": self._active_vehicle,
+                "requested_litres": 40,
+                "request_date": today(),
+            }
+        ).insert(ignore_permissions=True)
+        frappe.db.set_value(
+            "Fuel Request",
+            req.name,
+            {"status": "Done", "amount": 250.0, "request_date": today()},
+            update_modified=False,
+        )
+
     def _seed(self):
         # One Active vehicle anchors the incident + utilisation seeds.
         self._active_vehicle = self._vehicle("Active")
@@ -191,6 +210,7 @@ class TestFleetOpsRender(FrappeTestCase):
         self._assignment_draft()  # Vehicle Activations
         self._overstay_vehicle()  # Workshop Overstay
         self._alerts()  # Open Alerts by Type + Median Alert Resolve Days
+        self._fuel_request()  # Fuel Spend Trend (headline chart)
 
     def _card_result(self, card_name):
         """Render a Number Card exactly as the widget does.
@@ -246,35 +266,6 @@ class TestFleetOpsRender(FrappeTestCase):
                 empty.append(f"{name} ({chart_type})={config!r}")
         self.assertEqual(empty, [], f"fleet charts that rendered empty with data seeded: {empty}")
 
-    def test_fleet_onboarding_steps_open(self):
-        # get_steps() is the widget's resolver: it loads every referenced Onboarding
-        # Step doc (raising if one is missing). Then each step's click target -- the
-        # DocType form (Create Entry) or Desk Page (Go to Page) it opens -- must
-        # resolve. This is render-level, not the page access/role gate.
-        onboarding = frappe.get_doc("Module Onboarding", FLEET_ONBOARDING)
-        steps = onboarding.get_steps()
-        self.assertEqual(
-            len(steps), len(onboarding.steps), "every mapped onboarding step must load as a real doc"
-        )
-        unresolved = []
-        for step in steps:
-            if step.action in ("Create Entry", "Update Settings", "Show Form Tour"):
-                if not (step.reference_document and frappe.db.exists("DocType", step.reference_document)):
-                    unresolved.append(f"{step.name}: DocType {step.reference_document!r} missing")
-            elif step.action == "View Report":
-                if not (step.reference_report and frappe.db.exists("Report", step.reference_report)):
-                    unresolved.append(f"{step.name}: Report {step.reference_report!r} missing")
-            elif step.action == "Go to Page":
-                # A bare slug (no "/", not an app route) names a Desk Page record.
-                path = step.path or ""
-                if not path:
-                    unresolved.append(f"{step.name}: empty Go to Page path")
-                elif "/" not in path and not path.startswith("app") and not frappe.db.exists("Page", path):
-                    unresolved.append(f"{step.name}: Page {path!r} missing")
-            else:
-                unresolved.append(f"{step.name}: unhandled action {step.action!r}")
-        self.assertEqual(unresolved, [], f"fleet onboarding steps that open nothing: {unresolved}")
-
     def test_render_scan_is_non_vacuous(self):
         # Guard against a silently-passing suite: the cards/charts/onboarding the
         # workspace JSON actually references must still exist, so the proofs above
@@ -293,7 +284,7 @@ class TestFleetOpsRender(FrappeTestCase):
         self.assertEqual(
             set(FLEET_CHARTS),
             referenced_charts,
-            "the tested chart set must match the Fleet Operations workspace's chart blocks",
+            "the tested chart set must match the fleet workspace's chart blocks",
         )
         for name in FLEET_CARDS:
             self.assertTrue(frappe.db.exists("Number Card", name), f"Number Card {name} not installed")

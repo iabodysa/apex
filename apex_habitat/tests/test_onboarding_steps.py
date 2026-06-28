@@ -100,5 +100,5 @@ class TestOnboardingSteps(FrappeTestCase):
             for j in glob.glob(f"{APP}/**/module_onboarding/*/*.json", recursive=True)
         }
         self.assertIn("Close a Rental Settlement", steps, "expected onboarding step JSON not found -- glob is broken")
-        self.assertIn("Fleet Operations Go-Live", modules, "expected module onboarding JSON not found -- glob is broken")
+        self.assertIn("Custody Go-Live", modules, "expected module onboarding JSON not found -- glob is broken")
         self.assertGreaterEqual(len(steps), 20, f"too few onboarding steps scanned ({len(steps)}) -- glob is broken")
