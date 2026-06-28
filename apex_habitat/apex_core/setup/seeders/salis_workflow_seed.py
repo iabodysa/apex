@@ -148,14 +148,30 @@ def _seed_one(definition):
 
     name = definition["name"]
     if frappe.db.exists("Workflow", name):
-        # [#3imdxa]
-        if definition.get("is_active") and not frappe.db.get_value("Workflow", name, "is_active"):
-            doc = frappe.get_doc("Workflow", name)
-            doc.is_active = 1
-            doc.save(ignore_permissions=True)  # audit-ok
+        # [#3imdxa] Reconcile an existing workflow to the shipped JSON (the single
+        # source of truth): the states/transitions can change between releases
+        # (e.g. a DoA split that swaps a single Approve for tiered Authorize
+        # actions), so re-apply them rather than leaving the stale DB version in
+        # place. Idempotent: when the JSON already matches, this rewrites the same
+        # rows. Header flags + is_active are realigned too.
+        doc = frappe.get_doc("Workflow", name)
+        _apply_definition(doc, definition, document_type)
+        doc.save(ignore_permissions=True)  # audit-ok
         return True
 
     doc = frappe.new_doc("Workflow")
+    _apply_definition(doc, definition, document_type)
+    # [#8o993l]
+    doc.name = name
+    doc.flags.name_set = True
+    doc.insert(ignore_permissions=True)  # audit-ok
+    return True
+
+
+def _apply_definition(doc, definition, document_type):
+    """Write the JSON definition's header + states + transitions onto ``doc``
+    (replacing any existing child rows), so create and reconcile share one path."""
+    name = definition["name"]
     doc.workflow_name = definition.get("workflow_name", name)
     doc.document_type = document_type
     doc.workflow_state_field = definition["workflow_state_field"]
@@ -163,6 +179,7 @@ def _seed_one(definition):
     doc.override_status = definition.get("override_status", 0)
     doc.send_email_alert = definition.get("send_email_alert", 0)
 
+    doc.states = []
     for state in definition.get("states", []):
         doc.append(
             "states",
@@ -173,6 +190,7 @@ def _seed_one(definition):
                 "is_optional_state": state.get("is_optional_state", 0),
             },
         )
+    doc.transitions = []
     for transition in definition.get("transitions", []):
         doc.append(
             "transitions",
@@ -185,12 +203,6 @@ def _seed_one(definition):
                 "condition": transition.get("condition") or "",
             },
         )
-
-    # [#8o993l]
-    doc.name = name
-    doc.flags.name_set = True
-    doc.insert(ignore_permissions=True)  # audit-ok
-    return True
 
 
 def seed_salis_workflows():

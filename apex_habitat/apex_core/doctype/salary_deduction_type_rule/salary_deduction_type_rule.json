@@ -20,7 +20,12 @@
   "section_break_gate",
   "require_acknowledgment",
   "require_approval",
-  "approver_role"
+  "approver_role",
+  "section_break_authorization",
+  "activation_date",
+  "authorized_by",
+  "column_break_authorization",
+  "authorization_document"
  ],
  "fields": [
   {
@@ -125,6 +130,37 @@
    "fieldtype": "Link",
    "label": "Approver Role",
    "options": "Role"
+  },
+  {
+   "fieldname": "section_break_authorization",
+   "fieldtype": "Section Break",
+   "label": "Authorization"
+  },
+  {
+   "depends_on": "eval:doc.enabled",
+   "description": "Date from which this rule takes effect. A source event dated before this is not deducted. Used by recurring deductions such as Rent / Housing.",
+   "fieldname": "activation_date",
+   "fieldtype": "Date",
+   "label": "Activation Date"
+  },
+  {
+   "depends_on": "eval:doc.enabled",
+   "description": "User who authorized activating this deduction type (management sign-off).",
+   "fieldname": "authorized_by",
+   "fieldtype": "Link",
+   "label": "Authorized By",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_authorization",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.enabled",
+   "description": "Attach the internal authorization (management sign-off) approving this deduction type.",
+   "fieldname": "authorization_document",
+   "fieldtype": "Attach",
+   "label": "Authorization Document"
   }
  ],
  "istable": 1,

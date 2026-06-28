@@ -55,7 +55,15 @@ frappe.ui.form.on("Accommodation Lease", {
 					return;
 				}
 
-				frappe.db.get_single_value("Apex Settings", "default_payment_method").then(method => {
+				// The target payment DocType comes from the Payment Routing Settings
+				// router (replacing the retired Apex Settings default_payment_method).
+				// An unconfigured router answers "Payment Request"; this lease button
+				// has no Payment Request branch, so it keeps its prior default of
+				// Payment Entry in that case.
+				frappe.call({
+					method: "apex_habitat.apex_core.payment_router.get_target_payment_doctype",
+				}).then(r => {
+					const method = r && r.message;
 					if (method === "Expense Request Afmco") {
 						frappe.db.exists("DocType", "Expense Request Afmco").then(exists => {
 							if (!exists) {

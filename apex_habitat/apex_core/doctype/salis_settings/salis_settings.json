@@ -13,11 +13,13 @@
   "salis_settings_sec_alerts",
   "alert_lead_days",
   "license_alert_lead_days",
+  "license_expiring_warn_days",
   "salis_settings_alerts_col1",
   "idle_vehicle_days",
   "workshop_overstay_days",
   "salis_settings_alerts_col2",
   "fuel_pending_max_days",
+  "fuel_overage_margin_percent",
   "alert_aging_info_hours",
   "alert_aging_warning_hours",
   "alert_aging_critical_hours",
@@ -46,15 +48,11 @@
   "salis_settings_approvals_col",
   "fuel_request_approval_threshold_litres",
   "passenger_count_ops_threshold",
+  "admin_trip_ops_threshold",
   "salis_settings_sec_doa_thresholds",
   "writeoff_ops_threshold_sar",
   "salis_settings_doa_col",
-  "cost_recovery_ops_threshold_sar",
-  "salis_settings_sec_fuel_prices",
-  "fuel_price_petrol_91",
-  "salis_settings_fuel_col",
-  "fuel_price_petrol_95",
-  "fuel_price_diesel"
+  "cost_recovery_ops_threshold_sar"
  ],
  "fields": [
   {
@@ -105,6 +103,13 @@
    "label": "License Alert Lead Days"
   },
   {
+   "default": "30",
+   "description": "Days to expiry at or below which a driver licence or vehicle compliance document is flagged 'expiring' (amber) in the driver portal. A blank or zero value falls back to the built-in default.",
+   "fieldname": "license_expiring_warn_days",
+   "fieldtype": "Int",
+   "label": "License Expiring Warn Days"
+  },
+  {
    "fieldname": "salis_settings_alerts_col1",
    "fieldtype": "Column Break"
   },
@@ -132,6 +137,13 @@
    "fieldname": "fuel_pending_max_days",
    "fieldtype": "Int",
    "label": "Fuel Request Pending Max Days"
+  },
+  {
+   "default": "5",
+   "description": "Percent by which a vehicle's actual fuel consumption may exceed its monthly quota before an overage / excessive-topup alert is raised. A blank or zero value falls back to the built-in default.",
+   "fieldname": "fuel_overage_margin_percent",
+   "fieldtype": "Int",
+   "label": "Fuel Overage Margin (Percent)"
   },
   {
    "default": "72",
@@ -312,6 +324,13 @@
    "label": "Passenger Count Operations Threshold"
   },
   {
+   "default": "5",
+   "description": "Administrative / document-signing requests with more than this many trips this month require Operations-tier authority. A blank or zero value falls back to the built-in default.",
+   "fieldname": "admin_trip_ops_threshold",
+   "fieldtype": "Int",
+   "label": "Administrative Trip Operations Threshold"
+  },
+  {
    "fieldname": "salis_settings_sec_doa_thresholds",
    "fieldtype": "Section Break",
    "label": "Delegation-of-Authority Thresholds (SAR)"
@@ -333,30 +352,6 @@
    "fieldname": "cost_recovery_ops_threshold_sar",
    "fieldtype": "Currency",
    "label": "Cost Recovery Operations Threshold (SAR)"
-  },
-  {
-   "fieldname": "salis_settings_sec_fuel_prices",
-   "fieldtype": "Section Break",
-   "label": "Fuel Reference Prices (SAR/Litre)"
-  },
-  {
-   "fieldname": "fuel_price_petrol_91",
-   "fieldtype": "Currency",
-   "label": "Petrol 91 (SAR/Litre)"
-  },
-  {
-   "fieldname": "salis_settings_fuel_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "fuel_price_petrol_95",
-   "fieldtype": "Currency",
-   "label": "Petrol 95 (SAR/Litre)"
-  },
-  {
-   "fieldname": "fuel_price_diesel",
-   "fieldtype": "Currency",
-   "label": "Diesel (SAR/Litre)"
   }
  ],
  "issingle": 1,

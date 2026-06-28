@@ -4,7 +4,7 @@
 The Assignment record IS the check-in and the active occupancy stay. It carries
 both check_in_date and check_out_date; Accommodation Checkout closes it.
 
-Payroll effects are gated behind Habitat Settings and disabled by default.
+Payroll effects are gated behind the Salary Deduction Policy and disabled by default.
 """
 
 from __future__ import annotations
@@ -12,6 +12,9 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from apex_habitat.apex_core.doctype.salary_deduction_policy.salary_deduction_policy import (
+    get_policy,
+)
 from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
 
@@ -250,21 +253,21 @@ def on_submit(doc, method=None):
         frappe.db.rollback()
         frappe.throw(_("Could not update bed occupancy. The assignment was not submitted."))
 
-    settings = frappe.get_single("Habitat Settings")
-    activation = settings.deduction_activation_date
-    if settings.enable_housing_allowance_deduction and (
-        not activation or doc.check_in_date >= activation
-    ):
+    # housing-allowance deduction now reads the Salary Deduction Policy Rent rule;
+    # a rule is returned only when both the global master switch and the rule are on
+    rent_rule = get_policy().get_type_rule("Rent")
+    activation = rent_rule.activation_date if rent_rule else None
+    if rent_rule and (not activation or doc.check_in_date >= activation):
         doc.db_set("housing_allowance_suspended", 1)
         doc.add_comment(
             "Comment",
-            "Housing Allowance suspended per Habitat Settings.",
+            "Housing Allowance suspended per Salary Deduction Policy.",
         )
     else:
         doc.db_set("housing_allowance_suspended", 0)
         doc.add_comment(
             "Comment",
-            "Housing Allowance not suspended - feature disabled in Habitat Settings.",
+            "Housing Allowance not suspended - feature disabled in Salary Deduction Policy.",
         )
 
 

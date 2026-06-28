@@ -48,7 +48,9 @@ class TestSchemaIntegrity(FrappeTestCase):
         self.assertEqual(bad, [], f"hook/card method paths that do not resolve: {bad}")
 
     def test_settings_fields_exist(self):
-        pi = re.compile(r'_settings_int\(\s*["\']([a-z_0-9]+)["\']')
+        # Matches _settings_int / get_salis_int / get_salis_float literal-string reads
+        # of a Salis Settings field; all funnel through the same coalesce helpers.
+        pi = re.compile(r'(?:_settings_int|get_salis_int|get_salis_float)\(\s*["\']([a-z_0-9]+)["\']')
         ps = re.compile(r'get_single_value\(\s*["\']([A-Za-z ]+Settings)["\']\s*,\s*["\']([a-z_0-9]+)["\']')
         missing = []
         for f in glob.glob(f"{APP}/**/*.py", recursive=True):

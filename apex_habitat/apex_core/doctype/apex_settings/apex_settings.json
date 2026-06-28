@@ -1,14 +1,19 @@
 {
  "actions": [],
  "creation": "2026-06-12 00:00:00.000000",
- "description": "App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the finance integration defaults that govern how the app generates payment documents and whether it posts to the General Ledger.",
+ "description": "App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the GL-posting finance gate and the data-retention windows that govern how long machine-written time-series and alert records are kept.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "apex_settings_tab_finance",
   "apex_settings_sec_financial",
   "enable_gl_posting",
-  "default_payment_method"
+  "apex_settings_tab_retention",
+  "apex_settings_sec_retention",
+  "snapshot_retention_days",
+  "depreciation_snapshot_retention_days",
+  "apex_settings_retention_col",
+  "alert_retention_days"
  ],
  "fields": [
   {
@@ -29,17 +34,49 @@
    "label": "Enable GL Entry Posting"
   },
   {
-   "default": "Payment Entry",
-   "description": "Document type to generate when creating rent payments from Accommodation Lease.",
-   "fieldname": "default_payment_method",
-   "fieldtype": "Select",
-   "label": "Default Payment Method",
-   "options": "Payment Entry\nPayment Order\nExpense Request Afmco"
+   "fieldname": "apex_settings_tab_retention",
+   "fieldtype": "Tab Break",
+   "label": "Data Retention"
+  },
+  {
+   "collapsible": 1,
+   "description": "How long machine-written time-series and alert records are kept before the daily log cleanup purges old rows. Blank or 0 falls back to the built-in default for that record. Financial ledgers are never auto-purged.",
+   "fieldname": "apex_settings_sec_retention",
+   "fieldtype": "Section Break",
+   "label": "Data Retention"
+  },
+  {
+   "default": "365",
+   "description": "Retention for daily occupancy and weekly vehicle-utilisation snapshots (days). Default 365.",
+   "fieldname": "snapshot_retention_days",
+   "fieldtype": "Int",
+   "label": "Snapshot Retention (Days)",
+   "non_negative": 1
+  },
+  {
+   "default": "730",
+   "description": "Retention for submitted Non-Financial Depreciation Snapshots (days). Default 730.",
+   "fieldname": "depreciation_snapshot_retention_days",
+   "fieldtype": "Int",
+   "label": "Depreciation Snapshot Retention (Days)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "apex_settings_retention_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "90",
+   "description": "Retention for resolved Operations Alerts (days). Open and acknowledged alerts are never purged by age. Default 90.",
+   "fieldname": "alert_retention_days",
+   "fieldtype": "Int",
+   "label": "Resolved Alert Retention (Days)",
+   "non_negative": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-12 00:00:00.000000",
+ "modified": "2026-06-29 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Apex Settings",

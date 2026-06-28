@@ -17,15 +17,6 @@
   "auto_create_asset_movement_on_transfer",
   "habitat_settings_sec_housing",
   "housing_office_number",
-  "enable_housing_allowance_deduction",
-  "deduction_activation_date",
-  "authorized_by",
-  "authorization_document",
-  "habitat_settings_sec_damage",
-  "enable_damage_deduction",
-  "damage_salary_component",
-  "habitat_settings_damage_col",
-  "max_damage_deduction_per_checkout_sar",
   "habitat_settings_tab_notifications",
   "operational_notifications_sec",
   "enable_email_notifications",
@@ -127,7 +118,7 @@
   {
    "fieldname": "habitat_settings_sec_housing",
    "fieldtype": "Section Break",
-   "label": "Housing Allowance Deduction"
+   "label": "Housing Office"
   },
   {
    "description": "Housing office contact number shown to workers on the Masar home My Contacts card.",
@@ -135,63 +126,6 @@
    "fieldtype": "Data",
    "label": "Housing Office Number",
    "options": "Phone"
-  },
-  {
-   "default": "0",
-   "description": "When OFF (default), accommodation assignment does not touch Salary Structure Assignment.",
-   "fieldname": "enable_housing_allowance_deduction",
-   "fieldtype": "Check",
-   "label": "Enable Housing Allowance Deduction"
-  },
-  {
-   "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
-   "fieldname": "deduction_activation_date",
-   "fieldtype": "Date",
-   "label": "Deduction Activation Date"
-  },
-  {
-   "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
-   "fieldname": "authorized_by",
-   "fieldtype": "Link",
-   "label": "Authorized By",
-   "options": "User"
-  },
-  {
-   "depends_on": "eval:doc.enable_housing_allowance_deduction==1",
-   "fieldname": "authorization_document",
-   "fieldtype": "Attach",
-   "label": "Authorization Document"
-  },
-  {
-   "fieldname": "habitat_settings_sec_damage",
-   "fieldtype": "Section Break",
-   "label": "Damage Deduction"
-  },
-  {
-   "default": "0",
-   "description": "When ON, checkout damage amounts post to Additional Salary. Default OFF.",
-   "fieldname": "enable_damage_deduction",
-   "fieldtype": "Check",
-   "label": "Enable Damage Deduction Posting"
-  },
-  {
-   "depends_on": "eval:doc.enable_damage_deduction==1",
-   "description": "Salary Component (Deduction type) used when posting custody damage as Additional Salary. Must exist in HRMS before enabling.",
-   "fieldname": "damage_salary_component",
-   "fieldtype": "Link",
-   "label": "Damage Deduction Component",
-   "options": "Salary Component"
-  },
-  {
-   "fieldname": "habitat_settings_damage_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "500",
-   "description": "Hard cap on the damage amount posted to Additional Salary for a single checkout, regardless of assessed value.",
-   "fieldname": "max_damage_deduction_per_checkout_sar",
-   "fieldtype": "Currency",
-   "label": "Max Damage Deduction per Checkout (SAR)"
   },
   {
    "fieldname": "habitat_settings_tab_notifications",

@@ -1,13 +1,17 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Move the two app-wide finance settings from Habitat Settings to Apex Settings.
+"""Move the app-wide ``enable_gl_posting`` finance gate from Habitat Settings to
+Apex Settings.
 
-``default_payment_method`` and ``enable_gl_posting`` were relocated out of the
-housing-scoped Habitat Settings single into the app-wide Apex Settings single
-(they serve both Habitat and Salis). On a site that already set either value on
-Habitat Settings, that value still lingers as an orphan row in ``tabSingles``
-(removing a field from a Single's JSON does not delete its stored value). This
-patch copies any such value into Apex Settings, then deletes the orphan rows so
-nothing stale remains.
+``enable_gl_posting`` was relocated out of the housing-scoped Habitat Settings
+single into the app-wide Apex Settings single (it serves both Habitat and Salis).
+On a site that already set the value on Habitat Settings, it still lingers as an
+orphan row in ``tabSingles`` (removing a field from a Single's JSON does not delete
+its stored value). This patch copies any such value into Apex Settings, then
+deletes the orphan row so nothing stale remains.
+
+The companion ``default_payment_method`` was NOT moved onto Apex Settings — it was
+retired in favour of the Payment Routing Settings router; its migration + orphan
+cleanup are owned by ``retire_default_payment_method``.
 
 ONE-TIME, idempotent, install-safe:
   * reads the OLD value straight from ``tabSingles`` via the query builder — NOT
@@ -15,7 +19,7 @@ ONE-TIME, idempotent, install-safe:
     Habitat Settings meta;
   * only fills Apex Settings when its value is still the factory default / unset,
     so it never clobbers a value an admin set directly on Apex Settings;
-  * deletes the Habitat Settings orphan rows, so a second run is a pure no-op;
+  * deletes the Habitat Settings orphan row, so a second run is a pure no-op;
   * a no-op on fresh installs (no orphan rows exist).
 PRUNE (remove module + the patches.txt line) once every deployed site has run it.
 """
@@ -24,7 +28,6 @@ import frappe
 
 # [#n1agup]
 MOVED_FIELDS = {
-    "default_payment_method": "Payment Entry",
     "enable_gl_posting": "0",
 }
 

@@ -23,6 +23,40 @@ def get_salis_settings():
     return frappe.get_single("Salis Settings")
 
 
+# A new Int/Float on an existing Single stores 0 (not its JSON default), so every
+# numeric Salis Settings read must coalesce a blank/zero value to the caller's
+# default. These are the single source the controllers/engines/SPAs read tunables
+# through — no caller may trust a raw 0 or inline its own default.
+def get_salis_int(field: str, default: int) -> int:
+    """Read an Int from the Salis Settings single, falling back to ``default``
+    when the stored value is blank or zero (the new-Single-Int-stores-0 trap)."""
+    try:
+        value = frappe.db.get_single_value("Salis Settings", field)
+    except Exception:
+        return default
+    if not value:
+        return default
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def get_salis_float(field: str, default: float) -> float:
+    """Read a Float/Currency from the Salis Settings single, falling back to
+    ``default`` when the stored value is blank or zero (the zero-trap)."""
+    try:
+        value = frappe.db.get_single_value("Salis Settings", field)
+    except Exception:
+        return default
+    if not value:
+        return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
 # Boarding/departure flow tunables + their built-in fallbacks. A new Int on an
 # existing Single stores 0 (not its JSON default), so every read here coalesces a
 # blank/zero value to the default — the single source the boarding flow + the
@@ -56,16 +90,13 @@ def get_boarding_settings() -> dict:
 def get_default_company():
     """Resolve the company applied to Salis transactions when not set explicitly.
 
-    Mirrors Habitat's defaulting order: the explicit Salis Settings default first,
-    then the user's company default, then the global company default. Returns
-    ``None`` when no company is configured (no posting is performed regardless).
+    Thin wrapper over the shared resolver (explicit Salis Settings default ->
+    user company default -> global company default). Returns ``None`` when no
+    company is configured (no posting is performed regardless).
     """
-    company = frappe.db.get_single_value("Salis Settings", "default_company")
-    if not company:
-        company = frappe.defaults.get_user_default("Company")
-    if not company:
-        company = frappe.defaults.get_global_default("company")
-    return company or None
+    from apex_habitat.apex_core.utils.company import resolve_company
+
+    return resolve_company("Salis")
 
 
 def get_default_cost_center():

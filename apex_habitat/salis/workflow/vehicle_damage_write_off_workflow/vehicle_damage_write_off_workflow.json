@@ -82,7 +82,16 @@
   {
    "doctype": "Workflow Transition",
    "state": "Under Review",
-   "action": "Approve",
+   "action": "Authorize (Regional)",
+   "next_state": "Approved",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 0,
+   "condition": "not doc.needs_operations and doc.owner != frappe.session.user"
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Under Review",
+   "action": "Authorize (Operations)",
    "next_state": "Approved",
    "allowed": "Fleet Manager",
    "allow_self_approval": 0,
@@ -91,7 +100,7 @@
   {
    "doctype": "Workflow Transition",
    "state": "Under Review",
-   "action": "Approve",
+   "action": "Authorize (Operations)",
    "next_state": "Approved",
    "allowed": "System Manager",
    "allow_self_approval": 0,

@@ -26,17 +26,13 @@ ALERT_DOCTYPE = "Operations Alert"
 
 
 def _settings_int(fieldname: str, default: int) -> int:
-    """Read an Int from the Salis Settings single, falling back to ``default``."""
-    try:
-        value = frappe.db.get_single_value("Salis Settings", fieldname)
-    except Exception:
-        return default
-    if not value:
-        return default
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return default
+    """Read an Int from the Salis Settings single, falling back to ``default``.
+
+    Thin alias over the canonical ``get_salis_int`` coalesce helper, kept for the
+    existing in-module call sites."""
+    from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+
+    return get_salis_int(fieldname, default)
 
 
 def _resolve_project_supervisor(vehicle: str | None) -> str | None:
@@ -821,8 +817,9 @@ def reconcile_operations_alerts() -> None:
             as_dict=True,
         )
     }
-    from apex_habitat.salis.fuel_engine import OVERAGE_MARGIN, _period_month
+    from apex_habitat.salis.fuel_engine import _period_month, get_overage_margin
 
+    overage_margin = get_overage_margin()
     period_month = _period_month(today_str)
     for r in frappe.db.sql(
         """
@@ -840,7 +837,7 @@ def reconcile_operations_alerts() -> None:
     ):
         quota = float(r["quota"] or 0)
         consumed = float(r["consumed"] or 0)
-        if quota > 0 and consumed > quota * (1 + OVERAGE_MARGIN):
+        if quota > 0 and consumed > quota * (1 + overage_margin):
             excessive_topup_vehicles.add(r["vehicle"])
 
     def _vehicle_active(vehicle: str | None) -> bool:

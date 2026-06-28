@@ -106,12 +106,13 @@ def _permitted_projects():
 def _approval_threshold() -> float:
     """Litre threshold above which a Fuel Request needs explicit approval.
 
-    Read from the Salis Settings single. Returns 0.0 when unset (no threshold).
+    Read from the Salis Settings single via the canonical helper. Returns 0.0 when
+    unset, which means "no threshold" (every request auto-flows) — here a 0 IS the
+    semantic default, so the zero-coalesce is behaviour-preserving.
     """
-    value = frappe.db.get_single_value(
-        "Salis Settings", "fuel_request_approval_threshold_litres"
-    )
-    return flt(value)
+    from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_salis_float
+
+    return get_salis_float("fuel_request_approval_threshold_litres", 0.0)
 
 
 @frappe.whitelist()

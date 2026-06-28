@@ -19,15 +19,8 @@ def before_save(doc, method=None):
     if "System Manager" not in frappe.get_roles(frappe.session.user):
         frappe.throw("Only System Manager can modify Habitat Settings.")
 
-    if doc.enable_housing_allowance_deduction and doc.has_value_changed(
-        "enable_housing_allowance_deduction"
-    ):
-        if not doc.authorized_by:
-            frappe.throw("Authorized By is required to enable housing allowance deduction.")
-        if not doc.authorization_document:
-            frappe.throw("Authorization Document is required to enable housing allowance deduction.")
-        if not doc.deduction_activation_date:
-            doc.deduction_activation_date = frappe.utils.today()
+    # Salary-deduction config (housing/damage) moved to the Salary Deduction Policy;
+    # its authorization gate is enforced there, not here.
 
     roles = frappe.get_roles(frappe.session.user)
     doc.last_modified_by_role = roles[0] if roles else ""
@@ -39,8 +32,15 @@ def get_settings() -> Document:
 
 
 def get_default_company() -> str | None:
-    """Return the company configured in Habitat Settings, or None."""
-    return frappe.db.get_single_value("Habitat Settings", "company") or None
+    """Resolve the company applied to Habitat transactions when not set explicitly.
+
+    Thin wrapper over the shared resolver (explicit Habitat Settings ``company``
+    -> user company default -> global company default), so Habitat resolves a
+    company the same way Salis does. Returns ``None`` when none is configured.
+    """
+    from apex_habitat.apex_core.utils.company import resolve_company
+
+    return resolve_company("Habitat")
 
 
 def get_default_currency() -> str | None:

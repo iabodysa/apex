@@ -34,7 +34,23 @@ ALERT_DOCTYPE = "Operations Alert"
 BATCH_SIZE = 500
 
 # [#cz8o6i]
+# Default fraction by which actual consumption may exceed the monthly fuel quota
+# before an overage alert is raised. The effective value is read at call time from
+# Salis Settings (fuel_overage_margin_percent, an Int percent) via get_overage_margin;
+# this literal (5% -> 0.05) is the zero-trap fallback when the setting is unset.
 OVERAGE_MARGIN = 0.05
+OVERAGE_MARGIN_DEFAULT_PERCENT = 5
+
+
+def get_overage_margin() -> float:
+    """Return the fuel-quota overage margin as a fraction (e.g. 0.05 for 5%).
+
+    Reads the Int percent ``fuel_overage_margin_percent`` from Salis Settings via
+    the zero-trap helper and divides by 100, so a blank/0 setting keeps today's 5%."""
+    from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+
+    percent = get_salis_int("fuel_overage_margin_percent", OVERAGE_MARGIN_DEFAULT_PERCENT)
+    return percent / 100.0
 
 
 def _period_month(date_value) -> str:
@@ -396,7 +412,7 @@ def monthly_fuel_reconciliation() -> None:
                 )[0][0]
                 consumed = flt(consumed)
 
-                threshold = quota_litres * (1 + OVERAGE_MARGIN)
+                threshold = quota_litres * (1 + get_overage_margin())
                 if quota_litres <= 0 or consumed <= threshold:
                     continue
 

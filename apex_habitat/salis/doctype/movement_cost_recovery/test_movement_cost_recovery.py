@@ -156,3 +156,78 @@ class TestMovementCostRecoverySelfApproval(FrappeTestCase):
         rec.reload()
         self.assertEqual(rec.docstatus, 1)
         self.assertEqual(rec.status, "Approved")
+
+
+@unittest.skipUnless(
+    get_workflow_name("Movement Cost Recovery") == WORKFLOW,
+    "Movement Cost Recovery Workflow not seeded on this site",
+)
+class TestMovementCostRecoveryDoA(FrappeTestCase):
+    """Delegation-of-Authority tier gate: a recovery at/above the Cost Recovery
+    Operations Threshold needs Operations-tier authority (Fleet Manager); below it
+    Regional-tier (Fleet Supervisor) suffices. Proves the threshold is REAL (was
+    previously a dead Salis Settings field with no reader)."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.supervisor = _user("mcr_sup@example.com", "Fleet Supervisor")
+        cls.manager = _user("mcr_doa_mgr@example.com", "Fleet Manager")
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+        # Pin the threshold so the test does not depend on the seeded default.
+        self.settings = frappe.get_single("Salis Settings")
+        self.settings.cost_recovery_ops_threshold_sar = 1000
+        self.settings.save(ignore_permissions=True)
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    def _recovery(self, amount):
+        return frappe.get_doc(
+            {
+                "doctype": "Movement Cost Recovery",
+                "recovery_type": "Fuel Misuse",
+                "amount": amount,
+                "basis_evidence": "/files/qa-evidence.pdf",
+                "acknowledgement_received": 1,
+                "status": "Open",
+            }
+        ).insert(ignore_permissions=True)
+
+    def test_needs_operations_derived_from_amount(self):
+        below = self._recovery(amount=999)
+        self.assertEqual(below.needs_operations, 0)
+        at = self._recovery(amount=1000)
+        self.assertEqual(at.needs_operations, 1)
+        above = self._recovery(amount=5000)
+        self.assertEqual(above.needs_operations, 1)
+
+    def test_gate_fires_above_threshold_for_regional_user(self):
+        # A Fleet-Supervisor (Regional tier) may not approve a >= threshold recovery.
+        rec = self._recovery(amount=5000)
+        frappe.set_user(self.supervisor)
+        with self.assertRaises(frappe.ValidationError):
+            apply_workflow(rec, "Authorize (Regional)")
+        rec.reload()
+        self.assertEqual(rec.docstatus, 0)
+        self.assertEqual(rec.status, "Open")
+
+    def test_gate_passes_below_threshold_for_regional_user(self):
+        # Below the threshold the Regional tier (Fleet Supervisor) may authorise.
+        rec = self._recovery(amount=500)
+        frappe.set_user(self.supervisor)
+        apply_workflow(rec, "Authorize (Regional)")
+        rec.reload()
+        self.assertEqual(rec.docstatus, 1)
+        self.assertEqual(rec.status, "Approved")
+
+    def test_operations_user_passes_above_threshold(self):
+        # The Operations tier (Fleet Manager) may authorise a >= threshold recovery.
+        rec = self._recovery(amount=5000)
+        frappe.set_user(self.manager)
+        apply_workflow(rec, "Approve")
+        rec.reload()
+        self.assertEqual(rec.docstatus, 1)
+        self.assertEqual(rec.status, "Approved")

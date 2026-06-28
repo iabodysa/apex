@@ -25,6 +25,7 @@
   "evidence",
   "vwo_sec_disposition",
   "status",
+  "needs_operations",
   "vwo_disposition_col",
   "approved_by",
   "vwo_sec_system",
@@ -154,6 +155,14 @@
    "options": "Open\nUnder Review\nApproved\nRejected\nClosed\nCancelled"
   },
   {
+   "default": "0",
+   "description": "Derived server-side: set when the estimated cost reaches the Write-Off Operations Threshold, so only Operations-tier authority (Fleet Manager) may approve. Never trusted from the client.",
+   "fieldname": "needs_operations",
+   "fieldtype": "Check",
+   "label": "Needs Operations Authority",
+   "read_only": 1
+  },
+  {
    "fieldname": "vwo_disposition_col",
    "fieldtype": "Column Break"
   },
@@ -206,6 +215,7 @@
    "read": 1,
    "report": 1,
    "role": "Fleet Supervisor",
+   "submit": 1,
    "write": 1
   },
   {

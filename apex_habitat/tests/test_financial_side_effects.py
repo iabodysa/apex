@@ -7,6 +7,27 @@ from frappe.utils import flt
 from apex_habitat.tests.test_utils import ApexHabitatTestCase
 
 
+def _configure_damage_policy(enabled=1, cap=500, salary_component=None, default_component=None, bypass_validate=False):
+    """Set the Salary Deduction Policy Damage rule (the new home of the damage
+    deduction config) and the global master switch. ``bypass_validate`` lets a test
+    save an enabled-but-componentless rule (which the controller guard would normally
+    reject) to exercise the controller's own missing-component path. Returns the doc."""
+    policy = frappe.get_single("Salary Deduction Policy")
+    policy.enable_salary_deductions = 1 if enabled else 0
+    policy.global_max_percent_of_salary = 50
+    policy.default_salary_component = default_component
+    rule = next((r for r in policy.type_rules or [] if r.deduction_type == "Damage"), None)
+    if rule is None:
+        rule = policy.append("type_rules", {"deduction_type": "Damage"})
+    rule.enabled = 1 if enabled else 0
+    rule.cap_amount_per_event_sar = cap
+    rule.salary_component = salary_component
+    if bypass_validate:
+        policy.flags.ignore_validate = True
+    policy.save(ignore_permissions=True)
+    return policy
+
+
 class TestFinancialSideEffects(ApexHabitatTestCase):
     def setUp(self):
         # [#2uh11u]
@@ -151,13 +172,12 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
 
     def test_custody_damage_no_additional_salary_without_salary_component(self):
         # [#t393jb]
-        settings = frappe.get_single("Habitat Settings")
-        settings.enable_damage_deduction = 1
-        settings.max_damage_deduction_per_checkout_sar = 500
-        settings.save()
-
         # [#b0j60b]
         frappe.db.delete("Salary Component", {"type": "Deduction"})
+        # enabled rule, no component (and no default) -> controller skips, no entry.
+        # bypass_validate because the Policy guard would normally reject saving an
+        # enabled rule with no component; here we exercise the controller's own guard.
+        _configure_damage_policy(enabled=1, cap=500, salary_component=None, bypass_validate=True)
 
         # [#cvlsab]
         doc = frappe.get_doc({
@@ -191,11 +211,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
                 "type": "Deduction",
             }).insert(ignore_permissions=True)
 
-        settings = frappe.get_single("Habitat Settings")
-        settings.enable_damage_deduction = 1
-        settings.max_damage_deduction_per_checkout_sar = 500
-        settings.damage_salary_component = comp_name
-        settings.save()
+        _configure_damage_policy(enabled=1, cap=500, salary_component=comp_name)
 
         # draft checkout is the back-write target; QA assignment + ignore_links
         # keeps validate's early-return path (no full assignment chain needed)
@@ -257,9 +273,9 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
             })
             comp.insert(ignore_permissions=True)
 
-        settings = frappe.get_single("Habitat Settings")
-        settings.enable_damage_deduction = 1
-        settings.save()
+        # gate enabled, but the rule names no component (and no default) -> no entry,
+        # even though a deduction component exists in HRMS but is not wired to the rule
+        _configure_damage_policy(enabled=1, cap=500, salary_component=None, bypass_validate=True)
 
         # [#cvlsab]
         doc = frappe.get_doc({
@@ -280,5 +296,5 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
 
         # [#rrubmw]
         doc.reload()
-        self.assertIsNone(doc.deduction_entry, "Additional Salary deduction should not be generated unless explicitly configured in Settings.")
+        self.assertIsNone(doc.deduction_entry, "Additional Salary deduction should not be generated unless a component is wired to the Policy Damage rule.")
 

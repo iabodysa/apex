@@ -12,7 +12,7 @@ apex_habitat.setup.slides_settings = [
 		title: __("Apex — Accommodation and Fleet Setup"),
 		icon: "fa fa-home",
 		help: __(
-			"Choose how Apex handles payments and salary deductions. You can change any of these later in Habitat Settings."
+			"Choose how Apex handles payments and salary deductions. You can change the payment target later in Payment Routing Settings and the salary deductions in the Salary Deduction Policy."
 		),
 		fields: [
 			{
@@ -21,7 +21,7 @@ apex_habitat.setup.slides_settings = [
 				fieldtype: "Select",
 				options: "Payment Entry\nPayment Order\nExpense Request Afmco",
 				default: "Payment Entry",
-				description: __("Which document accommodation payments link to."),
+				description: __("The payment document the Pay action builds (sets the Payment Routing target)."),
 			},
 			{ fieldname: "apex_deductions_sb", fieldtype: "Section Break", label: __("Salary Deductions") },
 			{

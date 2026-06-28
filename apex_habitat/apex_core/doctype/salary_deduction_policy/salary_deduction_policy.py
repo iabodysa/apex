@@ -11,9 +11,12 @@ ships disabled. Conservative, KSA-Labor-Law-aligned caps are pre-filled (per-typ
 max %% well under the 50%% Art. 91 combined-wage ceiling) and a standing legal-review
 flag is kept ON.
 
-Skeleton only. The light integrity checks below are self-contained (they read only
-this Single and the referenced Salary Component); they do NOT wire into or import any
-operational controller — that wiring is a later increment.
+Single source of truth: operational controllers read their per-type config through
+``get_type_rule(rule_type)`` (or the ``get_damage_rule`` helper) — a rule is returned
+only when BOTH the global master switch and that row's ``enabled`` flag are ON, so the
+master switch genuinely gates every type. The Custody Damage Assessment controller
+(damage rule) and the Accommodation Assignment controller (rent / housing rule) are
+wired to these accessors.
 """
 
 from __future__ import annotations
@@ -21,7 +24,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, today
 
 # [#bi6a6t]
 KSA_MAX_TOTAL_DEDUCTION_PERCENT = 50.0
@@ -31,6 +34,25 @@ class SalaryDeductionPolicy(Document):
     def validate(self):
         self._guard_global_cap()
         self._guard_type_rules()
+        self._guard_authorization()
+
+    def _guard_authorization(self):
+        """An enabled Rent / Housing rule needs a recorded authorizer and document
+        (management sign-off), mirroring the gate that previously lived on Habitat
+        Settings. Activation date defaults to today when left blank."""
+        for row in self.type_rules or []:
+            if not row.enabled or row.deduction_type != "Rent":
+                continue
+            if not row.authorized_by:
+                frappe.throw(
+                    _("Authorized By is required to enable the Rent / Housing deduction rule.")
+                )
+            if not row.authorization_document:
+                frappe.throw(
+                    _("Authorization Document is required to enable the Rent / Housing deduction rule.")
+                )
+            if not row.activation_date:
+                row.activation_date = today()
 
     def _guard_global_cap(self):
         """The combined ceiling must never exceed the lawful 50%% (Art. 91)."""
@@ -73,3 +95,27 @@ class SalaryDeductionPolicy(Document):
                         component, row.deduction_type
                     )
                 )
+
+    def get_type_rule(self, rule_type):
+        """The ENABLED type rule for ``rule_type`` (Damage / Rent / Fuel / Custody), or None.
+
+        Returns the row only when the global master switch (``enable_salary_deductions``)
+        AND the row's own ``enabled`` flag are both ON — so the master switch gates every
+        type. The first matching enabled row wins. ``None`` means "do not deduct this type".
+        """
+        if not self.enable_salary_deductions:
+            return None
+        for row in self.type_rules or []:
+            if row.deduction_type == rule_type and row.enabled:
+                return row
+        return None
+
+
+def get_policy():
+    """The Salary Deduction Policy Single document."""
+    return frappe.get_single("Salary Deduction Policy")
+
+
+def get_damage_rule():
+    """The enabled Damage deduction rule (or None) from the Salary Deduction Policy."""
+    return get_policy().get_type_rule("Damage")

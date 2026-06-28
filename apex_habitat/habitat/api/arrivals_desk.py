@@ -700,13 +700,11 @@ def get_expected_arrivals(date=None, building=None) -> dict:
 
 
 def _company_name() -> str:
-    """The operating company for slip headers: prefer the Habitat Settings single,
-    fall back to the global default company."""
-    return (
-        frappe.db.get_single_value("Habitat Settings", "company")
-        or frappe.defaults.get_global_default("company")
-        or ""
-    )
+    """The operating company for slip headers, via the shared Habitat resolver
+    (explicit Habitat Settings company -> user default -> global default)."""
+    from apex_habitat.apex_core.utils.company import resolve_company
+
+    return resolve_company("Habitat") or ""
 
 
 def _slip_dir() -> str:

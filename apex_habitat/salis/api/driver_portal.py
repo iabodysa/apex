@@ -26,6 +26,15 @@ def _portal_enabled():
 	return bool(frappe.db.get_single_value("Salis Settings", "enable_driver_portal"))
 
 
+def _license_warn_days():
+	"""Days-to-expiry at/below which a licence or vehicle compliance document is
+	flagged ``expiring`` (the amber/red threshold). Read from Salis Settings via the
+	zero-trap helper so a blank/0 Single value keeps today's 30-day window."""
+	from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+
+	return get_salis_int("license_expiring_warn_days", 30)
+
+
 def _find_driver(user=None):
 	"""Return the Salis Driver name linked to the session user, or None.
 
@@ -268,6 +277,7 @@ def _vehicle_compliance(vehicle):
 		order_by="expiry_date asc",
 	)
 	today = frappe.utils.getdate()
+	warn_days = _license_warn_days()
 	out = []
 	for r in rows:
 		if r.get("compliance_type") not in _DRIVER_COMPLIANCE_TYPES or not r.get("expiry_date"):
@@ -279,7 +289,7 @@ def _vehicle_compliance(vehicle):
 				"document_number": r.get("document_number") or None,
 				"expiry_date": frappe.utils.cstr(r["expiry_date"]),
 				"days_to_expiry": days,
-				"state": "expired" if days < 0 else ("expiring" if days <= 30 else "valid"),
+				"state": "expired" if days < 0 else ("expiring" if days <= warn_days else "valid"),
 			}
 		)
 	return out
@@ -722,10 +732,11 @@ def _license_countdown(driver):
 	if not expiry:
 		return {"expiry_date": None, "days_to_expiry": None, "state": None}
 	days = frappe.utils.date_diff(expiry, frappe.utils.getdate())
+	warn_days = _license_warn_days()
 	return {
 		"expiry_date": frappe.utils.cstr(expiry),
 		"days_to_expiry": days,
-		"state": "expired" if days < 0 else ("expiring" if days <= 30 else "valid"),
+		"state": "expired" if days < 0 else ("expiring" if days <= warn_days else "valid"),
 	}
 
 
@@ -982,9 +993,9 @@ def my_fuel_quota(vehicle=None):
 		vehicle = _bound_vehicle(driver)
 	# Approval threshold (litres) so the Fuel screen can state which requests need
 	# approval; 0/blank on the Single means "no threshold" (every request auto-flows).
-	threshold = frappe.utils.flt(
-		frappe.db.get_single_value("Salis Settings", "fuel_request_approval_threshold_litres")
-	)
+	from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_salis_float
+
+	threshold = get_salis_float("fuel_request_approval_threshold_litres", 0.0)
 	if not vehicle:
 		return {"has_quota": False, "vehicle": None, "approval_threshold_litres": threshold}
 

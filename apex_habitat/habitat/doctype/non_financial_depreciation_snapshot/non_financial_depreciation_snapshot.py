@@ -11,19 +11,26 @@ from frappe.utils import flt
 
 class NonFinancialDepreciationSnapshot(Document):
     @staticmethod
-    def clear_old_logs(days=730):
+    def clear_old_logs(days=None):
         """Log Settings cleanup hook. A submittable, NON-financial snapshot of
         operational asset book values (no GL impact) that managers archive at a point
         in time for the Operational Depreciation Aging report. Registered in hooks
         ``default_log_clearing_doctypes`` and invoked by ``daily_maintenance``
         (run_log_clean_up). A two-year retention caps unbounded growth while keeping
         enough aging history; only SUBMITTED (docstatus=1) snapshots older than
-        ``days`` are purged — drafts are preserved. The child ``Depreciation Snapshot
-        Item`` rows are deleted explicitly FIRST, because ``frappe.db.delete`` does
-        not cascade to a parent's children (unlike ``frappe.delete_doc``)."""
+        ``days`` are purged — drafts are preserved. The window comes from Apex
+        Settings ``depreciation_snapshot_retention_days`` (default 730) when the
+        caller does not pass ``days``. The child ``Depreciation Snapshot Item`` rows
+        are deleted explicitly FIRST, because ``frappe.db.delete`` does not cascade
+        to a parent's children (unlike ``frappe.delete_doc``)."""
         from frappe.query_builder import Interval
         from frappe.query_builder.functions import Now
 
+        from apex_habitat.apex_core.doctype.apex_settings.apex_settings import (
+            effective_retention_days,
+        )
+
+        days = effective_retention_days("depreciation_snapshot_retention_days", days)
         parent = frappe.qb.DocType("Non-Financial Depreciation Snapshot")
         cutoff = Now() - Interval(days=days)
         names = [

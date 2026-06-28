@@ -161,19 +161,19 @@ class TransportRequest(Document):
         remains). Derived here — never trusted from the client — so the gate
         cannot be under-stated. Mirrors the previous before_submit tier logic.
         """
+        from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+
         worker_count = self.worker_count or 0
         trips = self.trips_this_month or 0
 
-        # [#4mmsa5]
-        ops_threshold = frappe.db.get_single_value(
-            "Salis Settings", "passenger_count_ops_threshold"
-        )
-        if not ops_threshold:
-            ops_threshold = 20
+        # [#4mmsa5] Tier thresholds read via the zero-trap helper (a blank/0 Single
+        # value falls back to the documented default — never trusted as a real 0).
+        ops_threshold = get_salis_int("passenger_count_ops_threshold", 20)
+        admin_trip_threshold = get_salis_int("admin_trip_ops_threshold", 5)
 
         self.needs_operations = 1 if (
             (self.request_type == "Inter-City Relocation" and worker_count > ops_threshold)
-            or (self.request_type == "Administrative Trip / Document Signing" and trips > 5)
+            or (self.request_type == "Administrative Trip / Document Signing" and trips > admin_trip_threshold)
             or (self.request_type == "Accommodation to Project Shuttle" and self.is_cross_region)
         ) else 0
 

@@ -8,6 +8,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from apex_habitat.apex_core.doctype.salary_deduction_policy.salary_deduction_policy import (
+    get_damage_rule,
+    get_policy,
+)
 from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
 
@@ -57,13 +61,15 @@ def on_submit(doc, method=None):
     # Additional Salary (mirrors the has_stock_entries/quota_applied idiom)
     if doc.deduction_entry:
         return
-    settings = frappe.get_single("Habitat Settings")
-    if getattr(settings, "enable_damage_deduction", 0) and doc.employee:
+    # config now lives on the Salary Deduction Policy (damage rule); a rule is
+    # returned only when both the global master switch and the rule are enabled
+    rule = get_damage_rule()
+    if rule and doc.employee:
         logger = frappe.logger()
 
         # [#cgz16m]
         amount = flt(doc.total_estimated_replacement_cost_sar)
-        max_deduction = flt(getattr(settings, "max_damage_deduction_per_checkout_sar", 500))
+        max_deduction = flt(rule.cap_amount_per_event_sar)
         if max_deduction > 0 and amount > max_deduction:
             amount = max_deduction
 
@@ -82,11 +88,11 @@ def on_submit(doc, method=None):
             )
             return
 
-        salary_component = settings.damage_salary_component
+        salary_component = rule.salary_component or get_policy().default_salary_component
         if not salary_component:
             logger.warning(
-                f"custody_damage_assessment.on_submit: Habitat Settings > Damage Deduction Component "
-                f"is not configured. Cannot auto-generate Additional Salary for assessment {doc.name}."
+                f"custody_damage_assessment.on_submit: Salary Deduction Policy > Damage rule has no "
+                f"Salary Component (and no default). Cannot auto-generate Additional Salary for assessment {doc.name}."
             )
             return
 

@@ -199,14 +199,19 @@ class TestCustodyDamageAssessment(FrappeTestCase):
             "type": "Deduction",
         }).insert(ignore_permissions=True, ignore_if_duplicate=True)
 
-        # arm the deduction path: enabled + a configured Deduction component
-        settings = frappe.get_single("Habitat Settings")
-        prev_enabled = settings.enable_damage_deduction
-        prev_component = settings.damage_salary_component
-        settings.enable_damage_deduction = 1
-        settings.damage_salary_component = salary_component.name
-        settings.flags.ignore_permissions = True
-        settings.save(ignore_permissions=True)
+        # arm the deduction path on the Salary Deduction Policy: global master on +
+        # an enabled Damage rule with a configured Deduction component
+        policy = frappe.get_single("Salary Deduction Policy")
+        prev_enabled = policy.enable_salary_deductions
+        damage = next((r for r in policy.type_rules or [] if r.deduction_type == "Damage"), None)
+        if damage is None:
+            damage = policy.append("type_rules", {"deduction_type": "Damage"})
+        prev_component = damage.salary_component
+        policy.enable_salary_deductions = 1
+        policy.global_max_percent_of_salary = 50
+        damage.enabled = 1
+        damage.salary_component = salary_component.name
+        policy.save(ignore_permissions=True)
 
         # a fully-provisioned Employee so the deduction block inserts a real
         # Additional Salary (HRMS validate requires a joined Employee)
@@ -296,7 +301,11 @@ class TestCustodyDamageAssessment(FrappeTestCase):
             frappe.get_doc("Salary Structure", struct.name).cancel()
             frappe.delete_doc("Salary Structure", struct.name, force=True, ignore_permissions=True)
             frappe.delete_doc("Employee", emp.name, force=True, ignore_permissions=True)
-            settings = frappe.get_single("Habitat Settings")
-            settings.enable_damage_deduction = prev_enabled
-            settings.damage_salary_component = prev_component
-            settings.save(ignore_permissions=True)
+            policy = frappe.get_single("Salary Deduction Policy")
+            policy.enable_salary_deductions = prev_enabled
+            damage = next((r for r in policy.type_rules or [] if r.deduction_type == "Damage"), None)
+            if damage is not None:
+                damage.enabled = prev_enabled
+                damage.salary_component = prev_component
+            policy.flags.ignore_validate = True
+            policy.save(ignore_permissions=True)

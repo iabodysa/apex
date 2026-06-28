@@ -32,6 +32,7 @@
   "basis_evidence",
   "mcr_sec_system",
   "status",
+  "needs_operations",
   "naming_series",
   "amended_from"
  ],
@@ -103,6 +104,14 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Open\nAcknowledged\nApproved\nRecovered\nWaived\nRejected\nCancelled"
+  },
+  {
+   "default": "0",
+   "description": "Derived server-side: set when the amount reaches the Cost Recovery Operations Threshold, so only Operations-tier authority (Fleet Manager) may approve. Never trusted from the client.",
+   "fieldname": "needs_operations",
+   "fieldtype": "Check",
+   "label": "Needs Operations Authority",
+   "read_only": 1
   },
   {
    "fieldname": "mcr_sec_amounts",
@@ -232,6 +241,7 @@
    "read": 1,
    "report": 1,
    "role": "Fleet Supervisor",
+   "submit": 1,
    "write": 1
   },
   {

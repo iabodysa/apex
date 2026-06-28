@@ -34,6 +34,19 @@ def get_target_doctype(settings=None) -> str:
     settings = settings or frappe.get_single("Payment Routing Settings")
     return settings.target_payment_doctype or DEFAULT_TARGET_DOCTYPE
 
+
+@frappe.whitelist()
+def get_target_payment_doctype() -> str:
+    """Whitelisted read of the configured target payment DocType.
+
+    The Accommodation Lease ``Generate Payment`` button reads this to decide which
+    payment document to build, replacing the retired
+    ``Apex Settings.default_payment_method`` Select. Read-only and unparameterised,
+    so any desk user may call it. Returns the native ``Payment Request`` default
+    when the router is unconfigured.
+    """
+    return get_target_doctype()
+
 # [#qj7x3p]
 _FALLBACK_CURRENCY = "SAR"
 

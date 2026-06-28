@@ -360,6 +360,8 @@ fixtures = [
     # not fixtures, since a fixture import crashes on a fresh site's NULL-lft/rgt root.
     # [#t543it] Worker-housing procurement catalog for the Items shopping surface.
     {"dt": "Item", "filters": [["item_code", "like", "ACC-%"]]},
+    # Custom ERPNext Party Type so a Freelance can be a payable party on Journal/Payment Entry.
+    {"dt": "Party Type", "filters": [["name", "in", ["Freelance"]]]},
 ]
 
 # [#6mioka]

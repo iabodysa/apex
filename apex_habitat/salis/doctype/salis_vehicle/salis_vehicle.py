@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import frappe
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate, today
 
@@ -96,7 +95,8 @@ class SalisVehicle(Document):
 
     @staticmethod
     def _get_alert_lead_days():
-        lead = frappe.db.get_single_value("Salis Settings", "alert_lead_days")
-        if not lead:
-            return DEFAULT_ALERT_LEAD_DAYS
-        return int(lead)
+        # Routed through the canonical zero-trap helper: a blank/0 Single value
+        # falls back to the documented default (never trusted as a real 0).
+        from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+
+        return get_salis_int("alert_lead_days", DEFAULT_ALERT_LEAD_DAYS)
