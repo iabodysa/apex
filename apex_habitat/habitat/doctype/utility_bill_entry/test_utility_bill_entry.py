@@ -142,6 +142,38 @@ class TestUtilityBillEntry(FrappeTestCase):
             {"source_doctype": "Utility Bill Entry", "source_name": src},
         ))
 
+    # ---- a backwards meter reading is a misread, not zero usage ----
+    def test_backwards_meter_reading_raises(self):
+        from apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
+        m = frappe.generate_hash(length=6)
+        doc = self._bill(
+            company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
+            meter_reading_previous=500, meter_reading_current=400,
+        )
+        with self.assertRaises(frappe.ValidationError):
+            validate(doc)
+
+    def test_forward_meter_reading_computes_consumption(self):
+        from apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
+        m = frappe.generate_hash(length=6)
+        doc = self._bill(
+            company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
+            meter_reading_previous=500, meter_reading_current=750,
+        )
+        validate(doc)  # must not raise
+        self.assertEqual(doc.meter_units_consumed, 250)
+
+    def test_equal_meter_readings_allowed_zero_usage(self):
+        """current == previous is genuine zero consumption, not a misread."""
+        from apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
+        m = frappe.generate_hash(length=6)
+        doc = self._bill(
+            company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
+            meter_reading_previous=500, meter_reading_current=500,
+        )
+        validate(doc)  # must not raise
+        self.assertEqual(doc.meter_units_consumed, 0)
+
     # ---- re-running the submit side-effect posts at most one live row ----
     def _ledger_building(self, m):
         bld = frappe.get_doc({

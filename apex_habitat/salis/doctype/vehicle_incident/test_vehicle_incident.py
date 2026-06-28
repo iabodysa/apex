@@ -119,3 +119,15 @@ class TestVehicleIncident(FrappeTestCase):
     def test_future_dated_incident_rejected(self):
         with self.assertRaises(frappe.ValidationError):
             self._incident("Accident", incident_date=add_days(today(), 1))
+
+    def test_negative_estimated_cost_rejected(self):
+        # An estimated repair/loss cost cannot be negative.
+        with self.assertRaises(frappe.ValidationError):
+            self._incident("Accident", fault="Third party", estimated_cost=-100)
+
+    def test_zero_or_positive_estimated_cost_allowed(self):
+        # Zero (cost unknown/none) and a positive cost both pass the same guard.
+        zero = self._incident("Accident", fault="Third party", estimated_cost=0)
+        self.assertTrue(zero.name)
+        positive = self._incident("Accident", fault="Third party", estimated_cost=2500)
+        self.assertTrue(positive.name)

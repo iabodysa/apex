@@ -97,6 +97,38 @@ class TestMaintenanceRequest(FrappeTestCase):
         self.assertEqual(doc.reported_by, "Administrator")
         frappe.delete_doc("Maintenance Request", doc.name, force=True, ignore_permissions=True)
 
+    def test_negative_cost_of_repair_raises(self):
+        """cost_of_repair is a spend; a negative value must be rejected on save."""
+        doc = frappe.get_doc({
+            "doctype": "Maintenance Request",
+            "naming_series": "MAINT-.YYYY.-.#####",
+            "building": "QA-BLDG",
+            "room": "ROOM-QA",
+            "reported_by": "Administrator",
+            "issue_type": "Plumbing",
+            "issue_description": "Leak under sink",
+            "cost_of_repair": -1,
+        })
+        with self.assertRaises(frappe.ValidationError):
+            doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_zero_and_positive_cost_of_repair_allowed(self):
+        """Zero (default/unset) and a positive cost must pass the guard."""
+        for cost in (0, 250.50):
+            doc = frappe.get_doc({
+                "doctype": "Maintenance Request",
+                "naming_series": "MAINT-.YYYY.-.#####",
+                "building": "QA-BLDG",
+                "room": "ROOM-QA",
+                "reported_by": "Administrator",
+                "issue_type": "Plumbing",
+                "issue_description": "Leak under sink",
+                "cost_of_repair": cost,
+            })
+            doc.insert(ignore_permissions=True, ignore_links=True)
+            self.assertEqual(doc.cost_of_repair, cost)
+            frappe.delete_doc("Maintenance Request", doc.name, force=True, ignore_permissions=True)
+
     # [#h5zcoh]
 
     def _get_perms_by_role(self):

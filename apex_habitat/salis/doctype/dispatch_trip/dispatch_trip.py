@@ -220,24 +220,22 @@ class DispatchTrip(Document):
         """Return Time must not precede Depart Time (a single-day trip cannot return
         before it departs).
 
-        Guard the check to Completed trips only. A return is a recorded execution
-        fact, not a plan, so it is meaningful only at completion. This also avoids a
-        false positive on a freshly created Planned trip: Frappe auto-fills an unset
-        Time field with the creation-time nowtime (model.create_new), so a brand-new
-        trip carries a spurious return_time that can read as earlier than a later
-        depart_time depending on the wall-clock at creation.
+        Guard to Completed trips only with BOTH times set. A return is a recorded
+        execution fact, not a plan, so it is meaningful only at completion. This also
+        avoids a false positive on a freshly created Planned trip: Frappe auto-fills
+        an unset Time field with the creation-time nowtime (model.create_new), so a
+        brand-new trip carries a spurious return_time that can read as earlier than a
+        later depart_time depending on the wall-clock at creation. Equal times are
+        allowed (a zero-duration record is not a sequencing error). get_time
+        normalizes both representations (HH:MM[:SS] str / datetime.time / DB
+        timedelta) so the comparison never raises on mismatched types.
         """
         if self.status != "Completed":
             return
-        if self.depart_time and self.return_time and self.return_time < self.depart_time:
-            frappe.throw(
-                _("Return Time cannot be earlier than Depart Time.")
-            )
-        # Safe time-order check using get_time for robust comparison across string
-        # representations (HH:MM, HH:MM:SS, datetime.time, timedelta).
-        if self.depart_time and self.return_time:
-            if get_time(self.return_time) < get_time(self.depart_time):
-                frappe.throw(_("Return Time must be after Depart Time"))
+        if not (self.depart_time and self.return_time):
+            return
+        if get_time(self.return_time) < get_time(self.depart_time):
+            frappe.throw(_("Return Time cannot be earlier than Depart Time."))
 
     def on_submit(self):
         if self.status == "Completed" and self.odometer_end and self.vehicle:

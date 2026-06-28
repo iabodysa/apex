@@ -62,6 +62,49 @@ class TestBuildingLicense(FrappeTestCase):
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
+    def test_expiry_on_or_before_issue_raises(self):
+        """expiry_date must fall strictly after issue_date; equal or backwards rejected."""
+        # expiry before issue
+        backwards = frappe.get_doc({
+            "doctype": "Building License",
+            "naming_series": "BLDG-LIC-.YYYY.-.####",
+            "license_type": "Civil Defence Certificate",
+            "building": "QA-BLDG",
+            "license_number": "LIC-QA-BACK",
+            "issue_date": "2027-01-01",
+            "expiry_date": "2026-01-01",
+        })
+        with self.assertRaises(frappe.ValidationError):
+            backwards.insert(ignore_permissions=True, ignore_links=True)
+        # expiry equal to issue is also a backwards range
+        equal = frappe.get_doc({
+            "doctype": "Building License",
+            "naming_series": "BLDG-LIC-.YYYY.-.####",
+            "license_type": "Civil Defence Certificate",
+            "building": "QA-BLDG",
+            "license_number": "LIC-QA-EQ",
+            "issue_date": "2026-01-01",
+            "expiry_date": "2026-01-01",
+        })
+        with self.assertRaises(frappe.ValidationError):
+            equal.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_only_issue_date_does_not_raise_date_guard(self):
+        """The date guard is skipped when expiry is empty (no false reject).
+
+        expiry_date is otherwise mandatory, so validate() is called directly to
+        isolate the date comparison from the unrelated MandatoryError.
+        """
+        only_issue = frappe.get_doc({
+            "doctype": "Building License",
+            "naming_series": "BLDG-LIC-.YYYY.-.####",
+            "license_type": "Civil Defence Certificate",
+            "building": "QA-BLDG",
+            "license_number": "LIC-QA-ISSUE-ONLY",
+            "issue_date": "2026-01-01",
+        })
+        only_issue.validate()  # must not raise on a one-sided range
+
     def test_extending_expiry_stamps_last_renewal_date(self):
         """Pushing expiry_date forward records the renewal on last_renewal_date."""
         from frappe.utils import today

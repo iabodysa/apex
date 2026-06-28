@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import today
+from frappe.utils import add_days, today
 
 
 class TestRentalMovementLifecycle(FrappeTestCase):
@@ -38,14 +38,14 @@ class TestRentalMovementLifecycle(FrappeTestCase):
             .name
         )
 
-    def _movement(self, movement_type, submit=True, daily_rate=50):
+    def _movement(self, movement_type, submit=True, daily_rate=50, movement_date=None):
         doc = frappe.get_doc(
             {
                 "doctype": "Rental Vehicle Movement",
                 "movement_type": movement_type,
                 "vehicle": self.vehicle,
                 "rental_office": self.office,
-                "movement_date": today(),
+                "movement_date": movement_date or today(),
                 "daily_rate": daily_rate if movement_type == "Receipt" else None,
             }
         ).insert(ignore_permissions=True)
@@ -63,6 +63,20 @@ class TestRentalMovementLifecycle(FrappeTestCase):
         self._movement("Receipt")
         with self.assertRaises(frappe.ValidationError):
             self._movement("Receipt", submit=False)
+
+    def test_return_dated_before_open_receipt_is_rejected(self):
+        # T-710: Receipt opens on day 0; a Return dated the day before would invert
+        # the in-service window and corrupt the accrual span -> rejected.
+        self._movement("Receipt", movement_date=today())
+        with self.assertRaises(frappe.ValidationError):
+            self._movement("Return", movement_date=add_days(today(), -1))
+
+    def test_return_same_day_as_receipt_is_allowed(self):
+        # Boundary: a same-day Return closes a zero-length window and is allowed.
+        receipt_date = add_days(today(), -2)
+        self._movement("Receipt", movement_date=receipt_date)
+        ret = self._movement("Return", movement_date=receipt_date)
+        self.assertEqual(ret.docstatus, 1)
 
     def test_receipt_then_return_is_allowed(self):
         # Non-vacuous: the normal Receipt -> Return cycle passes, and a new Receipt

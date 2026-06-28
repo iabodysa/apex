@@ -26,8 +26,11 @@ class MovementCostRecovery(Document):
 			frappe.throw(_("Amount must be greater than zero."))
 		if self.status == "Approved" and not self.basis_evidence:
 			frappe.throw(_("Basis / Evidence is required before a recovery can be Approved."))
-		# A recovery cannot be acknowledged or recovered until the party has accepted responsibility.
-		if self.status in ("Acknowledged", "Recovered") and not self.acknowledgement_received:
+		# The recovery cannot be authorised against a person until they have accepted
+		# responsibility. The enforcement points are Approve (the submit) and Recover;
+		# Acknowledged is the act of acknowledging, so it is not gated. Waive/Reject/Cancel
+		# need no acknowledgement (a claim can be dropped without the party accepting it).
+		if self.status in ("Approved", "Recovered") and not self.acknowledgement_received:
 			frappe.throw(_("Acknowledgement Received must be set before a recovery can be {0}.").format(_(self.status)))
 
 	def _set_financial_defaults(self):

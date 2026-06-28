@@ -1,6 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import flt
 
 # [#8evoal]
 test_ignore = [
@@ -68,3 +69,39 @@ class TestOperationalDepreciationPolicy(FrappeTestCase):
         })
         with self.assertRaises(frappe.exceptions.ValidationError):
             doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_residual_value_above_100_raises(self):
+        # residual is a fraction of cost; >100% is meaningless.
+        doc = frappe.get_doc({
+            "doctype": "Operational Depreciation Policy",
+            "policy_name": "QA Residual Over",
+            "useful_life_years": 5,
+            "residual_value_pct": 150,
+        })
+        with self.assertRaises(frappe.exceptions.ValidationError):
+            doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_residual_value_negative_raises(self):
+        doc = frappe.get_doc({
+            "doctype": "Operational Depreciation Policy",
+            "policy_name": "QA Residual Negative",
+            "useful_life_years": 5,
+            "residual_value_pct": -1,
+        })
+        with self.assertRaises(frappe.exceptions.ValidationError):
+            doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_residual_value_bounds_inclusive(self):
+        # 0 (full write-down) and 100 (no depreciation) are both meaningful endpoints.
+        for pct in (0, 100):
+            doc = frappe.get_doc({
+                "doctype": "Operational Depreciation Policy",
+                "policy_name": f"QA Residual {pct}",
+                "useful_life_years": 5,
+                "residual_value_pct": pct,
+            })
+            doc.insert(ignore_permissions=True, ignore_links=True)
+            self.assertEqual(flt(doc.residual_value_pct), pct)
+            frappe.delete_doc(
+                "Operational Depreciation Policy", doc.name, force=True, ignore_permissions=True
+            )
