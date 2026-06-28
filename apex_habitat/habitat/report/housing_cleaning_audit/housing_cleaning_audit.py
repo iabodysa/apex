@@ -1,23 +1,28 @@
 # Copyright (c) 2026, AFMCO and contributors
 # [#j03s5a]
 
-"""Housing Cleaning Audit.
+"""Housing Cleaning Audit — Script Report.
 
-Query Report that lets managers view Cleaning Log records per building,
-filterable by date range, building, and derived status. Shows cleaning date,
-building, cleaner, derived status, supervisor approval, and whether photo
-evidence was attached (evidence_photo field).
+Columns: date, building, housing_supervisor, status, submitted_at,
+rooms_cleaned (count of room_details rows with cleaned=1), photos_attached
+(count of area_photos child rows).
 
-Status is derived from the missed_cleaning and rework_required flags because
-Cleaning Log has no dedicated status field:
-  - Missed + Rework  : missed_cleaning=1 AND rework_required=1
-  - Missed           : missed_cleaning=1 AND rework_required=0
-  - Rework Required  : missed_cleaning=0 AND rework_required=1
-  - Completed        : missed_cleaning=0 AND rework_required=0
+Gap detection: for every (date, building) combination in the requested
+[from_date..to_date] window where no Cleaning Log exists (even a draft),
+a synthetic "Missed" row is emitted so managers can see missing coverage at a
+glance without needing to cross-reference the building list manually.
+
+Status derivation (for logs that do exist):
+  - Missed         : missed_cleaning=1
+  - Rework Required: rework_required=1 (and not missed)
+  - Completed      : supervisor_approved=1 (not missed/rework)
+  - Pending        : draft (docstatus=0), none of the above flags set
+
+Permission: Housing Supervisor users see only their own building(s).
 """
 
 import frappe
-from frappe.utils import getdate, today, add_days
+from frappe.utils import add_days, getdate, today
 
 from apex_habitat.habitat import permissions
 
@@ -25,19 +30,181 @@ from apex_habitat.habitat import permissions
 def execute(filters=None):
     filters = filters or {}
 
-    date_from = getdate(filters.get("from_date") or add_days(today(), -30))
+    date_from = getdate(filters.get("from_date") or today())
     date_to = getdate(filters.get("to_date") or today())
+    if date_to < date_from:
+        date_to = date_from
 
-    columns = [
+    columns = _columns()
+
+    # Building-level row scope for Housing Supervisor role.
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    chosen_building = filters.get("building") or ""
+    if restrict:
+        if not allowed or (chosen_building and chosen_building not in allowed):
+            return columns, []
+
+    # Determine which buildings to check (for gap detection).
+    bld_filters = {"status": "Active"}
+    if chosen_building:
+        bld_filters["name"] = chosen_building
+    elif restrict and allowed:
+        bld_filters["name"] = ["in", allowed]
+
+    all_buildings = frappe.get_all(
+        "Accommodation Building",
+        filters=bld_filters,
+        fields=["name", "responsible_facility_supervisor"],
+    )
+    if not all_buildings:
+        return columns, []
+
+    # Build supervisor display name map (one query, not N+1).
+    supervisor_ids = list({b.responsible_facility_supervisor for b in all_buildings
+                           if b.responsible_facility_supervisor})
+    supervisor_names: dict[str, str] = {}
+    if supervisor_ids:
+        for u in frappe.get_all(
+            "User",
+            filters={"name": ["in", supervisor_ids]},
+            fields=["name", "full_name"],
+        ):
+            supervisor_names[u.name] = u.full_name or u.name
+
+    building_supervisor: dict[str, str] = {
+        b.name: supervisor_names.get(b.responsible_facility_supervisor, b.responsible_facility_supervisor or "")
+        for b in all_buildings
+    }
+    building_names_set = set(building_supervisor)
+
+    # Fetch Cleaning Log rows in the date window.
+    log_conditions = [
+        "cl.cleaning_date BETWEEN %(date_from)s AND %(date_to)s",
+        "cl.docstatus != 2",
+    ]
+    params: dict = {"date_from": str(date_from), "date_to": str(date_to)}
+
+    if chosen_building:
+        log_conditions.append("cl.building = %(building)s")
+        params["building"] = chosen_building
+    elif restrict and allowed:
+        placeholders = ", ".join(f"%(bld_{i})s" for i, _ in enumerate(allowed))
+        log_conditions.append(f"cl.building IN ({placeholders})")
+        for i, bld in enumerate(allowed):
+            params[f"bld_{i}"] = bld
+
+    where = " AND ".join(log_conditions)
+    sql = f"""
+        SELECT
+            cl.name,
+            cl.cleaning_date,
+            cl.building,
+            cl.missed_cleaning,
+            cl.rework_required,
+            cl.supervisor_approved,
+            cl.docstatus,
+            cl.modified
+        FROM `tabCleaning Log` cl
+        WHERE {where}
+        ORDER BY cl.cleaning_date DESC, cl.building ASC
+    """
+    rows = frappe.db.sql(sql, params, as_dict=True)
+
+    # Pre-fetch room_details counts (cleaned=1) per Cleaning Log in one query.
+    log_names = [r.name for r in rows]
+    rooms_cleaned_map: dict[str, int] = {}
+    photos_map: dict[str, int] = {}
+
+    if log_names:
+        # Count room_details rows where cleaned=1.
+        for rec in frappe.db.sql(
+            """
+            SELECT parent, COUNT(*) AS cnt
+            FROM `tabCleaning Log Room Detail`
+            WHERE parent IN %(names)s
+              AND cleaned = 1
+            GROUP BY parent
+            """,
+            {"names": log_names},
+            as_dict=True,
+        ):
+            rooms_cleaned_map[rec.parent] = int(rec.cnt or 0)
+
+        # Count area_photos rows per log (field: area_photos → child table
+        # "Cleaning Area Photo" as confirmed from cleaning_log.json).
+        for rec in frappe.db.sql(
+            """
+            SELECT parent, COUNT(*) AS cnt
+            FROM `tabCleaning Area Photo`
+            WHERE parent IN %(names)s
+            GROUP BY parent
+            """,
+            {"names": log_names},
+            as_dict=True,
+        ):
+            photos_map[rec.parent] = int(rec.cnt or 0)
+
+    # Build a set of (building, date) pairs that have a log, for gap detection.
+    covered: set[tuple[str, str]] = set()
+    data = []
+
+    def _derive_status(row) -> str:
+        if row.missed_cleaning:
+            return "Missed"
+        if row.rework_required:
+            return "Rework Required"
+        if row.supervisor_approved:
+            return "Completed"
+        return "Pending"
+
+    for row in rows:
+        building = row.building or ""
+        cleaning_date = row.cleaning_date
+        covered.add((building, str(cleaning_date)))
+
+        # submitted_at: use modified date when docstatus=1 (submitted).
+        submitted_at = row.modified.date() if (row.docstatus == 1 and row.modified) else None
+
+        data.append({
+            "cleaning_date": cleaning_date,
+            "building": building,
+            "housing_supervisor": building_supervisor.get(building, ""),
+            "status": _derive_status(row),
+            "submitted_at": submitted_at,
+            "rooms_cleaned": rooms_cleaned_map.get(row.name, 0),
+            "photos_attached": photos_map.get(row.name, 0),
+        })
+
+    # Gap detection: emit a "Missed" synthetic row for every (building, date)
+    # with no Cleaning Log at all in the requested window.
+    current = date_from
+    while current <= date_to:
+        date_str = str(current)
+        for bld_name in sorted(building_names_set):
+            if (bld_name, date_str) not in covered:
+                data.append({
+                    "cleaning_date": current,
+                    "building": bld_name,
+                    "housing_supervisor": building_supervisor.get(bld_name, ""),
+                    "status": "Missed",
+                    "submitted_at": None,
+                    "rooms_cleaned": 0,
+                    "photos_attached": 0,
+                })
+        current = getdate(add_days(current, 1))
+
+    # Sort: date descending, building ascending for a readable audit view.
+    data.sort(key=lambda r: (str(r["cleaning_date"] or ""), r["building"] or ""),
+              reverse=False)
+    data.sort(key=lambda r: str(r["cleaning_date"] or ""), reverse=True)
+
+    return columns, data
+
+
+def _columns():
+    return [
         {
-            "label": frappe._("Log"),
-            "fieldname": "name",
-            "fieldtype": "Link",
-            "options": "Cleaning Log",
-            "width": 140,
-        },
-        {
-            "label": frappe._("Cleaning Date"),
+            "label": frappe._("Date"),
             "fieldname": "cleaning_date",
             "fieldtype": "Date",
             "width": 100,
@@ -50,14 +217,8 @@ def execute(filters=None):
             "width": 160,
         },
         {
-            "label": frappe._("Cleaner Type"),
-            "fieldname": "cleaner_type",
-            "fieldtype": "Data",
-            "width": 110,
-        },
-        {
-            "label": frappe._("Cleaner"),
-            "fieldname": "cleaner",
+            "label": frappe._("Housing Supervisor"),
+            "fieldname": "housing_supervisor",
             "fieldtype": "Data",
             "width": 150,
         },
@@ -65,126 +226,24 @@ def execute(filters=None):
             "label": frappe._("Status"),
             "fieldname": "status",
             "fieldtype": "Data",
-            "width": 130,
+            "width": 120,
         },
         {
-            "label": frappe._("Supervisor Approved"),
-            "fieldname": "supervisor_approved",
-            "fieldtype": "Check",
-            "width": 130,
+            "label": frappe._("Submitted At"),
+            "fieldname": "submitted_at",
+            "fieldtype": "Date",
+            "width": 110,
         },
         {
-            "label": frappe._("Photo Attached"),
-            "fieldname": "has_photo",
-            "fieldtype": "Data",
-            "width": 100,
+            "label": frappe._("Rooms Cleaned"),
+            "fieldname": "rooms_cleaned",
+            "fieldtype": "Int",
+            "width": 110,
+        },
+        {
+            "label": frappe._("Photos Attached"),
+            "fieldname": "photos_attached",
+            "fieldtype": "Int",
+            "width": 110,
         },
     ]
-
-    # Resolve building-level row scope (Housing Supervisor permission).
-    # get_all bypasses permission_query_conditions, so we re-apply it manually.
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
-    chosen_building = filters.get("building")
-    if restrict:
-        if not allowed or (chosen_building and chosen_building not in allowed):
-            return columns, []
-
-    # Build parameterized SQL. Using frappe.db.sql with %s placeholders keeps
-    # the query safe against injection while allowing flexible WHERE construction.
-    conditions = ["cl.cleaning_date BETWEEN %(date_from)s AND %(date_to)s"]
-    params = {
-        "date_from": str(date_from),
-        "date_to": str(date_to),
-    }
-
-    if chosen_building:
-        conditions.append("cl.building = %(building)s")
-        params["building"] = chosen_building
-    elif restrict and allowed:
-        # IN clause: frappe.db.sql does not natively expand lists; build inline.
-        placeholders = ", ".join(f"%(bld_{i})s" for i, _ in enumerate(allowed))
-        conditions.append(f"cl.building IN ({placeholders})")
-        for i, bld in enumerate(allowed):
-            params[f"bld_{i}"] = bld
-
-    where_clause = " AND ".join(conditions)
-
-    sql = f"""
-        SELECT
-            cl.name,
-            cl.cleaning_date,
-            cl.building,
-            cl.cleaner_type,
-            cl.cleaner_employee,
-            cl.cleaned_by,
-            cl.missed_cleaning,
-            cl.rework_required,
-            cl.supervisor_approved,
-            CASE
-                WHEN cl.evidence_photo IS NOT NULL AND cl.evidence_photo != ''
-                THEN 'Yes'
-                ELSE 'No'
-            END AS has_photo
-        FROM `tabCleaning Log` cl
-        WHERE {where_clause}
-        ORDER BY cl.cleaning_date DESC, cl.building ASC
-    """
-
-    rows = frappe.db.sql(sql, params, as_dict=True)
-
-    if not rows:
-        return columns, []
-
-    # Resolve employee names for internal cleaners.
-    employee_ids = list({r.cleaner_employee for r in rows if r.get("cleaner_employee")})
-    employee_name_map = {}
-    if employee_ids:
-        emp_rows = frappe.get_all(
-            "Employee",
-            filters={"name": ["in", employee_ids]},
-            fields=["name", "employee_name"],
-        )
-        employee_name_map = {e.name: e.employee_name for e in emp_rows}
-
-    # Derive status from flags.
-    def _derive_status(missed, rework):
-        if missed and rework:
-            return "Missed + Rework"
-        if missed:
-            return "Missed"
-        if rework:
-            return "Rework Required"
-        return "Completed"
-
-    # Apply optional status filter after derivation (can't do this in SQL cleanly
-    # because status is computed, not stored).
-    status_filter = filters.get("status") or ""
-
-    data = []
-    for row in rows:
-        cleaner_label = row.get("cleaned_by") or ""
-        if row.get("cleaner_employee"):
-            cleaner_label = employee_name_map.get(row.cleaner_employee) or row.cleaner_employee
-
-        derived_status = _derive_status(
-            bool(row.get("missed_cleaning")),
-            bool(row.get("rework_required")),
-        )
-
-        if status_filter and derived_status != status_filter:
-            continue
-
-        data.append(
-            {
-                "name": row.name,
-                "cleaning_date": row.cleaning_date,
-                "building": row.building,
-                "cleaner_type": row.cleaner_type or "",
-                "cleaner": cleaner_label,
-                "status": derived_status,
-                "supervisor_approved": row.supervisor_approved,
-                "has_photo": row.has_photo,
-            }
-        )
-
-    return columns, data

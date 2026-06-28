@@ -160,6 +160,8 @@ scheduler_events = {
         "apex_habitat.habitat.tasks.daily_occupancy_snapshot",
         # [#t554-clean] auto-create today's draft Cleaning Log per active building
         "apex_habitat.habitat.tasks.daily_cleaning_log_generator",
+        # [#t554-clean-sup] supervisor-targeted variant: only buildings with a supervisor
+        "apex_habitat.habitat.tasks.auto_create_cleaning_logs",
         # [#wave3-safety]
         "apex_habitat.habitat.tasks.daily_safety_task_compliance_scan",
         "apex_habitat.habitat.tasks.audit_remediation_deadline_watch",

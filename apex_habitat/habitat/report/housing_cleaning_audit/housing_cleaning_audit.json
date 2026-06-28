@@ -3,7 +3,7 @@
  "name": "Housing Cleaning Audit",
  "report_name": "Housing Cleaning Audit",
  "ref_doctype": "Cleaning Log",
- "report_type": "Query Report",
+ "report_type": "Script Report",
  "is_standard": "Yes",
  "module": "Habitat",
  "roles": [
@@ -18,6 +18,9 @@
   },
   {
    "role": "Internal Auditor"
+  },
+  {
+   "role": "Cleaning Supervisor"
   }
  ],
  "filters": [
@@ -25,12 +28,14 @@
    "fieldname": "from_date",
    "label": "From Date",
    "fieldtype": "Date",
+   "reqd": 1,
    "default": "Today"
   },
   {
    "fieldname": "to_date",
    "label": "To Date",
    "fieldtype": "Date",
+   "reqd": 1,
    "default": "Today"
   },
   {
@@ -38,25 +43,12 @@
    "label": "Building",
    "fieldtype": "Link",
    "options": "Accommodation Building"
-  },
-  {
-   "fieldname": "status",
-   "label": "Status",
-   "fieldtype": "Select",
-   "options": "\nCompleted\nMissed\nRework Required\nMissed + Rework"
   }
  ],
  "columns": [
   {
-   "fieldname": "name",
-   "label": "Log",
-   "fieldtype": "Link",
-   "options": "Cleaning Log",
-   "width": 140
-  },
-  {
    "fieldname": "cleaning_date",
-   "label": "Cleaning Date",
+   "label": "Date",
    "fieldtype": "Date",
    "width": 100
   },
@@ -68,14 +60,8 @@
    "width": 160
   },
   {
-   "fieldname": "cleaner_type",
-   "label": "Cleaner Type",
-   "fieldtype": "Data",
-   "width": 110
-  },
-  {
-   "fieldname": "cleaner",
-   "label": "Cleaner",
+   "fieldname": "housing_supervisor",
+   "label": "Housing Supervisor",
    "fieldtype": "Data",
    "width": 150
   },
@@ -83,19 +69,25 @@
    "fieldname": "status",
    "label": "Status",
    "fieldtype": "Data",
-   "width": 130
+   "width": 120
   },
   {
-   "fieldname": "supervisor_approved",
-   "label": "Supervisor Approved",
-   "fieldtype": "Check",
-   "width": 130
+   "fieldname": "submitted_at",
+   "label": "Submitted At",
+   "fieldtype": "Date",
+   "width": 110
   },
   {
-   "fieldname": "has_photo",
-   "label": "Photo Attached",
-   "fieldtype": "Data",
-   "width": 100
+   "fieldname": "rooms_cleaned",
+   "label": "Rooms Cleaned",
+   "fieldtype": "Int",
+   "width": 110
+  },
+  {
+   "fieldname": "photos_attached",
+   "label": "Photos Attached",
+   "fieldtype": "Int",
+   "width": 110
   }
  ]
 }

@@ -1780,3 +1780,56 @@ def weekly_custody_digest() -> None:
             )
 
     logger.info(f"weekly_custody_digest: sent {sent} supervisor digest(s).")
+
+
+def auto_create_cleaning_logs() -> None:
+    """Scheduled daily — create one draft Cleaning Log per active building that
+    has a Housing Supervisor assigned, skipping buildings already logged today.
+
+    This is the T-554 spec-named entry point. The heavier variant that also
+    pre-populates room_details rows is ``daily_cleaning_log_generator``
+    (registered separately). This function targets buildings that have an
+    assigned ``responsible_facility_supervisor`` and creates a minimal log so
+    the supervisor finds a ready record each morning.
+
+    Guard: ``frappe.db.exists("Cleaning Log", {"building": bld, "cleaning_date":
+    today()})`` — one log per (building, cleaning_date), non-cancelled.
+    """
+    from frappe.utils import today
+
+    cleaning_date = today()
+    logger = frappe.logger()
+
+    # Fetch buildings that are Active AND have a supervisor assigned.
+    buildings = frappe.get_all(
+        "Accommodation Building",
+        filters={
+            "status": "Active",
+            "responsible_facility_supervisor": ["is", "set"],
+        },
+        fields=["name", "responsible_facility_supervisor"],
+    )
+
+    created = 0
+    for bld in buildings:
+        try:
+            if frappe.db.exists(
+                "Cleaning Log",
+                {"building": bld.name, "cleaning_date": cleaning_date, "docstatus": ["!=", 2]},
+            ):
+                continue
+            log = frappe.get_doc({
+                "doctype": "Cleaning Log",
+                "building": bld.name,
+                "cleaning_date": cleaning_date,
+            })
+            log.insert(ignore_permissions=True)  # audit-ok — scheduler-run daily cleaning record
+            created += 1
+        except Exception:
+            frappe.db.rollback()
+            frappe.log_error(
+                message=frappe.get_traceback(),
+                title=f"auto_create_cleaning_logs: insert failed for {bld.name}"[:140],
+            )
+
+    logger.info(f"auto_create_cleaning_logs: created {created} cleaning log(s) for {cleaning_date}.")

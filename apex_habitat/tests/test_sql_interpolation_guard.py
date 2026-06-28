@@ -99,6 +99,16 @@ SAFE_ALLOWLIST = [
         "`_building_condition()` whose values are all `frappe.db.escape()`-d "
         "building names from User Permission records, never raw request input.",
     ),
+    (
+        "habitat/report/housing_cleaning_audit/housing_cleaning_audit.py",
+        "execute",
+        "Interpolates `{where}` into the SELECT SQL. `where` is assembled from "
+        "a list of literal SQL fragments and `%(param_name)s` placeholders only — "
+        "no user-supplied string is ever injected as SQL text. User values "
+        "(from_date, to_date, building) all go into the `params` dict and are "
+        "bound by the db driver. The IN-clause for building scope uses "
+        "`%(bld_N)s` placeholders whose keys are loop indices, not user data.",
+    ),
 ]
 
 # [#2m5lk7]
