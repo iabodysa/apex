@@ -26,8 +26,8 @@
  "is_standard": 1,
  "is_default": 0,
  "is_hidden": 0,
- "sequence_id": 3.0,
- "parent_page": "",
+ "sequence_id": 3.1,
+ "parent_page": "Salis",
  "content": "[{\"id\": \"masHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"masOnb0\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Masar Go-Live\", \"col\": 12}}, {\"id\": \"masChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workers Transport Over Time\", \"col\": 12}}, {\"id\": \"masHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"masQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Worker Route (Masar)\", \"col\": 3}}, {\"id\": \"masQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Transport Request\", \"col\": 3}}, {\"id\": \"masQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"masQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Passenger Manifest\", \"col\": 3}}, {\"id\": \"masHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"masKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workers Requests Open\", \"col\": 3}}, {\"id\": \"masKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"salis_workers_transport Scheduled Awaiting Dispatch\", \"col\": 3}}, {\"id\": \"masKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Large Worker Moves Pending Escalation\", \"col\": 3}}, {\"id\": \"masKM7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Transport SLA Breaches Open\", \"col\": 3}}, {\"id\": \"masHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"masCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Transport Process\", \"col\": 4}}, {\"id\": \"masCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"masCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}]",
  "shortcuts": [
   {
@@ -216,5 +216,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-29 10:00:00.000000"
+ "modified": "2026-06-29 12:00:00.000000"
 }

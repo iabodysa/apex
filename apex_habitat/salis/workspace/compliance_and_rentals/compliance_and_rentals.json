@@ -1,6 +1,6 @@
 {
  "doctype": "Workspace",
- "name": "compliance_rentals",
+ "name": "Compliance and Rentals",
  "label": "Compliance and Rentals",
  "title": "Compliance and Rentals",
  "module": "Salis",
@@ -9,8 +9,8 @@
  "is_standard": 1,
  "is_default": 0,
  "is_hidden": 0,
- "sequence_id": 7.0,
- "parent_page": "",
+ "sequence_id": 3.2,
+ "parent_page": "Salis",
  "roles": [
   {
    "role": "Fleet Manager"
@@ -302,5 +302,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-29 10:00:00.000000"
+ "modified": "2026-06-29 12:00:00.000000"
 }

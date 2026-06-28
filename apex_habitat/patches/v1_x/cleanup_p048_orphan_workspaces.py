@@ -28,7 +28,6 @@ ORPHAN_WORKSPACES = [
     "Apex Home",
     "Habitat Hub",
     "Fleet Operations",
-    "Salis",
     "Compliance",
     "Rentals",
 ]
@@ -57,15 +56,17 @@ def execute():
 
 
 def _shipped_workspace_names():
-    # The 8 workspaces still shipped as JSON after the merge.
+    # The workspaces still shipped as JSON (post P-096/P-099 hierarchy restore).
     return [
         "Launchpad",
         "My Work",
+        "Habitat",
+        "Salis",
         "Custody",
         "Housing",
         "Safety",
         "fleet",
         "Masar",
-        "compliance_rentals",
-        "costs",
+        "Compliance and Rentals",
+        "Costs and Leasing",
     ]

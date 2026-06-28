@@ -22,8 +22,8 @@
  ],
  "is_standard": 1,
  "is_default": 0,
- "sequence_id": 2.0,
- "parent_page": "",
+ "sequence_id": 2.1,
+ "parent_page": "Habitat",
  "content": "[{\"id\": \"WoNaZPIgru\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"338UshwXg9\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Accommodation Go-Live\", \"col\": 12}}, {\"id\": \"hsgChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Occupancy Percent Trend\", \"col\": 12}}, {\"id\": \"tWodpekYHU\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"AU1DYOtzOC\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"ArrDeskSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Arrivals Desk\", \"col\": 3}}, {\"id\": \"JZ2mlB7OJD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"FSNXXOZrD2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Checkout\", \"col\": 3}}, {\"id\": \"hsgInvCount1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inventory Count\", \"col\": 3}}, {\"id\": \"eaKnJiXIZ1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"hsgLiveVac1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vacant Beds\", \"col\": 3}}, {\"id\": \"hsgLiveImm1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Imminent Checkouts\", \"col\": 3}}, {\"id\": \"hsgOvdChk1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Checkouts\", \"col\": 3}}, {\"id\": \"hsgLiveReq1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Resident Requests\", \"col\": 3}}, {\"id\": \"Ieufvl4kMj\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"mp4HU2s3nG\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}, {\"id\": \"W81gManmPJ\", \"type\": \"card\", \"data\": {\"card_name\": \"Lifecycle\", \"col\": 4}}, {\"id\": \"zmHoma085p\", \"type\": \"card\", \"data\": {\"card_name\": \"Residents and Rooms\", \"col\": 4}}, {\"id\": \"i36f9v7sIW\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"CleanCardHsg1\", \"type\": \"card\", \"data\": {\"card_name\": \"Cleaning\", \"col\": 4}}, {\"id\": \"hsgCardMasters\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}]",
  "shortcuts": [
   {
@@ -331,5 +331,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-29 10:00:00.000000"
+ "modified": "2026-06-29 12:00:00.000000"
 }

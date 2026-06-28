@@ -241,3 +241,10 @@ apex_habitat.patches.v1_x.move_deduction_to_salary_policy
 # the case-insensitive "Costs"/"costs" + "Fleet"/"fleet" aliases of live workspaces.
 # Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site has run it.
 apex_habitat.patches.v1_x.cleanup_p048_orphan_workspaces
+
+# v1.x — P-099 rename two Workspaces so name == title (costs -> "Costs and Leasing",
+# compliance_rentals -> "Compliance and Rentals"). The desk router keys by slug(name)
+# but the sidebar links by slug(title); when they differ the sidebar link 404s on open.
+# Carries deployed sites across the rename. Idempotent, no-op on fresh installs / re-run.
+# PRUNE once every deployed site has run it.
+apex_habitat.patches.v1_x.rename_workspaces_for_hierarchy

@@ -23,7 +23,7 @@ import frappe
 
 # [#730brf]
 _LINKS = [
-    {"item_label": "Apex Salis — Movement & Fleet", "item_type": "Route", "route": "/app/salis"},
+    {"item_label": "Apex Salis — Movement and Fleet", "item_type": "Route", "route": "/app/salis"},
     {"item_label": "Apex Salis — Dispatch Board", "item_type": "Route", "route": "/app/salis-dispatch-board"},
 ]
 

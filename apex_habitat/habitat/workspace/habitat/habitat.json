@@ -1,0 +1,139 @@
+{
+ "doctype": "Workspace",
+ "name": "Habitat",
+ "label": "Habitat",
+ "title": "Habitat",
+ "module": "Habitat",
+ "icon": "home",
+ "public": 1,
+ "is_standard": 1,
+ "is_default": 0,
+ "is_hidden": 0,
+ "sequence_id": 2.0,
+ "parent_page": "",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Housing Supervisor"
+  },
+  {
+   "role": "Safety Officer"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "content": "[{\"id\": \"habHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat</b></span>\", \"col\": 12}}, {\"id\": \"habChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Occupancy Percent Trend\", \"col\": 12}}, {\"id\": \"habHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"habScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"habScMaint\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"habScCustody\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"habScBuilding\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Building\", \"col\": 3}}, {\"id\": \"habHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"habNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 3}}, {\"id\": \"habNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"habNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"habHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"habCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation\", \"col\": 4}}, {\"id\": \"habCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Operations\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Accommodation Assignment",
+   "link_to": "Accommodation Assignment",
+   "color": "Green",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Maintenance Request",
+   "link_to": "Maintenance Request",
+   "stats_filter": "{\"status\": \"Open\"}",
+   "format": "{} Open",
+   "color": "Yellow",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Custody Issue",
+   "link_to": "Custody Issue",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Accommodation Building",
+   "link_to": "Accommodation Building",
+   "idx": 4
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Accommodation",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Building",
+   "link_type": "DocType",
+   "link_to": "Accommodation Building",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Accommodation Assignment",
+   "link_type": "DocType",
+   "link_to": "Accommodation Assignment",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Operations",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Request",
+   "link_type": "DocType",
+   "link_to": "Maintenance Request",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Custody Issue",
+   "link_type": "DocType",
+   "link_to": "Custody Issue",
+   "idx": 6
+  }
+ ],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Occupancy Percent Trend",
+   "label": "Occupancy Percent Trend",
+   "idx": 1
+  }
+ ],
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Total Occupancy Percent",
+   "label": "Total Occupancy Percent",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Open Maintenance Requests",
+   "label": "Open Maintenance Requests",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Open Custody Issues",
+   "label": "Open Custody Issues",
+   "idx": 3
+  }
+ ],
+ "quick_lists": [],
+ "modified": "2026-06-29 12:00:00.000000"
+}

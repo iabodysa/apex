@@ -1467,6 +1467,7 @@ Group nodes classify materials and are not selectable as a concrete material,ا�
 HR,الموارد البشرية
 HR Case,قضية موارد بشرية
 HRMS Salary Component (Type = Deduction) the resulting Additional Salary will use. Defaults from the policy.,مكون الراتب في نظام الموارد البشرية (النوع = خصم) الذي سيستخدمه الراتب الإضافي الناتج. يُؤخذ افتراضيًا من السياسة.
+Habitat,الإسكان
 Habitat Dashboard,لوحة معلومات هابيتات
 Habitat Hub,مركز الإسكان
 Habitat Internal / No Financial Posting,داخلي في Habitat / بدون ترحيل مالي

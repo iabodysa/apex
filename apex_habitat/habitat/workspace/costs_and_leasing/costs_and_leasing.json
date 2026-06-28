@@ -1,6 +1,6 @@
 {
  "doctype": "Workspace",
- "name": "costs",
+ "name": "Costs and Leasing",
  "label": "Costs and Leasing",
  "title": "Costs and Leasing",
  "module": "Habitat",
@@ -9,8 +9,8 @@
  "is_standard": 1,
  "is_default": 0,
  "is_hidden": 0,
- "sequence_id": 8.0,
- "parent_page": "",
+ "sequence_id": 2.4,
+ "parent_page": "Habitat",
  "roles": [
   {
    "role": "Finance Manager"
@@ -249,5 +249,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-29 10:00:00.000000"
+ "modified": "2026-06-29 12:00:00.000000"
 }
