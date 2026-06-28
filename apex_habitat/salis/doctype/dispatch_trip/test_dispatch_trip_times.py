@@ -11,9 +11,7 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex_habitat.salis.doctype.dispatch_trip.dispatch_trip import DispatchTrip
-
-test_ignore = ["Salis Vehicle", "Salis Driver", "Route Plan", "Transport Request"]
+test_ignore = ["Salis Vehicle", "Salis Driver", "Route Plan", "Transport Request", "Payment Gateway"]
 
 
 def _trip(status, depart, ret):

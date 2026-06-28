@@ -16,8 +16,10 @@ import unittest
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_workflow_name
-
 from apex_habitat.tests._helpers import _user
+
+# Payment Gateway lives in the (uninstalled) payments app; skip it in the dependency closure.
+test_ignore = ["Mode of Payment", "Payment Entry", "Payment Gateway", "Salis Payment Request"]
 
 WORKFLOW = "Movement Cost Recovery Workflow"
 

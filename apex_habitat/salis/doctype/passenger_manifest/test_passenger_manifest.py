@@ -11,7 +11,7 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-test_ignore = ["Employee", "Salis Vehicle", "Salis Driver", "Route Plan", "Dispatch Trip"]
+test_ignore = ["Employee", "Salis Vehicle", "Salis Driver", "Route Plan", "Dispatch Trip", "Payment Gateway"]
 
 
 def _h(n=6):

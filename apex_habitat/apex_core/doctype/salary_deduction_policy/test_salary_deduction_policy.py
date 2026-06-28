@@ -12,6 +12,9 @@ no component.
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+# Payment Gateway lives in the (uninstalled) payments app; skip it in the dependency closure.
+test_ignore = ["Payment Gateway"]
+
 
 def _policy(global_cap, rule):
     """An in-memory (unsaved) Salary Deduction Policy Single carrying one type rule."""

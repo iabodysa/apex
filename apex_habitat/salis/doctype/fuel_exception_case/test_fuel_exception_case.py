@@ -11,6 +11,9 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+# Payment Gateway lives in the (uninstalled) payments app; skip it in the dependency closure.
+test_ignore = ["Payment Gateway"]
+
 
 class TestFuelExceptionCaseAmount(FrappeTestCase):
     def setUp(self):
