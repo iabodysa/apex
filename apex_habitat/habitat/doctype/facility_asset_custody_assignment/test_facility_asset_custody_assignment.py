@@ -85,6 +85,42 @@ class TestFacilityAssetCustodyAssignment(FrappeTestCase):
         doc.submit()
         return doc
 
+    def test_submit_unverified_raises(self):
+        """RED before fix: a Check=0 is treated as empty so reqd was unreliable and an
+        assignment could submit with the physical-verification box unticked. GREEN:
+        before_submit throws when all_assets_verified is not set."""
+        asset = self._make_asset("Administrator")
+        doc = frappe.get_doc({
+            "doctype": "Facility Asset Custody Assignment",
+            "naming_series": "FAC-CUST-.YYYY.-.#####",
+            "supervisor": "Administrator",
+            "building": "QA-BLDG",
+            "handover_date": "2026-06-01",
+            "all_assets_verified": 0,
+            "assets_in_custody": [{"facility_asset": asset.name}],
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        with self.assertRaises(frappe.ValidationError):
+            doc.submit()
+        frappe.delete_doc("Facility Asset Custody Assignment", doc.name, force=True, ignore_permissions=True)
+        frappe.delete_doc("Facility Asset", asset.name, force=True, ignore_permissions=True)
+
+    def test_submit_empty_asset_table_raises(self):
+        """An assignment verified but with no assets in custody has nothing to transfer;
+        before_submit throws rather than recording an empty physical-verification."""
+        doc = frappe.get_doc({
+            "doctype": "Facility Asset Custody Assignment",
+            "naming_series": "FAC-CUST-.YYYY.-.#####",
+            "supervisor": "Administrator",
+            "building": "QA-BLDG",
+            "handover_date": "2026-06-01",
+            "all_assets_verified": 1,
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        with self.assertRaises(frappe.ValidationError):
+            doc.submit()
+        frappe.delete_doc("Facility Asset Custody Assignment", doc.name, force=True, ignore_permissions=True)
+
     def test_submit_updates_asset_custodian(self):
         asset = self._make_asset("Administrator")
         doc = self._make_assignment(asset, "Guest")

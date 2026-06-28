@@ -141,6 +141,16 @@ class TestCustodyReturnOverdueNotification(FrappeTestCase):
         meta = frappe.get_meta("Custody Issue")
         self.assertTrue(meta.has_field("issued_to_user"))
 
+    def test_issued_to_user_is_link_to_user_with_fetch(self):
+        """The fix: issued_to_user must be a Link to User (not Data) so the two
+        custody Notifications resolve a real recipient via receiver_by_document_field
+        (a Link-to-User primitive); the employee->user_id fetch_from must survive."""
+        df = frappe.get_meta("Custody Issue").get_field("issued_to_user")
+        self.assertEqual(df.fieldtype, "Link", "issued_to_user must be a Link, not Data")
+        self.assertEqual(df.options, "User", "issued_to_user must link to the User doctype")
+        self.assertEqual(df.fetch_from, "issued_to_employee.user_id",
+                         "the employee->login-user mirror must be preserved")
+
     def test_condition_guards_on_the_user_mirror(self):
         # No mirrored user -> no recipient to email; the condition must short-circuit.
         n = frappe.get_doc("Notification", OVERDUE_NOTIFICATION)

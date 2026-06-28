@@ -38,6 +38,32 @@ class TestHousingInventory(FrappeTestCase):
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
+    def test_building_fetches_from_chosen_room(self):
+        """RED before fix: fetch_from(room.building) sat on the room field, so picking a
+        room wrote the Building docname back into the room Link (invalid) and building
+        never auto-filled. GREEN: fetch_from is on building, so selecting a room
+        populates building while the room field keeps a valid Room link."""
+        h = frappe.generate_hash(length=6)
+        building = frappe.get_doc({
+            "doctype": "Accommodation Building", "building_name": "HI Bldg " + h,
+        }).insert(ignore_permissions=True, ignore_links=True).name
+        room = frappe.get_doc({
+            "doctype": "Accommodation Room", "room_number": "HIR" + h, "building": building,
+        }).insert(ignore_permissions=True, ignore_links=True).name
+        doc = frappe.get_doc({
+            "doctype": "Housing Inventory",
+            "naming_series": "HINV-.YYYY.-.#####",
+            "item_name": "Wardrobe",
+            "item_category": "Furniture",
+            "room": room,  # building left blank — must fetch from the room
+        })
+        doc.insert(ignore_permissions=True)
+        self.assertEqual(doc.building, building)
+        # The room field stays a valid Accommodation Room link, not a Building docname.
+        self.assertEqual(doc.room, room)
+        self.assertTrue(frappe.db.exists("Accommodation Room", doc.room))
+        frappe.delete_doc("Housing Inventory", doc.name, force=True, ignore_permissions=True)
+
     def test_variance_is_derived_on_save(self):
         doc = frappe.get_doc({
             "doctype": "Housing Inventory",

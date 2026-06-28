@@ -61,10 +61,18 @@ class FuelQuota(Document):
 def on_doctype_update():
 	"""Belt-and-suspenders: a composite DB-level unique index prevents any duplicate
 	that slips past the application-layer guard (e.g. direct DB inserts or a race
-	that bypasses validate). Applied once at migrate/patch time."""
+	that bypasses validate). Applied once at migrate/patch time.
+
+	``docstatus`` is part of the key because Fuel Quota is submittable and the
+	app guard is scoped to docstatus < 2: a Cancelled(2) quota may be re-issued
+	and an amendment creates a new (vehicle, period_month) row alongside the
+	cancelled original. A bare two-column index would reject those legitimate
+	flows with DuplicateEntryError; including docstatus lets a Cancelled row
+	coexist while still blocking a duplicate live quota (mirrors the Scheduled
+	Task Instance backstop)."""
 	frappe.db.add_unique(
 		"Fuel Quota",
-		["vehicle", "period_month"],
+		["vehicle", "period_month", "docstatus"],
 		constraint_name="uq_fuel_quota_vehicle_period",
 	)
 	# [#qzsfcl]

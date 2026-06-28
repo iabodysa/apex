@@ -91,3 +91,44 @@ class TestRoomBedTransfer(FrappeTestCase):
         })
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True)
+
+    def test_cancel_restores_assignment_to_origin(self):
+        """RED->GREEN: submitting a transfer moves the assignment onto the target
+        bed/room/building; cancelling must reverse the move and restore the origin
+        bed/room/building (re-occupy origin bed, free target). origin == fx.bed/
+        room/building; target == a second Available bed in the same room."""
+        fx = self._fixtures()
+        target_bed = frappe.get_doc({
+            "doctype": "Accommodation Bed", "naming_series": "BED-.####", "room": fx.room,
+            "building": fx.building, "bed_code": "T" + self._h(),
+            "status": "Available"}).insert(ignore_permissions=True).name
+
+        asg = frappe.get_doc("Accommodation Assignment", fx.assignment)
+        asg.submit()  # origin bed -> Occupied, assignment active (checked-in)
+
+        transfer = frappe.get_doc({
+            "doctype": "Room Bed Transfer",
+            "naming_series": "RBT-.YYYY.-.####",
+            "assignment": fx.assignment,
+            "to_room": fx.room,
+            "to_bed": target_bed,
+            "transfer_date": "2026-06-02",
+        })
+        transfer.insert(ignore_permissions=True)
+        transfer.submit()
+
+        asg.reload()
+        self.assertEqual(asg.bed, target_bed, "submit moves the assignment onto the target bed")
+        self.assertEqual(frappe.db.get_value("Accommodation Bed", target_bed, "status"), "Occupied")
+        self.assertEqual(frappe.db.get_value("Accommodation Bed", fx.bed, "status"), "Available")
+
+        transfer.cancel()
+
+        asg.reload()
+        self.assertEqual(asg.bed, fx.bed, "cancel restores the origin bed onto the assignment")
+        self.assertEqual(asg.room, fx.room, "cancel restores the origin room")
+        self.assertEqual(asg.building, fx.building, "cancel restores the origin building")
+        self.assertEqual(frappe.db.get_value("Accommodation Bed", fx.bed, "status"), "Occupied",
+                         "origin bed is re-occupied on cancel")
+        self.assertEqual(frappe.db.get_value("Accommodation Bed", target_bed, "status"), "Available",
+                         "target bed is freed on cancel")

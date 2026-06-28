@@ -79,6 +79,70 @@ class TestFacilityAssetMovement(FrappeTestCase):
         self.assertEqual(doc.is_intercompany, 1)
 
 
+class TestFacilityAssetMovementOriginReconcile(FrappeTestCase):
+    """from_building/from_room are reconciled to the asset's actual location: a
+    hand-entered origin that contradicts the asset is rejected, and a blank origin is
+    defaulted from the asset so cancel reverts to a trustworthy prior location."""
+
+    def _h(self):
+        return frappe.generate_hash(length=6).upper()
+
+    def _building(self, name):
+        if not frappe.db.exists("Accommodation Building", name):
+            frappe.get_doc({
+                "doctype": "Accommodation Building", "building_name": name,
+            }).insert(ignore_permissions=True, ignore_mandatory=True)
+        return name
+
+    def setUp(self):
+        h = self._h()
+        self.b1 = self._building("ORIG-A-" + h)
+        self.b2 = self._building("ORIG-B-" + h)
+        self.asset = frappe.get_doc({
+            "doctype": "Facility Asset", "naming_series": "FAC-AST-.YYYY.-.####",
+            "asset_name": "Origin-QA " + h, "asset_category": "Other", "building": self.b1,
+        }).insert(ignore_permissions=True, ignore_mandatory=True).name
+
+    def test_mismatched_from_building_rejected(self):
+        """RED before fix: from_building was hand-entered and never checked, so a wrong
+        origin slipped through (and on_cancel would later revert the asset to it). GREEN:
+        validate throws when from_building contradicts the asset's current building."""
+        from apex_habitat.habitat.doctype.facility_asset_movement.facility_asset_movement import validate
+
+        doc = frappe.get_doc({
+            "doctype": "Facility Asset Movement",
+            "movement_date": "2026-06-01",
+            "facility_asset": self.asset,
+            "from_building": self.b2,  # asset is actually at b1
+            "to_building": self.b1,
+        })
+        with self.assertRaises(frappe.ValidationError):
+            validate(doc)
+
+    def test_blank_origin_defaulted_and_cancel_restores_true_prior(self):
+        """A blank from_building is defaulted from the asset, so after a move and a
+        cancel the asset is restored to its genuine prior building (b1), not a phantom."""
+        mv = frappe.get_doc({
+            "doctype": "Facility Asset Movement",
+            "naming_series": "FAM-.YYYY.-.####",
+            "movement_date": "2026-06-01",
+            "facility_asset": self.asset,
+            "to_building": self.b2,  # from_building left blank -> defaults to b1
+        })
+        mv.insert(ignore_permissions=True, ignore_links=True)
+        self.assertEqual(mv.from_building, self.b1)
+        mv.submit()
+        self.assertEqual(
+            frappe.db.get_value("Facility Asset", self.asset, "building"), self.b2
+        )
+        mv.db_set("cancellation_reason", "QA origin test")
+        mv.reload()
+        mv.cancel()
+        self.assertEqual(
+            frappe.db.get_value("Facility Asset", self.asset, "building"), self.b1
+        )
+
+
 class TestFacilityAssetMovementLedger(FrappeTestCase):
     """The movement ledger records each move as an immutable, queryable history
     row, instead of overwriting the asset's location in place with no trail."""

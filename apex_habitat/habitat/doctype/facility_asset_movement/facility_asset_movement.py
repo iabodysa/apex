@@ -50,6 +50,9 @@ def on_submit(doc, method=None):
     )
     if not asset:
         return
+    # location_in_building is free-text Data; to_room is a Link whose docname IS the
+    # Accommodation Room's room_number, so the stored value stays human-readable AND
+    # round-trips with _reconcile_origin (which only matches a value that is a Room).
     frappe.db.set_value("Facility Asset", doc.facility_asset, {
         "previous_building": asset.building,
         "previous_location_in_building": asset.location_in_building,
@@ -100,11 +103,18 @@ def _reconcile_origin(doc):
         frappe.throw(
             _("From Building does not match the asset's current location ({0}).").format(asset.building)
         )
+    # from_room is a Link(Accommodation Room); the asset stores its place in the
+    # free-text Data field location_in_building. Reconcile only against a value that
+    # is actually a Room docname (prior moves write the room there) — a descriptive
+    # free-text location ("Laundry Room") is not a Room and must not false-throw.
+    asset_room = asset.location_in_building
+    if asset_room and not frappe.db.exists("Accommodation Room", asset_room):
+        asset_room = None
     if not doc.from_room:
-        doc.from_room = asset.location_in_building
-    elif asset.location_in_building and doc.from_room != asset.location_in_building:
+        doc.from_room = asset_room
+    elif asset_room and doc.from_room != asset_room:
         frappe.throw(
-            _("From Room does not match the asset's current location ({0}).").format(asset.location_in_building)
+            _("From Room does not match the asset's current location ({0}).").format(asset_room)
         )
 
 

@@ -127,3 +127,47 @@ class TestTripStartLogOwnership(unittest.TestCase):
 
     def tearDown(self):
         frappe.set_user("Administrator")
+
+
+class TestTripStartLogBoardingDedup(unittest.TestCase):
+    """P-037: the same passenger must not board twice on one Trip Start Log.
+
+    A duplicate boarding row inflates ``boarded_count`` and corrupts the
+    expected-vs-boarded headcount reconciliation. ``_validate_boarding_rows``
+    guards both worker classes: a registered Employee (``worker``) and an
+    unregistered contractor/temp (``contractor_id`` / ``worker_name``)."""
+
+    def _make_log(self, rows):
+        """Return an unsaved Trip Start Log with the given boarding rows.
+
+        Each row dict is appended to boarding_events; we exercise the in-memory
+        validator directly (no insert) so the test is fast and self-contained."""
+        doc = frappe.new_doc("Trip Start Log")
+        for row in rows:
+            doc.append("boarding_events", row)
+        return doc
+
+    def test_duplicate_registered_worker_throws(self):
+        doc = self._make_log(
+            [{"worker": "EMP-DEDUP-1"}, {"worker": "EMP-DEDUP-1"}]
+        )
+        with self.assertRaises(frappe.ValidationError):
+            doc._validate_boarding_rows()
+
+    def test_distinct_registered_workers_pass(self):
+        doc = self._make_log(
+            [{"worker": "EMP-DEDUP-1"}, {"worker": "EMP-DEDUP-2"}]
+        )
+        # Must not raise.
+        doc._validate_boarding_rows()
+
+    def test_duplicate_unregistered_worker_throws(self):
+        # Case-insensitive: a casing variant must not slip a second boarding past.
+        doc = self._make_log(
+            [
+                {"is_unregistered": 1, "contractor_id": "C-99"},
+                {"is_unregistered": 1, "contractor_id": "c-99"},
+            ]
+        )
+        with self.assertRaises(frappe.ValidationError):
+            doc._validate_boarding_rows()

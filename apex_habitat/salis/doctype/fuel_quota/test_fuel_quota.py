@@ -47,6 +47,18 @@ class TestFuelQuotaUniqueness(FrappeTestCase):
         other = self._quota("2026-06")
         self.assertTrue(other.name)
 
+    def test_reissue_after_cancel_is_allowed(self):
+        """A cancelled quota must be re-issuable for the same vehicle + period.
+        Both the app guard (docstatus < 2) and the DB unique index carry docstatus,
+        so a Cancelled(2) row coexists with a fresh one — a bare two-column index
+        would wrongly raise DuplicateEntryError here."""
+        first = self._quota()
+        first.submit()
+        first.cancel()
+        reissued = self._quota()
+        self.assertTrue(reissued.name)
+        self.assertNotEqual(reissued.name, first.name)
+
     def test_guard_locks_vehicle_before_exists_check(self):
         """The duplicate guard must FOR-UPDATE lock the vehicle row BEFORE
         the exists-check. Two concurrent creates serialize on that row lock, so the
