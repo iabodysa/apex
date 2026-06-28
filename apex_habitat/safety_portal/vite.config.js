@@ -8,7 +8,12 @@ import path from "path";
 export default defineConfig({
   plugins: [frappeui(), vue()],
   base: "/assets/apex_habitat/safety_portal/",
-  resolve: { alias: { "@": path.resolve(__dirname, "src") } },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+      "@shared": path.resolve(__dirname, "../frontend_shared"),
+    },
+  },
   build: {
     outDir: path.resolve(__dirname, "../public/safety_portal"),
     emptyOutDir: true,

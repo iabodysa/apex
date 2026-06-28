@@ -1,0 +1,165 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-06-28 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "ra_tab_overview",
+  "ra_sec_assignment",
+  "work_shift",
+  "shift_name",
+  "ra_sec_assignment_col",
+  "shift_start_time",
+  "shift_end_time",
+  "project",
+  "ra_sec_system",
+  "naming_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "ra_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "ra_sec_assignment",
+   "fieldtype": "Section Break",
+   "label": "Route Assignment"
+  },
+  {
+   "fieldname": "work_shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Work Shift",
+   "options": "Work Shift",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "work_shift.shift_name",
+   "fetch_if_empty": 1,
+   "fieldname": "shift_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Shift Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ra_sec_assignment_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "work_shift.start_time",
+   "fetch_if_empty": 1,
+   "fieldname": "shift_start_time",
+   "fieldtype": "Time",
+   "label": "Shift Start Time",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "work_shift.end_time",
+   "fetch_if_empty": 1,
+   "fieldname": "shift_end_time",
+   "fieldtype": "Time",
+   "label": "Shift End Time",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "work_shift.project",
+   "fetch_if_empty": 1,
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "ra_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "default": "RA-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "RA-.####",
+   "reqd": 1
+  }
+ ],
+ "links": [
+  {
+   "group": "Operations",
+   "link_doctype": "Dispatch Trip",
+   "link_fieldname": "route_assignment"
+  }
+ ],
+ "modified": "2026-06-28 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Salis",
+ "name": "Route Assignment",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 0,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor"
+  },
+  {
+   "cancel": 0,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 0,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -6,7 +6,12 @@ import path from "path";
 export default defineConfig({
   plugins: [vue()],
   base: "/assets/apex_habitat/fleet_portal/",
-  resolve: { alias: { "@": path.resolve(__dirname, "src") } },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+      "@shared": path.resolve(__dirname, "../frontend_shared"),
+    },
+  },
   build: {
     outDir: path.resolve(__dirname, "../public/fleet_portal"),
     emptyOutDir: true,

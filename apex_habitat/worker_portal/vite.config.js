@@ -33,7 +33,12 @@ function stampServiceWorker() {
 export default defineConfig({
   plugins: [frappeui(), vue(), stampServiceWorker()],
   base: "/assets/apex_habitat/worker_portal/",
-  resolve: { alias: { "@": path.resolve(__dirname, "src") } },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+      "@shared": path.resolve(__dirname, "../frontend_shared"),
+    },
+  },
   build: {
     outDir: path.resolve(__dirname, "../public/worker_portal"),
     emptyOutDir: true,

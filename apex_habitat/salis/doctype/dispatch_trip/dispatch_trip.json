@@ -9,6 +9,8 @@
   "dispatch_trip_sec_trip",
   "route_plan",
   "transport_request",
+  "route_assignment",
+  "shift_name",
   "dispatch_trip_sec_trip_col1",
   "trip_date",
   "status",
@@ -57,6 +59,23 @@
    "fieldtype": "Link",
    "label": "Transport Request",
    "options": "Transport Request",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "route_plan.route_assignment",
+   "fetch_if_empty": 1,
+   "fieldname": "route_assignment",
+   "fieldtype": "Link",
+   "label": "Route Assignment",
+   "options": "Route Assignment",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "route_assignment.shift_name",
+   "fetch_if_empty": 1,
+   "fieldname": "shift_name",
+   "fieldtype": "Data",
+   "label": "Shift Name",
    "read_only": 1
   },
   {

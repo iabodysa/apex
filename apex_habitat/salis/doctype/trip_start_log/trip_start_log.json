@@ -7,6 +7,7 @@
  "field_order": [
   "sec_trip",
   "dispatch_trip",
+  "shift_name",
   "transport_request",
   "route_plan",
   "col_trip",
@@ -76,6 +77,14 @@
    "options": "Dispatch Trip",
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "fetch_from": "dispatch_trip.shift_name",
+   "fetch_if_empty": 1,
+   "fieldname": "shift_name",
+   "fieldtype": "Data",
+   "label": "Shift Name",
+   "read_only": 1
   },
   {
    "fetch_from": "dispatch_trip.transport_request",
