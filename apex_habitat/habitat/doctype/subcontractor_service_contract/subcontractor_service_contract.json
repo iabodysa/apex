@@ -110,7 +110,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Draft\nActive\nExpired\nTerminated",
+   "options": "Draft\nPending Approval\nActive\nRejected\nExpired\nTerminated",
    "default": "Draft",
    "idx": 13
   },

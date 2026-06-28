@@ -36,6 +36,8 @@ SINGLE_BUILDING = [
     ("Arrival Batch", P.arrival_batch_query),
     ("Accommodation Room", P.accommodation_room_query),
     ("Accommodation Bed", P.accommodation_bed_query),
+    # [#wave-b2] system-written read-only ledger; scoped on its own store `building`.
+    ("Accommodation Stock Ledger", P.accommodation_stock_ledger_query),
 ]
 
 # (DocType, query_fn) for the from_building/to_building members.

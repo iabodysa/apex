@@ -12,21 +12,21 @@
    "doctype": "Workflow Document State",
    "state": "Pending",
    "doc_status": "0",
-   "allow_edit": "HR Manager",
+   "allow_edit": "Finance Manager",
    "is_optional_state": 0
   },
   {
    "doctype": "Workflow Document State",
    "state": "Approved",
    "doc_status": "1",
-   "allow_edit": "HR Manager",
+   "allow_edit": "Finance Manager",
    "is_optional_state": 0
   },
   {
    "doctype": "Workflow Document State",
    "state": "Rejected",
    "doc_status": "0",
-   "allow_edit": "HR Manager",
+   "allow_edit": "Finance Manager",
    "is_optional_state": 0
   }
  ],
@@ -36,7 +36,7 @@
    "state": "Pending",
    "action": "Approve",
    "next_state": "Approved",
-   "allowed": "HR Manager",
+   "allowed": "Finance Manager",
    "allow_self_approval": 0,
    "condition": ""
   },
@@ -45,7 +45,7 @@
    "state": "Pending",
    "action": "Reject",
    "next_state": "Rejected",
-   "allowed": "HR Manager",
+   "allowed": "Finance Manager",
    "allow_self_approval": 1,
    "condition": ""
   },
@@ -54,7 +54,7 @@
    "state": "Rejected",
    "action": "Revise",
    "next_state": "Pending",
-   "allowed": "HR Manager",
+   "allowed": "Finance Manager",
    "allow_self_approval": 1,
    "condition": ""
   }

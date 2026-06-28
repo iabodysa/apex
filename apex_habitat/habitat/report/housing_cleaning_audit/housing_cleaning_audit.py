@@ -4,8 +4,16 @@
 """Housing Cleaning Audit — Script Report.
 
 Columns: date, building, housing_supervisor, status, submitted_at,
-rooms_cleaned (count of room_details rows with cleaned=1), photos_attached
+rooms_cleaned (the posted cleaned-room count), photos_attached
 (count of area_photos child rows).
+
+rooms_cleaned is the immutable posted fact: it is read from the Cleaning
+Compliance Ledger (one live row per cleaned room, is_cancelled=0), NOT from the
+mutable Cleaning Log Room Detail child rows. So a historical cleaned-room count
+does not change when the source log's child rows are later edited; a cancel
+posts a negating reversal (flagged is_cancelled) that nets the log out of the
+live count. The status/supervisor/photos columns are review-state and stay
+best-effort from the live log, mirroring daily_cleaning_compliance.
 
 Gap detection: for every (date, building) combination in the requested
 [from_date..to_date] window where no Cleaning Log exists (even a draft),
@@ -116,19 +124,18 @@ def execute(filters=None):
     photos_map: dict[str, int] = {}
 
     if log_names:
-        # Count room_details rows where cleaned=1.
-        for rec in frappe.db.sql(
-            """
-            SELECT parent, COUNT(*) AS cnt
-            FROM `tabCleaning Log Room Detail`
-            WHERE parent IN %(names)s
-              AND cleaned = 1
-            GROUP BY parent
-            """,
-            {"names": log_names},
-            as_dict=True,
+        # rooms_cleaned is the immutable posted fact: read the cleaned-room count
+        # from the Cleaning Compliance Ledger (one live row per cleaned room), not
+        # the mutable Cleaning Log Room Detail child rows, so the historical count
+        # is stable. Only live rows (is_cancelled=0) count; a cancel posts a
+        # negating reversal that nets the log out.
+        for rec in frappe.get_all(
+            "Cleaning Compliance Ledger",
+            filters={"cleaning_log": ["in", log_names], "cleaned": 1, "is_cancelled": 0},
+            fields=["cleaning_log", "count(name) as cnt"],
+            group_by="cleaning_log",
         ):
-            rooms_cleaned_map[rec.parent] = int(rec.cnt or 0)
+            rooms_cleaned_map[rec.cleaning_log] = int(rec.cnt or 0)
 
         # Count area_photos rows per log (field: area_photos → child table
         # "Cleaning Area Photo" as confirmed from cleaning_log.json).

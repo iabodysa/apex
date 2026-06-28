@@ -10,6 +10,7 @@
   "custody_damage_assessment_sec_overview",
   "assessment_date",
   "custody_return",
+  "status",
   "custody_damage_assessment_overview_col",
   "building",
   "custody_damage_assessment_sec_worker",
@@ -52,6 +53,16 @@
    "fieldtype": "Link",
    "label": "Custody Return",
    "options": "Custody Return"
+  },
+  {
+   "default": "Draft",
+   "description": "Approval state. Driven by the Custody Damage Assessment Workflow.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nPending Approval\nApproved\nRejected"
   },
   {
    "fieldname": "custody_damage_assessment_overview_col",

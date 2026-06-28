@@ -519,5 +519,108 @@ class TestNoInternalMarkersInMetadata(unittest.TestCase):
         )
 
 
+class TestPrintFormatGuards(unittest.TestCase):
+    """Static guards for three print-format fixes (no live site needed).
+
+    A Jinja print format renders on the server; an unguarded lookup or a missing
+    translation wrapper only shows up when an operator prints a real edge-case doc.
+    These checks read the shipped .html templates and lock the fixes in source.
+    """
+
+    ROOM_LABEL = os.path.join(
+        APP_ROOT, "habitat", "print_format", "accommodation_room_label",
+        "accommodation_room_label.html",
+    )
+    QR_POSTER = os.path.join(
+        APP_ROOT, "habitat", "print_format", "accommodation_qr_location_poster",
+        "accommodation_qr_location_poster.html",
+    )
+    FUEL_VOUCHER = os.path.join(
+        APP_ROOT, "salis", "print_format", "fuel_claim_voucher",
+        "fuel_claim_voucher.html",
+    )
+
+    def _read(self, path):
+        self.assertTrue(os.path.exists(path), f"print format missing: {path}")
+        with open(path, encoding="utf-8") as fh:
+            return fh.read()
+
+    def test_room_label_building_lookup_cannot_raise(self):
+        """P-008: an empty OR dangling `building` link must not abort the print.
+
+        `frappe.get_doc("Accommodation Building", doc.building)` raises
+        DoesNotExistError both when the link is unset and when it points at a
+        deleted record. The template must use a non-raising lookup (db.get_value
+        guarded on `doc.building`) so the label still renders with a blank name.
+        """
+        html = self._read(self.ROOM_LABEL)
+        self.assertNotIn(
+            'frappe.get_doc("Accommodation Building"',
+            html,
+            "room label still uses get_doc — raises on empty/dangling building link",
+        )
+        self.assertIn(
+            'frappe.db.get_value("Accommodation Building"',
+            html,
+            "room label must look up the building name via non-raising db.get_value",
+        )
+        self.assertIn("if doc.building else None", html, "building lookup must be guarded on doc.building")
+        # No unguarded attribute access on a possibly-None building object.
+        self.assertNotRegex(
+            html, r"\bbuilding\.building_name\b",
+            "render must not dereference a possibly-None building doc",
+        )
+
+    def test_qr_poster_user_strings_are_translatable(self):
+        """P-009: every user-facing QR-poster string must go through `_()`.
+
+        Hardcoded English never reaches ar.csv, so the poster prints English on an
+        Arabic site. Assert each visible label is wrapped and brace-free.
+        """
+        html = self._read(self.QR_POSTER)
+        required = [
+            '_("Need Help? Scan to Report")',
+            '_("Resident Support Services")',
+            '_("Location Reference")',
+            '_("Site")',
+            '_("Building")',
+            '_("Room")',
+            '_("Ref")',
+            '_("N/A")',
+            '_("Point your phone camera at the QR code to open the request form.")',
+            '_("For life or safety emergencies, contact the accommodation supervisor directly.")',
+        ]
+        missing = [s for s in required if s not in html]
+        self.assertEqual(missing, [], f"QR poster strings not wrapped in _(): {missing}")
+        # Static translatable labels must stay brace-free (no {0}/{name} placeholders).
+        for m in re.finditer(r'_\(\s*"([^"]*)"\s*\)', html):
+            self.assertNotRegex(
+                m.group(1), r"\{",
+                f"static translatable label must be placeholder-free: {m.group(1)!r}",
+            )
+
+    def test_fuel_voucher_litres_use_locale_number_format(self):
+        """P-010: litre Floats must print through frappe.format, not raw.
+
+        Raw `{{ doc.claimed_litres }}` emits an unformatted number (no thousands
+        separator / locale precision). Each litre measure must pass through
+        frappe.format with a Float/Currency fieldtype.
+        """
+        html = self._read(self.FUEL_VOUCHER)
+        for field in ("claimed_litres", "consumed_litres", "variance_litres"):
+            self.assertRegex(
+                html,
+                r"frappe\.format\(\s*doc\." + field,
+                f"{field} must render via frappe.format for locale number formatting",
+            )
+        # No bare, unformatted litre interpolation left in the template.
+        for field in ("claimed_litres", "consumed_litres", "variance_litres"):
+            self.assertNotRegex(
+                html,
+                r"\{\{\s*doc\." + field + r"(\s*or\s*0)?\s*\}\}",
+                f"{field} printed raw without frappe.format",
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

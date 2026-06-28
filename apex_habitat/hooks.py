@@ -370,6 +370,8 @@ after_install = [
     "apex_habitat.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
     # [#zy072c]
     "apex_habitat.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
+    # [#hbwf06]
+    "apex_habitat.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
     # [#2oqhfm]
     "apex_habitat.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
 ]
@@ -388,6 +390,8 @@ after_migrate = [
     "apex_habitat.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
     # [#mv2xth]
     "apex_habitat.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
+    # [#hbwf07]
+    "apex_habitat.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
     # [#tk37r7]
     "apex_habitat.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
     # [#hi9721]

@@ -66,13 +66,13 @@
    "reqd": 1
   },
   {
-   "default": "Received",
+   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Draft\nReceived\nUnder Review\nPaid\nDisputed"
+   "options": "Draft\nPending Approval\nApproved\nRejected\nReceived\nUnder Review\nPaid\nDisputed"
   },
   {
    "fieldname": "utility_bill_entry_overview_col",
