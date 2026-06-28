@@ -1,5 +1,6 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from unittest.mock import MagicMock, patch
 
 # [#8evoal]
 test_ignore = [
@@ -56,3 +57,49 @@ class TestNonFinancialDepreciationSnapshot(FrappeTestCase):
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
+
+    def test_validate_uses_single_bulk_policy_fetch(self):
+        """RED→GREEN: _compute_book_values must fetch each distinct policy once,
+        not once-per-row (N+1 guard).  Three rows sharing the same policy name
+        must trigger exactly one frappe.get_doc call, not three."""
+        from apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financial_depreciation_snapshot import validate
+
+        # Build a fake policy object that satisfies the computation path.
+        fake_policy = MagicMock()
+        fake_policy.useful_life_years = 10
+        fake_policy.residual_value_pct = 10
+        fake_policy.depreciation_method = "Straight Line"
+
+        doc = frappe.get_doc({
+            "doctype": "Non-Financial Depreciation Snapshot",
+            "snapshot_date": "2026-06-30",
+            "building": "QA-BLDG",
+            "items": [
+                {"doctype": "Depreciation Snapshot Item",
+                 "article": "QA-ART-1", "original_cost_sar": 1000,
+                 "age_years": 2, "policy": "POLICY-QA-001"},
+                {"doctype": "Depreciation Snapshot Item",
+                 "article": "QA-ART-2", "original_cost_sar": 2000,
+                 "age_years": 3, "policy": "POLICY-QA-001"},
+                {"doctype": "Depreciation Snapshot Item",
+                 "article": "QA-ART-3", "original_cost_sar": 3000,
+                 "age_years": 4, "policy": "POLICY-QA-001"},
+            ],
+        })
+
+        module_path = (
+            "apex_habitat.habitat.doctype"
+            ".non_financial_depreciation_snapshot"
+            ".non_financial_depreciation_snapshot.frappe.get_doc"
+        )
+        with patch(module_path, return_value=fake_policy) as mock_get_doc:
+            validate(doc)
+
+        # All three rows share one policy name — the cache must collapse them
+        # into a single get_doc call, proving the N+1 bug is fixed.
+        self.assertEqual(
+            mock_get_doc.call_count,
+            1,
+            f"Expected exactly 1 frappe.get_doc call for 3 rows sharing the same "
+            f"policy, but got {mock_get_doc.call_count} — N+1 bug still present.",
+        )
