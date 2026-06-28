@@ -10,6 +10,9 @@ from frappe.model.document import Document
 
 class FacilityAssetCustodyAssignment(Document):
     def before_submit(self):
+        # An empty asset table means there is nothing to transfer custody for.
+        if not self.get("assets_in_custody"):
+            frappe.throw(_("Asset table cannot be empty."))
         # Custody cannot transfer until the assets are physically verified.
         if not self.all_assets_verified:
             frappe.throw(_("All Assets Physically Verified must be checked before submitting the custody assignment."))

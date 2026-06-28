@@ -93,7 +93,7 @@
    "next_state": "Approved",
    "allowed": "Fleet Manager",
    "allow_self_approval": 0,
-   "condition": ""
+   "condition": "doc.owner != frappe.session.user"
   },
   {
    "doctype": "Workflow Transition",
@@ -102,7 +102,7 @@
    "next_state": "Approved",
    "allowed": "System Manager",
    "allow_self_approval": 0,
-   "condition": ""
+   "condition": "doc.owner != frappe.session.user"
   },
   {
    "doctype": "Workflow Transition",
@@ -111,7 +111,7 @@
    "next_state": "Approved",
    "allowed": "Fleet Manager",
    "allow_self_approval": 0,
-   "condition": ""
+   "condition": "doc.owner != frappe.session.user"
   },
   {
    "doctype": "Workflow Transition",
@@ -120,7 +120,7 @@
    "next_state": "Approved",
    "allowed": "System Manager",
    "allow_self_approval": 0,
-   "condition": ""
+   "condition": "doc.owner != frappe.session.user"
   },
   {
    "doctype": "Workflow Transition",

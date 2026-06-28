@@ -149,7 +149,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
-   "idx": 14
+   "idx": 13
   },
   {
    "doctype": "Workspace Link",
@@ -157,7 +157,7 @@
    "label": "Custody Damage Register",
    "link_type": "Report",
    "link_to": "Custody Damage Register",
-   "idx": 15,
+   "idx": 14,
    "is_query_report": 1
   },
   {
@@ -166,7 +166,7 @@
    "label": "Operational Depreciation Aging",
    "link_type": "Report",
    "link_to": "Operational Depreciation Aging",
-   "idx": 16,
+   "idx": 15,
    "is_query_report": 1
   },
   {
@@ -175,7 +175,7 @@
    "label": "Intercompany Movement Register",
    "link_type": "Report",
    "link_to": "Intercompany Movement Register",
-   "idx": 17,
+   "idx": 16,
    "is_query_report": 1
   },
   {
@@ -184,7 +184,7 @@
    "label": "Accommodation Stock Balance",
    "link_type": "Report",
    "link_to": "Accommodation Stock Balance",
-   "idx": 18,
+   "idx": 17,
    "is_query_report": 1
   },
   {
@@ -193,7 +193,7 @@
    "label": "Custody Outstanding by Worker",
    "link_type": "Report",
    "link_to": "Custody Outstanding by Worker",
-   "idx": 19,
+   "idx": 18,
    "is_query_report": 1
   }
  ],

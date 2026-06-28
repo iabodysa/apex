@@ -71,7 +71,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Transactions",
-   "idx": 7
+   "idx": 1
   },
   {
    "doctype": "Workspace Link",
@@ -79,7 +79,7 @@
    "label": "Transport Request",
    "link_type": "DocType",
    "link_to": "Transport Request",
-   "idx": 8
+   "idx": 2
   },
   {
    "doctype": "Workspace Link",
@@ -87,7 +87,7 @@
    "label": "Fuel Request",
    "link_type": "DocType",
    "link_to": "Fuel Request",
-   "idx": 9
+   "idx": 3
   },
   {
    "doctype": "Workspace Link",
@@ -95,7 +95,7 @@
    "label": "Dispatch Trip",
    "link_type": "DocType",
    "link_to": "Dispatch Trip",
-   "idx": 10
+   "idx": 4
   },
   {
    "doctype": "Workspace Link",
@@ -103,7 +103,7 @@
    "label": "Issue",
    "link_type": "DocType",
    "link_to": "Issue",
-   "idx": 11
+   "idx": 5
   },
   {
    "doctype": "Workspace Link",
@@ -111,13 +111,13 @@
    "label": "Salis Vehicle",
    "link_type": "DocType",
    "link_to": "Salis Vehicle",
-   "idx": 12
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
-   "idx": 13
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -125,7 +125,7 @@
    "label": "Movement KPI Summary",
    "link_type": "Report",
    "link_to": "Movement KPI Summary",
-   "idx": 14,
+   "idx": 8,
    "is_query_report": 1
   },
   {
@@ -135,7 +135,7 @@
    "link_type": "Report",
    "link_to": "Worker Transport Plan",
    "is_query_report": 1,
-   "idx": 15
+   "idx": 9
   },
   {
    "doctype": "Workspace Link",
@@ -144,13 +144,13 @@
    "link_type": "Report",
    "link_to": "Salis Fleet Register",
    "is_query_report": 1,
-   "idx": 16
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Dashboards",
-   "idx": 17
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
@@ -158,7 +158,7 @@
    "label": "Fleet Manager Dashboard",
    "link_type": "Dashboard",
    "link_to": "Fleet Manager Dashboard",
-   "idx": 18
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -166,13 +166,13 @@
    "label": "Movement Operations Dashboard",
    "link_type": "Dashboard",
    "link_to": "Movement Operations Dashboard",
-   "idx": 19
+   "idx": 13
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Alerts",
-   "idx": 20
+   "idx": 14
   },
   {
    "doctype": "Workspace Link",
@@ -180,7 +180,7 @@
    "label": "Operations Alert",
    "link_type": "DocType",
    "link_to": "Operations Alert",
-   "idx": 21
+   "idx": 15
   }
  ],
  "charts": [],

@@ -84,6 +84,21 @@ SAFE_ALLOWLIST = [
         "own arguments (migration-time schema names, never request input); "
         "the helper never raises. Reached through ledger_index.add_unique_guarded.",
     ),
+    (
+        "habitat/api/dashboard.py",
+        "get_custody_value_in_employee_hands",
+        "Interpolates `_building_condition()` which escapes every building name "
+        "with `frappe.db.escape()` before injecting it into the WHERE clause "
+        "(see permissions.py:136). Unscoped users receive '' (no filter); scoped "
+        "users with no buildings receive '1=0'. No external input reaches SQL text.",
+    ),
+    (
+        "habitat/api/dashboard.py",
+        "get_top_custody_holders_by_value",
+        "Same as get_custody_value_in_employee_hands: interpolates "
+        "`_building_condition()` whose values are all `frappe.db.escape()`-d "
+        "building names from User Permission records, never raw request input.",
+    ),
 ]
 
 # [#2m5lk7]

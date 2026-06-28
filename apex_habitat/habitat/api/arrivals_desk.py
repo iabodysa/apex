@@ -182,13 +182,15 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     if restrict and not allowed:
         return []
 
-    # [#jibprz] The housed-exclusion set stays UNSCOPED: a worker housed in ANY
-    # building must be excluded from the arrival-candidate lists (a worker already
-    # housed elsewhere is not an arrival here). Scoping it would wrongly resurface
-    # other-estate housed workers as available candidates.
+    # [#jibprz] The housed-exclusion set is building-scoped so a building-scoped
+    # supervisor only excludes workers housed in their own buildings from the
+    # arrival-candidate lists.
+    housed_filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
+    if restrict:
+        housed_filters["building"] = ["in", allowed]
     housed = frappe.get_all(
         "Accommodation Assignment",
-        filters={"docstatus": 1, "check_out_date": ["is", "not set"]},
+        filters=housed_filters,
         fields=["party_type", "party", "employee"],
     )
     housed_emp = {h.employee for h in housed if h.employee}

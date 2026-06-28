@@ -1,6 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 import frappe
 from frappe.utils import flt, today
+from apex_habitat.habitat.permissions import _building_condition
 
 # Custom Number Card return contract: {value: n, ...df} — value holds the number,
 # the dict doubles as the format docfield. Each method takes the `filters` kwarg
@@ -85,13 +86,16 @@ def get_custody_value_in_employee_hands(filters=None):
     return rows reverse, so the net is exactly what workers still hold. One bounded
     grouped query."""
     frappe.has_permission("Accommodation Stock Ledger", "read", throw=True)
+    building_cond = _building_condition()
+    extra = f"AND {building_cond}" if building_cond else ""
     total = frappe.db.sql(
-        """
+        f"""
         SELECT COALESCE(SUM(signed_qty * COALESCE(unit_cost_sar, 0)), 0)
         FROM `tabAccommodation Stock Ledger`
         WHERE is_cancelled = 0
           AND item_type = 'Custody Article'
           AND employee IS NOT NULL AND employee != ''
+          {extra}
         """
     )
     return {"value": flt(total[0][0]) if total else 0.0, "fieldtype": "Currency", "options": "SAR"}
@@ -103,13 +107,16 @@ def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:
     (qty * unit_cost_sar) over non-cancelled Custody Article rows with an employee
     set, grouped by employee. Holders whose net value is not positive are dropped.
     One bounded grouped query; returns ``[{employee, value}]`` value-desc."""
+    building_cond = _building_condition()
+    extra = f"AND {building_cond}" if building_cond else ""
     rows = frappe.db.sql(
-        """
+        f"""
         SELECT employee, COALESCE(SUM(qty * COALESCE(unit_cost_sar, 0)), 0) AS value
         FROM `tabAccommodation Stock Ledger`
         WHERE is_cancelled = 0
           AND item_type = 'Custody Article'
           AND employee IS NOT NULL AND employee != ''
+          {extra}
         GROUP BY employee
         HAVING value > 0
         ORDER BY value DESC

@@ -57,11 +57,12 @@ def before_insert(doc, method=None):
 
 
 def validate(doc, method=None):
+    _populate_location_from_token(doc)
     sync_party_employee(doc)
-    # The token is resolved to a building only in before_insert; re-checking on every
-    # save would block a manual update of an already-bound request (its building is
-    # never re-derived on update). Validate the token binding only at first bind.
-    if doc.is_new() and doc.location_token and not doc.building:
+    # Guard: if a token is present but produced no building, the token is invalid or
+    # inactive. Checked here (not only in before_insert) so a freshly typed token on
+    # a save/update also gets resolved and validated.
+    if doc.location_token and not doc.building:
         frappe.throw(_("Invalid or inactive location token."))
 
     _validate_status_transition(doc)

@@ -34,7 +34,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import now_datetime
+from frappe.utils import get_time, now_datetime
 
 from apex_habitat.salis.utils import (
     add_timeline_note,
@@ -233,6 +233,11 @@ class DispatchTrip(Document):
             frappe.throw(
                 _("Return Time cannot be earlier than Depart Time.")
             )
+        # Safe time-order check using get_time for robust comparison across string
+        # representations (HH:MM, HH:MM:SS, datetime.time, timedelta).
+        if self.depart_time and self.return_time:
+            if get_time(self.return_time) < get_time(self.depart_time):
+                frappe.throw(_("Return Time must be after Depart Time"))
 
     def on_submit(self):
         if self.status == "Completed" and self.odometer_end and self.vehicle:
