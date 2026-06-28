@@ -187,7 +187,7 @@ def consumable_custody_expiry_watch() -> None:
     rows = frappe.db.sql(
         """
         SELECT sle.item AS article, sle.employee AS employee,
-               SUM(sle.qty) AS net_qty, MIN(sle.posting_date) AS first_held,
+               SUM(sle.signed_qty) AS net_qty, MIN(sle.posting_date) AS first_held,
                art.article_name AS article_name,
                art.consumable_lifespan_months AS lifespan
         FROM `tabAccommodation Stock Ledger` sle

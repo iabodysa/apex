@@ -84,7 +84,7 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
 
         self.assertEqual(res["target_doctype"], "Habitat Safety Incident")
         inc = frappe.get_doc("Habitat Safety Incident", res["target_document"])
-        self.assertEqual(inc.accommodation_building, "RRC-BLDG")
+        self.assertEqual(inc.building, "RRC-BLDG")
         self.assertEqual(inc.severity, "Critical")
 
         req.reload()

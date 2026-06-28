@@ -15,8 +15,8 @@ def _h(n=4):
 def _bal(article, building, employee=None):
     filters = {"item": article, "building": building, "is_cancelled": 0}
     filters["employee"] = employee if employee else ["is", "not set"]
-    rows = frappe.get_all("Accommodation Stock Ledger", filters=filters, fields=["qty"])
-    return flt(sum(flt(r.qty) for r in rows))
+    rows = frappe.get_all("Accommodation Stock Ledger", filters=filters, fields=["signed_qty"])
+    return flt(sum(flt(r.signed_qty) for r in rows))
 
 
 class TestCustodyStockIntegration(ApexHabitatTestCase):

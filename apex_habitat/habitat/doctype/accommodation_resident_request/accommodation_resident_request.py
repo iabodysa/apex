@@ -273,7 +273,7 @@ def _build_maintenance_request(source):
 def _build_safety_incident(source):
     target = frappe.new_doc("Habitat Safety Incident")
     target.incident_datetime = frappe.utils.now_datetime()
-    target.accommodation_building = source.building
+    target.building = source.building
     target.specific_location = source.issue_location
     # [#qblrl5]
     _severity_map = {"Critical": "Critical", "High": "High", "Medium": "Medium", "Low": "Low"}

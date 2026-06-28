@@ -149,14 +149,14 @@ def _ordered_stops(route_plan):
         filters={"parent": route_plan, "parenttype": "Route Plan"},
         fields=[
             "name",
-            "sequence",
+            "idx",
             "stop_name",
             "accommodation_building",
             "location",
             "planned_time",
             "passengers",
         ],
-        order_by="sequence asc, idx asc",
+        order_by="idx asc",
     )
     # Bulk-prefetch the housing-pickup buildings in one query keyed on the stops'
     # building ids, instead of one get_value per stop (N+1). Indexed by name below.
@@ -189,7 +189,7 @@ def _ordered_stops(route_plan):
         stops.append(
             {
                 "stop_name": r.get("stop_name"),
-                "sequence": r.get("sequence"),
+                "sequence": r.get("idx"),
                 "location": r.get("location"),
                 "planned_time": _fmt_time(r.get("planned_time")),
                 "expected_passengers": r.get("passengers"),

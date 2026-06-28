@@ -87,7 +87,7 @@ def get_custody_value_in_employee_hands(filters=None):
     frappe.has_permission("Accommodation Stock Ledger", "read", throw=True)
     total = frappe.db.sql(
         """
-        SELECT COALESCE(SUM(qty * COALESCE(unit_cost_sar, 0)), 0)
+        SELECT COALESCE(SUM(signed_qty * COALESCE(unit_cost_sar, 0)), 0)
         FROM `tabAccommodation Stock Ledger`
         WHERE is_cancelled = 0
           AND item_type = 'Custody Article'

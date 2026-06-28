@@ -11,6 +11,7 @@
   "rp_request_col",
   "transport_request",
   "rp_sec_assignment",
+  "route_assignment",
   "project",
   "driver",
   "rp_assignment_col_1",
@@ -59,6 +60,14 @@
    "fieldname": "rp_sec_assignment",
    "fieldtype": "Section Break",
    "label": "Assignment"
+  },
+  {
+   "fieldname": "route_assignment",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Route Assignment",
+   "options": "Route Assignment",
+   "search_index": 1
   },
   {
    "fieldname": "project",

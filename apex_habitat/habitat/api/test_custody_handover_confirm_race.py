@@ -45,9 +45,9 @@ def _store_bal(article, building):
             "employee": ["is", "not set"],
             "is_cancelled": 0,
         },
-        fields=["qty"],
+        fields=["signed_qty"],
     )
-    return flt(sum(flt(r.qty) for r in rows))
+    return flt(sum(flt(r.signed_qty) for r in rows))
 
 
 class TestConfirmHandoverRace(ApexHabitatTestCase):
@@ -144,7 +144,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
                 "voucher_type": "Custody Handover",
                 "voucher_no": handover.name,
                 "building": self.dest,
-                "qty": [">", 0],
+                "signed_qty": [">", 0],
                 "is_cancelled": 0,
             },
         )

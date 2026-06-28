@@ -356,7 +356,7 @@ class TestReportScopeIntegration(FrappeTestCase):
             "posting_date": frappe.utils.today(),
             "item_type": "Custody Article",
             "item": article,
-            "qty": qty,
+            "signed_qty": qty,
             "unit_cost_sar": 10,
             "building": building,
             "employee": employee,

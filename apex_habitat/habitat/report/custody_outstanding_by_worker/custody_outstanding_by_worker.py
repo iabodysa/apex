@@ -62,7 +62,7 @@ def get_data(filters):
     rows = frappe.get_all(
         "Accommodation Stock Ledger",
         filters=conditions,
-        fields=["employee", "building", "item", "item_name", "uom", "qty", "unit_cost_sar"],
+        fields=["employee", "building", "item", "item_name", "uom", "signed_qty", "unit_cost_sar"],
     )
 
     agg = {}
@@ -73,7 +73,7 @@ def get_data(filters):
             "item_name": r.item_name, "uom": r.uom,
             "unit_cost_sar": flt(r.unit_cost_sar), "balance_qty": 0.0,
         })
-        bucket["balance_qty"] += flt(r.qty)
+        bucket["balance_qty"] += flt(r.signed_qty)
         if r.unit_cost_sar:
             bucket["unit_cost_sar"] = flt(r.unit_cost_sar)
 

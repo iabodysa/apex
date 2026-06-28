@@ -58,7 +58,7 @@ def get_data(filters):
         "Accommodation Stock Ledger",
         filters=conditions,
         fields=["building", "employee", "item_type", "item", "item_name", "uom",
-                "qty", "unit_cost_sar"],
+                "signed_qty", "unit_cost_sar"],
     )
 
     # [#p7co0q]
@@ -70,7 +70,7 @@ def get_data(filters):
             "item": r.item, "item_name": r.item_name, "uom": r.uom,
             "unit_cost_sar": flt(r.unit_cost_sar), "balance_qty": 0.0,
         })
-        bucket["balance_qty"] += flt(r.qty)
+        bucket["balance_qty"] += flt(r.signed_qty)
         if r.unit_cost_sar:
             bucket["unit_cost_sar"] = flt(r.unit_cost_sar)
 

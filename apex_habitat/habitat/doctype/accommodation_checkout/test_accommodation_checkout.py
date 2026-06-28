@@ -251,7 +251,7 @@ class TestAccommodationCheckout(FrappeTestCase):
         frappe.get_doc({
             "doctype": "Accommodation Stock Ledger", "naming_series": "ACC-SLE-.YYYY.-.######",
             "posting_date": "2026-06-15", "item_type": "Custody Article", "item": article,
-            "qty": qty, "unit_cost_sar": 100, "building": fx.building, "employee": fx.emp,
+            "signed_qty": qty, "unit_cost_sar": 100, "building": fx.building, "employee": fx.emp,
         }).insert(ignore_permissions=True)
 
     def _draft_checkout(self, fx, reason="End of Contract"):

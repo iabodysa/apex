@@ -5,6 +5,7 @@ to that series' consolidated note (newest patch first inside).
 
 ## Latest
 
+- [1.60.27](v1/v1_60_27.md)
 - [1.60.26](v1/v1_60_26.md)
 - [1.60.25](v1/v1_60_25.md)
 - [1.60.24](v1/v1_60_24.md)

@@ -161,10 +161,10 @@ def _outstanding_custody_for_employee(employee):
             "item_type": "Custody Article",
             "employee": employee,
         },
-        fields=["item", "qty"],
+        fields=["item", "signed_qty"],
     )
     for r in rows:
-        outstanding[r.item] = outstanding.get(r.item, 0) + (r.qty or 0)
+        outstanding[r.item] = outstanding.get(r.item, 0) + (r.signed_qty or 0)
     return {article: qty for article, qty in outstanding.items() if qty > 0}
 
 

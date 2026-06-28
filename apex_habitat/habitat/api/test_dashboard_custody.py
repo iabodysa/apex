@@ -56,7 +56,7 @@ class TestDashboardCustody(FrappeTestCase):
             "item": self.article,
             "item_name": "Test Article",
             "uom": "Nos",
-            "qty": qty,
+            "signed_qty": qty,
             "unit_cost_sar": self.unit_cost,
             "building": self.building,
             "employee": employee,
@@ -78,7 +78,7 @@ class TestDashboardCustody(FrappeTestCase):
         # direct sum scoped to this run's unique employee.
         seeded = frappe.db.sql(
             """
-            SELECT COALESCE(SUM(qty * COALESCE(unit_cost_sar, 0)), 0)
+            SELECT COALESCE(SUM(signed_qty * COALESCE(unit_cost_sar, 0)), 0)
             FROM `tabAccommodation Stock Ledger`
             WHERE is_cancelled = 0
               AND item_type = 'Custody Article'
