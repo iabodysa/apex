@@ -303,6 +303,16 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
         Assignment when a template has a legacy building set in the DB."""
         from apex_habitat.patches.v1_x.migrate_scheduled_task_template_to_assignments import execute
 
+        # A fresh site built from the current JSON never created the legacy `building`
+        # column (it lingers only on incrementally-migrated sites). Ensure it exists
+        # BEFORE any write this test makes, so the DDL runs with no pending transaction
+        # write (avoiding ImplicitCommitError) and we can simulate the pre-B legacy state.
+        if "building" not in frappe.db.get_table_columns("Scheduled Task Template"):
+            frappe.db.commit()
+            frappe.db.sql(
+                "ALTER TABLE `tabScheduled Task Template` ADD COLUMN `building` varchar(140)"
+            )
+
         # Create a template without items (migration doesn't need them).
         tmpl_name = "Test Template T6 Migration"
         existing = frappe.db.get_value(

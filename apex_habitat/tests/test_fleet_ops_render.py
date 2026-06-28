@@ -279,13 +279,16 @@ class TestFleetOpsRender(FrappeTestCase):
         # Guard against a silently-passing suite: the cards/charts/onboarding the
         # workspace JSON actually references must still exist, so the proofs above
         # ran against the real shipped records.
-        content = json.loads(frappe.db.get_value("Workspace", "Fleet Operations", "content") or "[]")
+        content = json.loads(frappe.db.get_value("Workspace", "fleet", "content") or "[]")
         referenced_cards = {b["data"]["number_card_name"] for b in content if b.get("type") == "number_card"}
         referenced_charts = {b["data"]["chart_name"] for b in content if b.get("type") == "chart"}
-        self.assertEqual(
+        # The 14->8 consolidation folded Fleet Operations into the 'fleet' workspace,
+        # which also carries fuel/maintenance cards proven in their own tests; assert the
+        # render-tested cards are present (a subset), not that they are the only ones.
+        self.assertLessEqual(
             set(FLEET_CARDS),
             referenced_cards,
-            "the tested card set must match the Fleet Operations workspace's number_card blocks",
+            f"render-tested cards missing from the fleet workspace: {set(FLEET_CARDS) - referenced_cards}",
         )
         self.assertEqual(
             set(FLEET_CHARTS),
