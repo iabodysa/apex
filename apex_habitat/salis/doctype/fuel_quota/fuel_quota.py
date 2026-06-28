@@ -56,4 +56,14 @@ class FuelQuota(Document):
 				)
 			)
 
+
+def on_doctype_update():
+	"""Belt-and-suspenders: a composite DB-level unique index prevents any duplicate
+	that slips past the application-layer guard (e.g. direct DB inserts or a race
+	that bypasses validate). Applied once at migrate/patch time."""
+	frappe.db.add_unique(
+		"Fuel Quota",
+		["vehicle", "period_month"],
+		constraint_name="uq_fuel_quota_vehicle_period",
+	)
 	# [#qzsfcl]

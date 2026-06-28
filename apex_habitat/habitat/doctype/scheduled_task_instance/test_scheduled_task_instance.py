@@ -53,3 +53,27 @@ class TestScheduledTaskInstance(FrappeTestCase):
         })
         with self.assertRaises(frappe.ValidationError):
             validate(doc)
+
+    def test_mark_completed_stamps_completed_date(self):
+        """mark_completed() must set completed_date to today (P-080)."""
+        from apex_habitat.habitat.doctype.scheduled_task_instance.scheduled_task_instance import mark_completed
+
+        doc = frappe.get_doc({
+            "doctype": "Scheduled Task Instance",
+            "naming_series": "STI-.YYYY.-.####",
+            "template": "QA TEMPLATE",
+            "due_date": frappe.utils.today(),
+            "status": "Open",
+        })
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        # Set docstatus=1 directly to satisfy mark_completed()'s guard without
+        # running submit()'s link-validation (QA TEMPLATE is a stub name).
+        frappe.db.set_value("Scheduled Task Instance", doc.name, "docstatus", 1)
+        doc.reload()
+        try:
+            mark_completed(doc.name)
+            doc.reload()
+            self.assertEqual(doc.completed_date, frappe.utils.getdate())
+        finally:
+            frappe.db.set_value("Scheduled Task Instance", doc.name, "docstatus", 2)
+            frappe.delete_doc("Scheduled Task Instance", doc.name, force=True, ignore_permissions=True)
