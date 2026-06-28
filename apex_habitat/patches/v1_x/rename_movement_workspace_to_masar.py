@@ -18,7 +18,7 @@ def execute():
 	if not frappe.db.exists("Workspace", "Movement"):
 		return
 	if frappe.db.exists("Workspace", "Masar"):
-		frappe.delete_doc("Workspace", "Movement", ignore_permissions=True, force=True)
+		frappe.delete_doc("Workspace", "Movement", ignore_permissions=True, force=True)  # audit-ok migration: system-context workspace cleanup
 	else:
-		frappe.rename_doc("Workspace", "Movement", "Masar", force=True, ignore_permissions=True)
+		frappe.rename_doc("Workspace", "Movement", "Masar", force=True, ignore_permissions=True)  # audit-ok migration: system-context workspace rename
 	frappe.clear_cache()

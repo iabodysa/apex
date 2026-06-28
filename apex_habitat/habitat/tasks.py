@@ -1733,7 +1733,7 @@ def weekly_custody_digest() -> None:
     value_by_building: dict[str, float] = defaultdict(float)
     for row in frappe.db.sql(
         """
-        SELECT building, COALESCE(SUM(qty * COALESCE(unit_cost_sar, 0)), 0) AS value
+        SELECT building, COALESCE(SUM(signed_qty * COALESCE(unit_cost_sar, 0)), 0) AS value
         FROM `tabAccommodation Stock Ledger`
         WHERE is_cancelled = 0
           AND item_type = 'Custody Article'

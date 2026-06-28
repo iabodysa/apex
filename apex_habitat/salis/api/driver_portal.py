@@ -1664,7 +1664,7 @@ def _stop_progress_map(dispatch_trip, driver):
 
 def _route_stop_names(route_plan):
 	"""The Route Stop child row names for a plan, in the SAME order masar._ordered_stops
-	returns its stops (sequence asc, idx asc) — so they zip 1:1 onto that list to give each
+	returns its stops (idx asc) — so they zip 1:1 onto that list to give each
 	stop a stable identity for progress tracking. masar drops the row name, so it is
 	re-fetched here. Read-only."""
 	if not route_plan:
@@ -1673,7 +1673,7 @@ def _route_stop_names(route_plan):
 		"Route Stop",
 		filters={"parent": route_plan, "parenttype": "Route Plan"},
 		pluck="name",
-		order_by="sequence asc, idx asc",
+		order_by="idx asc",
 	)
 
 

@@ -126,9 +126,9 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         rows = frappe.get_all(
             "Accommodation Stock Ledger",
             filters={"item_type": "Custody Article", "employee": party, "is_cancelled": 0},
-            fields=["qty"],
+            fields=["signed_qty"],
         )
-        custody_count = int(sum(int(r.qty or 0) for r in rows))
+        custody_count = int(sum(int(r.signed_qty or 0) for r in rows))
 
     token = (
         frappe.db.get_value(

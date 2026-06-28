@@ -1060,7 +1060,7 @@ def get_worker_custody(token=None):
             "item",
             "item_name",
             "uom",
-            "qty",
+            "signed_qty",
             "posting_date",
             "voucher_type",
             "voucher_no",
@@ -1083,10 +1083,10 @@ def get_worker_custody(token=None):
                 "_issue_voucher": None,
             },
         )
-        bucket["qty"] += flt(r.qty)
+        bucket["qty"] += flt(r.signed_qty)
         # [#cstdy1] latest issue (positive) row drives the worker-facing
         # "received date" + the source Custody Issue used to name the supervisor
-        if flt(r.qty) > 0:
+        if flt(r.signed_qty) > 0:
             bucket["received_date"] = _fmt_date(r.posting_date)
             if r.voucher_type == "Custody Issue" and r.voucher_no:
                 bucket["_issue_voucher"] = r.voucher_no

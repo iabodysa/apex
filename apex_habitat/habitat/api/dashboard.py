@@ -111,7 +111,7 @@ def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:
     extra = f"AND {building_cond}" if building_cond else ""
     rows = frappe.db.sql(
         f"""
-        SELECT employee, COALESCE(SUM(qty * COALESCE(unit_cost_sar, 0)), 0) AS value
+        SELECT employee, COALESCE(SUM(signed_qty * COALESCE(unit_cost_sar, 0)), 0) AS value
         FROM `tabAccommodation Stock Ledger`
         WHERE is_cancelled = 0
           AND item_type = 'Custody Article'

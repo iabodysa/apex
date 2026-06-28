@@ -82,7 +82,7 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
         Ledger = frappe.qb.DocType("Accommodation Stock Ledger")
         rows = (
             frappe.qb.from_(Ledger)
-            .select(Ledger.item, Ledger.qty)
+            .select(Ledger.item, Ledger.signed_qty)
             .where(Ledger.item_type == "Custody Article")
             .where(Ledger.building == building)
             .where(Ledger.is_cancelled == 0)
@@ -90,7 +90,7 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
             .run(as_dict=True)
         )
         for row in rows:
-            balances[row.item] = balances.get(row.item, 0.0) + flt(row.qty)
+            balances[row.item] = balances.get(row.item, 0.0) + flt(row.signed_qty)
 
     has_images = False
     for art in articles:
@@ -229,7 +229,7 @@ def _article_store_balance(article: str, building: str | None) -> float | None:
     Ledger = frappe.qb.DocType("Accommodation Stock Ledger")
     rows = (
         frappe.qb.from_(Ledger)
-        .select(Ledger.qty)
+        .select(Ledger.signed_qty)
         .where(Ledger.item_type == "Custody Article")
         .where(Ledger.item == article)
         .where(Ledger.building == building)
@@ -237,7 +237,7 @@ def _article_store_balance(article: str, building: str | None) -> float | None:
         .where(Ledger.employee.isnull())
         .run(as_dict=True)
     )
-    return flt(sum(flt(r.qty) for r in rows))
+    return flt(sum(flt(r.signed_qty) for r in rows))
 
 
 @frappe.whitelist(methods=["POST"])
