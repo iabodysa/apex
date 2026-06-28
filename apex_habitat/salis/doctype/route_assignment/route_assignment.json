@@ -7,6 +7,7 @@
  "field_order": [
   "ra_tab_overview",
   "ra_sec_assignment",
+  "route_template",
   "work_shift",
   "shift_name",
   "ra_sec_assignment_col",
@@ -26,6 +27,15 @@
    "fieldname": "ra_sec_assignment",
    "fieldtype": "Section Break",
    "label": "Route Assignment"
+  },
+  {
+   "fieldname": "route_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Route Template",
+   "options": "Route Template",
+   "search_index": 1
   },
   {
    "fieldname": "work_shift",
@@ -100,7 +110,7 @@
    "link_fieldname": "route_assignment"
   }
  ],
- "modified": "2026-06-28 00:00:00.000000",
+ "modified": "2026-06-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Assignment",
