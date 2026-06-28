@@ -49,7 +49,7 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
         "item": item,
         "item_name": item_name,
         "uom": uom,
-        "qty": flt(qty),
+        "signed_qty": flt(qty),
         "unit_cost_sar": unit_cost,
         "building": building,
         "cost_center": cost_center,
@@ -80,7 +80,7 @@ def get_store_balance(item_type: str, item: str, building: str, employee=None,
     Ledger = frappe.qb.DocType("Accommodation Stock Ledger")
     q = (
         frappe.qb.from_(Ledger)
-        .select(Ledger.qty)
+        .select(Ledger.signed_qty)
         .where(Ledger.item_type == item_type)
         .where(Ledger.item == item)
         .where(Ledger.building == building)
@@ -90,7 +90,7 @@ def get_store_balance(item_type: str, item: str, building: str, employee=None,
     if for_update:
         q = q.for_update()
     rows = q.run(as_dict=True)
-    return flt(sum(flt(r.qty) for r in rows))
+    return flt(sum(flt(r.signed_qty) for r in rows))
 
 
 def has_stock_entries(voucher_type: str, voucher_no: str) -> bool:
@@ -107,12 +107,12 @@ def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
     rows = frappe.get_all(
         "Accommodation Stock Ledger",
         filters={"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
-        fields=["name", "item_type", "item", "qty", "building", "employee",
+        fields=["name", "item_type", "item", "signed_qty", "building", "employee",
                 "from_building", "to_building"],
     )
     for r in rows:
         rev = post_stock_entry(
-            item_type=r.item_type, item=r.item, qty=-flt(r.qty), building=r.building,
+            item_type=r.item_type, item=r.item, qty=-flt(r.signed_qty), building=r.building,
             employee=r.employee, voucher_type=voucher_type, voucher_no=voucher_no,
             from_building=r.from_building, to_building=r.to_building,
             reversal_of=r.name, remarks="Reversal",

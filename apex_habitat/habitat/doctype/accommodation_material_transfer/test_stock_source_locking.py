@@ -181,7 +181,7 @@ def _locked_balance(item, building, wait=True):
     Ledger = frappe.qb.DocType("Accommodation Stock Ledger")
     q = (
         frappe.qb.from_(Ledger)
-        .select(Ledger.qty)
+        .select(Ledger.signed_qty)
         .where(Ledger.item_type == "Custody Article")
         .where(Ledger.item == item)
         .where(Ledger.building == building)
@@ -190,7 +190,7 @@ def _locked_balance(item, building, wait=True):
         .for_update(nowait=not wait)
     )
     from frappe.utils import flt
-    return flt(sum(flt(r.qty) for r in q.run(as_dict=True)))
+    return flt(sum(flt(r.signed_qty) for r in q.run(as_dict=True)))
 
 
 def _read(path):

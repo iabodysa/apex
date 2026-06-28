@@ -25,7 +25,7 @@
    "default": 1
   },
   {
-   "fieldname": "col1",
+   "fieldname": "qr_col_identity",
    "fieldtype": "Column Break"
   },
   {
@@ -34,7 +34,7 @@
    "label": "Last Printed On"
   },
   {
-   "fieldname": "sec2",
+   "fieldname": "qr_sec_scope",
    "fieldtype": "Section Break",
    "label": "Scope"
   },
@@ -122,9 +122,9 @@
   "qr_sec_identity",
   "poster_title",
   "is_active",
-  "col1",
+  "qr_col_identity",
   "last_printed_on",
-  "sec2",
+  "qr_sec_scope",
   "accommodation_site",
   "building",
   "room",

@@ -10,7 +10,7 @@
  "event": "Value Change",
  "idx": 0,
  "is_standard": 1,
- "message": "{{ _(\"A severe or critical safety incident has been reported and requires immediate management attention\") }}: {{ doc.name }} ({{ doc.severity }} — {{ doc.incident_type }}, {{ doc.accommodation_building }}).<br><br>\n<a href=\"/app/habitat-safety-incident/{{ doc.name }}\">{{ _(\"Open the incident record\") }}</a>",
+ "message": "{{ _(\"A severe or critical safety incident has been reported and requires immediate management attention\") }}: {{ doc.name }} ({{ doc.severity }} — {{ doc.incident_type }}, {{ doc.building }}).<br><br>\n<a href=\"/app/habitat-safety-incident/{{ doc.name }}\">{{ _(\"Open the incident record\") }}</a>",
  "message_type": "HTML",
  "module": "Habitat",
  "name": "Habitat - Severe Safety Incident",

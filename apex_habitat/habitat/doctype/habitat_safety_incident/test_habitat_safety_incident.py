@@ -27,7 +27,7 @@ class TestHabitatSafetyIncident(FrappeTestCase):
             "doctype": "Habitat Safety Incident",
             "naming_series": "HSI-.YYYY.-.#####",
             "incident_datetime": "2026-06-15 10:00:00",
-            "accommodation_building": "QA-BLDG",
+            "building": "QA-BLDG",
             "severity": "High",
             "description": "Smoke detected in stairwell.",
         }
@@ -43,7 +43,7 @@ class TestHabitatSafetyIncident(FrappeTestCase):
 
     def test_missing_building_raises(self):
         doc = self._base()
-        doc.accommodation_building = None
+        doc.building = None
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
@@ -62,3 +62,12 @@ class TestHabitatSafetyIncident(FrappeTestCase):
         doc = self._base(status="Closed")
         with self.assertRaises(frappe.exceptions.ValidationError):
             doc.insert(ignore_permissions=True, ignore_links=True)
+
+    def test_building_field_renamed(self):
+        """Regression: field must be 'building', not the old 'accommodation_building'."""
+        doc = self._base()
+        self.assertTrue(hasattr(doc, "building"), "'building' field is missing from the document")
+        self.assertFalse(
+            hasattr(doc, "accommodation_building"),
+            "Old fieldname 'accommodation_building' still present — rename incomplete",
+        )

@@ -17,7 +17,7 @@ class TestAccommodationStockLedger(FrappeTestCase):
             "posting_date": "2026-06-01",
             "item_type": "Custody Article",
             "item": "SLE-SMOKE-ITEM",
-            "qty": 1,
+            "signed_qty": 1,
             "building": "SLE-SMOKE-BLDG",
         })
         doc.insert(ignore_permissions=True, ignore_links=True)

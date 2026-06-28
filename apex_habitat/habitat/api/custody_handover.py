@@ -126,7 +126,7 @@ def _receive_leg_posted(doc) -> bool:
             "voucher_type": VOUCHER_TYPE,
             "voucher_no": doc.name,
             "building": doc.to_building,
-            "qty": [">", 0],
+            "signed_qty": [">", 0],
             "is_cancelled": 0,
         },
     ))

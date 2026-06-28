@@ -9,7 +9,7 @@
   "habitat_safety_incident_tab_overview",
   "habitat_safety_incident_sec_overview",
   "incident_datetime",
-  "accommodation_building",
+  "building",
   "specific_location",
   "habitat_safety_incident_overview_col",
   "incident_type",
@@ -47,7 +47,7 @@
    "reqd": 1
   },
   {
-   "fieldname": "accommodation_building",
+   "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
@@ -222,6 +222,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "accommodation_building",
+ "title_field": "building",
  "track_changes": 1
 }
