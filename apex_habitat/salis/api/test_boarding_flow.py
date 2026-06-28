@@ -341,6 +341,112 @@ class TestBoardingFlow(FrappeTestCase):
         self.assertEqual(state["status"], "Driver Rejected")
         self.assertEqual(state["reject_count"], 1)
 
+    # P-046: driver-arrived signal reaches the worker channel
+
+    def _seed_arrival_route(self):
+        """Give the trip a Route Plan + one Route Stop on a fresh building, link the
+        trip to that plan, and open a Trip Start Log. Returns (building, route_stop,
+        log) — the worker's own pickup stop, the join _worker_pickup_arrival keys on."""
+        building = frappe.get_doc(
+            {"doctype": "Accommodation Building", "building_name": "TBF-BLD-" + _h()}
+        )
+        building.flags.ignore_mandatory = True
+        building.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        self._cleanup.append(("Accommodation Building", building.name))
+
+        plan = frappe.get_doc(
+            {
+                "doctype": "Route Plan",
+                "naming_series": "RP-.######",
+                "route_name": "TBF-RP-" + _h(),
+                "transport_request": self.request.name,
+            }
+        )
+        plan.append(
+            "stops", {"stop_name": "Pickup", "accommodation_building": building.name}
+        )
+        plan.flags.ignore_validate = True
+        plan.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        self._cleanup.append(("Route Plan", plan.name))
+
+        frappe.db.set_value("Dispatch Trip", self.trip.name, "route_plan", plan.name)
+        route_stop = frappe.db.get_value(
+            "Route Stop", {"parent": plan.name, "parenttype": "Route Plan"}, "name"
+        )
+        # An open Trip Start Log is where Trip Stop Progress (the arrival flag) lives.
+        log = frappe.get_doc(
+            {
+                "doctype": "Trip Start Log",
+                "dispatch_trip": self.trip.name,
+                "driver": self.driver.name,
+                "route_plan": plan.name,
+                "status": "Started",
+                "start_datetime": now_datetime(),
+            }
+        )
+        log.insert(ignore_permissions=True)
+        return building.name, route_stop, log.name
+
+    def test_driver_arrival_publishes_and_reaches_worker_poll(self):
+        # Server-side P-046 contract: the driver's arrival mark (1) publishes an
+        # explicit boarding_arrived event to the Dispatch Trip room, and (2) is read
+        # back by the guest worker's poll as driver_arrived — the worker channel,
+        # since a guest worker has no socket.
+        building, route_stop, _log = self._seed_arrival_route()
+        boarding_flow.ensure_trip_boarding_state(self.trip.name)
+
+        from apex_habitat.salis.api import driver_portal
+
+        # mark_arrived is gated on the portal being enabled.
+        frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
+        self.addCleanup(
+            lambda: frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 0)
+        )
+
+        # Drive mark_arrived with the trip scoped to our test driver (the user->driver
+        # session link is covered by test_get_driver_for_user; here we assert the
+        # arrival contract, not the link plumbing).
+        with patch.object(driver_portal, "_resolve_driver", return_value=self.driver.name), patch(
+            "frappe.publish_realtime"
+        ) as pub:
+            driver_portal.mark_arrived(self.trip.name, route_stop, arrived=1)
+
+        # (1) the explicit arrival event went to the Dispatch Trip room, after_commit.
+        arrival_calls = [
+            c for c in pub.call_args_list if c.args and c.args[0] == "boarding_arrived"
+        ]
+        self.assertEqual(len(arrival_calls), 1, "mark_arrived publishes one boarding_arrived event")
+        kwargs = arrival_calls[0].kwargs
+        self.assertEqual(kwargs.get("doctype"), "Dispatch Trip")
+        self.assertTrue(kwargs.get("after_commit"), "arrival publishes after_commit (P-032 pattern)")
+        self.assertEqual(arrival_calls[0].args[1].get("dispatch_trip"), self.trip.name)
+        self.assertEqual(arrival_calls[0].args[1].get("route_stop"), route_stop)
+
+        # The durable arrival flag landed on the Trip Stop Progress row.
+        self.assertTrue(
+            frappe.db.get_value(
+                "Trip Stop Progress", {"route_stop": route_stop, "arrived": 1}, "name"
+            ),
+            "the arrival flag is persisted on the stop-progress rail",
+        )
+
+        # (2) the guest worker's poll surfaces driver_arrived for their own pickup
+        # stop. The masar resolver returns the worker's building (4th tuple element),
+        # the building-match _worker_pickup_arrival keys on.
+        with _patch_masar_resolver(self.trip.name, self.request.name, building=building):
+            state = boarding_flow.worker_trip_boarding(token="t")
+        self.assertIsNotNone(state.get("driver_arrived"), "the worker poll delivers the arrival")
+        self.assertTrue(state["driver_arrived"]["arrived"])
+
+    def test_worker_poll_silent_before_arrival(self):
+        # Before the driver marks arrival, the worker poll must NOT claim the driver
+        # arrived (driver_arrived stays None — the client shows nothing).
+        building, _route_stop, _log = self._seed_arrival_route()
+        boarding_flow.ensure_trip_boarding_state(self.trip.name)
+        with _patch_masar_resolver(self.trip.name, self.request.name, building=building):
+            state = boarding_flow.worker_trip_boarding(token="t")
+        self.assertIsNone(state.get("driver_arrived"), "no arrival signal before the driver marks it")
+
 
 class _patch_masar_resolver:
     """Patch masar._resolve_worker + _worker_today_dispatch_trip (the identity +
@@ -348,9 +454,10 @@ class _patch_masar_resolver:
     need not provision a Masar Worker Token. Patches them where boarding_flow
     imports them (function-local imports), i.e. on the masar module itself."""
 
-    def __init__(self, dispatch_trip, transport_request):
+    def __init__(self, dispatch_trip, transport_request, building=None):
         self.dispatch_trip = dispatch_trip
         self.transport_request = transport_request
+        self.building = building
         self._patches = []
 
     def __enter__(self):
@@ -367,7 +474,7 @@ class _patch_masar_resolver:
         p2 = patch.object(
             masar,
             "_worker_today_dispatch_trip",
-            return_value=(self.dispatch_trip, self.transport_request, "Gate", None),
+            return_value=(self.dispatch_trip, self.transport_request, "Gate", self.building),
         )
         self._patches = [p1, p2]
         for p in self._patches:

@@ -136,6 +136,13 @@ class TestMaintenanceWorkOrderCancel(FrappeTestCase):
             pluck="name",
         )
 
+    def _cost_ledger_rows(self, wo_name, **extra):
+        f = {"source_doctype": "Maintenance Work Order", "source_name": wo_name}
+        f.update(extra)
+        return frappe.get_all(
+            "Maintenance Cost Ledger", filters=f, fields=["name", "amount", "reversal_of"]
+        )
+
     def test_cancel_reverses_memo_and_releases_request(self):
         from apex_habitat.habitat.doctype.maintenance_work_order.maintenance_work_order import (
             mark_completed,
@@ -145,20 +152,35 @@ class TestMaintenanceWorkOrderCancel(FrappeTestCase):
         mr = self._submit_request(building, room)
         wo = self._submit_work_order(mr, building)
         try:
-            # Completion posts the memo and drives the request to Closed.
+            # Completion posts the aggregate memo + the immutable per-item cost
+            # ledger original, and drives the request to Closed.
             mark_completed(wo.name)
             self.assertEqual(len(self._ledger_rows(wo.name)), 1,
                              "completion should post exactly one ledger memo")
+            originals = self._cost_ledger_rows(wo.name, reversal_of=["is", "not set"])
+            self.assertEqual(len(originals), 1,
+                             "completion should post one Maintenance Cost Ledger original")
+            self.assertEqual(originals[0]["amount"], 25)
             self.assertEqual(
                 frappe.db.get_value("Maintenance Request", mr.name, "status"), "Closed")
 
-            # Cancel must undo both.
+            # Cancel must undo the memo, reverse the immutable cost ledger, and
+            # release the request.
             wo.reload()
             wo.cancellation_reason = "Duplicate work order"
             wo.cancel()
 
             self.assertEqual(self._ledger_rows(wo.name), [],
                              "cancel must delete the orphan ledger memo")
+            # The immutable cost ledger is reversed (negative mirror), never deleted:
+            # the original survives and a reversal_of row nets the total to zero.
+            rows = self._cost_ledger_rows(wo.name)
+            self.assertEqual(len(rows), 2,
+                             "cancel must add a reversal row, not delete the original")
+            self.assertTrue(any(r["reversal_of"] for r in rows),
+                            "a reversal_of mirror row must exist after cancel")
+            self.assertEqual(sum(r["amount"] for r in rows), 0,
+                             "the reversed cost ledger must net to zero")
             self.assertEqual(
                 frappe.db.get_value("Maintenance Request", mr.name, "status"), "Open",
                 "cancel must release the request off Closed")
@@ -172,6 +194,9 @@ class TestMaintenanceWorkOrderCancel(FrappeTestCase):
                                   force=True, ignore_permissions=True)
             for row in self._ledger_rows(wo.name):
                 frappe.delete_doc("Accommodation Ledger", row,
+                                  force=True, ignore_permissions=True)
+            for row in self._cost_ledger_rows(wo.name):
+                frappe.delete_doc("Maintenance Cost Ledger", row["name"],
                                   force=True, ignore_permissions=True)
             if frappe.db.exists("Maintenance Request", mr.name):
                 mr.reload()

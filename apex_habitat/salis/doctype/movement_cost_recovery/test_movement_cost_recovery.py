@@ -94,3 +94,65 @@ class TestMovementCostRecoveryAck(FrappeTestCase):
             apply_workflow(rec, "Recover")
         rec.reload()
         self.assertEqual(rec.status, "Approved")
+
+
+@unittest.skipUnless(
+    get_workflow_name("Movement Cost Recovery") == WORKFLOW,
+    "Movement Cost Recovery Workflow not seeded on this site",
+)
+class TestMovementCostRecoverySelfApproval(FrappeTestCase):
+    """The Approve transition is the money decision that gates the downstream
+    Salis Payment Request against a driver's salary, so it must enforce
+    segregation of duties: the creator/owner may not approve their own recovery.
+    The DocType has no requested_by field, so allow_self_approval=0 (which gates
+    on doc.owner) plus the explicit ``doc.owner != frappe.session.user`` condition
+    are the only self-approval defenses. These tests pin both: the owner is
+    refused Approve; a different Fleet Manager succeeds.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.owner = _user("mcr_owner@example.com", "Fleet Manager")
+        cls.other = _user("mcr_other@example.com", "Fleet Manager")
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    def _owned_recovery(self):
+        """An Open recovery whose doc.owner is cls.owner (created while logged in
+        as that manager), acknowledged so only the self-approval gate can block."""
+        frappe.set_user(self.owner)
+        rec = frappe.get_doc(
+            {
+                "doctype": "Movement Cost Recovery",
+                "recovery_type": "Fuel Misuse",
+                "amount": 500,
+                "basis_evidence": "/files/qa-evidence.pdf",
+                "acknowledgement_received": 1,
+                "status": "Open",
+            }
+        ).insert(ignore_permissions=True)
+        frappe.set_user("Administrator")
+        return rec
+
+    def test_owner_cannot_approve_own_recovery(self):
+        rec = self._owned_recovery()
+        self.assertEqual(rec.owner, self.owner)
+        frappe.set_user(self.owner)
+        with self.assertRaises(frappe.ValidationError):
+            apply_workflow(rec, "Approve")
+        rec.reload()
+        self.assertEqual(rec.docstatus, 0)
+        self.assertEqual(rec.status, "Open")
+
+    def test_other_fleet_manager_can_approve(self):
+        rec = self._owned_recovery()
+        frappe.set_user(self.other)
+        apply_workflow(rec, "Approve")
+        rec.reload()
+        self.assertEqual(rec.docstatus, 1)
+        self.assertEqual(rec.status, "Approved")
