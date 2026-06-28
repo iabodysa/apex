@@ -25,7 +25,7 @@
    "role": "System Manager"
   }
  ],
- "content": "[{\"id\": \"opsHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Salis</b></span>\", \"col\": 12}}, {\"id\": \"opsChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Dispatch Trips by Status\", \"col\": 12}}, {\"id\": \"opsHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"opsScBoard\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Board\", \"col\": 3}}, {\"id\": \"opsScCtrl\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Control\", \"col\": 3}}, {\"id\": \"opsScTrip\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"opsScAlert\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Alert\", \"col\": 3}}, {\"id\": \"opsHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"opsNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Operations Alerts\", \"col\": 3}}, {\"id\": \"opsNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Active Trips\", \"col\": 3}}, {\"id\": \"opsHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"opsCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement\", \"col\": 4}}, {\"id\": \"opsCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Control\", \"col\": 4}}]",
+ "content": "[{\"id\": \"opsHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Salis</b></span>\", \"col\": 12}}, {\"id\": \"opsChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Dispatch Trips by Status\", \"col\": 12}}, {\"id\": \"opsHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"opsScBoard\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Board\", \"col\": 3}}, {\"id\": \"opsScCtrl\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Control\", \"col\": 3}}, {\"id\": \"opsScTrip\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dispatch Trip\", \"col\": 3}}, {\"id\": \"opsScAlert\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Operations Alert\", \"col\": 3}}, {\"id\": \"opsHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"opsNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Unresolved Alerts\", \"col\": 3}}, {\"id\": \"opsNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Salis Active Trips\", \"col\": 3}}, {\"id\": \"opsHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"opsCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Movement\", \"col\": 4}}, {\"id\": \"opsCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Control\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -118,8 +118,8 @@
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
-   "number_card_name": "Open Operations Alerts",
-   "label": "Open Operations Alerts",
+   "number_card_name": "Unresolved Alerts",
+   "label": "Unresolved Alerts",
    "idx": 1
   },
   {
