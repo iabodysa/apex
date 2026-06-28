@@ -56,6 +56,7 @@
    "options": "Resignation\nTransfer\nTermination\nEnd of Assignment"
   },
   {
+   "depends_on": "eval:doc.driver",
    "description": "The driver's current assigned vehicle, captured for reference.",
    "fetch_from": "driver.current_vehicle",
    "fetch_if_empty": 1,
@@ -109,19 +110,22 @@
    "default": "0",
    "fieldname": "vehicle_returned",
    "fieldtype": "Check",
-   "label": "Vehicle Returned"
+   "label": "Vehicle Returned",
+   "read_only_depends_on": "eval:doc.status=='Cleared'||doc.status=='Cancelled'"
   },
   {
    "default": "0",
    "fieldname": "fuel_chip_returned",
    "fieldtype": "Check",
-   "label": "Fuel Chip Returned"
+   "label": "Fuel Chip Returned",
+   "read_only_depends_on": "eval:doc.status=='Cleared'||doc.status=='Cancelled'"
   },
   {
    "default": "0",
    "fieldname": "custody_returned",
    "fieldtype": "Check",
-   "label": "Custody Returned"
+   "label": "Custody Returned",
+   "read_only_depends_on": "eval:doc.status=='Cleared'||doc.status=='Cancelled'"
   },
   {
    "fieldname": "driver_clearance_returns_col",
@@ -129,6 +133,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.driver",
    "description": "Count of open Fuel Exception Case records for this driver. Must be zero to clear.",
    "fieldname": "outstanding_fuel_exceptions",
    "fieldtype": "Int",
@@ -137,6 +142,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.driver",
    "description": "Count of open Movement Cost Recovery records for this driver. Must be zero to clear.",
    "fieldname": "outstanding_recoveries",
    "fieldtype": "Int",

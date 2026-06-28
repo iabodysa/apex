@@ -202,3 +202,7 @@ apex_habitat.patches.v1_x.drop_sysmgr_from_accommodation_manager_profile
 # exist. Skips offices already linked or with no city; never deletes the inline value.
 # Idempotent, no-op on fresh installs / re-run. PRUNE once every deployed site has run it.
 apex_habitat.patches.v1_x.backfill_rental_office_native_address
+# ONE-TIME: renames Accommodation Goods Receipt → Goods Receipt and
+# Accommodation Custody Handover → Custody Handover (T-551 v1.60.18).
+# PRUNE once every deployed site has run it.
+apex_habitat.patches.v1_x.rename_accommodation_goods_receipt_and_custody_handover

@@ -1,6 +1,6 @@
 # Copyright (c) 2026, AFMCO Support Services Co. Ltd and contributors
 
-"""Accommodation Goods Receipt controller — books externally-purchased goods INTO a
+"""Goods Receipt controller — books externally-purchased goods INTO a
 procurement intake store via the Accommodation Stock Ledger. This is the first leg of
 the procurement -> handover -> custody chain: stock lands unassigned in the intake
 building's store (employee unset) and is later handed over into custody.
@@ -17,10 +17,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-VOUCHER_TYPE = "Accommodation Goods Receipt"
+VOUCHER_TYPE = "Goods Receipt"
 
 
-class AccommodationGoodsReceipt(Document):
+class GoodsReceipt(Document):
     def validate(self):
         if not self.items:
             frappe.throw(_("At least one item is required on a Goods Receipt."))

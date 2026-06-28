@@ -35,7 +35,7 @@ from apex_habitat.tests.test_utils import ApexHabitatTestCase
 _HERE = os.path.dirname(__file__)
 _TRANSFER_CTL = os.path.normpath(os.path.join(_HERE, "accommodation_material_transfer.py"))
 _HANDOVER_CTL = os.path.normpath(
-    os.path.join(_HERE, "..", "accommodation_custody_handover", "accommodation_custody_handover.py")
+    os.path.join(_HERE, "..", "custody_handover", "custody_handover.py")
 )
 
 
@@ -86,7 +86,7 @@ class TestStockSourceLocking(ApexHabitatTestCase):
 
     def _handover(self, qty):
         h = frappe.get_doc({
-            "doctype": "Accommodation Custody Handover", "naming_series": "ACC-HND-.YYYY.-.#####",
+            "doctype": "Custody Handover", "naming_series": "ACC-HND-.YYYY.-.#####",
             "handover_date": "2026-05-02", "from_building": self.source, "to_building": self.dest,
             "procurement_supervisor": self._user(), "receiving_supervisor": self._user()})
         h.append("items", {"item_type": "Custody Article", "item": self.article, "qty": qty})

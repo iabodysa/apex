@@ -95,6 +95,7 @@
    "label": "Quota & Status"
   },
   {
+   "depends_on": "eval:doc.is_increase==1",
    "fieldname": "fuel_quota",
    "fieldtype": "Link",
    "label": "Fuel Quota",
@@ -137,7 +138,8 @@
   {
    "fieldname": "claimed_amount",
    "fieldtype": "Currency",
-   "label": "Claimed Amount (SAR)"
+   "label": "Claimed Amount (SAR)",
+   "read_only_depends_on": "eval:doc.docstatus==1"
   },
   {
    "fieldname": "fuel_claim_amounts_col",
@@ -175,6 +177,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.company",
    "description": "Cost center for grouping; defaults from Salis Settings. Reference only \u2014 no GL.",
    "fieldname": "cost_center",
    "fieldtype": "Link",

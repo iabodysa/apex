@@ -44,6 +44,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Wash Platform",
+   "mandatory_depends_on": "eval:doc.status=='Approved'||doc.status=='Done'",
    "options": "Wash Platform"
   },
   {
@@ -80,6 +81,7 @@
    "options": "Pending\nApproved\nDone\nCancelled"
   },
   {
+   "depends_on": "eval:doc.status=='Approved'||doc.status=='Done'",
    "fieldname": "wash_date",
    "fieldtype": "Date",
    "label": "Wash Date"

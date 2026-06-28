@@ -35,7 +35,7 @@ def _store_bal(article, building):
     return flt(sum(flt(r.qty) for r in rows))
 
 
-class TestAccommodationCustodyHandover(ApexHabitatTestCase):
+class TestCustodyHandover(ApexHabitatTestCase):
     def setUp(self):
         # The OTP gate is off by default (a Check with no default reads 0 on the
         # Single); turn it on so the confirm path actually exercises the code/expiry.
@@ -76,7 +76,7 @@ class TestAccommodationCustodyHandover(ApexHabitatTestCase):
 
     def _receive(self, qty=5):
         gr = frappe.get_doc({
-            "doctype": "Accommodation Goods Receipt", "naming_series": "ACC-GRN-.YYYY.-.#####",
+            "doctype": "Goods Receipt", "naming_series": "ACC-GRN-.YYYY.-.#####",
             "receipt_date": "2026-05-01", "intake_building": self.intake,
             "procurement_supervisor": self.proc_user})
         gr.append("items", {"item_type": "Custody Article", "item": self.article, "qty": qty})
@@ -86,7 +86,7 @@ class TestAccommodationCustodyHandover(ApexHabitatTestCase):
 
     def _handover(self, qty=5):
         h = frappe.get_doc({
-            "doctype": "Accommodation Custody Handover", "naming_series": "ACC-HND-.YYYY.-.#####",
+            "doctype": "Custody Handover", "naming_series": "ACC-HND-.YYYY.-.#####",
             "handover_date": "2026-05-02", "from_building": self.intake, "to_building": self.dest,
             "procurement_supervisor": self.proc_user, "receiving_supervisor": self.recv_user})
         h.append("items", {"item_type": "Custody Article", "item": self.article, "qty": qty})

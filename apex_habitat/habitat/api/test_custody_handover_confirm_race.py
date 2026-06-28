@@ -86,7 +86,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
 
     def _receive(self, qty=5):
         gr = frappe.get_doc({
-            "doctype": "Accommodation Goods Receipt", "naming_series": "ACC-GRN-.YYYY.-.#####",
+            "doctype": "Goods Receipt", "naming_series": "ACC-GRN-.YYYY.-.#####",
             "receipt_date": "2026-05-01", "intake_building": self.intake,
             "procurement_supervisor": self.proc_user})
         gr.append("items", {"item_type": "Custody Article", "item": self.article, "qty": qty})
@@ -98,7 +98,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
         """A submitted, verified, Approved handover ready for OTP confirm; returns
         (doc, plaintext_code)."""
         h = frappe.get_doc({
-            "doctype": "Accommodation Custody Handover", "naming_series": "ACC-HND-.YYYY.-.#####",
+            "doctype": "Custody Handover", "naming_series": "ACC-HND-.YYYY.-.#####",
             "handover_date": "2026-05-02", "from_building": self.intake, "to_building": self.dest,
             "procurement_supervisor": self.proc_user, "receiving_supervisor": self.recv_user})
         h.append("items", {"item_type": "Custody Article", "item": self.article, "qty": qty})
@@ -140,7 +140,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
         receive_rows = frappe.get_all(
             "Accommodation Stock Ledger",
             filters={
-                "voucher_type": "Accommodation Custody Handover",
+                "voucher_type": "Custody Handover",
                 "voucher_no": handover.name,
                 "building": self.dest,
                 "qty": [">", 0],
@@ -158,7 +158,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
             has_stock_entries,
         )
         self.assertTrue(
-            has_stock_entries("Accommodation Custody Handover", handover.name),
+            has_stock_entries("Custody Handover", handover.name),
             "the ship leg already exists under this voucher",
         )
         self.assertFalse(

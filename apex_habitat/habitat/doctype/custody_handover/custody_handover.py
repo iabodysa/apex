@@ -1,4 +1,4 @@
-"""Accommodation Custody Handover controller — the OTP-confirmed move of
+"""Custody Handover controller — the OTP-confirmed move of
 externally-purchased goods from the procurement intake store into a receiving
 accommodation supervisor's building store, via the Accommodation Stock Ledger.
 
@@ -25,10 +25,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_to_date, flt, now_datetime
 
-VOUCHER_TYPE = "Accommodation Custody Handover"
+VOUCHER_TYPE = "Custody Handover"
 
 
-class AccommodationCustodyHandover(Document):
+class CustodyHandover(Document):
     def validate(self):
         if not self.items:
             frappe.throw(_("At least one item is required on a Custody Handover."))

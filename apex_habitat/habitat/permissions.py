@@ -260,7 +260,7 @@ def custody_acknowledgment_query(user=None):
     return _building_condition(user)
 
 
-def accommodation_custody_handover_query(user=None):
+def custody_handover_query(user=None):
     # [#dual] handover has from_building + to_building, not `building`.
     return _dual_building_condition(user)
 

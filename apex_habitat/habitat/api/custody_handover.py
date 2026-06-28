@@ -1,4 +1,4 @@
-"""Whitelisted API for the OTP-confirmed Accommodation Custody Handover.
+"""Whitelisted API for the OTP-confirmed Custody Handover.
 
 Confirmation is fail-closed: lockout, then expiry, then the review-and-approve
 gate, are all checked BEFORE the code is compared, and a mismatch reveals nothing
@@ -15,7 +15,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, flt, now_datetime
 
-from apex_habitat.habitat.doctype.accommodation_custody_handover.accommodation_custody_handover import (
+from apex_habitat.habitat.doctype.custody_handover.custody_handover import (
     VOUCHER_TYPE,
     generate_otp,
     hash_otp,

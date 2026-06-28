@@ -191,7 +191,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Accommodation Custody Handover",
+   "options": "Custody Handover",
    "print_hide": 1,
    "read_only": 1
   }
@@ -202,7 +202,7 @@
  "modified": "2026-06-23 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
- "name": "Accommodation Custody Handover",
+ "name": "Custody Handover",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

@@ -86,7 +86,7 @@ def _assert_source_availability(doc):
     """Reject the issue if the building store cannot cover the requested quantity
     for any article (aggregated per article, in case of duplicate rows).
 
-    Mirrors Accommodation Custody Handover's source-availability gate: issuing must
+    Mirrors Custody Handover's source-availability gate: issuing must
     not drive the store balance negative. Only the case where stock is actually
     posted is checked — a free-text issue with no linked employee moves no stock
     (see ``_post_custody_stock``), so it has nothing to verify."""

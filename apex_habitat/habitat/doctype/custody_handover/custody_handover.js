@@ -1,4 +1,4 @@
-frappe.ui.form.on("Accommodation Custody Handover", {
+frappe.ui.form.on("Custody Handover", {
 	refresh(frm) {
 		if (frm.doc.docstatus !== 1) {
 			return;

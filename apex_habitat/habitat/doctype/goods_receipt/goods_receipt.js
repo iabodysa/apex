@@ -1,4 +1,4 @@
-frappe.ui.form.on("Accommodation Goods Receipt", {
+frappe.ui.form.on("Goods Receipt", {
 	intake_building(frm) {
 		if (!frm.doc.intake_building) {
 			return;

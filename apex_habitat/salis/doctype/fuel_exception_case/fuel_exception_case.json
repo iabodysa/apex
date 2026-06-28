@@ -89,6 +89,7 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.fuel_request",
    "fetch_from": "fuel_request.fuel_quota",
    "fetch_if_empty": 1,
    "fieldname": "fuel_quota",
@@ -128,6 +129,7 @@
    "label": "Evidence"
   },
   {
+   "depends_on": "eval:doc.evidence",
    "fieldname": "evidence_notes",
    "fieldtype": "Small Text",
    "label": "Evidence Notes"
@@ -138,11 +140,13 @@
    "label": "Resolution"
   },
   {
+   "depends_on": "eval:['Resolved','Rejected','Closed'].includes(doc.status)",
    "fieldname": "resolution",
    "fieldtype": "Text",
    "label": "Resolution"
   },
   {
+   "depends_on": "eval:doc.status=='Resolved'||doc.status=='Closed'",
    "fieldname": "amount_recovered",
    "fieldtype": "Currency",
    "label": "Amount Recovered (SAR)"

@@ -42,7 +42,7 @@ SINGLE_BUILDING = [
 DUAL_BUILDING = [
     ("Accommodation Material Transfer", P.accommodation_material_transfer_query),
     ("Facility Asset Movement", P.facility_asset_movement_query),
-    ("Accommodation Custody Handover", P.accommodation_custody_handover_query),
+    ("Custody Handover", P.custody_handover_query),
 ]
 
 
