@@ -163,21 +163,30 @@ def _apply_priority_rules(doc):
         "injury",
     )
     high_terms = (
-        "ac",
-        "air conditioning",
         "bathroom leak",
         "broken bed",
         "missing locker",
         "security",
     )
 
+    # [#kgat6r] Use whole-word boundary matching to avoid false positives from
+    # substrings (e.g. "contact", "machine", "jacket", "back" all contain "ac").
     def _matches(term):
-        # [#kgat6r]
         return re.search(r"\b" + re.escape(term) + r"\b", text) is not None
+
+    # A/C is matched separately because it appears in multiple forms:
+    # "ac" (whole word), "a/c", "a-c", "air conditioning", "air conditioner".
+    # A bare \bac\b would be defeated by the category field value "ac" but would
+    # also silently pass for edge cases like "AC" embedded differently.  The
+    # explicit pattern below is unambiguous and covers all expected phrasings.
+    _AC_PATTERN = re.compile(r"\ba[/\-]?c\b|air.?condi", re.IGNORECASE)
+
+    def _is_ac_request():
+        return bool(_AC_PATTERN.search(text))
 
     if any(_matches(term) for term in critical_terms):
         doc.priority = "Critical"
-    elif any(_matches(term) for term in high_terms) and doc.priority in (None, "", "Low", "Medium"):
+    elif (_is_ac_request() or any(_matches(term) for term in high_terms)) and doc.priority in (None, "", "Low", "Medium"):
         doc.priority = "High"
 
 

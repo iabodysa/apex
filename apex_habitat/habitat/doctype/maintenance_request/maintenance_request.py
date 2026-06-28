@@ -39,6 +39,17 @@ def _validate_status_rules(doc):
 
 @frappe.whitelist(methods=["POST"])
 def make_work_order(source_name, target_doc=None):
+    """Create a Maintenance Work Order from this request.
+
+    field_map is intentionally omitted for building/issue_type: get_mapped_doc
+    copies same-named fields automatically (mapper lines 190-195).  status is
+    excluded via field_no_map so the source "Open" value is never copied; the
+    correct "Planned" value is written by set_missing_values instead.
+
+    Fields on Maintenance Request that have NO matching fieldname on Maintenance
+    Work Order (room, bed, priority) are therefore never referenced here, which
+    prevents the silent-drop data-loss described in P-082.
+    """
     frappe.has_permission("Maintenance Request", "read", doc=source_name, throw=True)
     from frappe.model.mapper import get_mapped_doc
 
@@ -46,14 +57,20 @@ def make_work_order(source_name, target_doc=None):
         target.maintenance_request = source.name
         target.status = "Planned"
 
-    doclist = get_mapped_doc("Maintenance Request", source_name, {
-        "Maintenance Request": {
-            "doctype": "Maintenance Work Order",
-            "field_map": {
-                "building": "building",
-                "issue_type": "issue_type"
+    doclist = get_mapped_doc(
+        "Maintenance Request",
+        source_name,
+        {
+            "Maintenance Request": {
+                "doctype": "Maintenance Work Order",
+                # building and issue_type are copied automatically (same fieldname
+                # on both sides); no explicit field_map entry needed.
+                # status is excluded so the source "Open" does not bleed through.
+                "field_no_map": ["status"],
             }
-        }
-    }, target_doc, set_missing_values)
+        },
+        target_doc,
+        set_missing_values,
+    )
 
     return doclist
