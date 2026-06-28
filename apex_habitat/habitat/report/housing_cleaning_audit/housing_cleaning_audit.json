@@ -1,0 +1,101 @@
+{
+ "doctype": "Report",
+ "name": "Housing Cleaning Audit",
+ "report_name": "Housing Cleaning Audit",
+ "ref_doctype": "Cleaning Log",
+ "report_type": "Query Report",
+ "is_standard": "Yes",
+ "module": "Habitat",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  }
+ ],
+ "filters": [
+  {
+   "fieldname": "from_date",
+   "label": "From Date",
+   "fieldtype": "Date",
+   "default": "Today"
+  },
+  {
+   "fieldname": "to_date",
+   "label": "To Date",
+   "fieldtype": "Date",
+   "default": "Today"
+  },
+  {
+   "fieldname": "building",
+   "label": "Building",
+   "fieldtype": "Link",
+   "options": "Accommodation Building"
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "\nCompleted\nMissed\nRework Required\nMissed + Rework"
+  }
+ ],
+ "columns": [
+  {
+   "fieldname": "name",
+   "label": "Log",
+   "fieldtype": "Link",
+   "options": "Cleaning Log",
+   "width": 140
+  },
+  {
+   "fieldname": "cleaning_date",
+   "label": "Cleaning Date",
+   "fieldtype": "Date",
+   "width": 100
+  },
+  {
+   "fieldname": "building",
+   "label": "Building",
+   "fieldtype": "Link",
+   "options": "Accommodation Building",
+   "width": 160
+  },
+  {
+   "fieldname": "cleaner_type",
+   "label": "Cleaner Type",
+   "fieldtype": "Data",
+   "width": 110
+  },
+  {
+   "fieldname": "cleaner",
+   "label": "Cleaner",
+   "fieldtype": "Data",
+   "width": 150
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Data",
+   "width": 130
+  },
+  {
+   "fieldname": "supervisor_approved",
+   "label": "Supervisor Approved",
+   "fieldtype": "Check",
+   "width": 130
+  },
+  {
+   "fieldname": "has_photo",
+   "label": "Photo Attached",
+   "fieldtype": "Data",
+   "width": 100
+  }
+ ]
+}
