@@ -15,6 +15,45 @@ const RS_ROOM_TYPES = [
 ];
 const RS_FLOOR_TYPES = ["Ground", "Middle", "Roof", "Basement"];
 
+// Desk pages ship no stylesheet — wizard layout is inline styles bound to native
+// Desk CSS variables (theme/dark-mode aware).
+const RS_STYLE = {
+	steps: "display:flex;flex-wrap:wrap;gap:8px;margin-block:var(--margin-sm,10px) var(--margin-lg,20px);",
+	step:
+		"display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border-color);border-radius:16px;font-size:var(--text-sm,12px);color:var(--text-muted);background:var(--card-bg);",
+	step_active: "border-color:var(--primary);color:var(--text-on-blue,#fff);background:var(--primary);font-weight:600;",
+	step_done: "border-color:var(--green-500);color:var(--green-700);background:var(--green-100);",
+	step_no:
+		"display:inline-flex;align-items:center;justify-content:center;inline-size:18px;block-size:18px;border-radius:50%;background:var(--control-bg);color:var(--text-color);font-size:11px;font-weight:700;",
+	stage: "display:flex;flex-direction:column;gap:var(--margin-sm,10px);",
+	floors: "border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);overflow:hidden;",
+	frow:
+		"display:grid;grid-template-columns:48px 1.4fr 0.8fr 1.4fr 0.8fr 48px;gap:8px;align-items:center;padding:8px var(--padding-sm,10px);border-block-end:1px solid var(--border-color);",
+	fhead: "background:var(--subtle-fg,var(--control-bg));font-weight:600;font-size:var(--text-sm,12px);color:var(--text-muted);",
+	fcell: "min-inline-size:0;",
+	fno: "font-weight:600;",
+	floor_block:
+		"border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);padding:var(--padding-md,15px);background:var(--card-bg);",
+	floor_title: "font-weight:600;font-size:var(--text-md,14px);margin-block-end:var(--margin-sm,10px);",
+	grid: "display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--margin-sm,10px);",
+	room:
+		"border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);padding:var(--padding-sm,10px);background:var(--fg-color,var(--card-bg));display:flex;flex-direction:column;gap:6px;",
+	room_no: "font-weight:600;font-size:var(--text-sm,12px);color:var(--text-muted);",
+	stepper: "display:inline-flex;align-items:center;gap:8px;",
+	bed_val: "min-inline-size:24px;text-align:center;font-weight:700;",
+	summary: "display:flex;gap:var(--margin-md,15px);flex-wrap:wrap;",
+	sum_card:
+		"border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);padding:var(--padding-md,15px);background:var(--card-bg);text-align:center;min-inline-size:96px;",
+	sum_n: "font-size:24px;font-weight:700;",
+	sum_l: "font-size:var(--text-sm,12px);color:var(--text-muted);",
+	review:
+		"display:flex;flex-direction:column;gap:6px;border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);padding:var(--padding-md,15px);background:var(--card-bg);",
+	review_row: "font-size:var(--text-sm,12px);padding-block:2px;border-block-end:1px solid var(--border-color);",
+	footer:
+		"display:flex;justify-content:space-between;gap:8px;margin-block-start:var(--margin-lg,20px);padding-block-start:var(--padding-md,15px);border-block-start:1px solid var(--border-color);",
+	fatal: "padding-block:var(--padding-xl,30px);text-align:center;",
+};
+
 class RoomSetup {
 	constructor(page) {
 		this.page = page;
@@ -55,27 +94,29 @@ class RoomSetup {
 
 	_steps_header() {
 		const labels = [__("Floors"), __("Room Types"), __("Beds"), __("Approve")];
-		const $h = $('<div class="rs-steps"></div>').appendTo(this.$body);
+		const $h = $('<div class="rs-steps"></div>').attr("style", RS_STYLE.steps).appendTo(this.$body);
 		labels.forEach((l, i) => {
 			const n = i + 1;
 			const cls = n === this.stage ? "active" : n < this.stage ? "done" : "";
+			const tone = n === this.stage ? RS_STYLE.step_active : n < this.stage ? RS_STYLE.step_done : "";
 			$(`<div class="rs-step ${cls}"></div>`)
-				.html(`<span class="rs-step-no">${n}</span> ${frappe.utils.escape_html(l)}`)
+				.attr("style", RS_STYLE.step + tone)
+				.html(`<span class="rs-step-no" style="${RS_STYLE.step_no}">${n}</span> ${frappe.utils.escape_html(l)}`)
 				.appendTo($h);
 		});
 	}
 
 	// [#aw8tj4]
 	_stage_floors() {
-		const $wrap = $('<div class="rs-stage"></div>').appendTo(this.$body);
+		const $wrap = $('<div class="rs-stage"></div>').attr("style", RS_STYLE.stage).appendTo(this.$body);
 		$('<p class="text-muted"></p>')
 			.text(__("Define the floors: rooms per floor, floor type, and the default room type and bed count."))
 			.appendTo($wrap);
 
-		const $tbl = $('<div class="rs-floors"></div>').appendTo($wrap);
-		const $head = $('<div class="rs-frow rs-fhead"></div>').appendTo($tbl);
+		const $tbl = $('<div class="rs-floors"></div>').attr("style", RS_STYLE.floors).appendTo($wrap);
+		const $head = $('<div class="rs-frow rs-fhead"></div>').attr("style", RS_STYLE.frow + RS_STYLE.fhead).appendTo($tbl);
 		[__("#"), __("Floor Type"), __("Rooms"), __("Default Room Type"), __("Default Beds"), ""].forEach((h) =>
-			$('<div class="rs-fcell"></div>').text(h).appendTo($head)
+			$('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).text(h).appendTo($head)
 		);
 		this.floors.forEach((f, idx) => this._floor_row($tbl, f, idx));
 
@@ -103,32 +144,32 @@ class RoomSetup {
 	}
 
 	_floor_row($tbl, f, idx) {
-		const $r = $('<div class="rs-frow"></div>').appendTo($tbl);
-		$('<div class="rs-fcell rs-fno"></div>').text(f.number).appendTo($r);
+		const $r = $('<div class="rs-frow"></div>').attr("style", RS_STYLE.frow).appendTo($tbl);
+		$('<div class="rs-fcell rs-fno"></div>').attr("style", RS_STYLE.fcell + RS_STYLE.fno).text(f.number).appendTo($r);
 
 		const $type = $('<select class="form-control input-sm"></select>').appendTo(
-			$('<div class="rs-fcell"></div>').appendTo($r)
+			$('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).appendTo($r)
 		);
 		RS_FLOOR_TYPES.forEach((t) => $("<option></option>").val(t).text(__(t)).appendTo($type));
 		$type.val(f.type).on("change", () => (f.type = $type.val()));
 
 		const $rooms = $('<input type="number" min="1" class="form-control input-sm">')
 			.val(f.rooms_per_floor)
-			.appendTo($('<div class="rs-fcell"></div>').appendTo($r));
+			.appendTo($('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).appendTo($r));
 		$rooms.on("change", () => (f.rooms_per_floor = cint($rooms.val()) || 1));
 
 		const $dtype = $('<select class="form-control input-sm"></select>').appendTo(
-			$('<div class="rs-fcell"></div>').appendTo($r)
+			$('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).appendTo($r)
 		);
 		RS_ROOM_TYPES.forEach((t) => $("<option></option>").val(t).text(__(t)).appendTo($dtype));
 		$dtype.val(f.def_type).on("change", () => (f.def_type = $dtype.val()));
 
 		const $beds = $('<input type="number" min="0" class="form-control input-sm">')
 			.val(f.def_beds)
-			.appendTo($('<div class="rs-fcell"></div>').appendTo($r));
+			.appendTo($('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).appendTo($r));
 		$beds.on("change", () => (f.def_beds = cint($beds.val())));
 
-		const $del = $('<div class="rs-fcell"></div>').appendTo($r);
+		const $del = $('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).appendTo($r);
 		if (this.floors.length > 1) {
 			$('<button class="btn btn-xs btn-default"></button>')
 				.html(frappe.utils.icon("delete", "sm"))
@@ -154,7 +195,7 @@ class RoomSetup {
 
 	// [#pax34c]
 	_stage_types() {
-		const $wrap = $('<div class="rs-stage"></div>').appendTo(this.$body);
+		const $wrap = $('<div class="rs-stage"></div>').attr("style", RS_STYLE.stage).appendTo(this.$body);
 		$('<p class="text-muted"></p>')
 			.text(__("Walk each floor and set the type of every room."))
 			.appendTo($wrap);
@@ -175,14 +216,14 @@ class RoomSetup {
 
 	// [#gnqe4p]
 	_stage_beds() {
-		const $wrap = $('<div class="rs-stage"></div>').appendTo(this.$body);
+		const $wrap = $('<div class="rs-stage"></div>').attr("style", RS_STYLE.stage).appendTo(this.$body);
 		$('<p class="text-muted"></p>')
 			.text(__("Set the number of beds in each room. Use − / + to adjust."))
 			.appendTo($wrap);
 		this._orderedFloors().forEach((f) =>
 			this._floor_block($wrap, f, (rm) => {
-				const $st = $('<div class="rs-stepper"></div>');
-				const $val = $('<span class="rs-bed-val"></span>').text(rm.beds);
+				const $st = $('<div class="rs-stepper"></div>').attr("style", RS_STYLE.stepper);
+				const $val = $('<span class="rs-bed-val"></span>').attr("style", RS_STYLE.bed_val).text(rm.beds);
 				$('<button class="btn btn-xs btn-default">−</button>')
 					.on("click", () => { rm.beds = Math.max(0, cint(rm.beds) - 1); $val.text(rm.beds); })
 					.appendTo($st);
@@ -201,33 +242,35 @@ class RoomSetup {
 	}
 
 	_floor_block($wrap, f, cellFn) {
-		const $b = $('<div class="rs-floor-block"></div>').appendTo($wrap);
+		const $b = $('<div class="rs-floor-block"></div>').attr("style", RS_STYLE.floor_block).appendTo($wrap);
 		$('<div class="rs-floor-title"></div>')
+			.attr("style", RS_STYLE.floor_title)
 			.text(__("Floor {0} — {1}", [f._code || f.number, __(f.type || "")]))
 			.appendTo($b);
-		const $grid = $('<div class="rs-grid"></div>').appendTo($b);
+		const $grid = $('<div class="rs-grid"></div>').attr("style", RS_STYLE.grid).appendTo($b);
 		(f.rooms || []).forEach((rm, i) => {
-			const $card = $('<div class="rs-room"></div>').appendTo($grid);
-			$('<div class="rs-room-no"></div>').text("#" + (i + 1)).appendTo($card);
+			const $card = $('<div class="rs-room"></div>').attr("style", RS_STYLE.room).appendTo($grid);
+			$('<div class="rs-room-no"></div>').attr("style", RS_STYLE.room_no).text("#" + (i + 1)).appendTo($card);
 			cellFn(rm).appendTo($card);
 		});
 	}
 
 	// [#13u2dc]
 	_stage_review() {
-		const $wrap = $('<div class="rs-stage"></div>').appendTo(this.$body);
+		const $wrap = $('<div class="rs-stage"></div>').attr("style", RS_STYLE.stage).appendTo(this.$body);
 		let rooms = 0, beds = 0;
 		this.floors.forEach((f) => (f.rooms || []).forEach((rm) => { rooms += 1; beds += cint(rm.beds); }));
 
-		const $sum = $('<div class="rs-summary"></div>').appendTo($wrap);
-		const card = (n, l) => $('<div class="rs-sum-card"></div>').html(`<div class="rs-sum-n">${n}</div><div class="rs-sum-l">${frappe.utils.escape_html(l)}</div>`).appendTo($sum);
+		const $sum = $('<div class="rs-summary"></div>').attr("style", RS_STYLE.summary).appendTo($wrap);
+		const card = (n, l) => $('<div class="rs-sum-card"></div>').attr("style", RS_STYLE.sum_card).html(`<div class="rs-sum-n" style="${RS_STYLE.sum_n}">${n}</div><div class="rs-sum-l" style="${RS_STYLE.sum_l}">${frappe.utils.escape_html(l)}</div>`).appendTo($sum);
 		card(this.floors.length, __("Floors"));
 		card(rooms, __("Rooms"));
 		card(beds, __("Beds"));
 
-		const $list = $('<div class="rs-review"></div>').appendTo($wrap);
+		const $list = $('<div class="rs-review"></div>').attr("style", RS_STYLE.review).appendTo($wrap);
 		this._grouped_floor_plan().forEach((row) => {
 			$('<div class="rs-review-row"></div>')
+				.attr("style", RS_STYLE.review_row)
 				.text(__("Floor {0} ({1}): {2} room(s) × {3}, {4} bed(s) each", [row.floor_number, __(row.floor_type || "-"), row.room_count, __(row.room_type), row.bed_capacity_per_room]))
 				.appendTo($list);
 		});
@@ -296,7 +339,7 @@ class RoomSetup {
 	_approve() {
 		const floors = this._grouped_floor_plan();
 		if (!floors.length) {
-			frappe.msgprint(__("Add at least one floor with rooms."));
+			frappe.show_alert({ message: __("Add at least one floor with rooms."), indicator: "orange" });
 			return;
 		}
 		frappe.dom.freeze(__("Creating rooms and beds…"));
@@ -314,7 +357,7 @@ class RoomSetup {
 	}
 
 	_footer(backFn, nextLabel, nextFn, nextCls) {
-		const $f = $('<div class="rs-footer"></div>').appendTo(this.$body);
+		const $f = $('<div class="rs-footer"></div>').attr("style", RS_STYLE.footer).appendTo(this.$body);
 		if (backFn) {
 			$('<button class="btn btn-default"></button>').text(__("Back")).on("click", backFn).appendTo($f);
 		} else {
@@ -328,6 +371,6 @@ class RoomSetup {
 
 	_fatal(msg) {
 		this.$body.empty();
-		$('<div class="rs-fatal text-muted"></div>').text(msg).appendTo(this.$body);
+		$('<div class="rs-fatal text-muted"></div>').attr("style", RS_STYLE.fatal).text(msg).appendTo(this.$body);
 	}
 }

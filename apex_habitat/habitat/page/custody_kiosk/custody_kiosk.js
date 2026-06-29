@@ -247,11 +247,8 @@ class CustodyKiosk {
 			)}" aria-label="${frappe.utils.escape_html(__("Search articles"))}">`
 		).appendTo($tools);
 		// [#guxhpt]
-		let search_timer = null;
-		this.$search.on("input", () => {
-			clearTimeout(search_timer);
-			search_timer = setTimeout(() => this._render_visible(), 120);
-		});
+		const debounced_render = frappe.utils.debounce(() => this._render_visible(), 120);
+		this.$search.on("input", debounced_render);
 
 		this.$tiles = $('<div class="ck-tiles"></div>').appendTo($catalog);
 

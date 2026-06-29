@@ -778,11 +778,14 @@ Costing & Mapping,احتساب التكلفة والربط
 Costs,التكاليف
 Costs and Leasing,التكاليف والتأجير
 Costs and Settlement,التكاليف والتسوية
+Could not acknowledge the selected alerts.,تعذّر الإقرار بالتنبيهات المحددة.
 Could not advance the request. Please try again.,تعذّر متابعة الطلب. حاول مرة أخرى.
 Could not apply {0},تعذّر تطبيق {0}
 Could not approve the handover. Please try again.,تعذّر اعتماد التسليم. حاول مرة أخرى.
+Could not assign the selected alerts.,تعذّر إسناد التنبيهات المحددة.
 Could not close the task,تعذّر إغلاق المهمة
 Could not complete the Work Order. No changes were saved. Please try again or contact support.,تعذّر إكمال أمر العمل. لم تُحفظ أي تغييرات. يرجى المحاولة مجدداً أو التواصل مع الدعم الفني.
+Could not complete the alert action.,تعذّر إكمال إجراء التنبيه.
 Could not complete the generation. Please try again.,تعذّر إتمام التوليد. يرجى المحاولة مجدداً.
 Could not confirm the handover. Please try again.,تعذّر تأكيد التسليم. حاول مرة أخرى.
 Could not create the payment. Please try again.,تعذّر إنشاء الدفعة. يُرجى المحاولة مرة أخرى.
@@ -814,6 +817,7 @@ Could not load your work center. Please retry.,تعذّر تحميل مركز ع
 Could not load {0}.,تعذّر تحميل {0}.
 Could not log the inspection. Please try again.,تعذّر تسجيل التفتيش. يرجى المحاولة مجدداً.
 Could not mark the Work Order as Completed. Please try again.,تعذّر وسم أمر العمل كمكتمل. يرجى المحاولة مجدداً.
+Could not mark the room ready.,تعذّر تعيين الغرفة كجاهزة.
 Could not mark the transfer as received. Please try again.,تعذّر تحديد التحويل كمستلَم. حاول مرة أخرى.
 Could not open the camera. Use the scan box instead.,تعذّر فتح الكاميرا. استخدم خانة المسح بدلاً من ذلك.
 Could not post the reversal to the ledger. The cancellation was rejected.,تعذّر ترحيل القيد العكسي إلى الدفتر. تم رفض الإلغاء.
@@ -828,6 +832,7 @@ Could not resolve the scan. Please try again.,تعذّر تحديد نتيجة �
 Could not return the cart. Please review and try again.,تعذّر إرجاع السلة. الرجاء المراجعة والمحاولة مرة أخرى.
 Could not save changes. Please try again or contact support.,تعذّر حفظ التغييرات. يرجى المحاولة مجدداً أو التواصل مع الدعم الفني.
 Could not send the link.,تعذّر إرسال الرابط.
+Could not snooze the selected alerts.,تعذّر تأجيل التنبيهات المحددة.
 Could not submit the round. Please try again.,تعذّر اعتماد الجولة. حاول مرة أخرى.
 Could not triage the requests. Please try again.,تعذّر فرز الطلبات. حاول مرة أخرى.
 Could not update bed occupancy. The assignment was not submitted.,تعذّر تحديث إشغال السرير. لم يُقدَّم التسكين.

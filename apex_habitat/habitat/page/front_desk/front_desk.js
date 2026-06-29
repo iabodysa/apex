@@ -41,6 +41,73 @@ function fd_indicator_color(bed_color) {
 	return { green: "green", red: "red", amber: "orange", grey: "gray" }[bed_color] || "gray";
 }
 
+// Bed-status colour key (free / occupied / not-ready / out-of-service), aliasing
+// the native Desk colour-scale vars — theme & dark-mode aware, no bespoke hex. A
+// Desk page ships no stylesheet, so the key is applied as an inline style overlay.
+const FD_BED_PALETTE = {
+	green: "background:var(--green-100);border-color:var(--green-500);color:var(--green-700);",
+	red: "background:var(--red-100);border-color:var(--red-500);color:var(--red-700);",
+	amber: "background:var(--yellow-100);border-color:var(--orange-500);color:var(--orange-700);cursor:not-allowed;",
+	grey: "background:var(--gray-100);border-color:var(--gray-400);color:var(--gray-600);cursor:not-allowed;",
+};
+// Left-edge pressure bar for the building chips (free/near-full/full).
+const FD_PRESSURE_BORDER = {
+	green: "var(--green-500)",
+	amber: "var(--orange-500)",
+	red: "var(--red-500)",
+};
+// Structural layout, all bound to native Desk CSS vars (with px fallbacks).
+const FD_STYLE = {
+	board: "padding-block:8px 32px;padding-inline:4px;",
+	empty: "padding-block:48px;padding-inline:16px;text-align:center;font-size:15px;",
+	buildings: "padding-inline:4px;padding-block-start:8px;",
+	buildings_row: "display:flex;flex-wrap:wrap;gap:8px;",
+	chip:
+		"display:inline-flex;align-items:baseline;gap:8px;padding:6px 12px;border-radius:16px;border:1px solid var(--border-color);background:var(--card-bg);cursor:pointer;font-size:var(--text-sm,13px);max-inline-size:280px;",
+	chip_selected: "border-color:var(--primary);box-shadow:0 0 0 1px var(--primary);",
+	chip_name: "font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;",
+	chip_counts: "font-weight:700;",
+	error: "padding-block:48px;padding-inline:16px;text-align:center;",
+	error_msg: "font-size:15px;margin-block-end:12px;",
+	summary:
+		"position:sticky;inset-block-start:0;z-index:2;display:flex;flex-direction:column;gap:8px;margin-block-end:16px;padding-block:10px;padding-inline:4px;background:var(--fg-color,var(--card-bg));border-block-end:1px solid var(--border-color);",
+	summary_head: "display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;",
+	summary_title: "font-size:18px;font-weight:600;",
+	summary_stats: "display:flex;gap:10px;flex-wrap:wrap;",
+	summary_stat:
+		"display:flex;align-items:baseline;gap:6px;padding:4px 10px;border-radius:8px;border-inline-start:4px solid var(--border-color);background:var(--control-bg);white-space:nowrap;",
+	summary_stat_num: "font-size:16px;font-weight:700;",
+	summary_stat_label: "font-size:12px;color:var(--text-muted);",
+	summary_meter: "display:flex;align-items:center;gap:10px;",
+	summary_meter_track:
+		"position:relative;flex:1 1 auto;block-size:6px;border-radius:3px;background:var(--control-bg);overflow:hidden;",
+	summary_meter_fill: "block-size:100%;background:var(--primary);",
+	summary_meter_label: "font-size:13px;font-weight:700;",
+	summary_meter_caption: "font-size:12px;color:var(--text-muted);white-space:nowrap;",
+	legend: "display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-block-end:16px;",
+	legend_key: "display:flex;flex-wrap:wrap;gap:12px;",
+	legend_item: "display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);",
+	legend_filters: "display:flex;flex-wrap:wrap;gap:8px;",
+	legend_filter:
+		"font-size:12px;padding:4px 10px;border-radius:14px;border:1px solid var(--border-color);background:var(--card-bg);color:var(--text-color);cursor:pointer;",
+	legend_filter_active: "border-color:var(--primary);background:var(--primary);color:var(--text-on-blue,#fff);font-weight:600;",
+	floor: "margin-block-end:24px;",
+	rooms: "display:flex;flex-wrap:wrap;gap:14px;",
+	room:
+		"border:1px solid var(--border-color);border-radius:8px;padding:12px;min-inline-size:240px;flex:1 1 260px;background:var(--card-bg);",
+	room_header: "display:flex;justify-content:space-between;align-items:baseline;margin-block-end:10px;gap:8px;",
+	room_number: "font-weight:600;font-size:var(--text-md,14px);",
+	room_meta: "font-size:12px;color:var(--text-muted);",
+	beds: "display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;",
+	bed:
+		"border-radius:8px;padding:12px 10px;min-block-size:84px;display:flex;flex-direction:column;gap:4px;cursor:pointer;border:2px solid transparent;user-select:none;background:var(--card-bg);",
+	bed_code: "font-weight:700;font-size:15px;",
+	bed_badge: "font-size:11px;font-weight:600;",
+	bed_occupant: "font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;",
+	summary_requests: "cursor:pointer;font-size:13px;padding:2px 8px;border-radius:10px;color:var(--text-muted);background:var(--control-bg);",
+	summary_requests_open: "color:var(--text-on-blue,#fff);background:var(--primary);font-weight:600;",
+};
+
 class FrontDesk {
 	constructor(page) {
 		this.page = page;
@@ -54,8 +121,8 @@ class FrontDesk {
 	}
 
 	setup() {
-		this.$strip = $('<div class="fd-buildings"></div>').appendTo(this.page.main);
-		this.$container = $('<div class="fd-board"></div>').appendTo(this.page.main);
+		this.$strip = $('<div class="fd-buildings"></div>').attr("style", FD_STYLE.buildings).appendTo(this.page.main);
+		this.$container = $('<div class="fd-board"></div>').attr("style", FD_STYLE.board).appendTo(this.page.main);
 		this._render_empty(__("Select a building to load the board."));
 		this._setup_controls();
 		this._load_buildings();
@@ -114,7 +181,9 @@ class FrontDesk {
 
 	_render_strip_error() {
 		this.$strip.empty();
-		const $err = $('<div class="fd-buildings-error"></div>').appendTo(this.$strip);
+		const $err = $('<div class="fd-buildings-error"></div>')
+			.css({ display: "flex", "align-items": "center", gap: "8px", "padding-block": "8px" })
+			.appendTo(this.$strip);
 		$('<span class="fd-buildings-error-msg"></span>')
 			.text(__("Could not load your buildings. Check your connection and try again."))
 			.appendTo($err);
@@ -148,7 +217,7 @@ class FrontDesk {
 			this._render_buildings_empty();
 			return;
 		}
-		const $row = $('<div class="fd-buildings-row"></div>').appendTo(this.$strip);
+		const $row = $('<div class="fd-buildings-row"></div>').attr("style", FD_STYLE.buildings_row).appendTo(this.$strip);
 		this.buildings.forEach((b) => {
 			this._render_building_chip($row, b);
 		});
@@ -184,14 +253,23 @@ class FrontDesk {
 		const $chip = $(
 			`<button class="fd-building-chip fd-building-chip--${pressure}${selected}" type="button"></button>`
 		).appendTo($row);
+		// Geometry + a colour-keyed left pressure bar + the selected outline, inline.
+		$chip.attr(
+			"style",
+			FD_STYLE.chip +
+				`border-inline-start:4px solid ${FD_PRESSURE_BORDER[pressure] || "var(--border-color)"};` +
+				(is_selected ? FD_STYLE.chip_selected : "")
+		);
 		$chip.attr("aria-pressed", is_selected);
 		$chip.attr("title", b.building_title || b.building);
 		$('<span class="fd-building-chip-name"></span>')
+			.attr("style", FD_STYLE.chip_name)
 			.text(b.building_title || b.building)
 			.appendTo($chip);
 		// bdi LTR-isolates the locale-grouped fraction so it cannot reverse beside
 		// an Arabic building name.
 		$('<bdi class="fd-building-chip-counts" dir="ltr"></bdi>')
+			.attr("style", FD_STYLE.chip_counts)
 			.text(fd_fraction(b.available, b.total_beds))
 			.appendTo($chip);
 		$chip.on("click", () => this._select_building(b.building));
@@ -276,6 +354,7 @@ class FrontDesk {
 	_render_empty(message) {
 		this.$container.empty();
 		$(`<div class="fd-empty text-muted"></div>`)
+			.attr("style", FD_STYLE.empty)
 			.text(message)
 			.appendTo(this.$container);
 	}
@@ -284,19 +363,23 @@ class FrontDesk {
 		this.$container.empty();
 		const $wrap = $('<div class="fd-loading" aria-busy="true"></div>').appendTo(this.$container);
 		$('<div class="fd-loading-label text-muted"></div>')
+			.css("margin-block-end", "12px")
 			.text(__("Loading board…"))
 			.appendTo($wrap);
-		const $skeleton = $('<div class="fd-skeleton-rooms"></div>').appendTo($wrap);
+		// Native Frappe skeleton blocks (shimmer included) — no custom skeleton CSS.
+		const $skeleton = $('<div class="fd-skeleton-rooms"></div>').attr("style", FD_STYLE.rooms).appendTo($wrap);
 		for (let i = 0; i < 6; i++) {
-			$('<div class="fd-skeleton-room"></div>').appendTo($skeleton);
+			$('<div class="skeleton-block"></div>')
+				.css({ "min-inline-size": "240px", flex: "1 1 260px", height: "120px", "border-radius": "8px" })
+				.appendTo($skeleton);
 		}
 	}
 
 	_render_error(message, opts) {
 		const allow_retry = !opts || opts.retry !== false;
 		this.$container.empty();
-		const $err = $('<div class="fd-error"></div>').appendTo(this.$container);
-		$('<div class="fd-error-msg"></div>').text(message).appendTo($err);
+		const $err = $('<div class="fd-error"></div>').attr("style", FD_STYLE.error).appendTo(this.$container);
+		$('<div class="fd-error-msg"></div>').attr("style", FD_STYLE.error_msg).text(message).appendTo($err);
 		if (allow_retry) {
 			$('<button class="btn btn-default btn-sm"></button>')
 				.text(__("Retry"))
@@ -318,28 +401,34 @@ class FrontDesk {
 			return;
 		}
 
+		// Uppercasing + letter-spacing break Arabic shaping → drop both in RTL.
+		const floor_head = frappe.utils.is_rtl()
+			? "font-size:var(--text-md,14px);font-weight:600;color:var(--text-muted);margin-block-end:10px;"
+			: "font-size:var(--text-md,14px);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);margin-block-end:10px;";
 		const NOT_READY = ["Needs Cleaning", "Needs Repair", "Out of Service"];
 		data.floors.forEach((floor) => {
-			const $floor = $('<div class="fd-floor"></div>').appendTo(this.$container);
+			const $floor = $('<div class="fd-floor"></div>').attr("style", FD_STYLE.floor).appendTo(this.$container);
 			$('<div class="fd-floor-header"></div>')
+				.attr("style", floor_head)
 				.text(floor.floor_label)
 				.appendTo($floor);
-			const $rooms = $('<div class="fd-rooms"></div>').appendTo($floor);
+			const $rooms = $('<div class="fd-rooms"></div>').attr("style", FD_STYLE.rooms).appendTo($floor);
 
 			(floor.rooms || []).forEach((room) => {
 				const needs_readiness = NOT_READY.includes(room.readiness_status);
 				const $room = $('<div class="fd-room"></div>')
+					.attr("style", FD_STYLE.room)
 					.attr("data-needs-readiness", needs_readiness ? "1" : "0")
 					.appendTo($rooms);
-				const $rh = $('<div class="fd-room-header"></div>').appendTo($room);
+				const $rh = $('<div class="fd-room-header"></div>').attr("style", FD_STYLE.room_header).appendTo($room);
 				// The room label keeps the word translatable but bdi-isolates the room
 				// code so the alphanumeric code is not reversed in an RTL locale.
-				const $rn = $('<span class="fd-room-number"></span>').appendTo($rh);
+				const $rn = $('<span class="fd-room-number"></span>').attr("style", FD_STYLE.room_number).appendTo($rh);
 				$rn.append(document.createTextNode(`${__("Room")} `));
 				$('<bdi dir="ltr"></bdi>').text(room.room_number || room.room).appendTo($rn);
 				// Room type stays in document direction; the occupancy fraction is
 				// LTR-isolated and locale-formatted.
-				const $rm = $('<span class="fd-room-meta"></span>').appendTo($rh);
+				const $rm = $('<span class="fd-room-meta"></span>').attr("style", FD_STYLE.room_meta).appendTo($rh);
 				const room_type = __(room.room_type || "");
 				if (room_type) {
 					$rm.append(document.createTextNode(`${room_type} · `));
@@ -356,7 +445,7 @@ class FrontDesk {
 						.appendTo($rh);
 				}
 
-				const $beds = $('<div class="fd-beds"></div>').appendTo($room);
+				const $beds = $('<div class="fd-beds"></div>').attr("style", FD_STYLE.beds).appendTo($room);
 				(room.beds || []).forEach((bed) => {
 					this._render_bed_card(bed, room, data.building)
 						.attr("data-color", bed.bed_color)
@@ -378,23 +467,26 @@ class FrontDesk {
 		const occupied = cint(s.occupied);
 		const pct = total ? Math.round((occupied / total) * 100) : 0;
 
-		const $bar = $('<div class="fd-summary" role="status" aria-live="polite"></div>').appendTo(
-			this.$container
-		);
+		const $bar = $('<div class="fd-summary" role="status" aria-live="polite"></div>')
+			.attr("style", FD_STYLE.summary)
+			.appendTo(this.$container);
 
-		const $head = $('<div class="fd-summary-head"></div>').appendTo($bar);
+		const $head = $('<div class="fd-summary-head"></div>').attr("style", FD_STYLE.summary_head).appendTo($bar);
 		$('<span class="fd-summary-title"></span>')
+			.attr("style", FD_STYLE.summary_title)
 			.text(data.building_title || data.building)
 			.appendTo($head);
 		this._render_open_requests_badge($head, data.building);
 
-		const $stats = $('<div class="fd-summary-stats"></div>').appendTo($bar);
+		const $stats = $('<div class="fd-summary-stats"></div>').attr("style", FD_STYLE.summary_stats).appendTo($bar);
+		// Per-stat left bar keyed to the bed palette.
+		const STAT_BORDER = { green: "var(--green-500)", red: "var(--red-500)", amber: "var(--orange-500)", grey: "var(--gray-400)" };
 		const stat = (key, label, value, tone) => {
-			const $stat = $(`<div class="fd-summary-stat fd-summary-stat--${tone}"></div>`).appendTo(
-				$stats
-			);
-			$('<bdi class="fd-summary-stat-num" dir="ltr"></bdi>').text(fd_int(value)).appendTo($stat);
-			$('<span class="fd-summary-stat-label"></span>').text(label).appendTo($stat);
+			const $stat = $(`<div class="fd-summary-stat fd-summary-stat--${tone}"></div>`)
+				.attr("style", FD_STYLE.summary_stat + `border-inline-start-color:${STAT_BORDER[tone] || "var(--border-color)"};`)
+				.appendTo($stats);
+			$('<bdi class="fd-summary-stat-num" dir="ltr"></bdi>').attr("style", FD_STYLE.summary_stat_num).text(fd_int(value)).appendTo($stat);
+			$('<span class="fd-summary-stat-label"></span>').attr("style", FD_STYLE.summary_stat_label).text(label).appendTo($stat);
 			$stat.attr("data-stat", key);
 		};
 		stat("available", __("Available"), s.available, "green");
@@ -402,17 +494,20 @@ class FrontDesk {
 		stat("blocked", __("Room not ready"), s.blocked, "amber");
 		stat("out_of_service", __("Out of service"), s.out_of_service, "grey");
 
-		const $meter = $('<div class="fd-summary-meter"></div>').appendTo($bar);
+		const $meter = $('<div class="fd-summary-meter"></div>').attr("style", FD_STYLE.summary_meter).appendTo($bar);
 		const $track = $(
 			`<div class="fd-summary-meter-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"></div>`
-		).appendTo($meter);
+		).attr("style", FD_STYLE.summary_meter_track).appendTo($meter);
 		$('<div class="fd-summary-meter-fill"></div>')
+			.attr("style", FD_STYLE.summary_meter_fill)
 			.css("inline-size", `${pct}%`)
 			.appendTo($track);
 		$('<bdi class="fd-summary-meter-label" dir="ltr"></bdi>')
+			.attr("style", FD_STYLE.summary_meter_label)
 			.text(fd_percent(pct))
 			.appendTo($meter);
 		$('<span class="fd-summary-meter-caption"></span>')
+			.attr("style", FD_STYLE.summary_meter_caption)
 			.text(__("{0} of {1} beds available", [fd_int(s.available), fd_int(s.total_beds)]))
 			.appendTo($meter);
 	}
@@ -421,7 +516,7 @@ class FrontDesk {
 	// each bed color means; three toggles narrow the board without a round-trip
 	// (filtering is purely show/hide over the already-loaded grid).
 	_render_legend() {
-		const $legend = $('<div class="fd-legend"></div>').appendTo(this.$container);
+		const $legend = $('<div class="fd-legend"></div>').attr("style", FD_STYLE.legend).appendTo(this.$container);
 
 		const swatches = [
 			["green", __("Available")],
@@ -429,9 +524,9 @@ class FrontDesk {
 			["amber", __("Room not ready")],
 			["grey", __("Out of service")],
 		];
-		const $key = $('<div class="fd-legend-key"></div>').appendTo($legend);
+		const $key = $('<div class="fd-legend-key"></div>').attr("style", FD_STYLE.legend_key).appendTo($legend);
 		swatches.forEach(([color, label]) => {
-			const $item = $('<span class="fd-legend-item"></span>').appendTo($key);
+			const $item = $('<span class="fd-legend-item"></span>').attr("style", FD_STYLE.legend_item).appendTo($key);
 			// Native indicator dot — same color vocabulary as the bed pills, no custom CSS.
 			$(`<span class="fd-legend-dot indicator ${fd_indicator_color(color)}"></span>`).appendTo(
 				$item
@@ -444,7 +539,8 @@ class FrontDesk {
 			["hide_out_of_service", __("Hide out of service")],
 			["only_needs_readiness", __("Rooms needing readiness")],
 		];
-		const $filters = $('<div class="fd-legend-filters"></div>').appendTo($legend);
+		const $filters = $('<div class="fd-legend-filters"></div>').attr("style", FD_STYLE.legend_filters).appendTo($legend);
+		const set_filter_style = ($btn, on) => $btn.attr("style", FD_STYLE.legend_filter + (on ? FD_STYLE.legend_filter_active : ""));
 		toggles.forEach(([key, label]) => {
 			const active = this.filters[key];
 			const $btn = $('<button type="button" class="fd-legend-filter"></button>')
@@ -452,10 +548,12 @@ class FrontDesk {
 				.attr("aria-pressed", active ? "true" : "false")
 				.text(label)
 				.appendTo($filters);
+			set_filter_style($btn, active);
 			$btn.on("click", () => {
 				this.filters[key] = !this.filters[key];
 				$btn.toggleClass("fd-legend-filter--active", this.filters[key]);
 				$btn.attr("aria-pressed", this.filters[key] ? "true" : "false");
+				set_filter_style($btn, this.filters[key]);
 				this._apply_filters();
 			});
 		});
@@ -503,6 +601,7 @@ class FrontDesk {
 				const statuses = r.message.statuses || [];
 				const indicator = count > 0 ? "fd-summary-requests--open" : "";
 				$(`<span class="fd-summary-requests ${indicator}" role="button" tabindex="0"></span>`)
+					.attr("style", FD_STYLE.summary_requests + (count > 0 ? FD_STYLE.summary_requests_open : ""))
 					.text(__("{0} open requests", [fd_int(count)]))
 					.on("click keydown", (e) => {
 						if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return;
@@ -514,14 +613,18 @@ class FrontDesk {
 					})
 					.appendTo($summary);
 			},
+			// Best-effort background badge: a failure must not nag the operator.
+			error: () => {},
 		});
 	}
 
 	_render_bed_card(bed, room, building) {
 		const $card = $(`<div class="fd-bed" tabindex="0" role="button"></div>`);
+		// Base geometry + the bed-status colour key overlaid (free/occupied/etc.).
+		$card.attr("style", FD_STYLE.bed + (FD_BED_PALETTE[bed.bed_color] || ""));
 		// The bed code is a naming-series-style token; isolate it LTR so it renders
 		// left-to-right on its own line, even on an RTL board beside an Arabic name.
-		$('<bdi class="fd-bed-code" dir="ltr"></bdi>').text(bed.bed_code || bed.bed).appendTo($card);
+		$('<bdi class="fd-bed-code" dir="ltr"></bdi>').attr("style", FD_STYLE.bed_code).text(bed.bed_code || bed.bed).appendTo($card);
 
 		let badge = "";
 		if (bed.bed_color === "green") badge = __("Available");
@@ -530,11 +633,13 @@ class FrontDesk {
 		else badge = __("Out of Service");
 		// Native Frappe status pill — color-coded with no custom CSS.
 		$(`<span class="fd-bed-badge indicator-pill ${fd_indicator_color(bed.bed_color)}"></span>`)
+			.attr("style", FD_STYLE.bed_badge)
 			.text(badge)
 			.appendTo($card);
 
 		if (bed.bed_color === "red" && bed.occupant) {
 			$('<div class="fd-bed-occupant"></div>')
+				.attr("style", FD_STYLE.bed_occupant)
 				.text(bed.occupant.employee_name || bed.occupant.employee)
 				.appendTo($card);
 		}
@@ -563,10 +668,11 @@ class FrontDesk {
 			method: "apex_habitat.habitat.api.front_desk.set_room_readiness",
 			args: { room: room, status: "Ready" },
 			callback: (r) => {
-				if (r.exc) return;
+				if (r.exc || !r.message) return;
 				frappe.show_alert({ message: __("Room marked ready."), indicator: "green" });
 				this.refresh();
 			},
+			error: () => frappe.show_alert({ message: __("Could not mark the room ready."), indicator: "red" }),
 		});
 	}
 

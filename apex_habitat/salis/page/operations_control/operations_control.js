@@ -57,6 +57,81 @@ function _bdi(value) {
 	return `<bdi>${frappe.utils.escape_html(value == null ? "" : String(value))}</bdi>`;
 }
 
+// Status-accent + severity colour keys, aliasing the native Desk colour-scale vars
+// (theme/dark-mode aware, no bespoke hex). Desk pages ship no stylesheet, so the
+// keys are applied as inline-style overlays.
+const FC_ACCENT = { green: "var(--green-500)", orange: "var(--orange-500)", red: "var(--red-500)", gray: "var(--gray-400)" };
+const FC_SEV_COLOR = { Critical: "var(--red-500)", Warning: "var(--orange-500)", Info: "var(--blue-500)" };
+// Layout, all bound to native Desk CSS vars (with px fallbacks where useful).
+const FC = {
+	progress: "height:3px;margin-block-end:8px;border-radius:3px;overflow:hidden;background:transparent;",
+	progress_on: "background:var(--gray-200);",
+	banner_on:
+		"display:flex;align-items:center;gap:10px;margin-block-end:12px;padding:6px 12px;border-radius:var(--border-radius-md,8px);background:var(--control-bg);font-size:var(--text-sm,13px);",
+	summary: "display:flex;flex-wrap:wrap;gap:10px;margin-block-end:14px;align-items:stretch;",
+	chip:
+		"flex:1 1 120px;min-inline-size:110px;background:var(--card-bg);border:1px solid var(--border-color);border-block-start:3px solid var(--gray-400);border-radius:var(--border-radius-md,8px);padding:10px 14px;",
+	chip_pressed: "outline:2px solid var(--primary);outline-offset:-2px;",
+	chip_val: "font-size:22px;font-weight:700;line-height:1.1;",
+	chip_lbl: "font-size:11px;color:var(--text-muted);",
+	controls: "display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;margin-block-end:14px;",
+	filter: "display:flex;flex-direction:column;gap:2px;font-size:var(--text-sm,12px);",
+	search: "min-inline-size:180px;",
+	result_count: "font-size:12px;color:var(--text-muted);margin-inline-start:auto;align-self:center;",
+	body: "display:flex;gap:14px;align-items:flex-start;",
+	grid: "flex:1 1 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;",
+	card:
+		"position:relative;background:var(--card-bg);border:1px solid var(--border-color);border-inline-start:4px solid var(--gray-300);border-radius:var(--border-radius-md,8px);padding:12px;cursor:pointer;",
+	card_sev:
+		"position:absolute;inset-block-start:8px;inset-inline-end:8px;min-inline-size:18px;height:18px;border-radius:9px;color:var(--white,#fff);font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 5px;",
+	card_head: "display:flex;justify-content:space-between;align-items:center;gap:8px;",
+	plate: "font-size:16px;font-weight:700;",
+	card_meta: "margin-block:6px;font-size:var(--text-sm,13px);",
+	sep_dot: "display:flex;flex-wrap:wrap;align-items:center;gap:6px;",
+	card_foot: "display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;margin-block-start:6px;flex-wrap:wrap;",
+	driver: "display:inline-flex;align-items:center;gap:5px;",
+	driver_icon: "display:inline-flex;color:var(--text-muted);",
+	empty: "padding:40px;text-align:center;inline-size:100%;",
+	empty_scope:
+		"padding:40px;text-align:center;inline-size:100%;border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);background:var(--control-bg);",
+	empty_title: "font-weight:600;font-size:var(--text-md,14px);margin-block-end:6px;",
+	error: "padding:24px;text-align:center;inline-size:100%;",
+	error_msg: "margin-block-end:10px;",
+	table: "inline-size:100%;font-size:var(--text-sm,13px);",
+	sev_counter:
+		"display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid transparent;border-radius:14px;background:var(--control-bg);font-size:var(--text-sm,12px);cursor:pointer;",
+	sev_counter_pressed: "border-color:var(--primary);background:var(--bg-color);",
+	sev_dot: "inline-size:9px;block-size:9px;border-radius:50%;flex:0 0 auto;",
+	sev_count: "font-weight:700;",
+	alert_clear: "display:inline-flex;align-items:center;padding:4px 10px;font-size:var(--text-sm,12px);color:var(--text-muted);",
+	queue_bulk: "display:flex;align-items:center;gap:10px;margin-block-end:8px;flex-wrap:wrap;inline-size:100%;",
+	queue: "inline-size:100%;display:flex;flex-direction:column;gap:6px;",
+	queue_row:
+		"display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border-color);border-inline-start:4px solid var(--gray-300);border-radius:var(--border-radius-md,8px);background:var(--card-bg);",
+	queue_aging: "background:var(--yellow-50,var(--yellow-100));",
+	queue_main: "flex:1 1 auto;min-inline-size:0;",
+	queue_msg: "font-size:var(--text-sm,13px);",
+	queue_meta: "font-size:11.5px;color:var(--text-muted);margin-block-start:2px;",
+	queue_owner: "font-weight:500;",
+	unowned: "color:var(--text-muted);font-style:italic;",
+	queue_aging_pill: "font-size:10.5px;font-weight:700;color:var(--orange-700);background:var(--yellow-100);border-radius:8px;padding:0 6px;",
+	queue_actions: "display:inline-flex;gap:6px;flex:0 0 auto;flex-wrap:wrap;",
+	drawer:
+		"flex:0 0 320px;inline-size:320px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);padding:14px;max-block-size:80vh;overflow:auto;",
+	drawer_head: "display:flex;align-items:center;gap:8px;margin-block-end:10px;flex-wrap:wrap;",
+	drawer_title: "font-size:17px;font-weight:700;flex:1 1 auto;",
+	drawer_sub: "font-size:11px;color:var(--text-muted);margin:14px 0 6px;font-weight:600;",
+	drawer_alerts: "display:flex;flex-direction:column;gap:6px;",
+	drawer_alert:
+		"border:1px solid var(--border-color);border-inline-start:4px solid var(--gray-300);border-radius:var(--border-radius-md,8px);padding:8px;",
+	dl: "display:flex;flex-direction:column;",
+	dl_row: "display:flex;gap:8px;padding:3px 0;font-size:var(--text-sm,13px);",
+	dl_k: "flex:0 0 110px;color:var(--text-muted);",
+	dl_v: "flex:1 1 auto;font-weight:500;",
+	list: "margin:0;padding-inline-start:0;list-style:none;font-size:12.5px;",
+	timeline_kind: "font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;",
+};
+
 class FleetControl {
 	constructor(page) {
 		this.page = page;
@@ -89,27 +164,21 @@ class FleetControl {
 		this.$root = $('<div class="fc-root"></div>')
 			.attr("dir", frappe.utils.is_rtl() ? "rtl" : "ltr")
 			.appendTo(this.page.main);
-		this.$progress = $('<div class="fc-progress"></div>').appendTo(this.$root);
+		this.$progress = $('<div class="fc-progress"></div>').attr("style", FC.progress).appendTo(this.$root);
 		// One-line 'since you last looked' delta banner (calm/absent when nothing changed).
-		this.$banner = $('<div class="fc-since-banner"></div>').appendTo(this.$root);
+		this.$banner = $('<div class="fc-since-banner"></div>').css("display", "none").appendTo(this.$root);
 		// Single merged counter row: status/incidents/compliance facets + severity facets.
-		this.$summary = $('<div class="fc-summary"></div>').appendTo(this.$root);
-		// fc-sheet/-closed are inert above 768px; below it the bar becomes a bottom
-		// sheet toggled by the Filters button.
-		this.$controls = $('<div class="fc-controls fc-sheet fc-sheet-closed"></div>').appendTo(this.$root);
-		this.$body = $('<div class="fc-body"></div>').appendTo(this.$root);
-		this.$grid = $('<div class="fc-grid"></div>').appendTo(this.$body);
-		this.$drawer = $('<div class="fc-drawer"></div>').appendTo(this.$body);
+		this.$summary = $('<div class="fc-summary"></div>').attr("style", FC.summary).appendTo(this.$root);
+		this.$controls = $('<div class="fc-controls"></div>').attr("style", FC.controls).appendTo(this.$root);
+		this.$body = $('<div class="fc-body"></div>').attr("style", FC.body).appendTo(this.$root);
+		this.$grid = $('<div class="fc-grid"></div>').attr("style", FC.grid).appendTo(this.$body);
+		// Drawer is hidden until a vehicle is opened (inline display toggle — no CSS
+		// width-transition rule, which a Desk page can't ship).
+		this.$drawer = $('<div class="fc-drawer"></div>').css("display", "none").appendTo(this.$body);
 
 		this.page.set_primary_action(__("Refresh"), () => this.refresh(), "refresh");
 		this.page.add_button(__("Cards / Table"), () => this.toggle_view("table"));
 		this.page.add_button(__("Alert queue"), () => this.toggle_view("queue"));
-		// Mobile-only Filters trigger for the bottom-sheet filter bar.
-		this.$sheet_toggle = $(
-			`<button class="btn btn-sm btn-default fc-sheet-toggle">${__("Filters")}</button>`
-		)
-			.on("click", () => this.$controls.toggleClass("fc-sheet-closed"))
-			.insertBefore(this.$summary);
 
 		this._build_controls();
 		this._render_skeleton();
@@ -153,7 +222,7 @@ class FleetControl {
 		this._fill_select(this.$compliance, ["Compliant", "Expiring Soon", "Expired"], this.filters.compliance);
 		this.$search = $(
 			`<input type="text" class="form-control input-sm fc-search" placeholder="${__("Search plate or category")}">`
-		).appendTo(this.$controls);
+		).attr("style", FC.search).appendTo(this.$controls);
 		this.$search.val(this.filters.search || "");
 		this.$search.on(
 			"input",
@@ -175,12 +244,12 @@ class FleetControl {
 			.appendTo(this.$sort);
 		this.$sort.val(this.sort);
 		// Live '{n} vehicles' count, right-aligned in the filter bar.
-		this.$count = $('<span class="fc-result-count"></span>').appendTo(this.$controls);
+		this.$count = $('<span class="fc-result-count"></span>').attr("style", FC.result_count).appendTo(this.$controls);
 	}
 
 	_select(label, on_change) {
-		const $wrap = $('<span class="fc-filter"></span>').appendTo(this.$controls);
-		$(`<label>${frappe.utils.escape_html(label)}</label>`).appendTo($wrap);
+		const $wrap = $('<span class="fc-filter"></span>').attr("style", FC.filter).appendTo(this.$controls);
+		$(`<label>${frappe.utils.escape_html(label)}</label>`).css({ "font-size": "11px", color: "var(--text-muted)", margin: "0" }).appendTo($wrap);
 		const $sel = $('<select class="form-control input-sm"></select>').appendTo($wrap);
 		$sel.on("change", on_change);
 		return $sel;
@@ -322,7 +391,7 @@ class FleetControl {
 	// when nothing changed or there is no prior visit (first ever load). New
 	// arrivals are measured by raised_on against the persisted last_seen.
 	_render_since_banner() {
-		this.$banner.empty().removeClass("fc-since-on");
+		this.$banner.empty().css("display", "none");
 		const since = this.last_seen;
 		if (!since) return;
 		const raised = (this.alerts || []).filter((a) => a.raised_on && a.raised_on > since);
@@ -331,15 +400,16 @@ class FleetControl {
 		const resolved = this.resolved_since || 0;
 		// Nothing changed since last visit → stay calm and render nothing.
 		if (!new_total && !resolved) return;
-		this.$banner.addClass("fc-since-on");
+		this.$banner.attr("style", FC.banner_on);
 		const hhmm = since.slice(11, 16);
 		const parts = [];
 		if (new_critical) parts.push(__("{0} new Critical", [new_critical]));
 		else if (new_total) parts.push(__("{0} new", [new_total]));
 		if (resolved) parts.push(__("{0} resolved", [resolved]));
 		const phrase = __("{0} since {1}", [parts.join(", "), hhmm]);
-		$('<span class="fc-since-text"></span>').text(phrase).appendTo(this.$banner);
+		$('<span class="fc-since-text"></span>').css("font-weight", "600").text(phrase).appendTo(this.$banner);
 		$('<button class="btn btn-xs btn-default fc-since-dismiss"></button>')
+			.css("margin-inline-start", "auto")
 			.text(__("Dismiss"))
 			.on("click", () => { this.last_seen = null; this._render_since_banner(); })
 			.appendTo(this.$banner);
@@ -375,8 +445,8 @@ class FleetControl {
 	// Render an error panel (with the server message) + Retry into a target element.
 	_render_error($target, retry, r) {
 		$target.empty();
-		const $panel = $('<div class="fc-error"></div>').appendTo($target);
-		$('<div class="fc-error-msg"></div>').text(this._error_text(r)).appendTo($panel);
+		const $panel = $('<div class="fc-error"></div>').attr("style", FC.error).appendTo($target);
+		$('<div class="fc-error-msg"></div>').attr("style", FC.error_msg).text(this._error_text(r)).appendTo($panel);
 		const $btn = $('<button class="btn btn-sm btn-default fc-error-retry"></button>')
 			.text(__("Retry"))
 			.appendTo($panel);
@@ -408,19 +478,22 @@ class FleetControl {
 
 	// Disable Refresh + show the top progress bar while a fetch is in flight (no blank screen, no double-click).
 	_set_loading(active) {
-		this.$progress.toggleClass("fc-progress-on", active);
+		// Indeterminate sweep needs a keyframe; a Desk page ships none, so the
+		// progress bar is a simple tinted track shown only while a fetch is in flight.
+		this.$progress.attr("style", FC.progress + (active ? FC.progress_on : ""));
 		if (this.page.btn_primary) this.page.btn_primary.prop("disabled", active);
 	}
 
 	// Placeholder chips + cards shown on first load, before get_fleet returns.
+	// Native Frappe skeleton blocks (shimmer included) — no custom skeleton CSS.
 	_render_skeleton() {
 		this.$summary.empty();
 		for (let i = 0; i < 4; i++) {
-			$('<div class="fc-chip fc-skeleton"></div>').appendTo(this.$summary);
+			$('<div class="skeleton-block"></div>').css({ flex: "1 1 120px", "min-inline-size": "110px", height: "62px", "border-radius": "8px" }).appendTo(this.$summary);
 		}
 		this.$grid.empty();
 		for (let i = 0; i < 6; i++) {
-			$('<div class="fc-card fc-skeleton"></div>').appendTo(this.$grid);
+			$('<div class="skeleton-block"></div>').css({ height: "120px", "border-radius": "8px" }).appendTo(this.$grid);
 		}
 	}
 
@@ -432,6 +505,7 @@ class FleetControl {
 		const total = (this.alert_summary && this.alert_summary.total) || 0;
 		if (!total) {
 			$('<div class="fc-sev-counter fc-alert-clear"></div>')
+				.attr("style", FC.alert_clear)
 				.text(__("All clear — no open alerts"))
 				.appendTo(this.$summary);
 			return;
@@ -441,10 +515,14 @@ class FleetControl {
 			if (!n) return;
 			const active = this.severity_filter === s;
 			const $b = $('<button type="button" class="fc-sev-counter"></button>')
+				.attr("style", FC.sev_counter + (active ? FC.sev_counter_pressed : ""))
 				.attr("aria-pressed", active ? "true" : "false")
 				.appendTo(this.$summary);
-			$('<span class="fc-sev-dot"></span>').addClass("fc-sev-" + s).appendTo($b);
-			$('<span class="fc-sev-count"></span>').text(n).appendTo($b);
+			$('<span class="fc-sev-dot"></span>')
+				.addClass("fc-sev-" + s)
+				.attr("style", FC.sev_dot + `background:${FC_SEV_COLOR[s] || "var(--gray-400)"};`)
+				.appendTo($b);
+			$('<span class="fc-sev-count"></span>').attr("style", FC.sev_count).text(n).appendTo($b);
 			$('<span></span>').text(__(s)).appendTo($b);
 			$b.on("click", () => {
 				this.severity_filter = active ? "" : s;
@@ -461,9 +539,10 @@ class FleetControl {
 	_ownership_counter(key, label, n) {
 		const active = this.ownership_filter === key;
 		const $b = $('<button type="button" class="fc-sev-counter fc-own-counter"></button>')
+			.attr("style", FC.sev_counter + "margin-inline-start:6px;" + (active ? FC.sev_counter_pressed : ""))
 			.attr("aria-pressed", active ? "true" : "false")
 			.appendTo(this.$summary);
-		$('<span class="fc-sev-count"></span>').text(n).appendTo($b);
+		$('<span class="fc-sev-count"></span>').attr("style", FC.sev_count).text(n).appendTo($b);
 		$('<span></span>').text(label).appendTo($b);
 		$b.on("click", () => {
 			this.ownership_filter = active ? "" : key;
@@ -477,10 +556,19 @@ class FleetControl {
 	_render_summary() {
 		this.$summary.empty();
 		const s = this.data.summary || { by_status: {}, total: 0, open_incidents: 0 };
+		// Map the chip colour class onto the top-accent colour (no stylesheet to key it).
+		const CHIP_ACCENT = {
+			"fc-chip-total": "var(--gray-600)", "fc-chip-green": "var(--green-500)",
+			"fc-chip-orange": "var(--orange-500)", "fc-chip-red": "var(--red-500)", "fc-chip-gray": "var(--gray-400)",
+		};
 		const chip = (label, value, cls, on_click, pressed) => {
-			const $c = $('<div class="fc-chip"></div>').addClass(cls || "").appendTo(this.$summary);
-			$('<div class="fc-chip-val"></div>').text(value).appendTo($c);
-			$('<div class="fc-chip-lbl"></div>').text(label).appendTo($c);
+			const accent = CHIP_ACCENT[cls] || "var(--gray-400)";
+			const $c = $('<div class="fc-chip"></div>')
+				.addClass(cls || "")
+				.attr("style", FC.chip + `border-block-start-color:${accent};` + (pressed ? FC.chip_pressed : "") + (on_click ? "cursor:pointer;" : ""))
+				.appendTo(this.$summary);
+			$('<div class="fc-chip-val"></div>').attr("style", FC.chip_val).text(value).appendTo($c);
+			$('<div class="fc-chip-lbl"></div>').attr("style", FC.chip_lbl).text(label).appendTo($c);
 			if (on_click) {
 				$c.attr("aria-pressed", pressed ? "true" : "false").on("click", on_click);
 			}
@@ -580,7 +668,9 @@ class FleetControl {
 			return;
 		}
 		this.$grid.empty();
+		// Table mode is a block, not a grid; flip the container display inline.
 		this.$grid.toggleClass("fc-grid-table", this.view === "table");
+		this.$grid.css("display", this.view === "table" ? "block" : "grid");
 		const vehicles = this._visible_vehicles();
 		this._update_count(vehicles.length, false);
 		if (!vehicles.length) {
@@ -601,19 +691,22 @@ class FleetControl {
 	// vs an over-filtered no-match. unscoped guards an empty-project oversight user.
 	_render_empty() {
 		if (!this.data.unscoped && (this.data.projects || []).length === 0) {
-			const $e = $('<div class="fc-empty fc-empty-scope"></div>').appendTo(this.$grid);
+			const $e = $('<div class="fc-empty fc-empty-scope"></div>').attr("style", FC.empty_scope).appendTo(this.$grid);
 			$('<div class="fc-empty-title"></div>')
+				.attr("style", FC.empty_title)
 				.text(__("You have no fleet project assigned"))
 				.appendTo($e);
 			$('<div class="fc-empty-hint text-muted"></div>')
+				.css("font-size", "var(--text-sm, 13px)")
 				.text(__("Contact your Fleet Manager to be granted a project."))
 				.appendTo($e);
 			return;
 		}
-		const $e = $('<div class="fc-empty fc-empty-filtered text-muted"></div>').appendTo(this.$grid);
+		const $e = $('<div class="fc-empty fc-empty-filtered text-muted"></div>').attr("style", FC.empty).appendTo(this.$grid);
 		$('<div></div>').text(__("No vehicles match the current filters.")).appendTo($e);
 		// Escape hatch out of an over-filtered board: reset every filter + refetch.
 		const $clear = $('<button class="btn btn-sm btn-default fc-clear-filters"></button>')
+			.css("margin-block-start", "12px")
 			.text(__("Clear filters"))
 			.appendTo($e);
 		$clear.on("click", () => this._clear_filters());
@@ -631,7 +724,9 @@ class FleetControl {
 
 	_render_card(v) {
 		const color = STATUS_COLOR[v.status] || "gray";
-		const $c = $('<div class="fc-card"></div>').addClass("fc-accent-" + color);
+		const $c = $('<div class="fc-card"></div>')
+			.addClass("fc-accent-" + color)
+			.attr("style", FC.card + `border-inline-start-color:${FC_ACCENT[color] || "var(--gray-400)"};`);
 		$c.on("click", () => this.open_detail(v));
 		// Top-corner severity badge when the vehicle has open alerts, coloured by the
 		// highest open severity (Critical red > Warning orange > Info blue).
@@ -640,26 +735,28 @@ class FleetControl {
 			const n = (this.alerts_by_vehicle[v.name] || []).length;
 			$('<span class="fc-card-sev"></span>')
 				.addClass("fc-sev-" + top_sev)
+				.attr("style", FC.card_sev + `background:${FC_SEV_COLOR[top_sev] || "var(--gray-500)"};`)
 				.attr("title", __(top_sev))
 				.text(n)
 				.appendTo($c);
 		}
-		const $head = $('<div class="fc-card-head"></div>').appendTo($c);
+		const $head = $('<div class="fc-card-head"></div>').attr("style", FC.card_head).appendTo($c);
 		// Plate / VEH-* id is LTR: <bdi> keeps it from reversing inside an RTL card.
-		$('<div class="fc-plate"></div>').html(_bdi(v.plate_number || v.name)).appendTo($head);
+		$('<div class="fc-plate"></div>').attr("style", FC.plate).html(_bdi(v.plate_number || v.name)).appendTo($head);
 		$('<span class="indicator-pill"></span>').addClass(color).text(__(v.status || "")).appendTo($head);
-		const $meta = $('<div class="fc-card-meta"></div>').appendTo($c);
+		const $meta = $('<div class="fc-card-meta"></div>').attr("style", FC.card_meta).appendTo($c);
 		$('<div></div>').text(v.vehicle_category || __("No category")).appendTo($meta);
-		// Office·project as separate nodes with a CSS dot separator — no string glue,
-		// so the middot doesn't strand between LTR/RTL tokens under RTL.
-		const $op = $('<div class="text-muted fc-sep-dot"></div>').appendTo($meta);
+		// Office·project as separate nodes — a middot separator joined inline so it
+		// can't strand between LTR/RTL tokens (no pseudo-element rule on a Desk page).
+		const $op = $('<div class="text-muted fc-sep-dot"></div>').attr("style", FC.sep_dot).appendTo($meta);
 		const parts = [v.rental_office, v.project].filter(Boolean);
 		if (!parts.length) $('<span></span>').text("—").appendTo($op);
 		else parts.forEach((p) => $("<span></span>").text(p).appendTo($op));
-		const $foot = $('<div class="fc-card-foot"></div>').appendTo($c);
+		const $foot = $('<div class="fc-card-foot"></div>').attr("style", FC.card_foot).appendTo($c);
 		// Driver: an icon node + a text node, not an emoji glued onto the string.
-		const $driver = $('<div class="fc-driver"></div>').appendTo($foot);
+		const $driver = $('<div class="fc-driver"></div>').attr("style", FC.driver).appendTo($foot);
 		$('<span class="fc-driver-icon"></span>')
+			.attr("style", FC.driver_icon)
 			.html(frappe.utils.icon("users", "sm"))
 			.appendTo($driver);
 		$('<span class="fc-driver-name"></span>')
@@ -688,7 +785,7 @@ class FleetControl {
 			["Driver", "current_driver_name"], ["Office", "rental_office"], ["Project", "project"],
 			["Open Incidents", "open_incidents"],
 		];
-		const $t = $('<table class="table table-bordered fc-table"></table>').appendTo(this.$grid);
+		const $t = $('<table class="table table-bordered fc-table"></table>').attr("style", FC.table).appendTo(this.$grid);
 		const $hr = $("<tr></tr>").appendTo($("<thead></thead>").appendTo($t));
 		cols.forEach((c) => $("<th></th>").text(__(c[0])).appendTo($hr));
 		const $tb = $("<tbody></tbody>").appendTo($t);
@@ -711,13 +808,13 @@ class FleetControl {
 	// Alert-queue view: open Operations Alerts, severity-sorted, with inline
 	// Acknowledge/Resolve/Assign/Snooze and checkbox multi-select + bulk actions.
 	_render_queue() {
-		this.$grid.empty().removeClass("fc-grid-table");
+		this.$grid.empty().removeClass("fc-grid-table").css("display", "block");
 		const sorted = (this.alerts || [])
 			.filter((a) => this._alert_matches_facets(a))
 			.slice()
 			.sort((a, b) => (SEVERITY_RANK[b.severity] || 0) - (SEVERITY_RANK[a.severity] || 0));
 		if (!sorted.length) {
-			const $e = $('<div class="fc-empty text-muted"></div>').appendTo(this.$grid);
+			const $e = $('<div class="fc-empty text-muted"></div>').attr("style", FC.empty).appendTo(this.$grid);
 			$('<div></div>')
 				.text(this.ownership_filter || this.severity_filter
 					? __("No alerts match the current filters.")
@@ -726,7 +823,7 @@ class FleetControl {
 			return;
 		}
 		// Bulk bar: select-all + acknowledge / assign-to-me / snooze the selection.
-		const $bulk = $('<div class="fc-queue-bulk"></div>').appendTo(this.$grid);
+		const $bulk = $('<div class="fc-queue-bulk"></div>').attr("style", FC.queue_bulk).appendTo(this.$grid);
 		const $all = $('<input type="checkbox">')
 			.on("change", () => {
 				this.selected_alerts = $all.prop("checked")
@@ -753,7 +850,7 @@ class FleetControl {
 			.on("click", () => this._bulk_snooze())
 			.appendTo($bulk);
 
-		const $wrap = $('<div class="fc-queue"></div>').appendTo(this.$grid);
+		const $wrap = $('<div class="fc-queue"></div>').attr("style", FC.queue).appendTo(this.$grid);
 		sorted.forEach((a) => this._render_queue_row(a, $wrap));
 	}
 
@@ -762,6 +859,7 @@ class FleetControl {
 		const $row = $('<div class="fc-queue-row"></div>')
 			.addClass("fc-sev-row-" + a.severity)
 			.toggleClass("fc-queue-aging", aging)
+			.attr("style", FC.queue_row + `border-inline-start-color:${FC_SEV_COLOR[a.severity] || "var(--gray-400)"};` + (aging ? FC.queue_aging : ""))
 			.appendTo($wrap);
 		// Any row can be selected for assign/snooze; acknowledge skips non-Open server-side.
 		$('<input type="checkbox" class="fc-queue-pick">')
@@ -772,10 +870,10 @@ class FleetControl {
 				this._render_queue();
 			})
 			.appendTo($row);
-		const $main = $('<div class="fc-queue-main"></div>').appendTo($row);
-		$('<div class="fc-queue-msg"></div>').text(a.message || __(a.alert_type || "")).appendTo($main);
-		// Meta line: plate · type · age · status · owner, dot-separated (RTL-safe).
-		const $meta = $('<div class="fc-queue-meta fc-sep-dot"></div>').appendTo($main);
+		const $main = $('<div class="fc-queue-main"></div>').attr("style", FC.queue_main).appendTo($row);
+		$('<div class="fc-queue-msg"></div>').attr("style", FC.queue_msg).text(a.message || __(a.alert_type || "")).appendTo($main);
+		// Meta line: plate · type · age · status · owner, gap-separated (RTL-safe).
+		const $meta = $('<div class="fc-queue-meta fc-sep-dot"></div>').attr("style", FC.queue_meta + FC.sep_dot).appendTo($main);
 		if (a.vehicle_plate) $('<span></span>').html(_bdi(a.vehicle_plate)).appendTo($meta);
 		$('<span></span>').text(__(a.alert_type || "")).appendTo($meta);
 		if (a.raised_on)
@@ -784,6 +882,7 @@ class FleetControl {
 		// Owner chip: who holds this alert (native _assign), or 'Unowned'.
 		const owners = a.assignee_names || [];
 		$('<span class="fc-queue-owner"></span>')
+			.attr("style", owners.length ? FC.queue_owner : FC.unowned)
 			.text(owners.length ? owners.join(", ") : __("Unowned"))
 			.toggleClass("fc-unowned", !owners.length)
 			.appendTo($meta);
@@ -791,10 +890,11 @@ class FleetControl {
 		// row is called out distinctly (it was seen but is sitting unresolved).
 		if (aging) {
 			$('<span class="fc-queue-aging-pill"></span>')
+				.attr("style", FC.queue_aging_pill)
 				.text(a.status === "Acknowledged" ? __("Stale") : __("Overdue"))
 				.appendTo($meta);
 		}
-		this._alert_actions(a, $('<div class="fc-queue-actions"></div>').appendTo($row));
+		this._alert_actions(a, $('<div class="fc-queue-actions"></div>').attr("style", FC.queue_actions).appendTo($row));
 	}
 
 	// Inline Acknowledge (Open only) + Resolve + ownership (claim/release) + Snooze
@@ -887,6 +987,7 @@ class FleetControl {
 					this._refresh_alerts();
 				}
 			},
+			error: () => frappe.show_alert({ message: __("Could not complete the alert action."), indicator: "red" }),
 		});
 	}
 
@@ -905,6 +1006,7 @@ class FleetControl {
 				this.selected_alerts = new Set();
 				this._refresh_alerts();
 			},
+			error: () => frappe.show_alert({ message: __("Could not acknowledge the selected alerts."), indicator: "red" }),
 		});
 	}
 
@@ -922,6 +1024,7 @@ class FleetControl {
 				this.selected_alerts = new Set();
 				this._refresh_alerts();
 			},
+			error: () => frappe.show_alert({ message: __("Could not assign the selected alerts."), indicator: "red" }),
 		});
 	}
 
@@ -941,6 +1044,7 @@ class FleetControl {
 						this.selected_alerts = new Set();
 						this._refresh_alerts();
 					},
+					error: () => frappe.show_alert({ message: __("Could not snooze the selected alerts."), indicator: "red" }),
 				});
 			},
 			__("Snooze alerts"),
@@ -949,12 +1053,12 @@ class FleetControl {
 	}
 
 	open_detail(v) {
-		this.$drawer.addClass("fc-open").empty();
+		this.$drawer.attr("style", FC.drawer).css("display", "block").empty();
 		const $close = $('<button class="btn btn-xs btn-default fc-close"></button>').text(__("Close"));
-		$close.on("click", () => this.$drawer.removeClass("fc-open"));
-		const $head = $('<div class="fc-drawer-head"></div>').appendTo(this.$drawer);
+		$close.on("click", () => this.$drawer.removeClass("fc-open").css("display", "none"));
+		const $head = $('<div class="fc-drawer-head"></div>').attr("style", FC.drawer_head).appendTo(this.$drawer);
 		// Plate / VEH-* id is LTR: <bdi> isolates it inside the RTL drawer header.
-		$('<div class="fc-drawer-title"></div>').html(_bdi(v.plate_number || v.name)).appendTo($head);
+		$('<div class="fc-drawer-title"></div>').attr("style", FC.drawer_title).html(_bdi(v.plate_number || v.name)).appendTo($head);
 		$close.appendTo($head);
 		// Drawer actions are grouped by intent: open the record, then operate on this
 		// vehicle (reassign / release), then create related records last.
@@ -998,17 +1102,18 @@ class FleetControl {
 			.slice()
 			.sort((a, b) => (SEVERITY_RANK[b.severity] || 0) - (SEVERITY_RANK[a.severity] || 0));
 		if (!list.length) return;
-		const $wrap = $('<div class="fc-drawer-alerts"></div>').appendTo(this.$drawer);
-		$('<div class="fc-drawer-sub"></div>').text(__("Alerts")).appendTo($wrap);
+		const $wrap = $('<div class="fc-drawer-alerts"></div>').attr("style", FC.drawer_alerts).appendTo(this.$drawer);
+		$('<div class="fc-drawer-sub"></div>').attr("style", FC.drawer_sub).text(__("Alerts")).appendTo($wrap);
 		list.forEach((a) => {
 			const $a = $('<div class="fc-drawer-alert"></div>')
 				.addClass("fc-sev-row-" + a.severity)
+				.attr("style", FC.drawer_alert + `border-inline-start-color:${FC_SEV_COLOR[a.severity] || "var(--gray-400)"};`)
 				.appendTo($wrap);
-			const $top = $('<div class="fc-sep-dot"></div>').appendTo($a);
+			const $top = $('<div class="fc-sep-dot"></div>').attr("style", FC.sep_dot).appendTo($a);
 			$('<span></span>').text(__(a.severity)).appendTo($top);
 			$('<span></span>').text(__(a.alert_type || "")).appendTo($top);
-			$('<div class="small"></div>').text(a.message || "").appendTo($a);
-			this._alert_actions(a, $('<div class="fc-drawer-alert-actions"></div>').appendTo($a));
+			$('<div class="small"></div>').css("margin-block", "4px").text(a.message || "").appendTo($a);
+			this._alert_actions(a, $('<div class="fc-drawer-alert-actions"></div>').css({ display: "flex", gap: "6px", "flex-wrap": "wrap", "margin-block-start": "4px" }).appendTo($a));
 		});
 	}
 
@@ -1037,7 +1142,7 @@ class FleetControl {
 	// alerts) replacing the old separate Recent-Incidents / Recent-Assignments lists.
 	_load_timeline(v, $body) {
 		const $section = $('<div class="fc-drawer-timeline"></div>').appendTo($body);
-		$('<div class="fc-drawer-sub"></div>').text(__("Timeline")).appendTo($section);
+		$('<div class="fc-drawer-sub"></div>').attr("style", FC.drawer_sub).text(__("Timeline")).appendTo($section);
 		const $loading = $('<div class="text-muted small"></div>').text(__("Loading…")).appendTo($section);
 		frappe.call({
 			method: "apex_habitat.salis.api.operations_control.get_vehicle_timeline",
@@ -1049,8 +1154,8 @@ class FleetControl {
 					$('<div class="text-muted small"></div>').text(__("None.")).appendTo($section);
 					return;
 				}
-				const $ul = $('<ul class="fc-list fc-timeline"></ul>').appendTo($section);
-				events.forEach((e) => this._timeline_row(e, $("<li></li>").appendTo($ul)));
+				const $ul = $('<ul class="fc-list fc-timeline"></ul>').attr("style", FC.list).appendTo($section);
+				events.forEach((e) => this._timeline_row(e, $("<li></li>").css("padding-block", "3px").appendTo($ul)));
 			},
 			error: (r) => {
 				$loading.remove();
@@ -1063,9 +1168,9 @@ class FleetControl {
 	// dot-separated nodes; the leading label says what KIND of event this is so the
 	// merged feed stays legible. Dates/ids are LTR (<bdi>) inside the RTL drawer.
 	_timeline_row(e, $li) {
-		$li.addClass("fc-sep-dot");
+		$li.addClass("fc-sep-dot").attr("style", FC.sep_dot);
 		const KIND = { incident: "Incident", stop: "Stop", assignment: "Assignment", alert: "Alert" };
-		$('<span class="fc-timeline-kind"></span>').text(__(KIND[e.kind] || e.kind)).appendTo($li);
+		$('<span class="fc-timeline-kind"></span>').attr("style", FC.timeline_kind).text(__(KIND[e.kind] || e.kind)).appendTo($li);
 		if (e.date) $("<span></span>").html(_bdi(e.date)).appendTo($li);
 		if (e.kind === "incident") {
 			$("<span></span>").text(__(e.incident_type || "")).appendTo($li);
@@ -1091,12 +1196,12 @@ class FleetControl {
 			["Odometer", d.odometer, true], ["Planned Fuel", d.planned_fuel_grade],
 			["Compliance", d.compliance_status], ["Next Expiry", d.next_expiry_date, true],
 		];
-		const $dl = $('<div class="fc-dl"></div>').appendTo($body);
+		const $dl = $('<div class="fc-dl"></div>').attr("style", FC.dl).appendTo($body);
 		rows.forEach(([k, val, ltr]) => {
 			if (val == null || val === "") return;
-			const $row = $('<div class="fc-dl-row"></div>').appendTo($dl);
-			$('<div class="fc-dl-k"></div>').text(__(k)).appendTo($row);
-			const $v = $('<div class="fc-dl-v"></div>').appendTo($row);
+			const $row = $('<div class="fc-dl-row"></div>').attr("style", FC.dl_row).appendTo($dl);
+			$('<div class="fc-dl-k"></div>').attr("style", FC.dl_k).text(__(k)).appendTo($row);
+			const $v = $('<div class="fc-dl-v"></div>').attr("style", FC.dl_v).appendTo($row);
 			if (ltr) $v.html(_bdi(val));
 			else $v.text(String(val));
 		});
@@ -1112,7 +1217,7 @@ class FleetControl {
 				callback: (r) => {
 					if (r && r.message && r.message.ok) {
 						frappe.show_alert({ message: __("Vehicle released"), indicator: "green" });
-						this.$drawer.removeClass("fc-open");
+						this.$drawer.removeClass("fc-open").css("display", "none");
 						this.refresh();
 					}
 				},
@@ -1142,7 +1247,7 @@ class FleetControl {
 					callback: (r) => {
 						if (r && r.message && r.message.ok) {
 							frappe.show_alert({ message: __("Driver reassigned"), indicator: "green" });
-							this.$drawer.removeClass("fc-open");
+							this.$drawer.removeClass("fc-open").css("display", "none");
 							this.refresh();
 						}
 					},
