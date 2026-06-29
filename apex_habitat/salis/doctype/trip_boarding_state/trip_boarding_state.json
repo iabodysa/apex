@@ -44,11 +44,11 @@
    "options": "Pending\nWorker Claimed\nBoarded\nDriver Rejected\nAbsent"
   },
   {
-   "description": "How the boarding was confirmed: by the driver, auto-confirmed after the worker-claim timeout, a QR scan, or manual entry.",
+   "description": "How the boarding was confirmed: the worker's self-confirm, a QR scan, manual driver entry, the driver, or auto-confirmed after the worker-claim timeout (legacy).",
    "fieldname": "confirm_source",
    "fieldtype": "Select",
    "label": "Confirm Source",
-   "options": "\nDriver\nAuto\nScan\nManual"
+   "options": "\nWorker\nDriver\nAuto\nScan\nManual"
   },
   {
    "fieldname": "worker_col_break",

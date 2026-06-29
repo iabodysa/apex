@@ -181,6 +181,7 @@ Age (Days),العمر (أيام)
 Age (Years),العمر (سنوات)
 Air Conditioning,تكييف الهواء
 Alert,تنبيه
+Alert Aging SLA (Hours),اتفاقية مستوى خدمة تقادم التنبيهات (بالساعات)
 Alert Lead Days,أيام التنبيه المسبق
 Alert Lead Days cannot be negative.,لا يمكن أن تكون أيام التنبيه المسبق سالبة.
 Alert Type,نوع التنبيه
@@ -1555,6 +1556,7 @@ How often a deduction of this type may recur for the same source until the balan
 How often rent payments are scheduled. Amount per installment is calculated automatically.,معدّل جدولة دفعات الإيجار. يُحسب مبلغ كل قسط تلقائياً.
 "How the boarding was captured: QR (driver scan), Manual (driver entry), or Worker (worker self-confirm via the Masar portal).",كيفية التقاط عملية الصعود: رمز QR (مسح السائق)، يدوي (إدخال السائق)، أو العامل (تأكيد ذاتي من العامل عبر بوابة مسار).
 "How the boarding was confirmed: by the driver, auto-confirmed after the worker-claim timeout, a QR scan, or manual entry.",كيف تم تأكيد الصعود: بواسطة السائق، أو تأكيد تلقائي بعد انتهاء مهلة ادعاء العامل، أو مسح رمز الاستجابة السريعة، أو إدخال يدوي.
+"How the boarding was confirmed: the worker's self-confirm, a QR scan, manual driver entry, the driver, or auto-confirmed after the worker-claim timeout (legacy).",كيف تم تأكيد الصعود: تأكيد العامل لنفسه، أو مسح رمز الاستجابة السريعة، أو إدخال يدوي من السائق، أو السائق، أو تأكيد تلقائي بعد انتهاء مهلة مطالبة العامل (قديم).
 Hygiene,النظافة
 I Confirm Receipt,أؤكّد الاستلام
 I acknowledge that I have received the above items in good condition.,أقر بأنني استلمت الأصناف المذكورة أعلاه بحالة جيدة.

@@ -275,17 +275,17 @@ PERMISSION_RECHECK_ALLOWLIST = [
     (
         "salis/api/boarding_flow.py",
         "worker_claim_boarded",
-        "Masar guest endpoint. allow_guest; the worker is resolved server-side from "
-        "the Masar token (_resolve_worker) and only their own boarding-state row on "
-        "their own today's trip is written; explicit rate_limit. A Guest has no role "
-        "to permission-check.",
+        "Masar guest endpoint (worker self-confirm). allow_guest; the worker is "
+        "resolved server-side from the Masar token (_resolve_worker) and only their "
+        "own boarding event + boarding-state row on their own today's trip is "
+        "written; explicit rate_limit. A Guest has no role to permission-check.",
     ),
     (
         "salis/api/boarding_flow.py",
-        "driver_confirm_boarding",
-        "Driver action. The caller is authorised on the trip by "
+        "driver_mark_not_boarded",
+        "Driver exception override. The caller is authorised on the trip by "
         "_resolve_trip_for_driver (own trip for a driver, any for Salis staff, "
-        "raises PermissionError otherwise) before the confirm/reject write. "
+        "raises PermissionError otherwise) before reversing a worker's self-confirm. "
         "Trip-scope-resolved writer.",
     ),
     (

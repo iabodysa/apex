@@ -20,7 +20,9 @@
   "salis_settings_alerts_col2",
   "fuel_pending_max_days",
   "fuel_overage_margin_percent",
+  "salis_settings_sec_alert_aging",
   "alert_aging_info_hours",
+  "salis_settings_alert_aging_col",
   "alert_aging_warning_hours",
   "alert_aging_critical_hours",
   "salis_settings_sec_portal",
@@ -165,6 +167,15 @@
    "fieldname": "alert_aging_critical_hours",
    "fieldtype": "Int",
    "label": "Critical Alert Aging Hours"
+  },
+  {
+   "fieldname": "salis_settings_sec_alert_aging",
+   "fieldtype": "Section Break",
+   "label": "Alert Aging SLA (Hours)"
+  },
+  {
+   "fieldname": "salis_settings_alert_aging_col",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "salis_settings_sec_portal",
@@ -356,7 +367,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-27 12:00:00.000000",
+ "modified": "2026-06-29 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

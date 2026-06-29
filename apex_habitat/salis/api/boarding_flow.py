@@ -1,6 +1,15 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Salis boarding/departure flow — driver "remaining passengers" notify, worker
-"please wait" request, the worker boarding poll, and the depart/finalize close.
+"please wait" request + self-confirm boarding, the worker boarding poll, and the
+depart/finalize close.
+
+Worker self-confirm model: a worker's "I'm on the bus" claim self-confirms
+(records the boarding event + marks them Boarded) and NOTIFIES the driver; there
+is no per-worker driver-approval gate. The driver intervenes only for an
+exception — driver_mark_not_boarded reverses a self-confirm (wrong bus / mistaken
+tap). The auto-confirm timeout machinery (_apply_auto_confirm,
+auto_confirm_claimed_boardings) is retained but inert: no path produces the
+"Worker Claimed" state it acts on, so the scheduled tick naturally no-ops.
 
 Builds on the existing boarding pass + manifest (``salis/api/boarding.py``) and
 the worker token identity (``salis/api/masar.py``); it does NOT duplicate the
@@ -510,96 +519,135 @@ def worker_request_wait(token=None):
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=30, seconds=60)
 def worker_claim_boarded(token=None):
-    """Worker action: "I'm on board" self-claim (write, token-scoped).
+    """Worker action: "I'm on board" self-confirm (write, token-scoped).
 
+    The worker's claim SELF-CONFIRMS — there is no per-worker driver-approval gate.
     Resolves the token to one Employee (sole identity source), finds their today's
-    trip from their OWN manifest, and moves their boarding-state row to
-    ``Worker Claimed`` with worker_claim_at=now — starting the auto-confirm clock.
-    A re-claim from ``Driver Rejected`` resets the row back to ``Worker Claimed``
-    (the worker's "try again / re-assert"); an already-Boarded row is left as is.
-    Publishes a ``boarding_claim`` to the Dispatch Trip room so the driver is
-    prompted to confirm. Returns the new state.
+    trip from their OWN manifest, records the boarding event (the SAME
+    ``method=Worker`` Trip Boarding Event + shared get-or-create log
+    ``masar.confirm_boarding`` writes, so the manifest headcount reconciles), and
+    flips their boarding-state row to ``Boarded`` (confirm_source=Worker,
+    worker_claim_at=now for the ledger's boarded_at). Publishes
+    ``boarding_confirmed`` so the driver is NOTIFIED (not asked to approve) — the
+    driver intervenes only via the exception override (driver_mark_not_boarded).
 
-    A worker with no boardable trip today, or not on the trip's boarding state, is
-    a clean no-op. Tight rate_limit so a personal link cannot spam the driver."""
-    from apex_habitat.salis.api.masar import _resolve_worker, _worker_today_dispatch_trip
+    Idempotent: an already-Boarded row records no second event and stays Boarded; a
+    re-confirm from ``Pending`` (e.g. after a driver "not boarded" override) boards
+    again. A worker with no boardable trip today, or not on the trip's boarding
+    state, is a clean no-op. Tight rate_limit so a personal link cannot spam."""
+    from apex_habitat.salis.api.masar import (
+        _already_boarded,
+        _get_or_create_trip_log,
+        _resolve_worker,
+        _worker_today_dispatch_trip,
+    )
 
     employee = _resolve_worker(token)
     resolved = _worker_today_dispatch_trip(employee)
     if not resolved:
         return {"trip": None, "status": None}
-    dispatch_trip = resolved[0]
+    dispatch_trip, request_name, stop_name, building = resolved
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     if target is None:
         return {"trip": dispatch_trip, "status": None}
-    if target.status == "Boarded":
-        # Already confirmed; a claim does not undo a real boarding.
-        return {"dispatch_trip": dispatch_trip, "status": target.status}
 
-    # Pending or Driver Rejected -> (re)assert the claim.
-    target.status = "Worker Claimed"
-    target.worker_claim_at = now_datetime()
-    trip.save(ignore_permissions=True)  # audit-ok: worker + trip resolved from token
+    # Record the boarding event on the shared manifest log (idempotent), so the
+    # self-confirm carries the same headcount weight as a QR scan / driver entry.
+    log = _get_or_create_trip_log(dispatch_trip)
+    if not _already_boarded(log, employee):
+        log.append(
+            "boarding_events",
+            {
+                "worker": employee,
+                "stop_name": stop_name,
+                "accommodation_building": building,
+                "boarded_at": now_datetime(),
+                "method": "Worker",
+            },
+        )
+        log.save(ignore_permissions=True)  # audit-ok: worker + trip resolved from token
+
+    # Flip state to Boarded (Worker source) — mark_boarded stamps confirm_source +
+    # clears any stale misboard hint. worker_claim_at carries the boarding instant
+    # for the ledger; set it explicitly since mark_boarded only touches status/source.
+    if target.status != "Boarded":
+        target.worker_claim_at = now_datetime()
+        trip.save(ignore_permissions=True)  # audit-ok: worker + trip resolved from token
+    mark_boarded(dispatch_trip, employee, source="Worker")
 
     _publish(
-        "boarding_claim",
+        "boarding_confirmed",
         dispatch_trip,
-        {
-            "employee": employee,
-            "reject_count": cint(target.reject_count),
-            "auto_confirm_minutes": get_boarding_setting("boarding_auto_confirm_minutes"),
-        },
+        {"employee": employee, "confirm_source": "Worker"},
     )
     return {
         "dispatch_trip": dispatch_trip,
-        "status": target.status,
+        "status": "Boarded",
+        "confirm_source": "Worker",
         "reject_count": cint(target.reject_count),
-        "auto_confirm_minutes": get_boarding_setting("boarding_auto_confirm_minutes"),
     }
+
+
+def _remove_boarding_event(dispatch_trip, employee):
+    """Drop a worker's registered boarding event from the trip's open manifest log
+    (the driver "not boarded" exception reversing a self-confirm). Best-effort: no
+    open log or no row for the worker is a clean no-op. Leaves any unregistered
+    rider rows untouched."""
+    log_name = frappe.db.get_value(
+        "Trip Start Log", {"dispatch_trip": dispatch_trip, "docstatus": 0}, "name"
+    )
+    if not log_name:
+        return
+    log = frappe.get_doc("Trip Start Log", log_name)
+    kept = [
+        row for row in (log.boarding_events or [])
+        if not (row.worker == employee and not row.is_unregistered)
+    ]
+    if len(kept) == len(log.boarding_events or []):
+        return
+    log.set("boarding_events", kept)
+    log.save(ignore_permissions=True)  # audit-ok: driver authorised on the trip
 
 
 @frappe.whitelist(methods=["POST"])
 @rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
-def driver_confirm_boarding(dispatch_trip, employee, decision):
-    """Driver action: confirm or reject a worker's boarding claim (write, driver-scoped).
+def driver_mark_not_boarded(dispatch_trip, employee):
+    """Driver EXCEPTION override: reverse a worker's self-confirm (write, driver-scoped).
 
-    ``decision="confirm"`` -> the worker's row becomes ``Boarded``
-    (confirm_source=Driver). ``decision="reject"`` -> ``Driver Rejected``,
-    reject_count++, and a ``boarding_rejected`` is published to the Dispatch Trip
-    room so the worker's poll surfaces the rejection (and can re-claim). Any other
-    decision is rejected. Caller must be allowed to act on the trip (own trip for
-    a driver, any for Salis staff); resolved server-side."""
+    The per-worker driver-approval gate is gone — a worker's claim self-confirms.
+    The driver only intervenes for an exception: a worker who self-confirmed but is
+    NOT actually aboard (wrong bus, mistaken tap). This drops their boarding event
+    from the manifest log and resets the state row to ``Pending`` (so they can
+    re-confirm if they do board), bumping reject_count for the audit. Publishes
+    ``boarding_unmarked`` so the worker's poll surfaces it. Caller must be allowed
+    to act on the trip (own trip for a driver, any for Salis staff); resolved
+    server-side."""
     _resolve_trip_for_driver(dispatch_trip)
-    decision = (decision or "").strip().lower()
-    if decision not in ("confirm", "reject"):
-        frappe.throw(_("Decision must be 'confirm' or 'reject'."))
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     if target is None:
         frappe.throw(_("Worker {0} is not on this trip's boarding state.").format(employee))
 
-    if decision == "confirm":
-        target.status = "Boarded"
-        target.confirm_source = "Driver"
-        event, payload = "boarding_update", {"employee": employee, "confirmed": True}
-    else:
-        target.status = "Driver Rejected"
-        target.reject_count = cint(target.reject_count) + 1
-        event, payload = "boarding_rejected", {
-            "employee": employee,
-            "reject_count": cint(target.reject_count),
-        }
+    _remove_boarding_event(dispatch_trip, employee)
+
+    target.status = "Pending"
+    target.confirm_source = None
+    target.worker_claim_at = None
+    target.reject_count = cint(target.reject_count) + 1
     trip.save(ignore_permissions=True)  # audit-ok: driver authorised on the trip
-    _publish(event, dispatch_trip, payload)
+    _publish(
+        "boarding_unmarked",
+        dispatch_trip,
+        {"employee": employee, "reject_count": cint(target.reject_count)},
+    )
 
     return {
         "dispatch_trip": dispatch_trip,
         "employee": employee,
         "status": target.status,
-        "confirm_source": target.confirm_source or None,
         "reject_count": cint(target.reject_count),
     }
 

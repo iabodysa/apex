@@ -11,9 +11,10 @@ Covers the server contract the driver + worker SPAs build against:
   * Feature B: driver notify bumps notify_count capped at the max and depart
     marks an exhausted Pending worker Absent (after grace); a worker wait request
     caps at its max.
-  * Two-sided confirmation: claim -> driver confirm -> Boarded; claim -> driver
-    reject -> reject_count++ -> worker re-claim -> Worker Claimed; claim ->
-    timeout (backdated claim) -> Auto-confirm Boarded.
+  * Worker self-confirm: the claim boards the worker immediately (no driver gate)
+    and records a Worker boarding event; the driver's only intervention is the
+    exception override (driver_mark_not_boarded) that reverses a self-confirm. The
+    auto-confirm timeout helper is retained but inert (no path makes Worker Claimed).
 
 The token-scoped worker endpoints resolve identity via masar._resolve_worker and
 masar._worker_today_dispatch_trip; the tests patch those two so a real Masar
@@ -233,22 +234,16 @@ class TestBoardingFlow(FrappeTestCase):
         )
         self.assertEqual(result["workers"][0]["employee"], self.employee.name)
 
-    def test_get_trip_boarding_reflects_auto_confirmed_claim(self):
+    def test_get_trip_boarding_reflects_self_confirmed_worker(self):
+        # A worker's self-confirm boards them immediately (no driver gate); the
+        # driver's pure read sees them Boarded with confirm_source=Worker.
         self._seed_state()
         with _patch_masar_resolver(self.trip.name, self.request.name):
             boarding_flow.worker_claim_boarded(token="t")
-        minutes = get_boarding_setting("boarding_auto_confirm_minutes")
-        frappe.db.set_value(
-            "Trip Boarding State",
-            self._row().name,
-            "worker_claim_at",
-            add_to_date(now_datetime(), minutes=-(minutes + 1)),
-            update_modified=False,
-        )
         result = boarding_flow.get_trip_boarding(self.trip.name)
         worker = next(w for w in result["workers"] if w["employee"] == self.employee.name)
-        self.assertEqual(worker["status"], "Boarded", "read applies the auto-confirm timeout")
-        self.assertEqual(worker["confirm_source"], "Auto")
+        self.assertEqual(worker["status"], "Boarded", "the self-confirm boards immediately")
+        self.assertEqual(worker["confirm_source"], "Worker")
 
     # Feature B: worker wait caps
 
@@ -263,83 +258,102 @@ class TestBoardingFlow(FrappeTestCase):
         self.assertEqual(last["remaining"], 0)
         self.assertEqual(self._row().wait_count, max_count)
 
-    # two-sided confirmation
+    # worker self-confirm + driver exception override
 
-    def test_claim_then_driver_confirm_boards(self):
+    def _boarding_events(self):
+        """The registered boarding-event workers on the trip's open manifest log."""
+        log = frappe.db.get_value(
+            "Trip Start Log", {"dispatch_trip": self.trip.name, "docstatus": 0}, "name"
+        )
+        if not log:
+            return []
+        return frappe.get_all(
+            "Trip Boarding Event",
+            filters={"parent": log, "parenttype": "Trip Start Log", "is_unregistered": 0},
+            pluck="worker",
+        )
+
+    def test_worker_claim_self_confirms_and_records_event(self):
+        # The claim self-confirms: Boarded immediately (no driver gate) AND a Worker
+        # boarding event is recorded so the manifest headcount reconciles.
         self._seed_state()
         with _patch_masar_resolver(self.trip.name, self.request.name):
             claim = boarding_flow.worker_claim_boarded(token="t")
-        self.assertEqual(claim["status"], "Worker Claimed")
-        self.assertIsNotNone(self._row().worker_claim_at)
-
-        result = boarding_flow.driver_confirm_boarding(
-            self.trip.name, self.employee.name, "confirm"
-        )
-        self.assertEqual(result["status"], "Boarded")
-        self.assertEqual(result["confirm_source"], "Driver")
+        self.assertEqual(claim["status"], "Boarded")
+        self.assertEqual(claim["confirm_source"], "Worker")
         self.assertEqual(self._row().status, "Boarded")
+        self.assertEqual(self._row().confirm_source, "Worker")
+        self.assertIn(self.employee.name, self._boarding_events(), "the manifest records the event")
 
-    def test_claim_reject_reclaim_cycle(self):
+    def test_worker_claim_is_idempotent(self):
+        # A second self-confirm records no second event and stays Boarded.
         self._seed_state()
         with _patch_masar_resolver(self.trip.name, self.request.name):
             boarding_flow.worker_claim_boarded(token="t")
-            rej = boarding_flow.driver_confirm_boarding(
-                self.trip.name, self.employee.name, "reject"
-            )
-            self.assertEqual(rej["status"], "Driver Rejected")
-            self.assertEqual(rej["reject_count"], 1)
-            self.assertEqual(self._row().status, "Driver Rejected")
-
-            # Worker re-asserts: Driver Rejected -> Worker Claimed, count preserved.
-            reclaim = boarding_flow.worker_claim_boarded(token="t")
-        self.assertEqual(reclaim["status"], "Worker Claimed")
-        self.assertEqual(self._row().reject_count, 1, "reject_count is preserved across re-claim")
-
-    def test_claim_timeout_auto_confirms(self):
-        self._seed_state()
-        with _patch_masar_resolver(self.trip.name, self.request.name):
             boarding_flow.worker_claim_boarded(token="t")
-        # Backdate the claim past the auto-confirm window.
-        minutes = get_boarding_setting("boarding_auto_confirm_minutes")
-        frappe.db.set_value(
-            "Trip Boarding State",
-            self._row().name,
-            "worker_claim_at",
-            add_to_date(now_datetime(), minutes=-(minutes + 1)),
-            update_modified=False,
+        self.assertEqual(self._row().status, "Boarded")
+        self.assertEqual(
+            self._boarding_events().count(self.employee.name), 1, "no duplicate boarding event"
         )
-        # Read-time auto-confirm (worker poll) flips it to Boarded/Auto.
+
+    def test_driver_mark_not_boarded_reverses_self_confirm(self):
+        # The driver's exception override: a self-confirmed worker who isn't really
+        # aboard is reset to Pending, their event dropped, reject_count bumped — then
+        # they can self-confirm again.
+        self._seed_state()
         with _patch_masar_resolver(self.trip.name, self.request.name):
+            boarding_flow.worker_claim_boarded(token="t")
+        self.assertIn(self.employee.name, self._boarding_events())
+
+        result = boarding_flow.driver_mark_not_boarded(self.trip.name, self.employee.name)
+        self.assertEqual(result["status"], "Pending")
+        self.assertEqual(result["reject_count"], 1)
+        self.assertEqual(self._row().status, "Pending")
+        self.assertIsNone(self._row().confirm_source)
+        self.assertNotIn(
+            self.employee.name, self._boarding_events(), "the override drops the boarding event"
+        )
+
+        # The worker re-confirms after the override; reject_count is preserved.
+        with _patch_masar_resolver(self.trip.name, self.request.name):
+            reclaim = boarding_flow.worker_claim_boarded(token="t")
+        self.assertEqual(reclaim["status"], "Boarded")
+        self.assertEqual(self._row().reject_count, 1, "reject_count is preserved across re-confirm")
+
+    def test_worker_poll_reflects_self_confirm(self):
+        # The worker poll surfaces the Boarded state right after the self-confirm.
+        self._seed_state()
+        with _patch_masar_resolver(self.trip.name, self.request.name):
+            boarding_flow.worker_claim_boarded(token="t")
             state = boarding_flow.worker_trip_boarding(token="t")
         self.assertEqual(state["status"], "Boarded")
-        self.assertEqual(state["confirm_source"], "Auto")
-        self.assertEqual(self._row().status, "Boarded")
+        self.assertEqual(state["confirm_source"], "Worker")
 
-    def test_scheduled_tick_auto_confirms_without_a_read_path(self):
+    def test_auto_confirm_machinery_is_retained_but_inert(self):
+        # The retained timeout helper still confirms a Worker Claimed row if one ever
+        # exists, but the self-confirm path never produces that state, so the
+        # scheduled tick naturally no-ops on the normal flow.
         self._seed_state()
+        # No path creates Worker Claimed anymore: a self-confirm boards directly.
         with _patch_masar_resolver(self.trip.name, self.request.name):
             boarding_flow.worker_claim_boarded(token="t")
+        self.assertEqual(
+            boarding_flow.auto_confirm_claimed_boardings(), 0, "no Worker Claimed rows to confirm"
+        )
+        # The helper still works if a legacy Worker Claimed row is constructed directly.
         minutes = get_boarding_setting("boarding_auto_confirm_minutes")
         frappe.db.set_value(
             "Trip Boarding State",
             self._row().name,
-            "worker_claim_at",
-            add_to_date(now_datetime(), minutes=-(minutes + 1)),
+            {
+                "status": "Worker Claimed",
+                "worker_claim_at": add_to_date(now_datetime(), minutes=-(minutes + 1)),
+            },
             update_modified=False,
         )
-        confirmed = boarding_flow.auto_confirm_claimed_boardings()
-        self.assertGreaterEqual(confirmed, 1)
+        self.assertGreaterEqual(boarding_flow.auto_confirm_claimed_boardings(), 1)
         self.assertEqual(self._row().status, "Boarded")
         self.assertEqual(self._row().confirm_source, "Auto")
-
-    def test_worker_poll_returns_rejection_state(self):
-        self._seed_state()
-        with _patch_masar_resolver(self.trip.name, self.request.name):
-            boarding_flow.worker_claim_boarded(token="t")
-            boarding_flow.driver_confirm_boarding(self.trip.name, self.employee.name, "reject")
-            state = boarding_flow.worker_trip_boarding(token="t")
-        self.assertEqual(state["status"], "Driver Rejected")
-        self.assertEqual(state["reject_count"], 1)
 
     # P-046: driver-arrived signal reaches the worker channel
 

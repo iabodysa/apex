@@ -1,17 +1,22 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Apex first-install Setup Wizard integration (native Frappe setup wizard).
 
-On a fresh site, Frappe's setup wizard renders an extra "Apex Configuration" slide
+On a fresh site, Frappe's setup wizard renders extra "Apex Configuration" slides
 (registered by public/js/apex_setup_wizard.js via the `setup_wizard_requires` hook).
 The operator's choices flow into the wizard args and land here at completion
-(`setup_wizard_complete` hook), where they are applied — ONCE. The GL-posting gate
-lands on the Apex Settings single (shared by Habitat and Salis), the chosen payment
-target on the Payment Routing Settings single, and the salary deduction toggles on
-the Salary Deduction Policy single.
+(`setup_wizard_complete` hook), where they are applied — ONCE — across every
+re-engineered Apex Single:
 
-Safe-by-default: a toggle the operator did not tick stays OFF, so the app never
-deducts a housing allowance or posts to the GL unless the operator explicitly opts
-in during setup. Idempotent: re-running with the same args is harmless.
+  - Apex Settings           — the app-wide GL-posting finance gate.
+  - Habitat Settings        — default company + the email/operational kill-switches.
+  - Salis Settings          — default company, cost center, driver portal, approvals.
+  - Salary Deduction Policy  — the housing/damage deduction toggles + posting company.
+  - Payment Routing Settings — the Pay-action target payment DocType.
+
+Safe-by-default + skip-safe: a field the operator leaves blank (or a toggle left
+at its pre-filled value) keeps the Single's own default — the wizard never writes
+a phantom value. The deduction master switch and the GL gate stay OFF unless the
+operator explicitly opts in. Idempotent: re-running with the same args is harmless.
 """
 
 import frappe
@@ -44,43 +49,89 @@ def setup_wizard_complete(args=None):
 
 
 def apply_apex_setup(args=None):
-    """Write the operator's Setup-Wizard choices (create-only semantics on the
-    toggles: default OFF unless explicitly chosen). No commit — Frappe commits
-    after all setup stages succeed.
+    """Write the operator's Setup-Wizard choices across every Apex Single.
 
-    The app-wide ``enable_gl_posting`` finance gate lives on the Apex Settings
-    single (it serves both Habitat and Salis); the operator's chosen payment
-    target lands on the Payment Routing Settings single (the router that replaced
-    the retired ``default_payment_method`` Select); the salary deduction toggles
-    live on the Salary Deduction Policy single."""
+    Skip-safe: a blank/absent field keeps the Single's shipped default (the helpers
+    below only write a Link when the arg is present and the target exists). No commit
+    — Frappe commits after all setup stages succeed."""
     args = frappe._dict(args or {})
 
-    payment_method = args.get("apex_default_payment_method")
+    _apply_apex_settings(args)
+    _apply_habitat_settings(args)
+    _apply_salis_settings(args)
+    _apply_payment_routing(args)
+    _apply_deduction_policy(args)
 
-    # [#55h4xa] The wizard's payment choice is a DocType name; route it to the
-    # Payment Routing target, but only when that DocType actually exists on the
-    # site (e.g. Expense Request Afmco is an optional client DocType), so the
-    # router never points at a missing target.
+
+def _apply_apex_settings(args):
+    """Apex Settings — the app-wide GL-posting finance gate (default OFF)."""
+    # [#gatccs]
+    apex = frappe.get_single("Apex Settings")
+    apex.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
+    apex.save(ignore_permissions=True)  # audit-ok
+
+
+def _apply_habitat_settings(args):
+    """Habitat Settings — default company + the email/operational notification
+    kill-switches. Company is only written when chosen so the Single default holds."""
+    habitat = frappe.get_single("Habitat Settings")
+    company = args.get("apex_default_company")
+    if company and frappe.db.exists("Company", company):
+        habitat.company = company
+    habitat.enable_email_notifications = 1 if cint(args.get("apex_enable_email")) else 0
+    habitat.enable_operational_notifications = (
+        1 if cint(args.get("apex_enable_operational_notifications")) else 0
+    )
+    habitat.save(ignore_permissions=True)  # audit-ok
+
+
+def _apply_salis_settings(args):
+    """Salis Settings — default company + cost center (write-when-chosen) and the
+    driver-portal / approvals switches."""
+    salis = frappe.get_single("Salis Settings")
+    company = args.get("apex_default_company")
+    if company and frappe.db.exists("Company", company):
+        salis.default_company = company
+    cost_center = args.get("apex_default_cost_center")
+    if cost_center and frappe.db.exists("Cost Center", cost_center):
+        salis.default_cost_center = cost_center
+    salis.enable_driver_portal = 1 if cint(args.get("apex_enable_driver_portal")) else 0
+    # Approvals ship ON; the slide pre-checks them ON, so honour the operator's choice.
+    salis.enable_approvals = 1 if cint(args.get("apex_enable_approvals")) else 0
+    salis.save(ignore_permissions=True)  # audit-ok
+
+
+def _apply_payment_routing(args):
+    """Payment Routing Settings — route the operator's chosen payment DocType to the
+    Pay-action target, but only when that DocType exists on the site (e.g. Expense
+    Request Afmco is an optional client DocType), so the router never points at a
+    missing target. Blank keeps the native Payment Request default."""
+    payment_method = args.get("apex_default_payment_method")
+    # [#55h4xa]
     if payment_method and frappe.db.exists("DocType", payment_method):
         router = frappe.get_single("Payment Routing Settings")
         router.target_payment_doctype = payment_method
         router.save(ignore_permissions=True)  # audit-ok
 
-    # [#gatccs]
-    apex = frappe.get_single("Apex Settings")
-    apex.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
-    apex.save(ignore_permissions=True)
 
-    # [#bbeka8]
+def _apply_deduction_policy(args):
+    """Salary Deduction Policy — the housing/damage deduction toggles (default OFF)
+    plus the posting company. The global master switch only turns on if at least one
+    per-type rule is enabled."""
     deduct_housing = bool(cint(args.get("apex_deduct_housing_allowance")))
     deduct_damage = bool(cint(args.get("apex_deduct_damage")))
+    company = args.get("apex_default_company")
+
+    # [#bbeka8]
     policy = frappe.get_single("Salary Deduction Policy")
+    if company and frappe.db.exists("Company", company):
+        policy.company = company
     # the global master switch must be on for any per-type rule to fire
     policy.enable_salary_deductions = 1 if (deduct_housing or deduct_damage) else 0
     _set_rule_enabled(policy, "Rent", deduct_housing)
     _set_rule_enabled(policy, "Damage", deduct_damage)
     try:
-        policy.save(ignore_permissions=True)
+        policy.save(ignore_permissions=True)  # audit-ok
     except frappe.ValidationError:
         # [#44x8l9]
         frappe.clear_last_message()
@@ -88,7 +139,7 @@ def apply_apex_setup(args=None):
         policy.enable_salary_deductions = 0
         _set_rule_enabled(policy, "Rent", False)
         _set_rule_enabled(policy, "Damage", False)
-        policy.save(ignore_permissions=True)
+        policy.save(ignore_permissions=True)  # audit-ok
         frappe.msgprint(
             _(
                 "Payment method saved. To enable salary deductions, set the "

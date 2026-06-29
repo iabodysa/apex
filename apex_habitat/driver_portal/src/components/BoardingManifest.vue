@@ -1,13 +1,15 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <!-- Boarding manifest panel for a STARTED trip. Lists each Trip Boarding State
-       worker with a status pill; a "Worker Claimed" row offers Confirm/Reject
-       (driver_confirm_boarding). "Notify remaining" nudges the still-Pending
+       worker with a status pill. A worker's "I'm on the bus" claim self-confirms
+       (no per-worker driver approval); the driver intervenes only for an exception
+       — a "Not boarded" override on a Boarded row (driver_mark_not_boarded) reverses
+       a mistaken/wrong-bus self-confirm. "Notify remaining" nudges the still-Pending
        workers (notify_remaining_passengers); before grace it's a soft ping, so
        the label reflects that. "Depart & finalize" closes the manifest
        (depart_and_finalize) and shows the boarded/absent/pending summary. Boarding
-       realtime (boarding_update / wait_request / boarding_claim / boarding_rejected)
-       refetches so a worker's claim or wait surfaces live; socket errors are
+       realtime (boarding_update / wait_request / boarding_confirmed / boarding_unmarked)
+       refetches so a worker's self-confirm or wait surfaces live; socket errors are
        swallowed in realtime.js so the manual fetch always carries the manifest. -->
   <div class="sheet-overlay" role="dialog" aria-modal="true" @click.self="close">
     <div class="sheet">
@@ -42,25 +44,16 @@
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <span class="pill shrink-0" :class="pillClass(w.status)">{{ te("boardingStatus", w.status) }}</span>
-              <!-- Two-sided confirmation: a worker's claim awaits the driver. -->
-              <template v-if="w.status === 'Worker Claimed'">
-                <button
-                  class="mini-btn mini-ok"
-                  :disabled="busy === w.employee"
-                  :aria-label="t('manifest.confirm')"
-                  @click="decide(w, 'confirm')"
-                >
-                  <Icon name="badge" :size="14" />
-                </button>
-                <button
-                  class="mini-btn mini-no"
-                  :disabled="busy === w.employee"
-                  :aria-label="t('manifest.reject')"
-                  @click="decide(w, 'reject')"
-                >
-                  <Icon name="x" :size="14" />
-                </button>
-              </template>
+              <!-- Exception override: a worker self-confirmed but isn't really aboard. -->
+              <button
+                v-if="w.status === 'Boarded'"
+                class="mini-btn mini-no"
+                :disabled="busy === w.employee"
+                :aria-label="t('manifest.notBoarded')"
+                @click="markNotBoarded(w)"
+              >
+                <Icon name="x" :size="14" />
+              </button>
             </div>
           </li>
         </ul>
@@ -145,17 +138,19 @@ function pillClass(status) {
   return "pill-accent";
 }
 
-const confirmRes = createResource({
-  url: "apex_habitat.salis.api.boarding_flow.driver_confirm_boarding",
+// Exception override only: reverse a worker's self-confirm (wrong bus / mistaken
+// tap). There is no per-worker approval — a claim self-confirms server-side.
+const notBoardedRes = createResource({
+  url: "apex_habitat.salis.api.boarding_flow.driver_mark_not_boarded",
   onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
 });
 
-async function decide(w, decision) {
+async function markNotBoarded(w) {
   if (busy.value) return;
   busy.value = w.employee;
   try {
-    await confirmRes.submit({ dispatch_trip: props.trip, employee: w.employee, decision });
-    pushToast(decision === "confirm" ? t("manifest.confirmed") : t("manifest.rejected"), "ok");
+    await notBoardedRes.submit({ dispatch_trip: props.trip, employee: w.employee });
+    pushToast(t("manifest.unmarked"), "ok");
     panel.reload(); // re-read the authoritative per-worker state
   } finally {
     busy.value = null;
@@ -204,9 +199,9 @@ async function depart() {
 }
 
 // ── Realtime (boarding events on the Dispatch Trip room) ──
-// A worker's wait/claim or any boarding state change for THIS trip refetches the
-// manifest so the [Confirm]/[Reject] appears and the pills repaint without a tap.
-// wait_request / boarding_claim also toast so the driver notices off-screen asks.
+// A worker's wait/self-confirm or any boarding state change for THIS trip refetches
+// the manifest so the pills repaint without a tap. wait_request / boarding_confirmed
+// also toast so the driver notices an off-screen ask or a worker boarding.
 let stopRealtime = () => {};
 function onBoarding(event, payload) {
   if (payload.dispatch_trip && payload.dispatch_trip !== props.trip) return;
@@ -219,8 +214,8 @@ function onBoarding(event, payload) {
       }),
       "ok",
     );
-  } else if (event === "boarding_claim") {
-    pushToast(t("manifest.newClaim", { name: payload.employee || "" }), "ok");
+  } else if (event === "boarding_confirmed") {
+    pushToast(t("manifest.workerAboard", { name: payload.employee || "" }), "ok");
   }
   panel.reload();
 }

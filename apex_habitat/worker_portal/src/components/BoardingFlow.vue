@@ -74,37 +74,10 @@
         </div>
       </div>
 
-      <!-- Driver Rejected: explain + offer a re-claim. -->
-      <div v-else-if="status === 'Driver Rejected'" class="bflow-panel bflow-rejected">
-        <div class="bflow-panel-head">
-          <Icon name="alert" :size="20" class="shrink-0" />
-          <span class="bflow-panel-title">{{ t("boarding.rejectedTitle") }}</span>
-        </div>
-        <p v-if="rejectCount" class="bflow-line">{{ t("boarding.rejectedCount", { n: rejectCount }) }}</p>
-        <p class="bflow-line bflow-muted">{{ t("boarding.rejectedHint") }}</p>
-        <div class="grid grid-cols-2 gap-3">
-          <button class="btn btn-outline" :disabled="claim.loading" @click="doClaim">
-            {{ t("boarding.tryAgain") }}
-          </button>
-          <button class="btn btn-primary" :disabled="claim.loading" @click="doClaim">
-            <Icon name="check" :size="18" /> {{ t("boarding.confirmAboard") }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Worker Claimed: awaiting the driver's confirmation. -->
-      <div v-else-if="status === 'Worker Claimed'" class="bflow-status bflow-pending">
-        <div class="spinner spinner-sm shrink-0"></div>
-        <div>
-          <p class="bflow-strong">{{ t("boarding.claimed") }}</p>
-          <p class="bflow-muted">{{ t("boarding.claimedHint") }}</p>
-          <p v-if="autoConfirmMinutes" class="bflow-muted">
-            {{ t("boarding.autoConfirm", { m: autoConfirmMinutes }) }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Pending (default): the primary "I'm on the bus" action. -->
+      <!-- Pending (default): the primary "I'm on the bus" action — it self-confirms
+           (no driver approval); the worker goes straight to Boarded. If the driver
+           later marks them not-boarded (an exception), the state resets to Pending
+           and this button simply returns. -->
       <button
         v-else
         class="btn btn-primary"
@@ -177,8 +150,6 @@ const props = defineProps({
 // --- Derived server state -------------------------------------------------
 const hasTrip = computed(() => !!(props.boarding && props.boarding.dispatch_trip));
 const status = computed(() => props.boarding?.status || "Pending");
-const rejectCount = computed(() => props.boarding?.reject_count || 0);
-const autoConfirmMinutes = computed(() => claim.data?.auto_confirm_minutes || 0);
 const wrongBus = computed(() => props.boarding?.wrong_bus || null);
 const correctTripLabel = computed(() => {
   const wb = wrongBus.value;
@@ -371,11 +342,6 @@ function openPass() {
   color: inherit;
 }
 
-.bflow-rejected {
-  border-color: var(--c-danger);
-  background: color-mix(in srgb, var(--c-danger) 8%, var(--c-surface));
-}
-
 /* Inline status rows. */
 .bflow-status {
   display: flex;
@@ -405,10 +371,6 @@ function openPass() {
 .bflow-danger .bflow-muted {
   color: inherit;
 }
-.bflow-pending {
-  background: color-mix(in srgb, var(--c-primary) 6%, var(--c-surface));
-}
-
 .bflow-wait-note {
   display: flex;
   align-items: center;
@@ -423,11 +385,5 @@ function openPass() {
   color: var(--c-muted);
   text-align: center;
   margin: 0;
-}
-
-.spinner.spinner-sm {
-  width: 20px;
-  height: 20px;
-  border-width: 2px;
 }
 </style>
