@@ -374,6 +374,30 @@ WORKER_PHOTO_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".heic", ".
 WORKER_PHOTO_MAX_BYTES = 8 * 1024 * 1024
 
 
+# [#tokcookie] The personal token is carried to the worker endpoints in the
+# httpOnly ``masar_wt`` cookie (set by www/masar.py from the one-time ?w= hit), NOT
+# in the query string (T-685: keeps it out of access logs) nor inlined into the page
+# (T-705). An explicit ``token`` argument still wins for backward-compat with any
+# freshly distributed ?w= link whose first request has not yet swapped to the cookie,
+# and so the resolver stays unit-testable without a live cookie jar.
+MASAR_TOKEN_COOKIE = "masar_wt"
+
+
+def _token_from_request(token=None):
+    """The personal token for this call: the explicit arg if given, else the
+    httpOnly cookie. Returns '' when neither is present (resolver fails closed)."""
+    token = (token or "").strip()
+    if token:
+        return token
+    request = getattr(frappe.local, "request", None)
+    if request is not None:
+        try:
+            return (request.cookies.get(MASAR_TOKEN_COOKIE) or "").strip()
+        except Exception:
+            return ""
+    return ""
+
+
 def _resolve_worker(token):
     """Resolve a personal Masar token to its single Employee, or 403.
 
@@ -389,15 +413,29 @@ def _resolve_worker(token):
     A Temporary-Worker token therefore has no ``employee`` and is rejected here
     with a DISTINCT, honest message (the link is valid but not active yet), not
     the misleading invalid/disabled one."""
-    token = (token or "").strip()
+    # [#tokcookie] Fall back to the httpOnly cookie when no token arg was supplied,
+    # so the SPA no longer has to pass the secret in the query string.
+    token = _token_from_request(token)
     if not token:
         frappe.throw(_("A worker link token is required."), frappe.PermissionError)
     row = frappe.db.get_value(
         "Masar Worker Token",
         {"token": token, "enabled": 1},
-        ["employee", "employee_name", "party_type"],
+        ["employee", "employee_name", "party_type", "expires_on"],
         as_dict=True,
     )
+    # [#tokttl] TTL enforcement (T-629): an expired link is refused, even if the row
+    # exists, is enabled, and points at an Active worker. expires_on is NULL only for
+    # rows minted before the TTL existed AND not yet backfilled — those never expire
+    # (fail-open here is the deliberate backward-compat seam; the migration stamps
+    # every live row a generous expiry so this NULL window is closed in practice).
+    if row and row.get("expires_on") and frappe.utils.now_datetime() > frappe.utils.get_datetime(
+        row["expires_on"]
+    ):
+        frappe.throw(
+            _("This worker link has expired. Please ask for a fresh link."),
+            frappe.PermissionError,
+        )
     # [#t325tw] A linkable token that simply isn't an Employee yet: explain that,
     # don't cry "invalid" — the worker becomes reachable once HR links the Iqama.
     if row and not row.get("employee") and row.get("party_type") == "Temporary Worker":

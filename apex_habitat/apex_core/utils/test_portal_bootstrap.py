@@ -72,12 +72,14 @@ class TestRouteSmoke(FrappeTestCase):
 			self.assertIn(key, ctx)
 
 	def test_masar_guest_context_keys(self):
-		# Masar is Guest-accessible (no redirect): appearance + csrf + token present.
+		# Masar is Guest-accessible (no ?w= -> no redirect): appearance + csrf present,
+		# plus the presence boolean (the raw token is no longer inlined — T-705).
 		frappe.set_user("Guest")
 		frappe.local.form_dict = frappe._dict()
 		ctx = masar_page.get_context(frappe._dict())
 		self.assertTrue(ctx.csrf_token)
-		self.assertIn("masar_token", ctx)
+		self.assertIn("masar_has_token", ctx)
+		self.assertNotIn("masar_token", ctx, "the raw token must not be in the shell context")
 		for key in _APPEARANCE_KEYS:
 			self.assertIn(key, ctx)
 

@@ -170,6 +170,255 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
                 masar.get_worker_context(token=token)
 
 
+class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
+    """The 2026 token-hardening contract (T-628/629/660/662/672/685/705).
+
+    Guards the four invariants that must hold after the security pass:
+      * T-629 — an EXPIRED token is refused (fail-closed), while a currently-valid
+        (pre-existing) link still resolves, including after the expiry backfill.
+      * T-628 — every guest token-resolution endpoint carries an @rate_limit, so a
+        personal link cannot be driven as a brute-force / enumeration oracle.
+      * T-662 — the ``token`` Data field is at permlevel 1, so the low roles that
+        only need the row (not the secret) cannot read the token.
+    """
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    def _company(self):
+        return (
+            frappe.defaults.get_global_default("company")
+            or frappe.get_all("Company", limit=1)[0].name
+        )
+
+    def _worker(self, suffix):
+        tag = f"{self._testMethodName}-{suffix}"
+        return (
+            frappe.get_doc(
+                {
+                    "doctype": "Employee",
+                    "first_name": f"Masar Sec {tag}",
+                    "company": self._company(),
+                    "status": "Active",
+                    "gender": "Male",
+                    "date_of_birth": "1990-01-01",
+                    "date_of_joining": "2020-01-01",
+                }
+            )
+            .insert(ignore_permissions=True)
+            .name
+        )
+
+    def _token_doc(self, employee):
+        return frappe.get_doc(
+            {
+                "doctype": "Masar Worker Token",
+                "party_type": "Employee",
+                "party": employee,
+                "employee": employee,
+                "enabled": 1,
+            }
+        ).insert(ignore_permissions=True)
+
+    # T-629 — TTL enforcement
+
+    def test_fresh_token_carries_a_future_expiry(self):
+        """A minted token gets a future ``expires_on`` (the TTL is stamped on insert),
+        and that token resolves to its worker — the happy path is non-vacuous."""
+        emp = self._worker("fresh")
+        doc = self._token_doc(emp)
+        self.assertTrue(doc.expires_on, "a minted token must carry an expiry")
+        self.assertGreater(
+            frappe.utils.get_datetime(doc.expires_on),
+            frappe.utils.now_datetime(),
+            "a fresh token's expiry must be in the future",
+        )
+        # A currently-valid (un-expired) link resolves exactly as before.
+        self.assertEqual(masar._resolve_worker(doc.token), emp)
+
+    def test_expired_token_is_refused(self):
+        """A token whose ``expires_on`` is in the past fails closed (PermissionError),
+        even though the row exists, is enabled, and points at an Active worker."""
+        emp = self._worker("expired")
+        doc = self._token_doc(emp)
+        # Force the expiry into the past (direct DB write — exercises exactly the
+        # expires_on read the resolver performs, no dependency on TTL maths).
+        frappe.db.set_value(
+            "Masar Worker Token",
+            doc.name,
+            "expires_on",
+            frappe.utils.add_to_date(frappe.utils.now_datetime(), days=-1),
+            update_modified=False,
+        )
+        # Non-vacuous: the row is still enabled + bound to an Active worker.
+        self.assertEqual(frappe.db.get_value("Masar Worker Token", doc.name, "enabled"), 1)
+        with self.assertRaises(frappe.PermissionError):
+            masar._resolve_worker(doc.token)
+        with self.assertRaises(frappe.PermissionError):
+            masar.get_worker_context(token=doc.token)
+
+    def test_null_expiry_legacy_token_still_resolves(self):
+        """A legacy row with a NULL expiry (minted before the field existed, not yet
+        backfilled) must NOT be treated as expired — it resolves, the deliberate
+        backward-compat seam that keeps live links working until the backfill runs."""
+        emp = self._worker("legacy")
+        doc = self._token_doc(emp)
+        frappe.db.set_value(
+            "Masar Worker Token", doc.name, "expires_on", None, update_modified=False
+        )
+        self.assertIsNone(frappe.db.get_value("Masar Worker Token", doc.name, "expires_on"))
+        self.assertEqual(masar._resolve_worker(doc.token), emp, "a NULL-expiry link must still resolve")
+
+    def test_backfill_stamps_a_future_expiry_and_link_survives(self):
+        """The migration's logic: a NULL-expiry live token gets a generous FUTURE
+        expiry, and the SAME (pre-existing) link keeps resolving afterwards — proving
+        the backfill never instantly invalidates a currently-distributed link."""
+        from apex_habitat.patches.v1_x.backfill_masar_token_expiry import execute
+
+        emp = self._worker("backfill")
+        doc = self._token_doc(emp)
+        token = doc.token
+        frappe.db.set_value(
+            "Masar Worker Token", doc.name, "expires_on", None, update_modified=False
+        )
+        execute()
+        stamped = frappe.db.get_value("Masar Worker Token", doc.name, "expires_on")
+        self.assertTrue(stamped, "backfill must stamp a NULL-expiry row")
+        self.assertGreater(
+            frappe.utils.get_datetime(stamped),
+            frappe.utils.now_datetime(),
+            "the backfilled expiry must be in the future (link not instantly expired)",
+        )
+        # The currently-distributed link still resolves after the backfill.
+        self.assertEqual(masar._resolve_worker(token), emp)
+
+    # T-628 — every guest token endpoint is rate-limited
+
+    def test_every_guest_worker_endpoint_carries_a_rate_limit(self):
+        """Each ``@frappe.whitelist(allow_guest=True)`` worker endpoint that resolves a
+        token must also carry an ``@rate_limit`` — the throttle that stops a personal
+        link being driven as a brute-force / enumeration oracle. The decorator wraps the
+        function via functools.wraps and stashes ``__wrapped__``; a missing throttle
+        leaves that attribute absent."""
+        guest_endpoints = [
+            masar.get_enum_labels,
+            masar.get_worker_context,
+            masar.get_worker_accommodation,
+            masar.get_worker_transport,
+            masar.list_worker_requests,
+            masar.get_worker_request_detail,
+            masar.get_worker_custody,
+            masar.create_worker_request,
+            masar.get_worker_home,
+            masar.get_worker_contacts,
+            masar.notify_hr_iqama_expiring,
+            masar.confirm_boarding,
+            masar.get_worker_boarding_pass,
+            masar.create_worker_transport_request,
+        ]
+        for fn in guest_endpoints:
+            self.assertTrue(
+                hasattr(fn, "__wrapped__"),
+                f"{fn.__name__} must be wrapped by @rate_limit (brute-force throttle)",
+            )
+
+    # T-662 — token field is permlevel-restricted
+
+    def test_token_field_is_permlevel_one(self):
+        """The ``token`` Data field sits at permlevel 1, so a role without a permlevel-1
+        read row never receives the secret in a row read — the low roles lose token
+        visibility while keeping the rest of the record."""
+        meta = frappe.get_meta("Masar Worker Token")
+        field = meta.get_field("token")
+        self.assertIsNotNone(field, "token field must exist")
+        self.assertEqual(field.permlevel, 1, "token must be at permlevel 1 (T-662)")
+
+        # Only the high roles carry a permlevel-1 read; the low roles do not.
+        high = {
+            p.role
+            for p in meta.permissions
+            if getattr(p, "permlevel", 0) == 1 and p.read
+        }
+        self.assertIn("System Manager", high)
+        self.assertIn("Accommodation Manager", high)
+        for low in ("Resident Supervisor", "HR User", "Fleet Supervisor"):
+            self.assertNotIn(
+                low, high, f"{low} must NOT have permlevel-1 read on the token field"
+            )
+
+
+class TestMasarTokenTransport(FrappeTestCase):
+    """The httpOnly-cookie transport (T-685/T-705).
+
+    The SPA no longer carries the raw token in the query string or in the page HTML;
+    it rides in the httpOnly ``masar_wt`` cookie and the endpoints read it server-side
+    via ``_token_from_request``. An explicit arg still wins (backward-compat with a
+    freshly distributed ?w= link and unit-test callers)."""
+
+    class _Req:
+        def __init__(self, cookies):
+            self.cookies = cookies
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+        self._prev_request = getattr(frappe.local, "request", None)
+
+    def tearDown(self):
+        frappe.local.request = self._prev_request
+        frappe.set_user("Administrator")
+
+    def test_explicit_arg_wins_over_cookie(self):
+        frappe.local.request = self._Req({"masar_wt": "from-cookie"})
+        self.assertEqual(masar._token_from_request("from-arg"), "from-arg")
+
+    def test_cookie_used_when_no_arg(self):
+        frappe.local.request = self._Req({"masar_wt": "from-cookie"})
+        self.assertEqual(masar._token_from_request(""), "from-cookie")
+        self.assertEqual(masar._token_from_request(None), "from-cookie")
+
+    def test_no_arg_no_cookie_is_empty(self):
+        frappe.local.request = self._Req({})
+        self.assertEqual(masar._token_from_request(None), "")
+
+    def test_resolver_reads_the_cookie(self):
+        """End-to-end: with no token arg, _resolve_worker resolves the worker from the
+        cookie alone — the transport the hardened SPA actually uses."""
+        company = (
+            frappe.defaults.get_global_default("company")
+            or frappe.get_all("Company", limit=1)[0].name
+        )
+        emp = (
+            frappe.get_doc(
+                {
+                    "doctype": "Employee",
+                    "first_name": f"Masar Cookie {self._testMethodName}",
+                    "company": company,
+                    "status": "Active",
+                    "gender": "Male",
+                    "date_of_birth": "1990-01-01",
+                    "date_of_joining": "2020-01-01",
+                }
+            )
+            .insert(ignore_permissions=True)
+            .name
+        )
+        token = frappe.get_doc(
+            {
+                "doctype": "Masar Worker Token",
+                "party_type": "Employee",
+                "party": emp,
+                "employee": emp,
+                "enabled": 1,
+            }
+        ).insert(ignore_permissions=True).token
+        frappe.local.request = self._Req({"masar_wt": token})
+        # No token arg supplied -> the resolver falls back to the cookie.
+        self.assertEqual(masar._resolve_worker(None), emp)
+
+
 class TestMasarNotifyHrIqamaExpiring(FrappeTestCase):
     """The one-tap 'notify HR my Iqama is expiring' contract.
 

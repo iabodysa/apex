@@ -25,6 +25,18 @@ from apex_habitat.apex_core.utils.party_link import sync_party_employee
 
 TOKEN_BYTES = 24  # [#9dvf8n]
 
+# [#tokttl] How long a freshly minted/rotated personal link stays valid. A leaked
+# /masar link is no longer valid forever (T-629); a worker re-opens (or a supervisor
+# re-shares via Show Link) well within this window, and Show Link / Regenerate both
+# extend it. 180 days is generous enough that a normally-active worker's link never
+# silently expires under them, while bounding the lifetime of a leaked link.
+TOKEN_TTL_DAYS = 180
+
+
+def _token_expiry():
+    """The expiry stamp for a freshly issued/extended link: now + the TTL window."""
+    return frappe.utils.add_to_date(frappe.utils.now_datetime(), days=TOKEN_TTL_DAYS)
+
 
 def _new_token() -> str:
     """A fresh url-safe random token, guaranteed unique across the doctype."""
@@ -61,16 +73,32 @@ class MasarWorkerToken(Document):
         sync_party_employee(self)
         # [#img31u]
         self.token = _new_token()
+        # [#tokttl] Stamp the link's expiry on mint so a leaked link cannot live forever.
+        self.expires_on = _token_expiry()
         self.last_generated_on = frappe.utils.now_datetime()
         self.last_generated_by = frappe.session.user
 
     def regenerate(self):
         """Rotate the token (invalidates any previously shared link/QR)."""
         self.token = _new_token()
+        # [#tokttl] A rotation issues a fresh link, so it also resets the expiry window.
+        self.expires_on = _token_expiry()
         self.last_generated_on = frappe.utils.now_datetime()
         self.last_generated_by = frappe.session.user
         self.save()
         return self.token
+
+    def extend_expiry(self):
+        """Push the expiry out by a fresh TTL window WITHOUT rotating the token.
+
+        Show Link re-shares the SAME distributed link, so it must keep that link
+        alive (a worker who is still active should never lose their link just because
+        the window lapsed). Token + QR are unchanged; only ``expires_on`` advances."""
+        self.expires_on = _token_expiry()
+        self.last_generated_on = frappe.utils.now_datetime()
+        self.last_generated_by = frappe.session.user
+        self.save()
+        return self.expires_on
 
 
 def get_or_create_for_employee(employee: str) -> "MasarWorkerToken":
@@ -105,6 +133,10 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
     elif not doc.token:
         # [#gl1eyq]
         doc.regenerate()
+    else:
+        # [#tokttl] Re-sharing the SAME link keeps it alive: push the expiry out so a
+        # still-active worker never loses their distributed link to a lapsed window.
+        doc.extend_expiry()
 
     link = _worker_link(doc.token)
     return {
@@ -114,6 +146,7 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
         "token": doc.token,
         "link": link,
         "qr": masar_qr_data_uri(link),
+        "expires_on": frappe.utils.cstr(doc.expires_on) if doc.expires_on else None,
         # [#p7spkl]
         "phone": frappe.db.get_value("Employee", doc.employee, "cell_number"),
     }
@@ -132,6 +165,9 @@ def batch_issue_worker_links(employees_json) -> list:
         doc = get_or_create_for_employee(emp)
         if not doc.token:
             doc.regenerate()
+        else:
+            # [#tokttl] Batch re-share keeps each existing link alive (fresh expiry).
+            doc.extend_expiry()
         link = _worker_link(doc.token)
         out.append(
             {

@@ -12,10 +12,12 @@ shared mixin, but every assertion here is a read):
      non-driver is rejected; the portal-disabled guard fires.
   2. the standalone ``/masar`` www page context — Masar is now the worker
      self-service app shell: it is guest-accessible (identity is the personal
-     ``?w=<token>`` resolved server-side by the API, not a desk login), so the
-     page never redirects, forwards the token verbatim to the SPA, and exposes
-     the Salis Portal Theme appearance. (The old driver "my route today" view
-     moved into the driver portal; see ``test_driver_portal``.)
+     ``?w=<token>`` resolved server-side by the API, not a desk login). With no
+     ``?w=`` it renders the shell (no redirect) and exposes the Salis Portal Theme
+     appearance plus a presence boolean; a valid ``?w=<token>`` is moved into an
+     httpOnly cookie and redirected to a clean ``/masar`` so the secret leaves the
+     URL (T-685/T-705). (The old driver "my route today" view moved into the
+     driver portal; see ``test_driver_portal``.)
 
 The worker-trip fixture and the driver/employee chain are reused from
 ``test_masar_worker_movement`` so the two suites stay convention-aligned and
@@ -145,8 +147,9 @@ class TestMasarPageContext(_WorkerTripMixin, FrappeTestCase):
 
     def test_guest_gets_app_shell_context_no_redirect(self):
         """Masar is now guest-accessible (identity is the personal token, resolved
-        server-side by the API), so the page must NOT redirect a guest to login —
-        it returns the populated SPA shell context instead."""
+        server-side by the API), so a request with NO ``?w=`` must NOT redirect —
+        it returns the populated SPA shell context. After the T-705 hardening the
+        raw token is never inlined; the shell only carries a presence boolean."""
         frappe.set_user("Guest")
         frappe.local.form_dict = frappe._dict()
         try:
@@ -155,22 +158,28 @@ class TestMasarPageContext(_WorkerTripMixin, FrappeTestCase):
             self.assertTrue(ctx.portal_theme)
             # [#b9e62g]
             self.assertIsInstance(ctx.csrf_token, str)
-            # [#p4chw1]
-            self.assertEqual(ctx.masar_token, "")
+            # [#p4chw1] The shell sees only the presence flag, never the raw token.
+            self.assertIn("masar_has_token", ctx)
+            self.assertIsInstance(ctx.masar_has_token, bool)
+            self.assertNotIn("masar_token", ctx)
         finally:
             frappe.local.form_dict = frappe._dict()
             frappe.set_user("Administrator")
 
-    def test_personal_token_is_passed_through_to_shell(self):
-        """The ``?w=<token>`` value is forwarded verbatim to the SPA; the page
-        never resolves it to an employee (the whitelisted API does, server-side)."""
+    def test_valid_token_redirects_to_clean_url(self):
+        """A valid ``?w=<token>`` is no longer forwarded into the shell (T-685/T-705):
+        the page drops it into the httpOnly cookie and redirects to a clean ``/masar``
+        so the secret leaves the URL. The raw token never reaches the SPA context."""
+        token = "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718"
         frappe.set_user("Guest")
-        frappe.local.form_dict = frappe._dict(w="opaque-personal-token")
+        frappe.local.form_dict = frappe._dict(w=token)
         try:
-            ctx = masar_page.get_context(frappe._dict())
-            self.assertEqual(ctx.masar_token, "opaque-personal-token")
+            with self.assertRaises(frappe.Redirect):
+                masar_page.get_context(frappe._dict())
+            self.assertEqual(frappe.local.flags.redirect_location, "/masar")
         finally:
             frappe.local.form_dict = frappe._dict()
+            frappe.local.flags.redirect_location = None
             frappe.set_user("Administrator")
 
     def test_theme_appearance_is_exposed(self):

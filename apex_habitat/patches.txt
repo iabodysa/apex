@@ -248,3 +248,12 @@ apex_habitat.patches.v1_x.cleanup_p048_orphan_workspaces
 # Carries deployed sites across the rename. Idempotent, no-op on fresh installs / re-run.
 # PRUNE once every deployed site has run it.
 apex_habitat.patches.v1_x.rename_workspaces_for_hierarchy
+
+# v1.x — stamp a generous expiry on existing Masar Worker Token rows (T-629, ONE-TIME).
+# The token gained a TTL (expires_on); rows minted before the field existed are NULL,
+# which the resolver treats as never-expiring. Runs AFTER model sync so the expires_on
+# field exists. Gives each live row the same generous window a fresh link gets, so no
+# currently distributed worker link is instantly invalidated. Never clobbers a set
+# expiry; idempotent; no-op on fresh installs / re-run. PRUNE once every deployed site
+# has run it (tracked in tabPatch Log).
+apex_habitat.patches.v1_x.backfill_masar_token_expiry

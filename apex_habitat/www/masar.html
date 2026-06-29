@@ -2,6 +2,11 @@
 <html lang="ar" data-theme="{{ portal_theme or 'afmco' }}">
   <head>
     <meta charset="utf-8" />
+    <!-- [T-660] no-referrer: the personal /masar?w=<token> link must never leak via
+         the Referer header to fonts/maps/any third party (it would carry the secret
+         token in the URL before the server redirect strips it). Renderer-independent
+         (the www template renderer does not propagate a header set in get_context). -->
+    <meta name="referrer" content="no-referrer" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#00844E" />
     <link rel="manifest" href="/assets/apex_habitat/worker_portal/manifest.webmanifest" />
@@ -33,7 +38,11 @@
     <title>Masar</title>
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
-      window.masar_token = {{ masar_token | tojson }};
+      // [T-705] The raw personal token is NEVER inlined here. It rides in the
+      // httpOnly `masar_wt` cookie (set server-side from the one-time ?w= hit) and
+      // is read by the worker endpoints server-side. The shell only learns whether
+      // a link is present, so it can show the "no link" state without the secret.
+      window.masar_has_token = {{ "true" if masar_has_token else "false" }};
       window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
       window.portal_logo = {{ (portal_logo or '') | tojson }};
     </script>

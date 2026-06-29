@@ -15,6 +15,7 @@
   "enabled",
   "section_token",
   "token",
+  "expires_on",
   "section_meta",
   "last_generated_on",
   "col_meta",
@@ -85,7 +86,16 @@
    "read_only": 1,
    "unique": 1,
    "search_index": 1,
-   "description": "Unguessable value bound to this one worker. Whoever holds the matching /masar link sees only this worker's data. Use Generate / Regenerate to issue or rotate it."
+   "permlevel": 1,
+   "no_copy": 1,
+   "description": "Unguessable value bound to this one worker. Whoever holds the matching /masar link sees only this worker's data. Use Generate / Regenerate to issue or rotate it. Restricted to high roles (permlevel 1)."
+  },
+  {
+   "fieldname": "expires_on",
+   "fieldtype": "Datetime",
+   "label": "Expires On",
+   "read_only": 1,
+   "description": "After this moment the personal link stops resolving (an expired link is refused). Regenerate to issue a fresh link with a new expiry."
   },
   {
    "fieldname": "section_meta",
@@ -164,11 +174,22 @@
    "report": 1,
    "role": "Fleet Supervisor",
    "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accommodation Manager"
   }
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
  "title_field": "employee_name",
- "track_changes": 1
+ "track_changes": 0
 }
