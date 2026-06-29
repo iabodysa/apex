@@ -332,6 +332,7 @@ def submit_round(building, cadence, round_date, lines, is_reinspection=0):
     # submit so this method only proceeds for roles that can actually submit the
     # executions (and the round). Do not silently swallow that.
     frappe.has_permission("Safety Task Execution", "submit", throw=True)
+    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
 
     if not building:
         frappe.throw(_("A building is required to submit a round."))

@@ -93,7 +93,17 @@ def run(csv_dir=None):
         if not did:
             continue
         name = frappe.db.get_value("Salis Driver", {"driver_id": did}, "name")
-        if not name:
+        if name:
+            try:
+                doc = frappe.get_doc("Salis Driver", name)
+                doc.full_name = (r.get("full_name") or did).strip()
+                doc.phone = (r.get("phone") or "").strip() or None
+                doc.status = (r.get("status") or "Active").strip()
+                doc.project = proj.get((r.get("project") or "").strip())
+                doc.save(ignore_permissions=True)
+            except Exception:
+                continue
+        else:
             try:
                 name = frappe.get_doc({
                     "doctype": "Salis Driver", "driver_id": did,
@@ -115,7 +125,19 @@ def run(csv_dir=None):
             continue
         norm = "".join(plate.split()).upper()
         name = frappe.db.get_value("Salis Vehicle", {"plate_normalized": norm}, "name")
-        if not name:
+        if name:
+            try:
+                doc = frappe.get_doc("Salis Vehicle", name)
+                doc.plate_number = plate
+                doc.vehicle_category = (r.get("vehicle_category") or "").strip() or None
+                doc.ownership = (r.get("ownership") or "Owned").strip()
+                doc.rental_office = (r.get("rental_office") or "").strip() or None
+                doc.project = proj.get((r.get("project") or "").strip())
+                doc.status = (r.get("status") or "Active").strip()
+                doc.save(ignore_permissions=True)
+            except Exception:
+                continue
+        else:
             try:
                 name = frappe.get_doc({
                     "doctype": "Salis Vehicle", "plate_number": plate,

@@ -279,6 +279,20 @@ class TestSafetyChecklist(FrappeTestCase):
             1,
         )
 
+    def test_submit_round_throws_without_permission(self):
+        # Mock has_permission so that Accommodation Building throws PermissionError
+        original_has_permission = frappe.has_permission
+        def mock_has_permission(doctype, ptype="read", doc=None, user=None, throw=False):
+            if doctype == "Accommodation Building" and doc == self.building:
+                if throw:
+                    frappe.throw("No permission", frappe.PermissionError)
+                return False
+            return original_has_permission(doctype, ptype, doc, user, throw)
+
+        with patch("apex_habitat.habitat.api.safety_checklist.frappe.has_permission", side_effect=mock_has_permission):
+            with self.assertRaises(frappe.PermissionError):
+                submit_round(self.building, "Weekly", today(), self._lines("Good"))
+
     # get_due_cadences
 
     def _insert_submitted_round(self, cadence, round_date):
