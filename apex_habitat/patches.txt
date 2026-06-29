@@ -257,3 +257,9 @@ apex_habitat.patches.v1_x.rename_workspaces_for_hierarchy
 # expiry; idempotent; no-op on fresh installs / re-run. PRUNE once every deployed site
 # has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.backfill_masar_token_expiry
+
+# v1.60.52 — P-102: add a composite index (is_cancelled, item_type, employee) on
+# Accommodation Stock Ledger for the custody/stock balance access path. Frappe only
+# emits single-column search_index rows, so this composite cannot live in the DocType
+# JSON. Idempotent: skips if the index already exists; no-op on re-run.
+apex_habitat.patches.v1_x.add_asl_composite_index

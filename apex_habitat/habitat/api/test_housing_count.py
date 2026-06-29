@@ -207,3 +207,11 @@ class TestHousingCount(FrappeTestCase):
         frappe.set_user(self.auditor)
         with self.assertRaises(frappe.PermissionError):
             submit_counts(self.b1, [{"name": self.item1, "counted_quantity": 1}])
+
+    def test_malformed_json_lines_raises_validation_error(self):
+        # A malformed `lines` JSON body must surface as a clean ValidationError, not
+        # a raw JSONDecodeError 500. The scoped supervisor clears the write gate +
+        # building check, so the call reaches the json.loads guard.
+        frappe.set_user(self.scoped)
+        with self.assertRaises(frappe.ValidationError):
+            submit_counts(self.b1, "{not valid json")

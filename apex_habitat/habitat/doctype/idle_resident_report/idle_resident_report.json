@@ -103,7 +103,8 @@
    "in_standard_filter": 1,
    "label": "Building",
    "options": "Accommodation Building",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "idle_resident_sec_classification",

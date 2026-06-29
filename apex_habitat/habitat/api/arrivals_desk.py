@@ -298,7 +298,9 @@ def register_temporary_worker(
         "party_type": PARTY_TEMPORARY_WORKER,
         "party": doc.name,
         "label": doc.worker_name,
-        "expiry_date": doc.expiry_date,
+        # JSON-safe ISO string (not a raw datetime.date) so the return contract is
+        # explicit for server/test callers, mirroring the rest of this module.
+        "expiry_date": frappe.utils.formatdate(doc.expiry_date) if doc.expiry_date else None,
     }
 
 

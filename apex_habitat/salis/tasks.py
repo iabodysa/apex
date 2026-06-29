@@ -51,6 +51,9 @@ def _resolve_project_supervisor(vehicle: str | None) -> str | None:
         project = frappe.db.get_value("Salis Vehicle", vehicle, "project")
         return _project_supervisor(project)
     except Exception:
+        # Best-effort denorm: never abort the job, but log so a real
+        # misconfiguration is not silently invisible.
+        frappe.log_error(title="Salis: resolve project supervisor failed")
         return None
 
 
@@ -61,6 +64,8 @@ def _vehicle_project(vehicle: str | None) -> str | None:
     try:
         return frappe.db.get_value("Salis Vehicle", vehicle, "project")
     except Exception:
+        # Best-effort denorm: never abort the job, but log the failure.
+        frappe.log_error(title="Salis: resolve vehicle project failed")
         return None
 
 

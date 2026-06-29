@@ -160,7 +160,11 @@ def submit_counts(building, lines):
         frappe.throw(_("A building is required to submit counts."))
 
     if isinstance(lines, str):
-        lines = json.loads(lines)
+        # Surface a malformed JSON body as a clean ValidationError, not a 500.
+        try:
+            lines = json.loads(lines)
+        except ValueError:
+            frappe.throw(_("Counts must be valid JSON."))
     if not isinstance(lines, list):
         frappe.throw(_("Counts must be a list."))
     if not lines:

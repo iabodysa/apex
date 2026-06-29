@@ -87,7 +87,8 @@
    "fieldname": "request_date",
    "fieldtype": "Date",
    "in_standard_filter": 1,
-   "label": "Request Date"
+   "label": "Request Date",
+   "search_index": 1
   },
   {
    "fieldname": "fuel_request_sec_request_col2",

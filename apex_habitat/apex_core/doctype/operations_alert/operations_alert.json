@@ -46,7 +46,8 @@
    "in_standard_filter": 1,
    "label": "Severity",
    "options": "Info\nWarning\nCritical",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "default": "Open",
@@ -60,7 +61,8 @@
   {
    "fieldname": "raised_on",
    "fieldtype": "Datetime",
-   "label": "Raised On"
+   "label": "Raised On",
+   "search_index": 1
   },
   {
    "description": "Hide this alert from the operations queue until this time; it reappears when the moment passes.",
@@ -92,7 +94,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Vehicle",
-   "options": "Salis Vehicle"
+   "options": "Salis Vehicle",
+   "search_index": 1
   },
   {
    "fetch_from": "vehicle.current_driver",
@@ -100,7 +103,8 @@
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",
-   "options": "Salis Driver"
+   "options": "Salis Driver",
+   "search_index": 1
   },
   {
    "fieldname": "operations_alert_sec_message",

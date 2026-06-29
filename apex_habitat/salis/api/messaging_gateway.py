@@ -109,7 +109,13 @@ def send_message(to: str, message: str, channel: str | None = None) -> dict:
 
     Credentials are read from Settings here, used for this call, and discarded;
     nothing is persisted or logged."""
-    cfg = _gateway_config()
+    # Reading the Settings Single can raise on a transient DB error; this is also
+    # an enqueue() target, so honour the "never raises" contract in the worker too.
+    try:
+        cfg = _gateway_config()
+    except Exception:
+        frappe.log_error(title="Messaging gateway config read failed")
+        return {"sent": False, "reason": "not_configured"}
     if not cfg:
         # No-op by design: callers fire-and-forget without guarding setup.
         frappe.logger("messaging_gateway").info("send skipped: gateway not configured")

@@ -40,7 +40,8 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Expiry Date",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "columns": 2,

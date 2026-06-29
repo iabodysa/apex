@@ -50,7 +50,8 @@
    "fieldtype": "Link",
    "label": "Assignment",
    "options": "Scheduled Task Assignment",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "task_catalog",

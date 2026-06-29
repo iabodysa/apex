@@ -58,6 +58,21 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         cls.project = cls._project("DC Workflow Project")
         cls._user_perm(cls.supervisor, cls.project)
 
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits a Project + User Permission OUTSIDE FrappeTestCase's
+        # per-method savepoint rollback; without this they leak across the test DB
+        # (the @example.com Project User Permission cross-test-pollution class).
+        frappe.set_user("Administrator")
+        frappe.db.delete(
+            "User Permission",
+            {"allow": "Project", "for_value": cls.project, "user": cls.supervisor},
+        )
+        if frappe.db.exists("Project", cls.project):
+            frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
     def setUp(self):
         frappe.set_user("Administrator")
 

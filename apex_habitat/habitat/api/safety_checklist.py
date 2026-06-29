@@ -347,9 +347,13 @@ def submit_round(building, cadence, round_date, lines, is_reinspection=0):
         frappe.throw(_("A round date is required to submit a round."))
 
     # `lines` arrives as a JSON string over HTTP; accept an already-parsed list
-    # too so server-side callers and tests can pass a list directly.
+    # too so server-side callers and tests can pass a list directly. A malformed
+    # body must surface as a clean ValidationError, not a raw JSONDecodeError 500.
     if isinstance(lines, str):
-        lines = json.loads(lines)
+        try:
+            lines = json.loads(lines)
+        except ValueError:
+            frappe.throw(_("Checklist lines must be valid JSON."))
     if not isinstance(lines, list):
         frappe.throw(_("Checklist lines must be a list."))
 
@@ -496,7 +500,11 @@ def submit_due_rounds(building, round_date, results):
         frappe.throw(_("A round date is required to submit rounds."))
 
     if isinstance(results, str):
-        results = json.loads(results)
+        # Surface a malformed JSON body as a clean ValidationError, not a 500.
+        try:
+            results = json.loads(results)
+        except ValueError:
+            frappe.throw(_("Results must be valid JSON."))
     if not isinstance(results, list):
         frappe.throw(_("Results must be a list."))
 

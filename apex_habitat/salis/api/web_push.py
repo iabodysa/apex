@@ -190,7 +190,13 @@ def send_to_driver(driver: str, title: str, body: str, url: str | None = None) -
 
 	``url`` is an in-app path (e.g. ``/driver?tab=trips``) the SW opens when the driver
 	taps the notification. Secrets are read here, used, and discarded."""
-	cfg = _vapid_config()
+	# Reading the Settings Single can raise on a transient DB error; this is also
+	# an enqueue() target, so honour the "never raises" contract in the worker too.
+	try:
+		cfg = _vapid_config()
+	except Exception:
+		frappe.log_error(title="Web push config read failed")
+		return {"sent": 0, "reason": "not_configured"}
 	if not cfg:
 		# No-op by design: callers fire-and-forget without guarding setup.
 		frappe.logger("web_push").info("send skipped: web push not configured")

@@ -258,6 +258,13 @@ class TestSafetyChecklist(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             submit_round(self.building, "Weekly", today(), self._lines("Good"))
 
+    def test_submit_round_malformed_json_lines_raises_validation_error(self):
+        # A malformed `lines` JSON body must surface as a clean ValidationError,
+        # not a raw JSONDecodeError 500. Building, cadence, and round_date are all
+        # valid so the call reaches the json.loads guard.
+        with self.assertRaises(frappe.ValidationError):
+            submit_round(self.building, "Weekly", today(), "[not valid json")
+
     def test_reinspection_round_is_allowed(self):
         submit_round(self.building, "Weekly", today(), self._lines("Good"))
         # The same date/cadence is allowed when flagged as a re-inspection.
@@ -372,6 +379,13 @@ class TestSafetyChecklist(FrappeTestCase):
             }
             for cadence, status in pairs
         ]
+
+    def test_submit_due_rounds_malformed_json_results_raises_validation_error(self):
+        # A malformed `results` JSON body must surface as a clean ValidationError,
+        # not a raw JSONDecodeError 500. Building (Administrator has read) and
+        # round_date are valid so the call reaches the json.loads guard.
+        with self.assertRaises(frappe.ValidationError):
+            submit_due_rounds(self.building, today(), "{not valid json")
 
     def test_submit_due_rounds_creates_one_round_per_cadence(self):
         results = self._results(
