@@ -202,17 +202,25 @@ def send_to_driver(driver: str, title: str, body: str, url: str | None = None) -
 		frappe.logger("web_push").info("send skipped: web push not configured")
 		return {"sent": 0, "reason": "not_configured"}
 
-	subs = _active_subscriptions(driver)
-	if not subs:
-		return {"sent": 0, "reason": "no_subscription"}
+	# Outer guard for the send body: _deliver already swallows per-device errors, but
+	# the subscription read can raise on a transient DB error, and this is an enqueue()
+	# target whose docstring promises it NEVER raises — so any unforeseen failure
+	# degrades to a logged no-op result instead of a silent RQ job crash.
+	try:
+		subs = _active_subscriptions(driver)
+		if not subs:
+			return {"sent": 0, "reason": "no_subscription"}
 
-	body = (body or "").strip()
-	if len(body) > _MAX_BODY_LEN:
-		body = body[: _MAX_BODY_LEN - 1] + "…"
-	payload = frappe.as_json({"title": title, "body": body, "url": url or "/driver"})
+		body = (body or "").strip()
+		if len(body) > _MAX_BODY_LEN:
+			body = body[: _MAX_BODY_LEN - 1] + "…"
+		payload = frappe.as_json({"title": title, "body": body, "url": url or "/driver"})
 
-	sent = sum(1 for sub in subs if _deliver(cfg, sub, payload))
-	return {"sent": sent, "devices": len(subs)}
+		sent = sum(1 for sub in subs if _deliver(cfg, sub, payload))
+		return {"sent": sent, "devices": len(subs)}
+	except Exception:
+		frappe.log_error(title="Web push send failed")
+		return {"sent": 0, "reason": "send_failed"}
 
 
 def enqueue_to_driver(driver: str, title: str, body: str, url: str | None = None) -> dict:

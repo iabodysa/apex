@@ -18,24 +18,47 @@ def get_context(context):
     user = frappe.session.user
     employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
 
-    # Issues already acknowledged by anyone — excluded from the holder's picklist.
-    acknowledged = {
-        a.custody_issue
-        for a in frappe.get_all(
-            "Custody Acknowledgment", fields=["custody_issue"], filters={"docstatus": ["<", 2]}
-        )
-    }
-
     my_issues = []
     if employee:
-        for ci in frappe.get_all(
+        # This holder's own open, issued custody issues — the picklist candidates.
+        candidates = frappe.get_all(
             "Custody Issue",
             filters={"issued_to_employee": employee, "docstatus": 1, "status": "Issued"},
             fields=["name", "issue_date", "building"],
             order_by="issue_date desc",
-        ):
-            if ci.name not in acknowledged:
-                my_issues.append(ci)
+        )
+        # Already-acknowledged subset, scoped to THIS holder's own issues. get_all
+        # bypasses permission_query_conditions, so an unfiltered query would read
+        # every building's acknowledgments cross-tenant; confining to the holder's
+        # own issue names keeps the read to the caller's own data.
+        candidate_names = [ci.name for ci in candidates]
+        acknowledged = (
+            {
+                a.custody_issue
+                for a in frappe.get_all(
+                    "Custody Acknowledgment",
+                    fields=["custody_issue"],
+                    filters={
+                        "docstatus": ["<", 2],
+                        "custody_issue": ["in", candidate_names],
+                    },
+                )
+            }
+            if candidate_names
+            else set()
+        )
+        my_issues = [ci for ci in candidates if ci.name not in acknowledged]
 
     context.my_custody_issues = my_issues
-    context.prefill_issue = frappe.form_dict.get("issue") or (my_issues[0].name if my_issues else "")
+
+    # [#own] Only pre-fill from ``?issue=`` when that issue is THIS holder's own.
+    # An unchecked URL param would render another employee's Custody Issue to any
+    # authenticated caller. A foreign / unknown docname falls back to the holder's
+    # first own issue (or blank).
+    requested = frappe.form_dict.get("issue")
+    own_issue = bool(requested) and frappe.db.get_value(
+        "Custody Issue", requested, "issued_to_employee"
+    ) == employee
+    context.prefill_issue = (
+        requested if own_issue else (my_issues[0].name if my_issues else "")
+    )

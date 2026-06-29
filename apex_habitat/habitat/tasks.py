@@ -181,6 +181,7 @@ def consumable_custody_expiry_watch() -> None:
     )
 
     today_date = getdate(today())
+    logger = frappe.logger("habitat.consumable_custody_expiry_watch")
     # Bulk-prefetch the holders' employee names in one query keyed on the grouped
     # rows' employee ids, instead of one get_value per held position (N+1).
     emp_ids = {r.employee for r in rows if r.employee}
@@ -194,24 +195,38 @@ def consumable_custody_expiry_watch() -> None:
         if emp_ids
         else {}
     )
+    flagged = 0
     for r in rows:
-        if not r.first_held:
-            continue
-        held = getdate(r.first_held)
-        age_months = (today_date.year - held.year) * 12 + (today_date.month - held.month)
-        if today_date.day < held.day:
-            age_months -= 1
-        if age_months < int(r.lifespan or 0):
-            continue
-        emp_name = emp_names.get(r.employee) or r.employee
-        token = f"{r.employee}:{r.article}"
-        # Token embedded so the message-LIKE dedupe in _raise_consumable_alert matches.
-        message = _(
-            "Consumable {0} held by {1} since {2} is {3} month(s) old, past its {4}-month lifespan."
-        ).format(
-            r.article_name or r.article, emp_name, r.first_held, age_months, int(r.lifespan or 0)
-        ) + f" [{token}]"
-        _raise_consumable_alert(message, dedupe_token=token)
+        # Per-row isolation: one bad held position must not abort the whole batch
+        # (a silent abort is indistinguishable from a clean no-op run).
+        try:
+            if not r.first_held:
+                continue
+            held = getdate(r.first_held)
+            age_months = (today_date.year - held.year) * 12 + (today_date.month - held.month)
+            if today_date.day < held.day:
+                age_months -= 1
+            if age_months < int(r.lifespan or 0):
+                continue
+            emp_name = emp_names.get(r.employee) or r.employee
+            token = f"{r.employee}:{r.article}"
+            # Token embedded so the message-LIKE dedupe in _raise_consumable_alert matches.
+            message = _(
+                "Consumable {0} held by {1} since {2} is {3} month(s) old, past its {4}-month lifespan."
+            ).format(
+                r.article_name or r.article, emp_name, r.first_held, age_months, int(r.lifespan or 0)
+            ) + f" [{token}]"
+            if _raise_consumable_alert(message, dedupe_token=token):
+                flagged += 1
+        except Exception:
+            frappe.db.rollback()
+            logger.error(
+                f"consumable_custody_expiry_watch row failed "
+                f"(employee={r.employee}, article={r.article}): {frappe.get_traceback()}"
+            )
+    logger.info(
+        f"consumable_custody_expiry_watch: {len(rows)} held positions scanned, {flagged} flagged"
+    )
 
 
 def daily_accommodation_cost_allocation() -> None:
@@ -1225,9 +1240,10 @@ def daily_safety_task_compliance_scan() -> None:
     """Daily — flag overdue Scheduled Task Instances Overdue, escalate the urgent ones,
     and flag active buildings with no safety round at all in the recent window.
 
-    An instance counts as overdue once today is past its due_date plus the configured
-    ``safety_overdue_grace_days`` (read as ``value or 0`` — a new Int on the Habitat
-    Settings Single may store 0). On flipping an instance to Overdue, the effective
+    An instance counts as overdue once today reaches or passes its due_date plus the
+    configured ``safety_overdue_grace_days`` (read as ``value or 0`` — a new Int on the
+    Habitat Settings Single may store 0). With zero grace a task is overdue ON its due
+    day (``due_date <= cutoff``), not the day after. On flipping an instance to Overdue, the effective
     priority is resolved through its template's Safety Task Catalog task: a High or
     Critical task additionally raises an idempotent Operations Alert AND posts a system
     Notification to the Safety Officer, so urgent safety lapses surface immediately.
@@ -1259,7 +1275,7 @@ def daily_safety_task_compliance_scan() -> None:
     while True:
         overdue = frappe.get_all(
             "Scheduled Task Instance",
-            filters={"docstatus": 0, "status": ["in", ["Open", "In Progress"]], "due_date": ["<", cutoff]},
+            filters={"docstatus": 0, "status": ["in", ["Open", "In Progress"]], "due_date": ["<=", cutoff]},
             fields=["name", "due_date", "template", "building"],
             limit_start=start,
             limit_page_length=batch_size,
@@ -1671,7 +1687,7 @@ def weekly_custody_digest() -> None:
     """
     from collections import defaultdict
 
-    from frappe.utils import escape_html, flt, fmt_money, get_url_to_list, getdate, today
+    from frappe.utils import date_diff, escape_html, flt, fmt_money, get_url_to_list, getdate, today
 
     from apex_habitat.apex_core.utils.email_gate import email_enabled
 
@@ -1704,7 +1720,10 @@ def weekly_custody_digest() -> None:
         if not issue.building:
             continue
         open_counts[issue.building] += 1
-        if issue.expected_return_date and str(issue.expected_return_date) < today_str:
+        # Overdue = the return date is strictly before today. date_diff (not a raw
+        # str(<) that only works by ISO-lexicographic accident) so a date-typed value
+        # compares correctly.
+        if issue.expected_return_date and date_diff(today_str, issue.expected_return_date) > 0:
             overdue_counts[issue.building] += 1
 
     # Net custody value still in worker hands, per building (ledger is the

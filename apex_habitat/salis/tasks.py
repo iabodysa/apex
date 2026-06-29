@@ -102,13 +102,19 @@ def _raise_alert(
     Returns the new alert name, or ``None`` if a duplicate was skipped or the
     insert failed.
     """
-    from frappe.utils import now_datetime, today
+    from frappe.utils import add_days, now_datetime, today
 
-    # [#91pwgy]
+    # [#91pwgy] raised_on is a Datetime; a "today" window must derive both bounds
+    # from ONE today() call. A "<= 23:59:59" upper bound silently drops a row stamped
+    # 23:59:59.xxxxxx (the column keeps microseconds), and two separate today() calls
+    # could straddle midnight — both reopen the duplicate alert the dedupe suppresses.
+    # The upper bound is next-day-midnight (between is inclusive, but now_datetime()
+    # never lands on exactly .000000, so tomorrow's first row is not falsely matched).
+    day = today()
     dedupe_filters = {
         "alert_type": alert_type,
         "status": "Open",
-        "raised_on": ["between", [f"{today()} 00:00:00", f"{today()} 23:59:59"]],
+        "raised_on": ["between", [f"{day} 00:00:00", f"{add_days(day, 1)} 00:00:00"]],
     }
     if vehicle:
         dedupe_filters["vehicle"] = vehicle
@@ -1078,14 +1084,26 @@ def workshop_overstay_watch() -> None:
     (see ``_overstay_stops`` for the rule), deduped daily by ``_raise_alert``.
     """
     days = _settings_int("workshop_overstay_days", 14)
+    logger = frappe.logger()
     for r in _overstay_stops():
-        msg = _("Vehicle {0} has been in the workshop since {1} (over {2} days).").format(
-            r.vehicle, r.stop_date, days
-        )
-        _raise_alert(
-            "Maintenance Overdue", "Warning", msg,
-            source_doctype="Vehicle Stop", source_name=r.name, vehicle=r.vehicle,
-        )
+        try:
+            msg = _("Vehicle {0} has been in the workshop since {1} (over {2} days).").format(
+                r.vehicle, r.stop_date, days
+            )
+            logger.warning(
+                f"workshop_overstay_watch: vehicle {r.vehicle} in workshop since "
+                f"{r.stop_date} (over {days} days)."
+            )
+            _raise_alert(
+                "Maintenance Overdue", "Warning", msg,
+                source_doctype="Vehicle Stop", source_name=r.name, vehicle=r.vehicle,
+            )
+        except Exception:
+            frappe.db.rollback()
+            frappe.log_error(
+                message=frappe.get_traceback(),
+                title=f"Workshop overstay watch failed for {r.name}"[:140],
+            )
 
 
 @frappe.whitelist()

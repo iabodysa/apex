@@ -98,3 +98,25 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
             self._supervisor_notified(sup, b.name),
             "BUG: supervisor wrongly alerted though a recent round exists",
         )
+
+    # ---- R11: off-by-one — a task due TODAY (zero grace) is overdue TODAY -----
+    def _task_instance(self, building, due_date):
+        """A draft Scheduled Task Instance in the Open state, due on ``due_date``."""
+        return frappe.get_doc({
+            "doctype": "Scheduled Task Instance",
+            "naming_series": "STI-.YYYY.-.####",
+            "due_date": due_date, "status": "Open", "building": building,
+        }).insert(ignore_permissions=True, ignore_mandatory=True, ignore_links=True).name
+
+    def test_instance_due_today_is_overdue_with_zero_grace(self):
+        """With safety_overdue_grace_days = 0, an instance due exactly today must flip
+        to Overdue on its due day — the `<=` boundary fix (was `<`, off-by-one)."""
+        frappe.db.set_single_value("Habitat Settings", "safety_overdue_grace_days", 0)
+        b = self._building()
+        inst = self._task_instance(b.name, today())
+        daily_safety_task_compliance_scan()
+        self.assertEqual(
+            frappe.db.get_value("Scheduled Task Instance", inst, "status"),
+            "Overdue",
+            "BUG: a task due today was NOT flagged overdue with zero grace (off-by-one)",
+        )

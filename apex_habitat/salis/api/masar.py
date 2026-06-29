@@ -43,15 +43,56 @@ def _fmt_time(value):
         return frappe.utils.cstr(value)
 
 
+# A finished trip is one whose journey is over — boarding it is meaningless. Used
+# to drop a YESTERDAY trip that has already completed/cancelled while keeping an
+# in-motion night run; today's trips are never date-filtered, so a today trip in
+# any status stays visible to the driver's route view.
+_FINISHED_TRIP_STATUSES = frozenset({"Completed", "Cancelled"})
+
+
+def _trip_date_window():
+    """The trip_date filter window for "boardable now" — today AND yesterday.
+
+    A night shift that departs before midnight runs past it: at 00:05 the trip's
+    ``trip_date`` is still yesterday, so a ``trip_date = today()`` filter drops it
+    at the exact moment the worker needs to board. Including yesterday keeps that
+    in-progress night trip reachable. The caller drops a YESTERDAY trip that has
+    already finished (see ``_drop_finished_yesterday``), so today's completed trips
+    stay visible while only an in-motion night run carries over — no double-count."""
+    return ["in", [frappe.utils.add_days(frappe.utils.today(), -1), frappe.utils.today()]]
+
+
+def _drop_finished_yesterday(trips):
+    """Drop carried-over YESTERDAY trips that are already finished.
+
+    The yesterday half of ``_trip_date_window`` exists only to keep a night run
+    still in motion reachable past midnight; a yesterday trip that has already
+    Completed/Cancelled is done and must not resurface. Today's trips pass through
+    untouched in every status (the driver's route view shows today's completed
+    runs). Keyed on ``trip_date``, so a row missing it is kept defensively."""
+    yesterday = frappe.utils.add_days(frappe.utils.today(), -1)
+    return [
+        t
+        for t in trips
+        if not (
+            frappe.utils.cstr(t.get("trip_date")) == yesterday
+            and t.get("status") in _FINISHED_TRIP_STATUSES
+        )
+    ]
+
+
 def _today_worker_trips(driver):
-    """Today's Dispatch Trips for ``driver`` whose linked Transport Request is on
-    the Workers service line. Returns a list of trip dicts with the route_plan and
-    transport_request resolved, ordered by departure time."""
+    """Today's (and an in-progress night shift's) Dispatch Trips for ``driver``
+    whose linked Transport Request is on the Workers service line. Returns a list
+    of trip dicts with the route_plan and transport_request resolved, ordered by
+    departure time. A trip that left before midnight is still boardable after it,
+    so the date window spans yesterday+today (see ``_trip_date_window``); a
+    yesterday trip that has already finished is dropped (``_drop_finished_yesterday``)."""
     trips = frappe.get_all(
         "Dispatch Trip",
         filters={
             "driver": driver,
-            "trip_date": frappe.utils.today(),
+            "trip_date": _trip_date_window(),
             "docstatus": ["<", 2],
         },
         fields=[
@@ -66,6 +107,7 @@ def _today_worker_trips(driver):
         ],
         order_by="depart_time asc",
     )
+    trips = _drop_finished_yesterday(trips)
     if not trips:
         return []
     # [#pmk91w] Backfill transport_request from the route plan for trips missing it,
@@ -1522,12 +1564,17 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
     own-set; an id the worker is not registered on simply does not match. Returns
     ``(dispatch_trip, transport_request, stop_name, accommodation_building)`` or
     None when the worker has no boardable trip today."""
+    # Window spans yesterday+today so a night run that left before midnight is still
+    # boardable after it (see _trip_date_window). A worker only boards BEFORE the
+    # trip finishes, so a Completed/Cancelled trip is never a boarding target in any
+    # status on either day — excluding both also drops the carried-over finished
+    # yesterday trip, so no _drop_finished_yesterday pass is needed here.
     trips = frappe.get_all(
         "Dispatch Trip",
         filters={
-            "trip_date": frappe.utils.today(),
+            "trip_date": _trip_date_window(),
             "docstatus": ["<", 2],
-            "status": ["!=", "Cancelled"],
+            "status": ["not in", list(_FINISHED_TRIP_STATUSES)],
         },
         fields=["name", "route_plan", "transport_request"],
         order_by="depart_time asc",

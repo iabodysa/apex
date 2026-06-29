@@ -121,17 +121,25 @@ def send_message(to: str, message: str, channel: str | None = None) -> dict:
         frappe.logger("messaging_gateway").info("send skipped: gateway not configured")
         return {"sent": False, "reason": "not_configured"}
 
-    phone = _normalize_phone(to)
-    if not phone:
-        return {"sent": False, "reason": "no_phone"}
+    # Outer guard for the send body: _post_to_gateway already swallows transport
+    # errors, but this is an enqueue() target whose docstring promises it NEVER
+    # raises — so any unforeseen failure (a future helper, an import) still degrades
+    # to a logged no-op result instead of a silent RQ job crash.
+    try:
+        phone = _normalize_phone(to)
+        if not phone:
+            return {"sent": False, "reason": "no_phone"}
 
-    message = (message or "").strip()
-    if not message:
-        return {"sent": False, "reason": "empty_message"}
-    if len(message) > _MAX_MESSAGE_LEN:
-        message = message[: _MAX_MESSAGE_LEN - 1] + "…"
+        message = (message or "").strip()
+        if not message:
+            return {"sent": False, "reason": "empty_message"}
+        if len(message) > _MAX_MESSAGE_LEN:
+            message = message[: _MAX_MESSAGE_LEN - 1] + "…"
 
-    return _post_to_gateway(cfg, phone, message, (channel or cfg["channel"]))
+        return _post_to_gateway(cfg, phone, message, (channel or cfg["channel"]))
+    except Exception:
+        frappe.log_error(title="Messaging gateway send failed")
+        return {"sent": False, "error": "gateway_error"}
 
 
 def enqueue_message(to: str, message: str, channel: str | None = None) -> dict:

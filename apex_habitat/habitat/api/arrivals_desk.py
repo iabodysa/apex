@@ -44,6 +44,59 @@ def _expiry_days(expiry_date) -> int | None:
     return frappe.utils.date_diff(expiry_date, frappe.utils.today())
 
 
+def _assert_party_in_scope(party_type, party) -> None:
+    """Enforce per-doc BUILDING scope before any party PII / identity is returned.
+
+    The desk lookups take a CLIENT-SUPPLIED docname. A type-level
+    ``has_permission`` only proves the caller may read the doctype at all — it does
+    NOT confine them to their own estate, so a scoped supervisor (or any low-role
+    user with a type-level read) could otherwise harvest another building's worker
+    identity, passport, and Iqama. This re-applies the same building scope the list
+    views get via ``permission_query_conditions`` (bypassed on the direct get_value
+    read here).
+
+    Unscoped oversight roles (HOUSING_UNSCOPED_ROLES) / Administrator pass through.
+    Scoped-user rules per party type:
+
+    * Temporary Worker — scoped on its own ``building`` field; a worker with no
+      building (or one outside the caller's estate) is denied (a scoped user can
+      never act on an estate-less party — mirrors permissions.[#1i4wio]). The
+      passport / Iqama leak (R1) lives here.
+    * Employee — scoped on the building of its LIVE Accommodation Assignment. An
+      employee actively housed in ANOTHER estate is denied (the real R2 leak). An
+      employee with NO live assignment (a not-yet-housed arrival) is allowed, so
+      the legitimate intake / check-in lookup the desk does before assigning a bed
+      is never broken — that path exposes only name + photo, never PII.
+    """
+    user = frappe.session.user
+    if permissions._building_is_unscoped(user):
+        return
+
+    allowed = set(permissions._allowed_buildings(user))
+
+    if party_type == PARTY_TEMPORARY_WORKER:
+        building = frappe.db.get_value("Temporary Worker", party, "building")
+        if not building or building not in allowed:
+            raise frappe.PermissionError(
+                _("You are not permitted to access this worker's record.")
+            )
+        return
+
+    if party_type == PARTY_EMPLOYEE:
+        # Employee carries no `building`; its estate is the live assignment's building.
+        building = frappe.db.get_value(
+            "Accommodation Assignment",
+            {"party_type": PARTY_EMPLOYEE, "party": party, "docstatus": 1, "check_out_date": ["is", "not set"]},
+            "building",
+        )
+        # Housed elsewhere -> deny; unhoused (intake) -> allow.
+        if building and building not in allowed:
+            raise frappe.PermissionError(
+                _("You are not permitted to access this worker's record.")
+            )
+        return
+
+
 @frappe.whitelist(methods=["POST"])
 def send_masar_link_message(employee, phone=None) -> dict:
     """Send a worker their already-issued Masar link to their phone (WhatsApp/SMS).
@@ -89,12 +142,17 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     tw_expiry = None
     if party_type == PARTY_EMPLOYEE:
         frappe.has_permission("Employee", "read", throw=True)
+        # [#scope] type-level read is not enough — confine to the caller's estate.
+        _assert_party_in_scope(party_type, party)
         info = frappe.db.get_value("Employee", party, ["employee_name", "image"], as_dict=True) or {}
         if not info:
             frappe.throw(_("Employee {0} does not exist.").format(party))
         worker_name, image = info.get("employee_name"), info.get("image")
     elif party_type == PARTY_TEMPORARY_WORKER:
         frappe.has_permission("Temporary Worker", "read", throw=True)
+        # [#scope] type-level read is not enough — confine to the caller's estate
+        # so passport / Iqama can never be harvested for an out-of-building worker.
+        _assert_party_in_scope(party_type, party)
         info = frappe.db.get_value(
             "Temporary Worker", party, ["worker_name", "expiry_date"], as_dict=True
         ) or {}
@@ -787,6 +845,10 @@ def get_arrival_slip(party_type, party) -> dict:
             ctx["qr"] = masar_qr_data_uri(_worker_link(token.get("token")))
     elif party_type == PARTY_TEMPORARY_WORKER:
         frappe.has_permission("Temporary Worker", "read", throw=True)
+        # [#scope] re-assert the building scope at the PII chokepoint (defence in
+        # depth): passport / Iqama are permlevel-1 confidential government IDs and
+        # must never be returned for a worker outside the caller's estate.
+        _assert_party_in_scope(party_type, party)
         tw = (
             frappe.db.get_value(
                 "Temporary Worker", party, ["passport_number", "iqama_number", "nationality"], as_dict=True

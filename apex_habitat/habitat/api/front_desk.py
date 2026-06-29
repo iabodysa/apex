@@ -436,7 +436,14 @@ def building_open_requests(building: str) -> dict:
 def get_employee_card(employee):
     """Read-only HR identity card for the check-in dialog: name + profile photo.
     Lets the supervisor visually verify the worker before assigning a bed."""
+    from apex_habitat.habitat.api.arrivals_desk import _assert_party_in_scope
+
     frappe.has_permission("Employee", "read", throw=True)
+    # [#r7] Mirror the arrivals-desk building scope: a scoped supervisor may look up
+    # an UNHOUSED (intake) employee for the pre-assignment check-in, but not one
+    # actively housed in another estate — keeps this desk consistent with
+    # get_arrival_card and closes the name/photo cross-tenant asymmetry.
+    _assert_party_in_scope("Employee", employee)
     vals = frappe.db.get_value("Employee", employee, ["employee_name", "image"], as_dict=True) or {}
     return {"employee_name": vals.get("employee_name"), "image": vals.get("image")}
 
