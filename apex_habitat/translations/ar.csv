@@ -778,14 +778,19 @@ Costing & Mapping,احتساب التكلفة والربط
 Costs,التكاليف
 Costs and Leasing,التكاليف والتأجير
 Costs and Settlement,التكاليف والتسوية
+Could not advance the request. Please try again.,تعذّر متابعة الطلب. حاول مرة أخرى.
 Could not apply {0},تعذّر تطبيق {0}
+Could not approve the handover. Please try again.,تعذّر اعتماد التسليم. حاول مرة أخرى.
 Could not close the task,تعذّر إغلاق المهمة
 Could not complete the Work Order. No changes were saved. Please try again or contact support.,تعذّر إكمال أمر العمل. لم تُحفظ أي تغييرات. يرجى المحاولة مجدداً أو التواصل مع الدعم الفني.
 Could not complete the generation. Please try again.,تعذّر إتمام التوليد. يرجى المحاولة مجدداً.
+Could not confirm the handover. Please try again.,تعذّر تأكيد التسليم. حاول مرة أخرى.
 Could not create the payment. Please try again.,تعذّر إنشاء الدفعة. يُرجى المحاولة مرة أخرى.
+Could not create the target document. Please try again.,تعذّر إنشاء المستند المستهدف. حاول مرة أخرى.
 Could not generate a unique worker token. Please try again.,تعذّر إنشاء رمز عامل فريد. يرجى المحاولة مجدداً.
 Could not identify the worker.,تعذّر تحديد هوية العامل.
 Could not issue the cart. Please review and try again.,تعذّر صرف السلة. يرجى المراجعة والمحاولة مجدداً.
+Could not issue the worker link. Please try again.,تعذّر إصدار رابط العامل. حاول مرة أخرى.
 Could not load employee photo.,تعذّر تحميل صورة الموظف.
 Could not load fleet data. Please try again.,تعذّر تحميل بيانات الأسطول. حاول مرة أخرى.
 Could not load held custody.,تعذّر تحميل العهدة المحتفظ بها.
@@ -809,21 +814,28 @@ Could not load your work center. Please retry.,تعذّر تحميل مركز ع
 Could not load {0}.,تعذّر تحميل {0}.
 Could not log the inspection. Please try again.,تعذّر تسجيل التفتيش. يرجى المحاولة مجدداً.
 Could not mark the Work Order as Completed. Please try again.,تعذّر وسم أمر العمل كمكتمل. يرجى المحاولة مجدداً.
+Could not mark the transfer as received. Please try again.,تعذّر تحديد التحويل كمستلَم. حاول مرة أخرى.
 Could not open the camera. Use the scan box instead.,تعذّر فتح الكاميرا. استخدم خانة المسح بدلاً من ذلك.
 Could not post the reversal to the ledger. The cancellation was rejected.,تعذّر ترحيل القيد العكسي إلى الدفتر. تم رفض الإلغاء.
 Could not post the utility cost to the ledger. The bill was not submitted.,تعذّر ترحيل تكلفة المرافق إلى الدفتر. لم تُقدَّم الفاتورة.
 Could not read the passport — enter the details manually.,تعذّرت قراءة الجواز — أدخل التفاصيل يدوياً.
 Could not read the payment settings. Please try again.,تعذّر قراءة إعدادات الدفع. يرجى المحاولة مجدداً.
+Could not regenerate the OTP. Please try again.,تعذّر إعادة توليد رمز التحقق. حاول مرة أخرى.
 Could not regenerate the payment schedule. Please try again.,تعذّر إعادة توليد جدول الدفعات. يرجى المحاولة مجدداً.
+Could not reject the handover. Please try again.,تعذّر رفض التسليم. حاول مرة أخرى.
+Could not renew the license. Please try again.,تعذّر تجديد الترخيص. حاول مرة أخرى.
 Could not resolve the scan. Please try again.,تعذّر تحديد نتيجة المسح. يرجى المحاولة مرة أخرى.
 Could not return the cart. Please review and try again.,تعذّر إرجاع السلة. الرجاء المراجعة والمحاولة مرة أخرى.
 Could not save changes. Please try again or contact support.,تعذّر حفظ التغييرات. يرجى المحاولة مجدداً أو التواصل مع الدعم الفني.
 Could not send the link.,تعذّر إرسال الرابط.
 Could not submit the round. Please try again.,تعذّر اعتماد الجولة. حاول مرة أخرى.
+Could not triage the requests. Please try again.,تعذّر فرز الطلبات. حاول مرة أخرى.
 Could not update bed occupancy. The assignment was not submitted.,تعذّر تحديث إشغال السرير. لم يُقدَّم التسكين.
 Could not update the Service Order. Please try again.,تعذّر تحديث أمر الخدمة. يرجى المحاولة مجدداً.
 Could not update the Task Instance. Please try again.,تعذّر تحديث تنفيذ المهمة. يرجى المحاولة مجدداً.
 Could not update the Work Order. Please try again.,تعذّر تحديث أمر العمل. يرجى المحاولة مجدداً.
+Could not update the bed. Please try again.,تعذّر تحديث السرير. حاول مرة أخرى.
+Could not update the room. Please try again.,تعذّر تحديث الغرفة. حاول مرة أخرى.
 Could not verify the Expense Request Afmco DocType. Please try again.,تعذّر التحقق من نوع مستند طلب الصرف. يرجى المحاولة مجدداً.
 Couldn't load custody store — retry,تعذّر تحميل مستودع العهدة — أعد المحاولة
 Count,العدد

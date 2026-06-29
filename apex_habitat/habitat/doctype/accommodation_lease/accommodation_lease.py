@@ -54,12 +54,29 @@ def validate(doc, method=None):
                 _("An overlapping lease already exists for this building: {0}").format(conflict)
             )
 
-    if not doc.payment_schedule:
-        _build_schedule(doc)
+    _maybe_build_schedule(doc)
 
     doc.total_scheduled = sum(
         flt(row.amount) for row in (doc.payment_schedule or [])
     )
+
+
+# Fields whose change invalidates a previously-generated payment schedule.
+_SCHEDULE_DRIVER_FIELDS = ("rent_amount", "billing_cycle", "first_payment_date", "lease_end_date")
+
+
+def _maybe_build_schedule(doc):
+    """Build the payment schedule when none exists, or rebuild it on a still-draft
+    lease when a driving input (rent/cycle/dates) changed — otherwise editing those
+    fields would silently leave a stale schedule. A submitted lease is never
+    auto-rebuilt; use the regenerate_schedule action on a draft instead."""
+    if not doc.payment_schedule:
+        _build_schedule(doc)
+        return
+    if doc.docstatus == 0 and not doc.is_new() and any(
+        doc.has_value_changed(f) for f in _SCHEDULE_DRIVER_FIELDS
+    ):
+        _build_schedule(doc)
 
 
 def _build_schedule(doc):

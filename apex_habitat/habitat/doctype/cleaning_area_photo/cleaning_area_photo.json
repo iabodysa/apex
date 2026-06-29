@@ -9,6 +9,14 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "description": "Required-area cleaning evidence: a photo and checklist status per audited common area (Bathrooms, Kitchen, Corridors, and optional extras).",
+ "field_order": [
+  "area",
+  "status",
+  "photo",
+  "note",
+  "captured_at",
+  "captured_by"
+ ],
  "fields": [
   {
    "doctype": "DocField",

@@ -50,6 +50,15 @@ class DriverClearance(Document):
 		if self.status == "Cleared":
 			self._release_driver()
 
+	def on_cancel(self):
+		# Reverse the release so cancelling a clearance does not leave the driver
+		# stuck in Released. Only the status is restored (Released -> Active): the
+		# current_vehicle link is owned by Vehicle Assignment, so it is left for a
+		# fresh assignment to set, never re-stamped here. Guarded against a driver
+		# that has since moved on (only an still-Released driver is restored).
+		if self.status == "Cleared":
+			self._restore_driver()
+
 	# [#m88md8]
 
 	def _capture_assigned_vehicle(self):
@@ -133,4 +142,21 @@ class DriverClearance(Document):
 				_(self.clearance_reason) if self.clearance_reason else _("n/a"),
 				current_vehicle or _("none"),
 			),
+		)
+
+	def _restore_driver(self):
+		"""Reverse _release_driver on cancel: move a still-Released driver back to
+		Active. Row-locked; a no-op if the driver no longer exists or has already
+		moved off Released (e.g. a later assignment), so a fresh assignment is never
+		clobbered."""
+		if not self.driver or not frappe.db.exists("Salis Driver", self.driver):
+			return
+		lock_driver(self.driver)
+		if frappe.db.get_value("Salis Driver", self.driver, "status") != "Released":
+			return
+		frappe.db.set_value("Salis Driver", self.driver, "status", "Active")
+		add_timeline_note(
+			"Salis Driver",
+			self.driver,
+			_("Clearance {0} cancelled; driver restored to Active.").format(self.name),
 		)

@@ -27,6 +27,7 @@ frappe.ui.form.on("Accommodation Assignment", {
 	},
 
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		// [#dsopww]
 		if (!frm.is_new() && frm.doc.employee) {
 			frm.add_custom_button(__("Issue Masar Link"), () => {
@@ -36,10 +37,17 @@ frappe.ui.form.on("Accommodation Assignment", {
 					freeze: true,
 					freeze_message: __("Issuing worker link…"),
 					callback: (r) => {
-						if (r.message) {
-							// [#jt1dyc]
-							apex_habitat.masar.show_worker_link_dialog(r.message);
+						if (r.exc || !r.message) {
+							return;
 						}
+						// [#jt1dyc]
+						apex_habitat.masar.show_worker_link_dialog(r.message);
+					},
+					error: () => {
+						frappe.show_alert({
+							message: __("Could not issue the worker link. Please try again."),
+							indicator: "red",
+						});
 					},
 				});
 			});

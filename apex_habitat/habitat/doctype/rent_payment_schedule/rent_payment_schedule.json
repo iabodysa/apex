@@ -6,6 +6,11 @@
  "istable": 1,
  "engine": "InnoDB",
  "description": "One row per scheduled rent payment on an Accommodation Lease. Status tracks payment state; rent is paid externally (no GL).",
+ "field_order": [
+  "due_date",
+  "amount",
+  "status"
+ ],
  "fields": [
   {
    "doctype": "DocField",

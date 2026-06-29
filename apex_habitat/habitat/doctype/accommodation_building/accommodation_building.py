@@ -253,8 +253,29 @@ def _recompute_occupancy_and_structure(doc):
     )
 
 
+# Annual cost inputs that must never be negative — a negative would silently drive a
+# negative monthly_cost_per_capacity_sar through the rollup.
+_ANNUAL_COST_FIELDS = (
+    "annual_rent_sar",
+    "annual_electricity_sar",
+    "annual_water_sar",
+    "annual_cleaning_staff_sar",
+    "annual_supervision_sar",
+    "annual_other_expenses_sar",
+)
+
+
+def _guard_non_negative_costs(doc):
+    for field in _ANNUAL_COST_FIELDS:
+        if flt(doc.get(field)) < 0:
+            frappe.throw(
+                _("{0} cannot be negative.").format(_(doc.meta.get_label(field)))
+            )
+
+
 def before_save(doc, method=None):
     _guard_abbreviation_lock(doc)
+    _guard_non_negative_costs(doc)
     if not doc.company:
         from apex_habitat.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()

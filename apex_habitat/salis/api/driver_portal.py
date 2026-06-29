@@ -1485,6 +1485,16 @@ def _manifest_for_board(transport_request):
 		fields=["employee", "pickup_point"],
 		order_by="idx asc",
 	)
+	# Resolve every employee_name in ONE query instead of one get_value per row.
+	emp_ids = [r["employee"] for r in rows if r.get("employee")]
+	names = dict(
+		frappe.get_all(
+			"Employee",
+			filters={"name": ["in", emp_ids]},
+			fields=["name", "employee_name"],
+			as_list=True,
+		)
+	) if emp_ids else {}
 	out = []
 	for r in rows:
 		if not r.get("employee"):
@@ -1492,7 +1502,7 @@ def _manifest_for_board(transport_request):
 		out.append(
 			{
 				"employee": r["employee"],
-				"employee_name": frappe.db.get_value("Employee", r["employee"], "employee_name"),
+				"employee_name": names.get(r["employee"]),
 				"pickup_point": r.get("pickup_point"),
 				"boarded": False,
 			}

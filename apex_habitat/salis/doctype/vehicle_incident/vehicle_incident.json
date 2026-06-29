@@ -125,7 +125,6 @@
   {
    "fieldname": "estimated_cost",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Estimated Cost (SAR)"
   },
   {

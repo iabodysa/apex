@@ -7,6 +7,12 @@
  "istable": 1,
  "engine": "InnoDB",
  "description": "Child: one expected worker on a pre-arrival manifest.",
+ "field_order": [
+  "worker_name",
+  "passport_number",
+  "nationality",
+  "temporary_worker"
+ ],
  "fields": [
   {
    "doctype": "DocField",

@@ -3,6 +3,7 @@
 
 frappe.ui.form.on("Accommodation Material Transfer", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		if (frm.doc.docstatus === 1 && frm.doc.status === "In Transit") {
 			frm.add_custom_button(__("Mark Received"), () => {
 				frappe.prompt(
@@ -13,6 +14,12 @@ frappe.ui.form.on("Accommodation Material Transfer", {
 							args: { transfer: frm.doc.name, received_date: values.received_date },
 							freeze: true,
 							callback: () => frm.reload_doc(),
+							error: () => {
+								frappe.show_alert({
+									message: __("Could not mark the transfer as received. Please try again."),
+									indicator: "red",
+								});
+							},
 						});
 					},
 					__("Receive Transfer"),

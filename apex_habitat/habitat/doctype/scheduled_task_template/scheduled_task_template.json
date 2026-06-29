@@ -9,6 +9,21 @@
  "description": "Master: recurring task template that drives automatic Scheduled Task Instance generation.",
  "autoname": "field:template_name",
  "naming_rule": "By fieldname",
+ "field_order": [
+  "scheduled_task_template_tab_details",
+  "scheduled_task_template_sec_details",
+  "template_name",
+  "task_type",
+  "scheduled_task_template_details_col",
+  "frequency",
+  "assigned_to",
+  "is_active",
+  "scheduled_task_template_sec_items",
+  "template_items",
+  "scheduled_task_template_sec_large_text",
+  "safety_task_catalog",
+  "description"
+ ],
  "fields": [
   {
    "doctype": "DocField",

@@ -2,7 +2,7 @@
 # [#j03s5a]
 
 import frappe
-from frappe.utils import getdate, today
+from frappe.utils import date_diff, today
 
 
 def execute(filters=None):
@@ -93,13 +93,13 @@ def execute(filters=None):
             if dr.employee not in damage_map:
                 damage_map[dr.employee] = dr.name
 
-    today_date = getdate(today())
+    today_str = today()
     data = []
     for co in checkouts:
         building = bed_building_map.get(co.bed, "") if co.bed else ""
         open_issues = issue_count_map.get(co.employee, 0) if co.employee else 0
         damage = damage_map.get(co.employee, "") if co.employee else ""
-        days_since = (today_date - getdate(co.checkout_date)).days if co.checkout_date else 0
+        days_since = date_diff(today_str, co.checkout_date) if co.checkout_date else 0
 
         # [#nlghie]
         if not co.custody_cleared or open_issues or damage:

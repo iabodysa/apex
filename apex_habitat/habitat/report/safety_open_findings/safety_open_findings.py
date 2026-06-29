@@ -2,7 +2,7 @@
 # [#j03s5a]
 
 import frappe
-from frappe.utils import getdate, today
+from frappe.utils import date_diff, today
 
 from apex_habitat.habitat import permissions
 
@@ -53,7 +53,7 @@ def execute(filters=None):
 
     data = []
     for row in rows:
-        days_open = (getdate(today()) - getdate(row.execution_date)).days if row.execution_date else 0
+        days_open = date_diff(today(), row.execution_date) if row.execution_date else 0
         data.append({
             "name": row.name,
             "execution_date": row.execution_date,

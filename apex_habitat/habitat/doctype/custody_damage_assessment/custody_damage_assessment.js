@@ -17,6 +17,9 @@ frappe.ui.form.on("Custody Damage Assessment", {
 		frm.call("apex_habitat.habitat.doctype.custody_damage_assessment.custody_damage_assessment.get_deduction_status", {
 			assessment: frm.doc.name,
 		}).then((r) => {
+			if (r.exc) {
+				return;
+			}
 			const result = r.message;
 			if (!result) {
 				return;

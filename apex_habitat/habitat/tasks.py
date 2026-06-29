@@ -1431,16 +1431,15 @@ def daily_scheduled_task_instance_generator() -> None:
                 filters={"parent": assignment.template, "is_active": 1},
                 fields=["task_catalog", "frequency_override", "title"],
             )
+            # Template default frequency depends only on the template, so resolve it
+            # once per assignment instead of per item (avoids the inner-loop N+1).
+            template_frequency = (
+                frappe.db.get_value("Scheduled Task Template", assignment.template, "frequency")
+                or "Monthly"
+            )
             for item in items:
                 # Resolve effective frequency: item override → template default.
-                frequency = item.frequency_override
-                if not frequency:
-                    frequency = (
-                        frappe.db.get_value(
-                            "Scheduled Task Template", assignment.template, "frequency"
-                        )
-                        or "Monthly"
-                    )
+                frequency = item.frequency_override or template_frequency
 
                 due_date = _period_key(frequency)
 

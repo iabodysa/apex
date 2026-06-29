@@ -10,6 +10,23 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "description": "Unified child table for inspection findings used by Safety Inspection Report and Maintenance Inspection Report.",
+ "field_order": [
+  "inspection_finding_item_sec_finding",
+  "finding_category",
+  "severity",
+  "issue_type",
+  "inspection_finding_item_finding_col",
+  "description",
+  "inspection_finding_item_sec_resolution",
+  "room",
+  "priority",
+  "status",
+  "assigned_to",
+  "due_date",
+  "inspection_finding_item_resolution_col",
+  "resolution_notes",
+  "generated_maintenance_request"
+ ],
  "fields": [
   {
    "doctype": "DocField",

@@ -12,6 +12,16 @@
  "sort_field": "template_name",
  "sort_order": "ASC",
  "description": "Pre-defined material sets per issue type. Load into Maintenance Request or Work Order procurement items.",
+ "field_order": [
+  "maintenance_material_template_sec_details",
+  "template_name",
+  "issue_type",
+  "is_active",
+  "maintenance_material_template_sec_items",
+  "items",
+  "maintenance_material_template_sec_notes",
+  "notes"
+ ],
  "fields": [
   {
    "doctype": "DocField",

@@ -2,6 +2,7 @@
 // [#go2egg]
 frappe.ui.form.on("Salis Payment Request", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		const finance_approved =
 			!!frm.doc.finance_approved_by ||
 			["Approved by Finance", "Paid"].includes(frm.doc.status);

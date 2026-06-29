@@ -74,7 +74,6 @@
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
-   "in_list_view": 1,
    "label": "Resident",
    "options": "party_type",
    "search_index": 1
@@ -86,7 +85,6 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Employee",
    "options": "Employee",
    "read_only": 1,
@@ -142,7 +140,6 @@
   {
    "fieldname": "bed",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Bed",
    "options": "Accommodation Bed",
    "reqd": 1,

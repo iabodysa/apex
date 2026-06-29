@@ -2,6 +2,7 @@
 // [#n8kglt]
 frappe.ui.form.on("Accommodation Checkout", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		// [#g123bl]
 		const departure = ["Final Exit", "End of Contract"];
 		if (
@@ -17,13 +18,14 @@ frappe.ui.form.on("Accommodation Checkout", {
 					freeze: true,
 					freeze_message: __("Raising departure transport…"),
 					callback: (r) => {
-						if (r.message) {
-							frappe.show_alert({
-								message: __("Departure Transport Request {0} raised.", [r.message]),
-								indicator: "green",
-							});
-							frm.reload_doc();
+						if (r.exc || !r.message) {
+							return;
 						}
+						frappe.show_alert({
+							message: __("Departure Transport Request {0} raised.", [r.message]),
+							indicator: "green",
+						});
+						frm.reload_doc();
 					},
 				});
 			});

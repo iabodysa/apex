@@ -59,7 +59,6 @@
   {
    "fieldname": "utility_account",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Utility Account",
    "options": "Utility Account",
@@ -91,7 +90,6 @@
   {
    "fieldname": "billing_period_from",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Billing Period From",
    "reqd": 1
   },

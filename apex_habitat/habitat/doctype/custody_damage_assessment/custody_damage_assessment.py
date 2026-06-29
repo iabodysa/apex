@@ -136,10 +136,17 @@ def on_submit(doc, method=None):
 
 
 def before_cancel(doc, method=None):
+    # Only a SUBMITTED (docstatus=1) deduction is a live payroll posting that must
+    # block the cancel. A Draft (0) or already-Cancelled (2) Additional Salary is
+    # not yet/no longer effective, so it must not permanently lock the assessment.
     if doc.deduction_entry:
-        frappe.throw(
-            _("Cannot cancel Custody Damage Assessment {0} because Additional Salary Deduction Entry {1} is already linked.").format(
-                doc.name, doc.deduction_entry
-            )
+        deduction_docstatus = frappe.db.get_value(
+            "Additional Salary", doc.deduction_entry, "docstatus"
         )
+        if deduction_docstatus == 1:
+            frappe.throw(
+                _("Cannot cancel Custody Damage Assessment {0} because Additional Salary Deduction Entry {1} is submitted.").format(
+                    doc.name, doc.deduction_entry
+                )
+            )
 

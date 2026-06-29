@@ -98,7 +98,6 @@
    "default": "Today",
    "fieldname": "arrival_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Arrival Date",
    "reqd": 1
   },

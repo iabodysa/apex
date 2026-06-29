@@ -17,7 +17,7 @@ import json
 import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
-from frappe.utils import cint, get_datetime, now_datetime
+from frappe.utils import cint, get_datetime, now_datetime, time_diff_in_seconds
 from frappe.utils.password import get_encryption_key
 
 from apex_habitat.salis.utils import get_driver_for_user
@@ -238,7 +238,12 @@ def get_boarding_pass(dispatch_trip, worker):
     }
 
 
+# Per-IP throttle: a forged/invalid token is logged BEFORE _resolve_trip's own-trip
+# gate runs, so without this any authenticated user could flood Boarding Scan Log
+# with garbage-token rows. The cap bounds that write-amplification vector while
+# leaving a real driver ample headroom to scan a busload.
 @frappe.whitelist(methods=["POST"])
+@rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
 def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
     """Validate a scanned QR boarding pass and log the boarding (write).
 
@@ -267,7 +272,7 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
 
     # [#bsl-expiry]
     issued = get_datetime(payload.get("iat"))
-    age_hours = (now_datetime() - issued).total_seconds() / 3600.0 if issued else None
+    age_hours = time_diff_in_seconds(now_datetime(), issued) / 3600.0 if issued else None
     if age_hours is None or age_hours > PASS_TTL_HOURS:
         log_name = _log_scan(
             dispatch_trip, trip, worker, "Expired", pass_token,

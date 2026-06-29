@@ -22,7 +22,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.desk.form import assign_to
-from frappe.utils import add_to_date, get_datetime, now_datetime
+from frappe.utils import add_to_date, get_datetime, now_datetime, time_diff_in_seconds
 
 from apex_habitat.salis.api.dispatch_board import _permitted_projects
 from apex_habitat.salis.api.enrich import vehicle_driver_titles
@@ -402,7 +402,7 @@ def get_alert_median_resolve_days(filters=None):
         limit_page_length=0,
     )
     spans = [
-        (r.resolved_on - r.raised_on).total_seconds() / 86400.0
+        time_diff_in_seconds(r.resolved_on, r.raised_on) / 86400.0
         for r in rows
         if r.resolved_on and r.raised_on
     ]

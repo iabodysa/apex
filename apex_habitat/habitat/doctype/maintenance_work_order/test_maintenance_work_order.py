@@ -1,6 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import flt
 
 # [#8evoal]
 test_ignore = [
@@ -170,8 +171,20 @@ class TestMaintenanceWorkOrderCancel(FrappeTestCase):
             wo.cancellation_reason = "Duplicate work order"
             wo.cancel()
 
-            self.assertEqual(self._ledger_rows(wo.name), [],
-                             "cancel must delete the orphan ledger memo")
+            # The Accommodation Ledger memo is immutable like the cost ledger
+            # (mirrors the Utility Bill Entry cancel idiom): the original survives
+            # and a negative mirror row nets the period sum to zero, never deleted.
+            memo_rows = frappe.get_all(
+                "Accommodation Ledger",
+                filters={"source_doctype": "Maintenance Work Order", "source_name": wo.name},
+                fields=["name", "total_site_cost", "reversal_of"],
+            )
+            self.assertEqual(len(memo_rows), 2,
+                             "cancel must add a reversal memo, not delete the original")
+            self.assertTrue(any(r["reversal_of"] for r in memo_rows),
+                            "a reversal_of mirror memo must exist after cancel")
+            self.assertEqual(sum(flt(r["total_site_cost"]) for r in memo_rows), 0,
+                             "the reversed accommodation memo must net to zero")
             # The immutable cost ledger is reversed (negative mirror), never deleted:
             # the original survives and a reversal_of row nets the total to zero.
             rows = self._cost_ledger_rows(wo.name)

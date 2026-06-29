@@ -9,6 +9,17 @@
   "description": "Master: useful life and write-down schedule for custody article categories. Operational only, no GL.",
   "autoname": "field:policy_name",
   "naming_rule": "By fieldname",
+  "field_order": [
+   "operational_depreciation_policy_tab_details",
+   "operational_depreciation_policy_sec_details",
+   "policy_name",
+   "useful_life_years",
+   "operational_depreciation_policy_details_col",
+   "depreciation_method",
+   "residual_value_pct",
+   "operational_depreciation_policy_sec_large_text",
+   "notes"
+  ],
   "fields": [
     {
       "doctype": "DocField",

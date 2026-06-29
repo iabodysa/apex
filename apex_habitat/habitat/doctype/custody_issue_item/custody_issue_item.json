@@ -7,6 +7,13 @@
  "istable": 1,
  "engine": "InnoDB",
  "description": "Child: one article line on a Custody Issue.",
+ "field_order": [
+  "article",
+  "article_name",
+  "qty",
+  "serial_no",
+  "condition_on_issue"
+ ],
  "fields": [
   {
    "doctype": "DocField",

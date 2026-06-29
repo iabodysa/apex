@@ -37,8 +37,10 @@ class EmployeeDeductionAcknowledgment(Document):
             self.approved_on = None
             self.approved_by = None
 
-    def on_submit(self):
-        # [#1nlve5]
+    def before_submit(self):
+        # [#1nlve5] Consent must gate the submit itself: before_submit runs while the
+        # doc is still docstatus 0, so the throw blocks the transition (on_submit fires
+        # only after docstatus=1 is written).
         from frappe import _, throw
 
         if not self.consent_given:

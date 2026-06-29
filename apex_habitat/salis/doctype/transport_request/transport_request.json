@@ -203,7 +203,6 @@
   {
    "fieldname": "from_location",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "From Location"
   },
   {

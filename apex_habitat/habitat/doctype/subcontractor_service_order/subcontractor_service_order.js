@@ -2,6 +2,7 @@
 // [#jb13ri]
 frappe.ui.form.on("Subcontractor Service Order", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		if (frm.doc.docstatus === 1) {
 			if (frm.doc.status === "Scheduled") {
 				frm.add_custom_button(__("Start Work"), function () {

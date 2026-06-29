@@ -2,6 +2,7 @@
 // [#f6nxz3]
 frappe.ui.form.on("Scheduled Task Instance", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		if (frm.doc.docstatus === 1 && frm.doc.status === "Open") {
 			frm.add_custom_button(__("Start Task"), function () {
 				frappe.confirm(

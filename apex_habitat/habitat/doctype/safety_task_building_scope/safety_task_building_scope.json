@@ -5,6 +5,9 @@
  "custom": 0,
  "istable": 1,
  "engine": "InnoDB",
+ "field_order": [
+  "building"
+ ],
  "fields": [
   {
    "doctype": "DocField",

@@ -4,6 +4,7 @@ const FUEL_HIGH_LITRES_THRESHOLD = 200;
 
 frappe.ui.form.on("Fuel Request", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		_update_fuel_indicator(frm);
 
 		if (frm.doc.status === "Pending") {

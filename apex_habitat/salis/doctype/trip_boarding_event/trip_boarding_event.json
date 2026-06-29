@@ -99,7 +99,6 @@
    "description": "How the boarding was captured: QR (driver scan), Manual (driver entry), or Worker (worker self-confirm via the Masar portal).",
    "fieldname": "method",
    "fieldtype": "Select",
-   "in_list_view": 1,
    "label": "Method",
    "options": "QR\nManual\nWorker"
   }
@@ -114,6 +113,5 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
- "track_changes": 1
+ "states": []
 }

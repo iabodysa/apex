@@ -2,6 +2,7 @@
 // [#947sr9]
 frappe.ui.form.on("Salis Vehicle", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		_update_vehicle_indicator(frm);
 
 		if (!frm.is_new() && frm.doc.current_driver) {

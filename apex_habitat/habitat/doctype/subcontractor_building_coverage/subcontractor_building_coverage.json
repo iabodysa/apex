@@ -5,6 +5,10 @@
  "custom": 0,
  "istable": 1,
  "engine": "InnoDB",
+ "field_order": [
+  "building",
+  "specific_rate_sar"
+ ],
  "fields": [
   {
    "doctype": "DocField",

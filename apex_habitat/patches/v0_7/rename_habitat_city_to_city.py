@@ -15,10 +15,15 @@ def execute():
         # [#1vr3sz]
         return
 
+    # Guard the rename target: if "City" already exists (a prior partial run, or a
+    # parallel slice created it), renaming onto it would collide. The source DocType
+    # is left in place for manual reconciliation rather than force-merged blindly.
+    if frappe.db.exists("DocType", "City"):
+        return
+
     frappe.rename_doc(
         "DocType",
         "Habitat City",
         "City",
         force=True,
     )
-    frappe.db.commit()

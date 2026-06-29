@@ -13,7 +13,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex_habitat.salis.utils import drive_transport_request
+from apex_habitat.salis.utils import drive_transport_request, revert_transport_request
 
 
 class RoutePlan(Document):
@@ -29,6 +29,20 @@ class RoutePlan(Document):
         # is never written back; db_set persists the fulfilling Movement planner.
         self.db_set("fulfilled_by_movement", frappe.session.user)
         self._mark_request_scheduled()
+
+    def on_cancel(self):
+        # Reverse _mark_request_scheduled so a cancelled plan does not leave the
+        # Transport Request stuck in Scheduled with a stale route_plan pointer.
+        # Scheduled was driven from Approved (both docstatus 1); a forward-only
+        # Workflow cannot transition back, so use the guarded reversal helper.
+        if not self.transport_request:
+            return
+        revert_transport_request(
+            self.transport_request,
+            from_state="Scheduled",
+            to_state="Approved",
+            clear_fields=["route_plan"],
+        )
 
     def _default_operations_requester(self):
         """Carry the Operations requester from the linked Transport Request

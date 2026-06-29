@@ -63,7 +63,6 @@
   },
   {
    "description": "Read-only Employee mirror of an Employee party (compatibility with payroll / Additional Salary, which is keyed on Employee).",
-   "fetch_if_empty": 1,
    "fieldname": "employee",
    "fieldtype": "Link",
    "label": "Employee",

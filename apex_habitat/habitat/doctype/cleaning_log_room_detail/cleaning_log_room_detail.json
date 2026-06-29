@@ -5,6 +5,13 @@
  "custom": 0,
  "istable": 1,
  "engine": "InnoDB",
+ "field_order": [
+  "room",
+  "room_status",
+  "skip_reason",
+  "cleaned",
+  "notes"
+ ],
  "fields": [
   {
    "doctype": "DocField",

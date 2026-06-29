@@ -2,6 +2,7 @@
 // [#l41jo9]
 frappe.ui.form.on("Maintenance Work Order", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		// [#j6atlg]
 		if (frm.doc.docstatus === 0 && frm.doc.issue_type) {
 			frm.add_custom_button(__("Load Material Template"), function() {
@@ -13,13 +14,14 @@ frappe.ui.form.on("Maintenance Work Order", {
 						issue_type: frm.doc.issue_type,
 					},
 					callback: function(r) {
-						if (r.message) {
-							frm.reload_doc();
-							let msg = r.message.rows_added
-								? __("{0} material(s) loaded from template {1}", [r.message.rows_added, r.message.template])
-								: __("No active template found for issue type: {0}", [frm.doc.issue_type]);
-							frappe.show_alert({message: msg, indicator: r.message.rows_added ? "green" : "orange"});
+						if (r.exc || !r.message) {
+							return;
 						}
+						frm.reload_doc();
+						let msg = r.message.rows_added
+							? __("{0} material(s) loaded from template {1}", [r.message.rows_added, r.message.template])
+							: __("No active template found for issue type: {0}", [frm.doc.issue_type]);
+						frappe.show_alert({message: msg, indicator: r.message.rows_added ? "green" : "orange"});
 					},
 					error: function() {
 						frappe.show_alert({message: __("Could not load the material template. Please try again."), indicator: "red"});

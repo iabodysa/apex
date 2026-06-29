@@ -5,6 +5,22 @@
  "custom": 0,
  "istable": 1,
  "engine": "InnoDB",
+ "field_order": [
+  "audit_remediation_item_sec_finding",
+  "finding_description",
+  "remediation_action",
+  "audit_remediation_item_sec_ownership",
+  "owner_role",
+  "audit_remediation_item_ownership_col",
+  "owner_user",
+  "audit_remediation_item_sec_schedule",
+  "due_date",
+  "status",
+  "audit_remediation_item_schedule_col",
+  "completion_date",
+  "audit_remediation_item_sec_evidence",
+  "evidence_attached"
+ ],
  "fields": [
   {
    "doctype": "DocField",

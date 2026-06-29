@@ -84,5 +84,6 @@ def renew(name: str, new_expiry_date: str | None = None, extend_days: int | None
     doc.last_renewal_date = today()
     doc.status = "Active"
     doc.save()
-    frappe.db.commit()
+    # No explicit commit: the request transaction commits on a successful response,
+    # so an early commit here would defeat rollback if a later step in the request fails.
     return {"name": doc.name, "expiry_date": str(new_expiry), "last_renewal_date": doc.last_renewal_date}

@@ -6,6 +6,12 @@
  "istable": 1,
  "engine": "InnoDB",
  "track_changes": 0,
+ "field_order": [
+  "material",
+  "quantity",
+  "unit",
+  "notes"
+ ],
  "fields": [
   {
    "doctype": "DocField",

@@ -11,6 +11,26 @@
  "naming_rule": "By \"Naming Series\" field",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "field_order": [
+  "room_bed_transfer_tab_overview",
+  "room_bed_transfer_sec_overview",
+  "assignment",
+  "to_room",
+  "to_bed",
+  "room_bed_transfer_overview_col",
+  "transfer_date",
+  "naming_series",
+  "room_bed_transfer_sec_large_text",
+  "reason",
+  "room_bed_transfer_tab_system",
+  "room_bed_transfer_sec_system",
+  "party_type",
+  "party",
+  "employee",
+  "from_bed",
+  "room_bed_transfer_system_col",
+  "amended_from"
+ ],
  "fields": [
   {
    "doctype": "DocField",

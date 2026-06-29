@@ -39,7 +39,6 @@
   {
    "fieldname": "cleaning_log",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Cleaning Log",
    "options": "Cleaning Log",
    "read_only": 1,

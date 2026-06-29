@@ -1,6 +1,7 @@
 // Copyright (c) 2026, AFMCO and contributors
 frappe.ui.form.on("Vehicle Handover", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		// Only show active templates in the picker.
 		frm.set_query("checklist_template", function () {
 			return { filters: { is_active: 1 } };
@@ -15,16 +16,17 @@ frappe.ui.form.on("Vehicle Handover", {
 					freeze: true,
 					freeze_message: __("Loading checklist..."),
 					callback: function (r) {
-						if (r.message) {
-							frm.reload_doc();
-							frappe.show_alert({
-								message: __("{0} check item(s) loaded from template {1}", [
-									r.message.rows_added,
-									r.message.template,
-								]),
-								indicator: r.message.rows_added ? "green" : "orange",
-							});
+						if (r.exc || !r.message) {
+							return;
 						}
+						frm.reload_doc();
+						frappe.show_alert({
+							message: __("{0} check item(s) loaded from template {1}", [
+								r.message.rows_added,
+								r.message.template,
+							]),
+							indicator: r.message.rows_added ? "green" : "orange",
+						});
 					},
 					error: function () {
 						frappe.show_alert({

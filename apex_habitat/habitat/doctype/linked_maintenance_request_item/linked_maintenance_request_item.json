@@ -8,6 +8,12 @@
  "editable_grid": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "field_order": [
+  "maintenance_request",
+  "room",
+  "issue_type",
+  "status"
+ ],
  "fields": [
   {
    "doctype": "DocField",

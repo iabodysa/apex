@@ -110,7 +110,6 @@
   {
    "fieldname": "service_cost_sar",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Service Cost (SAR)",
    "permlevel": 1
   },

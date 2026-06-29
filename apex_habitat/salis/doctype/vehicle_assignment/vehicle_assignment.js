@@ -2,6 +2,7 @@
 // [#53o1xx]
 frappe.ui.form.on("Vehicle Assignment", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		_update_assignment_indicator(frm);
 
 		if (!frm.is_new() && frm.doc.vehicle) {

@@ -5,6 +5,22 @@
  "custom": 0,
  "istable": 1,
  "engine": "InnoDB",
+ "field_order": [
+  "floor_plan_sec_layout",
+  "floor_number",
+  "room_count",
+  "floor_type",
+  "floor_plan_layout_col",
+  "room_type",
+  "bed_capacity_per_room",
+  "generate_beds",
+  "floor_plan_sec_numbering",
+  "room_prefix",
+  "floor_plan_numbering_col",
+  "starting_room_number",
+  "floor_plan_sec_notes",
+  "notes"
+ ],
  "fields": [
   {
    "doctype": "DocField",

@@ -260,12 +260,29 @@ def on_submit(doc, method=None):
                 )
 
 
+def _cancel_orphan_damage_assessment(doc):
+    """Reverse the on_submit side-effect: the auto-created Custody Damage Assessment
+    (linked back via source_checkout) is orphaned when the checkout is cancelled.
+    Cancel a still-draft assessment so it does not linger. A submitted assessment is
+    left for the manager to handle (it may carry a posted deduction); the CDA's own
+    before_cancel still guards a live payroll posting."""
+    for cda in frappe.get_all(
+        "Custody Damage Assessment",
+        filters={"source_checkout": doc.name, "docstatus": 0},
+        pluck="name",
+    ):
+        # audit-ok — reversing a draft side-effect this checkout created
+        frappe.delete_doc("Custody Damage Assessment", cda, ignore_permissions=True)  # audit-ok
+
+
 def before_cancel(doc, method=None):
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
 
 
 def on_cancel(doc, method=None):
+    _cancel_orphan_damage_assessment(doc)
+
     assignment = frappe.get_doc("Accommodation Assignment", doc.assignment)
 
     later_checkout = frappe.db.get_value(

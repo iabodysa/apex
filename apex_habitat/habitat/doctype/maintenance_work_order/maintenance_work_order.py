@@ -21,12 +21,11 @@ class MaintenanceWorkOrder(Document):
         source_doctype/source_name) and release the linked request back to Open.
         Open is the request's pre-Work-Order state; a request a human has since
         moved to a terminal Resolved/Cancelled is left untouched."""
-        for row in frappe.get_all(
-            "Accommodation Ledger",
-            filters={"source_doctype": "Maintenance Work Order", "source_name": self.name},
-            pluck="name",
-        ):
-            frappe.delete_doc("Accommodation Ledger", row, ignore_permissions=True, force=True)  # audit-ok — reversing a system memo this Work Order posted
+        # Accommodation Ledger is immutable like the per-item cost ledger: net out
+        # the completion memo with a negative mirror row (reversal_of), never a
+        # hard delete, so period-sum reports stay reconcilable. Mirrors the
+        # Utility Bill Entry before_cancel reversal idiom.
+        self._reverse_accommodation_memo()
 
         # Per-item cost ledger is immutable: reverse (negative mirror row), never delete.
         from apex_habitat.habitat.maintenance_engine import reverse_maintenance_cost
@@ -41,6 +40,40 @@ class MaintenanceWorkOrder(Document):
             frappe.db.set_value(
                 "Maintenance Request", self.maintenance_request, "status", "Open"
             )
+
+    def _reverse_accommodation_memo(self):
+        """Post a negative mirror for the live completion memo this Work Order
+        posted. Idempotent: skips if the original was already reversed."""
+        from frappe.utils import today
+
+        original = frappe.db.get_value(
+            "Accommodation Ledger",
+            {
+                "source_doctype": "Maintenance Work Order",
+                "source_name": self.name,
+                "reversal_of": ["is", "not set"],
+            },
+            ["name", "building", "ledger_type", "total_site_cost", "capacity_denominator"],
+            as_dict=True,
+        )
+        if not original:
+            return
+        if frappe.db.exists("Accommodation Ledger", {"reversal_of": original.name}):
+            return
+        frappe.get_doc({
+            "doctype": "Accommodation Ledger",
+            "posting_date": today(),
+            "building": original.building,
+            "ledger_type": original.ledger_type,
+            "total_site_cost": -flt(original.total_site_cost),
+            "capacity_denominator": original.capacity_denominator or 0,
+            "employee_daily_share": 0,
+            "posting_mode": "Operational Memo",
+            "source_doctype": "Maintenance Work Order",
+            "source_name": self.name,
+            "allocation_basis": "Direct",
+            "reversal_of": original.name,
+        }).insert(ignore_permissions=True)  # audit-ok — system ledger reversal this Work Order posted
 
 
 def validate(doc, method=None):

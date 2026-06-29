@@ -2,7 +2,7 @@
 # [#j03s5a]
 
 import frappe
-from frappe.utils import getdate, today, add_days
+from frappe.utils import add_days, date_diff, getdate, today
 
 from apex_habitat.habitat import permissions
 
@@ -79,7 +79,7 @@ def execute(filters=None):
         order_by="cleaning_date desc",
     )
 
-    today_date = getdate(today())
+    today_str = today()
 
     # [#4f0bon]
     all_logs = list(missed) + list(rework)
@@ -97,7 +97,7 @@ def execute(filters=None):
         cleaner_label = log.cleaned_by or ""
         if log.cleaner_employee:
             cleaner_label = employee_name_map.get(log.cleaner_employee) or log.cleaner_employee
-        days = (today_date - getdate(log.cleaning_date)).days if log.cleaning_date else 0
+        days = date_diff(today_str, log.cleaning_date) if log.cleaning_date else 0
         return {
             "name": log.name,
             "cleaning_date": log.cleaning_date,

@@ -7,6 +7,13 @@
  "istable": 1,
  "engine": "InnoDB",
  "description": "Child: one asset line in a Non-Financial Depreciation Snapshot.",
+ "field_order": [
+  "article",
+  "original_cost_sar",
+  "age_years",
+  "book_value_sar",
+  "policy"
+ ],
  "fields": [
   {
    "doctype": "DocField",

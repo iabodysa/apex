@@ -2,6 +2,7 @@
 // [#lhs0n9]
 frappe.ui.form.on("Accommodation Resident Request", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		_update_priority_indicator(frm);
 
 		// [#csgsrv]
@@ -23,17 +24,24 @@ frappe.ui.form.on("Accommodation Resident Request", {
 					freeze: true,
 					freeze_message: __("Creating target document..."),
 					callback: function (r) {
-						if (r.message) {
-							frappe.show_alert({
-								message: __("Created {0} {1}", [
-									__(r.message.target_doctype),
-									r.message.target_document,
-								]),
-								indicator: "green",
-							});
-							frm.reload_doc();
-							frappe.set_route("Form", r.message.target_doctype, r.message.target_document);
+						if (r.exc || !r.message) {
+							return;
 						}
+						frappe.show_alert({
+							message: __("Created {0} {1}", [
+								__(r.message.target_doctype),
+								r.message.target_document,
+							]),
+							indicator: "green",
+						});
+						frm.reload_doc();
+						frappe.set_route("Form", r.message.target_doctype, r.message.target_document);
+					},
+					error: function () {
+						frappe.show_alert({
+							message: __("Could not create the target document. Please try again."),
+							indicator: "red",
+						});
 					},
 				});
 			});
@@ -123,13 +131,20 @@ frappe.listview_settings["Accommodation Resident Request"] = {
 				args: { name: doc.name, to_status: to_status },
 				freeze: true,
 				callback(r) {
-					if (r.message && r.message.changed) {
-						frappe.show_alert({
-							message: __("{0} moved to {1}", [doc.name, __(r.message.status)]),
-							indicator: "green",
-						});
-						cur_list && cur_list.refresh();
+					if (r.exc || !r.message || !r.message.changed) {
+						return;
 					}
+					frappe.show_alert({
+						message: __("{0} moved to {1}", [doc.name, __(r.message.status)]),
+						indicator: "green",
+					});
+					cur_list && cur_list.refresh();
+				},
+				error() {
+					frappe.show_alert({
+						message: __("Could not advance the request. Please try again."),
+						indicator: "red",
+					});
 				},
 			});
 		},
@@ -150,14 +165,21 @@ frappe.listview_settings["Accommodation Resident Request"] = {
 					freeze: true,
 					freeze_message: __("Triaging requests..."),
 					callback(r) {
-						if (r.message) {
-							frappe.show_alert({
-								message: __("{0} of {1} marked Triaged", [r.message.advanced, r.message.total]),
-								indicator: "green",
-							});
-							listview.clear_checked_items();
-							listview.refresh();
+						if (r.exc || !r.message) {
+							return;
 						}
+						frappe.show_alert({
+							message: __("{0} of {1} marked Triaged", [r.message.advanced, r.message.total]),
+							indicator: "green",
+						});
+						listview.clear_checked_items();
+						listview.refresh();
+					},
+					error() {
+						frappe.show_alert({
+							message: __("Could not triage the requests. Please try again."),
+							indicator: "red",
+						});
 					},
 				});
 			},

@@ -59,7 +59,6 @@
   {
    "fieldname": "start_time",
    "fieldtype": "Time",
-   "in_list_view": 1,
    "label": "Start Time",
    "reqd": 1
   },

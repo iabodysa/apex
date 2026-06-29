@@ -179,7 +179,6 @@
    "depends_on": "eval:doc.request_type=='Standard'",
    "fieldname": "requested_litres",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Requested Litres"
   },
   {
@@ -248,7 +247,6 @@
    "depends_on": "eval:doc.request_type=='Chip'",
    "fieldname": "chip_number",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Chip Number"
   },
   {

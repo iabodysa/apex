@@ -2,6 +2,7 @@
 // [#ka8ulk]
 frappe.ui.form.on("Custody Return", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		// [#g123bl]
 		const has_damage = (frm.doc.items || []).some(
 			(row) => ["Damaged", "Lost"].includes(row.condition_on_return)

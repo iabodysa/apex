@@ -2,6 +2,7 @@
 // [#o4a9j5]
 frappe.ui.form.on("Masar Worker Token", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		if (frm.is_new()) {
 			return;
 		}
@@ -32,12 +33,18 @@ function _show_link(frm, regenerate) {
 		freeze: true,
 		freeze_message: __("Issuing worker link…"),
 		callback: (r) => {
-			if (!r.message) {
+			if (r.exc || !r.message) {
 				return;
 			}
 			frm.reload_doc();
 			// [#f43ja4]
 			apex_habitat.masar.show_worker_link_dialog(r.message);
+		},
+		error: () => {
+			frappe.show_alert({
+				message: __("Could not issue the worker link. Please try again."),
+				indicator: "red",
+			});
 		},
 	});
 }

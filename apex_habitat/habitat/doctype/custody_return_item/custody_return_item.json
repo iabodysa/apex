@@ -7,6 +7,12 @@
  "istable": 1,
  "engine": "InnoDB",
  "description": "Child: one article line on a Custody Return.",
+ "field_order": [
+  "article",
+  "qty",
+  "condition_on_return",
+  "serial_no"
+ ],
  "fields": [
   {
    "doctype": "DocField",

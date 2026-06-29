@@ -60,7 +60,6 @@
   {
    "fieldname": "building",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Building",
    "options": "Accommodation Building",
@@ -91,7 +90,6 @@
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
-   "in_list_view": 1,
    "label": "Worker",
    "options": "party_type",
    "search_index": 1

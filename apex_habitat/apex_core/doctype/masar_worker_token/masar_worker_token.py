@@ -139,9 +139,20 @@ def batch_issue_worker_links(employees_json) -> list:
                 "employee_name": doc.employee_name,
                 "link": link,
                 "qr": masar_qr_data_uri(link),
-                "phone": frappe.db.get_value("Employee", doc.employee, "cell_number"),
             }
         )
+    # Resolve every cell_number in ONE query, then fill — not one get_value per row.
+    emp_ids = [r["employee"] for r in out if r.get("employee")]
+    phones = dict(
+        frappe.get_all(
+            "Employee",
+            filters={"name": ["in", emp_ids]},
+            fields=["name", "cell_number"],
+            as_list=True,
+        )
+    ) if emp_ids else {}
+    for r in out:
+        r["phone"] = phones.get(r["employee"])
     return out
 
 

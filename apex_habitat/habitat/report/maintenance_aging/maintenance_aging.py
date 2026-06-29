@@ -2,7 +2,7 @@
 # [#j03s5a]
 
 import frappe
-from frappe.utils import getdate, today
+from frappe.utils import date_diff, today
 
 from apex_habitat.habitat.permissions import report_maintenance_request_scope
 
@@ -57,10 +57,9 @@ def execute(filters=None):
     )
 
     data = []
-    today_date = getdate(today())
+    today_str = today()
     for row in rows:
-        created = getdate(row.creation) if row.creation else today_date
-        age_days = (today_date - created).days
+        age_days = date_diff(today_str, row.creation) if row.creation else 0
         sla = _SLA_DAYS.get(row.priority or "Low", 14)
         breached = 1 if age_days > sla else 0
         data.append({

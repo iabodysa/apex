@@ -37,6 +37,26 @@ def start_work(service_order):
 
 
 @frappe.whitelist(methods=["POST"])
+def mark_completed(service_order):
+    """Transition Subcontractor Service Order from In Progress to Completed.
+
+    Controlled completion gate mirroring start_work / mark_missed: only a submitted
+    order that is In Progress may be marked Completed, so the terminal state is
+    reached through a guarded chokepoint rather than a free-form status edit."""
+    doc = frappe.get_doc("Subcontractor Service Order", service_order)
+    frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
+
+    if doc.docstatus != 1:
+        frappe.throw(_("Only submitted Service Orders can be marked Completed."))
+    if doc.status != "In Progress":
+        frappe.throw(_("Only Service Orders with status In Progress can be marked Completed."))
+
+    doc.db_set("status", "Completed")
+    doc.add_comment("Comment", _("Marked Completed via controlled method."))
+    return {"status": "Completed"}
+
+
+@frappe.whitelist(methods=["POST"])
 def mark_missed(service_order):
     """Transition Subcontractor Service Order from In Progress to Missed."""
     doc = frappe.get_doc("Subcontractor Service Order", service_order)

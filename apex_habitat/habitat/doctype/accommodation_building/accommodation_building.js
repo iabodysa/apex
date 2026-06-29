@@ -34,6 +34,8 @@ function _renderFloorLayout(frm) {
 	frappe.call({
 		method: "apex_habitat.habitat.api.building_dashboard.get_building_layout",
 		args: { building: frm.doc.name },
+		// Passive background render: fail silently rather than show the default error popup.
+		error: function () {},
 		callback: function (r) {
 			if (r.exc || !r.message) return;
 			var data = r.message;
@@ -110,7 +112,10 @@ function _renderSiteAddress(frm) {
 			site: frm.doc.site,
 			building_address: frm.doc.building_address,
 		},
+		// Passive background render: fail silently rather than show the default error popup.
+		error: function () {},
 		callback: function (r) {
+			if (r.exc) return;
 			wrapper.empty();
 			const text = r.message;
 			if (text) {
@@ -131,6 +136,8 @@ function _renderBuildingDashboard(frm) {
 	frappe.call({
 		method: "apex_habitat.habitat.api.building_dashboard.get_building_metrics",
 		args: { building: frm.doc.name },
+		// Passive background render: fail silently rather than show the default error popup.
+		error: function () {},
 		callback: function (r) {
 			if (r.exc || !r.message) return;
 			const m = r.message;
@@ -159,6 +166,7 @@ function _renderBuildingDashboard(frm) {
 
 frappe.ui.form.on("Accommodation Building", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		_toggleFloorFields(frm);
 		_renderBuildingDashboard(frm);
 

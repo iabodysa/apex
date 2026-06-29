@@ -9,6 +9,17 @@
   "description": "Master categories for issuable custody articles.",
   "autoname": "field:category_name",
   "naming_rule": "By fieldname",
+  "field_order": [
+   "custody_asset_category_tab_details",
+   "custody_asset_category_sec_details",
+   "category_name",
+   "default_depreciation_policy",
+   "custody_asset_category_details_col",
+   "is_active",
+   "default_custody_days",
+   "custody_asset_category_sec_large_text",
+   "description"
+  ],
   "fields": [
     {
       "doctype": "DocField",

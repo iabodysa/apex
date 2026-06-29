@@ -33,6 +33,28 @@ class SafetyInspectionReport(Document):
     def on_submit(self):
         self.generate_maintenance_requests()
 
+    def on_cancel(self):
+        """Reverse the on_submit fan-out: a cancelled report must not leave its
+        auto-spawned Maintenance Requests carrying a stale source_inspection
+        back-link. A still-draft generated ticket is a pure side-effect and is
+        deleted; a ticket already picked up (submitted) is left for the team and
+        only its dangling back-link is cleared. Native class method — Frappe fires
+        it on cancel; no hooks.py doc_event needed."""
+        for table_fieldname in _FINDING_TABLES:
+            for finding in self.get(table_fieldname) or []:
+                self._reverse_generated_request(finding.get("generated_maintenance_request"))
+
+    def _reverse_generated_request(self, mr_name: str):
+        if not mr_name or not frappe.db.exists("Maintenance Request", mr_name):
+            return
+        docstatus = frappe.db.get_value("Maintenance Request", mr_name, "docstatus")
+        if docstatus == 0:
+            # audit-ok — reversing a draft side-effect this report created
+            frappe.delete_doc("Maintenance Request", mr_name, ignore_permissions=True)  # audit-ok
+        else:
+            # Submitted ticket the team owns: only drop the stale source back-link.
+            frappe.db.set_value("Maintenance Request", mr_name, "source_inspection", None)
+
     # [#g5aqzg]
     def generate_maintenance_requests(self):
         """Fan out each actionable finding to one Maintenance Request and surface it.

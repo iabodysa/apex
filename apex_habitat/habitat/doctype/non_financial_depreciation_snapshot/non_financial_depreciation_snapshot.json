@@ -4,6 +4,19 @@
  "description": "Submittable: periodic snapshot of operational asset book values. No GL impact.",
  "doctype": "DocType",
  "engine": "InnoDB",
+ "field_order": [
+  "nfds_tab_details",
+  "nfds_sec_details",
+  "snapshot_date",
+  "building",
+  "nfds_details_col",
+  "naming_series",
+  "total_book_value_sar",
+  "nfds_sec_system",
+  "cancellation_reason",
+  "nfds_sec_table_items",
+  "items"
+ ],
  "fields": [
   {
    "doctype": "DocField",

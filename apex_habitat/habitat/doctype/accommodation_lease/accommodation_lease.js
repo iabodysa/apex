@@ -10,6 +10,7 @@ frappe.ui.form.on("Accommodation Lease", {
 	},
 
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		if (frm.doc.docstatus === 0 && !frm.is_new()) {
 			frm.add_custom_button(__("Regenerate Payment Schedule"), () => {
 				frappe.confirm(
@@ -19,6 +20,9 @@ frappe.ui.form.on("Accommodation Lease", {
 							method: "apex_habitat.habitat.doctype.accommodation_lease.accommodation_lease.regenerate_schedule",
 							args: { name: frm.doc.name },
 							callback(r) {
+								if (r.exc) {
+									return;
+								}
 								frappe.show_alert({
 									message: __("{0} payment rows generated.", [r.message]),
 									indicator: "green",

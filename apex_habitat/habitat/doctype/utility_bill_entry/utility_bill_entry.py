@@ -18,7 +18,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, fmt_money
 
 
 class UtilityBillEntry(Document):
@@ -68,8 +68,8 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    _compute_variance(doc)
-    doc.db_set("variance_from_avg_pct", doc.variance_from_avg_pct)
+    # variance_from_avg_pct is already computed and persisted by validate() on the
+    # submitting save (bill_amount_sar is finalized there), so no recompute is needed.
     try:
         _post_ledger_row(doc)
     except Exception:
@@ -81,7 +81,7 @@ def before_cancel(doc, method=None):
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
 
-    building = frappe.get_doc("Accommodation Building", doc.building)
+    total_capacity = frappe.db.get_value("Accommodation Building", doc.building, "total_capacity")
     from frappe.utils import today
 
     original_row = frappe.db.get_value(
@@ -101,7 +101,7 @@ def before_cancel(doc, method=None):
             "building": doc.building,
             "ledger_type": doc.utility_type,
             "total_site_cost": -flt(doc.bill_amount_sar),
-            "capacity_denominator": building.total_capacity or 0,
+            "capacity_denominator": total_capacity or 0,
             "employee_daily_share": 0,
             "posting_mode": "Operational Memo",
             "source_doctype": "Utility Bill Entry",
@@ -137,8 +137,8 @@ def _compute_sharing(doc) -> None:
 
         if pct < 100.0:
             doc.bill_share_note = (
-                f"Shared meter — {pct:.1f}% of SAR {total:,.2f} "
-                f"= SAR {share:,.2f} (building share)"
+                f"Shared meter — {pct:.1f}% of {fmt_money(total, currency='SAR')} "
+                f"= {fmt_money(share, currency='SAR')} (building share)"
             )
         else:
             doc.bill_share_note = ""
@@ -148,8 +148,9 @@ def _compute_variance(doc) -> None:
     if not doc.utility_account or not frappe.db.exists("Utility Account", doc.utility_account):
         doc.variance_from_avg_pct = 0.0
         return
-    utility_account = frappe.get_doc("Utility Account", doc.utility_account)
-    avg = flt(utility_account.average_monthly_bill_sar)
+    avg = flt(
+        frappe.db.get_value("Utility Account", doc.utility_account, "average_monthly_bill_sar")
+    )
     if avg > 0:
         variance = ((flt(doc.bill_amount_sar) - avg) / avg) * 100
         doc.variance_from_avg_pct = round(variance, 2)
@@ -168,7 +169,7 @@ def _post_ledger_row(doc) -> None:
     if _live_ledger_row(doc.name):
         return
 
-    building = frappe.get_doc("Accommodation Building", doc.building)
+    total_capacity = frappe.db.get_value("Accommodation Building", doc.building, "total_capacity")
 
     remarks = doc.bill_share_note or ""
 
@@ -178,7 +179,7 @@ def _post_ledger_row(doc) -> None:
         "building": doc.building,
         "ledger_type": doc.utility_type,
         "total_site_cost": flt(doc.bill_amount_sar),
-        "capacity_denominator": building.total_capacity or 0,
+        "capacity_denominator": total_capacity or 0,
         "employee_daily_share": 0,
         "posting_mode": "Operational Memo",
         "source_doctype": "Utility Bill Entry",

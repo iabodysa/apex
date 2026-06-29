@@ -7,6 +7,12 @@
  "istable": 1,
  "engine": "InnoDB",
  "description": "Child: one damaged article line on a Custody Damage Assessment.",
+ "field_order": [
+  "article",
+  "damage_description",
+  "estimated_replacement_cost_sar",
+  "serial_no"
+ ],
  "fields": [
   {
    "doctype": "DocField",

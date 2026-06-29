@@ -73,7 +73,6 @@
   {
    "fieldname": "done_at",
    "fieldtype": "Datetime",
-   "in_list_view": 1,
    "label": "Done At"
   }
  ],
@@ -87,6 +86,5 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
- "track_changes": 1
+ "states": []
 }

@@ -159,25 +159,27 @@ def validate(doc, method=None):
         frappe.throw(_("Selected Bed {0} does not belong to Room {1}").format(doc.bed, doc.room))
 
     # [#jcdpm8]
-    room_doc = frappe.get_doc("Accommodation Room", doc.room)
-    if room_doc.building != doc.building:
+    room = frappe.db.get_value(
+        "Accommodation Room", doc.room, ["building", "readiness_status"], as_dict=True
+    )
+    if room.building != doc.building:
         frappe.throw(
             _("Selected Room {0} does not belong to Building {1}").format(doc.room, doc.building)
         )
-        
+
     # [#agde2c]
-    if room_doc.readiness_status in ["Needs Repair", "Needs Cleaning", "Out of Service"]:
+    if room.readiness_status in ["Needs Repair", "Needs Cleaning", "Out of Service"]:
         frappe.throw(
             _("Room {0} is currently '{1}' and cannot be assigned to an employee.").format(
-                doc.room, room_doc.readiness_status
+                doc.room, room.readiness_status
             )
         )
 
     # [#lxozz0]
-    bed_doc = frappe.get_doc("Accommodation Bed", doc.bed)
-    if bed_doc.status == "Out of Service":
+    bed_status = frappe.db.get_value("Accommodation Bed", doc.bed, "status")
+    if bed_status == "Out of Service":
         frappe.throw(_("Selected Bed {0} is Out of Service").format(doc.bed))
-    elif bed_doc.status == "Occupied":
+    elif bed_status == "Occupied":
         occupying_asg = frappe.db.get_value(
             "Accommodation Assignment",
             {

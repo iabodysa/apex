@@ -8,6 +8,13 @@
  "editable_grid": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "field_order": [
+  "article",
+  "quantity_issued",
+  "quantity_returned",
+  "return_status",
+  "deduction_amount"
+ ],
  "fields": [
   {
    "doctype": "DocField",

@@ -84,7 +84,6 @@
   {
    "fieldname": "monthly_litres",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Monthly Litres",
    "reqd": 1
   },

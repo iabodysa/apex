@@ -2,6 +2,7 @@
 // [#huha6w]
 frappe.ui.form.on("Dispatch Trip", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		_update_trip_indicator(frm);
 
 		if (!frm.is_new() && frm.doc.status === "Dispatched") {
@@ -56,7 +57,9 @@ function _prompt_complete_trip(frm) {
 			}
 			frm.set_value("odometer_end", values.odometer_end);
 			frm.set_value("status", "Completed");
-			frm.save();
+			if (frm.is_dirty()) {
+				frm.save();
+			}
 		},
 		__("Complete Trip"),
 		__("Complete")

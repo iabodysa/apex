@@ -2,6 +2,7 @@
 // [#3liu9f]
 frappe.ui.form.on("Accommodation Bed", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		const colors = {
 			"Available": "green",
 			"Occupied": "red",
@@ -21,6 +22,12 @@ frappe.ui.form.on("Accommodation Bed", {
 					freeze: true,
 					callback: function (r) {
 						if (!r.exc) frm.reload_doc();
+					},
+					error: function () {
+						frappe.show_alert({
+							message: __("Could not update the bed. Please try again."),
+							indicator: "red",
+						});
 					},
 				});
 			});

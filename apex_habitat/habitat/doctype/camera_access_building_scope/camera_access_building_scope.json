@@ -5,6 +5,11 @@
  "custom": 0,
  "istable": 1,
  "engine": "InnoDB",
+ "field_order": [
+  "building",
+  "camera_count",
+  "notes"
+ ],
  "fields": [
   {
    "doctype": "DocField",

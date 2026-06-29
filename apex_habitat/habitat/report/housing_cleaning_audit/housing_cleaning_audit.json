@@ -44,50 +44,5 @@
    "fieldtype": "Link",
    "options": "Accommodation Building"
   }
- ],
- "columns": [
-  {
-   "fieldname": "cleaning_date",
-   "label": "Date",
-   "fieldtype": "Date",
-   "width": 100
-  },
-  {
-   "fieldname": "building",
-   "label": "Building",
-   "fieldtype": "Link",
-   "options": "Accommodation Building",
-   "width": 160
-  },
-  {
-   "fieldname": "housing_supervisor",
-   "label": "Housing Supervisor",
-   "fieldtype": "Data",
-   "width": 150
-  },
-  {
-   "fieldname": "status",
-   "label": "Status",
-   "fieldtype": "Data",
-   "width": 120
-  },
-  {
-   "fieldname": "submitted_at",
-   "label": "Submitted At",
-   "fieldtype": "Date",
-   "width": 110
-  },
-  {
-   "fieldname": "rooms_cleaned",
-   "label": "Rooms Cleaned",
-   "fieldtype": "Int",
-   "width": 110
-  },
-  {
-   "fieldname": "photos_attached",
-   "label": "Photos Attached",
-   "fieldtype": "Int",
-   "width": 110
-  }
  ]
 }

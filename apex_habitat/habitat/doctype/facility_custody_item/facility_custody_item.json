@@ -5,6 +5,13 @@
  "custom": 0,
  "istable": 1,
  "engine": "InnoDB",
+ "field_order": [
+  "facility_asset",
+  "asset_category",
+  "serial_number",
+  "physical_condition",
+  "condition_notes"
+ ],
  "fields": [
   {
    "doctype": "DocField",

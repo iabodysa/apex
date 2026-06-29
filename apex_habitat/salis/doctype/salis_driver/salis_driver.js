@@ -2,6 +2,7 @@
 // [#27qsq1]
 frappe.ui.form.on("Salis Driver", {
 	refresh(frm) {
+		frm.clear_custom_buttons();
 		_update_driver_indicator(frm);
 
 		if (!frm.is_new() && frm.doc.current_vehicle) {

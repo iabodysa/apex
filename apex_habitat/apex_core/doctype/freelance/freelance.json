@@ -79,7 +79,6 @@
   {
    "fieldname": "contract_start_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Contract Start Date",
    "reqd": 1
   },

@@ -5,8 +5,20 @@
  "custom": 0,
  "istable": 1,
  "engine": "InnoDB",
- "track_changes": 1,
  "description": "Materials required for the repair.",
+ "field_order": [
+  "maintenance_procurement_item_sec_details",
+  "item",
+  "material",
+  "item_description",
+  "maintenance_procurement_item_details_col",
+  "quantity",
+  "unit",
+  "maintenance_procurement_item_sec_costing",
+  "is_fixed_asset",
+  "maintenance_procurement_item_costing_col",
+  "estimated_cost"
+ ],
  "fields": [
   {
    "doctype": "DocField",
