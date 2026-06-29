@@ -349,14 +349,22 @@ class TestDuplicateOverlap(QABase):
         # Pin company to this test's own selection so the lease never depends on
         # the Habitat Settings single (global committed/cached state a sibling
         # test may leave set or unset across orderings).
+        #
+        # The Accommodation Lease Workflow is active, so a lease starts at Draft
+        # and reaches docstatus 1 only through the workflow transitions — a raw
+        # submit() with status="Active" is rejected by validate_workflow. We run
+        # the transitions as Administrator, who bypasses the Approve self-approval
+        # gate (has_approval_access), to land a submitted (Approved) lease.
+        from frappe.model.workflow import apply_workflow
         lease = frappe.get_doc({
             "doctype": "Accommodation Lease", "naming_series": "ACC-LEASE-.YYYY.-.####",
-            "building": building, "company": self.company, "status": "Active",
+            "building": building, "company": self.company, "status": "Draft",
             "lease_start_date": start, "lease_end_date": end,
             "rent_amount": 1000, "billing_cycle": "Monthly", "first_payment_date": first_pay,
         })
         lease.insert(ignore_permissions=True)
-        lease.submit()
+        apply_workflow(lease, "Submit for Approval")
+        apply_workflow(lease, "Approve")
         return lease
 
     def test_5b_overlapping_leases(self):

@@ -17,7 +17,9 @@ def execute(filters=None):
         {"label": frappe._("Monthly Rent (SAR)"), "fieldname": "rent_amount", "fieldtype": "Currency", "width": 140},
     ]
 
-    query_filters = {"docstatus": 1, "status": "Active"}
+    # A submitted lease is in force whether the approval workflow left it at
+    # Approved or it has since moved into its Active post-approval lifecycle.
+    query_filters = {"docstatus": 1, "status": ["in", ["Approved", "Active"]]}
     if filters.get("building"):
         query_filters["building"] = filters["building"]
     if filters.get("from_date") and filters.get("to_date"):

@@ -225,6 +225,27 @@ class TestCustodyDamageAssessmentWorkflow(_WorkflowSoDMixin, FrappeTestCase):
         })
 
 
+class TestAccommodationLeaseWorkflow(_WorkflowSoDMixin, FrappeTestCase):
+    DOCTYPE = "Accommodation Lease"
+    WORKFLOW = "Accommodation Lease Workflow"
+    # The Approve transition is gated to Finance Manager (the maker is an
+    # Accommodation Manager) — cross-role SoD plus allow_self_approval=0.  [#hbwf11]
+    APPROVER_ROLE = "Finance Manager"
+
+    def _draft(self, owner):
+        return _insert_as(owner, {
+            "doctype": self.DOCTYPE,
+            "naming_series": "ACC-LEASE-.YYYY.-.####",
+            "building": "QA-BLDG",
+            "status": "Draft",
+            "lease_start_date": "2026-07-01",
+            "lease_end_date": "2027-06-30",
+            "rent_amount": 8000,
+            "billing_cycle": "Monthly",
+            "first_payment_date": "2026-07-01",
+        })
+
+
 class TestEmployeeDeductionAcknowledgmentWorkflow(_WorkflowSoDMixin, FrappeTestCase):
     DOCTYPE = "Employee Deduction Acknowledgment"
     WORKFLOW = "Employee Deduction Acknowledgment Workflow"

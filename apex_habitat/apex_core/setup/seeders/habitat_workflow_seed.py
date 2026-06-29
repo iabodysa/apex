@@ -31,6 +31,7 @@ _WORKFLOWS = [
     ("habitat", "utility_bill_entry_workflow"),
     ("habitat", "subcontractor_service_contract_workflow"),
     ("habitat", "custody_damage_assessment_workflow"),
+    ("habitat", "accommodation_lease_workflow"),
     ("apex_core", "employee_deduction_acknowledgment_workflow"),
 ]
 

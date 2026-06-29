@@ -88,13 +88,14 @@
    "label": "Term & Status"
   },
   {
-   "default": "Active",
+   "default": "Draft",
+   "description": "Approval workflow drives the first four states (Draft → Pending Approval → Approved / Rejected); the remaining states are the post-approval lifecycle of an approved lease.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Active\nExpired\nTerminated"
+   "options": "Draft\nPending Approval\nApproved\nRejected\nActive\nExpired\nTerminated"
   },
   {
    "fieldname": "accommodation_lease_term_col",

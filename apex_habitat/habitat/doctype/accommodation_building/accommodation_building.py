@@ -112,7 +112,7 @@ def apply_active_lease(doc):
     rent, so the existing value is left untouched rather than zeroed."""
     lease = frappe.db.get_value(
         "Accommodation Lease",
-        {"building": doc.name, "status": "Active", "docstatus": ["<", 2]},
+        {"building": doc.name, "status": ["in", ["Approved", "Active"]], "docstatus": ["<", 2]},
         ["rent_amount", "billing_cycle", "company_share_pct", "supplier"],
         as_dict=True,
         order_by="lease_start_date desc",

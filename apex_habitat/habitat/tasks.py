@@ -678,8 +678,11 @@ def open_maintenance_escalation() -> None:
 def lease_expiry_watchlist() -> None:
     """Alert on leases expiring within the configured lead days.
 
-    Queries Accommodation Lease (submitted, status=Active) directly —
-    the authoritative source for lease dates.
+    Queries Accommodation Lease (submitted, live status) directly —
+    the authoritative source for lease dates. A live lease is one the
+    approval workflow has submitted (status=Approved) or that has been
+    moved into its post-approval lifecycle (status=Active); both are
+    in force and watchlisted.
     Sets lease status = Expired when lease_end_date has passed.
     """
     from frappe.utils import date_diff, today
@@ -693,7 +696,8 @@ def lease_expiry_watchlist() -> None:
     while True:
         leases = frappe.get_all(
             "Accommodation Lease",
-            filters={"docstatus": 1, "status": "Active", "lease_end_date": ["is", "set"]},
+            filters={"docstatus": 1, "status": ["in", ["Approved", "Active"]],
+                     "lease_end_date": ["is", "set"]},
             fields=["name", "building", "lease_end_date"],
             limit_start=start,
             limit_page_length=batch_size,
