@@ -270,6 +270,11 @@ def accommodation_material_transfer_query(user=None):
     return _dual_building_condition(user)
 
 
+def facility_asset_delivery_query(user=None):
+    # [#dual] delivery has from_building + to_building, not `building`.
+    return _dual_building_condition(user)
+
+
 def facility_asset_query(user=None):
     return _building_condition(user)
 

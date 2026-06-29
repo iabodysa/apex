@@ -161,6 +161,18 @@ class TestOpenAlertsQueueScope(FrappeTestCase):
 		frappe.set_user("Administrator")
 		_purge_alert(cls.aa)
 		_purge_alert(cls.ab)
+		# setUpClass also commits Projects + Vehicles + a User Permission OUTSIDE
+		# the per-method savepoint rollback; delete them so the @example.com
+		# Project User Permission rows do not poison later tests on the bench.
+		frappe.db.delete("User Permission",
+			{"allow": "Project", "for_value": cls.pa, "user": cls.sup})
+		for v in (cls.va, cls.vb):
+			if frappe.db.exists("Salis Vehicle", v):
+				frappe.delete_doc("Salis Vehicle", v, ignore_permissions=True, force=True)
+		for p in (cls.pa, cls.pb):
+			if frappe.db.exists("Project", p):
+				frappe.delete_doc("Project", p, ignore_permissions=True, force=True)
+		frappe.db.commit()
 		super().tearDownClass()
 
 	def test_supervisor_sees_only_in_scope_alerts(self):

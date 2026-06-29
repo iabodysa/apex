@@ -25,6 +25,20 @@ class TestProjectScoping(FrappeTestCase):
             frappe.get_doc({"doctype": "User Permission", "allow": "Project",
                             "for_value": cls.pa, "user": cls.sup}).insert(ignore_permissions=True)
 
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits a Project + User Permission OUTSIDE FrappeTestCase's
+        # per-method savepoint rollback; without this they leak across the test DB
+        # (the @example.com Project User Permission cross-test-pollution class).
+        frappe.set_user("Administrator")
+        frappe.db.delete("User Permission",
+                         {"allow": "Project", "for_value": cls.pa, "user": cls.sup})
+        for p in (cls.pa, cls.pb):
+            if frappe.db.exists("Project", p):
+                frappe.delete_doc("Project", p, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
     @staticmethod
     def _project(name):
         p = frappe.db.get_value("Project", {"project_name": name}, "name")

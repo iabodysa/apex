@@ -107,13 +107,26 @@ class TestFuelConsoleScoping(FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        super().tearDownClass()
         frappe.set_user("Administrator")
         for fr in (cls.fr_a, cls.fr_b):
             doc = frappe.get_doc("Fuel Request", fr.name)
             if doc.docstatus == 1:
                 doc.cancel()
             frappe.delete_doc("Fuel Request", fr.name, ignore_permissions=True, force=True)
+        # setUpClass also commits Projects + User Permissions + Vehicles OUTSIDE
+        # the per-method savepoint rollback; delete them too so the @example.com
+        # Project User Permission rows do not poison later tests on the bench.
+        for user in (cls.sup, cls.pm):
+            frappe.db.delete("User Permission",
+                             {"allow": "Project", "for_value": cls.pa, "user": user})
+        for v in (cls.veh_a, cls.veh_b):
+            if frappe.db.exists("Salis Vehicle", v):
+                frappe.delete_doc("Salis Vehicle", v, ignore_permissions=True, force=True)
+        for p in (cls.pa, cls.pb):
+            if frappe.db.exists("Project", p):
+                frappe.delete_doc("Project", p, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
 
     def tearDown(self):
         frappe.set_user("Administrator")
@@ -219,6 +232,20 @@ class TestSupportTicketScoping(FrappeTestCase):
         cls.sup = _user("tk_sup@example.com", "Fleet Supervisor")
         _grant_project(cls.sup, cls.pa)
         cls.mgr = _user("tk_mgr@example.com", "Fleet Manager")
+
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits Projects + a User Permission OUTSIDE the per-method
+        # savepoint rollback; delete them so the @example.com Project User
+        # Permission rows do not poison later tests on the shared bench.
+        frappe.set_user("Administrator")
+        frappe.db.delete("User Permission",
+                         {"allow": "Project", "for_value": cls.pa, "user": cls.sup})
+        for p in (cls.pa, cls.pb):
+            if frappe.db.exists("Project", p):
+                frappe.delete_doc("Project", p, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
 
     def _ticket(self, project=None, owner=None):
         return frappe._dict(

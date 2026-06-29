@@ -56,6 +56,24 @@ class TestSalisTenantScope(FrappeTestCase):
         cls.drv_a = cls._driver("Tenant Driver A", cls.pa)
         cls.drv_b = cls._driver("Tenant Driver B", cls.pb)
 
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits a Project + User Permission (and project-anchored
+        # Salis Drivers) OUTSIDE FrappeTestCase's per-method savepoint rollback;
+        # without this they leak across the test DB (the @example.com Project
+        # User Permission cross-test-pollution class).
+        frappe.set_user("Administrator")
+        frappe.db.delete("User Permission",
+                         {"allow": "Project", "for_value": cls.pa, "user": cls.sup})
+        for d in (cls.drv_a, cls.drv_b):
+            if frappe.db.exists("Salis Driver", d):
+                frappe.delete_doc("Salis Driver", d, ignore_permissions=True, force=True)
+        for p in (cls.pa, cls.pb):
+            if frappe.db.exists("Project", p):
+                frappe.delete_doc("Project", p, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
     # fixtures
 
     @staticmethod

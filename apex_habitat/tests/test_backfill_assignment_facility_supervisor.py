@@ -49,6 +49,18 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
             "BAFS-WITHOUT", room_number="BAFS-WITHOUT-R01"
         ).name
 
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits a Project OUTSIDE the per-method savepoint rollback;
+        # delete it so the committed Project does not leak across the test DB.
+        # (Company/Buildings/Rooms are fixed-name reuse-or-create shared fixtures
+        # and are intentionally left in place.)
+        frappe.set_user("Administrator")
+        if frappe.db.exists("Project", cls.project):
+            frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
     def _make_assignment(self, building, room, bed_code, supervisor=None):
         bed = factories.make_bed(room, bed_code=bed_code).name
         doc = frappe.get_doc({

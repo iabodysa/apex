@@ -108,6 +108,19 @@ class TestMasarWorkerScope(_WorkerTripMixin, FrappeTestCase):
         cls.worker = _employee("Masar Scope Worker B")
         cls.token = _make_token(cls.worker)
 
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits a per-class Project and a Masar Worker Token OUTSIDE
+        # the per-method savepoint rollback; delete them so the committed rows do
+        # not leak across the test DB. (Site/Buildings/Employees are
+        # reuse-or-create shared fixtures and are left in place.)
+        frappe.set_user("Administrator")
+        frappe.db.delete("Masar Worker Token", {"token": cls.token})
+        if frappe.db.exists("Project", cls.project):
+            frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
     def setUp(self):
         frappe.set_user("Administrator")
 

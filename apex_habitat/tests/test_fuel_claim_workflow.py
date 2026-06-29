@@ -66,6 +66,22 @@ class TestFuelClaimWorkflow(FrappeTestCase):
 					"for_value": cls.project,
 				}).insert(ignore_permissions=True)
 
+	@classmethod
+	def tearDownClass(cls):
+		# setUpClass commits a Project + User Permissions (and a Vehicle) OUTSIDE
+		# the per-method savepoint rollback; delete them so the @example.com
+		# Project User Permission rows do not poison later tests on the bench.
+		frappe.set_user("Administrator")
+		for u in (cls.requester, cls.manager, cls.manager_maker):
+			frappe.db.delete("User Permission",
+				{"user": u, "allow": "Project", "for_value": cls.project})
+		if frappe.db.exists("Salis Vehicle", cls.vehicle):
+			frappe.delete_doc("Salis Vehicle", cls.vehicle, ignore_permissions=True, force=True)
+		if frappe.db.exists("Project", cls.project):
+			frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+		frappe.db.commit()
+		super().tearDownClass()
+
 	def setUp(self):
 		frappe.set_user("Administrator")
 

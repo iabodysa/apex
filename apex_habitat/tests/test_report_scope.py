@@ -292,6 +292,31 @@ class TestReportScopeIntegration(FrappeTestCase):
         cls.hmgr = _user("rscope_acc_mgr@example.com", "Accommodation Manager")
 
     @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits Projects + User Permissions (and project/building
+        # scoped fixtures) OUTSIDE the per-method savepoint rollback; delete them
+        # so the @example.com Project User Permission rows do not poison later
+        # tests on the shared bench. (Company/Article/Employee are reuse-or-create
+        # and left alone — they may pre-exist on the bench.)
+        frappe.set_user("Administrator")
+        frappe.db.delete("User Permission",
+                         {"allow": "Project", "for_value": cls.pa, "user": cls.sup})
+        frappe.db.delete("User Permission",
+                         {"allow": "Accommodation Building", "for_value": cls.bld_a, "user": cls.hsup})
+        frappe.db.delete("Accommodation Stock Ledger", {"building": ["in", (cls.bld_a, cls.bld_b)]})
+        for v in (cls.veh_a, cls.veh_b):
+            if frappe.db.exists("Salis Vehicle", v):
+                frappe.delete_doc("Salis Vehicle", v, ignore_permissions=True, force=True)
+        for b in (cls.bld_a, cls.bld_b):
+            if frappe.db.exists("Accommodation Building", b):
+                frappe.delete_doc("Accommodation Building", b, ignore_permissions=True, force=True)
+        for p in (cls.pa, cls.pb):
+            if frappe.db.exists("Project", p):
+                frappe.delete_doc("Project", p, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
+    @classmethod
     def _vehicle(cls, project):
         return frappe.get_doc(
             {

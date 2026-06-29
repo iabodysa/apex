@@ -68,6 +68,20 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         for u in (cls.maker, cls.finance_maker):
             cls._grant_project(u, cls.project)
 
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits a Project + two User Permissions OUTSIDE the
+        # per-method savepoint rollback; delete them so the @example.com Project
+        # User Permission rows do not poison later tests on the shared bench.
+        frappe.set_user("Administrator")
+        for u in (cls.maker, cls.finance_maker):
+            frappe.db.delete("User Permission",
+                             {"allow": "Project", "for_value": cls.project, "user": u})
+        if frappe.db.exists("Project", cls.project):
+            frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
     @staticmethod
     def _project(name):
         p = frappe.db.get_value("Project", {"project_name": name}, "name")

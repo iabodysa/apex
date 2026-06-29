@@ -112,12 +112,21 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        super().tearDownClass()
         frappe.set_user("Administrator")
         for pr in (cls.pr_a, cls.pr_b, cls.pr_null):
             frappe.delete_doc(
                 "Salis Payment Request", pr.name, ignore_permissions=True, force=True
             )
+        # setUpClass also commits Projects + a User Permission OUTSIDE the
+        # per-method savepoint rollback; delete them so the @example.com Project
+        # User Permission rows do not poison later tests on the shared bench.
+        frappe.db.delete("User Permission",
+                         {"allow": "Project", "for_value": cls.pa, "user": cls.sup})
+        for p in (cls.pa, cls.pb):
+            if frappe.db.exists("Project", p):
+                frappe.delete_doc("Project", p, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
 
     def tearDown(self):
         frappe.set_user("Administrator")
@@ -218,6 +227,20 @@ class TestScopingDoesNotWeakenSoD(FrappeTestCase):
         # [#ge4s2o]
         cls.other = _user("sod_pm_other@example.com", "Fleet Project Manager")
         _grant_project(cls.other, cls.pa)
+
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits a Project + two User Permissions OUTSIDE the
+        # per-method savepoint rollback; delete them so the @example.com Project
+        # User Permission rows do not poison later tests on the shared bench.
+        frappe.set_user("Administrator")
+        for user in (cls.requester, cls.other):
+            frappe.db.delete("User Permission",
+                             {"allow": "Project", "for_value": cls.pa, "user": user})
+        if frappe.db.exists("Project", cls.pa):
+            frappe.delete_doc("Project", cls.pa, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
 
     def tearDown(self):
         frappe.set_user("Administrator")

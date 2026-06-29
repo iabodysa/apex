@@ -362,6 +362,17 @@ class TestManualBoarding(_DriverTripBuilder, FrappeTestCase):
 		cls.w2 = _employee("Manual Board Two")
 		cls.off = _employee("Manual Board Off Manifest")
 
+	@classmethod
+	def tearDownClass(cls):
+		# setUpClass commits a per-class Project OUTSIDE the per-method savepoint
+		# rollback; delete it so the committed Project does not leak across the
+		# test DB. (Building/Employees are reuse-or-create shared fixtures.)
+		frappe.set_user("Administrator")
+		if frappe.db.exists("Project", cls.project):
+			frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+		frappe.db.commit()
+		super().tearDownClass()
+
 	def setUp(self):
 		frappe.set_user("Administrator")
 
@@ -446,6 +457,17 @@ class TestStopProgress(_DriverTripBuilder, FrappeTestCase):
 		cls.project = _project("Stop Progress Project")
 		cls.building = _building("Stop Progress Building")
 		cls.w1 = _employee("Stop Progress Worker")
+
+	@classmethod
+	def tearDownClass(cls):
+		# setUpClass commits a per-class Project OUTSIDE the per-method savepoint
+		# rollback; delete it so the committed Project does not leak across the
+		# test DB. (Building/Employees are reuse-or-create shared fixtures.)
+		frappe.set_user("Administrator")
+		if frappe.db.exists("Project", cls.project):
+			frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+		frappe.db.commit()
+		super().tearDownClass()
 
 	def setUp(self):
 		frappe.set_user("Administrator")

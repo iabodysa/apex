@@ -118,6 +118,21 @@ class TestInsertOperationsAlertResolvesSupervisor(FrappeTestCase):
             .name
         )
 
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits a Project + User Permission (and a Vehicle) OUTSIDE
+        # the per-method savepoint rollback; delete them so the @example.com
+        # Project User Permission rows do not poison later tests on the bench.
+        frappe.set_user("Administrator")
+        frappe.db.delete("User Permission",
+                         {"allow": "Project", "for_value": cls.project, "user": cls.sup})
+        if frappe.db.exists("Salis Vehicle", cls.vehicle):
+            frappe.delete_doc("Salis Vehicle", cls.vehicle, ignore_permissions=True, force=True)
+        if frappe.db.exists("Project", cls.project):
+            frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
     def setUp(self):
         frappe.set_user("Administrator")
 

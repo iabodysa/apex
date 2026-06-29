@@ -135,6 +135,21 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
         ).insert(ignore_permissions=True).name
         _grant_project(cls.supervisor, cls.project)
 
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits a Project + User Permission (and a project-anchored
+        # Salis Driver) OUTSIDE the per-method savepoint rollback; delete them so
+        # the @example.com Project User Permission rows do not poison later tests.
+        frappe.set_user("Administrator")
+        frappe.db.delete("User Permission",
+                         {"allow": "Project", "for_value": cls.project, "user": cls.supervisor})
+        if frappe.db.exists("Salis Driver", cls.driver):
+            frappe.delete_doc("Salis Driver", cls.driver, ignore_permissions=True, force=True)
+        if frappe.db.exists("Project", cls.project):
+            frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
     def setUp(self):
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold_sar", 2000)

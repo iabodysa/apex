@@ -54,9 +54,16 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
             proj.insert(ignore_permissions=True)
             self.project = proj.name
 
-        self.employee = frappe.db.get_value("Employee", {"company": self.company})
+        # Reuse only an employee whose joining date is on/before the salary
+        # assignment's from_date (2026-01-01); a foreign test employee that joined
+        # "today" would make the hardcoded assignment fail (joining-after-from_date),
+        # so fall through and provision our own with a safe joining date.
+        joined_filter = ["<=", "2026-01-01"]
+        self.employee = frappe.db.get_value(
+            "Employee", {"company": self.company, "date_of_joining": joined_filter}
+        )
         if not self.employee:
-            self.employee = frappe.db.get_value("Employee", {})
+            self.employee = frappe.db.get_value("Employee", {"date_of_joining": joined_filter})
         if not self.employee:
             emp = frappe.get_doc({
                 "doctype": "Employee",

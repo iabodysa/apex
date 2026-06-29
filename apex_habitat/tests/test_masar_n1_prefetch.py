@@ -94,6 +94,17 @@ class TestMasarWorkerRoutePrefetch(_WorkerTripMixin, FrappeTestCase):
         cls.small_workers = [_employee(f"Masar N1 Small W{i}") for i in range(2)]
         cls.large_workers = [_employee(f"Masar N1 Large W{i}") for i in range(6)]
 
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits a per-class Project OUTSIDE the per-method savepoint
+        # rollback; delete it so the committed Project does not leak across the
+        # test DB. (Site/Building/Employees are reuse-or-create shared fixtures.)
+        frappe.set_user("Administrator")
+        if frappe.db.exists("Project", cls.project):
+            frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
     def setUp(self):
         frappe.set_user("Administrator")
 

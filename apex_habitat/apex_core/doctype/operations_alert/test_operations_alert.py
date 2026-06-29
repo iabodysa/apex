@@ -101,6 +101,27 @@ class TestOperationsAlertCriticalNotification(FrappeTestCase):
             {"doctype": "Salis Vehicle", "plate_number": f"NP-{suffix}", "status": "Active"}
         ).insert(ignore_permissions=True).name
 
+    @classmethod
+    def tearDownClass(cls):
+        # setUpClass commits a Project + two User Permissions (and Vehicles)
+        # OUTSIDE the per-method savepoint rollback; delete them so the
+        # @example.com Project User Permission rows do not poison later tests.
+        frappe.set_user("Administrator")
+        # _raise_alert / _critical_doc commit Operations Alert rows OUTSIDE the
+        # per-method savepoint too; leaving them Open poisons the global
+        # daily_open_alerts_digest scan in test_open_alerts_digest.
+        frappe.db.delete("Operations Alert", {"vehicle": cls.vehicle})
+        for user in (cls.sup, cls.oversight):
+            frappe.db.delete("User Permission",
+                             {"allow": "Project", "for_value": cls.project, "user": user})
+        for v in (cls.vehicle, cls.vehicle_no_project):
+            if frappe.db.exists("Salis Vehicle", v):
+                frappe.delete_doc("Salis Vehicle", v, ignore_permissions=True, force=True)
+        if frappe.db.exists("Project", cls.project):
+            frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
     def _critical_doc(self, **overrides):
         data = {
             "doctype": "Operations Alert", "alert_type": "License Expiry",
