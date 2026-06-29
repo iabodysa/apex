@@ -95,7 +95,18 @@
       </main>
 
       <nav class="tabbar" :style="{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }">
-        <router-link v-for="tab in tabs" :key="tab.to" :to="tab.to" class="tab">
+        <!-- The Home tab ("/") is a prefix of every route, so its inclusive
+             active class would light up on every page. Disable inclusive matching
+             for it (active-class="") and keep exact-active so it highlights only
+             on "/". Other tabs keep the default inclusive active class. -->
+        <router-link
+          v-for="tab in tabs"
+          :key="tab.to"
+          :to="tab.to"
+          class="tab"
+          :active-class="tab.to === '/' ? '' : 'router-link-active'"
+          exact-active-class="router-link-active"
+        >
           <span class="tab-icon-wrap"><Icon :name="tab.icon" :size="22" /></span>
           <span>{{ t(tab.labelKey) }}</span>
           <span class="tab-pip"></span>
@@ -210,15 +221,14 @@ const greeting = computed(() => {
 const showBrand = computed(() => window.portal_show_brand !== false);
 const brandLogo = computed(() => window.portal_logo || "");
 
-// Bottom bar = the two primary jobs only: Trips + Profile. Everything else is
-// nested, not demoted to a dead route:
-//   - Home (the today/next-trip dashboard) -> the header greeting/brand taps to "/"
-//     and Profile > More links it, so the hub is one tap away from either tab.
+// Bottom bar = the three primary destinations: Home + Trips + Profile. The brand
+// also taps to "/", but Home is a first-class tab so the dashboard is never hidden.
+// Secondary routes stay nested, not demoted to a dead route:
 //   - Route                 -> a Trips card (/route/:trip) and Profile > More (/route)
 //   - Vehicle, Attendance   -> Profile > More
 //   - Fuel, Support         -> Profile > My Requests
-// Two thumb-reachable primaries; every route stays reachable.
 const tabs = [
+  { to: "/", icon: "home", labelKey: "nav.home" },
   { to: "/trips", icon: "route", labelKey: "nav.trips" },
   { to: "/profile", icon: "user", labelKey: "nav.profile" },
 ];
@@ -238,17 +248,21 @@ const unlinkedCtx = computed(() => {
 
 <style scoped>
 /* Header brand logo: a fixed-height box with auto width + object-fit:contain so
-   an arbitrarily-shaped uploaded logo keeps its aspect (never stretched), capped
-   in width and given a little vertical breathing room inside the header bar. */
+   an arbitrarily-shaped uploaded logo keeps its aspect (never stretched). It is
+   capped in width and wrapped in clear breathing room so it never reads as
+   cramped/edge-to-edge: flex-shrink:0 stops the flex row from squeezing it (a
+   squeezed fixed-aspect logo looks distorted), and the block/inline padding give
+   it visible spacing inside the header bar. */
 .brand-logo {
   display: block;
+  flex-shrink: 0;
   height: 28px;
   width: auto;
   max-width: 132px;
   object-fit: contain;
   object-position: left center;
-  padding-block: 2px;
-  margin-inline-end: 2px;
+  padding-block: 4px;
+  margin-inline-end: 8px;
 }
 .offline-banner {
   display: flex;
