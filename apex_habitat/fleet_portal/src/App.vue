@@ -66,14 +66,22 @@ async function loadFleet() {
     loadState.value = "error";
   }
 }
+// True when the most recent background re-pull failed and the board is showing
+// the last good list — surfaced as a non-blocking stale banner so a silent poll
+// failure isn't invisible (the data stays, but the user knows it may be stale).
+const reloadStale = ref(false);
 // Re-pull after a successful write (keeps the panel in sync if it is open).
 async function reloadFleet() {
   try {
     const r = await call(GET);
     vehicles.value = ((r && r.vehicles) || []).map(normalize);
     loadReason.value = (r && r.reason) || null;
+    reloadStale.value = false;
   } catch (e) {
-    /* keep the last good list; the action toast already reported success */
+    // Keep the last good list (the action toast already reported any write
+    // success), but log it and flag the board as stale instead of swallowing.
+    console.warn("[fleet] background reload failed:", serverMsg(e));
+    reloadStale.value = true;
   }
   if (panel.open && panel.plate) {
     const fresh = vehicles.value.find((x) => x.plate === panel.plate);
@@ -1321,6 +1329,13 @@ function expiryFlag(v) {
           <button class="btn btn-amber" @click="bulkWorkshop"><Icon name="wrench" :size="14" /> {{ t("bulk.workshopSelected") }}</button>
           <button class="btn" @click="clearSelection"><Icon name="x" :size="14" /> {{ t("bulk.clear") }}</button>
         </div>
+      </div>
+
+      <!-- STALE (background refresh failed; the last good board is still shown) -->
+      <div v-if="loadState === 'ready' && reloadStale" class="fp-error-banner" style="border-color:var(--amber);background:color-mix(in srgb,var(--amber) 12%,transparent)">
+        <span style="color:var(--amber)"><Icon name="triangle-alert" :size="20" /></span>
+        <span class="fp-err-msg">{{ t("main.staleData") }}</span>
+        <button class="btn btn-amber" @click="reloadFleet">{{ t("common.retry") }}</button>
       </div>
 
       <!-- ERROR (persistent banner + retry) -->

@@ -34,6 +34,15 @@ function stampServiceWorker() {
 export default defineConfig({
   plugins: [frappeui(), vue(), stampServiceWorker()],
   base: "/assets/apex_habitat/driver_portal/",
+  // Dev-only: proxy API/asset calls to the local Frappe bench so `vite dev` can
+  // reach the backend. No effect on the production build.
+  server: {
+    proxy: {
+      "/api": "http://localhost:8000",
+      "/assets": "http://localhost:8000",
+      "/files": "http://localhost:8000",
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),

@@ -140,7 +140,7 @@
 </template>
 
 <script setup>
-import { computed, watch } from "vue";
+import { computed, watch, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import { createResource } from "frappe-ui";
 import Unlinked from "./components/Unlinked.vue";
@@ -156,8 +156,11 @@ import { updateReady, applyUpdate, initPwaUpdates } from "./pwa-updates";
 
 const { t, dir } = useI18n();
 
-// Watch the registered service worker for a new build and surface the reload banner.
-initPwaUpdates();
+// Watch the registered service worker for a new build and surface the reload
+// banner. Tear it down on unmount so its interval/listeners don't stack on an
+// HMR re-init of the App root.
+const stopPwaUpdates = initPwaUpdates();
+onUnmounted(() => stopPwaUpdates && stopPwaUpdates());
 
 // Clear any transient toast when the route changes so a success message never
 // lingers onto the next screen.

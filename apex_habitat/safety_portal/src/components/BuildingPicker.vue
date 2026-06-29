@@ -42,18 +42,45 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
+import { createListResource } from "frappe-ui";
 import Icon from "./Icon.vue";
-import { call } from "../api";
 import { useI18n, resourceErrorMessage } from "../i18n";
 
 const emit = defineEmits(["select"]);
 const { t } = useI18n();
 
-const buildings = ref([]);
-const loading = ref(true);
 const error = ref("");
 const q = ref("");
+
+// frappe-ui list resource over the same role-/permission-scoped get_list the
+// shared call() helper used — returns the identical { name, building_name } rows,
+// with CSRF handled by frappeRequest (configured in main.js).
+const buildingsRes = createListResource({
+  doctype: "Accommodation Building",
+  fields: ["name", "building_name"],
+  orderBy: "building_name asc",
+  // createListResource has NO "all rows" sentinel: pageLength 0/undefined falls
+  // back to its default of 20. The old fetch used limit_page_length:0 (all), so we
+  // set a ceiling well above any realistic building count to preserve "show all".
+  pageLength: 99999,
+  auto: true,
+  onSuccess: (rows) => {
+    // Scoped to exactly one building -> auto-select; one tap becomes zero.
+    if (Array.isArray(rows) && rows.length === 1) {
+      const only = rows[0];
+      emit("select", only.name, only.building_name || only.name);
+    }
+  },
+  onError: (e) => {
+    error.value = resourceErrorMessage(e, "errors.loadError");
+  },
+});
+
+const buildings = computed(() => buildingsRes.data || []);
+// createListResource exposes loading on its inner `.list` resource, not on the
+// top-level object — read it there so the spinner state is preserved.
+const loading = computed(() => buildingsRes.list.loading);
 
 const filtered = computed(() => {
   const term = q.value.trim().toLowerCase();
@@ -61,29 +88,6 @@ const filtered = computed(() => {
   return buildings.value.filter((b) =>
     (b.building_name || b.name || "").toLowerCase().includes(term),
   );
-});
-
-onMounted(async () => {
-  try {
-    const rows = await call("frappe.client.get_list", {
-      args: {
-        doctype: "Accommodation Building",
-        fields: JSON.stringify(["name", "building_name"]),
-        order_by: "building_name asc",
-        limit_page_length: 0,
-      },
-    });
-    buildings.value = Array.isArray(rows) ? rows : [];
-    // Scoped to exactly one building -> auto-select; one tap becomes zero.
-    if (buildings.value.length === 1) {
-      const only = buildings.value[0];
-      emit("select", only.name, only.building_name || only.name);
-    }
-  } catch (e) {
-    error.value = resourceErrorMessage(e, "errors.loadError");
-  } finally {
-    loading.value = false;
-  }
 });
 </script>
 

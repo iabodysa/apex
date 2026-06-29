@@ -9,6 +9,15 @@ import path from "path";
 export default defineConfig({
   plugins: [frappeui(), vue()],
   base: "/assets/apex_habitat/housing_portal/",
+  // Dev-only: proxy API/asset calls to the local Frappe bench so `vite dev` can
+  // reach the backend. No effect on the production build.
+  server: {
+    proxy: {
+      "/api": "http://localhost:8000",
+      "/assets": "http://localhost:8000",
+      "/files": "http://localhost:8000",
+    },
+  },
   resolve: { alias: { "@": path.resolve(__dirname, "src") } },
   build: {
     outDir: path.resolve(__dirname, "../public/housing_portal"),

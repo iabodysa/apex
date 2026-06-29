@@ -28,8 +28,17 @@ function trackInstalling(reg, worker) {
   });
 }
 
+// Returns a teardown fn that clears the interval and removes every listener it
+// added, so a caller can stop it in onUnmounted — this prevents a duplicate
+// poll/listener set from stacking on HMR re-init (the App root re-running setup).
 export function initPwaUpdates() {
-  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+    return () => {};
+  }
+
+  let pollTimer = null;
+  let onFocus = null;
+  let onVisibility = null;
 
   navigator.serviceWorker.ready
     .then((reg) => {
@@ -41,21 +50,31 @@ export function initPwaUpdates() {
       reg.addEventListener("updatefound", () => trackInstalling(reg, reg.installing));
 
       const poll = () => reg.update().catch(() => {});
-      setInterval(poll, UPDATE_POLL_MS);
-      window.addEventListener("focus", poll);
-      document.addEventListener("visibilitychange", () => {
+      pollTimer = setInterval(poll, UPDATE_POLL_MS);
+      onFocus = poll;
+      onVisibility = () => {
         if (document.visibilityState === "visible") poll();
-      });
+      };
+      window.addEventListener("focus", onFocus);
+      document.addEventListener("visibilitychange", onVisibility);
     })
     .catch(() => {});
 
   // When the new worker takes control (after SKIP_WAITING), reload once so the
   // page is served by the new build. Guarded so it fires a single time.
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
+  const onControllerChange = () => {
     if (reloading) return;
     reloading = true;
     window.location.reload();
-  });
+  };
+  navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+
+  return () => {
+    if (pollTimer) clearInterval(pollTimer);
+    if (onFocus) window.removeEventListener("focus", onFocus);
+    if (onVisibility) document.removeEventListener("visibilitychange", onVisibility);
+    navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+  };
 }
 
 export function applyUpdate() {

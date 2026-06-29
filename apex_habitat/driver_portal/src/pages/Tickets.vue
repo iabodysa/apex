@@ -170,6 +170,7 @@ import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
 import { useI18n, ISSUE_CATEGORIES, ISSUE_PRIORITIES } from "../i18n";
 import { pushToast } from "../toast";
+import { uploadPrivateFile } from "../upload";
 
 const { t, te } = useI18n();
 
@@ -207,16 +208,9 @@ async function onPhoto(e) {
   if (!file) return;
   uploading.value = true;
   try {
-    const fd = new FormData();
-    fd.append("file", file, file.name);
-    fd.append("is_private", 1);
-    const res = await fetch("/api/method/upload_file", {
-      method: "POST",
-      headers: { "X-Frappe-CSRF-Token": window.csrf_token },
-      body: fd,
-    });
-    const json = await res.json();
-    attachment.value = json.message?.file_url || null;
+    // Shared single upload helper (same native upload_file path Attendance uses),
+    // so the CSRF/FormData logic lives in one place instead of duplicated here.
+    attachment.value = await uploadPrivateFile(file);
     photoName.value = attachment.value ? file.name : "";
   } catch (_e) {
     pushToast(t("common.error"), "err");

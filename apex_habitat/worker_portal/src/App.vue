@@ -150,14 +150,16 @@ watch(
 // [T-318] reactive connectivity so the shell can show an offline banner.
 const online = ref(typeof navigator === "undefined" ? true : navigator.onLine);
 const syncOnline = () => (online.value = navigator.onLine);
+let stopPwaUpdates = null;
 onMounted(() => {
   window.addEventListener("online", syncOnline);
   window.addEventListener("offline", syncOnline);
-  initPwaUpdates();
+  stopPwaUpdates = initPwaUpdates();
 });
 onUnmounted(() => {
   window.removeEventListener("online", syncOnline);
   window.removeEventListener("offline", syncOnline);
+  if (stopPwaUpdates) stopPwaUpdates();
 });
 
 // Bootstrap read. method:"GET" is load-bearing: frappe-ui defaults to POST, which

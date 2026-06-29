@@ -261,13 +261,22 @@ function emitRefresh() {
 
 // --- Boarding pass (full-screen overlay) ----------------------------------
 const passOpen = ref(false);
+const passErrorMsg = ref("");
 const passResource = createResource({
   url: "apex_habitat.salis.api.masar.get_worker_boarding_pass",
   params: { token: TOKEN },
+  onError: (e) => {
+    // Surface the failure (matches the claim/wait resources) instead of letting
+    // it fall through to the static "none" text with no signal that a fetch failed.
+    passErrorMsg.value = e?.messages?.[0] || e?.message || t("boarding.none");
+  },
+  onSuccess: () => {
+    passErrorMsg.value = "";
+  },
 });
 const passData = computed(() => passResource.data?.pass || null);
 const passLoading = computed(() => passResource.loading);
-const passError = computed(() => passResource.error);
+const passError = computed(() => passErrorMsg.value || passResource.error);
 function openPass() {
   // Fetch once, then reveal the overlay as soon as the pass is available.
   if (passData.value) {
