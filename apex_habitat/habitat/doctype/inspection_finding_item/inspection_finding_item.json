@@ -37,6 +37,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Domain of the inspection finding, routing it to safety, maintenance, or hygiene handling, or general when it does not fit a specific domain.",
    "fieldname": "finding_category",
    "fieldtype": "Select",
    "label": "Category",
@@ -46,6 +47,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "How serious the finding is, driving remediation urgency from minor low-severity issues up to critical findings that require immediate correction.",
    "fieldname": "severity",
    "fieldtype": "Select",
    "label": "Severity",
@@ -97,6 +99,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Handling priority assigned to the finding for scheduling remediation, independent of severity, from low up to critical.",
    "fieldname": "priority",
    "fieldtype": "Select",
    "label": "Priority",

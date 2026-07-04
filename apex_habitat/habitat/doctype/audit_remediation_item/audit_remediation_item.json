@@ -98,6 +98,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Progress of a single audit finding through remediation, tracking work start, evidence submission, and whether the client verified or rejected the fix.",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",

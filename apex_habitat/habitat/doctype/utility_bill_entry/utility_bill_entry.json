@@ -66,6 +66,7 @@
   },
   {
    "default": "Draft",
+   "description": "Approval and payment stage of the utility bill, from draft and received through review and approval to paid, or held as rejected or disputed.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

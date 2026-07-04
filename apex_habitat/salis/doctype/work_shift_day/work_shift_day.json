@@ -9,6 +9,7 @@
  "fields": [
   {
    "columns": 4,
+   "description": "Day of the week this shift row applies to, used to build the driver weekly working schedule across the seven days.",
    "fieldname": "day_of_week",
    "fieldtype": "Select",
    "in_list_view": 1,

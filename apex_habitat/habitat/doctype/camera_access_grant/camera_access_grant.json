@@ -116,6 +116,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Lifecycle of a camera-footage access grant, from a pending request through approval and an active window to expiry or revocation of the access.",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",

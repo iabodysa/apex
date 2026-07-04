@@ -150,6 +150,7 @@
   },
   {
    "default": "Open",
+   "description": "Handling stage of the vehicle incident record, from open and under review to closed or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

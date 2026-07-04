@@ -46,6 +46,7 @@
   },
   {
    "default": "Present",
+   "description": "Attendance outcome recorded for the driver on the day, distinguishing present and late from absent or approved leave for payroll and availability.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

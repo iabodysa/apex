@@ -54,6 +54,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Current custody state of the item held by the resident, distinguishing items still issued from those returned intact versus those reported lost or damaged and therefore chargeable.",
    "fieldname": "status",
    "label": "Status",
    "fieldtype": "Select",

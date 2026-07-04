@@ -32,6 +32,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Trade category of the maintenance material used on a job, grouping electrical, air-conditioning, plumbing, sanitary, furniture, and general items for cost tracking.",
    "fieldname": "material_category",
    "fieldtype": "Select",
    "label": "Category",

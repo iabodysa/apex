@@ -112,6 +112,7 @@
    "label": "Assessment"
   },
   {
+   "description": "Recommended disposition for the damaged vehicle, whether to repair it, write it off, recover the cost from the driver, or file an insurance claim.",
    "fieldname": "recommended_action",
    "fieldtype": "Select",
    "in_standard_filter": 1,
@@ -147,6 +148,7 @@
   },
   {
    "default": "Open",
+   "description": "Review stage of the damage write-off case, from open and under review to approved or rejected, then closed or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

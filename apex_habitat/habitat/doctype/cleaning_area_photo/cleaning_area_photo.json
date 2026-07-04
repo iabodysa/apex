@@ -20,6 +20,7 @@
  "fields": [
   {
    "doctype": "DocField",
+   "description": "Which part of the accommodation this cleaning evidence photo covers, so before-and-after proof can be checked per area during cleaning audits.",
    "fieldname": "area",
    "fieldtype": "Select",
    "label": "Area",

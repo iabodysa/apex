@@ -35,6 +35,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Type of fixed facility asset being tracked, grouping surveillance, network, fire-safety, and utility equipment for inventory, maintenance, and compliance reporting.",
    "fieldname": "asset_category",
    "fieldtype": "Select",
    "label": "Category",
@@ -144,6 +145,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Operational state of the facility asset, distinguishing working units from faulty or in-repair ones and from assets that were replaced, scrapped, or put into storage.",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",

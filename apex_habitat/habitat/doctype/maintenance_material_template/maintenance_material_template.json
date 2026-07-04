@@ -41,6 +41,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Fault type this material template applies to, so the standard set of parts is suggested when a matching electrical, plumbing, air-conditioning, or other issue is raised.",
    "fieldname": "issue_type",
    "fieldtype": "Select",
    "label": "Issue Type",

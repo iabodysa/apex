@@ -56,6 +56,7 @@
    "search_index": 1
   },
   {
+   "description": "Reason the vehicle is being taken out of service, whether an accident, maintenance, violation, rental return, or another cause.",
    "fieldname": "stop_reason",
    "fieldtype": "Select",
    "in_list_view": 1,

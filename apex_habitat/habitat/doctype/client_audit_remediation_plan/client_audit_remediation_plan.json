@@ -62,6 +62,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Rolled-up remediation state for the whole client audit plan, summarising progress across its findings and flagging plans that are overdue or closed by the client.",
    "fieldname": "overall_status",
    "fieldtype": "Select",
    "label": "Overall Status",

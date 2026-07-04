@@ -15,6 +15,7 @@
  "fields": [
   {
    "columns": 2,
+   "description": "Kind of vehicle compliance document being tracked, such as registration, insurance, periodic inspection, or operating card, each monitored for expiry.",
    "fieldname": "compliance_type",
    "fieldtype": "Select",
    "in_list_view": 1,

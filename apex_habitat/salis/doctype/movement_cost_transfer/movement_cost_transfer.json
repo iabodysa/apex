@@ -43,6 +43,7 @@
    "label": "Transfer Details"
   },
   {
+   "description": "Category of cost being transferred between cost centres, whether fuel, rental, trip cost, or another type, used for internal cost reallocation.",
    "fieldname": "transfer_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -63,6 +64,7 @@
   },
   {
    "default": "Draft",
+   "description": "Approval stage of the cost transfer, from draft and pending approval to approved and posted as a memo entry, or rejected or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

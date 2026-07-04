@@ -27,6 +27,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Kind of regulatory document or permit held for the building, covering municipal, civil defence, housing, lease, labour authority, and insurance records tracked for expiry and compliance.",
    "fieldname": "license_type",
    "fieldtype": "Select",
    "label": "License Type",
@@ -138,6 +139,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Validity state of the license, flagging documents that are active, approaching expiry, already expired, in renewal, or revoked so compliance gaps are visible.",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",

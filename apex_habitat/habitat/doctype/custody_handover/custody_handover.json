@@ -57,6 +57,7 @@
   },
   {
    "default": "Draft",
+   "description": "Approval lifecycle of the custody handover between holders, moving from draft and pending receipt through review and approval to a confirmed, rejected, or cancelled handover.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

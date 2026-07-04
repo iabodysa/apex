@@ -162,6 +162,7 @@
    "permlevel": 1
   },
   {
+   "description": "Language the resident prefers for updates and responses on this request, so notifications and handling can be routed to staff who can communicate with the worker.",
    "fieldname": "preferred_language",
    "fieldtype": "Select",
    "label": "Preferred Language",
@@ -173,6 +174,7 @@
    "label": "Request Details"
   },
   {
+   "description": "Nature of the resident request, which determines the responsible team and workflow; ranges from physical issues such as maintenance, cleaning, and utilities to administrative items such as custody, reimbursement, complaints, and suggestions.",
    "fieldname": "request_category",
    "fieldtype": "Select",
    "label": "Category",
@@ -180,6 +182,7 @@
    "reqd": 1
   },
   {
+   "description": "Urgency assigned to the request, driving target response time and escalation, from routine low priority up to critical issues that need immediate action.",
    "fieldname": "priority",
    "fieldtype": "Select",
    "label": "Priority",
@@ -187,6 +190,7 @@
    "default": "Low"
   },
   {
+   "description": "Where inside or around the accommodation the reported issue is located, helping staff locate the problem and group recurring faults by area.",
    "fieldname": "issue_location",
    "fieldtype": "Select",
    "label": "Issue Location",
@@ -209,6 +213,7 @@
    "label": "Resolution"
   },
   {
+   "description": "Handling stage of the resident request from intake to closure, tracking triage, assignment, active work, an evidence hold, and the final resolved, rejected, or closed outcome.",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",

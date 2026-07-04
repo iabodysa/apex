@@ -96,6 +96,7 @@
   },
   {
    "default": "Active",
+   "description": "Current employment and availability state of the driver, distinguishing an active driver from one temporarily stopped or on leave, or released from the fleet.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

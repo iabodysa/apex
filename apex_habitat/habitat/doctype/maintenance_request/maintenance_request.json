@@ -119,6 +119,7 @@
    "label": "Ticket"
   },
   {
+   "description": "Trade or fault type of the reported problem, which routes the request to the right maintenance skill and drives default materials, covering electrical, plumbing, air-conditioning, fire safety, pest control, and structural issues.",
    "fieldname": "issue_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -129,6 +130,7 @@
   },
   {
    "default": "Medium",
+   "description": "Urgency of the maintenance request, setting target response time and escalation from routine low priority to critical faults needing immediate attention.",
    "fieldname": "priority",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -142,6 +144,7 @@
   },
   {
    "default": "Open",
+   "description": "Workflow stage of the maintenance request from open through assignment and active work to resolution and closure, including reopening when a fix does not hold.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

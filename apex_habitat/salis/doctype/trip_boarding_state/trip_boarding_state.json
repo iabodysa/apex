@@ -37,6 +37,7 @@
   {
    "columns": 2,
    "default": "Pending",
+   "description": "Boarding state of a worker for the trip, tracking whether boarding is pending, the worker claimed a seat, actually boarded, was rejected by the driver, or was absent.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

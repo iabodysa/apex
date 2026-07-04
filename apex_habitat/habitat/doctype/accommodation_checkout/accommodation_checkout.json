@@ -67,6 +67,7 @@
    "reqd": 1
   },
   {
+   "description": "Why the resident is leaving the accommodation, separating a permanent departure such as final exit or absconding from a move that keeps the worker in the workforce such as an internal or project transfer.",
    "fieldname": "checkout_reason",
    "fieldtype": "Select",
    "in_standard_filter": 1,

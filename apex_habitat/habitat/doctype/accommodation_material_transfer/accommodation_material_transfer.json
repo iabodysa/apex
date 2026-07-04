@@ -43,6 +43,7 @@
   },
   {
    "default": "Draft",
+   "description": "Lifecycle stage of the material transfer between locations, from an unsent draft to goods in transit, confirmed receipt at destination, or a cancelled transfer.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

@@ -67,6 +67,7 @@
   },
   {
    "default": "Standard",
+   "description": "Intended function of the room, which drives whether it counts toward resident bed capacity, such as worker, driver, or supervisor rooms, or is a non-residential space such as office, storage, isolation, or maintenance.",
    "fieldname": "room_type",
    "fieldtype": "Select",
    "label": "Room Type",
@@ -88,6 +89,7 @@
   },
   {
    "default": "Available",
+   "description": "Bed-availability state of the room derived from occupancy, marking whether it can still take residents, is full, or is temporarily out for maintenance.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -113,6 +115,7 @@
   },
   {
    "default": "Unknown",
+   "description": "Physical readiness of the room to receive a new resident, flagging whether it is ready or needs cleaning or repair before it can be occupied, or is out of service.",
    "fieldname": "readiness_status",
    "fieldtype": "Select",
    "in_list_view": 1,

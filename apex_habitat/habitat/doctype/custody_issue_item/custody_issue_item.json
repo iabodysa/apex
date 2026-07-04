@@ -54,6 +54,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Recorded physical condition of the item at the moment it is issued, providing the baseline used to assess wear or damage when it is later returned.",
    "fieldname": "condition_on_issue",
    "fieldtype": "Select",
    "label": "Condition on Issue",

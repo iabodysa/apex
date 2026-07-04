@@ -116,6 +116,7 @@
   {
    "allow_on_submit": 1,
    "default": "Draft",
+   "description": "Reconciliation stage of the fuel claim, from draft and submission to the movement team through reconciliation and approval to closure, or held when disputed.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

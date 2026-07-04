@@ -69,6 +69,7 @@
   {
    "allow_on_submit": 1,
    "default": "Draft",
+   "description": "Settlement stage of the rental period, from draft through reconciliation and approval to payment, or held as disputed or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

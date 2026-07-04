@@ -48,6 +48,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Condition of the facility item recorded at handover, flagging faulty units and items that could not be located during the custody check.",
    "fieldname": "physical_condition",
    "fieldtype": "Select",
    "label": "Condition at Handover",

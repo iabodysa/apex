@@ -66,6 +66,7 @@
    "reqd": 1
   },
   {
+   "description": "Cost category of the accommodation ledger line, separating recurring housing costs such as rent and utilities from staffing and maintenance charges for per-building cost analysis.",
    "fieldname": "ledger_type",
    "fieldtype": "Select",
    "label": "Ledger Type",
@@ -217,6 +218,7 @@
   },
   {
    "default": "Capacity",
+   "description": "Method used to spread a shared building cost onto residents or projects: by bed capacity, by actual occupancy, by a manual split, or charged directly without allocation.",
    "fieldname": "allocation_basis",
    "fieldtype": "Select",
    "label": "Allocation Basis",

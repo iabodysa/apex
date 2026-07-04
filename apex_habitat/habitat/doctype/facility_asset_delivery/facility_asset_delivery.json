@@ -78,6 +78,7 @@
   },
   {
    "default": "Draft",
+   "description": "Lifecycle of the asset delivery; Pending Exits marks a delivery waiting on outstanding item exits before it can be released, then delivered to the destination or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

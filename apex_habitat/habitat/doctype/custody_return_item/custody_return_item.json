@@ -36,6 +36,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Condition of the item when handed back, compared against its issue condition to decide whether a damage or loss charge applies to the holder.",
    "fieldname": "condition_on_return",
    "fieldtype": "Select",
    "label": "Condition on Return",

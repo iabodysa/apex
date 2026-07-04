@@ -182,6 +182,7 @@
   },
   {
    "default": "Draft",
+   "description": "State of the custody issue document, tracking whether items are still issued, fully or partially returned, or the issue was cancelled before handover.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

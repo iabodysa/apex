@@ -95,6 +95,7 @@
   },
   {
    "default": "Same-Company Relocation",
+   "description": "Business nature of the asset move, separating internal relocations from temporary or permanent transfers between companies and from maintenance, repair-return, or disposal movements, which drives cost and ownership treatment.",
    "fieldname": "movement_category",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -108,6 +109,7 @@
   },
   {
    "default": "Reallocation",
+   "description": "Underlying reason the asset is being moved, whether to reallocate it, service it, condemn it, or another cause, used for movement analysis.",
    "fieldname": "movement_reason",
    "fieldtype": "Select",
    "label": "Movement Reason",

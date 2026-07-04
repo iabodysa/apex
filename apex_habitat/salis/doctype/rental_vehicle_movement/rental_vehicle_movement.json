@@ -101,6 +101,7 @@
    "label": "Odometer"
   },
   {
+   "description": "Fuel gauge reading recorded at vehicle handover, from empty to full, used to compare fuel state at pickup and return of the rental vehicle.",
    "fieldname": "fuel_level",
    "fieldtype": "Select",
    "label": "Fuel Level",

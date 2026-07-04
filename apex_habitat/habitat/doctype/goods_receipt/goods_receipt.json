@@ -51,6 +51,7 @@
   },
   {
    "default": "Draft",
+   "description": "Stage of the goods receipt, tracking whether stock has been received into custody, handed over to the end holder, or the receipt was cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

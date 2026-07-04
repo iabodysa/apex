@@ -127,6 +127,7 @@
   },
   {
    "default": "Open",
+   "description": "State of a single generated task occurrence, tracking whether it is open, being worked, completed on time, overdue, or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

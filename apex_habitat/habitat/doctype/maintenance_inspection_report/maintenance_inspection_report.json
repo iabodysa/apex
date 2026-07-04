@@ -88,6 +88,7 @@
   },
   {
    "default": "Post-Work",
+   "description": "When the inspection is carried out relative to work, distinguishing pre-work and post-work checks from routine periodic rounds and unplanned emergency inspections.",
    "fieldname": "inspection_type",
    "fieldtype": "Select",
    "in_list_view": 1,

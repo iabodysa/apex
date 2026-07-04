@@ -30,6 +30,7 @@
    "label": "Overview"
   },
   {
+   "description": "Classifies the operational anomaly that triggered this alert so it routes to the right owner: idle assets, stalled or forgotten requests, supervisor delays, abnormal fuel top-ups, lapsing licenses, overdue maintenance, unsettled rentals, or expired consumables.",
    "fieldname": "alert_type",
    "fieldtype": "Select",
    "in_list_view": 1,

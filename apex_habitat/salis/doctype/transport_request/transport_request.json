@@ -311,6 +311,7 @@
   {
    "allow_on_submit": 1,
    "default": "New",
+   "description": "Handling stage of the transport request from intake through validation, approval, and scheduling to fulfilment, or a rejected or cancelled outcome.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

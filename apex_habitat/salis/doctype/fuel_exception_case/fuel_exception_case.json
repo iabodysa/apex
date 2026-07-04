@@ -73,6 +73,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Nature of the fuel anomaly under investigation, from over-consumption and GPS mismatches to duplicate claims, suspected fraud, or quota disputes, driving the investigation path.",
    "fieldname": "exception_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -105,6 +106,7 @@
   {
    "allow_on_submit": 1,
    "default": "Open",
+   "description": "Investigation stage of the fuel exception, tracking whether it is open, under investigation, awaiting evidence, resolved, rejected, or closed.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

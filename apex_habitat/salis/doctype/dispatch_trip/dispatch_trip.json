@@ -97,6 +97,7 @@
   {
    "allow_on_submit": 1,
    "default": "Planned",
+   "description": "Execution stage of the dispatch trip, from a planned trip to one dispatched to the driver, then completed or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

@@ -50,6 +50,7 @@
    "label": "Request"
   },
   {
+   "description": "Kind of expense the payment request covers, such as fuel, rental, a fine, sponsorship fee, or maintenance, which drives approval routing and account coding.",
    "fieldname": "expense_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -193,6 +194,7 @@
   {
    "allow_on_submit": 1,
    "default": "Draft",
+   "description": "Approval and payment stage of the request, from draft to pending finance review, then approved and paid, or rejected or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

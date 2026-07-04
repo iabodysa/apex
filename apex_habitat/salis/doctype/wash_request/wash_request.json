@@ -73,6 +73,7 @@
   },
   {
    "default": "Pending",
+   "description": "Processing state of the vehicle wash request, from pending approval to approved and done, or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

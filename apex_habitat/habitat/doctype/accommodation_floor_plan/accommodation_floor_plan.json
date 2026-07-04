@@ -49,6 +49,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Vertical position of the floor within the building, used for occupancy planning and to apply safety rules that differ for basement, ground, middle, and roof levels.",
    "fieldname": "floor_type",
    "label": "Floor Type",
    "fieldtype": "Select",
@@ -63,6 +64,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Intended function of the room, which drives whether it counts toward resident bed capacity, such as worker, driver, or supervisor rooms, or is a non-residential space such as office, storage, isolation, or maintenance.",
    "fieldname": "room_type",
    "label": "Room Type",
    "fieldtype": "Select",

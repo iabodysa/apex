@@ -50,6 +50,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Kind of recurring work this template generates, classifying instances as safety, maintenance, inspection, or cleaning for routing and reporting.",
    "fieldname": "task_type",
    "fieldtype": "Select",
    "label": "Task Type",
@@ -65,6 +66,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Recurrence interval used to generate task instances from this template, from daily through annually.",
    "fieldname": "frequency",
    "fieldtype": "Select",
    "label": "Frequency",

@@ -58,6 +58,7 @@
    "reqd": 1
   },
   {
+   "description": "Type of housing inventory item, grouping furniture, appliances, bedding, kitchenware, fixtures, and equipment for stock counts and replacement planning.",
    "fieldname": "item_category",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -153,6 +154,7 @@
   },
   {
    "default": "Good",
+   "description": "Current condition of the inventory item, flagging units that need maintenance, are damaged, or are missing so replacements and charges can be raised.",
    "fieldname": "condition",
    "fieldtype": "Select",
    "in_standard_filter": 1,

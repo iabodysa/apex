@@ -50,6 +50,7 @@
    "reqd": 1
   },
   {
+   "description": "How often this safety round is scheduled to recur, from daily through annual, driving generation of the next due round.",
    "fieldname": "cadence",
    "fieldtype": "Select",
    "in_list_view": 1,

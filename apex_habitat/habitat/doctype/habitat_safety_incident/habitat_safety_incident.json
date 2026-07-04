@@ -65,6 +65,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Category of the safety incident in the accommodation, routing fire, electrical, injury, structural, hygiene, and security events to the appropriate response and reporting path.",
    "fieldname": "incident_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -73,6 +74,7 @@
    "options": "Fire\nElectrical\nInjury\nStructural\nHealth and Hygiene\nSecurity\nOther"
   },
   {
+   "description": "Assessed seriousness of the incident, driving escalation and response urgency from minor low-severity events up to critical incidents needing immediate action.",
    "fieldname": "severity",
    "fieldtype": "Select",
    "in_list_view": 1,

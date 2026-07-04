@@ -83,6 +83,7 @@
   },
   {
    "default": "Active",
+   "description": "Operational state of the vehicle, distinguishing an active vehicle from one stopped or under maintenance, or released from the fleet.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -165,6 +166,7 @@
   },
   {
    "default": "Not Tracked",
+   "description": "Rolled-up regulatory compliance state of the vehicle across its documents, flagging vehicles that are compliant, approaching expiry, expired, or not tracked.",
    "fieldname": "compliance_status",
    "fieldtype": "Select",
    "label": "Compliance Status",

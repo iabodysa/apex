@@ -55,6 +55,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Kind of outsourced facility service the contract covers, such as pest control, tank suction, deep cleaning, or equipment servicing, used to match orders to the right vendor scope.",
    "fieldname": "service_type",
    "fieldtype": "Select",
    "label": "Service Type",
@@ -71,6 +72,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "How often the subcontractor is scheduled to visit under the contract, from weekly to quarterly, or on-call only when visits are requested as needed.",
    "fieldname": "visit_frequency",
    "fieldtype": "Select",
    "label": "Scheduled Visit Frequency",
@@ -107,6 +109,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Approval and validity state of the service contract, from draft and pending approval to active, or rejected, expired, or terminated.",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",

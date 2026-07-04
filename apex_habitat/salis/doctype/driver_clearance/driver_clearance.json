@@ -48,6 +48,7 @@
    "search_index": 1
   },
   {
+   "description": "Why the driver is being cleared from the fleet, separating a voluntary resignation or end of assignment from a transfer or termination, which affects settlement handling.",
    "fieldname": "clearance_reason",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -83,6 +84,7 @@
   {
    "allow_on_submit": 1,
    "default": "Open",
+   "description": "Progress of the driver clearance process, tracking whether checks are open or in progress, fully cleared, blocked by an outstanding item, or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

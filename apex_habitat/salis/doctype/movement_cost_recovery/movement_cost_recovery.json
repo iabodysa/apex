@@ -48,6 +48,7 @@
    "label": "Recovery Details"
   },
   {
+   "description": "Type of cost being recovered from a driver or party, such as vehicle damage, fuel misuse, custody loss, or a fine, which determines the recovery basis.",
    "fieldname": "recovery_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -98,6 +99,7 @@
   },
   {
    "default": "Open",
+   "description": "Lifecycle of the cost recovery case, tracking acknowledgement, approval, and whether the amount was recovered, waived, rejected, or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

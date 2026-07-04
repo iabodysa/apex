@@ -97,6 +97,7 @@
   {
    "allow_on_submit": 1,
    "default": "Pending",
+   "description": "Processing state of the fuel top-up request, from pending approval to a completed dispense, or failed, reverted, or cancelled outcomes.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,

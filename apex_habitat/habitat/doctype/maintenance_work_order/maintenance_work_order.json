@@ -192,6 +192,7 @@
   },
   {
    "default": "Draft",
+   "description": "Execution stage of the maintenance work order, from draft and planned through in-progress work to completion or cancellation.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -243,6 +244,7 @@
   {
    "fetch_from": "maintenance_request.issue_type",
    "fetch_if_empty": 1,
+   "description": "Fault type the work order addresses, carried from the request to route the job to the right trade, covering electrical, plumbing, air-conditioning, fire safety, pest control, and structural work.",
    "fieldname": "issue_type",
    "fieldtype": "Select",
    "label": "Issue Type",

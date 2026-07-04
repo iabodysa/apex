@@ -510,6 +510,7 @@
   },
   {
    "default": "Not Installed",
+   "description": "Live recording state of the building surveillance recorder, used to flag housing whose cameras are offline, not recording, or never installed for compliance follow-up.",
    "fieldname": "dvr_status",
    "fieldtype": "Select",
    "label": "DVR/NVR Status",

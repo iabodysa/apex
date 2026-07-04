@@ -67,6 +67,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Quality rating recorded when the safety task was carried out, from excellent down to poor, or Not Done when the task was skipped, feeding compliance scoring.",
    "fieldname": "execution_status",
    "fieldtype": "Select",
    "label": "Execution Status",

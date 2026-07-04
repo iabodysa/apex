@@ -112,6 +112,7 @@
    "label": "Classification"
   },
   {
+   "description": "Why a resident is idle and not deployed to work, such as a new hire awaiting assignment, a return from leave, or a legal or HR hold, used to target follow-up.",
    "fieldname": "reason_category",
    "fieldtype": "Select",
    "in_standard_filter": 1,
@@ -171,6 +172,7 @@
   },
   {
    "depends_on": "eval:doc.status==\"Resolved\"",
+   "description": "How the idle-resident case was closed out, recording whether the worker was deployed, checked out, transferred, or the case was otherwise closed.",
    "fieldname": "resolution_category",
    "fieldtype": "Select",
    "label": "Resolution Category",

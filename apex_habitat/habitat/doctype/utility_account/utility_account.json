@@ -35,6 +35,7 @@
   },
   {
    "doctype": "DocField",
+   "description": "Kind of utility this account represents, used to group meters and bills by service so consumption and cost can be tracked per utility.",
    "fieldname": "utility_type",
    "fieldtype": "Select",
    "label": "Utility Type",

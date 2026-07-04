@@ -79,6 +79,7 @@
   },
   {
    "default": "Scheduled",
+   "description": "State of an individual service visit order, tracking whether the visit is scheduled, in progress, completed, missed by the vendor, or cancelled.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
