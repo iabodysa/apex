@@ -12,6 +12,62 @@ frappe.pages["custody-kiosk"].on_page_load = function (wrapper) {
 	kiosk.setup();
 };
 
+// Kiosk look restored on native Desk CSS variables — a Desk page ships no stylesheet,
+// so the removed custody_kiosk.css is re-expressed as inline style="" overlays bound
+// to Desk vars (theme + dark-mode aware) with logical properties (RTL-mirrored). No
+// <style> injection (T-680).
+const CK_STYLE = {
+	modebar:
+		"display:inline-flex;gap:0;margin-block:4px 12px;border:1px solid var(--border-color);border-radius:8px;overflow:hidden;background:var(--control-bg);",
+	mode_btn:
+		"appearance:none;border:none;background:transparent;color:var(--text-color);font-size:14px;font-weight:600;padding-block:8px;padding-inline:22px;cursor:pointer;min-inline-size:96px;",
+	mode_btn_divider: "border-inline-start:1px solid var(--border-color);",
+	mode_btn_active: "background:var(--primary);color:var(--text-on-blue);",
+	// flex-wrap lets the sticky cart drop under the catalog on a narrow viewport
+	// (replaces the removed max-width column media query).
+	layout: "display:flex;gap:16px;align-items:flex-start;padding-block:8px 32px;padding-inline:4px;flex-wrap:wrap;",
+	catalog: "flex:1 1 320px;min-inline-size:0;",
+	tools: "margin-block-end:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;",
+	search: "max-inline-size:360px;font-size:15px;",
+	empty: "padding-block:48px;padding-inline:16px;text-align:center;font-size:15px;",
+	tiles: "display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;",
+	tile:
+		"border:2px solid var(--border-color);border-radius:10px;padding:12px;background:var(--card-bg);cursor:pointer;user-select:none;display:flex;flex-direction:column;gap:8px;min-block-size:180px;",
+	tile_skeleton: "cursor:default;pointer-events:none;",
+	thumb:
+		"inline-size:100%;block-size:110px;border-radius:8px;overflow:hidden;background:var(--control-bg);display:flex;align-items:center;justify-content:center;",
+	thumb_img: "inline-size:100%;block-size:100%;object-fit:cover;",
+	initials: "font-size:34px;font-weight:700;color:var(--text-muted);",
+	tile_name: "font-weight:600;font-size:14px;line-height:1.3;",
+	tile_meta: "font-size:12px;color:var(--text-muted);",
+	tile_sub: "font-size:11px;margin-block-start:-2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;",
+	skel_thumb: "inline-size:100%;block-size:110px;border-radius:8px;background:var(--skeleton-bg);",
+	skel_line: "block-size:12px;inline-size:80%;border-radius:6px;background:var(--skeleton-bg);",
+	skel_line_sm: "block-size:12px;inline-size:50%;border-radius:6px;background:var(--skeleton-bg);",
+	cart:
+		"flex:0 0 320px;border:1px solid var(--border-color);border-radius:10px;background:var(--card-bg);display:flex;flex-direction:column;position:sticky;inset-block-start:8px;max-block-size:calc(100vh - 120px);",
+	cart_header: "padding-block:14px;padding-inline:16px;font-size:16px;font-weight:600;border-block-end:1px solid var(--border-color);",
+	cart_lines: "flex:1 1 auto;overflow-y:auto;padding-block:8px;",
+	cart_empty: "padding-block:32px;padding-inline:16px;text-align:center;font-size:14px;",
+	cart_line:
+		"display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:10px;padding-inline:16px;border-block-end:1px solid var(--border-color);",
+	cart_line_name: "font-size:14px;font-weight:500;flex:1 1 auto;min-inline-size:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;",
+	cart_line_info: "flex:1 1 auto;min-inline-size:0;",
+	// name inside the return-cart info stack: no flex-grow (overridden from base).
+	cart_line_name_info: "font-size:14px;font-weight:500;flex:0 0 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;",
+	cart_line_sub: "font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;",
+	stepper: "display:flex;align-items:center;gap:8px;flex:0 0 auto;",
+	step: "inline-size:36px;block-size:36px;font-size:18px;line-height:1;padding:0;font-weight:700;",
+	step_qty: "min-inline-size:28px;text-align:center;font-size:15px;font-weight:600;",
+	cart_footer: "padding-block:14px;padding-inline:16px;border-block-start:1px solid var(--border-color);",
+	cart_subtotal: "display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-block-end:12px;font-size:14px;",
+	subtotal_value: "font-size:18px;font-weight:700;",
+	action_btn: "inline-size:100%;",
+	error:
+		"grid-column:1 / -1;padding-block:40px;padding-inline:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;",
+	error_msg: "font-size:15px;",
+};
+
 class CustodyKiosk {
 	constructor(page) {
 		this.page = page;
@@ -214,59 +270,69 @@ class CustodyKiosk {
 	}
 
 	_build_layout() {
-		this.$layout = $('<div class="ck-layout"></div>').appendTo(this.page.main);
+		this.$layout = $('<div class="ck-layout"></div>').attr("style", CK_STYLE.layout).appendTo(this.page.main);
 
 		// [#modeui]
 		const $modebar = $(
 			`<div class="ck-modebar" role="tablist" aria-label="${frappe.utils.escape_html(
 				__("Issue or return mode")
 			)}"></div>`
-		).appendTo(this.page.main);
+		)
+			.attr("style", CK_STYLE.modebar)
+			.appendTo(this.page.main);
 		// Mode bar must sit ABOVE the catalog/cart layout.
 		$modebar.insertBefore(this.$layout);
 
 		this.$mode_issue = $(
 			`<button class="ck-mode-btn" role="tab" type="button"></button>`
 		)
+			.attr("style", CK_STYLE.mode_btn)
 			.text(__("Issue Custody"))
 			.appendTo($modebar)
 			.on("click", () => this._set_mode("issue"));
 		this.$mode_return = $(
 			`<button class="ck-mode-btn" role="tab" type="button"></button>`
 		)
+			.attr("style", CK_STYLE.mode_btn + CK_STYLE.mode_btn_divider)
 			.text(__("Return"))
 			.appendTo($modebar)
 			.on("click", () => this._set_mode("return"));
 
 		// [#20cz3t]
-		const $catalog = $('<div class="ck-catalog"></div>').appendTo(this.$layout);
-		const $tools = $('<div class="ck-tools"></div>').appendTo($catalog);
+		const $catalog = $('<div class="ck-catalog"></div>').attr("style", CK_STYLE.catalog).appendTo(this.$layout);
+		const $tools = $('<div class="ck-tools"></div>').attr("style", CK_STYLE.tools).appendTo($catalog);
 		this.$search = $(
 			`<input type="search" class="ck-search form-control" placeholder="${frappe.utils.escape_html(
 				__("Search articles…")
 			)}" aria-label="${frappe.utils.escape_html(__("Search articles"))}">`
-		).appendTo($tools);
+		)
+			.attr("style", CK_STYLE.search)
+			.appendTo($tools);
 		// [#guxhpt]
 		const debounced_render = frappe.utils.debounce(() => this._render_visible(), 120);
 		this.$search.on("input", debounced_render);
 
-		this.$tiles = $('<div class="ck-tiles"></div>').appendTo($catalog);
+		this.$tiles = $('<div class="ck-tiles"></div>').attr("style", CK_STYLE.tiles).appendTo($catalog);
 
 		// [#4232vl]
-		const $cart = $('<div class="ck-cart"></div>').appendTo(this.$layout);
+		const $cart = $('<div class="ck-cart"></div>').attr("style", CK_STYLE.cart).appendTo(this.$layout);
 		this.$cart_header = $('<div class="ck-cart-header"></div>')
+			.attr("style", CK_STYLE.cart_header)
 			.text(__("Cart"))
 			.appendTo($cart);
-		this.$cart_lines = $('<div class="ck-cart-lines"></div>').appendTo($cart);
-		const $footer = $('<div class="ck-cart-footer"></div>').appendTo($cart);
+		this.$cart_lines = $('<div class="ck-cart-lines"></div>').attr("style", CK_STYLE.cart_lines).appendTo($cart);
+		const $footer = $('<div class="ck-cart-footer"></div>').attr("style", CK_STYLE.cart_footer).appendTo($cart);
 		// Value subtotal sits above the action button; aria-live so screen
 		// readers announce the running total as items are added/removed.
 		this.$subtotal = $(
 			`<div class="ck-cart-subtotal" role="status" aria-live="polite"></div>`
-		).appendTo($footer);
+		)
+			.attr("style", CK_STYLE.cart_subtotal)
+			.appendTo($footer);
 		this.$action_btn = $(
 			`<button class="btn btn-primary btn-lg ck-action-btn"></button>`
 		)
+			.attr("style", CK_STYLE.action_btn)
 			.text(__("Issue"))
 			.appendTo($footer);
 		this.$action_btn.on("click", () => this._commit());
@@ -283,12 +349,16 @@ class CustodyKiosk {
 		const is_return = this.mode === "return";
 
 		// Toggle the tablist visual + ARIA state (aria-pressed for a toggle pair).
+		// The active fill is re-applied inline since there is no stylesheet to key
+		// the `.active` class off of.
 		this.$mode_issue
 			.toggleClass("active", !is_return)
+			.attr("style", CK_STYLE.mode_btn + (!is_return ? CK_STYLE.mode_btn_active : ""))
 			.attr("aria-pressed", String(!is_return))
 			.attr("aria-selected", String(!is_return));
 		this.$mode_return
 			.toggleClass("active", is_return)
+			.attr("style", CK_STYLE.mode_btn + CK_STYLE.mode_btn_divider + (is_return ? CK_STYLE.mode_btn_active : ""))
 			.attr("aria-pressed", String(is_return))
 			.attr("aria-selected", String(is_return));
 
@@ -384,7 +454,7 @@ class CustodyKiosk {
 
 	_render_empty(message) {
 		this.$tiles.empty();
-		$('<div class="ck-empty text-muted"></div>').text(message).appendTo(this.$tiles);
+		$('<div class="ck-empty text-muted"></div>').attr("style", CK_STYLE.empty).text(message).appendTo(this.$tiles);
 	}
 
 	_render_held_empty(message) {
@@ -394,20 +464,24 @@ class CustodyKiosk {
 
 	_render_loading() {
 		this.$tiles.empty();
-		// [#3omcm3]
+		// [#3omcm3] — flat placeholder blocks on the native --skeleton-bg Desk var
+		// (theme + dark aware); the removed shimmer @keyframes needs a stylesheet.
 		for (let i = 0; i < 6; i++) {
-			const $sk = $('<div class="ck-tile ck-tile-skeleton" aria-hidden="true"></div>');
-			$('<div class="ck-tile-thumb ck-skel"></div>').appendTo($sk);
-			$('<div class="ck-skel ck-skel-line"></div>').appendTo($sk);
-			$('<div class="ck-skel ck-skel-line ck-skel-line-sm"></div>').appendTo($sk);
+			const $sk = $('<div class="ck-tile ck-tile-skeleton" aria-hidden="true"></div>').attr(
+				"style",
+				CK_STYLE.tile + CK_STYLE.tile_skeleton
+			);
+			$('<div class="ck-tile-thumb ck-skel"></div>').attr("style", CK_STYLE.skel_thumb).appendTo($sk);
+			$('<div class="ck-skel ck-skel-line"></div>').attr("style", CK_STYLE.skel_line).appendTo($sk);
+			$('<div class="ck-skel ck-skel-line ck-skel-line-sm"></div>').attr("style", CK_STYLE.skel_line_sm).appendTo($sk);
 			$sk.appendTo(this.$tiles);
 		}
 	}
 
 	_render_error(message, retry) {
 		this.$tiles.empty();
-		const $box = $('<div class="ck-error"></div>').appendTo(this.$tiles);
-		$('<div class="ck-error-msg text-danger"></div>').text(message).appendTo($box);
+		const $box = $('<div class="ck-error"></div>').attr("style", CK_STYLE.error).appendTo(this.$tiles);
+		$('<div class="ck-error-msg text-danger"></div>').attr("style", CK_STYLE.error_msg).text(message).appendTo($box);
 		$('<button class="btn btn-default btn-sm ck-retry"></button>')
 			.text(__("Retry"))
 			.appendTo($box)
@@ -456,21 +530,24 @@ class CustodyKiosk {
 	}
 
 	_render_tile(art) {
-		const $tile = $(`<div class="ck-tile" tabindex="0" role="button"></div>`);
+		const $tile = $(`<div class="ck-tile" tabindex="0" role="button"></div>`).attr("style", CK_STYLE.tile);
 
-		const $thumb = $('<div class="ck-tile-thumb"></div>').appendTo($tile);
+		const $thumb = $('<div class="ck-tile-thumb"></div>').attr("style", CK_STYLE.thumb).appendTo($tile);
 		if (art.image) {
 			$('<img class="ck-tile-img">')
+				.attr("style", CK_STYLE.thumb_img)
 				.attr("src", art.image)
 				.attr("alt", art.article_name || art.article)
 				.appendTo($thumb);
 		} else {
 			$('<div class="ck-tile-initials"></div>')
+				.attr("style", CK_STYLE.initials)
 				.text(this._initials(art.article_name || art.article))
 				.appendTo($thumb);
 		}
 
 		$('<div class="ck-tile-name"></div>')
+			.attr("style", CK_STYLE.tile_name)
 			.text(art.article_name || art.article)
 			.appendTo($tile);
 
@@ -493,14 +570,16 @@ class CustodyKiosk {
 
 	// [#heldtile]
 	_render_held_tile(line) {
-		const $tile = $(`<div class="ck-tile" tabindex="0" role="button"></div>`);
+		const $tile = $(`<div class="ck-tile" tabindex="0" role="button"></div>`).attr("style", CK_STYLE.tile);
 
-		const $thumb = $('<div class="ck-tile-thumb"></div>').appendTo($tile);
+		const $thumb = $('<div class="ck-tile-thumb"></div>').attr("style", CK_STYLE.thumb).appendTo($tile);
 		$('<div class="ck-tile-initials"></div>')
+			.attr("style", CK_STYLE.initials)
 			.text(this._initials(line.article_name || line.article))
 			.appendTo($thumb);
 
 		$('<div class="ck-tile-name"></div>')
+			.attr("style", CK_STYLE.tile_name)
 			.text(line.article_name || line.article)
 			.appendTo($tile);
 
@@ -508,7 +587,7 @@ class CustodyKiosk {
 		if ($meta) $meta.appendTo($tile);
 
 		// Each held line is tied to its source Custody Issue (bidi-isolated).
-		const $sub = $('<div class="ck-tile-sub text-muted"></div>').appendTo($tile);
+		const $sub = $('<div class="ck-tile-sub text-muted"></div>').attr("style", CK_STYLE.tile_sub).appendTo($tile);
 		const [isub_before, isub_after] = __("Issue: {0}").split("{0}");
 		$("<span></span>").text(isub_before).appendTo($sub);
 		$("<bdi></bdi>").text(line.custody_issue).appendTo($sub);
@@ -541,7 +620,7 @@ class CustodyKiosk {
 	_render_tile_meta(uom, count, template) {
 		const has_count = count !== null && count !== undefined;
 		if (!uom && !has_count) return null;
-		const $meta = $('<div class="ck-tile-meta"></div>');
+		const $meta = $('<div class="ck-tile-meta"></div>').attr("style", CK_STYLE.tile_meta);
 		if (uom) $("<span></span>").text(uom).appendTo($meta);
 		if (has_count) {
 			if (uom) $("<span></span>").text(" · ").appendTo($meta);
@@ -625,6 +704,7 @@ class CustodyKiosk {
 
 		if (!lines.length) {
 			$('<div class="ck-cart-empty text-muted"></div>')
+				.attr("style", CK_STYLE.cart_empty)
 				.text(__("Cart is empty."))
 				.appendTo(this.$cart_lines);
 			this.$action_btn.prop("disabled", true);
@@ -637,15 +717,17 @@ class CustodyKiosk {
 		let total = 0;
 		lines.forEach((line) => {
 			total += flt(line.rate) * flt(line.qty);
-			const $line = $('<div class="ck-cart-line"></div>').appendTo(this.$cart_lines);
-			$('<div class="ck-cart-line-name"></div>').text(line.article_name).appendTo($line);
+			const $line = $('<div class="ck-cart-line"></div>').attr("style", CK_STYLE.cart_line).appendTo(this.$cart_lines);
+			$('<div class="ck-cart-line-name"></div>').attr("style", CK_STYLE.cart_line_name).text(line.article_name).appendTo($line);
 
-			const $stepper = $('<div class="ck-stepper"></div>').appendTo($line);
+			const $stepper = $('<div class="ck-stepper"></div>').attr("style", CK_STYLE.stepper).appendTo($line);
 			$('<button class="btn btn-default btn-sm ck-step ck-step-minus">−</button>')
+				.attr("style", CK_STYLE.step)
 				.appendTo($stepper)
 				.on("click", () => this._change_qty(line.article, -1));
-			$('<span class="ck-step-qty"></span>').text(line.qty).appendTo($stepper);
+			$('<span class="ck-step-qty"></span>').attr("style", CK_STYLE.step_qty).text(line.qty).appendTo($stepper);
 			$('<button class="btn btn-default btn-sm ck-step ck-step-plus">+</button>')
+				.attr("style", CK_STYLE.step)
 				.appendTo($stepper)
 				.on("click", () => this._change_qty(line.article, 1));
 		});
@@ -667,6 +749,7 @@ class CustodyKiosk {
 			.text(__("Estimated value"))
 			.appendTo(this.$subtotal);
 		$('<span class="ck-subtotal-value"></span>')
+			.attr("style", CK_STYLE.subtotal_value)
 			.append($("<bdi></bdi>").text(format_currency(flt(total), "SAR")))
 			.appendTo(this.$subtotal);
 	}
@@ -679,6 +762,7 @@ class CustodyKiosk {
 
 		if (!lines.length) {
 			$('<div class="ck-cart-empty text-muted"></div>')
+				.attr("style", CK_STYLE.cart_empty)
 				.text(__("Return cart is empty."))
 				.appendTo(this.$cart_lines);
 			this.$action_btn.prop("disabled", true);
@@ -688,21 +772,24 @@ class CustodyKiosk {
 		this.$action_btn.prop("disabled", false);
 
 		lines.forEach((line) => {
-			const $line = $('<div class="ck-cart-line"></div>').appendTo(this.$cart_lines);
-			const $info = $('<div class="ck-cart-line-info"></div>').appendTo($line);
-			$('<div class="ck-cart-line-name"></div>').text(line.article_name).appendTo($info);
+			const $line = $('<div class="ck-cart-line"></div>').attr("style", CK_STYLE.cart_line).appendTo(this.$cart_lines);
+			const $info = $('<div class="ck-cart-line-info"></div>').attr("style", CK_STYLE.cart_line_info).appendTo($line);
+			$('<div class="ck-cart-line-name"></div>').attr("style", CK_STYLE.cart_line_name_info).text(line.article_name).appendTo($info);
 			$('<div class="ck-cart-line-sub text-muted"></div>')
+				.attr("style", CK_STYLE.cart_line_sub)
 				.text(line.custody_issue)
 				.appendTo($info);
 
-			const $stepper = $('<div class="ck-stepper"></div>').appendTo($line);
+			const $stepper = $('<div class="ck-stepper"></div>').attr("style", CK_STYLE.stepper).appendTo($line);
 			$('<button class="btn btn-default btn-sm ck-step ck-step-minus">−</button>')
+				.attr("style", CK_STYLE.step)
 				.appendTo($stepper)
 				.on("click", () => this._change_return_qty(line.key, -1));
-			$('<span class="ck-step-qty"></span>').text(line.qty).appendTo($stepper);
+			$('<span class="ck-step-qty"></span>').attr("style", CK_STYLE.step_qty).text(line.qty).appendTo($stepper);
 			const $plus = $(
 				'<button class="btn btn-default btn-sm ck-step ck-step-plus">+</button>'
 			)
+				.attr("style", CK_STYLE.step)
 				.appendTo($stepper)
 				.on("click", () => this._change_return_qty(line.key, 1));
 			// Cap at the held quantity.
