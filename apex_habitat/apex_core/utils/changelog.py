@@ -5,6 +5,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.60.59 — more of the app now reads in Arabic: the freelance pay record, salary-deduction authorization fields and their warnings, data-retention settings, fleet operations thresholds, and the worker-link, service-order and safety messages are translated",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-04 12:00:00",
+    },
+    {
         "title": "Apex 1.60.58 — logistics importer and safety round security hardening: driver and vehicle data imports now support update-on-exists logic; the safety round checklist single submission write path is secured with building read permission validation, alongside automated test coverage for imports and checklist API gating",
         "app_name": "apex_habitat",
         "link": "/safety",
