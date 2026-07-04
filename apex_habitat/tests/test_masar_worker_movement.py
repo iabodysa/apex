@@ -27,174 +27,31 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api import masar
-from apex_habitat.tests.test_driver_portal import _ensure_test_driver
+from apex_habitat.tests import factories
 
-
-def _company():
-    return (
-        frappe.defaults.get_global_default("company")
-        or frappe.get_all("Company", limit=1)[0].name
-    )
-
-
-def _project(name):
-    p = frappe.db.get_value("Project", {"project_name": name}, "name")
-    if not p:
-        p = frappe.get_doc(
-            {"doctype": "Project", "project_name": name}
-        ).insert(ignore_permissions=True).name
-    return p
-
-
-def _site(name):
-    s = frappe.db.get_value("Accommodation Site", {"site_name": name}, "name")
-    if not s:
-        s = frappe.get_doc(
-            {"doctype": "Accommodation Site", "site_name": name, "company": _company()}
-        ).insert(ignore_permissions=True).name
-    return s
-
-
-def _building(name):
-    b = frappe.db.get_value("Accommodation Building", {"building_name": name}, "name")
-    if not b:
-        b = frappe.get_doc(
-            {
-                "doctype": "Accommodation Building",
-                "building_name": name,
-                "site": _site("Masar Test Site"),
-                "total_capacity": 50,
-                "google_maps_url": "https://maps.example/masar-building",
-            }
-        ).insert(ignore_permissions=True).name
-    return b
-
-
-def _employee(first_name):
-    emp = frappe.db.get_value("Employee", {"employee_name": first_name}, "name")
-    if not emp:
-        emp = frappe.get_doc(
-            {
-                "doctype": "Employee",
-                "first_name": first_name,
-                "date_of_birth": "1990-01-01",
-                "date_of_joining": frappe.utils.today(),
-                "gender": "Male",
-                "company": _company(),
-            }
-        ).insert(ignore_permissions=True).name
-    return emp
-
-
-def _driver_user_for(driver):
-    """The login user behind a Salis Driver (via its Employee.user_id)."""
-    emp = frappe.db.get_value("Salis Driver", driver, "employee")
-    return frappe.db.get_value("Employee", emp, "user_id")
-
-
-def _ensure_driver_chain(email, first_name):
-    """Idempotently get-or-create a User+Employee+Salis Driver chain and return
-    ``(driver_name, email)``. Mirrors the driver-portal test helpers so re-runs on
-    a non-fresh DB never duplicate."""
-    if not frappe.db.exists("User", email):
-        u = frappe.get_doc(
-            {
-                "doctype": "User",
-                "email": email,
-                "first_name": first_name,
-                "send_welcome_email": 0,
-            }
-        )
-        u.insert(ignore_permissions=True)
-    user = frappe.get_doc("User", email)
-    if "Driver" not in frappe.get_roles(email):
-        user.add_roles("Driver")
-    emp = frappe.db.get_value("Employee", {"user_id": email}, "name")
-    if not emp:
-        emp = frappe.get_doc(
-            {
-                "doctype": "Employee",
-                "first_name": first_name,
-                "user_id": email,
-                "date_of_birth": "1990-01-01",
-                "date_of_joining": frappe.utils.today(),
-                "gender": "Male",
-                "company": _company(),
-            }
-        ).insert(ignore_permissions=True).name
-    drv = frappe.db.get_value("Salis Driver", {"employee": emp}, "name")
-    if not drv:
-        drv = frappe.get_doc(
-            {
-                "doctype": "Salis Driver",
-                "employee": emp,
-                "full_name": first_name,
-                "status": "Active",
-            }
-        ).insert(ignore_permissions=True).name
-    return drv, email
+# Fixture builders live in tests/factories.py (P-129). These module-level aliases
+# preserve the historical private names that sibling Masar test modules import from
+# here (test_masar_worker_scope, test_boarding_scan, test_masar_1b, ...), while the
+# single source of truth is now the factories library.
+_company = factories.default_company
+_project = factories.make_project
+_site = factories.make_site
+_building = factories.make_masar_building
+_employee = factories.make_worker_employee
+_driver_user_for = factories.driver_user
+_ensure_driver_chain = factories.make_driver_chain
+_ensure_test_driver = factories.make_test_driver
 
 
 class _WorkerTripMixin:
     """Builds a complete Workers-line trip for a given driver and returns the
-    handle records. Everything is created as Administrator."""
+    handle records, registering cleanup. Record creation is delegated to
+    ``factories.make_worker_trip``; everything is created as Administrator."""
 
     def _worker_trip(self, driver, project, building, workers, route_name):
-        tr = frappe.get_doc(
-            {
-                "doctype": "Transport Request",
-                "service_line": "Site Transport",
-                "request_type": "Accommodation to Project Shuttle",
-                "project": project,
-                "accommodation_building": building,
-                "from_location": building,
-                "to_location": "Project Site",
-                "source_channel": "Desk",
-                "status": "New",
-                "workers": [
-                    {"employee": e, "pickup_point": "Building Gate"} for e in workers
-                ],
-            }
-        ).insert(ignore_permissions=True)
-        # [#aj1ze2]
-        tr.reload()
-
-        rp = frappe.get_doc(
-            {
-                "doctype": "Route Plan",
-                "route_name": route_name,
-                "transport_request": tr.name,
-                "project": project,
-                "driver": driver,
-                "stops": [
-                    {
-                        "sequence": 1,
-                        "stop_name": "Housing Pickup",
-                        "accommodation_building": building,
-                        "location": "Building Gate",
-                        "passengers": len(workers),
-                    },
-                    {
-                        "sequence": 2,
-                        "stop_name": "Project Drop-off",
-                        "location": "Project Site",
-                        "passengers": 0,
-                    },
-                ],
-            }
-        ).insert(ignore_permissions=True)
-
-        dt = frappe.get_doc(
-            {
-                "doctype": "Dispatch Trip",
-                "route_plan": rp.name,
-                "transport_request": tr.name,
-                "driver": driver,
-                "trip_date": frappe.utils.today(),
-                "depart_time": "06:30:00",
-                "status": "Planned",
-            }
-        ).insert(ignore_permissions=True)
+        tr, rp, dt = factories.make_worker_trip(
+            driver, project, building, workers, route_name
+        )
         self.addCleanup(lambda: self._purge(dt.name, rp.name, tr.name))
         return tr, rp, dt
 

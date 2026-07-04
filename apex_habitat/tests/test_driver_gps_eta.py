@@ -27,13 +27,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api import driver_portal, masar
-from apex_habitat.tests.test_masar_worker_movement import (
-    _company,
-    _ensure_driver_chain,
-    _employee,
-    _project,
-    _site,
-)
+from apex_habitat.tests import factories
 
 # The deterministic geometry under test.
 _PICKUP_LAT = 24.700000
@@ -44,51 +38,6 @@ _ASSUMED_SPEED_KMPH = 40.0
 _EXPECTED_ETA_MIN = 15  # (10.10216 km / 40 km/h) * 60 = 15.153 -> round -> 15
 
 
-def _make_token(employee):
-    return (
-        frappe.get_doc(
-            {
-                "doctype": "Masar Worker Token",
-                "party_type": "Employee",
-                "party": employee,
-                "employee": employee,
-                "enabled": 1,
-            }
-        )
-        .insert(ignore_permissions=True)
-        .token
-    )
-
-
-def _building_with_coords(name, lat, lng):
-    """Get-or-create a building carrying pickup coordinates (idempotent on re-run)."""
-    existing = frappe.db.get_value("Accommodation Building", {"building_name": name}, "name")
-    if existing:
-        frappe.db.set_value(
-            "Accommodation Building", existing, {"pickup_lat": lat, "pickup_lng": lng}
-        )
-        return existing
-    return (
-        frappe.get_doc(
-            {
-                "doctype": "Accommodation Building",
-                "building_name": name,
-                "site": _site("Masar GPS Test Site"),
-                "total_capacity": 20,
-                "pickup_lat": lat,
-                "pickup_lng": lng,
-            }
-        )
-        .insert(ignore_permissions=True)
-        .name
-    )
-
-
-def _driver_user(driver):
-    emp = frappe.db.get_value("Salis Driver", driver, "employee")
-    return frappe.db.get_value("Employee", emp, "user_id")
-
-
 class TestDriverGpsEta(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
@@ -97,13 +46,15 @@ class TestDriverGpsEta(FrappeTestCase):
         frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
         # Pin the speed so the expected ETA is independent of the stored/blank value.
         frappe.db.set_single_value("Salis Settings", "assumed_fleet_speed_kmph", _ASSUMED_SPEED_KMPH)
-        cls.project = _project("Masar GPS Project")
-        cls.building = _building_with_coords("Masar GPS Residence", _PICKUP_LAT, _PICKUP_LNG)
-        cls.driver, cls.driver_email = _ensure_driver_chain(
+        cls.project = factories.make_project("Masar GPS Project")
+        cls.building = factories.make_building_with_coords(
+            "Masar GPS Residence", _PICKUP_LAT, _PICKUP_LNG
+        )
+        cls.driver, cls.driver_email = factories.make_driver_chain(
             "masar-gps-driver@example.com", "GPS Driver"
         )
         # A SECOND driver, to prove the ingestion API is ownership-scoped.
-        cls.other_driver, cls.other_email = _ensure_driver_chain(
+        cls.other_driver, cls.other_email = factories.make_driver_chain(
             "masar-gps-other@example.com", "GPS Other"
         )
         frappe.db.commit()
@@ -123,117 +74,40 @@ class TestDriverGpsEta(FrappeTestCase):
         # of a worker's requests — a reused worker would surface a stale leftover ride
         # instead of this test's dispatched trip. A unique worker owns exactly the one
         # ride each test builds, so next_ride is deterministically that ride.
-        self.worker = _employee(f"Masar GPS Worker {frappe.generate_hash(length=6)}")
-        self.token = _make_token(self.worker)
+        self.worker = factories.make_worker_employee(
+            f"Masar GPS Worker {frappe.generate_hash(length=6)}"
+        )
+        self.token = factories.make_worker_token(self.worker)
 
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # ── fixtures ──────────────────────────────────────────────────────────────
+    # ── fixtures (built via tests/factories.py) ────────────────────────────────
     def _assign_worker(self):
         """A submitted Accommodation Assignment putting the worker in the pickup
         building, so ``get_worker_transport`` scopes ``my_pickup`` to it."""
-        room = frappe.get_doc(
-            {
-                "doctype": "Accommodation Room",
-                "room_number": f"{self.building}-GPS-R",
-                "building": self.building,
-                "bed_capacity": 4,
-                "status": "Available",
-            }
-        )
-        if not frappe.db.exists("Accommodation Room", room.room_number):
-            room.insert(ignore_permissions=True)
-        bed_code = f"{self.building}-GPS-B"
-        if not frappe.db.exists("Accommodation Bed", bed_code):
-            frappe.get_doc(
-                {
-                    "doctype": "Accommodation Bed",
-                    "bed_code": bed_code,
-                    "room": f"{self.building}-GPS-R",
-                    "status": "Available",
-                }
-            ).insert(ignore_permissions=True)
-        company = frappe.db.get_value("Accommodation Building", self.building, "company") or _company()
-        cost_center = frappe.db.get_value("Cost Center", {"company": company, "is_group": 0}, "name")
-        doc = frappe.get_doc(
-            {
-                "doctype": "Accommodation Assignment",
-                "employee": self.worker,
-                "building": self.building,
-                "room": f"{self.building}-GPS-R",
-                "bed": bed_code,
-                "project": self.project,
-                "cost_center": cost_center,
-                "check_in_date": frappe.utils.today(),
-                "stay_type": "Permanent",
-            }
-        )
-        doc.insert(ignore_permissions=True)
-        doc.submit()
-        self.addCleanup(lambda: self._purge_assignment(doc.name))
-        return doc.name
+        name = factories.make_assignment(self.worker, self.building, self.project)
+        self.addCleanup(lambda: self._purge_assignment(name))
+        return name
 
     def _dispatched_trip(self, driver=None):
         """A dispatched Workers-line trip for the worker on ``driver``'s manifest,
         as the soonest upcoming ride. Returns the Dispatch Trip name."""
         driver = driver or self.driver
-        tr = frappe.get_doc(
-            {
-                "doctype": "Transport Request",
-                "service_line": "Site Transport",
-                "request_type": "Accommodation to Project Shuttle",
-                "project": self.project,
-                "accommodation_building": self.building,
-                "from_location": "Building Gate",
-                "to_location": "Project Site",
-                "source_channel": "Desk",
-                "status": "New",
-                # Soonest upcoming: a couple of hours out (>= now, so it is next_ride).
-                "pickup_datetime": frappe.utils.add_to_date(frappe.utils.now_datetime(), hours=2),
-                "workers": [{"employee": self.worker, "pickup_point": "Building Gate"}],
-            }
-        ).insert(ignore_permissions=True)
-        rp = frappe.get_doc(
-            {
-                "doctype": "Route Plan",
-                "route_name": f"GPS Route {frappe.generate_hash(length=6)}",
-                "transport_request": tr.name,
-                "project": self.project,
-                "driver": driver,
-                "stops": [
-                    {
-                        "sequence": 1,
-                        "stop_name": "Housing Pickup",
-                        "accommodation_building": self.building,
-                        "location": "Building Gate",
-                        "passengers": 1,
-                    },
-                    {
-                        "sequence": 2,
-                        "stop_name": "Project Drop-off",
-                        "location": "Project Site",
-                        "passengers": 0,
-                    },
-                ],
-            }
-        ).insert(ignore_permissions=True)
-        frappe.db.set_value("Transport Request", tr.name, "route_plan", rp.name)
-        dt = frappe.get_doc(
-            {
-                "doctype": "Dispatch Trip",
-                "route_plan": rp.name,
-                "transport_request": tr.name,
-                "driver": driver,
-                "trip_date": frappe.utils.today(),
-                "depart_time": "06:30:00",
-            }
-        ).insert(ignore_permissions=True)
-        # A new trip must start Planned (controller guard); advance it to Dispatched
-        # (docstatus 0 — not submitted) the way the driver is en route when a position
-        # streams in. The direct status write bypasses only the workflow UI, never the
-        # ingestion/ETA path under test.
-        frappe.db.set_value("Dispatch Trip", dt.name, "status", "Dispatched")
+        tr, rp, dt = factories.make_worker_trip(
+            driver,
+            self.project,
+            self.building,
+            [self.worker],
+            f"GPS Route {frappe.generate_hash(length=6)}",
+            from_location="Building Gate",
+            # Soonest upcoming: a couple of hours out (>= now, so it is next_ride).
+            pickup_datetime=frappe.utils.add_to_date(frappe.utils.now_datetime(), hours=2),
+            passengers=1,
+            # En route: the trip is Dispatched (docstatus 0) when a position streams in.
+            status="Dispatched",
+            link_route_plan_on_request=True,
+        )
         self.addCleanup(lambda: self._purge_trip(dt.name, rp.name, tr.name))
         return dt.name
 
