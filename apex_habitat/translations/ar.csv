@@ -51,6 +51,7 @@ A severe or critical safety incident has been reported and requires immediate ma
 A submitted Accommodation Checkout already exists for this assignment: {0},توجد بالفعل مغادرة سكن مُقدَّمة لهذا التسكين: {0}
 A temporary top-up requires a revert due date.,تتطلب التعبئة المؤقتة تحديد تاريخ استحقاق للاسترجاع.
 A trip has been scheduled,تمت جدولة رحلة
+A valid GPS position (latitude and longitude) is required.,يلزم موقع GPS صحيح (خط العرض وخط الطول).
 A vehicle compliance document is expiring soon — please start renewal,وثيقة امتثال مركبة على وشك الانتهاء — يُرجى بدء التجديد
 A vehicle has been reported stolen,تم الإبلاغ عن سرقة مركبة
 A vehicle has overstayed in the workshop,تجاوزت مركبة المدة المسموح بها في الورشة
@@ -355,6 +356,7 @@ Assignment Period,فترة الإسناد
 Assignment Type,نوع التسكين
 Assignment {0} (driver {1}) cancelled.,تم إلغاء التعيين {0} (السائق {1}).
 Assigns a vehicle to a driver and project for a defined period.,يُسنِد مركبة إلى سائق ومشروع لفترة محددة.
+Assumed Fleet Speed (km/h),السرعة المفترضة للأسطول (km/h)
 At least one asset line is required.,يجب إدخال بند أصول واحد على الأقل.
 At least one damaged item is required.,يجب إدخال بند تالف واحد على الأقل.
 At least one finding is required on a Maintenance Inspection Report.,يجب تسجيل ملاحظة واحدة على الأقل في تقرير فحص الصيانة.
@@ -1153,9 +1155,12 @@ Driver Clearance Certificate,شهادة إخلاء طرف السائق
 Driver Clearance Register,سجل إخلاء طرف السائقين
 Driver Clearances Pending,تصاريح السائقين قيد الانتظار
 Driver ID,معرّف السائق
+Driver Latitude,خط عرض السائق
 Driver Licenses Expiring Soon,رخص القيادة قاربت على الانتهاء
+Driver Longitude,خط طول السائق
 Driver Operations,عمليات السائقين
 Driver Portal,بوابة السائق
+Driver Position Updated At,وقت آخر تحديث لموقع السائق
 Driver Push Subscription,اشتراك إشعارات السائق
 Driver Rejected,رفض السائق
 Driver Stop,إيقاف سائق
@@ -1801,6 +1806,8 @@ Last Seen,آخر ظهور
 Last Status,آخر حالة
 Last Wait Request At,آخر طلب انتظار في
 Late,متأخر
+"Latest driver GPS latitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",أحدث خط عرض GPS للسائق، تدفعه بوابة السائق أثناء إرسال الرحلة. يغذّي الوقت المتوقع لوصول رحلة العامل المباشر. يُدار آليًا.
+"Latest driver GPS longitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",أحدث خط طول GPS للسائق، تدفعه بوابة السائق أثناء إرسال الرحلة. يغذّي الوقت المتوقع لوصول رحلة العامل المباشر. يُدار آليًا.
 Launchpad,لوحة الانطلاق
 Laundry washing machine for worker accommodation. Durable appliance.,غسالة ملابس لسكن العمال. جهاز معمّر.
 Lead days for driver licence-expiry alerts; the effective window is the larger of this and Alert Lead Days.,أيام التنبيه المسبق لانتهاء رخصة السائق؛ النافذةُ الفعليّة هي الأكبر بين هذه و«أيام التنبيه المسبق».
@@ -1866,6 +1873,7 @@ Linked Safety Inspection Report,تقرير فحص السلامة المرتبط
 Linked to Employee {0} (passport match); housing/custody re-pointed and cost back-dated.,مرتبط بالموظف {0} (تطابق جواز السفر)؛ تمت إعادة توجيه الإسكان/العهدة ورجوع التكلفة بأثر رجعي.
 Litres,اللترات
 Litres cannot be negative.,لا يمكن أن تكون اللترات سالبة.
+Live Driver Position,موقع السائق المباشر
 Live Occupancy,الإشغال المباشر
 Live Queue,الطابور الحيّ
 Live View + Playback,بث مباشر + إعادة تشغيل
@@ -2448,7 +2456,11 @@ Pickup,نقطة الانطلاق
 Pickup Building,مبنى الالتقاط
 Pickup Datetime,تاريخ ووقت الانطلاق
 Pickup From,نقطة الانطلاق
+Pickup Latitude,خط عرض نقطة الالتقاط
+Pickup Longitude,خط طول نقطة الالتقاط
 Pickup Point,نقطة الالتقاط
+Pickup latitude in decimal degrees. Set on housing buildings used as shuttle pickup stops so the worker's live ride ETA can be computed from the driver's GPS position.,خط عرض نقطة الالتقاط بالدرجات العشرية. يُضبط على مباني السكن المستخدمة نقاطَ التقاط للنقل ليُحسب الوقت المتوقع لوصول رحلة العامل المباشر من موقع GPS للسائق.
+Pickup longitude in decimal degrees. Set on housing buildings used as shuttle pickup stops so the worker's live ride ETA can be computed from the driver's GPS position.,خط طول نقطة الالتقاط بالدرجات العشرية. يُضبط على مباني السكن المستخدمة نقاطَ التقاط للنقل ليُحسب الوقت المتوقع لوصول رحلة العامل المباشر من موقع GPS للسائق.
 Placement,التسكين
 Plan a Route,تخطيط مسار
 "Plan your first route, dispatch a trip, and confirm the passenger manifest.",خطّط أول مسار، وشغّل رحلة، وأكّد كشف الركاب.
@@ -3393,6 +3405,7 @@ Thank you. Your receipt of the custody items has been recorded.,شكراً لك.
 That vehicle is not assigned to you. You can only request fuel for your own vehicle.,تلك المركبة غير مسندة إليك. يمكنك طلب الوقود لمركبتك فقط.
 The Dispatch Trip being executed; its linked Transport Request carries the worker manifest this log records boarding against.,رحلة التشغيل قيد التنفيذ؛ يحمل طلب النقل المرتبط بها قائمة العمّال التي يسجّل هذا السجل الصعود مقابلها.
 The Dispatch Trip the scanned pass was issued against.,رحلة التشغيل التي صدر التصريح الممسوح مقابلها.
+The GPS position is outside the valid coordinate range.,موقع GPS خارج نطاق الإحداثيات الصحيح.
 The HRMS Additional Salary deduction generated from this acknowledgment. Populated by the controller wiring in a later increment; read-only here.,خصم الراتب الإضافي في HRMS المُنشأ من هذا الإقرار. يُعبّأ بربط المتحكم في مرحلة لاحقة؛ للقراءة فقط هنا.
 "The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
 The Trip Start Log this scan boarded onto (set only when a boarding row was created).,سجل بدء الرحلة الذي صعد عليه هذا المسح (يُضبط فقط عند إنشاء صف صعود).
@@ -3796,6 +3809,7 @@ WhatsApp / SMS Gateway,بوابة واتساب / الرسائل النصية
 "When checked and the target DocType is submittable, the router submits the created payment document. Default off (leave the payment in Draft for review).",عند التفعيل وكون المستند المستهدف قابلًا للإرسال، يرسل الموجّه مستند الدفع المنشأ. معطّل افتراضيًا (يترك الدفع كمسودة للمراجعة).
 "When checked, the target field is set to the constant Static Value instead of copying from the request.",عند التحديد، يُضبط الحقل المستهدف على القيمة الثابتة بدلًا من نسخها من الطلب.
 When do you need pickup?,متى تحتاج إلى الاستقبال؟
+When the driver's GPS position was last refreshed. A stale timestamp lets the client suppress an out-of-date ETA.,وقت آخر تحديث لموقع GPS للسائق. الطابع الزمني القديم يتيح للتطبيق إخفاء وقت وصول متوقع غير محدَّث.
 When the recipient acknowledged receipt at the kiosk.,وقت إقرار المستلم بالاستلام في الكشك.
 When the resident accepted the housing terms at the tablet.,وقت موافقة الساكن على شروط السكن على اللوحي.
 When the worker self-claimed boarding (drives the auto-confirm timeout).,عندما أعلن العامل صعوده ذاتيًا (يحرك مهلة التأكيد التلقائي).

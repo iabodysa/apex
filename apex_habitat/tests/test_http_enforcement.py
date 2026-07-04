@@ -198,6 +198,14 @@ PERMISSION_RECHECK_ALLOWLIST = [
     ),
     (
         "salis/api/driver_portal.py",
+        "push_driver_position",
+        "Driver portal. The Salis Driver is resolved from the session server-side "
+        "and the trip is honoured only when it belongs to that driver "
+        "(_resolve_my_trip raises otherwise); writes the caller's own live GPS "
+        "position (range-validated) onto that trip. Token/identity-resolved writer.",
+    ),
+    (
+        "salis/api/driver_portal.py",
         "manual_board_workers",
         "Driver portal. The Salis Driver is resolved from the session server-side "
         "and the trip is honoured only when it belongs to that driver "

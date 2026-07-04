@@ -27,6 +27,7 @@
   "alert_aging_critical_hours",
   "salis_settings_sec_portal",
   "enable_driver_portal",
+  "assumed_fleet_speed_kmph",
   "salis_settings_sec_boarding_flow",
   "boarding_notify_max_count",
   "boarding_notify_window_seconds",
@@ -188,6 +189,13 @@
    "fieldname": "enable_driver_portal",
    "fieldtype": "Check",
    "label": "Enable Driver Portal"
+  },
+  {
+   "default": "40",
+   "description": "Assumed average fleet speed (km/h) used to estimate the worker's live ride ETA from the driver's GPS position (straight-line distance / speed). A blank or zero value falls back to the built-in default.",
+   "fieldname": "assumed_fleet_speed_kmph",
+   "fieldtype": "Float",
+   "label": "Assumed Fleet Speed (km/h)"
   },
   {
    "fieldname": "salis_settings_sec_boarding_flow",

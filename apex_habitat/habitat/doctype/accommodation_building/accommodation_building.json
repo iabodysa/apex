@@ -19,6 +19,8 @@
   "city",
   "district",
   "google_maps_url",
+  "pickup_lat",
+  "pickup_lng",
   "accommodation_building_location_col",
   "building_address",
   "address_html",
@@ -175,6 +177,20 @@
    "fieldtype": "Data",
    "label": "Google Maps Link",
    "options": "URL"
+  },
+  {
+   "description": "Pickup latitude in decimal degrees. Set on housing buildings used as shuttle pickup stops so the worker's live ride ETA can be computed from the driver's GPS position.",
+   "fieldname": "pickup_lat",
+   "fieldtype": "Float",
+   "label": "Pickup Latitude",
+   "precision": "6"
+  },
+  {
+   "description": "Pickup longitude in decimal degrees. Set on housing buildings used as shuttle pickup stops so the worker's live ride ETA can be computed from the driver's GPS position.",
+   "fieldname": "pickup_lng",
+   "fieldtype": "Float",
+   "label": "Pickup Longitude",
+   "precision": "6"
   },
   {
    "fieldname": "accommodation_building_location_col",

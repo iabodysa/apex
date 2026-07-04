@@ -229,12 +229,55 @@ const completeTrip = createResource({
   onError: (e) => pushToast(e.messages?.[0] || t("common.error"), "err"),
 });
 
+// --- Live position push: while a started trip is in progress, periodically read
+// the driver's GPS and push it so the worker's Masar Home shows a live ride ETA.
+// Opt-in and graceful: if the browser has no geolocation or the driver denies the
+// permission prompt, the push is simply skipped (the ride still runs; the worker
+// just sees no live ETA). One tracker at a time — a new start supersedes the old.
+const POSITION_PUSH_INTERVAL_MS = 30000; // 30s cadence — a glanceable, not live, ETA
+const pushPosition = createResource({
+  url: "apex_habitat.salis.api.driver_portal.push_driver_position",
+  // Best-effort telemetry: a failed push must never toast/interrupt the driver.
+  onError: () => {},
+});
+let positionTimer = null;
+let trackedTrip = null;
+function pushOnce() {
+  if (!trackedTrip || !navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      if (!trackedTrip) return;
+      pushPosition.submit({
+        dispatch_trip: trackedTrip,
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+      });
+    },
+    () => {}, // permission denied / unavailable — skip silently (opt-in)
+    { enableHighAccuracy: true, maximumAge: 15000, timeout: 10000 }
+  );
+}
+function startPositionTracking(tripName) {
+  stopPositionTracking();
+  if (!navigator.geolocation) return; // no geolocation support: nothing to do
+  trackedTrip = tripName;
+  pushOnce(); // immediate first fix, then on the interval
+  positionTimer = setInterval(pushOnce, POSITION_PUSH_INTERVAL_MS);
+}
+function stopPositionTracking() {
+  if (positionTimer) clearInterval(positionTimer);
+  positionTimer = null;
+  trackedTrip = null;
+}
+onUnmounted(stopPositionTracking);
+
 async function start(trip) {
   if (busy.value) return;
   busy.value = trip.name;
   try {
     await startTrip.submit({ dispatch_trip: trip.name });
     today.reload(); // server re-stamps started/trip_log_status on each card
+    startPositionTracking(trip.name); // begin live-position push for the ETA
   } finally {
     busy.value = null;
   }
@@ -245,6 +288,7 @@ async function complete(trip) {
   try {
     await completeTrip.submit({ dispatch_trip: trip.name });
     today.reload();
+    if (trackedTrip === trip.name) stopPositionTracking(); // trip done: stop pushing
   } finally {
     busy.value = null;
   }

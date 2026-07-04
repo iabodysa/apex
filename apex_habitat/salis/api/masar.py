@@ -27,6 +27,89 @@ from apex_habitat.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-
 # [#6ddse8]
 WORKER_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 
+# Live-ride ETA model. Self-contained (no external routing/traffic API): the ETA is
+# the great-circle (haversine) distance from the driver's last GPS position to the
+# worker's pickup building, divided by an assumed average fleet speed. Straight-line
+# distance under-estimates road distance, so this is a floor/indicative ETA — good
+# enough for a "your ride is ~N min away" glance, and fully deterministic for a test.
+_EARTH_RADIUS_KM = 6371.0088
+# Fallback when Salis Settings has no configured speed (the zero-trap default).
+_DEFAULT_FLEET_SPEED_KMPH = 40.0
+
+
+def _haversine_km(lat1, lng1, lat2, lng2):
+    """Great-circle distance in km between two WGS-84 points. Pure math, no I/O."""
+    import math
+
+    rlat1, rlat2 = math.radians(lat1), math.radians(lat2)
+    dlat = math.radians(lat2 - lat1)
+    dlng = math.radians(lng2 - lng1)
+    a = math.sin(dlat / 2) ** 2 + math.cos(rlat1) * math.cos(rlat2) * math.sin(dlng / 2) ** 2
+    return _EARTH_RADIUS_KM * 2 * math.asin(math.sqrt(a))
+
+
+def _assumed_fleet_speed_kmph():
+    """Assumed average fleet speed (km/h) for the ETA, from Salis Settings via the
+    zero-trap reader (a blank/0 Single value falls back to the built-in default)."""
+    from apex_habitat.apex_core.doctype.salis_settings.salis_settings import get_salis_float
+
+    return get_salis_float("assumed_fleet_speed_kmph", _DEFAULT_FLEET_SPEED_KMPH)
+
+
+def _pickup_building_of(trip):
+    """The Accommodation Building id the ETA targets for a worker's ride: the
+    worker's OWN pickup stop's building. None when the ride has no housing pickup
+    resolved (the ETA is then simply omitted)."""
+    my_pickup = trip.get("my_pickup") or {}
+    return my_pickup.get("accommodation_building")
+
+
+def _live_dispatch_trip(transport_request):
+    """The Dispatch Trip a worker's request is riding on RIGHT NOW — status
+    Dispatched, driver en route. The Transport Request's own ``dispatch_trip`` link
+    is stamped only at fulfilment (Completed), so during the en-route window — the
+    exact time the live ETA is wanted — resolve the active trip directly by its
+    back-link + live status. None when no trip is currently dispatched."""
+    return frappe.db.get_value(
+        "Dispatch Trip",
+        {"transport_request": transport_request, "status": "Dispatched", "docstatus": ["<", 2]},
+        "name",
+    )
+
+
+def compute_ride_eta_minutes(dispatch_trip, pickup_building):
+    """Minutes until the driver reaches ``pickup_building``, from the trip's last
+    stored driver GPS position — or None when the ETA cannot be computed.
+
+    Self-contained: haversine(driver → pickup) / assumed fleet speed. Returns None
+    (never raises) when the trip has no live position, the pickup building has no
+    coordinates, or the speed is non-positive — the caller omits the ETA cleanly.
+    Rounds to whole minutes; a driver already at the pickup yields 0."""
+    if not dispatch_trip or not pickup_building:
+        return None
+    pos = frappe.db.get_value(
+        "Dispatch Trip", dispatch_trip, ["driver_lat", "driver_lng"], as_dict=True
+    )
+    if not pos or pos.get("driver_lat") is None or pos.get("driver_lng") is None:
+        return None
+    dest = frappe.db.get_value(
+        "Accommodation Building", pickup_building, ["pickup_lat", "pickup_lng"], as_dict=True
+    )
+    if not dest or dest.get("pickup_lat") is None or dest.get("pickup_lng") is None:
+        return None
+    # A stored (0.0, 0.0) is treated as "no fix" (null island), not a real position.
+    if not (pos.get("driver_lat") or pos.get("driver_lng")):
+        return None
+    if not (dest.get("pickup_lat") or dest.get("pickup_lng")):
+        return None
+    speed = _assumed_fleet_speed_kmph()
+    if speed <= 0:
+        return None
+    distance_km = _haversine_km(
+        pos["driver_lat"], pos["driver_lng"], dest["pickup_lat"], dest["pickup_lng"]
+    )
+    return int(round((distance_km / speed) * 60))
+
 
 def _fmt_time(value):
     """Render a Time field as a clean zero-padded ``HH:MM:SS`` string (or None).
@@ -896,6 +979,11 @@ def get_worker_transport(token=None):
         destination = _route_destination_stop(stops, my_pickup)
         trip = {
             "transport_request": req["name"],
+            # The live Dispatch Trip carries the driver's GPS position; surfaced so
+            # the Home ETA can be computed from it. The request's own back-link is set
+            # only at fulfilment, so while the driver is en route we resolve the
+            # currently-dispatched trip directly (None when none is dispatched yet).
+            "dispatch_trip": req.get("dispatch_trip") or _live_dispatch_trip(req["name"]),
             "request_type": req.get("request_type"),
             "status": req.get("status"),
             "pickup_point": req.get("pickup_point"),
@@ -1373,6 +1461,17 @@ def get_worker_home(token=None):
     # list Transport shows under "upcoming" — the two screens cannot disagree.
     upcoming = transport.get("upcoming") or []
     next_ride = upcoming[0] if upcoming else None
+    # Live ride ETA: minutes from the driver's last GPS position (stored on the
+    # dispatched trip) to the worker's own pickup building, via haversine / assumed
+    # fleet speed. None until the trip is dispatched with a position AND the pickup
+    # building has coordinates — the card degrades cleanly when absent.
+    if next_ride:
+        next_ride = {
+            **next_ride,
+            "eta_minutes": compute_ride_eta_minutes(
+                next_ride.get("dispatch_trip"), _pickup_building_of(next_ride)
+            ),
+        }
 
     # the bed is shown on Home as a glanceable chip, but a bare bed code
     # ("DEMO-R-103-B2") tells the worker nothing. Carry the building + room (and

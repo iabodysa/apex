@@ -30,6 +30,11 @@
   "completion_notes",
   "dispatch_trip_sec_boarding",
   "boarding_state",
+  "dispatch_trip_sec_live_position",
+  "driver_lat",
+  "driver_lng",
+  "dispatch_trip_sec_live_position_col",
+  "driver_position_updated_at",
   "dispatch_trip_sec_system",
   "driver_user",
   "naming_series",
@@ -193,6 +198,42 @@
    "fieldtype": "Table",
    "label": "Boarding State",
    "options": "Trip Boarding State",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "dispatch_trip_sec_live_position",
+   "fieldtype": "Section Break",
+   "label": "Live Driver Position"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Latest driver GPS latitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",
+   "fieldname": "driver_lat",
+   "fieldtype": "Float",
+   "label": "Driver Latitude",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Latest driver GPS longitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",
+   "fieldname": "driver_lng",
+   "fieldtype": "Float",
+   "label": "Driver Longitude",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dispatch_trip_sec_live_position_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "When the driver's GPS position was last refreshed. A stale timestamp lets the client suppress an out-of-date ETA.",
+   "fieldname": "driver_position_updated_at",
+   "fieldtype": "Datetime",
+   "label": "Driver Position Updated At",
    "read_only": 1
   },
   {
