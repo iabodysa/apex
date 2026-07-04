@@ -529,6 +529,7 @@ Building {0} is not flagged as a Procurement Intake Store.,المبنى {0} غي
 Buildings Granted,المباني المرخصة
 Buildings In Scope,المباني المشمولة بالعمل
 Buildings Over Threshold,المباني المتجاوزة للحد
+"Business nature of the asset move, separating internal relocations from temporary or permanent transfers between companies and from maintenance, repair-return, or disposal movements, which drives cost and ownership treatment.",الطبيعة التشغيلية لنقل الأصل، تفصل النقل الداخلي عن التحويلات المؤقتة أو الدائمة بين الشركات وعن حركات الصيانة أو إعادة الإصلاح أو الإعدام، وتحدّد معالجة التكلفة والملكية.
 CCTV Camera,كاميرا مراقبة
 Cadence,الوتيرة
 Camera Access Building Scope,نطاق الوصول لكاميرات المبنى
@@ -639,6 +640,7 @@ Claimed Total minus Accrued Total.,إجمالي المطالب به ناقص إ�
 Claimed litres minus consumed litres. Positive = claim exceeds recorded consumption.,اللترات المطالب بها مطروحًا منها اللترات المستهلكة. القيمة الموجبة = المطالبة تتجاوز الاستهلاك المسجَّل.
 Classification,التصنيف
 "Classification of fleet vehicles (e.g., Sedan, Pickup, Bus).",تصنيف مركبات الأسطول (مثل سيدان أو بيك أب أو حافلة).
+"Classifies the operational anomaly that triggered this alert so it routes to the right owner: idle assets, stalled or forgotten requests, supervisor delays, abnormal fuel top-ups, lapsing licenses, overdue maintenance, unsettled rentals, or expired consumables.",يصنّف الشذوذ التشغيلي الذي أطلق هذا التنبيه ليوجَّه إلى المسؤول المناسب: أصول خاملة، طلبات متوقّفة أو منسيّة، تأخّر المشرفين، تعبئة وقود غير معتادة، تراخيص تُشارف الانتهاء، صيانة متأخّرة، إيجارات غير مُسوّاة، أو مستهلكات منتهية.
 Classifies why this trip is requested; the transport supervisor reads it when assigning requests onto a trip.,يصنّف سبب طلب هذه الرحلة؛ يطّلع عليه مشرف النقل عند إسناد الطلبات إلى الرحلة.
 Clean,سليم
 Cleaned,تم التنظيف
@@ -1379,6 +1381,7 @@ Failures ({0}):,الإخفاقات ({0}):
 Fair,مقبول
 Fallback when the holder cannot tick the confirmation: sign here to acknowledge receipt.,بديل عندما يتعذّر على الحائز تحديد خانة التأكيد: وقّع هنا للإقرار بالاستلام.
 Fault / Liable Party,الطرف المسؤول
+"Fault type the work order addresses, carried from the request to route the job to the right trade, covering electrical, plumbing, air-conditioning, fire safety, pest control, and structural work.",نوع العطل الذي يعالجه أمر العمل، مُرحَّلٌ من الطلب لتوجيه المهمّة إلى الحرفة المناسبة، ويشمل الكهرباء والسباكة والتكييف وسلامة الحريق ومكافحة الآفات والأعمال الإنشائية.
 "Fault type this material template applies to, so the standard set of parts is suggested when a matching electrical, plumbing, air-conditioning, or other issue is raised.",نوع العطل الذي ينطبق عليه قالب المواد هذا، بحيث تُقترح المجموعة القياسية من القطع عند رفع مشكلة كهربائية أو سباكة أو تكييف أو غيرها مطابقة.
 Faulty,معطل
 February,فبراير
@@ -1722,6 +1725,7 @@ Insurance Policy,بوليصة التأمين
 Intake Building,مبنى الاستلام
 Integration Enabled,التكامل مُفعّل
 Integration Help,مساعدة التكامل
+"Intended function of the room, which drives whether it counts toward resident bed capacity, such as worker, driver, or supervisor rooms, or is a non-residential space such as office, storage, isolation, or maintenance.",الوظيفة المقصودة للغرفة، وتحدّد ما إذا كانت تُحتسب ضمن السعة السريرية للساكنين كغرف العمّال أو السائقين أو المشرفين، أو أنّها مساحة غير سكنية كمكتب أو مستودع أو عزل أو صيانة.
 Inter-City Relocation,ترحيل بين المدن
 Inter-City Relocations This Month,الترحيلات بين المدن لهذا الشهر
 Inter-City Requests This Month,طلبات النقل بين المدن هذا الشهر
@@ -1820,6 +1824,7 @@ Key Metrics,المؤشرات الرئيسية
 "Kind of expense the payment request covers, such as fuel, rental, a fine, sponsorship fee, or maintenance, which drives approval routing and account coding.",نوع المصروف الذي يغطيه طلب الدفع، كالوقود أو الإيجار أو المخالفة أو رسم الكفالة أو الصيانة، ما يحرّك مسار الاعتماد وترميز الحساب.
 "Kind of outsourced facility service the contract covers, such as pest control, tank suction, deep cleaning, or equipment servicing, used to match orders to the right vendor scope.",نوع الخدمة المسندة للمرفق التي يغطيها العقد، كمكافحة الآفات أو شفط الخزانات أو التنظيف العميق أو صيانة المعدات، تُستخدم لمطابقة الأوامر مع نطاق المورّد الصحيح.
 "Kind of recurring work this template generates, classifying instances as safety, maintenance, inspection, or cleaning for routing and reporting.",نوع العمل المتكرر الذي يولّده هذا القالب، يصنّف الحالات كسلامة أو صيانة أو تفتيش أو تنظيف لأغراض التوجيه والتقارير.
+"Kind of regulatory document or permit held for the building, covering municipal, civil defence, housing, lease, labour authority, and insurance records tracked for expiry and compliance.",نوع المستند النظامي أو التصريح الخاص بالمبنى، ويشمل السجلّات البلدية والدفاع المدني والإسكان والإيجار وهيئة العمل والتأمين المتابَعة للانتهاء والامتثال.
 "Kind of utility this account represents, used to group meters and bills by service so consumption and cost can be tracked per utility.",نوع المرفق الذي يمثّله هذا الحساب، يُستخدم لتجميع العدادات والفواتير حسب الخدمة ليتسنى تتبّع الاستهلاك والتكلفة لكل مرفق.
 "Kind of vehicle compliance document being tracked, such as registration, insurance, periodic inspection, or operating card, each monitored for expiry.",نوع وثيقة امتثال المركبة المُتتبَّعة، كالاستمارة أو التأمين أو الفحص الدوري أو بطاقة التشغيل، تُراقَب كل منها من حيث انتهاء الصلاحية.
 Kitchen,المطبخ
@@ -2110,6 +2115,7 @@ National ID / Iqama,الهوية الوطنية / الإقامة
 National ID or Iqama number. PII — readable only by privileged roles (permlevel 1). Set once at creation; a DB-level unique index blocks duplicates.,رقم الهوية الوطنية أو الإقامة. بيانات شخصية — لا يقرؤها إلا أصحاب الصلاحيات المميزة (مستوى الصلاحية 1). يُحدد مرة واحدة عند الإنشاء؛ ويمنع فهرس فريد على مستوى قاعدة البيانات التكرار.
 Nationality,الجنسية
 "Nature of the fuel anomaly under investigation, from over-consumption and GPS mismatches to duplicate claims, suspected fraud, or quota disputes, driving the investigation path.",طبيعة شذوذ الوقود قيد التحقيق، من فرط الاستهلاك وعدم تطابق بيانات GPS إلى المطالبات المكررة أو الاشتباه بالاحتيال أو نزاعات الحصص، تحرّك مسار التحقيق.
+"Nature of the resident request, which determines the responsible team and workflow; ranges from physical issues such as maintenance, cleaning, and utilities to administrative items such as custody, reimbursement, complaints, and suggestions.",طبيعة طلب الساكن، وتحدّد الفريق المسؤول ومسار العمل؛ وتتراوح من المسائل المادّية كالصيانة والنظافة والمرافق إلى المسائل الإدارية كالعهدة والمطالبات والشكاوى والاقتراحات.
 Navigate,التنقل
 Need Help? Scan to Report,تحتاج مساعدة؟ امسح للإبلاغ
 Needs Attention,بحاجة إلى انتباه
@@ -2340,6 +2346,7 @@ Operational Notifications,الإشعارات التشغيلية
 Operational Status,الحالة التشغيلية
 Operational Tools,الأدوات التشغيلية
 Operational currency for Habitat cost fields. Fetched from Company if left blank.,العملة التشغيلية لحقول التكلفة في Habitat. تُجلب من الشركة إذا تُرك الحقل فارغاً.
+Operational source of the deduction. Damage = custody damage assessment; Rent = accommodation rent / housing; Fuel = fleet fuel over-consumption; Custody (Uhda) = unreturned custody / advance.,المصدر التشغيلي للخصم. التلف = تقييم تلف العهدة؛ الإيجار = إيجار السكن؛ الوقود = استهلاك وقود الأسطول الزائد؛ العهدة = عهدة غير مُعادة أو سلفة.
 "Operational state of the facility asset, distinguishing working units from faulty or in-repair ones and from assets that were replaced, scrapped, or put into storage.",الحالة التشغيلية لأصل المرفق، تميّز الوحدات العاملة عن المعطلة أو تحت الإصلاح وعن الأصول التي استُبدلت أو أُتلفت أو أُودعت في المخزن.
 "Operational state of the vehicle, distinguishing an active vehicle from one stopped or under maintenance, or released from the fleet.",الحالة التشغيلية للمركبة، تميّز المركبة النشطة عن الموقوفة أو تحت الصيانة، أو المُنهاة من الأسطول.
 Operations,العمليات
@@ -2552,6 +2559,7 @@ Policy,السياسة
 Policy Name,اسم السياسة
 Poor,رديء
 Poor Safety Task Executions,تنفيذات مهام السلامة الضعيفة
+"Portal design theme: AFMCO (flat brand default), Atelier (premium editorial refinement of AFMCO), Creative (flagship deep-navy editorial with electric-azure accent), Frappe Standard (neutral), Dark (AFMCO dark mode), or Gemini (glassmorphic).",سمة تصميم البوابة: AFMCO (الافتراضية المسطّحة للعلامة)، Atelier (تنقيح تحريري فاخر لـAFMCO)، Creative (الرائدة بكحليٍّ غامق ولمسة أزرق كهربائي)، Frappe Standard (محايدة)، Dark (وضع AFMCO الداكن)، أو Gemini (زجاجية).
 "Portal design theme: AFMCO (flat brand default), Atelier (premium editorial refinement of AFMCO), Frappe Standard (neutral), Dark (AFMCO dark mode), or Gemini (glassmorphic).",سمة تصميم البوابة: AFMCO (السمة المسطحة الافتراضية للعلامة)، أتيليه (تحسين تحريري متميز لسمة AFMCO)، Frappe Standard (محايدة)، Dark (الوضع الداكن لسمة AFMCO)، أو Gemini (زجاجية المظهر).
 Portal user who executed the movement — not the Employee on the source Facility Asset Movement.,مستخدم البوابة الذي نفّذ النقل — وليس الموظف المدوَّن في مستند نقل أصل المرفق المصدر.
 Post-Work,بعد العمل
@@ -2909,6 +2917,7 @@ Responsible Facility Supervisor,مشرف المنشأة المسؤول
 Responsible Role,الصلاحية المسؤولة
 Responsible Supervisor,المشرف المسؤول
 Responsible Worker,العامل المسؤول
+"Responsible safety domain that owns the catalog task, used to group and assign duties across fire safety, hygiene, security, maintenance, documentation, training, compliance, and emergency response.",نطاق السلامة المسؤول الذي يملك مهمّة الكتالوج، يُستخدَم لتجميع الواجبات وإسنادها عبر سلامة الحريق والنظافة والأمن والصيانة والتوثيق والتدريب والامتثال والاستجابة للطوارئ.
 Result,النتيجة
 Results must be a list.,يجب أن تكون النتائج قائمةً.
 Results must be valid JSON.,يجب أن تكون النتائج بصيغة JSON صحيحة.
@@ -3642,6 +3651,7 @@ Tracking,التتبع
 Tracks room setup progress. 'Draft' simply means rooms have not been set up yet — it advances automatically as you plan and generate rooms.,يتتبّع تقدّم إعداد الغرف. تعني حالة «مسودة» ببساطة أنّ الغرف لم تُجهّز بعد، وتتقدّم تلقائيًّا أثناء تخطيط الغرف وتوليدها.
 Tracks safety setup progress. 'Draft' simply means safety setup has not been generated yet — use 'Generate Safety Setup' to advance it.,يتتبّع تقدّم إعداد السلامة. تعني حالة «مسودة» ببساطة أنّ إعداد السلامة لم يُولّد بعد، استخدم «توليد إعداد السلامة» لتقدّمه.
 "Trade category of the maintenance material used on a job, grouping electrical, air-conditioning, plumbing, sanitary, furniture, and general items for cost tracking.",الفئة المهنية لمادة الصيانة المستخدمة في مهمة، تجمّع الأصناف الكهربائية والتكييف والسباكة والصحية والأثاث والعامة لأغراض تتبّع التكلفة.
+"Trade or fault type of the reported problem, which routes the request to the right maintenance skill and drives default materials, covering electrical, plumbing, air-conditioning, fire safety, pest control, and structural issues.",الحرفة أو نوع العطل للمشكلة المُبلَّغ عنها، توجّه الطلب إلى مهارة الصيانة المناسبة وتحدّد المواد الافتراضية، وتشمل الكهرباء والسباكة والتكييف وسلامة الحريق ومكافحة الآفات والمسائل الإنشائية.
 Training,تدريب
 Transactions,المعاملات
 Transfer,نقل
@@ -3909,6 +3919,7 @@ Which policy deduction type this consent is for. Must match an enabled rule on t
 Who is arriving?,من القادم؟
 "Why a resident is idle and not deployed to work, such as a new hire awaiting assignment, a return from leave, or a legal or HR hold, used to target follow-up.",سبب تعطّل المقيم وعدم إيفاده للعمل، كموظف جديد بانتظار الإسناد أو عائد من إجازة أو محتجز لسبب قانوني أو موارد بشرية، يُستخدم لتوجيه المتابعة.
 "Why the driver is being cleared from the fleet, separating a voluntary resignation or end of assignment from a transfer or termination, which affects settlement handling.",سبب إخلاء طرف السائق من الأسطول، يفصل الاستقالة الطوعية أو انتهاء الإسناد عن النقل أو إنهاء الخدمة، ما يؤثر في معالجة التسوية.
+"Why the resident is leaving the accommodation, separating a permanent departure such as final exit or absconding from a move that keeps the worker in the workforce such as an internal or project transfer.",سبب مغادرة الساكن للسكن، يفصل المغادرة الدائمة كالخروج النهائي أو التغيّب عن نقلٍ يُبقي العامل ضمن القوى العاملة كالنقل الداخلي أو نقل المشروع.
 Window,الفترة
 Window Days,أيام النافذة
 Window Days cannot exceed {0} days.,أيام النافذة لا يمكن أن تتجاوز {0} يومًا.
