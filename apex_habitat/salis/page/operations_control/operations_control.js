@@ -485,15 +485,15 @@ class FleetControl {
 	}
 
 	// Placeholder chips + cards shown on first load, before get_fleet returns.
-	// Native Frappe skeleton blocks (shimmer included) — no custom skeleton CSS.
+	// Placeholder blocks tinted with the native --skeleton-bg token — Desk ships no .skeleton-block rule, back it inline (no CSS file).
 	_render_skeleton() {
 		this.$summary.empty();
 		for (let i = 0; i < 4; i++) {
-			$('<div class="skeleton-block"></div>').css({ flex: "1 1 120px", "min-inline-size": "110px", height: "62px", "border-radius": "8px" }).appendTo(this.$summary);
+			$('<div class="skeleton-block"></div>').css({ flex: "1 1 120px", "min-inline-size": "110px", height: "62px", "border-radius": "8px", background: "var(--skeleton-bg)" }).appendTo(this.$summary);
 		}
 		this.$grid.empty();
 		for (let i = 0; i < 6; i++) {
-			$('<div class="skeleton-block"></div>').css({ height: "120px", "border-radius": "8px" }).appendTo(this.$grid);
+			$('<div class="skeleton-block"></div>').css({ height: "120px", "border-radius": "8px", background: "var(--skeleton-bg)" }).appendTo(this.$grid);
 		}
 	}
 

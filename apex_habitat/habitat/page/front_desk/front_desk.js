@@ -366,11 +366,11 @@ class FrontDesk {
 			.css("margin-block-end", "12px")
 			.text(__("Loading board…"))
 			.appendTo($wrap);
-		// Native Frappe skeleton blocks (shimmer included) — no custom skeleton CSS.
+		// Placeholder blocks tinted with the native --skeleton-bg token — Desk ships no .skeleton-block rule, back it inline (no CSS file).
 		const $skeleton = $('<div class="fd-skeleton-rooms"></div>').attr("style", FD_STYLE.rooms).appendTo($wrap);
 		for (let i = 0; i < 6; i++) {
 			$('<div class="skeleton-block"></div>')
-				.css({ "min-inline-size": "240px", flex: "1 1 260px", height: "120px", "border-radius": "8px" })
+				.css({ "min-inline-size": "240px", flex: "1 1 260px", height: "120px", "border-radius": "8px", background: "var(--skeleton-bg)" })
 				.appendTo($skeleton);
 		}
 	}

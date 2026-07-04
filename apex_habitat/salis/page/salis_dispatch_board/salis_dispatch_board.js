@@ -119,16 +119,16 @@ class SalisDispatchBoard {
 	// [#oi0x2w]
 	_show_loading() {
 		this.$panes.empty();
-		// Native Frappe skeleton blocks (.skeleton-block ships with Desk, shimmer
-		// included) — no custom skeleton CSS.
+		// Placeholder blocks tinted with the native --skeleton-bg token; Desk
+		// ships no .skeleton-block rule, so back it inline (no CSS file).
 		for (let i = 0; i < 4; i++) {
 			const $pane = $('<div class="sdb-pane"></div>').attr("style", SDB_STYLE.pane).appendTo(this.$panes);
 			$('<div class="skeleton-block"></div>')
-				.css({ height: "20px", margin: "var(--padding-md, 15px)" })
+				.css({ height: "20px", margin: "var(--padding-md, 15px)", background: "var(--skeleton-bg)", "border-radius": "6px" })
 				.appendTo($pane);
 			const $body = $('<div class="sdb-pane-body"></div>').attr("style", SDB_STYLE.pane_body).appendTo($pane);
 			for (let j = 0; j < 3; j++) {
-				$('<div class="skeleton-block"></div>').css("height", "48px").appendTo($body);
+				$('<div class="skeleton-block"></div>').css({ height: "48px", background: "var(--skeleton-bg)", "border-radius": "8px" }).appendTo($body);
 			}
 		}
 	}

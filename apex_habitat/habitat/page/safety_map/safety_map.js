@@ -120,13 +120,13 @@ class SafetyMap {
 	_render_loading() {
 		this.$container.empty();
 		const $skel = $('<div class="sm-skeleton" aria-busy="true"></div>').appendTo(this.$container);
-		// Native Frappe skeleton blocks (shimmer included) — no custom skeleton CSS.
+		// Placeholder blocks tinted with the native --skeleton-bg token — Desk ships no .skeleton-block rule, back it inline (no CSS file).
 		$('<div class="skeleton-block"></div>')
-			.css({ height: "20px", "margin-block": "var(--margin-sm, 10px)" })
+			.css({ height: "20px", "margin-block": "var(--margin-sm, 10px)", background: "var(--skeleton-bg)", "border-radius": "6px" })
 			.appendTo($skel);
 		const $grid = $('<div></div>').attr("style", SM_STYLE.grid).appendTo($skel);
 		for (let i = 0; i < 8; i++) {
-			$('<div class="skeleton-block"></div>').css("height", "86px").appendTo($grid);
+			$('<div class="skeleton-block"></div>').css({ height: "86px", background: "var(--skeleton-bg)", "border-radius": "8px" }).appendTo($grid);
 		}
 		$('<div class="sm-empty text-muted"></div>')
 			.attr("style", SM_STYLE.empty)

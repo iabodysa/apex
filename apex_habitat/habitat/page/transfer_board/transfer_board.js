@@ -163,10 +163,10 @@ class TransferBoard {
 			.css("margin-block-end", "var(--margin-sm, 10px)")
 			.text(__("Loading board…"))
 			.appendTo($wrap);
-		// [#aik87z] Native Frappe skeleton blocks (shimmer included) — no custom CSS.
+		// [#aik87z] Placeholder blocks tinted with the native --skeleton-bg token — Desk ships no .skeleton-block rule, back it inline (no CSS file).
 		const $sk = $('<div class="tb-skeleton"></div>').css({ display: "flex", "flex-direction": "column", gap: "8px" }).appendTo($wrap);
 		for (let i = 0; i < 3; i++) {
-			$('<div class="skeleton-block"></div>').css("height", "48px").appendTo($sk);
+			$('<div class="skeleton-block"></div>').css({ height: "48px", background: "var(--skeleton-bg)", "border-radius": "8px" }).appendTo($sk);
 		}
 	}
 
