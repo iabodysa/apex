@@ -27,9 +27,10 @@
   },
   {
    "doctype": "DocField",
+   "description": "The user the camera access is granted for (not the requester).",
    "fieldname": "requested_for",
    "fieldtype": "Link",
-   "label": "User Requesting Access",
+   "label": "Requested For (User)",
    "options": "User",
    "reqd": 1
   },

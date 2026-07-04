@@ -382,6 +382,9 @@ after_install = [
     "apex_habitat.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
     # [#2oqhfm]
     "apex_habitat.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
+    # P-108: fresh installs mark patches complete without running them; make the module
+    # root workspace the earliest-created (deterministic breadcrumb target) post-sync.
+    "apex_habitat.patches.v1_x.reorder_root_workspace_creation.execute",
 ]
 
 # [#6xge34]
@@ -407,6 +410,9 @@ after_migrate = [
     # [#byftwb]
     "apex_habitat.setup.create_roles",
     "apex_habitat.setup.create_role_profiles",
+    # P-108: a workspace JSON re-import (delete+insert) re-stamps creation=now(), which
+    # can demote the module root from breadcrumb target; restore root-first every migrate.
+    "apex_habitat.patches.v1_x.reorder_root_workspace_creation.execute",
 ]
 
 # [#10mrjh]

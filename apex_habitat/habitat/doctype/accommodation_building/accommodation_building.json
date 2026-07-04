@@ -111,6 +111,7 @@
    "read_only": 1
   },
   {
+   "description": "A row here may be a whole building or a single leased unit — name it as the property is known operationally.",
    "fieldname": "building_name",
    "fieldtype": "Data",
    "in_list_view": 1,

@@ -26,9 +26,10 @@
   },
   {
    "doctype": "DocField",
+   "description": "For example: Camera-Laundry-Room.",
    "fieldname": "asset_name",
    "fieldtype": "Data",
-   "label": "Asset Name (e.g., Camera-Laundry-Room)",
+   "label": "Asset Name",
    "reqd": 1,
    "idx": 3
   },

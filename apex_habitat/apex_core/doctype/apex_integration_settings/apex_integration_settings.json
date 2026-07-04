@@ -65,7 +65,7 @@
    "description": "CORS origin(s) an administrator should add to allow_cors in site_config.json so the frontend can call this backend, for example https://salis-fleet.com. This field only records the intended origins; it does not modify server configuration.",
    "fieldname": "allowed_origins",
    "fieldtype": "Small Text",
-   "label": "Allowed Origins (for site_config allow_cors)"
+   "label": "Allowed Origins"
   },
   {
    "fieldname": "apex_integration_sec_help",

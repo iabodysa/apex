@@ -263,3 +263,12 @@ apex_habitat.patches.v1_x.backfill_masar_token_expiry
 # emits single-column search_index rows, so this composite cannot live in the DocType
 # JSON. Idempotent: skips if the index already exists; no-op on re-run.
 apex_habitat.patches.v1_x.add_asl_composite_index
+
+# v1.x — P-108: make each module's ROOT workspace the deterministic breadcrumb target.
+# Desk breadcrumbs pick module_wise_workspaces[module][0], ordered by the Workspace
+# row's creation stamp; alphabetical JSON import + delete/reinsert on re-import let an
+# arbitrary child workspace sort first. Rewrites ONLY the root's creation to 1s before
+# its earliest sibling (modified untouched — bumping it would freeze future JSON syncs).
+# Also wired into after_install (fresh sites skip patches) + after_migrate (self-heal
+# after any re-import re-stamps creation). Idempotent, no-op when order is right.
+apex_habitat.patches.v1_x.reorder_root_workspace_creation

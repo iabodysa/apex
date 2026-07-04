@@ -71,6 +71,7 @@
    "read_only": 1
   },
   {
+   "description": "Portal user who executed the movement — not the Employee on the source Facility Asset Movement.",
    "fieldname": "moved_by",
    "fieldtype": "Link",
    "label": "Moved By",

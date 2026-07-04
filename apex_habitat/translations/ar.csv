@@ -47,6 +47,7 @@ A rent payment is due today and remains unpaid,دفعة إيجار مستحقة 
 A request reference is required.,مرجع الطلب مطلوب.
 A round date is required to submit a round.,يلزم تاريخ جولة لاعتماد جولة.
 A round date is required to submit rounds.,يلزم تاريخ الجولة لاعتماد الجولات.
+A row here may be a whole building or a single leased unit — name it as the property is known operationally.,السجل هنا قد يكون مبنى كاملاً أو وحدة مستأجرة واحدة — سمِّه بالاسم المتداول للعقار في التشغيل.
 A severe or critical safety incident has been reported and requires immediate management attention,تم الإبلاغ عن حادث سلامة جسيم أو حرج ويتطلب اهتمامًا فوريًا من الإدارة
 A submitted Accommodation Checkout already exists for this assignment: {0},توجد بالفعل مغادرة سكن مُقدَّمة لهذا التسكين: {0}
 A temporary top-up requires a revert due date.,تتطلب التعبئة المؤقتة تحديد تاريخ استحقاق للاسترجاع.
@@ -213,6 +214,7 @@ Allocation Period Start,بداية فترة التوزيع
 Allow Over-Capacity,السماح بتجاوز الطاقة الاستيعابية
 Allow drivers to access the self-service portal.,السماح للسائقين بالوصول إلى بوابة الخدمة الذاتية.
 Allow pop-ups to print the slip.,اسمح بالنوافذ المنبثقة لطباعة القسيمة.
+Allowed Origins,المصادر المسموح بها
 Allowed Origins (for site_config allow_cors),المصادر المسموح بها (لإعداد allow_cors في site_config)
 Amended From,مُعدّل من
 Amount,المبلغ
@@ -1420,6 +1422,7 @@ Floor {0},الطابق {0}
 Floor {0} — {1},الطابق {0} — {1}
 Floors,الطوابق
 For Subcontractor or External Worker when Employee link is not available.,للمقاول من الباطن أو العامل الخارجي عند عدم توفّر ارتباط الموظف.
+For example: Camera-Laundry-Room.,مثال: Camera-Laundry-Room.
 "For life or safety emergencies, contact the accommodation supervisor directly.",في حالات الطوارئ المتعلقة بالحياة أو السلامة، تواصل مع مشرف السكن مباشرة.
 Forgotten Request,طلب منسي
 Formal accommodation/housing safety-incident record with severity and automatic management escalation.,سجل رسمي لحادث سلامة في السكن مع درجة الخطورة والتصعيد الإداري التلقائي.
@@ -1824,6 +1827,7 @@ Leases by Status,عقود الإيجار حسب الحالة
 Leasing,التأجير
 Leave,إجازة
 Leave blank for permanent,اتركه فارغاً للدائم
+Leave empty for building-level stock.,اتركه فارغاً إذا كان المخزون على مستوى المبنى.
 Ledger Accrued Total,إجمالي استحقاق دفتر الأستاذ
 Ledger Cost This Month,تكلفة الدفتر هذا الشهر
 Ledger Cost by Type,تكلفة الدفتر حسب النوع
@@ -2146,6 +2150,7 @@ Notification,إشعار
 Notifications,الإشعارات
 Notify Count,عدد الإشعارات
 Notify Finance on Cross-Cost-Center Transfer,إشعار المالية عند النقل بين مراكز التكلفة
+Notify Finance on Liability Transfer,إشعار المالية عند نقل الالتزام
 November,نوفمبر
 Now tap an available bed to transfer the resident.,الآن انقر على سرير متاح لنقل المقيم.
 Number of Passengers,عدد الركاب
@@ -2499,6 +2504,7 @@ Policy Name,اسم السياسة
 Poor,رديء
 Poor Safety Task Executions,تنفيذات مهام السلامة الضعيفة
 "Portal design theme: AFMCO (flat brand default), Atelier (premium editorial refinement of AFMCO), Frappe Standard (neutral), Dark (AFMCO dark mode), or Gemini (glassmorphic).",سمة تصميم البوابة: AFMCO (السمة المسطحة الافتراضية للعلامة)، أتيليه (تحسين تحريري متميز لسمة AFMCO)، Frappe Standard (محايدة)، Dark (الوضع الداكن لسمة AFMCO)، أو Gemini (زجاجية المظهر).
+Portal user who executed the movement — not the Employee on the source Facility Asset Movement.,مستخدم البوابة الذي نفّذ النقل — وليس الموظف المدوَّن في مستند نقل أصل المرفق المصدر.
 Post-Work,بعد العمل
 Posted (memo),مُرحّل (مذكرة)
 Poster,الملصق
@@ -2782,6 +2788,7 @@ Request submitted successfully.,تم إرسال الطلب بنجاح.
 Requested By,مقدَّم بواسطة
 Requested By (Operations),طلب بواسطة (العمليات)
 Requested Count,العدد المطلوب
+Requested For (User),المستفيد من الصلاحية (المستخدم)
 Requested Litres,اللترات المطلوبة
 Requested Litres must be greater than zero.,يجب أن تكون اللترات المطلوبة أكبر من صفر.
 Requested volume ({0} L) exceeds the typical threshold of {1} L. Please verify before approving.,الكمّيّة المطلوبة ({0} لتر) تتجاوز الحدَّ المعتاد {1} لتر. الرجاء التحقّق قبل الاعتماد.
@@ -3447,6 +3454,7 @@ The submitted Custody Issue whose receipt is being acknowledged.,صرف العه
 The subscription's auth secret (client auth token for payload encryption).,المفتاح السري لمصادقة الاشتراك (رمز مصادقة العميل لتشفير الحمولة).
 The subscription's p256dh public key (client key for payload encryption).,المفتاح العام p256dh للاشتراك (مفتاح العميل لتشفير الحمولة).
 The tracked facility asset being delivered.,أصل المنشأة المتتبَّع الجاري تسليمه.
+The user the camera access is granted for (not the requester).,المستخدم الذي تُمنح له صلاحية الكاميرا (وليس مقدّم الطلب).
 The user who raised this case. Set automatically.,المستخدم الذي أنشأ هذه الحالة. يُضبط آلياً.
 The user who resolved or closed the case. Must differ from Reported By (segregation of duties).,المستخدم الذي عالج الحالة أو أغلقها. يجب أن يختلف عن المُبلِّغ (الفصل بين المهام).
 The vehicle has been taken out of service.,تم إخراج المركبة من الخدمة.

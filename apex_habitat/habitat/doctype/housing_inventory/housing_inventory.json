@@ -103,9 +103,10 @@
    "search_index": 1
   },
   {
+   "description": "Leave empty for building-level stock.",
    "fieldname": "room",
    "fieldtype": "Link",
-   "label": "Room (if room-specific)",
+   "label": "Room",
    "options": "Accommodation Room",
    "search_index": 1
   },
