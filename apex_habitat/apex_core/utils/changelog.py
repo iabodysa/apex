@@ -5,6 +5,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.60.61 — the worker's Home now shows the ride 'arriving in N min': the next-ride card reads the live server-computed ETA from the driver's GPS position and shows the minutes remaining while the driver is on the way, falling back to the plain en-route state when no live position exists yet",
+        "app_name": "apex_habitat",
+        "link": "/masar",
+        "creation": "2026-07-04 18:30:00",
+    },
+    {
         "title": "Apex 1.60.60 — a live ETA for the worker's next ride: the driver app shares its GPS position while a trip is under way (opt-in), and the worker's Home shows how many minutes until the shuttle reaches their own pickup, computed on the server from the driver's position and a tunable fleet speed",
         "app_name": "apex_habitat",
         "link": "/masar",

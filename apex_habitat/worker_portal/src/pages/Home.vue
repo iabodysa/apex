@@ -52,7 +52,7 @@
                worker can trust they're on the way, so we show that truthful live
                state instead. When the GPS feed lands, populate rideEta and this
                same slot renders the real ETA. -->
-          <div v-if="rideEta" class="flex items-center gap-2 text-sm">
+          <div v-if="rideEta !== null" class="flex items-center gap-2 text-sm">
             <Icon name="route" :size="16" class="text-primary shrink-0 rtl-flip" />
             <span class="font-semibold">{{ t("home.etaArriving", { eta: rideEta }) }}</span>
           </div>
@@ -220,15 +220,15 @@ const errorMessage = computed(() => resourceErrorMessage(home.error));
 const ride = computed(() => home.data?.next_ride || null);
 const bed = computed(() => home.data?.bed || null);
 
-// Live ride ETA — GATED behind a driver-GPS feed that does not exist yet.
-// PREMISE CHECK (T-331): the system has NO live driver location. Salis Vehicle
-// records no GPS/coordinate field (confirmed at salis/api/driver_portal.py:464),
-// and next_ride carries only a SCHEDULED depart_time/pickup_datetime + a status,
-// not a live position. So a real distance/time ETA cannot be computed here.
-// rideEta stays null (no fake ETA) until the next_ride payload gains a server-
-// computed `eta` from a driver-GPS feed; when it does, the card slot above
-// renders it automatically. FLAG: needs the driver-GPS feed.
-const rideEta = computed(() => ride.value?.eta || null);
+// Live ride ETA (T-331) — the server now computes it from the driver's live GPS
+// position (pushed by the driver app while the trip is dispatched) to the worker's
+// own pickup building; next_ride carries it as `eta_minutes`. Null until a position
+// exists, so the card falls back to the truthful en-route state and never shows a
+// fabricated ETA. 0 is a real value (driver at the pickup), so keep it.
+const rideEta = computed(() => {
+  const m = ride.value?.eta_minutes;
+  return m === null || m === undefined ? null : m;
+});
 
 // What we CAN show truthfully today: the trip's own status. "Dispatched" is the
 // stored Salis trip status meaning the driver has left, so the worker can trust
