@@ -5,6 +5,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.60.58 — logistics importer and safety round security hardening: driver and vehicle data imports now support update-on-exists logic; the safety round checklist single submission write path is secured with building read permission validation, alongside automated test coverage for imports and checklist API gating",
+        "app_name": "apex_habitat",
+        "link": "/safety",
+        "creation": "2026-06-29 12:00:00",
+    },
+    {
         "title": "Apex 1.60.5 — assign several transport requests onto one trip: a supervisor groups requests on a Dispatch Trip, the manifest is the union of their workers, a seat-capacity guard stops over-filling a vehicle, and each trip carries its purpose; several lists and reports now stay inside the building you can see, the public vehicle-incident and arrival-manifest forms are hardened against abuse, and a custody item's issued-to is now a proper user link, alongside reliability and layout tidy-ups",
         "app_name": "apex_habitat",
         "link": "/app/dispatch-trip",
