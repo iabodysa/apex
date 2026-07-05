@@ -36,15 +36,7 @@ _BASELINE = frozenset(
         ("test_consumable_custody_expiry.py", "apex_habitat.tests.test_utils"),
         ("test_custody_stock_integration.py", "apex_habitat.tests.test_utils"),
         ("test_driver_portal.py", "apex_habitat.tests.test_masar_worker_movement"),
-        ("test_driver_portal_attendance.py", "apex_habitat.tests.test_driver_portal"),
-        ("test_driver_portal_attendance.py", "apex_habitat.tests.test_driver_portal_scope"),
-        ("test_driver_portal_enrich.py", "apex_habitat.tests.test_driver_portal"),
-        ("test_driver_portal_enrich.py", "apex_habitat.tests.test_driver_portal_scope"),
-        ("test_driver_portal_flag.py", "apex_habitat.tests.test_driver_portal"),
-        ("test_driver_portal_push.py", "apex_habitat.tests.test_driver_portal"),
         ("test_driver_portal_scope.py", "apex_habitat.tests.test_driver_portal"),
-        ("test_driver_portal_today.py", "apex_habitat.tests.test_driver_portal"),
-        ("test_driver_portal_today.py", "apex_habitat.tests.test_driver_portal_scope"),
         ("test_financial_side_effects.py", "apex_habitat.tests.test_utils"),
         ("test_form_dashboards.py", "apex_habitat.tests.test_utils"),
         ("test_front_desk.py", "apex_habitat.tests.test_utils"),
@@ -68,16 +60,27 @@ _BASELINE = frozenset(
         ("test_resident_request_convert.py", "apex_habitat.tests.test_utils"),
         ("test_resident_request_todo.py", "apex_habitat.tests.test_utils"),
         ("test_safety_zero_rounds_scan.py", "apex_habitat.tests.test_utils"),
-        ("test_salis_controls.py", "apex_habitat.tests.test_driver_portal"),
         ("test_supplier_cost_recovery.py", "apex_habitat.tests.test_utils"),
         ("test_temporary_stay_and_idle.py", "apex_habitat.tests.test_utils"),
         ("test_v0_9_0_pages.py", "apex_habitat.tests.test_utils"),
     }
 )
 
-# Files that must stay 100% free of cross-test-module imports (cleaned by P-129).
+# Files that must stay 100% free of cross-test-module imports (cleaned by P-129 and
+# the P-135 baseline-retirement batches). The driver-portal batch (P-135) redirected
+# _ensure_test_driver -> factories.make_test_driver and _driver_without_vehicle ->
+# factories.make_driver_without_vehicle across these consumers.
 _MUST_BE_CLEAN = frozenset(
-    {"test_driver_gps_eta.py", "test_masar_worker_movement.py"}
+    {
+        "test_driver_gps_eta.py",
+        "test_masar_worker_movement.py",
+        "test_driver_portal_attendance.py",
+        "test_driver_portal_enrich.py",
+        "test_driver_portal_flag.py",
+        "test_driver_portal_push.py",
+        "test_driver_portal_today.py",
+        "test_salis_controls.py",
+    }
 )
 
 

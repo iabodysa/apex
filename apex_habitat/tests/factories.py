@@ -290,6 +290,41 @@ def make_test_driver():
     return drv
 
 
+def make_driver_without_vehicle(email):
+    """Get-or-create a User+Employee+Salis Driver chain with NO current_vehicle,
+    keyed on ``email``; return ``(driver_name, email)``. Idempotent — the fuel /
+    scope tests use it to prove a vehicle-less driver is rejected."""
+    if not frappe.db.exists("User", email):
+        try:
+            u = frappe.get_doc(
+                {"doctype": "User", "email": email, "first_name": "NoVeh", "send_welcome_email": 0}
+            )
+            u.add_roles("Driver")
+            u.insert(ignore_permissions=True)
+        except frappe.DuplicateEntryError:
+            # Concurrent create: another caller won the insert; fall through to reuse.
+            pass
+    emp = frappe.db.get_value("Employee", {"user_id": email}, "name")
+    if not emp:
+        emp = frappe.get_doc(
+            {
+                "doctype": "Employee",
+                "first_name": "NoVeh",
+                "user_id": email,
+                "date_of_birth": "1990-01-01",
+                "date_of_joining": today(),
+                "gender": "Male",
+                "company": default_company(),
+            }
+        ).insert(ignore_permissions=True).name
+    drv = frappe.db.get_value("Salis Driver", {"employee": emp}, "name")
+    if not drv:
+        drv = frappe.get_doc(
+            {"doctype": "Salis Driver", "employee": emp, "full_name": "NoVeh", "status": "Active"}
+        ).insert(ignore_permissions=True).name
+    return drv, email
+
+
 def make_worker_token(employee):
     """Create a Masar Worker Token for an Employee; return the token string."""
     return (

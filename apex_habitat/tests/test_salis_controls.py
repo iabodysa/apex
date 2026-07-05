@@ -9,7 +9,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions
 
 from apex_habitat.salis.api import driver_portal
-from apex_habitat.tests.test_driver_portal import _ensure_test_driver
+from apex_habitat.tests.factories import make_test_driver as _ensure_test_driver
 
 
 class TestDriverPortalGating(FrappeTestCase):

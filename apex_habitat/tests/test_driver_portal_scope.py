@@ -7,31 +7,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api import driver_portal
 from apex_habitat.tests.test_driver_portal import _ensure_test_driver
-
-
-def _driver_without_vehicle(email):
-    if not frappe.db.exists("User", email):
-        try:
-            u = frappe.get_doc(
-                {"doctype": "User", "email": email, "first_name": "NoVeh", "send_welcome_email": 0}
-            )
-            u.add_roles("Driver")
-            u.insert(ignore_permissions=True)
-        except frappe.DuplicateEntryError:
-            pass
-    emp = frappe.db.get_value("Employee", {"user_id": email}, "name")
-    if not emp:
-        company = (frappe.defaults.get_global_default("company")
-                   or frappe.get_all("Company", limit=1)[0].name)
-        emp = frappe.get_doc({"doctype": "Employee", "first_name": "NoVeh", "user_id": email,
-                              "date_of_birth": "1990-01-01", "date_of_joining": frappe.utils.today(),
-                              "gender": "Male", "company": company}).insert(ignore_permissions=True).name
-    drv = frappe.db.get_value("Salis Driver", {"employee": emp}, "name")
-    if not drv:
-        drv = frappe.get_doc({"doctype": "Salis Driver", "employee": emp,
-                              "full_name": "NoVeh", "status": "Active"}).insert(
-            ignore_permissions=True).name
-    return drv, email
+from apex_habitat.tests.factories import make_driver_without_vehicle as _driver_without_vehicle
 
 
 def _ensure_unlinked_user(email):
