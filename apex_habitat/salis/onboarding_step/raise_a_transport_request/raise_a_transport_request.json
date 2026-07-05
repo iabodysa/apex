@@ -8,7 +8,9 @@
  "is_single": 0,
  "is_complete": 0,
  "is_skipped": 0,
- "show_full_form": 0,
+ "show_full_form": 1,
+ "show_form_tour": 1,
+ "form_tour": "Transport Request",
  "description": "Capture a movement need so it can be validated, scheduled, and dispatched.",
  "action_label": "Raise Transport Request"
 }

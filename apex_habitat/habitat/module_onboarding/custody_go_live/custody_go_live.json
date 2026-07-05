@@ -13,6 +13,10 @@
   },
   {
    "doctype": "Onboarding Step Map",
+   "step": "Issue Custody"
+  },
+  {
+   "doctype": "Onboarding Step Map",
    "step": "Issue at the Kiosk"
   },
   {

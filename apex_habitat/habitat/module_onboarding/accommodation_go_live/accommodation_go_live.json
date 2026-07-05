@@ -17,6 +17,10 @@
   },
   {
    "doctype": "Onboarding Step Map",
+   "step": "Raise a Maintenance Request"
+  },
+  {
+   "doctype": "Onboarding Step Map",
    "step": "Review the Active Resident Register"
   }
  ]

@@ -1,0 +1,67 @@
+{
+ "creation": "2026-07-05 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-07-05 20:16:34.730705",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Maintenance Request",
+ "owner": "Administrator",
+ "reference_doctype": "Maintenance Request",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Select the building where the issue is.",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Building",
+   "position": "Right",
+   "title": "Choose the Building"
+  },
+  {
+   "description": "Select the affected room.",
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Room",
+   "position": "Right",
+   "title": "Choose the Room"
+  },
+  {
+   "description": "Classify the maintenance issue.",
+   "fieldname": "issue_type",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Issue Type",
+   "position": "Right",
+   "title": "Pick the Issue Type"
+  },
+  {
+   "description": "Set how urgent the repair is.",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Priority",
+   "position": "Right",
+   "title": "Set the Priority"
+  },
+  {
+   "description": "Describe the problem clearly, then save to open the ticket.",
+   "fieldname": "issue_description",
+   "fieldtype": "Small Text",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Issue Description",
+   "position": "Bottom",
+   "title": "Describe the Issue"
+  }
+ ],
+ "title": "Maintenance Request"
+}

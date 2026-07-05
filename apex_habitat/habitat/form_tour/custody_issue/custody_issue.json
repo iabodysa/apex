@@ -1,0 +1,80 @@
+{
+ "creation": "2026-07-05 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-07-05 20:16:34.730705",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Custody Issue",
+ "owner": "Administrator",
+ "reference_doctype": "Custody Issue",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Set the date these articles are handed over.",
+   "fieldname": "issue_date",
+   "fieldtype": "Date",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Issue Date",
+   "position": "Right",
+   "title": "Set the Issue Date"
+  },
+  {
+   "description": "Select the building where custody is issued.",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Building",
+   "position": "Right",
+   "title": "Choose the Building"
+  },
+  {
+   "description": "Choose whether the recipient is an Employee or another worker type.",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Worker Type",
+   "position": "Right",
+   "title": "Worker Type"
+  },
+  {
+   "description": "Pick the worker who receives the articles.",
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Worker",
+   "position": "Right",
+   "title": "Select the Worker"
+  },
+  {
+   "description": "Use this table to list every article handed over.",
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Items",
+   "position": "Bottom",
+   "title": "Add the Items"
+  },
+  {
+   "child_doctype": "Custody Issue Item",
+   "description": "In the first row, choose the article being issued and set its quantity.",
+   "fieldname": "article",
+   "fieldtype": "Link",
+   "has_next_condition": 1,
+   "is_table_field": 1,
+   "label": "Article",
+   "next_step_condition": "eval: doc.article",
+   "parent_fieldname": "items",
+   "position": "Right",
+   "title": "Pick an Article"
+  }
+ ],
+ "title": "Custody Issue"
+}

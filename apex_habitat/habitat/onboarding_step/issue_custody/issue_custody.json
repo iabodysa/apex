@@ -1,0 +1,16 @@
+{
+ "doctype": "Onboarding Step",
+ "name": "Issue Custody",
+ "intro_text": "Record a custody issue on the full form and follow the guided tour that walks you through handing articles to a worker.",
+ "title": "Issue Custody",
+ "action": "Create Entry",
+ "reference_document": "Custody Issue",
+ "is_single": 0,
+ "is_complete": 0,
+ "is_skipped": 0,
+ "show_full_form": 1,
+ "show_form_tour": 1,
+ "form_tour": "Custody Issue",
+ "description": "Issue articles to a worker, guided step by step through the form.",
+ "action_label": "Issue Custody"
+}

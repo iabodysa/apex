@@ -160,11 +160,14 @@ Actual Start Date and Actual End Date are required to mark Completed.,تاريخ
 Actual Visit Date,تاريخ الزيارة الفعلي
 Add,إضافة
 Add Compliance Record,إضافة سجل امتثال
+Add Details,أضف التفاصيل
 Add Floor,إضافة طابق
+"Add any extra detail, then save to submit the request.",أضف أي تفاصيل إضافية، ثم احفظ لتقديم الطلب.
 Add at least one expected worker to the manifest.,أضف عاملاً واحداً متوقعاً على الأقل إلى البيان.
 Add at least one floor with rooms.,أضِف طابقاً واحداً على الأقل بغرف.
 Add at least one item to the cart before issuing.,أضف صنفاً واحداً على الأقل قبل الصرف.
 Add at least one item to the cart before returning.,أضف بنداً واحداً على الأقل إلى السلة قبل الإرجاع.
+Add the Items,أضف الأصناف
 "Add the first driver, including license details used for clearance and dispatch.",أضف أول سائق، متضمناً بيانات الرخصة المستخدمة لإخلاء الطرف والتشغيل.
 Add the first vehicle compliance record so expiry alerts are active.,أضف أول سجل امتثال للمركبة حتى تُفعَّل تنبيهات انتهاء الصلاحية.
 "Add the first vehicle to the fleet so it can be assigned, fuelled, and dispatched.",أضف أول مركبة إلى الأسطول ليتسنى إسنادها وتزويدها بالوقود وتشغيلها.
@@ -343,6 +346,9 @@ Assets Moved This Month,الأصول المنقولة هذا الشهر
 Assets in Custody,الأصول في العهدة
 Assign a vehicle to a driver or project to start the movement lifecycle.,أسنِد مركبة إلى سائق أو مشروع لبدء دورة حياة الحركة.
 Assign an employee to a bed to start the accommodation lifecycle.,اربط الموظف بسرير لبدء دورة السكن.
+Assign the Bed,خصّص السرير
+Assign the Driver,عيّن السائق
+Assign the specific bed. This starts occupancy tracking and cost allocation.,خصّص السرير المحدّد. يبدأ هذا تتبّع الإشغال وتوزيع التكاليف.
 Assign to me,إسناد إليّ
 Assign to me ({0}),إسناد إليّ ({0})
 Assigned,مُسنَد
@@ -627,6 +633,13 @@ Chip,شريحة
 Chip Action,إجراء الشريحة
 Chip Cancellation,إلغاء الشريحة
 Chip Number,رقم الشريحة
+Choose the Building,اختر المبنى
+Choose the Room,اختر الغرفة
+Choose the Vehicle,اختر المركبة
+Choose the type of fuel request.,اختر نوع طلب الوقود.
+Choose the type of transport service needed.,اختر نوع خدمة النقل المطلوبة.
+Choose whether the recipient is an Employee or another worker type.,اختر ما إذا كان المستلم موظفاً أو نوعاً آخر من العمّال.
+Choose whether the resident is an Employee or a Temporary Worker.,اختر ما إذا كان المقيم موظفاً أو عاملاً مؤقتاً.
 City,المدينة
 City Name,اسم المدينة
 Civil Defence Certificate,ترخيص الدفاع المدني
@@ -644,6 +657,7 @@ Classification,التصنيف
 "Classification of fleet vehicles (e.g., Sedan, Pickup, Bus).",تصنيف مركبات الأسطول (مثل سيدان أو بيك أب أو حافلة).
 "Classifies the operational anomaly that triggered this alert so it routes to the right owner: idle assets, stalled or forgotten requests, supervisor delays, abnormal fuel top-ups, lapsing licenses, overdue maintenance, unsettled rentals, or expired consumables.",يصنّف الشذوذ التشغيلي الذي أطلق هذا التنبيه ليوجَّه إلى المسؤول المناسب: أصول خاملة، طلبات متوقّفة أو منسيّة، تأخّر المشرفين، تعبئة وقود غير معتادة، تراخيص تُشارف الانتهاء، صيانة متأخّرة، إيجارات غير مُسوّاة، أو مستهلكات منتهية.
 Classifies why this trip is requested; the transport supervisor reads it when assigning requests onto a trip.,يصنّف سبب طلب هذه الرحلة؛ يطّلع عليه مشرف النقل عند إسناد الطلبات إلى الرحلة.
+Classify the maintenance issue.,صنّف عطل الصيانة.
 Clean,سليم
 Cleaned,تم التنظيف
 Cleaner,عامل النظافة
@@ -1118,7 +1132,9 @@ Depreciation Snapshot Retention (Days),مدة الاحتفاظ بلقطات ال
 Derived Fields,الحقول المشتقة
 Derived from the active Accommodation Lease (annualized). Read-only.,مشتق من عقد الإيجار الفعّال (محسوباً سنوياً). للقراءة فقط.
 Derived on submit from the statuses of the linked Safety Task Execution rows.,تُشتقّ عند الاعتماد من حالات تنفيذات مهام السلامة المرتبطة.
+Describe the Issue,صف العطل
 Describe the issue,صف المشكلة
+"Describe the problem clearly, then save to open the ticket.",صف المشكلة بوضوح، ثم احفظ لفتح التذكرة.
 Description,الوصف
 Description is too long. Please keep it under 2000 characters.,الوصف طويل جداً. يرجى الإبقاء عليه تحت 2000 حرف.
 Description is too long. Please keep it under 4000 characters.,الوصف طويل جداً. يُرجى إبقاؤه دون أربعة آلاف حرف.
@@ -1285,6 +1301,7 @@ Ended,منتهٍ
 Endpoint,العنوان
 Engine Ledgers / Audit,دفاتر المحركات / التدقيق
 English,الإنجليزية
+"Enter how many litres are requested, then save.",أدخل عدد اللترات المطلوبة، ثم احفظ.
 Enter or scan an Iqama number or worker link.,أدخل أو امسح رقم إقامة أو رابط عامل.
 Entrance,المدخل
 Error Log,سجل الأخطاء
@@ -1699,6 +1716,7 @@ In Progress,قيد التنفيذ
 In Storage,في المستودع
 In Transit,في الطريق
 In stock: {0},في المخزون: {0}
+"In the first row, choose the article being issued and set its quantity.",في الصف الأول، اختر الصنف المصروف وحدّد كميته.
 Inactive,غير نشط
 Inactivity Evidence,إثبات عدم النشاط
 Inactivity evidence is required to submit a fuel chip cancellation.,إثبات عدم النشاط مطلوب لاعتماد إلغاء شريحة الوقود.
@@ -1798,6 +1816,7 @@ Issue Masar Link,إصدار رابط مسار
 Issue Type,نوع المشكلة / نوع الصرف
 Issue all ({0}),صرف الجميع ({0})
 Issue articles to a worker from the POS-style Custody Kiosk.,اصرف المواد لعامل من كشك العهدة بأسلوب نقاط البيع.
+"Issue articles to a worker, guided step by step through the form.",اصرف أصنافاً لعامل، بإرشاد خطوة بخطوة عبر النموذج.
 Issue at the Kiosk,الصرف من الكشك
 Issue custody,صرف العهدة
 Issue custody first,اصرف العهدة أولاً
@@ -2329,6 +2348,7 @@ Open Theft Reports,بلاغات السرقة المفتوحة
 Open Transport Requests,طلبات النقل المفتوحة
 Open Vehicle,فتح المركبة
 Open Vehicle Incidents,بلاغات المركبات المفتوحة
+"Open a maintenance ticket, guided step by step through the form.",افتح تذكرة صيانة، بإرشاد خطوة بخطوة عبر النموذج.
 Open the Action Inbox,افتح صندوق الإجراءات
 Open the Dispatch Board,افتح لوحة التشغيل
 Open the Front Desk,افتح مكتب الاستقبال
@@ -2380,6 +2400,7 @@ Optional: the specific Facility Asset this inspection covers. On submit its Last
 Options,الخيارات
 Ordered position of this stop on the trip's route (mirrors the Route Stop sequence).,الترتيب المرتّب لهذه المحطة على مسار الرحلة (يعكس تسلسل محطة المسار).
 Origin,المصدر
+Origin Building,مبنى الانطلاق
 Original Cost (SAR),التكلفة الأصلية (ريال)
 Other,أخرى
 Out of Service,خارج الخدمة
@@ -2523,7 +2544,11 @@ Pick a project first.,اختر مشروعاً أولاً.
 Pick a project…,اختر مشروعاً…
 "Pick a template, then use Load Checklist Template to populate the check items.",اختر قالباً، ثم استخدم تحميل قالب قائمة الفحص لتعبئة بنود الفحص.
 Pick a worker first.,اختر عاملاً أولاً.
+Pick an Article,اختر الصنف
 Pick an article.,اختر صنفاً.
+Pick the Issue Type,اختر نوع العطل
+Pick the person being housed. The list changes based on the resident type.,اختر الشخص المراد إسكانه. تتغيّر القائمة حسب نوع المقيم.
+Pick the worker who receives the articles.,اختر العامل الذي يستلم الأصناف.
 Pickup,نقطة الانطلاق
 Pickup Building,مبنى الالتقاط
 Pickup Datetime,تاريخ ووقت الانطلاق
@@ -2668,9 +2693,11 @@ Quota Litres,لترات الحصة
 Quota period in YYYY-MM format (e.g. 2026-05).,فترة الحصة بصيغة YYYY-MM (مثال: 2026-05).
 Quota-increase claim - requires Operations-tier approval and a Finance consult note.,طلب زيادة حصة الوقود — يستلزم موافقة مستوى العمليات وملاحظة استشارة مالية.
 Raise Fuel Request,إنشاء طلب وقود
+Raise Maintenance Request,رفع طلب صيانة
 Raise Payment Request,رفع طلب دفع
 Raise Transport Request,إنشاء طلب نقل
 Raise a Fuel Request,أنشئ طلب وقود
+Raise a Maintenance Request,رفع طلب صيانة
 Raise a Salis Payment Request,رفع طلب دفع سلس
 Raise a Transport Request,أنشئ طلب نقل
 Raise the first payment claim against a settled rental so cost recovery is complete.,ارفع أول مطالبة دفع على إيجار مُسوّى حتى يكتمل استرداد التكلفة.
@@ -2747,6 +2774,7 @@ Reference,المرجع
 Reference Document Type,نوع مستند المرجع
 Reference Name,اسم المرجع
 "Reference catalog of standardized safety tasks. Each task defines its department, frequency, priority, and instructions.",سجل مرجعي لمهام السلامة المعيارية. تحدّد كل مهمة قسمها ودوريتها وأولويتها وتعليماتها.
+"Reference data: durable records you set up once, not daily work.",بيانات مرجعية: سجلات دائمة تُعدّها مرة واحدة، وليست عملاً يومياً.
 "Reference to a Payment Entry settling this bill, if any. Set externally; this controller posts no Payment Entry.",إشارة إلى قيد دفع يسوّي هذه الفاتورة، إن وُجد. يُضبط خارجيًا؛ لا يُرحّل هذا المتحكم أي قيد دفع.
 "Reference to a Purchase Invoice settling this visit, if any. Set externally; this DocType creates no Purchase Invoice.",إشارة إلى فاتورة شراء تُسوّي هذه الزيارة، إن وُجدت. تُضبط خارجياً؛ ولا يُنشئ هذا المستند أي فاتورة شراء.
 Reference to the raised Salis Payment Request. Set automatically; this DocType never posts GL.,مرجع لطلب دفع سلس المُنشأ. يُضبط آلياً؛ ولا يرحّل هذا المستند أي قيد في دفتر الأستاذ العام.
@@ -3184,6 +3212,17 @@ Select at least one vehicle.,اختر مركبة واحدة على الأقل.
 Select at least one worker to board.,اختر عاملًا واحدًا على الأقل للصعود.
 Select from the Habitat material catalog. Optional — use instead of or alongside ERPNext Item.,اختر من كتالوج مواد Habitat. اختياري — استخدمه بدلاً من صنف ERPNext أو إلى جانبه.
 Select one or more New requests first.,اختر طلباً جديداً واحداً أو أكثر أولاً.
+Select the Resident,اختر المقيم
+Select the Worker,اختر العامل
+Select the accommodation building for this stay.,اختر مبنى السكن لهذه الإقامة.
+Select the affected room.,اختر الغرفة المتأثرة.
+Select the building the trip serves.,اختر المبنى الذي تخدمه الرحلة.
+Select the building where custody is issued.,اختر المبنى الذي تُصرف فيه العهدة.
+Select the building where the issue is.,اختر المبنى الذي يوجد به العطل.
+Select the driver for this request.,اختر السائق لهذا الطلب.
+Select the kind of request.,اختر نوع الطلب.
+Select the room inside the building.,اختر الغرفة داخل المبنى.
+Select the vehicle to be fuelled.,اختر المركبة المراد تزويدها بالوقود.
 Select the vehicle to release.,اختر المركبة المراد تحريرها.
 "Select this building's address, or a Site, to show it here.",اختر عنوانَ هذا المبنى، أو موقعًا، لعرضه هنا.
 Selected Bed {0} does not belong to Room {1},السرير المحدد {0} لا ينتمي إلى الغرفة {1}
@@ -3225,8 +3264,15 @@ Set by the receiving supervisor once every line has been physically checked. Req
 Set by the scheduled task once the Iqama issues and a permanent Employee record is created.,يُعيَّن بواسطة المهمة المجدولة بمجرد صدور الإقامة وإنشاء سجل موظف دائم.
 Set externally after Finance posts payment. This DocType never creates a GL or Payment Entry.,يُعيَّن خارجيًا بعد ترحيل المالية للدفعة. هذا المستند لا يُنشئ أبدًا قيدًا محاسبيًا أو قيد دفع.
 "Set for quota-increase claims, which always require Operations-tier authority.",يُعيَّن لمطالبات زيادة الحصة، التي تتطلب دائمًا صلاحية على مستوى العمليات.
+Set how urgent the repair is.,حدّد مدى إلحاح الإصلاح.
 Set on the reversal row posted when the source movement is cancelled. The original row is preserved for audit.,يُضبط على الصف العكسي المُرحَّل عند إلغاء الحركة المصدر. يُحتفظ بالصف الأصلي للتدقيق.
 Set once this expected worker is matched to a registered arrival.,يُضبط بمجرد مطابقة هذا العامل المتوقع بوصول مسجَّل.
+Set the Check-in Date,حدّد تاريخ الدخول
+Set the Issue Date,حدّد تاريخ الصرف
+Set the Priority,حدّد الأولوية
+Set the date of the request.,حدّد تاريخ الطلب.
+"Set the date the resident moves in, then save to begin the stay.",حدّد تاريخ دخول المقيم، ثم احفظ لبدء الإقامة.
+Set the date these articles are handed over.,حدّد تاريخ تسليم هذه الأصناف.
 Set the monthly litre allowance for a vehicle so consumption can be reconciled.,حدد البدل الشهري باللترات لمركبة ليتسنى مطابقة الاستهلاك.
 Set the number of beds in each room. Use − / + to adjust.,حدد عدد الأسرّة في كل غرفة. استخدم − / + للتعديل.
 Set to the session user on creation; read-only so the segregation-of-duties gate cannot be spoofed.,يُضبط إلى مستخدم الجلسة عند الإنشاء؛ وهو للقراءة فقط بحيث لا يمكن التحايل على بوابة الفصل بين المهام.
@@ -3364,6 +3410,7 @@ Starting Room Number,بداية ترقيم الغرف
 "State of a single generated task occurrence, tracking whether it is open, being worked, completed on time, overdue, or cancelled.",حالة نسخة مهمة مولّدة واحدة، تتابع ما إذا كانت مفتوحة أو قيد العمل أو مكتملة في وقتها أو متأخرة أو ملغاة.
 "State of an individual service visit order, tracking whether the visit is scheduled, in progress, completed, missed by the vendor, or cancelled.",حالة أمر زيارة خدمة فردي، تتابع ما إذا كانت الزيارة مجدولة أو قيد التنفيذ أو مكتملة أو فائتة من المورّد أو ملغاة.
 "State of the custody issue document, tracking whether items are still issued, fully or partially returned, or the issue was cancelled before handover.",حالة مستند صرف العهدة، تتابع ما إذا كانت الأصناف لا تزال مصروفة أو معادة كليًا أو جزئيًا، أو أُلغي الصرف قبل المناولة.
+State why the trip is needed.,وضّح سبب الحاجة إلى الرحلة.
 State: {0},الحالة: {0}
 Static,ثابت
 Static Value,القيمة الثابتة
@@ -3712,6 +3759,7 @@ Trip Fulfilment Ledger Rows,صفوف دفتر تنفيذ الرحلات
 Trip Fulfilment Ledger is a posted audit record and cannot be edited.,سجل تنفيذ الرحلة هو سجل تدقيق مرحَّل ولا يمكن تعديله.
 Trip Fulfilment Over Time,تنفيذ الرحلات عبر الزمن
 Trip Fulfilment Rate,معدل تنفيذ الرحلات
+Trip Purpose,غرض الرحلة
 Trip Scheduled: {{ doc.name }},تمت جدولة الرحلة: {{ doc.name }}
 Trip Start Log,سجل بدء الرحلة
 Trip Stop Progress,تقدم محطة الرحلة
@@ -3770,6 +3818,7 @@ Upload Photo (Optional),رفع صورة (اختياري)
 Urdu,الأردية
 "Urgency assigned to the request, driving target response time and escalation, from routine low priority up to critical issues that need immediate action.",الإلحاح المسند للطلب، يحرّك زمن الاستجابة المستهدف والتصعيد، من الأولوية المنخفضة الاعتيادية حتى القضايا الحرجة التي تتطلب إجراءً فوريًا.
 "Urgency of the maintenance request, setting target response time and escalation from routine low priority to critical faults needing immediate attention.",إلحاح طلب الصيانة، يحدّد زمن الاستجابة المستهدف والتصعيد من الأولوية المنخفضة الاعتيادية إلى الأعطال الحرجة التي تحتاج اهتمامًا فوريًا.
+Use this table to list every article handed over.,استخدم هذا الجدول لسرد كل صنف يتم تسليمه.
 "Use when the issue concerns a specific facility asset (e.g., CCTV camera, fire alarm panel)",استخدمه عندما تخص المشكلة أصل مرفق محدد (مثل كاميرا مراقبة، لوحة إنذار حريق)
 Used for variance alerts. Updated monthly by the variance scan job.,يُستخدم لتنبيهات الانحراف. يُحدَّث شهرياً بواسطة مهمة فحص الانحراف.
 Useful Life (Years),العمر الإنتاجي (سنوات)

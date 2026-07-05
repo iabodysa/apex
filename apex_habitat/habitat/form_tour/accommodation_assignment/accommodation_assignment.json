@@ -1,0 +1,77 @@
+{
+ "creation": "2026-07-05 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-07-05 20:16:34.730705",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Accommodation Assignment",
+ "owner": "Administrator",
+ "reference_doctype": "Accommodation Assignment",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Choose whether the resident is an Employee or a Temporary Worker.",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Resident Type",
+   "position": "Right",
+   "title": "Resident Type"
+  },
+  {
+   "description": "Pick the person being housed. The list changes based on the resident type.",
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Resident",
+   "position": "Right",
+   "title": "Select the Resident"
+  },
+  {
+   "description": "Select the accommodation building for this stay.",
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Building",
+   "position": "Right",
+   "title": "Choose the Building"
+  },
+  {
+   "description": "Select the room inside the building.",
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Room",
+   "position": "Right",
+   "title": "Choose the Room"
+  },
+  {
+   "description": "Assign the specific bed. This starts occupancy tracking and cost allocation.",
+   "fieldname": "bed",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Bed",
+   "position": "Right",
+   "title": "Assign the Bed"
+  },
+  {
+   "description": "Set the date the resident moves in, then save to begin the stay.",
+   "fieldname": "check_in_date",
+   "fieldtype": "Date",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Check-in Date",
+   "position": "Left",
+   "title": "Set the Check-in Date"
+  }
+ ],
+ "title": "Accommodation Assignment"
+}

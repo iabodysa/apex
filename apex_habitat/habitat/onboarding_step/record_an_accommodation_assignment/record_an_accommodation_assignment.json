@@ -8,7 +8,9 @@
  "is_single": 0,
  "is_complete": 0,
  "is_skipped": 0,
- "show_full_form": 0,
+ "show_full_form": 1,
+ "show_form_tour": 1,
+ "form_tour": "Accommodation Assignment",
  "description": "Assign an employee to a bed to start the accommodation lifecycle.",
  "action_label": "Create Accommodation Assignment"
 }
