@@ -103,7 +103,6 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Tools and Consoles",
-   "icon": "edit",
    "description": "Input screen: open an item to create or edit records.",
    "idx": 1
   },
@@ -135,7 +134,6 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Roles and Access",
-   "icon": "edit",
    "idx": 5
   },
   {
@@ -150,7 +148,6 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Logs",
-   "icon": "edit",
    "idx": 7
   },
   {
@@ -173,7 +170,6 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Worker Access",
-   "icon": "edit",
    "idx": 10
   },
   {
@@ -227,5 +223,5 @@
    "role": "Administrator"
   }
  ],
- "modified": "2026-07-05 18:39:24.929893"
+ "modified": "2026-07-05 19:12:59.527483"
 }

@@ -1006,6 +1006,7 @@ Daily Operations,العمليات اليومية
 Daily Rate,السعر اليومي
 Daily Rate cannot be negative.,لا يمكن أن يكون السعر اليومي سالباً.
 Daily Rate is required on a Receipt movement.,السعر اليومي مطلوب في حركة الاستلام.
+Daily Tasks,المهام اليومية
 Daily Work,العمل اليومي
 Daily cleaning record per building with worker accountability and evidence controls.,سجل نظافة يومي لكل مبنى مع مساءلة العامل وضوابط الأدلة.
 Daily driver attendance record with check-in/out times and photographic evidence.,سجل حضور يومي للسائق مع أوقات الدخول والمغادرة وأدلة مصوّرة.
@@ -1828,6 +1829,7 @@ KPI,مؤشر الأداء
 KSA Labor Law Note,ملاحظة نظام العمل السعودي
 Keep the accommodation and shared areas clean and tidy.,حافظ على نظافة وترتيب السكن والمناطق المشتركة.
 Key Metrics,المؤشرات الرئيسية
+Key Reports,التقارير المهمة
 "Kind of expense the payment request covers, such as fuel, rental, a fine, sponsorship fee, or maintenance, which drives approval routing and account coding.",نوع المصروف الذي يغطيه طلب الدفع، كالوقود أو الإيجار أو المخالفة أو رسم الكفالة أو الصيانة، ما يحرّك مسار الاعتماد وترميز الحساب.
 "Kind of outsourced facility service the contract covers, such as pest control, tank suction, deep cleaning, or equipment servicing, used to match orders to the right vendor scope.",نوع الخدمة المسندة للمرفق التي يغطيها العقد، كمكافحة الآفات أو شفط الخزانات أو التنظيف العميق أو صيانة المعدات، تُستخدم لمطابقة الأوامر مع نطاق المورّد الصحيح.
 "Kind of recurring work this template generates, classifying instances as safety, maintenance, inspection, or cleaning for routing and reporting.",نوع العمل المتكرر الذي يولّده هذا القالب، يصنّف الحالات كسلامة أو صيانة أو تفتيش أو تنظيف لأغراض التوجيه والتقارير.
@@ -2022,6 +2024,7 @@ Masar Go-Live,إطلاق تشغيل مسار
 Masar Worker,عامل مسار
 Masar Worker Token,رمز عامل مسار
 Masar is live. Use the Worker Route portal to manage transport requests and dispatch trips.,تم تشغيل مسار. استخدم بوابة مسار العامل لإدارة طلبات النقل وتشغيل الرحلات.
+Master Data,البيانات الأساسية
 Master Switch,المفتاح الرئيسي
 "Master agreement with an external subcontractor (pest control, sewage suction, deep cleaning, generator service, fire equipment service).",اتفاقية رئيسية مع مقاول باطن خارجي (مكافحة آفات، شفط مجاري، تنظيف عميق، خدمة مولدات، خدمة معدات الحريق).
 Master categories for issuable custody articles.,فئات أساسية لأصناف العهدة القابلة للصرف.

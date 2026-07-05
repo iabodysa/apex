@@ -21,7 +21,7 @@
  "is_default": 0,
  "sequence_id": 2.3,
  "parent_page": "Habitat",
- "content": "[{\"id\": \"cstHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"cstOnb0\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Custody Go-Live\", \"col\": 12}}, {\"id\": \"cstChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Custody Issues by Status\", \"col\": 12}}, {\"id\": \"GAJ58bRBht\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"cstScKiosk\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Kiosk\", \"col\": 3}}, {\"id\": \"h7rPQpwBDF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"Y3kWw6e9qD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"cstScGoodsReceipt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Goods Receipt\", \"col\": 3}}, {\"id\": \"cstHdrMetrics\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"cstNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Items Pending Return\", \"col\": 3}}, {\"id\": \"cxppVYIyNb\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"cstNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Returns\", \"col\": 3}}, {\"id\": \"h6sOtahi1Z\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"cstNcValue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Value in Employee Hands (SAR)\", \"col\": 3}}, {\"id\": \"f1V9RqLhsK\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"IxeVMDBiPa\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"xKUtrzTnmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"cstCardMasters\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}, {\"id\": \"rRLLPGC6jF\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "content": "[{\"id\": \"cstHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"cstOnb0\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Custody Go-Live\", \"col\": 12}}, {\"id\": \"cstChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Custody Issues by Status\", \"col\": 12}}, {\"id\": \"GAJ58bRBht\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"cstScKiosk\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Kiosk\", \"col\": 3}}, {\"id\": \"h7rPQpwBDF\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"Y3kWw6e9qD\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"cstScGoodsReceipt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Goods Receipt\", \"col\": 3}}, {\"id\": \"cstHdrMetrics\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"cstNcPending\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Items Pending Return\", \"col\": 3}}, {\"id\": \"cxppVYIyNb\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"cstNcOverdue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Returns\", \"col\": 3}}, {\"id\": \"h6sOtahi1Z\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"cstNcValue\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Value in Employee Hands (SAR)\", \"col\": 3}}, {\"id\": \"secDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"IxeVMDBiPa\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"xKUtrzTnmE\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"secReports\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Reports</b></span>\", \"col\": 12}}, {\"id\": \"rRLLPGC6jF\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"secMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"cstCardMasters\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -58,7 +58,6 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Custody Flow",
-   "icon": "edit",
    "description": "Input screen: open an item to create or edit records.",
    "idx": 1
   },
@@ -122,16 +121,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Facility Assets",
-   "icon": "edit",
    "idx": 9
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Facility Asset",
-   "link_type": "DocType",
-   "link_to": "Facility Asset",
-   "idx": 10
   },
   {
    "doctype": "Workspace Link",
@@ -139,7 +129,7 @@
    "label": "Facility Asset Custody Assignment",
    "link_type": "DocType",
    "link_to": "Facility Asset Custody Assignment",
-   "idx": 11
+   "idx": 10
   },
   {
    "doctype": "Workspace Link",
@@ -147,15 +137,14 @@
    "label": "Facility Asset Movement",
    "link_type": "DocType",
    "link_to": "Facility Asset Movement",
-   "idx": 12
+   "idx": 11
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
-   "icon": "list",
    "description": "Reports: read-only. Open to view on screen or export.",
-   "idx": 13
+   "idx": 12
   },
   {
    "doctype": "Workspace Link",
@@ -163,7 +152,7 @@
    "label": "Custody Damage Register",
    "link_type": "Report",
    "link_to": "Custody Damage Register",
-   "idx": 14,
+   "idx": 13,
    "is_query_report": 1
   },
   {
@@ -172,7 +161,7 @@
    "label": "Operational Depreciation Aging",
    "link_type": "Report",
    "link_to": "Operational Depreciation Aging",
-   "idx": 15,
+   "idx": 14,
    "is_query_report": 1
   },
   {
@@ -181,7 +170,7 @@
    "label": "Intercompany Movement Register",
    "link_type": "Report",
    "link_to": "Intercompany Movement Register",
-   "idx": 16,
+   "idx": 15,
    "is_query_report": 1
   },
   {
@@ -190,7 +179,7 @@
    "label": "Accommodation Stock Balance",
    "link_type": "Report",
    "link_to": "Accommodation Stock Balance",
-   "idx": 17,
+   "idx": 16,
    "is_query_report": 1
   },
   {
@@ -199,15 +188,15 @@
    "label": "Custody Outstanding by Worker",
    "link_type": "Report",
    "link_to": "Custody Outstanding by Worker",
-   "idx": 18,
+   "idx": 17,
    "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
-   "label": "Masters",
-   "icon": "edit",
-   "idx": 19
+   "label": "Master Data",
+   "idx": 18,
+   "description": "Reference data: durable records you set up once, not daily work."
   },
   {
    "doctype": "Workspace Link",
@@ -215,7 +204,7 @@
    "label": "Custody Article",
    "link_type": "DocType",
    "link_to": "Custody Article",
-   "idx": 20
+   "idx": 19
   },
   {
    "doctype": "Workspace Link",
@@ -223,6 +212,14 @@
    "label": "Custody Asset Category",
    "link_type": "DocType",
    "link_to": "Custody Asset Category",
+   "idx": 20
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Facility Asset",
+   "link_type": "DocType",
+   "link_to": "Facility Asset",
    "idx": 21
   }
  ],
@@ -267,5 +264,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-05 18:39:24.929893"
+ "modified": "2026-07-05 19:12:59.527483"
 }

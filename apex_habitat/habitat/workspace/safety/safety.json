@@ -25,7 +25,7 @@
  "is_hidden": 0,
  "sequence_id": 2.2,
  "parent_page": "Habitat",
- "content": "[{\"id\": \"facHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"facOnb0\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Safety Readiness\", \"col\": 12}}, {\"id\": \"facChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Findings by Severity\", \"col\": 12}}, {\"id\": \"facHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"facQ6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Checklist\", \"col\": 3}}, {\"id\": \"facQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"facQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Round\", \"col\": 3}}, {\"id\": \"facQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Safety Incident\", \"col\": 3}}, {\"id\": \"facQ4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building License\", \"col\": 3}}, {\"id\": \"facHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"facKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"facKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Escalated Maintenance Requests\", \"col\": 3}}, {\"id\": \"facKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"facKM8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Safety Tasks\", \"col\": 3}}, {\"id\": \"facKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"facKM7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Audit Remediation Plans\", \"col\": 3}}, {\"id\": \"facHdrNav\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Navigate</b></span>\", \"col\": 12}}, {\"id\": \"facCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Flow\", \"col\": 4}}, {\"id\": \"facCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Operations\", \"col\": 4}}, {\"id\": \"facCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Work\", \"col\": 4}}, {\"id\": \"facCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"facCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Materials\", \"col\": 4}}, {\"id\": \"facCardRptMnt\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Reports\", \"col\": 4}}, {\"id\": \"facCardRptSaf\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Reports\", \"col\": 4}}, {\"id\": \"facCardRptCln\", \"type\": \"card\", \"data\": {\"card_name\": \"Cleaning Reports\", \"col\": 4}}, {\"id\": \"facCardRptCmp\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance and Audit Reports\", \"col\": 4}}, {\"id\": \"facCardRptDsh\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"facCardMasters\", \"type\": \"card\", \"data\": {\"card_name\": \"Masters\", \"col\": 4}}]",
+ "content": "[{\"id\": \"facHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"facOnb0\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Safety Readiness\", \"col\": 12}}, {\"id\": \"facChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Findings by Severity\", \"col\": 12}}, {\"id\": \"facHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"facQ6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Checklist\", \"col\": 3}}, {\"id\": \"facQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"facQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Round\", \"col\": 3}}, {\"id\": \"facQ3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Habitat Safety Incident\", \"col\": 3}}, {\"id\": \"facQ4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building License\", \"col\": 3}}, {\"id\": \"facHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"facKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"facKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Escalated Maintenance Requests\", \"col\": 3}}, {\"id\": \"facKM2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"facKM8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Safety Tasks\", \"col\": 3}}, {\"id\": \"facKM3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"facKM7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Audit Remediation Plans\", \"col\": 3}}, {\"id\": \"secDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"facCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Flow\", \"col\": 4}}, {\"id\": \"facCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Operations\", \"col\": 4}}, {\"id\": \"facCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Work\", \"col\": 4}}, {\"id\": \"facCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"secReports\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Reports</b></span>\", \"col\": 12}}, {\"id\": \"facCardRptMnt\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance Reports\", \"col\": 4}}, {\"id\": \"facCardRptSaf\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety Reports\", \"col\": 4}}, {\"id\": \"facCardRptCln\", \"type\": \"card\", \"data\": {\"card_name\": \"Cleaning Reports\", \"col\": 4}}, {\"id\": \"facCardRptCmp\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance and Audit Reports\", \"col\": 4}}, {\"id\": \"facCardRptDsh\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"secMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"facCardMasters\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -72,7 +72,6 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Maintenance Flow",
-   "icon": "edit",
    "description": "Input screen: open an item to create or edit records.",
    "idx": 1
   },
@@ -104,7 +103,6 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Safety Operations",
-   "icon": "edit",
    "idx": 5
   },
   {
@@ -113,7 +111,7 @@
    "label": "Safety Round",
    "link_type": "DocType",
    "link_to": "Safety Round",
-   "idx": 7
+   "idx": 6
   },
   {
    "doctype": "Workspace Link",
@@ -121,7 +119,7 @@
    "label": "Habitat Safety Incident",
    "link_type": "DocType",
    "link_to": "Habitat Safety Incident",
-   "idx": 8
+   "idx": 7
   },
   {
    "doctype": "Workspace Link",
@@ -129,7 +127,7 @@
    "label": "Safety Task Execution",
    "link_type": "DocType",
    "link_to": "Safety Task Execution",
-   "idx": 9
+   "idx": 8
   },
   {
    "doctype": "Workspace Link",
@@ -137,13 +135,20 @@
    "label": "Safety Map (Board)",
    "link_type": "Page",
    "link_to": "safety-map",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Safety Inspection Report",
+   "link_type": "DocType",
+   "link_to": "Safety Inspection Report",
    "idx": 10
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Daily Work",
-   "icon": "edit",
    "idx": 11
   },
   {
@@ -166,7 +171,6 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Compliance",
-   "icon": "edit",
    "idx": 14
   },
   {
@@ -204,33 +208,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
-   "label": "Materials",
-   "icon": "edit",
-   "idx": 19
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Maintenance Material",
-   "link_type": "DocType",
-   "link_to": "Maintenance Material",
-   "idx": 20
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Maintenance Material Template",
-   "link_type": "DocType",
-   "link_to": "Maintenance Material Template",
-   "idx": 21
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Card Break",
    "label": "Maintenance Reports",
-   "icon": "list",
    "description": "Reports: read-only. Open to view on screen or export.",
-   "idx": 24
+   "idx": 19
   },
   {
    "doctype": "Workspace Link",
@@ -238,7 +218,7 @@
    "label": "Maintenance Backlog",
    "link_type": "Report",
    "link_to": "Maintenance Backlog",
-   "idx": 25,
+   "idx": 20,
    "is_query_report": 1
   },
   {
@@ -247,16 +227,15 @@
    "label": "Maintenance Aging",
    "link_type": "Report",
    "link_to": "Maintenance Aging",
-   "idx": 26,
+   "idx": 21,
    "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Safety Reports",
-   "icon": "list",
    "description": "Reports: read-only. Open to view on screen or export.",
-   "idx": 27
+   "idx": 22
   },
   {
    "doctype": "Workspace Link",
@@ -264,7 +243,7 @@
    "label": "Safety Open Findings",
    "link_type": "Report",
    "link_to": "Safety Open Findings",
-   "idx": 28,
+   "idx": 23,
    "is_query_report": 1
   },
   {
@@ -273,16 +252,15 @@
    "label": "Safety Round Compliance",
    "link_type": "Report",
    "link_to": "Safety Round Compliance",
-   "idx": 29,
+   "idx": 24,
    "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Cleaning Reports",
-   "icon": "list",
    "description": "Reports: read-only. Open to view on screen or export.",
-   "idx": 30
+   "idx": 25
   },
   {
    "doctype": "Workspace Link",
@@ -290,7 +268,7 @@
    "label": "Daily Cleaning Compliance",
    "link_type": "Report",
    "link_to": "Daily Cleaning Compliance",
-   "idx": 31,
+   "idx": 26,
    "is_query_report": 1
   },
   {
@@ -299,16 +277,15 @@
    "label": "Missed Cleaning Tasks",
    "link_type": "Report",
    "link_to": "Missed Cleaning Tasks",
-   "idx": 32,
+   "idx": 27,
    "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Compliance and Audit Reports",
-   "icon": "list",
    "description": "Reports: read-only. Open to view on screen or export.",
-   "idx": 33
+   "idx": 28
   },
   {
    "doctype": "Workspace Link",
@@ -316,7 +293,7 @@
    "label": "Scheduled Task Compliance",
    "link_type": "Report",
    "link_to": "Scheduled Task Compliance",
-   "idx": 34,
+   "idx": 29,
    "is_query_report": 1
   },
   {
@@ -325,16 +302,15 @@
    "label": "Audit Remediation Status",
    "link_type": "Report",
    "link_to": "Audit Remediation Status",
-   "idx": 35,
+   "idx": 30,
    "is_query_report": 1
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Dashboards",
-   "icon": "dashboard",
    "description": "Dashboards: live monitoring boards that refresh automatically.",
-   "idx": 36
+   "idx": 31
   },
   {
    "doctype": "Workspace Link",
@@ -342,7 +318,7 @@
    "label": "Resident Supervisor Dashboard",
    "link_type": "Dashboard",
    "link_to": "Resident Supervisor Dashboard",
-   "idx": 37
+   "idx": 32
   },
   {
    "doctype": "Workspace Link",
@@ -350,14 +326,14 @@
    "label": "Internal Auditor Dashboard",
    "link_type": "Dashboard",
    "link_to": "Internal Auditor Dashboard",
-   "idx": 38
+   "idx": 33
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
-   "label": "Masters",
-   "icon": "edit",
-   "idx": 39
+   "label": "Master Data",
+   "idx": 34,
+   "description": "Reference data: durable records you set up once, not daily work."
   },
   {
    "doctype": "Workspace Link",
@@ -365,7 +341,7 @@
    "label": "Safety Task Catalog",
    "link_type": "DocType",
    "link_to": "Safety Task Catalog",
-   "idx": 40
+   "idx": 35
   },
   {
    "doctype": "Workspace Link",
@@ -373,7 +349,7 @@
    "label": "Scheduled Task Template",
    "link_type": "DocType",
    "link_to": "Scheduled Task Template",
-   "idx": 41
+   "idx": 36
   },
   {
    "doctype": "Workspace Link",
@@ -381,15 +357,23 @@
    "label": "Scheduled Task Assignment",
    "link_type": "DocType",
    "link_to": "Scheduled Task Assignment",
-   "idx": 42
+   "idx": 37
   },
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Safety Inspection Report",
+   "label": "Maintenance Material",
    "link_type": "DocType",
-   "link_to": "Safety Inspection Report",
-   "idx": 43
+   "link_to": "Maintenance Material",
+   "idx": 38
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Material Template",
+   "link_type": "DocType",
+   "link_to": "Maintenance Material Template",
+   "idx": 39
   }
  ],
  "charts": [
@@ -439,5 +423,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-05 18:39:24.929893"
+ "modified": "2026-07-05 19:12:59.527483"
 }
