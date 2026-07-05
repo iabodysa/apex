@@ -74,13 +74,13 @@ Access Identity,هوية الوصول
 Access Level,مستوى الصلاحية
 Accident,حادث
 Accommodation,السكن
-Accommodation Assignment,إسناد السكن
+Accommodation Assignment,تسكين
 Accommodation Bed,سرير
 Accommodation Building,مبنى السكن
 Accommodation Building (Pickup),مبنى السكن (نقطة الالتقاط)
 Accommodation Building and Project are required for an Accommodation to Project Shuttle.,مبنى السكن والمشروع مطلوبان لرحلة النقل من السكن إلى المشروع.
 Accommodation Check-in,تسجيل وصول السكن
-Accommodation Checkout,مغادرة السكن
+Accommodation Checkout,إخلاء السكن
 Accommodation Cost Distribution,توزيع تكلفة السكن
 Accommodation Custody Handover,تسليم عهدة السكن
 Accommodation Custody Item,بند عهدة السكن
@@ -1344,7 +1344,7 @@ Expected return: {0},العودة المتوقعة: {0}
 Expense Request Afmco,طلب صرف
 Expense Request Afmco DocType is not installed.,نوع مستند طلب الصرف غير مثبت.
 Expense Type,نوع المصروف
-Expired,منتهٍ
+Expired,منتهي
 Expired Licenses,الرخص المنتهية
 Expires On,ينتهي في
 Expiring Soon,ينتهي قريباً
@@ -1565,7 +1565,7 @@ Global Max % of Salary cannot exceed {0}% (KSA Labor Law Art. 91 ceiling on comb
 Global master switch for all salary deductions; off until legal review is recorded.,مفتاح رئيسي عام لجميع خصومات الرواتب؛ يبقى متوقفاً حتى تسجيل المراجعة القانونية.
 Go To,الانتقال إلى
 Good,جيد
-Goods Receipt,إيصال استلام بضائع
+Goods Receipt,سند استلام بضائع
 Google Maps Link,رابط خرائط جوجل
 Grace days after the due date before a safety task is flagged Overdue.,أيام السماح بعد تاريخ الاستحقاق قبل تعليم مهمة السلامة كمتأخرة.
 Grace period (minutes) from trip start before notify escalation and absence marking apply. A blank or zero value falls back to the built-in default.,فترة المهلة (بالدقائق) من بدء الرحلة قبل تطبيق تصعيد الإشعارات وتسجيل الغياب. القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج.
@@ -2281,7 +2281,7 @@ Only the initiator or an Accommodation Manager may regenerate the code.,يحق �
 Only the procurement supervisor or an Accommodation Manager may regenerate the code.,لا يجوز إعادة توليد الرمز إلا لمشرف المشتريات أو مدير السكن.
 Only the receiving supervisor or an Accommodation Manager may action this handover.,لا يجوز اتخاذ إجراء على هذا التسليم إلا للمشرف المستلم أو مدير السكن.
 Only the receiving supervisor or an Accommodation Manager may confirm receipt.,يحق فقط للمشرف المستلِم أو مدير الإسكان تأكيد الاستلام.
-Open,فتح
+Open,مفتوح
 Open Action Inbox,فتح صندوق الإجراءات
 Open Alerts by Type,التنبيهات المفتوحة حسب النوع
 Open Audit Remediation Plans,خطط معالجة التدقيق المفتوحة
@@ -2937,7 +2937,7 @@ Return cart is empty.,سلة الإرجاع فارغة.
 Return date cannot be earlier than the open Receipt date ({0}).,لا يمكن أن يكون تاريخ الإرجاع أقدم من تاريخ الاستلام المفتوح ({0}).
 Return from Leave,العودة من الإجازة
 Return from Repair,إعادة بعد الإصلاح
-Returned,مُعاد
+Returned,مُرجَع
 Returned By (Employee),أُعيد بواسطة (الموظف)
 Returned Items,الأصناف المعادة
 Returned from Leave,عائد من إجازة
@@ -3731,7 +3731,7 @@ Under Maintenance,تحت الصيانة
 Under Renewal,تحت التجديد
 Under Renovation,تحت الترميم
 Under Repair,تحت الإصلاح
-Under Review,تحت المراجعة
+Under Review,قيد المراجعة
 "Underlying reason the asset is being moved, whether to reallocate it, service it, condemn it, or another cause, used for movement analysis.",السبب الجذري لنقل الأصل، سواء لإعادة توزيعه أو صيانته أو إتلافه أو سبب آخر، يُستخدم لتحليل الحركة.
 Unguessable value bound to this one worker. Whoever holds the matching /masar link sees only this worker's data. Use Generate / Regenerate to issue or rotate it.,قيمة غير قابلة للتخمين مرتبطة بهذا العامل وحده. من يحمل رابط /masar المطابق يرى بيانات هذا العامل فقط. استخدم توليد / إعادة توليد لإصدارها أو تدويرها.
 Unified child table for inspection findings used by Safety Inspection Report and Maintenance Inspection Report.,جدول تابع موحّد لملاحظات التفتيش يستخدمه تقرير تفتيش السلامة وتقرير تفتيش الصيانة.

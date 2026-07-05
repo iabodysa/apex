@@ -5,6 +5,12 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.60.67 — a few Arabic labels and status words now read in their standard everyday business form: Accommodation Assignment, Accommodation Checkout and Goods Receipt use the terms staff recognise, and the Open, Returned, Expired and Under Review status words show in their standard Arabic form; wording only, nothing already recorded is affected",
+        "app_name": "apex_habitat",
+        "link": "/app",
+        "creation": "2026-07-05 12:00:00",
+    },
+    {
         "title": "Apex 1.60.61 — the worker's Home now shows the ride 'arriving in N min': the next-ride card reads the live server-computed ETA from the driver's GPS position and shows the minutes remaining while the driver is on the way, falling back to the plain en-route state when no live position exists yet",
         "app_name": "apex_habitat",
         "link": "/masar",
