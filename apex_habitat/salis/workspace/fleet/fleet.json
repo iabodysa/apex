@@ -104,6 +104,8 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Masters",
+   "icon": "edit",
+   "description": "Input screen: open an item to create or edit records.",
    "idx": 1
   },
   {
@@ -150,6 +152,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Vehicle Custody",
+   "icon": "edit",
    "idx": 4
   },
   {
@@ -196,6 +199,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Fuel",
+   "icon": "edit",
    "idx": 11
   },
   {
@@ -250,6 +254,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Incidents and Recovery",
+   "icon": "edit",
    "idx": 18
   },
   {
@@ -280,6 +285,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Office Billing",
+   "icon": "edit",
    "idx": 22
   },
   {
@@ -294,6 +300,8 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
+   "icon": "list",
+   "description": "Reports: read-only. Open to view on screen or export.",
    "idx": 27
   },
   {
@@ -381,6 +389,8 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Dashboards",
+   "icon": "dashboard",
+   "description": "Dashboards: live monitoring boards that refresh automatically.",
    "idx": 37
   },
   {
@@ -453,5 +463,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-29 12:00:00.000000"
+ "modified": "2026-07-05 18:39:24.929893"
 }

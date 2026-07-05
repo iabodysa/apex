@@ -130,6 +130,7 @@ Acknowledged by {0},تم الإقرار بواسطة {0}
 Acknowledgement Received,تم استلام الإقرار
 Acknowledgement Received must be set before a recovery can be {0}.,"يجب تعيين ""تم استلام الإقرار"" قبل أن يمكن {0} الاسترداد."
 Action Inbox,صندوق الإجراءات الواردة
+Action Inbox (Board),صندوق الإجراءات (لوحة متابعة)
 Action failed. Please review and try again.,فشل الإجراء. يرجى المراجعة وإعادة المحاولة.
 Activate Bed,تفعيل السرير
 Activate Room,تفعيل الغرفة
@@ -307,6 +308,7 @@ Arrival Date plus Window Days. Computed by the controller.,تاريخ الوصو
 Arrival Manifest,بيان الوصول
 Arrival Slip,قسيمة الوصول
 Arrivals Desk,مكتب الوصول
+Arrivals Desk (Screen),مكتب الوصول (شاشة إدخال)
 Arrivals Expected Today: {{ doc.building }} ({{ doc.expected_count }}),وصول متوقع اليوم: {{ doc.building }} ({{ doc.expected_count }})
 Arrivals Intake,استقبال الوافدين
 Arrivals Today,الوافدون اليوم
@@ -979,6 +981,7 @@ Custody Issue {0} was not found or is not submitted.,صرف العهدة {0} غ�
 Custody Issues by Status,صرف العهد حسب الحالة
 Custody Items Pending Return,أصناف العهدة بانتظار الإرجاع
 Custody Kiosk,كشك العهد
+Custody Kiosk (Screen),كشك العهدة (شاشة إدخال)
 Custody Loss,فقدان عهدة
 Custody Master,بيانات العهد الأساسية
 Custody Outstanding by Worker,العهدة القائمة لكل عامل
@@ -1024,6 +1027,7 @@ Damaged Parts,الأجزاء المتضررة
 Dark,داكن
 Dashboards,اللوحات
 Dashboards & Reports,اللوحات والتقارير
+Dashboards: live monitoring boards that refresh automatically.,لوحات متابعة مباشرة تتحدث تلقائياً.
 Data Retention,الاحتفاظ بالبيانات
 Date,التاريخ
 Date from which this rule takes effect. A source event dated before this is not deducted. Used by recurring deductions such as Rent / Housing.,التاريخ الذي تسري منه هذه القاعدة. أي حدث مصدر بتاريخ سابق له لا يُحسم. تستخدمه الحسوم المتكررة مثل الإيجار / السكن.
@@ -1473,12 +1477,14 @@ From Room,من غرفة
 From Room does not match the asset's current location ({0}).,الغرفة المصدر لا تطابق الموقع الحالي للأصل ({0}).
 From and To location must differ for a Facility Asset Movement.,يجب أن يختلف موقع البداية والنهاية في حركة أصول المنشأة.
 Front Desk,مكتب الاستقبال
+Front Desk (Screen),مكتب الاستقبال (شاشة إدخال)
 Frontend Base URL,العنوان الأساسي للواجهة الأمامية
 Frontend Base URL must start with http:// or https:// (for example https://salis-fleet.com).,يجب أن يبدأ رابط الواجهة الأمامية بـ http:// أو https:// (مثال: https://salis-fleet.com).
 Frontend Integration,تكامل الواجهة الأمامية
 Fuel,وقود
 Fuel Account,حساب الوقود
 Fuel Approval Console,وحدة اعتماد الوقود
+Fuel Approval Console (Board),اعتماد الوقود (لوحة متابعة)
 Fuel Chip Returned,تم إرجاع شريحة الوقود
 Fuel Claim,مطالبة وقود
 Fuel Claim Register,سجل مطالبات الوقود
@@ -1709,6 +1715,7 @@ Info Alert Aging Hours,ساعات تقادم التنبيه المعلوماتي
 Information,معلومات
 Initiated By,بدأه
 Injury,إصابة
+Input screen: open an item to create or edit records.,شاشة إدخال: افتح عنصراً لإنشاء السجلات أو تعديلها.
 Inspected by (Supervisor),تم التفتيش بواسطة (المشرف)
 Inspection,تفتيش
 Inspection Date,تاريخ الفحص
@@ -2352,6 +2359,7 @@ Operational source of the deduction. Damage = custody damage assessment; Rent = 
 Operations,العمليات
 Operations Alert,تنبيه تشغيلي
 Operations Control,التحكم بالعمليات
+Operations Control (Board),مركز العمليات (لوحة متابعة)
 Operations Director by default,مدير العمليات افتراضياً
 "Operations requester, carried from the linked Transport Request (Operations owns the request).",مقدّم طلب العمليات، منقول من طلب النقل المرتبط (العمليات تملك الطلب).
 Operator-entered count of active CCTV cameras in this building. There is no per-camera asset record to auto-count from.,عدد كاميرات المراقبة النشطة في هذا المبنى كما أدخله المشغّل. لا يوجد سجل أصل لكل كاميرا للعدّ التلقائي منه.
@@ -2842,6 +2850,7 @@ Reported stolen from the Fleet OS dashboard.,أُبلغ عن السرقة من �
 Reported stolen via {0}.,أُبلغ عن سرقتها عبر {0}.
 Reporter & Resident,المبلِّغ والمقيم
 Reports,التقارير
+Reports: read-only. Open to view on screen or export.,تقارير: للعرض فقط. تُفتح للاطلاع على الشاشة أو التصدير.
 Representative,المندوب
 Representatives Transport Fulfilled This Month,نقل المندوبين المنفّذ هذا الشهر
 Representatives Transport Requests Open,طلبات نقل المندوبين المفتوحة
@@ -2982,6 +2991,7 @@ Room Number,رقم الغرفة
 Room Number Prefix,بادئة رقم الغرفة
 Room Numbering,ترقيم الغرف
 Room Setup,إعداد الغرف
+Room Setup (Screen),إعداد الغرف (شاشة إدخال)
 Room Setup — {0},إعداد الغرف — {0}
 Room Status,حالة الغرفة
 Room Status Breakdown,تفصيل حالة الغرف
@@ -3045,6 +3055,7 @@ Safety Inspections,تفتيشات السلامة
 Safety Inspections Over Time,تفتيشات السلامة عبر الزمن
 Safety Inspections Recorded,فحوصات السلامة المسجلة
 Safety Map,خريطة السلامة
+Safety Map (Board),خريطة السلامة (لوحة متابعة)
 Safety Open Findings,نتائج السلامة المفتوحة
 Safety Operations,عمليات السلامة
 Safety Overdue Grace Days,أيام سماح تأخر السلامة

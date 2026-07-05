@@ -73,12 +73,14 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Daily Operations",
+   "icon": "edit",
+   "description": "Input screen: open an item to create or edit records.",
    "idx": 1
   },
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Front Desk",
+   "label": "Front Desk (Screen)",
    "link_type": "Page",
    "link_to": "front-desk",
    "idx": 2
@@ -94,7 +96,7 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Arrivals Desk",
+   "label": "Arrivals Desk (Screen)",
    "link_type": "Page",
    "link_to": "arrivals-desk",
    "idx": 19
@@ -110,7 +112,7 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Room Setup",
+   "label": "Room Setup (Screen)",
    "link_type": "Page",
    "link_to": "room-setup",
    "idx": 20
@@ -119,6 +121,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Lifecycle",
+   "icon": "edit",
    "idx": 4
   },
   {
@@ -149,6 +152,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Residents and Rooms",
+   "icon": "edit",
    "idx": 8
   },
   {
@@ -187,6 +191,8 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Reports",
+   "icon": "list",
+   "description": "Reports: read-only. Open to view on screen or export.",
    "idx": 13
   },
   {
@@ -254,6 +260,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Cleaning",
+   "icon": "edit",
    "idx": 25
   },
   {
@@ -269,6 +276,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Masters",
+   "icon": "edit",
    "idx": 27
   },
   {
@@ -331,5 +339,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-29 12:00:00.000000"
+ "modified": "2026-07-05 18:39:24.929893"
 }

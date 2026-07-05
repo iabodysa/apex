@@ -72,6 +72,8 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Maintenance Flow",
+   "icon": "edit",
+   "description": "Input screen: open an item to create or edit records.",
    "idx": 1
   },
   {
@@ -102,6 +104,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Safety Operations",
+   "icon": "edit",
    "idx": 5
   },
   {
@@ -131,7 +134,7 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Safety Map",
+   "label": "Safety Map (Board)",
    "link_type": "Page",
    "link_to": "safety-map",
    "idx": 10
@@ -140,6 +143,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Daily Work",
+   "icon": "edit",
    "idx": 11
   },
   {
@@ -162,6 +166,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Compliance",
+   "icon": "edit",
    "idx": 14
   },
   {
@@ -200,6 +205,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Materials",
+   "icon": "edit",
    "idx": 19
   },
   {
@@ -222,6 +228,8 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Maintenance Reports",
+   "icon": "list",
+   "description": "Reports: read-only. Open to view on screen or export.",
    "idx": 24
   },
   {
@@ -246,6 +254,8 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Safety Reports",
+   "icon": "list",
+   "description": "Reports: read-only. Open to view on screen or export.",
    "idx": 27
   },
   {
@@ -270,6 +280,8 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Cleaning Reports",
+   "icon": "list",
+   "description": "Reports: read-only. Open to view on screen or export.",
    "idx": 30
   },
   {
@@ -294,6 +306,8 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Compliance and Audit Reports",
+   "icon": "list",
+   "description": "Reports: read-only. Open to view on screen or export.",
    "idx": 33
   },
   {
@@ -318,6 +332,8 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Dashboards",
+   "icon": "dashboard",
+   "description": "Dashboards: live monitoring boards that refresh automatically.",
    "idx": 36
   },
   {
@@ -340,6 +356,7 @@
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Masters",
+   "icon": "edit",
    "idx": 39
   },
   {
@@ -422,5 +439,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-06-29 12:00:00.000000"
+ "modified": "2026-07-05 18:39:24.929893"
 }
