@@ -373,6 +373,7 @@ Assignment Type,نوع التسكين
 Assignment {0} (driver {1}) cancelled.,تم إلغاء التعيين {0} (السائق {1}).
 Assigns a vehicle to a driver and project for a defined period.,يُسنِد مركبة إلى سائق ومشروع لفترة محددة.
 Assumed Fleet Speed (km/h),السرعة المفترضة للأسطول (km/h)
+Assumed average fleet speed (km/h) used to estimate the worker's live ride ETA from the driver's GPS position (straight-line distance / speed). A blank or zero value falls back to the built-in default.,متوسط السرعة المفترض للأسطول (كم/الساعة) المستخدم لتقدير الوقت المتوقّع لوصول رحلة العامل الحية انطلاقاً من موقع السائق عبر GPS (المسافة بخط مستقيم مقسومة على السرعة). القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج.
 At least one asset line is required.,يجب إدخال بند أصول واحد على الأقل.
 At least one damaged item is required.,يجب إدخال بند تالف واحد على الأقل.
 At least one finding is required on a Maintenance Inspection Report.,يجب تسجيل ملاحظة واحدة على الأقل في تقرير فحص الصيانة.
@@ -1068,6 +1069,7 @@ Days before a temporary stay's expected check-out date to flag it on the supervi
 Days before expiry to trigger renewal alert,عدد الأيام قبل الانتهاء لإطلاق تنبيه التجديد
 "Days the worker may remain on a passport-only basis. Standard 30, extendable to a maximum of 90.",عدد الأيام التي يجوز للعامل البقاء فيها بالاعتماد على جواز السفر فقط. القياسي 30، قابل للتمديد إلى حد أقصى 90.
 Days to Expiry,الأيام المتبقية للانتهاء
+Days to expiry at or below which a driver licence or vehicle compliance document is flagged 'expiring' (amber) in the driver portal. A blank or zero value falls back to the built-in default.,عدد الأيام المتبقية حتى الانتهاء التي عندها أو دونها تُميَّز رخصة السائق أو وثيقة امتثال المركبة بأنها «ستنتهي» (باللون الكهرماني) في بوابة السائق. القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج.
 Deactivate Bed,تعطيل السرير
 Deactivate Room,تعطيل الغرفة
 December,ديسمبر
@@ -2063,6 +2065,7 @@ Max % of Salary,الحد الأقصى % من الراتب
 Max Damage Deduction per Checkout (SAR),الحد الأقصى لخصم التلفيات عند المغادرة (ريال)
 Max Occupancy %,أعلى نسبة إشغال
 Maximum 'please wait' requests a worker may send the driver per trip. A blank or zero value falls back to the built-in default.,"الحد الأقصى لطلبات ""يرجى الانتظار"" التي يمكن للعامل إرسالها إلى السائق في كل رحلة. القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج."
+Maximum 'remaining passengers' notifications the driver may send a worker before that worker can be marked Absent at departure. A blank or zero value falls back to the built-in default.,الحد الأقصى لإشعارات «الركاب المتبقّون» التي يجوز للسائق إرسالها إلى العامل قبل أن يُتاح تعليمه غائباً عند المغادرة. القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج.
 May,مايو
 Median Alert Resolve Days,وسيط أيام حل التنبيه
 Medium,متوسطة
@@ -2080,6 +2083,7 @@ Migrated From,تم ترحيله من
 Min Occupancy %,أدنى نسبة إشغال
 Mine,الخاصة بي
 Minutes a handover one-time password stays valid before it expires.,عدد الدقائق التي يبقى فيها رمز التحقق للتسليم صالحاً قبل انتهاء صلاحيته.
+Minutes after a worker self-claims boarding before it is auto-confirmed (Boarded) when the driver neither confirms nor rejects. A blank or zero value falls back to the built-in default.,عدد الدقائق بعد أن يُسجّل العامل صعوده ذاتياً قبل تأكيده تلقائياً (تم الصعود) عندما لا يؤكّده السائق ولا يرفضه. القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج.
 Mirrors the building's supervisor so notifications can target the specific facility owner.,يعكس مشرف المبنى لتوجيه الإشعارات إلى مالك المنشأة المحدد.
 Missed,فائت
 Missed Cleaning,تنظيف مفقود
@@ -2503,6 +2507,7 @@ Per Pay Period,لكل فترة دفع
 "Per-manifest-worker boarding/departure state, populated from the manifest when the trip starts (first scan/self-confirm). System-maintained by the boarding flow.",حالة الصعود/المغادرة لكل عامل في القائمة، تُعبأ من قائمة الركاب عند بدء الرحلة (أول مسح/تأكيد ذاتي). يديرها النظام عبر تدفق الصعود.
 Per-stop completion the driver marks as the trip runs; persisted so it survives a reload.,إنجاز كل محطة الذي يضع السائق علامته أثناء تنفيذ الرحلة؛ محفوظ ليبقى بعد إعادة التحميل.
 Per-type rules sourced from operations. Each row is disabled by default. Damage / Rent / Fuel / Custody.,قواعد لكل نوع مصدرها العمليات. كل صف معطّل افتراضيًا. الضرر / الإيجار / الوقود / العهدة.
+Percent by which a vehicle's actual fuel consumption may exceed its monthly quota before an overage / excessive-topup alert is raised. A blank or zero value falls back to the built-in default.,النسبة المئوية التي يُسمح بأن يتجاوز بها استهلاك المركبة الفعلي من الوقود حصتها الشهرية قبل إطلاق تنبيه تجاوز أو تعبئة زائدة. القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج.
 Percentage of the total invoice borne by this building/unit,النسبة المئوية من إجمالي الفاتورة التي يتحمّلها هذا المبنى/الوحدة
 Performed By,نُفّذ بواسطة
 Period,الفترة
@@ -3231,6 +3236,7 @@ Selected Bed {0} is already occupied by Assignment {1},السرير المحدد
 Selected Room {0} does not belong to Building {1},الغرفة المحددة {0} لا تنتمي إلى المبنى {1}
 Semi-Annual,نصف سنوي
 Send a memo-only notification to Finance when a Material Transfer moves stock between buildings on different cost centers. No GL Entry is posted.,إرسال إشعار مذكرة فقط إلى المالية عند نقل المواد للمخزون بين مبانٍ على مراكز تكلفة مختلفة. دون ترحيل أي قيد في دفتر الأستاذ العام.
+"Send background push notifications (trip assigned, fuel approved) to opted-in driver devices. Requires a VAPID key pair below and the pywebpush package on the server; until both are present every push is a safe no-op.",إرسال إشعارات فورية في الخلفية (إسناد رحلة، اعتماد وقود) إلى أجهزة السائقين المشتركين. يتطلّب زوج مفاتيح VAPID أدناه وحزمة pywebpush على الخادم؛ وإلى أن يتوفّرا معاً يكون كل إشعار بلا أثر وبأمان.
 Send via WhatsApp/SMS,إرسال عبر واتساب/رسالة نصية
 Sender ID / From Number,معرّف المُرسِل / رقم الإرسال
 Sending…,جارٍ الإرسال…
