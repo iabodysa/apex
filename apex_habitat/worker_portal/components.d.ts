@@ -19,5 +19,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Skeleton: typeof import('./src/components/Skeleton.vue')['default']
+    TripProgressBar: typeof import('./src/components/TripProgressBar.vue')['default']
+    TripRating: typeof import('./src/components/TripRating.vue')['default']
   }
 }

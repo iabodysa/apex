@@ -120,6 +120,14 @@ PERMISSION_RECHECK_ALLOWLIST = [
     ),
     (
         "salis/api/masar.py",
+        "submit_trip_rating",
+        "Masar guest endpoint. allow_guest; the worker is resolved server-side from "
+        "the token (_resolve_worker) and the write is refused unless that worker is on "
+        "the trip's own Passenger Manifest (PermissionError otherwise); one rating per "
+        "worker+trip, explicit rate_limit. A Guest has no role to permission-check.",
+    ),
+    (
+        "salis/api/masar.py",
         "confirm_boarding",
         "Masar guest endpoint. allow_guest; authorisation is the Masar worker "
         "token resolved server-side (_resolve_worker), scope derived from the "

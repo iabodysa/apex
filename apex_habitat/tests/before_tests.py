@@ -21,3 +21,4 @@ def before_tests():
 
 	erpnext_before_tests()
 	frappe.db.commit()
+

@@ -1,6 +1,30 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
 <template>
   <div class="space-y-4">
+    <!-- Large Wait Request Notification Banner -->
+    <div
+      v-if="currentWait"
+      class="fixed inset-x-4 top-4 z-[999] rounded-xl bg-orange-600 text-white p-4 shadow-2xl flex items-center justify-between gap-3 border border-orange-500 animate-bounce"
+    >
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center shrink-0 animate-pulse">
+          <Icon name="alert" :size="20" class="text-white" />
+        </div>
+        <div class="min-w-0 text-right">
+          <h4 class="font-bold text-sm md:text-base leading-snug">طلب انتظار!</h4>
+          <p class="text-xs md:text-sm opacity-90 truncate"><bdi>{{ currentWait.employee }}</bdi> يطلب الانتظار</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="bg-white text-orange-600 font-extrabold text-base md:text-lg px-3 py-1.5 rounded-lg">
+          {{ currentWait.seconds }}ث
+        </div>
+        <button @click="currentWait = null" class="p-1 rounded-full hover:bg-white/10" aria-label="Dismiss">
+          <Icon name="x" :size="16" />
+        </button>
+      </div>
+    </div>
+
     <h2 class="section-title">{{ t("trips.title") }}</h2>
     <p class="-mt-2 text-sm text-soft">{{ t("trips.subtitle") }}</p>
 
@@ -26,6 +50,22 @@
       </button>
     </div>
 
+    <!-- Daily Summary Tiles (today only, when data is loaded) -->
+    <div v-if="tab === 'today' && today.data && today.data.length" class="grid gap-3 grid-cols-3">
+      <div class="stat">
+        <div class="stat-label">{{ t("trips.todayTrips") }}</div>
+        <div class="stat-value">{{ todayTripCount }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">{{ t("trips.completedTrips") }}</div>
+        <div class="stat-value text-success">{{ completedTripCount }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">{{ t("trips.totalBoarded") }}</div>
+        <div class="stat-value">{{ totalBoardedCount }}</div>
+      </div>
+    </div>
+
     <Skeleton v-if="active.loading" :rows="3" />
 
     <ErrorState v-else-if="active.error" :message="t('errors.loadFailed')" @retry="active.reload()" />
@@ -37,7 +77,13 @@
       :hint="tab === 'today' ? t('trips.emptyHint') : t('trips.recentEmptyHint')"
     />
 
-    <div v-for="trip in active.data" v-else :key="trip.name" class="card card-pad">
+    <div
+      v-for="trip in active.data"
+      v-else
+      :key="trip.name"
+      class="card card-pad"
+      :class="trip === nextTrip ? 'sticky top-4 z-10 shadow-xl border-primary/40 ring-1 ring-primary/30 transform transition-transform scale-[1.01]' : ''"
+    >
       <router-link :to="'/route/' + encodeURIComponent(trip.name)" class="block" style="text-decoration: none; color: inherit">
         <div class="flex items-start justify-between gap-2">
           <div class="font-bold leading-tight"><bdi>{{ trip.route_plan || trip.name }}</bdi></div>
@@ -76,13 +122,24 @@
         <Icon name="map-pin" :size="14" /> {{ t("route.openMap") }}
       </a>
 
-      <!-- Boarded headcount (today only): "N of M boarded" from the server counts. -->
+      <!-- Boarded headcount (today only): Circular Progress Ring -->
       <div
         v-if="tab === 'today' && trip.expected_count"
-        class="mt-2 flex items-center gap-2 text-sm text-soft"
+        class="mt-3 flex items-center gap-3 bg-gray-50/50 p-2.5 rounded-xl border border-gray-100"
       >
-        <Icon name="user" :size="16" class="text-primary shrink-0" />
-        <span>{{ t("trips.boardedOf", { n: trip.boarded_count || 0, m: trip.expected_count }) }}</span>
+        <div class="relative w-10 h-10 shrink-0">
+          <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="16" fill="none" class="stroke-gray-200" stroke-width="3"></circle>
+            <circle cx="18" cy="18" r="16" fill="none" class="stroke-primary transition-all duration-700 ease-out" stroke-width="3" stroke-dasharray="100.53" :stroke-dashoffset="100.53 - (((trip.boarded_count || 0) / trip.expected_count) * 100.53)" stroke-linecap="round"></circle>
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-700" dir="ltr">
+            {{ Math.round(((trip.boarded_count || 0) / trip.expected_count) * 100) }}%
+          </div>
+        </div>
+        
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-bold text-gray-800">{{ t("trips.boardedOf", { n: trip.boarded_count || 0, m: trip.expected_count }) }}</div>
+        </div>
       </div>
 
       <!-- Execution actions (today only): start → complete, writing a Trip Start Log. -->
@@ -92,34 +149,13 @@
         </span>
         <template v-else-if="trip.started">
           <span class="pill pill-warning"><Icon name="route" :size="14" /> {{ t("trips.started") }}</span>
-          <!-- Boarding manifest: track who's aboard, confirm worker claims, notify
-               remaining, then depart. Available once started (boarding state exists). -->
-          <button
-            v-if="trip.expected_count"
-            class="btn btn-primary"
-            style="width: auto; padding-inline: 16px"
-            @click="openManifest(trip)"
-          >
-            <Icon name="user" :size="16" /> {{ t("manifest.open") }}
-          </button>
-          <!-- Boarding scanner is available once the trip is started (a manifest exists). -->
-          <button
-            v-if="trip.expected_count"
-            class="btn btn-accent"
-            style="width: auto; padding-inline: 16px"
-            @click="openScanner(trip)"
-          >
-            <Icon name="qr" :size="16" /> {{ t("trips.scanBoarding") }}
-          </button>
-          <!-- Manual fallback when a pass can't be scanned: tick the manifest aboard. -->
-          <button
-            v-if="trip.expected_count"
-            class="btn btn-outline"
-            style="width: auto; padding-inline: 16px"
-            @click="openManual(trip)"
-          >
-            <Icon name="user" :size="16" /> {{ t("trips.manualBoarding") }}
-          </button>
+          <!-- Inline Boarding Actions -->
+          <template v-if="trip.expected_count">
+            <button class="btn btn-primary" style="width: auto; padding-inline: 16px" @click="openManifest(trip)">
+              <Icon name="user" :size="16" /> {{ t("manifest.title", "Boarding") }}
+            </button>
+          </template>
+          
           <button class="btn btn-dark" style="width: auto; padding-inline: 16px" :disabled="busy === trip.name" @click="complete(trip)">
             {{ t("trips.complete") }}
           </button>
@@ -135,7 +171,7 @@
     <!-- Manual-boarding fallback sheet, scoped to the tapped trip. -->
     <ManualBoarding v-if="manualTrip" :trip="manualTrip.name" @close="manualTrip = null" @boarded="onBoarded" />
     <!-- Boarding manifest / depart panel, scoped to the tapped started trip. -->
-    <BoardingManifest v-if="manifestTrip" :trip="manifestTrip.name" @close="manifestTrip = null" @finalized="onFinalized" />
+    <BoardingManifest v-if="manifestTrip" :trip="manifestTrip.name" @close="manifestTrip = null" @finalized="onFinalized" @open-scan="openScanner(manifestTrip); manifestTrip = null" @open-manual="openManual(manifestTrip); manifestTrip = null" />
   </div>
 </template>
 
@@ -153,9 +189,60 @@ import { useI18n } from "../i18n";
 import { pushToast } from "../toast";
 import { connectDriverRealtime } from "../realtime.js";
 
-const { t, te, fmtTime } = useI18n();
+const { t, te, fmtTime, dir } = useI18n();
 
 const tab = ref("today");
+
+const activeBoardingTrip = ref(null);
+function toggleBoardingMenu(trip) {
+  if (activeBoardingTrip.value === trip.name) {
+    activeBoardingTrip.value = null;
+  } else {
+    activeBoardingTrip.value = trip.name;
+  }
+}
+
+const currentWait = ref(null);
+let waitTimer = null;
+
+function showWaitNotification(payload) {
+  if (waitTimer) clearInterval(waitTimer);
+  currentWait.value = {
+    employee: payload.employee || "موظف",
+    seconds: payload.wait_window_seconds || 60,
+  };
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.3);
+  } catch (e) {
+    // ignore audio block
+  }
+  waitTimer = setInterval(() => {
+    if (currentWait.value) {
+      currentWait.value.seconds--;
+      if (currentWait.value.seconds <= 0) {
+        clearInterval(waitTimer);
+        currentWait.value = null;
+      }
+    } else {
+      clearInterval(waitTimer);
+    }
+  }, 1000);
+}
+
+function onBoardingEvent(event, payload) {
+  if (event === "wait_request") {
+    showWaitNotification(payload);
+  }
+}
 
 // The trip whose boarding scanner is open (null = closed). A Valid scan reloads
 // today's trips so the card's "N of M boarded" increments.
@@ -199,6 +286,23 @@ function showRecent() {
 
 const active = computed(() => (tab.value === "recent" ? recent : today));
 
+// Daily summary tile computations (today tab only).
+const todayTripCount = computed(() => (today.data || []).length);
+const completedTripCount = computed(
+  () => (today.data || []).filter((t) => t.trip_log_status === "Completed").length,
+);
+const totalBoardedCount = computed(
+  () => (today.data || []).reduce((sum, t) => sum + (t.boarded_count || 0), 0),
+);
+
+// Identify the very next trip for sticky highlight
+const nextTrip = computed(() => {
+  if (tab.value !== "today" || !today.data) return null;
+  return today.data.find(
+    (t) => t.trip_log_status !== "Completed" && t.status !== "Completed" && t.status !== "Cancelled"
+  ) || null;
+});
+
 // ── Realtime (socket push, ahead of a manual refresh) ──
 // When a Dispatch Trip the driver can read changes (assignment / status / board),
 // the server publishes `driver_trip_update`; refetch today's trips at once. Every
@@ -210,10 +314,12 @@ function onTripUpdate() {
   today.reload();
 }
 onMounted(() => {
-  stopRealtime = connectDriverRealtime(onTripUpdate);
+  stopRealtime = connectDriverRealtime(onTripUpdate, onBoardingEvent);
 });
 onUnmounted(() => {
   stopRealtime();
+  stopPositionTracking();
+  if (waitTimer) clearInterval(waitTimer);
 });
 
 // --- Trip execution: start → complete, writing a Trip Start Log. ---

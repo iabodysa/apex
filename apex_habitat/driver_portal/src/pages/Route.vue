@@ -33,6 +33,8 @@
 
           <!-- Trip with a route plan: render its ordered stops (the trip road) -->
           <div v-if="tripData.has_route_plan && tripData.stops && tripData.stops.length">
+            <!-- Horizontal progress stepper -->
+            <StopStepper :stops="tripData.stops" />
             <div class="flex items-center justify-between">
               <div class="field-label">{{ t("route.stops") }}</div>
               <span v-if="tripData.started" class="text-xs text-muted">
@@ -259,6 +261,7 @@ import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
+import StopStepper from "../components/StopStepper.vue";
 import { useI18n } from "../i18n";
 import { cacheGet, cacheSet } from "../cache";
 import { pushToast } from "../toast";

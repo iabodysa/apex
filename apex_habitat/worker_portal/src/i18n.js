@@ -138,6 +138,24 @@ const messages = {
       empty: "You hold no custody items.",
       emptyHint: "Items issued to you will appear here.",
     },
+    tripProgress: {
+      Planned: "Planned",
+      Dispatched: "Dispatched",
+      Started: "En Route",
+      Completed: "Arrived",
+    },
+    tripRating: {
+      title: "Rate your trip",
+      submit: "Submit Rating",
+      success: "Thank you for your rating!",
+      alreadyRated: "You have already rated this trip.",
+      feedbackPlaceholder: "Tell us about your experience (optional)",
+      star1: "Very Poor",
+      star2: "Poor",
+      star3: "Average",
+      star4: "Good",
+      star5: "Excellent"
+    },
     transport: {
       title: "My Transport",
       pickup: "Pickup",
@@ -424,6 +442,24 @@ const messages = {
       acknowledge: "تأكيد الاستلام",
       empty: "لا توجد لديك عُهدة حالياً.",
       emptyHint: "ستظهر هنا الأصناف المسلَّمة إليك.",
+    },
+    tripProgress: {
+      Planned: "مخططة",
+      Dispatched: "مرسلة",
+      Started: "في الطريق",
+      Completed: "وصلت",
+    },
+    tripRating: {
+      title: "قيّم رحلتك",
+      submit: "إرسال التقييم",
+      success: "شكراً لتقييمك!",
+      alreadyRated: "لقد قمت بتقييم هذه الرحلة مسبقاً.",
+      feedbackPlaceholder: "أخبرنا عن تجربتك (اختياري)",
+      star1: "سيء جداً",
+      star2: "سيء",
+      star3: "مقبول",
+      star4: "جيد",
+      star5: "ممتاز"
     },
     transport: {
       title: "نقلي",

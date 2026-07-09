@@ -232,6 +232,9 @@ const messages = {
       scanBoarding: "Scan boarding",
       manualBoarding: "Manual boarding",
       fullRoute: "Navigate full route",
+      todayTrips: "Today's trips",
+      completedTrips: "Completed",
+      totalBoarded: "Boarded",
     },
     boarding: {
       title: "Scan boarding pass",
@@ -568,6 +571,9 @@ const messages = {
       scanBoarding: "مسح الصعود",
       manualBoarding: "صعود يدوي",
       fullRoute: "التنقل في كامل المسار",
+      todayTrips: "رحلات اليوم",
+      completedTrips: "مكتملة",
+      totalBoarded: "صعدوا",
     },
     boarding: {
       title: "مسح بطاقة الصعود",

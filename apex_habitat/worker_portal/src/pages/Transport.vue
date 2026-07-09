@@ -45,6 +45,9 @@
           <span v-if="trip.status" class="pill pill-accent shrink-0">{{ tEnum("transportStatus", trip.status) }}</span>
         </div>
 
+        <!-- Trip progress bar (status stepper) -->
+        <TripProgressBar :status="trip.status" />
+
         <!-- Vehicle + driver -->
         <div v-if="trip.vehicle || trip.driver" class="grid grid-cols-1 gap-3">
           <div v-if="trip.vehicle" class="flex items-center gap-2 text-sm">
@@ -176,16 +179,27 @@
           <Icon name="chevron" :size="18" class="text-muted shrink-0 ms-auto" :style="showPast ? 'transform: rotate(90deg)' : ''" />
         </button>
         <ul v-if="showPast" class="space-y-2">
-          <li v-for="trip in past" :key="trip.transport_request" class="flex items-start gap-2 text-sm">
-            <Icon name="route" :size="16" class="text-muted shrink-0 mt-0.5 rtl-flip" />
-            <div class="min-w-0">
-              <div class="font-semibold leading-tight truncate">
-                {{ trip.request_type ? tEnum("requestType", trip.request_type) : trip.transport_request }}
+          <li v-for="trip in past" :key="trip.transport_request" class="flex flex-col gap-2 text-sm border-b pb-3 last:border-0 last:pb-0">
+            <div class="flex items-start gap-2">
+              <Icon name="route" :size="16" class="text-muted shrink-0 mt-0.5 rtl-flip" />
+              <div class="min-w-0 flex-1">
+                <div class="font-semibold leading-tight truncate">
+                  {{ trip.request_type ? tEnum("requestType", trip.request_type) : trip.transport_request }}
+                </div>
+                <div v-if="trip.pickup_point || trip.pickup_datetime" class="text-muted flex items-center justify-between">
+                  <div>
+                    <span v-if="trip.pickup_point">{{ trip.pickup_point }}</span>
+                    <span v-if="trip.depart_time || trip.pickup_datetime"> · <bdi>{{ trip.depart_time ? formatTime(trip.depart_time) : formatDateTime(trip.pickup_datetime) }}</bdi></span>
+                  </div>
+                  <span v-if="trip.has_rated" class="text-success text-xs font-medium flex items-center gap-1">
+                    <Icon name="check" :size="14" /> Rated
+                  </span>
+                </div>
               </div>
-              <div v-if="trip.pickup_point || trip.pickup_datetime" class="text-muted">
-                <span v-if="trip.pickup_point">{{ trip.pickup_point }}</span>
-                <span v-if="trip.depart_time || trip.pickup_datetime"> · <bdi>{{ trip.depart_time ? formatTime(trip.depart_time) : formatDateTime(trip.pickup_datetime) }}</bdi></span>
-              </div>
+            </div>
+            
+            <div v-if="trip.status === 'Completed' && trip.dispatch_trip && !trip.has_rated" class="mt-2">
+              <TripRating :trip="trip" @rated="trip.has_rated = true" />
             </div>
           </li>
         </ul>
@@ -227,6 +241,8 @@ import { computed, reactive, ref, watch, onUnmounted } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
+import TripProgressBar from "../components/TripProgressBar.vue";
+import TripRating from "../components/TripRating.vue";
 import PullIndicator from "../components/PullIndicator.vue";
 import BoardingFlow from "../components/BoardingFlow.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";

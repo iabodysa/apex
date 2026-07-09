@@ -487,6 +487,7 @@ def worker_request_wait(token=None):
     max_count = get_boarding_setting("worker_wait_request_max")
     window = get_boarding_setting("worker_wait_request_seconds")
 
+    ensure_trip_boarding_state(dispatch_trip)
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     if target is None:
@@ -548,6 +549,7 @@ def worker_claim_boarded(token=None):
         return {"trip": None, "status": None}
     dispatch_trip, request_name, stop_name, building = resolved
 
+    ensure_trip_boarding_state(dispatch_trip)
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     if target is None:

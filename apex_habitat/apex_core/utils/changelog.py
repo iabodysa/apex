@@ -5,6 +5,18 @@ from frappe.utils import get_datetime
 
 _RELEASES = [
     {
+        "title": "Apex 1.62.0 — housing and procurement staff can now confirm Asset Deliveries on-site: the Housing Portal has been fully wired into the app and now includes a dedicated Asset Delivery mobile interface; after the three exit checkpoints clear, the receiving supervisor enters the 6-digit on-site OTP directly from their phone to confirm receipt and securely log the asset transfer",
+        "app_name": "apex_habitat",
+        "link": "/housing",
+        "creation": "2026-07-09 16:20:00",
+    },
+    {
+        "title": "Apex 1.61.0 — workers can now rate their trips from the portal: a new 'Rate your trip' section appears on completed past trips in the Masar portal, letting workers give a 1-5 star rating and optional feedback that is recorded against the trip for fleet analytics",
+        "app_name": "apex_habitat",
+        "link": "/masar",
+        "creation": "2026-07-09 16:00:00",
+    },
+    {
         "title": "Apex 1.60.67 — a few Arabic labels and status words now read in their standard everyday business form: Accommodation Assignment, Accommodation Checkout and Goods Receipt use the terms staff recognise, and the Open, Returned, Expired and Under Review status words show in their standard Arabic form; wording only, nothing already recorded is affected",
         "app_name": "apex_habitat",
         "link": "/app",

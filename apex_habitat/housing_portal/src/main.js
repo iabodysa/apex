@@ -8,4 +8,6 @@ import "./index.css";
 // request with window.csrf_token (exposed by www/housing-count.py).
 setConfig("resourceFetcher", frappeRequest);
 
-createApp(App).mount("#app");
+import router from "./router";
+
+createApp(App).use(router).mount("#app");

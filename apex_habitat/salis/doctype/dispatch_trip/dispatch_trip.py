@@ -154,6 +154,11 @@ class DispatchTrip(Document):
                     _("Dispatch readiness: {0} is required before submitting.").format(label)
                 )
 
+        if not self.transport_request and not self.assigned_requests:
+            frappe.throw(
+                _("Dispatch readiness: A trip must have at least one assigned worker/request before submitting.")
+            )
+
     def _require_completion_notes(self):
         """Completion Notes are mandatory once the trip is marked Completed."""
         if self.status == "Completed" and not (self.completion_notes or "").strip():

@@ -22,6 +22,16 @@
 
       <p class="sheet-hint">{{ t("manifest.hint") }}</p>
 
+      <!-- Inline Boarding Actions -->
+      <div v-if="!summary" class="flex flex-wrap items-center gap-2 mb-4">
+        <button class="btn btn-accent flex-1" @click="emit('open-scan')">
+          <Icon name="qr" :size="16" /> {{ t("trips.scanBoarding", "Scan Boarding") }}
+        </button>
+        <button class="btn btn-outline flex-1" @click="emit('open-manual')">
+          <Icon name="user" :size="16" /> {{ t("trips.manualBoarding", "Manual Boarding") }}
+        </button>
+      </div>
+
       <!-- Departure summary replaces the list once finalized. -->
       <div v-if="summary" class="depart-summary">
         <Icon name="badge" :size="16" class="shrink-0" />
@@ -66,7 +76,7 @@
             <Icon name="alert" :size="16" />
             {{ graceElapsed ? t("manifest.notify") : t("manifest.notifySoft") }}
           </button>
-          <span v-if="graceElapsed" class="text-xs text-muted">
+          <span v-if="graceElapsed" class="text-xs text-muted transition-all duration-300" :style="reminderStyle">
             {{ t("manifest.notifyHint", { n: maxNotifySent, max: notifyMaxCount }) }}
           </span>
           <span v-else class="text-xs text-muted">{{ t("manifest.graceWaiting") }}</span>
@@ -102,7 +112,7 @@ const props = defineProps({
   trip: { type: String, required: true },
 });
 // `finalized` after a successful depart so the parent can refresh its trip card.
-const emit = defineEmits(["close", "finalized"]);
+const emit = defineEmits(["close", "finalized", "open-scan", "open-manual"]);
 
 // Read on open / after every action via the pure-read get_trip_boarding (same
 // shape, no side effects) — viewing the manifest must never bump a worker's
@@ -124,6 +134,17 @@ const hasPending = computed(() => workers.value.some((w) => w.status === "Pendin
 const maxNotifySent = computed(() =>
   workers.value.reduce((m, w) => Math.max(m, w.notify_count || 0), 0),
 );
+
+const reminderStyle = computed(() => {
+  if (maxNotifySent.value === 1) {
+    return { color: "var(--c-success)", fontWeight: "600" };
+  } else if (maxNotifySent.value === 2) {
+    return { color: "var(--c-warning)", fontWeight: "600" };
+  } else if (maxNotifySent.value >= notifyMaxCount.value) {
+    return { color: "var(--c-danger)", fontWeight: "700" };
+  }
+  return {};
+});
 
 // `busy` holds the in-flight employee (per-row confirm/reject disable);
 // `acting` guards the panel-level actions (notify / depart) against double taps.

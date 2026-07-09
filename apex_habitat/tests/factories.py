@@ -471,3 +471,4 @@ def make_worker_trip(
         frappe.db.set_value("Dispatch Trip", dt.name, "status", status)
         dt.reload()
     return tr, rp, dt
+

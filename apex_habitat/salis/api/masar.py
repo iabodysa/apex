@@ -977,6 +977,14 @@ def get_worker_transport(token=None):
         # renders only `my_pickup` + `destination`.
         my_pickup = _worker_pickup_stop(stops, my_building)
         destination = _route_destination_stop(stops, my_pickup)
+        # Check if already rated (only relevant for completed past trips)
+        has_rated = False
+        if req.get("dispatch_trip") and not is_upcoming:
+            has_rated = frappe.db.exists(
+                "Transport Trip Rating",
+                {"employee": employee, "dispatch_trip": req["dispatch_trip"]}
+            )
+
         trip = {
             "transport_request": req["name"],
             # The live Dispatch Trip carries the driver's GPS position; surfaced so
@@ -990,6 +998,7 @@ def get_worker_transport(token=None):
             "pickup_datetime": pickup_datetime,
             "depart_time": depart_time,
             "is_upcoming": is_upcoming,
+            "has_rated": bool(has_rated),
             "stops": stops,
             "my_pickup": my_pickup,
             "destination": destination,
@@ -1997,3 +2006,49 @@ def create_worker_transport_request(
     )
     doc.insert(ignore_permissions=True)  # audit-ok — worker resolved from token server-side
     return {"name": doc.name, "status": doc.status, "adhoc_count": len(adhoc_rows)}
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=10, seconds=60)
+def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=None, transport_request=None):
+    """Allows a worker to submit a rating and feedback for a completed trip.
+    
+    Scoped by the worker's token to ensure they actually went on the trip.
+    Creates a 'Transport Trip Rating' record."""
+    employee = _resolve_worker(token)
+    
+    if not dispatch_trip:
+        frappe.throw(_("Missing Dispatch Trip reference."))
+        
+    rating = frappe.utils.cint(rating)
+    if rating < 1 or rating > 5:
+        frappe.throw(_("Rating must be between 1 and 5."))
+
+    # Ensure worker was on this trip
+    # A worker is on the trip if they are in the Passenger Manifest of the trip
+    is_on_trip = frappe.db.exists(
+        "Passenger Manifest",
+        {"dispatch_trip": dispatch_trip, "employee": employee}
+    )
+    
+    if not is_on_trip:
+        frappe.throw(_("You were not part of this trip's manifest."), frappe.PermissionError)
+
+    # Check if already rated
+    existing = frappe.db.exists(
+        "Transport Trip Rating",
+        {"employee": employee, "dispatch_trip": dispatch_trip}
+    )
+    if existing:
+        frappe.throw(_("You have already rated this trip."))
+
+    doc = frappe.get_doc({
+        "doctype": "Transport Trip Rating",
+        "employee": employee,
+        "dispatch_trip": dispatch_trip,
+        "rating": rating,
+        "transport_request": transport_request,
+        "feedback": (feedback or "").strip()[:2000]
+    })
+    doc.insert(ignore_permissions=True)
+    return {"status": "success", "name": doc.name}
