@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-24 18:03:15.959201",
- "description": "Weekly on-site safety field inspection. On submit, each actionable finding (one with an Issue Type and Room, not yet resolved) automatically spawns a Maintenance Request, surfaced in the Generated Maintenance Requests table. (Deprecated: superseded by Safety Round + the Safety Round Compliance report.)",
+ "description": "Weekly on-site safety field inspection. On submit, each actionable finding (one with an Issue Type and Room, not yet resolved) automatically spawns a Maintenance Request, surfaced in the Generated Maintenance Requests table. (Deprecated: superseded by Safety Round + the Safety Task Compliance Summary report.)",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -173,7 +173,7 @@
    "link_fieldname": "linked_inspection"
   }
  ],
- "modified": "2026-06-25 10:00:00.000000",
+ "modified": "2026-07-10 07:59:07.006746",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Inspection Report",

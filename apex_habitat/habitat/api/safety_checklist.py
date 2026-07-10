@@ -8,7 +8,7 @@ Safety Round grouping a set of submitted Safety Task Execution rows.
 
 This module adds NO result/compliance logic of its own. The overall result is
 derived by the Safety Round controller's on_submit (worst execution status
-wins); the expected task set mirrors the Safety Round Compliance report's
+wins); the expected task set mirrors the Safety Task Compliance Summary report's
 two-mode catalog scope so the Page and the report agree on which tasks belong to
 a (building, cadence).
 
@@ -53,7 +53,7 @@ from frappe.utils import (
     nowdate,
 )
 
-# Mirrors safety_round_compliance._expected_tasks: only active catalog rows of
+# Mirrors safety_task_compliance_summary._expected_tasks: only active catalog rows of
 # the requested frequency are in scope.
 _SCOPE_BASE = {"is_active": 1}
 
@@ -80,7 +80,7 @@ def get_tasks_for_cadence(building, cadence):
     """Return the expected Safety Task Catalog rows for a (building, cadence).
 
     Uses the SAME two-mode scope as
-    ``safety_round_compliance._expected_tasks``: a task is expected when it is
+    ``safety_task_compliance_summary._expected_tasks``: a task is expected when it is
     active, its ``frequency`` equals ``cadence``, AND either it applies to all
     buildings (``applicable_to_all_buildings == 1``) OR it names this building in
     its ``applicable_buildings`` child table (Safety Task Building Scope). Both

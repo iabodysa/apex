@@ -4,8 +4,8 @@ schedule. These are the periodic operational digests:
 
 - Supplier Cost Recovery  — Monthly (Finance)
 - Occupancy Trend         — Weekly  (Accommodation Manager)
-- Maintenance Backlog     — Weekly  (fills the gap that escalation only logs)
-- Scheduled Task Compliance — Weekly (Resident Supervisor)
+- Open Maintenance Requests — Weekly (fills the gap that escalation only logs)
+- Safety Task Execution Log  — Weekly (Resident Supervisor)
 
 An Auto Email Report must name a real recipient; the customer's users/emails are
 unknown at install, so each is created **disabled** with Administrator as the
@@ -24,8 +24,8 @@ import frappe
 _REPORTS = [
     {"report": "Supplier Cost Recovery", "frequency": "Monthly"},
     {"report": "Occupancy Trend", "frequency": "Weekly"},
-    {"report": "Maintenance Backlog", "frequency": "Weekly"},
-    {"report": "Scheduled Task Compliance", "frequency": "Weekly"},
+    {"report": "Open Maintenance Requests", "frequency": "Weekly"},
+    {"report": "Safety Task Execution Log", "frequency": "Weekly"},
 ]
 
 

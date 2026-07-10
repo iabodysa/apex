@@ -32,7 +32,7 @@ from apex_habitat.salis import permissions as SP
 from apex_habitat.habitat import permissions as HP
 from apex_habitat.salis.report.fuel_consumption_summary import fuel_consumption_summary as R_fuel
 from apex_habitat.salis.report.driver_attendance_summary import driver_attendance_summary as R_driver
-from apex_habitat.salis.report.salis_fleet_register import salis_fleet_register as R_fleet
+from apex_habitat.salis.report.fleet_register import fleet_register as R_fleet
 from apex_habitat.salis.report.vehicle_compliance_register import vehicle_compliance_register as R_comp
 from apex_habitat.habitat.report.active_resident_register import active_resident_register as R_resident
 from apex_habitat.habitat.report.daily_cleaning_compliance import daily_cleaning_compliance as R_clean
@@ -256,7 +256,7 @@ def _grant(user, allow, value):
 class TestReportScopeIntegration(FrappeTestCase):
     """Real records across two tenants; real users; real row counts.
 
-    Covers the salis direct-project path (``salis_fleet_register``) and the
+    Covers the salis direct-project path (``fleet_register``) and the
     habitat direct-building path (``accommodation_stock_balance`` +
     ``custody_outstanding_by_worker``) end to end: a scoped user sees only their
     tenant's rows, an oversight user sees both, and the in-scope totals match.
@@ -391,7 +391,7 @@ class TestReportScopeIntegration(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # ----- salis_fleet_register -----
+    # ----- fleet_register -----
 
     def test_fleet_register_scoped_user_sees_only_his_project(self):
         frappe.set_user(self.sup)

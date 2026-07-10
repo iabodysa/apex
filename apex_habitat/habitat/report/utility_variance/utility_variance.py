@@ -11,7 +11,7 @@ def execute(filters=None):
         {"label": frappe._("Utility Account"), "fieldname": "utility_account", "fieldtype": "Link", "options": "Utility Account", "width": 150},
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 150},
         {"label": frappe._("Utility Type"), "fieldname": "utility_type", "fieldtype": "Data", "width": 110},
-        {"label": frappe._("Amount (SAR)"), "fieldname": "bill_amount", "fieldtype": "Currency", "width": 130},
+        {"label": frappe._("Amount"), "fieldname": "bill_amount", "fieldtype": "Currency", "width": 130},
         {"label": frappe._("Consumption"), "fieldname": "consumption_units", "fieldtype": "Float", "width": 110},
         {"label": frappe._("Variance from Avg (%)"), "fieldname": "variance_from_avg_pct", "fieldtype": "Percent", "width": 150},
         {"label": frappe._("Status"), "fieldname": "status", "fieldtype": "Data", "width": 110},

@@ -33,7 +33,7 @@ def get_columns():
         {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 200},
         {"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 200},
         {"label": _("Ledger Entries"), "fieldname": "entries", "fieldtype": "Int", "width": 120},
-        {"label": _("Total Cost (SAR)"), "fieldname": "total_cost", "fieldtype": "Currency", "width": 160},
+        {"label": _("Total Cost"), "fieldname": "total_cost", "fieldtype": "Currency", "width": 160},
     ]
 
 

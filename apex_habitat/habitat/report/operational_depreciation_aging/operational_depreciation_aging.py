@@ -43,13 +43,13 @@ def execute(filters=None):
             "width": 140,
         },
         {
-            "label": frappe._("Original Cost (SAR)"),
+            "label": frappe._("Original Cost"),
             "fieldname": "original_cost",
             "fieldtype": "Currency",
             "width": 140,
         },
         {
-            "label": frappe._("Book Value (SAR)"),
+            "label": frappe._("Book Value"),
             "fieldname": "book_value",
             "fieldtype": "Currency",
             "width": 130,

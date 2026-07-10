@@ -312,7 +312,7 @@ def list_supervisor_buildings() -> list[dict]:
         list of ``{building, building_title, total_beds, available, occupied,
         blocked, oos, occupancy_pct}`` sorted by building title.
     """
-    # [#scope-mirror] Same scope rule as housing_supervisor_report._get_buildings:
+    # [#scope-mirror] Same scope rule as building_operations_summary._get_buildings:
     # confine a scoped user to their User-Permission buildings; [] when none.
     from apex_habitat.habitat import permissions
 

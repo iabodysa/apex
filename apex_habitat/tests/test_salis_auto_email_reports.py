@@ -4,7 +4,7 @@
 The seeder is the declarative delivery path for the periodic movement/fleet
 digests; it must create each report disabled (the email kill-switch) and keyed on
 its report link so re-running is idempotent. This focuses on the daily
-fleet-status digest (Salis Fleet Register), which managers rely on for a daily
+fleet-status digest (Fleet Register), which managers rely on for a daily
 snapshot.
 """
 
@@ -15,7 +15,7 @@ from apex_habitat.apex_core.setup.seeders.salis_auto_email_reports_seed import (
     seed_salis_auto_email_reports,
 )
 
-DAILY_REPORT = "Salis Fleet Register"
+DAILY_REPORT = "Fleet Register"
 
 
 class TestSalisAutoEmailReportSeeder(FrappeTestCase):
@@ -57,7 +57,7 @@ class TestSalisAutoEmailReportSeeder(FrappeTestCase):
         # The digest produces a real fleet-status report (columns at minimum;
         # rows depend on site data and may legitimately be empty on a fresh site).
         columns, _data = frappe.get_attr(
-            "apex_habitat.salis.report.salis_fleet_register.salis_fleet_register.execute"
+            "apex_habitat.salis.report.fleet_register.fleet_register.execute"
         )(None)
         fieldnames = {c["fieldname"] for c in columns}
         self.assertIn("status", fieldnames)

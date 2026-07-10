@@ -115,7 +115,7 @@ class TestReports(QASysBase):
         "accommodation_ledger_summary",
         "accommodation_occupancy_summary",
         "checkout_pending_clearance",
-        "utility_variance_report",
+        "utility_variance",
         "operational_depreciation_aging",
         "lease_expiry_watchlist",
         "daily_cleaning_compliance",

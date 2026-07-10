@@ -527,6 +527,7 @@ Building Code Locked,رمز المبنى مقفل
 Building License,رخصة المبنى
 Building Licenses by Status,رخص المباني حسب الحالة
 Building Number,رقم المبنى
+Building Operations Summary,تقرير مشرف السكن
 Building Store,مخزن المبنى
 Building arrival cards…,جارٍ إنشاء بطاقات الوصول…
 Building is at full capacity ({0} of {1}). Over-capacity not allowed.,المبنى ممتلئ بالكامل ({0} من {1}). تجاوز السعة غير مسموح به.
@@ -1478,7 +1479,9 @@ Fleet Manager Dashboard,لوحة معلومات مدير الأسطول
 Fleet Operations,التشغيل
 Fleet Operations Go-Live,تشغيل الأسطول — الانطلاق
 Fleet Operations is live. Use Fleet Control to watch and act on the fleet.,تشغيل الأسطول جاهز. استخدم لوحة التحكّم لمراقبة الأسطول والتصرّف.
+Fleet Payment Register,سجل المدفوعات
 Fleet Portal,بوابة الأسطول
+Fleet Register,سجل الأسطول
 Fleet Supervisor Dashboard,لوحة معلومات مشرف الأسطول
 Fleet and Fuel Dashboard,لوحة الأسطول والوقود
 Fleet dashboard,لوحة الأسطول
@@ -1535,7 +1538,6 @@ Fuel Claim,مطالبة وقود
 Fuel Claim Register,سجل مطالبات الوقود
 Fuel Claim Variance by Month,انحراف مطالبات الوقود حسب الشهر
 Fuel Claim Voucher,سند مطالبة وقود
-Fuel Claim vs Consumption,مطالبات الوقود مقابل الاستهلاك
 Fuel Consumption (Litres),استهلاك الوقود (لترات)
 Fuel Consumption Ledger,دفتر استهلاك الوقود
 Fuel Consumption Summary,ملخص استهلاك الوقود
@@ -1688,7 +1690,6 @@ Housing Office,مكتب الإسكان
 Housing Office Number,رقم مكتب السكن
 Housing Request,طلب سكن
 Housing Supervisor,مشرف السكن
-Housing Supervisor Report,تقرير مشرف السكن
 Housing Terms & Conditions,شروط وأحكام السكن
 Housing Terms Acceptance,قبول شروط السكن
 Housing Terms — {0},شروط السكن — {0}
@@ -1734,6 +1735,7 @@ Identity type of the consenting worker. Mirrors the native party_type / party Dy
 Idle Days,أيام التوقف
 Idle Report,تقرير الخمول
 Idle Report Status,حالة تقرير الخمول
+Idle Resident Detection,رصد الساكنين غير المشغّلين
 Idle Resident Report,تقرير مقيم غير مُشغَّل
 Idle Residents,الساكنون غير المشغّلين
 Idle Vehicle,مركبة خاملة
@@ -2029,7 +2031,6 @@ MOL Worker Housing Approval,اعتماد سكن العمالة من وزارة �
 Maintained by movement processing.,يُحدَّث بواسطة معالجة الحركة.
 Maintenance,صيانة
 Maintenance Aging,تقادم طلبات الصيانة
-Maintenance Backlog,متراكمات أعمال الصيانة
 Maintenance Cost Ledger,سجل تكاليف الصيانة
 Maintenance Cost Ledger rows are immutable and cannot be edited.,صفوف سجل تكاليف الصيانة غير قابلة للتغيير ولا يمكن تعديلها.
 Maintenance Count,عدد مرات الصيانة
@@ -2923,7 +2924,6 @@ Rental Settlement Item,بند تسوية الإيجار
 Rental Settlement Register,سجل تسويات الإيجار
 Rental Settlement Statement,كشف تسوية الإيجار
 Rental Settlements This Month,تسويات الإيجار هذا الشهر
-Rental Variance Report,تقرير انحراف الإيجار
 Rental Vehicle Movement,حركة مركبة مستأجرة
 Rental accrual for office {0} in period {1} is unsettled: {2} SAR outstanding with no submitted Rental Settlement. (office {0}),استحقاق الإيجار للمكتب {0} في الفترة {1} غير مسوّى: {2} ريال سعودي مستحق دون تسوية إيجار مرسلة. (المكتب {0})
 Rental movement {0} ({1}) cancelled.,تم إلغاء حركة الإيجار {0} ({1}).
@@ -3167,7 +3167,6 @@ Safety Readiness,جاهزية السلامة
 Safety Report Recipient,مستلِم تقرير السلامة
 Safety Reports,تقارير السلامة
 Safety Round,جولة سلامة
-Safety Round Compliance,الالتزام بجولات السلامة
 Safety Round Report,تقرير جولة السلامة
 Safety Round Report: {0} ({1}),تقرير جولة السلامة: {0} ({1})
 Safety Section — No Issues,قسم السلامة — لا توجد ملاحظات
@@ -3179,7 +3178,9 @@ Safety Setup Status,حالة إعداد السلامة
 Safety Task (from Catalog),مهمة السلامة (من الدليل)
 Safety Task Building Scope,نطاق مبنى مهمة السلامة
 Safety Task Catalog,دليل مهام السلامة
+Safety Task Compliance Summary,الالتزام بجولات السلامة
 Safety Task Execution,تنفيذ مهمة السلامة
+Safety Task Execution Log,الالتزام بالمهام المجدولة
 Safety Task Executions by Result,تنفيذ مهام السلامة حسب النتيجة
 Safety and Task Master,بيانات السلامة والمهام
 Safety is set up. Scheduled tasks and inspections are active.,تم إعداد السلامة. المهام المجدولة والتفتيشات مفعّلة الآن.
@@ -3201,10 +3202,8 @@ Salis Compliance Drivers Licenses Expiring Soon,رخص قائدين قاربت �
 Salis Dispatch Board,لوحة توجيه سلس
 Salis Driver,سائق
 Salis Fleet Master,بيانات أسطول سلس
-Salis Fleet Register,سجل الأسطول
 Salis Fuel Setup,إعداد وقود سلس
 Salis Go-Live,إطلاق تشغيل سلس
-Salis Payment Register,سجل المدفوعات
 Salis Payment Request,طلب دفع
 Salis Rentals Costs Settlements Pending Approval,تسويات بانتظار الاعتماد
 Salis Representatives Fleet Vehicles Stopped,مركبات موقوفة
@@ -3238,7 +3237,6 @@ Scheduled Date,التاريخ المجدول
 Scheduled Job Log,سجل المهام المجدولة
 Scheduled Task,مهمة مجدولة
 Scheduled Task Assignment,إسناد مهمة مجدولة
-Scheduled Task Compliance,الالتزام بالمهام المجدولة
 Scheduled Task Instance,تنفيذ مهمة مجدولة
 Scheduled Task Instances by Status,سجلات تنفيذ المهام المجدولة حسب الحالة
 Scheduled Task Template,قالب جدولة المهام
@@ -3948,7 +3946,7 @@ Utility Bills by Status,فواتير الخدمات حسب الحالة
 Utility Cost Share (%),نسبة تحمل تكاليف المرافق (%)
 Utility Cost Share must be between 0 and 100.,يجب أن تكون نسبة تحمل تكاليف المرافق بين 0 و 100.
 Utility Type,نوع المرفق الخدمي
-Utility Variance Report,تقرير انحراف استهلاك الخدمات
+Utility Variance,تقرير انحراف استهلاك الخدمات
 "Utility account number per building (electricity, water, telecom). Links incoming bills to a building cost center.",رقم حساب المرافق لكل مبنى (كهرباء، ماء، اتصالات). يربط الفواتير الواردة بمركز تكلفة المبنى.
 VAPID 'sub' claim — a mailto: or https: contact the push service can reach (e.g. mailto:ops@yourcompany.com).,مطالبة 'sub' لبروتوكول VAPID — جهة اتصال mailto: أو https: يمكن لخدمة الإشعارات الوصول إليها (مثل mailto:ops@yourcompany.com).
 VAPID Private Key,مفتاح VAPID الخاص

@@ -8,11 +8,11 @@ from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.habitat.report.accommodation_occupancy_summary.accommodation_occupancy_summary import execute as execute_occupancy
 from apex_habitat.habitat.report.accommodation_cost_distribution.accommodation_cost_distribution import execute as execute_cost
 from apex_habitat.habitat.report.lease_expiry_watchlist.lease_expiry_watchlist import execute as execute_lease
-from apex_habitat.habitat.report.utility_variance_report.utility_variance_report import execute as execute_utility
+from apex_habitat.habitat.report.utility_variance.utility_variance import execute as execute_utility
 from apex_habitat.habitat.report.custody_damage_register.custody_damage_register import execute as execute_custody
 from apex_habitat.habitat.report.checkout_pending_clearance.checkout_pending_clearance import execute as execute_checkout_clearance
-from apex_habitat.habitat.report.scheduled_task_compliance.scheduled_task_compliance import execute as execute_task
-from apex_habitat.habitat.report.maintenance_backlog.maintenance_backlog import execute as execute_maintenance
+from apex_habitat.habitat.report.safety_task_execution_log.safety_task_execution_log import execute as execute_task
+from apex_habitat.habitat.report.open_maintenance_requests.open_maintenance_requests import execute as execute_maintenance
 from apex_habitat.habitat.report.maintenance_aging.maintenance_aging import execute as execute_maint_aging
 from apex_habitat.habitat.report.accommodation_ledger_summary.accommodation_ledger_summary import execute as execute_ledger_summary
 from apex_habitat.habitat.report.supplier_cost_recovery.supplier_cost_recovery import execute as execute_supplier
@@ -20,8 +20,7 @@ from apex_habitat.habitat.report.occupancy_trend.occupancy_trend import execute 
 from apex_habitat.salis.report.movement_cost_summary.movement_cost_summary import execute as execute_mov_summary
 from apex_habitat.salis.report.movement_cost_recovery_register.movement_cost_recovery_register import execute as execute_mov_recovery
 from apex_habitat.salis.report.rental_settlement_register.rental_settlement_register import execute as execute_rental_settlement
-from apex_habitat.salis.report.rental_variance_report.rental_variance_report import execute as execute_rental_variance
-from apex_habitat.salis.report.salis_payment_register.salis_payment_register import execute as execute_payment
+from apex_habitat.salis.report.fleet_payment_register.fleet_payment_register import execute as execute_payment
 from apex_habitat.salis.report.fuel_reconciliation.fuel_reconciliation import execute as execute_fuel_recon
 from apex_habitat.salis.report.cost_recovery_aging.cost_recovery_aging import execute as execute_cost_aging
 from apex_habitat.salis.report.fuel_spend_by_vehicle.fuel_spend_by_vehicle import execute as execute_fuel_spend
@@ -107,10 +106,10 @@ class TestReports(ApexHabitatTestCase):
         # [#mm0fu0]
         self.assertIn("employee_name", [c.get("fieldname") for c in result[0]])
 
-    def test_scheduled_task_compliance(self):
+    def test_safety_task_execution_log(self):
         self._assert_report_shape(execute_task())
 
-    def test_maintenance_backlog(self):
+    def test_open_maintenance_requests(self):
         self._assert_report_shape(execute_maintenance())
 
     def test_accommodation_ledger_summary(self):
@@ -133,14 +132,15 @@ class TestReports(ApexHabitatTestCase):
         self._assert_report_shape(execute_mov_recovery())
 
     def test_rental_settlement_register(self):
-        self._assert_report_shape(execute_rental_settlement())
+        # Now carries the ported variance chart (merged from the variance twin).
+        self._assert_chart_report(execute_rental_settlement())
 
-    def test_salis_payment_register(self):
+    def test_fleet_payment_register(self):
         self._assert_report_shape(execute_payment())
 
     # [#4yez14]
 
-    def test_utility_variance_report_chart(self):
+    def test_utility_variance_chart(self):
         self._assert_chart_report(execute_utility())
 
     def test_maintenance_aging_chart(self):
@@ -148,9 +148,6 @@ class TestReports(ApexHabitatTestCase):
 
     def test_occupancy_trend_chart(self):
         self._assert_chart_report(execute_occ_trend())
-
-    def test_rental_variance_report_chart(self):
-        self._assert_chart_report(execute_rental_variance())
 
     def test_fuel_reconciliation_chart(self):
         self._assert_chart_report(execute_fuel_recon())

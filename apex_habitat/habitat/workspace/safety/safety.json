@@ -224,9 +224,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Maintenance Backlog",
+   "label": "Open Maintenance Requests",
    "link_type": "Report",
-   "link_to": "Maintenance Backlog",
+   "link_to": "Open Maintenance Requests",
    "idx": 20,
    "is_query_report": 1
   },
@@ -258,9 +258,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Safety Round Compliance",
+   "label": "Safety Task Compliance Summary",
    "link_type": "Report",
-   "link_to": "Safety Round Compliance",
+   "link_to": "Safety Task Compliance Summary",
    "idx": 24,
    "is_query_report": 1
   },
@@ -299,9 +299,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Scheduled Task Compliance",
+   "label": "Safety Task Execution Log",
    "link_type": "Report",
-   "link_to": "Scheduled Task Compliance",
+   "link_to": "Safety Task Execution Log",
    "idx": 29,
    "is_query_report": 1
   },
@@ -432,5 +432,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-10 06:05:34.129545"
+ "modified": "2026-07-10 07:59:07.006746"
 }

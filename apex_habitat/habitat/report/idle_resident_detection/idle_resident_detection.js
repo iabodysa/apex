@@ -1,5 +1,5 @@
 // Copyright (c) 2026, AFMCO and contributors
-frappe.query_reports["Idle Resident Candidates"] = {
+frappe.query_reports["Idle Resident Detection"] = {
 	filters: [
 		{
 			fieldname: "building",

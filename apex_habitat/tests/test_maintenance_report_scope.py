@@ -4,7 +4,7 @@
 ``frappe.get_all`` forces ``ignore_permissions=True``, so the owner/assignee
 row-scoping the Maintenance Request desk list gets via
 ``maintenance_request_query`` (permission_query_conditions) is BYPASSED inside
-``maintenance_aging`` and ``maintenance_backlog`` — a non-privileged user running
+``maintenance_aging`` and ``open_maintenance_requests`` — a non-privileged user running
 either report would otherwise see EVERY ticket's row. Each report's ``execute()``
 re-applies the caller's owner/assignee scope via
 ``permissions.report_maintenance_request_scope`` (handed to get_all as
@@ -29,7 +29,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.habitat.report.maintenance_aging import maintenance_aging as R_aging
-from apex_habitat.habitat.report.maintenance_backlog import maintenance_backlog as R_backlog
+from apex_habitat.habitat.report.open_maintenance_requests import open_maintenance_requests as R_backlog
 from apex_habitat.tests._helpers import _user
 
 # [#9lw62p] A plainly non-privileged desk role (not in PRIVILEGED_ROLES).
@@ -72,7 +72,7 @@ class TestMaintenanceReportScopeLogic(FrappeTestCase):
             R_aging.execute({})
             self.assertIsNone(_last_or_filters(ga))
 
-    # ----- maintenance_backlog -----
+    # ----- open_maintenance_requests -----
 
     def test_backlog_scoped_user_gets_owner_assignee_or_filter(self):
         with patch.object(
@@ -194,7 +194,7 @@ class TestMaintenanceReportScopeIntegration(FrappeTestCase):
             "an oversight role sees every ticket",
         )
 
-    # ----- maintenance_backlog -----
+    # ----- open_maintenance_requests -----
 
     def test_backlog_scoped_user_sees_only_owned_and_assigned(self):
         names = self._names_for(self.requester, R_backlog.execute)

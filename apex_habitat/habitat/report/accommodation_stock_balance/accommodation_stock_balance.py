@@ -26,8 +26,8 @@ def get_columns():
         {"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 200},
         {"label": _("UOM"), "fieldname": "uom", "fieldtype": "Data", "width": 80},
         {"label": _("Balance Qty"), "fieldname": "balance_qty", "fieldtype": "Float", "width": 110},
-        {"label": _("Unit Cost (SAR)"), "fieldname": "unit_cost", "fieldtype": "Currency", "width": 130},
-        {"label": _("Value (SAR)"), "fieldname": "value_sar", "fieldtype": "Currency", "width": 130},
+        {"label": _("Unit Cost"), "fieldname": "unit_cost", "fieldtype": "Currency", "width": 130},
+        {"label": _("Value"), "fieldname": "value_sar", "fieldtype": "Currency", "width": 130},
     ]
 
 

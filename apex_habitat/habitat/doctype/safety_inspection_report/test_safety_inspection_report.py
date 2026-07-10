@@ -213,7 +213,7 @@ class TestSafetyInspectionReport(FrappeTestCase):
 
 class TestSafetyInspectionReportDeprecation(FrappeTestCase):
     """[T-281] Safety Inspection Report is deprecated in place (not renamed or
-    deleted) in favour of Safety Round + the Safety Round Compliance report.
+    deleted) in favour of Safety Round + the Safety Task Compliance Summary report.
     These are pure-file assertions on the DocType JSON, so they hold whether or
     not the running site has migrated the schema."""
 
@@ -237,7 +237,7 @@ class TestSafetyInspectionReportDeprecation(FrappeTestCase):
                       "SIR description must point to Safety Round")
 
     def test_sir_not_renamed_and_fields_intact(self):
-        # The housing_supervisor_report and other code query SIR by name, so the
+        # The building_operations_summary and other code query SIR by name, so the
         # name and its fields must survive deprecation untouched.
         schema = self._schema()
         self.assertEqual(schema.get("name"), "Safety Inspection Report")

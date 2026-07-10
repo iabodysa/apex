@@ -1,7 +1,7 @@
 {
   "doctype": "Report",
-  "name": "Salis Fleet Register",
-  "report_name": "Salis Fleet Register",
+  "name": "Fleet Register",
+  "report_name": "Fleet Register",
   "ref_doctype": "Salis Vehicle",
   "report_type": "Script Report",
   "is_standard": "Yes",

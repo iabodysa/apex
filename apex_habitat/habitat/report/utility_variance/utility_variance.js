@@ -1,6 +1,6 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#7r0wdm]
-frappe.query_reports["Utility Variance Report"] = {
+frappe.query_reports["Utility Variance"] = {
 	filters: [
 		{
 			fieldname: "building",

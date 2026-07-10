@@ -1,6 +1,6 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#7r0wdm]
-frappe.query_reports["Salis Payment Register"] = {
+frappe.query_reports["Fleet Payment Register"] = {
 	filters: [
 		{
 			fieldname: "company",

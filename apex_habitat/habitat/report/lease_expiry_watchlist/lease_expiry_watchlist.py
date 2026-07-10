@@ -14,7 +14,7 @@ def execute(filters=None):
         {"label": frappe._("Status"), "fieldname": "status", "fieldtype": "Data", "width": 100},
         {"label": frappe._("Lease End Date"), "fieldname": "lease_end_date", "fieldtype": "Date", "width": 120},
         {"label": frappe._("Days to Expiry"), "fieldname": "days_to_expiry", "fieldtype": "Int", "width": 120},
-        {"label": frappe._("Monthly Rent (SAR)"), "fieldname": "rent_amount", "fieldtype": "Currency", "width": 140},
+        {"label": frappe._("Monthly Rent"), "fieldname": "rent_amount", "fieldtype": "Currency", "width": 140},
     ]
 
     # A submitted lease is in force whether the approval workflow left it at

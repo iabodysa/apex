@@ -1,7 +1,7 @@
 {
  "doctype": "Report",
- "name": "Housing Supervisor Report",
- "report_name": "Housing Supervisor Report",
+ "name": "Building Operations Summary",
+ "report_name": "Building Operations Summary",
  "ref_doctype": "Building",
  "report_type": "Script Report",
  "is_standard": "Yes",

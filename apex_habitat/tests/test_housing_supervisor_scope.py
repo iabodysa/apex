@@ -15,8 +15,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.habitat import permissions as P
-from apex_habitat.habitat.report.housing_supervisor_report import (
-    housing_supervisor_report as R,
+from apex_habitat.habitat.report.building_operations_summary import (
+    building_operations_summary as R,
 )
 
 

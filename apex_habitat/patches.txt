@@ -76,6 +76,14 @@ apex_habitat.patches.v1_x.rename_freelance_party_type_to_freelancer
 # spelling guarded. PRUNE once every deployed site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v2_0.rename_doctypes_b7
 
+# v2.0.0 — B4 (P-158) Report rename/merge wave (ONE-TIME, pre-sync so rename_doc runs
+# before the is_standard Report JSON re-import — else the new-named report imports fresh
+# and the old-named DB row orphans). Renames 8 reports (Housing Supervisor Report ->
+# Building Operations Summary, ... Salis Fleet Register -> Fleet Register) and deletes
+# 2 merged-away twins (Fuel Claim vs Consumption, Rental Variance Report). Idempotent +
+# guarded. PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v2_0.rename_reports_b4
+
 [post_model_sync]
 # v2.0.0 — B6 (P-160) field-rename wave (ONE-TIME). Runs FIRST in post_model_sync so
 # rename_field copies each old column into its new (JSON-synced) name BEFORE the v1_x

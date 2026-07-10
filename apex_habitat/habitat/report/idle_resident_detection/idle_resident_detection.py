@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 # [#j03s5a]
 
-"""Idle Resident Candidates — housed workers whose work has ended.
+"""Idle Resident Detection — housed workers whose work has ended.
 
 Auto-detection layer the Idle Resident Report DocType lacked: an Idle Resident
 Report only existed once someone created it by hand, so a forgotten resident went
@@ -56,7 +56,7 @@ def _get_data(filters):
     # Match the list/card permission model: get_all bypasses
     # permission_query_conditions, so a building-scoped Resident Supervisor must be
     # confined to their User-Permission buildings here or the report would leak
-    # residents outside their scope. Mirrors housing_supervisor_report._get_buildings.
+    # residents outside their scope. Mirrors building_operations_summary._get_buildings.
     user = frappe.session.user
     if not permissions._building_is_unscoped(user):
         allowed = permissions._allowed_buildings(user)

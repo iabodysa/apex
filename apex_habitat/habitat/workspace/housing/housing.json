@@ -204,9 +204,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Housing Supervisor Report",
+   "label": "Building Operations Summary",
    "link_type": "Report",
-   "link_to": "Housing Supervisor Report",
+   "link_to": "Building Operations Summary",
    "idx": 18,
    "is_query_report": 1
   },
@@ -334,5 +334,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-10 06:05:34.129545"
+ "modified": "2026-07-10 07:59:07.006746"
 }

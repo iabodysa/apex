@@ -202,15 +202,6 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Rental Variance Report",
-   "link_type": "Report",
-   "link_to": "Rental Variance Report",
-   "idx": 17,
-   "is_query_report": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
    "label": "Movement Cost Recovery Register",
    "link_type": "Report",
    "link_to": "Movement Cost Recovery Register",
@@ -238,9 +229,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Salis Payment Register",
+   "label": "Fleet Payment Register",
    "link_type": "Report",
-   "link_to": "Salis Payment Register",
+   "link_to": "Fleet Payment Register",
    "idx": 21,
    "is_query_report": 1
   }
@@ -304,5 +295,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-05 19:12:59.527483"
+ "modified": "2026-07-10 07:59:07.006746"
 }

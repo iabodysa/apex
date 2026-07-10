@@ -43,4 +43,29 @@ def execute(filters=None):
         order_by="creation desc",
     )
 
-    return columns, data
+    return columns, data, None, _build_chart(data)
+
+
+def _build_chart(data):
+    """Bar chart of accrued-vs-claimed variance per rental office.
+
+    Ported from the merged variance twin report, which duplicated this
+    register's columns and only added this chart.
+    """
+    if not data:
+        return None
+    by_office = {}
+    for row in data:
+        office = row.get("rental_office") or frappe._("Unspecified")
+        by_office[office] = by_office.get(office, 0.0) + (row.get("variance") or 0.0)
+    if not by_office:
+        return None
+    labels = sorted(by_office)
+    values = [round(by_office[o], 2) for o in labels]
+    return {
+        "type": "bar",
+        "data": {
+            "labels": labels,
+            "datasets": [{"name": frappe._("Variance"), "values": values}],
+        },
+    }

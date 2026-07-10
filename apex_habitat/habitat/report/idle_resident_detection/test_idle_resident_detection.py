@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Tests for the Idle Resident Candidates report.
+"""Tests for the Idle Resident Detection report.
 
 Proves execute() surfaces only active residents whose linked Project has ended
 (Completed/Cancelled) — an Open-project resident is excluded, an ended-project
@@ -12,10 +12,10 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex_habitat.habitat.report.idle_resident_candidates.idle_resident_candidates import execute
+from apex_habitat.habitat.report.idle_resident_detection.idle_resident_detection import execute
 
 
-class TestIdleResidentCandidates(FrappeTestCase):
+class TestIdleResidentDetection(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         tag = frappe.generate_hash(length=5).upper()

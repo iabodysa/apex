@@ -155,9 +155,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Utility Variance Report",
+   "label": "Utility Variance",
    "link_type": "Report",
-   "link_to": "Utility Variance Report",
+   "link_to": "Utility Variance",
    "idx": 13,
    "is_query_report": 1
   },
@@ -259,5 +259,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-10 06:05:34.129545"
+ "modified": "2026-07-10 07:59:07.006746"
 }

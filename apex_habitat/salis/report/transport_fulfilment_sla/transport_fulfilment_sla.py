@@ -128,7 +128,7 @@ def execute(filters=None):
 
 
 def _build_chart(data):
-    """Line chart of the daily on-time fulfilment rate."""
+    """Line chart of the daily timed-fulfilment rate."""
     dated = [r for r in data if r.get("trip_date")]
     if not dated:
         return None
@@ -138,6 +138,6 @@ def _build_chart(data):
         "type": "line",
         "data": {
             "labels": labels,
-            "datasets": [{"name": _("On-Time %"), "values": values}],
+            "datasets": [{"name": _("Timed %"), "values": values}],
         },
     }

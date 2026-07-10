@@ -224,9 +224,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Salis Fleet Register",
+   "label": "Fleet Register",
    "link_type": "Report",
-   "link_to": "Salis Fleet Register",
+   "link_to": "Fleet Register",
    "idx": 17,
    "is_query_report": 1
   },
@@ -264,15 +264,6 @@
    "link_type": "Report",
    "link_to": "Fuel Spend by Vehicle",
    "idx": 21,
-   "is_query_report": 1
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Fuel Claim vs Consumption",
-   "link_type": "Report",
-   "link_to": "Fuel Claim vs Consumption",
-   "idx": 22,
    "is_query_report": 1
   },
   {
@@ -450,5 +441,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-05 19:12:59.527483"
+ "modified": "2026-07-10 07:59:07.006746"
 }

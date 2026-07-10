@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 # [#j03s5a]
 
-"""Safety Round Compliance.
+"""Safety Task Compliance Summary.
 
 Derives per-task compliance from submitted Safety Task Execution rows. The
 denominator is the EXPECTED task set for the selected cadence and building -

@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Tests for the Safety Round Compliance report.
+"""Tests for the Safety Task Compliance Summary report.
 
 Proves execute() returns the expected per-task shape over seeded, submitted
 Safety Task Execution rows: the expected denominator follows the two-mode
@@ -15,10 +15,10 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
-from apex_habitat.habitat.report.safety_round_compliance.safety_round_compliance import execute
+from apex_habitat.habitat.report.safety_task_compliance_summary.safety_task_compliance_summary import execute
 
 
-class TestSafetyRoundCompliance(FrappeTestCase):
+class TestSafetyTaskComplianceSummary(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         tag = self._testMethodName

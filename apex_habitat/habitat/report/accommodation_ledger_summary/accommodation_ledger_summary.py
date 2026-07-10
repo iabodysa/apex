@@ -15,8 +15,8 @@ def execute(filters=None):
         {"label": frappe._("Allocation Basis"), "fieldname": "allocation_basis", "fieldtype": "Data", "width": 130},
         {"label": frappe._("Period Start"), "fieldname": "period_start", "fieldtype": "Date", "width": 110},
         {"label": frappe._("Period End"), "fieldname": "period_end", "fieldtype": "Date", "width": 110},
-        {"label": frappe._("Total Site Cost (SAR)"), "fieldname": "total_site_cost", "fieldtype": "Currency", "width": 150},
-        {"label": frappe._("Employee Daily Share (SAR)"), "fieldname": "employee_daily_share", "fieldtype": "Currency", "width": 170},
+        {"label": frappe._("Total Site Cost"), "fieldname": "total_site_cost", "fieldtype": "Currency", "width": 150},
+        {"label": frappe._("Employee Daily Share"), "fieldname": "employee_daily_share", "fieldtype": "Currency", "width": 170},
         {"label": frappe._("Source"), "fieldname": "source_name", "fieldtype": "Data", "width": 140},
     ]
 

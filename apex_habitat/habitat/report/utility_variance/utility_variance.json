@@ -1,8 +1,8 @@
 {
  "doctype": "Report",
- "name": "Maintenance Backlog",
- "report_name": "Maintenance Backlog",
- "ref_doctype": "Maintenance Request",
+ "name": "Utility Variance",
+ "report_name": "Utility Variance",
+ "ref_doctype": "Utility Bill Entry",
  "report_type": "Script Report",
  "is_standard": "Yes",
  "module": "Habitat",
@@ -11,7 +11,7 @@
    "role": "Accommodation Manager"
   },
   {
-   "role": "Resident Supervisor"
+   "role": "Finance Manager"
   },
   {
    "role": "System Manager"

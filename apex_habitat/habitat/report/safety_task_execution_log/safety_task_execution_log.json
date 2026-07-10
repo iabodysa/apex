@@ -1,7 +1,7 @@
 {
  "doctype": "Report",
- "name": "Safety Round Compliance",
- "report_name": "Safety Round Compliance",
+ "name": "Safety Task Execution Log",
+ "report_name": "Safety Task Execution Log",
  "ref_doctype": "Safety Task Execution",
  "report_type": "Script Report",
  "is_standard": "Yes",
@@ -12,9 +12,6 @@
   },
   {
    "role": "Resident Supervisor"
-  },
-  {
-   "role": "Safety Officer"
   },
   {
    "role": "System Manager"

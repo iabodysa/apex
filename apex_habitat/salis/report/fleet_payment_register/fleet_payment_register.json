@@ -1,8 +1,8 @@
 {
   "doctype": "Report",
-  "name": "Rental Variance Report",
-  "report_name": "Rental Variance Report",
-  "ref_doctype": "Rental Settlement",
+  "name": "Fleet Payment Register",
+  "report_name": "Fleet Payment Register",
+  "ref_doctype": "Salis Payment Request",
   "report_type": "Script Report",
   "is_standard": "Yes",
   "module": "Salis",

@@ -24,7 +24,7 @@ def execute(filters=None):
         {"label": frappe._("Age (Days)"), "fieldname": "age_days", "fieldtype": "Int", "width": 90},
         {"label": frappe._("SLA (Days)"), "fieldname": "sla_days", "fieldtype": "Int", "width": 90},
         {"label": frappe._("SLA Breached"), "fieldname": "sla_breached", "fieldtype": "Check", "width": 110},
-        {"label": frappe._("Cost of Repair (SAR)"), "fieldname": "cost_of_repair", "fieldtype": "Currency", "width": 140},
+        {"label": frappe._("Cost of Repair"), "fieldname": "cost_of_repair", "fieldtype": "Currency", "width": 140},
     ]
 
     open_statuses = ["Open", "Assigned", "In Progress", "Reopened"]
