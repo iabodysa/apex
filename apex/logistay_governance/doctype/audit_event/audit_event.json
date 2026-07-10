@@ -1,0 +1,167 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-07-10 00:00:00.000000",
+ "description": "The immutable, append-only cross-entity governance log. Stock Version carries single-doc field diffs; an Audit Event carries a cross-entity governance action (an approval, an SoD/DoA block, an export decision) that is not one docfield change. No edit, no delete: a correction is a new compensating event.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "audit_event_sec_subject",
+  "gov_entity",
+  "gov_entity_id",
+  "audit_event_col_subject",
+  "gov_action",
+  "gov_subject_key",
+  "audit_event_sec_actor",
+  "gov_by",
+  "audit_event_col_actor",
+  "gov_at",
+  "audit_event_sec_authority",
+  "gov_doa_band",
+  "audit_event_col_authority",
+  "gov_sod_pair",
+  "audit_event_sec_change",
+  "gov_before",
+  "gov_after"
+ ],
+ "fields": [
+  {
+   "fieldname": "audit_event_sec_subject",
+   "fieldtype": "Section Break",
+   "label": "Subject"
+  },
+  {
+   "description": "The DocType the event is about (dynamic-link target type).",
+   "fieldname": "gov_entity",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Entity",
+   "search_index": 1
+  },
+  {
+   "description": "The record name the event is about (dynamic-link target name).",
+   "fieldname": "gov_entity_id",
+   "fieldtype": "Data",
+   "label": "Entity Id",
+   "search_index": 1
+  },
+  {
+   "fieldname": "audit_event_col_subject",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The governance action recorded.",
+   "fieldname": "gov_action",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Action",
+   "options": "intake_parse\nprofile_edit\ngap_waiver\nsupervisor_entry\nconsent_verify\nreconciliation_post\ninvoice_issue\ncredit_note_issue\ndeduction_apply\nwps_release\ndoa_approve\nsod_block\ndoa_block\nexport_sanitize\nexport_block",
+   "reqd": 1
+  },
+  {
+   "description": "Canonical domain.process.case_type.state grammar key for dedup and cross-entity correlation.",
+   "fieldname": "gov_subject_key",
+   "fieldtype": "Data",
+   "label": "Subject Key",
+   "search_index": 1
+  },
+  {
+   "fieldname": "audit_event_sec_actor",
+   "fieldtype": "Section Break",
+   "label": "Actor"
+  },
+  {
+   "description": "The in-system actor. An automated step is the system user; a verbal/WhatsApp trigger with no in-system actor is tagged unverified_trigger on the subject key and is NOT logged as a real approval.",
+   "fieldname": "gov_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "By",
+   "options": "User"
+  },
+  {
+   "fieldname": "audit_event_col_actor",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "When the action occurred.",
+   "fieldname": "gov_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "At"
+  },
+  {
+   "fieldname": "audit_event_sec_authority",
+   "fieldtype": "Section Break",
+   "label": "Authority"
+  },
+  {
+   "description": "The DoA Band that authorised the action (on doa_approve).",
+   "fieldname": "gov_doa_band",
+   "fieldtype": "Link",
+   "label": "DoA Band",
+   "options": "DoA Band"
+  },
+  {
+   "fieldname": "audit_event_col_authority",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The segregation-of-duties pair recorded as preparer::approver.",
+   "fieldname": "gov_sod_pair",
+   "fieldtype": "Data",
+   "label": "SoD Pair"
+  },
+  {
+   "fieldname": "audit_event_sec_change",
+   "fieldtype": "Section Break",
+   "label": "Change"
+  },
+  {
+   "description": "State/value before the action.",
+   "fieldname": "gov_before",
+   "fieldtype": "Long Text",
+   "label": "Before"
+  },
+  {
+   "description": "State/value after the action.",
+   "fieldname": "gov_after",
+   "fieldtype": "Long Text",
+   "label": "After"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay Governance",
+ "name": "Audit Event",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "gov_at",
+ "sort_order": "DESC",
+ "states": []
+}

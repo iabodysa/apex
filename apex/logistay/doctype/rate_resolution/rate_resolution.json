@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-07-10 00:00:00.000000",
+ "description": "Append-only record of one rate resolution: which Rate Card version priced one timesheet line, and the day rate + day-rate basis that were applied. Snapshotting the basis (not just the day rate) lets the reconciliation engine compare the BASIS across the billable and payable sides. Immutable - a closed period reprices identically; a correction is a new resolution, never an edit.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "rate_resolution_sec_subject",
+  "rc_resolved_card",
+  "rc_resolved_version",
+  "rc_period",
+  "rate_resolution_subject_col",
+  "rc_timesheet_line",
+  "rc_billing_unit",
+  "rate_resolution_sec_applied",
+  "rc_day_rate_applied",
+  "rc_day_rate_basis_applied",
+  "rate_resolution_sec_audit",
+  "rc_resolved_at",
+  "rate_resolution_audit_col",
+  "rc_resolved_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "rate_resolution_sec_subject",
+   "fieldtype": "Section Break",
+   "label": "Resolution Subject"
+  },
+  {
+   "description": "The Rate Card that priced this line.",
+   "fieldname": "rc_resolved_card",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Resolved Card",
+   "options": "Rate Card",
+   "reqd": 1
+  },
+  {
+   "description": "Version of the card in force at the period cutoff, snapshotted so a closed period reprices identically.",
+   "fieldname": "rc_resolved_version",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Resolved Version"
+  },
+  {
+   "description": "The billing period this resolution priced.",
+   "fieldname": "rc_period",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Timesheet Period",
+   "options": "Timesheet Period"
+  },
+  {
+   "fieldname": "rate_resolution_subject_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The specific timesheet line that was priced.",
+   "fieldname": "rc_timesheet_line",
+   "fieldtype": "Link",
+   "label": "Timesheet Line",
+   "options": "Timesheet Line"
+  },
+  {
+   "description": "Denormalized snapshot of the card billing unit at resolution time.",
+   "fieldname": "rc_billing_unit",
+   "fieldtype": "Select",
+   "label": "Billing Unit",
+   "options": "\npackage_day\nattendance_day\ndelivery_performance\nshift_hour"
+  },
+  {
+   "fieldname": "rate_resolution_sec_applied",
+   "fieldtype": "Section Break",
+   "label": "Applied Rate"
+  },
+  {
+   "description": "The day rate actually used. Computed at runtime from the seeded card value - not a committed configuration value.",
+   "fieldname": "rc_day_rate_applied",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Day Rate Applied"
+  },
+  {
+   "description": "The day-rate basis actually used (C3 snapshot). The reconciliation engine compares THIS across the billable and payable sides so a basis mismatch is caught, not just a day-count difference.",
+   "fieldname": "rc_day_rate_basis_applied",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Day Rate Basis Applied",
+   "options": "\nactual_cycle_days\nfixed_365_12\ndiv_31\nexplicit_rate_per_day"
+  },
+  {
+   "fieldname": "rate_resolution_sec_audit",
+   "fieldtype": "Section Break",
+   "label": "Audit"
+  },
+  {
+   "fieldname": "rc_resolved_at",
+   "fieldtype": "Datetime",
+   "label": "Resolved At"
+  },
+  {
+   "fieldname": "rate_resolution_audit_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rc_resolved_by",
+   "fieldtype": "Link",
+   "label": "Resolved By",
+   "options": "User"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Rate Resolution",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,153 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-07-10 00:00:00.000000",
+ "description": "Worker-side reconciliation output (GROSS, pre-deduction). Emitted by a Reconciliation Run and consumed by payroll (P-192); queried by rec_run, not a child row. Carries the day-rate basis snapshot compared against the paired Billable Line by the BASIS-CONSISTENT guard. A partial month is never silent: rec_partial_reason is always set.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "payable_line_sec_line",
+  "rec_run",
+  "rec_worker",
+  "payable_line_line_col",
+  "rec_payable_days",
+  "rec_partial_reason",
+  "payable_line_sec_gross",
+  "rec_monthly_package",
+  "rec_prorated_gross",
+  "payable_line_gross_col",
+  "rec_day_rate_basis_applied",
+  "rec_resolution_ref"
+ ],
+ "fields": [
+  {
+   "fieldname": "payable_line_sec_line",
+   "fieldtype": "Section Break",
+   "label": "Payable Line"
+  },
+  {
+   "fieldname": "rec_run",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Reconciliation Run",
+   "options": "Reconciliation Run",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The worker this gross line pays (internal PII).",
+   "fieldname": "rec_worker",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Worker",
+   "options": "Worker",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "payable_line_line_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Payable days for the worker this period.",
+   "fieldname": "rec_payable_days",
+   "fieldtype": "Float",
+   "label": "Payable Days"
+  },
+  {
+   "default": "full_month",
+   "description": "Why the month is full or partial. A partial payout is never silent: a non-full reason must be chosen deliberately.",
+   "fieldname": "rec_partial_reason",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Partial Reason",
+   "options": "full_month\npre_join\npost_exit\nunder_target_days_lt20\ntraining_excluded",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payable_line_sec_gross",
+   "fieldtype": "Section Break",
+   "label": "Gross"
+  },
+  {
+   "description": "Worker monthly package (runtime; from P-189 and the Worker master).",
+   "fieldname": "rec_monthly_package",
+   "fieldtype": "Currency",
+   "label": "Monthly Package",
+   "read_only": 1
+  },
+  {
+   "description": "Prorated GROSS, pre-deduction (computed at runtime). Deductions are never applied here.",
+   "fieldname": "rec_prorated_gross",
+   "fieldtype": "Currency",
+   "label": "Prorated Gross",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payable_line_gross_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Day-rate basis snapshot (A1). Compared against the paired Billable Line by the BASIS-CONSISTENT guard; a mismatch halts the run.",
+   "fieldname": "rec_day_rate_basis_applied",
+   "fieldtype": "Select",
+   "label": "Day Rate Basis Applied",
+   "options": "\nactual_cycle_days\nfixed_365_12\ndiv_31\nexplicit_rate_per_day"
+  },
+  {
+   "description": "Provenance link to the P-189 Rate Resolution that priced this worker; also the pairing key for the BASIS-CONSISTENT guard.",
+   "fieldname": "rec_resolution_ref",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Resolution Reference",
+   "options": "Rate Resolution",
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Payable Line",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

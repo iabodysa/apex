@@ -1,0 +1,36 @@
+{
+ "actions": [],
+ "creation": "2026-07-10 00:00:00.000000",
+ "description": "Child link row for the Rate Card enabled-components multiselect. One row per component the card charges; the row points at a Rate Card Component Type.",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "rc_component_type"
+ ],
+ "fields": [
+  {
+   "columns": 6,
+   "description": "The enabled billing component.",
+   "fieldname": "rc_component_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Component",
+   "options": "Rate Card Component Type",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Rate Card Enabled Component",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

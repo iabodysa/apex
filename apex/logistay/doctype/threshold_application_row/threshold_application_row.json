@@ -1,0 +1,87 @@
+{
+ "actions": [],
+ "creation": "2026-07-10 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "rec_worker",
+  "rec_threshold",
+  "rec_rule_applied",
+  "rec_routed_to_billing",
+  "rec_routed_to_deduction",
+  "rec_penalty_param_ref",
+  "rec_gated_open_item"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "description": "The worker the threshold fired for (internal PII).",
+   "fieldname": "rec_worker",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Worker",
+   "options": "Worker"
+  },
+  {
+   "columns": 2,
+   "description": "Which performance threshold was evaluated.",
+   "fieldname": "rec_threshold",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Threshold",
+   "options": "days_lt_20\nlate_ge_30min\nsuccess_pct\ntraining_days\ndeparture_late_count"
+  },
+  {
+   "columns": 2,
+   "description": "Which penalty rule was applied. Blank until a rule fires.",
+   "fieldname": "rec_rule_applied",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Rule Applied",
+   "options": "\npro_rate\nreview_only\nflat_penalty\nper_day_penalty\nexclude_from_billable"
+  },
+  {
+   "default": "0",
+   "description": "1 = the rule adjusted the client-side Billable Line.",
+   "fieldname": "rec_routed_to_billing",
+   "fieldtype": "Check",
+   "label": "Routed To Billing"
+  },
+  {
+   "default": "0",
+   "description": "1 = the rule raised a worker Deduction Candidate.",
+   "fieldname": "rec_routed_to_deduction",
+   "fieldtype": "Check",
+   "label": "Routed To Deduction"
+  },
+  {
+   "description": "The P-189 Rate Card Penalty Row that parameterized this rule.",
+   "fieldname": "rec_penalty_param_ref",
+   "fieldtype": "Link",
+   "label": "Penalty Parameter Reference",
+   "options": "Rate Card Penalty Row"
+  },
+  {
+   "default": "0",
+   "description": "1 = the rule was INFERRED (not owner-confirmed) and forces the run to PENDING-REVIEW.",
+   "fieldname": "rec_gated_open_item",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Gated Open Item"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Threshold Application Row",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

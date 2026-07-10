@@ -19,6 +19,8 @@ GUARDED_MAPS = ("permission_query_conditions", "has_permission", "doc_events")
 CORE_ALLOWLIST = {
     "Address": "frappe",  # [#52nj0h]
     "Issue": "frappe",  # [#db9ys1]
+    "Sales Invoice": "erpnext",  # Logistay invoice issuance gate (P-191)
+    "Additional Salary": "hrms",  # Logistay payroll/WPS validate gate (P-192)
 }
 
 # [#j1p8io]

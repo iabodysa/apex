@@ -1,0 +1,156 @@
+{
+ "custom_fields": [
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_logistay_sec",
+   "fieldtype": "Section Break",
+   "label": "Logistay Invoice",
+   "insert_after": "tax_id",
+   "collapsible": 1
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_assembly_run",
+   "fieldtype": "Link",
+   "label": "Invoice Assembly Run",
+   "options": "Invoice Assembly Run",
+   "insert_after": "inv_logistay_sec",
+   "read_only": 1,
+   "translatable": 0
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_component_type",
+   "fieldtype": "Select",
+   "label": "Component Type",
+   "options": "\ntimesheet\novertime\nlevy\neos",
+   "insert_after": "inv_assembly_run",
+   "read_only": 1,
+   "translatable": 0
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_rec_run",
+   "fieldtype": "Link",
+   "label": "Reconciliation Run",
+   "options": "Reconciliation Run",
+   "insert_after": "inv_component_type",
+   "read_only": 1,
+   "translatable": 0
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_eos_transfer_ref",
+   "fieldtype": "Data",
+   "label": "EOS Transfer Ref",
+   "insert_after": "inv_rec_run",
+   "depends_on": "eval:doc.inv_component_type=='eos'",
+   "mandatory_depends_on": "eval:doc.inv_component_type=='eos'",
+   "description": "D4 client-side: EOS is event-triggered only. Set ONLY when Component Type = eos; references the sponsorship-transfer event. Soft ref (Data) until the transfer-event DocType exists; convert to a hard Link then.",
+   "translatable": 0
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_logistay_col",
+   "fieldtype": "Column Break",
+   "insert_after": "inv_eos_transfer_ref"
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_doa_band",
+   "fieldtype": "Link",
+   "label": "DoA Band",
+   "options": "DoA Band",
+   "insert_after": "inv_logistay_col",
+   "read_only": 1,
+   "description": "The DoA Band resolved by the shared P-193 enforce_gate at issuance. Blank until resolved.",
+   "translatable": 0
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_doa_status",
+   "fieldtype": "Select",
+   "label": "DoA Status",
+   "options": "\nwithin_authority\nneeds_higher_band\nauthority_unknown",
+   "insert_after": "inv_doa_band",
+   "read_only": 1,
+   "description": "Fail-closed: authority_unknown until enforce_gate resolves exactly one active band and the approver holds it.",
+   "translatable": 0
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_zatca_sec",
+   "fieldtype": "Section Break",
+   "label": "ZATCA E-Invoice",
+   "insert_after": "inv_doa_status",
+   "collapsible": 1
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_zatca_stamp_status",
+   "fieldtype": "Select",
+   "label": "ZATCA Stamp Status",
+   "options": "not_stamped\nstamped\nreported\ncleared",
+   "default": "not_stamped",
+   "insert_after": "inv_zatca_sec",
+   "read_only": 1,
+   "description": "Populated by the procured ZATCA app; never hand-set by custom code.",
+   "translatable": 0
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_zatca_uuid",
+   "fieldtype": "Data",
+   "label": "ZATCA UUID",
+   "insert_after": "inv_zatca_stamp_status",
+   "read_only": 1,
+   "translatable": 0
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_zatca_hash",
+   "fieldtype": "Data",
+   "label": "ZATCA Hash",
+   "insert_after": "inv_zatca_uuid",
+   "read_only": 1,
+   "translatable": 0
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_zatca_pih",
+   "fieldtype": "Data",
+   "label": "ZATCA Previous Invoice Hash",
+   "insert_after": "inv_zatca_hash",
+   "read_only": 1,
+   "translatable": 0
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_zatca_col",
+   "fieldtype": "Column Break",
+   "insert_after": "inv_zatca_pih"
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_zatca_counter",
+   "fieldtype": "Int",
+   "label": "ZATCA Counter",
+   "insert_after": "inv_zatca_col",
+   "read_only": 1,
+   "translatable": 0
+  },
+  {
+   "dt": "Sales Invoice",
+   "fieldname": "inv_zatca_qr",
+   "fieldtype": "Long Text",
+   "label": "ZATCA QR",
+   "insert_after": "inv_zatca_counter",
+   "read_only": 1,
+   "translatable": 0
+  }
+ ],
+ "custom_perms": [],
+ "doctype": "Sales Invoice",
+ "property_setters": [],
+ "sync_on_migrate": 1
+}

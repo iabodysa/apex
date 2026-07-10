@@ -1,0 +1,259 @@
+{
+ "actions": [],
+ "autoname": "field:rec_run_name",
+ "creation": "2026-07-10 00:00:00.000000",
+ "description": "One monthly reconciliation run for a Client (optionally one Branch Site) over a Timesheet Period. Aggregates the closed period into ONE run that emits TWO sides: client-side Billable Line[] (to invoicing) and worker-side Payable Line[] (to payroll) plus Deduction Candidate[]. The BASIS-CONSISTENT guard halts the run when the two sides disagree on the day-rate basis; threshold application is skipped as a structural no-op for clients with no per-worker feed.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "reconciliation_run_sec_identity",
+  "rec_run_name",
+  "rec_client",
+  "rec_branch_site",
+  "rec_service_line",
+  "reconciliation_run_identity_col",
+  "rec_period",
+  "rec_period_cutoff",
+  "rec_version",
+  "reconciliation_run_sec_status",
+  "rec_status",
+  "rec_line_count",
+  "rec_open_flags",
+  "reconciliation_run_status_col",
+  "rec_total_billable",
+  "rec_total_payable",
+  "rec_fed_precondition_met",
+  "reconciliation_run_sec_sod",
+  "rec_prepared_by",
+  "rec_prepared_at",
+  "reconciliation_run_sod_col",
+  "rec_approved_by",
+  "rec_approved_at",
+  "reconciliation_run_sec_thresholds",
+  "rec_threshold_log"
+ ],
+ "fields": [
+  {
+   "fieldname": "reconciliation_run_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Reconciliation Run"
+  },
+  {
+   "description": "Unique run id, e.g. CLIENT-BRANCH-2026-05-v1. This is the record's id and cannot be changed once saved.",
+   "fieldname": "rec_run_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Run Name",
+   "reqd": 1,
+   "search_index": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "rec_client",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Client",
+   "options": "Client",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Optional. Leave blank for a client-wide run.",
+   "fieldname": "rec_branch_site",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch Site",
+   "options": "Branch Site"
+  },
+  {
+   "fieldname": "rec_service_line",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Service Line",
+   "options": "delivery\ncleaning\nsecurity",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reconciliation_run_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The billing / attendance cycle this run reconciles.",
+   "fieldname": "rec_period",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Period",
+   "options": "Timesheet Period",
+   "reqd": 1
+  },
+  {
+   "description": "Cutoff date of the run. Drives the P-189 effective-dated rate-card lookup and the per-client handoff SLA (Client Reconciliation Config).",
+   "fieldname": "rec_period_cutoff",
+   "fieldtype": "Date",
+   "label": "Period Cutoff",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "description": "Run version. A correction is a NEW version (reverse + re-run), never an in-place edit.",
+   "fieldname": "rec_version",
+   "fieldtype": "Int",
+   "label": "Version",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "reconciliation_run_sec_status",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "default": "draft",
+   "description": "State machine: draft to aggregated to rated to thresholds_applied, then either clean to awaiting_approval to posted, or pending_review when a gated / inferred item is open. A correction moves a posted run to reversed.",
+   "fieldname": "rec_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "draft\naggregated\nrated\nthresholds_applied\nclean\nawaiting_approval\nposted\npending_review\nreversed",
+   "reqd": 1
+  },
+  {
+   "description": "Count of emitted lines (computed).",
+   "fieldname": "rec_line_count",
+   "fieldtype": "Int",
+   "label": "Line Count",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Open exception / gate flags. Must be 0 before the run may reach posted.",
+   "fieldname": "rec_open_flags",
+   "fieldtype": "Int",
+   "label": "Open Flags",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reconciliation_run_status_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Sum of the Billable Line amounts (computed at runtime; no VAT here).",
+   "fieldname": "rec_total_billable",
+   "fieldtype": "Currency",
+   "label": "Total Billable",
+   "read_only": 1
+  },
+  {
+   "description": "Sum of the Payable Line gross amounts (computed at runtime).",
+   "fieldname": "rec_total_payable",
+   "fieldtype": "Currency",
+   "label": "Total Payable",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "FED-PRECONDITION snapshot. 1 = the client has a per-worker feed so threshold application runs; 0 = threshold application is skipped as a structural no-op (this run legitimately emits zero Deduction Candidates).",
+   "fieldname": "rec_fed_precondition_met",
+   "fieldtype": "Check",
+   "label": "Feed Precondition Met",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reconciliation_run_sec_sod",
+   "fieldtype": "Section Break",
+   "label": "Separation Of Duties"
+  },
+  {
+   "description": "Preparer of the run (maker). Must differ from the approver.",
+   "fieldname": "rec_prepared_by",
+   "fieldtype": "Link",
+   "label": "Prepared By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rec_prepared_at",
+   "fieldtype": "Datetime",
+   "label": "Prepared At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reconciliation_run_sod_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Approver of the POST (checker). Must differ from the preparer.",
+   "fieldname": "rec_approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rec_approved_at",
+   "fieldtype": "Datetime",
+   "label": "Approved At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reconciliation_run_sec_thresholds",
+   "fieldtype": "Section Break",
+   "label": "Threshold Application"
+  },
+  {
+   "description": "Audit of which penalty rule fired per worker. A gated / inferred row forces the run to PENDING-REVIEW.",
+   "fieldname": "rec_threshold_log",
+   "fieldtype": "Table",
+   "label": "Threshold Application Log",
+   "options": "Threshold Application Row"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Reconciliation Run",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "rec_run_name",
+ "track_changes": 1
+}

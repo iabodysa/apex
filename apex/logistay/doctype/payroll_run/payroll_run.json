@@ -1,0 +1,302 @@
+{
+ "actions": [],
+ "creation": "2026-07-11 09:00:00.000000",
+ "description": "One payroll run, 1:1 with a POSTED Reconciliation Run. Maps that run's Payable Lines (GROSS) onto stock Salary Slips, nets verified consented deductions, and orchestrates the regional WPS/SIF file. Custom code sets provenance + gate flags only; stock HRMS computes gross/deduction/net. RELEASE (WPS to bank) is the P-193-gated action (enforce_gate wps_release); it fails closed until every worker has a valid IBAN, every deduction has a verified consent, and Separation of Duties holds.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "pay_run_sec_identity",
+  "pay_client",
+  "pay_branch_site",
+  "pay_service_line",
+  "pay_run_identity_col",
+  "pay_period",
+  "pay_rec_run",
+  "pay_run_sec_totals",
+  "pay_worker_count",
+  "pay_total_gross",
+  "pay_total_deductions",
+  "pay_run_totals_col",
+  "pay_total_net",
+  "pay_open_consent_gaps",
+  "pay_run_sec_wps",
+  "pay_wps_channel",
+  "pay_wps_status",
+  "pay_run_wps_col",
+  "pay_iban_complete",
+  "pay_run_sec_governance",
+  "pay_doa_band",
+  "pay_doa_status",
+  "pay_prepared_by",
+  "pay_prepared_at",
+  "pay_run_governance_col",
+  "pay_approved_by",
+  "pay_approved_at",
+  "pay_run_sec_correction",
+  "pay_correction_of",
+  "pay_run_sec_status",
+  "pay_status",
+  "pay_notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "pay_run_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Payroll Run"
+  },
+  {
+   "description": "Client this run pays workers for.",
+   "fieldname": "pay_client",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Client",
+   "options": "Client",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Optional. Leave blank for a client-wide run.",
+   "fieldname": "pay_branch_site",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch Site",
+   "options": "Branch Site"
+  },
+  {
+   "fieldname": "pay_service_line",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Service Line",
+   "options": "delivery\ncleaning\nsecurity"
+  },
+  {
+   "fieldname": "pay_run_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The pay cycle. Amounts snapshot at this period cutoff.",
+   "fieldname": "pay_period",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Timesheet Period",
+   "options": "Timesheet Period",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The POSTED Reconciliation Run whose Payable Lines are the ONLY gross source for this payroll. Never hand-key gross.",
+   "fieldname": "pay_rec_run",
+   "fieldtype": "Link",
+   "label": "Reconciliation Run",
+   "options": "Reconciliation Run"
+  },
+  {
+   "fieldname": "pay_run_sec_totals",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "description": "Slips built for this run.",
+   "fieldname": "pay_worker_count",
+   "fieldtype": "Int",
+   "label": "Worker Count",
+   "read_only": 1
+  },
+  {
+   "description": "Runtime rollup of Salary Slip gross. Never a seeded config value.",
+   "fieldname": "pay_total_gross",
+   "fieldtype": "Currency",
+   "label": "Total Gross",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pay_total_deductions",
+   "fieldtype": "Currency",
+   "label": "Total Deductions",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pay_run_totals_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Runtime net = the WPS bank total. Stock HRMS never lets a slip net fall below zero on the WPS line.",
+   "fieldname": "pay_total_net",
+   "fieldtype": "Currency",
+   "label": "Total Net (WPS)",
+   "read_only": 1
+  },
+  {
+   "description": "Count of slips still missing a verified consent for a deduction. Must be 0 to RELEASE.",
+   "fieldname": "pay_open_consent_gaps",
+   "fieldtype": "Int",
+   "label": "Open Consent Gaps",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pay_run_sec_wps",
+   "fieldtype": "Section Break",
+   "label": "WPS / SIF"
+  },
+  {
+   "description": "Regional wage-protection channel the SIF file targets. The file itself is produced by the chosen export app (D10 procurement), never by this app.",
+   "fieldname": "pay_wps_channel",
+   "fieldtype": "Select",
+   "label": "WPS Channel",
+   "options": "\nmudad\nsarie"
+  },
+  {
+   "default": "not_generated",
+   "fieldname": "pay_wps_status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "WPS Status",
+   "options": "not_generated\ngenerated\nreleased\nconfirmed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pay_run_wps_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "WPS-COMPLETE precondition: 1 only when every included worker has a valid IBAN. Computed; release fails closed while 0.",
+   "fieldname": "pay_iban_complete",
+   "fieldtype": "Check",
+   "label": "IBAN Complete",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pay_run_sec_governance",
+   "fieldtype": "Section Break",
+   "label": "Authorization (DoA / SoD)"
+  },
+  {
+   "description": "Delegation-of-Authority band this release falls in. Resolved via P-193 from the run net amount; values seeded out-of-repo.",
+   "fieldname": "pay_doa_band",
+   "fieldtype": "Link",
+   "label": "DoA Band",
+   "options": "DoA Band"
+  },
+  {
+   "default": "authority_unknown",
+   "fieldname": "pay_doa_status",
+   "fieldtype": "Select",
+   "label": "DoA Status",
+   "options": "authority_unknown\nwithin_authority\nneeds_higher_band",
+   "read_only": 1
+  },
+  {
+   "description": "Who prepared the run (maker). Must differ from the releaser.",
+   "fieldname": "pay_prepared_by",
+   "fieldtype": "Link",
+   "label": "Prepared By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pay_prepared_at",
+   "fieldtype": "Datetime",
+   "label": "Prepared At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pay_run_governance_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Who released the WPS file (checker). Must differ from the preparer (Separation of Duties).",
+   "fieldname": "pay_approved_by",
+   "fieldtype": "Link",
+   "label": "Released By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pay_approved_at",
+   "fieldtype": "Datetime",
+   "label": "Released At",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pay_run_sec_correction",
+   "fieldtype": "Section Break",
+   "label": "Correction"
+  },
+  {
+   "description": "Set when this run is a same-period correction of an earlier version. A released run is never edited; a correction is a new v{n+1}.",
+   "fieldname": "pay_correction_of",
+   "fieldtype": "Link",
+   "label": "Correction Of",
+   "options": "Payroll Run"
+  },
+  {
+   "fieldname": "pay_run_sec_status",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "default": "Draft",
+   "description": "Lifecycle state (driven by the Logistay payroll Workflow). Released = WPS handed to the bank.",
+   "fieldname": "pay_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nDeclaration Requested\nDeclaration Received\nSlips Built\nConsent Checked\nNetted\nAwaiting Approval\nWPS Generated\nReleased\nConfirmed\nHeld\nSuperseded"
+  },
+  {
+   "fieldname": "pay_notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "icon": "fa fa-money",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-11 09:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Payroll Run",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

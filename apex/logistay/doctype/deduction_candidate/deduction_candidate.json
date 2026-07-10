@@ -1,0 +1,141 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-07-10 00:00:00.000000",
+ "description": "The performance-to-money link. Emitted by a Reconciliation Run as a CANDIDATE only, never finalized here: the amount is gated on the (owner-confirmed) penalty thresholds and the payroll consent gate is P-192. rec_source maps 1:1 onto the P-192 performance deduction categories.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "deduction_candidate_sec_candidate",
+  "rec_run",
+  "rec_worker",
+  "rec_source",
+  "deduction_candidate_candidate_col",
+  "rec_amount",
+  "rec_also_billing_adj",
+  "deduction_candidate_sec_routing",
+  "rec_requires_consent",
+  "rec_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "deduction_candidate_sec_candidate",
+   "fieldtype": "Section Break",
+   "label": "Deduction Candidate"
+  },
+  {
+   "fieldname": "rec_run",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Reconciliation Run",
+   "options": "Reconciliation Run",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The worker the deduction candidate is raised against (internal PII).",
+   "fieldname": "rec_worker",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Worker",
+   "options": "Worker",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The performance source. Maps 1:1 onto the P-192 performance deduction categories.",
+   "fieldname": "rec_source",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Source",
+   "options": "late_ge_30min_penalty\ndays_lt20_adjustment\nsuccess_pct_penalty\ndeparture_late_penalty"
+  },
+  {
+   "fieldname": "deduction_candidate_candidate_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Candidate amount (computed at runtime; gated on the owner-confirmed penalty thresholds; never invented).",
+   "fieldname": "rec_amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "1 = the same event also produced a Billable Line adjustment (the perf-to-money dual route).",
+   "fieldname": "rec_also_billing_adj",
+   "fieldtype": "Check",
+   "label": "Also Billing Adjustment"
+  },
+  {
+   "fieldname": "deduction_candidate_sec_routing",
+   "fieldtype": "Section Break",
+   "label": "Routing"
+  },
+  {
+   "default": "1",
+   "description": "1 = a verified worker consent is required before P-192 may apply this deduction (the payroll consent gate).",
+   "fieldname": "rec_requires_consent",
+   "fieldtype": "Check",
+   "label": "Requires Consent"
+  },
+  {
+   "default": "candidate",
+   "description": "candidate = raised, not finalized; sent_to_payroll = handed to P-192. Finalization is never done here.",
+   "fieldname": "rec_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "candidate\nsent_to_payroll"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-10 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Deduction Candidate",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

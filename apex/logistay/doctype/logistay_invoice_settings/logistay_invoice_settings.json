@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "creation": "2026-07-11 00:00:00.000000",
+ "description": "Deployment-level settings for the Logistay invoice generator: which procured KSA/ZATCA e-invoice app fills the inv_zatca_* fields, and which stock statutory VAT template applies. NAMES the procurement choice as an enum; the actual choice is a deployment decision (no default committed). No AFMCO value is stored here.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "inv_settings_sec_zatca",
+  "inv_zatca_enabled",
+  "inv_zatca_connector",
+  "inv_zatca_phase",
+  "inv_settings_zatca_col",
+  "inv_zatca_notes",
+  "inv_settings_sec_vat",
+  "inv_vat_template"
+ ],
+ "fields": [
+  {
+   "fieldname": "inv_settings_sec_zatca",
+   "fieldtype": "Section Break",
+   "label": "ZATCA E-Invoice Connector"
+  },
+  {
+   "default": "0",
+   "description": "Master switch. When OFF, no ZATCA stamping is attempted and inv_zatca_* stay blank.",
+   "fieldname": "inv_zatca_enabled",
+   "fieldtype": "Check",
+   "label": "Enable ZATCA Stamping"
+  },
+  {
+   "description": "Which procured KSA e-invoice app fills the Sales Invoice inv_zatca_* fields. Procurement enum only (no default); the app choice is a deployment decision, seeded out-of-repo. custom code NEVER writes these values.",
+   "fieldname": "inv_zatca_connector",
+   "fieldtype": "Select",
+   "label": "ZATCA Connector App",
+   "options": "\nksa_compliance\nzatca_erpgulf\nother"
+  },
+  {
+   "description": "ZATCA e-invoicing phase the connector targets (public statutory phases).",
+   "fieldname": "inv_zatca_phase",
+   "fieldtype": "Select",
+   "label": "ZATCA Phase",
+   "options": "\nphase_1_generation\nphase_2_integration"
+  },
+  {
+   "fieldname": "inv_settings_zatca_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "inv_zatca_notes",
+   "fieldtype": "Small Text",
+   "label": "Connector Notes"
+  },
+  {
+   "fieldname": "inv_settings_sec_vat",
+   "fieldtype": "Section Break",
+   "label": "VAT"
+  },
+  {
+   "description": "The stock ERPNext Sales Taxes and Charges Template that carries the statutory 15% VAT rate. Named here; the specific template is selected per deployment (no default).",
+   "fieldname": "inv_vat_template",
+   "fieldtype": "Link",
+   "label": "Statutory VAT Template",
+   "options": "Sales Taxes and Charges Template"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-11 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Logistay Invoice Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
