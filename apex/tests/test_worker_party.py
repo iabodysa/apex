@@ -338,7 +338,8 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         # [#6sa3jq]
         self.assertIn("def get_checkin_slip(", src)
         self.assertIn("def get_custody_handover_slip(", src)
-        self.assertIn("masar_qr_data_uri(_worker_link", src)  # [#gp5a8y]
+        self.assertIn("worker_link_for_row(token)", src)  # [#gp5a8y]
+        self.assertIn("masar_qr_data_uri(link)", src)  # [#gp5a8y]
         self.assertNotIn("#00844e", src)  # [#9n35yx]
         with open(
             os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"

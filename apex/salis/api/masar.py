@@ -17,6 +17,7 @@ import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
 
+from apex.apex_core.doctype.masar_worker_token.masar_worker_token import _hash_token
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
 # Maps deep-link builders shared with driver_portal so worker + driver open the
 # identical chained route; _stop_waypoint is re-exported for callers importing it
@@ -543,9 +544,12 @@ def _resolve_worker(token):
     token = _token_from_request(token)
     if not token:
         frappe.throw(_("A worker link token is required."), frappe.PermissionError)
+    # [#tokhash] The token is stored only as a hash (P-104); hash the presented value
+    # and match on that — a single indexed lookup, and a DB-row read leaks no usable
+    # secret. Presenting the stored hash itself hashes again and fails closed.
     row = frappe.db.get_value(
         "Masar Worker Token",
-        {"token": token, "enabled": 1},
+        {"token": _hash_token(token), "enabled": 1},
         ["employee", "employee_name", "party_type", "expires_on"],
         as_dict=True,
     )

@@ -74,7 +74,8 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
             doc = frappe.get_doc("Masar Worker Token", existing)
             if not doc.enabled:
                 doc.db_set("enabled", 1)
-            return doc.token
+            # Stored hashed at rest (P-104): recover the raw from its encrypted copy.
+            return doc.recover_token()
         doc = frappe.get_doc(
             {
                 "doctype": "Masar Worker Token",
@@ -84,7 +85,7 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
                 "enabled": 1,
             }
         ).insert(ignore_permissions=True)
-        return doc.token
+        return doc._plaintext_token
 
     def _purge_ratings(self, dispatch_trip):
         """Drop any Transport Trip Rating the endpoint wrote for a trip — the

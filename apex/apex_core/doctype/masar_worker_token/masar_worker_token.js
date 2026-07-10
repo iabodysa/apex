@@ -7,15 +7,26 @@ frappe.ui.form.on("Masar Worker Token", {
 			return;
 		}
 
-		frm.add_custom_button(__("Show Link and QR"), () => _show_link(frm, 0));
-		frm.add_custom_button(__("Regenerate Token"), () => {
-			frappe.confirm(
-				__(
-					"Regenerating invalidates the worker's current link and QR. Continue?"
-				),
-				() => _show_link(frm, 1)
-			);
-		});
+		// [#tokhash] The raw token is stored only as a hash, so it can never be
+		// re-displayed from the record. Issuing is ROTATE-ONLY: a fresh link + QR is
+		// minted and shown ONCE here; re-opening this action rotates (invalidating any
+		// previously shared link) rather than re-showing the old secret.
+		const has_link = Boolean(frm.doc.token);
+		frm.add_custom_button(
+			has_link ? __("Rotate Link and QR") : __("Issue Link and QR"),
+			() => {
+				if (!has_link) {
+					_show_link(frm, 1);
+					return;
+				}
+				frappe.confirm(
+					__(
+						"The current link cannot be shown again. Rotating issues a NEW link and QR and invalidates the previous one. Continue?"
+					),
+					() => _show_link(frm, 1)
+				);
+			}
+		);
 
 		if (!frm.doc.enabled) {
 			frm.dashboard.set_headline_alert(

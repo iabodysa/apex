@@ -88,7 +88,8 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
             doc = frappe.get_doc("Masar Worker Token", existing)
             if not doc.enabled:
                 doc.db_set("enabled", 1)
-            return doc.token
+            # Stored hashed at rest (P-104): recover the raw from its encrypted copy.
+            return doc.recover_token()
         doc = frappe.get_doc(
             {
                 "doctype": "Masar Worker Token",
@@ -98,7 +99,7 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
                 "enabled": 1,
             }
         ).insert(ignore_permissions=True)
-        return doc.token
+        return doc._plaintext_token
 
     def _boarding_rows_for(self, dispatch_trip, employee):
         """Trip Boarding Event rows for ``employee`` across this trip's Trip Start

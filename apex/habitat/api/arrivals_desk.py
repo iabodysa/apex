@@ -24,8 +24,8 @@ import frappe
 from frappe import _
 
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
-    _worker_link,
     masar_qr_data_uri,
+    worker_link_for_row,
 )
 from apex.habitat import permissions
 
@@ -117,16 +117,18 @@ def send_masar_link_message(employee, phone=None) -> dict:
     frappe.has_permission("Masar Worker Token", "read", throw=True)
     token = (
         frappe.db.get_value(
-            "Masar Worker Token", {"employee": employee}, ["token", "enabled"], as_dict=True
+            "Masar Worker Token", {"employee": employee}, ["token", "token_enc", "enabled"], as_dict=True
         )
         or {}
     )
     if not token.get("token") or not token.get("enabled"):
         frappe.throw(_("This worker has no active Masar link yet. Create the QR first."))
 
-    result = messaging_gateway.send_masar_link(
-        employee, _worker_link(token["token"]), phone=phone
-    )
+    # [#tokhash] The raw token is not stored; rebuild the link from its encrypted copy.
+    link = worker_link_for_row(token)
+    if not link:
+        frappe.throw(_("This worker's Masar link could not be recovered. Regenerate it first."))
+    result = messaging_gateway.send_masar_link(employee, link, phone=phone)
     return {"gateway_configured": messaging_gateway.is_configured(), **result}
 
 
@@ -838,11 +840,16 @@ def get_arrival_slip(party_type, party) -> dict:
         ctx["designation"] = frappe.db.get_value("Employee", party, "designation")
         frappe.has_permission("Masar Worker Token", "read", throw=True)
         token = (
-            frappe.db.get_value("Masar Worker Token", {"employee": party}, ["token", "enabled"], as_dict=True)
+            frappe.db.get_value(
+                "Masar Worker Token", {"employee": party}, ["token", "token_enc", "enabled"], as_dict=True
+            )
             or {}
         )
         if token.get("token") and token.get("enabled"):
-            ctx["qr"] = masar_qr_data_uri(_worker_link(token.get("token")))
+            # [#tokhash] Recover the link from the encrypted copy (raw is not stored).
+            link = worker_link_for_row(token)
+            if link:
+                ctx["qr"] = masar_qr_data_uri(link)
     elif party_type == PARTY_TEMPORARY_WORKER:
         frappe.has_permission("Temporary Worker", "read", throw=True)
         # [#scope] re-assert the building scope at the PII chokepoint (defence in

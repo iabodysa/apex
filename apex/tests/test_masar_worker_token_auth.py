@@ -20,6 +20,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
+    _hash_token,
     get_or_create_for_employee,
 )
 from apex.salis.api import masar
@@ -69,9 +70,9 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
         )
 
     def _make_token(self, employee, enabled=1):
-        """Issue a Masar Worker Token for ``employee`` and return its minted token
-        string. The token value is server-generated (read-only, auto in
-        before_insert), so we read it back rather than supplying it."""
+        """Issue a Masar Worker Token for ``employee`` and return its minted RAW token
+        string. The token is stored hashed (P-104), so the raw value is available only
+        transiently on the freshly minted doc (``_plaintext_token``)."""
         doc = frappe.get_doc(
             {
                 "doctype": "Masar Worker Token",
@@ -85,7 +86,7 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
         ).insert(ignore_permissions=True)
         self.assertTrue(doc.token, "fixture sanity: a token must be minted on insert")
         self.assertEqual(doc.employee, employee, "fixture sanity: token bound to the employee")
-        return doc.token
+        return doc._plaintext_token
 
     # the contract
 
@@ -124,8 +125,9 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
     def test_unknown_token_is_rejected(self):
         """A well-formed but non-existent token must 403 (no row -> fail closed)."""
         bogus = frappe.generate_hash(length=48)
-        # Non-vacuous: confirm this token genuinely matches no row before asserting.
-        self.assertFalse(frappe.db.exists("Masar Worker Token", {"token": bogus}))
+        # Non-vacuous: confirm this token's HASH genuinely matches no row (the resolver
+        # looks up by hash) before asserting it is rejected.
+        self.assertFalse(frappe.db.exists("Masar Worker Token", {"token": _hash_token(bogus)}))
         with self.assertRaises(frappe.PermissionError):
             masar._resolve_worker(bogus)
         with self.assertRaises(frappe.PermissionError):
@@ -137,9 +139,10 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
         emp = self._make_employee("disabled")
         token = self._make_token(emp, enabled=0)
         # Non-vacuous: the row exists and is bound to the worker — it is the
-        # enabled flag alone that must close the door.
+        # enabled flag alone that must close the door. (Lookup by employee: the row
+        # stores the token's HASH, not the raw value returned by _make_token.)
         self.assertEqual(
-            frappe.db.get_value("Masar Worker Token", {"token": token}, "enabled"),
+            frappe.db.get_value("Masar Worker Token", {"employee": emp}, "enabled"),
             0,
             "fixture sanity: token row must be present and disabled",
         )
@@ -236,8 +239,10 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
             frappe.utils.now_datetime(),
             "a fresh token's expiry must be in the future",
         )
-        # A currently-valid (un-expired) link resolves exactly as before.
-        self.assertEqual(masar._resolve_worker(doc.token), emp)
+        # A currently-valid (un-expired) link resolves exactly as before. The raw
+        # token (baked into the /masar link) is available transiently after mint; the
+        # row stores only its hash (P-104).
+        self.assertEqual(masar._resolve_worker(doc._plaintext_token), emp)
 
     def test_expired_token_is_refused(self):
         """A token whose ``expires_on`` is in the past fails closed (PermissionError),
@@ -256,9 +261,9 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
         # Non-vacuous: the row is still enabled + bound to an Active worker.
         self.assertEqual(frappe.db.get_value("Masar Worker Token", doc.name, "enabled"), 1)
         with self.assertRaises(frappe.PermissionError):
-            masar._resolve_worker(doc.token)
+            masar._resolve_worker(doc._plaintext_token)
         with self.assertRaises(frappe.PermissionError):
-            masar.get_worker_context(token=doc.token)
+            masar.get_worker_context(token=doc._plaintext_token)
 
     def test_null_expiry_legacy_token_still_resolves(self):
         """A legacy row with a NULL expiry (minted before the field existed, not yet
@@ -270,7 +275,9 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
             "Masar Worker Token", doc.name, "expires_on", None, update_modified=False
         )
         self.assertIsNone(frappe.db.get_value("Masar Worker Token", doc.name, "expires_on"))
-        self.assertEqual(masar._resolve_worker(doc.token), emp, "a NULL-expiry link must still resolve")
+        self.assertEqual(
+            masar._resolve_worker(doc._plaintext_token), emp, "a NULL-expiry link must still resolve"
+        )
 
     def test_backfill_stamps_a_future_expiry_and_link_survives(self):
         """The migration's logic: a NULL-expiry live token gets a generous FUTURE
@@ -280,7 +287,7 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
 
         emp = self._worker("backfill")
         doc = self._token_doc(emp)
-        token = doc.token
+        token = doc._plaintext_token
         frappe.db.set_value(
             "Masar Worker Token", doc.name, "expires_on", None, update_modified=False
         )
@@ -413,7 +420,7 @@ class TestMasarTokenTransport(FrappeTestCase):
                 "employee": emp,
                 "enabled": 1,
             }
-        ).insert(ignore_permissions=True).token
+        ).insert(ignore_permissions=True)._plaintext_token
         frappe.local.request = self._Req({"masar_wt": token})
         # No token arg supplied -> the resolver falls back to the cookie.
         self.assertEqual(masar._resolve_worker(None), emp)
@@ -466,7 +473,7 @@ class TestMasarNotifyHrIqamaExpiring(FrappeTestCase):
                 "employee": emp.name,
                 "enabled": 1,
             }
-        ).insert(ignore_permissions=True).token
+        ).insert(ignore_permissions=True)._plaintext_token
         return emp.name, token
 
     def _hr_notifications_for(self, employee):
@@ -578,7 +585,9 @@ class TestMasarEmployeeOnlyDecision(FrappeTestCase):
         forced_token = frappe.generate_hash(length=48)
         # db_insert bypasses the controller guard + autoname, mirroring a row that
         # predates the Employee-only enforcement; party_type is the temp worker and
-        # employee is empty exactly as sync_party_employee leaves it.
+        # employee is empty exactly as sync_party_employee leaves it. The token column
+        # stores the HASH (P-104), so the resolver — which hashes the presented value —
+        # matches this row when handed the raw forced_token.
         doc = frappe.get_doc(
             {
                 "doctype": "Masar Worker Token",
@@ -587,14 +596,14 @@ class TestMasarEmployeeOnlyDecision(FrappeTestCase):
                 "party": tw.name,
                 "employee": None,
                 "enabled": 1,
-                "token": forced_token,
+                "token": _hash_token(forced_token),
             }
         )
         doc.db_insert()
         # Non-vacuous: the row genuinely exists, is enabled, and has no employee.
         row = frappe.db.get_value(
             "Masar Worker Token",
-            {"token": forced_token},
+            {"token": _hash_token(forced_token)},
             ["party_type", "employee", "enabled"],
             as_dict=True,
         )

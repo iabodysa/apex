@@ -40,7 +40,8 @@ from apex.tests.factories import (
 
 
 def _make_token(employee, enabled=1):
-    """Issue a Masar Worker Token for ``employee`` (token auto-minted)."""
+    """Issue a Masar Worker Token for ``employee`` and return its RAW token (stored
+    hashed at rest — the raw value is only on the freshly minted doc)."""
     return (
         frappe.get_doc(
             {
@@ -52,7 +53,7 @@ def _make_token(employee, enabled=1):
             }
         )
         .insert(ignore_permissions=True)
-        .token
+        ._plaintext_token
     )
 
 
@@ -116,7 +117,8 @@ class TestMasarWorkerScope(_WorkerTripMixin, FrappeTestCase):
         # not leak across the test DB. (Site/Buildings/Employees are
         # reuse-or-create shared fixtures and are left in place.)
         frappe.set_user("Administrator")
-        frappe.db.delete("Masar Worker Token", {"token": cls.token})
+        # cls.token is the RAW token; the row stores its hash, so delete by worker.
+        frappe.db.delete("Masar Worker Token", {"employee": cls.worker})
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
         frappe.db.commit()

@@ -1847,6 +1847,7 @@ Issue,صرف
 Issue Custody,صرف العهدة
 Issue Date,تاريخ الإصدار / تاريخ الصرف
 Issue Description,وصف المشكلة / وصف الصرف
+Issue Link and QR,إصدار الرابط ورمز QR
 Issue Location,موقع المشكلة
 Issue Masar Link,إصدار رابط مسار
 Issue Type,نوع المشكلة / نوع الصرف
@@ -2844,9 +2845,9 @@ Register,تسجيل
 Register New Arrival (Passport),تسجيل وصول جديد (الجواز)
 Register Salis Driver,تسجيل سائق سلس
 Register Salis Vehicle,تسجيل مركبة سلس
-Register a Driver Compliance Record,تسجيل سجل امتثال سائق
 Register a Salis Driver,سجّل سائق سلس
 Register a Salis Vehicle,سجّل مركبة سلس
+Register a Vehicle Compliance Record,تسجيل سجل امتثال مركبة
 Register new arrival by passport,تسجيل وصول جديد برقم الجواز
 Registered worker (Employee) who boarded. Leave blank and tick 'Unregistered' for a contractor not on the manifest.,العامل المسجل (الموظف) الذي صعد. اتركه فارغًا وفعّل خيار 'غير مسجل' لمتعاقد ليس في كشف الركاب.
 Registered: {0},مُسجَّل: {0}
@@ -3106,6 +3107,7 @@ Rooms Total,إجمالي الغرف
 Rooms and beds created.,تم إنشاء الغرف والأسرّة.
 Rooms needing readiness,الغرف التي تحتاج إلى تجهيز
 Rooms on Floor,عدد الغرف في الطابق
+Rotate Link and QR,تدوير الرابط ورمز QR
 Round,جولة
 Round Date,تاريخ الجولة
 Route,المسار
@@ -3642,6 +3644,7 @@ The client's own code for this location. Unique only within the Client.,رمز �
 The closer must differ from the person who raised the case.,يجب أن يختلف من يُغلق الحالة عمّن رفعها.
 The consenting worker.,العامل الموافِق.
 "The current driver's login user, mirrored from the assigned driver. Drives the driver-facing compliance notification.",مستخدم دخول السائق الحالي، منعكس من السائق المُسنَد. يوجِّه إشعار الامتثال الموجَّه للسائق.
+The current link cannot be shown again. Rotating issues a NEW link and QR and invalidates the previous one. Continue?,لا يمكن عرض الرابط الحالي مرة أخرى. التدوير يُصدر رابطاً ورمز QR جديدين ويُبطل السابق. متابعة؟
 The cycle this batch feeds. A Closed period is skipped by the engine.,الدورة التي تغذّيها هذه الدفعة. يتخطى المحرك أي فترة مغلقة.
 "The device/browser user agent captured at opt-in, to help an operator recognise a stale device.",وكيل مستخدم الجهاز/المتصفح الملتقط عند الاشتراك، لمساعدة المشغّل على التعرف على جهاز قديم.
 The driver this device subscription belongs to.,السائق الذي يخصه اشتراك هذا الجهاز.
@@ -3761,6 +3764,8 @@ To Room,إلى غرفة
 Today's Dispatch Trips,رحلات توجيه اليوم
 Today's expected arrivals ({0}),الوصولات المتوقعة اليوم ({0})
 Token,الرمز
+Token (Encrypted),الرمز (مشفّر)
+Token Hash,بصمة الرمز
 Token Map,خريطة الرموز
 Token Rows,سطور الرموز
 Too many incorrect attempts. This delivery is temporarily locked.,محاولات خاطئة كثيرة. هذا التسليم مقفل مؤقتًا.

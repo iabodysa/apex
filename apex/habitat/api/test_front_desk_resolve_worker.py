@@ -112,7 +112,7 @@ class TestResolveWorker(FrappeTestCase):
     def test_resolves_masar_token(self):
         emp = self._employee()
         tok = self._token_for(emp.name)
-        r = resolve_worker(tok.token)
+        r = resolve_worker(tok._plaintext_token)
         self.assertTrue(r["found"])
         self.assertEqual(r["party_type"], "Employee")
         self.assertEqual(r["party"], emp.name)
@@ -122,7 +122,7 @@ class TestResolveWorker(FrappeTestCase):
         emp = self._employee()
         tok = self._token_for(emp.name)
         self._house("Employee", emp.name, employee=emp.name)
-        r = resolve_worker(tok.token)
+        r = resolve_worker(tok._plaintext_token)
         self.assertTrue(r["has_active_assignment"], "an Employee holding a live bed is flagged")
 
     def test_disabled_token_does_not_resolve(self):
@@ -130,7 +130,7 @@ class TestResolveWorker(FrappeTestCase):
         tok = self._token_for(emp.name)
         frappe.db.set_value("Masar Worker Token", tok.name, "enabled", 0)
         # A disabled token must not resolve; it also isn't a valid Iqama, so unknown.
-        self.assertFalse(resolve_worker(tok.token)["found"])
+        self.assertFalse(resolve_worker(tok._plaintext_token)["found"])
 
     def test_unknown_identifier_returns_not_found(self):
         r = resolve_worker("NOPE-" + _h())

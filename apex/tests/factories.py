@@ -343,7 +343,9 @@ def make_driver_without_vehicle(email):
 
 
 def make_worker_token(employee):
-    """Create a Masar Worker Token for an Employee; return the token string."""
+    """Create a Masar Worker Token for an Employee; return the RAW token string. The
+    token is stored hashed at rest (P-104), so the raw value is read from the freshly
+    minted doc's transient ``_plaintext_token`` (never re-readable from the row)."""
     return (
         frappe.get_doc(
             {
@@ -355,7 +357,7 @@ def make_worker_token(employee):
             }
         )
         .insert(ignore_permissions=True)
-        .token
+        ._plaintext_token
     )
 
 

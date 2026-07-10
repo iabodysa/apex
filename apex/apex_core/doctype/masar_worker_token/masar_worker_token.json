@@ -15,6 +15,7 @@
   "enabled",
   "section_token",
   "token",
+  "token_enc",
   "expires_on",
   "section_meta",
   "last_generated_on",
@@ -82,13 +83,23 @@
   {
    "fieldname": "token",
    "fieldtype": "Data",
-   "label": "Token",
+   "label": "Token Hash",
    "read_only": 1,
    "unique": 1,
    "search_index": 1,
    "permlevel": 1,
    "no_copy": 1,
-   "description": "Unguessable value bound to this one worker. Whoever holds the matching /masar link sees only this worker's data. Use Generate / Regenerate to issue or rotate it. Restricted to high roles (permlevel 1)."
+   "description": "SHA-256 hash of the worker's personal token — the raw token is never stored, so a direct row read exposes no usable secret. The resolver hashes the presented link and matches it here. Use Regenerate to issue a fresh link (shown once)."
+  },
+  {
+   "fieldname": "token_enc",
+   "fieldtype": "Small Text",
+   "label": "Token (Encrypted)",
+   "read_only": 1,
+   "hidden": 1,
+   "permlevel": 1,
+   "no_copy": 1,
+   "description": "Site-key-encrypted (Fernet) copy of the raw token, kept only so the desk can re-share the SAME link (QR / WhatsApp) without rotating. Useless without the site encryption key."
   },
   {
    "fieldname": "expires_on",
@@ -123,7 +134,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-07-10 13:39:42.272850",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Masar Worker Token",

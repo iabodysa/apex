@@ -57,7 +57,8 @@ def _token_for(employee):
         doc = frappe.get_doc("Masar Worker Token", existing)
         if not doc.enabled:
             doc.db_set("enabled", 1)
-        return doc.token
+        # Stored hashed at rest (P-104): recover the raw from its encrypted copy.
+        return doc.recover_token()
     return frappe.get_doc(
         {
             "doctype": "Masar Worker Token",
@@ -66,7 +67,7 @@ def _token_for(employee):
             "employee": employee,
             "enabled": 1,
         }
-    ).insert(ignore_permissions=True).token
+    ).insert(ignore_permissions=True)._plaintext_token
 
 
 class TestMasarWorkerContacts(_WorkerTripMixin, FrappeTestCase):

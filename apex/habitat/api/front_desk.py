@@ -507,10 +507,14 @@ def resolve_worker(identifier: str) -> dict:
 
     party_type = party = employee = employee_name = image = None
 
-    # A Masar token is unique and unguessable; resolve it exactly first.
+    # A Masar token is unique and unguessable; resolve it exactly first. [#tokhash]
+    # The token is stored only as a hash (P-104), so a scanned raw token is matched
+    # by its hash; a non-token identifier (an Iqama) simply misses and falls through.
+    from apex.apex_core.doctype.masar_worker_token.masar_worker_token import _hash_token
+
     token_row = frappe.db.get_value(
         "Masar Worker Token",
-        {"token": identifier, "enabled": 1},
+        {"token": _hash_token(identifier), "enabled": 1},
         ["party_type", "party", "employee", "employee_name"],
         as_dict=True,
     )
