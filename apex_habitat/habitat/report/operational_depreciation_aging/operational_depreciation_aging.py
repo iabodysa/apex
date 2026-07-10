@@ -12,7 +12,7 @@ def execute(filters=None):
             "label": frappe._("Snapshot"),
             "fieldname": "snapshot_name",
             "fieldtype": "Link",
-            "options": "Non-Financial Depreciation Snapshot",
+            "options": "Operational Depreciation Snapshot",
             "width": 180,
         },
         {
@@ -25,7 +25,7 @@ def execute(filters=None):
             "label": frappe._("Building"),
             "fieldname": "building",
             "fieldtype": "Link",
-            "options": "Accommodation Building",
+            "options": "Building",
             "width": 160,
         },
         {
@@ -106,7 +106,7 @@ def execute(filters=None):
 
     # [#ckl6h1]
     snapshots = frappe.get_all(
-        "Non-Financial Depreciation Snapshot",
+        "Operational Depreciation Snapshot",
         filters=parent_filters,
         fields=["name", "snapshot_date", "building"],
         order_by="snapshot_date desc",
@@ -123,7 +123,7 @@ def execute(filters=None):
     # [#kxoj8n]
     child_rows = frappe.get_all(
         "Depreciation Snapshot Item",
-        filters={"parent": ["in", snapshot_names], "parenttype": "Non-Financial Depreciation Snapshot"},
+        filters={"parent": ["in", snapshot_names], "parenttype": "Operational Depreciation Snapshot"},
         fields=["parent", "article", "original_cost_sar", "book_value_sar", "age_years"],
         order_by="parent desc",
     )

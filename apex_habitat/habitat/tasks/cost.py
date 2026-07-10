@@ -17,7 +17,7 @@ def daily_accommodation_cost_allocation() -> None:
 
     posting_date = today()
     buildings = frappe.get_all(
-        "Accommodation Assignment",
+        "Housing Assignment",
         filters={
             "docstatus": 1,
             "check_out_date": ["is", "not set"],
@@ -64,14 +64,14 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
     }
 
     # [#3r52d7]
-    if not frappe.db.exists("Accommodation Building", building):
+    if not frappe.db.exists("Building", building):
         logger.warning(
             f"allocate_building_accommodation_cost: Building {building} not found. Skipping."
         )
         return
-    building_doc = frappe.get_doc("Accommodation Building", building)
+    building_doc = frappe.get_doc("Building", building)
     # [#el5lmg]
-    from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import apply_active_lease
+    from apex_habitat.habitat.doctype.building.building import apply_active_lease
     apply_active_lease(building_doc)
     capacity = flt(building_doc.total_capacity)
     if capacity <= 0:
@@ -84,7 +84,7 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
     batch_size = 500
     while True:
         active_assignments = frappe.get_all(
-            "Accommodation Assignment",
+            "Housing Assignment",
             filters={
                 "docstatus": 1,
                 "check_out_date": ["is", "not set"],
@@ -143,7 +143,7 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
                         "capacity_denominator": int(capacity),
                         "employee_daily_share": daily_share,
                         "posting_mode": "Operational Memo",
-                        "source_doctype": "Accommodation Assignment",
+                        "source_doctype": "Housing Assignment",
                         "source_name": asgn.name,
                         "allocation_basis": "Capacity",
                         "allocation_period_start": posting_date,
@@ -179,7 +179,7 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
 
     to_date = to_date or today()
     asgn = frappe.db.get_value(
-        "Accommodation Assignment",
+        "Housing Assignment",
         assignment_name,
         ["name", "employee", "building", "project", "cost_center", "billed_to_supplier"],
         as_dict=True,
@@ -187,10 +187,10 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
     if not asgn or not asgn.employee or not asgn.building:
         return 0
     try:
-        building = frappe.get_doc("Accommodation Building", asgn.building)
+        building = frappe.get_doc("Building", asgn.building)
     except frappe.DoesNotExistError:
         return 0
-    from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import apply_active_lease
+    from apex_habitat.habitat.doctype.building.building import apply_active_lease
     apply_active_lease(building)  # [#ijk615]
     capacity = flt(building.total_capacity)
     if capacity <= 0:
@@ -242,7 +242,7 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
                     "capacity_denominator": int(capacity),
                     "employee_daily_share": daily_share,
                     "posting_mode": "Operational Memo",
-                    "source_doctype": "Accommodation Assignment",
+                    "source_doctype": "Housing Assignment",
                     "source_name": asgn.name,
                     "allocation_basis": "Capacity",
                     "allocation_period_start": posting_date,

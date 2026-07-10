@@ -7,7 +7,7 @@ frappe.query_reports["Accommodation Stock Balance"] = {
 			fieldname: "building",
 			label: __("Building"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 		},
 		{
 			fieldname: "item_type",

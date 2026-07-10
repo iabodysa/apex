@@ -6,7 +6,7 @@ frappe.query_reports["Utility Variance Report"] = {
 			fieldname: "building",
 			label: __("Building"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 		},
 		{
 			fieldname: "company",

@@ -727,13 +727,13 @@ _RELEASES = [
     {
         "title": "Apex Habitat 0.5 — give every building a safety checklist in one tap",
         "app_name": "apex_habitat",
-        "link": "/app/accommodation-building",
+        "link": "/app/building",
         "creation": "2026-03-18 18:01:00",
     },
     {
         "title": "Apex Habitat 0.4 — set up accommodation in bulk and get every room ready",
         "app_name": "apex_habitat",
-        "link": "/app/accommodation-building",
+        "link": "/app/building",
         "creation": "2026-03-18 00:03:00",
     },
     {

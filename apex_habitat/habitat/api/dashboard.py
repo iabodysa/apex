@@ -26,11 +26,11 @@ def get_buildings_over_threshold(filters=None):
     compare two fields, so this is a Custom Number Card. An unset/zero threshold
     falls back to the field default (120) rather than counting as a 0% threshold.
     """
-    frappe.has_permission("Accommodation Building", "read", throw=True)
+    frappe.has_permission("Building", "read", throw=True)
     row = frappe.db.sql(
         """
         SELECT COUNT(*)
-        FROM `tabAccommodation Building`
+        FROM `tabBuilding`
         WHERE occupancy_percent > COALESCE(NULLIF(over_capacity_threshold_percent, 0), 120)
         """
     )
@@ -42,9 +42,9 @@ def get_arrivals_today(filters=None):
     """Count workers housed today: submitted Accommodation Assignments whose
     check_in_date is today. Custom (not a Document Type filter) so the date is
     resolved server-side on each render rather than frozen into a saved filter."""
-    frappe.has_permission("Accommodation Assignment", "read", throw=True)
+    frappe.has_permission("Housing Assignment", "read", throw=True)
     count = frappe.db.count(
-        "Accommodation Assignment",
+        "Housing Assignment",
         {"check_in_date": today(), "docstatus": 1},
     )
     return {"value": count, "fieldtype": "Int"}
@@ -66,7 +66,7 @@ def get_pending_on_manifest(filters=None):
         FROM `tabArrival Batch` b
         LEFT JOIN (
             SELECT building, check_in_date, COUNT(*) AS housed
-            FROM `tabAccommodation Assignment`
+            FROM `tabHousing Assignment`
             WHERE docstatus = 1
             GROUP BY building, check_in_date
         ) h ON h.building = b.building AND h.check_in_date = b.expected_date

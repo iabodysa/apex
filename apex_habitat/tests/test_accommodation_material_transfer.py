@@ -28,7 +28,7 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
         self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
-        self.site = frappe.get_doc({"doctype": "Accommodation Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
         self.cc1 = self._cost_center()
         self.cc2 = self._cost_center()
         self.b1 = self._building(self.cc1)
@@ -46,7 +46,7 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
                                "is_group": 0}).insert(ignore_permissions=True).name
 
     def _building(self, cc):
-        return frappe.get_doc({"doctype": "Accommodation Building", "building_name": "B " + _h(),
+        return frappe.get_doc({"doctype": "Building", "building_name": "B " + _h(),
                                "site": self.site.name, "total_capacity": 4, "company": self.company,
                                "default_cost_center": cc}).insert(ignore_permissions=True).name
 
@@ -132,7 +132,7 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
 
     def test_no_finance_email_when_same_cost_center(self):
         # [#pgcc14]
-        frappe.db.set_value("Accommodation Building", self.b2, "default_cost_center", self.cc1)
+        frappe.db.set_value("Building", self.b2, "default_cost_center", self.cc1)
         self._set_finance_toggle(True)
         self._seed_store(self.b1, 10)
         t = self._transfer(4)

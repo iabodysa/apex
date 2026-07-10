@@ -34,21 +34,21 @@ class TestRoomBedTransfer(FrappeTestCase):
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
-        site = frappe.get_doc({"doctype": "Accommodation Site", "site_name": self._h() + self._h()}).insert(ignore_permissions=True).name
-        building = frappe.get_doc({"doctype": "Accommodation Building", "building_name": "B " + self._h(),
+        site = frappe.get_doc({"doctype": "Site", "site_name": self._h() + self._h()}).insert(ignore_permissions=True).name
+        building = frappe.get_doc({"doctype": "Building", "building_name": "B " + self._h(),
                                    "site": site, "total_capacity": 4, "company": company,
                                    "default_cost_center": cc}).insert(ignore_permissions=True).name
-        room = frappe.get_doc({"doctype": "Accommodation Room", "naming_series": "ROOM-.####", "building": building,
+        room = frappe.get_doc({"doctype": "Room", "naming_series": "ROOM-.####", "building": building,
                                "room_number": "R" + self._h(), "bed_capacity": 4,
                                "readiness_status": "Ready"}).insert(ignore_permissions=True).name
-        bed = frappe.get_doc({"doctype": "Accommodation Bed", "naming_series": "BED-.####", "room": room,
+        bed = frappe.get_doc({"doctype": "Bed", "naming_series": "BED-.####", "room": room,
                               "building": building, "bed_code": "B" + self._h(),
                               "status": "Available"}).insert(ignore_permissions=True).name
         emp = frappe.get_doc({"doctype": "Employee", "first_name": "E " + self._h(), "company": company,
                               "gender": "Male", "date_of_birth": "1990-01-01",
                               "date_of_joining": "2020-01-01"}).insert(ignore_permissions=True).name
         project = frappe.get_doc({"doctype": "Project", "project_name": "P " + self._h()}).insert(ignore_permissions=True).name
-        assignment = frappe.get_doc({"doctype": "Accommodation Assignment", "naming_series": "ACC-ASGN-.YYYY.-.####",
+        assignment = frappe.get_doc({"doctype": "Housing Assignment", "naming_series": "ACC-ASGN-.YYYY.-.####",
                                      "employee": emp, "project": project, "building": building, "room": room,
                                      "bed": bed, "cost_center": cc, "check_in_date": "2026-06-01",
                                      "assignment_type": "New Assignment"}).insert(ignore_permissions=True).name
@@ -100,13 +100,13 @@ class TestRoomBedTransfer(FrappeTestCase):
         validate gate passes and execution reaches the building guard."""
         fx = self._fixtures()
         no_bldg_room = frappe.get_doc({
-            "doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+            "doctype": "Room", "naming_series": "ROOM-.####",
             "room_number": "NB" + self._h(), "bed_capacity": 1,
             "readiness_status": "Ready"}).insert(ignore_permissions=True, ignore_mandatory=True).name
         # Be certain the guard sees an unset building even if a default crept in.
-        frappe.db.set_value("Accommodation Room", no_bldg_room, "building", None, update_modified=False)
+        frappe.db.set_value("Room", no_bldg_room, "building", None, update_modified=False)
         no_bldg_bed = frappe.get_doc({
-            "doctype": "Accommodation Bed", "naming_series": "BED-.####", "room": no_bldg_room,
+            "doctype": "Bed", "naming_series": "BED-.####", "room": no_bldg_room,
             "bed_code": "NB" + self._h(),
             "status": "Available"}).insert(ignore_permissions=True, ignore_mandatory=True).name
 
@@ -121,8 +121,8 @@ class TestRoomBedTransfer(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             doc.insert(ignore_permissions=True)
 
-        frappe.delete_doc("Accommodation Bed", no_bldg_bed, force=True, ignore_permissions=True)
-        frappe.delete_doc("Accommodation Room", no_bldg_room, force=True, ignore_permissions=True)
+        frappe.delete_doc("Bed", no_bldg_bed, force=True, ignore_permissions=True)
+        frappe.delete_doc("Room", no_bldg_room, force=True, ignore_permissions=True)
 
     def test_cancel_restores_assignment_to_origin(self):
         """RED->GREEN: submitting a transfer moves the assignment onto the target
@@ -131,11 +131,11 @@ class TestRoomBedTransfer(FrappeTestCase):
         room/building; target == a second Available bed in the same room."""
         fx = self._fixtures()
         target_bed = frappe.get_doc({
-            "doctype": "Accommodation Bed", "naming_series": "BED-.####", "room": fx.room,
+            "doctype": "Bed", "naming_series": "BED-.####", "room": fx.room,
             "building": fx.building, "bed_code": "T" + self._h(),
             "status": "Available"}).insert(ignore_permissions=True).name
 
-        asg = frappe.get_doc("Accommodation Assignment", fx.assignment)
+        asg = frappe.get_doc("Housing Assignment", fx.assignment)
         asg.submit()  # origin bed -> Occupied, assignment active (checked-in)
 
         transfer = frappe.get_doc({
@@ -151,8 +151,8 @@ class TestRoomBedTransfer(FrappeTestCase):
 
         asg.reload()
         self.assertEqual(asg.bed, target_bed, "submit moves the assignment onto the target bed")
-        self.assertEqual(frappe.db.get_value("Accommodation Bed", target_bed, "status"), "Occupied")
-        self.assertEqual(frappe.db.get_value("Accommodation Bed", fx.bed, "status"), "Available")
+        self.assertEqual(frappe.db.get_value("Bed", target_bed, "status"), "Occupied")
+        self.assertEqual(frappe.db.get_value("Bed", fx.bed, "status"), "Available")
 
         transfer.cancel()
 
@@ -160,7 +160,7 @@ class TestRoomBedTransfer(FrappeTestCase):
         self.assertEqual(asg.bed, fx.bed, "cancel restores the origin bed onto the assignment")
         self.assertEqual(asg.room, fx.room, "cancel restores the origin room")
         self.assertEqual(asg.building, fx.building, "cancel restores the origin building")
-        self.assertEqual(frappe.db.get_value("Accommodation Bed", fx.bed, "status"), "Occupied",
+        self.assertEqual(frappe.db.get_value("Bed", fx.bed, "status"), "Occupied",
                          "origin bed is re-occupied on cancel")
-        self.assertEqual(frappe.db.get_value("Accommodation Bed", target_bed, "status"), "Available",
+        self.assertEqual(frappe.db.get_value("Bed", target_bed, "status"), "Available",
                          "target bed is freed on cancel")

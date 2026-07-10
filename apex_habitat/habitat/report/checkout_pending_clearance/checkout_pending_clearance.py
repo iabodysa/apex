@@ -9,10 +9,10 @@ def execute(filters=None):
     filters = filters or {}
 
     columns = [
-        {"label": frappe._("Checkout"), "fieldname": "name", "fieldtype": "Link", "options": "Accommodation Checkout", "width": 150},
+        {"label": frappe._("Checkout"), "fieldname": "name", "fieldtype": "Link", "options": "Housing Checkout", "width": 150},
         {"label": frappe._("Employee"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 150},
         {"label": frappe._("Employee Name"), "fieldname": "employee_name", "fieldtype": "Data", "width": 160},
-        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 150},
+        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 150},
         {"label": frappe._("Checkout Date"), "fieldname": "checkout_date", "fieldtype": "Date", "width": 120},
         {"label": frappe._("Custody Cleared"), "fieldname": "custody_cleared", "fieldtype": "Check", "width": 110},
         {"label": frappe._("Open Custody Issues"), "fieldname": "open_custody_issues", "fieldtype": "Int", "width": 130},
@@ -23,7 +23,7 @@ def execute(filters=None):
     query_filters = {"docstatus": 1}
 
     checkouts = frappe.get_all(
-        "Accommodation Checkout",
+        "Housing Checkout",
         filters=query_filters,
         fields=["name", "employee", "bed", "checkout_date", "custody_cleared"],
         order_by="checkout_date desc",
@@ -37,7 +37,7 @@ def execute(filters=None):
     bed_building_map = {}
     if all_beds:
         bed_rows = frappe.get_all(
-            "Accommodation Bed",
+            "Bed",
             filters={"name": ["in", all_beds]},
             fields=["name", "building"],
         )

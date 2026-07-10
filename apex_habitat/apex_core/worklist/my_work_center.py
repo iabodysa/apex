@@ -44,7 +44,7 @@ WORKLIST_REGISTRY: dict[str, dict] = {
         "active": ["Open", "Assigned", "In Progress", "Reopened"],
         "terminal": ["Resolved", "Closed"],
     },
-    "Accommodation Resident Request": {
+    "Resident Request": {
         "active": ["New", "Triaged", "Assigned", "In Progress", "Waiting Evidence"],
         "terminal": ["Resolved", "Rejected", "Closed"],
     },

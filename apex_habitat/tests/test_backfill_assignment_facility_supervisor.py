@@ -64,7 +64,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
     def _make_assignment(self, building, room, bed_code, supervisor=None):
         bed = factories.make_bed(room, bed_code=bed_code).name
         doc = frappe.get_doc({
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "party_type": "Employee",
             "building": building,
             "room": room,
@@ -91,7 +91,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
         name = self._make_assignment(self.bldg_with, self.room_with, "BAFS-WITH-R01-B01")
         execute()
         self.assertEqual(
-            frappe.db.get_value("Accommodation Assignment", name,
+            frappe.db.get_value("Housing Assignment", name,
                                 "responsible_facility_supervisor"),
             self.sup_a,
         )
@@ -102,7 +102,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
         )
         execute()
         self.assertFalse(
-            frappe.db.get_value("Accommodation Assignment", name,
+            frappe.db.get_value("Housing Assignment", name,
                                 "responsible_facility_supervisor")
         )
 
@@ -113,7 +113,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
         )
         execute()
         self.assertEqual(
-            frappe.db.get_value("Accommodation Assignment", name,
+            frappe.db.get_value("Housing Assignment", name,
                                 "responsible_facility_supervisor"),
             self.sup_b,
         )
@@ -123,7 +123,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
         execute()
         execute()
         self.assertEqual(
-            frappe.db.get_value("Accommodation Assignment", name,
+            frappe.db.get_value("Housing Assignment", name,
                                 "responsible_facility_supervisor"),
             self.sup_a,
         )

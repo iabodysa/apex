@@ -38,17 +38,17 @@ class TestHousingSupervisorScope(FrappeTestCase):
             # [#6wozrv]
             self.assertIsNone(hp("Custody Issue", building="BLDG-1"))
             self.assertFalse(hp("Custody Issue", building="BLDG-2"))
-            self.assertIsNone(hp("Accommodation Assignment", building="BLDG-1"))
+            self.assertIsNone(hp("Housing Assignment", building="BLDG-1"))
             self.assertFalse(hp("Cleaning Log", building="BLDG-2"))
-            self.assertIsNone(hp("Accommodation Resident Request", building="BLDG-1"))
-            self.assertFalse(hp("Accommodation Resident Request", building="BLDG-2"))
+            self.assertIsNone(hp("Resident Request", building="BLDG-1"))
+            self.assertFalse(hp("Resident Request", building="BLDG-2"))
             self.assertIsNone(hp("Idle Resident Report", building="BLDG-1"))
             self.assertFalse(hp("Idle Resident Report", building="BLDG-2"))
             # [#nz69fx]
             self.assertFalse(hp("Cleaning Log", building=None))
             # [#5sn7zx]
-            self.assertIsNone(hp("Accommodation Building", name="BLDG-1"))
-            self.assertFalse(hp("Accommodation Building", name="BLDG-2"))
+            self.assertIsNone(hp("Building", name="BLDG-1"))
+            self.assertFalse(hp("Building", name="BLDG-2"))
 
     def test_scoped_supervisor_with_no_buildings_sees_nothing(self):
         with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(

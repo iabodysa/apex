@@ -324,7 +324,7 @@ class TestNamingRuleConsistency(unittest.TestCase):
     def test_scan_finds_doctypes(self):
         # [#hi39j1]
         names = {n for n, _, _ in self._doctypes()}
-        self.assertIn("Accommodation Bed", names, "DocType scan found nothing — parser broke")
+        self.assertIn("Bed", names, "DocType scan found nothing — parser broke")
 
     def test_autoname_implies_naming_rule(self):
         offenders = sorted(name for name, an, nr in self._doctypes() if an and not nr)
@@ -548,19 +548,19 @@ class TestPrintFormatGuards(unittest.TestCase):
     def test_room_label_building_lookup_cannot_raise(self):
         """P-008: an empty OR dangling `building` link must not abort the print.
 
-        `frappe.get_doc("Accommodation Building", doc.building)` raises
+        `frappe.get_doc("Building", doc.building)` raises
         DoesNotExistError both when the link is unset and when it points at a
         deleted record. The template must use a non-raising lookup (db.get_value
         guarded on `doc.building`) so the label still renders with a blank name.
         """
         html = self._read(self.ROOM_LABEL)
         self.assertNotIn(
-            'frappe.get_doc("Accommodation Building"',
+            'frappe.get_doc("Building"',
             html,
             "room label still uses get_doc — raises on empty/dangling building link",
         )
         self.assertIn(
-            'frappe.db.get_value("Accommodation Building"',
+            'frappe.db.get_value("Building"',
             html,
             "room label must look up the building name via non-raising db.get_value",
         )

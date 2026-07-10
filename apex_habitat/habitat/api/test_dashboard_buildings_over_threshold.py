@@ -29,12 +29,12 @@ class TestBuildingsOverThreshold(FrappeTestCase):
     def _building(self, occupancy, threshold):
         """Insert a building and force the two stored Percent columns directly."""
         doc = frappe.get_doc({
-            "doctype": "Accommodation Building",
+            "doctype": "Building",
             "building_name": "BLDG-" + _h(),
         })
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         frappe.db.set_value(
-            "Accommodation Building",
+            "Building",
             doc.name,
             {"occupancy_percent": occupancy, "over_capacity_threshold_percent": threshold},
             update_modified=False,
@@ -44,7 +44,7 @@ class TestBuildingsOverThreshold(FrappeTestCase):
 
     def tearDown(self):
         for name in self._names:
-            frappe.delete_doc("Accommodation Building", name, force=True,
+            frappe.delete_doc("Building", name, force=True,
                               ignore_permissions=True)
 
     def test_counts_only_buildings_over_their_own_threshold(self):

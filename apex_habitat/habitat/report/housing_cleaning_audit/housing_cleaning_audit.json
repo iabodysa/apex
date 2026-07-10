@@ -42,7 +42,7 @@
    "fieldname": "building",
    "label": "Building",
    "fieldtype": "Link",
-   "options": "Accommodation Building"
+   "options": "Building"
   }
  ]
 }

@@ -36,25 +36,25 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
             "doctype": "Supplier", "supplier_name": "Vendor " + _h(),
             "supplier_group": frappe.db.get_value("Supplier Group", {"is_group": 0}),
         }).insert(ignore_permissions=True).name
-        self.site = frappe.get_doc({"doctype": "Accommodation Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
         self.building = frappe.get_doc({
-            "doctype": "Accommodation Building", "building_name": "B " + _h(), "site": self.site.name,
+            "doctype": "Building", "building_name": "B " + _h(), "site": self.site.name,
             "total_capacity": 10, "default_cost_center": self.cost_center,
             "annual_rent_sar": 36500,
         }).insert(ignore_permissions=True)
         self.room = frappe.get_doc({
-            "doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+            "doctype": "Room", "naming_series": "ROOM-.####",
             "building": self.building.name, "room_number": "R" + _h(), "bed_capacity": 2,
         }).insert(ignore_permissions=True).name
         self.bed = frappe.get_doc({
-            "doctype": "Accommodation Bed", "naming_series": "BED-.####",
+            "doctype": "Bed", "naming_series": "BED-.####",
             "room": self.room, "bed_code": "B" + _h(),
         }).insert(ignore_permissions=True).name
 
     def test_supplier_propagation_and_report_markup(self):
         # [#3orr8w]
         a = frappe.get_doc({
-            "doctype": "Accommodation Assignment", "employee": self.employee, "project": self.project,
+            "doctype": "Housing Assignment", "employee": self.employee, "project": self.project,
             "cost_center": self.cost_center, "building": self.building.name, "room": self.room,
             "bed": self.bed, "check_in_date": getdate(), "assignment_type": "New Assignment",
             "is_external_supplier": 1, "billed_to_supplier": self.supplier,
@@ -97,7 +97,7 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
         from unittest.mock import patch
 
         a = frappe.get_doc({
-            "doctype": "Accommodation Assignment", "employee": self.employee, "project": self.project,
+            "doctype": "Housing Assignment", "employee": self.employee, "project": self.project,
             "cost_center": self.cost_center, "building": self.building.name, "room": self.room,
             "bed": self.bed, "check_in_date": getdate(), "assignment_type": "New Assignment",
         })

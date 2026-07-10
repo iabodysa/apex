@@ -362,11 +362,11 @@ class TestBoardingFlow(FrappeTestCase):
         trip to that plan, and open a Trip Start Log. Returns (building, route_stop,
         log) — the worker's own pickup stop, the join _worker_pickup_arrival keys on."""
         building = frappe.get_doc(
-            {"doctype": "Accommodation Building", "building_name": "TBF-BLD-" + _h()}
+            {"doctype": "Building", "building_name": "TBF-BLD-" + _h()}
         )
         building.flags.ignore_mandatory = True
         building.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        self._cleanup.append(("Accommodation Building", building.name))
+        self._cleanup.append(("Building", building.name))
 
         plan = frappe.get_doc(
             {

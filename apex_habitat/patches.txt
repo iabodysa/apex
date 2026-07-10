@@ -69,6 +69,13 @@ apex_habitat.patches.v1_x.backfill_accommodation_site_native_address
 apex_habitat.patches.v1_x.rename_freelance_doctype_to_freelancer
 apex_habitat.patches.v1_x.rename_freelance_party_type_to_freelancer
 
+# v2.0.0 — B7 (P-161) DocType-prefix rename wave (ONE-TIME, pre-sync so rename_doc
+# runs before sync_all rebuilds the tables — else sync creates an empty new-named
+# table beside real data). Renames 16 Habitat/Salis DocTypes (Accommodation Building
+# -> Building, ... Manifest Passenger -> Passenger Manifest Item). Idempotent + both-
+# spelling guarded. PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v2_0.rename_doctypes_b7
+
 [post_model_sync]
 # v1.x — TEMPORARY safeguard (GitHub #97): ensure the Web Form keeps its `route` on
 # an upgrade (the v15-removed make_route_to_web_form helper is never needed).

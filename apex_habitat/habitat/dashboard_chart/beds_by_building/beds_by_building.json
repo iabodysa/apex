@@ -2,7 +2,7 @@
  "chart_name": "Beds by Building",
  "chart_type": "Group By",
  "doctype": "Dashboard Chart",
- "document_type": "Accommodation Bed",
+ "document_type": "Bed",
  "group_by_based_on": "building",
  "group_by_type": "Count",
  "is_public": 1,
@@ -13,5 +13,5 @@
  "timeseries": 0,
  "type": "Bar",
  "filters_json": "[]",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-07-10 06:05:34.129545"
 }

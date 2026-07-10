@@ -32,11 +32,11 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
             }
         ).insert(ignore_permissions=True).name
         self.site = frappe.get_doc(
-            {"doctype": "Accommodation Site", "site_name": _h(6)}
+            {"doctype": "Site", "site_name": _h(6)}
         ).insert(ignore_permissions=True)
         self.intake = frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": "Intake " + _h(),
                 "site": self.site.name,
                 "company": self.company,
@@ -45,7 +45,7 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         ).insert(ignore_permissions=True, ignore_mandatory=True).name
         self.dest = frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": "Dest " + _h(),
                 "site": self.site.name,
                 "company": self.company,

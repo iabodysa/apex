@@ -39,7 +39,7 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
     company and cost center from the source masters/building."""
     item_name, uom, unit_cost = _resolve_item(item_type, item)
     company, cost_center = frappe.db.get_value(
-        "Accommodation Building", building, ["company", "default_cost_center"]
+        "Building", building, ["company", "default_cost_center"]
     ) or (None, None)
     doc = frappe.get_doc({
         "doctype": "Accommodation Stock Ledger",

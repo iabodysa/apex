@@ -5,7 +5,7 @@ frappe.query_reports["Idle Resident Candidates"] = {
 			fieldname: "building",
 			label: __("Building"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 		},
 		{
 			fieldname: "project_status",

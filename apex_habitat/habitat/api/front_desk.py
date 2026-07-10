@@ -61,13 +61,13 @@ def get_building_grid(building: str) -> dict:
     Returns:
         dict shaped as ``{building, building_title, generated_on, summary, floors}``.
     """
-    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+    frappe.has_permission("Building", "read", doc=building, throw=True)
 
-    building_title = frappe.db.get_value("Accommodation Building", building, "building_name") or building
+    building_title = frappe.db.get_value("Building", building, "building_name") or building
 
     # [#nl1hpu]
     rooms = frappe.get_all(
-        "Accommodation Room",
+        "Room",
         filters={"building": building},
         fields=[
             "name",
@@ -83,8 +83,8 @@ def get_building_grid(building: str) -> dict:
     rooms_by_name = {r.name: r for r in rooms}
 
     # [#hm7m0e]
-    Bed = frappe.qb.DocType("Accommodation Bed")
-    Room = frappe.qb.DocType("Accommodation Room")
+    Bed = frappe.qb.DocType("Bed")
+    Room = frappe.qb.DocType("Room")
     bed_rows = (
         frappe.qb.from_(Bed)
         .left_join(Room)
@@ -106,7 +106,7 @@ def get_building_grid(building: str) -> dict:
 
     # [#3pej3p]
     assignments = frappe.get_all(
-        "Accommodation Assignment",
+        "Housing Assignment",
         filters={
             "building": building,
             "docstatus": 1,
@@ -132,7 +132,7 @@ def get_building_grid(building: str) -> dict:
         custody_rows = frappe.get_all(
             "Accommodation Custody Item",
             filters={
-                "parenttype": "Accommodation Assignment",
+                "parenttype": "Housing Assignment",
                 "parent": ["in", assignment_names],
             },
             fields=["parent"],
@@ -290,7 +290,7 @@ def get_buildings_scope_state() -> dict:
         if not allowed:
             return {"is_scoped": True, "active_buildings": 0}
         f["name"] = ["in", allowed]
-    return {"is_scoped": is_scoped, "active_buildings": frappe.db.count("Accommodation Building", f)}
+    return {"is_scoped": is_scoped, "active_buildings": frappe.db.count("Building", f)}
 
 
 @frappe.whitelist()
@@ -324,7 +324,7 @@ def list_supervisor_buildings() -> list[dict]:
         f["name"] = ["in", allowed]
 
     buildings = frappe.get_all(
-        "Accommodation Building", filters=f, fields=["name", "building_name"]
+        "Building", filters=f, fields=["name", "building_name"]
     )
     if not buildings:
         return []
@@ -332,8 +332,8 @@ def list_supervisor_buildings() -> list[dict]:
 
     # [#one-aggregate] Single bed/room read across every in-scope building, bucketed
     # in Python via _bed_color — bounded no matter how many buildings are in scope.
-    Bed = frappe.qb.DocType("Accommodation Bed")
-    Room = frappe.qb.DocType("Accommodation Room")
+    Bed = frappe.qb.DocType("Bed")
+    Room = frappe.qb.DocType("Room")
     bed_rows = (
         frappe.qb.from_(Bed)
         .left_join(Room)
@@ -399,7 +399,7 @@ def _open_resident_request_statuses() -> list[str]:
     """Open statuses = the Select options minus the terminal set, read from meta
     so a newly-added non-terminal status is automatically treated as open
     (no hand-kept list to drift from the DocType)."""
-    options = frappe.get_meta("Accommodation Resident Request").get_field("status").options or ""
+    options = frappe.get_meta("Resident Request").get_field("status").options or ""
     return [
         o
         for o in (opt.strip() for opt in options.split("\n"))
@@ -422,11 +422,11 @@ def building_open_requests(building: str) -> dict:
     Returns:
         dict: ``{"building", "open_requests", "statuses"}``.
     """
-    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+    frappe.has_permission("Building", "read", doc=building, throw=True)
 
     statuses = _open_resident_request_statuses()
     count = frappe.db.count(
-        "Accommodation Resident Request",
+        "Resident Request",
         filters={"building": building, "status": ["in", statuses]},
     )
     return {"building": building, "open_requests": count, "statuses": statuses}
@@ -469,7 +469,7 @@ def _has_active_assignment(party_type: str, party: str, employee: str | None) ->
     else:
         filters["party_type"] = party_type
         filters["party"] = party
-    return bool(frappe.db.exists("Accommodation Assignment", filters))
+    return bool(frappe.db.exists("Housing Assignment", filters))
 
 
 # Per-IP throttle matching the Masar read endpoints: a scanned identifier probe
@@ -586,14 +586,14 @@ def set_room_readiness(room, status):
     Returns:
         dict: ``{"room": <docname>, "readiness_status": <status>}``.
     """
-    frappe.has_permission("Accommodation Room", "write", doc=room, throw=True)
+    frappe.has_permission("Room", "write", doc=room, throw=True)
 
-    options = frappe.get_meta("Accommodation Room").get_field("readiness_status").options or ""
+    options = frappe.get_meta("Room").get_field("readiness_status").options or ""
     valid = [o for o in (opt.strip() for opt in options.split("\n")) if o]
     if status not in valid:
         frappe.throw(_("{0} is not a valid readiness status.").format(status))
 
-    frappe.db.set_value("Accommodation Room", room, "readiness_status", status)
+    frappe.db.set_value("Room", room, "readiness_status", status)
     return {"room": room, "readiness_status": status}
 
 
@@ -629,20 +629,20 @@ def quick_check_in(bed, employee=None, project=None, check_in_date=None,
     Returns:
         dict: ``{"assignment": <docname>, "bed": <bed>}``.
     """
-    frappe.has_permission("Accommodation Assignment", "create", throw=True)
-    frappe.has_permission("Accommodation Assignment", "submit", throw=True)
+    frappe.has_permission("Housing Assignment", "create", throw=True)
+    frappe.has_permission("Housing Assignment", "submit", throw=True)
 
     # [#r8vwzx]
     if not party and employee:
         party_type, party = "Employee", employee
 
-    room, building = frappe.db.get_value("Accommodation Bed", bed, ["room", "building"])
+    room, building = frappe.db.get_value("Bed", bed, ["room", "building"])
     if not room or not building:
         frappe.throw(_("Bed {0} is not linked to a room and building.").format(bed))
 
     doc = frappe.get_doc(
         {
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "bed": bed,
             "room": room,
             "building": building,
@@ -697,11 +697,11 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_conditio
         checkout, or ``{"requires_full_form": True, "assignment": <name>}`` when
         custody routing is needed.
     """
-    frappe.has_permission("Accommodation Checkout", "create", throw=True)
-    frappe.has_permission("Accommodation Checkout", "submit", throw=True)
+    frappe.has_permission("Housing Checkout", "create", throw=True)
+    frappe.has_permission("Housing Checkout", "submit", throw=True)
 
     assignment = frappe.db.get_value(
-        "Accommodation Assignment",
+        "Housing Assignment",
         {"bed": bed, "docstatus": 1, "check_out_date": ["is", "not set"]},
         "name",
     )
@@ -712,7 +712,7 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_conditio
     has_custody = bool(
         frappe.db.exists(
             "Accommodation Custody Item",
-            {"parenttype": "Accommodation Assignment", "parent": assignment},
+            {"parenttype": "Housing Assignment", "parent": assignment},
         )
     )
     if has_custody:
@@ -720,7 +720,7 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_conditio
 
     doc = frappe.get_doc(
         {
-            "doctype": "Accommodation Checkout",
+            "doctype": "Housing Checkout",
             "assignment": assignment,
             "checkout_date": checkout_date or today(),
             "checkout_reason": checkout_reason,

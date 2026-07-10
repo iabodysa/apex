@@ -35,12 +35,12 @@ def execute(filters=None):
 
 def _columns():
     return [
-        {"label": _("Assignment"), "fieldname": "name", "fieldtype": "Link", "options": "Accommodation Assignment", "width": 150},
+        {"label": _("Assignment"), "fieldname": "name", "fieldtype": "Link", "options": "Housing Assignment", "width": 150},
         {"label": _("Employee"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 140},
         {"label": _("Employee Name"), "fieldname": "employee_name", "fieldtype": "Data", "width": 160},
-        {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 150},
-        {"label": _("Room"), "fieldname": "room", "fieldtype": "Link", "options": "Accommodation Room", "width": 110},
-        {"label": _("Bed"), "fieldname": "bed", "fieldtype": "Link", "options": "Accommodation Bed", "width": 110},
+        {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 150},
+        {"label": _("Room"), "fieldname": "room", "fieldtype": "Link", "options": "Room", "width": 110},
+        {"label": _("Bed"), "fieldname": "bed", "fieldtype": "Link", "options": "Bed", "width": 110},
         {"label": _("Check-in Date"), "fieldname": "check_in_date", "fieldtype": "Date", "width": 110},
         {"label": _("Days Housed"), "fieldname": "days_housed", "fieldtype": "Int", "width": 100},
         {"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 140},
@@ -69,7 +69,7 @@ def _get_data(filters):
         query_filters["building"] = filters["building"]
 
     assignments = frappe.get_all(
-        "Accommodation Assignment",
+        "Housing Assignment",
         filters=query_filters,
         fields=[
             "name", "employee", "employee_name", "building", "room", "bed",

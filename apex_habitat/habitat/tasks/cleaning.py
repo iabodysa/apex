@@ -46,7 +46,7 @@ def daily_cleaning_log_generator() -> None:
     # Pre-aggregate each building's rooms once, instead of one query per building.
     rooms_by_building: dict[str, list[str]] = {}
     for r in frappe.get_all(
-        "Accommodation Room",
+        "Room",
         filters={"building": ["is", "set"]},
         fields=["name", "building"],
     ):
@@ -57,7 +57,7 @@ def daily_cleaning_log_generator() -> None:
     batch_size = 500
     while True:
         buildings = frappe.get_all(
-            "Accommodation Building",
+            "Building",
             filters={"status": "Active"},
             pluck="name",
             limit_start=start,
@@ -119,7 +119,7 @@ def auto_create_cleaning_logs() -> None:
 
     # Fetch buildings that are Active AND have a supervisor assigned.
     buildings = frappe.get_all(
-        "Accommodation Building",
+        "Building",
         filters={
             "status": "Active",
             "responsible_facility_supervisor": ["is", "set"],

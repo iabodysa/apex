@@ -31,7 +31,7 @@ from apex_habitat.tests._helpers import _user
 
 # Fixture records the workflow docs link to that we do not provision here.  [#hbwf08]
 test_ignore = [
-    "Accommodation Building",
+    "Building",
     "Additional Salary",
     "Company",
     "Custody Return",
@@ -226,7 +226,7 @@ class TestCustodyDamageAssessmentWorkflow(_WorkflowSoDMixin, FrappeTestCase):
 
 
 class TestAccommodationLeaseWorkflow(_WorkflowSoDMixin, FrappeTestCase):
-    DOCTYPE = "Accommodation Lease"
+    DOCTYPE = "Lease"
     WORKFLOW = "Accommodation Lease Workflow"
     # The Approve transition is gated to Finance Manager (the maker is an
     # Accommodation Manager) — cross-role SoD plus allow_self_approval=0.  [#hbwf11]

@@ -175,7 +175,7 @@ def daily_safety_task_compliance_scan() -> None:
     start = 0
     while True:
         buildings = frappe.get_all(
-            "Accommodation Building",
+            "Building",
             filters={"status": "Active"},
             fields=["name", "building_name", "responsible_facility_supervisor"],
             limit_start=start,
@@ -216,7 +216,7 @@ def daily_safety_task_compliance_scan() -> None:
                 )
                 # Reach the building's own responsible supervisor: timeline note +
                 # a direct system alert (the role-wide ping above may not be them).
-                _notify_operational("Accommodation Building", b.name, msg)
+                _notify_operational("Building", b.name, msg)
                 _notify_user_system(
                     b.responsible_facility_supervisor,
                     subject=f"No recent safety round: {label}",
@@ -269,7 +269,7 @@ def weekly_safety_coverage_gate() -> None:
     batch_size = 500
     while True:
         buildings = frappe.get_all(
-            "Accommodation Building",
+            "Building",
             filters={"status": "Active"},
             fields=["name", "building_name"],
             limit_start=start,
@@ -340,7 +340,7 @@ def audit_remediation_deadline_watch() -> None:
     batch_size = 500
     while True:
         plans = frappe.get_all(
-            "Client Audit Remediation Plan",
+            "Audit Remediation Plan",
             filters={
                 "docstatus": 1,
                 "overall_status": ["not in", ["Closed by Client", "Overdue"]],
@@ -356,7 +356,7 @@ def audit_remediation_deadline_watch() -> None:
         for plan in plans:
             try:
                 frappe.db.set_value(
-                    "Client Audit Remediation Plan", plan.name, "overall_status", "Overdue"
+                    "Audit Remediation Plan", plan.name, "overall_status", "Overdue"
                 )
                 msg = (
                     f"audit_remediation_deadline_watch: remediation plan {plan.name} "
@@ -364,7 +364,7 @@ def audit_remediation_deadline_watch() -> None:
                     f"and is now Overdue."
                 )
                 logger.warning(msg)
-                _notify_operational("Client Audit Remediation Plan", plan.name, msg)
+                _notify_operational("Audit Remediation Plan", plan.name, msg)
                 # [#wave3-audit] notify the plan owner directly + the Operations Director role.
                 if plan.afmco_owner:
                     _notify_user_system(

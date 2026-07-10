@@ -1,0 +1,359 @@
+{
+ "doctype": "DocType",
+ "name": "Resident Request",
+ "module": "Habitat",
+ "custom": 0,
+ "is_submittable": 0,
+ "engine": "InnoDB",
+ "track_changes": 1,
+ "field_order": [
+  "arr_tab_overview",
+  "arr_sec_request_scope",
+  "accommodation_site",
+  "building",
+  "room",
+  "bed",
+  "no_active_assignment",
+  "arr_col_location",
+  "source_channel",
+  "arr_sec_reporter",
+  "requester_type",
+  "party_type",
+  "party",
+  "arr_col_resident",
+  "employee",
+  "worker_name",
+  "mobile_number",
+  "preferred_language",
+  "arr_sec_request_details",
+  "request_category",
+  "priority",
+  "issue_location",
+  "description",
+  "attachment",
+  "arr_sec_resolution",
+  "status",
+  "assigned_to",
+  "arr_col_resolution",
+  "triage_notes",
+  "resolution_notes",
+  "arr_tab_system",
+  "arr_sec_routing",
+  "naming_series",
+  "location_token",
+  "anonymous_tracking_code",
+  "target_doctype",
+  "target_document",
+  "arr_col_system",
+  "closed_on",
+  "closed_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "arr_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "arr_sec_request_scope",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "fetch_from": "building.site",
+   "fetch_if_empty": 1,
+   "fieldname": "accommodation_site",
+   "fieldtype": "Link",
+   "label": "Site",
+   "options": "Site"
+  },
+  {
+   "fetch_from": "room.building",
+   "fetch_if_empty": 1,
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Building",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "bed.room",
+   "fetch_if_empty": 1,
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "label": "Room",
+   "options": "Room",
+   "search_index": 1
+  },
+  {
+   "fieldname": "bed",
+   "fieldtype": "Link",
+   "label": "Bed",
+   "options": "Bed",
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "description": "No active accommodation assignment when raised — needs housing triage.",
+   "fieldname": "no_active_assignment",
+   "fieldtype": "Check",
+   "label": "No Active Assignment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "arr_col_location",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "source_channel",
+   "fieldtype": "Select",
+   "label": "Source Channel",
+   "options": "QR Web Form\nManual Entry",
+   "default": "QR Web Form"
+  },
+  {
+   "fieldname": "arr_sec_reporter",
+   "fieldtype": "Section Break",
+   "label": "Reporter & Resident"
+  },
+  {
+   "fieldname": "requester_type",
+   "fieldtype": "Select",
+   "label": "Requester Type",
+   "options": "Worker\nSupervisor\nAnonymous"
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "label": "Resident Type",
+   "options": "Employee\nTemporary Worker",
+   "default": "Employee",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Resident",
+   "options": "party_type",
+   "in_list_view": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "arr_col_resident",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "worker_name",
+   "fieldtype": "Data",
+   "label": "Worker Name"
+  },
+  {
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "permlevel": 1
+  },
+  {
+   "description": "Language the resident prefers for updates and responses on this request, so notifications and handling can be routed to staff who can communicate with the worker.",
+   "fieldname": "preferred_language",
+   "fieldtype": "Select",
+   "label": "Preferred Language",
+   "options": "English\nArabic\nUrdu\nHindi\nBengali"
+  },
+  {
+   "fieldname": "arr_sec_request_details",
+   "fieldtype": "Section Break",
+   "label": "Request Details"
+  },
+  {
+   "description": "Nature of the resident request, which determines the responsible team and workflow; ranges from physical issues such as maintenance, cleaning, and utilities to administrative items such as custody, reimbursement, complaints, and suggestions.",
+   "fieldname": "request_category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "Maintenance\nSafety\nCleaning\nPest Control\nCustody\nFacility Item\nWater\nElectrical\nAC\nPlumbing\nReimbursement\nComplaint\nSuggestion\nOther",
+   "reqd": 1
+  },
+  {
+   "description": "Urgency assigned to the request, driving target response time and escalation, from routine low priority up to critical issues that need immediate action.",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "Low\nMedium\nHigh\nCritical",
+   "default": "Low"
+  },
+  {
+   "description": "Where inside or around the accommodation the reported issue is located, helping staff locate the problem and group recurring faults by area.",
+   "fieldname": "issue_location",
+   "fieldtype": "Select",
+   "label": "Issue Location",
+   "options": "Room\nBathroom\nKitchen\nCommon Area\nEntrance\nStaircase\nExternal Area\nOther"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "reqd": 1
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment"
+  },
+  {
+   "fieldname": "arr_sec_resolution",
+   "fieldtype": "Section Break",
+   "label": "Resolution"
+  },
+  {
+   "description": "Handling stage of the resident request from intake to closure, tracking triage, assignment, active work, an evidence hold, and the final resolved, rejected, or closed outcome.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "New\nTriaged\nAssigned\nIn Progress\nWaiting Evidence\nResolved\nRejected\nClosed",
+   "default": "New"
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User"
+  },
+  {
+   "fieldname": "arr_col_resolution",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "triage_notes",
+   "fieldtype": "Small Text",
+   "label": "Triage Notes"
+  },
+  {
+   "fieldname": "resolution_notes",
+   "fieldtype": "Small Text",
+   "label": "Resolution Notes"
+  },
+  {
+   "fieldname": "arr_tab_system",
+   "fieldtype": "Tab Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "arr_sec_routing",
+   "fieldtype": "Section Break",
+   "label": "Routing & Tracking"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "REQ-.YYYY.-.####",
+   "reqd": 1,
+   "default": "REQ-.YYYY.-.####",
+   "hidden": 1
+  },
+  {
+   "fieldname": "location_token",
+   "fieldtype": "Data",
+   "label": "Location Token"
+  },
+  {
+   "fieldname": "anonymous_tracking_code",
+   "fieldtype": "Data",
+   "label": "Anonymous Tracking Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "target_doctype",
+   "fieldtype": "Data",
+   "label": "Target DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "target_document",
+   "fieldtype": "Data",
+   "label": "Target Document",
+   "read_only": 1
+  },
+  {
+   "fieldname": "arr_col_system",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "closed_on",
+   "fieldtype": "Datetime",
+   "label": "Closed On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "closed_by",
+   "fieldtype": "Link",
+   "label": "Closed By",
+   "options": "User",
+   "read_only": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "Accommodation Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "Resident Supervisor",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "System Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Accommodation Manager",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Resident Supervisor",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  },
+  {
+   "role": "Resident Request Coordinator",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "Resident Request Coordinator",
+   "permlevel": 1,
+   "read": 1,
+   "write": 1
+  }
+ ],
+ "autoname": "naming_series:",
+ "naming_rule": "By \"Naming Series\" field",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "modified": "2026-06-17 16:00:00.000000"
+}

@@ -68,11 +68,11 @@ class TestArrivalsCardScope(FrappeTestCase):
     @classmethod
     def _building(cls):
         doc = frappe.get_doc(
-            {"doctype": "Accommodation Building", "building_name": "CARD-" + _h()}
+            {"doctype": "Building", "building_name": "CARD-" + _h()}
         )
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         cls.addClassCleanup(
-            frappe.delete_doc, "Accommodation Building", doc.name, force=True, ignore_permissions=True
+            frappe.delete_doc, "Building", doc.name, force=True, ignore_permissions=True
         )
         return doc.name
 
@@ -95,7 +95,7 @@ class TestArrivalsCardScope(FrappeTestCase):
                 {
                     "doctype": "User Permission",
                     "user": email,
-                    "allow": "Accommodation Building",
+                    "allow": "Building",
                     "for_value": building,
                 }
             )
@@ -127,7 +127,7 @@ class TestArrivalsCardScope(FrappeTestCase):
         ``building`` (synthetic-row: docstatus flipped via db.set_value)."""
         doc = frappe.get_doc(
             {
-                "doctype": "Accommodation Assignment",
+                "doctype": "Housing Assignment",
                 "party_type": "Employee",
                 "party": employee,
                 "employee": employee,
@@ -140,11 +140,11 @@ class TestArrivalsCardScope(FrappeTestCase):
         # assignment write controller — the row only needs party/building/docstatus.
         doc.flags.ignore_validate = True
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        frappe.db.set_value("Accommodation Assignment", doc.name, "docstatus", 1)
+        frappe.db.set_value("Housing Assignment", doc.name, "docstatus", 1)
         cls.addClassCleanup(
             lambda n=doc.name: (
-                frappe.db.set_value("Accommodation Assignment", n, "docstatus", 0),
-                frappe.delete_doc("Accommodation Assignment", n, force=True, ignore_permissions=True),
+                frappe.db.set_value("Housing Assignment", n, "docstatus", 0),
+                frappe.delete_doc("Housing Assignment", n, force=True, ignore_permissions=True),
             )
         )
         return doc.name

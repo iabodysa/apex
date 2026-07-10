@@ -38,7 +38,7 @@ from apex_habitat.tests.factories import (
     make_worker_employee as _employee,
     make_project as _project,
 )
-from apex_habitat.salis.doctype.salis_portal_theme.salis_portal_theme import THEME_SLUGS
+from apex_habitat.salis.doctype.driver_portal_theme.driver_portal_theme import THEME_SLUGS
 from apex_habitat.www import masar as masar_page
 
 

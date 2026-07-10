@@ -55,13 +55,13 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
         # --- Accommodation Building fixture ---
         bname = f"STI Idempotency Building {method}"
         existing_bld = frappe.db.get_value(
-            "Accommodation Building", {"building_name": bname}, "name"
+            "Building", {"building_name": bname}, "name"
         )
         if existing_bld:
             self.building = existing_bld
         else:
             bld_doc = frappe.get_doc({
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": bname,
                 "status": "Active",
                 "total_capacity": 10,
@@ -69,7 +69,7 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
             bld_doc.insert(ignore_permissions=True)
             self.building = bld_doc.name
             self.addCleanup(
-                frappe.delete_doc, "Accommodation Building", self.building,
+                frappe.delete_doc, "Building", self.building,
                 force=True, ignore_permissions=True,
             )
 

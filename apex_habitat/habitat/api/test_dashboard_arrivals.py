@@ -39,7 +39,7 @@ class TestDashboardArrivals(FrappeTestCase):
 
     def _assignment(self, check_in_date, building=None):
         doc = frappe.get_doc({
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "naming_series": "ACC-ASGN-.YYYY.-.####",
             "party_type": "Employee",
             "party": "EMP-" + _h(),
@@ -48,7 +48,7 @@ class TestDashboardArrivals(FrappeTestCase):
         })
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         frappe.db.set_value(
-            "Accommodation Assignment", doc.name,
+            "Housing Assignment", doc.name,
             {"docstatus": 1, "check_in_date": check_in_date}, update_modified=False,
         )
         self._assignments.append(doc.name)
@@ -70,9 +70,9 @@ class TestDashboardArrivals(FrappeTestCase):
 
     def tearDown(self):
         for name in self._assignments:
-            frappe.db.set_value("Accommodation Assignment", name, "docstatus", 0,
+            frappe.db.set_value("Housing Assignment", name, "docstatus", 0,
                                 update_modified=False)
-            frappe.delete_doc("Accommodation Assignment", name, force=True,
+            frappe.delete_doc("Housing Assignment", name, force=True,
                               ignore_permissions=True)
         for name in self._batches:
             frappe.delete_doc("Arrival Batch", name, force=True, ignore_permissions=True)
@@ -91,7 +91,7 @@ class TestDashboardArrivals(FrappeTestCase):
         """A draft (docstatus=0) check-in dated today is not counted."""
         base = get_arrivals_today()
         doc = frappe.get_doc({
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "naming_series": "ACC-ASGN-.YYYY.-.####",
             "party_type": "Employee",
             "party": "EMP-" + _h(),
@@ -99,7 +99,7 @@ class TestDashboardArrivals(FrappeTestCase):
             "building": self.building,
         })
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        frappe.db.set_value("Accommodation Assignment", doc.name, "check_in_date",
+        frappe.db.set_value("Housing Assignment", doc.name, "check_in_date",
                             self.today, update_modified=False)
         self._assignments.append(doc.name)
         self.assertEqual(get_arrivals_today(), base, "draft check-in must not count")

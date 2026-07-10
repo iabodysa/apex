@@ -121,7 +121,7 @@ def on_submit(doc, method=None):
         # Financials tab reflects the posted Additional Salary
         if doc.source_checkout:
             frappe.db.set_value(
-                "Accommodation Checkout",
+                "Housing Checkout",
                 doc.source_checkout,
                 {
                     "linked_additional_salary": add_sal.name,

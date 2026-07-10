@@ -18,7 +18,7 @@ def execute(filters=None):
 
 def get_columns():
     return [
-        {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 180},
+        {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 180},
         {"label": _("Holder"), "fieldname": "holder", "fieldtype": "Data", "width": 120},
         {"label": _("Employee"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 160},
         {"label": _("Item Type"), "fieldname": "item_type", "fieldtype": "Data", "width": 140},

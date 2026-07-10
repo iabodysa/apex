@@ -51,13 +51,13 @@ class TestStockSourceLocking(ApexHabitatTestCase):
         cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) \
             or frappe.db.get_value("Cost Center", {"is_group": 0})
         self.site = frappe.get_doc({
-            "doctype": "Accommodation Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+            "doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
         self.source = frappe.get_doc({
-            "doctype": "Accommodation Building", "building_name": "Src " + _h(),
+            "doctype": "Building", "building_name": "Src " + _h(),
             "site": self.site.name, "total_capacity": 4, "company": self.company,
             "default_cost_center": cc}).insert(ignore_permissions=True).name
         self.dest = frappe.get_doc({
-            "doctype": "Accommodation Building", "building_name": "Dst " + _h(),
+            "doctype": "Building", "building_name": "Dst " + _h(),
             "site": self.site.name, "total_capacity": 4, "company": self.company,
             "default_cost_center": cc}).insert(ignore_permissions=True).name
         cat = frappe.db.get_value("Custody Asset Category", {}) or frappe.get_doc({

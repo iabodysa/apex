@@ -33,7 +33,7 @@ test_ignore = [
     "User",
     "Role",
     "Transport Request",
-    "Accommodation Building",
+    "Building",
 ]
 
 

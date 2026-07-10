@@ -21,11 +21,11 @@ class TestV090Pages(ApexHabitatTestCase):
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         self.cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
-        self.site = frappe.get_doc({"doctype": "Accommodation Site", "site_name": _h(6)}).insert(ignore_permissions=True)
-        self.building = frappe.get_doc({"doctype": "Accommodation Building", "building_name": "B " + _h(),
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        self.building = frappe.get_doc({"doctype": "Building", "building_name": "B " + _h(),
                                         "site": self.site.name, "total_capacity": 4, "company": self.company,
                                         "default_cost_center": self.cc}).insert(ignore_permissions=True).name
-        self.room = frappe.get_doc({"doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+        self.room = frappe.get_doc({"doctype": "Room", "naming_series": "ROOM-.####",
                                     "building": self.building, "room_number": "R" + _h(),
                                     "bed_capacity": 4, "readiness_status": "Ready"}).insert(ignore_permissions=True).name
         self.bed1 = self._bed()
@@ -35,7 +35,7 @@ class TestV090Pages(ApexHabitatTestCase):
         self.project = frappe.get_doc({"doctype": "Project", "project_name": "P " + _h()}).insert(ignore_permissions=True).name
 
     def _bed(self):
-        return frappe.get_doc({"doctype": "Accommodation Bed", "naming_series": "BED-.####",
+        return frappe.get_doc({"doctype": "Bed", "naming_series": "BED-.####",
                                "room": self.room, "building": self.building, "bed_code": "B" + _h(),
                                "status": "Available"}).insert(ignore_permissions=True).name
 
@@ -44,10 +44,10 @@ class TestV090Pages(ApexHabitatTestCase):
                        check_in_date="2026-05-01", cost_center=self.cc)
         transfer_occupant(source_bed=self.bed1, target_bed=self.bed2, transfer_date="2026-05-02")
         # [#r2skc0]
-        self.assertTrue(frappe.db.exists("Accommodation Assignment",
+        self.assertTrue(frappe.db.exists("Housing Assignment",
                         {"bed": self.bed2, "docstatus": 1, "check_out_date": ["is", "not set"]}))
-        self.assertEqual(frappe.db.get_value("Accommodation Bed", self.bed1, "status"), "Available")
-        self.assertEqual(frappe.db.get_value("Accommodation Bed", self.bed2, "status"), "Occupied")
+        self.assertEqual(frappe.db.get_value("Bed", self.bed1, "status"), "Available")
+        self.assertEqual(frappe.db.get_value("Bed", self.bed2, "status"), "Occupied")
 
     def test_safety_map_returns_floor_structure(self):
         grid = get_safety_map(self.building)

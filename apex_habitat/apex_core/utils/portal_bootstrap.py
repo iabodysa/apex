@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import frappe
 
-from apex_habitat.salis.doctype.salis_portal_theme.salis_portal_theme import (
+from apex_habitat.salis.doctype.driver_portal_theme.driver_portal_theme import (
 	get_portal_appearance,
 )
 

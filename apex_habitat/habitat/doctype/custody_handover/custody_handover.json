@@ -77,7 +77,7 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "From Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "reqd": 1
   },
   {
@@ -87,7 +87,7 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "To Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "reqd": 1
   },
   {

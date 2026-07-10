@@ -74,13 +74,13 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
             "Cost Center", {"is_group": 0}
         )
         site = frappe.get_doc(
-            {"doctype": "Accommodation Site", "site_name": self._h() + self._h()}
+            {"doctype": "Site", "site_name": self._h() + self._h()}
         ).insert(ignore_permissions=True).name
 
         def _building():
             return frappe.get_doc(
                 {
-                    "doctype": "Accommodation Building",
+                    "doctype": "Building",
                     "building_name": "B " + self._h(),
                     "site": site,
                     "total_capacity": 4,
@@ -92,7 +92,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
         def _room(building):
             return frappe.get_doc(
                 {
-                    "doctype": "Accommodation Room",
+                    "doctype": "Room",
                     "naming_series": "ROOM-.####",
                     "building": building,
                     "room_number": "R" + self._h(),
@@ -104,7 +104,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
         def _bed(building, room):
             return frappe.get_doc(
                 {
-                    "doctype": "Accommodation Bed",
+                    "doctype": "Bed",
                     "naming_series": "BED-.####",
                     "room": room,
                     "building": building,
@@ -153,7 +153,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
         'active (checked-in)' state on_submit requires."""
         asg = frappe.get_doc(
             {
-                "doctype": "Accommodation Assignment",
+                "doctype": "Housing Assignment",
                 "naming_series": "ACC-ASGN-.YYYY.-.####",
                 "employee": fx.emp,
                 "project": fx.project,
@@ -188,12 +188,12 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
         # Non-vacuous: the seed produced exactly the occupancy we rely on — the
         # assignment's on_submit already occupied from_bed and to_bed is free.
         self.assertEqual(
-            frappe.db.get_value("Accommodation Bed", fx.from_bed, "status"),
+            frappe.db.get_value("Bed", fx.from_bed, "status"),
             "Occupied",
             "seed precondition: from_bed must be Occupied by the active assignment",
         )
         self.assertEqual(
-            frappe.db.get_value("Accommodation Bed", fx.to_bed, "status"),
+            frappe.db.get_value("Bed", fx.to_bed, "status"),
             "Available",
             "seed precondition: to_bed must start Available",
         )
@@ -208,19 +208,19 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
 
         # The occupancy swap: source freed, target taken.
         self.assertEqual(
-            frappe.db.get_value("Accommodation Bed", fx.from_bed, "status"),
+            frappe.db.get_value("Bed", fx.from_bed, "status"),
             "Available",
             "on_submit must free the source bed",
         )
         self.assertEqual(
-            frappe.db.get_value("Accommodation Bed", fx.to_bed, "status"),
+            frappe.db.get_value("Bed", fx.to_bed, "status"),
             "Occupied",
             "on_submit must occupy the target bed",
         )
 
         # The live assignment is re-pointed in place to the target bed/room/building.
         row = frappe.db.get_value(
-            "Accommodation Assignment",
+            "Housing Assignment",
             asg.name,
             ["bed", "room", "building", "check_out_date", "docstatus"],
             as_dict=True,
@@ -247,12 +247,12 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
 
         # Post-submit precondition (non-vacuous): swap is in effect before we cancel.
         self.assertEqual(
-            frappe.db.get_value("Accommodation Bed", fx.from_bed, "status"),
+            frappe.db.get_value("Bed", fx.from_bed, "status"),
             "Available",
             "precondition: submit freed from_bed",
         )
         self.assertEqual(
-            frappe.db.get_value("Accommodation Bed", fx.to_bed, "status"),
+            frappe.db.get_value("Bed", fx.to_bed, "status"),
             "Occupied",
             "precondition: submit occupied to_bed",
         )
@@ -261,12 +261,12 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
 
         # on_cancel reverses ONLY the two bed statuses.
         self.assertEqual(
-            frappe.db.get_value("Accommodation Bed", fx.to_bed, "status"),
+            frappe.db.get_value("Bed", fx.to_bed, "status"),
             "Available",
             "on_cancel must free the target bed again",
         )
         self.assertEqual(
-            frappe.db.get_value("Accommodation Bed", fx.from_bed, "status"),
+            frappe.db.get_value("Bed", fx.from_bed, "status"),
             "Occupied",
             "on_cancel must re-occupy the source bed",
         )

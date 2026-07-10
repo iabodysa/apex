@@ -20,7 +20,7 @@ def execute(filters=None):
 
 def get_columns():
     return [
-        {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 200},
+        {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 200},
         {"label": _("Snapshots"), "fieldname": "snapshots", "fieldtype": "Int", "width": 100},
         {"label": _("Min Occupancy %"), "fieldname": "min_occ", "fieldtype": "Percent", "width": 140},
         {"label": _("Avg Occupancy %"), "fieldname": "avg_occ", "fieldtype": "Percent", "width": 140},
@@ -48,7 +48,7 @@ def _fetch_rows(filters):
             conditions["building"] = ["in", allowed]
 
     return frappe.get_all(
-        "Accommodation Occupancy Snapshot",
+        "Occupancy Snapshot",
         filters=conditions,
         fields=["building", "snapshot_date", "occupancy_percent", "available_capacity"],
         order_by="snapshot_date asc, building asc",

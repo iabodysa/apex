@@ -25,7 +25,7 @@ class GoodsReceipt(Document):
         if not self.items:
             frappe.throw(_("At least one item is required on a Goods Receipt."))
         if self.intake_building and not frappe.db.get_value(
-            "Accommodation Building", self.intake_building, "is_procurement_store"
+            "Building", self.intake_building, "is_procurement_store"
         ):
             frappe.throw(
                 _("Building {0} is not flagged as a Procurement Intake Store.").format(

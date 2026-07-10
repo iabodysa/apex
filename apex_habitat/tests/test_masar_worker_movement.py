@@ -50,7 +50,7 @@ class TestMasarSchemaInstall(FrappeTestCase):
         field = frappe.get_meta("Route Stop").get_field("accommodation_building")
         self.assertIsNotNone(field)
         self.assertEqual(field.fieldtype, "Link")
-        self.assertEqual(field.options, "Accommodation Building")
+        self.assertEqual(field.options, "Building")
 
     def test_route_stop_link_is_optional(self):
         """Existing/unset rows are unaffected: the link is nullable (not reqd)."""

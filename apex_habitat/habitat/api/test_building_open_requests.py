@@ -24,16 +24,16 @@ class TestBuildingOpenRequests(FrappeTestCase):
         self.other_building = self._building()
 
     def _building(self):
-        doc = frappe.get_doc({"doctype": "Accommodation Building", "building_name": "BLDG-" + _h()})
+        doc = frappe.get_doc({"doctype": "Building", "building_name": "BLDG-" + _h()})
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         self.addCleanup(
-            frappe.delete_doc, "Accommodation Building", doc.name, force=True, ignore_permissions=True
+            frappe.delete_doc, "Building", doc.name, force=True, ignore_permissions=True
         )
         return doc.name
 
     def _request(self, building, status):
         doc = frappe.get_doc({
-            "doctype": "Accommodation Resident Request",
+            "doctype": "Resident Request",
             "building": building,
             "request_category": "Other",
             "description": "Test request " + _h(),
@@ -50,7 +50,7 @@ class TestBuildingOpenRequests(FrappeTestCase):
 
     def tearDown(self):
         for name in self._requests:
-            frappe.delete_doc("Accommodation Resident Request", name, force=True, ignore_permissions=True)
+            frappe.delete_doc("Resident Request", name, force=True, ignore_permissions=True)
 
     def test_counts_only_open_requests_for_the_building(self):
         # Three open requests across distinct open statuses.

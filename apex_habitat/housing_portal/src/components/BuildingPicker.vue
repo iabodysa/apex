@@ -57,7 +57,7 @@ const q = ref("");
 // hand-rolled fetch used — returns the identical { name, building_name } rows,
 // with CSRF handled by frappeRequest (configured in main.js).
 const buildingsRes = createListResource({
-  doctype: "Accommodation Building",
+  doctype: "Building",
   fields: ["name", "building_name"],
   orderBy: "building_name asc",
   // createListResource has NO "all rows" sentinel: pageLength 0/undefined falls

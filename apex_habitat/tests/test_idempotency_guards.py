@@ -9,7 +9,7 @@ Covers two reported scenarios:
 
 import frappe
 from apex_habitat.tests.factories import ApexHabitatTestCase
-from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import (
+from apex_habitat.habitat.doctype.building.building import (
     generate_rooms_and_beds,
 )
 
@@ -38,12 +38,12 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
         }).insert(ignore_permissions=True).name
 
         self.site = frappe.get_doc({
-            "doctype": "Accommodation Site", "site_name": frappe.generate_hash(length=6),
+            "doctype": "Site", "site_name": frappe.generate_hash(length=6),
         }).insert(ignore_permissions=True)
 
     def _make_building(self, abbr):
         b = frappe.get_doc({
-            "doctype": "Accommodation Building",
+            "doctype": "Building",
             "building_name": f"Bldg {abbr}",
             "abbreviation": abbr,
             "site": self.site.name,
@@ -67,18 +67,18 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
         building = self._make_building(abbr)
 
         first = generate_rooms_and_beds(building.name)
-        rooms_after_first = frappe.db.count("Accommodation Room", {"building": building.name})
+        rooms_after_first = frappe.db.count("Room", {"building": building.name})
         beds_after_first = frappe.db.count(
-            "Accommodation Bed", {"room": ["in", frappe.get_all(
-                "Accommodation Room", {"building": building.name}, pluck="name")]}
+            "Bed", {"room": ["in", frappe.get_all(
+                "Room", {"building": building.name}, pluck="name")]}
         )
 
         # [#ooixjh]
         second = generate_rooms_and_beds(building.name)
-        rooms_after_second = frappe.db.count("Accommodation Room", {"building": building.name})
+        rooms_after_second = frappe.db.count("Room", {"building": building.name})
         beds_after_second = frappe.db.count(
-            "Accommodation Bed", {"room": ["in", frappe.get_all(
-                "Accommodation Room", {"building": building.name}, pluck="name")]}
+            "Bed", {"room": ["in", frappe.get_all(
+                "Room", {"building": building.name}, pluck="name")]}
         )
 
         self.assertEqual(first["created_rooms"], 3)
@@ -99,7 +99,7 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
     # [#gwmc0i]
     def _assignment(self, building, room, bed):
         a = frappe.get_doc({
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "employee": self.employee, "project": self.project,
             "cost_center": self.cost_center, "building": building,
             "room": room, "bed": bed, "check_in_date": "2026-05-01",
@@ -113,13 +113,13 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
         abbr = "C" + frappe.generate_hash(length=3).upper()
         building = self._make_building(abbr)
         generate_rooms_and_beds(building.name)
-        room = frappe.get_all("Accommodation Room", {"building": building.name}, pluck="name")[0]
-        bed = frappe.get_all("Accommodation Bed", {"room": room}, pluck="name")[0]
+        room = frappe.get_all("Room", {"building": building.name}, pluck="name")[0]
+        bed = frappe.get_all("Bed", {"room": room}, pluck="name")[0]
 
         assignment = self._assignment(building.name, room, bed)
 
         checkout1 = frappe.get_doc({
-            "doctype": "Accommodation Checkout", "assignment": assignment.name,
+            "doctype": "Housing Checkout", "assignment": assignment.name,
             "checkout_date": "2026-05-21", "checkout_reason": "Internal Transfer",
         })
         checkout1.insert(ignore_permissions=True)
@@ -127,7 +127,7 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
 
         # [#llp6ab]
         checkout2 = frappe.get_doc({
-            "doctype": "Accommodation Checkout", "assignment": assignment.name,
+            "doctype": "Housing Checkout", "assignment": assignment.name,
             "checkout_date": "2026-05-22", "checkout_reason": "Internal Transfer",
         })
         with self.assertRaises(frappe.ValidationError,

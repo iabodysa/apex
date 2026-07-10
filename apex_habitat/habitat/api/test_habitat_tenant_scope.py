@@ -31,11 +31,11 @@ SINGLE_BUILDING = [
     ("Housing Inventory", P.housing_inventory_query),
     ("Building License", P.building_license_query),
     ("Maintenance Work Order", P.maintenance_work_order_query),
-    ("Accommodation Occupancy Snapshot", P.accommodation_occupancy_snapshot_query),
+    ("Occupancy Snapshot", P.accommodation_occupancy_snapshot_query),
     ("Temporary Worker", P.temporary_worker_query),
     ("Arrival Batch", P.arrival_batch_query),
-    ("Accommodation Room", P.accommodation_room_query),
-    ("Accommodation Bed", P.accommodation_bed_query),
+    ("Room", P.accommodation_room_query),
+    ("Bed", P.accommodation_bed_query),
     # [#wave-b2] system-written read-only ledger; scoped on its own store `building`.
     ("Accommodation Stock Ledger", P.accommodation_stock_ledger_query),
 ]
@@ -65,10 +65,10 @@ class TestHabitatTenantScope(FrappeTestCase):
     # fixtures
     @classmethod
     def _building(cls):
-        doc = frappe.get_doc({"doctype": "Accommodation Building", "building_name": "TEN-" + _h()})
+        doc = frappe.get_doc({"doctype": "Building", "building_name": "TEN-" + _h()})
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         cls.addClassCleanup(
-            frappe.delete_doc, "Accommodation Building", doc.name, force=True, ignore_permissions=True
+            frappe.delete_doc, "Building", doc.name, force=True, ignore_permissions=True
         )
         return doc.name
 
@@ -92,7 +92,7 @@ class TestHabitatTenantScope(FrappeTestCase):
         up = frappe.get_doc({
             "doctype": "User Permission",
             "user": email,
-            "allow": "Accommodation Building",
+            "allow": "Building",
             "for_value": building,
         })
         up.insert(ignore_permissions=True)
@@ -225,7 +225,7 @@ class TestHabitatTenantScope(FrappeTestCase):
 
     # occupancy snapshot history is delete-locked to SysMgr
     def test_occupancy_snapshot_delete_locked_to_system_manager(self):
-        perms = frappe.get_meta("Accommodation Occupancy Snapshot").permissions
+        perms = frappe.get_meta("Occupancy Snapshot").permissions
         deleters = {p.role for p in perms if p.delete}
         self.assertEqual(
             deleters,

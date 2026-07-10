@@ -72,15 +72,15 @@ def get_safety_map(building):
         ``maintenance_count``, ``has_recent_damage``, ``signal``) and a
         ``common_zone`` tile.
     """
-    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+    frappe.has_permission("Building", "read", doc=building, throw=True)
 
     building_title = (
-        frappe.db.get_value("Accommodation Building", building, "building_name") or building
+        frappe.db.get_value("Building", building, "building_name") or building
     )
 
     # [#nl1hpu]
     rooms = frappe.get_all(
-        "Accommodation Room",
+        "Room",
         filters={"building": building},
         fields=["name", "room_number", "floor", "room_type", "status", "readiness_status"],
     )

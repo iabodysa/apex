@@ -85,7 +85,7 @@ def _assert_party_in_scope(party_type, party) -> None:
     if party_type == PARTY_EMPLOYEE:
         # Employee carries no `building`; its estate is the live assignment's building.
         building = frappe.db.get_value(
-            "Accommodation Assignment",
+            "Housing Assignment",
             {"party_type": PARTY_EMPLOYEE, "party": party, "docstatus": 1, "check_out_date": ["is", "not set"]},
             "building",
         )
@@ -166,7 +166,7 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     # [#e8oxzs]
     assignment = (
         frappe.db.get_value(
-            "Accommodation Assignment",
+            "Housing Assignment",
             {"party_type": party_type, "party": party, "docstatus": 1, "check_out_date": ["is", "not set"]},
             ["name", "project", "building", "bed", "check_in_date"],
             as_dict=True,
@@ -175,7 +175,7 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     )
     current_bed = assignment.get("bed")
     current_bed_code = (
-        frappe.db.get_value("Accommodation Bed", current_bed, "bed_code") if current_bed else None
+        frappe.db.get_value("Bed", current_bed, "bed_code") if current_bed else None
     )
 
     # [#rx0tdj]
@@ -247,7 +247,7 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     if restrict:
         housed_filters["building"] = ["in", allowed]
     housed = frappe.get_all(
-        "Accommodation Assignment",
+        "Housing Assignment",
         filters=housed_filters,
         fields=["party_type", "party", "employee"],
     )
@@ -569,14 +569,14 @@ def house_over_capacity(room, party_type, party, project, check_in_date=None) ->
     """
     from apex_habitat.habitat.api.front_desk import quick_check_in
 
-    frappe.has_permission("Accommodation Bed", "create", throw=True)
-    if not frappe.db.exists("Accommodation Room", room):
+    frappe.has_permission("Bed", "create", throw=True)
+    if not frappe.db.exists("Room", room):
         frappe.throw(_("Room {0} does not exist.").format(room))
 
-    n = frappe.db.count("Accommodation Bed", {"room": room, "is_temporary": 1}) + 1
+    n = frappe.db.count("Bed", {"room": room, "is_temporary": 1}) + 1
     bed = frappe.get_doc(
         {
-            "doctype": "Accommodation Bed",
+            "doctype": "Bed",
             "room": room,
             "bed_code": f"{room}-OC{n}",
             "status": "Available",
@@ -604,16 +604,16 @@ def get_arrival_summary(date=None, building=None) -> dict:
     over-capacity placement count. Built from a BOUNDED set of bulk queries (no
     per-row round trips), mirroring get_building_grid. Creates and locks nothing.
     """
-    frappe.has_permission("Accommodation Assignment", "read", throw=True)
+    frappe.has_permission("Housing Assignment", "read", throw=True)
     if building:
-        frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+        frappe.has_permission("Building", "read", doc=building, throw=True)
     date = date or frappe.utils.today()
 
     filters = {"check_in_date": date, "docstatus": 1}
     if building:
         filters["building"] = building
     arrivals = frappe.get_all(
-        "Accommodation Assignment",
+        "Housing Assignment",
         filters=filters,
         fields=["name", "bed", "party_type", "party", "is_external_supplier", "billed_to_supplier"],
     )
@@ -667,7 +667,7 @@ def get_arrival_summary(date=None, building=None) -> dict:
     over_capacity_count = 0
     if bed_ids:
         over_capacity_count = frappe.db.count(
-            "Accommodation Bed", {"name": ["in", list(set(bed_ids))], "is_temporary": 1}
+            "Bed", {"name": ["in", list(set(bed_ids))], "is_temporary": 1}
         )
 
     # Manifest completion needs the pre-arrival manifest source (Arrival Batch).
@@ -709,7 +709,7 @@ def get_expected_arrivals(date=None, building=None) -> dict:
         return {"date": date or frappe.utils.today(), "workers": [], "total": 0, "arrived": 0, "pending": 0}
     frappe.has_permission("Arrival Batch", "read", throw=True)
     if building:
-        frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+        frappe.has_permission("Building", "read", doc=building, throw=True)
     date = date or frappe.utils.today()
 
     filters = {"expected_date": date}
@@ -932,9 +932,9 @@ def get_checkin_slip(party_type, party) -> dict:
     building = card.get("current_building")
     if building:
         # [#t07zu3]
-        frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+        frappe.has_permission("Building", "read", doc=building, throw=True)
     bldg = (
-        frappe.db.get_value("Accommodation Building", building, ["city"], as_dict=True)
+        frappe.db.get_value("Building", building, ["city"], as_dict=True)
         if building
         else None
     ) or {}
@@ -945,7 +945,7 @@ def get_checkin_slip(party_type, party) -> dict:
         "dir": _slip_dir(),
         "lang": frappe.local.lang or "en",
         "building": building or "",
-        "address": get_address_text("Accommodation Building", building),
+        "address": get_address_text("Building", building),
         "city": bldg.get("city") or "",
         "bed": card.get("current_bed_code") or card.get("current_bed") or "",
         "project": card.get("project") or "",
@@ -1094,7 +1094,7 @@ def buildings_with_capacity(doctype, txt, searchfield, start, page_len, filters)
         f["building_name"] = ["like", f"%{txt}%"]
 
     buildings = frappe.get_all(
-        "Accommodation Building", filters=f, fields=["name", "building_name"]
+        "Building", filters=f, fields=["name", "building_name"]
     )
     if not buildings:
         return []
@@ -1102,8 +1102,8 @@ def buildings_with_capacity(doctype, txt, searchfield, start, page_len, filters)
 
     # One bed/room read across every in-scope building; bucket the green (available)
     # count per building in Python via _bed_color — bounded regardless of count.
-    Bed = frappe.qb.DocType("Accommodation Bed")
-    Room = frappe.qb.DocType("Accommodation Room")
+    Bed = frappe.qb.DocType("Bed")
+    Room = frappe.qb.DocType("Room")
     bed_rows = (
         frappe.qb.from_(Bed)
         .left_join(Room)

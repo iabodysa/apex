@@ -16,7 +16,7 @@ def execute(filters=None):
 
     columns = [
         {"label": frappe._("Request"), "fieldname": "name", "fieldtype": "Link", "options": "Maintenance Request", "width": 150},
-        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 150},
+        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 150},
         {"label": frappe._("Issue Type"), "fieldname": "issue_type", "fieldtype": "Data", "width": 130},
         {"label": frappe._("Priority"), "fieldname": "priority", "fieldtype": "Data", "width": 90},
         {"label": frappe._("Status"), "fieldname": "status", "fieldtype": "Data", "width": 110},

@@ -109,14 +109,14 @@ class TestMaintenanceReportScopeIntegration(FrappeTestCase):
 
         cls.building = frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": "MRS Bldg " + cls.tag,
                 "status": "Active",
             }
         ).insert(ignore_permissions=True).name
         cls.room = frappe.get_doc(
             {
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": cls.building,
                 "room_number": "MRS-" + cls.tag,
             }

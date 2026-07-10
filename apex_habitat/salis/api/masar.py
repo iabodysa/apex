@@ -93,7 +93,7 @@ def compute_ride_eta_minutes(dispatch_trip, pickup_building):
     if not pos or pos.get("driver_lat") is None or pos.get("driver_lng") is None:
         return None
     dest = frappe.db.get_value(
-        "Accommodation Building", pickup_building, ["pickup_lat", "pickup_lng"], as_dict=True
+        "Building", pickup_building, ["pickup_lat", "pickup_lng"], as_dict=True
     )
     if not dest or dest.get("pickup_lat") is None or dest.get("pickup_lng") is None:
         return None
@@ -290,7 +290,7 @@ def _ordered_stops(route_plan):
         {
             b["name"]: b
             for b in frappe.get_all(
-                "Accommodation Building",
+                "Building",
                 filters={"name": ["in", list(bldg_ids)]},
                 fields=["name", "building_name", "city", "district", "google_maps_url"],
             )
@@ -601,13 +601,13 @@ def _days_until(value):
 # hand-maintained JS duplicate that silently drifts.
 _ENUM_SOURCES = {
     "status": ("Employee", "status"),
-    "stayType": ("Accommodation Assignment", "stay_type"),
+    "stayType": ("Housing Assignment", "stay_type"),
     "requestType": ("Transport Request", "request_type"),
     "transportStatus": ("Transport Request", "status"),
-    "requestCategory": ("Accommodation Resident Request", "request_category"),
-    "requestStatus": ("Accommodation Resident Request", "status"),
-    "priority": ("Accommodation Resident Request", "priority"),
-    "issueLocation": ("Accommodation Resident Request", "issue_location"),
+    "requestCategory": ("Resident Request", "request_category"),
+    "requestStatus": ("Resident Request", "status"),
+    "priority": ("Resident Request", "priority"),
+    "issueLocation": ("Resident Request", "issue_location"),
 }
 
 
@@ -709,7 +709,7 @@ def _active_assignment(employee):
     """The worker's current (submitted, not checked-out) Accommodation Assignment,
     or None. Scoped strictly to the resolved employee."""
     rows = frappe.get_all(
-        "Accommodation Assignment",
+        "Housing Assignment",
         filters={
             "employee": employee,
             "docstatus": 1,
@@ -751,7 +751,7 @@ def get_worker_accommodation(token=None):
     building = None
     if assignment.get("building"):
         b = frappe.db.get_value(
-            "Accommodation Building",
+            "Building",
             assignment["building"],
             [
                 "name",
@@ -775,8 +775,8 @@ def get_worker_accommodation(token=None):
                     "phone": frappe.db.get_value("User", user, "mobile_no"),
                 }
             # [#le3pcb]
-            _addr = get_address_text("Accommodation Site", b.get("site")) or get_address_text(
-                "Accommodation Building", assignment["building"]
+            _addr = get_address_text("Site", b.get("site")) or get_address_text(
+                "Building", assignment["building"]
             )
             # [#s4cggu]
             building = {
@@ -794,7 +794,7 @@ def get_worker_accommodation(token=None):
     room = None
     if assignment.get("room"):
         r = frappe.db.get_value(
-            "Accommodation Room",
+            "Room",
             assignment["room"],
             ["name", "room_number", "floor", "room_type", "bed_capacity", "current_occupancy"],
             as_dict=True,
@@ -804,7 +804,7 @@ def get_worker_accommodation(token=None):
     bed = None
     if assignment.get("bed"):
         bd = frappe.db.get_value(
-            "Accommodation Bed", assignment["bed"], ["name", "bed_code", "status"], as_dict=True
+            "Bed", assignment["bed"], ["name", "bed_code", "status"], as_dict=True
         )
         bed = bd or None
 
@@ -1031,7 +1031,7 @@ def list_worker_requests(token=None):
     requests. Read-only."""
     employee = _resolve_worker(token)
     rows = frappe.get_all(
-        "Accommodation Resident Request",
+        "Resident Request",
         filters={"employee": employee},
         fields=[
             "name",
@@ -1135,7 +1135,7 @@ def get_worker_request_detail(token=None, name=None):
     # worker does not match -> no row -> PermissionError. The client name alone
     # can never widen access beyond the token's own employee.
     req = frappe.db.get_value(
-        "Accommodation Resident Request",
+        "Resident Request",
         {"name": name, "employee": employee},
         [
             "name",
@@ -1195,7 +1195,7 @@ def _custody_issued_by(custody_issue, building):
         return frappe.utils.get_fullname(owner) or owner
     if building:
         sup = frappe.db.get_value(
-            "Accommodation Building", building, "responsible_facility_supervisor"
+            "Building", building, "responsible_facility_supervisor"
         )
         if sup:
             return frappe.utils.get_fullname(sup) or sup
@@ -1382,7 +1382,7 @@ def create_worker_request(
 
     doc = frappe.get_doc(
         {
-            "doctype": "Accommodation Resident Request",
+            "doctype": "Resident Request",
             "source_channel": "QR Web Form",
             "requester_type": "Worker",
             "employee": employee,
@@ -1524,7 +1524,7 @@ def _building_in_charge(employee):
     same source the accommodation screen uses."""
     assignment = _active_assignment(employee)
     user = assignment and frappe.db.get_value(
-        "Accommodation Building", assignment.get("building"), "responsible_facility_supervisor"
+        "Building", assignment.get("building"), "responsible_facility_supervisor"
     )
     if not user:
         return None
@@ -2040,7 +2040,7 @@ def _worker_was_on_trip(employee, dispatch_trip):
         "Passenger Manifest", filters={"dispatch_trip": dispatch_trip}, pluck="name"
     )
     if manifests and frappe.db.exists(
-        "Manifest Passenger",
+        "Passenger Manifest Item",
         {
             "parent": ["in", manifests],
             "parenttype": "Passenger Manifest",

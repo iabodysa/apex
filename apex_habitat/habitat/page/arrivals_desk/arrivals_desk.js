@@ -305,7 +305,7 @@ class ArrivalsDesk {
 			df: {
 				fieldtype: 'Link',
 				fieldname: 'building',
-				options: 'Accommodation Building',
+				options: 'Building',
 				label: __('Building'),
 				placeholder: __('Pick a building…'),
 				// Offer only buildings that still have an available bed (server-scoped,
@@ -660,7 +660,7 @@ class ArrivalsDesk {
 					fieldname: 'building',
 					label: __('Building'),
 					fieldtype: 'Link',
-					options: 'Accommodation Building',
+					options: 'Building',
 					default: this.building,
 				},
 				{
@@ -795,7 +795,7 @@ class ArrivalsDesk {
 				primary_action_label: __('Open Checkout Form'),
 				primary_action: () => {
 					d.hide();
-					frappe.new_doc('Accommodation Checkout', { assignment: occupant.assignment });
+					frappe.new_doc('Housing Checkout', { assignment: occupant.assignment });
 				},
 			});
 			d.show();
@@ -855,7 +855,7 @@ class ArrivalsDesk {
 								message: __('This resident has custody items. Opening the full Checkout form to clear custody.'),
 								indicator: 'orange',
 							});
-							frappe.new_doc('Accommodation Checkout', { assignment: r.message.assignment });
+							frappe.new_doc('Housing Checkout', { assignment: r.message.assignment });
 							return;
 						}
 						frappe.show_alert({ message: __('Checked out: {0}', [r.message.checkout]), indicator: 'green' });

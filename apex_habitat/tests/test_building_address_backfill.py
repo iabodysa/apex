@@ -18,7 +18,7 @@ from apex_habitat.tests.factories import make_building, make_company
 def _make_address(title, link_building=None):
     """Insert a native Address (optionally Dynamic-Linked to a building) as Administrator."""
     links = (
-        [{"link_doctype": "Accommodation Building", "link_name": link_building}]
+        [{"link_doctype": "Building", "link_name": link_building}]
         if link_building
         else []
     )
@@ -46,12 +46,12 @@ class TestBuildingAddressBackfill(FrappeTestCase):
         bldg = make_building(name=f"T269 {self.key} B").name
         addr = _make_address(f"T269 {self.key} Addr", link_building=bldg).name
         # Precondition: the field is empty, the Dynamic Link exists.
-        self.assertFalse(frappe.db.get_value("Accommodation Building", bldg, "building_address"))
+        self.assertFalse(frappe.db.get_value("Building", bldg, "building_address"))
 
         execute()
 
         self.assertEqual(
-            frappe.db.get_value("Accommodation Building", bldg, "building_address"),
+            frappe.db.get_value("Building", bldg, "building_address"),
             addr,
             "empty building_address should be backfilled to the default linked Address",
         )
@@ -67,7 +67,7 @@ class TestBuildingAddressBackfill(FrappeTestCase):
         execute()
 
         self.assertEqual(
-            frappe.db.get_value("Accommodation Building", bldg, "building_address"),
+            frappe.db.get_value("Building", bldg, "building_address"),
             own,
             "a building that already has building_address must not be overwritten",
         )

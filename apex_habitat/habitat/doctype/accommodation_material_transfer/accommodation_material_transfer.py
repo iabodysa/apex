@@ -121,8 +121,8 @@ def _notify_finance_on_cost_center_shift(doc):
     and only when the admin has opted in via Habitat Settings."""
     if not frappe.db.get_single_value("Habitat Settings", "notify_finance_on_liability_transfer"):
         return
-    from_cc = frappe.db.get_value("Accommodation Building", doc.from_building, "default_cost_center")
-    to_cc = frappe.db.get_value("Accommodation Building", doc.to_building, "default_cost_center")
+    from_cc = frappe.db.get_value("Building", doc.from_building, "default_cost_center")
+    to_cc = frappe.db.get_value("Building", doc.to_building, "default_cost_center")
     if not from_cc or not to_cc or from_cc == to_cc:
         return
 

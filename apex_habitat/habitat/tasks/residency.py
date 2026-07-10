@@ -28,7 +28,7 @@ def lease_expiry_watchlist() -> None:
     batch_size = 500
     while True:
         leases = frappe.get_all(
-            "Accommodation Lease",
+            "Lease",
             filters={"docstatus": 1, "status": ["in", ["Approved", "Active"]],
                      "lease_end_date": ["is", "set"]},
             fields=["name", "building", "lease_end_date"],
@@ -42,20 +42,20 @@ def lease_expiry_watchlist() -> None:
             try:
                 days = date_diff(lease.lease_end_date, today_str)
                 if days < 0:
-                    frappe.db.set_value("Accommodation Lease", lease.name, "status", "Expired")
+                    frappe.db.set_value("Lease", lease.name, "status", "Expired")
                     msg = (
                         f"lease_expiry_watchlist: lease {lease.name} "
                         f"(building {lease.building}) expired {abs(days)} days ago."
                     )
                     logger.warning(msg)
-                    _notify_operational("Accommodation Lease", lease.name, msg)
+                    _notify_operational("Lease", lease.name, msg)
                 elif 0 <= days <= lease_lead:
                     msg = (
                         f"lease_expiry_watchlist: lease {lease.name} "
                         f"(building {lease.building}) expires in {days} days ({lease.lease_end_date})."
                     )
                     logger.warning(msg)
-                    _notify_operational("Accommodation Lease", lease.name, msg)
+                    _notify_operational("Lease", lease.name, msg)
             except Exception:
                 frappe.db.rollback()
                 frappe.log_error(
@@ -84,7 +84,7 @@ def temporary_stay_checkout_watchlist() -> None:
     batch_size = 500
     while True:
         stays = frappe.get_all(
-            "Accommodation Assignment",
+            "Housing Assignment",
             filters={
                 "stay_type": "Temporary",
                 "docstatus": 1,
@@ -107,12 +107,12 @@ def temporary_stay_checkout_watchlist() -> None:
                     msg = (f"temporary_stay_checkout_watchlist: {worker} is overdue — expected check-out was "
                            f"{s.expected_checkout_date} ({abs(days)} days ago) and the worker is still checked in.")
                     logger.warning(msg)
-                    _notify_operational("Accommodation Assignment", s.name, msg)
+                    _notify_operational("Housing Assignment", s.name, msg)
                 elif 0 <= days <= lead:
                     msg = (f"temporary_stay_checkout_watchlist: {worker}'s temporary stay ends on "
                            f"{s.expected_checkout_date} (in {days} days). Please arrange check-out.")
                     logger.warning(msg)
-                    _notify_operational("Accommodation Assignment", s.name, msg)
+                    _notify_operational("Housing Assignment", s.name, msg)
             except Exception:
                 frappe.db.rollback()
                 frappe.log_error(

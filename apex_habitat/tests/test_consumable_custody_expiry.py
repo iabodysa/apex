@@ -26,8 +26,8 @@ class TestConsumableCustodyExpiry(ApexHabitatTestCase):
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         cc = (frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company})
               or frappe.db.get_value("Cost Center", {"is_group": 0}))
-        self.site = frappe.get_doc({"doctype": "Accommodation Site", "site_name": _h(6)}).insert(ignore_permissions=True)
-        self.building = frappe.get_doc({"doctype": "Accommodation Building", "building_name": "B " + _h(),
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        self.building = frappe.get_doc({"doctype": "Building", "building_name": "B " + _h(),
                                         "site": self.site.name, "total_capacity": 4, "company": self.company,
                                         "default_cost_center": cc}).insert(ignore_permissions=True).name
         self.cat = frappe.db.get_value("Custody Asset Category", {}) or frappe.get_doc({

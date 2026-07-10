@@ -20,13 +20,13 @@ class QASysBase(ApexHabitatTestCase):
             or frappe.db.get_value("Cost Center", {"is_group": 0})
         )
         self.site = frappe.get_doc({
-            "doctype": "Accommodation Site", "site_name": _hash(6),
+            "doctype": "Site", "site_name": _hash(6),
         }).insert(ignore_permissions=True)
 
     def _make_building(self):
         abbr = "S" + _hash(3)
         b = frappe.get_doc({
-            "doctype": "Accommodation Building",
+            "doctype": "Building",
             "building_name": f"Bldg {abbr}", "abbreviation": abbr,
             "site": self.site.name, "total_capacity": 50,
             "default_cost_center": self.cost_center,
@@ -36,7 +36,7 @@ class QASysBase(ApexHabitatTestCase):
 
     def _room(self, building):
         return frappe.get_doc({
-            "doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+            "doctype": "Room", "naming_series": "ROOM-.####",
             "building": building, "room_number": "R" + _hash(), "bed_capacity": 2,
         }).insert(ignore_permissions=True).name
 

@@ -45,7 +45,7 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         # total_capacity is read_only in metadata but is dict-set on insert; the
         # cancel path reads building.total_capacity, so seed a real non-zero value.
         self.building = frappe.get_doc({
-            "doctype": "Accommodation Building",
+            "doctype": "Building",
             "building_name": f"UBL {tag}",
             "abbreviation": "U" + _hash(3),
             "status": "Active",
@@ -116,7 +116,7 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         # [#non-vacuous] Guard the whole file: if the seed silently failed, the
         # submit/cancel assertions below would pass vacuously against zero rows.
         self.assertTrue(
-            frappe.db.exists("Accommodation Building", self.building),
+            frappe.db.exists("Building", self.building),
             "seed building must exist",
         )
         self.assertTrue(

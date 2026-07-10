@@ -47,7 +47,7 @@
    "fieldname": "from_building",
    "fieldtype": "Link",
    "label": "From Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "read_only": 1
   },
   {
@@ -61,7 +61,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "To Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "read_only": 1
   },
   {

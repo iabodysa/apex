@@ -16,7 +16,7 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
 
     def setUp(self):
         self.site = frappe.get_doc({
-            "doctype": "Accommodation Site", "site_name": _hash(),
+            "doctype": "Site", "site_name": _hash(),
         }).insert(ignore_permissions=True)
 
     def _building(self, status="Active", supervisor=None):
@@ -24,7 +24,7 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
         # repeated runs on a persistent test DB never collide (was _hash(3), too narrow).
         abbr = "Z" + _hash()
         return frappe.get_doc({
-            "doctype": "Accommodation Building",
+            "doctype": "Building",
             "building_name": f"Bldg {abbr}", "abbreviation": abbr,
             "site": self.site.name, "total_capacity": 10, "status": status,
             "responsible_facility_supervisor": supervisor,

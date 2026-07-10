@@ -139,7 +139,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "From Building",
-   "options": "Accommodation Building"
+   "options": "Building"
   },
   {
    "fieldname": "facility_asset_movement_origin_col",
@@ -149,7 +149,7 @@
    "fieldname": "from_room",
    "fieldtype": "Link",
    "label": "From Room",
-   "options": "Accommodation Room"
+   "options": "Room"
   },
   {
    "fieldname": "facility_asset_movement_origin_col2",
@@ -173,7 +173,7 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "To Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "reqd": 1
   },
   {
@@ -184,7 +184,7 @@
    "fieldname": "to_room",
    "fieldtype": "Link",
    "label": "To Room",
-   "options": "Accommodation Room"
+   "options": "Room"
   },
   {
    "fieldname": "facility_asset_movement_destination_col2",

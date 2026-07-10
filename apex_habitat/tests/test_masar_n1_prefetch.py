@@ -152,11 +152,11 @@ class TestMasarWorkerRoutePrefetch(_WorkerTripMixin, FrappeTestCase):
         # times — never once-per-row. (Employee is the manifest; if it tracked row
         # count it would be 6 for the large trip.)
         self.assertLessEqual(large_counter.get_all_by_doctype.get("Employee", 0), 1)
-        self.assertLessEqual(large_counter.get_all_by_doctype.get("Accommodation Building", 0), 1)
+        self.assertLessEqual(large_counter.get_all_by_doctype.get("Building", 0), 1)
         # One constant Employee get_value is allowed: _find_driver resolves the
         # session user -> Employee once per request (identity), not per manifest row.
         self.assertLessEqual(large_counter.get_value_by_doctype.get("Employee", 0), 1)
-        self.assertEqual(large_counter.get_value_by_doctype.get("Accommodation Building", 0), 0)
+        self.assertEqual(large_counter.get_value_by_doctype.get("Building", 0), 0)
 
     def test_prefetched_output_matches_per_row_reads(self):
         """The endpoint's prefetched values equal a direct per-row read — the
@@ -174,7 +174,7 @@ class TestMasarWorkerRoutePrefetch(_WorkerTripMixin, FrappeTestCase):
         # Housing pickup: the building dict on the housing stop equals a direct read.
         housing_stop = next(s for s in trip["stops"] if s.get("accommodation_building"))
         b = frappe.db.get_value(
-            "Accommodation Building",
+            "Building",
             housing_stop["accommodation_building"],
             ["name", "building_name", "city", "district", "google_maps_url"],
             as_dict=True,

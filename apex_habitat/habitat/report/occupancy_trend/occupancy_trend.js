@@ -20,7 +20,7 @@ frappe.query_reports["Occupancy Trend"] = {
 			fieldname: "building",
 			label: __("Building"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 		},
 	],
 };

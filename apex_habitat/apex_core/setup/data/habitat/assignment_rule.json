@@ -26,7 +26,7 @@
     },
     {
       "name": "Habitat - Resident Request Triage",
-      "document_type": "Accommodation Resident Request",
+      "document_type": "Resident Request",
       "rule": "Round Robin",
       "disabled": 1,
       "description": "Auto-assign new resident requests to a triage owner (round robin). DISABLED by default: replace the placeholder user with your real triage team, then enable.",

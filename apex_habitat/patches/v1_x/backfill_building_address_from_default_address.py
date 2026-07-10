@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import frappe
 
-_DOCTYPE = "Accommodation Building"
+_DOCTYPE = "Building"
 
 
 def execute():

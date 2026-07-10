@@ -127,7 +127,7 @@ class TestPortalThemeStoredXSS(FrappeTestCase):
 
 	def setUp(self):
 		frappe.set_user("Administrator")
-		self.doc = frappe.get_single("Salis Portal Theme")
+		self.doc = frappe.get_single("Driver Portal Theme")
 		self._orig_accent = self.doc.accent_color
 		self._orig_logo = self.doc.brand_logo
 

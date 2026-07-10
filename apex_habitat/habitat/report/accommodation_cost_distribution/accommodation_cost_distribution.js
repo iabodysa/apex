@@ -20,7 +20,7 @@ frappe.query_reports["Accommodation Cost Distribution"] = {
 			fieldname: "building",
 			label: __("Building"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 		},
 		{
 			fieldname: "project",

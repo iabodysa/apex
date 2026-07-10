@@ -2,14 +2,14 @@
  "doctype": "Number Card",
  "name": "Vacant Beds",
  "label": "Vacant Beds",
- "document_type": "Accommodation Bed",
+ "document_type": "Bed",
  "function": "Count",
  "is_public": 1,
  "show_percentage_stats": 1,
  "stats_time_interval": "Daily",
  "type": "Document Type",
  "module": "Habitat",
- "filters_json": "[[\"Accommodation Bed\", \"status\", \"=\", \"Available\"]]",
+ "filters_json": "[[\"Bed\", \"status\", \"=\", \"Available\"]]",
  "is_standard": 1,
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-07-10 06:05:34.129545"
 }

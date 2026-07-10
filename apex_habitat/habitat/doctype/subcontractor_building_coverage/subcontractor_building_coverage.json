@@ -15,7 +15,7 @@
    "fieldname": "building",
    "fieldtype": "Link",
    "label": "Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "reqd": 1,
    "idx": 1,
    "in_list_view": 1,

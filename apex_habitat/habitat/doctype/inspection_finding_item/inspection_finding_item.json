@@ -92,7 +92,7 @@
    "fieldname": "room",
    "fieldtype": "Link",
    "label": "Room",
-   "options": "Accommodation Room",
+   "options": "Room",
    "description": "Room the Maintenance Request will target. Required for a finding to be actionable.",
    "in_list_view": 1,
    "idx": 8

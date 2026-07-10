@@ -81,7 +81,7 @@
    "fieldname": "passengers",
    "fieldtype": "Table",
    "label": "Passengers",
-   "options": "Manifest Passenger"
+   "options": "Passenger Manifest Item"
   },
   {
    "fieldname": "pm_sec_system",

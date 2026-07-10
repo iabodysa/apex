@@ -176,9 +176,9 @@ class TestReports(ApexHabitatTestCase):
         }).insert(ignore_permissions=True).name
         cost_center = (frappe.db.get_value("Cost Center", {"is_group": 0, "company": company})
                        or frappe.db.get_value("Cost Center", {"is_group": 0}))
-        site = frappe.get_doc({"doctype": "Accommodation Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
         building = frappe.get_doc({
-            "doctype": "Accommodation Building", "building_name": "B " + _h(), "site": site.name,
+            "doctype": "Building", "building_name": "B " + _h(), "site": site.name,
             "total_capacity": 10, "default_cost_center": cost_center, "annual_rent_sar": 36500,
         }).insert(ignore_permissions=True).name
 

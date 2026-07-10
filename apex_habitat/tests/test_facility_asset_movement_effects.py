@@ -40,23 +40,23 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         # rooms autoname off a `field:` so names must not collide across tests.
         tag = self._testMethodName
         self.bldg_a = frappe.get_doc(
-            {"doctype": "Accommodation Building", "building_name": f"FAM-EFFECTS A {tag}"}
+            {"doctype": "Building", "building_name": f"FAM-EFFECTS A {tag}"}
         ).insert(ignore_permissions=True).name
         self.bldg_b = frappe.get_doc(
-            {"doctype": "Accommodation Building", "building_name": f"FAM-EFFECTS B {tag}"}
+            {"doctype": "Building", "building_name": f"FAM-EFFECTS B {tag}"}
         ).insert(ignore_permissions=True).name
         # to_room/from_room are real Accommodation Room links; their NAME (room_number)
         # is what on_submit copies into the asset's Data location field.
         self.room_l0 = frappe.get_doc(
             {
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": self.bldg_a,
                 "room_number": f"FAM-EFFECTS L0 {tag}",
             }
         ).insert(ignore_permissions=True).name
         self.room_l1 = frappe.get_doc(
             {
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": self.bldg_b,
                 "room_number": f"FAM-EFFECTS L1 {tag}",
             }

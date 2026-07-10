@@ -50,7 +50,7 @@ class TestRequestTripNotifications(FrappeTestCase):
 		trigger wiring (so migrate exports + imports them)."""
 		rr = frappe.get_doc("Notification", RR_NOTIFICATION)
 		self.assertEqual(rr.is_standard, 1)
-		self.assertEqual(rr.document_type, "Accommodation Resident Request")
+		self.assertEqual(rr.document_type, "Resident Request")
 		self.assertEqual(rr.event, "Value Change")
 		self.assertEqual(rr.value_changed, "status")
 		self.assertEqual(rr.condition, "doc.status == 'Resolved'")
@@ -66,7 +66,7 @@ class TestRequestTripNotifications(FrappeTestCase):
 
 	def test_resident_request_resolved_notifies_coordinator(self):
 		req = frappe.get_doc({
-			"doctype": "Accommodation Resident Request",
+			"doctype": "Resident Request",
 			"naming_series": "REQ-.YYYY.-.####",
 			"request_category": "Maintenance",
 			"description": "AC not cooling.",
@@ -75,7 +75,7 @@ class TestRequestTripNotifications(FrappeTestCase):
 		}).insert(ignore_permissions=True)
 		self.addCleanup(
 			lambda: frappe.delete_doc(
-				"Accommodation Resident Request", req.name,
+				"Resident Request", req.name,
 				ignore_permissions=True, force=True,
 			)
 		)
@@ -92,7 +92,7 @@ class TestRequestTripNotifications(FrappeTestCase):
 		before recipients are resolved."""
 		notification = frappe.get_doc("Notification", RR_NOTIFICATION)
 		req = frappe.get_doc({
-			"doctype": "Accommodation Resident Request",
+			"doctype": "Resident Request",
 			"naming_series": "REQ-.YYYY.-.####",
 			"request_category": "Maintenance",
 			"description": "Leaking tap.",
@@ -100,7 +100,7 @@ class TestRequestTripNotifications(FrappeTestCase):
 		}).insert(ignore_permissions=True)
 		self.addCleanup(
 			lambda: frappe.delete_doc(
-				"Accommodation Resident Request", req.name,
+				"Resident Request", req.name,
 				ignore_permissions=True, force=True,
 			)
 		)

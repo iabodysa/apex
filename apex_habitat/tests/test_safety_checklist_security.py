@@ -26,13 +26,13 @@ class TestSafetyChecklistSecurity(FrappeTestCase):
         # Grant User Permission only for the allowed building
         if not frappe.db.exists(
             "User Permission",
-            {"user": self.user_email, "allow": "Accommodation Building", "for_value": self.building_allowed},
+            {"user": self.user_email, "allow": "Building", "for_value": self.building_allowed},
         ):
             frappe.get_doc(
                 {
                     "doctype": "User Permission",
                     "user": self.user_email,
-                    "allow": "Accommodation Building",
+                    "allow": "Building",
                     "for_value": self.building_allowed,
                 }
             ).insert(ignore_permissions=True)

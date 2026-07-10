@@ -13,7 +13,7 @@ frappe.query_reports["Cost by Dimension"] = {
 			fieldname: "building",
 			label: __("Building"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 		},
 		{
 			fieldname: "project",

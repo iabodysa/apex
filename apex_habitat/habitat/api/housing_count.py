@@ -108,7 +108,7 @@ def get_inventory_for_building(building, room=None):
     labels = {}
     if room_names:
         for r in frappe.get_all(
-            "Accommodation Room",
+            "Room",
             filters={"name": ["in", room_names]},
             fields=["name", "room_number"],
         ):

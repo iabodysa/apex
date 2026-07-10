@@ -151,7 +151,7 @@
    "is_child_table": 1,
    "link_doctype": "Accommodation Custody Item",
    "link_fieldname": "article",
-   "parent_doctype": "Accommodation Assignment",
+   "parent_doctype": "Housing Assignment",
    "table_fieldname": "custody_items"
   },
   {
@@ -159,7 +159,7 @@
    "is_child_table": 1,
    "link_doctype": "Accommodation Custody Return Item",
    "link_fieldname": "article",
-   "parent_doctype": "Accommodation Checkout",
+   "parent_doctype": "Housing Checkout",
    "table_fieldname": "custody_return_items"
   }
  ],

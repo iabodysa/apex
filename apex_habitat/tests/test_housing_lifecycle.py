@@ -53,13 +53,13 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         # [#2ky77n]
         suffix = frappe.generate_hash(length=6)
         self.site = frappe.get_doc({
-            "doctype": "Accommodation Site",
+            "doctype": "Site",
             "site_name": "Test Site " + suffix
         })
         self.site.insert(ignore_permissions=True)
 
         self.building = frappe.get_doc({
-            "doctype": "Accommodation Building",
+            "doctype": "Building",
             "building_name": "Test Building " + suffix,
             "site": self.site.name,
             "total_capacity": 10,
@@ -68,7 +68,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         self.building.insert(ignore_permissions=True)
 
         self.room = frappe.get_doc({
-            "doctype": "Accommodation Room",
+            "doctype": "Room",
             "naming_series": "ROOM-.####",
             "building": self.building.name,
             "room_number": "101-" + suffix,
@@ -77,7 +77,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         self.room.insert(ignore_permissions=True)
 
         self.bed = frappe.get_doc({
-            "doctype": "Accommodation Bed",
+            "doctype": "Bed",
             "naming_series": "BED-.####",
             "room": self.room.name,
             "bed_code": "B1-" + suffix
@@ -89,10 +89,10 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         # Company, Project, and Employee are NOT deleted here because setUp only
         # creates them when none exist at all — they may be real or shared fixtures.
         for doctype, name in [
-            ("Accommodation Bed", self.bed.name),
-            ("Accommodation Room", self.room.name),
-            ("Accommodation Building", self.building.name),
-            ("Accommodation Site", self.site.name),
+            ("Bed", self.bed.name),
+            ("Room", self.room.name),
+            ("Building", self.building.name),
+            ("Site", self.site.name),
         ]:
             if frappe.db.exists(doctype, name):
                 frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
@@ -100,7 +100,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
     def test_checkout_preserves_assignment_history(self):
         # [#roaq7a]
         assignment = frappe.get_doc({
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "employee": self.employee,
             "project": self.project,
             "cost_center": self.cost_center,
@@ -118,7 +118,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
 
         # [#rp84s0]
         checkout = frappe.get_doc({
-            "doctype": "Accommodation Checkout",
+            "doctype": "Housing Checkout",
             "assignment": assignment.name,
             "checkout_date": "2026-05-21",
             "checkout_reason": "Internal Transfer"
@@ -132,9 +132,9 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         self.assertEqual(assignment.docstatus, 1, "Assignment should not be cancelled (docstatus 2) on checkout; history should be preserved.")
         
         # [#me5am6] Bed must be freed and room must be queued for cleaning.
-        self.assertEqual(frappe.db.get_value("Accommodation Bed", self.bed.name, "status"), "Available",
+        self.assertEqual(frappe.db.get_value("Bed", self.bed.name, "status"), "Available",
                          "on_submit must flip the bed status to Available")
-        self.assertEqual(frappe.db.get_value("Accommodation Room", self.room.name, "readiness_status"), "Needs Cleaning",
+        self.assertEqual(frappe.db.get_value("Room", self.room.name, "readiness_status"), "Needs Cleaning",
                          "on_submit must set room readiness_status to Needs Cleaning")
 
     def test_checkout_pending_clearance_resolves_employee_name(self):
@@ -145,7 +145,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         )
 
         assignment = frappe.get_doc({
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "employee": self.employee,
             "project": self.project,
             "cost_center": self.cost_center,
@@ -160,7 +160,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
 
         # [#b1tocv]
         checkout = frappe.get_doc({
-            "doctype": "Accommodation Checkout",
+            "doctype": "Housing Checkout",
             "assignment": assignment.name,
             "checkout_date": "2026-05-21",
             "checkout_reason": "Internal Transfer",

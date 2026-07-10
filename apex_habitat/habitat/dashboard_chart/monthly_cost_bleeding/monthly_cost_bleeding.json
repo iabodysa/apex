@@ -3,7 +3,7 @@
  "chart_name": "Monthly Cost Bleeding",
  "chart_type": "Sum",
  "doctype": "Dashboard Chart",
- "document_type": "Accommodation Occupancy Snapshot",
+ "document_type": "Occupancy Snapshot",
  "group_by_type": "Count",
  "is_public": 1,
  "is_standard": 1,
@@ -16,5 +16,5 @@
  "type": "Bar",
  "value_based_on": "cost_bleeding",
  "filters_json": "[]",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-07-10 06:05:34.129545"
 }

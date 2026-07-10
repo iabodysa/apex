@@ -149,7 +149,7 @@ def weekly_custody_digest() -> None:
         return
 
     buildings = frappe.get_all(
-        "Accommodation Building",
+        "Building",
         filters={"responsible_facility_supervisor": ["is", "set"]},
         fields=["name", "responsible_facility_supervisor"],
     )

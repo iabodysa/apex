@@ -2,7 +2,7 @@
  "doctype": "Report",
  "name": "Accommodation Occupancy Summary",
  "report_name": "Accommodation Occupancy Summary",
- "ref_doctype": "Accommodation Assignment",
+ "ref_doctype": "Housing Assignment",
  "report_type": "Script Report",
  "is_standard": "Yes",
  "module": "Habitat",

@@ -6,7 +6,7 @@
  "days_in_advance": 0,
  "docstatus": 0,
  "doctype": "Notification",
- "document_type": "Accommodation Lease",
+ "document_type": "Lease",
  "enabled": 0,
  "event": "Days Before",
  "idx": 0,
@@ -23,5 +23,5 @@
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
  "subject": "Building Lease EXPIRED: {{ doc.building }}",
- "modified": "2026-06-29 09:35:00.000000"
+ "modified": "2026-07-10 06:05:34.129545"
 }

@@ -39,10 +39,10 @@ CORE_ALLOWLIST = {
 # user sees NOTHING, or the reverse). These are NOT hooks keys, so assertion 1 can't see them;
 # B7's rename sweep must update each. Enumerated here so the sweep has a checklist + a guard.
 #   permissions.py ~L111  _allowed_buildings(): frappe.get_all("User Permission",
-#                          filters={"allow": "Accommodation Building", ...})
-#   permissions.py ~L218  building_scoped_has_permission(): doc.doctype == "Accommodation Building"
+#                          filters={"allow": "Building", ...})
+#   permissions.py ~L218  building_scoped_has_permission(): doc.doctype == "Building"
 HARDCODED_PERMISSION_DOCTYPE_LITERALS = {
-    "Accommodation Building",
+    "Building",
 }
 
 

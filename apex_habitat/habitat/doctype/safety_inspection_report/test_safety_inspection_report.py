@@ -77,17 +77,17 @@ class TestSafetyInspectionReport(FrappeTestCase):
         Requests spawned server-side (which validate their Link targets) pass.
         ignore_links keeps the prerequisites' own external links (e.g. company)
         from needing ERPNext in CI."""
-        if not frappe.db.exists("Accommodation Building", "T103-BLDG"):
+        if not frappe.db.exists("Building", "T103-BLDG"):
             frappe.get_doc({
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": "T103-BLDG",
                 # [#tm0kvn]
                 "total_capacity": 10,
             }).insert(ignore_permissions=True, ignore_links=True)
-        if not frappe.db.exists("Accommodation Room", "T103-ROOM"):
+        if not frappe.db.exists("Room", "T103-ROOM"):
             # [#64yd4v]
             frappe.get_doc({
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": "T103-BLDG",
                 "room_number": "T103-ROOM",
                 "bed_capacity": 2,

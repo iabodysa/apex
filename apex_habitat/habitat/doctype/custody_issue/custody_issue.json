@@ -62,7 +62,7 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "reqd": 1,
    "search_index": 1
   },

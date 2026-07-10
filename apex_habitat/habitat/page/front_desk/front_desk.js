@@ -606,7 +606,7 @@ class FrontDesk {
 					.on("click keydown", (e) => {
 						if (e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return;
 						e.preventDefault();
-						frappe.set_route("List", "Accommodation Resident Request", {
+						frappe.set_route("List", "Resident Request", {
 							building: building,
 							status: ["in", statuses],
 						});
@@ -857,7 +857,7 @@ class FrontDesk {
 				primary_action_label: __("Open Checkout Form"),
 				primary_action: () => {
 					d.hide();
-					frappe.new_doc("Accommodation Checkout", { assignment: occupant.assignment });
+					frappe.new_doc("Housing Checkout", { assignment: occupant.assignment });
 				},
 			});
 			d.show();
@@ -915,7 +915,7 @@ class FrontDesk {
 								message: __("This resident has custody items. Opening the full Checkout form to clear custody."),
 								indicator: "orange",
 							});
-							frappe.new_doc("Accommodation Checkout", { assignment: r.message.assignment });
+							frappe.new_doc("Housing Checkout", { assignment: r.message.assignment });
 							return;
 						}
 						frappe.show_alert({

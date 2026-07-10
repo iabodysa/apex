@@ -2,14 +2,14 @@
  "doctype": "Number Card",
  "name": "Active Leases",
  "label": "Active Leases",
- "document_type": "Accommodation Lease",
+ "document_type": "Lease",
  "function": "Count",
  "is_public": 1,
  "show_percentage_stats": 1,
  "stats_time_interval": "Daily",
  "type": "Document Type",
  "module": "Habitat",
- "filters_json": "[[\"Accommodation Lease\", \"status\", \"in\", [\"Approved\", \"Active\"]]]",
+ "filters_json": "[[\"Lease\", \"status\", \"in\", [\"Approved\", \"Active\"]]]",
  "is_standard": 1,
- "modified": "2026-06-29 09:35:00.000000"
+ "modified": "2026-07-10 06:05:34.129545"
 }

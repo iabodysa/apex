@@ -299,10 +299,10 @@ class TestMyWorkCenter(ApexHabitatTestCase):
         """The core permission property: a non-owner who CAN read the DocType still
         must not see another user's submitted document in their worklist."""
         # [#3f8rbh]
-        cat = (frappe.get_meta("Accommodation Resident Request")
+        cat = (frappe.get_meta("Resident Request")
                .get_field("request_category").options.split("\n")[0].strip())
         frappe.get_doc({
-            "doctype": "Accommodation Resident Request",
+            "doctype": "Resident Request",
             "request_category": cat,
             "description": "worklist-test " + _h(),
         }).insert(ignore_permissions=True)  # [#1b55d8]

@@ -13,15 +13,15 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
-from apex_habitat.habitat.doctype.accommodation_occupancy_snapshot.accommodation_occupancy_snapshot import (
-    AccommodationOccupancySnapshot,
+from apex_habitat.habitat.doctype.occupancy_snapshot.occupancy_snapshot import (
+    OccupancySnapshot,
 )
 from apex_habitat.apex_core.doctype.operations_alert.operations_alert import OperationsAlert
 from apex_habitat.salis.doctype.vehicle_utilisation_snapshot.vehicle_utilisation_snapshot import (
     VehicleUtilisationSnapshot,
 )
-from apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financial_depreciation_snapshot import (
-    NonFinancialDepreciationSnapshot,
+from apex_habitat.habitat.doctype.operational_depreciation_snapshot.operational_depreciation_snapshot import (
+    OperationalDepreciationSnapshot,
 )
 
 
@@ -30,9 +30,9 @@ class TestLogClearing(FrappeTestCase):
         # [#pysfr6]
         for cls in (
             OperationsAlert,
-            AccommodationOccupancySnapshot,
+            OccupancySnapshot,
             VehicleUtilisationSnapshot,
-            NonFinancialDepreciationSnapshot,
+            OperationalDepreciationSnapshot,
         ):
             self.assertTrue(
                 callable(getattr(cls, "clear_old_logs", None)),
@@ -43,9 +43,9 @@ class TestLogClearing(FrappeTestCase):
         hook = frappe.get_hooks("default_log_clearing_doctypes") or {}
         for dt, retention in (
             ("Operations Alert", 90),
-            ("Accommodation Occupancy Snapshot", 365),
+            ("Occupancy Snapshot", 365),
             ("Vehicle Utilisation Snapshot", 365),
-            ("Non-Financial Depreciation Snapshot", 730),
+            ("Operational Depreciation Snapshot", 730),
         ):
             self.assertIn(dt, hook, f"{dt} must be registered for log clearing.")
             self.assertEqual(int(hook[dt][-1]), retention)
@@ -113,7 +113,7 @@ class TestLogClearing(FrappeTestCase):
 
         def make(suffix):
             doc = frappe.get_doc({
-                "doctype": "Non-Financial Depreciation Snapshot",
+                "doctype": "Operational Depreciation Snapshot",
                 "naming_series": "DEP-SNAP-.YYYY.-.####",
                 "snapshot_date": today(),
                 "building": f"QA-{marker}-{suffix}",
@@ -133,19 +133,19 @@ class TestLogClearing(FrappeTestCase):
         # [#5vsgd7]
         for name in (old_sub.name, recent_sub.name):
             frappe.db.set_value(
-                "Non-Financial Depreciation Snapshot", name, "docstatus", 1, update_modified=False
+                "Operational Depreciation Snapshot", name, "docstatus", 1, update_modified=False
             )
         for name in (old_sub.name, old_draft.name):
             frappe.db.sql(
-                "update `tabNon-Financial Depreciation Snapshot` set modified=%s where name=%s",
+                "update `tabOperational Depreciation Snapshot` set modified=%s where name=%s",
                 (add_days(today(), -800), name),
             )
 
-        NonFinancialDepreciationSnapshot.clear_old_logs(days=730)
+        OperationalDepreciationSnapshot.clear_old_logs(days=730)
 
         # [#h2um2i]
         self.assertFalse(
-            frappe.db.exists("Non-Financial Depreciation Snapshot", old_sub.name),
+            frappe.db.exists("Operational Depreciation Snapshot", old_sub.name),
             "Aged submitted snapshot should be cleared.",
         )
         self.assertEqual(
@@ -155,10 +155,10 @@ class TestLogClearing(FrappeTestCase):
         )
         # [#3a3nup]
         self.assertTrue(
-            frappe.db.exists("Non-Financial Depreciation Snapshot", recent_sub.name),
+            frappe.db.exists("Operational Depreciation Snapshot", recent_sub.name),
             "Recent submitted snapshot must survive.",
         )
         self.assertTrue(
-            frappe.db.exists("Non-Financial Depreciation Snapshot", old_draft.name),
+            frappe.db.exists("Operational Depreciation Snapshot", old_draft.name),
             "Aged DRAFT snapshot must be preserved (not submitted).",
         )

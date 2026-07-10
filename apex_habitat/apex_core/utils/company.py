@@ -61,7 +61,7 @@ def company_for_building(building: str | None, module: str = "Habitat") -> str |
     ``company`` Link, else the module default chain."""
     company = None
     if building:
-        company = frappe.db.get_value("Accommodation Building", building, "company")
+        company = frappe.db.get_value("Building", building, "company")
     return company or resolve_company(module)
 
 

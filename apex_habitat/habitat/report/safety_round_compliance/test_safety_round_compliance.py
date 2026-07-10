@@ -25,7 +25,7 @@ class TestSafetyRoundCompliance(FrappeTestCase):
 
         self.building = frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": f"SRC Bldg {tag}",
                 "status": "Active",
             }
@@ -64,7 +64,7 @@ class TestSafetyRoundCompliance(FrappeTestCase):
         # it must be excluded from the expected denominator.
         other_building = frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": f"SRC Other {tag}",
                 "status": "Active",
             }

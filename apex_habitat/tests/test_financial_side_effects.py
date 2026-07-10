@@ -78,26 +78,26 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
 
         # [#gbrgot]
         site_name = "Test Financial Site"
-        if not frappe.db.exists("Accommodation Site", site_name):
+        if not frappe.db.exists("Site", site_name):
             self.site = frappe.get_doc({
-                "doctype": "Accommodation Site",
+                "doctype": "Site",
                 "site_name": site_name
             })
             self.site.insert(ignore_permissions=True)
         else:
-            self.site = frappe.get_doc("Accommodation Site", site_name)
+            self.site = frappe.get_doc("Site", site_name)
 
         building_name = "Test Financial Building"
-        if not frappe.db.exists("Accommodation Building", building_name):
+        if not frappe.db.exists("Building", building_name):
             self.building = frappe.get_doc({
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": building_name,
                 "site": self.site.name,
                 "total_capacity": 10
             })
             self.building.insert(ignore_permissions=True)
         else:
-            self.building = frappe.get_doc("Accommodation Building", building_name)
+            self.building = frappe.get_doc("Building", building_name)
 
         # [#ryfpzi]
         category_name = "Furniture"
@@ -223,7 +223,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         # draft checkout is the back-write target; QA assignment + ignore_links
         # keeps validate's early-return path (no full assignment chain needed)
         checkout = frappe.get_doc({
-            "doctype": "Accommodation Checkout",
+            "doctype": "Housing Checkout",
             "naming_series": "ACC-CHKOUT-.YYYY.-.####",
             "assignment": "ACC-ASGN-QA",
             "checkout_date": "2026-05-21",
@@ -267,7 +267,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
             "Checkout must reflect the posted damage deduction amount.",
         )
 
-        frappe.delete_doc("Accommodation Checkout", checkout.name, force=True, ignore_permissions=True)
+        frappe.delete_doc("Housing Checkout", checkout.name, force=True, ignore_permissions=True)
 
     def test_custody_damage_no_additional_salary_without_explicit_setting(self):
         # [#paxi0y]

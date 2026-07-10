@@ -23,7 +23,7 @@ def execute(filters=None):
 def get_columns():
     return [
         {"label": _("Employee"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 180},
-        {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 170},
+        {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 170},
         {"label": _("Article"), "fieldname": "item", "fieldtype": "Link", "options": "Custody Article", "width": 150},
         {"label": _("Article Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 200},
         {"label": _("UOM"), "fieldname": "uom", "fieldtype": "Data", "width": 80},

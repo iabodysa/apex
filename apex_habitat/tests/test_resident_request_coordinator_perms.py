@@ -18,8 +18,8 @@ _DOCTYPE_JSON = (
     / "apex_habitat"
     / "habitat"
     / "doctype"
-    / "accommodation_resident_request"
-    / "accommodation_resident_request.json"
+    / "resident_request"
+    / "resident_request.json"
 )
 
 ROLE = "Resident Request Coordinator"

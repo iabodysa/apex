@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import frappe
 
-_DOCTYPE = "Accommodation Assignment"
+_DOCTYPE = "Housing Assignment"
 
 
 def execute():
@@ -45,7 +45,7 @@ def execute():
         building = row.building
         if building not in supervisor_by_building:
             supervisor_by_building[building] = frappe.db.get_value(
-                "Accommodation Building", building, "responsible_facility_supervisor"
+                "Building", building, "responsible_facility_supervisor"
             )
         supervisor = supervisor_by_building[building]
         if not supervisor:

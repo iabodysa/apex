@@ -178,14 +178,14 @@ class TestDriverGpsEta(FrappeTestCase):
     # ── cleanup ────────────────────────────────────────────────────────────────
     def _purge_assignment(self, name):
         frappe.set_user("Administrator")
-        if name and frappe.db.exists("Accommodation Assignment", name):
-            doc = frappe.get_doc("Accommodation Assignment", name)
+        if name and frappe.db.exists("Housing Assignment", name):
+            doc = frappe.get_doc("Housing Assignment", name)
             if doc.docstatus == 1:
                 try:
                     doc.cancel()
                 except Exception:
                     pass
-            frappe.delete_doc("Accommodation Assignment", name, ignore_permissions=True, force=True)
+            frappe.delete_doc("Housing Assignment", name, ignore_permissions=True, force=True)
 
     def _purge_trip(self, dt_name, rp_name, tr_name):
         frappe.set_user("Administrator")

@@ -108,7 +108,7 @@ def _reconcile_origin(doc):
     # is actually a Room docname (prior moves write the room there) — a descriptive
     # free-text location ("Laundry Room") is not a Room and must not false-throw.
     asset_room = asset.location_in_building
-    if asset_room and not frappe.db.exists("Accommodation Room", asset_room):
+    if asset_room and not frappe.db.exists("Room", asset_room):
         asset_room = None
     if not doc.from_room:
         doc.from_room = asset_room
@@ -120,9 +120,9 @@ def _reconcile_origin(doc):
 
 def _populate_company_fields(doc):
     if doc.from_building and not doc.from_company:
-        doc.from_company = frappe.db.get_value("Accommodation Building", doc.from_building, "company") or None
+        doc.from_company = frappe.db.get_value("Building", doc.from_building, "company") or None
     if doc.to_building and not doc.to_company:
-        doc.to_company = frappe.db.get_value("Accommodation Building", doc.to_building, "company") or None
+        doc.to_company = frappe.db.get_value("Building", doc.to_building, "company") or None
 
 
 def _detect_intercompany(doc):

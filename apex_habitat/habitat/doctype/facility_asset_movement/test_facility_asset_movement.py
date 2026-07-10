@@ -88,9 +88,9 @@ class TestFacilityAssetMovementOriginReconcile(FrappeTestCase):
         return frappe.generate_hash(length=6).upper()
 
     def _building(self, name):
-        if not frappe.db.exists("Accommodation Building", name):
+        if not frappe.db.exists("Building", name):
             frappe.get_doc({
-                "doctype": "Accommodation Building", "building_name": name,
+                "doctype": "Building", "building_name": name,
             }).insert(ignore_permissions=True, ignore_mandatory=True)
         return name
 
@@ -150,9 +150,9 @@ class TestFacilityAssetMovementLedger(FrappeTestCase):
     LEDGER = "Facility Asset Movement Ledger"
 
     def _make_building(self, name):
-        if not frappe.db.exists("Accommodation Building", name):
+        if not frappe.db.exists("Building", name):
             frappe.get_doc({
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": name,
             }).insert(ignore_permissions=True, ignore_mandatory=True)
         return name

@@ -73,12 +73,12 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
     @classmethod
     def _building(cls):
         doc = frappe.get_doc(
-            {"doctype": "Accommodation Building", "building_name": "RPT-" + _h()}
+            {"doctype": "Building", "building_name": "RPT-" + _h()}
         )
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         cls.addClassCleanup(
             frappe.delete_doc,
-            "Accommodation Building",
+            "Building",
             doc.name,
             force=True,
             ignore_permissions=True,
@@ -105,7 +105,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
                 {
                     "doctype": "User Permission",
                     "user": email,
-                    "allow": "Accommodation Building",
+                    "allow": "Building",
                     "for_value": building,
                 }
             )

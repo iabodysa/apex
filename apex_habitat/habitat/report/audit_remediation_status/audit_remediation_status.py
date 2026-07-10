@@ -7,7 +7,7 @@ from frappe.utils import getdate, today
 
 def execute(filters=None):
     columns = [
-        {"label": frappe._("Remediation Plan"), "fieldname": "plan", "fieldtype": "Link", "options": "Client Audit Remediation Plan", "width": 150},
+        {"label": frappe._("Remediation Plan"), "fieldname": "plan", "fieldtype": "Link", "options": "Audit Remediation Plan", "width": 150},
         {"label": frappe._("Remediation Action"), "fieldname": "remediation_action", "fieldtype": "Small Text", "width": 260},
         {"label": frappe._("Owner Role"), "fieldname": "owner_role", "fieldtype": "Link", "options": "Role", "width": 140},
         {"label": frappe._("Owner User"), "fieldname": "owner_user", "fieldtype": "Link", "options": "User", "width": 160},
@@ -19,7 +19,7 @@ def execute(filters=None):
 
     rows = frappe.get_all(
         "Audit Remediation Item",
-        filters={"parenttype": "Client Audit Remediation Plan"},
+        filters={"parenttype": "Audit Remediation Plan"},
         fields=[
             "parent as plan",
             "remediation_action",

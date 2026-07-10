@@ -22,7 +22,7 @@ class TestSafetyFindingLedger(FrappeTestCase):
         self.building = (
             frappe.get_doc(
                 {
-                    "doctype": "Accommodation Building",
+                    "doctype": "Building",
                     "building_name": f"SFL Bldg {tag}",
                     "status": "Active",
                 }

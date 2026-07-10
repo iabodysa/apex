@@ -1,7 +1,7 @@
 {
  "aggregate_function_based_on": "occupancy_percent",
  "doctype": "Number Card",
- "document_type": "Accommodation Building",
+ "document_type": "Building",
  "function": "Average",
  "is_public": 1,
  "is_standard": 1,
@@ -12,5 +12,5 @@
  "stats_time_interval": "Daily",
  "type": "Document Type",
  "filters_json": "[]",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-07-10 06:05:34.129545"
 }

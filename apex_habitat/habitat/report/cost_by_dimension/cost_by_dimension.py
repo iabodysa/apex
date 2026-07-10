@@ -30,7 +30,7 @@ def execute(filters=None):
 def get_columns():
     return [
         {"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 200},
-        {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 200},
+        {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 200},
         {"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 200},
         {"label": _("Ledger Entries"), "fieldname": "entries", "fieldtype": "Int", "width": 120},
         {"label": _("Total Cost (SAR)"), "fieldname": "total_cost", "fieldtype": "Currency", "width": 160},

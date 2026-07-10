@@ -140,7 +140,7 @@ def move_asset_on_delivery(doc) -> None:
     )
     if not asset:
         return
-    company = frappe.db.get_value("Accommodation Building", doc.to_building, "company")
+    company = frappe.db.get_value("Building", doc.to_building, "company")
     # Reuse the movement-ledger engine via a lightweight shim object: it reads
     # from_/to_/facility_asset/name/doctype off the passed doc. Build a thin
     # namespace matching what post_asset_movement expects.

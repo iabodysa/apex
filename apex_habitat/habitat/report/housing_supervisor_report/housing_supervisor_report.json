@@ -2,7 +2,7 @@
  "doctype": "Report",
  "name": "Housing Supervisor Report",
  "report_name": "Housing Supervisor Report",
- "ref_doctype": "Accommodation Building",
+ "ref_doctype": "Building",
  "report_type": "Script Report",
  "is_standard": "Yes",
  "module": "Habitat",
@@ -25,7 +25,7 @@
    "fieldname": "building",
    "fieldtype": "Link",
    "label": "Building",
-   "options": "Accommodation Building"
+   "options": "Building"
   }
  ],
  "roles": [

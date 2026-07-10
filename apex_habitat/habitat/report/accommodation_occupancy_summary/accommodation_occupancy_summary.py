@@ -8,7 +8,7 @@ from apex_habitat.habitat import permissions
 
 def execute(filters=None):
     columns = [
-        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 200},
+        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 200},
         {"label": frappe._("Active Residents"), "fieldname": "active_residents", "fieldtype": "Int", "width": 130},
         {"label": frappe._("Total Capacity"), "fieldname": "total_capacity", "fieldtype": "Int", "width": 130},
         {"label": frappe._("Available Capacity"), "fieldname": "available_capacity", "fieldtype": "Int", "width": 150},
@@ -35,7 +35,7 @@ def execute(filters=None):
             building_filters["name"] = ["in", allowed]
 
     buildings = frappe.get_all(
-        "Accommodation Building",
+        "Building",
         filters=building_filters,
         fields=["name", "current_occupants", "total_capacity"],
         order_by="name asc",
@@ -45,7 +45,7 @@ def execute(filters=None):
         return columns, []
 
     rooms = frappe.get_all(
-        "Accommodation Room",
+        "Room",
         filters={"building": ["in", [row.name for row in buildings]]} if buildings else {},
         fields=["building", "status", "count(name) as room_count"],
         group_by="building, status",

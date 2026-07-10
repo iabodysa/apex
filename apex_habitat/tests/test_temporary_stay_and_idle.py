@@ -16,8 +16,8 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         self.cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
-        self.site = frappe.get_doc({"doctype": "Accommodation Site", "site_name": _h(6)}).insert(ignore_permissions=True)
-        self.building = frappe.get_doc({"doctype": "Accommodation Building", "building_name": "B " + _h(),
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        self.building = frappe.get_doc({"doctype": "Building", "building_name": "B " + _h(),
                                         "site": self.site.name, "total_capacity": 4, "company": self.company,
                                         "default_cost_center": self.cc}).insert(ignore_permissions=True).name
         self.employee = frappe.get_doc({"doctype": "Employee", "first_name": "E " + _h(), "company": self.company,
@@ -26,7 +26,7 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
 
     def _assignment(self, stay_type, expected=None):
         return frappe.get_doc({
-            "doctype": "Accommodation Assignment", "naming_series": "ACC-ASG-.YYYY.-.#####",
+            "doctype": "Housing Assignment", "naming_series": "ACC-ASG-.YYYY.-.#####",
             "employee": self.employee, "project": self.project, "building": self.building,
             "cost_center": self.cc, "check_in_date": "2026-05-01",
             "stay_type": stay_type, "expected_checkout_date": expected,
@@ -42,7 +42,7 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
         supervisor = f"sup{_h()}@test.com".lower()
         frappe.get_doc({"doctype": "User", "email": supervisor, "first_name": "Sup",
                         "send_welcome_email": 0}).insert(ignore_permissions=True)
-        frappe.db.set_value("Accommodation Building", self.building,
+        frappe.db.set_value("Building", self.building,
                             "responsible_facility_supervisor", supervisor)
 
         room = make_room(self.building, readiness_status="Ready")

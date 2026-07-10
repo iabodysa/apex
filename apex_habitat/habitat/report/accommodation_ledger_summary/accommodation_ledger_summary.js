@@ -6,7 +6,7 @@ frappe.query_reports["Accommodation Ledger Summary"] = {
 			fieldname: "building",
 			label: __("Building"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 		},
 		{
 			fieldname: "project",

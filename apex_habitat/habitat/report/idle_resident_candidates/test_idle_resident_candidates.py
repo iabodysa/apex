@@ -28,7 +28,7 @@ class TestIdleResidentCandidates(FrappeTestCase):
             or frappe.db.get_value("Cost Center", {"is_group": 0})
 
         self.building = frappe.get_doc({
-            "doctype": "Accommodation Building", "building_name": f"IRC Bldg {tag}",
+            "doctype": "Building", "building_name": f"IRC Bldg {tag}",
             "status": "Active", "total_capacity": 10, "company": company,
             "default_cost_center": self.cc,
         }).insert(ignore_permissions=True).name
@@ -52,12 +52,12 @@ class TestIdleResidentCandidates(FrappeTestCase):
 
     def _assignment(self, project, tag, slot):
         room = frappe.get_doc({
-            "doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+            "doctype": "Room", "naming_series": "ROOM-.####",
             "building": self.building, "room_number": f"R{slot}{tag}", "bed_capacity": 4,
             "readiness_status": "Ready",
         }).insert(ignore_permissions=True).name
         bed = frappe.get_doc({
-            "doctype": "Accommodation Bed", "naming_series": "BED-.####", "room": room,
+            "doctype": "Bed", "naming_series": "BED-.####", "room": room,
             "building": self.building, "bed_code": f"B{slot}{tag}", "status": "Available",
         }).insert(ignore_permissions=True).name
         emp = frappe.get_doc({
@@ -65,7 +65,7 @@ class TestIdleResidentCandidates(FrappeTestCase):
             "gender": "Male", "date_of_birth": "1990-01-01", "date_of_joining": "2020-01-01",
         }).insert(ignore_permissions=True).name
         asg = frappe.get_doc({
-            "doctype": "Accommodation Assignment", "naming_series": "ACC-ASGN-.YYYY.-.####",
+            "doctype": "Housing Assignment", "naming_series": "ACC-ASGN-.YYYY.-.####",
             "employee": emp, "project": project, "building": self.building, "room": room,
             "bed": bed, "cost_center": self.cc, "check_in_date": "2026-06-01",
             "assignment_type": "New Assignment",
@@ -86,7 +86,7 @@ class TestIdleResidentCandidates(FrappeTestCase):
         self.assertIsNone(by_asg[self.asg_done]["existing_idle_report"])
 
     def test_existing_open_idle_report_is_joined(self):
-        emp = frappe.db.get_value("Accommodation Assignment", self.asg_done, "employee")
+        emp = frappe.db.get_value("Housing Assignment", self.asg_done, "employee")
         report = frappe.get_doc({
             "doctype": "Idle Resident Report", "naming_series": "IDLE-.YYYY.-.####",
             "party_type": "Employee", "party": emp, "employee": emp,

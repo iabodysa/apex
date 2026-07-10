@@ -40,8 +40,8 @@ class TestFormDashboards(ApexHabitatTestCase):
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
-        site = frappe.get_doc({"doctype": "Accommodation Site", "site_name": _h(6)}).insert(ignore_permissions=True)
-        b = frappe.get_doc({"doctype": "Accommodation Building", "building_name": "B " + _h(),
+        site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        b = frappe.get_doc({"doctype": "Building", "building_name": "B " + _h(),
                             "site": site.name, "total_capacity": 4, "default_cost_center": cc}).insert(ignore_permissions=True)
         m = get_building_metrics(b.name)
         for key in ("labels", "occupancy", "active_occupants", "open_maintenance", "open_custody"):

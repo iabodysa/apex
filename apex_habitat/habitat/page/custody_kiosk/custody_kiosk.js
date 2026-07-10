@@ -143,7 +143,7 @@ class CustodyKiosk {
 			fieldname: "building",
 			label: __("Building"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 			change: () => {
 				const val = this.building_field.get_value() || null;
 				if (val !== this.building) {

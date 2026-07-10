@@ -2,7 +2,7 @@
 """get_site_address resolves the building's address from the SAVED record.
 
 Regression for T-143: the building-address-over-site fallback is live in the
-controller (accommodation_building.get_site_address) but the existing suite only
+controller (building.get_site_address) but the existing suite only
 drives it through the unsaved-form path (T-138/T-144), passing `site` /
 `building_address` explicitly as keyword args. The persistence path — where BOTH
 args are omitted (None) and the endpoint reads the STORED `building_address` and
@@ -17,7 +17,7 @@ assert the precedence ORDER end-to-end from the database:
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import (
+from apex_habitat.habitat.doctype.building.building import (
     get_site_address,
 )
 from apex_habitat.tests.factories import make_building, make_company
@@ -25,9 +25,9 @@ from apex_habitat.tests.factories import make_building, make_company
 
 def _ensure_site(name):
     """Per-name idempotent Accommodation Site (re-runnable across test sessions)."""
-    if not frappe.db.exists("Accommodation Site", name):
+    if not frappe.db.exists("Site", name):
         frappe.get_doc(
-            {"doctype": "Accommodation Site", "site_name": name}
+            {"doctype": "Site", "site_name": name}
         ).insert(ignore_permissions=True)
     return name
 
@@ -65,7 +65,7 @@ class TestBuildingAddressFallback(FrappeTestCase):
         site = _ensure_site("T143 Fallback Site A")
         _ensure_address(
             "T143 Fallback Site A Addr", "Site Street 5", "Riyadh",
-            link_doctype="Accommodation Site", link_name=site,
+            link_doctype="Site", link_name=site,
         )
         bldg = make_building(name="T143 Fallback Bldg A", site=site).name
 
@@ -78,7 +78,7 @@ class TestBuildingAddressFallback(FrappeTestCase):
         site = _ensure_site("T143 Fallback Site B")
         _ensure_address(
             "T143 Fallback Site B Addr", "Site Street 7", "Riyadh",
-            link_doctype="Accommodation Site", link_name=site,
+            link_doctype="Site", link_name=site,
         )
         own = _ensure_address("T143 Fallback Own B Addr", "Own Street 9", "Jeddah")
         bldg = make_building(
@@ -96,14 +96,14 @@ class TestBuildingAddressFallback(FrappeTestCase):
         site = _ensure_site("T139 Reconcile Site")
         _ensure_address(
             "T139 Reconcile Site Addr", "Site Street 21", "Riyadh",
-            link_doctype="Accommodation Site", link_name=site,
+            link_doctype="Site", link_name=site,
         )
         # building_address Link field stays empty; the own address lives only in the
         # native Dynamic Link, so the building must exist before the Address links to it.
         bldg = make_building(name="T139 Reconcile Bldg", site=site).name
         _ensure_address(
             "T139 Reconcile Own Addr", "Legacy Own Street 23", "Jeddah",
-            link_doctype="Accommodation Building", link_name=bldg,
+            link_doctype="Building", link_name=bldg,
         )
 
         text = get_site_address(bldg)  # no args -> empty Link field, falls to Dynamic Link
@@ -116,7 +116,7 @@ class TestBuildingAddressFallback(FrappeTestCase):
         site = _ensure_site("T143 Fallback Site C")
         _ensure_address(
             "T143 Fallback Site C Addr", "Site Street 11", "Riyadh",
-            link_doctype="Accommodation Site", link_name=site,
+            link_doctype="Site", link_name=site,
         )
         own = _ensure_address("T143 Fallback Own C Addr", "Own Street 13", "Jeddah")
         bldg = make_building(
@@ -127,7 +127,7 @@ class TestBuildingAddressFallback(FrappeTestCase):
         self.assertIn("Own Street 13", get_site_address(bldg))
 
         # Clear the stored own address; the saved-record path now falls to the site.
-        frappe.db.set_value("Accommodation Building", bldg, "building_address", None)
+        frappe.db.set_value("Building", bldg, "building_address", None)
         cleared = get_site_address(bldg)
         self.assertIn("Site Street 11", cleared)   # site fallback re-engages
         self.assertNotIn("Own Street 13", cleared)  # the cleared own address is gone

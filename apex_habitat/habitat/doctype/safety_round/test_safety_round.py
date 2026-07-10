@@ -24,7 +24,7 @@ class TestSafetyRound(FrappeTestCase):
         # A building to round, and a catalog task to execute against it.
         self.building = frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": f"Round Bldg {tag}",
                 "status": "Active",
             }

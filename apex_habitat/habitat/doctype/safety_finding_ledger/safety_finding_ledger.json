@@ -51,7 +51,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "read_only": 1,
    "search_index": 1
   },

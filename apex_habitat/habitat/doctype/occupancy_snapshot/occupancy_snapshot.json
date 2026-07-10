@@ -1,0 +1,208 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-05-25 02:25:52.632364",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "occ_sec_snapshot",
+  "naming_series",
+  "snapshot_date",
+  "occ_col_snapshot",
+  "building",
+  "col_break_occ",
+  "active_occupants",
+  "total_capacity",
+  "occ_col_occ2",
+  "available_capacity",
+  "occupancy_percent",
+  "occ_col_occ3",
+  "cost_bleeding",
+  "sec_rooms",
+  "full_rooms",
+  "col_break_rooms",
+  "partial_rooms",
+  "occ_col_rooms3",
+  "available_rooms"
+ ],
+ "fields": [
+  {
+   "fieldname": "occ_sec_snapshot",
+   "fieldtype": "Section Break",
+   "label": "Snapshot"
+  },
+  {
+   "default": "ACC-OCC-.YYYY.-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Naming Series",
+   "options": "ACC-OCC-.YYYY.-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "snapshot_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Snapshot Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "occ_col_snapshot",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "building",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Building",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "col_break_occ",
+   "fieldtype": "Section Break",
+   "label": "Occupancy"
+  },
+  {
+   "fieldname": "active_occupants",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Active Occupants",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_capacity",
+   "fieldtype": "Int",
+   "label": "Total Capacity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "occ_col_occ2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "available_capacity",
+   "fieldtype": "Int",
+   "label": "Available Capacity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "occupancy_percent",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Occupancy %",
+   "read_only": 1
+  },
+  {
+   "fieldname": "occ_col_occ3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_bleeding",
+   "fieldtype": "Currency",
+   "label": "Cost Bleeding (SAR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_rooms",
+   "fieldtype": "Section Break",
+   "label": "Room Status Breakdown"
+  },
+  {
+   "fieldname": "full_rooms",
+   "fieldtype": "Int",
+   "label": "Full Rooms",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_rooms",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "partial_rooms",
+   "fieldtype": "Int",
+   "label": "Partially Occupied Rooms",
+   "read_only": 1
+  },
+  {
+   "fieldname": "occ_col_rooms3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "available_rooms",
+   "fieldtype": "Int",
+   "label": "Available Rooms",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-06-27 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Habitat",
+ "name": "Occupancy Snapshot",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Resident Supervisor",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "snapshot_date",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "building"
+}

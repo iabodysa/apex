@@ -6,7 +6,7 @@
  "days_in_advance": 2,
  "docstatus": 0,
  "doctype": "Notification",
- "document_type": "Accommodation Assignment",
+ "document_type": "Housing Assignment",
  "enabled": 0,
  "event": "Days Before",
  "idx": 0,
@@ -26,5 +26,5 @@
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
  "subject": "Temporary Stay Ending: {{ doc.name }}",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-07-10 06:05:34.129545"
 }

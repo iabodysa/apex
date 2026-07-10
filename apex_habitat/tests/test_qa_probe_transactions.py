@@ -3,7 +3,7 @@
 
 import frappe
 from apex_habitat.tests.factories import ApexHabitatTestCase
-from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import (
+from apex_habitat.habitat.doctype.building.building import (
     generate_rooms_and_beds,
 )
 
@@ -35,13 +35,13 @@ class QABase(ApexHabitatTestCase):
             "date_of_birth": "1990-01-01", "date_of_joining": "2020-01-01",
         }).insert(ignore_permissions=True).name
         self.site = frappe.get_doc({
-            "doctype": "Accommodation Site", "site_name": _hash(6),
+            "doctype": "Site", "site_name": _hash(6),
         }).insert(ignore_permissions=True)
 
     def _make_building(self, room_count=3, room_type="Standard", capacity=2, total_capacity=50):
         abbr = "B" + _hash(3)
         b = frappe.get_doc({
-            "doctype": "Accommodation Building",
+            "doctype": "Building",
             "building_name": f"Bldg {abbr}",
             "abbreviation": abbr,
             "site": self.site.name,
@@ -57,13 +57,13 @@ class QABase(ApexHabitatTestCase):
         return b
 
     def _first_room_bed(self, building):
-        room = frappe.get_all("Accommodation Room", {"building": building}, pluck="name")[0]
-        bed = frappe.get_all("Accommodation Bed", {"room": room}, pluck="name")[0]
+        room = frappe.get_all("Room", {"building": building}, pluck="name")[0]
+        bed = frappe.get_all("Bed", {"room": room}, pluck="name")[0]
         return room, bed
 
     def _assignment(self, building, room, bed, employee=None):
         a = frappe.get_doc({
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "employee": employee or self.employee, "project": self.project,
             "cost_center": self.cost_center, "building": building,
             "room": room, "bed": bed, "check_in_date": "2026-05-01",
@@ -79,9 +79,9 @@ class TestRoomGenerator(QABase):
     def test_1a_rerun_same_plan_no_duplicates(self):
         b = self._make_building(room_count=3)
         generate_rooms_and_beds(b.name)
-        before = frappe.db.count("Accommodation Room", {"building": b.name})
+        before = frappe.db.count("Room", {"building": b.name})
         res = generate_rooms_and_beds(b.name)
-        after = frappe.db.count("Accommodation Room", {"building": b.name})
+        after = frappe.db.count("Room", {"building": b.name})
         print(f"\n[1a] rooms before={before} after={after} created={res['created_rooms']} skipped={res['skipped_rooms']}")
         self.assertEqual(after, before, "BUG: re-run created duplicate rooms")
         self.assertEqual(res["created_rooms"], 0)
@@ -90,13 +90,13 @@ class TestRoomGenerator(QABase):
     def test_1b_change_room_type_updates_existing(self):
         b = self._make_building(room_count=3, room_type="Standard")
         generate_rooms_and_beds(b.name)
-        room = frappe.get_all("Accommodation Room", {"building": b.name}, pluck="name")[0]
+        room = frappe.get_all("Room", {"building": b.name}, pluck="name")[0]
 
         b.reload()
         b.floor_plan[0].room_type = "Supervisor"
         b.save(ignore_permissions=True)
         res = generate_rooms_and_beds(b.name)
-        type_after = frappe.db.get_value("Accommodation Room", room, "room_type")
+        type_after = frappe.db.get_value("Room", room, "room_type")
         print(f"\n[1b] room_type after={type_after} updated={res.get('updated_rooms')} created={res.get('created_rooms')}")
         self.assertEqual(type_after, "Supervisor", "existing room type must update to match the plan")
         self.assertGreaterEqual(res.get("updated_rooms", 0), 1)
@@ -106,7 +106,7 @@ class TestRoomGenerator(QABase):
     def test_1c_increase_room_count_requires_confirmation(self):
         b = self._make_building(room_count=3)
         generate_rooms_and_beds(b.name)
-        before = frappe.db.count("Accommodation Room", {"building": b.name})
+        before = frappe.db.count("Room", {"building": b.name})
 
         b.reload()
         b.floor_plan[0].room_count = 5
@@ -114,7 +114,7 @@ class TestRoomGenerator(QABase):
 
         # [#dz2rbh]
         res = generate_rooms_and_beds(b.name)
-        mid = frappe.db.count("Accommodation Room", {"building": b.name})
+        mid = frappe.db.count("Room", {"building": b.name})
         print(f"\n[1c] no-confirm before={before} after={mid} created={res.get('created_rooms')} pending={res.get('pending_new_rooms')} needs_confirmation={res.get('needs_confirmation')}")
         self.assertTrue(res.get("needs_confirmation"), "new rooms must require confirmation")
         self.assertEqual(res.get("created_rooms"), 0)
@@ -123,7 +123,7 @@ class TestRoomGenerator(QABase):
 
         # [#76jxz7]
         res2 = generate_rooms_and_beds(b.name, confirm_new_rooms=1)
-        after = frappe.db.count("Accommodation Room", {"building": b.name})
+        after = frappe.db.count("Room", {"building": b.name})
         print(f"[1c] confirmed after={after} created={res2.get('created_rooms')}")
         self.assertEqual(res2.get("created_rooms"), 2)
         self.assertEqual(after, before + 2)
@@ -138,14 +138,14 @@ class TestCheckout(QABase):
         a = self._assignment(b.name, room, bed)
 
         c1 = frappe.get_doc({
-            "doctype": "Accommodation Checkout", "assignment": a.name,
+            "doctype": "Housing Checkout", "assignment": a.name,
             "checkout_date": "2026-05-21", "checkout_reason": "Final Exit",
         })
         c1.insert(ignore_permissions=True)
         c1.submit()
 
         c2 = frappe.get_doc({
-            "doctype": "Accommodation Checkout", "assignment": a.name,
+            "doctype": "Housing Checkout", "assignment": a.name,
             "checkout_date": "2026-05-22", "checkout_reason": "Final Exit",
         })
         rejected = False
@@ -168,7 +168,7 @@ class TestCancelledRecreate(QABase):
 
         a1 = self._assignment(b.name, room, bed)
         a1.cancel()
-        print(f"\n[3] a1 docstatus after cancel={a1.docstatus}, bed status={frappe.db.get_value('Accommodation Bed', bed, 'status')}")
+        print(f"\n[3] a1 docstatus after cancel={a1.docstatus}, bed status={frappe.db.get_value('Bed', bed, 'status')}")
 
         allowed = True
         err = None
@@ -189,7 +189,7 @@ class TestCancelledRecreate(QABase):
         self._assignment_a = a
 
         c1 = frappe.get_doc({
-            "doctype": "Accommodation Checkout", "assignment": a.name,
+            "doctype": "Housing Checkout", "assignment": a.name,
             "checkout_date": "2026-05-21", "checkout_reason": "Final Exit",
         })
         c1.insert(ignore_permissions=True)
@@ -198,10 +198,10 @@ class TestCancelledRecreate(QABase):
         c1.cancellation_reason = "QA test"
         c1.cancel()
         a.reload()
-        print(f"\n[3b] after checkout cancel: assignment.check_out_date={a.check_out_date}, bed={frappe.db.get_value('Accommodation Bed', bed, 'status')}")
+        print(f"\n[3b] after checkout cancel: assignment.check_out_date={a.check_out_date}, bed={frappe.db.get_value('Bed', bed, 'status')}")
 
         c2 = frappe.get_doc({
-            "doctype": "Accommodation Checkout", "assignment": a.name,
+            "doctype": "Housing Checkout", "assignment": a.name,
             "checkout_date": "2026-05-23", "checkout_reason": "Final Exit",
         })
         allowed = True
@@ -357,7 +357,7 @@ class TestDuplicateOverlap(QABase):
         # gate (has_approval_access), to land a submitted (Approved) lease.
         from frappe.model.workflow import apply_workflow
         lease = frappe.get_doc({
-            "doctype": "Accommodation Lease", "naming_series": "ACC-LEASE-.YYYY.-.####",
+            "doctype": "Lease", "naming_series": "ACC-LEASE-.YYYY.-.####",
             "building": building, "company": self.company, "status": "Draft",
             "lease_start_date": start, "lease_end_date": end,
             "rent_amount": 1000, "billing_cycle": "Monthly", "first_payment_date": first_pay,
@@ -384,7 +384,7 @@ class TestDuplicateOverlap(QABase):
     # [#rndih9]
     def test_5c_two_work_orders_same_request(self):
         b = self._make_building()
-        room, _bed = self._first_room_bed(b.name) if frappe.db.count("Accommodation Room", {"building": b.name}) else (None, None)
+        room, _bed = self._first_room_bed(b.name) if frappe.db.count("Room", {"building": b.name}) else (None, None)
         if not room:
             generate_rooms_and_beds(b.name)
             room, _bed = self._first_room_bed(b.name)

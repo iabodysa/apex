@@ -5,7 +5,7 @@
   "records": [
     {
       "kanban_board_name": "Resident Requests",
-      "reference_doctype": "Accommodation Resident Request",
+      "reference_doctype": "Resident Request",
       "field_name": "status",
       "private": 0,
       "show_labels": 1,
@@ -39,7 +39,7 @@
     },
     {
       "kanban_board_name": "Room Readiness",
-      "reference_doctype": "Accommodation Room",
+      "reference_doctype": "Room",
       "field_name": "readiness_status",
       "private": 0,
       "show_labels": 1,

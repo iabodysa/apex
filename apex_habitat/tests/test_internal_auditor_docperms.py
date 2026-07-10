@@ -32,7 +32,7 @@ _TARGET_DOCTYPES = {
     "facility_asset_movement": ["System Manager", "Accommodation Manager", "Resident Supervisor"],
     "facility_asset_custody_assignment": ["System Manager", "Accommodation Manager", "Resident Supervisor"],
     "utility_bill_entry": ["System Manager", "Accommodation Manager", "Finance Manager"],
-    "accommodation_lease": ["System Manager", "Accommodation Manager", "Finance Manager"],
+    "lease": ["System Manager", "Accommodation Manager", "Finance Manager"],
     "accommodation_ledger": ["System Manager", "Finance Manager"],
     "cleaning_log": ["System Manager", "Accommodation Manager", "Resident Supervisor", "Cleaning Supervisor"],
 }
@@ -115,7 +115,7 @@ class TestInternalAuditorDocPerms(unittest.TestCase):
         self._check_doctype("utility_bill_entry", _TARGET_DOCTYPES["utility_bill_entry"])
 
     def test_accommodation_lease(self):
-        self._check_doctype("accommodation_lease", _TARGET_DOCTYPES["accommodation_lease"])
+        self._check_doctype("lease", _TARGET_DOCTYPES["lease"])
 
     def test_accommodation_ledger_edited_not_duplicated(self):
         """Existing Internal Auditor row was edited in-place; must not be duplicated."""

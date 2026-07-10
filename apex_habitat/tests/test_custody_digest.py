@@ -32,7 +32,7 @@ class TestWeeklyCustodyDigest(FrappeTestCase):
         return (
             frappe.get_doc(
                 {
-                    "doctype": "Accommodation Building",
+                    "doctype": "Building",
                     "building_name": f"CD-BLD-{frappe.generate_hash(length=6)}",
                     "responsible_facility_supervisor": supervisor,
                 }
@@ -81,7 +81,7 @@ class TestWeeklyCustodyDigest(FrappeTestCase):
         # over only that building must send nothing.
         orphan = frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": f"CD-ORPH-{frappe.generate_hash(length=6)}",
             }
         ).insert(ignore_permissions=True).name

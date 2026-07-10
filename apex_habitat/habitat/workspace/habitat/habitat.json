@@ -37,13 +37,13 @@
    "role": "System Manager"
   }
  ],
- "content": "[{\"id\": \"habHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat</b></span>\", \"col\": 12}}, {\"id\": \"habChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Occupancy Percent Trend\", \"col\": 12}}, {\"id\": \"habHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"habScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Assignment\", \"col\": 3}}, {\"id\": \"habScMaint\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"habScCustody\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"habScBuilding\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Building\", \"col\": 3}}, {\"id\": \"habHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"habNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 3}}, {\"id\": \"habNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"habNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"secDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"habCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation\", \"col\": 4}}, {\"id\": \"habCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Operations\", \"col\": 4}}, {\"id\": \"secMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"mdCard_MasterData\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
+ "content": "[{\"id\": \"habHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat</b></span>\", \"col\": 12}}, {\"id\": \"habChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Occupancy Percent Trend\", \"col\": 12}}, {\"id\": \"habHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"habScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Assignment\", \"col\": 3}}, {\"id\": \"habScMaint\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"habScCustody\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"habScBuilding\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building\", \"col\": 3}}, {\"id\": \"habHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"habNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 3}}, {\"id\": \"habNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"habNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"secDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"habCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Accommodation\", \"col\": 4}}, {\"id\": \"habCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Operations\", \"col\": 4}}, {\"id\": \"secMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"mdCard_MasterData\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
-   "label": "Accommodation Assignment",
-   "link_to": "Accommodation Assignment",
+   "label": "Housing Assignment",
+   "link_to": "Housing Assignment",
    "color": "Green",
    "idx": 1
   },
@@ -67,8 +67,8 @@
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
-   "label": "Accommodation Building",
-   "link_to": "Accommodation Building",
+   "label": "Building",
+   "link_to": "Building",
    "idx": 4
   }
  ],
@@ -83,9 +83,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Accommodation Assignment",
+   "label": "Housing Assignment",
    "link_type": "DocType",
-   "link_to": "Accommodation Assignment",
+   "link_to": "Housing Assignment",
    "idx": 2
   },
   {
@@ -120,9 +120,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Accommodation Building",
+   "label": "Building",
    "link_type": "DocType",
-   "link_to": "Accommodation Building",
+   "link_to": "Building",
    "idx": 7
   }
  ],
@@ -155,5 +155,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-10 04:16:24.090710"
+ "modified": "2026-07-10 06:05:34.129545"
 }

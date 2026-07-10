@@ -23,10 +23,10 @@ APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
 # [#eezzqo]
 DOCTYPE_SPECS = {
-    "Accommodation Assignment": ("habitat/doctype/accommodation_assignment/accommodation_assignment.json", 1, 0, 0, "Resident Type", "Resident"),
-    "Accommodation Checkout": ("habitat/doctype/accommodation_checkout/accommodation_checkout.json", 0, 1, 1, "Resident Type", "Resident"),
+    "Housing Assignment": ("habitat/doctype/housing_assignment/housing_assignment.json", 1, 0, 0, "Resident Type", "Resident"),
+    "Housing Checkout": ("habitat/doctype/housing_checkout/housing_checkout.json", 0, 1, 1, "Resident Type", "Resident"),
     "Room Bed Transfer": ("habitat/doctype/room_bed_transfer/room_bed_transfer.json", 0, 1, 1, "Resident Type", "Resident"),
-    "Accommodation Resident Request": ("habitat/doctype/accommodation_resident_request/accommodation_resident_request.json", 0, 0, 0, "Resident Type", "Resident"),
+    "Resident Request": ("habitat/doctype/resident_request/resident_request.json", 0, 0, 0, "Resident Type", "Resident"),
     "Idle Resident Report": ("habitat/doctype/idle_resident_report/idle_resident_report.json", 1, 0, 0, "Resident Type", "Resident"),
     "Accommodation Ledger": ("habitat/doctype/accommodation_ledger/accommodation_ledger.json", 0, 1, 1, "Resident Type", "Resident"),
     "Masar Worker Token": ("apex_core/doctype/masar_worker_token/masar_worker_token.json", 1, 0, 0, "Worker Type", "Worker"),
@@ -200,10 +200,10 @@ class TestTemporaryWorkerLink(unittest.TestCase):
     def test_repoint_map_matches_party_doctypes(self):
         from apex_habitat.habitat.temporary_worker_engine import PARTY_DOCTYPES
         expected = {
-            "Accommodation Assignment": "employee",
-            "Accommodation Checkout": "employee",
+            "Housing Assignment": "employee",
+            "Housing Checkout": "employee",
             "Room Bed Transfer": "employee",
-            "Accommodation Resident Request": "employee",
+            "Resident Request": "employee",
             "Idle Resident Report": "employee",
             "Accommodation Ledger": "employee",
             "Masar Worker Token": "employee",
@@ -239,7 +239,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         self.assertIn('party_type, party = "Employee", employee', src)
 
     def test_bed_has_is_temporary_flag(self):
-        fields, _fo = _fields("habitat/doctype/accommodation_bed/accommodation_bed.json")
+        fields, _fo = _fields("habitat/doctype/bed/bed.json")
         self.assertIn("is_temporary", fields, "Accommodation Bed missing is_temporary")
         self.assertEqual(fields["is_temporary"]["fieldtype"], "Check")
         self.assertTrue(fields["is_temporary"].get("read_only"), "is_temporary must be read-only")
@@ -393,7 +393,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
         # The housing-past-expiry guard lives in the assignment controller (all paths).
         with open(
             os.path.join(
-                APP_ROOT, "habitat", "doctype", "accommodation_assignment", "accommodation_assignment.py"
+                APP_ROOT, "habitat", "doctype", "housing_assignment", "housing_assignment.py"
             ),
             encoding="utf-8",
         ) as fh:

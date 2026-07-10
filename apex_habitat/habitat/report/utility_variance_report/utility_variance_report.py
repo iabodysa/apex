@@ -9,7 +9,7 @@ def execute(filters=None):
     columns = [
         {"label": frappe._("Bill"), "fieldname": "name", "fieldtype": "Link", "options": "Utility Bill Entry", "width": 150},
         {"label": frappe._("Utility Account"), "fieldname": "utility_account", "fieldtype": "Link", "options": "Utility Account", "width": 150},
-        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 150},
+        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 150},
         {"label": frappe._("Utility Type"), "fieldname": "utility_type", "fieldtype": "Data", "width": 110},
         {"label": frappe._("Amount (SAR)"), "fieldname": "bill_amount_sar", "fieldtype": "Currency", "width": 130},
         {"label": frappe._("Consumption"), "fieldname": "consumption_units", "fieldtype": "Float", "width": 110},

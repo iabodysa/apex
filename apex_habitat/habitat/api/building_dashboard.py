@@ -1,9 +1,9 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""On-form dashboard metrics for the Accommodation Building form.
+"""On-form dashboard metrics for the Building form.
 
 Frappe's form `get_data()` only renders the links/transactions section; the
 occupancy chart and indicator counts at the top of the form are rendered
-client-side (accommodation_building.js) from this whitelisted reader.
+client-side (building.js) from this whitelisted reader.
 """
 
 from __future__ import annotations
@@ -25,10 +25,10 @@ def get_building_layout(building: str) -> dict:
       - red    : status "Full"
       - grey   : status "Under Maintenance" or "Out of Service"
     """
-    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+    frappe.has_permission("Building", "read", doc=building, throw=True)
 
     rooms = frappe.get_all(
-        "Accommodation Room",
+        "Room",
         filters={"building": building},
         fields=[
             "name",
@@ -106,10 +106,10 @@ def get_building_layout(building: str) -> dict:
 
 @frappe.whitelist()
 def get_building_metrics(building: str) -> dict:
-    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+    frappe.has_permission("Building", "read", doc=building, throw=True)
 
     snaps = frappe.get_all(
-        "Accommodation Occupancy Snapshot",
+        "Occupancy Snapshot",
         filters={"building": building},
         fields=["snapshot_date", "occupancy_percent"],
         order_by="snapshot_date asc",
@@ -119,7 +119,7 @@ def get_building_metrics(building: str) -> dict:
         "labels": [str(s.snapshot_date) for s in snaps],
         "occupancy": [flt(s.occupancy_percent) for s in snaps],
         "active_occupants": frappe.db.count(
-            "Accommodation Assignment",
+            "Housing Assignment",
             {"building": building, "docstatus": 1, "check_out_date": ["is", "not set"]},
         ),
         "open_maintenance": frappe.db.count(

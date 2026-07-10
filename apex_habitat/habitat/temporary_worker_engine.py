@@ -24,10 +24,10 @@ _IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_ ]*$")
 
 # [#g9r6ee]
 PARTY_DOCTYPES = {
-    "Accommodation Assignment": "employee",
-    "Accommodation Checkout": "employee",
+    "Housing Assignment": "employee",
+    "Housing Checkout": "employee",
     "Room Bed Transfer": "employee",
-    "Accommodation Resident Request": "employee",
+    "Resident Request": "employee",
     "Idle Resident Report": "employee",
     "Accommodation Ledger": "employee",
     "Masar Worker Token": "employee",
@@ -119,7 +119,7 @@ def _link(tw, employee: str) -> None:
 
     # [#28clra]
     for asg in frappe.get_all(
-        "Accommodation Assignment",
+        "Housing Assignment",
         filters={"employee": employee, "docstatus": 1, "check_out_date": ["is", "not set"]},
         fields=["name", "check_in_date"],
     ):

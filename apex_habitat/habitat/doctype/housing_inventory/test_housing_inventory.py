@@ -45,10 +45,10 @@ class TestHousingInventory(FrappeTestCase):
         populates building while the room field keeps a valid Room link."""
         h = frappe.generate_hash(length=6)
         building = frappe.get_doc({
-            "doctype": "Accommodation Building", "building_name": "HI Bldg " + h,
+            "doctype": "Building", "building_name": "HI Bldg " + h,
         }).insert(ignore_permissions=True, ignore_links=True).name
         room = frappe.get_doc({
-            "doctype": "Accommodation Room", "room_number": "HIR" + h, "building": building,
+            "doctype": "Room", "room_number": "HIR" + h, "building": building,
         }).insert(ignore_permissions=True, ignore_links=True).name
         doc = frappe.get_doc({
             "doctype": "Housing Inventory",
@@ -61,7 +61,7 @@ class TestHousingInventory(FrappeTestCase):
         self.assertEqual(doc.building, building)
         # The room field stays a valid Accommodation Room link, not a Building docname.
         self.assertEqual(doc.room, room)
-        self.assertTrue(frappe.db.exists("Accommodation Room", doc.room))
+        self.assertTrue(frappe.db.exists("Room", doc.room))
         frappe.delete_doc("Housing Inventory", doc.name, force=True, ignore_permissions=True)
 
     def test_variance_is_derived_on_save(self):
@@ -91,7 +91,7 @@ class TestHousingInventoryMaintenanceReflection(FrappeTestCase):
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         self.building = frappe.get_doc({
-            "doctype": "Accommodation Building", "building_name": "B " + self._h(),
+            "doctype": "Building", "building_name": "B " + self._h(),
             "total_capacity": 4, "company": self.company,
         }).insert(ignore_permissions=True, ignore_links=True).name
         self.asset = frappe.get_doc({
@@ -122,7 +122,7 @@ class TestHousingInventoryMaintenanceReflection(FrappeTestCase):
 
     def _room(self):
         return frappe.get_doc({
-            "doctype": "Accommodation Room", "room_number": "R" + self._h(),
+            "doctype": "Room", "room_number": "R" + self._h(),
             "building": self.building,
         }).insert(ignore_permissions=True, ignore_links=True).name
 

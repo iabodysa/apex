@@ -62,10 +62,10 @@ def make_company(name="Test AFMCO", **kwargs):
 
 def make_building(name=None, company=None, **kwargs):
     name = name or "Test Building"
-    if frappe.db.exists("Accommodation Building", name):
-        return frappe.get_doc("Accommodation Building", name)
+    if frappe.db.exists("Building", name):
+        return frappe.get_doc("Building", name)
     doc = frappe.get_doc({
-        "doctype": "Accommodation Building",
+        "doctype": "Building",
         "building_name": name,
         "status": "Active",
         "total_capacity": kwargs.pop("total_capacity", 10),
@@ -78,10 +78,10 @@ def make_building(name=None, company=None, **kwargs):
 
 def make_room(building, room_number=None, **kwargs):
     room_number = room_number or f"{building}-R01"
-    if frappe.db.exists("Accommodation Room", room_number):
-        return frappe.get_doc("Accommodation Room", room_number)
+    if frappe.db.exists("Room", room_number):
+        return frappe.get_doc("Room", room_number)
     doc = frappe.get_doc({
-        "doctype": "Accommodation Room",
+        "doctype": "Room",
         "room_number": room_number,
         "building": building,
         "bed_capacity": kwargs.pop("bed_capacity", 2),
@@ -94,10 +94,10 @@ def make_room(building, room_number=None, **kwargs):
 
 def make_bed(room, bed_code=None, **kwargs):
     bed_code = bed_code or f"{room}-B01"
-    if frappe.db.exists("Accommodation Bed", bed_code):
-        return frappe.get_doc("Accommodation Bed", bed_code)
+    if frappe.db.exists("Bed", bed_code):
+        return frappe.get_doc("Bed", bed_code)
     doc = frappe.get_doc({
-        "doctype": "Accommodation Bed",
+        "doctype": "Bed",
         "bed_code": bed_code,
         "room": room,
         "status": "Available",
@@ -153,10 +153,10 @@ def make_project(name):
 
 def make_site(name):
     """Get-or-create an Accommodation Site by ``site_name``; return its name."""
-    s = frappe.db.get_value("Accommodation Site", {"site_name": name}, "name")
+    s = frappe.db.get_value("Site", {"site_name": name}, "name")
     if not s:
         s = frappe.get_doc(
-            {"doctype": "Accommodation Site", "site_name": name, "company": default_company()}
+            {"doctype": "Site", "site_name": name, "company": default_company()}
         ).insert(ignore_permissions=True).name
     return s
 
@@ -164,11 +164,11 @@ def make_site(name):
 def make_masar_building(name):
     """Get-or-create an Accommodation Building on the shared Masar test site,
     carrying a ``google_maps_url``; return its name."""
-    b = frappe.db.get_value("Accommodation Building", {"building_name": name}, "name")
+    b = frappe.db.get_value("Building", {"building_name": name}, "name")
     if not b:
         b = frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": name,
                 "site": make_site("Masar Test Site"),
                 "total_capacity": 50,
@@ -180,16 +180,16 @@ def make_masar_building(name):
 
 def make_building_with_coords(name, lat, lng):
     """Get-or-create a building carrying pickup coordinates (idempotent on re-run)."""
-    existing = frappe.db.get_value("Accommodation Building", {"building_name": name}, "name")
+    existing = frappe.db.get_value("Building", {"building_name": name}, "name")
     if existing:
         frappe.db.set_value(
-            "Accommodation Building", existing, {"pickup_lat": lat, "pickup_lng": lng}
+            "Building", existing, {"pickup_lat": lat, "pickup_lng": lng}
         )
         return existing
     return (
         frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": name,
                 "site": make_site("Masar GPS Test Site"),
                 "total_capacity": 20,
@@ -364,30 +364,30 @@ def make_assignment(employee, building, project, room_number=None, bed_code=None
     (creating the room + bed if needed). Returns the assignment name."""
     room_number = room_number or f"{building}-GPS-R"
     bed_code = bed_code or f"{building}-GPS-B"
-    if not frappe.db.exists("Accommodation Room", room_number):
+    if not frappe.db.exists("Room", room_number):
         frappe.get_doc(
             {
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "room_number": room_number,
                 "building": building,
                 "bed_capacity": 4,
                 "status": "Available",
             }
         ).insert(ignore_permissions=True)
-    if not frappe.db.exists("Accommodation Bed", bed_code):
+    if not frappe.db.exists("Bed", bed_code):
         frappe.get_doc(
             {
-                "doctype": "Accommodation Bed",
+                "doctype": "Bed",
                 "bed_code": bed_code,
                 "room": room_number,
                 "status": "Available",
             }
         ).insert(ignore_permissions=True)
-    company = frappe.db.get_value("Accommodation Building", building, "company") or default_company()
+    company = frappe.db.get_value("Building", building, "company") or default_company()
     cost_center = frappe.db.get_value("Cost Center", {"company": company, "is_group": 0}, "name")
     doc = frappe.get_doc(
         {
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "employee": employee,
             "building": building,
             "room": room_number,
@@ -537,7 +537,7 @@ def snapshot_building_baseline():
     Called from ``tests/before_tests.py`` (the ``before_tests`` hook)."""
     _BUILDING_BASELINE.clear()
     _BUILDING_BASELINE.update(
-        frappe.get_all("Accommodation Building", pluck="name")
+        frappe.get_all("Building", pluck="name")
     )
 
 
@@ -552,12 +552,12 @@ def purge_test_buildings():
     are themselves suite pollution)."""
     frappe.set_user("Administrator")
     removed = 0
-    for name in frappe.get_all("Accommodation Building", pluck="name"):
+    for name in frappe.get_all("Building", pluck="name"):
         if name in _BUILDING_BASELINE:
             continue
         try:
             frappe.delete_doc(
-                "Accommodation Building", name, ignore_permissions=True, force=True
+                "Building", name, ignore_permissions=True, force=True
             )
             removed += 1
         except Exception:

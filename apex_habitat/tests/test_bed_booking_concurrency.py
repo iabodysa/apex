@@ -45,8 +45,8 @@ ASSIGNMENT_CONTROLLER = os.path.normpath(
         "..",
         "habitat",
         "doctype",
-        "accommodation_assignment",
-        "accommodation_assignment.py",
+        "housing_assignment",
+        "housing_assignment.py",
     )
 )
 
@@ -76,7 +76,7 @@ class TestBedBookingConcurrencyGuard(unittest.TestCase):
         self.assertIn(
             FOR_UPDATE_FRAGMENT,
             source,
-            "The string 'FOR UPDATE' was not found in accommodation_assignment.py. "
+            "The string 'FOR UPDATE' was not found in housing_assignment.py. "
             "The SELECT FOR UPDATE concurrency guard has been removed. "
             "Restore it in the on_submit handler before merging.",
         )
@@ -98,7 +98,7 @@ class TestBedBookingConcurrencyGuard(unittest.TestCase):
 
         self.assertIsNotNone(
             on_submit_node,
-            "Function 'on_submit' not found in accommodation_assignment.py. "
+            "Function 'on_submit' not found in housing_assignment.py. "
             "The submit hook has been renamed or removed.",
         )
 

@@ -26,7 +26,7 @@ class TestDailyCleaningCompliance(FrappeTestCase):
 
         self.building = frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": f"DCC Bldg {tag}",
                 "status": "Active",
             }
@@ -36,14 +36,14 @@ class TestDailyCleaningCompliance(FrappeTestCase):
         # -> a stable 50% the report must reproduce from the ledger).
         self.room_a = frappe.get_doc(
             {
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": self.building,
                 "room_number": f"DCC-A-{tag}",
             }
         ).insert(ignore_permissions=True).name
         self.room_b = frappe.get_doc(
             {
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": self.building,
                 "room_number": f"DCC-B-{tag}",
             }

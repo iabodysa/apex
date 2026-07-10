@@ -9,14 +9,14 @@ from apex_habitat.tests.factories import ApexHabitatTestCase
 
 def _open_todos(name, user="Administrator"):
     return frappe.get_all("ToDo", filters={
-        "reference_type": "Accommodation Resident Request", "reference_name": name,
+        "reference_type": "Resident Request", "reference_name": name,
         "allocated_to": user, "status": "Open"})
 
 
 class TestResidentRequestToDo(ApexHabitatTestCase):
     def _new_request(self):
         doc = frappe.get_doc({
-            "doctype": "Accommodation Resident Request",
+            "doctype": "Resident Request",
             "request_category": "Maintenance",
             "description": "Test request " + frappe.generate_hash(length=4),
             "status": "New",

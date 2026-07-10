@@ -84,11 +84,11 @@ class TestHousingCount(FrappeTestCase):
     @classmethod
     def _building(cls):
         doc = frappe.get_doc(
-            {"doctype": "Accommodation Building", "building_name": "HC-" + _h()}
+            {"doctype": "Building", "building_name": "HC-" + _h()}
         )
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         cls.addClassCleanup(
-            frappe.delete_doc, "Accommodation Building", doc.name, force=True, ignore_permissions=True
+            frappe.delete_doc, "Building", doc.name, force=True, ignore_permissions=True
         )
         return doc.name
 
@@ -134,7 +134,7 @@ class TestHousingCount(FrappeTestCase):
             {
                 "doctype": "User Permission",
                 "user": email,
-                "allow": "Accommodation Building",
+                "allow": "Building",
                 "for_value": building,
             }
         )

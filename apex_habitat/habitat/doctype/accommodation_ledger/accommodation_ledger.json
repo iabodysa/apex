@@ -135,15 +135,15 @@
   {
    "fieldname": "assignment",
    "fieldtype": "Link",
-   "label": "Accommodation Assignment",
-   "options": "Accommodation Assignment",
+   "label": "Housing Assignment",
+   "options": "Housing Assignment",
    "search_index": 1
   },
   {
    "fieldname": "building",
    "fieldtype": "Link",
    "label": "Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "reqd": 1,
    "search_index": 1
   },

@@ -5,7 +5,7 @@
  "days_in_advance": 0,
  "docstatus": 0,
  "doctype": "Notification",
- "document_type": "Accommodation Resident Request",
+ "document_type": "Resident Request",
  "enabled": 0,
  "event": "Value Change",
  "idx": 0,
@@ -26,5 +26,5 @@
  "send_to_all_assignees": 0,
  "subject": "Resident Request Resolved: {{ doc.name }}",
  "value_changed": "status",
- "modified": "2026-06-25 12:00:00.000000"
+ "modified": "2026-07-10 06:05:34.129545"
 }

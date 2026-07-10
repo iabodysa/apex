@@ -3,7 +3,7 @@
  "name": "Beds by Status",
  "chart_name": "Beds by Status",
  "chart_type": "Group By",
- "document_type": "Accommodation Bed",
+ "document_type": "Bed",
  "group_by_type": "Count",
  "group_by_based_on": "status",
  "type": "Donut",
@@ -13,5 +13,5 @@
  "timeseries": 0,
  "filters_json": "[]",
  "is_standard": 1,
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-07-10 06:05:34.129545"
 }

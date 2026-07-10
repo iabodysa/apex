@@ -11,7 +11,7 @@ frappe.query_reports["Custody Outstanding by Worker"] = {
 			fieldname: "building",
 			label: __("Building"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 		},
 		{
 			fieldname: "as_on_date",

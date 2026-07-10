@@ -25,7 +25,7 @@
    "fieldname": "accommodation_building",
    "fieldtype": "Link",
    "label": "Accommodation Building (Pickup)",
-   "options": "Accommodation Building"
+   "options": "Building"
   },
   {
    "columns": 3,

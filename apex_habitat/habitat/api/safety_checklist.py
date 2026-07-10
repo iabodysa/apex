@@ -112,7 +112,7 @@ def get_tasks_for_cadence(building, cadence):
     # permission_query_conditions is bypassed. Gate on read of THIS building so a
     # scoped supervisor cannot build a checklist for an estate outside their scope;
     # oversight roles pass through unrestricted.
-    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+    frappe.has_permission("Building", "read", doc=building, throw=True)
 
     return {
         "building": building,
@@ -271,7 +271,7 @@ def get_due_cadences(building):
     # due-checks + catalog reads below run ignore_permissions, so gate on read of THIS
     # building to keep a scoped supervisor from probing an out-of-scope estate's
     # due-rounds. Oversight roles pass through unrestricted.
-    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+    frappe.has_permission("Building", "read", doc=building, throw=True)
 
     due = []
     for cadence in _CADENCE_ORDER:
@@ -332,7 +332,7 @@ def submit_round(building, cadence, round_date, lines, is_reinspection=0):
     # submit so this method only proceeds for roles that can actually submit the
     # executions (and the round). Do not silently swallow that.
     frappe.has_permission("Safety Task Execution", "submit", throw=True)
-    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+    frappe.has_permission("Building", "read", doc=building, throw=True)
 
     if not building:
         frappe.throw(_("A building is required to submit a round."))
@@ -496,7 +496,7 @@ def submit_due_rounds(building, round_date, results):
     # must not drive its due-rounds (defense-in-depth + fail-fast over the Safety
     # Round controller's own building check, which only fires once a round inserts;
     # this also blocks leaking the building via the report on an empty result set).
-    frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+    frappe.has_permission("Building", "read", doc=building, throw=True)
     if not round_date:
         frappe.throw(_("A round date is required to submit rounds."))
 

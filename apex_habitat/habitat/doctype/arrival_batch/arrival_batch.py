@@ -42,7 +42,7 @@ class ArrivalBatch(Document):
         # the manifest_not_reconciled Notification condition, which runs in a
         # restricted eval where frappe.db is unavailable — so it lives here.
         housed = frappe.db.count(
-            "Accommodation Assignment",
+            "Housing Assignment",
             {
                 "building": self.building,
                 "check_in_date": self.expected_date,

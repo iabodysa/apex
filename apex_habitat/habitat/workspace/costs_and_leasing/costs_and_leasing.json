@@ -22,13 +22,13 @@
    "role": "System Manager"
   }
  ],
- "content": "[{\"id\": \"cstLChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Ledger Cost by Type\", \"col\": 12}}, {\"id\": \"cstLHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"cstLScLease\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accommodation Lease\", \"col\": 3}}, {\"id\": \"cstLScBill\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Utility Bill Entry\", \"col\": 3}}, {\"id\": \"cstLScOrder\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Subcontractor Service Order\", \"col\": 3}}, {\"id\": \"cstLScDash\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Finance Manager Dashboard\", \"col\": 3}}, {\"id\": \"cstLHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"cstLNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Leases\", \"col\": 3}}, {\"id\": \"cstLNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Utility Bills\", \"col\": 3}}, {\"id\": \"cstLNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Utility Bills\", \"col\": 3}}, {\"id\": \"cstLNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Utility Bills Under Review\", \"col\": 3}}, {\"id\": \"cstLNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Subcontractor Service Orders\", \"col\": 3}}, {\"id\": \"cstLNc5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Missed Subcontractor Visits\", \"col\": 3}}, {\"id\": \"cstLNc6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Supplier-Billed Cost This Month\", \"col\": 3}}, {\"id\": \"cstLNc7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Ledger Cost This Month\", \"col\": 3}}, {\"id\": \"secDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"cstLCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Leasing\", \"col\": 4}}, {\"id\": \"cstLCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Utilities\", \"col\": 4}}, {\"id\": \"cstLCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Subcontractors\", \"col\": 4}}, {\"id\": \"secReports\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Reports</b></span>\", \"col\": 12}}, {\"id\": \"cstLCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"cstLCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"secMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"mdCard_MasterData\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
+ "content": "[{\"id\": \"cstLChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Ledger Cost by Type\", \"col\": 12}}, {\"id\": \"cstLHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"cstLScLease\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Lease\", \"col\": 3}}, {\"id\": \"cstLScBill\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Utility Bill Entry\", \"col\": 3}}, {\"id\": \"cstLScOrder\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Subcontractor Service Order\", \"col\": 3}}, {\"id\": \"cstLScDash\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Finance Manager Dashboard\", \"col\": 3}}, {\"id\": \"cstLHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"cstLNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Leases\", \"col\": 3}}, {\"id\": \"cstLNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Utility Bills\", \"col\": 3}}, {\"id\": \"cstLNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Disputed Utility Bills\", \"col\": 3}}, {\"id\": \"cstLNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Utility Bills Under Review\", \"col\": 3}}, {\"id\": \"cstLNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Subcontractor Service Orders\", \"col\": 3}}, {\"id\": \"cstLNc5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Missed Subcontractor Visits\", \"col\": 3}}, {\"id\": \"cstLNc6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Supplier-Billed Cost This Month\", \"col\": 3}}, {\"id\": \"cstLNc7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Ledger Cost This Month\", \"col\": 3}}, {\"id\": \"secDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"cstLCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Leasing\", \"col\": 4}}, {\"id\": \"cstLCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Utilities\", \"col\": 4}}, {\"id\": \"cstLCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Subcontractors\", \"col\": 4}}, {\"id\": \"secReports\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Reports</b></span>\", \"col\": 12}}, {\"id\": \"cstLCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"cstLCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"secMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"mdCard_MasterData\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
    "type": "DocType",
-   "label": "Accommodation Lease",
-   "link_to": "Accommodation Lease",
+   "label": "Lease",
+   "link_to": "Lease",
    "color": "Green",
    "idx": 1
   },
@@ -67,9 +67,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Accommodation Lease",
+   "label": "Lease",
    "link_type": "DocType",
-   "link_to": "Accommodation Lease",
+   "link_to": "Lease",
    "idx": 2
   },
   {
@@ -259,5 +259,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-05 19:12:59.527483"
+ "modified": "2026-07-10 06:05:34.129545"
 }

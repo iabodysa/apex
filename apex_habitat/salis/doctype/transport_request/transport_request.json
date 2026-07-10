@@ -145,8 +145,8 @@
    "depends_on": "eval:doc.service_line=='Site Transport' || doc.service_line=='Inter-City Relocation'",
    "fieldname": "accommodation_building",
    "fieldtype": "Link",
-   "label": "Accommodation Building",
-   "options": "Accommodation Building"
+   "label": "Building",
+   "options": "Building"
   },
   {
    "fieldname": "transport_request_sec_subject_col1",

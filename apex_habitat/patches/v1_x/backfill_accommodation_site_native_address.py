@@ -17,7 +17,7 @@ import frappe
 
 def execute():
     sites = frappe.db.get_all(
-        "Accommodation Site",
+        "Site",
         fields=["name", "city", "district"],
     )
 
@@ -32,7 +32,7 @@ def execute():
         already_linked = frappe.db.exists(
             "Dynamic Link",
             {
-                "link_doctype": "Accommodation Site",
+                "link_doctype": "Site",
                 "link_name": site.name,
                 "parenttype": "Address",
             },
@@ -69,7 +69,7 @@ def execute():
                     "city": city_val or district_val,
                     "links": [
                         {
-                            "link_doctype": "Accommodation Site",
+                            "link_doctype": "Site",
                             "link_name": site.name,
                         }
                     ],

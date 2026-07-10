@@ -94,14 +94,14 @@ class TransferBoard {
 			fieldname: "building_left",
 			label: __("Building A"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 			change: () => this._on_building_change("left"),
 		});
 		this.panes.right.field = this.page.add_field({
 			fieldname: "building_right",
 			label: __("Building B"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 			change: () => this._on_building_change("right"),
 		});
 

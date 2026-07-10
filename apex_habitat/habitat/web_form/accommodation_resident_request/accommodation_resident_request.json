@@ -11,7 +11,7 @@
  "client_script": "",
  "condition_json": "[]",
  "creation": "2026-05-23 00:00:00.000000",
- "doc_type": "Accommodation Resident Request",
+ "doc_type": "Resident Request",
  "docstatus": 0,
  "doctype": "Web Form",
  "web_form_fields": [

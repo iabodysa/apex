@@ -125,9 +125,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Salis Portal Theme",
+   "label": "Driver Portal Theme",
    "link_type": "DocType",
-   "link_to": "Salis Portal Theme",
+   "link_to": "Driver Portal Theme",
    "idx": 4
   },
   {
@@ -223,5 +223,5 @@
    "role": "Administrator"
   }
  ],
- "modified": "2026-07-05 19:12:59.527483"
+ "modified": "2026-07-10 06:05:34.129545"
 }

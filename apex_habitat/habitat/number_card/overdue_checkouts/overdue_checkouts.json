@@ -2,7 +2,7 @@
  "doctype": "Number Card",
  "name": "Overdue Checkouts",
  "label": "Overdue Checkouts",
- "document_type": "Accommodation Assignment",
+ "document_type": "Housing Assignment",
  "function": "Count",
  "is_public": 1,
  "is_standard": 1,
@@ -11,7 +11,7 @@
  "type": "Document Type",
  "module": "Habitat",
  "color": "#cb2929",
- "filters_json": "[[\"Accommodation Assignment\", \"docstatus\", \"=\", 1], [\"Accommodation Assignment\", \"check_out_date\", \"is\", \"not set\"]]",
- "dynamic_filters_json": "[[\"Accommodation Assignment\", \"expected_checkout_date\", \"<\", \"frappe.datetime.get_today()\"]]",
- "modified": "2026-06-25 23:50:00.000000"
+ "filters_json": "[[\"Housing Assignment\", \"docstatus\", \"=\", 1], [\"Housing Assignment\", \"check_out_date\", \"is\", \"not set\"]]",
+ "dynamic_filters_json": "[[\"Housing Assignment\", \"expected_checkout_date\", \"<\", \"frappe.datetime.get_today()\"]]",
+ "modified": "2026-07-10 06:05:34.129545"
 }

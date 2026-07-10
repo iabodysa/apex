@@ -2,7 +2,7 @@
  "chart_name": "Leases by Status",
  "chart_type": "Group By",
  "doctype": "Dashboard Chart",
- "document_type": "Accommodation Lease",
+ "document_type": "Lease",
  "group_by_based_on": "status",
  "group_by_type": "Count",
  "is_public": 1,
@@ -13,5 +13,5 @@
  "timeseries": 0,
  "type": "Donut",
  "filters_json": "[]",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-07-10 06:05:34.129545"
 }

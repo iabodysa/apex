@@ -26,7 +26,7 @@ def _has_perm(user, building):
     return bool(
         frappe.db.exists(
             "User Permission",
-            {"user": user, "allow": "Accommodation Building", "for_value": building},
+            {"user": user, "allow": "Building", "for_value": building},
         )
     )
 

@@ -28,12 +28,12 @@
  "links": [
   {
    "group": "Accommodation",
-   "link_doctype": "Accommodation Site",
+   "link_doctype": "Site",
    "link_fieldname": "city"
   },
   {
    "group": "Accommodation",
-   "link_doctype": "Accommodation Building",
+   "link_doctype": "Building",
    "link_fieldname": "city"
   }
  ],

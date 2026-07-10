@@ -180,7 +180,7 @@ class TestUtilityBillEntry(FrappeTestCase):
     # ---- re-running the submit side-effect posts at most one live row ----
     def _ledger_building(self, m):
         bld = frappe.get_doc({
-            "doctype": "Accommodation Building", "building_name": "QA-LEDG-BLD-" + m,
+            "doctype": "Building", "building_name": "QA-LEDG-BLD-" + m,
             "total_capacity": 10,
         })
         bld.insert(ignore_permissions=True, ignore_links=True)
@@ -201,7 +201,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         _post_ledger_row(doc)
         _post_ledger_row(doc)  # re-run must be a no-op
         self.assertEqual(self._ledger_count(src), 1)
-        frappe.delete_doc("Accommodation Building", bld.name, force=True, ignore_permissions=True)
+        frappe.delete_doc("Building", bld.name, force=True, ignore_permissions=True)
 
     def test_cancel_negative_reversal_still_posts(self):
         from apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry import (
@@ -224,4 +224,4 @@ class TestUtilityBillEntry(FrappeTestCase):
             "total_site_cost",
         )
         self.assertEqual(rev, -300)
-        frappe.delete_doc("Accommodation Building", bld.name, force=True, ignore_permissions=True)
+        frappe.delete_doc("Building", bld.name, force=True, ignore_permissions=True)

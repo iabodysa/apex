@@ -78,7 +78,7 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
     # [#q1odkg]
     balances: dict[str, float] = {}
     if building:
-        frappe.has_permission("Accommodation Building", "read", doc=building, throw=True)
+        frappe.has_permission("Building", "read", doc=building, throw=True)
         Ledger = frappe.qb.DocType("Accommodation Stock Ledger")
         rows = (
             frappe.qb.from_(Ledger)
@@ -224,7 +224,7 @@ def _article_store_balance(article: str, building: str | None) -> float | None:
     """
     if not building:
         return None
-    if not frappe.has_permission("Accommodation Building", "read", doc=building):
+    if not frappe.has_permission("Building", "read", doc=building):
         return None
     Ledger = frappe.qb.DocType("Accommodation Stock Ledger")
     rows = (

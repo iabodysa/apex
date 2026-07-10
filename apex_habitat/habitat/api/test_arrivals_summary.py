@@ -53,7 +53,7 @@ class TestArrivalsSummary(FrappeTestCase):
 
     def _bed(self, is_temporary):
         doc = frappe.get_doc({
-            "doctype": "Accommodation Bed",
+            "doctype": "Bed",
             "bed_code": "BED-" + _h(),
             "building": self.building,
             "status": "Available",
@@ -65,7 +65,7 @@ class TestArrivalsSummary(FrappeTestCase):
 
     def _assignment(self, check_in_date, party_type, party, bed):
         doc = frappe.get_doc({
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "naming_series": "ACC-ASGN-.YYYY.-.####",
             "party_type": party_type,
             "party": party,
@@ -76,7 +76,7 @@ class TestArrivalsSummary(FrappeTestCase):
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         # Force the submitted + check-in state the read endpoint filters on.
         frappe.db.set_value(
-            "Accommodation Assignment", doc.name,
+            "Housing Assignment", doc.name,
             {"docstatus": 1, "check_in_date": check_in_date}, update_modified=False,
         )
         self._assignments.append(doc.name)
@@ -84,15 +84,15 @@ class TestArrivalsSummary(FrappeTestCase):
 
     def tearDown(self):
         for name in self._assignments:
-            frappe.db.set_value("Accommodation Assignment", name, "docstatus", 0,
+            frappe.db.set_value("Housing Assignment", name, "docstatus", 0,
                                 update_modified=False)
-            frappe.delete_doc("Accommodation Assignment", name, force=True,
+            frappe.delete_doc("Housing Assignment", name, force=True,
                               ignore_permissions=True)
         if getattr(self, "tw", None):
             frappe.delete_doc("Temporary Worker", self.tw.name, force=True,
                               ignore_permissions=True)
         for name in self._beds:
-            frappe.delete_doc("Accommodation Bed", name, force=True,
+            frappe.delete_doc("Bed", name, force=True,
                               ignore_permissions=True)
 
     def test_housed_count_is_date_and_building_scoped(self):

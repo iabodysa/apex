@@ -9,7 +9,7 @@ def execute(filters=None):
     filters = filters or {}
 
     columns = [
-        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 160},
+        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 160},
         {"label": frappe._("Ledger Type"), "fieldname": "ledger_type", "fieldtype": "Data", "width": 130},
         {"label": frappe._("Posting Mode"), "fieldname": "posting_mode", "fieldtype": "Data", "width": 130},
         {"label": frappe._("Allocation Basis"), "fieldname": "allocation_basis", "fieldtype": "Data", "width": 130},

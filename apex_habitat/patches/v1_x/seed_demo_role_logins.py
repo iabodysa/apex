@@ -57,9 +57,9 @@ _BUILDING = "Demo Residence A"
 
 # DocTypes this seeder writes to; if any is missing the personas cannot be built.
 _REQUIRED = (
-    "Accommodation Building",
-    "Accommodation Room",
-    "Accommodation Occupancy Snapshot",
+    "Building",
+    "Room",
+    "Occupancy Snapshot",
     "Safety Round",
     "Employee",
     "Masar Worker Token",
@@ -75,21 +75,21 @@ def _get_or_create(doctype, key_filters, make):
 
 def _site(company):
     return _get_or_create(
-        "Accommodation Site",
+        "Site",
         {"site_name": _SITE},
         lambda: frappe.get_doc(
-            {"doctype": "Accommodation Site", "site_name": _SITE, "company": company}
+            {"doctype": "Site", "site_name": _SITE, "company": company}
         ).insert(ignore_permissions=True),  # audit-ok
     )
 
 
 def _building(company):
     return _get_or_create(
-        "Accommodation Building",
+        "Building",
         {"building_name": _BUILDING},
         lambda: frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": _BUILDING,
                 "site": _site(company),
                 "total_capacity": 40,
@@ -153,11 +153,11 @@ def _scope_supervisor_to_building(user, building):
     controller's on_update mints the Accommodation Building User Permission (the
     canonical source of the building scope). Belt-and-braces ensure the row even
     if the field was already set on a prior run."""
-    if frappe.db.get_value("Accommodation Building", building, "responsible_facility_supervisor") != user:
-        b = frappe.get_doc("Accommodation Building", building)
+    if frappe.db.get_value("Building", building, "responsible_facility_supervisor") != user:
+        b = frappe.get_doc("Building", building)
         b.responsible_facility_supervisor = user
         b.save(ignore_permissions=True)  # audit-ok — triggers permission sync
-    _user_permission(user, "Accommodation Building", building)
+    _user_permission(user, "Building", building)
 
 
 def _demo_rooms(building):
@@ -171,11 +171,11 @@ def _demo_rooms(building):
     ]
     for suffix, status, readiness in rooms:
         room_number = f"{_BUILDING[:4].upper()}-{suffix}"
-        if frappe.db.exists("Accommodation Room", room_number):
+        if frappe.db.exists("Room", room_number):
             continue
         frappe.get_doc(
             {
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": building,
                 "room_number": room_number,
                 "floor": 0,
@@ -189,11 +189,11 @@ def _demo_rooms(building):
 
 def _occupancy_snapshot(building):
     """One snapshot so the dashboard's occupancy chart has a data point."""
-    if frappe.db.exists("Accommodation Occupancy Snapshot", {"building": building}):
+    if frappe.db.exists("Occupancy Snapshot", {"building": building}):
         return
     frappe.get_doc(
         {
-            "doctype": "Accommodation Occupancy Snapshot",
+            "doctype": "Occupancy Snapshot",
             "building": building,
             "snapshot_date": frappe.utils.today(),
             "active_occupants": 18,

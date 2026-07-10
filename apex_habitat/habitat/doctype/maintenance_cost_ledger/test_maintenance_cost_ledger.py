@@ -20,15 +20,15 @@ class TestMaintenanceCostLedger(FrappeTestCase):
     duplicate); cancel reverses with negative mirror rows (never a delete)."""
 
     def _ensure_building(self):
-        if not frappe.db.exists("Accommodation Building", "MCL-TEST-BLDG"):
+        if not frappe.db.exists("Building", "MCL-TEST-BLDG"):
             frappe.get_doc({
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": "MCL-TEST-BLDG",
                 "total_capacity": 4,
             }).insert(ignore_permissions=True, ignore_links=True)
-        if not frappe.db.exists("Accommodation Room", "MCL-TEST-ROOM"):
+        if not frappe.db.exists("Room", "MCL-TEST-ROOM"):
             frappe.get_doc({
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": "MCL-TEST-BLDG",
                 "room_number": "MCL-TEST-ROOM",
                 "bed_capacity": 2,

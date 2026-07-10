@@ -80,7 +80,7 @@ class TestMasarWorkerContacts(_WorkerTripMixin, FrappeTestCase):
         cls.supervisor = _supervisor_user()
         # The active assignment's building carries the in-charge contact.
         frappe.db.set_value(
-            "Accommodation Building", cls.building, "responsible_facility_supervisor", cls.supervisor
+            "Building", cls.building, "responsible_facility_supervisor", cls.supervisor
         )
         frappe.db.set_single_value("Habitat Settings", "housing_office_number", _OFFICE_NUMBER)
 
@@ -107,17 +107,17 @@ class TestMasarWorkerContacts(_WorkerTripMixin, FrappeTestCase):
         Returns the assignment doc; registers full cleanup."""
         room = frappe.get_doc(
             {
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": self.building,
                 "room_number": f"MC-{worker}",
             }
         ).insert(ignore_permissions=True)
         bed = frappe.get_doc(
-            {"doctype": "Accommodation Bed", "room": room.name, "bed_code": f"MC-{worker}-B1"}
+            {"doctype": "Bed", "room": room.name, "bed_code": f"MC-{worker}-B1"}
         ).insert(ignore_permissions=True)
         asg = frappe.get_doc(
             {
-                "doctype": "Accommodation Assignment",
+                "doctype": "Housing Assignment",
                 "party_type": "Employee",
                 "party": worker,
                 "employee": worker,
@@ -138,15 +138,15 @@ class TestMasarWorkerContacts(_WorkerTripMixin, FrappeTestCase):
     @staticmethod
     def _purge_assignment(asg_name, room_name, bed_name):
         frappe.set_user("Administrator")
-        if frappe.db.exists("Accommodation Assignment", asg_name):
-            doc = frappe.get_doc("Accommodation Assignment", asg_name)
+        if frappe.db.exists("Housing Assignment", asg_name):
+            doc = frappe.get_doc("Housing Assignment", asg_name)
             if doc.docstatus == 1:
                 try:
                     doc.cancel()
                 except Exception:
                     pass
-            frappe.delete_doc("Accommodation Assignment", asg_name, ignore_permissions=True, force=True)
-        for dt, name in (("Accommodation Bed", bed_name), ("Accommodation Room", room_name)):
+            frappe.delete_doc("Housing Assignment", asg_name, ignore_permissions=True, force=True)
+        for dt, name in (("Bed", bed_name), ("Room", room_name)):
             if frappe.db.exists(dt, name):
                 frappe.delete_doc(dt, name, ignore_permissions=True, force=True)
 

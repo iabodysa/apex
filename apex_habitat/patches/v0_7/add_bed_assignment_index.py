@@ -13,13 +13,13 @@ import frappe
 
 
 def execute():
-    if not frappe.db.exists("DocType", "Accommodation Assignment"):
+    if not frappe.db.exists("DocType", "Housing Assignment"):
         return
 
     # [#44ssmk]
     try:
         frappe.db.sql(
-            "ALTER TABLE `tabAccommodation Assignment` "
+            "ALTER TABLE `tabHousing Assignment` "
             "ADD INDEX IF NOT EXISTS `idx_asgn_bed` (`bed`(140))"
         )
     except Exception:
@@ -32,7 +32,7 @@ def execute():
     # [#cfszw1]
     try:
         frappe.db.sql(
-            "ALTER TABLE `tabAccommodation Assignment` "
+            "ALTER TABLE `tabHousing Assignment` "
             "ADD INDEX IF NOT EXISTS `idx_asgn_bed_active` (`bed`(140), `docstatus`, `check_out_date`)"
         )
     except Exception:

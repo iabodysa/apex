@@ -6,7 +6,7 @@ frappe.query_reports["Maintenance Aging"] = {
 			fieldname: "building",
 			label: __("Building"),
 			fieldtype: "Link",
-			options: "Accommodation Building",
+			options: "Building",
 		},
 		{
 			fieldname: "priority",

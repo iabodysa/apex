@@ -81,7 +81,7 @@ def before_cancel(doc, method=None):
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
 
-    total_capacity = frappe.db.get_value("Accommodation Building", doc.building, "total_capacity")
+    total_capacity = frappe.db.get_value("Building", doc.building, "total_capacity")
     from frappe.utils import today
 
     original_row = frappe.db.get_value(
@@ -169,7 +169,7 @@ def _post_ledger_row(doc) -> None:
     if _live_ledger_row(doc.name):
         return
 
-    total_capacity = frappe.db.get_value("Accommodation Building", doc.building, "total_capacity")
+    total_capacity = frappe.db.get_value("Building", doc.building, "total_capacity")
 
     remarks = doc.bill_share_note or ""
 

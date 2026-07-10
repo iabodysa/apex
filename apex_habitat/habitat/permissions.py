@@ -104,11 +104,11 @@ HOUSING_UNSCOPED_ROLES = {
 
 
 def _allowed_buildings(user):
-    """Accommodation Building names the user has an explicit User Permission for."""
+    """Building names the user has an explicit User Permission for."""
     return list(
         frappe.get_all(
             "User Permission",
-            filters={"allow": "Accommodation Building", "user": user},
+            filters={"allow": "Building", "user": user},
             pluck="for_value",
         )
     )
@@ -204,7 +204,7 @@ def building_scoped_has_permission(doc, ptype, user=None):
     """Deny a building-scoped user acting on a doc outside their buildings.
 
     Returns None to defer to Frappe's default resolution (unscoped users / in-scope
-    docs — keeps DocPerms intact), or False to block. The Accommodation Building doc
+    docs — keeps DocPerms intact), or False to block. The Building doc
     is scoped on its own name; the transactions are scoped on their `building` field.
 
     Deny-only + ptype-agnostic: it never branches on ``ptype``, so an out-of-building
@@ -215,7 +215,7 @@ def building_scoped_has_permission(doc, ptype, user=None):
     if _building_is_unscoped(user):
         return None
 
-    if getattr(doc, "doctype", None) == "Accommodation Building":
+    if getattr(doc, "doctype", None) == "Building":
         building = getattr(doc, "name", None)
     else:
         building = getattr(doc, "building", None)

@@ -65,10 +65,10 @@ _REQUIRED = (
     "Route Plan",
     "Dispatch Trip",
     "Masar Worker Token",
-    "Accommodation Building",
-    "Accommodation Room",
-    "Accommodation Bed",
-    "Accommodation Assignment",
+    "Building",
+    "Room",
+    "Bed",
+    "Housing Assignment",
 )
 
 
@@ -102,11 +102,11 @@ def _city():
 def _site(company):
     city = _city()
     return _get_or_create(
-        "Accommodation Site",
+        "Site",
         {"site_name": _SITE},
         lambda: frappe.get_doc(
             {
-                "doctype": "Accommodation Site",
+                "doctype": "Site",
                 "site_name": _SITE,
                 "company": company,
                 "city": city,
@@ -118,11 +118,11 @@ def _site(company):
 def _building(spec, company, site):
     city = _city()
     return _get_or_create(
-        "Accommodation Building",
+        "Building",
         {"building_name": spec["name"]},
         lambda: frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": spec["name"],
                 "site": site,
                 "city": city,
@@ -138,11 +138,11 @@ def _room(building):
     """One ready demo room in ``building`` to hold the worker's bed."""
     room_number = f"{_BUILDING} R-101"
     return _get_or_create(
-        "Accommodation Room",
+        "Room",
         {"room_number": room_number},
         lambda: frappe.get_doc(
             {
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": building,
                 "room_number": room_number,
                 "floor": 1,
@@ -158,11 +158,11 @@ def _room(building):
 def _bed(room):
     bed_code = f"{_BUILDING} B-1"
     return _get_or_create(
-        "Accommodation Bed",
+        "Bed",
         {"bed_code": bed_code},
         lambda: frappe.get_doc(
             {
-                "doctype": "Accommodation Bed",
+                "doctype": "Bed",
                 "room": room,
                 "bed_code": bed_code,
                 "status": "Available",
@@ -176,7 +176,7 @@ def _assignment(employee, building, room, bed, project):
     accommodation card populates. Keyed on the worker's open assignment so a re-run
     never opens a second one."""
     existing = frappe.db.get_value(
-        "Accommodation Assignment",
+        "Housing Assignment",
         {"employee": employee, "docstatus": 1, "check_out_date": ["is", "not set"]},
         "name",
     )
@@ -184,7 +184,7 @@ def _assignment(employee, building, room, bed, project):
         return existing
     doc = frappe.get_doc(
         {
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "party_type": "Employee",
             "party": employee,
             "employee": employee,

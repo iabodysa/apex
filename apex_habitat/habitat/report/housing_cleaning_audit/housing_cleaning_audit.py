@@ -60,7 +60,7 @@ def execute(filters=None):
         bld_filters["name"] = ["in", allowed]
 
     all_buildings = frappe.get_all(
-        "Accommodation Building",
+        "Building",
         filters=bld_filters,
         fields=["name", "responsible_facility_supervisor"],
     )
@@ -220,7 +220,7 @@ def _columns():
             "label": frappe._("Building"),
             "fieldname": "building",
             "fieldtype": "Link",
-            "options": "Accommodation Building",
+            "options": "Building",
             "width": 160,
         },
         {

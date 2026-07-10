@@ -24,7 +24,7 @@ def get_data(data=None):
     })
     data["transactions"].extend([
         {"label": "Accommodation",
-         "items": ["Accommodation Assignment", "Accommodation Checkout"]},
+         "items": ["Housing Assignment", "Housing Checkout"]},
         {"label": "Custody",
          "items": ["Custody Issue", "Custody Return", "Custody Damage Assessment"]},
         {"label": "Tasks",

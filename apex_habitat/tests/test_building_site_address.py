@@ -9,16 +9,16 @@ the form's value. The endpoint now accepts the current `site` and prefers it.
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import (
+from apex_habitat.habitat.doctype.building.building import (
     get_site_address,
 )
 from apex_habitat.tests.factories import make_building
 
 
 def _ensure_site(name):
-    if not frappe.db.exists("Accommodation Site", name):
+    if not frappe.db.exists("Site", name):
         frappe.get_doc(
-            {"doctype": "Accommodation Site", "site_name": name}
+            {"doctype": "Site", "site_name": name}
         ).insert(ignore_permissions=True)
     return name
 
@@ -37,7 +37,7 @@ class TestBuildingSiteAddress(FrappeTestCase):
                     "address_type": "Other",
                     "address_line1": "A Street 1",
                     "city": "Riyadh",
-                    "links": [{"link_doctype": "Accommodation Site", "link_name": site_a}],
+                    "links": [{"link_doctype": "Site", "link_name": site_a}],
                 }
             ).insert(ignore_permissions=True)
         company = (
@@ -61,7 +61,7 @@ class TestBuildingSiteAddress(FrappeTestCase):
                 {
                     "doctype": "Address", "address_title": "T144 Site Addr",
                     "address_type": "Other", "address_line1": "Site Street", "city": "Riyadh",
-                    "links": [{"link_doctype": "Accommodation Site", "link_name": site_a}],
+                    "links": [{"link_doctype": "Site", "link_name": site_a}],
                 }
             ).insert(ignore_permissions=True)
         own = frappe.db.get_value("Address", {"address_title": "T144 Own Addr"})

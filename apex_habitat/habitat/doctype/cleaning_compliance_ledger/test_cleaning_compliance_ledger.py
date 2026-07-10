@@ -40,7 +40,7 @@ class TestCleaningComplianceLedger(FrappeTestCase):
         self.building = (
             frappe.get_doc(
                 {
-                    "doctype": "Accommodation Building",
+                    "doctype": "Building",
                     "building_name": f"CCL Bldg {self._testMethodName}",
                     "status": "Active",
                 }
@@ -53,7 +53,7 @@ class TestCleaningComplianceLedger(FrappeTestCase):
             self.rooms.append(
                 frappe.get_doc(
                     {
-                        "doctype": "Accommodation Room",
+                        "doctype": "Room",
                         "building": self.building,
                         "room_number": f"CCL-{self._testMethodName}-{n}",
                     }

@@ -29,42 +29,42 @@ doc_events = {
     "Address": {
         "validate": "apex_habitat.habitat.address_customizations.validate",
     },
-    "Accommodation Site": {},
-    "Accommodation Bed": {},
-    "Accommodation Room": {},
-    "Accommodation QR Location": {
-        "before_save": "apex_habitat.habitat.doctype.accommodation_qr_location.accommodation_qr_location.before_save",
+    "Site": {},
+    "Bed": {},
+    "Room": {},
+    "QR Location": {
+        "before_save": "apex_habitat.habitat.doctype.qr_location.qr_location.before_save",
     },
     "Accommodation Ledger": {
         "before_save": "apex_habitat.habitat.doctype.accommodation_ledger.accommodation_ledger.before_save",
     },
-    "Accommodation Resident Request": {
-        "before_insert": "apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request.before_insert",
-        "validate": "apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request.validate",
-        "on_update": "apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request.on_update",
+    "Resident Request": {
+        "before_insert": "apex_habitat.habitat.doctype.resident_request.resident_request.before_insert",
+        "validate": "apex_habitat.habitat.doctype.resident_request.resident_request.validate",
+        "on_update": "apex_habitat.habitat.doctype.resident_request.resident_request.on_update",
     },
     "Building License": {},
     "Camera Access Grant": {},
     "Cleaning Log": {},
-    "Client Audit Remediation Plan": {},
+    "Audit Remediation Plan": {},
     "Scheduled Task Template": {},
-    "Accommodation Building": {
-        "before_save": "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.before_save",
-        "on_update": "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.on_update",
+    "Building": {
+        "before_save": "apex_habitat.habitat.doctype.building.building.before_save",
+        "on_update": "apex_habitat.habitat.doctype.building.building.on_update",
     },
-    "Accommodation Assignment": {
-        "validate": "apex_habitat.habitat.doctype.accommodation_assignment.accommodation_assignment.validate",
-        "on_submit": "apex_habitat.habitat.doctype.accommodation_assignment.accommodation_assignment.on_submit",
-        "on_cancel": "apex_habitat.habitat.doctype.accommodation_assignment.accommodation_assignment.on_cancel",
+    "Housing Assignment": {
+        "validate": "apex_habitat.habitat.doctype.housing_assignment.housing_assignment.validate",
+        "on_submit": "apex_habitat.habitat.doctype.housing_assignment.housing_assignment.on_submit",
+        "on_cancel": "apex_habitat.habitat.doctype.housing_assignment.housing_assignment.on_cancel",
     },
-    "Accommodation Checkout": {
-        "validate": "apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout.validate",
-        "on_submit": "apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout.on_submit",
-        "before_cancel": "apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout.before_cancel",
-        "on_cancel": "apex_habitat.habitat.doctype.accommodation_checkout.accommodation_checkout.on_cancel",
+    "Housing Checkout": {
+        "validate": "apex_habitat.habitat.doctype.housing_checkout.housing_checkout.validate",
+        "on_submit": "apex_habitat.habitat.doctype.housing_checkout.housing_checkout.on_submit",
+        "before_cancel": "apex_habitat.habitat.doctype.housing_checkout.housing_checkout.before_cancel",
+        "on_cancel": "apex_habitat.habitat.doctype.housing_checkout.housing_checkout.on_cancel",
     },
-    "Accommodation Lease": {
-        "validate": "apex_habitat.habitat.doctype.accommodation_lease.accommodation_lease.validate",
+    "Lease": {
+        "validate": "apex_habitat.habitat.doctype.lease.lease.validate",
     },
     "Utility Bill Entry": {
         "validate": "apex_habitat.habitat.doctype.utility_bill_entry.utility_bill_entry.validate",
@@ -109,9 +109,9 @@ doc_events = {
         "on_submit": "apex_habitat.habitat.doctype.custody_damage_assessment.custody_damage_assessment.on_submit",
         "before_cancel": "apex_habitat.habitat.doctype.custody_damage_assessment.custody_damage_assessment.before_cancel",
     },
-    "Non-Financial Depreciation Snapshot": {
-        "validate": "apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financial_depreciation_snapshot.validate",
-        "before_cancel": "apex_habitat.habitat.doctype.non_financial_depreciation_snapshot.non_financial_depreciation_snapshot.before_cancel",
+    "Operational Depreciation Snapshot": {
+        "validate": "apex_habitat.habitat.doctype.operational_depreciation_snapshot.operational_depreciation_snapshot.validate",
+        "before_cancel": "apex_habitat.habitat.doctype.operational_depreciation_snapshot.operational_depreciation_snapshot.before_cancel",
     },
     # [#i91sa1]
     "Facility Asset": {},
@@ -215,10 +215,10 @@ scheduler_events = {
 # [#ow8j67]
 default_log_clearing_doctypes = {
     "Operations Alert": 90,
-    "Accommodation Occupancy Snapshot": 365,
+    "Occupancy Snapshot": 365,
     "Vehicle Utilisation Snapshot": 365,
     # [#263f83]
-    "Non-Financial Depreciation Snapshot": 730,
+    "Operational Depreciation Snapshot": 730,
 }
 
 # [#4z2uut]
@@ -231,15 +231,15 @@ override_doctype_dashboards = {
 permission_query_conditions = {
     "Maintenance Request": "apex_habitat.habitat.permissions.maintenance_request_query",
     # [#8oiixt]
-    "Accommodation Assignment": "apex_habitat.habitat.permissions.accommodation_assignment_query",
+    "Housing Assignment": "apex_habitat.habitat.permissions.accommodation_assignment_query",
     "Custody Issue": "apex_habitat.habitat.permissions.custody_issue_query",
     "Cleaning Log": "apex_habitat.habitat.permissions.cleaning_log_query",
-    "Accommodation Building": "apex_habitat.habitat.permissions.accommodation_building_query",
+    "Building": "apex_habitat.habitat.permissions.accommodation_building_query",
     # [#wave4-safety]
     "Safety Round": "apex_habitat.habitat.permissions.safety_round_query",
     "Safety Task Execution": "apex_habitat.habitat.permissions.safety_task_execution_query",
     "Scheduled Task Instance": "apex_habitat.habitat.permissions.scheduled_task_instance_query",
-    "Accommodation Resident Request": "apex_habitat.habitat.permissions.accommodation_resident_request_query",
+    "Resident Request": "apex_habitat.habitat.permissions.accommodation_resident_request_query",
     "Idle Resident Report": "apex_habitat.habitat.permissions.idle_resident_report_query",
     "Vehicle Assignment": "apex_habitat.salis.permissions.vehicle_assignment_query",
     "Fuel Request": "apex_habitat.salis.permissions.fuel_request_query",
@@ -258,7 +258,7 @@ permission_query_conditions = {
     "Passenger Manifest": "apex_habitat.salis.permissions.passenger_manifest_query",
     # [#wave2-pqc] habitat tenant scoping (single-building unless noted)
     "Facility Asset Custody Assignment": "apex_habitat.habitat.permissions.facility_asset_custody_assignment_query",
-    "Non-Financial Depreciation Snapshot": "apex_habitat.habitat.permissions.non_financial_depreciation_snapshot_query",
+    "Operational Depreciation Snapshot": "apex_habitat.habitat.permissions.non_financial_depreciation_snapshot_query",
     "Custody Return": "apex_habitat.habitat.permissions.custody_return_query",
     "Custody Damage Assessment": "apex_habitat.habitat.permissions.custody_damage_assessment_query",
     "Accommodation Material Transfer": "apex_habitat.habitat.permissions.accommodation_material_transfer_query",
@@ -270,11 +270,11 @@ permission_query_conditions = {
     "Housing Inventory": "apex_habitat.habitat.permissions.housing_inventory_query",
     "Building License": "apex_habitat.habitat.permissions.building_license_query",
     "Maintenance Work Order": "apex_habitat.habitat.permissions.maintenance_work_order_query",
-    "Accommodation Occupancy Snapshot": "apex_habitat.habitat.permissions.accommodation_occupancy_snapshot_query",
+    "Occupancy Snapshot": "apex_habitat.habitat.permissions.accommodation_occupancy_snapshot_query",
     "Temporary Worker": "apex_habitat.habitat.permissions.temporary_worker_query",
     "Arrival Batch": "apex_habitat.habitat.permissions.arrival_batch_query",
-    "Accommodation Room": "apex_habitat.habitat.permissions.accommodation_room_query",
-    "Accommodation Bed": "apex_habitat.habitat.permissions.accommodation_bed_query",
+    "Room": "apex_habitat.habitat.permissions.accommodation_room_query",
+    "Bed": "apex_habitat.habitat.permissions.accommodation_bed_query",
     # [#wave-b2] read-only quantity ledger, scoped on its store `building`.
     "Accommodation Stock Ledger": "apex_habitat.habitat.permissions.accommodation_stock_ledger_query",
     "Driver Attendance": "apex_habitat.salis.permissions.driver_attendance_query",
@@ -293,15 +293,15 @@ has_permission = {
     # [#jgdlwi]
     "Maintenance Request": "apex_habitat.habitat.permissions.maintenance_request_has_permission",
     # [#s6j0i9]
-    "Accommodation Assignment": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Housing Assignment": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Custody Issue": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Cleaning Log": "apex_habitat.habitat.permissions.building_scoped_has_permission",
-    "Accommodation Building": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Building": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     # [#wave4-safety]
     "Safety Round": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Safety Task Execution": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Scheduled Task Instance": "apex_habitat.habitat.permissions.building_scoped_has_permission",
-    "Accommodation Resident Request": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Resident Request": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Idle Resident Report": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Vehicle Assignment": "apex_habitat.salis.permissions.scoped_has_permission",
     "Fuel Request": "apex_habitat.salis.permissions.scoped_has_permission",
@@ -322,7 +322,7 @@ has_permission = {
     "Passenger Manifest": "apex_habitat.salis.permissions.scoped_has_permission",
     # [#wave2-pqc] habitat (3 dual-building use the dual helper)
     "Facility Asset Custody Assignment": "apex_habitat.habitat.permissions.building_scoped_has_permission",
-    "Non-Financial Depreciation Snapshot": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Operational Depreciation Snapshot": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Custody Return": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Custody Damage Assessment": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Custody Acknowledgment": "apex_habitat.habitat.permissions.building_scoped_has_permission",
@@ -334,11 +334,11 @@ has_permission = {
     "Facility Asset Movement": "apex_habitat.habitat.permissions.dual_building_scoped_has_permission",
     "Custody Handover": "apex_habitat.habitat.permissions.dual_building_scoped_has_permission",
     "Facility Asset Delivery": "apex_habitat.habitat.permissions.dual_building_scoped_has_permission",
-    "Accommodation Occupancy Snapshot": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Occupancy Snapshot": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Temporary Worker": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Arrival Batch": "apex_habitat.habitat.permissions.building_scoped_has_permission",
-    "Accommodation Room": "apex_habitat.habitat.permissions.building_scoped_has_permission",
-    "Accommodation Bed": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Room": "apex_habitat.habitat.permissions.building_scoped_has_permission",
+    "Bed": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     # [#wave-b2] form/REST read of a ledger row outside the user's store is denied.
     "Accommodation Stock Ledger": "apex_habitat.habitat.permissions.building_scoped_has_permission",
     "Driver Attendance": "apex_habitat.salis.permissions.driver_attendance_has_permission",

@@ -17,12 +17,12 @@ def get_data(data=None):
     data["fieldname"] = data.get("fieldname") or "supplier"
     # [#job590]
     data["non_standard_fieldnames"].update({
-        "Accommodation Assignment": "billed_to_supplier",
+        "Housing Assignment": "billed_to_supplier",
         "Accommodation Ledger": "billed_to_supplier",
     })
     data["transactions"].extend([
         {"label": "Housing (Supplier-billed)",
-         "items": ["Accommodation Assignment", "Accommodation Lease"]},
+         "items": ["Housing Assignment", "Lease"]},
         {"label": "Subcontracting",
          "items": ["Subcontractor Service Contract", "Subcontractor Service Order"]},
         {"label": "Cost Recovery",

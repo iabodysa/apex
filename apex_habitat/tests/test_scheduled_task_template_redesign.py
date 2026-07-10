@@ -51,12 +51,12 @@ def _make_building(suffix: str) -> str:
     """Get or create a minimal Accommodation Building record; returns name."""
     bname = f"Test Building {suffix}"
     existing = frappe.db.get_value(
-        "Accommodation Building", {"building_name": bname}, "name"
+        "Building", {"building_name": bname}, "name"
     )
     if existing:
         return existing
     doc = frappe.get_doc({
-        "doctype": "Accommodation Building",
+        "doctype": "Building",
         "building_name": bname,
         "status": "Active",
         "total_capacity": 10,

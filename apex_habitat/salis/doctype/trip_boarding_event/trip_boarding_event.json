@@ -80,7 +80,7 @@
    "fieldname": "accommodation_building",
    "fieldtype": "Link",
    "label": "Pickup Building",
-   "options": "Accommodation Building"
+   "options": "Building"
   },
   {
    "fieldname": "boarding_col_break",

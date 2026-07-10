@@ -8,7 +8,7 @@ Safety Round insert, or the report email — so a supervisor cannot drive (or le
 another estate's due-rounds. A supervisor acting on their OWN building is
 unaffected and still records the rounds.
 
-These tests pin the new ``frappe.has_permission("Accommodation Building",
+These tests pin the new ``frappe.has_permission("Building",
 "read", doc=building, throw=True)`` gate: that it fires (the cross-building call
 never reaches frappe.db.savepoint and creates no round) and that the in-scope
 caller still succeeds end-to-end.
@@ -43,12 +43,12 @@ class TestSubmitDueRoundsBuildingScope(FrappeTestCase):
     @classmethod
     def _building(cls):
         doc = frappe.get_doc(
-            {"doctype": "Accommodation Building", "building_name": "SCP-" + _h()}
+            {"doctype": "Building", "building_name": "SCP-" + _h()}
         )
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         cls.addClassCleanup(
             frappe.delete_doc,
-            "Accommodation Building",
+            "Building",
             doc.name,
             force=True,
             ignore_permissions=True,
@@ -74,7 +74,7 @@ class TestSubmitDueRoundsBuildingScope(FrappeTestCase):
             {
                 "doctype": "User Permission",
                 "user": email,
-                "allow": "Accommodation Building",
+                "allow": "Building",
                 "for_value": building,
             }
         )

@@ -86,7 +86,7 @@
    "fieldname": "building",
    "fieldtype": "Link",
    "label": "Assigned Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "reqd": 1,
    "idx": 5,
    "search_index": 1
@@ -195,7 +195,7 @@
    "fieldname": "previous_building",
    "fieldtype": "Link",
    "label": "Previous Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "read_only": 1,
    "description": "The building this asset was located in before its current location.",
    "idx": 20

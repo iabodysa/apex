@@ -5,7 +5,7 @@
  "days_in_advance": 0,
  "docstatus": 0,
  "doctype": "Notification",
- "document_type": "Accommodation Bed",
+ "document_type": "Bed",
  "enabled": 0,
  "event": "New",
  "idx": 0,
@@ -25,5 +25,5 @@
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "Over-Capacity Bed Created: {{ doc.building }}",
- "modified": "2026-06-25 13:01:33.269538"
+ "modified": "2026-07-10 06:05:34.129545"
 }

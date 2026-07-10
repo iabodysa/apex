@@ -97,7 +97,7 @@ class SafetyTaskExecution(Document):
             if finding.get("room"):
                 return finding.get("room")
         return frappe.db.get_value(
-            "Accommodation Room", {"building": self.building}, "name"
+            "Room", {"building": self.building}, "name"
         )
 
     def _enforce_evidence(self):

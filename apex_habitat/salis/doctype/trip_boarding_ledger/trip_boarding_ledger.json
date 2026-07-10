@@ -56,8 +56,8 @@
   {
    "fieldname": "building",
    "fieldtype": "Link",
-   "label": "Accommodation Building",
-   "options": "Accommodation Building",
+   "label": "Building",
+   "options": "Building",
    "read_only": 1
   },
   {

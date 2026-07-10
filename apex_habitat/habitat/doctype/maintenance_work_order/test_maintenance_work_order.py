@@ -82,15 +82,15 @@ class TestMaintenanceWorkOrderCancel(FrappeTestCase):
     ticket."""
 
     def _ensure_location(self):
-        if not frappe.db.exists("Accommodation Building", "MWO-CANCEL-BLDG"):
+        if not frappe.db.exists("Building", "MWO-CANCEL-BLDG"):
             frappe.get_doc({
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": "MWO-CANCEL-BLDG",
                 "total_capacity": 4,
             }).insert(ignore_permissions=True, ignore_links=True)
-        if not frappe.db.exists("Accommodation Room", "MWO-CANCEL-ROOM"):
+        if not frappe.db.exists("Room", "MWO-CANCEL-ROOM"):
             frappe.get_doc({
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": "MWO-CANCEL-BLDG",
                 "room_number": "MWO-CANCEL-ROOM",
                 "bed_capacity": 2,

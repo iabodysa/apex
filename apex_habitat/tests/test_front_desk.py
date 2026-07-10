@@ -36,14 +36,14 @@ class TestFrontDesk(ApexHabitatTestCase):
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         self.cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
-        self.site = frappe.get_doc({"doctype": "Accommodation Site", "site_name": _h(6)}).insert(ignore_permissions=True)
-        self.building = frappe.get_doc({"doctype": "Accommodation Building", "building_name": "B " + _h(),
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        self.building = frappe.get_doc({"doctype": "Building", "building_name": "B " + _h(),
                                         "site": self.site.name, "total_capacity": 4, "company": self.company,
                                         "default_cost_center": self.cc}).insert(ignore_permissions=True).name
-        self.room = frappe.get_doc({"doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+        self.room = frappe.get_doc({"doctype": "Room", "naming_series": "ROOM-.####",
                                     "building": self.building, "room_number": "R" + _h(),
                                     "bed_capacity": 2, "readiness_status": "Ready"}).insert(ignore_permissions=True).name
-        self.bed = frappe.get_doc({"doctype": "Accommodation Bed", "naming_series": "BED-.####",
+        self.bed = frappe.get_doc({"doctype": "Bed", "naming_series": "BED-.####",
                                    "room": self.room, "building": self.building, "bed_code": "B" + _h(),
                                    "status": "Available"}).insert(ignore_permissions=True).name
         self.employee = frappe.get_doc({"doctype": "Employee", "first_name": "E " + _h(), "company": self.company,
@@ -64,28 +64,28 @@ class TestFrontDesk(ApexHabitatTestCase):
         self.assertEqual(b2["bed_color"], "red", "bed is red after check-in")
         self.assertTrue(b2.get("occupant"), "occupied bed carries occupant info")
         # [#4va3oo]
-        self.assertTrue(frappe.db.exists("Accommodation Assignment",
+        self.assertTrue(frappe.db.exists("Housing Assignment",
                         {"bed": self.bed, "docstatus": 1, "check_out_date": ["is", "not set"]}))
 
     def test_amber_when_room_not_ready(self):
-        frappe.db.set_value("Accommodation Room", self.room, "readiness_status", "Needs Cleaning")
+        frappe.db.set_value("Room", self.room, "readiness_status", "Needs Cleaning")
         grid = get_building_grid(self.building)
         b = _find_bed(grid, self.bed)
         self.assertEqual(b["bed_color"], "amber", "available bed in a not-ready room is amber")
 
 
 def _make_building(company, cc, status="Active"):
-    site = frappe.get_doc({"doctype": "Accommodation Site", "site_name": _h(6)}).insert(ignore_permissions=True)
-    return frappe.get_doc({"doctype": "Accommodation Building", "building_name": "B " + _h(),
+    site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+    return frappe.get_doc({"doctype": "Building", "building_name": "B " + _h(),
                            "site": site.name, "total_capacity": 4, "company": company,
                            "status": status, "default_cost_center": cc}).insert(ignore_permissions=True).name
 
 
 def _make_bed(building, status="Available", readiness="Ready"):
-    room = frappe.get_doc({"doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+    room = frappe.get_doc({"doctype": "Room", "naming_series": "ROOM-.####",
                            "building": building, "room_number": "R" + _h(),
                            "bed_capacity": 2, "readiness_status": readiness}).insert(ignore_permissions=True).name
-    return frappe.get_doc({"doctype": "Accommodation Bed", "naming_series": "BED-.####",
+    return frappe.get_doc({"doctype": "Bed", "naming_series": "BED-.####",
                            "room": room, "building": building, "bed_code": "B" + _h(),
                            "status": status}).insert(ignore_permissions=True).name
 
@@ -183,10 +183,10 @@ class TestSetRoomReadiness(ApexHabitatTestCase):
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         self.cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
         self.building = _make_building(self.company, self.cc)
-        self.room = frappe.get_doc({"doctype": "Accommodation Room", "naming_series": "ROOM-.####",
+        self.room = frappe.get_doc({"doctype": "Room", "naming_series": "ROOM-.####",
                                     "building": self.building, "room_number": "R" + _h(),
                                     "bed_capacity": 2, "readiness_status": "Needs Cleaning"}).insert(ignore_permissions=True).name
-        self.bed = frappe.get_doc({"doctype": "Accommodation Bed", "naming_series": "BED-.####",
+        self.bed = frappe.get_doc({"doctype": "Bed", "naming_series": "BED-.####",
                                    "room": self.room, "building": self.building, "bed_code": "B" + _h(),
                                    "status": "Available"}).insert(ignore_permissions=True).name
 
@@ -208,7 +208,7 @@ class TestSetRoomReadiness(ApexHabitatTestCase):
 
         out = set_room_readiness(room=self.room, status="Ready")
         self.assertEqual(out["readiness_status"], "Ready")
-        self.assertEqual(frappe.db.get_value("Accommodation Room", self.room, "readiness_status"), "Ready")
+        self.assertEqual(frappe.db.get_value("Room", self.room, "readiness_status"), "Ready")
 
         # Board now reflects the change: the same bed is green.
         b2 = _find_bed(get_building_grid(self.building), self.bed)

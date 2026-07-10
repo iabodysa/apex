@@ -10,7 +10,7 @@ def execute(filters=None):
     columns = [
         {"label": frappe._("Execution"), "fieldname": "name", "fieldtype": "Link", "options": "Safety Task Execution", "width": 150},
         {"label": frappe._("Execution Date"), "fieldname": "execution_date", "fieldtype": "Date", "width": 120},
-        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 150},
+        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 150},
         {"label": frappe._("Task"), "fieldname": "task", "fieldtype": "Link", "options": "Safety Task Catalog", "width": 160},
         {"label": frappe._("Result"), "fieldname": "execution_status", "fieldtype": "Data", "width": 110},
         {"label": frappe._("Executed By"), "fieldname": "executed_by", "fieldtype": "Link", "options": "User", "width": 160},

@@ -143,7 +143,7 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Building (Store)",
-   "options": "Accommodation Building",
+   "options": "Building",
    "reqd": 1,
    "search_index": 1
   },
@@ -181,14 +181,14 @@
    "fieldname": "from_building",
    "fieldtype": "Link",
    "label": "From Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "read_only": 1
   },
   {
    "fieldname": "to_building",
    "fieldtype": "Link",
    "label": "To Building",
-   "options": "Accommodation Building",
+   "options": "Building",
    "read_only": 1
   },
   {

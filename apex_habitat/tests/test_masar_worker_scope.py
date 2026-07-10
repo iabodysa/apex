@@ -64,13 +64,13 @@ def _assign(employee, building, project):
     so submit's deduction/cost-center path passes."""
     room = make_room(building, room_number=f"{building}-SCOPE-R", bed_capacity=4)
     bed = make_bed(room.name, bed_code=f"{building}-SCOPE-B")
-    company = frappe.db.get_value("Accommodation Building", building, "company") or _company_default()
+    company = frappe.db.get_value("Building", building, "company") or _company_default()
     cost_center = frappe.db.get_value(
         "Cost Center", {"company": company, "is_group": 0}, "name"
     )
     doc = frappe.get_doc(
         {
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "employee": employee,
             "building": building,
             "room": room.name,
@@ -285,15 +285,15 @@ class TestMasarWorkerScope(_WorkerTripMixin, FrappeTestCase):
     def _purge_assignment(self):
         frappe.set_user("Administrator")
         name = getattr(self, "_assign_name", None)
-        if name and frappe.db.exists("Accommodation Assignment", name):
-            doc = frappe.get_doc("Accommodation Assignment", name)
+        if name and frappe.db.exists("Housing Assignment", name):
+            doc = frappe.get_doc("Housing Assignment", name)
             if doc.docstatus == 1:
                 try:
                     doc.cancel()
                 except Exception:
                     pass
             frappe.delete_doc(
-                "Accommodation Assignment", name, ignore_permissions=True, force=True
+                "Housing Assignment", name, ignore_permissions=True, force=True
             )
 
 

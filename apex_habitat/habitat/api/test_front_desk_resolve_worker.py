@@ -57,19 +57,19 @@ class TestResolveWorker(FrappeTestCase):
 
     def _bed(self):
         doc = frappe.get_doc({
-            "doctype": "Accommodation Bed",
+            "doctype": "Bed",
             "bed_code": "BED-" + _h(6),
             "building": self.building,
             "status": "Available",
         })
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        self._cleanup.append(("Accommodation Bed", doc.name))
+        self._cleanup.append(("Bed", doc.name))
         return doc.name
 
     def _house(self, party_type, party, employee=None):
         """A submitted, not-checked-out Accommodation Assignment for the party."""
         doc = frappe.get_doc({
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "naming_series": "ACC-ASGN-.YYYY.-.####",
             "party_type": party_type,
             "party": party,
@@ -79,7 +79,7 @@ class TestResolveWorker(FrappeTestCase):
         })
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         frappe.db.set_value(
-            "Accommodation Assignment", doc.name,
+            "Housing Assignment", doc.name,
             {"docstatus": 1, "check_in_date": "2026-06-20"}, update_modified=False,
         )
         self._assignments.append(doc.name)
@@ -87,9 +87,9 @@ class TestResolveWorker(FrappeTestCase):
 
     def tearDown(self):
         for name in self._assignments:
-            frappe.db.set_value("Accommodation Assignment", name, "docstatus", 0,
+            frappe.db.set_value("Housing Assignment", name, "docstatus", 0,
                                 update_modified=False)
-            frappe.delete_doc("Accommodation Assignment", name, force=True,
+            frappe.delete_doc("Housing Assignment", name, force=True,
                               ignore_permissions=True)
         for dt, name in reversed(self._cleanup):
             frappe.delete_doc(dt, name, force=True, ignore_permissions=True)

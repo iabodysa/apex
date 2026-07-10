@@ -67,7 +67,7 @@ class RoomSetup {
 			return;
 		}
 		frappe.db
-			.get_value("Accommodation Building", this.building, "building_name")
+			.get_value("Building", this.building, "building_name")
 			.then((r) => {
 				this.buildingName = (r && r.message && r.message.building_name) || this.building;
 				this.page.set_title(__("Room Setup — {0}", [this.buildingName]));
@@ -345,13 +345,13 @@ class RoomSetup {
 		frappe.dom.freeze(__("Creating rooms and beds…"));
 		frappe
 			.call({
-				method: "apex_habitat.habitat.doctype.accommodation_building.accommodation_building.setup_building_rooms",
+				method: "apex_habitat.habitat.doctype.building.building.setup_building_rooms",
 				args: { building_name: this.building, floors: JSON.stringify(floors) },
 			})
 			.then(() => {
 				frappe.dom.unfreeze();
 				frappe.show_alert({ message: __("Rooms and beds created."), indicator: "green" });
-				frappe.set_route("Form", "Accommodation Building", this.building);
+				frappe.set_route("Form", "Building", this.building);
 			})
 			.catch(() => frappe.dom.unfreeze());
 	}
@@ -363,7 +363,7 @@ class RoomSetup {
 		} else {
 			$('<button class="btn btn-default"></button>')
 				.text(__("Open Building"))
-				.on("click", () => frappe.set_route("Form", "Accommodation Building", this.building))
+				.on("click", () => frappe.set_route("Form", "Building", this.building))
 				.appendTo($f);
 		}
 		$(`<button class="btn ${nextCls || "btn-primary"}"></button>`).text(nextLabel).on("click", nextFn).appendTo($f);

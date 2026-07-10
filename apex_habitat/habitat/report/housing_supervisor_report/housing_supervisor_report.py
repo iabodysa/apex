@@ -63,7 +63,7 @@ def execute(filters=None):
 def _columns():
     return [
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link",
-         "options": "Accommodation Building", "width": 180},
+         "options": "Building", "width": 180},
         {"label": frappe._("Total Beds"), "fieldname": "total_beds", "fieldtype": "Int", "width": 90},
         {"label": frappe._("Occupied Beds"), "fieldname": "occupied_beds", "fieldtype": "Int", "width": 110},
         {"label": frappe._("Occupancy %"), "fieldname": "occupancy_pct", "fieldtype": "Float",
@@ -99,7 +99,7 @@ def _get_buildings(building_filter):
     elif building_filter:
         f["name"] = building_filter
 
-    return frappe.get_all("Accommodation Building", filters=f, fields=["name"], order_by="name")
+    return frappe.get_all("Building", filters=f, fields=["name"], order_by="name")
 
 
 def _is_scope_gap(building_filter):
@@ -127,7 +127,7 @@ def _no_scope_message():
 def _occupancy(building_names):
     result = defaultdict(lambda: {"total": 0, "occupied": 0})
 
-    beds = frappe.get_all("Accommodation Bed", filters={"building": ["in", building_names]},
+    beds = frappe.get_all("Bed", filters={"building": ["in", building_names]},
                            fields=["building", "status"])
     for bed in beds:
         result[bed.building]["total"] += 1
@@ -189,7 +189,7 @@ def _maintenance(building_names):
 def _resident_requests(building_names):
     result = defaultdict(int)
     tokens = frappe.get_all(
-        "Accommodation QR Location",
+        "QR Location",
         filters={"building": ["in", building_names]},
         fields=["name", "building"],
     )
@@ -198,7 +198,7 @@ def _resident_requests(building_names):
         return result
 
     requests = frappe.get_all(
-        "Accommodation Resident Request",
+        "Resident Request",
         filters={"location_token": ["in", list(token_to_building.keys())],
                  "status": ["in", ["Open", "Triaged"]]},
         fields=["location_token"],

@@ -27,7 +27,7 @@ class TestHousingCleaningAudit(FrappeTestCase):
 
         self.building = frappe.get_doc(
             {
-                "doctype": "Accommodation Building",
+                "doctype": "Building",
                 "building_name": f"HCA Bldg {tag}",
                 "status": "Active",
             }
@@ -37,14 +37,14 @@ class TestHousingCleaningAudit(FrappeTestCase):
         # the report must reproduce from the ledger.
         self.room_a = frappe.get_doc(
             {
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": self.building,
                 "room_number": f"HCA-A-{tag}",
             }
         ).insert(ignore_permissions=True).name
         self.room_b = frappe.get_doc(
             {
-                "doctype": "Accommodation Room",
+                "doctype": "Room",
                 "building": self.building,
                 "room_number": f"HCA-B-{tag}",
             }

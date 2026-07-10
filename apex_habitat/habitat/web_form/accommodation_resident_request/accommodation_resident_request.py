@@ -39,7 +39,7 @@ def submit_resident_request(
 
     # [#nxrqsg]
     doc = frappe.get_doc({
-        "doctype": "Accommodation Resident Request",
+        "doctype": "Resident Request",
         "location_token": location_token,
         "request_category": request_type,   # [#nnkung]
         "description": description,

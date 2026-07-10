@@ -18,10 +18,10 @@ DEFAULTS = {
 def execute():
     try:
         # [#4xotau]
-        if not frappe.db.exists("DocType", "Salis Portal Theme"):
+        if not frappe.db.exists("DocType", "Driver Portal Theme"):
             return
 
-        settings = frappe.get_single("Salis Portal Theme")
+        settings = frappe.get_single("Driver Portal Theme")
         changed = False
 
         # [#762qa4]

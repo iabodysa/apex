@@ -283,7 +283,7 @@ class TestSafetyChecklist(FrappeTestCase):
         # Mock has_permission so that Accommodation Building throws PermissionError
         original_has_permission = frappe.has_permission
         def mock_has_permission(doctype, ptype="read", doc=None, user=None, throw=False):
-            if doctype == "Accommodation Building" and doc == self.building:
+            if doctype == "Building" and doc == self.building:
                 if throw:
                     frappe.throw("No permission", frappe.PermissionError)
                 return False

@@ -75,7 +75,7 @@ class TestMaintenanceInspectionAssetStamp(FrappeTestCase):
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         self.building = frappe.get_doc({
-            "doctype": "Accommodation Building", "building_name": "B " + self._h(),
+            "doctype": "Building", "building_name": "B " + self._h(),
             "total_capacity": 4, "company": self.company,
         }).insert(ignore_permissions=True, ignore_links=True).name
         self.inspector = frappe.get_doc({

@@ -9,7 +9,7 @@ from apex_habitat.habitat.permissions import report_maintenance_request_scope
 def execute(filters=None):
     columns = [
         {"label": frappe._("Request ID"), "fieldname": "name", "fieldtype": "Link", "options": "Maintenance Request", "width": 140},
-        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Accommodation Building", "width": 150},
+        {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 150},
         {"label": frappe._("Issue Type"), "fieldname": "issue_type", "fieldtype": "Data", "width": 120},
         {"label": frappe._("Description"), "fieldname": "description", "fieldtype": "Small Text", "width": 240},
         {"label": frappe._("Priority"), "fieldname": "priority", "fieldtype": "Data", "width": 90},

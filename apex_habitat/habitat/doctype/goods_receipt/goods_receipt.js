@@ -5,7 +5,7 @@ frappe.ui.form.on("Goods Receipt", {
 			return;
 		}
 		frappe.db.get_value(
-			"Accommodation Building",
+			"Building",
 			frm.doc.intake_building,
 			"is_procurement_store",
 			(r) => {

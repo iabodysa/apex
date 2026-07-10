@@ -88,14 +88,14 @@ class TestArrivalBatch(FrappeTestCase):
         # Two real housed arrivals on the date in this building.
         for _i in range(2):
             asgn = frappe.get_doc({
-                "doctype": "Accommodation Assignment",
+                "doctype": "Housing Assignment",
                 "naming_series": "ACC-ASGN-.YYYY.-.####",
                 "party_type": "Employee",
                 "party": "EMP-" + _h(),
                 "employee": "EMP-" + _h(),
                 "building": self.building,
             }).insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-            frappe.db.set_value("Accommodation Assignment", asgn.name,
+            frappe.db.set_value("Housing Assignment", asgn.name,
                                 {"docstatus": 1, "check_in_date": self.date},
                                 update_modified=False)
 
@@ -112,14 +112,14 @@ class TestArrivalBatch(FrappeTestCase):
 
         # House one worker on the date in this building.
         asgn = frappe.get_doc({
-            "doctype": "Accommodation Assignment",
+            "doctype": "Housing Assignment",
             "naming_series": "ACC-ASGN-.YYYY.-.####",
             "party_type": "Employee",
             "party": "EMP-" + _h(),
             "employee": "EMP-" + _h(),
             "building": self.building,
         }).insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        frappe.db.set_value("Accommodation Assignment", asgn.name,
+        frappe.db.set_value("Housing Assignment", asgn.name,
                             {"docstatus": 1, "check_in_date": self.date},
                             update_modified=False)
         self.assertEqual(doc.pending_arrival_count, 2)
@@ -130,7 +130,7 @@ class TestArrivalBatch(FrappeTestCase):
         expected = {
             "Habitat - Arrival Batch Due Today": ("Arrival Batch", "Days Before"),
             "Habitat - Manifest Not Reconciled": ("Arrival Batch", "Days After"),
-            "Habitat - Over Capacity Used": ("Accommodation Bed", "New"),
+            "Habitat - Over Capacity Used": ("Bed", "New"),
         }
         for name, (dt, event) in expected.items():
             self.assertTrue(frappe.db.exists("Notification", name), f"{name} exists")
@@ -178,7 +178,7 @@ class TestArrivalManifestWebForm(FrappeTestCase):
         # accept() validates Links, so use a real Accommodation Building (it only
         # requires a name) rather than the bare-string shortcut the sibling cases use.
         building = frappe.get_doc({
-            "doctype": "Accommodation Building",
+            "doctype": "Building",
             "building_name": "BLDG-" + _h(),
         }).insert(ignore_permissions=True).name
         payload = {

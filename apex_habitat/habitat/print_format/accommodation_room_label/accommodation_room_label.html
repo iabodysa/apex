@@ -1,6 +1,6 @@
 {# Guard: building may be empty OR a dangling link to a deleted record — db.get_value
    returns None on both, where get_doc would raise DoesNotExistError and abort the print. #}
-{% set building_name = frappe.db.get_value("Accommodation Building", doc.building, "building_name") if doc.building else None %}
+{% set building_name = frappe.db.get_value("Building", doc.building, "building_name") if doc.building else None %}
 <style>
   .room-label {
     width: 10cm;

@@ -9,14 +9,14 @@ def execute():
     immediately after room generation), but buildings saved before that change show
     stale 0 / blank values. Recompute once for every existing building. Idempotent.
     """
-    for name in frappe.get_all("Accommodation Building", pluck="name"):
-        total_rooms = frappe.db.count("Accommodation Room", {"building": name})
+    for name in frappe.get_all("Building", pluck="name"):
+        total_rooms = frappe.db.count("Room", {"building": name})
         floor_values = frappe.db.get_all(
-            "Accommodation Room", filters={"building": name}, pluck="floor", distinct=True
+            "Room", filters={"building": name}, pluck="floor", distinct=True
         )
         total_floors = len([f for f in floor_values if f is not None])
         frappe.db.set_value(
-            "Accommodation Building",
+            "Building",
             name,
             {"total_rooms": total_rooms, "total_floors": total_floors},
             update_modified=False,

@@ -78,7 +78,7 @@ def transfer_occupant(source_bed, target_bed, transfer_date=None, reason=None):
 
     # [#m9v043]
     assignment = frappe.db.get_value(
-        "Accommodation Assignment",
+        "Housing Assignment",
         {"bed": source_bed, "docstatus": 1, "check_out_date": ["is", "not set"]},
         "name",
     )
@@ -87,12 +87,12 @@ def transfer_occupant(source_bed, target_bed, transfer_date=None, reason=None):
 
     # [#njtyxo]
     target_room, target_building = frappe.db.get_value(
-        "Accommodation Bed", target_bed, ["room", "building"]
+        "Bed", target_bed, ["room", "building"]
     )
     if not target_room or not target_building:
         frappe.throw(_("Target bed {0} is not linked to a room and building.").format(target_bed))
 
-    source_building = frappe.db.get_value("Accommodation Bed", source_bed, "building")
+    source_building = frappe.db.get_value("Bed", source_bed, "building")
 
     if source_building and target_building and source_building != target_building:
         frappe.throw(

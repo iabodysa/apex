@@ -22,7 +22,7 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
 
     def _new_request(self, category="Maintenance", priority="High", **kw):
         doc = frappe.get_doc({
-            "doctype": "Accommodation Resident Request",
+            "doctype": "Resident Request",
             "request_category": category,
             "priority": priority,
             "description": "Convert test " + frappe.generate_hash(length=4),
@@ -35,7 +35,7 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
         return doc
 
     def _convert(self, name):
-        from apex_habitat.habitat.doctype.accommodation_resident_request.accommodation_resident_request import (
+        from apex_habitat.habitat.doctype.resident_request.resident_request import (
             convert_request,
         )
         return convert_request(name)
@@ -82,13 +82,13 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
                                 issue_location="Staircase")
         res = self._convert(req.name)
 
-        self.assertEqual(res["target_doctype"], "Habitat Safety Incident")
-        inc = frappe.get_doc("Habitat Safety Incident", res["target_document"])
+        self.assertEqual(res["target_doctype"], "Safety Incident")
+        inc = frappe.get_doc("Safety Incident", res["target_document"])
         self.assertEqual(inc.building, "RRC-BLDG")
         self.assertEqual(inc.severity, "Critical")
 
         req.reload()
-        self.assertEqual(req.target_doctype, "Habitat Safety Incident")
+        self.assertEqual(req.target_doctype, "Safety Incident")
         self.assertEqual(req.target_document, res["target_document"])
 
     def test_non_convertible_category_throws(self):
