@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Coalesce, Sum
+from pypika.functions import Min
 
 
 def _raise_consumable_alert(message: str, dedupe_token: str) -> str | None:
@@ -54,23 +56,28 @@ def consumable_custody_expiry_watch() -> None:
     """
     from frappe.utils import getdate, today
 
-    rows = frappe.db.sql(
-        """
-        SELECT sle.item AS article, sle.employee AS employee,
-               SUM(sle.signed_qty) AS net_qty, MIN(sle.posting_date) AS first_held,
-               art.article_name AS article_name,
-               art.consumable_lifespan_months AS lifespan
-        FROM `tabAccommodation Stock Ledger` sle
-        INNER JOIN `tabCustody Article` art ON art.name = sle.item
-        WHERE sle.is_cancelled = 0
-          AND sle.item_type = 'Custody Article'
-          AND sle.employee IS NOT NULL AND sle.employee != ''
-          AND art.consumable_lifespan_months > 0
-        GROUP BY sle.item, sle.employee
-        HAVING net_qty > 0
-        """,
-        as_dict=True,
-    )
+    sle = frappe.qb.DocType("Accommodation Stock Ledger")
+    art = frappe.qb.DocType("Custody Article")
+    rows = (
+        frappe.qb.from_(sle)
+        .inner_join(art)
+        .on(art.name == sle.item)
+        .select(
+            sle.item.as_("article"),
+            sle.employee.as_("employee"),
+            Sum(sle.signed_qty).as_("net_qty"),
+            Min(sle.posting_date).as_("first_held"),
+            art.article_name.as_("article_name"),
+            art.consumable_lifespan_months.as_("lifespan"),
+        )
+        .where(sle.is_cancelled == 0)
+        .where(sle.item_type == "Custody Article")
+        .where(sle.employee.isnotnull())
+        .where(sle.employee != "")
+        .where(art.consumable_lifespan_months > 0)
+        .groupby(sle.item, sle.employee)
+        .having(Sum(sle.signed_qty) > 0)
+    ).run(as_dict=True)
 
     today_date = getdate(today())
     logger = frappe.logger("habitat.consumable_custody_expiry_watch")
@@ -180,34 +187,35 @@ def weekly_custody_digest() -> None:
     # Net custody value still in worker hands, per building (ledger is the
     # canonical valuation, mirroring get_custody_value_in_employee_hands).
     value_by_building: dict[str, float] = defaultdict(float)
-    for row in frappe.db.sql(
-        """
-        SELECT building, COALESCE(SUM(signed_qty * COALESCE(unit_cost, 0)), 0) AS value
-        FROM `tabAccommodation Stock Ledger`
-        WHERE is_cancelled = 0
-          AND item_type = 'Custody Article'
-          AND employee IS NOT NULL AND employee != ''
-          AND building IS NOT NULL AND building != ''
-        GROUP BY building
-        """,
-        as_dict=True,
-    ):
+    sle = frappe.qb.DocType("Accommodation Stock Ledger")
+    for row in (
+        frappe.qb.from_(sle)
+        .select(
+            sle.building,
+            Coalesce(Sum(sle.signed_qty * Coalesce(sle.unit_cost, 0)), 0).as_("value"),
+        )
+        .where(sle.is_cancelled == 0)
+        .where(sle.item_type == "Custody Article")
+        .where(sle.employee.isnotnull())
+        .where(sle.employee != "")
+        .where(sle.building.isnotnull())
+        .where(sle.building != "")
+        .groupby(sle.building)
+    ).run(as_dict=True):
         value_by_building[row.building] = flt(row.value)
 
     # Damage assessed month-to-date per building (submitted assessments only).
     damage_mtd: dict[str, float] = defaultdict(float)
-    for row in frappe.db.sql(
-        """
-        SELECT building, COALESCE(SUM(total_estimated_replacement_cost), 0) AS cost
-        FROM `tabCustody Damage Assessment`
-        WHERE docstatus = 1
-          AND assessment_date >= %(month_start)s
-          AND building IS NOT NULL AND building != ''
-        GROUP BY building
-        """,
-        {"month_start": month_start},
-        as_dict=True,
-    ):
+    cda = frappe.qb.DocType("Custody Damage Assessment")
+    for row in (
+        frappe.qb.from_(cda)
+        .select(cda.building, Coalesce(Sum(cda.total_estimated_replacement_cost), 0).as_("cost"))
+        .where(cda.docstatus == 1)
+        .where(cda.assessment_date >= month_start)
+        .where(cda.building.isnotnull())
+        .where(cda.building != "")
+        .groupby(cda.building)
+    ).run(as_dict=True):
         damage_mtd[row.building] = flt(row.cost)
 
     by_supervisor: dict[str, list] = defaultdict(list)

@@ -23,13 +23,15 @@ def get_driver_for_user(user=None):
 def lock_vehicle(name):
 	"""Row-lock a Salis Vehicle to prevent concurrent assignment/handover races."""
 	if name:
-		frappe.db.sql("SELECT name FROM `tabSalis Vehicle` WHERE name=%s FOR UPDATE", name)
+		Vehicle = frappe.qb.DocType("Salis Vehicle")
+		frappe.qb.from_(Vehicle).select(Vehicle.name).where(Vehicle.name == name).for_update().run()
 
 
 def lock_driver(name):
 	"""Row-lock a Salis Driver."""
 	if name:
-		frappe.db.sql("SELECT name FROM `tabSalis Driver` WHERE name=%s FOR UPDATE", name)
+		Driver = frappe.qb.DocType("Salis Driver")
+		frappe.qb.from_(Driver).select(Driver.name).where(Driver.name == name).for_update().run()
 
 
 def reassign_vehicle_driver(vehicle, driver, start_date=None, reject_same_driver=False):

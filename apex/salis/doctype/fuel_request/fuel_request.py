@@ -250,9 +250,10 @@ class FuelRequest(Document):
 			return
 
 		lock_vehicle(self.vehicle)
-		frappe.db.sql(
-			"SELECT name FROM `tabFuel Quota` WHERE name=%s FOR UPDATE", self.fuel_quota
-		)
+		FuelQuota = frappe.qb.DocType("Fuel Quota")
+		frappe.qb.from_(FuelQuota).select(FuelQuota.name).where(
+			FuelQuota.name == self.fuel_quota
+		).for_update().run()
 
 		quota = frappe.db.get_value(
 			"Fuel Quota", self.fuel_quota, ["consumed_litres", "monthly_litres", "status"], as_dict=True
@@ -282,9 +283,10 @@ class FuelRequest(Document):
 			return
 
 		lock_vehicle(self.vehicle)
-		frappe.db.sql(
-			"SELECT name FROM `tabFuel Quota` WHERE name=%s FOR UPDATE", self.fuel_quota
-		)
+		FuelQuota = frappe.qb.DocType("Fuel Quota")
+		frappe.qb.from_(FuelQuota).select(FuelQuota.name).where(
+			FuelQuota.name == self.fuel_quota
+		).for_update().run()
 
 		quota = frappe.db.get_value(
 			"Fuel Quota", self.fuel_quota, ["consumed_litres", "monthly_litres", "status"], as_dict=True

@@ -225,10 +225,13 @@ def validate(doc, method=None):
 
 def on_submit(doc, method=None):
     # [#el1zj2]
-    frappe.db.sql(
-        "SELECT `status` FROM `tabBed` WHERE `name` = %s FOR UPDATE",
-        doc.bed,
-    )
+    Bed = frappe.qb.DocType("Bed")
+    (
+        frappe.qb.from_(Bed)
+        .select(Bed.status)
+        .where(Bed.name == doc.bed)
+        .for_update()
+    ).run()
     current_status = frappe.db.get_value("Bed", doc.bed, "status")
     if current_status == "Occupied":
         occupying_asg = frappe.db.get_value(

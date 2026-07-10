@@ -81,9 +81,10 @@ def _match_employee(tw) -> str | None:
 
 def _repoint_party(tw_name: str, employee: str) -> None:
     """Re-point party_type/party (and the legacy Employee mirror) from the Temporary
-    Worker to the Employee on every party-bearing doctype. Direct, parameterised SQL:
-    these include submitted documents, and this is a system identity correction, not a
-    user edit. Existence-guarded on table + columns."""
+    Worker to the Employee on every party-bearing doctype. Built with frappe.qb so
+    the (dynamic) table and column identifiers are quoted by the builder, not
+    string-interpolated: these include submitted documents, and this is a system
+    identity correction, not a user edit. Existence-guarded on table + columns."""
     for doctype, emp_field in PARTY_DOCTYPES.items():
         if not _IDENT.match(doctype):
             frappe.throw(_("Invalid SQL identifier: doctype {0}").format(doctype))
@@ -93,19 +94,15 @@ def _repoint_party(tw_name: str, employee: str) -> None:
             continue
         if not {"party_type", "party", emp_field} <= set(frappe.db.get_table_columns(doctype)):
             continue
-        frappe.db.sql(
-            f"""
-            UPDATE `tab{doctype}`
-            SET party_type = %(emp_type)s, party = %(emp)s, `{emp_field}` = %(emp)s
-            WHERE party_type = %(tw_type)s AND party = %(tw)s
-            """,
-            {
-                "emp_type": PARTY_EMPLOYEE,
-                "emp": employee,
-                "tw_type": PARTY_TEMPORARY_WORKER,
-                "tw": tw_name,
-            },
-        )
+        tbl = frappe.qb.DocType(doctype)
+        (
+            frappe.qb.update(tbl)
+            .set(tbl.party_type, PARTY_EMPLOYEE)
+            .set(tbl.party, employee)
+            .set(getattr(tbl, emp_field), employee)
+            .where(tbl.party_type == PARTY_TEMPORARY_WORKER)
+            .where(tbl.party == tw_name)
+        ).run()
 
 
 def _link(tw, employee: str) -> None:

@@ -26,18 +26,15 @@ def missing_attendance_watch() -> None:
 
     # [#hww2kb]
     try:
-        rows = frappe.db.sql(
-            """
-            SELECT driver
-            FROM `tabDriver Attendance`
-            WHERE docstatus = 1
-              AND attendance_date = %(today)s
-              AND driver IS NOT NULL
-            GROUP BY driver
-            """,
-            {"today": today_str},
-            as_dict=True,
-        )
+        DA = frappe.qb.DocType("Driver Attendance")
+        rows = (
+            frappe.qb.from_(DA)
+            .select(DA.driver)
+            .where(DA.docstatus == 1)
+            .where(DA.attendance_date == today_str)
+            .where(DA.driver.isnotnull())
+            .groupby(DA.driver)
+        ).run(as_dict=True)
     except Exception:
         frappe.db.rollback()
         frappe.log_error(

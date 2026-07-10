@@ -44,12 +44,15 @@ def cleanup_orphaned_workflow_actions():
                 {"dt": dt},
             )
             # [#s0si3a]
-            frappe.db.sql(
-                f"""DELETE FROM `tabWorkflow Action`
-                    WHERE status = 'Open' AND reference_doctype = %(dt)s
-                      AND reference_name NOT IN (SELECT name FROM `tab{dt}`)""",
-                {"dt": dt},
-            )
+            WA = frappe.qb.DocType("Workflow Action")
+            DocTbl = frappe.qb.DocType(dt)
+            (
+                frappe.qb.from_(WA)
+                .delete()
+                .where(WA.status == "Open")
+                .where(WA.reference_doctype == dt)
+                .where(WA.reference_name.notin(frappe.qb.from_(DocTbl).select(DocTbl.name)))
+            ).run()
             frappe.db.commit()
         except Exception:
             frappe.db.rollback()

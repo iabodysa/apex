@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Coalesce, Sum
 
 from apex.salis.tasks.common import (
     ALERT_DOCTYPE,
@@ -161,45 +162,45 @@ def reconcile_operations_alerts() -> None:
     pending_cutoff = add_days(today_str, -pending_max_days)
 
     # [#e2kiah]
+    DT = frappe.qb.DocType("Dispatch Trip")
     vehicles_with_recent_trip = {
         r["vehicle"]
-        for r in frappe.db.sql(
-            """
-            SELECT vehicle FROM `tabDispatch Trip`
-            WHERE docstatus = 1 AND status IN ('Dispatched', 'Completed')
-              AND trip_date >= %(cutoff)s AND vehicle IS NOT NULL
-            GROUP BY vehicle
-            """,
-            {"cutoff": idle_cutoff},
-            as_dict=True,
-        )
+        for r in (
+            frappe.qb.from_(DT)
+            .select(DT.vehicle)
+            .where(DT.docstatus == 1)
+            .where(DT.status.isin(["Dispatched", "Completed"]))
+            .where(DT.trip_date >= idle_cutoff)
+            .where(DT.vehicle.isnotnull())
+            .groupby(DT.vehicle)
+        ).run(as_dict=True)
     }
 
     # [#ckt0ba]
     horizon = add_days(today_str, lead_days)
+    SVC = frappe.qb.DocType("Salis Vehicle Compliance")
     vehicles_with_open_compliance = {
         r["parent"]
-        for r in frappe.db.sql(
-            """
-            SELECT DISTINCT parent FROM `tabSalis Vehicle Compliance`
-            WHERE expiry_date IS NOT NULL AND expiry_date <= %(horizon)s
-            """,
-            {"horizon": horizon},
-            as_dict=True,
-        )
+        for r in (
+            frappe.qb.from_(SVC)
+            .select(SVC.parent)
+            .distinct()
+            .where(SVC.expiry_date.isnotnull())
+            .where(SVC.expiry_date <= horizon)
+        ).run(as_dict=True)
     }
 
     # [#2yh1kv]
+    FR = frappe.qb.DocType("Fuel Request")
     overdue_request_vehicles = set()
     overdue_request_drivers = set()
-    for r in frappe.db.sql(
-        """
-        SELECT vehicle, driver FROM `tabFuel Request`
-        WHERE docstatus = 1 AND status = 'Pending' AND request_date < %(cutoff)s
-        """,
-        {"cutoff": pending_cutoff},
-        as_dict=True,
-    ):
+    for r in (
+        frappe.qb.from_(FR)
+        .select(FR.vehicle, FR.driver)
+        .where(FR.docstatus == 1)
+        .where(FR.status == "Pending")
+        .where(FR.request_date < pending_cutoff)
+    ).run(as_dict=True):
         if r["vehicle"]:
             overdue_request_vehicles.add(r["vehicle"])
         if r["driver"]:
@@ -208,35 +209,40 @@ def reconcile_operations_alerts() -> None:
     # [#4oiqbl]
     excessive_topup_vehicles = {
         r["vehicle"]
-        for r in frappe.db.sql(
-            """
-            SELECT DISTINCT vehicle FROM `tabFuel Request`
-            WHERE request_type = 'Top-up' AND is_temporary = 1 AND reverted = 0
-              AND docstatus = 1 AND status IN ('Approved', 'Done')
-              AND revert_due_date < %(today)s AND vehicle IS NOT NULL
-            """,
-            {"today": today_str},
-            as_dict=True,
-        )
+        for r in (
+            frappe.qb.from_(FR)
+            .select(FR.vehicle)
+            .distinct()
+            .where(FR.request_type == "Top-up")
+            .where(FR.is_temporary == 1)
+            .where(FR.reverted == 0)
+            .where(FR.docstatus == 1)
+            .where(FR.status.isin(["Approved", "Done"]))
+            .where(FR.revert_due_date < today_str)
+            .where(FR.vehicle.isnotnull())
+        ).run(as_dict=True)
     }
     from apex.salis.fuel_engine import _period_month, get_overage_margin
 
     overage_margin = get_overage_margin()
     period_month = _period_month(today_str)
-    for r in frappe.db.sql(
-        """
-        SELECT q.vehicle AS vehicle, q.monthly_litres AS quota,
-               COALESCE(SUM(l.litres), 0) AS consumed
-        FROM `tabFuel Quota` q
-        LEFT JOIN `tabFuel Consumption Ledger` l
-          ON l.vehicle = q.vehicle AND l.period_month = q.period_month
-        WHERE q.docstatus = 1 AND q.status = 'Active'
-          AND q.period_month = %(period)s AND q.vehicle IS NOT NULL
-        GROUP BY q.name, q.vehicle, q.monthly_litres
-        """,
-        {"period": period_month},
-        as_dict=True,
-    ):
+    Q = frappe.qb.DocType("Fuel Quota")
+    L = frappe.qb.DocType("Fuel Consumption Ledger")
+    for r in (
+        frappe.qb.from_(Q)
+        .left_join(L)
+        .on((L.vehicle == Q.vehicle) & (L.period_month == Q.period_month))
+        .select(
+            Q.vehicle.as_("vehicle"),
+            Q.monthly_litres.as_("quota"),
+            Coalesce(Sum(L.litres), 0).as_("consumed"),
+        )
+        .where(Q.docstatus == 1)
+        .where(Q.status == "Active")
+        .where(Q.period_month == period_month)
+        .where(Q.vehicle.isnotnull())
+        .groupby(Q.name, Q.vehicle, Q.monthly_litres)
+    ).run(as_dict=True):
         quota = float(r["quota"] or 0)
         consumed = float(r["consumed"] or 0)
         if quota > 0 and consumed > quota * (1 + overage_margin):

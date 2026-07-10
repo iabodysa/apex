@@ -1,6 +1,8 @@
 # Copyright (c) 2026, AFMCO and contributors
 import frappe
 from frappe.utils import flt, today
+from frappe.query_builder.functions import Coalesce, Count
+from pypika.functions import NullIf
 from apex.habitat.permissions import _building_condition
 
 # Custom Number Card return contract: {value: n, ...df} — value holds the number,
@@ -27,13 +29,14 @@ def get_buildings_over_threshold(filters=None):
     falls back to the field default (120) rather than counting as a 0% threshold.
     """
     frappe.has_permission("Building", "read", throw=True)
-    row = frappe.db.sql(
-        """
-        SELECT COUNT(*)
-        FROM `tabBuilding`
-        WHERE occupancy_percent > COALESCE(NULLIF(over_capacity_threshold_percent, 0), 120)
-        """
-    )
+    Building = frappe.qb.DocType("Building")
+    # COALESCE(NULLIF(threshold, 0), 120): an unset/zero threshold falls back to 120.
+    threshold = Coalesce(NullIf(Building.over_capacity_threshold_percent, 0), 120)
+    row = (
+        frappe.qb.from_(Building)
+        .select(Count(Building.name))
+        .where(Building.occupancy_percent > threshold)
+    ).run()
     return {"value": int(row[0][0]) if row else 0, "fieldtype": "Int"}
 
 

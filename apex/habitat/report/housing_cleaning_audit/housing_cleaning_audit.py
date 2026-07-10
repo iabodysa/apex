@@ -30,7 +30,9 @@ Permission: Housing Supervisor users see only their own building(s).
 """
 
 import frappe
+from frappe.query_builder.functions import Count
 from frappe.utils import add_days, getdate, today
+from pypika import Order
 
 from apex.habitat import permissions
 
@@ -86,24 +88,10 @@ def execute(filters=None):
     building_names_set = set(building_supervisor)
 
     # Fetch Cleaning Log rows in the date window.
-    log_conditions = [
-        "cl.cleaning_date BETWEEN %(date_from)s AND %(date_to)s",
-        "cl.docstatus != 2",
-    ]
-    params: dict = {"date_from": str(date_from), "date_to": str(date_to)}
-
-    if chosen_building:
-        log_conditions.append("cl.building = %(building)s")
-        params["building"] = chosen_building
-    elif restrict and allowed:
-        placeholders = ", ".join(f"%(bld_{i})s" for i, _ in enumerate(allowed))
-        log_conditions.append(f"cl.building IN ({placeholders})")
-        for i, bld in enumerate(allowed):
-            params[f"bld_{i}"] = bld
-
-    where = " AND ".join(log_conditions)
-    sql = f"""
-        SELECT
+    cl = frappe.qb.DocType("Cleaning Log")
+    query = (
+        frappe.qb.from_(cl)
+        .select(
             cl.name,
             cl.cleaning_date,
             cl.building,
@@ -111,12 +99,19 @@ def execute(filters=None):
             cl.rework_required,
             cl.supervisor_approved,
             cl.docstatus,
-            cl.modified
-        FROM `tabCleaning Log` cl
-        WHERE {where}
-        ORDER BY cl.cleaning_date DESC, cl.building ASC
-    """
-    rows = frappe.db.sql(sql, params, as_dict=True)
+            cl.modified,
+        )
+        .where(cl.cleaning_date.between(str(date_from), str(date_to)))
+        .where(cl.docstatus != 2)
+        .orderby(cl.cleaning_date, order=Order.desc)
+        .orderby(cl.building, order=Order.asc)
+    )
+    if chosen_building:
+        query = query.where(cl.building == chosen_building)
+    elif restrict and allowed:
+        query = query.where(cl.building.isin(allowed))
+
+    rows = query.run(as_dict=True)
 
     # Pre-fetch room_details counts (cleaned=1) per Cleaning Log in one query.
     log_names = [r.name for r in rows]
@@ -139,16 +134,13 @@ def execute(filters=None):
 
         # Count area_photos rows per log (field: area_photos → child table
         # "Cleaning Area Photo" as confirmed from cleaning_log.json).
-        for rec in frappe.db.sql(
-            """
-            SELECT parent, COUNT(*) AS cnt
-            FROM `tabCleaning Area Photo`
-            WHERE parent IN %(names)s
-            GROUP BY parent
-            """,
-            {"names": log_names},
-            as_dict=True,
-        ):
+        cap = frappe.qb.DocType("Cleaning Area Photo")
+        for rec in (
+            frappe.qb.from_(cap)
+            .select(cap.parent, Count(cap.name).as_("cnt"))
+            .where(cap.parent.isin(log_names))
+            .groupby(cap.parent)
+        ).run(as_dict=True):
             photos_map[rec.parent] = int(rec.cnt or 0)
 
     # Build a set of (building, date) pairs that have a log, for gap detection.

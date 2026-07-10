@@ -28,6 +28,7 @@ Scheduler hooks:
 from __future__ import annotations
 
 import frappe
+from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import flt, today
 
 from apex.apex_core.utils.operations_alert import insert_operations_alert
@@ -201,16 +202,14 @@ def linked_accrued_total(rental_office: str, period_month: str) -> float:
         return 0.0
     first_day, last_day = bounds
     # [#ti294u]
-    total = frappe.db.sql(
-        """
-        SELECT COALESCE(SUM(amount), 0)
-        FROM `tabRental Accrual Ledger`
-        WHERE rental_office = %(office)s
-          AND accrual_date BETWEEN %(first)s AND %(last)s
-          AND (reversal_of IS NULL OR reversal_of = '')
-        """,
-        {"office": rental_office, "first": first_day, "last": last_day},
-    )[0][0]
+    RAL = frappe.qb.DocType("Rental Accrual Ledger")
+    total = (
+        frappe.qb.from_(RAL)
+        .select(Coalesce(Sum(RAL.amount), 0))
+        .where(RAL.rental_office == rental_office)
+        .where(RAL.accrual_date.between(first_day, last_day))
+        .where((RAL.reversal_of.isnull()) | (RAL.reversal_of == ""))
+    ).run()[0][0]
     return flt(total)
 
 
@@ -327,19 +326,17 @@ def monthly_rental_reconciliation() -> None:
     logger = frappe.logger()
 
     # [#1gqu7m]
-    rows = frappe.db.sql(
-        """
-        SELECT rental_office, COALESCE(SUM(amount), 0) AS outstanding
-        FROM `tabRental Accrual Ledger`
-        WHERE settled = 0
-          AND (reversal_of IS NULL OR reversal_of = '')
-          AND accrual_date BETWEEN %(first)s AND %(last)s
-          AND rental_office IS NOT NULL AND rental_office != ''
-        GROUP BY rental_office
-        """,
-        {"first": first_day, "last": last_day},
-        as_dict=True,
-    )
+    RAL = frappe.qb.DocType("Rental Accrual Ledger")
+    rows = (
+        frappe.qb.from_(RAL)
+        .select(RAL.rental_office, Coalesce(Sum(RAL.amount), 0).as_("outstanding"))
+        .where(RAL.settled == 0)
+        .where((RAL.reversal_of.isnull()) | (RAL.reversal_of == ""))
+        .where(RAL.accrual_date.between(first_day, last_day))
+        .where(RAL.rental_office.isnotnull())
+        .where(RAL.rental_office != "")
+        .groupby(RAL.rental_office)
+    ).run(as_dict=True)
 
     for row in rows:
         rental_office = row.rental_office

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import calendar
 import frappe
+from frappe.query_builder.functions import Count
 
 
 def weekly_occupancy_sync() -> None:
@@ -16,19 +17,17 @@ def weekly_occupancy_sync() -> None:
     batch_size = 500
 
     # [#d7yd9d]
+    HA = frappe.qb.DocType("Housing Assignment")
     active_by_room = {
         r["room"]: int(r["n"] or 0)
-        for r in frappe.db.sql(
-            """
-            SELECT room, COUNT(*) AS n
-            FROM `tabHousing Assignment`
-            WHERE docstatus = 1
-              AND (check_out_date IS NULL OR check_out_date = '')
-              AND room IS NOT NULL
-            GROUP BY room
-            """,
-            as_dict=True,
-        )
+        for r in (
+            frappe.qb.from_(HA)
+            .select(HA.room, Count(HA.name).as_("n"))
+            .where(HA.docstatus == 1)
+            .where((HA.check_out_date.isnull()) | (HA.check_out_date == ""))
+            .where(HA.room.isnotnull())
+            .groupby(HA.room)
+        ).run(as_dict=True)
     }
 
     start = 0
@@ -74,31 +73,26 @@ def weekly_occupancy_sync() -> None:
     frappe.logger().info("weekly_occupancy_sync: room occupancy counters refreshed.")
 
     # [#qm5tz5]
+    Room = frappe.qb.DocType("Room")
     rooms_per_building = {
         r["building"]: int(r["n"] or 0)
-        for r in frappe.db.sql(
-            """
-            SELECT building, COUNT(*) AS n
-            FROM `tabRoom`
-            WHERE building IS NOT NULL
-            GROUP BY building
-            """,
-            as_dict=True,
-        )
+        for r in (
+            frappe.qb.from_(Room)
+            .select(Room.building, Count(Room.name).as_("n"))
+            .where(Room.building.isnotnull())
+            .groupby(Room.building)
+        ).run(as_dict=True)
     }
     active_by_building = {
         r["building"]: int(r["n"] or 0)
-        for r in frappe.db.sql(
-            """
-            SELECT building, COUNT(*) AS n
-            FROM `tabHousing Assignment`
-            WHERE docstatus = 1
-              AND (check_out_date IS NULL OR check_out_date = '')
-              AND building IS NOT NULL
-            GROUP BY building
-            """,
-            as_dict=True,
-        )
+        for r in (
+            frappe.qb.from_(HA)
+            .select(HA.building, Count(HA.name).as_("n"))
+            .where(HA.docstatus == 1)
+            .where((HA.check_out_date.isnull()) | (HA.check_out_date == ""))
+            .where(HA.building.isnotnull())
+            .groupby(HA.building)
+        ).run(as_dict=True)
     }
 
     start = 0
@@ -171,34 +165,30 @@ def daily_occupancy_snapshot() -> None:
     }
 
     # [#90367k]
+    Room = frappe.qb.DocType("Room")
     rooms_by_building: dict = {}
-    for r in frappe.db.sql(
-        """
-        SELECT building, status, COUNT(*) AS n
-        FROM `tabRoom`
-        WHERE building IS NOT NULL
-        GROUP BY building, status
-        """,
-        as_dict=True,
-    ):
+    for r in (
+        frappe.qb.from_(Room)
+        .select(Room.building, Room.status, Count(Room.name).as_("n"))
+        .where(Room.building.isnotnull())
+        .groupby(Room.building, Room.status)
+    ).run(as_dict=True):
         bucket = rooms_by_building.setdefault(r["building"], {"_total": 0})
         bucket[r["status"]] = int(r["n"] or 0)
         bucket["_total"] += int(r["n"] or 0)
 
     # [#6kydth]
+    HA = frappe.qb.DocType("Housing Assignment")
     active_by_building = {
         r["building"]: int(r["n"] or 0)
-        for r in frappe.db.sql(
-            """
-            SELECT building, COUNT(*) AS n
-            FROM `tabHousing Assignment`
-            WHERE docstatus = 1
-              AND (check_out_date IS NULL OR check_out_date = '')
-              AND building IS NOT NULL
-            GROUP BY building
-            """,
-            as_dict=True,
-        )
+        for r in (
+            frappe.qb.from_(HA)
+            .select(HA.building, Count(HA.name).as_("n"))
+            .where(HA.docstatus == 1)
+            .where((HA.check_out_date.isnull()) | (HA.check_out_date == ""))
+            .where(HA.building.isnotnull())
+            .groupby(HA.building)
+        ).run(as_dict=True)
     }
 
     # [#im8xs8]

@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import frappe
+from frappe.query_builder.functions import Count, Sum
+from pypika import Case
 
 from apex.salis.tasks.common import (
     BATCH_SIZE,
@@ -31,19 +33,16 @@ def idle_vehicle_watch() -> None:
 
     # [#r94w3h]
     try:
-        rows = frappe.db.sql(
-            """
-            SELECT vehicle
-            FROM `tabDispatch Trip`
-            WHERE docstatus = 1
-              AND status IN ('Dispatched', 'Completed')
-              AND trip_date >= %(cutoff)s
-              AND vehicle IS NOT NULL
-            GROUP BY vehicle
-            """,
-            {"cutoff": cutoff},
-            as_dict=True,
-        )
+        DT = frappe.qb.DocType("Dispatch Trip")
+        rows = (
+            frappe.qb.from_(DT)
+            .select(DT.vehicle)
+            .where(DT.docstatus == 1)
+            .where(DT.status.isin(["Dispatched", "Completed"]))
+            .where(DT.trip_date >= cutoff)
+            .where(DT.vehicle.isnotnull())
+            .groupby(DT.vehicle)
+        ).run(as_dict=True)
     except Exception:
         frappe.db.rollback()
         frappe.log_error(
@@ -151,23 +150,25 @@ def vehicle_utilization_summary() -> None:
 
     # [#gdp7wq]
     try:
-        agg_rows = frappe.db.sql(
-            """
-            SELECT
-                vehicle,
-                COUNT(*) AS trip_count,
-                SUM(CASE WHEN odometer_end > odometer_start
-                         THEN odometer_end - odometer_start ELSE 0 END) AS distance
-            FROM `tabDispatch Trip`
-            WHERE docstatus = 1
-              AND status IN ('Dispatched', 'Completed')
-              AND trip_date BETWEEN %(start)s AND %(end)s
-              AND vehicle IS NOT NULL
-            GROUP BY vehicle
-            """,
-            {"start": window_start, "end": today_str},
-            as_dict=True,
+        DT = frappe.qb.DocType("Dispatch Trip")
+        distance_expr = Sum(
+            Case()
+            .when(DT.odometer_end > DT.odometer_start, DT.odometer_end - DT.odometer_start)
+            .else_(0)
         )
+        agg_rows = (
+            frappe.qb.from_(DT)
+            .select(
+                DT.vehicle,
+                Count(DT.name).as_("trip_count"),
+                distance_expr.as_("distance"),
+            )
+            .where(DT.docstatus == 1)
+            .where(DT.status.isin(["Dispatched", "Completed"]))
+            .where(DT.trip_date.between(window_start, today_str))
+            .where(DT.vehicle.isnotnull())
+            .groupby(DT.vehicle)
+        ).run(as_dict=True)
     except Exception:
         frappe.db.rollback()
         frappe.log_error(

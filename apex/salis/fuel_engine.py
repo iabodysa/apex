@@ -26,6 +26,7 @@ No GL is written. The Operations Alert insert goes through the apex_core
 from __future__ import annotations
 
 import frappe
+from frappe.query_builder.functions import Coalesce, Sum
 
 from apex.apex_core.utils.company import company_for_vehicle
 from apex.apex_core.utils.operations_alert import insert_operations_alert
@@ -387,14 +388,13 @@ def monthly_fuel_reconciliation() -> None:
                     continue
 
                 quota_litres = flt(quota.monthly_litres)
-                consumed = frappe.db.sql(
-                    """
-                    SELECT COALESCE(SUM(litres), 0)
-                    FROM `tabFuel Consumption Ledger`
-                    WHERE vehicle = %(vehicle)s AND period_month = %(period)s
-                    """,
-                    {"vehicle": quota.vehicle, "period": period_month},
-                )[0][0]
+                FCL = frappe.qb.DocType("Fuel Consumption Ledger")
+                consumed = (
+                    frappe.qb.from_(FCL)
+                    .select(Coalesce(Sum(FCL.litres), 0))
+                    .where(FCL.vehicle == quota.vehicle)
+                    .where(FCL.period_month == period_month)
+                ).run()[0][0]
                 consumed = flt(consumed)
 
                 threshold = quota_litres * (1 + get_overage_margin())

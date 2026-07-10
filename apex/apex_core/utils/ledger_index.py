@@ -29,6 +29,8 @@ once the data is clean.
 from __future__ import annotations
 
 import frappe
+from frappe.query_builder.functions import Count
+from pypika import Order
 
 
 def _constraint_exists(doctype: str, constraint_name: str) -> bool:
@@ -54,18 +56,16 @@ def _log_blocking_duplicates(doctype: str, fields: list[str], constraint_name: s
     """Find and log the row groups that violate the intended uniqueness, so the
     operator/orchestrator can clean them up. Best-effort: never raises."""
     try:
-        col_list = ", ".join(f"`{f}`" for f in fields)
-        groups = frappe.db.sql(
-            """
-            SELECT {cols}, COUNT(*) AS n
-            FROM `tab{dt}`
-            GROUP BY {cols}
-            HAVING n > 1
-            ORDER BY n DESC
-            LIMIT 20
-            """.format(cols=col_list, dt=doctype),
-            as_dict=True,
-        )
+        tbl = frappe.qb.DocType(doctype)
+        cols = [getattr(tbl, f) for f in fields]
+        groups = (
+            frappe.qb.from_(tbl)
+            .select(*cols, Count(tbl.name).as_("n"))
+            .groupby(*cols)
+            .having(Count(tbl.name) > 1)
+            .orderby(Count(tbl.name), order=Order.desc)
+            .limit(20)
+        ).run(as_dict=True)
     except Exception:
         groups = None
 

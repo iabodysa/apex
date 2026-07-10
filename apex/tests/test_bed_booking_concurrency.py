@@ -3,9 +3,10 @@
 
 File-level test — no Frappe site needed. Uses ast and stdlib only.
 
-This test verifies that the SELECT ... FOR UPDATE pattern is present in the
-Accommodation Assignment on_submit handler, providing row-level lock
-protection against concurrent double-booking.
+This test verifies that the row-lock guard is present in the Accommodation
+Assignment on_submit handler — written either as raw SQL ("SELECT ... FOR UPDATE")
+or via the query builder ("frappe.qb...for_update()", the P-209 port) — providing
+row-level lock protection against concurrent double-booking.
 
 What a full stress test would do
 ---------------------------------
@@ -51,7 +52,17 @@ ASSIGNMENT_CONTROLLER = os.path.normpath(
 )
 
 # [#1od4cm]
-FOR_UPDATE_FRAGMENT = "FOR UPDATE"
+# The row-lock guard may be written either as raw SQL ("SELECT ... FOR UPDATE")
+# or via the query builder ("frappe.qb...for_update()"). Accept BOTH markers so the
+# guard survives the P-209 frappe.qb port without weakening — it still fails if the
+# lock is removed entirely.
+LOCK_MARKERS = ("for_update(", "FOR UPDATE")
+
+
+def _find_lock(text):
+    """Earliest position of any row-lock marker in ``text``, or -1 if none."""
+    positions = [p for p in (text.find(m) for m in LOCK_MARKERS) if p != -1]
+    return min(positions) if positions else -1
 
 
 class TestBedBookingConcurrencyGuard(unittest.TestCase):
@@ -73,11 +84,12 @@ class TestBedBookingConcurrencyGuard(unittest.TestCase):
         proceeding to mark it 'Occupied'.
         """
         source = self._load_source()
-        self.assertIn(
-            FOR_UPDATE_FRAGMENT,
-            source,
-            "The string 'FOR UPDATE' was not found in housing_assignment.py. "
-            "The SELECT FOR UPDATE concurrency guard has been removed. "
+        self.assertGreater(
+            _find_lock(source),
+            -1,
+            "No row-lock marker ('for_update(' or 'FOR UPDATE') was found in "
+            "housing_assignment.py. The SELECT FOR UPDATE / qb for_update() "
+            "concurrency guard has been removed. "
             "Restore it in the on_submit handler before merging.",
         )
 
@@ -108,10 +120,11 @@ class TestBedBookingConcurrencyGuard(unittest.TestCase):
         end = on_submit_node.end_lineno
         func_source = "\n".join(source_lines[start:end])
 
-        self.assertIn(
-            FOR_UPDATE_FRAGMENT,
-            func_source,
-            "The 'FOR UPDATE' lock was not found inside the on_submit function body. "
+        self.assertGreater(
+            _find_lock(func_source),
+            -1,
+            "No row-lock marker ('for_update(' or 'FOR UPDATE') was found inside "
+            "the on_submit function body. "
             "It may have been moved out of the critical section. "
             "The lock must be acquired before checking bed status in on_submit.",
         )
@@ -140,13 +153,13 @@ class TestBedBookingConcurrencyGuard(unittest.TestCase):
         end = on_submit_node.end_lineno
         func_source = "\n".join(source_lines[start:end])
 
-        lock_pos = func_source.find(FOR_UPDATE_FRAGMENT)
+        lock_pos = _find_lock(func_source)
         status_check_pos = func_source.find("get_value")
 
         self.assertGreater(
             lock_pos,
             -1,
-            "FOR UPDATE not found in on_submit (checked again for position).",
+            "Row-lock marker not found in on_submit (checked again for position).",
         )
         self.assertGreater(
             status_check_pos,
