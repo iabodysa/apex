@@ -21,4 +21,4 @@ jobs:
         run: pip install ruff
 
       - name: Run ruff
-        run: ruff check apex_habitat/
+        run: ruff check apex/

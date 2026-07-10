@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ portal_theme or 'afmco' }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#072B1A" />
+    <link rel="manifest" href="/assets/apex/driver_portal/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+    />
+    <link rel="stylesheet" href="/assets/apex/driver_portal/assets/index.css" />
+    {%- include "apex/templates/includes/portal_accent.html" %}
+    <title>Salis Driver</title>
+    <script>
+      window.csrf_token = {{ csrf_token | tojson }};
+      window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
+      window.portal_logo = {{ (portal_logo or '') | tojson }};
+      window.portal_theme = {{ (portal_theme or 'afmco') | tojson }};
+      window.driver_socket = {
+        site_name: {{ site_name | tojson }},
+        socketio_port: {{ socketio_port }},
+        enabled: {{ "true" if async_enabled else "false" }},
+        dev_server: {{ dev_server or 0 }},
+      };
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/assets/apex/driver_portal/assets/index.js"></script>
+    <script>
+      // Register the Salis Driver PWA service worker. The worker is served from
+      // the ROOT (/driver-sw.min.js) so its scope can cover /driver — a service
+      // worker only controls URLs at or under its own path. It precaches the app
+      // shell (HTML + built bundle) and network-firsts the driver data API, so an
+      // offline reload still boots the SPA; a new build surfaces a reload banner.
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("/driver-sw.min.js", { scope: "/driver" })
+            .catch(function (err) {
+              console.warn("Driver SW registration failed", err);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>

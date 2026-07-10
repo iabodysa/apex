@@ -1,0 +1,226 @@
+# Copyright (c) 2026, AFMCO and contributors
+"""Seed the Salis native Frappe Workflows from their shipped JSON definitions.
+
+Frappe's ``bench migrate`` does NOT auto-import a ``Workflow`` from a module
+folder (Workflow is not in ``frappe.model.sync.IMPORTABLE_DOCTYPES``), unlike
+Web Form / Print Format / Notification. So the canonical definition is shipped
+as a JSON under ``salis/workflow/<name>/<name>.json`` (the design artifact and
+single source of truth) and applied here, idempotently and existence-guarded,
+exactly like the other Salis seeds (notifications / kanban / assignment rules).
+
+This module is reused by the app's ``after_install`` / ``after_migrate`` hooks
+and by ``patches/v1_x/seed_salis_workflows.py`` so a fresh install gets the
+workflows immediately while already-installed sites pick them up on migrate.
+Every step is existence-guarded and skip-missing (the target DocType, every
+Workflow State and Workflow Action Master referenced), so running it twice — or
+on a partially installed module — is safe and never aborts the migrate.
+
+Seeds the Salis Workflow Spine: Transport Request, Rental Settlement, Driver
+Clearance, Salis Payment Request, Support Ticket, Fuel Request, Fuel Claim,
+Fuel Exception Case and Dispatch Trip. Each one is applied independently, so a
+missing target DocType only skips that one workflow.
+
+Colours for the workflow states mirror each DocType's own status indicator
+colours so the desk Workflow widget matches the list view.
+"""
+
+import json
+import os
+
+import frappe
+
+# [#nhjgdf]
+_WORKFLOW_DIRS = [
+    "transport_request_workflow",
+    "rental_settlement_workflow",
+    "driver_clearance_workflow",
+    "salis_payment_request_workflow",
+    "fuel_request_workflow",
+    "fuel_claim_workflow",
+    "fuel_exception_case_workflow",
+    "dispatch_trip_workflow",
+    # [#bxfoca]
+    "movement_cost_recovery_workflow",
+    "movement_cost_transfer_workflow",
+    "vehicle_damage_write_off_workflow",
+]
+
+# [#ijqd52]
+_STATE_STYLE = {
+    # [#80vakv]
+    "New": "Primary",
+    "Validated": "Primary",
+    "Approved": "Primary",
+    "Scheduled": "Warning",
+    "Fulfilled": "Success",
+    "Rejected": "Danger",
+    "Cancelled": "Danger",
+    # [#rtbkfv]
+    "Draft": "Primary",
+    "Reconciled": "Warning",
+    "Disputed": "Danger",
+    "Paid": "Success",
+    # [#4i7fog]
+    "Open": "Warning",
+    "In Progress": "Primary",
+    "Cleared": "Success",
+    "Blocked": "Danger",
+    # [#r2yz72]
+    "Pending Finance": "Warning",
+    "Approved by Finance": "Primary",
+    # [#poky3p]
+    "Waiting": "Warning",
+    "Resolved": "Primary",
+    "Closed": "Success",
+    # [#9nszle]
+    "Completed": "Success",
+    # [#bbzd6n]
+    "Done": "Success",
+    "Failed": "Danger",
+    "Reverted": "Warning",
+    # [#mrgswh]
+    "Submitted to Movement": "Warning",
+    # [#8wu4sl]
+    "Under Investigation": "Primary",
+    "Evidence Required": "Warning",
+    # [#c13yy3]
+    "Planned": "Primary",
+    "Dispatched": "Warning",
+}
+
+
+def _load_definition(dir_name):
+    """Load a shipped Workflow JSON definition from salis/workflow/<dir>/.
+
+    The canonical definitions remain in the Salis module folder
+    ``salis/workflow/<dir>/<dir>.json`` (the design artifact / single source of
+    truth); this seeder lives under ``apex_core/setup/seeders/`` after the setup
+    consolidation, so the path is resolved against the app root rather than the
+    seeder's own location.
+    """
+    path = os.path.join(
+        frappe.get_app_path("apex", "salis", "workflow"),
+        dir_name,
+        dir_name + ".json",
+    )
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def _ensure_workflow_state(state_name):
+    """Create the Workflow State master record if absent (autoname = the name)."""
+    if frappe.db.exists("Workflow State", state_name):
+        return
+    frappe.get_doc(
+        {
+            "doctype": "Workflow State",
+            "workflow_state_name": state_name,
+            "style": _STATE_STYLE.get(state_name, ""),
+        }
+    ).insert(ignore_permissions=True)  # audit-ok
+
+
+def _ensure_workflow_action(action_name):
+    """Create the Workflow Action Master record if absent (autoname = the name)."""
+    if frappe.db.exists("Workflow Action Master", action_name):
+        return
+    frappe.get_doc(
+        {
+            "doctype": "Workflow Action Master",
+            "workflow_action_name": action_name,
+        }
+    ).insert(ignore_permissions=True)  # audit-ok
+
+
+def _seed_one(definition):
+    """Apply a single Workflow definition idempotently. Returns True if the
+    workflow now exists, False if it was skipped (e.g. document type missing)."""
+    document_type = definition["document_type"]
+    if not frappe.db.exists("DocType", document_type):
+        return False  # [#fwtsf9]
+
+    # [#t2iz8u]
+    for state in definition.get("states", []):
+        _ensure_workflow_state(state["state"])
+    for transition in definition.get("transitions", []):
+        _ensure_workflow_state(transition["next_state"])
+        _ensure_workflow_action(transition["action"])
+
+    name = definition["name"]
+    if frappe.db.exists("Workflow", name):
+        # [#3imdxa] Reconcile an existing workflow to the shipped JSON (the single
+        # source of truth): the states/transitions can change between releases
+        # (e.g. a DoA split that swaps a single Approve for tiered Authorize
+        # actions), so re-apply them rather than leaving the stale DB version in
+        # place. Idempotent: when the JSON already matches, this rewrites the same
+        # rows. Header flags + is_active are realigned too.
+        doc = frappe.get_doc("Workflow", name)
+        _apply_definition(doc, definition, document_type)
+        doc.save(ignore_permissions=True)  # audit-ok
+        return True
+
+    doc = frappe.new_doc("Workflow")
+    _apply_definition(doc, definition, document_type)
+    # [#8o993l]
+    doc.name = name
+    doc.flags.name_set = True
+    doc.insert(ignore_permissions=True)  # audit-ok
+    return True
+
+
+def _apply_definition(doc, definition, document_type):
+    """Write the JSON definition's header + states + transitions onto ``doc``
+    (replacing any existing child rows), so create and reconcile share one path."""
+    name = definition["name"]
+    doc.workflow_name = definition.get("workflow_name", name)
+    doc.document_type = document_type
+    doc.workflow_state_field = definition["workflow_state_field"]
+    doc.is_active = definition.get("is_active", 1)
+    doc.override_status = definition.get("override_status", 0)
+    doc.send_email_alert = definition.get("send_email_alert", 0)
+
+    doc.states = []
+    for state in definition.get("states", []):
+        doc.append(
+            "states",
+            {
+                "state": state["state"],
+                "doc_status": state.get("doc_status", "0"),
+                "allow_edit": state.get("allow_edit"),
+                "is_optional_state": state.get("is_optional_state", 0),
+            },
+        )
+    doc.transitions = []
+    for transition in definition.get("transitions", []):
+        doc.append(
+            "transitions",
+            {
+                "state": transition["state"],
+                "action": transition["action"],
+                "next_state": transition["next_state"],
+                "allowed": transition.get("allowed"),
+                "allow_self_approval": transition.get("allow_self_approval", 1),
+                "condition": transition.get("condition") or "",
+            },
+        )
+
+
+def seed_salis_workflows():
+    """Create the Salis native Workflows if absent. Idempotent + existence-guarded
+    on the target DocType and every referenced state/action master — safe to
+    re-run (install + every migrate)."""
+    for dir_name in _WORKFLOW_DIRS:
+        # [#3iky5e]
+        sp = "wf_seed"
+        frappe.db.savepoint(sp)
+        try:
+            definition = _load_definition(dir_name)
+            _seed_one(definition)
+        except Exception:
+            # [#5rxgad]
+            frappe.log_error(
+                title=f"seed_salis_workflows failed: {dir_name}",
+                message=frappe.get_traceback(),
+            )
+            frappe.db.rollback(save_point=sp)
+    frappe.db.commit()

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="{{ portal_theme or 'afmco' }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta name="theme-color" content="#072b1a" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>Safety Rounds — جولات السلامة</title>
+    {%- if has_safety_role %}
+    <link rel="stylesheet" href="/assets/apex/safety_portal/assets/index.css" />
+    {%- include "apex/templates/includes/portal_accent.html" %}
+    <script>
+      window.csrf_token = {{ csrf_token | tojson }};
+      window.portal_show_brand = {{ "true" if portal_show_brand else "false" }};
+      window.portal_logo = {{ (portal_logo or '') | tojson }};
+      window.safety_socket = {
+        site_name: {{ site_name | tojson }},
+        socketio_port: {{ socketio_port }},
+        enabled: {{ "true" if async_enabled else "false" }},
+        dev_server: {{ dev_server or 0 }},
+      };
+    </script>
+    {%- endif %}
+  </head>
+  <body>
+    {%- if has_safety_role %}
+    <div id="app"></div>
+    <script type="module" src="/assets/apex/safety_portal/assets/index.js"></script>
+    {%- else %}
+    <style>
+      body {
+        margin: 0;
+        font-family: "Cairo", sans-serif;
+        background: #0f1714;
+        color: #e7efe9;
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+      }
+      .safety-na {
+        max-width: 420px;
+        padding: 40px 28px;
+        text-align: center;
+        background: #15211b;
+        border: 1px solid #25362c;
+        border-radius: 18px;
+      }
+      .safety-na h1 {
+        font-size: 18px;
+        margin: 0 0 10px;
+      }
+      .safety-na p {
+        font-size: 13px;
+        color: #7d8f84;
+        line-height: 1.8;
+        margin: 0 0 4px;
+      }
+      .safety-na a {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 9px 22px;
+        border-radius: 12px;
+        background: #00a862;
+        color: #04130c;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+      }
+    </style>
+    <div class="safety-na">
+      <h1>{{ _("Safety rounds") }}</h1>
+      <p>{{ _("This page is for the safety team.") }}</p>
+      <p>{{ _("Your account does not have a role to access it.") }}</p>
+      <p>{{ _("Contact your system administrator to request access.") }}</p>
+      <a href="/app">{{ _("Back to the system") }}</a>
+    </div>
+    {%- endif %}
+  </body>
+</html>

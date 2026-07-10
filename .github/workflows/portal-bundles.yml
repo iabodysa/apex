@@ -22,9 +22,9 @@ jobs:
         include:
           - portal: fleet_portal
           - portal: worker_portal
-            sw: apex_habitat/www/masar-sw.min.js
+            sw: apex/www/masar-sw.min.js
           - portal: driver_portal
-            sw: apex_habitat/www/driver-sw.min.js
+            sw: apex/www/driver-sw.min.js
           - portal: safety_portal
           - portal: housing_portal
     steps:
@@ -36,26 +36,26 @@ jobs:
           node-version: "20"
 
       - name: Install from frozen lockfile
-        working-directory: apex_habitat/${{ matrix.portal }}
+        working-directory: apex/${{ matrix.portal }}
         run: npm ci
 
       - name: Build the portal bundle
-        working-directory: apex_habitat/${{ matrix.portal }}
+        working-directory: apex/${{ matrix.portal }}
         run: npm run build
 
       - name: Fail if the committed bundle is stale
         run: |
           set -uo pipefail
-          if ! git diff --exit-code -- "apex_habitat/public/${{ matrix.portal }}" ${{ matrix.sw }}; then
+          if ! git diff --exit-code -- "apex/public/${{ matrix.portal }}" ${{ matrix.sw }}; then
             echo "::error::Committed bundle for ${{ matrix.portal }} is stale."
-            echo "Run 'npm run build' in apex_habitat/${{ matrix.portal }} and commit apex_habitat/public/${{ matrix.portal }}/ (and the stamped www SW, if any)."
+            echo "Run 'npm run build' in apex/${{ matrix.portal }} and commit apex/public/${{ matrix.portal }}/ (and the stamped www SW, if any)."
             exit 1
           fi
           echo "${{ matrix.portal }} bundle is in sync with committed output"
 
   override-pins:
     # Single-source guard for the security npm `overrides` (dompurify, ws). The
-    # canonical values live in apex_habitat/frontend_shared/pins.json; npm still
+    # canonical values live in apex/frontend_shared/pins.json; npm still
     # needs the override in each package.json, so this fails if any of the five
     # portals drifts from the canonical pin set.
     runs-on: ubuntu-latest
@@ -65,10 +65,10 @@ jobs:
       - name: Every portal's overrides match frontend_shared/pins.json
         run: |
           set -uo pipefail
-          canon=$(jq -S '.overrides' apex_habitat/frontend_shared/pins.json)
+          canon=$(jq -S '.overrides' apex/frontend_shared/pins.json)
           fail=0
           for p in fleet_portal worker_portal driver_portal safety_portal housing_portal; do
-            got=$(jq -S '.overrides' "apex_habitat/${p}/package.json")
+            got=$(jq -S '.overrides' "apex/${p}/package.json")
             if [ "$got" != "$canon" ]; then
               echo "::error::${p}/package.json overrides differ from frontend_shared/pins.json"
               diff <(echo "$canon") <(echo "$got") || true

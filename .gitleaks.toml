@@ -21,6 +21,6 @@ regexes = [
 # valid-token clean-URL redirect. The fixture string is a fake test token, not a
 # real secret; the generic-api-key rule matches its high-entropy hex shape.
 paths = [
-  '''apex_habitat/tests/test_portal_xss\.py''',
-  '''apex_habitat/tests/test_masar_1b\.py''',
+  '''apex/tests/test_portal_xss\.py''',
+  '''apex/tests/test_masar_1b\.py''',
 ]

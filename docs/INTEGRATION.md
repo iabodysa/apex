@@ -1,10 +1,10 @@
 # Integration Guide
 
-This guide explains how to integrate an external frontend with **apex_habitat**, a [Frappe Framework](https://frappeframework.com/) v15 application. It is a developer starter kit: install the backend, authenticate, and start consuming the API from any stack.
+This guide explains how to integrate an external frontend with **apex**, a [Frappe Framework](https://frappeframework.com/) v15 application. It is a developer starter kit: install the backend, authenticate, and start consuming the API from any stack.
 
 ## 1. The backend / frontend model
 
-apex_habitat is a **backend** and the single source of truth. It owns the data model, authentication, permissions, business logic, workflows, and scheduled jobs.
+apex is a **backend** and the single source of truth. It owns the data model, authentication, permissions, business logic, workflows, and scheduled jobs.
 
 A **frontend** is any client that consumes this backend over HTTP. It is presentation only: it renders data and calls the API, but it never modifies the backend or its logic. Because all data, permissions, and workflow rules are enforced server-side, the client cannot weaken them.
 
@@ -12,19 +12,19 @@ The frontend is **stack-agnostic**. It can be React, Vue, Angular, Svelte, Flutt
 
 ```
 +------------------+        HTTP + token auth        +-----------------------------+
-|  Your frontend   |  ---------------------------->  |  apex_habitat (Frappe v15)  |
+|  Your frontend   |  ---------------------------->  |  apex (Frappe v15)  |
 |  (any stack)     |  <----------------------------  |  data, auth, logic, workflow|
 +------------------+          JSON responses         +-----------------------------+
 ```
 
 ## 2. Install the backend
 
-apex_habitat runs on a Frappe v15 bench and site. Its `required_apps` are **frappe**, **erpnext**, and **hrms**, so those must be installed on the same site.
+apex runs on a Frappe v15 bench and site. Its `required_apps` are **frappe**, **erpnext**, and **hrms**, so those must be installed on the same site.
 
 ```bash
 # Prerequisites: a Frappe v15 bench + site, with erpnext and hrms installed.
 bench get-app https://github.com/iabodysa/apex --branch apex
-bench --site <your-site> install-app apex_habitat
+bench --site <your-site> install-app apex
 bench --site <your-site> migrate
 ```
 
@@ -105,11 +105,11 @@ Filters use Frappe's list syntax (`[[fieldname, operator, value], ...]`, URL-enc
 
 Purpose-built endpoints are exposed as whitelisted methods. Call them at `/api/method/<dotted.path>` with arguments as query parameters (`GET`) or a JSON/form body (`POST`). Available endpoints include:
 
-- **Driver portal** - `apex_habitat.salis.api.driver_portal.*`
+- **Driver portal** - `apex.salis.api.driver_portal.*`
   (driver context, today's trips, support tickets, check-in / check-out, fuel-request submission, and support-ticket creation).
-- **Dispatch board** - `apex_habitat.salis.api.dispatch_board.*`
+- **Dispatch board** - `apex.salis.api.dispatch_board.*`
   (the dispatch board view: vehicles, trips, drivers, and transport requests, optionally scoped by project).
-- **Fuel console** - `apex_habitat.salis.api.fuel_console.get_pending_fuel_requests`, `apex_habitat.salis.api.fuel_console.approve_fuel_request`, `apex_habitat.salis.api.fuel_console.reject_fuel_request`.
+- **Fuel console** - `apex.salis.api.fuel_console.get_pending_fuel_requests`, `apex.salis.api.fuel_console.approve_fuel_request`, `apex.salis.api.fuel_console.reject_fuel_request`.
 
 These endpoints enforce the same roles, permissions, and project scoping as the rest of the backend.
 

@@ -1,0 +1,426 @@
+# Copyright (c) 2026, AFMCO and contributors
+# [#dvwfff]
+app_name = "apex"
+app_title = "Apex"
+app_publisher = "AFMCO Support Services Co. Ltd"
+app_description = "Apex — workforce operations suite: Habitat (accommodation & facilities) and Salis (movement & fleet)."
+app_email = "afm@afmcoltd.com"
+app_license = "MIT"
+
+# [#4d5ed9]
+required_apps = ["frappe", "erpnext", "hrms"]
+
+# [#3n2bsa]
+export_python_type_annotations = True
+
+# [#9molmh]
+app_include_js = ["masar_worker_link.bundle.js"]
+
+# [#dfjden]
+setup_wizard_requires = "assets/apex/js/apex_setup_wizard.js"
+setup_wizard_complete = "apex.apex_core.setup.setup_wizard.setup_wizard_complete"
+
+
+# [#nc1irs]
+
+# [#34xywz]
+doc_events = {
+    # Validate the Saudi National Address custom fields on the native Address.
+    "Address": {
+        "validate": "apex.habitat.address_customizations.validate",
+    },
+    "Site": {},
+    "Bed": {},
+    "Room": {},
+    "QR Location": {
+        "before_save": "apex.habitat.doctype.qr_location.qr_location.before_save",
+    },
+    "Accommodation Ledger": {
+        "before_save": "apex.habitat.doctype.accommodation_ledger.accommodation_ledger.before_save",
+    },
+    "Resident Request": {
+        "before_insert": "apex.habitat.doctype.resident_request.resident_request.before_insert",
+        "validate": "apex.habitat.doctype.resident_request.resident_request.validate",
+        "on_update": "apex.habitat.doctype.resident_request.resident_request.on_update",
+    },
+    "Building License": {},
+    "Camera Access Grant": {},
+    "Cleaning Log": {},
+    "Audit Remediation Plan": {},
+    "Scheduled Task Template": {},
+    "Building": {
+        "before_save": "apex.habitat.doctype.building.building.before_save",
+        "on_update": "apex.habitat.doctype.building.building.on_update",
+    },
+    "Housing Assignment": {
+        "validate": "apex.habitat.doctype.housing_assignment.housing_assignment.validate",
+        "on_submit": "apex.habitat.doctype.housing_assignment.housing_assignment.on_submit",
+        "on_cancel": "apex.habitat.doctype.housing_assignment.housing_assignment.on_cancel",
+    },
+    "Housing Checkout": {
+        "validate": "apex.habitat.doctype.housing_checkout.housing_checkout.validate",
+        "on_submit": "apex.habitat.doctype.housing_checkout.housing_checkout.on_submit",
+        "before_cancel": "apex.habitat.doctype.housing_checkout.housing_checkout.before_cancel",
+        "on_cancel": "apex.habitat.doctype.housing_checkout.housing_checkout.on_cancel",
+    },
+    "Lease": {
+        "validate": "apex.habitat.doctype.lease.lease.validate",
+    },
+    "Utility Bill Entry": {
+        "validate": "apex.habitat.doctype.utility_bill_entry.utility_bill_entry.validate",
+        "on_submit": "apex.habitat.doctype.utility_bill_entry.utility_bill_entry.on_submit",
+        "before_cancel": "apex.habitat.doctype.utility_bill_entry.utility_bill_entry.before_cancel",
+    },
+    "Room Bed Transfer": {
+        "validate": "apex.habitat.doctype.room_bed_transfer.room_bed_transfer.validate",
+        "on_submit": "apex.habitat.doctype.room_bed_transfer.room_bed_transfer.on_submit",
+        "on_cancel": "apex.habitat.doctype.room_bed_transfer.room_bed_transfer.on_cancel",
+    },
+    "Safety Inspection Report": {},
+    "Maintenance Request": {
+        "before_save": "apex.habitat.doctype.maintenance_request.maintenance_request.before_save",
+    },
+    "Custody Article": {},
+    "Custody Asset Category": {},
+    # [#ojl68r]
+    "Idle Resident Report": {
+        "validate": "apex.habitat.doctype.idle_resident_report.idle_resident_report.validate",
+        "after_insert": "apex.habitat.doctype.idle_resident_report.idle_resident_report.after_insert",
+    },
+    "Accommodation Material Transfer": {
+        "validate": "apex.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.validate",
+        "on_submit": "apex.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.on_submit",
+        "on_cancel": "apex.habitat.doctype.accommodation_material_transfer.accommodation_material_transfer.on_cancel",
+    },
+    "Custody Issue": {
+        "validate": "apex.habitat.doctype.custody_issue.custody_issue.validate",
+        "on_submit": "apex.habitat.doctype.custody_issue.custody_issue.on_submit",
+        "before_cancel": "apex.habitat.doctype.custody_issue.custody_issue.before_cancel",
+        "on_cancel": "apex.habitat.doctype.custody_issue.custody_issue.on_cancel",
+    },
+    "Custody Return": {
+        "validate": "apex.habitat.doctype.custody_return.custody_return.validate",
+        "on_submit": "apex.habitat.doctype.custody_return.custody_return.on_submit",
+        "before_cancel": "apex.habitat.doctype.custody_return.custody_return.before_cancel",
+        "on_cancel": "apex.habitat.doctype.custody_return.custody_return.on_cancel",
+    },
+    "Custody Damage Assessment": {
+        "validate": "apex.habitat.doctype.custody_damage_assessment.custody_damage_assessment.validate",
+        "on_submit": "apex.habitat.doctype.custody_damage_assessment.custody_damage_assessment.on_submit",
+        "before_cancel": "apex.habitat.doctype.custody_damage_assessment.custody_damage_assessment.before_cancel",
+    },
+    "Operational Depreciation Snapshot": {
+        "validate": "apex.habitat.doctype.operational_depreciation_snapshot.operational_depreciation_snapshot.validate",
+        "before_cancel": "apex.habitat.doctype.operational_depreciation_snapshot.operational_depreciation_snapshot.before_cancel",
+    },
+    # [#i91sa1]
+    "Facility Asset": {},
+    "Facility Asset Custody Assignment": {},
+    "Facility Asset Movement": {
+        "validate": "apex.habitat.doctype.facility_asset_movement.facility_asset_movement.validate",
+        "on_submit": "apex.habitat.doctype.facility_asset_movement.facility_asset_movement.on_submit",
+        "before_cancel": "apex.habitat.doctype.facility_asset_movement.facility_asset_movement.before_cancel",
+        "on_cancel": "apex.habitat.doctype.facility_asset_movement.facility_asset_movement.on_cancel",
+    },
+    "Operational Depreciation Policy": {},
+    "Subcontractor Service Order": {
+        "before_save": "apex.habitat.doctype.subcontractor_service_order.subcontractor_service_order.before_save",
+    },
+    "Subcontractor Service Contract": {},
+    "Utility Account": {},
+    "Habitat Settings": {
+        "before_save": "apex.apex_core.doctype.habitat_settings.habitat_settings.before_save",
+    },
+    "Safety Task Catalog": {},
+    "Safety Task Execution": {},
+    "Maintenance Work Order": {
+        "validate": "apex.habitat.doctype.maintenance_work_order.maintenance_work_order.validate",
+        "on_submit": "apex.habitat.doctype.maintenance_work_order.maintenance_work_order.on_submit",
+        "before_cancel": "apex.habitat.doctype.maintenance_work_order.maintenance_work_order.before_cancel",
+    },
+    # [#rt1blm]
+    "Scheduled Task Instance": {
+        "validate": "apex.habitat.doctype.scheduled_task_instance.scheduled_task_instance.validate",
+        "on_submit": "apex.habitat.doctype.scheduled_task_instance.scheduled_task_instance.on_submit",
+        "before_cancel": "apex.habitat.doctype.scheduled_task_instance.scheduled_task_instance.before_cancel",
+    },
+    "Maintenance Inspection Report": {
+        "validate": "apex.habitat.doctype.maintenance_inspection_report.maintenance_inspection_report.validate",
+        "before_cancel": "apex.habitat.doctype.maintenance_inspection_report.maintenance_inspection_report.before_cancel",
+    },
+}
+
+# [#qjzdot]
+scheduler_events = {
+    "daily": [
+        "apex.habitat.tasks.cost.daily_accommodation_cost_allocation",
+        "apex.habitat.tasks.maintenance.daily_building_license_expiry_check",
+        "apex.habitat.tasks.maintenance.open_maintenance_escalation",
+        "apex.habitat.tasks.residency.lease_expiry_watchlist",
+        "apex.habitat.tasks.residency.temporary_stay_checkout_watchlist",
+        "apex.habitat.tasks.residency.idle_resident_aging",
+        "apex.habitat.tasks.custody.consumable_custody_expiry_watch",
+        "apex.habitat.tasks.scheduled_tasks.daily_scheduled_task_instance_generator",
+        "apex.habitat.tasks.occupancy.daily_occupancy_snapshot",
+        # [#t554-clean] auto-create today's draft Cleaning Log per active building
+        "apex.habitat.tasks.cleaning.daily_cleaning_log_generator",
+        # [#t554-clean-sup] supervisor-targeted variant: only buildings with a supervisor
+        "apex.habitat.tasks.cleaning.auto_create_cleaning_logs",
+        # [#wave3-safety]
+        "apex.habitat.tasks.safety.daily_safety_task_compliance_scan",
+        "apex.habitat.tasks.safety.audit_remediation_deadline_watch",
+        # [#8d555o]
+        "apex.habitat.temporary_worker_engine.link_temporary_workers",
+        # [#3mjdri]
+        "apex.salis.tasks.driver.driver_license_expiry_watch",
+        "apex.salis.tasks.vehicle.idle_vehicle_watch",
+        "apex.salis.tasks.fuel.unreverted_topup_watch",
+        "apex.salis.tasks.fuel.overdue_fuel_request_watch",
+        "apex.salis.tasks.attendance.missing_attendance_watch",
+        "apex.salis.tasks.vehicle.vehicle_compliance_expiry_watch",
+        "apex.salis.tasks.workshop.workshop_overstay_watch",
+        "apex.salis.tasks.alerts.reconcile_operations_alerts",
+        "apex.salis.tasks.alerts.daily_open_alerts_digest",
+        "apex.salis.fuel_engine.accrue_fuel_consumption",
+        "apex.salis.rental_engine.daily_rental_accrual",
+        # Logistay: parse pending intake batches into canonical Timesheet Lines + exceptions.
+        "apex.logistay.ingestion_engine.normalize_pending_intakes",
+        # Logistay: post the immutable worker-hours ledger from COMPLETE Timesheet Lines.
+        "apex.logistay.timesheet_engine.post_timesheet_ledger",
+        # [#ptjnq1]
+        "apex.apex_core.utils.workflow_utils.cleanup_orphaned_workflow_actions",
+    ],
+    "weekly": [
+        "apex.habitat.tasks.occupancy.weekly_occupancy_sync",
+        "apex.habitat.tasks.custody.weekly_custody_digest",
+        # [#wave3-safety]
+        "apex.habitat.tasks.safety.weekly_safety_coverage_gate",
+        "apex.salis.tasks.vehicle.vehicle_utilization_summary",
+        "apex.salis.utilisation_engine.weekly_vehicle_utilisation_snapshot",
+    ],
+    "monthly": [
+        "apex.salis.fuel_engine.monthly_fuel_reconciliation",
+        # [#payd2f]
+        "apex.salis.rental_engine.monthly_rental_reconciliation",
+    ],
+    # Boarding two-sided confirmation: auto-confirm timed-out worker claims even
+    # when no read path fires; the timeout itself is read at runtime from settings.
+    "cron": {
+        "*/5 * * * *": [
+            "apex.salis.api.boarding_flow.auto_confirm_claimed_boardings",
+        ],
+    },
+}
+
+# [#ow8j67]
+default_log_clearing_doctypes = {
+    "Operations Alert": 90,
+    "Occupancy Snapshot": 365,
+    "Vehicle Utilisation Snapshot": 365,
+    # [#263f83]
+    "Operational Depreciation Snapshot": 730,
+}
+
+# [#4z2uut]
+override_doctype_dashboards = {
+    "Employee": "apex.habitat.api.employee_links.get_data",
+    "Supplier": "apex.habitat.api.supplier_links.get_data",
+}
+
+# [#2pnntm]
+permission_query_conditions = {
+    "Maintenance Request": "apex.habitat.permissions.maintenance_request_query",
+    # [#8oiixt]
+    "Housing Assignment": "apex.habitat.permissions.accommodation_assignment_query",
+    "Custody Issue": "apex.habitat.permissions.custody_issue_query",
+    "Cleaning Log": "apex.habitat.permissions.cleaning_log_query",
+    "Building": "apex.habitat.permissions.accommodation_building_query",
+    # [#wave4-safety]
+    "Safety Round": "apex.habitat.permissions.safety_round_query",
+    "Safety Task Execution": "apex.habitat.permissions.safety_task_execution_query",
+    "Scheduled Task Instance": "apex.habitat.permissions.scheduled_task_instance_query",
+    "Resident Request": "apex.habitat.permissions.accommodation_resident_request_query",
+    "Idle Resident Report": "apex.habitat.permissions.idle_resident_report_query",
+    "Vehicle Assignment": "apex.salis.permissions.vehicle_assignment_query",
+    "Fuel Request": "apex.salis.permissions.fuel_request_query",
+    "Dispatch Trip": "apex.salis.permissions.dispatch_trip_query",
+    "Trip Start Log": "apex.salis.permissions.trip_start_log_query",
+    "Transport Request": "apex.salis.permissions.transport_request_query",
+    "Route Plan": "apex.salis.permissions.route_plan_query",
+    # [#pq1o3p]
+    "Issue": "apex.salis.permissions.support_ticket_query",
+    "Fuel Claim": "apex.salis.permissions.fuel_claim_query",
+    "Fuel Quota": "apex.salis.permissions.fuel_quota_query",
+    "Fuel Exception Case": "apex.salis.permissions.fuel_exception_case_query",
+    "Salis Payment Request": "apex.salis.permissions.salis_payment_request_query",
+    "Salis Vehicle": "apex.salis.permissions.salis_vehicle_query",
+    "Salis Driver": "apex.salis.permissions.salis_driver_query",
+    "Passenger Manifest": "apex.salis.permissions.passenger_manifest_query",
+    # [#wave2-pqc] habitat tenant scoping (single-building unless noted)
+    "Facility Asset Custody Assignment": "apex.habitat.permissions.facility_asset_custody_assignment_query",
+    "Operational Depreciation Snapshot": "apex.habitat.permissions.non_financial_depreciation_snapshot_query",
+    "Custody Return": "apex.habitat.permissions.custody_return_query",
+    "Custody Damage Assessment": "apex.habitat.permissions.custody_damage_assessment_query",
+    "Accommodation Material Transfer": "apex.habitat.permissions.accommodation_material_transfer_query",
+    "Facility Asset Movement": "apex.habitat.permissions.facility_asset_movement_query",
+    "Custody Acknowledgment": "apex.habitat.permissions.custody_acknowledgment_query",
+    "Custody Handover": "apex.habitat.permissions.custody_handover_query",
+    "Facility Asset Delivery": "apex.habitat.permissions.facility_asset_delivery_query",
+    "Facility Asset": "apex.habitat.permissions.facility_asset_query",
+    "Housing Inventory": "apex.habitat.permissions.housing_inventory_query",
+    "Building License": "apex.habitat.permissions.building_license_query",
+    "Maintenance Work Order": "apex.habitat.permissions.maintenance_work_order_query",
+    "Occupancy Snapshot": "apex.habitat.permissions.accommodation_occupancy_snapshot_query",
+    "Temporary Worker": "apex.habitat.permissions.temporary_worker_query",
+    "Arrival Batch": "apex.habitat.permissions.arrival_batch_query",
+    "Room": "apex.habitat.permissions.accommodation_room_query",
+    "Bed": "apex.habitat.permissions.accommodation_bed_query",
+    # [#wave-b2] read-only quantity ledger, scoped on its store `building`.
+    "Accommodation Stock Ledger": "apex.habitat.permissions.accommodation_stock_ledger_query",
+    "Driver Attendance": "apex.salis.permissions.driver_attendance_query",
+    "Driver Stop": "apex.salis.permissions.driver_stop_query",
+    "Boarding Scan Log": "apex.salis.permissions.boarding_scan_log_query",
+    "Vehicle Damage Write-Off": "apex.salis.permissions.vehicle_damage_write_off_query",
+    "Vehicle Incident": "apex.salis.permissions.vehicle_incident_query",
+    "Driver Clearance": "apex.salis.permissions.driver_clearance_query",
+    "Vehicle Stop": "apex.salis.permissions.vehicle_stop_query",
+    "Movement Cost Transfer": "apex.salis.permissions.movement_cost_transfer_query",
+    # Project-scope via the alert's vehicle; oversight roles unrestricted.
+    "Operations Alert": "apex.salis.permissions.operations_alert_query",
+}
+
+has_permission = {
+    # [#jgdlwi]
+    "Maintenance Request": "apex.habitat.permissions.maintenance_request_has_permission",
+    # [#s6j0i9]
+    "Housing Assignment": "apex.habitat.permissions.building_scoped_has_permission",
+    "Custody Issue": "apex.habitat.permissions.building_scoped_has_permission",
+    "Cleaning Log": "apex.habitat.permissions.building_scoped_has_permission",
+    "Building": "apex.habitat.permissions.building_scoped_has_permission",
+    # [#wave4-safety]
+    "Safety Round": "apex.habitat.permissions.building_scoped_has_permission",
+    "Safety Task Execution": "apex.habitat.permissions.building_scoped_has_permission",
+    "Scheduled Task Instance": "apex.habitat.permissions.building_scoped_has_permission",
+    "Resident Request": "apex.habitat.permissions.building_scoped_has_permission",
+    "Idle Resident Report": "apex.habitat.permissions.building_scoped_has_permission",
+    "Vehicle Assignment": "apex.salis.permissions.scoped_has_permission",
+    "Fuel Request": "apex.salis.permissions.scoped_has_permission",
+    "Dispatch Trip": "apex.salis.permissions.dispatch_trip_has_permission",
+    # [#s72nfj]
+    "Trip Start Log": "apex.salis.permissions.trip_start_log_has_permission",
+    "Transport Request": "apex.salis.permissions.scoped_has_permission",
+    "Route Plan": "apex.salis.permissions.scoped_has_permission",
+    # [#pq1o3p]
+    "Issue": "apex.salis.permissions.scoped_has_permission",
+    "Fuel Claim": "apex.salis.permissions.scoped_has_permission",
+    "Fuel Quota": "apex.salis.permissions.scoped_has_permission",
+    "Fuel Exception Case": "apex.salis.permissions.scoped_has_permission",
+    "Salis Payment Request": "apex.salis.permissions.payment_sod_has_permission",
+    "Salis Vehicle": "apex.salis.permissions.scoped_has_permission",
+    # [#1v1380]
+    "Salis Driver": "apex.salis.permissions.salis_driver_has_permission",
+    "Passenger Manifest": "apex.salis.permissions.scoped_has_permission",
+    # [#wave2-pqc] habitat (3 dual-building use the dual helper)
+    "Facility Asset Custody Assignment": "apex.habitat.permissions.building_scoped_has_permission",
+    "Operational Depreciation Snapshot": "apex.habitat.permissions.building_scoped_has_permission",
+    "Custody Return": "apex.habitat.permissions.building_scoped_has_permission",
+    "Custody Damage Assessment": "apex.habitat.permissions.building_scoped_has_permission",
+    "Custody Acknowledgment": "apex.habitat.permissions.building_scoped_has_permission",
+    "Facility Asset": "apex.habitat.permissions.building_scoped_has_permission",
+    "Housing Inventory": "apex.habitat.permissions.building_scoped_has_permission",
+    "Building License": "apex.habitat.permissions.building_scoped_has_permission",
+    "Maintenance Work Order": "apex.habitat.permissions.building_scoped_has_permission",
+    "Accommodation Material Transfer": "apex.habitat.permissions.dual_building_scoped_has_permission",
+    "Facility Asset Movement": "apex.habitat.permissions.dual_building_scoped_has_permission",
+    "Custody Handover": "apex.habitat.permissions.dual_building_scoped_has_permission",
+    "Facility Asset Delivery": "apex.habitat.permissions.dual_building_scoped_has_permission",
+    "Occupancy Snapshot": "apex.habitat.permissions.building_scoped_has_permission",
+    "Temporary Worker": "apex.habitat.permissions.building_scoped_has_permission",
+    "Arrival Batch": "apex.habitat.permissions.building_scoped_has_permission",
+    "Room": "apex.habitat.permissions.building_scoped_has_permission",
+    "Bed": "apex.habitat.permissions.building_scoped_has_permission",
+    # [#wave-b2] form/REST read of a ledger row outside the user's store is denied.
+    "Accommodation Stock Ledger": "apex.habitat.permissions.building_scoped_has_permission",
+    "Driver Attendance": "apex.salis.permissions.driver_attendance_has_permission",
+    "Driver Stop": "apex.salis.permissions.driver_stop_has_permission",
+    "Boarding Scan Log": "apex.salis.permissions.boarding_scan_log_has_permission",
+    "Vehicle Damage Write-Off": "apex.salis.permissions.vehicle_damage_write_off_has_permission",
+    "Vehicle Incident": "apex.salis.permissions.vehicle_incident_has_permission",
+    "Driver Clearance": "apex.salis.permissions.driver_clearance_has_permission",
+    "Vehicle Stop": "apex.salis.permissions.vehicle_stop_has_permission",
+    "Movement Cost Transfer": "apex.salis.permissions.movement_cost_transfer_has_permission",
+    # Mirror operations_alert_query for direct form/REST/link access.
+    "Operations Alert": "apex.salis.permissions.operations_alert_has_permission",
+}
+
+# [#eo76cf]
+fixtures = [
+    # [#qzi031]
+    {"dt": "Role", "filters": [["name", "in", ["Accommodation Manager", "Resident Supervisor", "Finance Manager", "Internal Auditor"]]]},
+    # [#r86uty]
+    {"dt": "Role", "filters": [["name", "in", ["Maintenance Technician", "Cleaning Supervisor", "Safety Officer", "Resident Request Coordinator"]]]},
+    # [#e3f5ip]
+    {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Supervisor", "Government Relations Officer"]]]},
+    # [#40ogr7]
+    # Item Group is a NestedSet — seeded via patch (seed_accommodation_item_groups),
+    # not fixtures, since a fixture import crashes on a fresh site's NULL-lft/rgt root.
+    # [#t543it] Worker-housing procurement catalog for the Items shopping surface.
+    {"dt": "Item", "filters": [["item_code", "like", "ACC-%"]]},
+    # Custom ERPNext Party Type so a Freelancer can be a payable party on Journal/Payment Entry.
+    {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
+]
+
+# [#6mioka]
+after_install = [
+    "apex.setup.after_install",
+    "apex.salis.setup.after_install",
+    # [#imj0oa]
+    "apex.apex_core.setup.seed.seed_all",
+    # [#kn80cn]
+    "apex.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
+    # [#917n9u]
+    "apex.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
+    # [#zy072c]
+    "apex.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
+    # [#hbwf06]
+    "apex.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
+    # [#2oqhfm]
+    "apex.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
+    # P-108: fresh installs mark patches complete without running them; make the module
+    # root workspace the earliest-created (deterministic breadcrumb target) post-sync.
+    "apex.patches.v1_x.reorder_root_workspace_creation.execute",
+]
+
+# [#6xge34]
+after_sync = []
+# [#dczcal]
+after_migrate = [
+    # [#2k7wg7]
+    "apex.apex_core.setup.seed.seed_all",
+    # [#gmne6k]
+    "apex.apex_core.setup.seeders.habitat_auto_email_reports_seed.seed_auto_email_reports",
+    # [#5lhe9n]
+    "apex.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
+    # [#puz3yc]
+    "apex.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
+    # [#mv2xth]
+    "apex.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
+    # [#hbwf07]
+    "apex.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
+    # [#tk37r7]
+    "apex.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
+    # [#hi9721]
+    "apex.patches.v1_0.seed_salis_settings.execute",
+    # [#byftwb]
+    "apex.setup.create_roles",
+    "apex.setup.create_role_profiles",
+    # P-108: a workspace JSON re-import (delete+insert) re-stamps creation=now(), which
+    # can demote the module root from breadcrumb target; restore root-first every migrate.
+    "apex.patches.v1_x.reorder_root_workspace_creation.execute",
+]
+
+# [#10mrjh]
+before_tests = "apex.tests.before_tests.before_tests"
+
+# [#susk3d]
+get_changelog_feed = "apex.apex_core.utils.changelog.get_changelog_feed"

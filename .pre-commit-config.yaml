@@ -8,7 +8,7 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
-        files: "apex_habitat.*"
+        files: "apex.*"
         exclude: ".*json$|.*txt$|.*csv|.*md|.*svg"
       - id: check-merge-conflict
       - id: check-ast
@@ -38,11 +38,11 @@ repos:
         # Ignore any files that might contain jinja / bundles
         exclude: |
             (?x)^(
-                apex_habitat/public/dist/.*|
+                apex/public/dist/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
-                apex_habitat/templates/includes/.*|
-                apex_habitat/public/js/lib/.*
+                apex/templates/includes/.*|
+                apex/public/js/lib/.*
             )$
 
 
@@ -55,12 +55,12 @@ repos:
         # Ignore any files that might contain jinja / bundles
         exclude: |
             (?x)^(
-                apex_habitat/public/dist/.*|
+                apex/public/dist/.*|
                 cypress/.*|
                 .*node_modules.*|
                 .*boilerplate.*|
-                apex_habitat/templates/includes/.*|
-                apex_habitat/public/js/lib/.*
+                apex/templates/includes/.*|
+                apex/public/js/lib/.*
             )$
 
 ci:

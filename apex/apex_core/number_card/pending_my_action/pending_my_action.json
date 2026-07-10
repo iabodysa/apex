@@ -1,0 +1,11 @@
+{
+ "doctype": "Number Card",
+ "document_type": "ToDo",
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Pending My Action",
+ "method": "apex.apex_core.worklist.action_inbox.get_pending_action_count",
+ "module": "Apex Core",
+ "name": "Pending My Action",
+ "type": "Custom"
+}

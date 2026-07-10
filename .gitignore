@@ -23,8 +23,8 @@ docs/
 *.md
 !README.md
 # Frappe "Updated To A New Version" popup changelogs are shipped app files.
-!apex_habitat/change_log/v0/*.md
-!apex_habitat/change_log/v1/*.md
+!apex/change_log/v0/*.md
+!apex/change_log/v1/*.md
 # Public developer integration guide — ONLY this one file under docs/ is published
 # (docs/superpowers and all other docs/ content stay ignored).
 !docs/
@@ -37,7 +37,7 @@ docs/*
 !docs/training/*.md
 
 # Local-only rich demo generator — Arabic sample data, bench-only, never published
-apex_habitat/demo/
+apex/demo/
 
 # Local/private office source files.
 *.xlsx
@@ -48,10 +48,8 @@ apex_habitat/demo/
 *.ods
 
 # Translation CSV files are publishable because Arabic text belongs there.
-!apex_habitat/apex_habitat/translations/
-!apex_habitat/apex_habitat/translations/*.csv
-!apex_habitat/translations/
-!apex_habitat/translations/*.csv
+!apex/translations/
+!apex/translations/*.csv
 
 # Environment, secrets, and local runtime files.
 .env

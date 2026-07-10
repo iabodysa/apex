@@ -64,9 +64,9 @@ first thing a user in that role sees:
    top of the Desk sidebar, ahead of the generic `Launchpad` (`90.0`) and
    other module workspaces.
 2. **`User.default_workspace` provisioning patch** —
-   `apex_habitat/patches/v2_0/set_role_default_workspace.py`
+   `apex/patches/v2_0/set_role_default_workspace.py`
    (registered in `patches.txt` as
-   `apex_habitat.patches.v2_0.set_role_default_workspace`) is a guarded,
+   `apex.patches.v2_0.set_role_default_workspace`) is a guarded,
    idempotent, run-once patch. For each of the four roles it finds every user
    holding that role and, **only if `default_workspace` is still empty**,
    stamps it to the role's workspace. It never overwrites a workspace the
@@ -82,7 +82,7 @@ the workspace a `sequence_id` in the `1.x` range.
 
 ## 4. Worked examples
 
-The four daily role workspaces shipped under `apex_habitat/apex_core/workspace/`:
+The four daily role workspaces shipped under `apex/apex_core/workspace/`:
 
 | Workspace | `sequence_id` | Daily Tasks (Create Records) | Monitoring | Master Data |
 |---|---|---|---|---|
@@ -113,6 +113,6 @@ its board/portal.
    `(Board)` / `(Dashboard)` / `(Portal)` suffix, and add the Arabic
    translation to `translations/ar.csv` if it is a new label.
 6. Add the role → workspace mapping to `ROLE_WORKSPACE` in
-   `apex_habitat/patches/v2_0/set_role_default_workspace.py` (or a new
+   `apex/patches/v2_0/set_role_default_workspace.py` (or a new
    patch, per its `PRUNE` note) so the workspace becomes the role's default
    landing page.

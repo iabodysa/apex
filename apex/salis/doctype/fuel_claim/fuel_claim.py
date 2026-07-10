@@ -1,0 +1,108 @@
+# Copyright (c) 2026, AFMCO and contributors
+"""Fuel Claim controller.
+
+Submittable Movement fuel claim and reconciliation against a Fuel Quota.
+Movement is a service provider: Operations submits the
+claim, Movement reconciles it against the internal Fuel Consumption Ledger.
+
+The controller derives consumed litres from the ledger (sum of litres for the
+claim's vehicle + period) and computes the claimed-vs-consumed variance.
+
+Status transitions and the approval authority are owned by the native **Fuel
+Claim Workflow** (see ``salis/workflow/fuel_claim_workflow/``), not by this
+controller. The workflow enforces the role per transition and the
+Segregation-of-Duties gate on the approval (``allow_self_approval=0`` +
+``requested_by != session.user``). The document is submitted (docstatus 0 -> 1)
+by the ``Approve`` transition, whose ``allowed`` role (Fleet Manager) carries the
+governing approval authority; ``Closed`` is the post-submit terminal, reached
+from ``Approved`` as a docstatus-1 update (it finalizes, not voids, the claim —
+there is no cancel side-effect). The state field is ``allow_on_submit`` so a
+post-submit transition can move the status.
+
+This controller keeps only what the workflow cannot express: the required-field
+validation, the ledger-derived consumption/variance computation, the financial
+reference defaults, the initial-status guard (a claim must be created at Draft),
+and the server-side requester stamp the SoD gate relies on.
+"""
+
+from __future__ import annotations
+
+import frappe
+from frappe import _
+from frappe.model.document import Document
+
+# [#6n814k]
+VALID_STATUSES = (
+	"Draft",
+	"Submitted to Movement",
+	"Reconciled",
+	"Approved",
+	"Disputed",
+	"Closed",
+)
+
+
+class FuelClaim(Document):
+	def before_insert(self):
+		# [#lmqimg]
+		if not self.requested_by:
+			self.requested_by = frappe.session.user
+
+	def validate(self):
+		if not self.requested_by:
+			self.requested_by = frappe.session.user
+		if self.status and self.status not in VALID_STATUSES:
+			frappe.throw(_("Invalid status: {0}").format(self.status))
+		if (self.claimed_litres or 0) <= 0:
+			frappe.throw(_("Claimed Litres must be greater than zero."))
+		# [#a05dfs]
+		if (self.claimed_amount or 0) < 0:
+			frappe.throw(_("Claimed Amount cannot be negative."))
+		self._set_financial_defaults()
+		self._compute_consumption()
+		self._guard_initial_status()
+
+	def _set_financial_defaults(self):
+		"""Default company and cost center from Salis Settings for reporting and
+		financial context. Reference fields only - no GL/Payment Entry is posted."""
+		from apex.apex_core.doctype.salis_settings.salis_settings import (
+			get_default_company,
+			get_default_cost_center,
+		)
+
+		if not self.company:
+			self.company = get_default_company()
+		if not self.cost_center:
+			self.cost_center = get_default_cost_center()
+
+	# [#a4g9yp]
+
+	# [#m88md8]
+
+	def _compute_consumption(self):
+		"""Derive consumed litres from the Fuel Consumption Ledger and the
+		claimed-vs-consumed variance. Consumed litres is the sum of ledger
+		litres for this claim's vehicle and period."""
+		consumed = 0.0
+		if self.vehicle and self.period_month:
+			rows = frappe.get_all(
+				"Fuel Consumption Ledger",
+				filters={"vehicle": self.vehicle, "period_month": self.period_month},
+				fields=["litres"],
+			)
+			consumed = sum((row.litres or 0) for row in rows)
+
+		self.consumed_litres = consumed
+		self.variance_litres = (self.claimed_litres or 0) - consumed
+
+	def _guard_initial_status(self):
+		"""A new claim must be created at the initial state (Draft). Later states
+		are reached only through the Fuel Claim Workflow, which the desk drives —
+		this closes the insert-bypass the workflow itself cannot cover (a brand-new
+		document inserted directly at a later/terminal status)."""
+		if self.is_new() and self.status and self.status != "Draft":
+			frappe.throw(
+				_("A Fuel Claim must be created with status Draft; {0} is reached through the workflow.").format(
+					_(self.status)
+				)
+			)

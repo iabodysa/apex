@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name="apex_habitat",
+    name="apex",
     version="1.62.0",
     description="Apex Habitat custom application for Frappe Framework v15.",
     packages=find_packages(),

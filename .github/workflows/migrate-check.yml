@@ -3,8 +3,8 @@ name: Migration Smoke Check
 on:
   pull_request:
     paths:
-      - "apex_habitat/patches/**"
-      - "apex_habitat/patches.txt"
+      - "apex/patches/**"
+      - "apex/patches.txt"
 
 jobs:
   migrate-check:
@@ -77,7 +77,7 @@ jobs:
           bench get-app --branch version-15 --skip-assets erpnext
           bench get-app --branch version-15 --skip-assets hrms
 
-      - name: Get apex_habitat app
+      - name: Get apex app
         working-directory: frappe-bench
         run: bench get-app --skip-assets ${{ github.workspace }}
 
@@ -87,5 +87,5 @@ jobs:
           bench new-site test.localhost --db-root-password ${{ secrets.DB_ROOT_PASSWORD }} --admin-password ${{ secrets.ADMIN_PASSWORD }} --no-mariadb-socket
           bench --site test.localhost install-app erpnext
           bench --site test.localhost install-app hrms
-          bench --site test.localhost install-app apex_habitat
+          bench --site test.localhost install-app apex
           bench --site test.localhost migrate

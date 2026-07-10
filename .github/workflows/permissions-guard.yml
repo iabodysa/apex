@@ -32,7 +32,7 @@ jobs:
           # Production code only. Test files (tests/ and test_*.py) legitimately use
           # ignore_permissions=True to build fixtures and are not a runtime security
           # surface, so they are excluded from the guard.
-          COUNT=$(grep -rn "ignore_permissions=True" apex_habitat/ --include="*.py" \
+          COUNT=$(grep -rn "ignore_permissions=True" apex/ --include="*.py" \
             | grep -v "# audit-ok" \
             | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' \
             | wc -l \
@@ -47,7 +47,7 @@ jobs:
             echo "Baseline is $BASELINE."
             echo ""
             echo "New call sites (not present when baseline was set):"
-            grep -rn "ignore_permissions=True" apex_habitat/ --include="*.py" \
+            grep -rn "ignore_permissions=True" apex/ --include="*.py" \
               | grep -v "# audit-ok" \
               | grep -vE '/tests/|/test_[A-Za-z0-9_]*\.py:' || true
             echo ""

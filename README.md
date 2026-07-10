@@ -18,7 +18,7 @@ Four complementary diagrams document the system from module structure down to li
 
 ```mermaid
 graph TD
-    PKG(["apex_habitat · v1.50.10<br/>single package, 3 modules"]):::hub
+    PKG(["apex · v1.50.10<br/>single package, 3 modules"]):::hub
 
     subgraph CORE_BOX ["Apex Core — shared kernel"]
         CORE_SET["Habitat Settings<br/>Salis Settings<br/>Apex Integration Settings<br/>Salis Portal Theme"]:::core
@@ -298,15 +298,15 @@ Any logged-in user can raise a Maintenance Request and sees only their own ticke
 
 ## Localization
 
-The desk is delivered in Arabic via `apex_habitat/translations/ar.csv`. The driver portal is English-first with an in-portal English/Arabic toggle.
+The desk is delivered in Arabic via `apex/translations/ar.csv`. The driver portal is English-first with an in-portal English/Arabic toggle.
 
 ## Install
 
 Apex installs like any standard Frappe app:
 
 ```bash
-bench get-app apex_habitat
-bench --site <site> install-app apex_habitat
+bench get-app apex
+bench --site <site> install-app apex
 bench --site <site> migrate
 ```
 
