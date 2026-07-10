@@ -74,6 +74,11 @@ scratch/
 *.applescript
 flash_actions_report.json
 
+# Raw HTTP/curl response dumps — may capture live auth tokens; never commit.
+curl_output*.txt
+**/curl_output*.txt
+*.curl
+
 # macOS junk (also stripped by: apex.sh clean)
 ._*
 .AppleDouble
