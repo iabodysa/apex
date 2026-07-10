@@ -4,7 +4,7 @@ row per building (idempotent), and the Occupancy Trend report aggregates them.""
 
 import frappe
 from frappe.utils import today
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.habitat.tasks import daily_occupancy_snapshot
 from apex_habitat.habitat.report.occupancy_trend.occupancy_trend import execute
 

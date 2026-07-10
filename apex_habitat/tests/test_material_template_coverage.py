@@ -5,7 +5,7 @@
 """
 
 import frappe
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.apex_core.setup.seeders.maintenance_material_template_seed import (
     seed_templates,
 )

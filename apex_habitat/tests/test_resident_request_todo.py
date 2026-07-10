@@ -4,7 +4,7 @@ ToDo follow-up for that user; resolving/closing the request closes the ToDo. The
 ToDo creation is idempotent (no duplicate per assignee)."""
 
 import frappe
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 
 
 def _open_todos(name, user="Administrator"):

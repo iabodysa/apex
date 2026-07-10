@@ -9,6 +9,23 @@ from __future__ import annotations
 import frappe
 from frappe.utils import today
 
+try:
+    from frappe.tests.utils import FrappeTestCase
+    _UnitTestCase = FrappeTestCase
+except Exception:  # pragma: no cover — frappe absent (static analysis / non-bench)
+    FrappeTestCase = object  # type: ignore
+    _UnitTestCase = object  # type: ignore
+
+
+# Base test cases (promoted from tests/test_utils.py, P-135) so consumers import
+# them from this non-``test_*`` module and the cross-test-import ratchet stays empty.
+class ApexHabitatTestCase(FrappeTestCase):
+    """Base test case for apex_habitat integration tests."""
+
+
+class ApexHabitatUnitTestCase(_UnitTestCase):
+    """Base test case for apex_habitat unit tests (no database)."""
+
 # [#8evoal]
 test_ignore = [
     "Additional Salary",
@@ -471,4 +488,83 @@ def make_worker_trip(
         frappe.db.set_value("Dispatch Trip", dt.name, "status", status)
         dt.reload()
     return tr, rp, dt
+
+
+class WorkerTripMixin:
+    """Builds a complete Workers-line trip for a given driver and returns the
+    handle records, registering cleanup. Record creation is delegated to
+    ``make_worker_trip``; everything is created as Administrator.
+
+    Promoted from tests/test_masar_worker_movement.py (P-135) so the Masar test
+    modules share one mixin without a cross-test-module import."""
+
+    def _worker_trip(self, driver, project, building, workers, route_name):
+        tr, rp, dt = make_worker_trip(driver, project, building, workers, route_name)
+        self.addCleanup(lambda: self._purge(dt.name, rp.name, tr.name))
+        return tr, rp, dt
+
+    @staticmethod
+    def _purge(dt_name, rp_name, tr_name):
+        frappe.set_user("Administrator")
+        for dtp in (
+            ("Dispatch Trip", dt_name),
+            ("Route Plan", rp_name),
+            ("Transport Request", tr_name),
+        ):
+            if frappe.db.exists(*dtp):
+                doc = frappe.get_doc(*dtp)
+                if doc.docstatus == 1:
+                    try:
+                        doc.cancel()
+                    except Exception:
+                        pass
+                frappe.delete_doc(*dtp, ignore_permissions=True, force=True)
+
+
+# ── Suite building-pollution purge (P-148) ────────────────────────────────────
+#
+# Committing tests (``frappe.db.commit()`` breaks FrappeTestCase's per-class
+# rollback) leak hundreds of Accommodation Building rows that are never torn down.
+# Rather than match ~60 heterogeneous test building names, we snapshot the
+# pre-suite building set once (from before_tests) and purge everything created
+# afterward. Both run in the single test process, so a module-level set persists.
+
+_BUILDING_BASELINE: set[str] = set()
+
+
+def snapshot_building_baseline():
+    """Record the Accommodation Building names that exist before the suite runs.
+    Called from ``tests/before_tests.py`` (the ``before_tests`` hook)."""
+    _BUILDING_BASELINE.clear()
+    _BUILDING_BASELINE.update(
+        frappe.get_all("Accommodation Building", pluck="name")
+    )
+
+
+def purge_test_buildings():
+    """Force-delete every Accommodation Building created after the pre-suite
+    baseline snapshot; return the number removed. Idempotent, best-effort per row
+    (as Administrator). Invoked from a ``tearDownModule`` in building-creating test
+    modules so the post-suite building count returns to the pre-suite baseline.
+
+    ``force=True`` bypasses the link-validation check, so a building with dependent
+    rooms/beds/assignments is removed regardless (test site only; those children
+    are themselves suite pollution)."""
+    frappe.set_user("Administrator")
+    removed = 0
+    for name in frappe.get_all("Accommodation Building", pluck="name"):
+        if name in _BUILDING_BASELINE:
+            continue
+        try:
+            frappe.delete_doc(
+                "Accommodation Building", name, ignore_permissions=True, force=True
+            )
+            removed += 1
+        except Exception:
+            # Best-effort: a row wedged by an un-cancellable submitted link is left
+            # for the next sweep rather than failing the teardown.
+            pass
+    if removed:
+        frappe.db.commit()
+    return removed
 

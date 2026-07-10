@@ -13,7 +13,7 @@ import unittest
 
 import frappe
 
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.apex_core.worklist.my_work_center import (
     get_my_work,
     get_submitted_by_me_count,

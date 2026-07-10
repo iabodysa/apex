@@ -235,6 +235,10 @@ const messages = {
       todayTrips: "Today's trips",
       completedTrips: "Completed",
       totalBoarded: "Boarded",
+      waitRequestTitle: "Wait request!",
+      waitRequestBody: "asks to wait",
+      secondsShort: "s",
+      defaultWorker: "Worker",
     },
     boarding: {
       title: "Scan boarding pass",
@@ -574,6 +578,10 @@ const messages = {
       todayTrips: "رحلات اليوم",
       completedTrips: "مكتملة",
       totalBoarded: "صعدوا",
+      waitRequestTitle: "طلب انتظار!",
+      waitRequestBody: "يطلب الانتظار",
+      secondsShort: "ث",
+      defaultWorker: "موظف",
     },
     boarding: {
       title: "مسح بطاقة الصعود",

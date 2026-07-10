@@ -5,7 +5,7 @@ mirror and marks the original cancelled; the doctype is read-only."""
 
 import frappe
 from frappe.utils import flt
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
     post_stock_entry, has_stock_entries, reverse_stock_entries,
 )

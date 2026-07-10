@@ -4,7 +4,7 @@ import frappe
 from frappe.utils import today
 
 from apex_habitat.habitat.tasks import daily_safety_task_compliance_scan
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 
 
 def _hash(n=6):

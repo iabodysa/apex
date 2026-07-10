@@ -5,9 +5,9 @@ from frappe.tests.utils import FrappeTestCase
 from apex_habitat.salis.api import driver_portal
 from apex_habitat.salis.api.driver_portal import _resolve_driver
 
-# NOTE: test_masar_worker_movement imports _ensure_test_driver from THIS module, so a
-# top-level `from ... import` here would be circular. The worker-trip builder is therefore
-# imported lazily inside the helper that needs it (below).
+# The Masar worker-trip fixture builders live in tests/factories.py (P-135); this module
+# imports them from there (lazily, below) — no sibling test module is imported. The local
+# _ensure_test_driver mirrors factories.make_test_driver for this module's own use.
 
 
 def _ensure_test_driver():
@@ -316,7 +316,7 @@ class _DriverTripBuilder:
 	import cycle. Mix into a FrappeTestCase that sets ``self.drv``."""
 
 	def _trip(self, workers, route):
-		from apex_habitat.tests.test_masar_worker_movement import _WorkerTripMixin
+		from apex_habitat.tests.factories import WorkerTripMixin as _WorkerTripMixin
 
 		# _worker_trip uses self.addCleanup + self._purge; bind the mixin's _purge so
 		# the cleanup it registers resolves on this (non-mixin) test case.
@@ -350,7 +350,11 @@ class TestManualBoarding(_DriverTripBuilder, FrappeTestCase):
 		super().setUpClass()
 		frappe.set_user("Administrator")
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
-		from apex_habitat.tests.test_masar_worker_movement import _building, _employee, _project
+		from apex_habitat.tests.factories import (
+			make_masar_building as _building,
+			make_worker_employee as _employee,
+			make_project as _project,
+		)
 
 		cls.drv = _ensure_test_driver()
 		cls.user = frappe.db.get_value(
@@ -448,7 +452,11 @@ class TestStopProgress(_DriverTripBuilder, FrappeTestCase):
 		super().setUpClass()
 		frappe.set_user("Administrator")
 		frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
-		from apex_habitat.tests.test_masar_worker_movement import _building, _employee, _project
+		from apex_habitat.tests.factories import (
+			make_masar_building as _building,
+			make_worker_employee as _employee,
+			make_project as _project,
+		)
 
 		cls.drv = _ensure_test_driver()
 		cls.user = frappe.db.get_value(
@@ -532,3 +540,11 @@ class TestStopProgress(_DriverTripBuilder, FrappeTestCase):
 		res = driver_portal.mark_stop_progress(dt.name, stop["route_stop"], done=0)
 		frappe.set_user("Administrator")
 		self.assertFalse(res["stop_progress"].get(stop["route_stop"], {}).get("done"))
+
+
+def tearDownModule():
+    # P-148: drop this module's committed Accommodation Buildings so the suite's
+    # post-run building count returns to the pre-suite baseline (see factories.py).
+    from apex_habitat.tests import factories
+
+    factories.purge_test_buildings()

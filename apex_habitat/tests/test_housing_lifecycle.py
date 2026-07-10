@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.utils import getdate
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 
 
 class TestHousingLifecycle(ApexHabitatTestCase):

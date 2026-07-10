@@ -44,14 +44,12 @@
             <span v-if="relativeHint" class="pill pill-neutral ms-auto shrink-0">{{ relativeHint }}</span>
           </div>
 
-          <!-- Live ETA slot. A true distance/time ETA needs a driver-side GPS
-               feed, which the fleet has NO source for yet (Salis records no
-               vehicle GPS/coordinate — see salis/api/driver_portal.py:464), so we
-               never fabricate one: rideEta is always null until that feed exists.
-               What IS real is the trip status — once the driver is Dispatched the
-               worker can trust they're on the way, so we show that truthful live
-               state instead. When the GPS feed lands, populate rideEta and this
-               same slot renders the real ETA. -->
+          <!-- Live ETA row (Option A): shown ALONGSIDE the scheduled-time row
+               above, never replacing it. `eta_minutes` is computed server-side
+               from the driver's live GPS (compute_ride_eta_minutes in
+               salis/api/masar.py) and is null until a position exists — then this
+               slot falls back to the truthful en-route state, never a fabricated
+               ETA (0 = driver at the pickup, a real value). -->
           <div v-if="rideEta !== null" class="flex items-center gap-2 text-sm">
             <Icon name="route" :size="16" class="text-primary shrink-0 rtl-flip" />
             <span class="font-semibold">{{ t("home.etaArriving", { eta: rideEta }) }}</span>

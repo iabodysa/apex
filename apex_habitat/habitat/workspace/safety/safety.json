@@ -14,6 +14,15 @@
    "role": "Resident Supervisor"
   },
   {
+   "role": "Safety Officer"
+  },
+  {
+   "role": "Maintenance Technician"
+  },
+  {
+   "role": "Cleaning Supervisor"
+  },
+  {
    "role": "Internal Auditor"
   },
   {
@@ -423,5 +432,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-05 19:12:59.527483"
+ "modified": "2026-07-10 04:16:24.090710"
 }

@@ -6,7 +6,7 @@ Assignment through the existing controller (bed turns red/occupied)."""
 from unittest.mock import patch
 
 import frappe
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.habitat import permissions as P
 from apex_habitat.habitat.api.front_desk import (
     get_building_grid,

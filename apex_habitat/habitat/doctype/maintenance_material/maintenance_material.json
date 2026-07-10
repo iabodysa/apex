@@ -197,7 +197,7 @@
   },
   {
    "doctype": "DocPerm",
-   "role": "Maintenance Manager",
+   "role": "Maintenance Technician",
    "read": 1,
    "write": 1,
    "create": 1,
@@ -223,5 +223,5 @@
   "rgt",
   "old_parent"
  ],
- "modified": "2026-06-24 12:00:00.000000"
+ "modified": "2026-07-10 04:16:24.090710"
 }

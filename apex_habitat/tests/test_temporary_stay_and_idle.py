@@ -3,7 +3,7 @@
 Resident Report status flow (schema groundwork; no automation yet)."""
 
 import frappe
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 
 
 def _h(n=4):

@@ -7,7 +7,7 @@ cancel reverses every posted leg. Availability is enforced at submit."""
 from unittest.mock import patch
 
 import frappe
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
     post_stock_entry, get_store_balance,
 )

@@ -29,48 +29,9 @@ from frappe.tests.utils import FrappeTestCase
 from apex_habitat.salis.api import masar
 from apex_habitat.tests import factories
 
-# Fixture builders live in tests/factories.py (P-129). These module-level aliases
-# preserve the historical private names that sibling Masar test modules import from
-# here (test_masar_worker_scope, test_boarding_scan, test_masar_1b, ...), while the
-# single source of truth is now the factories library.
-_company = factories.default_company
-_project = factories.make_project
-_site = factories.make_site
-_building = factories.make_masar_building
-_employee = factories.make_worker_employee
-_driver_user_for = factories.driver_user
-_ensure_driver_chain = factories.make_driver_chain
-_ensure_test_driver = factories.make_test_driver
-
-
-class _WorkerTripMixin:
-    """Builds a complete Workers-line trip for a given driver and returns the
-    handle records, registering cleanup. Record creation is delegated to
-    ``factories.make_worker_trip``; everything is created as Administrator."""
-
-    def _worker_trip(self, driver, project, building, workers, route_name):
-        tr, rp, dt = factories.make_worker_trip(
-            driver, project, building, workers, route_name
-        )
-        self.addCleanup(lambda: self._purge(dt.name, rp.name, tr.name))
-        return tr, rp, dt
-
-    @staticmethod
-    def _purge(dt_name, rp_name, tr_name):
-        frappe.set_user("Administrator")
-        for dtp in (
-            ("Dispatch Trip", dt_name),
-            ("Route Plan", rp_name),
-            ("Transport Request", tr_name),
-        ):
-            if frappe.db.exists(*dtp):
-                doc = frappe.get_doc(*dtp)
-                if doc.docstatus == 1:
-                    try:
-                        doc.cancel()
-                    except Exception:
-                        pass
-                frappe.delete_doc(*dtp, ignore_permissions=True, force=True)
+# All fixture builders + the worker-trip mixin live in tests/factories.py (P-135);
+# this module calls them via the ``factories`` namespace — no local re-export aliases,
+# so the cross-test-import ratchet (test_no_cross_test_imports) stays empty.
 
 
 class TestMasarSchemaInstall(FrappeTestCase):
@@ -97,16 +58,16 @@ class TestMasarSchemaInstall(FrappeTestCase):
         self.assertFalse(field.reqd)
 
 
-class TestTripStartLogController(_WorkerTripMixin, FrappeTestCase):
+class TestTripStartLogController(factories.WorkerTripMixin, FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.project = _project("Masar TSL Project")
-        cls.building = _building("Masar TSL Building")
-        cls.driver = _ensure_test_driver()
-        cls.w1 = _employee("Masar Worker One")
-        cls.w2 = _employee("Masar Worker Two")
+        cls.project = factories.make_project("Masar TSL Project")
+        cls.building = factories.make_masar_building("Masar TSL Building")
+        cls.driver = factories.make_test_driver()
+        cls.w1 = factories.make_worker_employee("Masar Worker One")
+        cls.w2 = factories.make_worker_employee("Masar Worker Two")
 
     @classmethod
     def tearDownClass(cls):
@@ -297,19 +258,19 @@ class TestTripStartLogController(_WorkerTripMixin, FrappeTestCase):
         frappe.delete_doc("Trip Start Log", name, ignore_permissions=True, force=True)
 
 
-class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
+class TestMasarReadEndpoint(factories.WorkerTripMixin, FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
-        cls.project = _project("Masar EP Project")
-        cls.building = _building("Masar EP Building")
-        cls.driver = _ensure_test_driver()
-        cls.driver_user = _driver_user_for(cls.driver)
-        cls.w1 = _employee("Masar EP Worker One")
+        cls.project = factories.make_project("Masar EP Project")
+        cls.building = factories.make_masar_building("Masar EP Building")
+        cls.driver = factories.make_test_driver()
+        cls.driver_user = factories.driver_user(cls.driver)
+        cls.w1 = factories.make_worker_employee("Masar EP Worker One")
         # [#n2d8l0]
-        cls.other_driver, cls.other_user = _ensure_driver_chain(
+        cls.other_driver, cls.other_user = factories.make_driver_chain(
             "masar_other_drv@example.com", "Masar Other"
         )
 
@@ -398,7 +359,7 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
                 "request_type": "Administrative Trip / Document Signing",
                 "project": self.project,
                 # [#per8o9]
-                "representative": _employee("EP Representative"),
+                "representative": factories.make_worker_employee("EP Representative"),
                 "destination": "Ministry",
                 "from_location": "HQ",
                 "to_location": "Ministry",
@@ -431,3 +392,11 @@ class TestMasarReadEndpoint(_WorkerTripMixin, FrappeTestCase):
         payload = masar.get_my_worker_route_today()
         names = [t["dispatch_trip"] for t in payload["trips"]]
         self.assertNotIn(rep_dt.name, names)
+
+
+def tearDownModule():
+    # P-148: drop this module's committed Accommodation Buildings so the suite's
+    # post-run building count returns to the pre-suite baseline (see factories.py).
+    from apex_habitat.tests import factories
+
+    factories.purge_test_buildings()

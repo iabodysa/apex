@@ -209,3 +209,11 @@ def _func_source(src, path, name):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def tearDownModule():
+    # P-148: drop this module's committed Accommodation Buildings so the suite's
+    # post-run building count returns to the pre-suite baseline (see factories.py).
+    from apex_habitat.tests import factories
+
+    factories.purge_test_buildings()

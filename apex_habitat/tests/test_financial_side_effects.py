@@ -4,7 +4,7 @@
 import frappe
 from frappe.utils import flt
 
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 
 
 def _configure_damage_policy(enabled=1, cap=500, salary_component=None, default_component=None, bypass_validate=False):

@@ -12,7 +12,7 @@ import frappe
 from frappe.utils import add_months, today
 
 from apex_habitat.habitat.tasks import consumable_custody_expiry_watch
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 
 
 def _h(n=4):

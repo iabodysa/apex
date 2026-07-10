@@ -2,27 +2,16 @@
 """
 Test utilities and fixtures for apex_habitat.
 
-Test execution requires a configured Frappe test environment, which is not
-created or modified by this repository.
+The base test cases now live in ``tests/factories.py`` (P-135) — the single
+non-``test_*`` home the cross-test-import ratchet points every consumer at. This
+module re-exports them so DocType-level ``test_*`` files (outside ``tests/``, and
+outside the ratchet's scope) keep their historical import path.
 """
 
 from __future__ import annotations
 
-try:
-    import frappe
-    from frappe.tests.utils import FrappeTestCase
-    UnitTestCase = FrappeTestCase
-except Exception:  # pragma: no cover
-    # [#6ahmdc]
-    frappe = None
-    FrappeTestCase = object  # type: ignore
-    UnitTestCase = object  # type: ignore
-
-
-class ApexHabitatTestCase(FrappeTestCase):
-    """Base test case for apex_habitat integration tests."""
-
-
-class ApexHabitatUnitTestCase(UnitTestCase):
-    """Base test case for apex_habitat unit tests (no database)."""
+from apex_habitat.tests.factories import (  # noqa: F401  (re-export)
+    ApexHabitatTestCase,
+    ApexHabitatUnitTestCase,
+)
 

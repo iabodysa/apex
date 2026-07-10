@@ -3,7 +3,7 @@
 dashboard (don't replace it), and the Building metrics reader returns its shape."""
 
 import frappe
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.habitat.api import employee_links, supplier_links
 from apex_habitat.habitat.api.building_dashboard import get_building_metrics
 

@@ -234,3 +234,11 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         self.assertNotEqual(d.status, "Delivered")
         self.assertEqual(d.otp_attempts, 1)
         self.assertEqual(frappe.db.get_value("Facility Asset", self.asset, "building"), self.intake)
+
+
+def tearDownModule():
+    # P-148: drop this module's committed Accommodation Buildings so the suite's
+    # post-run building count returns to the pre-suite baseline (see factories.py).
+    from apex_habitat.tests import factories
+
+    factories.purge_test_buildings()

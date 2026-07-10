@@ -2008,30 +2008,68 @@ def create_worker_transport_request(
     return {"name": doc.name, "status": doc.status, "adhoc_count": len(adhoc_rows)}
 
 
+def _worker_was_on_trip(employee, dispatch_trip):
+    """True when ``employee`` actually rode ``dispatch_trip``.
+
+    ``Passenger Manifest`` has no ``employee`` column — the passengers live on its
+    child ``Manifest Passenger`` — so the membership must be resolved through a
+    child table, never a flat filter on the parent. Two authoritative links are
+    honoured so a worker can rate a trip however it is tracked:
+
+    1. Trip -> its Transport Request -> worker manifest (Transport Request Worker):
+       the SAME demand->worker chain ``get_worker_transport`` scopes by; the trip
+       carries its request from planning, long before the fulfilment back-link.
+    2. Passenger Manifest for the trip lists the employee among its passengers
+       (the on-board headcount record), matched via the child ``Manifest
+       Passenger`` rows."""
+    if not (employee and dispatch_trip):
+        return False
+    transport_request = frappe.db.get_value(
+        "Dispatch Trip", dispatch_trip, "transport_request"
+    )
+    if transport_request and frappe.db.exists(
+        "Transport Request Worker",
+        {
+            "parent": transport_request,
+            "parenttype": "Transport Request",
+            "employee": employee,
+        },
+    ):
+        return True
+    manifests = frappe.get_all(
+        "Passenger Manifest", filters={"dispatch_trip": dispatch_trip}, pluck="name"
+    )
+    if manifests and frappe.db.exists(
+        "Manifest Passenger",
+        {
+            "parent": ["in", manifests],
+            "parenttype": "Passenger Manifest",
+            "employee": employee,
+        },
+    ):
+        return True
+    return False
+
+
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=None, transport_request=None):
     """Allows a worker to submit a rating and feedback for a completed trip.
-    
+
     Scoped by the worker's token to ensure they actually went on the trip.
     Creates a 'Transport Trip Rating' record."""
     employee = _resolve_worker(token)
-    
+
     if not dispatch_trip:
         frappe.throw(_("Missing Dispatch Trip reference."))
-        
+
     rating = frappe.utils.cint(rating)
     if rating < 1 or rating > 5:
         frappe.throw(_("Rating must be between 1 and 5."))
 
-    # Ensure worker was on this trip
-    # A worker is on the trip if they are in the Passenger Manifest of the trip
-    is_on_trip = frappe.db.exists(
-        "Passenger Manifest",
-        {"dispatch_trip": dispatch_trip, "employee": employee}
-    )
-    
-    if not is_on_trip:
+    # Ensure the worker actually rode this trip before accepting a rating; the
+    # membership is resolved through the trip's request/manifest child tables.
+    if not _worker_was_on_trip(employee, dispatch_trip):
         frappe.throw(_("You were not part of this trip's manifest."), frappe.PermissionError)
 
     # Check if already rated

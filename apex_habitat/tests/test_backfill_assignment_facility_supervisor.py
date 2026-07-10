@@ -4,7 +4,7 @@ onto historical Accommodation Assignment rows whose field is still empty (the
 fetch_from only fires on save, so rows saved before the field existed stay blank)."""
 
 import frappe
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.tests import factories
 from apex_habitat.patches.v1_x.backfill_assignment_facility_supervisor import execute
 

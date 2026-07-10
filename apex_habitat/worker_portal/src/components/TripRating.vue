@@ -36,6 +36,9 @@
           rows="2"
           :placeholder="t('tripRating.feedbackPlaceholder')"
         ></textarea>
+        <p v-if="errorMessage" class="text-sm text-danger mt-2" role="alert">
+          {{ errorMessage }}
+        </p>
         <button
           type="submit"
           class="btn btn-primary w-full mt-3"
@@ -49,8 +52,9 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useI18n } from "../i18n";
+import { ref, computed } from "vue";
+import { createResource } from "frappe-ui";
+import { useI18n, resourceErrorMessage } from "../i18n";
 import Icon from "../components/Icon.vue";
 
 const { t, dir } = useI18n();
@@ -63,47 +67,41 @@ const emit = defineEmits(["rated"]);
 
 const rating = ref(0);
 const feedback = ref("");
-const submitting = ref(false);
 const success = ref(false);
+const errorMessage = ref("");
 
 const hasRated = ref(props.trip.has_rated || false);
+
+// Cookie-scoped write: the token is resolved server-side from the httpOnly
+// cookie, so only the rating payload is submitted (never a worker id).
+const ratingResource = createResource({
+  url: "apex_habitat.salis.api.masar.submit_trip_rating",
+  onSuccess: () => {
+    errorMessage.value = "";
+    success.value = true;
+    hasRated.value = true;
+    emit("rated", rating.value);
+  },
+  onError: (e) => {
+    errorMessage.value = resourceErrorMessage(e, "tripRating.submitFailed");
+  },
+});
+
+const submitting = computed(() => ratingResource.loading);
 
 function setRating(val) {
   rating.value = val;
 }
 
-async function submitRating() {
+function submitRating() {
   if (!rating.value) return;
-  submitting.value = true;
-  
-  try {
-    const res = await fetch("/api/method/apex_habitat.salis.api.masar.submit_trip_rating", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Frappe-CSRF-Token": window.csrf_token || "",
-      },
-      body: JSON.stringify({
-        dispatch_trip: props.trip.dispatch_trip,
-        transport_request: props.trip.transport_request,
-        rating: rating.value,
-        feedback: feedback.value,
-      }),
-    });
-    
-    if (!res.ok) {
-      throw new Error("Failed to submit rating");
-    }
-    
-    success.value = true;
-    hasRated.value = true;
-    emit("rated", rating.value);
-  } catch (err) {
-    console.error(err);
-    alert(t("errors.unknown") || "An error occurred");
-  } finally {
-    submitting.value = false;
-  }
+  errorMessage.value = "";
+  ratingResource.submit({
+    dispatch_trip: props.trip.dispatch_trip,
+    transport_request: props.trip.transport_request,
+    rating: rating.value,
+    feedback: feedback.value,
+  });
 }
 </script>
 

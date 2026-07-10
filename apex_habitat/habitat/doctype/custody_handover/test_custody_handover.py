@@ -163,3 +163,11 @@ class TestCustodyHandover(ApexHabitatTestCase):
         self.assertNotEqual(handover.status, "Confirmed")
         self.assertEqual(handover.otp_attempts, 1)
         self.assertEqual(_store_bal(self.article, self.dest), 0.0)
+
+
+def tearDownModule():
+    # P-148: drop this module's committed Accommodation Buildings so the suite's
+    # post-run building count returns to the pre-suite baseline (see factories.py).
+    from apex_habitat.tests import factories
+
+    factories.purge_test_buildings()

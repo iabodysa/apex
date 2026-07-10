@@ -29,14 +29,14 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api import masar
-from apex_habitat.tests.test_driver_portal import _ensure_test_driver
-from apex_habitat.tests.test_masar_worker_movement import (
-    _WorkerTripMixin,
-    _building,
-    _driver_user_for,
-    _employee,
-    _ensure_driver_chain,
-    _project,
+from apex_habitat.tests.factories import (
+    WorkerTripMixin as _WorkerTripMixin,
+    driver_user as _driver_user_for,
+    make_driver_chain as _ensure_driver_chain,
+    make_masar_building as _building,
+    make_test_driver as _ensure_test_driver,
+    make_worker_employee as _employee,
+    make_project as _project,
 )
 from apex_habitat.salis.doctype.salis_portal_theme.salis_portal_theme import THEME_SLUGS
 from apex_habitat.www import masar as masar_page
@@ -216,3 +216,11 @@ class TestMasarPageContext(_WorkerTripMixin, FrappeTestCase):
         finally:
             frappe.local.form_dict = frappe._dict()
             frappe.set_user("Administrator")
+
+
+def tearDownModule():
+    # P-148: drop this module's committed Accommodation Buildings so the suite's
+    # post-run building count returns to the pre-suite baseline (see factories.py).
+    from apex_habitat.tests import factories
+
+    factories.purge_test_buildings()

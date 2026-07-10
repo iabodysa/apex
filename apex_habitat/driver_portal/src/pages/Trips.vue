@@ -11,13 +11,13 @@
           <Icon name="alert" :size="20" class="text-white" />
         </div>
         <div class="min-w-0 text-right">
-          <h4 class="font-bold text-sm md:text-base leading-snug">طلب انتظار!</h4>
-          <p class="text-xs md:text-sm opacity-90 truncate"><bdi>{{ currentWait.employee }}</bdi> يطلب الانتظار</p>
+          <h4 class="font-bold text-sm md:text-base leading-snug">{{ t("trips.waitRequestTitle") }}</h4>
+          <p class="text-xs md:text-sm opacity-90 truncate"><bdi>{{ currentWait.employee }}</bdi> {{ t("trips.waitRequestBody") }}</p>
         </div>
       </div>
       <div class="flex items-center gap-2 shrink-0">
         <div class="bg-white text-orange-600 font-extrabold text-base md:text-lg px-3 py-1.5 rounded-lg">
-          {{ currentWait.seconds }}ث
+          {{ currentWait.seconds }}{{ t("trips.secondsShort") }}
         </div>
         <button @click="currentWait = null" class="p-1 rounded-full hover:bg-white/10" aria-label="Dismiss">
           <Icon name="x" :size="16" />
@@ -208,7 +208,7 @@ let waitTimer = null;
 function showWaitNotification(payload) {
   if (waitTimer) clearInterval(waitTimer);
   currentWait.value = {
-    employee: payload.employee || "موظف",
+    employee: payload.employee || t("trips.defaultWorker"),
     seconds: payload.wait_window_seconds || 60,
   };
   try {

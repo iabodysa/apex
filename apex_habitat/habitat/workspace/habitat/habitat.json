@@ -16,10 +16,22 @@
    "role": "Accommodation Manager"
   },
   {
-   "role": "Housing Supervisor"
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Resident Supervisor"
+  },
+  {
+   "role": "Cleaning Supervisor"
   },
   {
    "role": "Safety Officer"
+  },
+  {
+   "role": "Maintenance Technician"
+  },
+  {
+   "role": "Internal Auditor"
   },
   {
    "role": "System Manager"
@@ -143,5 +155,5 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-07-05 19:12:59.527483"
+ "modified": "2026-07-10 04:16:24.090710"
 }

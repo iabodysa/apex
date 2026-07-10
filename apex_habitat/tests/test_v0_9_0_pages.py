@@ -4,7 +4,7 @@ Board, Safety Map, and Custody Kiosk. Writes go through the real controllers."""
 
 import json
 import frappe
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.habitat.api.front_desk import quick_check_in
 from apex_habitat.habitat.api.transfer_board import transfer_occupant
 from apex_habitat.habitat.api.safety_map import get_safety_map

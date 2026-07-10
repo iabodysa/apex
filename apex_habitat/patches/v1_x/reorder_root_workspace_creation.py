@@ -26,6 +26,10 @@ One callable, registered three ways (idempotent, order-safe):
 Skips a module without exactly one public root (Apex Core ships two peer roots
 by design) and a module with no sibling workspaces. PRUNE from patches.txt only
 if the after_migrate/after_install hooks stay registered.
+
+PERMANENT compensator (ratified — Option A): the root cause is frappe's unordered
+workspace-sync directory import (``creation`` is stamped at import time and never
+ordered upstream). This is an accepted, standing trade-off, not temporary debt.
 """
 
 import frappe

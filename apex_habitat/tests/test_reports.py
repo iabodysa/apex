@@ -4,7 +4,7 @@
 import frappe
 from frappe.utils import add_days, getdate
 
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.habitat.report.accommodation_occupancy_summary.accommodation_occupancy_summary import execute as execute_occupancy
 from apex_habitat.habitat.report.accommodation_cost_distribution.accommodation_cost_distribution import execute as execute_cost
 from apex_habitat.habitat.report.lease_expiry_watchlist.lease_expiry_watchlist import execute as execute_lease

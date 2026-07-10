@@ -5,7 +5,7 @@ Supplier Cost Recovery report aggregates the month with the markup applied."""
 
 import frappe
 from frappe.utils import flt, getdate
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.habitat.tasks import (
     daily_accommodation_cost_allocation,
     allocate_building_accommodation_cost,

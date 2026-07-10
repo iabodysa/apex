@@ -29,12 +29,12 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex_habitat.salis.api import masar
-from apex_habitat.tests.test_masar_worker_movement import (
-    _WorkerTripMixin,
-    _building,
-    _employee,
-    _ensure_driver_chain,
-    _project,
+from apex_habitat.tests.factories import (
+    WorkerTripMixin as _WorkerTripMixin,
+    make_driver_chain as _ensure_driver_chain,
+    make_masar_building as _building,
+    make_worker_employee as _employee,
+    make_project as _project,
 )
 
 

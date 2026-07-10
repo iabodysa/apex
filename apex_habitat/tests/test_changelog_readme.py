@@ -40,3 +40,126 @@ class TestChangelogReadmeComplete(unittest.TestCase):
         # belong in the individual popups, not this summary mirror.
         offenders = [ln for ln in self._readme().splitlines() if ARABIC.search(ln)]
         self.assertEqual(offenders, [], f"Arabic in change_log/README.md: {offenders[:5]}")
+
+
+# Internal-QA / build register that must NEVER reach an operator-facing changelog
+# popup. The reader is the person who USES the app, never the engineer who built
+# it; a release note is not an audit reply. This bans test counts, test/QA
+# vocabulary, and dev-process narration (cause, CI, "correction wave", "hotfix").
+# It is deliberately phrase-scoped (not bare words) so legitimate product prose
+# survives — e.g. "green" as a bed status colour, "test" inside a domain term.
+BANNED_REGISTER = re.compile(
+    r"""(?ix)
+      \(\s*\d+\s+tests?\s*\)            # "(1601 tests)"
+    | \b(?:full\s+|behaviou?ral\s+|automated\s+)?test\s+suite\b
+    | \bfull\s+suite\b
+    | \bsuite\s+green\b
+    | \bgreen\s+(?:test\s+)?suite\b
+    | \btest\s+coverage\b
+    | \bbehaviou?ral\s+tests?\b
+    | \bautomated\s+tests?\b
+    | \bproper\s+tests?\b
+    | \btest[-\s]isolation\b
+    | \btest[-\s]environment\b
+    | \btest[-\s]only\b
+    | \bscope-tested\b
+    | \bcontinuous\s+integration\b
+    | \bregression\b
+    | \bscanner\b
+    | \bcorrection\s+wave\b
+    | \bhotfix\b
+    | \blatent\s+bug
+    | \bruntime\s+check\b
+    | \bdirect\s+scan\b
+    | \boverstat
+    | \bschema\s+rename\b
+    | \bQA\b
+    """,
+    re.VERBOSE,
+)
+
+VERSION_IN_TITLE = re.compile(r"\b(\d+\.\d+(?:\.\d+)?)\b")
+POPUP_FILE = re.compile(r"^v(\d+)_(\d+)_(\d+)\.md$")
+
+
+def _popup_files():
+    """Every shipped version popup file (change_log/v*/vX_Y_Z.md)."""
+    out = []
+    for fp in glob.glob(os.path.join(CHANGE_LOG, "v*", "v*_*_*.md")):
+        if POPUP_FILE.match(os.path.basename(fp)):
+            out.append(fp)
+    return out
+
+
+class TestChangelogRegisterVoice(unittest.TestCase):
+    """No popup may carry internal-QA / build-process register.
+
+    The FIX/SECURITY register is brief and never narrates: no test counts, no
+    scanner/test/CI vocabulary, no cause narration or audit-reply tone. A leak
+    here (e.g. "full test suite green (1601 tests)") shipped internal QA voice to
+    operators; this guard rejects it so a future entry cannot regress.
+    """
+
+    def test_scan_finds_popups(self):
+        self.assertTrue(_popup_files(), "no version popups found under change_log/v*/")
+
+    def test_no_qa_or_build_register_in_popups(self):
+        offenders = []
+        for fp in _popup_files():
+            with open(fp, encoding="utf-8") as fh:
+                text = fh.read()
+            for m in BANNED_REGISTER.finditer(text):
+                offenders.append(f"{os.path.relpath(fp, CHANGE_LOG)} <{m.group(0)!r}>")
+        self.assertEqual(
+            sorted(offenders),
+            [],
+            "internal-QA / build register in operator-facing changelog popup "
+            f"(rewrite to plain user terms): {sorted(offenders)}",
+        )
+
+
+class TestFeedCoversPopups(unittest.TestCase):
+    """Every popup version must have an entry in changelog.py `_RELEASES`.
+
+    `_RELEASES` feeds the "What's New" sidebar; it had drifted and omitted
+    shipped versions. This guard keeps the feed complete: a new (or restored)
+    popup with no matching feed title fails the build. Parsed from source so no
+    live Frappe/site is needed.
+    """
+
+    CHANGELOG_PY = os.path.join(APP_ROOT, "apex_core", "utils", "changelog.py")
+
+    def _feed_versions(self):
+        """Normalised (3-part) version set drawn from _RELEASES titles."""
+        with open(self.CHANGELOG_PY, encoding="utf-8") as fh:
+            text = fh.read()
+        versions = set()
+        for m in re.finditer(r'"title":\s*(["\'])(.*?)\1', text, re.DOTALL):
+            for v in VERSION_IN_TITLE.findall(m.group(2)):
+                parts = v.split(".")
+                if len(parts) == 2:  # "1.60" covers the series head "1.60.0"
+                    versions.add(f"{parts[0]}.{parts[1]}.0")
+                versions.add(v)
+        return versions
+
+    def test_feed_parser_finds_titles(self):
+        self.assertIn("1.62.0", self._feed_versions(), "feed title parse broke")
+
+    def test_every_popup_version_is_in_releases(self):
+        feed = self._feed_versions()
+        missing = []
+        for fp in _popup_files():
+            maj, minr, pat = POPUP_FILE.match(os.path.basename(fp)).groups()
+            ver = f"{int(maj)}.{int(minr)}.{int(pat)}"
+            if ver not in feed:
+                missing.append(f"{os.path.relpath(fp, CHANGE_LOG)} -> {ver}")
+        self.assertEqual(
+            sorted(missing),
+            [],
+            "popup versions absent from changelog.py _RELEASES feed "
+            f"(add the missing feed entries): {sorted(missing)}",
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -5,7 +5,7 @@ target_document) onto the request for traceability. Mirrors the Maintenance
 Request -> Work Order mapper pattern."""
 
 import frappe
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.tests import factories
 
 # [#5tgk0h]

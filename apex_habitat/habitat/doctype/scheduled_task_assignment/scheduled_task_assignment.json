@@ -41,7 +41,7 @@
    "label": "Active"
   }
  ],
- "modified": "2026-06-28 00:00:00.000000",
+ "modified": "2026-07-10 04:16:24.090710",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Scheduled Task Assignment",
@@ -58,7 +58,7 @@
   {
    "create": 1,
    "read": 1,
-   "role": "Housing Manager",
+   "role": "Accommodation Manager",
    "write": 1
   }
  ],

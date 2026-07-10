@@ -8,7 +8,7 @@ Covers two reported scenarios:
 """
 
 import frappe
-from apex_habitat.tests.test_utils import ApexHabitatTestCase
+from apex_habitat.tests.factories import ApexHabitatTestCase
 from apex_habitat.habitat.doctype.accommodation_building.accommodation_building import (
     generate_rooms_and_beds,
 )
