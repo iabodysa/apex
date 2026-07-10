@@ -157,3 +157,24 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         self.assertIsNotNone(res["name"])
         self.assertTrue(res["tracking_code"])
         self.assertTrue(frappe.db.exists("Resident Request", res["name"]))
+
+    def test_submission_rolls_back_with_transaction(self):
+        """The endpoint no longer issues a manual db.commit(): its insert now
+        participates in the enclosing transaction, so a rollback after the call
+        (exactly what the framework does on a later exception) undoes the row.
+        Under the old commit-in-request code the row would survive the rollback,
+        so this asserts the anti-pattern fix. [[reference-frappe-commit-in-request-antipattern]]"""
+        frappe.db.savepoint("pre_submit")
+        res = submit_resident_request(
+            location_token=None,
+            request_type="Maintenance",
+            description="rollback-safety probe",
+            website_field="",
+        )
+        name = res["name"]
+        self.assertTrue(frappe.db.exists("Resident Request", name))
+        frappe.db.rollback(save_point="pre_submit")
+        self.assertFalse(
+            frappe.db.exists("Resident Request", name),
+            "the insert must roll back with the transaction; a manual commit would defeat this",
+        )

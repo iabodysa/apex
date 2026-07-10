@@ -57,5 +57,6 @@ def submit_vehicle_incident(
         "status": "Open",
     })
     doc.insert(ignore_permissions=True)  # audit-ok — guest web-form intake, rate-limited + honeypot-guarded; draft only
-    frappe.db.commit()
+    # Request-boundary auto-commit persists this on success; a manual commit here would
+    # defeat the framework rollback if a later write is ever added. [[reference-frappe-commit-in-request-antipattern]]
     return {"name": doc.name}

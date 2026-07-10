@@ -47,5 +47,6 @@ def submit_resident_request(
         "source_channel": "QR Web Form",
     })
     doc.insert(ignore_permissions=True)  # audit-ok — guest QR web-form intake, rate-limited + honeypot-guarded
-    frappe.db.commit()
+    # Request-boundary auto-commit persists this on success; a manual commit here would
+    # defeat the framework rollback if a later write is ever added. [[reference-frappe-commit-in-request-antipattern]]
     return {"name": doc.name, "tracking_code": doc.anonymous_tracking_code}

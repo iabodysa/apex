@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 """One-command fleet data importer.
 
-Loads the CSVs produced by the local, git-ignored parser (``docs/etl_out/``)
+Loads the CSVs produced by the local, git-ignored parser (``scratch/data_dumps/etl_out/``)
 into the live Salis DocTypes, idempotently and in foreign-key order:
 
     Vehicle Category, Rental Office, Project
@@ -40,7 +40,9 @@ def _read(csv_dir, name):
 
 
 def run(csv_dir=None):
-    csv_dir = csv_dir or os.path.join(frappe.get_app_path("apex"), "..", "docs", "etl_out")
+    csv_dir = csv_dir or os.path.join(
+        frappe.get_app_path("apex"), "..", "scratch", "data_dumps", "etl_out"
+    )
     csv_dir = os.path.abspath(csv_dir)
     out = {"csv_dir": csv_dir}
 
