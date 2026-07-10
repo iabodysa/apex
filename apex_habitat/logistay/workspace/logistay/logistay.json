@@ -1,0 +1,151 @@
+{
+ "doctype": "Workspace",
+ "name": "Logistay",
+ "label": "Logistay",
+ "title": "Logistay",
+ "module": "Logistay",
+ "icon": "clock",
+ "public": 1,
+ "roles": [
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "is_standard": 1,
+ "is_default": 0,
+ "is_hidden": 0,
+ "sequence_id": 4.0,
+ "parent_page": "",
+ "content": "[{\"id\": \"logHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"logQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"TS Intake Source\", \"col\": 3}}, {\"id\": \"logQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Timesheet Exception Workbench\", \"col\": 3}}, {\"id\": \"logHdrMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"logCardMasters\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}, {\"id\": \"logHdrConfig\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Configuration</b></span>\", \"col\": 12}}, {\"id\": \"logCardConfig\", \"type\": \"card\", \"data\": {\"card_name\": \"Configuration\", \"col\": 4}}, {\"id\": \"logHdrRecords\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Records</b></span>\", \"col\": 12}}, {\"id\": \"logCardRecords\", \"type\": \"card\", \"data\": {\"card_name\": \"Records\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "TS Intake Source",
+   "link_to": "TS Intake Source",
+   "color": "Blue",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "Report",
+   "label": "Timesheet Exception Workbench",
+   "link_to": "Timesheet Exception Workbench",
+   "color": "Yellow",
+   "idx": 2
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Master Data",
+   "description": "Reference data: durable records you set up once, not daily work.",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Worker",
+   "link_type": "DocType",
+   "link_to": "Worker",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Client",
+   "link_type": "DocType",
+   "link_to": "Client",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Branch Site",
+   "link_type": "DocType",
+   "link_to": "Branch Site",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Timesheet Period",
+   "link_type": "DocType",
+   "link_to": "Timesheet Period",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Configuration",
+   "description": "Setup: mapping and format rules that drive timesheet ingestion.",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Mapping Profile",
+   "link_type": "DocType",
+   "link_to": "Mapping Profile",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Status Code Map",
+   "link_type": "DocType",
+   "link_to": "Status Code Map",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "TS Format Adapter",
+   "link_type": "DocType",
+   "link_to": "TS Format Adapter",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Records",
+   "description": "Transaction records: ingested timesheet data and its ledger.",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Timesheet Line",
+   "link_type": "DocType",
+   "link_to": "Timesheet Line",
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Timesheet Ledger",
+   "link_type": "DocType",
+   "link_to": "Timesheet Ledger",
+   "idx": 12
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Timesheet Exception Log",
+   "link_type": "DocType",
+   "link_to": "Timesheet Exception Log",
+   "idx": 13
+  }
+ ],
+ "charts": [],
+ "number_cards": [],
+ "quick_lists": [],
+ "modified": "2026-07-10 06:40:12.308301"
+}

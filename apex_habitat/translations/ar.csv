@@ -76,21 +76,15 @@ Access Identity,هوية الوصول
 Access Level,مستوى الصلاحية
 Accident,حادث
 Accommodation,السكن
-Housing Assignment,تسكين
-Bed,سرير
-Building,مبنى السكن
 Accommodation Building (Pickup),مبنى السكن (نقطة الالتقاط)
 Accommodation Building and Project are required for an Accommodation to Project Shuttle.,مبنى السكن والمشروع مطلوبان لرحلة النقل من السكن إلى المشروع.
 Accommodation Check-in,تسجيل وصول السكن
-Housing Checkout,إخلاء السكن
 Accommodation Cost Distribution,توزيع تكلفة السكن
 Accommodation Custody Handover,تسليم عهدة السكن
 Accommodation Custody Item,بند عهدة السكن
 Accommodation Custody Return Item,بند إرجاع عهدة السكن
-Floor Plan,مخطط طوابق المبنى
 Accommodation Go-Live,إطلاق تشغيل السكن
 Accommodation Goods Receipt,استلام بضائع السكن
-Lease,عقد الإيجار
 Accommodation Leases by Status,عقود السكن حسب الحالة
 Accommodation Ledger,دفتر تكاليف السكن
 Accommodation Ledger Summary,ملخص دفتر تكاليف السكن
@@ -98,12 +92,7 @@ Accommodation Manager Dashboard,لوحة معلومات مدير السكن
 Accommodation Master,بيانات السكن الأساسية
 Accommodation Material Transfer,نقل مواد السكن
 Accommodation Material Transfer Item,بند نقل مواد السكن
-Occupancy Snapshot,لقطة إشغال السكن
 Accommodation Occupancy Summary,ملخص الإشغال
-QR Location,موقع QR للسكن
-Resident Request,طلب مقيم
-Room,غرفة
-Site,موقع
 Accommodation Stock Balance,رصيد مخزون السكن
 Accommodation Stock Ledger,دفتر مخزون السكن
 Accommodation Type,نوع السكن
@@ -402,6 +391,7 @@ Audit Findings Received,تم استلام نتائج التدقيق
 Audit Reference,مرجع التدقيق
 Audit Remediation Building Scope,نطاق معالجة ملاحظات المباني
 Audit Remediation Item,بند معالجة التدقيق
+Audit Remediation Plan,خطة معالجة تدقيق العميل
 Audit Remediation Plans by Status,خطط معالجة التدقيق حسب الحالة
 Audit Remediation Status,حالة معالجة التدقيق
 August,أغسطس
@@ -709,7 +699,6 @@ Cleared and released via {0} (reason {1}; vehicle {2}).,تم الإخلاء وا
 Click a free bed to house him.,انقر على سرير شاغر لإسكانه.
 Client,العميل
 Client Audit Reference / Ticket,رقم مرجع/تذكرة تدقيق العميل
-Audit Remediation Plan,خطة معالجة تدقيق العميل
 Client Code,رمز العميل
 Client Name,اسم العميل
 Client Point of Contact,مسؤول التواصل لدى العميل
@@ -1228,6 +1217,7 @@ Driver Licenses Expiring Soon,رخص القيادة قاربت على الانت
 Driver Longitude,خط طول السائق
 Driver Operations,عمليات السائقين
 Driver Portal,بوابة السائق
+Driver Portal Theme,سمة بوابة سلس
 Driver Position Updated At,وقت آخر تحديث لموقع السائق
 Driver Push Subscription,اشتراك إشعارات السائق
 Driver Rejected,رفض السائق
@@ -1644,7 +1634,6 @@ Habitat,الإسكان
 Habitat Dashboard,لوحة معلومات هابيتات
 Habitat Hub,مركز الإسكان
 Habitat Internal / No Financial Posting,داخلي في Habitat / بدون ترحيل مالي
-Safety Incident,حادثة سلامة سكنية
 Habitat Settings,إعدادات السكن
 Half,نصف
 Hand back all issued custody items in good condition on checkout.,أعد جميع أصناف العهدة المصروفة بحالة جيدة عند تسجيل المغادرة.
@@ -1691,6 +1680,8 @@ Housed {0} in a temporary bed,تمّ إسكان {0} في سرير مؤقّت
 Housing,السكن
 Housing Allowance Deduction,خصم بدل السكن
 Housing Allowance Suspended,تعليق بدل السكن
+Housing Assignment,تسكين
+Housing Checkout,إخلاء السكن
 Housing Cleaning Audit,تدقيق نظافة السكن
 Housing Inventory,جرد السكن
 Housing Office,مكتب الإسكان
@@ -2064,7 +2055,6 @@ Maintenance Work Orders by Status,أوامر عمل الصيانة حسب الح
 Maintenance cost ledger. Maintained automatically by the system when a Maintenance Work Order is completed and not edited manually. One immutable row per procurement item.,سجل تكاليف الصيانة. يُحدَّث تلقائياً بواسطة النظام عند اكتمال أمر عمل صيانة، ولا يُحرَّر يدوياً. صف واحد غير قابل للتغيير لكل بند مشتريات.
 Maintenance: {0},الصيانة: {0}
 Manifest Not Reconciled: {{ doc.building }} ({{ doc.pending_arrival_count }} pending),بيان غير مُسوّى: {{ doc.building }} ({{ doc.pending_arrival_count }} معلّق)
-Passenger Manifest Item,راكب الكشف
 Manual,يدوي
 Manual Entry,إدخال يدوي
 Map Name,اسم الخريطة
@@ -2264,7 +2254,6 @@ No vehicles match the current filters.,لا مركبات تطابق المرشّ
 No worker matched.,لا يوجد عامل مطابق.
 No worker matches {0}.,لا يوجد عامل مطابق لـ {0}.
 No worker or article matched: {0},لا يوجد عامل أو عهدة مطابقة: {0}
-Operational Depreciation Snapshot,لقطة إهلاك غير مالي
 None.,لا شيء.
 "Normalized plate (spaces removed, uppercased). Set automatically.",لوحة منسَّقة (دون مسافات وبأحرف كبيرة). تُضبط تلقائياً.
 Not Cleaned,لم يُنظَّف
@@ -2308,6 +2297,7 @@ Occupancy,الإشغال
 Occupancy %,نسبة الإشغال (%)
 Occupancy % Trend,اتجاه نسبة الإشغال
 Occupancy Percent Trend,اتجاه نسبة الإشغال
+Occupancy Snapshot,لقطة إشغال السكن
 Occupancy Status,حالة الإشغال
 Occupancy Trend,اتجاه الإشغال
 Occupied,مشغول
@@ -2424,6 +2414,7 @@ Operational,تشغيلي
 Operational Alert Windows,نوافذ التنبيه التشغيلي
 Operational Depreciation Aging,أعمار الإهلاك التشغيلي
 Operational Depreciation Policy,سياسة الإهلاك التشغيلية
+Operational Depreciation Snapshot,لقطة إهلاك غير مالي
 Operational Markup,هامش تشغيلي
 Operational Memo,مذكرة تشغيلية
 Operational Notifications,الإشعارات التشغيلية
@@ -2517,6 +2508,7 @@ Pass with Observations,اجتياز مع وجود ملاحظات
 Passenger Count,عدد الركاب
 Passenger Count Operations Threshold,حد عمليات عدد الركاب
 Passenger Manifest,كشف الركاب
+Passenger Manifest Item,راكب الكشف
 Passenger Manifests Today,كشوف الركاب اليوم
 Passenger Name,اسم الراكب
 Passenger counts above this number require Operations-tier authority.,أعداد الركاب التي تتجاوز هذا الرقم تتطلب صلاحية مستوى العمليات.
@@ -2734,6 +2726,7 @@ Purpose,الغرض
 Purpose / Notes,الغرض / ملاحظات
 Purpose is too long. Please keep it under 2000 characters.,الغرض طويل جداً. يرجى إبقاؤه أقل من 2000 حرف.
 QR,رمز QR
+QR Location,موقع QR للسكن
 QR Web Form,نموذج ويب QR
 QR created for {0} worker(s),أُنشئ رمز QR لـ {0} عامل
 QR issued,صدر رمز QR
@@ -2829,6 +2822,7 @@ Record returned articles against their source Custody Issue.,سجّل الموا
 Record the passengers who boarded the dispatched trip to complete the movement lifecycle.,سجّل الركاب الذين صعدوا الرحلة المُشغَّلة لإتمام دورة حياة الحركة.
 "Recorded physical condition of the item at the moment it is issued, providing the baseline used to assess wear or damage when it is later returned.",الحالة المادية المسجّلة للصنف لحظة صرفه، توفّر الأساس المرجعي المستخدم لتقييم التآكل أو التلف عند إعادته لاحقًا.
 Recording,يُسجِّل
+Records,السجلات
 Records a vehicle stop event with reason and ownership context.,يسجّل حدث إيقاف مركبة مع السبب وسياق الملكية.
 Records damage on returned custody articles. A salary deduction is applied only when damage deduction is enabled in Habitat Settings.,يسجّل التلف في أصناف العهدة المرتجعة. ولا يُطبّق خصم من الراتب إلا عند تفعيل خصم التلف في إعدادات هابيتات.
 Records execution of a single safety task on a specific date for a specific building.,يسجّل تنفيذ مهمة سلامة واحدة في تاريخ محدد لمبنى محدد.
@@ -3000,6 +2994,7 @@ Requires Procurement,يتطلب شراء
 Resident,المقيم
 Resident & Building,المقيم والمبنى
 Resident / worker is required.,المقيم / العامل مطلوب.
+Resident Request,طلب مقيم
 Resident Request Resolved: {{ doc.name }},تمت معالجة طلب الساكن: {{ doc.name }}
 Resident Supervisor Dashboard,لوحة معلومات مشرف الساكنين
 Resident Support Services,خدمات دعم المقيمين
@@ -3156,6 +3151,7 @@ Safety Finding Ledger,سجل ملاحظات السلامة
 Safety Finding Ledger rows are immutable and cannot be edited.,صفوف سجل ملاحظات السلامة غير قابلة للتغيير ولا يمكن تعديلها.
 Safety Finding Ledger rows cannot be deleted. Cancel the Safety Round to post a reversal instead.,لا يمكن حذف صفوف سجل ملاحظات السلامة. ألغِ جولة السلامة لترحيل قيد عكسي بدلاً من ذلك.
 Safety Findings,ملاحظات السلامة
+Safety Incident,حادثة سلامة سكنية
 Safety Inspection Report,تقرير فحص السلامة
 Safety Inspections,تفتيشات السلامة
 Safety Inspections Over Time,تفتيشات السلامة عبر الزمن
@@ -3210,7 +3206,6 @@ Salis Fuel Setup,إعداد وقود سلس
 Salis Go-Live,إطلاق تشغيل سلس
 Salis Payment Register,سجل المدفوعات
 Salis Payment Request,طلب دفع
-Driver Portal Theme,سمة بوابة سلس
 Salis Rentals Costs Settlements Pending Approval,تسويات بانتظار الاعتماد
 Salis Representatives Fleet Vehicles Stopped,مركبات موقوفة
 Salis Settings,إعدادات سلس
