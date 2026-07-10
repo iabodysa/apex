@@ -18,7 +18,7 @@ portals.
 | `makeCache.js` | Shared offline/data cache factory. |
 | `components/` | Shared presentational `.vue` components imported via `@shared/components/*` (e.g. `Brand.vue` — the AFMCO inline-SVG emblem/supergraphic, self-contained, token-driven). |
 | `tokens.css` | Shared design tokens (CSS custom properties). |
-| `pins.json` | Canonical `overrides` (dompurify, ws) that every portal `package.json` must mirror. The `portal-bundles` CI job fails on drift. |
+| `pins.json` | Canonical version pins every portal `package.json` must mirror: `overrides` (dompurify, ws — security), `deps` (vue, vue-router, frappe-ui, vite, @vitejs/plugin-vue — shared framework versions required in all five), and `optionalDeps` (socket.io-client — pinned only where a portal declares it). The `portal-bundles` CI (`override-pins` + `dep-pins`) fails on drift. |
 
 Import from a portal with the `@shared` alias, e.g. `import { call } from "@shared/call.js"`.
 `frontend_shared/` has no `node_modules`; bare imports (`vue`, `frappe-ui`) resolve
@@ -68,5 +68,7 @@ helper modules at the `src/` root.
     commit the bundle after any portal `src/` or `frontend_shared/` change.
   - `override-pins` — fails if any portal's `package.json` `overrides` drift from
     `pins.json`.
+  - `dep-pins` — fails if any portal is missing a shared framework dep or declares
+    a version different from `pins.json` `.deps` (or `.optionalDeps` where present).
 - `.github/workflows/test.yml` `spa-lockfiles` — `npm ci` per portal keeps the
   frozen lockfiles honest.

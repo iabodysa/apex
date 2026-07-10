@@ -1,0 +1,75 @@
+name: Portal Tests
+
+on:
+  push:
+    branches: [apex]
+  pull_request:
+    branches: [apex]
+  # The bench-dependent smoke job is manual (it needs a running site — see below).
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Base URL of a running site with the portals built + served"
+        required: true
+
+jobs:
+  shared-components:
+    # Vitest for the shared portal components (@shared/components/*): IconBase, the
+    # deduped LangToggle / BuildingPicker, and the icons.js geometry registry
+    # invariants. Runs fully in CI (jsdom, no bench) so a change to a shared
+    # component that would break a consuming portal fails here. The frontend_shared
+    # dir is a dev-only test harness — it is NOT a portal, so `npm install` here does
+    # not touch the committed portal bundles or the bundle-guard / spa-lockfiles jobs.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install shared-component test deps
+        working-directory: frontend/frontend_shared
+        run: npm install --no-audit --no-fund
+
+      - name: Run shared-component vitest
+        working-directory: frontend/frontend_shared
+        run: npm test
+
+  portal-smoke:
+    # Smoke-mount e2e (P-206): opens each portal shell, asserts the SPA mounts
+    # (#app populated) with zero console/page errors. Mirrors the bundle-guard
+    # matrix (one leg per portal). It needs a RUNNING site with the portals built +
+    # served + a session credential, which PR CI here does not provide — so it runs
+    # only on manual dispatch (or a self-hosted/preview runner the integrator wires),
+    # against the `base_url` input. Locally the integrator runs the same spec on the
+    # bench: `APEX_PORTAL=<p> <bench>/env/bin/python e2e/portal_smoke_spec.py`.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        portal: [fleet, driver, masar, housing, safety]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Smoke-mount ${{ matrix.portal }}
+        env:
+          APEX_PORTAL: ${{ matrix.portal }}
+          BASE_URL: ${{ github.event.inputs.base_url }}
+          # SCREENSHOT_USER / SCREENSHOT_PW come from repo secrets on the runner
+          # (desk_auth.py reads them); set them in the environment for a real run.
+          SCREENSHOT_USER: ${{ secrets.SCREENSHOT_USER }}
+          SCREENSHOT_PW: ${{ secrets.SCREENSHOT_PW }}
+        run: python e2e/portal_smoke_spec.py

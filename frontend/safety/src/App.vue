@@ -159,8 +159,8 @@
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "./components/Icon.vue";
-import LangToggle from "./components/LangToggle.vue";
-import BuildingPicker from "./components/BuildingPicker.vue";
+import LangToggle from "@shared/components/LangToggle.vue";
+import BuildingPicker from "@shared/components/BuildingPicker.vue";
 import CadenceSection from "./components/CadenceSection.vue";
 import { useI18n, resourceErrorMessage } from "./i18n";
 import { connectSafetyRealtime } from "./realtime.js";

@@ -1,0 +1,16 @@
+{
+  "name": "frontend_shared",
+  "private": true,
+  "type": "module",
+  "description": "Dev-only test harness for the shared portal components/runtime. NOT a portal: the five *_portal builds import these source files via the @shared alias and never install this package. Only `npm install && npm test` HERE (or the portal-tests CI job) uses these devDependencies; the committed portal bundles and bundle-guard are unaffected.",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "@vue/test-utils": "^2.4.0",
+    "jsdom": "^24.0.0",
+    "vitest": "^1.6.0",
+    "vue": "^3.4.0"
+  }
+}

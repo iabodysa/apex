@@ -84,3 +84,42 @@ jobs:
           done
           [ "$fail" -eq 0 ] && echo "all portal overrides match the canonical pins"
           exit "$fail"
+
+  dep-pins:
+    # Single-source guard for the shared framework dep versions (vue, vue-router,
+    # frappe-ui, vite, @vitejs/plugin-vue). The canonical block lives in
+    # frontend/frontend_shared/pins.json (.deps); this job fails if any of the
+    # five portals is missing a required dep or declares a different spec — the
+    # unguarded drift surface that override-pins (which only pins security
+    # overrides) never covered. optionalDeps (.optionalDeps, e.g.
+    # socket.io-client) are pinned only where a portal already declares them.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Every portal's shared deps match frontend_shared/pins.json
+        run: |
+          set -uo pipefail
+          pins=frontend/frontend_shared/pins.json
+          fail=0
+          for p in fleet worker driver safety housing; do
+            pkg="frontend/${p}/package.json"
+            # Required deps: must exist (in dependencies or devDependencies) and match.
+            while IFS=$'\t' read -r dep ver; do
+              got=$(jq -r --arg d "$dep" '(.dependencies[$d] // .devDependencies[$d] // "MISSING")' "$pkg")
+              if [ "$got" != "$ver" ]; then
+                echo "::error::${pkg}: shared dep '${dep}' is '${got}', canonical (pins.json .deps) is '${ver}'"
+                fail=1
+              fi
+            done < <(jq -r '.deps | to_entries[] | "\(.key)\t\(.value)"' "$pins")
+            # Optional deps: checked only when the portal declares them.
+            while IFS=$'\t' read -r dep ver; do
+              got=$(jq -r --arg d "$dep" '(.dependencies[$d] // .devDependencies[$d] // "ABSENT")' "$pkg")
+              if [ "$got" != "ABSENT" ] && [ "$got" != "$ver" ]; then
+                echo "::error::${pkg}: optional dep '${dep}' is '${got}', canonical (pins.json .optionalDeps) is '${ver}'"
+                fail=1
+              fi
+            done < <(jq -r '(.optionalDeps // {}) | to_entries[] | "\(.key)\t\(.value)"' "$pins")
+          done
+          [ "$fail" -eq 0 ] && echo "all portal shared deps match the canonical pins"
+          exit "$fail"

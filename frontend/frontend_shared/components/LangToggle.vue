@@ -1,6 +1,13 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
 <!-- Language selector: EN | ع. Flips the active portal language (and, via App.vue,
-     the document direction). Token-driven segmented control; works on any theme. -->
+     the document direction). Token-driven segmented control; works on any theme.
+
+     Shared by the driver, housing and safety portals via
+     @shared/components/LangToggle.vue. `useI18n` resolves through the `@` alias to
+     whichever portal bundles this file, so the toggle carries no portal-specific
+     import while each portal keeps its own strings. The fleet portal (its own
+     "Fleet OS" token vocabulary) and the worker portal (a >2-language <select>)
+     keep their own local LangToggle — their shapes genuinely differ. -->
 <template>
   <div class="lang-toggle" :class="{ 'lang-toggle-header': variant === 'header' }" role="group" :aria-label="t('lang.label')">
     <button
@@ -27,7 +34,7 @@
 </template>
 
 <script setup>
-import { useI18n } from "../i18n";
+import { useI18n } from "@/i18n";
 
 const { t, lang, setLang } = useI18n();
 
@@ -47,8 +54,8 @@ defineProps({
   background: color-mix(in srgb, var(--c-ink) 8%, transparent);
 }
 .lang-opt {
-  min-width: 34px;
-  min-height: 28px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 4px 10px;
   border-radius: var(--radius-pill);
   font-size: var(--fs-sm);
@@ -66,8 +73,6 @@ defineProps({
   background: var(--c-primary);
   color: var(--c-primary-ink);
 }
-
-/* Header variant: sits on the dark header bar — use header tokens so it reads. */
 .lang-toggle-header {
   background: color-mix(in srgb, var(--c-header-ink) 14%, transparent);
 }

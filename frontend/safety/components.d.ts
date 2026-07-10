@@ -8,10 +8,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    BuildingPicker: typeof import('./src/components/BuildingPicker.vue')['default']
     CadenceSection: typeof import('./src/components/CadenceSection.vue')['default']
     Icon: typeof import('./src/components/Icon.vue')['default']
-    LangToggle: typeof import('./src/components/LangToggle.vue')['default']
     ProgressRing: typeof import('./src/components/ProgressRing.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

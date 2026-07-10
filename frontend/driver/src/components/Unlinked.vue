@@ -81,7 +81,7 @@
 <script setup>
 import Icon from "./Icon.vue";
 import Brand from "@shared/components/Brand.vue";
-import LangToggle from "./LangToggle.vue";
+import LangToggle from "@shared/components/LangToggle.vue";
 import { useI18n } from "../i18n";
 
 const { t } = useI18n();

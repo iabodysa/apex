@@ -1,8 +1,14 @@
 <!-- Copyright (c) 2026, AFMCO and contributors -->
-<!-- Building resolver/selector. Loads the buildings the signed-in user may read
-     (standard frappe.client.get_list, role- and permission-scoped on the server)
-     and lets them pick one. If the account is scoped to a single building it is
-     auto-selected and confirmed, so the common case is one tap to start. -->
+<!-- Building resolver/selector shared by the housing and safety portals. Loads the
+     buildings the signed-in user may read (standard frappe.client.get_list, role-
+     and permission-scoped on the server) and lets them pick one. If the account is
+     scoped to a single building it is auto-selected, so the common case is one tap
+     to start.
+
+     Shared via @shared/components/BuildingPicker.vue. i18n (`useI18n`,
+     `resourceErrorMessage`) and the portal-local `Icon` resolve through the `@`
+     alias to whichever portal bundles this file, so the component carries no
+     portal-specific wiring while each portal keeps its own strings + icon set. -->
 <template>
   <div class="picker">
     <div class="picker-hero">
@@ -44,8 +50,8 @@
 <script setup>
 import { computed, ref } from "vue";
 import { createListResource } from "frappe-ui";
-import Icon from "./Icon.vue";
-import { useI18n, resourceErrorMessage } from "../i18n";
+import Icon from "@/components/Icon.vue";
+import { useI18n, resourceErrorMessage } from "@/i18n";
 
 const emit = defineEmits(["select"]);
 const { t } = useI18n();
@@ -54,8 +60,8 @@ const error = ref("");
 const q = ref("");
 
 // frappe-ui list resource over the same role-/permission-scoped get_list the
-// shared call() helper used — returns the identical { name, building_name } rows,
-// with CSRF handled by frappeRequest (configured in main.js).
+// portals used — returns the identical { name, building_name } rows, with CSRF
+// handled by frappeRequest (configured in main.js).
 const buildingsRes = createListResource({
   doctype: "Building",
   fields: ["name", "building_name"],

@@ -227,7 +227,7 @@
 import { computed, onMounted } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
-import LangToggle from "../components/LangToggle.vue";
+import LangToggle from "@shared/components/LangToggle.vue";
 import LoadingState from "../components/LoadingState.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorState from "../components/ErrorState.vue";
