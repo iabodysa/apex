@@ -55,7 +55,7 @@ INTAKE_DOCTYPE = "TS Intake Source"
 LINE_DOCTYPE = "Timesheet Line"
 BATCH_SIZE = 200
 
-# Canonical Timesheet Line fields the field-map may target, with their coercion kind.
+# [#opep4j]
 _CANONICAL_FIELDS = {
     "ts_role_package": "data",
     "ts_payable_days": "float",
@@ -104,9 +104,7 @@ def log_exception(
     return doc.name
 
 
-# ---------------------------------------------------------------------------
-# Scheduler entry point
-# ---------------------------------------------------------------------------
+# [#2sd6vh]
 def normalize_pending_intakes() -> int:
     """Parse + merge + gap-check every pending TS Intake Source into canonical
     Timesheet Lines. Returns the number of sources processed. Safe to re-run:
@@ -116,12 +114,7 @@ def normalize_pending_intakes() -> int:
     )
     processed = 0
     for name in sources:
-        # Per-record failure isolation: a single bad intake is rolled back,
-        # logged against its own record, and marked Failed so the rest of the
-        # batch still runs. Narrowed from a bare ``except`` to the realistic
-        # per-record data/validation failures — a genuine code or infrastructure
-        # bug (AttributeError, DB OperationalError, ...) now propagates to the
-        # scheduler's own job-level logging instead of being silently skipped.
+        # [#8hoc04]
         try:
             _process_source(name)
         except (frappe.ValidationError, frappe.DoesNotExistError, ValueError, TypeError, KeyError):
@@ -148,9 +141,7 @@ def _fail_source(name: str) -> None:
     frappe.db.commit()
 
 
-# ---------------------------------------------------------------------------
-# Per-source processing
-# ---------------------------------------------------------------------------
+# [#14yxza]
 def _process_source(name: str) -> None:
     src = frappe.get_doc(INTAKE_DOCTYPE, name)
     ctx = {"rows_emitted": 0, "exceptions": 0}
@@ -175,7 +166,7 @@ def _process_source(name: str) -> None:
         _finish(src, "Skipped", ctx, "Routed to NEEDS-MAPPING: no profile matched.")
         return
 
-    # Year/month sanity: payload's declared month must match the period.
+    # [#aed3oj]
     payload_month = (payload.get("period_month") or "").strip()
     if payload_month and payload_month != (period.month or ""):
         _emit(
@@ -271,7 +262,7 @@ def _build_status_map(profile) -> dict:
         fields=["name", "ts_adapter"],
     )
     out: dict = {}
-    # Global (no adapter) first, then adapter-specific overrides.
+    # [#bam0yu]
     ordered = [m for m in maps if not m.ts_adapter] + [
         m for m in maps if adapter and m.ts_adapter == adapter
     ]
@@ -330,7 +321,7 @@ def _map_tokens(row, field_map) -> dict:
     for token, value in (row.get("tokens") or {}).items():
         mapped = field_map.get((token or "").strip().lower())
         if not mapped:
-            continue  # unmapped scalar columns are noise, not an exception
+            continue  # [#kz2ugz]
         canonical_field, transform = mapped
         out[canonical_field] = _coerce(canonical_field, _apply_transform(value, transform))
     return out
@@ -424,9 +415,7 @@ def _gate_completeness(src, period, line, required, ctx) -> None:
     line.ts_completeness = "INCOMPLETE" if blocked else "COMPLETE"
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+# [#ag25ve]
 def _emit(ctx, *args, **kwargs) -> None:
     log_exception(*args, **kwargs)
     ctx["exceptions"] += 1

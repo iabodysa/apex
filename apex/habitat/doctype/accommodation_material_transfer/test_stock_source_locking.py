@@ -102,11 +102,11 @@ class TestStockSourceLocking(ApexHabitatTestCase):
         u.add_roles("Accommodation Manager")
         return email
 
-    # validation half: the rejection that the lock makes race-safe
+    # [#8m0657]
     def test_transfer_overdraw_is_rejected_and_balance_never_negative(self):
         self._seed_source(5)
         with self.assertRaises(frappe.ValidationError):
-            self._transfer(8)  # > 5 available
+            self._transfer(8)  # [#b7nqiv]
         self.assertEqual(get_store_balance("Custody Article", self.article, self.source), 5.0)
         self.assertGreaterEqual(
             get_store_balance("Custody Article", self.article, self.source), 0.0,
@@ -115,7 +115,7 @@ class TestStockSourceLocking(ApexHabitatTestCase):
     def test_handover_overdraw_is_rejected_and_balance_never_negative(self):
         self._seed_source(3)
         with self.assertRaises(frappe.ValidationError):
-            self._handover(10)  # > 3 available
+            self._handover(10)  # [#ctsazk]
         self.assertEqual(get_store_balance("Custody Article", self.article, self.source), 3.0)
         self.assertGreaterEqual(
             get_store_balance("Custody Article", self.article, self.source), 0.0)
@@ -131,7 +131,7 @@ class TestStockSourceLocking(ApexHabitatTestCase):
             self._transfer(4)
         self.assertEqual(get_store_balance("Custody Article", self.article, self.source), 1.0)
 
-    # concurrency half: literal two-connection row-lock contention
+    # [#odcuk5]
     @timeout(15, "The source-balance for_update lock did not contend across connections")
     def test_concurrent_balance_lock_blocks_second_drain(self):
         """Two live transactions cannot both hold the source store's balance rows.
@@ -145,7 +145,7 @@ class TestStockSourceLocking(ApexHabitatTestCase):
         check (and overdraw) while the first holds the rows.
         """
         self._seed_source(5)
-        frappe.db.commit()  # the seeded rows must be visible to the second connection
+        frappe.db.commit()  # [#c0ksy0]
         self.addCleanup(frappe.db.rollback)
 
         with self.primary_connection():
@@ -155,7 +155,7 @@ class TestStockSourceLocking(ApexHabitatTestCase):
             with self.secondary_connection(), self.assertRaises(frappe.QueryTimeoutError):
                 _locked_balance(self.article, self.source, wait=False)
 
-    # structural guard: lock-before-check, no site needed
+    # [#9p5fh3]
     def test_both_controllers_lock_before_reading_balance(self):
         for ctl, fn in ((_TRANSFER_CTL, "_assert_source_availability"),
                         (_HANDOVER_CTL, "_assert_source_availability")):
@@ -212,8 +212,7 @@ if __name__ == "__main__":
 
 
 def tearDownModule():
-    # P-148: drop this module's committed Accommodation Buildings so the suite's
-    # post-run building count returns to the pre-suite baseline (see factories.py).
+    # [#2esm3x]
     from apex.tests import factories
 
     factories.purge_test_buildings()

@@ -46,7 +46,7 @@ MAX_OTP_ATTEMPTS = 3
 LOCKOUT_MINUTES = 5
 ELEVATED_ROLE = "Accommodation Manager"
 
-# The role that owns each exit. System Manager is always allowed (admin override).
+# [#b7a6f6]
 EXIT_ROLES = {
     1: "Resident Supervisor",
     2: "Accommodation Manager",
@@ -90,7 +90,7 @@ def _pass_exit(delivery: str, n: int):
     if doc.get(flag):
         frappe.throw(_("Exit {0} has already been cleared.").format(n))
 
-    # Exits must be cleared in order: every prior exit must already be cleared.
+    # [#4x07wr]
     for prior in range(1, n):
         if not doc.get(f"exit{prior}_{_exit_slug(prior)}_cleared"):
             frappe.throw(
@@ -108,7 +108,7 @@ def _pass_exit(delivery: str, n: int):
         }
     )
 
-    # Clearing the third exit opens the transfer lock.
+    # [#o4ynfb]
     if n == 3:
         doc.db_set("status", "Released")
         code = generate_otp(doc)
@@ -164,11 +164,7 @@ def confirm_receipt(delivery: str, code: str):
             frappe.PermissionError,
         )
 
-    # Serialize concurrent confirms on this delivery: FOR UPDATE makes a second
-    # caller block until the first commits, so two correct codes move the asset
-    # only once and two wrong guesses can't both read the same attempt count and
-    # each write back 1 (bypassing the lockout). Status/code reads below are
-    # RE-READ under this lock, not the stale pre-lock snapshot.
+    # [#dvauwo]
     locked = frappe.db.get_value(
         DELIVERY_DOCTYPE,
         doc.name,
@@ -193,7 +189,7 @@ def confirm_receipt(delivery: str, code: str):
     if locked.otp_hash and hmac.compare_digest(hash_otp(code or "", doc.name), locked.otp_hash):
         return _move_and_deliver(doc)
 
-    # Mismatch: count the strike, lock on the third, reveal nothing.
+    # [#6sybil]
     attempts = (locked.otp_attempts or 0) + 1
     if attempts >= MAX_OTP_ATTEMPTS:
         doc.db_set(

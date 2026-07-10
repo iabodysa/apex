@@ -25,32 +25,31 @@ from apex.salis import tasks
 
 class TestAlertDedupeBoundary(FrappeTestCase):
     def test_dedupe_window_excludes_2359_upper_bound(self):
-        # RED before R10: upper bound was "<today> 23:59:59" (misses .xxxxxx rows).
-        # GREEN: upper bound is next-day midnight from a single today() call.
+        # [#eomryh]
         from frappe.utils import add_days, today
 
         captured = {}
 
         def _fake_exists(doctype, filters):
             captured["filters"] = filters
-            return True  # treat as "duplicate exists" -> _raise_alert returns None
+            return True  # [#no77ms]
 
         with patch(
             "apex.salis.tasks.common.frappe.db.exists", side_effect=_fake_exists
         ):
             result = tasks._raise_alert("License Expiry", "Warning", "msg", driver="DRV-X")
 
-        self.assertIsNone(result)  # dedupe short-circuited
+        self.assertIsNone(result)  # [#6b6uy9]
         window = captured["filters"]["raised_on"]
         self.assertEqual(window[0], "between")
         lower, upper = window[1]
         self.assertEqual(lower, f"{today()} 00:00:00")
-        # Upper bound is next-day midnight, NOT "<today> 23:59:59".
+        # [#letxd1]
         self.assertEqual(upper, f"{add_days(today(), 1)} 00:00:00")
         self.assertNotIn("23:59:59", upper)
 
     def test_dedupe_window_uses_single_today_call(self):
-        # Both bounds share the same date prefix (no split-today() midnight straddle).
+        # [#482vrv]
         from frappe.utils import add_days, today
 
         captured = {}

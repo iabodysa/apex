@@ -23,7 +23,7 @@ import frappe
 
 LOG_DOCTYPE = "Notification Log"
 
-# Notification Log.subject is a 140-char field; clip so a long subject never throws.
+# [#f5xz9g]
 _SUBJECT_MAX = 140
 
 

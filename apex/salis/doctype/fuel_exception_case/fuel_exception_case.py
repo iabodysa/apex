@@ -53,7 +53,7 @@ class FuelExceptionCase(Document):
 
 	def validate(self):
 		self._default_reporter()
-		# A recovered amount is money clawed back — it can never be negative.
+		# [#97d5be]
 		if flt(self.amount_recovered) < 0:
 			frappe.throw(_("Amount recovered cannot be negative."))
 		if self.status and self.status not in VALID_STATUSES:

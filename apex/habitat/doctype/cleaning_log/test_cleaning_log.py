@@ -92,7 +92,7 @@ class TestCleaningLog(FrappeTestCase):
         doc.insert(ignore_permissions=True, ignore_links=True)
         doc.submit()
         self.assertEqual(doc.docstatus, 1)
-        # captured_at is server-stamped on the photo rows, never client-supplied.
+        # [#ojdw7n]
         photo_rows = [r for r in doc.area_photos if r.photo]
         self.assertTrue(all(r.captured_at for r in photo_rows))
         doc.cancel()

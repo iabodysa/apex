@@ -18,9 +18,7 @@ from frappe.exceptions import PermissionError as FrappePermissionError
 class TestTripStartLogOwnership(unittest.TestCase):
     """P-036: a Salis Driver must not write another driver's Trip Start Log."""
 
-    # ------------------------------------------------------------------
-    # helpers
-    # ------------------------------------------------------------------
+    # [#6p89j9]
 
     @classmethod
     def _make_user(cls, email: str, first_name: str) -> str:
@@ -56,9 +54,7 @@ class TestTripStartLogOwnership(unittest.TestCase):
         driver.insert(ignore_permissions=True)
         return driver.name
 
-    # ------------------------------------------------------------------
-    # set up / tear down
-    # ------------------------------------------------------------------
+    # [#sqvjdx]
 
     @classmethod
     def setUpClass(cls):
@@ -73,15 +69,12 @@ class TestTripStartLogOwnership(unittest.TestCase):
         cls.driver_a = cls._make_driver(cls.user_a, "Test Driver A")
         cls.driver_b = cls._make_driver(cls.user_b, "Test Driver B")
 
-    # ------------------------------------------------------------------
-    # tests
-    # ------------------------------------------------------------------
+    # [#jjplru]
 
     def _make_tsl_doc(self, driver_name: str) -> frappe.model.document.Document:
         """Return an *unsaved* TripStartLog stub with the given driver."""
         doc = frappe.new_doc("Trip Start Log")
-        # Bypass the mandatory dispatch_trip link for the unit test: we only
-        # need the driver field populated to exercise _check_driver_ownership.
+        # [#oib4l6]
         doc.driver = driver_name
         doc.flags.ignore_mandatory = True
         doc.flags.ignore_links = True
@@ -98,23 +91,22 @@ class TestTripStartLogOwnership(unittest.TestCase):
         """Driver-A saving a TSL whose driver field is Driver-A → no error."""
         frappe.set_user(self.user_a)
         doc = self._make_tsl_doc(self.driver_a)
-        # Must not raise.
+        # [#6cz98k]
         doc._check_driver_ownership()
 
     def test_administrator_is_unrestricted(self):
         """Administrator is never blocked regardless of the driver field."""
         frappe.set_user("Administrator")
         doc = self._make_tsl_doc(self.driver_b)
-        # Must not raise.
+        # [#6cz98k]
         doc._check_driver_ownership()
 
     def test_non_driver_user_is_unrestricted(self):
         """A user with no Salis Driver record is not blocked."""
-        # Use Administrator's session but pretend to be a user that has no
-        # Salis Driver record (Administrator itself has no driver record).
+        # [#fg573a]
         frappe.set_user("Administrator")
         doc = self._make_tsl_doc(self.driver_b)
-        # Temporarily point session user to a plain user who has no driver.
+        # [#2rwxoz]
         original = frappe.session.user
         frappe.session.user = "Guest"
         try:
@@ -122,9 +114,7 @@ class TestTripStartLogOwnership(unittest.TestCase):
         finally:
             frappe.session.user = original
 
-    # ------------------------------------------------------------------
-    # tear down — reset to Administrator so other tests are not affected
-    # ------------------------------------------------------------------
+    # [#su5hkf]
 
     def tearDown(self):
         frappe.set_user("Administrator")
@@ -159,11 +149,11 @@ class TestTripStartLogBoardingDedup(unittest.TestCase):
         doc = self._make_log(
             [{"worker": "EMP-DEDUP-1"}, {"worker": "EMP-DEDUP-2"}]
         )
-        # Must not raise.
+        # [#6cz98k]
         doc._validate_boarding_rows()
 
     def test_duplicate_unregistered_worker_throws(self):
-        # Case-insensitive: a casing variant must not slip a second boarding past.
+        # [#8wklf1]
         doc = self._make_log(
             [
                 {"is_unregistered": 1, "contractor_id": "C-99"},
@@ -185,7 +175,7 @@ class TestTripStartLogTripContext(unittest.TestCase):
         return doc
 
     def test_single_db_call_populates_both_fields(self):
-        doc = self._make_log(dispatch_trip="DT-001")  # both context fields empty
+        doc = self._make_log(dispatch_trip="DT-001")  # [#kdm0em]
         captured = {}
 
         def _fake_get_value(doctype, name, fieldname, **kwargs):
@@ -200,12 +190,12 @@ class TestTripStartLogTripContext(unittest.TestCase):
         ) as mocked:
             doc._resolve_trip_context()
 
-        # Exactly one round-trip to Dispatch Trip, asking for both columns at once.
+        # [#7sx1q1]
         self.assertEqual(mocked.call_count, 1)
         self.assertEqual(captured["doctype"], "Dispatch Trip")
         self.assertEqual(captured["fieldname"], ["transport_request", "route_plan"])
         self.assertTrue(captured["as_dict"])
-        # Both fields backfilled from that single row.
+        # [#7mftzs]
         self.assertEqual(doc.transport_request, "TR-7")
         self.assertEqual(doc.route_plan, "RP-3")
 

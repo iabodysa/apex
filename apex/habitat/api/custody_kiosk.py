@@ -169,7 +169,7 @@ def _resolve_worker_scan(code: str, party_type: str | None) -> dict | None:
         if not frappe.has_permission(pt, "read"):
             continue
         if frappe.db.exists(pt, code):
-            # get_title_field always resolves (falls back to name).
+            # [#34wx4m]
             title_field = frappe.get_meta(pt).get_title_field()
             party_name = frappe.db.get_value(pt, code, title_field)
             return {
@@ -292,7 +292,7 @@ def issue_cart(
     frappe.has_permission("Custody Issue", "create", throw=True)
     frappe.has_permission("Custody Issue", "submit", throw=True)
 
-    # Legacy callers pass only `employee`; treat it as an Employee party.
+    # [#dzclax]
     if not party and employee:
         party_type, party = PARTY_EMPLOYEE, employee
     party_type, party = _normalize_party(party_type, party)
@@ -375,11 +375,7 @@ def _open_party_custody(party_type: str, party: str) -> list[dict]:
         "status": ["in", _OPEN_ISSUE_STATUSES],
     }
 
-    # [#wave-b2] get_all forces ignore_permissions, bypassing the building row-scoping
-    # Custody Issue gets via permission_query_conditions; confine the open issues to
-    # the caller's buildings so a scoped supervisor never sees custody booked against
-    # another estate. Oversight roles (HOUSING_UNSCOPED_ROLES) stay unrestricted; a
-    # scoped user with no allowed building gets nothing.
+    # [#hiy523]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         if not allowed:

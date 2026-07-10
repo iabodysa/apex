@@ -157,13 +157,7 @@ def driver_check_in(photo=None):
 	driver = _resolve_driver()
 	doc = _today_attendance(driver)
 	doc.check_in = frappe.utils.nowtime()
-	# [#t537co] Check-in opens the shift; it must NEVER stamp check-out. Frappe core
-	# fills EVERY Time field with nowtime() on a brand-new doc (create_new.py
-	# set_dynamic_default_values, NOT gated on a field default), and insert()'s
-	# _set_defaults() copies that phantom onto our row via update_if_missing — so a
-	# bare check-in would persist check_out == check_in (an instant zero-length
-	# "full day"). Excluding check_out/worked_hours from update_if_missing keeps the
-	# phantom out; check-out is a separate, later action.
+	# [#9ywqrd]
 	doc.check_out = None
 	doc.worked_hours = 0
 	for _field in ("check_out", "worked_hours"):
@@ -193,18 +187,12 @@ def driver_check_out(photo=None):
 	driver = _resolve_driver()
 	doc = _today_attendance(driver)
 	now = frappe.utils.nowtime()
-	# [#t537zero] Refuse a zero-length (or negative) day: a check-out at or before the
-	# existing check-in would record check_out == check_in (worked_hours 0). Surface a
-	# friendly message instead of silently stamping an instant "full day".
+	# [#p0le20]
 	if doc.check_in and not _is_after(doc.attendance_date, doc.check_in, now):
 		frappe.throw(
 			_("You can't check out at or before your check-in time. Try again in a moment.")
 		)
-	# [#t537co] If the driver checks out without ever checking in, the get-or-created
-	# row has no check-in; keep it that way. Frappe core phantom-fills every Time
-	# field with nowtime() at insert (see driver_check_in), which would otherwise
-	# fabricate a check_in == check_out (instant zero-length day). Record presence as
-	# a check-out only.
+	# [#4rq5ag]
 	if not doc.check_in:
 		doc.check_in = None
 		if "check_in" not in doc.dont_update_if_missing:

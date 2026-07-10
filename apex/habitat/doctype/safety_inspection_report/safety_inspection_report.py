@@ -52,7 +52,7 @@ class SafetyInspectionReport(Document):
             # audit-ok — reversing a draft side-effect this report created
             frappe.delete_doc("Maintenance Request", mr_name, ignore_permissions=True)  # audit-ok
         else:
-            # Submitted ticket the team owns: only drop the stale source back-link.
+            # [#krxj5r]
             frappe.db.set_value("Maintenance Request", mr_name, "source_inspection", None)
 
     # [#g5aqzg]
@@ -71,11 +71,10 @@ class SafetyInspectionReport(Document):
 
         for table_fieldname in _FINDING_TABLES:
             rows = self.get(table_fieldname) or []
-            # Newly spawned tickets — surface each one.
+            # [#1t1399]
             for mr_name in fan_out_findings(rows, self):
                 self._surface(mr_name)
-            # Already-linked findings — make sure their ticket is surfaced too
-            # (covers a partially-completed earlier run).
+            # [#pe70sg]
             for finding in rows:
                 self._ensure_surfaced(finding.get("generated_maintenance_request"))
 

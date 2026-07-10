@@ -109,8 +109,7 @@ def post_cleaning_compliance(doc) -> int:
     for row in rows:
         if _row_already_posted(doc.name, row.name):
             continue
-        # A Skipped room is cleaned=0 regardless of the (defaulting) cleaned flag,
-        # so the ledger never records a skipped room as compliant.
+        # [#ccfxyb]
         room_status = getattr(row, "room_status", None)
         cleaned = 0 if room_status == "Skipped" else cint(getattr(row, "cleaned", 0))
         _insert_ledger_row(
@@ -175,8 +174,7 @@ def reverse_cleaning_compliance(cleaning_log: str) -> int:
             source_detail_no=row.source_detail_no,
             reversal_of=row.name,
         )
-        # set_value bypasses the immutability guard (read_only fields); both rows
-        # are flagged so neither counts in a live-compliance sum.
+        # [#sos4is]
         frappe.db.set_value(LEDGER_DOCTYPE, row.name, "is_cancelled", 1)
         frappe.db.set_value(LEDGER_DOCTYPE, rev, "is_cancelled", 1)
         posted += 1

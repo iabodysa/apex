@@ -27,10 +27,7 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
         self.project = frappe.db.get_value("Project", {}) or frappe.get_doc({
             "doctype": "Project", "project_name": "Test Project", "company": self.company,
         }).insert(ignore_permissions=True).name
-        # Always create a DEDICATED employee — never reuse an arbitrary existing
-        # one. The active-assignment guard keys on the employee, so reusing a site
-        # employee that already holds an active assignment would make the checkout
-        # test fail on a polluted site for an unrelated reason.
+        # [#34d2w7]
         self.employee = frappe.get_doc({
             "doctype": "Employee", "first_name": f"Test Emp {frappe.generate_hash(length=12)}",
             "company": self.company, "gender": "Male",

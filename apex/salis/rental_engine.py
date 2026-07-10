@@ -96,9 +96,7 @@ def daily_rental_accrual() -> None:
 
         for vehicle_row in vehicles:
             vehicle = vehicle_row.name
-            # [#sp1dly] savepoint per row: a failing vehicle rolls back ONLY its
-            # own accrual; a bare frappe.db.rollback() would discard every accrual
-            # memo already inserted for prior vehicles in this same transaction.
+            # [#gdvet0]
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:
@@ -340,8 +338,7 @@ def monthly_rental_reconciliation() -> None:
 
     for row in rows:
         rental_office = row.rental_office
-        # [#sp1dly] savepoint per row — isolate a failing alert insert so the
-        # other offices flagged in this run survive.
+        # [#9it4y3]
         sp = "accrual_row"
         frappe.db.savepoint(sp)
         try:

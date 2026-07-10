@@ -32,11 +32,7 @@ HOOKS_PY = os.path.join(APP_ROOT, "hooks.py")
 ARABIC = re.compile(r"[؀-ۿ]")
 PLACEHOLDER = re.compile(r"\{\d+")
 
-# The only places Arabic legitimately lives in the tree: the translation file,
-# print formats (bilingual is accepted), the portal i18n/UI bundles and the
-# owner-requested fleet board, plus tests (this file holds the ARABIC pattern) and
-# the git-ignored demo data. Everything else — production .py / .json / desk .js —
-# must be English-first (CLAUDE.md), so it is scanned by TestNoArabicInSource.
+# [#k9i6gc]
 ARABIC_HOMES = (
     os.sep + "tests" + os.sep,
     os.sep + "translations" + os.sep,
@@ -414,9 +410,7 @@ class TestNoArabicInSource(unittest.TestCase):
         )
 
 
-# Internal dev-process markers that must never leak into user-facing DocType
-# metadata. The business word "Internal" and setup-guidance "placeholder" are NOT
-# markers — they are legitimate domain text.
+# [#i460py]
 INTERNAL_MARKERS = re.compile(
     r"(T-\d{2,}|\bterminal-\d|\bTODO\b|\bFIXME\b|\bHACK\b|\bWIP\b|\bskeptic|by terminal)",
     re.IGNORECASE,
@@ -565,7 +559,7 @@ class TestPrintFormatGuards(unittest.TestCase):
             "room label must look up the building name via non-raising db.get_value",
         )
         self.assertIn("if doc.building else None", html, "building lookup must be guarded on doc.building")
-        # No unguarded attribute access on a possibly-None building object.
+        # [#ovmfuy]
         self.assertNotRegex(
             html, r"\bbuilding\.building_name\b",
             "render must not dereference a possibly-None building doc",
@@ -592,7 +586,7 @@ class TestPrintFormatGuards(unittest.TestCase):
         ]
         missing = [s for s in required if s not in html]
         self.assertEqual(missing, [], f"QR poster strings not wrapped in _(): {missing}")
-        # Static translatable labels must stay brace-free (no {0}/{name} placeholders).
+        # [#k7p94t]
         for m in re.finditer(r'_\(\s*"([^"]*)"\s*\)', html):
             self.assertNotRegex(
                 m.group(1), r"\{",
@@ -613,7 +607,7 @@ class TestPrintFormatGuards(unittest.TestCase):
                 r"frappe\.format\(\s*doc\." + field,
                 f"{field} must render via frappe.format for locale number formatting",
             )
-        # No bare, unformatted litre interpolation left in the template.
+        # [#74035w]
         for field in ("claimed_litres", "consumed_litres", "variance_litres"):
             self.assertNotRegex(
                 html,

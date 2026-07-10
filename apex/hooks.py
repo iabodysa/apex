@@ -25,7 +25,7 @@ setup_wizard_complete = "apex.apex_core.setup.setup_wizard.setup_wizard_complete
 
 # [#34xywz]
 doc_events = {
-    # Validate the Saudi National Address custom fields on the native Address.
+    # [#8xii8j]
     "Address": {
         "validate": "apex.habitat.address_customizations.validate",
     },
@@ -162,11 +162,11 @@ scheduler_events = {
         "apex.habitat.tasks.custody.consumable_custody_expiry_watch",
         "apex.habitat.tasks.scheduled_tasks.daily_scheduled_task_instance_generator",
         "apex.habitat.tasks.occupancy.daily_occupancy_snapshot",
-        # [#t554-clean] auto-create today's draft Cleaning Log per active building
+        # [#klx0rf]
         "apex.habitat.tasks.cleaning.daily_cleaning_log_generator",
-        # [#t554-clean-sup] supervisor-targeted variant: only buildings with a supervisor
+        # [#3cdnin]
         "apex.habitat.tasks.cleaning.auto_create_cleaning_logs",
-        # [#wave3-safety]
+        # [#6dwhev]
         "apex.habitat.tasks.safety.daily_safety_task_compliance_scan",
         "apex.habitat.tasks.safety.audit_remediation_deadline_watch",
         # [#8d555o]
@@ -183,9 +183,9 @@ scheduler_events = {
         "apex.salis.tasks.alerts.daily_open_alerts_digest",
         "apex.salis.fuel_engine.accrue_fuel_consumption",
         "apex.salis.rental_engine.daily_rental_accrual",
-        # Logistay: parse pending intake batches into canonical Timesheet Lines + exceptions.
+        # [#9muy7i]
         "apex.logistay.ingestion_engine.normalize_pending_intakes",
-        # Logistay: post the immutable worker-hours ledger from COMPLETE Timesheet Lines.
+        # [#c4f24z]
         "apex.logistay.timesheet_engine.post_timesheet_ledger",
         # [#ptjnq1]
         "apex.apex_core.utils.workflow_utils.cleanup_orphaned_workflow_actions",
@@ -193,7 +193,7 @@ scheduler_events = {
     "weekly": [
         "apex.habitat.tasks.occupancy.weekly_occupancy_sync",
         "apex.habitat.tasks.custody.weekly_custody_digest",
-        # [#wave3-safety]
+        # [#6dwhev]
         "apex.habitat.tasks.safety.weekly_safety_coverage_gate",
         "apex.salis.tasks.vehicle.vehicle_utilization_summary",
         "apex.salis.utilisation_engine.weekly_vehicle_utilisation_snapshot",
@@ -203,8 +203,7 @@ scheduler_events = {
         # [#payd2f]
         "apex.salis.rental_engine.monthly_rental_reconciliation",
     ],
-    # Boarding two-sided confirmation: auto-confirm timed-out worker claims even
-    # when no read path fires; the timeout itself is read at runtime from settings.
+    # [#6g8f3l]
     "cron": {
         "*/5 * * * *": [
             "apex.salis.api.boarding_flow.auto_confirm_claimed_boardings",
@@ -235,7 +234,7 @@ permission_query_conditions = {
     "Custody Issue": "apex.habitat.permissions.custody_issue_query",
     "Cleaning Log": "apex.habitat.permissions.cleaning_log_query",
     "Building": "apex.habitat.permissions.accommodation_building_query",
-    # [#wave4-safety]
+    # [#hkvkov]
     "Safety Round": "apex.habitat.permissions.safety_round_query",
     "Safety Task Execution": "apex.habitat.permissions.safety_task_execution_query",
     "Scheduled Task Instance": "apex.habitat.permissions.scheduled_task_instance_query",
@@ -256,7 +255,7 @@ permission_query_conditions = {
     "Salis Vehicle": "apex.salis.permissions.salis_vehicle_query",
     "Salis Driver": "apex.salis.permissions.salis_driver_query",
     "Passenger Manifest": "apex.salis.permissions.passenger_manifest_query",
-    # [#wave2-pqc] habitat tenant scoping (single-building unless noted)
+    # [#iiesva]
     "Facility Asset Custody Assignment": "apex.habitat.permissions.facility_asset_custody_assignment_query",
     "Operational Depreciation Snapshot": "apex.habitat.permissions.non_financial_depreciation_snapshot_query",
     "Custody Return": "apex.habitat.permissions.custody_return_query",
@@ -275,7 +274,7 @@ permission_query_conditions = {
     "Arrival Batch": "apex.habitat.permissions.arrival_batch_query",
     "Room": "apex.habitat.permissions.accommodation_room_query",
     "Bed": "apex.habitat.permissions.accommodation_bed_query",
-    # [#wave-b2] read-only quantity ledger, scoped on its store `building`.
+    # [#1pfgq8]
     "Accommodation Stock Ledger": "apex.habitat.permissions.accommodation_stock_ledger_query",
     "Driver Attendance": "apex.salis.permissions.driver_attendance_query",
     "Driver Stop": "apex.salis.permissions.driver_stop_query",
@@ -285,7 +284,7 @@ permission_query_conditions = {
     "Driver Clearance": "apex.salis.permissions.driver_clearance_query",
     "Vehicle Stop": "apex.salis.permissions.vehicle_stop_query",
     "Movement Cost Transfer": "apex.salis.permissions.movement_cost_transfer_query",
-    # Project-scope via the alert's vehicle; oversight roles unrestricted.
+    # [#a38tvk]
     "Operations Alert": "apex.salis.permissions.operations_alert_query",
 }
 
@@ -297,7 +296,7 @@ has_permission = {
     "Custody Issue": "apex.habitat.permissions.building_scoped_has_permission",
     "Cleaning Log": "apex.habitat.permissions.building_scoped_has_permission",
     "Building": "apex.habitat.permissions.building_scoped_has_permission",
-    # [#wave4-safety]
+    # [#hkvkov]
     "Safety Round": "apex.habitat.permissions.building_scoped_has_permission",
     "Safety Task Execution": "apex.habitat.permissions.building_scoped_has_permission",
     "Scheduled Task Instance": "apex.habitat.permissions.building_scoped_has_permission",
@@ -320,7 +319,7 @@ has_permission = {
     # [#1v1380]
     "Salis Driver": "apex.salis.permissions.salis_driver_has_permission",
     "Passenger Manifest": "apex.salis.permissions.scoped_has_permission",
-    # [#wave2-pqc] habitat (3 dual-building use the dual helper)
+    # [#2w0x02]
     "Facility Asset Custody Assignment": "apex.habitat.permissions.building_scoped_has_permission",
     "Operational Depreciation Snapshot": "apex.habitat.permissions.building_scoped_has_permission",
     "Custody Return": "apex.habitat.permissions.building_scoped_has_permission",
@@ -339,7 +338,7 @@ has_permission = {
     "Arrival Batch": "apex.habitat.permissions.building_scoped_has_permission",
     "Room": "apex.habitat.permissions.building_scoped_has_permission",
     "Bed": "apex.habitat.permissions.building_scoped_has_permission",
-    # [#wave-b2] form/REST read of a ledger row outside the user's store is denied.
+    # [#6ggmz1]
     "Accommodation Stock Ledger": "apex.habitat.permissions.building_scoped_has_permission",
     "Driver Attendance": "apex.salis.permissions.driver_attendance_has_permission",
     "Driver Stop": "apex.salis.permissions.driver_stop_has_permission",
@@ -349,7 +348,7 @@ has_permission = {
     "Driver Clearance": "apex.salis.permissions.driver_clearance_has_permission",
     "Vehicle Stop": "apex.salis.permissions.vehicle_stop_has_permission",
     "Movement Cost Transfer": "apex.salis.permissions.movement_cost_transfer_has_permission",
-    # Mirror operations_alert_query for direct form/REST/link access.
+    # [#dtq943]
     "Operations Alert": "apex.salis.permissions.operations_alert_has_permission",
 }
 
@@ -362,11 +361,9 @@ fixtures = [
     # [#e3f5ip]
     {"dt": "Role", "filters": [["name", "in", ["Fleet Project Manager", "Fleet Supervisor", "Government Relations Officer"]]]},
     # [#40ogr7]
-    # Item Group is a NestedSet — seeded via patch (seed_accommodation_item_groups),
-    # not fixtures, since a fixture import crashes on a fresh site's NULL-lft/rgt root.
-    # [#t543it] Worker-housing procurement catalog for the Items shopping surface.
+    # [#r6md4h]
     {"dt": "Item", "filters": [["item_code", "like", "ACC-%"]]},
-    # Custom ERPNext Party Type so a Freelancer can be a payable party on Journal/Payment Entry.
+    # [#9e59wa]
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
 ]
 
@@ -386,8 +383,7 @@ after_install = [
     "apex.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
     # [#2oqhfm]
     "apex.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
-    # P-108: fresh installs mark patches complete without running them; make the module
-    # root workspace the earliest-created (deterministic breadcrumb target) post-sync.
+    # [#r5fycj]
     "apex.patches.v1_x.reorder_root_workspace_creation.execute",
 ]
 
@@ -414,8 +410,7 @@ after_migrate = [
     # [#byftwb]
     "apex.setup.create_roles",
     "apex.setup.create_role_profiles",
-    # P-108: a workspace JSON re-import (delete+insert) re-stamps creation=now(), which
-    # can demote the module root from breadcrumb target; restore root-first every migrate.
+    # [#tf7fkk]
     "apex.patches.v1_x.reorder_root_workspace_creation.execute",
 ]
 

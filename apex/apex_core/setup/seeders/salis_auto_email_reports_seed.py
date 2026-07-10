@@ -25,7 +25,7 @@ the master toggle being OFF by default is upheld here without extra logic.
 import frappe
 
 _REPORTS = [
-    # Daily fleet-status snapshot (plate/status/driver/project) for fleet managers.
+    # [#84lsci]
     {"report": "Fleet Register", "frequency": "Daily"},
     {"report": "Fuel Reconciliation", "frequency": "Monthly"},
     {"report": "Cost Recovery Aging", "frequency": "Weekly"},

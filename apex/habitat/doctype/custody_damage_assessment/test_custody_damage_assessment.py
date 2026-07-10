@@ -103,8 +103,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
             "company": company,
             "currency": "SAR",
         })
-        # ignore_validate skips the HRMS date/joining checks (no Employee chain
-        # provisioned); keeps a real linked record to read docstatus from.
+        # [#q21w72]
         add_sal.flags.ignore_validate = True
         add_sal.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
 
@@ -159,7 +158,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
 
-        # a fresh user with no roles at all -> no CDA read access
+        # [#8i5bel]
         email = "qa-cda-noread-" + frappe.generate_hash(length=8) + "@example.com"
         no_read_user = frappe.get_doc({
             "doctype": "User",
@@ -176,7 +175,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
         finally:
             frappe.set_user("Administrator")
 
-        # the manager path (Administrator short-circuits has_permission) still works
+        # [#dq2kjr]
         result = get_deduction_status(doc.name)
         self.assertEqual(result["status"], "Not Created")
 
@@ -199,8 +198,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
             "type": "Deduction",
         }).insert(ignore_permissions=True, ignore_if_duplicate=True)
 
-        # arm the deduction path on the Salary Deduction Policy: global master on +
-        # an enabled Damage rule with a configured Deduction component
+        # [#lxzelf]
         policy = frappe.get_single("Salary Deduction Policy")
         prev_enabled = policy.enable_salary_deductions
         damage = next((r for r in policy.type_rules or [] if r.deduction_type == "Damage"), None)
@@ -213,8 +211,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
         damage.salary_component = salary_component.name
         policy.save(ignore_permissions=True)
 
-        # a fully-provisioned Employee so the deduction block inserts a real
-        # Additional Salary (HRMS validate requires a joined Employee)
+        # [#qiwt5g]
         emp = frappe.get_doc({
             "doctype": "Employee",
             "first_name": "QA Custody " + frappe.generate_hash(length=12),
@@ -226,9 +223,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
         })
         emp.insert(ignore_permissions=True, ignore_links=True)
 
-        # A submitted Salary Structure Assignment is HRMS's precondition for the
-        # Additional Salary insert (validate_salary_structure); build a minimal one
-        # bound to this employee's company. One Earning, no tax component.
+        # [#qx9yid]
         earn_component = "QA-DMG-Earn-" + frappe.generate_hash(length=12)
         frappe.get_doc({
             "doctype": "Salary Component",
@@ -270,11 +265,10 @@ class TestCustodyDamageAssessment(FrappeTestCase):
                         "damage_description": "cracked", "estimated_replacement_cost": 150}],
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
-        # validate() populates the total the deduction amount reads from
+        # [#5wi15n]
         doc.total_estimated_replacement_cost = 150
 
-        # Additional Salary has no `remarks` column, so identify the deduction by its
-        # real link tuple (employee + component + payroll_date) rather than remarks.
+        # [#d8kcf9]
         as_filters = {
             "employee": emp.name,
             "salary_component": salary_component.name,
@@ -282,7 +276,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
         }
         try:
             on_submit(doc)
-            # reload so doc.deduction_entry reflects the DB set_value
+            # [#55e5jo]
             doc.reload()
             self.assertTrue(doc.deduction_entry, "first on_submit must post one Additional Salary")
             on_submit(doc)
@@ -295,7 +289,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
             for row in frappe.get_all("Additional Salary", filters=as_filters):
                 frappe.delete_doc("Additional Salary", row.name, force=True, ignore_permissions=True)
             frappe.delete_doc("Custody Damage Assessment", doc.name, force=True, ignore_permissions=True)
-            # submitted docs must be cancelled before they can be force-deleted
+            # [#m1ayrq]
             frappe.get_doc("Salary Structure Assignment", assignment.name).cancel()
             frappe.delete_doc("Salary Structure Assignment", assignment.name, force=True, ignore_permissions=True)
             frappe.get_doc("Salary Structure", struct.name).cancel()

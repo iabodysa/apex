@@ -56,7 +56,7 @@ class TestFleetPageAccessGate(FrappeTestCase):
             frappe.set_user("Administrator")
 
     def test_non_fleet_role_gets_friendly_no_role_page(self):
-        # A real, non-fleet role: the gate must close (no redirect, no token).
+        # [#n5wmeo]
         frappe.set_user(self._user_with_roles("fleet-gate-norole@test.local", ["Internal Auditor"]))
         try:
             ctx = fleet.get_context(frappe._dict())

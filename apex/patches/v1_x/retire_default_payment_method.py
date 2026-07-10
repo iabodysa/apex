@@ -25,8 +25,7 @@ ONE-TIME, idempotent, install-safe (no-op on fresh installs). PRUNE (remove modu
 
 import frappe
 
-# [#n1agup] The old field name + the Singles that could carry its orphan value, in
-# precedence order (a moved Apex Settings orphan wins over the Habitat original).
+# [#gt68nn]
 _FIELD = "default_payment_method"
 _SOURCE_SINGLES = ("Apex Settings", "Habitat Settings")
 
@@ -47,14 +46,14 @@ def execute():
                 old_value = rows[0][0]
                 break
 
-        # Seed the router only if it is unconfigured and the value is a real DocType.
+        # [#q9z2to]
         if old_value and frappe.db.exists("DocType", "Payment Routing Settings"):
             router = frappe.get_single("Payment Routing Settings")
             if not router.target_payment_doctype and frappe.db.exists("DocType", old_value):
                 router.target_payment_doctype = old_value
                 router.save(ignore_permissions=True)  # audit-ok
 
-        # Delete the orphan rows from every source Single, so a re-run is a no-op.
+        # [#i80vod]
         frappe.qb.from_(singles).delete().where(
             (singles.doctype.isin(list(_SOURCE_SINGLES))) & (singles.field == _FIELD)
         ).run()

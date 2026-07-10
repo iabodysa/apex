@@ -31,9 +31,7 @@ from apex.salis.tasks import ALERT_DOCTYPE, _resolve_alert, _settings_int
 OPEN_STATUSES = ["Open", "Acknowledged"]
 SEVERITIES = ["Info", "Warning", "Critical"]
 
-# Per-severity "open too long" thresholds (hours). Read from Salis Settings so ops
-# can tune them; the field may be absent, in which case _settings_int returns the
-# default — so this is configurable without a schema change to the alert.
+# [#f8coxa]
 AGING_SETTING = {"Critical": "alert_aging_critical_hours", "Warning": "alert_aging_warning_hours", "Info": "alert_aging_info_hours"}
 AGING_DEFAULT = {"Critical": 4, "Warning": 24, "Info": 72}
 
@@ -87,16 +85,14 @@ def get_open_alerts(project=None, severity=None, since=None):
     filters = {"status": ["in", OPEN_STATUSES]}
     if severity in SEVERITIES:
         filters["severity"] = severity
-    # Exclude still-snoozed rows: keep only alerts whose snooze has lapsed or was
-    # never set. A list-of-lists or_filter is the native way to reference the same
-    # column twice (NULL OR past) — a dict would collapse the duplicate key.
+    # [#gqwzml]
     or_filters = [
         ["Operations Alert", "snooze_until", "is", "not set"],
         ["Operations Alert", "snooze_until", "<=", now],
     ]
 
     if project and (unscoped or project in (projects or [])):
-        # Narrow to the vehicles of a single in-scope project.
+        # [#jgk1ii]
         plates = frappe.get_all(
             "Salis Vehicle", filters={"project": project}, pluck="name", limit_page_length=0
         )
@@ -104,7 +100,7 @@ def get_open_alerts(project=None, severity=None, since=None):
     else:
         plates = _scoped_vehicles(unscoped, projects)
         if plates is not None:
-            # A vehicle-less alert has no project anchor, so a scoped user never sees it.
+            # [#pfwuoi]
             filters["vehicle"] = ["in", plates or [None]]
 
     alerts = frappe.get_all(
@@ -119,12 +115,10 @@ def get_open_alerts(project=None, severity=None, since=None):
         limit_page_length=0,
     )
 
-    # Bulk plate + driver-name enrichment (shared helper). Canonical key fix: the
-    # alert rows used to expose the plate as ``plate_number``; they now carry the
-    # ``vehicle_plate`` key every other Salis reader uses.
+    # [#8xvad5]
     vehicle_driver_titles(alerts)
 
-    # Parse native _assign (a JSON list of users) once per row into an assignees list.
+    # [#p1o2j6]
     for a in alerts:
         a["assignees"] = frappe.parse_json(a.get("_assign")) or []
     user = frappe.session.user
@@ -153,13 +147,11 @@ def get_open_alerts(project=None, severity=None, since=None):
         "projects": proj_opts,
         "severities": SEVERITIES,
         "unscoped": unscoped,
-        # Per-severity aging cutoffs (hours) + the server clock, so the client can
-        # flag a row open past its threshold without trusting the browser's time.
+        # [#44devs]
         "aging_hours": _aging_thresholds(),
         "server_now": str(now),
         "current_user": user,
-        # Alerts resolved since the user's last visit, for the delta banner. Scoped
-        # by the SAME vehicle filter as the queue (reuse filters['vehicle']).
+        # [#q46o9l]
         "resolved_since": _resolved_since(since, filters.get("vehicle")),
     }
 
@@ -218,7 +210,7 @@ def bulk_acknowledge_alerts(names):
             if acknowledge_alert(name).get("acknowledged"):
                 acknowledged.append(name)
         except frappe.PermissionError:
-            # Skip a row the caller cannot act on; don't abort the whole batch.
+            # [#g70vth]
             continue
     return {"ok": True, "acknowledged": acknowledged}
 
@@ -251,7 +243,7 @@ def unassign_alert(name, user=None):
     try:
         assign_to.remove(ALERT_DOCTYPE, name, target)
     except Exception:
-        # Removing an assignment that isn't there must not error the caller.
+        # [#bjjeci]
         pass
     return {"ok": True, "name": name, "assignees": _assignees(name)}
 
@@ -281,7 +273,7 @@ def _assignees(name) -> list:
     return frappe.parse_json(frappe.db.get_value(ALERT_DOCTYPE, name, "_assign")) or []
 
 
-# Named snooze windows the UI offers, mapped to (unit, amount) for add_to_date.
+# [#e50812]
 SNOOZE_PRESETS = {"tomorrow": ("days", 1), "2d": ("days", 2), "1w": ("days", 7)}
 
 
@@ -392,7 +384,7 @@ def get_alert_median_resolve_days(filters=None):
     }
     if not unscoped:
         plates = _scoped_vehicles(unscoped, projects)
-        # A vehicle-less alert has no project anchor, so a scoped user never sees it.
+        # [#9farr0]
         alert_filters["vehicle"] = ["in", plates or [None]]
 
     rows = frappe.get_all(

@@ -22,8 +22,7 @@ from apex.tests._helpers import _user
 class TestWeeklyCustodyDigest(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # The digest is gated behind the master email kill-switch (default OFF);
-        # turn it ON so the content tests below exercise the send path.
+        # [#exxfve]
         frappe.db.set_single_value("Habitat Settings", "enable_email_notifications", 1)
         self.sup = _user(f"cd_sup_{frappe.generate_hash(length=12)}@example.com", "Accommodation Manager")
         self.building = self._building(self.sup)
@@ -66,19 +65,18 @@ class TestWeeklyCustodyDigest(FrappeTestCase):
         return sent
 
     def test_supervisor_receives_digest_for_their_building(self):
-        # One open (future return) and one overdue (past return) issue.
+        # [#1j38s4]
         self._issue(self.building, "Issued", add_days(today(), 7))
         self._issue(self.building, "Partially Returned", add_days(today(), -3))
 
         sent = self._run_capturing_mail()
         mine = [m for m in sent if m["recipients"] == [self.sup]]
         self.assertEqual(len(mine), 1, "supervisor must receive exactly one digest")
-        # The supervisor's own building is named in the digest body.
+        # [#7gulyb]
         self.assertIn(self.building, mine[0]["message"])
 
     def test_building_without_supervisor_is_skipped(self):
-        # A building with no responsible supervisor has no recipient: a digest run
-        # over only that building must send nothing.
+        # [#s9a1x8]
         orphan = frappe.get_doc(
             {
                 "doctype": "Building",
@@ -88,7 +86,7 @@ class TestWeeklyCustodyDigest(FrappeTestCase):
         self._issue(orphan, "Issued", add_days(today(), 7))
 
         sent = self._run_capturing_mail()
-        # No mail can be addressed to a building that has no supervisor.
+        # [#jow14m]
         self.assertEqual([m for m in sent if orphan in m.get("message", "")], [])
 
     def test_no_sendmail_when_email_disabled(self):

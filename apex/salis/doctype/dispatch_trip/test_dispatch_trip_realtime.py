@@ -74,9 +74,7 @@ class TestDispatchTripRealtime(FrappeTestCase):
                 )
             )
 
-        # The controller must have published the driver event, to the Dispatch
-        # Trip room, after commit (filtering elsewhere may publish other events,
-        # so assert OUR call is among them rather than the only one).
+        # [#1ar0b5]
         calls = [
             c
             for c in pub.call_args_list

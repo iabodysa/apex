@@ -19,8 +19,7 @@ def execute(filters=None):
     columns = _columns()
     buildings = _get_buildings(building_filter)
     if not buildings:
-        # Distinguish a permission scope gap from a genuinely empty estate, so a
-        # scoped user with zero buildings sees guidance, not a blank grid.
+        # [#2tz8oq]
         if _is_scope_gap(building_filter):
             return columns, [], _no_scope_message()
         return columns, []
@@ -87,8 +86,7 @@ def _columns():
 def _get_buildings(building_filter):
     f = {"status": "Active"}
 
-    # Match list/card scope: a building-scoped user sees only their User-Permission
-    # buildings, so the report can't leak buildings outside their scope.
+    # [#sj87q2]
     if not permissions._building_is_unscoped(frappe.session.user):
         allowed = permissions._allowed_buildings(frappe.session.user)
         if building_filter:

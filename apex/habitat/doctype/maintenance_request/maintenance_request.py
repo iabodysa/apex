@@ -33,7 +33,7 @@ def _validate_status_rules(doc):
         frappe.throw(_("Assigned To is required when status is Assigned."))
     if status in ("Resolved", "Closed") and not doc.resolution_notes:
         frappe.throw(_("Resolution Notes are required to resolve or close a Maintenance Request."))
-    # A repair cost is a spend; a negative value is never valid.
+    # [#nr3u0q]
     if flt(doc.cost_of_repair) < 0:
         frappe.throw(_("Cost of Repair cannot be negative."))
 
@@ -64,9 +64,7 @@ def make_work_order(source_name, target_doc=None):
         {
             "Maintenance Request": {
                 "doctype": "Maintenance Work Order",
-                # building and issue_type are copied automatically (same fieldname
-                # on both sides); no explicit field_map entry needed.
-                # status is excluded so the source "Open" does not bleed through.
+                # [#gxz157]
                 "field_no_map": ["status"],
             }
         },

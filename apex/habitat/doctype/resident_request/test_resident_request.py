@@ -116,7 +116,7 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         self.assertEqual(frappe.db.get_value("Resident Request", a.name, "status"), "Triaged")
         self.assertEqual(frappe.db.get_value("Resident Request", b.name, "status"), "In Progress")
 
-    # --- Location token resolution on the update path ---
+    # [#ol39mx]
 
     def _active_qr(self):
         """An active QR location whose token resolves to a real building."""
@@ -139,10 +139,10 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         validate guard false-throw. GREEN: validate resolves the token too, so the
         save passes and building is populated from the token."""
         token, building = self._active_qr()
-        doc = self._request("New")  # inserted with no token, building empty
+        doc = self._request("New")  # [#pa4q1t]
         self.assertFalse(doc.building)
         doc.location_token = token
-        doc.save(ignore_permissions=True)  # must not throw "Invalid or inactive"
+        doc.save(ignore_permissions=True)  # [#512609]
         self.assertEqual(doc.building, building)
 
     def test_bad_token_rejected_on_update(self):
@@ -153,7 +153,7 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             doc.save(ignore_permissions=True)
 
-    # --- Priority rule word-boundary matching ---
+    # [#sipbov]
 
     def test_priority_substring_does_not_false_bump(self):
         """A description that only contains 'ac' as a substring of an ordinary word
@@ -174,7 +174,7 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         _apply_priority_rules(doc)
         self.assertEqual(doc.priority, "High")
 
-    # --- Web Form honeypot ---
+    # [#d45j1m]
 
     def test_honeypot_filled_is_rejected(self):
         """A non-empty honeypot field is treated as spam: the call short-circuits

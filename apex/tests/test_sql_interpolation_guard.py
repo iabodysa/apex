@@ -227,7 +227,7 @@ def _interpolated_names(first_arg):
     if fmt_names is not None:
         return (True, fmt_names)
 
-    # + concatenation / % formatting that builds the SQL text in Python.
+    # [#k1g0tw]
     bin_names = _binop_names(first_arg)
     if bin_names is not None:
         return (True, bin_names)
@@ -398,13 +398,13 @@ class TestSqlInterpolationGuard(unittest.TestCase):
             is_interp, names = _interpolated_names(first)
             self.assertTrue(is_interp, f"interpolation not detected: {snippet}")
             self.assertIn("dt", names)
-        # native parameterisation (placeholder in a literal, values bound) is safe
+        # [#56f5cn]
         safe = ast.parse('frappe.db.sql("SELECT * FROM t WHERE x = %s", (val,))')
         self.assertFalse(
             _interpolated_names(safe.body[0].value.args[0])[0],
             "native %s binding must not be flagged",
         )
-        # explicit concatenation of only literals carries no dynamic value
+        # [#p742ee]
         lit = ast.parse('frappe.db.sql("SELECT 1" + " FROM t")')
         self.assertFalse(
             _interpolated_names(lit.body[0].value.args[0])[0],

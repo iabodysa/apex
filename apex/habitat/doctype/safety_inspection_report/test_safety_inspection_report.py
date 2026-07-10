@@ -237,8 +237,7 @@ class TestSafetyInspectionReportDeprecation(FrappeTestCase):
                       "SIR description must point to Safety Round")
 
     def test_sir_not_renamed_and_fields_intact(self):
-        # The building_operations_summary and other code query SIR by name, so the
-        # name and its fields must survive deprecation untouched.
+        # [#n997m7]
         schema = self._schema()
         self.assertEqual(schema.get("name"), "Safety Inspection Report")
         fieldnames = {f.get("fieldname") for f in schema.get("fields", [])}

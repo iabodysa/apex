@@ -22,9 +22,7 @@ from frappe.tests.utils import FrappeTestCase
 
 APP = frappe.get_app_path("apex")
 
-# Start of a translate call: _( , frappe._( , __(  — then one or more string
-# literals concatenated to it (Python "a" "b" or JS "a" + "b"), which is the
-# runtime msgid. Mirrors the frappectl translates scanner so the two agree.
+# [#c2lit3]
 _CALL = re.compile(r"(?:frappe\.)?_\(|__\(")
 _NEXT_LITERAL = re.compile(r"""\s*\+?\s*(['"])((?:\\.|(?!\1).)*?)\1""")
 
@@ -43,7 +41,7 @@ def _translate_strings(text):
 
 
 def _is_ui_text(s):
-    # Skip empty / pure-placeholder / punctuation-only literals (e.g. "{0}", "—").
+    # [#raa2sc]
     return bool(re.search(r"[A-Za-z]", s))
 
 

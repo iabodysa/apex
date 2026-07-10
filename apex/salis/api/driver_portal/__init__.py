@@ -6,8 +6,7 @@ only on that driver's records; the client never supplies the driver id."""
 import frappe
 from frappe import _
 
-# Maps deep-link builders shared with masar so worker + driver match; _stop_waypoint
-# is re-exported here for callers importing it from this module (maps_links is pure).
+# [#95hxd8]
 from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url
 from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-exported)
 from apex.salis.utils import get_driver_for_user
@@ -143,7 +142,7 @@ def _route_first_stop_maps_url(route_plan):
 		return None
 	from apex.salis.api import masar
 
-	for stop in masar._ordered_stops(route_plan):  # read-only reuse; masar unedited
+	for stop in masar._ordered_stops(route_plan):  # [#492z2y]
 		pickup = stop.get("pickup") or {}
 		if pickup.get("google_maps_url"):
 			return pickup["google_maps_url"]
@@ -211,7 +210,7 @@ def _attach_boarding_counts(trips, driver):
 	boarded_by_trip = {
 		row["dispatch_trip"]: frappe.utils.cint(row.get("boarded_count")) for row in logs
 	}
-	# Expected = the trip's Transport Request manifest size (worker_count).
+	# [#7hx8om]
 	requests = {t.get("transport_request") for t in trips if t.get("transport_request")}
 	expected_by_request = {}
 	if requests:
@@ -385,10 +384,10 @@ def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=
 
 	_require_enabled()
 	driver = _resolve_driver()
-	_resolve_my_trip(dispatch_trip, driver)  # enforces own-trip; raises if not
+	_resolve_my_trip(dispatch_trip, driver)  # [#t2dv4b]
 	log = _open_trip_log(dispatch_trip, driver)
 	if not log:
-		# Arrival lives on the trip log, so the trip must be started first.
+		# [#cdwtmt]
 		frappe.throw(_("Start the trip before marking arrival."))
 
 	arrived = frappe.utils.cint(arrived)
@@ -410,8 +409,7 @@ def mark_arrived(dispatch_trip, route_stop, arrived=1, sequence=None, stop_name=
 	log.flags.ignore_permissions = True  # audit-ok — driver resolved from session identity
 	log.save()
 
-	# P-032: tell the trip room so any socketed client refreshes; the worker poll
-	# (worker_trip_boarding) carries the durable state for the guest Masar app.
+	# [#3zpvvl]
 	if arrived:
 		_publish("boarding_arrived", dispatch_trip, {"route_stop": route_stop})
 
@@ -443,9 +441,7 @@ def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
 	if not web_push.is_configured():
 		frappe.throw(_("Background notifications are not enabled."), frappe.PermissionError)
 
-	# SSRF gate: ``endpoint`` is client-supplied and later becomes a server-side POST
-	# target, so refuse anything but an https:// URL on a known push provider — blocks
-	# aiming the server at an internal/loopback/metadata host. See web_push allowlist.
+	# [#1yrr5m]
 	if not web_push.is_allowed_push_endpoint(endpoint):
 		frappe.throw(_("This push subscription endpoint is not allowed."))
 
@@ -471,11 +467,7 @@ def save_push_subscription(endpoint, p256dh=None, auth=None, user_agent=None):
 	return {"name": doc.name}
 
 
-# ---------------------------------------------------------------------------
-# Public endpoint re-exports (P-180). Keep the canonical dotted path
-# apex.salis.api.driver_portal.<endpoint> resolving here after the
-# domain split, so every frontend/test/notification caller is unaffected.
-# ---------------------------------------------------------------------------
+# [#s2ftfd]
 from apex.salis.api.driver_portal.profile import (  # noqa: E402
     get_driver_context,
     get_driver_profile,

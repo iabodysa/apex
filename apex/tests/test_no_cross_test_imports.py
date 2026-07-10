@@ -22,19 +22,13 @@ import unittest
 _TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PREFIX = "apex.tests.test_"
 
-# Retired to EMPTY at P-135. Every historical coupling was cleaned: the base
-# ``ApexHabitatTestCase`` moved to factories.py (test_utils.py now re-exports it for
-# the DocType-level tests outside this scope), and the driver-portal + Masar
-# worker-movement helper hubs (``_ensure_test_driver``, ``_WorkerTripMixin``,
-# ``_building``/``_employee``/``_project``/…) are all consumed from factories.py now.
-# Do NOT add entries here — put the shared fixture in factories.py.
+# [#3d5i52]
 _BASELINE = frozenset()
 
-# Files that must stay 100% free of cross-test-module imports. Seeded by P-129 and
-# extended by every P-135 batch as each coupling was redirected into factories.py.
+# [#ndtaep]
 _MUST_BE_CLEAN = frozenset(
     {
-        # P-129 / earlier driver-portal cleanups
+        # [#7kg0qw]
         "test_driver_gps_eta.py",
         "test_masar_worker_movement.py",
         "test_driver_portal_attendance.py",
@@ -43,7 +37,7 @@ _MUST_BE_CLEAN = frozenset(
         "test_driver_portal_push.py",
         "test_driver_portal_today.py",
         "test_salis_controls.py",
-        # P-135 base-TestCase batch (ApexHabitatTestCase -> factories)
+        # [#g96emv]
         "test_accommodation_material_transfer.py",
         "test_accommodation_stock_ledger.py",
         "test_backfill_assignment_facility_supervisor.py",
@@ -66,7 +60,7 @@ _MUST_BE_CLEAN = frozenset(
         "test_supplier_cost_recovery.py",
         "test_temporary_stay_and_idle.py",
         "test_v0_9_0_pages.py",
-        # P-135 Masar / driver-portal helper-hub batch
+        # [#8qn63i]
         "test_boarding_scan.py",
         "test_driver_portal.py",
         "test_driver_portal_scope.py",

@@ -48,8 +48,7 @@ class TestSchemaIntegrity(FrappeTestCase):
         self.assertEqual(bad, [], f"hook/card method paths that do not resolve: {bad}")
 
     def test_settings_fields_exist(self):
-        # Matches _settings_int / get_salis_int / get_salis_float literal-string reads
-        # of a Salis Settings field; all funnel through the same coalesce helpers.
+        # [#dt2pre]
         pi = re.compile(r'(?:_settings_int|get_salis_int|get_salis_float)\(\s*["\']([a-z_0-9]+)["\']')
         ps = re.compile(r'get_single_value\(\s*["\']([A-Za-z ]+Settings)["\']\s*,\s*["\']([a-z_0-9]+)["\']')
         missing = []
@@ -111,11 +110,7 @@ class TestSchemaIntegrity(FrappeTestCase):
         self.assertEqual(bad, [], f"workspace references that do not resolve: {bad}")
 
     def test_workspace_content_blocks_resolve(self):
-        # test_workspace_refs_resolve guards the shortcuts/links/charts/
-        # number_cards arrays; the `content` JSON is the actual rendered layout, and
-        # a block naming a card/chart/shortcut/quick-list absent from those arrays
-        # renders blank with no error. Guard each content block against the declared
-        # arrays, plus that every quick_list points at a real DocType.
+        # [#m6btux]
         ref = {
             "chart": ("chart_name", "charts"),
             "number_card": ("number_card_name", "number_cards"),

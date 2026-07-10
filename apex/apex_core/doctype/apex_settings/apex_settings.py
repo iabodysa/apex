@@ -15,10 +15,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import cint
 
-# Built-in retention windows (days), the fallback when the matching Apex Settings
-# Int is blank or 0. A new Int on an existing Single stores 0, not its JSON
-# default, so retention_days() coalesces a falsy stored value to the default here
-# rather than trusting the raw field (the new-Single-Int-stores-0 trap).
+# [#exc652]
 RETENTION_DEFAULTS = {
     "snapshot_retention_days": 365,
     "depreciation_snapshot_retention_days": 730,

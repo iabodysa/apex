@@ -22,7 +22,7 @@ from frappe.utils.password import get_encryption_key
 
 from apex.salis.utils import get_driver_for_user
 
-# A pass is valid for this many hours after issue (a trip is a same-day event).
+# [#78ttpx]
 PASS_TTL_HOURS = 24
 
 STAFF_ROLES = (
@@ -95,8 +95,7 @@ def _is_staff(user: str | None = None) -> bool:
 
 
 def _driver_for_user(user: str | None = None) -> str | None:
-    # Thin alias of the shared salis.utils resolver (single source); preserves the
-    # soft None-on-unlinked behaviour _resolve_trip's own-trip gate depends on.
+    # [#k39mos]
     return get_driver_for_user(user)
 
 
@@ -159,8 +158,7 @@ def _get_or_create_log(dispatch_trip: str) -> "frappe.model.document.Document":
         }
     )
     log.insert(ignore_permissions=True)  # audit-ok: trip authorised in _resolve_trip
-    # The trip has now started: seed the per-worker boarding state from the
-    # manifest so the boarding/departure flow has its rows from the first scan.
+    # [#sao0g7]
     from apex.salis.api.boarding_flow import ensure_trip_boarding_state
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -207,8 +205,7 @@ def _log_scan(
     return doc.name
 
 
-# Per-IP throttle matching the Masar read endpoints: pass issuance is a read but
-# must not be drivable as a bulk token-minting oracle from one address.
+# [#8xubuw]
 @frappe.whitelist()
 @rate_limit(key="frappe.request.remote_addr", limit=60, seconds=60)
 def get_boarding_pass(dispatch_trip, worker):
@@ -238,10 +235,7 @@ def get_boarding_pass(dispatch_trip, worker):
     }
 
 
-# Per-IP throttle: a forged/invalid token is logged BEFORE _resolve_trip's own-trip
-# gate runs, so without this any authenticated user could flood Boarding Scan Log
-# with garbage-token rows. The cap bounds that write-amplification vector while
-# leaving a real driver ample headroom to scan a busload.
+# [#2ursve]
 @frappe.whitelist(methods=["POST"])
 @rate_limit(key="frappe.request.remote_addr", limit=120, seconds=60)
 def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
@@ -257,8 +251,7 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
     boarding row count. No GL is posted."""
     payload = _verify_token(pass_token)
 
-    # [#bsl-forged] A bad signature is logged with no trip context — we cannot
-    # trust any field inside a forged token.
+    # [#1k5149]
     if not payload:
         log_name = _log_scan(
             None, None, None, "Invalid Token", pass_token,
@@ -270,7 +263,7 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
     worker = payload.get("w")
     trip = _resolve_trip(dispatch_trip)
 
-    # [#bsl-expiry]
+    # [#e2nfr9]
     issued = get_datetime(payload.get("iat"))
     age_hours = time_diff_in_seconds(now_datetime(), issued) / 3600.0 if issued else None
     if age_hours is None or age_hours > PASS_TTL_HOURS:
@@ -280,11 +273,7 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
         )
         return {"result": "Expired", "scan_log": log_name}
 
-    # [#bsl-manifest] The worker must still be on the trip's manifest. When they
-    # are not, try to resolve their REAL trip today and return a structured
-    # WRONG_BUS correction (correct trip + that driver's phone, for the worker to
-    # find the right bus); fall back to the plain Wrong Trip result otherwise. The
-    # scan attempt is recorded either way.
+    # [#pcko54]
     if worker not in _trip_manifest_workers(trip.get("transport_request"), dispatch_trip):
         log_name = _log_scan(
             dispatch_trip, trip, worker, "Wrong Trip", pass_token,
@@ -297,16 +286,12 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
             return {"result": "Wrong Trip", "scan_log": log_name, **correction}
         return {"result": "Wrong Trip", "scan_log": log_name}
 
-    # [#bsl-race] Serialize concurrent valid scans of the SAME trip: lock the
-    # Dispatch Trip row before get-or-create-log + the dup-check + append. Two
-    # scans of one (trip,worker) would otherwise both pass _already_boarded on a
-    # stale read and write two Trip Start Logs / two boarding events; the lock
-    # makes the second wait until the first commits, then it resolves to Duplicate.
+    # [#epmjm6]
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 
     log = _get_or_create_log(dispatch_trip)
 
-    # [#bsl-dup] Idempotent: a second scan of the same worker logs no new row.
+    # [#1s46p3]
     if _already_boarded(log, worker):
         log_name = _log_scan(
             dispatch_trip, trip, worker, "Duplicate", pass_token,
@@ -335,7 +320,7 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
         trip_start_log=log.name, boarding_created=1,
         accommodation_building=accommodation_building,
     )
-    # Reflect the boarding into the trip's flow state (Pending -> Boarded).
+    # [#2ocamf]
     from apex.salis.api.boarding_flow import mark_boarded
 
     mark_boarded(dispatch_trip, worker)

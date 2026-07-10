@@ -14,7 +14,7 @@ class PassengerManifest(Document):
         self.passenger_count = len(self.passengers or [])
 
     def _guard_duplicate_passengers(self):
-        # A duplicate employee row would inflate passenger_count and the seat headcount.
+        # [#agyew6]
         seen = set()
         for row in self.passengers or []:
             if not row.employee:

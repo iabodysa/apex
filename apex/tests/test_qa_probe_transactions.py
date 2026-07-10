@@ -14,14 +14,12 @@ def _hash(n=12):
 
 class QABase(ApexHabitatTestCase):
     def setUp(self):
-        # Pick a deterministic company: get_value(.., {}) returns an arbitrary
-        # "first" row, which shifts across orderings once sibling tests commit
-        # extra Company rows, dragging in a mismatched cost center / lease company.
+        # [#ianq9k]
         self.company = frappe.db.get_value("Company", {}, order_by="creation asc") or frappe.get_doc({
             "doctype": "Company", "company_name": "Test Company",
             "default_currency": "SAR", "country": "Saudi Arabia",
         }).insert(ignore_permissions=True).name
-        # Keep the cost center inside the chosen company (no cross-company fallback).
+        # [#bkqjhk]
         self.cost_center = frappe.db.get_value(
             "Cost Center", {"is_group": 0, "company": self.company}
         )
@@ -230,8 +228,7 @@ class TestCustody(QABase):
     def _issue(self, article, qty=5, employee=None):
         if not getattr(self, "_cust_building", None):
             self._cust_building = self._make_building().name
-        # Custody Issue now rejects issuing more than the store holds; receive
-        # opening stock into the building store first so the issue can draw it.
+        # [#ngagme]
         from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
             post_stock_entry,
         )
@@ -346,15 +343,7 @@ class TestDuplicateOverlap(QABase):
 
     # [#gxkhtt]
     def _lease(self, building, start, end, first_pay):
-        # Pin company to this test's own selection so the lease never depends on
-        # the Habitat Settings single (global committed/cached state a sibling
-        # test may leave set or unset across orderings).
-        #
-        # The Accommodation Lease Workflow is active, so a lease starts at Draft
-        # and reaches docstatus 1 only through the workflow transitions — a raw
-        # submit() with status="Active" is rejected by validate_workflow. We run
-        # the transitions as Administrator, who bypasses the Approve self-approval
-        # gate (has_approval_access), to land a submitted (Approved) lease.
+        # [#9omige]
         from frappe.model.workflow import apply_workflow
         lease = frappe.get_doc({
             "doctype": "Lease", "naming_series": "ACC-LEASE-.YYYY.-.####",

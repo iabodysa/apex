@@ -51,7 +51,7 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
                 "company": self.company,
             }
         ).insert(ignore_permissions=True, ignore_mandatory=True).name
-        # The asset starts in the intake store; a delivery moves it to dest.
+        # [#nt1itk]
         self.asset = frappe.get_doc(
             {
                 "doctype": "Facility Asset",
@@ -62,7 +62,7 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
                 "responsible_supervisor": "Administrator",
             }
         ).insert(ignore_permissions=True, ignore_mandatory=True).name
-        # Distinct users so SoD (initiator != receiver) and per-exit roles hold.
+        # [#cy36us]
         self.initiator = self._user("Procurement Supervisor")
         self.receiver = self._user("Accommodation Manager", "Resident Supervisor")
 
@@ -98,19 +98,19 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         d.submit()
         return d
 
-    # --- the 3-exit transfer lock ---------------------------------------------
+    # [#4so00v]
 
     def test_submit_opens_pending_exits_and_issues_code(self):
         d = self._delivery()
         self.assertEqual(d.status, "Pending Exits")
         code = frappe.response.get("delivery_otp")
         self.assertTrue(code and len(code) == 6, "submit must surface a 6-digit code once")
-        # Asset has NOT moved yet — still in the intake store.
+        # [#ev2tzj]
         self.assertEqual(frappe.db.get_value("Facility Asset", self.asset, "building"), self.intake)
 
     def test_lock_not_released_until_all_three_exits_pass(self):
         d = self._delivery()
-        frappe.set_user("Administrator")  # admin override clears every exit
+        frappe.set_user("Administrator")  # [#d1vue9]
         try:
             pass_exit_1(d.name)
             d.reload()
@@ -122,7 +122,7 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
             self.assertEqual(d.status, "Pending Exits")
             self.assertTrue(d.exit2_logistics_cleared)
 
-            # The third exit opens the lock and issues the on-site code.
+            # [#e6al6k]
             pass_exit_3(d.name)
         finally:
             frappe.set_user("Administrator")
@@ -130,17 +130,17 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         self.assertEqual(d.status, "Released")
         self.assertTrue(d.exit3_receiving_cleared)
         self.assertTrue(frappe.response.get("delivery_otp"))
-        # Still NOT moved — release only opens the on-site receipt step.
+        # [#b6uv64]
         self.assertEqual(frappe.db.get_value("Facility Asset", self.asset, "building"), self.intake)
 
     def test_exits_must_pass_in_order(self):
         d = self._delivery()
         frappe.set_user("Administrator")
         try:
-            # Skipping exit 1 -> exit 2 is rejected.
+            # [#i7qoaj]
             with self.assertRaises(frappe.ValidationError):
                 pass_exit_2(d.name)
-            # Skipping straight to exit 3 is rejected.
+            # [#p6efup]
             with self.assertRaises(frappe.ValidationError):
                 pass_exit_3(d.name)
         finally:
@@ -153,7 +153,7 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
     def test_cannot_confirm_before_release(self):
         d = self._delivery()
         code = frappe.response.get("delivery_otp")
-        # Only exits 1+2 passed — lock is still closed.
+        # [#q0dk97]
         frappe.set_user("Administrator")
         try:
             pass_exit_1(d.name)
@@ -170,7 +170,7 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         self.assertNotEqual(d.status, "Delivered")
         self.assertEqual(frappe.db.get_value("Facility Asset", self.asset, "building"), self.intake)
 
-    # --- the on-site code receipt ---------------------------------------------
+    # [#umj1im]
 
     def _release(self, d):
         """Pass all three exits (admin) and return the freshly issued code."""
@@ -195,12 +195,12 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         self.assertEqual(d.status, "Delivered")
         self.assertTrue(d.otp_verified_on)
         self.assertFalse(d.otp_hash, "hash is cleared once delivered")
-        # The asset has now moved into the destination accommodation.
+        # [#bn2jds]
         self.assertEqual(frappe.db.get_value("Facility Asset", self.asset, "building"), self.dest)
         self.assertEqual(
             frappe.db.get_value("Facility Asset", self.asset, "previous_building"), self.intake
         )
-        # An immutable movement-ledger row records the from->to.
+        # [#r1j4bo]
         rows = frappe.get_all(
             "Facility Asset Movement Ledger",
             filters={"source_doctype": "Facility Asset Delivery", "source_name": d.name},
@@ -210,7 +210,7 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
     def test_initiator_cannot_confirm_own_delivery(self):
         d = self._delivery()
         code = self._release(d)
-        # Separation of duties: the initiator who shipped may not confirm receipt.
+        # [#nao53r]
         frappe.set_user(self.initiator)
         try:
             with self.assertRaises(frappe.PermissionError):
@@ -237,8 +237,7 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
 
 
 def tearDownModule():
-    # P-148: drop this module's committed Accommodation Buildings so the suite's
-    # post-run building count returns to the pre-suite baseline (see factories.py).
+    # [#2esm3x]
     from apex.tests import factories
 
     factories.purge_test_buildings()

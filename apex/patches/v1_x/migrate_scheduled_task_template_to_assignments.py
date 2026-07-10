@@ -30,9 +30,7 @@ import frappe
 
 
 def execute():
-    # Read the legacy building column directly from the DB. This patch is
-    # registered pre_model_sync, so the column is still present here (sync_all
-    # drops it later in the same migrate). See module docstring for ordering.
+    # [#abyl1l]
     try:
         templates = frappe.db.sql(
             """SELECT name, building FROM `tabScheduled Task Template`
@@ -40,8 +38,7 @@ def execute():
             as_dict=True,
         )
     except Exception:
-        # Defensive: only reached if the column is already gone (e.g. a fresh
-        # install where it never existed, or a re-order). No-op in that case.
+        # [#419o9y]
         frappe.logger().info(
             "migrate_scheduled_task_template_to_assignments: "
             "building column not found — nothing to migrate."

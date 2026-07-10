@@ -40,7 +40,7 @@ class TestMyCustodyAckContext(ApexHabitatTestCase):
         cls.building = cls._building()
         cls.user_a, cls.emp_a = cls._employee_user()
         cls.user_b, cls.emp_b = cls._employee_user()
-        # A's own open issue and B's own open issue (the foreign one).
+        # [#khiccy]
         cls.issue_a = cls._issue(cls.emp_a)
         cls.issue_b = cls._issue(cls.emp_b)
 
@@ -93,9 +93,7 @@ class TestMyCustodyAckContext(ApexHabitatTestCase):
                 "issued_to_employee": employee,
             }
         )
-        # ignore_validate: skip the Custody Issue write controller (which requires a
-        # child item row). These tests pin the web-form context ownership scope, which
-        # reads only issued_to_employee — the items the controller mandates are irrelevant.
+        # [#jjdn13]
         doc.flags.ignore_validate = True
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         frappe.db.set_value("Custody Issue", doc.name, {"docstatus": 1, "status": "Issued"})
@@ -121,14 +119,14 @@ class TestMyCustodyAckContext(ApexHabitatTestCase):
         get_context(ctx)
         return ctx
 
-    # ---- R5 --------------------------------------------------------------
+    # [#jorcjg]
     def test_foreign_issue_param_not_prefilled(self):
         """A's session passes B's issue docname — it must NOT be echoed back."""
         ctx = self._context_as(self.user_a, issue_param=self.issue_b)
         self.assertNotEqual(
             ctx.prefill_issue, self.issue_b, "another employee's issue must never be pre-filled"
         )
-        # Falls back to A's own issue (A has exactly one open, unacknowledged issue).
+        # [#rcnuli]
         self.assertEqual(ctx.prefill_issue, self.issue_a)
 
     def test_own_issue_param_is_honoured(self):
@@ -139,7 +137,7 @@ class TestMyCustodyAckContext(ApexHabitatTestCase):
         ctx = self._context_as(self.user_a, issue_param="Custody Issue-DOES-NOT-EXIST")
         self.assertEqual(ctx.prefill_issue, self.issue_a)
 
-    # ---- R6 --------------------------------------------------------------
+    # [#i0xngg]
     def test_picklist_is_own_issues_only(self):
         """A's picklist contains A's issue and never B's."""
         ctx = self._context_as(self.user_a)

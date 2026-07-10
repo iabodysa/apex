@@ -61,15 +61,14 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Two estates; a Resident Supervisor scoped (User Permission) to ONLY b1,
-        # and an oversight Accommodation Manager who must stay unrestricted.
+        # [#ge40ld]
         cls.b1 = cls._building()
         cls.b2 = cls._building()
         cls.scoped = cls._user("Resident Supervisor", building=cls.b1)
         cls.oversight = cls._user("Accommodation Manager")
-        cls.lonely = cls._user("Resident Supervisor")  # role but NO User Permission
+        cls.lonely = cls._user("Resident Supervisor")  # [#s3pi7t]
 
-    # ---- fixtures ---------------------------------------------------------
+    # [#ir0iwd]
     @classmethod
     def _building(cls):
         doc = frappe.get_doc(
@@ -166,8 +165,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         frappe.db.set_value(
             "Custody Issue", doc.name, {"docstatus": 1, "status": "Issued"}
         )
-        # docstatus was faked to 1 via db.set_value; reset it before delete_doc
-        # (force=True does not bypass the submitted-record delete guard).
+        # [#1i4y73]
         cls.addClassCleanup(
             lambda n=doc.name: (
                 frappe.db.set_value("Custody Issue", n, "docstatus", 0),
@@ -222,10 +220,9 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
     def setUp(self):
         self.addCleanup(frappe.set_user, "Administrator")
 
-    # ---- T-686: search_arrivals_workers ----------------------------------
+    # [#9rlcxk]
     def test_search_workers_scoped_to_own_building(self):
-        # One active Temporary Worker per estate; the scoped supervisor's search
-        # must surface only b1's worker, never b2's.
+        # [#m2plrf]
         tw1 = self._temp_worker(self.b1)
         tw2 = self._temp_worker(self.b2)
         with _as_user(self.scoped):
@@ -244,16 +241,15 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         self.assertIn(tw2, parties, "oversight role is unrestricted across estates")
 
     def test_search_workers_lonely_scoped_user_sees_none(self):
-        # A scoped role with NO User Permission building must get nothing.
+        # [#ih2knq]
         self._temp_worker(self.b1)
         self._temp_worker(self.b2)
         with _as_user(self.lonely):
             self.assertEqual(search_arrivals_workers(), [])
 
-    # ---- T-687: get_party_custody ----------------------------------------
+    # [#b8m2oe]
     def test_party_custody_scoped_excludes_other_estate(self):
-        # The SAME party holds custody booked against b1 and against b2; the scoped
-        # supervisor must see only the b1 issue's line, never b2's.
+        # [#r6rbq1]
         tw = self._temp_worker(self.b1)
         issue1 = self._open_custody_issue(self.b1, "Temporary Worker", tw)
         issue2 = self._open_custody_issue(self.b2, "Temporary Worker", tw)
@@ -287,14 +283,14 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
         with _as_user(self.lonely):
             self.assertEqual(get_party_custody("Temporary Worker", tw)["lines"], [])
 
-    # ---- T-692: get_tasks_for_cadence / get_due_cadences -----------------
+    # [#r1ur8e]
     def test_tasks_for_cadence_denies_off_scope_building(self):
         self._daily_task()
         with _as_user(self.scoped):
-            # Own building: allowed.
+            # [#rnrexq]
             out = get_tasks_for_cadence(self.b1, "Daily")
             self.assertEqual(out["building"], self.b1)
-            # Off-scope building: denied via the building-read gate.
+            # [#2m6lw1]
             with self.assertRaises(frappe.PermissionError):
                 get_tasks_for_cadence(self.b2, "Daily")
 
@@ -309,6 +305,6 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
     def test_safety_reads_unrestricted_for_oversight(self):
         self._daily_task()
         with _as_user(self.oversight):
-            # Oversight may build a checklist for ANY estate.
+            # [#slk3a7]
             self.assertEqual(get_tasks_for_cadence(self.b2, "Daily")["building"], self.b2)
             self.assertEqual(get_due_cadences(self.b2)["building"], self.b2)

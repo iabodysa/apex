@@ -17,8 +17,7 @@ def execute(filters=None):
         {"label": frappe._("Monthly Rent"), "fieldname": "rent_amount", "fieldtype": "Currency", "width": 140},
     ]
 
-    # A submitted lease is in force whether the approval workflow left it at
-    # Approved or it has since moved into its Active post-approval lifecycle.
+    # [#ocqe4r]
     query_filters = {"docstatus": 1, "status": ["in", ["Approved", "Active"]]}
     if filters.get("building"):
         query_filters["building"] = filters["building"]

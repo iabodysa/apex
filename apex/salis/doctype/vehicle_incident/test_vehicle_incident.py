@@ -44,10 +44,7 @@ class TestVehicleIncident(FrappeTestCase):
         return frappe.get_doc(data).insert(ignore_permissions=True)
 
     def _card_count(self, card_name):
-        # Count exactly as the Fleet Operations dashboard does: read the
-        # shipped Number Card's own document_type + filters_json and apply them,
-        # so this fails if the card's filter ever drifts from the incident
-        # status/type contract it depends on.
+        # [#4kynzx]
         card = frappe.get_doc("Number Card", card_name)
         return frappe.db.count(card.document_type, json.loads(card.filters_json or "[]"))
 
@@ -67,8 +64,7 @@ class TestVehicleIncident(FrappeTestCase):
         self.assertEqual(inc.previous_driver, self.driver)
 
     def test_theft_increments_open_incident_and_theft_cards(self):
-        # The Fleet Operations dashboard counts open incidents and open
-        # thefts via two Number Cards; a submitted open Theft must register in both.
+        # [#ofos3i]
         before_incidents = self._card_count("Open Vehicle Incidents")
         before_theft = self._card_count("Open Theft Reports")
 
@@ -86,8 +82,7 @@ class TestVehicleIncident(FrappeTestCase):
             "the Open Theft Reports card must count the new theft",
         )
 
-        # An accident is an open incident but not a theft: it moves the
-        # general card only, proving the theft card's incident_type filter holds.
+        # [#s9978y]
         acc = self._incident("Accident", fault="Third party")
         acc.submit()
         self.assertEqual(
@@ -121,12 +116,12 @@ class TestVehicleIncident(FrappeTestCase):
             self._incident("Accident", incident_date=add_days(today(), 1))
 
     def test_negative_estimated_cost_rejected(self):
-        # An estimated repair/loss cost cannot be negative.
+        # [#82nrhv]
         with self.assertRaises(frappe.ValidationError):
             self._incident("Accident", fault="Third party", estimated_cost=-100)
 
     def test_zero_or_positive_estimated_cost_allowed(self):
-        # Zero (cost unknown/none) and a positive cost both pass the same guard.
+        # [#2qwohn]
         zero = self._incident("Accident", fault="Third party", estimated_cost=0)
         self.assertTrue(zero.name)
         positive = self._incident("Accident", fault="Third party", estimated_cost=2500)

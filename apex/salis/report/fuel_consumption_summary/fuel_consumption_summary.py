@@ -23,10 +23,7 @@ def execute(filters=None):
         elif filters.get("to_date"):
             log_filters["log_date"] = ["<=", filters["to_date"]]
 
-    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
-    # list gets via permission_query_conditions. Fuel Daily Log has no own project —
-    # it reaches one through its vehicle — so confine the logs to the vehicles in the
-    # caller's allowed projects; oversight roles see all.
+    # [#be5q0w]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:

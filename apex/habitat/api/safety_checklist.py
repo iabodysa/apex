@@ -53,17 +53,13 @@ from frappe.utils import (
     nowdate,
 )
 
-# Mirrors safety_task_compliance_summary._expected_tasks: only active catalog rows of
-# the requested frequency are in scope.
+# [#2qr2m0]
 _SCOPE_BASE = {"is_active": 1}
 
-# Canonical cadence order for the portal: shortest period first. get_due_cadences
-# returns due cadences in this order, and it is the set submit_due_rounds groups by.
+# [#ia8mpd]
 _CADENCE_ORDER = ["Daily", "Weekly", "Monthly", "Quarterly", "Annual"]
 
-# Render fields for one checklist row — the real catalog field names (verified
-# against safety_task_catalog.json). Shared by get_tasks_for_cadence and
-# get_due_cadences so the two endpoints return identical task payloads.
+# [#jvdv48]
 _TASK_FIELDS = [
     "name",
     "task_code",
@@ -107,11 +103,7 @@ def get_tasks_for_cadence(building, cadence):
         frappe.throw(_("A cadence is required to build the checklist."))
     if not building:
         frappe.throw(_("A building is required to build the checklist."))
-    # [#wave-b2] The catalog + Safety Round bulk reads below run on get_all/db.exists
-    # (ignore_permissions forced), so the building row-scoping the desk gets via
-    # permission_query_conditions is bypassed. Gate on read of THIS building so a
-    # scoped supervisor cannot build a checklist for an estate outside their scope;
-    # oversight roles pass through unrestricted.
+    # [#xh0530]
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
     return {
@@ -132,7 +124,7 @@ def _scoped_tasks(building, cadence):
     """
     base = {**_SCOPE_BASE, "frequency": cadence}
 
-    # Mode 1: tasks that apply to every building.
+    # [#31v73y]
     tasks = {}
     for t in frappe.get_all(
         "Safety Task Catalog",
@@ -141,7 +133,7 @@ def _scoped_tasks(building, cadence):
     ):
         tasks[t.name] = t
 
-    # Mode 2: tasks scoped to THIS building via the child table.
+    # [#qq7jmr]
     scoped_parents = frappe.get_all(
         "Safety Task Building Scope",
         filters={"parenttype": "Safety Task Catalog", "building": building},
@@ -189,8 +181,7 @@ def _current_period(cadence, on_date=None):
         return day, day, "Today"
 
     if cadence == "Weekly":
-        # ISO week: Monday (weekday()==0) start, Sunday end. Deterministic and
-        # independent of the site's first_day_of_the_week setting.
+        # [#1ogbzb]
         start = day - datetime.timedelta(days=day.weekday())
         end = start + datetime.timedelta(days=6)
         return start, end, "This week"
@@ -198,7 +189,7 @@ def _current_period(cadence, on_date=None):
     if cadence == "Monthly":
         start = getdate(get_first_day(day))
         end = getdate(get_last_day(day))
-        # e.g. "June 2026"
+        # [#qz4tl5]
         return start, end, start.strftime("%B %Y")
 
     if cadence == "Quarterly":
@@ -267,10 +258,7 @@ def get_due_cadences(building):
 
     if not building:
         frappe.throw(_("A building is required to compute due cadences."))
-    # [#wave-b2] Same scope gate as get_tasks_for_cadence: the per-cadence Safety Round
-    # due-checks + catalog reads below run ignore_permissions, so gate on read of THIS
-    # building to keep a scoped supervisor from probing an out-of-scope estate's
-    # due-rounds. Oversight roles pass through unrestricted.
+    # [#mrarf4]
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
     due = []
@@ -279,7 +267,7 @@ def get_due_cadences(building):
             continue
         tasks = _scoped_tasks(building, cadence)
         if not tasks:
-            # Due, but nothing scoped to check — omit it.
+            # [#hew5mv]
             continue
         _start, _end, period_label = _current_period(cadence)
         due.append(
@@ -328,9 +316,7 @@ def submit_round(building, cadence, round_date, lines, is_reinspection=0):
         dict ``{"ok": True, "safety_round": <docname>, "overall_result": <str>,
         "count": <int executions>}``.
     """
-    # Safety Officer has create but NOT submit on Safety Task Execution: gate on
-    # submit so this method only proceeds for roles that can actually submit the
-    # executions (and the round). Do not silently swallow that.
+    # [#kfzxpy]
     frappe.has_permission("Safety Task Execution", "submit", throw=True)
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
@@ -338,18 +324,13 @@ def submit_round(building, cadence, round_date, lines, is_reinspection=0):
         frappe.throw(_("A building is required to submit a round."))
     if not cadence:
         frappe.throw(_("A cadence is required to submit a round."))
-    # Reject any cadence outside the allowlist BEFORE _create_round runs: cadence
-    # feeds the savepoint identifier (f"..._{frappe.scrub(cadence)}"), so a value
-    # carrying a quote/semicolon must never reach that interpolation. Mirrors the
-    # guard submit_due_rounds already applies per line.
+    # [#dmzr86]
     if cadence not in _CADENCE_ORDER:
         frappe.throw(_("Unknown cadence: {0}").format(cadence))
     if not round_date:
         frappe.throw(_("A round date is required to submit a round."))
 
-    # `lines` arrives as a JSON string over HTTP; accept an already-parsed list
-    # too so server-side callers and tests can pass a list directly. A malformed
-    # body must surface as a clean ValidationError, not a raw JSONDecodeError 500.
+    # [#ranys3]
     if isinstance(lines, str):
         try:
             lines = json.loads(lines)
@@ -393,13 +374,11 @@ def _create_round(building, cadence, round_date, lines, is_reinspection):
     Returns ``(round_doc, count)`` — the SUBMITTED round document (caller may
     ``reload()`` to read derived fields) and the number of executions created.
     """
-    # A distinct savepoint name per cadence so nesting submit_due_rounds' outer
-    # savepoint and these inner ones never collide on the same identifier.
+    # [#2f11fa]
     savepoint = f"safety_checklist_round_{frappe.scrub(cadence)}"
     frappe.db.savepoint(savepoint)
     try:
-        # Insert the round but do NOT submit yet — the executions must exist and
-        # be submitted first so on_submit can read them.
+        # [#9gynfq]
         round_doc = frappe.get_doc(
             {
                 "doctype": "Safety Round",
@@ -435,8 +414,7 @@ def _create_round(building, cadence, round_date, lines, is_reinspection):
             ste.submit()
             count += 1
 
-        # Submit the round LAST so its on_submit derives overall_result from the
-        # full, already-submitted execution set.
+        # [#bwac6z]
         round_doc.submit()
     except Exception:
         frappe.db.rollback(save_point=savepoint)
@@ -447,8 +425,7 @@ def _create_round(building, cadence, round_date, lines, is_reinspection):
     return round_doc, count
 
 
-# Manager role notified after a successful submit_due_rounds. Used both to read a
-# configurable recipient override and as the role fallback.
+# [#3uaqou]
 _REPORT_ROLE = "Accommodation Manager"
 
 
@@ -491,17 +468,13 @@ def submit_due_rounds(building, round_date, results):
 
     if not building:
         frappe.throw(_("A building is required to submit rounds."))
-    # Scope gate: reject a caller without read on THIS building BEFORE any round
-    # is created or the report is emailed — a supervisor scoped off this building
-    # must not drive its due-rounds (defense-in-depth + fail-fast over the Safety
-    # Round controller's own building check, which only fires once a round inserts;
-    # this also blocks leaking the building via the report on an empty result set).
+    # [#sx7kz2]
     frappe.has_permission("Building", "read", doc=building, throw=True)
     if not round_date:
         frappe.throw(_("A round date is required to submit rounds."))
 
     if isinstance(results, str):
-        # Surface a malformed JSON body as a clean ValidationError, not a 500.
+        # [#2o10dh]
         try:
             results = json.loads(results)
         except ValueError:
@@ -509,8 +482,7 @@ def submit_due_rounds(building, round_date, results):
     if not isinstance(results, list):
         frappe.throw(_("Results must be a list."))
 
-    # Group lines by cadence, preserving the canonical Daily..Annual order for a
-    # stable round/return ordering. An unknown cadence is rejected up-front.
+    # [#q7aewr]
     by_cadence: dict[str, list] = {}
     for line in results:
         cadence = line.get("cadence")
@@ -523,7 +495,7 @@ def submit_due_rounds(building, round_date, results):
     if not by_cadence:
         frappe.throw(_("No result lines to submit."))
 
-    # Outer savepoint: roll back EVERY cadence's round together on any failure.
+    # [#c8yyrm]
     outer = "safety_checklist_submit_due_rounds"
     frappe.db.savepoint(outer)
     rounds = []
@@ -551,8 +523,7 @@ def submit_due_rounds(building, round_date, results):
     else:
         frappe.db.release_savepoint(outer)
 
-    # Email the manager OUTSIDE the savepoint-critical path: a mail error must
-    # not roll back the submitted rounds (caught + logged inside the helper).
+    # [#1zurym]
     emailed = _email_round_report(building, round_date, rounds)
 
     return {"ok": True, "rounds": rounds, "count": total, "emailed": emailed}
@@ -576,7 +547,7 @@ def _report_recipients():
             "Habitat Settings", "safety_report_recipient"
         )
     except Exception:
-        # Field not present on this site's schema yet — fall through to the role.
+        # [#5mm1qq]
         configured = None
     if configured:
         return [configured]
@@ -604,7 +575,7 @@ def _round_report_html(building, round_date, rounds):
 
     sections = []
     for r in rounds:
-        # The issues for this round: executions that scored Poor or Not Done.
+        # [#qzmx9b]
         issues = frappe.get_all(
             "Safety Task Execution",
             filters={

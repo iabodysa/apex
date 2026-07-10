@@ -23,10 +23,7 @@ def get_salis_settings():
     return frappe.get_single("Salis Settings")
 
 
-# A new Int/Float on an existing Single stores 0 (not its JSON default), so every
-# numeric Salis Settings read must coalesce a blank/zero value to the caller's
-# default. These are the single source the controllers/engines/SPAs read tunables
-# through — no caller may trust a raw 0 or inline its own default.
+# [#92zfgx]
 def get_salis_int(field: str, default: int) -> int:
     """Read an Int from the Salis Settings single, falling back to ``default``
     when the stored value is blank or zero (the new-Single-Int-stores-0 trap)."""
@@ -57,10 +54,7 @@ def get_salis_float(field: str, default: float) -> float:
         return default
 
 
-# Boarding/departure flow tunables + their built-in fallbacks. A new Int on an
-# existing Single stores 0 (not its JSON default), so every read here coalesces a
-# blank/zero value to the default — the single source the boarding flow + the
-# driver/worker SPAs read these limits through.
+# [#c409u5]
 BOARDING_FLOW_DEFAULTS = {
     "boarding_notify_max_count": 3,
     "boarding_notify_window_seconds": 60,

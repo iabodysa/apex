@@ -80,7 +80,7 @@ class TestRequestTripNotifications(FrappeTestCase):
 			)
 		)
 
-		# The alert fires on the transition into Resolved; evaluate against it.
+		# [#nxvy20]
 		req.status = "Resolved"
 		recipients = _recipients(RR_NOTIFICATION, req)
 		self.assertIn(self.coordinator, recipients)

@@ -35,7 +35,7 @@ class TestGetDriverForUser(FrappeTestCase):
         frappe.set_user("Administrator")
         self._cleanup = []
 
-        # A user linked through Employee.user_id to a Salis Driver.
+        # [#cjb30p]
         self.user = f"drv-{_h(12).lower()}@example.com"
         u = frappe.get_doc({
             "doctype": "User",
@@ -64,7 +64,7 @@ class TestGetDriverForUser(FrappeTestCase):
         self.driver.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         self._cleanup.append(("Salis Driver", self.driver.name))
 
-        # A user with no Employee link at all (the unlinked case).
+        # [#j434ox]
         self.unlinked_user = f"nolink-{_h(12).lower()}@example.com"
         nu = frappe.get_doc({
             "doctype": "User",
@@ -97,7 +97,7 @@ class TestGetDriverForUser(FrappeTestCase):
         expected = self.driver.name
         self.assertEqual(driver_portal._find_driver(self.user), expected)
         self.assertEqual(boarding._driver_for_user(self.user), expected)
-        # _resolve_driver (used by masar) wraps _find_driver -> same value.
+        # [#9s8s6u]
         self.assertEqual(driver_portal._resolve_driver(self.user), expected)
 
     def test_aliases_return_none_for_unlinked_user(self):
@@ -105,7 +105,7 @@ class TestGetDriverForUser(FrappeTestCase):
         self.assertIsNone(boarding._driver_for_user(self.unlinked_user))
 
     def test_resolve_driver_throws_for_unlinked_user(self):
-        # The hard wrapper masar/action endpoints use still fails closed on None.
+        # [#a8a9nq]
         with self.assertRaises(frappe.PermissionError):
             driver_portal._resolve_driver(self.unlinked_user)
 

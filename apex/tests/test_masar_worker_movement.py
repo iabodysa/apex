@@ -29,9 +29,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.salis.api import masar
 from apex.tests import factories
 
-# All fixture builders + the worker-trip mixin live in tests/factories.py (P-135);
-# this module calls them via the ``factories`` namespace — no local re-export aliases,
-# so the cross-test-import ratchet (test_no_cross_test_imports) stays empty.
+# [#a9gy7c]
 
 
 class TestMasarSchemaInstall(FrappeTestCase):
@@ -71,9 +69,7 @@ class TestTripStartLogController(factories.WorkerTripMixin, FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a per-class Project OUTSIDE the per-method savepoint
-        # rollback; delete it so the committed Project does not leak across the
-        # test DB. (Site/Building/Employees are reuse-or-create shared fixtures.)
+        # [#4w47gh]
         frappe.set_user("Administrator")
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -276,9 +272,7 @@ class TestMasarReadEndpoint(factories.WorkerTripMixin, FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a per-class Project OUTSIDE the per-method savepoint
-        # rollback; delete it so the committed Project does not leak across the
-        # test DB. (Site/Building/Employees are reuse-or-create shared fixtures.)
+        # [#4w47gh]
         frappe.set_user("Administrator")
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -395,8 +389,7 @@ class TestMasarReadEndpoint(factories.WorkerTripMixin, FrappeTestCase):
 
 
 def tearDownModule():
-    # P-148: drop this module's committed Accommodation Buildings so the suite's
-    # post-run building count returns to the pre-suite baseline (see factories.py).
+    # [#2esm3x]
     from apex.tests import factories
 
     factories.purge_test_buildings()

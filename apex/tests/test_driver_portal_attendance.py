@@ -55,7 +55,7 @@ class TestDriverPortalAttendanceHistory(FrappeTestCase):
 		)
 		cls.driver_b, cls.user_b = _driver_without_vehicle("drv_att_b@example.com")
 
-		# Two days this month + one day last month for driver A.
+		# [#64r9wc]
 		this_first = frappe.utils.get_first_day(frappe.utils.getdate())
 		cls.this_month = frappe.utils.cstr(this_first)[:7]
 		cls.day_1 = frappe.utils.cstr(this_first)
@@ -67,7 +67,7 @@ class TestDriverPortalAttendanceHistory(FrappeTestCase):
 		_attendance(cls.driver_a, cls.day_1, status="Present")
 		_attendance(cls.driver_a, cls.day_2, status="Late", check_out=None)
 		_attendance(cls.driver_a, cls.last_day, status="Present")
-		# A row for driver B this month — must never leak into driver A's history.
+		# [#beuika]
 		_attendance(cls.driver_b, cls.day_1, status="Absent", check_in=None, check_out=None)
 
 	def tearDown(self):
@@ -82,7 +82,7 @@ class TestDriverPortalAttendanceHistory(FrappeTestCase):
 		self.assertIn(self.day_1, dates)
 		self.assertIn(self.day_2, dates)
 		self.assertNotIn(self.last_day, dates)
-		# newest-first ordering
+		# [#gshfqr]
 		self.assertEqual(dates, sorted(dates, reverse=True))
 
 	def test_month_arg_selects_that_month(self):
@@ -98,7 +98,7 @@ class TestDriverPortalAttendanceHistory(FrappeTestCase):
 		frappe.set_user(self.user_a)
 		res = driver_portal.my_attendance()
 		statuses = {r["status"] for r in res["rows"]}
-		self.assertNotIn("Absent", statuses)  # B's row is the only Absent one
+		self.assertNotIn("Absent", statuses)  # [#hb9lk9]
 		frappe.set_user(self.user_b)
 		res_b = driver_portal.my_attendance()
 		self.assertEqual([r["status"] for r in res_b["rows"]], ["Absent"])

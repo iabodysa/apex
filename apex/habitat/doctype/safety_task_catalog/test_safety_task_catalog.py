@@ -5,10 +5,7 @@ import unittest
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Confidential client / accreditation-vendor names that must never appear in the seeded
-# Safety Task Catalog (the catalog must read client-neutral). Guards the genericization
-# against re-introduction. Assembled from fragments so the literal confidential
-# words never appear verbatim in this repo (the same privacy rule this test enforces).
+# [#onhbal]
 _CONFIDENTIAL_TOKENS = ("ama" + "zon", "ave" + "tta")
 _SEED_JSON = os.path.join(
     frappe.get_app_path("apex"),

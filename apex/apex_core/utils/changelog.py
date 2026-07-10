@@ -754,11 +754,7 @@ _RELEASES = [
 # [#a0cv0f]
 _FEED_TITLE_MAX = 140
 
-# Cap on how many items the sidebar "What's New" bell surfaces in one pull. `_RELEASES`
-# is kept COMPLETE on purpose (the TestFeedCoversPopups contract asserts every shipped
-# popup version has a source entry), but a user with an old/empty `since` must not be
-# dumped the entire multi-year back-catalogue. `_RELEASES` is newest-first, so slicing
-# the filtered result keeps the most recent releases. Bounded surface, complete source.
+# [#ojxrjf]
 _FEED_MAX = 20
 
 

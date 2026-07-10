@@ -31,11 +31,7 @@ from frappe.desk.doctype.number_card import number_card as card_api
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
-# Tier-1 Number Cards on the Fleet Operations workspace (Key Metrics block).
-# Open Theft Reports is also here; its behaviour is proven in
-# salis/doctype/vehicle_incident/test_vehicle_incident.py and re-proven below
-# through the render path for completeness.
-# Curated to the 2026-06-25 workspace design: only essential actionable cards.
+# [#hxpr7x]
 FLEET_CARDS = [
     "Open Vehicle Incidents",
     "Open Theft Reports",
@@ -43,7 +39,7 @@ FLEET_CARDS = [
     "Workshop Overstay",
 ]
 
-# P-094 headline-chart design: the fleet workspace pins one headline chart.
+# [#7ebb2c]
 FLEET_CHARTS = ["Fuel Cost by Month"]
 
 
@@ -56,7 +52,7 @@ class TestFleetOpsRender(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def _tag(self):
-        # Short, per-test unique token for plates / driver ids / dates.
+        # [#tady2h]
         return self._testMethodName[-24:]
 
     def _vehicle(self, status, suffix=""):
@@ -87,9 +83,7 @@ class TestFleetOpsRender(FrappeTestCase):
         )
 
     def _incident(self, incident_type):
-        # Draft (docstatus 0): a Count card's get_result and a Group By chart both
-        # include drafts, and staying unsubmitted avoids the Theft submit side
-        # effects (which would stop the vehicle and clear its driver).
+        # [#cmy74x]
         return frappe.get_doc(
             {
                 "doctype": "Vehicle Incident",
@@ -113,9 +107,7 @@ class TestFleetOpsRender(FrappeTestCase):
         ).insert(ignore_permissions=True)
 
     def _assignment_draft(self):
-        # Draft assignment dated today: the Vehicle Activations time-series counts
-        # docstatus < 2, so a draft lands in this month's bucket without firing the
-        # submit-time vehicle/driver mutation.
+        # [#6rpc19]
         driver = self._driver(suffix="A")
         return frappe.get_doc(
             {
@@ -128,9 +120,7 @@ class TestFleetOpsRender(FrappeTestCase):
         ).insert(ignore_permissions=True)
 
     def _overstay_vehicle(self):
-        # Workshop Overstay needs a SUBMITTED Maintenance Vehicle Stop older than
-        # the cutoff (Salis Settings.workshop_overstay_days, default 14) with no
-        # return_date, on a vehicle still Stopped/Under Maintenance.
+        # [#ii79bf]
         vehicle = self._vehicle("Active", suffix="W")
         stop = frappe.get_doc(
             {
@@ -140,13 +130,11 @@ class TestFleetOpsRender(FrappeTestCase):
                 "stop_date": add_days(today(), -20),
             }
         ).insert(ignore_permissions=True)
-        stop.submit()  # flips the vehicle to Stopped (an overstay-eligible status)
+        stop.submit()  # [#iobvk5]
         return vehicle
 
     def _alerts(self):
-        # Open Alerts by Type (Group By, status in Open/Acknowledged) needs an open
-        # alert to plot; Median Alert Resolve Days (Custom) needs a Resolved alert
-        # with both raised_on and resolved_on so the median span is > 0.
+        # [#55h071]
         vehicle = self._vehicle("Active", suffix="AL")
         frappe.get_doc(
             {
@@ -176,10 +164,7 @@ class TestFleetOpsRender(FrappeTestCase):
         )
 
     def _fuel_request(self):
-        # Fuel Cost by Month sums Fuel Request.amount (status=Done) by request_date.
-        # A new request is guarded to status Pending; the Done status + amount are
-        # reached through the workflow, so set them via db (same bypass _alerts uses)
-        # to land a real row the chart can sum without driving the full workflow.
+        # [#83tk35]
         req = frappe.get_doc(
             {
                 "doctype": "Fuel Request",
@@ -197,20 +182,20 @@ class TestFleetOpsRender(FrappeTestCase):
         )
 
     def _seed(self):
-        # One Active vehicle anchors the incident + utilisation seeds.
+        # [#3fk2xh]
         self._active_vehicle = self._vehicle("Active")
         self._vehicle("Stopped", suffix="S")
         self._vehicle("Under Maintenance", suffix="M")
         self._driver("Active")
-        self._incident("Accident")  # Open Vehicle Incidents
-        self._incident("Theft")  # Open Theft Reports (+ Incidents by Type)
-        # Two snapshots this month: Operating Days (Sum) + Vehicle Utilisation/Trend.
+        self._incident("Accident")  # [#kcfri5]
+        self._incident("Theft")  # [#6yb4v9]
+        # [#qxgvzm]
         self._snapshot(1, 5, 80.0)
         self._snapshot(3, 4, 60.0)
-        self._assignment_draft()  # Vehicle Activations
-        self._overstay_vehicle()  # Workshop Overstay
-        self._alerts()  # Open Alerts by Type + Median Alert Resolve Days
-        self._fuel_request()  # Fuel Cost by Month (headline chart)
+        self._assignment_draft()  # [#mcq9ia]
+        self._overstay_vehicle()  # [#81spwx]
+        self._alerts()  # [#22s0dx]
+        self._fuel_request()  # [#cuagxm]
 
     def _card_result(self, card_name):
         """Render a Number Card exactly as the widget does.
@@ -235,15 +220,13 @@ class TestFleetOpsRender(FrappeTestCase):
         return chart_api.get(chart_name=chart_name, refresh=1)
 
     def _series_total(self, config):
-        # A time-series chart always returns a label per date bucket, so 'non-empty'
-        # means the dataset values actually sum to > 0, not merely that labels exist.
+        # [#db4ue8]
         if not config or not config.get("datasets"):
             return 0
         return sum(frappe.utils.flt(v) for ds in config["datasets"] for v in ds.get("values", []))
 
     def test_every_tier1_number_card_renders_non_zero(self):
-        # Each Tier-1 card, rendered through its own widget path, must return a
-        # value > 0 after seeding -- the proof the workspace shows real numbers.
+        # [#f3jpfx]
         zero = []
         for name in FLEET_CARDS:
             result = self._card_result(name)
@@ -252,8 +235,7 @@ class TestFleetOpsRender(FrappeTestCase):
         self.assertEqual(zero, [], f"Tier-1 number cards that rendered zero with data seeded: {zero}")
 
     def test_every_fleet_chart_renders_non_empty(self):
-        # Each chart, rendered through dashboard_chart.get, must carry data:
-        # Group By -> a non-empty {labels, datasets}; time-series -> values summing > 0.
+        # [#oscfce]
         empty = []
         for name in FLEET_CHARTS:
             config = self._chart_data(name)
@@ -267,15 +249,11 @@ class TestFleetOpsRender(FrappeTestCase):
         self.assertEqual(empty, [], f"fleet charts that rendered empty with data seeded: {empty}")
 
     def test_render_scan_is_non_vacuous(self):
-        # Guard against a silently-passing suite: the cards/charts/onboarding the
-        # workspace JSON actually references must still exist, so the proofs above
-        # ran against the real shipped records.
+        # [#rotjf2]
         content = json.loads(frappe.db.get_value("Workspace", "fleet", "content") or "[]")
         referenced_cards = {b["data"]["number_card_name"] for b in content if b.get("type") == "number_card"}
         referenced_charts = {b["data"]["chart_name"] for b in content if b.get("type") == "chart"}
-        # The 14->8 consolidation folded Fleet Operations into the 'fleet' workspace,
-        # which also carries fuel/maintenance cards proven in their own tests; assert the
-        # render-tested cards are present (a subset), not that they are the only ones.
+        # [#u5ioeg]
         self.assertLessEqual(
             set(FLEET_CARDS),
             referenced_cards,

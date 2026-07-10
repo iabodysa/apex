@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import frappe
 
-# Canonical enrichment output keys every consumer reads.
+# [#3jhrrm]
 VEHICLE_PLATE_KEY = "vehicle_plate"
 DRIVER_NAME_KEY = "driver_name"
 

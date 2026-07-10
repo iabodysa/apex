@@ -18,14 +18,14 @@ site has run it (tracked in tabPatch Log).
 
 import frappe
 
-# Twins deleted outright (canonical kept) + pre-rename copies now shipped under new names.
+# [#9r14qy]
 LEGACY_CHARTS = [
-    # deleted twins
+    # [#dght3d]
     "Leases by Status",
     "Movement Trips by Status",
     "Fuel Spend by Platform",
     "Fuel Spend Trend",
-    # clarity renames (old names)
+    # [#ox7z7z]
     "Vehicle Utilisation",
     "Ledger Cost by Type",
     "Monthly Cost Bleeding",
@@ -33,16 +33,16 @@ LEGACY_CHARTS = [
 ]
 
 LEGACY_CARDS = [
-    # deleted twins
+    # [#dght3d]
     "Vacant Beds",
     "Fuel Spend This Month",
     "Salis Compliance Drivers Active Drivers",
-    # clarity renames (old names)
+    # [#ox7z7z]
     "Compliance Percent",
     "Buildings Over Threshold",
     "Pending on Manifest",
     "Ledger Cost This Month",
-    # broken raw-prefixed docnames (old names)
+    # [#p0oex4]
     "salis_fuel Approved This Month",
     "salis_fuel Litres Dispensed This Month",
     "salis_fuel Open Claim Disputes",

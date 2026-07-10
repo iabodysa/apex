@@ -17,15 +17,13 @@ from frappe import _
 from frappe.model.document import Document
 
 
-# A single manifest is a front-desk batch, not a payroll dump: cap the rows so a
-# guest cannot post an unbounded table through the public Arrival Manifest form.
+# [#7nku4t]
 _MAX_EXPECTED_WORKERS = 500
 
 
 class ArrivalBatch(Document):
     def validate(self) -> None:
-        # expected_count drives the manifest-completion telemetry; keep it in sync
-        # with the rows so the read endpoint never has to recount.
+        # [#eyhjls]
         self.expected_count = len(self.expected_workers or [])
         if not self.expected_count:
             frappe.throw(_("Add at least one expected worker to the manifest."))
@@ -37,10 +35,7 @@ class ArrivalBatch(Document):
 
     @property
     def pending_arrival_count(self) -> int:
-        # Manifest reconciliation = expected workers minus those actually housed in
-        # this building on the expected date (mirrors get_arrival_summary). Drives
-        # the manifest_not_reconciled Notification condition, which runs in a
-        # restricted eval where frappe.db is unavailable — so it lives here.
+        # [#jyfszg]
         housed = frappe.db.count(
             "Housing Assignment",
             {

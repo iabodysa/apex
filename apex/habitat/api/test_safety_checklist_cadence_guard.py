@@ -29,8 +29,7 @@ class TestSubmitRoundCadenceGuard(FrappeTestCase):
         ).name
 
     def _lines(self):
-        # A well-formed line so the ONLY thing wrong is the cadence — proves the
-        # rejection is the cadence guard, not line validation.
+        # [#mbaysw]
         task = frappe.get_doc(
             {
                 "doctype": "Safety Task Catalog",
@@ -46,8 +45,7 @@ class TestSubmitRoundCadenceGuard(FrappeTestCase):
         return [{"task": task, "execution_status": "Good"}]
 
     def test_quote_cadence_raises_clean_validation_error(self):
-        # A cadence with a quote must throw a clean ValidationError, NOT a SQL
-        # error from a poisoned savepoint identifier.
+        # [#pcq8ff]
         with self.assertRaises(frappe.ValidationError):
             submit_round(self.building, "Daily'; DROP", today(), self._lines())
 
@@ -56,8 +54,7 @@ class TestSubmitRoundCadenceGuard(FrappeTestCase):
             submit_round(self.building, "Weekly; SELECT 1", today(), self._lines())
 
     def test_bad_cadence_never_reaches_the_savepoint(self):
-        # The guard must fire BEFORE _create_round: frappe.db.savepoint is never
-        # called, and no Safety Round is created for the malicious cadence.
+        # [#ha4t43]
         before = frappe.db.count("Safety Round", {"building": self.building})
         with patch(
             "apex.habitat.api.safety_checklist.frappe.db.savepoint"
@@ -69,7 +66,7 @@ class TestSubmitRoundCadenceGuard(FrappeTestCase):
         self.assertEqual(after, before, "no round may be created for a bad cadence")
 
     def test_valid_cadence_still_accepted(self):
-        # Regression: a legitimate cadence still passes the new guard and records.
+        # [#oldwez]
         out = submit_round(self.building, "Daily", today(), self._lines())
         self.assertTrue(out["ok"])
         self.assertEqual(

@@ -148,13 +148,10 @@ class TestAccommodationCheckout(FrappeTestCase):
                       "'items' table field must exist on Custody Damage Assessment")
         self.assertEqual(fieldnames["items"].options, "Custody Damage Item")
 
-    # --- Departure transport hand-off ---
+    # [#k1ngbj]
 
     def _h(self):
-        # Unique identity suffix for fixtures. Room autonames field:room_number
-        # (unique) and Room is in test_ignore, so a short hash birthday-collides
-        # with residual rows -> DuplicateEntryError flake. 12 chars makes the
-        # 16^12 space collision-proof across runs. (P-216)
+        # [#b96xdj]
         return frappe.generate_hash(length=12).upper()
 
     def _fixtures(self):
@@ -237,7 +234,7 @@ class TestAccommodationCheckout(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             create_departure_transport(chk.name)
 
-    # Custody auto-fetch, submit gate, and deduction roll-up.
+    # [#q4s5ae]
 
     def _custody_article(self):
         category = frappe.db.get_value("Custody Asset Category", {}) or frappe.get_doc(
@@ -335,7 +332,7 @@ class TestAccommodationCheckout(FrappeTestCase):
         chk.insert(ignore_permissions=True)
         chk.custody_return_items[0].return_status = "Damaged"
         chk.custody_return_items[0].deduction_amount = 75
-        chk.damage_deduction_amount = 9999  # should be overwritten by the roll-up
+        chk.damage_deduction_amount = 9999  # [#4e1lse]
         chk.save(ignore_permissions=True)
         chk.reload()
         self.assertEqual(chk.damage_deduction_amount, 75)

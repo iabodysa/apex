@@ -41,7 +41,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import today
 
-# The on-site code mechanism is shared with Custody Handover — one implementation.
+# [#c3ra76]
 from apex.habitat.doctype.custody_handover.custody_handover import (
     generate_otp,
 )
@@ -51,9 +51,7 @@ from apex.habitat.asset_movement_engine import (
 )
 
 DELIVERY_DOCTYPE = "Facility Asset Delivery"
-# A pseudo source_doctype for the movement ledger so a delivery-driven move is
-# distinguishable from a Facility Asset Movement-driven one (both use the same
-# immutable ledger).
+# [#6cpx5d]
 LEDGER_SOURCE = "Facility Asset Delivery"
 
 
@@ -96,8 +94,7 @@ class FacilityAssetDelivery(Document):
         three exits pass (Released) and the receiving side confirms the code."""
         self.db_set("status", "Pending Exits")
         code = generate_otp(self)
-        # Surface the plaintext once so the Desk save response can show it to the
-        # initiator. Only its hash is stored; the code is never persisted.
+        # [#ciwilc]
         frappe.response["delivery_otp"] = code
 
     def on_cancel(self):
@@ -106,7 +103,7 @@ class FacilityAssetDelivery(Document):
         so the reversal is a no-op there (idempotent)."""
         if self.status == "Delivered":
             reverse_asset_movement(LEDGER_SOURCE, self.name)
-            # Revert the asset's location to where it came from.
+            # [#kv9ve6]
             if frappe.db.exists("Facility Asset", self.facility_asset):
                 count = frappe.db.get_value("Facility Asset", self.facility_asset, "movement_count") or 0
                 frappe.db.set_value(
@@ -141,9 +138,7 @@ def move_asset_on_delivery(doc) -> None:
     if not asset:
         return
     company = frappe.db.get_value("Building", doc.to_building, "company")
-    # Reuse the movement-ledger engine via a lightweight shim object: it reads
-    # from_/to_/facility_asset/name/doctype off the passed doc. Build a thin
-    # namespace matching what post_asset_movement expects.
+    # [#6p6qd7]
     ledger_doc = frappe._dict(
         doctype=LEDGER_SOURCE,
         name=doc.name,

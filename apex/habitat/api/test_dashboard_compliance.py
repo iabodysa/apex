@@ -32,7 +32,7 @@ class TestDashboardCompliance(FrappeTestCase):
             "due_date": "2026-06-01",
         })
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        # status is set after insert so a validate default cannot override it.
+        # [#b6lzjy]
         frappe.db.set_value("Scheduled Task Instance", doc.name, "status", status,
                             update_modified=False)
         self._names.append(doc.name)
@@ -68,7 +68,7 @@ class TestDashboardCompliance(FrappeTestCase):
         self._instance("Completed")
         self._instance("Completed")
         self._instance("In Progress")
-        self._instance("Cancelled")  # excluded from numerator AND denominator
+        self._instance("Cancelled")  # [#b45o17]
         self.assertEqual(get_compliance_percent()["value"], self._expected_percent())
 
     def test_cancelled_rows_never_break_the_ratio(self):

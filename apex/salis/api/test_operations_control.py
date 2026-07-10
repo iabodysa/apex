@@ -29,7 +29,7 @@ class TestReassignDriver(FrappeTestCase):
         )
         self.driver_a = self._driver()
         self.driver_b = self._driver()
-        # Seed a current assignment so reassign has an Active one to end.
+        # [#417x1z]
         self.first = (
             frappe.get_doc(
                 {
@@ -60,22 +60,21 @@ class TestReassignDriver(FrappeTestCase):
     def test_reassign_ends_old_and_stamps_new_driver(self):
         out = operations_control.reassign_driver(vehicle=self.vehicle, driver=self.driver_b)
         self.assertTrue(out["ok"])
-        # New assignment is Active and points at the new driver.
+        # [#jhsafp]
         new = frappe.get_doc("Vehicle Assignment", out["assignment"])
         self.assertEqual(new.driver, self.driver_b)
         self.assertEqual(new.status, "Active")
-        # The previous assignment is Ended (no longer Active).
+        # [#1nh1te]
         self.assertEqual(frappe.db.get_value("Vehicle Assignment", self.first.name, "status"), "Ended")
-        # The native on_submit stamped the denormalized links to the new driver.
+        # [#99wbp9]
         self.assertEqual(frappe.db.get_value("Salis Vehicle", self.vehicle, "current_driver"), self.driver_b)
         self.assertEqual(frappe.db.get_value("Salis Driver", self.driver_b, "current_vehicle"), self.vehicle)
 
     def test_reassign_to_same_driver_is_rejected(self):
-        # Reassigning to the driver already on the vehicle is a no-op and must throw
-        # rather than silently create a duplicate Active assignment.
+        # [#rme102]
         with self.assertRaises(frappe.ValidationError):
             operations_control.reassign_driver(vehicle=self.vehicle, driver=self.driver_a)
-        # The original assignment is untouched (still Active).
+        # [#nquaxn]
         self.assertEqual(frappe.db.get_value("Vehicle Assignment", self.first.name, "status"), "Active")
 
     def test_reassign_requires_a_driver(self):
@@ -114,15 +113,14 @@ class TestSupervisorSurfaceParity(FrappeTestCase):
         ).insert(ignore_permissions=True)
 
     def test_reassign_reaches_same_outcome_on_both_surfaces(self):
-        # Board surface: fleet_os.reassign takes the EXTERNAL driver_id.
+        # [#p16c3w]
         v1, d1 = self._vehicle(), self._driver()
         fleet_os.reassign(v1.plate_number, d1.driver_id)
-        # Drawer surface: operations_control.reassign_driver takes the driver NAME.
+        # [#hx8sp9]
         v2, d2 = self._vehicle(), self._driver()
         operations_control.reassign_driver(vehicle=v2.name, driver=d2.name)
 
-        # Same outcome: an Active assignment exists and the denormalized links are
-        # stamped (the shared helper relies on the assignment's on_submit for both).
+        # [#flm26p]
         for veh, drv in ((v1.name, d1.name), (v2.name, d2.name)):
             self.assertEqual(frappe.db.get_value("Salis Vehicle", veh, "current_driver"), drv)
             self.assertEqual(frappe.db.get_value("Salis Driver", drv, "current_vehicle"), veh)
@@ -134,7 +132,7 @@ class TestSupervisorSurfaceParity(FrappeTestCase):
             )
 
     def test_stop_close_reaches_same_outcome_on_both_surfaces(self):
-        # Board surface: workshop_in then workshop_out closes the Maintenance stop.
+        # [#7v5ry5]
         v1 = self._vehicle()
         fleet_os.workshop_in(v1.plate_number)
         ws_stop = frappe.db.get_value(
@@ -144,7 +142,7 @@ class TestSupervisorSurfaceParity(FrappeTestCase):
         )
         fleet_os.workshop_out(v1.plate_number)
 
-        # Drawer surface: a plain stop, then release_vehicle closes it.
+        # [#m3jjqg]
         v2 = self._vehicle()
         stop_doc = frappe.get_doc(
             {
@@ -157,8 +155,7 @@ class TestSupervisorSurfaceParity(FrappeTestCase):
         stop_doc.submit()
         operations_control.release_vehicle(vehicle=v2.name)
 
-        # Same outcome: each closed stop is cancelled with the exit date stamped, and
-        # the vehicle is restored to Active.
+        # [#8r83c0]
         for stop_name, veh in ((ws_stop, v1.name), (stop_doc.name, v2.name)):
             self.assertEqual(frappe.db.get_value("Vehicle Stop", stop_name, "docstatus"), 2)
             self.assertTrue(frappe.db.get_value("Vehicle Stop", stop_name, "return_date"))

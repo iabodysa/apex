@@ -1,13 +1,12 @@
 # Copyright (c) 2026, AFMCO Support Services Co. Ltd and contributors
-# For license information, please see license.txt
+# [#j03s5a]
 
-# import frappe
+# [#keeppb]
 from frappe.model.document import Document
 
 
 class TransportTripRating(Document):
-	# begin: auto-generated types
-	# This code is auto-generated. Do not modify anything in this block.
+	# [#q6y9j5]
 
 	from typing import TYPE_CHECKING
 
@@ -20,5 +19,5 @@ class TransportTripRating(Document):
 		naming_series: DF.Literal["TTR-.####"]
 		rating: DF.Rating
 		transport_request: DF.Link | None
-	# end: auto-generated types
+	# [#g4leg3]
 	pass

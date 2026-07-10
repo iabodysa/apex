@@ -117,9 +117,7 @@ class TestSalisPaymentRequestScoping(FrappeTestCase):
             frappe.delete_doc(
                 "Salis Payment Request", pr.name, ignore_permissions=True, force=True
             )
-        # setUpClass also commits Projects + a User Permission OUTSIDE the
-        # per-method savepoint rollback; delete them so the @example.com Project
-        # User Permission rows do not poison later tests on the shared bench.
+        # [#d47ucq]
         frappe.db.delete("User Permission",
                          {"allow": "Project", "for_value": cls.pa, "user": cls.sup})
         for p in (cls.pa, cls.pb):
@@ -230,9 +228,7 @@ class TestScopingDoesNotWeakenSoD(FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a Project + two User Permissions OUTSIDE the
-        # per-method savepoint rollback; delete them so the @example.com Project
-        # User Permission rows do not poison later tests on the shared bench.
+        # [#5aa0v7]
         frappe.set_user("Administrator")
         for user in (cls.requester, cls.other):
             frappe.db.delete("User Permission",

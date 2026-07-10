@@ -5,9 +5,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.salis.api import driver_portal
 from apex.salis.api.driver_portal import _resolve_driver
 
-# The Masar worker-trip fixture builders live in tests/factories.py (P-135); this module
-# imports them from there (lazily, below) — no sibling test module is imported. The local
-# _ensure_test_driver mirrors factories.make_test_driver for this module's own use.
+# [#637s16]
 
 
 def _ensure_test_driver():
@@ -147,11 +145,11 @@ class TestDriverPortal(FrappeTestCase):
 		self._clear_today_attendance(drv)
 		frappe.set_user(user)
 		res = driver_portal.driver_check_in()
-		# [#t537co] the projected state the SPA applies must show an OPEN shift
+		# [#g8l1iu]
 		self.assertTrue(res["checked_in"], "Check-in marks the driver present.")
 		self.assertFalse(res["checked_out"], "Check-in must NOT mark checked out.")
 		self.assertIsNone(res["check_out"], "Check-in must leave check_out empty.")
-		# [#t537db] and the persisted row must agree (no phantom stamp on disk)
+		# [#4v0tn2]
 		frappe.set_user("Administrator")
 		row = frappe.db.get_value(
 			"Driver Attendance", res["name"], ["check_in", "check_out", "worked_hours"], as_dict=True
@@ -168,7 +166,7 @@ class TestDriverPortal(FrappeTestCase):
 		self._clear_today_attendance(drv)
 		frappe.set_user(user)
 		ci = driver_portal.driver_check_in()
-		# Pin nowtime() to the check-in instant to simulate an immediate stray tap.
+		# [#g0vxvy]
 		import apex.salis.api.driver_portal as dp_mod
 
 		original = dp_mod.frappe.utils.nowtime
@@ -178,7 +176,7 @@ class TestDriverPortal(FrappeTestCase):
 				driver_portal.driver_check_out()
 		finally:
 			dp_mod.frappe.utils.nowtime = original
-		# The shift stays open; no check_out was written.
+		# [#6be9w3]
 		frappe.set_user("Administrator")
 		self.assertFalse(
 			frappe.db.get_value("Driver Attendance", ci["name"], "check_out"),
@@ -318,15 +316,10 @@ class _DriverTripBuilder:
 	def _trip(self, workers, route):
 		from apex.tests.factories import WorkerTripMixin as _WorkerTripMixin
 
-		# _worker_trip uses self.addCleanup + self._purge; bind the mixin's _purge so
-		# the cleanup it registers resolves on this (non-mixin) test case.
+		# [#41wom1]
 		self._purge = _WorkerTripMixin._purge
 		_tr, _rp, dt = _WorkerTripMixin._worker_trip(self, self.drv, self.project, self.building, workers, route)
-		# FrappeTestCase rolls back only at class end, so writes accumulate across the
-		# methods in a class. _purge drops the trip/route/request but NOT the Trip Start
-		# Log + Boarding Scan Log a board creates; clear those too so a reused dispatch-
-		# trip name (the naming counter is not durably advanced inside the held class
-		# transaction) can never inherit a prior method's open log / aboard worker.
+		# [#149sa3]
 		self.addCleanup(lambda name=dt.name: self._purge_trip_boarding(name))
 		return dt
 
@@ -368,9 +361,7 @@ class TestManualBoarding(_DriverTripBuilder, FrappeTestCase):
 
 	@classmethod
 	def tearDownClass(cls):
-		# setUpClass commits a per-class Project OUTSIDE the per-method savepoint
-		# rollback; delete it so the committed Project does not leak across the
-		# test DB. (Building/Employees are reuse-or-create shared fixtures.)
+		# [#oyxu68]
 		frappe.set_user("Administrator")
 		if frappe.db.exists("Project", cls.project):
 			frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -400,7 +391,7 @@ class TestManualBoarding(_DriverTripBuilder, FrappeTestCase):
 		row = log.boarding_events[0]
 		self.assertEqual(row.worker, self.w1)
 		self.assertEqual(row.method, "Manual")
-		# A Manual Boarding Scan Log audit row exists for this worker.
+		# [#gfliq2]
 		scan = frappe.get_all(
 			"Boarding Scan Log",
 			filters={"dispatch_trip": dt.name, "employee": self.w1},
@@ -418,7 +409,7 @@ class TestManualBoarding(_DriverTripBuilder, FrappeTestCase):
 		second = driver_portal.manual_board_workers(dt.name, frappe.as_json([self.w1]))
 		frappe.set_user("Administrator")
 		self.assertEqual(first["boarded"], [self.w1])
-		self.assertEqual(second["boarded"], [])  # already aboard -> no second row
+		self.assertEqual(second["boarded"], [])  # [#gmtb3s]
 		self.assertEqual(second["skipped"][0]["result"], "Duplicate")
 		log = frappe.get_doc("Trip Start Log", first["trip_start_log"])
 		self.assertEqual(log.boarded_count, 1)
@@ -468,9 +459,7 @@ class TestStopProgress(_DriverTripBuilder, FrappeTestCase):
 
 	@classmethod
 	def tearDownClass(cls):
-		# setUpClass commits a per-class Project OUTSIDE the per-method savepoint
-		# rollback; delete it so the committed Project does not leak across the
-		# test DB. (Building/Employees are reuse-or-create shared fixtures.)
+		# [#oyxu68]
 		frappe.set_user("Administrator")
 		if frappe.db.exists("Project", cls.project):
 			frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -488,12 +477,11 @@ class TestStopProgress(_DriverTripBuilder, FrappeTestCase):
 
 	def test_mark_stop_requires_started_trip(self):
 		dt = self._trip("Stop Route A")
-		# my_trip_route is identity-scoped (driver resolved from the session), so it must
-		# run as the driver — Administrator owns no trip and would get "Trip not found".
+		# [#gx3mtv]
 		frappe.set_user(self.user)
 		route = driver_portal.my_trip_route(dt.name)
 		stop = next(s for s in route["stops"] if s.get("route_stop"))
-		# No Trip Start Log yet -> marking a stop must be refused.
+		# [#1w5v9a]
 		with self.assertRaises(frappe.ValidationError):
 			driver_portal.mark_stop_progress(dt.name, stop["route_stop"], done=1)
 		frappe.set_user("Administrator")
@@ -501,7 +489,7 @@ class TestStopProgress(_DriverTripBuilder, FrappeTestCase):
 	def test_stop_progress_persists_and_survives_reload(self):
 		dt = self._trip("Stop Route B")
 		frappe.set_user(self.user)
-		driver_portal.start_my_trip(dt.name)  # opens the Trip Start Log
+		driver_portal.start_my_trip(dt.name)  # [#d77pc0]
 		route = driver_portal.my_trip_route(dt.name)
 		self.assertTrue(route["started"])
 		stop = next(s for s in route["stops"] if s.get("route_stop"))
@@ -513,13 +501,13 @@ class TestStopProgress(_DriverTripBuilder, FrappeTestCase):
 		)
 		self.assertTrue(res["stop_progress"][stop["route_stop"]]["done"])
 
-		# Re-read (reload): the done-state must be reflected from the server.
+		# [#1y48sn]
 		reloaded = driver_portal.my_trip_route(dt.name)
 		frappe.set_user("Administrator")
 		marked = next(s for s in reloaded["stops"] if s["route_stop"] == stop["route_stop"])
 		self.assertTrue(marked["done"], "Stop done-state must survive a reload.")
 
-		# It persisted as a Trip Stop Progress row on the open Trip Start Log.
+		# [#huqy7r]
 		log_name = frappe.db.get_value(
 			"Trip Start Log", {"dispatch_trip": dt.name, "docstatus": 0}, "name"
 		)
@@ -543,8 +531,7 @@ class TestStopProgress(_DriverTripBuilder, FrappeTestCase):
 
 
 def tearDownModule():
-    # P-148: drop this module's committed Accommodation Buildings so the suite's
-    # post-run building count returns to the pre-suite baseline (see factories.py).
+    # [#2esm3x]
     from apex.tests import factories
 
     factories.purge_test_buildings()

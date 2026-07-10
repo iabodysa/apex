@@ -34,7 +34,7 @@ from apex.apex_core.utils.portal_bootstrap import (
 	guest_redirect,
 )
 
-# Union of the count and delivery write roles (see module docstring).
+# [#8p519c]
 HOUSING_ROLES = {
 	"System Manager",
 	"Accommodation Manager",
@@ -50,7 +50,6 @@ def get_context(context):
 	context.has_housing_role = bool(HOUSING_ROLES & set(frappe.get_roles()))
 	if context.has_housing_role:
 		context.csrf_token = get_csrf_token()
-		# Appearance only for the authorised view (same projection as the other
-		# portals so /housing re-skins with them).
+		# [#t0tojh]
 		apply_portal_appearance(context)
 	return context

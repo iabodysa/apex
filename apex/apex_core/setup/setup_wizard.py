@@ -96,7 +96,7 @@ def _apply_salis_settings(args):
     if cost_center and frappe.db.exists("Cost Center", cost_center):
         salis.default_cost_center = cost_center
     salis.enable_driver_portal = 1 if cint(args.get("apex_enable_driver_portal")) else 0
-    # Approvals ship ON; the slide pre-checks them ON, so honour the operator's choice.
+    # [#dmgivt]
     salis.enable_approvals = 1 if cint(args.get("apex_enable_approvals")) else 0
     salis.save(ignore_permissions=True)  # audit-ok
 
@@ -126,7 +126,7 @@ def _apply_deduction_policy(args):
     policy = frappe.get_single("Salary Deduction Policy")
     if company and frappe.db.exists("Company", company):
         policy.company = company
-    # the global master switch must be on for any per-type rule to fire
+    # [#s458vc]
     policy.enable_salary_deductions = 1 if (deduct_housing or deduct_damage) else 0
     _set_rule_enabled(policy, "Rent", deduct_housing)
     _set_rule_enabled(policy, "Damage", deduct_damage)

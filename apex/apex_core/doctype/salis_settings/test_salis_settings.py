@@ -27,7 +27,7 @@ class TestSalisSettingsHelpers(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def test_int_returns_default_when_unset_not_zero(self):
-        # The zero-trap: a blank/0 Single value must yield the default, never 0.
+        # [#k0y30s]
         frappe.db.set_single_value("Salis Settings", "admin_trip_ops_threshold", 0)
         self.assertEqual(get_salis_int("admin_trip_ops_threshold", 5), 5)
 
@@ -48,7 +48,7 @@ class TestSalisSettingsHelpers(FrappeTestCase):
         self.assertEqual(get_salis_int("license_expiring_warn_days", 30), 30)
 
     def test_fuel_overage_margin_reads_via_helper(self):
-        # The extracted overage margin: an unset (0) percent keeps today's 5% (0.05).
+        # [#lvkez3]
         from apex.salis.fuel_engine import get_overage_margin
 
         frappe.db.set_single_value("Salis Settings", "fuel_overage_margin_percent", 0)

@@ -36,13 +36,13 @@ class TestFuelQuotaUniqueness(FrappeTestCase):
         ).insert(ignore_permissions=True)
 
     def test_duplicate_vehicle_period_is_rejected(self):
-        # First quota is fine; a second for the same vehicle + period double-allocates.
+        # [#ix3tze]
         self._quota()
         with self.assertRaises(frappe.ValidationError):
             self._quota()
 
     def test_different_period_is_allowed(self):
-        # Non-vacuous: the guard is scoped to the period, not the vehicle.
+        # [#94yueo]
         self._quota("2026-05")
         other = self._quota("2026-06")
         self.assertTrue(other.name)
@@ -78,7 +78,7 @@ class TestFuelQuotaUniqueness(FrappeTestCase):
         ), patch.object(frappe.db, "exists", side_effect=track_exists):
             self._quota()
 
-        # lock_vehicle ran, and it ran before the first exists-check in the guard.
+        # [#t7z6it]
         self.assertIn("lock", order)
         self.assertIn("exists", order)
         self.assertLess(
@@ -115,12 +115,12 @@ class TestFuelQuotaUniqueness(FrappeTestCase):
         )
 
     def test_nonpositive_allocation_is_rejected(self):
-        # Zero or negative litres is not a quota; the guard rejects the whole range.
+        # [#qy5z2b]
         for bad in (0, -1, -0.5):
             with self.assertRaises(frappe.ValidationError):
                 self._draft(bad).insert(ignore_permissions=True)
 
     def test_positive_allocation_is_allowed(self):
-        # Non-vacuous: the smallest positive allocation passes the same guard.
+        # [#fwq36a]
         doc = self._draft(0.1).insert(ignore_permissions=True)
         self.assertTrue(doc.name)

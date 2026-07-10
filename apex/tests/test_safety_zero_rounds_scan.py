@@ -20,8 +20,7 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
         }).insert(ignore_permissions=True)
 
     def _building(self, status="Active", supervisor=None):
-        # building_name is the autoname/PRIMARY key (unique) — use a full hash so
-        # repeated runs on a persistent test DB never collide (was _hash(3), too narrow).
+        # [#bv5acj]
         abbr = "Z" + _hash()
         return frappe.get_doc({
             "doctype": "Building",
@@ -99,7 +98,7 @@ class TestSafetyZeroRoundsScan(ApexHabitatTestCase):
             "BUG: supervisor wrongly alerted though a recent round exists",
         )
 
-    # ---- R11: off-by-one — a task due TODAY (zero grace) is overdue TODAY -----
+    # [#5yf1my]
     def _task_instance(self, building, due_date):
         """A draft Scheduled Task Instance in the Open state, due on ``due_date``."""
         return frappe.get_doc({

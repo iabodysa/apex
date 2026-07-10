@@ -34,8 +34,7 @@ class TestDispatchBoardPermissionGate(FrappeTestCase):
     """P-042: Dispatch Trip read is gated, not only Salis Vehicle read."""
 
     def test_vehicle_read_without_trip_read_is_denied(self):
-        # has_permission allows Salis Vehicle but throws on Dispatch Trip,
-        # exactly as the framework does for a role lacking Dispatch Trip read.
+        # [#610yiy]
         def _fake_has_permission(doctype, ptype, throw=False):
             if doctype == "Dispatch Trip":
                 if throw:
@@ -48,7 +47,7 @@ class TestDispatchBoardPermissionGate(FrappeTestCase):
                 dispatch_board.get_dispatch_board()
 
     def test_entry_point_gates_dispatch_trip_read(self):
-        # Both DocTypes are checked with throw=True before any pane is built.
+        # [#hg183d]
         calls = []
 
         def _record(doctype, ptype, throw=False):
@@ -56,7 +55,7 @@ class TestDispatchBoardPermissionGate(FrappeTestCase):
             return True
 
         with patch(f"{_MOD}.frappe.has_permission", side_effect=_record):
-            # Scope to an empty board so no pane queries run after the gates.
+            # [#i0pibo]
             with patch(f"{_MOD}._permitted_projects", return_value=(False, [])):
                 dispatch_board.get_dispatch_board()
 
@@ -89,7 +88,7 @@ class TestDispatchBoardDriverPiiGate(FrappeTestCase):
                 if fields and "phone" in fields:
                     row["phone"] = "0500000000"
                 return [row]
-            # Dispatch Trip "assigned today" lookup -> nobody assigned.
+            # [#6abn1f]
             return []
 
         return _impl
@@ -98,7 +97,7 @@ class TestDispatchBoardDriverPiiGate(FrappeTestCase):
         captured: dict = {}
         with patch(
             f"{_MOD}.frappe.get_meta",
-            return_value=self._meta_with_permlevels([0]),  # no permlevel-1 read
+            return_value=self._meta_with_permlevels([0]),  # [#j3rfkm]
         ):
             with patch(f"{_MOD}.frappe.get_all", side_effect=self._spy_get_all(captured)):
                 pane = dispatch_board._drivers_pane(unscoped=True, projects=None)
@@ -107,14 +106,14 @@ class TestDispatchBoardDriverPiiGate(FrappeTestCase):
         self.assertNotIn(
             "phone", driver_fields, "phone must not be in the query for an unprivileged caller"
         )
-        # And it never reaches the payload.
+        # [#rr9j97]
         self.assertEqual(pane["available"][0]["phone"], "")
 
     def test_phone_queried_for_privileged_caller(self):
         captured: dict = {}
         with patch(
             f"{_MOD}.frappe.get_meta",
-            return_value=self._meta_with_permlevels([0, 1]),  # has permlevel-1 read
+            return_value=self._meta_with_permlevels([0, 1]),  # [#bf65if]
         ):
             with patch(f"{_MOD}.frappe.get_all", side_effect=self._spy_get_all(captured)):
                 pane = dispatch_board._drivers_pane(unscoped=True, projects=None)

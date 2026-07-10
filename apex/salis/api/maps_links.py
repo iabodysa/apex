@@ -12,13 +12,10 @@ from urllib.parse import quote
 
 
 _COORD = r"(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)"
-# The PLACE coordinate carriers, in preference order. A complex Google share URL
-# can hold several lat,lng pairs; the place is the one in q=/query=/destination=
-# or the !3dLAT!4dLNG embed, NOT the `@LAT,LNG` map-center (the viewport) nor the
-# `/dir/<origin>` leg — grabbing either of those would resolve to the wrong point.
+# [#r56274]
 _PLACE_COORD_PATTERNS = (
-    r"[?&](?:q|query|destination)=" + _COORD,  # q=/query=/destination=lat,lng
-    r"!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)",  # place embed !3dLAT!4dLNG
+    r"[?&](?:q|query|destination)=" + _COORD,  # [#9sde22]
+    r"!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)",  # [#63wuhk]
 )
 
 
@@ -36,18 +33,16 @@ def _stop_waypoint(stop):
     nothing navigable, so it is skipped rather than breaking the chain."""
     pickup = stop.get("pickup") or {}
     url = pickup.get("google_maps_url") or ""
-    # 1. A place coordinate (q=/query=/destination= or !3d!4d) -> exact spot.
+    # [#guy5tc]
     for pat in _PLACE_COORD_PATTERNS:
         m = re.search(pat, url)
         if m:
             return f"{m.group(1)},{m.group(2)}"
-    # 2. A free-form q= place query (text, not coordinates).
+    # [#3rqtkf]
     m = re.search(r"[?&]q=([^&]+)", url)
     if m:
         return m.group(1)
-    # 3. A bare lat,lng ONLY on a clean coordinate URL — skip it when the URL also
-    # carries a `@` viewport or a `/dir/` leg, since the bare pair would then be a
-    # decoy (map-center / origin), not the place.
+    # [#dm62no]
     if "@" not in url and "/dir/" not in url:
         m = re.search(rf"[?&=/]{_COORD}", url)
         if m:
@@ -73,7 +68,7 @@ def _full_route_maps_url(stops):
     if len(points) < 2:
         return None
     destination = points[-1]
-    # Google Maps caps directions waypoints; keep the first nine intermediate stops.
+    # [#5h5u9d]
     waypoints = points[:-1][:9]
     url = "https://www.google.com/maps/dir/?api=1&destination=" + destination
     if waypoints:

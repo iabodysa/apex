@@ -140,10 +140,7 @@ def get_building_grid(building: str) -> dict:
         )
         custody_parents = {c.parent for c in custody_rows}
 
-    # Dominant project per room = the project held by the most active occupants in
-    # that room (the Arrivals board tints a room matching the selected worker's
-    # project so same-project residents are grouped). Tallied from the bed->room map
-    # already loaded above — no extra query.
+    # [#og2iza]
     bed_to_room = {b.bed: b.room for b in bed_rows}
     room_project_tally: dict[str, dict[str, int]] = {}
     for asg in assignments:
@@ -312,8 +309,7 @@ def list_supervisor_buildings() -> list[dict]:
         list of ``{building, building_title, total_beds, available, occupied,
         blocked, oos, occupancy_pct}`` sorted by building title.
     """
-    # [#scope-mirror] Same scope rule as building_operations_summary._get_buildings:
-    # confine a scoped user to their User-Permission buildings; [] when none.
+    # [#f7vwnm]
     from apex.habitat import permissions
 
     f = {"status": "Active"}
@@ -330,8 +326,7 @@ def list_supervisor_buildings() -> list[dict]:
         return []
     building_names = [b.name for b in buildings]
 
-    # [#one-aggregate] Single bed/room read across every in-scope building, bucketed
-    # in Python via _bed_color — bounded no matter how many buildings are in scope.
+    # [#5iswu5]
     Bed = frappe.qb.DocType("Bed")
     Room = frappe.qb.DocType("Room")
     bed_rows = (
@@ -367,8 +362,7 @@ def list_supervisor_buildings() -> list[dict]:
         else:
             bucket["oos"] += 1
 
-    # Auto-open hint: a single allowed building lets the Front Desk land straight on
-    # a loaded board with no Link/chip interaction.
+    # [#ci16xg]
     auto = len(buildings) == 1
     result = []
     for b in buildings:
@@ -391,7 +385,7 @@ def list_supervisor_buildings() -> list[dict]:
     return result
 
 
-# Terminal Resident Request statuses; everything else counts as "open".
+# [#12c5c2]
 _RESIDENT_REQUEST_CLOSED = ("Resolved", "Rejected", "Closed")
 
 
@@ -439,10 +433,7 @@ def get_employee_card(employee):
     from apex.habitat.api.arrivals_desk import _assert_party_in_scope
 
     frappe.has_permission("Employee", "read", throw=True)
-    # [#r7] Mirror the arrivals-desk building scope: a scoped supervisor may look up
-    # an UNHOUSED (intake) employee for the pre-assignment check-in, but not one
-    # actively housed in another estate — keeps this desk consistent with
-    # get_arrival_card and closes the name/photo cross-tenant asymmetry.
+    # [#e1rssy]
     _assert_party_in_scope("Employee", employee)
     vals = frappe.db.get_value("Employee", employee, ["employee_name", "image"], as_dict=True) or {}
     return {"employee_name": vals.get("employee_name"), "image": vals.get("image")}
@@ -472,8 +463,7 @@ def _has_active_assignment(party_type: str, party: str, employee: str | None) ->
     return bool(frappe.db.exists("Housing Assignment", filters))
 
 
-# Per-IP throttle matching the Masar read endpoints: a scanned identifier probe
-# must not become an Iqama/token-enumeration oracle from one address.
+# [#ry9ai3]
 @frappe.whitelist()
 @rate_limit(key="frappe.request.remote_addr", limit=60, seconds=60)
 def resolve_worker(identifier: str) -> dict:
@@ -507,9 +497,7 @@ def resolve_worker(identifier: str) -> dict:
 
     party_type = party = employee = employee_name = image = None
 
-    # A Masar token is unique and unguessable; resolve it exactly first. [#tokhash]
-    # The token is stored only as a hash (P-104), so a scanned raw token is matched
-    # by its hash; a non-token identifier (an Iqama) simply misses and falls through.
+    # [#5uwr3p]
     from apex.apex_core.doctype.masar_worker_token.masar_worker_token import _hash_token
 
     token_row = frappe.db.get_value(
@@ -524,8 +512,7 @@ def resolve_worker(identifier: str) -> dict:
         employee = token_row.employee
         employee_name = token_row.employee_name
 
-    # Otherwise treat the identifier as an Iqama: Employee first (if this HR setup
-    # has an Iqama field), then Temporary Worker.
+    # [#ounuyt]
     if not party:
         iqama_field = _employee_iqama_field()
         if iqama_field:
@@ -552,7 +539,7 @@ def resolve_worker(identifier: str) -> dict:
     if not party:
         return {"found": False, "message": _("No worker matches {0}.").format(identifier)}
 
-    # Don't leak Temporary Worker identity to a caller without that read grant.
+    # [#7a2hxg]
     if party_type == "Temporary Worker":
         frappe.has_permission("Temporary Worker", "read", throw=True)
 

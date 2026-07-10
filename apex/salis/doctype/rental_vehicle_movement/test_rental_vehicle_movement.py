@@ -54,33 +54,31 @@ class TestRentalMovementLifecycle(FrappeTestCase):
         return doc
 
     def test_return_without_open_receipt_is_rejected(self):
-        # No prior Receipt -> nothing to return; would corrupt the in-service window.
+        # [#4vlyl0]
         with self.assertRaises(frappe.ValidationError):
             self._movement("Return")
 
     def test_second_open_receipt_is_rejected(self):
-        # One Receipt opens the window; a second Receipt while open is rejected.
+        # [#ll7tkr]
         self._movement("Receipt")
         with self.assertRaises(frappe.ValidationError):
             self._movement("Receipt", submit=False)
 
     def test_return_dated_before_open_receipt_is_rejected(self):
-        # T-710: Receipt opens on day 0; a Return dated the day before would invert
-        # the in-service window and corrupt the accrual span -> rejected.
+        # [#214ox6]
         self._movement("Receipt", movement_date=today())
         with self.assertRaises(frappe.ValidationError):
             self._movement("Return", movement_date=add_days(today(), -1))
 
     def test_return_same_day_as_receipt_is_allowed(self):
-        # Boundary: a same-day Return closes a zero-length window and is allowed.
+        # [#ikii08]
         receipt_date = add_days(today(), -2)
         self._movement("Receipt", movement_date=receipt_date)
         ret = self._movement("Return", movement_date=receipt_date)
         self.assertEqual(ret.docstatus, 1)
 
     def test_receipt_then_return_is_allowed(self):
-        # Non-vacuous: the normal Receipt -> Return cycle passes, and a new Receipt
-        # is then allowed once the window is closed.
+        # [#37l40z]
         self._movement("Receipt")
         self._movement("Return")
         again = self._movement("Receipt")

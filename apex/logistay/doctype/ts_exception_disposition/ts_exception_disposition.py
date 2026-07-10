@@ -37,7 +37,7 @@ class TSExceptionDisposition(Document):
 
     def _group_filters(self) -> dict:
         filters = {"exception_type": self.exception_type, "entity": self.entity}
-        # Blank axis means "not set" - match rows with no value on that axis.
+        # [#oha5ax]
         filters["period_month"] = self.period_month or ["in", [None, ""]]
         filters["field_ref"] = self.field_ref or ["in", [None, ""]]
         return filters

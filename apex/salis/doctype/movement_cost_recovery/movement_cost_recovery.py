@@ -27,7 +27,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-# [#mcr-ops] Operations tier may authorise a high-value (>= threshold) recovery.
+# [#kj6uap]
 _OPERATIONS_ROLES = {"Fleet Manager", "System Manager"}
 
 
@@ -38,10 +38,7 @@ class MovementCostRecovery(Document):
 			frappe.throw(_("Amount must be greater than zero."))
 		if self.status == "Approved" and not self.basis_evidence:
 			frappe.throw(_("Basis / Evidence is required before a recovery can be Approved."))
-		# The recovery cannot be authorised against a person until they have accepted
-		# responsibility. The enforcement points are Approve (the submit) and Recover;
-		# Acknowledged is the act of acknowledging, so it is not gated. Waive/Reject/Cancel
-		# need no acknowledgement (a claim can be dropped without the party accepting it).
+		# [#4pwtt6]
 		if self.status in ("Approved", "Recovered") and not self.acknowledgement_received:
 			frappe.throw(_("Acknowledgement Received must be set before a recovery can be {0}.").format(_(self.status)))
 		self._derive_needs_operations()

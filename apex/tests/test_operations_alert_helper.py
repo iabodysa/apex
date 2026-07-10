@@ -20,9 +20,7 @@ from apex.tests._helpers import _user
 
 APP = frappe.get_app_path("apex")
 
-# Sanctioned raw-insert sites: the helper itself + the scheduler notifiers
-# that wrap their own domain-specific dedupe around the insert (the flat
-# habitat/salis tasks.py modules were split into packages).
+# [#b8m5rf]
 _SANCTIONED = {
     "apex_core/utils/operations_alert.py",
     "salis/tasks/common.py",
@@ -30,10 +28,7 @@ _SANCTIONED = {
     "habitat/tasks/safety.py",
 }
 
-# Matches an Operations Alert insert dict: "doctype" as the LEADING key of a doc
-# dict (the get_doc({...}).insert() shape). Anchoring to "{" + the leading key
-# avoids flagging a native helper payload (e.g. assign_to.add({"assign_to": ...,
-# "doctype": "Operations Alert"})) where doctype is not the dict's first key.
+# [#d3lmey]
 _RAW_INSERT = re.compile(r'\{\s*"doctype":\s*(?:ALERT_DOCTYPE|["\']Operations Alert["\'])')
 
 
@@ -41,9 +36,7 @@ class TestOperationsAlertWritePathGuard(FrappeTestCase):
     def test_no_unsanctioned_raw_inserts(self):
         offenders = []
         for f in glob.glob(f"{APP}/**/*.py", recursive=True):
-            # The guard steers PRODUCTION write-paths to the helper; test fixtures
-            # (under a tests/ dir or any test_*.py beside its module) legitimately
-            # build raw alerts to set up analytics scenarios.
+            # [#g0afuu]
             if "/tests/" in f or os.path.basename(f).startswith("test_"):
                 continue
             rel = os.path.relpath(f, APP)
@@ -122,9 +115,7 @@ class TestInsertOperationsAlertResolvesSupervisor(FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a Project + User Permission (and a Vehicle) OUTSIDE
-        # the per-method savepoint rollback; delete them so the @example.com
-        # Project User Permission rows do not poison later tests on the bench.
+        # [#l6stgo]
         frappe.set_user("Administrator")
         frappe.db.delete("User Permission",
                          {"allow": "Project", "for_value": cls.project, "user": cls.sup})
@@ -154,8 +145,7 @@ class TestInsertOperationsAlertResolvesSupervisor(FrappeTestCase):
         )
 
     def test_no_vehicle_leaves_supervisor_empty(self):
-        # Office-scoped alerts pass no vehicle; the notification condition requires
-        # responsible_supervisor and correctly skips them — never an empty-recipient send.
+        # [#e6xstc]
         name = insert_operations_alert(
             alert_type="Unsettled Rental",
             severity="Warning",

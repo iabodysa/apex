@@ -68,9 +68,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
     is removed even when a test fails mid-way.
     """
 
-    # ------------------------------------------------------------------
-    # Class-level users (created once, reused across all tests)
-    # ------------------------------------------------------------------
+    # [#1wln8e]
 
     @classmethod
     def setUpClass(cls):
@@ -80,7 +78,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         cls.supervisor = _user("ssf_sup@example.com", "Fleet Supervisor")
         cls.pmanager = _user("ssf_pm@example.com", "Fleet Project Manager")
         cls.project = cls._get_or_create_project("SSF Test Project")
-        # Scoped roles need a User Permission on the project.
+        # [#smuogs]
         for u in (cls.supervisor, cls.pmanager):
             if not frappe.db.exists(
                 "User Permission",
@@ -95,9 +93,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a Project + two User Permissions OUTSIDE the
-        # per-method savepoint rollback; delete them so the @example.com Project
-        # User Permission rows do not poison later tests on the shared bench.
+        # [#5aa0v7]
         frappe.set_user("Administrator")
         for u in (cls.supervisor, cls.pmanager):
             frappe.db.delete("User Permission",
@@ -113,9 +109,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # ------------------------------------------------------------------
-    # Static fixture builders
-    # ------------------------------------------------------------------
+    # [#swr9rs]
 
     @staticmethod
     def _get_or_create_project(name):
@@ -199,9 +193,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         self.addCleanup(lambda: self._purge_trip(dt.name))
         return dt
 
-    # ------------------------------------------------------------------
-    # Cleanup helpers
-    # ------------------------------------------------------------------
+    # [#omt543]
 
     @staticmethod
     def _purge_trip(name):
@@ -246,9 +238,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
                 "Transport Request", tr_name, ignore_permissions=True, force=True
             )
 
-    # ==================================================================
-    # 1. Initial-status guard (insert-bypass protection)
-    # ==================================================================
+    # [#dptus0]
 
     def test_insert_at_completed_blocked(self):
         """Controller rejects a direct insert at a terminal state (Completed).
@@ -285,9 +275,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         self.assertEqual(dt.status, "Planned")
         self.assertEqual(dt.docstatus, 0)
 
-    # ==================================================================
-    # 2. Happy-path lifecycle
-    # ==================================================================
+    # [#6hamk1]
 
     def test_happy_path_lifecycle(self):
         """A trip walks Planned → Dispatched → Completed via apply_workflow.
@@ -302,11 +290,11 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         driver = self._make_driver("HP1")
         dt = self._make_trip(rp, vehicle, driver)
 
-        # ---- Step 1: Planned (just created) ----
+        # [#5vdjux]
         self.assertEqual(dt.status, "Planned")
         self.assertEqual(dt.docstatus, 0)
 
-        # ---- Step 2: Planned → Dispatched (supervisor) ----
+        # [#1mjb6v]
         frappe.set_user(self.supervisor)
         self.assertIn("Dispatch", _actions(dt))
         apply_workflow(dt, "Dispatch")
@@ -314,14 +302,14 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         self.assertEqual(dt.status, "Dispatched")
         self.assertEqual(dt.docstatus, 0)
 
-        # ---- Step 3: set required completion data ----
+        # [#7k48mx]
         frappe.set_user("Administrator")
         dt.completion_notes = "All workers delivered on time."
         dt.odometer_start = 1000
         dt.odometer_end = 1120
         dt.save(ignore_permissions=True)
 
-        # ---- Step 4: Dispatched → Completed (manager; submit transition) ----
+        # [#6lmrpg]
         frappe.set_user(self.manager)
         self.assertIn("Complete", _actions(dt))
         apply_workflow(dt, "Complete")
@@ -329,9 +317,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         self.assertEqual(dt.status, "Completed")
         self.assertEqual(dt.docstatus, 1)
 
-    # ==================================================================
-    # 3. Invalid transition: skip Dispatch, try Complete from Planned
-    # ==================================================================
+    # [#5vgoef]
 
     def test_invalid_transition_from_planned_to_completed_blocked(self):
         """Workflow blocks the Complete action when the trip is still Planned.
@@ -351,9 +337,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(dt, "Complete")
 
-    # ==================================================================
-    # 4. Invalid transition: try to go backward from Completed
-    # ==================================================================
+    # [#eweldv]
 
     def test_invalid_transition_from_completed_to_dispatched_blocked(self):
         """Once a trip is Completed (submitted), the only legal next action is
@@ -365,7 +349,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         driver = self._make_driver("INV2")
         dt = self._make_trip(rp, vehicle, driver)
 
-        # Walk forward to Completed.
+        # [#nzdudk]
         frappe.set_user(self.manager)
         apply_workflow(dt, "Dispatch")
         dt.reload()
@@ -379,15 +363,13 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         dt.reload()
         self.assertEqual(dt.status, "Completed")
 
-        # Now try to go backward: Dispatch from Completed is not a valid edge.
+        # [#o9s3pf]
         offered = _actions(dt)
         self.assertNotIn("Dispatch", offered)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(dt, "Dispatch")
 
-    # ==================================================================
-    # 5. Idempotent transition guard
-    # ==================================================================
+    # [#hvql7y]
 
     def test_idempotent_transition_dispatch_twice_raises(self):
         """Applying the same Dispatch action twice must raise on the second call.
@@ -402,19 +384,17 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         dt = self._make_trip(rp, vehicle, driver)
 
         frappe.set_user(self.manager)
-        # First Dispatch — must succeed.
+        # [#9dsf1o]
         apply_workflow(dt, "Dispatch")
         dt.reload()
         self.assertEqual(dt.status, "Dispatched")
 
-        # Second Dispatch — must raise, not silently succeed.
+        # [#mlbg7r]
         dt.reload()
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(dt, "Dispatch")
 
-    # ==================================================================
-    # 6. Submit readiness guard (controller: before_submit)
-    # ==================================================================
+    # [#nvqkja]
 
     def test_submit_without_vehicle_blocked(self):
         """before_submit enforces dispatch readiness: vehicle is required.
@@ -424,9 +404,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         at insert time so the readiness check (before_submit) is the gate under
         test.  The doc is submitted directly as Administrator so no role gate
         interferes; the controller's _enforce_dispatch_readiness must throw."""
-        # Insert a bare trip bypassing validation so the initial-status guard
-        # doesn't interfere.  Flags are explicitly cleared after insert so
-        # subsequent Frappe lifecycle hooks run normally.
+        # [#6239k1]
         bare = frappe.get_doc({
             "doctype": "Dispatch Trip",
             "status": "Planned",
@@ -436,13 +414,11 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         bare.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         self.addCleanup(lambda: self._purge_trip(bare.name))
 
-        # Clear bypass flags so before_submit / validate run on the next call.
+        # [#8gltyo]
         bare.flags.ignore_validate = False
         bare.flags.ignore_mandatory = False
 
-        # Force status to Completed via db.set_value + reload so the trip looks
-        # eligible for submission.  The readiness guard fires in before_submit and
-        # must reject the missing vehicle.
+        # [#3h3f9n]
         frappe.db.set_value("Dispatch Trip", bare.name, "status", "Completed")
         bare.reload()
         bare.flags.ignore_validate = False
@@ -450,9 +426,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             bare.submit()
 
-    # ==================================================================
-    # 7. Completion notes guard (controller: validate)
-    # ==================================================================
+    # [#1r9ms1]
 
     def test_completion_notes_required_when_status_completed(self):
         """Saving a trip with status=Completed but no completion_notes raises.
@@ -469,16 +443,13 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         bare.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         self.addCleanup(lambda: self._purge_trip(bare.name))
 
-        # Simulate a direct status write (as an adversarial API call would do)
-        # and then attempt to save — the validate-level guard must reject it.
+        # [#jj8dl4]
         bare.status = "Completed"
         bare.completion_notes = ""
         with self.assertRaises(frappe.ValidationError):
             bare.save(ignore_permissions=True)
 
-    # ==================================================================
-    # 8. Odometer validation guard (controller: validate)
-    # ==================================================================
+    # [#j0olcb]
 
     def test_odometer_end_less_than_start_blocked(self):
         """Odometer end reading below start reading is rejected at validate.
@@ -495,7 +466,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         }).insert(ignore_permissions=True)
         self.addCleanup(lambda: self._purge_trip(bare.name))
 
-        # Flip end below start — validate must reject.
+        # [#e8f7p8]
         bare.odometer_start = 500
         bare.odometer_end = 300
         with self.assertRaises(frappe.ValidationError):
@@ -516,7 +487,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
         }).insert(ignore_permissions=True)
         self.addCleanup(lambda: self._purge_trip(bare.name))
 
-        # Remove end reading — validate must raise (both-or-neither or end<start).
+        # [#8zjodm]
         bare.odometer_start = 100
         bare.odometer_end = 0
         with self.assertRaises(frappe.ValidationError):

@@ -52,7 +52,7 @@ def _ensure_address(title, line1, city, link_doctype=None, link_name=None):
 
 class TestBuildingAddressFallback(FrappeTestCase):
     def setUp(self):
-        # The endpoint permission-gates on the caller; Administrator reads everything.
+        # [#ly9jxo]
         frappe.set_user("Administrator")
         make_company()
 
@@ -69,7 +69,7 @@ class TestBuildingAddressFallback(FrappeTestCase):
         )
         bldg = make_building(name="T143 Fallback Bldg A", site=site).name
 
-        # building_address is empty on the record -> falls through to the site.
+        # [#j6roe1]
         self.assertIn("Site Street 5", get_site_address(bldg))
 
     def test_saved_own_address_precedes_saved_site(self):
@@ -85,9 +85,9 @@ class TestBuildingAddressFallback(FrappeTestCase):
             name="T143 Fallback Bldg B", site=site, building_address=own
         ).name
 
-        text = get_site_address(bldg)  # no args -> reads stored building_address first
-        self.assertIn("Own Street 9", text)      # stored own address wins
-        self.assertNotIn("Site Street 7", text)  # not the stored site's
+        text = get_site_address(bldg)  # [#akga4i]
+        self.assertIn("Own Street 9", text)      # [#gtq69l]
+        self.assertNotIn("Site Street 7", text)  # [#hsbhsv]
 
     def test_legacy_dynamic_link_own_address_precedes_site(self):
         """A legacy own Address linked via Dynamic Link (the pre-Link-field native
@@ -98,17 +98,16 @@ class TestBuildingAddressFallback(FrappeTestCase):
             "T139 Reconcile Site Addr", "Site Street 21", "Riyadh",
             link_doctype="Site", link_name=site,
         )
-        # building_address Link field stays empty; the own address lives only in the
-        # native Dynamic Link, so the building must exist before the Address links to it.
+        # [#25pacv]
         bldg = make_building(name="T139 Reconcile Bldg", site=site).name
         _ensure_address(
             "T139 Reconcile Own Addr", "Legacy Own Street 23", "Jeddah",
             link_doctype="Building", link_name=bldg,
         )
 
-        text = get_site_address(bldg)  # no args -> empty Link field, falls to Dynamic Link
-        self.assertIn("Legacy Own Street 23", text)  # the legacy own address surfaces
-        self.assertNotIn("Site Street 21", text)     # not shadowed by the site's
+        text = get_site_address(bldg)  # [#9492zm]
+        self.assertIn("Legacy Own Street 23", text)  # [#8awh8k]
+        self.assertNotIn("Site Street 21", text)     # [#l6539t]
 
     def test_clearing_saved_own_address_falls_back_to_site(self):
         """Clearing the stored building_address on the record makes the next no-arg
@@ -123,11 +122,11 @@ class TestBuildingAddressFallback(FrappeTestCase):
             name="T143 Fallback Bldg C", site=site, building_address=own
         ).name
 
-        # Precondition: own address resolves first.
+        # [#n628qk]
         self.assertIn("Own Street 13", get_site_address(bldg))
 
-        # Clear the stored own address; the saved-record path now falls to the site.
+        # [#hnewke]
         frappe.db.set_value("Building", bldg, "building_address", None)
         cleared = get_site_address(bldg)
-        self.assertIn("Site Street 11", cleared)   # site fallback re-engages
-        self.assertNotIn("Own Street 13", cleared)  # the cleared own address is gone
+        self.assertIn("Site Street 11", cleared)   # [#i6lbi6]
+        self.assertNotIn("Own Street 13", cleared)  # [#pc1et8]

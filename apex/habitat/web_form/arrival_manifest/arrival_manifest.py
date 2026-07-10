@@ -3,13 +3,10 @@ import frappe
 from frappe import _
 from frappe.rate_limiter import rate_limit
 
-# Mirror the controller cap so the public endpoint rejects an oversized table
-# before it ever reaches insert.
+# [#8g8lrm]
 _MAX_EXPECTED_WORKERS = 500
 
-# Only these child fields are guest-writable. "temporary_worker" (Arrived As) is
-# read-only by design - it is set by the Arrivals Desk during reconciliation, so
-# a guest must never be able to seed it.
+# [#g4hzd4]
 _ALLOWED_WORKER_FIELDS = ("worker_name", "passport_number", "nationality")
 
 
@@ -38,7 +35,7 @@ def submit_arrival_manifest(
       fields are copied, and the row count is capped, so a guest cannot post an
       unbounded table or pre-set the read-only "Arrived As" link.
     """
-    # [#armp01] honeypot: a bot filling the hidden field is dropped, not stored.
+    # [#2pdod8]
     if website_field:
         return {"name": None}
 
@@ -46,13 +43,13 @@ def submit_arrival_manifest(
         expected_workers = frappe.parse_json(expected_workers)
     expected_workers = expected_workers or []
 
-    # [#armp02] cap before building rows so a huge payload fails fast.
+    # [#r2d5pb]
     if len(expected_workers) > _MAX_EXPECTED_WORKERS:
         frappe.throw(
             _("A manifest can list at most {0} expected workers.").format(_MAX_EXPECTED_WORKERS)
         )
 
-    # [#armp03] copy only the allowlisted child fields - never "temporary_worker".
+    # [#1zodbv]
     rows = [
         {field: row.get(field) for field in _ALLOWED_WORKER_FIELDS if row.get(field)}
         for row in expected_workers
@@ -68,6 +65,5 @@ def submit_arrival_manifest(
         "expected_workers": rows,
     })
     doc.insert(ignore_permissions=True)  # audit-ok — guest web-form intake, rate-limited + honeypot-guarded; field-allowlisted
-    # Request-boundary auto-commit persists this on success; a manual commit here would
-    # defeat the framework rollback if a later write is ever added. [[reference-frappe-commit-in-request-antipattern]]
+    # [#jwr9pv]
     return {"name": doc.name}

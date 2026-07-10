@@ -13,11 +13,10 @@ import frappe
 
 def execute():
     if not frappe.db.exists("DocType", "Freelance"):
-        # Fresh site (JSON already ships Freelancer) or already renamed.
+        # [#ef2j47]
         return
 
-    # Guard the rename target: renaming onto an existing 'Freelancer' would
-    # collide. Leave the source for manual reconciliation, never force-merge.
+    # [#510oz9]
     if frappe.db.exists("DocType", "Freelancer"):
         return
 

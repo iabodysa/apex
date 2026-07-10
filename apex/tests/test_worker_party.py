@@ -271,9 +271,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             js = fh.read()
         self.assertIn("search_arrivals_workers", js)
         self.assertIn("register_temporary_worker", js)
-        # [#5sm4oe] The search/register flow keeps a single register modal (no
-        # duplicate-modal regression). Other flows (e.g. checkout) have their own
-        # dialogs, so scope the guard to the register modal by its unique title.
+        # [#ox7rsa]
         self.assertEqual(
             js.count("Register New Arrival (Passport)"), 1, "exactly one register modal"
         )
@@ -380,7 +378,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             self.assertIn("v1_x.ensure_web_form_route", fh.read())
 
     def test_arrivals_surface_temporary_worker_expiry(self):
-        # The desk readers expose the Temporary Worker window + the page chips it.
+        # [#5syood]
         with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
             api = fh.read()
         self.assertIn("def _expiry_days(", api)
@@ -391,7 +389,7 @@ class TestArrivalsDeskGroundwork(unittest.TestCase):
             js = fh.read()
         self.assertIn("_expiry_chip(", js)
         self.assertIn("Window ends in {0}d", js)
-        # The housing-past-expiry guard lives in the assignment controller (all paths).
+        # [#5hkz9k]
         with open(
             os.path.join(
                 APP_ROOT, "habitat", "doctype", "housing_assignment", "housing_assignment.py"
@@ -426,7 +424,7 @@ class TestPassportMrzParser(unittest.TestCase):
         return parse_mrz_text
 
     def test_parses_td3_specimen(self):
-        # Synthetic TD3 passport MRZ (two 44-char lines) — no real identity.
+        # [#k31mth]
         parse = self._parser()
         text = "P<UTOSPECIMEN<<TRAVELLER<SAMPLE<<<<<<<<<<<<<<\nX123456785UTO8001011M3012315<<<<<<<<<<<<<<04"
         out = parse(text)
@@ -435,7 +433,7 @@ class TestPassportMrzParser(unittest.TestCase):
         self.assertEqual(out.get("expiry_date"), "2030-12-31")
 
     def test_garbled_scan_degrades_to_empty(self):
-        # Too few MRZ lines -> nothing parsed (manual entry stays), never raises.
+        # [#5mnv3z]
         parse = self._parser()
         self.assertEqual(parse("not a passport").get("passport_number"), None)
 

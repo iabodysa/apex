@@ -40,8 +40,7 @@ class Freelancer(Document):
             frappe.throw(_("Monthly Salary must be greater than zero."))
 
     def _derive_status(self) -> None:
-        # Mirror the Temporary Worker expiry: a past end date flips an otherwise
-        # Active contract to Expired. A manual Terminated is left untouched.
+        # [#qtiss4]
         if self.status == "Terminated":
             return
         if self.contract_end_date and getdate(self.contract_end_date) < getdate(nowdate()):
@@ -49,9 +48,7 @@ class Freelancer(Document):
 
 
 def on_doctype_update():
-    # Belt-and-suspenders: a DB-level unique index on the ID blocks any duplicate
-    # freelancer that slips past set_only_once / app validation (direct inserts or
-    # a race). Guarded so pre-existing duplicate data logs instead of aborting migrate.
+    # [#g6y2jf]
     add_unique_guarded(
         "Freelancer",
         ["national_id_or_iqama"],

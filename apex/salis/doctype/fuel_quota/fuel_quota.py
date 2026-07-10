@@ -18,7 +18,7 @@ from apex.salis.utils import lock_vehicle
 class FuelQuota(Document):
 	def validate(self):
 		self._guard_duplicate()
-		# An allocation of zero or negative litres is not a quota — reject it.
+		# [#eortzg]
 		if flt(self.monthly_litres) <= 0:
 			frappe.throw(_("Monthly litres must be greater than zero."))
 		monthly = self.monthly_litres or 0
@@ -38,8 +38,7 @@ class FuelQuota(Document):
 		cancelled quota can be re-issued and an amendment of this same doc passes."""
 		if not (self.vehicle and self.period_month):
 			return
-		# Serialize concurrent creates for the same vehicle: without this lock two
-		# transactions both pass the exists-check below and double-allocate the month.
+		# [#5gtjsg]
 		lock_vehicle(self.vehicle)
 		dup = frappe.db.exists(
 			"Fuel Quota",

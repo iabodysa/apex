@@ -20,8 +20,7 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# [#8evoal] Real linked masters are created in-test; tell the framework not to
-# auto-provision stubs for these (mirrors the sibling controller tests).
+# [#ooevhv]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -43,7 +42,7 @@ test_ignore = [
 
 class TestRoomBedTransferBedSwap(FrappeTestCase):
     def setUp(self):
-        # Author all fixtures + transitions as Administrator; restore in tearDown.
+        # [#h0djea]
         frappe.set_user("Administrator")
 
     def tearDown(self):
@@ -69,7 +68,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
                 "country": "Saudi Arabia",
             }
         ).insert(ignore_permissions=True).name
-        # A non-group cost center for billing (Building.default_cost_center).
+        # [#3mukgp]
         cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": company}) or frappe.db.get_value(
             "Cost Center", {"is_group": 0}
         )
@@ -97,7 +96,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
                     "building": building,
                     "room_number": "R" + self._h(),
                     "bed_capacity": 4,
-                    "readiness_status": "Ready",  # [#agde2c] avoids the not-assignable throw
+                    "readiness_status": "Ready",  # [#id4o4x]
                 }
             ).insert(ignore_permissions=True).name
 
@@ -185,8 +184,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
         asg = self._active_assignment(fx)
         self._asg_name = asg.name
 
-        # Non-vacuous: the seed produced exactly the occupancy we rely on — the
-        # assignment's on_submit already occupied from_bed and to_bed is free.
+        # [#s6cf35]
         self.assertEqual(
             frappe.db.get_value("Bed", fx.from_bed, "status"),
             "Occupied",
@@ -197,7 +195,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
             "Available",
             "seed precondition: to_bed must start Available",
         )
-        # from_bed is fetched from assignment.bed; confirm it resolved before submit.
+        # [#flajtg]
         transfer = self._transfer(fx)
         transfer.insert(ignore_permissions=True)
         self.assertEqual(
@@ -206,7 +204,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
 
         transfer.submit()
 
-        # The occupancy swap: source freed, target taken.
+        # [#4ph7om]
         self.assertEqual(
             frappe.db.get_value("Bed", fx.from_bed, "status"),
             "Available",
@@ -218,7 +216,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
             "on_submit must occupy the target bed",
         )
 
-        # The live assignment is re-pointed in place to the target bed/room/building.
+        # [#3ftvei]
         row = frappe.db.get_value(
             "Housing Assignment",
             asg.name,
@@ -230,7 +228,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
         self.assertEqual(
             row.building, fx.to_building, "assignment must now reference the target building"
         )
-        # The stay was never closed/re-opened: still an active (submitted) check-in.
+        # [#9xf9v0]
         self.assertEqual(row.docstatus, 1, "the transfer must not cancel the assignment")
         self.assertFalse(
             row.check_out_date, "the transfer must keep the assignment checked in"
@@ -245,7 +243,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
         transfer.insert(ignore_permissions=True)
         transfer.submit()
 
-        # Post-submit precondition (non-vacuous): swap is in effect before we cancel.
+        # [#ee6xdh]
         self.assertEqual(
             frappe.db.get_value("Bed", fx.from_bed, "status"),
             "Available",
@@ -259,7 +257,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
 
         transfer.cancel()
 
-        # on_cancel reverses ONLY the two bed statuses.
+        # [#bfzbhi]
         self.assertEqual(
             frappe.db.get_value("Bed", fx.to_bed, "status"),
             "Available",

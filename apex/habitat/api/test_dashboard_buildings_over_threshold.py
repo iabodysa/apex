@@ -16,7 +16,7 @@ def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
-# Card returns the {value: n, ...df} dict contract; unwrap to the count here.
+# [#ojqs7y]
 def get_buildings_over_threshold():
     return _get_buildings_over_threshold()["value"]
 
@@ -48,13 +48,13 @@ class TestBuildingsOverThreshold(FrappeTestCase):
                               ignore_permissions=True)
 
     def test_counts_only_buildings_over_their_own_threshold(self):
-        # Over its own threshold (130 > 120) -> counted.
+        # [#m5sw7v]
         self._building(occupancy=130, threshold=120)
-        # Exactly at threshold (120 == 120) -> NOT counted (strict greater-than).
+        # [#fyw698]
         self._building(occupancy=120, threshold=120)
-        # Under its own threshold (90 < 120) -> NOT counted.
+        # [#aurr42]
         self._building(occupancy=90, threshold=120)
-        # A high per-row threshold suppresses the count even when occupied (110 < 150).
+        # [#k5ge5x]
         self._building(occupancy=110, threshold=150)
 
         delta = get_buildings_over_threshold() - self.baseline
@@ -62,20 +62,19 @@ class TestBuildingsOverThreshold(FrappeTestCase):
                          "only the building strictly over its own threshold is counted")
 
     def test_unset_threshold_falls_back_to_default_not_zero(self):
-        # Threshold 0 must mean 'use the default 120', NOT 'over 0%'. At 50%
-        # occupancy with a 0 threshold the building is below the 120 default.
+        # [#sz4asi]
         self._building(occupancy=50, threshold=0)
         self.assertEqual(get_buildings_over_threshold() - self.baseline, 0,
                          "a 0/unset threshold falls back to 120 and is not over")
 
-        # Above the default fallback (130 > 120) it IS counted.
+        # [#9fiytb]
         self._building(occupancy=130, threshold=0)
         self.assertEqual(get_buildings_over_threshold() - self.baseline, 1,
                          "occupancy over the 120 default counts when threshold unset")
 
     def test_returns_number_card_dict_contract(self):
         res = _get_buildings_over_threshold()
-        # Custom Number Card contract: {value: <number>, ...df}.
+        # [#9jjszx]
         self.assertIsInstance(res, dict, "Custom Number Card returns a dict, not a scalar")
         self.assertIn("value", res, "the number must live under the 'value' key")
         self.assertIsInstance(res["value"], int)

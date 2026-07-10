@@ -23,7 +23,7 @@ WORKSPACE_GLOB = os.path.join(
     "*.json",
 )
 
-# All modules' workspaces / chart records, for the cross-module no-chart invariant.
+# [#q3fp4l]
 _APP = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 ALL_WORKSPACE_GLOB = os.path.join(_APP, "*", "workspace", "*", "*.json")
 ALL_CHART_GLOB = os.path.join(_APP, "*", "dashboard_chart", "*", "*.json")
@@ -142,8 +142,7 @@ class TestWorkspaceHeadlineCharts(unittest.TestCase):
     """
 
     def test_every_wired_chart_exists_on_disk(self):
-        # A workspace must never point at a chart record absent from disk — Frappe
-        # silently drops the tile (no error) when the referenced record is missing.
+        # [#6q5sa3]
         missing = _workspace_referenced_charts() - _chart_record_names()
         self.assertEqual(
             missing,
@@ -152,9 +151,7 @@ class TestWorkspaceHeadlineCharts(unittest.TestCase):
         )
 
     def test_scan_is_non_vacuous(self):
-        # Guard the guard: a glob that silently finds nothing would pass the
-        # invariant above for free. Chart records exist on disk and the workspace
-        # scan reaches every module's workspaces.
+        # [#1w1s6p]
         self.assertTrue(_chart_record_names(), "no Dashboard Chart records discovered on disk")
         self.assertTrue(_all_workspace_files(), "no workspace JSON discovered across modules")
         self.assertTrue(

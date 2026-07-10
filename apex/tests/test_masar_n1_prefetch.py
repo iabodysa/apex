@@ -83,8 +83,7 @@ class TestMasarWorkerRoutePrefetch(_WorkerTripMixin, FrappeTestCase):
         frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
         cls.project = _project("Masar N1 Project")
         cls.building = _building("Masar N1 Building")
-        # Distinct drivers so the small/large trips never share a manifest and the
-        # session-scoped endpoint reads exactly one trip per case.
+        # [#llw7jc]
         cls.small_driver, cls.small_user = _ensure_driver_chain(
             "masar_n1_small_drv@example.com", "Masar N1 Small"
         )
@@ -96,9 +95,7 @@ class TestMasarWorkerRoutePrefetch(_WorkerTripMixin, FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a per-class Project OUTSIDE the per-method savepoint
-        # rollback; delete it so the committed Project does not leak across the
-        # test DB. (Site/Building/Employees are reuse-or-create shared fixtures.)
+        # [#4w47gh]
         frappe.set_user("Administrator")
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -133,8 +130,7 @@ class TestMasarWorkerRoutePrefetch(_WorkerTripMixin, FrappeTestCase):
             self.large_driver, self.large_user, self.large_workers, "N1 Large Route"
         )
 
-        # Sanity: each case really resolved its trip with the expected manifest size,
-        # so the counts below are over genuinely different row counts.
+        # [#nvqmbz]
         self.assertEqual(len(small_payload["trips"]), 1)
         self.assertEqual(len(large_payload["trips"]), 1)
         self.assertEqual(len(small_payload["trips"][0]["workers"]), 2)
@@ -148,13 +144,10 @@ class TestMasarWorkerRoutePrefetch(_WorkerTripMixin, FrappeTestCase):
             f"large={large_counter.get_all_by_doctype}/{large_counter.get_value_by_doctype}",
         )
 
-        # The three prefetched DocTypes must each be read at most a fixed number of
-        # times — never once-per-row. (Employee is the manifest; if it tracked row
-        # count it would be 6 for the large trip.)
+        # [#tmrfkp]
         self.assertLessEqual(large_counter.get_all_by_doctype.get("Employee", 0), 1)
         self.assertLessEqual(large_counter.get_all_by_doctype.get("Building", 0), 1)
-        # One constant Employee get_value is allowed: _find_driver resolves the
-        # session user -> Employee once per request (identity), not per manifest row.
+        # [#rszb76]
         self.assertLessEqual(large_counter.get_value_by_doctype.get("Employee", 0), 1)
         self.assertEqual(large_counter.get_value_by_doctype.get("Building", 0), 0)
 
@@ -166,12 +159,12 @@ class TestMasarWorkerRoutePrefetch(_WorkerTripMixin, FrappeTestCase):
         )
         trip = payload["trips"][0]
 
-        # Employee names: prefetched map vs a fresh get_value per worker.
+        # [#q69g5q]
         for w in trip["workers"]:
             expected = frappe.db.get_value("Employee", w["employee"], "employee_name")
             self.assertEqual(w["employee_name"], expected)
 
-        # Housing pickup: the building dict on the housing stop equals a direct read.
+        # [#6i4gtw]
         housing_stop = next(s for s in trip["stops"] if s.get("accommodation_building"))
         b = frappe.db.get_value(
             "Building",

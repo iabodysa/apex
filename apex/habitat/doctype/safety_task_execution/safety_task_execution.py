@@ -21,15 +21,10 @@ from frappe.model.document import Document
 
 from apex.habitat.utils.finding_fanout import fan_out_findings
 
-# Catalog category (Safety Task Catalog.department) that demands photo evidence
-# before a finding may escalate. Matched case-insensitively so a finding-row
-# category carrying the same word is honoured too (best-effort, forward-compat).
+# [#f1ge3a]
 _SECURITY_CATEGORY = "security"
 
-# Overall execution_status values that signal the task itself failed and a repair
-# is needed (the schema promise on linked_maintenance_request). These drive ONE
-# summary Maintenance Request for the whole execution, distinct from the
-# per-finding fan-out above.
+# [#6qlbpt]
 _REPAIR_NEEDED_STATUSES = ("Poor", "Not Done")
 
 
@@ -38,9 +33,7 @@ class SafetyTaskExecution(Document):
         self._enforce_evidence()
 
     def on_submit(self):
-        # Each actionable finding spawns one Maintenance Request stamped with
-        # source_execution; the finding's generated_maintenance_request back-link
-        # is written so a re-run never duplicates a ticket.
+        # [#gugnzs]
         fan_out_findings(self.findings, self)
         self._escalate_failed_execution()
 
@@ -58,9 +51,7 @@ class SafetyTaskExecution(Document):
             return
         room = self._scope_room()
         if not room:
-            # Maintenance Request.room is mandatory; with no room in the building
-            # the summary ticket cannot be created. The per-finding fan-out still
-            # covers any finding that names its own room.
+            # [#jz2ktt]
             return
         mr = frappe.new_doc("Maintenance Request")
         mr.building = self.building
@@ -74,8 +65,7 @@ class SafetyTaskExecution(Document):
         mr.status = "Open"
         mr.source_execution = self.name
         mr.insert(ignore_permissions=True)  # audit-ok
-        # db_set: the parent is already submitted, so write the back-link without
-        # disturbing its modified stamp.
+        # [#ixanq1]
         self.db_set("linked_maintenance_request", mr.name)
 
     def _has_linked_request(self) -> bool:
@@ -113,7 +103,7 @@ class SafetyTaskExecution(Document):
              without an Evidence Photo.
         """
         if self.evidence_photo:
-            return  # a photo is present — both rules are satisfied
+            return  # [#kmn9ln]
 
         if self._failed_requires_evidence():
             frappe.throw(

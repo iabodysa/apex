@@ -132,7 +132,7 @@ class TestReports(ApexHabitatTestCase):
         self._assert_report_shape(execute_mov_recovery())
 
     def test_rental_settlement_register(self):
-        # Now carries the ported variance chart (merged from the variance twin).
+        # [#plzym0]
         self._assert_chart_report(execute_rental_settlement())
 
     def test_fleet_payment_register(self):

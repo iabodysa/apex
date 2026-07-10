@@ -5,9 +5,7 @@ from __future__ import annotations
 
 import frappe
 
-# Shared savepoint identifier for the per-building insert isolation in both daily
-# cleaning-log generators. Re-declaring the same name each loop iteration is safe:
-# a SAVEPOINT with an existing name replaces it, and it is released on success.
+# [#evsc2k]
 _CLEANING_SAVEPOINT = "cleaning_log_insert"
 
 
@@ -37,7 +35,7 @@ def daily_cleaning_log_generator() -> None:
     cleaning_date = today()
     logger = frappe.logger()
 
-    # One Cleaning Log per building per day — the idempotency guard.
+    # [#exgi8j]
     already = {
         r["building"]
         for r in frappe.get_all(
@@ -48,7 +46,7 @@ def daily_cleaning_log_generator() -> None:
         if r["building"]
     }
 
-    # Pre-aggregate each building's rooms once, instead of one query per building.
+    # [#qqq6iv]
     rooms_by_building: dict[str, list[str]] = {}
     for r in frappe.get_all(
         "Room",
@@ -76,23 +74,17 @@ def daily_cleaning_log_generator() -> None:
                 continue
             rooms = rooms_by_building.get(building) or []
             if not rooms:
-                # A building with no rooms has nothing to clean; skip rather
-                # than create an empty log.
+                # [#p9768y]
                 continue
 
-            # Per-building SAVEPOINT: a failure on one building rolls back ONLY
-            # that building's write, not the earlier successful inserts in this
-            # same job run. A bare frappe.db.rollback() would discard every prior
-            # uncommitted insert and leave `created` overstating the committed rows.
+            # [#k5xrmx]
             frappe.db.savepoint(_CLEANING_SAVEPOINT)
             try:
                 log = frappe.get_doc({
                     "doctype": "Cleaning Log",
                     "building": building,
                     "cleaning_date": cleaning_date,
-                    # cleaner_type defaults to Internal Employee; left for the
-                    # supervisor to confirm. Rooms start uncleaned (cleaned=0) and
-                    # at the room_status default — ready to mark.
+                    # [#thdaxn]
                     "room_details": [{"room": room} for room in rooms],
                 })
                 log.insert(ignore_permissions=True)  # audit-ok — scheduler-run daily cleaning record, no user session
@@ -129,7 +121,7 @@ def auto_create_cleaning_logs() -> None:
     cleaning_date = today()
     logger = frappe.logger()
 
-    # Fetch buildings that are Active AND have a supervisor assigned.
+    # [#hsr1dx]
     buildings = frappe.get_all(
         "Building",
         filters={
@@ -147,10 +139,7 @@ def auto_create_cleaning_logs() -> None:
         ):
             continue
 
-        # Per-building SAVEPOINT: isolate each insert so one failing building rolls
-        # back only its own write, never the earlier successful inserts in this same
-        # job run (a bare frappe.db.rollback() would discard them all and desync the
-        # `created` count from what is actually committed).
+        # [#burq2n]
         frappe.db.savepoint(_CLEANING_SAVEPOINT)
         try:
             log = frappe.get_doc({

@@ -12,7 +12,7 @@ import frappe
 
 
 def get_context(context):
-    # Renders per-user with live data; never serve a cached copy.
+    # [#f4ttvt]
     context.no_cache = 1
 
     user = frappe.session.user
@@ -20,17 +20,14 @@ def get_context(context):
 
     my_issues = []
     if employee:
-        # This holder's own open, issued custody issues — the picklist candidates.
+        # [#h8kmbh]
         candidates = frappe.get_all(
             "Custody Issue",
             filters={"issued_to_employee": employee, "docstatus": 1, "status": "Issued"},
             fields=["name", "issue_date", "building"],
             order_by="issue_date desc",
         )
-        # Already-acknowledged subset, scoped to THIS holder's own issues. get_all
-        # bypasses permission_query_conditions, so an unfiltered query would read
-        # every building's acknowledgments cross-tenant; confining to the holder's
-        # own issue names keeps the read to the caller's own data.
+        # [#138kj0]
         candidate_names = [ci.name for ci in candidates]
         acknowledged = (
             {
@@ -51,10 +48,7 @@ def get_context(context):
 
     context.my_custody_issues = my_issues
 
-    # [#own] Only pre-fill from ``?issue=`` when that issue is THIS holder's own.
-    # An unchecked URL param would render another employee's Custody Issue to any
-    # authenticated caller. A foreign / unknown docname falls back to the holder's
-    # first own issue (or blank).
+    # [#e7gnzt]
     requested = frappe.form_dict.get("issue")
     own_issue = bool(requested) and frappe.db.get_value(
         "Custody Issue", requested, "issued_to_employee"

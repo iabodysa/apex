@@ -21,13 +21,10 @@ class MaintenanceWorkOrder(Document):
         source_doctype/source_name) and release the linked request back to Open.
         Open is the request's pre-Work-Order state; a request a human has since
         moved to a terminal Resolved/Cancelled is left untouched."""
-        # Accommodation Ledger is immutable like the per-item cost ledger: net out
-        # the completion memo with a negative mirror row (reversal_of), never a
-        # hard delete, so period-sum reports stay reconcilable. Mirrors the
-        # Utility Bill Entry before_cancel reversal idiom.
+        # [#cczdtw]
         self._reverse_accommodation_memo()
 
-        # Per-item cost ledger is immutable: reverse (negative mirror row), never delete.
+        # [#oks1ah]
         from apex.habitat.maintenance_engine import reverse_maintenance_cost
         reverse_maintenance_cost(self.name)
 
@@ -94,8 +91,7 @@ def validate(doc, method=None):
             frappe.throw(
                 _("A Work Order already exists for this Maintenance Request: {0}").format(dup)
             )
-    # Procurement lines carry estimated_cost (Maintenance Procurement Item has no
-    # "amount" field); summing a non-existent key left the total stuck at 0.
+    # [#mq83a6]
     doc.total_procurement_cost = sum(
         flt(row.get("estimated_cost") or 0) for row in (doc.procurement_items or [])
     )
@@ -172,7 +168,7 @@ def mark_completed(work_order, completion_notes=None):
             if "status" in mr_status_field:
                 frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "Closed")
 
-        # db_set above fires no on_update doc_event, so reflect from this chokepoint.
+        # [#hm35wu]
         from apex.habitat.doctype.housing_inventory.housing_inventory import reflect_completed_maintenance
         reflect_completed_maintenance(doc)
 
@@ -199,8 +195,7 @@ def mark_completed(work_order, completion_notes=None):
             }).insert(ignore_permissions=True)  # audit-ok — system ledger memo on completion, gated by Work Order write (above)
             ledger_posted = True
 
-        # Per-item immutable cost trail (stable under later cancellation). Idempotent,
-        # so re-completion never double-posts; separate from the aggregate memo above.
+        # [#n9hvl5]
         from apex.habitat.maintenance_engine import post_maintenance_cost
         post_maintenance_cost(doc)
     except Exception:

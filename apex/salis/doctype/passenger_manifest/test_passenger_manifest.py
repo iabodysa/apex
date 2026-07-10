@@ -19,8 +19,7 @@ def _h(n=12):
 
 
 def _manifest(employees):
-    # Unsaved controller; run validate() directly to exercise the guard + count
-    # recompute without pulling the dispatch/vehicle link graph.
+    # [#31cvjj]
     doc = frappe.get_doc({"doctype": "Passenger Manifest"})
     for emp in employees:
         doc.append("passengers", {"employee": emp})
@@ -46,13 +45,13 @@ class TestPassengerManifestDuplicates(FrappeTestCase):
             _manifest([self.emp1, self.emp1]).validate()
 
     def test_distinct_employees_pass_and_count_matches(self):
-        # Non-vacuous: two distinct passengers validate and passenger_count == 2.
+        # [#3w27ro]
         doc = _manifest([self.emp1, self.emp2])
         doc.validate()
         self.assertEqual(doc.passenger_count, 2)
 
     def test_empty_employee_rows_are_ignored_by_guard(self):
-        # Blank-employee rows don't collide; the guard skips them.
+        # [#4xsrtb]
         doc = _manifest([self.emp1, None, None])
         doc.validate()
         self.assertEqual(doc.passenger_count, 3)

@@ -18,10 +18,7 @@ def _h(n=12):
 class TestArrivalBatch(FrappeTestCase):
     def setUp(self):
         self.date = "2026-07-01"
-        # A bare building string (not a real Accommodation Building) so the
-        # assignment controller's project/cost-center gates bail early — the same
-        # direct approach the sibling get_arrival_summary tests use. The Arrival
-        # Batch Link is inserted with ignore_links for the same reason.
+        # [#jcdpgr]
         self.building = "BLDG-" + _h()
         self.supplier = frappe.get_doc({
             "doctype": "Supplier",
@@ -44,7 +41,7 @@ class TestArrivalBatch(FrappeTestCase):
         """expected_count is derived from the manifest rows, not entered by hand."""
         doc = self._batch(["A", "B", "C"])
         self.assertEqual(doc.expected_count, 3)
-        # A title is stamped for the list/link display.
+        # [#oodln4]
         self.assertTrue(doc.title)
 
     def test_system_maintained_fields_are_documented_read_only(self):
@@ -83,9 +80,9 @@ class TestArrivalBatch(FrappeTestCase):
     def test_manifest_completion_measured_against_batch(self):
         """With a batch on the date and N housed arrivals, get_arrival_summary
         reports the expected count and a completion percentage (no longer None)."""
-        self._batch(["A", "B", "C", "D"])  # expected 4
+        self._batch(["A", "B", "C", "D"])  # [#nh8ame]
 
-        # Two real housed arrivals on the date in this building.
+        # [#7tuwdy]
         for _i in range(2):
             asgn = frappe.get_doc({
                 "doctype": "Housing Assignment",
@@ -106,11 +103,11 @@ class TestArrivalBatch(FrappeTestCase):
     def test_pending_arrival_count_drives_reconciliation_alert(self):
         """pending_arrival_count = expected minus housed (clamped at 0); this is what
         the Manifest Not Reconciled notification condition checks."""
-        doc = self._batch(["A", "B", "C"])  # expected 3
-        # Nothing housed yet -> all pending.
+        doc = self._batch(["A", "B", "C"])  # [#ck7crm]
+        # [#4l3u7f]
         self.assertEqual(doc.pending_arrival_count, 3)
 
-        # House one worker on the date in this building.
+        # [#ot3qhi]
         asgn = frappe.get_doc({
             "doctype": "Housing Assignment",
             "naming_series": "ACC-ASGN-.YYYY.-.####",
@@ -175,8 +172,7 @@ class TestArrivalManifestWebForm(FrappeTestCase):
         flow) creates an Arrival Batch whose expected_count is derived from the rows."""
         from frappe.website.doctype.web_form.web_form import accept
 
-        # accept() validates Links, so use a real Accommodation Building (it only
-        # requires a name) rather than the bare-string shortcut the sibling cases use.
+        # [#k68agj]
         building = frappe.get_doc({
             "doctype": "Building",
             "building_name": "BLDG-" + _h(),

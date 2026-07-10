@@ -15,16 +15,13 @@ from frappe.utils import getdate
 from apex.habitat.doctype.housing_assignment.housing_assignment import recalculate_spatial
 from apex.apex_core.utils.party_link import sync_party_employee
 
-# Checkouts that end the worker's stay in the country/contract — the only reasons
-# that warrant a Salis departure (relocation) transport, mirroring the arrival
-# hand-off direction. An internal/project transfer keeps the worker on site.
+# [#o8jo9s]
 DEPARTURE_REASONS = ("Final Exit", "End of Contract")
 
 
 class HousingCheckout(Document):
     def before_submit(self):
-        # Custody-clearance gate. A class method so it auto-fires via run_method
-        # without a hooks.py doc_events entry.
+        # [#ldruez]
         before_submit(self)
 
 
@@ -239,7 +236,7 @@ def on_submit(doc, method=None):
                 "employee": doc.employee,
                 "assessment_date": doc.checkout_date,
                 "building": building,
-                # back-link so the assessment can post its deduction back onto this checkout
+                # [#he8cmw]
                 "source_checkout": doc.name,
                 "remarks": _("Auto-generated from Accommodation Checkout {0}. Review replacement costs and submit.").format(doc.name),
             })

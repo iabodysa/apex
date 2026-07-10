@@ -35,15 +35,14 @@ class TestIngestionEngineFailureLogging(FrappeTestCase):
             }
         )
         src.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        # The engine's failure path calls frappe.db.rollback() then commits via
-        # _fail_source; commit the setup row first so it survives that rollback.
+        # [#1i708z]
         frappe.db.commit()
         return src.name
 
     def test_forced_failure_error_log_carries_reference(self):
         name = self._pending_intake()
         try:
-            # Force a realistic per-record failure inside the batch loop.
+            # [#9y67lm]
             with patch.object(
                 ingestion_engine,
                 "_process_source",
@@ -64,7 +63,7 @@ class TestIngestionEngineFailureLogging(FrappeTestCase):
                 "Error Log entry must carry the failing intake's "
                 "reference_doctype + reference_name",
             )
-            # The record is also stamped Failed so it is never re-ingested.
+            # [#dcwneh]
             self.assertEqual(
                 frappe.db.get_value(ingestion_engine.INTAKE_DOCTYPE, name, "status"),
                 "Failed",

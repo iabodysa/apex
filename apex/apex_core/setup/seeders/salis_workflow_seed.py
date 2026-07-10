@@ -148,12 +148,7 @@ def _seed_one(definition):
 
     name = definition["name"]
     if frappe.db.exists("Workflow", name):
-        # [#3imdxa] Reconcile an existing workflow to the shipped JSON (the single
-        # source of truth): the states/transitions can change between releases
-        # (e.g. a DoA split that swaps a single Approve for tiered Authorize
-        # actions), so re-apply them rather than leaving the stale DB version in
-        # place. Idempotent: when the JSON already matches, this rewrites the same
-        # rows. Header flags + is_active are realigned too.
+        # [#9ynomb]
         doc = frappe.get_doc("Workflow", name)
         _apply_definition(doc, definition, document_type)
         doc.save(ignore_permissions=True)  # audit-ok

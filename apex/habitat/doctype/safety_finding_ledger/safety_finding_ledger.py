@@ -27,9 +27,7 @@ from frappe.model.document import Document
 
 class SafetyFindingLedger(Document):
     def on_update(self):
-        # Immutable after creation: any field change to an existing row is
-        # rejected. Inserts pass through (is_new); the engine never edits a row
-        # after inserting it.
+        # [#41qjoa]
         if self.is_new():
             return
         if not self.flags.ignore_validate_update_after_submit and self.get_doc_before_save():
@@ -39,9 +37,7 @@ class SafetyFindingLedger(Document):
             )
 
     def on_trash(self):
-        # Never hand-delete a ledger row; cancellation posts a reversal instead.
-        # frappe.flags.in_install / in_migrate let teardown + framework paths
-        # through (e.g. uninstall), but normal deletion is blocked.
+        # [#r4nmfj]
         if frappe.flags.in_install or frappe.flags.in_migrate:
             return
         frappe.throw(

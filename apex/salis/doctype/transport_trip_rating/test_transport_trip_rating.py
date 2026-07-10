@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO Support Services Co. Ltd and Contributors
-# See license.txt
+# [#gi2kqa]
 
-# import frappe
+# [#keeppb]
 from frappe.tests.utils import FrappeTestCase
 
 

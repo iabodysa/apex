@@ -15,8 +15,7 @@ test_ignore = ["Salis Vehicle", "Salis Driver", "Route Plan", "Transport Request
 
 
 def _trip(status, depart, ret):
-    # Build an unsaved controller and run only the time guard — isolates the rule
-    # under test from the unrelated readiness/odometer/capacity validations.
+    # [#7c8rgb]
     doc = frappe.get_doc(
         {
             "doctype": "Dispatch Trip",
@@ -37,17 +36,17 @@ class TestDispatchTripTimes(FrappeTestCase):
             _trip("Completed", "10:00:00", "08:00:00")._validate_trip_times()
 
     def test_completed_return_after_depart_passes(self):
-        # Non-vacuous: a well-ordered Completed trip must not raise.
+        # [#t9f4l2]
         _trip("Completed", "08:00:00", "10:00:00")._validate_trip_times()
 
     def test_completed_equal_times_pass(self):
-        # Boundary: equal times are a zero-duration record, not a sequencing error.
+        # [#fp22aw]
         _trip("Completed", "09:00:00", "09:00:00")._validate_trip_times()
 
     def test_planned_reversed_times_are_exempt(self):
-        # A Planned trip carries an auto-filled nowtime; the guard must not fire.
+        # [#nmv3bw]
         _trip("Planned", "10:00:00", "08:00:00")._validate_trip_times()
 
     def test_completed_missing_one_time_is_exempt(self):
-        # Only depart set -> incomplete pair -> guard skipped (no crash).
+        # [#1w0b1q]
         _trip("Completed", "10:00:00", None)._validate_trip_times()

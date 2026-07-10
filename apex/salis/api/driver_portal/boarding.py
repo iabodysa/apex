@@ -20,7 +20,7 @@ def _manifest_for_board(transport_request):
 		fields=["employee", "pickup_point"],
 		order_by="idx asc",
 	)
-	# Resolve every employee_name in ONE query instead of one get_value per row.
+	# [#cvb0id]
 	emp_ids = [r["employee"] for r in rows if r.get("employee")]
 	names = dict(
 		frappe.get_all(
@@ -58,11 +58,11 @@ def manual_boarding_sheet(dispatch_trip):
 	_require_enabled()
 	from apex.salis.api import boarding
 
-	_resolve_driver()  # gate: caller must be a linked driver
-	trip = boarding._resolve_trip(dispatch_trip)  # read-only reuse; enforces own-trip (else 403)
+	_resolve_driver()  # [#s4jmhw]
+	trip = boarding._resolve_trip(dispatch_trip)  # [#4tljfu]
 
 	workers = _manifest_for_board(trip.get("transport_request"))
-	# Mark who is already aboard from the trip's open Trip Start Log (registered rows).
+	# [#er17go]
 	log_name = frappe.db.get_value(
 		"Trip Start Log", {"dispatch_trip": dispatch_trip, "docstatus": 0}, "name"
 	)
@@ -106,8 +106,8 @@ def manual_board_workers(dispatch_trip, workers, stop_name=None, accommodation_b
 	_require_enabled()
 	from apex.salis.api import boarding
 
-	_resolve_driver()  # gate: caller must be a linked driver
-	trip = boarding._resolve_trip(dispatch_trip)  # read-only reuse; enforces own-trip (else 403)
+	_resolve_driver()  # [#s4jmhw]
+	trip = boarding._resolve_trip(dispatch_trip)  # [#4tljfu]
 
 	requested = workers
 	if isinstance(requested, str):
@@ -121,18 +121,18 @@ def manual_board_workers(dispatch_trip, workers, stop_name=None, accommodation_b
 	if not requested:
 		frappe.throw(_("Select at least one worker to board."))
 
-	manifest = boarding._trip_manifest_workers(trip.get("transport_request"))  # read-only reuse
-	log = boarding._get_or_create_log(dispatch_trip)  # read-only reuse; draft TSL
+	manifest = boarding._trip_manifest_workers(trip.get("transport_request"))  # [#ba2aen]
+	log = boarding._get_or_create_log(dispatch_trip)  # [#clgkob]
 
 	boarded, skipped = [], []
 	for worker in requested:
 		if worker not in manifest:
-			# Off-manifest workers are audited as Wrong Trip, no boarding row.
+			# [#9ka9zn]
 			_log_manual_scan(dispatch_trip, trip, worker, "Wrong Trip", log.name,
 			                  notes="Worker is not on this trip's manifest.")
 			skipped.append({"worker": worker, "result": "Wrong Trip"})
 			continue
-		if boarding._already_boarded(log, worker):  # read-only reuse; idempotent
+		if boarding._already_boarded(log, worker):  # [#gwg33g]
 			_log_manual_scan(dispatch_trip, trip, worker, "Duplicate", log.name,
 			                 notes="Worker already boarded this trip.")
 			skipped.append({"worker": worker, "result": "Duplicate"})

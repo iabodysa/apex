@@ -39,7 +39,7 @@ class TestBuildingOpenRequests(FrappeTestCase):
             "description": "Test request " + _h(),
             "status": status,
         })
-        # Satisfy the controller's status-transition validators.
+        # [#qr65qv]
         if status == "Assigned":
             doc.assigned_to = "Administrator"
         if status in ("Resolved", "Closed"):
@@ -53,14 +53,14 @@ class TestBuildingOpenRequests(FrappeTestCase):
             frappe.delete_doc("Resident Request", name, force=True, ignore_permissions=True)
 
     def test_counts_only_open_requests_for_the_building(self):
-        # Three open requests across distinct open statuses.
+        # [#4tvv56]
         self._request(self.building, "New")
         self._request(self.building, "Triaged")
         self._request(self.building, "In Progress")
-        # Terminal requests must NOT count.
+        # [#d1o3kx]
         self._request(self.building, "Resolved")
         self._request(self.building, "Closed")
-        # A different building's open request must NOT leak into the count.
+        # [#sm4j85]
         self._request(self.other_building, "New")
 
         result = building_open_requests(self.building)
@@ -75,6 +75,6 @@ class TestBuildingOpenRequests(FrappeTestCase):
         statuses = _open_resident_request_statuses()
         for terminal in ("Resolved", "Rejected", "Closed"):
             self.assertNotIn(terminal, statuses)
-        # The returned statuses drive the client filter, so they must be non-empty.
+        # [#e8mpsh]
         self.assertIn("New", statuses)
         self.assertEqual(building_open_requests(self.building)["statuses"], statuses)

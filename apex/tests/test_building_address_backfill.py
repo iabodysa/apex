@@ -37,15 +37,15 @@ def _make_address(title, link_building=None):
 class TestBuildingAddressBackfill(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # make_building defaults company="Test AFMCO"; ensure it exists (link validation).
+        # [#nvhgvp]
         make_company()
-        # Per-test unique key so fixtures never collide across methods / reruns.
+        # [#1i98hj]
         self.key = self._testMethodName
 
     def test_empty_building_address_is_backfilled_from_default_address(self):
         bldg = make_building(name=f"T269 {self.key} B").name
         addr = _make_address(f"T269 {self.key} Addr", link_building=bldg).name
-        # Precondition: the field is empty, the Dynamic Link exists.
+        # [#q1lo3u]
         self.assertFalse(frappe.db.get_value("Building", bldg, "building_address"))
 
         execute()
@@ -57,10 +57,10 @@ class TestBuildingAddressBackfill(FrappeTestCase):
         )
 
     def test_existing_building_address_is_left_untouched(self):
-        # A standalone Address already chosen on the building...
+        # [#isatfx]
         own = _make_address(f"T269 {self.key} Own").name
         bldg = make_building(name=f"T269 {self.key} B", building_address=own).name
-        # ...and a DIFFERENT Address linked via Dynamic Link that the patch must NOT prefer.
+        # [#q0hcwi]
         other = _make_address(f"T269 {self.key} Other", link_building=bldg).name
         self.assertNotEqual(own, other)
 

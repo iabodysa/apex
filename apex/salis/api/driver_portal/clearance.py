@@ -42,11 +42,11 @@ def my_clearance():
 	if not row:
 		return {"has_clearance": False}
 
-	# A submitted, Cleared clearance is the issued state — expose the certificate PDF.
+	# [#o19xxt]
 	issued = row.get("docstatus") == 1 and row.get("status") == "Cleared"
 	certificate_url = None
 	if issued:
-		# Canonical download-pdf URL for the standard certificate print format.
+		# [#lgc78o]
 		from urllib.parse import urlencode
 
 		certificate_url = "/api/method/frappe.utils.print_format.download_pdf?" + urlencode(

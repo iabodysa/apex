@@ -36,7 +36,7 @@ class TestTripFulfilmentLedgerImmutability(unittest.TestCase):
         """A brand-new (unsaved) row is allowed through so the controller can post it."""
         doc = frappe.new_doc("Trip Fulfilment Ledger")
         doc.worker_count = 5
-        # Must not raise — is_new() is True.
+        # [#3wvqq3]
         doc._enforce_single_write_immutability()
 
     def test_resave_of_persisted_row_throws(self):
@@ -45,14 +45,12 @@ class TestTripFulfilmentLedgerImmutability(unittest.TestCase):
         doc = frappe.new_doc("Trip Fulfilment Ledger")
         doc.worker_count = 5
         doc.source_doctype = "Dispatch Trip"
-        # Bypass Link validation: this test exercises the immutability guard, not
-        # the link targets, which need no real Dispatch Trip / vehicle / driver.
+        # [#7iy5rx]
         doc.flags.ignore_links = True
         doc.insert(ignore_permissions=True)
         try:
             doc.worker_count = 99
-            # The guard throws frappe.PermissionError (NOT a ValidationError
-            # subclass), so the assertion must name PermissionError exactly.
+            # [#5i9rph]
             with self.assertRaises(frappe.PermissionError):
                 doc.save(ignore_permissions=True)
         finally:

@@ -71,7 +71,7 @@ class TestOperationalDepreciationPolicy(FrappeTestCase):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
     def test_residual_value_above_100_raises(self):
-        # residual is a fraction of cost; >100% is meaningless.
+        # [#3n2vbz]
         doc = frappe.get_doc({
             "doctype": "Operational Depreciation Policy",
             "policy_name": "QA Residual Over",
@@ -92,7 +92,7 @@ class TestOperationalDepreciationPolicy(FrappeTestCase):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
     def test_residual_value_bounds_inclusive(self):
-        # 0 (full write-down) and 100 (no depreciation) are both meaningful endpoints.
+        # [#dgwmjf]
         for pct in (0, 100):
             doc = frappe.get_doc({
                 "doctype": "Operational Depreciation Policy",

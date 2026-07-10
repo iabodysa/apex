@@ -59,8 +59,7 @@ class TestVehicleIncidentWebForm(FrappeTestCase):
         self.assertEqual(names[0].description, "Side-swiped while parked.")
 
     def test_theft_capture_does_not_stop_the_vehicle(self):
-        # A drafted Theft report must not run the on_submit lock until a
-        # supervisor submits it: the vehicle stays Active.
+        # [#jixp2j]
         self._accept(incident_type="Theft", description="Vehicle missing from yard.")
         frappe.set_user("Administrator")
         self.assertTrue(

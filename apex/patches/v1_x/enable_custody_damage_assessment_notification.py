@@ -5,9 +5,7 @@ _NOTIFICATION = "Habitat - Custody Damage Assessment Created"
 
 
 def execute():
-    # Notification.enabled is in import_file.ignore_values, so migrate preserves the
-    # old DB value and never picks up the JSON enabled flip on already-installed sites;
-    # set it directly here. Idempotent; no-op on fresh installs (JSON ships enabled=1).
+    # [#qfm9kh]
     if not frappe.db.exists("Notification", _NOTIFICATION):
         return
 

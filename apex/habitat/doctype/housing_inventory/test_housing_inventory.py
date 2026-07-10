@@ -55,11 +55,11 @@ class TestHousingInventory(FrappeTestCase):
             "naming_series": "HINV-.YYYY.-.#####",
             "item_name": "Wardrobe",
             "item_category": "Furniture",
-            "room": room,  # building left blank — must fetch from the room
+            "room": room,  # [#lku5nl]
         })
         doc.insert(ignore_permissions=True)
         self.assertEqual(doc.building, building)
-        # The room field stays a valid Accommodation Room link, not a Building docname.
+        # [#1j5yhd]
         self.assertEqual(doc.room, room)
         self.assertTrue(frappe.db.exists("Room", doc.room))
         frappe.delete_doc("Housing Inventory", doc.name, force=True, ignore_permissions=True)
@@ -107,7 +107,7 @@ class TestHousingInventoryMaintenanceReflection(FrappeTestCase):
         }).insert(ignore_permissions=True).name
 
     def _completed_work_order(self, end_date):
-        # Minimal completed Work Order whose request points at the linked asset.
+        # [#15n67e]
         mr = frappe.get_doc({
             "doctype": "Maintenance Request", "naming_series": "MAINT-.YYYY.-.#####",
             "building": self.building, "room": self._room(), "issue_type": "Air Conditioning",

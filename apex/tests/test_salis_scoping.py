@@ -27,9 +27,7 @@ class TestProjectScoping(FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a Project + User Permission OUTSIDE FrappeTestCase's
-        # per-method savepoint rollback; without this they leak across the test DB
-        # (the @example.com Project User Permission cross-test-pollution class).
+        # [#bipurv]
         frappe.set_user("Administrator")
         frappe.db.delete("User Permission",
                          {"allow": "Project", "for_value": cls.pa, "user": cls.sup})

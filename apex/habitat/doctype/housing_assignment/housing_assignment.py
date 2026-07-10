@@ -258,8 +258,7 @@ def on_submit(doc, method=None):
         frappe.db.rollback()
         frappe.throw(_("Could not update bed occupancy. The assignment was not submitted."))
 
-    # housing-allowance deduction now reads the Salary Deduction Policy Rent rule;
-    # a rule is returned only when both the global master switch and the rule are on
+    # [#7ezsfj]
     rent_rule = get_policy().get_type_rule("Rent")
     activation = rent_rule.activation_date if rent_rule else None
     if rent_rule and (not activation or doc.check_in_date >= activation):

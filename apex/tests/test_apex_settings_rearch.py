@@ -36,7 +36,7 @@ class TestRetentionSetting(FrappeTestCase):
             _set_single("Apex Settings", key, 0)
 
     def test_unset_falls_back_to_literal_not_zero(self):
-        # A new Int on an existing Single stores 0; the helper must NOT return 0.
+        # [#ckh4ch]
         for key, default in RETENTION_DEFAULTS.items():
             _set_single("Apex Settings", key, 0)
             self.assertEqual(retention_days(key), default)
@@ -50,12 +50,12 @@ class TestRetentionSetting(FrappeTestCase):
         self.assertEqual(effective_retention_days("alert_retention_days", None), 200)
 
     def test_effective_setting_overrides_untouched_hook_seed(self):
-        # Log Settings seeds days=90 (the hook default); the setting must win.
+        # [#cg8p7z]
         _set_single("Apex Settings", "alert_retention_days", 45)
         self.assertEqual(effective_retention_days("alert_retention_days", 90), 45)
 
     def test_effective_honours_explicit_operator_override(self):
-        # An operator who edits the Log Settings row to a non-default value wins.
+        # [#4bcpv9]
         _set_single("Apex Settings", "alert_retention_days", 45)
         self.assertEqual(effective_retention_days("alert_retention_days", 17), 17)
 
@@ -113,7 +113,7 @@ class TestResolveCompany(FrappeTestCase):
     def test_none_when_nothing_configured(self):
         _set_single("Habitat Settings", "company", None)
         frappe.defaults.clear_default("company", parenttype="__default")
-        # No module + no user/global default -> None.
+        # [#giftve]
         if not frappe.defaults.get_global_default("company"):
             self.assertIsNone(resolve_company("Habitat"))
 

@@ -27,10 +27,10 @@ def my_trips_today():
 		fields=["name", "route_plan", "vehicle", "transport_request", "depart_time", "return_time", "status"],
 		order_by="depart_time asc",
 	)
-	_attach_trip_maps(trips)  # one-tap Maps before _label_trips overwrites route_plan
-	_label_trips(trips)  # cards show plate / route name, not raw link ids
-	_attach_trip_log_state(trips, driver)  # cards show started/completed without a second call
-	_attach_boarding_counts(trips, driver)  # cards show "N of M boarded"
+	_attach_trip_maps(trips)  # [#c8i03i]
+	_label_trips(trips)  # [#jlry93]
+	_attach_trip_log_state(trips, driver)  # [#qu3kwf]
+	_attach_boarding_counts(trips, driver)  # [#d6x6zw]
 	return trips
 
 
@@ -60,8 +60,8 @@ def my_trips_recent(days=30, limit=50):
 		order_by="trip_date desc, depart_time desc",
 		limit=frappe.utils.cint(limit) or 50,
 	)
-	_attach_trip_maps(trips)  # one-tap Maps before _label_trips overwrites route_plan
-	_label_trips(trips)  # cards show plate / route name, not raw link ids
+	_attach_trip_maps(trips)  # [#c8i03i]
+	_label_trips(trips)  # [#jlry93]
 	for t in trips:
 		t["trip_date"] = frappe.utils.cstr(t["trip_date"]) if t.get("trip_date") else None
 	return trips
@@ -132,20 +132,19 @@ def my_trip_route(dispatch_trip):
         ["name", "route_plan", "vehicle", "transport_request", "depart_time", "return_time", "status"],
         as_dict=True,
     )
-    # [#t170nf] Unknown id OR a trip that isn't this driver's both fail closed.
+    # [#qg5cw1]
     if not trip:
         frappe.throw(_("Trip not found."), frappe.DoesNotExistError)
 
     from apex.salis.api import masar
 
     route_plan = trip.get("route_plan")
-    stops = masar._ordered_stops(route_plan)  # read-only reuse; masar unedited
-    # Stamp each stop with its source Route Stop row name (stable key) + persisted
-    # done-state, so the SPA can mark stops and have it reflect on reload.
+    stops = masar._ordered_stops(route_plan)  # [#492z2y]
+    # [#ja9fyd]
     _attach_stop_progress(stops, route_plan, trip["name"], driver)
 
-    # Registered worker manifest for this trip, each with a phone for a one-tap call.
-    workers = masar._registered_workers(trip.get("transport_request"))  # read-only reuse
+    # [#j3iz55]
+    workers = masar._registered_workers(trip.get("transport_request"))  # [#ba2aen]
     _enrich_workers_with_phone(workers)
 
     vehicle = trip.get("vehicle")
@@ -165,7 +164,7 @@ def my_trip_route(dispatch_trip):
         "return_time": masar._fmt_time(trip.get("return_time")),
         "status": trip.get("status"),
         "has_route_plan": bool(route_plan),
-        # Started gates the per-stop checkpoints — they persist on the open Trip Start Log.
+        # [#mis85h]
         "started": bool(
             frappe.db.exists(
                 "Trip Start Log",

@@ -34,7 +34,7 @@ def validate(doc, method=None):
         if doc.billing_period_to < doc.billing_period_from:
             frappe.throw(_("Billing Period To must be on or after Billing Period From."))
 
-    # [#egssfj] overlapping (not only exact) periods for the same building+account collide
+    # [#luwwrt]
     if doc.utility_account and doc.billing_period_from and doc.billing_period_to:
         overlap = frappe.db.get_value(
             "Utility Bill Entry",
@@ -61,15 +61,13 @@ def validate(doc, method=None):
     _compute_sharing(doc)
     _compute_variance(doc)
 
-    # reject negative amounts here; the intentional negative reversal is built
-    # directly in before_cancel and never routes through validate.
+    # [#laxlx5]
     if flt(doc.total_bill_amount) < 0 or flt(doc.bill_amount) < 0:
         frappe.throw(_("Bill amounts cannot be negative."))
 
 
 def on_submit(doc, method=None):
-    # variance_from_avg_pct is already computed and persisted by validate() on the
-    # submitting save (bill_amount is finalized there), so no recompute is needed.
+    # [#fcr6id]
     try:
         _post_ledger_row(doc)
     except Exception:
@@ -117,7 +115,7 @@ def before_cancel(doc, method=None):
 def _compute_meter_readings(doc) -> None:
     prev = flt(doc.meter_reading_previous)
     curr = flt(doc.meter_reading_current)
-    # A meter only advances; a current below previous is a misread, not zero usage.
+    # [#n9guyx]
     if curr and prev and curr < prev:
         frappe.throw(_("Current Meter Reading cannot be lower than the Previous Meter Reading."))
     if curr and prev and curr >= prev:
@@ -164,8 +162,7 @@ def _post_ledger_row(doc) -> None:
     Uses bill_amount (the building's actual share after bearing calculation).
     The bill_share_note provides the audit trail for shared-meter cases.
     """
-    # idempotent: skip if a live (original, not-yet-reversed) ledger row already
-    # exists for this bill, so re-running the submit side-effect never double-posts.
+    # [#k2wetb]
     if _live_ledger_row(doc.name):
         return
 

@@ -20,7 +20,7 @@ def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
-# Cards return the {value: n, ...df} dict contract; unwrap to the count here.
+# [#aqvzq8]
 def get_arrivals_today():
     return _get_arrivals_today()["value"]
 
@@ -77,14 +77,14 @@ class TestDashboardArrivals(FrappeTestCase):
         for name in self._batches:
             frappe.delete_doc("Arrival Batch", name, force=True, ignore_permissions=True)
 
-    # get_arrivals_today
+    # [#t5shhz]
 
     def test_arrivals_today_counts_only_today_submitted(self):
         """Only today's submitted check-ins are counted; yesterday's is excluded."""
         base = get_arrivals_today()
         self._assignment(self.today)
         self._assignment(self.today)
-        self._assignment(self.yesterday)  # excluded: not today
+        self._assignment(self.yesterday)  # [#c5x40g]
         self.assertEqual(get_arrivals_today(), base + 2)
 
     def test_arrivals_today_ignores_draft(self):
@@ -104,14 +104,14 @@ class TestDashboardArrivals(FrappeTestCase):
         self._assignments.append(doc.name)
         self.assertEqual(get_arrivals_today(), base, "draft check-in must not count")
 
-    # get_pending_on_manifest
+    # [#1xipz0]
 
     def test_pending_is_expected_minus_housed(self):
         """A due manifest of 3 with 1 housed in the building on its date leaves 2
         pending, mirroring ArrivalBatch.pending_arrival_count."""
         base = get_pending_on_manifest()
         self._batch(self.yesterday, 3)
-        self._assignment(self.yesterday)  # 1 housed against the manifest
+        self._assignment(self.yesterday)  # [#9tvtdd]
         self.assertEqual(get_pending_on_manifest(), base + 2)
 
     def test_future_manifest_not_yet_pending(self):
@@ -124,17 +124,17 @@ class TestDashboardArrivals(FrappeTestCase):
         """More housed than expected for one batch clamps that batch to 0 and does
         not offset another batch's shortfall (GREATEST(...,0) per batch)."""
         base = get_pending_on_manifest()
-        # Batch A: expect 1, house 3 (over-arrival) -> contributes 0, not -2.
+        # [#p6jslp]
         self._batch(self.yesterday, 1)
         self._assignment(self.yesterday)
         self._assignment(self.yesterday)
         self._assignment(self.yesterday)
-        # Batch B: a different building/date, expect 2, house 0 -> contributes 2.
+        # [#pn7312]
         other_building = "BLDG-" + _h()
         self._batch(self.yesterday, 2, building=other_building)
         self.assertEqual(get_pending_on_manifest(), base + 2)
 
-    # return-shape contract (both cards)
+    # [#fbphqm]
 
     def test_cards_return_number_card_dict_contract(self):
         """Both methods return the Custom Number Card {value: n, ...df} dict, not a

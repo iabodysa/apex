@@ -33,15 +33,15 @@ def submit_vehicle_incident(
     disposition fields for a Guest author, so this endpoint only has to bound the
     free-text inputs and reject spam.
     """
-    # [#vihp01] honeypot: a bot filling the hidden field is dropped, not stored.
+    # [#nm8m2k]
     if website_field:
         return {"name": None}
 
-    # [#vihp02] only the two intended report kinds; anything else is rejected.
+    # [#res70n]
     if incident_type not in ("Accident", "Theft"):
         frappe.throw(_("Invalid incident type."))
 
-    # [#vihp03] bound the attacker-controllable free text.
+    # [#s9t9ql]
     if len(description or "") > 4000:
         frappe.throw(_("Description is too long. Please keep it under 4000 characters."))
 
@@ -57,6 +57,5 @@ def submit_vehicle_incident(
         "status": "Open",
     })
     doc.insert(ignore_permissions=True)  # audit-ok — guest web-form intake, rate-limited + honeypot-guarded; draft only
-    # Request-boundary auto-commit persists this on success; a manual commit here would
-    # defeat the framework rollback if a later write is ever added. [[reference-frappe-commit-in-request-antipattern]]
+    # [#jwr9pv]
     return {"name": doc.name}

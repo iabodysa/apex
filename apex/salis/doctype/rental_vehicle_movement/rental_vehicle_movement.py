@@ -56,7 +56,7 @@ class RentalVehicleMovement(Document):
                         self.vehicle
                     )
                 )
-            # A Return dated before its open Receipt would corrupt the in-service window.
+            # [#28z6ul]
             if (
                 self.movement_type == "Return"
                 and self.movement_date

@@ -35,12 +35,11 @@ class TestDriverAttendanceHours(FrappeTestCase):
         ).insert(ignore_permissions=True)
 
     def test_overnight_shift_computes_real_span(self):
-        # Check-in 22:00, check-out 06:00 next morning = an 8-hour night shift.
-        # The old single-date math gave a negative span -> worked_hours 0.
+        # [#dpzh7x]
         doc = self._attendance("22:00:00", "06:00:00")
         self.assertEqual(doc.worked_hours, 8.0)
 
     def test_same_day_shift_still_correct(self):
-        # Non-vacuous: a daytime shift is unchanged by the overnight fix.
+        # [#8ootp8]
         doc = self._attendance("08:00:00", "16:30:00")
         self.assertEqual(doc.worked_hours, 8.5)

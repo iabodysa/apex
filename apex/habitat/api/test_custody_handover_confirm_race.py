@@ -117,9 +117,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
         return h, code
 
     def test_two_correct_confirms_post_receive_leg_once(self):
-        # Two correct-OTP confirms (the realistic serialized outcome: the second
-        # acquires the lock after the first commits, sees Confirmed, returns)
-        # must post the receive leg into the destination store EXACTLY once.
+        # [#du9kgd]
         self._receive(5)
         handover, code = self._approved_handover(5)
         self.assertEqual(_store_bal(self.article, self.dest), 0.0)
@@ -127,17 +125,16 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
         frappe.set_user(self.recv_user)
         try:
             confirm_handover(handover.name, code)
-            # Second confirm: the FOR UPDATE re-read sees Confirmed and returns
-            # without re-posting (and the receive-leg guard would catch it anyway).
+            # [#jsvdu3]
             confirm_handover(handover.name, code)
         finally:
             frappe.set_user("Administrator")
 
         handover.reload()
         self.assertEqual(handover.status, "Confirmed")
-        # Receive leg posted ONCE: destination holds exactly the handed qty, not 2x.
+        # [#1qdqry]
         self.assertEqual(_store_bal(self.article, self.dest), 5.0)
-        # Exactly one live positive receive row in to_building under this voucher.
+        # [#iot8gl]
         receive_rows = frappe.get_all(
             "Accommodation Stock Ledger",
             filters={
@@ -151,8 +148,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
         self.assertEqual(len(receive_rows), 1, "receive leg must post exactly once")
 
     def test_receive_leg_guard_ignores_ship_leg(self):
-        # After submit (ship leg only) the receive-leg guard must report NOT posted,
-        # even though has_stock_entries on the voucher_no is already True.
+        # [#e4piyg]
         self._receive(3)
         handover, _code = self._approved_handover(3)
         from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
@@ -168,8 +164,7 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
         )
 
     def test_direct_reentry_into_post_is_idempotent(self):
-        # Calling the post helper twice (simulating two callers that both passed the
-        # gate) posts the receive leg only once thanks to _receive_leg_posted.
+        # [#pwenbr]
         self._receive(4)
         handover, code = self._approved_handover(4)
         frappe.set_user(self.recv_user)
@@ -178,15 +173,13 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
         finally:
             frappe.set_user("Administrator")
         handover.reload()
-        # Re-enter the post helper directly: the guard short-circuits, no new rows.
+        # [#btlhe5]
         _post_receive_and_confirm(handover)
         self.assertTrue(_receive_leg_posted(handover))
         self.assertEqual(_store_bal(self.article, self.dest), 4.0)
 
     def test_wrong_guesses_lock_out_at_max_attempts(self):
-        # Each wrong guess increments the counter (read fresh under the lock); the
-        # MAX_OTP_ATTEMPTS-th miss flips the lockout and resets the counter, and a
-        # further attempt is refused by the lockout gate — not silently allowed.
+        # [#66lfnd]
         self._receive(2)
         handover, _code = self._approved_handover(2)
         frappe.set_user(self.recv_user)
@@ -198,19 +191,19 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
                 self.assertEqual(handover.otp_attempts, n)
                 self.assertFalse(handover.otp_locked_until)
 
-            # The MAX-th miss locks the handover and resets the counter to 0.
+            # [#r7wwk1]
             with self.assertRaises(frappe.ValidationError):
                 confirm_handover(handover.name, "000000")
             handover.reload()
             self.assertEqual(handover.otp_attempts, 0)
             self.assertTrue(handover.otp_locked_until, "lockout must be stamped")
 
-            # A further attempt now hits the lockout gate, not the code compare.
+            # [#te8mzs]
             with self.assertRaises(frappe.ValidationError):
                 confirm_handover(handover.name, "000000")
         finally:
             frappe.set_user("Administrator")
 
-        # No receive leg ever posted under a wrong code.
+        # [#hx1b8l]
         self.assertEqual(_store_bal(self.article, self.dest), 0.0)
         self.assertFalse(_receive_leg_posted(handover))

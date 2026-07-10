@@ -31,7 +31,7 @@ _VAPID_FIELDS = (
 	"web_push_vapid_private_key",
 	"web_push_vapid_subject",
 )
-# A real (test-only) VAPID public key shape — base64url, not a live secret.
+# [#q83lgd]
 _TEST_PUBLIC = "BNtest_public_key_value_for_unit_tests_only_000000000000000000000000000000000000000000"
 _TEST_PRIVATE = "test_private_key_value_for_unit_tests_only"
 
@@ -48,9 +48,7 @@ class TestDriverPortalWebPush(FrappeTestCase):
 		)
 
 	def setUp(self):
-		# Each test starts from the SHIPPED state: push off, no keys on file, and no
-		# device rows lingering from a prior method (committed saves persist within the
-		# class transaction, so clear them for per-test isolation).
+		# [#89umw4]
 		frappe.set_user("Administrator")
 		self._set_push(enabled=0, public="", private="")
 		self._clear_subscriptions()
@@ -77,7 +75,7 @@ class TestDriverPortalWebPush(FrappeTestCase):
 	def _configure_push(self):
 		self._set_push(enabled=1, public=_TEST_PUBLIC, private=_TEST_PRIVATE)
 
-	# --- The no-op-until-VAPID contract (shipped state: nothing configured) ---
+	# [#mnfove]
 
 	def test_send_noop_when_unconfigured(self):
 		"""With push off, a send is a logged no-op (never raises) and reports why."""
@@ -110,7 +108,7 @@ class TestDriverPortalWebPush(FrappeTestCase):
 			driver_portal.save_push_subscription(endpoint="https://push.example/abc")
 		frappe.set_user("Administrator")
 
-	# --- Configured: opt-in stores a scoped subscription; send still no-ops (no lib) ---
+	# [#q1ukeh]
 
 	def test_config_exposes_public_key_only(self):
 		"""Configured, is_configured is true and only the PUBLIC key is exposed."""
@@ -141,7 +139,7 @@ class TestDriverPortalWebPush(FrappeTestCase):
 		self.assertEqual(row.driver, self.driver)
 		self.assertEqual(row.user, self.user)
 		self.assertTrue(row.enabled)
-		# A driver cannot bank a subscription against another driver.
+		# [#tn43gl]
 		self.assertEqual(
 			frappe.db.get_value("Driver Push Subscription", {"endpoint": endpoint}, "driver"),
 			self.driver,
@@ -182,8 +180,7 @@ class TestDriverPortalWebPush(FrappeTestCase):
 			endpoint="https://fcm.googleapis.com/fcm/send/endpoint-4", p256dh="k", auth="a"
 		)
 		frappe.set_user("Administrator")
-		# pywebpush is intentionally not a dependency, so _deliver returns False and
-		# nothing is delivered — but the call returns cleanly with the device counted.
+		# [#cn3oba]
 		r = web_push.send_to_driver(self.driver, "Trip assigned", "Your next trip is ready.")
 		self.assertEqual(r["sent"], 0)
 		self.assertEqual(r["devices"], 1)

@@ -60,9 +60,7 @@ class TestMasarSummaryEndpoint(_WorkerTripMixin, FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a per-class Project OUTSIDE the per-method savepoint
-        # rollback; delete it so the committed Project does not leak across the
-        # test DB. (Site/Building/Employees are reuse-or-create shared fixtures.)
+        # [#4w47gh]
         frappe.set_user("Administrator")
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -152,9 +150,7 @@ class TestMasarPageContext(_WorkerTripMixin, FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a per-class Project OUTSIDE the per-method savepoint
-        # rollback; delete it so the committed Project does not leak across the
-        # test DB. (Site/Building/Employees are reuse-or-create shared fixtures.)
+        # [#4w47gh]
         frappe.set_user("Administrator")
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -180,7 +176,7 @@ class TestMasarPageContext(_WorkerTripMixin, FrappeTestCase):
             self.assertTrue(ctx.portal_theme)
             # [#b9e62g]
             self.assertIsInstance(ctx.csrf_token, str)
-            # [#p4chw1] The shell sees only the presence flag, never the raw token.
+            # [#bp5wiv]
             self.assertIn("masar_has_token", ctx)
             self.assertIsInstance(ctx.masar_has_token, bool)
             self.assertNotIn("masar_token", ctx)
@@ -219,8 +215,7 @@ class TestMasarPageContext(_WorkerTripMixin, FrappeTestCase):
 
 
 def tearDownModule():
-    # P-148: drop this module's committed Accommodation Buildings so the suite's
-    # post-run building count returns to the pre-suite baseline (see factories.py).
+    # [#2esm3x]
     from apex.tests import factories
 
     factories.purge_test_buildings()

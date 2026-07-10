@@ -44,9 +44,7 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a per-class Project OUTSIDE the per-method savepoint
-        # rollback; delete it so it does not leak across the test DB. (Site /
-        # Building / Employees are reuse-or-create shared fixtures.)
+        # [#4rwpwj]
         frappe.set_user("Administrator")
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -74,7 +72,7 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
             doc = frappe.get_doc("Masar Worker Token", existing)
             if not doc.enabled:
                 doc.db_set("enabled", 1)
-            # Stored hashed at rest (P-104): recover the raw from its encrypted copy.
+            # [#edhau9]
             return doc.recover_token()
         doc = frappe.get_doc(
             {
@@ -115,7 +113,7 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
         )
         self.addCleanup(lambda: self._purge_ratings(dt.name))
         token = self._token_for(w1)
-        # Non-vacuous: no rating exists for this worker yet.
+        # [#qp2m1c]
         self.assertEqual(self._ratings_for(dt.name, w1), [])
 
         res = masar.submit_trip_rating(
@@ -131,7 +129,7 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
         self.assertEqual(len(rows), 1, "exactly one rating for this worker")
         self.assertTrue(rows[0]["rating"], "the star count was persisted")
         self.assertEqual(rows[0]["feedback"], "Great ride")
-        # Scope: the OTHER worker on the same trip has no rating from w1's submit.
+        # [#8qprfj]
         self.assertEqual(self._ratings_for(dt.name, w2), [])
 
     def test_worker_not_on_trip_is_rejected(self):
@@ -144,7 +142,7 @@ class TestMasarTripRating(_WorkerTripMixin, FrappeTestCase):
         )
         self.addCleanup(lambda: self._purge_ratings(dt.name))
         token = self._token_for(off)
-        # Non-vacuous: the off-trip worker's token genuinely resolves.
+        # [#jzevkz]
         self.assertEqual(masar._resolve_worker(token), off)
 
         with self.assertRaises(frappe.PermissionError):

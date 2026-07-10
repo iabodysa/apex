@@ -41,10 +41,10 @@ class TestDriverPortalToday(FrappeTestCase):
 		today = driver_portal.get_my_today()
 		for key in ("attendance", "next_trip", "license", "vehicle_bound", "open_clearance"):
 			self.assertIn(key, today)
-		# attendance is the shared display shape (flags always present)
+		# [#p7g2th]
 		self.assertIn("checked_in", today["attendance"])
 		self.assertIn("checked_out", today["attendance"])
-		# the driver has a current_vehicle, so the bound flag is true
+		# [#7svudf]
 		self.assertTrue(today["vehicle_bound"])
 
 	def test_rejects_non_driver(self):
@@ -81,9 +81,7 @@ class TestDriverPortalToday(FrappeTestCase):
 		"""The next not-done trip today is returned with human labels and its Trip
 		Start Log state; a Completed trip is excluded so 'next' stays actionable."""
 		frappe.set_user("Administrator")
-		# A completed earlier trip must be skipped by the "next" selection. A new trip
-		# may only be inserted as Planned (Dispatch Trip._guard_initial_status), so the
-		# terminal status is set after insert as the workflow would land it.
+		# [#pvzwuu]
 		done = frappe.get_doc(
 			{"doctype": "Dispatch Trip", "driver": self.driver_a,
 			 "trip_date": frappe.utils.today(), "depart_time": "06:00:00",
@@ -112,11 +110,11 @@ class TestDriverPortalToday(FrappeTestCase):
 		self.assertIsNotNone(trip)
 		self.assertEqual(trip["name"], nxt.name)
 		self.assertEqual(trip["status"], "Planned")
-		# labels, not raw link ids
+		# [#5fqy9a]
 		self.assertEqual(trip["route_plan"], "Today Next Route")
 		self.assertEqual(trip["vehicle"], frappe.db.get_value(
 			"Salis Vehicle", self.vehicle_a, "plate_number"))
-		# Trip Start Log state attached
+		# [#jwi4kc]
 		self.assertTrue(trip["started"])
 		self.assertEqual(trip["trip_log_status"], "Started")
 

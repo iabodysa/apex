@@ -45,8 +45,7 @@ class TestDispatchTripAssignment(FrappeTestCase):
         frappe.set_user("Administrator")
         self._cleanup = []
 
-        # Three distinct workers; request A carries w1+w2, request B carries w2+w3
-        # (w2 overlaps so the union is 3, not 4).
+        # [#gyxb20]
         self.w1 = self._employee()
         self.w2 = self._employee()
         self.w3 = self._employee()
@@ -85,7 +84,7 @@ class TestDispatchTripAssignment(FrappeTestCase):
         for dt, name in reversed(self._cleanup):
             frappe.delete_doc(dt, name, force=True, ignore_permissions=True)
 
-    # builders
+    # [#n7ku3r]
 
     def _employee(self):
         emp = frappe.get_doc(
@@ -101,13 +100,12 @@ class TestDispatchTripAssignment(FrappeTestCase):
             req.append("workers", {"employee": w})
         req.flags.ignore_validate = True
         req.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        # worker_count is server-derived in validate(); set it directly since this
-        # synthetic insert skips validate.
+        # [#i8f1dd]
         frappe.db.set_value("Transport Request", req.name, "worker_count", len(workers), update_modified=False)
         self._cleanup.append(("Transport Request", req.name))
         return req.name
 
-    # union manifest + boarding state
+    # [#se8ts9]
 
     def test_assign_two_requests_unions_the_manifest(self):
         assign_requests_to_trip(self.trip.name, [self.req_a, self.req_b])
@@ -125,7 +123,7 @@ class TestDispatchTripAssignment(FrappeTestCase):
         seeded = {r.employee for r in self.trip.boarding_state}
         self.assertEqual(seeded, {self.w1, self.w2, self.w3})
 
-    # assignment flag back-link
+    # [#b9rqtw]
 
     def test_assign_flags_each_request(self):
         assign_requests_to_trip(self.trip.name, [self.req_a, self.req_b])
@@ -136,16 +134,16 @@ class TestDispatchTripAssignment(FrappeTestCase):
             self.assertTrue(row.is_assigned, f"{req} is flagged assigned")
             self.assertEqual(row.assigned_to_trip, self.trip.name)
 
-    # capacity guard
+    # [#ayurj7]
 
     def test_capacity_guard_throws_on_exceed(self):
-        # union of 3 workers; cap the vehicle at 2 -> exceed.
+        # [#afxa1h]
         frappe.db.set_value("Salis Vehicle", self.vehicle.name, "seat_capacity", 2)
         with self.assertRaises(frappe.ValidationError):
             assign_requests_to_trip(self.trip.name, [self.req_a, self.req_b])
 
     def test_capacity_guard_silent_when_capacity_unknown(self):
-        # seat_capacity 0 (unknown) -> guard skipped even though 3 > 0 workers.
+        # [#6l4ib1]
         result = assign_requests_to_trip(self.trip.name, [self.req_a, self.req_b])
         self.assertEqual(set(result), {self.req_a, self.req_b})
 
@@ -154,7 +152,7 @@ class TestDispatchTripAssignment(FrappeTestCase):
         result = assign_requests_to_trip(self.trip.name, [self.req_a, self.req_b])
         self.assertEqual(set(result), {self.req_a, self.req_b})
 
-    # idempotent append
+    # [#5f82vi]
 
     def test_assign_is_idempotent(self):
         assign_requests_to_trip(self.trip.name, [self.req_a])
@@ -162,7 +160,7 @@ class TestDispatchTripAssignment(FrappeTestCase):
         self.assertEqual(result.count(self.req_a), 1, "a re-assigned request is not duplicated")
         self.assertEqual(set(result), {self.req_a, self.req_b})
 
-    # batched existence check (P-210 N+1): a bad id still throws by name
+    # [#8ksr7n]
 
     def test_assign_unknown_request_throws_with_that_id(self):
         """A non-existent request id is rejected. The batched existence read (one
@@ -173,7 +171,7 @@ class TestDispatchTripAssignment(FrappeTestCase):
             assign_requests_to_trip(self.trip.name, [self.req_a, missing])
         self.assertIn(missing, str(ctx.exception))
 
-    # batched flag read (P-210 N+1): terminal requests are still skipped
+    # [#4zh7zt]
 
     def test_mark_assigned_skips_terminal_request(self):
         """A Cancelled request is not flagged assigned. The batched current-flags

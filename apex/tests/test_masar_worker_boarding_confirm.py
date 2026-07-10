@@ -42,9 +42,7 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a per-class Project OUTSIDE the per-method savepoint
-        # rollback; delete it so the committed Project does not leak across the
-        # test DB. (Site/Building/Employees are reuse-or-create shared fixtures.)
+        # [#4w47gh]
         frappe.set_user("Administrator")
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -88,7 +86,7 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
             doc = frappe.get_doc("Masar Worker Token", existing)
             if not doc.enabled:
                 doc.db_set("enabled", 1)
-            # Stored hashed at rest (P-104): recover the raw from its encrypted copy.
+            # [#edhau9]
             return doc.recover_token()
         doc = frappe.get_doc(
             {
@@ -129,7 +127,7 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
         )
         self.addCleanup(lambda: self._purge_trip_logs(dt.name))
         token = self._token_for(w1)
-        # Non-vacuous: no boarding row exists for this worker yet.
+        # [#b6mf82]
         self.assertEqual(self._boarding_rows_for(dt.name, w1), [])
 
         res = masar.confirm_boarding(token=token, transport_request=tr.name)
@@ -141,7 +139,7 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
         self.assertEqual(len(rows), 1, "exactly one boarding event for this worker")
         self.assertEqual(rows[0]["worker"], w1, "row scoped to the token's worker")
         self.assertEqual(rows[0]["method"], "Worker", "method is the worker self-confirm value")
-        # Scope: the OTHER worker on the same trip got no row from w1's confirm.
+        # [#bph9yk]
         self.assertEqual(
             self._boarding_rows_for(dt.name, w2), [], "must not board another worker"
         )
@@ -182,10 +180,10 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
     def test_worker_with_no_trip_today_is_noop(self):
         """A valid worker who is on no boardable trip today is a clean no-op — the
         token resolves, but nothing is written."""
-        # A fresh worker registered on NO transport request.
+        # [#r240vn]
         lonely = self._worker("lonely")
         token = self._token_for(lonely)
-        # Non-vacuous: the token genuinely resolves to this worker.
+        # [#7n7wi1]
         self.assertEqual(masar._resolve_worker(token), lonely)
 
         res = masar.confirm_boarding(token=token)
@@ -194,8 +192,7 @@ class TestMasarConfirmBoarding(_WorkerTripMixin, FrappeTestCase):
 
 
 def tearDownModule():
-    # P-148: drop this module's committed Accommodation Buildings so the suite's
-    # post-run building count returns to the pre-suite baseline (see factories.py).
+    # [#2esm3x]
     from apex.tests import factories
 
     factories.purge_test_buildings()

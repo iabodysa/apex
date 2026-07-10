@@ -113,7 +113,7 @@ class TestFacilityAssetMovementOriginReconcile(FrappeTestCase):
             "doctype": "Facility Asset Movement",
             "movement_date": "2026-06-01",
             "facility_asset": self.asset,
-            "from_building": self.b2,  # asset is actually at b1
+            "from_building": self.b2,  # [#ryzglq]
             "to_building": self.b1,
         })
         with self.assertRaises(frappe.ValidationError):
@@ -127,7 +127,7 @@ class TestFacilityAssetMovementOriginReconcile(FrappeTestCase):
             "naming_series": "FAM-.YYYY.-.####",
             "movement_date": "2026-06-01",
             "facility_asset": self.asset,
-            "to_building": self.b2,  # from_building left blank -> defaults to b1
+            "to_building": self.b2,  # [#ehr9h5]
         })
         mv.insert(ignore_permissions=True, ignore_links=True)
         self.assertEqual(mv.from_building, self.b1)
@@ -158,9 +158,7 @@ class TestFacilityAssetMovementLedger(FrappeTestCase):
         return name
 
     def _make_asset(self, building):
-        # No location_in_building: the controller derives from_room from it, and
-        # from_room is a Link to Accommodation Room — leaving it blank avoids an
-        # unrelated link-validation failure while still exercising the ledger.
+        # [#69rcc5]
         doc = frappe.get_doc({
             "doctype": "Facility Asset",
             "naming_series": "FAC-AST-.YYYY.-.####",
@@ -200,7 +198,7 @@ class TestFacilityAssetMovementLedger(FrappeTestCase):
         self.assertEqual(rows[0].to_building, self.b2)
         self.assertFalse(rows[0].reversal_of)
 
-        # Immutable: an already-posted row cannot be edited.
+        # [#3quubp]
         led = frappe.get_doc(self.LEDGER, rows[0].name)
         led.to_location = "tampered"
         with self.assertRaises(frappe.PermissionError):
@@ -210,7 +208,7 @@ class TestFacilityAssetMovementLedger(FrappeTestCase):
         from apex.habitat.asset_movement_engine import post_asset_movement
 
         mv = self._make_movement(self.asset, self.b1, self.b2)
-        # Re-firing the post for the same source must not double-post.
+        # [#m1hdvg]
         post_asset_movement(mv)
         rows = frappe.get_all(
             self.LEDGER,
@@ -224,7 +222,7 @@ class TestFacilityAssetMovementLedger(FrappeTestCase):
 
     def test_cancel_posts_negated_reversal(self):
         mv = self._make_movement(self.asset, self.b1, self.b2)
-        # The controller requires a cancellation reason before cancel.
+        # [#1ovvcx]
         mv.db_set("cancellation_reason", "QA reversal test")
         mv.reload()
         mv.cancel()
@@ -236,7 +234,7 @@ class TestFacilityAssetMovementLedger(FrappeTestCase):
         self.assertEqual(len(rows), 2)
         reversal = [r for r in rows if r.reversal_of]
         self.assertEqual(len(reversal), 1)
-        # The reversal mirrors the move with from/to swapped and is flagged cancelled.
+        # [#4zl8il]
         self.assertEqual(reversal[0].from_building, self.b2)
         self.assertEqual(reversal[0].to_building, self.b1)
         self.assertTrue(reversal[0].is_cancelled)

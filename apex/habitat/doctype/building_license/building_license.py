@@ -15,7 +15,7 @@ class BuildingLicense(Document):
         self._stamp_renewal_date()
 
     def _validate_dates(self) -> None:
-        # Expiry must fall after issue; a backwards range is a data-entry error.
+        # [#lebvtq]
         if self.issue_date and self.expiry_date and getdate(self.expiry_date) <= getdate(self.issue_date):
             frappe.throw(_("Expiry Date must be after the Issue Date."))
 
@@ -84,6 +84,5 @@ def renew(name: str, new_expiry_date: str | None = None, extend_days: int | None
     doc.last_renewal_date = today()
     doc.status = "Active"
     doc.save()
-    # No explicit commit: the request transaction commits on a successful response,
-    # so an early commit here would defeat rollback if a later step in the request fails.
+    # [#b5yz1g]
     return {"name": doc.name, "expiry_date": str(new_expiry), "last_renewal_date": doc.last_renewal_date}

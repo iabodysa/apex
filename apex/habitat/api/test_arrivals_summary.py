@@ -26,11 +26,11 @@ class TestArrivalsSummary(FrappeTestCase):
         self._assignments = []
         self._beds = []
 
-        # A normal bed and a minted over-capacity (is_temporary) bed in this building.
+        # [#1dfxaw]
         self.bed_normal = self._bed(is_temporary=0)
         self.bed_oc = self._bed(is_temporary=1)
 
-        # A labour supplier and a Temporary Worker billed to it.
+        # [#2n8a84]
         frappe.get_doc({
             "doctype": "Supplier",
             "supplier_name": self.supplier,
@@ -44,11 +44,11 @@ class TestArrivalsSummary(FrappeTestCase):
         })
         self.tw.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
 
-        # (1) Today, Temporary Worker via supplier, in the over-capacity bed.
+        # [#hom257]
         self._assignment(self.date, "Temporary Worker", self.tw.name, self.bed_oc)
-        # (2) Today, direct Employee (no supplier), in the normal bed.
+        # [#8jfqwt]
         self._assignment(self.date, "Employee", "EMP-" + _h(), self.bed_normal)
-        # (3) A different date -> must be excluded from the date-scoped summary.
+        # [#nxj2ks]
         self._assignment(self.other_date, "Employee", "EMP-" + _h(), self.bed_normal)
 
     def _bed(self, is_temporary):
@@ -74,7 +74,7 @@ class TestArrivalsSummary(FrappeTestCase):
             "bed": bed,
         })
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        # Force the submitted + check-in state the read endpoint filters on.
+        # [#qed5yf]
         frappe.db.set_value(
             "Housing Assignment", doc.name,
             {"docstatus": 1, "check_in_date": check_in_date}, update_modified=False,

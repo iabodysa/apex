@@ -39,10 +39,7 @@ def execute(filters=None):
     if filters.get("accounting_acknowledged") is not None:
         query_filters["accounting_acknowledged"] = filters["accounting_acknowledged"]
 
-    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
-    # list gets via permission_query_conditions. A movement carries no single `building`
-    # (only from_building + to_building), so a scoped user sees a row when EITHER
-    # endpoint is one of their estates — expressed as an OR via get_all's or_filters.
+    # [#tl7e4n]
     or_filters = None
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:

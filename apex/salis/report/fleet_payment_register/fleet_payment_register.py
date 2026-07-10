@@ -32,9 +32,7 @@ def execute(filters=None):
         elif filters.get("to_date"):
             query_filters["creation"] = ["<=", filters["to_date"]]
 
-    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
-    # list gets via permission_query_conditions; re-apply the caller's project scope
-    # (Salis Payment Request carries a direct project); oversight roles see all.
+    # [#l9orr2]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         chosen = query_filters.get("project")

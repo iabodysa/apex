@@ -17,8 +17,7 @@ except Exception:  # pragma: no cover — frappe absent (static analysis / non-b
     _UnitTestCase = object  # type: ignore
 
 
-# Base test cases (promoted from tests/test_utils.py, P-135) so consumers import
-# them from this non-``test_*`` module and the cross-test-import ratchet stays empty.
+# [#2gr8f9]
 class ApexHabitatTestCase(FrappeTestCase):
     """Base test case for apex integration tests."""
 
@@ -125,12 +124,7 @@ def make_employee(name=None, company=None, **kwargs):
     return doc
 
 
-# ── Salis / Masar movement fixtures (promoted from the Masar test modules, P-129) ──
-#
-# These build the Salis movement chain (project, site, building, driver, worker
-# token, accommodation assignment, and a full Transport Request + Route Plan +
-# Dispatch Trip). Callers own their own cleanup; every row is written with
-# ``ignore_permissions`` as Administrator.
+# [#cglp6s]
 
 
 def default_company():
@@ -279,7 +273,7 @@ def make_test_driver():
             u.add_roles("Driver")
             u.insert(ignore_permissions=True)
         except frappe.DuplicateEntryError:
-            # Concurrent create: another caller won the insert; fall through to reuse.
+            # [#hxpd3j]
             pass
     emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
     if not emp:
@@ -319,7 +313,7 @@ def make_driver_without_vehicle(email):
             u.add_roles("Driver")
             u.insert(ignore_permissions=True)
         except frappe.DuplicateEntryError:
-            # Concurrent create: another caller won the insert; fall through to reuse.
+            # [#hxpd3j]
             pass
     emp = frappe.db.get_value("Employee", {"user_id": email}, "name")
     if not emp:
@@ -523,13 +517,7 @@ class WorkerTripMixin:
                 frappe.delete_doc(*dtp, ignore_permissions=True, force=True)
 
 
-# ── Suite building-pollution purge (P-148) ────────────────────────────────────
-#
-# Committing tests (``frappe.db.commit()`` breaks FrappeTestCase's per-class
-# rollback) leak hundreds of Accommodation Building rows that are never torn down.
-# Rather than match ~60 heterogeneous test building names, we snapshot the
-# pre-suite building set once (from before_tests) and purge everything created
-# afterward. Both run in the single test process, so a module-level set persists.
+# [#446tat]
 
 _BUILDING_BASELINE: set[str] = set()
 
@@ -563,8 +551,7 @@ def purge_test_buildings():
             )
             removed += 1
         except Exception:
-            # Best-effort: a row wedged by an un-cancellable submitted link is left
-            # for the next sweep rather than failing the teardown.
+            # [#kgd2nu]
             pass
     if removed:
         frappe.db.commit()

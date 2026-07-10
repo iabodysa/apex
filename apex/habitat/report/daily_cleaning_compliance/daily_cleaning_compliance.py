@@ -49,8 +49,7 @@ def execute(filters=None):
         {"label": frappe._("Scheduled Task"), "fieldname": "scheduled_task_instance", "fieldtype": "Link", "options": "Scheduled Task Instance", "width": 140},
     ]
 
-    # The compliance fact comes from the immutable ledger: one live row per
-    # cleaned room, posting_date == the source log's cleaning_date.
+    # [#bjploo]
     ledger_filters = {
         "posting_date": ["between", [str(date_from), str(date_to)]],
         "is_cancelled": 0,
@@ -58,9 +57,7 @@ def execute(filters=None):
     if filters.get("building"):
         ledger_filters["building"] = filters["building"]
 
-    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
-    # list gets via permission_query_conditions — re-apply the caller's building scope
-    # (the ledger carries a direct building); oversight roles see all.
+    # [#6bg47z]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     chosen = ledger_filters.get("building")
     if restrict:
@@ -76,7 +73,7 @@ def execute(filters=None):
         limit_page_length=0,
     )
 
-    # Aggregate the immutable per-room facts up to one row per source log.
+    # [#sb89vt]
     from collections import defaultdict
     log_total = defaultdict(int)
     log_cleaned = defaultdict(int)
@@ -86,16 +83,14 @@ def execute(filters=None):
         log_total[log] += 1
         if row.cleaned:
             log_cleaned[log] += 1
-        # The first row seen pins the log's building/date; all rows of a log share them.
+        # [#wjrplx]
         log_meta.setdefault(log, {"building": row.building, "cleaning_date": row.posting_date})
 
     log_names = list(log_total.keys())
     if not log_names:
         return columns, []
 
-    # [#4f0bon] Best-effort supervisory enrichment from the live Cleaning Log.
-    # These are review-state fields, not posted facts; a log dropped/cancelled
-    # since posting simply yields blanks (its compliance fact still stands).
+    # [#6nzn05]
     enrich = {}
     log_meta_rows = frappe.get_all(
         "Cleaning Log",

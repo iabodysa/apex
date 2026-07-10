@@ -38,8 +38,7 @@ class TestRentalAccrualIdempotency(FrappeTestCase):
     @classmethod
     def tearDownClass(cls):
         frappe.set_user("Administrator")
-        # Cancel and delete any submitted Rental Vehicle Movement for this vehicle,
-        # then delete the vehicle and office created specifically for this test class.
+        # [#nym08x]
         movements = frappe.db.get_all(
             "Rental Vehicle Movement",
             filters={"vehicle": cls.vehicle, "movement_type": "Receipt"},
@@ -119,8 +118,7 @@ class TestFuelReconciliationNoDuplicateAlert(FrappeTestCase):
     @classmethod
     def tearDownClass(cls):
         frappe.set_user("Administrator")
-        # Delete the Fuel Consumption Ledger row seeded in setUpClass, then the
-        # submitted Fuel Quota (cancel first), then the vehicle.
+        # [#mlx5qk]
         frappe.db.delete("Fuel Consumption Ledger",
                          {"vehicle": cls.vehicle, "source_name": "FUELRECTEST"})
         quotas = frappe.db.get_all(
@@ -400,8 +398,7 @@ class TestOperationsAlertAutoResolve(FrappeTestCase):
     @classmethod
     def tearDownClass(cls):
         frappe.set_user("Administrator")
-        # Delete Driver Attendance records created for this test class, then
-        # the drivers and vehicle seeded in setUpClass.
+        # [#7rytqe]
         if cls.driver_ok and frappe.db.exists("Salis Driver", cls.driver_ok):
             attendances = frappe.db.get_all(
                 "Driver Attendance",

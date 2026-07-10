@@ -12,8 +12,7 @@ from frappe.model.document import Document
 
 class DriverPushSubscription(Document):
 	def before_save(self):
-		# A subscription is always tied to a real driver-linked login; default the
-		# user from the driver's Employee when a caller omits it.
+		# [#ancvsc]
 		if not self.user and self.driver:
 			employee = frappe.db.get_value("Salis Driver", self.driver, "employee")
 			if employee:

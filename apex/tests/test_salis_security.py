@@ -113,9 +113,7 @@ class TestFuelConsoleScoping(FrappeTestCase):
             if doc.docstatus == 1:
                 doc.cancel()
             frappe.delete_doc("Fuel Request", fr.name, ignore_permissions=True, force=True)
-        # setUpClass also commits Projects + User Permissions + Vehicles OUTSIDE
-        # the per-method savepoint rollback; delete them too so the @example.com
-        # Project User Permission rows do not poison later tests on the bench.
+        # [#hpf309]
         for user in (cls.sup, cls.pm):
             frappe.db.delete("User Permission",
                              {"allow": "Project", "for_value": cls.pa, "user": user})
@@ -205,7 +203,7 @@ class TestFuelConsoleScoping(FrappeTestCase):
         workflow error, and leave the request Pending."""
         from frappe.model.workflow import WorkflowTransitionError
 
-        # The request is raised BY the approver, so requested_by == the approver.
+        # [#51l6yi]
         frappe.set_user(self.pm)
         own = _pending_fuel_request(self.pa, self.veh_a)
         self.assertEqual(own.requested_by, self.pm)
@@ -235,9 +233,7 @@ class TestSupportTicketScoping(FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits Projects + a User Permission OUTSIDE the per-method
-        # savepoint rollback; delete them so the @example.com Project User
-        # Permission rows do not poison later tests on the shared bench.
+        # [#obo4jr]
         frappe.set_user("Administrator")
         frappe.db.delete("User Permission",
                          {"allow": "Project", "for_value": cls.pa, "user": cls.sup})

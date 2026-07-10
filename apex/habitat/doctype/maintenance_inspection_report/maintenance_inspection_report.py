@@ -10,8 +10,7 @@ from frappe.utils import getdate
 
 
 class MaintenanceInspectionReport(Document):
-    # on_submit/on_cancel are class methods so Frappe's run_method invokes them
-    # directly (no doc_events entry needed); validate/before_cancel stay wired in hooks.
+    # [#h17tf9]
 
     def on_submit(self):
         """Stamp the inspected Facility Asset's last_inspection_date.

@@ -38,7 +38,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
         cls.sup_a = _user("bafs-sup-a@example.com")
         cls.sup_b = _user("bafs-sup-b@example.com")
 
-        # Building WITH a supervisor and building WITHOUT one.
+        # [#gfk0qe]
         cls.bldg_with = factories.make_building(
             "BAFS-WITH", company="Test AFMCO", responsible_supervisor=cls.sup_a
         ).name
@@ -51,10 +51,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a Project OUTSIDE the per-method savepoint rollback;
-        # delete it so the committed Project does not leak across the test DB.
-        # (Company/Buildings/Rooms are fixed-name reuse-or-create shared fixtures
-        # and are intentionally left in place.)
+        # [#me7hwd]
         frappe.set_user("Administrator")
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -75,11 +72,10 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
             "project": self.project,
             "responsible_supervisor": supervisor,
         })
-        # Skip the occupancy/business validate(); keep framework field/link checks.
+        # [#axo3xs]
         doc.flags.ignore_validate = True
         doc.insert(ignore_permissions=True)
-        # The fetch_if_empty can populate on insert; force the historical blank state
-        # for the rows the patch is meant to repair.
+        # [#m3dc5v]
         if supervisor is None:
             frappe.db.set_value(
                 doc.doctype, doc.name, "responsible_supervisor", None,
@@ -107,7 +103,7 @@ class TestBackfillAssignmentFacilitySupervisor(ApexHabitatTestCase):
         )
 
     def test_does_not_clobber_existing_supervisor(self):
-        # Pre-set to sup_b even though the building's supervisor is sup_a.
+        # [#j4586o]
         name = self._make_assignment(
             self.bldg_with, self.room_with, "BAFS-WITH-R01-B02", supervisor=self.sup_b
         )

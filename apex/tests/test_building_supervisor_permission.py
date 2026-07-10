@@ -43,13 +43,13 @@ class TestBuildingSupervisorPermission(FrappeTestCase):
         b = make_building(
             name="T254 Building", company=company, responsible_supervisor=sup_a
         )
-        self.assertTrue(_has_perm(sup_a, b.name))  # granted on create
+        self.assertTrue(_has_perm(sup_a, b.name))  # [#246izc]
 
         b.responsible_supervisor = sup_b
         b.save(ignore_permissions=True)
-        self.assertFalse(_has_perm(sup_a, b.name))  # previous supervisor dropped
-        self.assertTrue(_has_perm(sup_b, b.name))  # new supervisor granted
+        self.assertFalse(_has_perm(sup_a, b.name))  # [#bdbao6]
+        self.assertTrue(_has_perm(sup_b, b.name))  # [#i14c84]
 
         b.responsible_supervisor = None
         b.save(ignore_permissions=True)
-        self.assertFalse(_has_perm(sup_b, b.name))  # cleared -> permission removed
+        self.assertFalse(_has_perm(sup_b, b.name))  # [#qidwvr]

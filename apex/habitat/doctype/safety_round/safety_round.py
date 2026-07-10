@@ -24,8 +24,7 @@ class SafetyRound(Document):
         self._guard_duplicate()
 
     def _guard_duplicate(self):
-        # A re-inspection is an explicit, allowed second round for the same
-        # (building, date, cadence); only block accidental duplicate first rounds.
+        # [#swjvq9]
         if self.is_reinspection:
             return
 
@@ -50,23 +49,19 @@ class SafetyRound(Document):
 
     def on_submit(self):
         self.db_set("overall_result", self._derive_overall_result())
-        # Post one immutable Safety Finding Ledger row per finding observed on
-        # this round's executions, so a closed finding cannot silently reopen on
-        # the mutable parent report. Idempotent on (execution, finding idx).
+        # [#rylc44]
         from apex.habitat.safety_engine import post_safety_findings
 
         post_safety_findings(self)
-        # A submitted round closes its cadence for the period, so the /safety
-        # portal's due set changes — signal it to refetch.
+        # [#23qg97]
         self._publish_safety_update("submit")
 
     def on_cancel(self):
-        # Reverse (never delete) the ledgered findings: a negating mirror row per
-        # original, preserving the audit trail.
+        # [#qgyftc]
         from apex.habitat.safety_engine import reverse_safety_findings
 
         reverse_safety_findings(self.name)
-        # Cancelling reopens the cadence; the due set changes again.
+        # [#c7t1n3]
         self._publish_safety_update("cancel")
 
     def _publish_safety_update(self, action: str) -> None:

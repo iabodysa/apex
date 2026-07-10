@@ -31,10 +31,7 @@ def execute(filters=None):
         elif to_date:
             query_filters["creation"] = ["<=", to_date]
 
-    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
-    # list gets via permission_query_conditions. Driver Clearance has no own project —
-    # it reaches one through its driver — so confine the records to the drivers in the
-    # caller's allowed projects; oversight roles see all.
+    # [#752yia]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:

@@ -26,9 +26,7 @@ def execute(filters=None):
         {"label": frappe._("Days Since"), "fieldname": "days_since", "fieldtype": "Int", "width": 90},
     ]
 
-    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
-    # list gets via permission_query_conditions; resolve the caller's building scope
-    # once and apply it to both the missed and the rework queries below.
+    # [#8a7ehf]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     chosen = filters.get("building")
     if restrict:

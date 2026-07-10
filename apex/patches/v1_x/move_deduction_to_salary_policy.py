@@ -49,7 +49,7 @@ def execute():
 
         old = _read_old_values()
         if not old:
-            return  # fresh install / already migrated — nothing to move
+            return  # [#lm1c77]
 
         policy = frappe.get_single("Salary Deduction Policy")
 
@@ -70,11 +70,11 @@ def execute():
             rule.enabled = 1
 
         if damage_on or rent_on:
-            # financial safety: keep the migrated deductions firing
+            # [#hltq5q]
             policy.enable_salary_deductions = 1
             policy.save(ignore_permissions=True)  # audit-ok
 
-        # delete the Habitat Settings orphan rows so a re-run is a pure no-op
+        # [#256mq9]
         singles = frappe.qb.Table("tabSingles")
         frappe.qb.from_(singles).delete().where(
             (singles.doctype == "Habitat Settings")

@@ -21,7 +21,7 @@ class TestVehicleHandoverChecklistTemplate(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # Active driver with no linked Employee is clearance-clear.
+        # [#6173v8]
         self.driver = frappe.get_doc(
             {
                 "doctype": "Salis Driver",
@@ -72,7 +72,7 @@ class TestVehicleHandoverChecklistTemplate(FrappeTestCase):
             load_template_into_doc(handover=self.handover, template=self.template)
 
     def test_only_draft_handover_accepts_a_template(self):
-        # Falsify the draft guard: submit the handover, then expect a rejection.
+        # [#7cjxyv]
         doc = frappe.get_doc("Vehicle Handover", self.handover)
         doc.odometer_reading = 100
         doc.signed_evidence = "/files/dummy-evidence.png"

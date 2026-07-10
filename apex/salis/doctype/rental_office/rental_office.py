@@ -10,7 +10,7 @@ from frappe.model.document import Document
 
 class RentalOffice(Document):
     def onload(self):
-        # Wire the native Frappe Address widget (Dynamic Link, ERPNext pattern).
+        # [#9g78bh]
         from frappe.contacts.address_and_contact import load_address_and_contact
 
         load_address_and_contact(self)

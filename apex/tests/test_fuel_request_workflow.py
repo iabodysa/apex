@@ -73,9 +73,7 @@ class TestFuelRequestWorkflow(FrappeTestCase):
 
 	@classmethod
 	def tearDownClass(cls):
-		# setUpClass commits a Project + User Permissions (and a Vehicle) OUTSIDE
-		# the per-method savepoint rollback; delete them so the @example.com
-		# Project User Permission rows do not poison later tests on the bench.
+		# [#deveym]
 		frappe.set_user("Administrator")
 		for u in (cls.requester, cls.manager, cls.manager_maker):
 			frappe.db.delete("User Permission",

@@ -42,8 +42,7 @@ def get_site_address(building_name, site=None, building_address=None):
     if building_address:
         frappe.has_permission("Address", "read", doc=building_address, throw=True)
         return get_address_text_by_name(building_address)
-    # Surface a legacy own Address linked via Dynamic Link (pre-Link-field native widget)
-    # before falling back to the Site, so it is not silently shadowed (mirrors the portal).
+    # [#og970b]
     own = get_address_text("Building", building_name)
     if own:
         return own
@@ -145,8 +144,7 @@ def _derive_total_capacity(building_name):
     )
 
 
-# responsible_supervisor is the single source of truth for the
-# building-scoped User Permission; on_update reconciles the permission to the field.
+# [#pgvbei]
 def _building_supervisor_permissions(user, building):
     return frappe.get_all(
         "User Permission",
@@ -178,10 +176,7 @@ def on_update(doc, method=None):
         ).insert(ignore_permissions=True)  # audit-ok — system permission sync, gated by building write
 
 
-# Own fields whose change should retrigger the cost/occupancy rollup. The external
-# counts (occupancy/rooms/floors/cctv/capacity) have their own writers (the assignment
-# controller, weekly_occupancy_sync, and the room/bed generator), so editing the
-# building need only refresh when one of these inputs actually changed.
+# [#6f8o1f]
 _ROLLUP_TRIGGER_FIELDS = (
     "annual_rent",
     "annual_electricity",
@@ -242,7 +237,7 @@ def _recompute_occupancy_and_structure(doc):
     )
     doc.total_floors = len([f for f in _floor_values if f is not None])
 
-    # Active cameras = CCTV Facility Assets still installed (retired ones excluded).
+    # [#np7si9]
     doc.cctv_camera_count = frappe.db.count(
         "Facility Asset",
         {
@@ -253,8 +248,7 @@ def _recompute_occupancy_and_structure(doc):
     )
 
 
-# Annual cost inputs that must never be negative — a negative would silently drive a
-# negative monthly_cost_per_capacity through the rollup.
+# [#p1ayc0]
 _ANNUAL_COST_FIELDS = (
     "annual_rent",
     "annual_electricity",
@@ -280,13 +274,10 @@ def before_save(doc, method=None):
         from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()
 
-    # total_capacity is the read-only physical-bed invariant — always re-derive it (and
-    # the cost ratios it drives) on every save; a bed going Out-of-Service won't show in
-    # the building's field-diff.
+    # [#805gvb]
     _recompute_capacity_and_cost(doc)
 
-    # The heavier occupancy/room/floor/cctv counts only change via their own external
-    # writers, so refresh them only on insert or when a relevant input field changed.
+    # [#sdxweu]
     if doc.is_new() or any(doc.has_value_changed(f) for f in _ROLLUP_TRIGGER_FIELDS):
         _recompute_occupancy_and_structure(doc)
 

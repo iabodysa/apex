@@ -27,7 +27,7 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
         frappe.set_user("Administrator")
         method = self._testMethodName
 
-        # --- Safety Task Catalog fixture ---
+        # [#oizrnh]
         catalog_code = f"STI-IDEM-{method}"[:20]
         existing_cat = frappe.db.get_value(
             "Safety Task Catalog", {"task_code": catalog_code}, "name"
@@ -52,7 +52,7 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
                 force=True, ignore_permissions=True,
             )
 
-        # --- Accommodation Building fixture ---
+        # [#941qd6]
         bname = f"STI Idempotency Building {method}"
         existing_bld = frappe.db.get_value(
             "Building", {"building_name": bname}, "name"
@@ -73,7 +73,7 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
                 force=True, ignore_permissions=True,
             )
 
-        # --- Scheduled Task Template fixture (with one child item) ---
+        # [#j2h70s]
         self.template_name = f"STI Idempotency {method}"
         existing_tmpl = frappe.db.get_value(
             "Scheduled Task Template", {"template_name": self.template_name}, "name"
@@ -97,7 +97,7 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
             force=True, ignore_permissions=True,
         )
 
-        # --- Scheduled Task Assignment fixture ---
+        # [#aid3rd]
         asgn_doc = frappe.get_doc({
             "doctype": "Scheduled Task Assignment",
             "template": self.template,
@@ -112,14 +112,12 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
             force=True, ignore_permissions=True,
         )
 
-        # Recompute the period_key exactly as the Monthly branch of the generator
-        # does (first day of the current month) so the count is scoped to the
-        # one period this run targets, independent of the calendar date.
+        # [#mxj4z4]
         self.period_key = str(get_first_day(getdate(today())))
 
     def tearDown(self):
         frappe.set_user("Administrator")
-        # Purge any Scheduled Task Instances created by the generator for this fixture.
+        # [#5na69w]
         for name in frappe.get_all(
             "Scheduled Task Instance",
             filters={"assignment": self.assignment, "due_date": self.period_key},
@@ -143,7 +141,7 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
     def test_generator_creates_one_instance_and_is_idempotent(self):
         from apex.habitat.tasks import daily_scheduled_task_instance_generator
 
-        # Non-vacuous precondition: the assignment must be discoverable.
+        # [#2tprhz]
         active = frappe.get_all(
             "Scheduled Task Assignment",
             filters={"is_active": 1, "name": self.assignment},
@@ -160,7 +158,7 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
             "fixture must start with no instance for its current period",
         )
 
-        # First run: generator must create exactly one instance.
+        # [#9mf9ku]
         daily_scheduled_task_instance_generator()
         self.assertEqual(
             self._instance_count(),
@@ -168,8 +166,7 @@ class TestStiGeneratorIdempotency(FrappeTestCase):
             "the first generator run must create exactly one instance",
         )
 
-        # Second run for the same period: the check-then-insert guard must not
-        # create a duplicate.
+        # [#leylpc]
         daily_scheduled_task_instance_generator()
         self.assertEqual(
             self._instance_count(),

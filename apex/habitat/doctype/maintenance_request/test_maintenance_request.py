@@ -262,7 +262,7 @@ class TestMakeWorkOrder(FrappeTestCase):
             self.assertEqual(wo.building, mr.building)
             self.assertEqual(wo.issue_type, mr.issue_type)
             self.assertEqual(wo.status, "Planned")
-            # The Work Order has no room/bed/priority — the mapper must not invent them.
+            # [#ai2g7v]
             meta_fields = {f.fieldname for f in frappe.get_meta("Maintenance Work Order").fields}
             for absent in ("room", "bed", "priority"):
                 self.assertNotIn(absent, meta_fields,

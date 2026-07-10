@@ -102,7 +102,7 @@ class TestMaintenanceSafety(QASysBase):
         mark_completed(sti.name)
         sti.reload()
         self.assertEqual(sti.status, "Completed", "mark_completed must move In Progress -> Completed")
-        # completed_date auto-stamped on controlled completion (mirrors closed_on elsewhere)
+        # [#6gh4dz]
         self.assertEqual(
             frappe.utils.getdate(sti.completed_date),
             frappe.utils.getdate(),
@@ -162,7 +162,7 @@ class TestSchedulers(QASysBase):
         "lease_expiry_watchlist",
         "daily_scheduled_task_instance_generator",
         "weekly_occupancy_sync",
-        # [#wave3-safety] renamed (was weekly_safety_task_compliance_scan) + new Wave-3 jobs
+        # [#d7hr52]
         "daily_safety_task_compliance_scan",
         "weekly_safety_coverage_gate",
         "audit_remediation_deadline_watch",

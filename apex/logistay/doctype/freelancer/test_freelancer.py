@@ -51,7 +51,7 @@ class TestFreelancer(FrappeTestCase):
             self._doc(monthly_salary=0).insert(ignore_permissions=True)
 
     def test_status_derives_expired_for_past_contract(self):
-        # A past end date flips an Active contract to Expired (Temporary Worker mirror).
+        # [#9od32f]
         doc = self._doc(
             contract_start_date=add_days(nowdate(), -200),
             contract_end_date=add_days(nowdate(), -10),
@@ -62,7 +62,7 @@ class TestFreelancer(FrappeTestCase):
         nid = f"ID{frappe.generate_hash(length=8)}"
         self._doc(national_id_or_iqama=nid).insert(ignore_permissions=True)
         with self.assertRaises(Exception):
-            # DB unique index (or set_only_once path) blocks a second row with the same ID.
+            # [#24o1sz]
             self._doc(national_id_or_iqama=nid).insert(ignore_permissions=True)
 
     def test_permlevel_pii_hidden_from_unprivileged_role(self):
@@ -85,14 +85,12 @@ class TestFreelancer(FrappeTestCase):
         try:
             fetched = frappe.get_doc("Freelancer", doc.name)
             fetched.check_permission("read")
-            # The permlevel-1 read gate is enforced by apply_fieldlevel_read_permissions
-            # (the same call the get_doc API applies before returning a doc) — it deletes
-            # the fields the user has no permlevel access to. as_dict() alone does NOT.
+            # [#b4mp7e]
             fetched.apply_fieldlevel_read_permissions()
             stripped = fetched.as_dict()
             self.assertIsNone(stripped.get("national_id_or_iqama"))
             self.assertIsNone(stripped.get("mobile_number"))
-            # A permlevel-0 field stays visible — proves the doc itself is readable.
+            # [#6wqlmz]
             self.assertEqual(stripped.get("full_name"), "Test Freelancer")
         finally:
             frappe.set_user("Administrator")
@@ -106,8 +104,7 @@ class TestFreelancer(FrappeTestCase):
         company = frappe.db.get_value("Company", {}, "name")
         if not company:
             self.skipTest("no Company configured")
-        # Pick accounts in the company's base currency so the JE never trips the
-        # ERPNext multi-currency guard — that path is irrelevant to the party-axis proof.
+        # [#jbf66z]
         base_currency = frappe.db.get_value("Company", company, "default_currency")
 
         def _account(account_type):
@@ -144,7 +141,7 @@ class TestFreelancer(FrappeTestCase):
                 ],
             }
         )
-        # Reaching validate without a party-type error is the proof the party axis works.
+        # [#lmolqb]
         je.set_missing_values()
         je.validate()
         self.assertEqual(je.accounts[0].party_type, "Freelancer")

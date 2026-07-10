@@ -22,17 +22,14 @@ def execute(filters=None):
         {"label": frappe._("Days Open"), "fieldname": "days_open", "fieldtype": "Int", "width": 90},
     ]
 
-    # Open findings = the real STE statuses that need follow-up. The
-    # old list ("Failed"/"Partially Completed"/"Escalated") are not valid
-    # execution_status options, so this report always returned nothing.
+    # [#ap3loz]
     query_filters = {"docstatus": 1, "execution_status": ["in", ["Poor", "Not Done"]]}
     if filters.get("building"):
         query_filters["building"] = filters["building"]
     if filters.get("priority"):
         query_filters["priority"] = filters["priority"]
 
-    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
-    # list gets via permission_query_conditions; re-apply the caller's building scope.
+    # [#537g2t]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         chosen = query_filters.get("building")

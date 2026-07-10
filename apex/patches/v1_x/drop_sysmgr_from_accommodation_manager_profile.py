@@ -34,7 +34,7 @@ def execute():
     profile = frappe.get_doc("Role Profile", _PROFILE)
     kept = [row for row in profile.roles if row.role != _ROLE]
     if len(kept) == len(profile.roles):
-        return  # no System Manager row -> nothing to do
+        return  # [#hedo5n]
 
     profile.set("roles", kept)
     profile.save(ignore_permissions=True)  # audit-ok: one-time admin cleanup patch

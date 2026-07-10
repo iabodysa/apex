@@ -25,7 +25,7 @@ def get_my_notifications(limit=20):
 	no commit; never raises for a driver with no notifications (returns an empty list).
 	"""
 	_require_enabled()
-	_resolve_driver()  # gate: only a linked driver sees the feed
+	_resolve_driver()  # [#jdlt6t]
 	rows = frappe.get_all(
 		"Notification Log",
 		filters={"for_user": frappe.session.user},
@@ -36,7 +36,7 @@ def get_my_notifications(limit=20):
 	for r in rows:
 		r["read"] = bool(r.get("read"))
 		r["creation"] = frappe.utils.cstr(r["creation"]) if r.get("creation") else None
-		# strip the notification's HTML so the SPA renders a clean line, not markup
+		# [#gd3a17]
 		r["body"] = frappe.utils.strip_html_tags(r.get("email_content") or "").strip() or None
 		r.pop("email_content", None)
 	return rows

@@ -29,8 +29,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from apex.www import masar as masar_page
 
-# A canonical reflected-XSS probe: it tries to break out of the quoted JS string
-# AND close the surrounding <script> to start its own.
+# [#8cwasu]
 _XSS_W = '";</script><script>alert(1)</script>'
 
 
@@ -67,9 +66,9 @@ class TestMasarReflectedXSS(FrappeTestCase):
 		frappe.set_user("Guest")
 		frappe.local.form_dict = frappe._dict(w=_XSS_W)
 		try:
-			# No Redirect is raised for the hostile payload (a valid token would raise).
+			# [#rmp21g]
 			ctx = masar_page.get_context(frappe._dict())
-			# The shell only ever sees the presence boolean — never a raw token.
+			# [#esx9v2]
 			self.assertFalse(getattr(ctx, "masar_has_token", False))
 			self.assertNotIn("masar_token", dict(ctx), "the raw token must not reach the shell context")
 		finally:
@@ -93,7 +92,7 @@ class TestMasarReflectedXSS(FrappeTestCase):
 		try:
 			with self.assertRaises(frappe.Redirect):
 				masar_page.get_context(frappe._dict())
-			# The redirect strips the token: the target is the bare /masar.
+			# [#9b9ppq]
 			self.assertEqual(frappe.local.flags.redirect_location, "/masar")
 		finally:
 			frappe.local.form_dict = frappe._dict()
@@ -114,7 +113,7 @@ class TestMasarReflectedXSS(FrappeTestCase):
 		"""csrf_token and portal_logo are emitted via tojson too (quoted JSON
 		literals), not bare interpolations — the same sink the audit flagged."""
 		html, ctx = _render_masar_shell({})
-		# tojson always quotes a string value; a bare {{ }} would not guarantee it.
+		# [#m3h3gg]
 		self.assertIn("window.csrf_token = ", html)
 		self.assertRegex(html, r'window\.csrf_token = "[^"]*";')
 		self.assertRegex(html, r'window\.portal_logo = "[^"]*";')
@@ -132,7 +131,7 @@ class TestPortalThemeStoredXSS(FrappeTestCase):
 		self._orig_logo = self.doc.brand_logo
 
 	def tearDown(self):
-		# Restore so the shared Single is left as found for other suites.
+		# [#e6avg3]
 		self.doc.accent_color = self._orig_accent
 		self.doc.brand_logo = self._orig_logo
 		frappe.set_user("Administrator")
@@ -150,9 +149,9 @@ class TestPortalThemeStoredXSS(FrappeTestCase):
 
 	def test_valid_hex_accent_passes(self):
 		self.doc.accent_color = "#0a84ff"
-		# Keep logo blank/valid so only the accent is under test.
+		# [#lps769]
 		self.doc.brand_logo = ""
-		self.doc.validate()  # must not raise
+		self.doc.validate()  # [#3vfaf1]
 
 	def test_valid_rgb_accent_passes(self):
 		self.doc.accent_color = "rgba(10, 132, 255, 0.5)"
@@ -168,4 +167,4 @@ class TestPortalThemeStoredXSS(FrappeTestCase):
 	def test_files_logo_passes(self):
 		self.doc.accent_color = ""
 		self.doc.brand_logo = "/files/logo.png"
-		self.doc.validate()  # must not raise
+		self.doc.validate()  # [#3vfaf1]

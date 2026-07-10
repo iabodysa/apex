@@ -56,7 +56,7 @@ class _ScopeCacheMixin:
     rows = None
 
     def setUp(self):
-        # Start every test with an empty request-local cache so counts are clean.
+        # [#56cp1b]
         frappe.local.cache = {}
 
     def tearDown(self):
@@ -68,13 +68,13 @@ class _ScopeCacheMixin:
         rows = self.rows
 
         def fake_get_all(doctype, filters=None, pluck=None, **kwargs):
-            # Mirror the real signature the resolvers use.
+            # [#ompae7]
             assert doctype == "User Permission"
             return list(rows[filters["user"]])
 
         return patch.object(frappe, "get_all", side_effect=fake_get_all)
 
-    # 1. Cache hit: one SQL per request context for a repeated resolve.
+    # [#4iwz7z]
     def test_single_sql_per_request_context(self):
         user = next(iter(self.rows))
         with self._patched_get_all() as m:
@@ -88,7 +88,7 @@ class _ScopeCacheMixin:
             "second resolve in the same request must be served from frappe.local cache",
         )
 
-    # 2. User-keyed: no cross-user bleed, one SQL per distinct user.
+    # [#e8wxhv]
     def test_user_keyed_no_cross_user_bleed(self):
         users = list(self.rows)
         self.assertGreaterEqual(len(users), 2, "fixture needs two distinct users")
@@ -100,7 +100,7 @@ class _ScopeCacheMixin:
             scope_b_again = self.resolver(b)
         self.assertEqual(scope_a, list(self.rows[a]))
         self.assertEqual(scope_b, list(self.rows[b]))
-        # The security invariant: User B never receives User A's cached scope.
+        # [#nc8cqd]
         self.assertNotEqual(scope_b, scope_a)
         self.assertEqual(scope_a_again, list(self.rows[a]))
         self.assertEqual(scope_b_again, list(self.rows[b]))
@@ -110,27 +110,27 @@ class _ScopeCacheMixin:
             "exactly one query per distinct user, then both served from cache",
         )
 
-    # 3. frappe.set_user clears the request cache (background-job identity switch).
+    # [#tl6rwe]
     def test_set_user_clears_request_scope_cache(self):
         users = list(self.rows)
         a, b = users[0], users[1]
         with self._patched_get_all():
             frappe.set_user(a)
             self.assertEqual(self.resolver(a), list(self.rows[a]))
-            # The resolver populated the request cache under some namespace.
+            # [#ahgal0]
             self.assertTrue(frappe.local.cache, "resolver should have cached something")
 
-            # A background job switches identity mid-run.
+            # [#a9pkwu]
             frappe.set_user(b)
             self.assertEqual(
                 frappe.local.cache,
                 {},
                 "frappe.set_user must reset frappe.local.cache so no scope bleeds across users",
             )
-            # The next resolve returns the NEW user's scope, never the previous user's.
+            # [#5fi677]
             self.assertEqual(self.resolver(b), list(self.rows[b]))
 
-    # 4. The returned list is a copy: a caller mutating it cannot corrupt the cache.
+    # [#4s5e8a]
     def test_resolved_scope_is_not_aliased(self):
         user = next(iter(self.rows))
         with self._patched_get_all():

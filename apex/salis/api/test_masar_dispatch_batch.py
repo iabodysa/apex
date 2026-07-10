@@ -105,8 +105,7 @@ class TestMasarDispatchBatch(FrappeTestCase):
         return trip
 
     def test_earliest_trip_on_manifest_wins_with_exact_tuple(self):
-        # Two trips the worker is on; the resolver returns the EARLIER-departing one
-        # and the full (trip, request, pickup, building) tuple must be exact.
+        # [#gywrk2]
         req_early = self._request(self.emp.name, "PICK-EARLY", self.building.name)
         req_late = self._request(self.emp.name, "PICK-LATE", self.building.name)
         trip_early = self._trip(req_early.name, depart_time="06:00:00")
@@ -119,9 +118,7 @@ class TestMasarDispatchBatch(FrappeTestCase):
         )
 
     def test_assigned_request_union_resolves_when_not_on_direct_request(self):
-        # The trip's DIRECT request carries only `other`; the worker is reached only
-        # through the supervisor's assigned-request union — the batched
-        # assigned_by_trip map must still surface that candidate.
+        # [#3dqxyi]
         req_direct = self._request(self.other.name, "OTHER-PICK", self.building.name)
         req_assigned = self._request(self.emp.name, "ASG-PICK", self.building.name)
         trip = self._trip(req_direct.name, assigned=[req_assigned.name])
@@ -133,8 +130,7 @@ class TestMasarDispatchBatch(FrappeTestCase):
         )
 
     def test_transport_request_filter_narrows_to_that_requests_trip(self):
-        # A client-supplied transport_request narrows the own-set: even though the
-        # early trip departs first, filtering to the late request selects its trip.
+        # [#dficmb]
         req_early = self._request(self.emp.name, "PICK-EARLY", self.building.name)
         req_late = self._request(self.emp.name, "PICK-LATE", self.building.name)
         self._trip(req_early.name, depart_time="06:00:00")
@@ -147,5 +143,5 @@ class TestMasarDispatchBatch(FrappeTestCase):
         )
 
     def test_worker_with_no_trip_today_is_none(self):
-        # A worker on no request today resolves to None (empty-trip-set fast path).
+        # [#dk1k98]
         self.assertIsNone(masar._worker_today_dispatch_trip(self.emp.name))

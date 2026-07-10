@@ -11,7 +11,7 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Payment Gateway lives in the (uninstalled) payments app; skip it in the dependency closure.
+# [#p0xvzg]
 test_ignore = ["Payment Gateway"]
 
 
@@ -31,12 +31,12 @@ class TestFuelExceptionCaseAmount(FrappeTestCase):
         )
 
     def test_negative_amount_recovered_rejected(self):
-        # A recovered amount is money clawed back; it can never be negative.
+        # [#9qi8lc]
         with self.assertRaises(frappe.ValidationError):
             self._case(-1).insert(ignore_permissions=True)
 
     def test_zero_or_positive_amount_recovered_allowed(self):
-        # Zero (resolved with nothing recovered) and a positive amount both pass.
+        # [#b8jcd1]
         zero = self._case(0).insert(ignore_permissions=True)
         self.assertTrue(zero.name)
         positive = self._case(500).insert(ignore_permissions=True)

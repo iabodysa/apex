@@ -58,8 +58,7 @@ class TestTripBoardingLedger(FrappeTestCase):
                 "status": "Planned",
             }
         )
-        # Direct child rows with settled / unsettled outcomes (the operational
-        # boarding_state the finalize path would have produced).
+        # [#qdacab]
         self.trip.append(
             "boarding_state",
             {"employee": self.boarded_emp, "status": "Boarded", "confirm_source": "Driver"},
@@ -107,7 +106,7 @@ class TestTripBoardingLedger(FrappeTestCase):
         self.assertEqual(set(rows), {self.boarded_emp, self.absent_emp})
         self.assertEqual(rows[self.boarded_emp].outcome, "Boarded")
         self.assertEqual(rows[self.absent_emp].outcome, "Absent")
-        # The Pending worker has no settled outcome -> not posted.
+        # [#gn11p0]
         self.assertNotIn(self.pending_emp, rows)
 
     def test_posted_row_is_immutable(self):
@@ -133,13 +132,13 @@ class TestTripBoardingLedger(FrappeTestCase):
         reversed_count = reverse_trip_boarding(self.trip.name)
         self.assertEqual(reversed_count, 2, "Each original posts one reversal.")
 
-        # Originals preserved (not deleted) and flagged is_cancelled.
+        # [#9byhd7]
         still = {r.name: r for r in self._originals()}
         self.assertEqual(len(still), 2, "Originals are preserved, never deleted.")
         for r in still.values():
             self.assertEqual(r.is_cancelled, 1, "Each original is flagged cancelled.")
 
-        # One mirror reversal per original, is_cancelled + reversal_of set.
+        # [#ixhnhn]
         for orig in originals:
             rev = frappe.get_all(
                 LEDGER,
@@ -150,6 +149,6 @@ class TestTripBoardingLedger(FrappeTestCase):
             self.assertEqual(rev[0].employee, orig.employee)
             self.assertEqual(rev[0].is_cancelled, 1)
 
-        # Idempotent: a second reversal pass posts nothing.
+        # [#hdkao5]
         again = reverse_trip_boarding(self.trip.name)
         self.assertEqual(again, 0, "A second reversal pass must not double-post.")

@@ -65,7 +65,7 @@ def seed_catalog():
     frappe.db.commit()
 
 
-# Single tree root; each category Select option becomes a group node beneath it.
+# [#t6acgz]
 MATERIAL_ROOT = "All Maintenance Materials"
 MATERIAL_CATEGORIES = [
     "Electrical", "Air Conditioning", "Plumbing",

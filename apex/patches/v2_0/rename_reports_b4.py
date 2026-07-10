@@ -16,7 +16,7 @@ Idempotent: skips a pair already renamed or absent; skips a twin already gone.
 
 import frappe
 
-# (old_report_name, new_report_name)
+# [#p7abqf]
 RENAMES = [
     ("Housing Supervisor Report", "Building Operations Summary"),
     ("Idle Resident Candidates", "Idle Resident Detection"),
@@ -28,7 +28,7 @@ RENAMES = [
     ("Salis Fleet Register", "Fleet Register"),
 ]
 
-# merged-away reports — delete the orphaned DB row (JSON already removed)
+# [#gqbwcy]
 MERGED_TWINS = [
     "Fuel Claim vs Consumption",
     "Rental Variance Report",
@@ -38,14 +38,14 @@ MERGED_TWINS = [
 def execute():
     for old, new in RENAMES:
         if frappe.db.exists("Report", new):
-            continue  # already renamed (idempotent re-run) / fresh install
+            continue  # [#45ot3n]
         if not frappe.db.exists("Report", old):
-            continue  # fresh install — never had the old name
+            continue  # [#28qx78]
         frappe.rename_doc("Report", old, new, force=True)
         frappe.db.commit()
 
     for twin in MERGED_TWINS:
         if not frappe.db.exists("Report", twin):
-            continue  # already removed / fresh install
+            continue  # [#5tm6as]
         frappe.delete_doc("Report", twin, force=True, ignore_permissions=True)
         frappe.db.commit()

@@ -135,7 +135,7 @@ def reverse_asset_movement(source_doctype: str, source_name: str) -> int:
                 "facility_asset": row.facility_asset,
                 "company": row.company,
                 "posting_datetime": now_datetime(),
-                # Swap from<->to: the reversal returns the asset to its origin.
+                # [#7b7rjz]
                 "from_building": row.to_building,
                 "from_location": row.to_location,
                 "to_building": row.from_building,

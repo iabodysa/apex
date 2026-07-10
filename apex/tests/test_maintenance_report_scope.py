@@ -32,7 +32,7 @@ from apex.habitat.report.maintenance_aging import maintenance_aging as R_aging
 from apex.habitat.report.open_maintenance_requests import open_maintenance_requests as R_backlog
 from apex.tests._helpers import _user
 
-# [#9lw62p] A plainly non-privileged desk role (not in PRIVILEGED_ROLES).
+# [#gkbyy6]
 NON_PRIVILEGED_ROLE = "Blogger"
 
 
@@ -50,11 +50,9 @@ class TestMaintenanceReportScopeLogic(FrappeTestCase):
     ``test_habitat_maintenance_scoping.py``.
     """
 
-    # ----- maintenance_aging -----
+    # [#qwisbq]
 
-    # Each report does ``from ...permissions import report_maintenance_request_scope``,
-    # so the bound name lives in the REPORT module's namespace — patch it there, not
-    # on the permissions module (the bare import would otherwise ignore an HP patch).
+    # [#kqkovc]
 
     def test_aging_scoped_user_gets_owner_assignee_or_filter(self):
         with patch.object(
@@ -72,7 +70,7 @@ class TestMaintenanceReportScopeLogic(FrappeTestCase):
             R_aging.execute({})
             self.assertIsNone(_last_or_filters(ga))
 
-    # ----- open_maintenance_requests -----
+    # [#5xdis0]
 
     def test_backlog_scoped_user_gets_owner_assignee_or_filter(self):
         with patch.object(
@@ -126,13 +124,13 @@ class TestMaintenanceReportScopeIntegration(FrappeTestCase):
         cls.stranger = _user("mrs_stranger@example.com", NON_PRIVILEGED_ROLE)
         cls.manager = _user("mrs_manager@example.com", "Accommodation Manager")
 
-        # owned by the requester (owner == requester)
+        # [#rdiubd]
         cls.t_owned = cls._ticket(owner=cls.requester, issue="Electrical")
-        # owned by a stranger, assigned to the requester (assignee branch)
+        # [#gklmo9]
         cls.t_assigned = cls._ticket(
             owner=cls.stranger, issue="Plumbing", assigned_to=cls.requester
         )
-        # owned by a stranger, unrelated to the requester (must stay hidden)
+        # [#ed3g2z]
         cls.t_foreign = cls._ticket(owner=cls.stranger, issue="Furniture")
 
     @classmethod
@@ -153,15 +151,13 @@ class TestMaintenanceReportScopeIntegration(FrappeTestCase):
                     "status": "Open",
                 }
             )
-            # ignore_permissions: the All-role create DocPerm governs intake in
-            # production; the test only needs the row with owner == the inserter.
+            # [#jvjcaq]
             doc.insert(ignore_permissions=True)
         finally:
             frappe.set_user("Administrator")
 
         if assigned_to:
-            # set assignee + flip to Assigned (the controller requires assigned_to
-            # for that status) as the privileged Administrator.
+            # [#emwg22]
             doc.assigned_to = assigned_to
             doc.status = "Assigned"
             doc.save(ignore_permissions=True)
@@ -175,7 +171,7 @@ class TestMaintenanceReportScopeIntegration(FrappeTestCase):
         seeded = {self.t_owned, self.t_assigned, self.t_foreign}
         return {r["name"] for r in execute({})[1] if r["name"] in seeded}
 
-    # ----- maintenance_aging -----
+    # [#qwisbq]
 
     def test_aging_scoped_user_sees_only_owned_and_assigned(self):
         names = self._names_for(self.requester, R_aging.execute)
@@ -194,7 +190,7 @@ class TestMaintenanceReportScopeIntegration(FrappeTestCase):
             "an oversight role sees every ticket",
         )
 
-    # ----- open_maintenance_requests -----
+    # [#5xdis0]
 
     def test_backlog_scoped_user_sees_only_owned_and_assigned(self):
         names = self._names_for(self.requester, R_backlog.execute)

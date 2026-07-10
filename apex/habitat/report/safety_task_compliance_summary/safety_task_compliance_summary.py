@@ -40,13 +40,12 @@ def execute(filters=None):
     expected = _expected_tasks(cadence, building)
     executions = _executions(cadence, building, date_from, date_to)
 
-    # Group executions by task, newest first so the first row seen is the last one.
+    # [#rwkwrx]
     by_task = {}
     for ex in executions:
         by_task.setdefault(ex.task, []).append(ex)
 
-    # The task universe is the expected set, plus any executed task not in it
-    # (e.g. an ad-hoc or out-of-scope execution) so nothing is silently dropped.
+    # [#dwfsf0]
     task_names = list(expected.keys())
     for task in by_task:
         if task not in expected:
@@ -109,7 +108,7 @@ def _expected_tasks(cadence, building):
 
     base = {"is_active": 1, "frequency": cadence}
 
-    # Mode 1: applies to all buildings.
+    # [#exehiq]
     all_buildings = frappe.get_all(
         "Safety Task Catalog",
         filters={**base, "applicable_to_all_buildings": 1},
@@ -117,7 +116,7 @@ def _expected_tasks(cadence, building):
     )
     expected = {t.name: {"task_title": t.task_title} for t in all_buildings}
 
-    # Mode 2: scoped to specific buildings via the child table.
+    # [#bmc982]
     if building:
         scoped_parents = frappe.get_all(
             "Safety Task Building Scope",
@@ -146,9 +145,7 @@ def _executions(cadence, building, date_from, date_to):
     if cadence:
         query_filters["frequency"] = cadence
 
-    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
-    # list gets via permission_query_conditions; confine executions to the caller's
-    # buildings so a scoped user never sees another estate's executions.
+    # [#8dhiu3]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         chosen = query_filters.get("building")

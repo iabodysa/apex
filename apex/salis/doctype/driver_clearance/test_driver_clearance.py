@@ -83,8 +83,7 @@ class TestDriverClearanceNotification(FrappeTestCase):
         )
 
     def test_driver_user_is_mirrored_onto_salis_driver(self):
-        # The single-hop fetch chain must land the driver's login User locally,
-        # otherwise the flat recipient field can never resolve to an email.
+        # [#dq7b9u]
         self.assertEqual(
             frappe.db.get_value("Salis Driver", self.driver, "driver_user"), self.user
         )
@@ -97,12 +96,11 @@ class TestDriverClearanceNotification(FrappeTestCase):
                 "clearance_reason": "Termination",
             }
         ).insert(ignore_permissions=True)
-        # Status is governed by the Driver Clearance Workflow; reach Blocked
-        # through the native transition rather than writing the field directly.
+        # [#lvn9b3]
         clearance = apply_workflow(clearance, "Block")
         self.assertEqual(clearance.status, "Blocked")
 
-        # The recipient field is fetched from driver.driver_user on save.
+        # [#o3oon1]
         self.assertEqual(clearance.driver_user, self.user)
 
         self._fire("Salis - Blocked Driver Clearance", clearance)
@@ -122,7 +120,7 @@ class TestDriverClearanceNotification(FrappeTestCase):
             }
         ).insert(ignore_permissions=True)
 
-        # current_driver_user is fetched from current_driver.driver_user on save.
+        # [#7qcnj1]
         self.assertEqual(vehicle.current_driver_user, self.user)
 
         self._fire("Salis - Vehicle Compliance Expiring Soon", vehicle)

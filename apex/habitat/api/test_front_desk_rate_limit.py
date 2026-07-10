@@ -30,7 +30,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.habitat.api.front_desk import resolve_worker
 from apex.salis.api.boarding import get_boarding_pass
 
-# Matches the decorator on both endpoints; the 61st call in the window is rejected.
+# [#sxhul5]
 LIMIT = 60
 
 
@@ -68,8 +68,7 @@ def _request_from(ip: str, cmd: str):
 class TestFrontDeskRateLimit(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # A unique IP per test so a leftover Redis counter from another run/test
-        # never bleeds in; the key includes cmd + ip. (TEST-NET-3, RFC 5737.)
+        # [#pqrpgg]
         self.ip = "203.0.113." + str(int(_h(12), 16) % 250 + 1)
         self.cmd = "test-rl-" + _h(12)
 
@@ -80,14 +79,12 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         cmd = self.cmd + "-rw"
         self.addCleanup(self._clear_window, cmd, self.ip)
         with _request_from(self.ip, cmd):
-            # The first LIMIT calls pass (a benign unknown identifier -> found:False,
-            # never throws on its own), proving the throttle does not bite the legit
-            # cadence.
+            # [#etrqqx]
             for i in range(LIMIT):
                 r = resolve_worker("NOPE-" + _h())
                 self.assertFalse(r["found"], f"call {i + 1} should answer, not throttle")
 
-            # The 61st call within the window is rejected.
+            # [#kp82cz]
             with self.assertRaises(frappe.RateLimitExceededError) as cm:
                 resolve_worker("NOPE-" + _h())
             self.assertEqual(getattr(cm.exception, "http_status_code", None), 429)
@@ -96,10 +93,7 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         cmd = self.cmd + "-gbp"
         self.addCleanup(self._clear_window, cmd, self.ip)
         with _request_from(self.ip, cmd):
-            # get_boarding_pass throws on an unknown trip (DoesNotExistError) BEFORE
-            # any boarding logic, so each call still passes THROUGH the decorator
-            # (the throttle wraps the call) without needing real trip fixtures. We
-            # count those as the consumed window, then assert the 61st is throttled.
+            # [#72k58u]
             for i in range(LIMIT):
                 with self.assertRaises(frappe.DoesNotExistError):
                     get_boarding_pass("NO-SUCH-TRIP-" + _h(), "NO-EMP")
@@ -124,7 +118,7 @@ class TestFrontDeskRateLimit(FrappeTestCase):
             with self.assertRaises(frappe.RateLimitExceededError):
                 resolve_worker("NOPE-" + _h())
 
-        # A different IP still gets its full allowance.
+        # [#x67r2c]
         with _request_from(ip_b, cmd):
             r = resolve_worker("NOPE-" + _h())
             self.assertFalse(r["found"], "a different IP must not inherit IP A's spent window")
@@ -133,6 +127,6 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         """Without an HTTP request the decorator is a no-op (rate_limiter.py:134),
         so the test suite / console callers are never throttled -- exactly why the
         functional boarding/resolve tests can loop freely."""
-        # Far beyond LIMIT, no request context -> never raises.
+        # [#mohszr]
         for _ in range(LIMIT + 5):
             self.assertFalse(resolve_worker("NOPE-" + _h())["found"])

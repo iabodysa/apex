@@ -34,13 +34,13 @@ class TestIdleResidentDetection(FrappeTestCase):
         }).insert(ignore_permissions=True).name
         self.company = company
 
-        # Two ended-work projects and one live one.
+        # [#ojjkbk]
         self.project_open = self._project(f"IRC Open {tag}", "Open")
         self.project_done = self._project(f"IRC Done {tag}", "Completed")
 
-        # Active resident on the live project — NOT idle.
+        # [#8bbj6x]
         self.asg_open = self._assignment(self.project_open, tag, "OPN")
-        # Active resident on the completed project — idle candidate.
+        # [#f2qux8]
         self.asg_done = self._assignment(self.project_done, tag, "DON")
 
     def _project(self, name, status):
@@ -100,11 +100,11 @@ class TestIdleResidentDetection(FrappeTestCase):
         self.assertEqual(row["existing_idle_report"], report)
         self.assertEqual(row["idle_report_status"], "Open")
 
-        # only_unlogged must now hide this already-logged candidate.
+        # [#6q54qw]
         _columns, data2 = execute({"building": self.building, "only_unlogged": 1})
         self.assertNotIn(self.asg_done, self._rows_by_assignment(data2))
 
     def test_project_status_filter_narrows_to_one_status(self):
-        # Filtering to Cancelled excludes the Completed-project candidate.
+        # [#4469gh]
         _columns, data = execute({"building": self.building, "project_status": "Cancelled"})
         self.assertNotIn(self.asg_done, self._rows_by_assignment(data))

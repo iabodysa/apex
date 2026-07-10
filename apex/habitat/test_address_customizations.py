@@ -37,7 +37,7 @@ class TestAddressCustomizations(FrappeTestCase):
         self.assertEqual(doc.secondary_number, "1234")
 
     def test_blank_saudi_fields_are_allowed(self):
-        # The fields are optional — a plain address must still save.
+        # [#geqicf]
         doc = self._address()
         self.assertFalse(doc.get("short_address"))
 

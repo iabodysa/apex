@@ -46,7 +46,7 @@ def _final_v1_version():
             continue
         stem = fname[:-3]
         parts = stem.split("_")
-        # Expect v<major>_<minor>_<patch> (e.g. v1_62_0).
+        # [#gdnkui]
         if len(parts) != 3 or not parts[0].startswith("v"):
             continue
         try:
@@ -74,7 +74,7 @@ def _parse(version):
 def execute():
     target_tuple, target_str = _final_v1_version()
     if not target_str:
-        return  # no v1 changelog on disk — nothing to pin to
+        return  # [#svvo8f]
 
     rows = frappe.get_all(
         "User",
@@ -90,12 +90,12 @@ def execute():
         except (ValueError, TypeError):
             continue
         if not isinstance(known, dict) or not known:
-            # Empty/blank map: a first-time user — leave native seeding to handle it.
+            # [#l73n99]
             continue
 
         entry = known.get("apex")
         current = _parse(entry.get("version")) if isinstance(entry, dict) else None
-        # Never downgrade a user already at/above the final v1 version.
+        # [#twaiyc]
         if current is not None and current >= target_tuple:
             continue
 

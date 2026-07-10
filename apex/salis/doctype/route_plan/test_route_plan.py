@@ -39,9 +39,7 @@ def _make_route_plan(stops):
 
 
 class TestRoutePlanP035(FrappeTestCase):
-    # ------------------------------------------------------------------
-    # 1. sequence field must not exist on the Route Stop child DocType
-    # ------------------------------------------------------------------
+    # [#eb9kj8]
     def test_sequence_field_removed(self):
         meta = frappe.get_meta("Route Stop")
         fieldnames = [f.fieldname for f in meta.fields]
@@ -51,9 +49,7 @@ class TestRoutePlanP035(FrappeTestCase):
             "sequence field must have been removed from Route Stop",
         )
 
-    # ------------------------------------------------------------------
-    # 2. stop_name must be marked required in the meta
-    # ------------------------------------------------------------------
+    # [#gow7g4]
     def test_stop_name_required_in_meta(self):
         meta = frappe.get_meta("Route Stop")
         stop_name_field = next(
@@ -66,23 +62,19 @@ class TestRoutePlanP035(FrappeTestCase):
             "stop_name must have reqd=1 on Route Stop",
         )
 
-    # ------------------------------------------------------------------
-    # 3. Blank stop_name raises ValidationError
-    # ------------------------------------------------------------------
+    # [#lfu11h]
     def test_blank_stop_name_raises(self):
         doc = _make_route_plan(
             [
                 {"stop_name": "Alpha Gate"},
-                {"stop_name": ""},          # blank — must be rejected
+                {"stop_name": ""},          # [#cnrebd]
                 {"stop_name": "Gamma Hall"},
             ]
         )
         with self.assertRaises(frappe.ValidationError):
             doc.validate()
 
-    # ------------------------------------------------------------------
-    # 4. Regression: 3 stops added, reordered via idx, order is preserved
-    # ------------------------------------------------------------------
+    # [#7du76a]
     def test_reorder_via_idx_preserved(self):
         """Create a Route Plan with 3 named stops, reorder their idx values,
         call validate() (which must not raise), and confirm the idx values
@@ -94,17 +86,15 @@ class TestRoutePlanP035(FrappeTestCase):
                 {"stop_name": "Gamma Hall"},
             ]
         )
-        # Simulate what the Frappe framework does when a user reorders rows:
-        # the front-end sends the rows back with new idx values.
-        # After reorder: Gamma=1, Alpha=2, Beta=3
-        doc.stops[0].idx = 2  # Alpha Gate → position 2
-        doc.stops[1].idx = 3  # Beta Block → position 3
-        doc.stops[2].idx = 1  # Gamma Hall → position 1
+        # [#6u9zy7]
+        doc.stops[0].idx = 2  # [#i70tpk]
+        doc.stops[1].idx = 3  # [#34h4pq]
+        doc.stops[2].idx = 1  # [#j0ewyn]
 
-        # validate() must not throw (all stop_names are set)
+        # [#6lpmrk]
         doc.validate()
 
-        # Confirm idx values were not scrambled by validate()
+        # [#ba1rwe]
         idx_by_name = {s.stop_name: s.idx for s in doc.stops}
         self.assertEqual(idx_by_name["Alpha Gate"], 2)
         self.assertEqual(idx_by_name["Beta Block"], 3)
@@ -129,13 +119,12 @@ class TestRoutePlanFulfilmentStamp(FrappeTestCase):
             }
         )
         doc.insert(ignore_permissions=True)
-        # Blank before submit (read-only field, never hand-set).
+        # [#pawxm1]
         self.assertFalse(doc.movement_planner)
 
         doc.submit()
 
-        # Re-read straight from the DB (not the in-memory doc) — this is what
-        # would expose a non-persisted plain attribute assignment.
+        # [#p3evhe]
         persisted = frappe.db.get_value(
             "Route Plan", doc.name, "movement_planner"
         )

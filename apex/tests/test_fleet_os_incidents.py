@@ -27,8 +27,7 @@ class TestFleetOsIncidents(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def _vehicle(self, suffix):
-        # Salis Vehicle autonames by series, so the SPA "plate" is plate_number,
-        # not doc.name — keep both to seed against name and match against plate.
+        # [#dnd9l4]
         plate = "FOSINC " + self._testMethodName + suffix
         doc = frappe.get_doc(
             {
@@ -93,7 +92,7 @@ class TestFleetOsIncidents(FrappeTestCase):
         row = self._row_for(veh_plate)
         self.assertIsNotNone(row, "the seeded vehicle must surface in get_fleet_os")
 
-        # Accidents: the Accident incident, not the Theft.
+        # [#1ap34g]
         self.assertEqual(len(row["accidents"]), 1, "the accident must show on the accidents tab")
         acc = row["accidents"][0]
         self.assertEqual(acc["date"], "2026-06-01")
@@ -101,19 +100,19 @@ class TestFleetOsIncidents(FrappeTestCase):
         self.assertEqual(acc["estimated_cost"], 1500)
         self.assertTrue(acc["description"])
 
-        # Damages: the write-off, in the SPA's d.{date,cost,description,status} shape.
+        # [#px9t33]
         self.assertEqual(len(row["damages"]), 1, "the write-off must show on the damages tab")
         dmg = row["damages"][0]
         self.assertEqual(dmg["cost"], 2200)
         self.assertTrue(dmg["date"], "a damage row must carry a date for the card head")
         self.assertTrue(dmg["description"])
 
-        # Stolen: the latest Theft drives stolen_info (the card stripe).
+        # [#zrtia1]
         self.assertIsNotNone(row["stolen_info"], "a theft incident must populate stolen_info")
         self.assertEqual(row["stolen_info"]["date"], "2026-06-10")
         self.assertEqual(row["stolen_info"]["report_number"], "PR-9002")
 
-        # Non-vacuous: a vehicle with no records keeps empty panels.
+        # [#gl6z7r]
         clean_row = self._row_for(clean_plate)
         self.assertIsNotNone(clean_row, "the clean vehicle must also surface")
         self.assertEqual(clean_row["accidents"], [])

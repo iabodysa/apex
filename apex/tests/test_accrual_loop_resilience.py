@@ -100,7 +100,7 @@ class TestFuelAccrualLoopResilience(FrappeTestCase):
         doc.insert(ignore_permissions=True)
         if get_workflow_name("Fuel Request") == "Fuel Request Workflow":
             if doc.requested_by == frappe.session.user:
-                doc.db_set("requested_by", "Guest")  # segregation-of-duties gate
+                doc.db_set("requested_by", "Guest")  # [#apla92]
                 doc.reload()
             apply_workflow(doc, "Approve")
             doc.reload()
@@ -122,7 +122,7 @@ class TestFuelAccrualLoopResilience(FrappeTestCase):
         )
 
     def test_failing_done_request_does_not_hang_or_discard_good_rows(self):
-        # Two good requests + one that deterministically fails to ledger.
+        # [#m9x3x4]
         good_a = self._make_done_request()
         good_b = self._make_done_request()
         bad = self._make_done_request()
@@ -136,26 +136,25 @@ class TestFuelAccrualLoopResilience(FrappeTestCase):
         attempts = {"bad": 0}
 
         def _insert_or_fail(**kwargs):
-            # Fail ledgering for the bad request only; everything else is real.
+            # [#t1idq8]
             if kwargs.get("source_name") == bad:
                 attempts["bad"] += 1
                 raise frappe.ValidationError("injected ledger failure")
             return real_insert(**kwargs)
 
         with patch.object(fuel_engine, "_insert_ledger_row", side_effect=_insert_or_fail):
-            # _run_bounded turns the old infinite loop into a fast failure.
+            # [#qae35g]
             ok = _run_bounded(accrue_fuel_consumption, seconds=30)
         self.assertTrue(ok, "accrue_fuel_consumption raised instead of returning")
 
-        # the always-failing row is attempted ONCE then skipped, not spun on.
+        # [#csv3zc]
         self.assertEqual(
             attempts["bad"], 1,
             "Bad request must be attempted exactly once, then excluded from re-query "
             "(termination guard) - a >1 count means the loop re-attempts it.",
         )
 
-        # both good siblings are ledgered and STAY ledgered (savepoint
-        # isolation - the bad row's rollback must not discard them).
+        # [#ht2sql]
         for n in (good_a, good_b):
             rows = frappe.db.count(
                 "Fuel Consumption Ledger",
@@ -167,8 +166,7 @@ class TestFuelAccrualLoopResilience(FrappeTestCase):
                 f"Good request {n} must remain flagged ledgered after the bad row failed.",
             )
 
-        # The bad row is left un-ledgered (its work rolled back), ready to retry
-        # on a later run once its cause is fixed.
+        # [#qe50d8]
         self.assertEqual(
             frappe.db.count(
                 "Fuel Consumption Ledger",
@@ -183,9 +181,7 @@ class TestFuelAccrualLoopResilience(FrappeTestCase):
         )
 
     def test_good_rows_survive_when_first_row_in_batch_fails(self):
-        # ordering variant: the FAILING row is processed first (order_by
-        # modified asc -> created earliest). The bare-rollback bug would have
-        # discarded the later good rows; savepoint isolation keeps them.
+        # [#2rscp3]
         bad = self._make_done_request()
         good = self._make_done_request()
         for n in (bad, good):
@@ -249,7 +245,7 @@ class TestRentalAccrualLoopResilience(FrappeTestCase):
                     "status": "Active",
                 }
             ).insert(ignore_permissions=True).name
-        # An open Receipt makes the vehicle in-service so the engine accrues it.
+        # [#i879zc]
         if not frappe.db.exists(
             "Rental Vehicle Movement",
             {"vehicle": name, "movement_type": "Receipt", "docstatus": 1},
@@ -276,12 +272,7 @@ class TestRentalAccrualLoopResilience(FrappeTestCase):
                 "Rental Accrual Ledger", {"vehicle": v, "accrual_date": posting}
             )
 
-        # frappe.get_doc is the engine's insert path; fail it for the bad vehicle
-        # only (a deterministic mid-loop failure), pass everything else through.
-        # Pass through with the ORIGINAL args/kwargs untouched: the engine's
-        # except-branch calls frappe.log_error, which itself calls get_doc with
-        # keyword-only args, so a forced positional (arg=None) would raise
-        # "First non keyword argument must be a string or dict" and mask the test.
+        # [#egv4ju]
         real_get_doc = rental_engine.frappe.get_doc
 
         def _get_doc_or_fail(*args, **kwargs):

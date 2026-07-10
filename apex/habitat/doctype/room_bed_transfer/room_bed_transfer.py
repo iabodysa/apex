@@ -35,9 +35,7 @@ def validate(doc, method=None):
     if bed_room is not None and bed_room != doc.to_room:
         frappe.throw(_("Target Bed {0} does not belong to Room {1}").format(doc.to_bed, doc.to_room))
 
-    # [#c91vez] An unset Link returns None (not ""), so the old `is not None and not`
-    # guard never fired — a room with no building slipped through. `not to_building`
-    # catches both None and an empty value, so the integrity check actually runs.
+    # [#hgjgqn]
     to_building = frappe.db.get_value("Room", doc.to_room, "building")
     if not to_building:
         frappe.throw(_("Target Room {0} is not associated with any Building.").format(doc.to_room))
@@ -68,9 +66,7 @@ def on_submit(doc, method=None):
 
 
 def on_cancel(doc, method=None):
-    # Inverse of on_submit: free the target bed, re-occupy the original, and move the
-    # assignment back to where it was. The original room/building are derived from
-    # from_bed (the transfer stores no from_room/from_building of its own).
+    # [#l362nf]
     frappe.db.set_value("Bed", doc.to_bed, "status", "Available")
     frappe.db.set_value("Bed", doc.from_bed, "status", "Occupied")
 
@@ -78,8 +74,7 @@ def on_cancel(doc, method=None):
     from_building = (
         frappe.db.get_value("Room", from_room, "building") if from_room else None
     )
-    # Only revert the assignment if it still points at this transfer's target; a later
-    # transfer or check-out may have moved it on, and we must not clobber that state.
+    # [#egcusl]
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
     if assignment.bed == doc.to_bed:
         assignment.db_set("bed", doc.from_bed)

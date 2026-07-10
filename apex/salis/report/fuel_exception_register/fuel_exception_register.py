@@ -34,9 +34,7 @@ def execute(filters=None):
         elif to_date:
             query_filters["creation"] = ["<=", to_date]
 
-    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
-    # list gets via permission_query_conditions; re-apply the caller's project scope
-    # (Fuel Exception Case carries a direct project); oversight roles see all.
+    # [#sjjexz]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:

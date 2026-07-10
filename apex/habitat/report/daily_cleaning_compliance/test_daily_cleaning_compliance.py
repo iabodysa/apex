@@ -32,8 +32,7 @@ class TestDailyCleaningCompliance(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # Two rooms so the compliance denominator is 2 (one cleaned, one skipped
-        # -> a stable 50% the report must reproduce from the ledger).
+        # [#i6i436]
         self.room_a = frappe.get_doc(
             {
                 "doctype": "Room",
@@ -82,15 +81,12 @@ class TestDailyCleaningCompliance(FrappeTestCase):
 
         before = self._row_for_log(log.name)
         self.assertIsNotNone(before, "the submitted log must appear in the report")
-        # 1 of 2 rooms cleaned (the Skipped room is never compliant) -> 50%.
+        # [#27ldjw]
         self.assertEqual(before["rooms_total"], 2)
         self.assertEqual(before["rooms_cleaned"], 1)
         self.assertEqual(before["compliance_pct"], 50.0)
 
-        # Cancel the source: a mutable report would now show a different (or empty)
-        # value. The ledger posts a reversal flagging both rows is_cancelled, so the
-        # live window nets the log out -> it must disappear from the live report,
-        # while the ledger ORIGINAL row (the historical fact) is preserved for audit.
+        # [#ck0eeu]
         log.cancel()
 
         after = self._row_for_log(log.name)
@@ -99,9 +95,7 @@ class TestDailyCleaningCompliance(FrappeTestCase):
             "a cancelled log nets out of the live compliance window (reversed, not deleted)",
         )
 
-        # Non-retroactivity proof: the ORIGINAL ledger fact still exists unchanged
-        # (preserved for audit) — the cancel reversed via a mirror row, never
-        # rewrote or deleted the snapshotted compliance fact.
+        # [#c80m2e]
         originals = frappe.get_all(
             "Cleaning Compliance Ledger",
             filters={"cleaning_log": log.name, "reversal_of": ["is", "not set"]},
@@ -121,8 +115,7 @@ class TestDailyCleaningCompliance(FrappeTestCase):
         before = self._row_for_log(log.name)
         self.assertEqual(before["compliance_pct"], 50.0)
 
-        # Tamper with the live child rows directly (no re-submit, so no re-post):
-        # flip the skipped room's cleaned flag on the live doc's DB row.
+        # [#6acipq]
         skipped = next(r for r in log.room_details if r.room == self.room_b)
         frappe.db.set_value("Cleaning Log Room Detail", skipped.name, "cleaned", 1)
 

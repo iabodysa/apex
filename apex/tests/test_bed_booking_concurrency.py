@@ -52,10 +52,7 @@ ASSIGNMENT_CONTROLLER = os.path.normpath(
 )
 
 # [#1od4cm]
-# The row-lock guard may be written either as raw SQL ("SELECT ... FOR UPDATE")
-# or via the query builder ("frappe.qb...for_update()"). Accept BOTH markers so the
-# guard survives the P-209 frappe.qb port without weakening — it still fails if the
-# lock is removed entirely.
+# [#eevlkq]
 LOCK_MARKERS = ("for_update(", "FOR UPDATE")
 
 

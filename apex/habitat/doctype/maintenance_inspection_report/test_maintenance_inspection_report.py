@@ -70,7 +70,7 @@ class TestMaintenanceInspectionAssetStamp(FrappeTestCase):
         return frappe.generate_hash(length=12).upper()
 
     def setUp(self):
-        # Real prerequisites so submit() (which cannot ignore_links) runs in full.
+        # [#ezpps1]
         self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
@@ -112,10 +112,10 @@ class TestMaintenanceInspectionAssetStamp(FrappeTestCase):
 
     def test_only_most_recent_date_wins(self):
         self._report("2026-06-10", self.asset).submit()
-        # A newer report advances the stamp.
+        # [#1vsi17]
         self._report("2026-06-20", self.asset).submit()
         self.assertEqual(str(self._stamp()), "2026-06-20")
-        # An older report must NOT roll the stamp back.
+        # [#pa6wzt]
         self._report("2026-06-01", self.asset).submit()
         self.assertEqual(str(self._stamp()), "2026-06-20")
 
@@ -124,7 +124,7 @@ class TestMaintenanceInspectionAssetStamp(FrappeTestCase):
         newest = self._report("2026-06-20", self.asset)
         newest.submit()
         self.assertEqual(str(self._stamp()), "2026-06-20")
-        # Cancelling the newest falls back to the next-latest submitted inspection.
+        # [#1amfza]
         newest.cancellation_reason = "test"
         newest.cancel()
         self.assertEqual(str(self._stamp()), "2026-06-10")
@@ -138,7 +138,7 @@ class TestMaintenanceInspectionAssetStamp(FrappeTestCase):
         self.assertIsNone(self._stamp())
 
     def test_report_without_asset_is_noop(self):
-        # No facility_asset -> submit/cancel must not error and must not touch the asset.
+        # [#hhy0lr]
         r = self._report("2026-06-15", None)
         r.submit()
         self.assertIsNone(self._stamp())

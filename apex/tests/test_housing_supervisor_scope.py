@@ -97,7 +97,7 @@ class TestHousingSupervisorScope(FrappeTestCase):
         with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
             P, "_allowed_buildings", return_value=["BLDG-1"]
         ), patch.object(R.frappe, "get_all", return_value=[]) as ga:
-            # In-scope filter narrows to that building; out-of-scope filter yields nothing.
+            # [#4k5sed]
             R._get_buildings("BLDG-1")
             self.assertEqual(ga.call_args.kwargs["filters"]["name"], ["in", ["BLDG-1"]])
             self.assertEqual(R._get_buildings("BLDG-9"), [])
@@ -117,7 +117,7 @@ class TestHousingSupervisorScope(FrappeTestCase):
             self.assertEqual(ga.call_args.kwargs["filters"], {"status": "Active"})
 
     def test_report_scope_gap_returns_guidance_message(self):
-        # A scoped user with zero buildings gets an explicit message, not a blank grid.
+        # [#tv0nth]
         with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
             P, "_allowed_buildings", return_value=[]
         ):
@@ -129,7 +129,7 @@ class TestHousingSupervisorScope(FrappeTestCase):
             self.assertTrue(message)
 
     def test_report_empty_estate_has_no_scope_message(self):
-        # An unscoped role with zero active buildings is a normal empty result, not a gap.
+        # [#g7f8z2]
         with patch.object(P, "_building_is_unscoped", return_value=True), patch.object(
             R.frappe, "get_all", return_value=[]
         ):
@@ -138,7 +138,7 @@ class TestHousingSupervisorScope(FrappeTestCase):
             self.assertEqual(res[1], [])
 
     def test_report_out_of_scope_filter_is_not_a_gap(self):
-        # An explicit out-of-scope building filter is a normal empty filter, no guidance.
+        # [#qt0f5b]
         with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
             P, "_allowed_buildings", return_value=["BLDG-1"]
         ):

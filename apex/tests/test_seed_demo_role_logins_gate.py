@@ -26,12 +26,7 @@ from apex.patches.v1_x import seed_demo_role_logins as seed
 
 class TestSeedDemoRoleLoginsGate(FrappeTestCase):
     def test_production_migrate_seeds_nothing(self):
-        # developer_mode off => execute() must return before any seeding work.
-        # Mock every persona helper: if the gate failed to short-circuit, one of
-        # these would be called and the assertion below would catch it.
-        # Swap the whole conf for a frappe._dict (what the real conf is) so the
-        # gate's .get("developer_mode") AND any deeper attribute read (the DB
-        # layer touches frappe.conf.allow_tests) resolve without raising.
+        # [#9xrhnc]
         with patch.object(
             seed.frappe, "conf", new=frappe._dict(developer_mode=None)
         ), patch.object(seed, "resolve_company_or_any") as company, patch.object(
@@ -47,10 +42,7 @@ class TestSeedDemoRoleLoginsGate(FrappeTestCase):
             )
 
     def test_dev_site_passes_the_developer_mode_gate(self):
-        # developer_mode on => execute() falls through the gate to the next guard
-        # (the DocType-existence check). Mock that check to fail so we stop right
-        # after the gate without writing rows, and assert the gate was crossed by
-        # confirming the DocType-existence check actually ran.
+        # [#l13w0j]
         with patch.object(
             seed.frappe, "conf", new=frappe._dict(developer_mode=1)
         ), patch.object(
@@ -68,12 +60,7 @@ class TestSeedDemoRoleLoginsGate(FrappeTestCase):
         )
 
     def test_dev_site_returns_both_login_recipes(self):
-        # developer_mode on + all DocTypes present + a company => execute() seeds
-        # both personas and returns the login recipes. Every record-writing helper
-        # is mocked and commit is stubbed, so the test asserts the returned recipe
-        # shape (the goal's per-persona login output) without touching the DB. The
-        # employee seeder returns the minted Masar token, which must surface in the
-        # masar_link.
+        # [#jc2zqp]
         with patch.object(
             seed.frappe, "conf", new=frappe._dict(developer_mode=1)
         ), patch.object(seed.frappe.db, "exists", return_value=True), patch.object(
@@ -101,5 +88,5 @@ class TestSeedDemoRoleLoginsGate(FrappeTestCase):
         emp = result["employee"]
         self.assertEqual(emp["email"], seed._EMP_USER)
         self.assertEqual(emp["password"], seed._DEMO_PASSWORD)
-        # The minted token funnels into the personal Masar link (the recipe).
+        # [#mras1v]
         self.assertEqual(emp["masar_link"], "http://demo.localhost/masar?w=tok_demo_123")

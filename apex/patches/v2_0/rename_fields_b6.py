@@ -24,9 +24,9 @@ column conversion is needed (rename_field does not convert types).
 import frappe
 from frappe.model.utils.rename_field import rename_field
 
-# (doctype, old_fieldname, new_fieldname) — POST-B7 DocType names.
+# [#40nwer]
 RENAMES = [
-    # --- named prefix / clarity renames ---
+    # [#g81ni1]
     ("Lease", "supplier", "landlord"),
     ("Housing Checkout", "linked_additional_salary", "additional_salary_deduction"),
     ("Housing Inventory", "linked_facility_asset", "facility_asset"),
@@ -41,11 +41,11 @@ RENAMES = [
     ("Facility Asset Movement Ledger", "moved_by", "moved_by_user"),
     ("Facility Asset Movement Ledger", "posting_date", "posting_datetime"),
     ("Idle Resident Report", "estimated_accommodation_cost_bleed_sar", "estimated_cost_bleed"),
-    # --- responsible-supervisor family unification (3 names -> responsible_supervisor) ---
+    # [#6ednk7]
     ("Building", "responsible_facility_supervisor", "responsible_supervisor"),
     ("Housing Assignment", "responsible_facility_supervisor", "responsible_supervisor"),
     ("Operations Alert", "project_supervisor", "responsible_supervisor"),
-    # --- _sar suffix family (drop suffix; labels retain "(SAR)") ---
+    # [#a5m6jv]
     ("Employee Deduction Acknowledgment", "amount_sar", "amount"),
     ("Salary Deduction Type Rule", "cap_amount_per_event_sar", "cap_amount_per_event"),
     ("Salis Settings", "cost_recovery_ops_threshold_sar", "cost_recovery_ops_threshold"),
@@ -82,11 +82,11 @@ RENAMES = [
 def execute():
     for doctype, old, new in RENAMES:
         if not frappe.db.exists("DocType", doctype):
-            continue  # fresh cut without this DocType — nothing to rename
+            continue  # [#pn24hb]
         meta = frappe.get_meta(doctype, cached=False)
         if not meta.get_field(new):
-            continue  # new column not synced (unexpected) — skip rather than error
+            continue  # [#b8jt6p]
         if not meta.issingle and not frappe.db.has_column(doctype, old):
-            continue  # fresh install / already renamed — old column gone
+            continue  # [#kiuez4]
         rename_field(doctype, old, new)
     frappe.clear_cache()

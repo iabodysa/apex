@@ -22,16 +22,14 @@ def execute(filters=None):
             if filters.get(field):
                 query_filters[field] = filters[field]
 
-    # get_all forces ignore_permissions, so the row-scoping the desk list gets via
-    # permission_query_conditions is bypassed here — re-apply the caller's project
-    # scope (Salis Vehicle carries a direct project); oversight roles see all.
+    # [#q0owts]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:
             return columns, []
         chosen = query_filters.get("project")
         if chosen and chosen not in allowed:
-            # an explicit out-of-scope project filter resolves to nothing
+            # [#k0ydtq]
             return columns, []
         if not chosen:
             query_filters["project"] = ["in", allowed]

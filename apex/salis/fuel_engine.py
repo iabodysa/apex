@@ -36,10 +36,7 @@ ALERT_DOCTYPE = "Operations Alert"
 BATCH_SIZE = 500
 
 # [#cz8o6i]
-# Default fraction by which actual consumption may exceed the monthly fuel quota
-# before an overage alert is raised. The effective value is read at call time from
-# Salis Settings (fuel_overage_margin_percent, an Int percent) via get_overage_margin;
-# this literal (5% -> 0.05) is the zero-trap fallback when the setting is unset.
+# [#h0ikjm]
 OVERAGE_MARGIN = 0.05
 OVERAGE_MARGIN_DEFAULT_PERCENT = 5
 
@@ -207,9 +204,7 @@ def accrue_fuel_consumption() -> None:
             break
 
         for log in logs:
-            # [#sp1dly] savepoint per row: a failing row rolls back ONLY itself;
-            # a bare frappe.db.rollback() would discard every sibling already
-            # ledgered in this same request transaction.
+            # [#p0ja2i]
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:
@@ -237,12 +232,7 @@ def accrue_fuel_consumption() -> None:
         start += BATCH_SIZE
 
     # [#hn7dnn]
-    # [#sp2trm] A row that deterministically fails to ledger stays ledgered=0,
-    # so re-querying the ledgered=0 set alone could spin forever (pinning CPU and
-    # — with the old whole-transaction rollback — zeroing the day's accrual). Track
-    # the names already attempted-and-failed and exclude them from the next query,
-    # so the working set strictly shrinks and the loop always terminates: a bad row
-    # is attempted once, then skipped.
+    # [#b85wxg]
     failed_names: set[str] = set()
     while True:
         filters = {
@@ -264,9 +254,7 @@ def accrue_fuel_consumption() -> None:
 
         progressed = False
         for req in requests:
-            # [#sp1dly] savepoint per row — failing row rolls back only itself,
-            # so a sibling's ledger insert + ledgered=1 flag in this same request
-            # transaction survive (the old bare rollback discarded them all).
+            # [#8xmm6h]
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:
@@ -300,7 +288,7 @@ def accrue_fuel_consumption() -> None:
                 progressed = True
             except Exception:
                 frappe.db.rollback(save_point=sp)
-                # [#sp2trm] remember the failure so it can't be re-queried forever
+                # [#mtmmhw]
                 failed_names.add(req.name)
                 frappe.log_error(
                     message=frappe.get_traceback(),
@@ -379,8 +367,7 @@ def monthly_fuel_reconciliation() -> None:
             break
 
         for quota in quotas:
-            # [#sp1dly] savepoint per row — isolate a failing alert insert so the
-            # other quotas reconciled in this run are not rolled back with it.
+            # [#gq48n8]
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:

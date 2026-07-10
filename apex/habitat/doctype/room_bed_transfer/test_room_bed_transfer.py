@@ -103,7 +103,7 @@ class TestRoomBedTransfer(FrappeTestCase):
             "doctype": "Room", "naming_series": "ROOM-.####",
             "room_number": "NB" + self._h(), "bed_capacity": 1,
             "readiness_status": "Ready"}).insert(ignore_permissions=True, ignore_mandatory=True).name
-        # Be certain the guard sees an unset building even if a default crept in.
+        # [#oaye3k]
         frappe.db.set_value("Room", no_bldg_room, "building", None, update_modified=False)
         no_bldg_bed = frappe.get_doc({
             "doctype": "Bed", "naming_series": "BED-.####", "room": no_bldg_room,
@@ -136,7 +136,7 @@ class TestRoomBedTransfer(FrappeTestCase):
             "status": "Available"}).insert(ignore_permissions=True).name
 
         asg = frappe.get_doc("Housing Assignment", fx.assignment)
-        asg.submit()  # origin bed -> Occupied, assignment active (checked-in)
+        asg.submit()  # [#tcwzyx]
 
         transfer = frappe.get_doc({
             "doctype": "Room Bed Transfer",

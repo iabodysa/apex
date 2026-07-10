@@ -25,22 +25,19 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
 )
 from apex.salis.api import masar
 
-# Employee.status values the resolver fails closed on, verbatim from
-# _resolve_worker ("Inactive", "Left"); "Active" is the standard happy-path value
-# proven insertable by tests/factories.make_employee.
+# [#bwkatw]
 BLOCKED_STATUSES = ("Inactive", "Left")
 
 
 class TestMasarWorkerTokenAuth(FrappeTestCase):
     def setUp(self):
-        # Build fixtures as Administrator; restore in tearDown so a changed user
-        # never leaks into another test.
+        # [#6tz8cy]
         frappe.set_user("Administrator")
 
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # fixtures
+    # [#kjq1ae]
 
     def _company(self):
         """A usable Company on this site (global default, else any)."""
@@ -76,8 +73,7 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
         doc = frappe.get_doc(
             {
                 "doctype": "Masar Worker Token",
-                # autoname is field:party, so party must be set before insert; the
-                # token's party IS the Employee (party_type Employee).
+                # [#627eic]
                 "party_type": "Employee",
                 "party": employee,
                 "employee": employee,
@@ -88,7 +84,7 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
         self.assertEqual(doc.employee, employee, "fixture sanity: token bound to the employee")
         return doc._plaintext_token
 
-    # the contract
+    # [#50ls4h]
 
     def test_token_resolves_to_only_its_own_employee(self):
         """Two seeded workers, two tokens: token A resolves to A and ONLY A —
@@ -99,16 +95,16 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
         token_a = self._make_token(emp_a)
         token_b = self._make_token(emp_b)
 
-        # Non-vacuous: the seed produced two distinct workers + two distinct tokens.
+        # [#5idrd4]
         self.assertNotEqual(emp_a, emp_b)
         self.assertNotEqual(token_a, token_b)
 
-        # The resolver itself (the SOLE authorization chokepoint) is exactly scoped.
+        # [#munz7x]
         self.assertEqual(masar._resolve_worker(token_a), emp_a)
         self.assertNotEqual(masar._resolve_worker(token_a), emp_b)
         self.assertEqual(masar._resolve_worker(token_b), emp_b)
 
-        # And the public guest endpoint returns ONLY employee A for token A.
+        # [#m2u9u0]
         ctx = masar.get_worker_context(token=token_a)
         self.assertEqual(ctx["employee"], emp_a, "get_worker_context must scope to token's worker")
         self.assertNotEqual(ctx["employee"], emp_b, "must never return the other worker")
@@ -125,8 +121,7 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
     def test_unknown_token_is_rejected(self):
         """A well-formed but non-existent token must 403 (no row -> fail closed)."""
         bogus = frappe.generate_hash(length=48)
-        # Non-vacuous: confirm this token's HASH genuinely matches no row (the resolver
-        # looks up by hash) before asserting it is rejected.
+        # [#601y4f]
         self.assertFalse(frappe.db.exists("Masar Worker Token", {"token": _hash_token(bogus)}))
         with self.assertRaises(frappe.PermissionError):
             masar._resolve_worker(bogus)
@@ -138,9 +133,7 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
         403, even though its Employee is a real, Active worker."""
         emp = self._make_employee("disabled")
         token = self._make_token(emp, enabled=0)
-        # Non-vacuous: the row exists and is bound to the worker — it is the
-        # enabled flag alone that must close the door. (Lookup by employee: the row
-        # stores the token's HASH, not the raw value returned by _make_token.)
+        # [#azg80h]
         self.assertEqual(
             frappe.db.get_value("Masar Worker Token", {"employee": emp}, "enabled"),
             0,
@@ -161,7 +154,7 @@ class TestMasarWorkerTokenAuth(FrappeTestCase):
             emp = self._make_employee(status.lower())
             token = self._make_token(emp, enabled=1)
             frappe.db.set_value("Employee", emp, "status", status)
-            # Non-vacuous: the worker really now carries the blocked status.
+            # [#gm5t3b]
             self.assertEqual(
                 frappe.db.get_value("Employee", emp, "status"),
                 status,
@@ -226,7 +219,7 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
             }
         ).insert(ignore_permissions=True)
 
-    # T-629 — TTL enforcement
+    # [#rtd33z]
 
     def test_fresh_token_carries_a_future_expiry(self):
         """A minted token gets a future ``expires_on`` (the TTL is stamped on insert),
@@ -239,9 +232,7 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
             frappe.utils.now_datetime(),
             "a fresh token's expiry must be in the future",
         )
-        # A currently-valid (un-expired) link resolves exactly as before. The raw
-        # token (baked into the /masar link) is available transiently after mint; the
-        # row stores only its hash (P-104).
+        # [#qx3e71]
         self.assertEqual(masar._resolve_worker(doc._plaintext_token), emp)
 
     def test_expired_token_is_refused(self):
@@ -249,8 +240,7 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
         even though the row exists, is enabled, and points at an Active worker."""
         emp = self._worker("expired")
         doc = self._token_doc(emp)
-        # Force the expiry into the past (direct DB write — exercises exactly the
-        # expires_on read the resolver performs, no dependency on TTL maths).
+        # [#dpfkek]
         frappe.db.set_value(
             "Masar Worker Token",
             doc.name,
@@ -258,7 +248,7 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
             frappe.utils.add_to_date(frappe.utils.now_datetime(), days=-1),
             update_modified=False,
         )
-        # Non-vacuous: the row is still enabled + bound to an Active worker.
+        # [#c52dtf]
         self.assertEqual(frappe.db.get_value("Masar Worker Token", doc.name, "enabled"), 1)
         with self.assertRaises(frappe.PermissionError):
             masar._resolve_worker(doc._plaintext_token)
@@ -299,10 +289,10 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
             frappe.utils.now_datetime(),
             "the backfilled expiry must be in the future (link not instantly expired)",
         )
-        # The currently-distributed link still resolves after the backfill.
+        # [#har8a2]
         self.assertEqual(masar._resolve_worker(token), emp)
 
-    # T-628 — every guest token endpoint is rate-limited
+    # [#bxst8b]
 
     def test_every_guest_worker_endpoint_carries_a_rate_limit(self):
         """Each ``@frappe.whitelist(allow_guest=True)`` worker endpoint that resolves a
@@ -332,7 +322,7 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
                 f"{fn.__name__} must be wrapped by @rate_limit (brute-force throttle)",
             )
 
-    # T-662 — token field is permlevel-restricted
+    # [#l08uie]
 
     def test_token_field_is_permlevel_one(self):
         """The ``token`` Data field sits at permlevel 1, so a role without a permlevel-1
@@ -343,7 +333,7 @@ class TestMasarWorkerTokenSecurityHardening(FrappeTestCase):
         self.assertIsNotNone(field, "token field must exist")
         self.assertEqual(field.permlevel, 1, "token must be at permlevel 1 (T-662)")
 
-        # Only the high roles carry a permlevel-1 read; the low roles do not.
+        # [#eezxp6]
         high = {
             p.role
             for p in meta.permissions
@@ -422,7 +412,7 @@ class TestMasarTokenTransport(FrappeTestCase):
             }
         ).insert(ignore_permissions=True)._plaintext_token
         frappe.local.request = self._Req({"masar_wt": token})
-        # No token arg supplied -> the resolver falls back to the cookie.
+        # [#jeguz7]
         self.assertEqual(masar._resolve_worker(None), emp)
 
 
@@ -487,17 +477,16 @@ class TestMasarNotifyHrIqamaExpiring(FrappeTestCase):
         """Iqama 15 days out (<= 30): the endpoint raises a Notification Log to the
         HR inbox, scoped to this worker, and reports notified=True."""
         employee, token = self._worker_with_iqama_in("soon", 15)
-        # Non-vacuous: no HR notification exists for this fresh worker yet.
+        # [#an6uqe]
         self.assertEqual(self._hr_notifications_for(employee), 0)
-        # Non-vacuous: HR Manager (fallback System Manager) has at least one user,
-        # else the notification has no destination and the test proves nothing.
+        # [#t9qxl7]
         self.assertTrue(masar._hr_notify_recipients(), "an HR inbox recipient must exist")
 
         res = masar.notify_hr_iqama_expiring(token=token)
         self.assertTrue(res["notified"], "an in-window Iqama must notify HR")
         self.assertEqual(res["days_left"], 15)
         self.assertGreaterEqual(res["recipients"], 1)
-        # The native HR notification row was actually created for THIS worker.
+        # [#d0135r]
         self.assertGreaterEqual(
             self._hr_notifications_for(employee), 1, "an HR Notification Log row must exist"
         )
@@ -506,8 +495,7 @@ class TestMasarNotifyHrIqamaExpiring(FrappeTestCase):
         """Iqama 200 days out (> 30): the same token resolves, but the endpoint
         raises NOTHING and reports notified=False — no HR row is created."""
         employee, token = self._worker_with_iqama_in("later", 200)
-        # The token is genuinely valid (resolves to this worker) — only the window
-        # closes the action, not a bad token.
+        # [#2s7h4d]
         self.assertEqual(masar._resolve_worker(token), employee)
 
         res = masar.notify_hr_iqama_expiring(token=token)
@@ -571,7 +559,7 @@ class TestMasarEmployeeOnlyDecision(FrappeTestCase):
                     "enabled": 1,
                 }
             ).insert(ignore_permissions=True)
-        # Non-vacuous: the guard, not a missing party, blocked it — no row landed.
+        # [#eug3ep]
         self.assertFalse(
             frappe.db.exists("Masar Worker Token", {"party_type": "Temporary Worker", "party": tw.name}),
             "no Temporary-Worker token row may be created",
@@ -583,11 +571,7 @@ class TestMasarEmployeeOnlyDecision(FrappeTestCase):
         the generic invalid/disabled one — and resolves to no employee."""
         tw = self._make_temporary_worker("resolve")
         forced_token = frappe.generate_hash(length=48)
-        # db_insert bypasses the controller guard + autoname, mirroring a row that
-        # predates the Employee-only enforcement; party_type is the temp worker and
-        # employee is empty exactly as sync_party_employee leaves it. The token column
-        # stores the HASH (P-104), so the resolver — which hashes the presented value —
-        # matches this row when handed the raw forced_token.
+        # [#4ziom4]
         doc = frappe.get_doc(
             {
                 "doctype": "Masar Worker Token",
@@ -600,7 +584,7 @@ class TestMasarEmployeeOnlyDecision(FrappeTestCase):
             }
         )
         doc.db_insert()
-        # Non-vacuous: the row genuinely exists, is enabled, and has no employee.
+        # [#bqonxo]
         row = frappe.db.get_value(
             "Masar Worker Token",
             {"token": _hash_token(forced_token)},
@@ -613,11 +597,11 @@ class TestMasarEmployeeOnlyDecision(FrappeTestCase):
 
         with self.assertRaises(frappe.PermissionError) as ctx:
             masar._resolve_worker(forced_token)
-        # The message is the honest temp-worker one, distinct from invalid/disabled.
+        # [#9uulji]
         self.assertIn("not linked to a permanent Employee", str(ctx.exception))
         self.assertNotIn("invalid or has been disabled", str(ctx.exception))
 
-        # And the public guest endpoint fails closed the same way (no data leak).
+        # [#gbwobw]
         with self.assertRaises(frappe.PermissionError):
             masar.get_worker_context(token=forced_token)
 
@@ -670,7 +654,7 @@ class TestMasarWorkerTokenAutoname(FrappeTestCase):
         doc = frappe.get_doc(
             {"doctype": "Masar Worker Token", "employee": emp}
         ).insert(ignore_permissions=True)
-        # Named off party (== employee) and the mirror fields were back-filled.
+        # [#hr7zks]
         self.assertEqual(doc.name, emp, "token must autoname to the employee via field:party")
         self.assertEqual(doc.party, emp)
         self.assertEqual(doc.party_type, "Employee")
@@ -681,13 +665,13 @@ class TestMasarWorkerTokenAutoname(FrappeTestCase):
         """get_or_create_for_employee inserts {doctype, employee} with no party; it
         must succeed for a brand-new Employee and return the named token row."""
         emp = self._make_employee("goc")
-        # Non-vacuous: no token row exists for this fresh worker yet.
+        # [#tetcl6]
         self.assertFalse(frappe.db.exists("Masar Worker Token", {"employee": emp}))
         doc = get_or_create_for_employee(emp)
         self.assertEqual(doc.employee, emp)
         self.assertEqual(doc.name, emp)
         self.assertEqual(doc.party, emp)
         self.assertTrue(frappe.db.exists("Masar Worker Token", {"employee": emp}))
-        # Idempotent: a second call returns the same row, not a duplicate.
+        # [#4guxi0]
         again = get_or_create_for_employee(emp)
         self.assertEqual(again.name, doc.name)

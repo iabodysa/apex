@@ -25,11 +25,10 @@ _DOCTYPE = "Building"
 
 
 def execute():
-    # Resolver from the native Address DocType; returns an Address name or None.
+    # [#9e7cws]
     from frappe.contacts.doctype.address.address import get_default_address
 
-    # Only consider rows where the target field is unset — keeps the backfill scoped
-    # and the loop a no-op once every building already carries its address.
+    # [#s244rl]
     buildings = frappe.get_all(
         _DOCTYPE,
         filters={"building_address": ["in", [None, ""]]},
@@ -43,7 +42,7 @@ def execute():
 
     for name in buildings:
         default_address = get_default_address(_DOCTYPE, name)
-        # No resolvable default Address -> leave the building untouched (legitimate).
+        # [#g4df5s]
         if not default_address:
             skipped += 1
             continue

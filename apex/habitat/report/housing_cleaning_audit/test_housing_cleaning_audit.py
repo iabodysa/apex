@@ -33,8 +33,7 @@ class TestHousingCleaningAudit(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # Two rooms: one cleaned, one skipped -> a stable rooms_cleaned of 1 that
-        # the report must reproduce from the ledger.
+        # [#c2rby7]
         self.room_a = frappe.get_doc(
             {
                 "doctype": "Room",
@@ -75,9 +74,7 @@ class TestHousingCleaningAudit(FrappeTestCase):
 
     def _row_for_log(self, log_name, building):
         _columns, data = execute({"from_date": today(), "to_date": today(), "building": building})[:2]
-        # The real (non-synthetic) row is the one whose building matches and whose
-        # rooms_cleaned was sourced from the ledger; match on building + a non-Missed
-        # status (the live log row), since synthetic gap rows carry Missed/0.
+        # [#jdlrv3]
         return next(
             (r for r in data if r["building"] == building and r["status"] != "Missed"),
             None,
@@ -93,8 +90,7 @@ class TestHousingCleaningAudit(FrappeTestCase):
         self.assertIsNotNone(before, "the submitted log must appear in the report")
         self.assertEqual(before["rooms_cleaned"], 1)
 
-        # Tamper with the live child rows directly (no re-submit, so no re-post):
-        # flip the skipped room's cleaned flag on the live doc's DB row.
+        # [#6acipq]
         skipped = next(r for r in log.room_details if r.room == self.room_b)
         frappe.db.set_value("Cleaning Log Room Detail", skipped.name, "cleaned", 1)
 
@@ -112,12 +108,10 @@ class TestHousingCleaningAudit(FrappeTestCase):
         before = self._row_for_log(log.name, self.building)
         self.assertEqual(before["rooms_cleaned"], 1)
 
-        # Cancel the source: the ledger posts a reversal flagging both rows
-        # is_cancelled, so the log nets out of the LIVE count.
+        # [#ny2fpa]
         log.cancel()
 
-        # Non-retroactivity proof: the ORIGINAL ledger fact still exists unchanged
-        # (preserved for audit).
+        # [#p30fz1]
         originals = frappe.get_all(
             "Cleaning Compliance Ledger",
             filters={"cleaning_log": log.name, "reversal_of": ["is", "not set"]},

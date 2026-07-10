@@ -34,7 +34,7 @@ from apex.apex_core.utils.company import company_for_trip
 
 LEDGER_DOCTYPE = "Trip Boarding Ledger"
 
-# Trip Boarding State statuses that are a final, postable outcome at finalize.
+# [#kr4uph]
 TERMINAL_OUTCOMES = ("Boarded", "Absent")
 
 
@@ -145,15 +145,13 @@ def post_trip_boarding(dispatch_trip: str) -> int:
     for row in rows:
         if row.status not in TERMINAL_OUTCOMES or not row.employee:
             continue
-        # savepoint per row: a failing row rolls back ONLY itself; a bare rollback
-        # would discard every sibling already posted in this same transaction.
+        # [#dzuxnf]
         sp = "boarding_row"
         frappe.db.savepoint(sp)
         try:
             if _ledger_exists(dispatch_trip, row.employee):
                 continue
-            # boarded_at: the worker's self-claim instant when present (the closest
-            # per-worker boarding timestamp the state carries); None for Absent.
+            # [#fknnny]
             boarded_at = (
                 row.worker_claim_at if row.status == "Boarded" else None
             )
@@ -236,8 +234,7 @@ def reverse_trip_boarding(dispatch_trip: str) -> int:
                 "reversal_of": row.name,
             }
         ).insert(ignore_permissions=True)  # audit-ok
-        # Flag the original via a direct DB write: the controller blocks ORM
-        # re-saves of a posted row, so the reversal never edits it through save().
+        # [#d4e60z]
         frappe.db.set_value(
             LEDGER_DOCTYPE, row.name, "is_cancelled", 1, update_modified=False
         )

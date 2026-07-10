@@ -54,10 +54,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
             proj.insert(ignore_permissions=True)
             self.project = proj.name
 
-        # Reuse only an employee whose joining date is on/before the salary
-        # assignment's from_date (2026-01-01); a foreign test employee that joined
-        # "today" would make the hardcoded assignment fail (joining-after-from_date),
-        # so fall through and provision our own with a safe joining date.
+        # [#qutlss]
         joined_filter = ["<=", "2026-01-01"]
         self.employee = frappe.db.get_value(
             "Employee", {"company": self.company, "date_of_joining": joined_filter}
@@ -124,15 +121,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         else:
             self.article = existing_article
 
-        # [#9ztpd7] A submitted Salary Structure Assignment is the precondition
-        # HRMS's Additional Salary checks on submit (validate_salary_structure); a
-        # bare site has none, so build one here. Everything is bound to the
-        # EMPLOYEE's own company (not self.company, which can differ across test
-        # classes on a shared site) so the assignment's company == structure's
-        # company == employee's company and HRMS validate_company holds. The
-        # structure carries one Earning (required to submit) and no tax component
-        # (so no Income Tax Slab is demanded); from_date precedes any test
-        # payroll_date.
+        # [#n6bzms]
         emp_company = frappe.db.get_value("Employee", self.employee, "company")
 
         earn_component = "Apex Habitat Test Earning"
@@ -181,9 +170,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         # [#t393jb]
         # [#b0j60b]
         frappe.db.delete("Salary Component", {"type": "Deduction"})
-        # enabled rule, no component (and no default) -> controller skips, no entry.
-        # bypass_validate because the Policy guard would normally reject saving an
-        # enabled rule with no component; here we exercise the controller's own guard.
+        # [#2he1br]
         _configure_damage_policy(enabled=1, cap=500, salary_component=None, bypass_validate=True)
 
         # [#cvlsab]
@@ -208,8 +195,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
         self.assertIsNone(doc.deduction_entry, "Additional Salary deduction should not be generated without configured deduction Salary Component.")
 
     def test_damage_deduction_back_propagates_to_source_checkout(self):
-        # back-link from the assessment to its checkout must post the deduction
-        # (Additional Salary + amount) onto the checkout's Financials tab
+        # [#39ks8b]
         comp_name = "Test Deduction Component"
         if not frappe.db.exists("Salary Component", comp_name):
             frappe.get_doc({
@@ -220,8 +206,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
 
         _configure_damage_policy(enabled=1, cap=500, salary_component=comp_name)
 
-        # draft checkout is the back-write target; QA assignment + ignore_links
-        # keeps validate's early-return path (no full assignment chain needed)
+        # [#pniqo6]
         checkout = frappe.get_doc({
             "doctype": "Housing Checkout",
             "naming_series": "ACC-CHKOUT-.YYYY.-.####",
@@ -280,8 +265,7 @@ class TestFinancialSideEffects(ApexHabitatTestCase):
             })
             comp.insert(ignore_permissions=True)
 
-        # gate enabled, but the rule names no component (and no default) -> no entry,
-        # even though a deduction component exists in HRMS but is not wired to the rule
+        # [#itxxjq]
         _configure_damage_policy(enabled=1, cap=500, salary_component=None, bypass_validate=True)
 
         # [#cvlsab]

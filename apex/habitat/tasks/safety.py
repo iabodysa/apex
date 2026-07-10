@@ -130,7 +130,7 @@ def daily_safety_task_compliance_scan() -> None:
                     "Scheduled Task Instance", inst.name,
                     f"Scheduled task {inst.name} ({inst.template}) is overdue (was due {inst.due_date}).",
                 )
-                # [#wave3-prio] High/Critical -> Operations Alert + Safety Officer system alert.
+                # [#i4yjwa]
                 priority = _instance_priority(inst.template)
                 if priority in ("High", "Critical"):
                     msg = (
@@ -167,7 +167,7 @@ def daily_safety_task_compliance_scan() -> None:
     else:
         logger.info("daily_safety_task_compliance_scan: No overdue instances found.")
 
-    # Zero-rounds pass: active buildings with NO safety round of any cadence recently.
+    # [#r2zv02]
     ZERO_ROUNDS_WINDOW_DAYS = 7
     window_start = str(getdate(add_days(today(), -ZERO_ROUNDS_WINDOW_DAYS)))
     no_rounds = 0
@@ -198,7 +198,7 @@ def daily_safety_task_compliance_scan() -> None:
                     continue
                 label = b.building_name or b.name
                 token = f"zero-rounds::{b.name}"
-                # Token embedded so _raise_safety_alert's message-LIKE dedupe matches.
+                # [#mpm9mc]
                 msg = (
                     f"daily_safety_task_compliance_scan [{token}]: building {label} has no "
                     f"submitted Safety Round in the last {ZERO_ROUNDS_WINDOW_DAYS} days."
@@ -214,8 +214,7 @@ def daily_safety_task_compliance_scan() -> None:
                     subject=f"No recent safety round: {label}",
                     message=msg,
                 )
-                # Reach the building's own responsible supervisor: timeline note +
-                # a direct system alert (the role-wide ping above may not be them).
+                # [#76la3e]
                 _notify_operational("Building", b.name, msg)
                 _notify_user_system(
                     b.responsible_supervisor,
@@ -260,8 +259,8 @@ def weekly_safety_coverage_gate() -> None:
         return
 
     today_date = getdate(today())
-    week_start = add_days(today_date, -today_date.weekday())  # Monday
-    week_end = add_days(week_start, 6)  # Sunday
+    week_start = add_days(today_date, -today_date.weekday())  # [#sg57er]
+    week_end = add_days(week_start, 6)  # [#ezuovy]
     logger = frappe.logger()
     uncovered = 0
 
@@ -365,7 +364,7 @@ def audit_remediation_deadline_watch() -> None:
                 )
                 logger.warning(msg)
                 _notify_operational("Audit Remediation Plan", plan.name, msg)
-                # [#wave3-audit] notify the plan owner directly + the Operations Director role.
+                # [#mzdqnr]
                 if plan.internal_owner:
                     _notify_user_system(
                         plan.internal_owner,

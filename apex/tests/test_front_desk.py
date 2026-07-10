@@ -98,11 +98,11 @@ class TestSupervisorBuildings(ApexHabitatTestCase):
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         self.cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
-        # Building A: one green (available+ready) + one red (occupied) bed.
+        # [#75be1e]
         self.b_a = _make_building(self.company, self.cc)
         _make_bed(self.b_a, status="Available", readiness="Ready")
         _make_bed(self.b_a, status="Occupied", readiness="Ready")
-        # Building B: one amber (available + not-ready) bed only.
+        # [#l98vlz]
         self.b_b = _make_building(self.company, self.cc)
         _make_bed(self.b_b, status="Available", readiness="Needs Cleaning")
 
@@ -113,7 +113,7 @@ class TestSupervisorBuildings(ApexHabitatTestCase):
         with patch.object(P, "_building_is_unscoped", return_value=True):
             rows = list_supervisor_buildings()
         names = {r["building"] for r in rows}
-        # Unscoped role sees every Active building (incl. both test buildings).
+        # [#p58atc]
         self.assertIn(self.b_a, names)
         self.assertIn(self.b_b, names)
 
@@ -128,7 +128,7 @@ class TestSupervisorBuildings(ApexHabitatTestCase):
         self.assertEqual(b["blocked"], 1, "available bed in a not-ready room counts as blocked")
         self.assertEqual(b["occupied"], 0)
         self.assertEqual(b["occupancy_pct"], 0)
-        # More than one building in scope: no auto-open hint (the user must pick).
+        # [#qj24wi]
         self.assertFalse(a["auto"], "multi-building scope does not auto-open")
 
     def test_one_building_scoped_user_sees_exactly_that_one(self):
@@ -138,8 +138,7 @@ class TestSupervisorBuildings(ApexHabitatTestCase):
             rows = list_supervisor_buildings()
         self.assertEqual([r["building"] for r in rows], [self.b_a])
         self.assertEqual(rows[0]["total_beds"], 2)
-        # A single allowed building carries the auto-open hint so the Front Desk
-        # lands straight on a loaded board with no chip interaction.
+        # [#47ijnu]
         self.assertTrue(rows[0]["auto"], "one-building supervisor gets auto:true")
 
     def test_zero_building_scoped_user_sees_empty(self):
@@ -154,8 +153,7 @@ class TestSupervisorBuildings(ApexHabitatTestCase):
         titles = [r["building_title"] for r in rows]
         self.assertEqual(titles, sorted(titles))
 
-    # An empty building list has two meanings; the scope-state endpoint
-    # tells them apart so the client can show the right empty copy.
+    # [#ib55ga]
     def test_scope_state_flags_permission_gap_for_scoped_user_with_none(self):
         with patch.object(P, "_building_is_unscoped", return_value=False), patch.object(
             P, "_allowed_buildings", return_value=[]
@@ -168,7 +166,7 @@ class TestSupervisorBuildings(ApexHabitatTestCase):
         with patch.object(P, "_building_is_unscoped", return_value=True):
             state = get_buildings_scope_state()
         self.assertFalse(state["is_scoped"])
-        # The seeded test buildings are Active, so the unscoped count is positive.
+        # [#b9ac7d]
         self.assertGreaterEqual(state["active_buildings"], 2)
 
 
@@ -202,7 +200,7 @@ class TestSetRoomReadiness(ApexHabitatTestCase):
         return email
 
     def test_flip_to_ready_turns_bed_green_on_board(self):
-        # Not-ready room -> the available bed is amber on the board.
+        # [#jbp0dx]
         b = _find_bed(get_building_grid(self.building), self.bed)
         self.assertEqual(b["bed_color"], "amber")
 
@@ -210,7 +208,7 @@ class TestSetRoomReadiness(ApexHabitatTestCase):
         self.assertEqual(out["readiness_status"], "Ready")
         self.assertEqual(frappe.db.get_value("Room", self.room, "readiness_status"), "Ready")
 
-        # Board now reflects the change: the same bed is green.
+        # [#7c1btd]
         b2 = _find_bed(get_building_grid(self.building), self.bed)
         self.assertEqual(b2["bed_color"], "green", "board reflects the readiness flip")
 
@@ -219,7 +217,7 @@ class TestSetRoomReadiness(ApexHabitatTestCase):
             set_room_readiness(room=self.room, status="Sparkling")
 
     def test_read_only_role_is_refused(self):
-        # Resident Supervisor has read (not write) on Accommodation Room.
+        # [#kp2oln]
         frappe.set_user(self._user_with_roles("fd-readiness-ro@test.local", ["Resident Supervisor"]))
         try:
             with self.assertRaises(frappe.PermissionError):

@@ -25,16 +25,12 @@ class RoutePlan(Document):
         self._default_operations_requester()
 
     def on_submit(self):
-        # A plain attribute set in on_submit (which runs AFTER the doc is saved)
-        # is never written back; db_set persists the fulfilling Movement planner.
+        # [#hi89yj]
         self.db_set("movement_planner", frappe.session.user)
         self._mark_request_scheduled()
 
     def on_cancel(self):
-        # Reverse _mark_request_scheduled so a cancelled plan does not leave the
-        # Transport Request stuck in Scheduled with a stale route_plan pointer.
-        # Scheduled was driven from Approved (both docstatus 1); a forward-only
-        # Workflow cannot transition back, so use the guarded reversal helper.
+        # [#p5mqbj]
         if not self.transport_request:
             return
         revert_transport_request(

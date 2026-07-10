@@ -54,8 +54,7 @@ def _driver_with_user(full_name, user):
             .insert(ignore_permissions=True)
             .name
         )
-    # driver_user is read-only (normally fetched from employee.user_id); set it
-    # directly so the mirror has a value to propagate.
+    # [#iuqgwy]
     frappe.db.set_value("Salis Driver", name, "driver_user", user)
     return name
 

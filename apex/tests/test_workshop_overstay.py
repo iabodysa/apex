@@ -31,7 +31,7 @@ class TestWorkshopOverstay(FrappeTestCase):
             }
         ).insert(ignore_permissions=True)
         self.stop.submit()  # [#ij3jpf]
-        # submit leaves return_date NULL (vehicle now Stopped); a closed stop sets it.
+        # [#hfcyz5]
         if return_date:
             frappe.db.set_value("Vehicle Stop", self.stop.name, "return_date", return_date)
         frappe.db.delete("Operations Alert", {"vehicle": vehicle, "alert_type": "Maintenance Overdue"})
@@ -64,8 +64,7 @@ class TestWorkshopOverstay(FrappeTestCase):
         )
 
     def test_overstay_stops_counts_null_return_date(self):
-        # A freshly-submitted overstaying stop has return_date NULL; the open-stop
-        # filter must count it. Direct unit on _overstay_stops (no alert dedupe).
+        # [#th47of]
         self._vehicle_with_maintenance_stop(20)
         self.assertIsNone(
             frappe.db.get_value("Vehicle Stop", self.stop.name, "return_date"),
@@ -78,8 +77,7 @@ class TestWorkshopOverstay(FrappeTestCase):
         )
 
     def test_overstay_stops_excludes_closed_return_date(self):
-        # Non-vacuous guard: a stop whose return_date is set (workshop exit) is
-        # closed and must NOT be counted, even when stop_date is past the cutoff.
+        # [#ok46m0]
         self._vehicle_with_maintenance_stop(20, return_date=add_days(today(), -1))
         names = {r.name for r in _overstay_stops()}
         self.assertNotIn(

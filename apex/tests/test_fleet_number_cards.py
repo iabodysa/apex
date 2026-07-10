@@ -28,8 +28,7 @@ from frappe.tests.utils import FrappeTestCase
 
 APP = frappe.get_app_path("apex")
 
-# Frappe injects these onto every DocType meta-side; never flag them as missing.
-# std_fields is a list of {fieldname, fieldtype, label} dicts, so take the names.
+# [#qqbam4]
 STD_FIELDS = set(default_fields) | {f["fieldname"] for f in std_fields} | {"docstatus"}
 
 
@@ -52,14 +51,12 @@ def _filter_fieldnames(filters_json):
 
 class TestFleetNumberCardsStructure(FrappeTestCase):
     def test_document_type_card_fields_exist(self):
-        # Every filtered field (and Sum/Average aggregate field) on a
-        # Document Type card must resolve on the card's document_type, else the
-        # metric silently reads 0/blank.
+        # [#6y8upy]
         bad = []
         seen = set()
         for d in _salis_cards():
             if d.get("type") != "Document Type":
-                continue  # Custom cards (e.g. Workshop Overstay) resolve via method, covered elsewhere.
+                continue  # [#ok4k6e]
             name, dt = d.get("name"), d.get("document_type")
             seen.add(name)
             if not dt or not frappe.db.exists("DocType", dt):
@@ -75,7 +72,7 @@ class TestFleetNumberCardsStructure(FrappeTestCase):
                 agg = d.get("aggregate_function_based_on")
                 if not agg or agg not in STD_FIELDS and not meta.get_field(agg):
                     bad.append(f"{name}: {d['function']} aggregate field {dt}.{agg!r} missing")
-        # Non-vacuous: a known card must have been scanned, so a broken glob can't pass by checking nothing.
+        # [#kuiaup]
         self.assertIn("Active Vehicles", seen, "card scan found no Active Vehicles card; glob/path is broken")
         self.assertEqual(bad, [], f"Document Type cards referencing missing fields: {bad}")
 
@@ -88,9 +85,7 @@ class TestFleetNumberCardsBehaviour(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def _card_count(self, card_name):
-        # Count exactly as the Fleet Operations dashboard does: read the shipped
-        # card's own document_type + filters_json and apply them, so this fails if
-        # the filter ever drifts from the status contract it depends on.
+        # [#1up09y]
         card = frappe.get_doc("Number Card", card_name)
         return frappe.db.count(card.document_type, json.loads(card.filters_json or "[]"))
 
@@ -105,7 +100,7 @@ class TestFleetNumberCardsBehaviour(FrappeTestCase):
         ).insert(ignore_permissions=True)
 
     def test_active_vehicles_card_counts_new_active_vehicle(self):
-        # Active Vehicles filters Salis Vehicle status=Active.
+        # [#akljzu]
         before = self._card_count("Active Vehicles")
         self._vehicle("Active")
         self.assertEqual(
@@ -115,7 +110,7 @@ class TestFleetNumberCardsBehaviour(FrappeTestCase):
         )
 
     def test_under_maintenance_card_counts_new_maintenance_vehicle(self):
-        # Vehicles Under Maintenance filters Salis Vehicle status=Under Maintenance.
+        # [#6danfc]
         before = self._card_count("Vehicles Under Maintenance")
         self._vehicle("Under Maintenance")
         self.assertEqual(

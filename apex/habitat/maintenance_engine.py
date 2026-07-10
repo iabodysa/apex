@@ -87,7 +87,7 @@ def post_maintenance_cost(work_order) -> int:
     already ledgered is skipped, so re-running completion posts nothing new. Rows
     with a zero/blank estimated cost are skipped (no zero-amount memo).
     """
-    # Work Order carries no company field -> module default chain (reference only).
+    # [#4n3h8i]
     company = resolve_company("Habitat")
     posted = 0
     for detail_no, row in enumerate(work_order.procurement_items or [], start=1):

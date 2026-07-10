@@ -102,9 +102,7 @@ def _assert_source_availability(doc):
             continue
         needed[row.article] = needed.get(row.article, 0) + (row.qty or 0)
     for article, qty in needed.items():
-        # for_update: lock the store's ledger rows before reading the balance so a
-        # concurrent issue/handover/transfer draining the same store can't pass this
-        # check on a stale balance and overdraw it negative (TOCTOU).
+        # [#i43idl]
         available = get_store_balance("Custody Article", article, doc.building, for_update=True)
         if qty > available:
             frappe.throw(

@@ -29,8 +29,7 @@ APP = frappe.get_app_path("apex")
 
 
 def _names_a_page(path):
-    # A Go to Page `path` references a Desk Page record only when it is a bare
-    # slug -- not a "/" list/view route, not an "app/..." route, not a workspace.
+    # [#3yzsmq]
     if not path or "/" in path or path.startswith("app"):
         return False
     return True
@@ -38,8 +37,7 @@ def _names_a_page(path):
 
 class TestOnboardingSteps(FrappeTestCase):
     def test_onboarding_step_targets_resolve(self):
-        # Resolve each shipped step's click target by its `action`; a target that
-        # does not exist means the step opens nothing.
+        # [#5wxntk]
         bad = []
         seen_actions = set()
         for j in glob.glob(f"{APP}/**/onboarding_step/*/*.json", recursive=True):
@@ -72,8 +70,7 @@ class TestOnboardingSteps(FrappeTestCase):
         self.assertEqual(bad, [], f"onboarding step targets that do not resolve: {bad}")
 
     def test_module_onboarding_steps_exist(self):
-        # Every step referenced by a Module Onboarding must exist as a shipped /
-        # DB Onboarding Step, else the onboarding widget renders a dangling row.
+        # [#98i2xg]
         bad = []
         for j in glob.glob(f"{APP}/**/module_onboarding/*/*.json", recursive=True):
             d = json.load(open(j, encoding="utf-8"))
@@ -89,10 +86,7 @@ class TestOnboardingSteps(FrappeTestCase):
         self.assertEqual(bad, [], f"module onboarding step links that do not resolve: {bad}")
 
     def test_daily_role_tours_visible_to_their_role(self):
-        # P-144: each B5 daily-role Module Onboarding must grant its role via
-        # allow_roles, else get_allowed_roles() returns only ["System Manager"]
-        # and desktop.get_onboarding_doc hides the Getting-Started tour from the
-        # very role that needs it. Assert the role is now allowed at runtime.
+        # [#spv8v5]
         expected = {
             "Accommodation Go-Live": "Resident Supervisor",
             "Salis Fuel Setup": "Fleet Supervisor",
@@ -108,8 +102,7 @@ class TestOnboardingSteps(FrappeTestCase):
         self.assertEqual(bad, [], f"daily-role tours not visible to their role: {bad}")
 
     def test_scan_is_non_vacuous(self):
-        # A broken glob must not pass by scanning nothing: assert known records
-        # are present on disk so the checks above ran against real data.
+        # [#o04t2t]
         steps = {
             json.load(open(j, encoding="utf-8")).get("name")
             for j in glob.glob(f"{APP}/**/onboarding_step/*/*.json", recursive=True)

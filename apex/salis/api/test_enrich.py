@@ -51,27 +51,27 @@ class TestVehicleDriverTitles(FrappeTestCase):
     def test_canonical_keys_and_bulk_resolution(self):
         rows = [
             frappe._dict(vehicle="V1", driver="D1"),
-            frappe._dict(vehicle="V2", driver="D1"),  # repeats -> deduped in the lookup
-            frappe._dict(vehicle="V3", driver=None),  # missing driver
+            frappe._dict(vehicle="V2", driver="D1"),  # [#ethysd]
+            frappe._dict(vehicle="V3", driver=None),  # [#3jv2xp]
         ]
-        plates = {"V1": "AAA 111", "V2": "BBB 222"}  # V3 absent -> docname fallback
+        plates = {"V1": "AAA 111", "V2": "BBB 222"}  # [#mfz458]
         names = {"D1": "Sara Driver"}
 
         fake = _fake_get_all(plates, names)
         with patch(_GET_ALL, side_effect=fake) as mocked:
             vehicle_driver_titles(rows)
 
-        # Two bounded queries total (one per referenced DocType), never N+1.
+        # [#9ujykz]
         self.assertEqual(mocked.call_count, 2)
 
-        # Canonical key is populated; the drifted key is never written.
+        # [#ma8ylb]
         self.assertEqual(rows[0][VEHICLE_PLATE_KEY], "AAA 111")
         self.assertEqual(rows[0][DRIVER_NAME_KEY], "Sara Driver")
         self.assertNotIn("plate_number", rows[0])
 
-        # Missing-title fallback returns the docname (plate) / docname (driver).
+        # [#o3e045]
         self.assertEqual(rows[2][VEHICLE_PLATE_KEY], "V3")
-        self.assertIsNone(rows[2][DRIVER_NAME_KEY])  # no driver ref -> None passthrough
+        self.assertIsNone(rows[2][DRIVER_NAME_KEY])  # [#hlmqpa]
 
     def test_empty_rows_make_no_queries(self):
         with patch(_GET_ALL, side_effect=AssertionError("must not query")) as mocked:
@@ -100,8 +100,7 @@ class TestConsumersReadCanonicalKey(FrappeTestCase):
             )
 
     def test_no_consumer_emits_the_drifted_plate_key(self):
-        # The old alert reader wrote a["plate_number"]; the fuel reader emitted a
-        # "plate_number" map key. Neither pattern may survive in the sources.
+        # [#kzs4xr]
         for mod in (dispatch_board, fuel_console, operations_alerts):
             src = inspect.getsource(mod)
             self.assertNotIn('"plate_number"]', src, f"{mod.__name__} still assigns plate_number")

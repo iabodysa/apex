@@ -17,11 +17,7 @@ from frappe.model.document import Document
 
 
 class CleaningComplianceLedger(Document):
-    # System-written ledger: block any ORM re-save of an existing row so the audit
-    # trail is tamper-evident. The engine posts rows via insert() (flags.in_insert)
-    # and flips is_cancelled via frappe.db.set_value (bypasses controller hooks),
-    # so neither legitimate engine path trips this guard — only an edit of an
-    # already-stored row through save() does.
+    # [#gcg81b]
     def on_update(self):
         if not self.flags.in_insert and not frappe.flags.in_install:
             frappe.throw(
@@ -29,6 +25,6 @@ class CleaningComplianceLedger(Document):
             )
 
     def on_trash(self):
-        # System Manager may purge (housekeeping); no other path deletes a row.
+        # [#3ebzoj]
         if "System Manager" not in frappe.get_roles(frappe.session.user):
             frappe.throw(_("Cleaning Compliance Ledger rows cannot be deleted."))

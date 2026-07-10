@@ -12,12 +12,10 @@ import frappe
 
 def execute():
     if not frappe.db.exists("Party Type", "Freelance"):
-        # Fresh site (fixture already ships Freelancer) or already renamed.
+        # [#tbd5do]
         return
 
-    # Guard the rename target: the fixture import may already have created
-    # 'Freelancer'. Renaming onto it would collide; merge instead so existing
-    # ledger rows keyed to 'Freelance' are re-pointed at the fixture row.
+    # [#9h1l10]
     if frappe.db.exists("Party Type", "Freelancer"):
         frappe.rename_doc(
             "Party Type",

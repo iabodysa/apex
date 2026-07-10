@@ -16,8 +16,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from apex.salis.api import fleet_os
 
-# get_fleet_os resolves scope through the shared fleet_reader service, so the
-# project-scope resolver is patched there (its single home).
+# [#awh5oi]
 _RESOLVER = "apex.salis.api.fleet_reader._permitted_projects"
 
 
@@ -26,14 +25,14 @@ class TestFleetOSEmptyReason(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def test_scope_empty_when_no_permitted_project(self):
-        # Scoped user granted no project -> access gap, not an empty fleet.
+        # [#tmtqtu]
         with patch(_RESOLVER, return_value=(False, [])):
             r = fleet_os.get_fleet_os()
         self.assertEqual(r["vehicles"], [])
         self.assertEqual(r["reason"], "scope_empty")
 
     def test_data_empty_when_scope_has_no_vehicles(self):
-        # Scoped to a project that owns no vehicle -> genuinely empty board.
+        # [#29d5x3]
         ghost = f"NO-SUCH-PROJECT-{frappe.generate_hash(length=10)}"
         with patch(_RESOLVER, return_value=(False, [ghost])):
             r = fleet_os.get_fleet_os()
@@ -45,7 +44,7 @@ class TestFleetOSEmptyReason(FrappeTestCase):
         name = frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
         ).insert(ignore_permissions=True).name
-        # Unscoped view sees the whole (non-empty) fleet -> no typed reason.
+        # [#gdata3]
         with patch(_RESOLVER, return_value=(True, None)):
             r = fleet_os.get_fleet_os()
         self.assertIsNone(r["reason"])
@@ -79,17 +78,16 @@ class TestWorkshopEvents(FrappeTestCase):
     def test_workshop_in_creates_submitted_maintenance_stop(self):
         res = fleet_os.workshop_in(self.plate, expected_return="2026-07-01", notes="brakes")
         stop = self._open_maintenance_stop()
-        # A submittable record with a reason exists (not a bare status flip).
+        # [#lpxlre]
         self.assertIsNotNone(stop)
         self.assertEqual(stop.name, res["stop"])
         self.assertEqual(stop.stop_reason, "Maintenance")
         self.assertEqual(stop.docstatus, 1)
-        # Vehicle reads the workshop state (the board's workshop lane).
+        # [#9f0wdi]
         self.assertEqual(
             frappe.db.get_value("Salis Vehicle", self.vehicle, "status"), "Under Maintenance"
         )
-        # Expected-return + note are captured in the audit notes, not return_date
-        # (an empty return_date is the "still in the workshop" invariant).
+        # [#bo1uxf]
         notes = frappe.db.get_value("Vehicle Stop", stop.name, "notes") or ""
         self.assertIn("2026-07-01", notes)
         self.assertIn("brakes", notes)
@@ -99,18 +97,18 @@ class TestWorkshopEvents(FrappeTestCase):
         fleet_os.workshop_in(self.plate)
         stop_name = self._open_maintenance_stop().name
         fleet_os.workshop_out(self.plate)
-        # The stop is cancelled and stamped with the workshop-exit date.
+        # [#25ns0m]
         self.assertEqual(frappe.db.get_value("Vehicle Stop", stop_name, "docstatus"), 2)
         self.assertTrue(frappe.db.get_value("Vehicle Stop", stop_name, "return_date"))
-        # Vehicle is restored to its pre-workshop status.
+        # [#luh90t]
         self.assertEqual(
             frappe.db.get_value("Salis Vehicle", self.vehicle, "status"), "Active"
         )
-        # No open workshop stop remains.
+        # [#7abhi0]
         self.assertIsNone(self._open_maintenance_stop())
 
     def test_workshop_out_without_open_stop_throws(self):
-        # Falsify: with no open workshop stop the return must raise, not no-op.
+        # [#b9z9nk]
         with self.assertRaises(frappe.ValidationError):
             fleet_os.workshop_out(self.plate)
 
@@ -149,8 +147,7 @@ class TestBulkActions(FrappeTestCase):
             )
 
     def test_bulk_isolates_a_failing_row(self):
-        # One unknown plate must be reported failed while the valid ones still
-        # commit — proves the per-row savepoint isolation is non-vacuous.
+        # [#q9phuj]
         ghost = f"NO-SUCH {frappe.generate_hash(length=12)}"
         res = fleet_os.bulk_stop_vehicles([self.plates[0], ghost])
         self.assertFalse(res["ok"])
@@ -160,7 +157,7 @@ class TestBulkActions(FrappeTestCase):
         self.assertTrue(by_plate[self.plates[0]]["ok"])
         self.assertFalse(by_plate[ghost]["ok"])
         self.assertIn("error", by_plate[ghost])
-        # The good row really stopped despite the sibling failure.
+        # [#gjfsio]
         good = frappe.db.get_value("Salis Vehicle", {"plate_number": self.plates[0]}, "name")
         self.assertEqual(frappe.db.get_value("Salis Vehicle", good, "status"), "Stopped")
 
@@ -182,7 +179,7 @@ class TestReaderErrors(FrappeTestCase):
             {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
         ).insert(ignore_permissions=True)
 
-        # Force only the incident reader to blow up; the board must still render.
+        # [#piajr8]
         real_get_all = frappe.get_all
 
         def boom(doctype, *a, **kw):
@@ -199,13 +196,13 @@ class TestReaderErrors(FrappeTestCase):
         self.assertTrue(any("error" in e and "reader" in e for e in r["reader_errors"]))
 
     def test_clean_read_has_empty_reader_errors(self):
-        # Non-vacuous: a healthy read carries the additive key, empty.
+        # [#hpyx73]
         with patch(_RESOLVER, return_value=(True, None)):
             r = fleet_os.get_fleet_os()
         self.assertEqual(r["reader_errors"], [])
 
     def test_empty_branches_carry_reader_errors_key(self):
-        # The additive key is present on both typed-empty branches too.
+        # [#ivjtqs]
         with patch(_RESOLVER, return_value=(False, [])):
             scope_empty = fleet_os.get_fleet_os()
         self.assertEqual(scope_empty["reason"], "scope_empty")
@@ -240,7 +237,7 @@ class TestWorkshopLane(FrappeTestCase):
         self.assertIn("gearbox", row["workshop_notes"])
         self.assertGreaterEqual(row["days_in_workshop"], 0)
         self.assertIn("workshop_overstay", row)
-        # A fresh stop is not overstaying (the default cutoff is 14 days).
+        # [#4t55az]
         self.assertFalse(row["workshop_overstay"])
 
     def test_non_workshop_vehicle_has_blank_lane(self):
@@ -264,10 +261,10 @@ class TestStatusMeta(FrappeTestCase):
     def test_returns_translated_status_options(self):
         res = fleet_os.get_status_meta()
         values = [s["value"] for s in res["statuses"]]
-        # The canonical Salis Vehicle.status options must all be present as values.
+        # [#bp0cha]
         for opt in ("Active", "Stopped", "Under Maintenance", "Released"):
             self.assertIn(opt, values)
-        # Each row carries a non-empty label (translated display string).
+        # [#ipz4cp]
         self.assertTrue(all(s["label"] for s in res["statuses"]))
 
 
@@ -301,7 +298,7 @@ class TestCreateHandover(FrappeTestCase):
         )
 
     def test_draft_handover_carries_prev_and_new_driver(self):
-        # Reassign A then B; B's reassign Ends A's row, so from_driver=A, to_driver=B.
+        # [#lt96xt]
         a, b = self._driver(), self._driver()
         fleet_os.reassign(self.plate, a.driver_id)
         fleet_os.reassign(self.plate, b.driver_id)
@@ -309,7 +306,7 @@ class TestCreateHandover(FrappeTestCase):
         res = fleet_os.create_handover(self.plate, b.driver_id, odometer=120)
         self.assertTrue(res["ok"])
         ho = frappe.get_doc("Vehicle Handover", res["handover"])
-        # Left as an UNsubmitted draft (the controller needs signed evidence to submit).
+        # [#13taxw]
         self.assertEqual(ho.docstatus, 0)
         self.assertEqual(ho.vehicle, self.vehicle)
         self.assertEqual(ho.to_driver, b.name)
@@ -317,16 +314,14 @@ class TestCreateHandover(FrappeTestCase):
         self.assertEqual(ho.odometer_reading, 120)
 
     def test_first_assignment_drafts_no_handover(self):
-        # First-ever assignment: no prior custodian, so no handover is drafted.
-        # (Forcing one would self-equal to_driver via the from_driver fetch_if_empty
-        # copy of current_driver and trip the controller's "must differ" guard.)
+        # [#jfj02n]
         a = self._driver()
         fleet_os.reassign(self.plate, a.driver_id)
         res = fleet_os.create_handover(self.plate, a.driver_id)
         self.assertTrue(res["ok"])
         self.assertIsNone(res["handover"])
         self.assertEqual(res.get("skipped"), "no_prior_driver")
-        # Non-vacuous: nothing was actually inserted for this vehicle.
+        # [#8unn2b]
         self.assertEqual(
             frappe.db.count("Vehicle Handover", {"vehicle": self.vehicle}), 0
         )
@@ -363,14 +358,14 @@ class TestVehicleTimeline(FrappeTestCase):
             }
         ).insert(ignore_permissions=True)
         inc.submit()
-        # A stop on a later date so we can assert the descending order.
-        fleet_os.workshop_in(plate)  # creates a Maintenance Vehicle Stop dated today
+        # [#9oina1]
+        fleet_os.workshop_in(plate)  # [#85do72]
 
         res = fleet_os.get_vehicle_timeline(plate)
         kinds = {e["kind"] for e in res["events"]}
         self.assertIn("incident", kinds)
         self.assertIn("stop", kinds)
-        # Descending by date: the most recent event (the stop, today) is first.
+        # [#dud1wb]
         dates = [e["date"] for e in res["events"] if e["date"]]
         self.assertEqual(dates, sorted(dates, reverse=True))
 
@@ -402,13 +397,12 @@ class TestVehicleTimeline(FrappeTestCase):
         ).insert(ignore_permissions=True)
         asg.submit()
 
-        # PII visible for Administrator (permlevel-1 read on Salis Driver).
+        # [#qytune]
         rows = [e for e in fleet_os.get_vehicle_timeline(plate)["events"] if e["kind"] == "assignment"]
         self.assertTrue(rows)
         self.assertEqual(rows[0]["driver"], driver.name)
 
-        # An unscoped oversight role WITHOUT permlevel-1 read (Internal Auditor) still
-        # sees the timeline, but the driver id is blanked — same gate as the reader.
+        # [#796x71]
         email = "tl-timeline-auditor@test.local"
         if not frappe.db.exists("User", email):
             frappe.get_doc(

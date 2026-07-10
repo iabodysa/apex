@@ -49,19 +49,16 @@ class TestSalisTenantScope(FrappeTestCase):
         cls.pa = cls._project("Tenant Scope A")
         cls.pb = cls._project("Tenant Scope B")
         cls.sup = _user("tenant_sup@example.com", "Fleet Supervisor")
-        cls.mgr = _user("tenant_mgr@example.com", "Fleet Manager")  # oversight
+        cls.mgr = _user("tenant_mgr@example.com", "Fleet Manager")  # [#dpuh30]
         cls.drv = _user("tenant_drv@example.com", "Driver")
         cls._user_perm(cls.sup, cls.pa)
-        # Synthetic drivers anchored to each project so the link-chain resolves.
+        # [#d5aiv0]
         cls.drv_a = cls._driver("Tenant Driver A", cls.pa)
         cls.drv_b = cls._driver("Tenant Driver B", cls.pb)
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a Project + User Permission (and project-anchored
-        # Salis Drivers) OUTSIDE FrappeTestCase's per-method savepoint rollback;
-        # without this they leak across the test DB (the @example.com Project
-        # User Permission cross-test-pollution class).
+        # [#di2n48]
         frappe.set_user("Administrator")
         frappe.db.delete("User Permission",
                          {"allow": "Project", "for_value": cls.pa, "user": cls.sup})
@@ -74,7 +71,7 @@ class TestSalisTenantScope(FrappeTestCase):
         frappe.db.commit()
         super().tearDownClass()
 
-    # fixtures
+    # [#kjq1ae]
 
     @staticmethod
     def _project(name):
@@ -112,13 +109,13 @@ class TestSalisTenantScope(FrappeTestCase):
         doc = frappe.new_doc("Salis Driver")
         doc.full_name = full_name
         doc.project = project
-        # Be tolerant of mandatory fields added later: fill any unset reqd field.
+        # [#1dxhyg]
         doc.flags.ignore_validate = True
         doc.flags.ignore_mandatory = True
         doc.insert(ignore_permissions=True)
         return doc.name
 
-    # helpers
+    # [#7i064h]
 
     def _resolves_to_b(self, fragment, column):
         """True if a row pointing at the Project-B driver passes ``fragment``.
@@ -146,13 +143,13 @@ class TestSalisTenantScope(FrappeTestCase):
         )
         return bool(rows)
 
-    # driver-chain queries: zero Project-B rows for the supervisor
+    # [#h66stu]
 
     def test_driver_attendance_query_excludes_other_project(self):
         frag = driver_attendance_query(self.sup)
         self.assertIn(self.pa, frag)
         self.assertNotIn(self.pb, frag)
-        self.assertIn("owner", frag)  # if_owner OR-clause present
+        self.assertIn("owner", frag)  # [#dtub9p]
         self.assertFalse(self._resolves_to_b(frag, "`driver`"))
         self.assertTrue(self._resolves_to_a(frag, "`driver`"))
 
@@ -174,7 +171,7 @@ class TestSalisTenantScope(FrappeTestCase):
         frag = vehicle_damage_write_off_query(self.sup)
         self.assertIn(self.pa, frag)
         self.assertNotIn(self.pb, frag)
-        self.assertNotIn("owner", frag)  # no Driver DocPerm -> pure project scope
+        self.assertNotIn("owner", frag)  # [#awgsrs]
         self.assertFalse(self._resolves_to_b(frag, "`driver`"))
         self.assertTrue(self._resolves_to_a(frag, "`driver`"))
 
@@ -196,7 +193,7 @@ class TestSalisTenantScope(FrappeTestCase):
         frag = vehicle_stop_query(self.sup)
         self.assertIn(self.pa, frag)
         self.assertNotIn(self.pb, frag)
-        self.assertIn("related_driver", frag)  # scopes the related_driver column
+        self.assertIn("related_driver", frag)  # [#piuopr]
         self.assertFalse(self._resolves_to_b(frag, "`related_driver`"))
         self.assertTrue(self._resolves_to_a(frag, "`related_driver`"))
 
@@ -204,14 +201,14 @@ class TestSalisTenantScope(FrappeTestCase):
         frag = movement_cost_transfer_query(self.sup)
         self.assertIn(self.pa, frag)
         self.assertNotIn(self.pb, frag)
-        # A transfer touching only Project B passes neither from/to clause.
+        # [#91ks9d]
         rows = frappe.db.sql(
             "select 1 from (select %s as `from_project`, %s as `to_project`) t "
             "where {frag}".format(frag=frag),
             (self.pb, self.pb),
         )
         self.assertFalse(bool(rows))
-        # A transfer with one endpoint in Project A is visible.
+        # [#2114v5]
         rows_a = frappe.db.sql(
             "select 1 from (select %s as `from_project`, %s as `to_project`) t "
             "where {frag}".format(frag=frag),
@@ -219,7 +216,7 @@ class TestSalisTenantScope(FrappeTestCase):
         )
         self.assertTrue(bool(rows_a))
 
-    # oversight roles unaffected
+    # [#cy09nh]
 
     def test_oversight_sees_all(self):
         for q in (
@@ -234,17 +231,16 @@ class TestSalisTenantScope(FrappeTestCase):
         ):
             self.assertEqual(q(self.mgr), "", "%s must not restrict oversight" % q.__name__)
 
-    # Driver if_owner self-record path preserved
+    # [#a8x34i]
 
     def test_driver_self_record_path_preserved(self):
-        # A bare Driver (no Project User Permission) still sees their own rows via
-        # the owner clause on the if_owner DocTypes, and never leaks a project list.
+        # [#305o9b]
         for q in (driver_attendance_query, driver_stop_query, boarding_scan_log_query):
             frag = q(self.drv)
             self.assertIn("owner", frag)
             self.assertNotIn(self.pa, frag)
             self.assertNotIn(self.pb, frag)
-            # The driver's own row (owner = me) passes regardless of driver project.
+            # [#838xys]
             rows = frappe.db.sql(
                 "select 1 from (select %s as `driver`, %s as `owner`) t "
                 "where {frag}".format(frag=frag),
@@ -252,7 +248,7 @@ class TestSalisTenantScope(FrappeTestCase):
             )
             self.assertTrue(bool(rows), "%s must keep the driver's own row" % q.__name__)
 
-    # ---- has_permission mirrors: block B-resolved docs, keep own + oversight -
+    # [#3xfstd]
 
     def test_driver_chain_has_permission_blocks_other_project(self):
         cases = (
@@ -275,12 +271,11 @@ class TestSalisTenantScope(FrappeTestCase):
                 fn(doc_a, "read", user=self.sup),
                 "%s must allow a Project-A doc to the scoped supervisor" % fn.__name__,
             )
-            # Oversight is always deferred (never denied) regardless of project.
+            # [#qf6l1z]
             self.assertIsNone(fn(doc_b, "read", user=self.mgr))
 
     def test_if_owner_has_permission_keeps_own_row(self):
-        # The Driver opening their own row on an if_owner DocType is never blocked,
-        # even though the doc resolves to Project B and the Driver is unscoped.
+        # [#mcu2ns]
         for fn in (
             driver_attendance_has_permission,
             driver_stop_has_permission,
@@ -293,7 +288,7 @@ class TestSalisTenantScope(FrappeTestCase):
             )
 
     def test_movement_cost_transfer_has_permission(self):
-        # Either endpoint in scope -> allowed; neither -> denied; oversight deferred.
+        # [#24npxl]
         a_in = frappe._dict({"from_project": self.pb, "to_project": self.pa})
         b_only = frappe._dict({"from_project": self.pb, "to_project": self.pb})
         self.assertIsNone(movement_cost_transfer_has_permission(a_in, "read", user=self.sup))

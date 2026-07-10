@@ -40,20 +40,18 @@ class TestHousingCount(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls._ensure_supervisor_write()
-        # Two estates; a Resident Supervisor scoped (User Permission) to ONLY b1.
+        # [#c37lgq]
         cls.b1 = cls._building()
         cls.b2 = cls._building()
         cls.scoped = cls._scoped_supervisor(cls.b1)
         cls.auditor = cls._auditor()
-        # One inventory line per building.
+        # [#2pdoxj]
         cls.item1 = cls._item(cls.b1, expected=10)
         cls.item2 = cls._item(cls.b2, expected=5)
 
     @classmethod
     def _ensure_supervisor_write(cls):
-        # The recommended decision: Resident Supervisor gets a building-scoped write
-        # on Housing Inventory. Guarantee it for the test even if the JSON DocPerm
-        # has not migrated into this bench yet, via a temporary Custom DocPerm.
+        # [#iu2wda]
         has_write = frappe.db.exists(
             "Custom DocPerm",
             {"parent": "Housing Inventory", "role": "Resident Supervisor", "permlevel": 0, "write": 1},
@@ -151,7 +149,7 @@ class TestHousingCount(FrappeTestCase):
     def setUp(self):
         self.addCleanup(frappe.set_user, "Administrator")
 
-    # Read scope: building permission confines what a supervisor can see.
+    # [#ssbcbz]
     def test_scoped_supervisor_sees_only_their_building(self):
         frappe.set_user(self.scoped)
         out = get_inventory_for_building(self.b1)
@@ -170,7 +168,7 @@ class TestHousingCount(FrappeTestCase):
         self.assertIn("Good", out["conditions"])
         self.assertIn("Damaged", out["conditions"])
 
-    # Write scope: submit_counts records the count and the controller derives variance.
+    # [#fm49cc]
     def test_in_scope_submit_sets_count_and_derives_variance(self):
         frappe.set_user(self.scoped)
         out = submit_counts(
@@ -182,36 +180,32 @@ class TestHousingCount(FrappeTestCase):
         frappe.set_user("Administrator")
         row = frappe.get_doc("Housing Inventory", self.item1)
         self.assertEqual(row.counted_quantity, 7)
-        # expected 10 - counted 7 -> variance derived by the controller, not the API.
+        # [#s5cgla]
         self.assertEqual(row.quantity_variance, -3)
         self.assertIsNotNone(row.last_count_date)
         self.assertEqual(row.condition, "Fair")
 
     def test_cross_building_write_blocked(self):
-        # A b1-scoped supervisor must not write a b2 item. submit_counts records the
-        # failure per row (savepoint-isolated) and saves nothing for b2.
+        # [#mb2v5s]
         frappe.set_user(self.scoped)
         out = submit_counts(self.b2, [{"name": self.item2, "counted_quantity": 99}])
         self.assertFalse(out["ok"])
         self.assertEqual(out["saved"], 0)
         self.assertEqual(out["failed"], 1)
         frappe.set_user("Administrator")
-        # b2's item is untouched (still its default zero count).
+        # [#77004o]
         self.assertEqual(
             frappe.db.get_value("Housing Inventory", self.item2, "counted_quantity"), 0
         )
 
     def test_read_only_role_rejected_by_write_gate(self):
-        # Internal Auditor has read but NO write on Housing Inventory: the up-front
-        # has_permission(..., "write", throw=True) gate must reject the call.
+        # [#74z6hk]
         frappe.set_user(self.auditor)
         with self.assertRaises(frappe.PermissionError):
             submit_counts(self.b1, [{"name": self.item1, "counted_quantity": 1}])
 
     def test_malformed_json_lines_raises_validation_error(self):
-        # A malformed `lines` JSON body must surface as a clean ValidationError, not
-        # a raw JSONDecodeError 500. The scoped supervisor clears the write gate +
-        # building check, so the call reaches the json.loads guard.
+        # [#sq86gs]
         frappe.set_user(self.scoped)
         with self.assertRaises(frappe.ValidationError):
             submit_counts(self.b1, "{not valid json")

@@ -29,7 +29,7 @@ from apex.apex_core.utils.company import company_for_building
 LEDGER_DOCTYPE = "Safety Finding Ledger"
 EXECUTION_DOCTYPE = "Safety Task Execution"
 
-# A finding whose snapshot status is this value is recorded as resolved.
+# [#1uirb9]
 _RESOLVED_STATUS = "Resolved"
 
 
@@ -112,8 +112,7 @@ def post_safety_findings(safety_round) -> int:
 
     posted = 0
     for execution_name in executions:
-        # The findings live on the execution as Inspection Finding Item child
-        # rows; read them in their stored row order so source_detail_no == idx.
+        # [#mmwff1]
         findings = frappe.get_all(
             "Inspection Finding Item",
             filters={"parent": execution_name, "parenttype": EXECUTION_DOCTYPE},

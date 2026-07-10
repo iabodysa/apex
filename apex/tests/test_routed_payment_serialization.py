@@ -65,7 +65,7 @@ from apex.apex_core.payment_router import (
 )
 
 SETTINGS = "Payment Routing Settings"
-# A throwaway SUBMITTABLE target so the auto-submit (ledger-post) leg is real.
+# [#4bwi8x]
 STUB_DOCTYPE = "Test Routed Serialization Stub"
 
 PAYMENT_ROUTER_SOURCE = os.path.normpath(
@@ -124,9 +124,7 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
 
     def setUp(self):
         frappe.set_user("Administrator")
-        # Route to the submittable stub, auto-submit ON, GL posting ON -- so the
-        # create path actually submits the target (the double-GL hazard the lock
-        # guards). Field map copies the source amount onto the target.
+        # [#s5eepm]
         s = frappe.get_single(SETTINGS)
         s.target_payment_doctype = STUB_DOCTYPE
         s.auto_submit_target = 1
@@ -193,12 +191,11 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
 
         targets_before = frappe.db.count(STUB_DOCTYPE)
 
-        # Winner: builds and submits exactly one target, stamps the link.
+        # [#mqiw6p]
         first = route_payment(pr.name)
         self.assertTrue(frappe.db.exists(STUB_DOCTYPE, first))
         first_doc = frappe.get_doc(STUB_DOCTYPE, first)
-        # The target was SUBMITTED -- this is the ledger-posting leg on the native
-        # path; the lock guards against a SECOND such submit for one source.
+        # [#dotjno]
         self.assertEqual(first_doc.docstatus, 1, "winning route must submit the target")
         self.assertEqual(float(first_doc.paid_amount), 1000.00)
 
@@ -215,9 +212,7 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
             "winning route must create exactly one target payment",
         )
 
-        # Loser: the SAME re-read-under-lock guard a serialized second transaction
-        # hits once the winner has stamped the link. Must return the SAME payment
-        # and build nothing new -- no second payment, no second (double) GL post.
+        # [#kgfatx]
         second = route_payment(pr.name)
         self.assertEqual(
             second,
@@ -230,7 +225,7 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
             "re-route must NOT create a second payment / second ledger post",
         )
 
-        # Exactly ONE submitted target exists for this source's stamped link.
+        # [#7t5iby]
         self.assertEqual(first_doc.docstatus, 1)
         pr.reload()
         self.assertEqual(
@@ -248,7 +243,7 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
         name without creating any target -- the loser-transaction path.
         """
         pr = self._approved_request(amount=42.00)
-        # Pre-stamp the link to a sentinel; no target is built for it.
+        # [#chqd9u]
         sentinel = "SENTINEL-EXISTING-PAYMENT"
         pr.db_set("linked_payment_entry", sentinel, update_modified=False)
         pr.reload()
@@ -305,10 +300,7 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
             "route_payment; restore it so concurrent routes serialize to one "
             "payment before merging.",
         )
-        # Anchor the lock ahead of the COMMITTED stamp (db_set with the quoted
-        # field name), which is unambiguously after the lock — unlike the first
-        # textual mention of linked_payment_entry, which an earlier read/docstring
-        # reference can precede and false-fail.
+        # [#fobbgo]
         lock_pos = func_source.find("for_update=True")
         stamp_pos = func_source.find('"linked_payment_entry"')
         self.assertGreater(stamp_pos, -1, "the linked_payment_entry stamp was not found in route_payment")

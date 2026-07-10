@@ -55,7 +55,7 @@ class TestReportScopeLogic(FrappeTestCase):
     then an empty primary result, and assert on the primary (last) call's filter.
     """
 
-    # ----- salis: direct project (Salis Vehicle) -----
+    # [#c45m9m]
 
     def test_fleet_register_scoped_filters_project(self):
         with patch.object(SP, "_is_unscoped", return_value=False), patch.object(
@@ -69,7 +69,7 @@ class TestReportScopeLogic(FrappeTestCase):
             SP, "_allowed_projects", return_value=["P-1", "P-2"]
         ), patch.object(R_fleet.frappe, "get_all", return_value=[]) as ga:
             R_fleet.execute({"project": "P-1"})
-            # an explicit in-scope filter narrows to that one project, not the whole set
+            # [#eaqnqf]
             self.assertEqual(_last_filters(ga)["project"], "P-1")
 
     def test_fleet_register_out_of_scope_filter_empty(self):
@@ -95,16 +95,16 @@ class TestReportScopeLogic(FrappeTestCase):
             R_fleet.execute({})
             self.assertNotIn("project", _last_filters(ga))
 
-    # ----- salis: indirect project via vehicle -----
+    # [#im4ram]
 
     def test_fuel_summary_scoped_filters_by_in_scope_vehicles(self):
         with patch.object(SP, "_is_unscoped", return_value=False), patch.object(
             SP, "_allowed_projects", return_value=["P-1"]
         ), patch.object(R_fuel.frappe, "get_all", side_effect=[["V-1", "V-2"], []]) as ga:
             R_fuel.execute({})
-            # first call resolves the in-scope vehicles by project
+            # [#1b60te]
             self.assertEqual(ga.call_args_list[0].kwargs["filters"], {"project": ["in", ["P-1"]]})
-            # primary log query confined to those vehicles
+            # [#i4dc0r]
             self.assertEqual(_last_filters(ga)["vehicle"], ["in", ["V-1", "V-2"]])
 
     def test_fuel_summary_no_in_scope_vehicles_empty(self):
@@ -113,7 +113,7 @@ class TestReportScopeLogic(FrappeTestCase):
         ), patch.object(R_fuel.frappe, "get_all", return_value=[]) as ga:
             cols, data = R_fuel.execute({})
             self.assertEqual(data, [])
-            self.assertEqual(ga.call_count, 1)  # only the vehicle lookup ran
+            self.assertEqual(ga.call_count, 1)  # [#oi23g5]
 
     def test_fuel_summary_oversight_unfiltered(self):
         with patch.object(SP, "_is_unscoped", return_value=True), patch.object(
@@ -152,7 +152,7 @@ class TestReportScopeLogic(FrappeTestCase):
             R_comp.execute({})
             self.assertNotIn("parent", _last_filters(ga))
 
-    # ----- habitat: direct building -----
+    # [#mz6vom]
 
     def test_resident_register_scoped_filters_building(self):
         with patch.object(HP, "_building_is_unscoped", return_value=False), patch.object(
@@ -268,22 +268,22 @@ class TestReportScopeIntegration(FrappeTestCase):
         frappe.set_user("Administrator")
         cls.tag = frappe.generate_hash(length=12).upper()
 
-        # --- salis: two projects, one vehicle each ---
+        # [#11u6ev]
         cls.pa = _project("RScope A " + cls.tag)
         cls.pb = _project("RScope B " + cls.tag)
         cls.veh_a = cls._vehicle(cls.pa)
         cls.veh_b = cls._vehicle(cls.pb)
 
-        # Fleet Supervisor is scoped (not in UNSCOPED_ROLES); Fleet Manager is oversight.
+        # [#bee98e]
         cls.sup = _user("rscope_fleet_sup@example.com", "Fleet Supervisor")
         _grant(cls.sup, "Project", cls.pa)
         cls.mgr = _user("rscope_fleet_mgr@example.com", "Fleet Manager")
 
-        # --- habitat: two buildings, two custody ledger rows each ---
+        # [#j1o7e0]
         cls.bld_a, cls.bld_b = cls._two_buildings()
         cls.article = cls._custody_article()
         cls.emp = cls._employee()
-        # building A: qty 5 ; building B: qty 7  (distinct so totals are checkable)
+        # [#clvr0j]
         cls._ledger(cls.bld_a, cls.article, cls.emp, 5)
         cls._ledger(cls.bld_b, cls.article, cls.emp, 7)
 
@@ -293,11 +293,7 @@ class TestReportScopeIntegration(FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits Projects + User Permissions (and project/building
-        # scoped fixtures) OUTSIDE the per-method savepoint rollback; delete them
-        # so the @example.com Project User Permission rows do not poison later
-        # tests on the shared bench. (Company/Article/Employee are reuse-or-create
-        # and left alone — they may pre-exist on the bench.)
+        # [#7ot0s1]
         frappe.set_user("Administrator")
         frappe.db.delete("User Permission",
                          {"allow": "Project", "for_value": cls.pa, "user": cls.sup})
@@ -366,7 +362,7 @@ class TestReportScopeIntegration(FrappeTestCase):
         emp = frappe.db.get_value("Employee", {})
         if emp:
             return emp
-        # minimal employee; company resolved above via building seed
+        # [#rkt7nx]
         company = frappe.db.get_value("Company", {})
         return frappe.get_doc({
             "doctype": "Employee", "employee_name": "RS Emp " + cls.tag,
@@ -391,7 +387,7 @@ class TestReportScopeIntegration(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # ----- fleet_register -----
+    # [#oxd6f8]
 
     def test_fleet_register_scoped_user_sees_only_his_project(self):
         frappe.set_user(self.sup)
@@ -407,7 +403,7 @@ class TestReportScopeIntegration(FrappeTestCase):
         self.assertTrue({self.pa, self.pb} <= projects,
                         "oversight role must see every project's vehicles")
 
-    # ----- accommodation_stock_balance / custody_outstanding_by_worker -----
+    # [#h3vtqk]
 
     def _stock_rows_for(self, user, execute):
         frappe.set_user(user)
@@ -418,7 +414,7 @@ class TestReportScopeIntegration(FrappeTestCase):
         buildings = {r["building"] for r in rows}
         self.assertEqual(buildings, {self.bld_a},
                          "scoped supervisor must see only their building's stock")
-        # in-scope total is unchanged by the scoping (qty 5 on building A)
+        # [#g5ivmr]
         self.assertEqual(sum(r["balance_qty"] for r in rows), 5)
 
     def test_stock_balance_oversight_sees_both_buildings(self):

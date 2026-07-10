@@ -58,9 +58,7 @@ def create_roles():
 
 def create_role_profiles():
     profiles = {
-        # [#4hbrle] No System Manager: bundling it granted every Accommodation
-        # Manager full administrative rights (privilege escalation). The profile
-        # carries only the functional Accommodation Manager role.
+        # [#gb52vh]
         "Habitat Accommodation Manager": ["Accommodation Manager"],
         "Habitat Resident Supervisor": ["Resident Supervisor"],
         "Habitat Finance Reviewer": ["Finance Manager", "Internal Auditor"],

@@ -74,8 +74,7 @@ def my_fuel_quota(vehicle=None):
 
 	if not vehicle or not _vehicle_bound_to_driver(driver, vehicle):
 		vehicle = _bound_vehicle(driver)
-	# Approval threshold (litres) so the Fuel screen can state which requests need
-	# approval; 0/blank on the Single means "no threshold" (every request auto-flows).
+	# [#7sx99k]
 	from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_float
 
 	threshold = get_salis_float("fuel_request_approval_threshold_litres", 0.0)

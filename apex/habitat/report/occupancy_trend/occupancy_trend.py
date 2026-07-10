@@ -37,8 +37,7 @@ def _fetch_rows(filters):
     if filters.get("building"):
         conditions["building"] = filters["building"]
 
-    # get_all forces ignore_permissions, bypassing the building row-scoping the desk
-    # list gets via permission_query_conditions; re-apply the caller's building scope.
+    # [#537g2t]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict:
         chosen = conditions.get("building")

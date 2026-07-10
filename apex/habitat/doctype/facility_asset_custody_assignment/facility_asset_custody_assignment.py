@@ -10,16 +10,15 @@ from frappe.model.document import Document
 
 class FacilityAssetCustodyAssignment(Document):
     def before_submit(self):
-        # An empty asset table means there is nothing to transfer custody for.
+        # [#lrtqej]
         if not self.get("assets_in_custody"):
             frappe.throw(_("Asset table cannot be empty."))
-        # Custody cannot transfer until the assets are physically verified.
+        # [#p31efh]
         if not self.all_assets_verified:
             frappe.throw(_("All Assets Physically Verified must be checked before submitting the custody assignment."))
 
     def on_submit(self):
-        # The sign-off only means something if it actually moves custody: point each
-        # listed asset's responsible_supervisor at this assignment's supervisor.
+        # [#9jfwvg]
         for row in self.assets_in_custody:
             if not row.facility_asset:
                 continue
@@ -28,10 +27,7 @@ class FacilityAssetCustodyAssignment(Document):
             )
 
     def on_cancel(self):
-        # Restore the custodian to whoever held it before this assignment. Read it from
-        # the latest OTHER submitted assignment that listed the asset (the prior is not
-        # stored on this doc); never blank a custodian, and never clobber a newer one
-        # that already moved custody past us.
+        # [#etcaoq]
         for row in self.assets_in_custody:
             if not row.facility_asset:
                 continue

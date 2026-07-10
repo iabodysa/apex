@@ -76,8 +76,7 @@ class TestCreateRolesList(unittest.TestCase):
         "Safety Officer",
         "Resident Request Coordinator",
     ]
-    # Roles added by the later safety build (Admin Manager / Operations Director /
-    # Facilities Supervisor) and Wave 0 (Procurement Supervisor).
+    # [#fs3811]
     GOVERNANCE_ROLES = [
         "Admin Manager",
         "Operations Director",
@@ -112,8 +111,7 @@ class TestCreateRolesList(unittest.TestCase):
         )
 
     def test_total_role_count(self):
-        # [#3tgwn1] Robust over a brittle magic count: the roles list must cover
-        # exactly the expected set (no missing, no unexpected extras).
+        # [#gi7rot]
         self.assertEqual(
             set(self.roles),
             set(self.EXPECTED_ROLES),
@@ -126,8 +124,7 @@ class TestCreateRoleProfilesDict(unittest.TestCase):
     """Structural tests for the profiles dict in create_role_profiles()."""
 
     EXISTING_PROFILES = {
-        # No System Manager — bundling it was a privilege escalation (every
-        # Accommodation Manager would carry full admin rights).
+        # [#rt3era]
         "Habitat Accommodation Manager": ["Accommodation Manager"],
         "Habitat Resident Supervisor": ["Resident Supervisor"],
         "Habitat Finance Reviewer": ["Finance Manager", "Internal Auditor"],

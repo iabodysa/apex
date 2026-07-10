@@ -149,10 +149,7 @@ def idle_resident_aging() -> None:
         if not reports:
             break
 
-        # Bulk-prefetch every ledger memo (assignment, posting_date <= today) for the
-        # batch's assignments in one query, grouped by assignment, instead of one
-        # get_all per report (N+1). The per-report reported_on..today window is then
-        # applied in memory below, so each report's cost bleed is unchanged.
+        # [#makt0v]
         asgn_ids = {r.assignment for r in reports if r.assignment and r.reported_on}
         ledger_by_assignment: dict = {}
         if asgn_ids:

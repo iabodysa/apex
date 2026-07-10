@@ -65,7 +65,7 @@ class TestNonFinancialDepreciationSnapshot(FrappeTestCase):
         must trigger exactly one frappe.get_doc call, not three."""
         from apex.habitat.doctype.operational_depreciation_snapshot.operational_depreciation_snapshot import validate
 
-        # Build a fake policy object that satisfies the computation path.
+        # [#oqfdyn]
         fake_policy = MagicMock()
         fake_policy.useful_life_years = 10
         fake_policy.residual_value_pct = 10
@@ -96,8 +96,7 @@ class TestNonFinancialDepreciationSnapshot(FrappeTestCase):
         with patch(module_path, return_value=fake_policy) as mock_get_doc:
             validate(doc)
 
-        # All three rows share one policy name — the cache must collapse them
-        # into a single get_doc call, proving the N+1 bug is fixed.
+        # [#o5l78r]
         self.assertEqual(
             mock_get_doc.call_count,
             1,

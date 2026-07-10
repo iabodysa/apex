@@ -21,15 +21,14 @@ DAILY_REPORT = "Fleet Register"
 class TestSalisAutoEmailReportSeeder(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # Clear the marker row so the seeder's create-if-absent path is exercised
-        # on a fresh or re-run site (global write — keep this test self-contained).
+        # [#cld9yf]
         existing = frappe.db.get_value("Auto Email Report", {"report": DAILY_REPORT})
         if existing:
             frappe.delete_doc("Auto Email Report", existing, force=True)
             frappe.db.commit()
 
     def test_seeds_daily_fleet_status_digest_disabled(self):
-        # The digest's underlying report must be registered on the bench.
+        # [#j7r0m6]
         self.assertTrue(frappe.db.exists("Report", DAILY_REPORT))
 
         seed_salis_auto_email_reports()
@@ -42,8 +41,7 @@ class TestSalisAutoEmailReportSeeder(FrappeTestCase):
         )
         self.assertIsNotNone(aer, "daily fleet-status Auto Email Report was not seeded")
         self.assertEqual(aer.frequency, "Daily")
-        # Disabled by default — nothing is emailed until an admin enables it and
-        # the master notification toggle is on.
+        # [#er4wsv]
         self.assertFalse(aer.enabled)
         self.assertEqual(aer.report_type, "Script Report")
 
@@ -54,8 +52,7 @@ class TestSalisAutoEmailReportSeeder(FrappeTestCase):
         self.assertEqual(len(rows), 1, "seeder must create exactly one digest per report")
 
     def test_daily_digest_report_renders_columns(self):
-        # The digest produces a real fleet-status report (columns at minimum;
-        # rows depend on site data and may legitimately be empty on a fresh site).
+        # [#4u2hr7]
         columns, _data = frappe.get_attr(
             "apex.salis.report.fleet_register.fleet_register.execute"
         )(None)

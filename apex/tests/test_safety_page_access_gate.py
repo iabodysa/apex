@@ -54,7 +54,7 @@ class TestSafetyPageAccessGate(FrappeTestCase):
             frappe.set_user("Administrator")
 
     def test_non_safety_role_gets_friendly_no_role_page(self):
-        # A real, non-safety role: the gate must close (no redirect, no token).
+        # [#lznwz4]
         frappe.set_user(self._user_with_roles("safety-gate-norole@test.local", ["Internal Auditor"]))
         try:
             ctx = safety.get_context(frappe._dict())
@@ -64,8 +64,7 @@ class TestSafetyPageAccessGate(FrappeTestCase):
             frappe.set_user("Administrator")
 
     def test_safety_officer_is_refused(self):
-        # Safety Officer can record but NOT submit a round, so the portal (which
-        # submits) must refuse it — guards the role list against drift.
+        # [#efwdwc]
         frappe.set_user(self._user_with_roles("safety-gate-officer@test.local", ["Safety Officer"]))
         try:
             ctx = safety.get_context(frappe._dict())

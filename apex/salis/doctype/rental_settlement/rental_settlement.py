@@ -159,9 +159,7 @@ class RentalSettlement(Document):
         if self.payment_request and frappe.db.exists("Salis Payment Request", self.payment_request):
             return self.payment_request
 
-        # [#pyr620] Never pay beyond what reconciled: cap the payable at the
-        # machine-reconciled accrued_total. A claim above the accrued amount is a
-        # variance to dispute, not an overpayment to disburse.
+        # [#4q57pb]
         claimed = flt(self.claimed_total)
         reconciled = flt(self.accrued_total)
         payable = min(claimed, reconciled) if claimed else reconciled

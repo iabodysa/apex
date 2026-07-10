@@ -86,7 +86,7 @@ class TestOperationsAlertCriticalNotification(FrappeTestCase):
         ).insert(ignore_permissions=True).name
         cls.sup = _user(f"oa_crit_sup_{suffix}@example.com", "Fleet Supervisor")
         cls.oversight = _user(f"oa_crit_mgr_{suffix}@example.com", "Fleet Manager")
-        # Both hold a Project User Permission; only the scoped one is "the supervisor".
+        # [#dqxiqt]
         for user in (cls.sup, cls.oversight):
             frappe.get_doc(
                 {"doctype": "User Permission", "allow": "Project",
@@ -96,20 +96,16 @@ class TestOperationsAlertCriticalNotification(FrappeTestCase):
             {"doctype": "Salis Vehicle", "plate_number": f"OA-{suffix}",
              "status": "Active", "project": cls.project}
         ).insert(ignore_permissions=True).name
-        # A second vehicle with no project, to prove the resolver returns None.
+        # [#r3v08a]
         cls.vehicle_no_project = frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": f"NP-{suffix}", "status": "Active"}
         ).insert(ignore_permissions=True).name
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a Project + two User Permissions (and Vehicles)
-        # OUTSIDE the per-method savepoint rollback; delete them so the
-        # @example.com Project User Permission rows do not poison later tests.
+        # [#rcag9y]
         frappe.set_user("Administrator")
-        # _raise_alert / _critical_doc commit Operations Alert rows OUTSIDE the
-        # per-method savepoint too; leaving them Open poisons the global
-        # daily_open_alerts_digest scan in test_open_alerts_digest.
+        # [#t0tflt]
         frappe.db.delete("Operations Alert", {"vehicle": cls.vehicle})
         for user in (cls.sup, cls.oversight):
             frappe.db.delete("User Permission",
@@ -132,7 +128,7 @@ class TestOperationsAlertCriticalNotification(FrappeTestCase):
         return frappe.get_doc(data)
 
     def test_project_supervisor_excludes_oversight(self):
-        # The scoped supervisor is returned; the oversight (unscoped) role is not.
+        # [#thp88g]
         self.assertEqual(_project_supervisor(self.project), self.sup)
         self.assertIsNone(_project_supervisor(None))
 
@@ -168,12 +164,12 @@ class TestOperationsAlertCriticalNotification(FrappeTestCase):
         self.assertTrue(
             frappe.safe_eval(notif.condition, None, get_context(critical))
         )
-        # Warning severity must NOT fire.
+        # [#s4iybm]
         warning = self._critical_doc(severity="Warning")
         self.assertFalse(
             frappe.safe_eval(notif.condition, None, get_context(warning))
         )
-        # Critical but no resolvable supervisor must NOT fire.
+        # [#1wr7td]
         orphan = self._critical_doc(responsible_supervisor=None)
         self.assertFalse(
             frappe.safe_eval(notif.condition, None, get_context(orphan))
@@ -186,7 +182,7 @@ class TestOperationsAlertCriticalNotification(FrappeTestCase):
         before = frappe.db.count(
             "Notification Log", {"for_user": self.sup, "document_name": critical.name}
         )
-        # System-notification half of the alert (send_system_notification=1).
+        # [#axo4k2]
         notif.create_system_notification(critical, get_context(critical))
         after = frappe.db.count(
             "Notification Log", {"for_user": self.sup, "document_name": critical.name}

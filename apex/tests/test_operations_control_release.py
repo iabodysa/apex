@@ -50,7 +50,7 @@ class TestOperationsControlRelease(FrappeTestCase):
         )
         stop.insert(ignore_permissions=True)
         stop.submit()
-        # on_submit must have stopped the vehicle for the precondition to hold.
+        # [#7kc4rg]
         self.assertEqual(
             frappe.db.get_value("Salis Vehicle", vehicle.name, "status"), "Stopped"
         )
@@ -76,13 +76,13 @@ class TestOperationsControlRelease(FrappeTestCase):
         res = release_vehicle(vehicle)
         self.assertTrue(res.get("ok"))
         self.assertEqual(res.get("stop"), stop)
-        # The stop is cancelled via the native lifecycle...
+        # [#nf1zak]
         self.assertEqual(frappe.db.get_value("Vehicle Stop", stop, "docstatus"), 2)
-        # ...whose on_cancel restored the vehicle to its previous (Active) status.
+        # [#kyp06e]
         self.assertEqual(
             frappe.db.get_value("Salis Vehicle", vehicle, "status"), "Active"
         )
-        # Release audit fields are stamped on the stop.
+        # [#mgxabx]
         row = frappe.db.get_value(
             "Vehicle Stop", stop, ["return_date", "released_on", "released_by"], as_dict=True
         )
@@ -131,7 +131,7 @@ class TestOperationsControlFleet(FrappeTestCase):
                 {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
             ).insert(ignore_permissions=True)
         name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-        # Stamp the read-only compliance fields directly (no form gate in a test).
+        # [#5he9rf]
         expiry = frappe.utils.add_days(frappe.utils.today(), 10)
         frappe.db.set_value(
             "Salis Vehicle", name, {"compliance_status": "Expiring Soon", "next_expiry_date": expiry}
@@ -154,7 +154,7 @@ class TestOperationsControlFleet(FrappeTestCase):
 
         summary = get_fleet(search=plate)["summary"]
         self.assertGreaterEqual(summary["compliance_at_risk"], 1)
-        # The chip keys are always present so the client never renders undefined.
+        # [#589t8n]
         self.assertIn("stopped_over_n", summary)
         self.assertIn("stopped_over_days", summary)
 
@@ -167,8 +167,7 @@ class TestOperationsControlFleet(FrappeTestCase):
                 {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
             ).insert(ignore_permissions=True)
         name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
-        # Submit a Maintenance stop (puts the vehicle Stopped), then backdate stop_date
-        # well past the default 14-day cutoff so it is overstaying.
+        # [#b5vb51]
         stop = frappe.get_doc(
             {
                 "doctype": "Vehicle Stop",

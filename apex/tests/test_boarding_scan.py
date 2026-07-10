@@ -41,14 +41,12 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
         cls.driver = _ensure_test_driver()
         cls.w1 = _employee("Boarding Worker One")
         cls.w2 = _employee("Boarding Worker Two")
-        # An employee deliberately NOT placed on the trip manifest.
+        # [#b7jhii]
         cls.off_manifest = _employee("Boarding Off Manifest")
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a per-class Project OUTSIDE the per-method savepoint
-        # rollback; delete it so the committed Project does not leak across the
-        # test DB. (Site/Building/Employees are reuse-or-create shared fixtures.)
+        # [#4w47gh]
         frappe.set_user("Administrator")
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -103,7 +101,7 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
         )
         self.assertEqual(res["result"], "Valid")
 
-        # The Trip Start Log gained exactly one boarding row for this worker.
+        # [#65569c]
         log = frappe.get_doc("Trip Start Log", res["trip_start_log"])
         self.assertEqual(log.boarded_count, 1)
         self.assertEqual(len(log.boarding_events), 1)
@@ -112,7 +110,7 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
         self.assertEqual(row.method, "QR")
         self.assertEqual(row.accommodation_building, self.building)
 
-        # An audit row was written, flagged as having created the boarding event.
+        # [#q4ltp5]
         scan = frappe.get_doc("Boarding Scan Log", res["scan_log"])
         self.assertEqual(scan.result, "Valid")
         self.assertEqual(scan.employee, self.w1)
@@ -135,7 +133,7 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
         log = frappe.get_doc("Trip Start Log", first["trip_start_log"])
         self.assertEqual(log.boarded_count, 1)
 
-        # Both attempts are audited (1 Valid + 1 Duplicate).
+        # [#1p0lyv]
         rows = frappe.get_all(
             "Boarding Scan Log",
             filters={"dispatch_trip": dt.name, "employee": self.w1},
@@ -150,16 +148,16 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
         )
         self._cleanup_logs(dt.name)
         pass_data = boarding.get_boarding_pass(dt.name, self.w1)
-        # Tamper the signature.
+        # [#5oy7f9]
         forged = pass_data["pass_token"][:-4] + "0000"
 
         res = boarding.scan_boarding_pass(forged)
         self.assertEqual(res["result"], "Invalid Token")
 
-        # No Trip Start Log boarding row exists for this trip.
+        # [#hvvfpf]
         logs = frappe.get_all("Trip Start Log", filters={"dispatch_trip": dt.name})
         self.assertEqual(logs, [])
-        # The rejected attempt is still audited.
+        # [#s0exfb]
         self.assertTrue(frappe.db.exists("Boarding Scan Log", res["scan_log"]))
 
     def test_pass_for_off_manifest_worker_rejected_at_issue(self):
@@ -192,12 +190,11 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
         res = boarding.scan_boarding_pass(pass_data["pass_token"])
         scan = frappe.get_doc("Boarding Scan Log", res["scan_log"])
         self.assertNotEqual(scan.pass_token_hash, pass_data["pass_token"])
-        self.assertEqual(len(scan.pass_token_hash), 64)  # sha-256 hexdigest
+        self.assertEqual(len(scan.pass_token_hash), 64)  # [#kllefw]
 
 
 def tearDownModule():
-    # P-148: drop this module's committed Accommodation Buildings so the suite's
-    # post-run building count returns to the pre-suite baseline (see factories.py).
+    # [#2esm3x]
     from apex.tests import factories
 
     factories.purge_test_buildings()

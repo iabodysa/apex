@@ -88,7 +88,7 @@ class TestOperationsAlertActions(FrappeTestCase):
 		name = _alert()
 		self.addCleanup(lambda: _purge_alert(name))
 		acknowledge_alert(name)
-		# A second call must not flip-flop or report a fresh acknowledgement.
+		# [#333lqv]
 		again = acknowledge_alert(name)
 		self.assertFalse(again.get("acknowledged"))
 		self.assertEqual(frappe.db.get_value("Operations Alert", name, "status"), "Acknowledged")
@@ -111,7 +111,7 @@ class TestOperationsAlertActions(FrappeTestCase):
 		first = resolve_alert(name, note="first")
 		self.assertTrue(first.get("resolved"))
 		first_on = frappe.db.get_value("Operations Alert", name, "resolved_on")
-		# A re-run must report resolved=False and must not rewrite resolved_on.
+		# [#8ad13g]
 		second = resolve_alert(name, note="second")
 		self.assertFalse(second.get("resolved"))
 		self.assertEqual(
@@ -128,7 +128,7 @@ class TestOperationsAlertActions(FrappeTestCase):
 	def test_writes_gated_on_alert_write(self):
 		name = _alert()
 		self.addCleanup(lambda: _purge_alert(name))
-		# Internal Auditor reads Operations Alert but cannot write it.
+		# [#cy0v8t]
 		auditor = _user("oa-actions-auditor@example.com", "Internal Auditor")
 		frappe.set_user(auditor)
 		with self.assertRaises(frappe.PermissionError):
@@ -161,9 +161,7 @@ class TestOpenAlertsQueueScope(FrappeTestCase):
 		frappe.set_user("Administrator")
 		_purge_alert(cls.aa)
 		_purge_alert(cls.ab)
-		# setUpClass also commits Projects + Vehicles + a User Permission OUTSIDE
-		# the per-method savepoint rollback; delete them so the @example.com
-		# Project User Permission rows do not poison later tests on the bench.
+		# [#c3wd36]
 		frappe.db.delete("User Permission",
 			{"allow": "Project", "for_value": cls.pa, "user": cls.sup})
 		for v in (cls.va, cls.vb):
@@ -206,13 +204,13 @@ class TestAlertAgingThresholds(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	def tearDown(self):
-		# Restore the persisted Single so a mutated value can't leak into other tests.
+		# [#p2a0do]
 		frappe.set_user("Administrator")
 		for field in AGING_SETTING.values():
 			frappe.db.set_single_value("Salis Settings", field, 0)
 
 	def test_aging_fields_defined_on_doctype(self):
-		# Each referenced fieldname must be a real Int field on the Salis Settings meta.
+		# [#xrmyus]
 		meta = frappe.get_meta("Salis Settings")
 		for field in AGING_SETTING.values():
 			df = meta.get_field(field)
@@ -220,13 +218,13 @@ class TestAlertAgingThresholds(FrappeTestCase):
 			self.assertEqual(df.fieldtype, "Int", f"{field} must be an Int")
 
 	def test_falls_back_to_default_when_unset_or_zero(self):
-		# Single new-field trap: 0/unset must yield the built-in default, not 0 hours.
+		# [#cxye9d]
 		for field in AGING_SETTING.values():
 			frappe.db.set_single_value("Salis Settings", field, 0)
 		self.assertEqual(_aging_thresholds(), AGING_DEFAULT)
 
 	def test_reads_configured_value_when_set(self):
-		# A non-zero stored value overrides the default for that severity.
+		# [#kg3w8w]
 		frappe.db.set_single_value("Salis Settings", AGING_SETTING["Warning"], 12)
 		thresholds = _aging_thresholds()
 		self.assertEqual(thresholds["Warning"], 12, "configured value must be read through")

@@ -85,9 +85,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         self.bed.insert(ignore_permissions=True)
 
     def tearDown(self):
-        # Delete in reverse dependency order: bed → room → building → site.
-        # Company, Project, and Employee are NOT deleted here because setUp only
-        # creates them when none exist at all — they may be real or shared fixtures.
+        # [#rmsl05]
         for doctype, name in [
             ("Bed", self.bed.name),
             ("Room", self.room.name),
@@ -131,7 +129,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         self.assertEqual(getdate(assignment.check_out_date), getdate("2026-05-21"))
         self.assertEqual(assignment.docstatus, 1, "Assignment should not be cancelled (docstatus 2) on checkout; history should be preserved.")
         
-        # [#me5am6] Bed must be freed and room must be queued for cleaning.
+        # [#885los]
         self.assertEqual(frappe.db.get_value("Bed", self.bed.name, "status"), "Available",
                          "on_submit must flip the bed status to Available")
         self.assertEqual(frappe.db.get_value("Room", self.room.name, "readiness_status"), "Needs Cleaning",

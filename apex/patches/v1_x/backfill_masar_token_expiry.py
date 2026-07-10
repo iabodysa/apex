@@ -32,8 +32,7 @@ def execute():
 
     expiry = _token_expiry()
     for name in names:
-        # update_modified=False: a backfill must not touch the audit timestamp, and
-        # the token field is unchanged (only the new expiry is stamped).
+        # [#9yh01d]
         frappe.db.set_value(
             "Masar Worker Token", name, "expires_on", expiry, update_modified=False
         )

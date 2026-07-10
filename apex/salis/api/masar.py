@@ -19,22 +19,16 @@ from frappe.rate_limiter import rate_limit
 
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import _hash_token
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
-# Maps deep-link builders shared with driver_portal so worker + driver open the
-# identical chained route; _stop_waypoint is re-exported for callers importing it
-# from masar (maps_links is pure, no circular-import risk).
+# [#55ldxu]
 from apex.salis.api.maps_links import _full_route_maps_url
 from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-exported)
 
 # [#6ddse8]
 WORKER_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 
-# Live-ride ETA model. Self-contained (no external routing/traffic API): the ETA is
-# the great-circle (haversine) distance from the driver's last GPS position to the
-# worker's pickup building, divided by an assumed average fleet speed. Straight-line
-# distance under-estimates road distance, so this is a floor/indicative ETA — good
-# enough for a "your ride is ~N min away" glance, and fully deterministic for a test.
+# [#kta0hy]
 _EARTH_RADIUS_KM = 6371.0088
-# Fallback when Salis Settings has no configured speed (the zero-trap default).
+# [#9inje9]
 _DEFAULT_FLEET_SPEED_KMPH = 40.0
 
 
@@ -98,7 +92,7 @@ def compute_ride_eta_minutes(dispatch_trip, pickup_building):
     )
     if not dest or dest.get("pickup_lat") is None or dest.get("pickup_lng") is None:
         return None
-    # A stored (0.0, 0.0) is treated as "no fix" (null island), not a real position.
+    # [#1w40qu]
     if not (pos.get("driver_lat") or pos.get("driver_lng")):
         return None
     if not (dest.get("pickup_lat") or dest.get("pickup_lng")):
@@ -127,10 +121,7 @@ def _fmt_time(value):
         return frappe.utils.cstr(value)
 
 
-# A finished trip is one whose journey is over — boarding it is meaningless. Used
-# to drop a YESTERDAY trip that has already completed/cancelled while keeping an
-# in-motion night run; today's trips are never date-filtered, so a today trip in
-# any status stays visible to the driver's route view.
+# [#hgsz8p]
 _FINISHED_TRIP_STATUSES = frozenset({"Completed", "Cancelled"})
 
 
@@ -194,10 +185,7 @@ def _today_worker_trips(driver):
     trips = _drop_finished_yesterday(trips)
     if not trips:
         return []
-    # [#pmk91w] Backfill transport_request from the route plan for trips missing it,
-    # then read each request's service_line. Both are bulk-prefetched (one query each,
-    # keyed on the collected ids) and indexed in memory, instead of two get_value
-    # calls per trip (N+1). Output is the same service-line-filtered trip list.
+    # [#popsyt]
     rp_ids = {t["route_plan"] for t in trips if not t.get("transport_request") and t.get("route_plan")}
     if rp_ids:
         rp_tr = {
@@ -239,8 +227,7 @@ def _registered_workers(transport_request):
         fields=["employee", "pickup_point", "notes"],
         order_by="idx asc",
     )
-    # Bulk-prefetch the employee names in one query keyed on the manifest's
-    # employee ids, instead of one get_value per row (N+1).
+    # [#c1mexk]
     emp_ids = {r["employee"] for r in rows if r.get("employee")}
     emp_names = (
         {
@@ -284,8 +271,7 @@ def _ordered_stops(route_plan):
         ],
         order_by="idx asc",
     )
-    # Bulk-prefetch the housing-pickup buildings in one query keyed on the stops'
-    # building ids, instead of one get_value per stop (N+1). Indexed by name below.
+    # [#1f00x5]
     bldg_ids = {r["accommodation_building"] for r in rows if r.get("accommodation_building")}
     buildings = (
         {
@@ -446,19 +432,9 @@ def get_my_worker_route_summary() -> dict:
 
 
 # [#74dyev]
-# Masar worker (token-scoped) endpoints — guest-callable over a personal link.
-#
-# Worker-write contract (every NEW write endpoint below MUST uphold all four, so
-# a personal link can never widen access or be used to spam):
-#   1. Call _resolve_worker(token) FIRST — the sole place a worker identity is
-#      established; never trust a client-supplied id.
-#   2. Derive ALL scope (employee/building/room/bed/trip) server-side from that
-#      resolved identity, not from request args.
-#   3. Carry an explicit @rate_limit(...) sized to the action.
+# [#sfc8jm]
 #   4. Mark each ignore_permissions write with an `# audit-ok` note stating the
-#      identity was resolved from the token server-side.
-# The live writes — create_worker_request (+ photo), notify_hr_iqama_expiring,
-# confirm_boarding — each follow this.
+# [#3n7rv4]
 
 # [#r00mpe]
 WORKER_REQUEST_CATEGORIES = (
@@ -475,9 +451,7 @@ WORKER_REQUEST_CATEGORIES = (
     "Other",
 )
 
-# [#t306loc] Issue Location Select options — mirror the Accommodation Resident
-# Request DocType field exactly; a client value outside this set is dropped (the
-# field is optional, so no throw — it simply isn't set).
+# [#dux84r]
 WORKER_ISSUE_LOCATIONS = (
     "Room",
     "Bathroom",
@@ -489,23 +463,15 @@ WORKER_ISSUE_LOCATIONS = (
     "Other",
 )
 
-# [#t306lang] Preferred Language Select options — mirror the DocType field. The
-# worker portal offers only the two it is localized in (English/Arabic); the
-# wider set is accepted here so the field stays in sync if the UI grows.
+# [#sncoz9]
 WORKER_PREFERRED_LANGUAGES = ("English", "Arabic", "Urdu", "Hindi", "Bengali")
 
-# [#t306photo] Guest-uploadable request photo: only real image types, capped so a
-# guest POST can never push an oversized blob through the create endpoint.
+# [#1kncdr]
 WORKER_PHOTO_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".heic", ".heif")
 WORKER_PHOTO_MAX_BYTES = 8 * 1024 * 1024
 
 
-# [#tokcookie] The personal token is carried to the worker endpoints in the
-# httpOnly ``masar_wt`` cookie (set by www/masar.py from the one-time ?w= hit), NOT
-# in the query string (T-685: keeps it out of access logs) nor inlined into the page
-# (T-705). An explicit ``token`` argument still wins for backward-compat with any
-# freshly distributed ?w= link whose first request has not yet swapped to the cookie,
-# and so the resolver stays unit-testable without a live cookie jar.
+# [#87hub4]
 MASAR_TOKEN_COOKIE = "masar_wt"
 
 
@@ -539,25 +505,18 @@ def _resolve_worker(token):
     A Temporary-Worker token therefore has no ``employee`` and is rejected here
     with a DISTINCT, honest message (the link is valid but not active yet), not
     the misleading invalid/disabled one."""
-    # [#tokcookie] Fall back to the httpOnly cookie when no token arg was supplied,
-    # so the SPA no longer has to pass the secret in the query string.
+    # [#rn4f9u]
     token = _token_from_request(token)
     if not token:
         frappe.throw(_("A worker link token is required."), frappe.PermissionError)
-    # [#tokhash] The token is stored only as a hash (P-104); hash the presented value
-    # and match on that — a single indexed lookup, and a DB-row read leaks no usable
-    # secret. Presenting the stored hash itself hashes again and fails closed.
+    # [#kvb11d]
     row = frappe.db.get_value(
         "Masar Worker Token",
         {"token": _hash_token(token), "enabled": 1},
         ["employee", "employee_name", "party_type", "expires_on"],
         as_dict=True,
     )
-    # [#tokttl] TTL enforcement (T-629): an expired link is refused, even if the row
-    # exists, is enabled, and points at an Active worker. expires_on is NULL only for
-    # rows minted before the TTL existed AND not yet backfilled — those never expire
-    # (fail-open here is the deliberate backward-compat seam; the migration stamps
-    # every live row a generous expiry so this NULL window is closed in practice).
+    # [#kcu68t]
     if row and row.get("expires_on") and frappe.utils.now_datetime() > frappe.utils.get_datetime(
         row["expires_on"]
     ):
@@ -565,8 +524,7 @@ def _resolve_worker(token):
             _("This worker link has expired. Please ask for a fresh link."),
             frappe.PermissionError,
         )
-    # [#t325tw] A linkable token that simply isn't an Employee yet: explain that,
-    # don't cry "invalid" — the worker becomes reachable once HR links the Iqama.
+    # [#88qawg]
     if row and not row.get("employee") and row.get("party_type") == "Temporary Worker":
         frappe.throw(
             _("This worker is not linked to a permanent Employee yet, so the worker portal is not available."),
@@ -599,10 +557,7 @@ def _days_until(value):
         return None
 
 
-# Masar SPA enum namespace -> (DocType, Select fieldname) it localizes. The SAME
-# pairs the worker portal renders via tEnum; keeping the source here (server-side)
-# is what lets us drive the labels from the live options + ar.csv instead of a
-# hand-maintained JS duplicate that silently drifts.
+# [#tultqv]
 _ENUM_SOURCES = {
     "status": ("Employee", "status"),
     "stayType": ("Housing Assignment", "stay_type"),
@@ -646,7 +601,7 @@ def get_enum_labels(lang="ar"):
         labels = {}
         for opt in meta_field.options.split("\n"):
             opt = opt.strip()
-            # Skip blanks and only carry a real translation (identity adds nothing).
+            # [#7r8jr6]
             if opt and translations.get(opt) and translations[opt] != opt:
                 labels[opt] = translations[opt]
         if labels:
@@ -826,9 +781,7 @@ def get_worker_accommodation(token=None):
     }
 
 
-# A trip is "upcoming" when its pickup is at or after this instant;
-# anything earlier is "past". Home's next_ride and Transport's upcoming list both
-# pivot on this one predicate so the two screens can never contradict each other.
+# [#77l2wp]
 def _is_upcoming_pickup(pickup_datetime, now_dt=None):
     """True when ``pickup_datetime`` (a backend string or datetime) is at or after
     ``now_dt`` (defaults to now). A missing pickup is treated as upcoming so a
@@ -842,11 +795,7 @@ def _is_upcoming_pickup(pickup_datetime, now_dt=None):
         return True
 
 
-# [#wkrscope] A worker is NOT the driver: the driver navigates every housing
-# pickup (A/B/C) + the drop-off, but a worker only cares about TWO points — where
-# the shuttle collects HIM, and where it is going. These derive that worker-scoped
-# pair from the full ordered stop list so the Masar Transport view (and the
-# boarding pass) never leak other buildings' stops to a worker.
+# [#3pph3v]
 def _worker_pickup_stop(stops, my_building):
     """The worker's OWN pickup stop from the ordered route stops.
 
@@ -860,7 +809,7 @@ def _worker_pickup_stop(stops, my_building):
         for s in stops:
             if s.get("accommodation_building") == my_building:
                 return s
-    # Unresolved building (or no match): the first housing pickup, else first stop.
+    # [#5c8x93]
     for s in stops:
         if s.get("accommodation_building"):
             return s
@@ -941,16 +890,11 @@ def get_worker_transport(token=None):
     employee = _resolve_worker(token)
     requests = _worker_transport_requests(employee)
     now_dt = frappe.utils.now_datetime()
-    # [#wkrscope] The worker's active housing building, resolved ONCE, scopes each
-    # trip's stops to the worker's own pickup (matched by accommodation_building).
+    # [#dtcuvv]
     assignment = _active_assignment(employee)
     my_building = assignment.get("building") if assignment else None
 
-    # [#p210batch] Pre-fetch the vehicle / driver / depart-time / rating lookups
-    # that used to run once PER request row (N+1 across the worker's shuttle list)
-    # as one bulk read each, keyed by name. Every replaced call was a pure
-    # key->value read by primary key (or an employee+trip existence check), so the
-    # per-trip dicts and the has_rated flag are byte-identical to the per-row form.
+    # [#hnuxj1]
     vehicle_names = {r["assigned_vehicle"] for r in requests if r.get("assigned_vehicle")}
     driver_names = {r["assigned_driver"] for r in requests if r.get("assigned_driver")}
     trip_names = {r["dispatch_trip"] for r in requests if r.get("dispatch_trip")}
@@ -969,7 +913,7 @@ def get_worker_transport(token=None):
             filters={"name": ["in", list(driver_names)]},
             fields=["name", "full_name", "phone"],
         ):
-            # Old shape carried only full_name + phone (name was not requested).
+            # [#phubnp]
             driver_map[d["name"]] = {"full_name": d["full_name"], "phone": d["phone"]}
     depart_map = {}
     if trip_names:
@@ -1002,25 +946,17 @@ def get_worker_transport(token=None):
         )
         is_upcoming = _is_upcoming_pickup(req.get("pickup_datetime"), now_dt)
         stops = _ordered_stops(req.get("route_plan"))
-        # [#wkrscope] Scope the multi-stop route down to the worker's two points:
-        # his OWN pickup (matched to his building) + the route's destination. The
-        # worker is not the driver, so other buildings' housing pickups are never
-        # surfaced to him; the full `stops` list stays available for any caller
-        # that still needs it (e.g. the driver-facing summary), but the client
-        # renders only `my_pickup` + `destination`.
+        # [#73v959]
         my_pickup = _worker_pickup_stop(stops, my_building)
         destination = _route_destination_stop(stops, my_pickup)
-        # Check if already rated (only relevant for completed past trips)
+        # [#4li4u0]
         has_rated = bool(
             req.get("dispatch_trip") and not is_upcoming and req["dispatch_trip"] in rated_trips
         )
 
         trip = {
             "transport_request": req["name"],
-            # The live Dispatch Trip carries the driver's GPS position; surfaced so
-            # the Home ETA can be computed from it. The request's own back-link is set
-            # only at fulfilment, so while the driver is en route we resolve the
-            # currently-dispatched trip directly (None when none is dispatched yet).
+            # [#rf9139]
             "dispatch_trip": req.get("dispatch_trip") or _live_dispatch_trip(req["name"]),
             "request_type": req.get("request_type"),
             "status": req.get("status"),
@@ -1032,15 +968,14 @@ def get_worker_transport(token=None):
             "stops": stops,
             "my_pickup": my_pickup,
             "destination": destination,
-            # One-tap full-route navigation (all stops chained as Maps waypoints).
+            # [#fpyvhu]
             "maps_route_url": _full_route_maps_url(stops),
             "vehicle": vehicle,
             "driver": driver,
         }
         (upcoming if is_upcoming else past).append(trip)
 
-    # Past trips read newest-first (most recently departed at the top); upcoming
-    # stays soonest-first as the underlying query already ordered them.
+    # [#g2nwgf]
     past.reverse()
     return {
         "date": frappe.utils.today(),
@@ -1082,10 +1017,7 @@ def list_worker_requests(token=None):
 
 
 # [#t322rd]
-# Accommodation Resident Request has NO status-history child table, so the
-# detail timeline is reconstructed from the few durable timestamps the DocType
-# carries: creation (raised), modified (last update), and closed_on (settled).
-# Status states that are settled -> their closed point is closed_on||modified.
+# [#afkogj]
 _RESIDENT_REQUEST_SETTLED_STATES = ("Resolved", "Rejected", "Closed")
 
 
@@ -1118,8 +1050,7 @@ def _request_status_timeline(req):
             }
         )
     else:
-        # Live request: surface the current state at its last-updated time so the
-        # timeline shows movement (New -> current) without inventing per-status dates.
+        # [#gdkpf5]
         if status and status != "New":
             timeline.append(
                 {
@@ -1160,10 +1091,7 @@ def get_worker_request_detail(token=None, name=None):
     if not name:
         frappe.throw(_("A request reference is required."), frappe.PermissionError)
 
-    # [#t322own] Ownership gate: key the fetch on name AND employee=<resolved>,
-    # mirroring list_worker_requests' filter exactly. A request owned by another
-    # worker does not match -> no row -> PermissionError. The client name alone
-    # can never widen access beyond the token's own employee.
+    # [#hua2eb]
     req = frappe.db.get_value(
         "Resident Request",
         {"name": name, "employee": employee},
@@ -1291,8 +1219,7 @@ def get_worker_custody(token=None):
             },
         )
         bucket["qty"] += flt(r.signed_qty)
-        # [#cstdy1] latest issue (positive) row drives the worker-facing
-        # "received date" + the source Custody Issue used to name the supervisor
+        # [#t7owl2]
         if flt(r.signed_qty) > 0:
             bucket["received_date"] = _fmt_date(r.posting_date)
             if r.voucher_type == "Custody Issue" and r.voucher_no:
@@ -1300,7 +1227,7 @@ def get_worker_custody(token=None):
 
     items = []
     for bucket in agg.values():
-        # [#cstdy2] only still-held positive net holdings; drop returned/zero rows
+        # [#lao4m9]
         if bucket["qty"] < 1e-9:
             continue
         bucket["issued_by"] = _custody_issued_by(bucket.pop("_issue_voucher"), bucket["building"])
@@ -1328,13 +1255,12 @@ def _attach_worker_photo(doc, photo, photo_filename):
         return
 
     fname = (photo_filename or "request-photo.jpg").strip() or "request-photo.jpg"
-    # Keep only the base name + a known image extension; default unknown to .jpg.
+    # [#609lpl]
     fname = fname.replace("\\", "/").split("/")[-1]
     if not fname.lower().endswith(WORKER_PHOTO_EXTENSIONS):
         fname = f"{fname}.jpg"
 
-    # Rough decoded-size guard BEFORE decode (base64 is ~4/3 of the bytes); the
-    # framework's check_max_file_size re-checks the exact size inside save_file.
+    # [#artorm]
     payload = photo.split(",", 1)[1] if photo.startswith("data:") and "," in photo else photo
     if len(payload) * 3 / 4 > WORKER_PHOTO_MAX_BYTES:
         frappe.throw(_("The attached photo is too large."))
@@ -1388,7 +1314,7 @@ def create_worker_request(
     if priority not in ("Low", "Medium", "High", "Critical"):
         priority = "Low"
 
-    # [#t306loc] / [#t306lang] optional, drop anything outside the Select set
+    # [#mt3f8m]
     issue_location = (issue_location or "").strip()
     if issue_location not in WORKER_ISSUE_LOCATIONS:
         issue_location = None
@@ -1430,21 +1356,17 @@ def create_worker_request(
         }
     )
     doc.insert(ignore_permissions=True)  # audit-ok — employee resolved from token server-side
-    # [#t306photo] attach after insert so the File can bind to the saved name
+    # [#aq6c4k]
     if photo:
         _attach_worker_photo(doc, photo, photo_filename)
     return {"name": doc.name, "status": doc.status}
 
 
 # [#hometdy]
-# Document is "expiring soon" within this many days — mirrors the established
-# Habitat renewal lead (Building License default renewal_lead_days = 60). A
-# negative days_left (already past) always alerts.
+# [#keyejt]
 _DOCUMENT_ALERT_LEAD_DAYS = 60
 
-# Accommodation Resident Request states that are settled, so NOT counted as open.
-# (Status options: New / Triaged / Assigned / In Progress / Waiting Evidence /
-# Resolved / Rejected / Closed — see the DocType.)
+# [#348vlj]
 _RESIDENT_REQUEST_CLOSED_STATES = ("Resolved", "Rejected", "Closed")
 
 
@@ -1474,8 +1396,7 @@ def get_worker_home(token=None):
     Purely additive: it composes the existing token-scoped endpoints (each
     re-resolves the same token via ``_resolve_worker``) and changes none of
     them. Read-only, no commit, no GL."""
-    # [#hometdy] resolve once up front so a bad/disabled token fails closed here
-    # exactly as the sibling endpoints do (each re-resolves it too).
+    # [#6lefv1]
     _resolve_worker(token)
 
     profile = get_worker_context(token)
@@ -1485,25 +1406,17 @@ def get_worker_home(token=None):
         for d in documents
         if d.get("days_left") is not None and d["days_left"] <= _DOCUMENT_ALERT_LEAD_DAYS
     ]
-    # Whole days until the Iqama expires, surfaced for the Home glance tile
-    # regardless of the alert window (None when no expiry is on file). Read from
-    # the documents profile already computed, not a second Employee read.
+    # [#hv1hes]
     iqama_days_left = next(
         (d.get("days_left") for d in documents if d.get("type") == "iqama"),
         None,
     )
 
     transport = get_worker_transport(token)
-    # the "next" ride is the soonest UPCOMING trip, never an
-    # already-departed one. get_worker_transport now partitions on the SAME
-    # now_datetime() predicate, so Home's next_ride is literally the head of the
-    # list Transport shows under "upcoming" — the two screens cannot disagree.
+    # [#js5pkb]
     upcoming = transport.get("upcoming") or []
     next_ride = upcoming[0] if upcoming else None
-    # Live ride ETA: minutes from the driver's last GPS position (stored on the
-    # dispatched trip) to the worker's own pickup building, via haversine / assumed
-    # fleet speed. None until the trip is dispatched with a position AND the pickup
-    # building has coordinates — the card degrades cleanly when absent.
+    # [#dyj7k3]
     if next_ride:
         next_ride = {
             **next_ride,
@@ -1512,10 +1425,7 @@ def get_worker_home(token=None):
             ),
         }
 
-    # the bed is shown on Home as a glanceable chip, but a bare bed code
-    # ("DEMO-R-103-B2") tells the worker nothing. Carry the building + room (and
-    # check-in) the accommodation endpoint already resolved so the chip reads as a
-    # real location. building/room may be None (degrade cleanly on the client).
+    # [#e4b2n4]
     acc = get_worker_accommodation(token)
     bed = acc.get("bed")
     if bed:
@@ -1599,11 +1509,7 @@ def get_worker_contacts(token=None):
     }
 
 
-# The worker may one-tap "notify HR" only once their Iqama is inside this
-# window. Distinct from the 60-day _DOCUMENT_ALERT_LEAD_DAYS visual alert: the
-# action is the tighter, action-worthy threshold the task fixes at 30 days. The
-# server re-checks it from the Employee record, so a client can never trigger the
-# alert outside this window.
+# [#l9ag3b]
 _IQAMA_NOTIFY_HR_LEAD_DAYS = 30
 
 
@@ -1642,14 +1548,13 @@ def notify_hr_iqama_expiring(token=None):
     employee = _resolve_worker(token)
     emp = _employee_doc(employee)
 
-    # [#nvwidj] same defensive field reads get_worker_context uses — Iqama field
-    # names vary by HR setup; recompute days_left from the record, never the client.
+    # [#ej5wro]
     iqama_no = emp.get("iqama") or emp.get("iqama_no")
     iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
     days_left = _days_until(iqama_expiry)
 
     if days_left is None or days_left > _IQAMA_NOTIFY_HR_LEAD_DAYS:
-        # Out of window (or no expiry on file): refuse silently, raise nothing.
+        # [#h4f4zz]
         return {"notified": False, "days_left": days_left, "recipients": 0}
 
     worker_name = emp.get("employee_name") or employee
@@ -1682,10 +1587,7 @@ def notify_hr_iqama_expiring(token=None):
     return {"notified": True, "days_left": days_left, "recipients": len(recipients)}
 
 
-# [#t323] Boarding method recorded when a worker self-confirms from Masar. The
-# Trip Boarding Event Select carries QR (driver scan) / Manual (driver entry) /
-# Worker (this self-confirm) — reusing the SAME child table the driver QR scan
-# writes, never a parallel one.
+# [#kmy4en]
 _WORKER_BOARDING_METHOD = "Worker"
 
 
@@ -1702,11 +1604,7 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
     own-set; an id the worker is not registered on simply does not match. Returns
     ``(dispatch_trip, transport_request, stop_name, accommodation_building)`` or
     None when the worker has no boardable trip today."""
-    # Window spans yesterday+today so a night run that left before midnight is still
-    # boardable after it (see _trip_date_window). A worker only boards BEFORE the
-    # trip finishes, so a Completed/Cancelled trip is never a boarding target in any
-    # status on either day — excluding both also drops the carried-over finished
-    # yesterday trip, so no _drop_finished_yesterday pass is needed here.
+    # [#g58324]
     trips = frappe.get_all(
         "Dispatch Trip",
         filters={
@@ -1720,19 +1618,10 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
     if not trips:
         return None
 
-    # [#p210batch] The three per-row lookups this resolver used to make INSIDE the
-    # trip/candidate loops (an O(trips x requests) round-trip on a HOT boarding
-    # poll) are pre-fetched as bulk reads and joined in memory. Each replaced call
-    # was a pure key->value read, so the resolution ORDER and the returned VALUES
-    # are byte-identical — only the DB round-trip count changes (N -> 3). The
-    # building lookup stays inline: it fired at most once (only for the winning
-    # candidate), so it is already O(1) per call and pre-fetching it would only
-    # over-read non-winning candidates.
+    # [#ft5pfw]
     trip_names = [t["name"] for t in trips]
 
-    # (1) Assigned Transport Requests per trip, idx-asc within each trip — the
-    # batched form of boarding_flow._assigned_request_names(trip) for every trip.
-    # Grouping a global idx-asc scan by parent preserves each parent's idx order.
+    # [#2pxml7]
     assigned_by_trip = {}
     for arow in frappe.get_all(
         "Dispatch Trip Assigned Request",
@@ -1742,8 +1631,7 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
     ):
         assigned_by_trip.setdefault(arow["parent"], []).append(arow["transport_request"])
 
-    # (2) Route Plan -> its Transport Request, only for trips with no direct request
-    # (the exact set the old per-trip get_value("Route Plan", ...) covered).
+    # [#lilrjj]
     route_plan_names = [
         t["route_plan"] for t in trips if not t.get("transport_request") and t.get("route_plan")
     ]
@@ -1756,12 +1644,7 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
         ):
             route_plan_req[rp["name"]] = rp["transport_request"]
 
-    # (3) This worker's pickup row on every Transport Request they are on, in ONE
-    # read. Presence in the map IS manifest membership — a NULL pickup_point still
-    # counts as a match, exactly as the old get_value returned a truthy dict with
-    # pickup_point=None (never None) for a present row. First-wins on modified-asc
-    # mirrors get_value's default ordering for the (rare) duplicate-manifest-row
-    # case; a worker is normally listed once per request so the map is exact.
+    # [#1rvc0x]
     worker_pickup = {}
     for wrow in frappe.get_all(
         "Transport Request Worker",
@@ -1775,16 +1658,14 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
         req = t.get("transport_request")
         if not req and t.get("route_plan"):
             req = route_plan_req.get(t["route_plan"])
-        # The worker may be on the Route Plan request OR on any request the
-        # supervisor assigned onto this trip; scan that union for their pickup row.
+        # [#3x0xvi]
         candidate_reqs = [req, *assigned_by_trip.get(t["name"], [])]
         if transport_request:
             candidate_reqs = [r for r in candidate_reqs if r == transport_request]
         for candidate in candidate_reqs:
             if not candidate:
                 continue
-            # Manifest membership IS the scope: presence of the worker's pickup row
-            # on this request (a NULL pickup still matches), else the request is skipped.
+            # [#6cszu6]
             if candidate not in worker_pickup:
                 continue
             building = frappe.db.get_value(
@@ -1814,8 +1695,7 @@ def _get_or_create_trip_log(dispatch_trip):
         }
     )
     log.insert(ignore_permissions=True)  # audit-ok — trip resolved from token's own manifest
-    # The trip has now started: seed the per-worker boarding state from the
-    # manifest so the boarding/departure flow has its rows from the first confirm.
+    # [#18h8rg]
     from apex.salis.api.boarding_flow import ensure_trip_boarding_state
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -1864,7 +1744,7 @@ def confirm_boarding(token=None, transport_request=None):
 
     log = _get_or_create_trip_log(dispatch_trip)
 
-    # Idempotent: a second confirm of the same worker adds no row.
+    # [#f3nr8r]
     if _already_boarded(log, employee):
         return {
             "created": False,
@@ -1885,7 +1765,7 @@ def confirm_boarding(token=None, transport_request=None):
         },
     )
     log.save(ignore_permissions=True)  # audit-ok — worker + trip resolved from token server-side
-    # Reflect the self-confirm into the trip's flow state (Pending -> Boarded).
+    # [#qoy1v1]
     from apex.salis.api.boarding_flow import mark_boarded
 
     mark_boarded(dispatch_trip, employee)
@@ -1923,10 +1803,7 @@ def get_worker_boarding_pass(token=None, transport_request=None):
         return {"pass": None}
     dispatch_trip, request_name, stop_name, building = resolved
 
-    # [#wkrscope] The pass shows the worker's OWN pickup + the route DESTINATION,
-    # not the generic per-request pickup_point ("Building Gate") for both. Resolve
-    # them from the route stops scoped to the worker's building (the SAME pair the
-    # Transport view renders), with safe fallbacks so the pass never goes blank.
+    # [#ny5hpd]
     route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan") or frappe.db.get_value(
         "Transport Request", request_name, "route_plan"
     )
@@ -1959,10 +1836,7 @@ def get_worker_boarding_pass(token=None, transport_request=None):
     }
 
 
-# [#masaradhoc] Ad-hoc passenger validation for a worker-initiated request: a name
-# and an ID document are required; the expiry, when supplied, must be a real date.
-# An ad-hoc row is an UNREGISTERED rider (no Employee), kept distinct from the
-# registered worker manifest so headcount + custody never confuse the two.
+# [#q39fbh]
 def _clean_adhoc_passengers(passengers):
     """Validate + normalize the client's ad-hoc passenger rows. Returns a list of
     clean dicts ready to append to the request's ``adhoc_passengers`` table; throws
@@ -1995,9 +1869,7 @@ def _clean_adhoc_passengers(passengers):
     return rows
 
 
-# [#masartr] Worker-initiated transport request: the worker portal offers only the
-# two worker service lines; the request type is derived from it (never trusted from
-# the client), matching the controller's SERVICE_LINE_REQUEST_TYPE map.
+# [#6nk520]
 _WORKER_TRANSPORT_SERVICE_REQUEST_TYPE = {
     "Site Transport": "Accommodation to Project Shuttle",
     "Inter-City Relocation": "Inter-City Relocation",
@@ -2055,8 +1927,7 @@ def create_worker_transport_request(
 
     adhoc_rows = _clean_adhoc_passengers(adhoc_passengers)
 
-    # [#masartrscope] employee's own active assignment seeds building/project — never
-    # taken from the client, so the request stays bound to the token's own worker.
+    # [#fyh5gw]
     assignment = _active_assignment(employee)
     building = assignment.get("building") if assignment else None
     project = assignment.get("project") if assignment else None
@@ -2143,12 +2014,11 @@ def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=Non
     if rating < 1 or rating > 5:
         frappe.throw(_("Rating must be between 1 and 5."))
 
-    # Ensure the worker actually rode this trip before accepting a rating; the
-    # membership is resolved through the trip's request/manifest child tables.
+    # [#ilh5tr]
     if not _worker_was_on_trip(employee, dispatch_trip):
         frappe.throw(_("You were not part of this trip's manifest."), frappe.PermissionError)
 
-    # Check if already rated
+    # [#tejynz]
     existing = frappe.db.exists(
         "Transport Trip Rating",
         {"employee": employee, "dispatch_trip": dispatch_trip}

@@ -40,9 +40,7 @@ class TestVehicleDamageWriteOff(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         tag = self._testMethodName
-        # submit()/cancel() below commit, so the per-method vehicle escapes the
-        # savepoint rollback and leaks; reuse it (unique plate_normalized) instead
-        # of colliding on a re-run or a shared, non-reset test bench.
+        # [#99ioui]
         self.vehicle = _ensure_vehicle(f"WO {tag}")
         self.incident = frappe.get_doc(
             {
@@ -97,20 +95,19 @@ class TestVehicleDamageWriteOff(FrappeTestCase):
         )
 
     def test_negative_estimated_cost_is_rejected(self):
-        # a negative estimated cost is never a valid write-off amount.
+        # [#srrxvw]
         with self.assertRaises(frappe.ValidationError):
             self._write_off(estimated_cost=-1)
 
     def test_non_negative_estimated_cost_is_allowed(self):
-        # Non-vacuous: the guard rejects only negatives; zero and positive pass.
+        # [#17ibxm]
         zero = self._write_off(estimated_cost=0)
         self.assertTrue(zero.name)
         positive = self._write_off(estimated_cost=500)
         self.assertTrue(positive.name)
 
     def test_needs_operations_derived_from_estimated_cost(self):
-        # The Write-Off Operations Threshold is REAL: needs_operations is derived
-        # server-side from estimated_cost vs the threshold (was a dead setting).
+        # [#gys5hx]
         frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold", 2000)
         below = self._write_off(estimated_cost=1999)
         self.assertEqual(below.needs_operations, 0)
@@ -132,12 +129,7 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
         super().setUpClass()
         cls.supervisor = _user("vwo_sup@example.com", "Fleet Supervisor")
         cls.manager = _user("vwo_doa_mgr@example.com", "Fleet Manager")
-        # The write-off is project-scoped (vehicle_damage_write_off_has_permission
-        # resolves the project via driver -> Salis Driver). Fleet Supervisor is a
-        # SCOPED role, so the regional authorizer must be permitted for the case's
-        # project for the project-scope gate to admit it — without this the DoA tier
-        # gate (the actual subject here) can never be reached. Fleet Manager is an
-        # UNSCOPED oversight role and needs no Project User Permission.
+        # [#nkqhd1]
         cls.project = _project()
         cls.driver = frappe.get_doc(
             {
@@ -150,9 +142,7 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a Project + User Permission (and a project-anchored
-        # Salis Driver) OUTSIDE the per-method savepoint rollback; delete them so
-        # the @example.com Project User Permission rows do not poison later tests.
+        # [#aog6ng]
         frappe.set_user("Administrator")
         frappe.db.delete("User Permission",
                          {"allow": "Project", "for_value": cls.project, "user": cls.supervisor})
@@ -166,16 +156,14 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "writeoff_ops_threshold", 2000)
-        # _case() applies a workflow (commits), so the per-method vehicle escapes
-        # the savepoint rollback and leaks; reuse it (unique plate_normalized)
-        # instead of colliding on a re-run or a shared, non-reset test bench.
+        # [#h8la3d]
         self.vehicle = _ensure_vehicle(f"WD {self._testMethodName}")
 
     def tearDown(self):
         frappe.set_user("Administrator")
 
     def _case(self, estimated_cost):
-        # Owned by Administrator so the approver (supervisor/manager) is never the owner.
+        # [#b6z7yk]
         case = frappe.get_doc(
             {
                 "doctype": "Vehicle Damage Write-Off",

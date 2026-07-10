@@ -67,8 +67,7 @@ class TestScheduledTaskInstance(FrappeTestCase):
             "status": "Open",
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
-        # Set docstatus=1 directly to satisfy mark_completed()'s guard without
-        # running submit()'s link-validation (QA TEMPLATE is a stub name).
+        # [#gzyz5c]
         frappe.db.set_value("Scheduled Task Instance", doc.name, "docstatus", 1)
         doc.reload()
         try:

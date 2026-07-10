@@ -28,14 +28,7 @@ from apex.apex_core.utils.party_link import sync_party_employee
 
 TOKEN_BYTES = 24  # [#9dvf8n]
 
-# [#tokhash] At-rest hardening (P-104): the raw token is NEVER stored in clear. The
-# ``token`` field holds only its SHA-256 hex digest (one-way — a direct DB-row read
-# exposes zero usable secret), and the resolver hash-and-compares the presented token
-# against it. A plain (unsalted) SHA-256 is sufficient because the raw token already
-# carries full ``generate_hash`` entropy (not brute-forceable), and it stays a single
-# indexed equality lookup. A recoverable Fernet copy lives in ``token_enc`` so the
-# desk can re-share the SAME link (QR / WhatsApp slip) without rotating — that
-# ciphertext is useless without the site encryption key, so the row still leaks nothing.
+# [#9haukd]
 
 
 def _hash_token(raw: str) -> str:
@@ -48,11 +41,7 @@ def _decrypt_token(token_enc: str) -> str:
     """Recover the raw token from its stored Fernet ciphertext (site-key protected)."""
     return decrypt(token_enc)
 
-# [#tokttl] How long a freshly minted/rotated personal link stays valid. A leaked
-# /masar link is no longer valid forever (T-629); a worker re-opens (or a supervisor
-# re-shares via Show Link) well within this window, and Show Link / Regenerate both
-# extend it. 180 days is generous enough that a normally-active worker's link never
-# silently expires under them, while bounding the lifetime of a leaked link.
+# [#7khxj6]
 TOKEN_TTL_DAYS = 180
 
 
@@ -65,7 +54,7 @@ def _new_token() -> str:
     """A fresh url-safe random raw token, whose HASH is unique across the doctype."""
     for _attempt in range(8):
         candidate = frappe.generate_hash(length=TOKEN_BYTES * 2)
-        # [#tokhash] Uniqueness is checked against the stored hash, not the raw value.
+        # [#9at93o]
         if not frappe.db.exists("Masar Worker Token", {"token": _hash_token(candidate)}):
             return candidate
     # [#s3grro]
@@ -73,16 +62,13 @@ def _new_token() -> str:
 
 
 class MasarWorkerToken(Document):
-    # [#tokhash] Mint/rotate: generate a fresh raw token, persist ONLY its hash (+ a
-    # recoverable Fernet copy), and stash the raw value transiently on the doc so the
-    # caller can show it ONCE. The raw token never touches the DB in clear and cannot
-    # be read back from a row — only shown at the moment it is issued/rotated.
+    # [#ojkvw4]
     def _mint(self) -> str:
         raw = _new_token()
         self.token = _hash_token(raw)
         self.token_enc = encrypt(raw)
         self._plaintext_token = raw
-        # [#tokttl] Stamp a fresh expiry window on every mint/rotate.
+        # [#ag7geg]
         self.expires_on = _token_expiry()
         self.last_generated_on = frappe.utils.now_datetime()
         self.last_generated_by = frappe.session.user
@@ -102,10 +88,7 @@ class MasarWorkerToken(Document):
     # [#pewmoc]
     def before_validate(self):
         sync_party_employee(self, require_party=True)
-        # [#t325tw] Masar is Employee-only (T-325): a Temporary Worker has no
-        # Employee-keyed data to surface, so a temp token would mint a dead link.
-        # Refuse it at source; the daily linking engine re-points the party to a
-        # real Employee (raw SQL, so it is unaffected by this guard).
+        # [#c8p9h6]
         if self.party_type == "Temporary Worker":
             frappe.throw(
                 _(
@@ -115,13 +98,9 @@ class MasarWorkerToken(Document):
             )
 
     def before_insert(self):
-        # autoname is field:party, which set_new_name resolves BEFORE before_validate
-        # runs — so a token created with only the Employee link (get_or_create_for_employee)
-        # would otherwise hit naming with an empty party ("Worker is required"). Mirror
-        # employee -> party here so naming has it; before_validate still runs the full
-        # require_party + Temporary-Worker guard.
+        # [#6ldmk7]
         sync_party_employee(self)
-        # [#img31u] [#tokhash] Persist the hash; stash the raw for the one-time show.
+        # [#n4hnje]
         self._mint()
 
     def regenerate(self):
@@ -187,10 +166,7 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
     share. No financial impact."""
     frappe.has_permission("Masar Worker Token", "write", throw=True)
     doc = get_or_create_for_employee(employee)
-    # [#tokhash] Obtain the RAW token to build the link. A brand-new row minted it in
-    # before_insert (stashed on ``_plaintext_token``); a rotate request or a token-less
-    # row mints a fresh one; otherwise re-share recovers the SAME raw from its encrypted
-    # copy and extends the expiry (a still-active worker keeps their distributed link).
+    # [#bqs6iz]
     raw = getattr(doc, "_plaintext_token", None)
     if raw is None:
         if frappe.utils.cint(regenerate) or not doc.token:
@@ -198,7 +174,7 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
             raw = doc.regenerate()
         else:
             raw = doc.recover_token()
-            # [#tokttl] Push the expiry out so re-sharing keeps the link alive.
+            # [#7k3u5f]
             doc.extend_expiry()
 
     link = _worker_link(raw)
@@ -206,7 +182,7 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
         "employee": doc.employee,
         "employee_name": doc.employee_name,
         "enabled": bool(doc.enabled),
-        # [#tokhash] The RAW token — shown ONCE here; the row stores only its hash.
+        # [#cqj0cx]
         "token": raw,
         "link": link,
         "qr": masar_qr_data_uri(link),
@@ -227,14 +203,14 @@ def batch_issue_worker_links(employees_json) -> list:
     out = []
     for emp in employees:
         doc = get_or_create_for_employee(emp)
-        # [#tokhash] Recover the RAW token to build each link (see issue_worker_link).
+        # [#t5zj54]
         raw = getattr(doc, "_plaintext_token", None)
         if raw is None:
             if not doc.token:
                 raw = doc.regenerate()
             else:
                 raw = doc.recover_token()
-                # [#tokttl] Batch re-share keeps each existing link alive (fresh expiry).
+                # [#8kwg9b]
                 doc.extend_expiry()
         link = _worker_link(raw)
         out.append(
@@ -245,7 +221,7 @@ def batch_issue_worker_links(employees_json) -> list:
                 "qr": masar_qr_data_uri(link),
             }
         )
-    # Resolve every cell_number in ONE query, then fill — not one get_value per row.
+    # [#n3vua5]
     emp_ids = [r["employee"] for r in out if r.get("employee")]
     phones = dict(
         frappe.get_all(

@@ -206,7 +206,7 @@ class TestAccommodationBuilding(FrappeTestCase):
         b = frappe.get_doc({
             "doctype": "Building",
             "building_name": "QA CCTV " + m,
-            "cctv_camera_count": 99,  # manual value must be overridden
+            "cctv_camera_count": 99,  # [#i524a2]
         })
         b.insert(ignore_permissions=True, ignore_links=True)
         cams = []
@@ -223,7 +223,7 @@ class TestAccommodationBuilding(FrappeTestCase):
                 })
                 cam.insert(ignore_permissions=True, ignore_links=True)
                 cams.append(cam.name)
-            # a non-CCTV asset must not be counted
+            # [#twh03w]
             other = frappe.get_doc({
                 "doctype": "Facility Asset",
                 "naming_series": "FAC-AST-.YYYY.-.####",

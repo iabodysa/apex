@@ -36,18 +36,12 @@ class TestChangelogReadmeComplete(unittest.TestCase):
         )
 
     def test_readme_is_english(self):
-        # The README is the GitHub-facing What's-New index; Arabic product glosses
-        # belong in the individual popups, not this summary mirror.
+        # [#d3rf70]
         offenders = [ln for ln in self._readme().splitlines() if ARABIC.search(ln)]
         self.assertEqual(offenders, [], f"Arabic in change_log/README.md: {offenders[:5]}")
 
 
-# Internal-QA / build register that must NEVER reach an operator-facing changelog
-# popup. The reader is the person who USES the app, never the engineer who built
-# it; a release note is not an audit reply. This bans test counts, test/QA
-# vocabulary, and dev-process narration (cause, CI, "correction wave", "hotfix").
-# It is deliberately phrase-scoped (not bare words) so legitimate product prose
-# survives — e.g. "green" as a bed status colour, "test" inside a domain term.
+# [#kc1808]
 BANNED_REGISTER = re.compile(
     r"""(?ix)
       \(\s*\d+\s+tests?\s*\)            # "(1601 tests)"
@@ -137,7 +131,7 @@ class TestFeedCoversPopups(unittest.TestCase):
         for m in re.finditer(r'"title":\s*(["\'])(.*?)\1', text, re.DOTALL):
             for v in VERSION_IN_TITLE.findall(m.group(2)):
                 parts = v.split(".")
-                if len(parts) == 2:  # "1.60" covers the series head "1.60.0"
+                if len(parts) == 2:  # [#5r0z70]
                     versions.add(f"{parts[0]}.{parts[1]}.0")
                 versions.add(v)
         return versions

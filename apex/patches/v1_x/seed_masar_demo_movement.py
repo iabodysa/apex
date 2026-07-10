@@ -30,7 +30,7 @@ import frappe
 
 from apex.apex_core.utils.company import resolve_company_or_any
 
-# Stable demo keys (idempotency anchors) — neutral placeholders, never real PII.
+# [#2hwj3p]
 _DEMO_USER = "demo.driver@masar.example"
 _DRIVER_NAME = "Demo Driver"
 _WORKER_ONE = "Demo Worker One"
@@ -40,16 +40,13 @@ _SITE = "Demo Housing Site"
 _CITY = "Riyadh"
 _ROUTE = "Demo Morning Shuttle"
 
-# Three demo residences with DISTINCT real Riyadh coordinates, so the chained
-# route has genuine in-city waypoints in order (lat,lng -> a Google Maps `q=` URL
-# the maps-link builder reads back as exact coordinates). Building A is the one
-# the demo worker is housed in.
+# [#5vbgsf]
 _BUILDINGS = (
     {"name": "Demo Residence A", "lat": "24.7136", "lng": "46.6753", "district": "Al Olaya"},
     {"name": "Demo Residence B", "lat": "24.6877", "lng": "46.7219", "district": "Al Malaz"},
     {"name": "Demo Residence C", "lat": "24.7743", "lng": "46.7386", "district": "Al Murabba"},
 )
-_BUILDING = _BUILDINGS[0]["name"]  # the worker's home building
+_BUILDING = _BUILDINGS[0]["name"]  # [#rwjtu1]
 
 
 def _maps_url(lat, lng):
@@ -58,7 +55,7 @@ def _maps_url(lat, lng):
     return f"https://www.google.com/maps?q={lat},{lng}"
 
 
-# Required DocTypes — if any is missing the scenario cannot be built; skip cleanly.
+# [#qxlw0h]
 _REQUIRED = (
     "Salis Driver",
     "Transport Request",
@@ -332,8 +329,7 @@ def _route_plan(project, driver, buildings, transport_request, workers):
 
 
 def _dispatch_trip(driver, route_plan, transport_request):
-    # Keyed on the demo route plan so a re-run never opens a second trip. trip_date
-    # is today so the driver portal (which shows today's trips) is not empty.
+    # [#64e380]
     name = frappe.db.get_value("Dispatch Trip", {"route_plan": route_plan}, "name")
     if name:
         return name
@@ -368,9 +364,7 @@ def _link_transport_request(transport_request, route_plan, dispatch_trip):
 def _worker_token(employee):
     if frappe.db.get_value("Masar Worker Token", {"employee": employee}, "name"):
         return
-    # autoname is field:party and naming runs before before_validate, so set the
-    # Employee party pair up front (mirrors sync_party_employee) or naming throws
-    # "Worker is required".
+    # [#b0b2nv]
     frappe.get_doc(
         {
             "doctype": "Masar Worker Token",
@@ -383,14 +377,14 @@ def _worker_token(employee):
 
 def execute():
     try:
-        # Demo data only on a developer/demo site — never seed a production site.
+        # [#kosh6b]
         if not frappe.conf.get("developer_mode"):
             return
         if any(not frappe.db.exists("DocType", dt) for dt in _REQUIRED):
             return
         company = resolve_company_or_any()
         if not company:
-            # No Company yet (very early install) — nothing to scope the demo to.
+            # [#cu5evy]
             return
 
         project = _project(company)
@@ -402,8 +396,7 @@ def execute():
         w2 = _employee(_WORKER_TWO, company)
         workers = [w1, w2]
 
-        # House the first demo worker in building A so /masar's accommodation card
-        # populates. Isolated: a housing failure must not discard the trip/route.
+        # [#ghzf6c]
         try:
             room = _room(home_building)
             bed = _bed(room)
@@ -422,8 +415,7 @@ def execute():
         _link_transport_request(tr, rp, dt)
         frappe.db.commit()
 
-        # The worker token is the Masar-app half; isolate it so a token failure does
-        # not discard the trip/route the driver portal needs.
+        # [#mklunr]
         try:
             _worker_token(w1)
             frappe.db.commit()

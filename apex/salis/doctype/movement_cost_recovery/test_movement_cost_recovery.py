@@ -18,7 +18,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_workflow_name
 from apex.tests._helpers import _user
 
-# Payment Gateway lives in the (uninstalled) payments app; skip it in the dependency closure.
+# [#p0xvzg]
 test_ignore = ["Mode of Payment", "Payment Entry", "Payment Gateway", "Salis Payment Request"]
 
 WORKFLOW = "Movement Cost Recovery Workflow"
@@ -33,7 +33,7 @@ class TestMovementCostRecoveryAck(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # The approver must differ from the owner (Approve has allow_self_approval=0).
+        # [#4ui2y8]
         cls.manager = _user("mcr_mgr@example.com", "Fleet Manager")
 
     def setUp(self):
@@ -57,8 +57,7 @@ class TestMovementCostRecoveryAck(FrappeTestCase):
         ).insert(ignore_permissions=True)
 
     def test_approve_blocked_without_acknowledgement(self):
-        # The Open -> Approve transition submits the doc (docstatus 1); the gate must
-        # fire here -- this is the path the buggy gate left unguarded.
+        # [#1ytj1k]
         rec = self._recovery(acknowledged=False)
         frappe.set_user(self.manager)
         with self.assertRaises(frappe.ValidationError):
@@ -76,9 +75,7 @@ class TestMovementCostRecoveryAck(FrappeTestCase):
         self.assertEqual(rec.docstatus, 1)
 
     def test_recover_requires_acknowledgement(self):
-        # Reaching Recovered also enforces the gate. Guard the value directly: an
-        # already-Approved (submitted) recovery whose flag is cleared cannot be moved
-        # to Recovered.
+        # [#2exq8g]
         rec = self._recovery(acknowledged=True)
         frappe.set_user(self.manager)
         apply_workflow(rec, "Approve")
@@ -176,7 +173,7 @@ class TestMovementCostRecoveryDoA(FrappeTestCase):
 
     def setUp(self):
         frappe.set_user("Administrator")
-        # Pin the threshold so the test does not depend on the seeded default.
+        # [#4t35wf]
         self.settings = frappe.get_single("Salis Settings")
         self.settings.cost_recovery_ops_threshold = 1000
         self.settings.save(ignore_permissions=True)
@@ -205,7 +202,7 @@ class TestMovementCostRecoveryDoA(FrappeTestCase):
         self.assertEqual(above.needs_operations, 1)
 
     def test_gate_fires_above_threshold_for_regional_user(self):
-        # A Fleet-Supervisor (Regional tier) may not approve a >= threshold recovery.
+        # [#trvxci]
         rec = self._recovery(amount=5000)
         frappe.set_user(self.supervisor)
         with self.assertRaises(frappe.ValidationError):
@@ -215,7 +212,7 @@ class TestMovementCostRecoveryDoA(FrappeTestCase):
         self.assertEqual(rec.status, "Open")
 
     def test_gate_passes_below_threshold_for_regional_user(self):
-        # Below the threshold the Regional tier (Fleet Supervisor) may authorise.
+        # [#6rrf29]
         rec = self._recovery(amount=500)
         frappe.set_user(self.supervisor)
         apply_workflow(rec, "Authorize (Regional)")
@@ -224,7 +221,7 @@ class TestMovementCostRecoveryDoA(FrappeTestCase):
         self.assertEqual(rec.status, "Approved")
 
     def test_operations_user_passes_above_threshold(self):
-        # The Operations tier (Fleet Manager) may authorise a >= threshold recovery.
+        # [#gs0ao5]
         rec = self._recovery(amount=5000)
         frappe.set_user(self.manager)
         apply_workflow(rec, "Approve")

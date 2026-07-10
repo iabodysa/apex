@@ -22,9 +22,7 @@ def before_tests():
 	erpnext_before_tests()
 	frappe.db.commit()
 
-	# P-148: record the pre-suite Accommodation Building set so purge_test_buildings()
-	# (invoked from building-creating modules' tearDownModule) restores the post-suite
-	# building count to this baseline.
+	# [#9ov3i5]
 	from apex.tests import factories
 
 	factories.snapshot_building_baseline()

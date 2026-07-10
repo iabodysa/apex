@@ -27,7 +27,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
-# DocType names used to decide which source back-link field to stamp.
+# [#g7h0bl]
 _STE_DOCTYPE = "Safety Task Execution"
 _SIR_DOCTYPE = "Safety Inspection Report"
 
@@ -58,8 +58,7 @@ def fan_out_findings(findings_rows, source_doc) -> list[str]:
         if _already_linked(finding):
             continue
         mr_name = _spawn_request(finding, source_doc)
-        # Back-link write via db_set so the (possibly submitted) parent's
-        # modified stamp is not disturbed. [#jxe3la]
+        # [#m8nkyx]
         finding.db_set("generated_maintenance_request", mr_name)
         created.append(mr_name)
     return created

@@ -26,24 +26,19 @@ import frappe
 
 _SETTINGS = "Salis Settings"
 
-# A push payload is tiny by design (title + body + a deep-link path); keep the body
-# bounded regardless of caller so a push service never rejects an oversized message.
+# [#l0bnlf]
 _MAX_BODY_LEN = 300
 
-# SSRF allowlist: a PushSubscription endpoint is client-supplied yet becomes a
-# server-side POST target in ``_deliver``. Only the real browser push services may
-# ever be that target, so a hostile endpoint can never aim our server at an internal
-# host (cloud metadata, loopback, RFC-1918). Exact hosts plus dotted-suffix wildcards
-# for the per-region providers (Apple/Windows mint per-device subdomains).
+# [#ecky1c]
 _PUSH_HOST_EXACT = frozenset(
     {
-        "fcm.googleapis.com",  # Chrome / FCM
-        "updates.push.services.mozilla.com",  # Firefox
+        "fcm.googleapis.com",  # [#knx5s8]
+        "updates.push.services.mozilla.com",  # [#osjzpl]
     }
 )
 _PUSH_HOST_SUFFIX = (
-    ".push.apple.com",  # Safari (e.g. web.push.apple.com, <region>.push.apple.com)
-    ".notify.windows.com",  # Edge / WNS (e.g. <region>.notify.windows.com)
+    ".push.apple.com",  # [#e3sq9j]
+    ".notify.windows.com",  # [#kq7se8]
 )
 
 
@@ -63,7 +58,7 @@ def is_allowed_push_endpoint(endpoint: str | None) -> bool:
     if parts.scheme != "https" or not parts.hostname:
         return False
     host = parts.hostname.lower()
-    # An IP literal is never a provider — reject so no private/loopback target slips in.
+    # [#jkyc9w]
     try:
         ipaddress.ip_address(host)
         return False
@@ -85,7 +80,7 @@ def _vapid_config() -> dict | None:
 	if not s.get("enable_web_push"):
 		return None
 	public_key = (s.get("web_push_vapid_public_key") or "").strip()
-	# get_password decrypts the stored secret; never inline a key in code.
+	# [#icjpjh]
 	private_key = s.get_password("web_push_vapid_private_key", raise_exception=False)
 	if not public_key or not private_key:
 		return None
@@ -135,9 +130,7 @@ def _deliver(cfg: dict, subscription: dict, payload: str) -> bool:
 	means the browser dropped the subscription, so the stale row is disabled. Any other
 	transport error is logged (title only — never the payload, endpoint, or key) and
 	swallowed, so one dead device never breaks a fan-out."""
-	# Defense in depth: re-gate the host before the POST so a row stored before the
-	# save-time allowlist (or tampered in the DB) can never make us POST to an internal
-	# target. A failing row is retired so the dead endpoint is not retried.
+	# [#2y51ef]
 	if not is_allowed_push_endpoint(subscription.get("endpoint")):
 		frappe.db.set_value("Driver Push Subscription", subscription["name"], "enabled", 0)
 		frappe.logger("web_push").info("send skipped: endpoint host not allowlisted")
@@ -146,7 +139,7 @@ def _deliver(cfg: dict, subscription: dict, payload: str) -> bool:
 	try:
 		from pywebpush import WebPushException, webpush
 	except ImportError:
-		# pywebpush not bundled — the no-op path until the owner enables push for real.
+		# [#t9xrdb]
 		frappe.logger("web_push").info("send skipped: pywebpush not installed")
 		return False
 
@@ -168,7 +161,7 @@ def _deliver(cfg: dict, subscription: dict, payload: str) -> bool:
 	except WebPushException as exc:
 		status = getattr(getattr(exc, "response", None), "status_code", None)
 		if status in (404, 410):
-			# Browser dropped this subscription — retire the stale device.
+			# [#huwrxc]
 			frappe.db.set_value("Driver Push Subscription", subscription["name"], "enabled", 0)
 		else:
 			frappe.log_error(title="Web push delivery failed")
@@ -190,22 +183,18 @@ def send_to_driver(driver: str, title: str, body: str, url: str | None = None) -
 
 	``url`` is an in-app path (e.g. ``/driver?tab=trips``) the SW opens when the driver
 	taps the notification. Secrets are read here, used, and discarded."""
-	# Reading the Settings Single can raise on a transient DB error; this is also
-	# an enqueue() target, so honour the "never raises" contract in the worker too.
+	# [#8gwi5x]
 	try:
 		cfg = _vapid_config()
 	except Exception:
 		frappe.log_error(title="Web push config read failed")
 		return {"sent": 0, "reason": "not_configured"}
 	if not cfg:
-		# No-op by design: callers fire-and-forget without guarding setup.
+		# [#2ry16q]
 		frappe.logger("web_push").info("send skipped: web push not configured")
 		return {"sent": 0, "reason": "not_configured"}
 
-	# Outer guard for the send body: _deliver already swallows per-device errors, but
-	# the subscription read can raise on a transient DB error, and this is an enqueue()
-	# target whose docstring promises it NEVER raises — so any unforeseen failure
-	# degrades to a logged no-op result instead of a silent RQ job crash.
+	# [#jbir2h]
 	try:
 		subs = _active_subscriptions(driver)
 		if not subs:

@@ -38,9 +38,7 @@ def execute(filters=None):
     elif to_date:
         query_filters["pickup_datetime"] = ["<=", to_date]
 
-    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
-    # list gets via permission_query_conditions; re-apply the caller's project scope
-    # (Transport Request carries a direct project); oversight roles see all.
+    # [#g44sc2]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:

@@ -3,7 +3,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
-# Dependencies whose absence in the test DB must not fail link validation.
+# [#df5lqd]
 test_ignore = [
     "Company",
     "Item",
@@ -61,7 +61,7 @@ class TestMaintenanceCostLedger(FrappeTestCase):
             "actual_start_date": "2026-06-11",
             "actual_end_date": "2026-06-12",
             "completion_photo": "/files/done.png",
-            # Two priced lines + one zero-cost line (the zero line posts nothing).
+            # [#99b1ty]
             "procurement_items": [
                 {"item_description": "Tap washer", "quantity": 2, "estimated_cost": 25},
                 {"item_description": "Sealant tube", "quantity": 1, "estimated_cost": 40},
@@ -120,7 +120,7 @@ class TestMaintenanceCostLedger(FrappeTestCase):
         mr = self._submit_request(building, room)
         wo = self._submit_work_order(mr, building)
         try:
-            # One immutable row per PRICED item (the zero-cost line posts nothing).
+            # [#gh8o0n]
             mark_completed(wo.name)
             originals = self._originals(wo.name)
             self.assertEqual(len(originals), 2,
@@ -128,13 +128,13 @@ class TestMaintenanceCostLedger(FrappeTestCase):
             self.assertEqual(flt(self._net_amount(wo.name)), 65.0,
                              "net cost equals the sum of priced items (25 + 40)")
 
-            # Re-running completion posts nothing new (idempotent).
+            # [#3wusnr]
             from apex.habitat.maintenance_engine import post_maintenance_cost
             wo.reload()
             self.assertEqual(post_maintenance_cost(wo), 0, "re-post must be idempotent")
             self.assertEqual(len(self._originals(wo.name)), 2)
 
-            # Cancel reverses with negative mirror rows, never a delete.
+            # [#el0ka9]
             wo.reload()
             wo.cancellation_reason = "Duplicate work order"
             wo.cancel()

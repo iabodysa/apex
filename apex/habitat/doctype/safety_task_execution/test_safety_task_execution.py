@@ -82,7 +82,7 @@ class TestSafetyTaskExecution(FrappeTestCase):
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
-    # evidence enforcement (Safety Task Execution.validate)
+    # [#8yd3tw]
 
     def _evidence_task(self, evidence_required):
         """Create a Safety Task Catalog row with the given evidence flag."""
@@ -172,7 +172,7 @@ class TestSafetyTaskExecution(FrappeTestCase):
             "Safety Task Execution", doc.name, force=True, ignore_permissions=True
         )
 
-    # failed-execution -> Maintenance Request escalation (on_submit)
+    # [#hf71ab]
 
     def _exec_task(self):
         """A catalog task with no photo requirement so a failed execution can be
@@ -215,7 +215,7 @@ class TestSafetyTaskExecution(FrappeTestCase):
         self.assertEqual(mr.building, building)
         self.assertEqual(mr.source_execution, ste.name)
         self.assertEqual(mr.status, "Open")
-        # Exactly one summary MR for this execution.
+        # [#a9p22s]
         self.assertEqual(
             frappe.db.count("Maintenance Request", {"source_execution": ste.name}), 1
         )
@@ -256,7 +256,7 @@ class TestSafetyTaskExecution(FrappeTestCase):
         first_mr = ste.linked_maintenance_request
         self.assertTrue(first_mr)
 
-        # Re-invoke the escalation directly (the path the back-link guard protects).
+        # [#ke25uv]
         ste._escalate_failed_execution()
         ste.reload()
 

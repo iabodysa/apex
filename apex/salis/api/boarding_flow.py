@@ -36,9 +36,7 @@ from apex.apex_core.doctype.salis_settings.salis_settings import (
     get_boarding_setting,
 )
 
-# Transient cross-request flag a misboarded worker's poll can read: keyed by the
-# worker's Employee id, holds the correct trip/driver correction the scan resolved.
-# TTL'd in the cache (volatile by design — it is a hint, not a record).
+# [#g5x09e]
 _MISBOARD_CACHE_PREFIX = "salis_misboard:"
 _MISBOARD_TTL_SECONDS = 30 * 60
 
@@ -59,7 +57,7 @@ def _publish(event, dispatch_trip, payload):
         pass
 
 
-# Trip Boarding State — populate from the manifest when the trip starts.
+# [#kxse2v]
 
 
 def _request_workers(transport_request):
@@ -132,8 +130,7 @@ def ensure_trip_boarding_state(dispatch_trip, transport_request=None):
         )
         added += 1
     if added:
-        # trip authorised by the calling boarding path; allow_on_submit field lets a
-        # started (submitted) trip still be seeded.
+        # [#4f5v0t]
         trip.save(ignore_permissions=True)  # audit-ok
     return added
 
@@ -155,11 +152,11 @@ def mark_boarded(dispatch_trip, employee, source="Scan"):
             changed = True
     if changed:
         trip.save(ignore_permissions=True)  # audit-ok: boarding path authorised the trip
-        # Clear any stale misboard hint now that the worker has boarded somewhere.
+        # [#bufed4]
         frappe.cache.delete_value(_MISBOARD_CACHE_PREFIX + employee)
 
 
-# Feature A — wrong bus correction (consumed by scan_boarding_pass).
+# [#fymzpx]
 
 
 def _driver_contact(dispatch_trip):
@@ -190,7 +187,7 @@ def build_wrong_bus_result(scanned_trip, worker):
         return None
     correct_trip, transport_request, stop_name, building = resolved
     if correct_trip == scanned_trip:
-        # Already the right trip after all — not a misboard.
+        # [#a9j2hc]
         return None
 
     correct_driver = _driver_contact(correct_trip)
@@ -202,7 +199,7 @@ def build_wrong_bus_result(scanned_trip, worker):
         "route": route_plan,
         "transport_request": transport_request,
     }
-    # Transient hint the worker's poll surfaces (volatile; a hint, not a record).
+    # [#7pj0hr]
     frappe.cache.set_value(
         _MISBOARD_CACHE_PREFIX + worker,
         {
@@ -224,7 +221,7 @@ def _read_misboard(worker):
     return frappe.cache.get_value(_MISBOARD_CACHE_PREFIX + worker)
 
 
-# Driver-arrived signal (P-046) — surfaced to the worker poll.
+# [#pyibn1]
 
 
 def _worker_pickup_arrival(dispatch_trip, building):
@@ -245,7 +242,7 @@ def _worker_pickup_arrival(dispatch_trip, building):
     route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan")
     if not route_plan:
         return None
-    # The worker's own pickup route stop (matched on his building); first match wins.
+    # [#gjawab]
     route_stop = frappe.db.get_value(
         "Route Stop",
         {
@@ -276,7 +273,7 @@ def _worker_pickup_arrival(dispatch_trip, building):
     }
 
 
-# Grace gate.
+# [#8xt8b2]
 
 
 def _trip_start_dt(dispatch_trip):
@@ -300,7 +297,7 @@ def _grace_elapsed(dispatch_trip):
     return time_diff_in_seconds(now_datetime(), start) >= grace * 60
 
 
-# Two-sided confirmation — auto-confirm the worker claim after the timeout.
+# [#72emxa]
 
 
 def _apply_auto_confirm(trip):
@@ -352,7 +349,7 @@ def auto_confirm_claimed_boardings():
     return confirmed
 
 
-# Feature B — endpoints.
+# [#eykptf]
 
 
 def _resolve_trip_for_driver(dispatch_trip):
@@ -400,8 +397,7 @@ def get_trip_boarding(dispatch_trip):
     notify_window = get_boarding_setting("boarding_notify_window_seconds")
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
-    # Realise timed-out claims on read (no notify-quota effect); persist only the
-    # timeout flip, never a notify bump.
+    # [#jkz9fh]
     if _apply_auto_confirm(trip):
         trip.save(ignore_permissions=True)  # audit-ok: system timeout, read-time confirm
 
@@ -443,7 +439,7 @@ def notify_remaining_passengers(dispatch_trip):
         if row.status != "Pending":
             continue
         row.notify_at = now
-        # Only consume the quota after grace; before grace the nudge is a soft ping.
+        # [#fbciqt]
         if grace_ok and cint(row.notify_count) < max_count:
             row.notify_count = cint(row.notify_count) + 1
         changed = True
@@ -555,8 +551,7 @@ def worker_claim_boarded(token=None):
     if target is None:
         return {"trip": dispatch_trip, "status": None}
 
-    # Record the boarding event on the shared manifest log (idempotent), so the
-    # self-confirm carries the same headcount weight as a QR scan / driver entry.
+    # [#gkl1pw]
     log = _get_or_create_trip_log(dispatch_trip)
     if not _already_boarded(log, employee):
         log.append(
@@ -571,9 +566,7 @@ def worker_claim_boarded(token=None):
         )
         log.save(ignore_permissions=True)  # audit-ok: worker + trip resolved from token
 
-    # Flip state to Boarded (Worker source) — mark_boarded stamps confirm_source +
-    # clears any stale misboard hint. worker_claim_at carries the boarding instant
-    # for the ledger; set it explicitly since mark_boarded only touches status/source.
+    # [#nd5ry5]
     if target.status != "Boarded":
         target.worker_claim_at = now_datetime()
         trip.save(ignore_permissions=True)  # audit-ok: worker + trip resolved from token
@@ -690,8 +683,7 @@ def worker_trip_boarding(token=None):
     building = resolved[3]
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
-    # Robust auto-confirm: evaluate the worker-claim timeout on read so the worker
-    # sees Boarded the moment the 1/4-hour rule fires, even if no tick ran yet.
+    # [#lu2q5q]
     if _apply_auto_confirm(trip):
         trip.save(ignore_permissions=True)  # audit-ok: system timeout, read-time confirm
     row = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
@@ -715,8 +707,7 @@ def worker_trip_boarding(token=None):
             "wait_window_seconds": get_boarding_setting("worker_wait_request_seconds"),
             "poll_seconds": poll_seconds,
             "wrong_bus": misboard or None,
-            # P-046: "your driver has arrived at your pickup" — read off the driver's
-            # arrival flag on this worker's own pickup stop. None when not yet arrived.
+            # [#38t4w1]
             "driver_arrived": _worker_pickup_arrival(dispatch_trip, building),
         }
     )
@@ -743,8 +734,7 @@ def depart_and_finalize(dispatch_trip):
     grace_ok = _grace_elapsed(dispatch_trip)
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
-    # Settle any timed-out worker claims first, so a claimed-then-timed-out worker
-    # departs as Boarded, not swept into Absent.
+    # [#n5fxtw]
     changed = bool(_apply_auto_confirm(trip))
     boarded = absent = pending = claimed = 0
     for row in trip.boarding_state or []:
@@ -755,10 +745,10 @@ def depart_and_finalize(dispatch_trip):
             absent += 1
             continue
         if row.status == "Worker Claimed":
-            # An un-timed-out claim is still in flight; keep it (not Absent).
+            # [#7wuzuo]
             claimed += 1
             continue
-        # Pending / Driver Rejected: exhausted-notify + grace -> Absent.
+        # [#ryp6x4]
         if grace_ok and cint(row.notify_count) >= max_count:
             row.status = "Absent"
             absent += 1
@@ -770,9 +760,7 @@ def depart_and_finalize(dispatch_trip):
 
     _close_trip_log(dispatch_trip)
 
-    # Post each settled outcome to the immutable Trip Boarding Ledger so per-worker
-    # boarding reports stay stable when the operational boarding_state child is
-    # later edited. Best-effort: a posting failure must never abort the finalize.
+    # [#skehl2]
     try:
         from apex.salis.boarding_engine import post_trip_boarding
 

@@ -61,7 +61,7 @@ def validate(doc, method=None):
     )
 
 
-# Fields whose change invalidates a previously-generated payment schedule.
+# [#bhb8ai]
 _SCHEDULE_DRIVER_FIELDS = ("rent_amount", "billing_cycle", "first_payment_date", "lease_end_date")
 
 

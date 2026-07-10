@@ -123,7 +123,7 @@ class TestMaintenanceWorkOrderCancel(FrappeTestCase):
             "actual_start_date": "2026-06-11",
             "actual_end_date": "2026-06-12",
             "completion_photo": "/files/done.png",
-            # A priced procurement line so mark_completed posts a ledger memo.
+            # [#3gyzif]
             "procurement_items": [{"item_description": "Tap washer", "quantity": 1, "estimated_cost": 25}],
         })
         wo.insert(ignore_permissions=True, ignore_links=True)
@@ -153,8 +153,7 @@ class TestMaintenanceWorkOrderCancel(FrappeTestCase):
         mr = self._submit_request(building, room)
         wo = self._submit_work_order(mr, building)
         try:
-            # Completion posts the aggregate memo + the immutable per-item cost
-            # ledger original, and drives the request to Closed.
+            # [#siquc7]
             mark_completed(wo.name)
             self.assertEqual(len(self._ledger_rows(wo.name)), 1,
                              "completion should post exactly one ledger memo")
@@ -165,15 +164,12 @@ class TestMaintenanceWorkOrderCancel(FrappeTestCase):
             self.assertEqual(
                 frappe.db.get_value("Maintenance Request", mr.name, "status"), "Closed")
 
-            # Cancel must undo the memo, reverse the immutable cost ledger, and
-            # release the request.
+            # [#5hstlt]
             wo.reload()
             wo.cancellation_reason = "Duplicate work order"
             wo.cancel()
 
-            # The Accommodation Ledger memo is immutable like the cost ledger
-            # (mirrors the Utility Bill Entry cancel idiom): the original survives
-            # and a negative mirror row nets the period sum to zero, never deleted.
+            # [#ahbaxg]
             memo_rows = frappe.get_all(
                 "Accommodation Ledger",
                 filters={"source_doctype": "Maintenance Work Order", "source_name": wo.name},
@@ -185,8 +181,7 @@ class TestMaintenanceWorkOrderCancel(FrappeTestCase):
                             "a reversal_of mirror memo must exist after cancel")
             self.assertEqual(sum(flt(r["total_site_cost"]) for r in memo_rows), 0,
                              "the reversed accommodation memo must net to zero")
-            # The immutable cost ledger is reversed (negative mirror), never deleted:
-            # the original survives and a reversal_of row nets the total to zero.
+            # [#mb39df]
             rows = self._cost_ledger_rows(wo.name)
             self.assertEqual(len(rows), 2,
                              "cancel must add a reversal row, not delete the original")

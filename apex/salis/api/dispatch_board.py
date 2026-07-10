@@ -105,9 +105,7 @@ def get_dispatch_board(project: str | None = None) -> dict:
           * ``transport_requests``: ``{"open": [...], "open_count"}``.
     """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
-    # The board also surfaces Dispatch Trips, so gate on that DocType too
-    # (defence in depth — a caller without Dispatch Trip read must not see the
-    # trips pane just because they can read Salis Vehicle).
+    # [#nfdgou]
     frappe.has_permission("Dispatch Trip", "read", throw=True)
 
     unscoped, projects = _permitted_projects()
@@ -244,7 +242,7 @@ def _trips_today_pane(unscoped, projects) -> dict:
         limit_page_length=0,
     )
 
-    vehicle_driver_titles(rows)  # bulk plate + driver-name enrichment (canonical vehicle_plate key)
+    vehicle_driver_titles(rows)  # [#jttthb]
     for r in rows:
         r["depart_time"] = str(r["depart_time"]) if r.get("depart_time") else None
         r["return_time"] = str(r["return_time"]) if r.get("return_time") else None
@@ -272,9 +270,7 @@ def _drivers_pane(unscoped, projects) -> dict:
     # [#2xijms]
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
 
-    # Fetch the phone (permlevel-1 PII) ONLY when the caller is allowed to see
-    # it — never load-then-blank, so the PII never leaves the DB for a role that
-    # cannot read it.
+    # [#f1zzle]
     driver_fields = ["name", "full_name", "status", "project", "current_vehicle"]
     if show_pii:
         driver_fields.append("phone")

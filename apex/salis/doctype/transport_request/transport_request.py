@@ -55,9 +55,7 @@ class TransportRequest(Document):
         if self.get("website_field"):
             frappe.throw(_("Invalid submission."), frappe.PermissionError)
 
-        # The requested_by __user default records "Guest" for anonymous QR
-        # submissions; keep the anonymous path requester-less so tracking stays
-        # code-based, not tied to the Guest user row.
+        # [#gywh2z]
         if self.requested_by == "Guest":
             self.requested_by = None
 
@@ -172,8 +170,7 @@ class TransportRequest(Document):
         worker_count = self.worker_count or 0
         trips = self.trips_this_month or 0
 
-        # [#4mmsa5] Tier thresholds read via the zero-trap helper (a blank/0 Single
-        # value falls back to the documented default — never trusted as a real 0).
+        # [#98k4h5]
         ops_threshold = get_salis_int("passenger_count_ops_threshold", 20)
         admin_trip_threshold = get_salis_int("admin_trip_ops_threshold", 5)
 

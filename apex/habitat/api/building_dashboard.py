@@ -71,7 +71,7 @@ def get_building_layout(building: str) -> dict:
     floors = []
     for floor_num in sorted(floors_map.keys()):
         floor_rooms = floors_map[floor_num]
-        # Translate at runtime so the Arabic UI gets Arabic floor labels.
+        # [#800gs5]
         if floor_num == 0:
             floor_label = _("Ground Floor")
         elif floor_num < 0:

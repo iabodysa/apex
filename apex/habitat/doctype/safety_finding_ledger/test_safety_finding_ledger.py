@@ -59,7 +59,7 @@ class TestSafetyFindingLedger(FrappeTestCase):
         return frappe.get_doc(data).insert(ignore_permissions=True)
 
     def _execution(self, safety_round, status, findings):
-        # findings: list of dicts mapped onto Inspection Finding Item rows.
+        # [#m22hrm]
         doc = frappe.get_doc(
             {
                 "doctype": "Safety Task Execution",
@@ -116,9 +116,9 @@ class TestSafetyFindingLedger(FrappeTestCase):
         self.assertEqual(by_desc["Blocked fire exit"].severity, "High")
         self.assertEqual(by_desc["Blocked fire exit"].status, "Open")
         self.assertEqual(by_desc["Blocked fire exit"].resolved, 0)
-        # The Resolved snapshot sets the resolved flag.
+        # [#3qhx6j]
         self.assertEqual(by_desc["Expired extinguisher"].resolved, 1)
-        # source_detail_no carries the finding row idx (1-based child idx).
+        # [#c3245z]
         self.assertEqual({r.source_detail_no for r in rows}, {1, 2})
 
     def test_posting_is_idempotent(self):
@@ -131,7 +131,7 @@ class TestSafetyFindingLedger(FrappeTestCase):
         rnd.submit()
         self.assertEqual(len(self._ledger_rows(rnd.name)), 1)
 
-        # Re-running the engine directly must not double-post.
+        # [#kmo8cr]
         from apex.habitat.safety_engine import post_safety_findings
 
         rnd.reload()
@@ -173,12 +173,11 @@ class TestSafetyFindingLedger(FrappeTestCase):
         rnd.submit()
         self.assertEqual(len(self._ledger_rows(rnd.name)), 2)
 
-        # A submitted Execution links the Round; cancel it first so the Round
-        # can be cancelled (native link-protection blocks an in-use parent).
+        # [#inhiyl]
         ex.cancel()
         rnd.cancel()
 
-        # Originals are preserved; a negating reversal row exists for each.
+        # [#3nz7zz]
         originals = self._ledger_rows(rnd.name)
         self.assertEqual(len(originals), 2, "originals are preserved on cancel")
         reversals = [

@@ -43,8 +43,7 @@ class TestConsumableCustodyExpiry(ApexHabitatTestCase):
                                "consumable_lifespan_months": lifespan}).insert(ignore_permissions=True).name
 
     def _issue(self, article, issue_date, qty=2):
-        # Custody Issue now rejects issuing more than the store holds; receive
-        # opening stock into the building store first so the issue can draw it.
+        # [#ngagme]
         from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
             post_stock_entry,
         )
@@ -64,10 +63,10 @@ class TestConsumableCustodyExpiry(ApexHabitatTestCase):
             "message": ["like", f"%{token}%"]})
 
     def test_over_age_fires_in_date_does_not(self):
-        # Lifespan 6 months; this holding is 10 months old -> over age.
+        # [#2pz4ko]
         over = self._article(lifespan=6)
         self._issue(over, issue_date=add_months(today(), -10))
-        # Lifespan 12 months; this holding is 1 month old -> in date.
+        # [#r38myr]
         in_date = self._article(lifespan=12)
         self._issue(in_date, issue_date=add_months(today(), -1))
 
@@ -79,7 +78,7 @@ class TestConsumableCustodyExpiry(ApexHabitatTestCase):
         self.assertEqual(len(self._open_consumable_alerts(in_token)), 0)
 
     def test_no_lifespan_never_fires(self):
-        # consumable_lifespan_months = 0 means no expiry, even for an ancient holding.
+        # [#lm8l7k]
         never = self._article(lifespan=0)
         self._issue(never, issue_date=add_months(today(), -60))
 

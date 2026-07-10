@@ -83,13 +83,13 @@ def _assert_party_in_scope(party_type, party) -> None:
         return
 
     if party_type == PARTY_EMPLOYEE:
-        # Employee carries no `building`; its estate is the live assignment's building.
+        # [#cgbs6q]
         building = frappe.db.get_value(
             "Housing Assignment",
             {"party_type": PARTY_EMPLOYEE, "party": party, "docstatus": 1, "check_out_date": ["is", "not set"]},
             "building",
         )
-        # Housed elsewhere -> deny; unhoused (intake) -> allow.
+        # [#6n8swy]
         if building and building not in allowed:
             raise frappe.PermissionError(
                 _("You are not permitted to access this worker's record.")
@@ -124,7 +124,7 @@ def send_masar_link_message(employee, phone=None) -> dict:
     if not token.get("token") or not token.get("enabled"):
         frappe.throw(_("This worker has no active Masar link yet. Create the QR first."))
 
-    # [#tokhash] The raw token is not stored; rebuild the link from its encrypted copy.
+    # [#6jy36j]
     link = worker_link_for_row(token)
     if not link:
         frappe.throw(_("This worker's Masar link could not be recovered. Regenerate it first."))
@@ -144,7 +144,7 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     tw_expiry = None
     if party_type == PARTY_EMPLOYEE:
         frappe.has_permission("Employee", "read", throw=True)
-        # [#scope] type-level read is not enough — confine to the caller's estate.
+        # [#f5nles]
         _assert_party_in_scope(party_type, party)
         info = frappe.db.get_value("Employee", party, ["employee_name", "image"], as_dict=True) or {}
         if not info:
@@ -152,8 +152,7 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         worker_name, image = info.get("employee_name"), info.get("image")
     elif party_type == PARTY_TEMPORARY_WORKER:
         frappe.has_permission("Temporary Worker", "read", throw=True)
-        # [#scope] type-level read is not enough — confine to the caller's estate
-        # so passport / Iqama can never be harvested for an out-of-building worker.
+        # [#ruz85o]
         _assert_party_in_scope(party_type, party)
         info = frappe.db.get_value(
             "Temporary Worker", party, ["worker_name", "expiry_date"], as_dict=True
@@ -218,7 +217,7 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         "has_custody": bool(custody_count),
         "masar_enabled": masar_enabled,
         "masar_status": "issued" if masar_enabled else "pending",
-        # Temporary-window telemetry for the desk's expiry chip.
+        # [#ja3ebn]
         "expiry_date": frappe.utils.formatdate(tw_expiry) if tw_expiry else None,
         "expiry_days": _expiry_days(tw_expiry),
     }
@@ -232,19 +231,12 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     txt = (txt or "").strip()
     results = []
 
-    # [#wave-b2] get_all forces ignore_permissions, so the building row-scoping the
-    # Accommodation Assignment / Temporary Worker lists get via
-    # permission_query_conditions is bypassed here. Re-apply it report-side so a
-    # building-scoped supervisor sees only their estates' workers; the oversight roles
-    # in HOUSING_UNSCOPED_ROLES stay unrestricted. A scoped user with no allowed
-    # building gets nothing.
+    # [#6pz7eg]
     restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if restrict and not allowed:
         return []
 
-    # [#jibprz] The housed-exclusion set is building-scoped so a building-scoped
-    # supervisor only excludes workers housed in their own buildings from the
-    # arrival-candidate lists.
+    # [#2quqbr]
     housed_filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
     if restrict:
         housed_filters["building"] = ["in", allowed]
@@ -279,9 +271,7 @@ def search_arrivals_workers(building=None, txt=None) -> list:
         ]
 
     if frappe.has_permission("Temporary Worker", "read"):
-        # [#wave-b2] Temporary Worker carries its own `building`; confine a scoped
-        # supervisor's candidate list to their estates (Employee has no building
-        # field — its other-estate housed rows are already removed by housed_emp).
+        # [#3oe33l]
         tw_filters = {"status": "Active"}
         if restrict:
             tw_filters["building"] = ["in", allowed]
@@ -307,7 +297,7 @@ def search_arrivals_workers(building=None, txt=None) -> list:
                 "party": t.name,
                 "label": t.worker_name or t.name,
                 "sub": _("Passport {0}").format(t.passport_number or "—"),
-                # So a search row can flag a worker whose window is closing/lapsed.
+                # [#jhxoxg]
                 "expiry_date": frappe.utils.formatdate(t.expiry_date) if t.expiry_date else None,
                 "expiry_days": _expiry_days(t.expiry_date),
             }
@@ -358,8 +348,7 @@ def register_temporary_worker(
         "party_type": PARTY_TEMPORARY_WORKER,
         "party": doc.name,
         "label": doc.worker_name,
-        # JSON-safe ISO string (not a raw datetime.date) so the return contract is
-        # explicit for server/test callers, mirroring the rest of this module.
+        # [#9k12b4]
         "expiry_date": frappe.utils.formatdate(doc.expiry_date) if doc.expiry_date else None,
     }
 
@@ -378,17 +367,9 @@ def _link_manifest_row(batch_row, temporary_worker) -> None:
     frappe.db.set_value("Arrival Batch Worker", batch_row, "temporary_worker", temporary_worker)
 
 
-# Passport MRZ (machine-readable zone) autofill for the register sheet.
-#
-# The MRZ is the two/three fixed-width OCR-B lines at the foot of a passport. The
-# PARSER below is pure, deterministic, and testable; the image->text OCR step is
-# pluggable (an optional bench engine) so the heavy/optional dependency is wired
-# by the operator, while the parse + the desk scaffold ship now. Feature-flagged
-# by Habitat Settings.enable_passport_mrz_ocr; manual entry always remains.
+# [#rszi33]
 
-# ISO 3166 alpha-3 -> human nationality, for the handful of labour-supply
-# nationalities the desk sees most; an unmapped code passes through as the raw
-# 3-letter code (still useful, never wrong).
+# [#dxrehx]
 _MRZ_NATIONALITY = {
     "IND": "Indian",
     "PAK": "Pakistani",
@@ -423,9 +404,7 @@ def _mrz_yymmdd_to_date(value: str, is_expiry: bool) -> str | None:
     if not (1 <= mm <= 12 and 1 <= dd <= 31):
         return None
     current_yy = frappe.utils.now_datetime().year % 100
-    # A passport expiry is always 20xx (none are 19xx, and 21xx is decades off),
-    # so the two-digit year maps straight onto the 2000s. A birth date is in the
-    # past: this-century only if not future, else last century.
+    # [#okrnm3]
     if is_expiry:
         century = 2000
     else:
@@ -448,7 +427,7 @@ def parse_mrz_text(text: str) -> dict:
     only the keys that parsed (plus ``raw_lines`` for debugging)."""
     import re
 
-    # Keep only plausible MRZ characters and split into the long fixed-width lines.
+    # [#jh0mbl]
     lines = [
         re.sub(r"[^A-Z0-9<]", "", ln.strip().upper())
         for ln in (text or "").splitlines()
@@ -461,7 +440,7 @@ def parse_mrz_text(text: str) -> dict:
 
     line1, line2 = mrz_lines[0], mrz_lines[1]
 
-    # Line 1: 'P<XXX' issuing-country prefix, then SURNAME<<GIVEN<NAMES.
+    # [#i2cp1h]
     name_part = line1
     m = re.match(r"^P[A-Z<]([A-Z]{3})(.*)$", line1)
     if m:
@@ -475,8 +454,7 @@ def parse_mrz_text(text: str) -> dict:
         if full:
             out["worker_name"] = full
 
-    # Line 2: passport_no(9) check(1) nationality(3) dob(6) check(1) sex(1)
-    #         expiry(6) check(1) ...
+    # [#172und]
     passport_no = line2[:9].replace("<", "").strip()
     if passport_no:
         out["passport_number"] = passport_no
@@ -509,13 +487,13 @@ def _ocr_image_to_text(image: str) -> str | None:
         return None
 
     try:
-        import pytesseract  # optional, operator-installed
+        import pytesseract  # [#6we9zm]
         from PIL import Image
 
         img = Image.open(io.BytesIO(raw))
         return pytesseract.image_to_string(img)
     except Exception:
-        # No OCR engine on the bench (or it failed) — signal "unavailable".
+        # [#lsfl7q]
         return None
 
 
@@ -543,7 +521,7 @@ def parse_passport(image) -> dict:
 
     text = _ocr_image_to_text(image)
     if text is None:
-        # Flag is on but no engine is wired — honest signal, manual entry stays.
+        # [#86mcou]
         return {"ok": False, "reason": "ocr_unavailable"}
 
     fields = parse_mrz_text(text)
@@ -621,8 +599,7 @@ def get_arrival_summary(date=None, building=None) -> dict:
     )
     housed_count = len(arrivals)
 
-    # Resolve each arrival's supplier in bulk: Temporary Worker -> labour_supplier,
-    # external-billed Employee -> billed_to_supplier, else Direct.
+    # [#4iwwhx]
     tw_parties = [a.party for a in arrivals if a.party_type == PARTY_TEMPORARY_WORKER and a.party]
     tw_supplier = {}
     if tw_parties:
@@ -663,8 +640,7 @@ def get_arrival_summary(date=None, building=None) -> dict:
         reverse=True,
     )
 
-    # Over-capacity placements = today's arrivals housed in a minted is_temporary
-    # bed (house_over_capacity), counted via one bulk bed lookup.
+    # [#5oi5cn]
     bed_ids = [a.bed for a in arrivals if a.bed]
     over_capacity_count = 0
     if bed_ids:
@@ -672,8 +648,7 @@ def get_arrival_summary(date=None, building=None) -> dict:
             "Bed", {"name": ["in", list(set(bed_ids))], "is_temporary": 1}
         )
 
-    # Manifest completion needs the pre-arrival manifest source (Arrival Batch).
-    # Until that DocType lands it is unmeasurable -> report None, never fake.
+    # [#745sq1]
     manifest_completion_pct = None
     manifest_expected = None
     if frappe.db.exists("DocType", "Arrival Batch"):
@@ -741,7 +716,7 @@ def get_expected_arrivals(date=None, building=None) -> dict:
                     "building": b.building if b else None,
                     "labour_supplier": b.labour_supplier if b else None,
                     "project": b.project if b else None,
-                    # Matched to a registered arrival -> this manifest line is ticked.
+                    # [#hjqs63]
                     "arrived": bool(r.temporary_worker),
                     "temporary_worker": r.temporary_worker,
                 }
@@ -846,15 +821,13 @@ def get_arrival_slip(party_type, party) -> dict:
             or {}
         )
         if token.get("token") and token.get("enabled"):
-            # [#tokhash] Recover the link from the encrypted copy (raw is not stored).
+            # [#45y3um]
             link = worker_link_for_row(token)
             if link:
                 ctx["qr"] = masar_qr_data_uri(link)
     elif party_type == PARTY_TEMPORARY_WORKER:
         frappe.has_permission("Temporary Worker", "read", throw=True)
-        # [#scope] re-assert the building scope at the PII chokepoint (defence in
-        # depth): passport / Iqama are permlevel-1 confidential government IDs and
-        # must never be returned for a worker outside the caller's estate.
+        # [#86baov]
         _assert_party_in_scope(party_type, party)
         tw = (
             frappe.db.get_value(
@@ -1107,8 +1080,7 @@ def buildings_with_capacity(doctype, txt, searchfield, start, page_len, filters)
         return []
     building_names = [b.name for b in buildings]
 
-    # One bed/room read across every in-scope building; bucket the green (available)
-    # count per building in Python via _bed_color — bounded regardless of count.
+    # [#e1ys9n]
     Bed = frappe.qb.DocType("Bed")
     Room = frappe.qb.DocType("Room")
     bed_rows = (

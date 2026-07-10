@@ -122,9 +122,9 @@ class TestFleetOsActions(FrappeTestCase):
         res = recover(plate)
         self.assertTrue(res.get("ok"))
         self.assertEqual(res.get("incident"), theft, "recover must report the theft it closed")
-        # The theft is closed, not left Open forever.
+        # [#j0taee]
         self.assertEqual(frappe.db.get_value("Vehicle Incident", theft, "status"), "Closed")
-        # The captured pre-theft state is restored: Active vehicle + original driver.
+        # [#7hgts7]
         self.assertEqual(frappe.db.get_value("Salis Vehicle", name, "status"), "Active")
         self.assertEqual(frappe.db.get_value("Salis Vehicle", name, "current_driver"), driver)
         self.assertEqual(frappe.db.get_value("Salis Driver", driver, "current_vehicle"), name)

@@ -53,11 +53,7 @@ class TestSafetyChecklist(FrappeTestCase):
         self.building = make_building(name=f"Checklist Bldg {tag}").name
         self.other_building = make_building(name=f"Checklist Other {tag}").name
 
-        # Mode 1: a Weekly task that applies to every building. evidence_required
-        # is 0: these tests drive rounds through the checklist API, which has no
-        # photo parameter, so a task demanding photo evidence cannot be submitted
-        # here. The Evidence Photo gate is covered directly in
-        # test_safety_task_execution.py, not through this API.
+        # [#skdnei]
         self.task_all = frappe.get_doc(
             {
                 "doctype": "Safety Task Catalog",
@@ -73,7 +69,7 @@ class TestSafetyChecklist(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # Mode 2: a Weekly task scoped to THIS building only.
+        # [#8xweti]
         self.task_scoped = frappe.get_doc(
             {
                 "doctype": "Safety Task Catalog",
@@ -88,7 +84,7 @@ class TestSafetyChecklist(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # A Weekly task scoped to a DIFFERENT building — must be excluded.
+        # [#7rqrj7]
         self.task_other_building = frappe.get_doc(
             {
                 "doctype": "Safety Task Catalog",
@@ -103,8 +99,7 @@ class TestSafetyChecklist(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # An applies-to-all task of a DIFFERENT cadence — must be excluded for
-        # the Weekly checklist.
+        # [#gy43ex]
         self.task_other_cadence = frappe.get_doc(
             {
                 "doctype": "Safety Task Catalog",
@@ -118,9 +113,7 @@ class TestSafetyChecklist(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # One applies-to-all task for EACH remaining cadence so every cadence is
-        # in scope for this building — needed by the get_due_cadences /
-        # submit_due_rounds tests. (Weekly + Monthly already seeded above.)
+        # [#1cqj0k]
         self.cadence_task = {
             "Weekly": self.task_all,
             "Monthly": self.task_other_cadence,
@@ -139,7 +132,7 @@ class TestSafetyChecklist(FrappeTestCase):
                 }
             ).insert(ignore_permissions=True).name
 
-    # get_tasks_for_cadence
+    # [#3yoxzu]
 
     def test_get_tasks_returns_exactly_in_scope_tasks(self):
         result = get_tasks_for_cadence(self.building, "Weekly")
@@ -148,10 +141,10 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertEqual(result["cadence"], "Weekly")
 
         names = {t["name"] for t in result["tasks"]}
-        # Both scope modes are included.
+        # [#bxyhdk]
         self.assertIn(self.task_all, names, "all-buildings task must be in scope")
         self.assertIn(self.task_scoped, names, "building-scoped task must be in scope")
-        # Out-of-scope tasks are excluded.
+        # [#cfm0vk]
         self.assertNotIn(
             self.task_other_building, names,
             "a task scoped to another building must be excluded",
@@ -160,7 +153,7 @@ class TestSafetyChecklist(FrappeTestCase):
             self.task_other_cadence, names,
             "a task of another cadence must be excluded",
         )
-        # Exactly the two in-scope tasks (none of THIS test's out-of-scope ones).
+        # [#cijnka]
         self.assertEqual(
             names & {self.task_all, self.task_scoped, self.task_other_building,
                      self.task_other_cadence},
@@ -182,18 +175,17 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertEqual(row["instructions"], "Check all extinguishers.")
 
     def test_get_tasks_other_cadence_returns_only_that_cadence(self):
-        # The Monthly applies-to-all task appears for Monthly, and the Weekly
-        # ones do not.
+        # [#dvpxi4]
         result = get_tasks_for_cadence(self.building, "Monthly")
         names = {t["name"] for t in result["tasks"]}
         self.assertIn(self.task_other_cadence, names)
         self.assertNotIn(self.task_all, names)
         self.assertNotIn(self.task_scoped, names)
 
-    # submit_round
+    # [#16ccbn]
 
     def _lines(self, *statuses):
-        # Use the in-scope tasks, cycling if more statuses than tasks.
+        # [#s8nfiw]
         tasks = [self.task_all, self.task_scoped]
         return [
             {"task": tasks[i % len(tasks)], "execution_status": s}
@@ -206,12 +198,12 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertTrue(round_name)
         self.assertEqual(result["count"], expected_count)
 
-        # Exactly one Safety Round, and it is submitted.
+        # [#538vt9]
         self.assertEqual(
             frappe.db.get_value("Safety Round", round_name, "docstatus"), 1
         )
 
-        # N submitted Safety Task Execution rows, all linked to the round.
+        # [#3nqq6k]
         steps = frappe.get_all(
             "Safety Task Execution",
             filters={"safety_round": round_name, "docstatus": 1},
@@ -234,7 +226,7 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertEqual(result["overall_result"], "Needs Attention")
 
     def test_submit_round_not_done_is_fail(self):
-        # Not Done outranks Poor: worst status wins -> Fail.
+        # [#6jp5qa]
         result = submit_round(
             self.building, "Weekly", today(), self._lines("Poor", "Not Done")
         )
@@ -253,21 +245,18 @@ class TestSafetyChecklist(FrappeTestCase):
 
     def test_duplicate_non_reinspection_round_is_rejected(self):
         submit_round(self.building, "Weekly", today(), self._lines("Good"))
-        # A second non-reinspection round for the same building/date/cadence is
-        # blocked by the Safety Round duplicate guard.
+        # [#8dwrbm]
         with self.assertRaises(frappe.ValidationError):
             submit_round(self.building, "Weekly", today(), self._lines("Good"))
 
     def test_submit_round_malformed_json_lines_raises_validation_error(self):
-        # A malformed `lines` JSON body must surface as a clean ValidationError,
-        # not a raw JSONDecodeError 500. Building, cadence, and round_date are all
-        # valid so the call reaches the json.loads guard.
+        # [#mv4z3c]
         with self.assertRaises(frappe.ValidationError):
             submit_round(self.building, "Weekly", today(), "[not valid json")
 
     def test_reinspection_round_is_allowed(self):
         submit_round(self.building, "Weekly", today(), self._lines("Good"))
-        # The same date/cadence is allowed when flagged as a re-inspection.
+        # [#fj47fl]
         result = submit_round(
             self.building, "Weekly", today(), self._lines("Good"), is_reinspection=1
         )
@@ -280,7 +269,7 @@ class TestSafetyChecklist(FrappeTestCase):
         )
 
     def test_submit_round_throws_without_permission(self):
-        # Mock has_permission so that Accommodation Building throws PermissionError
+        # [#sig0p2]
         original_has_permission = frappe.has_permission
         def mock_has_permission(doctype, ptype="read", doc=None, user=None, throw=False):
             if doctype == "Building" and doc == self.building:
@@ -293,7 +282,7 @@ class TestSafetyChecklist(FrappeTestCase):
             with self.assertRaises(frappe.PermissionError):
                 submit_round(self.building, "Weekly", today(), self._lines("Good"))
 
-    # get_due_cadences
+    # [#o3glyk]
 
     def _insert_submitted_round(self, cadence, round_date):
         """Insert + submit a Safety Round (with one execution) on an explicit
@@ -326,33 +315,27 @@ class TestSafetyChecklist(FrappeTestCase):
         return {block["cadence"] for block in result["due"]}
 
     def test_due_first_time_all_cadences_due(self):
-        # No prior rounds: every cadence with scoped tasks is due, ordered
-        # Daily -> Weekly -> Monthly -> Quarterly -> Annual.
+        # [#qw9t2f]
         result = get_due_cadences(self.building)
         cadences = [block["cadence"] for block in result["due"]]
         self.assertEqual(
             cadences, ["Daily", "Weekly", "Monthly", "Quarterly", "Annual"]
         )
-        # Each block carries the expected task and a non-empty period label.
+        # [#6gir48]
         for block in result["due"]:
             self.assertTrue(block["period_label"])
             names = {t["name"] for t in block["tasks"]}
             self.assertIn(self.cadence_task[block["cadence"]], names)
 
     def test_due_after_daily_round_today_omits_daily(self):
-        # A submitted Daily round today closes Daily for the rest of today; the
-        # longer cadences stay due.
+        # [#j0i3jy]
         submit_round(self.building, "Daily", today(), self._lines("Good"))
         due = self._due_cadences()
         self.assertNotIn("Daily", due)
         self.assertEqual(due, {"Weekly", "Monthly", "Quarterly", "Annual"})
 
     def test_due_weekly_round_this_week_omits_weekly_but_daily_still_due(self):
-        # A Weekly round recorded EARLIER this ISO week (a different day) closes
-        # Weekly for the whole week, yet Daily is still due "today" because the
-        # daily period is just today and no daily round exists.
-        # Monday of the current ISO week (== today only when today is Monday;
-        # either way it falls in this week's Mon-Sun window).
+        # [#bvsm3v]
         iso_monday = add_to_date(
             today(), days=-getdate(today()).weekday(), as_string=True
         )
@@ -362,9 +345,7 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertIn("Daily", due, "Daily is still due — no daily round today")
 
     def test_due_omits_cadence_with_no_scoped_tasks(self):
-        # Deactivate EVERY active Daily catalog task (the fixture plus any seeded
-        # on the site) so Daily has nothing to check; get_due_cadences then omits
-        # it, while Weekly — which still has the all-buildings fixture — stays due.
+        # [#h7z1jp]
         for name in frappe.get_all(
             "Safety Task Catalog", {"frequency": "Daily", "is_active": 1}, pluck="name"
         ):
@@ -374,13 +355,12 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertIn("Weekly", due)
 
     def test_due_monthly_round_last_month_does_not_close_this_month(self):
-        # A Monthly round dated in the PREVIOUS month is outside the current
-        # period, so Monthly is still due this month.
+        # [#71ll8o]
         last_month = get_first_day(add_to_date(today(), months=-1), as_str=True)
         self._insert_submitted_round("Monthly", last_month)
         self.assertIn("Monthly", self._due_cadences())
 
-    # submit_due_rounds
+    # [#q92nao]
 
     def _results(self, *pairs):
         """Build a multi-cadence results list from (cadence, status) pairs,
@@ -395,9 +375,7 @@ class TestSafetyChecklist(FrappeTestCase):
         ]
 
     def test_submit_due_rounds_malformed_json_results_raises_validation_error(self):
-        # A malformed `results` JSON body must surface as a clean ValidationError,
-        # not a raw JSONDecodeError 500. Building (Administrator has read) and
-        # round_date are valid so the call reaches the json.loads guard.
+        # [#5mp1d0]
         with self.assertRaises(frappe.ValidationError):
             submit_due_rounds(self.building, today(), "{not valid json")
 
@@ -410,8 +388,7 @@ class TestSafetyChecklist(FrappeTestCase):
 
         self.assertTrue(out["ok"])
         self.assertEqual(out["count"], 3)
-        # One round per cadence, ordered Daily -> Weekly -> Monthly, each with
-        # the overall_result derived from its single line.
+        # [#53kzgg]
         self.assertEqual([r["cadence"] for r in out["rounds"]],
                          ["Daily", "Weekly", "Monthly"])
         by_cad = {r["cadence"]: r for r in out["rounds"]}
@@ -419,7 +396,7 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertEqual(by_cad["Weekly"]["overall_result"], "Needs Attention")
         self.assertEqual(by_cad["Monthly"]["overall_result"], "Fail")
 
-        # Each round is submitted and links exactly its own execution.
+        # [#sig7p4]
         for cad, r in by_cad.items():
             self.assertEqual(
                 frappe.db.get_value("Safety Round", r["safety_round"], "docstatus"), 1
@@ -432,7 +409,7 @@ class TestSafetyChecklist(FrappeTestCase):
             self.assertEqual(linked, [self.cadence_task[cad]])
 
     def test_submit_due_rounds_then_those_cadences_not_due(self):
-        # Submitting the due rounds closes exactly those cadences for the period.
+        # [#c5gl3l]
         results = self._results(("Daily", "Good"), ("Weekly", "Good"))
         with patch("apex.habitat.api.safety_checklist.frappe.sendmail"):
             submit_due_rounds(self.building, today(), results)
@@ -442,10 +419,7 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertIn("Monthly", due)
 
     def test_submit_due_rounds_rolls_back_all_on_failure(self):
-        # Cadences are processed Daily -> Weekly, so Daily is created FIRST and
-        # succeeds; then a pre-existing Weekly round makes the Weekly leg collide
-        # with the duplicate guard and throw. The OUTER savepoint must then roll
-        # back the already-created Daily round too — proving all-or-nothing.
+        # [#lnobzy]
         self._insert_submitted_round("Weekly", today())
         before_daily = frappe.db.count(
             "Safety Round", {"building": self.building, "cadence": "Daily"}
@@ -454,14 +428,14 @@ class TestSafetyChecklist(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             with patch("apex.habitat.api.safety_checklist.frappe.sendmail"):
                 submit_due_rounds(self.building, today(), results)
-        # The Daily round created before the Weekly failure was rolled back.
+        # [#9gu2ug]
         after_daily = frappe.db.count(
             "Safety Round", {"building": self.building, "cadence": "Daily"}
         )
         self.assertEqual(after_daily, before_daily,
                          "the successful Daily round must roll back with the failed Weekly")
 
-    # submit_due_rounds email
+    # [#aifub1]
 
     def _enable_email(self):
         settings = frappe.get_single("Habitat Settings")
@@ -469,17 +443,13 @@ class TestSafetyChecklist(FrappeTestCase):
         settings.save(ignore_permissions=True)
 
     def _disable_email(self):
-        # Habitat Settings is a Single, so enable_email_notifications is sticky:
-        # an earlier test (or site setup) may have left it ON. Explicitly close
-        # the kill-switch instead of relying on the site default, so the
-        # kill-switch-off test asserts against the real OFF state.
+        # [#a571v2]
         settings = frappe.get_single("Habitat Settings")
         settings.enable_email_notifications = 0
         settings.save(ignore_permissions=True)
 
     def test_submit_due_rounds_emails_manager(self):
-        # Seed an enabled Accommodation Manager with an email so a recipient
-        # resolves, turn the kill-switch on, and assert sendmail was called.
+        # [#1zk6c3]
         self._enable_email()
         mgr = _user(f"safetymgr_{self._testMethodName}@example.com",
                     "Accommodation Manager")
@@ -492,14 +462,13 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertTrue(out["emailed"], "manager email must be attempted")
         self.assertEqual(mock_send.call_count, 1)
         self.assertIn(mgr, mock_send.call_args.kwargs["recipients"])
-        # The body names the issue (a Poor line) for the Weekly round.
+        # [#cw70mg]
         self.assertIn("Poor", mock_send.call_args.kwargs["message"])
 
     def test_submit_due_rounds_no_recipient_sets_emailed_false(self):
-        # Kill-switch ON but NO Accommodation Manager / configured recipient ->
-        # emailed is False and the rounds still succeed (no throw).
+        # [#46ra03]
         self._enable_email()
-        # Strip any Accommodation Manager grants so no recipient resolves.
+        # [#dje4nl]
         for u in frappe.get_all(
             "Has Role", filters={"role": "Accommodation Manager"}, pluck="parent"
         ):
@@ -514,8 +483,7 @@ class TestSafetyChecklist(FrappeTestCase):
         mock_send.assert_not_called()
 
     def test_submit_due_rounds_mail_failure_does_not_roll_back(self):
-        # A sendmail explosion must NOT roll back the submitted rounds: the round
-        # persists and emailed comes back False.
+        # [#k44yk9]
         self._enable_email()
         _user(f"safetymgr2_{self._testMethodName}@example.com",
               "Accommodation Manager")
@@ -530,12 +498,9 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertEqual(len(out["rounds"]), 1)
 
     def test_submit_due_rounds_kill_switch_off_sends_no_email(self):
-        # The email kill-switch is OFF by default: even with a resolvable manager,
-        # submit_due_rounds must send NO email and report emailed False — the
-        # production-safety contract (no surprise mail before email is enabled).
+        # [#lp7kqz]
         _user(f"safetymgr3_{self._testMethodName}@example.com", "Accommodation Manager")
-        # Explicitly close the kill-switch: Habitat Settings is a Single, so its
-        # value persists across tests — don't trust the site default to be OFF.
+        # [#esgv0d]
         self._disable_email()
         results = self._results(("Weekly", "Good"))
         with patch(
@@ -546,7 +511,7 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertFalse(out["emailed"], "no email may go out while the kill-switch is off")
         mock_send.assert_not_called()
         self.assertEqual(len(out["rounds"]), 1, "the round still records with email off")
-        # The Weekly round really persisted (submitted) despite the mail error.
+        # [#98f75j]
         self.assertEqual(
             frappe.db.get_value(
                 "Safety Round", out["rounds"][0]["safety_round"], "docstatus"

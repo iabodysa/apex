@@ -20,7 +20,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from apex.habitat import permissions as P
 
-# (DocType, query_fn) for every single-`building` member.
+# [#fq2bhs]
 SINGLE_BUILDING = [
     ("Facility Asset Custody Assignment", P.facility_asset_custody_assignment_query),
     ("Non Financial Depreciation Snapshot", P.non_financial_depreciation_snapshot_query),
@@ -36,11 +36,11 @@ SINGLE_BUILDING = [
     ("Arrival Batch", P.arrival_batch_query),
     ("Room", P.accommodation_room_query),
     ("Bed", P.accommodation_bed_query),
-    # [#wave-b2] system-written read-only ledger; scoped on its own store `building`.
+    # [#sous5g]
     ("Accommodation Stock Ledger", P.accommodation_stock_ledger_query),
 ]
 
-# (DocType, query_fn) for the from_building/to_building members.
+# [#bq4qr3]
 DUAL_BUILDING = [
     ("Accommodation Material Transfer", P.accommodation_material_transfer_query),
     ("Facility Asset Movement", P.facility_asset_movement_query),
@@ -56,13 +56,13 @@ class TestHabitatTenantScope(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Two synthetic estates + a Resident Supervisor scoped to exactly ONE of them.
+        # [#lr074d]
         cls.b1 = cls._building()
         cls.b2 = cls._building()
         cls.scoped = cls._scoped_supervisor(cls.b1)
         cls.oversight = cls._oversight_manager()
 
-    # fixtures
+    # [#kjq1ae]
     @classmethod
     def _building(cls):
         doc = frappe.get_doc({"doctype": "Building", "building_name": "TEN-" + _h()})
@@ -101,10 +101,10 @@ class TestHabitatTenantScope(FrappeTestCase):
 
     @classmethod
     def _oversight_manager(cls):
-        # Accommodation Manager is in HOUSING_UNSCOPED_ROLES -> must stay unrestricted.
+        # [#j57ale]
         return cls._user("Accommodation Manager")
 
-    # pqc: scoped user gets a non-empty, building-bounded fragment
+    # [#43uri6]
     def test_single_building_pqc_non_empty_and_bounded(self):
         for dt, fn in SINGLE_BUILDING:
             frag = fn(user=self.scoped)
@@ -121,12 +121,12 @@ class TestHabitatTenantScope(FrappeTestCase):
             self.assertIn("`to_building`", frag, "{0}: must scope to_building".format(dt))
             self.assertIn(self.b1, frag)
 
-    # pqc: oversight role is unrestricted
+    # [#q0pa9f]
     def test_oversight_pqc_is_empty(self):
         for dt, fn in SINGLE_BUILDING + DUAL_BUILDING:
             self.assertEqual(fn(user=self.oversight), "", "{0}: oversight role must be unrestricted".format(dt))
 
-    # has_permission: scoped user denied on an out-of-building doc
+    # [#53fjrm]
     def test_single_building_has_permission_denies_other_estate(self):
         in_scope = frappe.get_doc({"doctype": "Facility Asset", "building": self.b1})
         out_scope = frappe.get_doc({"doctype": "Facility Asset", "building": self.b2})
@@ -141,8 +141,7 @@ class TestHabitatTenantScope(FrappeTestCase):
         )
 
     def test_single_building_cross_estate_submit_denied(self):
-        # The submittable single-building members (e.g. custody assignment / depreciation
-        # snapshot) are denied on submit too — the helper never branches on ptype.
+        # [#4u7mwv]
         out_scope = frappe.get_doc({"doctype": "Facility Asset Custody Assignment", "building": self.b2})
         self.assertIs(
             P.building_scoped_has_permission(out_scope, "submit", user=self.scoped),
@@ -151,7 +150,7 @@ class TestHabitatTenantScope(FrappeTestCase):
         )
 
     def test_dual_building_has_permission_matches_either_endpoint(self):
-        # In scope when EITHER endpoint is the user's estate.
+        # [#q8nsrj]
         from_ok = frappe._dict(doctype="Accommodation Material Transfer", from_building=self.b1, to_building=self.b2)
         to_ok = frappe._dict(doctype="Accommodation Material Transfer", from_building=self.b2, to_building=self.b1)
         neither = frappe._dict(doctype="Accommodation Material Transfer", from_building=self.b2, to_building=self.b2)
@@ -174,25 +173,24 @@ class TestHabitatTenantScope(FrappeTestCase):
         self.assertIsNone(P.dual_building_scoped_has_permission(out_dual, "read", user=self.oversight))
 
     def test_scoped_user_with_no_building_sees_nothing(self):
-        lonely = self._user("Resident Supervisor")  # role but NO User Permission
+        lonely = self._user("Resident Supervisor")  # [#s3pi7t]
         self.assertEqual(P.facility_asset_query(user=lonely), "1=0")
         self.assertEqual(P.accommodation_material_transfer_query(user=lonely), "1=0")
 
-    # end-to-end: the fragment actually filters the List view
+    # [#ftanlm]
     def test_list_view_excludes_other_building_single(self):
         a = self._asset(self.b1)
         b = self._asset(self.b2)
         names = self._list_names("Facility Asset", self.scoped)
         self.assertIn(a, names, "scoped supervisor sees their own building's asset")
         self.assertNotIn(b, names, "scoped supervisor must NOT see another building's asset")
-        # Oversight sees both.
+        # [#248duc]
         names_all = self._list_names("Facility Asset", self.oversight)
         self.assertIn(a, names_all)
         self.assertIn(b, names_all)
 
     def test_list_view_dual_building_matches_either_endpoint(self):
-        # A transfer whose to_building is the user's estate must surface; one between two
-        # other estates must not.
+        # [#rijvzo]
         touching = self._transfer(self.b2, self.b1)
         outside = self._transfer(self.b2, self.b2)
         names = self._list_names("Accommodation Material Transfer", self.scoped)
@@ -223,7 +221,7 @@ class TestHabitatTenantScope(FrappeTestCase):
         with _as_user(user):
             return {r.name for r in frappe.get_list(doctype, fields=["name"], limit_page_length=0)}
 
-    # occupancy snapshot history is delete-locked to SysMgr
+    # [#4sw1ec]
     def test_occupancy_snapshot_delete_locked_to_system_manager(self):
         perms = frappe.get_meta("Occupancy Snapshot").permissions
         deleters = {p.role for p in perms if p.delete}
@@ -232,7 +230,7 @@ class TestHabitatTenantScope(FrappeTestCase):
             {"System Manager"},
             "only System Manager may delete system-generated occupancy history",
         )
-        # The oversight + supervisor roles keep read but lose delete.
+        # [#iuyx9j]
         for role in ("Accommodation Manager", "Resident Supervisor", "Finance Manager"):
             row = next(p for p in perms if p.role == role)
             self.assertTrue(row.read, "{0} keeps read".format(role))

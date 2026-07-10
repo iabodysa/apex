@@ -7,8 +7,7 @@ from frappe.model.document import Document
 
 
 class SafetyTaskCatalog(Document):
-    # begin: auto-generated types
-    # This code is auto-generated. Do not modify anything in this block.
+    # [#k8bmo5]
 
     from typing import TYPE_CHECKING
 
@@ -27,5 +26,5 @@ class SafetyTaskCatalog(Document):
         priority: DF.Literal["High", "Medium", "Low"]
         task_code: DF.Data
         task_title: DF.Data
-    # end: auto-generated types
+    # [#tqi9z4]
     pass

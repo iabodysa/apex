@@ -31,19 +31,16 @@ def _hash(n: int = 12) -> str:
     return frappe.generate_hash(length=n).upper()
 
 
-# Reversal rows carry reversal_of; the period post does not. This filter isolates
-# the single non-reversal post the controller emits on submit.
+# [#19fkf8]
 _NOT_REVERSAL = ["is", "not set"]
 
 
 class TestUtilityBillLedgerPosting(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # [#fixtures] Per-test unique keys so reruns never collide and assertions
-        # can scope to THIS test's building/account only.
+        # [#dyk1mk]
         tag = self._testMethodName + _hash()
-        # total_capacity is read_only in metadata but is dict-set on insert; the
-        # cancel path reads building.total_capacity, so seed a real non-zero value.
+        # [#syeh14]
         self.building = frappe.get_doc({
             "doctype": "Building",
             "building_name": f"UBL {tag}",
@@ -62,7 +59,7 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # helpers
+    # [#7i064h]
 
     def _bill(self, **overrides):
         """Build a Utility Bill Entry on this test's account.
@@ -110,11 +107,10 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
             return [r for r in rows if r.reversal_of]
         return rows
 
-    # tests
+    # [#6ec5k6]
 
     def test_seed_is_present(self):
-        # [#non-vacuous] Guard the whole file: if the seed silently failed, the
-        # submit/cancel assertions below would pass vacuously against zero rows.
+        # [#hzk03w]
         self.assertTrue(
             frappe.db.exists("Building", self.building),
             "seed building must exist",
@@ -134,7 +130,7 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         bill.insert(ignore_permissions=True)
         bill.submit()
 
-        # The fetch_from must have resolved the building the controller posts to.
+        # [#9gpkw8]
         self.assertEqual(bill.building, self.building, "building must fetch from the account")
 
         rows = self._ledger_rows(bill.name, reversal=False)
@@ -156,7 +152,7 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         self.assertEqual(len(original), 1, "precondition: one period row exists")
         original_name = original[0].name
 
-        # cancellation_reason is mandatory in before_cancel; set on the submitted doc.
+        # [#bjhbmi]
         bill.reload()
         bill.cancellation_reason = "QA reversal"
         bill.cancel()
@@ -172,7 +168,7 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
             flt(rev.total_site_cost), -1200.0,
             "the reversal must carry the negated bill_amount",
         )
-        # Money trail nets to zero across the two rows.
+        # [#tamopn]
         all_rows = self._ledger_rows(bill.name)
         self.assertEqual(len(all_rows), 2, "post + reversal = two rows total")
         self.assertEqual(
@@ -181,10 +177,9 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         )
 
     def test_shared_meter_posts_only_the_bearing_share(self):
-        # total 1000 borne at 40% => building share 400 (_compute_sharing).
+        # [#nqmjeg]
         bill = self._bill(total_bill_amount=1000, cost_bearing_pct=40)
-        # bill_amount is recomputed from the total/pct on validate; the seeded
-        # default must NOT survive.
+        # [#9fscau]
         bill.insert(ignore_permissions=True)
         self.assertEqual(
             flt(bill.bill_amount), 400.0,

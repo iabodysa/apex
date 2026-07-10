@@ -95,7 +95,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         validate(self._bill(company="QA-CO-OTHER-" + m, building="QA-BLD-1", utility_account="ACC-" + m))
         frappe.delete_doc("Utility Bill Entry", first.name, force=True, ignore_permissions=True)
 
-    # ---- overlapping period (not only exact equal) is flagged ----
+    # [#gh3wqq]
     def test_overlapping_period_same_account_blocked(self):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
         m = frappe.generate_hash(length=12)
@@ -104,21 +104,21 @@ class TestUtilityBillEntry(FrappeTestCase):
             billing_period_from="2026-06-01", billing_period_to="2026-06-30",
         )
         first.insert(ignore_permissions=True, ignore_links=True)
-        # straddles the tail of the first period -> overlap, not an exact match
+        # [#6apkyu]
         overlapping = self._bill(
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
             billing_period_from="2026-06-15", billing_period_to="2026-07-15",
         )
         with self.assertRaises(frappe.ValidationError):
             validate(overlapping)
-        # a disjoint later period for the same account is still allowed
+        # [#qll6c8]
         validate(self._bill(
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
             billing_period_from="2026-07-01", billing_period_to="2026-07-31",
         ))
         frappe.delete_doc("Utility Bill Entry", first.name, force=True, ignore_permissions=True)
 
-    # ---- negative amounts rejected in validate, no ledger row posted ----
+    # [#myr9i0]
     def test_negative_total_amount_raises(self):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
         m = frappe.generate_hash(length=12)
@@ -145,7 +145,7 @@ class TestUtilityBillEntry(FrappeTestCase):
             {"source_doctype": "Utility Bill Entry", "source_name": src},
         ))
 
-    # ---- a backwards meter reading is a misread, not zero usage ----
+    # [#p4co5t]
     def test_backwards_meter_reading_raises(self):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
         m = frappe.generate_hash(length=12)
@@ -163,7 +163,7 @@ class TestUtilityBillEntry(FrappeTestCase):
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
             meter_reading_previous=500, meter_reading_current=750,
         )
-        validate(doc)  # must not raise
+        validate(doc)  # [#3vfaf1]
         self.assertEqual(doc.meter_units_consumed, 250)
 
     def test_equal_meter_readings_allowed_zero_usage(self):
@@ -174,10 +174,10 @@ class TestUtilityBillEntry(FrappeTestCase):
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
             meter_reading_previous=500, meter_reading_current=500,
         )
-        validate(doc)  # must not raise
+        validate(doc)  # [#3vfaf1]
         self.assertEqual(doc.meter_units_consumed, 0)
 
-    # ---- re-running the submit side-effect posts at most one live row ----
+    # [#81uhc9]
     def _ledger_building(self, m):
         bld = frappe.get_doc({
             "doctype": "Building", "building_name": "QA-LEDG-BLD-" + m,
@@ -199,7 +199,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         doc = self._bill(building=bld.name, utility_type="Electricity", bill_amount=300)
         doc.name = src
         _post_ledger_row(doc)
-        _post_ledger_row(doc)  # re-run must be a no-op
+        _post_ledger_row(doc)  # [#o78vpn]
         self.assertEqual(self._ledger_count(src), 1)
         frappe.delete_doc("Building", bld.name, force=True, ignore_permissions=True)
 
@@ -215,7 +215,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         doc.cancellation_reason = "QA reversal test"
         _post_ledger_row(doc)
         before_cancel(doc)
-        # exactly one original + one negative reversal row
+        # [#g9w8qj]
         self.assertEqual(self._ledger_count(src), 1)
         self.assertEqual(self._ledger_count(src, reversal=True), 1)
         rev = frappe.db.get_value(

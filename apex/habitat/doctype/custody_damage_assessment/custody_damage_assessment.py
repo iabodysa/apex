@@ -26,8 +26,7 @@ def get_deduction_status(assessment):
     Read-only and computed on demand so the manager sees the current state of
     the Additional Salary rather than a stale stored copy.
     """
-    # whitelisted entry point: gate per-document read so a user without CDA
-    # read access can't probe another worker's deduction status (IDOR)
+    # [#2kf8j7]
     frappe.has_permission("Custody Damage Assessment", "read", doc=assessment, throw=True)
     entry = frappe.db.get_value("Custody Damage Assessment", assessment, "deduction_entry")
     if not entry:
@@ -39,7 +38,7 @@ def get_deduction_status(assessment):
     if docstatus == 0:
         return {"entry": entry, "status": "Draft"}
 
-    # docstatus 1: Paid once a submitted Salary Slip has consumed it
+    # [#pm40n2]
     paid = frappe.db.exists(
         "Salary Detail",
         {"additional_salary": entry, "parenttype": "Salary Slip", "docstatus": 1},
@@ -57,12 +56,10 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    # idempotency guard: a re-fired on_submit must not post a second
-    # Additional Salary (mirrors the has_stock_entries/quota_applied idiom)
+    # [#o53dvg]
     if doc.deduction_entry:
         return
-    # config now lives on the Salary Deduction Policy (damage rule); a rule is
-    # returned only when both the global master switch and the rule are enabled
+    # [#1we8qc]
     rule = get_damage_rule()
     if rule and doc.employee:
         logger = frappe.logger()
@@ -117,8 +114,7 @@ def on_submit(doc, method=None):
         # [#rbyvmi]
         frappe.db.set_value("Custody Damage Assessment", doc.name, "deduction_entry", add_sal.name)
 
-        # back-propagate the deduction onto the originating checkout so its
-        # Financials tab reflects the posted Additional Salary
+        # [#jyym7r]
         if doc.source_checkout:
             frappe.db.set_value(
                 "Housing Checkout",
@@ -136,9 +132,7 @@ def on_submit(doc, method=None):
 
 
 def before_cancel(doc, method=None):
-    # Only a SUBMITTED (docstatus=1) deduction is a live payroll posting that must
-    # block the cancel. A Draft (0) or already-Cancelled (2) Additional Salary is
-    # not yet/no longer effective, so it must not permanently lock the assessment.
+    # [#kep3uf]
     if doc.deduction_entry:
         deduction_docstatus = frappe.db.get_value(
             "Additional Salary", doc.deduction_entry, "docstatus"

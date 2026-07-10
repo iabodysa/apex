@@ -32,13 +32,13 @@ class TestAlertMedianResolveDays(FrappeTestCase):
             .insert(ignore_permissions=True)
             .name
         )
-        # Three resolved alerts on this vehicle with spans 1, 3 and 9 days -> median 3.
+        # [#9zwmsx]
         base = now_datetime() - timedelta(days=30)
         for span_days in (1, 3, 9):
             self._resolved_alert(self.vehicle, base, span_days)
-        # A noise alert: resolved but missing resolved_on must NOT count.
+        # [#9qaycs]
         self._alert(self.vehicle, status="Resolved", raised_on=base, resolved_on=None)
-        # A noise alert: still Open must NOT count.
+        # [#4hn5j1]
         self._alert(self.vehicle, status="Open", raised_on=base, resolved_on=None)
 
     def _alert(self, vehicle, status, raised_on, resolved_on):
@@ -68,14 +68,12 @@ class TestAlertMedianResolveDays(FrappeTestCase):
     def test_unscoped_median_is_known_value(self):
         with patch(_RESOLVER, return_value=(True, None)):
             res = operations_alerts.get_alert_median_resolve_days()
-        # spans 1,3,9 -> median 3.0; noise rows (no resolved_on / still Open) excluded.
+        # [#k2cpa1]
         self.assertEqual(res["value"], 3.0)
         self.assertEqual(res["fieldtype"], "Float")
 
     def test_scope_excludes_other_project_alerts(self):
-        # Scoped to a project that does not own this vehicle: the median sees no
-        # in-scope resolved alerts and returns 0, proving the vehicle-anchor scope
-        # is enforced (vehicle-less / out-of-project alerts are excluded).
+        # [#jnk68k]
         ghost = f"NO-SUCH-PROJECT-{frappe.generate_hash(length=10)}"
         with patch(_RESOLVER, return_value=(False, [ghost])):
             res = operations_alerts.get_alert_median_resolve_days()

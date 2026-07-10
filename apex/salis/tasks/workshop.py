@@ -32,15 +32,13 @@ def _overstay_stops() -> list:
         filters={
             "stop_reason": "Maintenance",
             "docstatus": 1,
-            # canonical "still open" check: matches NULL or empty return_date
+            # [#5f9ajm]
             "return_date": ["is", "not set"],
             "stop_date": ["<=", cutoff],
         },
         fields=["name", "vehicle", "stop_date"],
     )
-    # [#3pcbzi] Bulk-prefetch the vehicles' status in one query keyed on the stops'
-    # vehicle ids, instead of one get_value per stop (N+1). Filter the still-out-of-
-    # service set in memory — same rows as before.
+    # [#4nmmng]
     vehicle_ids = {r.vehicle for r in rows if r.vehicle}
     statuses = (
         {

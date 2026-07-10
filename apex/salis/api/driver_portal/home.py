@@ -14,8 +14,7 @@ from apex.salis.api.driver_portal import (
 )
 
 
-# [#clropn] A driver is "not cleared" while an exit clearance is still in any
-# unresolved state — Cleared/Cancelled are the only terminal states.
+# [#jdcim7]
 _OPEN_CLEARANCE_STATUSES = ("Open", "In Progress", "Blocked")
 
 
@@ -41,7 +40,7 @@ def _next_trip_today(driver):
 	if not trips:
 		return None
 	trip = trips[0]
-	_attach_trip_maps([trip])  # one-tap Maps before _label_trips overwrites route_plan
+	_attach_trip_maps([trip])  # [#c8i03i]
 	_label_trips([trip])
 	log = frappe.db.get_value(
 		"Trip Start Log",

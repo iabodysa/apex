@@ -33,11 +33,11 @@ class TestSubmitDueRoundsBuildingScope(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Two estates; a Resident Supervisor scoped (User Permission) to ONLY b1.
+        # [#c37lgq]
         cls.b1 = cls._building()
         cls.b2 = cls._building()
         cls.scoped = cls._scoped_supervisor(cls.b1)
-        # One active, applies-to-all Daily task so a real round can be recorded.
+        # [#ax70aw]
         cls.task = cls._daily_task()
 
     @classmethod
@@ -118,15 +118,14 @@ class TestSubmitDueRoundsBuildingScope(FrappeTestCase):
     def setUp(self):
         self.addCleanup(frappe.set_user, "Administrator")
 
-    # RED -> GREEN: a supervisor scoped to b1 cannot submit due-rounds for b2.
+    # [#heudx9]
     def test_cross_building_submit_denied(self):
         frappe.set_user(self.scoped)
         with self.assertRaises(frappe.PermissionError):
             submit_due_rounds(self.b2, today(), self._results())
 
     def test_cross_building_denied_before_any_side_effect(self):
-        # The gate must reject BEFORE the savepoint/round creation: frappe.db.savepoint
-        # is never reached and no Safety Round is created for the off-scope building.
+        # [#klgvgg]
         before = frappe.db.count("Safety Round", {"building": self.b2})
         frappe.set_user(self.scoped)
         with patch(
@@ -142,14 +141,12 @@ class TestSubmitDueRoundsBuildingScope(FrappeTestCase):
         )
 
     def test_cross_building_empty_results_denied_by_scope_not_validation(self):
-        # Even with NO result lines the scope gate fires first: a scoped-off caller
-        # gets PermissionError, NOT the "No result lines" ValidationError that would
-        # mean execution slipped past the building check (and could email the report).
+        # [#gkz6jq]
         frappe.set_user(self.scoped)
         with self.assertRaises(frappe.PermissionError):
             submit_due_rounds(self.b2, today(), [])
 
-    # The permitted supervisor still records rounds for their OWN building.
+    # [#1fvqoa]
     def test_in_scope_supervisor_still_processes(self):
         frappe.set_user(self.scoped)
         out = submit_due_rounds(self.b1, today(), self._results())

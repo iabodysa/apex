@@ -25,8 +25,7 @@ import os
 
 import frappe
 
-# (module_dir, workflow_dir) — the JSON lives at
-# <app>/<module_dir>/workflow/<workflow_dir>/<workflow_dir>.json  [#hbwf01]
+# [#t8tohs]
 _WORKFLOWS = [
     ("habitat", "utility_bill_entry_workflow"),
     ("habitat", "subcontractor_service_contract_workflow"),
@@ -35,7 +34,7 @@ _WORKFLOWS = [
     ("apex_core", "employee_deduction_acknowledgment_workflow"),
 ]
 
-# Mirror each DocType's status indicator colours on the desk Workflow widget.  [#hbwf02]
+# [#dy27i5]
 _STATE_STYLE = {
     "Draft": "Primary",
     "Pending": "Warning",
@@ -97,7 +96,7 @@ def _seed_one(definition):
 
     name = definition["name"]
     if frappe.db.exists("Workflow", name):
-        # Keep an already-seeded workflow active if the definition is active.  [#hbwf04]
+        # [#j4a37y]
         if definition.get("is_active") and not frappe.db.get_value("Workflow", name, "is_active"):
             doc = frappe.get_doc("Workflow", name)
             doc.is_active = 1
@@ -152,7 +151,7 @@ def seed_habitat_workflows():
             definition = _load_definition(module_dir, workflow_dir)
             _seed_one(definition)
         except Exception:
-            # One bad workflow must never abort the whole migrate.  [#hbwf05]
+            # [#b9mw4c]
             frappe.log_error(
                 title=f"seed_habitat_workflows failed: {workflow_dir}",
                 message=frappe.get_traceback(),

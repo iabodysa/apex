@@ -26,13 +26,13 @@ def on_doctype_update():
     """
     from apex.apex_core.utils.ledger_index import add_unique_guarded
 
-    # Drop the legacy single-assignment-per-template index if it still exists.
+    # [#p5hn9h]
     try:
         frappe.db.sql(
             "ALTER TABLE `tabScheduled Task Instance` DROP INDEX `unique_sti_template_due_status`"
         )
     except Exception:
-        pass  # index already absent — safe to ignore
+        pass  # [#3gy0zc]
 
     add_unique_guarded(
         "Scheduled Task Instance",

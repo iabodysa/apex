@@ -5,9 +5,7 @@ from frappe.query_builder.functions import Coalesce, Count
 from pypika.functions import NullIf
 from apex.habitat.permissions import _building_condition
 
-# Custom Number Card return contract: {value: n, ...df} — value holds the number,
-# the dict doubles as the format docfield. Each method takes the `filters` kwarg
-# Frappe passes via frappe.xcall(method, {filters}). See reference-frappe-custom-number-card-return.
+# [#eyjxdy]
 @frappe.whitelist()
 def get_compliance_percent(filters=None):
     # [#qh57p2]
@@ -30,7 +28,7 @@ def get_buildings_over_threshold(filters=None):
     """
     frappe.has_permission("Building", "read", throw=True)
     Building = frappe.qb.DocType("Building")
-    # COALESCE(NULLIF(threshold, 0), 120): an unset/zero threshold falls back to 120.
+    # [#rccxmo]
     threshold = Coalesce(NullIf(Building.over_capacity_threshold_percent, 0), 120)
     row = (
         frappe.qb.from_(Building)

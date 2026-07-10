@@ -42,6 +42,6 @@ class TestWorkShift(FrappeTestCase):
     def test_required_fields_enforced(self):
         """Inserting without shift_name must raise a MandatoryError."""
         doc = self._make_shift()
-        doc.shift_name = ""  # clear the required field
+        doc.shift_name = ""  # [#a6qqc7]
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True)

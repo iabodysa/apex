@@ -51,11 +51,7 @@ class DriverClearance(Document):
 			self._release_driver()
 
 	def on_cancel(self):
-		# Reverse the release so cancelling a clearance does not leave the driver
-		# stuck in Released. Only the status is restored (Released -> Active): the
-		# current_vehicle link is owned by Vehicle Assignment, so it is left for a
-		# fresh assignment to set, never re-stamped here. Guarded against a driver
-		# that has since moved on (only an still-Released driver is restored).
+		# [#71tnxd]
 		if self.status == "Cleared":
 			self._restore_driver()
 

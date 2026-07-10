@@ -146,13 +146,12 @@ def dispose(
         doc.period_month = period_month
         doc.field_ref = field_ref
 
-    # Recheck through the permission system: Internal Auditor is read-only and
-    # cannot dispose (SoD preserved). doc.save() enforces it too; this is explicit.
+    # [#7r7eal]
     frappe.has_permission(
         DISPOSITION_DOCTYPE, "write" if existing else "create", doc=doc, throw=True
     )
     doc.disposition = disposition
     doc.reason = reason
-    # disposed_by / at / group_key / matched_count are stamped in the controller.
+    # [#3v234f]
     doc.save()
     return doc.name

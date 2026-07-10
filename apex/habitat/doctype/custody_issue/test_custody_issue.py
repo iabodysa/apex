@@ -92,7 +92,7 @@ class TestCustodyIssueSerializedRules(FrappeTestCase):
         from apex.habitat.doctype.custody_issue.custody_issue import validate
         doc = self._issue(qty=1, serial_no="SN-1")
         validate(doc)
-        # Validate must not strip or mutate the serialized row.
+        # [#tgti4s]
         self.assertEqual(len(doc.items), 1, "items list must survive validate unchanged")
         row = doc.items[0]
         self.assertEqual(row.qty, 1, "qty must remain 1 after validate")
@@ -111,14 +111,14 @@ class TestCustodyAcknowledgmentNotification(FrappeTestCase):
         self.assertEqual(n.document_type, "Custody Issue")
         self.assertEqual(n.event, "Submit")
         fields = [r.receiver_by_document_field for r in n.recipients]
-        # Recipient resolves to a real email via the user mirror, not the Employee docname.
+        # [#o8dl15]
         self.assertIn("issued_to_user", fields)
 
     def test_message_renders_acknowledgment_form_link(self):
         n = frappe.get_doc("Notification", ACK_NOTIFICATION)
         rendered = frappe.render_template(n.message, {"doc": frappe._dict(name="CUST-ISS-QA")})
         self.assertIn("/my-custody-acknowledgment", rendered)
-        # the holder lands pre-filtered to their own issue
+        # [#ft3659]
         self.assertIn("custody_issue=CUST-ISS-QA", rendered)
 
 
@@ -152,6 +152,6 @@ class TestCustodyReturnOverdueNotification(FrappeTestCase):
                          "the employee->login-user mirror must be preserved")
 
     def test_condition_guards_on_the_user_mirror(self):
-        # No mirrored user -> no recipient to email; the condition must short-circuit.
+        # [#o0c4dd]
         n = frappe.get_doc("Notification", OVERDUE_NOTIFICATION)
         self.assertIn("issued_to_user", n.condition)

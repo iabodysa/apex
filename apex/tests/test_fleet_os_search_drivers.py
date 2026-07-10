@@ -28,7 +28,7 @@ PHONE = "0500001234"
 class TestFleetOsSearchDrivers(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # Unique per run so the fresh-site suite never collides on driver_id.
+        # [#l5abyd]
         self.tag = frappe.generate_hash(length=8).upper()
         self.full_name = f"Picker Driver {self.tag}"
         self.ext_id = f"PICK-{self.tag}"
@@ -55,12 +55,12 @@ class TestFleetOsSearchDrivers(FrappeTestCase):
         self.assertEqual(row["full_name"], self.full_name)
 
     def test_finds_by_external_id_for_pii_role(self):
-        # Administrator holds permlevel-1, so the driver_id match path is active.
+        # [#bdedv1]
         row = self._row(search_drivers(q=self.ext_id))
         self.assertIsNotNone(row, "a permlevel-1 role must match on the external id")
 
     def test_picked_name_resolves_in_reassign(self):
-        # The picker hands reassign the canonical name; reassign must resolve it.
+        # [#3a9ikc]
         plate = f"PICKVEH {self.tag}"
         frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
@@ -77,13 +77,13 @@ class TestFleetOsSearchDrivers(FrappeTestCase):
         auditor = _user("search-drivers-auditor@test.local", "Internal Auditor")
         frappe.set_user(auditor)
         row = self._row(search_drivers(q=self.full_name[:12]))
-        # Non-vacuous: the unscoped auditor still SEES the driver row.
+        # [#td16yx]
         self.assertIsNotNone(row, "the driver must still be visible (non-vacuous PII check)")
         self.assertEqual(row["driver_id"], "", "external id must be blanked without permlevel-1 read")
         self.assertEqual(row["phone"], "", "phone must be blanked without permlevel-1 read")
 
     def test_scoped_user_without_project_gets_empty(self):
-        # A scoped Fleet Supervisor granted no Project is the scope_empty path.
+        # [#si07ep]
         sup = _user("search-drivers-scoped@test.local", "Fleet Supervisor")
         frappe.db.delete("User Permission", {"user": sup, "allow": "Project"})
         frappe.set_user(sup)

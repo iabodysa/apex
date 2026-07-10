@@ -144,7 +144,7 @@ def get_fleet_os():
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
     reader_errors: list = []
     _unscoped, _projects, base_filters = scope_filter()
-    # base_filters is None only for a scoped user with no permitted project.
+    # [#hhf1zi]
     if base_filters is None:
         return {"vehicles": [], "reason": "scope_empty", "reader_errors": []}
 
@@ -231,8 +231,7 @@ def get_fleet_os():
             "branch_deliver": "",
         })
 
-    # Open/recent incidents + write-offs per vehicle, grouped in Python (N+1-free).
-    # Scope is inherited: `plates` is already the project-permitted vehicle set.
+    # [#jv6v1h]
     def _read_incidents():
         incidents = frappe.get_all(
             "Vehicle Incident",
@@ -259,7 +258,7 @@ def get_fleet_os():
                 "has_evidence": bool(inc.evidence),
             }
             if inc.incident_type == "Theft":
-                # First (most recent, non-closed preferred) theft drives the card stripe.
+                # [#ifni6b]
                 cur = theft.get(inc.vehicle)
                 if cur is None or (cur.get("status") == "closed" and row["status"] != "closed"):
                     theft[inc.vehicle] = row
@@ -287,7 +286,7 @@ def get_fleet_os():
             damages.setdefault(w.vehicle, []).append({
                 "case": w.name,
                 "date": str(getdate(w.creation) if w.creation else ""),
-                # Front-end shows a "repaired" chip on 'completed'; Approved/Closed map to it.
+                # [#g2qq8l]
                 "status": "completed" if w.status in ("Approved", "Closed") else (w.status or "").lower(),
                 "cost": w.estimated_cost or 0,
                 "estimated_cost": w.estimated_cost or 0,
@@ -299,9 +298,7 @@ def get_fleet_os():
 
     damages_by_vehicle: dict[str, list] = _read(reader_errors, _("damages"), _read_write_offs, {})
 
-    # Workshop lane: per-vehicle open Maintenance stop -> entry date, days-in-workshop,
-    # overstay flag and notes. Reuses tasks._overstay_stops (the single overstay rule)
-    # so the board can never disagree with the alert/number card.
+    # [#kw45gl]
     def _read_workshop():
         from apex.salis.tasks import _overstay_stops
 
@@ -317,7 +314,7 @@ def get_fleet_os():
             order_by="stop_date asc",
             limit_page_length=0,
         )
-        # Earliest open stop per vehicle drives the lane (ordered asc above).
+        # [#t3ij7f]
         by_vehicle: dict[str, dict] = {}
         for s in stops:
             by_vehicle.setdefault(s.vehicle, s)
@@ -352,10 +349,10 @@ def get_fleet_os():
             "plate": v.plate_number or v.name,
             "vehicle_type": v.vehicle_category or "",
             "fuel": cat_fuel.get(v.vehicle_category, ""),
-            # Real planned-fuel plan off Salis Vehicle (was always the design's "—").
+            # [#8ufs9k]
             "planned_fuel_grade": v.planned_fuel_grade or "",
             "planned_daily_fuel": v.planned_daily_fuel or 0,
-            # Compliance status + next expiry drive the card's pre-stop expiry flag.
+            # [#gkm63j]
             "compliance_status": v.compliance_status or "",
             "next_expiry_date": str(v.next_expiry_date or ""),
             "rental_office": v.rental_office or "",
@@ -363,8 +360,7 @@ def get_fleet_os():
             "area": "",  # [#6ptyey]
             "project": v.project or "",
             "vehicle_status": _vehicle_status(v.status, bool(v.get("current_driver"))),
-            # Workshop lane: entry date, days-in-workshop and the overstay flag off the
-            # open Maintenance stop (the inline return is the existing workshop_out action).
+            # [#5hq10c]
             "workshop_notes": (ws.notes or "") if ws else "",
             "workshop_date": ws_date,
             "days_in_workshop": (date_diff(today(), ws.stop_date) if ws and ws.stop_date else 0),
@@ -410,7 +406,7 @@ def search_drivers(q=None, limit=20):
     term = (q or "").strip()
     if term:
         like = f"%{term}%"
-        # driver_id is permlevel-1; only let a PII-bearing role match on it.
+        # [#615vqu]
         or_filters = {"full_name": ["like", like]}
         if show_pii:
             or_filters["driver_id"] = ["like", like]
@@ -425,9 +421,7 @@ def search_drivers(q=None, limit=20):
     )
 
     if not unscoped:
-        # Scope to drivers free or on a permitted-project vehicle. The driver's own
-        # project is advisory; the vehicle link is the operative scope (mirrors how
-        # get_fleet_os scopes by Salis Vehicle.project).
+        # [#r5nk98]
         veh_names = {r.current_vehicle for r in rows if r.get("current_vehicle")}
         permitted_veh = set()
         if veh_names:
@@ -556,7 +550,7 @@ def get_vehicle_timeline(plate):
             "message": al.message or "",
         })
 
-    # Newest first; empty dates sort last (so undated rows never head the feed).
+    # [#y71wmv]
     events.sort(key=lambda e: e.get("date") or "", reverse=True)
     return {"events": events}
 
@@ -584,9 +578,7 @@ def reassign(plate, driver_id, date=None):
     # [#cs6rw5]
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
 
-    # Shared native reassign (end Active assignment[s] + submit a new one). The new
-    # assignment's on_submit stamps current_driver / current_vehicle, so no manual
-    # link write is needed here. The board allows a refresh to the same driver.
+    # [#3jq52k]
     assignment = reassign_vehicle_driver(vehicle, driver, date)
     _publish_fleet_update(plate, "reassign")
     return {"ok": True, "assignment": assignment}
@@ -619,8 +611,7 @@ def create_handover(plate, driver_id, date=None, odometer=None, checklist_templa
         frappe.throw(_("Driver {0} not found.").format(driver_id))
     frappe.has_permission("Vehicle Handover", "create", throw=True)
 
-    # Previous driver = the driver on the latest Ended assignment for this vehicle
-    # (reassign ends the prior Active row before opening the new one).
+    # [#7obpbm]
     prev = frappe.get_all(
         "Vehicle Assignment",
         filters={"vehicle": vehicle, "status": "Ended", "driver": ["!=", to_driver]},
@@ -630,10 +621,7 @@ def create_handover(plate, driver_id, date=None, odometer=None, checklist_templa
     )
     from_driver = prev[0].driver if prev else None
 
-    # No prior custodian: a handover from nobody is not a real transfer, and the
-    # Handover.from_driver field fetch_if_empty-copies the vehicle's current_driver
-    # (already the NEW driver here), which would self-equal to_driver and fail the
-    # controller's "must differ" guard. Skip the draft instead of forcing one.
+    # [#5ntp6r]
     if not from_driver:
         return {"ok": True, "handover": None, "skipped": "no_prior_driver"}
 
@@ -756,10 +744,9 @@ def workshop_in(plate, expected_return=None, notes=None):
         "notes": note,
     })
     doc.insert()
-    doc.submit()  # on_submit captures previous_status + flips status to "Stopped".
+    doc.submit()  # [#q94ufk]
 
-    # Distinguish the workshop lane from a plain stop on the board; previous_status
-    # was already captured by on_submit so the return path can still restore it.
+    # [#nsn8wg]
     frappe.db.set_value("Salis Vehicle", vehicle, "status", "Under Maintenance")
     _publish_fleet_update(plate, "workshop_in")
     return {"ok": True, "stop": doc.name}
@@ -789,10 +776,9 @@ def workshop_out(plate):
     if not stop:
         frappe.throw(_("This vehicle has no open workshop stop to return."))
 
-    # Shared native stop-close (stamp audit fields + cancel); same helper
-    # operations_control.release_vehicle uses.
+    # [#f77fmu]
     close_open_stop(stop.name)
-    # on_cancel skips its restore while status != "Stopped"; bring it back explicitly.
+    # [#22cv6z]
     if frappe.db.get_value("Salis Vehicle", vehicle, "status") == "Under Maintenance":
         frappe.db.set_value("Salis Vehicle", vehicle, "status", stop.previous_status or "Active")
     _publish_fleet_update(plate, "workshop_out")
@@ -825,8 +811,7 @@ def _bulk_apply(plates, action) -> dict:
     """
     results = []
     for plate in _coerce_plates(plates):
-        # savepoint name must be a valid SQL identifier (a hex hash can start
-        # with a digit, which MariaDB rejects) — prefix with a letter.
+        # [#9ecrgo]
         sp = "sp" + frappe.generate_hash(length=10)
         frappe.db.savepoint(sp)
         try:
@@ -848,7 +833,7 @@ def _bulk_apply(plates, action) -> dict:
 @frappe.whitelist(methods=["POST"])
 def bulk_stop_vehicles(plates, reason=None):
     """Stop several vehicles at once, reusing stop_vehicle per plate."""
-    # Gate the batch up front; each plate is re-checked per-doc in _resolve_plate.
+    # [#bopf1d]
     frappe.has_permission("Salis Vehicle", "write", throw=True)
     return _bulk_apply(plates, lambda p: stop_vehicle(p, reason=reason))
 
@@ -856,7 +841,7 @@ def bulk_stop_vehicles(plates, reason=None):
 @frappe.whitelist(methods=["POST"])
 def bulk_workshop_in(plates, expected_return=None, notes=None):
     """Send several vehicles to the workshop at once, reusing workshop_in per plate."""
-    # Gate the batch up front; each plate is re-checked per-doc in _resolve_plate.
+    # [#bopf1d]
     frappe.has_permission("Salis Vehicle", "write", throw=True)
     return _bulk_apply(plates, lambda p: workshop_in(p, expected_return=expected_return, notes=notes))
 
@@ -887,8 +872,7 @@ def recover(plate):
         _publish_fleet_update(plate, "recover")
         return {"ok": True}
 
-    # Restore the pre-theft driver only if the vehicle is still free (mirror the
-    # incident's own on_cancel), then bring it back to its captured status.
+    # [#67gbhm]
     if incident.previous_driver and not frappe.db.get_value(
         "Salis Vehicle", vehicle, "current_driver"
     ):

@@ -50,7 +50,7 @@ class TestBoardingRace(FrappeTestCase):
         frappe.set_user("Administrator")
         self._cleanup = []
 
-        # One worker on a Transport Request manifest, one Dispatch Trip for it.
+        # [#f408rj]
         self.employee = frappe.get_doc({
             "doctype": "Employee",
             "first_name": "EMP-" + _h(12),
@@ -81,7 +81,7 @@ class TestBoardingRace(FrappeTestCase):
 
     def tearDown(self):
         frappe.set_user("Administrator")
-        # Trip Start Logs + Boarding Scan Logs created by the endpoint, by trip.
+        # [#k7fjnk]
         for tsl in frappe.get_all(
             "Trip Start Log", filters={"dispatch_trip": self.trip.name}, pluck="name"
         ):
@@ -99,7 +99,7 @@ class TestBoardingRace(FrappeTestCase):
         rate_limit decorator on get_boarding_pass is irrelevant to this test."""
         return _issue_token(self.trip.name, self.employee.name)
 
-    # functional half: the invariant the lock enforces
+    # [#ifpp59]
     def test_two_valid_scans_produce_one_log_one_event_second_duplicate(self):
         token = self._token()
 
@@ -109,12 +109,12 @@ class TestBoardingRace(FrappeTestCase):
         second = scan_boarding_pass(token)
         self.assertEqual(second["result"], "Duplicate", "a repeat scan is a Duplicate")
 
-        # Exactly one Trip Start Log for the trip.
+        # [#1fjxhx]
         logs = frappe.get_all("Trip Start Log", filters={"dispatch_trip": self.trip.name}, pluck="name")
         self.assertEqual(len(logs), 1, "two scans must open exactly one Trip Start Log")
         self.assertEqual(first["trip_start_log"], second["trip_start_log"])
 
-        # Exactly one boarding event for the worker on that log.
+        # [#8arhwb]
         events = frappe.get_all(
             "Trip Boarding Event",
             filters={"parent": logs[0], "worker": self.employee.name},
@@ -129,17 +129,14 @@ class TestBoardingRace(FrappeTestCase):
         self.assertEqual(scan_boarding_pass(pas["pass_token"])["result"], "Valid")
         self.assertEqual(scan_boarding_pass(pas["pass_token"])["result"], "Duplicate")
 
-    # replay: a captured valid pass reused WITHIN its 24h TTL is bounded to a
-    # harmless Duplicate by the per-Trip-Start-Log dedup (_already_boarded under
-    # the row lock), NOT a second boarding. No token nonce is needed -- the residual
-    # effect of a replay is only the intended append-only scan-log audit row.
+    # [#aerrc8]
     def test_replayed_valid_pass_within_ttl_is_duplicate_no_second_effect(self):
-        token = self._token()  # the exact bytes an attacker would capture and re-POST
+        token = self._token()  # [#3rd84u]
 
         first = scan_boarding_pass(token)
         self.assertEqual(first["result"], "Valid")
 
-        # Replay the captured token several times inside the TTL window.
+        # [#kh127e]
         for _i in range(3):
             replay = scan_boarding_pass(token)
             self.assertEqual(
@@ -151,7 +148,7 @@ class TestBoardingRace(FrappeTestCase):
                 "a replay must reuse the original log, never open a new one",
             )
 
-        # No double effect: still exactly one Trip Start Log and one boarding event.
+        # [#l0d4di]
         logs = frappe.get_all(
             "Trip Start Log", filters={"dispatch_trip": self.trip.name}, pluck="name"
         )
@@ -163,14 +160,13 @@ class TestBoardingRace(FrappeTestCase):
         )
         self.assertEqual(len(events), 1, "replays must NOT append a second boarding event")
 
-        # The headcount the trip acts on is unchanged by the replays.
+        # [#gznq8s]
         self.assertEqual(
             frappe.db.get_value("Trip Start Log", logs[0], "boarded_count"), 1,
             "boarded_count is derived from boarding events; replays must not inflate it",
         )
 
-        # The only residual is the intended immutable scan-log trail: one Valid row
-        # plus one Duplicate row per replay attempt (every attempt is recorded).
+        # [#nssps6]
         self.assertEqual(
             frappe.db.count(
                 "Boarding Scan Log",
@@ -188,7 +184,7 @@ class TestBoardingRace(FrappeTestCase):
             "each replay records a Duplicate audit row, no boarding side effect",
         )
 
-    # ---- concurrency half: literal two-connection row-lock contention ----
+    # [#8vs42o]
     @timeout(15, "The Dispatch Trip scan lock did not contend across connections")
     def test_concurrent_scan_lock_blocks_second_connection(self):
         """Two live transactions cannot both hold the Dispatch Trip row lock.
@@ -200,7 +196,7 @@ class TestBoardingRace(FrappeTestCase):
         proof the InnoDB row lock serializes the two scans, so the second cannot
         reach _already_boarded (and double-board) while the first holds the row.
         """
-        frappe.db.commit()  # the trip row must be visible to the second connection
+        frappe.db.commit()  # [#sl75fw]
         self.addCleanup(frappe.db.rollback)
 
         with self.primary_connection():
@@ -253,12 +249,12 @@ class TestBoardingRace(FrappeTestCase):
             "loser scan must NOT append a second boarding event",
         )
 
-    # ---- structural guard: lock-before-get-or-create, no site needed ----
+    # [#tizr1n]
     def test_scan_locks_trip_before_get_or_create_log(self):
         src = _read(_BOARDING_SRC)
         body = _func_source(src, _BOARDING_SRC, "scan_boarding_pass")
         lock_pos = body.find('get_value("Dispatch Trip"')
-        # the lock line must carry for_update=True
+        # [#1u42zt]
         lock_line = next(
             (ln for ln in body.splitlines() if 'get_value("Dispatch Trip"' in ln and "for_update=True" in ln),
             None,

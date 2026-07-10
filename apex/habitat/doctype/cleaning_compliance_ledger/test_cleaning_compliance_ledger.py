@@ -7,7 +7,7 @@ from apex.habitat.cleaning_engine import (
     reverse_cleaning_compliance,
 )
 
-# [#8evoal] keep ERPNext masters out of the test-record dependency graph.
+# [#dh8ujh]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -35,8 +35,7 @@ _AREA_PHOTOS = [
 
 class TestCleaningComplianceLedger(FrappeTestCase):
     def setUp(self):
-        # The ledger's building/room are real Link fields, so the masters must
-        # exist — the engine inserts the ledger row with full link validation.
+        # [#np0pdw]
         self.building = (
             frappe.get_doc(
                 {
@@ -106,7 +105,7 @@ class TestCleaningComplianceLedger(FrappeTestCase):
         self.assertEqual(len(live), 2)
         by_room = {r.room: r for r in live}
         self.assertEqual(by_room[self.rooms[0]].cleaned, 1)
-        # A Skipped room is recorded non-compliant regardless of the cleaned flag.
+        # [#dhqlxu]
         self.assertEqual(by_room[self.rooms[1]].cleaned, 0)
         self.assertEqual(by_room[self.rooms[1]].skip_reason, "Locked")
 
@@ -128,7 +127,7 @@ class TestCleaningComplianceLedger(FrappeTestCase):
         self.assertEqual(len(originals), 2)
         doc.cancel()
         self.assertEqual(len(self._ledger_rows(doc.name, is_cancelled=0)), 0)
-        # 2 originals + 2 reversals preserved for audit; reversals point back.
+        # [#rkils2]
         all_rows = self._ledger_rows(doc.name)
         self.assertEqual(len(all_rows), 4)
         reversals = [r for r in all_rows if r.reversal_of]

@@ -20,7 +20,7 @@ import frappe
 
 from apex.patches.v2_0.set_role_default_workspace import ROLE_WORKSPACE, execute
 
-# role -> (workspace name, expected sequence_id)
+# [#7j4nhq]
 ROLE_WORKSPACES = {
     "Resident Supervisor": ("Resident Supervisor", 1.0),
     "Fleet Supervisor": ("Fleet Supervisor", 1.1),
@@ -43,15 +43,15 @@ class TestB5RoleWorkspaces(unittest.TestCase):
                 self.assertEqual(doc.is_hidden, 0)
                 self.assertEqual(doc.sequence_id, seq)
 
-                # role-gated: the daily workspace is visible to its role
+                # [#ioh317]
                 roles = [r.role for r in doc.roles]
                 self.assertIn(role, roles, f"'{ws}' not gated to '{role}'")
 
-                # content blob parses (Today's-Actions layout intact)
+                # [#kkxjta]
                 blocks = json.loads(doc.content)
                 self.assertGreater(len(blocks), 0)
 
-                # every shortcut target resolves
+                # [#77aqus]
                 for s in doc.shortcuts:
                     if s.type == "DocType":
                         self.assertTrue(
@@ -69,7 +69,7 @@ class TestB5RoleWorkspaces(unittest.TestCase):
                             f"{ws}: shortcut '{s.label}' -> missing Report '{s.link_to}'",
                         )
 
-                # every link target resolves
+                # [#anphet]
                 for link in doc.links:
                     if not link.link_to:
                         continue
@@ -89,7 +89,7 @@ class TestB5RoleWorkspaces(unittest.TestCase):
                             f"{ws}: link '{link.label}' -> missing Page '{link.link_to}'",
                         )
 
-                # metric tiles resolve (a missing card silently drops at runtime)
+                # [#onnfv5]
                 for nc in doc.number_cards:
                     self.assertTrue(
                         frappe.db.exists("Number Card", nc.number_card_name),
@@ -102,17 +102,13 @@ class TestB5RoleWorkspaces(unittest.TestCase):
                     )
 
     def test_fleet_fuel_request_shortcut_stats_filter_queryable(self):
-        # P-144: the Fleet Supervisor "Fuel Request" shortcut filtered on
-        # workflow_state, but the Fuel Request Workflow reuses the `status`
-        # field (no workflow_state column) -> the shortcut count raised
-        # "Field not permitted in query: workflow_state" on every open. Assert
-        # the shipped filter is now {status: Pending} and actually executes.
+        # [#1gwxdw]
         doc = frappe.get_doc("Workspace", "Fleet Supervisor")
         shortcut = next(s for s in doc.shortcuts if s.label == "Fuel Request")
         stats = json.loads(shortcut.stats_filter)
         self.assertNotIn("workflow_state", stats, "shortcut still filters on workflow_state")
         self.assertEqual(stats, {"status": "Pending"})
-        # the count runs cleanly with the shipped filter (no permitted-field error)
+        # [#1r9vx9]
         frappe.db.count("Fuel Request", stats)
 
     def test_patch_stamps_empty_and_preserves_choice(self):

@@ -68,11 +68,7 @@ def confirm_handover(handover: str, otp: str):
             frappe.PermissionError,
         )
 
-    # Serialize concurrent confirms on this handover: FOR UPDATE makes a second
-    # caller block until the first commits, so two correct codes post the receive
-    # leg only once and two wrong guesses can't both read the same attempt count
-    # and each write back 1 (bypassing the lockout). All status/OTP reads below
-    # are RE-READ under this lock, not the stale pre-lock snapshot.
+    # [#cyqoms]
     locked = frappe.db.get_value(
         VOUCHER_TYPE, doc.name,
         ["status", "otp_attempts", "otp_locked_until", "otp_expires_at", "otp_hash"],
@@ -95,7 +91,7 @@ def confirm_handover(handover: str, otp: str):
         frappe.throw(_("Review and approve the handover before confirming receipt."))
 
     if not otp_required:
-        # OTP switched off: approval alone authorises the receive leg.
+        # [#9niymh]
         if locked.status != "Approved":
             frappe.throw(_("Review and approve the handover before confirming receipt."))
         return _post_receive_and_confirm(doc)
@@ -103,9 +99,7 @@ def confirm_handover(handover: str, otp: str):
     if locked.otp_hash and hmac.compare_digest(hash_otp(otp or "", doc.name), locked.otp_hash):
         return _post_receive_and_confirm(doc)
 
-    # Mismatch: count the strike, lock on the third, reveal nothing. The count is
-    # read fresh under the FOR UPDATE lock above, so concurrent wrong guesses
-    # increment serially and cannot all stamp the same value to skip the lockout.
+    # [#hn42cc]
     attempts = (locked.otp_attempts or 0) + 1
     if attempts >= MAX_OTP_ATTEMPTS:
         doc.db_set({
@@ -141,9 +135,7 @@ def _post_receive_and_confirm(doc):
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
         post_stock_entry,
     )
-    # has_stock_entries keys on voucher_no, which the SHIP leg already satisfies;
-    # the receive leg is the positive row landing in to_building, so guard on
-    # exactly that shape so a re-entry can't double-post the receipt.
+    # [#b0o476]
     if _receive_leg_posted(doc):
         return doc.name
     now = now_datetime()

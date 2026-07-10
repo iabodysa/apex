@@ -26,7 +26,7 @@ class TestDispatchTripOdometer(unittest.TestCase):
         return doc
 
     def test_end_set_while_start_zero_throws(self):
-        # The core gap: end=150, start left at the Frappe Int 0 default.
+        # [#m5vzuy]
         doc = self._make_trip(0, 150)
         with self.assertRaises(frappe.ValidationError):
             doc._validate_odometer()
@@ -43,10 +43,10 @@ class TestDispatchTripOdometer(unittest.TestCase):
 
     def test_both_unset_passes(self):
         doc = self._make_trip(0, 0)
-        # Must not raise — both-empty is a valid (not-yet-recorded) state.
+        # [#f0byet]
         doc._validate_odometer()
 
     def test_valid_pair_passes(self):
         doc = self._make_trip(100, 250)
-        # Must not raise.
+        # [#6cz98k]
         doc._validate_odometer()

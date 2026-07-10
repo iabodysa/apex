@@ -23,24 +23,24 @@ _REAL_APPLE = "https://web.push.apple.com/QABCDEF/notification"
 _REAL_WNS = "https://db5.notify.windows.com/w/?token=AaBb"
 _REAL_MOZILLA = "https://updates.push.services.mozilla.com/wpush/v2/gAAAA"
 
-# Endpoints that must never be stored or POSTed to (internal / non-provider / non-https).
+# [#hb8rda]
 _HOSTILE = [
-    "http://localhost/push",  # loopback name, non-https
-    "https://localhost/push",  # loopback name
-    "http://127.0.0.1/push",  # loopback IP
-    "https://127.0.0.1/push",  # loopback IP, https
-    "http://169.254.169.254/latest/meta-data/",  # cloud metadata (link-local)
-    "https://169.254.169.254/latest/meta-data/",  # metadata over https
-    "https://10.0.0.5/push",  # RFC-1918 private
-    "https://192.168.1.10/push",  # RFC-1918 private
-    "https://172.16.0.9/push",  # RFC-1918 private
-    "https://[::1]/push",  # IPv6 loopback
-    "http://fcm.googleapis.com/fcm/send/x",  # right host, wrong (non-https) scheme
-    "https://fcm.googleapis.com.evil.com/x",  # exact-host spoof via suffix
-    "https://evil-push.apple.com/x",  # suffix spoof, no dot boundary
-    "https://evil.com/x",  # arbitrary external host
-    "ftp://fcm.googleapis.com/x",  # non-http(s) scheme
-    "",  # empty
+    "http://localhost/push",  # [#mslqpm]
+    "https://localhost/push",  # [#nn5er2]
+    "http://127.0.0.1/push",  # [#87n9dc]
+    "https://127.0.0.1/push",  # [#onegft]
+    "http://169.254.169.254/latest/meta-data/",  # [#1ll2x5]
+    "https://169.254.169.254/latest/meta-data/",  # [#zjyg10]
+    "https://10.0.0.5/push",  # [#lktwqn]
+    "https://192.168.1.10/push",  # [#lktwqn]
+    "https://172.16.0.9/push",  # [#lktwqn]
+    "https://[::1]/push",  # [#elgdeb]
+    "http://fcm.googleapis.com/fcm/send/x",  # [#asn96m]
+    "https://fcm.googleapis.com.evil.com/x",  # [#k6bm6k]
+    "https://evil-push.apple.com/x",  # [#6yq4k8]
+    "https://evil.com/x",  # [#9ewpnn]
+    "ftp://fcm.googleapis.com/x",  # [#tvauq1]
+    "",  # [#qmta63]
 ]
 
 
@@ -62,7 +62,7 @@ class TestSavePushSubscriptionGate(FrappeTestCase):
     """``save_push_subscription`` rejects a hostile endpoint before any persistence."""
 
     def setUp(self):
-        # Neutralise identity/config gates so only the SSRF check is under test; no DB.
+        # [#q9nvck]
         self._patches = [
             patch.object(driver_portal, "_require_enabled", return_value=None),
             patch.object(driver_portal, "_resolve_driver", return_value="DRV-0001"),
@@ -76,7 +76,7 @@ class TestSavePushSubscriptionGate(FrappeTestCase):
             p.stop()
 
     def test_internal_host_endpoint_is_rejected_at_save(self):
-        # An internal/metadata host must throw and never reach the DocType layer.
+        # [#kx0zh9]
         for ep in ("http://localhost/push", "http://169.254.169.254/latest/meta-data/"):
             with patch.object(driver_portal.frappe, "get_doc") as get_doc, patch.object(
                 driver_portal.frappe, "new_doc"
@@ -91,8 +91,7 @@ class TestSavePushSubscriptionGate(FrappeTestCase):
             driver_portal.save_push_subscription(endpoint="http://fcm.googleapis.com/fcm/send/x")
 
     def test_real_fcm_endpoint_passes_the_gate(self):
-        # A genuine FCM endpoint clears the SSRF gate and reaches persistence (mocked,
-        # so no real row/network). Proves the gate does not block valid push.
+        # [#ihwtf4]
         doc = MagicMock(name="DRV-PUSH-NEW")
         doc.name = "DRV-PUSH-NEW"
         with patch.object(
@@ -101,6 +100,6 @@ class TestSavePushSubscriptionGate(FrappeTestCase):
             res = driver_portal.save_push_subscription(
                 endpoint=_REAL_FCM, p256dh="key", auth="secret", user_agent="ua"
             )
-        new_doc.assert_called_once()  # gate passed -> we built the subscription doc
+        new_doc.assert_called_once()  # [#754ove]
         doc.save.assert_called_once()
         self.assertEqual(res["name"], "DRV-PUSH-NEW")

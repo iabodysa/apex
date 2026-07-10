@@ -25,13 +25,11 @@ from apex.apex_core.setup.seeders.salis_issue_seed import (
     _ISSUE_TYPES,
 )
 
-# SPA source now lives at repo-root frontend/ (P-183 relocation), one level up from
-# the Python package dir returned by get_app_path (".../apex/apex").
+# [#5df8qv]
 REPO_ROOT = os.path.dirname(frappe.get_app_path("apex"))
 I18N = f"{REPO_ROOT}/frontend/driver/src/i18n.js"
 
-# i18n.js enum namespace -> the live source of its option values. A Select field is
-# ("doctype", "field"); a seeded master set is a plain list of stable English values.
+# [#si5y3n]
 ENUM_SOURCES = {
     "tripStatus": ("Dispatch Trip", "status"),
     "issueStatus": ("Issue", "status"),
@@ -48,7 +46,7 @@ def _ar_block(js):
     assert anchor, "enums map not found in i18n.js"
     ar = re.search(r"\bar\s*:\s*\{", js[anchor.end():])
     assert ar, "enums.ar block not found in i18n.js"
-    start = anchor.end() + ar.end() - 1  # index of the opening brace of enums.ar
+    start = anchor.end() + ar.end() - 1  # [#t8iv34]
     depth = 0
     for i in range(start, len(js)):
         if js[i] == "{":

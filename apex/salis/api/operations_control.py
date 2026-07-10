@@ -22,10 +22,10 @@ from apex.salis.utils import close_open_stop, lock_vehicle, reassign_vehicle_dri
 
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 
-# Compliance states that count a vehicle as "at risk" — the same two the card flags.
+# [#di1yr8]
 COMPLIANCE_AT_RISK = ("Expiring Soon", "Expired")
 
-# Compliance facet values the board filter offers (mapped 1:1 to the field's options).
+# [#rnk82v]
 COMPLIANCE_FILTERS = ("Compliant", "Expiring Soon", "Expired")
 
 
@@ -47,7 +47,7 @@ def _empty(offices=None, projects=None, unscoped=False, stopped_over_days=14):
         "offices": offices or [],
         "projects": projects or [],
         "statuses": VEHICLE_STATUSES,
-        # Lets the client tell a scoped-but-no-project gap apart from an empty filter.
+        # [#82uaal]
         "unscoped": unscoped,
     }
 
@@ -72,7 +72,7 @@ def get_fleet(status=None, rental_office=None, project=None, search=None, compli
         if unscoped
         else list(projects or [])
     )
-    # base_filters is None only for a scoped user with no permitted project (access gap).
+    # [#a6weh4]
     if base_filters is None:
         return _empty(offices, proj_opts, unscoped, stopped_over_days)
 
@@ -131,9 +131,7 @@ def get_fleet(status=None, rental_office=None, project=None, search=None, compli
         if v.get("compliance_status") in COMPLIANCE_AT_RISK:
             summary["compliance_at_risk"] += 1
 
-    # "Stopped > N days": reuse the workshop-overstay rule (single source of truth in
-    # tasks._overstay_stops) so the chip can never disagree with the alert / number card.
-    # Intersect with the already-scoped board so the count respects project scope.
+    # [#9c31st]
     from apex.salis.tasks import _overstay_stops
 
     on_board = {v.name for v in vehicles}
@@ -183,8 +181,7 @@ def get_vehicle_detail(vehicle):
     return {"vehicle": v, "incidents": incidents, "assignments": assignments}
 
 
-# How many of each event type to pull before merging, and the merged-feed cap. Kept
-# bounded (no limit_page_length=0) so a long-lived vehicle never returns an unbounded feed.
+# [#lmvwwr]
 TIMELINE_PER_SOURCE = 20
 TIMELINE_LIMIT = 40
 
@@ -256,8 +253,7 @@ def get_vehicle_timeline(vehicle):
             "status": r.status,
         })
 
-    # Only resolved alerts join the history; the open queue is shown live at the top of
-    # the drawer. Dated by resolved_on (its place on the timeline is when it closed).
+    # [#55rf3l]
     for r in frappe.get_all(
         "Operations Alert",
         filters={"vehicle": vehicle, "status": "Resolved", "resolved_on": ["is", "set"]},
@@ -274,7 +270,7 @@ def get_vehicle_timeline(vehicle):
             "message": r.message,
         })
 
-    # Date-sort the merged feed (newest first); undated rows sink to the bottom.
+    # [#33mqrv]
     events.sort(key=lambda e: e["date"] or "", reverse=True)
     return {"vehicle": vehicle, "events": events[:TIMELINE_LIMIT]}
 
@@ -307,8 +303,7 @@ def release_vehicle(vehicle, return_date=None):
     if not stop:
         frappe.throw(_("This vehicle has no open stop to release."))
 
-    # Shared native stop-close (stamp audit fields + cancel -> on_cancel restores
-    # previous_status); same helper the /fleet workshop_out uses.
+    # [#inqm7p]
     close_open_stop(stop, return_date)
     return {"ok": True, "stop": stop}
 
@@ -337,7 +332,6 @@ def reassign_driver(vehicle, driver, start_date=None):
         frappe.throw(_("Driver {0} not found.").format(driver))
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
 
-    # Shared native reassign (end Active assignment[s] + submit a new one; on_submit
-    # stamps the driver links). The drawer rejects a no-op reassign to the same driver.
+    # [#6isxga]
     assignment = reassign_vehicle_driver(vehicle, driver, start_date, reject_same_driver=True)
     return {"ok": True, "assignment": assignment}

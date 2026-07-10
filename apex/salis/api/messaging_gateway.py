@@ -19,12 +19,10 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
-# Settings home for the gateway config. One Single, read fresh per send so an
-# operator toggle takes effect without a restart.
+# [#83v5lw]
 _SETTINGS = "Apex Integration Settings"
 
-# Max body length handed to the gateway — keeps a single SMS-class message sane
-# regardless of provider; longer text is truncated rather than rejected.
+# [#9b2f3r]
 _MAX_MESSAGE_LEN = 1000
 
 
@@ -39,7 +37,7 @@ def _gateway_config() -> dict | None:
     if not s.get("messaging_gateway_enabled"):
         return None
     url = (s.get("messaging_gateway_url") or "").strip()
-    # get_password decrypts the stored secret; never inline a key in code.
+    # [#3uc5g2]
     api_key = s.get_password("messaging_gateway_api_key", raise_exception=False)
     if not url or not api_key:
         return None
@@ -91,7 +89,7 @@ def _post_to_gateway(cfg: dict, to: str, message: str, channel: str) -> dict:
         response = make_post_request(cfg["url"], headers=headers, json=payload)
         return {"sent": True, "channel": channel, "response": response}
     except Exception:
-        # Log title only — never the message body, phone, or key.
+        # [#e19ex1]
         frappe.log_error(title="Messaging gateway send failed")
         return {"sent": False, "channel": channel, "error": "gateway_error"}
 
@@ -109,22 +107,18 @@ def send_message(to: str, message: str, channel: str | None = None) -> dict:
 
     Credentials are read from Settings here, used for this call, and discarded;
     nothing is persisted or logged."""
-    # Reading the Settings Single can raise on a transient DB error; this is also
-    # an enqueue() target, so honour the "never raises" contract in the worker too.
+    # [#g186o4]
     try:
         cfg = _gateway_config()
     except Exception:
         frappe.log_error(title="Messaging gateway config read failed")
         return {"sent": False, "reason": "not_configured"}
     if not cfg:
-        # No-op by design: callers fire-and-forget without guarding setup.
+        # [#fvmqje]
         frappe.logger("messaging_gateway").info("send skipped: gateway not configured")
         return {"sent": False, "reason": "not_configured"}
 
-    # Outer guard for the send body: _post_to_gateway already swallows transport
-    # errors, but this is an enqueue() target whose docstring promises it NEVER
-    # raises — so any unforeseen failure (a future helper, an import) still degrades
-    # to a logged no-op result instead of a silent RQ job crash.
+    # [#rtpvqi]
     try:
         phone = _normalize_phone(to)
         if not phone:

@@ -13,7 +13,7 @@ Housing Assignment (not bare "Assignment" = frappe's Task); Accommodation Checko
 
 import frappe
 
-# (old, new) — order immaterial (independent renames); Building last by convention.
+# [#ttd4lk]
 RENAMES = [
     ("Accommodation Bed", "Bed"),
     ("Accommodation Checkout", "Housing Checkout"),
@@ -30,15 +30,15 @@ RENAMES = [
     ("Salis Portal Theme", "Driver Portal Theme"),
     ("Manifest Passenger", "Passenger Manifest Item"),
     ("Accommodation Assignment", "Housing Assignment"),
-    ("Accommodation Building", "Building"),  # HEAVIEST — also User Permission scoping
+    ("Accommodation Building", "Building"),  # [#ka38nf]
 ]
 
 
 def execute():
     for old, new in RENAMES:
         if frappe.db.exists("DocType", new):
-            continue  # already renamed (idempotent re-run)
+            continue  # [#3562qx]
         if not frappe.db.exists("DocType", old):
-            continue  # fresh install — never had the old name
+            continue  # [#28qx78]
         frappe.rename_doc("DocType", old, new, force=True)
-        frappe.db.commit()  # rename is a DDL implicit-commit already; be explicit
+        frappe.db.commit()  # [#c9uohc]

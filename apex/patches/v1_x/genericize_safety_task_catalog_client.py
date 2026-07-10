@@ -34,11 +34,9 @@ import os
 import frappe
 
 _DOCTYPE = "Safety Task Catalog"
-# Confidential client / accreditation-vendor tokens that must not survive in any live row
-# (lower-cased compare). Assembled from fragments so the literal confidential words never
-# appear verbatim in this repo (the same privacy rule this patch enforces).
+# [#9xtpzp]
 _LEAK_TOKENS = ("ama" + "zon", "ave" + "tta")
-# The corrected seed file -- the single source of the genericized wording.
+# [#rlil6l]
 _SEED_JSON = os.path.join(
     os.path.dirname(__file__),
     "..",
@@ -65,8 +63,7 @@ def execute():
         spec = json.load(fh)
     clean_by_code = {r["task_code"]: r for r in spec["records"]}
 
-    # Only rows that still carry a confidential token -- keeps the loop scoped and makes
-    # the patch a no-op once every row is clean.
+    # [#7bty71]
     rows = frappe.get_all(
         _DOCTYPE,
         fields=["name", "task_code", "task_title", "instructions"],
@@ -79,7 +76,7 @@ def execute():
         if not _has_leak(row.get("task_title"), row.get("instructions"), row.get("task_code")):
             continue
         clean = clean_by_code.get(row["task_code"])
-        # A leaked row whose code is not in the clean JSON cannot be safely rewritten.
+        # [#nd649w]
         if not clean:
             skipped += 1
             continue

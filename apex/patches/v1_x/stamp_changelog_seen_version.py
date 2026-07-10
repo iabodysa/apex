@@ -42,13 +42,12 @@ def execute():
         except (ValueError, TypeError):
             continue
         if not isinstance(known, dict) or not known:
-            # Empty/blank map: Frappe treats it as a first-time user and shows
-            # nothing, so leave it for the native first-login seeding.
+            # [#8gjssk]
             continue
 
         entry = known.get("apex")
         if isinstance(entry, dict) and entry.get("version") == current_version:
-            continue  # already current — nothing to do
+            continue  # [#bfpto6]
 
         if isinstance(entry, dict):
             entry["version"] = current_version

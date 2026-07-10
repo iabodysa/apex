@@ -148,7 +148,7 @@ class TestAccommodationAssignment(FrappeTestCase):
         """Housing a Temporary Worker whose window has lapsed warns (msgprint) but
         does NOT block the assignment."""
         fx = self._fixtures()
-        # Arrived 60 days ago on a 30-day window -> expiry was 30 days ago.
+        # [#149740]
         tw = self._temporary_worker(add_days(today(), -60), window_days=30)
         self.assertLess(frappe.utils.getdate(tw.expiry_date), frappe.utils.getdate(today()))
         frappe.clear_messages()
@@ -157,7 +157,7 @@ class TestAccommodationAssignment(FrappeTestCase):
         doc.submit()
         msgs = " ".join(m.get("message", "") for m in frappe.get_message_log())
         self.assertIn("expired", msgs.lower())
-        self.assertEqual(doc.docstatus, 1)  # soft flag, not a block
+        self.assertEqual(doc.docstatus, 1)  # [#grodwe]
 
     def test_housing_temporary_worker_within_window_no_flag(self):
         """A Temporary Worker still inside the window houses with no expiry warning."""

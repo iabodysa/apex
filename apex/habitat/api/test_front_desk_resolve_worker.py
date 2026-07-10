@@ -100,7 +100,7 @@ class TestResolveWorker(FrappeTestCase):
         self.assertEqual(r["party_type"], "Temporary Worker")
         self.assertEqual(r["party"], self.tw.name)
         self.assertEqual(r["employee_name"], self.tw.worker_name)
-        # Not yet housed.
+        # [#rmrjzj]
         self.assertFalse(r["has_active_assignment"])
 
     def test_flags_already_housed_worker(self):
@@ -129,7 +129,7 @@ class TestResolveWorker(FrappeTestCase):
         emp = self._employee()
         tok = self._token_for(emp.name)
         frappe.db.set_value("Masar Worker Token", tok.name, "enabled", 0)
-        # A disabled token must not resolve; it also isn't a valid Iqama, so unknown.
+        # [#i6750x]
         self.assertFalse(resolve_worker(tok._plaintext_token)["found"])
 
     def test_unknown_identifier_returns_not_found(self):

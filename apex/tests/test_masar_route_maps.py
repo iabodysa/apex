@@ -27,14 +27,12 @@ class TestMasarRouteMaps(FrappeTestCase):
         self.assertEqual(wp, "24.7136,46.6753")
 
     def test_waypoint_ignores_at_viewport_center(self):
-        # A bare `@lat,lng` is the map-center (viewport), NOT the place — it must
-        # not be grabbed; with nothing else navigable the stop resolves to None.
+        # [#4urg1w]
         wp = masar._stop_waypoint(_stop(google_maps_url="https://www.google.com/maps/@24.7,46.6,17z"))
         self.assertIsNone(wp)
 
     def test_waypoint_prefers_place_over_viewport_and_origin(self):
-        # A complex share URL with a `/dir/<origin>` leg and an `@` viewport AND a
-        # real place query must resolve to the PLACE (q=), not the decoy coords.
+        # [#pvdx5u]
         url = "https://www.google.com/maps/dir/24.0,46.0/@24.5,46.5,12z/data=!4m2?q=24.7136,46.6753"
         wp = masar._stop_waypoint(_stop(google_maps_url=url))
         self.assertEqual(wp, "24.7136,46.6753")
@@ -45,8 +43,7 @@ class TestMasarRouteMaps(FrappeTestCase):
         self.assertEqual(wp, "24.7136,46.6753")
 
     def test_waypoint_clean_coord_url_unchanged(self):
-        # A clean coordinate URL (no @ viewport / no /dir leg) still resolves the
-        # bare lat,lng — behavior identical to before for simple links.
+        # [#o881g2]
         wp = masar._stop_waypoint(_stop(google_maps_url="https://maps.app/loc/24.7,46.6"))
         self.assertEqual(wp, "24.7,46.6")
 
@@ -75,16 +72,14 @@ class TestMasarRouteMaps(FrappeTestCase):
         self.assertIn("waypoints=24.1,46.1|Mid%2C%20Riyadh", url)
 
     def test_full_route_caps_waypoints_at_nine(self):
-        # 12 navigable stops -> last is destination, first 9 are kept as waypoints.
+        # [#2fwyjv]
         stops = [_stop(location=f"S{i}") for i in range(12)]
         url = masar._full_route_maps_url(stops)
-        self.assertEqual(url.count("|"), 8)  # 9 waypoints => 8 separators
+        self.assertEqual(url.count("|"), 8)  # [#e9htqt]
         self.assertTrue(url.endswith("destination=S11&waypoints=" + "|".join(f"S{i}" for i in range(9))))
 
     def test_driver_and_worker_build_identical_url(self):
-        # Both call sites must yield the SAME deep-link for the same ordered stops:
-        # masar/maps_links chain a resolved list; driver_portal resolves a plan via
-        # masar._ordered_stops first, then delegates to the same chainer.
+        # [#9hkr9u]
         stops = [
             _stop(google_maps_url="https://maps.google.com/?q=24.1,46.1"),
             _stop(building_name="Mid", city="Riyadh"),
@@ -103,7 +98,7 @@ class TestMasarRouteMaps(FrappeTestCase):
         self.assertTrue(driver_url.startswith("https://www.google.com/maps/dir/?api=1&destination=Site"))
 
     def test_shared_module_is_single_source(self):
-        # The dedup invariant: both modules expose the one shared builder, not copies.
+        # [#e4pjft]
         self.assertIs(masar._stop_waypoint, maps_links._stop_waypoint)
         self.assertIs(driver_portal._stop_waypoint, maps_links._stop_waypoint)
         self.assertIs(masar._full_route_maps_url, maps_links._full_route_maps_url)

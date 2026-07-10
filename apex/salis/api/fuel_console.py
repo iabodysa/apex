@@ -65,8 +65,7 @@ def _drive_fuel_action(doc, action: str) -> None:
         apply_workflow(doc, action)
         return
 
-    # Distinguish the two reasons the transition is unavailable so the operator
-    # sees why, not "Not a valid Workflow Action".
+    # [#g5awmf]
     if doc.get("requested_by") == frappe.session.user:
         frappe.throw(
             _("You cannot {0} a fuel request you raised yourself (segregation of duties).").format(
@@ -185,7 +184,7 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
     if not rows:
         return []
 
-    # [#ooth66] bulk plate + driver-name enrichment (shared helper; canonical vehicle_plate key)
+    # [#9esmfn]
     vehicle_driver_titles(rows)
 
     threshold = _approval_threshold()

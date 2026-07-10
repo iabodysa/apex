@@ -105,19 +105,15 @@ class TestMasarWorkerScope(_WorkerTripMixin, FrappeTestCase):
         cls.bldg_b = _building("Masar Scope Residence B")
         cls.bldg_c = _building("Masar Scope Residence C")
         cls.driver = _ensure_test_driver()
-        # Worker lives in building B — the MIDDLE pickup, so a pass/fail can't be a
-        # coincidence of "first stop" or "last stop".
+        # [#oikg4v]
         cls.worker = _employee("Masar Scope Worker B")
         cls.token = _make_token(cls.worker)
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a per-class Project and a Masar Worker Token OUTSIDE
-        # the per-method savepoint rollback; delete them so the committed rows do
-        # not leak across the test DB. (Site/Buildings/Employees are
-        # reuse-or-create shared fixtures and are left in place.)
+        # [#g3hia8]
         frappe.set_user("Administrator")
-        # cls.token is the RAW token; the row stores its hash, so delete by worker.
+        # [#90ozts]
         frappe.db.delete("Masar Worker Token", {"employee": cls.worker})
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -192,9 +188,7 @@ class TestMasarWorkerScope(_WorkerTripMixin, FrappeTestCase):
             }
         ).insert(ignore_permissions=True)
 
-        # Stamp the route plan back onto the request (the live flow does this when
-        # the Route Plan is submitted; we set it directly to avoid driving the full
-        # scheduling workflow, which is out of scope for this read-path test).
+        # [#a9hfr8]
         frappe.db.set_value("Transport Request", tr.name, "route_plan", rp.name)
 
         dt = frappe.get_doc(
@@ -231,21 +225,18 @@ class TestMasarWorkerScope(_WorkerTripMixin, FrappeTestCase):
         trip = self._trip_for(tr.name)
         self.assertIsNotNone(trip, "fixture sanity: the worker's trip is returned")
 
-        # The worker-scoped pickup is HIS building's housing pickup (B), the middle
-        # stop — proving the match is by accommodation_building, not stop position.
+        # [#d5nu0h]
         self.assertIsNotNone(trip["my_pickup"])
         self.assertEqual(trip["my_pickup"]["accommodation_building"], self.bldg_b)
         self.assertEqual(trip["my_pickup"]["stop_name"], "Housing Pickup 2")
 
-        # The destination is the final drop-off, NOT a housing pickup.
+        # [#r6xe62]
         self.assertIsNotNone(trip["destination"])
         self.assertEqual(trip["destination"]["stop_name"], "Project Drop-off")
         self.assertEqual(trip["destination"]["location"], "Project Site")
         self.assertIsNone(trip["destination"]["accommodation_building"])
 
-        # Anti-leak: the worker's two-point view is NOT the other buildings'
-        # pickups. (The full `stops` list is still carried for any driver-facing
-        # caller, but my_pickup/destination are the worker's scoped pair.)
+        # [#e1j1g0]
         self.assertNotEqual(
             trip["my_pickup"]["accommodation_building"], self.bldg_a
         )
@@ -257,13 +248,13 @@ class TestMasarWorkerScope(_WorkerTripMixin, FrappeTestCase):
         """A worker with NO active assignment (building unresolved) still gets a
         sane pickup — the first housing pickup — plus the destination, never a
         blank or the whole route."""
-        # No _assign() here: the worker has no active assignment.
+        # [#aijuky]
         tr, _rp, _dt = self._multi_building_trip("Scope Route B")
 
         trip = self._trip_for(tr.name)
         self.assertIsNotNone(trip, "fixture sanity: the worker's trip is returned")
         self.assertIsNotNone(trip["my_pickup"])
-        # Fallback = the first stop carrying an accommodation_building (A).
+        # [#fhk123]
         self.assertEqual(trip["my_pickup"]["accommodation_building"], self.bldg_a)
         self.assertEqual(trip["destination"]["stop_name"], "Project Drop-off")
 
@@ -279,9 +270,9 @@ class TestMasarWorkerScope(_WorkerTripMixin, FrappeTestCase):
         self.assertIsNotNone(res["pass"], "fixture sanity: the worker has a boardable trip today")
         pass_ = res["pass"]
 
-        # Destination = the drop-off location, NOT "Building Gate".
+        # [#oye382]
         self.assertEqual(pass_["destination_label"], "Project Site")
-        # Pickup = the worker's own building (B), NOT the generic "Building Gate".
+        # [#aruhgb]
         self.assertEqual(pass_["pickup_label"], "Masar Scope Residence B")
 
     def _purge_assignment(self):
@@ -300,8 +291,7 @@ class TestMasarWorkerScope(_WorkerTripMixin, FrappeTestCase):
 
 
 def tearDownModule():
-    # P-148: drop this module's committed Accommodation Buildings so the suite's
-    # post-run building count returns to the pre-suite baseline (see factories.py).
+    # [#2esm3x]
     from apex.tests import factories
 
     factories.purge_test_buildings()

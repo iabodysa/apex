@@ -40,7 +40,7 @@ def execute():
         return
 
     valid_users = set(frappe.get_all("User", pluck="name"))
-    # Resolve a non-name value to a User name via its email, once per distinct value.
+    # [#4ne697]
     resolved_cache: dict[str, str | None] = {}
     remapped = 0
     cleared = 0

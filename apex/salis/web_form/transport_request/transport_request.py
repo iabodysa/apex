@@ -67,6 +67,5 @@ def submit_transport_request(
         "status": "New",
     })
     doc.insert(ignore_permissions=True)  # audit-ok
-    # Request-boundary auto-commit persists this on success; a manual commit here would
-    # defeat the framework rollback if a later write is ever added. [[reference-frappe-commit-in-request-antipattern]]
+    # [#jwr9pv]
     return {"name": doc.name, "tracking_code": doc.anonymous_tracking_code}

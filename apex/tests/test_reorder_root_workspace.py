@@ -29,11 +29,9 @@ from frappe.utils import add_to_date, get_datetime
 
 from apex.patches.v1_x import reorder_root_workspace_creation
 
-# A real apex module that ships exactly one public root workspace. The
-# patch skips Apex Core (two peer roots by design) and any module whose root is
-# not synced, so a single-root module is required to exercise the reorder branch.
+# [#2sb8rz]
 _MODULE = "Salis"
-_ROOT = "Salis"  # the public root workspace name for _MODULE (parent_page == "")
+_ROOT = "Salis"  # [#h4z3kl]
 
 
 class TestReorderRootWorkspace(FrappeTestCase):
@@ -41,8 +39,7 @@ class TestReorderRootWorkspace(FrappeTestCase):
         self._synthetic = []
         if not self._is_single_root_module():
             self.skipTest(f"{_MODULE} root workspace not synced as a single public root on this site")
-        # on_update exports public workspaces to disk under developer_mode; disable
-        # it so the synthetic inserts never touch the repo working tree.
+        # [#k5mwfr]
         self._orig_dev_mode = frappe.conf.get("developer_mode")
         frappe.conf.developer_mode = 0
         self._orig_root_creation = frappe.db.get_value("Workspace", _ROOT, "creation")
@@ -52,14 +49,14 @@ class TestReorderRootWorkspace(FrappeTestCase):
             if frappe.db.exists("Workspace", name):
                 frappe.delete_doc("Workspace", name, force=True, ignore_permissions=True)
         if getattr(self, "_orig_root_creation", None) and frappe.db.exists("Workspace", _ROOT):
-            # restore the real root's creation so the test leaves the DB untouched
+            # [#997j86]
             frappe.db.set_value(
                 "Workspace", _ROOT, "creation", self._orig_root_creation, update_modified=False
             )
         if hasattr(self, "_orig_dev_mode"):
             frappe.conf.developer_mode = self._orig_dev_mode
 
-    # ------------------------------------------------------------------ helpers
+    # [#f9hua6]
     def _is_single_root_module(self):
         roots = frappe.get_all(
             "Workspace",
@@ -101,15 +98,13 @@ class TestReorderRootWorkspace(FrappeTestCase):
         )
         return doc.name
 
-    # -------------------------------------------------------------------- tests
+    # [#kz11hh]
     def test_execute_orders_root_before_every_sibling(self):
         h = frappe.generate_hash(length=12)
         child_a = self._make_child_before_root(f"P108 Child A {h}", seconds_before=30)
         child_b = self._make_child_before_root(f"P108 Child B {h}", seconds_before=20)
 
-        # PRECONDITION: the root is now NOT the earliest — at least one sibling
-        # (a synthetic child) pre-dates it, so module_wise_workspaces[module][0]
-        # would resolve to a child, i.e. the wrong breadcrumb target.
+        # [#2lpurj]
         before = self._module_creations()
         root_before = before.pop(_ROOT)
         self.assertTrue(
@@ -121,7 +116,7 @@ class TestReorderRootWorkspace(FrappeTestCase):
 
         reorder_root_workspace_creation.execute()
 
-        # POSTCONDITION 1: raw creation order — the root sorts strictly first.
+        # [#k8t1ki]
         after = self._module_creations()
         root_after = after.pop(_ROOT)
         for name, created in after.items():
@@ -131,8 +126,7 @@ class TestReorderRootWorkspace(FrappeTestCase):
                 f"after execute() the root must sort before sibling {name}",
             )
 
-        # POSTCONDITION 2: the framework resolver the breadcrumb consumes now
-        # returns the root first for this module (breadcrumbs.js:161 reads [0]).
+        # [#1fvlcv]
         from frappe.desk.doctype.workspace.workspace import Workspace
 
         ordered = Workspace.get_module_wise_workspaces().get(_MODULE, [])
@@ -144,9 +138,7 @@ class TestReorderRootWorkspace(FrappeTestCase):
         )
 
     def test_execute_is_idempotent(self):
-        # Running execute() a second time with the root already first must be a
-        # no-op (the patch's "root already sorts first" continue branch), never
-        # dragging the root earlier on every migrate beyond the one-second offset.
+        # [#kilssi]
         child = self._make_child_before_root(f"P108 Child C {frappe.generate_hash(length=12)}", 30)  # noqa: F841
 
         reorder_root_workspace_creation.execute()

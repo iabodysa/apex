@@ -10,10 +10,9 @@ from frappe.utils import flt, getdate
 
 class HousingInventory(Document):
     def before_save(self):
-        # Variance is derived, never hand-entered, so the count and any report agree.
+        # [#5xe6y0]
         self.quantity_variance = flt(self.counted_quantity) - flt(self.expected_quantity)
-        # Stamp the count date on the first count AND whenever the counted quantity
-        # is recorded again (a field re-count via the portal must advance the date).
+        # [#fhkedg]
         if self.counted_quantity is not None and (
             self.last_count_date is None or self.has_value_changed("counted_quantity")
         ):

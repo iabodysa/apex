@@ -29,7 +29,7 @@ from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_
 from apex.apex_core.setup.seeders.habitat_workflow_seed import seed_habitat_workflows
 from apex.tests._helpers import _user
 
-# Fixture records the workflow docs link to that we do not provision here.  [#hbwf08]
+# [#ovhwnj]
 test_ignore = [
     "Building",
     "Additional Salary",
@@ -72,8 +72,7 @@ class _WorkflowSoDMixin:
         super().setUpClass()
         frappe.set_user("Administrator")
         seed_habitat_workflows()
-        # maker == document owner (the self-approval subject); approver is a
-        # different user holding the same approver role.  [#hbwf09]
+        # [#qxw23h]
         cls.maker = _user("hbwf_maker@example.com", cls.APPROVER_ROLE)
         cls.approver = _user("hbwf_approver@example.com", cls.APPROVER_ROLE)
         cls.outsider = _user("hbwf_outsider@example.com", cls.OTHER_ROLE)
@@ -106,7 +105,7 @@ class _WorkflowSoDMixin:
             doc.reload()
         return doc
 
-    # -- the three locked-in behaviours -----------------------------------
+    # [#qk3xk5]
 
     def test_workflow_is_seeded(self):
         self.assertEqual(
@@ -119,12 +118,7 @@ class _WorkflowSoDMixin:
             self.skipTest(f"{self.WORKFLOW} not seeded on this site")
         doc = self._to_pending(self._draft(self.maker))
 
-        # The maker holds the approver role, so get_transitions still OFFERS
-        # Approve (the role gate passes) — the self-approval block lives in
-        # apply_workflow (has_approval_access), which throws because the maker is
-        # doc.owner and the Approve transition sets allow_self_approval=0. This
-        # is the native SoD, not a controller hack. The throw fires before any
-        # save()/submit(), so the document stays an unsubmitted draft.
+        # [#e1edaq]
         frappe.set_user(self.maker)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(doc, self.APPROVE_ACTION)
@@ -136,11 +130,7 @@ class _WorkflowSoDMixin:
             self.skipTest(f"{self.WORKFLOW} not seeded on this site")
         doc = self._to_pending(self._draft(self.maker))
 
-        # A different user holding the approver role (not the owner) passes both
-        # the role gate and the self-approval gate, so Approve IS offered. We
-        # assert the gate, not the side-effecting submit() — apply_workflow's
-        # submit posts to downstream ledgers needing real masters this fixture
-        # does not provision (the self/role gates above already throw pre-submit).
+        # [#7kq0et]
         frappe.set_user(self.approver)
         self.assertIn(self.APPROVE_ACTION, _actions(doc))
 
@@ -149,8 +139,7 @@ class _WorkflowSoDMixin:
             self.skipTest(f"{self.WORKFLOW} not seeded on this site")
         doc = self._to_pending(self._draft(self.maker))
 
-        # the outsider lacks the approver role -> get_transitions filters Approve
-        # out (role gate), and apply_workflow throws WorkflowTransitionError.
+        # [#tirqxa]
         frappe.set_user(self.outsider)
         self.assertNotIn(self.APPROVE_ACTION, _actions(doc))
         with self.assertRaises(frappe.ValidationError):
@@ -228,8 +217,7 @@ class TestCustodyDamageAssessmentWorkflow(_WorkflowSoDMixin, FrappeTestCase):
 class TestAccommodationLeaseWorkflow(_WorkflowSoDMixin, FrappeTestCase):
     DOCTYPE = "Lease"
     WORKFLOW = "Accommodation Lease Workflow"
-    # The Approve transition is gated to Finance Manager (the maker is an
-    # Accommodation Manager) — cross-role SoD plus allow_self_approval=0.  [#hbwf11]
+    # [#8zk3af]
     APPROVER_ROLE = "Finance Manager"
 
     def _draft(self, owner):
@@ -250,7 +238,7 @@ class TestEmployeeDeductionAcknowledgmentWorkflow(_WorkflowSoDMixin, FrappeTestC
     DOCTYPE = "Employee Deduction Acknowledgment"
     WORKFLOW = "Employee Deduction Acknowledgment Workflow"
     APPROVER_ROLE = "Finance Manager"
-    # this workflow is keyed on approval_status; the initial state is "Pending"  [#hbwf10]
+    # [#qm2i56]
     STATE_FIELD = "approval_status"
     PENDING_STATE = "Pending"
 

@@ -53,16 +53,13 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         frappe.set_user("Administrator")
         cls.supervisor = _user("dc_sup@example.com", "Fleet Supervisor")
         cls.manager = _user("dc_mgr@example.com", "Fleet Manager")
-        # Driver Clearance is project-scoped through its driver; the non-oversight
-        # supervisor needs a Project User Permission to read/transition rows.
+        # [#fef3xr]
         cls.project = cls._project("DC Workflow Project")
         cls._user_perm(cls.supervisor, cls.project)
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a Project + User Permission OUTSIDE FrappeTestCase's
-        # per-method savepoint rollback; without this they leak across the test DB
-        # (the @example.com Project User Permission cross-test-pollution class).
+        # [#bipurv]
         frappe.set_user("Administrator")
         frappe.db.delete(
             "User Permission",

@@ -24,8 +24,7 @@ class TimesheetLedger(Document):
 
 
 def on_doctype_update():
-    # Belt-and-suspenders: block a duplicate posting for the same source document.
-    # Guarded so any pre-existing duplicate data logs instead of aborting migrate.
+    # [#qkp193]
     add_unique_guarded(
         "Timesheet Ledger",
         ["source_doctype", "source_name"],

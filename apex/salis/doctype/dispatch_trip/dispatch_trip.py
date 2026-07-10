@@ -119,12 +119,7 @@ class DispatchTrip(Document):
         ]
         if not request_names:
             return
-        # [#p210batch] One bulk read of the assigned requests' current flags/status,
-        # replacing the per-row get_value. Wrapped so a read failure marks nothing
-        # (matching the old per-row swallow) and never aborts the trip save. The
-        # write side stays per-row with its own swallow (a field write can't batch
-        # without raw SQL); a duplicate assigned row just re-applies the same
-        # idempotent set_value, leaving the identical final state.
+        # [#d77fjl]
         try:
             current_by_name = {
                 r["name"]: r
@@ -220,9 +215,7 @@ class DispatchTrip(Document):
             )
 
     def _validate_odometer(self):
-        # Both-or-neither: a lone start or lone end reading is incomplete and would
-        # silently break distance/odometer-advance accounting on submit.
-        # Frappe stores empty Int fields as 0 in MySQL, so treat 0 as «not set».
+        # [#h411he]
         start_set = bool(self.odometer_start)
         end_set = bool(self.odometer_end)
         if start_set != end_set:
@@ -351,16 +344,14 @@ class DispatchTrip(Document):
             frappe.delete_doc(
                 "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True  # audit-ok
             )
-        # Reverse-not-delete the immutable per-worker boarding outcomes: post a
-        # negative mirror + flag the originals is_cancelled, so reports net out
-        # the cancelled trip while the audit record is preserved.
+        # [#js4w8o]
         from apex.salis.boarding_engine import reverse_trip_boarding
 
         reverse_trip_boarding(self.name)
         # [#r7e254]
 
 
-# Roles permitted to assign requests onto a trip (the transport-supervisor action).
+# [#nyiuhd]
 ASSIGNMENT_ROLES = ("Fleet Manager", "Fleet Project Manager", "Fleet Supervisor", "System Manager")
 
 
@@ -397,9 +388,7 @@ def assign_requests_to_trip(dispatch_trip, transport_requests):
         )
 
     existing = {row.transport_request for row in (trip.assigned_requests or [])}
-    # [#p210batch] One bulk existence read for the new request ids, replacing the
-    # per-id frappe.db.exists. The loop still walks the list in order so the first
-    # missing id is the one reported, byte-identical to the per-row throw.
+    # [#91zjnv]
     to_check = {r for r in transport_requests if r and r not in existing}
     valid = (
         set(

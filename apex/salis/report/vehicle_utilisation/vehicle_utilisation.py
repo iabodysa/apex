@@ -44,10 +44,7 @@ def execute(filters=None):
     elif filters.get("to_date"):
         query_filters["snapshot_date"] = ["<=", filters["to_date"]]
 
-    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
-    # list gets via permission_query_conditions. The snapshot has no own project —
-    # it reaches one through its vehicle — so confine the rows to the vehicles in the
-    # caller's allowed projects; oversight roles see all.
+    # [#c8co3d]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:

@@ -29,15 +29,14 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
-# Controller hooks under test; the test is vacuous if these are not actually wired.
+# [#ju3nqz]
 _MOVEMENT_HOOKS = ("on_submit", "on_cancel")
 
 
 class TestFacilityAssetMovementEffects(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        # Per-test unique fixtures keyed off the method name; both buildings and
-        # rooms autoname off a `field:` so names must not collide across tests.
+        # [#jvn7sf]
         tag = self._testMethodName
         self.bldg_a = frappe.get_doc(
             {"doctype": "Building", "building_name": f"FAM-EFFECTS A {tag}"}
@@ -45,8 +44,7 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         self.bldg_b = frappe.get_doc(
             {"doctype": "Building", "building_name": f"FAM-EFFECTS B {tag}"}
         ).insert(ignore_permissions=True).name
-        # to_room/from_room are real Accommodation Room links; their NAME (room_number)
-        # is what on_submit copies into the asset's Data location field.
+        # [#qc2tsa]
         self.room_l0 = frappe.get_doc(
             {
                 "doctype": "Room",
@@ -61,7 +59,7 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
                 "room_number": f"FAM-EFFECTS L1 {tag}",
             }
         ).insert(ignore_permissions=True).name
-        # Asset starts at building A / location L0 with no movement history.
+        # [#m6fk9q]
         self.asset = frappe.get_doc(
             {
                 "doctype": "Facility Asset",
@@ -73,7 +71,7 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # Non-vacuous guard 1: the seed really landed where the rest of the test assumes.
+        # [#bxh7g8]
         seeded = frappe.db.get_value(
             "Facility Asset",
             self.asset,
@@ -88,7 +86,7 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def _movement(self):
-        # A -> B (L0 -> L1), same company so the intercompany gate stays off.
+        # [#4gy687]
         return frappe.get_doc(
             {
                 "doctype": "Facility Asset Movement",
@@ -103,8 +101,7 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         ).insert(ignore_permissions=True)
 
     def test_submit_relocates_asset_and_bumps_audit(self):
-        # Non-vacuous guard 2: the side-effect hooks must actually be wired, else
-        # doc.submit() would be a no-op and the asserts below would be meaningless.
+        # [#azktou]
         import apex.hooks as hooks
 
         wired = hooks.doc_events.get("Facility Asset Movement", {})
@@ -143,7 +140,7 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
     def test_cancel_reverts_asset_to_origin(self):
         mv = self._movement()
         mv.submit()
-        # before_cancel requires a cancellation reason (allow_on_submit field).
+        # [#7k1vp7]
         mv.db_set("cancellation_reason", "Movement reversed in test")
         mv.reload()
         mv.cancel()

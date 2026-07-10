@@ -21,9 +21,7 @@ import frappe
 
 # [#p048cw]
 
-# P-048-deleted Workspaces whose DB rows are now orphaned. Names collected from the
-# pre-merge JSON. "Costs"/"Fleet" are intentionally excluded -- they alias the live
-# "costs"/"fleet" rows under case-insensitive collation.
+# [#qsfsd8]
 ORPHAN_WORKSPACES = [
     "Apex Home",
     "Habitat Hub",
@@ -32,7 +30,7 @@ ORPHAN_WORKSPACES = [
     "Rentals",
 ]
 
-# P-048-deleted Module Onboardings (their JSON is removed with this change).
+# [#j8jr35]
 ORPHAN_ONBOARDINGS = [
     "Fleet Operations Go-Live",
     "Salis Go-Live",
@@ -42,7 +40,7 @@ ORPHAN_ONBOARDINGS = [
 def execute():
     live = {w.lower() for w in _shipped_workspace_names()}
     for name in ORPHAN_WORKSPACES:
-        # [#p048g] never delete a row that aliases a live workspace
+        # [#lbzzw7]
         if name.lower() in live:
             continue
         if frappe.db.exists("Workspace", name):
@@ -56,7 +54,7 @@ def execute():
 
 
 def _shipped_workspace_names():
-    # The workspaces still shipped as JSON (post P-096/P-099 hierarchy restore).
+    # [#52mj2j]
     return [
         "Launchpad",
         "My Work",

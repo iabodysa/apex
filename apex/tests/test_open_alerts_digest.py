@@ -20,13 +20,9 @@ class TestOpenAlertsDigest(FrappeTestCase):
 
     def setUp(self):
         frappe.set_user("Administrator")
-        # The digest is gated behind the master email kill-switch (default OFF).
-        # Turn it ON so the content/bucketing tests below exercise the send path;
-        # the disabled-no-op case re-flips it locally.
+        # [#ovj1ei]
         frappe.db.set_single_value("Habitat Settings", "enable_email_notifications", 1)
-        # The job reads every open alert globally, so clear this module's prior
-        # rows for a deterministic snapshot (per-test isolation can leak inserts
-        # past the savepoint when a side-effect commits).
+        # [#i7af0o]
         frappe.db.delete("Operations Alert", {"message": ("like", f"{self.MARKER}%")})
         self.sup_a = _user(f"oad_a_{frappe.generate_hash(length=12)}@example.com", "Fleet Supervisor")
         self.sup_b = _user(f"oad_b_{frappe.generate_hash(length=12)}@example.com", "Fleet Supervisor")
@@ -63,7 +59,7 @@ class TestOpenAlertsDigest(FrappeTestCase):
 
         self.assertIn(self.sup_a, by_recipient)
         self.assertIn(self.sup_b, by_recipient)
-        # Supervisor A's subject reflects 2 alerts, B's reflects 1.
+        # [#nvu0zd]
         self.assertIn("2", by_recipient[self.sup_a]["subject"])
         self.assertIn("1", by_recipient[self.sup_b]["subject"])
 
@@ -75,18 +71,17 @@ class TestOpenAlertsDigest(FrappeTestCase):
         by_recipient = {mail["recipients"][0]: mail for mail in sent}
 
         self.assertIn(self.sup_a, by_recipient)
-        # Only the Acknowledged row counts; the Resolved one is excluded.
+        # [#9ww8uw]
         self.assertIn("1", by_recipient[self.sup_a]["subject"])
 
     def test_alerts_without_supervisor_are_skipped(self):
-        # An alert with no owning supervisor has no recipient and must not mail.
+        # [#2yla2l]
         self._alert("Critical", None)
         sent = self._run_capturing_mail()
         self.assertEqual(sent, [])
 
     def test_no_sendmail_when_email_disabled(self):
-        # With the master kill-switch OFF the digest must short-circuit before any
-        # send — proving it cannot flood OutgoingEmailError on an email-less site.
+        # [#9784t5]
         self._alert("Critical", self.sup_a)
         frappe.db.set_single_value("Habitat Settings", "enable_email_notifications", 0)
 

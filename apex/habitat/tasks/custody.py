@@ -81,8 +81,7 @@ def consumable_custody_expiry_watch() -> None:
 
     today_date = getdate(today())
     logger = frappe.logger("habitat.consumable_custody_expiry_watch")
-    # Bulk-prefetch the holders' employee names in one query keyed on the grouped
-    # rows' employee ids, instead of one get_value per held position (N+1).
+    # [#7gkzff]
     emp_ids = {r.employee for r in rows if r.employee}
     emp_names = (
         {
@@ -96,8 +95,7 @@ def consumable_custody_expiry_watch() -> None:
     )
     flagged = 0
     for r in rows:
-        # Per-row isolation: one bad held position must not abort the whole batch
-        # (a silent abort is indistinguishable from a clean no-op run).
+        # [#pjbauj]
         try:
             if not r.first_held:
                 continue
@@ -109,7 +107,7 @@ def consumable_custody_expiry_watch() -> None:
                 continue
             emp_name = emp_names.get(r.employee) or r.employee
             token = f"{r.employee}:{r.article}"
-            # Token embedded so the message-LIKE dedupe in _raise_consumable_alert matches.
+            # [#p419mz]
             message = _(
                 "Consumable {0} held by {1} since {2} is {3} month(s) old, past its {4}-month lifespan."
             ).format(
@@ -167,7 +165,7 @@ def weekly_custody_digest() -> None:
     today_str = str(getdate(today()))
     month_start = str(getdate(today()).replace(day=1))
 
-    # Open custody issues per building, and how many are overdue.
+    # [#deqqai]
     open_counts: dict[str, int] = defaultdict(int)
     overdue_counts: dict[str, int] = defaultdict(int)
     for issue in frappe.get_all(
@@ -178,14 +176,11 @@ def weekly_custody_digest() -> None:
         if not issue.building:
             continue
         open_counts[issue.building] += 1
-        # Overdue = the return date is strictly before today. date_diff (not a raw
-        # str(<) that only works by ISO-lexicographic accident) so a date-typed value
-        # compares correctly.
+        # [#dt215a]
         if issue.expected_return_date and date_diff(today_str, issue.expected_return_date) > 0:
             overdue_counts[issue.building] += 1
 
-    # Net custody value still in worker hands, per building (ledger is the
-    # canonical valuation, mirroring get_custody_value_in_employee_hands).
+    # [#fjn5il]
     value_by_building: dict[str, float] = defaultdict(float)
     sle = frappe.qb.DocType("Accommodation Stock Ledger")
     for row in (
@@ -204,7 +199,7 @@ def weekly_custody_digest() -> None:
     ).run(as_dict=True):
         value_by_building[row.building] = flt(row.value)
 
-    # Damage assessed month-to-date per building (submitted assessments only).
+    # [#4oq81g]
     damage_mtd: dict[str, float] = defaultdict(float)
     cda = frappe.qb.DocType("Custody Damage Assessment")
     for row in (

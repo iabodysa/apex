@@ -32,7 +32,7 @@ from apex.salis.api import driver_portal
 from apex.www import driver as driver_page
 from apex.www import masar as masar_page
 
-# A frappe.generate_hash() token is hex; this is the charset window.csrf_token holds.
+# [#d2dz55]
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
@@ -53,7 +53,7 @@ class TestMasarCsrfToken(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def test_guest_context_has_nonempty_valid_token(self):
-        # Masar is Guest-accessible; get_csrf_token() must still mint a real token.
+        # [#hk0xw6]
         frappe.set_user("Guest")
         frappe.local.form_dict = frappe._dict()
         ctx = masar_page.get_context(frappe._dict())
@@ -72,7 +72,7 @@ class TestMasarCsrfToken(FrappeTestCase):
         frappe.local.form_dict = frappe._dict()
         ctx = masar_page.get_context(frappe._dict())
         html = _render_shell(masar_page, "masar.html", ctx)
-        # tojson emits a quoted JS string literal; it must be non-empty (not "").
+        # [#abfywq]
         m = re.search(r'window\.csrf_token = "([^"]*)";', html)
         self.assertIsNotNone(m, "csrf_token assignment missing from masar shell")
         self.assertNotEqual(m.group(1), "", "masar shell emitted an empty csrf_token")
@@ -85,7 +85,7 @@ class TestDriverCsrfToken(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def test_context_has_nonempty_valid_token(self):
-        # driver.py redirects Guest, so the authenticated path is the one under test.
+        # [#7edqup]
         ctx = driver_page.get_context(frappe._dict())
         self.assertTrue(ctx.csrf_token, "driver csrf_token must not be empty")
         self.assertRegex(ctx.csrf_token, _TOKEN_RE)
@@ -98,15 +98,13 @@ class TestDriverCsrfToken(FrappeTestCase):
         self.assertNotEqual(m.group(1), "", "driver shell emitted an empty csrf_token")
 
     def test_get_driver_context_returns_context_without_raising(self):
-        # The SPA's first call. It must never raise (a friendly payload for an
-        # unlinked user) and must return the bootstrap keys the shell renders from.
+        # [#tgxx9o]
         result = driver_portal.get_driver_context()
         self.assertIn("enabled", result)
         self.assertIn("linked", result)
         self.assertIn("driver", result)
 
     def test_session_token_matches_emitted_token(self):
-        # The token the shell emits is the same one the CSRF guard validates against,
-        # so a POST carrying it back (frappe-ui's X-Frappe-CSRF-Token) will match.
+        # [#px4xxc]
         ctx = driver_page.get_context(frappe._dict())
         self.assertEqual(ctx.csrf_token, get_csrf_token())

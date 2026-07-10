@@ -58,7 +58,7 @@ class TestCustodyStockIntegration(ApexHabitatTestCase):
 
     def test_issue_moves_to_custody_then_return_to_store(self):
         issue = self._issue(5)
-        # [#9qenh7] Opening +5 into the store, issue -5 store / +5 employee.
+        # [#3of7lf]
         self.assertEqual(_bal(self.article, self.building, self.emp), 5.0)
         self.assertEqual(_bal(self.article, self.building, None), 0.0)
 
@@ -68,7 +68,7 @@ class TestCustodyStockIntegration(ApexHabitatTestCase):
         ret.append("items", {"article": self.article, "qty": 5})
         ret.insert(ignore_permissions=True)
         ret.submit()
-        # [#mq6wnv] Return moves the 5 back: employee 0, store back to the opening 5.
+        # [#r2w6f4]
         self.assertEqual(_bal(self.article, self.building, self.emp), 0.0)
         self.assertEqual(_bal(self.article, self.building, None), 5.0)
 

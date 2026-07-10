@@ -31,13 +31,10 @@ def execute():
     )
     for row in rows:
         token = (row.token or "").strip()
-        # Already hardened (post-P-104 mint, or a prior run of this patch): skip so we
-        # never double-hash. A hashed row's raw is not recoverable — nothing to do.
+        # [#hh2tlz]
         if not token or _looks_hashed(token):
             continue
-        # `token` is still the raw secret: keep an encrypted recoverable copy, then
-        # replace the stored value with its hash. update_modified=False: an at-rest
-        # migration must not disturb the audit timestamp.
+        # [#njj81m]
         from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
             _hash_token,
         )

@@ -19,10 +19,9 @@ from frappe.utils import date_diff, today
 
 from apex.habitat import permissions
 
-# Project statuses that mean the deployment is over, so the resident still housed
-# against it is a cost bleed. Project.status options are Open/Completed/Cancelled.
+# [#kbzrzp]
 ENDED_PROJECT_STATUSES = ("Completed", "Cancelled")
-# An idle report in either active state means the case is already on someone's desk.
+# [#d3ahsh]
 OPEN_REPORT_STATUSES = ("Open", "Acknowledged")
 
 
@@ -53,10 +52,7 @@ def _columns():
 def _get_data(filters):
     query_filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
 
-    # Match the list/card permission model: get_all bypasses
-    # permission_query_conditions, so a building-scoped Resident Supervisor must be
-    # confined to their User-Permission buildings here or the report would leak
-    # residents outside their scope. Mirrors building_operations_summary._get_buildings.
+    # [#cxlwka]
     user = frappe.session.user
     if not permissions._building_is_unscoped(user):
         allowed = permissions._allowed_buildings(user)
@@ -89,8 +85,7 @@ def _get_data(filters):
     data = []
     for asg in assignments:
         status = project_status.get(asg.project) if asg.project else None
-        # Candidate when the work has ended or the resident has no project link at
-        # all (housed against nothing).
+        # [#3909gv]
         if asg.project and status not in ENDED_PROJECT_STATUSES:
             continue
         if wanted_status and (status or "") != wanted_status:

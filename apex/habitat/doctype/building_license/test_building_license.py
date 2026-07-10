@@ -64,7 +64,7 @@ class TestBuildingLicense(FrappeTestCase):
 
     def test_expiry_on_or_before_issue_raises(self):
         """expiry_date must fall strictly after issue_date; equal or backwards rejected."""
-        # expiry before issue
+        # [#eymu3z]
         backwards = frappe.get_doc({
             "doctype": "Building License",
             "naming_series": "BLDG-LIC-.YYYY.-.####",
@@ -76,7 +76,7 @@ class TestBuildingLicense(FrappeTestCase):
         })
         with self.assertRaises(frappe.ValidationError):
             backwards.insert(ignore_permissions=True, ignore_links=True)
-        # expiry equal to issue is also a backwards range
+        # [#m1uzq3]
         equal = frappe.get_doc({
             "doctype": "Building License",
             "naming_series": "BLDG-LIC-.YYYY.-.####",
@@ -103,7 +103,7 @@ class TestBuildingLicense(FrappeTestCase):
             "license_number": "LIC-QA-ISSUE-ONLY",
             "issue_date": "2026-01-01",
         })
-        only_issue.validate()  # must not raise on a one-sided range
+        only_issue.validate()  # [#7unoan]
 
     def test_extending_expiry_stamps_last_renewal_date(self):
         """Pushing expiry_date forward records the renewal on last_renewal_date."""

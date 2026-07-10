@@ -47,7 +47,7 @@ class TestFleetImportUpdates(FrappeTestCase):
                 f.write(",".join(str(val) for val in row) + "\n")
 
     def test_fleet_import_updates(self):
-        # 1. Write the initial CSV files
+        # [#lhw7b8]
         self.write_csv("project.csv", ["project_name"], [["Import Test Project"]])
         self.write_csv("vehicle_category.csv", ["category_name", "default_fuel_type"], [["Import Test Category", "Petrol"]])
         self.write_csv("rental_office.csv", ["office_name", "status"], [["Import Test Office", "Active"]])
@@ -61,10 +61,10 @@ class TestFleetImportUpdates(FrappeTestCase):
             [["ABC 123", "Import Test Category", "Owned", "Import Test Office", "Import Test Project", "Active"]]
         )
 
-        # Run import first time
+        # [#jwsaoa]
         run(self.temp_dir)
         
-        # Get actual document names from DB
+        # [#rl6o66]
         driver_name = frappe.db.get_value("Salis Driver", {"driver_id": "D-109"}, "name")
         vehicle_name = frappe.db.get_value("Salis Vehicle", {"plate_normalized": "ABC123"}, "name")
         project_name = frappe.db.get_value("Project", {"project_name": "Import Test Project"}, "name")
@@ -73,14 +73,14 @@ class TestFleetImportUpdates(FrappeTestCase):
         self.assertTrue(bool(vehicle_name))
         self.assertTrue(bool(project_name))
 
-        # Add to cleanup tracking
+        # [#2hjlys]
         self.created_drivers.append(driver_name)
         self.created_vehicles.append(vehicle_name)
         self.created_projects.append(project_name)
         self.created_categories.append("Import Test Category")
         self.created_offices.append("Import Test Office")
 
-        # Verify initial values
+        # [#a89kmn]
         driver = frappe.get_doc("Salis Driver", driver_name)
         self.assertEqual(driver.full_name, "Initial Driver Name")
         self.assertEqual(driver.phone, "+123456789")
@@ -91,7 +91,7 @@ class TestFleetImportUpdates(FrappeTestCase):
         self.assertEqual(vehicle.ownership, "Owned")
         self.assertEqual(vehicle.status, "Active")
 
-        # 2. Write CSV files with updated values for existing records
+        # [#qjvmxk]
         self.write_csv("salis_driver.csv", 
             ["driver_id", "full_name", "phone", "status", "project"],
             [["D-109", "Updated Driver Name", "+987654321", "Stopped", "Import Test Project"]]
@@ -101,10 +101,10 @@ class TestFleetImportUpdates(FrappeTestCase):
             [["ABC 123", "Import Test Category", "Rented", "Import Test Office", "Import Test Project", "Stopped"]]
         )
 
-        # Run import second time
+        # [#qtoybg]
         run(self.temp_dir)
 
-        # Fetch and verify updated values
+        # [#erj9u2]
         driver.reload()
         self.assertEqual(driver.full_name, "Updated Driver Name")
         self.assertEqual(driver.phone, "+987654321")

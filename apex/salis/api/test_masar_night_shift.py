@@ -32,8 +32,7 @@ def _captured_filters(calls, doctype):
 
 class TestMasarNightShiftWindow(FrappeTestCase):
     def test_today_worker_trips_window_spans_yesterday_and_today(self):
-        # RED before R4: filter was {"trip_date": today()} — yesterday's still-running
-        # night trip was unreachable. GREEN: trip_date is an ["in", [yesterday, today]].
+        # [#1oofa2]
         from frappe.utils import add_days, today
 
         with patch("apex.salis.api.masar.frappe.get_all", return_value=[]) as g:
@@ -46,9 +45,7 @@ class TestMasarNightShiftWindow(FrappeTestCase):
         self.assertIn(add_days(today(), -1), td[1])
 
     def test_worker_today_dispatch_trip_window_and_excludes_finished(self):
-        # RED before R4: filter was {"trip_date": today()}. GREEN: window spans
-        # yesterday+today and excludes BOTH Completed and Cancelled (a worker only
-        # boards before completion, so a finished trip is never a boarding target).
+        # [#6nki40]
         from frappe.utils import add_days, today
 
         with patch("apex.salis.api.masar.frappe.get_all", return_value=[]) as g:
@@ -65,8 +62,7 @@ class TestMasarNightShiftWindow(FrappeTestCase):
         self.assertIn("Cancelled", status[1])
 
     def test_drop_finished_yesterday_keeps_inmotion_night_run(self):
-        # A yesterday trip still Dispatched (the night run in motion) is KEPT;
-        # a yesterday trip already Completed/Cancelled is DROPPED.
+        # [#6ilibo]
         from frappe.utils import add_days, today
 
         yest = add_days(today(), -1)
@@ -79,8 +75,7 @@ class TestMasarNightShiftWindow(FrappeTestCase):
         self.assertEqual(kept, {"DT-NIGHT"})
 
     def test_drop_finished_yesterday_keeps_todays_completed_trip(self):
-        # Today's completed trip must stay visible to the driver's route view —
-        # only the YESTERDAY half of the window is pruned by finished status.
+        # [#6k3ldk]
         from frappe.utils import today
 
         trips = [

@@ -60,11 +60,11 @@ class TestArrivalsCardScope(FrappeTestCase):
         cls.b2 = cls._building()
         cls.scoped = cls._user("Resident Supervisor", building=cls.b1)
         cls.oversight = cls._user("Accommodation Manager")
-        # A Temporary Worker in each estate, each carrying a passport + Iqama.
+        # [#nwxncy]
         cls.tw1 = cls._temp_worker(cls.b1)
         cls.tw2 = cls._temp_worker(cls.b2)
 
-    # ---- fixtures ---------------------------------------------------------
+    # [#ir0iwd]
     @classmethod
     def _building(cls):
         doc = frappe.get_doc(
@@ -135,9 +135,7 @@ class TestArrivalsCardScope(FrappeTestCase):
                 "check_in_date": frappe.utils.today(),
             }
         )
-        # ignore_validate: bypass the assignment controller (project / cost-center
-        # write-gates). These tests pin the READ scope of the arrivals desk, not the
-        # assignment write controller — the row only needs party/building/docstatus.
+        # [#38ia0v]
         doc.flags.ignore_validate = True
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         frappe.db.set_value("Housing Assignment", doc.name, "docstatus", 1)
@@ -170,14 +168,11 @@ class TestArrivalsCardScope(FrappeTestCase):
     def setUp(self):
         self.addCleanup(frappe.set_user, "Administrator")
 
-    # ---- R2: get_arrival_card --------------------------------------------
+    # [#rhzq6s]
     def test_card_scoped_user_allowed_own_building(self):
         with _as_user(self.scoped):
             card = get_arrival_card(party_type="Temporary Worker", party=self.tw1)
-        # The scope gate (which reads tw.building) passed -> no PermissionError -> the
-        # in-scope worker's card is returned. current_building derives from a LIVE
-        # Accommodation Assignment (none here), so it is correctly None — the gate, not
-        # the assignment join, is what this test pins.
+        # [#a3dhgo]
         self.assertEqual(card["party"], self.tw1)
         self.assertEqual(card["worker_name"], frappe.db.get_value(
             "Temporary Worker", self.tw1, "worker_name"))
@@ -194,14 +189,7 @@ class TestArrivalsCardScope(FrappeTestCase):
                 get_arrival_card(party_type="Temporary Worker", party=self.tw2)["party"], self.tw2
             )
 
-    # ---- R2 Employee path: housed-elsewhere denied, intake allowed -------
-    # The Employee branch of the building scope is exercised against
-    # _assert_party_in_scope directly: the desk's pre-existing
-    # has_permission("Employee") gate (HRMS-owned, orthogonal to this fix) denies a
-    # building-scoped non-HR user a TYPE-LEVEL Employee read regardless of building, so
-    # routing through get_arrival_card would conflate the two gates. These pin the
-    # PER-BUILDING confinement that this fix adds: housed-elsewhere denied, unhoused
-    # intake allowed, housed-own allowed.
+    # [#8fbspo]
     def test_employee_housed_other_building_denied(self):
         """An Employee actively housed in b2 must be denied by the scope gate."""
         emp = self._employee()
@@ -215,13 +203,13 @@ class TestArrivalsCardScope(FrappeTestCase):
         is never broken — that path exposes only name + photo, never PII."""
         emp = self._employee()
         with _as_user(self.scoped):
-            _assert_party_in_scope("Employee", emp)  # must NOT raise
+            _assert_party_in_scope("Employee", emp)  # [#nptgyw]
 
     def test_employee_housed_own_building_allowed(self):
         emp = self._employee()
         self._house(emp, self.b1)
         with _as_user(self.scoped):
-            _assert_party_in_scope("Employee", emp)  # must NOT raise
+            _assert_party_in_scope("Employee", emp)  # [#nptgyw]
 
     def test_card_full_stack_housed_other_building_denied(self):
         """Full-stack belt-and-suspenders: get_arrival_card for an out-of-estate
@@ -233,7 +221,7 @@ class TestArrivalsCardScope(FrappeTestCase):
             with self.assertRaises(frappe.PermissionError):
                 get_arrival_card(party_type="Employee", party=emp)
 
-    # ---- R7: front-desk check-in card mirrors the same building scope ----
+    # [#6ay602]
     def test_front_desk_card_housed_other_building_denied(self):
         """R7: front_desk.get_employee_card (name+photo) now applies the same building
         scope — an employee housed in another estate is denied to a scoped user (the
@@ -252,9 +240,9 @@ class TestArrivalsCardScope(FrappeTestCase):
         orthogonal HRMS type-level Employee read is a separate, pre-existing gate.)"""
         emp = self._employee()
         with _as_user(self.scoped):
-            _assert_party_in_scope("Employee", emp)  # scope gate must not raise
+            _assert_party_in_scope("Employee", emp)  # [#5xhbdy]
 
-    # ---- R1: get_arrival_slip (passport + Iqama PII) ---------------------
+    # [#kehrtd]
     def test_slip_scoped_user_denied_other_building_pii(self):
         """The headline: a b1-scoped user must NOT receive b2's passport / Iqama.
 
@@ -268,7 +256,7 @@ class TestArrivalsCardScope(FrappeTestCase):
     def test_slip_scoped_user_allowed_own_building(self):
         with _as_user(self.scoped):
             out = get_arrival_slip(party_type="Temporary Worker", party=self.tw1)
-        # The slip renders for the in-scope worker (PII for the OWN estate is allowed).
+        # [#2yntkp]
         self.assertIn("html", out)
 
     def test_slip_pii_never_leaks_to_off_scope_user(self):

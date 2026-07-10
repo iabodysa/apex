@@ -59,9 +59,7 @@ def before_insert(doc, method=None):
 def validate(doc, method=None):
     _populate_location_from_token(doc)
     sync_party_employee(doc)
-    # Guard: if a token is present but produced no building, the token is invalid or
-    # inactive. Checked here (not only in before_insert) so a freshly typed token on
-    # a save/update also gets resolved and validated.
+    # [#merae4]
     if doc.location_token and not doc.building:
         frappe.throw(_("Invalid or inactive location token."))
 
@@ -171,16 +169,11 @@ def _apply_priority_rules(doc):
         "security",
     )
 
-    # [#kgat6r] Use whole-word boundary matching to avoid false positives from
-    # substrings (e.g. "contact", "machine", "jacket", "back" all contain "ac").
+    # [#hnmm79]
     def _matches(term):
         return re.search(r"\b" + re.escape(term) + r"\b", text) is not None
 
-    # A/C is matched separately because it appears in multiple forms:
-    # "ac" (whole word), "a/c", "a-c", "air conditioning", "air conditioner".
-    # A bare \bac\b would be defeated by the category field value "ac" but would
-    # also silently pass for edge cases like "AC" embedded differently.  The
-    # explicit pattern below is unambiguous and covers all expected phrasings.
+    # [#1yjpt4]
     _AC_PATTERN = re.compile(r"\ba[/\-]?c\b|air.?condi", re.IGNORECASE)
 
     def _is_ac_request():
@@ -295,11 +288,7 @@ def _build_custody_issue(source):
     return target
 
 
-# One-tap triage advance map. Only targets with no extra mandatory field are listed
-# — Assigned needs assigned_to and Resolved/Closed need resolution_notes, so those
-# are reached on the form, not by a list-view tap. Kept here (not in JS) so the
-# allowed progression is server-authoritative and shared by the row button and the
-# bulk action.
+# [#c4lz3y]
 _TRIAGE_NEXT = {
     "New": "Triaged",
     "Triaged": "In Progress",
@@ -333,9 +322,7 @@ def advance_triage_status(name, to_status):
     return {"name": doc.name, "status": doc.status, "changed": True}
 
 
-# A desk multi-select up to this many rows triages inline (instant count in the
-# UI); a larger, client-supplied selection is an unbounded loop that could time
-# out the request, so it runs in a background job instead.
+# [#pxf8ls]
 BULK_TRIAGE_SYNC_LIMIT = 50
 
 
@@ -356,11 +343,7 @@ def bulk_triage(names):
     names = names or []
 
     if len(names) > BULK_TRIAGE_SYNC_LIMIT:
-        # bulk_triage makes no write of its own before this point, so there is no
-        # pending transaction to piggyback: the default enqueue_after_commit=False
-        # queues the job immediately (enqueue_after_commit=True would silently drop
-        # it if this request never committed). The worker runs the job as the
-        # enqueuing user, so the per-row write-permission check is preserved.
+        # [#puiz3v]
         frappe.enqueue(
             "apex.habitat.doctype.resident_request.resident_request._bulk_triage_job",
             queue="short",

@@ -4,7 +4,7 @@ from frappe.utils.nestedset import NestedSet
 
 
 class MaintenanceMaterial(NestedSet):
-    # NestedSet maintains lft/rgt; enforce a single tree root.
+    # [#bc52av]
     def on_update(self):
         NestedSet.on_update(self)
         self.validate_one_root()

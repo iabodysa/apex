@@ -57,7 +57,7 @@ def _token_for(employee):
         doc = frappe.get_doc("Masar Worker Token", existing)
         if not doc.enabled:
             doc.db_set("enabled", 1)
-        # Stored hashed at rest (P-104): recover the raw from its encrypted copy.
+        # [#dx2ua1]
         return doc.recover_token()
     return frappe.get_doc(
         {
@@ -79,7 +79,7 @@ class TestMasarWorkerContacts(_WorkerTripMixin, FrappeTestCase):
         cls.building = _building("Masar Contacts Building")
         cls.driver = _ensure_test_driver()
         cls.supervisor = _supervisor_user()
-        # The active assignment's building carries the in-charge contact.
+        # [#q9cgf7]
         frappe.db.set_value(
             "Building", cls.building, "responsible_supervisor", cls.supervisor
         )
@@ -87,9 +87,7 @@ class TestMasarWorkerContacts(_WorkerTripMixin, FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # setUpClass commits a per-class Project OUTSIDE the per-method savepoint
-        # rollback; delete it so the committed Project does not leak across the
-        # test DB. (Site/Building/Employees are reuse-or-create shared fixtures.)
+        # [#4w47gh]
         frappe.set_user("Administrator")
         if frappe.db.exists("Project", cls.project):
             frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
@@ -163,19 +161,19 @@ class TestMasarWorkerContacts(_WorkerTripMixin, FrappeTestCase):
 
         res = masar.get_worker_contacts(token=token)
 
-        # building in-charge — from the building's responsible_supervisor
+        # [#kyf4sw]
         self.assertIsNotNone(res["building_in_charge"], "in-charge must resolve from the assignment")
         self.assertEqual(res["building_in_charge"]["phone"], _SUPERVISOR_MOBILE)
         self.assertTrue(res["building_in_charge"]["name"])
 
-        # today's driver — the driver of the worker's own today Dispatch Trip
+        # [#9zohhz]
         self.assertIsNotNone(res["today_driver"], "today's driver must resolve from the trip")
         self.assertEqual(
             res["today_driver"]["full_name"],
             frappe.db.get_value("Salis Driver", self.driver, "full_name"),
         )
 
-        # housing office number — from Habitat Settings
+        # [#i57zg5]
         self.assertEqual(res["housing_office_number"], _OFFICE_NUMBER)
 
     def test_degrades_cleanly_without_assignment_or_trip(self):
@@ -195,8 +193,7 @@ class TestMasarWorkerContacts(_WorkerTripMixin, FrappeTestCase):
 
 
 def tearDownModule():
-    # P-148: drop this module's committed Accommodation Buildings so the suite's
-    # post-run building count returns to the pre-suite baseline (see factories.py).
+    # [#2esm3x]
     from apex.tests import factories
 
     factories.purge_test_buildings()

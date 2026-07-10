@@ -35,27 +35,24 @@ import frappe
 
 from apex.apex_core.utils.company import resolve_company_or_any
 
-# Fixed, non-secret demo credential — only ever set on a developer_mode site
-# (the whole seeder is gated on that). Returned in the login recipe, never a real
-# secret.
+# [#ma0k24]
 _DEMO_PASSWORD = "ApexDemo#2024"
 
-# Supervisor persona.
+# [#ogdqsc]
 _SUP_USER = "supervisor.demo@example.com"
 _SUP_NAME = "Demo Supervisor"
 _SUP_ROLES = ("Resident Supervisor", "Fleet Supervisor")
 
-# Employee persona.
+# [#1vufxt]
 _EMP_USER = "employee.demo@example.com"
 _EMP_NAME = "Demo Employee"
 
-# Shared demo estate — same stable keys as seed_masar_demo_movement so the two
-# seeders land on ONE estate and the supervisor's scope matches the demo trip.
+# [#2xz9fr]
 _PROJECT = "Demo Transport Project"
 _SITE = "Demo Housing Site"
 _BUILDING = "Demo Residence A"
 
-# DocTypes this seeder writes to; if any is missing the personas cannot be built.
+# [#27d3ps]
 _REQUIRED = (
     "Building",
     "Room",
@@ -124,8 +121,7 @@ def _user(email, full_name, roles):
     user = frappe.get_doc("User", email)
     missing = [r for r in roles if r not in frappe.get_roles(email)]
     if missing:
-        # Only add roles that actually exist, so a not-yet-seeded role never
-        # crashes the persona (the others still apply).
+        # [#h5wfaa]
         existing = [r for r in missing if frappe.db.exists("Role", r)]
         if existing:
             user.add_roles(*existing)
@@ -256,8 +252,7 @@ def _seed_supervisor(company):
     project = _project()
     user = _user(_SUP_USER, _SUP_NAME, _SUP_ROLES)
     _scope_supervisor_to_building(user, building)
-    # Fleet operations-control is project-scoped; scope the supervisor to the demo
-    # Project so the demo Dispatch Trip (seed_masar_demo_movement) is in view.
+    # [#43h85p]
     _user_permission(user, "Project", project)
     _demo_rooms(building)
     _occupancy_snapshot(building)
@@ -274,7 +269,7 @@ def execute():
     """Seed both demo logins. Returns a dict of login recipes (and the minted
     Masar token) on a dev site; None / a no-op otherwise."""
     try:
-        # Demo logins only on a developer/demo site — never seed a production site.
+        # [#2oze4d]
         if not frappe.conf.get("developer_mode"):
             return
         if any(not frappe.db.exists("DocType", dt) for dt in _REQUIRED):
@@ -286,8 +281,7 @@ def execute():
         _seed_supervisor(company)
         frappe.db.commit()
 
-        # The Masar token is the employee half; isolate it so a token failure does
-        # not discard the supervisor persona already committed above.
+        # [#l837ss]
         token = None
         try:
             token = _seed_employee(company)

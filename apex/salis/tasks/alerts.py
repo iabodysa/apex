@@ -40,8 +40,7 @@ def daily_open_alerts_digest() -> None:
 
     logger = frappe.logger()
 
-    # Master email kill-switch (default OFF): without it the daily send floods
-    # OutgoingEmailError on a site with no outgoing Email Account configured.
+    # [#20guid]
     if not email_enabled():
         logger.info("daily_open_alerts_digest: email disabled (Habitat Settings); skipped.")
         return
@@ -328,8 +327,7 @@ def reconcile_operations_alerts() -> None:
 
         start += BATCH_SIZE
 
-    # Push the operations board to refetch once per project whose alert(s) cleared,
-    # so a resolved alert disappears without a manual Refresh.
+    # [#470qkc]
     for project in resolved_projects:
         _publish_operations_alert(project)
 

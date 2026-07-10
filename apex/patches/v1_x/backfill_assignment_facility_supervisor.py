@@ -36,7 +36,7 @@ def execute():
     if not rows:
         return
 
-    # Resolve each distinct building's supervisor once, not per assignment row.
+    # [#clkke3]
     supervisor_by_building = {}
     updated = 0
     skipped = 0

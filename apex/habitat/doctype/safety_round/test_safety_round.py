@@ -21,7 +21,7 @@ class TestSafetyRound(FrappeTestCase):
         frappe.set_user("Administrator")
         tag = self._testMethodName
 
-        # A building to round, and a catalog task to execute against it.
+        # [#sssveb]
         self.building = frappe.get_doc(
             {
                 "doctype": "Building",
@@ -72,7 +72,7 @@ class TestSafetyRound(FrappeTestCase):
 
     def test_reinspection_second_round_is_allowed(self):
         self._round()
-        # An explicit re-inspection for the same building/date/cadence is allowed.
+        # [#g7bx99]
         second = self._round(is_reinspection=1)
         self.assertTrue(second.name, "a marked re-inspection must be accepted")
 
@@ -101,16 +101,13 @@ class TestSafetyRound(FrappeTestCase):
         self.assertEqual(rnd.overall_result, "Pass")
 
     def _safety_update_call(self, pub):
-        # Frappe itself fires doc_update/list_update on submit/cancel, so pick
-        # the safety_update call out of all publish_realtime calls (asserting it
-        # was emitted exactly once).
+        # [#12swcd]
         calls = [c for c in pub.call_args_list if c.args and c.args[0] == "safety_update"]
         self.assertEqual(len(calls), 1, "exactly one safety_update must be published")
         return calls[0]
 
     def test_submit_publishes_safety_update(self):
-        # on_submit signals the /safety portal (whose due set just changed) to
-        # refetch: a safety_update event on the Safety Round room, after_commit.
+        # [#pxbmyc]
         rnd = self._round()
         with patch.object(frappe, "publish_realtime") as pub:
             rnd.submit()
@@ -121,7 +118,7 @@ class TestSafetyRound(FrappeTestCase):
         self.assertEqual(args[1].get("action"), "submit")
 
     def test_cancel_publishes_safety_update(self):
-        # Cancelling reopens the cadence; the portal must refetch too.
+        # [#ihxzwx]
         rnd = self._round()
         rnd.submit()
         with patch.object(frappe, "publish_realtime") as pub:

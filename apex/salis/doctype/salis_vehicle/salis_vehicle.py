@@ -95,8 +95,7 @@ class SalisVehicle(Document):
 
     @staticmethod
     def _get_alert_lead_days():
-        # Routed through the canonical zero-trap helper: a blank/0 Single value
-        # falls back to the documented default (never trusted as a real 0).
+        # [#nt5cx7]
         from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
 
         return get_salis_int("alert_lead_days", DEFAULT_ALERT_LEAD_DAYS)

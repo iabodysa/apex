@@ -12,7 +12,7 @@ no component.
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-# Payment Gateway lives in the (uninstalled) payments app; skip it in the dependency closure.
+# [#p0xvzg]
 test_ignore = ["Payment Gateway"]
 
 
@@ -31,15 +31,13 @@ def _policy(global_cap, rule):
 class TestSalaryDeductionPolicy(FrappeTestCase):
 
     def test_zero_global_cap_is_honoured_not_treated_as_unset(self):
-        # A deliberate 0% ceiling must reject an enabled rule that wants 5% -- the gate
-        # must fire (5 > 0), not fall back to the 50% default and let it through.
+        # [#8ph755]
         doc = _policy(0, {"deduction_type": "Damage", "enabled": 1, "max_percent_of_salary": 5})
         with self.assertRaises(frappe.ValidationError):
             doc.validate()
 
     def test_zero_global_cap_allows_zero_rule(self):
-        # 0% rule under a 0% cap is not a violation (0 > 0 is False) -- no false positive.
-        # The rule names a component so it passes the downstream component check too.
+        # [#fv28op]
         component = _deduction_component()
         doc = _policy(
             0,
@@ -50,7 +48,7 @@ class TestSalaryDeductionPolicy(FrappeTestCase):
                 "salary_component": component,
             },
         )
-        doc.validate()  # must not raise
+        doc.validate()  # [#3vfaf1]
 
     def test_positive_cap_allows_within_cap_rule(self):
         component = _deduction_component()
@@ -63,7 +61,7 @@ class TestSalaryDeductionPolicy(FrappeTestCase):
                 "salary_component": component,
             },
         )
-        doc.validate()  # must not raise
+        doc.validate()  # [#3vfaf1]
 
     def test_rule_exceeding_positive_cap_rejected(self):
         doc = _policy(20, {"deduction_type": "Damage", "enabled": 1, "max_percent_of_salary": 30})
@@ -71,13 +69,12 @@ class TestSalaryDeductionPolicy(FrappeTestCase):
             doc.validate()
 
     def test_disabled_rule_ignores_cap(self):
-        # A disabled row may hold any draft value; it never fires while disabled.
+        # [#hadxfr]
         doc = _policy(0, {"deduction_type": "Damage", "enabled": 0, "max_percent_of_salary": 40})
-        doc.validate()  # must not raise
+        doc.validate()  # [#3vfaf1]
 
     def test_get_type_rule_gates_on_master_switch_and_enabled(self):
-        # The accessor that controllers read: a rule is returned only when BOTH the
-        # global master switch and the row's enabled flag are on.
+        # [#7smg22]
         component = _deduction_component()
         rule = {"deduction_type": "Damage", "enabled": 1, "max_percent_of_salary": 5,
                 "salary_component": component}
@@ -100,14 +97,14 @@ class TestMoveDeductionPatch(FrappeTestCase):
         from apex.patches.v1_x import move_deduction_to_salary_policy as patch
 
         component = _deduction_component()
-        # reset the Policy to a clean OFF baseline
+        # [#75h98h]
         policy = frappe.get_single("Salary Deduction Policy")
         policy.enable_salary_deductions = 0
         policy.type_rules = []
         policy.flags.ignore_validate = True
         policy.save(ignore_permissions=True)
 
-        # seed Habitat Settings orphan rows the way an upgraded site would carry them
+        # [#n4lvp8]
         for field, value in (
             ("enable_damage_deduction", "1"),
             ("damage_salary_component", component),
@@ -132,13 +129,13 @@ class TestMoveDeductionPatch(FrappeTestCase):
         self.assertEqual(damage.salary_component, component)
         self.assertEqual(float(damage.cap_amount_per_event), 350.0)
 
-        # idempotent: the orphan rows are gone, a re-run is a no-op
+        # [#2l1zdr]
         remaining = frappe.db.sql(
             "SELECT field FROM `tabSingles` WHERE doctype=%s AND field IN %s",
             ("Habitat Settings", tuple(patch.ALL_FIELDS)),
         )
         self.assertEqual(remaining, (), "orphan rows must be deleted after the move")
-        patch.execute()  # second run must not raise
+        patch.execute()  # [#d38q25]
 
 
 def _deduction_component():

@@ -24,9 +24,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.habitat.tasks import daily_scheduled_task_instance_generator
 
 
-# ---------------------------------------------------------------------------
-# Helper factories
-# ---------------------------------------------------------------------------
+# [#ps6zpi]
 
 def _make_catalog(suffix: str) -> str:
     """Get or create a minimal Safety Task Catalog record; returns name."""
@@ -73,7 +71,7 @@ def _make_template(suffix: str, frequency: str = "Daily", items: list | None = N
         "Scheduled Task Template", {"template_name": tname}, "name"
     )
     if existing:
-        # Clean up child rows and re-add; simpler to delete and re-create.
+        # [#1s6a2r]
         frappe.delete_doc("Scheduled Task Template", existing, force=True, ignore_permissions=True)
 
     child_rows = []
@@ -113,9 +111,7 @@ def _purge_instances(filters: dict) -> None:
         frappe.delete_doc("Scheduled Task Instance", name, force=True, ignore_permissions=True)
 
 
-# ---------------------------------------------------------------------------
-# Test class
-# ---------------------------------------------------------------------------
+# [#adahy4]
 
 class TestScheduledTaskTemplateRedesign(FrappeTestCase):
 
@@ -124,21 +120,19 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
         super().setUpClass()
         frappe.set_user("Administrator")
 
-        # Shared catalog records
+        # [#80igj8]
         cls.catalog_a = _make_catalog("RSTTR-A")
         cls.catalog_b = _make_catalog("RSTTR-B")
         cls.catalog_c = _make_catalog("RSTTR-C")
 
-        # Shared building records
+        # [#7pxpbf]
         cls.building_1 = _make_building("RSTTR-1")
         cls.building_2 = _make_building("RSTTR-2")
 
     def setUp(self):
         frappe.set_user("Administrator")
 
-    # ------------------------------------------------------------------
-    # Test 1: A new instance is created for an active assignment
-    # ------------------------------------------------------------------
+    # [#8wtp3y]
     def test_new_instance_created_for_active_assignment(self):
         tmpl = _make_template("T1", frequency="Daily", items=[self.catalog_a])
         asgn = _make_assignment(tmpl, self.building_1)
@@ -147,7 +141,7 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
         self.addCleanup(frappe.delete_doc, "Scheduled Task Template", tmpl,
                         force=True, ignore_permissions=True)
 
-        # Remove any pre-existing instance for this assignment + catalog today.
+        # [#kh9ok1]
         _purge_instances({"assignment": asgn, "task_catalog": self.catalog_a,
                           "due_date": frappe.utils.today()})
 
@@ -162,9 +156,7 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
                         {"assignment": asgn, "task_catalog": self.catalog_a})
         self.assertEqual(count, 1, "Expected exactly 1 instance for the active assignment")
 
-    # ------------------------------------------------------------------
-    # Test 2: Running the generator twice does not create duplicates
-    # ------------------------------------------------------------------
+    # [#20a98h]
     def test_no_duplicate_instance_for_same_day(self):
         tmpl = _make_template("T2", frequency="Daily", items=[self.catalog_a])
         asgn = _make_assignment(tmpl, self.building_1)
@@ -188,9 +180,7 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
                         {"assignment": asgn, "task_catalog": self.catalog_a})
         self.assertEqual(count, 1, "Generator ran twice — must still produce exactly 1 instance")
 
-    # ------------------------------------------------------------------
-    # Test 3: An inactive assignment produces no instances
-    # ------------------------------------------------------------------
+    # [#452ynq]
     def test_cancelled_assignment_produces_no_instance(self):
         tmpl = _make_template("T3", frequency="Daily", items=[self.catalog_a])
         asgn = _make_assignment(tmpl, self.building_1, is_active=0)
@@ -213,9 +203,7 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
                         {"assignment": asgn, "task_catalog": self.catalog_a})
         self.assertEqual(count, 0, "Inactive assignment must produce 0 instances")
 
-    # ------------------------------------------------------------------
-    # Test 4: 3 items × 2 assignments = 6 instances
-    # ------------------------------------------------------------------
+    # [#n4gju6]
     def test_template_with_3_items_and_2_assignments_creates_6_instances(self):
         catalogs = [self.catalog_a, self.catalog_b, self.catalog_c]
         tmpl = _make_template("T4", frequency="Daily", items=catalogs)
@@ -247,14 +235,12 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
                             {"task_catalog": cat, "assignment": ["in", [asgn1, asgn2]]})
         self.assertEqual(count, 6, "3 items × 2 assignments must yield exactly 6 instances")
 
-    # ------------------------------------------------------------------
-    # Test 5: Frequency override on item is respected
-    # ------------------------------------------------------------------
+    # [#o2db8p]
     def test_frequency_override_is_used_when_set(self):
         """Item with frequency_override='Weekly' must still produce an instance.
         The test verifies the instance is created (frequency filtering is the
         caller's concern; the generator always creates for the current period)."""
-        # Create template with Monthly as default, but item overrides to Weekly.
+        # [#nywyc0]
         tmpl_name = "Test Template T5"
         existing = frappe.db.get_value(
             "Scheduled Task Template", {"template_name": tmpl_name}, "name"
@@ -296,9 +282,7 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
         self.assertGreaterEqual(count, 1,
                                 "Item with frequency_override='Weekly' must produce at least 1 instance")
 
-    # ------------------------------------------------------------------
-    # Test 6: Migration patch creates an Assignment from a legacy template
-    # ------------------------------------------------------------------
+    # [#fbte6e]
     def test_migration_patch_creates_assignment(self):
         """Call the migration patch execute() directly; confirm it creates an
         Assignment when a template has a legacy building set in the DB, and that a
@@ -311,17 +295,14 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
         """
         from apex.patches.v1_x.migrate_scheduled_task_template_to_assignments import execute
 
-        # A fresh site built from the current JSON never created the legacy `building`
-        # column (it lingers only on incrementally-migrated sites). Ensure it exists
-        # BEFORE any write this test makes, so the DDL runs with no pending transaction
-        # write (avoiding ImplicitCommitError) and we can simulate the pre-B legacy state.
+        # [#fwozt3]
         if "building" not in frappe.db.get_table_columns("Scheduled Task Template"):
             frappe.db.commit()
             frappe.db.sql(
                 "ALTER TABLE `tabScheduled Task Template` ADD COLUMN `building` varchar(140)"
             )
 
-        # Create a template without items (migration doesn't need them).
+        # [#hu62y6]
         tmpl_name = "Test Template T6 Migration"
         existing = frappe.db.get_value(
             "Scheduled Task Template", {"template_name": tmpl_name}, "name"
@@ -341,16 +322,14 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
         self.addCleanup(frappe.delete_doc, "Scheduled Task Template", tmpl,
                         force=True, ignore_permissions=True)
 
-        # Write the building directly into the DB column (simulating the pre-B state
-        # where the column existed on the table). The DocType JSON no longer lists the
-        # field, but frappe.db.set_value writes the column unconditionally.
+        # [#bwzi01]
         frappe.db.set_value(
             "Scheduled Task Template", tmpl, "building", self.building_1,
             update_modified=False,
         )
         frappe.db.commit()
 
-        # Remove any pre-existing Assignment for this (template, building) pair.
+        # [#ccju71]
         old_asgns = frappe.get_all(
             "Scheduled Task Assignment",
             filters={"template": tmpl, "building": self.building_1},
@@ -359,8 +338,7 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
         for a in old_asgns:
             frappe.delete_doc("Scheduled Task Assignment", a, force=True, ignore_permissions=True)
 
-        # Run twice: the (template, building) idempotency guard must prevent a
-        # second Assignment on re-run (patches can replay across migrates).
+        # [#bity15]
         execute()
         execute()
 
@@ -378,11 +356,7 @@ class TestScheduledTaskTemplateRedesign(FrappeTestCase):
             "Migration patch must create exactly one Assignment and be idempotent on re-run",
         )
 
-    # ------------------------------------------------------------------
-    # Test 7: The migration patch is registered in the [pre_model_sync]
-    # section — the real guard against the ordering regression that would
-    # let sync_all() drop the legacy `building` column before the backfill runs.
-    # ------------------------------------------------------------------
+    # [#bfbol7]
     def test_migration_patch_registered_pre_model_sync(self):
         """The backfill reads the legacy `building` column off tabScheduled Task
         Template. sync_all() drops that column on the same migrate that ships this

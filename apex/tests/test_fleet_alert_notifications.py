@@ -47,8 +47,7 @@ class TestFleetAlertNotifications(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def _vehicle(self):
-        # A unique plate per call: a single test may build several incidents, each
-        # needing its own vehicle, and plate_normalized is a unique key.
+        # [#g492jh]
         plate = "FAN " + frappe.generate_hash(length=8).upper()
         return frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}

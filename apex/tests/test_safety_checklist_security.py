@@ -19,11 +19,11 @@ class TestSafetyChecklistSecurity(FrappeTestCase):
         self.building_allowed = make_building(name=f"Sec Bldg Allowed {tag}").name
         self.building_forbidden = make_building(name=f"Sec Bldg Forbidden {tag}").name
 
-        # Create a user with Resident Supervisor role (has submit permission on Safety Task Execution)
+        # [#2hgqvb]
         self.user_email = f"supervisor-{tag}@example.com".lower()
         _user(self.user_email, "Resident Supervisor")
 
-        # Grant User Permission only for the allowed building
+        # [#pp24wc]
         if not frappe.db.exists(
             "User Permission",
             {"user": self.user_email, "allow": "Building", "for_value": self.building_allowed},
@@ -43,8 +43,7 @@ class TestSafetyChecklistSecurity(FrappeTestCase):
     def test_submit_round_throws_without_permission(self):
         frappe.set_user(self.user_email)
 
-        # Attempt to submit a round for the forbidden building
-        # lines list matches the structure submit_round expects
+        # [#sj0zz6]
         lines = []
 
         with self.assertRaises(frappe.PermissionError):

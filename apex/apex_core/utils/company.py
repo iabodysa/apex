@@ -21,9 +21,7 @@ from __future__ import annotations
 
 import frappe
 
-# Per-module explicit-default field: (Single DocType, fieldname). The fieldname
-# differs by module by historical design (Habitat: ``company``; Salis:
-# ``default_company``) — read each through its own field, do not rename either.
+# [#j2foqi]
 _MODULE_COMPANY_FIELD = {
     "Habitat": ("Habitat Settings", "company"),
     "Salis": ("Salis Settings", "default_company"),
@@ -48,12 +46,7 @@ def resolve_company(module: str | None = None) -> str | None:
     return company or None
 
 
-# --- Entity-scoped resolvers -------------------------------------------------
-# Ledger rows carry a company only as a reporting-grouping reference (no GL). Each
-# helper reads the company off the source entity first, then falls through to the
-# module default chain (``resolve_company``). Fallback contract is UNIFORM: an
-# entity with no company resolves the module default, never ``None`` while a
-# default is configured. These replace the per-engine ``_company_for_*`` copies.
+# [#n1qrwf]
 
 
 def company_for_building(building: str | None, module: str = "Habitat") -> str | None:

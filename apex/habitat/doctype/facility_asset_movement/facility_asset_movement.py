@@ -39,8 +39,7 @@ def on_submit(doc, method=None):
     on Facility Asset (its fields are ``building``/``location_in_building``), so the
     guarded ``updates`` dict stayed empty — every movement was a silent no-op and the
     audit fields (previous_*/movement_count/last_movement_date) never populated."""
-    # Post the immutable from->to history row first; the in-place update below only
-    # tracks the current location, not the move history.
+    # [#tlz09o]
     post_asset_movement(doc)
     asset = frappe.db.get_value(
         "Facility Asset",
@@ -50,9 +49,7 @@ def on_submit(doc, method=None):
     )
     if not asset:
         return
-    # location_in_building is free-text Data; to_room is a Link whose docname IS the
-    # Accommodation Room's room_number, so the stored value stays human-readable AND
-    # round-trips with _reconcile_origin (which only matches a value that is a Room).
+    # [#7ufx25]
     frappe.db.set_value("Facility Asset", doc.facility_asset, {
         "previous_building": asset.building,
         "previous_location_in_building": asset.location_in_building,
@@ -65,8 +62,7 @@ def on_submit(doc, method=None):
 
 def on_cancel(doc, method=None):
     """Revert the asset to where it came from when a submitted movement is cancelled."""
-    # Reverse the ledger (negated mirror row, not a delete) so the history stays
-    # auditable; runs even if the asset row was deleted after the move.
+    # [#ts0anf]
     reverse_asset_movement(doc.doctype, doc.name)
     if not frappe.db.exists("Facility Asset", doc.facility_asset):
         return
@@ -103,10 +99,7 @@ def _reconcile_origin(doc):
         frappe.throw(
             _("From Building does not match the asset's current location ({0}).").format(asset.building)
         )
-    # from_room is a Link(Accommodation Room); the asset stores its place in the
-    # free-text Data field location_in_building. Reconcile only against a value that
-    # is actually a Room docname (prior moves write the room there) — a descriptive
-    # free-text location ("Laundry Room") is not a Room and must not false-throw.
+    # [#bwngzw]
     asset_room = asset.location_in_building
     if asset_room and not frappe.db.exists("Room", asset_room):
         asset_room = None

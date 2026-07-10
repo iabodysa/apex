@@ -1,46 +1,27 @@
 # Copyright (c) 2026, AFMCO Support Services Co. Ltd
-#
-# PERMISSION-PARITY GUARD (council precondition for the v2 DocType-rename batch, B7).
-#
-# WHY: hooks.py wires row/doc permission enforcement to a doctype by NAME (dict key)
-# and to a handler by DOTTED PATH. A rename that updates the JSON/DB name but leaves a
-# stale hooks key, or moves/renames a handler, does not error at boot — Frappe simply
-# stops applying the scope for that doctype. That fails OPEN: a building-scoped user
-# starts seeing every building's rows (cross-building data exposure). This guard turns
-# that silent post-rename drift into a red CI test.
-#
-# Pure-python + AST only: no `frappe` import, no live site, no DB. Runs standalone
-# (`python3 apex/tests/test_permission_parity.py`) and under `bench run-tests`.
+# [#dnpszp]
 
 import ast
 import json
 import unittest
 from pathlib import Path
 
-# apex package root: .../apex/tests/<this file> -> parents[1]
+# [#3gope4]
 PKG_ROOT = Path(__file__).resolve().parents[1]
-PKG_NAME = PKG_ROOT.name  # "apex"
+PKG_NAME = PKG_ROOT.name  # [#ct0mew]
 HOOKS = PKG_ROOT / "hooks.py"
 PERMISSIONS_PY = PKG_ROOT / "habitat" / "permissions.py"
 
-# The three permission-relevant hook maps this guard covers.
+# [#exmywc]
 GUARDED_MAPS = ("permission_query_conditions", "has_permission", "doc_events")
 
-# Core (framework/erpnext/hrms) doctypes apex legitimately hooks but does NOT own.
-# Seed = every current key in the guarded maps whose JSON is NOT under apex/**/doctype/.
-# One-word reason each. A NEW non-owned key must be added here deliberately (never silently).
+# [#f011w0]
 CORE_ALLOWLIST = {
-    "Address": "frappe",  # National Address custom-field validation on native Address
-    "Issue": "frappe",  # Salis support-ticket scoping rides ERPNext/Frappe Issue
+    "Address": "frappe",  # [#52nj0h]
+    "Issue": "frappe",  # [#db9ys1]
 }
 
-# Hardcoded doctype-name string literals inside habitat/permissions.py that fail CLOSED on
-# a rename (a User Permission `allow=`/scope filter that silently matches nothing -> a scoped
-# user sees NOTHING, or the reverse). These are NOT hooks keys, so assertion 1 can't see them;
-# B7's rename sweep must update each. Enumerated here so the sweep has a checklist + a guard.
-#   permissions.py ~L111  _allowed_buildings(): frappe.get_all("User Permission",
-#                          filters={"allow": "Building", ...})
-#   permissions.py ~L218  building_scoped_has_permission(): doc.doctype == "Building"
+# [#j1p8io]
 HARDCODED_PERMISSION_DOCTYPE_LITERALS = {
     "Building",
 }
@@ -50,7 +31,7 @@ def _owned_doctypes():
     """Names of every DocType whose JSON lives under apex/**/doctype/<slug>/<slug>.json."""
     owned = set()
     for jp in PKG_ROOT.glob("**/doctype/*/*.json"):
-        if jp.stem != jp.parent.name:  # only the main <slug>.json, not child fixtures
+        if jp.stem != jp.parent.name:  # [#m78671]
             continue
         try:
             data = json.loads(jp.read_text(encoding="utf-8"))
@@ -147,8 +128,7 @@ class TestPermissionParity(unittest.TestCase):
         cls.maps = _load_hook_maps()
         cls.allowed = cls.owned | set(CORE_ALLOWLIST)
 
-    # 1) Every guarded-map doctype KEY is apex-owned OR in CORE_ALLOWLIST.
-    #    A key naming a doctype that is neither = the post-rename stale-key bug.
+    # [#hkinda]
     def test_every_hook_key_is_owned_or_allowlisted(self):
         offenders = []
         for map_name, entries in self.maps.items():
@@ -162,8 +142,7 @@ class TestPermissionParity(unittest.TestCase):
             f"CORE_ALLOWLIST only if legitimately a core doctype: {sorted(offenders)}",
         )
 
-    # 2) Every dotted handler TARGET in the guarded maps resolves: module file exists and
-    #    the attribute is defined. Catches a rename that moved/renamed a handler.
+    # [#gmqxf0]
     def test_every_handler_target_resolves(self):
         broken = []
         for map_name, entries in self.maps.items():
@@ -180,10 +159,7 @@ class TestPermissionParity(unittest.TestCase):
             f"hooks.py points at handler(s) that no longer exist (renamed/moved): {sorted(broken)}",
         )
 
-    # 3) Parity for the scoping family: every doctype with a permission_query_conditions
-    #    handler in a *.permissions module MUST also have its has_permission handler there,
-    #    and vice-versa. A rename that drops one half silently widens access (list scoped but
-    #    form/REST open, or the reverse).
+    # [#cercgv]
     def test_query_and_haspermission_family_parity(self):
         pqc_family = {
             dt
@@ -205,10 +181,7 @@ class TestPermissionParity(unittest.TestCase):
             f"have has_permission but NO permission_query_conditions={missing_pqc}",
         )
 
-    # 4) Hardcoded doctype-name string literals in permissions.py that fail CLOSED on a
-    #    rename. Each must still name an owned (or allowlisted) doctype, AND must still be
-    #    physically present in permissions.py (so this checklist can't silently rot). B7's
-    #    rename sweep updates these by hand — this test is that sweep's checklist + guard.
+    # [#pdfmwk]
     def test_hardcoded_permission_literals_track_owned_doctypes(self):
         src = PERMISSIONS_PY.read_text(encoding="utf-8")
         stale_checklist = sorted(
@@ -230,14 +203,7 @@ class TestPermissionParity(unittest.TestCase):
         )
 
 
-# B7 INTEGRATOR BENCH-STEP (cannot run here — needs a live site + seeded data):
-# After each Building/Assignment-family rename, on the bench run the LIVE scoped-login
-# row-count check: as a building-scoped user (a Housing/Resident Supervisor with a User
-# Permission on ONE Accommodation Building), open the renamed DocType's list and a report
-# over it and assert the row count == that user's in-building rows only (NOT the global
-# count) for BOTH the list (permission_query_conditions) and a direct form/REST GET
-# (has_permission). A post-rename count == global row count is the fail-open regression
-# this static guard cannot observe without data.
+# [#aicnjb]
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

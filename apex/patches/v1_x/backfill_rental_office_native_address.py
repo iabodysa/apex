@@ -48,8 +48,7 @@ def execute():
             skipped += 1
             continue
 
-        # Index-based, guaranteed SQL-safe identifier — a doc-name-derived name can
-        # contain spaces/parentheses/non-ASCII that break the savepoint SQL.
+        # [#tggfof]
         savepoint = f"bfill_rental_office_addr_{idx}"
         try:
             frappe.db.savepoint(savepoint)

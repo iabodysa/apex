@@ -40,8 +40,7 @@ def _resolve_project_supervisor(vehicle: str | None) -> str | None:
         project = frappe.db.get_value("Salis Vehicle", vehicle, "project")
         return _project_supervisor(project)
     except Exception:
-        # Best-effort denorm: never abort the job, but log so a real
-        # misconfiguration is not silently invisible.
+        # [#6uz2xe]
         frappe.log_error(title="Salis: resolve project supervisor failed")
         return None
 
@@ -53,7 +52,7 @@ def _vehicle_project(vehicle: str | None) -> str | None:
     try:
         return frappe.db.get_value("Salis Vehicle", vehicle, "project")
     except Exception:
-        # Best-effort denorm: never abort the job, but log the failure.
+        # [#tn6dm7]
         frappe.log_error(title="Salis: resolve vehicle project failed")
         return None
 
@@ -93,12 +92,7 @@ def _raise_alert(
     """
     from frappe.utils import add_days, now_datetime, today
 
-    # [#91pwgy] raised_on is a Datetime; a "today" window must derive both bounds
-    # from ONE today() call. A "<= 23:59:59" upper bound silently drops a row stamped
-    # 23:59:59.xxxxxx (the column keeps microseconds), and two separate today() calls
-    # could straddle midnight — both reopen the duplicate alert the dedupe suppresses.
-    # The upper bound is next-day-midnight (between is inclusive, but now_datetime()
-    # never lands on exactly .000000, so tomorrow's first row is not falsely matched).
+    # [#k7ei2t]
     day = today()
     dedupe_filters = {
         "alert_type": alert_type,
@@ -148,9 +142,7 @@ def _raise_alert(
         )
         return None
 
-    # Push the operations board to refetch when a new alert lands on a project in
-    # view (ahead of its poll). after_commit so subscribers read committed state;
-    # client filters by project, so a vehicle-less alert (no project) reloads all.
+    # [#oplihr]
     _publish_operations_alert(_vehicle_project(vehicle))
 
     # [#gg8xk4]

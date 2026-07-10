@@ -22,10 +22,7 @@ def execute():
         frappe.db.set_value("Web Form", WEB_FORM, updates)
         frappe.db.commit()
 
-    # ASSERT the route is byte-identical (B9 / V2 cutover red-line). The QR posters and
-    # deep links hardcode `/qr-request`; the B7 DocType rename must leave this route
-    # untouched. Fail CLOSED on any drift so a cutover that silently repointed the form
-    # is caught at migrate time instead of shipping dead QR codes to the field.
+    # [#2nw7ow]
     final_route = frappe.db.get_value("Web Form", WEB_FORM, "route")
     if final_route != ROUTE:
         frappe.throw(

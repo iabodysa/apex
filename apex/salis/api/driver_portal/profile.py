@@ -45,7 +45,7 @@ def _employee_documents(employee):
 		return []
 	emp = frappe.get_cached_doc("Employee", employee)
 	documents = []
-	# Same Iqama field fallbacks masar uses (iqama/iqama_no, iqama_expiry/valid_upto).
+	# [#bakgm3]
 	iqama_no = emp.get("iqama") or emp.get("iqama_no")
 	iqama_expiry = emp.get("iqama_expiry") or emp.get("valid_upto")
 	if iqama_no or iqama_expiry:
@@ -57,7 +57,7 @@ def _employee_documents(employee):
 				"days_left": _days_until(iqama_expiry),
 			}
 		)
-	# Passport mirrors masar — surfaced only when a number is on file.
+	# [#hch49w]
 	passport_no = emp.get("passport_number")
 	if passport_no:
 		documents.append(
@@ -149,20 +149,16 @@ def get_driver_profile():
 	) or {}
 	if d.get("license_expiry"):
 		d["license_expiry"] = frappe.utils.cstr(d["license_expiry"])
-	# [#projlbl] portal shows the project's display name, not its series code
+	# [#mlgvqm]
 	if d.get("project"):
 		d["project"] = _project_label(d["project"])
-	# Iqama/passport expiries from the linked Employee (defensive .get(), like masar)
+	# [#1mupnp]
 	d["documents"] = _employee_documents(d.get("employee"))
 	return d
 
 
 
-# [#vehcmp] Compliance child rows the driver actually cares about, in the order
-# they should read on the card. "Operating Card"/"Other" are deliberately omitted —
-# a driver acts on the registration (istimara), insurance, and periodic inspection
-# (fahes) expiries; the rest is back-office. Keys are the stable Select option
-# values on Salis Vehicle Compliance.compliance_type.
+# [#f1dc1a]
 _DRIVER_COMPLIANCE_TYPES = (
 	"Registration (Istimara)",
 	"Insurance",
@@ -258,11 +254,11 @@ def get_my_vehicle():
 		as_dict=True,
 	) or {}
 
-	# [#projlbl] portal shows the project's display name, not its series code
+	# [#mlgvqm]
 	if v.get("project"):
 		v["project"] = _project_label(v["project"])
 
-	# [#vehcmp] driver-relevant expiries with a server-computed warning state
+	# [#drxwau]
 	v["compliance"] = _vehicle_compliance(vehicle)
 
 	# [#kcrj1g]
@@ -278,7 +274,7 @@ def get_my_vehicle():
 		if assignment and assignment.get("start_date")
 		else None
 	)
-	# [#vehmap] last-known site deep-link (derived from the latest trip route — no GPS field)
+	# [#gw6jyz]
 	v["last_site_maps_url"] = _vehicle_last_site_maps_url(vehicle)
 	return {"vehicle": v}
 

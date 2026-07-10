@@ -29,13 +29,13 @@ from frappe.tests.utils import FrappeTestCase
 from apex.salis.api import driver_portal, masar
 from apex.tests import factories
 
-# The deterministic geometry under test.
+# [#hp6kkb]
 _PICKUP_LAT = 24.700000
 _PICKUP_LNG = 46.700000
 _DRIVER_LAT = 24.700000
 _DRIVER_LNG = 46.800000
 _ASSUMED_SPEED_KMPH = 40.0
-_EXPECTED_ETA_MIN = 15  # (10.10216 km / 40 km/h) * 60 = 15.153 -> round -> 15
+_EXPECTED_ETA_MIN = 15  # [#se6l8h]
 
 
 class TestDriverGpsEta(FrappeTestCase):
@@ -44,7 +44,7 @@ class TestDriverGpsEta(FrappeTestCase):
         super().setUpClass()
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)
-        # Pin the speed so the expected ETA is independent of the stored/blank value.
+        # [#k9vbl9]
         frappe.db.set_single_value("Salis Settings", "assumed_fleet_speed_kmph", _ASSUMED_SPEED_KMPH)
         cls.project = factories.make_project("Masar GPS Project")
         cls.building = factories.make_building_with_coords(
@@ -53,7 +53,7 @@ class TestDriverGpsEta(FrappeTestCase):
         cls.driver, cls.driver_email = factories.make_driver_chain(
             "masar-gps-driver@example.com", "GPS Driver"
         )
-        # A SECOND driver, to prove the ingestion API is ownership-scoped.
+        # [#5qt121]
         cls.other_driver, cls.other_email = factories.make_driver_chain(
             "masar-gps-other@example.com", "GPS Other"
         )
@@ -69,11 +69,7 @@ class TestDriverGpsEta(FrappeTestCase):
 
     def setUp(self):
         frappe.set_user("Administrator")
-        # A pristine worker PER TEST: the shared test bench accumulates committed
-        # Transport Requests, and next_ride is the soonest upcoming ride across ALL
-        # of a worker's requests — a reused worker would surface a stale leftover ride
-        # instead of this test's dispatched trip. A unique worker owns exactly the one
-        # ride each test builds, so next_ride is deterministically that ride.
+        # [#ioxpy9]
         self.worker = factories.make_worker_employee(
             f"Masar GPS Worker {frappe.generate_hash(length=12)}"
         )
@@ -82,7 +78,7 @@ class TestDriverGpsEta(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-    # ── fixtures (built via tests/factories.py) ────────────────────────────────
+    # [#88mv24]
     def _assign_worker(self):
         """A submitted Accommodation Assignment putting the worker in the pickup
         building, so ``get_worker_transport`` scopes ``my_pickup`` to it."""
@@ -101,25 +97,24 @@ class TestDriverGpsEta(FrappeTestCase):
             [self.worker],
             f"GPS Route {frappe.generate_hash(length=12)}",
             from_location="Building Gate",
-            # Soonest upcoming: a couple of hours out (>= now, so it is next_ride).
+            # [#fqdlds]
             pickup_datetime=frappe.utils.add_to_date(frappe.utils.now_datetime(), hours=2),
             passengers=1,
-            # En route: the trip is Dispatched (docstatus 0) when a position streams in.
+            # [#rbemo2]
             status="Dispatched",
             link_route_plan_on_request=True,
         )
         self.addCleanup(lambda: self._purge_trip(dt.name, rp.name, tr.name))
         return dt.name
 
-    # ── the goal: server-computed ETA on next_ride ─────────────────────────────
+    # [#s9nb6z]
     def test_next_ride_eta_is_computed(self):
         """Feed a driver GPS fix via the ingestion API, then assert Home's
         next_ride carries the exact server-computed ETA (15 min)."""
         self._assign_worker()
         dt = self._dispatched_trip()
 
-        # The driver pushes their live position through the permission-gated API,
-        # impersonating the real driver login (not a raw db write).
+        # [#p3w8qi]
         frappe.set_user(self.driver_email)
         result = driver_portal.push_driver_position(
             dispatch_trip=dt, lat=_DRIVER_LAT, lng=_DRIVER_LNG
@@ -129,15 +124,14 @@ class TestDriverGpsEta(FrappeTestCase):
         self.assertIsNotNone(result["driver_position_updated_at"])
         frappe.set_user("Administrator")
 
-        # The position landed on the trip.
+        # [#brhu1s]
         self.assertEqual(frappe.db.get_value("Dispatch Trip", dt, "driver_lat"), _DRIVER_LAT)
 
         home = masar.get_worker_home(token=self.token)
         next_ride = home["next_ride"]
         self.assertIsNotNone(next_ride, "fixture sanity: the worker has a next ride")
         self.assertEqual(next_ride["dispatch_trip"], dt)
-        # The load-bearing assertion: the EXACT server-computed ETA, deterministic
-        # from the known haversine distance and pinned speed.
+        # [#ito418]
         self.assertEqual(next_ride["eta_minutes"], _EXPECTED_ETA_MIN)
 
     def test_eta_is_none_without_a_position(self):
@@ -149,19 +143,17 @@ class TestDriverGpsEta(FrappeTestCase):
         self.assertEqual(home["next_ride"]["dispatch_trip"], dt)
         self.assertIsNone(home["next_ride"]["eta_minutes"])
 
-    # ── ingestion API: permission + validation gates ───────────────────────────
+    # [#ekocsg]
     def test_push_rejects_another_drivers_trip(self):
         """A driver may not write a position onto a trip that is not theirs — the
         ownership guard fails closed."""
         self._assign_worker()
-        dt = self._dispatched_trip(driver=self.driver)  # belongs to self.driver
-        frappe.set_user(self.other_email)  # a DIFFERENT driver
+        dt = self._dispatched_trip(driver=self.driver)  # [#7z0tvn]
+        frappe.set_user(self.other_email)  # [#p9nnmp]
         with self.assertRaises(frappe.DoesNotExistError):
             driver_portal.push_driver_position(dispatch_trip=dt, lat=_DRIVER_LAT, lng=_DRIVER_LNG)
         frappe.set_user("Administrator")
-        # Nothing was written — a never-pushed Float field is stored as 0.0 (Frappe
-        # defaults an empty Float to 0, not NULL), so the rejected foreign push must
-        # leave it falsy.
+        # [#4hfag4]
         self.assertFalse(frappe.db.get_value("Dispatch Trip", dt, "driver_lat"))
 
     def test_push_rejects_out_of_range_coords(self):
@@ -175,7 +167,7 @@ class TestDriverGpsEta(FrappeTestCase):
             driver_portal.push_driver_position(dispatch_trip=dt, lat="not-a-number", lng=46.7)
         frappe.set_user("Administrator")
 
-    # ── cleanup ────────────────────────────────────────────────────────────────
+    # [#ktm872]
     def _purge_assignment(self, name):
         frappe.set_user("Administrator")
         if name and frappe.db.exists("Housing Assignment", name):

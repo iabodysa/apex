@@ -28,7 +28,7 @@ class TestBuildingSiteAddress(FrappeTestCase):
         frappe.set_user("Administrator")
         site_a = _ensure_site("T138 Site A")
         site_b = _ensure_site("T138 Site B")
-        # an Address linked only to site A
+        # [#eysfd2]
         if not frappe.db.exists("Address", {"address_title": "T138 A"}):
             frappe.get_doc(
                 {
@@ -46,9 +46,9 @@ class TestBuildingSiteAddress(FrappeTestCase):
         )
         bldg = make_building(name="T138 Building", site=site_a, company=company).name
 
-        # stored-site fallback returns A's address (non-empty)
+        # [#5nmzi3]
         self.assertTrue(get_site_address(bldg))
-        # the form's current Site (B, which has no address) wins — empty, not A's stale address
+        # [#pd9s1s]
         self.assertEqual(get_site_address(bldg, site=site_b), "")
 
     def test_building_address_overrides_site(self):
@@ -79,6 +79,6 @@ class TestBuildingSiteAddress(FrappeTestCase):
         bldg = make_building(name="T144 Building", site=site_a, company=company).name
 
         own_text = get_site_address(bldg, site=site_a, building_address=own)
-        self.assertIn("Own Street 9", own_text)  # the building's own address wins
-        self.assertNotIn("Site Street", own_text)  # not the site's
+        self.assertIn("Own Street 9", own_text)  # [#ekahi0]
+        self.assertNotIn("Site Street", own_text)  # [#cw5c17]
         self.assertIn("Site Street", get_site_address(bldg, site=site_a, building_address=""))

@@ -140,7 +140,7 @@ def get_ticket(name):
 	for f in ("creation", "response_by", "resolution_by", "first_responded_on", "resolution_date"):
 		if issue.get(f):
 			issue[f] = frappe.utils.cstr(issue[f])
-	# Native Communications threaded against the Issue, oldest first (the reply log).
+	# [#7wn25s]
 	comms = frappe.get_all(
 		"Communication",
 		filters={"reference_doctype": "Issue", "reference_name": name},
@@ -151,7 +151,7 @@ def get_ticket(name):
 		c["communication_date"] = (
 			frappe.utils.cstr(c["communication_date"]) if c.get("communication_date") else None
 		)
-		# strip markup so the SPA renders a clean line, not raw HTML
+		# [#plxvhk]
 		c["content"] = frappe.utils.strip_html_tags(c.get("content") or "").strip() or None
 	issue["communications"] = comms
 	return issue
@@ -186,7 +186,7 @@ def reply_to_ticket(name, message):
 		}
 	)
 	comm.insert(ignore_permissions=True)  # audit-ok — Issue resolved server-side to this driver
-	# A driver reply revives a closed ticket so staff re-engage.
+	# [#6v8hml]
 	if issue.get("status") in ("Resolved", "Closed"):
 		frappe.db.set_value("Issue", name, "status", "Open")
 	return {"name": comm.name}
@@ -206,7 +206,7 @@ def report_vehicle_problem(subject, description, priority=None):
 	driver = _resolve_driver()
 	vehicle = _bound_vehicle(driver)
 	plate = frappe.db.get_value("Salis Vehicle", vehicle, "plate_number") if vehicle else None
-	# Vehicle context goes into the body (Issue has no native vehicle link).
+	# [#cad16i]
 	body = description or ""
 	if plate or vehicle:
 		body = f"{body}\n\n" + _("Vehicle: {0}").format(plate or vehicle)

@@ -32,7 +32,7 @@ class TestApplyPortalAppearance(FrappeTestCase):
 		apply_portal_appearance(ctx)
 		for key in _APPEARANCE_KEYS:
 			self.assertIn(key, ctx, f"{key} not projected onto context")
-		# Theme always resolves to a slug; show_brand is a real bool.
+		# [#m513nt]
 		self.assertTrue(ctx.portal_theme)
 		self.assertIsInstance(ctx.portal_show_brand, bool)
 
@@ -53,7 +53,7 @@ class TestGuestRedirect(FrappeTestCase):
 	def test_authenticated_user_is_a_noop(self):
 		frappe.set_user("Administrator")
 		frappe.local.flags.redirect_location = None
-		guest_redirect("/driver")  # must not raise
+		guest_redirect("/driver")  # [#3vfaf1]
 		self.assertIsNone(frappe.local.flags.redirect_location)
 
 
@@ -72,8 +72,7 @@ class TestRouteSmoke(FrappeTestCase):
 			self.assertIn(key, ctx)
 
 	def test_masar_guest_context_keys(self):
-		# Masar is Guest-accessible (no ?w= -> no redirect): appearance + csrf present,
-		# plus the presence boolean (the raw token is no longer inlined — T-705).
+		# [#h1uj6r]
 		frappe.set_user("Guest")
 		frappe.local.form_dict = frappe._dict()
 		ctx = masar_page.get_context(frappe._dict())
@@ -84,7 +83,7 @@ class TestRouteSmoke(FrappeTestCase):
 			self.assertIn(key, ctx)
 
 	def test_safety_context_role_gate_and_appearance(self):
-		# Administrator holds System Manager -> the role-gated branch runs.
+		# [#4l0371]
 		frappe.set_user("Administrator")
 		ctx = safety_page.get_context(frappe._dict())
 		self.assertTrue(ctx.has_safety_role)
@@ -93,8 +92,7 @@ class TestRouteSmoke(FrappeTestCase):
 			self.assertIn(key, ctx)
 
 	def test_fleet_context_role_gate_no_appearance(self):
-		# Fleet has no appearance projection by design; assert the gate + socket keys
-		# and that the dedupe did not add appearance.
+		# [#p8eeoq]
 		frappe.set_user("Administrator")
 		ctx = fleet_page.get_context(frappe._dict())
 		self.assertTrue(ctx.has_fleet_role)
@@ -103,7 +101,7 @@ class TestRouteSmoke(FrappeTestCase):
 		self.assertNotIn("portal_theme", ctx)
 
 	def test_guest_is_redirected_on_admin_routes(self):
-		# The shared guest_redirect still fires for driver/fleet/safety (not masar).
+		# [#fqysuh]
 		frappe.set_user("Guest")
 		for page in (driver_page, fleet_page, safety_page):
 			with self.assertRaises(frappe.Redirect):

@@ -18,7 +18,7 @@ import frappe
 
 ALERT_DOCTYPE = "Operations Alert"
 
-# Operations Alert.message is a 2000-char field; clip so a long body never throws.
+# [#qqv12a]
 _MESSAGE_MAX = 2000
 
 

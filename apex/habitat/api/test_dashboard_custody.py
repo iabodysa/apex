@@ -26,25 +26,24 @@ def _h(n=12):
 
 class TestDashboardCustody(FrappeTestCase):
     def setUp(self):
-        # Unique tokens so seeded rows are isolated from any other ledger data.
+        # [#t0t3a8]
         self.employee = "EMP-" + _h()
         self.building = "BLDG-" + _h()
         self.article = "ART-" + _h()
         self.unit_cost = 12.0
         self.issue_qty = 5.0
-        self.return_qty = 2.0  # partial return
-        self.net_qty = self.issue_qty - self.return_qty  # 3 still in custody
-        self.net_value = self.net_qty * self.unit_cost  # 36.0 SAR
+        self.return_qty = 2.0  # [#tsnugi]
+        self.net_qty = self.issue_qty - self.return_qty  # [#pkhwzj]
+        self.net_value = self.net_qty * self.unit_cost  # [#hnh87s]
         self._names = []
 
-        # (1) Issue: +5 of the article into the employee's custody.
+        # [#7sub0c]
         self._post(qty=self.issue_qty, employee=self.employee)
-        # (2) Partial return: -2 reverses part of the custody holding.
+        # [#53uk6k]
         self._post(qty=-self.return_qty, employee=self.employee)
-        # (3) Cancelled row: a large issue that MUST be excluded (is_cancelled=1).
+        # [#pqi132]
         self._post(qty=99, employee=self.employee, is_cancelled=1)
-        # (4) No-employee row: store stock for the same article that MUST be
-        #     excluded (employee unset means it is not in anyone's custody).
+        # [#mw28jz]
         self._post(qty=7, employee=None)
 
     def _post(self, qty, employee, is_cancelled=0):
@@ -74,8 +73,7 @@ class TestDashboardCustody(FrappeTestCase):
     def test_value_in_employee_hands_is_signed_net(self):
         """The dashboard scalar equals the seeded signed net SAR for this employee,
         added on top of whatever else exists on the site (delta is exact)."""
-        # Measure the contribution of only the seeded rows by comparing against a
-        # direct sum scoped to this run's unique employee.
+        # [#kt58d0]
         seeded = frappe.db.sql(
             """
             SELECT COALESCE(SUM(signed_qty * COALESCE(unit_cost, 0)), 0)
@@ -89,12 +87,10 @@ class TestDashboardCustody(FrappeTestCase):
         self.assertEqual(flt(seeded[0][0]), self.net_value,
                          "scoped seeded net SAR must be issue*cost - return*cost")
 
-        # The whole-site scalar must include our exact net contribution and must
-        # not be polluted by the cancelled or no-employee rows.
+        # [#1lpknc]
         total = flt(get_custody_value_in_employee_hands()["value"])
         self.assertGreaterEqual(total, self.net_value)
-        # Cancelled (+99) and store (+7) rows would inflate it; their exclusion is
-        # asserted directly below via the scoped sum, so total stays finite/sane.
+        # [#sfsdsj]
         self.assertNotIn(99 * self.unit_cost, [total])
 
     def test_value_in_hands_returns_number_card_dict_contract(self):
@@ -135,12 +131,11 @@ class TestDashboardCustody(FrappeTestCase):
         """The +7 store row (employee unset) must never appear as a custody
         holding — the report only counts rows with an employee set."""
         _, data = run_custody_report({"building": self.building})
-        # No report row may have a blank employee, and none may carry the +7 store
-        # qty for our building.
+        # [#mkrb38]
         for r in data:
             self.assertTrue(r["employee"], "report rows must have an employee set")
         mine = [r for r in data if r["building"] == self.building]
-        # Only the one custody row for our seeded employee should match.
+        # [#c1syt9]
         self.assertEqual(len(mine), 1)
         self.assertEqual(mine[0]["employee"], self.employee)
         self.assertEqual(flt(mine[0]["balance_qty"]), self.net_qty)

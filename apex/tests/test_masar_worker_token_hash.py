@@ -57,7 +57,7 @@ class TestMasarWorkerTokenHashedAtRest(FrappeTestCase):
             .name
         )
 
-    # the at-rest contract
+    # [#qnpby5]
 
     def test_minted_row_stores_the_hash_not_the_raw_token(self):
         """A minted token exposes the RAW value once (via the controller), but the
@@ -78,7 +78,7 @@ class TestMasarWorkerTokenHashedAtRest(FrappeTestCase):
         self.assertTrue(raw, "the raw token must be available once, right after mint")
 
         stored = frappe.db.get_value("Masar Worker Token", doc.name, "token")
-        # The stored value is the hash, NOT the raw token.
+        # [#5l3onr]
         self.assertNotEqual(stored, raw, "the raw token must never be stored in clear")
         self.assertEqual(stored, _hash_token(raw), "the row must store the SHA-256 hash")
         self.assertEqual(len(stored), 64, "a SHA-256 hex digest is 64 chars")
@@ -100,10 +100,9 @@ class TestMasarWorkerTokenHashedAtRest(FrappeTestCase):
         raw = doc._plaintext_token
 
         self.assertEqual(masar._resolve_worker(raw), emp)
-        # And the public guest endpoint scopes to this worker via the raw link token.
+        # [#pjomex]
         self.assertEqual(masar.get_worker_context(token=raw)["employee"], emp)
-        # Presenting the STORED hash (as a DB reader might) fails closed — it is not a
-        # usable token (it hashes again to something else and matches no row).
+        # [#lvscif]
         with self.assertRaises(frappe.PermissionError):
             masar._resolve_worker(doc.token)
 
@@ -141,7 +140,7 @@ class TestMasarWorkerTokenHashedAtRest(FrappeTestCase):
         self.assertEqual(stored, _hash_token(raw), "the row must store only the hash")
         self.assertNotEqual(stored, raw)
 
-    # the migration
+    # [#ean2an]
 
     def test_migration_hashes_a_plaintext_row_and_link_survives(self):
         """The P-104 migration: a pre-existing row carrying a PLAINTEXT token (forced
@@ -152,8 +151,7 @@ class TestMasarWorkerTokenHashedAtRest(FrappeTestCase):
 
         emp = self._make_employee("migrate")
         raw = frappe.generate_hash(length=48)
-        # db_insert bypasses the controller (which would hash on mint), mirroring a
-        # legacy row whose token column still holds the raw secret in clear.
+        # [#smvzqb]
         frappe.get_doc(
             {
                 "doctype": "Masar Worker Token",
@@ -165,7 +163,7 @@ class TestMasarWorkerTokenHashedAtRest(FrappeTestCase):
                 "token": raw,
             }
         ).db_insert()
-        # Non-vacuous: the row genuinely stores the plaintext before the migration.
+        # [#6amc17]
         self.assertEqual(frappe.db.get_value("Masar Worker Token", emp, "token"), raw)
 
         execute()
@@ -177,7 +175,7 @@ class TestMasarWorkerTokenHashedAtRest(FrappeTestCase):
             frappe.db.get_value("Masar Worker Token", emp, "token_enc"),
             "the migration must stash an encrypted recoverable copy",
         )
-        # The currently-distributed link (the raw token) still resolves after the migration.
+        # [#liazqs]
         self.assertEqual(masar._resolve_worker(raw), emp)
 
     def test_migration_is_idempotent(self):

@@ -106,13 +106,7 @@ def _project_condition(user, column="`project`"):
     return "{column} in ({values})".format(column=column, values=escaped)
 
 
-# [#rptscope] Script Reports run on frappe.get_all, which forces ignore_permissions
-# (frappe/__init__.py get_all forces ignore_permissions), so the project row-scoping
-# the desk list gets via permission_query_conditions is bypassed in report code. This
-# helper consolidates the re-application that the Salis reports had duplicated inline:
-# it returns the project filter a report must AND onto its own get_all so a project-
-# scoped user sees only their projects' rows while the UNSCOPED_ROLES oversight roles
-# stay unrestricted.
+# [#iecjvo]
 def report_project_scope(user=None):
     """Return ``(restrict, allowed_projects)`` for report-side project scoping.
 
@@ -201,8 +195,7 @@ def dispatch_trip_query(user=None):
 
     projects = _allowed_projects(user)
     if not projects:
-        # No project scope: a Driver still sees their own trips; any other scoped
-        # user (no driver) is held to that same own-trips clause (matches nothing).
+        # [#fdplqh]
         return own
 
     escaped = ", ".join(frappe.db.escape(p) for p in projects)
@@ -319,10 +312,7 @@ def passenger_manifest_query(user=None):
     )
 
 
-# Indirect-tenant DocTypes: no own `project`, but a Salis Driver link carries it.
-# Scope each through `driver -> Salis Driver -> project`; where a Driver `if_owner`
-# DocPerm exists (Driver Attendance / Driver Stop / Boarding Scan Log) OR the
-# `owner = me` clause so the self-record path survives (mirrors salis_driver_query).
+# [#1hud7u]
 # [#dr1tz9]
 
 def _driver_chain_condition(user, column="`driver`", with_owner=False):
@@ -567,7 +557,7 @@ def dispatch_trip_has_permission(doc, ptype, user=None):
     if _is_unscoped(user):
         return None
 
-    # Driver-own: the trip is dispatched to this user's Salis Driver.
+    # [#daxlu1]
     own_driver = get_driver_for_user(user)
     if own_driver and getattr(doc, "driver", None) == own_driver:
         return None
@@ -582,9 +572,7 @@ def dispatch_trip_has_permission(doc, ptype, user=None):
     return None
 
 
-# has_permission mirrors for the indirect-tenant DocTypes (form view / REST
-# resource / link reads), matching the permission_query_conditions above so the
-# direct-access path enforces the same project boundary as the list/report view.
+# [#oyj21f]
 # [#dr2hpm]
 
 def _driver_chain_project(doc, driver_field="driver"):
@@ -679,9 +667,7 @@ def movement_cost_transfer_has_permission(doc, ptype, user=None):
     return False
 
 
-# Operations Alert has no own `project` column; scope is derived through
-# `vehicle -> Salis Vehicle -> project` (see the two functions' docstrings). Closes
-# the cross-project leak where a scoped supervisor could see every project's alerts.
+# [#9w8q9b]
 
 def operations_alert_query(user=None):
     """List/report scope for Operations Alert via the vehicle's project.

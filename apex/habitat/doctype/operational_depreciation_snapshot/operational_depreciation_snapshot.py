@@ -61,8 +61,7 @@ def before_cancel(doc, method=None):
 
 
 def _compute_book_values(doc):
-    # Load each distinct policy once (rows often share a policy) to avoid an N+1
-    # get_doc per item; cache keyed by policy name.
+    # [#nrea75]
     policy_cache: dict[str, "Document"] = {}
     for row in doc.items:
         if row.policy and row.policy not in policy_cache:

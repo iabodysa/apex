@@ -26,8 +26,7 @@ def _rule_enabled(policy, rule_type):
 
 class TestApexSetupWizard(FrappeTestCase):
     def test_payment_method_routes_to_router_and_toggles_stay_safe(self):
-        # [#ql6hkn] "Payment Order" is a core ERPNext DocType, so it exists and the
-        # wizard routes it onto the Payment Routing target.
+        # [#p21yh6]
         setup_wizard_complete(
             {
                 "apex_default_payment_method": "Payment Order",
@@ -39,8 +38,7 @@ class TestApexSetupWizard(FrappeTestCase):
         apex = frappe.get_single("Apex Settings")
         router = frappe.get_single("Payment Routing Settings")
         self.assertEqual(router.target_payment_doctype, "Payment Order")
-        # [#pnt7gf] prerequisites (authorizer / component) missing -> wizard reverts
-        # the deductions to OFF safely; the app never silently starts deducting
+        # [#e5daxc]
         self.assertEqual(policy.enable_salary_deductions, 0)
         self.assertEqual(_rule_enabled(policy, "Rent"), 0)
         self.assertEqual(_rule_enabled(policy, "Damage"), 0)

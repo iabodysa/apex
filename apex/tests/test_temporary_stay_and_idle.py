@@ -33,10 +33,7 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
         })
 
     def test_expected_checkout_notification_targets_building_supervisor(self):
-        # The Expected Checkout Approaching alert must resolve to the building's own
-        # responsible_supervisor, not only the broad Resident Supervisor /
-        # Accommodation Manager roles. The supervisor is mirrored onto the assignment
-        # via fetch_from so the notification's receiver_by_document_field can read it.
+        # [#ewr6of]
         from apex.tests.factories import make_bed, make_room
 
         supervisor = f"sup{_h()}@test.com".lower()
@@ -52,7 +49,7 @@ class TestTemporaryStayAndIdle(ApexHabitatTestCase):
         asg.bed = bed.name
         asg.insert(ignore_permissions=True)
 
-        # fetch_from must have mirrored the building supervisor onto the assignment row.
+        # [#pp203q]
         self.assertEqual(asg.responsible_supervisor, supervisor)
 
         notification = frappe.get_doc("Notification", "Habitat - Expected Checkout Approaching")

@@ -25,7 +25,7 @@ from frappe.utils import flt
 
 from apex.salis.utils import add_timeline_note
 
-# [#dwo-ops] Operations tier may authorise a high-value (>= threshold) write-off.
+# [#4xgl2m]
 _OPERATIONS_ROLES = {"Fleet Manager", "System Manager"}
 
 
@@ -34,7 +34,7 @@ class VehicleDamageWriteOff(Document):
         # [#83ntz1]
         if self.status and self.status != "Open" and not self.evidence:
             frappe.throw(_("Evidence is required before moving the write-off case beyond Open."))
-        # A negative estimated cost is never a valid write-off amount.
+        # [#kh1fqw]
         if self.estimated_cost is not None and flt(self.estimated_cost) < 0:
             frappe.throw(_("Estimated cost cannot be negative."))
         self._derive_needs_operations()
@@ -90,15 +90,14 @@ class VehicleDamageWriteOff(Document):
             self.approved_by = frappe.session.user
 
     def _stamp_source_incident(self):
-        # Complete the escalation back-link: the incident's read_only write_off_case
-        # is only ever populated here, making the Incident<->Write-Off link bidirectional.
+        # [#oxkzun]
         if self.source_incident:
             frappe.db.set_value(
                 "Vehicle Incident", self.source_incident, "write_off_case", self.name
             )
 
     def _clear_source_incident(self):
-        # Reverse the back-link on cancel so no stale write_off_case pointer survives.
+        # [#d04slv]
         if self.source_incident:
             frappe.db.set_value(
                 "Vehicle Incident", self.source_incident, "write_off_case", None

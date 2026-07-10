@@ -33,8 +33,7 @@ import json
 import frappe
 from frappe import _
 
-# Fields rendered for one inventory line. quantity_variance is the SERVER-derived
-# figure the portal shows read-only (it is never recomputed on the client).
+# [#m8nh8w]
 _ITEM_FIELDS = [
     "name",
     "item_name",
@@ -50,8 +49,7 @@ _ITEM_FIELDS = [
     "last_count_date",
 ]
 
-# The fields a portal line may stage. quantity_variance / last_count_date are
-# deliberately NOT here — they are derived by the controller, never client-set.
+# [#8ip76x]
 _WRITABLE = ("counted_quantity", "condition", "notes")
 
 
@@ -93,8 +91,7 @@ def get_inventory_for_building(building, room=None):
     if room:
         filters["room"] = room
 
-    # No ignore_permissions: housing_inventory_query AND-s the building scope, so a
-    # scoped supervisor only sees their own estate's rows.
+    # [#le8fuk]
     items = frappe.get_list(
         "Housing Inventory",
         filters=filters,
@@ -103,7 +100,7 @@ def get_inventory_for_building(building, room=None):
         limit_page_length=0,
     )
 
-    # Resolve a friendly room label (the room number) for client-side grouping.
+    # [#80tm7s]
     room_names = sorted({it.room for it in items if it.room})
     labels = {}
     if room_names:
@@ -160,7 +157,7 @@ def submit_counts(building, lines):
         frappe.throw(_("A building is required to submit counts."))
 
     if isinstance(lines, str):
-        # Surface a malformed JSON body as a clean ValidationError, not a 500.
+        # [#2o10dh]
         try:
             lines = json.loads(lines)
         except ValueError:
@@ -181,16 +178,16 @@ def submit_counts(building, lines):
         savepoint = "housing_count_" + frappe.scrub(name)
         frappe.db.savepoint(savepoint)
         try:
-            # Permission-checked fetch: build scope + write DocPerm both apply.
+            # [#qwhtu5]
             doc = frappe.get_doc("Housing Inventory", name)
             if doc.building != building:
-                # Reject a smuggled out-of-building id; never cross the count scope.
+                # [#1e8yav]
                 frappe.throw(
                     _("Item {0} does not belong to this building.").format(name),
                     frappe.PermissionError,
                 )
 
-            # Stage only the writable fields; never touch quantity_variance.
+            # [#f2430u]
             if line.get("counted_quantity") is not None:
                 doc.counted_quantity = frappe.utils.flt(line.get("counted_quantity"))
             if line.get("condition"):
@@ -198,7 +195,7 @@ def submit_counts(building, lines):
             if "notes" in line:
                 doc.notes = line.get("notes")
 
-            # No ignore_permissions: the per-doc building scope check fires here.
+            # [#eipi09]
             doc.save()
         except Exception as e:
             frappe.db.rollback(save_point=savepoint)

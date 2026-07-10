@@ -41,12 +41,12 @@ class TripStartLog(Document):
         """
         if frappe.session.user == "Administrator":
             return
-        # Resolve the Salis Driver record linked to the current portal user.
+        # [#t95um9]
         driver = frappe.db.get_value(
             "Salis Driver", {"driver_user": frappe.session.user}, "name"
         )
         if not driver:
-            # Current user is not a driver — no ownership restriction applies.
+            # [#gz8d7y]
             return
         if self.driver and self.driver != driver:
             frappe.throw(
@@ -92,8 +92,7 @@ class TripStartLog(Document):
                             "Boarding row #{0}: an unregistered worker needs a name or a contractor/temp id."
                         ).format(row.idx)
                     )
-                # Dedup an unregistered worker by their contractor/temp id when given,
-                # else by name; case-insensitive so casing variants do not slip past.
+                # [#9cqrk6]
                 key = (row.contractor_id or row.worker_name or "").strip().casefold()
                 if key:
                     if key in seen_unregistered:

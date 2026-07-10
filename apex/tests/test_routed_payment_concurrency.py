@@ -47,8 +47,7 @@ from apex.apex_core.payment_router import (
 )
 
 SETTINGS = "Payment Routing Settings"
-# Submittable target so the auto-submit (ledger-post) leg -- the double-GL hazard
-# the lock guards -- is real.
+# [#8o6y3a]
 STUB_DOCTYPE = "Test Routed Concurrency Stub"
 
 
@@ -81,7 +80,7 @@ class TestRoutedPaymentConcurrency(FrappeTestCase):
         super().setUpClass()
         frappe.set_user("Administrator")
         _make_stub_submittable_doctype()
-        frappe.db.commit()  # make the stub DocType visible to the second connection
+        frappe.db.commit()  # [#bfrxza]
 
     @classmethod
     def tearDownClass(cls):
@@ -93,8 +92,7 @@ class TestRoutedPaymentConcurrency(FrappeTestCase):
 
     def setUp(self):
         frappe.set_user("Administrator")
-        # Route to the submittable stub, auto-submit + GL posting ON, so the winning
-        # route actually submits (posts) and a second submit would be a double post.
+        # [#bol7f1]
         s = frappe.get_single(SETTINGS)
         s.target_payment_doctype = STUB_DOCTYPE
         s.auto_submit_target = 1
@@ -142,21 +140,20 @@ class TestRoutedPaymentConcurrency(FrappeTestCase):
         cross-transaction lock contention, not a sequential re-call.
         """
         pr = self._approved_request()
-        frappe.db.commit()  # the source row must be visible to the second connection
+        frappe.db.commit()  # [#rsw7w3]
 
         with self.primary_connection():
-            # Winner enters the critical section: same lock route_payment opens with.
+            # [#g20hj8]
             locked = frappe.db.get_value(SOURCE_DOCTYPE, pr.name, "name", for_update=True)
             self.assertEqual(locked, pr.name)
 
-            # Concurrent route hits the held lock; with wait disabled it is
-            # rejected immediately instead of double-building.
+            # [#jrwsot]
             with self.secondary_connection(), self.assertRaises(frappe.QueryTimeoutError):
                 frappe.db.get_value(
                     SOURCE_DOCTYPE, pr.name, "name", for_update=True, wait=False
                 )
 
-            # Winner finishes its route and commits the link stamp.
+            # [#2ftlni]
             with self.primary_connection():
                 first = route_payment(pr.name)
                 frappe.db.commit()
@@ -214,7 +211,7 @@ class TestRoutedPaymentConcurrency(FrappeTestCase):
         frappe.db.commit()
 
         with self.primary_connection():
-            first = route_payment(pr.name)  # holds the source lock; not yet committed
+            first = route_payment(pr.name)  # [#7ywdr7]
 
             with self.secondary_connection(), self.assertRaises(frappe.QueryTimeoutError):
                 frappe.db.get_value(

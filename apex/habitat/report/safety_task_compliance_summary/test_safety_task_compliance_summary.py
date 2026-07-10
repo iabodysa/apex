@@ -31,7 +31,7 @@ class TestSafetyTaskComplianceSummary(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # Mode 1: a Weekly task that applies to every building.
+        # [#4b4aog]
         self.task_all = frappe.get_doc(
             {
                 "doctype": "Safety Task Catalog",
@@ -45,7 +45,7 @@ class TestSafetyTaskComplianceSummary(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # Mode 2: a Weekly task scoped to this building only.
+        # [#m2ce7m]
         self.task_scoped = frappe.get_doc(
             {
                 "doctype": "Safety Task Catalog",
@@ -60,8 +60,7 @@ class TestSafetyTaskComplianceSummary(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # A Weekly task NOT covering this building (different building scope) so
-        # it must be excluded from the expected denominator.
+        # [#a0qvoa]
         other_building = frappe.get_doc(
             {
                 "doctype": "Building",
@@ -112,11 +111,10 @@ class TestSafetyTaskComplianceSummary(FrappeTestCase):
         self.assertEqual(by_task[self.task_scoped]["expected"], 1)
 
     def test_per_task_shape_counts_and_last_status(self):
-        # task_all: two executions, the later one Poor -> last status Poor, one
-        # needs-attention; evidence present on one of them.
+        # [#h94o8h]
         self._execution(self.task_all, "Good", evidence="/files/a.jpg")
         self._execution(self.task_all, "Poor")
-        # task_scoped: a single Not Done -> needs-attention, no evidence.
+        # [#jrpb21]
         self._execution(self.task_scoped, "Not Done")
 
         _columns, data = execute({"cadence": "Weekly", "building": self.building})
@@ -138,8 +136,7 @@ class TestSafetyTaskComplianceSummary(FrappeTestCase):
         self.assertEqual(scoped_row["has_evidence"], 0)
 
     def test_expected_but_unexecuted_task_has_zero_count(self):
-        # Only execute the scoped task; the all-buildings task is expected but
-        # never executed and must still appear with a zero executed count.
+        # [#rb1slp]
         self._execution(self.task_scoped, "Good")
 
         _columns, data = execute({"cadence": "Weekly", "building": self.building})

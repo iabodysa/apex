@@ -42,10 +42,7 @@ def execute(filters=None):
     if filters.get("period_month"):
         query_filters["period_month"] = filters["period_month"]
 
-    # get_all forces ignore_permissions, bypassing the project row-scoping the desk
-    # list gets via permission_query_conditions. The ledger has no own project — it
-    # reaches one through its vehicle — so confine the rows to the vehicles in the
-    # caller's allowed projects; oversight roles see all.
+    # [#m9gboo]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:
