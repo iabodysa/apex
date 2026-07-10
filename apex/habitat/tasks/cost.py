@@ -6,6 +6,82 @@ from __future__ import annotations
 import calendar
 import frappe
 
+# Building annual-cost field per Accommodation Ledger ledger_type. Single source
+# of truth shared by the daily allocator and the back-dating path.
+_COST_TYPE_MAPPING = {
+    "Rent": "annual_rent",
+    "Electricity": "annual_electricity",
+    "Water": "annual_water",
+    "Cleaning Staff Salary": "annual_cleaning_staff",
+    "Supervisor Salary": "annual_supervision",
+    "Other": "annual_other_expenses",
+}
+
+
+def _post_accommodation_ledger_row(
+    *,
+    posting_date,
+    employee,
+    assignment,
+    building,
+    project,
+    cost_center,
+    billed_to_supplier,
+    ledger_type,
+    annual_cost,
+    capacity,
+    days_in_year,
+) -> None:
+    """Insert ONE daily Operational-Memo Accommodation Ledger row from explicit
+    params. Idempotent: an existing row for the (employee, posting_date,
+    assignment, building, ledger_type) key is skipped. This is the ONLY writer of
+    the daily accommodation-cost ledger row — both the batch allocator and the
+    back-dating path route through it so the 18-key row and the
+    daily-share rounding stay byte-identical.
+
+    Callers OWN the try/except around this call: the batch allocator splits
+    DuplicateEntryError from other errors; the back-dating path uses a single
+    Exception guard. This helper deliberately does no exception handling.
+    """
+    from frappe.utils import flt
+
+    # [#pqghnl]
+    daily_share = flt(flt(annual_cost / days_in_year, 5) / capacity, 5)
+
+    # [#4g0jys]
+    if frappe.db.exists(
+        "Accommodation Ledger",
+        {
+            "employee": employee,
+            "posting_date": posting_date,
+            "assignment": assignment,
+            "building": building,
+            "ledger_type": ledger_type,
+        },
+    ):
+        return
+
+    frappe.get_doc({
+        "doctype": "Accommodation Ledger",
+        "posting_date": posting_date,
+        "employee": employee,
+        "assignment": assignment,
+        "building": building,
+        "project": project,
+        "cost_center": cost_center,
+        "billed_to_supplier": billed_to_supplier,
+        "ledger_type": ledger_type,
+        "total_site_cost": annual_cost,
+        "capacity_denominator": int(capacity),
+        "employee_daily_share": daily_share,
+        "posting_mode": "Operational Memo",
+        "source_doctype": "Housing Assignment",
+        "source_name": assignment,
+        "allocation_basis": "Capacity",
+        "allocation_period_start": posting_date,
+        "allocation_period_end": posting_date,
+    }).insert(ignore_permissions=True)  # audit-ok — scheduler/back-dated cost allocation, no user session
+
 
 def daily_accommodation_cost_allocation() -> None:
     """Scheduler entry — fan daily accommodation cost allocation out PER BUILDING
@@ -54,15 +130,6 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
     year = int(posting_date[:4])
     days_in_year = 366 if calendar.isleap(year) else 365
 
-    cost_type_mapping = {
-        "Rent": "annual_rent",
-        "Electricity": "annual_electricity",
-        "Water": "annual_water",
-        "Cleaning Staff Salary": "annual_cleaning_staff",
-        "Supervisor Salary": "annual_supervision",
-        "Other": "annual_other_expenses"
-    }
-
     # [#3r52d7]
     if not frappe.db.exists("Building", building):
         logger.warning(
@@ -104,52 +171,25 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
                 )
                 continue
 
-            for ledger_type, building_field in cost_type_mapping.items():
+            for ledger_type, building_field in _COST_TYPE_MAPPING.items():
                 annual_cost = flt(building_doc.get(building_field))
                 if annual_cost <= 0:
                     continue
 
-                # [#pqghnl]
-                daily_cost = flt(annual_cost / days_in_year, 5)
-                daily_share = flt(daily_cost / capacity, 5)
-
-                # [#4g0jys]
-                exists = frappe.db.exists(
-                    "Accommodation Ledger",
-                    {
-                        "employee": asgn.employee,
-                        "posting_date": posting_date,
-                        "assignment": asgn.name,
-                        "building": building,
-                        "ledger_type": ledger_type
-                    }
-                )
-
-                if exists:
-                    continue
-
                 try:
-                    ledger_entry = frappe.get_doc({
-                        "doctype": "Accommodation Ledger",
-                        "posting_date": posting_date,
-                        "employee": asgn.employee,
-                        "assignment": asgn.name,
-                        "building": building,
-                        "project": asgn.project,
-                        "cost_center": asgn.cost_center,
-                        "billed_to_supplier": asgn.billed_to_supplier,
-                        "ledger_type": ledger_type,
-                        "total_site_cost": annual_cost,
-                        "capacity_denominator": int(capacity),
-                        "employee_daily_share": daily_share,
-                        "posting_mode": "Operational Memo",
-                        "source_doctype": "Housing Assignment",
-                        "source_name": asgn.name,
-                        "allocation_basis": "Capacity",
-                        "allocation_period_start": posting_date,
-                        "allocation_period_end": posting_date,
-                    })
-                    ledger_entry.insert(ignore_permissions=True)  # audit-ok — scheduler-run cost allocation, no user session
+                    _post_accommodation_ledger_row(
+                        posting_date=posting_date,
+                        employee=asgn.employee,
+                        assignment=asgn.name,
+                        building=building,
+                        project=asgn.project,
+                        cost_center=asgn.cost_center,
+                        billed_to_supplier=asgn.billed_to_supplier,
+                        ledger_type=ledger_type,
+                        annual_cost=annual_cost,
+                        capacity=capacity,
+                        days_in_year=days_in_year,
+                    )
                 except frappe.exceptions.DuplicateEntryError:
                     frappe.db.rollback()  # [#g4zbzv]
                 except Exception as e:
@@ -196,58 +236,30 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
     if capacity <= 0:
         return 0
 
-    cost_type_mapping = {
-        "Rent": "annual_rent",
-        "Electricity": "annual_electricity",
-        "Water": "annual_water",
-        "Cleaning Staff Salary": "annual_cleaning_staff",
-        "Supervisor Salary": "annual_supervision",
-        "Other": "annual_other_expenses",
-    }
-
     d = getdate(from_date)
     end = getdate(to_date)
     days = 0
     while d <= end:
         posting_date = str(d)
         days_in_year = 366 if calendar.isleap(d.year) else 365
-        for ledger_type, building_field in cost_type_mapping.items():
+        for ledger_type, building_field in _COST_TYPE_MAPPING.items():
             annual_cost = flt(building.get(building_field))
             if annual_cost <= 0:
                 continue
-            daily_share = flt(flt(annual_cost / days_in_year, 5) / capacity, 5)
-            if frappe.db.exists(
-                "Accommodation Ledger",
-                {
-                    "employee": asgn.employee,
-                    "posting_date": posting_date,
-                    "assignment": asgn.name,
-                    "building": asgn.building,
-                    "ledger_type": ledger_type,
-                },
-            ):
-                continue
             try:
-                frappe.get_doc({
-                    "doctype": "Accommodation Ledger",
-                    "posting_date": posting_date,
-                    "employee": asgn.employee,
-                    "assignment": asgn.name,
-                    "building": asgn.building,
-                    "project": asgn.project,
-                    "cost_center": asgn.cost_center,
-                    "billed_to_supplier": asgn.billed_to_supplier,
-                    "ledger_type": ledger_type,
-                    "total_site_cost": annual_cost,
-                    "capacity_denominator": int(capacity),
-                    "employee_daily_share": daily_share,
-                    "posting_mode": "Operational Memo",
-                    "source_doctype": "Housing Assignment",
-                    "source_name": asgn.name,
-                    "allocation_basis": "Capacity",
-                    "allocation_period_start": posting_date,
-                    "allocation_period_end": posting_date,
-                }).insert(ignore_permissions=True)  # audit-ok — back-dated cost memo
+                _post_accommodation_ledger_row(
+                    posting_date=posting_date,
+                    employee=asgn.employee,
+                    assignment=asgn.name,
+                    building=asgn.building,
+                    project=asgn.project,
+                    cost_center=asgn.cost_center,
+                    billed_to_supplier=asgn.billed_to_supplier,
+                    ledger_type=ledger_type,
+                    annual_cost=annual_cost,
+                    capacity=capacity,
+                    days_in_year=days_in_year,
+                )
             except Exception:
                 frappe.db.rollback()
                 frappe.log_error(

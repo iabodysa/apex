@@ -36,19 +36,20 @@ def validate(doc, method=None):
 
     # [#luwwrt]
     if doc.utility_account and doc.billing_period_from and doc.billing_period_to:
-        overlap = frappe.db.get_value(
+        from apex.apex_core.utils.date_ranges import has_overlapping_record
+        overlap = has_overlapping_record(
             "Utility Bill Entry",
             {
                 # [#p1ktdw]
                 "company": doc.company,
                 "building": doc.building,
                 "utility_account": doc.utility_account,
-                "billing_period_from": ["<=", doc.billing_period_to],
-                "billing_period_to": [">=", doc.billing_period_from],
-                "docstatus": ["!=", 2],
-                "name": ["!=", doc.name or ""],
             },
-            "name",
+            "billing_period_from",
+            "billing_period_to",
+            doc.billing_period_from,
+            doc.billing_period_to,
+            doc.name,
         )
         if overlap:
             frappe.throw(

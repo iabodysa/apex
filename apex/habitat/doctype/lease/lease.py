@@ -39,15 +39,15 @@ def validate(doc, method=None):
 
     # [#i29e7n]
     if doc.building and doc.lease_start_date and doc.lease_end_date:
-        conflict = frappe.db.exists(
+        from apex.apex_core.utils.date_ranges import has_overlapping_record
+        conflict = has_overlapping_record(
             "Lease",
-            {
-                "building": doc.building,
-                "docstatus": ["!=", 2],
-                "name": ["!=", doc.name or ""],
-                "lease_start_date": ["<=", doc.lease_end_date],
-                "lease_end_date": [">=", doc.lease_start_date],
-            },
+            {"building": doc.building},
+            "lease_start_date",
+            "lease_end_date",
+            doc.lease_start_date,
+            doc.lease_end_date,
+            doc.name,
         )
         if conflict:
             frappe.throw(
