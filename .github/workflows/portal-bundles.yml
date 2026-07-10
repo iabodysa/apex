@@ -15,18 +15,25 @@ jobs:
     # portal src (or the shared vite factory / frontend_shared) without rebuilding
     # and committing the bundle. The SW portals also stamp their www/*-sw.min.js,
     # so that file is diff-checked too. Mirrors the spa-lockfiles matrix shape.
+    # `dir` is the source tree (frontend/<dir>/); `portal` is the served output
+    # dir name (apex/public/<portal>/) — the two diverge since the src relocated.
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - portal: fleet_portal
-          - portal: worker_portal
+          - dir: fleet
+            portal: fleet_portal
+          - dir: worker
+            portal: worker_portal
             sw: apex/www/masar-sw.min.js
-          - portal: driver_portal
+          - dir: driver
+            portal: driver_portal
             sw: apex/www/driver-sw.min.js
-          - portal: safety_portal
-          - portal: housing_portal
+          - dir: safety
+            portal: safety_portal
+          - dir: housing
+            portal: housing_portal
     steps:
       - uses: actions/checkout@v5
 
@@ -36,11 +43,11 @@ jobs:
           node-version: "20"
 
       - name: Install from frozen lockfile
-        working-directory: apex/${{ matrix.portal }}
+        working-directory: frontend/${{ matrix.dir }}
         run: npm ci
 
       - name: Build the portal bundle
-        working-directory: apex/${{ matrix.portal }}
+        working-directory: frontend/${{ matrix.dir }}
         run: npm run build
 
       - name: Fail if the committed bundle is stale
@@ -48,14 +55,14 @@ jobs:
           set -uo pipefail
           if ! git diff --exit-code -- "apex/public/${{ matrix.portal }}" ${{ matrix.sw }}; then
             echo "::error::Committed bundle for ${{ matrix.portal }} is stale."
-            echo "Run 'npm run build' in apex/${{ matrix.portal }} and commit apex/public/${{ matrix.portal }}/ (and the stamped www SW, if any)."
+            echo "Run 'npm run build' in frontend/${{ matrix.dir }} and commit apex/public/${{ matrix.portal }}/ (and the stamped www SW, if any)."
             exit 1
           fi
           echo "${{ matrix.portal }} bundle is in sync with committed output"
 
   override-pins:
     # Single-source guard for the security npm `overrides` (dompurify, ws). The
-    # canonical values live in apex/frontend_shared/pins.json; npm still
+    # canonical values live in frontend/frontend_shared/pins.json; npm still
     # needs the override in each package.json, so this fails if any of the five
     # portals drifts from the canonical pin set.
     runs-on: ubuntu-latest
@@ -65,12 +72,12 @@ jobs:
       - name: Every portal's overrides match frontend_shared/pins.json
         run: |
           set -uo pipefail
-          canon=$(jq -S '.overrides' apex/frontend_shared/pins.json)
+          canon=$(jq -S '.overrides' frontend/frontend_shared/pins.json)
           fail=0
-          for p in fleet_portal worker_portal driver_portal safety_portal housing_portal; do
-            got=$(jq -S '.overrides' "apex/${p}/package.json")
+          for p in fleet worker driver safety housing; do
+            got=$(jq -S '.overrides' "frontend/${p}/package.json")
             if [ "$got" != "$canon" ]; then
-              echo "::error::${p}/package.json overrides differ from frontend_shared/pins.json"
+              echo "::error::frontend/${p}/package.json overrides differ from frontend_shared/pins.json"
               diff <(echo "$canon") <(echo "$got") || true
               fail=1
             fi

@@ -1,11 +1,18 @@
 // Copyright (c) 2026, AFMCO and contributors
 //
-// Single Vite config factory for every *_portal SPA. Each portal's
-// vite.config.js is a <=15-line call to createPortalConfig(), passing only what
-// actually differs between portals (its dirname, package name, and — for the two
-// PWAs — the service-worker filename). Everything else (frappe-ui + vue plugins,
-// the dev proxy, the @/@shared aliases, the vue/frappe-ui dedupe, the stable
-// un-hashed output names) is defined ONCE here so the five configs cannot drift.
+// Single Vite config factory for every portal SPA. The five SPA source trees
+// live at repo-root frontend/<portal>/ (hrms pattern); this shared factory sits
+// beside them at frontend/frontend_shared/. Each portal's vite.config.js is a
+// <=15-line call to createPortalConfig(), passing only what actually differs
+// between portals (its dirname, package name, and — for the two PWAs — the
+// service-worker filename). Everything else (frappe-ui + vue plugins, the dev
+// proxy, the @/@shared aliases, the vue/frappe-ui dedupe, the stable un-hashed
+// output names) is defined ONCE here so the five configs cannot drift.
+//
+// Source lives under frontend/<portal>/ but the built bundle MUST still land in
+// the Python package at apex/public/<portal>_portal/ so Frappe serves it at the
+// unchanged /assets/apex/<portal>_portal/ URL. Hence the ../../apex/... hops
+// below reach back out of frontend/ into the apex package.
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import frappeui from "frappe-ui/vite";
@@ -20,8 +27,8 @@ import crypto from "crypto";
 // the SPA shows its reload banner. Defined once here; only the two PWA portals
 // (driver, worker) opt in by passing `sw`.
 function stampServiceWorker({ dirname, name, sw }) {
-  const swPath = path.resolve(dirname, "../www/" + sw);
-  const bundlePath = path.resolve(dirname, "../public/" + name + "/assets/index.js");
+  const swPath = path.resolve(dirname, "../../apex/www/" + sw);
+  const bundlePath = path.resolve(dirname, "../../apex/public/" + name + "/assets/index.js");
   return {
     name: "stamp-sw-" + name,
     closeBundle() {
@@ -41,7 +48,7 @@ function stampServiceWorker({ dirname, name, sw }) {
 
 // createPortalConfig({ dirname, name, sw? }) -> a Vite config identical for all
 // portals except base/outDir (derived from `name`) and the optional SW stamp.
-//   dirname : the portal's __dirname (its vite.config.js sits in the portal root)
+//   dirname : the portal's __dirname (its vite.config.js sits at frontend/<portal>/)
 //   name    : the portal package dir, e.g. "driver_portal" (drives base + outDir)
 //   sw      : optional www SW filename to stamp, e.g. "driver-sw.min.js"
 export function createPortalConfig({ dirname, name, sw }) {
@@ -70,7 +77,7 @@ export function createPortalConfig({ dirname, name, sw }) {
       dedupe: ["vue", "frappe-ui", "socket.io-client"],
     },
     build: {
-      outDir: path.resolve(dirname, "../public/" + name),
+      outDir: path.resolve(dirname, "../../apex/public/" + name),
       emptyOutDir: true,
       target: "es2015",
       rollupOptions: {

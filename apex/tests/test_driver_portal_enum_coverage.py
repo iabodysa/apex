@@ -3,7 +3,7 @@
 
 The driver portal localizes server enum values (Dispatch Trip / Issue statuses and the
 seeded Issue Type / Issue Priority masters) for Arabic mode through a hand-maintained
-``enums`` map in ``driver_portal/src/i18n.js`` (consumed via ``translateEnum`` / ``te``).
+``enums`` map in ``frontend/driver/src/i18n.js`` (consumed via ``translateEnum`` / ``te``).
 ``translateEnum`` falls back to the raw English value when a key is missing — so a new or
 renamed option silently renders ENGLISH inside the Arabic UI (the owner's recurring
 "language changes in places" class) with nothing to catch the drift.
@@ -14,6 +14,7 @@ moment an option is added/renamed without updating the map. Mirrors the worker-p
 coverage guard (test_worker_portal_enum_coverage).
 """
 
+import os
 import re
 
 import frappe
@@ -24,8 +25,10 @@ from apex.apex_core.setup.seeders.salis_issue_seed import (
     _ISSUE_TYPES,
 )
 
-APP = frappe.get_app_path("apex")
-I18N = f"{APP}/driver_portal/src/i18n.js"
+# SPA source now lives at repo-root frontend/ (P-183 relocation), one level up from
+# the Python package dir returned by get_app_path (".../apex/apex").
+REPO_ROOT = os.path.dirname(frappe.get_app_path("apex"))
+I18N = f"{REPO_ROOT}/frontend/driver/src/i18n.js"
 
 # i18n.js enum namespace -> the live source of its option values. A Select field is
 # ("doctype", "field"); a seeded master set is a plain list of stable English values.
