@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex.apex_core.utils.report_helpers import date_range_condition
+
 
 def execute(filters=None):
     columns = [
@@ -20,12 +22,9 @@ def execute(filters=None):
             query_filters["company"] = filters["company"]
         if filters.get("cost_center"):
             query_filters["cost_center"] = filters["cost_center"]
-        if filters.get("from_date") and filters.get("to_date"):
-            query_filters["request_date"] = ["between", [filters["from_date"], filters["to_date"]]]
-        elif filters.get("from_date"):
-            query_filters["request_date"] = [">=", filters["from_date"]]
-        elif filters.get("to_date"):
-            query_filters["request_date"] = ["<=", filters["to_date"]]
+        date_condition = date_range_condition(filters, "request_date")
+        if date_condition is not None:
+            query_filters["request_date"] = date_condition
 
     records = frappe.get_all(
         "Movement Cost Recovery",

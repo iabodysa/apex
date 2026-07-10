@@ -3,6 +3,7 @@
 
 import frappe
 
+from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.habitat import permissions
 
 
@@ -30,12 +31,9 @@ def execute(filters=None):
         query_filters["from_company"] = filters["from_company"]
     if filters.get("to_company"):
         query_filters["to_company"] = filters["to_company"]
-    if filters.get("from_date") and filters.get("to_date"):
-        query_filters["movement_date"] = ["between", [filters["from_date"], filters["to_date"]]]
-    elif filters.get("from_date"):
-        query_filters["movement_date"] = [">=", filters["from_date"]]
-    elif filters.get("to_date"):
-        query_filters["movement_date"] = ["<=", filters["to_date"]]
+    date_condition = date_range_condition(filters, "movement_date")
+    if date_condition is not None:
+        query_filters["movement_date"] = date_condition
     if filters.get("accounting_acknowledged") is not None:
         query_filters["accounting_acknowledged"] = filters["accounting_acknowledged"]
 

@@ -19,16 +19,12 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, nowdate
 
+from apex.apex_core.utils.report_helpers import date_range_condition
+
 
 def _date_range(field, filters):
-    f = {}
-    if filters.get("from_date") and filters.get("to_date"):
-        f[field] = ["between", [filters["from_date"], filters["to_date"]]]
-    elif filters.get("from_date"):
-        f[field] = [">=", filters["from_date"]]
-    elif filters.get("to_date"):
-        f[field] = ["<=", filters["to_date"]]
-    return f
+    condition = date_range_condition(filters, field)
+    return {field: condition} if condition is not None else {}
 
 
 def execute(filters=None):

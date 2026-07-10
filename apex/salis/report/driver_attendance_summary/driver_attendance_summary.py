@@ -3,6 +3,7 @@
 
 import frappe
 
+from apex.apex_core.utils.report_helpers import date_range_condition, scoped_names
 from apex.salis import permissions
 
 
@@ -17,23 +18,16 @@ def execute(filters=None):
 
     attendance_filters = {}
     if filters:
-        if filters.get("from_date") and filters.get("to_date"):
-            attendance_filters["attendance_date"] = ["between", [filters["from_date"], filters["to_date"]]]
-        elif filters.get("from_date"):
-            attendance_filters["attendance_date"] = [">=", filters["from_date"]]
-        elif filters.get("to_date"):
-            attendance_filters["attendance_date"] = ["<=", filters["to_date"]]
+        date_condition = date_range_condition(filters, "attendance_date")
+        if date_condition is not None:
+            attendance_filters["attendance_date"] = date_condition
 
     # [#qc3e9v]
     restrict, allowed = permissions.report_project_scope(frappe.session.user)
     if restrict:
         if not allowed:
             return columns, []
-        in_scope_drivers = frappe.get_all(
-            "Salis Driver",
-            filters={"project": ["in", allowed]},
-            pluck="name",
-        )
+        in_scope_drivers = scoped_names("Salis Driver", allowed)
         if not in_scope_drivers:
             return columns, []
         attendance_filters["driver"] = ["in", in_scope_drivers]

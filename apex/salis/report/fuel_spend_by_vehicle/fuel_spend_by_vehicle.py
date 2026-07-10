@@ -16,6 +16,7 @@ Optional filters: vehicle, period_month (YYYY-MM exact match).
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.report_helpers import scoped_names
 from apex.salis import permissions
 
 
@@ -47,11 +48,7 @@ def execute(filters=None):
     if restrict:
         if not allowed:
             return columns, []
-        in_scope_vehicles = frappe.get_all(
-            "Salis Vehicle",
-            filters={"project": ["in", allowed]},
-            pluck="name",
-        )
+        in_scope_vehicles = scoped_names("Salis Vehicle", allowed)
         if not in_scope_vehicles:
             return columns, []
         query_filters["vehicle"] = ["in", in_scope_vehicles]

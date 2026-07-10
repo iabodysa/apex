@@ -17,6 +17,8 @@ Optional filters: rental_office, vehicle, from_date / to_date (on accrual_date).
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.report_helpers import date_range_condition
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -41,12 +43,9 @@ def execute(filters=None):
         query_filters["rental_office"] = filters["rental_office"]
     if filters.get("vehicle"):
         query_filters["vehicle"] = filters["vehicle"]
-    if filters.get("from_date") and filters.get("to_date"):
-        query_filters["accrual_date"] = ["between", [filters["from_date"], filters["to_date"]]]
-    elif filters.get("from_date"):
-        query_filters["accrual_date"] = [">=", filters["from_date"]]
-    elif filters.get("to_date"):
-        query_filters["accrual_date"] = ["<=", filters["to_date"]]
+    date_condition = date_range_condition(filters, "accrual_date")
+    if date_condition is not None:
+        query_filters["accrual_date"] = date_condition
 
     rows = frappe.get_all(
         "Rental Accrual Ledger",

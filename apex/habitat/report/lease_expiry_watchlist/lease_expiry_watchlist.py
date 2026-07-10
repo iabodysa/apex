@@ -4,6 +4,8 @@
 import frappe
 from frappe.utils import date_diff, today, flt
 
+from apex.apex_core.utils.report_helpers import date_range_condition
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -21,12 +23,9 @@ def execute(filters=None):
     query_filters = {"docstatus": 1, "status": ["in", ["Approved", "Active"]]}
     if filters.get("building"):
         query_filters["building"] = filters["building"]
-    if filters.get("from_date") and filters.get("to_date"):
-        query_filters["lease_end_date"] = ["between", [filters["from_date"], filters["to_date"]]]
-    elif filters.get("from_date"):
-        query_filters["lease_end_date"] = [">=", filters["from_date"]]
-    elif filters.get("to_date"):
-        query_filters["lease_end_date"] = ["<=", filters["to_date"]]
+    date_condition = date_range_condition(filters, "lease_end_date")
+    if date_condition is not None:
+        query_filters["lease_end_date"] = date_condition
 
     leases = frappe.get_all(
         "Lease",

@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import getdate, today, date_diff
 
+from apex.apex_core.utils.report_helpers import scoped_names
 from apex.salis import permissions
 
 
@@ -36,11 +37,7 @@ def execute(filters=None):
     if restrict:
         if not allowed:
             return columns, []
-        in_scope_vehicles = frappe.get_all(
-            "Salis Vehicle",
-            filters={"project": ["in", allowed]},
-            pluck="name",
-        )
+        in_scope_vehicles = scoped_names("Salis Vehicle", allowed)
         if not in_scope_vehicles:
             return columns, []
         row_filters["parent"] = ["in", in_scope_vehicles]

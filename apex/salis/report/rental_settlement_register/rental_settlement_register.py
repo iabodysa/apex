@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex.apex_core.utils.report_helpers import date_range_condition
+
 
 def execute(filters=None):
     columns = [
@@ -20,12 +22,9 @@ def execute(filters=None):
         for field in ("rental_office", "status", "period_month", "company"):
             if filters.get(field):
                 query_filters[field] = filters[field]
-        if filters.get("from_date") and filters.get("to_date"):
-            query_filters["creation"] = ["between", [filters["from_date"], filters["to_date"]]]
-        elif filters.get("from_date"):
-            query_filters["creation"] = [">=", filters["from_date"]]
-        elif filters.get("to_date"):
-            query_filters["creation"] = ["<=", filters["to_date"]]
+        date_condition = date_range_condition(filters, "creation")
+        if date_condition is not None:
+            query_filters["creation"] = date_condition
 
     data = frappe.get_all(
         "Rental Settlement",
