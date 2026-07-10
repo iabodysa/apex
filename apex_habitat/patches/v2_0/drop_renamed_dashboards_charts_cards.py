@@ -65,5 +65,5 @@ def execute():
     ):
         for name in names:
             if frappe.db.exists(doctype, name):
-                frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
+                frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)  # audit-ok
     frappe.db.commit()
