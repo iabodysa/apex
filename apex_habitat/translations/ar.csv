@@ -515,6 +515,7 @@ Book Value (SAR),القيمة الدفترية (ريال)
 Bookkeeping,المسك المحاسبي
 Both a source bed and a target bed are required.,يلزم تحديد سرير المصدر وسرير الوجهة معاً.
 Branch Coverage,تغطية الفرع
+Branch Site,موقع الفرع
 Brand Logo,شعار العلامة التجارية
 Brand Logo must be an uploaded file (a /files/ path).,يجب أن يكون شعار العلامة التجارية ملفًا مرفوعًا (مسار /files/).
 Build the catalog of issuable articles that the custody flow hands out.,ابنِ كتالوج المواد القابلة للصرف التي يصرفها مسار العهدة.
@@ -694,8 +695,11 @@ Cleared By,تم الإخلاء بواسطة
 Cleared On,تاريخ الإخلاء
 Cleared and released via {0} (reason {1}; vehicle {2}).,تم الإخلاء والإفراج عبر {0} (السبب {1}؛ المركبة {2}).
 Click a free bed to house him.,انقر على سرير شاغر لإسكانه.
+Client,العميل
 Client Audit Reference / Ticket,رقم مرجع/تذكرة تدقيق العميل
 Client Audit Remediation Plan,خطة معالجة تدقيق العميل
+Client Code,رمز العميل
+Client Name,اسم العميل
 Client Point of Contact,مسؤول التواصل لدى العميل
 Client Project,مشروع العميل
 Close,إغلاق
@@ -706,6 +710,7 @@ Closed Maintenance,صيانة مغلقة
 Closed On,تاريخ الإغلاق
 Closed by Client,أُغلق من قِبل العميل
 Closed in the Last 48h,مُنجَزة آخر 48 ساعة
+Closed periods are locked against further ingestion.,الفترات المغلقة مقفلة أمام أي إدخال إضافي.
 Closing…,جارٍ الإغلاق…
 Code Attempts,محاولات الرمز
 Code Expires At,انتهاء صلاحية الرمز
@@ -1478,6 +1483,7 @@ Formal accommodation/housing safety-incident record with severity and automatic 
 Formal lease contract holder for one building. Carries the rent payment schedule. The landlord is identified by the Lease's supplier field.,حامل عقد الإيجار الرسمي لمبنى واحد. يحمل جدول دفعات الإيجار. يُحدَّد المؤجّر عبر حقل المورّد في عقد الإيجار.
 Frappe Standard,Frappe القياسي
 Freelance,مستقل
+Freelancer,مستقل
 Frequency,التكرار / الدورية
 Frequency Override,تجاوز التكرار
 Friday,الجمعة
@@ -2093,6 +2099,7 @@ Missed Cleaning Tasks,مهام النظافة الفائتة
 Missed Reason,سبب التغيب
 Missed Subcontractor Visits,زيارات مقاول الباطن الفائتة
 Missing,مفقود
+Missing Dispatch Trip reference.,مرجع رحلة التشغيل مفقود.
 Mixed,مختلط
 Mobile Number,رقم الجوال
 Mobile Number (Optional),رقم الجوال (اختياري)
@@ -2147,6 +2154,7 @@ Naming Series,سلسلة الترقيم
 National ID,رقم الهوية الوطنية
 National ID / Iqama,الهوية الوطنية / الإقامة
 National ID or Iqama number. PII — readable only by privileged roles (permlevel 1). Set once at creation; a DB-level unique index blocks duplicates.,رقم الهوية الوطنية أو الإقامة. بيانات شخصية — لا يقرؤها إلا أصحاب الصلاحيات المميزة (مستوى الصلاحية 1). يُحدد مرة واحدة عند الإنشاء؛ ويمنع فهرس فريد على مستوى قاعدة البيانات التكرار.
+National id / Iqama reference. PII: readable only at permlevel 1.,مرجع الهوية الوطنية / الإقامة. بيانات شخصية: تُقرأ فقط عند مستوى الصلاحية الأول.
 Nationality,الجنسية
 "Nature of the fuel anomaly under investigation, from over-consumption and GPS mismatches to duplicate claims, suspected fraud, or quota disputes, driving the investigation path.",طبيعة شذوذ الوقود قيد التحقيق، من فرط الاستهلاك وعدم تطابق بيانات GPS إلى المطالبات المكررة أو الاشتباه بالاحتيال أو نزاعات الحصص، تحرّك مسار التحقيق.
 "Nature of the resident request, which determines the responsible team and workflow; ranges from physical issues such as maintenance, cleaning, and utilities to administrative items such as custody, reimbursement, complaints, and suggestions.",طبيعة طلب الساكن، وتحدّد الفريق المسؤول ومسار العمل؛ وتتراوح من المسائل المادّية كالصيانة والنظافة والمرافق إلى المسائل الإدارية كالعهدة والمطالبات والشكاوى والاقتراحات.
@@ -2401,6 +2409,7 @@ Optional photo of the bed/room condition at check-in (handover evidence).,صور
 Optional photo of the bed/room condition at checkout (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند المغادرة (دليل تسليم).
 Optional primary accent colour override. Leave blank to use the theme default.,تجاوز اختياري للون التمييز الأساسي. اتركه فارغًا لاستخدام لون السمة الافتراضي.
 Optional sender id / from number the gateway should send as (when the provider requires it). Sent as sender_id in the request body.,معرّف مُرسِل / رقم إرسال اختياري ترسل البوابة باسمه (عندما يتطلّب المزوّد ذلك). يُرسَل بوصفه sender_id في جسم الطلب.
+Optional. Leave blank for a client-wide period.,اختياري. اتركه فارغاً لفترة تشمل العميل بالكامل.
 Optional: the specific Facility Asset this inspection covers. On submit its Last Inspected Date is stamped with the Inspection Date.,اختياري: أصل المنشأة المحدد الذي يغطيه هذا الفحص. عند الترحيل يُختم تاريخ آخر فحص له بتاريخ الفحص.
 Options,الخيارات
 Ordered position of this stop on the trip's route (mirrors the Route Stop sequence).,الترتيب المرتّب لهذه المحطة على مسار الرحلة (يعكس تسلسل محطة المسار).
@@ -2517,9 +2526,11 @@ Period (Month),الفترة (الشهر)
 Period Days,أيام الفترة
 Period End,نهاية الفترة
 Period From,الفترة من
+Period Label,تسمية الفترة
 Period Month,شهر الفترة
 Period Start,بداية الفترة
 Period To,الفترة إلى
+Period Window,نطاق الفترة
 Periodic,دوري
 Periodic Inspection,الفحص الدوري
 Permanent,دائم
@@ -2612,6 +2623,7 @@ Posting,الترحيل
 Posting Date,تاريخ الترحيل
 Posting Mode,نمط الترحيل
 Posting date {0} falls inside closed Accounting Period {1} for company {2}.,تاريخ الترحيل {0} يقع ضمن فترة محاسبية مغلقة {1} للشركة {2}.
+Posting month in YYYY-MM format (e.g. 2026-05).,شهر الترحيل بصيغة YYYY-MM (مثال: 2026-05).
 "Pots, pans and cooking utensils set for shared accommodation kitchen. Consumable kitchenware.",طقم قدور ومقالي وأدوات طهي لمطبخ السكن المشترك. أدوات مطبخ استهلاكية.
 Pre-Work,قبل العمل
 "Pre-arrival manifest: the workers a labour supplier expects to deliver to a building on a date. Captured up front via the public Arrival Manifest web form (front-desk intake) and managed here as the backend record the Arrivals Desk reconciles real arrivals against. Title, Expected Count and each row's Arrived As are system-maintained (read-only by design).",بيان ما قبل الوصول: العمال الذين يتوقع مورّد العمالة تسليمهم إلى مبنى في تاريخ محدد. يُلتقط مبدئياً عبر نموذج ويب بيان الوصول العام (إدخال مكتب الاستقبال) ويُدار هنا كسجل خلفي يطابق به مكتب الوصول الوصول الفعلي. العنوان والعدد المتوقع وحقل «وصل بصفة» في كل صف تُدار آلياً (للقراءة فقط بحكم التصميم).
@@ -2711,6 +2723,7 @@ Raised By,أُنشئ بواسطة
 Raised On,أُنشئ في
 Raising departure transport…,جارٍ إنشاء نقل المغادرة…
 Rating,التقييم
+Rating must be between 1 and 5.,يجب أن يكون التقييم بين ١ و٥.
 Re-inspection,إعادة تفتيش
 Re: {0},رد: {0}
 "Read-only Employee mirror of an Employee party (compatibility with payroll / Additional Salary, which is keyed on Employee).",نسخة موظف للقراءة فقط تعكس طرف الموظف (للتوافق مع كشوف الرواتب / الراتب الإضافي المعتمد على الموظف).
@@ -3273,6 +3286,7 @@ Set externally after Finance posts payment. This DocType never creates a GL or P
 "Set for quota-increase claims, which always require Operations-tier authority.",يُعيَّن لمطالبات زيادة الحصة، التي تتطلب دائمًا صلاحية على مستوى العمليات.
 Set how urgent the repair is.,حدّد مدى إلحاح الإصلاح.
 Set on the reversal row posted when the source movement is cancelled. The original row is preserved for audit.,يُضبط على الصف العكسي المُرحَّل عند إلغاء الحركة المصدر. يُحتفظ بالصف الأصلي للتدقيق.
+Set once the worker is registered as a permanent Employee.,يُحدَّد بمجرد تسجيل العامل موظفاً دائماً.
 Set once this expected worker is matched to a registered arrival.,يُضبط بمجرد مطابقة هذا العامل المتوقع بوصول مسجَّل.
 Set the Check-in Date,حدّد تاريخ الدخول
 Set the Issue Date,حدّد تاريخ الصرف
@@ -3345,6 +3359,7 @@ Single mattress for worker accommodation bed. Routinely purchased bedding item.,
 Single monthly utility bill linked to a Utility Account. Posts to Accommodation Ledger on submit.,فاتورة مرافق شهرية واحدة مرتبطة بحساب مرافق. تُرحَّل إلى سجل السكن عند الاعتماد.
 "Single service visit, such as one pest control visit or one sewage tank suction.",زيارة خدمة واحدة، مثل زيارة مكافحة آفات واحدة أو شفط خزان مجاري واحد.
 Site,الموقع
+Site Code,رمز الموقع
 Site Name,اسم الموقع
 Site Token,رمز الموقع
 Site Transport,النقل داخل الموقع
@@ -3376,12 +3391,15 @@ Source DocType,نوع المستند المصدر
 Source DocType:name this row was migrated from when Fuel Topup/Chip Request DocTypes merged into Fuel Request. Blank for native requests.,المستند:الاسم المصدري الذي تم ترحيل هذا الصف منه عند دمج مستندي تعبئة الوقود/طلب الشريحة في طلب الوقود. يُترك فارغًا للطلبات الأصلية.
 Source Document,المستند المصدر
 Source Fieldname (Salis Payment Request),اسم الحقل المصدر (طلب دفع ساليس)
+Source Freelancer,المستقل المصدر
 Source Handover,تسليم المصدر
 Source Incident,البلاغ المصدر
 Source Inspection Report,تقرير الفحص المصدر
 Source Line ID,معرّف سطر المصدر
+Source Records,السجلات المصدر
 Source Reference,مرجع المصدر
 Source Safety Execution,تنفيذ السلامة المصدر
+Source Temporary Worker,العامل المؤقت المصدر
 Source Type,نوع المصدر
 Source and Tracking,المصدر والتتبّع
 Source and destination buildings must be different.,يجب أن يكون مبنى المصدر والوجهة مختلفين.
@@ -3394,6 +3412,7 @@ Specific Rate for this Building (SAR),تسعيرة المبنى الخاصة (ر
 Specific fixed asset this request concerns (e.g. AC-001). Enables maintenance history per asset.,الأصل الثابت المحدد الذي يخصه هذا الطلب (مثل AC-001). يتيح سجل الصيانة لكل أصل.
 Split air-conditioning unit for accommodation cooling. Durable appliance; periodic maintenance and refrigerant refill.,وحدة تكييف منفصلة لتبريد السكن. جهاز معمّر؛ صيانة دورية وإعادة تعبئة غاز التبريد.
 Sponsorship Fee,رسوم كفالة
+Stable business code. This is the record's id and cannot be changed once saved.,رمز تجاري ثابت. هو معرِّف السجل ولا يمكن تغييره بعد الحفظ.
 "Stage of the goods receipt, tracking whether stock has been received into custody, handed over to the end holder, or the receipt was cancelled.",مرحلة استلام البضاعة، تتابع ما إذا أُدخل المخزون إلى العهدة، أو سُلّم إلى الحائز النهائي، أو أُلغي الاستلام.
 Staircase,الدرج
 Stale,متقادم
@@ -3405,6 +3424,7 @@ Standard Rate Per Visit (SAR),أجرة الزيارة القياسية (ريال
 Standard Unit Cost (SAR),تكلفة الوحدة القياسية (ريال)
 "Standard: quota consumption + ledger posting. Top-up: add litres, optionally temporary. Chip: issue/replace/cancel a fuel chip.",قياسي: استهلاك الحصة + ترحيل الدفتر. تعبئة: إضافة لترات، مؤقتة اختياريًا. شريحة: إصدار/استبدال/إلغاء شريحة وقود.
 Start Date,تاريخ البدء
+Start Date cannot be after End Date.,لا يمكن أن يكون تاريخ البداية بعد تاريخ النهاية.
 Start Datetime,تاريخ ووقت البدء
 Start Review,بدء المراجعة
 Start Task,بدء المهمة
@@ -3557,14 +3577,18 @@ Thank you. Your receipt of the custody items has been recorded.,شكراً لك.
 That vehicle is not assigned to you. You can only request fuel for your own vehicle.,تلك المركبة غير مسندة إليك. يمكنك طلب الوقود لمركبتك فقط.
 The Dispatch Trip being executed; its linked Transport Request carries the worker manifest this log records boarding against.,رحلة التشغيل قيد التنفيذ؛ يحمل طلب النقل المرتبط بها قائمة العمّال التي يسجّل هذا السجل الصعود مقابلها.
 The Dispatch Trip the scanned pass was issued against.,رحلة التشغيل التي صدر التصريح الممسوح مقابلها.
+"The Freelancer record this identity was created from, if any.",سجل المستقل الذي أُنشئت منه هذه الهوية، إن وُجد.
 The GPS position is outside the valid coordinate range.,موقع GPS خارج نطاق الإحداثيات الصحيح.
 The HRMS Additional Salary deduction generated from this acknowledgment. Populated by the controller wiring in a later increment; read-only here.,خصم الراتب الإضافي في HRMS المُنشأ من هذا الإقرار. يُعبّأ بربط المتحكم في مرحلة لاحقة؛ للقراءة فقط هنا.
 "The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
+"The Temporary Worker record this identity was created from, if any.",سجل العامل المؤقت الذي أُنشئت منه هذه الهوية، إن وُجد.
 The Trip Start Log this scan boarded onto (set only when a boarding row was created).,سجل بدء الرحلة الذي صعد عليه هذا المسح (يُضبط فقط عند إنشاء صف صعود).
 The attached photo is too large.,الصورة المرفقة كبيرة جداً.
+"The billing counterparty a Mapping Profile and Timesheet Period belong to. Named by its stable business code so Links read as the code, not an opaque id.",الطرف المقابل للفوترة الذي ينتمي إليه ملف المطابقة وفترة سجل الدوام. يُسمّى برمزه التجاري الثابت لتظهر الروابط بالرمز لا بمعرِّف غامض.
 The browser PushSubscription endpoint URL the push service delivers to. Unique per device. Treat as a secret.,عنوان اشتراك الإشعارات في المتصفح الذي تسلّم إليه خدمة الإشعارات. فريد لكل جهاز. عامِله كمعلومة سرية.
 "The building code is locked: {0} room(s) already use it in their room numbers, and renaming it would orphan them. Delete the generated rooms first if the code must change.",رمز المبنى مقفل: {0} غرفة تستخدمه بالفعل في أرقام غرفها، وإعادة تسميته ستجعلها معزولة. احذف الغرف المولّدة أولًا إذا كان لا بد من تغيير الرمز.
 The building this asset was located in before its current location.,المبنى الذي كان هذا الأصل موجوداً فيه قبل موقعه الحالي.
+The client's own code for this location. Unique only within the Client.,رمز العميل الخاص بهذا الموقع. فريد ضمن العميل الواحد فقط.
 The closer must differ from the person who raised the case.,يجب أن يختلف من يُغلق الحالة عمّن رفعها.
 The consenting worker.,العامل الموافِق.
 "The current driver's login user, mirrored from the assigned driver. Drives the driver-facing compliance notification.",مستخدم دخول السائق الحالي، منعكس من السائق المُسنَد. يوجِّه إشعار الامتثال الموجَّه للسائق.
@@ -3662,6 +3686,7 @@ Ticket,التذكرة
 Ticket not found.,التذكرة غير موجودة.
 Timed %,النسبة الموقّتة (%)
 Timeline,الجدول الزمني
+Timesheet Period,فترة سجل الدوام
 Title,العنوان
 To Bed,إلى سرير
 To Building,إلى مبنى
@@ -3804,6 +3829,7 @@ Under Review,قيد المراجعة
 "Underlying reason the asset is being moved, whether to reallocate it, service it, condemn it, or another cause, used for movement analysis.",السبب الجذري لنقل الأصل، سواء لإعادة توزيعه أو صيانته أو إتلافه أو سبب آخر، يُستخدم لتحليل الحركة.
 Unguessable value bound to this one worker. Whoever holds the matching /masar link sees only this worker's data. Use Generate / Regenerate to issue or rotate it.,قيمة غير قابلة للتخمين مرتبطة بهذا العامل وحده. من يحمل رابط /masar المطابق يرى بيانات هذا العامل فقط. استخدم توليد / إعادة توليد لإصدارها أو تدويرها.
 Unified child table for inspection findings used by Safety Inspection Report and Maintenance Inspection Report.,جدول تابع موحّد لملاحظات التفتيش يستخدمه تقرير تفتيش السلامة وتقرير تفتيش الصيانة.
+"Unique cycle label, e.g. CLIENT-BRANCH-2026-05. This is the record's id and cannot be changed once saved.",تسمية دورة فريدة، مثال: CLIENT-BRANCH-2026-05. هي معرِّف السجل ولا يمكن تغييره بعد الحفظ.
 Unit,الوحدة
 Unit Cost (SAR),تكلفة الوحدة (ريال)
 Unit of Measure,وحدة القياس
@@ -4057,9 +4083,11 @@ You do not have write permission on this Dispatch Trip.,لا تملك صلاحي
 You don't have any building assigned. Ask an administrator to grant you a building.,لا يوجد لديك أي مبنى مُسند. اطلب من المسؤول منحك مبنى.
 You don't have permission to view this building.,ليس لديك صلاحية لعرض هذا المبنى.
 You have a trip assigned for tomorrow,لديك رحلة مجدولة غدًا
+You have already rated this trip.,لقد قيّمت هذه الرحلة بالفعل.
 You have no fleet project assigned,لا يوجد مشروع أسطول مُسنَد إليك
 You have {0} open operations alert(s),لديك {0} تنبيه عمليات مفتوح
 You may only handle boarding for your own trips.,لا يمكنك إدارة الصعود إلا لرحلاتك الخاصة.
+You were not part of this trip's manifest.,لم تكن ضمن قائمة ركاب هذه الرحلة.
 Your Name (Optional),اسمك (اختياري)
 Your account does not have a role to access it.,لا يملك حسابك دورًا للوصول إليها.
 Your arrival manifest was submitted. The accommodation team will reconcile arrivals against it on the expected date.,تم إرسال بيان الوصول الخاص بك. سيقوم فريق السكن بمطابقة الوصول الفعلي مع البيان في التاريخ المتوقع.
