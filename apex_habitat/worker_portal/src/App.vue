@@ -6,7 +6,7 @@
     <div
       v-if="updateReady"
       class="flex items-center justify-center gap-2 text-xs font-semibold"
-      style="background: var(--c-accent, #00844e); color: #fff; padding: 8px 12px"
+      style="background: var(--c-accent, var(--brand-green)); color: #fff; padding: 8px 12px"
     >
       <Icon name="refresh" :size="14" />
       <span>{{ t("update.available") }}</span>

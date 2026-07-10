@@ -1,0 +1,22 @@
+/* Copyright (c) 2026, AFMCO and contributors */
+/* [#shared-tokens] */
+/* Single source for the cross-portal brand primitives and responsive
+ * breakpoints. Every *_portal/src/index.css imports this first, then layers its
+ * own theme blocks (afmco/frappe/dark/gemini/atelier/creative) and components on
+ * top. The brand accent (Growth Green) is defined ONCE here as --brand-green and
+ * referenced via var() by each portal's theme block, so the tenant accent has a
+ * single edit point and never drifts between portals.
+ *
+ * Breakpoints are exposed as tokens for documentation + JS/container-query use.
+ * NOTE: CSS @media conditions cannot read custom properties, so a `@media
+ * (min-width: 768px)` rule cites --bp-tablet in a comment and must keep the same
+ * pixel value — the token is the documented source of truth for that number. */
+
+:root {
+  /* Brand palette primitives (AFMCO identity) */
+  --brand-green: #00844e; /* Growth Green — primary/accent/success brand hue */
+
+  /* Responsive breakpoints (documented shared source; see NOTE above) */
+  --bp-phone: 480px; /* single-column phone shell max-width */
+  --bp-tablet: 768px; /* widen the centered shell to a reading column */
+}

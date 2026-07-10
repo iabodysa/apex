@@ -369,8 +369,8 @@ async function toggleStop(stop) {
   transition: background 0.12s ease, color 0.12s ease;
 }
 .stop-check.is-done {
-  background: var(--c-success, #00844e);
-  border-color: var(--c-success, #00844e);
+  background: var(--c-success, var(--brand-green));
+  border-color: var(--c-success, var(--brand-green));
   color: #fff;
 }
 .stop-check:disabled {

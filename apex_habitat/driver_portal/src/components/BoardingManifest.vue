@@ -303,7 +303,7 @@ function close() {
   font-size: 0.875rem;
   font-weight: 600;
   background: var(--c-success-bg, #dcfce7);
-  color: var(--c-success, #00844e);
+  color: var(--c-success, var(--brand-green));
 }
 .sheet-list {
   display: flex;
@@ -330,7 +330,7 @@ function close() {
   flex-shrink: 0;
 }
 .mini-ok {
-  background: var(--c-success, #00844e);
+  background: var(--c-success, var(--brand-green));
   color: #fff;
 }
 .mini-no {

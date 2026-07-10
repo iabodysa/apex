@@ -2,7 +2,7 @@
 // Mirrors driver_portal/src/i18n.js: an EN/AR dictionary with a reactive
 // translate / setLang / dir / useI18n layer. Arabic strings live here, which is
 // allowed for *_portal bundles; code carries stable English keys only.
-import { computed, ref } from "vue";
+import { createI18n } from "@shared/i18n";
 
 const STORAGE_KEY = "fleet_portal_lang";
 export const SUPPORTED = ["en", "ar"];
@@ -788,45 +788,14 @@ const messages = {
   },
 };
 
-function detectInitial() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && SUPPORTED.includes(saved)) return saved;
-  } catch (e) {
-    /* storage blocked */
-  }
-  return "ar"; // supervisor board defaults to Arabic (mirrors driver/safety portals)
-}
+// supervisor board defaults to Arabic (mirrors driver/safety portals)
+const { lang, dir, translate, setLang } = createI18n({
+  messages,
+  storageKey: STORAGE_KEY,
+  supported: SUPPORTED,
+});
 
-const lang = ref(detectInitial());
-
-function lookup(locale, key) {
-  return key.split(".").reduce((o, part) => (o == null ? undefined : o[part]), messages[locale]);
-}
-
-function interpolate(str, params) {
-  if (!params) return str;
-  return str.replace(/\{(\w+)\}/g, (m, k) => (params[k] != null ? params[k] : m));
-}
-
-export function translate(key, params) {
-  const val = lookup(lang.value, key);
-  if (val != null) return interpolate(val, params);
-  const fallback = lookup("en", key);
-  return interpolate(fallback != null ? fallback : key, params);
-}
-
-export function setLang(next) {
-  if (!SUPPORTED.includes(next)) return;
-  lang.value = next;
-  try {
-    localStorage.setItem(STORAGE_KEY, next);
-  } catch (e) {
-    /* storage blocked */
-  }
-}
-
-const dir = computed(() => (lang.value === "ar" ? "rtl" : "ltr"));
+export { translate, setLang };
 
 export function useI18n() {
   return {

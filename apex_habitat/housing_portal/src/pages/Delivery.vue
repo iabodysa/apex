@@ -47,7 +47,7 @@
         <div class="p-4 border-b border-gray-50">
           <div class="flex justify-between items-start mb-2">
             <div>
-              <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[var(--c-accent)] bg-[#00844e15] px-2 py-0.5 rounded">
+              <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[var(--c-accent)] bg-[color-mix(in_srgb,var(--c-accent)_8%,transparent)] px-2 py-0.5 rounded">
                 <Icon name="truck" :size="12" />
                 {{ del.status }}
               </span>

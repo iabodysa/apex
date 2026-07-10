@@ -1,11 +1,11 @@
 // Copyright (c) 2026, AFMCO and contributors
 import { createApp } from "vue";
-import { setConfig, frappeRequest } from "frappe-ui";
+import { configureApi } from "@shared/call";
 import App from "./App.vue";
 import "./index.css";
 
-// frappe-ui's frappeRequest (used by src/api.js's call()) signs each request with
-// window.csrf_token (exposed by the www host page); wire it as the fetcher.
-setConfig("resourceFetcher", frappeRequest);
+// Wire frappe-ui's resourceFetcher (frappeRequest, also used by src/api.js's
+// call()) — signs each request with window.csrf_token. Shared with every portal.
+configureApi();
 
 createApp(App).mount("#app");

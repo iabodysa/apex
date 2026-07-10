@@ -59,8 +59,8 @@ defineProps({
 }
 
 .stepper-dot-done {
-  background: var(--c-success, #00844e);
-  border-color: var(--c-success, #00844e);
+  background: var(--c-success, var(--brand-green));
+  border-color: var(--c-success, var(--brand-green));
   color: #fff;
 }
 
@@ -74,7 +74,7 @@ defineProps({
 }
 
 .stepper-line-done {
-  background: var(--c-success, #00844e);
+  background: var(--c-success, var(--brand-green));
 }
 
 .stepper-num {

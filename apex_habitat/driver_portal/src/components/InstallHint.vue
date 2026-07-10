@@ -44,7 +44,7 @@ function onInstall() {
 
 <style scoped>
 .install-hint {
-  border: var(--border-width, 1px) solid var(--c-primary, #00844e);
+  border: var(--border-width, 1px) solid var(--c-primary, var(--brand-green));
 }
 .install-x {
   color: var(--c-ink-soft, #777);

@@ -1,6 +1,7 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#h991b9]
-import { computed, ref } from "vue";
+import { ref } from "vue";
+import { createI18n } from "@shared/i18n";
 
 const STORAGE_KEY = "masar_portal_lang";
 export const SUPPORTED = ["en", "ar", "ur", "hi", "bn"];
@@ -1407,59 +1408,17 @@ export function translateEnum(namespace, value) {
   return (map && map[value]) || value;
 }
 
-// [#93umvm]
-export function resourceErrorMessage(e, invalidFallbackKey = "errors.loadError") {
-  if (!e) return translate(invalidFallbackKey);
-  const status = e.response?.status;
-  const excType = e.exc_type || "";
-  if (status === 429 || excType === "TooManyRequestsError") {
-    return translate("errors.rateLimited");
-  }
-  if (excType.includes("CSRFTokenError") || excType.includes("Authorization")) {
-    return translate("errors.sessionExpired");
-  }
-  return e.messages?.[0] || e.message || translate(invalidFallbackKey);
-}
+// Shared translate / setLang / dir / resource-error machinery; workers default
+// to Arabic and RTL covers Arabic + Urdu. translateEnum + setEnumLabels stay
+// local (server-driven enum labels keyed off the factory's reactive `lang`).
+const { lang, dir, translate, setLang, resourceErrorMessage } = createI18n({
+  messages,
+  storageKey: STORAGE_KEY,
+  supported: SUPPORTED,
+  rtlLangs: RTL_LANGS,
+});
 
-function detectInitial() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && SUPPORTED.includes(saved)) return saved;
-  } catch (e) {
-    // [#9qybx5]
-  }
-  return "ar"; // workers default to Arabic
-}
-
-const lang = ref(detectInitial());
-
-function lookup(locale, key) {
-  return key.split(".").reduce((o, part) => (o == null ? undefined : o[part]), messages[locale]);
-}
-
-function interpolate(str, params) {
-  if (!params) return str;
-  return str.replace(/\{(\w+)\}/g, (m, k) => (params[k] != null ? params[k] : m));
-}
-
-export function translate(key, params) {
-  const val = lookup(lang.value, key);
-  if (val != null) return interpolate(val, params);
-  const fallback = lookup("en", key);
-  return interpolate(fallback != null ? fallback : key, params);
-}
-
-export function setLang(next) {
-  if (!SUPPORTED.includes(next)) return;
-  lang.value = next;
-  try {
-    localStorage.setItem(STORAGE_KEY, next);
-  } catch (e) {
-    // [#l7a9zm]
-  }
-}
-
-const dir = computed(() => (RTL_LANGS.includes(lang.value) ? "rtl" : "ltr"));
+export { translate, setLang, resourceErrorMessage };
 
 export function useI18n() {
   return {

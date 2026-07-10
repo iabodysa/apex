@@ -2,7 +2,7 @@
 // Mirrors worker_portal/src/i18n.js: a tiny EN/AR dictionary with the same
 // translate / setLang / dir / useI18n machinery and a shared resource-error
 // mapper. Arabic strings live here, which is allowed for *_portal bundles.
-import { computed, ref } from "vue";
+import { createI18n } from "@shared/i18n";
 
 const STORAGE_KEY = "safety_portal_lang";
 export const SUPPORTED = ["en", "ar"];
@@ -219,61 +219,16 @@ export function translateEnum(namespace, value) {
   return (map && map[value]) || value;
 }
 
-// Same mapper worker_portal uses: turn a frappe-ui resource error into a short,
-// language-aware line, distinguishing rate-limit / session-expired from a
-// generic failure.
-export function resourceErrorMessage(e, fallbackKey = "errors.loadError") {
-  if (!e) return translate(fallbackKey);
-  const status = e.response?.status;
-  const excType = e.exc_type || "";
-  if (status === 429 || excType === "TooManyRequestsError") {
-    return translate("errors.rateLimited");
-  }
-  if (excType.includes("CSRFTokenError") || excType.includes("Authorization")) {
-    return translate("errors.sessionExpired");
-  }
-  return e.messages?.[0] || e.message || translate(fallbackKey);
-}
+// Shared translate / setLang / dir / resource-error machinery. Supervisors on
+// site default to Arabic. translateEnum stays local (reads namespaces from the
+// messages dict via the factory's lookup).
+const { lang, dir, lookup, translate, setLang, resourceErrorMessage } = createI18n({
+  messages,
+  storageKey: STORAGE_KEY,
+  supported: SUPPORTED,
+});
 
-function detectInitial() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && SUPPORTED.includes(saved)) return saved;
-  } catch (e) {
-    /* storage blocked — fall through to default */
-  }
-  return "ar"; // supervisors on site default to Arabic
-}
-
-const lang = ref(detectInitial());
-
-function lookup(locale, key) {
-  return key.split(".").reduce((o, part) => (o == null ? undefined : o[part]), messages[locale]);
-}
-
-function interpolate(str, params) {
-  if (!params) return str;
-  return String(str).replace(/\{(\w+)\}/g, (m, k) => (params[k] != null ? params[k] : m));
-}
-
-export function translate(key, params) {
-  const val = lookup(lang.value, key);
-  if (val != null && typeof val !== "object") return interpolate(val, params);
-  const fallback = lookup("en", key);
-  return interpolate(fallback != null && typeof fallback !== "object" ? fallback : key, params);
-}
-
-export function setLang(next) {
-  if (!SUPPORTED.includes(next)) return;
-  lang.value = next;
-  try {
-    localStorage.setItem(STORAGE_KEY, next);
-  } catch (e) {
-    /* storage blocked — keep the in-memory choice */
-  }
-}
-
-const dir = computed(() => (lang.value === "ar" ? "rtl" : "ltr"));
+export { translate, setLang, resourceErrorMessage };
 
 export function useI18n() {
   return {

@@ -5,7 +5,7 @@
 // browser Push API support, server reports push configured, and the SW is active.
 // Secrets stay server-side: the SPA only handles the PUBLIC VAPID key.
 import { computed, ref } from "vue";
-import { frappeRequest } from "frappe-ui";
+import { call } from "@shared/call";
 
 // Server-reported config (set on init): is push configured + the public VAPID key.
 const config = ref({ enabled: false, vapid_public_key: "", subscribed: false });
@@ -51,9 +51,7 @@ function subKeys(sub) {
 export async function initPush() {
   if (!isPushSupported()) return;
   try {
-    const cfg = await frappeRequest({
-      url: "/api/method/apex_habitat.salis.api.driver_portal.get_push_config",
-    });
+    const cfg = await call("apex_habitat.salis.api.driver_portal.get_push_config");
     config.value = cfg || { enabled: false };
     if (config.value.enabled) {
       const reg = await navigator.serviceWorker.ready;
@@ -87,10 +85,9 @@ export async function enablePush() {
         applicationServerKey: urlBase64ToUint8Array(config.value.vapid_public_key),
       }));
     const { p256dh, auth } = subKeys(sub);
-    await frappeRequest({
-      url: "/api/method/apex_habitat.salis.api.driver_portal.save_push_subscription",
-      method: "POST",
-      params: { endpoint: sub.endpoint, p256dh, auth, user_agent: navigator.userAgent },
+    await call("apex_habitat.salis.api.driver_portal.save_push_subscription", {
+      type: "POST",
+      args: { endpoint: sub.endpoint, p256dh, auth, user_agent: navigator.userAgent },
     });
     subscribed.value = true;
     return true;
@@ -110,10 +107,9 @@ export async function disablePush() {
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
     if (sub) {
-      await frappeRequest({
-        url: "/api/method/apex_habitat.salis.api.driver_portal.delete_push_subscription",
-        method: "POST",
-        params: { endpoint: sub.endpoint },
+      await call("apex_habitat.salis.api.driver_portal.delete_push_subscription", {
+        type: "POST",
+        args: { endpoint: sub.endpoint },
       }).catch(() => {});
       await sub.unsubscribe().catch(() => {});
     }

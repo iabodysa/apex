@@ -1,34 +1,29 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#t647-shared-call]
-// Single call() implementation shared by fleet_portal and safety_portal.
-// Each SPA's api.js re-exports from here via the @shared vite alias.
-//
-// CSRF token is read lazily from window.csrf_token (set by the www/*.py host
-// page before the SPA bundle loads). Works for GET (args → query-string) and
-// POST/PUT/DELETE (args → JSON body).
+// The single API-call layer shared by every *_portal SPA, built on frappe-ui's
+// frappeRequest (CSRF is signed from window.csrf_token, exposed by the www host
+// page). Each portal imports from "@shared/call":
+//   - configureApi()  → wire frappeRequest as the resourceFetcher (call once in
+//     main.js so createResource() throughout the app signs its requests).
+//   - call(method,{args,type}) → imperative one-off method call, returning the
+//     endpoint's unwrapped `message`. Used where a portal needs a direct call
+//     outside a createResource (fleet_portal/api.js, driver_portal push opt-in).
+import { frappeRequest, setConfig } from "frappe-ui";
 
-const CSRF = () => (typeof window !== "undefined" && window.csrf_token) || "";
+// Wire frappe-ui's createResource() to sign every request via frappeRequest.
+// Idempotent — safe to call once per SPA boot.
+export function configureApi() {
+  setConfig("resourceFetcher", frappeRequest);
+}
 
-export async function call(method, { args = null, type = "GET" } = {}) {
-  const url = "/api/method/" + method;
-  const opts = {
-    method: type,
-    headers: { "X-Frappe-CSRF-Token": CSRF(), "Content-Type": "application/json" },
-    credentials: "same-origin",
-  };
-  let full = url;
-  if (type === "GET" && args) {
-    const q = new URLSearchParams(args).toString();
-    full = url + (q ? "?" + q : "");
-  } else if (args) {
-    opts.body = JSON.stringify(args);
-  }
-  const res = await fetch(full, opts);
-  if (!res.ok) {
-    let detail = res.statusText;
-    try { detail = (await res.json())._server_messages || detail; } catch (e) {}
-    throw new Error(detail || "HTTP " + res.status);
-  }
-  const data = await res.json();
-  return data.message;
+// call(method, { args, type }) -> the endpoint's `message`.
+//   GET  -> args become query params
+//   POST/PUT/DELETE -> args become the JSON body
+export function call(method, { args = null, type = "GET" } = {}) {
+  const opts = { url: "/api/method/" + method, method: type };
+  // frappeRequest carries `params` as the query-string for GET and as the JSON
+  // body for POST/PUT/DELETE (the same split the old hand-rolled helper did).
+  if (args) opts.params = args;
+  // Resolves to the unwrapped `message` and rejects with a frappe-ui error.
+  return frappeRequest(opts);
 }

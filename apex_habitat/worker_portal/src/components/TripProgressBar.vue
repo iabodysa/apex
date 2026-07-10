@@ -84,8 +84,8 @@ const steps = computed(() => {
 }
 
 .progress-step-done .progress-dot {
-  background: var(--c-success, #00844e);
-  border-color: var(--c-success, #00844e);
+  background: var(--c-success, var(--brand-green));
+  border-color: var(--c-success, var(--brand-green));
   color: #fff;
 }
 
@@ -122,7 +122,7 @@ const steps = computed(() => {
 }
 
 .progress-connector-done {
-  background: var(--c-success, #00844e);
+  background: var(--c-success, var(--brand-green));
 }
 
 [dir="rtl"] .progress-connector {

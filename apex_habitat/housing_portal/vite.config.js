@@ -18,7 +18,15 @@ export default defineConfig({
       "/files": "http://localhost:8000",
     },
   },
-  resolve: { alias: { "@": path.resolve(__dirname, "src") } },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+      "@shared": path.resolve(__dirname, "../frontend_shared"),
+    },
+    // frontend_shared/ lives outside this portal's root and has no node_modules,
+    // so bare imports there (frappe-ui, vue) must resolve to THIS portal's copy.
+    dedupe: ["vue", "frappe-ui"],
+  },
   build: {
     outDir: path.resolve(__dirname, "../public/housing_portal"),
     emptyOutDir: true,

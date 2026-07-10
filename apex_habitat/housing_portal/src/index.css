@@ -3,6 +3,8 @@
    habitat portals. Components consume these CSS variables exclusively, so a
    tenant can re-skin by swapping the token block. */
 
+/* Shared brand primitives (--brand-green) + breakpoint tokens — single source. */
+@import "@shared/tokens.css";
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap");
 
 @tailwind base;
@@ -11,19 +13,19 @@
 
 :root,
 [data-theme="afmco"] {
-  --c-primary: #00844e;
+  --c-primary: var(--brand-green);
   --c-primary-ink: #ffffff;
   --c-ink: #072b1a;
   --c-ink-soft: #355040;
   --c-canvas: #ece6d6;
   --c-surface: #f8f5ee;
   --c-surface-2: #ffffff;
-  --c-accent: #00844e;
+  --c-accent: var(--brand-green);
   --c-mint: #60d297;
   --c-muted: #6f7e76;
   --c-border: #ddd5c2;
   --c-border-strong: #cabfa3;
-  --c-success: #00844e;
+  --c-success: var(--brand-green);
   --c-success-bg: #d9f0e3;
   --c-warning: #c9851f;
   --c-warning-bg: #f7ead2;
@@ -220,19 +222,19 @@
    Theme is set to "Atelier"). Same brand palette, elevated finish. Keeps Cairo
    for the RTL Arabic surface. */
 [data-theme="atelier"] {
-  --c-primary: #00844e;
+  --c-primary: var(--brand-green);
   --c-primary-ink: #ffffff;
   --c-ink: #06241a;
   --c-ink-soft: #3a5448;
   --c-canvas: #efe9da;
   --c-surface: #fffdf7;
   --c-surface-2: #ffffff;
-  --c-accent: #00844e;
+  --c-accent: var(--brand-green);
   --c-mint: #5ccf94;
   --c-muted: #6f7e76;
   --c-border: #e2dac6;
   --c-border-strong: #cdc1a4;
-  --c-success: #00844e;
+  --c-success: var(--brand-green);
   --c-success-bg: #dcf1e5;
   --c-warning: #b9791b;
   --c-warning-bg: #f6e8cf;
@@ -319,6 +321,8 @@ body {
   }
   /* On iPad / tablet the phone-width column looks lost in the viewport. Widen
      the centered shell to a comfortable reading column (≈720px). */
+  /* 768px = shared --bp-tablet (frontend_shared/tokens.css); keep in sync —
+     CSS @media conditions cannot read a custom property. */
   @media (min-width: 768px) {
     .app-shell {
       max-width: 720px;

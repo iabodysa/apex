@@ -1,5 +1,7 @@
 /* [#8wb1ff] */
 
+/* Shared brand primitives (--brand-green) + breakpoint tokens — single source. */
+@import "@shared/tokens.css";
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
 
 @tailwind base;
@@ -10,19 +12,19 @@
 :root,
 [data-theme="afmco"] {
   /* [#7t3jhc] */
-  --c-primary: #00844e; /* Growth Green */
+  --c-primary: var(--brand-green); /* Growth Green */
   --c-primary-ink: #ffffff; /* text/icon on primary */
   --c-ink: #072b1a; /* Deep Forest — headings/body */
   --c-ink-soft: #355040; /* muted forest for secondary text */
   --c-canvas: #ece6d6; /* Sand — warm page background */
   --c-surface: #f8f5ee; /* Off-White — cards/paper */
   --c-surface-2: #ffffff; /* raised paper (hover) */
-  --c-accent: #00844e; /* CTA accent (per-tenant override target) */
+  --c-accent: var(--brand-green); /* CTA accent (per-tenant override target) */
   --c-mint: #60d297; /* Mint highlight/success */
   --c-muted: #6f7e76; /* muted label text */
   --c-border: #ddd5c2; /* hairline on sand/paper */
   --c-border-strong: #cabfa3;
-  --c-success: #00844e;
+  --c-success: var(--brand-green);
   --c-success-bg: #d9f0e3;
   --c-warning: #c9851f;
   --c-warning-bg: #f7ead2;
@@ -714,19 +716,19 @@ body {
    palette (Growth Green / Deep Forest / Sand), elevated finish: soft depth,
    warmer paper hierarchy, a gold-leaf header hairline, tighter editorial type. */
 [data-theme="atelier"] {
-  --c-primary: #00844e; /* Growth Green — unchanged brand primary */
+  --c-primary: var(--brand-green); /* Growth Green — unchanged brand primary */
   --c-primary-ink: #ffffff;
   --c-ink: #06241a; /* slightly deeper forest for crisper headings */
   --c-ink-soft: #3a5448;
   --c-canvas: #efe9da; /* soft sand canvas */
   --c-surface: #fffdf7; /* true ivory paper — lifts cards off the sand */
   --c-surface-2: #ffffff;
-  --c-accent: #00844e;
+  --c-accent: var(--brand-green);
   --c-mint: #5ccf94;
   --c-muted: #6f7e76;
   --c-border: #e2dac6;
   --c-border-strong: #cdc1a4;
-  --c-success: #00844e;
+  --c-success: var(--brand-green);
   --c-success-bg: #dcf1e5;
   --c-warning: #b9791b;
   --c-warning-bg: #f6e8cf;

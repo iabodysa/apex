@@ -286,7 +286,7 @@ const unlinkedCtx = computed(() => {
   padding: 8px 12px;
   font-size: 0.75rem;
   font-weight: 600;
-  background: var(--c-accent, #00844e);
+  background: var(--c-accent, var(--brand-green));
   color: #fff;
 }
 .update-reload {

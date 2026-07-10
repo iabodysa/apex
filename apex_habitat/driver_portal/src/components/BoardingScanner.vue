@@ -268,7 +268,7 @@ onBeforeUnmount(() => {
   text-align: center;
   padding: 24px;
 }
-.scanner-result.is-valid { background: var(--c-success, #00844e); }
+.scanner-result.is-valid { background: var(--c-success, var(--brand-green)); }
 .scanner-result.is-warn { background: var(--c-warning, #c9851f); }
 .scanner-result.is-err { background: var(--c-danger, #c0392b); }
 .result-icon {

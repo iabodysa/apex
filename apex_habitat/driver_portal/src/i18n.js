@@ -1,6 +1,6 @@
 // Copyright (c) 2026, AFMCO and contributors
 // [#7qn779]
-import { computed, ref } from "vue";
+import { createI18n } from "@shared/i18n";
 
 const STORAGE_KEY = "salis_portal_lang";
 export const SUPPORTED = ["en", "ar"];
@@ -794,27 +794,17 @@ const enums = {
 export const ISSUE_CATEGORIES = Object.keys(enums.en.issueCategory);
 export const ISSUE_PRIORITIES = Object.keys(enums.en.issuePriority);
 
-function detectInitial() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && SUPPORTED.includes(saved)) return saved;
-  } catch (e) {
-    // [#9qybx5]
-  }
-  return "ar"; // drivers default to Arabic (mirrors worker_portal/safety_portal)
-}
-
 // [#o7zbpi]
-const lang = ref(detectInitial());
+// Shared translate / setLang / dir machinery; drivers default to Arabic (mirrors
+// worker_portal/safety_portal). translateEnum + the Intl formatters below stay
+// local — they read the factory's reactive `lang`.
+const { lang, dir, translate, setLang } = createI18n({
+  messages,
+  storageKey: STORAGE_KEY,
+  supported: SUPPORTED,
+});
 
-function lookup(locale, key) {
-  return key.split(".").reduce((o, part) => (o == null ? undefined : o[part]), messages[locale]);
-}
-
-function interpolate(str, params) {
-  if (!params) return str;
-  return str.replace(/\{(\w+)\}/g, (m, k) => (params[k] != null ? params[k] : m));
-}
+export { translate, setLang };
 
 // BCP-47 locale for Intl, keyed to the active UI language. Arabic uses the
 // Saudi locale so dates/numbers shape consistently with the rest of the app.
@@ -849,14 +839,6 @@ export function fmtDate(v) {
   return new Intl.DateTimeFormat(intlLocale(), { year: "numeric", month: "short", day: "numeric" }).format(d);
 }
 
-// [#90zqoh]
-export function translate(key, params) {
-  const val = lookup(lang.value, key);
-  if (val != null) return interpolate(val, params);
-  const fallback = lookup("en", key);
-  return interpolate(fallback != null ? fallback : key, params);
-}
-
 // Localize a stored server enum value; returns the raw value if the namespace or
 // key is unknown (so an unmapped option degrades to English, never blanks).
 export function translateEnum(namespace, value) {
@@ -864,18 +846,6 @@ export function translateEnum(namespace, value) {
   const ns = (enums[lang.value] || {})[namespace] || (enums.en || {})[namespace];
   return (ns && ns[value]) != null ? ns[value] : value;
 }
-
-export function setLang(next) {
-  if (!SUPPORTED.includes(next)) return;
-  lang.value = next;
-  try {
-    localStorage.setItem(STORAGE_KEY, next);
-  } catch (e) {
-    // [#p3xobl]
-  }
-}
-
-const dir = computed(() => (lang.value === "ar" ? "rtl" : "ltr"));
 
 export function useI18n() {
   return {

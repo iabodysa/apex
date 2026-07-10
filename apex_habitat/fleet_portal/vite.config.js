@@ -22,6 +22,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
       "@shared": path.resolve(__dirname, "../frontend_shared"),
     },
+    // frontend_shared/ lives outside this portal's root and has no node_modules,
+    // so bare imports there (frappe-ui, vue) must resolve to THIS portal's copy.
+    dedupe: ["vue", "frappe-ui"],
   },
   build: {
     outDir: path.resolve(__dirname, "../public/fleet_portal"),
