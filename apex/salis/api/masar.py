@@ -945,29 +945,58 @@ def get_worker_transport(token=None):
     # trip's stops to the worker's own pickup (matched by accommodation_building).
     assignment = _active_assignment(employee)
     my_building = assignment.get("building") if assignment else None
+
+    # [#p210batch] Pre-fetch the vehicle / driver / depart-time / rating lookups
+    # that used to run once PER request row (N+1 across the worker's shuttle list)
+    # as one bulk read each, keyed by name. Every replaced call was a pure
+    # key->value read by primary key (or an employee+trip existence check), so the
+    # per-trip dicts and the has_rated flag are byte-identical to the per-row form.
+    vehicle_names = {r["assigned_vehicle"] for r in requests if r.get("assigned_vehicle")}
+    driver_names = {r["assigned_driver"] for r in requests if r.get("assigned_driver")}
+    trip_names = {r["dispatch_trip"] for r in requests if r.get("dispatch_trip")}
+    vehicle_map = {}
+    if vehicle_names:
+        for v in frappe.get_all(
+            "Salis Vehicle",
+            filters={"name": ["in", list(vehicle_names)]},
+            fields=["name", "plate_number", "vehicle_category"],
+        ):
+            vehicle_map[v["name"]] = v
+    driver_map = {}
+    if driver_names:
+        for d in frappe.get_all(
+            "Salis Driver",
+            filters={"name": ["in", list(driver_names)]},
+            fields=["name", "full_name", "phone"],
+        ):
+            # Old shape carried only full_name + phone (name was not requested).
+            driver_map[d["name"]] = {"full_name": d["full_name"], "phone": d["phone"]}
+    depart_map = {}
+    if trip_names:
+        for dt in frappe.get_all(
+            "Dispatch Trip",
+            filters={"name": ["in", list(trip_names)]},
+            fields=["name", "depart_time"],
+        ):
+            depart_map[dt["name"]] = dt["depart_time"]
+    rated_trips = set()
+    if trip_names:
+        rated_trips = set(
+            frappe.get_all(
+                "Transport Trip Rating",
+                filters={"employee": employee, "dispatch_trip": ["in", list(trip_names)]},
+                pluck="dispatch_trip",
+            )
+        )
+
     upcoming = []
     past = []
     for req in requests:
-        vehicle = None
-        if req.get("assigned_vehicle"):
-            v = frappe.db.get_value(
-                "Salis Vehicle",
-                req["assigned_vehicle"],
-                ["name", "plate_number", "vehicle_category"],
-                as_dict=True,
-            )
-            vehicle = v or None
-        driver = None
-        if req.get("assigned_driver"):
-            d = frappe.db.get_value(
-                "Salis Driver", req["assigned_driver"], ["full_name", "phone"], as_dict=True
-            )
-            driver = d or None
+        vehicle = vehicle_map.get(req["assigned_vehicle"]) if req.get("assigned_vehicle") else None
+        driver = driver_map.get(req["assigned_driver"]) if req.get("assigned_driver") else None
         depart_time = None
         if req.get("dispatch_trip"):
-            depart_time = _fmt_time(
-                frappe.db.get_value("Dispatch Trip", req["dispatch_trip"], "depart_time")
-            )
+            depart_time = _fmt_time(depart_map.get(req["dispatch_trip"]))
         pickup_datetime = (
             frappe.utils.cstr(req["pickup_datetime"]) if req.get("pickup_datetime") else None
         )
@@ -982,12 +1011,9 @@ def get_worker_transport(token=None):
         my_pickup = _worker_pickup_stop(stops, my_building)
         destination = _route_destination_stop(stops, my_pickup)
         # Check if already rated (only relevant for completed past trips)
-        has_rated = False
-        if req.get("dispatch_trip") and not is_upcoming:
-            has_rated = frappe.db.exists(
-                "Transport Trip Rating",
-                {"employee": employee, "dispatch_trip": req["dispatch_trip"]}
-            )
+        has_rated = bool(
+            req.get("dispatch_trip") and not is_upcoming and req["dispatch_trip"] in rated_trips
+        )
 
         trip = {
             "transport_request": req["name"],
@@ -1691,34 +1717,80 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
         fields=["name", "route_plan", "transport_request"],
         order_by="depart_time asc",
     )
-    from apex.salis.api.boarding_flow import _assigned_request_names
+    if not trips:
+        return None
+
+    # [#p210batch] The three per-row lookups this resolver used to make INSIDE the
+    # trip/candidate loops (an O(trips x requests) round-trip on a HOT boarding
+    # poll) are pre-fetched as bulk reads and joined in memory. Each replaced call
+    # was a pure key->value read, so the resolution ORDER and the returned VALUES
+    # are byte-identical — only the DB round-trip count changes (N -> 3). The
+    # building lookup stays inline: it fired at most once (only for the winning
+    # candidate), so it is already O(1) per call and pre-fetching it would only
+    # over-read non-winning candidates.
+    trip_names = [t["name"] for t in trips]
+
+    # (1) Assigned Transport Requests per trip, idx-asc within each trip — the
+    # batched form of boarding_flow._assigned_request_names(trip) for every trip.
+    # Grouping a global idx-asc scan by parent preserves each parent's idx order.
+    assigned_by_trip = {}
+    for arow in frappe.get_all(
+        "Dispatch Trip Assigned Request",
+        filters={"parent": ["in", trip_names], "parenttype": "Dispatch Trip"},
+        fields=["parent", "transport_request"],
+        order_by="idx asc",
+    ):
+        assigned_by_trip.setdefault(arow["parent"], []).append(arow["transport_request"])
+
+    # (2) Route Plan -> its Transport Request, only for trips with no direct request
+    # (the exact set the old per-trip get_value("Route Plan", ...) covered).
+    route_plan_names = [
+        t["route_plan"] for t in trips if not t.get("transport_request") and t.get("route_plan")
+    ]
+    route_plan_req = {}
+    if route_plan_names:
+        for rp in frappe.get_all(
+            "Route Plan",
+            filters={"name": ["in", route_plan_names]},
+            fields=["name", "transport_request"],
+        ):
+            route_plan_req[rp["name"]] = rp["transport_request"]
+
+    # (3) This worker's pickup row on every Transport Request they are on, in ONE
+    # read. Presence in the map IS manifest membership — a NULL pickup_point still
+    # counts as a match, exactly as the old get_value returned a truthy dict with
+    # pickup_point=None (never None) for a present row. First-wins on modified-asc
+    # mirrors get_value's default ordering for the (rare) duplicate-manifest-row
+    # case; a worker is normally listed once per request so the map is exact.
+    worker_pickup = {}
+    for wrow in frappe.get_all(
+        "Transport Request Worker",
+        filters={"parenttype": "Transport Request", "employee": employee},
+        fields=["parent", "pickup_point"],
+        order_by="modified asc",
+    ):
+        worker_pickup.setdefault(wrow["parent"], wrow.get("pickup_point"))
 
     for t in trips:
         req = t.get("transport_request")
         if not req and t.get("route_plan"):
-            req = frappe.db.get_value("Route Plan", t["route_plan"], "transport_request")
+            req = route_plan_req.get(t["route_plan"])
         # The worker may be on the Route Plan request OR on any request the
         # supervisor assigned onto this trip; scan that union for their pickup row.
-        candidate_reqs = [req, *_assigned_request_names(t["name"])]
+        candidate_reqs = [req, *assigned_by_trip.get(t["name"], [])]
         if transport_request:
             candidate_reqs = [r for r in candidate_reqs if r == transport_request]
         for candidate in candidate_reqs:
             if not candidate:
                 continue
-            # Manifest membership IS the scope: the worker's own pickup row on this
-            # request, or no match (-> this request is skipped).
-            row = frappe.db.get_value(
-                "Transport Request Worker",
-                {"parent": candidate, "parenttype": "Transport Request", "employee": employee},
-                ["pickup_point"],
-                as_dict=True,
-            )
-            if not row:
+            # Manifest membership IS the scope: presence of the worker's pickup row
+            # on this request (a NULL pickup still matches), else the request is skipped.
+            if candidate not in worker_pickup:
                 continue
             building = frappe.db.get_value(
                 "Transport Request", candidate, "accommodation_building"
             )
-            return t["name"], candidate, row.get("pickup_point"), building
+            return t["name"], candidate, worker_pickup[candidate], building
     return None
 
 

@@ -168,10 +168,19 @@ frappe.listview_settings["Resident Request"] = {
 						if (r.exc || !r.message) {
 							return;
 						}
-						frappe.show_alert({
-							message: __("{0} of {1} marked Triaged", [r.message.advanced, r.message.total]),
-							indicator: "green",
-						});
+						if (r.message.queued) {
+							// A large selection is triaged in the background; the list
+							// refresh below is optimistic (the job may still be running).
+							frappe.show_alert({
+								message: __("Triaging {0} requests in the background...", [r.message.total]),
+								indicator: "blue",
+							});
+						} else {
+							frappe.show_alert({
+								message: __("{0} of {1} marked Triaged", [r.message.advanced, r.message.total]),
+								indicator: "green",
+							});
+						}
 						listview.clear_checked_items();
 						listview.refresh();
 					},

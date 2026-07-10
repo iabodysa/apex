@@ -1,9 +1,13 @@
 # Copyright (c) 2026, AFMCO and contributors
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.habitat.doctype.resident_request import resident_request as rr
 from apex.habitat.doctype.resident_request.resident_request import (
     _apply_priority_rules,
+    _bulk_triage_job,
     advance_triage_status,
     bulk_triage,
 )
@@ -71,6 +75,46 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         a = self._request("New")
         res = bulk_triage(frappe.as_json([a.name]))
         self.assertEqual(res["advanced"], 1)
+
+    def test_bulk_triage_large_selection_is_enqueued(self):
+        """A selection larger than the sync limit is handed to a background job so
+        the request returns at once (queued, no synchronous count) instead of
+        blocking the worker thread on an unbounded client-supplied loop. The job is
+        enqueued with the full selection and NOT enqueue_after_commit (there is no
+        pending write to piggyback). [[reference-frappe-enqueue-now-and-after-commit]]"""
+        names = [f"REQ-FAKE-{i}" for i in range(rr.BULK_TRIAGE_SYNC_LIMIT + 1)]
+        with patch.object(rr.frappe, "enqueue") as enq:
+            res = bulk_triage(names)
+        self.assertTrue(res["queued"])
+        self.assertIsNone(res["advanced"])
+        self.assertEqual(res["total"], len(names))
+        enq.assert_called_once()
+        self.assertEqual(
+            enq.call_args.args[0],
+            "apex.habitat.doctype.resident_request.resident_request._bulk_triage_job",
+        )
+        self.assertEqual(enq.call_args.kwargs["names"], names)
+        self.assertNotEqual(enq.call_args.kwargs.get("enqueue_after_commit"), True)
+
+    def test_bulk_triage_small_selection_stays_inline(self):
+        """A within-limit selection is NOT enqueued: it runs inline and returns the
+        real advanced count so the desk action shows it immediately."""
+        a = self._request("New")
+        with patch.object(rr.frappe, "enqueue") as enq:
+            res = bulk_triage([a.name])
+        enq.assert_not_called()
+        self.assertEqual(res["advanced"], 1)
+        self.assertNotIn("queued", res)
+
+    def test_bulk_triage_job_advances_like_inline(self):
+        """The background job runs the identical per-row triage, so a large-batch
+        worker produces the same New -> Triaged result the inline path would, and
+        leaves a non-New row untouched (same partial-apply skip rule)."""
+        a = self._request("New")
+        b = self._request("In Progress")
+        _bulk_triage_job([a.name, b.name])
+        self.assertEqual(frappe.db.get_value("Resident Request", a.name, "status"), "Triaged")
+        self.assertEqual(frappe.db.get_value("Resident Request", b.name, "status"), "In Progress")
 
     # --- Location token resolution on the update path ---
 

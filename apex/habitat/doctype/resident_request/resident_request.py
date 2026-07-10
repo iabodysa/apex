@@ -333,14 +333,48 @@ def advance_triage_status(name, to_status):
     return {"name": doc.name, "status": doc.status, "changed": True}
 
 
+# A desk multi-select up to this many rows triages inline (instant count in the
+# UI); a larger, client-supplied selection is an unbounded loop that could time
+# out the request, so it runs in a background job instead.
+BULK_TRIAGE_SYNC_LIMIT = 50
+
+
 @frappe.whitelist(methods=["POST"])
 def bulk_triage(names):
     """Bulk-advance a selection of New requests to Triaged (the universal first
     triage step). Skips any row not in New so a mixed selection partially applies
-    rather than failing whole. Returns the count actually advanced."""
+    rather than failing whole.
+
+    Small selections run inline and return the count actually advanced (the desk
+    list action shows it immediately). A selection larger than
+    ``BULK_TRIAGE_SYNC_LIMIT`` is handed to a background job so the request returns
+    at once instead of blocking the worker thread on an unbounded loop; the
+    response then carries ``queued=True`` and ``advanced=None`` (the job applies
+    the same per-row triage under the enqueuing user's permissions)."""
     if isinstance(names, str):
         names = frappe.parse_json(names)
+    names = names or []
 
+    if len(names) > BULK_TRIAGE_SYNC_LIMIT:
+        # bulk_triage makes no write of its own before this point, so there is no
+        # pending transaction to piggyback: the default enqueue_after_commit=False
+        # queues the job immediately (enqueue_after_commit=True would silently drop
+        # it if this request never committed). The worker runs the job as the
+        # enqueuing user, so the per-row write-permission check is preserved.
+        frappe.enqueue(
+            "apex.habitat.doctype.resident_request.resident_request._bulk_triage_job",
+            queue="short",
+            names=names,
+        )
+        return {"advanced": None, "total": len(names), "queued": True}
+
+    return _apply_bulk_triage(names)
+
+
+def _apply_bulk_triage(names):
+    """Advance each New Resident Request in ``names`` to Triaged (per-row write
+    permission checked); returns the count advanced. Shared body of the inline and
+    the background bulk-triage paths."""
     advanced = 0
     for name in names or []:
         frappe.has_permission("Resident Request", "write", doc=name, throw=True)
@@ -351,3 +385,11 @@ def bulk_triage(names):
         doc.save()
         advanced += 1
     return {"advanced": advanced, "total": len(names or [])}
+
+
+def _bulk_triage_job(names):
+    """Background runner for a large bulk_triage selection (queued by ``bulk_triage``).
+    Runs under the enqueuing user — frappe.enqueue captures the session user and
+    the worker re-applies it via frappe.set_user — so the per-row write-permission
+    check inside ``_apply_bulk_triage`` still applies."""
+    _apply_bulk_triage(names)

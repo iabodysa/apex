@@ -161,3 +161,31 @@ class TestDispatchTripAssignment(FrappeTestCase):
         result = assign_requests_to_trip(self.trip.name, [self.req_a, self.req_b])
         self.assertEqual(result.count(self.req_a), 1, "a re-assigned request is not duplicated")
         self.assertEqual(set(result), {self.req_a, self.req_b})
+
+    # batched existence check (P-210 N+1): a bad id still throws by name
+
+    def test_assign_unknown_request_throws_with_that_id(self):
+        """A non-existent request id is rejected. The batched existence read (one
+        get_all replacing the per-id frappe.db.exists) must still report the first
+        missing id by name, byte-identical to the old per-row throw."""
+        missing = "TR-DOES-NOT-EXIST-" + _h()
+        with self.assertRaises(frappe.ValidationError) as ctx:
+            assign_requests_to_trip(self.trip.name, [self.req_a, missing])
+        self.assertIn(missing, str(ctx.exception))
+
+    # batched flag read (P-210 N+1): terminal requests are still skipped
+
+    def test_mark_assigned_skips_terminal_request(self):
+        """A Cancelled request is not flagged assigned. The batched current-flags
+        read preserves the per-row terminal-status skip in _mark_assigned_requests,
+        while a live request in the same selection is still flagged."""
+        frappe.db.set_value("Transport Request", self.req_a, "status", "Cancelled")
+        assign_requests_to_trip(self.trip.name, [self.req_a, self.req_b])
+        self.assertFalse(
+            frappe.db.get_value("Transport Request", self.req_a, "is_assigned"),
+            "a Cancelled request stays unflagged",
+        )
+        self.assertTrue(
+            frappe.db.get_value("Transport Request", self.req_b, "is_assigned"),
+            "the live request in the same batch is still flagged",
+        )

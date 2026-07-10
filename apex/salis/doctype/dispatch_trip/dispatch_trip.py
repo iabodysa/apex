@@ -114,23 +114,38 @@ class DispatchTrip(Document):
         "Assigned" state between Scheduled and Fulfilled; forcing one would break
         the existing fulfilment chain). A terminal/cancelled request is skipped.
         Swallowed per row so an un-writable request never aborts the trip save."""
-        for row in self.assigned_requests or []:
-            if not row.transport_request:
+        request_names = [
+            row.transport_request for row in (self.assigned_requests or []) if row.transport_request
+        ]
+        if not request_names:
+            return
+        # [#p210batch] One bulk read of the assigned requests' current flags/status,
+        # replacing the per-row get_value. Wrapped so a read failure marks nothing
+        # (matching the old per-row swallow) and never aborts the trip save. The
+        # write side stays per-row with its own swallow (a field write can't batch
+        # without raw SQL); a duplicate assigned row just re-applies the same
+        # idempotent set_value, leaving the identical final state.
+        try:
+            current_by_name = {
+                r["name"]: r
+                for r in frappe.get_all(
+                    "Transport Request",
+                    filters={"name": ["in", request_names]},
+                    fields=["name", "is_assigned", "assigned_to_trip", "status"],
+                )
+            }
+        except Exception:
+            return
+        for name in request_names:
+            current = current_by_name.get(name)
+            if not current or current.get("status") in ("Cancelled", "Rejected"):
+                continue
+            if current.get("is_assigned") and current.get("assigned_to_trip") == self.name:
                 continue
             try:
-                current = frappe.db.get_value(
-                    "Transport Request",
-                    row.transport_request,
-                    ["is_assigned", "assigned_to_trip", "status"],
-                    as_dict=True,
-                )
-                if not current or current.status in ("Cancelled", "Rejected"):
-                    continue
-                if current.is_assigned and current.assigned_to_trip == self.name:
-                    continue
                 frappe.db.set_value(
                     "Transport Request",
-                    row.transport_request,
+                    name,
                     {"is_assigned": 1, "assigned_to_trip": self.name},
                     update_modified=False,
                 )
@@ -382,10 +397,23 @@ def assign_requests_to_trip(dispatch_trip, transport_requests):
         )
 
     existing = {row.transport_request for row in (trip.assigned_requests or [])}
+    # [#p210batch] One bulk existence read for the new request ids, replacing the
+    # per-id frappe.db.exists. The loop still walks the list in order so the first
+    # missing id is the one reported, byte-identical to the per-row throw.
+    to_check = {r for r in transport_requests if r and r not in existing}
+    valid = (
+        set(
+            frappe.get_all(
+                "Transport Request", filters={"name": ["in", list(to_check)]}, pluck="name"
+            )
+        )
+        if to_check
+        else set()
+    )
     for request in transport_requests:
         if not request or request in existing:
             continue
-        if not frappe.db.exists("Transport Request", request):
+        if request not in valid:
             frappe.throw(_("Transport Request {0} does not exist.").format(request))
         trip.append("assigned_requests", {"transport_request": request})
         existing.add(request)

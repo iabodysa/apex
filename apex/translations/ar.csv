@@ -3846,6 +3846,7 @@ Transport requests the supervisor has assigned onto this trip. The trip manifest
 Triage Notes,ملاحظات الفرز
 Triaged,تم الفرز
 Triaging requests...,جارٍ فرز الطلبات...
+Triaging {0} requests in the background...,جارٍ فرز {0} طلبًا في الخلفية…
 Trigger Event,الحدث المُشغِّل
 Trigger alert if monthly bill deviates from average by more than this percentage.,أطلق تنبيهاً إذا انحرفت الفاتورة الشهرية عن المتوسط بأكثر من هذه النسبة.
 Trip,الرحلة
