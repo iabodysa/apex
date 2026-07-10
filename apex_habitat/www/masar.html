@@ -21,20 +21,7 @@
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap"
     />
     <link rel="stylesheet" href="/assets/apex_habitat/worker_portal/assets/index.css" />
-    {%- if portal_accent %}
-    <style>
-      /* Per-tenant accent override (Salis Portal Theme → Accent Color). Set on
-         the element so it wins over the theme's token defaults. The www renderer
-         has autoescape OFF; accent_color is source-validated to a strict CSS
-         colour in salis_portal_theme.validate(), so it cannot break out of the
-         <style> (CSS does not decode HTML entities, so source validation is the
-         real guard here). */
-      html[data-theme] {
-        --c-accent: {{ portal_accent }};
-        --c-primary: {{ portal_accent }};
-      }
-    </style>
-    {%- endif %}
+    {%- include "apex_habitat/templates/includes/portal_accent.html" %}
     <title>Masar</title>
     <script>
       window.csrf_token = {{ csrf_token | tojson }};

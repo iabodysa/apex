@@ -246,11 +246,11 @@ import TripRating from "../components/TripRating.vue";
 import PullIndicator from "../components/PullIndicator.vue";
 import BoardingFlow from "../components/BoardingFlow.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { formatTime, formatDateTime } from "../datetime";
-import { TOKEN } from "../token";
-import { waLink } from "../phone";
-import { usePullToRefresh } from "../usePullToRefresh";
-import { cacheGet, cacheSet } from "../cache";
+import { formatTime, formatDateTime } from "../utils/datetime";
+import { TOKEN } from "../utils/token";
+import { waLink } from "../utils/phone";
+import { usePullToRefresh } from "../composables/usePullToRefresh";
+import { cacheGet, cacheSet } from "../utils/cache";
 
 const { t, tEnum } = useI18n();
 

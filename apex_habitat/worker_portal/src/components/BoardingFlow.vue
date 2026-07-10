@@ -134,8 +134,8 @@ import { createResource } from "frappe-ui";
 import Icon from "./Icon.vue";
 import BoardingPassOverlay from "./BoardingPassOverlay.vue";
 import { useI18n } from "../i18n";
-import { TOKEN } from "../token";
-import { waLink } from "../phone";
+import { TOKEN } from "../utils/token";
+import { waLink } from "../utils/phone";
 
 const { t } = useI18n();
 

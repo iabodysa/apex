@@ -9,7 +9,7 @@
 //
 // Reactivity: these helpers read `lang.value` (the same reactive ref t() uses),
 // so a render that calls them re-runs when the user toggles the language.
-import { useI18n } from "./i18n";
+import { useI18n } from "../i18n";
 
 // useI18n() returns the singleton `lang` ref — reading `.value` inside a render
 // tracks it as a dependency, exactly as t() does.

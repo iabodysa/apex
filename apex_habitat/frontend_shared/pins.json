@@ -1,0 +1,7 @@
+{
+  "_comment": "Single source of truth for the security-driven npm `overrides` that every *_portal/package.json must carry identically. npm has no cross-package override sharing without a workspace, so the value still lives in each package.json — but this file is the canonical declaration and the portal-bundles CI job fails if any portal drifts from it. Bump a pin HERE, then mirror it into all five package.json (and refresh each lockfile).",
+  "overrides": {
+    "dompurify": ">=3.4.11",
+    "ws": ">=8.21.0"
+  }
+}

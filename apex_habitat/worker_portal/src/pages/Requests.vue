@@ -160,7 +160,7 @@ import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { TOKEN } from "../token";
+import { TOKEN } from "../utils/token";
 
 const { t, tEnum } = useI18n();
 

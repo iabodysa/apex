@@ -1,10 +1,10 @@
-// Plain-node unit test for src/qrColor.js (no framework). Run: node qrColor.test.mjs
+// Plain-node unit test for src/utils/qrColor.js (no framework). Run: node qrColor.test.mjs
 // Locks the themed-QR contrast invariants that keep the code SCANNABLE: the
 // resolved pair always clears the contrast floor, dark stays darker than light,
 // and an inverted (light-ink-on-dark) theme clamps to black-on-white.
 // (The full round-trip jsQR decode oracle lives in a scratch harness — vendoring
 // jsQR as a repo dep is unwarranted; this guards the new color math.)
-import { qrColors, contrastRatio, MIN_RATIO, parseColor } from "./src/qrColor.js";
+import { qrColors, contrastRatio, MIN_RATIO, parseColor } from "./src/utils/qrColor.js";
 
 function lum([r, g, b]) {
   const lin = (c) => {

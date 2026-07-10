@@ -115,10 +115,10 @@ import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import Skeleton from "../components/Skeleton.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { formatDate } from "../datetime";
-import { TOKEN } from "../token";
-import { waLink } from "../phone";
-import { cacheGet, cacheSet } from "../cache";
+import { formatDate } from "../utils/datetime";
+import { TOKEN } from "../utils/token";
+import { waLink } from "../utils/phone";
+import { cacheGet, cacheSet } from "../utils/cache";
 
 const { t, tEnum } = useI18n();
 

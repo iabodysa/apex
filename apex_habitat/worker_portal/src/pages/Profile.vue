@@ -103,7 +103,7 @@ import { computed, h } from "vue";
 import Icon from "../components/Icon.vue";
 import LangToggle from "../components/LangToggle.vue";
 import { useI18n } from "../i18n";
-import { formatDate } from "../datetime";
+import { formatDate } from "../utils/datetime";
 
 const { t, tEnum } = useI18n();
 

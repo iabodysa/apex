@@ -1,7 +1,7 @@
-// Plain-node unit test for src/phone.js (no framework). Run: node phone.test.mjs
+// Plain-node unit test for src/utils/phone.js (no framework). Run: node phone.test.mjs
 // Locks the hand-rolled worker-portal phone normaliser: +966, leading-0
 // local, 00 international, non-Saudi, and non-digit separators must stay correct.
-import { normalizeMsisdn } from "./src/phone.js";
+import { normalizeMsisdn } from "./src/utils/phone.js";
 
 const cases = [
   ["0512345678", "966512345678"],

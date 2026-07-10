@@ -113,8 +113,8 @@ import { useRoute } from "vue-router";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { formatDateTime } from "../datetime";
-import { TOKEN } from "../token";
+import { formatDateTime } from "../utils/datetime";
+import { TOKEN } from "../utils/token";
 
 const { t, tEnum } = useI18n();
 const route = useRoute();

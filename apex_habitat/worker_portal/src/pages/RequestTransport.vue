@@ -98,7 +98,7 @@ import { computed, reactive, ref } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "../components/Icon.vue";
 import { useI18n, resourceErrorMessage } from "../i18n";
-import { TOKEN } from "../token";
+import { TOKEN } from "../utils/token";
 
 const { t } = useI18n();
 

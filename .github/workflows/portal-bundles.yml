@@ -1,0 +1,79 @@
+name: Portal Bundles
+
+on:
+  push:
+    branches: [apex]
+  pull_request:
+    branches: [apex]
+
+jobs:
+  bundle-guard:
+    # Staleness guard for the committed SPA bundles. Each portal's built output
+    # (public/<portal>/) is shipped committed so the app installs without a Node
+    # toolchain. This job rebuilds every portal from its frozen lockfile and fails
+    # if the fresh output differs from what is committed — i.e. someone changed
+    # portal src (or the shared vite factory / frontend_shared) without rebuilding
+    # and committing the bundle. The SW portals also stamp their www/*-sw.min.js,
+    # so that file is diff-checked too. Mirrors the spa-lockfiles matrix shape.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - portal: fleet_portal
+          - portal: worker_portal
+            sw: apex_habitat/www/masar-sw.min.js
+          - portal: driver_portal
+            sw: apex_habitat/www/driver-sw.min.js
+          - portal: safety_portal
+          - portal: housing_portal
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install from frozen lockfile
+        working-directory: apex_habitat/${{ matrix.portal }}
+        run: npm ci
+
+      - name: Build the portal bundle
+        working-directory: apex_habitat/${{ matrix.portal }}
+        run: npm run build
+
+      - name: Fail if the committed bundle is stale
+        run: |
+          set -uo pipefail
+          if ! git diff --exit-code -- "apex_habitat/public/${{ matrix.portal }}" ${{ matrix.sw }}; then
+            echo "::error::Committed bundle for ${{ matrix.portal }} is stale."
+            echo "Run 'npm run build' in apex_habitat/${{ matrix.portal }} and commit apex_habitat/public/${{ matrix.portal }}/ (and the stamped www SW, if any)."
+            exit 1
+          fi
+          echo "${{ matrix.portal }} bundle is in sync with committed output"
+
+  override-pins:
+    # Single-source guard for the security npm `overrides` (dompurify, ws). The
+    # canonical values live in apex_habitat/frontend_shared/pins.json; npm still
+    # needs the override in each package.json, so this fails if any of the five
+    # portals drifts from the canonical pin set.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Every portal's overrides match frontend_shared/pins.json
+        run: |
+          set -uo pipefail
+          canon=$(jq -S '.overrides' apex_habitat/frontend_shared/pins.json)
+          fail=0
+          for p in fleet_portal worker_portal driver_portal safety_portal housing_portal; do
+            got=$(jq -S '.overrides' "apex_habitat/${p}/package.json")
+            if [ "$got" != "$canon" ]; then
+              echo "::error::${p}/package.json overrides differ from frontend_shared/pins.json"
+              diff <(echo "$canon") <(echo "$got") || true
+              fail=1
+            fi
+          done
+          [ "$fail" -eq 0 ] && echo "all portal overrides match the canonical pins"
+          exit "$fail"

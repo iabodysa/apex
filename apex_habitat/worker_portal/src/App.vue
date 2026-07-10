@@ -121,9 +121,9 @@ import Icon from "./components/Icon.vue";
 import Brand from "./components/Brand.vue";
 import LangToggle from "./components/LangToggle.vue";
 import { useI18n, resourceErrorMessage, setEnumLabels } from "./i18n";
-import { TOKEN, hasToken } from "./token";
+import { TOKEN, hasToken } from "./utils/token";
 import { updateReady, applyUpdate, initPwaUpdates } from "./pwa";
-import { usePoll } from "./usePoll";
+import { usePoll } from "./composables/usePoll";
 
 const { t, dir } = useI18n();
 

@@ -21,8 +21,8 @@
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from "vue";
-import { encodeQr } from "../qrcode";
-import { qrColors } from "../qrColor";
+import { encodeQr } from "../utils/qrcode";
+import { qrColors } from "../utils/qrColor";
 
 const props = defineProps({
   value: { type: String, required: true },
