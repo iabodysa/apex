@@ -63,7 +63,6 @@ A {0} Safety Round already exists for {1} on {2} ({3}). Tick Is Re-inspection to
 AC,تكييف
 AC Maintenance,صيانة المكيفات
 AFMCO,AFMCO
-AFMCO Owner,مالك شركة (AFMCO)
 API Contract Version,إصدار عقد الواجهة البرمجية
 Abbreviation,الاختصار
 About,حول
@@ -108,6 +107,7 @@ Accrual,الاستحقاق
 Accrual Date,تاريخ الاستحقاق
 Accrual Rows,أسطر الاستحقاق
 Accrued Total,إجمالي المستحق
+Accrued Total (SAR),إجمالي المستحق (ريال)
 Accrued Total minus Ledger Accrued Total — non-zero means the entered vehicle lines disagree with the accrual ledger.,إجمالي الاستحقاق مطروحًا منه إجمالي استحقاق دفتر الأستاذ — أي قيمة غير صفرية تعني أن بنود المركبات المُدخلة لا تتطابق مع دفتر استحقاق الإيجار.
 Accrued total. Sum of the vehicle line amounts when lines are entered; otherwise derived from the linked Rental Accrual Ledger.,إجمالي الاستحقاق. مجموع مبالغ بنود المركبات عند إدخال البنود؛ وإلا فيُشتق من دفتر استحقاق الإيجار المرتبط.
 Acknowledge,إقرار
@@ -452,7 +452,6 @@ Basis / Evidence is required before a recovery can be Approved.,يجب توفي�
 Bathroom,دورة المياه
 Bathrooms,دورات المياه
 Bed,سرير
-Bed (if bed-specific),السرير (إذا كان مخصصاً لسرير محدد)
 Bed Board,لوحة الأسرّة
 Bed Capacity,الطاقة الاستيعابية (أسرة)
 Bed Code,رمز السرير
@@ -659,6 +658,7 @@ Claimed Amount cannot be negative.,لا يمكن أن يكون المبلغ ال
 Claimed Litres,اللترات المطالب بها
 Claimed Litres must be greater than zero.,يجب أن تكون اللترات المطالب بها أكبر من صفر.
 Claimed Total,إجمالي المطالب به
+Claimed Total (SAR),إجمالي المطالب به (ريال)
 Claimed Total and Accrued Total cannot be negative.,لا يمكن أن يكون الإجمالي المُطالب به وإجمالي الاستحقاق سالبين.
 Claimed Total minus Accrued Total.,إجمالي المطالب به ناقص إجمالي المستحق.
 Claimed litres minus consumed litres. Positive = claim exceeds recorded consumption.,اللترات المطالب بها مطروحًا منها اللترات المستهلكة. القيمة الموجبة = المطالبة تتجاوز الاستهلاك المسجَّل.
@@ -1032,6 +1032,7 @@ Daily Cleaning Compliance,الالتزام اليومي بالنظافة
 Daily Open Operations Alerts: {0},تنبيهات العمليات المفتوحة اليومية: {0}
 Daily Operations,العمليات اليومية
 Daily Rate,السعر اليومي
+Daily Rate (SAR),السعر اليومي (ريال)
 Daily Rate cannot be negative.,لا يمكن أن يكون السعر اليومي سالباً.
 Daily Rate is required on a Receipt movement.,السعر اليومي مطلوب في حركة الاستلام.
 Daily Tasks,المهام اليومية
@@ -1336,7 +1337,7 @@ Escalated Maintenance Requests,طلبات الصيانة المصعدة
 Estimated Accommodation Cost Bleed (SAR),التكلفة المقدّرة لهدر السكن (ريال)
 Estimated Cost (SAR),التكلفة التقديرية (ريال)
 Estimated Replacement Cost (SAR),تكلفة الاستبدال التقديرية (ريال)
-Estimated Unit Cost,التكلفة التقديرية للوحدة
+Estimated Unit Cost (SAR),التكلفة التقديرية للوحدة (ريال)
 Estimated accommodation cost from the memo ledger only (not salary). Populated by the aging job.,تكلفة الإسكان التقديرية من سجل المذكرات فقط (وليس الراتب). تُعبّأ بواسطة مهمة التقادم.
 Estimated cost cannot be negative.,لا يمكن أن تكون التكلفة التقديرية سالبة.
 Estimated value,القيمة التقديرية
@@ -1562,7 +1563,7 @@ Fuel Exception Register,سجل استثناءات الوقود
 Fuel Level,مستوى الوقود
 Fuel Litres Dispensed This Month,لترات الوقود المصروفة هذا الشهر
 Fuel Misuse,إساءة استخدام الوقود
-Fuel Overage Margin (Percent),هامش تجاوز الوقود (نسبة مئوية)
+Fuel Overage Margin (%),هامش تجاوز الوقود (٪)
 Fuel Plan,خطة الوقود
 Fuel Platform,منصة الوقود
 Fuel Quota,حصة الوقود
@@ -1570,7 +1571,7 @@ Fuel Quota {0} already exists for vehicle {1} in period {2}.,حصة الوقود
 Fuel Reconciliation,مطابقة الوقود
 Fuel Reference Prices (SAR/Litre),الأسعار المرجعية للوقود (ريال سعودي/لتر)
 Fuel Request,طلب وقود
-Fuel Request Approval Threshold (Litres),حد اعتماد طلب الوقود (لترات)
+Fuel Request Approval Threshold (L),حد اعتماد طلب الوقود (لتر)
 Fuel Request Approval Threshold cannot be negative.,لا يمكن أن يكون حد اعتماد طلب الوقود سالباً.
 Fuel Request Decision:,قرار طلب الوقود:
 Fuel Request Pending Max Days,الحد الأقصى لأيام انتظار طلب الوقود
@@ -1814,6 +1815,7 @@ Internal Auditor Dashboard (Dashboard),لوحة معلومات المدقق ال
 Internal Billing Model,نموذج الفوترة الداخلية
 Internal Billing Notes,ملاحظات الفوترة الداخلية
 Internal Employee,موظف داخلي
+Internal Owner,المسؤول الداخلي
 Internal Store,المتجر الداخلي
 Internal Transfer,نقل داخلي
 "Internal approval state, in addition to the worker's consent. The deduction posts only when approved.",حالة الاعتماد الداخلي، إضافةً إلى موافقة العامل. لا يُرحَّل الخصم إلا عند الاعتماد.
@@ -1908,7 +1910,6 @@ Kitchen gas cooker / stove for accommodation. Durable kitchenware.,موقد / ط
 Kitchenware,أدوات مطبخ
 Labour Supplier,مورّد العمالة
 Landlord,المؤجّر
-Landlord Supplier,المؤجر (مورد)
 Landlord-issued contract number or file reference.,رقم العقد الصادر من المالك أو مرجع الملف.
 "Language the resident prefers for updates and responses on this request, so notifications and handling can be routed to staff who can communicate with the worker.",اللغة التي يفضّلها المقيم للتحديثات والردود على هذا الطلب، ليتسنى توجيه الإشعارات والمعالجة إلى الموظفين القادرين على التواصل مع العامل.
 Large Worker Moves Pending Escalation,تنقلات العمالة الكبيرة بانتظار التصعيد
@@ -1949,11 +1950,13 @@ Leave,إجازة
 Leave blank for permanent,اتركه فارغاً للدائم
 Leave empty for building-level stock.,اتركه فارغاً إذا كان المخزون على مستوى المبنى.
 Ledger Accrued Total,إجمالي استحقاق دفتر الأستاذ
+Ledger Accrued Total (SAR),إجمالي استحقاق دفتر الأستاذ (ريال)
 Ledger Entries,قيود الدفتر
 Ledger Entry,قيد الأستاذ
 Ledger Rows,أسطر الدفتر
 Ledger Type,نوع الدفتر
 Ledger Variance,انحراف دفتر الأستاذ
+Ledger Variance (SAR),انحراف دفتر الأستاذ (ريال)
 Ledgered,تم ترحيله للدفتر
 Left,منتهي الخدمة
 Legal,الشؤون القانونية
@@ -2606,9 +2609,10 @@ Photo Evidence Required,يلزم إثبات بالصورة
 Photo evidence that maintenance work was completed. Required before closing.,دليل مصوّر على اكتمال أعمال الصيانة. مطلوب قبل الإغلاق.
 Photographic evidence captured for a driver attendance record.,دليل مصوّر يُلتقط لسجل حضور سائق.
 Photos Attached,الصور المرفقة
-"Physical Location (e.g., Laundry Room, Floor 2 Hallway)",الموقع الفعلي (مثال: غرفة الغسيل، ممر الطابق 2)
+Physical Location,الموقع الفعلي
 Physical facility asset movement with intercompany approval controls.,نقل مادي لأصل مرفق مع ضوابط اعتماد بين الشركات.
 Physical location in the receiving building (e.g. Laundry Room).,الموقع الفعلي في المبنى المستلِم (مثل غرفة الغسيل).
+"Physical location within the building (e.g. Laundry Room, Floor 2 Hallway).",الموقع الفعلي داخل المبنى (مثال: غرفة الغسيل، ممر الطابق الثاني).
 Physical meter ID as printed on the meter or invoice,معرّف العدّاد الفعلي كما هو مطبوع على العدّاد أو الفاتورة
 "Physical readiness of the room to receive a new resident, flagging whether it is ready or needs cleaning or repair before it can be occupied, or is out of service.",الجاهزية المادية للغرفة لاستقبال مقيم جديد، تبيّن ما إذا كانت جاهزة أو تحتاج تنظيفًا أو إصلاحًا قبل إشغالها، أو خارج الخدمة.
 Pick a building and a cadence to build the checklist.,اختر مبنى ووتيرة لبناء قائمة الفحص.
@@ -3359,6 +3363,7 @@ Set how urgent the repair is.,حدّد مدى إلحاح الإصلاح.
 Set on the reversal row posted when the source movement is cancelled. The original row is preserved for audit.,يُضبط على الصف العكسي المُرحَّل عند إلغاء الحركة المصدر. يُحتفظ بالصف الأصلي للتدقيق.
 Set once the worker is registered as a permanent Employee.,يُحدَّد بمجرد تسجيل العامل موظفاً دائماً.
 Set once this expected worker is matched to a registered arrival.,يُضبط بمجرد مطابقة هذا العامل المتوقع بوصول مسجَّل.
+Set only when the request concerns a specific bed.,يُحدَّد فقط عندما يخص الطلب سريرًا معيّنًا.
 Set the Check-in Date,حدّد تاريخ الدخول
 Set the Issue Date,حدّد تاريخ الصرف
 Set the Priority,حدّد الأولوية
@@ -3590,7 +3595,7 @@ Supervisor at the receiving accommodation who confirms the on-site code receipt.
 Supervisor signature,توقيع المشرف
 Supplier,المورّد
 Supplier Cost Recovery,استرداد تكلفة المورد
-Supplier Markup Percent,نسبة هامش المورد
+Supplier Markup (%),هامش المورد (٪)
 Supplier Name,اسم المورّد
 Supplier-Billed Cost This Month,التكلفة المحمَّلة على المورّد هذا الشهر
 Supporting evidence for the loss and its valuation. Required before the recovery can be Approved.,أدلة داعمة للخسارة وتقييمها. مطلوبة قبل أن يتسنى اعتماد الاسترداد.
@@ -3990,6 +3995,7 @@ Value (SAR),القيمة (ريال)
 Value in hands,القيمة في العهدة
 Variance,الانحراف
 Variance (L),الفرق (لتر)
+Variance (SAR),الانحراف (ريال)
 Variance ({0} L) exceeds 10% of the claimed volume - requires Operations-tier approval and a Finance consult note.,التباين ({0} لتر) يتجاوز 10% من الكمّيّة المُطالَب بها - يتطلّب موافقةً بمستوى العمليّات ومذكّرة استشارة ماليّة.
 Variance Alert Threshold (%),حد تنبيه انحراف الخدمة
 Variance Litres,فرق اللترات
@@ -4125,7 +4131,7 @@ Window Days must be at least 1 day.,يجب أن تكون أيام النافذة
 Window ends in {0}d,تنتهي المهلة خلال {0} يوم
 Window expired {0}d ago,انتهت المهلة منذ {0} يوم
 Within SLA,ضمن اتفاقية مستوى الخدمة
-Witness Role,دور الشاهد
+Witness,الشاهد
 Work Description,وصف العمل
 Work Order marked Completed.,تم وسم أمر العمل كمكتمل.
 Work Order marked In Progress.,تم تحديد حالة أمر العمل كـ 'قيد التنفيذ'.

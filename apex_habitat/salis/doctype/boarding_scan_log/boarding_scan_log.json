@@ -79,7 +79,7 @@
    "fieldname": "employee",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Worker",
+   "label": "Employee",
    "options": "Employee",
    "read_only": 1
   },
@@ -165,7 +165,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-06-24 00:00:00.000000",
+ "modified": "2026-07-10 09:22:42.696478",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Boarding Scan Log",

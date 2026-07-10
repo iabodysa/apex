@@ -89,7 +89,7 @@
    "doctype": "DocField",
    "fieldname": "estimated_unit_cost",
    "fieldtype": "Currency",
-   "label": "Estimated Unit Cost",
+   "label": "Estimated Unit Cost (SAR)",
    "idx": 7
   },
   {
@@ -223,5 +223,5 @@
   "rgt",
   "old_parent"
  ],
- "modified": "2026-07-10 04:16:24.090710"
+ "modified": "2026-07-10 09:22:42.696478"
 }

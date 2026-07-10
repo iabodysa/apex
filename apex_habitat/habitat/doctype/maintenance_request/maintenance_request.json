@@ -107,9 +107,10 @@
    "search_index": 1
   },
   {
+   "description": "Set only when the request concerns a specific bed.",
    "fieldname": "bed",
    "fieldtype": "Link",
-   "label": "Bed (if bed-specific)",
+   "label": "Bed",
    "options": "Bed",
    "search_index": 1
   },
@@ -384,7 +385,7 @@
    "table_fieldname": "linked_maintenance_requests"
   }
  ],
- "modified": "2026-06-09 11:00:00.000000",
+ "modified": "2026-07-10 09:22:42.696478",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",

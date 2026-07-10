@@ -146,7 +146,7 @@
    "description": "Percent by which a vehicle's actual fuel consumption may exceed its monthly quota before an overage / excessive-topup alert is raised. A blank or zero value falls back to the built-in default.",
    "fieldname": "fuel_overage_margin_percent",
    "fieldtype": "Int",
-   "label": "Fuel Overage Margin (Percent)"
+   "label": "Fuel Overage Margin (%)"
   },
   {
    "default": "72",
@@ -333,7 +333,7 @@
    "description": "Fuel requests above this litre amount require approval.",
    "fieldname": "fuel_request_approval_threshold_litres",
    "fieldtype": "Float",
-   "label": "Fuel Request Approval Threshold (Litres)"
+   "label": "Fuel Request Approval Threshold (L)"
   },
   {
    "default": "20",
@@ -375,7 +375,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-06-29 12:00:00.000000",
+ "modified": "2026-07-10 09:22:42.696478",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

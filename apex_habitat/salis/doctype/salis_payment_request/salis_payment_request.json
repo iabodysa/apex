@@ -63,7 +63,7 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Amount",
+   "label": "Amount (SAR)",
    "reqd": 1
   },
   {
@@ -260,7 +260,7 @@
    "link_fieldname": "payment_request"
   }
  ],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-07-10 09:22:42.696478",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Payment Request",

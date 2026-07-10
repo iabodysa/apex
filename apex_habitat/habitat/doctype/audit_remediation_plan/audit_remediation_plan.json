@@ -73,7 +73,7 @@
    "doctype": "DocField",
    "fieldname": "internal_owner",
    "fieldtype": "Link",
-   "label": "AFMCO Owner",
+   "label": "Internal Owner",
    "options": "User",
    "description": "Operations Director by default"
   },
@@ -178,5 +178,5 @@
   "client_audit_remediation_plan_sec_system",
   "naming_series"
  ],
- "modified": "2026-06-08 21:00:00.000000"
+ "modified": "2026-07-10 09:22:42.696478"
 }

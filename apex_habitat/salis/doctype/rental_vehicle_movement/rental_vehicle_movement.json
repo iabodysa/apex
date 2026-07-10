@@ -88,7 +88,7 @@
    "description": "Contracted daily rental rate. Carried into the Rental Accrual Ledger memo for each in-service day.",
    "fieldname": "daily_rate",
    "fieldtype": "Currency",
-   "label": "Daily Rate"
+   "label": "Daily Rate (SAR)"
   },
   {
    "fieldname": "rental_vehicle_movement_sec_condition",
@@ -134,7 +134,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-26 13:00:00.000000",
+ "modified": "2026-07-10 09:22:42.696478",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Vehicle Movement",

@@ -104,7 +104,7 @@
    "description": "Amount claimed by the rental office.",
    "fieldname": "claimed_total",
    "fieldtype": "Currency",
-   "label": "Claimed Total",
+   "label": "Claimed Total (SAR)",
    "permlevel": 1
   },
   {
@@ -115,7 +115,7 @@
    "description": "Accrued total. Sum of the vehicle line amounts when lines are entered; otherwise derived from the linked Rental Accrual Ledger.",
    "fieldname": "accrued_total",
    "fieldtype": "Currency",
-   "label": "Accrued Total",
+   "label": "Accrued Total (SAR)",
    "permlevel": 1,
    "read_only": 1
   },
@@ -123,7 +123,7 @@
    "description": "Sum of the linked Rental Accrual Ledger rows for this office and period — the machine-written source of truth. Reference cross-check.",
    "fieldname": "ledger_accrued_total",
    "fieldtype": "Currency",
-   "label": "Ledger Accrued Total",
+   "label": "Ledger Accrued Total (SAR)",
    "permlevel": 1,
    "read_only": 1
   },
@@ -135,7 +135,7 @@
    "description": "Claimed Total minus Accrued Total.",
    "fieldname": "variance",
    "fieldtype": "Currency",
-   "label": "Variance",
+   "label": "Variance (SAR)",
    "permlevel": 1,
    "read_only": 1
   },
@@ -143,7 +143,7 @@
    "description": "Accrued Total minus Ledger Accrued Total — non-zero means the entered vehicle lines disagree with the accrual ledger.",
    "fieldname": "ledger_variance",
    "fieldtype": "Currency",
-   "label": "Ledger Variance",
+   "label": "Ledger Variance (SAR)",
    "permlevel": 1,
    "read_only": 1
   },
@@ -218,7 +218,7 @@
    "link_fieldname": "rental_settlement"
   }
  ],
- "modified": "2026-06-12 10:00:00.000000",
+ "modified": "2026-07-10 09:22:42.696478",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Settlement",
