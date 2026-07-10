@@ -118,7 +118,7 @@
 import { computed, watch, ref, onMounted, onUnmounted } from "vue";
 import { createResource } from "frappe-ui";
 import Icon from "./components/Icon.vue";
-import Brand from "./components/Brand.vue";
+import Brand from "@shared/components/Brand.vue";
 import LangToggle from "./components/LangToggle.vue";
 import { useI18n, resourceErrorMessage, setEnumLabels } from "./i18n";
 import { TOKEN, hasToken } from "./utils/token";

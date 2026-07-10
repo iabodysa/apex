@@ -13,7 +13,10 @@ portals.
 | `vite.base.js` | `createPortalConfig({ dirname, name, sw? })` — the single Vite config factory. Every `<portal>/vite.config.js` is a <=15-line call to it. Defines the frappe-ui + vue plugins, the dev proxy, the `@`/`@shared` aliases, the vue/frappe-ui dedupe, the stable un-hashed output names, and the one `stampServiceWorker` plugin (opt-in via `sw`). |
 | `i18n.js` | Shared translation runtime. |
 | `call.js` | Shared Frappe API call helper. |
+| `bootstrap.js` | `bootstrapPortal({ App, router?, setup? })` — the one SPA boot sequence (configureApi + createApp + optional router + optional pre-mount `setup(app)` + mount). Every `<portal>/src/main.js` is a single call to it. |
+| `realtime.js` | `createRealtime({ socketGlobal, roomDoctype, event, extraEvents? })` — the Frappe Socket.IO subscription factory (host/join/refetch/teardown, every failure path swallowed). Used by the live portals (fleet, safety, driver); each supplies only its socket-config global, room doctype, event, and optional same-room extra events. Its `socket.io-client` import resolves via the factory's `dedupe`. |
 | `makeCache.js` | Shared offline/data cache factory. |
+| `components/` | Shared presentational `.vue` components imported via `@shared/components/*` (e.g. `Brand.vue` — the AFMCO inline-SVG emblem/supergraphic, self-contained, token-driven). |
 | `tokens.css` | Shared design tokens (CSS custom properties). |
 | `pins.json` | Canonical `overrides` (dompurify, ws) that every portal `package.json` must mirror. The `portal-bundles` CI job fails on drift. |
 

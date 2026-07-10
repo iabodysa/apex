@@ -65,8 +65,9 @@ export function createPortalConfig({ dirname, name, sw }) {
         "@shared": path.resolve(dirname, "../frontend_shared"),
       },
       // frontend_shared/ lives outside each portal's root and has no node_modules,
-      // so bare imports there (frappe-ui, vue) must resolve to the portal's copy.
-      dedupe: ["vue", "frappe-ui"],
+      // so bare imports there (frappe-ui, vue, socket.io-client used by the shared
+      // realtime factory) must resolve to the importing portal's copy.
+      dedupe: ["vue", "frappe-ui", "socket.io-client"],
     },
     build: {
       outDir: path.resolve(dirname, "../public/" + name),

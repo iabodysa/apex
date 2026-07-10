@@ -145,7 +145,7 @@ import { useRoute } from "vue-router";
 import { createResource } from "frappe-ui";
 import Unlinked from "./components/Unlinked.vue";
 import Icon from "./components/Icon.vue";
-import Brand from "./components/Brand.vue";
+import Brand from "@shared/components/Brand.vue";
 import LangToggle from "./components/LangToggle.vue";
 import Toast from "./components/Toast.vue";
 import InstallHint from "./components/InstallHint.vue";

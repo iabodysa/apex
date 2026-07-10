@@ -8,7 +8,8 @@
                                supergraphic (decorative framing element).
 
      The mark mirrors the AFMCO logo symbol from Brand.md (the "split circle").
-     Flat 2D, no gradients, no shadows — honouring the "Flatten" philosophy. -->
+     Flat 2D, no gradients, no shadows — honouring the "Flatten" philosophy.
+     Shared by every portal via @shared/components/Brand.vue. -->
 <template>
   <!-- Standalone emblem: two facing arcs forming an implied, split circle. -->
   <svg
