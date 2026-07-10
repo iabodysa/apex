@@ -20,13 +20,36 @@ def _resolve_user(user=None):
 
 
 def _allowed_projects(user):
-    """Project names the given user has an explicit User Permission for."""
-    rows = frappe.get_all(
-        "User Permission",
-        filters={"allow": "Project", "user": user},
-        pluck="for_value",
+    """Project names the given user has an explicit User Permission for.
+
+    Request-scoped cache: every project permission check (list pqc,
+    form/submit has_permission, report scope, and the driver-chain fragments)
+    funnels through here, so on a single list view / report render the same
+    User Permission set was resolved with one SQL per row/doc.
+    ``frappe.local_cache`` memoises the result in ``frappe.local.cache`` for the
+    life of ONE request context, collapsing that to a single query per
+    (request, user).
+
+    Security — why it cannot leak across users: the cache KEY is ``user``, so
+    User A's scope is never returned for User B. ``frappe.local.cache`` is
+    per-request thread-local (no cross-request bleed), and ``frappe.set_user``
+    resets ``local.cache = {}``, so a background job that switches users mid-run
+    starts from an empty cache and re-resolves for the new user. The generator
+    closes over the SAME ``user`` used as the key, so key and value can never
+    disagree. A fresh ``list(...)`` is returned each call so a caller mutating
+    the result cannot corrupt the cached scope.
+    """
+    return list(
+        frappe.local_cache(
+            "apex_allowed_projects",
+            user,
+            lambda: frappe.get_all(
+                "User Permission",
+                filters={"allow": "Project", "user": user},
+                pluck="for_value",
+            ),
+        )
     )
-    return list(rows)
 
 
 def _is_unscoped(user):
