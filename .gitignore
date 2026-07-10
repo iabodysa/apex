@@ -60,9 +60,9 @@ apex/demo/
 *.pem
 
 # Build and packaging outputs.
+# (*.egg-info is covered once, above.)
 build/
 dist/
-*.egg-info/
 
 # Dead code archive.
 archive/

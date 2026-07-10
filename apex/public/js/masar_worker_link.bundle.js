@@ -32,7 +32,7 @@ apex.masar.show_worker_link_dialog = function (m, opts) {
 	opts = opts || {};
 	const qr = m.qr
 		? `<div style="text-align:center;margin:12px 0">
-		     <img src="${m.qr}" alt="QR" style="width:200px;height:200px" />
+		     <img src="${frappe.utils.escape_html(m.qr)}" alt="QR" style="width:200px;height:200px" />
 		   </div>`
 		: `<p style="color:#888">${__("QR rendering is unavailable on this site; share the link below.")}</p>`;
 	const safe_link = frappe.utils.escape_html(m.link);
