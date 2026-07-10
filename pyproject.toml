@@ -40,3 +40,8 @@ target-version = "py310"
 # Frappe / ERPNext / HRMS ruff config.
 ignore = ["F722"]
 typing-modules = ["frappe.types.DF"]
+
+# Package __init__.py files re-export their split submodules for back-compat
+# (the P-179/P-180 god-file splits); those imports are unused-by-design.
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]
