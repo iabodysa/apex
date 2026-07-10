@@ -25,7 +25,7 @@ from apex.habitat.web_form.my_custody_acknowledgment.my_custody_acknowledgment i
 from apex.tests.test_utils import ApexHabitatTestCase
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

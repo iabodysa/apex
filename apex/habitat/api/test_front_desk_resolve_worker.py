@@ -12,21 +12,21 @@ from frappe.tests.utils import FrappeTestCase
 from apex.habitat.api.front_desk import resolve_worker
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
 class TestResolveWorker(FrappeTestCase):
     def setUp(self):
-        self.building = "BLDG-" + _h(6)
+        self.building = "BLDG-" + _h(12)
         self._cleanup = []
         self._assignments = []
 
-        self.iqama = _h(10)
+        self.iqama = _h(12)
         self.tw = frappe.get_doc({
             "doctype": "Temporary Worker",
-            "worker_name": "TW-" + _h(6),
-            "passport_number": "P" + _h(8),
+            "worker_name": "TW-" + _h(12),
+            "passport_number": "P" + _h(12),
             "iqama_number": self.iqama,
         })
         self.tw.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
@@ -36,7 +36,7 @@ class TestResolveWorker(FrappeTestCase):
         """A minimal Employee — Masar tokens may only bind to an Employee."""
         doc = frappe.get_doc({
             "doctype": "Employee",
-            "first_name": "EMP-" + _h(6),
+            "first_name": "EMP-" + _h(12),
             "naming_series": "HR-EMP-",
         })
         doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
@@ -58,7 +58,7 @@ class TestResolveWorker(FrappeTestCase):
     def _bed(self):
         doc = frappe.get_doc({
             "doctype": "Bed",
-            "bed_code": "BED-" + _h(6),
+            "bed_code": "BED-" + _h(12),
             "building": self.building,
             "status": "Available",
         })

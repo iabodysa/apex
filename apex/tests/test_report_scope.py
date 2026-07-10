@@ -266,7 +266,7 @@ class TestReportScopeIntegration(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.tag = frappe.generate_hash(length=6).upper()
+        cls.tag = frappe.generate_hash(length=12).upper()
 
         # --- salis: two projects, one vehicle each ---
         cls.pa = _project("RScope A " + cls.tag)
@@ -321,7 +321,7 @@ class TestReportScopeIntegration(FrappeTestCase):
         return frappe.get_doc(
             {
                 "doctype": "Salis Vehicle",
-                "plate_number": "RS " + frappe.generate_hash(length=5).upper(),
+                "plate_number": "RS " + frappe.generate_hash(length=12).upper(),
                 "ownership": "Rented",
                 "status": "Active",
                 "project": project,

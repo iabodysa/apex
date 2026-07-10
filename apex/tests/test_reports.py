@@ -27,7 +27,7 @@ from apex.salis.report.fuel_spend_by_vehicle.fuel_spend_by_vehicle import execut
 from apex.salis.report.transport_fulfilment_sla.transport_fulfilment_sla import execute as execute_transport_sla
 
 
-def _h(n=4):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -173,7 +173,7 @@ class TestReports(ApexHabitatTestCase):
         }).insert(ignore_permissions=True).name
         cost_center = (frappe.db.get_value("Cost Center", {"is_group": 0, "company": company})
                        or frappe.db.get_value("Cost Center", {"is_group": 0}))
-        site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        site = frappe.get_doc({"doctype": "Site", "site_name": _h(12)}).insert(ignore_permissions=True)
         building = frappe.get_doc({
             "doctype": "Building", "building_name": "B " + _h(), "site": site.name,
             "total_capacity": 10, "default_cost_center": cost_center, "annual_rent": 36500,
@@ -187,7 +187,7 @@ class TestReports(ApexHabitatTestCase):
         }).insert(ignore_permissions=True).name
 
         # [#pgwkti]
-        prefix = "FILTER-" + _h(6) + "-"
+        prefix = "FILTER-" + _h(12) + "-"
         src_a, src_b = prefix + "A", prefix + "B"
         for project, src in ((project_a, src_a), (project_b, src_b)):
             frappe.get_doc({

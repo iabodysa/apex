@@ -27,7 +27,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
 
-def _hash(n: int = 6) -> str:
+def _hash(n: int = 12) -> str:
     return frappe.generate_hash(length=n).upper()
 
 

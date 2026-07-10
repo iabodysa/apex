@@ -19,7 +19,7 @@ from apex.habitat.report.accommodation_stock_balance.accommodation_stock_balance
 )
 
 
-def _h(n=4):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -28,7 +28,7 @@ class TestAccommodationMaterialTransfer(ApexHabitatTestCase):
         self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
-        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(12)}).insert(ignore_permissions=True)
         self.cc1 = self._cost_center()
         self.cc2 = self._cost_center()
         self.b1 = self._building(self.cc1)

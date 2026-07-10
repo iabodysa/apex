@@ -70,7 +70,7 @@ class TestAccommodationAssignment(FrappeTestCase):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
     def _h(self):
-        return frappe.generate_hash(length=4).upper()
+        return frappe.generate_hash(length=12).upper()
 
     def _fixtures(self):
         """Create a real, internally-consistent building/room/bed/employee/project

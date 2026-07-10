@@ -67,7 +67,7 @@ class TestMaintenanceInspectionAssetStamp(FrappeTestCase):
     wins); on_cancel recomputes it from the remaining submitted inspections."""
 
     def _h(self):
-        return frappe.generate_hash(length=6).upper()
+        return frappe.generate_hash(length=12).upper()
 
     def setUp(self):
         # Real prerequisites so submit() (which cannot ignore_links) runs in full.

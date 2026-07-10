@@ -25,7 +25,7 @@ test_ignore = [
 class TestRoomBedTransfer(FrappeTestCase):
 
     def _h(self):
-        return frappe.generate_hash(length=4).upper()
+        return frappe.generate_hash(length=12).upper()
 
     def _fixtures(self):
         """Real building/room/bed/assignment so validate() runs in full: the target

@@ -32,7 +32,7 @@ from apex.habitat.api.arrivals_desk import (
 )
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -155,8 +155,8 @@ class TestArrivalsCardScope(FrappeTestCase):
             {
                 "doctype": "Temporary Worker",
                 "worker_name": "TW-" + _h(),
-                "passport_number": "PASS" + _h(8),
-                "iqama_number": "IQ" + _h(8),
+                "passport_number": "PASS" + _h(12),
+                "iqama_number": "IQ" + _h(12),
                 "building": building,
                 "status": "Active",
             }

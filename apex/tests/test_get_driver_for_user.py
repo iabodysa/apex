@@ -26,7 +26,7 @@ from apex.salis import utils
 from apex.salis.api import boarding, driver_portal
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -36,11 +36,11 @@ class TestGetDriverForUser(FrappeTestCase):
         self._cleanup = []
 
         # A user linked through Employee.user_id to a Salis Driver.
-        self.user = f"drv-{_h(6).lower()}@example.com"
+        self.user = f"drv-{_h(12).lower()}@example.com"
         u = frappe.get_doc({
             "doctype": "User",
             "email": self.user,
-            "first_name": "Driver " + _h(4),
+            "first_name": "Driver " + _h(12),
             "send_welcome_email": 0,
         })
         u.insert(ignore_permissions=True)
@@ -48,7 +48,7 @@ class TestGetDriverForUser(FrappeTestCase):
 
         self.employee = frappe.get_doc({
             "doctype": "Employee",
-            "first_name": "EMP-" + _h(6),
+            "first_name": "EMP-" + _h(12),
             "naming_series": "HR-EMP-",
             "user_id": self.user,
         })
@@ -58,18 +58,18 @@ class TestGetDriverForUser(FrappeTestCase):
         self.driver = frappe.get_doc({
             "doctype": "Salis Driver",
             "naming_series": "DRV-.######",
-            "full_name": "Driver " + _h(4),
+            "full_name": "Driver " + _h(12),
             "employee": self.employee.name,
         })
         self.driver.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         self._cleanup.append(("Salis Driver", self.driver.name))
 
         # A user with no Employee link at all (the unlinked case).
-        self.unlinked_user = f"nolink-{_h(6).lower()}@example.com"
+        self.unlinked_user = f"nolink-{_h(12).lower()}@example.com"
         nu = frappe.get_doc({
             "doctype": "User",
             "email": self.unlinked_user,
-            "first_name": "Unlinked " + _h(4),
+            "first_name": "Unlinked " + _h(12),
             "send_welcome_email": 0,
         })
         nu.insert(ignore_permissions=True)

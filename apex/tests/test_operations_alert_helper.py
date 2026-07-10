@@ -113,7 +113,7 @@ class TestInsertOperationsAlertResolvesSupervisor(FrappeTestCase):
         cls.vehicle = (
             frappe.get_doc(
                 {"doctype": "Salis Vehicle",
-                 "plate_number": "OA-PROBE-" + frappe.generate_hash(length=4),
+                 "plate_number": "OA-PROBE-" + frappe.generate_hash(length=12),
                  "project": cls.project}
             )
             .insert(ignore_permissions=True)

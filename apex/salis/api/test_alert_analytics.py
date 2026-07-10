@@ -26,7 +26,7 @@ _RESOLVER = "apex.salis.api.operations_alerts._permitted_projects"
 class TestAlertMedianResolveDays(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        self.plate = f"MED {frappe.generate_hash(length=6)}"
+        self.plate = f"MED {frappe.generate_hash(length=12)}"
         self.vehicle = (
             frappe.get_doc({"doctype": "Salis Vehicle", "plate_number": self.plate, "status": "Active"})
             .insert(ignore_permissions=True)

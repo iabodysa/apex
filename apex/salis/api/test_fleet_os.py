@@ -41,7 +41,7 @@ class TestFleetOSEmptyReason(FrappeTestCase):
         self.assertEqual(r["reason"], "data_empty")
 
     def test_no_reason_when_vehicles_returned(self):
-        plate = f"FOS {frappe.generate_hash(length=6)}"
+        plate = f"FOS {frappe.generate_hash(length=12)}"
         name = frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
         ).insert(ignore_permissions=True).name
@@ -58,7 +58,7 @@ class TestWorkshopEvents(FrappeTestCase):
 
     def setUp(self):
         frappe.set_user("Administrator")
-        self.plate = f"WS {frappe.generate_hash(length=6)}"
+        self.plate = f"WS {frappe.generate_hash(length=12)}"
         self.vehicle = (
             frappe.get_doc(
                 {"doctype": "Salis Vehicle", "plate_number": self.plate, "status": "Active"}
@@ -123,7 +123,7 @@ class TestBulkActions(FrappeTestCase):
         frappe.set_user("Administrator")
         self.plates = []
         for _i in range(2):
-            plate = f"BLK {frappe.generate_hash(length=6)}"
+            plate = f"BLK {frappe.generate_hash(length=12)}"
             frappe.get_doc(
                 {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
             ).insert(ignore_permissions=True)
@@ -151,7 +151,7 @@ class TestBulkActions(FrappeTestCase):
     def test_bulk_isolates_a_failing_row(self):
         # One unknown plate must be reported failed while the valid ones still
         # commit — proves the per-row savepoint isolation is non-vacuous.
-        ghost = f"NO-SUCH {frappe.generate_hash(length=6)}"
+        ghost = f"NO-SUCH {frappe.generate_hash(length=12)}"
         res = fleet_os.bulk_stop_vehicles([self.plates[0], ghost])
         self.assertFalse(res["ok"])
         self.assertEqual(res["succeeded"], 1)
@@ -177,7 +177,7 @@ class TestReaderErrors(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def test_partial_reader_failure_is_signalled_not_thrown(self):
-        plate = f"RE {frappe.generate_hash(length=6)}"
+        plate = f"RE {frappe.generate_hash(length=12)}"
         frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
         ).insert(ignore_permissions=True)
@@ -227,7 +227,7 @@ class TestWorkshopLane(FrappeTestCase):
         return None
 
     def test_workshop_fields_populate_for_a_vehicle_in_the_shop(self):
-        plate = f"WSL {frappe.generate_hash(length=6)}"
+        plate = f"WSL {frappe.generate_hash(length=12)}"
         frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
         ).insert(ignore_permissions=True)
@@ -244,7 +244,7 @@ class TestWorkshopLane(FrappeTestCase):
         self.assertFalse(row["workshop_overstay"])
 
     def test_non_workshop_vehicle_has_blank_lane(self):
-        plate = f"WSL {frappe.generate_hash(length=6)}"
+        plate = f"WSL {frappe.generate_hash(length=12)}"
         frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
         ).insert(ignore_permissions=True)
@@ -277,7 +277,7 @@ class TestCreateHandover(FrappeTestCase):
 
     def setUp(self):
         frappe.set_user("Administrator")
-        self.plate = f"HO {frappe.generate_hash(length=6)}"
+        self.plate = f"HO {frappe.generate_hash(length=12)}"
         self.vehicle = (
             frappe.get_doc(
                 {"doctype": "Salis Vehicle", "plate_number": self.plate, "status": "Active"}
@@ -287,7 +287,7 @@ class TestCreateHandover(FrappeTestCase):
         )
 
     def _driver(self):
-        did = f"HOD-{frappe.generate_hash(length=6)}"
+        did = f"HOD-{frappe.generate_hash(length=12)}"
         return (
             frappe.get_doc(
                 {
@@ -333,7 +333,7 @@ class TestCreateHandover(FrappeTestCase):
 
     def test_unknown_driver_throws(self):
         with self.assertRaises(frappe.ValidationError):
-            fleet_os.create_handover(self.plate, f"NO-SUCH-{frappe.generate_hash(length=6)}")
+            fleet_os.create_handover(self.plate, f"NO-SUCH-{frappe.generate_hash(length=12)}")
 
 
 class TestVehicleTimeline(FrappeTestCase):
@@ -344,7 +344,7 @@ class TestVehicleTimeline(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def test_timeline_merges_every_source_descending(self):
-        plate = f"TL {frappe.generate_hash(length=6)}"
+        plate = f"TL {frappe.generate_hash(length=12)}"
         veh = (
             frappe.get_doc(
                 {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
@@ -375,7 +375,7 @@ class TestVehicleTimeline(FrappeTestCase):
         self.assertEqual(dates, sorted(dates, reverse=True))
 
     def test_timeline_blanks_driver_for_non_pii_role(self):
-        plate = f"TL {frappe.generate_hash(length=6)}"
+        plate = f"TL {frappe.generate_hash(length=12)}"
         veh = (
             frappe.get_doc(
                 {"doctype": "Salis Vehicle", "plate_number": plate, "status": "Active"}
@@ -387,7 +387,7 @@ class TestVehicleTimeline(FrappeTestCase):
             {
                 "doctype": "Salis Driver",
                 "full_name": "TL Driver",
-                "driver_id": f"TLD-{frappe.generate_hash(length=6)}",
+                "driver_id": f"TLD-{frappe.generate_hash(length=12)}",
                 "status": "Active",
             }
         ).insert(ignore_permissions=True)

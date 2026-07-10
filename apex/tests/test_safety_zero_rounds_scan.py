@@ -7,7 +7,7 @@ from apex.habitat.tasks import daily_safety_task_compliance_scan
 from apex.tests.factories import ApexHabitatTestCase
 
 
-def _hash(n=6):
+def _hash(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

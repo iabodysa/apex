@@ -15,7 +15,7 @@ class TestDriverAttendanceHours(FrappeTestCase):
             frappe.get_doc(
                 {
                     "doctype": "Salis Driver",
-                    "full_name": f"Rider {frappe.generate_hash(length=6)}",
+                    "full_name": f"Rider {frappe.generate_hash(length=12)}",
                     "status": "Active",
                 }
             )

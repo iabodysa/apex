@@ -105,7 +105,7 @@ class TestMaintenanceReportScopeIntegration(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.tag = frappe.generate_hash(length=6).upper()
+        cls.tag = frappe.generate_hash(length=12).upper()
 
         cls.building = frappe.get_doc(
             {

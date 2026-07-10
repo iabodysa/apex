@@ -42,7 +42,7 @@ class _FakeRequest:
         self.method = method
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -70,8 +70,8 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         frappe.set_user("Administrator")
         # A unique IP per test so a leftover Redis counter from another run/test
         # never bleeds in; the key includes cmd + ip. (TEST-NET-3, RFC 5737.)
-        self.ip = "203.0.113." + str(int(_h(4), 16) % 250 + 1)
-        self.cmd = "test-rl-" + _h(6)
+        self.ip = "203.0.113." + str(int(_h(12), 16) % 250 + 1)
+        self.cmd = "test-rl-" + _h(12)
 
     def _clear_window(self, cmd, ip):
         frappe.cache.delete_value(frappe.cache.make_key(f"rl:{cmd}:{ip}"))

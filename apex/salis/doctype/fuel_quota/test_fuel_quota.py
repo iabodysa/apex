@@ -16,7 +16,7 @@ class TestFuelQuotaUniqueness(FrappeTestCase):
             frappe.get_doc(
                 {
                     "doctype": "Salis Vehicle",
-                    "plate_number": f"FQ {frappe.generate_hash(length=6)}",
+                    "plate_number": f"FQ {frappe.generate_hash(length=12)}",
                     "status": "Active",
                 }
             )

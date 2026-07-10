@@ -17,7 +17,7 @@ from apex.habitat.api.facility_asset_delivery import (
 from apex.tests.test_utils import ApexHabitatTestCase
 
 
-def _h(n=4):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -32,7 +32,7 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
             }
         ).insert(ignore_permissions=True).name
         self.site = frappe.get_doc(
-            {"doctype": "Site", "site_name": _h(6)}
+            {"doctype": "Site", "site_name": _h(12)}
         ).insert(ignore_permissions=True)
         self.intake = frappe.get_doc(
             {
@@ -67,7 +67,7 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         self.receiver = self._user("Accommodation Manager", "Resident Supervisor")
 
     def _user(self, *roles):
-        email = f"fad-{_h(6).lower()}@example.com"
+        email = f"fad-{_h(12).lower()}@example.com"
         u = frappe.get_doc(
             {
                 "doctype": "User",

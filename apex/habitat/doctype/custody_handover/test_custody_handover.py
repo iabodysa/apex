@@ -15,7 +15,7 @@ from apex.habitat.api.custody_handover import (
 from apex.tests.test_utils import ApexHabitatTestCase
 
 
-def _h(n=4):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -46,7 +46,7 @@ class TestCustodyHandover(ApexHabitatTestCase):
         cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) \
             or frappe.db.get_value("Cost Center", {"is_group": 0})
         self.site = frappe.get_doc({
-            "doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+            "doctype": "Site", "site_name": _h(12)}).insert(ignore_permissions=True)
         # Source = a procurement intake store; destination = a receiving building store.
         self.intake = frappe.get_doc({
             "doctype": "Building", "building_name": "Intake " + _h(),
@@ -67,7 +67,7 @@ class TestCustodyHandover(ApexHabitatTestCase):
         self.recv_user = self._user("Accommodation Manager")
 
     def _user(self, *roles):
-        email = f"ach-{_h(6).lower()}@example.com"
+        email = f"ach-{_h(12).lower()}@example.com"
         u = frappe.get_doc({"doctype": "User", "email": email, "first_name": "U " + _h(),
                             "send_welcome_email": 0})
         u.insert(ignore_permissions=True)

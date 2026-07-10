@@ -15,7 +15,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.habitat.api.dashboard import get_compliance_percent
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

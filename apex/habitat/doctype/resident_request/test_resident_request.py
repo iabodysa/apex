@@ -78,7 +78,7 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         """An active QR location whose token resolves to a real building."""
         building = frappe.get_doc({
             "doctype": "Building",
-            "building_name": "QR Bldg " + frappe.generate_hash(length=6),
+            "building_name": "QR Bldg " + frappe.generate_hash(length=12),
         }).insert(ignore_permissions=True, ignore_links=True)
         qr = frappe.get_doc({
             "doctype": "QR Location",

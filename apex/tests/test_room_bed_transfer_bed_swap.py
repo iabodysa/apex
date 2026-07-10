@@ -50,7 +50,7 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
         frappe.set_user("Administrator")
 
     def _h(self):
-        return frappe.generate_hash(length=4).upper()
+        return frappe.generate_hash(length=12).upper()
 
     def _fixtures(self):
         """A fully consistent two-building / two-room / two-bed world so the

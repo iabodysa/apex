@@ -23,7 +23,7 @@ from apex.apex_core.worklist.my_work_center import (
 APP_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n)
 
 

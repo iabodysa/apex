@@ -51,7 +51,7 @@ class TestHousingLifecycle(ApexHabitatTestCase):
         self.cost_center = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0}) or frappe.db.get_value("Cost Center", {})
 
         # [#2ky77n]
-        suffix = frappe.generate_hash(length=6)
+        suffix = frappe.generate_hash(length=12)
         self.site = frappe.get_doc({
             "doctype": "Site",
             "site_name": "Test Site " + suffix

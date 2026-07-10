@@ -18,7 +18,7 @@ class TestResidentRequestToDo(ApexHabitatTestCase):
         doc = frappe.get_doc({
             "doctype": "Resident Request",
             "request_category": "Maintenance",
-            "description": "Test request " + frappe.generate_hash(length=4),
+            "description": "Test request " + frappe.generate_hash(length=12),
             "status": "New",
         })
         doc.insert(ignore_permissions=True)

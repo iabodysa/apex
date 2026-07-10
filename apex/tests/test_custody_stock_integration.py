@@ -8,7 +8,7 @@ from frappe.utils import flt
 from apex.tests.factories import ApexHabitatTestCase
 
 
-def _h(n=4):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -25,7 +25,7 @@ class TestCustodyStockIntegration(ApexHabitatTestCase):
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
-        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(12)}).insert(ignore_permissions=True)
         self.building = frappe.get_doc({"doctype": "Building", "building_name": "B " + _h(),
                                         "site": self.site.name, "total_capacity": 4, "company": self.company,
                                         "default_cost_center": cc}).insert(ignore_permissions=True).name

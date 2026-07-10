@@ -41,7 +41,7 @@ _HERE = os.path.dirname(__file__)
 _BOARDING_SRC = os.path.normpath(os.path.join(_HERE, "boarding.py"))
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -53,7 +53,7 @@ class TestBoardingRace(FrappeTestCase):
         # One worker on a Transport Request manifest, one Dispatch Trip for it.
         self.employee = frappe.get_doc({
             "doctype": "Employee",
-            "first_name": "EMP-" + _h(6),
+            "first_name": "EMP-" + _h(12),
             "naming_series": "HR-EMP-",
         })
         self.employee.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)

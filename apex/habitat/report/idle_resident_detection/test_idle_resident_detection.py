@@ -18,7 +18,7 @@ from apex.habitat.report.idle_resident_detection.idle_resident_detection import 
 class TestIdleResidentDetection(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        tag = frappe.generate_hash(length=5).upper()
+        tag = frappe.generate_hash(length=12).upper()
 
         company = frappe.db.get_value("Company", {}) or frappe.get_doc({
             "doctype": "Company", "company_name": "IRC Co " + tag,

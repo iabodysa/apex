@@ -75,7 +75,7 @@ class TestDriverGpsEta(FrappeTestCase):
         # instead of this test's dispatched trip. A unique worker owns exactly the one
         # ride each test builds, so next_ride is deterministically that ride.
         self.worker = factories.make_worker_employee(
-            f"Masar GPS Worker {frappe.generate_hash(length=6)}"
+            f"Masar GPS Worker {frappe.generate_hash(length=12)}"
         )
         self.token = factories.make_worker_token(self.worker)
 
@@ -99,7 +99,7 @@ class TestDriverGpsEta(FrappeTestCase):
             self.project,
             self.building,
             [self.worker],
-            f"GPS Route {frappe.generate_hash(length=6)}",
+            f"GPS Route {frappe.generate_hash(length=12)}",
             from_location="Building Gate",
             # Soonest upcoming: a couple of hours out (>= now, so it is next_ride).
             pickup_datetime=frappe.utils.add_to_date(frappe.utils.now_datetime(), hours=2),

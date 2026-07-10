@@ -32,13 +32,13 @@ class TestIdempotencyGuards(ApexHabitatTestCase):
         # employee that already holds an active assignment would make the checkout
         # test fail on a polluted site for an unrelated reason.
         self.employee = frappe.get_doc({
-            "doctype": "Employee", "first_name": f"Test Emp {frappe.generate_hash(length=6)}",
+            "doctype": "Employee", "first_name": f"Test Emp {frappe.generate_hash(length=12)}",
             "company": self.company, "gender": "Male",
             "date_of_birth": "1990-01-01", "date_of_joining": "2020-01-01",
         }).insert(ignore_permissions=True).name
 
         self.site = frappe.get_doc({
-            "doctype": "Site", "site_name": frappe.generate_hash(length=6),
+            "doctype": "Site", "site_name": frappe.generate_hash(length=12),
         }).insert(ignore_permissions=True)
 
     def _make_building(self, abbr):

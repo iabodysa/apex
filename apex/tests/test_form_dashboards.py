@@ -8,7 +8,7 @@ from apex.habitat.api import employee_links, supplier_links
 from apex.habitat.api.building_dashboard import get_building_metrics
 
 
-def _h(n=4):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -40,7 +40,7 @@ class TestFormDashboards(ApexHabitatTestCase):
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
-        site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        site = frappe.get_doc({"doctype": "Site", "site_name": _h(12)}).insert(ignore_permissions=True)
         b = frappe.get_doc({"doctype": "Building", "building_name": "B " + _h(),
                             "site": site.name, "total_capacity": 4, "default_cost_center": cc}).insert(ignore_permissions=True)
         m = get_building_metrics(b.name)

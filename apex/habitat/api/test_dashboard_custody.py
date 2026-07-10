@@ -20,7 +20,7 @@ from apex.habitat.report.custody_outstanding_by_worker.custody_outstanding_by_wo
 )
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

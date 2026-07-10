@@ -17,7 +17,7 @@ from apex.habitat.api.front_desk import (
 )
 
 
-def _h(n=4):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -36,7 +36,7 @@ class TestFrontDesk(ApexHabitatTestCase):
             "doctype": "Company", "company_name": "Test Co", "default_currency": "SAR",
             "country": "Saudi Arabia"}).insert(ignore_permissions=True).name
         self.cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) or frappe.db.get_value("Cost Center", {"is_group": 0})
-        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(12)}).insert(ignore_permissions=True)
         self.building = frappe.get_doc({"doctype": "Building", "building_name": "B " + _h(),
                                         "site": self.site.name, "total_capacity": 4, "company": self.company,
                                         "default_cost_center": self.cc}).insert(ignore_permissions=True).name
@@ -75,7 +75,7 @@ class TestFrontDesk(ApexHabitatTestCase):
 
 
 def _make_building(company, cc, status="Active"):
-    site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+    site = frappe.get_doc({"doctype": "Site", "site_name": _h(12)}).insert(ignore_permissions=True)
     return frappe.get_doc({"doctype": "Building", "building_name": "B " + _h(),
                            "site": site.name, "total_capacity": 4, "company": company,
                            "status": status, "default_cost_center": cc}).insert(ignore_permissions=True).name

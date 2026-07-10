@@ -8,7 +8,7 @@ from apex.habitat.doctype.building.building import (
 )
 
 
-def _hash(n=4):
+def _hash(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -35,7 +35,7 @@ class QABase(ApexHabitatTestCase):
             "date_of_birth": "1990-01-01", "date_of_joining": "2020-01-01",
         }).insert(ignore_permissions=True).name
         self.site = frappe.get_doc({
-            "doctype": "Site", "site_name": _hash(6),
+            "doctype": "Site", "site_name": _hash(12),
         }).insert(ignore_permissions=True)
 
     def _make_building(self, room_count=3, room_type="Standard", capacity=2, total_capacity=50):

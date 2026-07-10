@@ -114,7 +114,7 @@ class TestCustodyReturnDamageAssessment(FrappeTestCase):
     return into a pre-filled draft assessment that back-links the return."""
 
     def setUp(self):
-        h = frappe.generate_hash(length=4).upper()
+        h = frappe.generate_hash(length=12).upper()
         self.cat = frappe.get_doc({
             "doctype": "Custody Asset Category", "category_name": "Cat " + h,
         }).insert(ignore_permissions=True).name
@@ -200,7 +200,7 @@ class TestCustodyReturnSerializedRules(FrappeTestCase):
     """The serialized-article guard is enforced on return as well as issue."""
 
     def setUp(self):
-        h = frappe.generate_hash(length=4).upper()
+        h = frappe.generate_hash(length=12).upper()
         cat = frappe.db.get_value("Custody Asset Category", {}) or frappe.get_doc({
             "doctype": "Custody Asset Category", "category_name": "Cat " + h,
         }).insert(ignore_permissions=True).name

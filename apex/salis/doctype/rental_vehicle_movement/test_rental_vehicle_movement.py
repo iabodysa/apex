@@ -16,7 +16,7 @@ class TestRentalMovementLifecycle(FrappeTestCase):
             frappe.get_doc(
                 {
                     "doctype": "Salis Vehicle",
-                    "plate_number": f"RV {frappe.generate_hash(length=6)}",
+                    "plate_number": f"RV {frappe.generate_hash(length=12)}",
                     "status": "Active",
                     "ownership": "Rented",
                     "rental_office": self.office,
@@ -31,7 +31,7 @@ class TestRentalMovementLifecycle(FrappeTestCase):
             frappe.get_doc(
                 {
                     "doctype": "Rental Office",
-                    "office_name": f"Office {frappe.generate_hash(length=6)}",
+                    "office_name": f"Office {frappe.generate_hash(length=12)}",
                 }
             )
             .insert(ignore_permissions=True)

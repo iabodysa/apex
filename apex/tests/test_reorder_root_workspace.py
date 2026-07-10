@@ -103,7 +103,7 @@ class TestReorderRootWorkspace(FrappeTestCase):
 
     # -------------------------------------------------------------------- tests
     def test_execute_orders_root_before_every_sibling(self):
-        h = frappe.generate_hash(length=6)
+        h = frappe.generate_hash(length=12)
         child_a = self._make_child_before_root(f"P108 Child A {h}", seconds_before=30)
         child_b = self._make_child_before_root(f"P108 Child B {h}", seconds_before=20)
 
@@ -147,7 +147,7 @@ class TestReorderRootWorkspace(FrappeTestCase):
         # Running execute() a second time with the root already first must be a
         # no-op (the patch's "root already sorts first" continue branch), never
         # dragging the root earlier on every migrate beyond the one-second offset.
-        child = self._make_child_before_root(f"P108 Child C {frappe.generate_hash(length=6)}", 30)  # noqa: F841
+        child = self._make_child_before_root(f"P108 Child C {frappe.generate_hash(length=12)}", 30)  # noqa: F841
 
         reorder_root_workspace_creation.execute()
         first = get_datetime(frappe.db.get_value("Workspace", _ROOT, "creation"))

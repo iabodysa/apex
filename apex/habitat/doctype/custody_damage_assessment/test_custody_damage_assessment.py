@@ -217,7 +217,7 @@ class TestCustodyDamageAssessment(FrappeTestCase):
         # Additional Salary (HRMS validate requires a joined Employee)
         emp = frappe.get_doc({
             "doctype": "Employee",
-            "first_name": "QA Custody " + frappe.generate_hash(length=6),
+            "first_name": "QA Custody " + frappe.generate_hash(length=12),
             "company": company,
             "gender": "Male",
             "date_of_birth": "1990-01-01",
@@ -229,13 +229,13 @@ class TestCustodyDamageAssessment(FrappeTestCase):
         # A submitted Salary Structure Assignment is HRMS's precondition for the
         # Additional Salary insert (validate_salary_structure); build a minimal one
         # bound to this employee's company. One Earning, no tax component.
-        earn_component = "QA-DMG-Earn-" + frappe.generate_hash(length=6)
+        earn_component = "QA-DMG-Earn-" + frappe.generate_hash(length=12)
         frappe.get_doc({
             "doctype": "Salary Component",
             "salary_component": earn_component,
             "type": "Earning",
         }).insert(ignore_permissions=True, ignore_if_duplicate=True)
-        struct_name = "QA-DMG-Struct-" + frappe.generate_hash(length=6)
+        struct_name = "QA-DMG-Struct-" + frappe.generate_hash(length=12)
         struct = frappe.get_doc({
             "doctype": "Salary Structure",
             "name": struct_name,

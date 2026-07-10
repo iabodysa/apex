@@ -76,7 +76,7 @@ class TestUtilityBillEntry(FrappeTestCase):
 
     def test_duplicate_same_company_building_account_period_blocked(self):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         first = self._bill(company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m)
         first.insert(ignore_permissions=True, ignore_links=True)
         dup = self._bill(company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m)
@@ -86,7 +86,7 @@ class TestUtilityBillEntry(FrappeTestCase):
 
     def test_same_account_period_different_building_or_company_allowed(self):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         first = self._bill(company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m)
         first.insert(ignore_permissions=True, ignore_links=True)
         # [#hottg0]
@@ -98,7 +98,7 @@ class TestUtilityBillEntry(FrappeTestCase):
     # ---- overlapping period (not only exact equal) is flagged ----
     def test_overlapping_period_same_account_blocked(self):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         first = self._bill(
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
             billing_period_from="2026-06-01", billing_period_to="2026-06-30",
@@ -121,7 +121,7 @@ class TestUtilityBillEntry(FrappeTestCase):
     # ---- negative amounts rejected in validate, no ledger row posted ----
     def test_negative_total_amount_raises(self):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         doc = self._bill(
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
             total_bill_amount=-50, bill_amount=0,
@@ -131,7 +131,7 @@ class TestUtilityBillEntry(FrappeTestCase):
 
     def test_negative_bill_amount_raises_and_posts_no_ledger(self):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         src = "QA-UBE-NEG-" + m
         doc = self._bill(
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
@@ -148,7 +148,7 @@ class TestUtilityBillEntry(FrappeTestCase):
     # ---- a backwards meter reading is a misread, not zero usage ----
     def test_backwards_meter_reading_raises(self):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         doc = self._bill(
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
             meter_reading_previous=500, meter_reading_current=400,
@@ -158,7 +158,7 @@ class TestUtilityBillEntry(FrappeTestCase):
 
     def test_forward_meter_reading_computes_consumption(self):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         doc = self._bill(
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
             meter_reading_previous=500, meter_reading_current=750,
@@ -169,7 +169,7 @@ class TestUtilityBillEntry(FrappeTestCase):
     def test_equal_meter_readings_allowed_zero_usage(self):
         """current == previous is genuine zero consumption, not a misread."""
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import validate
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         doc = self._bill(
             company="QA-CO-" + m, building="QA-BLD-1", utility_account="ACC-" + m,
             meter_reading_previous=500, meter_reading_current=500,
@@ -193,7 +193,7 @@ class TestUtilityBillEntry(FrappeTestCase):
 
     def test_post_ledger_idempotent_on_rerun(self):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import _post_ledger_row
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         bld = self._ledger_building(m)
         src = "QA-UBE-IDEM-" + m
         doc = self._bill(building=bld.name, utility_type="Electricity", bill_amount=300)
@@ -207,7 +207,7 @@ class TestUtilityBillEntry(FrappeTestCase):
         from apex.habitat.doctype.utility_bill_entry.utility_bill_entry import (
             _post_ledger_row, before_cancel,
         )
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         bld = self._ledger_building(m)
         src = "QA-UBE-REV-" + m
         doc = self._bill(building=bld.name, utility_type="Electricity", bill_amount=300)

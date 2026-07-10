@@ -13,7 +13,7 @@ from apex.habitat.api.front_desk import (
 )
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

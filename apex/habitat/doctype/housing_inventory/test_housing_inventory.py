@@ -43,7 +43,7 @@ class TestHousingInventory(FrappeTestCase):
         room wrote the Building docname back into the room Link (invalid) and building
         never auto-filled. GREEN: fetch_from is on building, so selecting a room
         populates building while the room field keeps a valid Room link."""
-        h = frappe.generate_hash(length=6)
+        h = frappe.generate_hash(length=12)
         building = frappe.get_doc({
             "doctype": "Building", "building_name": "HI Bldg " + h,
         }).insert(ignore_permissions=True, ignore_links=True).name
@@ -84,7 +84,7 @@ class TestHousingInventoryMaintenanceReflection(FrappeTestCase):
     housing item's maintenance stamps and clears a maintenance condition/status."""
 
     def _h(self):
-        return frappe.generate_hash(length=6).upper()
+        return frappe.generate_hash(length=12).upper()
 
     def setUp(self):
         self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({

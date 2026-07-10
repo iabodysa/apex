@@ -16,7 +16,7 @@ from apex.habitat.api.dashboard import (
 )
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -60,7 +60,7 @@ class TestDashboardArrivals(FrappeTestCase):
             "building": building or self.building,
             "expected_date": expected_date,
             "expected_workers": [
-                {"worker_name": "W-" + _h(), "passport_number": "P" + _h(8)}
+                {"worker_name": "W-" + _h(), "passport_number": "P" + _h(12)}
                 for _ in range(expected_n)
             ],
         })

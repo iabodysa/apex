@@ -37,7 +37,7 @@ test_ignore = [
 ]
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

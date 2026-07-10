@@ -13,7 +13,7 @@ class TestAccommodationOccupancySnapshot(FrappeTestCase):
         the mandatory Link."""
         building = frappe.get_doc({
             "doctype": "Building",
-            "building_name": "OCC-SMOKE-" + frappe.generate_hash(length=6),
+            "building_name": "OCC-SMOKE-" + frappe.generate_hash(length=12),
             "total_capacity": 4,
         }).insert(ignore_permissions=True).name
 

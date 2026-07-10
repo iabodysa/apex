@@ -11,7 +11,7 @@ from apex.salis.doctype.vehicle_handover_checklist_template.vehicle_handover_che
 
 class TestVehicleHandoverChecklistTemplate(FrappeTestCase):
     def setUp(self):
-        suffix = frappe.generate_hash(length=6)
+        suffix = frappe.generate_hash(length=12)
 
         self.vehicle = frappe.get_doc(
             {

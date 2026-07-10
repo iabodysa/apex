@@ -17,7 +17,7 @@ from frappe.website.doctype.web_form.web_form import accept
 WEB_FORM = "vehicle-incident"
 
 
-def _h(n=5):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

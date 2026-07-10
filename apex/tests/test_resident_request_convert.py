@@ -25,7 +25,7 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
             "doctype": "Resident Request",
             "request_category": category,
             "priority": priority,
-            "description": "Convert test " + frappe.generate_hash(length=4),
+            "description": "Convert test " + frappe.generate_hash(length=12),
             "building": "RRC-BLDG",
             "room": "RRC-BLDG-R01",
             "status": "New",

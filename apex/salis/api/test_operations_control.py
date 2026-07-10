@@ -20,7 +20,7 @@ class TestReassignDriver(FrappeTestCase):
             frappe.get_doc(
                 {
                     "doctype": "Salis Vehicle",
-                    "plate_number": f"RA {frappe.generate_hash(length=6)}",
+                    "plate_number": f"RA {frappe.generate_hash(length=12)}",
                     "status": "Active",
                 }
             )
@@ -49,7 +49,7 @@ class TestReassignDriver(FrappeTestCase):
             frappe.get_doc(
                 {
                     "doctype": "Salis Driver",
-                    "full_name": f"Rider {frappe.generate_hash(length=6)}",
+                    "full_name": f"Rider {frappe.generate_hash(length=12)}",
                     "status": "Active",
                 }
             )
@@ -96,7 +96,7 @@ class TestSupervisorSurfaceParity(FrappeTestCase):
             frappe.get_doc(
                 {
                     "doctype": "Salis Vehicle",
-                    "plate_number": f"PAR {frappe.generate_hash(length=6)}",
+                    "plate_number": f"PAR {frappe.generate_hash(length=12)}",
                     "status": "Active",
                 }
             )
@@ -107,8 +107,8 @@ class TestSupervisorSurfaceParity(FrappeTestCase):
         return frappe.get_doc(
             {
                 "doctype": "Salis Driver",
-                "full_name": f"Rider {frappe.generate_hash(length=6)}",
-                "driver_id": f"PARD-{frappe.generate_hash(length=6)}",
+                "full_name": f"Rider {frappe.generate_hash(length=12)}",
+                "driver_id": f"PARD-{frappe.generate_hash(length=12)}",
                 "status": "Active",
             }
         ).insert(ignore_permissions=True)

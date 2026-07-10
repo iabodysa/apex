@@ -85,7 +85,7 @@ class TestFacilityAssetMovementOriginReconcile(FrappeTestCase):
     defaulted from the asset so cancel reverts to a trustworthy prior location."""
 
     def _h(self):
-        return frappe.generate_hash(length=6).upper()
+        return frappe.generate_hash(length=12).upper()
 
     def _building(self, name):
         if not frappe.db.exists("Building", name):

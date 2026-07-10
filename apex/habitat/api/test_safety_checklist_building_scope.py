@@ -25,7 +25,7 @@ from frappe.utils import today
 from apex.habitat.api.safety_checklist import submit_due_rounds
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

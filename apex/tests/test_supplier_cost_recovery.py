@@ -13,7 +13,7 @@ from apex.habitat.tasks import (
 from apex.habitat.report.supplier_cost_recovery.supplier_cost_recovery import execute
 
 
-def _h(n=4):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -36,7 +36,7 @@ class TestSupplierCostRecovery(ApexHabitatTestCase):
             "doctype": "Supplier", "supplier_name": "Vendor " + _h(),
             "supplier_group": frappe.db.get_value("Supplier Group", {"is_group": 0}),
         }).insert(ignore_permissions=True).name
-        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(12)}).insert(ignore_permissions=True)
         self.building = frappe.get_doc({
             "doctype": "Building", "building_name": "B " + _h(), "site": self.site.name,
             "total_capacity": 10, "default_cost_center": self.cost_center,

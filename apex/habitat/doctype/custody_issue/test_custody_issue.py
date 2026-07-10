@@ -62,7 +62,7 @@ class TestCustodyIssueSerializedRules(FrappeTestCase):
     """A serialized article must carry a serial_no and qty==1 on every line."""
 
     def setUp(self):
-        h = frappe.generate_hash(length=4).upper()
+        h = frappe.generate_hash(length=12).upper()
         cat = frappe.db.get_value("Custody Asset Category", {}) or frappe.get_doc({
             "doctype": "Custody Asset Category", "category_name": "Cat " + h,
         }).insert(ignore_permissions=True).name

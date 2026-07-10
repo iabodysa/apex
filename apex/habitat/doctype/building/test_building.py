@@ -75,7 +75,7 @@ class TestAccommodationBuilding(FrappeTestCase):
 
     def test_abbreviation_locked_after_rooms_exist(self):
         # [#r0twhb]
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         b = frappe.get_doc({
             "doctype": "Building", "building_name": "QA Lock " + m,
             "abbreviation": "QA" + m[:2].upper(), "total_capacity": 10,
@@ -109,7 +109,7 @@ class TestAccommodationBuilding(FrappeTestCase):
             frappe.get_meta("Building").get_field("total_capacity").read_only, 1,
             "total_capacity must be read_only (auto-derived)",
         )
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         b = frappe.get_doc({
             "doctype": "Building",
             "building_name": "QA Capacity " + m,
@@ -162,7 +162,7 @@ class TestAccommodationBuilding(FrappeTestCase):
         from apex.habitat.doctype.building.building import (
             generate_rooms_and_beds,
         )
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         b = frappe.get_doc({
             "doctype": "Building",
             "building_name": "QA NoBed " + m,
@@ -202,7 +202,7 @@ class TestAccommodationBuilding(FrappeTestCase):
             frappe.get_meta("Building").get_field("cctv_camera_count").read_only, 1,
             "cctv_camera_count must be read_only (auto-derived)",
         )
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         b = frappe.get_doc({
             "doctype": "Building",
             "building_name": "QA CCTV " + m,
@@ -252,7 +252,7 @@ class TestAccommodationBuilding(FrappeTestCase):
         from apex.habitat.doctype.building.building import (
             generate_rooms_and_beds,
         )
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         b = frappe.get_doc({
             "doctype": "Building",
             "building_name": "QA Perm Test " + m,
@@ -275,7 +275,7 @@ class TestAccommodationBuilding(FrappeTestCase):
         from apex.habitat.doctype.building.building import (
             generate_rooms_and_beds,
         )
-        m = frappe.generate_hash(length=6)
+        m = frappe.generate_hash(length=12)
         b = frappe.get_doc({
             "doctype": "Building",
             "building_name": "QA Idempotent " + m,

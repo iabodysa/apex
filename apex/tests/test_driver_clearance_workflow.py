@@ -190,7 +190,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
 
     def test_clear_blocked_while_open_case_then_allowed(self):
         # [#ib4mi7]
-        driver = self._driver("DC Driver OpenCase " + frappe.generate_hash(length=6))
+        driver = self._driver("DC Driver OpenCase " + frappe.generate_hash(length=12))
         fec = self._open_fuel_exception(driver)
         dc = self._new_clearance(driver)
 

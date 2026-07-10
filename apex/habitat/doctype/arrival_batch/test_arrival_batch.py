@@ -11,7 +11,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.habitat.api.arrivals_desk import get_arrival_summary
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -35,7 +35,7 @@ class TestArrivalBatch(FrappeTestCase):
             "building": self.building,
             "expected_date": self.date,
             "labour_supplier": self.supplier,
-            "expected_workers": [{"worker_name": w, "passport_number": "P" + _h(8)} for w in rows],
+            "expected_workers": [{"worker_name": w, "passport_number": "P" + _h(12)} for w in rows],
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
         return doc
@@ -185,8 +185,8 @@ class TestArrivalManifestWebForm(FrappeTestCase):
             "building": building,
             "expected_date": "2026-08-01",
             "expected_workers": [
-                {"worker_name": "Worker " + _h(4), "passport_number": "P" + _h(8)},
-                {"worker_name": "Worker " + _h(4), "passport_number": "P" + _h(8)},
+                {"worker_name": "Worker " + _h(12), "passport_number": "P" + _h(12)},
+                {"worker_name": "Worker " + _h(12), "passport_number": "P" + _h(12)},
             ],
         }
         doc = accept(web_form=self.WEB_FORM, data=frappe.as_json(payload))

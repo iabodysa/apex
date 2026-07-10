@@ -28,8 +28,8 @@ class TestOpenAlertsDigest(FrappeTestCase):
         # rows for a deterministic snapshot (per-test isolation can leak inserts
         # past the savepoint when a side-effect commits).
         frappe.db.delete("Operations Alert", {"message": ("like", f"{self.MARKER}%")})
-        self.sup_a = _user(f"oad_a_{frappe.generate_hash(length=6)}@example.com", "Fleet Supervisor")
-        self.sup_b = _user(f"oad_b_{frappe.generate_hash(length=6)}@example.com", "Fleet Supervisor")
+        self.sup_a = _user(f"oad_a_{frappe.generate_hash(length=12)}@example.com", "Fleet Supervisor")
+        self.sup_b = _user(f"oad_b_{frappe.generate_hash(length=12)}@example.com", "Fleet Supervisor")
 
     def _alert(self, severity, supervisor, status="Open"):
         return frappe.get_doc(
@@ -38,7 +38,7 @@ class TestOpenAlertsDigest(FrappeTestCase):
                 "alert_type": "Idle Vehicle",
                 "severity": severity,
                 "status": status,
-                "message": f"{self.MARKER} " + frappe.generate_hash(length=6),
+                "message": f"{self.MARKER} " + frappe.generate_hash(length=12),
                 "responsible_supervisor": supervisor,
             }
         ).insert(ignore_permissions=True).name

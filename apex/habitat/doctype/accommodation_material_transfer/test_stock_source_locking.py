@@ -39,7 +39,7 @@ _HANDOVER_CTL = os.path.normpath(
 )
 
 
-def _h(n=4):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -51,7 +51,7 @@ class TestStockSourceLocking(ApexHabitatTestCase):
         cc = frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company}) \
             or frappe.db.get_value("Cost Center", {"is_group": 0})
         self.site = frappe.get_doc({
-            "doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+            "doctype": "Site", "site_name": _h(12)}).insert(ignore_permissions=True)
         self.source = frappe.get_doc({
             "doctype": "Building", "building_name": "Src " + _h(),
             "site": self.site.name, "total_capacity": 4, "company": self.company,
@@ -71,7 +71,7 @@ class TestStockSourceLocking(ApexHabitatTestCase):
         """Book `qty` of the article into the source store (employee unset)."""
         post_stock_entry(
             item_type="Custody Article", item=self.article, qty=qty, building=self.source,
-            employee=None, voucher_type="Seed", voucher_no="SEED-" + _h(6),
+            employee=None, voucher_type="Seed", voucher_no="SEED-" + _h(12),
             posting_date="2026-05-01",
         )
 
@@ -95,7 +95,7 @@ class TestStockSourceLocking(ApexHabitatTestCase):
         return h
 
     def _user(self):
-        email = f"ssl-{_h(6).lower()}@example.com"
+        email = f"ssl-{_h(12).lower()}@example.com"
         u = frappe.get_doc({"doctype": "User", "email": email, "first_name": "U " + _h(),
                             "send_welcome_email": 0})
         u.insert(ignore_permissions=True)

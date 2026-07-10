@@ -40,7 +40,7 @@ from apex.tests._helpers import _user
 WORKFLOW = "Dispatch Trip Workflow"
 
 
-def _h(n=6):
+def _h(n=12):
     """Short random hash suffix for unique fixture names."""
     return frappe.generate_hash(length=n).upper()
 
@@ -128,7 +128,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
 
     @staticmethod
     def _make_vehicle(suffix=None, odometer=0):
-        plate = "SSF-" + (suffix or _h(4))
+        plate = "SSF-" + (suffix or _h(12))
         existing = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
         if existing:
             return existing
@@ -141,7 +141,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
 
     @staticmethod
     def _make_driver(suffix=None):
-        full_name = "SSF Driver " + (suffix or _h(4))
+        full_name = "SSF Driver " + (suffix or _h(12))
         existing = frappe.db.get_value("Salis Driver", {"full_name": full_name}, "name")
         if existing:
             return existing
@@ -178,7 +178,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
 
         rp = frappe.get_doc({
             "doctype": "Route Plan",
-            "route_name": "SSF Route " + _h(4),
+            "route_name": "SSF Route " + _h(12),
             "transport_request": tr.name,
             "project": project,
         }).insert(ignore_permissions=True)

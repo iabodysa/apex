@@ -37,7 +37,7 @@ from apex.habitat.api.safety_checklist import (
 )
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -125,7 +125,7 @@ class TestArrivalsCustodyReportScope(FrappeTestCase):
             {
                 "doctype": "Temporary Worker",
                 "worker_name": "TW-" + _h(),
-                "passport_number": "P" + _h(8),
+                "passport_number": "P" + _h(12),
                 "building": building,
                 "status": "Active",
             }

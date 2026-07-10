@@ -30,7 +30,7 @@ test_ignore = ["Company", "Employee", "User"]
 class TestDriverClearanceNotification(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        tag = frappe.generate_hash(length=6).lower()
+        tag = frappe.generate_hash(length=12).lower()
 
         self.user = frappe.get_doc(
             {
@@ -116,7 +116,7 @@ class TestDriverClearanceNotification(FrappeTestCase):
         vehicle = frappe.get_doc(
             {
                 "doctype": "Salis Vehicle",
-                "plate_number": f"DCL {frappe.generate_hash(length=4).upper()}",
+                "plate_number": f"DCL {frappe.generate_hash(length=12).upper()}",
                 "status": "Active",
                 "current_driver": self.driver,
             }

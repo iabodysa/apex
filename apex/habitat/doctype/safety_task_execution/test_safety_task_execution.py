@@ -89,7 +89,7 @@ class TestSafetyTaskExecution(FrappeTestCase):
         return frappe.get_doc({
             "doctype": "Safety Task Catalog",
             "naming_series": "STC-.####",
-            "task_code": f"STC-EV-{frappe.generate_hash(length=4)}",
+            "task_code": f"STC-EV-{frappe.generate_hash(length=12)}",
             "task_title": "Evidence task",
             "department": "Fire Safety",
             "frequency": "Monthly",
@@ -181,7 +181,7 @@ class TestSafetyTaskExecution(FrappeTestCase):
         return frappe.get_doc({
             "doctype": "Safety Task Catalog",
             "naming_series": "STC-.####",
-            "task_code": f"STC-MR-{frappe.generate_hash(length=4)}",
+            "task_code": f"STC-MR-{frappe.generate_hash(length=12)}",
             "task_title": "Escalation task",
             "department": "Fire Safety",
             "frequency": "Monthly",

@@ -9,7 +9,7 @@ from apex.habitat.tasks import daily_occupancy_snapshot
 from apex.habitat.report.occupancy_trend.occupancy_trend import execute
 
 
-def _h(n=4):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -26,7 +26,7 @@ class TestOccupancySnapshot(ApexHabitatTestCase):
         self.employee = frappe.get_doc({
             "doctype": "Employee", "first_name": "E " + _h(), "company": self.company, "gender": "Male",
             "date_of_birth": "1990-01-01", "date_of_joining": "2020-01-01"}).insert(ignore_permissions=True).name
-        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(6)}).insert(ignore_permissions=True)
+        self.site = frappe.get_doc({"doctype": "Site", "site_name": _h(12)}).insert(ignore_permissions=True)
         self.building = frappe.get_doc({
             "doctype": "Building", "building_name": "B " + _h(), "site": self.site.name,
             "total_capacity": 4, "default_cost_center": self.cost_center}).insert(ignore_permissions=True)

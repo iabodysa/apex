@@ -14,7 +14,7 @@ from frappe.tests.utils import FrappeTestCase
 test_ignore = ["Employee", "Salis Vehicle", "Salis Driver", "Route Plan", "Dispatch Trip", "Payment Gateway"]
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

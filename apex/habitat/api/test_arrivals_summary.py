@@ -13,7 +13,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.habitat.api.arrivals_desk import get_arrival_summary
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -39,7 +39,7 @@ class TestArrivalsSummary(FrappeTestCase):
         self.tw = frappe.get_doc({
             "doctype": "Temporary Worker",
             "worker_name": "TW-" + _h(),
-            "passport_number": "P" + _h(8),
+            "passport_number": "P" + _h(12),
             "labour_supplier": self.supplier,
         })
         self.tw.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)

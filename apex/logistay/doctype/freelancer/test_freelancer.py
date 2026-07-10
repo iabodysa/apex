@@ -71,7 +71,7 @@ class TestFreelancer(FrappeTestCase):
         mobile from its view."""
         doc = self._doc(mobile_number="0500000000").insert(ignore_permissions=True)
 
-        user_id = f"freelance_auditor_{frappe.generate_hash(length=6)}@example.com"
+        user_id = f"freelance_auditor_{frappe.generate_hash(length=12)}@example.com"
         user = frappe.get_doc(
             {
                 "doctype": "User",

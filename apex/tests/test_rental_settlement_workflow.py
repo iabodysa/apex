@@ -77,7 +77,7 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
 
     @staticmethod
     def _vehicle():
-        plate = "RSW-" + frappe.generate_hash(length=4).upper()
+        plate = "RSW-" + frappe.generate_hash(length=12).upper()
         return frappe.get_doc(
             {"doctype": "Salis Vehicle", "plate_number": plate,
              "ownership": "Rented", "status": "Active"}

@@ -25,7 +25,7 @@ class TestWeeklyCustodyDigest(FrappeTestCase):
         # The digest is gated behind the master email kill-switch (default OFF);
         # turn it ON so the content tests below exercise the send path.
         frappe.db.set_single_value("Habitat Settings", "enable_email_notifications", 1)
-        self.sup = _user(f"cd_sup_{frappe.generate_hash(length=6)}@example.com", "Accommodation Manager")
+        self.sup = _user(f"cd_sup_{frappe.generate_hash(length=12)}@example.com", "Accommodation Manager")
         self.building = self._building(self.sup)
 
     def _building(self, supervisor):
@@ -33,7 +33,7 @@ class TestWeeklyCustodyDigest(FrappeTestCase):
             frappe.get_doc(
                 {
                     "doctype": "Building",
-                    "building_name": f"CD-BLD-{frappe.generate_hash(length=6)}",
+                    "building_name": f"CD-BLD-{frappe.generate_hash(length=12)}",
                     "responsible_supervisor": supervisor,
                 }
             )
@@ -82,7 +82,7 @@ class TestWeeklyCustodyDigest(FrappeTestCase):
         orphan = frappe.get_doc(
             {
                 "doctype": "Building",
-                "building_name": f"CD-ORPH-{frappe.generate_hash(length=6)}",
+                "building_name": f"CD-ORPH-{frappe.generate_hash(length=12)}",
             }
         ).insert(ignore_permissions=True).name
         self._issue(orphan, "Issued", add_days(today(), 7))

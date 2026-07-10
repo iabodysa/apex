@@ -36,7 +36,7 @@ test_ignore = [
 ]
 
 
-def _h(n=6):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -58,7 +58,7 @@ class TestDispatchTripAssignment(FrappeTestCase):
             {
                 "doctype": "Salis Vehicle",
                 "naming_series": "VEH-.######",
-                "plate_number": "ASG " + _h(4),
+                "plate_number": "ASG " + _h(12),
                 "status": "Active",
                 "seat_capacity": 0,
             }
