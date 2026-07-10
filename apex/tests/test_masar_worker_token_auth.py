@@ -16,6 +16,8 @@ PermissionError) are verified against the live resolver and the public
 get_worker_context endpoint on a migrated site with no production data.
 """
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -24,6 +26,7 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     get_or_create_for_employee,
 )
 from apex.salis.api import masar
+from apex.tests._helpers import _user
 
 # [#bwkatw]
 BLOCKED_STATUSES = ("Inactive", "Left")
@@ -511,6 +514,40 @@ class TestMasarNotifyHrIqamaExpiring(FrappeTestCase):
         fails closed (PermissionError) before any notification is considered."""
         with self.assertRaises(frappe.PermissionError):
             masar.notify_hr_iqama_expiring(token="")
+
+    def test_disabled_hr_recipient_is_skipped(self):
+        """C2 (bug fix — behaviour IMPROVED, not merely preserved): the notify loop now
+        routes through ``notify_user_system``, which carries an enabled-user check the raw
+        ``Notification Log`` insert lacked. BEFORE, a disabled HR user still received a row;
+        AFTER, only the enabled recipient does. Two recipients (one enabled, one disabled)
+        prove the skip while the enabled path still delivers exactly one scoped alert."""
+        employee, token = self._worker_with_iqama_in("mixed", 10)
+        suffix = frappe.generate_hash(length=8)
+        enabled_user = _user(f"hr_on_{suffix}@example.com", "HR Manager")
+        disabled_user = _user(f"hr_off_{suffix}@example.com", "HR Manager")
+        frappe.db.set_value("User", disabled_user, "enabled", 0)
+        self.addCleanup(frappe.db.set_value, "User", disabled_user, "enabled", 1)
+
+        with patch.object(
+            masar, "_hr_notify_recipients", return_value=[enabled_user, disabled_user]
+        ):
+            res = masar.notify_hr_iqama_expiring(token=token)
+
+        self.assertTrue(res["notified"])
+        # the enabled recipient receives exactly one row scoped to this worker
+        self.assertEqual(
+            frappe.db.count(
+                "Notification Log", {"for_user": enabled_user, "document_name": employee}
+            ),
+            1,
+        )
+        # the disabled recipient receives NONE — the redirect's enabled-check (the fix)
+        self.assertEqual(
+            frappe.db.count(
+                "Notification Log", {"for_user": disabled_user, "document_name": employee}
+            ),
+            0,
+        )
 
 
 class TestMasarEmployeeOnlyDecision(FrappeTestCase):

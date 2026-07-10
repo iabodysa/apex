@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import frappe
 
+from apex.apex_core.utils.operations_alert import insert_operations_alert
+
 
 def daily_building_license_expiry_check() -> None:
     """Flip Building License status to Expired / Expiring Soon on the transition edge.
@@ -79,7 +81,7 @@ def _raise_maintenance_alert(
     the insert and the optional timeline comment are individually guarded so a
     failure rolls back and logs but never aborts the calling loop.
     """
-    from frappe.utils import now_datetime, today
+    from frappe.utils import today
 
     alert_type = "Maintenance Overdue"  # [#ihzt5o]
     severity = "Critical" if priority == "Critical" else "Warning"
@@ -111,24 +113,10 @@ def _raise_maintenance_alert(
         )
         return
 
-    # [#rx9vmh]
-    try:
-        frappe.get_doc(
-            {
-                "doctype": "Operations Alert",
-                "alert_type": alert_type,
-                "severity": severity,
-                "status": "Open",
-                "raised_on": now_datetime(),
-                "message": message,
-            }
-        ).insert(ignore_permissions=True)  # audit-ok — scheduler-run escalation, no user session
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Maintenance alert insert failed ({req_name})"[:140],
-        )
+    # [#rx9vmh] Insert via the shared helper (ignore_permissions + message clip +
+    # rollback/log_error) — a maintenance alert carries no vehicle/driver. A failed/None
+    # insert skips the timeline comment below, exactly as the old try/except return did.
+    if insert_operations_alert(alert_type, severity, message) is None:
         return
 
     # [#q02x8v]

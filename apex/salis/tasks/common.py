@@ -6,6 +6,8 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.operations_alert import insert_operations_alert
+
 
 BATCH_SIZE = 500
 
@@ -90,7 +92,7 @@ def _raise_alert(
     Returns the new alert name, or ``None`` if a duplicate was skipped or the
     insert failed.
     """
-    from frappe.utils import add_days, now_datetime, today
+    from frappe.utils import add_days, today
 
     # [#k7ei2t]
     day = today()
@@ -115,31 +117,18 @@ def _raise_alert(
         )
         return None
 
-    # [#sqhguz]
-    alert_name = None
-    responsible_supervisor = _resolve_project_supervisor(vehicle)
-    try:
-        alert = frappe.get_doc(
-            {
-                "doctype": ALERT_DOCTYPE,
-                "alert_type": alert_type,
-                "severity": severity,
-                "status": "Open",
-                "raised_on": now_datetime(),
-                "vehicle": vehicle,
-                "driver": driver,
-                "responsible_supervisor": responsible_supervisor,
-                "message": message[:2000],
-            }
-        )
-        alert.insert(ignore_permissions=True)  # audit-ok
-        alert_name = alert.name
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Salis alert insert failed ({alert_type})"[:140],
-        )
+    # [#sqhguz] Insert via the shared helper: it applies ignore_permissions, resolves
+    # responsible_supervisor from the vehicle's project (same logic as the local
+    # _resolve_project_supervisor), clips the message to 2000, and rolls back/log_errors
+    # on failure — byte-for-byte the old inline block. A failed/None insert skips the rest.
+    alert_name = insert_operations_alert(
+        alert_type,
+        severity,
+        message,
+        vehicle=vehicle,
+        driver=driver,
+    )
+    if alert_name is None:
         return None
 
     # [#oplihr]

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import frappe
 
+from apex.apex_core.utils.operations_alert import insert_operations_alert
 from apex.habitat.tasks.common import (
     _notify_operational,
     _notify_role_system,
@@ -21,7 +22,7 @@ def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_tok
     Operations Alert Select options (the DocType's option set is closed). Returns the
     new alert name, or None when a duplicate was skipped or the insert failed.
     """
-    from frappe.utils import now_datetime, today
+    from frappe.utils import today
 
     today_str = today()
     try:
@@ -43,26 +44,9 @@ def _raise_safety_alert(alert_type: str, severity: str, message: str, dedupe_tok
         )
         return None
 
-    try:
-        alert = frappe.get_doc(
-            {
-                "doctype": "Operations Alert",
-                "alert_type": alert_type,
-                "severity": severity,
-                "status": "Open",
-                "raised_on": now_datetime(),
-                "message": message[:2000],
-            }
-        )
-        alert.insert(ignore_permissions=True)  # audit-ok — scheduler-run safety escalation
-        return alert.name
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title=f"Safety alert insert failed ({dedupe_token})"[:140],
-        )
-        return None
+    # Insert via the shared helper (ignore_permissions + message clip + rollback/log_error)
+    # — a safety alert carries no vehicle/driver. Returns the new name, or None on failure.
+    return insert_operations_alert(alert_type, severity, message)
 
 
 def _instance_priority(template: str | None) -> str:

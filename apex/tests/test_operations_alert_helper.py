@@ -20,12 +20,11 @@ from apex.tests._helpers import _user
 
 APP = frappe.get_app_path("apex")
 
-# [#b8m5rf]
+# [#b8m5rf] Only the shared helper may raw-insert an Operations Alert now — the
+# scheduler sites (salis/tasks/common, habitat/tasks/maintenance, habitat/tasks/safety)
+# were redirected to insert_operations_alert(), so they are no longer exempt.
 _SANCTIONED = {
     "apex_core/utils/operations_alert.py",
-    "salis/tasks/common.py",
-    "habitat/tasks/maintenance.py",
-    "habitat/tasks/safety.py",
 }
 
 # [#d3lmey]

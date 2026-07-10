@@ -18,6 +18,7 @@ from frappe import _
 from frappe.rate_limiter import rate_limit
 
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import _hash_token
+from apex.apex_core.utils.system_notify import notify_user_system
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
 # [#55ldxu]
 from apex.salis.api.maps_links import _full_route_maps_url
@@ -1570,19 +1571,19 @@ def notify_hr_iqama_expiring(token=None):
         "{2} is expiring (expiry {3}, {4} day(s) left). Please action the renewal."
     ).format(worker_name, emp_no, iqama_no or _("on file"), _fmt_date(iqama_expiry), days_left)
 
+    # Route through the shared system-notify helper: it adds the enabled-user check +
+    # rollback/log_error that the raw loop lacked, so a DISABLED HR user is now skipped and
+    # one failed insert no longer aborts the rest. Subject clip (140) + type Alert + Employee
+    # link are identical to the old inline insert for an enabled recipient.
     recipients = _hr_notify_recipients()
     for user in recipients:
-        frappe.get_doc(
-            {
-                "doctype": "Notification Log",
-                "for_user": user,
-                "type": "Alert",
-                "document_type": "Employee",
-                "document_name": employee,
-                "subject": subject[:140],
-                "email_content": message,
-            }
-        ).insert(ignore_permissions=True)  # audit-ok — worker resolved from token server-side
+        notify_user_system(
+            user,
+            subject,
+            message,
+            document_type="Employee",
+            document_name=employee,
+        )
 
     return {"notified": True, "days_left": days_left, "recipients": len(recipients)}
 
