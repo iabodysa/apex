@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "autoname": "field:map_name",
+ "creation": "2026-07-10 05:00:00.000000",
+ "description": "Canonical attendance status vocabulary: maps the free per-format source tokens (P, A, OFF, Eid, Arabic free-text, ...) onto the one canonical Timesheet Daily Status enum. A map with no adapter is the global default; an adapter-specific map overrides it token-by-token. Unmapped tokens raise a WARN exception in the ingestion layer, never a silent drop.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "status_code_map_sec_identity",
+  "map_name",
+  "ts_adapter",
+  "status_code_map_identity_col",
+  "ts_locale",
+  "enabled",
+  "status_code_map_sec_tokens",
+  "ts_token_rows"
+ ],
+ "fields": [
+  {
+   "fieldname": "status_code_map_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Status Code Map"
+  },
+  {
+   "description": "Unique map name. This is the record's id and cannot be changed once saved.",
+   "fieldname": "map_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Map Name",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "description": "Bind to one adapter, or leave blank for the global default map.",
+   "fieldname": "ts_adapter",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Adapter",
+   "options": "TS Format Adapter"
+  },
+  {
+   "fieldname": "status_code_map_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "EN",
+   "fieldname": "ts_locale",
+   "fieldtype": "Select",
+   "label": "Locale",
+   "options": "EN\nAR\nmixed"
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "status_code_map_sec_tokens",
+   "fieldtype": "Section Break",
+   "label": "Token Map"
+  },
+  {
+   "description": "Each row maps one source token onto a canonical attendance code.",
+   "fieldname": "ts_token_rows",
+   "fieldtype": "Table",
+   "label": "Token Rows",
+   "options": "Status Token Map"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-10 05:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Status Code Map",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "map_name",
+ "track_changes": 1
+}

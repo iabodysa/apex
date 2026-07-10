@@ -1,0 +1,180 @@
+{
+ "actions": [],
+ "creation": "2026-07-10 05:00:00.000000",
+ "description": "The operator's disposition of an exception GROUP, kept as a companion record so the immutable Timesheet Exception Log is never edited. One disposition covers every identical log row (same type + entity + period + field), identified by a stable group key; a log row is Open until a disposition for its group exists. Waiving requires a reason; resolving records that the underlying data-quality gap was fixed and re-ingested.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "ts_exception_disposition_sec_identity",
+  "disposition",
+  "exception_type",
+  "entity",
+  "ts_exception_disposition_identity_col",
+  "period_month",
+  "field_ref",
+  "group_key",
+  "ts_exception_disposition_sec_reason",
+  "reason",
+  "ts_exception_disposition_sec_system",
+  "disposed_by",
+  "disposed_at",
+  "ts_exception_disposition_system_col",
+  "matched_count",
+  "naming_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "ts_exception_disposition_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Disposition"
+  },
+  {
+   "description": "Waived: accepted as-is with a reason. Resolved: the data-quality gap was fixed and re-ingested.",
+   "fieldname": "disposition",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Disposition",
+   "options": "Waived\nResolved",
+   "reqd": 1
+  },
+  {
+   "fieldname": "exception_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Exception Type",
+   "reqd": 1
+  },
+  {
+   "description": "The worker / branch / source the group is about.",
+   "fieldname": "entity",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Entity",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ts_exception_disposition_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Period in YYYY-MM format.",
+   "fieldname": "period_month",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Period (Month)"
+  },
+  {
+   "description": "The canonical field / source column the group concerns, if any.",
+   "fieldname": "field_ref",
+   "fieldtype": "Data",
+   "label": "Field"
+  },
+  {
+   "description": "Stable group identity (type + entity + period + field). Unique: one disposition per group.",
+   "fieldname": "group_key",
+   "fieldtype": "Data",
+   "label": "Group Key",
+   "read_only": 1,
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "ts_exception_disposition_sec_reason",
+   "fieldtype": "Section Break",
+   "label": "Reason"
+  },
+  {
+   "description": "Required when Waived: why the exception is accepted without a data fix.",
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason"
+  },
+  {
+   "fieldname": "ts_exception_disposition_sec_system",
+   "fieldtype": "Section Break",
+   "label": "System"
+  },
+  {
+   "fieldname": "disposed_by",
+   "fieldtype": "Link",
+   "label": "Disposed By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "disposed_at",
+   "fieldtype": "Datetime",
+   "label": "Disposed At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ts_exception_disposition_system_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "How many log rows this group covered at disposition time.",
+   "fieldname": "matched_count",
+   "fieldtype": "Int",
+   "label": "Matched Count",
+   "read_only": 1
+  },
+  {
+   "default": "XDS-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "XDS-.######",
+   "reqd": 1
+  }
+ ],
+ "icon": "fa fa-check-square-o",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-10 05:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "TS Exception Disposition",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "entity",
+ "track_changes": 1
+}

@@ -183,6 +183,8 @@ scheduler_events = {
         "apex_habitat.salis.tasks.alerts.daily_open_alerts_digest",
         "apex_habitat.salis.fuel_engine.accrue_fuel_consumption",
         "apex_habitat.salis.rental_engine.daily_rental_accrual",
+        # Logistay: parse pending intake batches into canonical Timesheet Lines + exceptions.
+        "apex_habitat.logistay.ingestion_engine.normalize_pending_intakes",
         # Logistay: post the immutable worker-hours ledger from COMPLETE Timesheet Lines.
         "apex_habitat.logistay.timesheet_engine.post_timesheet_ledger",
         # [#ptjnq1]

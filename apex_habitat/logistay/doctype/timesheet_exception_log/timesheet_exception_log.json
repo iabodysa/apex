@@ -34,7 +34,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Exception Type",
-   "options": "missing_field\nblank_branch\nbroken_formula\ntotals_zero_with_grid\ntotals_vs_detail_mismatch\ndup_iqama\nyear_month_mismatch\nna_run_partial_month\nplaceholder_noise\nunmapped_status_token\nnon_machine_readable_media",
+   "options": "missing_field\nblank_branch\nbroken_formula\ntotals_zero_with_grid\ntotals_vs_detail_mismatch\ndup_iqama\nyear_month_mismatch\nna_run_partial_month\nplaceholder_noise\nunmapped_status_token\nnon_machine_readable_media\nno_mapping_profile\nworker_not_found\nmerge_conflict",
    "read_only": 1,
    "search_index": 1
   },
@@ -125,7 +125,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 0,
  "links": [],
- "modified": "2026-07-10 03:32:21.249675",
+ "modified": "2026-07-10 05:24:43.006634",
  "modified_by": "Administrator",
  "module": "Logistay",
  "name": "Timesheet Exception Log",

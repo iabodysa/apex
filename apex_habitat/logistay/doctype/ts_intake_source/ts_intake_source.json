@@ -1,0 +1,224 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-07-10 05:00:00.000000",
+ "description": "One raw upload / source batch queued for ingestion. An operator (or an upstream extractor) files the client or supervisor artifact here with its extracted JSON payload; the daily ingestion engine parses Pending rows through the Mapping Profile, emits canonical Timesheet Lines, and stamps the outcome. Status walks Pending -> Processed / Failed / Skipped, so re-runs never re-ingest the same batch.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "ts_intake_source_sec_identity",
+  "source_title",
+  "ts_client",
+  "ts_branch_site",
+  "ts_intake_source_identity_col",
+  "ts_period",
+  "ts_mapping_profile",
+  "ts_source_kind",
+  "ts_intake_source_sec_payload",
+  "ts_source_file",
+  "ts_payload",
+  "ts_intake_source_sec_status",
+  "status",
+  "ts_received_at",
+  "ts_intake_source_status_col",
+  "ts_processed_at",
+  "ts_rows_emitted",
+  "ts_exceptions_raised",
+  "ts_intake_source_sec_notes",
+  "ts_notes",
+  "naming_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "ts_intake_source_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Intake"
+  },
+  {
+   "fieldname": "source_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Source Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ts_client",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Client",
+   "options": "Client",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Optional. Leave blank for a client-wide intake.",
+   "fieldname": "ts_branch_site",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch Site",
+   "options": "Branch Site"
+  },
+  {
+   "fieldname": "ts_intake_source_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The cycle this batch feeds. A Closed period is skipped by the engine.",
+   "fieldname": "ts_period",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Timesheet Period",
+   "options": "Timesheet Period",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Optional. Leave blank to let the engine resolve the profile in force for this client/branch at the period start.",
+   "fieldname": "ts_mapping_profile",
+   "fieldtype": "Link",
+   "label": "Mapping Profile",
+   "options": "Mapping Profile"
+  },
+  {
+   "default": "client_file",
+   "description": "Which artifact this is; stamped onto every canonical field's provenance.",
+   "fieldname": "ts_source_kind",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Source Kind",
+   "options": "client_file\nsupervisor_entry\nocr\nsystem_default"
+  },
+  {
+   "fieldname": "ts_intake_source_sec_payload",
+   "fieldtype": "Section Break",
+   "label": "Payload"
+  },
+  {
+   "description": "The original client / supervisor upload, for audit.",
+   "fieldname": "ts_source_file",
+   "fieldtype": "Attach",
+   "label": "Source File"
+  },
+  {
+   "description": "Extracted tabular payload the engine consumes (JSON). See the ingestion engine docstring for the schema: a period_month plus a rows[] list of worker + tokens + daily.",
+   "fieldname": "ts_payload",
+   "fieldtype": "Code",
+   "label": "Payload (JSON)",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "ts_intake_source_sec_status",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "default": "Pending",
+   "description": "Pending rows are picked up by the daily ingestion job. Processed / Failed / Skipped rows are never re-ingested.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nProcessed\nFailed\nSkipped",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ts_received_at",
+   "fieldtype": "Datetime",
+   "label": "Received At"
+  },
+  {
+   "fieldname": "ts_intake_source_status_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ts_processed_at",
+   "fieldtype": "Datetime",
+   "label": "Processed At",
+   "read_only": 1
+  },
+  {
+   "description": "Canonical Timesheet Lines emitted or merged by this batch.",
+   "fieldname": "ts_rows_emitted",
+   "fieldtype": "Int",
+   "label": "Rows Emitted",
+   "read_only": 1
+  },
+  {
+   "description": "Exceptions this batch raised into the Timesheet Exception Log.",
+   "fieldname": "ts_exceptions_raised",
+   "fieldtype": "Int",
+   "label": "Exceptions Raised",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ts_intake_source_sec_notes",
+   "fieldtype": "Section Break",
+   "label": "Outcome"
+  },
+  {
+   "description": "Engine-written outcome summary for this batch.",
+   "fieldname": "ts_notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "read_only": 1
+  },
+  {
+   "default": "INTK-.YYYY.-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "INTK-.YYYY.-.######",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-10 05:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "TS Intake Source",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "source_title",
+ "track_changes": 1
+}

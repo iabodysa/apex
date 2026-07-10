@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "autoname": "field:adapter_code",
+ "creation": "2026-07-10 05:00:00.000000",
+ "description": "The adapter registry for the ingestion layer: one row per parser kind (tabular workbook family, paper scan, OCR image). A Mapping Profile links to the adapter that runs it, replacing the old inline Select. Adding a new client format family is a new adapter row plus a Mapping Profile, no code change for the operator.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "ts_format_adapter_sec_identity",
+  "adapter_code",
+  "adapter_name",
+  "ts_format_adapter_identity_col",
+  "parser_kind",
+  "enabled",
+  "ts_format_adapter_sec_detail",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "ts_format_adapter_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Adapter"
+  },
+  {
+   "description": "Stable adapter code. This is the record's id and cannot be changed once saved.",
+   "fieldname": "adapter_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Adapter Code",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "adapter_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Adapter Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ts_format_adapter_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "tabular",
+   "description": "How this adapter reads the source: a tabular workbook, a paper scan, or an OCR image.",
+   "fieldname": "parser_kind",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Parser Kind",
+   "options": "tabular\npaper\nocr"
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "ts_format_adapter_sec_detail",
+   "fieldtype": "Section Break",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-10 05:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "TS Format Adapter",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "adapter_name",
+ "track_changes": 1
+}

@@ -73,11 +73,12 @@
    "options": "F1\nF2\nF3\nF4\nF5\nF6\nF7\nF8\nF9\nF10\nF11"
   },
   {
-   "description": "The adapter (parser kind) that runs this profile. The full TS Format Adapter config DocType is delivered with the ingestion-adapters engine batch; the skeleton carries the adapter code here.",
+   "description": "The adapter (parser kind) that runs this profile, from the TS Format Adapter registry.",
    "fieldname": "ts_adapter",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Adapter",
-   "options": "A\nB\nC\nD\nE\nF\nG\nH\nPAPER"
+   "options": "TS Format Adapter"
   },
   {
    "default": "1",
@@ -165,7 +166,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-10 03:32:21.249675",
+ "modified": "2026-07-10 05:24:43.006634",
  "modified_by": "Administrator",
  "module": "Logistay",
  "name": "Mapping Profile",
