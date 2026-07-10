@@ -151,7 +151,11 @@ class TestAccommodationCheckout(FrappeTestCase):
     # --- Departure transport hand-off ---
 
     def _h(self):
-        return frappe.generate_hash(length=4).upper()
+        # Unique identity suffix for fixtures. Room autonames field:room_number
+        # (unique) and Room is in test_ignore, so a short hash birthday-collides
+        # with residual rows -> DuplicateEntryError flake. 12 chars makes the
+        # 16^12 space collision-proof across runs. (P-216)
+        return frappe.generate_hash(length=12).upper()
 
     def _fixtures(self):
         """Real, internally-consistent housing chain + a submitted assignment so a
