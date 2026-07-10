@@ -84,6 +84,49 @@ def _log_blocking_duplicates(doctype: str, fields: list[str], constraint_name: s
     )
 
 
+def _index_exists(doctype: str, index_name: str) -> bool:
+    """True if a (plain or unique) index with this name exists on the table."""
+    try:
+        return bool(
+            frappe.db.sql(
+                "SHOW INDEX FROM `tab{dt}` WHERE Key_name = %s".format(dt=doctype),
+                (index_name,),
+            )
+        )
+    except Exception:
+        return False
+
+
+def add_index_guarded(doctype: str, fields: list[str], index_name: str) -> bool:
+    """Add a plain composite (non-unique) performance index idempotently.
+
+    Called from a controller ``on_doctype_update`` so BOTH fresh installs (app
+    sync applies it) and existing sites (``bench migrate``) get the index — a
+    patch alone never reaches fresh installs, which mark patches complete without
+    running them. No-op when the index already exists; best-effort on DDL error
+    (logs and returns ``False`` rather than aborting migrate).
+    """
+    if _index_exists(doctype, index_name):
+        return True
+
+    col_list = ", ".join(f"`{f}`" for f in fields)
+    try:
+        frappe.db.sql(
+            "ALTER TABLE `tab{dt}` ADD INDEX `{idx}` ({cols})".format(
+                dt=doctype, idx=index_name, cols=col_list
+            )
+        )
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Index add failed: {index_name}"[:140],
+        )
+        return False
+
+    return _index_exists(doctype, index_name)
+
+
 def add_unique_guarded(doctype: str, fields: list[str], constraint_name: str) -> bool:
     """Add a composite UNIQUE index, guarding against pre-existing duplicate data.
 

@@ -85,6 +85,23 @@ SAFE_ALLOWLIST = [
         "the helper never raises. Reached through ledger_index.add_unique_guarded.",
     ),
     (
+        "apex_core/utils/ledger_index.py",
+        "_index_exists",
+        "SHOW INDEX existence probe. The interpolated `dt` is an internally-"
+        "supplied DocType name from a controller `on_doctype_update` (migration-"
+        "time schema name, never request input); the index name is bound as %s. "
+        "Wrapped in try/except, never raises. Reached through add_index_guarded.",
+    ),
+    (
+        "apex_core/utils/ledger_index.py",
+        "add_index_guarded",
+        "Adds a plain composite performance index via ALTER TABLE at migration "
+        "time. The interpolated `dt`/`idx`/`cols` are internally-supplied DocType, "
+        "index and backtick-quoted fieldnames from the calling `on_doctype_update` "
+        "(schema names, never request input); DDL error is caught, rolled back and "
+        "logged. Reached through a controller on_doctype_update, not any request.",
+    ),
+    (
         "habitat/api/dashboard.py",
         "get_custody_value_in_employee_hands",
         "Interpolates `_building_condition()` which escapes every building name "

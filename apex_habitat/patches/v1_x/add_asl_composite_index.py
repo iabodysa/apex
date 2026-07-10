@@ -3,12 +3,13 @@
 
 The custody/stock balance queries filter the ledger by these three columns together
 (active rows of a given item type for an employee). A single composite index serves
-that access path far better than the per-column search indexes alone. This index
-cannot live in the DocType JSON (Frappe only emits single-column search_index rows),
-so it is added here.
+that access path far better than the per-column search indexes alone.
 
-Idempotent: skips if the index already exists. Runs in post_model_sync so the table
-and its synced columns exist.
+The index now lives in the controller ``on_doctype_update`` (via the shared
+``add_index_guarded`` helper) so fresh installs — which mark patches complete without
+running them — also get it. This patch delegates to the same helper so already-migrated
+sites still create it in the same idempotent way. Safe to prune once every deployed site
+has run the on_doctype_update path.
 """
 
 import frappe
@@ -18,26 +19,12 @@ def execute():
     if not frappe.db.exists("DocType", "Accommodation Stock Ledger"):
         return
 
-    # Skip if the index already exists (ADD INDEX IF NOT EXISTS is not portable
-    # across all MariaDB builds for composite indexes).
-    existing = frappe.db.sql(
-        "SHOW INDEX FROM `tabAccommodation Stock Ledger` "
-        "WHERE Key_name = 'idx_asl_cancel_type_emp'"
-    )
-    if existing:
-        return
-
     # [#asl9cx]
-    try:
-        frappe.db.sql(
-            "ALTER TABLE `tabAccommodation Stock Ledger` "
-            "ADD INDEX `idx_asl_cancel_type_emp` (`is_cancelled`, `item_type`, `employee`)"
-        )
-    except Exception:
-        frappe.log_error(
-            message=frappe.get_traceback(),
-            title="Patch: add idx_asl_cancel_type_emp failed",
-        )
-        raise
+    from apex_habitat.apex_core.utils.ledger_index import add_index_guarded
 
+    add_index_guarded(
+        "Accommodation Stock Ledger",
+        ["is_cancelled", "item_type", "employee"],
+        "idx_asl_cancel_type_emp",
+    )
     frappe.db.commit()

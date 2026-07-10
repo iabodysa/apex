@@ -17,6 +17,21 @@ class AccommodationStockLedger(Document):
     pass
 
 
+def on_doctype_update():
+    """Composite index (is_cancelled, item_type, employee) serving the custody /
+    stock-balance access path (active rows of an item type for an employee). Added
+    here — not only via a patch — so fresh installs, which mark patches complete
+    without running them, also get it. Runs on app sync + every migrate; idempotent."""
+    # [#asl9cx]
+    from apex_habitat.apex_core.utils.ledger_index import add_index_guarded
+
+    add_index_guarded(
+        "Accommodation Stock Ledger",
+        ["is_cancelled", "item_type", "employee"],
+        "idx_asl_cancel_type_emp",
+    )
+
+
 # [#swxhdr]
 _MASTER_FIELDS = {
     "Custody Article": ("article_name", "unit_of_measure", "standard_unit_cost"),

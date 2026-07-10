@@ -10,8 +10,10 @@
 #   fixes, and the M-10/M-11-superseded kanban/assignment/email/salis-artifact
 #   no-ops (those records are now provisioned by the data-driven loader
 #   apex_core/setup/seed.seed_all, wired into after_install + after_migrate).
-#   HELD on purpose: add_city_doctype (the ONLY City seed path — no data/ JSON,
-#   no other inserter), rename_habitat_city_to_city (date-gated, remove on/after
+#   HELD on purpose: add_city_doctype (now delegates to the data/ JSON loader
+#   data/habitat/city.json via seed_all — kept so already-migrated sites re-seed
+#   idempotently; fresh installs seed via after_install seed_all),
+#   rename_habitat_city_to_city (date-gated, remove on/after
 #   2026-06-24), v1_x.ensure_web_form_route (recent GitHub #97 route safeguard),
 #   seed_salis_operations_roles (a guarded no-op but still imported by hooks +
 #   salis/setup, so its module must stay). PERMANENT seeders kept below.
