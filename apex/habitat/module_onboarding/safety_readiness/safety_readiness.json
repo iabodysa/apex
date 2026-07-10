@@ -6,6 +6,13 @@
  "subtitle": "Confirm your safety catalog and log your first inspection.",
  "success_message": "Safety is set up. Scheduled tasks and inspections are active.",
  "is_complete": 0,
+ "modified": "2026-07-10 14:33:26.666126",
+ "allow_roles": [
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Safety Officer"
+  }
+ ],
  "steps": [
   {
    "doctype": "Onboarding Step Map",

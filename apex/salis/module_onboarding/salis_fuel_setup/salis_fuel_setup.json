@@ -6,6 +6,13 @@
  "subtitle": "Set a fuel quota, request fuel, and reconcile the claim.",
  "success_message": "Fuel is live. Quotas, requests, and claims now keep consumption and spend reconciled.",
  "is_complete": 0,
+ "modified": "2026-07-10 14:33:26.666126",
+ "allow_roles": [
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Fleet Supervisor"
+  }
+ ],
  "steps": [
   {
    "doctype": "Onboarding Step Map",

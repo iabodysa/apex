@@ -6,6 +6,13 @@
  "subtitle": "Open the front desk and place your first resident.",
  "success_message": "Accommodation is live. Use the Front Desk for daily check-in/out.",
  "is_complete": 0,
+ "modified": "2026-07-10 14:33:26.666126",
+ "allow_roles": [
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Resident Supervisor"
+  }
+ ],
  "steps": [
   {
    "doctype": "Onboarding Step Map",

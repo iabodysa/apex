@@ -88,6 +88,25 @@ class TestOnboardingSteps(FrappeTestCase):
                     bad.append(f"{name} -> Onboarding Step {step} missing")
         self.assertEqual(bad, [], f"module onboarding step links that do not resolve: {bad}")
 
+    def test_daily_role_tours_visible_to_their_role(self):
+        # P-144: each B5 daily-role Module Onboarding must grant its role via
+        # allow_roles, else get_allowed_roles() returns only ["System Manager"]
+        # and desktop.get_onboarding_doc hides the Getting-Started tour from the
+        # very role that needs it. Assert the role is now allowed at runtime.
+        expected = {
+            "Accommodation Go-Live": "Resident Supervisor",
+            "Salis Fuel Setup": "Fleet Supervisor",
+            "Safety Readiness": "Safety Officer",
+            "Maintenance Daily Flow": "Maintenance Technician",
+        }
+        bad = []
+        for name, role in expected.items():
+            doc = frappe.get_doc("Module Onboarding", name)
+            roles = doc.get_allowed_roles()
+            if role not in roles:
+                bad.append(f"{name}: {roles} missing '{role}'")
+        self.assertEqual(bad, [], f"daily-role tours not visible to their role: {bad}")
+
     def test_scan_is_non_vacuous(self):
         # A broken glob must not pass by scanning nothing: assert known records
         # are present on disk so the checks above ran against real data.

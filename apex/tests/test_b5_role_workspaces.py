@@ -101,6 +101,20 @@ class TestB5RoleWorkspaces(unittest.TestCase):
                         f"{ws}: missing Dashboard Chart '{ch.chart_name}'",
                     )
 
+    def test_fleet_fuel_request_shortcut_stats_filter_queryable(self):
+        # P-144: the Fleet Supervisor "Fuel Request" shortcut filtered on
+        # workflow_state, but the Fuel Request Workflow reuses the `status`
+        # field (no workflow_state column) -> the shortcut count raised
+        # "Field not permitted in query: workflow_state" on every open. Assert
+        # the shipped filter is now {status: Pending} and actually executes.
+        doc = frappe.get_doc("Workspace", "Fleet Supervisor")
+        shortcut = next(s for s in doc.shortcuts if s.label == "Fuel Request")
+        stats = json.loads(shortcut.stats_filter)
+        self.assertNotIn("workflow_state", stats, "shortcut still filters on workflow_state")
+        self.assertEqual(stats, {"status": "Pending"})
+        # the count runs cleanly with the shipped filter (no permitted-field error)
+        frappe.db.count("Fuel Request", stats)
+
     def test_patch_stamps_empty_and_preserves_choice(self):
         role = "Safety Officer"
         ws = ROLE_WORKSPACE[role]
