@@ -39,7 +39,7 @@
  ],
  "charts": [
   {
-   "chart": "Movement Trips by Status",
+   "chart": "Dispatch Trips by Status",
    "width": "Half"
   },
   {
@@ -55,7 +55,7 @@
    "width": "Half"
   },
   {
-   "chart": "Vehicle Utilisation",
+   "chart": "Avg Vehicle Utilisation % (All-Time)",
    "width": "Full"
   },
   {

@@ -1,0 +1,20 @@
+{
+ "based_on": "snapshot_date",
+ "chart_name": "Vacant Capacity Cost Trend (Monthly)",
+ "chart_type": "Sum",
+ "doctype": "Dashboard Chart",
+ "document_type": "Occupancy Snapshot",
+ "group_by_type": "Count",
+ "is_public": 1,
+ "is_standard": 1,
+ "module": "Habitat",
+ "name": "Vacant Capacity Cost Trend (Monthly)",
+ "number_of_groups": 0,
+ "time_interval": "Monthly",
+ "timeseries": 1,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "value_based_on": "cost_bleeding",
+ "filters_json": "[]",
+ "modified": "2026-07-10 08:15:21.997787"
+}

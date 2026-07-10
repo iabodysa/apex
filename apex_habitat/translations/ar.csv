@@ -80,6 +80,7 @@ Accommodation Building (Pickup),مبنى السكن (نقطة الالتقاط)
 Accommodation Building and Project are required for an Accommodation to Project Shuttle.,مبنى السكن والمشروع مطلوبان لرحلة النقل من السكن إلى المشروع.
 Accommodation Check-in,تسجيل وصول السكن
 Accommodation Cost Distribution,توزيع تكلفة السكن
+Accommodation Cost by Type,تكلفة الإسكان حسب النوع
 Accommodation Custody Handover,تسليم عهدة السكن
 Accommodation Custody Item,بند عهدة السكن
 Accommodation Custody Return Item,بند إرجاع عهدة السكن
@@ -435,6 +436,7 @@ Avg Available Capacity,متوسط السعة المتاحة
 Avg Cost / Litre,متوسط التكلفة لكل لتر
 Avg Occupancy %,متوسط نسبة الإشغال
 Avg Utilisation %,متوسط نسبة الاستخدام (%)
+Avg Vehicle Utilisation % (All-Time),متوسط نسبة استغلال المركبات (الإجمالي)
 Awareness and Training,التوعية والتدريب
 Back,رجوع
 Back to the system,العودة إلى النظام
@@ -537,7 +539,7 @@ Building {0} is not flagged as a Procurement Intake Store.,المبنى {0} غي
 "Building-level fixed asset: CCTV camera, DVR/NVR, hard disk, router, switch, generator. Custody is on the supervisor, not on an employee.",أصل ثابت على مستوى المبنى: كاميرا مراقبة، مسجّل DVR/NVR، قرص صلب، موجّه، مبدّل، مولّد. العهدة على المشرف وليست على موظف.
 Buildings Granted,المباني المرخصة
 Buildings In Scope,المباني المشمولة بالعمل
-Buildings Over Threshold,المباني المتجاوزة للحد
+Buildings Over Occupancy Threshold,المباني المتجاوزة لحد الإشغال
 Bump on any client format revision. Revisions create a new version; never overwrite.,ارفع الإصدار عند أي تعديل على صيغة العميل. التعديلات تنشئ إصدارًا جديدًا ولا تستبدل القديم.
 "Business nature of the asset move, separating internal relocations from temporary or permanent transfers between companies and from maintenance, repair-return, or disposal movements, which drives cost and ownership treatment.",الطبيعة التشغيلية لنقل الأصل، تفصل النقل الداخلي عن التحويلات المؤقتة أو الدائمة بين الشركات وعن حركات الصيانة أو إعادة الإصلاح أو الإعدام، وتحدّد معالجة التكلفة والملكية.
 CCTV Camera,كاميرا مراقبة
@@ -833,7 +835,6 @@ Cost,التكلفة
 Cost Allocation,توزيع التكلفة
 Cost Attribution,عزو التكلفة
 Cost Bearing (%),نسبة تحمّل التكلفة (٪)
-Cost Bleed by Building,هدر التكلفة حسب المبنى
 Cost Bleeding (SAR),هدر التكلفة (ريال)
 Cost Center,مركز التكلفة
 Cost Center is required. Please set it or configure a default Cost Center on Building {0}.,مركز التكلفة مطلوب. يُرجى تعيينه أو تهيئة مركز تكلفة افتراضي على المبنى {0}.
@@ -1566,9 +1567,6 @@ Fuel Request Pending Max Days,الحد الأقصى لأيام انتظار طل
 Fuel Request {0} is not pending (current status: {1}).,طلب الوقود {0} ليس قيد الانتظار (الحالة الحالية: {1}).
 Fuel Requests Approved This Month,طلبات الوقود المعتمدة هذا الشهر
 Fuel Requests by Status,طلبات الوقود حسب الحالة
-Fuel Spend This Month,إنفاق الوقود لهذا الشهر
-Fuel Spend Trend,اتجاه إنفاق الوقود
-Fuel Spend by Platform,إنفاق الوقود حسب المنصة
 Fuel Spend by Vehicle,إنفاق الوقود حسب المركبة
 Fuel chip {0} via request {1} (chip {2}).,شريحة وقود {0} عبر الطلب {1} (الشريحة {2}).
 Fuel consumption {0} L for vehicle {1} in period {2} exceeds the monthly quota of {3} L by {4} L (quota {5}).,استهلاك الوقود {0} لتر للمركبة {1} في الفترة {2} يتجاوز الحصة الشهرية البالغة {3} لتر بمقدار {4} لتر (الحصة {5}).
@@ -1736,6 +1734,7 @@ Idle Days,أيام التوقف
 Idle Report,تقرير الخمول
 Idle Report Status,حالة تقرير الخمول
 Idle Resident Detection,رصد الساكنين غير المشغّلين
+Idle Resident Housing Cost by Building,تكلفة سكن المقيمين الخامل حسب المبنى
 Idle Resident Report,تقرير مقيم غير مُشغَّل
 Idle Residents,الساكنون غير المشغّلين
 Idle Vehicle,مركبة خاملة
@@ -1933,14 +1932,11 @@ Lease Expiry Lead Days,أيام التنبيه قبل انتهاء الإيجا�
 Lease Expiry Watchlist,قائمة مراقبة انتهاء عقود الإيجار
 Lease Start Date,تاريخ بداية عقد الإيجار
 Lease payment reference: {0},مرجع دفعة الإيجار: {0}
-Leases by Status,عقود الإيجار حسب الحالة
 Leasing,التأجير
 Leave,إجازة
 Leave blank for permanent,اتركه فارغاً للدائم
 Leave empty for building-level stock.,اتركه فارغاً إذا كان المخزون على مستوى المبنى.
 Ledger Accrued Total,إجمالي استحقاق دفتر الأستاذ
-Ledger Cost This Month,تكلفة الدفتر هذا الشهر
-Ledger Cost by Type,تكلفة الدفتر حسب النوع
 Ledger Entries,قيود الدفتر
 Ledger Entry,قيد الأستاذ
 Ledger Rows,أسطر الدفتر
@@ -2140,7 +2136,6 @@ Monday,الاثنين
 Month,الشهر
 Monthly,شهري
 Monthly Amount (SAR),المبلغ الشهري (ريال)
-Monthly Cost Bleeding,هدر التكلفة الشهري
 Monthly Cost per Bed Capacity (SAR),تكلفة السرير الشهرية للسعة (ريال)
 Monthly Litres,اللترات الشهرية
 Monthly Rent (SAR),الإيجار الشهري (ريال)
@@ -2167,7 +2162,6 @@ Movement Date,تاريخ الحركة
 Movement KPI Summary,ملخص مؤشرات أداء الحركة
 Movement Operations Dashboard,لوحة معلومات عمليات الحركة
 Movement Reason,سبب الحركة
-Movement Trips by Status,رحلات الحركة حسب الحالة
 Movement Type,نوع الحركة
 "Movement planner who fulfilled the request, set on submit (Movement fulfils the request).",مخطّط الحركة الذي نفّذ الطلب، يُضبط عند الاعتماد (الحركة تنفّذ الطلب).
 Must be Admin Manager,يجب أن يكون مدير الشؤون الإدارية
@@ -2470,6 +2464,7 @@ Over-capacity,تجاوز السعة
 Overall Result,النتيجة الإجمالية
 Overall Status,الحالة العامة
 Overdue,متأخر
+Overdue Arrivals Awaiting Housing,الوافدون المتأخرون بانتظار الإسكان
 Overdue Audit Remediation Plans,خطط معالجة التدقيق المتأخرة
 Overdue Checkouts,مغادرات متأخرة
 Overdue Rental Settlements,تسويات الإيجار المتأخرة
@@ -2552,7 +2547,6 @@ Pending Transport Requests,طلبات نقل معلّقة
 Pending Utility Bills,فواتير الخدمات المعلّقة
 Pending Vehicle Write-Offs,شطب المركبات المعلّق
 Pending Wash Requests,طلبات الغسيل المعلّقة
-Pending on Manifest,المتبقّون في كشف الوصول
 Pending on manifest,المتبقّون في كشف الوصول
 Pending rows are picked up by the daily ingestion job. Processed / Failed / Skipped rows are never re-ingested.,تلتقط مهمة الإدخال اليومية السطور المعلّقة. أما السطور المعالَجة/الفاشلة/المتخطّاة فلا يُعاد إدخالها.
 Per Pay Period,لكل فترة دفع
@@ -3237,6 +3231,7 @@ Scheduled Date,التاريخ المجدول
 Scheduled Job Log,سجل المهام المجدولة
 Scheduled Task,مهمة مجدولة
 Scheduled Task Assignment,إسناد مهمة مجدولة
+Scheduled Task Completion Rate %,نسبة إنجاز المهام المجدولة (%)
 Scheduled Task Instance,تنفيذ مهمة مجدولة
 Scheduled Task Instances by Status,سجلات تنفيذ المهام المجدولة حسب الحالة
 Scheduled Task Template,قالب جدولة المهام
@@ -3786,6 +3781,7 @@ Top-up Litres,لترات التعبئة
 Top-up Litres must be greater than zero.,يجب أن تكون لترات التعبئة أكبر من صفر.
 Topups by Status,التعبئات حسب الحالة
 Total,الإجمالي
+Total Accommodation Cost This Month,إجمالي تكلفة الإسكان هذا الشهر
 Total Accrued,إجمالي المستحق
 Total Amount,المبلغ الإجمالي
 Total Asset Book Value,إجمالي القيمة الدفترية للأصول
@@ -3954,7 +3950,7 @@ VAPID Public Key,مفتاح VAPID العام
 VAPID Subject,موضوع VAPID
 "VAPID private key. Secret — stored encrypted, never exposed to the client.",مفتاح VAPID الخاص. سري — يُخزَّن مشفّرًا ولا يُكشف للعميل أبدًا.
 VAPID public key (base64url). Handed to the browser to subscribe; safe to expose.,مفتاح VAPID العام (base64url). يُسلَّم للمتصفح للاشتراك؛ آمن الكشف.
-Vacant Beds,الأسرة الشاغرة
+Vacant Capacity Cost Trend (Monthly),اتجاه تكلفة السعة الشاغرة (شهري)
 Valid,ساري
 Valid From,صالح من
 Valid Until,صالح حتى
@@ -4139,6 +4135,7 @@ Workers Transport Dashboard,لوحة نقل العمالة
 Workers Transport Fulfilled This Month,نقل العمالة المنفّذ هذا الشهر
 Workers Transport Over Time,نقل العمالة عبر الزمن
 Workers Transport Requests Open,طلبات نقل العمالة المفتوحة
+Workers Transport Scheduled Awaiting Dispatch,نقل العمال المجدول بانتظار الإرسال
 Workers are expected to arrive at this building today — prepare beds and custody,من المتوقع وصول عمال إلى هذا المبنى اليوم — جهّز الأسرّة والعهدة
 "Workflow stage of the maintenance request from open through assignment and active work to resolution and closure, including reopening when a fix does not hold.",مرحلة سير عمل طلب الصيانة من مفتوح مرورًا بالإسناد والعمل النشط حتى الحل والإغلاق، بما في ذلك إعادة الفتح عند عدم صمود الإصلاح.
 Workshop Overstay,تأخّر في الورشة

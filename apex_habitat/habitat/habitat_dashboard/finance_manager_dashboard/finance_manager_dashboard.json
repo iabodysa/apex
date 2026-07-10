@@ -13,7 +13,7 @@
    "card": "Disputed Utility Bills"
   },
   {
-   "card": "Ledger Cost This Month"
+   "card": "Total Accommodation Cost This Month"
   },
   {
    "card": "Supplier-Billed Cost This Month"
@@ -27,11 +27,11 @@
  ],
  "charts": [
   {
-   "chart": "Ledger Cost by Type",
+   "chart": "Accommodation Cost by Type",
    "width": "Half"
   },
   {
-   "chart": "Monthly Cost Bleeding",
+   "chart": "Vacant Capacity Cost Trend (Monthly)",
    "width": "Half"
   },
   {
@@ -39,7 +39,7 @@
    "width": "Half"
   },
   {
-   "chart": "Leases by Status",
+   "chart": "Accommodation Leases by Status",
    "width": "Half"
   },
   {

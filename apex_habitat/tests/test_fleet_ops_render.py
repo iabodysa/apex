@@ -44,7 +44,7 @@ FLEET_CARDS = [
 ]
 
 # P-094 headline-chart design: the fleet workspace pins one headline chart.
-FLEET_CHARTS = ["Fuel Spend Trend"]
+FLEET_CHARTS = ["Fuel Cost by Month"]
 
 
 class TestFleetOpsRender(FrappeTestCase):
@@ -176,7 +176,7 @@ class TestFleetOpsRender(FrappeTestCase):
         )
 
     def _fuel_request(self):
-        # Fuel Spend Trend sums Fuel Request.amount (status=Done) by request_date.
+        # Fuel Cost by Month sums Fuel Request.amount (status=Done) by request_date.
         # A new request is guarded to status Pending; the Done status + amount are
         # reached through the workflow, so set them via db (same bypass _alerts uses)
         # to land a real row the chart can sum without driving the full workflow.
@@ -210,7 +210,7 @@ class TestFleetOpsRender(FrappeTestCase):
         self._assignment_draft()  # Vehicle Activations
         self._overstay_vehicle()  # Workshop Overstay
         self._alerts()  # Open Alerts by Type + Median Alert Resolve Days
-        self._fuel_request()  # Fuel Spend Trend (headline chart)
+        self._fuel_request()  # Fuel Cost by Month (headline chart)
 
     def _card_result(self, card_name):
         """Render a Number Card exactly as the widget does.

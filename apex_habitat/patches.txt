@@ -107,6 +107,14 @@ apex_habitat.patches.v1_x.ensure_web_form_route
 # deployed site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v1_x.drop_legacy_is_standard0_dashboards
 
+# v2.0.0 — B3 (P-157) dashboards/charts/number-cards cleanup (ONE-TIME). The B3 wave
+# deleted duplicate twins and renamed charts/cards/dashboards by shipping them under new
+# is_standard=1 JSON; is_standard import is add/update-by-name only, so this force-deletes
+# the OLD-named orphan rows left on upgrading sites (the shipped dashboards already point at
+# the canonical/renamed names). Guarded exists-check; idempotent; no-op on fresh installs.
+# PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v2_0.drop_renamed_dashboards_charts_cards
+
 # v1.52.x — backfill total_rooms / total_floors on existing buildings (ONE-TIME). The
 # controller now derives both from the generated rooms; rows saved earlier showed stale 0.
 # Idempotent, no-op on fresh installs. PRUNE once every deployed site has run it.
