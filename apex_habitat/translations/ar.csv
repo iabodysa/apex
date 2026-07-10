@@ -306,6 +306,7 @@ Arrival Date plus Window Days. Computed by the controller.,تاريخ الوصو
 Arrival Manifest,بيان الوصول
 Arrival Slip,قسيمة الوصول
 Arrivals Desk,مكتب الوصول
+Arrivals Desk (Board),مكتب الوصول (لوحة متابعة)
 Arrivals Desk (Screen),مكتب الوصول (شاشة إدخال)
 Arrivals Expected Today: {{ doc.building }} ({{ doc.expected_count }}),وصول متوقع اليوم: {{ doc.building }} ({{ doc.expected_count }})
 Arrivals Intake,استقبال الوافدين
@@ -511,6 +512,7 @@ Boarding Scan Log rows are append-only and cannot be edited.,صفوف سجل م�
 Boarding State,حالة الصعود
 Boarding and Departure Flow,تدفق الصعود والمغادرة
 "Boarding state of a worker for the trip, tracking whether boarding is pending, the worker claimed a seat, actually boarded, was rejected by the driver, or was absent.",حالة صعود العامل للرحلة، تتابع ما إذا كان الصعود قيد الانتظار، أو حجز العامل مقعدًا، أو صعد فعليًا، أو رفضه السائق، أو تغيّب.
+Boards and Dashboards,لوحات المتابعة ولوحات المعلومات
 Book Value (SAR),القيمة الدفترية (ريال)
 Bookkeeping,المسك المحاسبي
 Both a source bed and a target bed are required.,يلزم تحديد سرير المصدر وسرير الوجهة معاً.
@@ -731,6 +733,7 @@ Company's share (%) of shared utility bills for this building. Agreed with the p
 Complaint,شكوى
 Complete,إكمال
 Complete Trip,إتمام الرحلة
+Complete a Maintenance Work Order,إكمال أمر عمل صيانة
 Completed,مكتمل
 Completed (timed),المكتملة (موقّتة)
 Completed Date,تاريخ الإنجاز
@@ -940,6 +943,7 @@ Create Driver,إنشاء سائق
 Create Fuel Quota,إنشاء حصة وقود
 Create Payment,إنشاء دفعة
 Create QR for all ({0}),إنشاء رمز QR للجميع ({0})
+Create Records,إنشاء السجلات
 Create Rental Settlement,إنشاء تسوية إيجار
 Create Route Plan,إنشاء خطة مسار
 Create Safety Inspection Report,إنشاء تقرير تفتيش سلامة
@@ -1004,6 +1008,7 @@ Custody Issue {0} was not found or is not submitted.,صرف العهدة {0} غ�
 Custody Issues by Status,صرف العهد حسب الحالة
 Custody Items Pending Return,أصناف العهدة بانتظار الإرجاع
 Custody Kiosk,كشك العهد
+Custody Kiosk (Board),كشك العهد (لوحة متابعة)
 Custody Kiosk (Screen),كشك العهدة (شاشة إدخال)
 Custody Loss,فقدان عهدة
 Custody Master,بيانات العهد الأساسية
@@ -1476,14 +1481,18 @@ Flags a building that receives externally-purchased goods before they are handed
 Flags that this policy must be reviewed by Legal/HR against KSA Labor Law (wage-deduction articles) before activation. Kept ON by design as a standing reminder.,يشير إلى وجوب مراجعة هذه السياسة من قبل الشؤون القانونية/الموارد البشرية وفق نظام العمل السعودي (مواد خصم الأجور) قبل التفعيل. يبقى مفعّلًا بالتصميم كتذكير دائم.
 Fleet,الأسطول
 Fleet Control,التحكّم بالأسطول
+Fleet Control (Board),التحكّم بالأسطول (لوحة متابعة)
 Fleet Manager Dashboard,لوحة معلومات مدير الأسطول
 Fleet Operations,التشغيل
 Fleet Operations Go-Live,تشغيل الأسطول — الانطلاق
 Fleet Operations is live. Use Fleet Control to watch and act on the fleet.,تشغيل الأسطول جاهز. استخدم لوحة التحكّم لمراقبة الأسطول والتصرّف.
 Fleet Payment Register,سجل المدفوعات
 Fleet Portal,بوابة الأسطول
+Fleet Portal (Portal),بوابة الأسطول (بوابة)
 Fleet Register,سجل الأسطول
+Fleet Supervisor,مشرف الأسطول
 Fleet Supervisor Dashboard,لوحة معلومات مشرف الأسطول
+Fleet Supervisor Dashboard (Dashboard),لوحة معلومات مشرف الأسطول (لوحة معلومات)
 Fleet and Fuel Dashboard,لوحة الأسطول والوقود
 Fleet dashboard,لوحة الأسطول
 "Fleet driver master record: identity, project, supervisor, vehicle linkage, and compliance.",سجل أساسي لسائق الأسطول: الهوية والمشروع والمشرف وربط المركبة والامتثال.
@@ -1526,6 +1535,7 @@ From Room,من غرفة
 From Room does not match the asset's current location ({0}).,الغرفة المصدر لا تطابق الموقع الحالي للأصل ({0}).
 From and To location must differ for a Facility Asset Movement.,يجب أن يختلف موقع البداية والنهاية في حركة أصول المنشأة.
 Front Desk,مكتب الاستقبال
+Front Desk (Board),مكتب الاستقبال (لوحة متابعة)
 Front Desk (Screen),مكتب الاستقبال (شاشة إدخال)
 Frontend Base URL,العنوان الأساسي للواجهة الأمامية
 Frontend Base URL must start with http:// or https:// (for example https://salis-fleet.com).,يجب أن يبدأ رابط الواجهة الأمامية بـ http:// أو https:// (مثال: https://salis-fleet.com).
@@ -1686,6 +1696,7 @@ Housing Cleaning Audit,تدقيق نظافة السكن
 Housing Inventory,جرد السكن
 Housing Office,مكتب الإسكان
 Housing Office Number,رقم مكتب السكن
+Housing Portal (Portal),بوابة الإسكان (بوابة)
 Housing Request,طلب سكن
 Housing Supervisor,مشرف السكن
 Housing Terms & Conditions,شروط وأحكام السكن
@@ -1799,6 +1810,7 @@ Intercompany Permanent,نقل دائم بين الشركات
 Intercompany Temporary,نقل مؤقت بين الشركات
 Interior,داخلي
 Internal Auditor Dashboard,لوحة معلومات المدقق الداخلي
+Internal Auditor Dashboard (Dashboard),لوحة معلومات المدقق الداخلي (لوحة معلومات)
 Internal Billing Model,نموذج الفوترة الداخلية
 Internal Billing Notes,ملاحظات الفوترة الداخلية
 Internal Employee,موظف داخلي
@@ -2030,6 +2042,7 @@ Maintenance Aging,تقادم طلبات الصيانة
 Maintenance Cost Ledger,سجل تكاليف الصيانة
 Maintenance Cost Ledger rows are immutable and cannot be edited.,صفوف سجل تكاليف الصيانة غير قابلة للتغيير ولا يمكن تعديلها.
 Maintenance Count,عدد مرات الصيانة
+Maintenance Daily Flow,سير العمل اليومي للصيانة
 Maintenance Dispatch,إرسال للصيانة
 Maintenance Findings,ملاحظات الصيانة
 Maintenance Flow,مسار الصيانة
@@ -2045,11 +2058,13 @@ Maintenance Reports,تقارير الصيانة
 Maintenance Request,طلب صيانة
 Maintenance Requests by Priority,طلبات الصيانة حسب الأولوية
 Maintenance Requests by Status,طلبات الصيانة حسب الحالة
+Maintenance Technician,فني الصيانة
 Maintenance Work Order,أمر عمل صيانة
 Maintenance Work Orders Completed,أوامر عمل الصيانة المكتملة
 Maintenance Work Orders In Progress,أوامر عمل الصيانة قيد التنفيذ
 Maintenance Work Orders by Status,أوامر عمل الصيانة حسب الحالة
 Maintenance cost ledger. Maintained automatically by the system when a Maintenance Work Order is completed and not edited manually. One immutable row per procurement item.,سجل تكاليف الصيانة. يُحدَّث تلقائياً بواسطة النظام عند اكتمال أمر عمل صيانة، ولا يُحرَّر يدوياً. صف واحد غير قابل للتغيير لكل بند مشتريات.
+Maintenance is set up. Raise requests and close work orders from your daily page.,تم إعداد الصيانة. أنشئ الطلبات وأغلق أوامر العمل من صفحتك اليومية.
 Maintenance: {0},الصيانة: {0}
 Manifest Not Reconciled: {{ doc.building }} ({{ doc.pending_arrival_count }} pending),بيان غير مُسوّى: {{ doc.building }} ({{ doc.pending_arrival_count }} معلّق)
 Manual,يدوي
@@ -2133,6 +2148,9 @@ Mobile Number,رقم الجوال
 Mobile Number (Optional),رقم الجوال (اختياري)
 Mobile Portals,البوابات الجوالة
 Monday,الاثنين
+Monitoring,المراقبة
+Monitoring boards and dashboards: live views that refresh automatically.,لوحات المتابعة ولوحات المعلومات: عروض مباشرة تُحدَّث تلقائيًا.
+Monitoring list: open items to watch and action.,قائمة المراقبة: عناصر مفتوحة للمتابعة واتخاذ الإجراء.
 Month,الشهر
 Monthly,شهري
 Monthly Amount (SAR),المبلغ الشهري (ريال)
@@ -2373,6 +2391,7 @@ Open Fuel Exception Cases,حالات استثناء وقود مفتوحة
 Open Incidents,البلاغات المفتوحة
 Open Maintenance,صيانة مفتوحة
 Open Maintenance Requests,طلبات الصيانة المفتوحة
+Open Maintenance Work Order,فتح أمر عمل الصيانة
 Open Maintenance: {0},صيانة مفتوحة: {0}
 Open Movement Cost Recoveries,عمليات استرداد تكلفة حركة مفتوحة
 Open Passenger Manifest,فتح كشف الركاب
@@ -2388,6 +2407,7 @@ Open Transport Requests,طلبات النقل المفتوحة
 Open Vehicle,فتح المركبة
 Open Vehicle Incidents,بلاغات المركبات المفتوحة
 "Open a maintenance ticket, guided step by step through the form.",افتح تذكرة صيانة، بإرشاد خطوة بخطوة عبر النموذج.
+Open a work order and record the job on the full form.,افتح أمر عمل وسجّل المهمة في النموذج الكامل.
 Open the Action Inbox,افتح صندوق الإجراءات
 Open the Dispatch Board,افتح لوحة التشغيل
 Open the Front Desk,افتح مكتب الاستقبال
@@ -2758,6 +2778,7 @@ Raise a Fuel Request,أنشئ طلب وقود
 Raise a Maintenance Request,رفع طلب صيانة
 Raise a Salis Payment Request,رفع طلب دفع سلس
 Raise a Transport Request,أنشئ طلب نقل
+Raise a maintenance request and complete your first work order.,أنشئ طلب صيانة وأكمل أول أمر عمل لك.
 Raise the first payment claim against a settled rental so cost recovery is complete.,ارفع أول مطالبة دفع على إيجار مُسوّى حتى يكتمل استرداد التكلفة.
 Raised By,أُنشئ بواسطة
 Raised On,أُنشئ في
@@ -2990,7 +3011,9 @@ Resident & Building,المقيم والمبنى
 Resident / worker is required.,المقيم / العامل مطلوب.
 Resident Request,طلب مقيم
 Resident Request Resolved: {{ doc.name }},تمت معالجة طلب الساكن: {{ doc.name }}
+Resident Supervisor,مشرف الساكنين
 Resident Supervisor Dashboard,لوحة معلومات مشرف الساكنين
+Resident Supervisor Dashboard (Dashboard),لوحة معلومات مشرف الساكنين (لوحة معلومات)
 Resident Support Services,خدمات دعم المقيمين
 Resident Type,نوع المقيم
 Resident request assigned for follow-up: {0},تم إسناد طلب المقيم للمتابعة: {0}
@@ -3085,6 +3108,7 @@ Room Number,رقم الغرفة
 Room Number Prefix,بادئة رقم الغرفة
 Room Numbering,ترقيم الغرف
 Room Setup,إعداد الغرف
+Room Setup (Board),إعداد الغرف (لوحة متابعة)
 Room Setup (Screen),إعداد الغرف (شاشة إدخال)
 Room Setup — {0},إعداد الغرف — {0}
 Room Status,حالة الغرفة
@@ -3152,9 +3176,11 @@ Safety Inspections Over Time,تفتيشات السلامة عبر الزمن
 Safety Inspections Recorded,فحوصات السلامة المسجلة
 Safety Map,خريطة السلامة
 Safety Map (Board),خريطة السلامة (لوحة متابعة)
+Safety Officer,مسؤول السلامة
 Safety Open Findings,نتائج السلامة المفتوحة
 Safety Operations,عمليات السلامة
 Safety Overdue Grace Days,أيام سماح تأخر السلامة
+Safety Portal (Portal),بوابة السلامة (بوابة)
 Safety Pre-Due Lead Days,أيام التنبيه المسبق للسلامة
 Safety Profile,ملف السلامة
 Safety Readiness,جاهزية السلامة
@@ -3194,6 +3220,7 @@ Salis Active Drivers,السائقون النشطون
 Salis Active Trips,رحلات نشطة
 Salis Compliance Drivers Licenses Expiring Soon,رخص قائدين قاربت الانتهاء
 Salis Dispatch Board,لوحة توجيه سلس
+Salis Dispatch Board (Board),لوحة توجيه سلس (لوحة متابعة)
 Salis Driver,سائق
 Salis Fleet Master,بيانات أسطول سلس
 Salis Fuel Setup,إعداد وقود سلس

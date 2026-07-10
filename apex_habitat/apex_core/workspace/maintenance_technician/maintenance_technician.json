@@ -1,0 +1,242 @@
+{
+ "doctype": "Workspace",
+ "name": "Maintenance Technician",
+ "label": "Maintenance Technician",
+ "title": "Maintenance Technician",
+ "module": "Apex Core",
+ "icon": "wrench",
+ "public": 1,
+ "is_standard": 1,
+ "is_default": 0,
+ "is_hidden": 0,
+ "sequence_id": 1.3,
+ "parent_page": "",
+ "roles": [
+  {
+   "role": "Maintenance Technician"
+  },
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "content": "[{\"id\": \"mtHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"mtOnb\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Maintenance Daily Flow\", \"col\": 12}}, {\"id\": \"mtHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"mtScReq\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"mtScWO\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Work Order\", \"col\": 3}}, {\"id\": \"mtScInsp\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Inspection Report\", \"col\": 3}}, {\"id\": \"mtScAsset\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Facility Asset\", \"col\": 3}}, {\"id\": \"mtHdrDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"mtCardCreate\", \"type\": \"card\", \"data\": {\"card_name\": \"Create Records\", \"col\": 4}}, {\"id\": \"mtHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"mtNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"mtNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Escalated Maintenance Requests\", \"col\": 3}}, {\"id\": \"mtNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders In Progress\", \"col\": 3}}, {\"id\": \"mtNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Facility Assets Needing Attention\", \"col\": 3}}, {\"id\": \"mtChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Maintenance Requests by Status\", \"col\": 12}}, {\"id\": \"mtHdrMon\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Monitoring</b></span>\", \"col\": 12}}, {\"id\": \"mtCardMon\", \"type\": \"card\", \"data\": {\"card_name\": \"Monitoring\", \"col\": 4}}, {\"id\": \"mtHdrRpt\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Reports</b></span>\", \"col\": 12}}, {\"id\": \"mtCardRpt\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"mtHdrMD\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"mtCardMD\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Maintenance Request",
+   "link_to": "Maintenance Request",
+   "stats_filter": "{\"status\": [\"in\", [\"Open\", \"Assigned\", \"In Progress\", \"Reopened\"]]}",
+   "format": "{} Open",
+   "color": "Yellow",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Maintenance Work Order",
+   "link_to": "Maintenance Work Order",
+   "color": "Green",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Maintenance Inspection Report",
+   "link_to": "Maintenance Inspection Report",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Facility Asset",
+   "link_to": "Facility Asset",
+   "idx": 4
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Create Records",
+   "description": "Input screen: open an item to create or edit records.",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Request",
+   "link_type": "DocType",
+   "link_to": "Maintenance Request",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Work Order",
+   "link_type": "DocType",
+   "link_to": "Maintenance Work Order",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Inspection Report",
+   "link_type": "DocType",
+   "link_to": "Maintenance Inspection Report",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Facility Asset",
+   "link_type": "DocType",
+   "link_to": "Facility Asset",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Facility Asset Movement",
+   "link_type": "DocType",
+   "link_to": "Facility Asset Movement",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Subcontractor Service Order",
+   "link_type": "DocType",
+   "link_to": "Subcontractor Service Order",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Monitoring",
+   "description": "Monitoring list: open items to watch and action.",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Operations Alert",
+   "link_type": "DocType",
+   "link_to": "Operations Alert",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Scheduled Task Instance",
+   "link_type": "DocType",
+   "link_to": "Scheduled Task Instance",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Reports",
+   "description": "Reports: read-only. Open to view on screen or export.",
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Open Maintenance Requests",
+   "link_type": "Report",
+   "link_to": "Open Maintenance Requests",
+   "is_query_report": 1,
+   "idx": 12
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Aging",
+   "link_type": "Report",
+   "link_to": "Maintenance Aging",
+   "is_query_report": 1,
+   "idx": 13
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Operational Depreciation Aging",
+   "link_type": "Report",
+   "link_to": "Operational Depreciation Aging",
+   "is_query_report": 1,
+   "idx": 14
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Master Data",
+   "description": "Reference data: durable records you set up once, not daily work.",
+   "idx": 15
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Material",
+   "link_type": "DocType",
+   "link_to": "Maintenance Material",
+   "idx": 16
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Maintenance Material Template",
+   "link_type": "DocType",
+   "link_to": "Maintenance Material Template",
+   "idx": 17
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Subcontractor Service Contract",
+   "link_type": "DocType",
+   "link_to": "Subcontractor Service Contract",
+   "idx": 18
+  }
+ ],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Maintenance Requests by Status",
+   "label": "Maintenance Requests by Status",
+   "idx": 1
+  }
+ ],
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Open Maintenance Requests",
+   "label": "Open Maintenance Requests",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Escalated Maintenance Requests",
+   "label": "Escalated Maintenance Requests",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Maintenance Work Orders In Progress",
+   "label": "Maintenance Work Orders In Progress",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Facility Assets Needing Attention",
+   "label": "Facility Assets Needing Attention",
+   "idx": 4
+  }
+ ],
+ "custom_blocks": [],
+ "quick_lists": [],
+ "modified": "2026-07-10 08:55:47.226566"
+}

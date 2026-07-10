@@ -1,0 +1,316 @@
+{
+ "doctype": "Workspace",
+ "name": "Fleet Supervisor",
+ "label": "Fleet Supervisor",
+ "title": "Fleet Supervisor",
+ "module": "Apex Core",
+ "icon": "truck",
+ "public": 1,
+ "is_standard": 1,
+ "is_default": 0,
+ "is_hidden": 0,
+ "sequence_id": 1.1,
+ "parent_page": "",
+ "roles": [
+  {
+   "role": "Fleet Supervisor"
+  },
+  {
+   "role": "Fleet Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "content": "[{\"id\": \"fsHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"fsOnb\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Salis Fuel Setup\", \"col\": 12}}, {\"id\": \"fsHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"fsScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"fsScHandover\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Handover\", \"col\": 3}}, {\"id\": \"fsScFuel\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Request\", \"col\": 3}}, {\"id\": \"fsScIncident\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Incident\", \"col\": 3}}, {\"id\": \"fsScControl\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fleet Control (Board)\", \"col\": 3}}, {\"id\": \"fsScPortal\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fleet Portal (Portal)\", \"col\": 3}}, {\"id\": \"fsHdrDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"fsCardCreate\", \"type\": \"card\", \"data\": {\"card_name\": \"Create Records\", \"col\": 4}}, {\"id\": \"fsHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"fsNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Vehicles Under Maintenance\", \"col\": 3}}, {\"id\": \"fsNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Fuel Requests\", \"col\": 3}}, {\"id\": \"fsNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Exception Cases\", \"col\": 3}}, {\"id\": \"fsNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Vehicle Incidents\", \"col\": 3}}, {\"id\": \"fsNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workshop Overstay\", \"col\": 3}}, {\"id\": \"fsChart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Cost by Month\", \"col\": 12}}, {\"id\": \"fsHdrMon\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Boards and Dashboards</b></span>\", \"col\": 12}}, {\"id\": \"fsCardBoards\", \"type\": \"card\", \"data\": {\"card_name\": \"Boards and Dashboards\", \"col\": 4}}, {\"id\": \"fsHdrRpt\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Reports</b></span>\", \"col\": 12}}, {\"id\": \"fsCardRpt\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"fsHdrMD\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"fsCardMD\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
+ "shortcuts": [
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Vehicle Assignment",
+   "link_to": "Vehicle Assignment",
+   "color": "Green",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Vehicle Handover",
+   "link_to": "Vehicle Handover",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Fuel Request",
+   "link_to": "Fuel Request",
+   "stats_filter": "{\"workflow_state\": [\"in\", [\"Draft\", \"Pending Approval\"]]}",
+   "format": "{} Pending",
+   "color": "Yellow",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "DocType",
+   "label": "Vehicle Incident",
+   "link_to": "Vehicle Incident",
+   "stats_filter": "{\"status\": \"Open\"}",
+   "format": "{} Open",
+   "color": "Red",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "Page",
+   "label": "Fleet Control (Board)",
+   "link_to": "operations-control",
+   "color": "Blue",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Shortcut",
+   "type": "URL",
+   "label": "Fleet Portal (Portal)",
+   "url": "/fleet",
+   "color": "Green",
+   "idx": 6
+  }
+ ],
+ "links": [
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Create Records",
+   "description": "Input screen: open an item to create or edit records.",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Assignment",
+   "link_type": "DocType",
+   "link_to": "Vehicle Assignment",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Handover",
+   "link_type": "DocType",
+   "link_to": "Vehicle Handover",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Driver Attendance",
+   "link_type": "DocType",
+   "link_to": "Driver Attendance",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Wash Request",
+   "link_type": "DocType",
+   "link_to": "Wash Request",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Request",
+   "link_type": "DocType",
+   "link_to": "Fuel Request",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Daily Log",
+   "link_type": "DocType",
+   "link_to": "Fuel Daily Log",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Incident",
+   "link_type": "DocType",
+   "link_to": "Vehicle Incident",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Stop",
+   "link_type": "DocType",
+   "link_to": "Vehicle Stop",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Boards and Dashboards",
+   "description": "Monitoring boards and dashboards: live views that refresh automatically.",
+   "idx": 10
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fleet Control (Board)",
+   "link_type": "Page",
+   "link_to": "operations-control",
+   "idx": 11
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Approval Console (Board)",
+   "link_type": "Page",
+   "link_to": "fuel-approval-console",
+   "idx": 12
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Dispatch Board (Board)",
+   "link_type": "Page",
+   "link_to": "salis-dispatch-board",
+   "idx": 13
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fleet Supervisor Dashboard (Dashboard)",
+   "link_type": "Dashboard",
+   "link_to": "Fleet Supervisor Dashboard",
+   "idx": 14
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Reports",
+   "description": "Reports: read-only. Open to view on screen or export.",
+   "idx": 15
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fleet Register",
+   "link_type": "Report",
+   "link_to": "Fleet Register",
+   "is_query_report": 1,
+   "idx": 16
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Utilisation",
+   "link_type": "Report",
+   "link_to": "Vehicle Utilisation",
+   "is_query_report": 1,
+   "idx": 17
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Reconciliation",
+   "link_type": "Report",
+   "link_to": "Fuel Reconciliation",
+   "is_query_report": 1,
+   "idx": 18
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Driver Attendance Summary",
+   "link_type": "Report",
+   "link_to": "Driver Attendance Summary",
+   "is_query_report": 1,
+   "idx": 19
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Card Break",
+   "label": "Master Data",
+   "description": "Reference data: durable records you set up once, not daily work.",
+   "idx": 20
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Vehicle",
+   "link_type": "DocType",
+   "link_to": "Salis Vehicle",
+   "idx": 21
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Salis Driver",
+   "link_type": "DocType",
+   "link_to": "Salis Driver",
+   "idx": 22
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Vehicle Category",
+   "link_type": "DocType",
+   "link_to": "Vehicle Category",
+   "idx": 23
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Fuel Quota",
+   "link_type": "DocType",
+   "link_to": "Fuel Quota",
+   "idx": 24
+  }
+ ],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Fuel Cost by Month",
+   "label": "Fuel Cost by Month",
+   "idx": 1
+  }
+ ],
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Vehicles Under Maintenance",
+   "label": "Vehicles Under Maintenance",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Pending Fuel Requests",
+   "label": "Pending Fuel Requests",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Open Fuel Exception Cases",
+   "label": "Open Fuel Exception Cases",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Open Vehicle Incidents",
+   "label": "Open Vehicle Incidents",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "number_card_name": "Workshop Overstay",
+   "label": "Workshop Overstay",
+   "idx": 5
+  }
+ ],
+ "custom_blocks": [],
+ "quick_lists": [],
+ "modified": "2026-07-10 08:55:47.226566"
+}

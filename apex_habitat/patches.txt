@@ -115,6 +115,14 @@ apex_habitat.patches.v1_x.drop_legacy_is_standard0_dashboards
 # PRUNE once every deployed site has run it (tracked in tabPatch Log).
 apex_habitat.patches.v2_0.drop_renamed_dashboards_charts_cards
 
+# v2.0.0 — B5 (P-159): stamp the four task-first daily role workspaces as the default
+# landing for users holding each role (Resident Supervisor / Fleet Supervisor / Safety
+# Officer / Maintenance Technician). Frappe has no per-role default-workspace primitive;
+# this sets User.default_workspace only when empty (never clobbers a user's choice), and
+# runs after model sync so the Workspace rows exist. Idempotent; no-op on fresh installs.
+# PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v2_0.set_role_default_workspace
+
 # v1.52.x — backfill total_rooms / total_floors on existing buildings (ONE-TIME). The
 # controller now derives both from the generated rooms; rows saved earlier showed stale 0.
 # Idempotent, no-op on fresh installs. PRUNE once every deployed site has run it.
