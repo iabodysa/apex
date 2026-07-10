@@ -20,6 +20,7 @@ from frappe.rate_limiter import rate_limit
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import _hash_token
 from apex.apex_core.utils.system_notify import notify_user_system
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
+from apex.salis.utils import days_until as _days_until
 # [#55ldxu]
 from apex.salis.api.maps_links import _full_route_maps_url
 from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-exported)
@@ -546,16 +547,6 @@ def _employee_doc(employee):
 
 def _fmt_date(value):
     return frappe.utils.cstr(value) if value else None
-
-
-def _days_until(value):
-    """Whole days from today until ``value`` (a date), or None."""
-    if not value:
-        return None
-    try:
-        return frappe.utils.date_diff(value, frappe.utils.today())
-    except Exception:
-        return None
 
 
 # [#tultqv]

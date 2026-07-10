@@ -34,6 +34,50 @@ def lock_driver(name):
 		frappe.qb.from_(Driver).select(Driver.name).where(Driver.name == name).for_update().run()
 
 
+def lock_fuel_quota(name):
+	"""Row-lock a Fuel Quota to serialize quota consumption/reversal."""
+	if name:
+		FuelQuota = frappe.qb.DocType("Fuel Quota")
+		frappe.qb.from_(FuelQuota).select(FuelQuota.name).where(
+			FuelQuota.name == name
+		).for_update().run()
+
+
+def normalize_plate(plate):
+	"""Canonical plate key: strip all whitespace and upper-case.
+
+	The single normaliser behind ``Salis Vehicle.plate_normalized`` and every
+	plate lookup, so a plate written with different spacing/case still resolves
+	to one vehicle. Callers own their own None/empty guard before calling."""
+	return "".join(str(plate).split()).upper()
+
+
+def expiry_state(expiry_date, warn_days):
+	"""Signed days-to-expiry plus a near-/over-expiry state for an expiry date.
+
+	Returns ``(days, state)`` where ``days = date_diff(expiry_date, today)`` (a
+	signed int; negative = already expired) and ``state`` is ``expired`` (days <
+	0) | ``expiring`` (days <= ``warn_days``) | ``valid``. Computed server-side so
+	the driver/masar SPAs need no date math and both languages render identically."""
+	days = frappe.utils.date_diff(expiry_date, frappe.utils.getdate())
+	state = "expired" if days < 0 else ("expiring" if days <= warn_days else "valid")
+	return days, state
+
+
+def days_until(value):
+	"""Whole days from today until ``value`` (a date), or None.
+
+	Defensive: a missing or unparseable value degrades to None rather than
+	raising, so an identity-document expiry that is blank/malformed never aborts
+	a profile render."""
+	if not value:
+		return None
+	try:
+		return frappe.utils.date_diff(value, frappe.utils.today())
+	except Exception:
+		return None
+
+
 def reassign_vehicle_driver(vehicle, driver, start_date=None, reject_same_driver=False):
 	"""End the vehicle's open Active assignment(s) and start a new submitted one.
 

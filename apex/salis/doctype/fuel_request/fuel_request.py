@@ -46,6 +46,7 @@ from frappe.utils import getdate, nowdate
 
 from apex.salis.utils import (
 	add_timeline_note,
+	lock_fuel_quota,
 	lock_vehicle,
 	raise_rider_clearance_task,
 	rider_block_reason,
@@ -250,10 +251,7 @@ class FuelRequest(Document):
 			return
 
 		lock_vehicle(self.vehicle)
-		FuelQuota = frappe.qb.DocType("Fuel Quota")
-		frappe.qb.from_(FuelQuota).select(FuelQuota.name).where(
-			FuelQuota.name == self.fuel_quota
-		).for_update().run()
+		lock_fuel_quota(self.fuel_quota)
 
 		quota = frappe.db.get_value(
 			"Fuel Quota", self.fuel_quota, ["consumed_litres", "monthly_litres", "status"], as_dict=True
@@ -283,10 +281,7 @@ class FuelRequest(Document):
 			return
 
 		lock_vehicle(self.vehicle)
-		FuelQuota = frappe.qb.DocType("Fuel Quota")
-		frappe.qb.from_(FuelQuota).select(FuelQuota.name).where(
-			FuelQuota.name == self.fuel_quota
-		).for_update().run()
+		lock_fuel_quota(self.fuel_quota)
 
 		quota = frappe.db.get_value(
 			"Fuel Quota", self.fuel_quota, ["consumed_litres", "monthly_litres", "status"], as_dict=True

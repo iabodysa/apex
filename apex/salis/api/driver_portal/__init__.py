@@ -9,7 +9,7 @@ from frappe import _
 # [#95hxd8]
 from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url
 from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401  (re-exported)
-from apex.salis.utils import get_driver_for_user
+from apex.salis.utils import expiry_state, get_driver_for_user
 
 
 # [#g14lmr]
@@ -280,12 +280,11 @@ def _license_countdown(driver):
 	expiry = frappe.db.get_value("Salis Driver", driver, "license_expiry")
 	if not expiry:
 		return {"expiry_date": None, "days_to_expiry": None, "state": None}
-	days = frappe.utils.date_diff(expiry, frappe.utils.getdate())
-	warn_days = _license_warn_days()
+	days, state = expiry_state(expiry, _license_warn_days())
 	return {
 		"expiry_date": frappe.utils.cstr(expiry),
 		"days_to_expiry": days,
-		"state": "expired" if days < 0 else ("expiring" if days <= warn_days else "valid"),
+		"state": state,
 	}
 
 def _resolve_my_trip(dispatch_trip, driver):

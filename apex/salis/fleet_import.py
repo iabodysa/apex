@@ -30,6 +30,8 @@ import os
 
 import frappe
 
+from apex.salis.utils import normalize_plate
+
 
 def _read(csv_dir, name):
     path = os.path.join(csv_dir, name)
@@ -125,7 +127,7 @@ def run(csv_dir=None):
         plate = (r.get("plate_number") or "").strip()
         if not plate:
             continue
-        norm = "".join(plate.split()).upper()
+        norm = normalize_plate(plate)
         name = frappe.db.get_value("Salis Vehicle", {"plate_normalized": norm}, "name")
         if name:
             try:

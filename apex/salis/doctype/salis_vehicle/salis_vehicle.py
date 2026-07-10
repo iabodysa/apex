@@ -6,6 +6,8 @@ from __future__ import annotations
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate, today
 
+from apex.salis.utils import normalize_plate
+
 DEFAULT_ALERT_LEAD_DAYS = 30
 
 _STATUS_RANK = {"Compliant": 0, "Expiring Soon": 1, "Expired": 2}
@@ -30,7 +32,7 @@ class SalisVehicle(Document):
 
     def _set_plate_normalized(self):
         if self.plate_number:
-            self.plate_normalized = "".join(self.plate_number.split()).upper()
+            self.plate_normalized = normalize_plate(self.plate_number)
         else:
             self.plate_normalized = None
 

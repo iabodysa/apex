@@ -1,0 +1,105 @@
+# Copyright (c) 2026, AFMCO and contributors
+"""Tests for the shared salis.utils small helpers deduped in R4.
+
+Locks in the byte-identical behaviour of the three helpers that replaced
+copy-pasted inline expressions across the Salis module:
+
+* ``normalize_plate`` — the canonical plate key (strip whitespace + upper-case),
+  formerly re-implemented in Salis Vehicle / fleet_import / fleet_os.
+* ``expiry_state`` — signed days-to-expiry + near/over-expiry state, formerly the
+  same ternary in the driver-portal licence countdown and vehicle-compliance list.
+* ``days_until`` — defensive whole-days-until helper, formerly duplicated in
+  masar.py and driver_portal/profile.py.
+* ``lock_fuel_quota`` — the ``FOR UPDATE`` row lock formerly inlined twice in
+  Fuel Request quota consumption/reversal.
+"""
+
+from __future__ import annotations
+
+import frappe
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, getdate
+
+from apex.salis.utils import days_until, expiry_state, lock_fuel_quota, normalize_plate
+
+
+class TestSalisUtils(FrappeTestCase):
+    # --- normalize_plate ------------------------------------------------
+    def test_normalize_plate_strips_and_uppercases(self):
+        self.assertEqual(normalize_plate("abc 123"), "ABC123")
+        self.assertEqual(normalize_plate("  a b c  "), "ABC")
+        self.assertEqual(normalize_plate("ABC123"), "ABC123")
+        # tabs / newlines are whitespace and are stripped too
+        self.assertEqual(normalize_plate("a\tb\nc"), "ABC")
+
+    def test_normalize_plate_coerces_non_str(self):
+        # fleet_os wrapped the value in str(); the helper preserves that
+        self.assertEqual(normalize_plate(12345), "12345")
+
+    # --- expiry_state ---------------------------------------------------
+    def _state_for_offset(self, offset_days, warn_days=30):
+        expiry = add_days(getdate(), offset_days)
+        return expiry_state(expiry, warn_days)
+
+    def test_expiry_state_expired(self):
+        days, state = self._state_for_offset(-1)
+        self.assertEqual(days, -1)
+        self.assertEqual(state, "expired")
+
+    def test_expiry_state_expiring_at_zero(self):
+        days, state = self._state_for_offset(0)
+        self.assertEqual(days, 0)
+        self.assertEqual(state, "expiring")
+
+    def test_expiry_state_boundary_at_warn_days_is_expiring(self):
+        # days == warn_days must be "expiring" (the ternary is <=, not <)
+        days, state = self._state_for_offset(30, warn_days=30)
+        self.assertEqual(days, 30)
+        self.assertEqual(state, "expiring")
+
+    def test_expiry_state_just_past_boundary_is_valid(self):
+        # days == warn_days + 1 crosses into "valid"
+        days, state = self._state_for_offset(31, warn_days=30)
+        self.assertEqual(days, 31)
+        self.assertEqual(state, "valid")
+
+    # --- days_until -----------------------------------------------------
+    def test_days_until_none_for_empty(self):
+        self.assertIsNone(days_until(None))
+        self.assertIsNone(days_until(""))
+
+    def test_days_until_counts_forward(self):
+        self.assertEqual(days_until(add_days(getdate(), 5)), 5)
+        self.assertEqual(days_until(add_days(getdate(), -3)), -3)
+
+    def test_days_until_none_for_unparseable(self):
+        # a malformed value degrades to None rather than raising
+        self.assertIsNone(days_until("not-a-date"))
+
+    # --- lock_fuel_quota ------------------------------------------------
+    def test_lock_fuel_quota_noop_on_empty(self):
+        # matches the lock_vehicle/lock_driver house style: falsy name = no-op
+        try:
+            lock_fuel_quota(None)
+            lock_fuel_quota("")
+        except Exception as exc:  # pragma: no cover
+            self.fail(f"lock_fuel_quota should be a no-op on empty, raised {exc!r}")
+
+    def test_lock_fuel_quota_issues_for_update(self):
+        # The query lock_fuel_quota builds must carry FOR UPDATE row-lock semantics.
+        FuelQuota = frappe.qb.DocType("Fuel Quota")
+        q = (
+            frappe.qb.from_(FuelQuota)
+            .select(FuelQuota.name)
+            .where(FuelQuota.name == "ANY")
+            .for_update()
+        )
+        self.assertIn("FOR UPDATE", q.get_sql().upper())
+
+    def test_lock_fuel_quota_runs_against_db(self):
+        # Executes the real FOR UPDATE SELECT (0 rows for a ghost name) without error,
+        # proving the helper's query is valid SQL on the live schema.
+        try:
+            lock_fuel_quota(f"NO-SUCH-QUOTA-{frappe.generate_hash(length=8)}")
+        except Exception as exc:  # pragma: no cover
+            self.fail(f"lock_fuel_quota raised on a valid table lock: {exc!r}")

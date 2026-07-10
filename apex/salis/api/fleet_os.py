@@ -33,6 +33,7 @@ from apex.salis.utils import (
     add_timeline_note,
     close_open_stop,
     lock_vehicle,
+    normalize_plate,
     reassign_vehicle_driver,
 )
 
@@ -114,7 +115,7 @@ def _resolve_plate(plate: str, ptype: str = "write") -> str:
         frappe.throw(_("Plate is required."))
     name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
     if not name:
-        normalized = "".join(str(plate).split()).upper()
+        normalized = normalize_plate(plate)
         name = frappe.db.get_value("Salis Vehicle", {"plate_normalized": normalized}, "name")
     if not name and frappe.db.exists("Salis Vehicle", plate):
         name = plate

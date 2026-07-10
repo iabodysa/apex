@@ -14,22 +14,12 @@ from apex.salis.api.driver_portal import (
     _user_full_name,
     _vehicle_last_site_maps_url,
 )
+from apex.salis.utils import days_until as _days_until
+from apex.salis.utils import expiry_state
 
 
 def _fmt_date(value):
 	return frappe.utils.cstr(value) if value else None
-
-
-
-def _days_until(value):
-	"""Whole days from today until ``value``, or None — mirrors masar's helper so
-	a missing/unparseable expiry never raises."""
-	if not value:
-		return None
-	try:
-		return frappe.utils.date_diff(value, frappe.utils.today())
-	except Exception:
-		return None
 
 
 
@@ -190,20 +180,19 @@ def _vehicle_compliance(vehicle):
 		fields=["compliance_type", "document_number", "expiry_date"],
 		order_by="expiry_date asc",
 	)
-	today = frappe.utils.getdate()
 	warn_days = _license_warn_days()
 	out = []
 	for r in rows:
 		if r.get("compliance_type") not in _DRIVER_COMPLIANCE_TYPES or not r.get("expiry_date"):
 			continue
-		days = frappe.utils.date_diff(r["expiry_date"], today)
+		days, state = expiry_state(r["expiry_date"], warn_days)
 		out.append(
 			{
 				"compliance_type": r["compliance_type"],
 				"document_number": r.get("document_number") or None,
 				"expiry_date": frappe.utils.cstr(r["expiry_date"]),
 				"days_to_expiry": days,
-				"state": "expired" if days < 0 else ("expiring" if days <= warn_days else "valid"),
+				"state": state,
 			}
 		)
 	return out
