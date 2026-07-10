@@ -381,6 +381,7 @@ after_install = [
     "apex.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
     # [#hbwf06]
     "apex.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
+    "apex.apex_core.setup.seeders.logistay_workflow_seed.seed_logistay_workflows",
     # [#2oqhfm]
     "apex.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
     # [#r5fycj]
@@ -403,6 +404,7 @@ after_migrate = [
     "apex.apex_core.setup.seeders.salis_workflow_seed.seed_salis_workflows",
     # [#hbwf07]
     "apex.apex_core.setup.seeders.habitat_workflow_seed.seed_habitat_workflows",
+    "apex.apex_core.setup.seeders.logistay_workflow_seed.seed_logistay_workflows",
     # [#tk37r7]
     "apex.apex_core.setup.seeders.salis_issue_seed.seed_salis_issue_masters",
     # [#hi9721]

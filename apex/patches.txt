@@ -47,6 +47,7 @@ apex.patches.v1_0.seed_salis_portal_theme
 # is the install path; both also run from after_install/after_migrate.
 apex.patches.v1_x.seed_salis_communications
 apex.patches.v1_x.seed_salis_workflows
+apex.patches.v1_x.seed_logistay_workflows
 
 # v1.55.x — seed the Accommodation Item Groups (PERMANENT, idempotent, NestedSet-safe).
 # Item Group is a NestedSet; a fixture import crashed fresh-site install on the NULL
