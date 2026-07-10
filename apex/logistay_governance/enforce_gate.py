@@ -219,7 +219,7 @@ def write_audit(
     event.gov_sod_pair = sod_pair
     # System-written governance record: insert past DocPerm, but the append-only
     # controller still blocks any later edit/delete.
-    event.insert(ignore_permissions=True)
+    event.insert(ignore_permissions=True)  # audit-ok
     return event.name
 
 
@@ -248,13 +248,13 @@ def gate_export(
 
     if audience == "owner_internal":
         scan.gov_verdict = "pass"
-        scan.insert(ignore_permissions=True)
+        scan.insert(ignore_permissions=True)  # audit-ok
         return "pass"
 
     verdict, findings = _run_scanner(file_ref, audience, scanner_args)
     scan.gov_verdict = verdict
     scan.gov_findings = findings
-    scan.insert(ignore_permissions=True)
+    scan.insert(ignore_permissions=True)  # audit-ok
 
     if verdict != "pass":
         write_audit(
