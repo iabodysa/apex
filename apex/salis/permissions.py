@@ -3,6 +3,7 @@
 
 import frappe
 
+from apex.apex_core.utils import permission_scope
 from apex.salis.utils import get_driver_for_user
 
 UNSCOPED_ROLES = {
@@ -16,48 +17,27 @@ UNSCOPED_ROLES = {
 
 def _resolve_user(user=None):
     """Return the effective user, defaulting to the session user."""
-    return user or frappe.session.user
+    return permission_scope.resolve_user(user)
 
 
 def _allowed_projects(user):
-    """Project names the given user has an explicit User Permission for.
+    """Project names the given user has an explicit User Permission for (cached).
 
-    Request-scoped cache: every project permission check (list pqc,
-    form/submit has_permission, report scope, and the driver-chain fragments)
-    funnels through here, so on a single list view / report render the same
-    User Permission set was resolved with one SQL per row/doc.
-    ``frappe.local_cache`` memoises the result in ``frappe.local.cache`` for the
-    life of ONE request context, collapsing that to a single query per
-    (request, user).
-
-    Security — why it cannot leak across users: the cache KEY is ``user``, so
-    User A's scope is never returned for User B. ``frappe.local.cache`` is
-    per-request thread-local (no cross-request bleed), and ``frappe.set_user``
-    resets ``local.cache = {}``, so a background job that switches users mid-run
-    starts from an empty cache and re-resolves for the new user. The generator
-    closes over the SAME ``user`` used as the key, so key and value can never
-    disagree. A fresh ``list(...)`` is returned each call so a caller mutating
-    the result cannot corrupt the cached scope.
+    Thin wrapper over ``permission_scope.allowed_for`` binding the Project
+    ``allow`` doctype and the ``apex_allowed_projects`` cache namespace. That
+    namespace is DISTINCT from Habitat's ``apex_allowed_buildings`` so a Project
+    scope and a Building scope can never collide in ``frappe.local.cache`` for the
+    same user in one request. See ``permission_scope.allowed_for`` for the
+    request-cache + no-cross-user-bleed invariant. Kept as a module-level function
+    because the scoped permission test-suite (and the driver-chain fragments)
+    resolve it by name.
     """
-    return list(
-        frappe.local_cache(
-            "apex_allowed_projects",
-            user,
-            lambda: frappe.get_all(
-                "User Permission",
-                filters={"allow": "Project", "user": user},
-                pluck="for_value",
-            ),
-        )
-    )
+    return permission_scope.allowed_for(user, "Project", "apex_allowed_projects")
 
 
 def _is_unscoped(user):
     """True when the user holds any oversight role that sees all projects."""
-    if user in ("Administrator", "Guest"):
-        return user == "Administrator"
-    user_roles = set(frappe.get_roles(user))
-    return bool(user_roles & UNSCOPED_ROLES)
+    return permission_scope.is_unscoped(user, UNSCOPED_ROLES)
 
 
 def _project_supervisor(project):
@@ -92,18 +72,14 @@ def _project_condition(user, column="`project`"):
     """Build the SQL fragment restricting `column` to the allowed projects.
 
     Returns "" for unscoped users (no restriction). Returns "1=0" when the
-    user is scoped but has no allowed projects, so they see nothing.
+    user is scoped but has no allowed projects, so they see nothing. Delegates
+    the shared fragment logic to ``permission_scope.scope_condition``, injecting
+    this module's own project resolvers so the Project oversight set + cache
+    namespace stay bound here.
     """
-    user = _resolve_user(user)
-    if _is_unscoped(user):
-        return ""
-
-    projects = _allowed_projects(user)
-    if not projects:
-        return "1=0"
-
-    escaped = ", ".join(frappe.db.escape(p) for p in projects)
-    return "{column} in ({values})".format(column=column, values=escaped)
+    return permission_scope.scope_condition(
+        user, _is_unscoped, _allowed_projects, column
+    )
 
 
 # [#iecjvo]
@@ -113,12 +89,10 @@ def report_project_scope(user=None):
     ``restrict`` is False for unscoped oversight roles (the report applies no extra
     filter — they see everything). When True the report must confine its rows to
     ``allowed_projects`` (an empty list means a scoped user with no permitted
-    project, i.e. the report should return no rows).
+    project, i.e. the report should return no rows). Thin wrapper over
+    ``permission_scope.report_scope`` with this module's project resolvers.
     """
-    user = _resolve_user(user)
-    if _is_unscoped(user):
-        return False, []
-    return True, _allowed_projects(user)
+    return permission_scope.report_scope(user, _is_unscoped, _allowed_projects)
 
 
 # [#89nxdl]

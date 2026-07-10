@@ -3,6 +3,8 @@
 
 import frappe
 
+from apex.apex_core.utils import permission_scope
+
 # [#mirgwe]
 PRIVILEGED_ROLES = {
     "System Manager",
@@ -14,7 +16,7 @@ PRIVILEGED_ROLES = {
 
 def _resolve_user(user=None):
     """Return the effective user, defaulting to the session user."""
-    return user or frappe.session.user
+    return permission_scope.resolve_user(user)
 
 
 def _is_privileged(user):
@@ -99,58 +101,36 @@ HOUSING_UNSCOPED_ROLES = {
 
 
 def _allowed_buildings(user):
-    """Building names the user has an explicit User Permission for.
+    """Building names the user has an explicit User Permission for (request-cached).
 
-    Request-scoped cache: every building permission check (list pqc,
-    form/submit has_permission, report scope) funnels through here, so on a
-    single list view / report render the same User Permission set was resolved
-    with one SQL per row/doc. ``frappe.local_cache`` memoises the result in
-    ``frappe.local.cache`` for the life of ONE request context, collapsing that
-    to a single query per (request, user).
-
-    Security — why it cannot leak across users: the cache KEY is ``user``, so
-    User A's scope is never returned for User B. ``frappe.local.cache`` is
-    per-request thread-local (no cross-request bleed), and ``frappe.set_user``
-    resets ``local.cache = {}``, so a background job that switches users mid-run
-    starts from an empty cache and re-resolves for the new user. The generator
-    closes over the SAME ``user`` used as the key, so key and value can never
-    disagree. A fresh ``list(...)`` is returned each call so a caller mutating
-    the result cannot corrupt the cached scope.
+    Thin wrapper over ``permission_scope.allowed_for`` binding the Building
+    ``allow`` doctype and the ``apex_allowed_buildings`` cache namespace. That
+    namespace is DISTINCT from Salis' ``apex_allowed_projects`` so a Building scope
+    and a Project scope can never collide in ``frappe.local.cache`` for the same
+    user in one request. See ``permission_scope.allowed_for`` for the
+    request-cache + no-cross-user-bleed invariant. Kept as a module-level function
+    because the scoped permission test-suite stubs this name directly.
     """
-    return list(
-        frappe.local_cache(
-            "apex_allowed_buildings",
-            user,
-            lambda: frappe.get_all(
-                "User Permission",
-                filters={"allow": "Building", "user": user},
-                pluck="for_value",
-            ),
-        )
-    )
+    return permission_scope.allowed_for(user, "Building", "apex_allowed_buildings")
 
 
 def _building_is_unscoped(user):
     """True when the user is the Administrator or holds a building-oversight role."""
-    if user in ("Administrator", "Guest"):
-        return user == "Administrator"
-    return bool(set(frappe.get_roles(user)) & HOUSING_UNSCOPED_ROLES)
+    return permission_scope.is_unscoped(user, HOUSING_UNSCOPED_ROLES)
 
 
 def _building_condition(user=None, column="`building`"):
     """SQL WHERE fragment restricting ``column`` to the user's allowed buildings.
 
     "" for unscoped users (no restriction); "1=0" when the user is scoped but has
-    no allowed buildings (so they see nothing).
+    no allowed buildings (so they see nothing). Delegates the shared fragment
+    logic to ``permission_scope.scope_condition``, injecting this module's own
+    building resolvers so the Building oversight set + cache namespace stay bound
+    here.
     """
-    user = _resolve_user(user)
-    if _building_is_unscoped(user):
-        return ""
-    buildings = _allowed_buildings(user)
-    if not buildings:
-        return "1=0"
-    escaped = ", ".join(frappe.db.escape(b) for b in buildings)
-    return "{column} in ({values})".format(column=column, values=escaped)
+    return permission_scope.scope_condition(
+        user, _building_is_unscoped, _allowed_buildings, column
+    )
 
 
 # [#63ah2p]
@@ -200,12 +180,12 @@ def report_building_scope(user=None):
     ``restrict`` is False for unscoped oversight roles (the report applies no extra
     filter — they see everything). When True the report must confine its rows to
     ``allowed_buildings`` (an empty list means a scoped user with no permitted
-    building, i.e. the report should return no rows).
+    building, i.e. the report should return no rows). Thin wrapper over
+    ``permission_scope.report_scope`` with this module's building resolvers.
     """
-    user = _resolve_user(user)
-    if _building_is_unscoped(user):
-        return False, []
-    return True, _allowed_buildings(user)
+    return permission_scope.report_scope(
+        user, _building_is_unscoped, _allowed_buildings
+    )
 
 
 def building_scoped_has_permission(doc, ptype, user=None):
