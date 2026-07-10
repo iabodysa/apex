@@ -1,0 +1,147 @@
+{
+ "actions": [],
+ "autoname": "field:period_label",
+ "creation": "2026-07-10 00:00:00.000000",
+ "description": "One billing / attendance cycle for a Client (optionally one Branch Site) over a calendar month. A Timesheet Line and Timesheet Ledger row belong to exactly one Period. Named by the unique period label so Links read the cycle, not an opaque id; a run uses the Period open at ingestion time.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "timesheet_period_sec_identity",
+  "period_label",
+  "client",
+  "branch_site",
+  "timesheet_period_identity_col",
+  "month",
+  "status",
+  "timesheet_period_sec_window",
+  "start_date",
+  "timesheet_period_window_col",
+  "end_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "timesheet_period_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Timesheet Period"
+  },
+  {
+   "description": "Unique cycle label, e.g. CLIENT-BRANCH-2026-05. This is the record's id and cannot be changed once saved.",
+   "fieldname": "period_label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Period Label",
+   "reqd": 1,
+   "search_index": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "client",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Client",
+   "options": "Client",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Optional. Leave blank for a client-wide period.",
+   "fieldname": "branch_site",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch Site",
+   "options": "Branch Site"
+  },
+  {
+   "fieldname": "timesheet_period_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Posting month in YYYY-MM format (e.g. 2026-05).",
+   "fieldname": "month",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Month",
+   "reqd": 1
+  },
+  {
+   "default": "Open",
+   "description": "Closed periods are locked against further ingestion.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nClosed",
+   "reqd": 1
+  },
+  {
+   "fieldname": "timesheet_period_sec_window",
+   "fieldtype": "Section Break",
+   "label": "Period Window"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "timesheet_period_window_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-10 04:43:13.687681",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Timesheet Period",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "period_label",
+ "track_changes": 1
+}

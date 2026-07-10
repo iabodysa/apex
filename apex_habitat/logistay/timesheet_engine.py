@@ -84,4 +84,4 @@ def _post_one(line) -> None:
             "source_doctype": LINE_DOCTYPE,
             "source_name": line.name,
         }
-    ).insert(ignore_permissions=True)
+    ).insert(ignore_permissions=True)  # audit-ok — engine posts an immutable ledger row server-side

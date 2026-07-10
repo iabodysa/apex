@@ -56,7 +56,7 @@ def log_exception(
             "source_doctype": source_doctype,
             "source_name": source_name,
         }
-    ).insert(ignore_permissions=True)
+    ).insert(ignore_permissions=True)  # audit-ok — engine logs an immutable exception row server-side
     return doc.name
 
 

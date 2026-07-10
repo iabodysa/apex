@@ -1,0 +1,184 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-07-10 00:00:00.000000",
+ "description": "Canonical workforce identity referenced by the timesheet flow. One Worker unifies a person who may originate as a Temporary Worker, a Freelancer, or a permanent Employee, so attendance and billing point at a single stable id regardless of employment form.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "worker_tab_overview",
+  "worker_sec_identity",
+  "worker_name",
+  "iqama_number",
+  "nationality",
+  "worker_identity_col",
+  "company",
+  "status",
+  "worker_sec_source",
+  "source_temporary_worker",
+  "source_freelancer",
+  "worker_source_col",
+  "linked_employee",
+  "naming_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "worker_tab_overview",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "worker_sec_identity",
+   "fieldtype": "Section Break",
+   "label": "Worker Identity"
+  },
+  {
+   "fieldname": "worker_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Worker Name",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "National id / Iqama reference. PII: readable only at permlevel 1.",
+   "fieldname": "iqama_number",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Iqama Number",
+   "permlevel": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "nationality",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Nationality",
+   "options": "Country",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "worker_identity_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nInactive",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "worker_sec_source",
+   "fieldtype": "Section Break",
+   "label": "Source Records"
+  },
+  {
+   "description": "The Temporary Worker record this identity was created from, if any.",
+   "fieldname": "source_temporary_worker",
+   "fieldtype": "Link",
+   "label": "Source Temporary Worker",
+   "options": "Temporary Worker"
+  },
+  {
+   "description": "The Freelancer record this identity was created from, if any.",
+   "fieldname": "source_freelancer",
+   "fieldtype": "Link",
+   "label": "Source Freelancer",
+   "options": "Freelancer"
+  },
+  {
+   "fieldname": "worker_source_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Set once the worker is registered as a permanent Employee.",
+   "fieldname": "linked_employee",
+   "fieldtype": "Link",
+   "label": "Linked Employee",
+   "options": "Employee"
+  },
+  {
+   "default": "WRK-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "WRK-.#####",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-10 04:43:13.687681",
+ "modified_by": "Administrator",
+ "module": "Logistay",
+ "name": "Worker",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Finance Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Finance Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Internal Auditor"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "worker_name",
+ "track_changes": 1
+}
