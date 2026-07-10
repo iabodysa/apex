@@ -31,6 +31,7 @@ docs/
 docs/*
 !docs/INTEGRATION.md
 !docs/TRAINING.md
+!docs/WORKSPACE-DESIGN.md
 # Public per-area training guide (index + one file per functional area)
 !docs/training/
 !docs/training/*.md
