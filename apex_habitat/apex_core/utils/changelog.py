@@ -748,6 +748,13 @@ _RELEASES = [
 # [#a0cv0f]
 _FEED_TITLE_MAX = 140
 
+# Cap on how many items the sidebar "What's New" bell surfaces in one pull. `_RELEASES`
+# is kept COMPLETE on purpose (the TestFeedCoversPopups contract asserts every shipped
+# popup version has a source entry), but a user with an old/empty `since` must not be
+# dumped the entire multi-year back-catalogue. `_RELEASES` is newest-first, so slicing
+# the filtered result keeps the most recent releases. Bounded surface, complete source.
+_FEED_MAX = 20
+
 
 def _clip_title(title):
     title = title.strip()
@@ -758,13 +765,14 @@ def _clip_title(title):
 
 def get_changelog_feed(since):
     """
-    Returns Apex Habitat release items newer than `since`.
-    Registered via hooks.py get_changelog_feed hook.
+    Returns Apex Habitat release items newer than `since`, newest first, capped at
+    `_FEED_MAX`. Registered via hooks.py get_changelog_feed hook.
     Frappe's fetch_changelog_feed() calls this and deduplicates by exact field match.
     """
     since_dt = get_datetime(since)
-    return [
+    items = [
         {**r, "title": _clip_title(r["title"])}
         for r in _RELEASES
         if get_datetime(r["creation"]) > since_dt
     ]
+    return items[:_FEED_MAX]

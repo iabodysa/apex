@@ -227,11 +227,15 @@ apex_habitat.patches.v1_x.seed_masar_demo_movement
 # DocTypes; idempotent get-or-create on stable keys; never aborts install/migrate.
 apex_habitat.patches.v1_x.seed_demo_role_logins
 
-# v1.x — stamp last_known_versions[apex_habitat] for users already past the changelog
-# popup, so the version-feed migration to a tracked seen-version does not re-show old
-# release notes. Touches only the changelog-seen value; preserves other apps' entries.
-# Idempotent; no-op on fresh installs / re-run.
-apex_habitat.patches.v1_x.stamp_changelog_seen_version
+# v2.0.0 — B9 (P-163) changelog cutover stamp (ONE-TIME). Pins each already-onboarded
+# User's last_known_versions[apex_habitat] to the FINAL v1 series head (highest
+# change_log/v1/vX_Y_Z.md, derived) so the v2.0.0 "What's New" popup replays ONLY the
+# new v2 note, not the whole v1 back-catalogue. SUPERSEDES v1_x.stamp_changelog_seen_version
+# (retired here in the same change): that entry stamps the LIVE __version__, which at
+# cutover is 2.0.0 — it would suppress the v2.0.0 popup itself, so the two must not race.
+# Never downgrades a user already at/above the final v1 version. Idempotent; no-op on
+# fresh installs / re-run. PRUNE once every deployed site has run it (tracked in tabPatch Log).
+apex_habitat.patches.v2_0.stamp_last_known_versions_v2_cutover
 
 # v1.x — reconcile Custody Issue.issued_to_user to valid User names (ONE-TIME). The
 # field changed from a free Data field to Link -> User; runs AFTER model sync so the
